@@ -8,6 +8,7 @@ import { Droplet, Wheat, Home, Heart, Users, Leaf } from 'lucide-react';
 import { getColorForScore } from '../utils/scoreColor';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../utils/indicatorIcons';
+import { LEVEL_COLORS, LEVEL_LABELS } from '../utils/metricIcons';
 
 const MAPBOX_TOKEN = (import.meta as any).env.VITE_MAPBOX_TOKEN;
 if (MAPBOX_TOKEN) {
@@ -28,6 +29,7 @@ interface HumanityMapProps {
   activeIndicatorId?: string | null;
   indicators?: any[];
   activeMarkerId?: string | null;
+  activeMetricId?: string | null;
 }
 
 function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature; objectiveIndicators?: { id: string; name: string }[] }) {
@@ -109,7 +111,28 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
   );
 }
 
-export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId }: HumanityMapProps) {
+function StationTooltip({ properties }: { properties: any }) {
+  const level = properties.level as string | undefined;
+  const color = level ? (LEVEL_COLORS[level] || '#94a3b8') : '#94a3b8';
+  return (
+    <div className="p-3 bg-white rounded-xl shadow-xl border border-slate-100 font-sans z-50 relative w-max max-w-[220px]">
+      <div className="font-bold text-slate-800 text-sm mb-1">{properties.name}</div>
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+        <span className="text-xs font-bold" style={{ color }}>
+          {level ? (LEVEL_LABELS[level] || level) : 'Sin nivel'}
+        </span>
+        {properties.value != null && (
+          <span className="text-[10px] text-slate-400">
+            {properties.value} {properties.unit || ''}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId, activeMetricId }: HumanityMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -237,6 +260,49 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           minzoom: 4.5,
           paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }
         });
+
+        // Measurement stations for the active metric (contaminant), shown as
+        // colored points (Bajo/Moderado/Alto/Peligroso) instead of territory fills.
+        map.current!.addSource('stations', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.current!.addLayer({
+          id: 'stations-points',
+          type: 'circle',
+          source: 'stations',
+          paint: {
+            'circle-radius': 7,
+            'circle-color': [
+              'match', ['get', 'level'],
+              'bajo', LEVEL_COLORS.bajo,
+              'moderado', LEVEL_COLORS.moderado,
+              'alto', LEVEL_COLORS.alto,
+              'peligroso', LEVEL_COLORS.peligroso,
+              '#94a3b8'
+            ],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff'
+          }
+        });
+
+        const handleStationMouseMove = (e: mapboxgl.MapMouseEvent & any) => {
+          if (e.features && e.features.length > 0) {
+            map.current!.getCanvas().style.cursor = 'pointer';
+            const props = e.features[0].properties;
+            if (mapPopupRef.current) {
+              mapPopupRef.current.setLngLat(e.lngLat);
+              const popupNode = document.createElement('div');
+              const root = createRoot(popupNode);
+              root.render(<StationTooltip properties={props} />);
+              mapPopupRef.current.setDOMContent(popupNode);
+              if (!mapPopupRef.current.isOpen()) mapPopupRef.current.addTo(map.current!);
+            }
+          }
+        };
+        const handleStationMouseLeave = () => {
+          map.current!.getCanvas().style.cursor = '';
+          if (mapPopupRef.current) mapPopupRef.current.remove();
+        };
+        map.current!.on('mousemove', 'stations-points', handleStationMouseMove);
+        map.current!.on('mouseleave', 'stations-points', handleStationMouseLeave);
 
         const handleMouseMove = (e: mapboxgl.MapMouseEvent & any) => {
           if (e.features && e.features.length > 0) {
@@ -612,6 +678,31 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
     const timer = setTimeout(loadPostGISViewportData, 150);
     return () => clearTimeout(timer);
   }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId]);
+
+  // Load measurement-station points for the active metric (contaminant), if any
+  useEffect(() => {
+    if (!map.current) return;
+    const source = map.current.getSource('stations') as mapboxgl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    if (!activeMetricId) {
+      source.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/geo/metrics/${activeMetricId}/stations`)
+      .then(r => r.json())
+      .then(geojson => {
+        if (!cancelled && map.current) {
+          const src = map.current.getSource('stations') as mapboxgl.GeoJSONSource | undefined;
+          if (src) src.setData(geojson);
+        }
+      })
+      .catch(err => console.error('Error loading measurement stations', err));
+
+    return () => { cancelled = true; };
+  }, [activeMetricId]);
 
   // CSS for custom popup
   useEffect(() => {

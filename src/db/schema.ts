@@ -117,6 +117,42 @@ export const markerObservations = pgTable('marker_observations', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Contaminante/variable concreta medida dentro de un marcador,
+// p.ej. Mercurio, Plomo... dentro del marcador "Pureza".
+export const metrics = pgTable('metrics', {
+  id: text('id').primaryKey(),
+  markerId: text('marker_id').notNull().references(() => markers.id),
+  name: text('name').notNull(),
+  unit: text('unit'),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Estación de medida física, georreferenciada, asociada a un territorio.
+export const measurementStations = pgTable('measurement_stations', {
+  id: text('id').primaryKey(),
+  territoryId: text('territory_id').notNull().references(() => territories.id),
+  name: text('name').notNull(),
+  lat: doublePrecision('lat').notNull(),
+  lng: doublePrecision('lng').notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Lectura de una métrica en una estación concreta (aún sin datos cargados;
+// tabla lista para cuando se disponga de las mediciones reales).
+export const metricObservations = pgTable('metric_observations', {
+  id: serial('id').primaryKey(),
+  metricId: text('metric_id').notNull().references(() => metrics.id),
+  stationId: text('station_id').notNull().references(() => measurementStations.id),
+  value: doublePrecision('value'),
+  unit: text('unit'),
+  level: text('level'), // bajo | moderado | alto | peligroso
+  date: date('date'),
+  source: text('source'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const organizations = pgTable('organizations', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),

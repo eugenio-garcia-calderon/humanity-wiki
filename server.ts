@@ -433,6 +433,56 @@ async function startServer() {
     } catch(e:any) { res.status(500).json({error: e.message}); }
   });
 
+  app.get("/api/data/metrics", async (req, res) => {
+    try {
+      const markerId = req.query.markerId as string | undefined;
+      const result = markerId
+        ? await db.execute(sql`
+            SELECT id, marker_id, name, unit, description
+            FROM metrics
+            WHERE marker_id = ${markerId}
+            ORDER BY name
+          `)
+        : await db.execute(sql`
+            SELECT id, marker_id, name, unit, description
+            FROM metrics
+            ORDER BY marker_id, name
+          `);
+      res.json(result.rows);
+    } catch(e:any) { res.status(500).json({error: e.message}); }
+  });
+
+  // Estaciones de medida para una métrica concreta, como puntos GeoJSON
+  // (nivel/valor por estación). Se usa para pintar los marcadores en el mapa.
+  app.get("/api/geo/metrics/:metricId/stations", async (req, res) => {
+    try {
+      const { metricId } = req.params;
+      const result = await db.execute(sql`
+        SELECT
+          ms.id, ms.name, ms.territory_id, ms.lat, ms.lng,
+          mo.value, mo.unit, mo.level, mo.date, mo.source
+        FROM measurement_stations ms
+        JOIN metric_observations mo ON mo.station_id = ms.id
+        WHERE mo.metric_id = ${metricId}
+      `);
+      const features = result.rows.map((r: any) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [r.lng, r.lat] },
+        properties: {
+          stationId: r.id,
+          name: r.name,
+          territoryId: r.territory_id,
+          value: r.value,
+          unit: r.unit,
+          level: r.level,
+          date: r.date,
+          source: r.source,
+        }
+      }));
+      res.json({ type: "FeatureCollection", features });
+    } catch(e:any) { res.status(500).json({error: e.message}); }
+  });
+
   // REST WRITE ENDPOINTS (INSERT / UPDATE / DELETE with Drizzle / PostgreSQL)
   const handleUpsertEntity = async (entity: string, req: Request, res: Response) => {
     try {

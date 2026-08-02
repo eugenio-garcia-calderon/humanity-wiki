@@ -6,6 +6,7 @@ import { mapService } from '../services/MapService';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS } from '../utils/indicatorIcons';
 import { MARKER_ICONS } from '../utils/markerIcons';
+import { METRIC_ICONS } from '../utils/metricIcons';
 
 
 export default function MapPage() {
@@ -19,8 +20,10 @@ export default function MapPage() {
   const [activeObjective, setActiveObjective] = useState<ObjectiveKey>('overall');
   const [activeIndicatorId, setActiveIndicatorId] = useState<string | null>(null);
   const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
+  const [activeMetricId, setActiveMetricId] = useState<string | null>(null);
   const [indicators, setIndicators] = useState<any[]>([]);
   const [markers, setMarkers] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any[]>([]);
 
   useEffect(() => {
     fetch('/api/data/indicators')
@@ -31,18 +34,30 @@ export default function MapPage() {
       .then(r => r.json())
       .then(setMarkers)
       .catch(err => console.error('Error loading markers', err));
+    fetch('/api/data/metrics')
+      .then(r => r.json())
+      .then(setMetrics)
+      .catch(err => console.error('Error loading metrics', err));
   }, []);
 
   const handleObjectiveChange = (key: ObjectiveKey) => {
     setActiveObjective(key);
     setActiveIndicatorId(null);
     setActiveMarkerId(null);
+    setActiveMetricId(null);
   };
 
   const handleIndicatorChange = (indicatorId: string) => {
     const isActive = activeIndicatorId === indicatorId;
     setActiveIndicatorId(isActive ? null : indicatorId);
     setActiveMarkerId(null);
+    setActiveMetricId(null);
+  };
+
+  const handleMarkerChange = (markerId: string) => {
+    const isActive = activeMarkerId === markerId;
+    setActiveMarkerId(isActive ? null : markerId);
+    setActiveMetricId(null);
   };
 
   const activeObjectiveIndicators = activeObjective === 'overall'
@@ -51,6 +66,10 @@ export default function MapPage() {
 
   const activeIndicatorMarkers = activeIndicatorId
     ? markers.filter(m => m.indicator_id === activeIndicatorId)
+    : [];
+
+  const activeMarkerMetrics = activeMarkerId
+    ? metrics.filter(m => m.marker_id === activeMarkerId)
     : [];
 
   const handleFeatureClick = async (id: string, type: string) => {
@@ -189,7 +208,7 @@ export default function MapPage() {
               return (
                 <button
                   key={marker.id}
-                  onClick={() => setActiveMarkerId(isActive ? null : marker.id)}
+                  onClick={() => handleMarkerChange(marker.id)}
                   title={marker.name}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all shrink-0 ${
                     isActive
@@ -199,6 +218,31 @@ export default function MapPage() {
                 >
                   <Icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                   <span>{marker.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Metric sub-filter: appears when a marker is selected and has metrics */}
+        {activeMarkerMetrics.length > 0 && (
+          <div className="flex items-center gap-1 sm:gap-2 px-3 py-1.5 border-t border-slate-100 overflow-x-auto">
+            {activeMarkerMetrics.map(metric => {
+              const Icon = METRIC_ICONS[metric.id] || Layers;
+              const isActive = activeMetricId === metric.id;
+              return (
+                <button
+                  key={metric.id}
+                  onClick={() => setActiveMetricId(isActive ? null : metric.id)}
+                  title={metric.name}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wide transition-all shrink-0 ${
+                    isActive
+                      ? 'bg-red-600 text-white shadow-md scale-105'
+                      : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100/80'
+                  }`}
+                >
+                  <Icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{metric.name}</span>
                 </button>
               );
             })}
@@ -218,6 +262,7 @@ export default function MapPage() {
             activeIndicatorId={activeIndicatorId}
             indicators={indicators}
             activeMarkerId={activeMarkerId}
+            activeMetricId={activeMetricId}
           />
         </div>
 
