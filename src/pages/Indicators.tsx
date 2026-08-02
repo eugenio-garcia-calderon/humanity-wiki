@@ -1,7 +1,6 @@
 import { useHelpers } from '../contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
 
-import { slugify } from '../utils/slugify';
 import { getColorForScore } from '../utils/scoreColor';
 
 export default function Indicators() {
@@ -37,7 +36,7 @@ export default function Indicators() {
                     <div
                       key={indicator.id}
                       className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-emerald-500 hover:shadow-md transition-all h-full flex flex-col relative group cursor-pointer"
-                      onClick={() => navigate(`/indicadores/${slugify(indicator.name)}`)}
+                      onClick={() => navigate(`/indicadores/${indicator.id}`)}
                     >
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">INDICADOR</span>
