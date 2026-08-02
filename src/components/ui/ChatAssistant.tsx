@@ -142,7 +142,7 @@ Si modificas algo, dile al usuario que la operación fue un éxito.`;
       <button 
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-6 right-6 w-14 h-14 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl hover:bg-emerald-700 transition-all z-50",
+          "fixed bottom-16 right-6 w-14 h-14 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl hover:bg-emerald-700 transition-all z-50",
           isOpen && "hidden"
         )}
       >
@@ -151,7 +151,7 @@ Si modificas algo, dile al usuario que la operación fue un éxito.`;
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-80 sm:w-96 h-[32rem] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200 overflow-hidden">
+        <div className="fixed bottom-16 right-6 w-80 sm:w-96 h-[32rem] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-slate-200 overflow-hidden">
           <div className="flex items-center justify-between p-4 bg-emerald-600 text-white">
             <h3 className="font-bold">Asistente IA</h3>
             <button onClick={() => setIsOpen(false)} className="hover:bg-emerald-700 p-1 rounded-full">
