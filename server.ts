@@ -696,6 +696,21 @@ async function startServer() {
     return map;
   };
 
+  // Helper to retrieve real marker scores (from marker_observations) grouped by territory
+  const getMarkerScoresByTerritory = async (): Promise<Record<string, Record<string, number>>> => {
+    const result = await db.execute(sql`
+      SELECT territory_id, marker_id, score
+      FROM marker_observations
+      WHERE score IS NOT NULL
+    `);
+    const map: Record<string, Record<string, number>> = {};
+    for (const row of result.rows as any[]) {
+      if (!map[row.territory_id]) map[row.territory_id] = {};
+      map[row.territory_id][row.marker_id] = row.score;
+    }
+    return map;
+  };
+
   // 1. POLYGONS ENDPOINT serving GeoJSON features mapped to territory IDs
   app.get("/api/geo/territories/polygons", async (req, res) => {
     try {
@@ -765,6 +780,7 @@ async function startServer() {
 
       // Populate objective scores directly onto polygon properties
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const markerScoresByTerritory = await getMarkerScoresByTerritory();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
         const objs = getObjectivesForTerritory(tid);
@@ -773,7 +789,8 @@ async function startServer() {
           properties: {
             ...f.properties,
             objectives: objs,
-            indicatorScores: indicatorScoresByTerritory[tid] || {}
+            indicatorScores: indicatorScoresByTerritory[tid] || {},
+            markerScores: markerScoresByTerritory[tid] || {}
           }
         };
       });
@@ -817,6 +834,7 @@ async function startServer() {
       });
 
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const markerScoresByTerritory = await getMarkerScoresByTerritory();
 
       const features = filtered.map(t => {
         const aguaVal = seedObjectives.find(o => o.title === "AGUA")?.progress_by_territory[t.id] ?? 50;
@@ -851,6 +869,7 @@ async function startServer() {
             description: t.description,
             objectives: { ...obj, overall },
             indicatorScores: indicatorScoresByTerritory[t.id] || {},
+            markerScores: markerScoresByTerritory[t.id] || {},
             challenges: t.active_challenges || []
           }
         };

@@ -39,10 +39,10 @@ const markers: MarkerSeed[] = [
     weight: 0.15,
   },
   {
-    id: 'MARKER_AGUA_CALIDAD_TOXICIDAD',
-    name: 'Toxicidad',
+    id: 'MARKER_AGUA_CALIDAD_PUREZA',
+    name: 'Pureza',
     includes: 'Metales pesados, pesticidas, hidrocarburos, contaminantes emergentes',
-    description: 'Mide la presencia de sustancias tóxicas para los ecosistemas y la salud humana.',
+    description: 'Mide la ausencia de sustancias tóxicas para los ecosistemas y la salud humana.',
     unit: 'Índice compuesto',
     weight: 0.15,
   },

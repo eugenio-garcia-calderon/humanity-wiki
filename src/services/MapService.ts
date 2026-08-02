@@ -16,6 +16,7 @@ export interface MapFeature {
   coordinates: [number, number];
   objectives: TerritoryObjectives;
   indicatorScores?: Record<string, number>;
+  markerScores?: Record<string, number>;
   challenges: string[];
 }
 

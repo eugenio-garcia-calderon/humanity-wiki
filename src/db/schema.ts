@@ -103,6 +103,20 @@ export const markers = pgTable('markers', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Valor de un marcador para un territorio concreto (aún sin datos cargados;
+// tabla lista para cuando se disponga de series por territorio).
+export const markerObservations = pgTable('marker_observations', {
+  id: serial('id').primaryKey(),
+  markerId: text('marker_id').notNull().references(() => markers.id),
+  territoryId: text('territory_id').notNull().references(() => territories.id),
+  value: doublePrecision('value'),
+  rawValue: text('raw_value'),
+  score: doublePrecision('score'),
+  date: date('date'),
+  source: text('source'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const organizations = pgTable('organizations', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
