@@ -88,6 +88,21 @@ export const indicatorObservations = pgTable('indicator_observations', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Sub-componentes (variables) que desglosan el cálculo de un indicador,
+// p.ej. Oxigenación/Nutrientes/... dentro del indicador "Calidad" del agua.
+export const markers = pgTable('markers', {
+  id: text('id').primaryKey(),
+  indicatorId: text('indicator_id').notNull().references(() => indicators.id),
+  name: text('name').notNull(), // Variable
+  includes: text('includes'), // Incluye: qué mide en concreto
+  description: text('description'),
+  unit: text('unit'), // Unidad principal
+  weight: doublePrecision('weight'), // Peso recomendado dentro del indicador (0-1)
+  source: text('source'),
+  lastUpdated: date('last_updated'), // fecha de la última toma de datos
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const organizations = pgTable('organizations', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),

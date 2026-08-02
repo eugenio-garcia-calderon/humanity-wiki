@@ -414,6 +414,25 @@ async function startServer() {
     } catch(e:any) { res.status(500).json({error: e.message}); }
   });
 
+  app.get("/api/data/markers", async (req, res) => {
+    try {
+      const indicatorId = req.query.indicatorId as string | undefined;
+      const result = indicatorId
+        ? await db.execute(sql`
+            SELECT id, indicator_id, name, includes, description, unit, weight, source, last_updated
+            FROM markers
+            WHERE indicator_id = ${indicatorId}
+            ORDER BY weight DESC
+          `)
+        : await db.execute(sql`
+            SELECT id, indicator_id, name, includes, description, unit, weight, source, last_updated
+            FROM markers
+            ORDER BY indicator_id, weight DESC
+          `);
+      res.json(result.rows);
+    } catch(e:any) { res.status(500).json({error: e.message}); }
+  });
+
   // REST WRITE ENDPOINTS (INSERT / UPDATE / DELETE with Drizzle / PostgreSQL)
   const handleUpsertEntity = async (entity: string, req: Request, res: Response) => {
     try {
