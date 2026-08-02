@@ -770,7 +770,7 @@ async function startServer() {
 
       let targetType = typeStr;
       if (!targetType && !parentIdStr) {
-        if (zoom < 2.5) targetType = 'planet';
+        if (zoom < 2.0) targetType = 'planet';
         else if (zoom < 3.5) targetType = 'continent';
         else if (zoom < 5.0) targetType = 'country';
         else targetType = 'region';
@@ -865,7 +865,7 @@ async function startServer() {
 
       let targetType = typeStr;
       if (!targetType && !parentIdStr) {
-        if (zoom < 2.5) targetType = 'planet';
+        if (zoom < 2.0) targetType = 'planet';
         else if (zoom < 3.5) targetType = 'continent';
         else if (zoom < 5.0) targetType = 'country';
         else if (zoom < 7.0) targetType = 'region';

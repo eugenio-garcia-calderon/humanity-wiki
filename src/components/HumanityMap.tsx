@@ -16,6 +16,7 @@ if (MAPBOX_TOKEN) {
 }
 
 const NO_DATA_COLOR = '#cbd5e1'; // slate-300, used when a territory has no data for the selected indicator
+const PLANET_MAX_ZOOM = 2.0; // below this the globe shows as a satellite-style "small planet"
 
 export type ObjectiveKey = keyof TerritoryObjectives;
 
@@ -188,9 +189,31 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
               map.current!.setLayoutProperty(layer.id, 'visibility', 'none');
             }
+            // The base style's own country/region border lines would otherwise show
+            // through at the planet/continent scale, looking like country divisions
+            // on top of our single-color continent shapes. Push them to country scale.
+            if (layer.type === 'line' && layer.id.startsWith('admin-')) {
+              map.current!.setLayerZoomRange(layer.id, 3.5, (layer as any).maxzoom ?? 24);
+            }
           }
         }
-        
+
+        // Satellite imagery shown only at the most zoomed-out "planet" scale, so the
+        // globe looks like a real planet instead of a flat colored blob.
+        map.current!.addSource('satellite', {
+          type: 'raster',
+          url: 'mapbox://mapbox.satellite',
+          tileSize: 256
+        });
+        map.current!.addLayer({
+          id: 'satellite-layer',
+          type: 'raster',
+          source: 'satellite',
+          minzoom: 0,
+          maxzoom: PLANET_MAX_ZOOM,
+          paint: { 'raster-opacity': 1 }
+        });
+
         // Add sources and layers for polygon rendering
         map.current!.addSource('planets', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.current!.addLayer({
@@ -198,36 +221,32 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           type: 'fill',
           source: 'planets',
           minzoom: 0,
-          maxzoom: 2.5,
-          paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.75 }
+          maxzoom: PLANET_MAX_ZOOM,
+          paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.35 }
         });
         map.current!.addLayer({
           id: 'planets-line',
           type: 'line',
           source: 'planets',
           minzoom: 0,
-          maxzoom: 2.5,
-          paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }
+          maxzoom: PLANET_MAX_ZOOM,
+          paint: { 'line-color': '#ffffff', 'line-width': 1, 'line-opacity': 0.5 }
         });
 
+        // Continent shapes: the source geometry is made of many per-country pieces
+        // sharing one territoryId per continent, so we deliberately skip a "line"
+        // layer here — it would draw a border around every piece and look like
+        // country divisions instead of a single continent silhouette.
         map.current!.addSource('continents', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.current!.addLayer({
           id: 'continents-fill',
           type: 'fill',
           source: 'continents',
-          minzoom: 2.5,
+          minzoom: PLANET_MAX_ZOOM,
           maxzoom: 3.5,
           paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.75 }
         });
-        map.current!.addLayer({
-          id: 'continents-line',
-          type: 'line',
-          source: 'continents',
-          minzoom: 2.5,
-          maxzoom: 3.5,
-          paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }
-        });
-        
+
         map.current!.addSource('countries', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.current!.addLayer({
           id: 'countries-fill',
@@ -565,8 +584,11 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             el.appendChild(dot);
           }
           
+          const isContinent = feature.type === 'continent';
           const label = document.createElement('div');
-          label.className = 'bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-sm pointer-events-none whitespace-nowrap transition-transform group-hover:scale-110';
+          label.className = isContinent
+            ? 'bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xl font-black text-slate-800 shadow-md pointer-events-none whitespace-nowrap transition-transform group-hover:scale-110 tracking-tight'
+            : 'bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-sm pointer-events-none whitespace-nowrap transition-transform group-hover:scale-110';
           if (!isPolygon) {
             label.className += ' absolute top-8';
           }
