@@ -68,6 +68,8 @@ export const indicators = pgTable('indicators', {
   unit: text('unit'),
   category: text('category'),
   direction: text('direction'), // higher_is_better, lower_is_better
+  weight: doublePrecision('weight'), // peso del indicador en la puntuación del objetivo (0-1)
+  methodology: text('methodology'), // explicación del cálculo de la puntuación
   objectiveId: text('objective_id').references(() => objectives.id),
   createdAt: timestamp('created_at').defaultNow(),
 });
@@ -77,6 +79,9 @@ export const indicatorObservations = pgTable('indicator_observations', {
   indicatorId: text('indicator_id').notNull().references(() => indicators.id),
   territoryId: text('territory_id').notNull().references(() => territories.id),
   value: doublePrecision('value').notNull(),
+  rawValue: text('raw_value'), // dato original descriptivo (puede incluir varias métricas)
+  score: doublePrecision('score'), // puntuación 0-100
+  weightedScore: doublePrecision('weighted_score'), // puntos ponderados (score * weight)
   date: date('date'),
   source: text('source'),
   sourceUrl: text('source_url'),

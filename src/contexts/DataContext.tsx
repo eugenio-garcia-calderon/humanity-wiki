@@ -8,6 +8,7 @@ type DataContextType = {
   projects: any[];
   organizations: any[];
   causes: any[];
+  indicators: any[];
   loading: boolean;
   refetchData: () => Promise<void>;
   saveEntity: (entity: string, data: any) => Promise<void>;
@@ -22,6 +23,7 @@ const DataContext = createContext<DataContextType>({
   projects: [],
   organizations: [],
   causes: [],
+  indicators: [],
   loading: true,
   refetchData: async () => {},
   saveEntity: async () => {},
@@ -36,22 +38,24 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     solutions: [],
     projects: [],
     organizations: [],
-    causes: []
+    causes: [],
+    indicators: []
   });
   const [loading, setLoading] = useState(true);
 
   const refetchData = async () => {
     try {
-      const [territories, objectives, challenges, solutions, projects, organizations, causes] = await Promise.all([
+      const [territories, objectives, challenges, solutions, projects, organizations, causes, indicators] = await Promise.all([
         fetch('/api/data/territories').then(r => r.json()),
         fetch('/api/data/objectives').then(r => r.json()),
         fetch('/api/data/challenges').then(r => r.json()),
         fetch('/api/data/solutions').then(r => r.json()),
         fetch('/api/data/projects').then(r => r.json()),
         fetch('/api/data/organizations').then(r => r.json()),
-        fetch('/api/data/causes').then(r => r.json())
+        fetch('/api/data/causes').then(r => r.json()),
+        fetch('/api/data/indicators').then(r => r.json())
       ]);
-      setData({ territories, objectives, challenges, solutions, projects, organizations, causes });
+      setData({ territories, objectives, challenges, solutions, projects, organizations, causes, indicators });
     } catch (e) {
       console.error(e);
     }
@@ -97,5 +101,6 @@ export const useHelpers = () => {
     getChallengeSolutions: (challengeId: string) => data.solutions.filter(s => s.challenge_ids?.includes(challengeId)),
     getChallengeProjects: (challengeId: string) => data.projects.filter(p => p.challenge_ids?.includes(challengeId)),
     getProjectOrganizations: (projectId: string) => data.organizations.filter(o => data.projects.find(p => p.id === projectId)?.organization_ids?.includes(o.id)),
+    getIndicatorsByObjective: (objectiveId: string) => data.indicators.filter(i => i.objective_id === objectiveId),
   };
 };

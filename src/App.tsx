@@ -6,6 +6,8 @@ import ChallengeProfile from './pages/ChallengeProfile';
 import SolutionProfile from './pages/SolutionProfile';
 import Objectives from './pages/Objectives';
 import ObjectiveDetail from './pages/ObjectiveDetail';
+import Indicators from './pages/Indicators';
+import IndicatorDetail from './pages/IndicatorDetail';
 import Challenges from './pages/Challenges';
 import Solutions from './pages/Solutions';
 import Territories from './pages/Territories';
@@ -41,6 +43,8 @@ export default function App() {
                 <Route path="soluciones/:id" element={<SolutionProfile />} />
                                 <Route path="objetivos/:id" element={<ObjectiveDetail />} />
                 <Route path="objetivos" element={<Objectives />} />
+                <Route path="indicadores/:id" element={<IndicatorDetail />} />
+                <Route path="indicadores" element={<Indicators />} />
                 <Route path="retos" element={<Challenges />} />
                 <Route path="soluciones" element={<Solutions />} />
                 <Route path="territorios" element={<Territories />} />

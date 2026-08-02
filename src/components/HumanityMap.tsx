@@ -5,11 +5,14 @@ import { mapService, MapFeature, TerritoryObjectives } from '../services/MapServ
 import { mapDataProvider } from '../services/MapDataProvider';
 import { createRoot } from 'react-dom/client';
 import { Droplet, Wheat, Home, Heart, Users, Leaf } from 'lucide-react';
+import { getColorForScore } from '../utils/scoreColor';
 
 const MAPBOX_TOKEN = (import.meta as any).env.VITE_MAPBOX_TOKEN;
 if (MAPBOX_TOKEN) {
   mapboxgl.accessToken = MAPBOX_TOKEN;
 }
+
+const NO_DATA_COLOR = '#cbd5e1'; // slate-300, used when a territory has no data for the selected indicator
 
 export type ObjectiveKey = keyof TerritoryObjectives;
 
@@ -20,20 +23,7 @@ interface HumanityMapProps {
   shouldReload?: boolean;
   activeObjective: ObjectiveKey;
   activeChallenge: string | null;
-}
-
-function getColorForScore(score: number): string {
-  if (score >= 95) return '#14532d'; // green-900
-  if (score >= 90) return '#166534'; // green-800
-  if (score >= 85) return '#15803d'; // green-700
-  if (score >= 80) return '#16a34a'; // green-600
-  if (score >= 75) return '#22c55e'; // green-500
-  if (score >= 70) return '#ca8a04'; // yellow-600
-  if (score >= 65) return '#eab308'; // yellow-500
-  if (score >= 50) return '#facc15'; // yellow-400
-  if (score >= 30) return '#f97316'; // orange-500
-  if (score >= 10) return '#b45309'; // amber-700
-  return '#78350f'; // amber-900
+  activeIndicatorId?: string | null;
 }
 
 function TooltipContent({ feature }: { feature: MapFeature }) {
@@ -83,7 +73,7 @@ function TooltipContent({ feature }: { feature: MapFeature }) {
   );
 }
 
-export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge }: HumanityMapProps) {
+export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId }: HumanityMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -356,6 +346,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           description: f.properties.description,
           coordinates: f.geometry.coordinates as [number, number],
           objectives: f.properties.objectives || { agua: 50, alimentacion: 50, vivienda: 50, salud: 50, convivencia: 50, ecosistemas: 50, overall: 50 },
+          indicatorScores: f.properties.indicatorScores || {},
           challenges: f.properties.challenges || []
         }));
 
@@ -379,9 +370,11 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         (polygonsGeo.features || []).forEach((feature: any) => {
           const tid = feature.properties.territoryId || feature.properties.id;
           const feat = filteredFeatures.find(ff => ff.id === tid);
+          const indicatorScores = feat ? feat.indicatorScores : feature.properties?.indicatorScores;
+          const hasIndicatorScore = !!activeIndicatorId && indicatorScores?.[activeIndicatorId] !== undefined;
           const objs = feat ? feat.objectives : feature.properties?.objectives;
-          const score = objs ? (objs[activeObjective] ?? 50) : 50;
-          const fillColor = getColorForScore(score);
+          const score = activeIndicatorId ? indicatorScores?.[activeIndicatorId] : (objs ? (objs[activeObjective] ?? 50) : 50);
+          const fillColor = activeIndicatorId && !hasIndicatorScore ? NO_DATA_COLOR : getColorForScore(score ?? 50);
 
           const styledFeature = {
             ...feature,
@@ -436,13 +429,17 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         // Render Centroid Markers
         filteredFeatures.forEach(feature => {
           const isPolygon = activePolygonIds.has(feature.id);
-          const score = feature.objectives[activeObjective];
-          const color = getColorForScore(score);
-          
+          const hasIndicatorScore = !!activeIndicatorId && feature.indicatorScores?.[activeIndicatorId] !== undefined;
+          const score = activeIndicatorId ? feature.indicatorScores?.[activeIndicatorId] : feature.objectives[activeObjective];
+          const color = activeIndicatorId && !hasIndicatorScore ? NO_DATA_COLOR : getColorForScore(score ?? 50);
+
           let finalColor = color;
           let dotBorder = 'border-white';
-          if (feature.objectives.overall === 0) {
+          if (!activeIndicatorId && feature.objectives.overall === 0) {
             finalColor = '#f8fafc';
+            dotBorder = 'border-slate-300';
+          }
+          if (activeIndicatorId && !hasIndicatorScore) {
             dotBorder = 'border-slate-300';
           }
           
@@ -474,8 +471,8 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           if (!isPolygon) {
             scoreLabel.className += ' absolute top-14';
           }
-          scoreLabel.style.color = finalColor;
-          scoreLabel.textContent = `${score}%`;
+          scoreLabel.style.color = activeIndicatorId && !hasIndicatorScore ? '#94a3b8' : finalColor;
+          scoreLabel.textContent = activeIndicatorId && !hasIndicatorScore ? 'Sin datos' : `${score}%`;
           el.appendChild(scoreLabel);
 
           if (!isPolygon) {
@@ -531,7 +528,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
 
     const timer = setTimeout(loadPostGISViewportData, 150);
     return () => clearTimeout(timer);
-  }, [zoom, shouldReload, activeObjective, activeChallenge]);
+  }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId]);
 
   // CSS for custom popup
   useEffect(() => {

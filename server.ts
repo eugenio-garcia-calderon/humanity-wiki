@@ -398,6 +398,19 @@ async function startServer() {
     } catch(e:any) { res.status(500).json({error: e.message}); }
   });
 
+  app.get("/api/data/indicators", async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT i.id, i.name, i.unit, i.category, i.direction, i.weight, i.methodology, i.objective_id,
+          io.territory_id, io.value, io.raw_value, io.score, io.weighted_score, io.date, io.source, io.source_url
+        FROM indicators i
+        LEFT JOIN indicator_observations io ON io.indicator_id = i.id
+        ORDER BY i.id
+      `);
+      res.json(result.rows);
+    } catch(e:any) { res.status(500).json({error: e.message}); }
+  });
+
   // REST WRITE ENDPOINTS (INSERT / UPDATE / DELETE with Drizzle / PostgreSQL)
   const handleUpsertEntity = async (entity: string, req: Request, res: Response) => {
     try {
@@ -646,6 +659,21 @@ async function startServer() {
     return { agua: aguaVal, alimentacion: alimVal, vivienda: vivVal, salud: saludVal, convivencia: convVal, ecosistemas: ecoVal, overall };
   };
 
+  // Helper to retrieve real indicator scores (from indicator_observations) grouped by territory
+  const getIndicatorScoresByTerritory = async (): Promise<Record<string, Record<string, number>>> => {
+    const result = await db.execute(sql`
+      SELECT territory_id, indicator_id, score
+      FROM indicator_observations
+      WHERE score IS NOT NULL
+    `);
+    const map: Record<string, Record<string, number>> = {};
+    for (const row of result.rows as any[]) {
+      if (!map[row.territory_id]) map[row.territory_id] = {};
+      map[row.territory_id][row.indicator_id] = row.score;
+    }
+    return map;
+  };
+
   // 1. POLYGONS ENDPOINT serving GeoJSON features mapped to territory IDs
   app.get("/api/geo/territories/polygons", async (req, res) => {
     try {
@@ -714,6 +742,7 @@ async function startServer() {
       }
 
       // Populate objective scores directly onto polygon properties
+      const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
         const objs = getObjectivesForTerritory(tid);
@@ -721,7 +750,8 @@ async function startServer() {
           ...f,
           properties: {
             ...f.properties,
-            objectives: objs
+            objectives: objs,
+            indicatorScores: indicatorScoresByTerritory[tid] || {}
           }
         };
       });
@@ -764,6 +794,8 @@ async function startServer() {
         return true;
       });
 
+      const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+
       const features = filtered.map(t => {
         const aguaVal = seedObjectives.find(o => o.title === "AGUA")?.progress_by_territory[t.id] ?? 50;
         const alimVal = seedObjectives.find(o => o.title === "ALIMENTACIÓN")?.progress_by_territory[t.id] ?? 50;
@@ -796,6 +828,7 @@ async function startServer() {
             parent_id: t.parent_id,
             description: t.description,
             objectives: { ...obj, overall },
+            indicatorScores: indicatorScoresByTerritory[t.id] || {},
             challenges: t.active_challenges || []
           }
         };

@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, Beaker, Waves, Gauge, AlertTriangle, GlassWater, Wrench, Recycle, Sun } from 'lucide-react';
 import { mapService } from '../services/MapService';
+
+const OBJECTIVE_ID_BY_KEY: Record<string, string> = {
+  agua: 'O001',
+  alimentacion: 'O002',
+  vivienda: 'O003',
+  salud: 'O004',
+  convivencia: 'O005',
+  ecosistemas: 'O006',
+};
+
+const INDICATOR_ICONS: Record<string, any> = {
+  Acceso: Droplet,
+  Calidad: Beaker,
+  Saneamiento: Waves,
+  Disponibilidad: Gauge,
+  Estrés: AlertTriangle,
+  Consumo: GlassWater,
+  Pérdidas: Wrench,
+  Reutilización: Recycle,
+  Sequía: Sun,
+};
 
 
 export default function MapPage() {
@@ -14,6 +35,24 @@ export default function MapPage() {
 
   // Filters
   const [activeObjective, setActiveObjective] = useState<ObjectiveKey>('overall');
+  const [activeIndicatorId, setActiveIndicatorId] = useState<string | null>(null);
+  const [indicators, setIndicators] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/data/indicators')
+      .then(r => r.json())
+      .then(setIndicators)
+      .catch(err => console.error('Error loading indicators', err));
+  }, []);
+
+  const handleObjectiveChange = (key: ObjectiveKey) => {
+    setActiveObjective(key);
+    setActiveIndicatorId(null);
+  };
+
+  const activeObjectiveIndicators = activeObjective === 'overall'
+    ? []
+    : indicators.filter(i => i.objective_id === OBJECTIVE_ID_BY_KEY[activeObjective]);
 
   const handleFeatureClick = async (id: string, type: string) => {
     try {
@@ -102,6 +141,7 @@ export default function MapPage() {
             shouldReload={reloadTrigger}
             activeObjective={activeObjective}
             activeChallenge={null}
+            activeIndicatorId={activeIndicatorId}
           />
 
           {/* Centered Bottom Bar with 6 Objectives Icons (+ General) */}
@@ -112,11 +152,11 @@ export default function MapPage() {
               return (
                 <button
                   key={obj.key}
-                  onClick={() => setActiveObjective(obj.key)}
+                  onClick={() => handleObjectiveChange(obj.key)}
                   title={obj.label}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-                    isActive 
-                      ? 'bg-slate-900 text-white shadow-md scale-105' 
+                    isActive
+                      ? 'bg-slate-900 text-white shadow-md scale-105'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                   }`}
                 >
@@ -126,6 +166,31 @@ export default function MapPage() {
               );
             })}
           </div>
+
+          {/* Indicator sub-filter: appears when an objective (not "General") is selected and has indicators */}
+          {activeObjectiveIndicators.length > 0 && (
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-auto flex items-center gap-1 sm:gap-2 bg-white/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-xl border border-slate-200/80 max-w-[95vw] overflow-x-auto">
+              {activeObjectiveIndicators.map(indicator => {
+                const Icon = INDICATOR_ICONS[indicator.name] || Layers;
+                const isActive = activeIndicatorId === indicator.id;
+                return (
+                  <button
+                    key={indicator.id}
+                    onClick={() => setActiveIndicatorId(isActive ? null : indicator.id)}
+                    title={indicator.name}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                      isActive
+                        ? 'bg-emerald-600 text-white shadow-md scale-105'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+                    <span>{indicator.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* CONTEXTUAL SIDE PANEL */}

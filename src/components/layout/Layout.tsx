@@ -28,6 +28,7 @@ export default function Layout() {
   const navItems = [
     { name: 'Mapa', path: '/' },
     { name: 'Objetivos', path: '/objetivos' },
+    { name: 'Indicadores', path: '/indicadores' },
     { name: 'Retos', path: '/retos' },
     { name: 'Soluciones', path: '/soluciones' },
     { name: 'Territorios', path: '/territorios' },
