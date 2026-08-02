@@ -400,11 +400,14 @@ async function startServer() {
 
   app.get("/api/data/indicators", async (req, res) => {
     try {
+      // National (España) observation only — per-territory breakdowns for the map
+      // come from /api/geo/territories/{polygons,centroids} via indicatorScores.
+      const territoryId = (req.query.territoryId as string) || 'T003';
       const result = await db.execute(sql`
         SELECT i.id, i.name, i.unit, i.category, i.direction, i.weight, i.methodology, i.objective_id,
           io.territory_id, io.value, io.raw_value, io.score, io.weighted_score, io.date, io.source, io.source_url
         FROM indicators i
-        LEFT JOIN indicator_observations io ON io.indicator_id = i.id
+        LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
         ORDER BY i.id
       `);
       res.json(result.rows);

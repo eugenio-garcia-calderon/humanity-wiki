@@ -143,7 +143,8 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         style: 'mapbox://styles/mapbox/light-v11',
         center: [15, 25],
         zoom: zoom,
-        doubleClickZoom: false
+        doubleClickZoom: false,
+        attributionControl: false
       });
 
       if (!mapPopupRef.current) {
@@ -585,6 +586,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
+      .mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib { display: none !important; }
       .custom-popup { pointer-events: none; }
       .custom-popup .mapboxgl-popup-content {
         padding: 0;
