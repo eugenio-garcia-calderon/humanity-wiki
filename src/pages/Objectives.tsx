@@ -103,20 +103,20 @@ function AddChallengeSelector({ objId, selectedTerritoryId, onAddExisting, onCre
 
 export default function Objectives({ embeddedTerritoryId }: { embeddedTerritoryId?: string }) {
   const { challenges, solutions, territories, objectives, getTerritory, loading } = useHelpers();
-  if (loading) return <div>Cargando...</div>;
-
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTerritory = embeddedTerritoryId || searchParams.get('territorio') || "T003";
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>(initialTerritory);
-  
+
   React.useEffect(() => {
     if (embeddedTerritoryId) setSelectedTerritoryId(embeddedTerritoryId);
   }, [embeddedTerritoryId]);
-  
+
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [expandedObjIds, setExpandedObjIds] = useState<Set<string>>(new Set());
+
+  if (loading) return <div>Cargando...</div>;
 
   const handleTerritoryChange = (id: string) => {
     setSelectedTerritoryId(id);

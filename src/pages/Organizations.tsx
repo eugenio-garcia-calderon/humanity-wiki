@@ -17,13 +17,12 @@ const typeTranslation: Record<string, string> = {
 
 export default function OrganizationsPage() {
   const { objectives, organizations, territories, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('');
-  
+
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
   const navigate = useNavigate();
+  if(loading) return <div>Cargando...</div>;
 
   const typeTerritories = territories.filter(t => t.type === 'municipality' || t.type === 'region' || t.type === 'country');
 

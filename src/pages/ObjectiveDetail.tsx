@@ -20,10 +20,9 @@ const defaultColors = { from: 'from-slate-400', to: 'to-slate-600', bg: 'bg-slat
 
 export default function ObjectiveDetail() {
   const { objectives, challenges, solutions, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { id } = useParams<{ id: string }>();
   const { objectiveImages } = useDesign();
+  if(loading) return <div>Cargando...</div>;
   
   const decodedId = decodeURIComponent(id || '');
   

@@ -9,13 +9,12 @@ import { slugify } from '../utils/slugify';
 
 export default function TerritoryProfile() {
   const { getTerritory, getTerritoryChallenges, territories, challenges, projects, organizations, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { id } = useParams();
   const navigate = useNavigate();
-  const territory = getTerritory(id || 'T004');
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
+  if(loading) return <div>Cargando...</div>;
 
+  const territory = getTerritory(id || 'T004');
   if (!territory) return <div>Territorio no encontrado</div>;
 
   const activeChallenges = getTerritoryChallenges(territory.id);

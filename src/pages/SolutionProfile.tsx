@@ -8,11 +8,10 @@ import { slugify } from '../utils/slugify';
 
 export default function SolutionProfile() {
   const { solutions, challenges, causes, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { id } = useParams();
   const navigate = useNavigate();
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
+  if(loading) return <div>Cargando...</div>;
   
   const decodedId = decodeURIComponent(id || '');
   

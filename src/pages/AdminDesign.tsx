@@ -7,9 +7,8 @@ import { cn } from '../utils/cn';
 
 export default function AdminDesign() {
   const { objectives, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { objectiveImages, setObjectiveImage, logoImage, setLogoImage } = useDesign();
+  if(loading) return <div>Cargando...</div>;
 
   const handleFileUpload = (title: string, file: File) => {
     if (!file) return;

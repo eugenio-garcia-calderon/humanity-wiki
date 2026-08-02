@@ -10,12 +10,11 @@ import { useEdit } from '../contexts/EditContext';
 
 export default function Solutions() {
   const { objectives, challenges, solutions, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
   const navigate = useNavigate();
+  if(loading) return <div>Cargando...</div>;
 
   return (
     <div key={updateCounter} className="space-y-8 animate-in fade-in duration-500 pb-12">

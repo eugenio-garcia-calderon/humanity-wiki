@@ -9,10 +9,9 @@ import { slugify } from '../utils/slugify';
 
 export default function ChallengeProfile() {
   const { getChallengeCauses, getChallengeSolutions, getChallengeProjects, territories, challenges, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { id } = useParams();
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
+  if(loading) return <div>Cargando...</div>;
   
   const decodedId = decodeURIComponent(id || '');
   

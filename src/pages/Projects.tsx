@@ -10,13 +10,12 @@ import { useEdit } from '../contexts/EditContext';
 
 export default function ProjectsPage() {
   const { objectives, projects, territories, organizations, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('');
-  
+
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
   const navigate = useNavigate();
+  if(loading) return <div>Cargando...</div>;
 
   const typeTerritories = territories.filter(t => t.type === 'municipality' || t.type === 'region' || t.type === 'country');
 

@@ -18,11 +18,10 @@ const typeLabels: Record<string, string> = {
 
 export default function Territories() {
   const { territories, loading } = useHelpers();
-  if(loading) return <div>Cargando...</div>;
-
   const { openEdit, triggerUpdate, updateCounter } = useEdit();
   const { user } = useAuth();
   const [filter, setFilter] = useState('');
+  if(loading) return <div>Cargando...</div>;
 
   const filteredTerritories = territories.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()));
 
