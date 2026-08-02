@@ -469,6 +469,15 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           label.textContent = feature.name;
           el.appendChild(label);
 
+          const scoreLabel = document.createElement('div');
+          scoreLabel.className = 'bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm pointer-events-none whitespace-nowrap transition-transform group-hover:scale-110 mt-0.5';
+          if (!isPolygon) {
+            scoreLabel.className += ' absolute top-14';
+          }
+          scoreLabel.style.color = finalColor;
+          scoreLabel.textContent = `${score}%`;
+          el.appendChild(scoreLabel);
+
           if (!isPolygon) {
             el.addEventListener('mouseenter', () => {
               if (map.current) {
