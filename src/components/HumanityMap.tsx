@@ -140,6 +140,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
   const [mapError, setMapError] = useState<string | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const popupsRef = useRef<mapboxgl.Popup[]>([]);
+  const stationMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const hoveredPolygonIdRef = useRef<string | null>(null);
   const mapPopupRef = useRef<mapboxgl.Popup | null>(null);
   const mapFeaturesRef = useRef<MapFeature[]>([]);
@@ -260,49 +261,6 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           minzoom: 4.5,
           paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }
         });
-
-        // Measurement stations for the active metric (contaminant), shown as
-        // colored points (Bajo/Moderado/Alto/Peligroso) instead of territory fills.
-        map.current!.addSource('stations', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-        map.current!.addLayer({
-          id: 'stations-points',
-          type: 'circle',
-          source: 'stations',
-          paint: {
-            'circle-radius': 7,
-            'circle-color': [
-              'match', ['get', 'level'],
-              'bajo', LEVEL_COLORS.bajo,
-              'moderado', LEVEL_COLORS.moderado,
-              'alto', LEVEL_COLORS.alto,
-              'peligroso', LEVEL_COLORS.peligroso,
-              '#94a3b8'
-            ],
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#ffffff'
-          }
-        });
-
-        const handleStationMouseMove = (e: mapboxgl.MapMouseEvent & any) => {
-          if (e.features && e.features.length > 0) {
-            map.current!.getCanvas().style.cursor = 'pointer';
-            const props = e.features[0].properties;
-            if (mapPopupRef.current) {
-              mapPopupRef.current.setLngLat(e.lngLat);
-              const popupNode = document.createElement('div');
-              const root = createRoot(popupNode);
-              root.render(<StationTooltip properties={props} />);
-              mapPopupRef.current.setDOMContent(popupNode);
-              if (!mapPopupRef.current.isOpen()) mapPopupRef.current.addTo(map.current!);
-            }
-          }
-        };
-        const handleStationMouseLeave = () => {
-          map.current!.getCanvas().style.cursor = '';
-          if (mapPopupRef.current) mapPopupRef.current.remove();
-        };
-        map.current!.on('mousemove', 'stations-points', handleStationMouseMove);
-        map.current!.on('mouseleave', 'stations-points', handleStationMouseLeave);
 
         const handleMouseMove = (e: mapboxgl.MapMouseEvent & any) => {
           if (e.features && e.features.length > 0) {
@@ -679,29 +637,63 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
     return () => clearTimeout(timer);
   }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators, activeMarkerId]);
 
-  // Load measurement-station points for the active metric (contaminant), if any
+  // Load measurement-station markers (droplet+lens icon + risk-level label) for the active metric
   useEffect(() => {
     if (!map.current) return;
-    const source = map.current.getSource('stations') as mapboxgl.GeoJSONSource | undefined;
-    if (!source) return;
+    let cancelled = false;
 
-    if (!activeMetricId) {
-      source.setData({ type: 'FeatureCollection', features: [] });
-      return;
+    if (activeMetricId) {
+      fetch(`/api/geo/metrics/${activeMetricId}/stations`)
+        .then(r => r.json())
+        .then(geojson => {
+          if (cancelled || !map.current) return;
+          (geojson.features || []).forEach((feature: any) => {
+            const level = feature.properties.level as string | undefined;
+            const color = level ? (LEVEL_COLORS[level] || '#94a3b8') : '#94a3b8';
+            const label = level ? (LEVEL_LABELS[level] || level) : 'Sin nivel';
+
+            const el = document.createElement('div');
+            el.className = 'flex items-center gap-1 bg-white/95 backdrop-blur-sm pl-1 pr-2 py-1 rounded-full shadow-md border-2 cursor-pointer transition-transform hover:scale-110';
+            el.style.borderColor = color;
+            el.style.color = color;
+            el.innerHTML = `
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 2C9 2 3.5 9.5 3.5 14C3.5 17.5 6 20 9 20C12 20 14.5 17.5 14.5 14C14.5 9.5 9 2 9 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="16" cy="16" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+                <line x1="18.4" y1="18.4" x2="21" y2="21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span class="text-[10px] font-extrabold uppercase tracking-wide">${label}</span>
+            `;
+
+            let popup: mapboxgl.Popup | null = null;
+            el.addEventListener('mouseenter', () => {
+              if (!map.current) return;
+              const popupNode = document.createElement('div');
+              const root = createRoot(popupNode);
+              root.render(<StationTooltip properties={feature.properties} />);
+              popup = new mapboxgl.Popup({ offset: 14, closeButton: false, closeOnClick: false, className: 'custom-popup', anchor: 'top' })
+                .setDOMContent(popupNode)
+                .setLngLat(feature.geometry.coordinates)
+                .addTo(map.current);
+            });
+            el.addEventListener('mouseleave', () => {
+              if (popup) { popup.remove(); popup = null; }
+            });
+
+            const marker = new mapboxgl.Marker(el)
+              .setLngLat(feature.geometry.coordinates)
+              .addTo(map.current!);
+            stationMarkersRef.current.push(marker);
+          });
+        })
+        .catch(err => console.error('Error loading measurement stations', err));
     }
 
-    let cancelled = false;
-    fetch(`/api/geo/metrics/${activeMetricId}/stations`)
-      .then(r => r.json())
-      .then(geojson => {
-        if (!cancelled && map.current) {
-          const src = map.current.getSource('stations') as mapboxgl.GeoJSONSource | undefined;
-          if (src) src.setData(geojson);
-        }
-      })
-      .catch(err => console.error('Error loading measurement stations', err));
-
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      stationMarkersRef.current.forEach(m => m.remove());
+      stationMarkersRef.current = [];
+    };
   }, [activeMetricId]);
 
   // CSS for custom popup
