@@ -6,6 +6,8 @@ import { mapDataProvider } from '../services/MapDataProvider';
 import { createRoot } from 'react-dom/client';
 import { Droplet, Wheat, Home, Heart, Users, Leaf } from 'lucide-react';
 import { getColorForScore } from '../utils/scoreColor';
+import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
+import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../utils/indicatorIcons';
 
 const MAPBOX_TOKEN = (import.meta as any).env.VITE_MAPBOX_TOKEN;
 if (MAPBOX_TOKEN) {
@@ -24,11 +26,44 @@ interface HumanityMapProps {
   activeObjective: ObjectiveKey;
   activeChallenge: string | null;
   activeIndicatorId?: string | null;
+  indicators?: any[];
 }
 
-function TooltipContent({ feature }: { feature: MapFeature }) {
+function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature; objectiveIndicators?: { id: string; name: string }[] }) {
   const { objectives } = feature;
-  
+
+  // Contextual mode: an objective filter with its own indicators is active
+  if (objectiveIndicators && objectiveIndicators.length > 0) {
+    return (
+      <div className="p-3 bg-white rounded-xl shadow-xl border border-slate-100 font-sans z-50 relative w-max max-w-[260px]">
+        <div className="font-bold text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">
+          {feature.name}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {objectiveIndicators.map(indicator => {
+            const score = feature.indicatorScores?.[indicator.id];
+            const Icon = INDICATOR_ICONS[indicator.id] || DEFAULT_INDICATOR_ICON;
+            const color = score != null ? getColorForScore(score) : '#94a3b8';
+            return (
+              <div key={indicator.id} className="flex flex-col items-center text-center">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[9px] leading-none shadow-sm"
+                  style={{ backgroundColor: score != null ? color : '#cbd5e1' }}
+                >
+                  {score != null ? `${score}%` : 'N/D'}
+                </div>
+                <div className="text-[9px] uppercase tracking-wider text-slate-500 mt-1 flex items-center gap-0.5">
+                  <Icon className="w-3 h-3 shrink-0" />
+                  <span className="line-clamp-1">{indicator.name}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   const items = [
     { key: 'agua', label: 'Agua', icon: Droplet, score: objectives.agua },
     { key: 'alimentacion', label: 'Alim.', icon: Wheat, score: objectives.alimentacion },
@@ -37,13 +72,13 @@ function TooltipContent({ feature }: { feature: MapFeature }) {
     { key: 'convivencia', label: 'Conv.', icon: Users, score: objectives.convivencia },
     { key: 'ecosistemas', label: 'Ecos.', icon: Leaf, score: objectives.ecosistemas },
   ];
-  
+
   return (
     <div className="p-3 bg-white rounded-xl shadow-xl border border-slate-100 font-sans z-50 relative w-max">
       <div className="font-bold text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2 flex justify-between items-center gap-6">
         <span>{feature.name}</span>
         <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
-          Media 
+          Media
           <span className="text-sm font-black" style={{ color: getColorForScore(objectives.overall) }}>
             {objectives.overall}%
           </span>
@@ -55,7 +90,7 @@ function TooltipContent({ feature }: { feature: MapFeature }) {
           const color = getColorForScore(item.score);
           return (
             <div key={item.key} className="flex flex-col items-center">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm"
                 style={{ backgroundColor: color }}
               >
@@ -73,7 +108,7 @@ function TooltipContent({ feature }: { feature: MapFeature }) {
   );
 }
 
-export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId }: HumanityMapProps) {
+export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapClick, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators }: HumanityMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [zoom, setZoom] = useState(2.4);
@@ -87,6 +122,14 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
 
   const onFeatureClickRef = useRef(onFeatureClick);
   useEffect(() => { onFeatureClickRef.current = onFeatureClick; }, [onFeatureClick]);
+
+  // Kept fresh via ref because handleMouseMove is registered once inside 'style.load'
+  // and would otherwise close over stale activeObjective/indicators values.
+  const activeIndicatorsRef = useRef<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    const objId = OBJECTIVE_ID_BY_KEY[activeObjective];
+    activeIndicatorsRef.current = objId ? (indicators || []).filter(i => i.objective_id === objId) : [];
+  }, [activeObjective, indicators]);
 
   // Initialize Mapbox
   useEffect(() => {
@@ -207,6 +250,10 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
                 if (typeof objs === 'string') {
                   try { objs = JSON.parse(objs); } catch (e) { objs = null; }
                 }
+                let indScores = props.indicatorScores;
+                if (typeof indScores === 'string') {
+                  try { indScores = JSON.parse(indScores); } catch (e) { indScores = null; }
+                }
                 feat = {
                   id: tid,
                   name: props.name || tid,
@@ -214,6 +261,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
                   description: props.description || '',
                   coordinates: [e.lngLat.lng, e.lngLat.lat],
                   objectives: objs || { agua: 50, alimentacion: 50, vivienda: 50, salud: 50, convivencia: 50, ecosistemas: 50, overall: 50 },
+                  indicatorScores: indScores || {},
                   challenges: []
                 };
               }
@@ -221,7 +269,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
                 mapPopupRef.current.setLngLat([e.lngLat.lng, e.lngLat.lat]);
                 const popupNode = document.createElement('div');
                 const root = createRoot(popupNode);
-                root.render(<TooltipContent feature={feat} />);
+                root.render(<TooltipContent feature={feat} objectiveIndicators={activeIndicatorsRef.current} />);
                 mapPopupRef.current.setDOMContent(popupNode);
               }
             }
@@ -427,6 +475,9 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         popupsRef.current = [];
 
         // Render Centroid Markers
+        const currentObjId = OBJECTIVE_ID_BY_KEY[activeObjective];
+        const currentObjectiveIndicators = currentObjId ? (indicators || []).filter(i => i.objective_id === currentObjId) : [];
+
         filteredFeatures.forEach(feature => {
           const isPolygon = activePolygonIds.has(feature.id);
           const hasIndicatorScore = !!activeIndicatorId && feature.indicatorScores?.[activeIndicatorId] !== undefined;
@@ -485,7 +536,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
                 
                 const popupNode = document.createElement('div');
                 const root = createRoot(popupNode);
-                root.render(<TooltipContent feature={feature} />);
+                root.render(<TooltipContent feature={feature} objectiveIndicators={currentObjectiveIndicators} />);
                 
                 const popup = new mapboxgl.Popup({
                   offset: 15,
@@ -528,7 +579,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
 
     const timer = setTimeout(loadPostGISViewportData, 150);
     return () => clearTimeout(timer);
-  }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId]);
+  }, [zoom, shouldReload, activeObjective, activeChallenge, activeIndicatorId, indicators]);
 
   // CSS for custom popup
   useEffect(() => {

@@ -1,29 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, Beaker, Waves, Gauge, AlertTriangle, GlassWater, Wrench, Recycle, Sun } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers } from 'lucide-react';
 import { mapService } from '../services/MapService';
-
-const OBJECTIVE_ID_BY_KEY: Record<string, string> = {
-  agua: 'O001',
-  alimentacion: 'O002',
-  vivienda: 'O003',
-  salud: 'O004',
-  convivencia: 'O005',
-  ecosistemas: 'O006',
-};
-
-const INDICATOR_ICONS: Record<string, any> = {
-  Acceso: Droplet,
-  Calidad: Beaker,
-  Saneamiento: Waves,
-  Disponibilidad: Gauge,
-  Estrés: AlertTriangle,
-  Consumo: GlassWater,
-  Pérdidas: Wrench,
-  Reutilización: Recycle,
-  Sequía: Sun,
-};
+import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
+import { INDICATOR_ICONS } from '../utils/indicatorIcons';
 
 
 export default function MapPage() {
@@ -142,6 +123,7 @@ export default function MapPage() {
             activeObjective={activeObjective}
             activeChallenge={null}
             activeIndicatorId={activeIndicatorId}
+            indicators={indicators}
           />
 
           {/* Centered Bottom Bar with 6 Objectives Icons (+ General) */}
@@ -154,14 +136,14 @@ export default function MapPage() {
                   key={obj.key}
                   onClick={() => handleObjectiveChange(obj.key)}
                   title={obj.label}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all shrink-0 ${
                     isActive
                       ? 'bg-slate-900 text-white shadow-md scale-105'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 opacity-50'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : obj.color}`} />
-                  <span className="hidden md:inline">{obj.label}</span>
+                  <span className={`hidden md:inline transition-all ${isActive ? 'text-base font-extrabold' : 'text-xs'}`}>{obj.label}</span>
                 </button>
               );
             })}
@@ -171,7 +153,7 @@ export default function MapPage() {
           {activeObjectiveIndicators.length > 0 && (
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-auto flex items-center gap-1 sm:gap-2 bg-white/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-xl border border-slate-200/80 max-w-[95vw] overflow-x-auto">
               {activeObjectiveIndicators.map(indicator => {
-                const Icon = INDICATOR_ICONS[indicator.name] || Layers;
+                const Icon = INDICATOR_ICONS[indicator.id] || Layers;
                 const isActive = activeIndicatorId === indicator.id;
                 return (
                   <button
