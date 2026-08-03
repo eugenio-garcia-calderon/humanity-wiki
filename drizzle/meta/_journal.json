@@ -36,6 +36,13 @@
       "when": 1785693508830,
       "tag": "0004_burly_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785770078654,
+      "tag": "0005_burly_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

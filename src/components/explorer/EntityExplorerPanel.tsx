@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { getColorForScore } from '../../utils/scoreColor';
+import { slugify } from '../../utils/slugify';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../../utils/indicatorIcons';
 import { MARKER_ICONS, DEFAULT_MARKER_ICON } from '../../utils/markerIcons';
 import { METRIC_ICONS, DEFAULT_METRIC_ICON, LEVEL_COLORS, LEVEL_LABELS } from '../../utils/metricIcons';
+
+// Circular "sphere" used for both Retos and Soluciones — a self-contained
+// labeled bubble, laid out left-to-right in its card.
+function EntitySphere({ title, to, gradient }: { title: string; to: string; gradient: string }) {
+  return (
+    <Link
+      to={to}
+      className={`w-20 h-20 rounded-full shrink-0 bg-gradient-to-br ${gradient} shadow-md flex items-center justify-center text-center px-2 text-white text-[10px] font-bold uppercase leading-tight tracking-wide hover:scale-105 transition-transform`}
+      title={title}
+    >
+      {title}
+    </Link>
+  );
+}
 
 export type ExplorerLevel = 'objetivo' | 'indicador' | 'marcador' | 'metrica';
 
@@ -288,6 +304,34 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
           {level === 'metrica' && (
             <p className="text-[11px] text-slate-300 italic">Este es el nivel más profundo de esta jerarquía — no hay más niveles por debajo.</p>
           )}
+
+          {/* Retos */}
+          <div>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Retos</h3>
+            {data.challenges && data.challenges.length > 0 ? (
+              <div className="flex flex-row flex-wrap gap-3">
+                {data.challenges.map((c: any) => (
+                  <EntitySphere key={c.id} title={c.title} to={`/retos/${slugify(c.title)}`} gradient="from-red-500 to-rose-600" />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">No hay retos registrados para este nivel en {data.territory?.name}.</p>
+            )}
+          </div>
+
+          {/* Soluciones */}
+          <div>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Soluciones</h3>
+            {data.solutions && data.solutions.length > 0 ? (
+              <div className="flex flex-row flex-wrap gap-3">
+                {data.solutions.map((s: any) => (
+                  <EntitySphere key={s.id} title={s.title} to={`/soluciones/${slugify(s.title)}`} gradient="from-emerald-500 to-teal-600" />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">No hay soluciones vinculadas todavía.</p>
+            )}
+          </div>
         </>
       )}
     </div>

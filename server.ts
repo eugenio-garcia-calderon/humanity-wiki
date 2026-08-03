@@ -1113,6 +1113,21 @@ async function startServer() {
     return result.rows;
   };
 
+  // Solutions ("Soluciones") linked to a set of challenges, via challenge_solutions —
+  // used to populate the explorer's Soluciones card from whichever challenges are
+  // shown in its Retos card at the same level+territory.
+  const getSolutionsForChallenges = async (challengeIds: string[]) => {
+    if (challengeIds.length === 0) return [];
+    const result = await db.execute(sql`
+      SELECT DISTINCT s.id, s.title, s.type, s.description, s.impact, s.cost, s.readiness
+      FROM solutions s
+      JOIN challenge_solutions cs ON cs.solution_id = s.id
+      WHERE cs.challenge_id IN ${challengeIds}
+      ORDER BY s.title
+    `);
+    return result.rows;
+  };
+
   // Unified drill-down endpoint for the map's filter menu: given a level of the
   // Objetivo→Indicador→Marcador→Métrica hierarchy and an entity id, returns its
   // general metadata, the observation for the given territory, and its children
@@ -1146,6 +1161,16 @@ async function startServer() {
           ORDER BY i.id
         `);
 
+        const challengesResult = await db.execute(sql`
+          SELECT c.id, c.title, c.priority
+          FROM challenges c
+          JOIN challenge_objectives co ON co.challenge_id = c.id
+          JOIN challenge_territories ct ON ct.challenge_id = c.id
+          WHERE co.objective_id = ${id} AND ct.territory_id = ${territoryId}
+          ORDER BY c.title
+        `);
+        const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
+
         return res.json({
           level: "objetivo",
           entity: { id: objective.id, name: objective.title, description: objective.description },
@@ -1154,7 +1179,9 @@ async function startServer() {
           hasData: score != null,
           children: indicatorsResult.rows.map((r: any) => ({
             level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
-          }))
+          })),
+          challenges: challengesResult.rows,
+          solutions: solutionsRows
         });
       }
 
@@ -1180,6 +1207,16 @@ async function startServer() {
           ORDER BY m.weight DESC NULLS LAST, m.id
         `);
 
+        const challengesResult = await db.execute(sql`
+          SELECT c.id, c.title, c.priority
+          FROM challenges c
+          JOIN challenge_indicators ci ON ci.challenge_id = c.id
+          JOIN challenge_territories ct ON ct.challenge_id = c.id
+          WHERE ci.indicator_id = ${id} AND ct.territory_id = ${territoryId}
+          ORDER BY c.title
+        `);
+        const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
+
         return res.json({
           level: "indicador",
           entity: {
@@ -1192,7 +1229,9 @@ async function startServer() {
           hasData: !!observation,
           children: markersResult.rows.map((r: any) => ({
             level: "marcador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
-          }))
+          })),
+          challenges: challengesResult.rows,
+          solutions: solutionsRows
         });
       }
 
@@ -1228,6 +1267,16 @@ async function startServer() {
           ORDER BY me.name
         `);
 
+        const challengesResult = await db.execute(sql`
+          SELECT c.id, c.title, c.priority
+          FROM challenges c
+          JOIN challenge_markers cm ON cm.challenge_id = c.id
+          JOIN challenge_territories ct ON ct.challenge_id = c.id
+          WHERE cm.marker_id = ${id} AND ct.territory_id = ${territoryId}
+          ORDER BY c.title
+        `);
+        const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
+
         return res.json({
           level: "marcador",
           entity: {
@@ -1240,7 +1289,9 @@ async function startServer() {
           hasData: !!observation,
           children: metricsResult.rows.map((r: any) => ({
             level: "metrica", id: r.id, name: r.name, score: null, hasData: r.worst_level != null, riskLevel: r.worst_level ?? null
-          }))
+          })),
+          challenges: challengesResult.rows,
+          solutions: solutionsRows
         });
       }
 
@@ -1252,6 +1303,16 @@ async function startServer() {
         if (!metric) return res.status(404).json({ error: "Métrica no encontrada" });
 
         const stationRows = await getStationsNearTerritory(territoryId, id, radiusKm);
+
+        const challengesResult = await db.execute(sql`
+          SELECT c.id, c.title, c.priority
+          FROM challenges c
+          JOIN challenge_metrics cme ON cme.challenge_id = c.id
+          JOIN challenge_territories ct ON ct.challenge_id = c.id
+          WHERE cme.metric_id = ${id} AND ct.territory_id = ${territoryId}
+          ORDER BY c.title
+        `);
+        const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
 
         return res.json({
           level: "metrica",
@@ -1265,7 +1326,9 @@ async function startServer() {
             withinTerritory: r.territory_id === territoryId,
             value: r.value, unit: r.unit, level: r.level, date: r.date, source: r.source
           })),
-          children: []
+          children: [],
+          challenges: challengesResult.rows,
+          solutions: solutionsRows
         });
       }
 

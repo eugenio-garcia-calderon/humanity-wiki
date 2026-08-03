@@ -200,6 +200,31 @@ export const challengeObjectives = pgTable('challenge_objectives', {
   pk: primaryKey({ columns: [t.challengeId, t.objectiveId] }),
 }));
 
+// Ligan un reto a un Indicador/Marcador/Métrica concretos (además del
+// objetivo general vía challenge_objectives), para poder mostrar los retos
+// relevantes en cualquier nivel del explorador del mapa, no solo a nivel
+// de objetivo.
+export const challengeIndicators = pgTable('challenge_indicators', {
+  challengeId: text('challenge_id').notNull().references(() => challenges.id),
+  indicatorId: text('indicator_id').notNull().references(() => indicators.id),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.challengeId, t.indicatorId] }),
+}));
+
+export const challengeMarkers = pgTable('challenge_markers', {
+  challengeId: text('challenge_id').notNull().references(() => challenges.id),
+  markerId: text('marker_id').notNull().references(() => markers.id),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.challengeId, t.markerId] }),
+}));
+
+export const challengeMetrics = pgTable('challenge_metrics', {
+  challengeId: text('challenge_id').notNull().references(() => challenges.id),
+  metricId: text('metric_id').notNull().references(() => metrics.id),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.challengeId, t.metricId] }),
+}));
+
 export const challengeCauses = pgTable('challenge_causes', {
   challengeId: text('challenge_id').notNull().references(() => challenges.id),
   causeId: text('cause_id').notNull().references(() => causes.id),

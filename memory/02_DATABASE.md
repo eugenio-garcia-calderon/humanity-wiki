@@ -75,6 +75,9 @@ Todas con clave primaria compuesta (`primaryKey({ columns: [...] })`), sin colum
 |---|---|
 | `challenge_territories` | reto ↔ territorio |
 | `challenge_objectives` | reto ↔ objetivo |
+| `challenge_indicators` | reto ↔ indicador (añadida 2026-08-03, mismo patrón que `challenge_objectives` pero un nivel más profundo) |
+| `challenge_markers` | reto ↔ marcador (2026-08-03) |
+| `challenge_metrics` | reto ↔ métrica (2026-08-03) |
 | `challenge_causes` | reto ↔ causa |
 | `challenge_solutions` | reto ↔ solución |
 | `solution_causes` | solución ↔ causa |
