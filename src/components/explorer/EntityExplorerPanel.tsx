@@ -364,34 +364,65 @@ export default function EntityExplorerPanel({
                 {level === 'indicador' && 'Marcadores'}
                 {level === 'marcador' && 'Métricas'}
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {data.children.map((child: any) => {
-                  const ChildIcon = iconForLevel(child.level, child.id);
-                  return (
-                    <div key={child.id} className="relative group">
-                      <button
-                        onClick={() => onNavigate(child.level, child.id)}
-                        className="w-full flex items-center gap-2 p-3 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors text-left"
-                      >
-                        <ChildIcon className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="flex-1 text-xs font-semibold text-slate-700 truncate pr-5">{child.name}</span>
-                        <ChildBadge child={child} />
-                      </button>
-                      {user?.isAdmin && (
-                        <AdminMenu
-                          className="absolute top-1 right-1"
-                          onEdit={() => openEdit(
-                            EXPLORER_LEVEL_LABELS[child.level as ExplorerLevel],
-                            getChildEntity(child),
-                            () => {},
-                            () => {}
-                          )}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              {level === 'objetivo' ? (
+                <div className="flex flex-row items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  {data.children.map((child: any) => {
+                    const ChildIcon = iconForLevel(child.level, child.id);
+                    return (
+                      <div key={child.id} className="relative shrink-0 group">
+                        <button
+                          onClick={() => onNavigate(child.level, child.id)}
+                          className="flex items-center gap-1.5 pl-3 pr-2.5 py-2 rounded-full border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors whitespace-nowrap"
+                        >
+                          <ChildIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="text-xs font-semibold text-slate-700">{child.name}</span>
+                          <ChildBadge child={child} />
+                        </button>
+                        {user?.isAdmin && (
+                          <AdminMenu
+                            className="absolute -top-1 -right-1 bg-white rounded-full shadow-sm"
+                            onEdit={() => openEdit(
+                              EXPLORER_LEVEL_LABELS[child.level as ExplorerLevel],
+                              getChildEntity(child),
+                              () => {},
+                              () => {}
+                            )}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {data.children.map((child: any) => {
+                    const ChildIcon = iconForLevel(child.level, child.id);
+                    return (
+                      <div key={child.id} className="relative group">
+                        <button
+                          onClick={() => onNavigate(child.level, child.id)}
+                          className="w-full flex items-center gap-2 p-3 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors text-left"
+                        >
+                          <ChildIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span className="flex-1 text-xs font-semibold text-slate-700 truncate pr-5">{child.name}</span>
+                          <ChildBadge child={child} />
+                        </button>
+                        {user?.isAdmin && (
+                          <AdminMenu
+                            className="absolute top-1 right-1"
+                            onEdit={() => openEdit(
+                              EXPLORER_LEVEL_LABELS[child.level as ExplorerLevel],
+                              getChildEntity(child),
+                              () => {},
+                              () => {}
+                            )}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

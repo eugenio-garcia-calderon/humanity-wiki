@@ -109,7 +109,7 @@ function AddChallengeSelector({ objId, selectedTerritoryId, onAddExisting, onCre
   );
 }
 
-export default function Objectives({ embeddedTerritoryId }: { embeddedTerritoryId?: string }) {
+export default function Objectives({ embeddedTerritoryId, onSelectObjective }: { embeddedTerritoryId?: string; onSelectObjective?: (objId: string) => void }) {
   const { challenges, solutions, territories, objectives, getTerritory, loading } = useHelpers();
   const { openEdit, updateCounter, triggerUpdate } = useEdit();
   const { user } = useAuth();
@@ -229,6 +229,53 @@ export default function Objectives({ embeddedTerritoryId }: { embeddedTerritoryI
       </div>
 
       {/* Objectives Grid */}
+      {embeddedTerritoryId ? (
+        <div className="grid grid-cols-3 gap-2">
+          {objectives.map(obj => {
+            const Icon = iconMap[obj.title] || TreePine;
+            const progress = obj.progress_by_territory?.[selectedTerritoryId] || 0;
+            return (
+              <div key={obj.id} className="relative group">
+                <button
+                  onClick={() => onSelectObjective?.(obj.id)}
+                  className="w-full flex flex-col items-center gap-1 p-2.5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-200 hover:shadow-md transition-all text-center"
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-emerald-600 shrink-0">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-tight text-slate-700 leading-tight line-clamp-1 w-full">{obj.title}</span>
+                  <div className="w-full flex items-center gap-1.5">
+                    <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }} />
+                    </div>
+                    <span className="text-[10px] font-black text-emerald-600 shrink-0">{progress}%</span>
+                  </div>
+                </button>
+                {user?.isAdmin && (
+                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <AdminMenu onEdit={() => {
+                      let initialData = { ...obj };
+                      if (selectedTerritoryId && initialData.progress_by_territory) {
+                        initialData.progress_by_territory = { [selectedTerritoryId]: initialData.progress_by_territory[selectedTerritoryId] || 0 };
+                      }
+                      openEdit('Objetivo', initialData, (data) => {
+                        if (selectedTerritoryId && data.progress_by_territory) {
+                          data.progress_by_territory = {
+                            ...(obj.progress_by_territory || {}),
+                            [selectedTerritoryId]: data.progress_by_territory[selectedTerritoryId]
+                          };
+                        }
+                        Object.assign(obj, data);
+                        triggerUpdate();
+                      });
+                    }} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 gap-6">
         {objectives.map(obj => {
           // Filter challenges for this objective AND this territory
@@ -469,6 +516,7 @@ export default function Objectives({ embeddedTerritoryId }: { embeddedTerritoryI
           );
         })}
       </div>
+      )}
     </div>
   );
 }
