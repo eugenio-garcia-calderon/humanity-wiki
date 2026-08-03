@@ -247,6 +247,11 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.75 }
         });
 
+        // These minzoom/maxzoom breakpoints (3.5 continent/country, 4.5
+        // country/region) must match the zoom brackets in server.ts's
+        // /api/geo/territories/polygons and /centroids — otherwise there's a
+        // zoom range where this layer wants a territory type the endpoint
+        // isn't serving yet, and the map goes blank until the next fetch.
         map.current!.addSource('countries', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.current!.addLayer({
           id: 'countries-fill',

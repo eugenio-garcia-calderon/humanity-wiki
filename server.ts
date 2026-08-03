@@ -846,9 +846,14 @@ async function startServer() {
 
       let targetType = typeStr;
       if (!targetType && !parentIdStr) {
+        // These breakpoints must match the Mapbox layer minzoom/maxzoom values
+        // in HumanityMap.tsx (continents-fill, countries-fill/line,
+        // regions-fill/line) — otherwise there's a zoom range where the layer
+        // wants to show one polygon type but this endpoint is still serving
+        // the previous one, leaving the map blank until the next fetch fires.
         if (zoom < 2.0) targetType = 'planet';
         else if (zoom < 3.5) targetType = 'continent';
-        else if (zoom < 5.0) targetType = 'country';
+        else if (zoom < 4.5) targetType = 'country';
         else targetType = 'region';
       }
 
@@ -941,9 +946,13 @@ async function startServer() {
 
       let targetType = typeStr;
       if (!targetType && !parentIdStr) {
+        // Must match the polygons endpoint's breakpoints (and the Mapbox layer
+        // minzoom/maxzoom in HumanityMap.tsx) at the continent/country/region
+        // boundaries, or centroid labels and filled polygons briefly disagree
+        // on which territory type to show for the same zoom level.
         if (zoom < 2.0) targetType = 'planet';
         else if (zoom < 3.5) targetType = 'continent';
-        else if (zoom < 5.0) targetType = 'country';
+        else if (zoom < 4.5) targetType = 'country';
         else if (zoom < 7.0) targetType = 'region';
         else if (zoom < 9.0) targetType = 'municipality';
       }

@@ -23,10 +23,12 @@
 - ✅ Rediseño del mapa a layout de 3 columnas (filtros en acordeón / panel de territorio permanente / mapa).
 - ✅ Sistema de documentación viva `/memory` (este conjunto de archivos).
 - ✅ Páginas de entidad ligadas a territorio para todo el menú de filtros (Objetivo→Indicador→Marcador→Métrica): endpoint único `/api/explorer/:level/:id`, componente único `EntityExplorerPanel`, navegación reflejada en la URL (`?territorio=<slug>&nivel=&id=`), territorio por defecto vía geolocalización IP con reserva en "Mundo" (`/api/geo/locate`), "alrededores" de una métrica por radio de distancia (150 km) desde el centro del territorio.
+- ✅ Menú de filtros colapsable estilo Codex/VS Code (rail de 56px + flyout en hover), 20% más estrecho, con default responsive (colapsado en móvil, abierto en tablet/escritorio) y botón de colapsar/expandir con estilo llamativo.
 
 ## En desarrollo / pendiente inmediato
 
 - 🔲 **Ítem 4 de `MEJORAS_PENDIENTES.md`** (pendiente, añadido por el usuario directamente en GitHub, aún sin implementar): hacer que las 3 columnas principales del mapa sean redimensionables por el usuario, al estilo de los paneles de la UI de Claude Code.
+- 🔲 Rediseño responsive completo de `/mapa` para móvil: hoy solo el menú de filtros está preparado para móvil (colapsa por defecto); las columnas 2 (panel de territorio) y 3 (mapa) siguen apretadas en viewports estrechos.
 
 ## Falta por hacer (no iniciado, sin fecha)
 
