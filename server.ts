@@ -10,6 +10,8 @@ import { territories as seedTerritories, objectives as seedObjectives } from "./
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
+import { registerGraphRoutes } from "./src/server/graph.js";
+import { registerSocialRoutes } from "./src/server/social.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -226,6 +228,12 @@ async function startServer() {
   // `req.user` a partir de la cookie de sesión — todos los endpoints
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
+
+  // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
+  // Van después de la autenticación porque dependen de `req.user`
+  // para aplicar los niveles de rol.
+  registerGraphRoutes(app, db);
+  registerSocialRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
