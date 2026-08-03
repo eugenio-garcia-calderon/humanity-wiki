@@ -23,6 +23,9 @@ function getEntityTypeFromTitle(title: string, data: any): string {
   const t = (title || '').toLowerCase();
   if (t.includes('territorio')) return 'territories';
   if (t.includes('objetivo')) return 'objectives';
+  if (t.includes('indicador')) return 'indicators';
+  if (t.includes('marcador')) return 'markers';
+  if (t.includes('métrica') || t.includes('metrica')) return 'metrics';
   if (t.includes('reto')) return 'challenges';
   if (t.includes('solución') || t.includes('solucion')) return 'solutions';
   if (t.includes('causa')) return 'causes';

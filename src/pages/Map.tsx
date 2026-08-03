@@ -478,6 +478,9 @@ export default function MapPage() {
               breadcrumb={buildBreadcrumb()}
               onNavigate={navigateExplorer}
               onClearFilter={clearExplorer}
+              indicators={indicators}
+              markers={markers}
+              metrics={metrics}
             />
           ) : (
             <div className="p-4 sm:p-6">

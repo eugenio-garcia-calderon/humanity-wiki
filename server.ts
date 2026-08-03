@@ -608,6 +608,24 @@ async function startServer() {
             await db.execute(sql`INSERT INTO challenge_objectives (challenge_id, objective_id) VALUES (${id}, ${oid}) ON CONFLICT DO NOTHING`);
           }
         }
+        if (Array.isArray(data.indicator_ids)) {
+          await db.execute(sql`DELETE FROM challenge_indicators WHERE challenge_id = ${id}`);
+          for (const iid of data.indicator_ids) {
+            await db.execute(sql`INSERT INTO challenge_indicators (challenge_id, indicator_id) VALUES (${id}, ${iid}) ON CONFLICT DO NOTHING`);
+          }
+        }
+        if (Array.isArray(data.marker_ids)) {
+          await db.execute(sql`DELETE FROM challenge_markers WHERE challenge_id = ${id}`);
+          for (const mid of data.marker_ids) {
+            await db.execute(sql`INSERT INTO challenge_markers (challenge_id, marker_id) VALUES (${id}, ${mid}) ON CONFLICT DO NOTHING`);
+          }
+        }
+        if (Array.isArray(data.metric_ids)) {
+          await db.execute(sql`DELETE FROM challenge_metrics WHERE challenge_id = ${id}`);
+          for (const meid of data.metric_ids) {
+            await db.execute(sql`INSERT INTO challenge_metrics (challenge_id, metric_id) VALUES (${id}, ${meid}) ON CONFLICT DO NOTHING`);
+          }
+        }
       } else if (entity === "causes") {
         await db.execute(sql`
           INSERT INTO causes (id, title, type, description)
@@ -620,9 +638,52 @@ async function startServer() {
         if (Array.isArray(data.challenge_ids)) {
           await db.execute(sql`DELETE FROM challenge_causes WHERE cause_id = ${id}`);
           for (const cid of data.challenge_ids) {
-            await db.execute(sql`INSERT INTO challenge_causes (challenge_id, cause_id) VALUES (${cid}, ${id}) ON CONFLICT DO NOTHING`);
+            // percentage is this cause's weight within THIS specific challenge —
+            // stored on the join row, not on the cause itself (see schema.ts).
+            await db.execute(sql`
+              INSERT INTO challenge_causes (challenge_id, cause_id, percentage)
+              VALUES (${cid}, ${id}, ${data.percentage ?? null})
+              ON CONFLICT (challenge_id, cause_id) DO UPDATE SET percentage = EXCLUDED.percentage
+            `);
           }
         }
+      } else if (entity === "indicators") {
+        await db.execute(sql`
+          INSERT INTO indicators (id, name, unit, category, direction, weight, methodology, objective_id)
+          VALUES (${id}, ${data.name || 'Nuevo Indicador'}, ${data.unit || null}, ${data.category || null}, ${data.direction || null}, ${data.weight ?? null}, ${data.methodology || null}, ${data.objective_id || null})
+          ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            unit = EXCLUDED.unit,
+            category = EXCLUDED.category,
+            direction = EXCLUDED.direction,
+            weight = EXCLUDED.weight,
+            methodology = EXCLUDED.methodology,
+            objective_id = EXCLUDED.objective_id
+        `);
+      } else if (entity === "markers") {
+        await db.execute(sql`
+          INSERT INTO markers (id, indicator_id, name, includes, description, unit, weight, source, last_updated)
+          VALUES (${id}, ${data.indicator_id}, ${data.name || 'Nuevo Marcador'}, ${data.includes || null}, ${data.description || null}, ${data.unit || null}, ${data.weight ?? null}, ${data.source || null}, ${data.last_updated || null})
+          ON CONFLICT (id) DO UPDATE SET
+            indicator_id = EXCLUDED.indicator_id,
+            name = EXCLUDED.name,
+            includes = EXCLUDED.includes,
+            description = EXCLUDED.description,
+            unit = EXCLUDED.unit,
+            weight = EXCLUDED.weight,
+            source = EXCLUDED.source,
+            last_updated = EXCLUDED.last_updated
+        `);
+      } else if (entity === "metrics") {
+        await db.execute(sql`
+          INSERT INTO metrics (id, marker_id, name, unit, description)
+          VALUES (${id}, ${data.marker_id}, ${data.name || 'Nueva Métrica'}, ${data.unit || null}, ${data.description || null})
+          ON CONFLICT (id) DO UPDATE SET
+            marker_id = EXCLUDED.marker_id,
+            name = EXCLUDED.name,
+            unit = EXCLUDED.unit,
+            description = EXCLUDED.description
+        `);
       } else if (entity === "solutions") {
         await db.execute(sql`
           INSERT INTO solutions (id, title, type, description, impact, cost, readiness)
@@ -730,6 +791,9 @@ async function startServer() {
       } else if (entity === "challenges") {
         await db.execute(sql`DELETE FROM challenge_territories WHERE challenge_id = ${id}`);
         await db.execute(sql`DELETE FROM challenge_objectives WHERE challenge_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_indicators WHERE challenge_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_markers WHERE challenge_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_metrics WHERE challenge_id = ${id}`);
         await db.execute(sql`DELETE FROM challenge_causes WHERE challenge_id = ${id}`);
         await db.execute(sql`DELETE FROM challenge_solutions WHERE challenge_id = ${id}`);
         await db.execute(sql`DELETE FROM project_challenges WHERE challenge_id = ${id}`);
@@ -738,6 +802,20 @@ async function startServer() {
         await db.execute(sql`DELETE FROM challenge_causes WHERE cause_id = ${id}`);
         await db.execute(sql`DELETE FROM solution_causes WHERE cause_id = ${id}`);
         await db.execute(sql`DELETE FROM causes WHERE id = ${id}`);
+      } else if (entity === "indicators") {
+        // No cascade to markers on purpose — if markers still reference this
+        // indicator, the FK constraint rejects the delete (safe default).
+        await db.execute(sql`DELETE FROM indicator_observations WHERE indicator_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_indicators WHERE indicator_id = ${id}`);
+        await db.execute(sql`DELETE FROM indicators WHERE id = ${id}`);
+      } else if (entity === "markers") {
+        await db.execute(sql`DELETE FROM marker_observations WHERE marker_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_markers WHERE marker_id = ${id}`);
+        await db.execute(sql`DELETE FROM markers WHERE id = ${id}`);
+      } else if (entity === "metrics") {
+        await db.execute(sql`DELETE FROM metric_observations WHERE metric_id = ${id}`);
+        await db.execute(sql`DELETE FROM challenge_metrics WHERE metric_id = ${id}`);
+        await db.execute(sql`DELETE FROM metrics WHERE id = ${id}`);
       } else if (entity === "solutions") {
         await db.execute(sql`DELETE FROM challenge_solutions WHERE solution_id = ${id}`);
         await db.execute(sql`DELETE FROM solution_causes WHERE solution_id = ${id}`);
@@ -1182,7 +1260,7 @@ async function startServer() {
         `);
 
         const challengesResult = await db.execute(sql`
-          SELECT c.id, c.title, c.priority
+          SELECT c.id, c.title, c.priority, c.scope, c.description
           FROM challenges c
           JOIN challenge_objectives co ON co.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
@@ -1228,7 +1306,7 @@ async function startServer() {
         `);
 
         const challengesResult = await db.execute(sql`
-          SELECT c.id, c.title, c.priority
+          SELECT c.id, c.title, c.priority, c.scope, c.description
           FROM challenges c
           JOIN challenge_indicators ci ON ci.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
@@ -1288,7 +1366,7 @@ async function startServer() {
         `);
 
         const challengesResult = await db.execute(sql`
-          SELECT c.id, c.title, c.priority
+          SELECT c.id, c.title, c.priority, c.scope, c.description
           FROM challenges c
           JOIN challenge_markers cm ON cm.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
@@ -1325,7 +1403,7 @@ async function startServer() {
         const stationRows = await getStationsNearTerritory(territoryId, id, radiusKm);
 
         const challengesResult = await db.execute(sql`
-          SELECT c.id, c.title, c.priority
+          SELECT c.id, c.title, c.priority, c.scope, c.description
           FROM challenges c
           JOIN challenge_metrics cme ON cme.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id

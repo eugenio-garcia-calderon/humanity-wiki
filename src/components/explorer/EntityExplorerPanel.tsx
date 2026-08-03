@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
+import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Plus } from 'lucide-react';
 import { getColorForScore } from '../../utils/scoreColor';
 import { slugify } from '../../utils/slugify';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../../utils/indicatorIcons';
 import { MARKER_ICONS, DEFAULT_MARKER_ICON } from '../../utils/markerIcons';
 import { METRIC_ICONS, DEFAULT_METRIC_ICON, LEVEL_COLORS, LEVEL_LABELS } from '../../utils/metricIcons';
+import { AdminMenu } from '../ui/AdminMenu';
+import { useEdit } from '../../contexts/EditContext';
+import { useAuth } from '../../contexts/AuthContext';
 import CauseDonutChart from './CauseDonutChart';
 
 // Circular "sphere" used for both Retos and Soluciones — a self-contained
@@ -28,6 +31,19 @@ function EntitySphere({ title, to, onClick, gradient, active }: { title: string;
   );
 }
 
+// Dashed "+" sphere, same footprint as EntitySphere, used to add a new Reto/Solución.
+function AddSphere({ onClick, title }: { onClick: () => void; title: string }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="w-20 h-20 rounded-full shrink-0 border-2 border-dashed border-slate-300 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex items-center justify-center transition-colors"
+    >
+      <Plus className="w-6 h-6" />
+    </button>
+  );
+}
+
 export type ExplorerLevel = 'objetivo' | 'indicador' | 'marcador' | 'metrica';
 
 export interface BreadcrumbEntry {
@@ -41,6 +57,15 @@ const EXPLORER_LEVEL_LABELS: Record<ExplorerLevel, string> = {
   indicador: 'Indicador',
   marcador: 'Marcador',
   metrica: 'Métrica',
+};
+
+// Which relation array on a challenge links it to the entity at each level
+// (see challenge_objectives/challenge_indicators/challenge_markers/challenge_metrics).
+const CHALLENGE_RELATION_KEY: Record<ExplorerLevel, string> = {
+  objetivo: 'objective_ids',
+  indicador: 'indicator_ids',
+  marcador: 'marker_ids',
+  metrica: 'metric_ids',
 };
 
 const OBJECTIVE_ICONS: Record<string, any> = {
@@ -102,19 +127,33 @@ interface EntityExplorerPanelProps {
   breadcrumb: BreadcrumbEntry[];
   onNavigate: (level: ExplorerLevel, id: string) => void;
   onClearFilter: () => void;
+  indicators?: any[];
+  markers?: any[];
+  metrics?: any[];
 }
 
-export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb, onNavigate, onClearFilter }: EntityExplorerPanelProps) {
+export default function EntityExplorerPanel({
+  level, id, territoryId, breadcrumb, onNavigate, onClearFilter,
+  indicators = [], markers = [], metrics = [],
+}: EntityExplorerPanelProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { openEdit, updateCounter } = useEdit();
+
+  // Only a real navigation (new level/entity/territory) should collapse the
+  // open causes chart — a save/delete elsewhere (updateCounter) must NOT,
+  // otherwise saving a new cause closes the very chart showing it.
+  useEffect(() => {
+    setSelectedChallengeId(null);
+  }, [level, id, territoryId]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    setSelectedChallengeId(null);
     fetch(`/api/explorer/${level}/${id}?territoryId=${encodeURIComponent(territoryId)}`)
       .then(r => {
         if (!r.ok) throw new Error('No se pudo cargar la información');
@@ -124,9 +163,43 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [level, id, territoryId]);
+    // updateCounter bumps after any save/delete anywhere in the app (via
+    // EditContext), so this panel refetches and reflects the change.
+  }, [level, id, territoryId, updateCounter]);
 
   const Icon = iconForLevel(level, id);
+
+  const getChildEntity = (child: any) => {
+    const list = child.level === 'indicador' ? indicators : child.level === 'marcador' ? markers : metrics;
+    return list.find((e: any) => e.id === child.id) || { id: child.id, name: child.name };
+  };
+
+  const handleAddChallenge = () => {
+    const newChallenge: any = {
+      id: `R${1000 + Math.floor(Math.random() * 9000)}`,
+      title: '',
+      scope: 'regional',
+      description: '',
+      priority: 'medium',
+      territory_ids: [territoryId],
+    };
+    newChallenge[CHALLENGE_RELATION_KEY[level]] = [id];
+    openEdit('Reto', newChallenge, () => {}, undefined);
+  };
+
+  const handleAddSolution = () => {
+    const newSolution = {
+      id: `S${1000 + Math.floor(Math.random() * 9000)}`,
+      title: '',
+      type: 'general',
+      description: '',
+      impact: '',
+      cost: '',
+      readiness: '',
+      challenge_ids: (data?.challenges || []).map((c: any) => c.id),
+    };
+    openEdit('Solución', newSolution, () => {}, undefined);
+  };
 
   return (
     <div className="p-4 sm:p-6 space-y-5 animate-in fade-in duration-300">
@@ -295,15 +368,27 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
                 {data.children.map((child: any) => {
                   const ChildIcon = iconForLevel(child.level, child.id);
                   return (
-                    <button
-                      key={child.id}
-                      onClick={() => onNavigate(child.level, child.id)}
-                      className="flex items-center gap-2 p-3 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors text-left"
-                    >
-                      <ChildIcon className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="flex-1 text-xs font-semibold text-slate-700 truncate">{child.name}</span>
-                      <ChildBadge child={child} />
-                    </button>
+                    <div key={child.id} className="relative group">
+                      <button
+                        onClick={() => onNavigate(child.level, child.id)}
+                        className="w-full flex items-center gap-2 p-3 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/40 transition-colors text-left"
+                      >
+                        <ChildIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span className="flex-1 text-xs font-semibold text-slate-700 truncate pr-5">{child.name}</span>
+                        <ChildBadge child={child} />
+                      </button>
+                      {user?.isAdmin && (
+                        <AdminMenu
+                          className="absolute top-1 right-1"
+                          onEdit={() => openEdit(
+                            EXPLORER_LEVEL_LABELS[child.level as ExplorerLevel],
+                            getChildEntity(child),
+                            () => {},
+                            () => {}
+                          )}
+                        />
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -316,18 +401,28 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
 
           {/* Retos */}
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Retos</h3>
-            {data.challenges && data.challenges.length > 0 ? (
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Retos</h3>
+            </div>
+            {(data.challenges && data.challenges.length > 0) || user?.isAdmin ? (
               <div className="flex flex-row flex-wrap gap-3">
-                {data.challenges.map((c: any) => (
-                  <EntitySphere
-                    key={c.id}
-                    title={c.title}
-                    gradient="from-red-500 to-rose-600"
-                    active={selectedChallengeId === c.id}
-                    onClick={() => setSelectedChallengeId(prev => (prev === c.id ? null : c.id))}
-                  />
+                {(data.challenges || []).map((c: any) => (
+                  <div key={c.id} className="relative">
+                    <EntitySphere
+                      title={c.title}
+                      gradient="from-red-500 to-rose-600"
+                      active={selectedChallengeId === c.id}
+                      onClick={() => setSelectedChallengeId(prev => (prev === c.id ? null : c.id))}
+                    />
+                    {user?.isAdmin && (
+                      <AdminMenu
+                        className="absolute -top-1 -right-1 bg-white rounded-full shadow-sm"
+                        onEdit={() => openEdit('Reto', c, () => {}, () => { if (selectedChallengeId === c.id) setSelectedChallengeId(null); })}
+                      />
+                    )}
+                  </div>
                 ))}
+                {user?.isAdmin && <AddSphere title="Añadir reto" onClick={handleAddChallenge} />}
               </div>
             ) : (
               <p className="text-sm text-slate-400 italic">No hay retos registrados para este nivel en {data.territory?.name}.</p>
@@ -346,12 +441,23 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
 
           {/* Soluciones */}
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Soluciones</h3>
-            {data.solutions && data.solutions.length > 0 ? (
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Soluciones</h3>
+            </div>
+            {(data.solutions && data.solutions.length > 0) || user?.isAdmin ? (
               <div className="flex flex-row flex-wrap gap-3">
-                {data.solutions.map((s: any) => (
-                  <EntitySphere key={s.id} title={s.title} to={`/soluciones/${slugify(s.title)}`} gradient="from-emerald-500 to-teal-600" />
+                {(data.solutions || []).map((s: any) => (
+                  <div key={s.id} className="relative">
+                    <EntitySphere title={s.title} to={`/soluciones/${slugify(s.title)}`} gradient="from-emerald-500 to-teal-600" />
+                    {user?.isAdmin && (
+                      <AdminMenu
+                        className="absolute -top-1 -right-1 bg-white rounded-full shadow-sm"
+                        onEdit={() => openEdit('Solución', s, () => {}, () => {})}
+                      />
+                    )}
+                  </div>
                 ))}
+                {user?.isAdmin && <AddSphere title="Añadir solución" onClick={handleAddSolution} />}
               </div>
             ) : (
               <p className="text-sm text-slate-400 italic">No hay soluciones vinculadas todavía.</p>

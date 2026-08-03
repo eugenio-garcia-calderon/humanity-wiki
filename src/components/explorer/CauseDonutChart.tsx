@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
+import { useEdit } from '../../contexts/EditContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Cause {
   id: string;
@@ -26,6 +28,8 @@ export default function CauseDonutChart({ challengeId, challengeTitle, territory
   const [causes, setCauses] = useState<Cause[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { openEdit, updateCounter } = useEdit();
 
   useEffect(() => {
     let cancelled = false;
@@ -37,9 +41,22 @@ export default function CauseDonutChart({ challengeId, challengeTitle, territory
       .catch(() => { if (!cancelled) setCauses([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [challengeId]);
+    // updateCounter bumps after any save/delete (e.g. adding a new cause via
+    // the modal below), so this chart refetches and shows it immediately.
+  }, [challengeId, updateCounter]);
 
   const selectedCause = causes?.find(c => c.id === selectedId) || null;
+
+  const handleAddCause = () => {
+    openEdit('Nueva Causa', {
+      id: `C${1000 + Math.floor(Math.random() * 9000)}`,
+      title: '',
+      type: '',
+      description: '',
+      percentage: 0,
+      challenge_ids: [challengeId],
+    }, () => {}, undefined);
+  };
 
   const renderLabel = (props: any) => {
     if (!causes) return null;
@@ -65,15 +82,33 @@ export default function CauseDonutChart({ challengeId, challengeTitle, territory
     <div className="bg-white rounded-2xl border border-slate-100 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Causas del reto</h3>
-        <button onClick={onClose} className="p-1 text-slate-300 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors" title="Cerrar gráfico">
-          <X className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {user?.isAdmin && (
+            <button
+              onClick={handleAddCause}
+              className="p-1 text-slate-300 hover:text-emerald-600 rounded-full hover:bg-slate-50 transition-colors"
+              title="Añadir causa"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button onClick={onClose} className="p-1 text-slate-300 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors" title="Cerrar gráfico">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {loading && <div className="text-sm text-slate-400 py-8 text-center">Cargando...</div>}
 
       {!loading && causes && causes.length === 0 && (
-        <p className="text-sm text-slate-400 italic py-4">Este reto todavía no tiene causas registradas.</p>
+        <div className="text-center py-4">
+          <p className="text-sm text-slate-400 italic mb-2">Este reto todavía no tiene causas registradas.</p>
+          {user?.isAdmin && (
+            <button onClick={handleAddCause} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest">
+              + Añadir la primera causa
+            </button>
+          )}
+        </div>
       )}
 
       {!loading && causes && causes.length > 0 && (
