@@ -1,0 +1,1 @@
+ALTER TABLE "challenge_causes" ADD COLUMN "percentage" double precision;

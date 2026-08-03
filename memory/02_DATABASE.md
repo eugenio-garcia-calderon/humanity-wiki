@@ -78,7 +78,7 @@ Todas con clave primaria compuesta (`primaryKey({ columns: [...] })`), sin colum
 | `challenge_indicators` | reto ↔ indicador (añadida 2026-08-03, mismo patrón que `challenge_objectives` pero un nivel más profundo) |
 | `challenge_markers` | reto ↔ marcador (2026-08-03) |
 | `challenge_metrics` | reto ↔ métrica (2026-08-03) |
-| `challenge_causes` | reto ↔ causa |
+| `challenge_causes` | reto ↔ causa, con `percentage` (0-100, añadido 2026-08-03): peso de esa causa dentro de ESE reto, para el gráfico de anillo del explorador — es propiedad de la relación, no de la causa (la misma causa puede pesar distinto en retos distintos) |
 | `challenge_solutions` | reto ↔ solución |
 | `solution_causes` | solución ↔ causa |
 | `project_challenges` | proyecto ↔ reto |

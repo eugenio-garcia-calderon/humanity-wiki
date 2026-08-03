@@ -1128,6 +1128,26 @@ async function startServer() {
     return result.rows;
   };
 
+  // Causas de un reto concreto, con su peso (%) para el gráfico de anillo
+  // interactivo del explorador del mapa. El peso es propio de la relación
+  // reto+causa (challenge_causes.percentage), no de la causa en sí.
+  app.get("/api/challenges/:id/causes", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await db.execute(sql`
+        SELECT c.id, c.title, c.type, c.description, cc.percentage
+        FROM causes c
+        JOIN challenge_causes cc ON cc.cause_id = c.id
+        WHERE cc.challenge_id = ${id}
+        ORDER BY cc.percentage DESC NULLS LAST
+      `);
+      res.json(result.rows);
+    } catch (e: any) {
+      console.error("Error fetching challenge causes:", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Unified drill-down endpoint for the map's filter menu: given a level of the
   // Objetivo→Indicador→Marcador→Métrica hierarchy and an entity id, returns its
   // general metadata, the observation for the given territory, and its children

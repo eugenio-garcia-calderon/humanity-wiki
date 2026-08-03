@@ -228,6 +228,11 @@ export const challengeMetrics = pgTable('challenge_metrics', {
 export const challengeCauses = pgTable('challenge_causes', {
   challengeId: text('challenge_id').notNull().references(() => challenges.id),
   causeId: text('cause_id').notNull().references(() => causes.id),
+  // % de peso de esta causa dentro de ESTE reto en concreto (0-100), para el
+  // gráfico de anillo de causas — es una propiedad de la relación reto+causa,
+  // no de la causa en sí, ya que la misma causa puede pesar distinto en retos
+  // diferentes.
+  percentage: doublePrecision('percentage'),
 }, (t) => ({
   pk: primaryKey({ columns: [t.challengeId, t.causeId] }),
 }));

@@ -6,16 +6,23 @@ import { slugify } from '../../utils/slugify';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../../utils/indicatorIcons';
 import { MARKER_ICONS, DEFAULT_MARKER_ICON } from '../../utils/markerIcons';
 import { METRIC_ICONS, DEFAULT_METRIC_ICON, LEVEL_COLORS, LEVEL_LABELS } from '../../utils/metricIcons';
+import CauseDonutChart from './CauseDonutChart';
 
 // Circular "sphere" used for both Retos and Soluciones — a self-contained
-// labeled bubble, laid out left-to-right in its card.
-function EntitySphere({ title, to, gradient }: { title: string; to: string; gradient: string }) {
+// labeled bubble, laid out left-to-right in its card. Renders as a link
+// (navigates to the entity's own page) or as a button (e.g. Retos, which
+// toggle the causes chart open below instead of navigating away).
+function EntitySphere({ title, to, onClick, gradient, active }: { title: string; to?: string; onClick?: () => void; gradient: string; active?: boolean }) {
+  const className = `w-20 h-20 rounded-full shrink-0 bg-gradient-to-br ${gradient} shadow-md flex items-center justify-center text-center px-2 text-white text-[10px] font-bold uppercase leading-tight tracking-wide hover:scale-105 transition-transform ${active ? 'ring-4 ring-offset-2 ring-red-200' : ''}`;
+  if (onClick) {
+    return (
+      <button onClick={onClick} className={className} title={title}>
+        {title}
+      </button>
+    );
+  }
   return (
-    <Link
-      to={to}
-      className={`w-20 h-20 rounded-full shrink-0 bg-gradient-to-br ${gradient} shadow-md flex items-center justify-center text-center px-2 text-white text-[10px] font-bold uppercase leading-tight tracking-wide hover:scale-105 transition-transform`}
-      title={title}
-    >
+    <Link to={to!} className={className} title={title}>
       {title}
     </Link>
   );
@@ -101,11 +108,13 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setSelectedChallengeId(null);
     fetch(`/api/explorer/${level}/${id}?territoryId=${encodeURIComponent(territoryId)}`)
       .then(r => {
         if (!r.ok) throw new Error('No se pudo cargar la información');
@@ -311,13 +320,29 @@ export default function EntityExplorerPanel({ level, id, territoryId, breadcrumb
             {data.challenges && data.challenges.length > 0 ? (
               <div className="flex flex-row flex-wrap gap-3">
                 {data.challenges.map((c: any) => (
-                  <EntitySphere key={c.id} title={c.title} to={`/retos/${slugify(c.title)}`} gradient="from-red-500 to-rose-600" />
+                  <EntitySphere
+                    key={c.id}
+                    title={c.title}
+                    gradient="from-red-500 to-rose-600"
+                    active={selectedChallengeId === c.id}
+                    onClick={() => setSelectedChallengeId(prev => (prev === c.id ? null : c.id))}
+                  />
                 ))}
               </div>
             ) : (
               <p className="text-sm text-slate-400 italic">No hay retos registrados para este nivel en {data.territory?.name}.</p>
             )}
           </div>
+
+          {/* Gráfico de causas del reto seleccionado */}
+          {selectedChallengeId && (
+            <CauseDonutChart
+              challengeId={selectedChallengeId}
+              challengeTitle={data.challenges.find((c: any) => c.id === selectedChallengeId)?.title || ''}
+              territoryName={data.territory?.name || ''}
+              onClose={() => setSelectedChallengeId(null)}
+            />
+          )}
 
           {/* Soluciones */}
           <div>
