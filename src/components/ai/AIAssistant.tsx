@@ -1,0 +1,363 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { cn } from '../../utils/cn';
+
+// ============================================================================
+// Asistente IA — panel flotante (Fase 9)
+// ============================================================================
+// Botón permanente abajo a la derecha que abre un panel de aproximadamente un
+// tercio de la pantalla, según el encargo.
+//
+// Piezas clave:
+//  - Envía SIEMPRE el estado actual de la pantalla (ruta, territorio,
+//    objetivo, indicador… leídos de la URL), para que el modelo conozca el
+//    contexto visual sin que el usuario tenga que explicarlo.
+//  - Aplica los eventos de interfaz que devuelve el modelo (navegar, hacer
+//    zoom, filtrar), de modo que la IA controla la aplicación.
+//  - Distingue visualmente el origen de la información: plataforma o internet.
+//  - Selector de permisos de edición: manual, aceptar cambios o autónomo.
+//  - Las acciones propuestas se confirman con Sí / No, como en Claude Code.
+
+type EditMode = 'manual' | 'aceptar' | 'autonomo';
+
+const EDIT_MODE_LABELS: Record<EditMode, { label: string; hint: string }> = {
+  manual:   { label: 'Manual',   hint: 'La IA solo sugiere. No propone cambios aplicables.' },
+  aceptar:  { label: 'Aceptar',  hint: 'La IA propone cambios y tú confirmas cada uno.' },
+  autonomo: { label: 'Autónomo', hint: 'La IA aplica directamente lo que tu rol permita.' },
+};
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: Array<{ type: string; id: string; origin: string }>;
+  actions?: any[];
+  pending?: boolean;
+  error?: boolean;
+}
+
+export default function AIAssistant() {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<EditMode>('manual');
+  const [searchWeb, setSearchWeb] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [status, setStatus] = useState<{ ready: boolean; message: string } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    fetch('/api/ai/status').then(r => r.json()).then(setStatus).catch(() => setStatus(null));
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages, busy]);
+
+  /** Estado visual actual, tomado de la URL: es lo que ve el usuario ahora. */
+  const currentContext = () => ({
+    route: location.pathname,
+    territorio: searchParams.get('territorio'),
+    nivel: searchParams.get('nivel'),
+    entidadSeleccionada: searchParams.get('id'),
+    usuario: user ? { id: user.id, nivel: user.roleLevel, rol: user.roleLabel } : null,
+  });
+
+  /** Aplica los eventos de interfaz que devuelve el modelo. */
+  const applyUiEvents = (events: any[]) => {
+    for (const e of events || []) {
+      const p = e.params || {};
+      switch (e.type) {
+        case 'OPEN_TERRITORY':
+        case 'ZOOM_TO_TERRITORY':
+          navigate(`/mapa?territorio=${encodeURIComponent(p.territorySlug || p.territoryId || '')}`);
+          break;
+        case 'FILTER_OBJECTIVE':
+          navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=objetivo&id=${p.objectiveId}`);
+          break;
+        case 'SELECT_INDICATOR':
+          navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=indicador&id=${p.indicatorId}`);
+          break;
+        case 'SELECT_MARKER':
+          navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=marcador&id=${p.markerId}`);
+          break;
+        case 'SELECT_METRIC':
+          navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=metrica&id=${p.metricId}`);
+          break;
+        case 'OPEN_CHALLENGE': navigate(`/retos/${p.slug || p.challengeId}`); break;
+        case 'OPEN_SOLUTION':  navigate(`/soluciones/${p.slug || p.solutionId}`); break;
+        case 'SHOW_MARKET':    navigate('/mercado'); break;
+        case 'SHOW_INITIATIVES': navigate('/proyectos'); break;
+        default: break;
+      }
+    }
+  };
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy) return;
+    setInput('');
+    setMessages(m => [...m, { role: 'user', content: text }]);
+    setBusy(true);
+    try {
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          message: text,
+          conversation_id: conversationId,
+          context: currentContext(),
+          edit_mode: editMode,
+          search_web: searchWeb,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setMessages(m => [...m, { role: 'assistant', content: json.error || 'No se pudo responder.', error: true }]);
+        return;
+      }
+      setConversationId(json.conversation_id);
+      setMessages(m => [...m, {
+        role: 'assistant',
+        content: json.reply,
+        sources: json.sources,
+        actions: json.proposed_actions,
+      }]);
+      applyUiEvents(json.ui_events);
+    } catch (e: any) {
+      setMessages(m => [...m, { role: 'assistant', content: e.message || 'Error de red.', error: true }]);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const decideAction = async (actionId: number, decision: 'aceptar' | 'rechazar', msgIndex: number) => {
+    try {
+      const res = await fetch(`/api/ai/actions/${actionId}/decide`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ decision }),
+      });
+      const json = await res.json();
+      setMessages(m => m.map((msg, i) => i !== msgIndex ? msg : {
+        ...msg,
+        actions: (msg.actions || []).map((a: any) =>
+          a.id === actionId ? { ...a, status: json.status || (decision === 'aceptar' ? 'ejecutada' : 'rechazada'), error: json.error } : a),
+      }));
+    } catch { /* el estado se queda como estaba */ }
+  };
+
+  const newConversation = () => {
+    setConversationId(null);
+    setMessages([]);
+    setInput('');
+  };
+
+  return (
+    <>
+      {/* Botón flotante permanente */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          title="Asistente de Red Humana"
+          className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+        >
+          <Sparkles className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Panel */}
+      {open && (
+        <div className="fixed inset-y-0 right-0 z-[9998] w-full sm:w-[420px] lg:w-[34%] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+          {/* Cabecera */}
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-black text-slate-900 leading-none">Asistente</p>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {status?.ready ? 'Conectado' : 'Inactivo — falta clave de API'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={newConversation} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+              <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+                <Settings2 className="w-4 h-4" />
+              </button>
+              <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Configuración: permisos de edición */}
+          {showSettings && (
+            <div className="px-4 py-3 border-b border-slate-100 bg-white space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Permisos de edición</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(Object.keys(EDIT_MODE_LABELS) as EditMode[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setEditMode(m)}
+                    className={cn(
+                      'px-2 py-2 rounded-lg text-[11px] font-bold border transition-colors',
+                      editMode === m
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
+                    )}
+                  >
+                    {EDIT_MODE_LABELS[m].label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
+              {!user && (
+                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                  Sin sesión iniciada, el asistente solo puede consultar información. No podrá modificar nada.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Conversación */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center py-10">
+                <MessageSquare className="w-8 h-8 text-slate-200 mx-auto mb-3" />
+                <p className="text-sm text-slate-400 mb-4">Pregúntame sobre cualquier cosa de la plataforma.</p>
+                <div className="space-y-1.5 text-left">
+                  {[
+                    'Muéstrame los retos del agua en Madrid',
+                    '¿Qué productos ayudan con los nitratos?',
+                    'Llévame al municipio de Talamanca',
+                    '¿Qué iniciativas han mejorado indicadores?',
+                  ].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setInput(s)}
+                      className="w-full text-left text-xs px-3 py-2 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {messages.map((m, i) => (
+              <div key={i} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
+                <div className={cn('max-w-[92%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
+                  m.role === 'user' ? 'bg-emerald-600 text-white'
+                    : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                    : 'bg-slate-100 text-slate-800')}>
+                  {m.content}
+
+                  {/* Origen de la información: plataforma vs internet */}
+                  {m.sources && m.sources.length > 0 && (
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex flex-wrap gap-1">
+                      {m.sources.some(s => s.origin === 'plataforma') && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
+                          <Database className="w-2.5 h-2.5" />
+                          {m.sources.filter(s => s.origin === 'plataforma').length} de la plataforma
+                        </span>
+                      )}
+                      {m.sources.some(s => s.origin === 'internet') && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">
+                          <Globe className="w-2.5 h-2.5" /> de internet
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Acciones propuestas: Sí / No */}
+                  {m.actions && m.actions.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {m.actions.map((a: any) => (
+                        <div key={a.id} className="bg-white border border-slate-200 rounded-xl p-2.5">
+                          <p className="text-[11px] font-bold text-slate-800">{a.description || a.action_type}</p>
+                          {a.rationale && <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">{a.rationale}</p>}
+                          {!a.allowed && (
+                            <p className="text-[10px] text-amber-700 mt-1">Requiere nivel {a.requiredLevel}. Tu nivel no alcanza.</p>
+                          )}
+                          {a.allowed && a.status === 'propuesta' && (
+                            <div className="flex gap-1.5 mt-2">
+                              <button onClick={() => decideAction(a.id, 'aceptar', i)} className="flex-1 inline-flex items-center justify-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                                <Check className="w-3 h-3" /> Sí, aplícalo
+                              </button>
+                              <button onClick={() => decideAction(a.id, 'rechazar', i)} className="flex-1 inline-flex items-center justify-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:border-red-300 hover:text-red-600 transition-colors">
+                                <Ban className="w-3 h-3" /> No
+                              </button>
+                            </div>
+                          )}
+                          {a.status && a.status !== 'propuesta' && (
+                            <p className={cn('text-[10px] font-bold mt-1.5 uppercase tracking-wide',
+                              a.status === 'ejecutada' ? 'text-emerald-600' : a.status === 'fallida' ? 'text-red-600' : 'text-slate-400')}>
+                              {a.status}{a.error ? `: ${a.error}` : ''}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {busy && <p className="text-xs text-slate-400 italic">Pensando…</p>}
+          </div>
+
+          {/* Entrada */}
+          <div className="border-t border-slate-100 p-3 space-y-2 bg-white">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSearchWeb(v => !v)}
+                title="Buscar también en internet"
+                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
+                  searchWeb ? 'bg-sky-50 border-sky-300 text-sky-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+              >
+                <Globe className="w-3 h-3" /> Internet {searchWeb ? 'activado' : 'desactivado'}
+              </button>
+            </div>
+            <div className="flex items-end gap-2">
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                rows={2}
+                placeholder="Escribe tu pregunta…"
+                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
+              />
+              <button
+                onClick={send}
+                disabled={busy || !input.trim()}
+                className="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+            {status && !status.ready && (
+              <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-relaxed">
+                {status.message}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

@@ -16,6 +16,7 @@ import Organizations from './pages/Organizations';
 import ProjectProfile from './pages/ProjectProfile';
 import OrganizationProfile from './pages/OrganizationProfile';
 import MapPage from './pages/Map';
+import Mercado from './pages/Mercado';
 import Login from './pages/Login';
 import AdminDesign from './pages/AdminDesign';
 import AboutRoot from './pages/about/AboutRoot';
@@ -45,6 +46,7 @@ export default function App() {
                 <Route path="soluciones/:id" element={<SolutionProfile />} />
                                 <Route path="objetivos/:id" element={<ObjectiveDetail />} />
                 <Route path="objetivos" element={<Objectives />} />
+                <Route path="mercado" element={<Mercado />} />
                 <Route path="indicadores/:id" element={<IndicatorDetail />} />
                 <Route path="indicadores" element={<Indicators />} />
                 <Route path="retos" element={<Challenges />} />

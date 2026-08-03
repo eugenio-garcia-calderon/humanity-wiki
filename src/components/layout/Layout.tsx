@@ -5,7 +5,10 @@ import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
-import { ChatAssistant } from '../ui/ChatAssistant';
+// El antiguo ChatAssistant se conserva en el repositorio pero deja de
+// montarse: el asistente IA de la Fase 9 ocupa su mismo lugar y tener dos
+// burbujas flotantes a la vez sería confuso. Ver 03_DECISIONS.md.
+import AIAssistant from '../ai/AIAssistant';
 
 export default function Layout() {
   const location = useLocation();
@@ -166,20 +169,20 @@ export default function Layout() {
 
           {user ? (
             <div className="hidden sm:flex items-center gap-1.5">
-              <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200/60">Admin</span>
+              <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200/60" title={user.email}>{user.roleLabel}</span>
               <button onClick={() => { logout(); navigate('/'); }} className="p-1 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar sesión">
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
-            <Link to="/login" className="hidden sm:flex w-6 h-6 rounded-full border border-slate-200 items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-emerald-600 transition-colors" title="Acceso Admin">
+            <Link to="/login" className="hidden sm:flex w-6 h-6 rounded-full border border-slate-200 items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-emerald-600 transition-colors" title="Iniciar sesión">
               <User className="w-3.5 h-3.5" />
             </Link>
           )}
         </div>
       </nav>
 
-      <ChatAssistant />
+      <AIAssistant />
     </div>
   );
 }

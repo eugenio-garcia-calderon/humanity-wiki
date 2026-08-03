@@ -12,6 +12,7 @@ import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
+import { registerAIRoutes } from "./src/server/ai/assistant.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -234,6 +235,11 @@ async function startServer() {
   // para aplicar los niveles de rol.
   registerGraphRoutes(app, db);
   registerSocialRoutes(app, db);
+
+  // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
+  // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de
+  // fallar de forma opaca.
+  registerAIRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {

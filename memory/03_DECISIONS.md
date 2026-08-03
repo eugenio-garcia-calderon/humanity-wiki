@@ -243,3 +243,34 @@
   - `actorFromRequest()` en `server.ts` pasa a leer `req.user.id`, de modo que la autoría y el historial de la Fase 1 quedan atribuidos al usuario real. La cabecera `x-user-id` se conserva solo como respaldo para scripts de siembra, que no tienen cookie.
 - **Decisión sobre la verificación de email**: los usuarios se crean con `email_verified = true` porque todavía no hay proveedor de correo configurado (instrucción explícita del usuario: "el tema del correo avanza sin verificación primero"). La estructura completa (`password_resets`, endpoints de olvido/restablecimiento) sí está construida y probada; en desarrollo el token se devuelve en la respuesta para poder probar el flujo, y está explícitamente condicionado a `NODE_ENV !== 'production'`. Activar la verificación real será poner ese campo a `false` y enchufar el envío.
 - **Nota de arquitectura**: todo vive en `src/server/auth.ts` como módulo independiente que se registra con `registerAuthRoutes(app, db)`, cumpliendo el requisito de modularidad de `03_ARCHITECTURE.md`. Exporta también `requireLevel(n)` como guarda reutilizable para los módulos de las fases siguientes.
+
+---
+
+## 2026-08-03 — Fase 9: el modelo de IA nunca escribe en la base de datos
+
+- **Problema**: el encargo pide que la IA "pueda ejecutar cualquier acción permitida por el rol del usuario" — crear retos, productos, publicaciones, editar indicadores. Darle al modelo capacidad de escritura directa es la forma más rápida de conseguirlo y también la más peligrosa: una alucinación, o una instrucción inyectada en un dato que el modelo lea, se convertiría en una escritura real.
+- **Opciones consideradas**: (a) dar al modelo herramientas que escriban directamente; (b) que el modelo solo devuelva intención + parámetros, y que un "agente de acciones" del backend valide y ejecute.
+- **Decisión tomada**: (b), que además es lo que pide literalmente el encargo ("Claude nunca modifica directamente la base de datos"). El modelo devuelve un bloque JSON delimitado con `ui_events` y `actions`; las acciones se guardan en `ai_proposed_actions` con estado `propuesta` y **nunca** se ejecutan en la misma petición.
+- **Tres controles independientes** antes de que algo se escriba:
+  1. **Catálogo cerrado**: solo existen 11 tipos de acción (`ACTION_CATALOG`), cada uno con su nivel mínimo. Cualquier otra cosa que devuelva el modelo se descarta.
+  2. **Modo de edición** elegido por el usuario: `manual` (no se generan acciones en absoluto), `aceptar` (cada acción exige un Sí/No explícito) o `autonomo`.
+  3. **Revalidación en el momento de ejecutar**: el permiso se comprueba otra vez al aplicar, no solo al proponer. Si el rol del usuario cambió entre medias, la acción se rechaza.
+- **Motivo**: separar "lo que la IA quiere hacer" de "lo que el sistema permite hacer" convierte un fallo del modelo en una propuesta rechazada, no en un dato corrupto. Y deja auditoría completa: toda propuesta queda registrada con quién la decidió y cuándo, aceptada o no.
+- **Consecuencia**: añadir una capacidad nueva a la IA es añadir una entrada al catálogo y su implementación en `executeAction`, no ampliar los permisos del modelo.
+
+---
+
+## 2026-08-03 — Capa de proveedor de IA independiente del modelo
+
+- **Problema**: el encargo pide preparar la arquitectura para conectar OpenAI, Gemini, Mistral o Llama además de Claude "sin modificar el resto de la aplicación".
+- **Decisión tomada**: `src/server/ai/provider.ts` define la interfaz `AIProvider` y un registro de proveedores. Ningún otro archivo importa el SDK de un proveedor concreto. Añadir un modelo nuevo es implementar la interfaz y registrarlo.
+- **Decisión secundaria**: se llama a la API de Anthropic por HTTP directamente en vez de añadir el SDK oficial como dependencia — son dos peticiones `fetch` y evita arrastrar un paquete más y sus actualizaciones. Si en el futuro se necesitan funciones avanzadas del SDK, se cambia dentro de `ClaudeProvider` sin tocar nada más.
+- **Consecuencia**: mientras `ANTHROPIC_API_KEY` esté vacía, el asistente está construido y enrutado pero responde HTTP 503 con un mensaje que explica exactamente qué falta, en vez de fallar de forma opaca. La interfaz lo muestra en el propio panel.
+
+---
+
+## 2026-08-03 — El antiguo ChatAssistant deja de montarse (no se borra)
+
+- **Problema**: ya existía un `ChatAssistant` flotante en la esquina inferior derecha, exactamente donde el encargo pide el nuevo asistente IA. Dos burbujas flotantes simultáneas sería confuso.
+- **Decisión tomada**: `Layout.tsx` pasa a montar `AIAssistant` en su lugar. El archivo `src/components/ui/ChatAssistant.tsx` **se conserva intacto** en el repositorio, respetando la instrucción del usuario de no eliminar componentes.
+- **Motivo**: sustituir el punto de montaje es reversible en una línea; borrar el componente no lo sería.
