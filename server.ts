@@ -9,6 +9,7 @@ import { territories, projects, challenges, organizations } from "./src/db/schem
 import { territories as seedTerritories, objectives as seedObjectives } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
+import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -219,6 +220,12 @@ async function startServer() {
   });
 
   app.use(express.json());
+
+  // 1.5 AUTENTICACIÓN (Fase 2). Se monta justo después de express.json() y
+  // antes que el resto de la API, porque instala el middleware que resuelve
+  // `req.user` a partir de la cookie de sesión — todos los endpoints
+  // posteriores dependen de él para conocer el usuario y su nivel de rol.
+  registerAuthRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
@@ -624,12 +631,11 @@ async function startServer() {
     territories: [{ table: 'territories', fk: 'parent_id', label: 'territorios hijos' }],
   };
 
-  // Autor de la operación. Hasta la Fase 2 (sistema real de usuarios) no hay
-  // sesión, así que se acepta una cabecera y se cae a null. Cuando exista
-  // autenticación, este helper pasará a leer el usuario de la sesión y será
-  // el único punto a cambiar.
+  // Autor de la operación: el usuario autenticado de la sesión (Fase 2).
+  // La cabecera x-user-id se conserva como respaldo para scripts internos
+  // y siembras, que no tienen cookie de sesión.
   const actorFromRequest = (req: Request): string | null =>
-    (req.header('x-user-id') || null);
+    (req.user?.id || req.header('x-user-id') || null);
 
   const fetchEntityRow = async (table: string, id: string) => {
     const result = await db.execute(sql`SELECT * FROM ${sql.raw(table)} WHERE id = ${id}`);
