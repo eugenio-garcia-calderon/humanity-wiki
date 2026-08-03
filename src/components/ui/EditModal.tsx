@@ -281,8 +281,12 @@ export function EditModal({ title, initialData, onSave, onClose, onDelete }: any
         </div>
         
         <div className="p-6 border-t border-slate-100 flex justify-between gap-3 bg-slate-50 rounded-b-2xl">
+          {/* "Archivar", no "Eliminar": el principio 6 de la Constitución
+              (nunca se elimina conocimiento) hace que esta acción oculte la
+              entidad conservando la fila, su historial y sus relaciones, de
+              modo que siempre puede restaurarse. */}
           {onDelete ? (
-            <Button variant="outline" type="button" onClick={handleDelete} className={confirmDelete ? "bg-red-600 text-white hover:bg-red-700" : "text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"}>{confirmDelete ? "¿Confirmar?" : "Eliminar"}</Button>
+            <Button variant="outline" type="button" onClick={handleDelete} title="La entidad se oculta pero nunca se borra: conserva su historial y puede restaurarse" className={confirmDelete ? "bg-amber-600 text-white hover:bg-amber-700" : "text-amber-700 border-amber-200 hover:bg-amber-50 hover:border-amber-300"}>{confirmDelete ? "¿Confirmar?" : "Archivar"}</Button>
           ) : (
             <div></div>
           )}

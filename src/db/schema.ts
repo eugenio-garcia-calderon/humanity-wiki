@@ -13,6 +13,26 @@ import {
   uuid
 } from 'drizzle-orm/pg-core';
 
+// Columnas transversales exigidas por 99_CONSTITUTION.md (UUID permanente,
+// autor, historial, versionado) y 04_DATABASE.md (auditoría). Se aplican a
+// toda entidad de conocimiento mediante spread, para no repetirlas a mano
+// tabla por tabla ni olvidarlas al añadir entidades nuevas.
+//
+// Nota importante: el `id` de texto legible sigue siendo la clave primaria y
+// el identificador público (URLs, iconos, GeoJSON). El `uuid` es el
+// identificador permanente global que pide la Constitución, no su sustituto.
+// `archivedAt` implementa "nunca se elimina conocimiento": archivar en vez
+// de borrar. Toda lectura debe filtrar `archived_at IS NULL`.
+const auditColumns = {
+  uuid: uuid('uuid').notNull().defaultRandom().unique(),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
+  version: integer('version').notNull().default(1),
+  archivedAt: timestamp('archived_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+};
+
 export const territories = pgTable('territories', {
   id: text('id').primaryKey(),
   type: text('type').notNull(),
@@ -23,15 +43,14 @@ export const territories = pgTable('territories', {
   areaKm2: doublePrecision('area_km2'),
   geometry: geometry('geometry', { type: 'multipolygon' }),
   centroid: geometry('centroid', { type: 'point' }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const objectives = pgTable('objectives', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
   description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const challenges = pgTable('challenges', {
@@ -40,7 +59,7 @@ export const challenges = pgTable('challenges', {
   scope: text('scope').notNull(), // global, national, regional, municipal
   description: text('description'),
   priority: text('priority'), // critical, high, medium, low
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const causes = pgTable('causes', {
@@ -48,7 +67,7 @@ export const causes = pgTable('causes', {
   title: text('title').notNull(),
   type: text('type'),
   description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const solutions = pgTable('solutions', {
@@ -59,7 +78,7 @@ export const solutions = pgTable('solutions', {
   impact: text('impact'),
   cost: text('cost'),
   readiness: text('readiness'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const indicators = pgTable('indicators', {
@@ -71,7 +90,7 @@ export const indicators = pgTable('indicators', {
   weight: doublePrecision('weight'), // peso del indicador en la puntuación del objetivo (0-1)
   methodology: text('methodology'), // explicación del cálculo de la puntuación
   objectiveId: text('objective_id').references(() => objectives.id),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const indicatorObservations = pgTable('indicator_observations', {
@@ -85,7 +104,7 @@ export const indicatorObservations = pgTable('indicator_observations', {
   date: date('date'),
   source: text('source'),
   sourceUrl: text('source_url'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // Sub-componentes (variables) que desglosan el cálculo de un indicador,
@@ -100,7 +119,7 @@ export const markers = pgTable('markers', {
   weight: doublePrecision('weight'), // Peso recomendado dentro del indicador (0-1)
   source: text('source'),
   lastUpdated: date('last_updated'), // fecha de la última toma de datos
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // Valor de un marcador para un territorio concreto (aún sin datos cargados;
@@ -114,7 +133,7 @@ export const markerObservations = pgTable('marker_observations', {
   score: doublePrecision('score'),
   date: date('date'),
   source: text('source'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // Contaminante/variable concreta medida dentro de un marcador,
@@ -125,7 +144,7 @@ export const metrics = pgTable('metrics', {
   name: text('name').notNull(),
   unit: text('unit'),
   description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // Estación de medida física, georreferenciada, asociada a un territorio.
@@ -136,7 +155,7 @@ export const measurementStations = pgTable('measurement_stations', {
   lat: doublePrecision('lat').notNull(),
   lng: doublePrecision('lng').notNull(),
   description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // Lectura de una métrica en una estación concreta (aún sin datos cargados;
@@ -150,7 +169,7 @@ export const metricObservations = pgTable('metric_observations', {
   level: text('level'), // bajo | moderado | alto | peligroso
   date: date('date'),
   source: text('source'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const organizations = pgTable('organizations', {
@@ -161,9 +180,12 @@ export const organizations = pgTable('organizations', {
   territoryId: text('territory_id').references(() => territories.id),
   description: text('description'),
   image: text('image'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
+// NOTA: en la Fase 7 esta tabla pasará a llamarse `initiatives` (ver
+// 02_DOMAIN_MODEL.md y la decisión del usuario de 2026-08-03). Se mantiene
+// como `projects` hasta esa migración para no romper las páginas actuales.
 export const projects = pgTable('projects', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -172,7 +194,7 @@ export const projects = pgTable('projects', {
   status: text('status'),
   description: text('description'),
   image: text('image'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 export const content = pgTable('content', {
@@ -181,7 +203,7 @@ export const content = pgTable('content', {
   type: text('type'),
   summary: text('summary'),
   url: text('url'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
 });
 
 // MANY-TO-MANY RELATIONSHIPS
@@ -298,7 +320,30 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   name: text('name'),
   role: text('role').default('user'),
-  createdAt: timestamp('created_at').defaultNow(),
+  ...auditColumns,
+});
+
+// Historial universal exigido por 99_CONSTITUTION.md (principio 4: toda
+// modificación genera historial) y 04_DATABASE.md.
+//
+// 04_DATABASE.md sugiere una tabla por entidad (challenge_history,
+// product_history...). Se implementa como UNA tabla polimórfica: misma
+// garantía y mismo contenido, pero sin tener que crear y mantener una tabla
+// nueva cada vez que el dominio crece — que es justo lo que ocurrirá en las
+// fases siguientes (publicaciones, productos, demandas, iniciativas...).
+// `snapshot` guarda la fila completa resultante, de modo que cualquier
+// versión pasada puede reconstruirse íntegramente.
+export const entityHistory = pgTable('entity_history', {
+  id: serial('id').primaryKey(),
+  entityType: text('entity_type').notNull(), // 'challenges', 'solutions'...
+  entityId: text('entity_id').notNull(),
+  entityUuid: uuid('entity_uuid'),
+  version: integer('version').notNull(),
+  operation: text('operation').notNull(), // create | update | archive | restore
+  snapshot: jsonb('snapshot').notNull(),
+  previous: jsonb('previous'),
+  changedBy: text('changed_by'),
+  changedAt: timestamp('changed_at').notNull().defaultNow(),
 });
 
 export const memberships = pgTable('memberships', {

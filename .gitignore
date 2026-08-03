@@ -6,3 +6,11 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Secretos en texto plano dentro del repo. Las claves reales viven solo en
+# .env (ya ignorado); estas carpetas/archivos nunca deben subirse.
+Claves API Stripe/
+*.rtf
+secrets/
+*.pem
+*.key

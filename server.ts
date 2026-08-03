@@ -373,7 +373,10 @@ async function startServer() {
 
   const getTable = async (tableName: string, res: Response) => {
     try {
-      const result = await db.execute(sql.raw(`SELECT * FROM ${tableName}`));
+      // Filtra lo archivado: principio 6 de la Constitución (nunca se elimina
+      // conocimiento) implica que lo archivado sigue en la tabla pero no debe
+      // aparecer en la aplicación.
+      const result = await db.execute(sql.raw(`SELECT * FROM ${tableName} WHERE archived_at IS NULL`));
       res.json(result.rows);
     } catch (e: any) {
       console.error(e);
@@ -385,8 +388,8 @@ async function startServer() {
   
   app.get("/api/data/objectives", async (req, res) => {
     try {
-      const result = await db.execute(sql`SELECT * FROM objectives`);
-      const territoryIdsResult = await db.execute(sql`SELECT id FROM territories`);
+      const result = await db.execute(sql`SELECT * FROM objectives WHERE archived_at IS NULL`);
+      const territoryIdsResult = await db.execute(sql`SELECT id FROM territories WHERE archived_at IS NULL`);
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
@@ -424,6 +427,7 @@ async function startServer() {
         FROM challenges c
         LEFT JOIN challenge_territories ct ON c.id = ct.challenge_id
         LEFT JOIN challenge_objectives co ON c.id = co.challenge_id
+        WHERE c.archived_at IS NULL
         GROUP BY c.id
       `);
       res.json(result.rows);
@@ -439,6 +443,7 @@ async function startServer() {
         FROM solutions s
         LEFT JOIN solution_causes sc ON s.id = sc.solution_id
         LEFT JOIN challenge_solutions cs ON s.id = cs.solution_id
+        WHERE s.archived_at IS NULL
         GROUP BY s.id
       `);
       res.json(result.rows);
@@ -452,6 +457,7 @@ async function startServer() {
           COALESCE(json_agg(DISTINCT cc.challenge_id) FILTER (WHERE cc.challenge_id IS NOT NULL), '[]') as challenge_ids
         FROM causes c
         LEFT JOIN challenge_causes cc ON c.id = cc.cause_id
+        WHERE c.archived_at IS NULL
         GROUP BY c.id
       `);
       res.json(result.rows);
@@ -471,6 +477,7 @@ async function startServer() {
         LEFT JOIN project_solutions ps ON p.id = ps.project_id
         LEFT JOIN project_objectives po ON p.id = po.project_id
         LEFT JOIN project_organizations porg ON p.id = porg.project_id
+        WHERE p.archived_at IS NULL
         GROUP BY p.id
       `);
       res.json(result.rows);
@@ -486,6 +493,7 @@ async function startServer() {
         FROM organizations o
         LEFT JOIN organization_objectives oo ON o.id = oo.organization_id
         LEFT JOIN organization_solutions os ON o.id = os.organization_id
+        WHERE o.archived_at IS NULL
         GROUP BY o.id
       `);
       res.json(result.rows);
@@ -502,6 +510,7 @@ async function startServer() {
           io.territory_id, io.value, io.raw_value, io.score, io.weighted_score, io.date, io.source, io.source_url
         FROM indicators i
         LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
+        WHERE i.archived_at IS NULL
         ORDER BY i.id
       `);
       res.json(result.rows);
@@ -515,12 +524,13 @@ async function startServer() {
         ? await db.execute(sql`
             SELECT id, indicator_id, name, includes, description, unit, weight, source, last_updated
             FROM markers
-            WHERE indicator_id = ${indicatorId}
+            WHERE indicator_id = ${indicatorId} AND archived_at IS NULL
             ORDER BY weight DESC
           `)
         : await db.execute(sql`
             SELECT id, indicator_id, name, includes, description, unit, weight, source, last_updated
             FROM markers
+            WHERE archived_at IS NULL
             ORDER BY indicator_id, weight DESC
           `);
       res.json(result.rows);
@@ -534,12 +544,13 @@ async function startServer() {
         ? await db.execute(sql`
             SELECT id, marker_id, name, unit, description
             FROM metrics
-            WHERE marker_id = ${markerId}
+            WHERE marker_id = ${markerId} AND archived_at IS NULL
             ORDER BY name
           `)
         : await db.execute(sql`
             SELECT id, marker_id, name, unit, description
             FROM metrics
+            WHERE archived_at IS NULL
             ORDER BY marker_id, name
           `);
       res.json(result.rows);
@@ -577,11 +588,103 @@ async function startServer() {
     } catch(e:any) { res.status(500).json({error: e.message}); }
   });
 
-  // REST WRITE ENDPOINTS (INSERT / UPDATE / DELETE with Drizzle / PostgreSQL)
+  // ==========================================
+  // AUDITORÍA, HISTORIAL Y ARCHIVADO (Fase 1 — cimientos)
+  // ==========================================
+  // Implementa los principios 2, 4, 5 y 6 de 99_CONSTITUTION.md sobre las
+  // entidades que ya existían: toda entidad tiene autor y UUID, toda
+  // modificación genera historial, y nunca se elimina conocimiento (se
+  // archiva). Ver también 04_DATABASE.md.
+
+  // Nombre de entidad de la API -> tabla física. Hoy coinciden en todos los
+  // casos, pero el mapa explícito evita interpolar en SQL nada que venga de
+  // la URL (`/api/data/:entity`), que sería inyectable.
+  const ENTITY_TABLES: Record<string, string> = {
+    territories: 'territories',
+    objectives: 'objectives',
+    challenges: 'challenges',
+    causes: 'causes',
+    solutions: 'solutions',
+    indicators: 'indicators',
+    markers: 'markers',
+    metrics: 'metrics',
+    organizations: 'organizations',
+    projects: 'projects',
+    content: 'content',
+  };
+
+  // Archivar un padre que todavía tiene hijos visibles dejaría el árbol
+  // incoherente (hijos huérfanos visibles colgando de algo oculto). Se
+  // rechaza explícitamente, conservando el mismo criterio "seguro por
+  // defecto" que antes garantizaban las claves foráneas al borrar.
+  const ARCHIVE_BLOCKERS: Record<string, { table: string; fk: string; label: string }[]> = {
+    objectives: [{ table: 'indicators', fk: 'objective_id', label: 'indicadores' }],
+    indicators: [{ table: 'markers', fk: 'indicator_id', label: 'marcadores' }],
+    markers: [{ table: 'metrics', fk: 'marker_id', label: 'métricas' }],
+    territories: [{ table: 'territories', fk: 'parent_id', label: 'territorios hijos' }],
+  };
+
+  // Autor de la operación. Hasta la Fase 2 (sistema real de usuarios) no hay
+  // sesión, así que se acepta una cabecera y se cae a null. Cuando exista
+  // autenticación, este helper pasará a leer el usuario de la sesión y será
+  // el único punto a cambiar.
+  const actorFromRequest = (req: Request): string | null =>
+    (req.header('x-user-id') || null);
+
+  const fetchEntityRow = async (table: string, id: string) => {
+    const result = await db.execute(sql`SELECT * FROM ${sql.raw(table)} WHERE id = ${id}`);
+    return (result.rows[0] as any) || null;
+  };
+
+  const recordHistory = async (
+    entity: string,
+    id: string,
+    operation: 'create' | 'update' | 'archive' | 'restore',
+    previous: any | null,
+    changedBy: string | null,
+  ) => {
+    const table = ENTITY_TABLES[entity];
+    if (!table) return;
+    const snapshot = await fetchEntityRow(table, id);
+    if (!snapshot) return;
+    await db.execute(sql`
+      INSERT INTO entity_history (entity_type, entity_id, entity_uuid, version, operation, snapshot, previous, changed_by)
+      VALUES (
+        ${entity}, ${id}, ${snapshot.uuid ?? null}, ${snapshot.version ?? 1}, ${operation},
+        ${JSON.stringify(snapshot)}::jsonb,
+        ${previous ? JSON.stringify(previous) : null}::jsonb,
+        ${changedBy}
+      )
+    `);
+  };
+
+  // Se aplica DESPUÉS del upsert, en vez de añadir version/updated_by a las
+  // ~11 ramas ON CONFLICT DO UPDATE existentes: mismo resultado, sin tocar
+  // ninguna de las ramas ya probadas.
+  const bumpAudit = async (entity: string, id: string, isUpdate: boolean, actor: string | null) => {
+    const table = ENTITY_TABLES[entity];
+    if (!table) return;
+    if (isUpdate) {
+      await db.execute(sql`
+        UPDATE ${sql.raw(table)} SET version = version + 1, updated_at = now(), updated_by = ${actor}
+        WHERE id = ${id}
+      `);
+    } else {
+      await db.execute(sql`
+        UPDATE ${sql.raw(table)} SET created_by = ${actor}, updated_by = ${actor}
+        WHERE id = ${id}
+      `);
+    }
+  };
+
+  // REST WRITE ENDPOINTS (INSERT / UPDATE / ARCHIVE with Drizzle / PostgreSQL)
   const handleUpsertEntity = async (entity: string, req: Request, res: Response) => {
     try {
       const data = req.body;
       const id = req.params.id || data.id || `${entity.slice(0, 3).toUpperCase()}_${Date.now()}`;
+      const actor = actorFromRequest(req);
+      const entityTable = ENTITY_TABLES[entity];
+      const previous = entityTable ? await fetchEntityRow(entityTable, id) : null;
 
       if (entity === "territories") {
         await db.execute(sql`
@@ -788,6 +891,11 @@ async function startServer() {
         }
       }
 
+      if (entityTable) {
+        await bumpAudit(entity, id, !!previous, actor);
+        await recordHistory(entity, id, previous ? 'update' : 'create', previous, actor);
+      }
+
       res.json({ success: true, id, entity });
     } catch (e: any) {
       console.error(e);
@@ -795,64 +903,69 @@ async function startServer() {
     }
   };
 
-  const handleDeleteEntity = async (entity: string, req: Request, res: Response) => {
+  // ARCHIVAR (no borrar). Principio 6 de la Constitución: "nunca se elimina
+  // conocimiento". La entidad deja de mostrarse en toda la aplicación (todas
+  // las lecturas filtran `archived_at IS NULL`) pero la fila y todas sus
+  // relaciones permanecen intactas, de modo que restaurarla la devuelve
+  // completa. La ruta sigue siendo DELETE por compatibilidad con el cliente
+  // existente; lo que cambia es la semántica.
+  const handleArchiveEntity = async (entity: string, req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      if (entity === "territories") {
-        await db.execute(sql`DELETE FROM challenge_territories WHERE territory_id = ${id}`);
-        await db.execute(sql`DELETE FROM territories WHERE id = ${id}`);
-      } else if (entity === "objectives") {
-        await db.execute(sql`DELETE FROM challenge_objectives WHERE objective_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_objectives WHERE objective_id = ${id}`);
-        await db.execute(sql`DELETE FROM organization_objectives WHERE objective_id = ${id}`);
-        await db.execute(sql`DELETE FROM objectives WHERE id = ${id}`);
-      } else if (entity === "challenges") {
-        await db.execute(sql`DELETE FROM challenge_territories WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_objectives WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_indicators WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_markers WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_metrics WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_causes WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_solutions WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_challenges WHERE challenge_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenges WHERE id = ${id}`);
-      } else if (entity === "causes") {
-        await db.execute(sql`DELETE FROM challenge_causes WHERE cause_id = ${id}`);
-        await db.execute(sql`DELETE FROM solution_causes WHERE cause_id = ${id}`);
-        await db.execute(sql`DELETE FROM causes WHERE id = ${id}`);
-      } else if (entity === "indicators") {
-        // No cascade to markers on purpose — if markers still reference this
-        // indicator, the FK constraint rejects the delete (safe default).
-        await db.execute(sql`DELETE FROM indicator_observations WHERE indicator_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_indicators WHERE indicator_id = ${id}`);
-        await db.execute(sql`DELETE FROM indicators WHERE id = ${id}`);
-      } else if (entity === "markers") {
-        await db.execute(sql`DELETE FROM marker_observations WHERE marker_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_markers WHERE marker_id = ${id}`);
-        await db.execute(sql`DELETE FROM markers WHERE id = ${id}`);
-      } else if (entity === "metrics") {
-        await db.execute(sql`DELETE FROM metric_observations WHERE metric_id = ${id}`);
-        await db.execute(sql`DELETE FROM challenge_metrics WHERE metric_id = ${id}`);
-        await db.execute(sql`DELETE FROM metrics WHERE id = ${id}`);
-      } else if (entity === "solutions") {
-        await db.execute(sql`DELETE FROM challenge_solutions WHERE solution_id = ${id}`);
-        await db.execute(sql`DELETE FROM solution_causes WHERE solution_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_solutions WHERE solution_id = ${id}`);
-        await db.execute(sql`DELETE FROM organization_solutions WHERE solution_id = ${id}`);
-        await db.execute(sql`DELETE FROM solutions WHERE id = ${id}`);
-      } else if (entity === "projects") {
-        await db.execute(sql`DELETE FROM project_challenges WHERE project_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_solutions WHERE project_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_objectives WHERE project_id = ${id}`);
-        await db.execute(sql`DELETE FROM project_organizations WHERE project_id = ${id}`);
-        await db.execute(sql`DELETE FROM projects WHERE id = ${id}`);
-      } else if (entity === "organizations") {
-        await db.execute(sql`DELETE FROM project_organizations WHERE organization_id = ${id}`);
-        await db.execute(sql`DELETE FROM organization_objectives WHERE organization_id = ${id}`);
-        await db.execute(sql`DELETE FROM organization_solutions WHERE organization_id = ${id}`);
-        await db.execute(sql`DELETE FROM organizations WHERE id = ${id}`);
+      const actor = actorFromRequest(req);
+      const table = ENTITY_TABLES[entity];
+      if (!table) return res.status(400).json({ error: `Entidad no soportada: ${entity}` });
+
+      const previous = await fetchEntityRow(table, id);
+      if (!previous) return res.status(404).json({ error: 'No encontrado' });
+
+      // Un padre con hijos vivos no puede archivarse: dejaría hijos visibles
+      // colgando de algo oculto.
+      for (const blocker of ARCHIVE_BLOCKERS[entity] || []) {
+        const check = await db.execute(sql`
+          SELECT count(*)::int AS n FROM ${sql.raw(blocker.table)}
+          WHERE ${sql.raw(blocker.fk)} = ${id} AND archived_at IS NULL AND id <> ${id}
+        `);
+        const n = (check.rows[0] as any)?.n ?? 0;
+        if (n > 0) {
+          return res.status(409).json({
+            error: `No se puede archivar: todavía tiene ${n} ${blocker.label} activos. Archívalos primero.`,
+          });
+        }
       }
-      res.json({ success: true, id, entity });
+
+      await db.execute(sql`
+        UPDATE ${sql.raw(table)}
+        SET archived_at = now(), version = version + 1, updated_at = now(), updated_by = ${actor}
+        WHERE id = ${id}
+      `);
+      await recordHistory(entity, id, 'archive', previous, actor);
+
+      res.json({ success: true, id, entity, archived: true });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ error: e.message });
+    }
+  };
+
+  const handleRestoreEntity = async (entity: string, req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const actor = actorFromRequest(req);
+      const table = ENTITY_TABLES[entity];
+      if (!table) return res.status(400).json({ error: `Entidad no soportada: ${entity}` });
+
+      const previous = await fetchEntityRow(table, id);
+      if (!previous) return res.status(404).json({ error: 'No encontrado' });
+
+      await db.execute(sql`
+        UPDATE ${sql.raw(table)}
+        SET archived_at = NULL, version = version + 1, updated_at = now(), updated_by = ${actor}
+        WHERE id = ${id}
+      `);
+      await recordHistory(entity, id, 'restore', previous, actor);
+
+      res.json({ success: true, id, entity, archived: false });
     } catch (e: any) {
       console.error(e);
       res.status(500).json({ error: e.message });
@@ -861,7 +974,38 @@ async function startServer() {
 
   app.post("/api/data/:entity", (req, res) => handleUpsertEntity(req.params.entity, req, res));
   app.put("/api/data/:entity/:id", (req, res) => handleUpsertEntity(req.params.entity, req, res));
-  app.delete("/api/data/:entity/:id", (req, res) => handleDeleteEntity(req.params.entity, req, res));
+  app.delete("/api/data/:entity/:id", (req, res) => handleArchiveEntity(req.params.entity, req, res));
+  app.post("/api/data/:entity/:id/restore", (req, res) => handleRestoreEntity(req.params.entity, req, res));
+
+  // Historial completo de una entidad, más reciente primero.
+  app.get("/api/data/:entity/:id/history", async (req, res) => {
+    try {
+      const { entity, id } = req.params;
+      const result = await db.execute(sql`
+        SELECT id, entity_type, entity_id, entity_uuid, version, operation, snapshot, previous, changed_by, changed_at
+        FROM entity_history
+        WHERE entity_type = ${entity} AND entity_id = ${id}
+        ORDER BY changed_at DESC, id DESC
+      `);
+      res.json(result.rows);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Papelera: entidades archivadas de un tipo, para poder restaurarlas.
+  app.get("/api/data/:entity/archived", async (req, res) => {
+    try {
+      const table = ENTITY_TABLES[req.params.entity];
+      if (!table) return res.status(400).json({ error: `Entidad no soportada: ${req.params.entity}` });
+      const result = await db.execute(sql`
+        SELECT * FROM ${sql.raw(table)} WHERE archived_at IS NOT NULL ORDER BY archived_at DESC
+      `);
+      res.json(result.rows);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
 
 
   // ==========================================
@@ -905,7 +1049,7 @@ async function startServer() {
   let indicatorsMetaCache: { id: string; objectiveId: string; weight: number | null }[] | null = null;
   const getIndicatorsMeta = async () => {
     if (!indicatorsMetaCache) {
-      const result = await db.execute(sql`SELECT id, objective_id, weight FROM indicators`);
+      const result = await db.execute(sql`SELECT id, objective_id, weight FROM indicators WHERE archived_at IS NULL`);
       indicatorsMetaCache = (result.rows as any[]).map(r => ({
         id: r.id, objectiveId: r.objective_id, weight: r.weight != null ? Number(r.weight) : null
       }));
@@ -1279,7 +1423,7 @@ async function startServer() {
       SELECT DISTINCT s.id, s.title, s.type, s.description, s.impact, s.cost, s.readiness
       FROM solutions s
       JOIN challenge_solutions cs ON cs.solution_id = s.id
-      WHERE cs.challenge_id IN ${challengeIds}
+      WHERE cs.challenge_id IN ${challengeIds} AND s.archived_at IS NULL
       ORDER BY s.title
     `);
     return result.rows;
@@ -1295,7 +1439,7 @@ async function startServer() {
         SELECT c.id, c.title, c.type, c.description, cc.percentage
         FROM causes c
         JOIN challenge_causes cc ON cc.cause_id = c.id
-        WHERE cc.challenge_id = ${id}
+        WHERE cc.challenge_id = ${id} AND c.archived_at IS NULL
         ORDER BY cc.percentage DESC NULLS LAST
       `);
       res.json(result.rows);
@@ -1339,7 +1483,7 @@ async function startServer() {
           SELECT i.id, i.name, io.score
           FROM indicators i
           LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
-          WHERE i.objective_id = ${id}
+          WHERE i.objective_id = ${id} AND i.archived_at IS NULL
           ORDER BY i.id
         `);
 
@@ -1348,7 +1492,7 @@ async function startServer() {
           FROM challenges c
           JOIN challenge_objectives co ON co.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
-          WHERE co.objective_id = ${id} AND ct.territory_id = ${territoryId}
+          WHERE co.objective_id = ${id} AND ct.territory_id = ${territoryId} AND c.archived_at IS NULL
           ORDER BY c.title
         `);
         const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
@@ -1385,7 +1529,7 @@ async function startServer() {
           SELECT m.id, m.name, mo.score
           FROM markers m
           LEFT JOIN marker_observations mo ON mo.marker_id = m.id AND mo.territory_id = ${territoryId}
-          WHERE m.indicator_id = ${id}
+          WHERE m.indicator_id = ${id} AND m.archived_at IS NULL
           ORDER BY m.weight DESC NULLS LAST, m.id
         `);
 
@@ -1394,7 +1538,7 @@ async function startServer() {
           FROM challenges c
           JOIN challenge_indicators ci ON ci.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
-          WHERE ci.indicator_id = ${id} AND ct.territory_id = ${territoryId}
+          WHERE ci.indicator_id = ${id} AND ct.territory_id = ${territoryId} AND c.archived_at IS NULL
           ORDER BY c.title
         `);
         const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
@@ -1445,7 +1589,7 @@ async function startServer() {
               LIMIT 1
             ) AS worst_level
           FROM metrics me
-          WHERE me.marker_id = ${id}
+          WHERE me.marker_id = ${id} AND me.archived_at IS NULL
           ORDER BY me.name
         `);
 
@@ -1454,7 +1598,7 @@ async function startServer() {
           FROM challenges c
           JOIN challenge_markers cm ON cm.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
-          WHERE cm.marker_id = ${id} AND ct.territory_id = ${territoryId}
+          WHERE cm.marker_id = ${id} AND ct.territory_id = ${territoryId} AND c.archived_at IS NULL
           ORDER BY c.title
         `);
         const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
@@ -1491,7 +1635,7 @@ async function startServer() {
           FROM challenges c
           JOIN challenge_metrics cme ON cme.challenge_id = c.id
           JOIN challenge_territories ct ON ct.challenge_id = c.id
-          WHERE cme.metric_id = ${id} AND ct.territory_id = ${territoryId}
+          WHERE cme.metric_id = ${id} AND ct.territory_id = ${territoryId} AND c.archived_at IS NULL
           ORDER BY c.title
         `);
         const solutionsRows = await getSolutionsForChallenges(challengesResult.rows.map((r: any) => r.id));
