@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
-import { Search, Package, Megaphone, MapPin, Filter, X, Plus } from 'lucide-react';
+import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart } from 'lucide-react';
 import { cn } from '../utils/cn';
+import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 
 // ============================================================================
 // Mercado — Fase 5
@@ -42,6 +43,7 @@ export default function Mercado() {
   const [products, setProducts] = useState<any[]>([]);
   const [demands, setDemands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
   const { can } = useAuth();
   const { territories, objectives } = useHelpers();
@@ -245,9 +247,36 @@ export default function Mercado() {
               {p.stock != null && (
                 <p className="text-[10px] text-slate-400 mt-1.5">{p.stock} disponibles</p>
               )}
+              {p.price_cents != null && (
+                <button
+                  onClick={() => setCheckoutProduct(p)}
+                  className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
+                >
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  {p.modality === 'suscripcion' ? 'Suscribirse' : 'Comprar'}
+                </button>
+              )}
             </div>
           ))}
         </div>
+      )}
+
+      {checkoutProduct && (
+        <EmbeddedCheckoutModal
+          title={`Comprar: ${checkoutProduct.name}`}
+          onClose={() => setCheckoutProduct(null)}
+          createSession={async () => {
+            const res = await fetch('/api/stripe/checkout/product', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ product_id: checkoutProduct.id }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || 'No se pudo iniciar la compra.');
+            return json;
+          }}
+        />
       )}
 
       {!loading && tab === 'demandas' && demands.length > 0 && (

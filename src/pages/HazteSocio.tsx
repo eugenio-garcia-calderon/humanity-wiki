@@ -67,19 +67,27 @@ export default function HazteSocio() {
           const stripe = await loadStripe(publishableKey);
           if (!stripe) throw new Error('No se pudo cargar el SDK de Stripe.');
 
+          // El SDK de Stripe se carga desde su propio CDN en tiempo de
+          // ejecución (no desde node_modules), así que su API puede cambiar
+          // sin que cambie la versión instalada de @stripe/stripe-js.
+          // `initEmbeddedCheckout` sigue existiendo como función pero LANZA
+          // al llamarla ("ha sido eliminada, usa createEmbeddedCheckoutPage")
+          // en vez de no existir — comprobado en directo el 2026-08-04, por
+          // eso se prueba primero el nombre nuevo. Ver también
+          // EmbeddedCheckoutModal.tsx, que sigue el mismo orden.
           const stripeAny = stripe as any;
           let checkout: any;
 
-          if (typeof stripeAny.initEmbeddedCheckout === 'function') {
-            checkout = await stripeAny.initEmbeddedCheckout({
-              fetchClientSecret: () => Promise.resolve(clientSecret),
-            });
-          } else if (typeof stripeAny.createEmbeddedCheckoutPage === 'function') {
+          if (typeof stripeAny.createEmbeddedCheckoutPage === 'function') {
             checkout = await stripeAny.createEmbeddedCheckoutPage({
               clientSecret,
             });
+          } else if (typeof stripeAny.initEmbeddedCheckout === 'function') {
+            checkout = await stripeAny.initEmbeddedCheckout({
+              fetchClientSecret: () => Promise.resolve(clientSecret),
+            });
           } else {
-            throw new Error('Tu versión del SDK de Stripe no soporta initEmbeddedCheckout.');
+            throw new Error('Esta versión del SDK de Stripe no soporta Checkout embebido.');
           }
 
           if (isMounted && checkoutRef.current && checkout) {

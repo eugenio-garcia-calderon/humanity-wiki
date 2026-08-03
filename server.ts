@@ -13,6 +13,7 @@ import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
+import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -58,20 +59,8 @@ async function startServer() {
   const PORT = 3000;
   app.set("trust proxy", true);
 
-  // Lazy Stripe Initialization
-  let stripeClient: Stripe | null = null;
-  function getStripe(): Stripe {
-    if (!stripeClient) {
-      const key = process.env.STRIPE_SECRET_KEY;
-      if (!key) {
-        throw new Error("STRIPE_SECRET_KEY environment variable is not set");
-      }
-      stripeClient = new Stripe(key, {
-        apiVersion: "2025-01-27.acacia" as any,
-      });
-    }
-    return stripeClient;
-  }
+  // getStripe() vive ahora en src/server/stripe.ts (Fase 6), compartido por
+  // el flujo de socios de aquí abajo y por el nuevo mercado.
 
   // In-memory fallback for memberships & stripe events
   const inMemoryMemberships = new Map<string, any>();
@@ -219,6 +208,15 @@ async function startServer() {
       }
     }
 
+    // Fase 6 (mercado): eventos nuevos (compra de producto, apoyo a
+    // creadores, cuentas Connect, reembolsos) distinguidos por
+    // `metadata.kind`, sin tocar el switch de socios/membresía de arriba.
+    try {
+      await handleMarketplaceWebhookEvent(event, db);
+    } catch (e) {
+      console.error('Error procesando evento de mercado:', e);
+    }
+
     res.json({ received: true });
   });
 
@@ -241,7 +239,12 @@ async function startServer() {
   // fallar de forma opaca.
   registerAIRoutes(app, db);
 
-  // 2. STRIPE CHECKOUT ENDPOINTS
+  // 1.8 ECONOMÍA Y MERCADO (Fase 6): Connect, checkout embebido de
+  // productos, apoyo a creadores y reembolsos. Coexiste con el flujo de
+  // socios/membresía de abajo, que no se modifica.
+  registerStripeRoutes(app, db);
+
+  // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
     try {
       const { userId, email, membershipType = "socio_regular" } = req.body;
