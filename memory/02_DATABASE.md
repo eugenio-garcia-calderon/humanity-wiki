@@ -31,6 +31,8 @@ Cada nivel de la jerarquía tiene su propia tabla de "observación por territori
 ### `territories`
 Territorio de cualquier tipo (`type`): planeta, continente, país, región/comunidad autónoma. Auto-referenciada vía `parent_id` (jerarquía geográfica, no confundir con la jerarquía de objetivos). Incluye geometría PostGIS (`geometry` multipolígono, `centroid` punto) para renderizado en mapa y consultas espaciales (`ST_AsMVT`, `/api/geo/near`).
 
+> **Trampa conocida:** la columna `centroid` **existe en el esquema pero está vacía (`NULL`) para las 33 filas actuales** (comprobado el 2026-08-03). El centro real de cada territorio que usa el resto de la app viene de `seedTerritories` en `src/data/seed.ts` (campo `coordinates: [lng, lat]`), no de esta columna. Cualquier función nueva que necesite el centro de un territorio (distancias, "alrededores", etc.) debe leer `seedTerritories`, no `territories.centroid` — ver decisión del 2026-08-03 en `03_DECISIONS.md`.
+
 ### `objectives`
 Los 6 grandes retos (id, title, description). Fijos por diseño — ampliarlos es una decisión de producto, no solo técnica (ver `03_DECISIONS.md` si se añade un 7º objetivo).
 

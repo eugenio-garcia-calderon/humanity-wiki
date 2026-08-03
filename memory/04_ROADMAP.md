@@ -22,6 +22,7 @@
 - ✅ Eliminación de la marca de agua/atribución de Mapbox (con riesgo contractual aceptado explícitamente por el usuario — ver `03_DECISIONS.md`).
 - ✅ Rediseño del mapa a layout de 3 columnas (filtros en acordeón / panel de territorio permanente / mapa).
 - ✅ Sistema de documentación viva `/memory` (este conjunto de archivos).
+- ✅ Páginas de entidad ligadas a territorio para todo el menú de filtros (Objetivo→Indicador→Marcador→Métrica): endpoint único `/api/explorer/:level/:id`, componente único `EntityExplorerPanel`, navegación reflejada en la URL (`?territorio=<slug>&nivel=&id=`), territorio por defecto vía geolocalización IP con reserva en "Mundo" (`/api/geo/locate`), "alrededores" de una métrica por radio de distancia (150 km) desde el centro del territorio.
 
 ## En desarrollo / pendiente inmediato
 

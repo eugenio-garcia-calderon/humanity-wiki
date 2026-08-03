@@ -3,14 +3,56 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import Stripe from "stripe";
+import geoip from "geoip-lite";
 import { db } from "./src/db/index.js";
 import { territories, projects, challenges, organizations } from "./src/db/schema.js";
 import { territories as seedTerritories, objectives as seedObjectives } from "./src/data/seed.js";
+import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
+
+// Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
+const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
+  Object.entries(OBJECTIVE_ID_BY_KEY).map(([key, id]) => [id, key])
+);
+
+// Best-effort IP -> territory name resolution, used only to pick a sensible
+// default territory on first load. No adjacency/neighbor table exists yet,
+// so this is intentionally coarse (country-level, region-level for Spain).
+const COUNTRY_NAME_BY_ISO2: Record<string, string> = {
+  ES: "España",
+  AR: "Argentina",
+  IT: "Italia",
+  ET: "Etiopía",
+  GQ: "Guinea Ecuatorial",
+};
+
+// ISO 3166-2:ES subdivision codes -> comunidad autónoma name in our DB.
+const ES_REGION_NAME_BY_ISO_CODE: Record<string, string> = {
+  AN: "Andalucía",
+  AR: "Aragón",
+  CN: "Canarias",
+  CB: "Cantabria",
+  CL: "Castilla y León",
+  CM: "Castilla-La Mancha",
+  CT: "Cataluña",
+  CE: "Ceuta",
+  MD: "Comunidad de Madrid",
+  NC: "Comunidad Foral de Navarra",
+  VC: "Comunidad Valenciana",
+  EX: "Extremadura",
+  GA: "Galicia",
+  IB: "Illes Balears",
+  RI: "La Rioja",
+  ML: "Melilla",
+  PV: "País Vasco",
+  AS: "Principado de Asturias",
+  MC: "Región de Murcia",
+};
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  app.set("trust proxy", true);
 
   // Lazy Stripe Initialization
   let stripeClient: Stripe | null = null;
@@ -293,6 +335,40 @@ async function startServer() {
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // Best-effort default territory based on the client's IP. Falls back to the
+  // planet-level territory ("Mundo") whenever geolocation isn't possible —
+  // e.g. local/private IPs during development always hit this fallback.
+  app.get("/api/geo/locate", async (req, res) => {
+    try {
+      const forwardedFor = (req.headers["x-forwarded-for"] as string) || "";
+      const ip = forwardedFor.split(",")[0].trim() || req.socket.remoteAddress || req.ip || "";
+      const geo = ip ? geoip.lookup(ip) : null;
+
+      let territoryName: string | null = null;
+      if (geo?.country === "ES" && geo.region && ES_REGION_NAME_BY_ISO_CODE[geo.region]) {
+        territoryName = ES_REGION_NAME_BY_ISO_CODE[geo.region];
+      } else if (geo?.country && COUNTRY_NAME_BY_ISO2[geo.country]) {
+        territoryName = COUNTRY_NAME_BY_ISO2[geo.country];
+      }
+
+      let territoryId: string | null = null;
+      if (territoryName) {
+        const result = await db.execute(sql`SELECT id FROM territories WHERE name = ${territoryName} LIMIT 1`);
+        territoryId = (result.rows[0]?.id as string) || null;
+      }
+
+      if (!territoryId) {
+        const planet = await db.execute(sql`SELECT id FROM territories WHERE type = 'planet' LIMIT 1`);
+        territoryId = (planet.rows[0]?.id as string) || "T001";
+      }
+
+      res.json({ territoryId, source: territoryName ? "ip" : "default" });
+    } catch (e: any) {
+      console.error("Error locating territory by IP:", e);
+      res.json({ territoryId: "T001", source: "default" });
+    }
   });
 
   const getTable = async (tableName: string, res: Response) => {
@@ -978,6 +1054,213 @@ async function startServer() {
       });
     } catch (e: any) {
       console.error("Error querying nearby entities:", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Measurement stations relevant to a territory + metric: the ones that
+  // belong to the territory itself, plus any within `radiusKm` of its
+  // centroid ("alrededores" — there is no territory-adjacency table, so
+  // distance from the centroid is used as the proxy for "nearby").
+  // Centroid coordinates come from the seed data (`seedTerritories`), not the
+  // `territories.centroid` PostGIS column — that column exists in the schema
+  // but is never populated; every territory's real lng/lat lives in seed.ts.
+  const getStationsNearTerritory = async (territoryId: string, metricId: string, radiusKm: number) => {
+    const seedTerritory = seedTerritories.find(t => t.id === territoryId);
+    const centroid = seedTerritory?.coordinates
+      ? { lng: seedTerritory.coordinates[0], lat: seedTerritory.coordinates[1] }
+      : undefined;
+
+    if (!centroid) {
+      const result = await db.execute(sql`
+        SELECT ms.id, ms.name, ms.territory_id, ms.lat, ms.lng,
+          mo.value, mo.unit, mo.level, mo.date, mo.source, NULL::numeric AS distance_km
+        FROM measurement_stations ms
+        LEFT JOIN metric_observations mo ON mo.station_id = ms.id AND mo.metric_id = ${metricId}
+        WHERE ms.territory_id = ${territoryId}
+      `);
+      return result.rows;
+    }
+
+    const result = await db.execute(sql`
+      SELECT ms.id, ms.name, ms.territory_id, ms.lat, ms.lng,
+        mo.value, mo.unit, mo.level, mo.date, mo.source,
+        ROUND((ST_Distance(
+          ST_SetSRID(ST_MakePoint(ms.lng, ms.lat), 4326)::geography,
+          ST_SetSRID(ST_MakePoint(${centroid.lng}, ${centroid.lat}), 4326)::geography
+        ) / 1000.0)::numeric, 1) AS distance_km
+      FROM measurement_stations ms
+      LEFT JOIN metric_observations mo ON mo.station_id = ms.id AND mo.metric_id = ${metricId}
+      WHERE ms.territory_id = ${territoryId}
+         OR ST_DWithin(
+           ST_SetSRID(ST_MakePoint(ms.lng, ms.lat), 4326)::geography,
+           ST_SetSRID(ST_MakePoint(${centroid.lng}, ${centroid.lat}), 4326)::geography,
+           ${radiusKm * 1000}
+         )
+      ORDER BY distance_km ASC NULLS LAST
+    `);
+    return result.rows;
+  };
+
+  // Unified drill-down endpoint for the map's filter menu: given a level of the
+  // Objetivo→Indicador→Marcador→Métrica hierarchy and an entity id, returns its
+  // general metadata, the observation for the given territory, and its children
+  // (so both the left-hand menu and the center panel can keep drilling down).
+  // Adding a future 5th level only means adding one more `if (level === ...)`
+  // branch here — the route, the territory resolution and the response
+  // envelope stay the same.
+  app.get("/api/explorer/:level/:id", async (req, res) => {
+    try {
+      const { level, id } = req.params;
+      const territoryId = (req.query.territoryId as string) || "T001";
+      const radiusKm = parseFloat(req.query.radiusKm as string) || 150;
+
+      const territoryResult = await db.execute(sql`SELECT id, name, type FROM territories WHERE id = ${territoryId}`);
+      const territory = territoryResult.rows[0] || { id: territoryId, name: territoryId, type: null };
+
+      if (level === "objetivo") {
+        const objResult = await db.execute(sql`SELECT id, title, description FROM objectives WHERE id = ${id}`);
+        const objective = objResult.rows[0] as any;
+        if (!objective) return res.status(404).json({ error: "Objetivo no encontrado" });
+
+        const objKey = OBJECTIVE_KEY_BY_ID[id];
+        const scores = getObjectivesForTerritory(territoryId);
+        const score = objKey ? (scores as any)[objKey] : null;
+
+        const indicatorsResult = await db.execute(sql`
+          SELECT i.id, i.name, io.score
+          FROM indicators i
+          LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
+          WHERE i.objective_id = ${id}
+          ORDER BY i.id
+        `);
+
+        return res.json({
+          level: "objetivo",
+          entity: { id: objective.id, name: objective.title, description: objective.description },
+          territory,
+          score: score ?? null,
+          hasData: score != null,
+          children: indicatorsResult.rows.map((r: any) => ({
+            level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
+          }))
+        });
+      }
+
+      if (level === "indicador") {
+        const indResult = await db.execute(sql`
+          SELECT id, name, unit, category, direction, weight, methodology, objective_id
+          FROM indicators WHERE id = ${id}
+        `);
+        const indicator = indResult.rows[0] as any;
+        if (!indicator) return res.status(404).json({ error: "Indicador no encontrado" });
+
+        const obsResult = await db.execute(sql`
+          SELECT value, raw_value, score, weighted_score, date, source, source_url
+          FROM indicator_observations WHERE indicator_id = ${id} AND territory_id = ${territoryId}
+        `);
+        const observation = obsResult.rows[0] || null;
+
+        const markersResult = await db.execute(sql`
+          SELECT m.id, m.name, mo.score
+          FROM markers m
+          LEFT JOIN marker_observations mo ON mo.marker_id = m.id AND mo.territory_id = ${territoryId}
+          WHERE m.indicator_id = ${id}
+          ORDER BY m.weight DESC NULLS LAST, m.id
+        `);
+
+        return res.json({
+          level: "indicador",
+          entity: {
+            id: indicator.id, name: indicator.name, unit: indicator.unit, category: indicator.category,
+            direction: indicator.direction, weight: indicator.weight, methodology: indicator.methodology,
+            objectiveId: indicator.objective_id
+          },
+          territory,
+          observation,
+          hasData: !!observation,
+          children: markersResult.rows.map((r: any) => ({
+            level: "marcador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
+          }))
+        });
+      }
+
+      if (level === "marcador") {
+        const markResult = await db.execute(sql`
+          SELECT id, name, includes, description, unit, weight, source, last_updated, indicator_id
+          FROM markers WHERE id = ${id}
+        `);
+        const marker = markResult.rows[0] as any;
+        if (!marker) return res.status(404).json({ error: "Marcador no encontrado" });
+
+        const obsResult = await db.execute(sql`
+          SELECT value, raw_value, score, date, source
+          FROM marker_observations WHERE marker_id = ${id} AND territory_id = ${territoryId}
+        `);
+        const observation = obsResult.rows[0] || null;
+
+        // Metrics don't have a 0-100 score of their own — summarize each one by
+        // the worst (most severe) risk level found among this territory's stations.
+        const metricsResult = await db.execute(sql`
+          SELECT me.id, me.name,
+            (
+              SELECT mo.level FROM metric_observations mo
+              JOIN measurement_stations ms ON ms.id = mo.station_id
+              WHERE mo.metric_id = me.id AND ms.territory_id = ${territoryId}
+              ORDER BY CASE mo.level
+                WHEN 'peligroso' THEN 4 WHEN 'alto' THEN 3 WHEN 'moderado' THEN 2 WHEN 'bajo' THEN 1 ELSE 0
+              END DESC
+              LIMIT 1
+            ) AS worst_level
+          FROM metrics me
+          WHERE me.marker_id = ${id}
+          ORDER BY me.name
+        `);
+
+        return res.json({
+          level: "marcador",
+          entity: {
+            id: marker.id, name: marker.name, includes: marker.includes, description: marker.description,
+            unit: marker.unit, weight: marker.weight, source: marker.source, lastUpdated: marker.last_updated,
+            indicatorId: marker.indicator_id
+          },
+          territory,
+          observation,
+          hasData: !!observation,
+          children: metricsResult.rows.map((r: any) => ({
+            level: "metrica", id: r.id, name: r.name, score: null, hasData: r.worst_level != null, riskLevel: r.worst_level ?? null
+          }))
+        });
+      }
+
+      if (level === "metrica") {
+        const metResult = await db.execute(sql`
+          SELECT id, name, unit, description, marker_id FROM metrics WHERE id = ${id}
+        `);
+        const metric = metResult.rows[0] as any;
+        if (!metric) return res.status(404).json({ error: "Métrica no encontrada" });
+
+        const stationRows = await getStationsNearTerritory(territoryId, id, radiusKm);
+
+        return res.json({
+          level: "metrica",
+          entity: { id: metric.id, name: metric.name, unit: metric.unit, description: metric.description, markerId: metric.marker_id },
+          territory,
+          radiusKm,
+          stations: stationRows.map((r: any) => ({
+            id: r.id, name: r.name,
+            lat: r.lat, lng: r.lng,
+            distanceKm: r.distance_km != null ? Number(r.distance_km) : null,
+            withinTerritory: r.territory_id === territoryId,
+            value: r.value, unit: r.unit, level: r.level, date: r.date, source: r.source
+          })),
+          children: []
+        });
+      }
+
+      return res.status(400).json({ error: `Nivel desconocido: ${level}` });
+    } catch (e: any) {
+      console.error("Explorer endpoint error:", e);
       res.status(500).json({ error: e.message });
     }
   });

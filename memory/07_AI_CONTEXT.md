@@ -26,9 +26,11 @@ Detalle completo: `01_ARCHITECTURE.md`. Esquema completo de tablas: `02_DATABASE
 
 ## Estado actual (resumen — detalle en `04_ROADMAP.md`)
 
-Terminado: modelo de 4 niveles con datos reales de agua/pureza para España + comunidades autónomas, filtro en cascada de mapa de 4 niveles, layout de mapa en 3 columnas (filtros/panel de territorio permanente/mapa), sistema `/memory`.
+Terminado: modelo de 4 niveles con datos reales de agua/pureza para España + comunidades autónomas, filtro en cascada de mapa de 4 niveles, layout de mapa en 3 columnas (filtros/panel de territorio permanente/mapa), sistema `/memory`, páginas de entidad ligadas a territorio para todo el menú de filtros (endpoint único `/api/explorer/:level/:id` + componente único `EntityExplorerPanel`, navegación reflejada en la URL, territorio por defecto vía geolocalización IP).
 
 Pendiente inmediato conocido: hacer las 3 columnas del mapa redimensionables por el usuario (ítem 4 de `MEJORAS_PENDIENTES.md`, añadido por el usuario directamente en GitHub).
+
+**Trampa a recordar**: `territories.centroid` (PostGIS) está vacía en toda la tabla — el centro real de cada territorio viene de `seedTerritories` en `src/data/seed.ts`. Ver `02_DATABASE.md`.
 
 ## Filosofía (detalle en `00_PROJECT_VISION.md`)
 

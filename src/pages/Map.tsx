@@ -1,13 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
+import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
 import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown } from 'lucide-react';
 import { mapService } from '../services/MapService';
+import { useHelpers } from '../contexts/DataContext';
+import { slugify } from '../utils/slugify';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS } from '../utils/indicatorIcons';
 import { MARKER_ICONS } from '../utils/markerIcons';
 import { METRIC_ICONS } from '../utils/metricIcons';
 
+const OBJECTIVE_KEY_BY_ID: Record<string, ObjectiveKey> = Object.fromEntries(
+  Object.entries(OBJECTIVE_ID_BY_KEY).map(([key, id]) => [id, key])
+) as Record<string, ObjectiveKey>;
+
+async function loadTerritoryDetail(tid: string) {
+  try {
+    const res = await fetch(`/api/territories/${tid}`);
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        id: data.id,
+        name: data.name,
+        type: data.type,
+        description: data.description,
+        population: data.population || 0,
+        area: data.area_km2 || 0,
+        challenges: data.challenges
+      };
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return {
+    id: tid,
+    name: tid.startsWith('T_') ? tid.replace('T_', '').replace(/_/g, ' ') : tid,
+    type: 'region',
+    description: '',
+    population: 0,
+    area: 0,
+    challenges: []
+  };
+}
 
 export default function MapPage() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -15,6 +51,9 @@ export default function MapPage() {
   const [formData, setFormData] = useState({ name: '', type: 'municipality', description: '' });
   const [selectedTerritory, setSelectedTerritory] = useState<any>(null);
   const [reloadTrigger, setReloadTrigger] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { territories, loading: territoriesLoading } = useHelpers();
+  const [territoryResolved, setTerritoryResolved] = useState(false);
 
   // Filters
   const [activeObjective, setActiveObjective] = useState<ObjectiveKey>('overall');
@@ -40,63 +79,185 @@ export default function MapPage() {
       .catch(err => console.error('Error loading metrics', err));
   }, []);
 
-  const handleObjectiveChange = (key: ObjectiveKey) => {
-    setActiveObjective(key);
+  const updateUrlParams = (patch: Record<string, string | null>, opts?: { replace?: boolean }) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(patch).forEach(([key, value]) => {
+        if (value == null) next.delete(key);
+        else next.set(key, value);
+      });
+      return next;
+    }, opts?.replace ? { replace: true } : undefined);
+  };
+
+  // Resolve which territory to show on first load: the `territorio` slug
+  // already in the URL if it matches one we know, otherwise a best-effort
+  // guess from the visitor's IP (falls back to "Mundo" — see /api/geo/locate).
+  useEffect(() => {
+    if (territoriesLoading || territoryResolved) return;
+    let cancelled = false;
+    (async () => {
+      const slug = searchParams.get('territorio');
+      const match = slug ? territories.find((t: any) => slugify(t.name) === slug) : null;
+
+      if (match) {
+        const detail = await loadTerritoryDetail(match.id);
+        if (!cancelled) setSelectedTerritory(detail);
+      } else {
+        let territoryId = 'T001';
+        try {
+          const res = await fetch('/api/geo/locate');
+          if (res.ok) {
+            const json = await res.json();
+            territoryId = json.territoryId || 'T001';
+          }
+        } catch (e) {
+          console.error('Error locating default territory', e);
+        }
+        const detail = await loadTerritoryDetail(territoryId);
+        if (!cancelled) {
+          setSelectedTerritory(detail);
+          updateUrlParams({ territorio: slugify(detail.name) }, { replace: true });
+        }
+      }
+      if (!cancelled) setTerritoryResolved(true);
+    })();
+    return () => { cancelled = true; };
+  }, [territoriesLoading, territoryResolved]);
+
+  // Resolve the full ancestor chain (Objetivo -> Indicador -> Marcador -> Métrica)
+  // for a given level+id using the already-loaded lists, so a deep link (or a
+  // browser back/forward step) lands on a fully consistent filter state.
+  const resolveAncestors = (level: ExplorerLevel, id: string) => {
+    let objectiveId: string | null = null;
+    let indicatorId: string | null = null;
+    let markerId: string | null = null;
+    let metricId: string | null = null;
+
+    if (level === 'objetivo') {
+      objectiveId = id;
+    } else if (level === 'indicador') {
+      indicatorId = id;
+      objectiveId = indicators.find(i => i.id === id)?.objective_id ?? null;
+    } else if (level === 'marcador') {
+      markerId = id;
+      indicatorId = markers.find(m => m.id === id)?.indicator_id ?? null;
+      objectiveId = indicators.find(i => i.id === indicatorId)?.objective_id ?? null;
+    } else if (level === 'metrica') {
+      metricId = id;
+      markerId = metrics.find(m => m.id === id)?.marker_id ?? null;
+      indicatorId = markers.find(m => m.id === markerId)?.indicator_id ?? null;
+      objectiveId = indicators.find(i => i.id === indicatorId)?.objective_id ?? null;
+    }
+
+    return { objectiveId, indicatorId, markerId, metricId };
+  };
+
+  // Keep the 4 cascading filter states in sync with the URL's `nivel`+`id`,
+  // so the left menu, the center panel and browser back/forward all agree.
+  useEffect(() => {
+    const nivel = searchParams.get('nivel') as ExplorerLevel | null;
+    const entId = searchParams.get('id');
+    if (nivel && entId) {
+      const { objectiveId, indicatorId, markerId, metricId } = resolveAncestors(nivel, entId);
+      setActiveObjective(objectiveId ? (OBJECTIVE_KEY_BY_ID[objectiveId] || 'overall') : 'overall');
+      setActiveIndicatorId(indicatorId);
+      setActiveMarkerId(markerId);
+      setActiveMetricId(metricId);
+    } else {
+      setActiveObjective('overall');
+      setActiveIndicatorId(null);
+      setActiveMarkerId(null);
+      setActiveMetricId(null);
+    }
+  }, [searchParams, indicators, markers, metrics]);
+
+  const navigateExplorer = (level: ExplorerLevel, id: string) => {
+    const { objectiveId, indicatorId, markerId, metricId } = resolveAncestors(level, id);
+    setActiveObjective(objectiveId ? (OBJECTIVE_KEY_BY_ID[objectiveId] || 'overall') : 'overall');
+    setActiveIndicatorId(indicatorId);
+    setActiveMarkerId(markerId);
+    setActiveMetricId(metricId);
+    updateUrlParams({ nivel: level, id });
+  };
+
+  const clearExplorer = () => {
+    setActiveObjective('overall');
     setActiveIndicatorId(null);
     setActiveMarkerId(null);
     setActiveMetricId(null);
+    updateUrlParams({ nivel: null, id: null });
+  };
+
+  const handleObjectiveChange = (key: ObjectiveKey) => {
+    if (key === 'overall') {
+      clearExplorer();
+    } else {
+      navigateExplorer('objetivo', OBJECTIVE_ID_BY_KEY[key]);
+    }
   };
 
   const handleIndicatorChange = (indicatorId: string) => {
     const isActive = activeIndicatorId === indicatorId;
-    setActiveIndicatorId(isActive ? null : indicatorId);
-    setActiveMarkerId(null);
-    setActiveMetricId(null);
+    if (isActive) {
+      const objId = OBJECTIVE_ID_BY_KEY[activeObjective];
+      if (objId) navigateExplorer('objetivo', objId); else clearExplorer();
+    } else {
+      navigateExplorer('indicador', indicatorId);
+    }
   };
 
   const handleMarkerChange = (markerId: string) => {
     const isActive = activeMarkerId === markerId;
-    setActiveMarkerId(isActive ? null : markerId);
-    setActiveMetricId(null);
+    if (isActive) {
+      if (activeIndicatorId) navigateExplorer('indicador', activeIndicatorId); else clearExplorer();
+    } else {
+      navigateExplorer('marcador', markerId);
+    }
+  };
+
+  const handleMetricChange = (metricId: string) => {
+    const isActive = activeMetricId === metricId;
+    if (isActive) {
+      if (activeMarkerId) navigateExplorer('marcador', activeMarkerId); else clearExplorer();
+    } else {
+      navigateExplorer('metrica', metricId);
+    }
+  };
+
+  const currentExplorerLevel: ExplorerLevel | null = activeMetricId
+    ? 'metrica' : activeMarkerId
+    ? 'marcador' : activeIndicatorId
+    ? 'indicador' : (activeObjective !== 'overall' ? 'objetivo' : null);
+  const currentExplorerId: string | null = activeMetricId || activeMarkerId || activeIndicatorId
+    || (activeObjective !== 'overall' ? OBJECTIVE_ID_BY_KEY[activeObjective] : null);
+
+  const buildBreadcrumb = (): BreadcrumbEntry[] => {
+    const crumbs: BreadcrumbEntry[] = [];
+    if (activeObjective !== 'overall') {
+      const objId = OBJECTIVE_ID_BY_KEY[activeObjective];
+      const objLabel = objectivesList.find(o => o.key === activeObjective)?.label || activeObjective;
+      crumbs.push({ level: 'objetivo', id: objId, name: objLabel });
+    }
+    if (activeIndicatorId) {
+      const ind = indicators.find(i => i.id === activeIndicatorId);
+      crumbs.push({ level: 'indicador', id: activeIndicatorId, name: ind?.name || activeIndicatorId });
+    }
+    if (activeMarkerId) {
+      const mk = markers.find(m => m.id === activeMarkerId);
+      crumbs.push({ level: 'marcador', id: activeMarkerId, name: mk?.name || activeMarkerId });
+    }
+    if (activeMetricId) {
+      const me = metrics.find(m => m.id === activeMetricId);
+      crumbs.push({ level: 'metrica', id: activeMetricId, name: me?.name || activeMetricId });
+    }
+    return crumbs;
   };
 
   const handleFeatureClick = async (id: string, type: string) => {
-    try {
-      const res = await fetch(`/api/territories/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSelectedTerritory({
-          id: data.id,
-          name: data.name,
-          type: data.type,
-          description: data.description,
-          population: data.population || 0,
-          area: data.area_km2 || 0,
-          challenges: data.challenges
-        });
-      } else {
-        setSelectedTerritory({
-          id,
-          name: id.startsWith('T_') ? id.replace('T_', '').replace(/_/g, ' ') : id,
-          type,
-          description: '',
-          population: 0,
-          area: 0,
-          challenges: []
-        });
-      }
-    } catch (e) {
-      console.error(e);
-      setSelectedTerritory({
-        id,
-        name: id.startsWith('T_') ? id.replace('T_', '').replace(/_/g, ' ') : id,
-        type,
-        description: '',
-        population: 0,
-        area: 0,
-        challenges: []
-      });
-    }
+    const detail = await loadTerritoryDetail(id);
+    setSelectedTerritory(detail);
+    updateUrlParams({ territorio: slugify(detail.name) });
   };
 
   const handleMapDoubleClick = (lngLat: any) => {
@@ -216,7 +377,7 @@ export default function MapPage() {
                                         return (
                                           <button
                                             key={metric.id}
-                                            onClick={() => setActiveMetricId(isMetActive ? null : metric.id)}
+                                            onClick={() => handleMetricChange(metric.id)}
                                             className={`w-full flex items-center gap-2 pl-12 pr-4 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wide transition-colors ${
                                               isMetActive ? 'bg-red-600 text-white' : 'text-slate-400 hover:bg-slate-200'
                                             }`}
@@ -246,21 +407,32 @@ export default function MapPage() {
       {/* COLUMN 2 (~2/5): permanent territory panel (replaces the old floating panel) */}
       <div className="w-2/5 h-full overflow-y-auto bg-white border-r border-slate-200 shrink-0">
         {selectedTerritory ? (
-          <div className="p-4 sm:p-6">
-            <div className="flex justify-end mb-2">
-              <button
-                onClick={() => {
-                  const url = `/objetivos?territorio=${selectedTerritory.id}`;
-                  window.open(url, '_blank');
-                }}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 transition-colors"
-                title="Abrir en pantalla completa"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-              </button>
+          currentExplorerLevel && currentExplorerId ? (
+            <EntityExplorerPanel
+              level={currentExplorerLevel}
+              id={currentExplorerId}
+              territoryId={selectedTerritory.id}
+              breadcrumb={buildBreadcrumb()}
+              onNavigate={navigateExplorer}
+              onClearFilter={clearExplorer}
+            />
+          ) : (
+            <div className="p-4 sm:p-6">
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => {
+                    const url = `/objetivos?territorio=${selectedTerritory.id}`;
+                    window.open(url, '_blank');
+                  }}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 transition-colors"
+                  title="Abrir en pantalla completa"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                </button>
+              </div>
+              <Objectives embeddedTerritoryId={selectedTerritory.id} />
             </div>
-            <Objectives embeddedTerritoryId={selectedTerritory.id} />
-          </div>
+          )
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center p-8">
             <MapPin className="w-10 h-10 mb-3 text-slate-300" />

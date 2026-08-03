@@ -123,6 +123,25 @@ activeObjective ──▶ activeIndicatorId ──▶ activeMarkerId ──▶ a
 
 Cada cambio de nivel resetea los niveles más profundos (`handleObjectiveChange`, `handleIndicatorChange`, `handleMarkerChange` en `src/pages/Map.tsx`). Los territorios sin dato en el nivel activo se pintan en gris `NO_DATA_COLOR` (`#cbd5e1`) con etiqueta "Sin datos", nunca heredan una puntuación del nivel superior.
 
+## Páginas de entidad ligadas a territorio (Objetivo→Indicador→Marcador→Métrica)
+
+Además de colorear el mapa, cada nivel del filtro en cascada abre en la columna central una "página" con información general de la entidad más los datos concretos del territorio seleccionado (y, para métricas, de sus estaciones "y alrededores"). Arquitectura (añadida 2026-08-03, ver decisión completa en `03_DECISIONS.md`):
+
+- **Backend**: un único endpoint genérico `GET /api/explorer/:level/:id?territoryId=...&radioKm=...` (`server.ts`), con una rama `if (level === 'objetivo'|'indicador'|'marcador'|'metrica')`. Cada rama devuelve `{ level, entity, territory, observation|score, hasData, children }`; el nivel métrica devuelve además `stations` (sin `children`, es el nivel hoja). Los `children` de un nivel son directamente los hijos del siguiente nivel de la jerarquía, con su score/nivel de riesgo ya resuelto para el territorio — así el propio panel central permite seguir bajando de nivel, no solo el menú de la izquierda.
+- **"Alrededores" de una métrica**: `getStationsNearTerritory()` en `server.ts` devuelve las estaciones del territorio más las que estén dentro de un radio (150 km por defecto) de su centro, usando `ST_DWithin`/`ST_Distance` sobre las coordenadas de `seedTerritories` (¡no `territories.centroid`, que está vacía! — ver `02_DATABASE.md`).
+- **Frontend**: un único componente `src/components/explorer/EntityExplorerPanel.tsx` renderiza los 4 niveles a partir de la misma forma de respuesta (breadcrumb + info general + datos del territorio + hijos clicables). `src/pages/Map.tsx` centraliza la navegación: `navigateExplorer(level, id)` resuelve toda la cadena de ancestros (a partir de las listas ya cargadas de indicadores/marcadores/métricas, sin llamada extra al backend) y actualiza tanto los 4 estados `activeObjective/activeIndicatorId/activeMarkerId/activeMetricId` (que ya gobernaban el coloreado del mapa) como la URL.
+- **Escalabilidad**: añadir un 5º nivel futuro (p. ej. un nuevo objetivo con datos propios) solo requiere una rama más en el endpoint y ningún cambio en el componente ni en el esquema de URL.
+
+### Esquema de URL de `/mapa`
+
+```
+/mapa?territorio=<slug-del-nombre-del-territorio>&nivel=<objetivo|indicador|marcador|metrica>&id=<id-de-la-entidad>
+```
+
+- `territorio` usa el **nombre** del territorio slugificado (p. ej. `aragon`, `espana`, `mundo`), no su id interno `T0XX` — decisión explícita del usuario para que la URL sea legible y compartible. Se resuelve contra la lista de territorios de `DataContext` con `slugify(t.name) === param`.
+- Solo se guarda el nivel más profundo activo (`nivel`+`id`); los niveles superiores se derivan en el cliente. Los clics del menú, del breadcrumb y de los "hijos" del panel central usan `push` (no `replace`), así que el botón atrás/adelante del navegador deshace la navegación por el árbol paso a paso.
+- Si no hay `territorio` en la URL al entrar, se pide `GET /api/geo/locate` (geolocalización por IP, `geoip-lite`, sin llamadas de red externas) para elegir un territorio por defecto, con reserva en el territorio de tipo `planet` ("Mundo") si no se puede determinar — ver decisión en `03_DECISIONS.md`.
+
 ## Diseño visual del mapa por nivel de zoom
 
 - **Zoom bajo (vista "planeta")**: capa raster de satélite (`mapbox://mapbox.satellite`, minzoom 0, maxzoom `PLANET_MAX_ZOOM = 2.0`), continentes con relleno semitransparente (opacity 0.35) y **sin líneas divisorias internas** (las piezas de `continents.json` comparten `territoryId` pero son ~90 polígonos por país; no se dibuja `continents-line` para evitar fronteras falsas). Las capas `admin-*` del propio estilo base de Mapbox se empujan a `minzoom 3.5` vía `setLayerZoomRange` por el mismo motivo.
