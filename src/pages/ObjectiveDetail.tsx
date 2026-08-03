@@ -14,6 +14,14 @@ const objectiveColors: Record<string, { from: string; to: string; bg: string; te
   'SALUD': { from: 'from-rose-400', to: 'to-red-500', bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100' },
   'CONVIVENCIA': { from: 'from-purple-500', to: 'to-pink-500', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' },
   'ECOSISTEMAS': { from: 'from-emerald-400', to: 'to-teal-500', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
+  'EDUCACIÓN': { from: 'from-sky-500', to: 'to-blue-600', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-100' },
+  'MOVILIDAD': { from: 'from-orange-400', to: 'to-amber-600', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
+  'ENERGÍA': { from: 'from-yellow-400', to: 'to-orange-500', bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-100' },
+  'TECNOLOGÍA': { from: 'from-cyan-500', to: 'to-sky-600', bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-100' },
+  'EMPLEO': { from: 'from-lime-500', to: 'to-green-600', bg: 'bg-lime-50', text: 'text-lime-600', border: 'border-lime-100' },
+  'GOBERNANZA': { from: 'from-fuchsia-500', to: 'to-purple-600', bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', border: 'border-fuchsia-100' },
+  'ECONOMÍA': { from: 'from-violet-500', to: 'to-indigo-600', bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-100' },
+  'CULTURA': { from: 'from-pink-500', to: 'to-rose-600', bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-100' },
 };
 
 const defaultColors = { from: 'from-slate-400', to: 'to-slate-600', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100' };

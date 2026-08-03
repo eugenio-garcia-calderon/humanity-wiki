@@ -5,10 +5,10 @@ Este documento explica el **modelo de puntuación** de Red Humana — el "cómo 
 ## Los 4 niveles
 
 ```
-Objetivo  (0-100, 6 fijos)
+Objetivo  (0-100, 14 actualmente: los 6 originales + 8 añadidos el 2026-08-03)
    │  score = media ponderada de sus Indicadores (weight de cada indicador)
    ▼
-Indicador (0-100, 41 actualmente)
+Indicador (0-100, 97 actualmente: 41 de los 6 originales + 56 de los 8 nuevos)
    │  score = calculado a partir de indicator_observations.value según methodology/direction
    ▼
 Marcador  (0-100, 7 actualmente — solo bajo "Calidad" de Agua)
@@ -18,15 +18,31 @@ Métrica   (nivel de riesgo discreto, no 0-100 — 8 actualmente, bajo "Pureza")
           nivel = bajo | moderado | alto | peligroso, según el valor medido en una estación física
 ```
 
-## Objetivos (6, fijos)
+## Objetivos (14)
 
-Los grandes retos sistémicos que la plataforma mapea. Hoy confirmados en el modelo: **Agua**, **Alimentación**, **Vivienda**, **Convivencia**, **Ecosistemas**, + 1 adicional (ver tabla `objectives` para el listado completo y actualizado — este documento no repite los 6 nombres exactos para no quedar desactualizado si cambian; consultar `SELECT * FROM objectives` o `GET /api/data/objectives`).
+Los grandes retos sistémicos que la plataforma mapea. Ver tabla `objectives` para el listado completo y actualizado (este documento no repite los nombres exactos para no quedar desactualizado si cambian; consultar `SELECT * FROM objectives` o `GET /api/data/objectives`). A fecha 2026-08-03 hay 14: los 6 originales (Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas) más 8 añadidos ese día (Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía, Cultura).
 
-Cada objetivo tiene un `id` estable (`O001`...) mapeado en `src/utils/objectiveIds.ts` (`OBJECTIVE_ID_BY_KEY`, clave textual en minúsculas → id).
+Cada objetivo tiene un `id` estable (`O001`...) mapeado en `src/utils/objectiveIds.ts` (`OBJECTIVE_ID_BY_KEY`, clave textual en minúsculas → id) — este archivo es la única fuente de verdad que hay que tocar para añadir un objetivo nuevo; el resto del sistema (tipo `TerritoryObjectives`, cálculo de puntuación, coloreado del mapa) lo deriva dinámicamente.
 
-**Cálculo de puntuación de objetivo (estado actual)**: hoy es un **cálculo mock en memoria** (`getObjectivesForTerritory` en `server.ts`, a partir de `seedObjectives`), no proviene de observaciones reales por territorio. Es la próxima pieza de deuda de modelo a resolver — ver `04_ROADMAP.md`.
+**Cálculo de puntuación de objetivo (estado actual)**: hoy es un **cálculo mock en memoria** (`getObjectivesForTerritory` en `server.ts`, a partir de `seedObjectives`), no proviene de observaciones reales por territorio — pieza de deuda de modelo pendiente (ver `04_ROADMAP.md`). Los 6 objetivos originales tienen valores mock (con fallback a 50 si el territorio no está listado); los 8 objetivos añadidos el 2026-08-03 **no tienen ningún valor mock** — su score es `null` ("Sin datos") hasta que se cargue un dato real, siguiendo el principio de no fabricar datos (ver `03_DECISIONS.md`).
 
-## Indicadores (41)
+### Los 8 objetivos nuevos (2026-08-03): mismo indicador-plantilla en los 8
+
+Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía y Cultura se crearon con el mismo conjunto de 7 indicadores cada uno (sembrado por `src/db/seed-new-objectives.ts`, id `IND_<OBJETIVO>_<INDICADOR>` sin acentos, p. ej. `IND_EDUCACION_ACCESIBILIDAD`):
+
+| Indicador | Dirección | Qué mide (genérico, pendiente de metodología real) |
+|---|---|---|
+| Accesibilidad | `higher_is_better` | Grado de acceso de la población a este ámbito |
+| Coste | `lower_is_better` | Coste económico que supone para la población |
+| Soberanía | `higher_is_better` | Autosuficiencia y control propio frente a la dependencia externa |
+| Eficiencia | `higher_is_better` | Relación entre recursos empleados y resultados obtenidos |
+| Calidad | `higher_is_better` | Nivel de calidad percibida y objetiva |
+| Sostenibilidad | `higher_is_better` | Capacidad de mantenerse en el tiempo sin agotar recursos |
+| Innovación | `higher_is_better` | Grado de incorporación de nuevas soluciones y mejoras |
+
+Ninguno tiene `indicator_observations` todavía — son estructura pura ("construir la estructura antes que los datos", mismo patrón que Marcadores/Métricas de Agua). Peso igual (`1/7≈0.143`) en los 7, al no haber datos reales de los que derivar una ponderación distinta.
+
+## Indicadores (97)
 
 Cada indicador pertenece a un objetivo (`objective_id`) y tiene:
 - `unit`: unidad de medida.

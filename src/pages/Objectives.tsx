@@ -7,7 +7,7 @@ import { useEdit } from '../contexts/EditContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/core';
 import { slugify } from '../utils/slugify';
-import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown } from 'lucide-react';
+import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const typeLabels: Record<string, string> = {
@@ -27,6 +27,14 @@ const iconMap: Record<string, any> = {
   'SALUD': HeartPulse,
   'CONVIVENCIA': Users,
   'ECOSISTEMAS': TreePine,
+  'EDUCACIÓN': GraduationCap,
+  'MOVILIDAD': Car,
+  'ENERGÍA': Zap,
+  'TECNOLOGÍA': Cpu,
+  'EMPLEO': Briefcase,
+  'GOBERNANZA': Landmark,
+  'ECONOMÍA': Coins,
+  'CULTURA': Palette,
 };
 
 const territoryTypes = ['country', 'region', 'municipality', 'comunidad_vecinos', 'aldea'];

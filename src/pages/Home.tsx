@@ -6,7 +6,7 @@ import { AdminMenu } from '../components/ui/AdminMenu';
 import { useEdit } from '../contexts/EditContext';
 import { useDesign } from '../contexts/DesignContext';
 import { cn } from '../utils/cn';
-import { Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, Plus, X, MapPin } from 'lucide-react';
+import { Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, Plus, X, MapPin, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
   'AGUA': Droplets,
@@ -15,6 +15,14 @@ const iconMap: Record<string, any> = {
   'SALUD': HeartPulse,
   'CONVIVENCIA': Users,
   'ECOSISTEMAS': TreePine,
+  'EDUCACIÓN': GraduationCap,
+  'MOVILIDAD': Car,
+  'ENERGÍA': Zap,
+  'TECNOLOGÍA': Cpu,
+  'EMPLEO': Briefcase,
+  'GOBERNANZA': Landmark,
+  'ECONOMÍA': Coins,
+  'CULTURA': Palette,
 };
 
 export default function Home() {
@@ -190,7 +198,7 @@ export default function Home() {
               </div>
 
               {/* Objectives Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                 {objectives.map(obj => {
                   const Icon = iconMap[obj.title] || TreePine;
                   const imgPath = objectiveImages[obj.title];

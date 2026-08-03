@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
 import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Sparkles, PanelLeftClose } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Sparkles, PanelLeftClose, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { mapService } from '../services/MapService';
 import { useHelpers } from '../contexts/DataContext';
 import { slugify } from '../utils/slugify';
@@ -305,6 +305,14 @@ export default function MapPage() {
     { key: 'salud', label: 'Salud', icon: Heart, color: 'text-rose-500' },
     { key: 'convivencia', label: 'Convivencia', icon: Users, color: 'text-purple-500' },
     { key: 'ecosistemas', label: 'Ecosistemas', icon: Leaf, color: 'text-emerald-500' },
+    { key: 'educacion', label: 'Educación', icon: GraduationCap, color: 'text-sky-500' },
+    { key: 'movilidad', label: 'Movilidad', icon: Car, color: 'text-orange-500' },
+    { key: 'energia', label: 'Energía', icon: Zap, color: 'text-yellow-500' },
+    { key: 'tecnologia', label: 'Tecnología', icon: Cpu, color: 'text-cyan-500' },
+    { key: 'empleo', label: 'Empleo', icon: Briefcase, color: 'text-lime-500' },
+    { key: 'gobernanza', label: 'Gobernanza', icon: Landmark, color: 'text-fuchsia-500' },
+    { key: 'economia', label: 'Economía', icon: Coins, color: 'text-violet-500' },
+    { key: 'cultura', label: 'Cultura', icon: Palette, color: 'text-pink-500' },
   ];
 
   return (

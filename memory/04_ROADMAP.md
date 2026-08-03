@@ -1,6 +1,6 @@
 # 04 — Roadmap
 
-> Estado a fecha 2026-08-02. Actualizar esta fecha y las secciones correspondientes cada vez que cambie el estado de una tarea.
+> Estado a fecha 2026-08-03. Actualizar esta fecha y las secciones correspondientes cada vez que cambie el estado de una tarea.
 
 ## Terminado
 
@@ -24,6 +24,8 @@
 - ✅ Sistema de documentación viva `/memory` (este conjunto de archivos).
 - ✅ Páginas de entidad ligadas a territorio para todo el menú de filtros (Objetivo→Indicador→Marcador→Métrica): endpoint único `/api/explorer/:level/:id`, componente único `EntityExplorerPanel`, navegación reflejada en la URL (`?territorio=<slug>&nivel=&id=`), territorio por defecto vía geolocalización IP con reserva en "Mundo" (`/api/geo/locate`), "alrededores" de una métrica por radio de distancia (150 km) desde el centro del territorio.
 - ✅ Menú de filtros colapsable estilo Codex/VS Code (rail de 56px + flyout en hover), 20% más estrecho, con default responsive (colapsado en móvil, abierto en tablet/escritorio) y botón de colapsar/expandir con estilo llamativo.
+- ✅ Corregido el "mapa en blanco" entre el zoom de país y el de regiones (desalineación de umbrales entre `server.ts` y las capas de Mapbox).
+- ✅ Ampliación a 14 Objetivos: 8 nuevos (Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía, Cultura), cada uno con 7 indicadores (Accesibilidad, Coste, Soberanía, Eficiencia, Calidad, Sostenibilidad, Innovación) sin observaciones todavía ("Sin datos" en toda la app). Arquitectura generalizada (`TerritoryObjectives` ya no es un tipo con 6 campos fijos, `getObjectivesForTerritory` itera dinámicamente) para que añadir objetivos futuros no requiera tocar tipos ni duplicar lógica — ver `03_DECISIONS.md`.
 
 ## En desarrollo / pendiente inmediato
 
@@ -35,11 +37,12 @@
 - 🔲 Tabla `objective_observations` con datos reales de objetivo por territorio (hoy son datos mock en memoria, ver `02_DATABASE.md`).
 - 🔲 Ampliar marcadores/métricas a indicadores fuera de "Calidad" del agua (hoy solo existe esa rama del árbol con 3º y 4º nivel poblado).
 - 🔲 Ampliar territorios más allá de España (comunidades autónomas) — el modelo ya soporta cualquier país/región, falta cargar geometría y datos.
-- 🔲 Consolidar los 7 scripts `seed-*.ts` en un único comando `npm run seed` (hoy se ejecutan manualmente uno a uno).
+- 🔲 Consolidar los scripts `seed-*.ts` en un único comando `npm run seed` (hoy se ejecutan manualmente uno a uno).
 - 🔲 Confirmar y documentar el despliegue en producción (Cloud SQL, hosting del frontend/backend) — hoy solo está probado el entorno local.
 - 🔲 Revisar la decisión de eliminar la atribución de Mapbox si el proyecto pasa a producción pública (riesgo contractual activo, ver `03_DECISIONS.md`).
 - 🔲 Flujo de membresía Stripe: probado a nivel de código, no confirmado end-to-end con claves de producción reales.
 - 🔲 Tabla `users` está vacía (0 filas) — no hay autenticación de usuarios reales probada en este entorno.
+- 🔲 Cargar datos reales (indicator_observations) para los 8 objetivos nuevos (Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía, Cultura) — hoy están "Sin datos" en toda la app, solo la estructura (objetivo + 7 indicadores cada uno) existe. Ver `03_DECISIONS.md` (2026-08-03) y `06_INDICATORS.md`.
 
 ## Prioridades sugeridas (a validar con el usuario en cada sesión, no asumir sin confirmar)
 

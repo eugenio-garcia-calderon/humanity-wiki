@@ -5,4 +5,12 @@ export const OBJECTIVE_ID_BY_KEY: Record<string, string> = {
   salud: 'O004',
   convivencia: 'O005',
   ecosistemas: 'O006',
+  educacion: 'O007',
+  movilidad: 'O008',
+  energia: 'O009',
+  tecnologia: 'O010',
+  empleo: 'O011',
+  gobernanza: 'O012',
+  economia: 'O013',
+  cultura: 'O014',
 };

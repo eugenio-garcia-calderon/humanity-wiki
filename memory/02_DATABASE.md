@@ -7,8 +7,10 @@ Motor: **PostgreSQL 17 + PostGIS 3.6**. Migraciones versionadas en `drizzle/000X
 ## Jerarquía científica (columna vertebral del modelo)
 
 ```
-objectives (6, fijos: Agua, Alimentación, Vivienda, Convivencia, Ecosistemas, + 1 más)
-  └─▶ indicators (41 actualmente) ── objective_id
+objectives (14: Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas,
+            Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza,
+            Economía, Cultura)
+  └─▶ indicators (41 de los 6 originales + 56 de los 8 nuevos = 97 actualmente) ── objective_id
         └─▶ markers (7 actualmente, solo bajo el indicador "Calidad" de Agua) ── indicator_id
               └─▶ metrics (8 actualmente, solo bajo el marcador "Pureza") ── marker_id
                     └─▶ measurement_stations (15, estaciones físicas georreferenciadas) ── territory_id
@@ -34,10 +36,10 @@ Territorio de cualquier tipo (`type`): planeta, continente, país, región/comun
 > **Trampa conocida:** la columna `centroid` **existe en el esquema pero está vacía (`NULL`) para las 33 filas actuales** (comprobado el 2026-08-03). El centro real de cada territorio que usa el resto de la app viene de `seedTerritories` en `src/data/seed.ts` (campo `coordinates: [lng, lat]`), no de esta columna. Cualquier función nueva que necesite el centro de un territorio (distancias, "alrededores", etc.) debe leer `seedTerritories`, no `territories.centroid` — ver decisión del 2026-08-03 en `03_DECISIONS.md`.
 
 ### `objectives`
-Los 6 grandes retos (id, title, description). Fijos por diseño — ampliarlos es una decisión de producto, no solo técnica (ver `03_DECISIONS.md` si se añade un 7º objetivo).
+14 grandes retos (id, title, description): los 6 originales (Agua O001…Ecosistemas O006) más 8 añadidos el 2026-08-03 (Educación O007, Movilidad O008, Energía O009, Tecnología O010, Empleo O011, Gobernanza O012, Economía O013, Cultura O014). Ampliarlos sigue siendo una decisión de producto, no solo técnica (ver `03_DECISIONS.md`) — pero ya no es una decisión "grande" a nivel de arquitectura: el `id`↔`key` se registra en `src/utils/objectiveIds.ts` y todo lo demás (tipos, coloración del mapa, cálculo de "overall") se deriva de esa lista, no hay que tocar una estructura fija por cada objetivo nuevo.
 
 ### `indicators`
-41 indicadores agrupados bajo un objetivo (`objective_id`). Campos clave: `unit`, `category`, `direction` (`higher_is_better`/`lower_is_better`), `weight` (peso 0–1 en la puntuación del objetivo), `methodology` (texto explicando el cálculo).
+97 indicadores agrupados bajo un objetivo (`objective_id`): 41 de los 6 objetivos originales (con datos reales para Agua en España) + 56 de los 8 objetivos nuevos (8 objetivos × 7 indicadores idénticos: Accesibilidad, Coste, Soberanía, Eficiencia, Calidad, Sostenibilidad, Innovación — sembrados por `src/db/seed-new-objectives.ts`, **sin observaciones todavía**, por lo que se muestran como "Sin datos" en toda la app hasta que se cargue un dato real). Campos clave: `unit`, `category`, `direction` (`higher_is_better`/`lower_is_better` — para los 7 nuevos, `Coste` es `lower_is_better` y el resto `higher_is_better`), `weight` (peso 0–1 en la puntuación del objetivo — los 7 nuevos usan peso igual `1/7≈0.143` al no haber datos reales de los que derivar una ponderación mejor), `methodology` (texto explicando el cálculo, o una nota de "sin datos reales todavía" para los nuevos).
 
 ### `indicator_observations`
 Valor real de un indicador para un territorio concreto: `value`, `raw_value` (texto descriptivo libre), `score` (0–100), `weighted_score`, `date`, `source`, `source_url`. 58 filas actuales (España + comunidades autónomas, dominio Agua ampliado a Alimentación/Vivienda/Convivencia/Ecosistemas).

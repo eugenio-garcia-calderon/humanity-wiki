@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge } from 'lucide-react';
+import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { getColorForScore } from '../../utils/scoreColor';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../../utils/indicatorIcons';
 import { MARKER_ICONS, DEFAULT_MARKER_ICON } from '../../utils/markerIcons';
@@ -27,6 +27,14 @@ const OBJECTIVE_ICONS: Record<string, any> = {
   O004: Heart,
   O005: Users,
   O006: Leaf,
+  O007: GraduationCap,
+  O008: Car,
+  O009: Zap,
+  O010: Cpu,
+  O011: Briefcase,
+  O012: Landmark,
+  O013: Coins,
+  O014: Palette,
 };
 
 function iconForLevel(level: ExplorerLevel, id: string) {

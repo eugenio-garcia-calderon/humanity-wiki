@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { mapService, MapFeature, TerritoryObjectives } from '../services/MapService';
 import { mapDataProvider } from '../services/MapDataProvider';
 import { createRoot } from 'react-dom/client';
-import { Droplet, Wheat, Home, Heart, Users, Leaf } from 'lucide-react';
+import { Droplet, Wheat, Home, Heart, Users, Leaf, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { getColorForScore } from '../utils/scoreColor';
 import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../utils/indicatorIcons';
@@ -18,7 +18,17 @@ if (MAPBOX_TOKEN) {
 const NO_DATA_COLOR = '#cbd5e1'; // slate-300, used when a territory has no data for the selected indicator
 const PLANET_MAX_ZOOM = 2.0; // below this the globe shows as a satellite-style "small planet"
 
-export type ObjectiveKey = keyof TerritoryObjectives;
+// Plain string, not `keyof TerritoryObjectives` — the objective set is now
+// data-driven (see objectiveIds.ts), not a fixed list of literal keys.
+export type ObjectiveKey = string;
+
+// Neutral fallback used only when a feature's real objective scores haven't
+// loaded yet — built from the same key list as everywhere else so it always
+// covers every objective, current and future.
+const DEFAULT_OBJECTIVE_SCORES: TerritoryObjectives = {
+  ...Object.fromEntries(Object.keys(OBJECTIVE_ID_BY_KEY).map(key => [key, 50])),
+  overall: 50,
+};
 
 interface HumanityMapProps {
   onFeatureClick?: (id: string, type: string) => void;
@@ -75,30 +85,39 @@ function TooltipContent({ feature, objectiveIndicators }: { feature: MapFeature;
     { key: 'salud', label: 'Salud', icon: Heart, score: objectives.salud },
     { key: 'convivencia', label: 'Conv.', icon: Users, score: objectives.convivencia },
     { key: 'ecosistemas', label: 'Ecos.', icon: Leaf, score: objectives.ecosistemas },
+    { key: 'educacion', label: 'Educ.', icon: GraduationCap, score: objectives.educacion },
+    { key: 'movilidad', label: 'Movil.', icon: Car, score: objectives.movilidad },
+    { key: 'energia', label: 'Energ.', icon: Zap, score: objectives.energia },
+    { key: 'tecnologia', label: 'Tecn.', icon: Cpu, score: objectives.tecnologia },
+    { key: 'empleo', label: 'Empleo', icon: Briefcase, score: objectives.empleo },
+    { key: 'gobernanza', label: 'Gobern.', icon: Landmark, score: objectives.gobernanza },
+    { key: 'economia', label: 'Econ.', icon: Coins, score: objectives.economia },
+    { key: 'cultura', label: 'Cult.', icon: Palette, score: objectives.cultura },
   ];
 
   return (
-    <div className="p-3 bg-white rounded-xl shadow-xl border border-slate-100 font-sans z-50 relative w-max">
+    <div className="p-3 bg-white rounded-xl shadow-xl border border-slate-100 font-sans z-50 relative w-max max-w-[300px]">
       <div className="font-bold text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2 flex justify-between items-center gap-6">
         <span>{feature.name}</span>
         <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
           Media
-          <span className="text-sm font-black" style={{ color: getColorForScore(objectives.overall) }}>
-            {objectives.overall}%
+          <span className="text-sm font-black" style={{ color: objectives.overall != null ? getColorForScore(objectives.overall) : '#94a3b8' }}>
+            {objectives.overall != null ? `${objectives.overall}%` : 'N/D'}
           </span>
         </div>
       </div>
-      <div className="flex flex-row gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {items.map(item => {
           const Icon = item.icon;
-          const color = getColorForScore(item.score);
+          const hasData = item.score != null;
+          const color = hasData ? getColorForScore(item.score as number) : '#cbd5e1';
           return (
             <div key={item.key} className="flex flex-col items-center">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[10px] leading-none shadow-sm"
                 style={{ backgroundColor: color }}
               >
-                {item.score}%
+                {hasData ? `${item.score}%` : 'N/D'}
               </div>
               <div className="text-[9px] uppercase tracking-wider text-slate-500 mt-1 flex items-center gap-0.5">
                 <Icon className="w-3 h-3" />
@@ -314,7 +333,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
                   type: props.type || 'region',
                   description: props.description || '',
                   coordinates: [e.lngLat.lng, e.lngLat.lat],
-                  objectives: objs || { agua: 50, alimentacion: 50, vivienda: 50, salud: 50, convivencia: 50, ecosistemas: 50, overall: 50 },
+                  objectives: objs || DEFAULT_OBJECTIVE_SCORES,
                   indicatorScores: indScores || {},
                   markerScores: markScores || {},
                   challenges: []
@@ -448,7 +467,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           type: f.properties.type,
           description: f.properties.description,
           coordinates: f.geometry.coordinates as [number, number],
-          objectives: f.properties.objectives || { agua: 50, alimentacion: 50, vivienda: 50, salud: 50, convivencia: 50, ecosistemas: 50, overall: 50 },
+          objectives: f.properties.objectives || DEFAULT_OBJECTIVE_SCORES,
           indicatorScores: f.properties.indicatorScores || {},
           markerScores: f.properties.markerScores || {},
           challenges: f.properties.challenges || []
@@ -558,8 +577,10 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             score = feature.indicatorScores?.[activeIndicatorId];
             hasData = score !== undefined;
           } else {
-            score = feature.objectives[activeObjective];
-            hasData = true;
+            score = feature.objectives[activeObjective] ?? undefined;
+            // Legacy objectives (Agua...Ecosistemas) always have a mock value;
+            // newer objectives without any data yet correctly show "Sin datos".
+            hasData = score != null;
           }
           const isDrilledDown = !!activeMarkerId || !!activeIndicatorId;
           const color = !hasData ? NO_DATA_COLOR : getColorForScore(score ?? 50);
@@ -570,7 +591,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
             finalColor = '#f8fafc';
             dotBorder = 'border-slate-300';
           }
-          if (isDrilledDown && !hasData) {
+          if (!hasData) {
             dotBorder = 'border-slate-300';
           }
           
@@ -605,8 +626,8 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           if (!isPolygon) {
             scoreLabel.className += ' absolute top-14';
           }
-          scoreLabel.style.color = isDrilledDown && !hasData ? '#94a3b8' : finalColor;
-          scoreLabel.textContent = isDrilledDown && !hasData ? 'Sin datos' : `${score}%`;
+          scoreLabel.style.color = !hasData ? '#94a3b8' : finalColor;
+          scoreLabel.textContent = !hasData ? 'Sin datos' : `${score}%`;
           el.appendChild(scoreLabel);
 
           if (!isPolygon) {

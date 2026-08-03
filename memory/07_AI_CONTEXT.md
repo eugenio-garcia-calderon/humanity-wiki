@@ -4,7 +4,7 @@
 
 ## Qué es esto
 
-**Red Humana**: plataforma que mapea los grandes retos sistémicos de la humanidad (agua, alimentación, vivienda, convivencia, ecosistemas...) por territorio, con un modelo de datos jerárquico de 4 niveles: **Objetivo → Indicador → Marcador → Métrica**, cada uno con puntuación real por territorio (o "Sin datos" explícito — nunca inventado). Detalle completo en `00_PROJECT_VISION.md`.
+**Red Humana**: plataforma que mapea los grandes retos sistémicos de la humanidad (14 Objetivos: Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas, Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía, Cultura) por territorio, con un modelo de datos jerárquico de 4 niveles: **Objetivo → Indicador → Marcador → Métrica**, cada uno con puntuación real por territorio (o "Sin datos" explícito — nunca inventado). Detalle completo en `00_PROJECT_VISION.md`.
 
 ## Stack técnico en una frase por capa
 
@@ -23,12 +23,13 @@ Detalle completo: `01_ARCHITECTURE.md`. Esquema completo de tablas: `02_DATABASE
 3. **Identificar indicadores/marcadores/métricas por `id`, nunca por `name`** — los nombres se repiten entre objetivos.
 4. **Nunca fabricar puntuaciones** — territorio sin dato real = "Sin datos" (gris `#cbd5e1`), nunca un valor heredado o inventado.
 5. La atribución de Mapbox fue eliminada del mapa **a sabiendas de que incumple sus Términos de Servicio** — decisión consciente del usuario, no un descuido; riesgo activo si el proyecto se hace público.
+6. **El conjunto de Objetivos es dinámico, no una lista fija de 6.** `TerritoryObjectives` es `Record<string, number|null>` y `ObjectiveKey` es `string` — para añadir un objetivo nuevo, solo hay que tocar `src/utils/objectiveIds.ts` (+ datos en `objectives`/`indicators` + opcionalmente icono/color en 5-6 sitios de UI con fallback genérico). Nunca volver a hardcodear un tipo/objeto con los nombres de objetivo como campos fijos.
 
 ## Estado actual (resumen — detalle en `04_ROADMAP.md`)
 
-Terminado: modelo de 4 niveles con datos reales de agua/pureza para España + comunidades autónomas, filtro en cascada de mapa de 4 niveles, layout de mapa en 3 columnas (filtros/panel de territorio permanente/mapa), sistema `/memory`, páginas de entidad ligadas a territorio para todo el menú de filtros (endpoint único `/api/explorer/:level/:id` + componente único `EntityExplorerPanel`, navegación reflejada en la URL, territorio por defecto vía geolocalización IP).
+Terminado: modelo de 4 niveles con datos reales de agua/pureza para España + comunidades autónomas, filtro en cascada de mapa de 4 niveles, layout de mapa en 3 columnas (filtros/panel de territorio permanente/mapa), sistema `/memory`, páginas de entidad ligadas a territorio para todo el menú de filtros (endpoint único `/api/explorer/:level/:id` + componente único `EntityExplorerPanel`, navegación reflejada en la URL, territorio por defecto vía geolocalización IP), menú de filtros colapsable estilo Codex, fix del mapa en blanco entre zoom de país/región, ampliación a 14 Objetivos (8 nuevos sin datos todavía, ver `03_DECISIONS.md`).
 
-Pendiente inmediato conocido: hacer las 3 columnas del mapa redimensionables por el usuario (ítem 4 de `MEJORAS_PENDIENTES.md`, añadido por el usuario directamente en GitHub).
+Pendiente inmediato conocido: (1) ítem 4 de `MEJORAS_PENDIENTES.md` (columnas redimensionables en el mapa); (2) cargar datos reales para los 8 objetivos nuevos.
 
 **Trampa a recordar**: `territories.centroid` (PostGIS) está vacía en toda la tabla — el centro real de cada territorio viene de `seedTerritories` en `src/data/seed.ts`. Ver `02_DATABASE.md`.
 

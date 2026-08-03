@@ -18,7 +18,7 @@ export default function AboutScoring() {
       
       <div className="prose prose-slate prose-emerald max-w-none">
         <p className="text-slate-700 leading-relaxed mb-6">
-          El mapa de Red Humana utiliza un sistema de puntuación de 0 a 100 para evaluar el estado de los territorios en cada uno de los grandes Objetivos Universales (Agua, Alimentación, Vivienda, Salud, Convivencia y Ecosistemas). Este índice permite identificar visualmente las áreas que requieren mayor atención y recursos.
+          El mapa de Red Humana utiliza un sistema de puntuación de 0 a 100 para evaluar el estado de los territorios en cada uno de los grandes Objetivos Universales (Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas, Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía y Cultura). Este índice permite identificar visualmente las áreas que requieren mayor atención y recursos.
         </p>
         
         <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl mb-8">

@@ -1,12 +1,9 @@
-export interface TerritoryObjectives {
-  agua: number;
-  alimentacion: number;
-  vivienda: number;
-  salud: number;
-  convivencia: number;
-  ecosistemas: number;
-  overall: number;
-}
+import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
+
+// One entry per objective key (see objectiveIds.ts) plus 'overall'. A generic
+// dictionary rather than fixed fields so adding a new objective never requires
+// touching this type — score is null when a territory has no data yet.
+export type TerritoryObjectives = Record<string, number | null>;
 
 export interface MapFeature {
   id: string;
@@ -58,7 +55,10 @@ export class MapService {
           type: json.type,
           description: data.description,
           coordinates: json.coordinates,
-          objectives: { agua: 0, alimentacion: 0, vivienda: 0, salud: 0, convivencia: 0, ecosistemas: 0, overall: 0 },
+          objectives: {
+            ...Object.fromEntries(Object.keys(OBJECTIVE_ID_BY_KEY).map(key => [key, 0])),
+            overall: 0
+          },
           challenges: []
         };
       }

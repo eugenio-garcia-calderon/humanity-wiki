@@ -794,17 +794,31 @@ async function startServer() {
     return geoFilesCache[filename];
   };
 
-  // Helper to retrieve objective scores for any territory ID
-  const getObjectivesForTerritory = (tid: string) => {
-    const aguaVal = seedObjectives.find(o => o.title === "AGUA")?.progress_by_territory[tid] ?? 50;
-    const alimVal = seedObjectives.find(o => o.title === "ALIMENTACIÓN")?.progress_by_territory[tid] ?? 50;
-    const vivVal = seedObjectives.find(o => o.title === "VIVIENDA")?.progress_by_territory[tid] ?? 50;
-    const saludVal = seedObjectives.find(o => o.title === "SALUD")?.progress_by_territory[tid] ?? 50;
-    const convVal = seedObjectives.find(o => o.title === "CONVIVENCIA")?.progress_by_territory[tid] ?? 50;
-    const ecoVal = seedObjectives.find(o => o.title === "ECOSISTEMAS")?.progress_by_territory[tid] ?? 50;
-    const overall = Math.round((aguaVal + alimVal + vivVal + saludVal + convVal + ecoVal) / 6);
+  // Keys that have historical mock progress data in src/data/seed.ts and keep
+  // defaulting to a neutral 50 when a territory isn't listed there (legacy
+  // behavior, preserved as-is). Newer objectives have no mock data at all, so
+  // they correctly report "Sin datos" (null) until real data is added — see
+  // the 2026-08-03 decision in memory/03_DECISIONS.md about never fabricating
+  // scores for objectives that don't have any.
+  const LEGACY_MOCK_OBJECTIVE_KEYS = new Set(['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas']);
 
-    return { agua: aguaVal, alimentacion: alimVal, vivienda: vivVal, salud: saludVal, convivencia: convVal, ecosistemas: ecoVal, overall };
+  // Helper to retrieve objective scores for any territory ID. Loops over every
+  // objective in OBJECTIVE_ID_BY_KEY instead of hardcoding one lookup per
+  // objective, so adding a new objective there is enough on its own — no
+  // changes needed here.
+  const getObjectivesForTerritory = (tid: string): Record<string, number | null> => {
+    const result: Record<string, number | null> = {};
+    let sum = 0;
+    let count = 0;
+    for (const [key, id] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
+      const seedEntry = seedObjectives.find(o => o.id === id);
+      const raw = seedEntry?.progress_by_territory?.[tid];
+      const value = raw != null ? raw : (LEGACY_MOCK_OBJECTIVE_KEYS.has(key) ? 50 : null);
+      result[key] = value;
+      if (value != null) { sum += value; count++; }
+    }
+    result.overall = count > 0 ? Math.round(sum / count) : null;
+    return result;
   };
 
   // Helper to retrieve real indicator scores (from indicator_observations) grouped by territory
@@ -972,22 +986,10 @@ async function startServer() {
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
 
       const features = filtered.map(t => {
-        const aguaVal = seedObjectives.find(o => o.title === "AGUA")?.progress_by_territory[t.id] ?? 50;
-        const alimVal = seedObjectives.find(o => o.title === "ALIMENTACIÓN")?.progress_by_territory[t.id] ?? 50;
-        const vivVal = seedObjectives.find(o => o.title === "VIVIENDA")?.progress_by_territory[t.id] ?? 50;
-        const saludVal = seedObjectives.find(o => o.title === "SALUD")?.progress_by_territory[t.id] ?? 50;
-        const convVal = seedObjectives.find(o => o.title === "CONVIVENCIA")?.progress_by_territory[t.id] ?? 50;
-        const ecoVal = seedObjectives.find(o => o.title === "ECOSISTEMAS")?.progress_by_territory[t.id] ?? 50;
-
-        const obj = {
-          agua: aguaVal,
-          alimentacion: alimVal,
-          vivienda: vivVal,
-          salud: saludVal,
-          convivencia: convVal,
-          ecosistemas: ecoVal,
-        };
-        const overall = Math.round((aguaVal + alimVal + vivVal + saludVal + convVal + ecoVal) / 6);
+        // Was a second, hand-duplicated copy of getObjectivesForTerritory's
+        // averaging logic — now calls the same helper the polygons endpoint
+        // uses, so both endpoints automatically agree for every objective.
+        const objectivesForTerritory = getObjectivesForTerritory(t.id);
 
         return {
           type: "Feature",
@@ -1002,7 +1004,7 @@ async function startServer() {
             type: t.type,
             parent_id: t.parent_id,
             description: t.description,
-            objectives: { ...obj, overall },
+            objectives: objectivesForTerritory,
             indicatorScores: indicatorScoresByTerritory[t.id] || {},
             markerScores: markerScoresByTerritory[t.id] || {},
             challenges: t.active_challenges || []
