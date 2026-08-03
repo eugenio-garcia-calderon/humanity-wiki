@@ -61,29 +61,56 @@ export function registerAIRoutes(app: Express, db: any) {
    * Todo lo que devuelve lleva su procedencia, para poder distinguir después
    * lo que viene de la plataforma de lo que venga de internet.
    */
+  // Palabras funcionales frecuentes en preguntas, sin valor de búsqueda —
+  // evita que "explícame"/"cuáles"/"está" compitan con los términos de
+  // dominio reales ("nitratos", "reto", "Arroyo"...) a la hora de matchear.
+  const STOPWORDS = new Set([
+    'explicame', 'explícame', 'cuales', 'cuáles', 'donde', 'dónde', 'como', 'cómo',
+    'esta', 'está', 'estan', 'están', 'para', 'sobre', 'este', 'esta', 'esos', 'esas',
+    'dime', 'quiero', 'puedes', 'podrias', 'podrías', 'frases', 'palabras', 'aplicando',
+    'siendo', 'entre', 'desde', 'hacia', 'todos', 'todas', 'algun', 'algún', 'alguna',
+  ]);
+
+  const extractKeywords = (question: string) =>
+    question.toLowerCase()
+      .replace(/[^\wáéíóúñü\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 3 && !STOPWORDS.has(w));
+
   const retrieveContext = async (question: string, limit = 12) => {
     const found: any[] = [];
+    const words = extractKeywords(question);
 
-    // Coincidencias directas por nombre en las entidades principales.
-    const pattern = `%${question.slice(0, 120)}%`;
-    const direct = await db.execute(sql`
-      SELECT 'challenges' AS entity_type, id, title AS label, description AS content FROM challenges
-        WHERE archived_at IS NULL AND (title ILIKE ${pattern} OR description ILIKE ${pattern})
-      UNION ALL
-      SELECT 'solutions', id, title, description FROM solutions
-        WHERE archived_at IS NULL AND (title ILIKE ${pattern} OR description ILIKE ${pattern})
-      UNION ALL
-      SELECT 'products', id, name, description FROM products
-        WHERE archived_at IS NULL AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
-      UNION ALL
-      SELECT 'initiatives', id, name, description FROM initiatives
-        WHERE archived_at IS NULL AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
-      LIMIT ${limit}
-    `);
-    for (const r of direct.rows as any[]) found.push({ ...r, source: 'plataforma' });
+    // Coincidencias directas por palabra clave (no por la frase completa:
+    // "explícame el reto de nitratos" nunca sería substring de un título
+    // corto como "Contaminación por nitratos del agua").
+    //
+    // `ANY(${array})` no funciona con el driver: interpola cada elemento como
+    // un parámetro posicional suelto ($1,$2,$3...) en vez de como un array de
+    // Postgres, y `ANY(($1,$2,$3))` es sintaxis de fila, no de array. Se
+    // construye el array explícitamente con ARRAY[...] a partir de
+    // parámetros individuales (sql.join), que sí es válido y mantiene cada
+    // valor ligado de forma segura.
+    if (words.length) {
+      const patternArray = sql`ARRAY[${sql.join(words.map(w => sql`${'%' + w + '%'}`), sql.raw(', '))}]`;
+      const direct = await db.execute(sql`
+        SELECT 'challenges' AS entity_type, id, title AS label, description AS content FROM challenges
+          WHERE archived_at IS NULL AND (title ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
+        UNION ALL
+        SELECT 'solutions', id, title, description FROM solutions
+          WHERE archived_at IS NULL AND (title ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
+        UNION ALL
+        SELECT 'products', id, name, description FROM products
+          WHERE archived_at IS NULL AND (name ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
+        UNION ALL
+        SELECT 'initiatives', id, name, description FROM initiatives
+          WHERE archived_at IS NULL AND (name ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
+        LIMIT ${limit}
+      `);
+      for (const r of direct.rows as any[]) found.push({ ...r, source: 'plataforma' });
+    }
 
     // Búsqueda por palabras sueltas sobre el índice de texto completo.
-    const words = question.toLowerCase().replace(/[^\wáéíóúñü\s]/g, ' ').split(/\s+/).filter(w => w.length > 3);
     if (words.length) {
       const tsQuery = words.slice(0, 6).join(' | ');
       const chunks = await db.execute(sql`

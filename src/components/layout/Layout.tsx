@@ -5,9 +5,6 @@ import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
-// El antiguo ChatAssistant se conserva en el repositorio pero deja de
-// montarse: el asistente IA de la Fase 9 ocupa su mismo lugar y tener dos
-// burbujas flotantes a la vez sería confuso. Ver 03_DECISIONS.md.
 import AIAssistant from '../ai/AIAssistant';
 
 export default function Layout() {
