@@ -334,7 +334,7 @@ export default function MapPage() {
           }
         >
           <div className={`sticky top-0 z-10 bg-white border-b border-slate-100 flex items-center ${menuShowFull ? 'justify-between px-4 py-3' : 'justify-center py-3'}`}>
-            {menuShowFull && <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Filtros</h2>}
+            {menuShowFull && <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Filtros</h2>}
             <button
               onClick={() => setMenuCollapsed(c => !c)}
               title={menuCollapsed ? 'Explorar el conocimiento de la Humanidad' : 'Colapsar menú de filtros'}
@@ -381,7 +381,7 @@ export default function MapPage() {
                 }`}
               >
                 <Icon className={`w-4 h-4 shrink-0 ${isObjActive ? 'text-emerald-400' : obj.color}`} />
-                <span className={`flex-1 font-semibold ${isObjActive ? 'text-sm' : 'text-xs'}`}>{obj.label}</span>
+                <span className={`flex-1 font-semibold ${isObjActive ? 'text-base' : 'text-sm'}`}>{obj.label}</span>
                 {objIndicators.length > 0 && (
                   <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${isObjActive ? 'rotate-180 text-white' : 'text-slate-400'}`} />
                 )}
@@ -398,7 +398,7 @@ export default function MapPage() {
                       <div key={indicator.id}>
                         <button
                           onClick={() => handleIndicatorChange(indicator.id)}
-                          className={`w-full flex items-center gap-2 pl-6 pr-4 py-2 text-left text-xs font-semibold transition-colors ${
+                          className={`w-full flex items-center gap-2 pl-6 pr-4 py-2 text-left text-sm font-semibold transition-colors ${
                             isIndActive ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'
                           }`}
                         >
@@ -420,7 +420,7 @@ export default function MapPage() {
                                 <div key={marker.id}>
                                   <button
                                     onClick={() => handleMarkerChange(marker.id)}
-                                    className={`w-full flex items-center gap-2 pl-9 pr-4 py-1.5 text-left text-[11px] font-semibold transition-colors ${
+                                    className={`w-full flex items-center gap-2 pl-9 pr-4 py-1.5 text-left text-xs font-semibold transition-colors ${
                                       isMarkActive ? 'bg-slate-700 text-white' : 'text-slate-500 hover:bg-slate-200/60'
                                     }`}
                                   >
@@ -440,7 +440,7 @@ export default function MapPage() {
                                           <button
                                             key={metric.id}
                                             onClick={() => handleMetricChange(metric.id)}
-                                            className={`w-full flex items-center gap-2 pl-12 pr-4 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                                            className={`w-full flex items-center gap-2 pl-12 pr-4 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wide transition-colors ${
                                               isMetActive ? 'bg-red-600 text-white' : 'text-slate-400 hover:bg-slate-200'
                                             }`}
                                           >

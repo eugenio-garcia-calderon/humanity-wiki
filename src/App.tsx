@@ -27,9 +27,11 @@ import { AuthProvider } from './contexts/AuthContext';
 import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 export default function App() {
   return (
+    <SettingsProvider>
     <AuthProvider>
       <DataProvider>
         <EditProvider>
@@ -68,5 +70,6 @@ export default function App() {
         </EditProvider>
       </DataProvider>
     </AuthProvider>
+    </SettingsProvider>
   );
 }

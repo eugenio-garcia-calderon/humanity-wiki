@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, User, LogOut, Heart } from 'lucide-react';
+import { Menu, User, LogOut, Heart, Settings, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
+import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
 import { ChatAssistant } from '../ui/ChatAssistant';
 
 export default function Layout() {
@@ -11,14 +12,20 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { updateCounter } = useEdit();
-  
+  const { fontScale, setFontScale } = useSettings();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
+      }
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setSettingsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -46,6 +53,37 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
+      {/* App settings (font size), fixed top-right, offset from the map's own zoom controls */}
+      <div className="fixed top-4 right-16 z-50" ref={settingsRef}>
+        <button
+          onClick={() => setSettingsOpen(o => !o)}
+          className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+          title="Configuración"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+        {settingsOpen && (
+          <div className="absolute top-11 right-0 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50">
+            <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+              Tamaño de letra
+            </div>
+            {(Object.keys(FONT_SCALE_LABELS) as FontScaleKey[]).map(key => (
+              <button
+                key={key}
+                onClick={() => setFontScale(key)}
+                className={cn(
+                  "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors font-medium",
+                  fontScale === key ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-700 hover:bg-slate-50"
+                )}
+              >
+                {FONT_SCALE_LABELS[key]}
+                {fontScale === key && <Check className="w-3.5 h-3.5" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Main Content View */}
       <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative ${isMapPage ? '' : 'p-4 sm:p-8'}`}>
         <div className={isMapPage ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
