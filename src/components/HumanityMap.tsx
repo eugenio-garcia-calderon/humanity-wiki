@@ -295,6 +295,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           type: 'fill',
           source: 'regions',
           minzoom: 4.5,
+          maxzoom: 7.0,
           paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.75 }
         });
         map.current!.addLayer({
@@ -302,7 +303,29 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           type: 'line',
           source: 'regions',
           minzoom: 4.5,
+          maxzoom: 7.0,
           paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }
+        });
+
+        // Municipios (currently: the 179 municipalities of the Comunidad de
+        // Madrid — see public/geo/madrid_municipios.json). This breakpoint
+        // (7.0) must match server.ts's /api/geo/territories/polygons AND the
+        // region/municipality cut already used by /centroids, or the map goes
+        // blank for a moment at the boundary zoom — same trap as above.
+        map.current!.addSource('municipalities', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.current!.addLayer({
+          id: 'municipalities-fill',
+          type: 'fill',
+          source: 'municipalities',
+          minzoom: 7.0,
+          paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.75 }
+        });
+        map.current!.addLayer({
+          id: 'municipalities-line',
+          type: 'line',
+          source: 'municipalities',
+          minzoom: 7.0,
+          paint: { 'line-color': '#ffffff', 'line-width': 1.5, 'line-opacity': 0.8 }
         });
 
         const handleMouseMove = (e: mapboxgl.MapMouseEvent & any) => {
@@ -384,6 +407,10 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
         map.current!.on('mousemove', 'regions-fill', handleMouseMove);
         map.current!.on('mouseleave', 'regions-fill', handleMouseLeave);
         map.current!.on('click', 'regions-fill', (e) => handleClick(e, 'region'));
+
+        map.current!.on('mousemove', 'municipalities-fill', handleMouseMove);
+        map.current!.on('mouseleave', 'municipalities-fill', handleMouseLeave);
+        map.current!.on('click', 'municipalities-fill', (e) => handleClick(e, 'municipality'));
       });
 
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -401,7 +428,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
       });
 
       map.current.on('click', (e) => { 
-        const features = map.current!.queryRenderedFeatures(e.point, { layers: ['planets-fill', 'continents-fill', 'countries-fill', 'regions-fill'] });
+        const features = map.current!.queryRenderedFeatures(e.point, { layers: ['planets-fill', 'continents-fill', 'countries-fill', 'regions-fill', 'municipalities-fill'] });
         if (features.length === 0 && onMapClick) {
           onMapClick();
         }
@@ -487,7 +514,8 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           planets: [],
           continents: [],
           countries: [],
-          regions: []
+          regions: [],
+          municipalities: []
         };
 
         (polygonsGeo.features || []).forEach((feature: any) => {
@@ -524,6 +552,7 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           if (type === 'planet') sourceDataMap.planets.push(styledFeature);
           else if (type === 'continent') sourceDataMap.continents.push(styledFeature);
           else if (type === 'country') sourceDataMap.countries.push(styledFeature);
+          else if (type === 'municipality') sourceDataMap.municipalities.push(styledFeature);
           else sourceDataMap.regions.push(styledFeature);
 
           activePolygonIds.add(tid);
@@ -552,6 +581,12 @@ export default function HumanityMap({ onFeatureClick, onMapDoubleClick, onMapCli
           (map.current.getSource('regions') as mapboxgl.GeoJSONSource).setData({
             type: 'FeatureCollection',
             features: sourceDataMap.regions
+          });
+        }
+        if (map.current.getSource('municipalities')) {
+          (map.current.getSource('municipalities') as mapboxgl.GeoJSONSource).setData({
+            type: 'FeatureCollection',
+            features: sourceDataMap.municipalities
           });
         }
 

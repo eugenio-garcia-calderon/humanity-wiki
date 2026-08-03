@@ -386,10 +386,28 @@ async function startServer() {
   app.get("/api/data/objectives", async (req, res) => {
     try {
       const result = await db.execute(sql`SELECT * FROM objectives`);
-      // Attach mock progress for now to not break the UI
+      const territoryIdsResult = await db.execute(sql`SELECT id FROM territories`);
+      const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorsMeta = await getIndicatorsMeta();
+
+      // Build progress_by_territory per objective from the same
+      // getObjectivesForTerritory helper the map/explorer already use (legacy
+      // mock first, falling back to a real weighted indicator average) —
+      // replaces a hardcoded 2-territory stub that left every other
+      // territory (including e.g. España, and the Madrid municipios) showing
+      // 0% in the objectives grid regardless of their real data.
+      const progressByObjective: Record<string, Record<string, number | null>> = {};
+      for (const { id } of result.rows as any[]) progressByObjective[id] = {};
+      for (const { id: tid } of territoryIdsResult.rows as any[]) {
+        const scores = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
+        for (const [key, objId] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
+          if (progressByObjective[objId]) progressByObjective[objId][tid] = (scores as any)[key];
+        }
+      }
+
       const mapped = result.rows.map((r: any) => ({
         ...r,
-        progress_by_territory: { "T001": 75, "T004": 90 }
+        progress_by_territory: progressByObjective[r.id] || {}
       }));
       res.json(mapped);
     } catch (e: any) {
@@ -880,18 +898,65 @@ async function startServer() {
   // scores for objectives that don't have any.
   const LEGACY_MOCK_OBJECTIVE_KEYS = new Set(['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas']);
 
+  // Static metadata (id/objective_id/weight) for every indicator, cached for
+  // the life of the process — used to weight-average indicator scores up
+  // into an objective score for territories with no legacy mock entry (see
+  // getObjectivesForTerritory below).
+  let indicatorsMetaCache: { id: string; objectiveId: string; weight: number | null }[] | null = null;
+  const getIndicatorsMeta = async () => {
+    if (!indicatorsMetaCache) {
+      const result = await db.execute(sql`SELECT id, objective_id, weight FROM indicators`);
+      indicatorsMetaCache = (result.rows as any[]).map(r => ({
+        id: r.id, objectiveId: r.objective_id, weight: r.weight != null ? Number(r.weight) : null
+      }));
+    }
+    return indicatorsMetaCache;
+  };
+
   // Helper to retrieve objective scores for any territory ID. Loops over every
   // objective in OBJECTIVE_ID_BY_KEY instead of hardcoding one lookup per
   // objective, so adding a new objective there is enough on its own — no
   // changes needed here.
-  const getObjectivesForTerritory = (tid: string): Record<string, number | null> => {
+  //
+  // Score priority per objective: (1) the legacy mock progress_by_territory
+  // entry in src/data/seed.ts, if present — preserved as-is for territories
+  // that already rely on it; (2) otherwise a weighted average of that
+  // objective's own indicators' real indicator_observations for this
+  // territory (using each indicator's `weight`, defaulting to an equal split
+  // if unset) — this is what makes territories seeded ONLY with real
+  // indicator data (e.g. the Madrid municipios) show a correct roll-up
+  // instead of "Sin datos"; (3) a neutral 50 for the 6 original objectives
+  // with neither (legacy behavior), or null ("Sin datos") for newer ones.
+  const getObjectivesForTerritory = (
+    tid: string,
+    indicatorScoresForTid: Record<string, number> = {},
+    indicatorsMeta: { id: string; objectiveId: string; weight: number | null }[] = []
+  ): Record<string, number | null> => {
     const result: Record<string, number | null> = {};
     let sum = 0;
     let count = 0;
     for (const [key, id] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
       const seedEntry = seedObjectives.find(o => o.id === id);
       const raw = seedEntry?.progress_by_territory?.[tid];
-      const value = raw != null ? raw : (LEGACY_MOCK_OBJECTIVE_KEYS.has(key) ? 50 : null);
+      let value: number | null;
+      if (raw != null) {
+        value = raw;
+      } else {
+        const objIndicators = indicatorsMeta.filter(i => i.objectiveId === id);
+        let weightedSum = 0;
+        let weightTotal = 0;
+        for (const ind of objIndicators) {
+          const score = indicatorScoresForTid[ind.id];
+          if (score != null) {
+            const w = ind.weight != null ? ind.weight : (1 / objIndicators.length);
+            weightedSum += score * w;
+            weightTotal += w;
+          }
+        }
+        value = weightTotal > 0
+          ? Math.round(weightedSum / weightTotal)
+          : (LEGACY_MOCK_OBJECTIVE_KEYS.has(key) ? 50 : null);
+      }
       result[key] = value;
       if (value != null) { sum += value; count++; }
     }
@@ -946,7 +1011,8 @@ async function startServer() {
         if (zoom < 2.0) targetType = 'planet';
         else if (zoom < 3.5) targetType = 'continent';
         else if (zoom < 4.5) targetType = 'country';
-        else targetType = 'region';
+        else if (zoom < 7.0) targetType = 'region';
+        else targetType = 'municipality';
       }
 
       let rawFeatures: any[] = [];
@@ -984,7 +1050,7 @@ async function startServer() {
             type: 'country'
           }
         }));
-      } else {
+      } else if (targetType === 'region') {
         const data = getGeoJsonFile('regions.json');
         rawFeatures = (data.features || []).map((f: any) => ({
           ...f,
@@ -993,6 +1059,17 @@ async function startServer() {
             id: f.properties.territoryId || f.properties.id,
             territoryId: f.properties.territoryId || f.properties.id,
             type: 'region'
+          }
+        }));
+      } else {
+        const data = getGeoJsonFile('madrid_municipios.json');
+        rawFeatures = (data.features || []).map((f: any) => ({
+          ...f,
+          properties: {
+            ...f.properties,
+            id: f.properties.territoryId || f.properties.id,
+            territoryId: f.properties.territoryId || f.properties.id,
+            type: 'municipality'
           }
         }));
       }
@@ -1004,9 +1081,10 @@ async function startServer() {
       // Populate objective scores directly onto polygon properties
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
+      const indicatorsMeta = await getIndicatorsMeta();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
-        const objs = getObjectivesForTerritory(tid);
+        const objs = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
         return {
           ...f,
           properties: {
@@ -1062,12 +1140,13 @@ async function startServer() {
 
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
+      const indicatorsMeta = await getIndicatorsMeta();
 
       const features = filtered.map(t => {
         // Was a second, hand-duplicated copy of getObjectivesForTerritory's
         // averaging logic — now calls the same helper the polygons endpoint
         // uses, so both endpoints automatically agree for every objective.
-        const objectivesForTerritory = getObjectivesForTerritory(t.id);
+        const objectivesForTerritory = getObjectivesForTerritory(t.id, indicatorScoresByTerritory[t.id] || {}, indicatorsMeta);
 
         return {
           type: "Feature",
@@ -1248,7 +1327,12 @@ async function startServer() {
         if (!objective) return res.status(404).json({ error: "Objetivo no encontrado" });
 
         const objKey = OBJECTIVE_KEY_BY_ID[id];
-        const scores = getObjectivesForTerritory(territoryId);
+        const territoryIndicatorScoresResult = await db.execute(sql`
+          SELECT indicator_id, score FROM indicator_observations WHERE territory_id = ${territoryId} AND score IS NOT NULL
+        `);
+        const territoryIndicatorScores: Record<string, number> = {};
+        for (const r of territoryIndicatorScoresResult.rows as any[]) territoryIndicatorScores[r.indicator_id] = r.score;
+        const scores = getObjectivesForTerritory(territoryId, territoryIndicatorScores, await getIndicatorsMeta());
         const score = objKey ? (scores as any)[objKey] : null;
 
         const indicatorsResult = await db.execute(sql`
