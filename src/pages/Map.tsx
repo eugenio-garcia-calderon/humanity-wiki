@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
 import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Sparkles, PanelLeftClose, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Menu, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
 import { mapService } from '../services/MapService';
 import { useHelpers } from '../contexts/DataContext';
 import { slugify } from '../utils/slugify';
@@ -200,7 +200,8 @@ export default function MapPage() {
   };
 
   const handleObjectiveChange = (key: ObjectiveKey) => {
-    if (key === 'overall') {
+    if (key === 'overall' || key === activeObjective) {
+      // Clicking the already-active objective collapses its indicator accordion.
       clearExplorer();
     } else {
       navigateExplorer('objetivo', OBJECTIVE_ID_BY_KEY[key]);
@@ -337,13 +338,10 @@ export default function MapPage() {
             <button
               onClick={() => setMenuCollapsed(c => !c)}
               title={menuCollapsed ? 'Explorar el conocimiento de la Humanidad' : 'Colapsar menú de filtros'}
-              className="relative w-9 h-9 shrink-0 rounded-full flex items-center justify-center group"
+              className="relative w-9 h-9 shrink-0 rounded-full flex items-center justify-center"
             >
-              {menuCollapsed && (
-                <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-70 animate-ping" />
-              )}
-              <span className="relative w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-600 shadow-lg shadow-emerald-500/40 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
-                {menuCollapsed ? <Sparkles className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              <span className="relative w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-600 shadow-lg shadow-emerald-500/40 flex items-center justify-center text-white">
+                <Menu className="w-4 h-4" />
               </span>
             </button>
           </div>
