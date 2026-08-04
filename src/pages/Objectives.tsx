@@ -7,7 +7,7 @@ import { useEdit } from '../contexts/EditContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/core';
 import { slugify } from '../utils/slugify';
-import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
+import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const typeLabels: Record<string, string> = {
@@ -183,6 +183,15 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
               {!embeddedTerritoryId && <p className="text-xs font-bold uppercase tracking-widest opacity-60 mt-1 text-slate-500">
                 {typeLabels[selectedTerritory?.type || '']}
               </p>}
+              {selectedTerritory?.is_ai_generated && (
+                <p
+                  className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full"
+                  title="Los 14 objetivos de este territorio se sembraron con números aleatorios generados por IA, a la espera de datos reales."
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Datos de IA · Pendiente de revisión
+                </p>
+              )}
             </div>
           </div>
         </div>

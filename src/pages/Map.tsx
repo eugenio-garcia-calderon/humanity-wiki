@@ -30,7 +30,8 @@ async function loadTerritoryDetail(tid: string) {
         description: data.description,
         population: data.population || 0,
         area: data.area_km2 || 0,
-        challenges: data.challenges
+        challenges: data.challenges,
+        isAiGenerated: !!data.is_ai_generated,
       };
     }
   } catch (e) {
@@ -43,7 +44,8 @@ async function loadTerritoryDetail(tid: string) {
     description: '',
     population: 0,
     area: 0,
-    challenges: []
+    challenges: [],
+    isAiGenerated: false,
   };
 }
 

@@ -1,16 +1,17 @@
 import { relations } from 'drizzle-orm';
 import { 
-  pgTable, 
-  serial, 
-  text, 
-  timestamp, 
-  integer, 
-  doublePrecision, 
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  integer,
+  doublePrecision,
   primaryKey,
   jsonb,
   geometry,
   date,
-  uuid
+  uuid,
+  boolean
 } from 'drizzle-orm/pg-core';
 
 // Columnas transversales exigidas por 99_CONSTITUTION.md (UUID permanente,
@@ -43,6 +44,9 @@ export const territories = pgTable('territories', {
   areaKm2: doublePrecision('area_km2'),
   geometry: geometry('geometry', { type: 'multipolygon' }),
   centroid: geometry('centroid', { type: 'point' }),
+  // Ver drizzle/0011_ai_generated_flag.sql: territorio sembrado con datos de
+  // prueba generados por IA, pendiente de revisión humana.
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
   ...auditColumns,
 });
 
@@ -104,6 +108,9 @@ export const indicatorObservations = pgTable('indicator_observations', {
   date: date('date'),
   source: text('source'),
   sourceUrl: text('source_url'),
+  // Ver drizzle/0011_ai_generated_flag.sql: valor aleatorio generado por IA
+  // para no dejar el indicador vacío, no una medición real todavía.
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
   ...auditColumns,
 });
 

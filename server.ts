@@ -1782,7 +1782,7 @@ async function startServer() {
       const { id } = req.params;
       
       const territoryResult = await db.execute(sql`
-        SELECT id, name, type, description
+        SELECT id, name, type, description, is_ai_generated
         FROM territories
         WHERE id = ${id}
       `);

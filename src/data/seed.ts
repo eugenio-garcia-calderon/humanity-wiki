@@ -85,7 +85,43 @@ export const territories: Territory[] = [
   { id: "T030", type: "region", name: "País Vasco", parent_id: "T003", description: "Perfil regional de la comunidad autónoma.", key_indicators: [], active_challenges: [], featured_objectives: ["O001", "O002", "O003", "O004", "O005", "O006"], coordinates: [-2.67, 42.98] },
   { id: "T031", type: "region", name: "La Rioja", parent_id: "T003", description: "Perfil regional de la comunidad autónoma.", key_indicators: [], active_challenges: [], featured_objectives: ["O001", "O002", "O003", "O004", "O005", "O006"], coordinates: [-2.44, 42.27] },
   { id: "T032", type: "region", name: "Ceuta", parent_id: "T003", description: "Perfil regional de la comunidad autónoma.", key_indicators: [], active_challenges: [], featured_objectives: ["O001", "O002", "O003", "O004", "O005", "O006"], coordinates: [-5.31, 35.88] },
-  { id: "T033", type: "region", name: "Melilla", parent_id: "T003", description: "Perfil regional de la comunidad autónoma.", key_indicators: [], active_challenges: [], featured_objectives: ["O001", "O002", "O003", "O004", "O005", "O006"], coordinates: [-2.93, 35.29] }];
+  { id: "T033", type: "region", name: "Melilla", parent_id: "T003", description: "Perfil regional de la comunidad autónoma.", key_indicators: [], active_challenges: [], featured_objectives: ["O001", "O002", "O003", "O004", "O005", "O006"], coordinates: [-2.93, 35.29] },
+  // Países de Europa añadidos con datos de prueba generados por IA (ver
+  // src/db/seed-europe-countries.ts) — la marca is_ai_generated real vive en
+  // la tabla territories de la base de datos, no aquí (este array solo sirve
+  // para posicionar el punto en el mapa).
+  { id: "T034", type: "country", name: "Francia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [2.2, 46.6] },
+  { id: "T035", type: "country", name: "Alemania", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [10.4, 51.2] },
+  { id: "T036", type: "country", name: "Portugal", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [-8.0, 39.6] },
+  { id: "T037", type: "country", name: "Reino Unido", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [-2.0, 54.0] },
+  { id: "T038", type: "country", name: "Países Bajos", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [5.3, 52.2] },
+  { id: "T039", type: "country", name: "Bélgica", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [4.5, 50.6] },
+  { id: "T040", type: "country", name: "Suiza", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [8.2, 46.8] },
+  { id: "T041", type: "country", name: "Austria", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [14.1, 47.6] },
+  { id: "T042", type: "country", name: "Polonia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [19.5, 52.0] },
+  { id: "T043", type: "country", name: "Suecia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [15.0, 62.0] },
+  { id: "T044", type: "country", name: "Noruega", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [9.0, 61.0] },
+  { id: "T045", type: "country", name: "Dinamarca", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [10.0, 56.0] },
+  { id: "T046", type: "country", name: "Finlandia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [26.0, 64.0] },
+  { id: "T047", type: "country", name: "Irlanda", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [-8.0, 53.4] },
+  { id: "T048", type: "country", name: "Grecia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [22.0, 39.0] },
+  { id: "T049", type: "country", name: "República Checa", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [15.5, 49.8] },
+  { id: "T050", type: "country", name: "Hungría", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [19.5, 47.2] },
+  { id: "T051", type: "country", name: "Rumanía", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [25.0, 45.9] },
+  { id: "T052", type: "country", name: "Bulgaria", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [25.5, 42.7] },
+  { id: "T053", type: "country", name: "Croacia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [15.2, 45.1] },
+  { id: "T054", type: "country", name: "Eslovaquia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [19.5, 48.7] },
+  { id: "T055", type: "country", name: "Eslovenia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [14.8, 46.1] },
+  { id: "T056", type: "country", name: "Serbia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [21.0, 44.0] },
+  { id: "T057", type: "country", name: "Estonia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [25.0, 58.6] },
+  { id: "T058", type: "country", name: "Letonia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [24.6, 56.9] },
+  { id: "T059", type: "country", name: "Lituania", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [23.9, 55.2] },
+  { id: "T060", type: "country", name: "Luxemburgo", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [6.1, 49.8] },
+  { id: "T061", type: "country", name: "Islandia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [-18.0, 65.0] },
+  { id: "T062", type: "country", name: "Malta", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [14.4, 35.9] },
+  { id: "T063", type: "country", name: "Chipre", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [33.4, 35.1] },
+  { id: "T064", type: "country", name: "Ucrania", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [32.0, 49.0] },
+  { id: "T065", type: "country", name: "Bielorrusia", parent_id: "T002", description: "Perfil territorial nacional.", key_indicators: [], active_challenges: [], featured_objectives: [], coordinates: [28.0, 53.7] }];
 
 export const challenges: Challenge[] = [
   {
