@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
-import { getProvider, listProviders, type AIMessage } from './provider.js';
+import { getProvider, listProviders, type AIMessage, type AIContentBlock } from './provider.js';
 import { ROLE } from '../auth.js';
 
 // ============================================================================
@@ -230,13 +230,24 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  /** Tipos de adjunto admitidos en el chat y su límite de tamaño (Fase 9, multimodal). */
+  const ATTACHMENT_LIMITS: Record<string, number> = {
+    'image/jpeg': 5 * 1024 * 1024,
+    'image/png': 5 * 1024 * 1024,
+    'image/gif': 5 * 1024 * 1024,
+    'image/webp': 5 * 1024 * 1024,
+    'application/pdf': 15 * 1024 * 1024,
+  };
+
   /**
    * POST /api/ai/chat
-   * Cuerpo: { message, conversation_id?, context?, edit_mode?, search_web? }
+   * Cuerpo: { message, conversation_id?, context?, edit_mode?, search_web?, attachment? }
+   * `attachment`, si lo hay: { name, media_type, data } con `data` en base64
+   * sin el prefijo `data:...;base64,`.
    */
   app.post('/api/ai/chat', async (req: Request, res: Response) => {
     try {
-      const { message, context, edit_mode, search_web } = req.body || {};
+      const { message, context, edit_mode, search_web, attachment } = req.body || {};
       if (!message) return res.status(400).json({ error: 'Falta el mensaje.' });
 
       const provider = getProvider();
@@ -245,6 +256,24 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
           error: 'El asistente está construido pero inactivo: falta ANTHROPIC_API_KEY en .env.',
           ready: false,
         });
+      }
+
+      // El adjunto se valida aquí (tipo y tamaño) y se convierte al bloque
+      // multimodal que espera la API de Claude — nunca se guarda el binario
+      // en la base de datos, solo se usa para esta llamada al modelo.
+      let attachmentBlock: AIContentBlock | null = null;
+      if (attachment?.data && attachment?.media_type) {
+        const maxBytes = ATTACHMENT_LIMITS[attachment.media_type];
+        if (!maxBytes) {
+          return res.status(400).json({ error: 'Tipo de archivo no admitido. Solo imágenes (JPG, PNG, GIF, WEBP) o PDF.' });
+        }
+        const rawBytes = (String(attachment.data).length * 3) / 4;
+        if (rawBytes > maxBytes) {
+          return res.status(400).json({ error: `El archivo pesa demasiado (máximo ${Math.round(maxBytes / (1024 * 1024))} MB).` });
+        }
+        attachmentBlock = attachment.media_type === 'application/pdf'
+          ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } }
+          : { type: 'image', source: { type: 'base64', media_type: attachment.media_type, data: attachment.data } };
       }
 
       const editMode = Object.values(EDIT_MODES).includes(edit_mode) ? edit_mode : EDIT_MODES.MANUAL;
@@ -259,8 +288,9 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         `);
       }
 
+      const storedContent = attachment?.name ? `${message}\n\n[Adjunto: ${attachment.name}]` : message;
       await db.execute(sql`
-        INSERT INTO ai_messages (conversation_id, role, content) VALUES (${conversationId}, 'user', ${message})
+        INSERT INTO ai_messages (conversation_id, role, content) VALUES (${conversationId}, 'user', ${storedContent})
       `);
 
       // RAG
@@ -275,6 +305,16 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         .reverse()
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role, content: m.content }));
+
+      // El adjunto solo viaja en ESTE turno — no se vuelve a mandar en
+      // preguntas posteriores de la misma conversación (el binario nunca se
+      // guardó, así que tampoco podría).
+      if (attachmentBlock && messages.length) {
+        messages[messages.length - 1] = {
+          role: 'user',
+          content: [attachmentBlock, { type: 'text', text: String(message) }],
+        };
+      }
 
       const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web);
       const result = await provider.complete({ system, messages, webSearch: !!search_web });

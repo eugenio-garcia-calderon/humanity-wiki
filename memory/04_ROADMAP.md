@@ -29,15 +29,15 @@ todo construido y verificado en modo test. Pendiente, acción del usuario:
 - Cuando se quiera pasar a producción: las claves `_LIVE` ya están aportadas
   y aparcadas sin activar en `.env`.
 
-### Fase 9 — Asistente IA (activo, faltan mejoras opcionales)
+### Fase 9 — Asistente IA (activo, solo queda una decisión pendiente)
 Proveedor abstracto, RAG (con dos fallos reales corregidos), agente de
 acciones con catálogo cerrado, panel acoplado con permisos de edición y ancho
 redimensionable, panel de administración con costes y vacíos de conocimiento,
 **búsqueda real en internet** (herramienta nativa `web_search_20250305` de
-Claude, con citas reales verificadas — completada el 2026-08-04). Pendiente:
-- Multimodal (imágenes/PDF): la estructura de mensajes lo admite, falta la
-  ingesta. Voz/Excel/Word explícitamente aparcados (necesitan pipelines
-  aparte).
+Claude, con citas reales verificadas) y **multimodal — imagen y PDF**
+(bloques de contenido nativos de Claude, el binario nunca se guarda en BD),
+ambas completadas y verificadas el 2026-08-04. Voz/Excel/Word explícitamente
+aparcados (necesitan pipelines aparte, no pedidos todavía). Pendiente:
 - Embeddings reales para el RAG (hoy usa índice de texto completo en
   español, que funciona; `ai_knowledge_chunks.embedding` está preparado por
   si se decide añadir pgvector — necesitaría una clave de Voyage AI u otro

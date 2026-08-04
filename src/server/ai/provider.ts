@@ -9,9 +9,20 @@
 // habla con la interfaz `AIProvider` de abajo. Cambiar de modelo es registrar
 // otro proveedor, no tocar el asistente.
 
+/**
+ * Bloque multimodal (Fase 9): una imagen o un PDF adjuntos a un mensaje del
+ * usuario, en el mismo formato que espera la API de Claude — así el resto
+ * del sistema no depende de un SDK concreto para construirlo.
+ */
+export type AIContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+  | { type: 'document'; source: { type: 'base64'; media_type: 'application/pdf'; data: string } };
+
 export interface AIMessage {
   role: 'user' | 'assistant';
-  content: string;
+  /** Texto simple, o bloques multimodales cuando el mensaje lleva un adjunto. */
+  content: string | AIContentBlock[];
 }
 
 export interface AICompletionRequest {

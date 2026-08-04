@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import ResizeHandle from '../ui/ResizeHandle';
@@ -43,7 +43,22 @@ interface Message {
   actions?: any[];
   pending?: boolean;
   error?: boolean;
+  attachmentName?: string;
 }
+
+interface PendingAttachment {
+  name: string;
+  mediaType: string;
+  /** Base64 sin el prefijo data:...;base64, */
+  data: string;
+}
+
+const ATTACHMENT_ACCEPT = 'image/jpeg,image/png,image/gif,image/webp,application/pdf';
+const ATTACHMENT_MAX_BYTES: Record<string, number> = {
+  'image/jpeg': 5 * 1024 * 1024, 'image/png': 5 * 1024 * 1024,
+  'image/gif': 5 * 1024 * 1024, 'image/webp': 5 * 1024 * 1024,
+  'application/pdf': 15 * 1024 * 1024,
+};
 
 export default function AIAssistant() {
   const [open, setOpen] = useState(false);
@@ -55,7 +70,10 @@ export default function AIAssistant() {
   const [searchWeb, setSearchWeb] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState<{ ready: boolean; message: string } | null>(null);
+  const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
+  const [attachError, setAttachError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useAuth();
   const location = useLocation();
@@ -119,11 +137,35 @@ export default function AIAssistant() {
     }
   };
 
+  const handleFileSelect = (file: File | undefined) => {
+    setAttachError(null);
+    if (!file) return;
+    const maxBytes = ATTACHMENT_MAX_BYTES[file.type];
+    if (!maxBytes) {
+      setAttachError('Solo se admiten imágenes (JPG, PNG, GIF, WEBP) o PDF.');
+      return;
+    }
+    if (file.size > maxBytes) {
+      setAttachError(`El archivo pesa demasiado (máximo ${Math.round(maxBytes / (1024 * 1024))} MB).`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const data = result.slice(result.indexOf(',') + 1); // quita el prefijo data:...;base64,
+      setAttachment({ name: file.name, mediaType: file.type, data });
+    };
+    reader.onerror = () => setAttachError('No se pudo leer el archivo.');
+    reader.readAsDataURL(file);
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || busy) return;
+    const pendingAttachment = attachment;
     setInput('');
-    setMessages(m => [...m, { role: 'user', content: text }]);
+    setAttachment(null);
+    setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
     setBusy(true);
     try {
       const res = await fetch('/api/ai/chat', {
@@ -136,6 +178,9 @@ export default function AIAssistant() {
           context: currentContext(),
           edit_mode: editMode,
           search_web: searchWeb,
+          attachment: pendingAttachment
+            ? { name: pendingAttachment.name, media_type: pendingAttachment.mediaType, data: pendingAttachment.data }
+            : undefined,
         }),
       });
       const json = await res.json();
@@ -272,6 +317,12 @@ export default function AIAssistant() {
                   m.role === 'user' ? 'bg-emerald-600 text-white'
                     : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200'
                     : 'bg-slate-100 text-slate-800')}>
+                  {m.attachmentName && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/20 px-1.5 py-0.5 rounded mb-1">
+                      <Paperclip className="w-2.5 h-2.5" /> {m.attachmentName}
+                    </span>
+                  )}
+                  {m.attachmentName && <br />}
                   {m.content}
 
                   {/* Origen de la información: plataforma vs internet */}
@@ -356,7 +407,34 @@ export default function AIAssistant() {
               >
                 <Globe className="w-3 h-3" /> Internet {searchWeb ? 'activado' : 'desactivado'}
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ATTACHMENT_ACCEPT}
+                onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Adjuntar imagen o PDF"
+                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
+                  attachment ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+              >
+                <Paperclip className="w-3 h-3" /> Adjuntar
+              </button>
             </div>
+            {attachment && (
+              <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
+                {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
+                <span className="truncate flex-1">{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            {attachError && (
+              <p className="text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">{attachError}</p>
+            )}
             <div className="flex items-end gap-2">
               <textarea
                 value={input}

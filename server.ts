@@ -220,6 +220,13 @@ async function startServer() {
     res.json({ received: true });
   });
 
+  // El chat del asistente admite adjuntar una imagen o PDF (Fase 9,
+  // multimodal): en base64 dentro del JSON pesa bastante más que el límite
+  // por defecto de 100kb, así que esta única ruta necesita un límite propio,
+  // más alto. Se registra ANTES del express.json() global para tener
+  // prioridad solo en esta ruta — el resto de la API sigue con el límite
+  // pequeño de siempre.
+  app.use('/api/ai/chat', express.json({ limit: '20mb' }));
   app.use(express.json());
 
   // 1.5 AUTENTICACIÓN (Fase 2). Se monta justo después de express.json() y
