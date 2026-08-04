@@ -121,28 +121,42 @@ export function registerSocialRoutes(app: Express, db: any) {
       const limit = Math.min(Number(req.query.limit) || 30, 100);
       const entityType = req.query.entity_type as string | undefined;
       const entityId = req.query.entity_id as string | undefined;
+      const authorId = req.query.author_id as string | undefined;
 
-      // Publicaciones de una entidad concreta (la ficha de un reto, un
-      // territorio, un producto...).
-      const rows = entityType && entityId
-        ? await db.execute(sql`
-            SELECT p.*, u.display_name AS author_name, u.avatar_url AS author_avatar
-            FROM publications p
-            JOIN publication_links pl ON pl.publication_id = p.id
-            LEFT JOIN users u ON u.id = p.author_user_id
-            WHERE pl.entity_type = ${entityType} AND pl.entity_id = ${entityId}
-              AND p.archived_at IS NULL AND p.status = 'publicada'
-            ORDER BY p.pinned DESC, p.created_at DESC
-            LIMIT ${limit}
-          `)
-        : await db.execute(sql`
-            SELECT p.*, u.display_name AS author_name, u.avatar_url AS author_avatar
-            FROM publications p
-            LEFT JOIN users u ON u.id = p.author_user_id
-            WHERE p.archived_at IS NULL AND p.status = 'publicada'
-            ORDER BY p.pinned DESC, p.created_at DESC
-            LIMIT ${limit}
-          `);
+      let rows;
+      if (entityType && entityId) {
+        // Publicaciones de una entidad concreta (la ficha de un reto, un
+        // territorio, un producto...).
+        rows = await db.execute(sql`
+          SELECT p.*, u.display_name AS author_name, u.avatar_url AS author_avatar
+          FROM publications p
+          JOIN publication_links pl ON pl.publication_id = p.id
+          LEFT JOIN users u ON u.id = p.author_user_id
+          WHERE pl.entity_type = ${entityType} AND pl.entity_id = ${entityId}
+            AND p.archived_at IS NULL AND p.status = 'publicada'
+          ORDER BY p.pinned DESC, p.created_at DESC
+          LIMIT ${limit}
+        `);
+      } else if (authorId) {
+        // Publicaciones de un autor concreto (para su perfil público).
+        rows = await db.execute(sql`
+          SELECT p.*, u.display_name AS author_name, u.avatar_url AS author_avatar
+          FROM publications p
+          LEFT JOIN users u ON u.id = p.author_user_id
+          WHERE p.author_user_id = ${authorId} AND p.archived_at IS NULL AND p.status = 'publicada'
+          ORDER BY p.created_at DESC
+          LIMIT ${limit}
+        `);
+      } else {
+        rows = await db.execute(sql`
+          SELECT p.*, u.display_name AS author_name, u.avatar_url AS author_avatar
+          FROM publications p
+          LEFT JOIN users u ON u.id = p.author_user_id
+          WHERE p.archived_at IS NULL AND p.status = 'publicada'
+          ORDER BY p.pinned DESC, p.created_at DESC
+          LIMIT ${limit}
+        `);
+      }
 
       res.json(await decoratePublications(rows.rows, req.user?.id));
     } catch (e: any) {

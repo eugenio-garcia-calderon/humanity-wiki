@@ -109,6 +109,7 @@ export interface AuthUser {
   reputation: number;
   impactScore: number;
   isAdmin: boolean;
+  uiSettings: Record<string, any>;
 }
 
 declare global {
@@ -143,6 +144,7 @@ function rowToUser(r: any): AuthUser {
     reputation: Number(r.reputation ?? 0),
     impactScore: Number(r.impact_score ?? 0),
     isAdmin: level >= ROLE.ADMIN,
+    uiSettings: r.ui_settings ?? {},
   };
 }
 
@@ -332,6 +334,28 @@ export function registerAuthRoutes(app: Express, db: any) {
       res.json({ user: rowToUser(result.rows[0]) });
     } catch (e: any) {
       console.error('update profile error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // PUT /api/auth/ui-settings — preferencias de interfaz (ancho de paneles...)
+  // --------------------------------------------------------------------------
+  // Separado de PUT /api/auth/me porque se llama muy a menudo (cada vez que
+  // el usuario suelta un panel redimensionado) y hace una fusión superficial
+  // jsonb (`||`) en vez de reemplazar el perfil entero.
+  app.put('/api/auth/ui-settings', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'No autenticado.' });
+      const patch = req.body || {};
+      const result = await db.execute(sql`
+        UPDATE users SET ui_settings = ui_settings || ${JSON.stringify(patch)}::jsonb
+        WHERE id = ${req.user.id}
+        RETURNING *
+      `);
+      res.json({ user: rowToUser(result.rows[0]) });
+    } catch (e: any) {
+      console.error('update ui-settings error:', e);
       res.status(500).json({ error: e.message });
     }
   });

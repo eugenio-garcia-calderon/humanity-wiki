@@ -41,6 +41,7 @@ export interface AuthUser {
   reputation: number;
   impactScore: number;
   isAdmin: boolean;
+  uiSettings: Record<string, any>;
 }
 
 interface AuthContextType {
@@ -54,6 +55,8 @@ interface AuthContextType {
   register: (email: string, password: string, name?: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateProfile: (data: Record<string, any>) => Promise<{ ok: boolean; error?: string }>;
+  /** Fusión superficial (jsonb `||`) sobre user.uiSettings — no toca el resto del perfil. */
+  updateUiSettings: (patch: Record<string, any>) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -142,11 +145,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Sin sesión, no hay dónde grabar la preferencia en el servidor: el hook
+  // que la usa (usePanelWidth) cae a localStorage por su cuenta.
+  const updateUiSettings: AuthContextType['updateUiSettings'] = async (patch) => {
+    if (!user) return;
+    try {
+      const res = await fetch('/api/auth/ui-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(patch),
+      });
+      const json = await res.json();
+      if (res.ok && json.user) setUser(json.user);
+    } catch { /* la próxima vez que ajuste el panel se reintenta */ }
+  };
+
   const level = user?.roleLevel ?? ROLE.VISITOR;
   const can = (minLevel: number) => level >= minLevel;
 
   return (
-    <AuthContext.Provider value={{ user, loading, level, can, login, register, logout, updateProfile, refresh }}>
+    <AuthContext.Provider value={{ user, loading, level, can, login, register, logout, updateProfile, updateUiSettings, refresh }}>
       {children}
     </AuthContext.Provider>
   );

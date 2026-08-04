@@ -2,13 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePanelWidth } from '../../hooks/usePanelWidth';
+import ResizeHandle from '../ui/ResizeHandle';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
-// Asistente IA — panel flotante (Fase 9)
+// Asistente IA — panel acoplado (Fase 9, redimensionado en Fase 10)
 // ============================================================================
-// Botón permanente abajo a la derecha que abre un panel de aproximadamente un
-// tercio de la pantalla, según el encargo.
+// Botón permanente abajo a la derecha que abre un panel acoplado junto al
+// mapa (no superpuesto encima): ocupa una columna real del layout, con un
+// 20% de ancho por defecto, redimensionable arrastrando su borde izquierdo,
+// y ese ancho queda grabado en la cuenta del usuario (usePanelWidth). En
+// pantallas pequeñas, donde un 20% no cabe con sentido, se comporta como un
+// cajón a pantalla completa en su lugar.
 //
 // Piezas clave:
 //  - Envía SIEMPRE el estado actual de la pantalla (ruta, territorio,
@@ -19,6 +25,8 @@ import { cn } from '../../utils/cn';
 //  - Distingue visualmente el origen de la información: plataforma o internet.
 //  - Selector de permisos de edición: manual, aceptar cambios o autónomo.
 //  - Las acciones propuestas se confirman con Sí / No, como en Claude Code.
+
+const DESKTOP_BREAKPOINT = 768;
 
 type EditMode = 'manual' | 'aceptar' | 'autonomo';
 
@@ -53,6 +61,16 @@ export default function AIAssistant() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const { width, startResize, dragging } = usePanelWidth('ai_assistant', 20, { min: 18, max: 45 });
+  const [isDesktop, setIsDesktop] = useState(() => (
+    typeof window !== 'undefined' ? window.innerWidth >= DESKTOP_BREAKPOINT : true
+  ));
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= DESKTOP_BREAKPOINT);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     fetch('/api/ai/status').then(r => r.json()).then(setStatus).catch(() => setStatus(null));
@@ -163,23 +181,12 @@ export default function AIAssistant() {
     setInput('');
   };
 
-  return (
+  // Contenido del panel, compartido entre el acople de escritorio (columna
+  // real junto al mapa) y el cajón a pantalla completa de móvil — solo se
+  // monta uno de los dos a la vez, según `isDesktop`.
+  const panelBody = (
     <>
-      {/* Botón flotante permanente */}
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          title="Asistente de Red Humana"
-          className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-        >
-          <Sparkles className="w-6 h-6" />
-        </button>
-      )}
-
-      {/* Panel */}
-      {open && (
-        <div className="fixed inset-y-0 right-0 z-[9998] w-full sm:w-[420px] lg:w-[34%] bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
-          {/* Cabecera */}
+      {/* Cabecera */}
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
@@ -356,6 +363,42 @@ export default function AIAssistant() {
               </p>
             )}
           </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Botón flotante permanente: se mantiene fijo aunque el panel esté
+          acoplado, ya que no forma parte de la columna con ancho real. */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          title="Asistente de Red Humana"
+          className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+        >
+          <Sparkles className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Escritorio: columna real acoplada junto al mapa, redimensionable y
+          con el ancho grabado en la cuenta del usuario. No se superpone: al
+          abrirse, empuja el contenido de <main> porque es un hermano flex
+          normal (ver Layout.tsx), no un elemento `fixed`. */}
+      {open && isDesktop && (
+        <div
+          className="relative h-full shrink-0 bg-white border-l border-slate-200 shadow-xl flex flex-col animate-in fade-in duration-150"
+          style={{ width: `${width}%` }}
+        >
+          <ResizeHandle onMouseDown={startResize('left')} edge="left" active={dragging} />
+          {panelBody}
+        </div>
+      )}
+
+      {/* Móvil: un 20% de una pantalla estrecha es inutilizable, así que ahí
+          se mantiene como cajón a pantalla completa. */}
+      {open && !isDesktop && (
+        <div className="fixed inset-0 z-[9998] bg-white flex flex-col animate-in slide-in-from-right duration-200">
+          {panelBody}
         </div>
       )}
     </>

@@ -11,6 +11,8 @@ import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds';
 import { INDICATOR_ICONS } from '../utils/indicatorIcons';
 import { MARKER_ICONS } from '../utils/markerIcons';
 import { METRIC_ICONS } from '../utils/metricIcons';
+import { usePanelWidth } from '../hooks/usePanelWidth';
+import ResizeHandle from '../components/ui/ResizeHandle';
 
 const OBJECTIVE_KEY_BY_ID: Record<string, ObjectiveKey> = Object.fromEntries(
   Object.entries(OBJECTIVE_ID_BY_KEY).map(([key, id]) => [id, key])
@@ -61,6 +63,12 @@ export default function MapPage() {
   const [menuHoverPeek, setMenuHoverPeek] = useState(false);
   const menuShowFull = !menuCollapsed || menuHoverPeek;
   const menuIsFlyout = menuCollapsed && menuHoverPeek;
+  // Anchos de columna redimensionables y grabados en la cuenta del usuario
+  // (ver 04_ROADMAP.md, petición de ensanchar/estrechar todas las ventanas).
+  const { width: filtrosWidth, startResize: startResizeFiltros, dragging: draggingFiltros } =
+    usePanelWidth('filtros', 16, { min: 10, max: 30 });
+  const { width: explorerWidth, startResize: startResizeExplorer, dragging: draggingExplorer } =
+    usePanelWidth('explorer', 40, { min: 25, max: 60 });
   const [searchParams, setSearchParams] = useSearchParams();
   const { territories, loading: territoriesLoading } = useHelpers();
   const [territoryResolved, setTerritoryResolved] = useState(false);
@@ -322,7 +330,8 @@ export default function MapPage() {
           Collapses to a 56px icon rail; hovering the rail while collapsed opens
           the full menu as a floating flyout instead of resizing the layout. */}
       <div
-        className={`relative h-full shrink-0 transition-[width] duration-200 ${menuCollapsed ? 'w-14' : 'w-[16%] min-w-[168px]'}`}
+        className={`relative h-full shrink-0 ${menuCollapsed ? 'w-14 transition-[width] duration-200' : ''}`}
+        style={!menuCollapsed ? { width: `${filtrosWidth}%`, minWidth: 168 } : undefined}
         onMouseEnter={() => { if (menuCollapsed) setMenuHoverPeek(true); }}
         onMouseLeave={() => setMenuHoverPeek(false)}
       >
@@ -465,10 +474,17 @@ export default function MapPage() {
           );
           })}
         </div>
+        {!menuCollapsed && (
+          <ResizeHandle onMouseDown={startResizeFiltros('right')} edge="right" active={draggingFiltros} />
+        )}
       </div>
 
-      {/* COLUMN 2 (~2/5): permanent territory panel (replaces the old floating panel) */}
-      <div className="w-2/5 h-full overflow-y-auto bg-white border-r border-slate-200 shrink-0">
+      {/* COLUMN 2 (~2/5 por defecto, redimensionable): permanent territory panel (replaces the old floating panel) */}
+      <div
+        className="relative h-full overflow-y-auto bg-white border-r border-slate-200 shrink-0"
+        style={{ width: `${explorerWidth}%` }}
+      >
+        <ResizeHandle onMouseDown={startResizeExplorer('right')} edge="right" active={draggingExplorer} />
         {selectedTerritory ? (
           currentExplorerLevel && currentExplorerId ? (
             <EntityExplorerPanel

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, User, LogOut, Heart, Settings, Check } from 'lucide-react';
+import { Menu, User, LogOut, Heart, Settings, Check, Store } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -84,12 +84,17 @@ export default function Layout() {
         )}
       </div>
 
-      {/* Main Content View */}
-      <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative ${isMapPage ? '' : 'p-4 sm:p-8'}`}>
-        <div className={isMapPage ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
-          <Outlet />
-        </div>
-      </main>
+      {/* Main Content View + Asistente IA: fila flex real, así el panel del
+          asistente (cuando está acoplado en escritorio) empuja el contenido
+          en vez de superponerse encima. */}
+      <div className="flex-1 flex overflow-hidden">
+        <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${isMapPage ? '' : 'p-4 sm:p-8'}`}>
+          <div className={isMapPage ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
+            <Outlet />
+          </div>
+        </main>
+        <AIAssistant />
+      </div>
 
       {!isMapPage && (
         <footer className="h-10 border-t border-slate-100 px-4 sm:px-8 flex items-center justify-between bg-slate-50 shrink-0">
@@ -157,6 +162,13 @@ export default function Layout() {
         {/* Right: Contribuye Button & User Actions */}
         <div className="flex items-center justify-end gap-2 w-1/4">
           <Link
+            to="/mercado"
+            className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold text-[11px] px-2.5 py-1 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-all shrink-0"
+          >
+            <Store className="w-3 h-3" />
+            <span className="hidden sm:inline">Mercado</span>
+          </Link>
+          <Link
             to="/contribuye"
             className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm hover:shadow-md transition-all shrink-0"
           >
@@ -178,8 +190,6 @@ export default function Layout() {
           )}
         </div>
       </nav>
-
-      <AIAssistant />
     </div>
   );
 }

@@ -320,6 +320,9 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   name: text('name'),
   role: text('role').default('user'),
+  // Preferencias de interfaz grabadas en la cuenta (ancho de paneles, etc.),
+  // ver drizzle/0010_user_ui_settings.sql.
+  uiSettings: jsonb('ui_settings').notNull().default({}),
   ...auditColumns,
 });
 
