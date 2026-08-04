@@ -18,6 +18,8 @@ import OrganizationProfile from './pages/OrganizationProfile';
 import MapPage from './pages/Map';
 import Mercado from './pages/Mercado';
 import PanelFinanciero from './pages/PanelFinanciero';
+import Muro from './pages/Muro';
+import PersonaPublica from './pages/PersonaPublica';
 import Login from './pages/Login';
 import AdminDesign from './pages/AdminDesign';
 import AboutRoot from './pages/about/AboutRoot';
@@ -49,6 +51,8 @@ export default function App() {
                 <Route path="objetivos" element={<Objectives />} />
                 <Route path="mercado" element={<Mercado />} />
                 <Route path="panel-financiero" element={<PanelFinanciero />} />
+                <Route path="muro" element={<Muro />} />
+                <Route path="personas/:id" element={<PersonaPublica />} />
                 <Route path="indicadores/:id" element={<IndicatorDetail />} />
                 <Route path="indicadores" element={<Indicators />} />
                 <Route path="retos" element={<Challenges />} />

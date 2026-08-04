@@ -11,47 +11,38 @@
 | 1 | Cimientos: UUID, autoría, versionado, historial, archivado | **Completada** |
 | 2 | Usuarios, 4 niveles de rol, perfiles, sesiones | **Completada** |
 | 3 | Grafo de conocimiento + Necesidades | **Completada** |
-| 4 | Red social: publicaciones, feed, seguir, comentar, notificaciones | **Completada (API)** |
+| 4 | Red social: publicaciones, feed, seguir, comentar, notificaciones | **Completada** |
 | 5 | Mercado: productos y demandas | **Completada** |
-| 6 | Economía y Stripe | **Estructura lista, inactiva** |
-| 7 | Iniciativas y casos de éxito | **Estructura y datos listos** |
+| 6 | Economía y Stripe | **Activa (claves de test)** |
+| 7 | Iniciativas y casos de éxito | **Completada** (`projects` migrado) |
 | 8 | Ejemplo completo y datos de demostración | **Completada** |
-| 9 | Asistente IA universal | **Construido, inactivo** |
+| 9 | Asistente IA universal | **Activo** (Claude conectado, RAG corregido) |
 
 ## Lo que falta para dar cada fase por cerrada del todo
 
-### Fase 4 — Red social (falta interfaz)
-La API está completa y probada. Falta construir las páginas: muro/feed,
-perfil público de usuario, y los componentes de publicar/comentar/seguir
-embebidos en las fichas de entidad.
+### Fase 6 — Economía (activa en modo test, pendiente de producción)
+Checkout embebido, Stripe Connect, webhooks, reembolsos y panel financiero,
+todo construido y verificado en modo test. Pendiente, acción del usuario:
+- `STRIPE_WEBHOOK_SECRET` real (hoy vacío — la firma no se verifica; probado
+  con eventos sintéticos enviados directamente al endpoint).
+- Activar Stripe Connect una vez en `dashboard.stripe.com/connect`.
+- Cuando se quiera pasar a producción: las claves `_LIVE` ya están aportadas
+  y aparcadas sin activar en `.env`.
 
-### Fase 6 — Economía (bloqueada por claves)
-Las tablas (`transactions`, `stripe_accounts`, `supports`, `refunds`) y el
-grafo de transacciones existen. Falta:
-- Claves de **test** de Stripe (`sk_test_`, `pk_test_`, webhook secret). Las
-  claves de producción que aportó el usuario están **aparcadas sin activar**
-  en `.env` (ver `03_DECISIONS.md`).
-- Checkout embebido, Stripe Connect (onboarding de vendedores), webhooks,
-  reembolsos y panel financiero por usuario.
-
-### Fase 7 — Iniciativas (falta migrar `projects`)
-`initiatives`, `success_cases` e `initiative_results` existen y tienen datos.
-Falta:
-- Migrar las 19 filas de `projects` a `initiatives` (la columna
-  `legacy_project_id` está preparada para dejar trazada la procedencia).
-- Páginas de listado y ficha de iniciativa y de caso de éxito.
-
-### Fase 9 — Asistente IA (bloqueado por clave)
-Todo construido: proveedor abstracto, RAG, agente de acciones con catálogo
-cerrado, panel flotante con permisos de edición, panel de administración con
-costes y vacíos de conocimiento. Falta:
-- `ANTHROPIC_API_KEY` en `.env` para activarlo.
-- Proveedor de búsqueda en internet (el botón y la distinción de origen ya
-  están; falta decidir con qué buscador se resuelve).
-- Multimodal (voz, imágenes, PDF, Excel): la estructura de mensajes lo admite,
-  falta la ingesta.
-- Embeddings reales para el RAG (hoy usa índice de texto completo en español;
-  `ai_knowledge_chunks.embedding` está preparado y habría que añadir pgvector).
+### Fase 9 — Asistente IA (activo, faltan mejoras opcionales)
+Proveedor abstracto, RAG (con dos fallos reales corregidos), agente de
+acciones con catálogo cerrado, panel acoplado con permisos de edición y ancho
+redimensionable, panel de administración con costes y vacíos de conocimiento.
+Pendiente (tareas #99-101 del backlog de sesión):
+- Búsqueda real en internet (el botón y la distinción de origen ya están;
+  falta conectar el `web_search` nativo de Claude o decidir otro proveedor).
+- Multimodal (imágenes/PDF): la estructura de mensajes lo admite, falta la
+  ingesta. Voz/Excel/Word explícitamente aparcados (necesitan pipelines
+  aparte).
+- Embeddings reales para el RAG (hoy usa índice de texto completo en
+  español, que funciona; `ai_knowledge_chunks.embedding` está preparado por
+  si se decide añadir pgvector — necesitaría una clave de Voyage AI u otro
+  proveedor de embeddings, decisión pendiente del usuario).
 
 ## Transversal pendiente
 - **Correo**: sin proveedor configurado. Por eso los usuarios se crean con
@@ -60,3 +51,10 @@ costes y vacíos de conocimiento. Falta:
   campo a `false`.
 - **Panel derecho** de `11_UI_GUIDELINES.md` en las fichas de entidad.
 - **Provincia y Barrio** en la jerarquía territorial.
+- **Barra de búsqueda global** con resultados agrupados por categoría
+  (productos, retos, indicadores, personas) — pedida por el usuario, aún no
+  construida.
+- **Polígonos de país** para los 32 países de Europa añadidos el 2026-08-04:
+  se posicionan como puntos (centroides) pero no tienen relleno propio a
+  zoom de país todavía (`public/geo/countries.json` solo tiene España e
+  Italia) — mismo hueco preexistente que Argentina/Guinea Ecuatorial/Etiopía.

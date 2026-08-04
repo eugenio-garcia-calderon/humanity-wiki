@@ -34,6 +34,7 @@ export default function Layout() {
 
   const navItems = [
     { name: 'Mapa', path: '/' },
+    { name: 'Muro', path: '/muro' },
     { name: 'Objetivos', path: '/objetivos' },
     { name: 'Indicadores', path: '/indicadores' },
     { name: 'Retos', path: '/retos' },
