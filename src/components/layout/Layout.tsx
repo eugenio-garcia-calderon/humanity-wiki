@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
 import AIAssistant from '../ai/AIAssistant';
+import GlobalSearch from '../ui/GlobalSearch';
 
 export default function Layout() {
   const location = useLocation();
@@ -54,35 +55,42 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
-      {/* App settings (font size), fixed top-right, offset from the map's own zoom controls */}
-      <div className="fixed top-4 right-16 z-50" ref={settingsRef}>
-        <button
-          onClick={() => setSettingsOpen(o => !o)}
-          className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-          title="Configuración"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
-        {settingsOpen && (
-          <div className="absolute top-11 right-0 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50">
-            <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
-              Tamaño de letra
+      {/* Barra superior: búsqueda global (petición del usuario, busca en toda
+          la plataforma agrupado por categoría) + configuración de letra. Fila
+          real (no `fixed`), así nunca se superpone con nada de cada página. */}
+      <div className="h-16 border-b border-slate-100 px-4 sm:px-6 flex items-center gap-4 shrink-0 bg-white z-40">
+        <div className="flex-1 flex justify-center">
+          <GlobalSearch />
+        </div>
+        <div className="relative shrink-0" ref={settingsRef}>
+          <button
+            onClick={() => setSettingsOpen(o => !o)}
+            className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            title="Configuración"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+          {settingsOpen && (
+            <div className="absolute top-11 right-0 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50">
+              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                Tamaño de letra
+              </div>
+              {(Object.keys(FONT_SCALE_LABELS) as FontScaleKey[]).map(key => (
+                <button
+                  key={key}
+                  onClick={() => setFontScale(key)}
+                  className={cn(
+                    "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors font-medium",
+                    fontScale === key ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-700 hover:bg-slate-50"
+                  )}
+                >
+                  {FONT_SCALE_LABELS[key]}
+                  {fontScale === key && <Check className="w-3.5 h-3.5" />}
+                </button>
+              ))}
             </div>
-            {(Object.keys(FONT_SCALE_LABELS) as FontScaleKey[]).map(key => (
-              <button
-                key={key}
-                onClick={() => setFontScale(key)}
-                className={cn(
-                  "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors font-medium",
-                  fontScale === key ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-700 hover:bg-slate-50"
-                )}
-              >
-                {FONT_SCALE_LABELS[key]}
-                {fontScale === key && <Check className="w-3.5 h-3.5" />}
-              </button>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Main Content View + Asistente IA: fila flex real, así el panel del

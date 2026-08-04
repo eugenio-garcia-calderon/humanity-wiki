@@ -32,6 +32,11 @@ export function resolveEntityLink(type: string, id: string, helpers: any): Resol
       const s = helpers.solutions?.find((x: any) => x.id === id);
       return s ? { label: s.title, to: `/soluciones/${slugify(s.title)}` } : { label: `${typeLabel} ${id}`, to: null };
     }
+    case 'indicators': {
+      const ind = helpers.indicators?.find((x: any) => x.id === id);
+      // IndicatorDetail.tsx acepta el id crudo directamente, sin slugificar.
+      return ind ? { label: ind.name, to: `/indicadores/${id}` } : { label: `${typeLabel} ${id}`, to: null };
+    }
     case 'territories': {
       const t = helpers.territories?.find((x: any) => x.id === id);
       return t ? { label: t.name, to: `/mapa?territorio=${slugify(t.name)}` } : { label: `${typeLabel} ${id}`, to: null };
