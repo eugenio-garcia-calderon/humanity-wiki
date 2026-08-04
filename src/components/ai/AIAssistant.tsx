@@ -39,7 +39,7 @@ const EDIT_MODE_LABELS: Record<EditMode, { label: string; hint: string }> = {
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  sources?: Array<{ type: string; id: string; origin: string }>;
+  sources?: Array<{ type: string; id: string; origin: string; url?: string; title?: string }>;
   actions?: any[];
   pending?: boolean;
   error?: boolean;
@@ -276,18 +276,35 @@ export default function AIAssistant() {
 
                   {/* Origen de la información: plataforma vs internet */}
                   {m.sources && m.sources.length > 0 && (
-                    <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex flex-wrap gap-1">
-                      {m.sources.some(s => s.origin === 'plataforma') && (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
-                          <Database className="w-2.5 h-2.5" />
-                          {m.sources.filter(s => s.origin === 'plataforma').length} de la plataforma
-                        </span>
-                      )}
-                      {m.sources.some(s => s.origin === 'internet') && (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">
-                          <Globe className="w-2.5 h-2.5" /> de internet
-                        </span>
-                      )}
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/70 space-y-1.5">
+                      <div className="flex flex-wrap gap-1">
+                        {m.sources.some(s => s.origin === 'plataforma') && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
+                            <Database className="w-2.5 h-2.5" />
+                            {m.sources.filter(s => s.origin === 'plataforma').length} de la plataforma
+                          </span>
+                        )}
+                        {m.sources.some(s => s.origin === 'internet') && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">
+                            <Globe className="w-2.5 h-2.5" />
+                            {m.sources.filter(s => s.origin === 'internet').length} de internet
+                          </span>
+                        )}
+                      </div>
+                      {/* Enlaces reales citados por la búsqueda web, cuando la hubo. */}
+                      {m.sources.filter(s => s.origin === 'internet' && s.url).map((s, i) => (
+                        <a
+                          key={i}
+                          href={s.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 text-[10px] text-sky-700 hover:underline truncate"
+                          title={s.url}
+                        >
+                          <Globe className="w-2.5 h-2.5 shrink-0" />
+                          <span className="truncate">{s.title || s.url}</span>
+                        </a>
+                      ))}
                     </div>
                   )}
 

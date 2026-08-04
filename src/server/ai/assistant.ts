@@ -132,7 +132,7 @@ export function registerAIRoutes(app: Express, db: any) {
   };
 
   /** Construye la instrucción de sistema con el contexto visual y el rol. */
-  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string) => {
+  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean) => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
       .filter(([, v]) => level >= v.minLevel)
@@ -160,6 +160,9 @@ REGLAS:
 5. Puedes proponer cambios en los datos SOLO mediante acciones. Tú no escribes en la base de datos: el servidor valida y ejecuta.
 6. Acciones permitidas para el nivel de este usuario: ${allowed.length ? allowed.join(', ') : 'NINGUNA (solo consulta)'}.
 ${editMode === EDIT_MODES.MANUAL ? '7. El usuario está en modo MANUAL: puedes sugerir cambios en texto, pero NO devuelvas acciones.' : ''}
+${webSearch
+  ? '8. Tienes activada la búsqueda en internet: úsala SOLO para lo que el contexto de la plataforma no cubra (datos externos, actualidad, verificación). Prioriza siempre el contexto recuperado de la plataforma cuando exista.'
+  : '8. La búsqueda en internet está desactivada para esta pregunta: responde solo con el contexto de la plataforma y tu conocimiento general, sin inventar que has buscado nada.'}
 
 FORMATO DE RESPUESTA:
 Responde en texto normal. Si quieres navegar o proponer cambios, añade AL FINAL un bloque JSON delimitado así:
@@ -273,8 +276,8 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role, content: m.content }));
 
-      const system = buildSystemPrompt(context, retrieved, req.user, editMode);
-      const result = await provider.complete({ system, messages });
+      const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web);
+      const result = await provider.complete({ system, messages, webSearch: !!search_web });
       const { clean, ui_events, actions } = parseModelBlock(result.text);
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
@@ -303,12 +306,14 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         }
       }
 
-      const sources = retrieved.map(r => ({ type: r.entity_type, id: r.id, origin: 'plataforma' }));
-      if (search_web) {
-        // La búsqueda en internet se marca aquí como origen distinto. La
-        // integración del buscador queda pendiente de decidir proveedor.
-        sources.push({ type: 'web', id: 'pendiente', origin: 'internet' } as any);
-      }
+      const sources = [
+        ...retrieved.map(r => ({ type: r.entity_type, id: r.id, origin: 'plataforma' })),
+        // Solo aparecen aquí las páginas que el modelo realmente citó al usar
+        // la herramienta de búsqueda — si activó `search_web` pero no hizo
+        // falta buscar nada, no se añade ninguna (a diferencia del aviso fijo
+        // anterior, que se mostraba siempre aunque no se hubiese buscado).
+        ...result.webSources.map(w => ({ type: 'web', id: w.url, url: w.url, title: w.title, origin: 'internet' })),
+      ];
 
       await db.execute(sql`
         INSERT INTO ai_messages (conversation_id, role, content, sources, entities_used, actions,

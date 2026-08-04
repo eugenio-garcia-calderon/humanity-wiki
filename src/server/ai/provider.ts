@@ -19,6 +19,13 @@ export interface AICompletionRequest {
   messages: AIMessage[];
   maxTokens?: number;
   temperature?: number;
+  /** Activa la búsqueda real en internet (herramienta nativa del proveedor, si la tiene). */
+  webSearch?: boolean;
+}
+
+export interface WebSource {
+  url: string;
+  title: string;
 }
 
 export interface AICompletionResult {
@@ -26,9 +33,11 @@ export interface AICompletionResult {
   model: string;
   inputTokens: number;
   outputTokens: number;
-  /** Coste estimado en céntimos de euro. */
+  /** Coste estimado en céntimos de euro (no incluye el coste de las búsquedas web, si las hubo). */
   costCents: number;
   durationMs: number;
+  /** Páginas citadas por el modelo al usar la búsqueda web, si `webSearch` estaba activo. */
+  webSources: WebSource[];
 }
 
 export interface AIProvider {
@@ -65,6 +74,20 @@ export class ClaudeProvider implements AIProvider {
     }
     const started = Date.now();
 
+    const body: Record<string, any> = {
+      model: CLAUDE_MODEL,
+      max_tokens: req.maxTokens ?? 2048,
+      temperature: req.temperature ?? 0.2,
+      system: req.system,
+      messages: req.messages,
+    };
+    // Herramienta de búsqueda web nativa de Anthropic: la ejecuta el propio
+    // servidor de Claude dentro de esta misma llamada (no hace falta bucle
+    // agente-herramienta en nuestro backend, ni clave de un buscador aparte).
+    if (req.webSearch) {
+      body.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }];
+    }
+
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -72,13 +95,7 @@ export class ClaudeProvider implements AIProvider {
         'x-api-key': process.env.ANTHROPIC_API_KEY!,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: req.maxTokens ?? 2048,
-        temperature: req.temperature ?? 0.2,
-        system: req.system,
-        messages: req.messages,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -87,10 +104,24 @@ export class ClaudeProvider implements AIProvider {
     }
 
     const json: any = await res.json();
-    const text = (json.content || [])
+    const content: any[] = json.content || [];
+    const text = content
       .filter((b: any) => b.type === 'text')
       .map((b: any) => b.text)
       .join('\n');
+
+    // Las citas de páginas reales usadas por el modelo viajan dentro de los
+    // bloques de texto que se apoyaron en la búsqueda (`citations`), no en un
+    // campo aparte — se deduplican por URL.
+    const webSources: WebSource[] = [];
+    for (const block of content) {
+      if (block.type !== 'text' || !Array.isArray(block.citations)) continue;
+      for (const c of block.citations) {
+        if (c.url && !webSources.some(w => w.url === c.url)) {
+          webSources.push({ url: c.url, title: c.title || c.url });
+        }
+      }
+    }
 
     const inputTokens = json.usage?.input_tokens ?? 0;
     const outputTokens = json.usage?.output_tokens ?? 0;
@@ -104,6 +135,7 @@ export class ClaudeProvider implements AIProvider {
         (inputTokens / 1_000_000) * PRICE_PER_MTOK.input +
         (outputTokens / 1_000_000) * PRICE_PER_MTOK.output,
       durationMs: Date.now() - started,
+      webSources,
     };
   }
 }

@@ -32,10 +32,9 @@ todo construido y verificado en modo test. Pendiente, acción del usuario:
 ### Fase 9 — Asistente IA (activo, faltan mejoras opcionales)
 Proveedor abstracto, RAG (con dos fallos reales corregidos), agente de
 acciones con catálogo cerrado, panel acoplado con permisos de edición y ancho
-redimensionable, panel de administración con costes y vacíos de conocimiento.
-Pendiente (tareas #99-101 del backlog de sesión):
-- Búsqueda real en internet (el botón y la distinción de origen ya están;
-  falta conectar el `web_search` nativo de Claude o decidir otro proveedor).
+redimensionable, panel de administración con costes y vacíos de conocimiento,
+**búsqueda real en internet** (herramienta nativa `web_search_20250305` de
+Claude, con citas reales verificadas — completada el 2026-08-04). Pendiente:
 - Multimodal (imágenes/PDF): la estructura de mensajes lo admite, falta la
   ingesta. Voz/Excel/Word explícitamente aparcados (necesitan pipelines
   aparte).
