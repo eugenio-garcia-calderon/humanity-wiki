@@ -1,21 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, User, LogOut, Heart, Settings, Check, Store } from 'lucide-react';
+import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Network } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
 import AIAssistant from '../ai/AIAssistant';
-import GlobalSearch from '../ui/GlobalSearch';
 
 // ============================================================================
-// Layout — reestructuración Fase 11 (2026-08-05, decisión del usuario)
+// Layout — barra superior mínima (2026-08-05, decisión del usuario)
 // ============================================================================
-// El menú pasa ARRIBA en toda la aplicación, fusionado con el buscador global
-// y los ajustes en una sola barra superior. La barra inferior desaparece: en
-// las páginas de Grafos de Conocimiento (el nuevo inicio), abajo vive el
-// chat/buscador de IA siempre desplegado; en el resto, el asistente sigue
-// siendo el panel acoplado a la derecha.
+// Sin menú hamburguesa y sin buscador global: la marca «Humanity Wiki», dos
+// destinos primarios (Mapa y Grafos) y las acciones. Todo lo demás se
+// encuentra con el chat de IA de la parte inferior.
 
 export default function Layout() {
   const location = useLocation();
@@ -24,16 +21,11 @@ export default function Layout() {
   const { updateCounter } = useEdit();
   const { fontScale, setFontScale } = useSettings();
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
       if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
         setSettingsOpen(false);
       }
@@ -42,25 +34,6 @@ export default function Layout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navItems = [
-    { name: 'Grafos de Conocimiento', path: '/' },
-    { name: 'Mapa', path: '/mapa' },
-    { name: 'Muro', path: '/muro' },
-    { name: 'Objetivos', path: '/objetivos' },
-    { name: 'Indicadores', path: '/indicadores' },
-    { name: 'Retos', path: '/retos' },
-    { name: 'Soluciones', path: '/soluciones' },
-    { name: 'Territorios', path: '/territorios' },
-    { name: 'Proyectos', path: '/proyectos' },
-    { name: 'Organizaciones', path: '/organizaciones' },
-    { name: 'Sobre la plataforma', path: '/sobre-red-humana' },
-    { name: 'Contribuye', path: '/contribuye' }
-  ];
-
-  if (user) {
-    navItems.push({ name: 'Diseño', path: '/admin/design' });
-  }
-
   // Modo embed: la app se incrusta a sí misma (p. ej. el mapa dentro de una
   // ventana de conocimiento) sin barra superior ni asistente.
   const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
@@ -68,7 +41,9 @@ export default function Layout() {
   // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
   // completa y chat de IA como barra inferior.
   const isGrafosPage = location.pathname === '/' || location.pathname.startsWith('/grafos');
-  const fullBleed = isMapPage || isGrafosPage;
+  // /mapas (el grafo de mapas) también es lienzo a sangre con la barra de IA.
+  const isMapasPage = location.pathname === '/mapas';
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage;
 
   if (isEmbed) {
     return (
@@ -80,54 +55,42 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
-      {/* Barra superior única: menú + marca + buscador global + acciones */}
+      {/* Barra superior mínima: marca + Mapa/Grafos + acciones */}
       <header className="h-14 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 sm:px-6 flex items-center gap-3 z-40 shrink-0 shadow-sm">
-        {/* Menú */}
-        <div className="relative shrink-0" ref={menuRef}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium"
-            title="Menú principal"
-          >
-            <Menu className="w-4 h-4" />
-            <span className="hidden md:inline text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Menú</span>
-          </button>
-          {menuOpen && (
-            <div className="absolute top-full left-0 mt-2 w-60 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
-                Navegación
-              </div>
-              {navItems.map(item => {
-                const isActive = location.pathname === item.path || location.pathname + location.search === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMenuOpen(false)}
-                    className={cn(
-                      "block px-4 py-2.5 text-sm transition-colors font-medium",
-                      isActive ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-700 hover:bg-slate-50 hover:text-emerald-600"
-                    )}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
         {/* Marca */}
         <Link to="/" className="shrink-0 hover:opacity-85 transition-opacity">
           <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
-            humanity<span className="text-emerald-600">.wiki</span>
+            Humanity<span className="text-emerald-600"> Wiki</span>
           </span>
         </Link>
 
-        {/* Buscador global centrado */}
-        <div className="flex-1 flex justify-center min-w-0">
-          <GlobalSearch />
-        </div>
+        {/* Destinos primarios */}
+        <nav className="flex items-center gap-1.5 ml-1 sm:ml-3">
+          <Link
+            to="/mapa"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/mapa'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <MapIcon className="w-3.5 h-3.5" /> Mapa
+          </Link>
+          <Link
+            to="/"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/' || location.pathname.startsWith('/grafos')
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <Network className="w-3.5 h-3.5" /> Grafos
+          </Link>
+        </nav>
+
+        <div className="flex-1" />
 
         {/* Acciones a la derecha */}
         <div className="flex items-center gap-2 shrink-0">
@@ -208,7 +171,7 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
-        <AIAssistant mode={isGrafosPage ? 'bar' : 'dock'} />
+        <AIAssistant mode={isGrafosPage || isMapasPage ? 'bar' : 'dock'} />
       </div>
 
       {!fullBleed && (

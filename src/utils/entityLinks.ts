@@ -20,6 +20,7 @@ export interface ResolvedLink {
  */
 const CHALLENGE_GRAPH_SLUG: Record<string, string> = {
   R017: 'incendios-espana', // Incendios
+  R021: 'ceuta-frontera-amenazada', // Presión sobre la frontera sur
 };
 
 /** A dónde debe llevar el clic en un reto concreto, en cualquier parte de la app. */

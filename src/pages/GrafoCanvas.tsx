@@ -12,7 +12,7 @@ import {
   ArrowLeft, X, Eye, MessageCircle, Sparkles, User as UserIcon, Network,
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon, MapPin,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
-  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown,
+  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown, Flame,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useHelpers } from '../contexts/DataContext';
@@ -169,16 +169,25 @@ function CenterHandles() {
 // ----------------------------------------------------------------------------
 function CenterNode({ data }: NodeProps<any>) {
   const g = (data as any).graph;
+  // Grafo de RETO: anclado a un challenge — identidad visual roja y la
+  // palabra «Reto» presente en el propio centro (petición del usuario).
+  const isReto = !!(data as any).isReto;
   const left = g.center?.left;
   const right = g.center?.right;
   const cat = g.center?.category;
   const vari = g.center?.variable;
 
+  const retoChip = isReto ? (
+    <span className="mb-1.5 inline-flex items-center gap-1 bg-red-600 text-white text-[9px] font-black uppercase tracking-[0.22em] px-2.5 py-0.5 rounded-full shadow-lg">
+      <Flame className="w-2.5 h-2.5" /> Reto
+    </span>
+  ) : null;
+
   // Jerarquía: una gran CATEGORÍA con su variable (p. ej. territorio) como
   // etiqueta subordinada debajo — para títulos largos que no caben en la
   // fusión de dos círculos iguales.
   if (cat?.label) {
-    const accent = cat.color || '#ef4444';
+    const accent = isReto ? '#ef4444' : (cat.color || '#10b981');
     return (
       <div className="flex flex-col items-center" style={{ width: CENTER_W }}>
         <CenterHandles />
@@ -186,6 +195,7 @@ function CenterNode({ data }: NodeProps<any>) {
           className="w-[215px] h-[215px] rounded-full bg-slate-900 shadow-2xl flex flex-col items-center justify-center text-center px-5"
           style={{ border: `4px solid ${accent}`, boxShadow: `0 0 60px ${accent}33, 0 25px 50px -12px rgb(0 0 0 / 0.4)` }}
         >
+          {retoChip}
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1.5" style={{ color: accent }}>
             {cat.sublabel || 'Categoría'}
           </p>
@@ -214,6 +224,7 @@ function CenterNode({ data }: NodeProps<any>) {
     return (
       <div className="flex flex-col items-center" style={{ width: CENTER_W }}>
         <CenterHandles />
+        {retoChip && <div className="mb-1 z-20">{retoChip}</div>}
         <div className="flex items-center">
           <div className="w-[150px] h-[150px] rounded-full bg-slate-900 border-4 border-emerald-500 shadow-2xl flex flex-col items-center justify-center text-center px-4 z-10">
             <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400 mb-1">{left.sublabel || 'Entidad'}</p>
@@ -494,7 +505,10 @@ export default function GrafoCanvas() {
       id: '__center__', type: 'centro',
       position: { x: -CENTER_W / 2, y: -CENTER_H / 2 },
       draggable: false, selectable: false,
-      data: { graph: data.graph },
+      data: {
+        graph: data.graph,
+        isReto: (data.entity_links || []).some((l: any) => l.entity_type === 'challenges'),
+      },
     };
 
     const branchIds = activeBranch ? branchWindowIds(data.edges, activeBranch.edgeId) : null;

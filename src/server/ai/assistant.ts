@@ -185,7 +185,7 @@ ${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content
 
 GRAFOS DE CONOCIMIENTO PUBLICADOS (lienzos curados de un tema; si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo):
 ${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
-Si el usuario pide explorar un tema del que NO existe grafo, puedes proponer la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales ({title, kind, config}) — se creará en borrador para revisión humana.
+Si el usuario pide CREAR un grafo (o explorar un tema del que NO existe grafo), propón la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales. Cada window: {title, kind, config, relation, relation_label}. kind SOLO puede ser: publicacion (config: {title, body}), imagen ({image_url, caption, source}), video ({youtube_id, channel}), wikipedia ({wiki_lang, wiki_page}), enlace ({url, title}), grafica ({chart: 'line'|'donut', series/segments...}), ficha ({rows: [{label, value}]}), texto ({body}). relation (la arista desde el centro): contexto | causa | dato | fuente | apoya | contradice | matiza, con relation_label como pregunta corta (p. ej. "¿qué está pasando?"). Investiga ANTES en internet si está activado y llena las ventanas con datos, cifras y fuentes REALES (nunca inventadas); el grafo nace en borrador para revisión humana. Es una de tus funciones principales: sé un auténtico creador de grafos.
 Si el usuario pide crear un MAPA a su nombre (una vista pública del mapa de la humanidad), propón la acción CREATE_MAP con title, description y opcionalmente territorio (slug, p. ej. "espana"), nivel ("objetivo"|"indicador"|"marcador"|"metrica") e id (el id de esa entidad) — se publicará a su nombre y podrá abrirse con OPEN_USER_MAP {slug}. Límite: los usuarios de nivel 1 pueden tener hasta 5 grafos y 5 mapas; nivel 2+ sin límite.
 
 REGLAS:
@@ -215,10 +215,13 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
   const parseModelBlock = (text: string): { clean: string; ui_events: any[]; actions: any[] } => {
-    const m = text.match(/```redhumana\s*([\s\S]*?)```/);
+    // El cierre ``` puede faltar si la respuesta se truncó por max_tokens:
+    // aun así el bloque se RETIRA del texto visible (nunca se enseña JSON
+    // crudo al usuario) aunque sus acciones ya no se puedan recuperar.
+    const m = text.match(/```redhumana\s*([\s\S]*?)(?:```|$)/);
     if (!m) return { clean: text.trim(), ui_events: [], actions: [] };
     let parsed: any = {};
-    try { parsed = JSON.parse(m[1]); } catch { /* bloque mal formado: se ignora */ }
+    try { parsed = JSON.parse(m[1]); } catch { /* bloque mal formado o truncado: se ignora */ }
     return {
       clean: text.replace(m[0], '').trim(),
       ui_events: Array.isArray(parsed.ui_events) ? parsed.ui_events.filter((e: any) => UI_EVENTS.includes(e?.type)) : [],
@@ -563,9 +566,13 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
           const limitMsg = await graphLimitReached(db, actorId, actorLevel, 'knowledge_graphs');
           if (limitMsg) return { ok: false, error: limitMsg };
           const id = newId('KG');
-          const slug = String(params.slug || params.title || id).toLowerCase()
+          let slug = String(params.slug || params.title || id).toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          // El slug es UNIQUE (incluye grafos archivados): si ya existe, se
+          // le a\u00f1ade un sufijo en vez de tumbar toda la creaci\u00f3n.
+          const clash = await db.execute(sql`SELECT 1 FROM knowledge_graphs WHERE slug = ${slug} LIMIT 1`);
+          if ((clash.rows as any[]).length) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
           await db.execute(sql`
             INSERT INTO knowledge_graphs (id, title, slug, description, creator_user_id, trigger_keywords,
                                           status, is_ai_generated, created_by, updated_by)
@@ -573,27 +580,39 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
                     ${JSON.stringify(params.trigger_keywords || [])}::jsonb,
                     'borrador', true, ${actorId}, ${actorId})
           `);
+          // Los `kind` que proponga el modelo se sanean contra el CHECK de la
+          // tabla (un kind inventado tumbaba TODA la creación del grafo); una
+          // ventana defectuosa se salta sin arrastrar a las demás.
+          const VALID_KINDS = new Set(['publicacion', 'imagen', 'video', 'wikipedia', 'enlace', 'mapa',
+            'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'producto', 'soluciones', 'texto']);
+          const VALID_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);
           let i = 0;
           for (const w of (params.windows || []).slice(0, 12)) {
-            if (!w?.title || !w?.kind) continue;
-            const wid = newId('KW');
-            await db.execute(sql`
-              INSERT INTO knowledge_windows (id, title, kind, config, creator_user_id, is_ai_generated, created_by, updated_by)
-              VALUES (${wid}, ${w.title}, ${w.kind}, ${JSON.stringify(w.config || {})}::jsonb,
-                      ${actorId}, true, ${actorId}, ${actorId})
-            `);
-            const angle = (i / Math.max((params.windows || []).length, 1)) * 2 * Math.PI;
-            await db.execute(sql`
-              INSERT INTO graph_windows (graph_id, window_id, x, y)
-              VALUES (${id}, ${wid}, ${Math.round(Math.cos(angle) * 520)}, ${Math.round(Math.sin(angle) * 380)})
-            `);
-            await db.execute(sql`
-              INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation)
-              VALUES (${id}, NULL, ${wid}, 'contexto')
-            `);
-            i++;
+            if (!w?.title) continue;
+            try {
+              const wid = newId('KW');
+              const kind = VALID_KINDS.has(w.kind) ? w.kind : 'ficha';
+              await db.execute(sql`
+                INSERT INTO knowledge_windows (id, title, kind, config, creator_user_id, is_ai_generated, created_by, updated_by)
+                VALUES (${wid}, ${w.title}, ${kind}, ${JSON.stringify(w.config || {})}::jsonb,
+                        ${actorId}, true, ${actorId}, ${actorId})
+              `);
+              const angle = (i / Math.max((params.windows || []).length, 1)) * 2 * Math.PI;
+              await db.execute(sql`
+                INSERT INTO graph_windows (graph_id, window_id, x, y)
+                VALUES (${id}, ${wid}, ${Math.round(Math.cos(angle) * 620)}, ${Math.round(Math.sin(angle) * 450)})
+              `);
+              const relation = VALID_RELATIONS.has(w.relation) ? w.relation : 'contexto';
+              await db.execute(sql`
+                INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label)
+                VALUES (${id}, NULL, ${wid}, ${relation}, ${w.relation_label || null})
+              `);
+              i++;
+            } catch (we) {
+              console.error('CREATE_KNOWLEDGE_GRAPH: ventana saltada:', (we as any)?.message);
+            }
           }
-          return { ok: true, entityId: id, entityType: 'knowledge_graphs', slug, status: 'borrador' };
+          return { ok: true, entityId: id, entityType: 'knowledge_graphs', slug, status: 'borrador', windows: i };
         }
         case 'CREATE_MAP': {
           // Mapa público a nombre del usuario: una vista del mapa de la
