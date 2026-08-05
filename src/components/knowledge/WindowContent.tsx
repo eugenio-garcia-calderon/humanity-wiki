@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ExternalLink, PlayCircle, BookOpen, Link2, Map as MapIcon, Quote,
   Users as UsersIcon, Network, FileText, CalendarClock,
@@ -11,6 +12,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis
 // `variant='node'`: miniatura dentro del lienzo del grafo.
 // `variant='full'`: contenido completo en el panel lateral derecho.
 // La configuración de cada tipo está documentada en knowledge.ts (backend).
+
+const cn2 = (...cls: Array<string | false | undefined>) => cls.filter(Boolean).join(' ');
 
 const CHART_COLORS = ['#059669', '#0284c7', '#d97706', '#7c3aed', '#dc2626', '#64748b', '#0d9488'];
 
@@ -268,13 +271,34 @@ export default function WindowContent({ kind, config, variant }: {
         </div>
       );
 
-    case 'grafo':
-      return (
-        <div className="flex items-center gap-2 text-xs text-slate-600">
-          <Network className="w-4 h-4 text-emerald-500 shrink-0" />
-          <span>{config.description || 'Grafo de conocimiento relacionado'}</span>
+    case 'grafo': {
+      // Referencia a otro grafo con PORTADA: aparece como tarjeta de
+      // presentación y el enlace lo abre (petición del usuario, 2026-08-05).
+      const cover = (
+        <div className={cn2(
+          'relative rounded-xl overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-700 to-indigo-800 text-white flex flex-col justify-end',
+          isNode ? 'h-32 p-3' : 'h-44 p-4'
+        )}>
+          <Network className={isNode ? 'absolute top-2.5 right-2.5 w-5 h-5 text-white/40' : 'absolute top-3 right-3 w-7 h-7 text-white/40'} />
+          <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-200 mb-0.5">Grafo de Conocimiento</p>
+          <p className={isNode ? 'text-sm font-black leading-tight line-clamp-2' : 'text-lg font-black leading-tight'}>{config.title || 'Grafo relacionado'}</p>
+          {config.creator_name && <p className="text-[9px] text-white/70 mt-0.5">de {config.creator_name}</p>}
         </div>
       );
+      if (isNode) return cover;
+      return (
+        <div className="space-y-2.5">
+          {cover}
+          {config.description && <p className="text-sm text-slate-600 leading-relaxed">{config.description}</p>}
+          {config.graph_slug && (
+            <Link to={`/grafos/${config.graph_slug}`}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors">
+              <Network className="w-4 h-4" /> Abrir grafo
+            </Link>
+          )}
+        </div>
+      );
+    }
 
     case 'texto':
     default:

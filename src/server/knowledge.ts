@@ -68,13 +68,20 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   // ==========================================================================
   app.get('/api/graphs', async (req: Request, res: Response) => {
     try {
+      // ?creator_id= filtra los grafos de una persona (su carta de
+      // presentación en el perfil). Los borradores solo los ve su creador o
+      // un administrador.
+      const creatorId = (req.query.creator_id as string) || null;
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
                g.created_at, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
                (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
-        WHERE g.archived_at IS NULL AND (g.status = 'publicado' OR g.creator_user_id = ${req.user?.id || null})
+        WHERE g.archived_at IS NULL
+          AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
+          AND (g.status = 'publicado' OR g.creator_user_id = ${req.user?.id || null}
+               OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
         ORDER BY g.views DESC, g.created_at DESC
         LIMIT 60
       `);
@@ -140,8 +147,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL
       `);
       const edges = await db.execute(sql`
-        SELECT id, from_window_id, to_window_id, relation, label
-        FROM graph_edges WHERE graph_id = ${graph.id}
+        SELECT e.id, e.from_window_id, e.to_window_id, e.relation, e.label,
+               e.description, e.created_at, u.display_name AS creator_name
+        FROM graph_edges e LEFT JOIN users u ON u.id = e.created_by
+        WHERE e.graph_id = ${graph.id}
       `);
 
       // Anclaje al grafo general de la plataforma (ontología, Fase 11b): de
@@ -166,6 +175,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
       const winIds = (windows.rows as any[]).map(w => w.id);
       const { agg, mine } = await ratingsFor('knowledge_windows', winIds, req.user?.id);
+      // Las conexiones también se valoran (protagonismo de las uniones).
+      const edgeIds = (edges.rows as any[]).map(e => String(e.id));
+      const eRatings = await ratingsFor('graph_edges', edgeIds, req.user?.id);
       const gRating = await ratingsFor('knowledge_graphs', [graph.id], req.user?.id);
       const comments = winIds.length ? await db.execute(sql`
         SELECT entity_id, count(*)::int AS n FROM comments
@@ -185,7 +197,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           my_score: mine[w.id] ?? null,
           comment_count: cMap[w.id] || 0,
         })),
-        edges: edges.rows,
+        edges: (edges.rows as any[]).map(e => ({
+          ...e,
+          rating: eRatings.agg[String(e.id)] || null,
+          my_score: eRatings.mine[String(e.id)] ?? null,
+        })),
         entity_links: entityLinks.rows,
         related_graphs: relatedGraphs.rows,
         can_edit: canEdit(req, graph.creator_user_id),
@@ -204,9 +220,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const id = newId('KG');
       const slug = d.slug || normalize(d.title).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       await db.execute(sql`
-        INSERT INTO knowledge_graphs (id, title, slug, description, creator_user_id, trigger_keywords,
+        INSERT INTO knowledge_graphs (id, title, slug, description, center, creator_user_id, trigger_keywords,
                                       status, is_ai_generated, created_by, updated_by)
-        VALUES (${id}, ${d.title}, ${slug}, ${d.description || null}, ${req.user!.id},
+        VALUES (${id}, ${d.title}, ${slug}, ${d.description || null},
+                ${JSON.stringify(d.center || {})}::jsonb, ${req.user!.id},
                 ${JSON.stringify(d.trigger_keywords || [])}::jsonb, ${d.status || 'publicado'},
                 ${!!d.is_ai_generated}, ${req.user!.id}, ${req.user!.id})
       `);
@@ -228,6 +245,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         UPDATE knowledge_graphs SET
           title = COALESCE(${d.title ?? null}, title),
           description = COALESCE(${d.description ?? null}, description),
+          center = COALESCE(${d.center ? JSON.stringify(d.center) : null}::jsonb, center),
           trigger_keywords = COALESCE(${d.trigger_keywords ? JSON.stringify(d.trigger_keywords) : null}::jsonb, trigger_keywords),
           status = COALESCE(${d.status ?? null}, status),
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
@@ -353,11 +371,35 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const d = req.body || {};
       const relation = EDGE_RELATIONS.has(d.relation) ? d.relation : 'contexto';
       const insert = await db.execute(sql`
-        INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label)
-        VALUES (${req.params.id}, ${d.from_window_id || null}, ${d.to_window_id}, ${relation}, ${d.label || null})
+        INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label, description, created_by, updated_by)
+        VALUES (${req.params.id}, ${d.from_window_id || null}, ${d.to_window_id}, ${relation}, ${d.label || null},
+                ${d.description || null}, ${req.user!.id}, ${req.user!.id})
         RETURNING *
       `);
       res.json(insert.rows[0]);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Editar los atributos de una conexión (creador del grafo o administrador). */
+  app.put('/api/graphs/:id/edges/:edgeId', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const g = await db.execute(sql`SELECT creator_user_id FROM knowledge_graphs WHERE id = ${req.params.id}`);
+      if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
+      if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden editar sus conexiones.' });
+      }
+      const d = req.body || {};
+      const relation = d.relation && EDGE_RELATIONS.has(d.relation) ? d.relation : null;
+      await db.execute(sql`
+        UPDATE graph_edges SET
+          relation = COALESCE(${relation}, relation),
+          label = COALESCE(${d.label ?? null}, label),
+          description = COALESCE(${d.description ?? null}, description),
+          updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}
+      `);
+      res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

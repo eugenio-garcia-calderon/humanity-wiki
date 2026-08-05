@@ -210,19 +210,31 @@ const WINDOWS: WindowSeed[] = [
 // Aristas: el centro conecta con todo; las relaciones tipadas cuentan la
 // historia (la roja "contradice" entre el análisis y el documento de EE. UU.
 // es el corazón didáctico del grafo).
-const EDGES: Array<{ from: string | null; to: string; relation: string; label?: string }> = [
-  { from: null, to: 'KW_CEUTA_CONTEXTO', relation: 'contexto', label: 'qué está pasando' },
-  { from: null, to: 'KW_CEUTA_MAPA_EOM', relation: 'dato', label: 'enclave geoestratégico' },
-  { from: null, to: 'KW_CEUTA_DOC_EEUU', relation: 'fuente', label: 'documento oficial' },
-  { from: null, to: 'KW_CEUTA_VIDEO', relation: 'contexto', label: 'la historia' },
-  { from: null, to: 'KW_CEUTA_WIKI', relation: 'fuente' },
-  { from: null, to: 'KW_CEUTA_MAPA_IND', relation: 'dato', label: 'indicadores del territorio' },
-  { from: null, to: 'KW_CEUTA_CRONO', relation: 'contexto', label: 'línea de tiempo' },
-  { from: null, to: 'KW_CEUTA_ENCUESTA', relation: 'dato', label: 'percepción ciudadana' },
-  { from: null, to: 'KW_CEUTA_AUTORES', relation: 'fuente', label: 'para profundizar' },
-  { from: 'KW_CEUTA_ANALISIS', to: 'KW_CEUTA_DOC_EEUU', relation: 'contradice', label: 'réplica jurídica' },
-  { from: 'KW_CEUTA_CRONO', to: 'KW_CEUTA_ANALISIS', relation: 'apoya', label: 'los hechos históricos' },
-  { from: 'KW_CEUTA_MAPA_EOM', to: 'KW_CEUTA_CONTEXTO', relation: 'causa', label: 'la geografía lo explica' },
+const EDGES: Array<{ from: string | null; to: string; relation: string; label?: string; description?: string }> = [
+  { from: null, to: 'KW_CEUTA_CONTEXTO', relation: 'contexto', label: 'qué está pasando',
+    description: 'La puerta de entrada al grafo: los hechos de la crisis actual, sin los cuales el resto de piezas no se entienden.' },
+  { from: null, to: 'KW_CEUTA_MAPA_EOM', relation: 'dato', label: 'enclave geoestratégico',
+    description: 'El mapa condensa la evidencia geográfica: 14 km de mar por los que pasa el tráfico global, la migración y las disputas de soberanía a la vez.' },
+  { from: null, to: 'KW_CEUTA_DOC_EEUU', relation: 'fuente', label: 'documento oficial',
+    description: 'Fuente primaria en su literalidad: el texto exacto del informe del comité del Senado de EE. UU. que reabrió la disputa, sin interpretaciones intermedias.' },
+  { from: null, to: 'KW_CEUTA_VIDEO', relation: 'contexto', label: 'la historia',
+    description: 'Seis siglos en vídeo: sin la historia de las dos ciudades no se puede juzgar la reclamación actual.' },
+  { from: null, to: 'KW_CEUTA_WIKI', relation: 'fuente',
+    description: 'La ficha enciclopédica de referencia, con los datos básicos verificables del territorio.' },
+  { from: null, to: 'KW_CEUTA_MAPA_IND', relation: 'dato', label: 'indicadores del territorio',
+    description: 'Los 14 objetivos de la plataforma medidos sobre Ceuta: el estado real del territorio más allá del titular.' },
+  { from: null, to: 'KW_CEUTA_CRONO', relation: 'contexto', label: 'línea de tiempo',
+    description: 'Los diez hitos que ordenan cronológicamente todo lo que muestran las demás ventanas.' },
+  { from: null, to: 'KW_CEUTA_ENCUESTA', relation: 'dato', label: 'percepción ciudadana',
+    description: 'Qué preocupa a quienes viven allí — la dimensión humana que suele faltar en el debate geopolítico. Datos orientativos de IA, pendientes de encuesta real.' },
+  { from: null, to: 'KW_CEUTA_AUTORES', relation: 'fuente', label: 'para profundizar',
+    description: 'Autores y fuentes de referencia para seguir tirando del hilo con rigor.' },
+  { from: 'KW_CEUTA_ANALISIS', to: 'KW_CEUTA_DOC_EEUU', relation: 'contradice', label: 'réplica jurídica',
+    description: 'El corazón del grafo: el análisis jurídico-histórico disputa la premisa del informe estadounidense (la presencia española es anterior al Estado marroquí y la ONU no considera a Ceuta territorio pendiente de descolonización). Dos piezas enfrentadas, las dos con fuente — así se muestra una controversia honestamente.' },
+  { from: 'KW_CEUTA_CRONO', to: 'KW_CEUTA_ANALISIS', relation: 'apoya', label: 'los hechos históricos',
+    description: 'Las fechas de la cronología (1415, 1497, 1668, 1956…) son la base factual sobre la que se sostiene el argumento jurídico.' },
+  { from: 'KW_CEUTA_MAPA_EOM', to: 'KW_CEUTA_CONTEXTO', relation: 'causa', label: 'la geografía lo explica',
+    description: 'La crisis migratoria no es casualidad: ocurre exactamente donde la geografía comprime todos los flujos — el mapa explica el porqué del suceso.' },
 ];
 
 async function main() {
@@ -256,9 +268,10 @@ async function main() {
 
   // El grafo.
   await db.execute(sql`
-    INSERT INTO knowledge_graphs (id, title, slug, description, creator_user_id, trigger_keywords, status, is_ai_generated, created_by, updated_by)
+    INSERT INTO knowledge_graphs (id, title, slug, description, center, creator_user_id, trigger_keywords, status, is_ai_generated, created_by, updated_by)
     VALUES (${GRAPH_ID}, 'Ceuta: la frontera amenazada', 'ceuta-frontera-amenazada',
             'Por qué 14 kilómetros de mar concentran historia, geopolítica, migración y convivencia. El conocimiento conectado para entender un problema complejo — no un titular.',
+            ${JSON.stringify({ left: { label: 'Ceuta', sublabel: 'Territorio' }, right: { label: 'Amenaza', sublabel: 'Concepto' } })}::jsonb,
             ${EUGENIO},
             ${JSON.stringify(['ceuta', 'frontera', 'amenaza', 'ceuta frontera', 'frontera sur', 'melilla', 'marruecos', 'inmigracion', 'migracion', 'crisis migratoria', 'estrecho de gibraltar'])}::jsonb,
             'publicado', false, ${EUGENIO}, ${EUGENIO})
@@ -276,8 +289,9 @@ async function main() {
   }
   for (const e of EDGES) {
     await db.execute(sql`
-      INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label)
-      VALUES (${GRAPH_ID}, ${e.from}, ${e.to}, ${e.relation}, ${e.label || null})
+      INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label, description, created_by, updated_by)
+      VALUES (${GRAPH_ID}, ${e.from}, ${e.to}, ${e.relation}, ${e.label || null},
+              ${e.description || null}, ${EUGENIO}, ${EUGENIO})
     `);
   }
 
