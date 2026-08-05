@@ -237,6 +237,74 @@ export function registerAuthRoutes(app: Express, db: any) {
   });
 
   // --------------------------------------------------------------------------
+  // Login con Google (Fase 13) — Google Identity Services
+  // --------------------------------------------------------------------------
+  // El frontend obtiene un ID token (JWT) del botón de Google y lo manda
+  // aquí. Se verifica contra el endpoint oficial de Google (tokeninfo) sin
+  // añadir dependencias: audiencia = nuestro client id y email verificado.
+  // Si el usuario existe (por google_id o por email) se vincula/inicia
+  // sesión; si no, se crea con nivel 1 — sin contraseña.
+
+  /** Configuración pública de autenticación (qué proveedores están activos). */
+  app.get('/api/auth/config', (_req: Request, res: Response) => {
+    res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null });
+  });
+
+  app.post('/api/auth/google', async (req: Request, res: Response) => {
+    try {
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      if (!clientId) return res.status(503).json({ error: 'El login con Google no está configurado.' });
+      const { credential } = req.body || {};
+      if (!credential) return res.status(400).json({ error: 'Falta el token de Google.' });
+
+      const infoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(String(credential))}`);
+      if (!infoRes.ok) return res.status(401).json({ error: 'Token de Google inválido.' });
+      const info: any = await infoRes.json();
+
+      if (info.aud !== clientId) return res.status(401).json({ error: 'Token de Google de otra aplicación.' });
+      if (info.email_verified !== 'true' && info.email_verified !== true) {
+        return res.status(401).json({ error: 'Tu email de Google no está verificado.' });
+      }
+      const googleId = String(info.sub);
+      const email = String(info.email).trim().toLowerCase();
+
+      // 1) ¿Ya vinculado a Google?
+      let row = (await db.execute(sql`SELECT * FROM users WHERE google_id = ${googleId} AND archived_at IS NULL`)).rows[0];
+
+      // 2) ¿Cuenta existente con ese email? → vincular (Google verifica el
+      //    email, así que es el mismo dueño).
+      if (!row) {
+        const byEmail = (await db.execute(sql`SELECT * FROM users WHERE lower(email) = ${email} AND archived_at IS NULL`)).rows[0];
+        if (byEmail) {
+          await db.execute(sql`
+            UPDATE users SET google_id = ${googleId}, email_verified = true,
+              avatar_url = COALESCE(avatar_url, ${info.picture || null})
+            WHERE id = ${(byEmail as any).id}
+          `);
+          row = (await db.execute(sql`SELECT * FROM users WHERE id = ${(byEmail as any).id}`)).rows[0];
+        }
+      }
+
+      // 3) Usuario nuevo: alta con nivel 1, sin contraseña.
+      if (!row) {
+        const id = `U${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        await db.execute(sql`
+          INSERT INTO users (id, email, name, display_name, avatar_url, google_id, role_level, email_verified, created_by)
+          VALUES (${id}, ${email}, ${info.name || null}, ${info.name || null},
+                  ${info.picture || null}, ${googleId}, ${ROLE.USER}, true, ${id})
+        `);
+        row = (await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)).rows[0];
+      }
+
+      await createSession(req, res, (row as any).id);
+      res.json({ user: rowToUser(row) });
+    } catch (e: any) {
+      console.error('google login error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
   // POST /api/auth/login
   // --------------------------------------------------------------------------
   app.post('/api/auth/login', async (req: Request, res: Response) => {

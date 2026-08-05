@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -17,8 +17,59 @@ export default function Login() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [busy, setBusy] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, refresh } = useAuth();
   const navigate = useNavigate();
+
+  // ---------------------------------------------------------------------------
+  // Login con Google (Fase 13): si el servidor tiene GOOGLE_CLIENT_ID
+  // configurado, se carga Google Identity Services y se muestra el botón.
+  // El ID token que devuelve Google se valida SIEMPRE en el servidor.
+  // ---------------------------------------------------------------------------
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/config').then(r => r.json())
+      .then(j => setGoogleClientId(j.googleClientId || null))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!googleClientId) return;
+    const init = () => {
+      const g = (window as any).google;
+      if (!g?.accounts?.id || !googleBtnRef.current) return;
+      g.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (resp: any) => {
+          setBusy(true);
+          setError('');
+          try {
+            const res = await fetch('/api/auth/google', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ credential: resp.credential }),
+            });
+            const json = await res.json();
+            if (res.ok) { await refresh(); navigate('/'); }
+            else setError(json.error || 'No se pudo iniciar sesión con Google.');
+          } finally {
+            setBusy(false);
+          }
+        },
+      });
+      g.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'outline', size: 'large', width: 320, text: 'continue_with', locale: 'es',
+      });
+    };
+    if ((window as any).google?.accounts?.id) { init(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.onload = init;
+    document.head.appendChild(s);
+  }, [googleClientId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +116,17 @@ export default function Login() {
           <h2 className="text-2xl font-light tracking-tighter italic">{titles[mode]}</h2>
           <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest">Humanity.wiki</p>
         </div>
+
+        {googleClientId && mode !== 'forgot' && (
+          <div className="mb-6">
+            <div ref={googleBtnRef} className="flex justify-center" />
+            <div className="flex items-center gap-3 mt-6">
+              <div className="flex-1 h-px bg-slate-100" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">o con tu email</span>
+              <div className="flex-1 h-px bg-slate-100" />
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'register' && (
