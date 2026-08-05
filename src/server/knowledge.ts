@@ -25,7 +25,7 @@ export const normalize = (s: string) =>
 
 const WINDOW_KINDS = new Set([
   'publicacion', 'imagen', 'video', 'wikipedia', 'enlace', 'mapa',
-  'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto', 'producto',
+  'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto', 'producto', 'soluciones',
 ]);
 
 const EDGE_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);

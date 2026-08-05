@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ExternalLink, PlayCircle, BookOpen, Link2, Map as MapIcon, Quote,
-  Users as UsersIcon, Network, FileText, CalendarClock,
+  Users as UsersIcon, Network, FileText, CalendarClock, Lightbulb,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 
@@ -329,6 +329,42 @@ export default function WindowContent({ kind, config, variant }: {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-bold transition-colors">
             Ver en el Mercado
           </Link>
+        </div>
+      );
+    }
+
+    case 'soluciones': {
+      // Tarjetas de soluciones (la tecnología de tarjetas de la plataforma,
+      // embebida en el grafo). Cada item: {title, type, impact, cost,
+      // readiness, description, source_name, source_url, solution_id}.
+      const items: any[] = Array.isArray(config.items) ? config.items : [];
+      const shown = isNode ? items.slice(0, 2) : items;
+      const chip = (label: string, value: string, cls: string) => value ? (
+        <span className={cn2('text-[8px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full', cls)}>{label}: {value}</span>
+      ) : null;
+      return (
+        <div className="space-y-1.5">
+          {shown.map((s, i) => (
+            <div key={i} className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-2.5">
+              <p className={cn2('font-black text-slate-900 leading-tight flex items-start gap-1.5', isNode ? 'text-[11px]' : 'text-sm')}>
+                <Lightbulb className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" /> {s.title}
+              </p>
+              {!isNode && s.description && (
+                <p className="text-xs text-slate-600 leading-relaxed mt-1">{s.description}</p>
+              )}
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {chip('Impacto', s.impact, 'bg-emerald-100 text-emerald-700')}
+                {chip('Coste', s.cost, 'bg-amber-100 text-amber-700')}
+                {chip('Madurez', s.readiness, 'bg-sky-100 text-sky-700')}
+              </div>
+              {!isNode && (s.source_name || s.source_url) && (
+                <div className="mt-1.5"><SourceCredit name={s.source_name} url={s.source_url} /></div>
+              )}
+            </div>
+          ))}
+          {isNode && items.length > 2 && (
+            <p className="text-[10px] text-slate-400 text-center">+{items.length - 2} soluciones más — abre la ventana</p>
+          )}
         </div>
       );
     }

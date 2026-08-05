@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import Stripe from "stripe";
 import geoip from "geoip-lite";
 import { db } from "./src/db/index.js";
@@ -1868,6 +1867,9 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== "production") {
+    // Import dinámico: vite solo existe (y solo hace falta) en desarrollo —
+    // el bundle de producción nunca lo carga.
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

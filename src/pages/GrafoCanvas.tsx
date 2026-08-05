@@ -11,7 +11,7 @@ import {
   ArrowLeft, X, Eye, MessageCircle, Sparkles, User as UserIcon, Network,
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
-  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag,
+  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useHelpers } from '../contexts/DataContext';
@@ -51,6 +51,7 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   documento:   { label: 'Documento',   icon: FileText,       chip: 'bg-rose-50 text-rose-700' },
   grafo:       { label: 'Grafo',       icon: Network,        chip: 'bg-emerald-50 text-emerald-700' },
   producto:    { label: 'Producto',    icon: ShoppingBag,     chip: 'bg-amber-50 text-amber-700' },
+  soluciones:  { label: 'Soluciones',  icon: Lightbulb,       chip: 'bg-emerald-50 text-emerald-700' },
   texto:       { label: 'Texto',       icon: FileText,       chip: 'bg-slate-100 text-slate-600' },
 };
 
