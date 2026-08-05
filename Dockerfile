@@ -10,6 +10,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 COPY . .
+# Las VITE_* se incrustan en el bundle en tiempo de build: hay que pasarlas
+# como build-arg (docker-compose las lee de .env.production), no por env_file.
+ARG VITE_MAPBOX_TOKEN
+ENV VITE_MAPBOX_TOKEN=$VITE_MAPBOX_TOKEN
 RUN npm run build
 
 FROM node:22-alpine
