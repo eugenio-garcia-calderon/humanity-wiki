@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Send, User as UserIcon } from 'lucide-react';
+import { Send, User as UserIcon, Sparkles } from 'lucide-react';
 import { useAuth, ROLE } from '../../contexts/AuthContext';
 
 // ============================================================================
@@ -34,6 +34,15 @@ export default function EntityComments({ entityType, entityId, onCountChange }: 
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
 
+  const refetch = () => {
+    fetch(`/api/comments?entity_type=${entityType}&entity_id=${encodeURIComponent(entityId)}`)
+      .then(r => r.json())
+      .then(json => {
+        if (Array.isArray(json)) { setComments(json); onCountChange?.(json.length); }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -42,6 +51,7 @@ export default function EntityComments({ entityType, entityId, onCountChange }: 
       .then(json => { if (!cancelled) setComments(Array.isArray(json) ? json : []); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType, entityId]);
 
   const send = async () => {
@@ -59,6 +69,10 @@ export default function EntityComments({ entityType, entityId, onCountChange }: 
       if (res.ok) {
         setComments(c => { onCountChange?.(c.length + 1); return [...c, json]; });
         setText('');
+        // La IA de Conocimiento responde en segundo plano — se recarga en
+        // unos segundos para que la persona vea su respuesta al instante.
+        setTimeout(refetch, 5000);
+        setTimeout(refetch, 12000);
       }
     } finally {
       setSending(false);
@@ -74,20 +88,25 @@ export default function EntityComments({ entityType, entityId, onCountChange }: 
       {!loading && comments.length === 0 && (
         <p className="text-xs text-slate-400 italic">Sin comentarios todavía.</p>
       )}
-      {comments.map(c => (
-        <div key={c.id} className="flex gap-2 text-xs">
-          <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400">
-            <UserIcon className="w-3 h-3" />
-          </span>
-          <div className="flex-1 bg-slate-50 rounded-xl px-3 py-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-700">{c.author_name || 'Alguien'}</span>
-              <span className="text-slate-400 text-[10px]">{timeAgo(c.created_at)}</span>
+      {comments.map(c => {
+        const isIA = c.author_name === 'IA de Conocimiento';
+        return (
+          <div key={c.id} className="flex gap-2 text-xs">
+            <span className={isIA
+              ? 'w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center shrink-0 text-white'
+              : 'w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-400'}>
+              {isIA ? <Sparkles className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+            </span>
+            <div className={isIA ? 'flex-1 bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-1.5' : 'flex-1 bg-slate-50 rounded-xl px-3 py-1.5'}>
+              <div className="flex items-center gap-1.5">
+                <span className={isIA ? 'font-bold text-emerald-700' : 'font-bold text-slate-700'}>{c.author_name || 'Alguien'}</span>
+                <span className="text-slate-400 text-[10px]">{timeAgo(c.created_at)}</span>
+              </div>
+              <p className="text-slate-600 leading-relaxed">{c.body}</p>
             </div>
-            <p className="text-slate-600 leading-relaxed">{c.body}</p>
           </div>
-        </div>
-      ))}
+        );
+      })}
       {can(ROLE.USER) && (
         <div className="flex items-center gap-2 pt-1">
           <input

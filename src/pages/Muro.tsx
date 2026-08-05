@@ -101,6 +101,12 @@ function CommentsSection({ publicationId }: { publicationId: string }) {
       if (res.ok) {
         setComments(c => [...c, json]);
         setText('');
+        // La IA de Conocimiento responde en segundo plano: recargar en unos
+        // segundos para que aparezca su respuesta.
+        const refetch = () => fetch(`/api/publications/${publicationId}/comments`)
+          .then(r => r.json()).then(j => { if (Array.isArray(j)) setComments(j); }).catch(() => {});
+        setTimeout(refetch, 5000);
+        setTimeout(refetch, 12000);
       }
     } finally {
       setSending(false);

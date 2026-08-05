@@ -4,6 +4,7 @@ import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Che
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import ResizeHandle from '../ui/ResizeHandle';
+import PublicationPopup from '../knowledge/PublicationPopup';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -74,6 +75,8 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
   const [attachError, setAttachError] = useState<string | null>(null);
   // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
   const [graphMatches, setGraphMatches] = useState<Array<{ slug: string; title: string; score: number }>>([]);
+  // Pop-up central: la publicación real que responde a la pregunta.
+  const [popupPub, setPopupPub] = useState<{ publication: any; graphs: any[] } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -189,14 +192,27 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
     setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
     setBusy(true);
     try {
-      // Fast-path (modo barra): si la consulta coincide con un grafo de
-      // conocimiento publicado, se abre directamente sin llamar a la IA.
+      // Fast-path (modo barra), en este orden (petición del usuario):
+      // 1º una PREGUNTA que coincide con una publicación existente abre esa
+      //    publicación en un pop-up central (la plataforma responde con su
+      //    conocimiento real, no generando texto nuevo);
+      // 2º un TEMA que coincide con un grafo publicado lo abre directamente.
+      // Ninguno de los dos gasta una llamada a la IA.
       if (mode === 'bar' && !pendingAttachment) {
         try {
-          const r = await fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`);
-          const json = await r.json();
-          if (json.confident && json.matches?.[0]?.slug) {
-            const g = json.matches[0];
+          const [gr, pr] = await Promise.all([
+            fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
+            fetch(`/api/publications/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
+          ]);
+          const g = gr.confident && gr.matches?.[0]?.slug ? gr.matches[0] : null;
+          const p = pr.confident && pr.matches?.[0]?.publication ? pr.matches[0] : null;
+          const isQuestion = text.includes('?') || /\bes cierto\b/i.test(text);
+          if (p && (isQuestion || !g || p.score > g.score)) {
+            setMessages(m => [...m, { role: 'assistant', content: `Esto es lo más relevante que hay publicado sobre tu pregunta: «${p.publication.title || 'publicación'}» de ${p.publication.author_name || 'la comunidad'}.` }]);
+            setPopupPub(p);
+            return;
+          }
+          if (g) {
             setMessages(m => [...m, { role: 'assistant', content: `Abriendo el grafo de conocimiento «${g.title}».` }]);
             navigate(`/grafos/${g.slug}`);
             return;
@@ -604,6 +620,16 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
             </p>
           )}
         </div>
+
+        {popupPub && (
+          <div className="pointer-events-auto">
+            <PublicationPopup
+              publication={popupPub.publication}
+              graphs={popupPub.graphs || []}
+              onClose={() => setPopupPub(null)}
+            />
+          </div>
+        )}
       </div>
     );
   }

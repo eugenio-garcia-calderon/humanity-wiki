@@ -677,9 +677,17 @@ export default function GrafoCanvas() {
         </div>
       )}
 
-      {/* Panel lateral: la VENTANA expandida */}
+      {/* POP-UP CENTRAL: la ventana expandida — el grafo sigue visible detrás;
+          clic fuera o en la X cierra (petición del usuario, 2026-08-05). */}
       {selected && meta && (
-        <div className="absolute top-0 right-0 bottom-0 w-full sm:w-[440px] bg-white border-l border-slate-200 shadow-2xl z-20 overflow-y-auto animate-in slide-in-from-right duration-200">
+        <div
+          className="absolute inset-0 z-30 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setSelected(null)}
+        >
+        <div
+          className="bg-white w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl animate-in zoom-in-95 duration-150"
+          onClick={e => e.stopPropagation()}
+        >
           <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between gap-2 z-10">
             <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded', meta.chip)}>
               <meta.icon className="w-2.5 h-2.5" /> {meta.label}
@@ -689,7 +697,7 @@ export default function GrafoCanvas() {
             </button>
           </div>
 
-          <div className="px-4 py-4 space-y-4 pb-32">
+          <div className="px-4 py-4 space-y-4 pb-6">
             <div>
               <h2 className="text-xl font-black text-slate-900 leading-tight">{selected.title}</h2>
               <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-[10px] text-slate-400">
@@ -724,6 +732,7 @@ export default function GrafoCanvas() {
               />
             </div>
           </div>
+        </div>
         </div>
       )}
 
