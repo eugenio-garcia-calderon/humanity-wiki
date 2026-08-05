@@ -64,6 +64,7 @@ const SOLUTIONS = [
 // ----------------------------------------------------------------------------
 const W = {
   CONTEXTO: 'KW_INC_CONTEXTO', TENDENCIA: 'KW_INC_TENDENCIA', MAPA: 'KW_INC_MAPA',
+  CONSECUENCIAS: 'KW_INC_CONSECUENCIAS',
   CAUSAS: 'KW_INC_CAUSAS', VIDEO: 'KW_INC_VIDEO', WIKI: 'KW_INC_WIKI',
   FOTO: 'KW_INC_FOTO', CULEBRA: 'KW_INC_CULEBRA', CHINA: 'KW_INC_CHINA',
   SOLUCIONES: 'KW_INC_SOLUCIONES',
@@ -114,6 +115,23 @@ const WINDOWS: Array<{ id: string; title: string; kind: string; config: any; cre
         ],
       },
       source_note: 'Distribución decenal aproximada (MITECO, estadística general de incendios forestales). Casi 8 de cada 10 incendios tienen origen humano — coherente con las causas del reto Incendios de esta plataforma.',
+    },
+  },
+  {
+    id: W.CONSECUENCIAS, title: 'La rueda de las consecuencias: qué se pierde cuando arde', kind: 'grafica', creator: IA, ia: true, x: 1180, y: -180,
+    config: {
+      chart: {
+        type: 'donut', unit: '%',
+        data: [
+          { name: 'Masa forestal y hábitats', value: 35 },
+          { name: 'Suelo fértil y erosión posterior', value: 20 },
+          { name: 'Emisiones de CO2 y humos', value: 15 },
+          { name: 'Economía rural (pastos, apicultura, castañares)', value: 15 },
+          { name: 'Agua: calidad de cuencas y embalses', value: 8 },
+          { name: 'Viviendas, infraestructuras y vidas', value: 7 },
+        ],
+      },
+      source_note: 'Distribución ORIENTATIVA del impacto elaborada por IA (pendiente de revisión con datos oficiales). Las consecuencias no terminan al apagarse el fuego: la erosión del suelo y la contaminación de las cuencas llegan con las primeras lluvias, y la recuperación del arbolado tarda décadas.',
     },
   },
   {
@@ -182,6 +200,8 @@ const EDGES: Array<{ from: string | null; to: string; relation: string; label?: 
     description: 'La crónica enciclopédica y referenciada de la temporada 2025, incendio a incendio.' },
   { from: null, to: W.FOTO, relation: 'contexto', label: 'en imágenes',
     description: 'Una imagen con licencia libre de la Culebra ardiendo: la magnitud que las cifras no transmiten.' },
+  { from: null, to: W.CONSECUENCIAS, relation: 'dato', label: 'las consecuencias',
+    description: 'La rueda de lo que se pierde: bosque, suelo, agua, economía rural, salud. El coste real de cada hectárea quemada, más allá del titular.' },
   { from: null, to: W.SOLUCIONES, relation: 'dato', label: 'cómo lo resolvemos',
     description: 'Las cinco palancas, como tarjetas de solución reales de la plataforma: prevención del combustible, mosaico ganadero, detección temprana, persecución del incendiario y planificación del paisaje.' },
   { from: W.CULEBRA, to: W.CONTEXTO, relation: 'contexto', label: 'el precedente',
@@ -192,6 +212,8 @@ const EDGES: Array<{ from: string | null; to: string; relation: string; label?: 
     description: 'La experiencia china demuestra que la detección temprana y la responsabilidad territorial reducen drásticamente la superficie quemada.' },
   { from: W.CHINA, to: W.SOLUCIONES, relation: 'matiza', label: 'la paradoja de la supresión',
     description: 'El matiz científico (Human Ecology, Springer): apagar TODO acumula combustible y prepara incendios peores. Por eso las soluciones combinan detección temprana CON gestión del combustible — no basta con más hidroaviones.' },
+  { from: W.CONSECUENCIAS, to: W.SOLUCIONES, relation: 'apoya', label: 'por qué urge actuar',
+    description: 'La magnitud de las consecuencias — décadas de recuperación, cuencas contaminadas, comarcas despobladas — es el argumento de urgencia de las cinco soluciones.' },
   { from: W.CAUSAS, to: W.SOLUCIONES, relation: 'causa', label: 'de la causa a la solución',
     description: 'Si el origen es mayoritariamente humano, las soluciones también: prevención, investigación y economía rural pesan más que cualquier tecnología.' },
 ];

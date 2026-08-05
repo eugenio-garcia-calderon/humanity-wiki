@@ -46,8 +46,8 @@ jobs:
             cd /opt/humanity-wiki
             git fetch origin main
             git reset --hard origin/main
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
             docker image prune -f
             # Espera y comprobación de salud: si la app no responde, el job falla.
             sleep 10
-            curl -fsS http://localhost:3000/api/health >/dev/null || (docker compose -f docker-compose.prod.yml logs --tail 50 app && exit 1)
+            curl -fsS http://localhost:3000/api/health >/dev/null || (docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail 50 app && exit 1)
