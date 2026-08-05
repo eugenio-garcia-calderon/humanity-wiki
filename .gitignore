@@ -6,6 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+!.env.production.example
 
 # Secretos en texto plano dentro del repo. Las claves reales viven solo en
 # .env (ya ignorado); estas carpetas/archivos nunca deben subirse.
