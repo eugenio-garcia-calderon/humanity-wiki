@@ -6,6 +6,7 @@ import { AdminMenu } from '../components/ui/AdminMenu';
 import { useEdit } from '../contexts/EditContext';
 import { cn } from '../utils/cn';
 import { slugify } from '../utils/slugify';
+import { challengeLinkTo } from '../utils/entityLinks';
 
 export default function TerritoryProfile() {
   const { getTerritory, getTerritoryChallenges, territories, challenges, projects, organizations, loading } = useHelpers();
@@ -74,7 +75,7 @@ export default function TerritoryProfile() {
                   className="p-5 flex flex-col justify-between group hover:border-emerald-300 transition-all cursor-pointer relative"
                   onClick={(e) => {
                     if ((e.target as HTMLElement).closest('.admin-menu-trigger')) return;
-                    navigate(`/retos/${slugify(challenge.title)}`);
+                    navigate(challengeLinkTo(challenge));
                   }}
                 >
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity admin-menu-trigger">

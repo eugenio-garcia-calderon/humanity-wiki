@@ -5,6 +5,7 @@ import { useParams, Navigate, Link } from 'react-router-dom';
 import { useDesign } from '../contexts/DesignContext';
 import { cn } from '../utils/cn';
 import { slugify } from '../utils/slugify';
+import { challengeLinkTo } from '../utils/entityLinks';
 
 // Colors for each objective
 const objectiveColors: Record<string, { from: string; to: string; bg: string; text: string; border: string }> = {
@@ -95,7 +96,7 @@ export default function ObjectiveDetail() {
             {objChallenges.map(challenge => (
               <Link 
                 key={challenge.id} 
-                to={`/retos/${slugify(challenge.title)}`}
+                to={challengeLinkTo(challenge)}
                 className={`bg-white border ${colors.border} rounded-2xl p-5 hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all group block relative overflow-hidden`}
               >
                 <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl ${colors.from} to-transparent opacity-10 -mr-8 -mt-8 rounded-full transition-transform group-hover:scale-150`}></div>

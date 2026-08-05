@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType,
   useNodesState, useEdgesState, useInternalNode, getStraightPath,
   BaseEdge, EdgeLabelRenderer,
   type Node, type Edge, type NodeProps, type EdgeProps, type InternalNode,
+  type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
   ArrowLeft, X, Eye, MessageCircle, Sparkles, User as UserIcon, Network,
-  Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon,
+  Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon, MapPin,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
   FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown,
 } from 'lucide-react';
@@ -68,10 +69,35 @@ const RELATION_STYLE: Record<string, { color: string; label: string }> = {
 const RELATIONS = Object.keys(RELATION_STYLE);
 
 // Geometría del anillo de relaciones.
-const RING_RADIUS = 330;
-const CIRCLE_SIZE = 104;
+const RING_RADIUS = 370;
+const CIRCLE_SIZE = 122;
 const CENTER_W = 300;
 const CENTER_H = 190;
+
+/** Ventanas de la rama de una conexión del centro: la ventana destino y todo
+ *  lo conectado a ella (BFS sin dirección, máx. 2 saltos para no arrastrar
+ *  medio grafo cuando las ramas se tocan entre sí). */
+function branchWindowIds(edges: any[], centerEdgeId: number): Set<string> {
+  const e = edges.find((x: any) => x.id === centerEdgeId && !x.from_window_id);
+  const seen = new Set<string>();
+  if (!e) return seen;
+  const adj: Record<string, string[]> = {};
+  for (const x of edges) {
+    if (!x.from_window_id) continue;
+    (adj[x.from_window_id] ||= []).push(x.to_window_id);
+    (adj[x.to_window_id] ||= []).push(x.from_window_id);
+  }
+  seen.add(e.to_window_id);
+  let frontier = [e.to_window_id];
+  for (let depth = 0; depth < 2; depth++) {
+    const next: string[] = [];
+    for (const cur of frontier) for (const n of adj[cur] || []) {
+      if (!seen.has(n)) { seen.add(n); next.push(n); }
+    }
+    frontier = next;
+  }
+  return seen;
+}
 
 // ----------------------------------------------------------------------------
 // Arista flotante: línea RECTA entre los bordes reales de los dos nodos.
@@ -145,6 +171,44 @@ function CenterNode({ data }: NodeProps<any>) {
   const g = (data as any).graph;
   const left = g.center?.left;
   const right = g.center?.right;
+  const cat = g.center?.category;
+  const vari = g.center?.variable;
+
+  // Jerarquía: una gran CATEGORÍA con su variable (p. ej. territorio) como
+  // etiqueta subordinada debajo — para títulos largos que no caben en la
+  // fusión de dos círculos iguales.
+  if (cat?.label) {
+    const accent = cat.color || '#ef4444';
+    return (
+      <div className="flex flex-col items-center" style={{ width: CENTER_W }}>
+        <CenterHandles />
+        <div
+          className="w-[215px] h-[215px] rounded-full bg-slate-900 shadow-2xl flex flex-col items-center justify-center text-center px-5"
+          style={{ border: `4px solid ${accent}`, boxShadow: `0 0 60px ${accent}33, 0 25px 50px -12px rgb(0 0 0 / 0.4)` }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1.5" style={{ color: accent }}>
+            {cat.sublabel || 'Categoría'}
+          </p>
+          <p className={cn('font-black text-white uppercase leading-none tracking-tight break-words w-full',
+            String(cat.label).length > 11 ? 'text-xl' : 'text-3xl')}>
+            {cat.label}
+          </p>
+        </div>
+        {vari?.label && (
+          <div className="-mt-4 z-10 inline-flex items-center gap-1.5 bg-slate-900 border-2 border-emerald-500 rounded-full px-3.5 py-1.5 shadow-xl">
+            <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400">{vari.sublabel || 'Territorio'}</span>
+            <span className="text-xs font-black text-white">{vari.label}</span>
+          </div>
+        )}
+        {g.creator_name && (
+          <p className="mt-2 text-[10px] text-slate-400">
+            grafo de <span className="font-semibold text-slate-500">{g.creator_name}</span>
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (left?.label && right?.label) {
     return (
@@ -187,14 +251,37 @@ function RelacionNode({ data }: NodeProps<any>) {
   const rel = RELATION_STYLE[d.relation] || RELATION_STYLE.contexto;
   return (
     <div
-      onClick={() => d.onOpenEdge?.(d.edgeId)}
-      className="rounded-full bg-white shadow-xl flex items-center justify-center text-center p-3 cursor-pointer transition-transform hover:scale-105"
-      style={{ width: CIRCLE_SIZE, height: CIRCLE_SIZE, border: `3px solid ${rel.color}` }}
-      title="Ver los atributos de esta conexión"
+      onClick={() => (d.active ? d.onOpenEdge?.(d.edgeId) : d.onFocus?.(d.edgeId))}
+      className={cn(
+        'group rounded-full bg-slate-900 flex flex-col items-center justify-center text-center px-3 cursor-pointer',
+        'transition-all duration-200 ease-out hover:scale-110 active:scale-95',
+      )}
+      style={{
+        width: CIRCLE_SIZE, height: CIRCLE_SIZE,
+        border: `4px solid ${rel.color}`,
+        boxShadow: d.active
+          ? `0 0 0 8px ${rel.color}40, 0 0 45px ${rel.color}80, 0 20px 25px -5px rgb(0 0 0 / 0.3)`
+          : `0 0 25px ${rel.color}26, 0 10px 15px -3px rgb(0 0 0 / 0.25)`,
+      }}
+      title={d.active ? 'Ver los atributos de esta conexión' : 'Hacer zoom a esta rama'}
     >
       <CenterHandles />
-      <span className="text-[11px] font-black uppercase leading-tight tracking-wide" style={{ color: rel.color }}>
-        {d.label || rel.label}
+      {d.label ? (
+        <>
+          <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: rel.color }}>
+            {rel.label}
+          </p>
+          <p className="text-[11px] font-black uppercase leading-tight tracking-wide text-white break-words w-full">
+            {d.label}
+          </p>
+        </>
+      ) : (
+        <p className="text-xs font-black uppercase leading-tight tracking-wide text-white">
+          {rel.label}
+        </p>
+      )}
+      <span className="text-[7px] font-bold uppercase tracking-widest text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {d.active ? 'ver conexión' : 'explorar rama'}
       </span>
     </div>
   );
@@ -210,10 +297,10 @@ function VentanaNode({ data }: NodeProps<any>) {
   return (
     <div
       onClick={() => onOpen(win.id)}
-      className="w-64 bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden"
+      className="w-80 bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden"
     >
       <CenterHandles />
-      <div className="px-3 pt-2.5 flex items-center justify-between gap-2">
+      <div className="px-3.5 pt-3 flex items-center justify-between gap-2">
         <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded', meta.chip)}>
           <Icon className="w-2.5 h-2.5" /> {meta.label}
         </span>
@@ -223,13 +310,13 @@ function VentanaNode({ data }: NodeProps<any>) {
           </span>
         )}
       </div>
-      <div className="px-3 pt-1.5">
-        <p className="text-sm font-black text-slate-900 leading-tight line-clamp-2">{win.title}</p>
+      <div className="px-3.5 pt-1.5">
+        <p className="text-[15px] font-black text-slate-900 leading-tight line-clamp-2">{win.title}</p>
       </div>
-      <div className="px-3 py-2">
+      <div className="px-3.5 py-2">
         <WindowContent kind={win.kind} config={win.config} variant="node" />
       </div>
-      <div className="px-3 py-1.5 border-t border-slate-50 flex items-center gap-2.5 text-[9px] text-slate-400">
+      <div className="px-3.5 py-1.5 border-t border-slate-50 flex items-center gap-2.5 text-[9px] text-slate-400">
         <span className="inline-flex items-center gap-0.5 truncate max-w-[80px]"><UserIcon className="w-2.5 h-2.5 shrink-0" />{win.creator_name || '—'}</span>
         <RatingWidget entityType="knowledge_windows" entityId={win.id}
           avg={win.rating?.avg ?? null} count={win.rating?.count ?? 0} myScore={null} compact />
@@ -317,6 +404,9 @@ function ConnectModal({ windows, graphId, onClose, onDone }: {
 export default function GrafoCanvas() {
   const { slug } = useParams();
   const helpers = useHelpers();
+  // Instancia real de React Flow (via onInit): controla el viewport (fitView).
+  const rf = useRef<ReactFlowInstance | null>(null);
+  const fitView = useCallback((opts?: any) => { rf.current?.fitView(opts); }, []);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<any>(null);
@@ -328,6 +418,9 @@ export default function GrafoCanvas() {
   // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
   // el lienzo; se expande con un clic para ver descripción/etiquetas.
   const [infoOpen, setInfoOpen] = useState(false);
+  // Rama activa: círculo de relación clicado — el lienzo hace zoom a su rama
+  // y el resto se atenúa para no perder el hilo de dónde estás.
+  const [activeBranch, setActiveBranch] = useState<{ edgeId: number; relation: string; label: string } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
@@ -356,6 +449,28 @@ export default function GrafoCanvas() {
     });
   }, []);
 
+  /** Clic en un círculo de relación: zoom animado a esa rama (círculo +
+   *  sus publicaciones), manteniendo el círculo en pantalla como ancla. */
+  const focusBranch = useCallback((edgeId: number) => {
+    setData((d: any) => {
+      const e = d?.edges?.find((x: any) => x.id === edgeId && !x.from_window_id);
+      if (!e) return d;
+      const rel = RELATION_STYLE[e.relation] || RELATION_STYLE.contexto;
+      setActiveBranch({ edgeId, relation: e.relation, label: e.label || rel.label });
+      const ids = [`rel-${edgeId}`, ...branchWindowIds(d.edges, edgeId)];
+      requestAnimationFrame(() => {
+        fitView({ nodes: ids.map(id => ({ id })), duration: 800, padding: 0.18, maxZoom: 1.1 });
+      });
+      return d;
+    });
+  }, [fitView]);
+
+  /** Salir de la rama: vuelve a la vista completa del grafo. */
+  const clearBranch = useCallback(() => {
+    setActiveBranch(null);
+    fitView({ duration: 800, padding: 0.12 });
+  }, [fitView]);
+
   /** Abre el panel de atributos de una conexión (desde el círculo o la flecha). */
   const openEdge = useCallback((edgeId: number) => {
     setData((d: any) => {
@@ -382,11 +497,16 @@ export default function GrafoCanvas() {
       data: { graph: data.graph },
     };
 
+    const branchIds = activeBranch ? branchWindowIds(data.edges, activeBranch.edgeId) : null;
+
     const winNodes: Node[] = data.windows.map((w: any) => ({
       id: w.id, type: 'ventana',
       position: { x: w.x, y: w.y },
       draggable: !!data.can_edit,
       data: { win: w, onOpen: openWindow },
+      // Con una rama activa, lo que no pertenece a ella se atenúa para
+      // que sepas visualmente en qué tema estás sin perder el contexto.
+      style: branchIds && !branchIds.has(w.id) ? { opacity: 0.25, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
     }));
 
     const centerEdges = (data.edges as any[]).filter(e => !e.from_window_id && winById[e.to_window_id]);
@@ -394,7 +514,7 @@ export default function GrafoCanvas() {
 
     const angleOfTarget = (e: any) => {
       const w = winById[e.to_window_id];
-      return Math.atan2(w.y + 110, w.x + 128);
+      return Math.atan2(w.y + 110, w.x + 160);
     };
     const sortedCenter = [...centerEdges].sort((a, b) => angleOfTarget(a) - angleOfTarget(b));
     const N = Math.max(sortedCenter.length, 1);
@@ -409,28 +529,35 @@ export default function GrafoCanvas() {
           y: Math.sin(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
         },
         draggable: false, selectable: false,
-        data: { relation: e.relation, label: e.label, edgeId: e.id, onOpenEdge: openEdge },
+        data: {
+          relation: e.relation, label: e.label, edgeId: e.id,
+          onOpenEdge: openEdge, onFocus: focusBranch,
+          active: activeBranch?.edgeId === e.id,
+        },
+        style: activeBranch && activeBranch.edgeId !== e.id ? { opacity: 0.3, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
       };
     });
 
     const flowEdges: Edge[] = [];
     for (const e of sortedCenter) {
       const rel = RELATION_STYLE[e.relation] || RELATION_STYLE.contexto;
+      const dim = activeBranch && activeBranch.edgeId !== e.id;
       flowEdges.push({
         id: `ec-${e.id}`, source: '__center__', target: `rel-${e.id}`, type: 'flotante',
-        style: { stroke: rel.color, strokeWidth: 1.75, opacity: 0.75 },
+        style: { stroke: rel.color, strokeWidth: 1.75, opacity: dim ? 0.15 : 0.75 },
       });
       flowEdges.push({
         id: `e-${e.id}`, source: `rel-${e.id}`, target: e.to_window_id, type: 'flotante',
-        style: { stroke: rel.color, strokeWidth: 4 },
+        style: { stroke: rel.color, strokeWidth: 4, opacity: dim ? 0.15 : 1 },
         markerEnd: { type: MarkerType.ArrowClosed, color: rel.color, width: 16, height: 16 },
       });
     }
     for (const e of restEdges) {
       const rel = RELATION_STYLE[e.relation] || RELATION_STYLE.contexto;
+      const dim = branchIds && !(branchIds.has(e.from_window_id) && branchIds.has(e.to_window_id));
       flowEdges.push({
         id: `e-${e.id}`, source: e.from_window_id, target: e.to_window_id, type: 'flotante',
-        style: { stroke: rel.color, strokeWidth: 3 },
+        style: { stroke: rel.color, strokeWidth: 3, opacity: dim ? 0.15 : 1 },
         markerEnd: { type: MarkerType.ArrowClosed, color: rel.color, width: 15, height: 15 },
         animated: e.relation === 'contradice',
         data: { label: e.label || rel.label },
@@ -439,7 +566,17 @@ export default function GrafoCanvas() {
 
     setNodes([centerNode, ...relNodes, ...winNodes]);
     setEdges(flowEdges);
-  }, [data, openWindow, openEdge, setNodes, setEdges]);
+  }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges]);
+
+  // Encuadre inicial: con ReactFlowProvider externo, la prop fitView no se
+  // aplica a nodos que llegan tras el montaje — se lanza a mano una vez.
+  const didFitRef = useRef(false);
+  useEffect(() => {
+    if (didFitRef.current || nodes.length === 0) return;
+    didFitRef.current = true;
+    const t = setTimeout(() => fitView({ padding: 0.12 }), 80);
+    return () => clearTimeout(t);
+  }, [nodes, fitView]);
 
   const onNodeDragStop = useCallback((_: any, node: Node) => {
     if (!data?.can_edit || node.type !== 'ventana') return;
@@ -520,6 +657,7 @@ export default function GrafoCanvas() {
         onEdgesChange={onEdgesChange}
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={onEdgeClick}
+        onInit={inst => { rf.current = inst; }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesConnectable={false}
@@ -547,6 +685,32 @@ export default function GrafoCanvas() {
           </button>
         </div>
       )}
+
+      {/* Píldora de rama activa: te dice en qué tema estás mientras exploras
+          con zoom, y te devuelve a la vista completa de un clic. */}
+      {activeBranch && (() => {
+        const rel = RELATION_STYLE[activeBranch.relation] || RELATION_STYLE.contexto;
+        return (
+          <div className={cn('absolute left-1/2 -translate-x-1/2 z-10 animate-in fade-in slide-in-from-top-2 duration-300', data.can_edit ? 'top-16' : 'top-4')}>
+            <div
+              className="bg-slate-900/95 backdrop-blur text-white rounded-full shadow-2xl pl-3.5 pr-1.5 py-1.5 flex items-center gap-2"
+              style={{ border: `2px solid ${rel.color}` }}
+            >
+              <span className="w-2 h-2 rounded-full animate-pulse shrink-0" style={{ backgroundColor: rel.color }} />
+              <span className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: rel.color }}>{rel.label}</span>
+              <span className="text-xs font-black max-w-[180px] truncate">{activeBranch.label}</span>
+              <button onClick={() => openEdge(activeBranch.edgeId)} title="Ver los atributos de esta conexión"
+                className="p-1.5 text-slate-300 hover:text-white rounded-full hover:bg-white/10 transition-colors">
+                <GitBranch className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={clearBranch} title="Salir de la rama — ver todo el grafo"
+                className="p-1.5 text-slate-300 hover:text-white rounded-full hover:bg-white/10 transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Cabecera del grafo: colapsada por defecto — solo el título — para
           no tapar el lienzo; un clic la expande con todo el detalle. */}

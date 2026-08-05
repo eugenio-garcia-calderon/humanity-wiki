@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { Search, MapPin } from 'lucide-react';
 import { slugify } from '../utils/slugify';
+import { challengeLinkTo } from '../utils/entityLinks';
 import { AdminMenu } from '../components/ui/AdminMenu';
 import { useEdit } from '../contexts/EditContext';
 
@@ -89,7 +90,7 @@ export default function Challenges() {
                     className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-emerald-500 hover:shadow-md transition-all h-full flex flex-col relative group cursor-pointer"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('.admin-menu-trigger')) return;
-                      navigate(`/retos/${slugify(challenge.title)}`);
+                      navigate(challengeLinkTo(challenge));
                     }}
                   >
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity admin-menu-trigger z-10">
@@ -144,7 +145,7 @@ export default function Challenges() {
                     className="bg-slate-50 border border-slate-200 rounded-2xl p-5 hover:border-slate-300 hover:shadow-md transition-all h-full flex flex-col relative group cursor-pointer"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('.admin-menu-trigger')) return;
-                      navigate(`/retos/${slugify(challenge.title)}`);
+                      navigate(challengeLinkTo(challenge));
                     }}
                   >
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity admin-menu-trigger z-10">
