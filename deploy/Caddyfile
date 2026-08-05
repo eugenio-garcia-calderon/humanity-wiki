@@ -20,3 +20,11 @@ humanity.wiki {
 www.humanity.wiki {
 	redir https://humanity.wiki{uri} permanent
 }
+
+# --- TEMPORAL hasta que humanity.wiki apunte a Cloudflare (nameservers en
+# --- tránsito): dominio público inmediato vía sslip.io → esta IP.
+# --- Retirar este bloque cuando el dominio real esté activo.
+167-233-245-191.sslip.io {
+	encode zstd gzip
+	reverse_proxy app:3000
+}
