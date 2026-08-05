@@ -356,3 +356,8 @@
 - El modelo puede incluir en su bloque `redhumana` una `question` {text, options[≤4]} cuando necesita una decisión del usuario (enfoque, territorio, alcance…); el prompt le pide no abusar: si puede decidir con criterio, decide y actúa.
 - La interfaz pinta la pregunta como botones numerados 1/2/… más un «Otro — escríbelo abajo» (que libera el cuadro de texto), como en Claude Code. Elegir una opción la envía como mensaje y desactiva los botones.
 - `send()` acepta ahora texto directo (`send(opcion)`), lo que también deja listo el envío programático desde otras superficies.
+
+### 2026-08-06 — Fase 16c: anti-solape «imán», tarjetas visuales protagonistas y paleta semántica
+- **Las ventanas se repelen (petición)**: relajación iterativa de rectángulos en el cliente — ningún par de tarjetas puede compartir espacio (padding 28px) y ninguna puede invadir la zona del anillo de círculos (empuje radial). Solo presentación; las posiciones guardadas no cambian. Los ángulos de los círculos se calculan sobre las posiciones ya resueltas.
+- **Lo visual manda (petición)**: las ventanas de imagen/vídeo/mapa/gráfica son más anchas (420px) y su medio crece (imagen h-64, vídeo h-56, mapa h-64, gráficas h-52, miniatura Wikipedia h-40) — tarjetas que llaman la atención frente al texto.
+- **Paleta semántica fija (petición)**: fuera el fondo negro de los círculos — cada concepto tiene SIEMPRE su color: contexto/historia azul, dato azul claro, fuente azul oscuro, causa AMARILLO, apoya/solución VERDE, contradice/reto ROJO, matiza naranja. Círculo = color de fondo + anillo blanco + halo; el trazo de las flechas usa el mismo color.

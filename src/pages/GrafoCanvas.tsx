@@ -56,14 +56,19 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   texto:       { label: 'Texto',       icon: FileText,       chip: 'bg-slate-100 text-slate-600' },
 };
 
-const RELATION_STYLE: Record<string, { color: string; label: string }> = {
-  contexto:   { color: '#64748b', label: 'contexto' },
-  causa:      { color: '#7c3aed', label: 'causa' },
-  dato:       { color: '#0284c7', label: 'dato' },
-  fuente:     { color: '#475569', label: 'fuente' },
-  apoya:      { color: '#059669', label: 'apoya' },
-  contradice: { color: '#dc2626', label: 'contradice' },
-  matiza:     { color: '#d97706', label: 'matiza' },
+// Paleta SEMÁNTICA fija (decisión del usuario, 2026-08-06): cada concepto
+// tiene siempre el mismo color en toda la plataforma — historia/contexto y
+// datos en azules, causas en amarillo, apoyo/soluciones en verde,
+// conflicto/reto en rojo, matiz en naranja. `color` es el trazo de las
+// flechas; `bg`/`text` pintan el círculo (nunca más fondo negro).
+const RELATION_STYLE: Record<string, { color: string; bg: string; text: string; label: string }> = {
+  contexto:   { color: '#2563eb', bg: '#2563eb', text: '#ffffff', label: 'contexto' },
+  dato:       { color: '#0ea5e9', bg: '#0ea5e9', text: '#ffffff', label: 'dato' },
+  fuente:     { color: '#1e40af', bg: '#1e40af', text: '#ffffff', label: 'fuente' },
+  causa:      { color: '#eab308', bg: '#facc15', text: '#422006', label: 'causa' },
+  apoya:      { color: '#16a34a', bg: '#16a34a', text: '#ffffff', label: 'apoya' },
+  contradice: { color: '#dc2626', bg: '#dc2626', text: '#ffffff', label: 'contradice' },
+  matiza:     { color: '#f97316', bg: '#f97316', text: '#ffffff', label: 'matiza' },
 };
 
 const RELATIONS = Object.keys(RELATION_STYLE);
@@ -265,34 +270,35 @@ function RelacionNode({ data }: NodeProps<any>) {
     <div
       onClick={() => (d.active ? d.onOpenEdge?.(d.edgeId) : d.onFocus?.(d.edgeId))}
       className={cn(
-        'group rounded-full bg-slate-900 flex flex-col items-center justify-center text-center px-3 cursor-pointer',
+        'group rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer',
         'transition-all duration-200 ease-out hover:scale-110 active:scale-95',
       )}
       style={{
         width: CIRCLE_SIZE, height: CIRCLE_SIZE,
-        border: `4px solid ${rel.color}`,
+        backgroundColor: rel.bg,
+        border: '4px solid rgba(255,255,255,0.9)',
         boxShadow: d.active
           ? `0 0 0 8px ${rel.color}40, 0 0 45px ${rel.color}80, 0 20px 25px -5px rgb(0 0 0 / 0.3)`
-          : `0 0 25px ${rel.color}26, 0 10px 15px -3px rgb(0 0 0 / 0.25)`,
+          : `0 0 25px ${rel.color}40, 0 10px 15px -3px rgb(0 0 0 / 0.2)`,
       }}
       title={d.active ? 'Ver los atributos de esta conexión' : 'Hacer zoom a esta rama'}
     >
       <CenterHandles />
       {d.label ? (
         <>
-          <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: rel.color }}>
+          <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-0.5 opacity-75" style={{ color: rel.text }}>
             {rel.label}
           </p>
-          <p className="text-[11px] font-black uppercase leading-tight tracking-wide text-white break-words w-full">
+          <p className="text-[11px] font-black uppercase leading-tight tracking-wide break-words w-full" style={{ color: rel.text }}>
             {d.label}
           </p>
         </>
       ) : (
-        <p className="text-xs font-black uppercase leading-tight tracking-wide text-white">
+        <p className="text-xs font-black uppercase leading-tight tracking-wide" style={{ color: rel.text }}>
           {rel.label}
         </p>
       )}
-      <span className="text-[7px] font-bold uppercase tracking-widest text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <span className="text-[7px] font-bold uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-70 transition-opacity" style={{ color: rel.text }}>
         {d.active ? 'ver conexión' : 'explorar rama'}
       </span>
     </div>
@@ -302,14 +308,22 @@ function RelacionNode({ data }: NodeProps<any>) {
 // ----------------------------------------------------------------------------
 // Nodo ventana (miniatura).
 // ----------------------------------------------------------------------------
+/** Tipos de ventana donde manda lo VISUAL: tarjeta más grande, con la
+ *  imagen/gráfica/mapa como protagonista (petición del usuario, 2026-08-06). */
+const MEDIA_KINDS = new Set(['imagen', 'video', 'mapa', 'grafica']);
+
 function VentanaNode({ data }: NodeProps<any>) {
   const { win, onOpen } = data as any;
   const meta = KIND_META[win.kind] || KIND_META.texto;
   const Icon = meta.icon;
+  const isMedia = MEDIA_KINDS.has(win.kind);
   return (
     <div
       onClick={() => onOpen(win.id)}
-      className="w-80 bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden"
+      className={cn(
+        'bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden',
+        isMedia ? 'w-[420px]' : 'w-80',
+      )}
     >
       <CenterHandles />
       <div className="px-3.5 pt-3 flex items-center justify-between gap-2">
@@ -517,9 +531,58 @@ export default function GrafoCanvas() {
 
     const branchIds = activeBranch ? branchWindowIds(data.edges, activeBranch.edgeId) : null;
 
+    // ------------------------------------------------------------------
+    // Anti-solape «imán» (petición del usuario, 2026-08-06): las ventanas
+    // se repelen entre sí hasta no compartir espacio, y ninguna puede
+    // invadir la zona del anillo de círculos. Relajación iterativa de
+    // rectángulos con tamaños estimados por tipo (las de medios son
+    // más grandes). Solo afecta a la presentación — no se persiste.
+    // ------------------------------------------------------------------
+    const estSize = (w: any) => MEDIA_KINDS.has(w.kind)
+      ? { w: 420, h: 400 }
+      : { w: 320, h: 220 };
+    const PAD = 28;
+    const INNER_R = RING_RADIUS + CIRCLE_SIZE / 2 + 32;
+    const boxes = data.windows.map((w: any) => ({ id: w.id, x: w.x, y: w.y, ...estSize(w) }));
+    for (let it = 0; it < 150; it++) {
+      let moved = false;
+      for (let a = 0; a < boxes.length; a++) {
+        for (let b = a + 1; b < boxes.length; b++) {
+          const A = boxes[a], B = boxes[b];
+          const dx = (A.x + A.w / 2) - (B.x + B.w / 2);
+          const dy = (A.y + A.h / 2) - (B.y + B.h / 2);
+          const ox = (A.w + B.w) / 2 + PAD - Math.abs(dx);
+          const oy = (A.h + B.h) / 2 + PAD - Math.abs(dy);
+          if (ox > 0 && oy > 0) {
+            moved = true;
+            if (ox < oy) { const s = ((dx || (a - b)) >= 0 ? 1 : -1) * ox / 2; A.x += s; B.x -= s; }
+            else { const s = ((dy || (a - b)) >= 0 ? 1 : -1) * oy / 2; A.y += s; B.y -= s; }
+          }
+        }
+      }
+      for (const A of boxes) {
+        // Punto del rectángulo más cercano al origen: si entra en la zona
+        // del anillo, la tarjeta entera se empuja radialmente hacia fuera.
+        const nx = Math.max(A.x, Math.min(0, A.x + A.w));
+        const ny = Math.max(A.y, Math.min(0, A.y + A.h));
+        const d = Math.hypot(nx, ny);
+        if (d < INNER_R) {
+          moved = true;
+          const cx = A.x + A.w / 2, cy = A.y + A.h / 2;
+          const cd = Math.hypot(cx, cy) || 1;
+          const push = INNER_R - d + 8;
+          A.x += (cx / cd) * push;
+          A.y += (cy / cd) * push;
+        }
+      }
+      if (!moved) break;
+    }
+    const posById: Record<string, { x: number; y: number; w: number; h: number }> =
+      Object.fromEntries(boxes.map((b: any) => [b.id, b]));
+
     const winNodes: Node[] = data.windows.map((w: any) => ({
       id: w.id, type: 'ventana',
-      position: { x: w.x, y: w.y },
+      position: { x: posById[w.id]?.x ?? w.x, y: posById[w.id]?.y ?? w.y },
       draggable: !!data.can_edit,
       data: { win: w, onOpen: openWindow },
       // Con una rama activa, lo que no pertenece a ella se atenúa para
@@ -531,8 +594,9 @@ export default function GrafoCanvas() {
     const restEdges = (data.edges as any[]).filter(e => e.from_window_id);
 
     const angleOfTarget = (e: any) => {
+      const b = posById[e.to_window_id];
       const w = winById[e.to_window_id];
-      return Math.atan2(w.y + 110, w.x + 160);
+      return b ? Math.atan2(b.y + b.h / 2, b.x + b.w / 2) : Math.atan2(w.y + 110, w.x + 160);
     };
     const sortedCenter = [...centerEdges].sort((a, b) => angleOfTarget(a) - angleOfTarget(b));
     const N = Math.max(sortedCenter.length, 1);
