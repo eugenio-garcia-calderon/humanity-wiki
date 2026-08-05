@@ -54,3 +54,4 @@ Registradas en detalle en `/memory/03_DECISIONS.md`:
 5. **Iniciativas**: `projects` pasará a `initiatives` en la Fase 7.
 6. **Faltan** `12_ROADMAP.md` y `13_TEST_DATA.md`, que el usuario decidió
    descartar. El plan por fases vive en `/memory/04_ROADMAP.md`.
+| [13_DEPLOY.md](13_DEPLOY.md) | Despliegue en producción: Docker, Caddy, CI/CD y runbook del servidor |

@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.env*
+!.env.production.example
+*.dump
+memory
+docs
+Claves API Stripe
+secrets
+*.pem
+*.key
+*.rtf

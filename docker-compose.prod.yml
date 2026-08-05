@@ -1,0 +1,58 @@
+# ============================================================================
+# humanity.wiki — producción (Hetzner). Tres servicios:
+#   db    → PostgreSQL 17 + PostGIS (datos en volumen persistente)
+#   app   → la plataforma (API + frontend estático), detrás de Caddy
+#   caddy → HTTPS automático (Let's Encrypt) y proxy inverso
+# Uso:  docker compose -f docker-compose.prod.yml up -d --build
+# Variables: copiar .env.production.example → .env.production y rellenar.
+# ============================================================================
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SQL_DB_NAME:-humanity}
+      POSTGRES_USER: ${SQL_ADMIN_USER:-humanity}
+      POSTGRES_PASSWORD: ${SQL_ADMIN_PASSWORD:?falta SQL_ADMIN_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_ADMIN_USER:-humanity} -d ${SQL_DB_NAME:-humanity}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      NODE_ENV: production
+      SQL_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

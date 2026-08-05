@@ -1,0 +1,22 @@
+# humanity.wiki — HTTPS automático (Let's Encrypt) + proxy al app.
+# Cloudflare va delante (proxy naranja): SSL "Full (strict)" contra este Caddy.
+
+humanity.wiki {
+	encode zstd gzip
+	reverse_proxy app:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Estáticos con hash de Vite: cachear un año en el navegador/Cloudflare.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}
+
+www.humanity.wiki {
+	redir https://humanity.wiki{uri} permanent
+}
