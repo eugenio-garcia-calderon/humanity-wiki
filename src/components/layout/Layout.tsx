@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Network } from 'lucide-react';
+import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Network, Orbit } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -41,9 +41,11 @@ export default function Layout() {
   // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
   // completa y chat de IA como barra inferior.
   const isGrafosPage = location.pathname === '/' || location.pathname.startsWith('/grafos');
-  // /mapas (el grafo de mapas) también es lienzo a sangre con la barra de IA.
+  // /mapas (el grafo de mapas) y /universo también son lienzo a sangre con
+  // la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage;
+  const isUniversoPage = location.pathname === '/universo';
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage;
 
   if (isEmbed) {
     return (
@@ -87,6 +89,17 @@ export default function Layout() {
             )}
           >
             <Network className="w-3.5 h-3.5" /> Grafos
+          </Link>
+          <Link
+            to="/universo"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all',
+              location.pathname === '/universo'
+                ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white shadow'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <Orbit className="w-3.5 h-3.5" /> Universo
           </Link>
         </nav>
 
@@ -171,7 +184,7 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
-        <AIAssistant mode={isGrafosPage || isMapasPage ? 'bar' : 'dock'} />
+        <AIAssistant mode={isGrafosPage || isMapasPage || isUniversoPage ? 'bar' : 'dock'} />
       </div>
 
       {!fullBleed && (
