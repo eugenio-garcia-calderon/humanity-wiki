@@ -1,6 +1,6 @@
 # 07_MARKETPLACE.md
 
-# Mercado de Red Humana
+# Mercado de Conocimiento de la Humanidad
 
 ## Objetivo
 

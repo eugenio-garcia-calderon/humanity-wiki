@@ -39,6 +39,10 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   UPDATE_MARKER:      { minLevel: ROLE.KNOWLEDGE, entity: 'markers',      description: 'Actualizar un marcador' },
   CREATE_OBJECTIVE:   { minLevel: ROLE.ADMIN,     entity: 'objectives',   description: 'Crear un objetivo' },
   CREATE_TERRITORY:   { minLevel: ROLE.ADMIN,     entity: 'territories',  description: 'Crear un territorio' },
+  // Fase 11: la IA puede proponer un grafo nuevo cuando alguien busca un tema
+  // que aún no existe — siempre en borrador y marcado is_ai_generated,
+  // pendiente de revisión humana. Abierto a nivel 1 por decisión del usuario.
+  CREATE_KNOWLEDGE_GRAPH: { minLevel: ROLE.USER,  entity: 'knowledge_graphs', description: 'Crear un grafo de conocimiento (borrador)' },
 };
 
 /** Eventos de navegación que la IA puede emitir para controlar la interfaz. */
@@ -47,6 +51,7 @@ const UI_EVENTS = [
   'OPEN_SUCCESS_CASE', 'OPEN_PUBLICATION', 'OPEN_TERRITORY', 'ZOOM_TO_TERRITORY',
   'FILTER_OBJECTIVE', 'SELECT_INDICATOR', 'SELECT_MARKER', 'SELECT_METRIC',
   'SHOW_MARKET', 'SHOW_FEED', 'SHOW_INITIATIVES',
+  'OPEN_KNOWLEDGE_GRAPH', // params: { slug }
 ];
 
 export function registerAIRoutes(app: Express, db: any) {
@@ -105,6 +110,10 @@ export function registerAIRoutes(app: Express, db: any) {
         UNION ALL
         SELECT 'initiatives', id, name, description FROM initiatives
           WHERE archived_at IS NULL AND (name ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
+        UNION ALL
+        SELECT 'knowledge_graphs', id, title, description FROM knowledge_graphs
+          WHERE archived_at IS NULL AND status = 'publicado'
+            AND (title ILIKE ANY(${patternArray}) OR description ILIKE ANY(${patternArray}))
         LIMIT ${limit}
       `);
       for (const r of direct.rows as any[]) found.push({ ...r, source: 'plataforma' });
@@ -132,13 +141,13 @@ export function registerAIRoutes(app: Express, db: any) {
   };
 
   /** Construye la instrucción de sistema con el contexto visual y el rol. */
-  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean) => {
+  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []) => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
       .filter(([, v]) => level >= v.minLevel)
       .map(([k]) => k);
 
-    return `Eres el asistente de Red Humana, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
+    return `Eres el asistente de Conocimiento de la Humanidad, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
 
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
 Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Necesidad → Producto → Demanda → Transacción → Iniciativa → Resultados → Caso de éxito
@@ -151,6 +160,10 @@ MODO DE EDICIÓN: ${editMode}
 
 CONTEXTO RECUPERADO DE LA PLATAFORMA (${retrieved.length} fragmentos):
 ${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content || '').slice(0, 300)}`).join('\n') || '(sin coincidencias en la plataforma)'}
+
+GRAFOS DE CONOCIMIENTO PUBLICADOS (lienzos curados de un tema; si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo):
+${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
+Si el usuario pide explorar un tema del que NO existe grafo, puedes proponer la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales ({title, kind, config}) — se creará en borrador para revisión humana.
 
 REGLAS:
 1. Responde SIEMPRE en español, de forma directa y sin adornos.
@@ -316,7 +329,16 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         };
       }
 
-      const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web);
+      // Los grafos publicados van SIEMPRE en el prompt (son pocos y cortos):
+      // así el modelo puede enrutar "Ceuta frontera amenaza" → OPEN_KNOWLEDGE_GRAPH
+      // aunque las palabras no coincidan literalmente con las claves.
+      const publishedGraphs = await db.execute(sql`
+        SELECT slug, title, trigger_keywords FROM knowledge_graphs
+        WHERE archived_at IS NULL AND status = 'publicado'
+        ORDER BY views DESC LIMIT 40
+      `);
+
+      const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
       const result = await provider.complete({ system, messages, webSearch: !!search_web });
       const { clean, ui_events, actions } = parseModelBlock(result.text);
 
@@ -468,6 +490,43 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
           }
           return { ok: true, entityId: id, entityType: 'publications' };
         }
+        case 'CREATE_KNOWLEDGE_GRAPH': {
+          // Siempre nace en borrador y marcado como generado por IA: un humano
+          // tiene que revisarlo y publicarlo. Las ventanas iniciales (si el
+          // modelo las propone) se crean con la misma marca.
+          const id = newId('KG');
+          const slug = String(params.slug || params.title || id).toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          await db.execute(sql`
+            INSERT INTO knowledge_graphs (id, title, slug, description, creator_user_id, trigger_keywords,
+                                          status, is_ai_generated, created_by, updated_by)
+            VALUES (${id}, ${params.title}, ${slug}, ${params.description || null}, ${actorId},
+                    ${JSON.stringify(params.trigger_keywords || [])}::jsonb,
+                    'borrador', true, ${actorId}, ${actorId})
+          `);
+          let i = 0;
+          for (const w of (params.windows || []).slice(0, 12)) {
+            if (!w?.title || !w?.kind) continue;
+            const wid = newId('KW');
+            await db.execute(sql`
+              INSERT INTO knowledge_windows (id, title, kind, config, creator_user_id, is_ai_generated, created_by, updated_by)
+              VALUES (${wid}, ${w.title}, ${w.kind}, ${JSON.stringify(w.config || {})}::jsonb,
+                      ${actorId}, true, ${actorId}, ${actorId})
+            `);
+            const angle = (i / Math.max((params.windows || []).length, 1)) * 2 * Math.PI;
+            await db.execute(sql`
+              INSERT INTO graph_windows (graph_id, window_id, x, y)
+              VALUES (${id}, ${wid}, ${Math.round(Math.cos(angle) * 520)}, ${Math.round(Math.sin(angle) * 380)})
+            `);
+            await db.execute(sql`
+              INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation)
+              VALUES (${id}, NULL, ${wid}, 'contexto')
+            `);
+            i++;
+          }
+          return { ok: true, entityId: id, entityType: 'knowledge_graphs', slug, status: 'borrador' };
+        }
         case 'CREATE_CHALLENGE': {
           const id = params.id || newId('R');
           await db.execute(sql`
@@ -616,6 +675,8 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         ['markers', 'markers', 'name', 'description'],
         ['objectives', 'objectives', 'title', 'description'],
         ['territories', 'territories', 'name', 'description'],
+        ['knowledge_graphs', 'knowledge_graphs', 'title', 'description'],
+        ['knowledge_windows', 'knowledge_windows', 'title', 'kind'],
       ];
       let total = 0;
       for (const [type, table, labelCol, bodyCol] of sources) {

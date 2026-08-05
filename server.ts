@@ -13,6 +13,7 @@ import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
+import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
@@ -240,6 +241,10 @@ async function startServer() {
   // para aplicar los niveles de rol.
   registerGraphRoutes(app, db);
   registerSocialRoutes(app, db);
+
+  // 1.65 GRAFOS DE CONOCIMIENTO (Fase 11): lienzos curados de ventanas de
+  // conocimiento con creador, valoración 0-10 y resolución por palabras clave.
+  registerKnowledgeRoutes(app, db);
 
   // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
   // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de
@@ -642,6 +647,8 @@ async function startServer() {
     organizations: 'organizations',
     projects: 'projects',
     content: 'content',
+    knowledge_graphs: 'knowledge_graphs',
+    knowledge_windows: 'knowledge_windows',
   };
 
   // Archivar un padre que todavía tiene hijos visibles dejaría el árbol

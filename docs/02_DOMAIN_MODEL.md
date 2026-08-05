@@ -1,6 +1,6 @@
 # 02_DOMAIN_MODEL.md
 
-# Modelo de Dominio de Red Humana
+# Modelo de Dominio de Conocimiento de la Humanidad
 
 ## Propósito
 

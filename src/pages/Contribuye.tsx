@@ -48,7 +48,7 @@ export default function Contribuye() {
       <div className="text-center mb-10 sm:mb-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-4">
           <Heart className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" />
-          <span>Red Humana de Bienestar Colectivo</span>
+          <span>Conocimiento de la Humanidad de Bienestar Colectivo</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
           Contribuye al proyecto
@@ -69,7 +69,7 @@ export default function Contribuye() {
               Suscripción Embebida
             </div>
             <h2 className="text-xl font-bold mb-2">
-              Hazte Socio de Red Humana
+              Hazte Socio de Conocimiento de la Humanidad
             </h2>
             <p className="text-slate-300 text-sm leading-relaxed mb-6">
               Únete como socio para sostener activamente la red, participar en decisiones y acceder a informes exclusivos.
@@ -165,7 +165,7 @@ export default function Contribuye() {
           <div>
             <h3 className="font-bold text-lg mb-1">Impacto Transparente</h3>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Red Humana forma parte de la iniciativa de Light Humanity para garantizar el acceso a las necesidades humanas fundamentales en todos los territorios.
+              Conocimiento de la Humanidad forma parte de la iniciativa de Light Humanity para garantizar el acceso a las necesidades humanas fundamentales en todos los territorios.
             </p>
           </div>
         </div>

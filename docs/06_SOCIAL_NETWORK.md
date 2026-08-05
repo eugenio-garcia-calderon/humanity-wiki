@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Definir el funcionamiento de la red social integrada en Red Humana.
+Definir el funcionamiento de la red social integrada en Conocimiento de la Humanidad.
 
 ---
 

@@ -1,6 +1,6 @@
 # 00_VISION.md
 
-# Visión de Red Humana
+# Visión de Conocimiento de la Humanidad
 
 ## Misión
 Permitir comprender retos, coordinar recursos y ejecutar iniciativas.

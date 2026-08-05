@@ -32,6 +32,11 @@ export const NODE_TYPES: Record<string, { table: string; label: string; extra?: 
   users:         { table: 'users',              label: 'display_name', extra: ['avatar_url', 'role_level'] },
   publications:  { table: 'publications',       label: 'title' },
   projects:      { table: 'projects',           label: 'name',  extra: ['status'] },
+  // Fase 11: los grafos y ventanas de conocimiento son entidades de primera
+  // clase del grafo general — aparecen en la búsqueda global, se pueden
+  // seguir, valorar y enlazar desde publicaciones.
+  knowledge_graphs:  { table: 'knowledge_graphs',  label: 'title', extra: ['slug', 'views'] },
+  knowledge_windows: { table: 'knowledge_windows', label: 'title', extra: ['kind'] },
 };
 
 interface Edge {

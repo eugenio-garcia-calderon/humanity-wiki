@@ -1,6 +1,6 @@
 # 10_PRODUCT_REQUIREMENTS.md
 
-# Especificación Funcional de Red Humana
+# Especificación Funcional de Conocimiento de la Humanidad
 
 ## Objetivo
 

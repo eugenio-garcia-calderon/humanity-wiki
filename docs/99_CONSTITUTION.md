@@ -1,11 +1,11 @@
 # 99_CONSTITUTION.md
 
-# Constitución de Red Humana
+# Constitución de Conocimiento de la Humanidad
 
 Versión 1.0
 
 ## Propósito
-Define las reglas fundamentales de Red Humana.
+Define las reglas fundamentales de Conocimiento de la Humanidad.
 
 ## Principios
 1. Todo pertenece al grafo de conocimiento.

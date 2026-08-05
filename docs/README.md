@@ -1,4 +1,4 @@
-# Documentación normativa de Red Humana
+# Documentación normativa de Conocimiento de la Humanidad
 
 Esta carpeta contiene los documentos que **definen** la plataforma. Tienen
 prioridad sobre cualquier decisión de implementación.
@@ -24,6 +24,7 @@ Orden de prioridad (según `99_CONSTITUTION.md`):
 | [09_STRIPE.md](09_STRIPE.md) | Integración de pagos |
 | [10_PRODUCT_REQUIREMENTS.md](10_PRODUCT_REQUIREMENTS.md) | Requisitos funcionales |
 | [11_UI_GUIDELINES.md](11_UI_GUIDELINES.md) | Guía de interfaz |
+| [12_KNOWLEDGE_GRAPHS.md](12_KNOWLEDGE_GRAPHS.md) | Ontología de los Grafos de Conocimiento (Fase 11) |
 
 ## Relación con `/memory`
 

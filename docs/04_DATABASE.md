@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Definir la estructura lógica de la base de datos de Red Humana.
+Definir la estructura lógica de la base de datos de Conocimiento de la Humanidad.
 
 ---
 

@@ -17,6 +17,8 @@
 | 7 | Iniciativas y casos de éxito | **Completada** (`projects` migrado) |
 | 8 | Ejemplo completo y datos de demostración | **Completada** |
 | 9 | Asistente IA universal | **Activo** (Claude conectado, RAG corregido) |
+| 10 | Paneles redimensionables, países de Europa, búsqueda global | **Completada** |
+| 11 | Grafos de Conocimiento + renombrado "Conocimiento de la Humanidad" | **Completada** (2026-08-05) |
 
 ## Lo que falta para dar cada fase por cerrada del todo
 
@@ -42,6 +44,13 @@ aparcados (necesitan pipelines aparte, no pedidos todavía). Pendiente:
   español, que funciona; `ai_knowledge_chunks.embedding` está preparado por
   si se decide añadir pgvector — necesitaría una clave de Voyage AI u otro
   proveedor de embeddings, decisión pendiente del usuario).
+
+### Fase 11 — Grafos de Conocimiento (completada; mejoras naturales siguientes)
+Ver `docs/12_KNOWLEDGE_GRAPHS.md`. Posibles siguientes pasos, no pedidos aún:
+- Editor visual de grafos (crear/conectar ventanas desde el lienzo; hoy la
+  creación manual va por API y la IA crea borradores).
+- Cola de revisión para publicar borradores generados por la IA.
+- Sub-grafos tipo "Debates" del boceto (el tipo de ventana `grafo` ya existe).
 
 ## Transversal pendiente
 - **Correo**: sin proveedor configurado. Por eso los usuarios se crean con

@@ -356,6 +356,58 @@ export const entityHistory = pgTable('entity_history', {
   changedAt: timestamp('changed_at').notNull().defaultNow(),
 });
 
+// ============================================================================
+// Grafos de Conocimiento (Fase 11) — ver drizzle/0012_knowledge_graphs.sql
+// ============================================================================
+export const knowledgeGraphs = pgTable('knowledge_graphs', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  creatorUserId: text('creator_user_id'),
+  triggerKeywords: jsonb('trigger_keywords').notNull().default([]),
+  status: text('status').notNull().default('publicado'),
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
+  views: integer('views').notNull().default(0),
+  ...auditColumns,
+});
+
+export const knowledgeWindows = pgTable('knowledge_windows', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  kind: text('kind').notNull(),
+  config: jsonb('config').notNull().default({}),
+  creatorUserId: text('creator_user_id'),
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
+  views: integer('views').notNull().default(0),
+  ...auditColumns,
+});
+
+export const graphWindows = pgTable('graph_windows', {
+  graphId: text('graph_id').notNull(),
+  windowId: text('window_id').notNull(),
+  x: doublePrecision('x').notNull().default(0),
+  y: doublePrecision('y').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.graphId, t.windowId] })]);
+
+export const graphEdges = pgTable('graph_edges', {
+  id: serial('id').primaryKey(),
+  graphId: text('graph_id').notNull(),
+  fromWindowId: text('from_window_id'), // NULL = nodo central
+  toWindowId: text('to_window_id').notNull(),
+  relation: text('relation').notNull().default('contexto'),
+  label: text('label'),
+});
+
+export const ratings = pgTable('ratings', {
+  userId: text('user_id').notNull(),
+  entityType: text('entity_type').notNull(),
+  entityId: text('entity_id').notNull(),
+  score: integer('score').notNull(), // 0-10
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.entityType, t.entityId] })]);
+
 export const memberships = pgTable('memberships', {
   id: text('id').primaryKey(),
   userId: text('user_id'),

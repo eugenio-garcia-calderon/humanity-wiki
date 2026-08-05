@@ -20,6 +20,8 @@ import Mercado from './pages/Mercado';
 import PanelFinanciero from './pages/PanelFinanciero';
 import Muro from './pages/Muro';
 import PersonaPublica from './pages/PersonaPublica';
+import Grafos from './pages/Grafos';
+import GrafoCanvas from './pages/GrafoCanvas';
 import Login from './pages/Login';
 import AdminDesign from './pages/AdminDesign';
 import AboutRoot from './pages/about/AboutRoot';
@@ -43,7 +45,11 @@ export default function App() {
             <BrowserRouter>
             <Routes>
               <Route path="/" element={<Layout />}>
-                <Route index element={<MapPage />} />
+                {/* Fase 11: los Grafos de Conocimiento son el nuevo inicio;
+                    el mapa conserva su ruta /mapa (enlazada en el menú). */}
+                <Route index element={<Grafos />} />
+                <Route path="grafos" element={<Grafos />} />
+                <Route path="grafos/:slug" element={<GrafoCanvas />} />
                 <Route path="territorios/:id" element={<TerritoryProfile />} />
                 <Route path="retos/:id" element={<ChallengeProfile />} />
                 <Route path="soluciones/:id" element={<SolutionProfile />} />

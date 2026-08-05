@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, X, MapPin, Target, BarChart3, Flag, Activity, AlertTriangle,
   GitBranch, Lightbulb, HelpCircle, Package, Megaphone, Rocket, Award,
-  Building2, User, MessageSquare, Briefcase, Loader2,
+  Building2, User, MessageSquare, Briefcase, Loader2, Network, AppWindow,
 } from 'lucide-react';
 import { useHelpers } from '../../contexts/DataContext';
 import { resolveEntityLink } from '../../utils/entityLinks';
@@ -35,11 +35,13 @@ const CATEGORY_META: Record<string, { label: string; icon: any }> = {
   users:         { label: 'Personas',       icon: User },
   publications:  { label: 'Publicaciones',  icon: MessageSquare },
   projects:      { label: 'Proyectos',      icon: Briefcase },
+  knowledge_graphs:  { label: 'Grafos de Conocimiento', icon: Network },
+  knowledge_windows: { label: 'Ventanas de Conocimiento', icon: AppWindow },
 };
 
 // Orden fijo, con los tipos que el usuario mencionó explícitamente primero.
 const CATEGORY_ORDER = [
-  'products', 'challenges', 'indicators', 'users',
+  'knowledge_graphs', 'products', 'challenges', 'indicators', 'users',
   'territories', 'objectives', 'solutions', 'organizations', 'initiatives',
   'demands', 'needs', 'markers', 'metrics', 'causes', 'success_cases',
   'publications', 'projects',
@@ -99,6 +101,13 @@ export default function GlobalSearch() {
   const orderedTypes = CATEGORY_ORDER.filter(t => grouped[t]?.length);
 
   const goTo = (r: SearchResult) => {
+    // Los grafos llevan su slug en el resultado (extra de NODE_TYPES).
+    if (r.type === 'knowledge_graphs' && r.slug) {
+      navigate(`/grafos/${r.slug}`);
+      setOpen(false);
+      setQuery('');
+      return;
+    }
     const resolved = resolveEntityLink(r.type, r.id, helpers);
     if (resolved.to) {
       navigate(resolved.to);
@@ -146,7 +155,9 @@ export default function GlobalSearch() {
                   {meta.label}
                 </p>
                 {grouped[type].map(r => {
-                  const resolved = resolveEntityLink(r.type, r.id, helpers);
+                  const resolved = r.type === 'knowledge_graphs' && r.slug
+                    ? { label: r.label, to: `/grafos/${r.slug}` }
+                    : resolveEntityLink(r.type, r.id, helpers);
                   return (
                     <button
                       key={r.id}

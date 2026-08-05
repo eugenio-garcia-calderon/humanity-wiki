@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Definir los principios de diseño visual y experiencia de usuario de Red Humana.
+Definir los principios de diseño visual y experiencia de usuario de Conocimiento de la Humanidad.
 
 ---
 

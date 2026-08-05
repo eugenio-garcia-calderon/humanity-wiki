@@ -1,6 +1,6 @@
 # 08_ECONOMY.md
 
-# Sistema Económico de Red Humana
+# Sistema Económico de Conocimiento de la Humanidad
 
 ## Objetivo
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import ResizeHandle from '../ui/ResizeHandle';
@@ -60,7 +60,7 @@ const ATTACHMENT_MAX_BYTES: Record<string, number> = {
   'application/pdf': 15 * 1024 * 1024,
 };
 
-export default function AIAssistant() {
+export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -72,8 +72,11 @@ export default function AIAssistant() {
   const [status, setStatus] = useState<{ ready: boolean; message: string } | null>(null);
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
+  // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
+  const [graphMatches, setGraphMatches] = useState<Array<{ slug: string; title: string; score: number }>>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { user } = useAuth();
   const location = useLocation();
@@ -97,6 +100,22 @@ export default function AIAssistant() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
+
+  // Fast-path del buscador de grafos: al escribir en la barra, se consultan
+  // los grafos publicados que coinciden (sin gastar una llamada a la IA).
+  useEffect(() => {
+    if (mode !== 'bar') return;
+    const q = input.trim();
+    if (q.length < 3) { setGraphMatches([]); return; }
+    if (resolveTimer.current) clearTimeout(resolveTimer.current);
+    resolveTimer.current = setTimeout(() => {
+      fetch(`/api/graphs/resolve?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(json => setGraphMatches(Array.isArray(json.matches) ? json.matches : []))
+        .catch(() => setGraphMatches([]));
+    }, 250);
+    return () => { if (resolveTimer.current) clearTimeout(resolveTimer.current); };
+  }, [input, mode]);
 
   /** Estado visual actual, tomado de la URL: es lo que ve el usuario ahora. */
   const currentContext = () => ({
@@ -132,6 +151,7 @@ export default function AIAssistant() {
         case 'OPEN_SOLUTION':  navigate(`/soluciones/${p.slug || p.solutionId}`); break;
         case 'SHOW_MARKET':    navigate('/mercado'); break;
         case 'SHOW_INITIATIVES': navigate('/proyectos'); break;
+        case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/grafos/${p.slug || p.graphId || ''}`); break;
         default: break;
       }
     }
@@ -165,9 +185,24 @@ export default function AIAssistant() {
     const pendingAttachment = attachment;
     setInput('');
     setAttachment(null);
+    setGraphMatches([]);
     setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
     setBusy(true);
     try {
+      // Fast-path (modo barra): si la consulta coincide con un grafo de
+      // conocimiento publicado, se abre directamente sin llamar a la IA.
+      if (mode === 'bar' && !pendingAttachment) {
+        try {
+          const r = await fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`);
+          const json = await r.json();
+          if (json.confident && json.matches?.[0]?.slug) {
+            const g = json.matches[0];
+            setMessages(m => [...m, { role: 'assistant', content: `Abriendo el grafo de conocimiento «${g.title}».` }]);
+            navigate(`/grafos/${g.slug}`);
+            return;
+          }
+        } catch { /* si falla la resolución, se sigue con la IA */ }
+      }
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -226,74 +261,17 @@ export default function AIAssistant() {
     setInput('');
   };
 
-  // Contenido del panel, compartido entre el acople de escritorio (columna
-  // real junto al mapa) y el cajón a pantalla completa de móvil — solo se
-  // monta uno de los dos a la vez, según `isDesktop`.
-  const panelBody = (
+  // Hilo de conversación (estado vacío + mensajes + indicador), compartido
+  // por el panel acoplado y por el modo barra de las páginas de Grafos.
+  const conversationInner = (
     <>
-      {/* Cabecera */}
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-black text-slate-900 leading-none">Asistente</p>
-                <p className="text-[10px] text-slate-400 truncate">
-                  {status?.ready ? 'Conectado' : 'Inactivo — falta clave de API'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={newConversation} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
-                <Plus className="w-4 h-4" />
-              </button>
-              <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
-                <Settings2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Configuración: permisos de edición */}
-          {showSettings && (
-            <div className="px-4 py-3 border-b border-slate-100 bg-white space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Permisos de edición</p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(Object.keys(EDIT_MODE_LABELS) as EditMode[]).map(m => (
-                  <button
-                    key={m}
-                    onClick={() => setEditMode(m)}
-                    className={cn(
-                      'px-2 py-2 rounded-lg text-[11px] font-bold border transition-colors',
-                      editMode === m
-                        ? 'bg-emerald-600 text-white border-emerald-600'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
-                    )}
-                  >
-                    {EDIT_MODE_LABELS[m].label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
-              {!user && (
-                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                  Sin sesión iniciada, el asistente solo puede consultar información. No podrá modificar nada.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Conversación */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {messages.length === 0 && (
               <div className="text-center py-10">
                 <MessageSquare className="w-8 h-8 text-slate-200 mx-auto mb-3" />
                 <p className="text-sm text-slate-400 mb-4">Pregúntame sobre cualquier cosa de la plataforma.</p>
                 <div className="space-y-1.5 text-left">
                   {[
+                    'Ceuta frontera amenaza',
                     'Muéstrame los retos del agua en Madrid',
                     '¿Qué productos ayudan con los nitratos?',
                     'Llévame al municipio de Talamanca',
@@ -394,6 +372,72 @@ export default function AIAssistant() {
             ))}
 
             {busy && <p className="text-xs text-slate-400 italic">Pensando…</p>}
+    </>
+  );
+
+  // Contenido del panel, compartido entre el acople de escritorio (columna
+  // real junto al mapa) y el cajón a pantalla completa de móvil — solo se
+  // monta uno de los dos a la vez, según `isDesktop`.
+  const panelBody = (
+    <>
+      {/* Cabecera */}
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-black text-slate-900 leading-none">Asistente</p>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {status?.ready ? 'Conectado' : 'Inactivo — falta clave de API'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={newConversation} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+              <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+                <Settings2 className="w-4 h-4" />
+              </button>
+              <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Configuración: permisos de edición */}
+          {showSettings && (
+            <div className="px-4 py-3 border-b border-slate-100 bg-white space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Permisos de edición</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(Object.keys(EDIT_MODE_LABELS) as EditMode[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setEditMode(m)}
+                    className={cn(
+                      'px-2 py-2 rounded-lg text-[11px] font-bold border transition-colors',
+                      editMode === m
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
+                    )}
+                  >
+                    {EDIT_MODE_LABELS[m].label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
+              {!user && (
+                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                  Sin sesión iniciada, el asistente solo puede consultar información. No podrá modificar nada.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Conversación */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {conversationInner}
           </div>
 
           {/* Entrada */}
@@ -461,6 +505,109 @@ export default function AIAssistant() {
     </>
   );
 
+  // ==========================================================================
+  // MODO BARRA (páginas de Grafos): el chat/buscador vive centrado abajo,
+  // siempre desplegado — es la puerta de entrada al conocimiento.
+  // ==========================================================================
+  if (mode === 'bar') {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+        <div className="mx-auto w-full max-w-2xl px-4 pb-4 pointer-events-auto">
+          {(messages.length > 0 || busy) && (
+            <div className="mb-2 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <Sparkles className="w-3 h-3 text-emerald-500" /> Asistente de Conocimiento
+                </span>
+                <button onClick={newConversation} title="Nueva conversación" className="p-1 text-slate-400 hover:text-emerald-600 rounded transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div ref={scrollRef} className="max-h-[42vh] overflow-y-auto px-4 py-4 space-y-4">
+                {conversationInner}
+              </div>
+            </div>
+          )}
+
+          {/* Grafos que coinciden con lo escrito: fast-path sin gastar IA */}
+          {graphMatches.length > 0 && (
+            <div className="mb-2 flex flex-wrap justify-center gap-1.5 animate-in fade-in duration-150">
+              {graphMatches.map(g => (
+                <button
+                  key={g.slug}
+                  onClick={() => { setInput(''); setGraphMatches([]); navigate(`/grafos/${g.slug}`); }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold shadow-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <Network className="w-3 h-3" /> {g.title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {attachment && (
+            <div className="mb-2 flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 shadow">
+              {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
+              <span className="truncate flex-1">{attachment.name}</span>
+              <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {attachError && (
+            <p className="mb-2 text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5 shadow">{attachError}</p>
+          )}
+
+          {/* Barra de entrada */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 flex items-end gap-1.5">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ATTACHMENT_ACCEPT}
+              onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }}
+              className="hidden"
+            />
+            <button
+              onClick={() => setSearchWeb(v => !v)}
+              title={searchWeb ? 'Internet activado' : 'Internet desactivado'}
+              className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
+                searchWeb ? 'bg-sky-50 border-sky-300 text-sky-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
+            >
+              <Globe className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Adjuntar imagen o PDF"
+              className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
+                attachment ? 'bg-emerald-50 border-emerald-300 text-emerald-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+              rows={1}
+              placeholder="Busca un tema o pregunta a la IA — p. ej. «Ceuta frontera amenaza»"
+              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
+            />
+            <button
+              onClick={send}
+              disabled={busy || !input.trim()}
+              className="shrink-0 w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+          {status && !status.ready && (
+            <p className="mt-1.5 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-relaxed shadow">
+              {status.message}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Botón flotante permanente: se mantiene fijo aunque el panel esté
@@ -468,7 +615,7 @@ export default function AIAssistant() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          title="Asistente de Red Humana"
+          title="Asistente de Conocimiento de la Humanidad"
           className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
         >
           <Sparkles className="w-6 h-6" />

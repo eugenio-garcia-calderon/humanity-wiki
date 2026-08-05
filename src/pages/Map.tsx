@@ -308,6 +308,11 @@ export default function MapPage() {
     }
   };
 
+  // Modo embed (Fase 11): el mapa incrustado dentro de una ventana de
+  // conocimiento — solo el lienzo del mapa, sin filtros ni panel de
+  // territorio (Layout ya quita la barra superior con ?embed=1).
+  const isEmbedMode = searchParams.get('embed') === '1';
+
   const objectivesList: { key: ObjectiveKey; label: string; icon: any; color: string }[] = [
     { key: 'overall', label: 'General', icon: Layers, color: 'text-slate-600' },
     { key: 'agua', label: 'Agua', icon: Droplet, color: 'text-blue-500' },
@@ -325,6 +330,25 @@ export default function MapPage() {
     { key: 'economia', label: 'Economía', icon: Coins, color: 'text-violet-500' },
     { key: 'cultura', label: 'Cultura', icon: Palette, color: 'text-pink-500' },
   ];
+
+  if (isEmbedMode) {
+    return (
+      <div className="w-full h-full relative">
+        <HumanityMap
+          onFeatureClick={handleFeatureClick}
+          onMapClick={() => setSelectedTerritory(null)}
+          onMapDoubleClick={() => { /* sin alta de territorios en modo embed */ }}
+          shouldReload={reloadTrigger}
+          activeObjective={activeObjective}
+          activeChallenge={null}
+          activeIndicatorId={activeIndicatorId}
+          indicators={indicators}
+          activeMarkerId={activeMarkerId}
+          activeMetricId={activeMetricId}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">

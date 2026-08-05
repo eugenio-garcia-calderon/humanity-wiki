@@ -1,6 +1,6 @@
 # 03_ARCHITECTURE.md
 
-# Arquitectura de Red Humana
+# Arquitectura de Conocimiento de la Humanidad
 
 ## Objetivo
 

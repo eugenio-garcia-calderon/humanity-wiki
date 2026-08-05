@@ -1,6 +1,6 @@
 # 05_KNOWLEDGE_GRAPH.md
 
-# Grafo de Conocimiento de Red Humana
+# Grafo de Conocimiento de Conocimiento de la Humanidad
 
 ## Objetivo
 
