@@ -63,7 +63,7 @@ export default function Login() {
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4">RH</div>
           <h2 className="text-2xl font-light tracking-tighter italic">{titles[mode]}</h2>
-          <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest">Conocimiento de la Humanidad</p>
+          <p className="text-xs text-slate-500 mt-2 uppercase tracking-widest">Humanity.wiki</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

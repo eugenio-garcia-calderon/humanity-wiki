@@ -1,6 +1,6 @@
 # 01_PRINCIPLES.md
 
-# Principios de Diseño de Conocimiento de la Humanidad
+# Principios de Diseño de Humanity.wiki
 
 Versión 1.0
 
@@ -8,7 +8,7 @@ Versión 1.0
 
 # Objetivo
 
-Este documento define los principios que deben guiar todas las decisiones funcionales, técnicas y de diseño de Conocimiento de la Humanidad. Ninguna nueva funcionalidad deberá desarrollarse sin respetarlos.
+Este documento define los principios que deben guiar todas las decisiones funcionales, técnicas y de diseño de Humanity.wiki. Ninguna nueva funcionalidad deberá desarrollarse sin respetarlos.
 
 ---
 
@@ -116,6 +116,6 @@ Toda iniciativa debe poder medir su impacto mediante indicadores antes y despué
 
 # 14. Evolución continua
 
-Conocimiento de la Humanidad está diseñada para evolucionar.
+Humanity.wiki está diseñada para evolucionar.
 
 Las nuevas funcionalidades deberán integrarse en la arquitectura existente sin romper los principios anteriores.

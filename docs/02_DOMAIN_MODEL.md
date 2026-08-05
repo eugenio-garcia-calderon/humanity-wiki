@@ -1,6 +1,6 @@
 # 02_DOMAIN_MODEL.md
 
-# Modelo de Dominio de Conocimiento de la Humanidad
+# Modelo de Dominio de Humanity.wiki
 
 ## Propósito
 

@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Definir el funcionamiento de la red social integrada en Conocimiento de la Humanidad.
+Definir el funcionamiento de la red social integrada en Humanity.wiki.
 
 ---
 

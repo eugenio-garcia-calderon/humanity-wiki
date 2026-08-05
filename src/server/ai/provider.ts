@@ -32,6 +32,8 @@ export interface AICompletionRequest {
   temperature?: number;
   /** Activa la búsqueda real en internet (herramienta nativa del proveedor, si la tiene). */
   webSearch?: boolean;
+  /** Modelo elegido por el usuario (debe estar en AI_MODELS); si falta, el de la plataforma. */
+  model?: string;
 }
 
 export interface WebSource {
@@ -67,9 +69,25 @@ export interface AIProvider {
 
 const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
-// Precios por millón de tokens en dólares, convertidos a céntimos de euro con
-// una tasa aproximada. Sirve para el panel de costes del administrador; no es
-// facturación real.
+/**
+ * Catálogo de modelos que el usuario puede elegir para sus creaciones
+ * (grafos, mapas, chat). Precios oficiales de Anthropic por millón de
+ * tokens, en céntimos de € (aproximación 1$ ≈ 1€ — misma convención que el
+ * resto del panel de costes). La facturación al usuario añade un 50% de
+ * comisión de la plataforma (ver AI_PLATFORM_FEE).
+ */
+export const AI_MODELS: Record<string, { label: string; hint: string; input: number; output: number }> = {
+  'claude-haiku-4-5': { label: 'Haiku 4.5',  hint: 'Rápido y económico',        input: 100,  output: 500 },
+  'claude-sonnet-5':  { label: 'Sonnet 5',   hint: 'Equilibrado (recomendado)', input: 300,  output: 1500 },
+  'claude-opus-5':    { label: 'Opus 5',     hint: 'Máxima capacidad',          input: 500,  output: 2500 },
+  'claude-fable-5':   { label: 'Fable 5',    hint: 'El más potente (premium)',  input: 1000, output: 5000 },
+};
+
+/** Comisión de la plataforma sobre el coste de créditos de Anthropic. */
+export const AI_PLATFORM_FEE = 0.5;
+
+// Precio del modelo por defecto de la plataforma (respuestas automáticas de
+// la IA, comentarios, etc. — no facturadas al usuario).
 const PRICE_PER_MTOK = { input: 300, output: 1500 }; // céntimos de € por millón
 
 export class ClaudeProvider implements AIProvider {
@@ -85,8 +103,11 @@ export class ClaudeProvider implements AIProvider {
     }
     const started = Date.now();
 
+    // Solo se aceptan modelos del catálogo: nunca un ID arbitrario del cliente.
+    const model = req.model && AI_MODELS[req.model] ? req.model : CLAUDE_MODEL;
+
     const body: Record<string, any> = {
-      model: CLAUDE_MODEL,
+      model,
       max_tokens: req.maxTokens ?? 2048,
       temperature: req.temperature ?? 0.2,
       system: req.system,
@@ -137,14 +158,15 @@ export class ClaudeProvider implements AIProvider {
     const inputTokens = json.usage?.input_tokens ?? 0;
     const outputTokens = json.usage?.output_tokens ?? 0;
 
+    const price = AI_MODELS[model] || PRICE_PER_MTOK;
     return {
       text,
-      model: json.model || CLAUDE_MODEL,
+      model: json.model || model,
       inputTokens,
       outputTokens,
       costCents:
-        (inputTokens / 1_000_000) * PRICE_PER_MTOK.input +
-        (outputTokens / 1_000_000) * PRICE_PER_MTOK.output,
+        (inputTokens / 1_000_000) * price.input +
+        (outputTokens / 1_000_000) * price.output,
       durationMs: Date.now() - started,
       webSources,
     };

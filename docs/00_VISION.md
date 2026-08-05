@@ -1,6 +1,6 @@
 # 00_VISION.md
 
-# Visión de Conocimiento de la Humanidad
+# Visión de Humanity.wiki
 
 ## Misión
 Permitir comprender retos, coordinar recursos y ejecutar iniciativas.

@@ -1,7 +1,7 @@
 # 12 — Grafos de Conocimiento
 
 > Documento normativo de la Fase 11 (2026-08-05). Define la ontología de los
-> Grafos de Conocimiento de **Conocimiento de la Humanidad** siguiendo los
+> Grafos de Conocimiento de **Humanity.wiki** siguiendo los
 > seis componentes canónicos de un grafo de conocimiento: entidades,
 > identificadores, atributos, relaciones, ontología e inferencia.
 

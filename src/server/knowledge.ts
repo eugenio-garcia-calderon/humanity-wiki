@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
+import { graphLimitReached } from './ai/assistant.js';
 
 // ============================================================================
 // Grafos de Conocimiento — Fase 11
@@ -24,7 +25,7 @@ export const normalize = (s: string) =>
 
 const WINDOW_KINDS = new Set([
   'publicacion', 'imagen', 'video', 'wikipedia', 'enlace', 'mapa',
-  'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto',
+  'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto', 'producto',
 ]);
 
 const EDGE_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);
@@ -71,7 +72,7 @@ export async function aiReplyToComment(db: any, opts: {
     }
 
     const result = await provider.complete({
-      system: `Eres la IA de Conocimiento de la plataforma "Conocimiento de la Humanidad". Respondes brevemente (2-4 frases, español) al comentario de una persona sobre un contenido. Reglas: agradece o reconoce lo válido de su punto; aporta UN matiz, dato o perspectiva que le falte, con honestidad y sin condescendencia; si afirma algo incorrecto, corrígelo con delicadeza citando en qué se basa la corrección; nunca inventes cifras; termina invitando a seguir explorando el grafo. No uses markdown.`,
+      system: `Eres la IA de Conocimiento de la plataforma "Humanity.wiki". Respondes brevemente (2-4 frases, español) al comentario de una persona sobre un contenido. Reglas: agradece o reconoce lo válido de su punto; aporta UN matiz, dato o perspectiva que le falte, con honestidad y sin condescendencia; si afirma algo incorrecto, corrígelo con delicadeza citando en qué se basa la corrección; nunca inventes cifras; termina invitando a seguir explorando el grafo. No uses markdown.`,
       messages: [{ role: 'user', content: `CONTENIDO COMENTADO:\n${contextText || '(sin contexto disponible)'}\n\nCOMENTARIO DE ${opts.userName}:\n${opts.userComment.slice(0, 600)}` }],
       maxTokens: 300,
       temperature: 0.4,
@@ -240,6 +241,69 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // MAPAS DE USUARIO (Fase 12) — vistas del mapa publicadas a nombre de una
+  // persona, indexadas y valorables. La config dice qué carga el mapa.
+  // ==========================================================================
+  app.get('/api/maps', async (req: Request, res: Response) => {
+    try {
+      const creatorId = (req.query.creator_id as string) || null;
+      const rows = await db.execute(sql`
+        SELECT m.id, m.title, m.slug, m.description, m.config, m.status, m.is_ai_generated, m.views,
+               m.created_at, u.display_name AS creator_name
+        FROM user_maps m LEFT JOIN users u ON u.id = m.creator_user_id
+        WHERE m.archived_at IS NULL
+          AND (${creatorId}::text IS NULL OR m.creator_user_id = ${creatorId})
+          AND (m.status = 'publicado' OR m.creator_user_id = ${req.user?.id || null}
+               OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
+        ORDER BY m.views DESC, m.created_at DESC
+        LIMIT 60
+      `);
+      const { agg } = await ratingsFor('user_maps', (rows.rows as any[]).map(r => r.id));
+      res.json((rows.rows as any[]).map(r => ({ ...r, rating: agg[r.id] || null })));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get('/api/maps/:slug', async (req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`
+        SELECT m.*, u.display_name AS creator_name
+        FROM user_maps m LEFT JOIN users u ON u.id = m.creator_user_id
+        WHERE (m.slug = ${req.params.slug} OR m.id = ${req.params.slug}) AND m.archived_at IS NULL
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Mapa no encontrado.' });
+      const map = r.rows[0] as any;
+      if (map.status !== 'publicado' && !canEdit(req, map.creator_user_id)) {
+        return res.status(404).json({ error: 'Mapa no encontrado.' });
+      }
+      const { agg, mine } = await ratingsFor('user_maps', [map.id], req.user?.id);
+      db.execute(sql`UPDATE user_maps SET views = views + 1 WHERE id = ${map.id}`).catch(() => {});
+      res.json({ ...map, rating: agg[map.id] || null, my_score: mine[map.id] ?? null, can_edit: canEdit(req, map.creator_user_id) });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post('/api/maps', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const limitMsg = await graphLimitReached(db, req.user!.id, req.user!.roleLevel ?? 0, 'user_maps');
+      if (limitMsg) return res.status(403).json({ error: limitMsg });
+      const d = req.body || {};
+      if (!d.title) return res.status(400).json({ error: 'El mapa necesita un título.' });
+      const id = newId('UM');
+      const slug = normalize(String(d.slug || d.title)).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || id.toLowerCase();
+      await db.execute(sql`
+        INSERT INTO user_maps (id, title, slug, description, creator_user_id, config, trigger_keywords, status, created_by, updated_by)
+        VALUES (${id}, ${d.title}, ${slug}, ${d.description || null}, ${req.user!.id},
+                ${JSON.stringify(d.config || {})}::jsonb, ${JSON.stringify(d.trigger_keywords || [])}::jsonb,
+                ${d.status || 'publicado'}, ${req.user!.id}, ${req.user!.id})
+      `);
+      res.json({ id, slug });
+    } catch (e: any) {
+      if (String(e.message).includes('unique')) return res.status(400).json({ error: 'Ya existe un mapa con ese título/slug.' });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // DETALLE COMPLETO DE UN GRAFO
   // ==========================================================================
   app.get('/api/graphs/:slug', async (req: Request, res: Response) => {
@@ -331,6 +395,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   app.post('/api/graphs', async (req: Request, res: Response) => {
     try {
       if (!requireLevel(req, res, ROLE.USER)) return;
+      const limitMsg = await graphLimitReached(db, req.user!.id, req.user!.roleLevel ?? 0, 'knowledge_graphs');
+      if (limitMsg) return res.status(403).json({ error: limitMsg });
       const d = req.body || {};
       if (!d.title) return res.status(400).json({ error: 'El grafo necesita un título.' });
       const id = newId('KG');

@@ -21,7 +21,7 @@ const LINKABLE = new Set([
   'territories', 'objectives', 'indicators', 'markers', 'metrics', 'challenges',
   'causes', 'solutions', 'needs', 'products', 'demands', 'initiatives',
   'success_cases', 'users', 'organizations', 'projects',
-  'knowledge_graphs', 'knowledge_windows',
+  'knowledge_graphs', 'knowledge_windows', 'user_maps',
 ]);
 
 export function registerSocialRoutes(app: Express, db: any) {
