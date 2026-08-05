@@ -48,6 +48,8 @@ interface Message {
   attachmentName?: string;
   /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
   usage?: { model: string; totalCents: number };
+  /** Pregunta con opciones (estilo Claude Code): botones 1/2/… + «Otro». */
+  question?: { text: string; options: string[]; answered?: boolean };
 }
 
 /** Modelo de Anthropic disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
@@ -216,8 +218,8 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
     reader.readAsDataURL(file);
   };
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (overrideText?: string) => {
+    const text = (typeof overrideText === 'string' ? overrideText : input).trim();
     if (!text || busy) return;
     const pendingAttachment = attachment;
     setInput('');
@@ -284,6 +286,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         content: json.reply,
         sources: json.sources,
         actions: json.proposed_actions,
+        question: json.question || undefined,
         usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
       }]);
       applyUiEvents(json.ui_events);
@@ -327,6 +330,15 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
       }));
       return json;
     } catch { return null; /* el estado se queda como estaba */ }
+  };
+
+  /** Responder a una pregunta con opciones: marca la pregunta como
+   *  respondida y envía la opción elegida como mensaje del usuario. */
+  const answerQuestion = (msgIndex: number, option: string) => {
+    setMessages(m => m.map((msg, i) => i === msgIndex && msg.question
+      ? { ...msg, question: { ...msg.question, answered: true } }
+      : msg));
+    send(option);
   };
 
   const newConversation = () => {
@@ -408,6 +420,34 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
                           <span className="truncate">{s.title || s.url}</span>
                         </a>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Pregunta con opciones (estilo Claude Code): 1 / 2 / … / Otro */}
+                  {m.question && (
+                    <div className="mt-3 bg-white border border-slate-200 rounded-xl p-3">
+                      <p className="text-[11px] font-bold text-slate-800 mb-2">{m.question.text}</p>
+                      <div className="flex flex-col gap-1.5">
+                        {m.question.options.map((opt, oi) => (
+                          <button
+                            key={oi}
+                            disabled={busy || m.question!.answered}
+                            onClick={() => answerQuestion(i, opt)}
+                            className="flex items-center gap-2 text-left text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                          >
+                            <span className="w-4 h-4 rounded-full bg-slate-900 text-white text-[9px] font-black flex items-center justify-center shrink-0">{oi + 1}</span>
+                            {opt}
+                          </button>
+                        ))}
+                        <button
+                          disabled={busy || m.question.answered}
+                          onClick={() => setMessages(msgs => msgs.map((mm, mi) => mi === i && mm.question ? { ...mm, question: { ...mm.question, answered: true } } : mm))}
+                          className="flex items-center gap-2 text-left text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-dashed border-slate-300 text-slate-500 hover:border-slate-400 transition-colors disabled:opacity-50"
+                        >
+                          <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[9px] font-black flex items-center justify-center shrink-0">…</span>
+                          Otro — escríbelo abajo
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -620,7 +660,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
                 className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
               />
               <button
-                onClick={send}
+                onClick={() => send()}
                 disabled={busy || !input.trim()}
                 className="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
@@ -724,7 +764,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
               className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
             />
             <button
-              onClick={send}
+              onClick={() => send()}
               disabled={busy || !input.trim()}
               className="shrink-0 w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >

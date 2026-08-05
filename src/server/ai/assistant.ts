@@ -206,26 +206,35 @@ Responde en texto normal. Si quieres navegar o proponer cambios, añade AL FINAL
 \`\`\`redhumana
 {
   "ui_events": [{"type": "ZOOM_TO_TERRITORY", "params": {"territoryId": "T003"}}],
-  "actions": [{"type": "CREATE_PRODUCT", "params": {"name": "..."}, "rationale": "por qué"}]
+  "actions": [{"type": "CREATE_PRODUCT", "params": {"name": "..."}, "rationale": "por qué"}],
+  "question": {"text": "¿Qué enfoque prefieres para el grafo?", "options": ["Toda España", "Solo grandes ciudades"]}
 }
 \`\`\`
 
+"question" es OPCIONAL: úsala solo cuando necesites una decisión del usuario para continuar bien (enfoque, territorio, alcance…). Máximo 4 opciones cortas y claras — la interfaz añade «Otro» automáticamente. No la uses para trivialidades: si puedes decidir con buen criterio, decide y actúa.
 Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
   };
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
-  const parseModelBlock = (text: string): { clean: string; ui_events: any[]; actions: any[] } => {
+  const parseModelBlock = (text: string): { clean: string; ui_events: any[]; actions: any[]; question: any } => {
     // El cierre ``` puede faltar si la respuesta se truncó por max_tokens:
     // aun así el bloque se RETIRA del texto visible (nunca se enseña JSON
     // crudo al usuario) aunque sus acciones ya no se puedan recuperar.
     const m = text.match(/```redhumana\s*([\s\S]*?)(?:```|$)/);
-    if (!m) return { clean: text.trim(), ui_events: [], actions: [] };
+    if (!m) return { clean: text.trim(), ui_events: [], actions: [], question: null };
     let parsed: any = {};
     try { parsed = JSON.parse(m[1]); } catch { /* bloque mal formado o truncado: se ignora */ }
+    // Pregunta con opciones (estilo Claude Code): {text, options[]} — la
+    // interfaz las pinta como botones y añade «Otro» por su cuenta.
+    const q = parsed.question;
+    const question = q && typeof q.text === 'string' && Array.isArray(q.options) && q.options.length >= 2
+      ? { text: q.text, options: q.options.slice(0, 4).map((o: any) => String(o)) }
+      : null;
     return {
       clean: text.replace(m[0], '').trim(),
       ui_events: Array.isArray(parsed.ui_events) ? parsed.ui_events.filter((e: any) => UI_EVENTS.includes(e?.type)) : [],
       actions: Array.isArray(parsed.actions) ? parsed.actions : [],
+      question,
     };
   };
 
@@ -392,7 +401,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       // Modelo elegido por el usuario (validado contra el catálogo).
       const chosenModel = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
       const result = await provider.complete({ system, messages, webSearch: !!search_web, model: chosenModel });
-      const { clean, ui_events, actions } = parseModelBlock(result.text);
+      const { clean, ui_events, actions, question } = parseModelBlock(result.text);
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
       const proposed: any[] = [];
@@ -454,6 +463,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         reply: clean,
         ui_events,
         proposed_actions: proposed,
+        question,
         sources,
         usage: {
           model: result.model, inputTokens: result.inputTokens, outputTokens: result.outputTokens,
