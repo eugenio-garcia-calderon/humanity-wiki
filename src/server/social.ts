@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { aiReplyToComment } from './knowledge.js';
 
 // ============================================================================
 // Red Social y Mercado — Fases 4 y 5
@@ -295,6 +296,17 @@ export function registerSocialRoutes(app: Express, db: any) {
         FROM comments c LEFT JOIN users u ON u.id = c.author_user_id WHERE c.id = ${id}
       `);
       res.json(row.rows[0]);
+
+      // La IA de Conocimiento responde también en el Muro (en segundo plano).
+      if (req.user!.id !== 'U_IA_CONOCIMIENTO') {
+        void aiReplyToComment(db, {
+          entityType: 'publications',
+          entityId: req.params.id,
+          parentCommentId: id,
+          userName: req.user!.displayName || 'una persona',
+          userComment: body,
+        });
+      }
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
