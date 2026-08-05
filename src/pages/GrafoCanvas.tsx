@@ -68,9 +68,10 @@ const RELATION_STYLE: Record<string, { color: string; label: string }> = {
 
 const RELATIONS = Object.keys(RELATION_STYLE);
 
-// Geometría del anillo de relaciones.
-const RING_RADIUS = 370;
-const CIRCLE_SIZE = 122;
+// Geometría del anillo de relaciones: círculos grandes y cerca del centro
+// (petición del usuario, 2026-08-06).
+const RING_RADIUS = 300;
+const CIRCLE_SIZE = 144;
 const CENTER_W = 300;
 const CENTER_H = 190;
 
@@ -504,6 +505,9 @@ export default function GrafoCanvas() {
     const centerNode: Node = {
       id: '__center__', type: 'centro',
       position: { x: -CENTER_W / 2, y: -CENTER_H / 2 },
+      // Centro y círculos SIEMPRE por encima de las ventanas (las tarjetas
+      // nunca deben tapar los protagonistas del grafo).
+      zIndex: 20,
       draggable: false, selectable: false,
       data: {
         graph: data.graph,
@@ -542,6 +546,7 @@ export default function GrafoCanvas() {
           x: Math.cos(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
           y: Math.sin(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
         },
+        zIndex: 10,
         draggable: false, selectable: false,
         data: {
           relation: e.relation, label: e.label, edgeId: e.id,
@@ -675,6 +680,7 @@ export default function GrafoCanvas() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesConnectable={false}
+        elevateNodesOnSelect={false}
         fitView
         fitViewOptions={{ padding: 0.12 }}
         minZoom={0.12}
