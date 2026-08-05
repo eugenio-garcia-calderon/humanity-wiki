@@ -50,4 +50,4 @@ jobs:
             docker image prune -f
             # Espera y comprobación de salud: si la app no responde, el job falla.
             sleep 10
-            curl -fsS http://localhost:3000/api/health >/dev/null || (docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail 50 app && exit 1)
+            docker compose -f docker-compose.prod.yml --env-file .env.production exec -T app wget -qO- http://127.0.0.1:3000/api/health >/dev/null || (docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail 50 app && exit 1)
