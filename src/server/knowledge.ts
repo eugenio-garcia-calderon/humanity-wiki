@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { getProvider } from './ai/provider.js';
 
 // ============================================================================
 // Grafos de Conocimiento — Fase 11
@@ -27,6 +28,69 @@ const WINDOW_KINDS = new Set([
 ]);
 
 const EDGE_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);
+
+/**
+ * La IA de Conocimiento responde a cada comentario humano (petición del
+ * usuario, 2026-08-05): la persona se siente respondida al instante y recibe
+ * matices si su punto de vista es incompleto — antídoto de desinformación.
+ * Se ejecuta en segundo plano (fire-and-forget): nunca bloquea ni rompe el
+ * comentario original. Firma siempre como U_IA_CONOCIMIENTO.
+ */
+export async function aiReplyToComment(db: any, opts: {
+  entityType: string;
+  entityId: string;
+  parentCommentId: string;
+  userName: string;
+  userComment: string;
+}) {
+  try {
+    const provider = getProvider();
+    if (!provider.isReady()) return;
+
+    // Contexto real de aquello que se comenta.
+    let contextText = '';
+    if (opts.entityType === 'knowledge_windows') {
+      const w = await db.execute(sql`SELECT title, kind, config FROM knowledge_windows WHERE id = ${opts.entityId}`);
+      if (w.rows.length) {
+        const win = w.rows[0] as any;
+        const c = win.config || {};
+        contextText = `Ventana de conocimiento "${win.title}" (tipo ${win.kind}). Contenido: ${(c.body || c.excerpt || c.quote || c.description || c.caption || '').slice(0, 800)}`;
+      }
+    } else if (opts.entityType === 'graph_edges') {
+      const e = await db.execute(sql`SELECT relation, label, description FROM graph_edges WHERE id = ${Number(opts.entityId)}`);
+      if (e.rows.length) {
+        const ed = e.rows[0] as any;
+        contextText = `Conexión de un grafo de conocimiento (relación "${ed.relation}"${ed.label ? `, etiqueta "${ed.label}"` : ''}). Significado: ${(ed.description || '').slice(0, 600)}`;
+      }
+    } else if (opts.entityType === 'publications') {
+      const p = await db.execute(sql`SELECT title, body FROM publications WHERE id = ${opts.entityId}`);
+      if (p.rows.length) {
+        const pub = p.rows[0] as any;
+        contextText = `Publicación "${pub.title || 'sin título'}": ${(pub.body || '').slice(0, 800)}`;
+      }
+    }
+
+    const result = await provider.complete({
+      system: `Eres la IA de Conocimiento de la plataforma "Conocimiento de la Humanidad". Respondes brevemente (2-4 frases, español) al comentario de una persona sobre un contenido. Reglas: agradece o reconoce lo válido de su punto; aporta UN matiz, dato o perspectiva que le falte, con honestidad y sin condescendencia; si afirma algo incorrecto, corrígelo con delicadeza citando en qué se basa la corrección; nunca inventes cifras; termina invitando a seguir explorando el grafo. No uses markdown.`,
+      messages: [{ role: 'user', content: `CONTENIDO COMENTADO:\n${contextText || '(sin contexto disponible)'}\n\nCOMENTARIO DE ${opts.userName}:\n${opts.userComment.slice(0, 600)}` }],
+      maxTokens: 300,
+      temperature: 0.4,
+    });
+    const reply = result.text.trim();
+    if (!reply) return;
+
+    const id = `CMT${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase()}`;
+    await db.execute(sql`
+      INSERT INTO comments (id, entity_type, entity_id, publication_id, parent_comment_id, author_user_id, body, created_by, updated_by)
+      VALUES (${id}, ${opts.entityType}, ${opts.entityId},
+              ${opts.entityType === 'publications' ? opts.entityId : null},
+              ${opts.parentCommentId}, 'U_IA_CONOCIMIENTO', ${reply},
+              'U_IA_CONOCIMIENTO', 'U_IA_CONOCIMIENTO')
+    `);
+  } catch (e) {
+    console.error('aiReplyToComment error:', e);
+  }
+}
 
 export function registerKnowledgeRoutes(app: Express, db: any) {
 
@@ -68,13 +132,20 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   // ==========================================================================
   app.get('/api/graphs', async (req: Request, res: Response) => {
     try {
+      // ?creator_id= filtra los grafos de una persona (su carta de
+      // presentación en el perfil). Los borradores solo los ve su creador o
+      // un administrador.
+      const creatorId = (req.query.creator_id as string) || null;
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
                g.created_at, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
                (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
-        WHERE g.archived_at IS NULL AND (g.status = 'publicado' OR g.creator_user_id = ${req.user?.id || null})
+        WHERE g.archived_at IS NULL
+          AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
+          AND (g.status = 'publicado' OR g.creator_user_id = ${req.user?.id || null}
+               OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
         ORDER BY g.views DESC, g.created_at DESC
         LIMIT 60
       `);
@@ -116,6 +187,58 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * GET /api/publications/resolve?q=…
+   * Cuando la pregunta del usuario coincide fuertemente con una publicación
+   * EXISTENTE, el chat no genera una respuesta nueva: abre esa publicación en
+   * un pop-up central, junto con los grafos donde está enlazada (petición del
+   * usuario, 2026-08-05 — la plataforma responde con su conocimiento real).
+   */
+  app.get('/api/publications/resolve', async (req: Request, res: Response) => {
+    try {
+      const q = normalize(String(req.query.q || ''));
+      if (q.length < 4) return res.json({ query: q, matches: [], confident: false });
+      const words = [...new Set(q.split(/\s+/).filter(w => w.length > 3))];
+      if (!words.length) return res.json({ query: q, matches: [], confident: false });
+
+      const pubs = await db.execute(sql`
+        SELECT p.id, p.title, p.body, p.created_at, p.author_user_id,
+               u.display_name AS author_name
+        FROM publications p LEFT JOIN users u ON u.id = p.author_user_id
+        WHERE p.archived_at IS NULL AND p.status = 'publicada'
+      `);
+
+      const scored = (pubs.rows as any[]).map(p => {
+        const title = normalize(p.title || '');
+        const body = normalize(p.body || '');
+        let score = 0;
+        for (const w of words) {
+          if (title.includes(w)) score += 3;
+          else if (body.includes(w)) score += 1;
+        }
+        return { p, score };
+      }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
+
+      const matches = [];
+      for (const { p, score } of scored) {
+        // Grafos donde aparece: como ventana de tipo publicación o enlazada.
+        const graphs = await db.execute(sql`
+          SELECT DISTINCT g.slug, g.title FROM knowledge_windows w
+          JOIN graph_windows gw ON gw.window_id = w.id
+          JOIN knowledge_graphs g ON g.id = gw.graph_id AND g.status = 'publicado' AND g.archived_at IS NULL
+          WHERE w.kind = 'publicacion' AND w.config->>'publication_id' = ${p.id} AND w.archived_at IS NULL
+          UNION
+          SELECT g.slug, g.title FROM publication_links pl
+          JOIN knowledge_graphs g ON g.id = pl.entity_id AND g.status = 'publicado' AND g.archived_at IS NULL
+          WHERE pl.publication_id = ${p.id} AND pl.entity_type = 'knowledge_graphs'
+        `);
+        matches.push({ publication: p, score, graphs: graphs.rows });
+      }
+
+      res.json({ query: q, matches, confident: matches.length > 0 && matches[0].score >= 5 });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   // ==========================================================================
   // DETALLE COMPLETO DE UN GRAFO
   // ==========================================================================
@@ -140,8 +263,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL
       `);
       const edges = await db.execute(sql`
-        SELECT id, from_window_id, to_window_id, relation, label
-        FROM graph_edges WHERE graph_id = ${graph.id}
+        SELECT e.id, e.from_window_id, e.to_window_id, e.relation, e.label,
+               e.description, e.created_at, u.display_name AS creator_name
+        FROM graph_edges e LEFT JOIN users u ON u.id = e.created_by
+        WHERE e.graph_id = ${graph.id}
       `);
 
       // Anclaje al grafo general de la plataforma (ontología, Fase 11b): de
@@ -166,6 +291,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
       const winIds = (windows.rows as any[]).map(w => w.id);
       const { agg, mine } = await ratingsFor('knowledge_windows', winIds, req.user?.id);
+      // Las conexiones también se valoran (protagonismo de las uniones).
+      const edgeIds = (edges.rows as any[]).map(e => String(e.id));
+      const eRatings = await ratingsFor('graph_edges', edgeIds, req.user?.id);
       const gRating = await ratingsFor('knowledge_graphs', [graph.id], req.user?.id);
       const comments = winIds.length ? await db.execute(sql`
         SELECT entity_id, count(*)::int AS n FROM comments
@@ -185,7 +313,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           my_score: mine[w.id] ?? null,
           comment_count: cMap[w.id] || 0,
         })),
-        edges: edges.rows,
+        edges: (edges.rows as any[]).map(e => ({
+          ...e,
+          rating: eRatings.agg[String(e.id)] || null,
+          my_score: eRatings.mine[String(e.id)] ?? null,
+        })),
         entity_links: entityLinks.rows,
         related_graphs: relatedGraphs.rows,
         can_edit: canEdit(req, graph.creator_user_id),
@@ -204,9 +336,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const id = newId('KG');
       const slug = d.slug || normalize(d.title).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       await db.execute(sql`
-        INSERT INTO knowledge_graphs (id, title, slug, description, creator_user_id, trigger_keywords,
+        INSERT INTO knowledge_graphs (id, title, slug, description, center, creator_user_id, trigger_keywords,
                                       status, is_ai_generated, created_by, updated_by)
-        VALUES (${id}, ${d.title}, ${slug}, ${d.description || null}, ${req.user!.id},
+        VALUES (${id}, ${d.title}, ${slug}, ${d.description || null},
+                ${JSON.stringify(d.center || {})}::jsonb, ${req.user!.id},
                 ${JSON.stringify(d.trigger_keywords || [])}::jsonb, ${d.status || 'publicado'},
                 ${!!d.is_ai_generated}, ${req.user!.id}, ${req.user!.id})
       `);
@@ -228,6 +361,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         UPDATE knowledge_graphs SET
           title = COALESCE(${d.title ?? null}, title),
           description = COALESCE(${d.description ?? null}, description),
+          center = COALESCE(${d.center ? JSON.stringify(d.center) : null}::jsonb, center),
           trigger_keywords = COALESCE(${d.trigger_keywords ? JSON.stringify(d.trigger_keywords) : null}::jsonb, trigger_keywords),
           status = COALESCE(${d.status ?? null}, status),
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
@@ -353,11 +487,35 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const d = req.body || {};
       const relation = EDGE_RELATIONS.has(d.relation) ? d.relation : 'contexto';
       const insert = await db.execute(sql`
-        INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label)
-        VALUES (${req.params.id}, ${d.from_window_id || null}, ${d.to_window_id}, ${relation}, ${d.label || null})
+        INSERT INTO graph_edges (graph_id, from_window_id, to_window_id, relation, label, description, created_by, updated_by)
+        VALUES (${req.params.id}, ${d.from_window_id || null}, ${d.to_window_id}, ${relation}, ${d.label || null},
+                ${d.description || null}, ${req.user!.id}, ${req.user!.id})
         RETURNING *
       `);
       res.json(insert.rows[0]);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Editar los atributos de una conexión (creador del grafo o administrador). */
+  app.put('/api/graphs/:id/edges/:edgeId', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const g = await db.execute(sql`SELECT creator_user_id FROM knowledge_graphs WHERE id = ${req.params.id}`);
+      if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
+      if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden editar sus conexiones.' });
+      }
+      const d = req.body || {};
+      const relation = d.relation && EDGE_RELATIONS.has(d.relation) ? d.relation : null;
+      await db.execute(sql`
+        UPDATE graph_edges SET
+          relation = COALESCE(${relation}, relation),
+          label = COALESCE(${d.label ?? null}, label),
+          description = COALESCE(${d.description ?? null}, description),
+          updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}
+      `);
+      res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -420,6 +578,17 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         FROM comments c LEFT JOIN users u ON u.id = c.author_user_id WHERE c.id = ${id}
       `);
       res.json(row.rows[0]);
+
+      // La IA responde en segundo plano (nunca a sí misma).
+      if (req.user!.id !== 'U_IA_CONOCIMIENTO') {
+        void aiReplyToComment(db, {
+          entityType: entity_type,
+          entityId: entity_id,
+          parentCommentId: id,
+          userName: req.user!.displayName || 'una persona',
+          userComment: body,
+        });
+      }
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 }

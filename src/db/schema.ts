@@ -364,6 +364,8 @@ export const knowledgeGraphs = pgTable('knowledge_graphs', {
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
+  // Fusión central {left:{label,sublabel}, right:{label,sublabel}} — ver 0014.
+  center: jsonb('center').notNull().default({}),
   creatorUserId: text('creator_user_id'),
   triggerKeywords: jsonb('trigger_keywords').notNull().default([]),
   status: text('status').notNull().default('publicado'),

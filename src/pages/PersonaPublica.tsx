@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network, Eye, AppWindow, Plus, Sparkles, Star } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
+import CreateGraphModal from '../components/knowledge/CreateGraphModal';
 
 // ============================================================================
 // Perfil público — Fase 4 (interfaz)
@@ -55,6 +56,9 @@ export default function PersonaPublica() {
   const [following, setFollowing] = useState(false);
   const [supportStep, setSupportStep] = useState<'amount' | 'checkout' | null>(null);
   const [supportAmount, setSupportAmount] = useState(SUPPORT_AMOUNTS[0]);
+  const [graphs, setGraphs] = useState<any[]>([]);
+  const [showCreateGraph, setShowCreateGraph] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
@@ -63,11 +67,13 @@ export default function PersonaPublica() {
     Promise.all([
       fetch(`/api/users/${id}/profile`).then(r => r.json()),
       fetch(`/api/publications?author_id=${id}`).then(r => r.json()),
-    ]).then(([profileJson, pubsJson]) => {
+      fetch(`/api/graphs?creator_id=${id}`, { credentials: 'include' }).then(r => r.json()),
+    ]).then(([profileJson, pubsJson, graphsJson]) => {
       if (cancelled) return;
       setProfileUser(profileJson.user || null);
       setStats(profileJson.stats || { followers: 0, following: 0, publications: 0 });
       setPubs(Array.isArray(pubsJson) ? pubsJson : []);
+      setGraphs(Array.isArray(graphsJson) ? graphsJson : []);
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [id]);
@@ -160,6 +166,48 @@ export default function PersonaPublica() {
           <span><b className="text-slate-900">{stats.following}</b> <span className="text-slate-400">siguiendo</span></span>
         </div>
       </div>
+
+      {/* Grafos de Conocimiento: la carta de presentación de la persona —
+          en qué está trabajando, contado de forma conectada. */}
+      <div className="px-4 sm:px-6 mt-6">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
+            <Network className="w-4 h-4 text-emerald-600" /> Grafos de Conocimiento
+          </h2>
+          {isMe && (
+            <button onClick={() => setShowCreateGraph(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold transition-colors">
+              <Plus className="w-3 h-3" /> Crear grafo
+            </button>
+          )}
+        </div>
+        {graphs.length === 0 && (
+          <p className="text-xs text-slate-400 italic mb-2">
+            {isMe ? 'Todavía no has creado ningún grafo — tu primer grafo será tu carta de presentación.' : 'Todavía no ha publicado ningún grafo.'}
+          </p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {graphs.map(g => (
+            <Link key={g.id} to={`/grafos/${g.slug}`}
+              className="group bg-gradient-to-br from-emerald-600 via-teal-700 to-indigo-800 text-white rounded-2xl p-4 shadow hover:shadow-lg transition-all relative overflow-hidden">
+              <Network className="absolute top-3 right-3 w-6 h-6 text-white/30" />
+              <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-200 mb-1">Grafo de Conocimiento</p>
+              <h3 className="text-base font-black leading-tight line-clamp-2">{g.title}</h3>
+              <div className="flex items-center gap-3 mt-2.5 text-[10px] text-white/70">
+                {g.rating?.avg != null && <span className="inline-flex items-center gap-0.5"><Star className="w-3 h-3 fill-amber-300 text-amber-300" />{g.rating.avg.toFixed(1)}</span>}
+                <span className="inline-flex items-center gap-0.5"><Eye className="w-3 h-3" />{g.views}</span>
+                <span className="inline-flex items-center gap-0.5"><AppWindow className="w-3 h-3" />{g.window_count} ventanas</span>
+                {g.status === 'borrador' && <span className="bg-white/20 px-1.5 py-0.5 rounded-full font-bold uppercase">Borrador</span>}
+                {g.is_ai_generated && <span className="inline-flex items-center gap-0.5 bg-amber-400/30 px-1.5 py-0.5 rounded-full font-bold uppercase"><Sparkles className="w-2.5 h-2.5" />IA</span>}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {showCreateGraph && (
+        <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/grafos/${slug}`)} />
+      )}
 
       <div className="px-4 sm:px-6 mt-6 space-y-4">
         {pubs.length === 0 && (

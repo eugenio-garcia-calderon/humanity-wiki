@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Bookmark, Send, User as UserIcon } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Send, User as UserIcon, Pencil, X } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
 import { resolveEntityLink } from '../utils/entityLinks';
@@ -101,6 +101,12 @@ function CommentsSection({ publicationId }: { publicationId: string }) {
       if (res.ok) {
         setComments(c => [...c, json]);
         setText('');
+        // La IA de Conocimiento responde en segundo plano: recargar en unos
+        // segundos para que aparezca su respuesta.
+        const refetch = () => fetch(`/api/publications/${publicationId}/comments`)
+          .then(r => r.json()).then(j => { if (Array.isArray(j)) setComments(j); }).catch(() => {});
+        setTimeout(refetch, 5000);
+        setTimeout(refetch, 12000);
       }
     } finally {
       setSending(false);
@@ -149,10 +155,12 @@ function CommentsSection({ publicationId }: { publicationId: string }) {
   );
 }
 
-function PublicationCard({ pub, onReact, onSave }: {
+function PublicationCard({ pub, onReact, onSave, canEdit, onEdit }: {
   pub: Publication;
   onReact: (id: string) => void;
   onSave: (id: string) => void;
+  canEdit: boolean;
+  onEdit: (pub: Publication) => void;
 }) {
   const [showComments, setShowComments] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -177,6 +185,12 @@ function PublicationCard({ pub, onReact, onSave }: {
           )}
           <p className="text-[10px] text-slate-400">{timeAgo(pub.created_at)}</p>
         </div>
+        {canEdit && (
+          <button onClick={() => onEdit(pub)} title="Editar publicación"
+            className="p-1.5 text-slate-300 hover:text-emerald-600 rounded-lg hover:bg-slate-50 transition-colors shrink-0">
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {pub.title && <h3 className="text-base font-black text-slate-900 mt-3">{pub.title}</h3>}
@@ -218,12 +232,67 @@ function PublicationCard({ pub, onReact, onSave }: {
   );
 }
 
+/** Editor de una publicación: su autor o un administrador (que puede editar TODAS). */
+function EditPublicationModal({ pub, onClose, onSaved }: {
+  pub: Publication & { title?: string | null };
+  onClose: () => void;
+  onSaved: (updated: any) => void;
+}) {
+  const [title, setTitle] = useState((pub as any).title || '');
+  const [body, setBody] = useState(pub.body || '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/publications/${pub.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title: title.trim() || null, body }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'No se pudo guardar.');
+      onSaved(json);
+      onClose();
+    } catch (e: any) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-3" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-black text-slate-900">Editar publicación</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título (opcional)"
+          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300" />
+        <textarea value={body} onChange={e => setBody(e.target.value)} rows={6}
+          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300" />
+        {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600">Cancelar</button>
+          <button onClick={save} disabled={saving || !body.trim()}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-40">
+            {saving ? 'Guardando…' : 'Guardar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Muro() {
   const { user, can } = useAuth();
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
   const [posting, setPosting] = useState(false);
+  const [editingPub, setEditingPub] = useState<Publication | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const loadFeed = () => {
@@ -328,9 +397,19 @@ export default function Muro() {
 
       <div className="space-y-4">
         {publications.map(p => (
-          <PublicationCard key={p.id} pub={p} onReact={react} onSave={save} />
+          <PublicationCard key={p.id} pub={p} onReact={react} onSave={save}
+            canEdit={!!user && (user.id === p.author_user_id || user.isAdmin)}
+            onEdit={setEditingPub} />
         ))}
       </div>
+
+      {editingPub && (
+        <EditPublicationModal
+          pub={editingPub}
+          onClose={() => setEditingPub(null)}
+          onSaved={updated => setPublications(pubs => pubs.map(p => p.id === updated.id ? { ...p, ...updated } : p))}
+        />
+      )}
     </div>
   );
 }

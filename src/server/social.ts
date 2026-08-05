@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { aiReplyToComment } from './knowledge.js';
 
 // ============================================================================
 // Red Social y Mercado — Fases 4 y 5
@@ -116,6 +117,35 @@ export function registerSocialRoutes(app: Express, db: any) {
       console.error('notify followers error:', e);
     }
   };
+
+  /**
+   * Editar una publicación: su autor o un administrador (petición del
+   * usuario, 2026-08-05 — el administrador puede editar TODAS).
+   */
+  app.put('/api/publications/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const row = await db.execute(sql`SELECT author_user_id FROM publications WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!row.rows.length) return res.status(404).json({ error: 'Publicación no encontrada.' });
+      const isAuthor = (row.rows[0] as any).author_user_id === req.user!.id;
+      const isAdmin = (req.user!.roleLevel ?? 0) >= ROLE.ADMIN;
+      if (!isAuthor && !isAdmin) {
+        return res.status(403).json({ error: 'Solo el autor o un administrador pueden editar esta publicación.' });
+      }
+      const d = req.body || {};
+      await db.execute(sql`
+        UPDATE publications SET
+          title = COALESCE(${d.title ?? null}, title),
+          body = COALESCE(${d.body ?? null}, body),
+          version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${req.params.id}
+      `);
+      const updated = await db.execute(sql`SELECT * FROM publications WHERE id = ${req.params.id}`);
+      res.json(updated.rows[0]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
 
   app.get('/api/publications', async (req: Request, res: Response) => {
     try {
@@ -266,6 +296,17 @@ export function registerSocialRoutes(app: Express, db: any) {
         FROM comments c LEFT JOIN users u ON u.id = c.author_user_id WHERE c.id = ${id}
       `);
       res.json(row.rows[0]);
+
+      // La IA de Conocimiento responde también en el Muro (en segundo plano).
+      if (req.user!.id !== 'U_IA_CONOCIMIENTO') {
+        void aiReplyToComment(db, {
+          entityType: 'publications',
+          entityId: req.params.id,
+          parentCommentId: id,
+          userName: req.user!.displayName || 'una persona',
+          userComment: body,
+        });
+      }
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
