@@ -5,6 +5,7 @@ import { Card, Badge, Button } from '../components/ui/core';
 import { AdminMenu } from '../components/ui/AdminMenu';
 import { useEdit } from '../contexts/EditContext';
 import { slugify } from '../utils/slugify';
+import { challengeLinkTo } from '../utils/entityLinks';
 
 export default function SolutionProfile() {
   const { solutions, challenges, causes, loading } = useHelpers();
@@ -59,7 +60,7 @@ export default function SolutionProfile() {
           </div>
           <div className="space-y-4">
             {relatedChallenges.map(c => (
-              <Link key={c.id} to={`/retos/${slugify(c.title)}`} className="block group">
+              <Link key={c.id} to={challengeLinkTo(c)} className="block group">
                 <Card className="p-5 hover:border-emerald-300 transition-all cursor-pointer">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{c.scope}</span>

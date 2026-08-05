@@ -13,6 +13,27 @@ export interface ResolvedLink {
   to: string | null;
 }
 
+/**
+ * Retos que ya tienen su propio Grafo de Conocimiento: el clic lleva
+ * directamente al grafo (más rico) en vez de a la ficha genérica del reto.
+ * Petición del usuario, 2026-08-05, a raíz del grafo «Incendios en España».
+ */
+const CHALLENGE_GRAPH_SLUG: Record<string, string> = {
+  R017: 'incendios-espana', // Incendios
+};
+
+/** A dónde debe llevar el clic en un reto concreto, en cualquier parte de la app. */
+export function challengeLinkTo(challenge: { id: string; title: string }): string {
+  const graphSlug = CHALLENGE_GRAPH_SLUG[challenge.id];
+  return graphSlug ? `/grafos/${graphSlug}` : `/retos/${slugify(challenge.title)}`;
+}
+
+/** Ruta al grafo del reto, o null si ese reto aún no tiene grafo propio. */
+export function challengeGraphTo(challengeId: string): string | null {
+  const graphSlug = CHALLENGE_GRAPH_SLUG[challengeId];
+  return graphSlug ? `/grafos/${graphSlug}` : null;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   territories: 'Territorio', objectives: 'Objetivo', indicators: 'Indicador',
   markers: 'Marcador', metrics: 'Métrica', challenges: 'Reto', causes: 'Causa',
@@ -26,7 +47,7 @@ export function resolveEntityLink(type: string, id: string, helpers: any): Resol
   switch (type) {
     case 'challenges': {
       const c = helpers.challenges?.find((x: any) => x.id === id);
-      return c ? { label: c.title, to: `/retos/${slugify(c.title)}` } : { label: `${typeLabel} ${id}`, to: null };
+      return c ? { label: c.title, to: challengeLinkTo(c) } : { label: `${typeLabel} ${id}`, to: null };
     }
     case 'solutions': {
       const s = helpers.solutions?.find((x: any) => x.id === id);

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Droplet, Wheat, Home, Heart, Users, Leaf, ChevronRight, MapPin, Layers, Gauge, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Plus } from 'lucide-react';
 import { getColorForScore } from '../../utils/scoreColor';
 import { slugify } from '../../utils/slugify';
+import { challengeGraphTo } from '../../utils/entityLinks';
 import { INDICATOR_ICONS, DEFAULT_INDICATOR_ICON } from '../../utils/indicatorIcons';
 import { MARKER_ICONS, DEFAULT_MARKER_ICON } from '../../utils/markerIcons';
 import { METRIC_ICONS, DEFAULT_METRIC_ICON, LEVEL_COLORS, LEVEL_LABELS } from '../../utils/metricIcons';
@@ -437,14 +438,20 @@ export default function EntityExplorerPanel({
             </div>
             {(data.challenges && data.challenges.length > 0) || user?.isAdmin ? (
               <div className="flex flex-row flex-wrap gap-3">
-                {(data.challenges || []).map((c: any) => (
+                {(data.challenges || []).map((c: any) => {
+                  const graphTo = challengeGraphTo(c.id);
+                  return (
                   <div key={c.id} className="relative">
-                    <EntitySphere
-                      title={c.title}
-                      gradient="from-red-500 to-rose-600"
-                      active={selectedChallengeId === c.id}
-                      onClick={() => setSelectedChallengeId(prev => (prev === c.id ? null : c.id))}
-                    />
+                    {graphTo ? (
+                      <EntitySphere title={c.title} gradient="from-red-500 to-rose-600" to={graphTo} />
+                    ) : (
+                      <EntitySphere
+                        title={c.title}
+                        gradient="from-red-500 to-rose-600"
+                        active={selectedChallengeId === c.id}
+                        onClick={() => setSelectedChallengeId(prev => (prev === c.id ? null : c.id))}
+                      />
+                    )}
                     {user?.isAdmin && (
                       <AdminMenu
                         className="absolute -top-1 -right-1 bg-white rounded-full shadow-sm"
@@ -452,7 +459,8 @@ export default function EntityExplorerPanel({
                       />
                     )}
                   </div>
-                ))}
+                  );
+                })}
                 {user?.isAdmin && <AddSphere title="Añadir reto" onClick={handleAddChallenge} />}
               </div>
             ) : (

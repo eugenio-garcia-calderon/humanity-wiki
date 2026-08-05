@@ -140,7 +140,13 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
                g.created_at, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
-               (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count
+               (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count,
+               (SELECT w.config->>'image_url' FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
+                 WHERE gw.graph_id = g.id AND w.kind = 'imagen' AND w.config->>'image_url' IS NOT NULL
+                 ORDER BY w.created_at LIMIT 1) AS cover_image,
+               (SELECT w.config->>'youtube_id' FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
+                 WHERE gw.graph_id = g.id AND w.kind = 'video' AND w.config->>'youtube_id' IS NOT NULL
+                 ORDER BY w.created_at LIMIT 1) AS cover_video_id
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
         WHERE g.archived_at IS NULL

@@ -7,6 +7,7 @@ import { useEdit } from '../contexts/EditContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/core';
 import { slugify } from '../utils/slugify';
+import { challengeLinkTo } from '../utils/entityLinks';
 import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -404,7 +405,7 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
                   
                   {objChallenges.map(challenge => (
                     <div key={challenge.id} className="relative group/card bg-white p-3 rounded-xl border border-slate-100 hover:border-red-200 shadow-sm">
-                      <Link to={`/retos/${slugify(challenge.title)}`} className="block">
+                      <Link to={challengeLinkTo(challenge)} className="block">
                         <h5 className="text-sm font-bold text-slate-900 group-hover/card:text-red-600 line-clamp-1">{challenge.title}</h5>
                         <p className="text-xs text-slate-500 line-clamp-2 mt-1">{challenge.description}</p>
                       </Link>

@@ -245,7 +245,7 @@ async function main() {
     INSERT INTO knowledge_graphs (id, title, slug, description, center, creator_user_id, trigger_keywords, status, is_ai_generated, created_by, updated_by)
     VALUES (${GRAPH_ID}, 'Incendios en España: del récord de 2025 a las soluciones', 'incendios-espana',
             'El peor año de incendios desde que hay registros (403.000 ha en 2025), explicado con datos, mapas, causas y cinco soluciones reales — incluido el caso de éxito de China y su matiz científico.',
-            ${JSON.stringify({ left: { label: 'España', sublabel: 'Territorio' }, right: { label: 'Incendios', sublabel: 'Crisis' } })}::jsonb,
+            ${JSON.stringify({ category: { label: 'Incendios', sublabel: 'Crisis', color: '#ef4444' }, variable: { label: 'España', sublabel: 'Territorio' } })}::jsonb,
             ${EUGENIO},
             ${JSON.stringify(['incendios', 'incendio forestal', 'fuego', 'hectareas quemadas', 'sierra de la culebra', 'ourense', 'zamora', 'incendios espana', 'ola de incendios', 'megaincendios', 'effis'])}::jsonb,
             'publicado', false, ${EUGENIO}, ${EUGENIO})
