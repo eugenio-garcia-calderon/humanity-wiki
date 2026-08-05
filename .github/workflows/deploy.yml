@@ -1,0 +1,53 @@
+# ============================================================================
+# Despliegue continuo de humanity.wiki
+# ============================================================================
+# Cada merge a `main` conecta por SSH al servidor y levanta la nueva versión.
+# Se activa cuando existan estos secretos en GitHub (Settings → Secrets →
+# Actions): DEPLOY_HOST (IP del Hetzner), DEPLOY_USER (p. ej. deploy),
+# DEPLOY_SSH_KEY (clave privada ed25519 exclusiva para despliegues).
+# Hasta entonces, el job termina en "saltado" sin fallar.
+
+name: Deploy humanity.wiki
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar si el despliegue está configurado
+        id: check
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_HOST no configurado — despliegue omitido (aún sin servidor)."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Desplegar por SSH
+        if: steps.check.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /opt/humanity-wiki
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
+            # Espera y comprobación de salud: si la app no responde, el job falla.
+            sleep 10
+            curl -fsS http://localhost:3000/api/health >/dev/null || (docker compose -f docker-compose.prod.yml logs --tail 50 app && exit 1)
