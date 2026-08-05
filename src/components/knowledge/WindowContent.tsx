@@ -87,7 +87,7 @@ export default function WindowContent({ kind, config, variant }: {
             <img
               src={config.image_url}
               alt={config.caption || ''}
-              className={isNode ? 'w-full h-32 object-cover rounded-lg' : 'w-full rounded-xl'}
+              className={isNode ? 'w-full h-64 object-cover rounded-lg' : 'w-full rounded-xl'}
             />
           ) : (
             <div className="w-full h-24 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
@@ -104,7 +104,7 @@ export default function WindowContent({ kind, config, variant }: {
       if (isNode) {
         return (
           <div className="relative">
-            <img src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`} alt="" className="w-full h-32 object-cover rounded-lg" />
+            <img src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`} alt="" className="w-full h-56 object-cover rounded-lg" />
             <PlayCircle className="absolute inset-0 m-auto w-10 h-10 text-white drop-shadow-lg" />
             {config.channel && <p className="text-[10px] text-slate-400 mt-1 truncate">{config.channel} · YouTube</p>}
           </div>
@@ -133,7 +133,7 @@ export default function WindowContent({ kind, config, variant }: {
             <BookOpen className="w-3 h-3" /> Wikipedia
           </div>
           {wiki?.thumbnail?.source && (
-            <img src={wiki.thumbnail.source} alt="" className={isNode ? 'w-full h-24 object-cover rounded-lg' : 'w-full max-h-56 object-cover rounded-xl'} />
+            <img src={wiki.thumbnail.source} alt="" className={isNode ? 'w-full h-40 object-cover rounded-lg' : 'w-full max-h-56 object-cover rounded-xl'} />
           )}
           <p className={isNode ? 'text-[11px] text-slate-600 leading-snug line-clamp-3' : 'text-sm text-slate-600 leading-relaxed'}>
             {wiki?.extract || 'Cargando resumen…'}
@@ -163,7 +163,7 @@ export default function WindowContent({ kind, config, variant }: {
     case 'mapa':
       return (
         <div className="space-y-1.5">
-          <div className={isNode ? 'relative h-36 rounded-lg overflow-hidden border border-slate-200' : 'relative h-[420px] rounded-xl overflow-hidden border border-slate-200'}>
+          <div className={isNode ? 'relative h-64 rounded-lg overflow-hidden border border-slate-200' : 'relative h-[420px] rounded-xl overflow-hidden border border-slate-200'}>
             <iframe
               src={config.map_url}
               title="Mapa de indicadores"
@@ -277,7 +277,7 @@ export default function WindowContent({ kind, config, variant }: {
       const cover = (
         <div className={cn2(
           'relative rounded-xl overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-700 to-indigo-800 text-white flex flex-col justify-end',
-          isNode ? 'h-32 p-3' : 'h-44 p-4'
+          isNode ? 'h-52 p-3' : 'h-44 p-4'
         )}>
           <Network className={isNode ? 'absolute top-2.5 right-2.5 w-5 h-5 text-white/40' : 'absolute top-3 right-3 w-7 h-7 text-white/40'} />
           <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-200 mb-0.5">Grafo de Conocimiento</p>
@@ -307,7 +307,7 @@ export default function WindowContent({ kind, config, variant }: {
         ? (config.price_cents / 100).toLocaleString('es-ES', { style: 'currency', currency: config.currency || 'EUR' })
         : null;
       const cover = (
-        <div className={cn2('relative rounded-xl overflow-hidden bg-slate-100 flex flex-col justify-end', isNode ? 'h-32' : 'h-44')}>
+        <div className={cn2('relative rounded-xl overflow-hidden bg-slate-100 flex flex-col justify-end', isNode ? 'h-52' : 'h-44')}>
           {config.image_url ? (
             <img src={config.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
           ) : (
