@@ -18,7 +18,7 @@
 | 8 | Ejemplo completo y datos de demostración | **Completada** |
 | 9 | Asistente IA universal | **Activo** (Claude conectado, RAG corregido) |
 | 10 | Paneles redimensionables, países de Europa, búsqueda global | **Completada** |
-| 11 | Grafos de Conocimiento + renombrado "Conocimiento de la Humanidad" | **Completada** (2026-08-05) |
+| 11 | Grafos de Conocimiento + renombrado "Humanity.wiki" | **Completada** (2026-08-05) |
 
 ## Lo que falta para dar cada fase por cerrada del todo
 

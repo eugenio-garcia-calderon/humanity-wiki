@@ -19,6 +19,7 @@ const KINDS: Array<{ kind: string; label: string }> = [
   { kind: 'imagen', label: 'Imagen' },
   { kind: 'wikipedia', label: 'Wikipedia' },
   { kind: 'grafo', label: 'Otro grafo' },
+  { kind: 'producto', label: 'Producto del Mercado' },
 ];
 
 const RELATIONS = ['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza'];
@@ -42,6 +43,9 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
   const [selectedPub, setSelectedPub] = useState<any>(null);
   const [graphs, setGraphs] = useState<any[]>([]);
   const [selectedGraph, setSelectedGraph] = useState<any>(null);
+  const [productQuery, setProductQuery] = useState('');
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +59,16 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
         .then(r => r.json()).then(j => setGraphs((Array.isArray(j) ? j : []).filter((g: any) => g.id !== graphId))).catch(() => {});
     }
   }, [kind, user, graphId]);
+
+  // Búsqueda de productos del Mercado (con debounce), para referenciarlos como ventana.
+  useEffect(() => {
+    if (kind !== 'producto') return;
+    const t = setTimeout(() => {
+      fetch(`/api/products?limit=20${productQuery.trim() ? `&q=${encodeURIComponent(productQuery.trim())}` : ''}`)
+        .then(r => r.json()).then(j => setProducts(Array.isArray(j) ? j : [])).catch(() => {});
+    }, 250);
+    return () => clearTimeout(t);
+  }, [kind, productQuery]);
 
   const buildWindow = (): { title: string; config: any } | null => {
     switch (kind) {
@@ -95,6 +109,21 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
         return {
           title: title.trim() || `Grafo: ${selectedGraph.title}`,
           config: { graph_slug: selectedGraph.slug, title: selectedGraph.title, description: selectedGraph.description, creator_name: selectedGraph.creator_name },
+        };
+      }
+      case 'producto': {
+        if (!selectedProduct) { setError('Elige el producto a mostrar.'); return null; }
+        const images = Array.isArray(selectedProduct.images) ? selectedProduct.images : [];
+        return {
+          title: title.trim() || selectedProduct.name,
+          config: {
+            product_id: selectedProduct.id,
+            name: selectedProduct.name,
+            description: selectedProduct.description,
+            price_cents: selectedProduct.price_cents,
+            currency: selectedProduct.currency,
+            image_url: images[0] || null,
+          },
         };
       }
       default:
@@ -196,6 +225,26 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
                   <span className="text-slate-400">{g.window_count} ventanas · de {g.creator_name || 'Anónimo'}</span>
                 </button>
               ))}
+            </div>
+          )}
+
+          {kind === 'producto' && (
+            <div className="space-y-1.5">
+              <input value={productQuery} onChange={e => setProductQuery(e.target.value)} placeholder="Buscar producto por nombre…" className={input} />
+              <div className="space-y-1.5 max-h-44 overflow-y-auto border border-slate-100 rounded-xl p-2">
+                {products.length === 0 && <p className="text-xs text-slate-400 italic p-2">Sin resultados en el Mercado.</p>}
+                {products.map(p => (
+                  <button key={p.id} onClick={() => setSelectedProduct(p)}
+                    className={cn('w-full text-left px-3 py-2 rounded-lg text-xs transition-colors',
+                      selectedProduct?.id === p.id ? 'bg-emerald-50 border border-emerald-300 text-emerald-800' : 'hover:bg-slate-50 border border-transparent text-slate-600')}>
+                    <span className="font-bold block truncate">{p.name}</span>
+                    <span className="text-slate-400">
+                      {typeof p.price_cents === 'number' ? (p.price_cents / 100).toLocaleString('es-ES', { style: 'currency', currency: p.currency || 'EUR' }) : 'Sin precio'}
+                      {p.organization_name ? ` · ${p.organization_name}` : ''}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

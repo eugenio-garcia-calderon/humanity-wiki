@@ -56,7 +56,7 @@ export default function SocioConfirmacion() {
           ¡Gracias por hacerte socio!
         </h1>
         <p className="text-slate-600 text-base mb-8 max-w-md mx-auto leading-relaxed">
-          Tu apoyo continuado impulsa la Conocimiento de la Humanidad y nos acerca a garantizar el acceso a las necesidades básicas en todos los territorios.
+          Tu apoyo continuado impulsa la Humanity.wiki y nos acerca a garantizar el acceso a las necesidades básicas en todos los territorios.
         </p>
 
         {session && (

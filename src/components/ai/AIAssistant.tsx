@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
+import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
 import PublicationPopup from '../knowledge/PublicationPopup';
 import { cn } from '../../utils/cn';
@@ -45,7 +46,12 @@ interface Message {
   pending?: boolean;
   error?: boolean;
   attachmentName?: string;
+  /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
+  usage?: { model: string; totalCents: number };
 }
+
+/** Modelo de Anthropic disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
+interface AIModelInfo { label: string; hint: string; input: number; output: number; }
 
 interface PendingAttachment {
   name: string;
@@ -70,7 +76,9 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
   const [editMode, setEditMode] = useState<EditMode>('manual');
   const [searchWeb, setSearchWeb] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [status, setStatus] = useState<{ ready: boolean; message: string } | null>(null);
+  const [status, setStatus] = useState<{ ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number } | null>(null);
+  // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
+  const [selectedModel, setSelectedModel] = useState<string>('');
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
@@ -80,6 +88,17 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
+  const dictationBase = useRef('');
+  const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((text, isFinal) => {
+    const sep = dictationBase.current && !dictationBase.current.endsWith(' ') ? ' ' : '';
+    setInput(dictationBase.current + sep + text);
+    if (isFinal) dictationBase.current = dictationBase.current + sep + text;
+  });
+  const handleMicClick = () => {
+    if (!listening) dictationBase.current = input;
+    toggleVoice();
+  };
 
   const { user } = useAuth();
   const location = useLocation();
@@ -155,6 +174,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         case 'SHOW_MARKET':    navigate('/mercado'); break;
         case 'SHOW_INITIATIVES': navigate('/proyectos'); break;
         case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/grafos/${p.slug || p.graphId || ''}`); break;
+        case 'OPEN_USER_MAP': navigate(`/mapas/${p.slug || p.mapId || ''}`); break;
         default: break;
       }
     }
@@ -229,6 +249,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
           context: currentContext(),
           edit_mode: editMode,
           search_web: searchWeb,
+          model: selectedModel || undefined,
           attachment: pendingAttachment
             ? { name: pendingAttachment.name, media_type: pendingAttachment.mediaType, data: pendingAttachment.data }
             : undefined,
@@ -245,6 +266,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         content: json.reply,
         sources: json.sources,
         actions: json.proposed_actions,
+        usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
       }]);
       applyUiEvents(json.ui_events);
     } catch (e: any) {
@@ -383,6 +405,20 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
                       ))}
                     </div>
                   )}
+
+                  {/* Coste real de esta respuesta: créditos de Anthropic + comisión (Fase 12) */}
+                  {m.usage && (
+                    <p className="mt-2 pt-1.5 border-t border-slate-200/70 text-[9px] text-slate-400 flex items-center gap-1">
+                      <Euro className="w-2.5 h-2.5" />
+                      {(m.usage.totalCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} €
+                      · {(() => {
+                        // El proveedor devuelve el ID con fecha (p. ej. claude-haiku-4-5-20251001);
+                        // el catálogo usa el ID corto — se empareja por prefijo.
+                        const entry = Object.entries(status?.models || {}).find(([id]) => m.usage!.model.startsWith(id));
+                        return entry ? entry[1].label : m.usage!.model;
+                      })()} · incl. comisión de la plataforma
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -443,6 +479,37 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
                 ))}
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
+
+              {/* Modelo de IA para tus creaciones (grafos, mapas, chat) — Fase 12 */}
+              {status?.models && (
+                <div className="pt-2 border-t border-slate-100">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1">
+                    <Cpu className="w-3 h-3" /> Modelo de IA
+                  </p>
+                  <div className="space-y-1">
+                    {Object.entries(status.models).map(([id, info]) => (
+                      <button
+                        key={id}
+                        onClick={() => setSelectedModel(id)}
+                        className={cn(
+                          'w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
+                          selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
+                        )}
+                      >
+                        <span>
+                          <span className="font-bold text-slate-700">{info.label}</span>
+                          <span className="text-slate-400"> · {info.hint}</span>
+                        </span>
+                        <span className="text-slate-400 shrink-0">${(info.input / 100).toFixed(2)}/${(info.output / 100).toFixed(2)} p. 1M</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                    Se te factura el coste real de créditos de Anthropic más un {Math.round((status.platformFee ?? 0.5) * 100)}% de comisión de la plataforma. Precio orientativo por millón de tokens (entrada/salida).
+                  </p>
+                </div>
+              )}
+
               {!user && (
                 <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
                   Sin sesión iniciada, el asistente solo puede consultar información. No podrá modificar nada.
@@ -482,6 +549,16 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
               >
                 <Paperclip className="w-3 h-3" /> Adjuntar
               </button>
+              {voiceSupported && (
+                <button
+                  onClick={handleMicClick}
+                  title={listening ? 'Detener dictado' : 'Dictar por voz'}
+                  className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
+                    listening ? 'bg-red-50 border-red-300 text-red-700 animate-pulse' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+                >
+                  {listening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />} {listening ? 'Escuchando…' : 'Dictar'}
+                </button>
+              )}
             </div>
             {attachment && (
               <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
@@ -498,7 +575,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
             <div className="flex items-end gap-2">
               <textarea
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 rows={2}
                 placeholder="Escribe tu pregunta…"
@@ -598,9 +675,19 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
             >
               <Paperclip className="w-4 h-4" />
             </button>
+            {voiceSupported && (
+              <button
+                onClick={handleMicClick}
+                title={listening ? 'Detener dictado' : 'Dictar por voz'}
+                className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
+                  listening ? 'bg-red-50 border-red-300 text-red-600 animate-pulse' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
+              >
+                {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
+            )}
             <textarea
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
               rows={1}
               placeholder="Busca un tema o pregunta a la IA — p. ej. «Ceuta frontera amenaza»"
@@ -641,7 +728,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          title="Asistente de Conocimiento de la Humanidad"
+          title="Asistente de Humanity.wiki"
           className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
         >
           <Sparkles className="w-6 h-6" />

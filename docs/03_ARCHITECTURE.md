@@ -1,6 +1,6 @@
 # 03_ARCHITECTURE.md
 
-# Arquitectura de Conocimiento de la Humanidad
+# Arquitectura de Humanity.wiki
 
 ## Objetivo
 

@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Definir la arquitectura de integración de Stripe como infraestructura de pagos de Conocimiento de la Humanidad.
+Definir la arquitectura de integración de Stripe como infraestructura de pagos de Humanity.wiki.
 
 ---
 
@@ -12,7 +12,7 @@ Definir la arquitectura de integración de Stripe como infraestructura de pagos 
 
 - Todos los pagos utilizarán Stripe.
 - La plataforma actuará como intermediario mediante Stripe Connect.
-- Los pagos deberán realizarse sin abandonar Conocimiento de la Humanidad.
+- Los pagos deberán realizarse sin abandonar Humanity.wiki.
 - Toda transacción quedará registrada y vinculada al grafo de conocimiento.
 
 ---
@@ -166,4 +166,4 @@ Toda transacción deberá poder relacionarse con:
 
 # Objetivo final
 
-Convertir Stripe en la infraestructura financiera de Conocimiento de la Humanidad, garantizando una experiencia de pago segura, transparente, integrada y completamente conectada con el ecosistema de conocimiento.
+Convertir Stripe en la infraestructura financiera de Humanity.wiki, garantizando una experiencia de pago segura, transparente, integrada y completamente conectada con el ecosistema de conocimiento.

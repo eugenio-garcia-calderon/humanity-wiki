@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, X, MapPin, Target, BarChart3, Flag, Activity, AlertTriangle,
   GitBranch, Lightbulb, HelpCircle, Package, Megaphone, Rocket, Award,
-  Building2, User, MessageSquare, Briefcase, Loader2, Network, AppWindow,
+  Building2, User, MessageSquare, Briefcase, Loader2, Network, AppWindow, Map as MapIcon,
 } from 'lucide-react';
 import { useHelpers } from '../../contexts/DataContext';
 import { resolveEntityLink } from '../../utils/entityLinks';
@@ -37,11 +37,12 @@ const CATEGORY_META: Record<string, { label: string; icon: any }> = {
   projects:      { label: 'Proyectos',      icon: Briefcase },
   knowledge_graphs:  { label: 'Grafos de Conocimiento', icon: Network },
   knowledge_windows: { label: 'Ventanas de Conocimiento', icon: AppWindow },
+  user_maps:         { label: 'Mapas de Usuario', icon: MapIcon },
 };
 
 // Orden fijo, con los tipos que el usuario mencionó explícitamente primero.
 const CATEGORY_ORDER = [
-  'knowledge_graphs', 'products', 'challenges', 'indicators', 'users',
+  'knowledge_graphs', 'user_maps', 'products', 'challenges', 'indicators', 'users',
   'territories', 'objectives', 'solutions', 'organizations', 'initiatives',
   'demands', 'needs', 'markers', 'metrics', 'causes', 'success_cases',
   'publications', 'projects',
@@ -108,6 +109,12 @@ export default function GlobalSearch() {
       setQuery('');
       return;
     }
+    if (r.type === 'user_maps' && r.slug) {
+      navigate(`/mapas/${r.slug}`);
+      setOpen(false);
+      setQuery('');
+      return;
+    }
     const resolved = resolveEntityLink(r.type, r.id, helpers);
     if (resolved.to) {
       navigate(resolved.to);
@@ -157,6 +164,8 @@ export default function GlobalSearch() {
                 {grouped[type].map(r => {
                   const resolved = r.type === 'knowledge_graphs' && r.slug
                     ? { label: r.label, to: `/grafos/${r.slug}` }
+                    : r.type === 'user_maps' && r.slug
+                    ? { label: r.label, to: `/mapas/${r.slug}` }
                     : resolveEntityLink(r.type, r.id, helpers);
                   return (
                     <button

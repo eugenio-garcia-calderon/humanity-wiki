@@ -37,6 +37,7 @@ export const NODE_TYPES: Record<string, { table: string; label: string; extra?: 
   // seguir, valorar y enlazar desde publicaciones.
   knowledge_graphs:  { table: 'knowledge_graphs',  label: 'title', extra: ['slug', 'views'] },
   knowledge_windows: { table: 'knowledge_windows', label: 'title', extra: ['kind'] },
+  user_maps: { table: 'user_maps', label: 'title', extra: ['slug', 'views'] },
 };
 
 interface Edge {

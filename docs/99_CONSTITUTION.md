@@ -1,11 +1,11 @@
 # 99_CONSTITUTION.md
 
-# Constitución de Conocimiento de la Humanidad
+# Constitución de Humanity.wiki
 
 Versión 1.0
 
 ## Propósito
-Define las reglas fundamentales de Conocimiento de la Humanidad.
+Define las reglas fundamentales de Humanity.wiki.
 
 ## Principios
 1. Todo pertenece al grafo de conocimiento.

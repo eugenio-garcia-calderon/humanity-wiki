@@ -1,6 +1,6 @@
 # 07_MARKETPLACE.md
 
-# Mercado de Conocimiento de la Humanidad
+# Mercado de Humanity.wiki
 
 ## Objetivo
 

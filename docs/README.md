@@ -1,4 +1,4 @@
-# Documentación normativa de Conocimiento de la Humanidad
+# Documentación normativa de Humanity.wiki
 
 Esta carpeta contiene los documentos que **definen** la plataforma. Tienen
 prioridad sobre cualquier decisión de implementación.

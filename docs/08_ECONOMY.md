@@ -1,6 +1,6 @@
 # 08_ECONOMY.md
 
-# Sistema Económico de Conocimiento de la Humanidad
+# Sistema Económico de Humanity.wiki
 
 ## Objetivo
 

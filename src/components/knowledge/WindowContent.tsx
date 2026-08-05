@@ -300,6 +300,39 @@ export default function WindowContent({ kind, config, variant }: {
       );
     }
 
+    case 'producto': {
+      // Producto del Mercado como ventana (petición del usuario, 2026-08-05):
+      // portada con imagen, nombre y precio; enlaza al Mercado.
+      const price = typeof config.price_cents === 'number'
+        ? (config.price_cents / 100).toLocaleString('es-ES', { style: 'currency', currency: config.currency || 'EUR' })
+        : null;
+      const cover = (
+        <div className={cn2('relative rounded-xl overflow-hidden bg-slate-100 flex flex-col justify-end', isNode ? 'h-32' : 'h-44')}>
+          {config.image_url ? (
+            <img src={config.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 via-orange-600 to-rose-700" />
+          )}
+          <div className="relative bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-2.5">
+            <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-amber-200 mb-0.5">Producto</p>
+            <p className={cn2('font-black text-white leading-tight', isNode ? 'text-sm line-clamp-2' : 'text-lg')}>{config.name || 'Producto'}</p>
+            {price && <p className="text-xs font-bold text-white/90 mt-0.5">{price}</p>}
+          </div>
+        </div>
+      );
+      if (isNode) return cover;
+      return (
+        <div className="space-y-2.5">
+          {cover}
+          {config.description && <p className="text-sm text-slate-600 leading-relaxed">{config.description}</p>}
+          <Link to="/mercado"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-bold transition-colors">
+            Ver en el Mercado
+          </Link>
+        </div>
+      );
+    }
+
     case 'texto':
     default:
       return (

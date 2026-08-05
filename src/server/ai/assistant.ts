@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
-import { getProvider, listProviders, type AIMessage, type AIContentBlock } from './provider.js';
+import { getProvider, listProviders, type AIMessage, type AIContentBlock , AI_MODELS, AI_PLATFORM_FEE } from './provider.js';
 import { ROLE } from '../auth.js';
 
 // ============================================================================
@@ -43,7 +43,28 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // que aún no existe — siempre en borrador y marcado is_ai_generated,
   // pendiente de revisión humana. Abierto a nivel 1 por decisión del usuario.
   CREATE_KNOWLEDGE_GRAPH: { minLevel: ROLE.USER,  entity: 'knowledge_graphs', description: 'Crear un grafo de conocimiento (borrador)' },
+  // Fase 12: mapas de usuario — vistas del mapa publicadas a nombre de la
+  // persona, indexadas e integradas con el conocimiento de la plataforma.
+  CREATE_MAP: { minLevel: ROLE.USER, entity: 'user_maps', description: 'Crear un mapa público a nombre del usuario' },
 };
+
+/**
+ * Límite de creación de grafos/mapas vía IA (petición del usuario, 2026-08-05):
+ * nivel 1 (Usuario) hasta 5 grafos; nivel 2+ (Verificado) sin límite.
+ */
+export async function graphLimitReached(db: any, userId: string, roleLevel: number, table: 'knowledge_graphs' | 'user_maps'): Promise<string | null> {
+  if (roleLevel >= ROLE.VERIFIED) return null;
+  const r = await db.execute(sql`
+    SELECT count(*)::int AS n FROM ${sql.raw(table)}
+    WHERE creator_user_id = ${userId} AND archived_at IS NULL
+  `);
+  const n = (r.rows[0] as any).n;
+  if (n >= 5) {
+    const what = table === 'user_maps' ? 'mapas' : 'grafos de conocimiento';
+    return `Has alcanzado el límite de 5 ${what} para el nivel Usuario. Verifica tu cuenta (nivel 2) para crear sin límite, o archiva alguno existente.`;
+  }
+  return null;
+}
 
 /** Eventos de navegación que la IA puede emitir para controlar la interfaz. */
 const UI_EVENTS = [
@@ -52,6 +73,7 @@ const UI_EVENTS = [
   'FILTER_OBJECTIVE', 'SELECT_INDICATOR', 'SELECT_MARKER', 'SELECT_METRIC',
   'SHOW_MARKET', 'SHOW_FEED', 'SHOW_INITIATIVES',
   'OPEN_KNOWLEDGE_GRAPH', // params: { slug }
+  'OPEN_USER_MAP',        // params: { slug }
 ];
 
 export function registerAIRoutes(app: Express, db: any) {
@@ -147,7 +169,7 @@ export function registerAIRoutes(app: Express, db: any) {
       .filter(([, v]) => level >= v.minLevel)
       .map(([k]) => k);
 
-    return `Eres el asistente de Conocimiento de la Humanidad, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
+    return `Eres el asistente de Humanity.wiki, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
 
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
 Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Necesidad → Producto → Demanda → Transacción → Iniciativa → Resultados → Caso de éxito
@@ -164,6 +186,7 @@ ${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content
 GRAFOS DE CONOCIMIENTO PUBLICADOS (lienzos curados de un tema; si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo):
 ${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
 Si el usuario pide explorar un tema del que NO existe grafo, puedes proponer la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales ({title, kind, config}) — se creará en borrador para revisión humana.
+Si el usuario pide crear un MAPA a su nombre (una vista pública del mapa de la humanidad), propón la acción CREATE_MAP con title, description y opcionalmente territorio (slug, p. ej. "espana"), nivel ("objetivo"|"indicador"|"marcador"|"metrica") e id (el id de esa entidad) — se publicará a su nombre y podrá abrirse con OPEN_USER_MAP {slug}. Límite: los usuarios de nivel 1 pueden tener hasta 5 grafos y 5 mapas; nivel 2+ sin límite.
 
 REGLAS:
 1. Responde SIEMPRE en español, de forma directa y sin adornos.
@@ -218,7 +241,31 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       editModes: Object.values(EDIT_MODES),
       actionCatalog: ACTION_CATALOG,
       uiEvents: UI_EVENTS,
+      models: AI_MODELS,
+      platformFee: AI_PLATFORM_FEE,
     });
+  });
+
+  /** Consumo de IA del usuario: saldo pendiente y últimas llamadas. */
+  app.get('/api/ai/usage', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const pending = await db.execute(sql`
+        SELECT coalesce(sum(total_cents), 0)::float AS total, count(*)::int AS calls
+        FROM ai_usage_charges WHERE user_id = ${req.user.id} AND settled_at IS NULL
+      `);
+      const recent = await db.execute(sql`
+        SELECT kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents, settled_at, created_at
+        FROM ai_usage_charges WHERE user_id = ${req.user.id}
+        ORDER BY created_at DESC LIMIT 30
+      `);
+      res.json({
+        pending_cents: (pending.rows[0] as any).total,
+        pending_calls: (pending.rows[0] as any).calls,
+        platform_fee: AI_PLATFORM_FEE,
+        recent: recent.rows,
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   app.get('/api/ai/conversations', async (req: Request, res: Response) => {
@@ -339,7 +386,9 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       `);
 
       const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
-      const result = await provider.complete({ system, messages, webSearch: !!search_web });
+      // Modelo elegido por el usuario (validado contra el catálogo).
+      const chosenModel = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
+      const result = await provider.complete({ system, messages, webSearch: !!search_web, model: chosenModel });
       const { clean, ui_events, actions } = parseModelBlock(result.text);
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
@@ -403,8 +452,24 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         ui_events,
         proposed_actions: proposed,
         sources,
-        usage: { model: result.model, inputTokens: result.inputTokens, outputTokens: result.outputTokens, costCents: result.costCents, durationMs: result.durationMs },
+        usage: {
+          model: result.model, inputTokens: result.inputTokens, outputTokens: result.outputTokens,
+          costCents: result.costCents, durationMs: result.durationMs,
+          feeCents: result.costCents * AI_PLATFORM_FEE,
+          totalCents: result.costCents * (1 + AI_PLATFORM_FEE),
+        },
       });
+
+      // Libro de consumo: coste de créditos + 50% de comisión, a nombre del
+      // usuario (fire-and-forget; nunca bloquea la respuesta).
+      if (req.user) {
+        db.execute(sql`
+          INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents, conversation_id)
+          VALUES (${req.user.id}, 'chat', ${result.model}, ${result.inputTokens}, ${result.outputTokens},
+                  ${result.costCents}, ${result.costCents * AI_PLATFORM_FEE}, ${result.costCents * (1 + AI_PLATFORM_FEE)},
+                  ${conversationId})
+        `).catch((e: any) => console.error('ai charge error:', e));
+      }
     } catch (e: any) {
       console.error('ai chat error:', e);
       res.status(500).json({ error: e.message });
@@ -455,7 +520,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       }
 
       const params = { ...(action.params || {}), ...(params_override || {}) };
-      const result = await executeAction(action.action_type, params, req.user.id);
+      const result = await executeAction(action.action_type, params, req.user.id, req.user.roleLevel ?? 0);
 
       await db.execute(sql`
         UPDATE ai_proposed_actions
@@ -471,7 +536,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
   });
 
   /** Ejecuta una acción validada. Único punto donde la IA acaba escribiendo. */
-  const executeAction = async (type: string, params: any, actorId: string): Promise<any> => {
+  const executeAction = async (type: string, params: any, actorId: string, actorLevel: number = 0): Promise<any> => {
     try {
       switch (type) {
         case 'CREATE_PUBLICATION': {
@@ -494,6 +559,9 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
           // Siempre nace en borrador y marcado como generado por IA: un humano
           // tiene que revisarlo y publicarlo. Las ventanas iniciales (si el
           // modelo las propone) se crean con la misma marca.
+          // Límite: nivel 1 → 5 grafos; nivel 2+ sin límite.
+          const limitMsg = await graphLimitReached(db, actorId, actorLevel, 'knowledge_graphs');
+          if (limitMsg) return { ok: false, error: limitMsg };
           const id = newId('KG');
           const slug = String(params.slug || params.title || id).toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -526,6 +594,31 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
             i++;
           }
           return { ok: true, entityId: id, entityType: 'knowledge_graphs', slug, status: 'borrador' };
+        }
+        case 'CREATE_MAP': {
+          // Mapa público a nombre del usuario: una vista del mapa de la
+          // humanidad (territorio + nivel + objetivo) con título, indexada.
+          const limitMsg = await graphLimitReached(db, actorId, actorLevel, 'user_maps');
+          if (limitMsg) return { ok: false, error: limitMsg };
+          const id = newId('UM');
+          const slug = String(params.slug || params.title || id).toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          // Config alineada con los parámetros reales de la URL del mapa
+          // interactivo (Map.tsx): territorio (slug), nivel + id (el nivel
+          // del explorador: objetivo/indicador/marcador/metrica + su id).
+          const config = {
+            territorio: params.territorio || params.territory_slug || null,
+            nivel: params.nivel || params.level || null,
+            id: params.id || params.entity_id || params.objective_id || null,
+          };
+          await db.execute(sql`
+            INSERT INTO user_maps (id, title, slug, description, creator_user_id, config, trigger_keywords, status, is_ai_generated, created_by, updated_by)
+            VALUES (${id}, ${params.title}, ${slug}, ${params.description || null}, ${actorId},
+                    ${JSON.stringify(config)}::jsonb, ${JSON.stringify(params.trigger_keywords || [])}::jsonb,
+                    'publicado', false, ${actorId}, ${actorId})
+          `);
+          return { ok: true, entityId: id, entityType: 'user_maps', slug, status: 'publicado' };
         }
         case 'CREATE_CHALLENGE': {
           const id = params.id || newId('R');

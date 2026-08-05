@@ -36,7 +36,7 @@ async function main() {
       INSERT INTO users (id, email, name, display_name, password_hash, role, role_level, email_verified, bio, created_by)
       VALUES (${ADMIN_ID}, ${ADMIN_EMAIL}, 'Eugenio', 'Eugenio',
               ${hashPassword(ADMIN_PASSWORD)}, 'admin', ${ROLE.ADMIN}, true,
-              'Impulsor de Conocimiento de la Humanidad.', ${ADMIN_ID})
+              'Impulsor de Humanity.wiki.', ${ADMIN_ID})
     `);
     console.log(`Administrador creado: ${ADMIN_EMAIL} (${ADMIN_ID}), nivel ${ROLE.ADMIN}.`);
   }

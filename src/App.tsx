@@ -22,6 +22,7 @@ import Muro from './pages/Muro';
 import PersonaPublica from './pages/PersonaPublica';
 import Grafos from './pages/Grafos';
 import GrafoCanvas from './pages/GrafoCanvas';
+import UserMapa from './pages/UserMapa';
 import Login from './pages/Login';
 import AdminDesign from './pages/AdminDesign';
 import AboutRoot from './pages/about/AboutRoot';
@@ -50,6 +51,7 @@ export default function App() {
                 <Route index element={<Grafos />} />
                 <Route path="grafos" element={<Grafos />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
+                <Route path="mapas/:slug" element={<UserMapa />} />
                 <Route path="territorios/:id" element={<TerritoryProfile />} />
                 <Route path="retos/:id" element={<ChallengeProfile />} />
                 <Route path="soluciones/:id" element={<SolutionProfile />} />

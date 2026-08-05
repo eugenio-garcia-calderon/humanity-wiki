@@ -222,7 +222,7 @@ export function registerStripeRoutes(app: Express, db: any) {
         line_items: [{
           price_data: {
             currency: 'eur',
-            product_data: { name: 'Apoyo a un creador de Conocimiento de la Humanidad' },
+            product_data: { name: 'Apoyo a un creador de Humanity.wiki' },
             unit_amount: amount_cents,
             ...(recurring ? { recurring: { interval: period === 'anual' ? 'year' : 'month', interval_count: period === 'trimestral' ? 3 : 1 } } : {}),
           },

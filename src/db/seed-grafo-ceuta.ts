@@ -28,7 +28,7 @@ async function ensureUsers() {
     UPDATE users SET
       name = 'Eugenio García-Calderón Huerta',
       display_name = 'Eugenio García-Calderón Huerta',
-      bio = 'Fundador de Conocimiento de la Humanidad. Impulsor de los Grafos de Conocimiento: conectar el saber para entender los problemas complejos.',
+      bio = 'Fundador de Humanity.wiki. Impulsor de los Grafos de Conocimiento: conectar el saber para entender los problemas complejos.',
       updated_at = now()
     WHERE id = ${EUGENIO}
   `);

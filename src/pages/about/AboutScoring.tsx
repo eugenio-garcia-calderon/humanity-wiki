@@ -6,7 +6,7 @@ export default function AboutScoring() {
     <div className="max-w-3xl mx-auto space-y-8">
       <Link to="/sobre-red-humana" className="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Volver a Sobre Conocimiento de la Humanidad
+        Volver a Sobre Humanity.wiki
       </Link>
       
       <div>
@@ -18,19 +18,19 @@ export default function AboutScoring() {
       
       <div className="prose prose-slate prose-emerald max-w-none">
         <p className="text-slate-700 leading-relaxed mb-6">
-          El mapa de Conocimiento de la Humanidad utiliza un sistema de puntuación de 0 a 100 para evaluar el estado de los territorios en cada uno de los grandes Objetivos Universales (Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas, Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía y Cultura). Este índice permite identificar visualmente las áreas que requieren mayor atención y recursos.
+          El mapa de Humanity.wiki utiliza un sistema de puntuación de 0 a 100 para evaluar el estado de los territorios en cada uno de los grandes Objetivos Universales (Agua, Alimentación, Vivienda, Salud, Convivencia, Ecosistemas, Educación, Movilidad, Energía, Tecnología, Empleo, Gobernanza, Economía y Cultura). Este índice permite identificar visualmente las áreas que requieren mayor atención y recursos.
         </p>
         
         <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl mb-8">
           <h3 className="text-lg font-bold text-emerald-900 mb-2">Fase actual (Prototipo MVP)</h3>
           <p className="text-emerald-800 text-sm leading-relaxed">
-            En la versión actual de la plataforma, los indicadores son establecidos de forma centralizada por el equipo de Conocimiento de la Humanidad, sirviendo como datos de referencia y calibración inicial para el funcionamiento técnico del mapa.
+            En la versión actual de la plataforma, los indicadores son establecidos de forma centralizada por el equipo de Humanity.wiki, sirviendo como datos de referencia y calibración inicial para el funcionamiento técnico del mapa.
           </p>
         </div>
         
         <h2 className="text-2xl font-bold text-slate-900 mb-4">El futuro de las métricas territoriales</h2>
         <p className="text-slate-700 leading-relaxed mb-4">
-          La visión de Conocimiento de la Humanidad no es ser un árbitro central de la verdad, sino una herramienta de autoconocimiento sistémico. En futuras versiones de la plataforma, el cálculo de las puntuaciones evolucionará hacia un modelo dinámico y distribuido:
+          La visión de Humanity.wiki no es ser un árbitro central de la verdad, sino una herramienta de autoconocimiento sistémico. En futuras versiones de la plataforma, el cálculo de las puntuaciones evolucionará hacia un modelo dinámico y distribuido:
         </p>
         
         <ul className="space-y-4 mb-8 list-none pl-0">

@@ -90,7 +90,7 @@ export default function PanelFinanciero() {
     <div className="animate-in fade-in duration-500 pb-16 space-y-6 max-w-4xl">
       <div>
         <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 mb-2">Panel financiero</h2>
-        <p className="text-base text-slate-500">Tu balance, ventas, compras, donaciones y suscripciones en Conocimiento de la Humanidad.</p>
+        <p className="text-base text-slate-500">Tu balance, ventas, compras, donaciones y suscripciones en Humanity.wiki.</p>
       </div>
 
       {/* Stripe Connect */}

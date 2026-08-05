@@ -120,7 +120,7 @@ export default function Layout() {
         {/* Marca */}
         <Link to="/" className="shrink-0 hover:opacity-85 transition-opacity">
           <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
-            Conocimiento <span className="text-emerald-600">de la Humanidad</span>
+            humanity<span className="text-emerald-600">.wiki</span>
           </span>
         </Link>
 
@@ -214,7 +214,7 @@ export default function Layout() {
       {!fullBleed && (
         <footer className="h-10 border-t border-slate-100 px-4 sm:px-8 flex items-center justify-between bg-slate-50 shrink-0">
           <div className="flex gap-6 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-             <span>Conocimiento de la Humanidad · MVP 0.2</span>
+             <span>humanity.wiki · Beta V1</span>
              <span className="hidden sm:inline">Arquitectura: Sistémica-Territorial</span>
           </div>
           <div className="flex gap-4 items-center">

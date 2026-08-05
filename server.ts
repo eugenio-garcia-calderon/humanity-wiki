@@ -649,6 +649,7 @@ async function startServer() {
     content: 'content',
     knowledge_graphs: 'knowledge_graphs',
     knowledge_windows: 'knowledge_windows',
+    user_maps: 'user_maps',
   };
 
   // Archivar un padre que todavía tiene hijos visibles dejaría el árbol
