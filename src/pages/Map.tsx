@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
 import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
@@ -352,6 +352,19 @@ export default function MapPage() {
 
   return (
     <div className="flex w-full h-full bg-slate-50 overflow-hidden font-sans relative">
+      {/* Identidad del mapa + puerta a los demás mapas: este es el Mapa de
+          Indicadores de la Humanidad, y cualquiera puede crear el suyo. */}
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3.5 pr-1.5 py-1 flex items-center gap-2 max-w-[92vw]">
+        <span className="text-[10px] font-black text-slate-700 truncate hidden sm:inline">Mapa de Indicadores de la Humanidad</span>
+        <span className="text-[10px] font-black text-slate-700 sm:hidden">Mapa</span>
+        <Link
+          to="/mapas"
+          className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-full text-[10px] font-black shadow transition-colors shrink-0"
+        >
+          Todos los mapas
+        </Link>
+      </div>
+
       {/* COLUMN 1 (~1/6): vertical accordion filters — Objetivo > Indicador > Marcador > Métrica.
           Collapses to a 56px icon rail; hovering the rail while collapsed opens
           the full menu as a floating flyout instead of resizing the layout. */}

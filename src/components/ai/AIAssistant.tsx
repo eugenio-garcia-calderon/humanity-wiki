@@ -73,8 +73,11 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
   const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<EditMode>('manual');
-  const [searchWeb, setSearchWeb] = useState(false);
+  // Por defecto AUTÓNOMO y con internet: el chat crea lo que se le pide sin
+  // pedir confirmación y busca siempre que lo necesite (decisión del usuario,
+  // 2026-08-05). Ambos siguen siendo configurables en los ajustes.
+  const [editMode, setEditMode] = useState<EditMode>('autonomo');
+  const [searchWeb] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState<{ ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
@@ -113,6 +116,17 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
     const onResize = () => setIsDesktop(window.innerWidth >= DESKTOP_BREAKPOINT);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Prefill desde otras páginas (p. ej. el nodo «Crear tu mapa» de /mapas):
+  // rellena el cuadro y abre el asistente listo para completar la petición.
+  useEffect(() => {
+    const onPrefill = (e: Event) => {
+      const text = (e as CustomEvent).detail;
+      if (typeof text === 'string') { setInput(text); setOpen(true); }
+    };
+    window.addEventListener('ai:prefill', onPrefill);
+    return () => window.removeEventListener('ai:prefill', onPrefill);
   }, []);
 
   useEffect(() => {
@@ -218,7 +232,11 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
       //    conocimiento real, no generando texto nuevo);
       // 2º un TEMA que coincide con un grafo publicado lo abre directamente.
       // Ninguno de los dos gasta una llamada a la IA.
-      if (mode === 'bar' && !pendingAttachment) {
+      // EXCEPCIÓN: si el mensaje pide CREAR algo («crea un grafo de…»), el
+      // fast-path no debe secuestrar la intención abriendo un grafo parecido —
+      // va directo a la IA, que sabe ejecutar CREATE_KNOWLEDGE_GRAPH/CREATE_MAP.
+      const wantsToCreate = /\b(crea|créa\w*|creame|crear|hazme?|genera\w*|génera\w*|constru\w+|nuevo\s+(grafo|mapa)|nueva\s+ventana)\b/i.test(text);
+      if (mode === 'bar' && !pendingAttachment && !wantsToCreate) {
         try {
           const [gr, pr] = await Promise.all([
             fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
@@ -269,6 +287,22 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
       }]);
       applyUiEvents(json.ui_events);
+
+      // Modo AUTÓNOMO: las acciones permitidas se ejecutan solas (sin botones
+      // de confirmación) y, si crean un grafo o un mapa, se abre directamente.
+      for (const a of json.proposed_actions || []) {
+        if (!a.autoApply || a.status !== 'propuesta') continue;
+        const rj = await decideAction(a.id, 'aceptar', -1);
+        if (rj?.ok && rj.slug && rj.entityType === 'knowledge_graphs') {
+          setMessages(m => [...m, { role: 'assistant', content: `He creado el grafo como borrador y lo estoy abriendo — revísalo y publícalo cuando quieras.` }]);
+          navigate(`/grafos/${rj.slug}`);
+        } else if (rj?.ok && rj.slug && rj.entityType === 'user_maps') {
+          setMessages(m => [...m, { role: 'assistant', content: `He creado tu mapa y lo estoy abriendo.` }]);
+          navigate(`/mapas/${rj.slug}`);
+        } else if (rj && rj.ok === false && rj.error) {
+          setMessages(m => [...m, { role: 'assistant', content: rj.error, error: true }]);
+        }
+      }
     } catch (e: any) {
       setMessages(m => [...m, { role: 'assistant', content: e.message || 'Error de red.', error: true }]);
     } finally {
@@ -276,7 +310,8 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
     }
   };
 
-  const decideAction = async (actionId: number, decision: 'aceptar' | 'rechazar', msgIndex: number) => {
+  /** msgIndex -1 = el último mensaje (el que se acaba de añadir). */
+  const decideAction = async (actionId: number, decision: 'aceptar' | 'rechazar', msgIndex: number): Promise<any> => {
     try {
       const res = await fetch(`/api/ai/actions/${actionId}/decide`, {
         method: 'POST',
@@ -285,12 +320,13 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         body: JSON.stringify({ decision }),
       });
       const json = await res.json();
-      setMessages(m => m.map((msg, i) => i !== msgIndex ? msg : {
+      setMessages(m => m.map((msg, i) => (msgIndex === -1 ? i !== m.length - 1 : i !== msgIndex) ? msg : {
         ...msg,
         actions: (msg.actions || []).map((a: any) =>
-          a.id === actionId ? { ...a, status: json.status || (decision === 'aceptar' ? 'ejecutada' : 'rechazada'), error: json.error } : a),
+          a.id === actionId ? { ...a, status: json.ok === false ? 'fallida' : (decision === 'aceptar' ? 'ejecutada' : 'rechazada'), error: json.error } : a),
       }));
-    } catch { /* el estado se queda como estaba */ }
+      return json;
+    } catch { return null; /* el estado se queda como estaba */ }
   };
 
   const newConversation = () => {
@@ -423,7 +459,17 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
               </div>
             ))}
 
-            {busy && <p className="text-xs text-slate-400 italic">Pensando…</p>}
+            {busy && (
+              <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2">
+                <span className="relative flex w-2 h-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
+                </span>
+                <p className="text-xs text-slate-500 font-medium">
+                  Trabajando en ello — investigando y creando lo que has pedido…
+                </p>
+              </div>
+            )}
     </>
   );
 
@@ -526,14 +572,6 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
           {/* Entrada */}
           <div className="border-t border-slate-100 p-3 space-y-2 bg-white">
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSearchWeb(v => !v)}
-                title="Buscar también en internet"
-                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
-                  searchWeb ? 'bg-sky-50 border-sky-300 text-sky-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
-              >
-                <Globe className="w-3 h-3" /> Internet {searchWeb ? 'activado' : 'desactivado'}
-              </button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -660,20 +698,12 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
               className="hidden"
             />
             <button
-              onClick={() => setSearchWeb(v => !v)}
-              title={searchWeb ? 'Internet activado' : 'Internet desactivado'}
-              className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
-                searchWeb ? 'bg-sky-50 border-sky-300 text-sky-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
-            >
-              <Globe className="w-4 h-4" />
-            </button>
-            <button
               onClick={() => fileInputRef.current?.click()}
-              title="Adjuntar imagen o PDF"
+              title="Añadir — subir imagen o PDF"
               className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
                 attachment ? 'bg-emerald-50 border-emerald-300 text-emerald-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
             >
-              <Paperclip className="w-4 h-4" />
+              <Plus className="w-4 h-4" />
             </button>
             {voiceSupported && (
               <button

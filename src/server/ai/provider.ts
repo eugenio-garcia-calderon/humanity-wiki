@@ -108,7 +108,9 @@ export class ClaudeProvider implements AIProvider {
 
     const body: Record<string, any> = {
       model,
-      max_tokens: req.maxTokens ?? 2048,
+      // 8192: crear un grafo entero (ventanas+aristas en el bloque de acciones)
+      // no cabía en 2048 y el JSON llegaba truncado sin cerrar el bloque.
+      max_tokens: req.maxTokens ?? 8192,
       temperature: req.temperature ?? 0.2,
       system: req.system,
       messages: req.messages,
