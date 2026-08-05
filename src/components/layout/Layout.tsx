@@ -44,7 +44,7 @@ export default function Layout() {
   // /mapas (el grafo de mapas) y /universo también son lienzo a sangre con
   // la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
-  const isUniversoPage = location.pathname === '/universo';
+  const isUniversoPage = location.pathname.startsWith('/universo');
   const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage;
 
   if (isEmbed) {
@@ -94,7 +94,7 @@ export default function Layout() {
             to="/universo"
             className={cn(
               'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all',
-              location.pathname === '/universo'
+              location.pathname.startsWith('/universo')
                 ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white shadow'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
