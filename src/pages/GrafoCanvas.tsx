@@ -11,7 +11,7 @@ import {
   ArrowLeft, X, Eye, MessageCircle, Sparkles, User as UserIcon, Network,
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
-  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb,
+  FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useHelpers } from '../contexts/DataContext';
@@ -325,6 +325,9 @@ export default function GrafoCanvas() {
   const [edgeForm, setEdgeForm] = useState({ relation: 'contexto', label: '', description: '' });
   const [showAdd, setShowAdd] = useState(false);
   const [showConnect, setShowConnect] = useState(false);
+  // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
+  // el lienzo; se expande con un clic para ver descripción/etiquetas.
+  const [infoOpen, setInfoOpen] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
@@ -545,52 +548,67 @@ export default function GrafoCanvas() {
         </div>
       )}
 
-      {/* Cabecera del grafo */}
-      <div className="absolute top-4 left-4 z-10 max-w-sm bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg px-4 py-3">
-        <Link to="/" className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-emerald-600 transition-colors uppercase tracking-widest mb-1">
-          <ArrowLeft className="w-3 h-3" /> Grafos
-        </Link>
-        <h1 className="text-lg font-black text-slate-900 leading-tight">{data.graph.title}</h1>
-        <div className="flex flex-wrap items-center gap-2.5 mt-1.5 text-[10px] text-slate-400">
-          <span className="inline-flex items-center gap-1"><UserIcon className="w-3 h-3" />{data.graph.creator_name || 'Anónimo'}</span>
-          <RatingWidget entityType="knowledge_graphs" entityId={data.graph.id}
-            avg={data.graph.rating?.avg ?? null} count={data.graph.rating?.count ?? 0} myScore={null} compact />
-          <span className="inline-flex items-center gap-1"><Eye className="w-3 h-3" />{data.graph.views}</span>
-          {data.graph.is_ai_generated && (
-            <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">
-              <Sparkles className="w-2.5 h-2.5" /> IA · pendiente de revisión
-            </span>
-          )}
-          {data.graph.status === 'borrador' && (
-            <span className="text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Borrador</span>
-          )}
+      {/* Cabecera del grafo: colapsada por defecto — solo el título — para
+          no tapar el lienzo; un clic la expande con todo el detalle. */}
+      <div className="absolute top-4 left-4 z-10 max-w-sm">
+        <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-1 pr-3 py-1 flex items-center gap-1.5">
+          <Link to="/" title="Volver a Grafos" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-full hover:bg-slate-50 transition-colors shrink-0">
+            <ArrowLeft className="w-3.5 h-3.5" />
+          </Link>
+          <button
+            onClick={() => setInfoOpen(v => !v)}
+            className="flex items-center gap-1.5 min-w-0 py-0.5"
+            title={infoOpen ? 'Ocultar detalles' : 'Ver detalles del grafo'}
+          >
+            <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px]">{data.graph.title}</h1>
+            <ChevronDown className={cn('w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform', infoOpen && 'rotate-180')} />
+          </button>
         </div>
-        {data.graph.description && (
-          <p className="text-xs text-slate-500 leading-relaxed mt-1.5 line-clamp-3">{data.graph.description}</p>
-        )}
 
-        {data.entity_links?.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {data.entity_links.map((l: any, i: number) => {
-              const resolved = resolveEntityLink(l.entity_type, l.entity_id, helpers);
-              const chip = (
-                <span className="text-[9px] font-bold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-                  {resolved.label}
+        {infoOpen && (
+          <div className="mt-1.5 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg px-4 py-3 animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="flex flex-wrap items-center gap-2.5 text-[10px] text-slate-400">
+              <span className="inline-flex items-center gap-1"><UserIcon className="w-3 h-3" />{data.graph.creator_name || 'Anónimo'}</span>
+              <RatingWidget entityType="knowledge_graphs" entityId={data.graph.id}
+                avg={data.graph.rating?.avg ?? null} count={data.graph.rating?.count ?? 0} myScore={null} compact />
+              <span className="inline-flex items-center gap-1"><Eye className="w-3 h-3" />{data.graph.views}</span>
+              {data.graph.is_ai_generated && (
+                <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                  <Sparkles className="w-2.5 h-2.5" /> IA · pendiente de revisión
                 </span>
-              );
-              return resolved.to ? <Link key={i} to={resolved.to}>{chip}</Link> : <span key={i}>{chip}</span>;
-            })}
-          </div>
-        )}
+              )}
+              {data.graph.status === 'borrador' && (
+                <span className="text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Borrador</span>
+              )}
+            </div>
+            {data.graph.description && (
+              <p className="text-xs text-slate-500 leading-relaxed mt-1.5 line-clamp-3">{data.graph.description}</p>
+            )}
 
-        {data.related_graphs?.length > 0 && (
-          <div className="mt-2 pt-2 border-t border-slate-100">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Grafos relacionados</p>
-            {data.related_graphs.map((g: any) => (
-              <Link key={g.id} to={`/grafos/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
-                <Network className="w-3 h-3 shrink-0" /> {g.title}
-              </Link>
-            ))}
+            {data.entity_links?.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {data.entity_links.map((l: any, i: number) => {
+                  const resolved = resolveEntityLink(l.entity_type, l.entity_id, helpers);
+                  const chip = (
+                    <span className="text-[9px] font-bold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                      {resolved.label}
+                    </span>
+                  );
+                  return resolved.to ? <Link key={i} to={resolved.to}>{chip}</Link> : <span key={i}>{chip}</span>;
+                })}
+              </div>
+            )}
+
+            {data.related_graphs?.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-slate-100">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Grafos relacionados</p>
+                {data.related_graphs.map((g: any) => (
+                  <Link key={g.id} to={`/grafos/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
+                    <Network className="w-3 h-3 shrink-0" /> {g.title}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
