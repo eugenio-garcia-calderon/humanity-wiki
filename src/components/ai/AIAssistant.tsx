@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -69,12 +70,18 @@ const ATTACHMENT_MAX_BYTES: Record<string, number> = {
   'application/pdf': 15 * 1024 * 1024,
 };
 
-export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }) {
+/** Hueco que la portada deja para la barra: el asistente se monta en el
+ *  Layout (así la conversación sobrevive al cambio de página) pero se pinta
+ *  ahí dentro mediante un portal. */
+export const ANCLA_IA_EN_LINEA = 'ancla-ia-en-linea';
+
+export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' | 'inline' }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [anclaEnLinea, setAnclaEnLinea] = useState<HTMLElement | null>(null);
   // Por defecto AUTÓNOMO y con internet: el chat crea lo que se le pide sin
   // pedir confirmación y busca siempre que lo necesite (decisión del usuario,
   // 2026-08-05). Ambos siguen siendo configurables en los ajustes.
@@ -139,10 +146,14 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
 
+  useEffect(() => {
+    setAnclaEnLinea(mode === 'inline' ? document.getElementById(ANCLA_IA_EN_LINEA) : null);
+  }, [mode, location.pathname]);
+
   // Fast-path del buscador de grafos: al escribir en la barra, se consultan
   // los grafos publicados que coinciden (sin gastar una llamada a la IA).
   useEffect(() => {
-    if (mode !== 'bar') return;
+    if (mode === 'dock') return;
     const q = input.trim();
     if (q.length < 3) { setGraphMatches([]); return; }
     if (resolveTimer.current) clearTimeout(resolveTimer.current);
@@ -238,7 +249,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
       // fast-path no debe secuestrar la intención abriendo un grafo parecido —
       // va directo a la IA, que sabe ejecutar CREATE_KNOWLEDGE_GRAPH/CREATE_MAP.
       const wantsToCreate = /\b(crea|créa\w*|creame|crear|hazme?|genera\w*|génera\w*|constru\w+|nuevo\s+(grafo|mapa)|nueva\s+ventana)\b/i.test(text);
-      if (mode === 'bar' && !pendingAttachment && !wantsToCreate) {
+      if (mode !== 'dock' && !pendingAttachment && !wantsToCreate) {
         try {
           const [gr, pr] = await Promise.all([
             fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
@@ -680,10 +691,13 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
   // MODO BARRA (páginas de Grafos): el chat/buscador vive centrado abajo,
   // siempre desplegado — es la puerta de entrada al conocimiento.
   // ==========================================================================
-  if (mode === 'bar') {
-    return (
-      <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
-        <div className="mx-auto w-full max-w-2xl px-4 pb-4 pointer-events-auto">
+  if (mode === 'bar' || mode === 'inline') {
+    // En línea: la misma barra, pero dentro del flujo de la página (la
+    // portada la coloca justo debajo de las tres ventanas).
+    const enLinea = mode === 'inline';
+    const contenido = (
+      <div className={enLinea ? 'w-full' : 'fixed bottom-0 left-0 right-0 z-40 pointer-events-none'}>
+        <div className={cn('mx-auto w-full max-w-2xl pointer-events-auto', !enLinea && 'px-4 pb-4')}>
           {(messages.length > 0 || busy) && (
             <div className="mb-2 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
               <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -789,6 +803,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' }
         )}
       </div>
     );
+    return enLinea ? (anclaEnLinea ? createPortal(contenido, anclaEnLinea) : null) : contenido;
   }
 
   return (

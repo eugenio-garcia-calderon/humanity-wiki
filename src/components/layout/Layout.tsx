@@ -47,6 +47,8 @@ export default function Layout() {
   const isUniversoPage = location.pathname.startsWith('/universo');
   // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
   const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
+  // La portada monta su propia barra de IA en línea, debajo de las ventanas.
+  const isInicioPage = location.pathname === '/';
   const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage;
 
   if (isEmbed) {
@@ -208,7 +210,13 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
-        <AIAssistant mode={isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage ? 'bar' : 'dock'} />
+        <AIAssistant
+          mode={
+            isInicioPage ? 'inline'
+              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage ? 'bar'
+                : 'dock'
+          }
+        />
       </div>
 
       {!fullBleed && (
