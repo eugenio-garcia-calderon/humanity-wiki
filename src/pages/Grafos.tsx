@@ -55,6 +55,7 @@ interface GraphRow {
   status: string; is_ai_generated: boolean; views: number; creator_name: string | null;
   window_count: number; cover_image: string | null; cover_video_id: string | null;
   is_reto: boolean; windows?: any[]; edges?: any[];
+  center?: { short?: string; annex_of?: string } | null;
 }
 
 function Handles() {
@@ -141,10 +142,11 @@ function EsferaNode({ data }: NodeProps<any>) {
       {/* dentro de la esfera solo la identidad visual: al alejarte, el
           título sería ilegible — vive fuera, con escala compensada. */}
       <div className="relative z-10">
-        <span className={cn('inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full',
+        <span className={cn('inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] px-2.5 py-1 rounded-full max-w-[240px]',
           g.is_reto ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white')}
           style={{ transform: `scale(${ls})` }}>
-          {g.is_reto ? <><Flame className="w-3 h-3" /> Reto</> : <><Network className="w-3 h-3" /> Grafo</>}
+          {g.is_reto ? <Flame className="w-3 h-3 shrink-0" /> : <Network className="w-3 h-3 shrink-0" />}
+          <span className="truncate">{g.center?.short || (g.is_reto ? 'Reto' : 'Grafo')}</span>
         </span>
       </div>
 
@@ -233,12 +235,13 @@ function VentanaNode({ data }: NodeProps<any>) {
 // ----------------------------------------------------------------------------
 // La ESFERA que lo envuelve todo: la membrana del conocimiento común.
 // ----------------------------------------------------------------------------
-function EnvolturaNode() {
+function EnvolturaNode({ data }: NodeProps<any>) {
+  const d = data as any;
   return (
     <div
       className="pointer-events-none rounded-[50%]"
       style={{
-        width: SHELL_X * 2, height: SHELL_Y * 2,
+        width: (d?.rx ?? SHELL_X) * 2, height: (d?.ry ?? SHELL_Y) * 2,
         border: '2px solid rgba(16,185,129,0.35)',
         background: 'radial-gradient(ellipse at 42% 32%, rgba(255,255,255,0.9) 0%, rgba(236,253,245,0.55) 45%, rgba(219,234,254,0.35) 78%, rgba(224,231,255,0.15) 100%)',
         boxShadow: 'inset -30px -40px 90px rgba(15,23,42,0.06), inset 30px 40px 90px rgba(255,255,255,0.9), 0 0 70px rgba(16,185,129,0.12)',
@@ -429,7 +432,14 @@ export default function Grafos() {
   const built = useMemo(() => {
     const ns: Node[] = [];
     const es: Edge[] = [];
-    const N = Math.max(graphs.length, 1);
+    // Grafos ANEXOS (petición del usuario): otra vista de la misma realidad
+    // (p. ej. «Estrecho Gibraltar» es una lectura de «Frontera Ceuta»).
+    // No son retos de España aparte: cuelgan de su grafo padre.
+    const isAnnex = (g: GraphRow) => !!g.center?.annex_of &&
+      graphs.some(p => p.slug === g.center!.annex_of);
+    const principales = graphs.filter(g => !isAnnex(g));
+    const anexos = graphs.filter(isAnnex);
+    const N = Math.max(principales.length, 1);
 
     // Relevancia relativa de cada grafo (0..1): visitas + volumen de
     // conocimiento. Gobierna el grosor y el flujo de su línea de energía.
@@ -437,13 +447,6 @@ export default function Grafos() {
     const maxScore = Math.max(...graphs.map(score), 1);
     const relevance: Record<string, number> = Object.fromEntries(
       graphs.map(g => [g.id, score(g) / maxScore]));
-
-    ns.push({
-      id: '__envoltura__', type: 'envoltura',
-      position: { x: -SHELL_X, y: -SHELL_Y },
-      draggable: false, selectable: false, zIndex: -20,
-      data: {},
-    });
 
     ns.push({
       id: '__nucleo__', type: 'nucleo',
@@ -457,10 +460,37 @@ export default function Grafos() {
       },
     });
 
-    graphs.forEach((g, i) => {
+    // Centro de cada esfera: los principales en el anillo; los anexos, a un
+    // lado de su padre (se resuelven después, cuando ya se conoce el padre).
+    const centers: Record<string, { x: number; y: number }> = {};
+    principales.forEach((g, i) => {
       const ang = -Math.PI / 2 + (2 * Math.PI * i) / N;
-      const cx = Math.cos(ang) * ORBIT_X;
-      const cy = Math.sin(ang) * ORBIT_Y;
+      centers[g.id] = { x: Math.cos(ang) * ORBIT_X, y: Math.sin(ang) * ORBIT_Y };
+    });
+    anexos.forEach(g => {
+      const padre = graphs.find(p => p.slug === g.center!.annex_of)!;
+      const pc = centers[padre.id] || { x: 0, y: 0 };
+      // Se aparta del centro, en la misma dirección que su padre: queda
+      // claramente "detrás" de él, colgando.
+      const d = Math.hypot(pc.x, pc.y) || 1;
+      centers[g.id] = { x: pc.x + (pc.x / d) * 620, y: pc.y + (pc.y / d) * 380 };
+    });
+
+    // La membrana se ajusta a las esferas que hay de verdad, para que ningún
+    // grafo —tampoco un anexo— quede fuera de la esfera común.
+    const all = Object.values(centers);
+    const shellRx = Math.max(SHELL_X, ...all.map(c => Math.abs(c.x))) + SPHERE / 2 + 130;
+    const shellRy = Math.max(SHELL_Y, ...all.map(c => Math.abs(c.y))) + SPHERE / 2 + 165;
+    ns.push({
+      id: '__envoltura__', type: 'envoltura',
+      position: { x: -shellRx, y: -shellRy },
+      draggable: false, selectable: false, zIndex: -20,
+      data: { rx: shellRx, ry: shellRy },
+    });
+
+    graphs.forEach(g => {
+      const cx = centers[g.id].x;
+      const cy = centers[g.id].y;
       const accent = g.is_reto ? '#dc2626' : '#059669';
 
       ns.push({
@@ -469,10 +499,15 @@ export default function Grafos() {
         draggable: false, selectable: false, zIndex: 20,
         data: { graph: g, onFocus: focusGraph, forceOpen: focused === g.id },
       });
+      // Un anexo no cuelga del núcleo: cuelga de su grafo padre, porque es
+      // otra lectura del mismo reto, no un reto de España aparte.
+      const padre = isAnnex(g) ? graphs.find(p => p.slug === g.center!.annex_of) : null;
       es.push({
         // Electricidad núcleo → reto: grosor y flujo según la relevancia.
-        id: `e-${g.id}`, source: '__nucleo__', target: `esf-${g.id}`, type: 'flujo',
-        data: { t: relevance[g.id] ?? 0.5, accent },
+        id: `e-${g.id}`,
+        source: padre ? `esf-${padre.id}` : '__nucleo__',
+        target: `esf-${g.id}`, type: 'flujo',
+        data: { t: padre ? 0.32 : (relevance[g.id] ?? 0.5), accent },
       });
 
       // Las publicaciones del grafo, con su disposición original encogida
@@ -647,7 +682,7 @@ export default function Grafos() {
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3 pr-1.5 py-1.5 flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-900">
-            <Globe2 className="w-4 h-4 text-emerald-600" /> Esfera de Conocimiento
+            <Globe2 className="w-4 h-4 text-emerald-600" /> Red de Datos
           </span>
           <button
             onClick={openCreate}

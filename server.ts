@@ -1045,6 +1045,74 @@ async function startServer() {
     handleRestoreEntity(req.params.entity, req, res);
   });
 
+  // ==========================================================================
+  // BASE DE DATOS — el inventario real de tablas, para la página homónima.
+  // Solo administradores: vuelca datos crudos. Nunca se exponen columnas
+  // sensibles (contraseñas, tokens, claves) ni la tabla interna de PostGIS.
+  // ==========================================================================
+  const SENSITIVE_COLUMNS = new Set([
+    'password_hash', 'session_token', 'token', 'refresh_token', 'secret',
+    'stripe_secret_key', 'webhook_secret', 'google_id', 'api_key',
+  ]);
+  const HIDDEN_TABLES = new Set(['spatial_ref_sys', 'geography_columns', 'geometry_columns']);
+
+  app.get('/api/db/tables', async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const rows = await db.execute(sql`
+        SELECT c.relname AS name, c.reltuples::bigint AS approx_rows,
+               (SELECT count(*)::int FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = c.relname) AS columns
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public' AND c.relkind = 'r'
+        ORDER BY c.relname
+      `);
+      res.json((rows.rows as any[])
+        .filter(r => !HIDDEN_TABLES.has(r.name))
+        .map(r => ({ name: r.name, columns: r.columns, approxRows: Number(r.approx_rows) })));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get('/api/db/tables/:name', async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const name = String(req.params.name);
+      // El nombre viene del usuario: se valida contra el catálogo real en
+      // vez de interpolarlo a ciegas (no hay forma de inyectar nada).
+      const exists = await db.execute(sql`
+        SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname = ${name} LIMIT 1
+      `);
+      if (!(exists.rows as any[]).length || HIDDEN_TABLES.has(name)) {
+        return res.status(404).json({ error: 'Esa tabla no existe.' });
+      }
+      const cols = await db.execute(sql`
+        SELECT column_name, data_type FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = ${name}
+        ORDER BY ordinal_position
+      `);
+      const visible = (cols.rows as any[])
+        .map(c => c.column_name)
+        .filter(c => !SENSITIVE_COLUMNS.has(c));
+      const redacted = (cols.rows as any[]).length - visible.length;
+
+      const limit = Math.min(Number(req.query.limit) || 50, 200);
+      const total = await db.execute(sql`SELECT count(*)::int AS n FROM ${sql.raw(`"${name}"`)}`);
+      const rows = await db.execute(sql`
+        SELECT ${sql.raw(visible.map(c => `"${c}"`).join(', '))}
+        FROM ${sql.raw(`"${name}"`)} LIMIT ${limit}
+      `);
+      res.json({
+        name,
+        columns: visible,
+        types: Object.fromEntries((cols.rows as any[]).map(c => [c.column_name, c.data_type])),
+        redactedColumns: redacted,
+        total: (total.rows[0] as any).n,
+        rows: rows.rows,
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   // Historial completo de una entidad, más reciente primero.
   app.get("/api/data/:entity/:id/history", async (req, res) => {
     try {

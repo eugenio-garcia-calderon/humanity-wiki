@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit } from 'lucide-react';
+import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database, Home } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -40,7 +40,7 @@ export default function Layout() {
   const isMapPage = location.pathname === '/mapa';
   // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
   // completa y chat de IA como barra inferior.
-  const isGrafosPage = location.pathname === '/' || location.pathname.startsWith('/grafos');
+  const isGrafosPage = location.pathname === '/red' || location.pathname.startsWith('/grafos');
   // /mapas (el grafo de mapas) y /universo también son lienzo a sangre con
   // la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
@@ -71,6 +71,17 @@ export default function Layout() {
         {/* Destinos primarios */}
         <nav className="flex items-center gap-1.5 ml-1 sm:ml-3">
           <Link
+            to="/"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <Home className="w-3.5 h-3.5" /> Inicio
+          </Link>
+          <Link
             to="/mapa"
             className={cn(
               'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
@@ -79,18 +90,29 @@ export default function Layout() {
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
-            <MapIcon className="w-3.5 h-3.5" /> Mapa
+            <MapIcon className="w-3.5 h-3.5" /> Geolocalización de Datos
           </Link>
           <Link
-            to="/"
+            to="/red"
             className={cn(
               'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/' || location.pathname.startsWith('/grafos')
+              location.pathname === '/red' || location.pathname.startsWith('/grafos')
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
-            <Globe2 className="w-3.5 h-3.5" /> Esfera de Conocimiento
+            <Globe2 className="w-3.5 h-3.5" /> Red de Datos
+          </Link>
+          <Link
+            to="/base-de-datos"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/base-de-datos'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <Database className="w-3.5 h-3.5" /> Base de Datos
           </Link>
           <Link
             to="/universo"
