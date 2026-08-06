@@ -44,6 +44,13 @@ yet.** They are here so the decision can be explicit.
 - **Cost later**: the only part of the backend not following the modular pattern. Every new line there is a line that will have to be moved.
 - **Rule until fixed**: frozen. Everything new goes into a module under `src/server/`.
 
+### Two new endpoints were added to the frozen `server.ts` (2026-08-06)
+- **What**: `GET /api/db/tables` and `GET /api/db/tables/:name`, for the Base de Datos page, went into `server.ts` — which `src/server/CLAUDE.md` says is frozen ("new endpoints go in a module here"). They belong in a small `src/server/database.ts`.
+- **Why it happened**: they read the `pg_class` catalogue, which felt like it belonged next to the other raw-SQL routes. That is not a reason, it is a habit.
+- **Cost to fix**: ~15 min. They are self-contained: two handlers, two constants (`SENSITIVE_COLUMNS`, `HIDDEN_TABLES`) and the `requireAdmin` guard, plus one `registerDatabaseRoutes(app, db)` line.
+- **Cost later**: `server.ts` grows past 1.900 lines and the "frozen" rule loses its force — the next person reads it as advisory.
+- **Note**: the same day, `getSolutionsForChallenges` inside `server.ts` was extended with `challenge_ids`. That one is a fix in place to existing code, which the rule allows.
+
 ### `schema.ts` declares 39 of the 92 tables
 - **What**: everything social, marketplace, initiatives and AI exists only as raw SQL, untyped.
 - **Cost later**: queries have no types, and `drizzle-kit generate` does not know those tables exist.

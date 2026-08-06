@@ -150,7 +150,13 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
                  WHERE gw.graph_id = g.id AND w.kind = 'video' AND w.config->>'youtube_id' IS NOT NULL
                  ORDER BY w.created_at LIMIT 1) AS cover_video_id,
                EXISTS(SELECT 1 FROM graph_entity_links gel
-                 WHERE gel.graph_id = g.id AND gel.entity_type = 'challenges') AS is_reto
+                 WHERE gel.graph_id = g.id AND gel.entity_type = 'challenges') AS is_reto,
+               -- Retos a los que está anclado: el explorador del mapa empareja
+               -- cada reto con su grafo para previsualizarlo, sin una consulta
+               -- por reto.
+               (SELECT coalesce(array_agg(gel3.entity_id), '{}')
+                  FROM graph_entity_links gel3
+                 WHERE gel3.graph_id = g.id AND gel3.entity_type = 'challenges') AS challenge_ids
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
         WHERE g.archived_at IS NULL
