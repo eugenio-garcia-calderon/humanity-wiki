@@ -409,3 +409,10 @@
 - **El arreglo**: `requireAdmin()` en los cuatro endpoints — 401 sin sesión, 403 sin nivel ADMIN. No quita capacidades a nadie: la edición desde la interfaz ya era exclusiva de administradores (AdminMenu), esto solo cierra la puerta de atrás.
 - **Verificado tras el arreglo**: anónimo → 401 en los tres verbos, nada creado, T003 intacto; administrador con sesión → 200, sigue pudiendo editar. Filas de prueba eliminadas.
 - **Pendiente de la auditoría de Javier** (anotado, no urgente): 242 territorios sin geometría con PostGIS instalado y sin usar; 17.421 observaciones fabricadas sin marcar como generadas por IA (confirmado: 20.557 totales − 3.136 marcadas); 127 botones crudos sin primitiva de UI; `src/index.css` de una sola línea.
+
+### 2026-08-06 — FIX: el clic en una esfera no hacía zoom al reto
+Tres causas encadenadas, las tres reales (el clic NUNCA funcionó de verdad: las pruebas anteriores usaban `dispatchEvent`, que se salta `pointer-events` y daba un falso positivo).
+1. **React Flow apagaba el ratón sobre los nodos.** Con `draggable:false` + `selectable:false` y sin manejadores a nivel de lienzo, React Flow pone `pointer-events:none` en el nodo — el `onClick` del div interior jamás se disparaba. Arreglado moviendo clic y hover a `onNodeClick` / `onNodeMouseEnter` / `onNodeMouseLeave` del `<ReactFlow>` (que es además lo que activa el ratón sobre los nodos).
+2. **Las aristas se comían el clic.** React Flow da a cada arista un trazo invisible ancho para poder clicarla; al converger muchas en cada esfera, la tapaban. En esta página no se clica ninguna línea → `pointer-events:none` en todas las aristas (CSS) + `interactionWidth={0}` + los trazos animados de flujo marcados como decorativos.
+3. **El vuelo se cancelaba a sí mismo.** El efecto que hacía `fitView` dependía de `nodes`; como enfocar reconstruye los nodos, la limpieza del efecto abortaba la animación antes de empezar. Ahora depende SOLO del foco, con 80 ms de respiro para que React Flow haya aplicado las posiciones.
+- Verificado con clics reales (no simulados): clic en una esfera → vuelo animado + despliegue de sus publicaciones; X o núcleo → vuelta a la vista general.

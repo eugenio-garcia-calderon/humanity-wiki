@@ -77,7 +77,6 @@ function NucleoNode({ data }: NodeProps<any>) {
   const zoom = useZoom();
   return (
     <div
-      onClick={() => d.onReset()}
       className="relative flex flex-col items-center justify-center text-center cursor-pointer select-none"
       style={{ width: CENTER_SPHERE, height: CENTER_SPHERE }}
       title="Ver toda la pizarra"
@@ -114,9 +113,6 @@ function EsferaNode({ data }: NodeProps<any>) {
   const accent = g.is_reto ? '#dc2626' : '#059669';
   return (
     <div
-      onClick={() => d.onFocus(g.id)}
-      onMouseEnter={() => d.onHover?.(g.id)}
-      onMouseLeave={() => d.onHover?.(null)}
       className="group relative flex flex-col items-center justify-center text-center cursor-pointer select-none transition-transform duration-300 ease-out hover:scale-105"
       style={{ width: SPHERE, height: SPHERE }}
       title={open ? 'Ver toda la pizarra' : `Acercarse a «${g.title}» — clic para hacer zoom`}
@@ -206,7 +202,6 @@ function VentanaNode({ data }: NodeProps<any>) {
 
   return (
     <div
-      onClick={() => open && d.onOpenWindow(w, d.graph)}
       className="w-64 bg-white rounded-2xl overflow-hidden transition-all ease-out"
       style={{
         opacity: open ? 1 : d.hoverPreview ? 1 : 0.9,
@@ -313,6 +308,7 @@ function FadeEdge({ id, sourceX, sourceY, targetX, targetY, style, markerEnd, da
         id={id}
         path={path}
         markerEnd={open ? markerEnd : undefined}
+        interactionWidth={0}
         style={{ ...style, opacity: open ? (style as any)?.opacity ?? 1 : 0, transition: 'opacity 450ms ease-out' }}
       />
       {open && (
@@ -322,7 +318,7 @@ function FadeEdge({ id, sourceX, sourceY, targetX, targetY, style, markerEnd, da
           stroke={stroke}
           strokeWidth={Math.max(1.5, Number((style as any)?.strokeWidth || 1.5))}
           strokeLinecap="round"
-          style={{ strokeDasharray: '2 12', animation: 'esferaFlujo 1.6s linear infinite', opacity: 0.9 }}
+          style={{ strokeDasharray: '2 12', animation: 'esferaFlujo 1.6s linear infinite', opacity: 0.9, pointerEvents: 'none' }}
         />
       )}
     </>
@@ -343,14 +339,14 @@ function FlujoEdge({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps) 
   const dash = t > 0.66 ? '3 10' : t > 0.33 ? '3 14' : '2 18'; // y más densa
   return (
     <>
-      <BaseEdge id={id} path={path} style={{ stroke: color, strokeWidth: width, opacity: 0.28 }} />
+      <BaseEdge id={id} path={path} interactionWidth={0} style={{ stroke: color, strokeWidth: width, opacity: 0.28, pointerEvents: 'none' }} />
       <path
         d={path}
         fill="none"
         stroke={color}
         strokeWidth={Math.max(2, width * 0.6)}
         strokeLinecap="round"
-        style={{ strokeDasharray: dash, animation: `esferaFlujo ${dur}s linear infinite`, opacity: 0.95, filter: `drop-shadow(0 0 ${2 + t * 4}px ${color})` }}
+        style={{ strokeDasharray: dash, animation: `esferaFlujo ${dur}s linear infinite`, opacity: 0.95, filter: `drop-shadow(0 0 ${2 + t * 4}px ${color})`, pointerEvents: 'none' }}
       />
     </>
   );
@@ -395,27 +391,37 @@ export default function Grafos() {
     return ids.length ? ids : undefined;
   }, []);
 
-  /** Acercarse a un grafo = fitView sobre su esfera y sus publicaciones. */
+  /** El clic SOLO cambia el estado. El vuelo lo hace el efecto de abajo,
+   *  una vez React Flow ha aplicado los nodos nuevos — si se animara aquí,
+   *  la reconstrucción del lienzo (forceOpen, satélites) cancelaría el
+   *  fitView a medio camino y el zoom no llegaba a ocurrir. */
   const focusGraph = useCallback((graphId: string) => {
-    const inst = rf.current;
-    if (!inst) return;
-    // Si ya estás dentro, el clic te devuelve a la visión general.
-    if (focused === graphId) {
-      setFocused(null);
-      inst.fitView({ nodes: overviewNodes(), duration: 800, padding: 0.26 });
-      return;
-    }
-    setFocused(graphId);
-    const ids = inst.getNodes()
-      .filter(n => n.id === `esf-${graphId}` || String(n.id).startsWith(`w-${graphId}-`))
-      .map(n => ({ id: n.id }));
-    inst.fitView({ nodes: ids, duration: 900, padding: 0.16, maxZoom: 0.95 });
-  }, [focused, overviewNodes]);
+    setFocused(prev => (prev === graphId ? null : graphId));
+  }, []);
 
-  const resetView = useCallback(() => {
-    setFocused(null);
-    rf.current?.fitView({ nodes: overviewNodes(), duration: 800, padding: 0.26 });
-  }, [overviewNodes]);
+  const resetView = useCallback(() => setFocused(null), []);
+
+  // El VUELO: depende SOLO del foco. No puede depender de `nodes`, porque
+  // el propio cambio de foco los reconstruye y la limpieza del efecto
+  // cancelaría el vuelo antes de empezar. Un respiro corto basta para que
+  // React Flow haya aplicado ya las posiciones nuevas.
+  const firstFit = useRef(false);
+  useEffect(() => {
+    if (!firstFit.current) return;   // el encuadre inicial lo hace su efecto
+    const t = setTimeout(() => {
+      const inst = rf.current;
+      if (!inst) return;
+      if (!focused) {
+        inst.fitView({ nodes: overviewNodes(), duration: 800, padding: 0.26 });
+        return;
+      }
+      const ids = inst.getNodes()
+        .filter(n => n.id === `esf-${focused}` || String(n.id).startsWith(`w-${focused}-`))
+        .map(n => ({ id: n.id }));
+      if (ids.length) inst.fitView({ nodes: ids, duration: 900, padding: 0.16, maxZoom: 0.95 });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [focused, overviewNodes]);
 
   const openWindow = useCallback((win: any, graph: GraphRow) => setPopup({ win, graph }), []);
 
@@ -587,7 +593,7 @@ export default function Grafos() {
     const t = setInterval(() => {
       if (++tries > 25) { clearInterval(t); return; }
       rf.current?.fitView({ nodes: overviewNodes(), padding: 0.26 })
-        .then(ok => { if (ok) { didFit.current = true; clearInterval(t); } });
+        .then(ok => { if (ok) { didFit.current = true; firstFit.current = true; clearInterval(t); } });
     }, 120);
     return () => clearInterval(t);
   }, [nodes]);
@@ -597,7 +603,14 @@ export default function Grafos() {
 
   return (
     <div className="relative w-full h-full bg-slate-50">
-      <style>{`@keyframes esferaFlujo { to { stroke-dashoffset: -26; } }`}</style>
+      <style>{`
+        @keyframes esferaFlujo { to { stroke-dashoffset: -26; } }
+        /* En la Esfera se hace clic en las ESFERAS y en las publicaciones,
+           nunca en una línea. React Flow da a cada arista un trazo de clic
+           ancho que, al converger muchas en cada esfera, se comía el clic
+           y el zoom al reto no llegaba a ocurrir. */
+        .react-flow__edge, .react-flow__edge-path, .react-flow__edge-interaction { pointer-events: none !important; }
+      `}</style>
       {loading ? (
         <p className="text-sm text-slate-400 py-16 text-center">Cargando la pizarra…</p>
       ) : (
@@ -607,6 +620,16 @@ export default function Grafos() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onInit={inst => { rf.current = inst; }}
+          onNodeClick={(_, node) => {
+            const d: any = node.data;
+            if (node.type === 'esfera') focusGraph(d.graph.id);
+            else if (node.type === 'nucleo') resetView();
+            else if (node.type === 'ventana' && (d.forceOpen || (rf.current?.getZoom() ?? 0) >= REVEAL)) {
+              openWindow(d.win, d.graph);
+            }
+          }}
+          onNodeMouseEnter={(_, node) => { if (node.type === 'esfera') setHoverId((node.data as any).graph.id); }}
+          onNodeMouseLeave={(_, node) => { if (node.type === 'esfera') setHoverId(null); }}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           nodesConnectable={false}
