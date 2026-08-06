@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, MapPin, Plus, Flame, Sprout } from 'lucide-react';
+import { ChevronRight, MapPin, Plus, Flame, Sprout, Info } from 'lucide-react';
 import { slugify } from '../../utils/slugify';
 import { LEVEL_LABELS } from '../../utils/metricIcons';
 import { useEdit } from '../../contexts/EditContext';
@@ -64,6 +64,7 @@ export default function EntityExplorerPanel({
   const [error, setError] = useState<string | null>(null);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
   const [graphs, setGraphs] = useState<any[]>([]);
+  const [fichaAbierta, setFichaAbierta] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { openEdit, updateCounter } = useEdit();
@@ -95,7 +96,7 @@ export default function EntityExplorerPanel({
   // Los grafos de conocimiento, una sola vez: cada reto que tenga uno lo
   // enseña dentro de su nodo como previsualización viva.
   useEffect(() => {
-    fetch('/api/graphs', { credentials: 'include' })
+    fetch('/api/graphs?with_windows=1', { credentials: 'include' })
       .then(r => r.json())
       .then(j => setGraphs(Array.isArray(j) ? j : []))
       .catch(() => {});
@@ -118,7 +119,8 @@ export default function EntityExplorerPanel({
     return { level: prev.level, id: prev.id, name: prev.name, levelLabel: EXPLORER_LEVEL_LABELS[prev.level] };
   }, [breadcrumb, level, id]);
 
-  // La ficha de metodología, que antes era el bloque «Información general».
+  // La metodología y las unidades: antes eran un bloque de texto, ahora una
+  // tarjeta discreta sobre el lienzo que se puede plegar.
   const ficha = useMemo(() => {
     if (!data?.entity) return null;
     const e = data.entity;
@@ -129,7 +131,7 @@ export default function EntityExplorerPanel({
     if (e.includes) metadatos.push(`Incluye: ${e.includes}`);
     if (e.lastUpdated) metadatos.push(`Última toma: ${e.lastUpdated}`);
     if (e.source) metadatos.push(`Fuente: ${e.source}`);
-    const texto = e.methodology || e.description || 'Sin descripción todavía.';
+    const texto = e.methodology || e.description || '';
     if (!texto && !metadatos.length) return null;
     return { texto, metadatos };
   }, [data]);
@@ -214,15 +216,34 @@ export default function EntityExplorerPanel({
             level={level}
             levelLabel={EXPLORER_LEVEL_LABELS[level]}
             parent={parent}
-            ficha={ficha}
             graphsByChallenge={graphsByChallenge}
-            isAdmin={!!user?.isAdmin}
             onNavigate={(lvl, entityId) => onNavigate(lvl as ExplorerLevel, entityId)}
             onOpenChallenge={cid => setSelectedChallengeId(prev => (prev === cid ? null : cid))}
             onOpenSolution={s => navigate(`/soluciones/${slugify(s.title)}`)}
-            onEditChallenge={c => openEdit('Reto', c, () => {}, () => { if (selectedChallengeId === c.id) setSelectedChallengeId(null); })}
-            onEditSolution={s => openEdit('Solución', s, () => {}, () => {})}
+            onOpenGraph={slug => navigate(`/grafos/${slug}`)}
           />
+
+          {/* La ficha de metodología, plegable, sobre el lienzo */}
+          {ficha && (
+            <div className="absolute top-3 right-3 z-10 max-w-[280px]">
+              <button
+                onClick={() => setFichaAbierta(o => !o)}
+                className="w-full text-left bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg px-3.5 py-2.5 hover:border-slate-300 transition-colors"
+              >
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 inline-flex items-center gap-1">
+                  <Info className="w-2.5 h-2.5" /> Información general
+                </span>
+                {fichaAbierta && (
+                  <>
+                    {ficha.texto && <p className="text-[11px] text-slate-600 leading-relaxed mt-1.5">{ficha.texto}</p>}
+                    {ficha.metadatos.map((m, i) => (
+                      <p key={i} className="text-[10px] text-slate-400 mt-0.5">{m}</p>
+                    ))}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Crear: el lienzo también se edita */}
           {user?.isAdmin && (
