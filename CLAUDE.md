@@ -119,7 +119,7 @@ the concrete alternatives for that part of the code.
 ```
 server.ts                 Express: legacy API + membership Stripe + Vite/static. FROZEN
 src/
-  pages/                  34 pages          → src/pages/CLAUDE.md
+  pages/                  35 pages          → src/pages/CLAUDE.md
   components/                               → src/components/CLAUDE.md
     ui/                   shared primitives → src/components/ui/CLAUDE.md
   contexts/               data and session  → src/contexts/CLAUDE.md
@@ -128,6 +128,7 @@ src/
   utils/                  icons by id, score colours, slugify
   services/               map geographic data access
 drizzle/                  versioned SQL migrations → drizzle/CLAUDE.md
+scripts/geo/              generators for two of the public/geo files → scripts/geo/README.md
 public/geo/               territory GeoJSON (the real geometry lives here)
 docs/                     the specification, in Spanish. Eugenio's → docs/CLAUDE.md
 memory/                   technical state and decisions → memory/CLAUDE.md

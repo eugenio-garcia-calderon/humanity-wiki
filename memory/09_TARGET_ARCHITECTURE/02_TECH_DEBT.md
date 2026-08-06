@@ -78,18 +78,10 @@ yet.** They are here so the decision can be explicit.
 - **What**: no code splitting. Mapbox, React Flow, Recharts and react-simple-maps all land in the first chunk even though the landing page uses none of them.
 - **Cost to fix**: low. Vite config plus dynamic `import()` on the map and graph pages.
 
-### Dead dependencies
-- **What**: `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports. AI Studio scaffold leftovers.
-- **Cost**: install weight and confusion. They do not affect the bundle, because code that is never imported is never bundled. Removing them is 10 minutes.
-- **Partly done 2026-08-06**: `firebase`, `firebase-admin` and `@google/genai` removed, along with `firebase-applet-config.json` and `metadata.json`. The remaining four are still here because `react-simple-maps` (which *is* used) is the reason `--legacy-peer-deps` exists, and untangling that deserves its own pass.
-
-### Two lockfiles
-- **What**: `bun.lock` and `package-lock.json` coexist. The Dockerfile uses `npm ci`.
-- **Risk**: local and production installing different versions.
-
-### Loose scripts in the repo root
-- **What**: `fix_layout.cjs`, `fix_map2.cjs`, `fix_map_continents.cjs`, `fix_server.cjs`, `fix_server2.cjs`, `update_map.cjs`, `make_continents.cjs`, `create_planet.cjs`, `test_comp.tsx`.
-- **Cost**: no technical cost, but nine files nobody knows are safe to delete.
+### `GlobalSearch.tsx` is finished and mounted nowhere
+- **What**: `src/components/ui/GlobalSearch.tsx`, 8.3 KB. Queries `GET /api/search`, debounces, groups by category, resolves each hit through `resolveEntityLink`. No page imports it.
+- **Cost**: not debt in the usual sense — it is a working feature nobody can reach. Either wire it into the header or delete it; leaving it is the only bad option.
+- **Found**: 2026-08-06, import-graph audit.
 
 ---
 
@@ -120,6 +112,25 @@ yet.** They are here so the decision can be explicit.
 ---
 
 ## Resolved
+
+### Loose scripts in the repo root — fixed 2026-08-06
+- **What it was**: nine `.cjs`/`.tsx` files from the initial commit that nobody knew were safe to delete.
+- **Worse than clutter**: a dry run against the current source showed three of them (`update_map.cjs`, `fix_map_continents.cjs`, `fix_layout.cjs`) were no longer no-ops. Two would re-add Mapbox sources (`planets`, `continents`) that already exist in `HumanityMap.tsx`, which throws at runtime; the third would have changed routing so `/` counted as the map page.
+- **Fix**: the six patch scripts and `test_comp.tsx` deleted. The two generators that carry real provenance (`make_continents.cjs`, `create_planet.cjs`) moved to `scripts/geo/` with their 689 KB input and a README. Their paths were relative to the working directory, so they were re-anchored to `__dirname`.
+- **Verified**: run from an unrelated working directory, both reproduce `public/geo/continents.json` and `planet.json` byte for byte.
+
+### Dead dependencies — fixed 2026-08-06
+- **What it was**: `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports, plus `@types/leaflet`, `@types/mapbox-gl` and `autoprefixer` found in the same pass. `@types/mapbox-gl` stubs mapbox-gl v2 and can shadow the types v3 ships itself; `autoprefixer` has no `postcss.config` and Tailwind v4 does not use it.
+- **Fix**: all seven removed. `tsc --noEmit` clean, `npm run build` passes.
+- **Deliberately kept**: `prop-types` and `react-is`. `react-simple-maps` and `recharts` need them and they are pinned by hand because of `--legacy-peer-deps`.
+
+### Two lockfiles — fixed 2026-08-06
+- **What it was**: `bun.lock` and `package-lock.json` side by side, with the Dockerfile running `npm ci`. Risk of local and production resolving different versions.
+- **Fix**: `bun.lock` deleted. `package-lock.json` is the single source.
+
+### Two `drizzle.config.ts` — fixed 2026-08-06
+- **What it was**: a root config and a near-duplicate in `src/db/`. drizzle-kit resolves the root one from the working directory, so the `src/db` copy never ran — but it was the better of the two.
+- **Fix**: ported its env var validation and `tablesFilter: ["!spatial_ref_sys"]` into the root config, then deleted it. Without that filter drizzle-kit reads the PostGIS-owned `spatial_ref_sys` as unmanaged and offers to drop it on every `generate`.
 
 ### Unauthenticated writes on `/api/data/:entity` — fixed 2026-08-06
 - **What it was**: `POST`, `PUT`, `DELETE` and `.../restore` across 14 core tables with no session and no role check. Found by Javier in PR #23, reproduced live (anonymous POST returned 200 and created the row; anonymous DELETE archived it).

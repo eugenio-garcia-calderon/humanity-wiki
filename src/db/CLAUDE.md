@@ -94,6 +94,16 @@ seed-db → seed-indicators → seed-indicator-regions → seed-markers
 
 Run each with `node --env-file=.env node_modules/.bin/tsx src/db/<name>.ts`.
 
+Two more scripts live here and are not part of that chain:
+
+| Script | What it does |
+|---|---|
+| `import-geo.ts` | Loads the GeoJSON in `public/geo/` (continents, countries, regions, spain\*, italy, madrid_municipios) into the database. The only reader of most of those files |
+| `migrate-projects-to-initiatives.ts` | One-shot data migration from `projects` to `initiatives`, reusing the same id. Idempotent, safe to re-run. `projects` is left intact on purpose (see `memory/03_DECISIONS.md`, 2026-08-03) |
+
+Every script in this folder is a manual entry point, so import-graph tools will
+always report them as unreferenced. That is expected, not dead code.
+
 ## Before you change this, decide
 
 | If you are about to... | Current shortcut | Right pattern | Cost of switching now |
