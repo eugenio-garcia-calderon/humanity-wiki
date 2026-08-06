@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ReactFlow, Background, BackgroundVariant, Controls, Handle, Position, MarkerType,
-  useNodesState, useEdgesState, useStore,
-  type Node, type Edge, type NodeProps, type ReactFlowInstance,
+  useNodesState, useEdgesState, useStore, BaseEdge, getStraightPath,
+  type Node, type Edge, type NodeProps, type EdgeProps, type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CreateGraphModal from '../components/knowledge/CreateGraphModal';
 import WindowContent from '../components/knowledge/WindowContent';
 import { cn } from '../utils/cn';
+import { relStyle } from '../utils/relationStyle';
 
 // ============================================================================
 // GRAFOS — la PIZARRA INFINITA (2026-08-06, petición del usuario)
@@ -28,8 +29,13 @@ import { cn } from '../utils/cn';
 
 const SPHERE = 340;          // diámetro de la esfera de un grafo
 const CENTER_SPHERE = 380;   // diámetro del núcleo
-const ORBIT_X = 1250;        // semieje horizontal del anillo (elipse: la
-const ORBIT_Y = 780;         // pantalla es más ancha que alta)
+const ORBIT_X = 1050;        // semieje horizontal del anillo (elipse: la
+const ORBIT_Y = 640;         // pantalla es más ancha que alta)
+// La ESFERA que envuelve a todos los grafos (petición del usuario): una
+// membrana elíptica —una esfera vista en perspectiva— con el núcleo dentro.
+const SHELL_X = ORBIT_X + SPHERE / 2 + 130;
+const SHELL_Y = ORBIT_Y + SPHERE / 2 + 165;
+const REL_CIRCLE = 86;       // círculo de la categoría de conocimiento
 const WIN_SCALE = 0.3;       // las posiciones del grafo original, encogidas
 const REVEAL = 0.46;         // zoom a partir del cual emergen las publicaciones
 
@@ -48,7 +54,7 @@ interface GraphRow {
   id: string; title: string; slug: string; description: string | null;
   status: string; is_ai_generated: boolean; views: number; creator_name: string | null;
   window_count: number; cover_image: string | null; cover_video_id: string | null;
-  is_reto: boolean; windows?: any[];
+  is_reto: boolean; windows?: any[]; edges?: any[];
 }
 
 function Handles() {
@@ -208,7 +214,89 @@ function VentanaNode({ data }: NodeProps<any>) {
   );
 }
 
-const nodeTypes = { nucleo: NucleoNode, esfera: EsferaNode, ventana: VentanaNode };
+// ----------------------------------------------------------------------------
+// La ESFERA que lo envuelve todo: la membrana del conocimiento común.
+// ----------------------------------------------------------------------------
+function EnvolturaNode() {
+  return (
+    <div
+      className="pointer-events-none rounded-[50%]"
+      style={{
+        width: SHELL_X * 2, height: SHELL_Y * 2,
+        border: '2px solid rgba(16,185,129,0.35)',
+        background: 'radial-gradient(ellipse at 42% 32%, rgba(255,255,255,0.9) 0%, rgba(236,253,245,0.55) 45%, rgba(219,234,254,0.35) 78%, rgba(224,231,255,0.15) 100%)',
+        boxShadow: 'inset -30px -40px 90px rgba(15,23,42,0.06), inset 30px 40px 90px rgba(255,255,255,0.9), 0 0 70px rgba(16,185,129,0.12)',
+      }}
+    >
+      <Handles />
+      {/* brillo de esfera */}
+      <div
+        className="absolute rounded-[50%]"
+        style={{
+          left: '14%', top: '9%', width: '30%', height: '22%',
+          background: 'radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, transparent 70%)',
+        }}
+      />
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Círculo de relación: la CATEGORÍA de conocimiento que une el grafo con
+// cada publicación (contexto, causa, dato, fuente, apoya, contradice, matiza).
+// ----------------------------------------------------------------------------
+function RelacionNode({ data }: NodeProps<any>) {
+  const d = data as any;
+  const rel = relStyle(d.relation);
+  const zoom = useZoom();
+  const open = d.forceOpen || zoom >= REVEAL;
+  return (
+    <div
+      className="rounded-full flex flex-col items-center justify-center text-center px-2 transition-all ease-out"
+      style={{
+        width: REL_CIRCLE, height: REL_CIRCLE,
+        backgroundColor: rel.bg,
+        border: '3px solid rgba(255,255,255,0.92)',
+        boxShadow: `0 0 20px ${rel.color}55, 0 8px 14px -6px rgb(0 0 0 / 0.25)`,
+        opacity: open ? 1 : 0,
+        transform: open ? 'scale(1)' : 'scale(0.3)',
+        transitionDuration: '450ms',
+        pointerEvents: 'none',
+      }}
+      title={d.label || rel.label}
+    >
+      <Handles />
+      <p className="text-[8px] font-black uppercase tracking-[0.16em] opacity-80" style={{ color: rel.text }}>
+        {rel.label}
+      </p>
+      {d.label && (
+        <p className="text-[9px] font-black uppercase leading-tight tracking-wide break-words w-full" style={{ color: rel.text }}>
+          {d.label}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Arista que aparece y desaparece con las publicaciones: cuando están
+ *  colapsadas, la vista general queda limpia (solo esferas). */
+function FadeEdge({ id, sourceX, sourceY, targetX, targetY, style, markerEnd, data }: EdgeProps) {
+  const zoom = useZoom();
+  const open = (data as any)?.forceOpen || zoom >= REVEAL;
+  const [path] = getStraightPath({ sourceX, sourceY, targetX, targetY });
+  return (
+    <BaseEdge
+      id={id}
+      path={path}
+      markerEnd={open ? markerEnd : undefined}
+      style={{ ...style, opacity: open ? (style as any)?.opacity ?? 1 : 0, transition: 'opacity 450ms ease-out' }}
+    />
+  );
+}
+
+const edgeTypes = { fade: FadeEdge };
+
+const nodeTypes = { nucleo: NucleoNode, esfera: EsferaNode, ventana: VentanaNode, envoltura: EnvolturaNode, relacion: RelacionNode };
 
 export default function Grafos() {
   const [graphs, setGraphs] = useState<GraphRow[]>([]);
@@ -230,13 +318,15 @@ export default function Grafos() {
       .finally(() => setLoading(false));
   }, []);
 
-  const allRetos = graphs.length > 0 && graphs.every(g => g.is_reto);
+  // El nombre del centro: «Retos de España» cuando la esfera es, sobre todo,
+  // de retos (petición del usuario).
+  const allRetos = graphs.length > 0 && graphs.filter(g => g.is_reto).length * 2 >= graphs.length;
 
   /** La visión general encuadra SOLO el núcleo y las esferas: las
    *  publicaciones están colapsadas y no deben estirar el encuadre. */
   const overviewNodes = useCallback(() => {
     const ids = (rf.current?.getNodes() || [])
-      .filter(n => n.type === 'nucleo' || n.type === 'esfera')
+      .filter(n => n.type === 'nucleo' || n.type === 'esfera' || n.type === 'envoltura')
       .map(n => ({ id: n.id }));
     return ids.length ? ids : undefined;
   }, []);
@@ -270,6 +360,13 @@ export default function Grafos() {
     const ns: Node[] = [];
     const es: Edge[] = [];
     const N = Math.max(graphs.length, 1);
+
+    ns.push({
+      id: '__envoltura__', type: 'envoltura',
+      position: { x: -SHELL_X, y: -SHELL_Y },
+      draggable: false, selectable: false, zIndex: -20,
+      data: {},
+    });
 
     ns.push({
       id: '__nucleo__', type: 'nucleo',
@@ -348,6 +445,14 @@ export default function Grafos() {
         if (!moved) break;
       }
 
+      // La CATEGORÍA de conocimiento con la que el grafo sostiene cada
+      // publicación (contexto, causa, dato…), tomada de las aristas del
+      // centro del grafo original.
+      const relByWindow: Record<string, any> = {};
+      for (const e of (g.edges || [])) {
+        if (!e.from_window_id && e.to_window_id) relByWindow[e.to_window_id] = e;
+      }
+
       wins.forEach((w: any, j: number) => {
         ns.push({
           id: `w-${g.id}-${w.id}`, type: 'ventana',
@@ -355,10 +460,42 @@ export default function Grafos() {
           draggable: false, selectable: false, zIndex: 10,
           data: { win: w, graph: g, onOpenWindow: openWindow, forceOpen: focused === g.id },
         });
-        es.push({
-          id: `ew-${g.id}-${w.id}`, source: `esf-${g.id}`, target: `w-${g.id}-${w.id}`, type: 'straight',
-          style: { stroke: accent, strokeWidth: 1, opacity: 0.22 },
-        });
+
+        const rel = relByWindow[w.id];
+        if (rel) {
+          // El círculo va a medio camino entre la esfera y la publicación:
+          // se ve la cadena grafo → categoría → publicación.
+          const mx = boxes[j].x + CW / 2, my = boxes[j].y + CH / 2;
+          const dist = Math.hypot(mx, my) || 1;
+          const t = Math.min(0.5, (SPHERE / 2 + 105) / dist);
+          const rx = cx + mx * t - REL_CIRCLE / 2;
+          const ry = cy + my * t - REL_CIRCLE / 2;
+          const relId = `r-${g.id}-${w.id}`;
+          const rs = relStyle(rel.relation);
+          ns.push({
+            id: relId, type: 'relacion',
+            position: { x: rx, y: ry },
+            draggable: false, selectable: false, zIndex: 15,
+            data: { relation: rel.relation, label: rel.label, forceOpen: focused === g.id },
+          });
+          es.push({
+            id: `er1-${g.id}-${w.id}`, source: `esf-${g.id}`, target: relId, type: 'fade',
+            style: { stroke: rs.color, strokeWidth: 1.5, opacity: 0.5 },
+            data: { forceOpen: focused === g.id },
+          });
+          es.push({
+            id: `er2-${g.id}-${w.id}`, source: relId, target: `w-${g.id}-${w.id}`, type: 'fade',
+            style: { stroke: rs.color, strokeWidth: 2, opacity: 0.75 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: rs.color, width: 12, height: 12 },
+            data: { forceOpen: focused === g.id },
+          });
+        } else {
+          es.push({
+            id: `ew-${g.id}-${w.id}`, source: `esf-${g.id}`, target: `w-${g.id}-${w.id}`, type: 'fade',
+            style: { stroke: accent, strokeWidth: 1, opacity: 0.22 },
+            data: { forceOpen: focused === g.id },
+          });
+        }
       });
     });
 
@@ -395,6 +532,7 @@ export default function Grafos() {
           onEdgesChange={onEdgesChange}
           onInit={inst => { rf.current = inst; }}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           nodesConnectable={false}
           elevateNodesOnSelect={false}
           minZoom={0.1}
