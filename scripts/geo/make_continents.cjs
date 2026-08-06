@@ -1,5 +1,12 @@
+// Regenerates public/geo/continents.json from world.geojson.
+// Run from anywhere: node scripts/geo/make_continents.cjs
 const fs = require('fs');
-const world = JSON.parse(fs.readFileSync('world.geojson', 'utf8'));
+const path = require('path');
+
+const here = __dirname;
+const repoRoot = path.resolve(here, '../..');
+
+const world = JSON.parse(fs.readFileSync(path.join(here, 'world.geojson'), 'utf8'));
 
 const continentMap = {
   'Europe': 'T002',
@@ -21,7 +28,7 @@ const features = world.features
     };
   });
 
-fs.writeFileSync('public/geo/continents.json', JSON.stringify({
+fs.writeFileSync(path.join(repoRoot, 'public/geo/continents.json'), JSON.stringify({
   type: 'FeatureCollection',
   features: features
 }));

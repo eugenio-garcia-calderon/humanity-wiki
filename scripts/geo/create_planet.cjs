@@ -1,5 +1,12 @@
+// Regenerates public/geo/planet.json by dissolving continents.json into one
+// MultiPolygon. Run make_continents.cjs first.
+// Run from anywhere: node scripts/geo/create_planet.cjs
 const fs = require('fs');
-const continents = JSON.parse(fs.readFileSync('public/geo/continents.json', 'utf8'));
+const path = require('path');
+
+const repoRoot = path.resolve(__dirname, '../..');
+
+const continents = JSON.parse(fs.readFileSync(path.join(repoRoot, 'public/geo/continents.json'), 'utf8'));
 const planet = {
   type: "FeatureCollection",
   features: [
@@ -20,4 +27,4 @@ const planet = {
     }
   ]
 };
-fs.writeFileSync('public/geo/planet.json', JSON.stringify(planet));
+fs.writeFileSync(path.join(repoRoot, 'public/geo/planet.json'), JSON.stringify(planet));
