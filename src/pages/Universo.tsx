@@ -12,7 +12,6 @@ import {
 import { useHelpers } from '../contexts/DataContext';
 import { challengeLinkTo } from '../utils/entityLinks';
 import { slugify } from '../utils/slugify';
-import UniversoSwitcher from '../components/universo/UniversoSwitcher';
 
 // ============================================================================
 // UNIVERSO — la tercera forma de ver la wiki de la humanidad (2026-08-06)
@@ -404,8 +403,6 @@ export default function Universo() {
       >
         <Background variant={BackgroundVariant.Dots} gap={40} size={1} color="rgba(148,163,184,0.10)" />
       </ReactFlow>
-
-      <UniversoSwitcher current={1} dark />
 
       {/* identidad + esfera activa */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
