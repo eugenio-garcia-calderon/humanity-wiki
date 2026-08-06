@@ -115,9 +115,11 @@ function EsferaNode({ data }: NodeProps<any>) {
   return (
     <div
       onClick={() => d.onFocus(g.id)}
+      onMouseEnter={() => d.onHover?.(g.id)}
+      onMouseLeave={() => d.onHover?.(null)}
       className="group relative flex flex-col items-center justify-center text-center cursor-pointer select-none transition-transform duration-300 ease-out hover:scale-105"
       style={{ width: SPHERE, height: SPHERE }}
-      title={open ? 'Ver toda la pizarra' : `Acercarse a «${g.title}»`}
+      title={open ? 'Ver toda la pizarra' : `Acercarse a «${g.title}» — clic para hacer zoom`}
     >
       <Handles />
       {/* la esfera: portada recortada en círculo */}
@@ -182,14 +184,33 @@ function VentanaNode({ data }: NodeProps<any>) {
   // ocupa mucho y el zoom de encuadre puede caer bajo el umbral.
   const open = d.forceOpen || zoom >= REVEAL;
   const tint = KIND_TINT[w.kind] || '#64748b';
+
+  // SEMI-DESPLIEGUE (petición del usuario): colapsada, la publicación no
+  // desaparece — se convierte en un satélite en miniatura pegado a su
+  // esfera, para que se VEA que ahí hay información agregada. Con hover
+  // sobre la esfera, los satélites se abren un poco más (invitan al clic).
+  // d.dx/d.dy = desplazamiento del centro de la tarjeta respecto al centro
+  // de su esfera; el satélite viaja a un anillo fijo alrededor de ella,
+  // esquivando el arco inferior donde vive el título.
+  const dist = Math.hypot(d.dx, d.dy) || 1;
+  let ang = Math.atan2(d.dy, d.dx);
+  const lo = Math.PI * 0.32, hi = Math.PI * 0.68; // arco del título, abajo
+  if (ang > lo && ang < hi) ang = ang < Math.PI / 2 ? lo : hi;
+  // Compensación por zoom: de lejos los satélites crecen un poco para
+  // seguir viéndose (señal de que hay información agregada ahí).
+  const comp = Math.min(2.4, Math.max(1, 0.42 / Math.max(zoom, 0.05)));
+  const miniScale = (d.hoverPreview ? 0.34 : 0.16) * comp;
+  const ringR = (d.hoverPreview ? 262 : 208) + (comp - 1) * 55;
+  const tx = Math.cos(ang) * ringR - d.dx;
+  const ty = Math.sin(ang) * ringR - d.dy;
+
   return (
     <div
       onClick={() => open && d.onOpenWindow(w, d.graph)}
       className="w-64 bg-white rounded-2xl overflow-hidden transition-all ease-out"
       style={{
-        // Colapso: al alejarte la tarjeta se encoge hacia su esfera y se apaga.
-        opacity: open ? 1 : 0,
-        transform: open ? 'scale(1)' : 'scale(0.35)',
+        opacity: open ? 1 : d.hoverPreview ? 1 : 0.9,
+        transform: open ? 'translate(0px, 0px) scale(1)' : `translate(${tx}px, ${ty}px) scale(${miniScale})`,
         transitionDuration: '450ms',
         pointerEvents: open ? 'auto' : 'none',
         border: `1.5px solid ${tint}55`,
@@ -279,22 +300,63 @@ function RelacionNode({ data }: NodeProps<any>) {
 }
 
 /** Arista que aparece y desaparece con las publicaciones: cuando están
- *  colapsadas, la vista general queda limpia (solo esferas). */
+ *  colapsadas, la vista general queda limpia (solo esferas). Abierta,
+ *  lleva un flujo animado de partículas (conexiones VIVAS). */
 function FadeEdge({ id, sourceX, sourceY, targetX, targetY, style, markerEnd, data }: EdgeProps) {
   const zoom = useZoom();
   const open = (data as any)?.forceOpen || zoom >= REVEAL;
   const [path] = getStraightPath({ sourceX, sourceY, targetX, targetY });
+  const stroke = (style as any)?.stroke || '#64748b';
   return (
-    <BaseEdge
-      id={id}
-      path={path}
-      markerEnd={open ? markerEnd : undefined}
-      style={{ ...style, opacity: open ? (style as any)?.opacity ?? 1 : 0, transition: 'opacity 450ms ease-out' }}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        path={path}
+        markerEnd={open ? markerEnd : undefined}
+        style={{ ...style, opacity: open ? (style as any)?.opacity ?? 1 : 0, transition: 'opacity 450ms ease-out' }}
+      />
+      {open && (
+        <path
+          d={path}
+          fill="none"
+          stroke={stroke}
+          strokeWidth={Math.max(1.5, Number((style as any)?.strokeWidth || 1.5))}
+          strokeLinecap="round"
+          style={{ strokeDasharray: '2 12', animation: 'esferaFlujo 1.6s linear infinite', opacity: 0.9 }}
+        />
+      )}
+    </>
   );
 }
 
-const edgeTypes = { fade: FadeEdge };
+/** La ELECTRICIDAD del conocimiento: la línea del núcleo «Retos de España»
+ *  a cada reto. Su GROSOR y la velocidad/densidad del flujo de partículas
+ *  dependen de la intensidad y relevancia actual del reto (visitas y
+ *  volumen de conocimiento) — se ve de un vistazo qué reto late más. */
+function FlujoEdge({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps) {
+  const d = data as any;
+  const t = Math.max(0, Math.min(1, d?.t ?? 0.5)); // relevancia 0..1
+  const color = d?.accent || '#059669';
+  const [path] = getStraightPath({ sourceX, sourceY, targetX, targetY });
+  const width = 2 + t * 7;                    // más relevante = más gorda
+  const dur = (2.6 - t * 2).toFixed(2);       // más relevante = más rápida
+  const dash = t > 0.66 ? '3 10' : t > 0.33 ? '3 14' : '2 18'; // y más densa
+  return (
+    <>
+      <BaseEdge id={id} path={path} style={{ stroke: color, strokeWidth: width, opacity: 0.28 }} />
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={Math.max(2, width * 0.6)}
+        strokeLinecap="round"
+        style={{ strokeDasharray: dash, animation: `esferaFlujo ${dur}s linear infinite`, opacity: 0.95, filter: `drop-shadow(0 0 ${2 + t * 4}px ${color})` }}
+      />
+    </>
+  );
+}
+
+const edgeTypes = { fade: FadeEdge, flujo: FlujoEdge };
 
 const nodeTypes = { nucleo: NucleoNode, esfera: EsferaNode, ventana: VentanaNode, envoltura: EnvolturaNode, relacion: RelacionNode };
 
@@ -304,6 +366,8 @@ export default function Grafos() {
   const [showCreate, setShowCreate] = useState(false);
   const [popup, setPopup] = useState<{ win: any; graph: GraphRow } | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
+  // Esfera bajo el ratón: sus satélites se abren en pequeño (invitación).
+  const [hoverId, setHoverId] = useState<string | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const rf = useRef<ReactFlowInstance | null>(null);
@@ -361,6 +425,13 @@ export default function Grafos() {
     const es: Edge[] = [];
     const N = Math.max(graphs.length, 1);
 
+    // Relevancia relativa de cada grafo (0..1): visitas + volumen de
+    // conocimiento. Gobierna el grosor y el flujo de su línea de energía.
+    const score = (g: GraphRow) => g.views + g.window_count * 8;
+    const maxScore = Math.max(...graphs.map(score), 1);
+    const relevance: Record<string, number> = Object.fromEntries(
+      graphs.map(g => [g.id, score(g) / maxScore]));
+
     ns.push({
       id: '__envoltura__', type: 'envoltura',
       position: { x: -SHELL_X, y: -SHELL_Y },
@@ -393,9 +464,9 @@ export default function Grafos() {
         data: { graph: g, onFocus: focusGraph, forceOpen: focused === g.id },
       });
       es.push({
-        id: `e-${g.id}`, source: '__nucleo__', target: `esf-${g.id}`, type: 'straight',
-        style: { stroke: accent, strokeWidth: 2, strokeDasharray: '6 8', opacity: 0.45 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: accent, width: 14, height: 14 },
+        // Electricidad núcleo → reto: grosor y flujo según la relevancia.
+        id: `e-${g.id}`, source: '__nucleo__', target: `esf-${g.id}`, type: 'flujo',
+        data: { t: relevance[g.id] ?? 0.5, accent },
       });
 
       // Las publicaciones del grafo, con su disposición original encogida
@@ -458,7 +529,11 @@ export default function Grafos() {
           id: `w-${g.id}-${w.id}`, type: 'ventana',
           position: { x: cx + boxes[j].x, y: cy + boxes[j].y },
           draggable: false, selectable: false, zIndex: 10,
-          data: { win: w, graph: g, onOpenWindow: openWindow, forceOpen: focused === g.id },
+          data: {
+            win: w, graph: g, onOpenWindow: openWindow, forceOpen: focused === g.id,
+            hoverPreview: hoverId === g.id && focused !== g.id,
+            dx: boxes[j].x + CW / 2, dy: boxes[j].y + CH / 2,
+          },
         });
 
         const rel = relByWindow[w.id];
@@ -500,7 +575,7 @@ export default function Grafos() {
     });
 
     return { ns, es };
-  }, [graphs, allRetos, focusGraph, resetView, openWindow, focused]);
+  }, [graphs, allRetos, focusGraph, resetView, openWindow, focused, hoverId]);
 
   useEffect(() => { setNodes(built.ns); setEdges(built.es); }, [built, setNodes, setEdges]);
 
@@ -522,6 +597,7 @@ export default function Grafos() {
 
   return (
     <div className="relative w-full h-full bg-slate-50">
+      <style>{`@keyframes esferaFlujo { to { stroke-dashoffset: -26; } }`}</style>
       {loading ? (
         <p className="text-sm text-slate-400 py-16 text-center">Cargando la pizarra…</p>
       ) : (

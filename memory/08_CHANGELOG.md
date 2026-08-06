@@ -396,3 +396,9 @@
 - **Paleta compartida**: `RELATION_STYLE` sale de GrafoCanvas a `src/utils/relationStyle.ts` (con `relStyle()`), y la usan tanto el lienzo del grafo como la Esfera — un solo lenguaje visual, una sola fuente de verdad.
 - **Membrana envolvente (petición)**: todos los grafos viven ahora DENTRO de una esfera —una elipse de cristal con brillo, sin peso visual— cuyo centro se llama **«Retos de España»** (el nombre se elige por mayoría: si la mayoría de los grafos son retos, la esfera es de retos).
 - **Vista general limpia**: nueva arista `fade` que se desvanece con las publicaciones colapsadas; al alejarse solo quedan la membrana, el núcleo y las esferas.
+
+### 2026-08-06 — Esfera de Conocimiento: satélites, hover-preview y electricidad por relevancia
+- **Semi-despliegue al alejar (petición)**: las publicaciones colapsadas ya no desaparecen — se convierten en SATÉLITES en miniatura que orbitan pegados a su esfera (con escala compensada por zoom y esquivando el arco del título), señal visible de que ahí hay información agregada.
+- **Hover que invita (petición)**: pasar el ratón por una esfera abre sus satélites en pequeño (bloom a un anillo mayor y ×2 de tamaño) — la previsualización incita al clic. El clic sigue haciendo el zoom automático animado a ese reto (fitView a su clúster).
+- **Electricidad por relevancia (petición)**: nueva arista `flujo` del núcleo «Retos de España» a cada reto — su GROSOR (2-9px), la velocidad (2.6s→0.6s), la densidad de partículas y el halo dependen de la relevancia actual del reto (visitas + volumen de conocimiento, normalizado). De un vistazo se ve qué reto late más (hoy: Incendios).
+- **Conexiones vivas**: las aristas internas (esfera→categoría→publicación) llevan flujo animado de partículas cuando están desplegadas (keyframes `esferaFlujo` en CSS puro).
