@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
 import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Menu, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Menu, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Maximize2, Minimize2 } from 'lucide-react';
 import { mapService } from '../services/MapService';
 import { useHelpers } from '../contexts/DataContext';
 import { slugify } from '../utils/slugify';
@@ -69,6 +69,9 @@ export default function MapPage() {
   // (ver 04_ROADMAP.md, petición de ensanchar/estrechar todas las ventanas).
   const { width: filtrosWidth, startResize: startResizeFiltros, dragging: draggingFiltros } =
     usePanelWidth('filtros', 16, { min: 10, max: 30 });
+  // Pantalla completa del explorador: las esferas piden sitio y el panel se
+  // queda corto (petición del usuario).
+  const [explorerFull, setExplorerFull] = useState(false);
   const { width: explorerWidth, startResize: startResizeExplorer, dragging: draggingExplorer } =
     usePanelWidth('explorer', 40, { min: 25, max: 60 });
   const [searchParams, setSearchParams] = useSearchParams();
@@ -520,10 +523,23 @@ export default function MapPage() {
 
       {/* COLUMN 2 (~2/5 por defecto, redimensionable): permanent territory panel (replaces the old floating panel) */}
       <div
-        className="relative h-full overflow-y-auto bg-white border-r border-slate-200 shrink-0"
-        style={{ width: `${explorerWidth}%` }}
+        className={`relative h-full overflow-y-auto bg-white border-r border-slate-200 ${
+          explorerFull ? 'flex-1 min-w-0' : 'shrink-0'
+        }`}
+        style={explorerFull ? undefined : { width: `${explorerWidth}%` }}
       >
-        <ResizeHandle onMouseDown={startResizeExplorer('right')} edge="right" active={draggingExplorer} />
+        {!explorerFull && (
+          <ResizeHandle onMouseDown={startResizeExplorer('right')} edge="right" active={draggingExplorer} />
+        )}
+        {selectedTerritory && currentExplorerLevel && currentExplorerId && (
+          <button
+            onClick={() => setExplorerFull(f => !f)}
+            title={explorerFull ? 'Volver al mapa' : 'Ver a pantalla completa'}
+            className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full bg-white border border-slate-200 shadow-lg flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors"
+          >
+            {explorerFull ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+        )}
         {selectedTerritory ? (
           currentExplorerLevel && currentExplorerId ? (
             <EntityExplorerPanel
@@ -568,7 +584,7 @@ export default function MapPage() {
 
       {/* COLUMN 3: the map — fills whatever width remains after columns 1 and 2,
           so it reclaims the space freed when the filters menu collapses. */}
-      <div className="flex-1 min-w-0 h-full relative">
+      <div className={`flex-1 min-w-0 h-full relative ${explorerFull ? 'hidden' : ''}`}>
         <HumanityMap
           onFeatureClick={handleFeatureClick}
           onMapClick={() => setSelectedTerritory(null)}
