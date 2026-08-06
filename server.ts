@@ -1555,11 +1555,16 @@ async function startServer() {
   // shown in its Retos card at the same level+territory.
   const getSolutionsForChallenges = async (challengeIds: string[]) => {
     if (challengeIds.length === 0) return [];
+    // challenge_ids: de qué reto(s) cuelga cada solución. El explorador del
+    // mapa lo dibuja como grafo (reto → soluciones), así que necesita saber
+    // a cuál engancharla, no solo la lista plana.
     const result = await db.execute(sql`
-      SELECT DISTINCT s.id, s.title, s.type, s.description, s.impact, s.cost, s.readiness
+      SELECT s.id, s.title, s.type, s.description, s.impact, s.cost, s.readiness,
+             array_agg(DISTINCT cs.challenge_id) AS challenge_ids
       FROM solutions s
       JOIN challenge_solutions cs ON cs.solution_id = s.id
       WHERE cs.challenge_id IN ${challengeIds} AND s.archived_at IS NULL
+      GROUP BY s.id, s.title, s.type, s.description, s.impact, s.cost, s.readiness
       ORDER BY s.title
     `);
     return result.rows;
