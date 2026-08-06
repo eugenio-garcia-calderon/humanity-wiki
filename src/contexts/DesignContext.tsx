@@ -19,8 +19,8 @@ export function DesignProvider({ children }: { children: React.ReactNode }) {
       'AGUA': '/illustrations/agua.png',
       'ALIMENTACIÓN': '/illustrations/alimentacion.png',
       'VIVIENDA': '/illustrations/vivienda.png',
-      'SALUD': '/illustrations/salud.jpg',
-      'CONVIVENCIA': '/illustrations/convivencia.jpg',
+      'SALUD': '/illustrations/salud.png',
+      'CONVIVENCIA': '/illustrations/convivencia.png',
       'ECOSISTEMAS': '/illustrations/ecosistemas.png',
     };
     const saved = localStorage.getItem('evo_objective_images');
