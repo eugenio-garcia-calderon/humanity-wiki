@@ -137,9 +137,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       // presentación en el perfil). Los borradores solo los ve su creador o
       // un administrador.
       const creatorId = (req.query.creator_id as string) || null;
+      // ?challenge=R021 — solo los grafos anclados a ese reto (sus VISTAS).
+      const challengeId = (req.query.challenge as string) || null;
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
-               g.created_at, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
+               g.created_at, g.center, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
                (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count,
                (SELECT w.config->>'image_url' FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
                  WHERE gw.graph_id = g.id AND w.kind = 'imagen' AND w.config->>'image_url' IS NOT NULL
@@ -153,6 +155,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         LEFT JOIN users u ON u.id = g.creator_user_id
         WHERE g.archived_at IS NULL
           AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
+          AND (${challengeId}::text IS NULL OR EXISTS (
+            SELECT 1 FROM graph_entity_links gel2
+            WHERE gel2.graph_id = g.id AND gel2.entity_type = 'challenges' AND gel2.entity_id = ${challengeId}))
           AND (g.status = 'publicado' OR g.creator_user_id = ${req.user?.id || null}
                OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
         ORDER BY g.views DESC, g.created_at DESC

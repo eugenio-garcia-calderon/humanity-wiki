@@ -25,6 +25,7 @@ import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
 import Universo from './pages/Universo';
+import RetoVistas from './pages/RetoVistas';
 import Universo2 from './pages/Universo2';
 import Universo3 from './pages/Universo3';
 import IncendiosMapa from './pages/IncendiosMapa';
@@ -57,6 +58,7 @@ export default function App() {
                 <Route path="grafos" element={<Grafos />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
                 <Route path="universo" element={<Universo />} />
+                <Route path="retos-vistas/:id" element={<RetoVistas />} />
                 <Route path="universo-2" element={<Universo2 />} />
                 <Route path="universo-3" element={<Universo3 />} />
                 <Route path="mapas" element={<Mapas />} />
