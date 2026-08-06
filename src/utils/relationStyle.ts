@@ -6,7 +6,7 @@
 // conflicto en rojo, matiz en naranja. `color` es el trazo de las flechas;
 // `bg`/`text` pintan el círculo de la relación.
 // Vive aquí (y no en una página) porque la comparten el lienzo del grafo y
-// la Esfera de Conocimiento — el mismo lenguaje visual en ambos sitios.
+// la Red de Datos — el mismo lenguaje visual en ambos sitios.
 
 export interface RelationStyle {
   color: string;

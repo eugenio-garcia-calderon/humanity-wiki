@@ -16,12 +16,7 @@ yet.** They are here so the decision can be explicit.
 
 ## Urgent: active risk, not debt
 
-### Unauthenticated writes on `/api/data/:entity`
-- **What**: `POST`, `PUT` and `DELETE` across 14 tables with no session or role check. Verified returning 200.
-- **Risk**: anyone with the URL can create or archive territories, objectives and indicators in production.
-- **Cost to fix**: low. The role policy already exists in `src/server/ai/assistant.ts`; extract and apply it.
-- **Why it is still here**: found on 2026-08-06, not yet decided.
-- **When it becomes critical**: as soon as the domain is public and someone looks at the API.
+*(empty — the unauthenticated-writes hole was fixed on 2026-08-06, see "Resolved")*
 
 ---
 
@@ -65,6 +60,12 @@ yet.** They are here so the decision can be explicit.
 - **What**: `src/index.css` is a single line. 117 bare `<button>` elements, 24 hex colours, `ui/core.tsx` with 3 primitives used by 10 of 34 pages.
 - **Cost now**: creating the `@theme` block and lifting 12 primitives is one afternoon.
 - **Cost later**: grows with every page. The 4 newest files already added 22 more hex values.
+- **2026-08-06 update**: `Inicio.tsx` adds 33 more and `BaseDeDatos.tsx` 7 (plus 2 bare `<button>`). Most of `Inicio`'s are inside hand-drawn SVG miniatures, where a Tailwind class does not apply — but the 7 family colours in `BaseDeDatos` and the 3 accents in `Inicio` are the same palette declared for the fourth time in the repo. That palette is the cheapest token to extract first.
+
+### The nav is hardcoded JSX and now has 5 entries
+- **What**: `Layout.tsx` repeats the same `<Link>` + `cn(...)` block five times (Inicio, Geolocalización de Datos, Red de Datos, Base de Datos, Universo). `src/pages/CLAUDE.md` says the 4th entry is the moment to turn it into an array; we passed it at the 5th.
+- **Cost now**: ~20 min to lift it to `const NAV = [{ to, label, icon, match }]` and map over it.
+- **Cost later**: every rename touches 5 places and the active-state logic drifts. This renaming round already proved it: three labels changed and one of them (the page's own header pill) was missed until it was seen in the browser.
 
 ### Single 3.17 MB bundle (893 KB gzipped)
 - **What**: no code splitting. Mapbox, React Flow, Recharts and react-simple-maps all land in the first chunk even though the landing page uses none of them.
@@ -112,4 +113,8 @@ yet.** They are here so the decision can be explicit.
 
 ## Resolved
 
-*(empty: entries move here with their date)*
+### Unauthenticated writes on `/api/data/:entity` — fixed 2026-08-06
+- **What it was**: `POST`, `PUT`, `DELETE` and `.../restore` across 14 core tables with no session and no role check. Found by Javier in PR #23, reproduced live (anonymous POST returned 200 and created the row; anonymous DELETE archived it).
+- **Fix**: `requireAdmin()` on the four endpoints — 401 without a session, 403 below ADMIN. No capability was removed: editing from the UI was already admin-only.
+- **Verified after the fix**: anonymous → 401 on all three verbs, nothing created; admin with a session → 200. Checked locally and against production.
+- **What it left behind**: `server.ts` still has no authorisation *pattern*, only this guard. See "server.ts is 1.891 lines of raw SQL with no authorisation" above — new endpoints added on 2026-08-06 (`/api/db/tables`) had to call `requireAdmin` by hand.

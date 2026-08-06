@@ -25,6 +25,8 @@ import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
 import Universo from './pages/Universo';
+import Inicio from './pages/Inicio';
+import BaseDeDatos from './pages/BaseDeDatos';
 import RetoVistas from './pages/RetoVistas';
 import IncendiosMapa from './pages/IncendiosMapa';
 import Login from './pages/Login';
@@ -52,8 +54,12 @@ export default function App() {
               <Route path="/" element={<Layout />}>
                 {/* Fase 11: los Grafos de Conocimiento son el nuevo inicio;
                     el mapa conserva su ruta /mapa (enlazada en el menú). */}
-                <Route index element={<Grafos />} />
+                {/* La portada presenta las TRES formas de ver (2026-08-06).
+                    La Red de Datos (antes «Grafos») vive en /red. */}
+                <Route index element={<Inicio />} />
+                <Route path="red" element={<Grafos />} />
                 <Route path="grafos" element={<Grafos />} />
+                <Route path="base-de-datos" element={<BaseDeDatos />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
                 <Route path="universo" element={<Universo />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />
