@@ -15,6 +15,7 @@ import {
   FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown, Flame,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
 import { useHelpers } from '../contexts/DataContext';
 import { resolveEntityLink } from '../utils/entityLinks';
 import WindowContent from '../components/knowledge/WindowContent';
@@ -56,22 +57,6 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   texto:       { label: 'Texto',       icon: FileText,       chip: 'bg-slate-100 text-slate-600' },
 };
 
-// Paleta SEMÁNTICA fija (decisión del usuario, 2026-08-06): cada concepto
-// tiene siempre el mismo color en toda la plataforma — historia/contexto y
-// datos en azules, causas en amarillo, apoyo/soluciones en verde,
-// conflicto/reto en rojo, matiz en naranja. `color` es el trazo de las
-// flechas; `bg`/`text` pintan el círculo (nunca más fondo negro).
-const RELATION_STYLE: Record<string, { color: string; bg: string; text: string; label: string }> = {
-  contexto:   { color: '#2563eb', bg: '#2563eb', text: '#ffffff', label: 'contexto' },
-  dato:       { color: '#0ea5e9', bg: '#0ea5e9', text: '#ffffff', label: 'dato' },
-  fuente:     { color: '#1e40af', bg: '#1e40af', text: '#ffffff', label: 'fuente' },
-  causa:      { color: '#eab308', bg: '#facc15', text: '#422006', label: 'causa' },
-  apoya:      { color: '#16a34a', bg: '#16a34a', text: '#ffffff', label: 'apoya' },
-  contradice: { color: '#dc2626', bg: '#dc2626', text: '#ffffff', label: 'contradice' },
-  matiza:     { color: '#f97316', bg: '#f97316', text: '#ffffff', label: 'matiza' },
-};
-
-const RELATIONS = Object.keys(RELATION_STYLE);
 
 // Geometría del anillo de relaciones: círculos grandes y cerca del centro
 // (petición del usuario, 2026-08-06).

@@ -177,7 +177,18 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         `);
         const byGraph: Record<string, any[]> = {};
         for (const w of wins.rows as any[]) (byGraph[w.graph_id] ||= []).push(w);
-        out = out.map(r => ({ ...r, windows: byGraph[r.id] || [] }));
+
+        // Las aristas del CENTRO llevan la categoría de conocimiento
+        // (contexto, causa, dato…): son los círculos de relación que la
+        // Esfera dibuja entre el grafo y cada publicación.
+        const eds = await db.execute(sql`
+          SELECT graph_id, id, from_window_id, to_window_id, relation, label
+          FROM graph_edges WHERE graph_id IN ${ids}
+        `);
+        const edgesByGraph: Record<string, any[]> = {};
+        for (const e of eds.rows as any[]) (edgesByGraph[e.graph_id] ||= []).push(e);
+
+        out = out.map(r => ({ ...r, windows: byGraph[r.id] || [], edges: edgesByGraph[r.id] || [] }));
       }
       res.json(out);
     } catch (e: any) { res.status(500).json({ error: e.message }); }

@@ -390,3 +390,9 @@
 - **Anti-solape por clúster**: las publicaciones de cada esfera se repelen entre sí y no pueden taparle la cara a su esfera (relajación iterativa, mismo «imán» que el lienzo del grafo). Conservan la disposición original del grafo, encogida ×0.3.
 - **Backend**: `GET /api/graphs?with_windows=1` devuelve las ventanas de todos los grafos en una sola consulta, para poder desplegarlas sin navegar.
 - Clic en una publicación abre un pop-up sobre la misma pizarra (contenido completo + acceso al grafo entero); solo se cambia de página al abrir el grafo para editarlo.
+
+### 2026-08-06 — Esfera de Conocimiento: círculos de categoría recuperados + membrana envolvente
+- **Círculos de relación recuperados (aviso del usuario)**: al pasar a la pizarra se habían perdido los círculos que indican la CATEGORÍA de conocimiento entre el grafo y cada publicación. Ahora la cadena vuelve a ser `esfera → círculo de categoría → publicación`, con la paleta semántica de siempre (contexto/dato/fuente en azules, causa amarillo, apoya verde, contradice rojo, matiza naranja) y su etiqueta. `GET /api/graphs?with_windows=1` devuelve también las aristas de cada grafo para poder pintarlas.
+- **Paleta compartida**: `RELATION_STYLE` sale de GrafoCanvas a `src/utils/relationStyle.ts` (con `relStyle()`), y la usan tanto el lienzo del grafo como la Esfera — un solo lenguaje visual, una sola fuente de verdad.
+- **Membrana envolvente (petición)**: todos los grafos viven ahora DENTRO de una esfera —una elipse de cristal con brillo, sin peso visual— cuyo centro se llama **«Retos de España»** (el nombre se elige por mayoría: si la mayoría de los grafos son retos, la esfera es de retos).
+- **Vista general limpia**: nueva arista `fade` que se desvanece con las publicaciones colapsadas; al alejarse solo quedan la membrana, el núcleo y las esferas.
