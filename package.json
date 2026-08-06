@@ -12,7 +12,6 @@
     "start": "node dist/server.cjs"
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
     "@stripe/stripe-js": "^9.12.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/mapbox-gl": "^3.5.0",
@@ -24,8 +23,6 @@
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
-    "firebase": "^12.17.0",
-    "firebase-admin": "^14.2.0",
     "geoip-lite": "^2.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",

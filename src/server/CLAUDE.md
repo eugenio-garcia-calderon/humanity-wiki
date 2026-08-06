@@ -86,13 +86,20 @@ CREATE_PUBLICATION, CREATE_KNOWLEDGE_GRAPH,
 CREATE_MAP                                    level 1
 ```
 
-Use those numbers. Do not invent a new policy per endpoint. Note the current oddity:
-the AI is **more** restricted than the REST API, because the legacy `/api/data/*`
-write routes check nothing at all.
+Use those numbers for per-entity endpoints. Do not invent a new policy per endpoint.
 
-That policy belongs in one shared module used by both the routes and the assistant.
-Extracting it is the first item in
-`memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+**Current state after PR #25**: the generic `/api/data/*` write routes and the
+`/api/db/*` browser go through `requireAdmin` (`server.ts:1019`), which demands
+level 4 for everything. That is stricter than the catalogue above and it costs
+nothing today, because editing from the UI is already admin-only.
+
+It stops being enough the moment a level-2 verified user is meant to create a
+challenge from the interface. At that point the generic endpoint has to move to the
+graduated levels, and that policy belongs in **one shared module** used by the
+routes, the assistant and the UI. Until then, `requireAdmin` is the right call and
+the guard is copied by hand into each new route.
+
+See the `server.ts` entry in `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
 
 ## Reading rules
 

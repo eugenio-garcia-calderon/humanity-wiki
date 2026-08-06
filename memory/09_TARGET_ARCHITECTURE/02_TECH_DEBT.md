@@ -16,7 +16,14 @@ yet.** They are here so the decision can be explicit.
 
 ## Urgent: active risk, not debt
 
-*(empty — the unauthenticated-writes hole was fixed on 2026-08-06, see "Resolved")*
+### Google API key exposed in the public repository — needs an action in Google Cloud
+- **What**: `firebase-applet-config.json` carried the API key and OAuth client id of the Google project `inteligencia-colectiva-489419`. It arrived with the AI Studio scaffold in the initial commit (2026-08-01) and **nothing in the app ever imported it**. The file was removed on 2026-08-06.
+- **Why deleting the file is not the fix**: this repository is **public**, and the key was readable for five days. It remains in the git history. Bots that scrape GitHub for keys will already have it.
+- **Severity, honestly**: Firebase web API keys are designed to be public and identify a project rather than authorise access, so by itself this is low severity. The real risk is if the key is **unrestricted**, because then it reaches any other Google API enabled on that project. `metadata.json` declared `MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API`, so a Gemini quota or billing charge is the plausible abuse path.
+- **Action required, and only Eugenio can do it** (it is his Google account): in the Google Cloud console, delete or restrict that API key, and check the project's billing for unexpected usage.
+- **Status**: file removed from the repo. **Key rotation pending.** This entry stays here until that is confirmed.
+
+*(The unauthenticated-writes hole was fixed on 2026-08-06 — see "Resolved".)*
 
 ---
 
@@ -72,8 +79,9 @@ yet.** They are here so the decision can be explicit.
 - **Cost to fix**: low. Vite config plus dynamic `import()` on the map and graph pages.
 
 ### Dead dependencies
-- **What**: `firebase`, `firebase-admin`, `@google/genai`, `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports. AI Studio scaffold leftovers, along with `firebase-applet-config.json` and `metadata.json`.
-- **Cost**: install weight and confusion ("do we use Firebase?"). Removing them is 10 minutes.
+- **What**: `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports. AI Studio scaffold leftovers.
+- **Cost**: install weight and confusion. They do not affect the bundle, because code that is never imported is never bundled. Removing them is 10 minutes.
+- **Partly done 2026-08-06**: `firebase`, `firebase-admin` and `@google/genai` removed, along with `firebase-applet-config.json` and `metadata.json`. The remaining four are still here because `react-simple-maps` (which *is* used) is the reason `--legacy-peer-deps` exists, and untangling that deserves its own pass.
 
 ### Two lockfiles
 - **What**: `bun.lock` and `package-lock.json` coexist. The Dockerfile uses `npm ci`.

@@ -88,7 +88,7 @@ data for measured data is the most expensive error made in this project so far.
 
 1. **`drizzle-kit push`**: hangs in a non-interactive shell and kills the session. Use `generate` + `psql -f`.
 2. **Deleting knowledge**: archive with `archived_at`. Constitution, rule 6.
-3. **A write route without a role check**: this already happened and there is an open hole in production because of it.
+3. **A write route without a role check**: the generic write endpoints shipped with no check at all and had to be closed on 2026-08-06 (PR #25). Every new write route calls `requireAdmin` or `requireLevel`. See `src/server/CLAUDE.md`.
 4. **Real secrets in versioned files**, and never copied into `memory/`. To check whether a key is configured, read `process.env.X` at runtime; never print its value.
 5. **Hex colours and bare `<button>` in pages**: use `src/components/ui/`.
 6. **Creating a new junction table** (`thing_a_thing_b`): there are already 43. See `src/db/CLAUDE.md`.
