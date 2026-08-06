@@ -402,3 +402,10 @@
 - **Hover que invita (petición)**: pasar el ratón por una esfera abre sus satélites en pequeño (bloom a un anillo mayor y ×2 de tamaño) — la previsualización incita al clic. El clic sigue haciendo el zoom automático animado a ese reto (fitView a su clúster).
 - **Electricidad por relevancia (petición)**: nueva arista `flujo` del núcleo «Retos de España» a cada reto — su GROSOR (2-9px), la velocidad (2.6s→0.6s), la densidad de partículas y el halo dependen de la relevancia actual del reto (visitas + volumen de conocimiento, normalizado). De un vistazo se ve qué reto late más (hoy: Incendios).
 - **Conexiones vivas**: las aristas internas (esfera→categoría→publicación) llevan flujo animado de partículas cuando están desplegadas (keyframes `esferaFlujo` en CSS puro).
+
+### 2026-08-06 — SEGURIDAD: se cierra la escritura anónima en /api/data/:entity
+- **El agujero**: `POST /api/data/:entity`, `PUT /api/data/:entity/:id`, `DELETE .../:id` y `.../restore` no comprobaban sesión NI rol. Cualquiera podía crear, modificar o archivar territorios, indicadores, retos, soluciones… (14 tablas del núcleo) sin cuenta. Llevaba vivo en producción.
+- **Hallado por Javier** (PR #23, auditoría documental) y **verificado en local** con un POST anónimo que devolvía 200 y creaba la fila; el DELETE anónimo la archivaba.
+- **El arreglo**: `requireAdmin()` en los cuatro endpoints — 401 sin sesión, 403 sin nivel ADMIN. No quita capacidades a nadie: la edición desde la interfaz ya era exclusiva de administradores (AdminMenu), esto solo cierra la puerta de atrás.
+- **Verificado tras el arreglo**: anónimo → 401 en los tres verbos, nada creado, T003 intacto; administrador con sesión → 200, sigue pudiendo editar. Filas de prueba eliminadas.
+- **Pendiente de la auditoría de Javier** (anotado, no urgente): 242 territorios sin geometría con PostGIS instalado y sin usar; 17.421 observaciones fabricadas sin marcar como generadas por IA (confirmado: 20.557 totales − 3.136 marcadas); 127 botones crudos sin primitiva de UI; `src/index.css` de una sola línea.

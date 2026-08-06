@@ -1009,10 +1009,41 @@ async function startServer() {
     }
   };
 
-  app.post("/api/data/:entity", (req, res) => handleUpsertEntity(req.params.entity, req, res));
-  app.put("/api/data/:entity/:id", (req, res) => handleUpsertEntity(req.params.entity, req, res));
-  app.delete("/api/data/:entity/:id", (req, res) => handleArchiveEntity(req.params.entity, req, res));
-  app.post("/api/data/:entity/:id/restore", (req, res) => handleRestoreEntity(req.params.entity, req, res));
+  // ESCRITURA GENÉRICA — solo administradores.
+  // Estos cuatro endpoints tocan 14 tablas del núcleo (territorios,
+  // indicadores, retos…) y estaban ABIERTOS: un POST sin sesión creaba
+  // entidades. Detectado por Javier (PR #23) y verificado en local con un
+  // POST anónimo que devolvió 200. La edición desde la interfaz ya es
+  // exclusiva de administradores (AdminMenu), así que exigirlo aquí no
+  // quita nada a nadie: solo cierra la puerta de atrás.
+  const requireAdmin = (req: Request, res: Response): boolean => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Debes iniciar sesión para modificar datos.' });
+      return false;
+    }
+    if ((req.user.roleLevel ?? 0) < ROLE.ADMIN) {
+      res.status(403).json({ error: 'Solo un administrador puede modificar estos datos.' });
+      return false;
+    }
+    return true;
+  };
+
+  app.post("/api/data/:entity", (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    handleUpsertEntity(req.params.entity, req, res);
+  });
+  app.put("/api/data/:entity/:id", (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    handleUpsertEntity(req.params.entity, req, res);
+  });
+  app.delete("/api/data/:entity/:id", (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    handleArchiveEntity(req.params.entity, req, res);
+  });
+  app.post("/api/data/:entity/:id/restore", (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    handleRestoreEntity(req.params.entity, req, res);
+  });
 
   // Historial completo de una entidad, más reciente primero.
   app.get("/api/data/:entity/:id/history", async (req, res) => {
