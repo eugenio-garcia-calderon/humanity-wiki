@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Network, Orbit } from 'lucide-react';
+import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -90,7 +90,7 @@ export default function Layout() {
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
-            <Network className="w-3.5 h-3.5" /> Grafos
+            <Globe2 className="w-3.5 h-3.5" /> Esfera de Conocimiento
           </Link>
           <Link
             to="/universo"

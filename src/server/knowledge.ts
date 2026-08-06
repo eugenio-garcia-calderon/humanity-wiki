@@ -164,7 +164,22 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         LIMIT 60
       `);
       const { agg } = await ratingsFor('knowledge_graphs', (rows.rows as any[]).map(r => r.id));
-      res.json((rows.rows as any[]).map(r => ({ ...r, rating: agg[r.id] || null })));
+      let out = (rows.rows as any[]).map(r => ({ ...r, rating: agg[r.id] || null }));
+
+      // ?with_windows=1 — la PIZARRA INFINITA necesita las ventanas de todos
+      // los grafos a la vez para desplegarlas al hacer zoom, sin navegar.
+      if (req.query.with_windows === '1' && out.length) {
+        const ids = out.map(r => r.id);
+        const wins = await db.execute(sql`
+          SELECT gw.graph_id, w.id, w.title, w.kind, w.config, w.is_ai_generated, gw.x, gw.y
+          FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
+          WHERE gw.graph_id IN ${ids} AND w.archived_at IS NULL
+        `);
+        const byGraph: Record<string, any[]> = {};
+        for (const w of wins.rows as any[]) (byGraph[w.graph_id] ||= []).push(w);
+        out = out.map(r => ({ ...r, windows: byGraph[r.id] || [] }));
+      }
+      res.json(out);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
