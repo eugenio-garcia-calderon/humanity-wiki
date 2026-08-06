@@ -18,21 +18,19 @@ export interface ResolvedLink {
  * directamente al grafo (más rico) en vez de a la ficha genérica del reto.
  * Petición del usuario, 2026-08-05, a raíz del grafo «Incendios en España».
  */
-const CHALLENGE_GRAPH_SLUG: Record<string, string> = {
-  R017: 'incendios-espana', // Incendios
-  R021: 'ceuta-frontera-amenazada', // Presión sobre la frontera sur
+const CHALLENGE_GRAPH_ROUTE: Record<string, string> = {
+  R017: '/grafos/incendios-espana', // Incendios — una sola vista
+  R021: '/retos-vistas/R021', // Presión sobre la frontera sur — VARIAS vistas (cadena causal + teoría de juegos)
 };
 
 /** A dónde debe llevar el clic en un reto concreto, en cualquier parte de la app. */
 export function challengeLinkTo(challenge: { id: string; title: string }): string {
-  const graphSlug = CHALLENGE_GRAPH_SLUG[challenge.id];
-  return graphSlug ? `/grafos/${graphSlug}` : `/retos/${slugify(challenge.title)}`;
+  return CHALLENGE_GRAPH_ROUTE[challenge.id] || `/retos/${slugify(challenge.title)}`;
 }
 
-/** Ruta al grafo del reto, o null si ese reto aún no tiene grafo propio. */
+/** Ruta al grafo/vistas del reto, o null si ese reto aún no tiene grafo propio. */
 export function challengeGraphTo(challengeId: string): string | null {
-  const graphSlug = CHALLENGE_GRAPH_SLUG[challengeId];
-  return graphSlug ? `/grafos/${graphSlug}` : null;
+  return CHALLENGE_GRAPH_ROUTE[challengeId] || null;
 }
 
 const TYPE_LABELS: Record<string, string> = {

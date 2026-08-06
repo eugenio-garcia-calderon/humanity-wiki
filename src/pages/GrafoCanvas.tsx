@@ -353,7 +353,25 @@ function VentanaNode({ data }: NodeProps<any>) {
   );
 }
 
-const nodeTypes = { centro: CenterNode, relacion: RelacionNode, ventana: VentanaNode };
+/** Línea del SUELO para grafos en forma de árbol (center.ground): separa las
+ *  ramas visibles (hechos, arriba) de las raíces (intereses, abajo). */
+function SueloNode({ data }: NodeProps<any>) {
+  const g = (data as any).ground || {};
+  return (
+    <div className="pointer-events-none" style={{ width: 5200 }}>
+      <CenterHandles />
+      <div className="border-t-2 border-dashed" style={{ borderColor: '#a1620788' }} />
+      <p className="absolute -top-7 left-10 text-[11px] font-black uppercase tracking-[0.3em] text-sky-700/80">
+        ☀ {g.above || 'Lo visible'}
+      </p>
+      <p className="absolute top-3 left-10 text-[11px] font-black uppercase tracking-[0.3em] text-amber-700/80">
+        ⌄ {g.below || 'Las raíces'}
+      </p>
+    </div>
+  );
+}
+
+const nodeTypes = { centro: CenterNode, relacion: RelacionNode, ventana: VentanaNode, suelo: SueloNode };
 const edgeTypes = { flotante: FloatingEdge };
 
 // ----------------------------------------------------------------------------
@@ -647,7 +665,17 @@ export default function GrafoCanvas() {
       });
     }
 
-    setNodes([centerNode, ...relNodes, ...winNodes]);
+    const extraNodes: Node[] = [];
+    if (data.graph.center?.ground) {
+      extraNodes.push({
+        id: '__suelo__', type: 'suelo',
+        position: { x: -2600, y: -1 },
+        draggable: false, selectable: false, zIndex: 1,
+        data: { ground: data.graph.center.ground },
+      });
+    }
+
+    setNodes([centerNode, ...extraNodes, ...relNodes, ...winNodes]);
     setEdges(flowEdges);
   }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges]);
 

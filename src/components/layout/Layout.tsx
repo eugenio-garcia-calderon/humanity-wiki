@@ -45,7 +45,9 @@ export default function Layout() {
   // la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
   const isUniversoPage = location.pathname.startsWith('/universo');
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage;
+  // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
+  const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage;
 
   if (isEmbed) {
     return (
@@ -184,7 +186,7 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
-        <AIAssistant mode={isGrafosPage || isMapasPage || isUniversoPage ? 'bar' : 'dock'} />
+        <AIAssistant mode={isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage ? 'bar' : 'dock'} />
       </div>
 
       {!fullBleed && (
