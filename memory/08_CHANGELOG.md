@@ -382,3 +382,11 @@
 
 ### 2026-08-06 — Universo: se elimina II y III
 - Decisión del usuario: queda UNA sola versión del Universo (el cosmos con zoom semántico). Se borran `Universo2.tsx` (El Pulso), `Universo3.tsx` (La Esfera), el `UniversoSwitcher` y sus rutas `/universo-2` y `/universo-3`. Los conceptos quedan documentados en la entrada de la Fase 17b por si se recuperan.
+
+### 2026-08-06 — Fase 19: la ESFERA DE CONOCIMIENTO (pizarra infinita) y renombrado del menú
+- **Renombrado (petición)**: en el menú superior, «Grafos» pasa a llamarse **«Esfera de Conocimiento»** con icono de globo (Globe2), acorde al nuevo concepto.
+- **La página deja de ser un tablero de tarjetas y pasa a ser una PIZARRA INFINITA (petición)**: cada grafo es una ESFERA con su portada recortada en círculo (previsualización) y su chip Reto/Grafo; el título y las estadísticas viven FUERA de la esfera con escala compensada por zoom (como los topónimos de un mapa: legibles de lejos y de cerca).
+- **Zoom semántico sin cambiar de página**: al acercarse con la rueda —o al hacer clic en una esfera, que hace un fitView animado a su clúster— las publicaciones de ese grafo EMERGEN a su alrededor en el mismo lienzo; al alejarse (o clic en la esfera activa / en el núcleo / en la X) se COLAPSAN de vuelta dentro de la esfera con una transición de escala. El grafo enfocado se mantiene desplegado aunque el encuadre baje del umbral (`forceOpen`), porque una constelación abierta ocupa mucho.
+- **Anti-solape por clúster**: las publicaciones de cada esfera se repelen entre sí y no pueden taparle la cara a su esfera (relajación iterativa, mismo «imán» que el lienzo del grafo). Conservan la disposición original del grafo, encogida ×0.3.
+- **Backend**: `GET /api/graphs?with_windows=1` devuelve las ventanas de todos los grafos en una sola consulta, para poder desplegarlas sin navegar.
+- Clic en una publicación abre un pop-up sobre la misma pizarra (contenido completo + acceso al grafo entero); solo se cambia de página al abrir el grafo para editarlo.
