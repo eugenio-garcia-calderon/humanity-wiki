@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ExternalLink, PlayCircle, BookOpen, Link2, Map as MapIcon, Quote,
   Users as UsersIcon, Network, FileText, CalendarClock, Lightbulb,
+  CheckSquare, Square, Plus, Trash2, Rocket,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 
@@ -71,10 +72,13 @@ function ChartBlock({ chart, height }: { chart: any; height: number }) {
   );
 }
 
-export default function WindowContent({ kind, config, variant }: {
+export default function WindowContent({ kind, config, variant, onConfigChange }: {
   kind: string;
   config: any;
   variant: 'node' | 'full';
+  /** Si llega, la ventana es EDITABLE (dueño): tareas que se marcan, tablas
+   *  que se rellenan, pasos de proyecto que se tachan. Guarda en el servidor. */
+  onConfigChange?: (config: any) => void;
 }) {
   const isNode = variant === 'node';
   const wiki = useWikipedia(kind === 'wikipedia' ? (config.wiki_lang || 'es') : undefined, config.wiki_page);
@@ -364,6 +368,174 @@ export default function WindowContent({ kind, config, variant }: {
           ))}
           {isNode && items.length > 2 && (
             <p className="text-[10px] text-slate-400 text-center">+{items.length - 2} soluciones más — abre la ventana</p>
+          )}
+        </div>
+      );
+    }
+
+    case 'tarea': {
+      const done = !!config.done;
+      const toggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onConfigChange?.({ ...config, done: !done });
+      };
+      const Box = done ? CheckSquare : Square;
+      return (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Box
+              onClick={onConfigChange ? toggle : undefined}
+              className={cn2('w-5 h-5 shrink-0', done ? 'text-emerald-600' : 'text-slate-300', onConfigChange && 'cursor-pointer hover:scale-110 transition-transform')}
+            />
+            <span className={cn2('text-xs font-bold', done ? 'text-slate-400 line-through' : 'text-slate-700')}>
+              {done ? 'Hecha' : 'Pendiente'}
+            </span>
+            {config.due && (
+              <span className="ml-auto text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                {config.due}
+              </span>
+            )}
+          </div>
+          {config.notes && (
+            <p className={isNode ? 'text-[11px] text-slate-500 line-clamp-2' : 'text-sm text-slate-600 leading-relaxed'}>{config.notes}</p>
+          )}
+        </div>
+      );
+    }
+
+    case 'tabla': {
+      const cols: any[] = Array.isArray(config.cols) ? config.cols : [];
+      const rows: any[] = Array.isArray(config.rows) ? config.rows : [];
+      if (isNode || !onConfigChange) {
+        const shown = rows.slice(0, isNode ? 3 : rows.length);
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full text-[11px] border-collapse">
+              <thead><tr>{cols.map(c => (
+                <th key={c.id} className="text-left font-black text-slate-500 border-b border-slate-200 px-1.5 py-1">{c.name}</th>
+              ))}</tr></thead>
+              <tbody>{shown.map((r, i) => (
+                <tr key={i}>{cols.map(c => (
+                  <td key={c.id} className="border-b border-slate-50 px-1.5 py-1 text-slate-700 truncate max-w-[110px]">{r[c.id] ?? ''}</td>
+                ))}</tr>
+              ))}</tbody>
+            </table>
+            {rows.length === 0 && <p className="text-[10px] text-slate-400 italic py-1">Tabla vacía{onConfigChange || !isNode ? '' : ' — abre la ventana para rellenarla'}.</p>}
+            {isNode && rows.length > 3 && <p className="text-[10px] text-slate-400 py-1">+{rows.length - 3} filas más</p>}
+          </div>
+        );
+      }
+      // Editable (dueño, vista completa): rejilla tipo Notion.
+      const save = (next: any) => onConfigChange({ ...config, ...next });
+      const setCell = (ri: number, colId: string, value: string) => {
+        const nr = rows.map((r, i) => (i === ri ? { ...r, [colId]: value } : r));
+        save({ rows: nr });
+      };
+      return (
+        <div className="space-y-2 overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead><tr>
+              {cols.map((c, ci) => (
+                <th key={c.id} className="border-b-2 border-slate-200 px-1 py-1">
+                  <input
+                    value={c.name}
+                    onChange={e => save({ cols: cols.map((x, i) => (i === ci ? { ...x, name: e.target.value } : x)) })}
+                    className="w-full font-black text-slate-600 bg-transparent focus:outline-none focus:bg-amber-50 rounded px-1"
+                  />
+                </th>
+              ))}
+              <th className="w-7 border-b-2 border-slate-200">
+                <button
+                  onClick={() => save({ cols: [...cols, { id: 'c' + Date.now(), name: 'Columna', type: 'text' }] })}
+                  title="Añadir columna" className="p-1 text-slate-300 hover:text-emerald-600"><Plus className="w-3.5 h-3.5" /></button>
+              </th>
+            </tr></thead>
+            <tbody>
+              {rows.map((r, ri) => (
+                <tr key={ri} className="group">
+                  {cols.map(c => (
+                    <td key={c.id} className="border-b border-slate-100 px-1 py-0.5">
+                      <input
+                        value={r[c.id] ?? ''}
+                        onChange={e => setCell(ri, c.id, e.target.value)}
+                        className="w-full text-slate-700 bg-transparent focus:outline-none focus:bg-emerald-50/60 rounded px-1 py-0.5"
+                      />
+                    </td>
+                  ))}
+                  <td className="border-b border-slate-100 text-center">
+                    <button onClick={() => save({ rows: rows.filter((_, i) => i !== ri) })}
+                      title="Borrar fila" className="p-1 text-slate-200 group-hover:text-red-400 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button onClick={() => save({ rows: [...rows, {}] })}
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 transition-colors">
+            <Plus className="w-3 h-3" /> Añadir fila
+          </button>
+        </div>
+      );
+    }
+
+    case 'proyecto': {
+      const steps: any[] = Array.isArray(config.steps) ? config.steps : [];
+      const doneCount = steps.filter(st => st.done).length;
+      const ESTADOS: Record<string, [string, string]> = {
+        idea: ['Idea', 'bg-slate-100 text-slate-600'],
+        en_marcha: ['En marcha', 'bg-sky-50 text-sky-700'],
+        terminado: ['Terminado', 'bg-emerald-50 text-emerald-700'],
+      };
+      const [estadoLabel, estadoCls] = ESTADOS[config.status] || ESTADOS.en_marcha;
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Rocket className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            {onConfigChange && !isNode ? (
+              <select
+                value={config.status || 'en_marcha'}
+                onChange={e => onConfigChange({ ...config, status: e.target.value })}
+                onClick={e => e.stopPropagation()}
+                className={cn2('text-[10px] font-black uppercase tracking-wide rounded-full px-2 py-0.5 border-0 focus:outline-none', estadoCls)}
+              >
+                {Object.entries(ESTADOS).map(([k, [l]]) => <option key={k} value={k}>{l}</option>)}
+              </select>
+            ) : (
+              <span className={cn2('text-[10px] font-black uppercase tracking-wide rounded-full px-2 py-0.5', estadoCls)}>{estadoLabel}</span>
+            )}
+            {steps.length > 0 && <span className="ml-auto text-[10px] font-bold text-slate-400">{doneCount}/{steps.length} pasos</span>}
+          </div>
+          {config.goal && (
+            <p className={isNode ? 'text-[11px] text-slate-600 line-clamp-2' : 'text-sm text-slate-600 leading-relaxed'}>{config.goal}</p>
+          )}
+          {steps.length > 0 && (
+            <div className="space-y-1">
+              {(isNode ? steps.slice(0, 3) : steps).map((st, i) => {
+                const Box = st.done ? CheckSquare : Square;
+                return (
+                  <div key={i} className="flex items-start gap-1.5 text-xs">
+                    <Box
+                      onClick={onConfigChange && !isNode ? (e => { e.stopPropagation(); onConfigChange({ ...config, steps: steps.map((x, j) => (j === i ? { ...x, done: !x.done } : x)) }); }) : undefined}
+                      className={cn2('w-3.5 h-3.5 mt-0.5 shrink-0', st.done ? 'text-emerald-600' : 'text-slate-300', onConfigChange && !isNode && 'cursor-pointer')}
+                    />
+                    <span className={st.done ? 'text-slate-400 line-through' : 'text-slate-600'}>{st.text}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {onConfigChange && !isNode && (
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                const inp = (e.target as any).elements.paso;
+                if (inp.value.trim()) { onConfigChange({ ...config, steps: [...steps, { text: inp.value.trim(), done: false }] }); inp.value = ''; }
+              }}
+              className="flex gap-1.5"
+            >
+              <input name="paso" placeholder="Nuevo paso…" className="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300" />
+              <button type="submit" className="px-2 py-1 bg-emerald-600 text-white rounded-lg"><Plus className="w-3 h-3" /></button>
+            </form>
           )}
         </div>
       );

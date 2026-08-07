@@ -20,17 +20,22 @@ const KINDS: Array<{ kind: string; label: string }> = [
   { kind: 'wikipedia', label: 'Wikipedia' },
   { kind: 'grafo', label: 'Otro grafo' },
   { kind: 'producto', label: 'Producto del Mercado' },
+  { kind: 'tarea', label: 'Tarea' },
+  { kind: 'tabla', label: 'Tabla' },
+  { kind: 'proyecto', label: 'Proyecto' },
 ];
 
 const RELATIONS = ['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza'];
 
-export default function AddWindowPanel({ graphId, onClose, onAdded }: {
+export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind }: {
   graphId: string;
   onClose: () => void;
   onAdded: () => void;
+  /** Herramienta preseleccionada (la barra de Mi Conocimiento abre directo). */
+  initialKind?: string;
 }) {
   const { user } = useAuth();
-  const [kind, setKind] = useState('publicacion');
+  const [kind, setKind] = useState(initialKind || 'publicacion');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('');
@@ -126,6 +131,33 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
           },
         };
       }
+      case 'tarea':
+        if (!title.trim()) { setError('La tarea necesita un título.'); return null; }
+        return {
+          title: title.trim(),
+          config: { done: false, due: url.trim() || null, notes: body.trim() || null },
+        };
+      case 'tabla':
+        return {
+          title: title.trim() || 'Tabla',
+          config: {
+            cols: [
+              { id: 'c1', name: 'Nombre', type: 'text' },
+              { id: 'c2', name: 'Valor', type: 'text' },
+            ],
+            rows: [],
+          },
+        };
+      case 'proyecto':
+        if (!title.trim()) { setError('El proyecto necesita un nombre.'); return null; }
+        return {
+          title: title.trim(),
+          config: {
+            status: 'en_marcha',
+            goal: body.trim() || null,
+            steps: [],
+          },
+        };
       default:
         return null;
     }
@@ -263,6 +295,18 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
           )}
           {kind === 'wikipedia' && (
             <input value={wikiPage} onChange={e => setWikiPage(e.target.value)} placeholder="Título exacto de la página, ej. Ceuta" className={input} />
+          )}
+          {kind === 'tarea' && (
+            <>
+              <input type="date" value={url} onChange={e => setUrl(e.target.value)} className={input} title="Fecha límite (opcional)" />
+              <textarea value={body} onChange={e => setBody(e.target.value)} rows={2} placeholder="Notas (opcional)" className={cn(input, 'resize-none')} />
+            </>
+          )}
+          {kind === 'proyecto' && (
+            <textarea value={body} onChange={e => setBody(e.target.value)} rows={3} placeholder="¿Qué quiere conseguir este proyecto?" className={cn(input, 'resize-none')} />
+          )}
+          {kind === 'tabla' && (
+            <p className="text-xs text-slate-400">Se crea con columnas Nombre y Valor — luego añades filas y columnas desde la propia ventana.</p>
           )}
 
           {/* Conexión con el centro */}
