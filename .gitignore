@@ -15,3 +15,4 @@ Claves API Stripe/
 secrets/
 *.pem
 *.key
+uploads/

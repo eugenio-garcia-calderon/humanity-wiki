@@ -302,7 +302,7 @@ function RelacionNode({ data }: NodeProps<any>) {
 const MEDIA_KINDS = new Set(['imagen', 'video', 'mapa', 'grafica']);
 
 function VentanaNode({ data }: NodeProps<any>) {
-  const { win, onOpen } = data as any;
+  const { win, onOpen, onConnectFrom } = data as any;
   const meta = KIND_META[win.kind] || KIND_META.texto;
   const Icon = meta.icon;
   const isMedia = MEDIA_KINDS.has(win.kind);
@@ -310,11 +310,21 @@ function VentanaNode({ data }: NodeProps<any>) {
     <div
       onClick={() => onOpen(win.id)}
       className={cn(
-        'bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden',
+        'group relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden',
         isMedia ? 'w-[420px]' : 'w-80',
       )}
     >
       <CenterHandles />
+      {/* Crecer desde aquí: nace un elemento nuevo YA conectado a este. */}
+      {onConnectFrom && (
+        <button
+          onClick={e => { e.stopPropagation(); onConnectFrom(win); }}
+          title={`Crear algo nuevo conectado a «${win.title}»`}
+          className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-110 transition-all"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      )}
       <div className="px-3.5 pt-3 flex items-center justify-between gap-2">
         <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded', meta.chip)}>
           <Icon className="w-2.5 h-2.5" /> {meta.label}
@@ -460,6 +470,8 @@ export function GrafoLienzo({ slug, toolbar }: {
   const [editingEdge, setEditingEdge] = useState(false);
   const [edgeForm, setEdgeForm] = useState({ relation: 'contexto', label: '', description: '' });
   const [showAdd, setShowAdd] = useState<boolean | string>(false);
+  // Ventana de la que nace la siguiente (el «+» de un nodo). null = del centro.
+  const [connectFrom, setConnectFrom] = useState<{ id: string; title: string; pos?: { x: number; y: number } } | null>(null);
   const [showConnect, setShowConnect] = useState(false);
   // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
   // el lienzo; se expande con un clic para ver descripción/etiquetas.
@@ -482,6 +494,85 @@ export function GrafoLienzo({ slug, toolbar }: {
   }, [slug]);
 
   useEffect(() => { load(); }, [load]);
+
+  // ==========================================================================
+  // PEGAR EN EL LIENZO (2026-08-07, petición del usuario)
+  // ==========================================================================
+  // Ctrl/Cmd+V sobre el lienzo crea la ventana que toque: una imagen del
+  // portapapeles se sube y se convierte en ventana `imagen`; un enlace de
+  // YouTube en `video`; cualquier otra URL en `enlace`; y el texto suelto en
+  // una nota. Todo queda conectado al centro, como cualquier creación.
+  const [pegando, setPegando] = useState<string | null>(null);
+
+  const crearVentana = useCallback(async (win: { title: string; kind: string; config: any }) => {
+    if (!data?.graph?.id) return;
+    const ang = Math.random() * 2 * Math.PI;
+    const res = await fetch(`/api/graphs/${data.graph.id}/windows`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({
+        ...win,
+        x: Math.round(Math.cos(ang) * 640) - 128,
+        y: Math.round(Math.sin(ang) * 500) - 110,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'No se pudo crear la ventana.');
+    await fetch(`/api/graphs/${data.graph.id}/edges`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ from_window_id: null, to_window_id: json.id, relation: 'contexto', label: null }),
+    }).catch(() => {});
+    load();
+  }, [data?.graph?.id, load]);
+
+  useEffect(() => {
+    if (!data?.can_edit) return;
+    const onPaste = async (e: ClipboardEvent) => {
+      // Nunca robar el pegado de un campo de texto (el chat, los formularios).
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const cd = e.clipboardData;
+      if (!cd) return;
+
+      const archivo = Array.from(cd.files || []).find(f => f.type.startsWith('image/'));
+      if (archivo) {
+        e.preventDefault();
+        setPegando('Subiendo la imagen…');
+        try {
+          const up = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/octet-stream' },
+            body: archivo,
+          });
+          const j = await up.json();
+          if (!up.ok) throw new Error(j.error || 'No se pudo subir la imagen.');
+          await crearVentana({ title: 'Imagen pegada', kind: 'imagen', config: { image_url: j.url } });
+          setPegando(null);
+        } catch (err: any) { setPegando(err.message); setTimeout(() => setPegando(null), 4000); }
+        return;
+      }
+
+      const texto = (cd.getData('text/plain') || '').trim();
+      if (!texto) return;
+      e.preventDefault();
+      setPegando('Creando…');
+      try {
+        const yt = texto.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+        if (yt && /^https?:\/\//i.test(texto)) {
+          await crearVentana({ title: 'Vídeo pegado', kind: 'video', config: { youtube_id: yt[1] } });
+        } else if (/^https?:\/\/\S+$/i.test(texto)) {
+          await crearVentana({ title: texto.replace(/^https?:\/\//, '').slice(0, 60), kind: 'enlace', config: { url: texto } });
+        } else {
+          await crearVentana({
+            title: texto.split('\n')[0].slice(0, 60) || 'Nota',
+            kind: 'texto', config: { body: texto },
+          });
+        }
+        setPegando(null);
+      } catch (err: any) { setPegando(err.message); setTimeout(() => setPegando(null), 4000); }
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [data?.can_edit, crearVentana]);
 
   const openWindow = useCallback((winId: string) => {
     setData((d: any) => {
@@ -604,7 +695,12 @@ export function GrafoLienzo({ slug, toolbar }: {
       id: w.id, type: 'ventana',
       position: { x: posById[w.id]?.x ?? w.x, y: posById[w.id]?.y ?? w.y },
       draggable: !!data.can_edit,
-      data: { win: w, onOpen: openWindow },
+      data: {
+        win: w, onOpen: openWindow,
+        onConnectFrom: data.can_edit
+          ? (v: any) => setConnectFrom({ id: v.id, title: v.title, pos: posById[v.id] || { x: v.x, y: v.y } })
+          : undefined,
+      },
       // Con una rama activa, lo que no pertenece a ella se atenúa para
       // que sepas visualmente en qué tema estás sin perder el contexto.
       style: branchIds && !branchIds.has(w.id) ? { opacity: 0.25, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
@@ -997,9 +1093,20 @@ export function GrafoLienzo({ slug, toolbar }: {
             <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded', meta.chip)}>
               <meta.icon className="w-2.5 h-2.5" /> {meta.label}
             </span>
-            <button onClick={() => setSelected(null)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {data.can_edit && (
+                <button
+                  onClick={() => { setConnectFrom({ id: selected.id, title: selected.title }); setSelected(null); }}
+                  title="Crear algo nuevo conectado a esta ventana"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 border border-emerald-200 hover:border-emerald-400 rounded-full transition-colors"
+                >
+                  <Plus className="w-3 h-3" /> Conectar algo nuevo
+                </button>
+              )}
+              <button onClick={() => setSelected(null)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="px-4 py-4 space-y-4 pb-6">
@@ -1052,9 +1159,20 @@ export function GrafoLienzo({ slug, toolbar }: {
         </div>
       )}
 
-      {showAdd !== false && (
-        <AddWindowPanel graphId={data.graph.id} initialKind={typeof showAdd === 'string' ? showAdd : undefined}
-          onClose={() => setShowAdd(false)} onAdded={load} />
+      {pegando && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-bold shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+          {pegando}
+        </div>
+      )}
+
+      {(showAdd !== false || connectFrom) && (
+        <AddWindowPanel
+          graphId={data.graph.id}
+          initialKind={typeof showAdd === 'string' ? showAdd : undefined}
+          from={connectFrom}
+          onClose={() => { setShowAdd(false); setConnectFrom(null); }}
+          onAdded={load}
+        />
       )}
       {showConnect && (
         <ConnectModal windows={data.windows} graphId={data.graph.id} onClose={() => setShowConnect(false)} onDone={load} />

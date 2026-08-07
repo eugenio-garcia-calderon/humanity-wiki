@@ -32,6 +32,11 @@ services:
     environment:
       NODE_ENV: production
       SQL_HOST: db
+      UPLOADS_DIR: /data/uploads
+    volumes:
+      # Los archivos subidos (imágenes pegadas en el lienzo) viven fuera del
+      # contenedor: si estuvieran dentro, cada despliegue los borraría.
+      - uploads:/data/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -57,5 +62,6 @@ services:
 
 volumes:
   pgdata:
+  uploads:
   caddy_data:
   caddy_config:
