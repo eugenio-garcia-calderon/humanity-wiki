@@ -17,10 +17,11 @@ humanity.wiki {
 	header @assets Cache-Control "public, max-age=31536000, immutable"
 }
 
-www.humanity.wiki {
-	redir https://humanity.wiki{uri} permanent
-}
-
+# www.humanity.wiki se redirige en el BORDE de Cloudflare (Redirect Rule
+# «WWW to Root», cert Universal SSL de Cloudflare) — aquí no se sirve ni se
+# pide certificado para www. El bloque anterior quemaba el cupo de Let's
+# Encrypt (5 fallos/hora) porque algunos centros de Cloudflare devolvían 404
+# al validador durante la propagación inicial del subdominio (2026-08-07).
+#
 # El bloque temporal 167-233-245-191.sslip.io se retiró el 2026-08-07: el
-# dominio humanity.wiki quedó activo en Cloudflare ese día (cert Let's
-# Encrypt emitido vía HTTP-01 a través del proxy).
+# dominio humanity.wiki quedó activo en Cloudflare ese día.
