@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database, Home } from 'lucide-react';
+import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database, Home, BrainCircuit } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -47,9 +47,11 @@ export default function Layout() {
   const isUniversoPage = location.pathname.startsWith('/universo');
   // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
   const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
+  // Mi Conocimiento: el lienzo personal — a sangre completa y con barra de IA.
+  const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage;
 
   if (isEmbed) {
     return (
@@ -115,6 +117,17 @@ export default function Layout() {
             )}
           >
             <Database className="w-3.5 h-3.5" /> Base de Datos
+          </Link>
+          <Link
+            to="/mi-conocimiento"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/mi-conocimiento'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            )}
+          >
+            <BrainCircuit className="w-3.5 h-3.5" /> Mi Conocimiento
           </Link>
           <Link
             to="/universo"
@@ -213,7 +226,7 @@ export default function Layout() {
         <AIAssistant
           mode={
             isInicioPage ? 'inline'
-              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage ? 'bar'
+              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage ? 'bar'
                 : 'dock'
           }
         />

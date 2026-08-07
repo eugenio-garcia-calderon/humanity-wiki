@@ -26,6 +26,8 @@ export const normalize = (s: string) =>
 const WINDOW_KINDS = new Set([
   'publicacion', 'imagen', 'video', 'wikipedia', 'enlace', 'mapa',
   'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto', 'producto', 'soluciones',
+  // Mi Conocimiento (2026-08-07): work items on the personal canvas.
+  'tarea', 'tabla', 'proyecto',
 ]);
 
 const EDGE_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);
@@ -160,6 +162,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
         WHERE g.archived_at IS NULL
+          -- Los lienzos personales (Mi Conocimiento) no son parte del común.
+          AND coalesce(g.center->>'personal','') <> '1'
           AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
           AND (${challengeId}::text IS NULL OR EXISTS (
             SELECT 1 FROM graph_entity_links gel2
@@ -215,6 +219,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const rows = await db.execute(sql`
         SELECT id, title, slug, description, trigger_keywords
         FROM knowledge_graphs WHERE archived_at IS NULL AND status = 'publicado'
+          AND coalesce(center->>'personal','') <> '1'
       `);
 
       const matches = (rows.rows as any[]).map(g => {
@@ -499,6 +504,121 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         `);
       }
       res.json({ success: true, updated: positions.length });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // MI CONOCIMIENTO — the personal infinite canvas (2026-08-07, user request)
+  // ==========================================================================
+
+  /**
+   * POST /api/knowledge/personal
+   * Ensures the logged-in user's personal canvas exists and returns it.
+   * It is a normal knowledge graph marked center.personal = '1':
+   *  - the CENTER is the user (their branch root: everything they create
+   *    hangs from them, "creado por <name>"),
+   *  - status 'borrador' so it never surfaces in the common space,
+   *  - one per user, with a deterministic slug.
+   */
+  app.post('/api/knowledge/personal', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const existing = await db.execute(sql`
+        SELECT id, slug, title FROM knowledge_graphs
+        WHERE creator_user_id = ${req.user!.id} AND center->>'personal' = '1' AND archived_at IS NULL
+        LIMIT 1
+      `);
+      if (existing.rows.length) return res.json(existing.rows[0]);
+
+      const id = newId('KG');
+      const name = req.user!.displayName || 'Mi espacio';
+      const slug = `mi-conocimiento-${normalize(req.user!.id).replace(/[^a-z0-9]+/g, '-')}`;
+      const center = {
+        personal: '1',
+        category: name,
+        variable: 'Mi Conocimiento',
+        short: name.split(' ')[0] || 'Yo',
+      };
+      await db.execute(sql`
+        INSERT INTO knowledge_graphs (id, title, slug, description, center, creator_user_id,
+                                      trigger_keywords, status, is_ai_generated, created_by, updated_by)
+        VALUES (${id}, ${'Conocimiento de ' + name}, ${slug},
+                ${'El lienzo personal de ' + name + ': todo lo que crea cuelga de su nombre.'},
+                ${JSON.stringify(center)}::jsonb, ${req.user!.id},
+                '[]'::jsonb, 'borrador', false, ${req.user!.id}, ${req.user!.id})
+      `);
+      const row = await db.execute(sql`SELECT id, slug, title FROM knowledge_graphs WHERE id = ${id}`);
+      res.json(row.rows[0]);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * GET /api/knowledge/related?q=incendios&exclude_graph=KG…
+   * The connection recommender: how much does the common space already know
+   * about a topic, and which concrete pieces could you link instead of
+   * duplicating them. Searches published graphs, their windows, challenges
+   * and solutions. Returns counts (the "cuánta info hay" gauge) + top items.
+   */
+  app.get('/api/knowledge/related', async (req: Request, res: Response) => {
+    try {
+      const q = String(req.query.q || '').trim();
+      if (q.length < 2) return res.json({ q, totales: null, grafos: [], publicaciones: [], retos: [], soluciones: [] });
+      const like = `%${q}%`;
+      const exclude = (req.query.exclude_graph as string) || null;
+
+      const grafos = await db.execute(sql`
+        SELECT g.id, g.slug, g.title, u.display_name AS creator_name,
+               (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count
+        FROM knowledge_graphs g LEFT JOIN users u ON u.id = g.creator_user_id
+        WHERE g.archived_at IS NULL AND g.status = 'publicado'
+          AND coalesce(g.center->>'personal','') <> '1'
+          AND (${exclude}::text IS NULL OR g.id <> ${exclude})
+          AND (g.title ILIKE ${like} OR g.description ILIKE ${like} OR g.trigger_keywords::text ILIKE ${like})
+        ORDER BY g.views DESC LIMIT 6
+      `);
+
+      const publicaciones = await db.execute(sql`
+        SELECT DISTINCT ON (w.id) w.id, w.title, w.kind, g.slug AS graph_slug, g.title AS graph_title,
+               u.display_name AS creator_name
+        FROM knowledge_windows w
+        JOIN graph_windows gw ON gw.window_id = w.id
+        JOIN knowledge_graphs g ON g.id = gw.graph_id
+        LEFT JOIN users u ON u.id = w.creator_user_id
+        WHERE w.archived_at IS NULL AND g.archived_at IS NULL AND g.status = 'publicado'
+          AND coalesce(g.center->>'personal','') <> '1'
+          AND (${exclude}::text IS NULL OR g.id <> ${exclude})
+          AND (w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
+        LIMIT 10
+      `);
+
+      const retos = await db.execute(sql`
+        SELECT id, title FROM challenges
+        WHERE archived_at IS NULL AND (title ILIKE ${like} OR description ILIKE ${like})
+        LIMIT 5
+      `);
+      const soluciones = await db.execute(sql`
+        SELECT id, title FROM solutions
+        WHERE archived_at IS NULL AND (title ILIKE ${like} OR description ILIKE ${like})
+        LIMIT 5
+      `);
+
+      // The gauge: how much the común already holds about this topic.
+      const autores = new Set([
+        ...(grafos.rows as any[]).map(r => r.creator_name),
+        ...(publicaciones.rows as any[]).map(r => r.creator_name),
+      ].filter(Boolean));
+      res.json({
+        q,
+        totales: {
+          grafos: grafos.rows.length,
+          publicaciones: publicaciones.rows.length,
+          retos: retos.rows.length,
+          soluciones: soluciones.rows.length,
+          autores: autores.size,
+        },
+        grafos: grafos.rows, publicaciones: publicaciones.rows,
+        retos: retos.rows, soluciones: soluciones.rows,
+      });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

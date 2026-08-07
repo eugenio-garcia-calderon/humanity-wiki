@@ -13,6 +13,7 @@ import {
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon, MapPin,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
   FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown, Flame,
+  CheckSquare, Table2, Rocket,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
@@ -55,6 +56,9 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   producto:    { label: 'Producto',    icon: ShoppingBag,     chip: 'bg-amber-50 text-amber-700' },
   soluciones:  { label: 'Soluciones',  icon: Lightbulb,       chip: 'bg-emerald-50 text-emerald-700' },
   texto:       { label: 'Texto',       icon: FileText,       chip: 'bg-slate-100 text-slate-600' },
+  tarea:       { label: 'Tarea',       icon: CheckSquare,    chip: 'bg-emerald-50 text-emerald-700' },
+  tabla:       { label: 'Tabla',       icon: Table2,         chip: 'bg-sky-50 text-sky-700' },
+  proyecto:    { label: 'Proyecto',    icon: Rocket,         chip: 'bg-indigo-50 text-indigo-700' },
 };
 
 
@@ -430,8 +434,21 @@ function ConnectModal({ windows, graphId, onClose, onDone }: {
   );
 }
 
-export default function GrafoCanvas() {
-  const { slug } = useParams();
+/** API que el lienzo ofrece a una barra de herramientas externa
+ *  (Mi Conocimiento monta la suya estilo Miro sobre este mismo lienzo). */
+export interface LienzoApi {
+  graphId: string;
+  windows: any[];
+  reload: () => void;
+  openAdd: (kind?: string) => void;
+  openConnect: () => void;
+}
+
+export function GrafoLienzo({ slug, toolbar }: {
+  slug: string;
+  /** Sustituye los botones Ventana/Conectar por una barra propia. */
+  toolbar?: (api: LienzoApi) => React.ReactNode;
+}) {
   const helpers = useHelpers();
   // Instancia real de React Flow (via onInit): controla el viewport (fitView).
   const rf = useRef<ReactFlowInstance | null>(null);
@@ -442,7 +459,7 @@ export default function GrafoCanvas() {
   const [selectedEdge, setSelectedEdge] = useState<any>(null);
   const [editingEdge, setEditingEdge] = useState(false);
   const [edgeForm, setEdgeForm] = useState({ relation: 'contexto', label: '', description: '' });
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd] = useState<boolean | string>(false);
   const [showConnect, setShowConnect] = useState(false);
   // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
   // el lienzo; se expande con un clic para ver descripción/etiquetas.
@@ -770,7 +787,14 @@ export default function GrafoCanvas() {
       </ReactFlow>
 
       {/* Herramientas de creación (solo creador o admin) */}
-      {data.can_edit && (
+      {toolbar && data.can_edit && toolbar({
+        graphId: data.graph.id,
+        windows: data.windows || [],
+        reload: load,
+        openAdd: (kind?: string) => setShowAdd(kind || true),
+        openConnect: () => setShowConnect(true),
+      })}
+      {!toolbar && data.can_edit && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           <button onClick={() => setShowAdd(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-lg transition-colors">
@@ -992,7 +1016,18 @@ export default function GrafoCanvas() {
               </div>
             </div>
 
-            <WindowContent kind={selected.kind} config={selected.config} variant="full" />
+            <WindowContent
+              kind={selected.kind} config={selected.config} variant="full"
+              onConfigChange={data.can_edit ? (config => {
+                // Optimista: se pinta ya y se guarda detrás.
+                patchWindow(selected.id, { config });
+                setSelected((sel: any) => ({ ...sel, config }));
+                fetch(`/api/windows/${selected.id}`, {
+                  method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include', body: JSON.stringify({ config }),
+                }).catch(() => {});
+              }) : undefined}
+            />
 
             <div className="border-t border-slate-100 pt-3">
               <RatingWidget
@@ -1017,12 +1052,19 @@ export default function GrafoCanvas() {
         </div>
       )}
 
-      {showAdd && (
-        <AddWindowPanel graphId={data.graph.id} onClose={() => setShowAdd(false)} onAdded={load} />
+      {showAdd !== false && (
+        <AddWindowPanel graphId={data.graph.id} initialKind={typeof showAdd === 'string' ? showAdd : undefined}
+          onClose={() => setShowAdd(false)} onAdded={load} />
       )}
       {showConnect && (
         <ConnectModal windows={data.windows} graphId={data.graph.id} onClose={() => setShowConnect(false)} onDone={load} />
       )}
     </div>
   );
+}
+
+export default function GrafoCanvas() {
+  const { slug } = useParams();
+  if (!slug) return null;
+  return <GrafoLienzo slug={slug} />;
 }
