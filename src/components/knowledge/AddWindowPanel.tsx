@@ -27,12 +27,15 @@ const KINDS: Array<{ kind: string; label: string }> = [
 
 const RELATIONS = ['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza'];
 
-export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind }: {
+export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind, from }: {
   graphId: string;
   onClose: () => void;
   onAdded: () => void;
   /** Herramienta preseleccionada (la barra de Mi Conocimiento abre directo). */
   initialKind?: string;
+  /** Si llega, la ventana nueva se conecta a ESA ventana en vez de al centro
+   *  — es el «+» que sale al pasar el ratón por un nodo del lienzo. */
+  from?: { id: string; title: string; pos?: { x: number; y: number } } | null;
 }) {
   const { user } = useAuth();
   const [kind, setKind] = useState(initialKind || 'publicacion');
@@ -173,14 +176,15 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind 
       // Colocación inicial: en el anillo exterior, en un ángulo aleatorio —
       // el creador la arrastra después y la posición queda grabada.
       const ang = Math.random() * 2 * Math.PI;
+      const cerca = from?.pos;
       const res = await fetch(`/api/graphs/${graphId}/windows`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           title: w.title, kind, config: w.config,
-          x: Math.round(Math.cos(ang) * 640) - 128,
-          y: Math.round(Math.sin(ang) * 500) - 110,
+          x: cerca ? Math.round(cerca.x + Math.cos(ang) * 430) : Math.round(Math.cos(ang) * 640) - 128,
+          y: cerca ? Math.round(cerca.y + Math.sin(ang) * 330) : Math.round(Math.sin(ang) * 500) - 110,
         }),
       });
       const json = await res.json();
@@ -190,7 +194,7 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ from_window_id: null, to_window_id: json.id, relation, label: edgeLabel.trim() || null }),
+          body: JSON.stringify({ from_window_id: from?.id ?? null, to_window_id: json.id, relation, label: edgeLabel.trim() || null }),
         });
       }
       onAdded();
@@ -209,7 +213,8 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind 
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-emerald-600" /> Nueva Ventana de Conocimiento
+            <Plus className="w-4 h-4 text-emerald-600" />
+            {from ? 'Conectar algo nuevo' : 'Nueva Ventana de Conocimiento'}
           </h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors">
             <X className="w-4 h-4" />
@@ -313,7 +318,7 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind 
           <div className="border-t border-slate-100 pt-3 space-y-2">
             <label className="flex items-center gap-2 text-xs text-slate-600">
               <input type="checkbox" checked={connectCenter} onChange={e => setConnectCenter(e.target.checked)} className="accent-emerald-600" />
-              Conectar al centro del grafo
+              {from ? <>Conectar con «<b className="font-bold">{from.title}</b>»</> : 'Conectar al centro del grafo'}
             </label>
             {connectCenter && (
               <div className="grid grid-cols-2 gap-2">
