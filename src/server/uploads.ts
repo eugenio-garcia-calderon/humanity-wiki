@@ -52,6 +52,30 @@ const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 export const uploadsDir = () =>
   process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads');
 
+/**
+ * Guarda unos bytes ya en memoria (no un `req` — lo usa también la
+ * generación de imágenes por IA, que nunca pasa por el endpoint HTTP) y
+ * devuelve la misma forma que `POST /api/uploads`. Mismo almacén, mismas
+ * carpetas por mes, mismo nombre UUID: un origen único de verdad.
+ */
+export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; bytes: number; type: string; esImagen: boolean } {
+  const ext = TIPOS[tipo.toLowerCase()];
+  if (!ext) throw new Error(`Formato no admitido: ${tipo}`);
+  if (bytes.length > MAX_BYTES) throw new Error('El archivo supera los 10 MB.');
+  const raiz = uploadsDir();
+  const ahora = new Date();
+  const rel = path.join(String(ahora.getFullYear()), String(ahora.getMonth() + 1).padStart(2, '0'));
+  mkdirSync(path.join(raiz, rel), { recursive: true });
+  const nombre = `${randomUUID()}.${ext}`;
+  writeFileSync(path.join(raiz, rel, nombre), bytes);
+  return {
+    url: `/uploads/${rel.split(path.sep).join('/')}/${nombre}`,
+    bytes: bytes.length,
+    type: tipo,
+    esImagen: tipo in IMAGENES,
+  };
+}
+
 export function registerUploadRoutes(app: Express, _db: any) {
   const raiz = uploadsDir();
   mkdirSync(raiz, { recursive: true });
@@ -95,22 +119,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
         if (bytes.length > MAX_BYTES) {
           return res.status(413).json({ error: 'El archivo supera los 10 MB.' });
         }
-
-        // Carpetas por mes: miles de ficheros en un solo directorio hacen
-        // lento cualquier listado y las copias de seguridad.
-        const ahora = new Date();
-        const rel = path.join(String(ahora.getFullYear()), String(ahora.getMonth() + 1).padStart(2, '0'));
-        mkdirSync(path.join(raiz, rel), { recursive: true });
-
-        const nombre = `${randomUUID()}.${ext}`;
-        writeFileSync(path.join(raiz, rel, nombre), bytes);
-
-        res.json({
-          url: `/uploads/${rel.split(path.sep).join('/')}/${nombre}`,
-          bytes: bytes.length,
-          type: tipo,
-          esImagen: tipo in IMAGENES,
-        });
+        res.json(guardarArchivo(tipo, bytes));
       } catch (e: any) {
         console.error('upload error:', e);
         res.status(500).json({ error: e.message });

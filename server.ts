@@ -16,6 +16,7 @@ import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
 import { registerUploadRoutes } from "./src/server/uploads.js";
 import { registerRoadmapRoutes } from "./src/server/roadmap.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
+import { registerPuntosRoutes } from "./src/server/puntos.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -258,6 +259,7 @@ async function startServer() {
   // productos, apoyo a creadores y reembolsos. Coexiste con el flujo de
   // socios/membresía de abajo, que no se modifica.
   registerStripeRoutes(app, db);
+  registerPuntosRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {

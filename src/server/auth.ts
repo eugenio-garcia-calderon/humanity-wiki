@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
+import { registrarRegaloBienvenida } from './puntos.js';
 
 // ============================================================================
 // Módulo de autenticación — Fase 2
@@ -226,6 +227,10 @@ export function registerAuthRoutes(app: Express, db: any) {
         VALUES (${id}, ${normalizedEmail}, ${name || null}, ${name || null},
                 ${hashPassword(String(password))}, ${ROLE.USER}, true, ${id})
       `);
+      // El regalo de bienvenida: `users.puntos` ya nace en 100 por el valor
+      // por defecto de la columna (migración 0026) — no se vuelve a sumar
+      // aquí, solo se deja su justificante en el libro de movimientos.
+      await registrarRegaloBienvenida(db, id);
 
       await createSession(req, res, id);
       const result = await db.execute(sql`SELECT * FROM users WHERE id = ${id}`);
@@ -293,6 +298,7 @@ export function registerAuthRoutes(app: Express, db: any) {
           VALUES (${id}, ${email}, ${info.name || null}, ${info.name || null},
                   ${info.picture || null}, ${googleId}, ${ROLE.USER}, true, ${id})
         `);
+        await registrarRegaloBienvenida(db, id);
         row = (await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)).rows[0];
       }
 

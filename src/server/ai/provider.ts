@@ -76,12 +76,41 @@ const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
  * resto del panel de costes). La facturación al usuario añade un 50% de
  * comisión de la plataforma (ver AI_PLATFORM_FEE).
  */
-export const AI_MODELS: Record<string, { label: string; hint: string; input: number; output: number }> = {
+/** Id de catálogo de Nano Banana — lo que el usuario elige en el chat. Distinto
+ *  de `NANO_BANANA_MODEL` (más abajo), que es el id real que se llama en la
+ *  API de Google y puede cambiar vía la variable de entorno GEMINI_IMAGE_MODEL. */
+export const NANO_BANANA_CATALOG_MODEL = 'gemini-2.5-flash-image';
+
+export const AI_MODELS: Record<string, { label: string; hint: string; input: number; output: number; image?: boolean }> = {
   'claude-haiku-4-5': { label: 'Haiku 4.5',  hint: 'Rápido y económico',        input: 100,  output: 500 },
   'claude-sonnet-5':  { label: 'Sonnet 5',   hint: 'Equilibrado (recomendado)', input: 300,  output: 1500 },
   'claude-opus-5':    { label: 'Opus 5',     hint: 'Máxima capacidad',          input: 500,  output: 2500 },
   'claude-fable-5':   { label: 'Fable 5',    hint: 'El más potente (premium)',  input: 1000, output: 5000 },
+  // Google Gemini (2026-08-08, petición del usuario): «que se pueda conectar
+  // a diferentes modelos tanto de Anthropic como de Google». El prefijo
+  // `gemini-` es lo que enruta al proveedor correcto — ver `providerOfModel`.
+  // Precios de lista de Google AI, en céntimos de € por millón de tokens
+  // (misma aproximación 1$≈1€ que el resto de la tabla); conviene revisarlos
+  // cuando Google los cambie.
+  // Alias «-latest», no una versión fechada: Google bloquea los IDs con
+  // fecha para las claves nuevas ("no longer available to new users") y va
+  // rotando qué modelo concreto hay detrás — comprobado en vivo con
+  // GET /v1beta/models el 2026-08-08.
+  'gemini-flash-latest': { label: 'Gemini Flash', hint: 'Rápido, de Google',    input: 30,  output: 250 },
+  'gemini-pro-latest':   { label: 'Gemini Pro',   hint: 'Más capaz, de Google', input: 125, output: 1000 },
+  // Nano Banana (2026-08-08, petición del usuario): elegible en el mismo
+  // selector, pero genera una IMAGEN en vez de texto — `image: true` es lo
+  // que el frontend usa para no mostrarle un precio por millón de tokens que
+  // no le corresponde. El coste real por imagen no se factura todavía (ver
+  // `generarImagenNanoBanana`), así que input/output quedan a 0 en vez de
+  // inventar una cifra.
+  [NANO_BANANA_CATALOG_MODEL]: { label: 'Nano Banana', hint: 'Genera imágenes, de Google', input: 0, output: 0, image: true },
 };
+
+/** Qué proveedor sabe hablar con cada modelo del catálogo. */
+export function providerOfModel(model?: string): string {
+  return model?.startsWith('gemini-') ? 'gemini' : 'claude';
+}
 
 /** Comisión de la plataforma sobre el coste de créditos de Anthropic. */
 export const AI_PLATFORM_FEE = 0.5;
@@ -176,12 +205,131 @@ export class ClaudeProvider implements AIProvider {
 }
 
 // ----------------------------------------------------------------------------
+// Proveedor: Gemini (Google)
+// ----------------------------------------------------------------------------
+// API REST directa (`generateContent`), igual que Claude: nada de SDK nuevo
+// para una interfaz de 30 líneas. La única traducción real es de forma —
+// Gemini llama `model` a lo que aquí es `assistant`, y el system prompt va
+// en `systemInstruction`, no como primer mensaje.
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta';
+
+/** Bloques Claude → `parts` de Gemini (texto, imagen o PDF en base64). */
+const aPartesGemini = (content: string | AIContentBlock[]) => {
+  if (typeof content === 'string') return [{ text: content }];
+  return content.map(b => b.type === 'text'
+    ? { text: b.text }
+    : { inlineData: { mimeType: b.source.media_type, data: b.source.data } });
+};
+
+export class GeminiProvider implements AIProvider {
+  readonly name = 'gemini';
+
+  isReady(): boolean {
+    return !!process.env.GEMINI_API_KEY;
+  }
+
+  async complete(req: AICompletionRequest): Promise<AICompletionResult> {
+    if (!this.isReady()) {
+      throw new Error('GEMINI_API_KEY no está configurada. Consíguela en aistudio.google.com/apikey y añádela a .env.');
+    }
+    const started = Date.now();
+    const model = req.model && AI_MODELS[req.model] && providerOfModel(req.model) === 'gemini'
+      ? req.model : 'gemini-flash-latest';
+
+    const body: Record<string, any> = {
+      systemInstruction: { parts: [{ text: req.system }] },
+      contents: req.messages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: aPartesGemini(m.content),
+      })),
+      generationConfig: {
+        maxOutputTokens: req.maxTokens ?? 8192,
+        temperature: req.temperature ?? 0.2,
+      },
+    };
+    // Búsqueda real de Google, herramienta nativa igual que en Claude.
+    if (req.webSearch) body.tools = [{ googleSearch: {} }];
+
+    const res = await fetch(`${GEMINI_API}/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new Error(`Error de la API de Gemini (${res.status}): ${detail.slice(0, 300)}`);
+    }
+    const json: any = await res.json();
+    const parts: any[] = json.candidates?.[0]?.content?.parts || [];
+    const text = parts.filter(p => p.text).map(p => p.text).join('\n');
+
+    // Las citas de la búsqueda viajan en `groundingMetadata`, con forma
+    // distinta a la de Claude — se homogeneizan aquí, no fuera de este archivo.
+    const webSources: WebSource[] = [];
+    const chunks = json.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    for (const c of chunks) {
+      if (c.web?.uri && !webSources.some(w => w.url === c.web.uri)) {
+        webSources.push({ url: c.web.uri, title: c.web.title || c.web.uri });
+      }
+    }
+
+    const inputTokens = json.usageMetadata?.promptTokenCount ?? 0;
+    const outputTokens = json.usageMetadata?.candidatesTokenCount ?? 0;
+    const price = AI_MODELS[model] || AI_MODELS['gemini-flash-latest'];
+    return {
+      text, model,
+      inputTokens, outputTokens,
+      costCents: (inputTokens / 1_000_000) * price.input + (outputTokens / 1_000_000) * price.output,
+      durationMs: Date.now() - started,
+      webSources,
+    };
+  }
+}
+
+// ----------------------------------------------------------------------------
+// NANO BANANA — generación de imágenes con Gemini (2026-08-08, petición del
+// usuario). No encaja en la interfaz `AIProvider` (su salida es una imagen,
+// no texto), así que es una función aparte que usa la MISMA clave
+// `GEMINI_API_KEY` y el mismo endpoint `generateContent`, pidiendo una
+// modalidad de respuesta distinta.
+// ----------------------------------------------------------------------------
+/** El nombre real del modelo puede cambiar por parte de Google; queda en una
+ *  variable de entorno para poder corregirlo sin tocar código. */
+const NANO_BANANA_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+
+export interface ImagenGenerada { mimeType: string; base64: string }
+
+export async function generarImagenNanoBanana(prompt: string): Promise<ImagenGenerada> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY no está configurada. Consíguela en aistudio.google.com/apikey y añádela a .env.');
+  }
+  const res = await fetch(`${GEMINI_API}/models/${NANO_BANANA_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseModalities: ['IMAGE'] },
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Nano Banana no ha podido generar la imagen (${res.status}): ${detail.slice(0, 300)}`);
+  }
+  const json: any = await res.json();
+  const parts: any[] = json.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(p => p.inlineData?.data);
+  if (!imagePart) throw new Error('Nano Banana no ha devuelto ninguna imagen.');
+  return { mimeType: imagePart.inlineData.mimeType || 'image/png', base64: imagePart.inlineData.data };
+}
+
+// ----------------------------------------------------------------------------
 // Registro de proveedores
 // ----------------------------------------------------------------------------
-// Añadir OpenAI/Gemini/Mistral en el futuro es implementar `AIProvider` y
+// Añadir OpenAI/Mistral en el futuro es implementar `AIProvider` y
 // registrarlo aquí. Ningún otro archivo cambia.
 const providers: Record<string, AIProvider> = {
   claude: new ClaudeProvider(),
+  gemini: new GeminiProvider(),
 };
 
 export function getProvider(name?: string): AIProvider {

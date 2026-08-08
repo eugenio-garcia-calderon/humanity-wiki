@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { otorgarPuntos } from './puntos.js';
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -254,6 +255,37 @@ export function registerStripeRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // PUNTOS DE HUMANITY.WIKI — comprar más saldo (2026-08-08, petición del usuario)
+  // ==========================================================================
+  /** 100 puntos por 100 €: el paquete que pidió el usuario, de momento el único. */
+  const PAQUETE_PUNTOS = { puntos: 100, amount_cents: 10000 };
+
+  app.post('/api/stripe/checkout/puntos', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const stripe = getStripe();
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        ui_mode: 'embedded',
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: { name: `${PAQUETE_PUNTOS.puntos} Puntos de Humanity.wiki` },
+            unit_amount: PAQUETE_PUNTOS.amount_cents,
+          },
+          quantity: 1,
+        }],
+        metadata: { kind: 'puntos', buyer_id: req.user!.id, puntos: String(PAQUETE_PUNTOS.puntos) },
+        return_url: `${APP_URL}/vision?compra=completada&session_id={CHECKOUT_SESSION_ID}`,
+      });
+      res.json({ clientSecret: session.client_secret, sessionId: session.id });
+    } catch (e: any) {
+      console.error('checkout puntos error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // REEMBOLSOS
   // ==========================================================================
   app.post('/api/stripe/refunds', async (req: Request, res: Response) => {
@@ -388,6 +420,13 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             ON CONFLICT DO NOTHING
           `);
         }
+      } else if (kind === 'puntos') {
+        // El saldo solo se acredita AQUÍ, en la confirmación real del pago
+        // (no al crear la sesión de checkout) — así un pago abandonado o
+        // fallido nunca regala puntos.
+        await otorgarPuntos(db, session.metadata!.buyer_id, Number(session.metadata!.puntos) || 0, 'compra', {
+          stripeSessionId: session.id,
+        });
       } else if (kind === 'support') {
         const supportId = newId2('SUP');
         const recurring = session.metadata?.recurring === '1';

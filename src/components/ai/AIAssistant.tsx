@@ -51,10 +51,12 @@ interface Message {
   usage?: { model: string; totalCents: number };
   /** Pregunta con opciones (estilo Claude Code): botones 1/2/… + «Otro». */
   question?: { text: string; options: string[]; answered?: boolean };
+  /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
+  imageUrl?: string;
 }
 
-/** Modelo de Anthropic disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
-interface AIModelInfo { label: string; hint: string; input: number; output: number; }
+/** Modelo de Anthropic o Google disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
+interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; }
 
 interface PendingAttachment {
   name: string;
@@ -299,6 +301,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         actions: json.proposed_actions,
         question: json.question || undefined,
         usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
+        imageUrl: json.imageUrl || undefined,
       }]);
       applyUiEvents(json.ui_events);
 
@@ -399,6 +402,15 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
                   )}
                   {m.attachmentName && <br />}
                   {m.content}
+
+                  {/* Imagen generada por Nano Banana */}
+                  {m.imageUrl && (
+                    <img
+                      src={m.imageUrl}
+                      alt="Imagen generada por IA"
+                      className="mt-2 rounded-xl max-w-full border border-slate-200"
+                    />
+                  )}
 
                   {/* Origen de la información: plataforma vs internet */}
                   {m.sources && m.sources.length > 0 && (
@@ -597,7 +609,9 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
                           <span className="font-bold text-slate-700">{info.label}</span>
                           <span className="text-slate-400"> · {info.hint}</span>
                         </span>
-                        <span className="text-slate-400 shrink-0">${(info.input / 100).toFixed(2)}/${(info.output / 100).toFixed(2)} p. 1M</span>
+                        <span className="text-slate-400 shrink-0">
+                          {info.image ? 'por imagen' : `$${(info.input / 100).toFixed(2)}/$${(info.output / 100).toFixed(2)} p. 1M`}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -667,7 +681,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
                 onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 rows={2}
-                placeholder="Escribe tu pregunta…"
+                placeholder={selectedModel === 'gemini-2.5-flash-image' ? 'Describe la imagen que quieres generar…' : 'Escribe tu pregunta…'}
                 className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
               />
               <button
