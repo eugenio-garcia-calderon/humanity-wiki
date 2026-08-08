@@ -34,7 +34,9 @@ import { Proyectos, Proyecto } from './pages/Proyectos';
 import RetoVistas from './pages/RetoVistas';
 import IncendiosMapa from './pages/IncendiosMapa';
 import Login from './pages/Login';
+import Restablecer from './pages/Restablecer';
 import AdminDesign from './pages/AdminDesign';
+import AdminUsuarios from './pages/AdminUsuarios';
 import AboutRoot from './pages/about/AboutRoot';
 import AboutScoring from './pages/about/AboutScoring';
 import Contribuye from './pages/Contribuye';
@@ -103,7 +105,9 @@ export default function App() {
                 <Route path="organizaciones/:id" element={<OrganizationProfile />} />
             <Route path="mapa" element={<MapPage />} />
                 <Route path="login" element={<Login />} />
+                <Route path="restablecer" element={<Restablecer />} />
                 <Route path="admin/design" element={<AdminDesign />} />
+                <Route path="admin/usuarios" element={<AdminUsuarios />} />
                 <Route path="sobre-red-humana" element={<AboutRoot />} />
                 <Route path="sobre-red-humana/puntuacion-territorios" element={<AboutScoring />} />
                 <Route path="contribuye" element={<Contribuye />} />

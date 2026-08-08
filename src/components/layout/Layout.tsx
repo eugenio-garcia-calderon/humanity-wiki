@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -191,6 +191,15 @@ export default function Layout() {
 
           {user ? (
             <div className="flex items-center gap-1.5">
+              {user.isAdmin && (
+                <Link
+                  to="/admin/usuarios"
+                  className="p-1 text-slate-400 hover:text-emerald-600 transition-colors"
+                  title="Administrar usuarios"
+                >
+                  <Users2 className="w-3.5 h-3.5" />
+                </Link>
+              )}
               <Link
                 to={`/personas/${user.id}`}
                 className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200/60 hover:bg-emerald-100 transition-colors"
