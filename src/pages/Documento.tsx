@@ -3,9 +3,11 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
-  Download, Sparkles, Loader2, ArrowLeft, FileText,
+  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes,
+  Search, X, Wand2, PenLine, Smile,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import WindowContent from '../components/knowledge/WindowContent';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
 } from '../utils/bloques';
@@ -39,7 +41,10 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
   { tipo: 'tabla', label: 'Tabla', icon: Table2 },
+  { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
 ];
+
+const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '🏛️', '💡', '🎯', '🧭', '🤝', '⚖️', '🛠️', '🗺️', '❤️'];
 
 /** Marcado inline de markdown → nodos React (negrita, cursiva, código, enlaces). */
 function Inline({ texto }: { texto: string }) {
@@ -103,6 +108,19 @@ export default function Documento() {
   // en crudo (**negrita**); los demás se ven ya formateados aunque estés en
   // modo edición. Al pulsar uno, pasa a activo y se puede teclear.
   const [bloqueActivo, setBloqueActivo] = useState<string | null>(null);
+  // Fase 2 —
+  const [portada, setPortada] = useState<string | null>(null);
+  const [icono, setIcono] = useState<string | null>(null);
+  const [eligiendoIcono, setEligiendoIcono] = useState(false);
+  const [arrastrando, setArrastrando] = useState<string | null>(null);   // id del bloque en vuelo
+  const [sobreBloque, setSobreBloque] = useState<string | null>(null);   // id del bloque bajo el cursor
+  const [buscadorPub, setBuscadorPub] = useState<string | null>(null);   // id del bloque tras el que insertar ('' = al final)
+  const [busquedaPub, setBusquedaPub] = useState('');
+  const [resultadosPub, setResultadosPub] = useState<any[]>([]);
+  const [iaOcupada, setIaOcupada] = useState<string | null>(null);       // 'continuar' | id del bloque
+  const [menuDescargar, setMenuDescargar] = useState(false);
+  // Contenido real de las ventanas embebidas, cargado en vivo una sola vez.
+  const [ventanasEmbebidas, setVentanasEmbebidas] = useState<Record<string, any>>({});
 
   // Texto vivo de cada bloque (y celdas de tabla), fuera del estado de React.
   const textosRef = useRef<Record<string, string>>({});
@@ -110,6 +128,7 @@ export default function Documento() {
   const docId = useRef<string | null>(esNuevo ? null : id || null);
   const timerGuardado = useRef<any>(null);
   const finalRef = useRef<HTMLDivElement>(null);
+  const docRef = useRef<HTMLDivElement>(null);
 
   // --------------------------------------------------------------------------
   // Carga normal (documento existente)
@@ -123,6 +142,8 @@ export default function Documento() {
         setAutor(j.autor_nombre || null);
         setPublico(!!j.publico);
         setPuedoEditar(!!j.puedo_editar);
+        setPortada(j.config?.portada || null);
+        setIcono(j.config?.icono || null);
         let bs: Bloque[] = j.config?.bloques || [];
         // Documentos guardados antes del arreglo del título duplicado: si el
         // primer bloque es un H1 idéntico al título, se omite (y el próximo
@@ -209,25 +230,39 @@ export default function Documento() {
   // --------------------------------------------------------------------------
   // Guardado (estructura del estado + textos vivos de los refs)
   // --------------------------------------------------------------------------
+  // El temporizador del autoguardado dispara 1,2 s DESPUÉS del cambio: si
+  // leyera el estado capturado en el cierre, guardaría lo de ANTES (el título
+  // sin su última letra, la estructura sin el bloque recién insertado). Por
+  // eso lee SIEMPRE de estos refs, que un efecto mantiene al día en cuanto
+  // React aplica cada cambio de estado.
+  const bloquesRef = useRef<Bloque[]>([]);
+  const metaRef = useRef<{ titulo: string; portada: string | null; icono: string | null }>({ titulo: '', portada: null, icono: null });
+  useEffect(() => { bloquesRef.current = bloques; }, [bloques]);
+  useEffect(() => { metaRef.current = { titulo, portada, icono }; }, [titulo, portada, icono]);
+
   const serializar = useCallback((): Bloque[] =>
-    bloques.map(b => ({
+    bloquesRef.current.map(b => ({
       ...b,
       texto: b.texto !== undefined || textosRef.current[b.id] !== undefined
         ? (textosRef.current[b.id] ?? b.texto ?? '') : undefined,
       filas: b.tipo === 'tabla' ? (filasRef.current[b.id] ?? b.filas ?? [['', ''], ['', '']]) : undefined,
-    })), [bloques]);
+    })), []);
 
   const guardarAhora = useCallback(async (estructura?: Bloque[]) => {
     if (!docId.current || !puedoEditar) return;
     setGuardado('guardando');
     const bs = estructura ?? serializar();
+    const meta = metaRef.current;
     const r = await fetch(`/api/windows/${docId.current}`, {
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: titulo || 'Documento sin título', config: { bloques: bs } }),
+      body: JSON.stringify({
+        title: meta.titulo || 'Documento sin título',
+        config: { bloques: bs, portada: meta.portada || undefined, icono: meta.icono || undefined },
+      }),
     }).catch(() => null);
     setGuardado(r?.ok ? 'sí' : 'pendiente');
-  }, [puedoEditar, serializar, titulo]);
+  }, [puedoEditar, serializar]);
 
   const programarGuardado = useCallback(() => {
     setGuardado('pendiente');
@@ -241,6 +276,15 @@ export default function Documento() {
   // Operaciones de bloques
   // --------------------------------------------------------------------------
   const insertar = (tras: string | null, tipo: TipoBloque) => {
+    // El bloque de publicación no se inserta vacío: primero se elige QUÉ
+    // publicación embeber, en el buscador.
+    if (tipo === 'publicacion') {
+      setMenuAbierto(null);
+      setBuscadorPub(tras ?? '');
+      setBusquedaPub('');
+      setResultadosPub([]);
+      return;
+    }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
     if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla') textosRef.current[nuevo.id] = '';
@@ -266,6 +310,157 @@ export default function Documento() {
     });
     delete textosRef.current[bid];
     delete filasRef.current[bid];
+    programarGuardado();
+  };
+
+  // -- Fase 2: reordenar arrastrando desde el tirador ⋮⋮ ----------------------
+  const soltarSobre = (destino: string) => {
+    if (!arrastrando || arrastrando === destino) { setArrastrando(null); setSobreBloque(null); return; }
+    setBloques(bs => {
+      const desde = bs.findIndex(b => b.id === arrastrando);
+      const hasta = bs.findIndex(b => b.id === destino);
+      if (desde < 0 || hasta < 0) return bs;
+      const copia = [...bs];
+      const [movido] = copia.splice(desde, 1);
+      copia.splice(hasta, 0, movido);
+      return copia;
+    });
+    setArrastrando(null);
+    setSobreBloque(null);
+    programarGuardado();
+  };
+
+  // -- Fase 2: buscador de publicaciones para embeber -------------------------
+  useEffect(() => {
+    if (buscadorPub === null) return;
+    const t = setTimeout(() => {
+      const p = new URLSearchParams();
+      if (busquedaPub.trim()) p.set('q', busquedaPub.trim());
+      fetch(`/api/publicaciones?${p}`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(j => setResultadosPub(Array.isArray(j) ? j.filter((x: any) => x.id !== docId.current).slice(0, 12) : []))
+        .catch(() => setResultadosPub([]));
+    }, 250);
+    return () => clearTimeout(t);
+  }, [buscadorPub, busquedaPub]);
+
+  const embeber = (pub: any) => {
+    const rutaDe: Record<string, string> = { lienzo: '/grafos/', mapa: '/mapas/', proyecto: '/proyectos/' };
+    const nuevo: Bloque = {
+      id: nuevoIdBloque(),
+      tipo: 'publicacion',
+      pubTipo: pub.tipo,
+      entityId: pub.id,
+      pubKind: pub.kind || pub.tipo,
+      pubTitulo: pub.titulo || pub.title || 'Publicación',
+      pubAutor: pub.autor_nombre || undefined,
+      pubUrl: pub.tipo === 'ventana' && pub.kind === 'pagina' ? `/documentos/${pub.id}`
+        : rutaDe[pub.tipo] ? `${rutaDe[pub.tipo]}${pub.slug || pub.id}` : undefined,
+    };
+    setBloques(bs => {
+      if (buscadorPub === '') return [...bs, nuevo];
+      const i = bs.findIndex(b => b.id === buscadorPub);
+      const copia = [...bs];
+      copia.splice(i + 1, 0, nuevo);
+      return copia;
+    });
+    setBuscadorPub(null);
+    programarGuardado();
+  };
+
+  // Contenido real de una ventana embebida (tabla, imagen, gráfica…): se
+  // carga una vez y se enseña con el MISMO renderer del resto de la app.
+  useEffect(() => {
+    const pendientes = bloques.filter(b =>
+      b.tipo === 'publicacion' && b.pubTipo === 'ventana' && b.entityId && !(b.entityId in ventanasEmbebidas));
+    if (!pendientes.length) return;
+    for (const b of pendientes) {
+      setVentanasEmbebidas(v => ({ ...v, [b.entityId!]: null })); // marcada como en curso
+      fetch(`/api/windows/${b.entityId}`, { credentials: 'include' })
+        .then(r => (r.ok ? r.json() : null))
+        .then(j => setVentanasEmbebidas(v => ({ ...v, [b.entityId!]: j })))
+        .catch(() => {});
+    }
+  }, [bloques, ventanasEmbebidas]);
+
+  // -- Fase 2: IA dentro del documento ---------------------------------------
+  const iaMejorar = async (b: Bloque) => {
+    if (!docId.current) return;
+    setIaOcupada(b.id);
+    setMenuAbierto(null);
+    try {
+      const r = await fetch('/api/ai/documento-bloque', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ window_id: docId.current, accion: 'mejorar', texto: textosRef.current[b.id] ?? b.texto ?? '' }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      textosRef.current[b.id] = j.texto;
+      setBloques(bs => bs.map(x => x.id === b.id ? { ...x, texto: j.texto } : x));
+      await guardarAhora();
+    } catch (e: any) {
+      setError(e.message);
+      setTimeout(() => setError(null), 4000);
+    } finally {
+      setIaOcupada(null);
+    }
+  };
+
+  const iaContinuar = async () => {
+    if (!docId.current) return;
+    setIaOcupada('continuar');
+    try {
+      // Lo escrito hasta ahora viaja guardado antes de pedir la continuación.
+      await guardarAhora();
+      const r = await fetch('/api/ai/documento-bloque', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ window_id: docId.current, accion: 'continuar' }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      const nuevos: Bloque[] = j.bloques || [];
+      for (const n of nuevos) if (n.texto !== undefined) textosRef.current[n.id] = n.texto;
+      setBloques(bs => [...bs, ...nuevos]);
+      programarGuardado();
+      setTimeout(() => finalRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (e: any) {
+      setError(e.message);
+      setTimeout(() => setError(null), 4000);
+    } finally {
+      setIaOcupada(null);
+    }
+  };
+
+  // -- Fase 2: exportar a Word, PDF y PNG ------------------------------------
+  const descargarPng = async () => {
+    setMenuDescargar(false);
+    if (!docRef.current) return;
+    // html2canvas solo se descarga cuando alguien exporta a imagen: no debe
+    // pagarlo quien nunca lo usa.
+    const { default: html2canvas } = await import('html2canvas');
+    const canvas = await html2canvas(docRef.current, { backgroundColor: '#ffffff', scale: 2, useCORS: true });
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${titulo.replace(/[^a-zA-Z0-9áéíóúñ ]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'documento'}.png`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  };
+
+  const subirPortada = async (archivo: File) => {
+    const bytes = await archivo.arrayBuffer();
+    const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes,
+    });
+    const j = await r.json();
+    if (!r.ok) { setError(j.error || 'No se ha podido subir la portada.'); return; }
+    setPortada(j.url);
     programarGuardado();
   };
 
@@ -406,6 +601,38 @@ export default function Documento() {
         );
       }
 
+      // Publicación embebida (Fase 2): una ventana enseña su contenido REAL
+      // con el mismo renderer que el resto de la app; un lienzo, mapa o
+      // proyecto se enseña como tarjeta que lleva a su página.
+      if (b.tipo === 'publicacion') {
+        const ventana = b.pubTipo === 'ventana' ? ventanasEmbebidas[b.entityId || ''] : undefined;
+        const etiqueta = ({ ventana: b.pubKind || 'ventana', lienzo: 'lienzo', mapa: 'mapa', proyecto: 'proyecto', muro: 'muro' } as any)[b.pubTipo || ''] || 'publicación';
+        const interior = (
+          <div className="border border-emerald-200 bg-emerald-50/30 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-emerald-100">
+              <Boxes className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-700 shrink-0">{etiqueta}</span>
+              <span className="text-xs font-black text-slate-800 truncate">{b.pubTitulo}</span>
+              {b.pubAutor && <span className="text-[10px] text-slate-400 truncate">· {b.pubAutor}</span>}
+            </div>
+            {b.pubTipo === 'ventana' ? (
+              <div className="px-3.5 py-3 bg-white">
+                {!ventana
+                  ? <p className="text-xs text-slate-400">Cargando…</p>
+                  : <WindowContent kind={ventana.kind} config={ventana.config || {}} variant="node" />}
+              </div>
+            ) : (
+              <div className="px-3.5 py-2.5 bg-white text-xs text-slate-500">
+                Una publicación de humanity.wiki — púlsala para explorarla entera.
+              </div>
+            )}
+          </div>
+        );
+        return b.pubUrl
+          ? <Link to={b.pubUrl} className="block hover:-translate-y-0.5 transition-transform">{interior}</Link>
+          : interior;
+      }
+
       // Estilo Typora: SOLO el bloque activo enseña el marcado en crudo para
       // teclear; los demás se ven formateados, y un clic los activa.
       const esActivo = editable && bloqueActivo === b.id;
@@ -461,10 +688,19 @@ export default function Documento() {
       return <div {...comun}>{contenido}</div>;
     })();
 
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion'].includes(b.tipo);
+
     return (
-      <div key={b.id} className="group/bloque relative">
+      <div
+        key={b.id}
+        className={cn('group/bloque relative rounded transition-shadow',
+          sobreBloque === b.id && arrastrando && 'shadow-[0_-2px_0_0_theme(colors.emerald.400)]',
+          arrastrando === b.id && 'opacity-40')}
+        onDragOver={editable ? e => { if (arrastrando) { e.preventDefault(); setSobreBloque(b.id); } } : undefined}
+        onDrop={editable ? () => soltarSobre(b.id) : undefined}
+      >
         {editable && (
-          <div className="absolute -left-9 top-0.5 flex items-center opacity-0 group-hover/bloque:opacity-100 transition-opacity">
+          <div className="absolute -left-14 top-0.5 flex items-center opacity-0 group-hover/bloque:opacity-100 transition-opacity">
             <button
               onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
               title="Añadir un bloque debajo"
@@ -472,6 +708,22 @@ export default function Documento() {
             >
               <Plus className="w-4 h-4" />
             </button>
+            <span
+              draggable
+              onDragStart={e => { setArrastrando(b.id); e.dataTransfer.effectAllowed = 'move'; }}
+              onDragEnd={() => { setArrastrando(null); setSobreBloque(null); }}
+              title="Arrastrar para reordenar"
+              className="p-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing"
+            >
+              <GripVertical className="w-4 h-4" />
+            </span>
+          </div>
+        )}
+        {iaOcupada === b.id && (
+          <div className="absolute inset-0 z-20 bg-white/70 rounded flex items-center justify-center">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black text-indigo-600">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> La IA está reescribiendo…
+            </span>
           </div>
         )}
         {cuerpo}
@@ -484,6 +736,12 @@ export default function Documento() {
                 <t.icon className="w-3.5 h-3.5 text-slate-400" /> {t.label}
               </button>
             ))}
+            {esBloqueTexto && (
+              <button onClick={() => iaMejorar(b)}
+                className="col-span-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 text-left transition-colors">
+                <Wand2 className="w-3.5 h-3.5" /> Mejorar este texto con IA
+              </button>
+            )}
             <button onClick={() => { eliminar(b.id); setMenuAbierto(null); }}
               className="col-span-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 text-left transition-colors">
               <Trash2 className="w-3.5 h-3.5" /> Eliminar este bloque
@@ -496,11 +754,11 @@ export default function Documento() {
 
   // --------------------------------------------------------------------------
   useEffect(() => {
-    if (!menuAbierto) return;
-    const cerrar = () => setMenuAbierto(null);
+    if (!menuAbierto && !menuDescargar) return;
+    const cerrar = () => { setMenuAbierto(null); setMenuDescargar(false); };
     window.addEventListener('click', cerrar);
     return () => window.removeEventListener('click', cerrar);
-  }, [menuAbierto]);
+  }, [menuAbierto, menuDescargar]);
 
   if (cargando) return <p className="text-sm text-slate-400 text-center py-24">Abriendo el documento…</p>;
 
@@ -546,11 +804,87 @@ export default function Documento() {
               </button>
             </>
           )}
-          <button onClick={descargarMarkdown} title="Descargar como Markdown"
-            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">
-            <Download className="w-4 h-4" />
-          </button>
+          <div className="relative">
+            <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title="Descargar"
+              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">
+              <Download className="w-4 h-4" />
+            </button>
+            {menuDescargar && (
+              <div className="absolute right-0 top-full z-40 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 w-44"
+                onClick={e => e.stopPropagation()}>
+                {[
+                  { label: 'Markdown (.md)', accion: () => { setMenuDescargar(false); descargarMarkdown(); } },
+                  { label: 'Word (.docx)', accion: () => { setMenuDescargar(false); window.open(`/api/documentos/${docId.current}/docx`, '_blank'); } },
+                  { label: 'PDF (.pdf)', accion: () => { setMenuDescargar(false); window.open(`/api/documentos/${docId.current}/pdf`, '_blank'); } },
+                  { label: 'Imagen (.png)', accion: descargarPng },
+                ].map(o => (
+                  <button key={o.label} onClick={o.accion}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors">
+                    <Download className="w-3 h-3 text-slate-400" /> {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
+        <div ref={docRef} className="bg-white">
+        {/* Portada e icono, estilo Notion (Fase 2) */}
+        {portada && (
+          <div className="group/portada relative -mx-6 sm:-mx-12 mb-6">
+            <img src={portada} alt="" className="w-full h-44 sm:h-56 object-cover rounded-2xl" />
+            {editable && (
+              <button
+                onClick={() => { setPortada(null); programarGuardado(); }}
+                className="absolute top-2 right-2 px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600 opacity-0 group-hover/portada:opacity-100 transition-opacity"
+              >
+                Quitar portada
+              </button>
+            )}
+          </div>
+        )}
+        {icono && (
+          <div className="relative inline-block">
+            <button
+              onClick={() => editable && setEligiendoIcono(v => !v)}
+              className={cn('text-5xl leading-none mb-2', editable && 'hover:scale-110 transition-transform')}
+              title={editable ? 'Cambiar icono' : undefined}
+            >
+              {icono}
+            </button>
+          </div>
+        )}
+        {editable && (eligiendoIcono || !icono || !portada) && (
+          <div className="flex items-center gap-3 mb-2">
+            {(eligiendoIcono || !icono) && (
+              <div className="flex items-center gap-1 flex-wrap">
+                {!icono && !eligiendoIcono && (
+                  <button onClick={() => setEligiendoIcono(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
+                    <Smile className="w-3.5 h-3.5" /> Añadir icono
+                  </button>
+                )}
+                {eligiendoIcono && (
+                  <>
+                    {EMOJIS_ICONO.map(e => (
+                      <button key={e} onClick={() => { setIcono(e); setEligiendoIcono(false); programarGuardado(); }}
+                        className="text-lg hover:scale-125 transition-transform">{e}</button>
+                    ))}
+                    <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
+                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 ml-1">Quitar</button>
+                  </>
+                )}
+              </div>
+            )}
+            {!portada && !eligiendoIcono && (
+              <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
+                <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
+              </label>
+            )}
+          </div>
+        )}
 
         {/* Título del documento */}
         {editable ? (
@@ -569,6 +903,7 @@ export default function Documento() {
         <div className={cn('space-y-2', editable && 'pl-0')}>
           {bloques.map((b, i) => renderBloque(b, i))}
         </div>
+        </div>
 
         {generando && (
           <p className="inline-flex items-center gap-2 mt-6 text-xs font-bold text-slate-400">
@@ -577,16 +912,69 @@ export default function Documento() {
         )}
         <div ref={finalRef} />
 
-        {/* Añadir al final, siempre visible en edición */}
+        {/* Añadir al final + continuar con IA, siempre visibles en edición */}
         {editable && (
-          <button
-            onClick={e => { e.stopPropagation(); setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
-            className="inline-flex items-center gap-1.5 mt-6 text-xs font-bold text-slate-300 hover:text-emerald-600 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" /> Añadir un bloque
-          </button>
+          <div className="flex items-center gap-4 mt-6">
+            <button
+              onClick={e => { e.stopPropagation(); setMenuAbierto(bloques[bloques.length - 1]?.id || null); }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-emerald-600 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Añadir un bloque
+            </button>
+            <button
+              onClick={iaContinuar}
+              disabled={iaOcupada === 'continuar'}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-600 disabled:opacity-60 transition-colors"
+            >
+              {iaOcupada === 'continuar'
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> La IA está escribiendo…</>
+                : <><PenLine className="w-3.5 h-3.5" /> Continuar con IA</>}
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Buscador de publicaciones para embeber (Fase 2) */}
+      {buscadorPub !== null && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-start justify-center pt-24 px-5"
+          onClick={() => setBuscadorPub(null)}>
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
+              <input
+                autoFocus value={busquedaPub} onChange={e => setBusquedaPub(e.target.value)}
+                placeholder="Busca la publicación que quieres insertar…"
+                className="flex-1 text-sm outline-none"
+              />
+              <button onClick={() => setBuscadorPub(null)} className="p-1 text-slate-400 hover:text-slate-700">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="max-h-80 overflow-y-auto p-1.5">
+              {!resultadosPub.length ? (
+                <p className="text-xs text-slate-400 text-center py-8">
+                  {busquedaPub ? 'Nada con ese nombre.' : 'Escribe para buscar entre las publicaciones.'}
+                </p>
+              ) : resultadosPub.map(p => (
+                <button
+                  key={`${p.tipo}-${p.id}`}
+                  onClick={() => embeber(p)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-emerald-50 text-left transition-colors"
+                >
+                  <Boxes className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xs font-black text-slate-800 truncate">{p.titulo || p.title}</span>
+                    <span className="block text-[10px] text-slate-400 truncate">
+                      {(p.kind || p.tipo)}{p.autor_nombre ? ` · ${p.autor_nombre}` : ''}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
