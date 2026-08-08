@@ -1091,14 +1091,6 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const descripcion = typeof d.descripcion === 'string' ? d.descripcion : null;
       const yo = req.user!.id;
 
-      // El lienzo personal es el espacio privado de cada persona: publicarlo
-      // entero de golpe expondría todo lo que tiene dentro sin querer.
-      if (tipo === 'lienzo' && publico === true && fila.personal === '1') {
-        return res.status(400).json({
-          error: 'Tu lienzo personal no se publica entero. Publica desde él las piezas que quieras compartir.',
-        });
-      }
-
       if (estado) await guardarMeta(tipo, id, yo, { estado });
 
       if (tipo === 'ventana') {

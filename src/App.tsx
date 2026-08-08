@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import TerritoryProfile from './pages/TerritoryProfile';
 import ChallengeProfile from './pages/ChallengeProfile';
@@ -67,7 +67,10 @@ export default function App() {
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
                 <Route path="vision" element={<Vision />} />
                 <Route path="explorar" element={<Explorar />} />
-                <Route path="mis-publicaciones" element={<Explorar mias />} />
+                {/* Atajo, no una página aparte: si fuera <Explorar mias /> el cambio
+                    de ruta desmontaría el componente y perdería la carpeta abierta
+                    al tocar el interruptor De la Humanidad/Mías (2026-08-08). */}
+                <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />

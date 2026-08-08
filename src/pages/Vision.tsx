@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Compass, Layers, Map as MapIcon, Table2, Users, Store, Palette, Sparkles,
   Shield, Scale, FolderKanban, ArrowUpRight, Pencil, Check, X, Coins,
-  Sparkle, TrendingUp, ShoppingBag,
+  Sparkle, TrendingUp, ShoppingBag, Server, Cpu, RefreshCw, Receipt,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -48,9 +48,6 @@ const ICONOS: Record<string, any> = {
 const DEFECTOS: Record<string, string> = {
   titular: 'Agregar el conocimiento de la humanidad\ny repartir lo que genere entre quienes lo crean',
   parrafo_1: 'Hoy el saber está partido: los datos en un sitio, los mapas en otro, las conversaciones en un tercero, y lo que cada persona sabe encerrado en su cabeza o en su Notion. humanity.wiki junta las tres formas de mirar — el dato en crudo, el conocimiento conectado y el conocimiento situado en el territorio — sobre una sola base.',
-  parrafo_2: 'La plataforma tiene dos mitades que se necesitan. El común, donde se agrega lo que aporta todo el mundo y nada se duplica: si alguien ya lo escribió, se conecta. Y tu espacio propio, un lienzo infinito donde construyes lo tuyo y decides qué compartes.',
-  parrafo_3: 'La inteligencia natural y la artificial trabajan aquí del mismo lado: la IA busca, contrasta, señala contradicciones y responde comentarios, pero todo lo que escribe queda marcado y pendiente de revisión humana. Y quien crea conocimiento que la gente lee, cobra por ello.',
-  parrafo_estrategia: 'La estrategia de desarrollo de humanity.wiki es agregar todas las herramientas y funcionalidades relacionadas con la generación y el orden del conocimiento en un solo sitio: una herramienta todo en uno. Así el conocimiento se unifica en una base de datos universal, se puede aprender de lo que ya ha escrito otra persona, reciclar y reutilizar su contenido para el proyecto propio, y mostrar la complejidad de un proyecto o de un conocimiento de formas distintas — un mapa, un grafo, una tabla — sin cambiar nunca de aplicación.',
   economia_titular: 'Puntos de Humanity.wiki',
   economia_parrafo_1: 'Todo el mundo empieza con 100 puntos al registrarse. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
   economia_parrafo_2: 'Hoy son un saldo interno, sin nada por detrás salvo la base de datos de la plataforma. El plan es que, más adelante, se conviertan en un token real sobre blockchain — pero eso es el destino, no el punto de partida: primero funcionan aquí dentro, con las mismas reglas que tendrán después.',
@@ -211,13 +208,141 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
   );
 }
 
+const eur = (n: number) =>
+  n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
+
+/** La pestaña Gasto: lo que cuesta mantener la plataforma, con datos reales. */
+function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
+  const [gasto, setGasto] = useState<any>(null);
+  const [cargando, setCargando] = useState(true);
+
+  const cargar = (refrescar = false) => {
+    setCargando(true);
+    fetch(`/api/gasto${refrescar ? '?refrescar=1' : ''}`, { credentials: 'include' })
+      .then(r => r.json()).then(setGasto).catch(() => setGasto(null))
+      .finally(() => setCargando(false));
+  };
+  useEffect(() => { cargar(); }, []);
+
+  if (cargando && !gasto) return <p className="text-sm text-slate-400 py-16 text-center">Consultando el gasto real…</p>;
+  if (!gasto) return <p className="text-sm text-slate-400 py-16 text-center">No se ha podido cargar el gasto.</p>;
+
+  const srv = gasto.servidores;
+  const oficial = gasto.ia.oficial_anthropic;
+  const interno = gasto.ia.interno;
+  const iaMes = oficial.estado === 'ok'
+    ? oficial.mes_actual_eur + interno.mes_actual.google_eur
+    : interno.mes_actual.total_eur;
+  const totalMes = (srv.estado === 'ok' ? srv.total_mes_eur : 0) + iaMes;
+
+  return (
+    <div className="max-w-3xl">
+      <div className="flex items-center gap-3 flex-wrap">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Gasto de la plataforma</h1>
+        <span className="text-[11px] text-slate-400 font-bold ml-auto inline-flex items-center gap-1.5">
+          Actualizado {new Date(gasto.actualizado).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          · cada {gasto.cache_horas} h
+          {esAdmin && (
+            <button onClick={() => cargar(true)} title="Actualizar ahora"
+              className="p-1 text-slate-400 hover:text-emerald-600 rounded-md hover:bg-slate-50 transition-colors">
+              <RefreshCw className={cn('w-3.5 h-3.5', cargando && 'animate-spin')} />
+            </button>
+          )}
+        </span>
+      </div>
+      <p className="text-sm text-slate-500 mt-2">
+        Lo que cuesta mantener humanity.wiki en marcha, con datos reales de cada proveedor. Transparencia total: este es el dinero que sale.
+      </p>
+
+      <div className="mt-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6">
+        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 inline-flex items-center gap-1.5">
+          <Receipt className="w-3.5 h-3.5" /> Este mes
+        </p>
+        <p className="text-4xl font-black mt-1.5">{eur(totalMes)}</p>
+        <p className="text-xs text-slate-400 mt-1">Servidores + modelos de IA</p>
+      </div>
+
+      <div className="mt-4 grid sm:grid-cols-2 gap-4">
+        {/* ------------------------- Servidores ------------------------- */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-5">
+          <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 inline-flex items-center gap-1.5">
+            <Server className="w-3.5 h-3.5" /> Servidores · Hetzner
+          </p>
+          {srv.estado === 'ok' ? (
+            <>
+              <p className="text-2xl font-black text-slate-900 mt-1.5">{eur(srv.total_mes_eur)}<span className="text-sm font-bold text-slate-400"> /mes</span></p>
+              <div className="mt-3 space-y-1.5">
+                {srv.servidores.map((s: any) => (
+                  <div key={s.nombre} className="flex items-center text-xs">
+                    <span className="text-slate-600 font-bold truncate">{s.nombre}</span>
+                    <span className="text-slate-400 ml-1.5 shrink-0">({s.tipo})</span>
+                    <span className="text-slate-900 font-black ml-auto shrink-0">{eur(s.eur_mes)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+              {esAdmin ? srv.mensaje : 'Todavía sin conectar con el proveedor.'}
+            </p>
+          )}
+        </div>
+
+        {/* ------------------------ Modelos de IA ----------------------- */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-5">
+          <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 inline-flex items-center gap-1.5">
+            <Cpu className="w-3.5 h-3.5" /> Modelos de IA
+          </p>
+          <p className="text-2xl font-black text-slate-900 mt-1.5">{eur(iaMes)}<span className="text-sm font-bold text-slate-400"> este mes</span></p>
+          <div className="mt-3 space-y-1.5 text-xs">
+            <div className="flex items-center">
+              <span className="text-slate-600 font-bold">Anthropic (Claude)</span>
+              <span className="text-slate-900 font-black ml-auto">
+                {eur(oficial.estado === 'ok' ? oficial.mes_actual_eur : interno.mes_actual.anthropic_eur)}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-slate-600 font-bold">Google (Gemini)</span>
+              <span className="text-slate-900 font-black ml-auto">{eur(interno.mes_actual.google_eur)}</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-3 leading-relaxed">
+            {oficial.estado === 'ok'
+              ? 'Anthropic: dato oficial de facturación. Google: estimación por el registro interno de llamadas.'
+              : 'Estimación por el registro interno de cada llamada a la IA.'}
+            {esAdmin && oficial.estado !== 'ok' && ` ${oficial.mensaje}`}
+          </p>
+        </div>
+      </div>
+
+      {interno.historial.length > 1 && (
+        <div className="mt-4 bg-white border border-slate-200 rounded-3xl p-5">
+          <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 mb-3">Gasto en IA por mes (registro interno)</p>
+          <div className="space-y-1.5">
+            {interno.historial.map((h: any) => (
+              <div key={h.mes} className="flex items-center gap-3 text-xs">
+                <span className="text-slate-500 font-bold w-16 shrink-0">{h.mes}</span>
+                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-full"
+                    style={{ width: `${Math.min(100, (h.total_eur / Math.max(...interno.historial.map((x: any) => x.total_eur), 0.01)) * 100)}%` }} />
+                </div>
+                <span className="text-slate-900 font-black w-20 text-right shrink-0">{eur(h.total_eur)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Vision() {
   const { user } = useAuth();
   const esAdmin = !!user?.isAdmin;
   const [items, setItems] = useState<ItemTablero[]>([]);
   const [cargando, setCargando] = useState(true);
   const [textos, setTextos] = useState<Record<string, string>>({});
-  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia'>('hoja_de_ruta');
+  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>('hoja_de_ruta');
 
   const cargar = () => fetch('/api/roadmap')
     .then(r => r.json())
@@ -256,11 +381,11 @@ export default function Vision() {
             esAdmin={esAdmin} onGuardado={guardadoTexto}
             as="h1" className="text-3xl sm:text-4xl font-black tracking-tight leading-[1.1] text-slate-900"
           />
+          {/* Un único bloque editable (2026-08-08, petición del usuario: «deja
+              solo el primero») — admite varios párrafos separados por líneas
+              en blanco dentro del mismo texto. */}
           <div className="mt-5 space-y-3 text-sm text-slate-600 leading-relaxed">
             {texto('parrafo_1')}
-            {texto('parrafo_2')}
-            {texto('parrafo_3')}
-            {texto('parrafo_estrategia')}
           </div>
 
           <div className="mt-7 flex items-center gap-4">
@@ -297,11 +422,20 @@ export default function Vision() {
           >
             <Coins className="w-3.5 h-3.5" /> Economía
           </button>
+          <button
+            onClick={() => setTab('gasto')}
+            className={cn('inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-black border-b-2 -mb-px transition-colors',
+              tab === 'gasto' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-700')}
+          >
+            <Receipt className="w-3.5 h-3.5" /> Gasto
+          </button>
         </div>
 
         <div className="mt-7">
           {tab === 'economia' ? (
             <PestanaEconomia textos={textos} esAdmin={esAdmin} guardadoTexto={guardadoTexto} />
+          ) : tab === 'gasto' ? (
+            <PestanaGasto esAdmin={esAdmin} />
           ) : cargando ? (
             <p className="text-sm text-slate-400 text-center py-24">Cargando el tablero…</p>
           ) : (

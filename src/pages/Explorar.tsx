@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
@@ -107,17 +107,18 @@ function formatosDescarga(pub: Publicacion): { id: string; label: string; accion
   return salida;
 }
 
-export default function Explorar({ mias = false }: { mias?: boolean }) {
+export default function Explorar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // -- El interruptor grande: de quién son las publicaciones que se ven --
-  const [modo, setModo] = useState<'humanidad' | 'mias'>(mias ? 'mias' : 'humanidad');
-  useEffect(() => { setModo(mias ? 'mias' : 'humanidad'); }, [mias]);
+  // Vive en la query string de esta MISMA ruta (`/mis-publicaciones` ahora
+  // solo redirige aquí con `?mias=1`) para que cambiar de modo no desmonte
+  // el componente ni pierda la carpeta que se estaba explorando (2026-08-08).
+  const modo: 'humanidad' | 'mias' = searchParams.get('mias') === '1' ? 'mias' : 'humanidad';
   const cambiarModo = (m: 'humanidad' | 'mias') => {
-    setModo(m);
-    setCarpetaActiva(null);
-    navigate(m === 'mias' ? '/mis-publicaciones' : '/explorar');
+    setSearchParams(m === 'mias' ? { mias: '1' } : {}, { replace: true });
   };
 
   const [items, setItems] = useState<Publicacion[]>([]);
@@ -412,61 +413,55 @@ export default function Explorar({ mias = false }: { mias?: boolean }) {
       {/* Contenido principal                                                */}
       {/* ------------------------------------------------------------------ */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1500px] mx-auto px-5 sm:px-8 pt-9 pb-24">
+        <div className="max-w-[1500px] mx-auto px-5 sm:px-8 pt-5 pb-24">
 
-          {/* El interruptor grande y centrado: de la Humanidad, o mías. */}
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="inline-flex p-1 bg-slate-100 rounded-2xl">
+          {/* Barra compacta: modo, carpeta, papelera y contador en una sola línea
+              (2026-08-08 — antes eran tres bloques apilados que empujaban las
+              publicaciones muy abajo en la pantalla). */}
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <div className="inline-flex p-0.5 bg-slate-100 rounded-lg shrink-0">
               <button
                 onClick={() => cambiarModo('humanidad')}
-                className={cn('inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-xl text-sm font-black transition-all',
-                  modo === 'humanidad' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800')}
+                className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all',
+                  modo === 'humanidad' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}
               >
-                <Globe2 className="w-4 h-4" /> De la Humanidad
+                <Globe2 className="w-3.5 h-3.5" /> Humanidad
               </button>
               <button
                 onClick={() => cambiarModo('mias')}
-                className={cn('inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-xl text-sm font-black transition-all',
-                  modo === 'mias' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800')}
+                className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all',
+                  modo === 'mias' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}
               >
-                <Users2 className="w-4 h-4" /> Mías
+                <Users2 className="w-3.5 h-3.5" /> Mías
               </button>
             </div>
-            <p className="text-sm text-slate-500 mt-3 max-w-md">
-              {modo === 'mias'
-                ? 'Todo lo que has publicado. Pulsa una tarjeta para abrirla y editarla.'
-                : 'Todo lo que ha publicado todo el mundo en humanity.wiki.'}
+
+            {carpetaActiva && (
+              <button onClick={() => setCarpetaActiva(null)}
+                className="inline-flex items-center gap-1.5 shrink-0 pl-1.5 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors">
+                <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: carpetaActiva.color || colorDe(carpetaActiva.id) }} />
+                {carpetaActiva.nombre}
+              </button>
+            )}
+
+            {user && !carpetaActiva && (
+              <button
+                onClick={() => setVerPapelera(v => !v)}
+                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors shrink-0',
+                  verPapelera ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+              >
+                <Trash className="w-3.5 h-3.5" />
+                {papelera.length ? `Papelera · ${papelera.length}` : 'Papelera'}
+              </button>
+            )}
+
+            <p className="text-[11px] font-bold text-slate-400 shrink-0 ml-auto">
+              {verPapelera && !carpetaActiva ? `${papelera.length} en la papelera`
+                : carpetaActiva ? `${visibles.length} dentro`
+                : `${visibles.length} publicaciones`}
             </p>
           </div>
-
-          {carpetaActiva && (
-            <div className="flex items-center gap-3 mb-4">
-              <button onClick={() => setCarpetaActiva(null)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
-                <ArrowLeft className="w-3.5 h-3.5" /> Todas
-              </button>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: carpetaActiva.color || colorDe(carpetaActiva.id) }} />
-              <h2 className="text-sm font-black text-slate-900">{carpetaActiva.nombre}</h2>
-              <span className="text-xs text-slate-400 ml-auto">{visibles.length} dentro</span>
-            </div>
-          )}
-          {!carpetaActiva && (
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-              {user && (
-                <button
-                  onClick={() => setVerPapelera(v => !v)}
-                  className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors',
-                    verPapelera ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                  Papelera{papelera.length ? ` · ${papelera.length}` : ''}
-                </button>
-              )}
-              <p className="text-xs font-bold text-slate-400 ml-auto">
-                {verPapelera ? `${papelera.length} en la papelera` : `${visibles.length} publicaciones`}
-              </p>
-            </div>
-          )}
 
           {verPapelera && !carpetaActiva ? (
             <div className="mt-5">
@@ -506,26 +501,30 @@ export default function Explorar({ mias = false }: { mias?: boolean }) {
             <>
               {/* Buscador y tipos: se quedan también dentro de una carpeta —
                   el tipo filtra su contenido igual que el de fuera, y el
-                  buscador filtra por título lo que ya se ha cargado. */}
-              <div className="flex flex-wrap items-center gap-2 sticky top-0 bg-white/95 backdrop-blur z-20 py-3 -mx-2 px-2 rounded-2xl">
-                <div className="relative flex-1 min-w-[240px] max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  buscador filtra por título lo que ya se ha cargado. Una sola
+                  fila compacta y pegajosa; los tipos se desplazan en horizontal
+                  en vez de envolver en varias líneas (2026-08-08). */}
+              <div className="sticky top-0 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
+                <div className="relative flex-1 min-w-[140px] max-w-xs shrink-0">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                   <input
                     value={busqueda} onChange={e => setBusqueda(e.target.value)}
-                    placeholder="Buscar entre las publicaciones…"
-                    className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
+                    placeholder="Buscar…"
+                    className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
                   />
                 </div>
-                {TIPOS.map(t => (
-                  <button
-                    key={t.label}
-                    onClick={() => setTipo(t.label)}
-                    className={cn('px-3 py-1.5 rounded-full text-xs font-bold border transition-colors',
-                      tipo === t.label ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+                <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:thin] pb-0.5">
+                  {TIPOS.map(t => (
+                    <button
+                      key={t.label}
+                      onClick={() => setTipo(t.label)}
+                      className={cn('shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors',
+                        tipo === t.label ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {cargando ? (
