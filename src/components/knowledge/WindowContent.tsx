@@ -577,6 +577,27 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
       );
     }
 
+    // Presentación (2026-08-08): miniatura del primer frame + recuento.
+    case 'presentacion': {
+      const diapos: any[] = Array.isArray(config.diapositivas) ? config.diapositivas : [];
+      const primera = diapos[0];
+      return (
+        <div className="space-y-1.5">
+          <div className="relative w-full rounded-lg overflow-hidden border border-slate-100"
+            style={{ paddingBottom: '56.25%', backgroundColor: primera?.fondo || '#ffffff' }}>
+            <div className="absolute inset-0 p-3 flex flex-col items-center justify-center text-center">
+              {(primera?.elementos || []).filter((e: any) => e.tipo === 'texto').slice(0, 2).map((e: any) => (
+                <p key={e.id} className={cn2('leading-snug', e.negrita ? 'text-sm font-black text-slate-800' : 'text-[10px] text-slate-500')}>
+                  {e.texto}
+                </p>
+              ))}
+            </div>
+          </div>
+          <p className="text-[10px] font-bold text-slate-400">{diapos.length} {diapos.length === 1 ? 'frame' : 'frames'}</p>
+        </div>
+      );
+    }
+
     case 'texto':
     default:
       return (

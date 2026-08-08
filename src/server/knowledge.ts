@@ -31,6 +31,8 @@ const WINDOW_KINDS = new Set([
   'tarea', 'tabla', 'proyecto',
   // Documentos estilo Notion (2026-08-08): config.bloques es el contenido.
   'pagina',
+  // Presentaciones estilo PowerPoint (2026-08-08): config.diapositivas.
+  'presentacion',
 ]);
 
 /** Días que algo permanece en la papelera antes de borrarse de verdad. */
