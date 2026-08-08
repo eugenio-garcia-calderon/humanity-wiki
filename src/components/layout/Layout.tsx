@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database, Home, BrainCircuit } from 'lucide-react';
+import {
+  User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, LayoutGrid,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -14,6 +17,23 @@ import AIAssistant from '../ai/AIAssistant';
 // destinos primarios (Mapa y Grafos) y las acciones. Todo lo demás se
 // encuentra con el chat de IA de la parte inferior.
 
+/** Todo lo que no son los dos destinos principales. */
+const SECCIONES_COMUN = [
+  { to: '/', label: 'Inicio', icon: Home },
+  { to: '/mapa', label: 'Geolocalización de Datos', icon: MapIcon },
+  { to: '/red', label: 'Red de Datos', icon: Globe2 },
+  { to: '/base-de-datos', label: 'Base de Datos', icon: Database },
+  { to: '/universo', label: 'Universo', icon: Orbit },
+];
+const SECCIONES_TUYO = [
+  { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
+  { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+];
+const SECCIONES_PIE = [
+  { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
+  { to: '/mercado', label: 'Mercado', icon: Store },
+];
+
 export default function Layout() {
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -22,6 +42,10 @@ export default function Layout() {
   const { fontScale, setFontScale } = useSettings();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Menú de tres líneas junto al logo: todo lo que no son los dos destinos
+  // principales vive aquí (decisión del usuario, 2026-08-08).
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,6 +57,17 @@ export default function Layout() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const fuera = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', fuera);
+    return () => document.removeEventListener('mousedown', fuera);
+  }, []);
+
+  // Al cambiar de página, el desplegable se cierra solo.
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   // Modo embed: la app se incrusta a sí misma (p. ej. el mapa dentro de una
   // ventana de conocimiento) sin barra superior ni asistente.
@@ -51,6 +86,7 @@ export default function Layout() {
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
+  const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
   const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage;
 
   if (isEmbed) {
@@ -65,6 +101,48 @@ export default function Layout() {
     <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
       {/* Barra superior mínima: marca + Mapa/Grafos + acciones */}
       <header className="h-14 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 sm:px-6 flex items-center gap-3 z-40 shrink-0 shadow-sm">
+        {/* Menú de tres líneas: todo lo demás vive aquí */}
+        <div className="relative shrink-0" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            title="Todas las secciones"
+            className={cn('w-9 h-9 rounded-xl flex items-center justify-center transition-colors',
+              menuOpen ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900')}
+          >
+            {menuOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
+          </button>
+
+          {menuOpen && (
+            <div className="absolute top-11 left-0 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">El común</p>
+              {SECCIONES_COMUN.map(x => (
+                <Link key={x.to} to={x.to}
+                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
+                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
+                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
+                </Link>
+              ))}
+              <div className="h-px bg-slate-100 my-1.5" />
+              <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Lo tuyo</p>
+              {SECCIONES_TUYO.map(x => (
+                <Link key={x.to} to={x.to}
+                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
+                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
+                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
+                </Link>
+              ))}
+              <div className="h-px bg-slate-100 my-1.5" />
+              {SECCIONES_PIE.map(x => (
+                <Link key={x.to} to={x.to}
+                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
+                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
+                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Marca */}
         <Link to="/" className="shrink-0 hover:opacity-85 transition-opacity">
           <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
@@ -72,73 +150,29 @@ export default function Layout() {
           </span>
         </Link>
 
-        {/* Destinos primarios */}
-        <nav className="flex items-center gap-1.5 ml-1 sm:ml-3">
+        {/* Los DOS destinos principales */}
+        <nav className="flex items-center gap-1.5 ml-1 sm:ml-4">
           <Link
-            to="/"
+            to="/explorar"
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/'
+              'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/explorar'
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
-            <Home className="w-3.5 h-3.5" /> Inicio
+            <Compass className="w-3.5 h-3.5" /> Explorar
           </Link>
           <Link
-            to="/mapa"
+            to="/mis-publicaciones"
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/mapa'
+              'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-colors',
+              location.pathname === '/mis-publicaciones'
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
-            <MapIcon className="w-3.5 h-3.5" /> Geolocalización de Datos
-          </Link>
-          <Link
-            to="/red"
-            className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/red' || location.pathname.startsWith('/grafos')
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <Globe2 className="w-3.5 h-3.5" /> Red de Datos
-          </Link>
-          <Link
-            to="/base-de-datos"
-            className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/base-de-datos'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <Database className="w-3.5 h-3.5" /> Base de Datos
-          </Link>
-          <Link
-            to="/mi-conocimiento"
-            className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/mi-conocimiento'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <BrainCircuit className="w-3.5 h-3.5" /> Mi Conocimiento
-          </Link>
-          <Link
-            to="/universo"
-            className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all',
-              location.pathname.startsWith('/universo')
-                ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white shadow'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <Orbit className="w-3.5 h-3.5" /> Universo
+            <LayoutGrid className="w-3.5 h-3.5" /> Mis publicaciones
           </Link>
         </nav>
 

@@ -28,6 +28,9 @@ import Universo from './pages/Universo';
 import Inicio from './pages/Inicio';
 import BaseDeDatos from './pages/BaseDeDatos';
 import MiConocimiento from './pages/MiConocimiento';
+import Vision from './pages/Vision';
+import Explorar from './pages/Explorar';
+import { Proyectos, Proyecto } from './pages/Proyectos';
 import RetoVistas from './pages/RetoVistas';
 import IncendiosMapa from './pages/IncendiosMapa';
 import Login from './pages/Login';
@@ -62,6 +65,11 @@ export default function App() {
                 <Route path="grafos" element={<Grafos />} />
                 <Route path="base-de-datos" element={<BaseDeDatos />} />
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
+                <Route path="vision" element={<Vision />} />
+                <Route path="explorar" element={<Explorar />} />
+                <Route path="mis-publicaciones" element={<Explorar mias />} />
+                <Route path="proyectos" element={<Proyectos />} />
+                <Route path="proyectos/:slug" element={<Proyecto />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
                 <Route path="universo" element={<Universo />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />

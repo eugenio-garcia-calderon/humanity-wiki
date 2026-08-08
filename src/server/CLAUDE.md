@@ -96,8 +96,8 @@ Extracting it is the first item in
 
 ## Reading rules
 
-- **Always filter `archived_at IS NULL`.** Nothing is deleted in this project, so an
-  unfiltered read returns archived content. Constitution, rule 6.
+- **Always filter `archived_at IS NULL`** (and `deleted_at IS NULL` where it exists). An
+  unfiltered read returns archived and binned content. Constitution, rule 6 (v1.1).
 - Interpolate values through the `sql` template so they are parameterised. Only use
   `sql.raw()` for identifiers, and only from a hardcoded whitelist, the way
   `ENTITY_TABLES` does it.
@@ -109,7 +109,8 @@ Extracting it is the first item in
 - Set `created_by` / `updated_by` from `req.user.id`, bump `version`, touch
   `updated_at`.
 - Record history where the entity has it (`entity_history`). Constitution, rule 4.
-- Archive, never delete. And refuse to archive a parent that still has visible
+- Archive by default. A real delete only happens through the recycle bin sweep, 15 days
+  after the creator asked for it. Refuse to archive a parent that still has visible
   children: `ARCHIVE_BLOCKERS` in `server.ts` defines those chains.
 
 ## Response shape
