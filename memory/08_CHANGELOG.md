@@ -567,4 +567,8 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 
 ### 2026-08-08 — Gasto de servidores sin API: importe fijo configurable
 - El usuario preguntó qué API de Hetzner faltaba en la pestaña Gasto y apuntó bien: para un servidor fijo no hace falta ninguna. `gastoHetzner()` acepta ahora `SERVIDOR_COSTE_EUR_MES` como vía sin token: si está configurada, la sección Servidores sale en `ok` con ese importe, etiquetado «importe fijo configurado a mano». `HETZNER_API_TOKEN` queda como mejora opcional (precios en vivo, se actualiza solo si el servidor cambia).
-- La máquina identificada por sus specs vía SSH (8 vCPU, 16 GB, 320 GB, nbg1): un **Hetzner Cloud CX42**, ~16,40 €/mes de lista + 0,50 € de IPv4 → configurado `SERVIDOR_COSTE_EUR_MES=16.90` en `.env` local y `.env.production` (ajustable a la factura real).
+- La máquina identificada por sus specs vía SSH (8 vCPU, 16 GB, 320 GB, nbg1): se estimó CX42 a 16,90 €/mes, pero **el usuario corrigió con la consola de Hetzner en la mano: es un CPX42 (AMD) a 69,49 €/mes** — buena lección sobre estimar precios desde specs en vez de mirar la factura. `SERVIDOR_COSTE_EUR_MES=69.49` en los dos `.env` y etiqueta CPX42.
+
+### 2026-08-08 — Administración: borrar (archivar) y restaurar usuarios
+- Petición del usuario: «permíteme como ADMIN borrar usuarios». Siguiendo la regla 6 de la Constitución, «borrar» = archivar: `POST /api/admin/users/:id/archivar` pone `archived_at`, revoca todas sus sesiones al momento y el login/Google/attachUser ya lo rechazan (todos filtran `archived_at IS NULL` desde siempre). Nada de lo publicado se destruye. `POST /api/admin/users/:id/restaurar` lo deshace. Un admin no puede borrarse a sí mismo.
+- En `/admin/usuarios`: papelera roja por fila (con confirmación que explica exactamente qué pasa) y botón «Restaurar» en las filas archivadas, que ya salían atenuadas con su etiqueta.

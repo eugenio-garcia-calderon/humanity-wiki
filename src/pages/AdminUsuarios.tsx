@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users2, Coins, KeyRound, Check, Copy, ShieldAlert } from 'lucide-react';
+import { Users2, Coins, KeyRound, Check, Copy, ShieldAlert, Trash2, RotateCcw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 
@@ -70,6 +70,23 @@ export default function AdminUsuarios() {
     if (!r.ok) return avisar(j.error || 'No se han podido mover los puntos.');
     avisar(`${cantidad > 0 ? '+' : ''}${cantidad} puntos a ${u.email} (saldo: ${j.puntos.toFixed(2)}).`);
     setPuntosEdit(p => ({ ...p, [u.id]: '' }));
+    cargar();
+  };
+
+  const borrar = async (u: Usuario) => {
+    if (!confirm(`¿Borrar a ${u.email}?\n\nNo podrá volver a entrar y sus sesiones se cierran ahora mismo. Lo que publicó NO se destruye, y podrás restaurarlo desde esta misma página.`)) return;
+    const r = await fetch(`/api/admin/users/${u.id}/archivar`, { method: 'POST', credentials: 'include' });
+    const j = await r.json();
+    if (!r.ok) return avisar(j.error || 'No se ha podido borrar.');
+    avisar(`${u.email} borrado. Puedes restaurarlo cuando quieras.`);
+    cargar();
+  };
+
+  const restaurar = async (u: Usuario) => {
+    const r = await fetch(`/api/admin/users/${u.id}/restaurar`, { method: 'POST', credentials: 'include' });
+    const j = await r.json();
+    if (!r.ok) return avisar(j.error || 'No se ha podido restaurar.');
+    avisar(`${u.email} restaurado: ya puede volver a entrar.`);
     cargar();
   };
 
@@ -171,6 +188,25 @@ export default function AdminUsuarios() {
                     {enlaceCopiado === u.id ? <Copy className="w-3.5 h-3.5 text-emerald-600" /> : <KeyRound className="w-3.5 h-3.5" />}
                     {enlaceCopiado === u.id ? 'Copiado' : 'Contraseña'}
                   </button>
+
+                  {u.archived_at ? (
+                    <button
+                      onClick={() => restaurar(u)}
+                      title="Restaurar: podrá volver a entrar"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-bold transition-colors shrink-0"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Restaurar
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => borrar(u)}
+                      disabled={u.id === user.id}
+                      title={u.id === user.id ? 'No puedes borrarte a ti mismo' : 'Borrar: no podrá volver a entrar (restaurable)'}
+                      className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:text-slate-300 disabled:hover:bg-transparent shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
