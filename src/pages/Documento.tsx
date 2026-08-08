@@ -108,6 +108,11 @@ export default function Documento() {
   // en crudo (**negrita**); los demás se ven ya formateados aunque estés en
   // modo edición. Al pulsar uno, pasa a activo y se puede teclear.
   const [bloqueActivo, setBloqueActivo] = useState<string | null>(null);
+  // Selección múltiple (2026-08-08, petición del usuario): Ctrl/Cmd+clic
+  // marca bloques sueltos, Shift+clic marca el rango desde el último
+  // marcado, y una barra flotante los elimina de golpe.
+  const [seleccion, setSeleccion] = useState<string[]>([]);
+  const ultimoSeleccionado = useRef<string | null>(null);
   // Fase 2 —
   const [portada, setPortada] = useState<string | null>(null);
   const [icono, setIcono] = useState<string | null>(null);
@@ -464,40 +469,201 @@ export default function Documento() {
     programarGuardado();
   };
 
+  const ES_TEXTO: TipoBloque[] = ['parrafo', 'titulo1', 'titulo2', 'titulo3', 'lista', 'numerada', 'tarea', 'cita'];
+
   const alTeclear = (b: Bloque, e: React.KeyboardEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
     if (e.key === 'Enter' && !e.shiftKey && b.tipo !== 'codigo') {
       e.preventDefault();
       const heredan: TipoBloque[] = ['lista', 'numerada', 'tarea'];
-      const texto = (e.currentTarget.textContent || '').trim();
+      const texto = el.textContent || '';
       // Enter en un ítem vacío de lista lo convierte en párrafo, como Notion.
-      if (heredan.includes(b.tipo) && !texto) {
+      if (heredan.includes(b.tipo) && !texto.trim()) {
         setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo: 'parrafo' } : x));
         programarGuardado();
         return;
       }
-      insertar(b.id, heredan.includes(b.tipo) ? b.tipo : 'parrafo');
-    } else if (e.key === 'Backspace' && !(e.currentTarget.textContent || '')) {
-      e.preventDefault();
-      eliminar(b.id);
+      // Enter PARTE el texto por el cursor: lo de antes se queda, lo de
+      // después baja al bloque nuevo con el cursor a su inicio (como Notion).
+      const corte = offsetCaret(el);
+      const antes = texto.slice(0, corte);
+      const despues = texto.slice(corte);
+      textosRef.current[b.id] = antes;
+      const nuevo: Bloque = { id: nuevoIdBloque(), tipo: heredan.includes(b.tipo) ? b.tipo : 'parrafo', texto: despues };
+      textosRef.current[nuevo.id] = despues;
+      setBloques(bs => {
+        const i = bs.findIndex(x => x.id === b.id);
+        const copia = bs.map(x => x.id === b.id ? { ...x, texto: antes } : x);
+        copia.splice(i + 1, 0, nuevo);
+        return copia;
+      });
+      setBloqueActivo(nuevo.id);
+      posicionCaret.current = 0;
+      setFocoId(nuevo.id);
+      programarGuardado();
+    } else if (e.key === 'Backspace') {
+      const texto = el.textContent || '';
+      if (!texto) {
+        e.preventDefault();
+        eliminar(b.id);
+        return;
+      }
+      // Backspace con el cursor al principio FUSIONA con el bloque de texto
+      // anterior, dejando el cursor en la juntura (como Notion).
+      if (offsetCaret(el) === 0) {
+        const i = bloques.findIndex(x => x.id === b.id);
+        const anterior = bloques[i - 1];
+        if (anterior && ES_TEXTO.includes(anterior.tipo)) {
+          e.preventDefault();
+          const textoAnterior = textosRef.current[anterior.id] ?? anterior.texto ?? '';
+          const fusionado = textoAnterior + texto;
+          textosRef.current[anterior.id] = fusionado;
+          delete textosRef.current[b.id];
+          setBloques(bs => bs
+            .map(x => x.id === anterior.id ? { ...x, texto: fusionado } : x)
+            .filter(x => x.id !== b.id));
+          setBloqueActivo(anterior.id);
+          posicionCaret.current = textoAnterior.length;
+          setFocoId(anterior.id);
+          programarGuardado();
+        }
+      }
     }
   };
 
-  // Enfocar el bloque recién creado/activado cuando ya está en el DOM, con
-  // el cursor al final del texto.
+  /** Atajos markdown al teclear a principio de línea: «# », «- », «1. »… */
+  const autoformato = (b: Bloque, el: HTMLDivElement) => {
+    if (b.tipo !== 'parrafo') return;
+    const texto = el.textContent || '';
+    const reglas: [RegExp, TipoBloque][] = [
+      [/^###\s/, 'titulo3'], [/^##\s/, 'titulo2'], [/^#\s/, 'titulo1'],
+      [/^[-*]\s/, 'lista'], [/^1[.)]\s/, 'numerada'], [/^>\s/, 'cita'],
+      [/^\[\s?\]\s/, 'tarea'], [/^```/, 'codigo'],
+    ];
+    for (const [re, tipo] of reglas) {
+      if (re.test(texto)) {
+        const limpio = texto.replace(re, '');
+        textosRef.current[b.id] = limpio;
+        setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: limpio } : x));
+        posicionCaret.current = 0;
+        setFocoId(b.id);
+        programarGuardado();
+        return;
+      }
+    }
+  };
+
+  /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
+   *  markdown de siempre — pegar una lista pega una lista de verdad. */
+  const alPegar = (b: Bloque, e: React.ClipboardEvent<HTMLDivElement>) => {
+    const texto = e.clipboardData.getData('text/plain');
+    if (!texto.includes('\n') || b.tipo === 'codigo') return; // pegado normal
+    e.preventDefault();
+    const nuevos = markdownABloques(texto);
+    if (!nuevos.length) return;
+    for (const n of nuevos) if (n.texto !== undefined) textosRef.current[n.id] = n.texto;
+    const actual = (e.currentTarget.textContent || '').trim();
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === b.id);
+      const copia = [...bs];
+      // Sobre un bloque vacío lo sustituyen; con texto, van detrás.
+      copia.splice(actual ? i + 1 : i, actual ? 0 : 1, ...nuevos);
+      return copia;
+    });
+    if (!actual) delete textosRef.current[b.id];
+    const ultimo = nuevos[nuevos.length - 1];
+    setBloqueActivo(ultimo.id);
+    setFocoId(ultimo.id);
+    programarGuardado();
+  };
+
+  // -- Selección múltiple -----------------------------------------------------
+  const clicSeleccion = (b: Bloque, e: React.MouseEvent) => {
+    if (!editable || !(e.metaKey || e.ctrlKey || e.shiftKey)) return false;
+    e.preventDefault();
+    e.stopPropagation();
+    setBloqueActivo(null);
+    if (e.shiftKey && ultimoSeleccionado.current) {
+      const desde = bloques.findIndex(x => x.id === ultimoSeleccionado.current);
+      const hasta = bloques.findIndex(x => x.id === b.id);
+      if (desde >= 0 && hasta >= 0) {
+        const [a, z] = desde <= hasta ? [desde, hasta] : [hasta, desde];
+        const rango = bloques.slice(a, z + 1).map(x => x.id);
+        setSeleccion(s => [...new Set([...s, ...rango])]);
+      }
+    } else {
+      setSeleccion(s => (s.includes(b.id) ? s.filter(x => x !== b.id) : [...s, b.id]));
+    }
+    ultimoSeleccionado.current = b.id;
+    return true;
+  };
+
+  const eliminarSeleccion = useCallback(() => {
+    if (!seleccion.length) return;
+    setBloques(bs => {
+      const restantes = bs.filter(x => !seleccion.includes(x.id));
+      return restantes.length ? restantes : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
+    });
+    for (const id of seleccion) { delete textosRef.current[id]; delete filasRef.current[id]; }
+    setSeleccion([]);
+    ultimoSeleccionado.current = null;
+    programarGuardado();
+  }, [seleccion, programarGuardado]);
+
+  // Suprimir/Backspace borra la selección (si no estás tecleando dentro de un
+  // bloque) y Escape la deshace.
+  useEffect(() => {
+    if (!seleccion.length) return;
+    const tecla = (e: KeyboardEvent) => {
+      const activo = document.activeElement as HTMLElement | null;
+      if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
+      if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); eliminarSeleccion(); }
+      else if (e.key === 'Escape') setSeleccion([]);
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, [seleccion, eliminarSeleccion]);
+
+  // Enfocar el bloque recién creado/activado cuando ya está en el DOM. Por
+  // defecto el cursor va al final; `posicionCaret` lo coloca en un punto
+  // concreto (partir con Enter deja el cursor al INICIO del bloque nuevo;
+  // fusionar con Backspace lo deja en la juntura).
+  const posicionCaret = useRef<number | null>(null);
   useEffect(() => {
     if (!focoId) return;
     const el = document.querySelector<HTMLElement>(`[data-bloque="${focoId}"]`);
     if (el) {
       el.focus();
       const rango = document.createRange();
-      rango.selectNodeContents(el);
-      rango.collapse(false);
+      if (posicionCaret.current !== null && el.firstChild) {
+        const nodo = el.firstChild;
+        const max = nodo.textContent?.length ?? 0;
+        rango.setStart(nodo, Math.min(posicionCaret.current, max));
+        rango.collapse(true);
+      } else if (posicionCaret.current !== null) {
+        rango.selectNodeContents(el);
+        rango.collapse(true);
+      } else {
+        rango.selectNodeContents(el);
+        rango.collapse(false);
+      }
       const sel = window.getSelection();
       sel?.removeAllRanges();
       sel?.addRange(rango);
+      posicionCaret.current = null;
       setFocoId(null);
     }
   });
+
+  /** Dónde está el cursor dentro de un contentEditable, en caracteres. */
+  const offsetCaret = (el: HTMLElement): number => {
+    const sel = window.getSelection();
+    if (!sel?.rangeCount) return 0;
+    const previo = sel.getRangeAt(0).cloneRange();
+    previo.selectNodeContents(el);
+    previo.setEnd(sel.getRangeAt(0).startContainer, sel.getRangeAt(0).startOffset);
+    return previo.toString().length;
+  };
 
   const subirImagen = async (b: Bloque, archivo: File) => {
     const bytes = await archivo.arrayBuffer();
@@ -642,13 +808,15 @@ export default function Documento() {
         'data-bloque': b.id,
         onInput: (e: React.FormEvent<HTMLDivElement>) => {
           textosRef.current[b.id] = e.currentTarget.textContent || '';
+          autoformato(b, e.currentTarget);
           programarGuardado();
         },
         onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => alTeclear(b, e),
+        onPaste: (e: React.ClipboardEvent<HTMLDivElement>) => alPegar(b, e),
         onBlur: () => setBloqueActivo(a => (a === b.id ? null : a)),
         className: cn(CLASES_TEXTO[b.tipo], 'outline-none bg-emerald-50/40 rounded px-1 -mx-1 min-h-[1.4em] whitespace-pre-wrap'),
       } : {
-        onClick: editable ? () => { setBloqueActivo(b.id); setFocoId(b.id); } : undefined,
+        onClick: editable ? () => { setSeleccion([]); setBloqueActivo(b.id); setFocoId(b.id); } : undefined,
         className: cn(CLASES_TEXTO[b.tipo], 'px-1 -mx-1 min-h-[1.4em]', editable && 'cursor-text hover:bg-slate-50/80 rounded'),
       };
 
@@ -695,7 +863,9 @@ export default function Documento() {
         key={b.id}
         className={cn('group/bloque relative rounded transition-shadow',
           sobreBloque === b.id && arrastrando && 'shadow-[0_-2px_0_0_theme(colors.emerald.400)]',
-          arrastrando === b.id && 'opacity-40')}
+          arrastrando === b.id && 'opacity-40',
+          seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}
+        onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
         onDragOver={editable ? e => { if (arrastrando) { e.preventDefault(); setSobreBloque(b.id); } } : undefined}
         onDrop={editable ? () => soltarSobre(b.id) : undefined}
       >
@@ -930,9 +1100,32 @@ export default function Documento() {
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> La IA está escribiendo…</>
                 : <><PenLine className="w-3.5 h-3.5" /> Continuar con IA</>}
             </button>
+            <span className="text-[10px] text-slate-300 hidden sm:inline">
+              Ctrl+clic marca varios bloques · Shift+clic marca un tramo
+            </span>
           </div>
         )}
       </div>
+
+      {/* Barra flotante de la selección múltiple */}
+      {seleccion.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white rounded-2xl shadow-2xl px-4 py-2.5">
+          <span className="text-xs font-black">{seleccion.length} {seleccion.length === 1 ? 'bloque' : 'bloques'}</span>
+          <button
+            onClick={eliminarSeleccion}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-black transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Eliminar
+          </button>
+          <button
+            onClick={() => setSeleccion([])}
+            title="Deshacer la selección (Esc)"
+            className="p-1 text-slate-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Buscador de publicaciones para embeber (Fase 2) */}
       {buscadorPub !== null && (
