@@ -171,6 +171,27 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   });
 
   /**
+   * POST /api/documentos   { titulo? }
+   * Un documento EN BLANCO, sin IA: nace privado con un párrafo vacío y se
+   * abre en /documentos/:id para escribir a mano. Lo usa el creador de
+   * publicaciones de Explorar (2026-08-08).
+   */
+  app.post('/api/documentos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para crear documentos.' });
+      const titulo = String(req.body?.titulo || '').trim() || 'Documento sin título';
+      const id = newId('KW');
+      const bloques = [{ id: `B${Date.now().toString(36)}0`, tipo: 'parrafo', texto: '' }];
+      await db.execute(sql`
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)
+        VALUES (${id}, ${titulo}, 'pagina', ${JSON.stringify({ bloques })}::jsonb,
+                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id})
+      `);
+      res.json({ id });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * POST /api/ai/documento-bloque   { window_id, accion: 'mejorar'|'continuar', texto? }
    * IA dentro del documento (Fase 2): «mejorar» reescribe el texto de un
    * bloque; «continuar» añade contenido nuevo al final teniendo el documento

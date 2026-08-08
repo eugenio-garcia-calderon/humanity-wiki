@@ -32,7 +32,10 @@ interface GastoServidores {
   estado: 'ok' | 'sin_conectar' | 'error';
   mensaje?: string;
   total_mes_eur?: number;
-  servidores?: { nombre: string; tipo: string; eur_mes: number }[];
+  /** Lo consumido en el mes en curso (horas encendido × precio/hora), la
+   *  misma cifra «Usage» que enseña la consola de Hetzner. Solo con token. */
+  consumo_mes_eur?: number;
+  servidores?: { nombre: string; tipo: string; eur_mes: number; consumo_eur?: number }[];
 }
 
 interface GastoOficialAnthropic {
@@ -84,19 +87,32 @@ async function gastoHetzner(): Promise<GastoServidores> {
       return { estado: 'error', mensaje: `Hetzner ha respondido ${res.status}: ${detalle.slice(0, 200)}` };
     }
     const json: any = await res.json();
+    // El consumo del mes es la misma cuenta que hace la consola de Hetzner en
+    // «Usage»: horas encendido este mes × precio por hora, con el precio
+    // mensual como techo. Un servidor creado a mitad de mes cuenta desde su
+    // creación, no desde el día 1.
+    const ahora = Date.now();
+    const inicioMes = new Date();
+    inicioMes.setUTCDate(1); inicioMes.setUTCHours(0, 0, 0, 0);
     const servidores = (json.servers || []).map((s: any) => {
       const ubicacion = s.datacenter?.location?.name;
       const precio = (s.server_type?.prices || []).find((p: any) => p.location === ubicacion) || s.server_type?.prices?.[0];
+      const eurMes = Number(precio?.price_monthly?.gross ?? 0);
+      const eurHora = Number(precio?.price_hourly?.gross ?? 0);
+      const desde = Math.max(new Date(s.created || inicioMes).getTime(), inicioMes.getTime());
+      const horas = Math.max(0, (ahora - desde) / 3_600_000);
       return {
         nombre: s.name || s.id,
         tipo: s.server_type?.name || '—',
-        eur_mes: Number(precio?.price_monthly?.gross ?? 0),
+        eur_mes: eurMes,
+        consumo_eur: Math.min(Math.round(horas * eurHora * 100) / 100, eurMes),
       };
     });
     return {
       estado: 'ok',
       servidores,
       total_mes_eur: servidores.reduce((a: number, s: any) => a + s.eur_mes, 0),
+      consumo_mes_eur: Math.round(servidores.reduce((a: number, s: any) => a + (s.consumo_eur || 0), 0) * 100) / 100,
     };
   } catch (e: any) {
     return { estado: 'error', mensaje: e.message };

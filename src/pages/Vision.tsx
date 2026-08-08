@@ -233,7 +233,9 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
   const iaMes = oficial.estado === 'ok'
     ? oficial.mes_actual_eur + interno.mes_actual.google_eur
     : interno.mes_actual.total_eur;
-  const totalMes = (srv.estado === 'ok' ? srv.total_mes_eur : 0) + iaMes;
+  // Si hay consumo real del mes (token de Hetzner), «Este mes» suma lo
+  // consumido de verdad; si solo hay precio fijo, suma el precio mensual.
+  const totalMes = (srv.estado === 'ok' ? (srv.consumo_mes_eur ?? srv.total_mes_eur) : 0) + iaMes;
 
   return (
     <div className="max-w-3xl">
@@ -270,13 +272,24 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
           </p>
           {srv.estado === 'ok' ? (
             <>
-              <p className="text-2xl font-black text-slate-900 mt-1.5">{eur(srv.total_mes_eur)}<span className="text-sm font-bold text-slate-400"> /mes</span></p>
+              {/* Con token de Hetzner el dato protagonista es el CONSUMO del
+                  mes en curso (el «Usage» de la consola); el precio mensual
+                  queda como referencia. Sin token solo hay precio fijo. */}
+              {typeof srv.consumo_mes_eur === 'number' ? (
+                <p className="text-2xl font-black text-slate-900 mt-1.5">
+                  {eur(srv.consumo_mes_eur)}<span className="text-sm font-bold text-slate-400"> consumido este mes · {eur(srv.total_mes_eur)}/mes</span>
+                </p>
+              ) : (
+                <p className="text-2xl font-black text-slate-900 mt-1.5">{eur(srv.total_mes_eur)}<span className="text-sm font-bold text-slate-400"> /mes</span></p>
+              )}
               <div className="mt-3 space-y-1.5">
                 {srv.servidores.map((s: any) => (
                   <div key={s.nombre} className="flex items-center text-xs">
                     <span className="text-slate-600 font-bold truncate">{s.nombre}</span>
                     <span className="text-slate-400 ml-1.5 shrink-0">({s.tipo})</span>
-                    <span className="text-slate-900 font-black ml-auto shrink-0">{eur(s.eur_mes)}</span>
+                    <span className="text-slate-900 font-black ml-auto shrink-0">
+                      {typeof s.consumo_eur === 'number' ? `${eur(s.consumo_eur)} · ${eur(s.eur_mes)}/mes` : eur(s.eur_mes)}
+                    </span>
                   </div>
                 ))}
               </div>
