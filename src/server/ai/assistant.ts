@@ -1,8 +1,12 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
-import { getProvider, listProviders, type AIMessage, type AIContentBlock , AI_MODELS, AI_PLATFORM_FEE } from './provider.js';
+import {
+  getProvider, listProviders, providerOfModel, generarImagenNanoBanana, NANO_BANANA_CATALOG_MODEL,
+  type AIMessage, type AIContentBlock, AI_MODELS, AI_PLATFORM_FEE,
+} from './provider.js';
 import { ROLE } from '../auth.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
+import { guardarArchivo } from '../uploads.js';
 
 // ============================================================================
 // Asistente IA universal — Fase 9
@@ -327,10 +331,25 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       const { message, context, edit_mode, search_web, attachment } = req.body || {};
       if (!message) return res.status(400).json({ error: 'Falta el mensaje.' });
 
-      const provider = getProvider();
-      if (!provider.isReady()) {
+      // Modelo elegido por el usuario (validado contra el catálogo): decide
+      // TAMBIÉN el proveedor, para que «Gemini 2.5 Flash» hable de verdad con
+      // Google y no con Claude (2026-08-08, petición del usuario: «que se
+      // pueda conectar a diferentes modelos tanto de Anthropic como de Google»).
+      const chosenModel = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
+      // Nano Banana genera una IMAGEN, no texto: no encaja en AIProvider.complete()
+      // (texto→texto), así que se trata aparte más abajo y aquí no pasa por
+      // el proveedor de chat de texto.
+      const esNanoBanana = chosenModel === NANO_BANANA_CATALOG_MODEL;
+      const provider = esNanoBanana ? null : getProvider(providerOfModel(chosenModel));
+      if (esNanoBanana) {
+        if (!process.env.GEMINI_API_KEY) {
+          return res.status(503).json({ error: 'Nano Banana está construido pero inactivo: falta GEMINI_API_KEY en .env.', ready: false });
+        }
+      } else if (!provider!.isReady()) {
         return res.status(503).json({
-          error: 'El asistente está construido pero inactivo: falta ANTHROPIC_API_KEY en .env.',
+          error: provider!.name === 'gemini'
+            ? 'Gemini está construido pero inactivo: falta GEMINI_API_KEY en .env.'
+            : 'El asistente está construido pero inactivo: falta ANTHROPIC_API_KEY en .env.',
           ready: false,
         });
       }
@@ -370,6 +389,37 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         INSERT INTO ai_messages (conversation_id, role, content) VALUES (${conversationId}, 'user', ${storedContent})
       `);
 
+      // Nano Banana responde aquí mismo, sin RAG ni historial ni prompt de
+      // sistema — esa maquinaria es para el chat de texto y no le sirve a un
+      // modelo que solo sabe transformar un prompt en una imagen.
+      if (esNanoBanana) {
+        const started = Date.now();
+        const imagen = await generarImagenNanoBanana(String(message));
+        const guardada = guardarArchivo(imagen.mimeType, Buffer.from(imagen.base64, 'base64'));
+        const durationMs = Date.now() - started;
+        const clean = 'He generado esta imagen a partir de tu descripción.';
+        await db.execute(sql`
+          INSERT INTO ai_messages (conversation_id, role, content, model, duration_ms)
+          VALUES (${conversationId}, 'assistant', ${clean}, ${NANO_BANANA_CATALOG_MODEL}, ${durationMs})
+        `);
+        await db.execute(sql`UPDATE ai_conversations SET updated_at = now() WHERE id = ${conversationId}`);
+        if (req.user) {
+          db.execute(sql`
+            INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents, conversation_id)
+            VALUES (${req.user.id}, 'imagen', ${NANO_BANANA_CATALOG_MODEL}, 0, 0, 0, 0, 0, ${conversationId})
+          `).catch((e: any) => console.error('ai charge error:', e));
+        }
+        return res.json({
+          conversation_id: conversationId,
+          reply: clean,
+          imageUrl: guardada.url,
+          ui_events: [],
+          proposed_actions: [],
+          sources: [],
+          usage: { model: NANO_BANANA_CATALOG_MODEL, inputTokens: 0, outputTokens: 0, costCents: 0, durationMs, feeCents: 0, totalCents: 0 },
+        });
+      }
+
       // RAG
       const retrieved = await retrieveContext(String(message));
 
@@ -403,8 +453,6 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       `);
 
       const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
-      // Modelo elegido por el usuario (validado contra el catálogo).
-      const chosenModel = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
       const result = await provider.complete({ system, messages, webSearch: !!search_web, model: chosenModel });
       const { clean, ui_events, actions, question } = parseModelBlock(result.text);
 
@@ -490,6 +538,32 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       }
     } catch (e: any) {
       console.error('ai chat error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/ai/generar-imagen   { prompt }
+   * Nano Banana (Gemini 2.5 Flash Image), 2026-08-08: genera una imagen desde
+   * una descripción y la deja en el MISMO almacén que una imagen pegada o
+   * subida a mano — el resultado es una URL de `/uploads/…` que cualquier
+   * lienzo ya sabe convertir en una ventana `imagen`.
+   */
+  app.post('/api/ai/generar-imagen', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const prompt = String(req.body?.prompt || '').trim();
+      if (!prompt) return res.status(400).json({ error: 'Falta describir la imagen que quieres.' });
+      const started = Date.now();
+      const imagen = await generarImagenNanoBanana(prompt);
+      const guardada = guardarArchivo(imagen.mimeType, Buffer.from(imagen.base64, 'base64'));
+      db.execute(sql`
+        INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
+        VALUES (${req.user.id}, 'imagen', ${process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image'}, 0, 0, 0, 0, 0)
+      `).catch((e: any) => console.error('ai charge error:', e));
+      res.json({ url: guardada.url, prompt, duration_ms: Date.now() - started });
+    } catch (e: any) {
+      console.error('nano banana error:', e);
       res.status(500).json({ error: e.message });
     }
   });

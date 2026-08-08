@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
 import { graphLimitReached } from './ai/assistant.js';
+import { otorgarPuntos } from './puntos.js';
 
 // ============================================================================
 // Grafos de Conocimiento — Fase 11
@@ -1090,14 +1091,6 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const descripcion = typeof d.descripcion === 'string' ? d.descripcion : null;
       const yo = req.user!.id;
 
-      // El lienzo personal es el espacio privado de cada persona: publicarlo
-      // entero de golpe expondría todo lo que tiene dentro sin querer.
-      if (tipo === 'lienzo' && publico === true && fila.personal === '1') {
-        return res.status(400).json({
-          error: 'Tu lienzo personal no se publica entero. Publica desde él las piezas que quieras compartir.',
-        });
-      }
-
       if (estado) await guardarMeta(tipo, id, yo, { estado });
 
       if (tipo === 'ventana') {
@@ -1644,7 +1637,20 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
   app.post('/api/windows/:id/view', async (req: Request, res: Response) => {
     try {
-      await db.execute(sql`UPDATE knowledge_windows SET views = views + 1 WHERE id = ${req.params.id}`);
+      const w = await db.execute(sql`
+        UPDATE knowledge_windows SET views = views + 1 WHERE id = ${req.params.id}
+        RETURNING creator_user_id, publico
+      `);
+      // «Ganar céntimos de punto cuando contribuyen con una publicación
+      // pública... y es vista por otros usuarios» (2026-08-08). No se
+      // distingue visitante único — cada vista suma un céntimo de punto a
+      // quien la escribió, salvo que se esté viendo a sí mismo.
+      const fila = w.rows[0] as any;
+      if (fila?.publico && fila.creator_user_id && fila.creator_user_id !== req.user?.id) {
+        await otorgarPuntos(db, fila.creator_user_id, 0.01, 'vista_publicacion', {
+          entidadTipo: 'knowledge_windows', entidadId: req.params.id,
+        }).catch(() => {});
+      }
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });

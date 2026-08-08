@@ -227,4 +227,36 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
+
+  // ==========================================================================
+  // TEXTOS DE PÁGINA EDITABLES (2026-08-08, petición del usuario)
+  // ==========================================================================
+  // «Permite a eugenio@lighthumanity.org como ADMIN cambiar todos los textos
+  // de esta web de visión.» El titular, los párrafos, la nueva declaración de
+  // estrategia — todo vivía como JSX fijo. Sin fila = usa el texto por
+  // defecto que trae el componente, así que añadir un sitio editable nuevo
+  // nunca necesita una semilla.
+
+  /** GET /api/textos/:pagina — de lectura pública, lo pintan todas las visitas. */
+  app.get('/api/textos/:pagina', async (req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`SELECT clave, valor FROM page_texts WHERE pagina = ${req.params.pagina}`);
+      res.json(Object.fromEntries((rows.rows as any[]).map(r => [r.clave, r.valor])));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** PUT /api/textos/:pagina/:clave  { valor } — solo administradores. */
+  app.put('/api/textos/:pagina/:clave', async (req: Request, res: Response) => {
+    try {
+      if (!requireAdmin(req, res)) return;
+      const valor = String(req.body?.valor ?? '').trim();
+      if (!valor) return res.status(400).json({ error: 'El texto no puede quedar vacío.' });
+      await db.execute(sql`
+        INSERT INTO page_texts (pagina, clave, valor, updated_by)
+        VALUES (${req.params.pagina}, ${req.params.clave}, ${valor}, ${req.user!.id})
+        ON CONFLICT (pagina, clave) DO UPDATE SET valor = EXCLUDED.valor, updated_by = EXCLUDED.updated_by, updated_at = now()
+      `);
+      res.json({ success: true, valor });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
 }

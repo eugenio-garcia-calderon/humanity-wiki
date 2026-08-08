@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   X, Plus, Image as ImageIcon, Trash2, User as UserIcon,
-  CircleDot, CircleCheck, Circle, Flame, Layers,
+  CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -158,6 +158,24 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
   const [error, setError] = useState<string | null>(null);
   const archivo = useRef<HTMLInputElement>(null);
 
+  // Editar el título y el resumen de la tarjeta (petición del usuario,
+  // 2026-08-08): el menú de tres puntos abre la caja de texto en el sitio,
+  // sin cambiar de ventana. Antes solo se podían cambiar estado/prioridad/
+  // notas — el título y el resumen quedaban fijos aunque fueras el admin.
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [editandoTexto, setEditandoTexto] = useState(false);
+  const [tituloEdit, setTituloEdit] = useState(item.titulo);
+  const [resumenEdit, setResumenEdit] = useState(item.resumen || '');
+
+  useEffect(() => { setTituloEdit(item.titulo); setResumenEdit(item.resumen || ''); }, [item.titulo, item.resumen]);
+
+  useEffect(() => {
+    if (!menuAbierto) return;
+    const fuera = () => setMenuAbierto(false);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [menuAbierto]);
+
   useEffect(() => {
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
     window.addEventListener('keydown', esc);
@@ -207,19 +225,68 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
 
         <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0"
           style={{ borderTopWidth: 4, borderTopColor: g.color }}>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: g.color }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: g.color }} /> {g.label}
             </span>
-            <h2 className="text-xl font-black text-slate-900 leading-tight mt-1">{item.titulo}</h2>
+            {editandoTexto ? (
+              <input
+                value={tituloEdit} onChange={e => setTituloEdit(e.target.value)} autoFocus
+                className="block w-full text-xl font-black text-slate-900 leading-tight mt-1 px-2 py-1 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-400"
+              />
+            ) : (
+              <h2 className="text-xl font-black text-slate-900 leading-tight mt-1">{item.titulo}</h2>
+            )}
           </div>
-          <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 shrink-0">
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {puedeEditar && !editandoTexto && (
+              <div className="relative">
+                <button onClick={() => setMenuAbierto(v => !v)} title="Opciones"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                {menuAbierto && (
+                  <div className="absolute right-0 top-8 z-10 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1"
+                    onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => { setEditandoTexto(true); setMenuAbierto(false); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar título y resumen
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {editandoTexto ? (
+              <button
+                onClick={async () => {
+                  await guardar({ titulo: tituloEdit.trim() || item.titulo, resumen: resumenEdit.trim() || null });
+                  setEditandoTexto(false);
+                }}
+                disabled={guardando}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold disabled:opacity-50"
+              >
+                <Check className="w-3.5 h-3.5" /> Guardar
+              </button>
+            ) : (
+              <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {item.resumen && <p className="text-sm text-slate-600 leading-relaxed">{item.resumen}</p>}
+          {editandoTexto ? (
+            <textarea
+              value={resumenEdit} onChange={e => setResumenEdit(e.target.value)} rows={2}
+              placeholder="Resumen breve de la tarjeta…"
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm leading-relaxed resize-none focus:outline-none focus:border-emerald-300"
+            />
+          ) : (
+            item.resumen && <p className="text-sm text-slate-600 leading-relaxed">{item.resumen}</p>
+          )}
 
           {/* Estado y prioridad */}
           <div className="flex flex-wrap items-center gap-2">
