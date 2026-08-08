@@ -192,6 +192,112 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   });
 
   /**
+   * POST /api/presentaciones   { titulo? }
+   * Una presentación EN BLANCO (kind 'presentacion'): una diapositiva de
+   * portada y a trabajar en /presentaciones/:id. (2026-08-08)
+   */
+  app.post('/api/presentaciones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para crear presentaciones.' });
+      const titulo = String(req.body?.titulo || '').trim() || 'Presentación sin título';
+      const id = newId('KW');
+      const diapositivas = [{
+        id: `D${Date.now().toString(36)}0`,
+        elementos: [
+          { id: 'E1', tipo: 'texto', x: 80, y: 200, w: 800, h: 90, texto: titulo, tamano: 44, negrita: true, color: '#0f172a', alineacion: 'center' },
+          { id: 'E2', tipo: 'texto', x: 80, y: 310, w: 800, h: 40, texto: 'Haz doble clic para editar', tamano: 20, color: '#64748b', alineacion: 'center' },
+        ],
+      }];
+      await db.execute(sql`
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)
+        VALUES (${id}, ${titulo}, 'presentacion', ${JSON.stringify({ diapositivas })}::jsonb,
+                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id})
+      `);
+      res.json({ id });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * POST /api/ai/presentacion   { prompt }
+   * La IA redacta la presentación entera (título + diapositivas con puntos)
+   * y aquí se convierte en elementos posicionados en el lienzo de 960×540.
+   */
+  app.post('/api/ai/presentacion', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const prompt = String(req.body?.prompt || '').trim();
+      if (!prompt) return res.status(400).json({ error: 'Describe la presentación que quieres.' });
+
+      const provider = getProvider('claude');
+      const r = await provider.complete({
+        system: `Eres quien redacta presentaciones en humanity.wiki. Devuelve SOLO un JSON válido, sin comentarios ni vallas de código, con esta forma exacta:
+{"titulo":"...","diapositivas":[{"titulo":"...","puntos":["...","..."]}]}
+Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítulo único); de 3 a 5 puntos por diapositiva, frases cortas y concretas; en el idioma del encargo.`,
+        messages: [{ role: 'user', content: `Encargo de la presentación: ${prompt}` }],
+        maxTokens: 3000,
+      });
+
+      let datos: any;
+      try {
+        datos = JSON.parse(r.text.replace(/^```(json)?\s*/i, '').replace(/\s*```\s*$/, ''));
+      } catch {
+        return res.status(500).json({ error: 'La IA no ha devuelto una presentación válida — prueba a describirla de otra forma.' });
+      }
+      const titulo = String(datos.titulo || prompt).slice(0, 120);
+      const diapositivas = (datos.diapositivas || []).slice(0, 12).map((d: any, i: number) => ({
+        id: `D${Date.now().toString(36)}${i}`,
+        elementos: i === 0
+          ? [
+              { id: `E${i}a`, tipo: 'texto', x: 80, y: 190, w: 800, h: 110, texto: String(d.titulo || titulo), tamano: 42, negrita: true, color: '#0f172a', alineacion: 'center' },
+              ...(d.puntos?.length ? [{ id: `E${i}b`, tipo: 'texto', x: 80, y: 320, w: 800, h: 50, texto: String(d.puntos[0]), tamano: 20, color: '#475569', alineacion: 'center' }] : []),
+            ]
+          : [
+              { id: `E${i}a`, tipo: 'texto', x: 60, y: 40, w: 840, h: 70, texto: String(d.titulo || `Diapositiva ${i + 1}`), tamano: 30, negrita: true, color: '#0f172a', alineacion: 'left' },
+              { id: `E${i}b`, tipo: 'texto', x: 60, y: 140, w: 840, h: 340, texto: (d.puntos || []).map((p: any) => `• ${p}`).join('\n'), tamano: 20, color: '#334155', alineacion: 'left' },
+            ],
+      }));
+      if (!diapositivas.length) return res.status(500).json({ error: 'La IA no ha generado diapositivas.' });
+
+      const id = newId('KW');
+      await db.execute(sql`
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)
+        VALUES (${id}, ${titulo}, 'presentacion', ${JSON.stringify({ diapositivas })}::jsonb,
+                false, ${req.user.id}, true, ${req.user.id}, ${req.user.id})
+      `);
+      db.execute(sql`
+        INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
+        VALUES (${req.user.id}, 'documento', ${r.model}, ${r.inputTokens}, ${r.outputTokens},
+                ${r.costCents}, ${r.costCents * AI_PLATFORM_FEE}, ${r.costCents * (1 + AI_PLATFORM_FEE)})
+      `).catch((e: any) => console.error('presentacion charge error:', e));
+      res.json({ id, titulo, diapositivas: diapositivas.length });
+    } catch (e: any) {
+      console.error('presentacion error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/ventanas   { kind: 'imagen', title, config }
+   * Una ventana suelta como publicación (el editor de imágenes guarda aquí
+   * su resultado). Lista blanca corta a propósito: solo lo que tiene editor.
+   */
+  app.post('/api/ventanas', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const kind = String(req.body?.kind || '');
+      if (!['imagen'].includes(kind)) return res.status(400).json({ error: 'Tipo de ventana no admitido aquí.' });
+      const titulo = String(req.body?.titulo || '').trim() || 'Imagen sin título';
+      const id = newId('KW');
+      await db.execute(sql`
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)
+        VALUES (${id}, ${titulo}, ${kind}, ${JSON.stringify(req.body?.config || {})}::jsonb,
+                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id})
+      `);
+      res.json({ id });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * POST /api/ai/documento-bloque   { window_id, accion: 'mejorar'|'continuar', texto? }
    * IA dentro del documento (Fase 2): «mejorar» reescribe el texto de un
    * bloque; «continuar» añade contenido nuevo al final teniendo el documento

@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   X, Sparkles, FileText, Network, Map as MapIcon, FolderKanban,
-  MessageSquare, Loader2, ArrowRight,
+  MessageSquare, Loader2, ArrowRight, MonitorPlay, Image as ImageIcon,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import EditorImagen from './EditorImagen';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -21,12 +22,14 @@ import { cn } from '../../utils/cn';
 //  - A MANO: eliges el tipo, le pones título y se llama al endpoint de
 //    creación de ese tipo (los mismos POST de siempre), abriéndolo al crear.
 
-type TipoCreable = 'documento' | 'lienzo' | 'mapa' | 'proyecto' | 'muro';
+type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'imagen' | 'proyecto' | 'muro';
 
 const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string; conIA: boolean }[] = [
   { tipo: 'documento', label: 'Documento', icon: FileText, descripcion: 'Página estilo Notion con bloques, tablas e imágenes', conIA: true },
+  { tipo: 'presentacion', label: 'Presentación', icon: MonitorPlay, descripcion: 'Frames horizontales estilo PowerPoint, exportable a .pptx', conIA: true },
   { tipo: 'lienzo', label: 'Lienzo', icon: Network, descripcion: 'Pizarra infinita con ventanas conectadas', conIA: true },
   { tipo: 'mapa', label: 'Mapa', icon: MapIcon, descripcion: 'Mapa con indicadores sobre el territorio', conIA: true },
+  { tipo: 'imagen', label: 'Imagen', icon: ImageIcon, descripcion: 'Sube una foto y edítala: recorte, filtros, texto…', conIA: false },
   { tipo: 'proyecto', label: 'Proyecto', icon: FolderKanban, descripcion: 'Tablero de tarjetas por hacer / en curso / hecho', conIA: false },
   { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
@@ -40,6 +43,8 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
   const [cuerpo, setCuerpo] = useState('');
   const [ocupado, setOcupado] = useState<'ia' | 'mano' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Editor de imágenes: la foto subida esperando a editarse/guardarse.
+  const [imagenEnEdicion, setImagenEnEdicion] = useState<string | null>(null);
 
   if (!abierto) return null;
 
@@ -55,6 +60,25 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     if (tipo === 'documento') {
       onCerrar();
       navigate(`/documentos/nuevo?prompt=${encodeURIComponent(p)}`);
+      return;
+    }
+    if (tipo === 'presentacion') {
+      setOcupado('ia');
+      try {
+        const r = await fetch('/api/ai/presentacion', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: p }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'La IA no ha podido crearla.');
+        onCerrar();
+        navigate(`/presentaciones/${j.id}`);
+      } catch (e: any) {
+        fallo(e.message);
+      } finally {
+        setOcupado(o => (o === 'ia' ? null : o));
+      }
       return;
     }
     // Lienzo o mapa: el chat en modo autónomo ya sabe crearlos de verdad —
@@ -116,6 +140,9 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
       if (tipo === 'documento') {
         const j = await llamar('/api/documentos', { titulo: t });
         onCerrar(); navigate(`/documentos/${j.id}`);
+      } else if (tipo === 'presentacion') {
+        const j = await llamar('/api/presentaciones', { titulo: t });
+        onCerrar(); navigate(`/presentaciones/${j.id}`);
       } else if (tipo === 'lienzo') {
         const j = await llamar('/api/graphs', { title: t, status: 'borrador' });
         onCerrar(); navigate(`/grafos/${j.slug}`);
@@ -133,6 +160,45 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
       fallo(e.message);
     } finally {
       setOcupado(o => (o === 'mano' ? null : o));
+    }
+  };
+
+  /** Imagen: se sube el original y se abre el editor encima. */
+  const subirParaEditar = async (archivo: File) => {
+    setError(null);
+    setOcupado('mano');
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: await archivo.arrayBuffer(),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'No se ha podido subir la imagen.');
+      if (!titulo.trim()) setTitulo(archivo.name.replace(/\.[^.]+$/, ''));
+      setImagenEnEdicion(j.url);
+    } catch (e: any) {
+      fallo(e.message);
+    } finally {
+      setOcupado(null);
+    }
+  };
+
+  const guardarImagenEditada = async (url: string) => {
+    try {
+      const r = await fetch('/api/ventanas', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'imagen', titulo: titulo.trim() || 'Imagen sin título', config: { image_url: url } }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'No se ha podido guardar.');
+      setImagenEnEdicion(null);
+      onCerrar();
+      navigate('/mis-publicaciones');
+    } catch (e: any) {
+      setImagenEnEdicion(null);
+      fallo(e.message);
     }
   };
 
@@ -197,23 +263,41 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                 {elegido.conIA ? 'O créalo tú desde cero' : 'Créalo tú'}
               </p>
-              <input
-                value={titulo} onChange={e => setTitulo(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && tipo !== 'muro') crearAMano(); }}
-                placeholder={tipo === 'muro' ? 'Título (opcional)' : `Título de tu ${elegido.label.toLowerCase()}`}
-                className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
-              />
-              {tipo === 'muro' && (
-                <textarea
-                  value={cuerpo} onChange={e => setCuerpo(e.target.value)}
-                  rows={3} placeholder="¿Qué quieres contar?"
-                  className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 resize-none"
-                />
+              {tipo === 'imagen' ? (
+                <>
+                  <input
+                    value={titulo} onChange={e => setTitulo(e.target.value)}
+                    placeholder="Título de la imagen (opcional)"
+                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
+                  />
+                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-colors">
+                    {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                    Elegir una foto — se abrirá el editor
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => e.target.files?.[0] && subirParaEditar(e.target.files[0])} />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <input
+                    value={titulo} onChange={e => setTitulo(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && tipo !== 'muro') crearAMano(); }}
+                    placeholder={tipo === 'muro' ? 'Título (opcional)' : `Título de tu ${elegido.label.toLowerCase()}`}
+                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
+                  />
+                  {tipo === 'muro' && (
+                    <textarea
+                      value={cuerpo} onChange={e => setCuerpo(e.target.value)}
+                      rows={3} placeholder="¿Qué quieres contar?"
+                      className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 resize-none"
+                    />
+                  )}
+                  <button onClick={crearAMano} disabled={ocupado !== null}
+                    className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white rounded-xl text-xs font-black transition-colors">
+                    {ocupado === 'mano' ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creando…</> : <>Crear y abrir <ArrowRight className="w-3.5 h-3.5" /></>}
+                  </button>
+                </>
               )}
-              <button onClick={crearAMano} disabled={ocupado !== null}
-                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white rounded-xl text-xs font-black transition-colors">
-                {ocupado === 'mano' ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creando…</> : <>Crear y abrir <ArrowRight className="w-3.5 h-3.5" /></>}
-              </button>
             </div>
 
             {error && (
@@ -222,6 +306,14 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
           </div>
         )}
       </div>
+
+      {imagenEnEdicion && (
+        <EditorImagen
+          src={imagenEnEdicion}
+          onGuardar={guardarImagenEditada}
+          onCerrar={() => setImagenEnEdicion(null)}
+        />
+      )}
     </div>
   );
 }

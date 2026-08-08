@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import WindowContent from '../components/knowledge/WindowContent';
+import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
 } from '../utils/bloques';
@@ -124,6 +125,8 @@ export default function Documento() {
   const [resultadosPub, setResultadosPub] = useState<any[]>([]);
   const [iaOcupada, setIaOcupada] = useState<string | null>(null);       // 'continuar' | id del bloque
   const [menuDescargar, setMenuDescargar] = useState(false);
+  // Editor de imágenes sobre un bloque imagen: id del bloque en edición.
+  const [imagenEditando, setImagenEditando] = useState<string | null>(null);
   // Contenido real de las ventanas embebidas, cargado en vivo una sola vez.
   const [ventanasEmbebidas, setVentanasEmbebidas] = useState<Record<string, any>>({});
 
@@ -711,8 +714,16 @@ export default function Documento() {
 
       if (b.tipo === 'imagen') {
         return b.url ? (
-          <figure>
+          <figure className="group/img relative">
             <img src={b.url} alt={b.pie || ''} className="rounded-xl max-w-full border border-slate-100" />
+            {editable && (
+              <button
+                onClick={e => { e.stopPropagation(); setImagenEditando(b.id); }}
+                className="absolute top-2 right-2 px-2.5 py-1 bg-white/90 border border-slate-200 rounded-lg text-[10px] font-black text-slate-700 opacity-0 group-hover/img:opacity-100 transition-opacity shadow-sm"
+              >
+                Editar imagen
+              </button>
+            )}
             {b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>}
           </figure>
         ) : editable ? (
@@ -1126,6 +1137,22 @@ export default function Documento() {
           </button>
         </div>
       )}
+
+      {/* Editor de imágenes sobre un bloque imagen */}
+      {imagenEditando && (() => {
+        const b = bloques.find(x => x.id === imagenEditando);
+        return b?.url ? (
+          <EditorImagen
+            src={b.url}
+            onGuardar={url => {
+              setBloques(bs => bs.map(x => x.id === imagenEditando ? { ...x, url } : x));
+              setImagenEditando(null);
+              programarGuardado();
+            }}
+            onCerrar={() => setImagenEditando(null)}
+          />
+        ) : null;
+      })()}
 
       {/* Buscador de publicaciones para embeber (Fase 2) */}
       {buscadorPub !== null && (

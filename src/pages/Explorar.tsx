@@ -32,6 +32,7 @@ const TIPOS: { label: string; kinds: string[] | null }[] = [
   // Los cuatro grandes primero: son lo que la gente construye.
   { label: 'Mapas', kinds: ['mapa'] },
   { label: 'Lienzos', kinds: ['grafo'] },
+  { label: 'Presentaciones', kinds: ['presentacion'] },
   { label: 'Proyectos', kinds: ['proyecto'] },
   { label: 'Bases de datos', kinds: ['tabla', 'ficha'] },
   { label: 'Imágenes', kinds: ['imagen'] },
@@ -556,7 +557,9 @@ export default function Explorar() {
                         key={clave}
                         draggable={!!user}
                         onDragStart={e => e.dataTransfer.setData('application/json', JSON.stringify({ tipo: it.tipo, id: it.id }))}
-                        onClick={() => it.kind === 'pagina' ? navigate(`/documentos/${it.id}`) : setAbierta({ pub: it, editar: false })}
+                        onClick={() => it.kind === 'pagina' ? navigate(`/documentos/${it.id}`)
+                          : it.kind === 'presentacion' ? navigate(`/presentaciones/${it.id}`)
+                          : setAbierta({ pub: it, editar: false })}
                         className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
                       >
                         <div className="px-3.5 pt-3 flex items-center gap-1.5">
