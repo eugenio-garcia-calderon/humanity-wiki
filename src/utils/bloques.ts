@@ -12,7 +12,8 @@
 export type TipoBloque =
   | 'parrafo' | 'titulo1' | 'titulo2' | 'titulo3'
   | 'lista' | 'numerada' | 'tarea'
-  | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla';
+  | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla'
+  | 'publicacion';
 
 export interface Bloque {
   id: string;
@@ -28,6 +29,47 @@ export interface Bloque {
   pie?: string;
   /** Solo tabla: la primera fila es la cabecera. */
   filas?: string[][];
+  /** Solo publicacion (Fase 2): una publicación de la plataforma embebida.
+   *  Se captura lo necesario al insertarla para pintar la tarjeta sin otra
+   *  consulta; el contenido real de una ventana sí se carga en vivo. */
+  pubTipo?: string;   // ventana | lienzo | mapa | proyecto | muro
+  entityId?: string;
+  pubKind?: string;   // el kind si es una ventana (tabla, imagen, …)
+  pubTitulo?: string;
+  pubAutor?: string;
+  pubUrl?: string;    // /grafos/:slug, /mapas/:slug, /proyectos/:slug…
+}
+
+/** Un tramo de texto con su formato resuelto — para las exportaciones (Word,
+ *  PDF), que no pueden renderizar marcado markdown por sí mismas. */
+export interface TramoInline {
+  texto: string;
+  negrita?: boolean;
+  cursiva?: boolean;
+  codigo?: boolean;
+  enlace?: string;
+}
+
+export function tokenizarInline(texto: string): TramoInline[] {
+  const out: TramoInline[] = [];
+  const re = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\(([^)]+)\))/g;
+  let ultimo = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(texto))) {
+    if (m.index > ultimo) out.push({ texto: texto.slice(ultimo, m.index) });
+    const s = m[0];
+    if (s.startsWith('**')) out.push({ texto: s.slice(2, -2), negrita: true });
+    else if (s.startsWith('`')) out.push({ texto: s.slice(1, -1), codigo: true });
+    else if (s.startsWith('*')) out.push({ texto: s.slice(1, -1), cursiva: true });
+    else {
+      const link = s.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (link) out.push({ texto: link[1], enlace: link[2] });
+      else out.push({ texto: s });
+    }
+    ultimo = m.index + s.length;
+  }
+  if (ultimo < texto.length) out.push({ texto: texto.slice(ultimo) });
+  return out.length ? out : [{ texto: '' }];
 }
 
 export const nuevoIdBloque = () =>
@@ -143,6 +185,7 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       case 'separador': salida.push('---'); break;
       case 'codigo': salida.push('```' + (b.lenguaje || '') + '\n' + (b.texto || '') + '\n```'); break;
       case 'imagen': salida.push(`![${b.pie || ''}](${b.url || ''})`); break;
+      case 'publicacion': salida.push(`[${b.pubTitulo || 'Publicación'}](${b.pubUrl || ''})`); break;
       case 'tabla': {
         const filas = b.filas || [];
         if (!filas.length) break;
