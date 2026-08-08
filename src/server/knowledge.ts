@@ -662,6 +662,71 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   });
 
   /**
+   * GET /api/publicaciones[?autor=U_…][&q=…]
+   * TODO lo publicado en la plataforma, de todo el mundo, en un solo listado:
+   * las ventanas de conocimiento de los grafos públicos y las publicaciones
+   * del muro. Es lo que alimenta «Explorar» y «Mis publicaciones».
+   * Los lienzos personales quedan fuera salvo que pidas los tuyos.
+   */
+  app.get('/api/publicaciones', async (req: Request, res: Response) => {
+    try {
+      const autor = (req.query.autor as string) || null;
+      const q = (req.query.q as string || '').trim();
+      const like = q ? `%${q}%` : null;
+      const limit = Math.min(Number(req.query.limit) || 120, 300);
+      // Solo el dueño ve lo suyo de su lienzo personal.
+      const incluirPersonales = !!autor && autor === req.user?.id;
+
+      const ventanas = await db.execute(sql`
+        SELECT DISTINCT ON (w.id)
+               w.id, w.title, w.kind, w.config, w.views, w.is_ai_generated, w.created_at,
+               w.creator_user_id, u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               g.slug AS grafo_slug, g.title AS grafo_titulo,
+               coalesce(g.center->>'personal','') = '1' AS es_personal
+        FROM knowledge_windows w
+        JOIN graph_windows gw ON gw.window_id = w.id
+        JOIN knowledge_graphs g ON g.id = gw.graph_id
+        LEFT JOIN users u ON u.id = w.creator_user_id
+        WHERE w.archived_at IS NULL AND w.deleted_at IS NULL AND g.archived_at IS NULL
+          AND (${incluirPersonales} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          AND (${autor}::text IS NULL OR w.creator_user_id = ${autor})
+          AND (${like}::text IS NULL OR w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
+        ORDER BY w.id, w.created_at DESC
+        LIMIT ${limit}
+      `);
+
+      const muro = await db.execute(sql`
+        SELECT p.id, p.title, p.body, p.created_at, p.author_user_id AS creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
+        FROM publications p LEFT JOIN users u ON u.id = p.author_user_id
+        WHERE p.archived_at IS NULL
+          AND (${autor}::text IS NULL OR p.author_user_id = ${autor})
+          AND (${like}::text IS NULL OR p.title ILIKE ${like} OR p.body ILIKE ${like})
+        ORDER BY p.created_at DESC
+        LIMIT ${limit}
+      `);
+
+      const todo = [
+        ...(ventanas.rows as any[]).map(w => ({
+          tipo: 'ventana', id: w.id, titulo: w.title, kind: w.kind, config: w.config,
+          vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
+          autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
+          donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
+        })),
+        ...(muro.rows as any[]).map(p => ({
+          tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
+          kind: 'publicacion', config: { body: p.body },
+          vistas: 0, ia: false, fecha: p.created_at,
+          autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
+          donde: 'El muro', donde_slug: null, personal: false,
+        })),
+      ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+      res.json(todo.slice(0, limit));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * GET /api/knowledge/related?q=incendios&exclude_graph=KG…
    * The connection recommender: how much does the common space already know
    * about a topic, and which concrete pieces could you link instead of

@@ -14,6 +14,7 @@ import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
 import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
 import { registerUploadRoutes } from "./src/server/uploads.js";
+import { registerRoadmapRoutes } from "./src/server/roadmap.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
@@ -246,6 +247,7 @@ async function startServer() {
   // conocimiento con creador, valoración 0-10 y resolución por palabras clave.
   registerKnowledgeRoutes(app, db);
   registerUploadRoutes(app, db);
+  registerRoadmapRoutes(app, db);
 
   // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
   // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de

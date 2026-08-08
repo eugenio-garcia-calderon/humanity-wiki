@@ -87,7 +87,7 @@ data for measured data is the most expensive error made in this project so far.
 ## Forbidden, with the reason
 
 1. **`drizzle-kit push`**: hangs in a non-interactive shell and kills the session. Use `generate` + `psql -f`.
-2. **Deleting knowledge**: archive with `archived_at`. Constitution, rule 6.
+2. **Deleting knowledge by accident**: archive with `archived_at`. Constitution rule 6 (v1.1) does allow the creator to ask for permanent deletion — that path goes through the 15-day recycle bin (`deleted_at`), never a bare DELETE.
 3. **A write route without a role check**: this already happened and there is an open hole in production because of it.
 4. **Real secrets in versioned files**, and never copied into `memory/`. To check whether a key is configured, read `process.env.X` at runtime; never print its value.
 5. **Hex colours and bare `<button>` in pages**: use `src/components/ui/`.
