@@ -86,8 +86,11 @@ export default function Layout() {
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
+  // Explorar/Mis publicaciones se fusionaron en una sola página con su propio
+  // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
+  // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage;
 
   if (isEmbed) {
     return (

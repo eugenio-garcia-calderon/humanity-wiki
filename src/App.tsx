@@ -90,9 +90,13 @@ export default function App() {
                 <Route path="retos" element={<Challenges />} />
                 <Route path="soluciones" element={<Solutions />} />
                 <Route path="territorios" element={<Territories />} />
-                <Route path="proyectos" element={<Projects />} />
+                {/* Las iniciativas vivían en /proyectos hasta que los proyectos
+                    tipo Trello ocuparon esa ruta (2026-08-08) y las dejaron
+                    inalcanzables. La tabla se llama `initiatives` desde hace
+                    tiempo, así que la URL pasa a decir lo mismo. */}
+                <Route path="iniciativas" element={<Projects />} />
                 <Route path="organizaciones" element={<Organizations />} />
-                <Route path="proyectos/:id" element={<ProjectProfile />} />
+                <Route path="iniciativas/:id" element={<ProjectProfile />} />
                 <Route path="organizaciones/:id" element={<OrganizationProfile />} />
             <Route path="mapa" element={<MapPage />} />
                 <Route path="login" element={<Login />} />

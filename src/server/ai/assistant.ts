@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { getProvider, listProviders, type AIMessage, type AIContentBlock , AI_MODELS, AI_PLATFORM_FEE } from './provider.js';
 import { ROLE } from '../auth.js';
+import { autoOrganizarCarpetas } from '../knowledge.js';
 
 // ============================================================================
 // Asistente IA universal — Fase 9
@@ -46,6 +47,9 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // Fase 12: mapas de usuario — vistas del mapa publicadas a nombre de la
   // persona, indexadas e integradas con el conocimiento de la plataforma.
   CREATE_MAP: { minLevel: ROLE.USER, entity: 'user_maps', description: 'Crear un mapa público a nombre del usuario' },
+  // 2026-08-08: "ordename las publicaciones por carpetas" — sin parámetros,
+  // el servidor lee todo lo que ha publicado quien pregunta y las agrupa.
+  ORGANIZAR_CARPETAS: { minLevel: ROLE.USER, entity: 'carpetas', description: 'Organizar tus publicaciones en carpetas temáticas' },
 };
 
 /**
@@ -187,6 +191,7 @@ GRAFOS DE CONOCIMIENTO PUBLICADOS (lienzos curados de un tema; si la consulta de
 ${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
 Si el usuario pide CREAR un grafo (o explorar un tema del que NO existe grafo), propón la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales. Cada window: {title, kind, config, relation, relation_label}. kind SOLO puede ser: publicacion (config: {title, body}), imagen ({image_url, caption, source}), video ({youtube_id, channel}), wikipedia ({wiki_lang, wiki_page}), enlace ({url, title}), grafica ({chart: 'line'|'donut', series/segments...}), ficha ({rows: [{label, value}]}), texto ({body}). relation (la arista desde el centro): contexto | causa | dato | fuente | apoya | contradice | matiza, con relation_label como pregunta corta (p. ej. "¿qué está pasando?"). Investiga ANTES en internet si está activado y llena las ventanas con datos, cifras y fuentes REALES (nunca inventadas); el grafo nace en borrador para revisión humana. Es una de tus funciones principales: sé un auténtico creador de grafos.
 Si el usuario pide crear un MAPA a su nombre (una vista pública del mapa de la humanidad), propón la acción CREATE_MAP con title, description y opcionalmente territorio (slug, p. ej. "espana"), nivel ("objetivo"|"indicador"|"marcador"|"metrica") e id (el id de esa entidad) — se publicará a su nombre y podrá abrirse con OPEN_USER_MAP {slug}. Límite: los usuarios de nivel 1 pueden tener hasta 5 grafos y 5 mapas; nivel 2+ sin límite.
+Si el usuario pide ORDENAR, ORGANIZAR o CLASIFICAR sus publicaciones en carpetas (por ejemplo "ordename las publicaciones por carpetas"), propón la acción ORGANIZAR_CARPETAS SIN parámetros (params: {}): el servidor lee todo lo que ha publicado y las agrupa por tema, creando las carpetas que hagan falta. Una misma publicación puede acabar en varias carpetas a la vez.
 
 REGLAS:
 1. Responde SIEMPRE en español, de forma directa y sin adornos.
@@ -724,6 +729,11 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
             `);
           }
           return { ok: true, entityId: id, entityType: 'causes' };
+        }
+        case 'ORGANIZAR_CARPETAS': {
+          const resultado = await autoOrganizarCarpetas(db, actorId);
+          if (resultado.ok === false) return { ok: false, error: resultado.error };
+          return { ok: true, entityId: null, entityType: 'carpetas', carpetas: resultado.carpetas };
         }
         default:
           return { ok: false, error: `Acción no implementada: ${type}` };

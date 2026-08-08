@@ -199,7 +199,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         case 'OPEN_CHALLENGE': navigate(`/retos/${p.slug || p.challengeId}`); break;
         case 'OPEN_SOLUTION':  navigate(`/soluciones/${p.slug || p.solutionId}`); break;
         case 'SHOW_MARKET':    navigate('/mercado'); break;
-        case 'SHOW_INITIATIVES': navigate('/proyectos'); break;
+        case 'SHOW_INITIATIVES': navigate('/iniciativas'); break;
         case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/grafos/${p.slug || p.graphId || ''}`); break;
         case 'OPEN_USER_MAP': navigate(`/mapas/${p.slug || p.mapId || ''}`); break;
         default: break;

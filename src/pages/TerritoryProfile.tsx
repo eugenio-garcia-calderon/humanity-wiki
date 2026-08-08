@@ -104,7 +104,7 @@ export default function TerritoryProfile() {
             </h2>
             <div className="space-y-4">
               {territoryProjects.length > 0 ? territoryProjects.map(project => (
-                <Link to={`/proyectos/${slugify(project.name)}`} key={project.id} className="block">
+                <Link to={`/iniciativas/${slugify(project.name)}`} key={project.id} className="block">
                   <Card className="p-5 flex flex-col sm:flex-row gap-4 justify-between sm:items-start group hover:border-emerald-300 transition-all cursor-pointer relative">
                     <div className="pr-8 sm:pr-0">
                       <h4 className="text-lg font-medium leading-tight group-hover:text-emerald-600">{project.name}</h4>

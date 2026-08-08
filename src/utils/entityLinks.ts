@@ -71,7 +71,7 @@ export function resolveEntityLink(type: string, id: string, helpers: any): Resol
     }
     case 'projects': {
       const p = helpers.projects?.find((x: any) => x.id === id);
-      return p ? { label: p.name, to: `/proyectos/${slugify(p.name)}` } : { label: `${typeLabel} ${id}`, to: null };
+      return p ? { label: p.name, to: `/iniciativas/${slugify(p.name)}` } : { label: `${typeLabel} ${id}`, to: null };
     }
     case 'users':
       return { label: 'Persona', to: `/personas/${id}` };
