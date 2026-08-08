@@ -16,9 +16,9 @@ import path from 'node:path';
 // base64: evita el +33% de tamaño y, sobre todo, esquiva el `express.json()`
 // global de server.ts (100 kB) sin tener que tocar ese archivo congelado.
 
-/** Solo imágenes, y la extensión la decidimos NOSOTROS a partir del tipo
- *  declarado — nunca del nombre que envía el navegador. */
-const TIPOS: Record<string, string> = {
+/** La extensión la decidimos NOSOTROS a partir del tipo declarado — nunca del
+ *  nombre que envía el navegador. */
+const IMAGENES: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
@@ -26,6 +26,24 @@ const TIPOS: Record<string, string> = {
   'image/avif': 'avif',
   'image/svg+xml': 'svg',
 };
+
+/** Documentos que se pueden arrastrar al lienzo (2026-08-07). Se sirven SIEMPRE
+ *  como descarga: un PDF o un SVG incrustado en nuestro dominio podría ejecutar
+ *  cosas en él, y aquí no hace falta correr ese riesgo. */
+const DOCUMENTOS: Record<string, string> = {
+  'application/pdf': 'pdf',
+  'text/csv': 'csv',
+  'application/json': 'json',
+  'application/zip': 'zip',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+};
+
+const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS };
+
+/** Lo que se puede mostrar dentro de la página; el resto, descarga. */
+const EN_LINEA = new Set(Object.values(IMAGENES).filter(e => e !== 'svg'));
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -45,11 +63,13 @@ export function registerUploadRoutes(app: Express, _db: any) {
     immutable: true,
     index: false,
     dotfiles: 'deny',
-    setHeaders: res => {
-      // Un SVG subido puede llevar scripts: se sirve como descarga inerte y
-      // sin poder ejecutar nada en nuestro dominio.
+    setHeaders: (res, ruta) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'");
+      // Solo las imágenes de verdad se pintan en la página. Un PDF, un SVG o
+      // un ZIP se descargan: así nada de lo subido se ejecuta en el dominio.
+      const ext = path.extname(ruta).slice(1).toLowerCase();
+      if (!EN_LINEA.has(ext)) res.setHeader('Content-Disposition', 'attachment');
     },
   }));
 
@@ -64,7 +84,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
         const ext = TIPOS[tipo];
         if (!ext) {
           return res.status(400).json({
-            error: `Formato no admitido. Se aceptan: ${Object.keys(TIPOS).join(', ')}.`,
+            error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG) y documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX).`,
           });
         }
 
@@ -73,7 +93,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
           return res.status(400).json({ error: 'El archivo llegó vacío.' });
         }
         if (bytes.length > MAX_BYTES) {
-          return res.status(413).json({ error: 'La imagen supera los 10 MB.' });
+          return res.status(413).json({ error: 'El archivo supera los 10 MB.' });
         }
 
         // Carpetas por mes: miles de ficheros en un solo directorio hacen
@@ -89,6 +109,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
           url: `/uploads/${rel.split(path.sep).join('/')}/${nombre}`,
           bytes: bytes.length,
           type: tipo,
+          esImagen: tipo in IMAGENES,
         });
       } catch (e: any) {
         console.error('upload error:', e);
