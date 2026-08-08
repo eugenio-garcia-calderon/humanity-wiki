@@ -561,6 +561,22 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
       );
     }
 
+    // Documento estilo Notion (2026-08-08): el contenido vive en
+    // config.bloques; la miniatura enseña sus primeras líneas de texto.
+    case 'pagina': {
+      const bloques: any[] = Array.isArray(config.bloques) ? config.bloques : [];
+      const resumen = bloques
+        .filter(b => typeof b.texto === 'string' && b.texto.trim())
+        .slice(0, 6)
+        .map(b => b.texto.replace(/[*_`#>]/g, ''))
+        .join(' — ');
+      return (
+        <p className={isNode ? 'text-[11px] text-slate-600 leading-snug line-clamp-4' : 'text-sm text-slate-700 leading-relaxed'}>
+          {resumen || 'Documento vacío.'}
+        </p>
+      );
+    }
+
     case 'texto':
     default:
       return (

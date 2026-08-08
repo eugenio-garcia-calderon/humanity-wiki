@@ -323,6 +323,89 @@ export async function generarImagenNanoBanana(prompt: string): Promise<ImagenGen
 }
 
 // ----------------------------------------------------------------------------
+// STREAMING — el texto según se genera (2026-08-08, para los documentos:
+// «según lo va generando aparece»). Solo Claude por ahora: es el único sitio
+// que lo necesita y añadir el parseo SSE de Gemini sin usarlo sería código
+// muerto. `AIProvider.complete()` sigue siendo la vía normal; esto es una
+// función aparte, como Nano Banana, porque su contrato es distinto (recibe un
+// callback por trozo en vez de devolver el texto entero).
+// ----------------------------------------------------------------------------
+export interface StreamResult {
+  texto: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  costCents: number;
+  durationMs: number;
+}
+
+export async function completarClaudeStream(
+  req: { system: string; messages: AIMessage[]; maxTokens?: number; model?: string },
+  onDelta: (texto: string) => void,
+): Promise<StreamResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY no está configurada.');
+  }
+  const started = Date.now();
+  const model = req.model && AI_MODELS[req.model] && providerOfModel(req.model) === 'claude'
+    ? req.model : (process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY!,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: req.maxTokens ?? 8192,
+      temperature: 0.3,
+      system: req.system,
+      messages: req.messages,
+      stream: true,
+    }),
+  });
+  if (!res.ok || !res.body) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Error de la API de Claude (${res.status}): ${detail.slice(0, 300)}`);
+  }
+
+  // La API emite Server-Sent Events: líneas `data: {json}` separadas por
+  // líneas en blanco. Los trozos de texto llegan en `content_block_delta`;
+  // los tokens de entrada en `message_start` y los de salida en
+  // `message_delta` del final.
+  let texto = '';
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let buffer = '';
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lineas = buffer.split('\n');
+    buffer = lineas.pop() || '';
+    for (const linea of lineas) {
+      if (!linea.startsWith('data:')) continue;
+      let ev: any;
+      try { ev = JSON.parse(linea.slice(5)); } catch { continue; }
+      if (ev.type === 'message_start') inputTokens = ev.message?.usage?.input_tokens ?? 0;
+      else if (ev.type === 'content_block_delta' && ev.delta?.text) { texto += ev.delta.text; onDelta(ev.delta.text); }
+      else if (ev.type === 'message_delta') outputTokens = ev.usage?.output_tokens ?? outputTokens;
+    }
+  }
+
+  const price = AI_MODELS[model] || PRICE_PER_MTOK;
+  return {
+    texto, model, inputTokens, outputTokens,
+    costCents: (inputTokens / 1_000_000) * price.input + (outputTokens / 1_000_000) * price.output,
+    durationMs: Date.now() - started,
+  };
+}
+
+// ----------------------------------------------------------------------------
 // Registro de proveedores
 // ----------------------------------------------------------------------------
 // Añadir OpenAI/Mistral en el futuro es implementar `AIProvider` y

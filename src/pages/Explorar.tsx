@@ -36,7 +36,7 @@ const TIPOS: { label: string; kinds: string[] | null }[] = [
   { label: 'Imágenes', kinds: ['imagen'] },
   { label: 'Vídeos', kinds: ['video'] },
   { label: 'Notas', kinds: ['texto'] },
-  { label: 'Documentos', kinds: ['documento'] },
+  { label: 'Documentos', kinds: ['documento', 'pagina'] },
   { label: 'Datos', kinds: ['grafica'] },
   { label: 'Enlaces', kinds: ['enlace', 'wikipedia'] },
   { label: 'Del muro', kinds: ['publicacion'] },
@@ -547,7 +547,7 @@ export default function Explorar() {
                         key={clave}
                         draggable={!!user}
                         onDragStart={e => e.dataTransfer.setData('application/json', JSON.stringify({ tipo: it.tipo, id: it.id }))}
-                        onClick={() => setAbierta({ pub: it, editar: false })}
+                        onClick={() => it.kind === 'pagina' ? navigate(`/documentos/${it.id}`) : setAbierta({ pub: it, editar: false })}
                         className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
                       >
                         <div className="px-3.5 pt-3 flex items-center gap-1.5">

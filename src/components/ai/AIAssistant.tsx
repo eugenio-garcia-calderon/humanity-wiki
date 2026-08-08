@@ -251,6 +251,23 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
       // fast-path no debe secuestrar la intención abriendo un grafo parecido —
       // va directo a la IA, que sabe ejecutar CREATE_KNOWLEDGE_GRAPH/CREATE_MAP.
       const wantsToCreate = /\b(crea|créa\w*|creame|crear|hazme?|genera\w*|génera\w*|constru\w+|nuevo\s+(grafo|mapa)|nueva\s+ventana)\b/i.test(text);
+
+      // Documento pedido al chat (2026-08-08): «hazme un informe de…»,
+      // «dámelo en forma de documento»… no se responde con texto en la
+      // burbuja: se abre /documentos/nuevo y el documento se ve escribirse en
+      // directo, quedando guardado en las publicaciones de quien lo pidió.
+      const pideDocumento =
+        /\b(documento|informe|acta|art[ií]culo|memoria|dossier|redacci[oó]n)\b/i.test(text) &&
+        (wantsToCreate || /\b(dame|d[áa]melo|en forma de|como (un )?documento|convi[eé]rte\w*|p[áa]salo|redacta)\b/i.test(text));
+      if (pideDocumento && user && !pendingAttachment) {
+        setMessages(m => [...m, {
+          role: 'assistant',
+          content: 'Abriendo el documento — lo verás escribirse en directo. Quedará guardado en tus publicaciones como borrador privado.',
+        }]);
+        navigate(`/documentos/nuevo?prompt=${encodeURIComponent(text)}${conversationId ? `&conv=${conversationId}` : ''}`);
+        return;
+      }
+
       if (mode !== 'dock' && !pendingAttachment && !wantsToCreate) {
         try {
           const [gr, pr] = await Promise.all([
