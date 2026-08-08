@@ -403,12 +403,37 @@ export function registerDocumentosRoutes(app: Express, db: any) {
             if (!filas.length) break;
             doc.moveDown(0.3);
             const ancho = (doc.page.width - doc.page.margins.left - doc.page.margins.right) / (filas[0].length || 1);
+            const fondoPagina = () => doc.page.height - doc.page.margins.bottom;
             for (let fi = 0; fi < filas.length; fi++) {
+              // Una tabla larga salta de página fila a fila, repitiendo la
+              // cabecera para que la continuación se entienda sola.
+              if (doc.y + 24 > fondoPagina()) {
+                doc.addPage();
+                if (fi > 0) {
+                  const yCab = doc.y;
+                  let altoCab = 0;
+                  filas[0].forEach((celda, ci) => {
+                    doc.font('Helvetica-Bold').fontSize(9).fillColor('#1e293b');
+                    doc.text(celda.replace(/\*\*/g, ''), doc.page.margins.left + ci * ancho + 4, yCab + 3, { width: ancho - 8 });
+                    altoCab = Math.max(altoCab, doc.y - yCab);
+                  });
+                  doc.y = yCab + altoCab + 6;
+                  doc.moveTo(doc.page.margins.left, doc.y - 2).lineTo(doc.page.width - doc.page.margins.right, doc.y - 2).strokeColor('#cbd5e1').stroke();
+                }
+              }
               const y0 = doc.y;
               let alto = 0;
               filas[fi].forEach((celda, ci) => {
-                doc.font(fi === 0 ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).fillColor('#1e293b');
-                doc.text(celda.replace(/\*\*/g, ''), doc.page.margins.left + ci * ancho + 4, y0 + 3, { width: ancho - 8 });
+                // El marcado inline de la celda (negritas, código) se respeta
+                // igual que en los párrafos, tramo a tramo con `continued`.
+                const x = doc.page.margins.left + ci * ancho + 4;
+                const tramos = tokenizarInline(celda);
+                tramos.forEach((t, ti) => {
+                  doc.font(fi === 0 || t.negrita ? 'Helvetica-Bold' : t.codigo ? 'Courier' : t.cursiva ? 'Helvetica-Oblique' : 'Helvetica')
+                    .fontSize(9).fillColor('#1e293b');
+                  if (ti === 0) doc.text(t.texto, x, y0 + 3, { width: ancho - 8, continued: ti < tramos.length - 1 });
+                  else doc.text(t.texto, { width: ancho - 8, continued: ti < tramos.length - 1 });
+                });
                 alto = Math.max(alto, doc.y - y0);
               });
               doc.y = y0 + alto + 6;
