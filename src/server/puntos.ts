@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { ROLE } from './auth.js';
 
 // ============================================================================
 // PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
@@ -61,6 +62,30 @@ export function registerPuntosRoutes(app: Express, db: any) {
         ORDER BY created_at DESC LIMIT 20
       `);
       res.json({ puntos: Number((saldo.rows[0] as any)?.puntos ?? 0), movimientos: movimientos.rows });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * POST /api/admin/users/:id/puntos   { cantidad }
+   * Un administrador regala o retira puntos a mano (motivo `ajuste_admin`).
+   * Positivo suma, negativo resta; con decimales, igual que el resto del
+   * sistema. Pasa por `otorgarPuntos` como todo lo demás: saldo y libro de
+   * movimientos siempre juntos.
+   */
+  app.post('/api/admin/users/:id/puntos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const cantidad = Number(req.body?.cantidad);
+      if (!Number.isFinite(cantidad) || cantidad === 0) {
+        return res.status(400).json({ error: 'Indica una cantidad distinta de cero (positiva para dar, negativa para quitar).' });
+      }
+      const existe = await db.execute(sql`SELECT id FROM users WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!existe.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado.' });
+      await otorgarPuntos(db, req.params.id, cantidad, 'ajuste_admin');
+      const saldo = await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.params.id}`);
+      res.json({ success: true, puntos: Number((saldo.rows[0] as any)?.puntos ?? 0) });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 }

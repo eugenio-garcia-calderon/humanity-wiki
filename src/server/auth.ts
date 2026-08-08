@@ -536,7 +536,7 @@ export function registerAuthRoutes(app: Express, db: any) {
       }
       const result = await db.execute(sql`
         SELECT id, uuid, email, name, display_name, role_level, email_verified,
-               reputation, impact_score, last_login_at, created_at, archived_at
+               reputation, impact_score, puntos, last_login_at, created_at, archived_at
         FROM users ORDER BY created_at DESC
       `);
       res.json(result.rows);
@@ -565,6 +565,31 @@ export function registerAuthRoutes(app: Express, db: any) {
         WHERE id = ${req.params.id}
       `);
       res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/admin/users/:id/reset-link
+   * Un administrador genera un enlace de restablecimiento para entregárselo
+   * al usuario por el canal que sea (no hay proveedor de correo todavía).
+   * Reutiliza la misma tabla y la misma página /restablecer que el flujo de
+   * «he olvidado mi contraseña»; el token caduca en 24 h.
+   */
+  app.post('/api/admin/users/:id/reset-link', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const fila = await db.execute(sql`SELECT id, email FROM users WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!fila.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado.' });
+      const token = crypto.randomBytes(32).toString('hex');
+      await db.execute(sql`
+        INSERT INTO password_resets (token, user_id, expires_at)
+        VALUES (${token}, ${req.params.id}, now() + interval '24 hours')
+      `);
+      res.json({ url: `/restablecer?token=${token}`, caduca_horas: 24, email: (fila.rows[0] as any).email });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
