@@ -4,11 +4,12 @@ import {
   Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2,
+  ArrowLeft, Users2, Globe2, Plus,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import WindowContent from '../components/knowledge/WindowContent';
 import FichaPublicacion, { type Publicacion } from '../components/knowledge/FichaPublicacion';
+import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 
 // ============================================================================
@@ -128,6 +129,7 @@ export default function Explorar() {
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   const [verPapelera, setVerPapelera] = useState(false);
+  const [creadorAbierto, setCreadorAbierto] = useState(false);
   const [papelera, setPapelera] = useState<any[]>([]);
   const debounce = useRef<any>(null);
 
@@ -419,6 +421,13 @@ export default function Explorar() {
               (2026-08-08 — antes eran tres bloques apilados que empujaban las
               publicaciones muy abajo en la pantalla). */}
           <div className="flex items-center gap-2 flex-wrap mb-2">
+            <button
+              onClick={() => setCreadorAbierto(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black shadow-sm transition-colors shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" /> Crear
+            </button>
+
             <div className="inline-flex p-0.5 bg-slate-100 rounded-lg shrink-0">
               <button
                 onClick={() => cambiarModo('humanidad')}
@@ -697,6 +706,8 @@ export default function Explorar() {
           onCerrar={() => setAbierta(null)}
         />
       )}
+
+      <CreadorPublicacion abierto={creadorAbierto} onCerrar={() => setCreadorAbierto(false)} />
     </div>
   );
 }
