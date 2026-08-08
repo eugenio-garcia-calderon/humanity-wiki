@@ -13,7 +13,7 @@ import {
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon, MapPin,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
   FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown, Flame,
-  CheckSquare, Table2, Rocket,
+  CheckSquare, Table2, Rocket, Lock, Unlock,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
@@ -255,18 +255,26 @@ function CenterNode({ data }: NodeProps<any>) {
 // ----------------------------------------------------------------------------
 // Círculo de relación: protagonista clicable — abre los atributos de la unión.
 // ----------------------------------------------------------------------------
-function RelacionNode({ data }: NodeProps<any>) {
+function RelacionNode({ data, selected }: NodeProps<any>) {
   const d = data as any;
   const rel = RELATION_STYLE[d.relation] || RELATION_STYLE.contexto;
+  // Editable como cualquier otro elemento del lienzo (petición del usuario,
+  // 2026-08-08): arrastrar, redimensionar y bloquear, con el mismo cromado
+  // que ya llevan las ventanas — la geometría se guarda en graph_edges.layout.
+  const puedeGestionar = !!d.onGeometria;
+  const puedeDeformar = puedeGestionar && !d.locked;
+  const marcado = !!selected;
+  const aMedida = !!d.size;
   return (
     <div
       onClick={() => (d.active ? d.onOpenEdge?.(d.edgeId) : d.onFocus?.(d.edgeId))}
       className={cn(
-        'group rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer',
-        'transition-all duration-200 ease-out hover:scale-110 active:scale-95',
+        'group rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer relative',
+        'transition-all duration-200 ease-out hover:scale-105 active:scale-95',
+        aMedida && 'w-full h-full',
       )}
       style={{
-        width: CIRCLE_SIZE, height: CIRCLE_SIZE,
+        width: aMedida ? undefined : CIRCLE_SIZE, height: aMedida ? undefined : CIRCLE_SIZE,
         backgroundColor: rel.bg,
         border: '4px solid rgba(255,255,255,0.9)',
         boxShadow: d.active
@@ -276,6 +284,28 @@ function RelacionNode({ data }: NodeProps<any>) {
       title={d.active ? 'Ver los atributos de esta conexión' : 'Hacer zoom a esta rama'}
     >
       <CenterHandles />
+      {puedeDeformar && (
+        <TiradoresTamano
+          visible={marcado}
+          minW={80} minH={80}
+          keepAspectRatio
+          onFin={(w, h) => d.onGeometria(d.edgeId, { size: { w, h } })}
+        />
+      )}
+      {puedeGestionar && <MarcoSeleccion visible={marcado} radio={999} />}
+      {puedeDeformar && <PuntosConexion visible={marcado} />}
+      {puedeGestionar && (
+        <button
+          onClick={e => { e.stopPropagation(); d.onGeometria(d.edgeId, { locked: !d.locked }); }}
+          title={d.locked ? 'Desbloquear' : 'Bloquear'}
+          className={cn(
+            'absolute -top-1.5 -right-1.5 z-10 w-6 h-6 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center transition-opacity',
+            marcado || d.locked ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          )}
+        >
+          {d.locked ? <Lock className="w-3 h-3 text-amber-600" /> : <Unlock className="w-3 h-3 text-slate-400" />}
+        </button>
+      )}
       {d.label ? (
         <>
           <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-0.5 opacity-75" style={{ color: rel.text }}>
@@ -558,10 +588,10 @@ export function GrafoLienzo({ slug, toolbar }: {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || 'No se pudo crear la ventana.');
-    await fetch(`/api/graphs/${data.graph.id}/edges`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ from_window_id: null, to_window_id: json.id, relation: 'contexto', label: null }),
-    }).catch(() => {});
+    // Sin conexión automática al núcleo (petición del usuario, 2026-08-08):
+    // pegar o soltar algo lo deja LIBRE en el punto donde cae. Conectarlo es
+    // una decisión aparte — el botón «+» de un elemento, o arrastrar desde un
+    // punto de conexión.
   }, [data?.graph?.id]);
 
   /** Sube el archivo y lo convierte en la ventana que corresponda. */
@@ -635,6 +665,13 @@ export function GrafoLienzo({ slug, toolbar }: {
     return true;
   }, [traerArchivo, traerTexto, load]);
 
+  // Dónde está el ratón AHORA MISMO sobre el lienzo (petición del usuario,
+  // 2026-08-08): Ctrl/Cmd+V no trae coordenadas propias, así que se guarda la
+  // última posición vista para que lo pegado caiga justo ahí, no en un punto
+  // fijo. Va en un ref, no en estado: se actualiza en cada pixel de
+  // movimiento y no debe disparar un re-render.
+  const ratonEnLienzo = useRef<{ x: number; y: number } | null>(null);
+
   useEffect(() => {
     if (!data?.can_edit) return;
     const onPaste = async (e: ClipboardEvent) => {
@@ -642,7 +679,8 @@ export function GrafoLienzo({ slug, toolbar }: {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       if (!e.clipboardData) return;
-      if (await traer(e.clipboardData)) e.preventDefault();
+      const p = ratonEnLienzo.current && rf.current?.screenToFlowPosition(ratonEnLienzo.current);
+      if (await traer(e.clipboardData, p ? { x: p.x - 160, y: p.y - 90 } : undefined)) e.preventDefault();
     };
     window.addEventListener('paste', onPaste);
     return () => window.removeEventListener('paste', onPaste);
@@ -822,18 +860,26 @@ export function GrafoLienzo({ slug, toolbar }: {
 
     const relNodes: Node[] = sortedCenter.map((e, i) => {
       const ang = startAngle + (2 * Math.PI * i) / N;
+      // Con una posición o un tamaño propios, mandan sobre el anillo
+      // calculado: es lo que persiste el arrastre y el redimensionado.
+      const size = e.layout?.size as { w: number; h: number } | undefined;
+      const propia = e.layout?.pos as { x: number; y: number } | undefined;
+      const half = (size?.w ?? CIRCLE_SIZE) / 2;
       return {
         id: `rel-${e.id}`, type: 'relacion',
-        position: {
-          x: Math.cos(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
-          y: Math.sin(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
+        position: propia || {
+          x: Math.cos(ang) * RING_RADIUS - half,
+          y: Math.sin(ang) * RING_RADIUS - half,
         },
+        width: size?.w, height: size?.h,
         zIndex: 10,
-        draggable: false, selectable: false,
+        draggable: !!data.can_edit && !e.locked, selectable: true,
         data: {
           relation: e.relation, label: e.label, edgeId: e.id,
           onOpenEdge: openEdge, onFocus: focusBranch,
           active: activeBranch?.edgeId === e.id,
+          size, locked: e.locked,
+          onGeometria: data.can_edit ? guardarGeometriaArista : undefined,
         },
         style: activeBranch && activeBranch.edgeId !== e.id ? { opacity: 0.3, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
       };
@@ -914,6 +960,32 @@ export function GrafoLienzo({ slug, toolbar }: {
     fetch(`/api/graphs/${data.graph.id}/layout`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({ positions: [{ window_id: winId, ...patch }] }),
+    }).catch(() => {});
+  }, [data?.graph?.id]);
+
+  /**
+   * Guarda posición, tamaño o bloqueo de un círculo de relación (petición del
+   * usuario, 2026-08-08: «permíteme modificarlos… como si fuesen un elemento
+   * más»). Reutiliza `graph_edges.layout`/`locked`, ya soportados por el
+   * backend desde la migración 0020 — no hace falta tocar el servidor.
+   */
+  const guardarGeometriaArista = useCallback((
+    edgeId: number,
+    patch: { pos?: { x: number; y: number }; size?: { w: number; h: number }; locked?: boolean },
+  ) => {
+    setData((d: any) => d && ({
+      ...d,
+      edges: d.edges.map((e: any) => (e.id === edgeId
+        ? { ...e, layout: { ...e.layout, ...(patch.pos ? { pos: patch.pos } : {}), ...(patch.size ? { size: patch.size } : {}) }, ...(patch.locked !== undefined ? { locked: patch.locked } : {}) }
+        : e)),
+    }));
+    if (!data?.graph?.id) return;
+    const body: any = {};
+    if (patch.pos || patch.size) body.layout = { ...(patch.pos ? { pos: patch.pos } : {}), ...(patch.size ? { size: patch.size } : {}) };
+    if (patch.locked !== undefined) body.locked = patch.locked;
+    fetch(`/api/graphs/${data.graph.id}/edges/${edgeId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify(body),
     }).catch(() => {});
   }, [data?.graph?.id]);
 
@@ -1020,7 +1092,13 @@ export function GrafoLienzo({ slug, toolbar }: {
   }, [data?.can_edit, data?.graph?.id, load]);
 
   const onNodeDragStop = useCallback((_: any, node: Node) => {
-    if (!data?.can_edit || node.type !== 'ventana') return;
+    if (!data?.can_edit) return;
+    if (node.type === 'relacion') {
+      const edgeId = Number(node.id.replace('rel-', ''));
+      guardarGeometriaArista(edgeId, { pos: node.position });
+      return;
+    }
+    if (node.type !== 'ventana') return;
     setData((d: any) => ({
       ...d,
       windows: d.windows.map((w: any) => w.id === node.id ? { ...w, x: node.position.x, y: node.position.y } : w),
@@ -1031,7 +1109,7 @@ export function GrafoLienzo({ slug, toolbar }: {
       credentials: 'include',
       body: JSON.stringify({ positions: [{ window_id: node.id, x: node.position.x, y: node.position.y }] }),
     }).catch(() => {});
-  }, [data]);
+  }, [data, guardarGeometriaArista]);
 
   const patchWindow = (winId: string, patch: any) => {
     setData((d: any) => ({
@@ -1096,6 +1174,7 @@ export function GrafoLienzo({ slug, toolbar }: {
       onDragOver={e => { if (data.can_edit) e.preventDefault(); }}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
+      onMouseMove={e => { ratonEnLienzo.current = { x: e.clientX, y: e.clientY }; }}
     >
       <ReactFlow
         nodes={nodes}

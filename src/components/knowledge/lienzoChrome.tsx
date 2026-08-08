@@ -110,10 +110,12 @@ export function TiradorRotar({ visible, rot, onCambio, onFin }: {
 }
 
 /** Solo las 4 esquinas: los lados se reservan para los puntos de conexión. */
-export function TiradoresTamano({ visible, minW = 140, minH = 90, onFin }: {
+export function TiradoresTamano({ visible, minW = 140, minH = 90, keepAspectRatio = false, onFin }: {
   visible: boolean;
   minW?: number;
   minH?: number;
+  /** Para los círculos (relación): que no se puedan ovalar. */
+  keepAspectRatio?: boolean;
   onFin: (w: number, h: number) => void;
 }) {
   return (
@@ -121,6 +123,7 @@ export function TiradoresTamano({ visible, minW = 140, minH = 90, onFin }: {
       isVisible={visible}
       minWidth={minW}
       minHeight={minH}
+      keepAspectRatio={keepAspectRatio}
       lineClassName="!border-transparent"
       handleClassName="!w-2.5 !h-2.5 !rounded-full !bg-white !border-2 !border-blue-500"
       onResizeEnd={(_, p) => onFin(Math.round(p.width), Math.round(p.height))}
