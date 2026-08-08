@@ -302,3 +302,30 @@
 - **Decisión tomada**: invertir el orden de la comprobación en los dos sitios: probar primero `createEmbeddedCheckoutPage` (el nombre nuevo) y caer a `initEmbeddedCheckout` solo si aquel no existe.
 - **Motivo para documentarlo con este detalle**: es un fallo que ya existía en `HazteSocio.tsx` desde antes de esta sesión (no lo introduje yo), simplemente nunca se había ejercitado con el SDK real en esta fase del proyecto. Al encontrarlo en el componente nuevo, se corrigió también en el existente por ser exactamente la misma causa raíz — dejarlo sin corregir habría sido dejar conscientemente un flujo de pago roto sabiendo la causa exacta.
 - **Consecuencias**: cualquier integración futura con Stripe que use detección de métodos por `typeof` debe tener en cuenta que el SDK cargado en el navegador no es el paquete de `node_modules` — su API real solo se conoce probándola en directo.
+
+## 2026-08-08 — A recycle bin, as an explicit exception to Constitution rule 6
+
+**Context.** Rule 6 of `docs/99_CONSTITUTION.md` forbids deleting knowledge: everything is
+archived with `archived_at` and kept forever. Building the Miro-style canvas, Eugenio was
+asked what «Borrar» should do in the element menu.
+
+**His decision (verbatim).** «Cuando se borra del lienzo, sigue como elemento disponible en
+la base de datos, pero también se le da al usuario la opción de borrar definitivamente de la
+base de datos. Cuando lo borras, se va a la papelera de reciclaje durante 15 días, y luego se
+elimina definitivamente.»
+
+**What was built.** Two distinct actions, deliberately worded so nobody destroys anything by
+accident:
+- **Quitar del lienzo** — deletes only the placement (`graph_windows` row) and this canvas's
+  edges. The window stays in the database and on every other canvas. Reversible by re-linking.
+- **Borrar** — sets `knowledge_windows.deleted_at`. A daily sweep hard-deletes anything past
+  15 days, first releasing its foreign keys (placements, edges, ratings, comments).
+
+**Why `deleted_at` and not `archived_at`.** They mean different things and mixing them would
+be dangerous: `archived_at` is editorial withdrawal kept forever; `deleted_at` is «the person
+asked for this to disappear». Keeping them in separate columns guarantees the purge sweep can
+never reach something that was merely archived by another flow.
+
+**What it costs.** Rule 6 no longer holds literally for knowledge windows. Anyone reasoning
+about permanence must read this entry. If the rule is ever restored, the fix is one line —
+turn the sweep off — and nothing older than 15 days would have been lost in the meantime.

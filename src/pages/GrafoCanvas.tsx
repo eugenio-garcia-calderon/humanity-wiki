@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType,
+  ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType, ConnectionMode,
   useNodesState, useEdgesState, useInternalNode, getStraightPath,
   BaseEdge, EdgeLabelRenderer,
   type Node, type Edge, type NodeProps, type EdgeProps, type InternalNode,
@@ -23,6 +23,9 @@ import WindowContent from '../components/knowledge/WindowContent';
 import RatingWidget from '../components/knowledge/RatingWidget';
 import EntityComments from '../components/knowledge/EntityComments';
 import AddWindowPanel from '../components/knowledge/AddWindowPanel';
+import { PuntosConexion, TiradorRotar, TiradoresTamano, MarcoSeleccion } from '../components/knowledge/lienzoChrome';
+import BarraElemento from '../components/knowledge/BarraElemento';
+import RecortarImagen from '../components/knowledge/RecortarImagen';
 
 // ============================================================================
 // Lienzo de un Grafo de Conocimiento (Fase 11, rediseño 11c-11e)
@@ -301,20 +304,51 @@ function RelacionNode({ data }: NodeProps<any>) {
  *  imagen/gráfica/mapa como protagonista (petición del usuario, 2026-08-06). */
 const MEDIA_KINDS = new Set(['imagen', 'video', 'mapa', 'grafica']);
 
-function VentanaNode({ data }: NodeProps<any>) {
-  const { win, onOpen, onConnectFrom } = data as any;
+function VentanaNode({ data, selected }: NodeProps<any>) {
+  const { win, onOpen, onConnectFrom, onGeometria, acciones } = data as any;
   const meta = KIND_META[win.kind] || KIND_META.texto;
   const Icon = meta.icon;
   const isMedia = MEDIA_KINDS.has(win.kind);
+  const puedeGestionar = !!onGeometria;
+  const puedeDeformar = puedeGestionar && !win.locked;
+  const marcado = !!selected;
+  // Si tiene tamaño guardado manda ese; si no, el natural de su tipo.
+  const aMedida = win.w != null || win.h != null;
   return (
     <div
-      onClick={() => onOpen(win.id)}
+      // Un clic SELECCIONA (lo gestiona React Flow); el doble clic abre la
+      // ficha completa — la convención de cualquier lienzo.
+      onDoubleClick={() => onOpen(win.id)}
+      title="Doble clic para abrirla"
       className={cn(
-        'group relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden',
-        isMedia ? 'w-[420px]' : 'w-80',
+        'group relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-shadow cursor-pointer',
+        aMedida ? 'w-full h-full overflow-hidden flex flex-col' : (isMedia ? 'w-[420px] overflow-hidden' : 'w-80 overflow-hidden'),
       )}
+      style={{ transform: win.rot ? `rotate(${win.rot}deg)` : undefined }}
     >
       <CenterHandles />
+      {puedeDeformar && (
+        <>
+          <TiradoresTamano
+            visible={marcado}
+            minW={isMedia ? 220 : 180}
+            minH={140}
+            onFin={(w, h) => onGeometria(win.id, { w, h })}
+          />
+          <MarcoSeleccion visible={marcado} />
+          <PuntosConexion visible={marcado} />
+          <TiradorRotar
+            visible={marcado}
+            rot={win.rot || 0}
+            onCambio={g => onGeometria(win.id, { rot: g }, true)}
+            onFin={g => onGeometria(win.id, { rot: g })}
+          />
+        </>
+      )}
+      {win.locked && marcado && (
+        <div className="absolute inset-0 rounded-2xl border-2 border-amber-400 pointer-events-none z-[5]" />
+      )}
+      {marcado && acciones && <BarraElemento win={win} acciones={acciones(win)} />}
       {/* Crecer desde aquí: nace un elemento nuevo YA conectado a este. */}
       {onConnectFrom && (
         <button
@@ -338,7 +372,7 @@ function VentanaNode({ data }: NodeProps<any>) {
       <div className="px-3.5 pt-1.5">
         <p className="text-[15px] font-black text-slate-900 leading-tight line-clamp-2">{win.title}</p>
       </div>
-      <div className="px-3.5 py-2">
+      <div className={cn('px-3.5 py-2', aMedida && 'flex-1 min-h-0 overflow-hidden')}>
         <WindowContent kind={win.kind} config={win.config} variant="node" />
       </div>
       <div className="px-3.5 py-1.5 border-t border-slate-50 flex items-center gap-2.5 text-[9px] text-slate-400">
@@ -471,7 +505,7 @@ export function GrafoLienzo({ slug, toolbar }: {
   const [edgeForm, setEdgeForm] = useState({ relation: 'contexto', label: '', description: '' });
   const [showAdd, setShowAdd] = useState<boolean | string>(false);
   // Ventana de la que nace la siguiente (el «+» de un nodo). null = del centro.
-  const [connectFrom, setConnectFrom] = useState<{ id: string; title: string; pos?: { x: number; y: number } } | null>(null);
+  const [connectFrom, setConnectFrom] = useState<{ id: string; title: string; pos?: { x: number; y: number }; kind?: string } | null>(null);
   const [showConnect, setShowConnect] = useState(false);
   // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
   // el lienzo; se expande con un clic para ver descripción/etiquetas.
@@ -755,9 +789,16 @@ export function GrafoLienzo({ slug, toolbar }: {
     const winNodes: Node[] = data.windows.map((w: any) => ({
       id: w.id, type: 'ventana',
       position: { x: posById[w.id]?.x ?? w.x, y: posById[w.id]?.y ?? w.y },
-      draggable: !!data.can_edit,
+      draggable: !!data.can_edit && !w.locked,
+      selectable: true,
+      // Si el usuario le dio un tamaño, manda ese: React Flow necesita
+      // conocerlo para que el NodeResizer trabaje sobre el nodo real.
+      width: w.w ?? undefined,
+      height: w.h ?? undefined,
       data: {
         win: w, onOpen: openWindow,
+        onGeometria: data.can_edit ? guardarGeometria : undefined,
+        acciones: data.can_edit ? accionesDe : undefined,
         onConnectFrom: data.can_edit
           ? (v: any) => setConnectFrom({ id: v.id, title: v.title, pos: posById[v.id] || { x: v.x, y: v.y } })
           : undefined,
@@ -834,7 +875,14 @@ export function GrafoLienzo({ slug, toolbar }: {
       });
     }
 
-    setNodes([centerNode, ...extraNodes, ...relNodes, ...winNodes]);
+    // Se CONSERVA qué estaba seleccionado: cualquier cambio (renombrar,
+    // bloquear, mover) reconstruye los nodos, y sin esto la barra flotante
+    // desaparecía en cuanto hacías una sola acción.
+    setNodes(prev => {
+      const marcados = new Set(prev.filter(n => n.selected).map(n => n.id));
+      return [centerNode, ...extraNodes, ...relNodes, ...winNodes].map(n =>
+        (marcados.has(n.id) ? { ...n, selected: true } : n));
+    });
     setEdges(flowEdges);
   }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges]);
 
@@ -847,6 +895,129 @@ export function GrafoLienzo({ slug, toolbar }: {
     const t = setTimeout(() => fitView({ padding: 0.12 }), 80);
     return () => clearTimeout(t);
   }, [nodes, fitView]);
+
+  /**
+   * Guarda tamaño, giro, capa o bloqueo de una ventana en ESTE lienzo.
+   * `soloEnPantalla` sirve para el giro en curso: se pinta al momento y solo
+   * se manda al servidor al soltar, para no bombardearlo con cada grado.
+   */
+  const guardarGeometria = useCallback((
+    winId: string,
+    patch: { w?: number | null; h?: number | null; rot?: number; z?: number; locked?: boolean },
+    soloEnPantalla = false,
+  ) => {
+    setData((d: any) => d && ({
+      ...d,
+      windows: d.windows.map((w: any) => (w.id === winId ? { ...w, ...patch } : w)),
+    }));
+    if (soloEnPantalla || !data?.graph?.id) return;
+    fetch(`/api/graphs/${data.graph.id}/layout`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ positions: [{ window_id: winId, ...patch }] }),
+    }).catch(() => {});
+  }, [data?.graph?.id]);
+
+  const [recortando, setRecortando] = useState<any>(null);
+
+  /** Guarda campos de la ventana en sí (título, tipo, contenido). */
+  const guardarVentana = useCallback(async (winId: string, patch: any) => {
+    setData((d: any) => d && ({
+      ...d,
+      windows: d.windows.map((w: any) => (w.id === winId ? { ...w, ...patch } : w)),
+    }));
+    await fetch(`/api/windows/${winId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify(patch),
+    }).catch(() => {});
+  }, []);
+
+  /** Todo lo que la barra flotante puede hacer con un elemento. */
+  const accionesDe = useCallback((win: any) => ({
+    abrir: () => openWindow(win.id),
+    renombrar: (titulo: string) => guardarVentana(win.id, { title: titulo }),
+    convertir: (kind: string) => guardarVentana(win.id, { kind }),
+    ponerAlt: (alt: string) => guardarVentana(win.id, { config: { ...win.config, alt } }),
+    recortar: () => setRecortando(win),
+    comentar: () => openWindow(win.id),
+    bloquear: (v: boolean) => guardarGeometria(win.id, { locked: v }),
+    capa: (dir: 1 | -1) => guardarGeometria(win.id, { z: (win.z || 0) + dir }),
+    crearConectado: (kind: string) =>
+      setConnectFrom({ id: win.id, title: win.title, pos: { x: win.x, y: win.y }, kind }),
+
+    descargar: () => {
+      const url = win.config?.image_url || win.config?.url;
+      if (url) window.open(url, '_blank', 'noopener');
+    },
+
+    reemplazarArchivo: async (f: File) => {
+      setPegando('Subiendo…');
+      try {
+        const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+        });
+        const j = await up.json();
+        if (!up.ok) throw new Error(j.error || 'No se pudo subir.');
+        const campo = j.esImagen ? 'image_url' : 'url';
+        await guardarVentana(win.id, { config: { ...win.config, [campo]: j.url } });
+        setPegando(null);
+      } catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 4000); }
+    },
+
+    preguntarIA: () => {
+      const c = win.config || {};
+      const extracto = (c.body || c.excerpt || c.description || c.caption || c.quote || '').slice(0, 400);
+      window.dispatchEvent(new CustomEvent('ai:prefill', {
+        detail: `Sobre «${win.title}» (${win.kind}${extracto ? `: ${extracto}` : ''}) del grafo «${data?.graph?.title}»: `,
+      }));
+    },
+
+    duplicar: async () => {
+      if (!data?.graph?.id) return;
+      const res = await fetch(`/api/graphs/${data.graph.id}/windows`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({
+          title: `${win.title} (copia)`, kind: win.kind, config: win.config,
+          x: (win.x || 0) + 60, y: (win.y || 0) + 60,
+        }),
+      });
+      if (res.ok) load();
+    },
+
+    quitarDelLienzo: async () => {
+      if (!data?.graph?.id) return;
+      const r = await fetch(`/api/graphs/${data.graph.id}/windows/${win.id}`, {
+        method: 'DELETE', credentials: 'include',
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) {
+        setPegando(j.sigueEnOtrosLienzos
+          ? `Quitada de aquí — sigue en ${j.sigueEnOtrosLienzos} lienzo(s) más`
+          : 'Quitada del lienzo — sigue en la base de datos');
+        setTimeout(() => setPegando(null), 4000);
+        load();
+      }
+    },
+
+    aPapelera: async () => {
+      const r = await fetch(`/api/windows/${win.id}/papelera`, { method: 'POST', credentials: 'include' });
+      if (r.ok) {
+        setPegando('En la papelera — se borra del todo en 15 días');
+        setTimeout(() => setPegando(null), 5000);
+        load();
+      }
+    },
+  }), [data?.graph?.id, data?.graph?.title, openWindow, guardarVentana, guardarGeometria, load]);
+
+  /** Nace una conexión al unir dos puntos (clic-clic o arrastrando). */
+  const onConnect = useCallback(async (c: any) => {
+    if (!data?.can_edit || !c.source || !c.target || c.source === c.target) return;
+    await fetch(`/api/graphs/${data.graph.id}/edges`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ from_window_id: c.source, to_window_id: c.target, relation: 'contexto', label: null }),
+    }).catch(() => {});
+    load();
+  }, [data?.can_edit, data?.graph?.id, load]);
 
   const onNodeDragStop = useCallback((_: any, node: Node) => {
     if (!data?.can_edit || node.type !== 'ventana') return;
@@ -936,7 +1107,11 @@ export function GrafoLienzo({ slug, toolbar }: {
         onInit={inst => { rf.current = inst; }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        nodesConnectable={false}
+        nodesConnectable={!!data.can_edit}
+        connectionMode={ConnectionMode.Loose}
+        connectOnClick
+        onConnect={onConnect}
+        elementsSelectable
         elevateNodesOnSelect={false}
         fitView
         fitViewOptions={{ padding: 0.12 }}
@@ -1244,10 +1419,19 @@ export function GrafoLienzo({ slug, toolbar }: {
         </div>
       )}
 
+      {recortando && (
+        <RecortarImagen
+          url={recortando.config?.image_url}
+          inicial={recortando.config?.crop || null}
+          onCerrar={() => setRecortando(null)}
+          onGuardar={crop => guardarVentana(recortando.id, { config: { ...recortando.config, crop } })}
+        />
+      )}
+
       {(showAdd !== false || connectFrom) && (
         <AddWindowPanel
           graphId={data.graph.id}
-          initialKind={typeof showAdd === 'string' ? showAdd : undefined}
+          initialKind={connectFrom?.kind || (typeof showAdd === 'string' ? showAdd : undefined)}
           from={connectFrom}
           onClose={() => { setShowAdd(false); setConnectFrom(null); }}
           onAdded={load}

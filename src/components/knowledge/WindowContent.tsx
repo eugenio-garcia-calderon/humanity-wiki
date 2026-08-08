@@ -84,15 +84,34 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
   const wiki = useWikipedia(kind === 'wikipedia' ? (config.wiki_lang || 'es') : undefined, config.wiki_page);
 
   switch (kind) {
-    case 'imagen':
+    case 'imagen': {
+      // El recorte es no destructivo: un rectángulo en % sobre el original.
+      const c = config.crop;
+      const recortada = c && (c.x || c.y || c.w !== 100 || c.h !== 100);
       return (
         <div className="space-y-1.5">
           {config.image_url ? (
-            <img
-              src={config.image_url}
-              alt={config.caption || ''}
-              className={isNode ? 'w-full h-64 object-cover rounded-lg' : 'w-full rounded-xl'}
-            />
+            recortada ? (
+              <div className={cn2('relative overflow-hidden', isNode ? 'w-full h-64 rounded-lg' : 'w-full rounded-xl aspect-[4/3]')}>
+                <img
+                  src={config.image_url}
+                  alt={config.alt || config.caption || ''}
+                  className="absolute max-w-none"
+                  style={{
+                    width: `${(100 / c.w) * 100}%`,
+                    height: `${(100 / c.h) * 100}%`,
+                    left: `${-(c.x / c.w) * 100}%`,
+                    top: `${-(c.y / c.h) * 100}%`,
+                  }}
+                />
+              </div>
+            ) : (
+              <img
+                src={config.image_url}
+                alt={config.alt || config.caption || ''}
+                className={isNode ? 'w-full h-64 object-cover rounded-lg' : 'w-full rounded-xl'}
+              />
+            )
           ) : (
             <div className="w-full h-24 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
               <FileText className="w-6 h-6" />
@@ -102,6 +121,7 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
           <SourceCredit name={config.source_name} url={config.source_url} />
         </div>
       );
+    }
 
     case 'video': {
       const id = config.youtube_id;
