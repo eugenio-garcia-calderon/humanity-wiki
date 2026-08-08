@@ -30,6 +30,9 @@ const WINDOW_KINDS = new Set([
   'tarea', 'tabla', 'proyecto',
 ]);
 
+/** Días que algo permanece en la papelera antes de borrarse de verdad. */
+const PAPELERA_DIAS = 15;
+
 const EDGE_RELATIONS = new Set(['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza']);
 
 /**
@@ -183,7 +186,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         const wins = await db.execute(sql`
           SELECT gw.graph_id, w.id, w.title, w.kind, w.config, w.is_ai_generated, gw.x, gw.y
           FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
-          WHERE gw.graph_id IN ${ids} AND w.archived_at IS NULL
+          WHERE gw.graph_id IN ${ids} AND w.archived_at IS NULL AND w.deleted_at IS NULL
         `);
         const byGraph: Record<string, any[]> = {};
         for (const w of wins.rows as any[]) (byGraph[w.graph_id] ||= []).push(w);
@@ -370,14 +373,15 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       }
 
       const windows = await db.execute(sql`
-        SELECT w.*, gw.x, gw.y, u.display_name AS creator_name, u.avatar_url AS creator_avatar
+        SELECT w.*, gw.x, gw.y, gw.w, gw.h, gw.rot, gw.z, gw.locked,
+               u.display_name AS creator_name, u.avatar_url AS creator_avatar
         FROM graph_windows gw
         JOIN knowledge_windows w ON w.id = gw.window_id
         LEFT JOIN users u ON u.id = w.creator_user_id
-        WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL
+        WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL AND w.deleted_at IS NULL
       `);
       const edges = await db.execute(sql`
-        SELECT e.id, e.from_window_id, e.to_window_id, e.relation, e.label,
+        SELECT e.id, e.from_window_id, e.to_window_id, e.relation, e.label, e.style, e.layout, e.locked,
                e.description, e.created_at, u.display_name AS creator_name
         FROM graph_edges e LEFT JOIN users u ON u.id = e.created_by
         WHERE e.graph_id = ${graph.id}
@@ -496,14 +500,119 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
         return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden mover sus ventanas.' });
       }
-      const positions: Array<{ window_id: string; x: number; y: number }> = req.body?.positions || [];
+      // Cada campo es opcional: mover manda solo x/y, redimensionar manda w/h,
+      // rotar manda rot… y COALESCE deja intacto lo que no viaja.
+      const positions: Array<{
+        window_id: string; x?: number; y?: number;
+        w?: number | null; h?: number | null; rot?: number; z?: number; locked?: boolean;
+      }> = req.body?.positions || [];
       for (const p of positions) {
         await db.execute(sql`
-          UPDATE graph_windows SET x = ${p.x}, y = ${p.y}
+          UPDATE graph_windows SET
+            x      = COALESCE(${p.x ?? null}, x),
+            y      = COALESCE(${p.y ?? null}, y),
+            w      = CASE WHEN ${p.w === null} THEN NULL ELSE COALESCE(${p.w ?? null}, w) END,
+            h      = CASE WHEN ${p.h === null} THEN NULL ELSE COALESCE(${p.h ?? null}, h) END,
+            rot    = COALESCE(${p.rot ?? null}, rot),
+            z      = COALESCE(${p.z ?? null}, z),
+            locked = COALESCE(${p.locked ?? null}, locked)
           WHERE graph_id = ${req.params.id} AND window_id = ${p.window_id}
         `);
       }
       res.json({ success: true, updated: positions.length });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // LIENZO ESTILO MIRO (2026-08-08, petición del usuario)
+  // ==========================================================================
+
+  /**
+   * DELETE /api/graphs/:id/windows/:windowId
+   * QUITAR DEL LIENZO: se borra la colocación, no el conocimiento. La ventana
+   * sigue viva en la base de datos y en los demás lienzos donde esté — que es
+   * justo lo que permite conectar sin duplicar.
+   */
+  app.delete('/api/graphs/:id/windows/:windowId', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const g = await db.execute(sql`SELECT creator_user_id FROM knowledge_graphs WHERE id = ${req.params.id}`);
+      if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
+      if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden quitar sus ventanas.' });
+      }
+      // Las conexiones de esa ventana en ESTE lienzo se van con ella.
+      await db.execute(sql`
+        DELETE FROM graph_edges
+        WHERE graph_id = ${req.params.id}
+          AND (from_window_id = ${req.params.windowId} OR to_window_id = ${req.params.windowId})
+      `);
+      await db.execute(sql`
+        DELETE FROM graph_windows
+        WHERE graph_id = ${req.params.id} AND window_id = ${req.params.windowId}
+      `);
+      const resto = await db.execute(sql`
+        SELECT count(*)::int AS n FROM graph_windows WHERE window_id = ${req.params.windowId}
+      `);
+      res.json({ success: true, sigueEnOtrosLienzos: (resto.rows[0] as any).n });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * POST /api/windows/:id/papelera  y  /restaurar
+   * PAPELERA (decisión del usuario, 2026-08-08): borrar de verdad manda la
+   * ventana a la papelera; a los 15 días se elimina definitivamente. Es una
+   * excepción consciente a la regla 6 de la Constitución («archivar, nunca
+   * borrar»), registrada en memory/03_DECISIONS.md.
+   */
+  app.post('/api/windows/:id/papelera', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const w = await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${req.params.id}`);
+      if (!w.rows.length) return res.status(404).json({ error: 'Ventana no encontrada.' });
+      if (!canEdit(req, (w.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo quien la creó (o un administrador) puede borrarla.' });
+      }
+      await db.execute(sql`
+        UPDATE knowledge_windows SET deleted_at = now(), updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ success: true, diasParaBorradoDefinitivo: PAPELERA_DIAS });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post('/api/windows/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const w = await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${req.params.id}`);
+      if (!w.rows.length) return res.status(404).json({ error: 'Ventana no encontrada.' });
+      if (!canEdit(req, (w.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo quien la creó (o un administrador) puede restaurarla.' });
+      }
+      await db.execute(sql`
+        UPDATE knowledge_windows SET deleted_at = NULL, updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/papelera — lo que borraste y cuántos días le quedan. */
+  app.get('/api/papelera', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const esAdmin = (req.user!.roleLevel ?? 0) >= ROLE.ADMIN;
+      const rows = await db.execute(sql`
+        SELECT w.id, w.title, w.kind, w.config, w.deleted_at,
+               ${PAPELERA_DIAS} - floor(extract(epoch FROM now() - w.deleted_at) / 86400)::int AS dias_restantes,
+               u.display_name AS creator_name
+        FROM knowledge_windows w LEFT JOIN users u ON u.id = w.creator_user_id
+        WHERE w.deleted_at IS NOT NULL
+          AND (${esAdmin} OR w.creator_user_id = ${req.user!.id})
+        ORDER BY w.deleted_at DESC
+        LIMIT 200
+      `);
+      res.json(rows.rows);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -664,9 +773,12 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         return res.status(403).json({ error: 'Solo el creador de la ventana o un administrador pueden editarla.' });
       }
       const d = req.body || {};
+      // «Convert to»: cambiar el tipo de una ventana ya creada.
+      const kind = d.kind && WINDOW_KINDS.has(d.kind) ? d.kind : null;
       await db.execute(sql`
         UPDATE knowledge_windows SET
           title = COALESCE(${d.title ?? null}, title),
+          kind = COALESCE(${kind}, kind),
           config = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${req.params.id}
@@ -743,6 +855,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           relation = COALESCE(${relation}, relation),
           label = COALESCE(${d.label ?? null}, label),
           description = COALESCE(${d.description ?? null}, description),
+          -- El aspecto se FUNDE con lo que ya había: la barra manda solo lo
+          -- que acabas de tocar (el color, o la punta), no la ficha entera.
+          style  = style  || COALESCE(${d.style ? JSON.stringify(d.style) : null}::jsonb, '{}'::jsonb),
+          layout = layout || COALESCE(${d.layout ? JSON.stringify(d.layout) : null}::jsonb, '{}'::jsonb),
+          locked = COALESCE(${d.locked ?? null}, locked),
           updated_by = ${req.user!.id}, updated_at = now()
         WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}
       `);
@@ -753,6 +870,75 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   // ==========================================================================
   // VALORACIÓN 0-10 (polimórfica)
   // ==========================================================================
+  /** Invertir el sentido de una conexión (la flecha cambia de lado). */
+  app.post('/api/graphs/:id/edges/:edgeId/invertir', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const g = await db.execute(sql`SELECT creator_user_id FROM knowledge_graphs WHERE id = ${req.params.id}`);
+      if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
+      if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden editar sus conexiones.' });
+      }
+      // Las aristas del CENTRO (from_window_id NULL) no se pueden invertir:
+      // el centro no puede ser destino de sí mismo.
+      const e = await db.execute(sql`
+        SELECT from_window_id FROM graph_edges WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}
+      `);
+      if (!e.rows.length) return res.status(404).json({ error: 'Conexión no encontrada.' });
+      if (!(e.rows[0] as any).from_window_id) {
+        return res.status(400).json({ error: 'Las conexiones que nacen del centro del grafo no se pueden invertir.' });
+      }
+      await db.execute(sql`
+        UPDATE graph_edges
+        SET from_window_id = to_window_id, to_window_id = from_window_id,
+            updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}
+      `);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quitar una conexión del lienzo (une dos cosas, no es conocimiento en sí). */
+  app.delete('/api/graphs/:id/edges/:edgeId', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const g = await db.execute(sql`SELECT creator_user_id FROM knowledge_graphs WHERE id = ${req.params.id}`);
+      if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
+      if (!canEdit(req, (g.rows[0] as any).creator_user_id)) {
+        return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden quitar sus conexiones.' });
+      }
+      await db.execute(sql`DELETE FROM graph_edges WHERE id = ${Number(req.params.edgeId)} AND graph_id = ${req.params.id}`);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // El BARRIDO de la papelera: lo que lleve más de PAPELERA_DIAS se borra de
+  // verdad. Corre al arrancar y una vez al día; `unref()` para que no impida
+  // que el proceso termine.
+  const vaciarPapelera = async () => {
+    try {
+      const caducadas = await db.execute(sql`
+        SELECT id FROM knowledge_windows
+        WHERE deleted_at IS NOT NULL AND deleted_at < now() - (${PAPELERA_DIAS} || ' days')::interval
+      `);
+      const ids = (caducadas.rows as any[]).map(r => r.id);
+      if (!ids.length) return;
+      // Hay claves ajenas apuntando a la ventana: primero se sueltan sus
+      // amarras (colocaciones, conexiones, valoraciones y comentarios) y
+      // solo después se borra la fila.
+      await db.execute(sql`DELETE FROM graph_edges WHERE from_window_id IN ${ids} OR to_window_id IN ${ids}`);
+      await db.execute(sql`DELETE FROM graph_windows WHERE window_id IN ${ids}`);
+      await db.execute(sql`DELETE FROM ratings WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ids}`);
+      await db.execute(sql`DELETE FROM comments WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ids}`);
+      await db.execute(sql`DELETE FROM knowledge_windows WHERE id IN ${ids}`);
+      console.log(`papelera: ${ids.length} ventanas eliminadas definitivamente`);
+    } catch (e: any) {
+      console.error('papelera: fallo al vaciar —', e.message);
+    }
+  };
+  setTimeout(vaciarPapelera, 30_000).unref?.();
+  setInterval(vaciarPapelera, 24 * 60 * 60 * 1000).unref?.();
+
   app.post('/api/rate', async (req: Request, res: Response) => {
     try {
       if (!requireLevel(req, res, ROLE.USER)) return;
