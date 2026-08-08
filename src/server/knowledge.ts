@@ -98,6 +98,97 @@ export async function aiReplyToComment(db: any, opts: {
   }
 }
 
+/**
+ * Organiza automáticamente las publicaciones del usuario en carpetas
+ * temáticas: le pide a la IA que las lea y las agrupe, crea las carpetas
+ * que falten y las rellena. La usa tanto el botón «Ordenar con IA» como la
+ * acción ORGANIZAR_CARPETAS del asistente de chat.
+ */
+export const autoOrganizarCarpetas = async (db: any, userId: string): Promise<{ ok: true; carpetas: { nombre: string; piezas: number }[] } | { ok: false; error: string }> => {
+  const ventanas = await db.execute(sql`
+    SELECT w.id, w.title, w.kind, g.title AS grafo_titulo
+    FROM knowledge_windows w JOIN graph_windows gw ON gw.window_id = w.id JOIN knowledge_graphs g ON g.id = gw.graph_id
+    WHERE w.creator_user_id = ${userId} AND w.archived_at IS NULL AND w.deleted_at IS NULL
+    ORDER BY w.created_at DESC LIMIT 60
+  `);
+  const lienzos = await db.execute(sql`
+    SELECT id, title FROM knowledge_graphs
+    WHERE creator_user_id = ${userId} AND archived_at IS NULL AND deleted_at IS NULL
+      AND coalesce(center->>'personal','') <> '1'
+    ORDER BY created_at DESC LIMIT 30
+  `);
+  const proyectos = await db.execute(sql`
+    SELECT id, titulo AS title FROM proyectos
+    WHERE creador_user_id = ${userId} AND archived_at IS NULL AND deleted_at IS NULL
+    ORDER BY created_at DESC LIMIT 30
+  `);
+  const mapas = await db.execute(sql`
+    SELECT id, title FROM user_maps
+    WHERE creator_user_id = ${userId} AND archived_at IS NULL AND deleted_at IS NULL
+    ORDER BY created_at DESC LIMIT 30
+  `);
+
+  const candidatas = [
+    ...(ventanas.rows as any[]).map(w => ({ tipo: 'ventana', id: w.id, texto: `${w.title} (${w.kind}, en «${w.grafo_titulo}»)` })),
+    ...(lienzos.rows as any[]).map(g => ({ tipo: 'lienzo', id: g.id, texto: `${g.title} (lienzo)` })),
+    ...(proyectos.rows as any[]).map(p => ({ tipo: 'proyecto', id: p.id, texto: `${p.title} (proyecto)` })),
+    ...(mapas.rows as any[]).map(m => ({ tipo: 'mapa', id: m.id, texto: `${m.title} (mapa)` })),
+  ];
+  if (!candidatas.length) return { ok: false, error: 'Todavía no tienes publicaciones que organizar.' };
+
+  const provider = getProvider();
+  const listado = candidatas.map((c, i) => `${i}. [${c.tipo}] ${c.texto}`).join('\n');
+  const system = `Agrupas por TEMA una lista de publicaciones de una persona. Devuelve SOLO un JSON válido, sin explicación ni bloque de código, con esta forma exacta:
+{"carpetas": [{"nombre": "Salud", "indices": [0, 4, 7]}, ...]}
+Reglas: nombres de carpeta cortos (una o dos palabras, en español, con mayúscula inicial, p. ej. "Vivienda", "Incendios", "Retos"). Como máximo 8 carpetas. Cada índice puede aparecer en más de una carpeta si de verdad encaja en varios temas. No dejes fuera algo por no encajar bien: mételo en la carpeta más cercana. No inventes índices que no existan en la lista.`;
+  let texto = '';
+  try {
+    const result = await provider.complete({ system, messages: [{ role: 'user', content: listado }] });
+    texto = result.text;
+  } catch (e: any) {
+    return { ok: false, error: `La IA no ha podido clasificar: ${e.message}` };
+  }
+
+  let parsed: { carpetas: { nombre: string; indices: number[] }[] };
+  try {
+    const m = texto.match(/\{[\s\S]*\}/);
+    parsed = JSON.parse(m ? m[0] : texto);
+  } catch {
+    return { ok: false, error: 'La IA no ha devuelto una clasificación legible. Inténtalo de nuevo.' };
+  }
+  if (!Array.isArray(parsed?.carpetas)) return { ok: false, error: 'La IA no ha devuelto carpetas.' };
+
+  const resumen: { nombre: string; piezas: number }[] = [];
+  for (const grupo of parsed.carpetas) {
+    const nombre = String(grupo?.nombre || '').trim().slice(0, 40);
+    const indices = Array.isArray(grupo?.indices) ? grupo.indices : [];
+    if (!nombre || !indices.length) continue;
+
+    const existente = await db.execute(sql`SELECT id FROM carpetas WHERE user_id = ${userId} AND lower(nombre) = ${nombre.toLowerCase()}`);
+    let carpetaId = (existente.rows[0] as any)?.id as string | undefined;
+    if (!carpetaId) {
+      carpetaId = newId('CAR');
+      const orden = await db.execute(sql`SELECT coalesce(max(orden), -1) + 1 AS n FROM carpetas WHERE user_id = ${userId}`);
+      await db.execute(sql`
+        INSERT INTO carpetas (id, user_id, nombre, orden) VALUES (${carpetaId}, ${userId}, ${nombre}, ${(orden.rows[0] as any).n})
+      `);
+    }
+    let metidas = 0;
+    for (const i of indices) {
+      const c = candidatas[i];
+      if (!c) continue;
+      await db.execute(sql`
+        INSERT INTO carpeta_publicaciones (carpeta_id, tipo, entity_id, added_by)
+        VALUES (${carpetaId}, ${c.tipo}, ${c.id}, ${userId})
+        ON CONFLICT DO NOTHING
+      `);
+      metidas++;
+    }
+    if (metidas) resumen.push({ nombre, piezas: metidas });
+  }
+  return { ok: true, carpetas: resumen };
+};
+
 export function registerKnowledgeRoutes(app: Express, db: any) {
 
   const requireLevel = (req: Request, res: Response, min: number): boolean => {
@@ -164,7 +255,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
                  WHERE gel3.graph_id = g.id AND gel3.entity_type = 'challenges') AS challenge_ids
         FROM knowledge_graphs g
         LEFT JOIN users u ON u.id = g.creator_user_id
-        WHERE g.archived_at IS NULL
+        WHERE g.archived_at IS NULL AND g.deleted_at IS NULL
           -- Los lienzos personales (Mi Conocimiento) no son parte del común.
           AND coalesce(g.center->>'personal','') <> '1'
           AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
@@ -221,7 +312,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
       const rows = await db.execute(sql`
         SELECT id, title, slug, description, trigger_keywords
-        FROM knowledge_graphs WHERE archived_at IS NULL AND status = 'publicado'
+        FROM knowledge_graphs WHERE archived_at IS NULL AND deleted_at IS NULL AND status = 'publicado'
           AND coalesce(center->>'personal','') <> '1'
       `);
 
@@ -304,7 +395,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         SELECT m.id, m.title, m.slug, m.description, m.config, m.status, m.is_ai_generated, m.views,
                m.created_at, u.display_name AS creator_name
         FROM user_maps m LEFT JOIN users u ON u.id = m.creator_user_id
-        WHERE m.archived_at IS NULL
+        WHERE m.archived_at IS NULL AND m.deleted_at IS NULL
           AND (${creatorId}::text IS NULL OR m.creator_user_id = ${creatorId})
           AND (m.status = 'publicado' OR m.creator_user_id = ${req.user?.id || null}
                OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
@@ -321,7 +412,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT m.*, u.display_name AS creator_name
         FROM user_maps m LEFT JOIN users u ON u.id = m.creator_user_id
-        WHERE (m.slug = ${req.params.slug} OR m.id = ${req.params.slug}) AND m.archived_at IS NULL
+        WHERE (m.slug = ${req.params.slug} OR m.id = ${req.params.slug})
+          AND m.archived_at IS NULL AND m.deleted_at IS NULL
       `);
       if (!r.rows.length) return res.status(404).json({ error: 'Mapa no encontrado.' });
       const map = r.rows[0] as any;
@@ -364,7 +456,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const g = await db.execute(sql`
         SELECT g.*, u.display_name AS creator_name, u.avatar_url AS creator_avatar
         FROM knowledge_graphs g LEFT JOIN users u ON u.id = g.creator_user_id
-        WHERE (g.slug = ${req.params.slug} OR g.id = ${req.params.slug}) AND g.archived_at IS NULL
+        WHERE (g.slug = ${req.params.slug} OR g.id = ${req.params.slug})
+          AND g.archived_at IS NULL AND g.deleted_at IS NULL
       `);
       if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
       const graph = g.rows[0] as any;
@@ -379,6 +472,9 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         JOIN knowledge_windows w ON w.id = gw.window_id
         LEFT JOIN users u ON u.id = w.creator_user_id
         WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL AND w.deleted_at IS NULL
+          -- Una pieza marcada como privada solo la ve quien la escribió.
+          AND (w.publico OR w.creator_user_id = ${req.user?.id || null}::text
+               OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
       `);
       const edges = await db.execute(sql`
         SELECT e.id, e.from_window_id, e.to_window_id, e.relation, e.label, e.style, e.layout, e.locked,
@@ -597,19 +693,49 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  /** GET /api/papelera — lo que borraste y cuántos días le quedan. */
+  /**
+   * GET /api/papelera — lo que borraste y cuántos días le quedan.
+   * Los cinco tipos en una sola lista: para quien la mira, todo lo que ha
+   * tirado está en el mismo sitio, venga de la tabla que venga.
+   */
   app.get('/api/papelera', async (req: Request, res: Response) => {
     try {
       if (!requireLevel(req, res, ROLE.USER)) return;
       const esAdmin = (req.user!.roleLevel ?? 0) >= ROLE.ADMIN;
+      const yo = req.user!.id;
+      const dias = sql`${PAPELERA_DIAS} - floor(extract(epoch FROM now() - t.deleted_at) / 86400)::int`;
       const rows = await db.execute(sql`
-        SELECT w.id, w.title, w.kind, w.config, w.deleted_at,
-               ${PAPELERA_DIAS} - floor(extract(epoch FROM now() - w.deleted_at) / 86400)::int AS dias_restantes,
-               u.display_name AS creator_name
-        FROM knowledge_windows w LEFT JOIN users u ON u.id = w.creator_user_id
-        WHERE w.deleted_at IS NOT NULL
-          AND (${esAdmin} OR w.creator_user_id = ${req.user!.id})
-        ORDER BY w.deleted_at DESC
+        SELECT * FROM (
+          SELECT 'ventana' AS tipo, t.id, t.title AS titulo, t.kind, t.config, t.deleted_at,
+                 ${dias} AS dias_restantes, u.display_name AS autor_nombre
+          FROM knowledge_windows t LEFT JOIN users u ON u.id = t.creator_user_id
+          WHERE t.deleted_at IS NOT NULL AND (${esAdmin} OR t.creator_user_id = ${yo})
+          UNION ALL
+          SELECT 'lienzo', t.id, t.title, 'grafo',
+                 jsonb_build_object('title', t.title, 'description', t.description, 'graph_slug', t.slug),
+                 t.deleted_at, ${dias}, u.display_name
+          FROM knowledge_graphs t LEFT JOIN users u ON u.id = t.creator_user_id
+          WHERE t.deleted_at IS NOT NULL AND (${esAdmin} OR t.creator_user_id = ${yo})
+          UNION ALL
+          SELECT 'mapa', t.id, t.title, 'mapa',
+                 jsonb_build_object('title', t.title, 'description', t.description),
+                 t.deleted_at, ${dias}, u.display_name
+          FROM user_maps t LEFT JOIN users u ON u.id = t.creator_user_id
+          WHERE t.deleted_at IS NOT NULL AND (${esAdmin} OR t.creator_user_id = ${yo})
+          UNION ALL
+          SELECT 'proyecto', t.id, t.titulo, 'proyecto',
+                 jsonb_build_object('goal', t.descripcion),
+                 t.deleted_at, ${dias}, u.display_name
+          FROM proyectos t LEFT JOIN users u ON u.id = t.creador_user_id
+          WHERE t.deleted_at IS NOT NULL AND (${esAdmin} OR t.creador_user_id = ${yo})
+          UNION ALL
+          SELECT 'muro', t.id, coalesce(t.title, left(t.body, 70)), 'publicacion',
+                 jsonb_build_object('body', t.body),
+                 t.deleted_at, ${dias}, u.display_name
+          FROM publications t LEFT JOIN users u ON u.id = t.author_user_id
+          WHERE t.deleted_at IS NOT NULL AND (${esAdmin} OR t.author_user_id = ${yo})
+        ) q
+        ORDER BY q.deleted_at DESC
         LIMIT 200
       `);
       res.json(rows.rows);
@@ -664,8 +790,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   /**
    * GET /api/publicaciones[?autor=U_…][&q=…]
    * TODO lo publicado en la plataforma, de todo el mundo, en un solo listado:
-   * las ventanas de conocimiento de los grafos públicos y las publicaciones
-   * del muro. Es lo que alimenta «Explorar» y «Mis publicaciones».
+   * las ventanas de conocimiento de los grafos públicos, las publicaciones del
+   * muro y —desde 2026-08-08— los lienzos y los proyectos en sí, que también
+   * son cosas que la gente publica, no solo contenedores de lo que cuelga
+   * dentro. Es lo que alimenta «Explorar» y «Mis publicaciones».
    * Los lienzos personales quedan fuera salvo que pidas los tuyos.
    */
   app.get('/api/publicaciones', async (req: Request, res: Response) => {
@@ -674,21 +802,30 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const q = (req.query.q as string || '').trim();
       const like = q ? `%${q}%` : null;
       const limit = Math.min(Number(req.query.limit) || 120, 300);
+      const usuarioId = req.user?.id || null;
+      const esAdmin = (req.user?.roleLevel ?? 0) >= ROLE.ADMIN;
       // Solo el dueño ve lo suyo de su lienzo personal.
       const incluirPersonales = !!autor && autor === req.user?.id;
 
       const ventanas = await db.execute(sql`
         SELECT DISTINCT ON (w.id)
                w.id, w.title, w.kind, w.config, w.views, w.is_ai_generated, w.created_at,
-               w.creator_user_id, u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               w.publico, w.creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
                g.slug AS grafo_slug, g.title AS grafo_titulo,
-               coalesce(g.center->>'personal','') = '1' AS es_personal
+               coalesce(g.center->>'personal','') = '1' AS es_personal,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
         FROM knowledge_windows w
         JOIN graph_windows gw ON gw.window_id = w.id
         JOIN knowledge_graphs g ON g.id = gw.graph_id
         LEFT JOIN users u ON u.id = w.creator_user_id
-        WHERE w.archived_at IS NULL AND w.deleted_at IS NULL AND g.archived_at IS NULL
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'ventana' AND pm.entity_id = w.id
+        WHERE w.archived_at IS NULL AND w.deleted_at IS NULL
+          AND g.archived_at IS NULL AND g.deleted_at IS NULL
           AND (${incluirPersonales} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          AND (w.publico OR w.creator_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR w.creator_user_id = ${autor})
           AND (${like}::text IS NULL OR w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
         ORDER BY w.id, w.created_at DESC
@@ -696,15 +833,99 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       `);
 
       const muro = await db.execute(sql`
-        SELECT p.id, p.title, p.body, p.created_at, p.author_user_id AS creator_user_id,
-               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
-        FROM publications p LEFT JOIN users u ON u.id = p.author_user_id
-        WHERE p.archived_at IS NULL
+        SELECT p.id, p.title, p.body, p.created_at, p.visibility, p.author_user_id AS creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM publications p
+        LEFT JOIN users u ON u.id = p.author_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'muro' AND pm.entity_id = p.id
+        WHERE p.archived_at IS NULL AND p.deleted_at IS NULL
+          -- Las filas que ya había usan 'publica'; se considera privado solo
+          -- lo marcado explícitamente como tal, para no ocultar nada por un
+          -- valor antiguo o vacío.
+          AND (coalesce(p.visibility,'publica') <> 'privada' OR p.author_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR p.author_user_id = ${autor})
           AND (${like}::text IS NULL OR p.title ILIKE ${like} OR p.body ILIKE ${like})
         ORDER BY p.created_at DESC
         LIMIT ${limit}
       `);
+
+      // Un lienzo es en sí mismo una publicación: es lo que la persona ha
+      // construido, no solo el contenedor de lo que cuelga dentro.
+      const lienzos = await db.execute(sql`
+        SELECT g.id, g.slug, g.title, g.description, g.views, g.created_at, g.status,
+               g.is_ai_generated, g.creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               coalesce(g.center->>'personal','') = '1' AS es_personal,
+               (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS piezas,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM knowledge_graphs g
+        LEFT JOIN users u ON u.id = g.creator_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'lienzo' AND pm.entity_id = g.id
+        WHERE g.archived_at IS NULL AND g.deleted_at IS NULL
+          AND (g.status = 'publicado' OR g.creator_user_id = ${usuarioId}::text)
+          AND (${incluirPersonales} OR coalesce(g.center->>'personal','') <> '1')
+          AND (${autor}::text IS NULL OR g.creator_user_id = ${autor})
+          AND (${like}::text IS NULL OR g.title ILIKE ${like} OR g.description ILIKE ${like})
+        ORDER BY g.created_at DESC
+        LIMIT ${limit}
+      `);
+
+      const proyectos = await db.execute(sql`
+        SELECT p.id, p.slug, p.titulo, p.descripcion, p.vision, p.publico, p.created_at,
+               p.creador_user_id AS creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               (SELECT count(*)::int FROM roadmap_items r WHERE r.proyecto_id = p.id) AS tarjetas,
+               (SELECT count(*)::int FROM roadmap_items r WHERE r.proyecto_id = p.id AND r.estado = 'hecho') AS hechas,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM proyectos p
+        LEFT JOIN users u ON u.id = p.creador_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'proyecto' AND pm.entity_id = p.id
+        WHERE p.archived_at IS NULL AND p.deleted_at IS NULL
+          AND (p.publico OR p.creador_user_id = ${usuarioId}::text)
+          AND (${autor}::text IS NULL OR p.creador_user_id = ${autor})
+          AND (${like}::text IS NULL OR p.titulo ILIKE ${like} OR p.descripcion ILIKE ${like})
+        ORDER BY p.created_at DESC
+        LIMIT ${limit}
+      `);
+
+      // Un mapa también lo publicó alguien: el Mapa de Indicadores de la
+      // Humanidad es de Eugenio igual que lo es cualquier mapa que crees tú.
+      const mapas = await db.execute(sql`
+        SELECT m.id, m.slug, m.title, m.description, m.config, m.views, m.status,
+               m.is_ai_generated, m.created_at, m.creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM user_maps m
+        LEFT JOIN users u ON u.id = m.creator_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'mapa' AND pm.entity_id = m.id
+        WHERE m.archived_at IS NULL AND m.deleted_at IS NULL
+          AND (m.status = 'publicado' OR m.creator_user_id = ${usuarioId}::text)
+          AND (${autor}::text IS NULL OR m.creator_user_id = ${autor})
+          AND (${like}::text IS NULL OR m.title ILIKE ${like} OR m.description ILIKE ${like})
+        ORDER BY m.created_at DESC
+        LIMIT ${limit}
+      `);
+
+      // `puedo_editar` viaja resuelto desde aquí: la tarjeta no debe deducir
+      // permisos por su cuenta, y así el lápiz, el candado y la papelera sólo
+      // aparecen cuando el servidor va a aceptarlos de verdad.
+      //   editar  → autor, colaborador o administrador
+      //   mandar / visibilidad / colaboradores → solo autor o administrador
+      const comun = (r: any) => ({
+        estado: r.estado as 'en_desarrollo' | 'terminado',
+        n_colaboradores: r.n_colaboradores as number,
+        puedo_editar: !!usuarioId && (r.creator_user_id === usuarioId || esAdmin || r.soy_colaborador),
+        soy_autor: !!usuarioId && (r.creator_user_id === usuarioId || esAdmin),
+      });
 
       const todo = [
         ...(ventanas.rows as any[]).map(w => ({
@@ -712,6 +933,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
           autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
           donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
+          ruta: w.grafo_slug ? `/grafos/${w.grafo_slug}` : null,
+          publico: w.publico, ...comun(w),
         })),
         ...(muro.rows as any[]).map(p => ({
           tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
@@ -719,10 +942,576 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           vistas: 0, ia: false, fecha: p.created_at,
           autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
           donde: 'El muro', donde_slug: null, personal: false,
+          ruta: '/muro',
+          publico: (p.visibility || 'publica') !== 'privada', ...comun(p),
+        })),
+        ...(lienzos.rows as any[]).map(g => ({
+          tipo: 'lienzo', id: g.id, titulo: g.title, kind: 'grafo',
+          config: {
+            title: g.title, description: g.description,
+            graph_slug: g.slug, creator_name: g.autor_nombre,
+          },
+          vistas: g.views, ia: g.is_ai_generated, fecha: g.created_at,
+          autor_id: g.creator_user_id, autor_nombre: g.autor_nombre, autor_avatar: g.autor_avatar,
+          donde: `${g.piezas} ${g.piezas === 1 ? 'pieza' : 'piezas'}`, donde_slug: g.slug,
+          personal: g.es_personal,
+          ruta: `/grafos/${g.slug}`,
+          publico: g.status === 'publicado', ...comun(g),
+        })),
+        ...(proyectos.rows as any[]).map(p => ({
+          tipo: 'proyecto', id: p.id, titulo: p.titulo, kind: 'proyecto',
+          config: {
+            goal: p.descripcion || p.vision,
+            // El estado del proyecto no se inventa: sale de sus tarjetas.
+            status: !p.tarjetas ? 'idea' : p.hechas === p.tarjetas ? 'terminado' : 'en_marcha',
+            steps: [],
+          },
+          vistas: 0, ia: false, fecha: p.created_at,
+          autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
+          donde: p.tarjetas ? `${p.hechas}/${p.tarjetas} hechas` : 'Sin tarjetas aún',
+          donde_slug: p.slug, personal: false,
+          ruta: `/proyectos/${p.slug}`,
+          publico: p.publico, ...comun(p),
+        })),
+        ...(mapas.rows as any[]).map(m => ({
+          tipo: 'mapa', id: m.id, titulo: m.title, kind: 'mapa',
+          // El mapa principal de la plataforma vive en /mapa; los demás en su
+          // propia página. `config.principal` es lo que los distingue.
+          config: { ...(m.config || {}), title: m.title, description: m.description },
+          vistas: m.views, ia: m.is_ai_generated, fecha: m.created_at,
+          autor_id: m.creator_user_id, autor_nombre: m.autor_nombre, autor_avatar: m.autor_avatar,
+          donde: 'Mapas', donde_slug: m.slug, personal: false,
+          ruta: (m.config || {}).principal ? '/mapa' : `/mapas/${m.slug}`,
+          publico: m.status === 'publicado', ...comun(m),
         })),
       ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
       res.json(todo.slice(0, limit));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // UNA PUBLICACIÓN ES UNA PUBLICACIÓN (2026-08-08, petición del usuario)
+  // ==========================================================================
+  // Un mapa, un lienzo, un proyecto, un libro, un documento: para quien lo
+  // escribe son todos lo mismo, «algo que ha publicado». Viven en cuatro
+  // tablas distintas, así que estas tres rutas son la única puerta común:
+  // editar, hacer pública o privada, y mandar a la papelera. Los permisos se
+  // comprueban aquí una sola vez, no en cada tabla.
+
+  const TIPOS_PUB = new Set(['ventana', 'muro', 'lienzo', 'proyecto', 'mapa']);
+
+  /** Autor y colaboradores de una publicación. `undefined` = no existe. */
+  const cargarPublicacion = async (tipo: string, id: string) => {
+    const r = tipo === 'ventana'
+      ? await db.execute(sql`SELECT creator_user_id AS autor FROM knowledge_windows WHERE id = ${id}`)
+      : tipo === 'muro'
+      ? await db.execute(sql`SELECT author_user_id AS autor FROM publications WHERE id = ${id}`)
+      : tipo === 'lienzo'
+      ? await db.execute(sql`SELECT creator_user_id AS autor, center->>'personal' AS personal FROM knowledge_graphs WHERE id = ${id}`)
+      : tipo === 'mapa'
+      ? await db.execute(sql`SELECT creator_user_id AS autor, config->>'principal' AS principal FROM user_maps WHERE id = ${id}`)
+      : await db.execute(sql`SELECT creador_user_id AS autor FROM proyectos WHERE id = ${id}`);
+    if (!r.rows.length) return undefined;
+    const meta = await db.execute(sql`
+      SELECT estado, colaboradores FROM publicacion_meta WHERE tipo = ${tipo} AND entity_id = ${id}
+    `);
+    const m = (meta.rows[0] as any) || {};
+    return {
+      ...(r.rows[0] as any),
+      estado: m.estado || 'en_desarrollo',
+      colaboradores: Array.isArray(m.colaboradores) ? (m.colaboradores as string[]) : [],
+    };
+  };
+
+  /**
+   * Sesión + tipo válido + permiso.
+   * `exigirAutor` separa las dos cosas que no son lo mismo: un colaborador
+   * ayuda a escribir, pero no decide si la publicación es pública, ni la
+   * manda a la papelera, ni cambia quién más puede entrar.
+   */
+  const accesoPublicacion = async (
+    req: Request, res: Response, tipo: string, id: string, exigirAutor: boolean,
+  ) => {
+    if (!TIPOS_PUB.has(tipo)) { res.status(400).json({ error: 'Ese tipo de publicación no existe.' }); return null; }
+    if (!requireLevel(req, res, ROLE.USER)) return null;
+    const fila = await cargarPublicacion(tipo, id);
+    if (!fila) { res.status(404).json({ error: 'Esa publicación ya no existe.' }); return null; }
+    const esAutor = canEdit(req, fila.autor ?? null);
+    const esColaborador = fila.colaboradores.includes(req.user!.id);
+    if (!esAutor && !(esColaborador && !exigirAutor)) {
+      res.status(403).json({
+        error: exigirAutor
+          ? 'Solo quien la publicó (o un administrador) puede hacer eso.'
+          : 'Solo quien la publicó, sus colaboradores o un administrador pueden editarla.',
+      });
+      return null;
+    }
+    return { ...fila, esAutor };
+  };
+
+  /** Crea o actualiza la fila de metadatos sin pisar lo que no se toca. */
+  const guardarMeta = async (
+    tipo: string, id: string, yo: string,
+    cambios: { estado?: string; colaboradores?: string[] },
+  ) => {
+    await db.execute(sql`
+      INSERT INTO publicacion_meta (tipo, entity_id, estado, colaboradores, updated_by, updated_at)
+      VALUES (${tipo}, ${id},
+              ${cambios.estado ?? 'en_desarrollo'},
+              ${JSON.stringify(cambios.colaboradores ?? [])}::jsonb,
+              ${yo}, now())
+      ON CONFLICT (tipo, entity_id) DO UPDATE SET
+        estado        = COALESCE(${cambios.estado ?? null}, publicacion_meta.estado),
+        colaboradores = COALESCE(${cambios.colaboradores ? JSON.stringify(cambios.colaboradores) : null}::jsonb,
+                                 publicacion_meta.colaboradores),
+        updated_by = ${yo}, updated_at = now()
+    `);
+  };
+
+  /**
+   * PATCH /api/publicaciones/:tipo/:id
+   * { titulo?, config?, cuerpo?, descripcion?, publico? }
+   * `publico` se traduce a la columna que ya usaba cada tabla: no se inventa
+   * una nueva forma de decir «privado» por cada tipo.
+   */
+  app.patch('/api/publicaciones/:tipo/:id', async (req: Request, res: Response) => {
+    try {
+      const { tipo, id } = req.params;
+      const d = req.body || {};
+      const publico = typeof d.publico === 'boolean' ? d.publico : null;
+      const estado = d.estado === 'terminado' || d.estado === 'en_desarrollo' ? d.estado : null;
+      // Cambiar la visibilidad no es editar: eso lo decide solo quien publica.
+      const fila = await accesoPublicacion(req, res, tipo, id, publico !== null);
+      if (!fila) return;
+
+      const titulo = typeof d.titulo === 'string' && d.titulo.trim() ? d.titulo.trim() : null;
+      const cuerpo = typeof d.cuerpo === 'string' ? d.cuerpo : null;
+      const descripcion = typeof d.descripcion === 'string' ? d.descripcion : null;
+      const yo = req.user!.id;
+
+      // El lienzo personal es el espacio privado de cada persona: publicarlo
+      // entero de golpe expondría todo lo que tiene dentro sin querer.
+      if (tipo === 'lienzo' && publico === true && fila.personal === '1') {
+        return res.status(400).json({
+          error: 'Tu lienzo personal no se publica entero. Publica desde él las piezas que quieras compartir.',
+        });
+      }
+
+      if (estado) await guardarMeta(tipo, id, yo, { estado });
+
+      if (tipo === 'ventana') {
+        await db.execute(sql`
+          UPDATE knowledge_windows SET
+            title = COALESCE(${titulo}, title),
+            config = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
+            publico = COALESCE(${publico}, publico),
+            version = version + 1, updated_at = now(), updated_by = ${yo}
+          WHERE id = ${id}
+        `);
+      } else if (tipo === 'muro') {
+        await db.execute(sql`
+          UPDATE publications SET
+            title = COALESCE(${titulo}, title),
+            body = COALESCE(${cuerpo}, body),
+            visibility = COALESCE(${publico === null ? null : publico ? 'publica' : 'privada'}, visibility),
+            version = version + 1, updated_at = now(), updated_by = ${yo}
+          WHERE id = ${id}
+        `);
+      } else if (tipo === 'lienzo') {
+        await db.execute(sql`
+          UPDATE knowledge_graphs SET
+            title = COALESCE(${titulo}, title),
+            description = COALESCE(${descripcion}, description),
+            status = COALESCE(${publico === null ? null : publico ? 'publicado' : 'borrador'}, status),
+            version = version + 1, updated_at = now(), updated_by = ${yo}
+          WHERE id = ${id}
+        `);
+      } else if (tipo === 'mapa') {
+        await db.execute(sql`
+          UPDATE user_maps SET
+            title = COALESCE(${titulo}, title),
+            description = COALESCE(${descripcion}, description),
+            config = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
+            status = COALESCE(${publico === null ? null : publico ? 'publicado' : 'borrador'}, status),
+            version = version + 1, updated_at = now(), updated_by = ${yo}
+          WHERE id = ${id}
+        `);
+      } else {
+        await db.execute(sql`
+          UPDATE proyectos SET
+            titulo = COALESCE(${titulo}, titulo),
+            descripcion = COALESCE(${descripcion}, descripcion),
+            publico = COALESCE(${publico}, publico),
+            updated_at = now(), updated_by = ${yo}
+          WHERE id = ${id}
+        `);
+      }
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Marca o desmarca la papelera de cualquiera de los cinco tipos. */
+  const marcarPapelera = async (tipo: string, id: string, yo: string, borrar: boolean) => {
+    const cuando = borrar ? sql`now()` : sql`NULL`;
+    if (tipo === 'ventana') {
+      await db.execute(sql`UPDATE knowledge_windows SET deleted_at = ${cuando}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+    } else if (tipo === 'muro') {
+      await db.execute(sql`UPDATE publications SET deleted_at = ${cuando}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+    } else if (tipo === 'lienzo') {
+      await db.execute(sql`UPDATE knowledge_graphs SET deleted_at = ${cuando}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+    } else if (tipo === 'mapa') {
+      await db.execute(sql`UPDATE user_maps SET deleted_at = ${cuando}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+    } else {
+      await db.execute(sql`UPDATE proyectos SET deleted_at = ${cuando}, updated_at = now(), updated_by = ${yo} WHERE id = ${id}`);
+    }
+  };
+
+  /** DELETE /api/publicaciones/:tipo/:id — a la papelera, 15 días. */
+  app.delete('/api/publicaciones/:tipo/:id', async (req: Request, res: Response) => {
+    try {
+      const { tipo, id } = req.params;
+      if (!await accesoPublicacion(req, res, tipo, id, true)) return;
+      await marcarPapelera(tipo, id, req.user!.id, true);
+      res.json({ success: true, diasParaBorradoDefinitivo: PAPELERA_DIAS });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/publicaciones/:tipo/:id/restaurar — sacarla de la papelera. */
+  app.post('/api/publicaciones/:tipo/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      const { tipo, id } = req.params;
+      if (!await accesoPublicacion(req, res, tipo, id, true)) return;
+      await marcarPapelera(tipo, id, req.user!.id, false);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicaciones/:tipo/:id/colaboradores — quién más puede escribir. */
+  app.get('/api/publicaciones/:tipo/:id/colaboradores', async (req: Request, res: Response) => {
+    try {
+      const { tipo, id } = req.params;
+      if (!await accesoPublicacion(req, res, tipo, id, false)) return;
+      const filas = await db.execute(sql`
+        SELECT u.id, u.display_name, u.email, u.avatar_url
+        FROM publicacion_meta pm
+        JOIN jsonb_array_elements_text(pm.colaboradores) AS c(uid) ON true
+        JOIN users u ON u.id = c.uid
+        WHERE pm.tipo = ${tipo} AND pm.entity_id = ${id}
+        ORDER BY u.display_name
+      `);
+      res.json(filas.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * PUT /api/publicaciones/:tipo/:id/colaboradores   { personas: ["a@b.com", …] }
+   * Se aceptan correos o identificadores; devuelve cuáles no existen todavía
+   * para poder decírselo a quien invita, en vez de fallar en silencio.
+   */
+  app.put('/api/publicaciones/:tipo/:id/colaboradores', async (req: Request, res: Response) => {
+    try {
+      const { tipo, id } = req.params;
+      const fila = await accesoPublicacion(req, res, tipo, id, true);
+      if (!fila) return;
+      const entrada: string[] = Array.isArray(req.body?.personas)
+        ? req.body.personas.map((p: any) => String(p).trim()).filter(Boolean)
+        : [];
+      if (!entrada.length) {
+        await guardarMeta(tipo, id, req.user!.id, { colaboradores: [] });
+        return res.json({ colaboradores: [], no_encontrados: [] });
+      }
+      const encontrados = await db.execute(sql`
+        SELECT id, email, display_name FROM users
+        WHERE lower(email) IN ${entrada.map(e => e.toLowerCase())} OR id IN ${entrada}
+      `);
+      const filas = encontrados.rows as any[];
+      const ids = [...new Set(filas.map(u => u.id))].filter(u => u !== fila.autor);
+      const conocidos = new Set(filas.flatMap(u => [String(u.email || '').toLowerCase(), u.id]));
+      const noEncontrados = entrada.filter(e => !conocidos.has(e.toLowerCase()) && !conocidos.has(e));
+      await guardarMeta(tipo, id, req.user!.id, { colaboradores: ids });
+      res.json({ colaboradores: filas.filter(u => ids.includes(u.id)), no_encontrados: noEncontrados });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // CARPETAS PERSONALES (2026-08-08, petición del usuario)
+  // ==========================================================================
+  // «Un menú lateral izquierdo que sean carpetas donde el usuario puede
+  // ordenar sus publicaciones… una publicación puede estar en muchas carpetas
+  // a la vez.» Son carpetas de MARCADORES: cualquier publicación que puedas
+  // ver (tuya o de otra persona) se puede guardar en tus carpetas; guardarla
+  // no cambia su autoría ni su visibilidad, solo la organiza para ti.
+
+  /**
+   * Resuelve un conjunto concreto de referencias (tipo, entity_id) al mismo
+   * formato que usa /api/publicaciones, respetando las mismas reglas de
+   * visibilidad (privado solo lo ve su autor). Es lo que rellena una carpeta
+   * y lo que arma cada tarjeta del resultado de organizar-con-IA.
+   */
+  const resolverPublicaciones = async (
+    refs: { tipo: string; entity_id: string }[], usuarioId: string | null, esAdmin: boolean,
+  ) => {
+    if (!refs.length) return [];
+    const porTipo: Record<string, string[]> = {};
+    for (const r of refs) (porTipo[r.tipo] ||= []).push(r.entity_id);
+    const salida: any[] = [];
+    const mio = (creador: string | null) => !!usuarioId && (creador === usuarioId || esAdmin);
+
+    if (porTipo.ventana?.length) {
+      const rows = await db.execute(sql`
+        SELECT w.id, w.title, w.kind, w.config, w.views, w.is_ai_generated, w.created_at,
+               w.publico, w.creator_user_id, u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               g.slug AS grafo_slug, g.title AS grafo_titulo, coalesce(g.center->>'personal','') = '1' AS es_personal,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM knowledge_windows w
+        JOIN graph_windows gw ON gw.window_id = w.id
+        JOIN knowledge_graphs g ON g.id = gw.graph_id
+        LEFT JOIN users u ON u.id = w.creator_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'ventana' AND pm.entity_id = w.id
+        WHERE w.id IN ${porTipo.ventana} AND w.archived_at IS NULL AND w.deleted_at IS NULL
+          AND (w.publico OR w.creator_user_id = ${usuarioId}::text OR ${esAdmin})
+      `);
+      for (const w of rows.rows as any[]) salida.push({
+        tipo: 'ventana', id: w.id, titulo: w.title, kind: w.kind, config: w.config,
+        vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
+        autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
+        donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
+        ruta: w.grafo_slug ? `/grafos/${w.grafo_slug}` : null,
+        publico: w.publico, estado: w.estado, n_colaboradores: w.n_colaboradores,
+        puedo_editar: mio(w.creator_user_id) || (!!usuarioId && w.soy_colaborador), soy_autor: mio(w.creator_user_id),
+      });
+    }
+    if (porTipo.muro?.length) {
+      const rows = await db.execute(sql`
+        SELECT p.id, p.title, p.body, p.created_at, p.visibility, p.author_user_id AS creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM publications p LEFT JOIN users u ON u.id = p.author_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'muro' AND pm.entity_id = p.id
+        WHERE p.id IN ${porTipo.muro} AND p.archived_at IS NULL AND p.deleted_at IS NULL
+          AND (coalesce(p.visibility,'publica') <> 'privada' OR p.author_user_id = ${usuarioId}::text OR ${esAdmin})
+      `);
+      for (const p of rows.rows as any[]) salida.push({
+        tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
+        kind: 'publicacion', config: { body: p.body },
+        vistas: 0, ia: false, fecha: p.created_at,
+        autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
+        donde: 'El muro', donde_slug: null, personal: false, ruta: '/muro',
+        publico: (p.visibility || 'publica') !== 'privada', estado: p.estado, n_colaboradores: p.n_colaboradores,
+        puedo_editar: mio(p.creator_user_id) || (!!usuarioId && p.soy_colaborador), soy_autor: mio(p.creator_user_id),
+      });
+    }
+    if (porTipo.lienzo?.length) {
+      const rows = await db.execute(sql`
+        SELECT g.id, g.slug, g.title, g.description, g.views, g.created_at, g.status, g.is_ai_generated, g.creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar, coalesce(g.center->>'personal','') = '1' AS es_personal,
+               (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS piezas,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM knowledge_graphs g LEFT JOIN users u ON u.id = g.creator_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'lienzo' AND pm.entity_id = g.id
+        WHERE g.id IN ${porTipo.lienzo} AND g.archived_at IS NULL AND g.deleted_at IS NULL
+          AND (g.status = 'publicado' OR g.creator_user_id = ${usuarioId}::text OR ${esAdmin})
+      `);
+      for (const g of rows.rows as any[]) salida.push({
+        tipo: 'lienzo', id: g.id, titulo: g.title, kind: 'grafo',
+        config: { title: g.title, description: g.description, graph_slug: g.slug, creator_name: g.autor_nombre },
+        vistas: g.views, ia: g.is_ai_generated, fecha: g.created_at,
+        autor_id: g.creator_user_id, autor_nombre: g.autor_nombre, autor_avatar: g.autor_avatar,
+        donde: `${g.piezas} ${g.piezas === 1 ? 'pieza' : 'piezas'}`, donde_slug: g.slug, personal: g.es_personal,
+        ruta: `/grafos/${g.slug}`,
+        publico: g.status === 'publicado', estado: g.estado, n_colaboradores: g.n_colaboradores,
+        puedo_editar: mio(g.creator_user_id) || (!!usuarioId && g.soy_colaborador), soy_autor: mio(g.creator_user_id),
+      });
+    }
+    if (porTipo.proyecto?.length) {
+      const rows = await db.execute(sql`
+        SELECT p.id, p.slug, p.titulo, p.descripcion, p.vision, p.publico, p.created_at, p.creador_user_id AS creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               (SELECT count(*)::int FROM roadmap_items r WHERE r.proyecto_id = p.id) AS tarjetas,
+               (SELECT count(*)::int FROM roadmap_items r WHERE r.proyecto_id = p.id AND r.estado = 'hecho') AS hechas,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM proyectos p LEFT JOIN users u ON u.id = p.creador_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'proyecto' AND pm.entity_id = p.id
+        WHERE p.id IN ${porTipo.proyecto} AND p.archived_at IS NULL AND p.deleted_at IS NULL
+          AND (p.publico OR p.creador_user_id = ${usuarioId}::text OR ${esAdmin})
+      `);
+      for (const p of rows.rows as any[]) salida.push({
+        tipo: 'proyecto', id: p.id, titulo: p.titulo, kind: 'proyecto',
+        config: { goal: p.descripcion || p.vision, status: !p.tarjetas ? 'idea' : p.hechas === p.tarjetas ? 'terminado' : 'en_marcha', steps: [] },
+        vistas: 0, ia: false, fecha: p.created_at,
+        autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
+        donde: p.tarjetas ? `${p.hechas}/${p.tarjetas} hechas` : 'Sin tarjetas aún', donde_slug: p.slug, personal: false,
+        ruta: `/proyectos/${p.slug}`,
+        publico: p.publico, estado: p.estado, n_colaboradores: p.n_colaboradores,
+        puedo_editar: mio(p.creator_user_id) || (!!usuarioId && p.soy_colaborador), soy_autor: mio(p.creator_user_id),
+      });
+    }
+    if (porTipo.mapa?.length) {
+      const rows = await db.execute(sql`
+        SELECT m.id, m.slug, m.title, m.description, m.config, m.views, m.status, m.is_ai_generated, m.created_at, m.creator_user_id,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               coalesce(pm.estado, 'en_desarrollo') AS estado,
+               coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
+               coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
+        FROM user_maps m LEFT JOIN users u ON u.id = m.creator_user_id
+        LEFT JOIN publicacion_meta pm ON pm.tipo = 'mapa' AND pm.entity_id = m.id
+        WHERE m.id IN ${porTipo.mapa} AND m.archived_at IS NULL AND m.deleted_at IS NULL
+          AND (m.status = 'publicado' OR m.creator_user_id = ${usuarioId}::text OR ${esAdmin})
+      `);
+      for (const m of rows.rows as any[]) salida.push({
+        tipo: 'mapa', id: m.id, titulo: m.title, kind: 'mapa',
+        config: { ...(m.config || {}), title: m.title, description: m.description },
+        vistas: m.views, ia: m.is_ai_generated, fecha: m.created_at,
+        autor_id: m.creator_user_id, autor_nombre: m.autor_nombre, autor_avatar: m.autor_avatar,
+        donde: 'Mapas', donde_slug: m.slug, personal: false,
+        ruta: (m.config || {}).principal ? '/mapa' : `/mapas/${m.slug}`,
+        publico: m.status === 'publicado', estado: m.estado, n_colaboradores: m.n_colaboradores,
+        puedo_editar: mio(m.creator_user_id) || (!!usuarioId && m.soy_colaborador), soy_autor: mio(m.creator_user_id),
+      });
+    }
+    return salida;
+  };
+
+  /** GET /api/carpetas — las carpetas del usuario, con cuántas piezas tiene cada una. */
+  app.get('/api/carpetas', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const rows = await db.execute(sql`
+        SELECT c.id, c.nombre, c.color, c.orden, c.created_at,
+               (SELECT count(*)::int FROM carpeta_publicaciones cp WHERE cp.carpeta_id = c.id) AS piezas
+        FROM carpetas c WHERE c.user_id = ${req.user!.id}
+        ORDER BY c.orden, c.created_at
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/carpetas  { nombre, color? } */
+  app.post('/api/carpetas', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const nombre = String(req.body?.nombre || '').trim();
+      if (!nombre) return res.status(400).json({ error: 'La carpeta necesita un nombre.' });
+      const id = newId('CAR');
+      const orden = await db.execute(sql`SELECT coalesce(max(orden), -1) + 1 AS n FROM carpetas WHERE user_id = ${req.user!.id}`);
+      await db.execute(sql`
+        INSERT INTO carpetas (id, user_id, nombre, color, orden)
+        VALUES (${id}, ${req.user!.id}, ${nombre}, ${req.body?.color || null}, ${(orden.rows[0] as any).n})
+      `);
+      res.json({ id, nombre, color: req.body?.color || null, piezas: 0 });
+    } catch (e: any) {
+      if (String(e.message).includes('unique')) return res.status(400).json({ error: 'Ya tienes una carpeta con ese nombre.' });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  const propiaCarpeta = async (req: Request, res: Response, id: string) => {
+    if (!requireLevel(req, res, ROLE.USER)) return null;
+    const c = await db.execute(sql`SELECT user_id FROM carpetas WHERE id = ${id}`);
+    if (!c.rows.length) { res.status(404).json({ error: 'Carpeta no encontrada.' }); return null; }
+    if ((c.rows[0] as any).user_id !== req.user!.id) {
+      res.status(403).json({ error: 'Esta carpeta no es tuya.' }); return null;
+    }
+    return c.rows[0];
+  };
+
+  /** PUT /api/carpetas/:id  { nombre?, color?, orden? } */
+  app.put('/api/carpetas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!await propiaCarpeta(req, res, req.params.id)) return;
+      const d = req.body || {};
+      await db.execute(sql`
+        UPDATE carpetas SET
+          nombre = COALESCE(${d.nombre ? String(d.nombre).trim() : null}, nombre),
+          color = COALESCE(${d.color ?? null}, color),
+          orden = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
+          updated_at = now()
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** DELETE /api/carpetas/:id — borra la carpeta; lo de dentro sigue existiendo, solo deja de estar archivado ahí. */
+  app.delete('/api/carpetas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!await propiaCarpeta(req, res, req.params.id)) return;
+      await db.execute(sql`DELETE FROM carpetas WHERE id = ${req.params.id}`);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/carpetas/:id/publicaciones — lo que hay dentro. */
+  app.get('/api/carpetas/:id/publicaciones', async (req: Request, res: Response) => {
+    try {
+      const carpeta = await propiaCarpeta(req, res, req.params.id);
+      if (!carpeta) return;
+      const refs = await db.execute(sql`SELECT tipo, entity_id FROM carpeta_publicaciones WHERE carpeta_id = ${req.params.id}`);
+      const items = await resolverPublicaciones(refs.rows as any[], req.user!.id, (req.user!.roleLevel ?? 0) >= ROLE.ADMIN);
+      res.json(items.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicaciones/:tipo/:id/carpetas — en cuáles de MIS carpetas está ya. */
+  app.get('/api/publicaciones/:tipo/:id/carpetas', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const rows = await db.execute(sql`
+        SELECT c.id, c.nombre, c.color
+        FROM carpetas c
+        JOIN carpeta_publicaciones cp ON cp.carpeta_id = c.id
+        WHERE c.user_id = ${req.user!.id} AND cp.tipo = ${req.params.tipo} AND cp.entity_id = ${req.params.id}
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * PUT /api/publicaciones/:tipo/:id/carpetas  { carpeta_ids: string[] }
+   * Sustituye de golpe el conjunto de carpetas propias que contienen esta
+   * publicación — es lo que usa el selector «Guardar en:» (marcar/desmarcar).
+   */
+  app.put('/api/publicaciones/:tipo/:id/carpetas', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const { tipo, id } = req.params;
+      if (!TIPOS_PUB.has(tipo) && tipo !== 'ventana') return res.status(400).json({ error: 'Tipo desconocido.' });
+      const pedidas: string[] = Array.isArray(req.body?.carpeta_ids) ? req.body.carpeta_ids.map(String) : [];
+      // Solo se tocan carpetas propias — no se puede colar en carpetas ajenas.
+      const mias = await db.execute(sql`SELECT id FROM carpetas WHERE user_id = ${req.user!.id}`);
+      const idsMias = new Set((mias.rows as any[]).map(c => c.id));
+      const validas = pedidas.filter(cid => idsMias.has(cid));
+      await db.execute(sql`
+        DELETE FROM carpeta_publicaciones
+        WHERE tipo = ${tipo} AND entity_id = ${id} AND carpeta_id IN ${[...idsMias]}
+      `);
+      for (const carpetaId of validas) {
+        await db.execute(sql`
+          INSERT INTO carpeta_publicaciones (carpeta_id, tipo, entity_id, added_by)
+          VALUES (${carpetaId}, ${tipo}, ${id}, ${req.user!.id})
+          ON CONFLICT DO NOTHING
+        `);
+      }
+      res.json({ success: true, carpeta_ids: validas });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/carpetas/auto-organizar — el botón «Ordenar con IA». */
+  app.post('/api/carpetas/auto-organizar', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const resultado = await autoOrganizarCarpetas(db, req.user!.id);
+      if (resultado.ok === false) return res.status(400).json({ error: resultado.error });
+      res.json(resultado);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -744,7 +1533,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         SELECT g.id, g.slug, g.title, u.display_name AS creator_name,
                (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count
         FROM knowledge_graphs g LEFT JOIN users u ON u.id = g.creator_user_id
-        WHERE g.archived_at IS NULL AND g.status = 'publicado'
+        WHERE g.archived_at IS NULL AND g.deleted_at IS NULL AND g.status = 'publicado'
           AND coalesce(g.center->>'personal','') <> '1'
           AND (${exclude}::text IS NULL OR g.id <> ${exclude})
           AND (g.title ILIKE ${like} OR g.description ILIKE ${like} OR g.trigger_keywords::text ILIKE ${like})
@@ -758,7 +1547,8 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         JOIN graph_windows gw ON gw.window_id = w.id
         JOIN knowledge_graphs g ON g.id = gw.graph_id
         LEFT JOIN users u ON u.id = w.creator_user_id
-        WHERE w.archived_at IS NULL AND g.archived_at IS NULL AND g.status = 'publicado'
+        WHERE w.archived_at IS NULL AND w.deleted_at IS NULL AND w.publico
+          AND g.archived_at IS NULL AND g.deleted_at IS NULL AND g.status = 'publicado'
           AND coalesce(g.center->>'personal','') <> '1'
           AND (${exclude}::text IS NULL OR g.id <> ${exclude})
           AND (w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
@@ -981,22 +1771,66 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
   // verdad. Corre al arrancar y una vez al día; `unref()` para que no impida
   // que el proceso termine.
   const vaciarPapelera = async () => {
-    try {
-      const caducadas = await db.execute(sql`
-        SELECT id FROM knowledge_windows
+    const caducados = async (tabla: any) => {
+      const r = await db.execute(sql`
+        SELECT id FROM ${tabla}
         WHERE deleted_at IS NOT NULL AND deleted_at < now() - (${PAPELERA_DIAS} || ' days')::interval
       `);
-      const ids = (caducadas.rows as any[]).map(r => r.id);
-      if (!ids.length) return;
-      // Hay claves ajenas apuntando a la ventana: primero se sueltan sus
-      // amarras (colocaciones, conexiones, valoraciones y comentarios) y
-      // solo después se borra la fila.
-      await db.execute(sql`DELETE FROM graph_edges WHERE from_window_id IN ${ids} OR to_window_id IN ${ids}`);
-      await db.execute(sql`DELETE FROM graph_windows WHERE window_id IN ${ids}`);
-      await db.execute(sql`DELETE FROM ratings WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ids}`);
-      await db.execute(sql`DELETE FROM comments WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ids}`);
-      await db.execute(sql`DELETE FROM knowledge_windows WHERE id IN ${ids}`);
-      console.log(`papelera: ${ids.length} ventanas eliminadas definitivamente`);
+      return (r.rows as any[]).map(x => x.id as string);
+    };
+    // Nada se borra sin soltar antes lo que le apunta: si queda una clave
+    // ajena viva, el barrido falla entero y la papelera deja de vaciarse.
+    const soltarMeta = async (tipo: string, ids: string[]) => {
+      await db.execute(sql`DELETE FROM publicacion_meta WHERE tipo = ${tipo} AND entity_id IN ${ids}`);
+    };
+
+    try {
+      const ventanas = await caducados(sql.raw('knowledge_windows'));
+      if (ventanas.length) {
+        await db.execute(sql`DELETE FROM graph_edges WHERE from_window_id IN ${ventanas} OR to_window_id IN ${ventanas}`);
+        await db.execute(sql`DELETE FROM graph_windows WHERE window_id IN ${ventanas}`);
+        await db.execute(sql`DELETE FROM ratings WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ventanas}`);
+        await db.execute(sql`DELETE FROM comments WHERE entity_type = 'knowledge_windows' AND entity_id IN ${ventanas}`);
+        await soltarMeta('ventana', ventanas);
+        await db.execute(sql`DELETE FROM knowledge_windows WHERE id IN ${ventanas}`);
+      }
+
+      const lienzos = await caducados(sql.raw('knowledge_graphs'));
+      if (lienzos.length) {
+        await db.execute(sql`DELETE FROM graph_edges WHERE graph_id IN ${lienzos}`);
+        await db.execute(sql`DELETE FROM graph_windows WHERE graph_id IN ${lienzos}`);
+        await db.execute(sql`DELETE FROM graph_entity_links WHERE graph_id IN ${lienzos}`);
+        await db.execute(sql`DELETE FROM ratings WHERE entity_type = 'knowledge_graphs' AND entity_id IN ${lienzos}`);
+        await db.execute(sql`DELETE FROM comments WHERE entity_type = 'knowledge_graphs' AND entity_id IN ${lienzos}`);
+        await soltarMeta('lienzo', lienzos);
+        await db.execute(sql`DELETE FROM knowledge_graphs WHERE id IN ${lienzos}`);
+      }
+
+      const mapas = await caducados(sql.raw('user_maps'));
+      if (mapas.length) {
+        await db.execute(sql`DELETE FROM ratings WHERE entity_type = 'user_maps' AND entity_id IN ${mapas}`);
+        await db.execute(sql`DELETE FROM comments WHERE entity_type = 'user_maps' AND entity_id IN ${mapas}`);
+        await soltarMeta('mapa', mapas);
+        await db.execute(sql`DELETE FROM user_maps WHERE id IN ${mapas}`);
+      }
+
+      const proyectos = await caducados(sql.raw('proyectos'));
+      if (proyectos.length) {
+        await db.execute(sql`DELETE FROM roadmap_items WHERE proyecto_id IN ${proyectos}`);
+        await soltarMeta('proyecto', proyectos);
+        await db.execute(sql`DELETE FROM proyectos WHERE id IN ${proyectos}`);
+      }
+
+      const muro = await caducados(sql.raw('publications'));
+      if (muro.length) {
+        await db.execute(sql`DELETE FROM publication_links WHERE publication_id IN ${muro}`);
+        await db.execute(sql`DELETE FROM comments WHERE publication_id IN ${muro}`);
+        await soltarMeta('muro', muro);
+        await db.execute(sql`DELETE FROM publications WHERE id IN ${muro}`);
+      }
+
+      const total = ventanas.length + lienzos.length + mapas.length + proyectos.length + muro.length;
+      if (total) console.log(`papelera: ${total} publicaciones eliminadas definitivamente`);
     } catch (e: any) {
       console.error('papelera: fallo al vaciar —', e.message);
     }

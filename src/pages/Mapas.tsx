@@ -16,6 +16,7 @@ interface UserMap {
   description: string | null;
   views: number;
   creator_name: string | null;
+  config: { principal?: boolean } | null;
 }
 
 export default function Mapas() {
@@ -31,25 +32,22 @@ export default function Mapas() {
       .finally(() => setLoading(false));
   }, []);
 
-  const items: MetaItem[] = useMemo(() => [
-    {
-      id: '__mapa_humanidad__',
-      title: 'Mapa de Indicadores de la Humanidad',
-      subtitle: 'El mapa principal de la plataforma: objetivos, indicadores y territorios de toda la humanidad.',
-      to: '/mapa',
-      kind: 'mapa' as const,
-      creator: 'Eugenio García-Calderón Huerta',
-    },
-    ...maps.map(m => ({
+  // El Mapa de Indicadores de la Humanidad ya no se pinta a mano: es una fila
+  // de user_maps como los demás (2026-08-08), de eugenio@lighthumanity.org, y
+  // por eso se puede editar desde «Mis publicaciones». Lo único propio que
+  // tiene es `config.principal`, que lo lleva a /mapa en vez de a su página.
+  const items: MetaItem[] = useMemo(
+    () => maps.map(m => ({
       id: m.id,
       title: m.title,
       subtitle: m.description,
-      to: `/mapas/${m.slug}`,
+      to: m.config?.principal ? '/mapa' : `/mapas/${m.slug}`,
       kind: 'mapa' as const,
       creator: m.creator_name,
       views: m.views,
     })),
-  ], [maps]);
+    [maps],
+  );
 
   // Crear un mapa = pedírselo a la IA en la barra de abajo, con el texto ya
   // preparado (el asistente ejecuta CREATE_MAP en modo autónomo).

@@ -55,6 +55,12 @@ yet.** They are here so the decision can be explicit.
 - **What**: everything social, marketplace, initiatives and AI exists only as raw SQL, untyped.
 - **Cost later**: queries have no types, and `drizzle-kit generate` does not know those tables exist.
 
+### `memory/02_DATABASE.md` stopped tracking reality around Fase 8
+- **What**: it documents the original scientific/territory schema only. Everything from knowledge graphs onward — `knowledge_graphs`, `knowledge_windows`, `graph_windows`, `graph_edges`, `graph_entity_links`, `publications`, `user_maps`, `proyectos`, `roadmap_items`, `publicacion_meta`, `carpetas`, `carpeta_publicaciones`, the `ai_*` tables, `products`/`demands`/`needs` — is undocumented there, even though every migration since has followed the "update `memory/02_DATABASE.md` in the same change" rule for the *new* tables only, on top of an already-stale base.
+- **Why it happened this time (2026-08-08)**: adding 0023/0024's three tables to this file would have made it look current when the other ~30 tables added since Fase 9 still aren't in it — a partial patch would have been more misleading than useful.
+- **Cost to fix**: a real afternoon — walk every migration since 0012 and reconcile. `drizzle/` is the source of truth in the meantime; `01_TARGET_SCHEMA.md` documents where the model is *heading*, not what exists today.
+- **Rule until fixed**: don't trust `02_DATABASE.md`'s table list. Read the migrations, or query `information_schema.tables`.
+
 ### `PORT` is hardcoded to 3000
 - **What**: `server.ts:59`. The `PORT` variable in `.env.production` is ignored.
 - **Cost**: trivial to fix, but it surprises anyone trying to change the port.

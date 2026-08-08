@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, LayoutGrid,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -86,8 +86,11 @@ export default function Layout() {
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
+  // Explorar/Mis publicaciones se fusionaron en una sola página con su propio
+  // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
+  // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage;
 
   if (isEmbed) {
     return (
@@ -150,29 +153,20 @@ export default function Layout() {
           </span>
         </Link>
 
-        {/* Los DOS destinos principales */}
+        {/* El único destino principal: Explorar y Mis publicaciones eran la
+            misma página con un interruptor dentro (2026-08-08) — un botón
+            de menú no debía apuntar a dos sitios que ya son uno. */}
         <nav className="flex items-center gap-1.5 ml-1 sm:ml-4">
           <Link
             to="/explorar"
             className={cn(
               'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/explorar'
+              isExplorarPage
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
             )}
           >
             <Compass className="w-3.5 h-3.5" /> Explorar
-          </Link>
-          <Link
-            to="/mis-publicaciones"
-            className={cn(
-              'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-colors',
-              location.pathname === '/mis-publicaciones'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" /> Mis publicaciones
           </Link>
         </nav>
 
