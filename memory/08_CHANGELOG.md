@@ -482,3 +482,12 @@ La otra mitad de la plataforma (petición del usuario): el común agrega el cono
 - **Seguridad de la subida**: solo imágenes de una lista blanca; **la extensión la decide el servidor** a partir del tipo declarado, nunca el nombre del navegador; nombre UUID; tope de 10 MB; y los ficheros se sirven con `nosniff` + CSP restrictiva para que un SVG subido no pueda ejecutar nada en el dominio.
 - **Volumen de Docker `uploads`** en `docker-compose.prod.yml`: sin él, cada despliegue borraría las imágenes.
 - **Verificado e2e con eventos de pegado reales**: imagen → subida (2.942 bytes), fichero en disco, servida con 200/image-png y ventana creada; texto → nota; URL de Wikipedia → enlace; y el «+» sobre «Imagen pegada» → tarea conectada con categoría `contexto` (comprobado en la base de datos). Subida sin sesión → 401.
+
+### 2026-08-07 — Arrastrar archivos al lienzo (además de pegarlos)
+Continuación de «pegar en el lienzo»: ahora también se puede **soltar un archivo arrastrándolo** desde el escritorio, y cae EN EL PUNTO donde lo sueltas (`screenToFlowPosition` de React Flow), no en un sitio aleatorio — la diferencia entre un lienzo y un formulario.
+
+- **Velo de «Suelta aquí»** mientras arrastras sobre el lienzo, con un contador de `dragenter`/`dragleave` para que no parpadee al pasar por encima de los nodos hijos.
+- **Cada archivo se convierte en lo que le corresponde**: imagen → ventana `imagen` visible; PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX → se suben y quedan como `enlace` descargable con su tamaño; `.txt` y `.md` → **no se suben**, se lee su contenido y se convierte en nota (`texto`). Varios archivos a la vez caen en cascada, desplazados 48 px, para no apilarse.
+- **Pegar y soltar comparten camino** (`traer()`): un enlace de YouTube es vídeo, cualquier otra URL es enlace, y el texto suelto es nota — igual se pegue o se arrastre.
+- **Seguridad del almacén**: `uploads.ts` acepta ahora documentos además de imágenes, pero **solo las imágenes de verdad se sirven en línea**; PDF, SVG, ZIP y compañía salen con `Content-Disposition: attachment`, así nada de lo subido se ejecuta en el dominio. Verificado en local: el PNG sale `image/png` inline y el PDF con `attachment`.
+- **Verificado con arrastres reales** (eventos `dragenter`/`dragover`/`drop` con `DataTransfer`): PNG + PDF soltados juntos → dos ventanas en el punto del soltar (380,107 y 428,155), la imagen se ve y el PDF descarga; un `.md` soltado → nota con su contenido en (50,318) y **cero ficheros `.md` en disco**.

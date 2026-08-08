@@ -496,23 +496,30 @@ export function GrafoLienzo({ slug, toolbar }: {
   useEffect(() => { load(); }, [load]);
 
   // ==========================================================================
-  // PEGAR EN EL LIENZO (2026-08-07, petición del usuario)
+  // TRAER COSAS AL LIENZO: PEGAR y ARRASTRAR (2026-08-07, petición del usuario)
   // ==========================================================================
-  // Ctrl/Cmd+V sobre el lienzo crea la ventana que toque: una imagen del
-  // portapapeles se sube y se convierte en ventana `imagen`; un enlace de
-  // YouTube en `video`; cualquier otra URL en `enlace`; y el texto suelto en
+  // Ctrl/Cmd+V pega; arrastrar un archivo desde el escritorio lo suelta EN EL
+  // PUNTO donde lo sueltas. En ambos casos se crea la ventana que toque:
+  // una imagen se sube y se ve; un PDF u hoja de cálculo se sube y queda como
+  // enlace descargable; un .txt o .md se lee y se convierte en nota; un enlace
+  // de YouTube en vídeo; cualquier otra URL en enlace; y el texto suelto en
   // una nota. Todo queda conectado al centro, como cualquier creación.
   const [pegando, setPegando] = useState<string | null>(null);
+  const [soltando, setSoltando] = useState(false);
+  const arrastres = useRef(0);   // dragenter/dragleave se disparan por cada hijo
 
-  const crearVentana = useCallback(async (win: { title: string; kind: string; config: any }) => {
+  const crearVentana = useCallback(async (
+    win: { title: string; kind: string; config: any },
+    pos?: { x: number; y: number },
+  ) => {
     if (!data?.graph?.id) return;
     const ang = Math.random() * 2 * Math.PI;
     const res = await fetch(`/api/graphs/${data.graph.id}/windows`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({
         ...win,
-        x: Math.round(Math.cos(ang) * 640) - 128,
-        y: Math.round(Math.sin(ang) * 500) - 110,
+        x: Math.round(pos ? pos.x : Math.cos(ang) * 640 - 128),
+        y: Math.round(pos ? pos.y : Math.sin(ang) * 500 - 110),
       }),
     });
     const json = await res.json();
@@ -521,8 +528,78 @@ export function GrafoLienzo({ slug, toolbar }: {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({ from_window_id: null, to_window_id: json.id, relation: 'contexto', label: null }),
     }).catch(() => {});
+  }, [data?.graph?.id]);
+
+  /** Sube el archivo y lo convierte en la ventana que corresponda. */
+  const traerArchivo = useCallback(async (f: File, pos?: { x: number; y: number }) => {
+    const esTexto = f.type.startsWith('text/plain') || /\.(md|txt)$/i.test(f.name);
+    if (esTexto) {
+      // Un .txt o .md no hace falta subirlo: su contenido ES la nota.
+      const cuerpo = (await f.text()).trim();
+      if (!cuerpo) return;
+      await crearVentana({
+        title: f.name.replace(/\.(md|txt)$/i, '').slice(0, 60) || 'Nota',
+        kind: 'texto', config: { body: cuerpo },
+      }, pos);
+      return;
+    }
+    const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: f,
+    });
+    const j = await up.json();
+    if (!up.ok) throw new Error(j.error || 'No se pudo subir el archivo.');
+    if (j.esImagen && f.type !== 'image/svg+xml') {
+      await crearVentana({
+        title: f.name.replace(/\.[^.]+$/, '').slice(0, 60) || 'Imagen',
+        kind: 'imagen', config: { image_url: j.url, caption: null },
+      }, pos);
+    } else {
+      const kb = Math.max(1, Math.round(j.bytes / 1024));
+      await crearVentana({
+        title: f.name.slice(0, 60),
+        kind: 'enlace',
+        config: { url: j.url, description: `Archivo subido · ${kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'}` },
+      }, pos);
+    }
+  }, [crearVentana]);
+
+  /** Convierte texto suelto (o una URL) en la ventana que corresponda. */
+  const traerTexto = useCallback(async (texto: string, pos?: { x: number; y: number }) => {
+    const yt = texto.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+    if (yt && /^https?:\/\//i.test(texto)) {
+      await crearVentana({ title: 'Vídeo', kind: 'video', config: { youtube_id: yt[1] } }, pos);
+    } else if (/^https?:\/\/\S+$/i.test(texto)) {
+      await crearVentana({ title: texto.replace(/^https?:\/\//, '').slice(0, 60), kind: 'enlace', config: { url: texto } }, pos);
+    } else {
+      await crearVentana({ title: texto.split('\n')[0].slice(0, 60) || 'Nota', kind: 'texto', config: { body: texto } }, pos);
+    }
+  }, [crearVentana]);
+
+  /** El camino común de pegar y soltar. */
+  const traer = useCallback(async (dt: DataTransfer, pos?: { x: number; y: number }) => {
+    const archivos = Array.from(dt.files || []);
+    if (archivos.length) {
+      setPegando(archivos.length > 1 ? `Subiendo ${archivos.length} archivos…` : 'Subiendo…');
+      try {
+        // En cascada, para que varios archivos no caigan uno encima de otro.
+        for (let i = 0; i < archivos.length; i++) {
+          await traerArchivo(archivos[i], pos ? { x: pos.x + i * 48, y: pos.y + i * 48 } : undefined);
+        }
+        setPegando(null);
+      } catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 5000); }
+      load();
+      return true;
+    }
+    const texto = (dt.getData('text/plain') || '').trim();
+    if (!texto) return false;
+    setPegando('Creando…');
+    try { await traerTexto(texto, pos); setPegando(null); }
+    catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 5000); }
     load();
-  }, [data?.graph?.id, load]);
+    return true;
+  }, [traerArchivo, traerTexto, load]);
 
   useEffect(() => {
     if (!data?.can_edit) return;
@@ -530,49 +607,33 @@ export function GrafoLienzo({ slug, toolbar }: {
       // Nunca robar el pegado de un campo de texto (el chat, los formularios).
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      const cd = e.clipboardData;
-      if (!cd) return;
-
-      const archivo = Array.from(cd.files || []).find(f => f.type.startsWith('image/'));
-      if (archivo) {
-        e.preventDefault();
-        setPegando('Subiendo la imagen…');
-        try {
-          const up = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
-            method: 'POST', credentials: 'include',
-            headers: { 'Content-Type': 'application/octet-stream' },
-            body: archivo,
-          });
-          const j = await up.json();
-          if (!up.ok) throw new Error(j.error || 'No se pudo subir la imagen.');
-          await crearVentana({ title: 'Imagen pegada', kind: 'imagen', config: { image_url: j.url } });
-          setPegando(null);
-        } catch (err: any) { setPegando(err.message); setTimeout(() => setPegando(null), 4000); }
-        return;
-      }
-
-      const texto = (cd.getData('text/plain') || '').trim();
-      if (!texto) return;
-      e.preventDefault();
-      setPegando('Creando…');
-      try {
-        const yt = texto.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
-        if (yt && /^https?:\/\//i.test(texto)) {
-          await crearVentana({ title: 'Vídeo pegado', kind: 'video', config: { youtube_id: yt[1] } });
-        } else if (/^https?:\/\/\S+$/i.test(texto)) {
-          await crearVentana({ title: texto.replace(/^https?:\/\//, '').slice(0, 60), kind: 'enlace', config: { url: texto } });
-        } else {
-          await crearVentana({
-            title: texto.split('\n')[0].slice(0, 60) || 'Nota',
-            kind: 'texto', config: { body: texto },
-          });
-        }
-        setPegando(null);
-      } catch (err: any) { setPegando(err.message); setTimeout(() => setPegando(null), 4000); }
+      if (!e.clipboardData) return;
+      if (await traer(e.clipboardData)) e.preventDefault();
     };
     window.addEventListener('paste', onPaste);
     return () => window.removeEventListener('paste', onPaste);
-  }, [data?.can_edit, crearVentana]);
+  }, [data?.can_edit, traer]);
+
+  /** Soltar sobre el lienzo: la ventana nace justo donde la sueltas. */
+  const onDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    arrastres.current = 0;
+    setSoltando(false);
+    if (!data?.can_edit || !e.dataTransfer) return;
+    const p = rf.current?.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+    await traer(e.dataTransfer, p ? { x: p.x - 160, y: p.y - 90 } : undefined);
+  }, [data?.can_edit, traer]);
+
+  const onDragEnter = useCallback((e: React.DragEvent) => {
+    if (!data?.can_edit || !Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+    arrastres.current++;
+    setSoltando(true);
+  }, [data?.can_edit]);
+
+  const onDragLeave = useCallback(() => {
+    arrastres.current = Math.max(0, arrastres.current - 1);
+    if (arrastres.current === 0) setSoltando(false);
+  }, []);
 
   const openWindow = useCallback((winId: string) => {
     setData((d: any) => {
@@ -858,7 +919,13 @@ export function GrafoLienzo({ slug, toolbar }: {
     id ? (data.windows.find((w: any) => w.id === id)?.title || id) : 'Centro del grafo';
 
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full"
+      onDrop={onDrop}
+      onDragOver={e => { if (data.can_edit) e.preventDefault(); }}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -1156,6 +1223,18 @@ export function GrafoLienzo({ slug, toolbar }: {
             </div>
           </div>
         </div>
+        </div>
+      )}
+
+      {soltando && (
+        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center bg-emerald-50/70 backdrop-blur-[1px] border-4 border-dashed border-emerald-400 rounded-2xl animate-in fade-in duration-150">
+          <div className="text-center">
+            <Plus className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
+            <p className="text-sm font-black text-emerald-800">Suelta aquí</p>
+            <p className="text-[11px] text-emerald-700/80 mt-0.5">
+              Imágenes, PDF, hojas de cálculo o notas de texto
+            </p>
+          </div>
         </div>
       )}
 
