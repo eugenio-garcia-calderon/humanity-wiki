@@ -594,6 +594,49 @@ export function registerAuthRoutes(app: Express, db: any) {
       res.status(500).json({ error: e.message });
     }
   });
+
+  /**
+   * POST /api/admin/users/:id/archivar  y  /restaurar
+   * «Borrar» un usuario es archivarlo (regla 6 de la Constitución: nunca un
+   * DELETE a secas): no puede volver a entrar —login, Google y attachUser
+   * filtran archived_at— y sus sesiones abiertas se revocan al momento, pero
+   * lo que publicó no se destruye. Restaurar deshace todo salvo las sesiones.
+   */
+  app.post('/api/admin/users/:id/archivar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      if (req.params.id === req.user.id) {
+        return res.status(400).json({ error: 'No puedes borrarte a ti mismo.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE users SET archived_at = now(), version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id} AND archived_at IS NULL RETURNING email
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado (o ya estaba borrado).' });
+      await db.execute(sql`UPDATE sessions SET revoked_at = now() WHERE user_id = ${req.params.id} AND revoked_at IS NULL`);
+      res.json({ success: true, email: (r.rows[0] as any).email });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/users/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE users SET archived_at = NULL, version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id} AND archived_at IS NOT NULL RETURNING email
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado (o no estaba borrado).' });
+      res.json({ success: true, email: (r.rows[0] as any).email });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
 }
 
 // ----------------------------------------------------------------------------

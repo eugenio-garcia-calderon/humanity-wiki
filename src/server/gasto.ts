@@ -66,7 +66,7 @@ async function gastoHetzner(): Promise<GastoServidores> {
     if (Number.isFinite(fijo) && fijo > 0) {
       return {
         estado: 'ok',
-        servidores: [{ nombre: 'humanity-wiki-prod · importe fijo configurado a mano', tipo: 'CX42', eur_mes: fijo }],
+        servidores: [{ nombre: 'humanity-wiki-prod · importe fijo configurado a mano', tipo: 'CPX42', eur_mes: fijo }],
         total_mes_eur: fijo,
       };
     }
