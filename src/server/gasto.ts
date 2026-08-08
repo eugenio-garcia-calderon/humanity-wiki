@@ -58,7 +58,22 @@ let cache: { datos: Gasto; expira: number } | null = null;
 async function gastoHetzner(): Promise<GastoServidores> {
   const token = process.env.HETZNER_API_TOKEN;
   if (!token) {
-    return { estado: 'sin_conectar', mensaje: 'Falta HETZNER_API_TOKEN en .env (un token de solo lectura del proyecto de Hetzner Cloud).' };
+    // Sin API también se sabe: el precio de un servidor fijo es fijo. Si
+    // SERVIDOR_COSTE_EUR_MES está configurado (lo que se paga al mes, IVA e
+    // IPv4 incluidos), se enseña ese importe tal cual. El token queda como
+    // mejora opcional: precios exactos en vivo y al día si el servidor cambia.
+    const fijo = Number(process.env.SERVIDOR_COSTE_EUR_MES);
+    if (Number.isFinite(fijo) && fijo > 0) {
+      return {
+        estado: 'ok',
+        servidores: [{ nombre: 'humanity-wiki-prod · importe fijo configurado a mano', tipo: 'CX42', eur_mes: fijo }],
+        total_mes_eur: fijo,
+      };
+    }
+    return {
+      estado: 'sin_conectar',
+      mensaje: 'Falta HETZNER_API_TOKEN en .env (token de solo lectura del proyecto de Hetzner Cloud) — o, más sencillo, SERVIDOR_COSTE_EUR_MES con lo que pagas al mes.',
+    };
   }
   try {
     const res = await fetch('https://api.hetzner.cloud/v1/servers', {
