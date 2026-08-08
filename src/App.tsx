@@ -31,6 +31,7 @@ import MiConocimiento from './pages/MiConocimiento';
 import Vision from './pages/Vision';
 import Explorar from './pages/Explorar';
 import { Proyectos, Proyecto } from './pages/Proyectos';
+import Documento from './pages/Documento';
 import RetoVistas from './pages/RetoVistas';
 import IncendiosMapa from './pages/IncendiosMapa';
 import Login from './pages/Login';
@@ -75,6 +76,9 @@ export default function App() {
                 <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
+                {/* /documentos/nuevo?prompt=… genera con la IA en directo;
+                    /documentos/:id abre uno guardado. */}
+                <Route path="documentos/:id" element={<Documento />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
                 <Route path="universo" element={<Universo />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />

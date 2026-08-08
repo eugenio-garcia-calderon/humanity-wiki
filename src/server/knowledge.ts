@@ -29,6 +29,8 @@ const WINDOW_KINDS = new Set([
   'grafica', 'ficha', 'cronologia', 'autores', 'documento', 'grafo', 'texto', 'producto', 'soluciones',
   // Mi Conocimiento (2026-08-07): work items on the personal canvas.
   'tarea', 'tabla', 'proyecto',
+  // Documentos estilo Notion (2026-08-08): config.bloques es el contenido.
+  'pagina',
 ]);
 
 /** Días que algo permanece en la papelera antes de borrarse de verdad. */
@@ -819,13 +821,17 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
                coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
                coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
         FROM knowledge_windows w
-        JOIN graph_windows gw ON gw.window_id = w.id
-        JOIN knowledge_graphs g ON g.id = gw.graph_id
+        -- LEFT JOIN (2026-08-08): una ventana sin lienzo también es una
+        -- publicación — los documentos del chat nacen sueltos, sin grafo.
+        LEFT JOIN graph_windows gw ON gw.window_id = w.id
+        LEFT JOIN knowledge_graphs g ON g.id = gw.graph_id
         LEFT JOIN users u ON u.id = w.creator_user_id
         LEFT JOIN publicacion_meta pm ON pm.tipo = 'ventana' AND pm.entity_id = w.id
         WHERE w.archived_at IS NULL AND w.deleted_at IS NULL
-          AND g.archived_at IS NULL AND g.deleted_at IS NULL
-          AND (${incluirPersonales} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          AND (g.id IS NULL OR (
+            g.archived_at IS NULL AND g.deleted_at IS NULL
+            AND (${incluirPersonales} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          ))
           AND (w.publico OR w.creator_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR w.creator_user_id = ${autor})
           AND (${like}::text IS NULL OR w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
