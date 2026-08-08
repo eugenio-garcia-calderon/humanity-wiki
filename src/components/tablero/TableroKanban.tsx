@@ -12,10 +12,13 @@ import { cn } from '../../utils/cn';
 // proyecto de cada persona: los grupos los pone quien monta el tablero, así
 // que sirve igual para «El lienzo / Los mapas / La IA» que para lo que sea.
 
+// Orden de lectura natural (petición del usuario, 2026-08-08): Por hacer a
+// la izquierda, Hecho a la derecha — el flujo de trabajo va de izquierda a
+// derecha, no al revés.
 const COLUMNAS = [
-  { id: 'hecho', label: 'Hecho', icon: CircleCheck, color: '#16a34a' },
-  { id: 'en_curso', label: 'En curso', icon: CircleDot, color: '#d97706' },
   { id: 'por_hacer', label: 'Por hacer', icon: Circle, color: '#64748b' },
+  { id: 'en_curso', label: 'En curso', icon: CircleDot, color: '#d97706' },
+  { id: 'hecho', label: 'Hecho', icon: CircleCheck, color: '#16a34a' },
 ] as const;
 
 
