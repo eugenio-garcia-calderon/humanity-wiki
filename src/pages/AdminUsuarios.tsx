@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users2, Coins, KeyRound, Check, Copy, ShieldAlert, Trash2, RotateCcw } from 'lucide-react';
+import { Users2, Coins, KeyRound, Check, Copy, ShieldAlert, Trash2, RotateCcw, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 
@@ -34,6 +34,15 @@ export default function AdminUsuarios() {
   // Cantidad de puntos escrita por fila, antes de confirmar.
   const [puntosEdit, setPuntosEdit] = useState<Record<string, string>>({});
   const [enlaceCopiado, setEnlaceCopiado] = useState<string | null>(null);
+  // Usuario pendiente de confirmar borrado: sustituye a window.confirm(), que
+  // Chrome puede silenciar por completo («Evitar que este sitio cree más
+  // cuadros de diálogo»), dejando el botón sin ningún efecto visible.
+  const [confirmando, setConfirmando] = useState<Usuario | null>(null);
+  const [creando, setCreando] = useState(false);
+  const [creandoEnvio, setCreandoEnvio] = useState(false);
+  const [nuevoEmail, setNuevoEmail] = useState('');
+  const [nuevoNombre, setNuevoNombre] = useState('');
+  const [nuevoRol, setNuevoRol] = useState(1);
 
   const cargar = () =>
     fetch('/api/admin/users', { credentials: 'include' })
@@ -47,58 +56,106 @@ export default function AdminUsuarios() {
   const avisar = (texto: string) => { setAviso(texto); setTimeout(() => setAviso(null), 4000); };
 
   const cambiarRol = async (u: Usuario, nivel: number) => {
-    const r = await fetch(`/api/admin/users/${u.id}/role`, {
-      method: 'PUT', credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role_level: nivel }),
-    });
-    const j = await r.json();
-    if (!r.ok) return avisar(j.error || 'No se ha podido cambiar el rol.');
-    avisar(`${u.email} ahora es ${ROLES[nivel]}.`);
-    cargar();
+    try {
+      const r = await fetch(`/api/admin/users/${u.id}/role`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role_level: nivel }),
+      });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se ha podido cambiar el rol.');
+      avisar(`${u.email} ahora es ${ROLES[nivel]}.`);
+      cargar();
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    }
   };
 
   const darPuntos = async (u: Usuario) => {
     const cantidad = Number((puntosEdit[u.id] || '').replace(',', '.'));
     if (!Number.isFinite(cantidad) || cantidad === 0) return avisar('Escribe una cantidad (negativa para quitar).');
-    const r = await fetch(`/api/admin/users/${u.id}/puntos`, {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cantidad }),
-    });
-    const j = await r.json();
-    if (!r.ok) return avisar(j.error || 'No se han podido mover los puntos.');
-    avisar(`${cantidad > 0 ? '+' : ''}${cantidad} puntos a ${u.email} (saldo: ${j.puntos.toFixed(2)}).`);
-    setPuntosEdit(p => ({ ...p, [u.id]: '' }));
-    cargar();
+    try {
+      const r = await fetch(`/api/admin/users/${u.id}/puntos`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cantidad }),
+      });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se han podido mover los puntos.');
+      avisar(`${cantidad > 0 ? '+' : ''}${cantidad} puntos a ${u.email} (saldo: ${j.puntos.toFixed(2)}).`);
+      setPuntosEdit(p => ({ ...p, [u.id]: '' }));
+      cargar();
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    }
   };
 
-  const borrar = async (u: Usuario) => {
-    if (!confirm(`¿Borrar a ${u.email}?\n\nNo podrá volver a entrar y sus sesiones se cierran ahora mismo. Lo que publicó NO se destruye, y podrás restaurarlo desde esta misma página.`)) return;
-    const r = await fetch(`/api/admin/users/${u.id}/archivar`, { method: 'POST', credentials: 'include' });
-    const j = await r.json();
-    if (!r.ok) return avisar(j.error || 'No se ha podido borrar.');
-    avisar(`${u.email} borrado. Puedes restaurarlo cuando quieras.`);
-    cargar();
+  const borrar = (u: Usuario) => setConfirmando(u);
+
+  const ejecutarBorrado = async () => {
+    const u = confirmando;
+    if (!u) return;
+    setConfirmando(null);
+    try {
+      const r = await fetch(`/api/admin/users/${u.id}/archivar`, { method: 'POST', credentials: 'include' });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se ha podido borrar.');
+      avisar(`${u.email} borrado. Puedes restaurarlo cuando quieras.`);
+      cargar();
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    }
   };
 
   const restaurar = async (u: Usuario) => {
-    const r = await fetch(`/api/admin/users/${u.id}/restaurar`, { method: 'POST', credentials: 'include' });
-    const j = await r.json();
-    if (!r.ok) return avisar(j.error || 'No se ha podido restaurar.');
-    avisar(`${u.email} restaurado: ya puede volver a entrar.`);
-    cargar();
+    try {
+      const r = await fetch(`/api/admin/users/${u.id}/restaurar`, { method: 'POST', credentials: 'include' });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se ha podido restaurar.');
+      avisar(`${u.email} restaurado: ya puede volver a entrar.`);
+      cargar();
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    }
   };
 
   const generarEnlace = async (u: Usuario) => {
-    const r = await fetch(`/api/admin/users/${u.id}/reset-link`, { method: 'POST', credentials: 'include' });
-    const j = await r.json();
-    if (!r.ok) return avisar(j.error || 'No se ha podido generar el enlace.');
-    const url = `${window.location.origin}${j.url}`;
-    try { await navigator.clipboard.writeText(url); } catch { /* sin permiso: se muestra igualmente */ }
-    setEnlaceCopiado(u.id);
-    setTimeout(() => setEnlaceCopiado(null), 4000);
-    avisar(`Enlace copiado (caduca en ${j.caduca_horas} h): ${url}`);
+    try {
+      const r = await fetch(`/api/admin/users/${u.id}/reset-link`, { method: 'POST', credentials: 'include' });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se ha podido generar el enlace.');
+      const url = `${window.location.origin}${j.url}`;
+      try { await navigator.clipboard.writeText(url); } catch { /* sin permiso: se muestra igualmente */ }
+      setEnlaceCopiado(u.id);
+      setTimeout(() => setEnlaceCopiado(null), 4000);
+      avisar(`Enlace copiado (caduca en ${j.caduca_horas} h): ${url}`);
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    }
+  };
+
+  const crearUsuario = async () => {
+    const email = nuevoEmail.trim();
+    if (!email) return avisar('Escribe un email.');
+    setCreandoEnvio(true);
+    try {
+      const r = await fetch('/api/admin/users', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: nuevoNombre.trim() || undefined, role_level: nuevoRol }),
+      });
+      const j = await r.json();
+      if (!r.ok) return avisar(j.error || 'No se ha podido crear el usuario.');
+      const url = `${window.location.origin}${j.url}`;
+      try { await navigator.clipboard.writeText(url); } catch { /* sin permiso: se muestra igualmente */ }
+      avisar(`${email} creado. Enlace copiado (caduca en ${j.caduca_horas} h) para que ponga su contraseña: ${url}`);
+      setNuevoEmail(''); setNuevoNombre(''); setNuevoRol(1); setCreando(false);
+      cargar();
+    } catch {
+      avisar('Error de red. Inténtalo de nuevo.');
+    } finally {
+      setCreandoEnvio(false);
+    }
   };
 
   if (!user?.isAdmin) {
@@ -129,6 +186,62 @@ export default function AdminUsuarios() {
             {aviso}
           </div>
         )}
+
+        <div className="mt-6">
+          {!creando ? (
+            <button
+              onClick={() => setCreando(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> Nuevo usuario
+            </button>
+          ) : (
+            <div className="bg-white border border-slate-200 rounded-2xl p-4">
+              <p className="text-xs font-black text-slate-700 mb-3">Crear usuario</p>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  value={nuevoEmail}
+                  onChange={e => setNuevoEmail(e.target.value)}
+                  placeholder="email@ejemplo.com"
+                  className="flex-1 min-w-[180px] px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+                />
+                <input
+                  value={nuevoNombre}
+                  onChange={e => setNuevoNombre(e.target.value)}
+                  placeholder="Nombre (opcional)"
+                  className="flex-1 min-w-[140px] px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+                />
+                <select
+                  value={nuevoRol}
+                  onChange={e => setNuevoRol(Number(e.target.value))}
+                  className="px-2 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-emerald-300"
+                >
+                  {Object.entries(ROLES).map(([n, label]) => (
+                    <option key={n} value={n}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Se genera un enlace para que la persona ponga su propia contraseña (caduca en 24 h). Se copia al portapapeles al crear.
+              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={crearUsuario}
+                  disabled={creandoEnvio}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                >
+                  {creandoEnvio ? 'Creando…' : 'Crear y copiar enlace'}
+                </button>
+                <button
+                  onClick={() => { setCreando(false); setNuevoEmail(''); setNuevoNombre(''); setNuevoRol(1); }}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {cargando ? (
           <p className="text-sm text-slate-400 text-center py-24">Cargando usuarios…</p>
@@ -213,6 +326,34 @@ export default function AdminUsuarios() {
           </div>
         )}
       </div>
+
+      {confirmando && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-5"
+          onClick={() => setConfirmando(null)}
+        >
+          <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+            <h2 className="text-sm font-black text-slate-900">¿Borrar a {confirmando.email}?</h2>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              No podrá volver a entrar y sus sesiones se cierran ahora mismo. Lo que publicó NO se destruye, y podrás restaurarlo desde esta misma página.
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setConfirmando(null)}
+                className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={ejecutarBorrado}
+                className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
+              >
+                Borrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
