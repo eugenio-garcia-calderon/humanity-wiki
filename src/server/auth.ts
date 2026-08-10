@@ -545,6 +545,53 @@ export function registerAuthRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * POST /api/admin/users   { email, name?, role_level? }
+   * Un administrador da de alta una cuenta directamente, sin que la persona
+   * tenga que pasar por /login → «Crear una cuenta» (petición del usuario:
+   * «tampoco me deja registrar usuarios nuevos desde esa página siendo
+   * ADMIN»). Nace con una contraseña aleatoria que NUNCA se transmite en
+   * claro: en su lugar se genera de una vez el mismo enlace de
+   * restablecimiento que usa «Contraseña» en el resto de la tabla, listo
+   * para copiar y entregar. No crea sesión — el navegador del admin sigue
+   * siendo el del admin.
+   */
+  app.post('/api/admin/users', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ error: 'Escribe un email válido.' });
+      }
+      const name = String(req.body?.name || '').trim() || null;
+      const roleLevel = [0, 1, 2, 3, 4].includes(Number(req.body?.role_level)) ? Number(req.body.role_level) : ROLE.USER;
+
+      const existente = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${email}`);
+      if (existente.rows.length > 0) {
+        return res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
+      }
+
+      const id = `U${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      await db.execute(sql`
+        INSERT INTO users (id, email, name, display_name, password_hash, role_level, email_verified, created_by, updated_by)
+        VALUES (${id}, ${email}, ${name}, ${name},
+                ${hashPassword(crypto.randomBytes(24).toString('hex'))}, ${roleLevel}, true, ${req.user.id}, ${req.user.id})
+      `);
+      await registrarRegaloBienvenida(db, id);
+
+      const token = crypto.randomBytes(32).toString('hex');
+      await db.execute(sql`
+        INSERT INTO password_resets (token, user_id, expires_at)
+        VALUES (${token}, ${id}, now() + interval '24 hours')
+      `);
+      res.json({ id, email, url: `/restablecer?token=${token}`, caduca_horas: 24 });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.put('/api/admin/users/:id/role', async (req: Request, res: Response) => {
     try {
       if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
