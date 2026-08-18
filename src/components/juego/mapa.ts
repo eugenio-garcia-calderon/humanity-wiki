@@ -59,6 +59,19 @@ export function casasAldea(): CasaAldea[] {
   return lista;
 }
 
+/** Medio ancho y medio fondo del edificio de un proyecto, para colisiones. */
+export const RADIO_EDIFICIO = 4.6;
+
+/**
+ * Dónde se planta el edificio del proyecto número `i` del distrito.
+ * Lo usan el mundo 3D, los obstáculos y el minimapa: si cada uno lo calculara
+ * por su cuenta, moverías el distrito y el mapa (o las colisiones) se
+ * quedarían apuntando al sitio viejo. Ya pasó con las casas.
+ */
+export function posicionProyecto(i: number): { x: number; z: number } {
+  return { x: 42 + (i % 3) * 19, z: -36 + Math.floor(i / 3) * 21 };
+}
+
 /** El río, como línea quebrada de (x, z) para pintarlo en el mapa. */
 export function trazadoRio(paso = 40): Array<[number, number]> {
   const puntos: Array<[number, number]> = [];

@@ -5,6 +5,7 @@
 // ============================================================================
 import { useMemo, useRef } from 'react';
 import type { Obstaculo } from './Personaje';
+import { posicionProyecto, RADIO_EDIFICIO } from './mapa';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
@@ -47,7 +48,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino }: {
+export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom }: {
   entrada: React.MutableRefObject<EntradaMando>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
@@ -56,6 +57,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
   onCercania: (c: Cercania) => void;
   onChoque: (id: string) => void;
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
+  zoom: React.MutableRefObject<number>;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
@@ -63,14 +65,22 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
   // Lo sólido del mundo. En una ref para que el personaje lo lea cada
   // fotograma sin volver a montarse cuando cambian los agentes.
   const obstaculos = useRef<Obstaculo[]>([]);
-  obstaculos.current = useMemo(() => agentes.map(a => ({
-    id: a.id,
-    x: a.x,
-    // El edificio de un proyecto es ancho: su centro sólido está detrás de
-    // la puerta, no en el punto donde se plantó.
-    z: a.tipo === 'proyecto' ? a.z : a.z,
-    radio: a.tipo === 'proyecto' ? 4.6 : 1.1,
-  })), [agentes]);
+  obstaculos.current = useMemo(() => [
+    ...agentes.map(a => ({
+      id: a.id,
+      x: a.x,
+      z: a.z,
+      radio: a.tipo === 'proyecto' ? RADIO_EDIFICIO : 1.1,
+    })),
+    // Los edificios de los proyectos de la Fase 1 también son sólidos: antes
+    // se atravesaban y chocar con ellos no hacía nada (fallo reportado por
+    // Eugenio). El prefijo distingue quién es quién al avisar del choque.
+    ...proyectos.slice(0, 12).map((p, i) => ({
+      id: `proy:${p.id}`,
+      ...posicionProyecto(i),
+      radio: RADIO_EDIFICIO,
+    })),
+  ], [agentes, proyectos]);
 
   return (
     <Canvas
@@ -116,6 +126,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
         obstaculos={obstaculos}
         onChoque={onChoque}
         destino={destino}
+        zoom={zoom}
       />
       <Coordinador medidas={medidas} onCercania={onCercania} />
     </Canvas>

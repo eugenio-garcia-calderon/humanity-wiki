@@ -3,7 +3,7 @@ import type * as THREE from 'three';
 import { Map as MapIcon, X, Maximize2, UserPlus, Building2, Bot } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Agente, ProyectoJuego } from './tipos';
-import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio } from './mapa';
+import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionProyecto } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
 
 // ============================================================================
@@ -65,11 +65,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
 
   /** Los edificios de proyectos que NO son agentes (los de la Fase 1). */
   const edificiosProyecto = useMemo(() =>
-    proyectos.slice(0, 12).map((p, i) => ({
-      p,
-      x: 42 + (i % 3) * 19,
-      z: -36 + Math.floor(i / 3) * 21,
-    })), [proyectos]);
+    proyectos.slice(0, 12).map((p, i) => ({ p, ...posicionProyecto(i) })), [proyectos]);
 
   /**
    * El mapa grande encuadra DONDE ESTÁ TU VIDA, no las 118 ha enteras: si

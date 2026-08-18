@@ -19,7 +19,7 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, destino }: {
+export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom }: {
   entrada: React.MutableRefObject<EntradaMando>;
   jugadorPos: THREE.Vector3;
   luzRef: React.RefObject<THREE.DirectionalLight | null>;
@@ -27,10 +27,13 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, d
   onChoque: (id: string) => void;
   /** Viaje rápido desde el mapa: se pone aquí y el personaje aparece allí. */
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
+  /** Cuánto se aleja la cámara: 1 = por encima del hombro, 6 = media aldea. */
+  zoom: React.MutableRefObject<number>;
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
-  const rumbo = useRef(0);
+  // Apareces mirando al norte, hacia la plaza (rumbo 0 sería de espaldas a ella).
+  const rumbo = useRef(Math.PI);
   const t = useRef(0);
   // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
   // no cada fotograma mientras sigas pegado a él.
@@ -109,11 +112,14 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, d
     // botecito que simulaba el paso.
     jugadorPos.copy(g.position);
 
-    // --- follow camera (fixed offset, smoothed)
+    // --- Cámara que te sigue, con la distancia que hayas elegido. Al alejarte
+    // mira un poco más arriba, para que el mundo se abra en vez de quedarte
+    // mirando tus propios pies desde lejos.
     const cam = estado.camera;
-    tmpCam.set(g.position.x, g.position.y + 11, g.position.z + 15);
+    const z = zoom.current;
+    tmpCam.set(g.position.x, g.position.y + 11 * z, g.position.z + 15 * z);
     cam.position.lerp(tmpCam, 1 - Math.exp(-4 * dt));
-    tmpMira.set(g.position.x, g.position.y + 1.6, g.position.z);
+    tmpMira.set(g.position.x, g.position.y + 1.6 + (z - 1) * 1.5, g.position.z);
     cam.lookAt(tmpMira);
 
     // --- the shadow camera is small (sharp shadows): it must travel with us
@@ -129,10 +135,9 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, d
     // Spawn on the south path at the plaza edge: open view over the fountain,
     // no house blocking the camera.
     <group ref={grupo} position={[0, 0, 17]}>
-      {/* El modelo mira a -Z y nuestro rumbo es +Z: media vuelta. */}
-      <group rotation-y={Math.PI}>
-        <Persona3D cuerpo="character-male-a" animacion={andando ? 'walk' : 'idle'} />
-      </group>
+      {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
+          vuelta que había aquí hacía que anduviera de espaldas. */}
+      <Persona3D cuerpo="character-male-a" animacion={andando ? 'walk' : 'idle'} />
     </group>
   );
 }
