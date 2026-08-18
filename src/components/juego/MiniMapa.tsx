@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as THREE from 'three';
 import { Map as MapIcon, X, Maximize2, UserPlus, Building2, Bot } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo } from './tipos';
-import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionProyecto } from './mapa';
+import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo, type OverrideMundo } from './tipos';
+import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionesProyectos } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
 import { PANTALLA } from './Pantalla';
 
@@ -35,12 +35,14 @@ const COLOR_ITEM: Record<string, string> = {
   video: '#e11d48', musica: '#16a34a', lienzo: '#7c3aed', mapa: '#059669', prop: '#8d9e6f',
 };
 
-export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], onViajar, onCrearEn }: {
+export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], overrides = [], onViajar, onCrearEn }: {
   jugadorPos: THREE.Vector3;
   agentes: Agente[];
   proyectos: ProyectoJuego[];
   /** Lo plantado por el jugador: también se ve y se pulsa en el mapa 2D. */
   items?: ItemMundo[];
+  /** Los retoques del pueblo: los portales arrastrados salen donde están. */
+  overrides?: OverrideMundo[];
   onViajar: (d: { x: number; z: number; agente?: Agente }) => void;
   /** Clic en suelo VACÍO del mapa grande: abre «Crear aquí» en ese punto —
    *  el mapa 2D es un creador completo (petición de Eugenio). */
@@ -77,9 +79,11 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
   const casas = useMemo(() => casasAldea(), []);
   const rio = useMemo(() => trazadoRio(), []);
 
-  /** Los edificios de proyectos que NO son agentes (los de la Fase 1). */
-  const edificiosProyecto = useMemo(() =>
-    proyectos.slice(0, 12).map((p, i) => ({ p, ...posicionProyecto(i) })), [proyectos]);
+  /** Los portales del distrito, con los arrastres del jugador aplicados. */
+  const edificiosProyecto = useMemo(() => {
+    const posiciones = posicionesProyectos(proyectos, overrides);
+    return proyectos.slice(0, 12).map((p, i) => ({ p, ...posiciones[i] }));
+  }, [proyectos, overrides]);
 
   /**
    * El mapa grande encuadra DONDE ESTÁ TU VIDA, no las 118 ha enteras: si

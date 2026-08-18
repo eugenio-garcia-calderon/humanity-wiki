@@ -5,7 +5,7 @@
 // ============================================================================
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Obstaculo } from './Personaje';
-import { posicionProyecto, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
+import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
 import type { Aspecto } from './aspecto';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
@@ -22,6 +22,7 @@ import { Personaje } from './Personaje';
 import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
 import { PantallaGrande, PANTALLA } from './Pantalla';
+import { PortalVerde } from './PortalVerde';
 import { Agentes } from './Agentes';
 import { PlazaProyecto, type DatosInterior } from './Interior';
 import {
@@ -145,6 +146,12 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
     return lista;
   }, [mundo.overrides]);
 
+  // Los portales del distrito, con los ARRASTRES del jugador aplicados.
+  const posProyectos = useMemo(
+    () => posicionesProyectos(proyectos, mundo.overrides),
+    [proyectos, mundo.overrides],
+  );
+
   // Para los hilos de conocimiento: dónde está cada cosa a la que se apunta.
   const resolverDestino = useCallback((ref: string) => {
     if (ref.startsWith('item:')) {
@@ -159,12 +166,11 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
     }
     if (ref.startsWith('proy:')) {
       const i = proyectos.findIndex(x => x.id === ref.slice(5));
-      if (i < 0) return null;
-      const p = posicionProyecto(i);
-      return { x: p.x, y: 4, z: p.z };
+      if (i < 0 || !posProyectos[i]) return null;
+      return { x: posProyectos[i].x, y: 4, z: posProyectos[i].z };
     }
     return null;
-  }, [mundo.items, agentes, proyectos]);
+  }, [mundo.items, agentes, proyectos, posProyectos]);
 
   // Lo sólido del mundo. En una ref para que el personaje lo lea cada
   // fotograma sin volver a montarse cuando cambian los agentes.
@@ -206,7 +212,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       // Eugenio). El prefijo distingue quién es quién al avisar del choque.
       ...proyectos.slice(0, 12).map((p, i) => ({
         id: `proy:${p.id}`,
-        ...posicionProyecto(i),
+        ...(posProyectos[i] || posicionProyecto(i)),
         radio: RADIO_EDIFICIO,
       })),
       // La gran pantalla del cine también es sólida: rebota, no abre ficha
@@ -231,7 +237,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         radio: radioProp(it.modelo),
       })),
     ];
-  }, [agentes, proyectos, interior, piezas, mundo.items]);
+  }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items]);
 
   return (
     <Canvas
@@ -312,9 +318,34 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
             resolverDestino={resolverDestino}
           />
-          <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} onEntrar={onEntrarProyecto} />
+          <EdificiosProyectos
+            proyectos={proyectos}
+            posiciones={posProyectos}
+            jugadorPos={jugadorPos}
+            medidas={medidas}
+            onEntrar={onEntrarProyecto}
+            onAgarrar={(p, pos, e) => {
+              if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+              onAgarrarMundo(
+                { clase: 'semilla', id: `proy:${p.id}`, tipo: 'portal', etiqueta: p.titulo, x: pos.x, z: pos.z, rot: 0 },
+                { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+              );
+            }}
+          />
           <PantallaGrande onAbrir={onPantalla} />
-          <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} onHablar={onHablarAgente} />
+          <Agentes
+            agentes={agentes}
+            jugadorPos={jugadorPos}
+            medidas={medidas}
+            onHablar={onHablarAgente}
+            onAgarrarProyecto={(a, e) => {
+              if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+              onAgarrarMundo(
+                { clase: 'semilla', id: `agente:${a.id}`, tipo: 'portal', etiqueta: a.nombre, x: a.x, z: a.z, rot: 0 },
+                { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+              );
+            }}
+          />
           <Robot jugadorPos={jugadorPos} medidas={medidas} />
           {editor.activo && (
             <>
@@ -325,7 +356,9 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
                 <MovilFantasma movil={movilRef} rot={editor.sel.rot}>
                   {editor.sel.clase === 'item'
                     ? (() => { const it = mundo.items.find(x => x.id === editor.sel!.id); return it ? <ItemVisual item={it} /> : null; })()
-                    : (() => { const pz = piezas.find(x => x.seed_id === editor.sel!.id); return pz ? <PiezaVisual pieza={pz} /> : null; })()}
+                    : editor.sel.tipo === 'portal'
+                      ? <PortalVerde radio={2.4} />
+                      : (() => { const pz = piezas.find(x => x.seed_id === editor.sel!.id); return pz ? <PiezaVisual pieza={pz} /> : null; })()}
                 </MovilFantasma>
               )}
               {editor.sel && !editor.moviendo && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}

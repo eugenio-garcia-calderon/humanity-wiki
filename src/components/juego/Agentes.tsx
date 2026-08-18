@@ -52,7 +52,11 @@ function Persona({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) 
   );
 }
 
-function ProyectoAgente({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) {
+function ProyectoAgente({ a, onHablar, onAgarrar }: {
+  a: Agente;
+  onHablar: (a: Agente) => void;
+  onAgarrar?: (a: Agente, e: any) => void;
+}) {
   const pct = a.tarjetas && a.tarjetas > 0 ? (a.hechas || 0) / a.tarjetas : 0;
   return (
     <group position={[a.x, 0, a.z]}>
@@ -64,6 +68,7 @@ function ProyectoAgente({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => v
             pct={pct}
             radio={2.2}
             resaltado={resaltado}
+            onAgarrar={onAgarrar ? (e) => onAgarrar(a, e) : undefined}
           />
         )}
       </Interactivo>
@@ -71,12 +76,14 @@ function ProyectoAgente({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => v
   );
 }
 
-export function Agentes({ agentes, jugadorPos, medidas, onHablar }: {
+export function Agentes({ agentes, jugadorPos, medidas, onHablar, onAgarrarProyecto }: {
   agentes: Agente[];
   jugadorPos: THREE.Vector3;
   medidas: React.MutableRefObject<Medidas>;
   /** Pulsar abre su chat sin tener que acercarse (petición de Eugenio). */
   onHablar: (a: Agente) => void;
+  /** Pinchar sin soltar un PORTAL de proyecto: se arrastra y se recoloca. */
+  onAgarrarProyecto?: (a: Agente, e: any) => void;
 }) {
   useFrame(() => {
     let mejor: Medidas['agente'] = null;
@@ -91,7 +98,7 @@ export function Agentes({ agentes, jugadorPos, medidas, onHablar }: {
     <group>
       {agentes.map(a => a.tipo === 'persona'
         ? <Persona key={a.id} a={a} onHablar={onHablar} />
-        : <ProyectoAgente key={a.id} a={a} onHablar={onHablar} />)}
+        : <ProyectoAgente key={a.id} a={a} onHablar={onHablar} onAgarrar={onAgarrarProyecto} />)}
     </group>
   );
 }

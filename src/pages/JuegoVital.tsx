@@ -25,7 +25,7 @@ import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
 import { PLAZA_ENTRADA, habitantesDeSala } from '../components/juego/planta';
-import { posicionProyecto, RADIO_EDIFICIO } from '../components/juego/mapa';
+import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO } from '../components/juego/mapa';
 // Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
 // esta parte del proyecto cumple la regla de «ni un hex en src/pages».
 import { PALETA } from '../components/juego/paleta';
@@ -187,6 +187,8 @@ export default function JuegoVital() {
   // --- El mundo editable: un Miro en 3D (2026-08-18, petición de Eugenio) ---
   const [mundoItems, setMundoItems] = useState<ItemMundo[]>([]);
   const [overridesMundo, setOverridesMundo] = useState<OverrideMundo[]>([]);
+  const overridesRef = useRef<OverrideMundo[]>([]);
+  overridesRef.current = overridesMundo;
   const [selMundo, setSelMundo] = useState<SeleccionMundo | null>(null);
   const [moviendoMundo, setMoviendoMundo] = useState(false);
   const [conectando, setConectando] = useState(false);
@@ -578,8 +580,9 @@ export default function JuegoVital() {
     if (interiorRef.current) return null;   // dentro de una plaza no hay portales
     const R = RADIO_EDIFICIO + 0.8;
     const lista = proyectosRef.current;
+    const posiciones = posicionesProyectos(lista, overridesRef.current);
     for (let i = 0; i < Math.min(lista.length, 12); i++) {
-      const pos = posicionProyecto(i);
+      const pos = posiciones[i];
       if (Math.hypot(px - pos.x, pz - pos.z) < R) return lista[i];
     }
     for (const a of agentesRef.current) {
@@ -658,8 +661,10 @@ export default function JuegoVital() {
             guardarEnProyectoRef.current(sel.id, proy);
           } else {
             if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
+            else if (sel.id.startsWith('agente:')) guardarPosAgenteRef.current(sel.id.slice(7), p.x, p.z);
             else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
-            setSelMundo({ ...sel, x: p.x, z: p.z });
+            // Un portal no tiene ficha de opciones: se suelta y listo.
+            setSelMundo(sel.tipo === 'portal' ? null : { ...sel, x: p.x, z: p.z });
           }
         }
         setMoviendoMundo(false);
@@ -677,6 +682,18 @@ export default function JuegoVital() {
       window.removeEventListener('pointercancel', soltar);
     };
   }, [guardarItem, guardarOverride]);
+
+  /** Un portal construido desde el juego se mueve guardando su agente. */
+  const guardarPosAgente = useCallback(async (id: string, x: number, z: number) => {
+    setAgentes(prev => prev.map(a => (a.id === id ? { ...a, x, z } : a)));
+    await fetch(`/api/juego/agentes/${id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ x, z }),
+    }).catch(() => avisar('No se ha podido mover el portal.'));
+  }, []);
+  const guardarPosAgenteRef = useRef(guardarPosAgente);
+  guardarPosAgenteRef.current = guardarPosAgente;
 
   /** Clic sobre una pieza o un objeto en modo edición. */
   const alPulsarMundo = useCallback((sel: SeleccionMundo) => {
@@ -736,8 +753,9 @@ export default function JuegoVital() {
       if (proy) { guardarEnProyectoRef.current(sel.id, proy); return; }
     }
     if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
+    else if (sel.id.startsWith('agente:')) guardarPosAgenteRef.current(sel.id.slice(7), p.x, p.z);
     else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
-    setSelMundo({ ...sel, x: p.x, z: p.z });
+    setSelMundo(sel.tipo === 'portal' ? null : { ...sel, x: p.x, z: p.z });
   }, [guardarItem, guardarOverride]);
 
   const girarSel = useCallback(() => {
@@ -1084,7 +1102,8 @@ export default function JuegoVital() {
     const i = interiorRef.current;
     if (!i) return;
     const idx = proyectosRef.current.findIndex(p => p.id === i.proyecto.id);
-    const pos = posicionProyecto(Math.max(0, idx));
+    const pos = posicionesProyectos(proyectosRef.current, overridesRef.current)[Math.max(0, idx)]
+      || posicionProyecto(Math.max(0, idx));
     cambiarEscenario('Aldea', i.color, () => {
       setInterior(null);
       destinoViaje.current = { x: pos.x, z: pos.z + 4 };
@@ -1473,6 +1492,7 @@ export default function JuegoVital() {
           agentes={agentes}
           proyectos={proyectos}
           items={mundoItems}
+          overrides={overridesMundo}
           onViajar={viajarA}
           onCrearEn={user ? (p) => { setCrearEn(p); setSelMundo(null); setSelHilo(null); } : undefined}
         />

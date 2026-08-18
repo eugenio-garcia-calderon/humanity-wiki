@@ -72,6 +72,24 @@ export function posicionProyecto(i: number): { x: number; z: number } {
   return { x: 42 + (i % 3) * 19, z: -36 + Math.floor(i / 3) * 21 };
 }
 
+/**
+ * Dónde está el portal de cada proyecto del distrito, con los ARRASTRES del
+ * jugador aplicados (2026-08-18: los portales se mueven como cualquier otro
+ * objeto; la posición se guarda en game_world_overrides con seed_id
+ * `proy:<id>`). La usan el dibujo, los obstáculos, el minimapa y la salida —
+ * si cada uno la calculara, moverías el portal y chocarías con el sitio viejo.
+ */
+export function posicionesProyectos(
+  proyectos: Array<{ id: string }>,
+  overrides: Array<{ seed_id: string; x: number | null; z: number | null }>,
+): Array<{ x: number; z: number }> {
+  const ov = new Map(overrides.map(o => [o.seed_id, o]));
+  return proyectos.slice(0, 12).map((p, i) => {
+    const o = ov.get(`proy:${p.id}`);
+    return o && o.x != null && o.z != null ? { x: o.x, z: o.z } : posicionProyecto(i);
+  });
+}
+
 /** El río, como línea quebrada de (x, z) para pintarlo en el mapa. */
 export function trazadoRio(paso = 40): Array<[number, number]> {
   const puntos: Array<[number, number]> = [];
