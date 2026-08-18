@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import type { Medidas, ProyectoJuego } from './tipos';
 import { PALETA } from './paleta';
+import { posicionProyecto } from './mapa';
 
 interface Parcela {
   p: ProyectoJuego;
@@ -88,8 +89,7 @@ export function EdificiosProyectos({ proyectos, jugadorPos, medidas }: {
   const parcelas = useMemo<Parcela[]>(() =>
     proyectos.slice(0, 12).map((p, i) => ({
       p,
-      x: 42 + (i % 3) * 19,
-      z: -36 + Math.floor(i / 3) * 21,
+      ...posicionProyecto(i),
       color: PALETA.edificiosProyecto[i % PALETA.edificiosProyecto.length],
     })), [proyectos]);
 

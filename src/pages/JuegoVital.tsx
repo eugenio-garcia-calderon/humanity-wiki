@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
+  ZoomIn, ZoomOut,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -52,10 +53,19 @@ export default function JuegoVital() {
   // jugador; el velo tapa el salto y la cámara hace el resto.
   const destinoViaje = useRef<{ x: number; z: number } | null>(null);
   const [viajando, setViajando] = useState<string | null>(null);
+  // Distancia de la cámara: 1 = por encima del hombro, 6 = media aldea a la vista.
+  const zoom = useRef(1);
+  const [zoomVisible, setZoomVisible] = useState(1);
+  const ajustarZoom = useCallback((factor: number) => {
+    zoom.current = Math.min(6, Math.max(0.6, zoom.current * factor));
+    setZoomVisible(zoom.current);
+  }, []);
   const cercaniaRef = useRef<Cercania>(null);
   cercaniaRef.current = cercania;
   const agentesRef = useRef<Agente[]>([]);
   agentesRef.current = agentes;
+  const proyectosRef = useRef<ProyectoJuego[]>([]);
+  proyectosRef.current = proyectos;
 
   const [tactil] = useState(() =>
     typeof window !== 'undefined' &&
@@ -219,8 +229,16 @@ export default function JuegoVital() {
     }, 900);
   }, [hablarCon]);
 
-  /** Chocarte con alguien es empezar a hablar con él: nada de atravesarlo. */
+  /**
+   * Chocarte con algo es empezar a tratar con ello: con una persona se abre su
+   * chat, con un edificio de proyecto se abre su ficha. Nada se atraviesa.
+   */
   const alChocar = useCallback((id: string) => {
+    if (id.startsWith('proy:')) {
+      const p = proyectosRef.current.find(x => `proy:${x.id}` === id);
+      if (p) setPanel(p);
+      return;
+    }
     const a = agentesRef.current.find(x => x.id === id);
     if (!a) return;
     setFichaAgente(a);
@@ -271,6 +289,40 @@ export default function JuegoVital() {
     };
   }, [interactuar]);
 
+  // Alejar y acercar la cámara: rueda del ratón y pellizco de dos dedos.
+  useEffect(() => {
+    const rueda = (e: WheelEvent) => {
+      const t = e.target as HTMLElement | null;
+      // Dentro de un panel o del chat, la rueda hace scroll, no zoom.
+      if (t?.closest('[data-ui-juego]')) return;
+      e.preventDefault();
+      ajustarZoom(e.deltaY > 0 ? 1.12 : 1 / 1.12);
+    };
+    let pellizco: number | null = null;
+    const distancia = (e: TouchEvent) =>
+      Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    const inicio = (e: TouchEvent) => { if (e.touches.length === 2) pellizco = distancia(e); };
+    const mover = (e: TouchEvent) => {
+      if (e.touches.length !== 2 || pellizco === null) return;
+      e.preventDefault();
+      const d = distancia(e);
+      if (Math.abs(d - pellizco) < 6) return;
+      ajustarZoom(d > pellizco ? 1 / 1.06 : 1.06);
+      pellizco = d;
+    };
+    const fin = () => { pellizco = null; };
+    window.addEventListener('wheel', rueda, { passive: false });
+    window.addEventListener('touchstart', inicio, { passive: true });
+    window.addEventListener('touchmove', mover, { passive: false });
+    window.addEventListener('touchend', fin);
+    return () => {
+      window.removeEventListener('wheel', rueda);
+      window.removeEventListener('touchstart', inicio);
+      window.removeEventListener('touchmove', mover);
+      window.removeEventListener('touchend', fin);
+    };
+  }, [ajustarZoom]);
+
   useEffect(() => {
     if (!bocadillo) return;
     const t = setTimeout(() => setBocadillo(null), 12000);
@@ -293,6 +345,7 @@ export default function JuegoVital() {
           onCercania={alCambiarCercania}
           onChoque={alChocar}
           destino={destinoViaje}
+          zoom={zoom}
         />
       </Suspense>
 
@@ -317,8 +370,29 @@ export default function JuegoVital() {
         </p>
       </div>
 
-      <div className="hidden sm:block absolute top-3 right-3 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
-        <p className="text-[10px] font-bold text-slate-500">WASD para caminar · E para hablar</p>
+      {/* Alejar / acercar la cámara. La rueda y el pellizco hacen lo mismo. */}
+      {user && (
+        <div data-ui-juego className="absolute bottom-28 right-3 sm:right-auto sm:left-3 sm:bottom-3 z-30 flex flex-col items-center gap-1 px-1.5 py-1.5 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
+          <button
+            onClick={() => ajustarZoom(1 / 1.35)}
+            title="Acercar"
+            className="w-9 h-9 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <span className="text-[9px] font-black text-slate-400 tabular-nums">{Math.round(zoomVisible * 15)} m</span>
+          <button
+            onClick={() => ajustarZoom(1.35)}
+            title="Alejar para ver el mundo"
+            className="w-9 h-9 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="hidden sm:block absolute top-3 right-40 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
+        <p className="text-[10px] font-bold text-slate-500">WASD para caminar · E para hablar · rueda para alejar</p>
       </div>
 
       {aviso && (
