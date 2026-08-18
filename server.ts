@@ -16,6 +16,8 @@ import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
 import { registerUploadRoutes } from "./src/server/uploads.js";
 import { registerRoadmapRoutes } from "./src/server/roadmap.js";
 import { registerJuegoRoutes } from "./src/server/juego.js";
+import { registerYoutubeRoutes } from "./src/server/youtube.js";
+import { registerSpotifyRoutes } from "./src/server/spotify.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
 import { registerPuntosRoutes } from "./src/server/puntos.js";
 import { registerGastoRoutes } from "./src/server/gasto.js";
@@ -253,6 +255,8 @@ async function startServer() {
   registerUploadRoutes(app, db);
   registerRoadmapRoutes(app, db);
   registerJuegoRoutes(app, db);
+  registerYoutubeRoutes(app, db);
+  registerSpotifyRoutes(app, db);
 
   // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
   // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de

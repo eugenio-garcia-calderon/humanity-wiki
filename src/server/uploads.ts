@@ -40,12 +40,30 @@ const DOCUMENTOS: Record<string, string> = {
   'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
 };
 
-const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS };
+/** Audio para la música del mapa 3D (2026-08-18, petición de Eugenio): además
+ *  de linkar Spotify, se puede subir la canción. Se sirve EN LÍNEA (un <audio>
+ *  no ejecuta nada) y con un tope más alto: un MP3 decente ronda los 10 MB. */
+const AUDIO: Record<string, string> = {
+  'audio/mpeg': 'mp3',
+  'audio/mp4': 'm4a',
+  'audio/x-m4a': 'm4a',
+  'audio/ogg': 'ogg',
+  'audio/wav': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/aac': 'aac',
+  'audio/flac': 'flac',
+};
+
+const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS, ...AUDIO };
 
 /** Lo que se puede mostrar dentro de la página; el resto, descarga. */
-const EN_LINEA = new Set(Object.values(IMAGENES).filter(e => e !== 'svg'));
+const EN_LINEA = new Set([
+  ...Object.values(IMAGENES).filter(e => e !== 'svg'),
+  ...Object.values(AUDIO),
+]);
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_AUDIO = 25 * 1024 * 1024; // 25 MB, solo para canciones
 
 /** Dónde viven los ficheros. En producción es un volumen de Docker, para que
  *  sobrevivan a cada despliegue. */
@@ -61,7 +79,8 @@ export const uploadsDir = () =>
 export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; bytes: number; type: string; esImagen: boolean } {
   const ext = TIPOS[tipo.toLowerCase()];
   if (!ext) throw new Error(`Formato no admitido: ${tipo}`);
-  if (bytes.length > MAX_BYTES) throw new Error('El archivo supera los 10 MB.');
+  const tope = tipo.toLowerCase() in AUDIO ? MAX_AUDIO : MAX_BYTES;
+  if (bytes.length > tope) throw new Error(`El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.`);
   const raiz = uploadsDir();
   const ahora = new Date();
   const rel = path.join(String(ahora.getFullYear()), String(ahora.getMonth() + 1).padStart(2, '0'));
@@ -99,7 +118,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
 
   app.post(
     '/api/uploads',
-    express.raw({ type: 'application/octet-stream', limit: MAX_BYTES }),
+    express.raw({ type: 'application/octet-stream', limit: MAX_AUDIO }),
     async (req: Request, res: Response) => {
       try {
         if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para subir archivos.' });
@@ -108,7 +127,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
         const ext = TIPOS[tipo];
         if (!ext) {
           return res.status(400).json({
-            error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG) y documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX).`,
+            error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG), documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX) y audio (MP3, M4A, OGG, WAV, AAC, FLAC).`,
           });
         }
 
@@ -116,8 +135,9 @@ export function registerUploadRoutes(app: Express, _db: any) {
         if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
           return res.status(400).json({ error: 'El archivo llegó vacío.' });
         }
-        if (bytes.length > MAX_BYTES) {
-          return res.status(413).json({ error: 'El archivo supera los 10 MB.' });
+        const tope = tipo in AUDIO ? MAX_AUDIO : MAX_BYTES;
+        if (bytes.length > tope) {
+          return res.status(413).json({ error: `El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.` });
         }
         res.json(guardarArchivo(tipo, bytes));
       } catch (e: any) {
