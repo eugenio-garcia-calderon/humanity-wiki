@@ -5,44 +5,69 @@
 // Everything is procedural low-poly (no external assets) and deterministic:
 // the same seed builds the same village on every visit.
 // ============================================================================
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
-import { Detalles } from './Detalles';
+import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles';
 import { Modelo, CASAS } from './Modelos';
-// La distribución vive en mapa.ts y la comparten el mundo 3D y el minimapa,
-// para que el mapa no pueda enseñar la aldea donde ya no está.
-import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, casasAldea } from './mapa';
+// La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
+// el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
+import { MITAD, PLAZA_R, CAMINOS, LAGOS, sueloLibre, type PiezaAldea } from './mapa';
+import type { SeleccionMundo } from './tipos';
 
-// ---------------------------------------------------------------------------
-// Houses
-// ---------------------------------------------------------------------------
-/** Una casa de verdad del pack CC0, en lugar de la caja con tejado piramidal. */
-function Casa({ x, z, rot, modelo }: { x: number; z: number; rot: number; modelo: string }) {
+/** Nombre visible de cada tipo de pieza en el panel del editor. */
+const ETIQUETAS: Record<string, string> = {
+  casa: 'Casa', nave: 'Nave', fuente: 'Fuente', banco: 'Banco', farola: 'Farola',
+  puesto: 'Puesto del mercado', pozo: 'Pozo', carro: 'Carro', arbol: 'Árbol',
+};
+
+function seleccionDe(p: PiezaAldea): SeleccionMundo {
+  return {
+    clase: 'semilla', id: p.seed_id, tipo: p.tipo,
+    etiqueta: ETIQUETAS[p.tipo] || p.tipo,
+    x: p.x, z: p.z, rot: p.rot,
+    modelo: p.modelo != null ? String(p.modelo) : null,
+  };
+}
+
+/**
+ * Envuelve una pieza del pueblo y, en modo edición, la hace pulsable para
+ * seleccionarla. El umbral de arrastre es el de siempre: arrastrar es girar
+ * la cámara, no pulsar.
+ */
+function Editable({ pieza, editando, onPulsar, children }: {
+  pieza: PiezaAldea; editando: boolean;
+  onPulsar: (sel: SeleccionMundo) => void;
+  children: React.ReactNode;
+}) {
   return (
-    <group position={[x, 0, z]} rotation-y={rot}>
-      <Modelo nombre={modelo} escala={3.2} />
+    <group
+      position={[pieza.x, 0, pieza.z]}
+      rotation-y={pieza.rot}
+      onClick={editando ? (e: ThreeEvent<MouseEvent>) => {
+        if (e.delta > 6) return;
+        e.stopPropagation();
+        onPulsar(seleccionDe(pieza));
+      } : undefined}
+    >
+      {children}
     </group>
   );
 }
 
-function Casas() {
-  const casas = useMemo(() => casasAldea(), []);
-  return (
-    <>
-      {casas.map((c, i) => (
-        <Casa key={i} x={c.x} z={c.z} rot={c.rot} modelo={CASAS[c.modelo % CASAS.length]} />
-      ))}
-    </>
-  );
-}
+// ---------------------------------------------------------------------------
+// Houses
+// ---------------------------------------------------------------------------
+// Las casas se pintan desde `piezas` (con los retoques del jugador aplicados)
+// dentro del ensamblado de Aldea, envueltas en <Editable>.
 
 // ---------------------------------------------------------------------------
 // Industrial naves (west side)
 // ---------------------------------------------------------------------------
-function Nave({ x, z }: { x: number; z: number }) {
+function Nave() {
   return (
-    <group position={[x, 0, z]}>
+    <group>
       <mesh castShadow receiveShadow position={[0, 3.25, 0]}>
         <boxGeometry args={[16, 6.5, 10]} />
         <meshStandardMaterial color={PALETA.nave} />
@@ -218,43 +243,17 @@ function Fuente() {
 // Instanced vegetation and props (built imperatively: full control over
 // matrices/colors without TS friction, one draw call per mesh).
 // ---------------------------------------------------------------------------
-function libre(x: number, z: number): boolean {
-  if (Math.abs(x) > 540 || Math.abs(z) > 540) return false;
-  if (Math.hypot(x, z) < 52) return false;                          // village
-  if (x > 28 && x < 96 && z > -62 && z < 18) return false;          // project district
-  if (Math.abs(x - centroRio(z)) < 16) return false;                // river
-  if (x > -94 && x < -46 && z > -50 && z < 50) return false;        // naves
-  if (Math.abs(z) < 6 && x > -98 && x < 132) return false;          // E-W paths
-  if (Math.abs(x) < 6 && Math.abs(z) < 68) return false;            // N-S paths
-  for (const l of LAGOS) {
-    if (Math.hypot((x - l.x) / (l.rx + 8), (z - l.z) / (l.rz + 8)) < 1) return false;
-  }
-  return true;
-}
-
-function Vegetacion() {
+function Vegetacion({ arboles, editando, onPulsar }: {
+  arboles: PiezaAldea[];
+  editando: boolean;
+  onPulsar: (sel: SeleccionMundo) => void;
+}) {
   const grupo = useMemo(() => {
-    const azar = crearAzar(118);
+    // Semilla 119 para arbustos, rocas y flores: antes compartían el chorro de
+    // azar de los árboles (118); al mover los árboles a mapa.ts se les da el
+    // suyo. Se recolocan una vez y quedan deterministas para siempre.
+    const azar = crearAzar(119);
     const g = new THREE.Group();
-
-    // --- scatter tree positions: forest clusters + open sprinkle
-    const arboles: Array<{ x: number; z: number; s: number; pino: boolean }> = [];
-    const nucleos = [
-      [-320, -180], [260, 130], [-150, -380], [320, -320],
-      [-350, 260], [150, 330], [430, 80], [-80, 430],
-    ];
-    for (const [nx, nz] of nucleos) {
-      for (let i = 0; i < 105; i++) {
-        const x = nx + (azar() + azar() - 1) * 110;
-        const z = nz + (azar() + azar() - 1) * 110;
-        if (libre(x, z)) arboles.push({ x, z, s: 0.75 + azar() * 0.7, pino: azar() > 0.42 });
-      }
-    }
-    for (let i = 0; i < 300; i++) {
-      const x = (azar() - 0.5) * 1060;
-      const z = (azar() - 0.5) * 1060;
-      if (libre(x, z)) arboles.push({ x, z, s: 0.7 + azar() * 0.7, pino: azar() > 0.5 });
-    }
 
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
@@ -269,41 +268,50 @@ function Vegetacion() {
       mesh.setMatrixAt(i, m);
     };
 
-    // trunks
+    // Troncos: uno por árbol. `userData.arboles` mapea instancia → índice del
+    // árbol en la lista, que es lo que hace el bosque PULSABLE en el editor.
     const troncos = new THREE.InstancedMesh(
       new THREE.CylinderGeometry(0.28, 0.45, 2.4, 6),
       new THREE.MeshStandardMaterial({ color: PALETA.tronco }),
-      arboles.length,
+      Math.max(1, arboles.length),
     );
-    arboles.forEach((a, i) => colocar(troncos, i, a.x, 1.1 * a.s, a.z, a.s, azar() * Math.PI));
+    troncos.userData.arboles = arboles.map((_, i) => i);
+    arboles.forEach((a, i) => colocar(troncos, i, a.x, 1.1 * (a.escala || 1), a.z, a.escala || 1, azar() * Math.PI));
 
-    // crowns: pines (cones) and broadleaves (flattened icosahedra), tinted per instance
-    const pinos = arboles.filter(a => a.pino);
-    const hojas = arboles.filter(a => !a.pino);
+    // Copas: pinos (conos) y frondosas (icosaedros), con su mapa de índices.
+    const pinos: number[] = [];
+    const hojas: number[] = [];
+    arboles.forEach((a, i) => (a.pino ? pinos : hojas).push(i));
     const copaPino = new THREE.InstancedMesh(
       new THREE.ConeGeometry(2.0, 4.8, 7),
       new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }),
-      pinos.length,
+      Math.max(1, pinos.length),
     );
-    pinos.forEach((a, i) => {
-      colocar(copaPino, i, a.x, (2.2 + 2.4) * a.s, a.z, a.s, azar() * Math.PI);
+    copaPino.userData.arboles = pinos;
+    pinos.forEach((idx, i) => {
+      const a = arboles[idx];
+      const s = a.escala || 1;
+      colocar(copaPino, i, a.x, (2.2 + 2.4) * s, a.z, s, azar() * Math.PI);
       copaPino.setColorAt(i, color.set(azar() > 0.5 ? PALETA.pino : PALETA.pinoClaro));
     });
     const copaHoja = new THREE.InstancedMesh(
       new THREE.IcosahedronGeometry(2.1, 0),
       new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }),
-      hojas.length,
+      Math.max(1, hojas.length),
     );
-    hojas.forEach((a, i) => {
-      posicion.set(a.x, (2.2 + 1.7) * a.s, a.z);
-      escala.set(a.s, a.s * 0.85, a.s);
+    copaHoja.userData.arboles = hojas;
+    hojas.forEach((idx, i) => {
+      const a = arboles[idx];
+      const s = a.escala || 1;
+      posicion.set(a.x, (2.2 + 1.7) * s, a.z);
+      escala.set(s, s * 0.85, s);
       q.setFromAxisAngle(EJE_Y, azar() * Math.PI);
       m.compose(posicion, q, escala);
       copaHoja.setMatrixAt(i, m);
       copaHoja.setColorAt(i, color.set(azar() > 0.5 ? PALETA.hoja : PALETA.hojaClara));
     });
 
-    // bushes, rocks and flowers for ground life
+    // Arbustos, rocas y flores: vida de suelo, sin identidad (no editables).
     const arbustos = new THREE.InstancedMesh(
       new THREE.SphereGeometry(0.75, 8, 6),
       new THREE.MeshStandardMaterial({ color: PALETA.arbusto, flatShading: true }),
@@ -311,7 +319,7 @@ function Vegetacion() {
     );
     for (let i = 0; i < 220; i++) {
       let x = 0, z = 0, intentos = 0;
-      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!libre(x, z) && intentos < 8);
+      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
       const s = 0.6 + azar() * 0.9;
       posicion.set(x, 0.45 * s, z);
       escala.set(s, s * 0.7, s);
@@ -327,7 +335,7 @@ function Vegetacion() {
     );
     for (let i = 0; i < 90; i++) {
       let x = 0, z = 0, intentos = 0;
-      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!libre(x, z) && intentos < 8);
+      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
       const s = 0.4 + azar() * 1.1;
       colocar(rocas, i, x, 0.3 * s, z, s, azar() * Math.PI);
     }
@@ -338,7 +346,6 @@ function Vegetacion() {
       260,
     );
     for (let i = 0; i < 260; i++) {
-      // flowers concentrate near the village and paths, where the player walks
       const x = (azar() - 0.5) * 320;
       const z = (azar() - 0.5) * 320;
       colocar(flores, i, x, 0.12, z, 0.8 + azar() * 0.6, 0);
@@ -355,25 +362,75 @@ function Vegetacion() {
     flores.frustumCulled = false;
     g.add(flores);
     return g;
-  }, []);
-  return <primitive object={grupo} />;
+  }, [arboles]);
+
+  // El modo edición cambia sin reconstruir el bosque: se lee de una ref.
+  const editandoRef = useRef(editando);
+  editandoRef.current = editando;
+
+  return (
+    <primitive
+      object={grupo}
+      onClick={(e: ThreeEvent<MouseEvent>) => {
+        const mapa = (e.object as THREE.Object3D).userData?.arboles as number[] | undefined;
+        if (!editandoRef.current || !mapa || e.instanceId == null || e.delta > 6) return;
+        const pieza = arboles[mapa[e.instanceId]];
+        if (!pieza) return;
+        e.stopPropagation();
+        onPulsar(seleccionDe(pieza));
+      }}
+    />
+  );
 }
 
 const EJE_Y = new THREE.Vector3(0, 1, 0);
 
 // ---------------------------------------------------------------------------
-export function Aldea() {
+export function Aldea({ piezas, editando, onPulsar }: {
+  /** El pueblo con los retoques del jugador YA aplicados (los calcula Escena). */
+  piezas: PiezaAldea[];
+  /** Modo edición: las piezas se vuelven pulsables para seleccionarlas. */
+  editando: boolean;
+  onPulsar: (sel: SeleccionMundo) => void;
+}) {
+  const de = (tipo: string) => piezas.filter(p => p.tipo === tipo);
+  const arboles = useMemo(() => piezas.filter(p => p.tipo === 'arbol'), [piezas]);
   return (
     <group>
       <Terreno />
       <Caminos />
-      <Fuente />
-      <Casas />
-      {NAVES.map(n => <Nave key={n.z} x={n.x} z={n.z} />)}
+      {de('fuente').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Fuente /></Editable>
+      ))}
+      {de('casa').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}>
+          <Modelo nombre={CASAS[(p.modelo ?? 0) % CASAS.length]} escala={3.2} />
+        </Editable>
+      ))}
+      {de('nave').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Nave /></Editable>
+      ))}
+      {de('banco').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Banco x={0} z={0} rot={0} /></Editable>
+      ))}
+      {de('farola').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Farola x={0} z={0} /></Editable>
+      ))}
+      {de('puesto').map((p, i) => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}>
+          <PuestoMercado x={0} z={0} rot={0} color={PALETA.tela[i % PALETA.tela.length]} />
+        </Editable>
+      ))}
+      {de('pozo').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Pozo x={0} z={0} /></Editable>
+      ))}
+      {de('carro').map(p => (
+        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Carro x={0} z={0} rot={0} /></Editable>
+      ))}
       <Rio />
       <Puente />
       <Lagos />
-      <Vegetacion />
+      <Vegetacion arboles={arboles} editando={editando} onPulsar={onPulsar} />
       <Detalles />
     </group>
   );

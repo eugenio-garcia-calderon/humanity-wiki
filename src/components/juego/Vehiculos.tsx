@@ -73,27 +73,34 @@ export function Bici({ rodando }: { rodando: boolean }) {
 
 /**
  * Planeador «Aptera»: tres ruedas, carrocería de gota, panel solar arriba y
- * cuatro rotores de despegue vertical que se despliegan al volar.
+ * DOS ALAS en V al estilo del V-Coptr Falcon (petición de Eugenio): al
+ * despegar se despliegan dos brazos que forman una V, con UN rotor en el
+ * extremo de cada uno. En el suelo van plegadas en vertical, como una libélula
+ * con las alas cerradas; el despliegue es el gesto del despegue.
  *
- * `alturaVuelo` decide todo lo que se mueve: los rotores giran y se abren al
- * despegar, y las ruedas se recogen. Se le pasa por ref para no re-renderizar.
+ * `alturaVuelo` decide todo lo que se mueve: las alas se abren y los dos
+ * rotores aceleran con la altura. Va por ref para no re-renderizar cada metro.
  */
 export function Aptera({ alturaVuelo, avanzando }: {
   alturaVuelo: React.MutableRefObject<number>;
   avanzando: boolean;
 }) {
-  const rotores = useRef<THREE.Group>(null);
+  const alaIzq = useRef<THREE.Group>(null);
+  const alaDer = useRef<THREE.Group>(null);
   const palas = useRef<THREE.Group[]>([]);
   const cuerpo = useRef<THREE.Group>(null);
 
   useFrame((_, dt) => {
     const h = alturaVuelo.current;
-    // 0 en el suelo, 1 en pleno vuelo: abre los rotores y los acelera.
+    // 0 en el suelo, 1 en pleno vuelo: abre las alas y acelera los rotores.
     const vuelo = Math.min(1, h / 6);
+    // Plegadas casi en vertical (1,35 rad) → V abierta (0,52 rad ≈ 30°).
+    const ang = 1.35 - vuelo * 0.83;
+    if (alaIzq.current) alaIzq.current.rotation.z += (ang - alaIzq.current.rotation.z) * Math.min(1, dt * 4);
+    if (alaDer.current) alaDer.current.rotation.z += (-ang - alaDer.current.rotation.z) * Math.min(1, dt * 4);
     for (const p of palas.current) {
-      if (p) p.rotation.y += dt * (6 + vuelo * 46);
+      if (p) p.rotation.y += dt * (5 + vuelo * 48);
     }
-    if (rotores.current) rotores.current.scale.setScalar(0.35 + vuelo * 0.65);
     // Al avanzar se inclina hacia delante, como cualquier multirrotor.
     if (cuerpo.current) {
       const objetivo = avanzando && h > 0.5 ? -0.16 : 0;
@@ -101,10 +108,42 @@ export function Aptera({ alturaVuelo, avanzando }: {
     }
   });
 
-  const brazos: Array<[number, number]> = [[1.15, 1.25], [-1.15, 1.25], [1.15, -1.35], [-1.15, -1.35]];
+  /** Un ala en V con su rotor en la punta. `lado` 1 = izquierda, -1 = derecha. */
+  const Ala = ({ lado, refAla, iPala }: {
+    lado: 1 | -1; refAla: React.RefObject<THREE.Group | null>; iPala: number;
+  }) => (
+    <group ref={refAla} position={[lado * 0.5, 1.38, -0.55]} rotation={[0, 0, lado * 1.35]}>
+      {/* El brazo del ala: ancho en la raíz, fino en la punta */}
+      <mesh position={[lado * 1.15, 0, 0]} castShadow>
+        <boxGeometry args={[2.3, 0.09, 0.42]} />
+        <meshStandardMaterial color={PALETA.lienzoBlanco} roughness={0.35} metalness={0.15} />
+      </mesh>
+      <mesh position={[lado * 1.15, 0.02, -0.14]} castShadow>
+        <boxGeometry args={[2.1, 0.05, 0.14]} />
+        <meshStandardMaterial color={PALETA.robotDetalle} roughness={0.3} metalness={0.4} />
+      </mesh>
+      {/* Góndola del rotor, en el EXTREMO del ala */}
+      <group position={[lado * 2.3, 0.05, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.16, 0.2, 0.3, 10]} />
+          <meshStandardMaterial color={PALETA.robotDetalle} />
+        </mesh>
+        <group ref={(g) => { if (g) palas.current[iPala] = g; }} position={[0, 0.18, 0]}>
+          {[0, Math.PI / 2].map(a => (
+            <mesh key={a} rotation={[0, a, 0]}>
+              <boxGeometry args={[1.7, 0.03, 0.13]} />
+              <meshStandardMaterial color={PALETA.robotDetalle} transparent opacity={0.65} />
+            </mesh>
+          ))}
+        </group>
+      </group>
+    </group>
+  );
 
   return (
     <group ref={cuerpo} position={[0, 0, 0]}>
+      <Ala lado={1} refAla={alaIzq} iPala={0} />
+      <Ala lado={-1} refAla={alaDer} iPala={1} />
       {/* Carrocería: gota alargada. Una esfera escalada da el morro redondo y
           el cono de detrás, la cola afilada que define la silueta. */}
       <mesh position={[0, 0.85, 0.35]} scale={[1.05, 0.62, 1.5]} castShadow receiveShadow>
@@ -136,30 +175,6 @@ export function Aptera({ alturaVuelo, avanzando }: {
         </group>
       ))}
       <Rueda x={0} y={0.34} z={-1.35} r={0.34} ancho={0.16} />
-
-      {/* Rotores de despegue vertical: recogidos en el suelo, abiertos al volar */}
-      <group ref={rotores} position={[0, 1.42, 0]}>
-        {brazos.map(([x, z], i) => (
-          <group key={i} position={[x, 0, z]}>
-            <mesh position={[-x / 2, -0.06, -z / 2]} rotation={[0, Math.atan2(x, z), 0]} castShadow>
-              <boxGeometry args={[0.09, 0.07, Math.hypot(x, z)]} />
-              <meshStandardMaterial color={PALETA.hierro} />
-            </mesh>
-            <mesh castShadow>
-              <cylinderGeometry args={[0.13, 0.13, 0.12, 10]} />
-              <meshStandardMaterial color={PALETA.robotDetalle} />
-            </mesh>
-            <group ref={(g) => { if (g) palas.current[i] = g; }}>
-              {[0, Math.PI / 2].map(a => (
-                <mesh key={a} position={[0, 0.09, 0]} rotation={[0, a, 0]}>
-                  <boxGeometry args={[1.5, 0.03, 0.11]} />
-                  <meshStandardMaterial color={PALETA.robotDetalle} transparent opacity={0.65} />
-                </mesh>
-              ))}
-            </group>
-          </group>
-        ))}
-      </group>
     </group>
   );
 }

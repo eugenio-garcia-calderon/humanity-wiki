@@ -13,9 +13,11 @@ export interface EntradaMando {
   x: number;
   z: number;
   y: number;
-  /** Barra espaciadora: corre. A pie y en bici multiplica la velocidad; en el
-   *  planeador no, porque allí la barra es lo que te hace subir. */
+  /** Mayúsculas (Shift): corre. A pie y en bici multiplica la velocidad. */
   turbo: boolean;
+  /** Barra espaciadora: un toque salta. El personaje lo consume (lo pone a
+   *  false) para que un toque sea UN salto y no uno por fotograma. */
+  salto: boolean;
 }
 
 /** Where the camera is looking. Written by the look-drag (right half of the
@@ -24,6 +26,9 @@ export interface EntradaMando {
 export interface Camara {
   yaw: number;
   pitch: number;
+  /** El dedo o el ratón están girando la vista AHORA. Mientras dura, la
+   *  cámara no persigue el rumbo del personaje: mandas tú. */
+  arrastrando?: boolean;
 }
 
 /** Cómo te mueves por el mundo. La bici es el doble de rápida; la Aptera es
@@ -76,11 +81,78 @@ export interface Agente {
   archivos: Array<{ url: string; nombre: string; tipo: string; es_imagen: boolean; created_at: string }>;
   proyecto_id: string | null;
   proyecto_slug?: string | null;
+  /** Proyectos de los que esta persona FORMA PARTE (sección de personas,
+   *  fuera del kanban — petición de Eugenio). */
+  proyecto_ids?: string[];
   tarjetas?: number;
   hechas?: number;
   conversation_id: string | null;
   x: number;
   z: number;
+}
+
+// ---------------------------------------------------------------------------
+// El mundo editable: un Miro en 3D (2026-08-18, petición de Eugenio)
+// ---------------------------------------------------------------------------
+
+/** Un objeto plantado por el jugador: un prop del catálogo, una nota, una
+ *  imagen o un documento. Vive en `game_world_items`. */
+export interface ItemMundo {
+  id: string;
+  tipo: 'prop' | 'nota' | 'imagen' | 'documento';
+  modelo: string | null;
+  texto: string | null;
+  url: string | null;
+  nombre: string | null;
+  x: number;
+  z: number;
+  rot: number;
+  escala: number;
+  /** Hilos de conocimiento: a qué apunta este objeto. Cada destino es
+   *  'item:WM…', 'agente:GA…' o 'proy:PRY…'. */
+  enlaces?: Array<{ a: string }>;
+}
+
+/** El catálogo de props que se pueden plantar. Vive aquí (y no en el editor
+ *  3D) porque el panel de creación es HTML de la página, que NO importa three. */
+export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: string }> = [
+  { modelo: 'arbol', nombre: 'Árbol', icono: '🌳' },
+  { modelo: 'pino', nombre: 'Pino', icono: '🌲' },
+  { modelo: 'casa', nombre: 'Casa', icono: '🏠' },
+  { modelo: 'banco', nombre: 'Banco', icono: '🪑' },
+  { modelo: 'farola', nombre: 'Farola', icono: '💡' },
+  { modelo: 'puesto', nombre: 'Puesto', icono: '⛺' },
+  { modelo: 'pozo', nombre: 'Pozo', icono: '🪣' },
+  { modelo: 'roca', nombre: 'Roca', icono: '🪨' },
+  { modelo: 'arbusto', nombre: 'Arbusto', icono: '🌿' },
+];
+
+/** Un retoque sobre el pueblo de serie: mover, eliminar o cambiar el diseño
+ *  de una casa, una farola, un árbol… `seed_id` es 'casa:3', 'arbol:517'… */
+export interface OverrideMundo {
+  seed_id: string;
+  eliminado: boolean;
+  x: number | null;
+  z: number | null;
+  rot: number | null;
+  modelo: string | null;
+}
+
+/** Lo que el jugador tiene seleccionado en modo edición. */
+export interface SeleccionMundo {
+  /** 'semilla' = objeto del pueblo de serie; 'item' = creado por el jugador. */
+  clase: 'semilla' | 'item';
+  id: string;
+  /** casa | arbol | farola | banco | puesto | pozo | carro | nave | prop | nota | imagen | documento */
+  tipo: string;
+  etiqueta: string;
+  x: number;
+  z: number;
+  rot: number;
+  /** Solo los objetos con variantes de diseño enseñan el botón «Diseño». */
+  modelo?: string | null;
+  texto?: string | null;
+  url?: string | null;
 }
 
 /** What the player is currently standing next to (drives the interaction UI). */

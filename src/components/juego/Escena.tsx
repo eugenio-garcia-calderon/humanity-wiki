@@ -3,14 +3,18 @@
 // it: this file (and everything it imports, including three.js) lives in its
 // own chunk that only game visitors download.
 // ============================================================================
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Obstaculo } from './Personaje';
-import { posicionProyecto, RADIO_EDIFICIO } from './mapa';
+import { posicionProyecto, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
 import type { Aspecto } from './aspecto';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
-import type { Agente, Camara, Cercania, EntradaMando, Medidas, ProyectoJuego, Vehiculo } from './tipos';
+import type {
+  Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
+  ProyectoJuego, SeleccionMundo, Vehiculo,
+} from './tipos';
+import { ObjetosMundo, SueloEditor, MarcadorMover, AnilloSeleccion } from './Editor';
 import { PALETA } from './paleta';
 import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
@@ -75,7 +79,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -95,9 +99,64 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onEntrarProyecto: (p: ProyectoJuego) => void;
   /** Clic o toque sobre alguien de tu mundo: se abre su chat sin acercarse. */
   onHablarAgente: (a: Agente) => void;
+  /** El mundo editable: objetos del jugador + retoques del pueblo semilla. */
+  mundo: { items: ItemMundo[]; overrides: OverrideMundo[] };
+  /** Estado del modo edición (lo lleva la página; aquí solo se dibuja). */
+  editor: { activo: boolean; moviendo: boolean; sel: SeleccionMundo | null };
+  onPulsarMundo: (sel: SeleccionMundo) => void;
+  /** Clic en suelo vacío en modo edición: abrir el panel de crear ahí. */
+  onSuelo: (p: { x: number; z: number }) => void;
+  /** Soltar el objeto que se estaba moviendo. */
+  onSoltar: (p: { x: number; z: number }) => void;
+  /** Fuera del modo edición: leer una nota, ver una imagen, abrir un documento. */
+  onAbrirItem: (item: ItemMundo) => void;
+  /** Última posición del ratón sobre el suelo mientras se mueve algo. */
+  movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
+
+  // El pueblo con los retoques del jugador aplicados: piezas movidas, con otro
+  // diseño o eliminadas. UNA lista que comparten el dibujo, el rebote y el
+  // editor — si cada uno la calculara, chocarías con una casa ya borrada.
+  const piezas = useMemo<PiezaAldea[]>(() => {
+    const ov = new Map(mundo.overrides.map(o => [o.seed_id, o]));
+    const lista: PiezaAldea[] = [];
+    for (const p of piezasAldea()) {
+      const o = ov.get(p.seed_id);
+      if (!o) { lista.push(p); continue; }
+      if (o.eliminado) continue;
+      lista.push({
+        ...p,
+        x: o.x ?? p.x,
+        z: o.z ?? p.z,
+        rot: o.rot ?? p.rot,
+        modelo: o.modelo != null && o.modelo !== '' ? Number(o.modelo) : p.modelo,
+      });
+    }
+    return lista;
+  }, [mundo.overrides]);
+
+  // Para los hilos de conocimiento: dónde está cada cosa a la que se apunta.
+  const resolverDestino = useCallback((ref: string) => {
+    if (ref.startsWith('item:')) {
+      const it = mundo.items.find(x => x.id === ref.slice(5));
+      return it ? { x: it.x, y: 1.8, z: it.z } : null;
+    }
+    if (ref.startsWith('agente:')) {
+      const a = agentes.find(x => x.id === ref.slice(7));
+      if (!a) return null;
+      if (a.tipo === 'proyecto') return { x: a.x, y: 3.5, z: a.z };
+      return { x: a.x, y: 1.8, z: a.z };
+    }
+    if (ref.startsWith('proy:')) {
+      const i = proyectos.findIndex(x => x.id === ref.slice(5));
+      if (i < 0) return null;
+      const p = posicionProyecto(i);
+      return { x: p.x, y: 4, z: p.z };
+    }
+    return null;
+  }, [mundo.items, agentes, proyectos]);
 
   // Lo sólido del mundo. En una ref para que el personaje lo lea cada
   // fotograma sin volver a montarse cuando cambian los agentes.
@@ -110,7 +169,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   obstaculos.current = useMemo(() => {
     if (interior) {
       if (interior.sala) {
-        const gente = habitantesDeSala(interior.items, interior.sala, interior.agentes);
+        const gente = habitantesDeSala(interior.items, interior.sala, interior.agentes, interior.proyecto.id);
         return [
           { id: 'interior:sala', ...HAB_SALIDA, radio: 2.2 },
           // Dentro de una habitación la gente también es sólida: chocarte con
@@ -146,8 +205,25 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         ...posicionProyecto(i),
         radio: RADIO_EDIFICIO,
       })),
+      // Todo el mobiliario del pueblo es sólido y hace REBOTAR (petición de
+      // Eugenio): farolas, bancos, árboles, casas… El prefijo `deco:` es lo
+      // que le dice al personaje «rebota y no abras ninguna ficha».
+      ...piezas.filter(p => p.radio > 0).map(p => ({
+        id: `deco:semilla:${p.seed_id}`,
+        x: p.x,
+        z: p.z,
+        radio: p.radio,
+      })),
+      // Los props que plantó el jugador también; sus notas y documentos no
+      // (se atraviesan: son conocimiento flotando, no muros).
+      ...mundo.items.filter(it => it.tipo === 'prop').map(it => ({
+        id: `deco:item:${it.id}`,
+        x: it.x,
+        z: it.z,
+        radio: radioProp(it.modelo),
+      })),
     ];
-  }, [agentes, proyectos, interior]);
+  }, [agentes, proyectos, interior, piezas, mundo.items]);
 
   return (
     <Canvas
@@ -188,10 +264,24 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             shadow-camera-far={400}
             shadow-bias={-0.0004}
           />
-          <Aldea />
+          <Aldea piezas={piezas} editando={editor.activo} onPulsar={onPulsarMundo} />
+          <ObjetosMundo
+            items={mundo.items}
+            editando={editor.activo}
+            onPulsar={onPulsarMundo}
+            onAbrir={onAbrirItem}
+            resolverDestino={resolverDestino}
+          />
           <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} onEntrar={onEntrarProyecto} />
           <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} onHablar={onHablarAgente} />
           <Robot jugadorPos={jugadorPos} medidas={medidas} />
+          {editor.activo && (
+            <>
+              <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
+              {editor.moviendo && <MarcadorMover movil={movilRef} />}
+              {editor.sel && !editor.moviendo && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}
+            </>
+          )}
         </>
       )}
       <Personaje

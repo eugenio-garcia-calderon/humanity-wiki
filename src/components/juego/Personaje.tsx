@@ -19,8 +19,12 @@ import type { Aspecto } from './aspecto';
 /** Velocidad máxima en m/s. A pie es un paseo vivo; la bici, ciclismo urbano;
  *  la Aptera, la de un coche por ciudad (el mapa mide 1 km de lado). */
 const VEL_MAX: Record<Vehiculo, number> = { pie: 8, bici: 17, aptera: 32 };
-/** Lo que multiplica la barra espaciadora a pie y en bici (petición de Eugenio). */
+/** Lo que multiplica Shift a pie y en bici (petición de Eugenio: «si pulso
+ *  Shift el muñeco va más rápido»; antes era la barra, que ahora salta). */
 const TURBO = 3;
+/** Salto: velocidad inicial y gravedad. Da un brinco de ~1,3 m. */
+const VEL_SALTO = 7.2;
+const GRAVEDAD = 20;
 const LIMITE = 530;          // keep the player inside the 118 ha
 const TECHO = 130;           // altura máxima de vuelo, en metros
 const VEL_VERTICAL = 11;     // subir y bajar, en m/s
@@ -56,6 +60,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
+  // El salto: velocidad vertical y altura sobre el suelo, solo a pie o en bici.
+  const velSalto = useRef(0);
+  const alturaSalto = useRef(0);
   // Apareces mirando al norte, hacia la plaza (rumbo 0 sería de espaldas a ella).
   const rumbo = useRef(Math.PI);
   // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
@@ -96,18 +103,36 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       alturaVuelo.current + subida * VEL_VERTICAL * dt, 0, vuela ? TECHO : 0,
     );
 
+    // --- Salto (petición de Eugenio: la barra salta). Solo a pie o en bici:
+    // volando la altura ya la llevan W y S.
+    if (!vuela) {
+      if (entrada.current.salto && alturaSalto.current <= 0) velSalto.current = VEL_SALTO;
+      entrada.current.salto = false;   // un toque = UN salto, no uno por frame
+      if (alturaSalto.current > 0 || velSalto.current > 0) {
+        alturaSalto.current = Math.max(0, alturaSalto.current + velSalto.current * dt);
+        velSalto.current -= GRAVEDAD * dt;
+        if (alturaSalto.current <= 0) velSalto.current = 0;
+      }
+    } else {
+      entrada.current.salto = false;
+      alturaSalto.current = 0;
+      velSalto.current = 0;
+    }
+
     // --- Movimiento. El mando viene en ejes de PANTALLA; se gira con el rumbo
     // de la cámara para que «adelante» sea siempre adelante en la vista.
     const yaw = camara.current.yaw;
     const sx = entrada.current.x;
-    const sz = entrada.current.z;
+    // La nave CRUZA sola: en el aire siempre avanza (se pilota con A/D y la
+    // vista, y W/S llevan la altura — petición de Eugenio). En el suelo, no.
+    const sz = vuela ? (alturaVuelo.current > 0.5 ? -1 : 0) : entrada.current.z;
     tmpObjetivo.set(
       sx * Math.cos(yaw) + sz * Math.sin(yaw),
       0,
       -sx * Math.sin(yaw) + sz * Math.cos(yaw),
     );
     if (tmpObjetivo.lengthSq() > 1) tmpObjetivo.normalize();
-    // Correr: la barra multiplica por 3, salvo volando — allí la barra sube.
+    // Correr: Shift multiplica por 3, salvo volando.
     const turbo = entrada.current.turbo && !vuela;
     tmpObjetivo.multiplyScalar(VEL_MAX[vehiculo] * (turbo ? TURBO : 1));
     vel.current.lerp(tmpObjetivo, 1 - Math.exp(-(vuela ? 4 : 10) * dt));
@@ -115,7 +140,7 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     const lim = limite ?? LIMITE;
     g.position.x = THREE.MathUtils.clamp(g.position.x, -lim, lim);
     g.position.z = THREE.MathUtils.clamp(g.position.z, -lim, lim);
-    g.position.y = alturaVuelo.current;
+    g.position.y = alturaVuelo.current + alturaSalto.current;
 
     // --- Colisión: a la gente y a los edificios no se les atraviesa.
     // Al tocarlos te quedas fuera de su radio y se avisa a la página, que
@@ -134,6 +159,17 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
         const nz = dd > 0.001 ? dz / dd : 1;
         g.position.x = o.x + nx * o.radio;
         g.position.z = o.z + nz * o.radio;
+        if (o.id.startsWith('deco:')) {
+          // El mobiliario del pueblo (farolas, bancos, árboles, casas…) hace
+          // REBOTAR (petición de Eugenio): se refleja la velocidad respecto a
+          // la normal y se pierde algo de energía. No abre ninguna ficha.
+          const dot = vel.current.x * nx + vel.current.z * nz;
+          if (dot < 0) {
+            vel.current.x = (vel.current.x - 2 * dot * nx) * 0.55;
+            vel.current.z = (vel.current.z - 2 * dot * nz) * 0.55;
+          }
+          continue;
+        }
         vel.current.multiplyScalar(0.2);
         choque = o.id;
       }
@@ -159,6 +195,16 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       const dif = Math.atan2(Math.sin(deseo - rumbo.current), Math.cos(deseo - rumbo.current));
       rumbo.current += dif * (1 - Math.exp(-(vuela ? 6 : 12) * dt));
       g.rotation.y = rumbo.current;
+      // La cámara SIGUE el giro del muñeco (petición de Eugenio): al girar con
+      // A/D la vista se va poniendo sola a su espalda, como en un juego de
+      // conducción. Salvo cuando estás mirando tú con el ratón o el dedo
+      // (`arrastrando`), y salvo andando hacia ATRÁS: reculando, girar la
+      // cámara 180° sería marearte.
+      if (!camara.current.arrastrando && sz <= 0.3) {
+        const yawDeseo = rumbo.current - Math.PI;
+        const dy = Math.atan2(Math.sin(yawDeseo - camara.current.yaw), Math.cos(yawDeseo - camara.current.yaw));
+        camara.current.yaw += dy * (1 - Math.exp(-(vuela ? 2.4 : 3.2) * dt));
+      }
     }
     // El modelo tiene su propia animación de andar: ya no hace falta el
     // botecito que simulaba el paso.

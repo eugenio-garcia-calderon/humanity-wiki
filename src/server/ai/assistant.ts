@@ -233,9 +233,9 @@ Estás DENTRO de un edificio, no en la aldea: aquí NO se crean vecinos ni edifi
 a) UNA COSA (una tarea, una nota, un gasto, una idea):
 {"acciones_juego": [{"tipo": "tarjeta", "grupo": "<id de la habitación>", "nombre": "...", "descripcion": "..."}]}
 
-b) UNA PERSONA — «mete a Anita aquí», «añade a Gala a esta sala»:
-{"acciones_juego": [{"tipo": "habitante", "grupo": "<id de la habitación>", "agente_id": "<id de esa persona>", "nombre": "<su nombre>"}]}
-**Mira SIEMPRE la lista \`agentes\` de arriba y usa el \`id\` de la persona que ya existe.** Meter a alguien en una habitación no es crear a nadie: es traer al que ya vive en su mundo, con su cara, su memoria y su conversación. Duplicarlo es un fallo grave (le pasó a Eugenio: pidió a Anita y le apareció una Anita nueva y vacía). Solo si NO hay nadie con ese nombre en la lista, manda la acción sin \`agente_id\` y se creará una vez.
+b) UNA PERSONA — «mete a Anita aquí», «añade a Gala al proyecto»:
+{"acciones_juego": [{"tipo": "habitante", "agente_id": "<id de esa persona>", "nombre": "<su nombre>"}]}
+La persona SE UNE AL PROYECTO: entra en su sección de personas (no en el tablero — una persona no es una tarea) y aparece de pie, con su avatar, en la sala «Personas» del edificio. **Mira SIEMPRE la lista \`agentes\` de arriba y usa el \`id\` de la persona que ya existe; \`en_proyectos\` te dice quién está ya dentro.** Duplicar a alguien es un fallo grave (le pasó a Eugenio: pidió a Anita y le apareció una Anita nueva y vacía). Solo si NO hay nadie con ese nombre en la lista, manda la acción sin \`agente_id\` y se creará una vez.
 Nunca uses "tarjeta" para una persona.
 ${juego.dentro.sala_actual
     ? `Si dice «en esta sala», «aquí» o no nombra ninguna, usa grupo "${juego.dentro.sala_actual.id}".`
@@ -245,6 +245,9 @@ NO uses "tipo": "persona" ni "proyecto" mientras esté aquí dentro: eso planta 
         : `CÓMO CONSTRUYES EN SU MUNDO:
 Devuelve acciones en el bloque JSON final con este formato:
 {"acciones_juego": [{"tipo": "persona"|"proyecto", "nombre": "...", "rol": "...", "descripcion": "..."}]}
+Y si te pide APUNTAR algo («apúntame esto», «déjame una nota», «recuérdame X»), clava una NOTA en el suelo de su mundo, junto a él:
+{"acciones_juego": [{"tipo": "nota", "nombre": "<título corto>", "descripcion": "<el texto de la nota>"}]}
+En \`plantado_en_el_mapa\` tienes lo que ya hay plantado (notas, documentos, imágenes y objetos, con sus coordenadas): úsalo para responder «¿qué notas tengo?» o «¿dónde dejé X?» sin inventar nada.
 La interfaz las crea al momento en el mundo, junto al jugador. Propón como mucho 4 de golpe. No repitas lo que ya existe en el mundo (lo tienes arriba).`}
 
 REGLAS:
@@ -261,10 +264,10 @@ Texto normal. Si creas algo, añade AL FINAL:
 
 ${juego.dentro ? `Ejemplo real, para «añade a Gala en esta sala» estando en «${juego.dentro.sala_actual?.label || 'Personas'}», con Gala ya en la lista de agentes con id GA123:
 
-Ya está: Gala está aquí, en ${juego.dentro.sala_actual?.label || 'esta habitación'}.
+Ya está: Gala se une al proyecto — la tienes de pie en la sala de Personas.
 
 \`\`\`redhumana
-{"acciones_juego": [{"tipo": "habitante", "grupo": "${juego.dentro.sala_actual?.id || 'personas'}", "agente_id": "GA123", "nombre": "Gala"}]}
+{"acciones_juego": [{"tipo": "habitante", "agente_id": "GA123", "nombre": "Gala"}]}
 \`\`\``
         : `\`\`\`redhumana
 {"acciones_juego": [{"tipo": "proyecto", "nombre": "Camión camperizado", "descripcion": "..."}],
@@ -352,7 +355,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         ? parsed.acciones_juego
             .filter((a: any) => a
               && (a.tipo === 'persona' || a.tipo === 'proyecto'
-                || a.tipo === 'tarjeta' || a.tipo === 'habitante')
+                || a.tipo === 'tarjeta' || a.tipo === 'habitante' || a.tipo === 'nota')
               && typeof a.nombre === 'string')
             .slice(0, 4)
         : [],

@@ -279,8 +279,8 @@ function Nucleo({ pct, color }: { pct: number; color: string }) {
 }
 
 /** Una puerta = un grupo del tablero = una carpeta en la que entrar. */
-function Puerta({ x, z, ang, grupo, n }: {
-  x: number; z: number; ang: number; grupo: Grupo; n: number;
+function Puerta({ x, z, ang, grupo, n, unidad = 'tarjeta' }: {
+  x: number; z: number; ang: number; grupo: Grupo; n: number; unidad?: string;
 }) {
   const luz = useRef<THREE.Mesh>(null);
   const fase = useMemo(() => Math.random() * 6, []);
@@ -315,7 +315,7 @@ function Puerta({ x, z, ang, grupo, n }: {
           {grupo.label}
         </Text>
         <Text position={[0, -0.62, 0]} fontSize={0.32} color={grupo.color} anchorX="center" anchorY="middle">
-          {n === 0 ? 'vacía' : n === 1 ? '1 tarjeta' : `${n} tarjetas`}
+          {n === 0 ? 'vacía' : `${n} ${unidad}${n === 1 ? '' : 's'}`}
         </Text>
       </Billboard>
     </group>
@@ -427,7 +427,7 @@ export function InteriorProyecto({ datos, onHablar }: {
     const suyos = items.filter(i => i.grupo === sala);
     // Las tarjetas que SON personas se sacan aparte: no se dibujan como una
     // lámina con su nombre, sino como la persona misma, de pie en la sala.
-    const gente = habitantesDeSala(items, sala, agentes);
+    const gente = habitantesDeSala(items, sala, agentes, proyecto.id);
     const cosas: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
     for (const it of suyos) {
       if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
@@ -538,12 +538,17 @@ export function InteriorProyecto({ datos, onHablar }: {
 
       {grupos.map((g, i) => {
         const p = posicionPuerta(i, grupos.length);
+        // La puerta de «Personas» cuenta a la GENTE del proyecto (miembros),
+        // no tarjetas: las personas ya no viven en el kanban.
+        const gente = habitantesDeSala(items, g.id, agentes, proyecto.id);
+        const cosas = items.filter(it => it.grupo === g.id && !agenteDeItem(it, agentes)).length;
         return (
           <Puerta
             key={g.id}
             x={p.x} z={p.z} ang={p.ang}
             grupo={g}
-            n={items.filter(it => it.grupo === g.id).length}
+            n={cosas + gente.length}
+            unidad={g.id === 'personas' ? 'persona' : 'tarjeta'}
           />
         );
       })}

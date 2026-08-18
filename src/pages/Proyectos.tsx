@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -230,6 +231,8 @@ export function Proyecto() {
           )}
         </div>
 
+        <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
+
         <div className="mt-8">
           <TableroKanban
             items={items} grupos={grupos} puedeEditar={puedeEditar}
@@ -245,6 +248,98 @@ export function Proyecto() {
           onCerrar={() => setNueva(null)}
           onCreada={() => { setNueva(null); cargarItems(proyecto.id); }}
         />
+      )}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Las PERSONAS del proyecto (2026-08-18, petición de Eugenio): una sección
+// propia, fuera del kanban — una persona no es una tarea pendiente. Son las
+// personas de tu mundo del Juego Vital: unirlas aquí las pone de pie en la
+// sala «Personas» del edificio 3D del proyecto.
+// ----------------------------------------------------------------------------
+function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; puedeEditar: boolean }) {
+  const [personas, setPersonas] = useState<any[]>([]);
+  const [todas, setTodas] = useState<any[]>([]);
+  const [anadiendo, setAnadiendo] = useState(false);
+
+  const cargar = () =>
+    fetch(`/api/juego/proyectos/${proyectoId}/personas`, { credentials: 'include' })
+      .then(r => r.json()).then(j => setPersonas(Array.isArray(j) ? j : [])).catch(() => setPersonas([]));
+
+  useEffect(() => { cargar(); }, [proyectoId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const abrirAnadir = async () => {
+    setAnadiendo(true);
+    const j = await fetch('/api/juego/agentes', { credentials: 'include' }).then(r => r.json()).catch(() => []);
+    setTodas(Array.isArray(j) ? j.filter((a: any) => a.tipo === 'persona') : []);
+  };
+
+  const poner = async (agenteId: string, quitar = false) => {
+    await fetch(`/api/juego/agentes/${agenteId}/proyectos`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: proyectoId, quitar }),
+    }).catch(() => {});
+    setAnadiendo(false);
+    cargar();
+  };
+
+  // Sin personas y sin permiso de edición no hay nada que enseñar.
+  if (!personas.length && !puedeEditar) return null;
+
+  const candidatas = todas.filter(t => !personas.some(m => m.id === t.id));
+
+  return (
+    <div className="mt-8 max-w-3xl">
+      <div className="flex items-center gap-2 mb-2.5">
+        <Users className="w-3.5 h-3.5 text-emerald-600" />
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Personas del proyecto</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {personas.map(m => (
+          <span key={m.id} className="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm">
+            {m.foto_url
+              ? <img src={m.foto_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+              : <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black flex items-center justify-center">{(m.nombre || '?')[0]}</span>}
+            <span className="text-xs font-bold text-slate-700">{m.nombre}</span>
+            {m.rol && <span className="text-[10px] text-slate-400">{m.rol}</span>}
+            {puedeEditar && (
+              <button onClick={() => poner(m.id, true)} title="Quitar del proyecto" className="text-slate-300 hover:text-red-500 transition-colors">
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </span>
+        ))}
+        {personas.length === 0 && (
+          <p className="text-xs text-slate-400">Nadie todavía. Las personas de tu mundo pueden formar parte de este proyecto.</p>
+        )}
+        {puedeEditar && !anadiendo && (
+          <button onClick={abrirAnadir}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-dashed border-slate-300 rounded-full text-xs font-bold text-slate-400 hover:text-emerald-700 hover:border-emerald-300 transition-colors">
+            <Plus className="w-3 h-3" /> Añadir
+          </button>
+        )}
+      </div>
+      {anadiendo && (
+        <div className="mt-2.5 p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tu gente</p>
+            <button onClick={() => setAnadiendo(false)} className="text-slate-300 hover:text-slate-600"><X className="w-3.5 h-3.5" /></button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {candidatas.map(t => (
+              <button key={t.id} onClick={() => poner(t.id)}
+                className="px-2.5 py-1.5 border border-slate-200 rounded-full text-xs font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors">
+                + {t.nombre}
+              </button>
+            ))}
+            {candidatas.length === 0 && (
+              <p className="text-xs text-slate-400">Todas las personas de tu mundo están ya en el proyecto (o aún no has creado ninguna en el Juego Vital).</p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

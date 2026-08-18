@@ -94,16 +94,27 @@ export function agenteDeItem(it: ItemProyecto, agentes: Agente[]): Agente | null
  * Quién está de pie en una habitación. Un solo sitio lo decide, y lo leen la
  * escena (para dibujarlos), los obstáculos (para poder chocarte con ellos) y
  * la página (para contárselo a la IA).
+ *
+ * Desde 2026-08-18 la fuente principal es la MEMBRESÍA (`proyecto_ids` del
+ * agente): quien forma parte del proyecto está de pie en su sala «Personas»,
+ * sin tarjeta en el kanban (petición de Eugenio). Las tarjetas enlazadas de
+ * antes se siguen leyendo como rescate.
  */
 export function habitantesDeSala(
-  items: ItemProyecto[], sala: string | null, agentes: Agente[],
+  items: ItemProyecto[], sala: string | null, agentes: Agente[], proyectoId?: string,
 ): Agente[] {
   if (!sala) return [];
   const out: Agente[] = [];
+  const meter = (a: Agente) => { if (!out.some(x => x.id === a.id)) out.push(a); };
+  if (sala === 'personas' && proyectoId) {
+    for (const a of agentes) {
+      if (a.tipo === 'persona' && a.proyecto_ids?.includes(proyectoId)) meter(a);
+    }
+  }
   for (const it of items) {
     if (it.grupo !== sala) continue;
     const a = agenteDeItem(it, agentes);
-    if (a && !out.some(x => x.id === a.id)) out.push(a);
+    if (a) meter(a);
   }
   return out;
 }
