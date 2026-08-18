@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
 import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles';
 import { Camper } from './Camper';
+import { PantallaVisual } from './Pantalla';
 import { SenalDePortal } from './Senales';
 import { Modelo, CASAS } from './Modelos';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
@@ -22,7 +23,7 @@ import type { SeleccionMundo } from './tipos';
 const ETIQUETAS: Record<string, string> = {
   casa: 'Casa', nave: 'Nave', fuente: 'Fuente', banco: 'Banco', farola: 'Farola',
   puesto: 'Puesto del mercado', pozo: 'Pozo', carro: 'Carro', arbol: 'Árbol',
-  camper: 'Camión camperizado',
+  camper: 'Camión camperizado', pantalla: 'Gran pantalla',
 };
 
 function seleccionDe(p: PiezaAldea): SeleccionMundo {
@@ -74,7 +75,7 @@ function Editable({ pieza, onPulsar, onAgarrar, children }: {
 /** Dónde flota el rótulo de portal de cada tipo de pieza: por encima de su
  *  tejado, no dentro de él. */
 const ALTO_SENAL: Record<string, number> = {
-  casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6,
+  casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6, pantalla: 9.4,
   puesto: 3.6, pozo: 3.2, carro: 2.8, arbol: 6.2,
 };
 
@@ -94,6 +95,9 @@ export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?:
     case 'pozo': return <Pozo x={0} z={0} />;
     case 'carro': return <Carro x={0} z={0} rot={0} />;
     case 'camper': return <Camper />;
+    // Solo para el FANTASMA del arrastre: en el mundo la pinta PantallaGrande
+    // (con su clic de entrar al cine), no el ensamblado de Aldea.
+    case 'pantalla': return <PantallaVisual />;
     case 'arbol': return (
       <group scale={s}>
         <mesh castShadow position={[0, 1.1, 0]}>

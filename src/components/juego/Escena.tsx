@@ -21,7 +21,8 @@ import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
 import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
-import { PantallaGrande, PANTALLA } from './Pantalla';
+import { PantallaGrande } from './Pantalla';
+import { CineYouTube, CINE_LIM, CINE_SALIDA, type CategoriaCine, type VideoCine } from './Cine';
 import { PortalVerde } from './PortalVerde';
 import { Agentes } from './Agentes';
 import { PlazaProyecto, type DatosInterior } from './Interior';
@@ -81,7 +82,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -119,8 +120,13 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onSoltar: (p: { x: number; z: number }) => void;
   /** Fuera del modo edición: leer una nota, ver una imagen, abrir un documento. */
   onAbrirItem: (item: ItemMundo) => void;
-  /** Pulsar la gran pantalla del cine: abre el panel de YouTube. */
+  /** Pulsar la gran pantalla del cine: entrar en la sala 3D. */
   onPantalla: () => void;
+  /** Si está puesto, se está DENTRO del cine del agente de YouTube. */
+  cine: { estado: string; categorias: CategoriaCine[] } | null;
+  onVerVideo?: (v: VideoCine) => void;
+  onSalirCine?: () => void;
+  onActualizarCine?: () => void;
   /** Última posición del ratón sobre el suelo mientras se mueve algo. */
   movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
@@ -198,6 +204,9 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   // está ahí.
   const obstaculos = useRef<Obstaculo[]>([]);
   obstaculos.current = useMemo(() => {
+    if (cine) {
+      return [{ id: 'cine:salir', ...CINE_SALIDA, radio: 2 }];
+    }
     if (interior) {
       // La plaza del proyecto: el portal de salida y la gente son sólidos
       // (chocar = salir / hablar). Los props plantados dentro también.
@@ -233,9 +242,6 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         radio: RADIO_EDIFICIO,
         // Un portal quitado del mapa tampoco choca (radio 0 = se ignora).
       })).filter((_, i) => !posProyectos[i]?.eliminado),
-      // La gran pantalla del cine también es sólida: rebota, no abre ficha
-      // (se abre pulsándola con el ratón).
-      { id: 'deco:pantalla', x: PANTALLA.x, z: PANTALLA.z, radio: PANTALLA.radio },
       // Todo el mobiliario del pueblo es sólido y hace REBOTAR (petición de
       // Eugenio): farolas, bancos, árboles, casas… El prefijo `deco:` es lo
       // que le dice al personaje «rebota y no abras ninguna ficha».
@@ -258,7 +264,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         radio: it.tipo === 'prop' ? radioProp(it.modelo) : 1.5,
       })),
     ];
-  }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items]);
+  }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items, cine]);
 
   return (
     <Canvas
@@ -276,7 +282,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
     >
       {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
           cielo de día, ya no existe la sala oscura. */}
-      <Ambiente interior={false} />
+      <Ambiente interior={!!cine} />
       <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
       <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
       <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
@@ -297,7 +303,15 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         shadow-bias={-0.0004}
       />
 
-      {interior ? (
+      {cine ? (
+        <CineYouTube
+          categorias={cine.categorias}
+          estado={cine.estado}
+          onVer={(v) => onVerVideo?.(v)}
+          onActualizar={() => onActualizarCine?.()}
+          onSalir={() => onSalirCine?.()}
+        />
+      ) : interior ? (
         <>
           <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} />
           {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
@@ -353,7 +367,26 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
               );
             }}
           />
-          <PantallaGrande onAbrir={onPantalla} />
+          {/* La gran pantalla vive como pieza (pantalla:0): posición con los
+              arrastres aplicados; ocultada si va agarrada (la lleva el
+              fantasma). El clic entra al cine; pinchar sin soltar la mueve. */}
+          {(() => {
+            const pz = piezas.find(p => p.seed_id === 'pantalla:0');
+            if (!pz || (editor.moviendo && editor.sel?.clase === 'semilla' && editor.sel.id === 'pantalla:0')) return null;
+            return (
+              <PantallaGrande
+                x={pz.x} z={pz.z} rot={pz.rot}
+                onAbrir={onPantalla}
+                onAgarrar={(e) => {
+                  if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+                  onAgarrarMundo(
+                    { clase: 'semilla', id: 'pantalla:0', tipo: 'pantalla', etiqueta: 'Gran pantalla', x: pz.x, z: pz.z, rot: pz.rot },
+                    { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+                  );
+                }}
+              />
+            );
+          })()}
           <Agentes
             agentes={agentes}
             jugadorPos={jugadorPos}
@@ -396,7 +429,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         onChoque={onChoque}
         destino={destino}
         zoom={zoom}
-        limite={interior ? PLAZA_LIM : undefined}
+        limite={cine ? CINE_LIM : interior ? PLAZA_LIM : undefined}
         aspecto={aspectoJugador}
         vehiculo={vehiculo}
         alturaVuelo={alturaVuelo}

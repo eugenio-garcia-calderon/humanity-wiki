@@ -221,14 +221,17 @@ export function registerYoutubeRoutes(app: Express, db: any) {
    * las palabras clave de TUS proyectos. Dos listas: `relacionados` (con la
    * explicación de con qué proyecto casan) y `recientes` (el resto, por fecha).
    */
-  app.get('/api/youtube/recomendaciones', async (req: Request, res: Response) => {
-    if (!requiereUsuario(req, res)) return;
-    try {
-      const cache = cacheRecs.get(req.user!.id);
-      if (cache && Date.now() - cache.t < CACHE_MS) return res.json(cache.datos);
+  /**
+   * El cálculo compartido: suscripciones → RSS → puntuar contra los temas de
+   * TUS proyectos. Lo usan /recomendaciones (panel) y /cine (la sala 3D).
+   * Devuelve null si YouTube no está conectado.
+   */
+  const calcularRecs = async (userId: string) => {
+      const cache = cacheRecs.get(userId);
+      if (cache && Date.now() - cache.t < CACHE_MS) return cache.datos;
 
-      const token = await tokenVigente(req.user!.id);
-      if (!token) return res.status(401).json({ error: 'YouTube no está conectado (o la conexión caducó). Conéctalo desde la pantalla.' });
+      const token = await tokenVigente(userId);
+      if (!token) return null;
 
       // 1) Tus suscripciones, en el orden de relevancia que ya calcula YouTube.
       const sr = await fetch(`https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=${MAX_CANALES}`, {
@@ -236,7 +239,7 @@ export function registerYoutubeRoutes(app: Express, db: any) {
       });
       if (!sr.ok) {
         console.error('youtube subs', await sr.text());
-        return res.status(502).json({ error: 'YouTube no devolvió tus suscripciones. Prueba a reconectar.' });
+        throw new Error('YouTube no devolvió tus suscripciones. Prueba a reconectar.');
       }
       const sj: any = await sr.json();
       const canales: Array<{ id: string; titulo: string }> = (sj.items || [])
@@ -274,7 +277,7 @@ export function registerYoutubeRoutes(app: Express, db: any) {
                  (SELECT string_agg(concat_ws(' ', r.titulo, r.resumen), ' ')
                     FROM roadmap_items r WHERE r.proyecto_id = p.id AND r.archived_at IS NULL)) AS texto
         FROM proyectos p
-        WHERE p.archived_at IS NULL AND p.creador_user_id = ${req.user!.id}
+        WHERE p.archived_at IS NULL AND p.creador_user_id = ${userId}
       `)).rows as Array<{ id: string; titulo: string; texto: string }>;
       const temas = proys.map(p => ({ titulo: p.titulo, claves: palabrasClave(p.texto || '') }));
 
@@ -300,8 +303,63 @@ export function registerYoutubeRoutes(app: Express, db: any) {
       const recientes = puntuados.filter(v => !idsRel.has(v.videoId)).sort(orden).slice(0, 12);
 
       const datos = { relacionados, recientes, canales: canales.length, proyectos: temas.map(t => t.titulo) };
-      cacheRecs.set(req.user!.id, { t: Date.now(), datos });
+      cacheRecs.set(userId, { t: Date.now(), datos });
+      return datos;
+  };
+
+  app.get('/api/youtube/recomendaciones', async (req: Request, res: Response) => {
+    if (!requiereUsuario(req, res)) return;
+    try {
+      const datos = await calcularRecs(req.user!.id);
+      if (!datos) return res.status(401).json({ error: 'YouTube no está conectado (o la conexión caducó). Conéctalo desde la pantalla.' });
       res.json(datos);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * GET /api/youtube/cine — lo que el AGENTE DE YOUTUBE cuelga en la sala 3D
+   * del cine (2026-08-19, petición de Eugenio): los mismos vídeos, agrupados
+   * por la TEMÁTICA de cada portal (cada proyecto es una categoría) más una
+   * de «Novedades». `?demo=1` (solo fuera de producción) devuelve una sala
+   * de muestra para poder ver la disposición sin cuenta conectada.
+   */
+  app.get('/api/youtube/cine', async (req: Request, res: Response) => {
+    if (!requiereUsuario(req, res)) return;
+    try {
+      if (req.query.demo === '1' && process.env.NODE_ENV !== 'production') {
+        const proys = (await db.execute(sql`
+          SELECT titulo FROM proyectos WHERE archived_at IS NULL AND creador_user_id = ${req.user!.id}
+          ORDER BY created_at LIMIT 5
+        `)).rows as Array<{ titulo: string }>;
+        const demoIds = ['iTK9dLjbrno', 'dQw4w9WgXcQ', 'jNQXAC9IVRw', '9bZkp7q19f0', 'aqz-KE-bpKQ', 'kJQP7kiw5Fk'];
+        const categorias = proys.map((p, i) => ({
+          tema: p.titulo,
+          videos: demoIds.slice(0, 3 + (i % 3)).map((id, j) => ({
+            videoId: id, titulo: `Vídeo de muestra ${j + 1} sobre ${p.titulo}`, canal: 'Canal demo',
+            url: `https://www.youtube.com/watch?v=${id}`,
+          })),
+        }));
+        return res.json({ estado: 'ok', demo: true, categorias });
+      }
+
+      const datos = await calcularRecs(req.user!.id);
+      if (!datos) return res.json({ estado: 'sin_conexion', categorias: [] });
+
+      // Agrupar por tema: cada vídeo cuelga de TODAS las temáticas con las
+      // que casó (relacionadoCon), y lo que no casó con nada va a Novedades.
+      const porTema = new Map<string, any[]>();
+      for (const v of datos.relacionados as any[]) {
+        for (const tema of (v.relacionadoCon || [])) {
+          if (!porTema.has(tema)) porTema.set(tema, []);
+          const lista = porTema.get(tema)!;
+          if (lista.length < 6) lista.push(v);
+        }
+      }
+      const categorias = [...porTema.entries()].map(([tema, videos]) => ({ tema, videos }));
+      if ((datos.recientes as any[]).length) {
+        categorias.push({ tema: 'Novedades', videos: (datos.recientes as any[]).slice(0, 6) });
+      }
+      res.json({ estado: 'ok', categorias });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 }

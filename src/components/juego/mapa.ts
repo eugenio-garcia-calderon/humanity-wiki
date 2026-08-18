@@ -235,6 +235,9 @@ export function piezasAldea(): PiezaAldea[] {
   // se mueve y se puede quitar como el resto del pueblo.
   // (en 26,9 pisaba la primera casa del anillo con la escala nueva)
   lista.push({ seed_id: 'camper:0', tipo: 'camper', x: 20, z: 7.5, rot: -0.45, radio: 4 });
+  // La gran pantalla del cine (2026-08-19): pieza con identidad para que se
+  // arrastre y guarde como todo lo demás. Posición de fábrica en Pantalla.tsx.
+  lista.push({ seed_id: 'pantalla:0', tipo: 'pantalla', x: 27, z: -18, rot: -0.98, radio: 4.2 });
   lista.push(...arbolesAldea());
   cachePiezas = lista;
   return lista;

@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn';
 import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo, type OverrideMundo } from './tipos';
 import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionesProyectos } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
-import { PANTALLA } from './Pantalla';
+
 
 // ============================================================================
 // JUEGO VITAL — minimapa estilo GTA (2026-08-18, petición de Eugenio)
@@ -119,7 +119,12 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
 
   const destinos: Destino[] = useMemo(() => [
     { tipo: 'robot' as const, nombre: 'Tu robot', x: CASA_DEL_ROBOT.x, z: CASA_DEL_ROBOT.z },
-    { tipo: 'pantalla' as const, nombre: 'Gran pantalla', x: PANTALLA.x, z: PANTALLA.z, color: '#ff0033' },
+    // La pantalla es la pieza pantalla:0: su marcador sigue a su retoque.
+    ...(() => {
+      const o = overrides.find(v => v.seed_id === 'pantalla:0');
+      if (o?.eliminado) return [];
+      return [{ tipo: 'pantalla' as const, nombre: 'Gran pantalla', x: o?.x ?? 27, z: o?.z ?? -18, color: '#ff0033' }];
+    })(),
     ...agentes.map((a): Destino => ({
       tipo: a.tipo === 'persona' ? 'persona' : 'proyecto',
       nombre: a.nombre, x: a.x, z: a.z, agente: a,
@@ -134,7 +139,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
       nombre: nombreLimpio(it.nombre, it.texto?.slice(0, 22) || it.tipo),
       x: it.x, z: it.z, color: COLOR_ITEM[it.tipo] || '#64748b',
     })),
-  ], [agentes, edificiosProyecto, items]);
+  ], [agentes, edificiosProyecto, items, overrides]);
 
   /** El terreno: lo mismo en el minimapa y en el mapa grande. */
   const terreno = (
