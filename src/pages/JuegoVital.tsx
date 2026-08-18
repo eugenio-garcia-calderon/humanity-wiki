@@ -44,6 +44,10 @@ import { PALETA } from '../components/juego/paleta';
 // El motor 3D (~1 MB) se carga en diferido: quien no juega no lo descarga.
 // ============================================================================
 
+// Solo TIPOS del cine: un import de valor arrastraría three/drei al chunk
+// principal (la escena va aparte con lazy()).
+import type { CategoriaCine, VideoCine } from '../components/juego/Cine';
+
 const Escena = lazy(() => import('../components/juego/Escena'));
 // PDF.js pesa: solo se baja la primera vez que se abre un PDF.
 const VisorPdf = lazy(() => import('../components/juego/VisorPdf'));
@@ -1213,11 +1217,67 @@ export default function JuegoVital() {
     });
   }, [cambiarEscenario]);
 
+  // ------------------------------------------------------------------
+  // EL CINE por dentro (2026-08-19): la sala 3D del agente de YouTube.
+  // ------------------------------------------------------------------
+  const [cineYT, setCineYT] = useState<{ estado: string; categorias: CategoriaCine[] } | null>(null);
+  const cineRef = useRef(cineYT);
+  cineRef.current = cineYT;
+
+  /** Entra en el cine (o refresca sus recomendaciones si ya estás dentro). */
+  const abrirCine = useCallback(async () => {
+    const yaDentro = !!cineRef.current;
+    const entrar = () => {
+      setPanel(null);
+      setVehiculo('pie');
+      alturaVuelo.current = 0;
+      setCineYT({ estado: 'cargando', categorias: [] });
+      // Bien adentro: en z 14 la cámara nacía ENCIMA del portal de salida
+      // (z 24) y su espiral llenaba la pantalla — misma trampa que la plaza.
+      destinoViaje.current = { x: 0, z: 6 };
+    };
+    if (yaDentro) setCineYT(c => (c ? { ...c, estado: 'cargando' } : c));
+    else cambiarEscenario('Gran pantalla', '#ff0033', entrar);
+    try {
+      // ?cinedemo en la URL de la página = sala de muestra (solo en local).
+      const demo = new URLSearchParams(window.location.search).has('cinedemo') ? '?demo=1' : '';
+      const r = await fetch(`/api/youtube/cine${demo}`, { credentials: 'include' });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setCineYT({ estado: 'sin_conexion', categorias: [] }); return; }
+      setCineYT({ estado: j.estado === 'ok' ? 'ok' : 'sin_conexion', categorias: j.categorias || [] });
+      // Sin cuenta conectada: se abre también el panel con el botón de
+      // conectar, que es el único sitio donde vive el OAuth.
+      if (j.estado !== 'ok') setPantallaYT(true);
+    } catch {
+      setCineYT({ estado: 'sin_conexion', categorias: [] });
+    }
+  }, [cambiarEscenario]);
+
+  const salirCine = useCallback(() => {
+    const o = overridesRef.current.find(x => x.seed_id === 'pantalla:0');
+    // 27,-18 = posición de fábrica de la pieza pantalla:0 (piezasAldea).
+    const px = o?.x ?? 27, pz = o?.z ?? -18;
+    cambiarEscenario('Aldea', '#ff0033', () => {
+      setCineYT(null);
+      destinoViaje.current = { x: px, z: pz + 5 };
+    });
+  }, [cambiarEscenario]);
+
+  /** Un vídeo del cine se ve en la ventana interna de siempre. */
+  const verVideoCine = useCallback((v: VideoCine) => {
+    setLeyendo({
+      id: `cine:${v.videoId}`, tipo: 'video', modelo: null,
+      texto: v.canal || null, url: v.url || `https://www.youtube.com/watch?v=${v.videoId}`,
+      nombre: v.titulo || 'Vídeo', x: 0, z: 0, rot: 0, escala: 1,
+    });
+  }, []);
+
   /**
    * Chocarte con algo es empezar a tratar con ello: con una persona se abre su
    * chat, con un edificio de proyecto se ENTRA DENTRO. Nada se atraviesa.
    */
   const alChocar = useCallback((id: string) => {
+    if (id === 'cine:salir') { salirCine(); return; }
     // Dentro de un proyecto, lo sólido son sus puertas y su salida.
     if (id === 'interior:salir') { salirDelProyecto(); return; }
     // Dentro de una habitación también hay gente: chocarte con alguien es
@@ -1259,7 +1319,7 @@ export default function JuegoVital() {
     setFichaAgente(a);
     // Sin robar el teclado: te has tropezado con él, no has decidido escribirle.
     hablarCon(a, false);
-  }, [hablarCon, entrarEnProyecto]);
+  }, [hablarCon, entrarEnProyecto, salirCine]);
 
   /**
    * Subirse o bajarse. Al bajar del planeador NO se apaga en el aire: se pone
@@ -1577,7 +1637,11 @@ export default function JuegoVital() {
           onSuelo={alSuelo}
           onSoltar={alSoltar}
           onAbrirItem={(it) => setLeyendo(it)}
-          onPantalla={abrirPantallaYT}
+          onPantalla={abrirCine}
+          cine={cineYT}
+          onVerVideo={verVideoCine}
+          onSalirCine={salirCine}
+          onActualizarCine={abrirCine}
           movilRef={movilRef}
           proyectos={proyectos}
           agentes={agentes}
