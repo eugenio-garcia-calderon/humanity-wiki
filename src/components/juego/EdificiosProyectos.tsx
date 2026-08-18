@@ -7,11 +7,12 @@
 import { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Text } from '@react-three/drei';
+import { Billboard, Text } from '@react-three/drei';
 import type { Medidas, ProyectoJuego } from './tipos';
 import { PALETA } from './paleta';
 import { posicionProyecto } from './mapa';
-import { Halo, Interactivo, Rotulo } from './Senales';
+import { Interactivo, Rotulo } from './Senales';
+import { PortalVerde, LuzDePortal, VERDE_PORTAL } from './PortalVerde';
 
 interface Parcela {
   p: ProyectoJuego;
@@ -20,90 +21,59 @@ interface Parcela {
   color: string;
 }
 
-function EdificioProyecto({ p, x, z, color, onEntrar }: Parcela & { onEntrar: (p: ProyectoJuego) => void }) {
+function EdificioProyecto({ p, x, z, onEntrar }: Parcela & { onEntrar: (p: ProyectoJuego) => void }) {
   const pct = p.tarjetas > 0 ? p.hechas / p.tarjetas : 0;
-  const alto = 3 + pct * 2.4; // real progress → taller building
   return (
     <group position={[x, 0, z]}>
-      {/* Halo: dice de lejos que aquí se entra (petición de Eugenio) */}
-      <Halo y={alto + 2.6} color={color} radio={1.5} />
       <Interactivo onPulsar={() => onEntrar(p)}>
-        {(resaltado) => (
-          <EdificioPulsable p={p} alto={alto} pct={pct} color={color} resaltado={resaltado} />
-        )}
+        {(resaltado) => <PortalDeProyecto titulo={p.titulo} tarjetas={p.tarjetas} pct={pct} resaltado={resaltado} />}
       </Interactivo>
     </group>
   );
 }
 
-/** El edificio en sí. `resaltado` es «tienes el ratón encima». */
-function EdificioPulsable({ p, alto, pct, color, resaltado }: {
-  p: ProyectoJuego; alto: number; pct: number; color: string; resaltado: boolean;
+/**
+ * El portal de un proyecto: la espiral verde, el TÍTULO flotando encima y la
+ * barra de progreso real del tablero. `resaltado` es «tienes el ratón encima»
+ * — mismo hover que tenían los edificios. Lo comparten el distrito y los
+ * proyectos construidos desde el juego (Agentes.tsx).
+ */
+export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, pie = 'Pulsa para entrar', resaltado }: {
+  titulo: string; tarjetas: number; pct: number; radio?: number; pie?: string; resaltado: boolean;
 }) {
   return (
     <group>
       {/* El nombre grande al pasar por encima: se mide en pantalla, así que
           se lee igual de cerca que desde el otro lado del valle. */}
-      <Rotulo y={alto + 4.6} texto={p.titulo} pie="Pulsa para entrar" color={color} resaltado={resaltado} />
-      <mesh castShadow receiveShadow position={[0, alto / 2, 0]}>
-        <boxGeometry args={[8, alto, 6]} />
-        <meshStandardMaterial color={color} />
+      <Rotulo y={radio * 2 + 2.6} texto={titulo} pie={pie} color={VERDE_PORTAL} resaltado={resaltado} />
+      <PortalVerde radio={radio} resaltado={resaltado} />
+      <LuzDePortal radio={radio} />
+      {/* Blanco generoso para el clic y el dedo: el aro fino era difícil de acertar */}
+      <mesh position={[0, radio, 0]}>
+        <cylinderGeometry args={[radio * 1.05, radio * 1.05, radio * 2.2, 10]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <mesh castShadow position={[0, alto + 0.2, 0]}>
-        <boxGeometry args={[8.6, 0.4, 6.6]} />
-        <meshStandardMaterial color={PALETA.tejadoPlano} />
-      </mesh>
-      <mesh position={[0, 1.1, 3.02]}>
-        <planeGeometry args={[1.3, 2.2]} />
-        <meshStandardMaterial color={PALETA.puerta} />
-      </mesh>
-      {[-2.4, 2.4].map((wx, i) => (
-        <mesh key={i} position={[wx, 2, 3.02]}>
-          <planeGeometry args={[1.4, 1.1]} />
-          <meshStandardMaterial color={PALETA.ventanaLuz} emissive={PALETA.ventanaLuz} emissiveIntensity={0.25} />
-        </mesh>
-      ))}
-
-      {/* sign with the real title and progress */}
-      <mesh castShadow position={[0, 1.3, 4.6]}>
-        <cylinderGeometry args={[0.09, 0.09, 2.6, 8]} />
-        <meshStandardMaterial color={PALETA.poste} />
-      </mesh>
-      <group position={[0, 2.75, 4.6]}>
-        <mesh castShadow>
-          <boxGeometry args={[5.6, 1.7, 0.16]} />
-          <meshStandardMaterial
-            color={PALETA.cartel}
-            emissive={color}
-            emissiveIntensity={resaltado ? 0.45 : 0}
-          />
-        </mesh>
-        <Text
-          position={[0, 0.25, 0.1]}
-          fontSize={0.42}
-          maxWidth={5.1}
-          color={PALETA.robotDetalle}
-          anchorX="center"
-          anchorY="middle"
-          textAlign="center"
-        >
-          {p.titulo}
+      {/* Título y progreso reales, flotando bajo el portal */}
+      <Billboard position={[0, radio * 2 + 1, 0]}>
+        <Text fontSize={0.46} maxWidth={5.4} color="#ffffff" anchorX="center" anchorY="middle" textAlign="center"
+          outlineWidth={0.03} outlineColor="#0f3d16">
+          {titulo}
         </Text>
-        {p.tarjetas > 0 && (
-          <group position={[0, -0.5, 0.1]}>
+        {tarjetas > 0 && (
+          <group position={[0, -0.62, 0]}>
             <mesh>
-              <boxGeometry args={[4.6, 0.22, 0.05]} />
-              <meshStandardMaterial color={PALETA.barraFondo} />
+              <planeGeometry args={[3.8, 0.18]} />
+              <meshBasicMaterial color={PALETA.barraFondo} toneMapped={false} />
             </mesh>
             {pct > 0 && (
-              <mesh position={[-(4.6 * (1 - pct)) / 2, 0, 0.02]}>
-                <boxGeometry args={[4.6 * pct, 0.22, 0.05]} />
-                <meshStandardMaterial color={PALETA.robotLuz} emissive={PALETA.robotLuz} emissiveIntensity={0.5} />
+              <mesh position={[-(3.8 * (1 - pct)) / 2, 0, 0.01]}>
+                <planeGeometry args={[3.8 * pct, 0.18]} />
+                <meshBasicMaterial color={VERDE_PORTAL} toneMapped={false} />
               </mesh>
             )}
           </group>
         )}
-      </group>
+      </Billboard>
     </group>
   );
 }

@@ -12,6 +12,7 @@ import type { Agente, Medidas } from './tipos';
 import { PALETA } from './paleta';
 import { Persona3D, cuerpoDe } from './Modelos';
 import { Halo, Interactivo, Rotulo } from './Senales';
+import { PortalDeProyecto } from './EdificiosProyectos';
 
 function Persona({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) {
   const grupo = useRef<THREE.Group>(null);
@@ -53,35 +54,17 @@ function Persona({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) 
 
 function ProyectoAgente({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) {
   const pct = a.tarjetas && a.tarjetas > 0 ? (a.hechas || 0) / a.tarjetas : 0;
-  const alto = 3 + pct * 2.4;
-  const color = a.apariencia?.color
-    || PALETA.edificiosProyecto[a.nombre.length % PALETA.edificiosProyecto.length];
   return (
     <group position={[a.x, 0, a.z]}>
-      <Halo y={alto + 2.4} color={color} radio={1.3} />
       <Interactivo onPulsar={() => onHablar(a)}>
         {(resaltado) => (
-          <group>
-            <mesh castShadow receiveShadow position={[0, alto / 2, 0]}>
-              <boxGeometry args={[7, alto, 5.5]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={resaltado ? 0.3 : 0} />
-            </mesh>
-            <mesh castShadow position={[0, alto + 0.2, 0]}>
-              <boxGeometry args={[7.6, 0.4, 6.1]} />
-              <meshStandardMaterial color={PALETA.tejadoPlano} />
-            </mesh>
-            <mesh position={[0, 1.1, 2.77]}>
-              <planeGeometry args={[1.3, 2.2]} />
-              <meshStandardMaterial color={PALETA.puerta} />
-            </mesh>
-            {[-2.1, 2.1].map((wx, i) => (
-              <mesh key={i} position={[wx, 2, 2.77]}>
-                <planeGeometry args={[1.3, 1]} />
-                <meshStandardMaterial color={PALETA.ventanaLuz} emissive={PALETA.ventanaLuz} emissiveIntensity={0.25} />
-              </mesh>
-            ))}
-            <Rotulo y={alto + 1.3} texto={a.nombre} pie="Pulsa para hablar" color={color} resaltado={resaltado} />
-          </group>
+          <PortalDeProyecto
+            titulo={a.nombre}
+            tarjetas={a.tarjetas || 0}
+            pct={pct}
+            radio={2.2}
+            resaltado={resaltado}
+          />
         )}
       </Interactivo>
     </group>
