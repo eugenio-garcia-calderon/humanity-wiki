@@ -81,7 +81,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -99,6 +99,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   interior: DatosInterior | null;
   /** Clic o toque sobre un edificio de proyecto: se entra sin caminar. */
   onEntrarProyecto: (p: ProyectoJuego) => void;
+  /** Clic o toque sobre el portal «Salir a la aldea» de una plaza. */
+  onSalirProyecto?: () => void;
   /** Clic o toque sobre alguien de tu mundo: se abre su chat sin acercarse. */
   onHablarAgente: (a: Agente) => void;
   /** El mundo editable: objetos del jugador + retoques del pueblo semilla. */
@@ -214,7 +216,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         id: `proy:${p.id}`,
         ...(posProyectos[i] || posicionProyecto(i)),
         radio: RADIO_EDIFICIO,
-      })),
+        // Un portal quitado del mapa tampoco choca (radio 0 = se ignora).
+      })).filter((_, i) => !posProyectos[i]?.eliminado),
       // La gran pantalla del cine también es sólida: rebota, no abre ficha
       // (se abre pulsándola con el ratón).
       { id: 'deco:pantalla', x: PANTALLA.x, z: PANTALLA.z, radio: PANTALLA.radio },
@@ -278,7 +281,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
 
       {interior ? (
         <>
-          <PlazaProyecto datos={interior} onHablar={onHablarAgente} />
+          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} />
           {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
               aldea: pulsar, arrastrar, hilos y crear en el suelo. */}
           <ObjetosMundo

@@ -81,15 +81,18 @@ export function posicionProyecto(i: number): { x: number; z: number } {
  */
 export function posicionesProyectos(
   proyectos: Array<{ id: string }>,
-  overrides: Array<{ seed_id: string; x: number | null; z: number | null; modelo?: string | null }>,
-): Array<{ x: number; z: number; portada: string | null }> {
+  overrides: Array<{ seed_id: string; eliminado?: boolean; x: number | null; z: number | null; modelo?: string | null }>,
+): Array<{ x: number; z: number; portada: string | null; eliminado: boolean }> {
   const ov = new Map(overrides.map(o => [o.seed_id, o]));
   return proyectos.slice(0, 12).map((p, i) => {
     const o = ov.get(`proy:${p.id}`);
     const base = o && o.x != null && o.z != null ? { x: o.x, z: o.z } : posicionProyecto(i);
     // La PORTADA del portal viaja en `modelo` del mismo retoque: para las
     // casas es el índice del diseño, para un portal es la URL de su foto.
-    return { ...base, portada: o?.modelo || null };
+    // `eliminado` = el jugador quitó el portal del mapa (el proyecto sigue
+    // existiendo en la plataforma); las posiciones se calculan por índice
+    // ANTES de filtrar para que quitar uno no recoloque a los demás.
+    return { ...base, portada: o?.modelo || null, eliminado: !!o?.eliminado };
   });
 }
 
