@@ -5,12 +5,17 @@ import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
-  ArrowLeft, LogOut,
+  ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
-import type { Agente, Camara, Cercania, EntradaMando, ItemProyecto, ProyectoJuego, Vehiculo } from '../components/juego/tipos';
+import {
+  CATALOGO_PROPS,
+  type Agente, type Camara, type Cercania, type EntradaMando, type ItemMundo,
+  type ItemProyecto, type OverrideMundo, type ProyectoJuego, type SeleccionMundo,
+  type Vehiculo,
+} from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
@@ -49,12 +54,24 @@ const GRUPOS_MINIMOS = [{ id: 'todo', label: 'Todo', color: PALETA.robotLuz }];
  * dónde estás, qué hay en tu mundo y, si estás dentro de un proyecto, en qué
  * habitación y qué hay en ella.
  */
-function contextoJuego(interior: DatosInterior | null, agentes: Agente[], proyectos: ProyectoJuego[]) {
+function contextoJuego(interior: DatosInterior | null, agentes: Agente[], proyectos: ProyectoJuego[], mundoItems: ItemMundo[]) {
   const grupo = interior?.sala ? interior.grupos.find(g => g.id === interior.sala) : null;
   return {
     mundo: interior ? 'interior_de_proyecto' : 'aldea',
-    agentes: agentes.map(a => ({ id: a.id, tipo: a.tipo, nombre: a.nombre, conversation_id: a.conversation_id })),
-    proyectos_reales: proyectos.map(p => ({ titulo: p.titulo, tareas: p.tarjetas, hechas: p.hechas })),
+    agentes: agentes.map(a => ({
+      id: a.id, tipo: a.tipo, nombre: a.nombre, conversation_id: a.conversation_id,
+      // De qué proyectos FORMA PARTE: así la IA sabe quién está ya dentro.
+      en_proyectos: a.proyecto_ids?.length ? a.proyecto_ids : undefined,
+    })),
+    proyectos_reales: proyectos.map(p => ({ id: p.id, titulo: p.titulo, tareas: p.tarjetas, hechas: p.hechas })),
+    // Lo plantado en el mapa: la IA puede leerlo («¿qué notas tengo?») y
+    // saber dónde está cada cosa.
+    plantado_en_el_mapa: mundoItems.length ? mundoItems.map(it => ({
+      tipo: it.tipo,
+      resumen: it.tipo === 'nota' ? (it.texto || '').slice(0, 90)
+        : it.tipo === 'prop' ? it.modelo : (it.nombre || ''),
+      x: Math.round(it.x), z: Math.round(it.z),
+    })) : undefined,
     vacio: agentes.length === 0 && proyectos.length === 0,
     // Dónde está el jugador AHORA MISMO. Es lo que da sentido a «esta sala».
     dentro: interior ? {
@@ -67,7 +84,7 @@ function contextoJuego(interior: DatosInterior | null, agentes: Agente[], proyec
       // Quién está YA de pie en esta habitación. Sirve para no meter dos veces
       // a la misma persona cuando el jugador lo pide otra vez.
       personas_en_la_sala: grupo
-        ? habitantesDeSala(interior.items, grupo.id, agentes).map(a => ({ id: a.id, nombre: a.nombre }))
+        ? habitantesDeSala(interior.items, grupo.id, agentes, interior.proyecto.id).map(a => ({ id: a.id, nombre: a.nombre }))
         : null,
     } : null,
   };
@@ -86,7 +103,7 @@ const FRASES_ROBOT = [
 export default function JuegoVital() {
   const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
-  const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0, turbo: false });
+  const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0, turbo: false, salto: false });
   // Hacia dónde mira la cámara. `yaw` 0 es la vista clásica por encima del
   // hombro; `pitch` 0,63 es la altura de siempre (11 arriba, 15 detrás).
   const camara = useRef<Camara>({ yaw: 0, pitch: 0.63 });
@@ -164,6 +181,27 @@ export default function JuegoVital() {
   const proyectosRef = useRef<ProyectoJuego[]>([]);
   proyectosRef.current = proyectos;
 
+  // --- El mundo editable: un Miro en 3D (2026-08-18, petición de Eugenio) ---
+  const [mundoItems, setMundoItems] = useState<ItemMundo[]>([]);
+  const [overridesMundo, setOverridesMundo] = useState<OverrideMundo[]>([]);
+  const [editandoMundo, setEditandoMundo] = useState(false);
+  const [selMundo, setSelMundo] = useState<SeleccionMundo | null>(null);
+  const [moviendoMundo, setMoviendoMundo] = useState(false);
+  const [conectando, setConectando] = useState(false);
+  const [crearEn, setCrearEn] = useState<{ x: number; z: number } | null>(null);
+  const [leyendo, setLeyendo] = useState<ItemMundo | null>(null);
+  const [notaBorrador, setNotaBorrador] = useState('');
+  const movilRef = useRef<{ x: number; z: number } | null>(null);
+  const archivoMundoRef = useRef<HTMLInputElement>(null);
+  const subiendoComo = useRef<'imagen' | 'documento'>('imagen');
+  // Lo que el teclado y los clics 3D necesitan leer sin re-suscribirse.
+  const editorRef = useRef({ activo: false, conectando: false, sel: null as SeleccionMundo | null });
+  editorRef.current = { activo: editandoMundo, conectando, sel: selMundo };
+  const leyendoRef = useRef<ItemMundo | null>(null);
+  leyendoRef.current = leyendo;
+  const crearEnRef = useRef<{ x: number; z: number } | null>(null);
+  crearEnRef.current = crearEn;
+
   const [tactil] = useState(() =>
     typeof window !== 'undefined' &&
     (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0));
@@ -202,9 +240,20 @@ export default function JuegoVital() {
     } catch { /* mundo vacío si falla */ }
   }, []);
 
+  const cargarMundo = useCallback(async () => {
+    try {
+      const j = await fetch('/api/juego/mundo', { credentials: 'include' }).then(r => r.json());
+      if (Array.isArray(j?.items)) {
+        setMundoItems(j.items.map((it: any) => ({ ...it, enlaces: Array.isArray(it.enlaces) ? it.enlaces : [] })));
+      }
+      if (Array.isArray(j?.overrides)) setOverridesMundo(j.overrides);
+    } catch { /* el mundo se juega igual sin editar */ }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     cargarAgentes();
+    cargarMundo();
     // Fetch directo justificado: solo esta página lo usa y va parametrizado
     // por la sesión (misma excepción que /api/explorer en el mapa).
     fetch('/api/proyectos', { credentials: 'include' })
@@ -222,7 +271,7 @@ export default function JuegoVital() {
           })));
       })
       .catch(() => setProyectos([]));
-  }, [user, cargarAgentes]);
+  }, [user, cargarAgentes, cargarMundo]);
 
   // --- conversación: quién habla --------------------------------------------
   /** Manda al asistente el estado del mundo y con quién se habla. */
@@ -235,9 +284,10 @@ export default function JuegoVital() {
    * como escritura y te quedabas encerrado en la ficha de la persona con la
    * que te habías tropezado (fallo reportado por Eugenio).
    */
+  const mundoItemsRef = useRef<ItemMundo[]>([]);
   const hablarCon = useCallback((agente: Agente | null, enfocar = true) => {
     window.dispatchEvent(new CustomEvent('humanity:juego-contexto', {
-      detail: { ...contextoJuego(interiorRef.current, agentesRef.current, proyectos), agente },
+      detail: { ...contextoJuego(interiorRef.current, agentesRef.current, proyectos, mundoItemsRef.current), agente },
     }));
     if (enfocar) window.dispatchEvent(new CustomEvent('humanity:asistente-focus'));
   }, [proyectos]);
@@ -255,9 +305,9 @@ export default function JuegoVital() {
   useEffect(() => {
     if (!user) return;
     window.dispatchEvent(new CustomEvent('humanity:juego-contexto', {
-      detail: contextoJuego(interior, agentes, proyectos),
+      detail: contextoJuego(interior, agentes, proyectos, mundoItems),
     }));
-  }, [user, interior, agentes, proyectos]);
+  }, [user, interior, agentes, proyectos, mundoItems]);
 
   // La lista lateral del chat pide hablar con alguien: si es un agente, se
   // cambia de interlocutor sin tener que caminar hasta él.
@@ -302,6 +352,24 @@ export default function JuegoVital() {
           await crearTarjeta(a.grupo || dentro.sala || dentro.grupos[0]?.id, a.nombre, a.descripcion).catch(() => {});
           continue;
         }
+        // «Apúntame esto en una nota»: la IA clava una nota en el suelo, junto
+        // al jugador, como las que él planta a mano en el modo edición.
+        if (a.tipo === 'nota' && !dentro) {
+          const texto = [a.nombre, a.descripcion].filter(Boolean).join('\n');
+          const r = await fetch('/api/juego/mundo', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tipo: 'nota', texto,
+              x: jugadorPos.x + 3 + (i % 2) * 2, z: jugadorPos.z - 3 - Math.floor(i / 2) * 3,
+            }),
+          }).catch(() => null);
+          if (r?.ok) {
+            const nuevo = await r.json();
+            setMundoItems(prev => [...prev, { ...nuevo, enlaces: [] }]);
+          }
+          continue;
+        }
         await crearAgente({
           tipo: a.tipo, nombre: a.nombre, rol: a.rol, descripcion: a.descripcion,
           dx: (i % 2 === 0 ? 4 : -4), dz: -4 - Math.floor(i / 2) * 5,
@@ -340,6 +408,158 @@ export default function JuegoVital() {
     return j;
   };
 
+  // ------------------------------------------------------------------------
+  // El editor del mundo: crear, mover, girar, cambiar diseño, eliminar y
+  // conectar (petición de Eugenio: «un Miro en 3D con una UI genial»).
+  // ------------------------------------------------------------------------
+
+  const salirDelEditor = useCallback(() => {
+    setEditandoMundo(false);
+    setSelMundo(null);
+    setMoviendoMundo(false);
+    setConectando(false);
+    setCrearEn(null);
+    movilRef.current = null;
+  }, []);
+
+  /** Guarda un retoque de una pieza del pueblo y lo refleja al momento. */
+  const guardarOverride = useCallback(async (seed_id: string, patch: Partial<OverrideMundo>) => {
+    setOverridesMundo(prev => {
+      const otro = prev.find(o => o.seed_id === seed_id);
+      const nuevo: OverrideMundo = {
+        seed_id,
+        eliminado: patch.eliminado ?? otro?.eliminado ?? false,
+        x: patch.x ?? otro?.x ?? null,
+        z: patch.z ?? otro?.z ?? null,
+        rot: patch.rot ?? otro?.rot ?? null,
+        modelo: patch.modelo ?? otro?.modelo ?? null,
+      };
+      return [...prev.filter(o => o.seed_id !== seed_id), nuevo];
+    });
+    const r = await fetch('/api/juego/mundo/semilla', {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seed_id, ...patch }),
+    }).catch(() => null);
+    if (!r?.ok) avisar('No se ha podido guardar el retoque.');
+  }, []);
+
+  /** Cambia un objeto del jugador y lo refleja al momento. */
+  const guardarItem = useCallback(async (id: string, patch: Partial<ItemMundo>) => {
+    setMundoItems(prev => prev.map(it => (it.id === id ? { ...it, ...patch } : it)));
+    const r = await fetch(`/api/juego/mundo/${id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    }).catch(() => null);
+    if (!r?.ok) avisar('No se ha podido guardar el cambio.');
+  }, []);
+
+  /** Planta un objeto nuevo donde se pulsó el suelo. */
+  const crearItemMundo = useCallback(async (d: Partial<ItemMundo> & { tipo: ItemMundo['tipo'] }) => {
+    const donde = crearEn || { x: jugadorPos.x + 3, z: jugadorPos.z - 3 };
+    setCrearEn(null);
+    const r = await fetch('/api/juego/mundo', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...d, x: donde.x, z: donde.z }),
+    }).catch(() => null);
+    if (!r?.ok) { avisar('No se ha podido crear.'); return; }
+    const nuevo = await r.json();
+    setMundoItems(prev => [...prev, { ...nuevo, enlaces: [] }]);
+  }, [crearEn, jugadorPos]);
+
+  /** Clic sobre una pieza o un objeto en modo edición. */
+  const alPulsarMundo = useCallback((sel: SeleccionMundo) => {
+    const ed = editorRef.current;
+    // Conectando: el segundo clic elige el DESTINO del hilo.
+    if (ed.conectando && ed.sel?.clase === 'item' && !(sel.clase === 'item' && sel.id === ed.sel.id)) {
+      if (sel.clase === 'item') {
+        const origen = mundoItems.find(it => it.id === ed.sel!.id);
+        if (origen) {
+          guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `item:${sel.id}` }] });
+          avisar('Hilo creado.');
+        }
+        setConectando(false);
+        return;
+      }
+      return; // el pueblo semilla no es destino de hilos (aún)
+    }
+    setSelMundo(sel);
+    setCrearEn(null);
+    setMoviendoMundo(false);
+    setNotaBorrador(sel.tipo === 'nota' ? (sel.texto || '') : '');
+  }, [mundoItems, guardarItem]);
+
+  /** Clic en suelo vacío: crear ahí (o cerrar lo abierto). */
+  const alSuelo = useCallback((p: { x: number; z: number }) => {
+    if (editorRef.current.sel) { setSelMundo(null); setConectando(false); return; }
+    setCrearEn(p);
+  }, []);
+
+  /** Soltar lo que se estaba moviendo. */
+  const alSoltar = useCallback((p: { x: number; z: number }) => {
+    const sel = editorRef.current.sel;
+    setMoviendoMundo(false);
+    movilRef.current = null;
+    if (!sel) return;
+    if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
+    else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
+    setSelMundo({ ...sel, x: p.x, z: p.z });
+  }, [guardarItem, guardarOverride]);
+
+  const girarSel = useCallback(() => {
+    const sel = editorRef.current.sel;
+    if (!sel) return;
+    const rot = (sel.rot + Math.PI / 4) % (Math.PI * 2);
+    if (sel.clase === 'item') guardarItem(sel.id, { rot });
+    else guardarOverride(sel.id, { rot, eliminado: false });
+    setSelMundo({ ...sel, rot });
+  }, [guardarItem, guardarOverride]);
+
+  const eliminarSel = useCallback(() => {
+    const sel = editorRef.current.sel;
+    if (!sel) return;
+    if (sel.clase === 'item') {
+      setMundoItems(prev => prev.filter(it => it.id !== sel.id));
+      fetch(`/api/juego/mundo/${sel.id}/archivar`, { method: 'POST', credentials: 'include' }).catch(() => {});
+    } else {
+      guardarOverride(sel.id, { eliminado: true });
+    }
+    setSelMundo(null);
+    avisar('Eliminado. (Se guarda en tu mundo, no borra nada de la plataforma.)');
+  }, [guardarOverride]);
+
+  /** Cambiar el diseño: las casas rotan entre los 12 modelos; los árboles
+   *  alternan entre frondoso y pino. */
+  const disenoSel = useCallback(() => {
+    const sel = editorRef.current.sel;
+    if (!sel) return;
+    if (sel.clase === 'semilla' && sel.tipo === 'casa') {
+      const actual = sel.modelo != null && sel.modelo !== '' ? Number(sel.modelo) : 0;
+      const siguiente = String((actual + 1) % 12);
+      guardarOverride(sel.id, { modelo: siguiente, eliminado: false });
+      setSelMundo({ ...sel, modelo: siguiente });
+    } else if (sel.clase === 'item' && (sel.modelo === 'arbol' || sel.modelo === 'pino')) {
+      const siguiente = sel.modelo === 'arbol' ? 'pino' : 'arbol';
+      guardarItem(sel.id, { modelo: siguiente });
+      setSelMundo({ ...sel, modelo: siguiente });
+    }
+  }, [guardarItem, guardarOverride]);
+
+  /** Subir una imagen o un documento y plantarlo donde se pulsó. */
+  const subirAlMundo = useCallback(async (f: File | undefined) => {
+    if (!f) return;
+    const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: f,
+    }).catch(() => null);
+    const j = await r?.json().catch(() => null);
+    if (!r?.ok || !j?.url) { avisar(j?.error || 'No se ha podido subir el archivo.'); return; }
+    await crearItemMundo({ tipo: subiendoComo.current, url: j.url, nombre: f.name });
+  }, [crearItemMundo]);
+
   /**
    * Acercarse a un proyecto ABRE su ficha sola, sin pulsar nada (petición de
    * Eugenio). Al alejarse se cierra. Con las personas no: ahí manda el choque.
@@ -366,7 +586,11 @@ export default function JuegoVital() {
     // teclado que vive fuera del ciclo de React, y un `setX(prev => …)` no
     // devolvería el valor a tiempo para saber si había algo abierto.
     const a = abiertos.current;
-    if (a.aspecto) setEditandoAspecto(null);
+    const ed = editorRef.current;
+    if (leyendoRef.current) setLeyendo(null);
+    else if (ed.activo && (ed.sel || ed.conectando)) { setSelMundo(null); setConectando(false); setMoviendoMundo(false); }
+    else if (crearEnRef.current) setCrearEn(null);
+    else if (a.aspecto) setEditandoAspecto(null);
     else if (a.construyendo) setConstruyendo(null);
     else if (a.ficha) setFichaAgente(null);
     else if (a.panel) setPanel(null);
@@ -505,7 +729,7 @@ export default function JuegoVital() {
    * conversación. Solo si de verdad no existe nadie con ese nombre se crea,
    * una sola vez, y se enlaza esa.
    */
-  const meterPersonaEnSala = useCallback(async (grupo: string, d: {
+  const meterPersonaEnSala = useCallback(async (_grupo: string, d: {
     agente_id?: string; nombre: string; rol?: string; descripcion?: string;
   }) => {
     const i = interiorRef.current;
@@ -523,14 +747,19 @@ export default function JuegoVital() {
         x: pos.x - 7, z: pos.z + 7,
       }).catch(() => null);
       if (!creado?.id) { avisar(`No se ha podido traer a ${d.nombre}.`); return; }
-      quien = { ...creado, apariencia: creado.apariencia || {}, memoria: [] } as Agente;
+      quien = creado as Agente;
     }
-    await crearTarjeta(
-      grupo, quien.nombre, quien.rol || d.rol || d.descripcion || 'Persona del proyecto',
-      [{ tipo: 'agente', agente_id: quien.id, texto: quien.nombre }],
-    );
+    // La persona SE UNE al proyecto: sección de personas, no tarjeta del
+    // kanban (petición de Eugenio). En la sala «Personas» aparece su avatar.
+    const r = await fetch(`/api/juego/agentes/${quien.id}/proyectos`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: i.proyecto.id }),
+    }).catch(() => null);
+    if (!r?.ok) { avisar(`No se ha podido unir a ${d.nombre} al proyecto.`); return; }
+    await cargarAgentes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [crearTarjeta]);
+  }, [cargarAgentes]);
 
   /** De la sala a una habitación, y de la habitación de vuelta a la sala. */
   const irASala = useCallback((sala: string | null) => {
@@ -642,19 +871,34 @@ export default function JuegoVital() {
   // subiendo para siempre porque el «soltar espacio» llegaba a otro oyente.
   const acciones = useRef({ interactuar, irAtras, montar });
   acciones.current = { interactuar, irAtras, montar };
+  // El manejador del teclado se monta UNA vez; en qué vas ahora se lee de aquí.
+  const vehiculoRef = useRef(vehiculo);
+  vehiculoRef.current = vehiculo;
   useEffect(() => {
     const teclas = new Set<string>();
+    // Doble toque de barra = a volar (petición de Eugenio).
+    let ultimoEspacio = 0;
     const escribiendo = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
     };
     const aplicar = () => {
+      const volando = vehiculoRef.current === 'aptera';
       entrada.current.x = +(teclas.has('d') || teclas.has('arrowright')) - +(teclas.has('a') || teclas.has('arrowleft'));
-      entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
-      // La barra hace dos cosas según dónde estés, y no se pisan: a pie y en
-      // bici te hace correr; en el planeador, subir (petición de Eugenio).
-      entrada.current.turbo = teclas.has(' ');
-      mandoY.current.teclado = +teclas.has(' ') - +teclas.has('shift');
+      // Pilotando la nave, W y S son SUBIR y BAJAR (petición de Eugenio) y la
+      // nave avanza sola; a pie y en bici son adelante y atrás, como siempre.
+      entrada.current.z = volando ? 0
+        : +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
+      // Shift corre (petición de Eugenio; antes era la barra, que ahora salta).
+      entrada.current.turbo = teclas.has('shift');
+      mandoY.current.teclado = volando
+        ? +(teclas.has('w') || teclas.has('arrowup')) - +(teclas.has('s') || teclas.has('arrowdown'))
+        : 0;
+      // Tocar W o S pilotando cancela la subida/bajada fijada por botón: si
+      // no, el despegue automático del doble espacio te llevaría al techo.
+      if (volando && mandoY.current.teclado !== 0 && mandoY.current.boton !== 0) {
+        fijarSubida(mandoY.current.boton);   // el toggle lo deja a cero
+      }
       recalcularY();
       // Seguir caminando cierra lo que haya abierto: tropezarte con alguien no
       // puede dejarte encerrado en su ficha. Si sigues andando, te vas.
@@ -675,7 +919,21 @@ export default function JuegoVital() {
       if (k === 'v') { acciones.current.montar('aptera'); return; }
       // Atrás con algo abierto: cerrarlo y NO andar. Es el gesto de «ahora no».
       if ((k === 'arrowdown' || k === 's') && acciones.current.irAtras()) return;
-      if (k === ' ') e.preventDefault();  // si no, la página hace scroll
+      if (k === ' ') {
+        e.preventDefault();                 // si no, la página hace scroll
+        if (!e.repeat) {
+          const ahora = performance.now();
+          if (ahora - ultimoEspacio < 350 && vehiculoRef.current !== 'aptera') {
+            // Doble barra: a la nave y despegue vertical automático. Con W/S
+            // se toma el mando de la altura (arriba se cancela el fijado).
+            acciones.current.montar('aptera');
+            fijarSubida(1);
+          } else if (vehiculoRef.current !== 'aptera') {
+            entrada.current.salto = true;   // un toque = un salto
+          }
+          ultimoEspacio = ahora;
+        }
+      }
       teclas.add(k); aplicar();
     };
     const arriba = (e: KeyboardEvent) => { teclas.delete(e.key.toLowerCase()); aplicar(); };
@@ -715,6 +973,8 @@ export default function JuegoVital() {
       if (e.pointerType !== 'mouse' && e.clientX < window.innerWidth * 0.4) return;
       id = e.pointerId;
       ultimo = { x: e.clientX, y: e.clientY };
+      // Mientras arrastras mandas tú: la cámara deja de perseguir el rumbo.
+      camara.current.arrastrando = true;
     };
     const mover = (e: PointerEvent) => {
       if (id !== e.pointerId) return;
@@ -730,7 +990,7 @@ export default function JuegoVital() {
     };
     const acabar = (e: PointerEvent) => {
       dedos = Math.max(0, dedos - 1);
-      if (id === e.pointerId) id = null;
+      if (id === e.pointerId) { id = null; camara.current.arrastrando = false; }
     };
     window.addEventListener('pointerdown', empezar);
     window.addEventListener('pointermove', mover);
@@ -784,6 +1044,8 @@ export default function JuegoVital() {
     return () => clearTimeout(t);
   }, [bocadillo]);
 
+  mundoItemsRef.current = mundoItems;
+
   const nombre = user?.name?.split(' ')[0] || 'visitante';
   const pct = panel && panel.tarjetas > 0 ? Math.round((panel.hechas / panel.tarjetas) * 100) : null;
   const personas = agentes.filter(a => a.tipo === 'persona');
@@ -798,8 +1060,42 @@ export default function JuegoVital() {
           vehiculo={vehiculo}
           alturaVuelo={alturaVuelo}
           interior={interior}
-          onEntrarProyecto={entrarEnProyecto}
-          onHablarAgente={(a) => { setFichaAgente(a); hablarCon(a); }}
+          onEntrarProyecto={(p) => {
+            const ed = editorRef.current;
+            // Conectando un hilo: el edificio del proyecto es el destino.
+            if (ed.conectando && ed.sel?.clase === 'item') {
+              const origen = mundoItems.find(it => it.id === ed.sel!.id);
+              if (origen) {
+                guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `proy:${p.id}` }] });
+                avisar('Hilo creado hasta el proyecto.');
+              }
+              setConectando(false);
+              return;
+            }
+            if (ed.activo) return;   // editando no se entra en sitios sin querer
+            entrarEnProyecto(p);
+          }}
+          onHablarAgente={(a) => {
+            const ed = editorRef.current;
+            if (ed.conectando && ed.sel?.clase === 'item') {
+              const origen = mundoItems.find(it => it.id === ed.sel!.id);
+              if (origen) {
+                guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `agente:${a.id}` }] });
+                avisar(`Hilo creado hasta ${a.nombre}.`);
+              }
+              setConectando(false);
+              return;
+            }
+            if (ed.activo) return;
+            setFichaAgente(a); hablarCon(a);
+          }}
+          mundo={{ items: mundoItems, overrides: overridesMundo }}
+          editor={{ activo: editandoMundo, moviendo: moviendoMundo, sel: selMundo }}
+          onPulsarMundo={alPulsarMundo}
+          onSuelo={alSuelo}
+          onSoltar={alSoltar}
+          onAbrirItem={(it) => setLeyendo(it)}
+          movilRef={movilRef}
           proyectos={proyectos}
           agentes={agentes}
           jugadorPos={jugadorPos}
@@ -869,7 +1165,7 @@ export default function JuegoVital() {
 
       <div className="hidden sm:block absolute top-3 right-40 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
         <p className="text-[10px] font-bold text-slate-500">
-          WASD caminar · espacio correr · arrastra para mirar · E hablar · ↓ salir · B bici · V volar
+          WASD caminar · Shift correr · espacio saltar (dos veces: volar) · en vuelo W sube y S baja · E hablar · B bici · V volar
         </p>
       </div>
 
@@ -911,7 +1207,7 @@ export default function JuegoVital() {
             <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center gap-1.5">
               <button
                 onClick={() => fijarSubida(1)}
-                title="Subir. Se queda subiendo hasta que lo vuelvas a pulsar (o mantén la barra espaciadora)."
+                title="Subir (o mantén W). Se queda subiendo hasta que lo vuelvas a pulsar."
                 className={cn(
                   'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
                   subiendo === 1
@@ -924,7 +1220,7 @@ export default function JuegoVital() {
               <span className="text-[9px] font-black text-slate-400 tabular-nums">{alturaVisible} m</span>
               <button
                 onClick={() => fijarSubida(-1)}
-                title="Bajar. Al tocar el suelo te bajas del planeador (o mantén Mayúsculas)."
+                title="Bajar (o mantén S). Al tocar el suelo te bajas del planeador."
                 className={cn(
                   'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
                   subiendo === -1
@@ -942,6 +1238,150 @@ export default function JuegoVital() {
       {aviso && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
           {aviso}
+        </div>
+      )}
+
+      {/* ---------------------------------------------------------------- */}
+      {/* EDITOR DEL MUNDO: un Miro en 3D (petición de Eugenio)             */}
+      {/* ---------------------------------------------------------------- */}
+      {user && !interior && editandoMundo && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 bg-amber-500/95 text-white rounded-xl shadow-lg flex items-center gap-2">
+          <Wrench className="w-3.5 h-3.5" />
+          <p className="text-[11px] font-bold">
+            {moviendoMundo ? 'Pulsa el suelo donde quieras dejarlo'
+              : conectando ? 'Pulsa el destino del hilo: otra cosa, una persona o un proyecto'
+                : 'Modo edición · pulsa un objeto para editarlo, o el suelo para crear'}
+          </p>
+          <button onClick={salirDelEditor} className="ml-1 text-white/80 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+
+      {/* Ficha del objeto seleccionado */}
+      {user && !interior && editandoMundo && selMundo && !moviendoMundo && !conectando && (
+        <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[21rem] max-w-[92vw]">
+          <Card className="p-3 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-black text-slate-900 truncate">{selMundo.etiqueta}</p>
+              <Button variant="ghost" onClick={() => setSelMundo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+            </div>
+            {selMundo.tipo === 'nota' && (
+              <textarea
+                value={notaBorrador}
+                onChange={e => setNotaBorrador(e.target.value)}
+                onBlur={() => { if (notaBorrador !== (selMundo.texto || '')) { guardarItem(selMundo.id, { texto: notaBorrador }); setSelMundo({ ...selMundo, texto: notaBorrador }); } }}
+                rows={3}
+                className="w-full mt-2 px-2.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-amber-300 resize-none"
+                placeholder="Escribe la nota…"
+              />
+            )}
+            <div className="flex flex-wrap gap-1.5 mt-2.5">
+              <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={() => { setMoviendoMundo(true); movilRef.current = { x: selMundo.x, z: selMundo.z }; }}>
+                <Move className="w-3.5 h-3.5 mr-1 inline" />Mover
+              </Button>
+              <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={girarSel}>
+                <RotateCw className="w-3.5 h-3.5 mr-1 inline" />Girar
+              </Button>
+              {((selMundo.clase === 'semilla' && selMundo.tipo === 'casa') || (selMundo.clase === 'item' && (selMundo.modelo === 'arbol' || selMundo.modelo === 'pino'))) && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={disenoSel}>
+                  <Shapes className="w-3.5 h-3.5 mr-1 inline" />Diseño
+                </Button>
+              )}
+              {selMundo.clase === 'item' && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={() => setConectando(true)}>
+                  <Link2 className="w-3.5 h-3.5 mr-1 inline" />Conectar
+                </Button>
+              )}
+              {selMundo.url && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={() => window.open(selMundo.url!, '_blank')}>
+                  <FileText className="w-3.5 h-3.5 mr-1 inline" />Abrir
+                </Button>
+              )}
+              <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-red-200 text-red-600 hover:bg-red-50" onClick={eliminarSel}>
+                <Trash2 className="w-3.5 h-3.5 mr-1 inline" />Eliminar
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Panel de crear: sale al pulsar suelo vacío en modo edición */}
+      {user && !interior && editandoMundo && crearEn && (
+        <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[23rem] max-w-[94vw]">
+          <Card className="p-3.5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-black text-slate-900">Crear aquí</p>
+              <Button variant="ghost" onClick={() => setCrearEn(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5 mt-2.5">
+              {CATALOGO_PROPS.map(c => (
+                <button
+                  key={c.modelo}
+                  onClick={() => crearItemMundo({ tipo: 'prop', modelo: c.modelo })}
+                  className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-colors"
+                >
+                  <span className="text-lg leading-none">{c.icono}</span>
+                  <span className="text-[9px] font-bold text-slate-600">{c.nombre}</span>
+                </button>
+              ))}
+            </div>
+            <div className="h-px bg-slate-200 my-2.5" />
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Conocimiento</p>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => { crearItemMundo({ tipo: 'nota', texto: '' }); }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
+              >
+                <StickyNote className="w-3.5 h-3.5" />Nota
+              </button>
+              <button
+                onClick={() => { subiendoComo.current = 'imagen'; archivoMundoRef.current?.click(); }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
+              >
+                <ImagePlus className="w-3.5 h-3.5" />Imagen
+              </button>
+              <button
+                onClick={() => { subiendoComo.current = 'documento'; archivoMundoRef.current?.click(); }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5" />Documento
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2">La nota se escribe al seleccionarla. Todo se puede mover, conectar con hilos y eliminar después.</p>
+          </Card>
+        </div>
+      )}
+      <input
+        ref={archivoMundoRef}
+        type="file"
+        accept="image/*,.pdf,.csv,.json,.zip,.docx,.xlsx,.pptx"
+        className="hidden"
+        onChange={e => { subirAlMundo(e.target.files?.[0]); e.target.value = ''; }}
+      />
+
+      {/* Leer lo plantado: nota, imagen o documento, fuera del modo edición */}
+      {leyendo && (
+        <div data-ui-juego className="absolute inset-0 z-50 flex items-center justify-center px-5 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setLeyendo(null)}>
+          <Card className="p-5 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-black text-slate-900 flex items-center gap-2">
+                {leyendo.tipo === 'nota' ? <StickyNote className="w-4 h-4 text-amber-500" />
+                  : leyendo.tipo === 'imagen' ? <ImagePlus className="w-4 h-4 text-emerald-600" />
+                    : <FileText className="w-4 h-4 text-emerald-600" />}
+                {leyendo.tipo === 'nota' ? 'Nota' : leyendo.nombre || (leyendo.tipo === 'imagen' ? 'Imagen' : 'Documento')}
+              </p>
+              <Button variant="ghost" onClick={() => setLeyendo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+            </div>
+            {leyendo.tipo === 'nota' && (
+              <p className="text-sm text-slate-700 mt-3 whitespace-pre-wrap leading-relaxed">{leyendo.texto || 'Nota vacía.'}</p>
+            )}
+            {leyendo.tipo === 'imagen' && leyendo.url && (
+              <img src={leyendo.url} alt={leyendo.nombre || 'Imagen'} className="mt-3 rounded-xl max-h-[55vh] w-full object-contain bg-slate-50" />
+            )}
+            {leyendo.tipo === 'documento' && leyendo.url && (
+              <Button onClick={() => window.open(leyendo.url!, '_blank')} className="w-full mt-4">Abrir el documento</Button>
+            )}
+            <p className="text-[10px] text-slate-400 mt-3">Plantado en tu mundo · usa la llave inglesa para moverlo o conectarlo con hilos.</p>
+          </Card>
         </div>
       )}
 
@@ -974,6 +1414,18 @@ export default function JuegoVital() {
               className="w-11 h-11 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
             >
               <Palette className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => (editandoMundo ? salirDelEditor() : setEditandoMundo(true))}
+              title="Editar el mundo: pulsa cualquier objeto para moverlo, cambiarlo o eliminarlo, y el suelo para crear (notas, archivos, árboles, casas…)"
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                editandoMundo
+                  ? 'bg-amber-500 border-amber-500 text-white'
+                  : 'bg-white border-slate-200 hover:border-amber-300 text-slate-600 hover:text-amber-600',
+              )}
+            >
+              <Wrench className="w-5 h-5" />
             </button>
             <div className="h-px bg-slate-200 mx-1" />
             <button
@@ -1046,7 +1498,9 @@ export default function JuegoVital() {
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: g.color }} />
                 <span className="text-[10px] font-bold text-white truncate">{g.label}</span>
                 <span className="ml-auto text-[9px] font-black text-slate-500 tabular-nums">
-                  {interior.items.filter(i => i.grupo === g.id).length}
+                  {/* Personas cuenta a la GENTE del proyecto, no tarjetas */}
+                  {interior.items.filter(i => i.grupo === g.id).length
+                    + habitantesDeSala(interior.items, g.id, agentes, interior.proyecto.id).length}
                 </span>
               </button>
             ))}

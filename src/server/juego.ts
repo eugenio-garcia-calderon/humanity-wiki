@@ -262,4 +262,176 @@ export function registerJuegoRoutes(app: Express, db: any) {
       res.status(500).json({ error: e.message });
     }
   });
+
+  // ==========================================================================
+  // Personas EN proyectos (2026-08-18, petición de Eugenio: «que las personas
+  // formen parte de un proyecto y no se añadan en el kanban sino en una
+  // sección de personas ad hoc»). La membresía vive en `proyecto_ids` del
+  // agente: una persona puede estar en varios proyectos a la vez.
+  // ==========================================================================
+
+  /** POST /api/juego/agentes/:id/proyectos { proyecto_id, quitar? } */
+  app.post('/api/juego/agentes/:id/proyectos', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const a = await agenteMio(req, res);
+      if (!a) return;
+      const pid = String(req.body?.proyecto_id || '');
+      if (!pid) return res.status(400).json({ error: 'Falta el proyecto.' });
+      const actuales: string[] = Array.isArray(a.proyecto_ids) ? a.proyecto_ids : [];
+      const nuevos = req.body?.quitar
+        ? actuales.filter(x => x !== pid)
+        : (actuales.includes(pid) ? actuales : [...actuales, pid]);
+      await db.execute(sql`
+        UPDATE game_agents
+        SET proyecto_ids = ${JSON.stringify(nuevos)}::jsonb, updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${a.id}
+      `);
+      res.json({ ok: true, proyecto_ids: nuevos });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * GET /api/juego/proyectos/:id/personas — los miembros de un proyecto.
+   * Solo para su creador: las personas de tu mundo son representaciones
+   * privadas y no se enseñan a quien visita un proyecto público.
+   */
+  app.get('/api/juego/proyectos/:id/personas', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.json([]);
+      const filas = await db.execute(sql`
+        SELECT id, nombre, rol, descripcion, foto_url, apariencia, proyecto_ids
+        FROM game_agents
+        WHERE user_id = ${req.user.id} AND archived_at IS NULL AND tipo = 'persona'
+          AND proyecto_ids ? ${req.params.id}
+        ORDER BY created_at ASC
+      `);
+      res.json(filas.rows);
+    } catch (e: any) {
+      if (e?.code === '42P01' || e?.code === '42703') return res.json([]);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
+  // El mundo editable (2026-08-18, petición de Eugenio: «un Miro en 3D» —
+  // crear, mover, cambiar el diseño y eliminar objetos, y plantar notas,
+  // imágenes y documentos en el mapa).
+  // ==========================================================================
+
+  const TIPOS_MUNDO = new Set(['prop', 'nota', 'imagen', 'documento']);
+
+  /** GET /api/juego/mundo — tus objetos + tus retoques del pueblo semilla. */
+  app.get('/api/juego/mundo', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.json({ items: [], overrides: [] });
+      const items = await db.execute(sql`
+        SELECT * FROM game_world_items
+        WHERE user_id = ${req.user.id} AND archived_at IS NULL
+        ORDER BY created_at ASC
+      `);
+      const overrides = await db.execute(sql`
+        SELECT seed_id, eliminado, x, z, rot, modelo FROM game_world_overrides
+        WHERE user_id = ${req.user.id}
+      `);
+      res.json({ items: items.rows, overrides: overrides.rows });
+    } catch (e: any) {
+      // Código desplegado antes que la migración 0031: mundo sin editar.
+      if (e?.code === '42P01') return res.json({ items: [], overrides: [] });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** POST /api/juego/mundo — plantar un objeto nuevo. */
+  app.post('/api/juego/mundo', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const d = req.body || {};
+      if (!TIPOS_MUNDO.has(d.tipo)) return res.status(400).json({ error: 'Tipo de objeto no válido.' });
+      const id = `WM${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      await db.execute(sql`
+        INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala)
+        VALUES (${id}, ${req.user!.id}, ${d.tipo}, ${d.modelo || null}, ${d.texto || null},
+                ${d.url || null}, ${d.nombre || null},
+                ${Number(d.x) || 0}, ${Number(d.z) || 0}, ${Number(d.rot) || 0},
+                ${Number(d.escala) || 1})
+      `);
+      const fila = await db.execute(sql`SELECT * FROM game_world_items WHERE id = ${id}`);
+      res.json(fila.rows[0]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PUT /api/juego/mundo/semilla — retocar el pueblo de serie: mover, eliminar
+   * o cambiar el diseño de una casa, farola, árbol… Upsert por (user, seed_id).
+   */
+  app.put('/api/juego/mundo/semilla', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const d = req.body || {};
+      const seed = String(d.seed_id || '');
+      if (!seed) return res.status(400).json({ error: 'Falta el objeto a retocar.' });
+      await db.execute(sql`
+        INSERT INTO game_world_overrides (user_id, seed_id, eliminado, x, z, rot, modelo)
+        VALUES (${req.user!.id}, ${seed}, ${!!d.eliminado},
+                ${d.x ?? null}, ${d.z ?? null}, ${d.rot ?? null}, ${d.modelo ?? null})
+        ON CONFLICT (user_id, seed_id) DO UPDATE SET
+          eliminado  = ${!!d.eliminado},
+          x          = COALESCE(${d.x ?? null}::double precision, game_world_overrides.x),
+          z          = COALESCE(${d.z ?? null}::double precision, game_world_overrides.z),
+          rot        = COALESCE(${d.rot ?? null}::double precision, game_world_overrides.rot),
+          modelo     = COALESCE(${d.modelo ?? null}, game_world_overrides.modelo),
+          updated_at = now()
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // OJO: esta ruta va DESPUÉS de /mundo/semilla. Express prueba en orden de
+  // registro y «semilla» encajaría en `:id` — pasó y el retoque devolvía 404.
+  /** PUT /api/juego/mundo/:id — mover, girar, cambiar texto o diseño. */
+  app.put('/api/juego/mundo/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const d = req.body || {};
+      const r = await db.execute(sql`
+        UPDATE game_world_items
+        SET x      = COALESCE(${d.x ?? null}::double precision, x),
+            z      = COALESCE(${d.z ?? null}::double precision, z),
+            rot    = COALESCE(${d.rot ?? null}::double precision, rot),
+            escala = COALESCE(${d.escala ?? null}::double precision, escala),
+            texto  = COALESCE(${d.texto ?? null}, texto),
+            modelo = COALESCE(${d.modelo ?? null}, modelo),
+            enlaces = COALESCE(${d.enlaces ? JSON.stringify(d.enlaces) : null}::jsonb, enlaces),
+            updated_at = now()
+        WHERE id = ${req.params.id} AND user_id = ${req.user!.id} AND archived_at IS NULL
+        RETURNING *
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Ese objeto no está en tu mundo.' });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** POST /api/juego/mundo/:id/archivar — quitar un objeto (regla 6). */
+  app.post('/api/juego/mundo/:id/archivar', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      await db.execute(sql`
+        UPDATE game_world_items SET archived_at = now()
+        WHERE id = ${req.params.id} AND user_id = ${req.user!.id}
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
 }

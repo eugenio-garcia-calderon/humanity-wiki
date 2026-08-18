@@ -14,7 +14,7 @@ import * as THREE from 'three';
 import { PALETA, crearAzar } from './paleta';
 
 // ---------------------------------------------------------------------------
-function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
+export function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
   return (
     <group position={[x, 0, z]} rotation-y={rot}>
       <mesh castShadow receiveShadow position={[0, 0.45, 0]}>
@@ -35,7 +35,7 @@ function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
   );
 }
 
-function Farola({ x, z }: { x: number; z: number }) {
+export function Farola({ x, z }: { x: number; z: number }) {
   return (
     <group position={[x, 0, z]}>
       <mesh castShadow position={[0, 0.12, 0]}>
@@ -59,7 +59,7 @@ function Farola({ x, z }: { x: number; z: number }) {
   );
 }
 
-function PuestoMercado({ x, z, rot, color }: { x: number; z: number; rot: number; color: string }) {
+export function PuestoMercado({ x, z, rot, color }: { x: number; z: number; rot: number; color: string }) {
   return (
     <group position={[x, 0, z]} rotation-y={rot}>
       {/* mostrador */}
@@ -96,7 +96,7 @@ function PuestoMercado({ x, z, rot, color }: { x: number; z: number; rot: number
   );
 }
 
-function Pozo({ x, z }: { x: number; z: number }) {
+export function Pozo({ x, z }: { x: number; z: number }) {
   return (
     <group position={[x, 0, z]}>
       <mesh castShadow receiveShadow position={[0, 0.5, 0]}>
@@ -129,7 +129,7 @@ function Pozo({ x, z }: { x: number; z: number }) {
   );
 }
 
-function Carro({ x, z, rot }: { x: number; z: number; rot: number }) {
+export function Carro({ x, z, rot }: { x: number; z: number; rot: number }) {
   return (
     <group position={[x, 0, z]} rotation-y={rot}>
       <mesh castShadow receiveShadow position={[0, 0.75, 0]}>
@@ -304,24 +304,9 @@ function Huerto({ x, z, azar }: { x: number; z: number; azar: () => number }) {
 export function Detalles() {
   const azar = useMemo(() => crearAzar(3141592), []);
 
-  const bancos = useMemo(() => [
-    { x: -9, z: 7, rot: 0.5 }, { x: 9, z: 7, rot: -0.5 },
-    { x: -9, z: -7, rot: 2.6 }, { x: 9, z: -7, rot: -2.6 },
-  ], []);
-
-  const farolas = useMemo(() => [
-    { x: -13, z: 0 }, { x: 13, z: 0 }, { x: 0, z: -13 },
-    { x: 30, z: 3 }, { x: 52, z: 3 }, { x: -30, z: 3 }, { x: -52, z: 3 },
-    { x: 0, z: 30 }, { x: 0, z: 52 },
-  ], []);
-
-  // El mercadillo va en el cuadrante noreste, fuera de los caminos y lejos
-  // del punto donde apareces: antes tapaba la vista nada más entrar.
-  const puestos = useMemo(() => [
-    { x: 15, z: 16, rot: -0.5, color: PALETA.tela[0] },
-    { x: 20, z: 10, rot: -1.0, color: PALETA.tela[1] },
-    { x: 11, z: 21, rot: -0.2, color: PALETA.tela[2] },
-  ], []);
+  // Bancos, farolas, puestos, pozo y carro se colocan ahora desde Aldea con
+  // las posiciones de mapa.ts: son editables (mover, eliminar) y esa lista es
+  // la misma que usan el rebote y el minimapa.
 
   // Humo en algunas casas del anillo (mismas posiciones que Casas: r 27-40).
   const humos = useMemo(() => {
@@ -347,11 +332,6 @@ export function Detalles() {
 
   return (
     <group>
-      {bancos.map((b, i) => <Banco key={i} {...b} />)}
-      {farolas.map((f, i) => <Farola key={i} {...f} />)}
-      {puestos.map((p, i) => <PuestoMercado key={i} {...p} />)}
-      <Pozo x={-16} z={13} />
-      <Carro x={17} z={-14} rot={0.7} />
       <Tendedero x={-24} z={20} rot={0.3} azar={azar} />
       <Tendedero x={26} z={22} rot={-0.5} azar={azar} />
       <Huerto x={-34} z={-24} azar={azar} />
