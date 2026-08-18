@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as THREE from 'three';
 import { Map as MapIcon, X, Maximize2, UserPlus, Building2, Bot } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import type { Agente, ProyectoJuego } from './tipos';
+import type { Agente, ProyectoJuego, ItemMundo } from './tipos';
 import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionProyecto } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
+import { PANTALLA } from './Pantalla';
 
 // ============================================================================
 // JUEGO VITAL — minimapa estilo GTA (2026-08-18, petición de Eugenio)
@@ -26,15 +27,28 @@ const VISTA = MITAD * 2; // el mundo es cuadrado: 1090 × 1090 m
 /** Mundo (x, z) → coordenadas del SVG, con el norte arriba. */
 const aSvg = (x: number, z: number) => [x + MITAD, z + MITAD];
 
-interface Destino { tipo: 'persona' | 'proyecto' | 'robot'; nombre: string; x: number; z: number; agente?: Agente }
+interface Destino { tipo: 'persona' | 'proyecto' | 'robot' | 'item' | 'pantalla'; nombre: string; x: number; z: number; agente?: Agente; color?: string }
 
-export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
+/** El color de cada cosa plantada en el mapa 2D: el mismo lenguaje que en 3D. */
+const COLOR_ITEM: Record<string, string> = {
+  nota: '#f59e0b', imagen: '#10b981', documento: '#0ea5e9', enlace: '#64748b',
+  video: '#e11d48', musica: '#16a34a', lienzo: '#7c3aed', mapa: '#059669', prop: '#8d9e6f',
+};
+
+export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], onViajar, onCrearEn }: {
   jugadorPos: THREE.Vector3;
   agentes: Agente[];
   proyectos: ProyectoJuego[];
+  /** Lo plantado por el jugador: también se ve y se pulsa en el mapa 2D. */
+  items?: ItemMundo[];
   onViajar: (d: { x: number; z: number; agente?: Agente }) => void;
+  /** Clic en suelo VACÍO del mapa grande: abre «Crear aquí» en ese punto —
+   *  el mapa 2D es un creador completo (petición de Eugenio). */
+  onCrearEn?: (p: { x: number; z: number }) => void;
 }) {
   const [abierto, setAbierto] = useState(false);
+  /** Índice del marcador bajo el ratón: crece y resalta su nombre. */
+  const [sobre, setSobre] = useState<number | null>(null);
   const jugadorMini = useRef<SVGGElement>(null);
   const jugadorGrande = useRef<SVGGElement>(null);
   const svgMini = useRef<SVGSVGElement>(null);
@@ -92,7 +106,8 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
   }, [casas, agentes, edificiosProyecto]);
 
   const destinos: Destino[] = useMemo(() => [
-    { tipo: 'robot', nombre: 'Tu robot', x: CASA_DEL_ROBOT.x, z: CASA_DEL_ROBOT.z },
+    { tipo: 'robot' as const, nombre: 'Tu robot', x: CASA_DEL_ROBOT.x, z: CASA_DEL_ROBOT.z },
+    { tipo: 'pantalla' as const, nombre: 'Gran pantalla', x: PANTALLA.x, z: PANTALLA.z, color: '#ff0033' },
     ...agentes.map((a): Destino => ({
       tipo: a.tipo === 'persona' ? 'persona' : 'proyecto',
       nombre: a.nombre, x: a.x, z: a.z, agente: a,
@@ -100,7 +115,14 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
     ...edificiosProyecto.map((e): Destino => ({
       tipo: 'proyecto', nombre: e.p.titulo, x: e.x, z: e.z + 4,
     })),
-  ], [agentes, edificiosProyecto]);
+    // Lo plantado (notas, vídeos, documentos…) también vive en el mapa 2D.
+    // Los props (árboles, rocas…) no: son decorado, taparían lo importante.
+    ...items.filter(it => it.tipo !== 'prop').map((it): Destino => ({
+      tipo: 'item',
+      nombre: it.nombre || it.texto?.slice(0, 22) || it.tipo,
+      x: it.x, z: it.z, color: COLOR_ITEM[it.tipo] || '#64748b',
+    })),
+  ], [agentes, edificiosProyecto, items]);
 
   /** El terreno: lo mismo en el minimapa y en el mapa grande. */
   const terreno = (
@@ -155,8 +177,8 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
           {terreno}
           {destinos.map((d, i) => {
             const [cx, cy] = aSvg(d.x, d.z);
-            return <circle key={i} cx={cx} cy={cy} r={7}
-              fill={d.tipo === 'persona' ? '#f59e0b' : d.tipo === 'robot' ? '#10b981' : '#7ba8c9'}
+            return <circle key={i} cx={cx} cy={cy} r={d.tipo === 'item' ? 5 : 7}
+              fill={d.color || (d.tipo === 'persona' ? '#f59e0b' : d.tipo === 'robot' ? '#10b981' : '#7ba8c9')}
               stroke="#fff" strokeWidth={2} />;
           })}
           <g ref={jugadorMini}>{marcadorJugador(9)}</g>
@@ -179,7 +201,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
             <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
               <p className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                 <MapIcon className="w-3.5 h-3.5 text-emerald-600" /> Tu aldea
-                <span className="font-medium text-slate-400 ml-1">· pulsa un sitio para viajar</span>
+                <span className="font-medium text-slate-400 ml-1">· pulsa algo para viajar · pulsa suelo vacío para crear ahí</span>
               </p>
               <button onClick={() => setAbierto(false)} className="p-1 text-slate-400 hover:text-slate-900 rounded transition-colors">
                 <X className="w-4 h-4" />
@@ -187,7 +209,23 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
             </div>
 
             <div className="relative bg-emerald-100">
-              <svg viewBox={encuadre.viewBox} className="w-full aspect-square max-h-[62vh]">
+              {/* Clic en suelo VACÍO del mapa = crear AHÍ (el mapa 2D es un
+                  creador completo, petición de Eugenio). Los marcadores paran
+                  la propagación para que su clic siga siendo «viajar». */}
+              <svg
+                viewBox={encuadre.viewBox}
+                className={cn('w-full aspect-square max-h-[62vh]', onCrearEn && 'cursor-crosshair')}
+                onClick={(e) => {
+                  if (!onCrearEn) return;
+                  const svg = e.currentTarget;
+                  const caja = svg.getBoundingClientRect();
+                  const [vx, vy, vw, vh] = encuadre.viewBox.split(' ').map(Number);
+                  const x = vx + ((e.clientX - caja.left) / caja.width) * vw - MITAD;
+                  const z = vy + ((e.clientY - caja.top) / caja.height) * vh - MITAD;
+                  setAbierto(false);
+                  onCrearEn({ x, z });
+                }}
+              >
                 {terreno}
                 {/* Tamaños relativos al encuadre: los nombres se leen igual de
                     bien cuando tu mundo es pequeño que cuando ya es grande. */}
@@ -204,17 +242,27 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
                       ly -= alturaLinea;
                     }
                     puestos.push({ x: cx, y: ly });
-                    const color = d.tipo === 'persona' ? '#f59e0b' : d.tipo === 'robot' ? '#10b981' : '#7ba8c9';
+                    const color = d.color || (d.tipo === 'persona' ? '#f59e0b' : d.tipo === 'robot' ? '#10b981' : '#7ba8c9');
+                    const crecido = sobre === i ? 1.45 : 1; // hover: crece y resalta
                     return (
-                      <g key={i} className="cursor-pointer" onClick={() => { setAbierto(false); onViajar(d); }}>
+                      <g
+                        key={i}
+                        className="cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); setSobre(null); setAbierto(false); onViajar(d); }}
+                        onMouseEnter={() => setSobre(i)}
+                        onMouseLeave={() => setSobre(null)}
+                      >
                         <circle cx={cx} cy={cy} r={u * 5} fill="transparent" />
                         {/* hilo del marcador a su nombre cuando se ha subido */}
                         {ly < cy - u * 4 && (
                           <line x1={cx} y1={cy - u * 2.4} x2={cx} y2={ly + u} stroke={color} strokeWidth={u * 0.35} opacity={0.7} />
                         )}
-                        <circle cx={cx} cy={cy} r={u * 2} fill={color} stroke="#fff" strokeWidth={u * 0.7} />
-                        <text x={cx} y={ly} textAnchor="middle" fontSize={u * 3.2} fontWeight="700"
-                          fill="#0f172a" stroke="#fff" strokeWidth={u} paintOrder="stroke">
+                        {sobre === i && <circle cx={cx} cy={cy} r={u * 3.6} fill={color} opacity={0.25} />}
+                        {d.tipo === 'item'
+                          ? <rect x={cx - u * 1.5 * crecido} y={cy - u * 1.5 * crecido} width={u * 3 * crecido} height={u * 3 * crecido} rx={u * 0.7} fill={color} stroke="#fff" strokeWidth={u * 0.6} />
+                          : <circle cx={cx} cy={cy} r={u * 2 * crecido} fill={color} stroke="#fff" strokeWidth={u * 0.7} />}
+                        <text x={cx} y={ly} textAnchor="middle" fontSize={u * (sobre === i ? 3.9 : 3.2)} fontWeight="700"
+                          fill={sobre === i ? '#000000' : '#0f172a'} stroke="#fff" strokeWidth={u} paintOrder="stroke">
                           {d.nombre.length > 22 ? `${d.nombre.slice(0, 21)}…` : d.nombre}
                         </text>
                       </g>
@@ -230,6 +278,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, onViajar }: {
               <span className="flex items-center gap-1"><Bot className="w-3 h-3 text-emerald-500" /> Robot</span>
               <span className="flex items-center gap-1"><UserPlus className="w-3 h-3 text-amber-500" /> Personas</span>
               <span className="flex items-center gap-1"><Building2 className="w-3 h-3 text-sky-500" /> Proyectos</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-violet-500 border border-white" /> Plantado</span>
               <span className="ml-auto text-slate-400">118 ha · 1,09 × 1,09 km</span>
             </div>
           </div>
