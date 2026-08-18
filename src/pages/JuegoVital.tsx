@@ -553,6 +553,36 @@ export default function JuegoVital() {
     }
   };
 
+  // Renombrar el proyecto desde su portal (petición de Eugenio): cambia el
+  // título REAL del proyecto — el portal, el distrito y la página /proyectos
+  // enseñan el mismo nombre.
+  const [renombrandoProy, setRenombrandoProy] = useState(false);
+  const [nombreProyBorrador, setNombreProyBorrador] = useState('');
+  // Al cambiar (o cerrarse) el panel, el modo renombrar no se queda pegado.
+  useEffect(() => { setRenombrandoProy(false); }, [panel?.id]);
+  const renombrarProyecto = async () => {
+    const titulo = nombreProyBorrador.trim();
+    if (!titulo || !panel) return;
+    const r = await fetch(`/api/proyectos/${panel.id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo }),
+    }).catch(() => null);
+    if (!r?.ok) { avisar('No se ha podido cambiar el nombre.'); return; }
+    setProyectos(prev => prev.map(p => (p.id === panel.id ? { ...p, titulo } : p)));
+    setPanel(p => (p ? { ...p, titulo } : p));
+    setRenombrandoProy(false);
+  };
+
+  /** Quita el PORTAL del mapa (retoque eliminado). El proyecto NO se borra:
+   *  sigue en la página de Proyectos con todo lo suyo. */
+  const quitarPortalDelMapa = async () => {
+    if (!panel) return;
+    await guardarOverride(`proy:${panel.id}`, { eliminado: true });
+    setPanel(null);
+    avisar('Portal quitado del mapa. El proyecto sigue en tu página de Proyectos.');
+  };
+
   /** Cambia un objeto del jugador y lo refleja al momento. */
   const guardarItem = useCallback(async (id: string, patch: Partial<ItemMundo>) => {
     setMundoItems(prev => prev.map(it => (it.id === id ? { ...it, ...patch } : it)));
@@ -1445,6 +1475,7 @@ export default function JuegoVital() {
             }
             entrarEnProyecto(p);
           }}
+          onSalirProyecto={salirDelProyecto}
           onHablarAgente={(a) => {
             const ed = editorRef.current;
             if (ed.conectando && ed.sel?.clase === 'item') {
@@ -2404,6 +2435,38 @@ export default function JuegoVital() {
             >
               <Camera className="w-3.5 h-3.5 mr-1.5 inline" /> {subiendoPortadaProy ? 'Subiendo…' : 'Foto de portada del portal'}
             </Button>
+            {renombrandoProy ? (
+              <div className="flex gap-1.5 mt-2">
+                <input
+                  value={nombreProyBorrador}
+                  onChange={e => setNombreProyBorrador(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); renombrarProyecto(); }
+                    if (e.key === 'Escape') setRenombrandoProy(false);
+                  }}
+                  autoFocus
+                  className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+                />
+                <Button onClick={renombrarProyecto} disabled={!nombreProyBorrador.trim()} className="shrink-0">Guardar</Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => { setNombreProyBorrador(panel.titulo); setRenombrandoProy(true); }}
+                className="w-full mt-2"
+              >
+                <PenTool className="w-3.5 h-3.5 mr-1.5 inline" /> Cambiar el nombre
+              </Button>
+            )}
+            <button
+              onClick={quitarPortalDelMapa}
+              className="w-full mt-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5 inline" /> Quitar el portal del mapa
+            </button>
+            <p className="mt-1.5 text-[10px] text-slate-400 leading-snug">
+              Quitar el portal no borra el proyecto: sigue en tu página de Proyectos.
+            </p>
           </Card>
         </div>
       )}
@@ -2614,6 +2677,10 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
   const [portada, setPortada] = useState(agente.foto_url || null);
   const [subiendoPortada, setSubiendoPortada] = useState(false);
   const portadaRef = useRef<HTMLInputElement>(null);
+  // Renombrar desde la ficha (petición de Eugenio para los portales).
+  const [nombre, setNombre] = useState(agente.nombre);
+  const [renombrando, setRenombrando] = useState(false);
+  const [nombreBorrador, setNombreBorrador] = useState('');
 
   // Al cambiar de amigo, la ficha enseña lo suyo (el componente no se
   // desmonta entre uno y otro cuando se elige desde la lista lateral).
@@ -2621,9 +2688,30 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     setMemoria(agente.memoria || []);
     setArchivos(agente.archivos || []);
     setPortada(agente.foto_url || null);
+    setNombre(agente.nombre);
+    setRenombrando(false);
     setNota('');
     setErrorArchivo(null);
-  }, [agente.id, agente.memoria, agente.archivos, agente.foto_url]);
+  }, [agente.id, agente.memoria, agente.archivos, agente.foto_url, agente.nombre]);
+
+  /** Guarda el nombre nuevo del agente (persona o portal de proyecto). */
+  const renombrar = async () => {
+    const nuevo = nombreBorrador.trim();
+    if (!nuevo) return;
+    try {
+      const r = await fetch(`/api/juego/agentes/${agente.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nuevo }),
+      });
+      if (!r.ok) { setErrorArchivo('No se ha podido cambiar el nombre.'); return; }
+      setNombre(nuevo);
+      setRenombrando(false);
+      await onGuardado();
+    } catch {
+      setErrorArchivo('Error de red al cambiar el nombre.');
+    }
+  };
 
   /** Sube el archivo y lo guarda en el archivo del agente. */
   const anadirArchivo = async (f?: File) => {
@@ -2716,8 +2804,33 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
         {portada && <img src={portada} alt="" className="w-full h-28 object-cover" />}
         <div className="p-4">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-sm font-black text-slate-900 truncate">{agente.nombre}</p>
+            <div className="min-w-0 flex-1">
+              {renombrando ? (
+                <div className="flex gap-1.5">
+                  <input
+                    value={nombreBorrador}
+                    onChange={e => setNombreBorrador(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); renombrar(); }
+                      if (e.key === 'Escape') setRenombrando(false);
+                    }}
+                    autoFocus
+                    className="flex-1 min-w-0 px-2 py-1 border border-slate-200 rounded-lg text-sm font-black focus:outline-none focus:border-emerald-300"
+                  />
+                  <Button onClick={renombrar} disabled={!nombreBorrador.trim()} className="shrink-0 px-2 py-1 text-xs">Guardar</Button>
+                </div>
+              ) : (
+                <p className="text-sm font-black text-slate-900 truncate">
+                  {nombre}
+                  <button
+                    onClick={() => { setNombreBorrador(nombre); setRenombrando(true); }}
+                    title="Cambiar el nombre"
+                    className="ml-1.5 align-middle text-slate-300 hover:text-emerald-600 transition-colors"
+                  >
+                    <PenTool className="w-3 h-3 inline" />
+                  </button>
+                </p>
+              )}
               <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                 {agente.tipo === 'persona' ? 'Persona' : 'Proyecto'}{agente.rol ? ` · ${agente.rol}` : ''}
               </p>

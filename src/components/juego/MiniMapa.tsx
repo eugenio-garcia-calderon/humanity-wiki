@@ -82,7 +82,9 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
   /** Los portales del distrito, con los arrastres del jugador aplicados. */
   const edificiosProyecto = useMemo(() => {
     const posiciones = posicionesProyectos(proyectos, overrides);
-    return proyectos.slice(0, 12).map((p, i) => ({ p, ...posiciones[i] }));
+    // Los portales quitados del mapa tampoco salen aquí.
+    return proyectos.slice(0, 12).map((p, i) => ({ p, ...posiciones[i] }))
+      .filter(e => !e.eliminado);
   }, [proyectos, overrides]);
 
   /**

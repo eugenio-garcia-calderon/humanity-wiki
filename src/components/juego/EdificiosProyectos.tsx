@@ -20,6 +20,8 @@ interface Parcela {
   z: number;
   color: string;
   portada?: string | null;
+  /** El jugador quitó este portal del mapa: no se dibuja ni se mide. */
+  eliminado?: boolean;
 }
 
 function EdificioProyecto({ p, x, z, portada, onEntrar, onAgarrar }: Parcela & {
@@ -91,9 +93,9 @@ export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, resaltado
 
 export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas, onEntrar, onAgarrar }: {
   proyectos: ProyectoJuego[];
-  /** De posicionesProyectos(): las del distrito con los arrastres aplicados
-   *  y la portada de cada portal (la foto del centro), si la tiene. */
-  posiciones: Array<{ x: number; z: number; portada?: string | null }>;
+  /** De posicionesProyectos(): las del distrito con los arrastres aplicados,
+   *  la portada de cada portal (la foto del centro) y si está quitado. */
+  posiciones: Array<{ x: number; z: number; portada?: string | null; eliminado?: boolean }>;
   jugadorPos: THREE.Vector3;
   medidas: React.MutableRefObject<Medidas>;
   /** Pulsar el edificio entra en él sin tener que caminar hasta allí. */
@@ -111,6 +113,7 @@ export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas,
   useFrame(() => {
     let mejor: Medidas['proyecto'] = null;
     for (const b of parcelas) {
+      if (b.eliminado) continue;
       // the door/sign face is on +z: measure from a bit in front of the building
       const d = Math.hypot(jugadorPos.x - b.x, jugadorPos.z - (b.z + 3));
       if (d < 8 && (!mejor || d < mejor.d)) mejor = { p: b.p, d };
@@ -134,7 +137,7 @@ export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas,
           {proyectos.length > 0 ? 'Distrito de Proyectos' : 'Distrito de Proyectos — aún vacío'}
         </Text>
       </group>
-      {parcelas.map(b => <EdificioProyecto key={b.p.id} {...b} onEntrar={onEntrar} onAgarrar={onAgarrar} />)}
+      {parcelas.filter(b => !b.eliminado).map(b => <EdificioProyecto key={b.p.id} {...b} onEntrar={onEntrar} onAgarrar={onAgarrar} />)}
     </group>
   );
 }

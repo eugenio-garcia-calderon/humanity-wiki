@@ -573,9 +573,11 @@ export function InteriorProyecto({ datos, onHablar }: {
 // información del proyecto con el editor de siempre (clic en el suelo).
 // ---------------------------------------------------------------------------
 
-export function PlazaProyecto({ datos, onHablar }: {
+export function PlazaProyecto({ datos, onHablar, onSalir }: {
   datos: DatosInterior;
   onHablar: (a: Agente) => void;
+  /** Pulsar el portal de salida también te saca a la aldea (no solo chocar). */
+  onSalir?: () => void;
 }) {
   const { proyecto, items, color, agentes } = datos;
   const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
@@ -656,15 +658,27 @@ export function PlazaProyecto({ datos, onHablar }: {
         );
       })}
 
-      {/* El portal verde de vuelta a la aldea */}
+      {/* El portal verde de vuelta a la aldea: chocar O PULSARLO te saca
+          (petición de Eugenio: el clic en «Salir a la aldea» no hacía nada). */}
       <group position={[PLAZA_SALIDA.x, 0, PLAZA_SALIDA.z]}>
-        <PortalVerde radio={2.1} />
+        <Interactivo onPulsar={() => onSalir?.()}>
+          {(resaltado) => (
+            <group>
+              <PortalVerde radio={2.1} resaltado={resaltado} />
+              {/* Blanco generoso e invisible para el clic y el dedo */}
+              <mesh position={[0, 2.1, 0]}>
+                <cylinderGeometry args={[2.3, 2.3, 4.6, 10]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+              </mesh>
+              <Billboard position={[0, 5.1, 0]}>
+                <Text fontSize={resaltado ? 0.58 : 0.48} color="#ffffff" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#1d3a24">
+                  Salir a la aldea
+                </Text>
+              </Billboard>
+            </group>
+          )}
+        </Interactivo>
         <LuzDePortal radio={2.1} />
-        <Billboard position={[0, 5.1, 0]}>
-          <Text fontSize={0.48} color="#ffffff" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#1d3a24">
-            Salir a la aldea
-          </Text>
-        </Billboard>
         <pointLight position={[0, 2.4, 0]} color={VERDE_PORTAL} intensity={8} distance={12} />
       </group>
     </group>
