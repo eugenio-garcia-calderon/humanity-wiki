@@ -9,6 +9,8 @@ import { useMemo, useRef } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
+import { mapasPBR } from './texturas';
+import { MaterialAgua } from './Agua';
 import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles';
 import { Camper } from './Camper';
 import { PantallaVisual } from './Pantalla';
@@ -155,12 +157,16 @@ function Nave() {
 // ---------------------------------------------------------------------------
 function cintaRio(ancho: number, y: number): THREE.BufferGeometry {
   const pos: number[] = [];
+  const uv: number[] = [];
   const idx: number[] = [];
   const paso = 12;
   let fila = 0;
   for (let z = -MITAD - 15; z <= MITAD + 15; z += paso) {
     const cx = centroRio(z);
     pos.push(cx - ancho / 2, y, z, cx + ancho / 2, y, z);
+    // UVs para las texturas de la fase 1: u cruza la cinta, v recorre el
+    // río (una vuelta de textura cada ~7 m).
+    uv.push(0, z * 0.15, 1, z * 0.15);
     if (fila > 0) {
       const a = (fila - 1) * 2;
       idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
@@ -169,6 +175,7 @@ function cintaRio(ancho: number, y: number): THREE.BufferGeometry {
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx);
   g.computeVertexNormals();
   return g;
@@ -179,11 +186,11 @@ function Rio() {
   const agua = useMemo(() => cintaRio(14, 0.07), []);
   return (
     <group>
-      <mesh geometry={orilla}>
-        <meshStandardMaterial color={PALETA.arena} side={THREE.DoubleSide} />
+      <mesh geometry={orilla} receiveShadow>
+        <meshStandardMaterial {...mapasPBR('tierra', 2.4, 1)} side={THREE.DoubleSide} />
       </mesh>
       <mesh geometry={agua}>
-        <meshStandardMaterial color={PALETA.aguaRio} roughness={0.15} transparent opacity={0.92} side={THREE.DoubleSide} />
+        <MaterialAgua color={PALETA.aguaRio} repetirX={1.6} repetirY={1} velocidad={2.2} />
       </mesh>
     </group>
   );
@@ -193,14 +200,14 @@ function Puente() {
   const bx = centroRio(0);
   return (
     <group position={[bx, 0, 0]}>
-      <mesh castShadow position={[0, 0.55, 0]}>
+      <mesh castShadow receiveShadow position={[0, 0.55, 0]}>
         <boxGeometry args={[22, 0.5, 5]} />
-        <meshStandardMaterial color={PALETA.madera} />
+        <meshStandardMaterial {...mapasPBR('madera', 7, 2)} />
       </mesh>
       {[-2.4, 2.4].map((rz, i) => (
         <mesh key={i} castShadow position={[0, 1.25, rz]}>
           <boxGeometry args={[22, 0.7, 0.22]} />
-          <meshStandardMaterial color={PALETA.madera} />
+          <meshStandardMaterial {...mapasPBR('madera', 7, 1)} />
         </mesh>
       ))}
       {[-9, 9].flatMap(px => [-2.4, 2.4].map(pz => (
@@ -221,13 +228,13 @@ function Lagos() {
     <>
       {LAGOS.map((l, i) => (
         <group key={i} position={[l.x, 0, l.z]}>
-          <mesh rotation-x={-Math.PI / 2} position-y={0.03} scale={[l.rx + 5, l.rz + 5, 1]}>
+          <mesh rotation-x={-Math.PI / 2} position-y={0.03} scale={[l.rx + 5, l.rz + 5, 1]} receiveShadow>
             <circleGeometry args={[1, 36]} />
-            <meshStandardMaterial color={PALETA.arena} />
+            <meshStandardMaterial {...mapasPBR('tierra', 9)} />
           </mesh>
           <mesh rotation-x={-Math.PI / 2} position-y={0.06} scale={[l.rx, l.rz, 1]}>
             <circleGeometry args={[1, 36]} />
-            <meshStandardMaterial color={PALETA.aguaLago} roughness={0.15} transparent opacity={0.94} />
+            <MaterialAgua color={PALETA.aguaLago} opacidad={0.94} repetirX={7} repetirY={7} />
           </mesh>
         </group>
       ))}
@@ -250,14 +257,17 @@ function Terreno() {
   }, []);
   return (
     <group>
+      {/* El prado con FOTO real de hierba (fase 1): la textura se repite
+          cada ~5,5 m; los parches tintados de siempre disimulan la
+          repetición a lo lejos. */}
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[1100, 1100]} />
-        <meshStandardMaterial color={PALETA.prado} />
+        <meshStandardMaterial {...mapasPBR('hierba', 200)} />
       </mesh>
       {parches.map((p, i) => (
         <mesh key={i} rotation-x={-Math.PI / 2} position={[p.x, 0.02, p.z]}>
           <circleGeometry args={[p.r, 24]} />
-          <meshStandardMaterial color={p.color} transparent opacity={0.45} />
+          <meshStandardMaterial color={p.color} transparent opacity={0.28} depthWrite={false} />
         </mesh>
       ))}
     </group>
@@ -267,15 +277,18 @@ function Terreno() {
 function Caminos() {
   return (
     <group>
+      {/* Caminos de grava real: la repetición de la textura se calcula del
+          tamaño de cada tramo para que la piedra mida lo mismo en todos. */}
       {CAMINOS.map(([cx, cz, w, l], i) => (
         <mesh key={i} position={[cx, 0.04, cz]} receiveShadow>
           <boxGeometry args={[w, 0.06, l]} />
-          <meshStandardMaterial color={PALETA.camino} />
+          <meshStandardMaterial {...mapasPBR('grava', Math.max(1, Math.round(w / 3)), Math.max(1, Math.round(l / 3)))} />
         </mesh>
       ))}
+      {/* La plaza, ADOQUINADA de verdad: cada piedra con su relieve. */}
       <mesh rotation-x={-Math.PI / 2} position-y={0.05} receiveShadow>
-        <circleGeometry args={[PLAZA_R, 36]} />
-        <meshStandardMaterial color={PALETA.plaza} />
+        <circleGeometry args={[PLAZA_R, 48]} />
+        <meshStandardMaterial {...mapasPBR('adoquin', (PLAZA_R * 2) / 2.4)} />
       </mesh>
     </group>
   );
@@ -290,7 +303,7 @@ function Fuente() {
       </mesh>
       <mesh position={[0, 0.72, 0]}>
         <cylinderGeometry args={[2.0, 2.0, 0.06, 20]} />
-        <meshStandardMaterial color={PALETA.aguaLago} roughness={0.1} />
+        <MaterialAgua color={PALETA.aguaLago} repetirX={2} repetirY={2} velocidad={1.6} />
       </mesh>
       <mesh castShadow position={[0, 1.35, 0]}>
         <cylinderGeometry args={[0.3, 0.42, 1.3, 10]} />

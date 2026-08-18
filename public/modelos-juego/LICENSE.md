@@ -25,3 +25,12 @@ que anotarlos en esta tabla.
 
 - `cielo/dia_despejado_1k.hdr` — "Qwantani Pure Sky" by Greg Zaal / Poly Haven,
   https://polyhaven.com/a/qwantani_puresky — License: CC0 1.0 (public domain).
+
+## Texturas PBR del suelo (fase 1 del realismo)
+
+- `texturas/hierba` — "Grass 001", `texturas/tierra` — "Ground 037",
+  `texturas/grava` — "Gravel 022", `texturas/adoquin` — "Paving Stones 070",
+  `texturas/madera` — "Planks 012" — todas de https://ambientcg.com,
+  License: CC0 1.0 (public domain). Recomprimidas a JPEG q70-85.
+- `texturas/agua_normales.jpg` — three.js examples (waternormals.jpg),
+  https://github.com/mrdoob/three.js — License: MIT.
