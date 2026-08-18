@@ -7,12 +7,13 @@ import { useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
-import type { Cercania, EntradaMando, Medidas, ProyectoJuego } from './tipos';
+import type { Agente, Cercania, EntradaMando, Medidas, ProyectoJuego } from './tipos';
 import { PALETA } from './paleta';
 import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
 import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
+import { Agentes } from './Agentes';
 
 /** Arbitrates what the player is close to (robot beats buildings) and only
  *  notifies the page when the answer CHANGES — never once per frame. */
@@ -24,9 +25,15 @@ function Coordinador({ medidas, onCercania }: {
   useFrame(() => {
     const m = medidas.current;
     let c: Cercania = null;
-    if (m.robot < 4.5) c = { tipo: 'robot' };
+    // Un habitante creado por el jugador gana al robot: si te has acercado a
+    // alguien, es con él con quien quieres hablar.
+    if (m.agente && m.agente.d < 5) c = { tipo: 'agente', agente: m.agente.a };
+    else if (m.robot < 4.5) c = { tipo: 'robot' };
     else if (m.proyecto && m.proyecto.d < 8) c = { tipo: 'proyecto', proyecto: m.proyecto.p };
-    const clave = c === null ? '' : c.tipo === 'robot' ? 'robot' : `p:${c.proyecto.id}`;
+    const clave = c === null ? ''
+      : c.tipo === 'robot' ? 'robot'
+        : c.tipo === 'agente' ? `a:${c.agente.id}`
+          : `p:${c.proyecto.id}`;
     if (clave !== ultima.current) {
       ultima.current = clave;
       onCercania(c);
@@ -39,14 +46,16 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, onCercania }: {
+export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania }: {
   entrada: React.MutableRefObject<EntradaMando>;
   proyectos: ProyectoJuego[];
+  agentes: Agente[];
+  /** Compartida con la página: es donde se plantan las cosas al construir. */
+  jugadorPos: THREE.Vector3;
   onCercania: (c: Cercania) => void;
 }) {
-  const jugadorPos = useMemo(() => new THREE.Vector3(0, 0, 17), []);
   const luzRef = useRef<THREE.DirectionalLight>(null);
-  const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null });
+  const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
 
   return (
     <Canvas
@@ -83,6 +92,7 @@ export default function Escena({ entrada, proyectos, onCercania }: {
 
       <Aldea />
       <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
+      <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} />
       <Robot jugadorPos={jugadorPos} medidas={medidas} />
       <Personaje entrada={entrada} jugadorPos={jugadorPos} luzRef={luzRef} />
       <Coordinador medidas={medidas} onCercania={onCercania} />

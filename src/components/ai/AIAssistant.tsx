@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Minus, ChevronUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
@@ -106,10 +106,48 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   // la página lanza este evento y la barra recibe el foco.
   const barInputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    const enfocar = () => barInputRef.current?.focus();
+    const enfocar = () => { setMinimizado(false); barInputRef.current?.focus(); };
     window.addEventListener('humanity:asistente-focus', enfocar);
     return () => window.removeEventListener('humanity:asistente-focus', enfocar);
   }, []);
+
+  // --- Juego Vital: la página del juego manda aquí el estado del mundo y el
+  // agente con el que se habla; cada agente tiene su propio hilo, así que al
+  // cambiar de interlocutor se cambia de conversación.
+  const [juegoCtx, setJuegoCtx] = useState<any>(null);
+  const [minimizado, setMinimizado] = useState(false);
+  useEffect(() => {
+    const alContexto = (e: Event) => {
+      const d = (e as CustomEvent).detail || null;
+      setJuegoCtx(d);
+      const nuevaConv = d?.agente?.conversation_id ?? d?.conversation_id ?? null;
+      const idAgente = d?.agente?.id ?? 'robot';
+      if (idAgente !== interlocutor.current) {
+        interlocutor.current = idAgente;
+        setConversationId(nuevaConv);
+        setMessages([]);
+        if (nuevaConv) cargarConversacion(nuevaConv);
+        setMinimizado(false);
+      }
+    };
+    window.addEventListener('humanity:juego-contexto', alContexto);
+    return () => window.removeEventListener('humanity:juego-contexto', alContexto);
+  }, []);
+  const interlocutor = useRef<string | null>(null);
+  const [listaAbierta, setListaAbierta] = useState(false);
+  /** Con quién hablas ahora mismo: se enseña en la cabecera y al minimizar. */
+  const tituloInterlocutor = juegoCtx?.agente?.nombre
+    || (juegoCtx ? 'Tu robot' : 'Asistente de Conocimiento');
+
+  /** Carga los mensajes de una conversación existente (hilo por agente y listado lateral). */
+  const cargarConversacion = async (id: string) => {
+    try {
+      const filas = await fetch(`/api/ai/conversations/${id}/messages`, { credentials: 'include' }).then(r => r.json());
+      if (!Array.isArray(filas)) return;
+      setConversationId(id);
+      setMessages(filas.map((m: any) => ({ role: m.role, content: m.content })));
+    } catch { /* si falla, se sigue con el hilo vacío */ }
+  };
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
   const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((text, isFinal) => {
@@ -183,6 +221,10 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
     nivel: searchParams.get('nivel'),
     entidadSeleccionada: searchParams.get('id'),
     usuario: user ? { id: user.id, nivel: user.roleLevel, rol: user.roleLabel } : null,
+    // Juego Vital: cuando el jugador habla con su robot o con un agente, la
+    // página nos manda el estado del mundo y con quién está hablando. Sin
+    // esto el modelo respondía como el asistente genérico de la plataforma.
+    juego: juegoCtx || undefined,
   });
 
   /** Aplica los eventos de interfaz que devuelve el modelo. */
@@ -319,6 +361,14 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         return;
       }
       setConversationId(json.conversation_id);
+      // Juego Vital: el hilo pertenece al agente con el que se habla, y lo que
+      // la IA propone crear (personas, proyectos) lo construye la página
+      // llamando al backend con sus comprobaciones de rol.
+      if (juegoCtx) {
+        window.dispatchEvent(new CustomEvent('humanity:juego-respuesta', {
+          detail: { conversation_id: json.conversation_id, acciones: json.acciones_juego || [] },
+        }));
+      }
       setMessages(m => [...m, {
         role: 'assistant',
         content: json.reply,
@@ -738,19 +788,78 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
       <div className={enLinea ? 'w-full' : 'fixed bottom-0 left-0 right-0 z-40 pointer-events-none'}>
         <div className={cn('mx-auto w-full max-w-2xl pointer-events-auto', !enLinea && 'px-4 pb-4')}>
           {(messages.length > 0 || busy) && (
-            <div className="mb-2 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
-              <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  <Sparkles className="w-3 h-3 text-emerald-500" /> Asistente de Conocimiento
-                </span>
-                <button onClick={newConversation} title="Nueva conversación" className="p-1 text-slate-400 hover:text-emerald-600 rounded transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
+            minimizado ? (
+              /* Minimizado: una pastilla que dice con quién hablabas y cuánto
+                 llevabais dicho, sin tapar el mundo (petición del usuario). */
+              <button
+                onClick={() => setMinimizado(false)}
+                className="mb-2 inline-flex items-center gap-2 px-3 py-1.5 bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg text-[11px] font-bold text-slate-600 hover:text-emerald-700 transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                {tituloInterlocutor} · {messages.length} mensajes
+                <ChevronUp className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <div className="mb-2 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+                <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 min-w-0">
+                    <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span className="truncate">{tituloInterlocutor}</span>
+                  </span>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    {juegoCtx && (
+                      <button
+                        onClick={() => setListaAbierta(v => !v)}
+                        title="Tus conversaciones"
+                        className={cn('p-1 rounded transition-colors', listaAbierta ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-emerald-600')}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button onClick={newConversation} title="Nueva conversación" className="p-1 text-slate-400 hover:text-emerald-600 rounded transition-colors">
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => setMinimizado(true)} title="Minimizar" className="p-1 text-slate-400 hover:text-slate-900 rounded transition-colors">
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex">
+                  {/* Listado lateral: tus conversaciones agrupadas por personas
+                      y proyectos del mundo (petición del usuario). */}
+                  {juegoCtx && listaAbierta && (
+                    <div className="w-40 shrink-0 border-r border-slate-100 bg-slate-50/50 max-h-[42vh] overflow-y-auto py-2">
+                      {(['robot', 'persona', 'proyecto'] as const).map(grupo => {
+                        const items = grupo === 'robot'
+                          ? [{ id: 'robot', nombre: 'Tu robot', conversation_id: juegoCtx.conversation_id }]
+                          : (juegoCtx.agentes || []).filter((a: any) => a.tipo === grupo);
+                        if (!items.length) return null;
+                        return (
+                          <div key={grupo} className="mb-1">
+                            <p className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                              {grupo === 'robot' ? 'Compañero' : grupo === 'persona' ? 'Personas' : 'Proyectos'}
+                            </p>
+                            {items.map((a: any) => (
+                              <button
+                                key={a.id}
+                                onClick={() => window.dispatchEvent(new CustomEvent('humanity:juego-hablar', { detail: { id: a.id } }))}
+                                className={cn('w-full text-left px-2.5 py-1.5 text-[11px] font-bold truncate transition-colors',
+                                  interlocutor.current === a.id ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 hover:bg-white')}
+                              >
+                                {a.nombre}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div ref={scrollRef} className="flex-1 min-w-0 max-h-[42vh] overflow-y-auto px-4 py-4 space-y-4">
+                    {conversationInner}
+                  </div>
+                </div>
               </div>
-              <div ref={scrollRef} className="max-h-[42vh] overflow-y-auto px-4 py-4 space-y-4">
-                {conversationInner}
-              </div>
-            </div>
+            )
           )}
 
           {/* Grafos que coinciden con lo escrito: fast-path sin gastar IA */}
