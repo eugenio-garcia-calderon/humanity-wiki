@@ -19,12 +19,14 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }: {
+export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, destino }: {
   entrada: React.MutableRefObject<EntradaMando>;
   jugadorPos: THREE.Vector3;
   luzRef: React.RefObject<THREE.DirectionalLight | null>;
   obstaculos: React.MutableRefObject<Obstaculo[]>;
   onChoque: (id: string) => void;
+  /** Viaje rápido desde el mapa: se pone aquí y el personaje aparece allí. */
+  destino: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
@@ -42,6 +44,22 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }:
     if (!g) return;
     const dt = Math.min(dtBruto, 0.05); // tab-switch spikes must not teleport
     t.current += dt;
+
+    // --- Viaje rápido: apareces junto al destino, mirándolo. La cámara NO
+    // salta: sigue interpolando, así que hace un vuelo rasante por encima de
+    // la aldea hasta alcanzarte. Ese barrido es la animación del viaje.
+    const d = destino.current;
+    if (d) {
+      destino.current = null;
+      // Se llega por el sur, a 5 m: distancia de conversación sin empotrarse.
+      g.position.set(d.x, 0, d.z + 5);
+      vel.current.set(0, 0, 0);
+      rumbo.current = Math.PI; // mirando al norte, hacia el destino
+      g.rotation.y = rumbo.current;
+      tocando.current = null; // el próximo contacto vuelve a contar como choque
+      jugadorPos.copy(g.position);
+      return;
+    }
 
     // --- movement (world axes: fixed-angle camera makes screen == world)
     tmpObjetivo.set(entrada.current.x, 0, entrada.current.z);

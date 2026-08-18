@@ -10,8 +10,9 @@ import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
 import { Detalles } from './Detalles';
 import { Modelo, CASAS } from './Modelos';
-
-const MITAD = 545; // half map side
+// La distribución vive en mapa.ts y la comparten el mundo 3D y el minimapa,
+// para que el mapa no pueda enseñar la aldea donde ya no está.
+import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, casasAldea } from './mapa';
 
 // ---------------------------------------------------------------------------
 // Houses
@@ -26,28 +27,14 @@ function Casa({ x, z, rot, modelo }: { x: number; z: number; rot: number; modelo
 }
 
 function Casas() {
-  const casas = useMemo(() => {
-    const azar = crearAzar(20260818);
-    const lista: Array<React.ComponentProps<typeof Casa>> = [];
-    // 14 houses on a ring around the plaza, leaving the east corridor free
-    // (the path to the project district crosses there).
-    for (let i = 0; i < 14; i++) {
-      const ang = 0.45 + (i / 14) * (Math.PI * 2 - 0.9);
-      const r = (i % 2 === 0 ? 27 : 36) + azar() * 4;
-      const x = Math.cos(ang) * r;
-      const z = Math.sin(ang) * r;
-      // Se consumen los mismos números aleatorios que antes para que las
-      // posiciones (y el humo de las chimeneas, que las recalcula) no cambien.
-      azar(); azar(); azar(); azar();
-      lista.push({
-        x, z,
-        rot: -ang - Math.PI / 2, // la fachada mira a la plaza
-        modelo: CASAS[i % CASAS.length],
-      });
-    }
-    return lista;
-  }, []);
-  return <>{casas.map((c, i) => <Casa key={i} {...c} />)}</>;
+  const casas = useMemo(() => casasAldea(), []);
+  return (
+    <>
+      {casas.map((c, i) => (
+        <Casa key={i} x={c.x} z={c.z} rot={c.rot} modelo={CASAS[c.modelo % CASAS.length]} />
+      ))}
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -139,11 +126,6 @@ function Puente() {
 // ---------------------------------------------------------------------------
 // Lakes
 // ---------------------------------------------------------------------------
-const LAGOS = [
-  { x: -230, z: 190, rx: 46, rz: 33 },
-  { x: 180, z: -260, rx: 56, rz: 40 },
-];
-
 function Lagos() {
   return (
     <>
@@ -193,23 +175,16 @@ function Terreno() {
 }
 
 function Caminos() {
-  const tramos: Array<[number, number, number, number]> = [
-    // [cx, cz, width(x), length(z)] — flat boxes slightly above the ground
-    [70, 0, 120, 4],   // east: plaza → project district → bridge
-    [-53, 0, 86, 4],   // west: plaza → naves
-    [0, 38, 4, 54],    // north
-    [0, -38, 4, 54],   // south
-  ];
   return (
     <group>
-      {tramos.map(([cx, cz, w, l], i) => (
+      {CAMINOS.map(([cx, cz, w, l], i) => (
         <mesh key={i} position={[cx, 0.04, cz]} receiveShadow>
           <boxGeometry args={[w, 0.06, l]} />
           <meshStandardMaterial color={PALETA.camino} />
         </mesh>
       ))}
       <mesh rotation-x={-Math.PI / 2} position-y={0.05} receiveShadow>
-        <circleGeometry args={[13, 36]} />
+        <circleGeometry args={[PLAZA_R, 36]} />
         <meshStandardMaterial color={PALETA.plaza} />
       </mesh>
     </group>
@@ -394,7 +369,7 @@ export function Aldea() {
       <Caminos />
       <Fuente />
       <Casas />
-      {[-36, -12, 12, 36].map(z => <Nave key={z} x={-70} z={z} />)}
+      {NAVES.map(n => <Nave key={n.z} x={n.x} z={n.z} />)}
       <Rio />
       <Puente />
       <Lagos />
