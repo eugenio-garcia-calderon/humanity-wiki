@@ -573,11 +573,39 @@ export function InteriorProyecto({ datos, onHablar }: {
 // información del proyecto con el editor de siempre (clic en el suelo).
 // ---------------------------------------------------------------------------
 
-export function PlazaProyecto({ datos, onHablar, onSalir }: {
+/**
+ * El corro de conocimiento de la plaza, CON posiciones: lo comparten el
+ * dibujo y los obstáculos de Escena (chocar con una tarjeta la abre) — si
+ * cada uno calculara el anillo por su cuenta, chocarías con una tarjeta que
+ * se dibuja en otro sitio.
+ */
+export function cosasDePlaza(items: ItemProyecto[], agentes: Agente[]): Array<{
+  clave: string; tipo: 'tarjeta' | 'foto' | 'doc';
+  item?: ItemProyecto; url?: string; nombre?: string; x: number; z: number;
+}> {
+  const lista: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
+  for (const it of items) {
+    if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
+    lista.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
+    for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
+      if (b?.tipo === 'imagen' && b.url) lista.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
+      else if (b?.tipo === 'texto' && b.texto) lista.push({ clave: `d:${it.id}:${i}`, tipo: 'doc', nombre: b.texto });
+    }
+  }
+  return lista.map((c, i) => {
+    const ang = (i / Math.max(lista.length, 1)) * Math.PI * 2 + 0.35;
+    const r = 13.5 + (i % 2) * 2.6;
+    return { ...c, x: Math.cos(ang) * r, z: Math.sin(ang) * r };
+  });
+}
+
+export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta }: {
   datos: DatosInterior;
   onHablar: (a: Agente) => void;
   /** Pulsar el portal de salida también te saca a la aldea (no solo chocar). */
   onSalir?: () => void;
+  /** Pulsar (o chocar con) una tarjeta del corro: abre su ficha central. */
+  onAbrirTarjeta?: (item: ItemProyecto) => void;
 }) {
   const { proyecto, items, color, agentes } = datos;
   const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
@@ -585,16 +613,9 @@ export function PlazaProyecto({ datos, onHablar, onSalir }: {
   // La gente que FORMA PARTE del proyecto, de pie en la plaza.
   const gente = habitantesDeSala(items, 'personas', agentes, proyecto.id);
 
-  // TODO el conocimiento del tablero, junto (ya no hay habitaciones).
-  const cosas: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
-  for (const it of items) {
-    if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
-    cosas.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
-    for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
-      if (b?.tipo === 'imagen' && b.url) cosas.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
-      else if (b?.tipo === 'texto' && b.texto) cosas.push({ clave: `d:${it.id}:${i}`, tipo: 'doc', nombre: b.texto });
-    }
-  }
+  // TODO el conocimiento del tablero, junto, con el anillo YA calculado
+  // (compartido con los obstáculos de Escena: chocar con una tarjeta la abre).
+  const cosas = cosasDePlaza(items, agentes);
 
   return (
     <group>
@@ -642,21 +663,37 @@ export function PlazaProyecto({ datos, onHablar, onSalir }: {
         );
       })}
 
-      {/* El conocimiento del tablero, en corro alrededor de la plaza */}
-      {cosas.map((cosa, i) => {
-        const ang = (i / Math.max(cosas.length, 1)) * Math.PI * 2 + 0.35;
-        const r = 13.5 + (i % 2) * 2.6;
-        const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
-        return (
-          <group key={cosa.clave} position={[x, 2.1, z]} rotation={[0, Math.atan2(-x, -z), 0]}>
-            <Flotante fase={i * 1.7}>
-              {cosa.tipo === 'tarjeta' && cosa.item && <Tarjeta item={cosa.item} color={color} />}
-              {cosa.tipo === 'foto' && cosa.url && <Foto url={cosa.url} />}
-              {cosa.tipo === 'doc' && <Documento nombre={cosa.nombre || 'Nota'} color={color} />}
-            </Flotante>
-          </group>
-        );
-      })}
+      {/* El conocimiento del tablero, en corro alrededor de la plaza.
+          Las TARJETAS se expanden con el ratón encima y se abren al pulsarlas
+          (o al chocar con ellas — eso lo avisa Escena). */}
+      {cosas.map((cosa, i) => (
+        <group key={cosa.clave} position={[cosa.x, 2.1, cosa.z]} rotation={[0, Math.atan2(-cosa.x, -cosa.z), 0]}>
+          <Flotante fase={i * 1.7}>
+            {cosa.tipo === 'tarjeta' && cosa.item && (
+              <Interactivo onPulsar={() => onAbrirTarjeta?.(cosa.item!)}>
+                {(resaltado) => (
+                  <group scale={resaltado ? 1.45 : 1}>
+                    <Tarjeta item={cosa.item!} color={color} />
+                    {/* Blanco generoso: la lámina fina era difícil de acertar */}
+                    <mesh position={[0, 0, 0.1]}>
+                      <planeGeometry args={[4.4, 2.8]} />
+                      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+                    </mesh>
+                    {resaltado && (
+                      <Text position={[0, -1.75, 0.05]} fontSize={0.26} color="#ffffff" anchorX="center" anchorY="middle"
+                        outlineWidth={0.02} outlineColor="#1d3a24">
+                        Pulsa para abrir la ficha
+                      </Text>
+                    )}
+                  </group>
+                )}
+              </Interactivo>
+            )}
+            {cosa.tipo === 'foto' && cosa.url && <Foto url={cosa.url} />}
+            {cosa.tipo === 'doc' && <Documento nombre={cosa.nombre || 'Nota'} color={color} />}
+          </Flotante>
+        </group>
+      ))}
 
       {/* El portal verde de vuelta a la aldea: chocar O PULSARLO te saca
           (petición de Eugenio: el clic en «Salir a la aldea» no hacía nada). */}
