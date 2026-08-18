@@ -20,3 +20,8 @@ revisaron y se copió solo lo que se usa, para no cargar el repositorio.
 
 **Si añades más modelos aquí, tienen que ser CC0 o de licencia compatible**, y hay
 que anotarlos en esta tabla.
+
+## Cielo HDRI
+
+- `cielo/dia_despejado_1k.hdr` — "Qwantani Pure Sky" by Greg Zaal / Poly Haven,
+  https://polyhaven.com/a/qwantani_puresky — License: CC0 1.0 (public domain).

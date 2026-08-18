@@ -3,12 +3,14 @@
 // it: this file (and everything it imports, including three.js) lives in its
 // own chunk that only game visitors download.
 // ============================================================================
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Obstaculo } from './Personaje';
 import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
 import type { Aspecto } from './aspecto';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky } from '@react-three/drei';
+import { Sky, Environment, PerformanceMonitor } from '@react-three/drei';
+import { Efectos } from './Efectos';
+import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
 import * as THREE from 'three';
 import type {
   Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
@@ -43,12 +45,28 @@ function Ambiente({ interior }: { interior: boolean }) {
       // Niebla MUY larga: la sala mide 48 m de lado a lado y con una niebla
       // corta se tragaba las puertas y el núcleo — se veía todo negro.
       scene.fog = new THREE.Fog('#0d1117', 70, 210);
+      // El cine es una sala oscura: la luz del cielo HDRI casi no entra.
+      scene.environmentIntensity = 0.22;
     } else {
       scene.background = null;
       scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+      scene.environmentIntensity = 0.6;
     }
   }, [interior, scene]);
   return null;
+}
+
+/** El vigilante de FPS con periodo de gracia: los primeros segundos de juego
+ *  siempre van a trompicones (compilar shaders, subir texturas) y no deben
+ *  costar un escalón de calidad. */
+function VigilanteDeCalidad({ onBajar }: { onBajar: () => void }) {
+  const [listo, setListo] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setListo(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
+  if (!listo) return null;
+  return <PerformanceMonitor flipflops={2} onDecline={onBajar} />;
 }
 
 /** Arbitrates what the player is close to (robot beats buildings) and only
@@ -273,13 +291,29 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
     ];
   }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items, cine]);
 
+  // Nivel de calidad: se detecta una vez al montar y solo puede BAJAR (si los
+  // FPS caen de forma sostenida, PerformanceMonitor avisa). Nunca sube solo:
+  // subir y bajar en bucle se nota más que quedarse en el escalón estable.
+  const [nivel, setNivel] = useState<NivelCalidad>(() => detectarCalidad());
+  const ajustes = AJUSTES[nivel];
+
   return (
     <Canvas
-      shadows
-      dpr={[1, 1.75]}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      // «percentage» = PCF a secas: en este three el PCFSoft clásico está
+      // retirado (el renderer lo degrada solo, avisando por consola). El
+      // borde suave lo pone el radio de penumbra de la luz, más abajo.
+      shadows="percentage"
+      dpr={ajustes.dpr}
+      // Con el composer de efectos el antialias del navegador no pinta nada
+      // (lo hace SMAA); en calidad baja no hay composer y sí se necesita.
+      gl={{ antialias: !ajustes.efectos, powerPreference: 'high-performance' }}
       camera={{ fov: 48, near: 0.5, far: 1400, position: [0, 11, 32] }}
       onCreated={(estado) => {
+        // Color «de cine»: curva ACES con algo más de exposición. Con el
+        // composer activo esto lo pisa el efecto ToneMapping (Efectos.tsx);
+        // aquí queda para la calidad baja, que va sin composer.
+        estado.gl.toneMapping = THREE.ACESFilmicToneMapping;
+        estado.gl.toneMappingExposure = 1.12;
         estado.scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
         estado.scene.background = null;
         // Dev-only handle for in-browser scene inspection (used to debug the
@@ -287,27 +321,42 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         if ((import.meta as any).env?.DEV) (window as any).__JV = estado;
       }}
     >
+      {/* Baja un escalón de calidad si los FPS caen de verdad (dos rachas).
+          Espera unos segundos antes de vigilar: la carga inicial (compilar
+          materiales, cargar el cielo) siempre da un bajón que no cuenta. */}
+      {nivel !== 'baja' && (
+        <VigilanteDeCalidad onBajar={() => setNivel(bajarNivel)} />
+      )}
       {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
           cielo de día, ya no existe la sala oscura. */}
       <Ambiente interior={!!cine} />
       <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
-      <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
-      <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
+      {/* La luz ambiental REAL: un cielo fotográfico (CC0, autoalojado) que
+          baña la escena — es lo que da reflejos y rebotes creíbles a los
+          materiales. Las luces planas de antes bajan para dejarle sitio. */}
+      <Environment files="/modelos-juego/cielo/dia_despejado_1k.hdr" />
+      <ambientLight intensity={0.18} color={PALETA.luzAmbiente} />
+      <hemisphereLight intensity={0.25} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
       <directionalLight
+        // Al cambiar el lado del mapa de sombras three no lo reconstruye
+        // solo: la key fuerza una luz nueva cuando cambia el nivel.
+        key={`sol-${nivel}`}
         ref={luzRef}
         castShadow
         position={[60, 95, -45]}
-        intensity={1.7}
+        intensity={1.9}
         color={PALETA.luzSol}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-left={-70}
-        shadow-camera-right={70}
-        shadow-camera-top={70}
-        shadow-camera-bottom={-70}
+        shadow-mapSize-width={ajustes.sombras}
+        shadow-mapSize-height={ajustes.sombras}
+        shadow-camera-left={-48}
+        shadow-camera-right={48}
+        shadow-camera-top={48}
+        shadow-camera-bottom={-48}
         shadow-camera-near={5}
         shadow-camera-far={400}
-        shadow-bias={-0.0004}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.03}
+        shadow-radius={4}
       />
 
       {cine ? (
@@ -444,6 +493,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       {/* Dentro de un proyecto no hay robot ni vecinos: el arbitraje de
           cercanía se apaga para que no arrastre la última medida de la aldea. */}
       {!interior && <Coordinador medidas={medidas} onCercania={onCercania} />}
+      <Efectos nivel={nivel} />
     </Canvas>
   );
 }

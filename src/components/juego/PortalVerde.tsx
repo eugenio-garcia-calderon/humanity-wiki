@@ -103,6 +103,12 @@ export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORT
   const giroB = useRef<THREE.Mesh>(null);
   const borde = useRef<THREE.Mesh>(null);
   const tex = useMemo(() => espiral(), []);
+  // Color por encima de 1: con el bloom de la fase 0 de realismo, el aro
+  // RESPLANDECE de verdad (sin efectos activos se ve como siempre).
+  const colorAro = useMemo(
+    () => new THREE.Color(resaltado ? VERDE_BORDE : color).multiplyScalar(1.9),
+    [resaltado, color],
+  );
 
   useFrame(({ clock }, dt) => {
     if (giroA.current) giroA.current.rotation.z -= dt * 1.5;
@@ -137,7 +143,7 @@ export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORT
       {/* El borde verde brillante, latiendo */}
       <mesh ref={borde} position={[0, 0, 0.04]}>
         <ringGeometry args={[radio * 0.94, radio * 1.08, 48]} />
-        <meshBasicMaterial color={resaltado ? VERDE_BORDE : color} toneMapped={false} transparent opacity={0.95} />
+        <meshBasicMaterial color={colorAro} toneMapped={false} transparent opacity={0.95} />
       </mesh>
       {/* La portada del portal, si la tiene */}
       {fotoUrl && <FotoDePortal url={fotoUrl} radio={radio} />}
