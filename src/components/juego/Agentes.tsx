@@ -28,7 +28,7 @@ function Persona({ a }: { a: Agente }) {
   return (
     <group position={[a.x, 0, a.z]}>
       <group ref={grupo}>
-        <Persona3D cuerpo={cuerpo} animacion="idle" />
+        <Persona3D cuerpo={a.apariencia?.cuerpo || cuerpo} animacion="idle" aspecto={a.apariencia} />
       </group>
       <Billboard position={[0, 2.75, 0]}>
         <Text fontSize={0.34} color={PALETA.robotDetalle} anchorX="center" anchorY="middle" outlineWidth={0.03} outlineColor="#ffffff">
