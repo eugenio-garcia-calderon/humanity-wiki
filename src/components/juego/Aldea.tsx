@@ -9,43 +9,18 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
 import { Detalles } from './Detalles';
+import { Modelo, CASAS } from './Modelos';
 
 const MITAD = 545; // half map side
 
 // ---------------------------------------------------------------------------
 // Houses
 // ---------------------------------------------------------------------------
-function Casa({ x, z, rot, ancho, fondo, alto, color, tejado, chimenea }: {
-  x: number; z: number; rot: number; ancho: number; fondo: number; alto: number;
-  color: string; tejado: string; chimenea: boolean;
-}) {
+/** Una casa de verdad del pack CC0, en lugar de la caja con tejado piramidal. */
+function Casa({ x, z, rot, modelo }: { x: number; z: number; rot: number; modelo: string }) {
   return (
     <group position={[x, 0, z]} rotation-y={rot}>
-      <mesh castShadow receiveShadow position={[0, alto / 2, 0]}>
-        <boxGeometry args={[ancho, alto, fondo]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      {/* 4-sided cone rotated 45° = pyramid roof */}
-      <mesh castShadow position={[0, alto + 1.15, 0]} rotation-y={Math.PI / 4}>
-        <coneGeometry args={[Math.max(ancho, fondo) * 0.78, 2.3, 4]} />
-        <meshStandardMaterial color={tejado} flatShading />
-      </mesh>
-      <mesh position={[0, 1.0, fondo / 2 + 0.02]}>
-        <planeGeometry args={[1.1, 2.0]} />
-        <meshStandardMaterial color={PALETA.puerta} />
-      </mesh>
-      {[-ancho / 4, ancho / 4].map((wx, i) => (
-        <mesh key={i} position={[wx, 1.9, fondo / 2 + 0.02]}>
-          <planeGeometry args={[0.85, 0.85]} />
-          <meshStandardMaterial color={PALETA.ventana} />
-        </mesh>
-      ))}
-      {chimenea && (
-        <mesh castShadow position={[ancho / 3, alto + 1.7, -fondo / 5]}>
-          <boxGeometry args={[0.5, 1.3, 0.5]} />
-          <meshStandardMaterial color={tejado} />
-        </mesh>
-      )}
+      <Modelo nombre={modelo} escala={3.2} />
     </group>
   );
 }
@@ -61,15 +36,13 @@ function Casas() {
       const r = (i % 2 === 0 ? 27 : 36) + azar() * 4;
       const x = Math.cos(ang) * r;
       const z = Math.sin(ang) * r;
+      // Se consumen los mismos números aleatorios que antes para que las
+      // posiciones (y el humo de las chimeneas, que las recalcula) no cambien.
+      azar(); azar(); azar(); azar();
       lista.push({
         x, z,
-        rot: -ang - Math.PI / 2, // front door towards the plaza
-        ancho: 5 + azar() * 2,
-        fondo: 4.5 + azar() * 1.5,
-        alto: 2.9 + azar() * 0.6,
-        color: PALETA.casas[i % PALETA.casas.length],
-        tejado: PALETA.tejados[i % PALETA.tejados.length],
-        chimenea: azar() > 0.55,
+        rot: -ang - Math.PI / 2, // la fachada mira a la plaza
+        modelo: CASAS[i % CASAS.length],
       });
     }
     return lista;

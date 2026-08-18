@@ -15,6 +15,8 @@
 | First phase | **"Pasear tu vida"** — walk the village with the robot, real projects as buildings. |
 | Photo → 3D objects | **Hybrid**: CC0 stylized asset library matched by AI (free, instant) + real image-to-3D generation (~€0.10-0.50/object, to verify) as a premium option that costs puntos. |
 | Target devices | **Mobile + desktop from day 1** (Eugenio's call over the desktop-first recommendation; adds touch joystick + mobile perf budget to F1). |
+| Real messaging | **Telegram, not WhatsApp** (Eugenio, 2026-08-18, choosing among four options). Official bot API: real two-way messages, no risk of losing his personal number. WhatsApp bridges were offered and declined — see the WhatsApp section below, which stands. **Known limit, stated before building: a Telegram bot can only write to people who have messaged it first**, so each friend must `/start` the bot once. |
+| 3D assets | **Full downloaded library — people AND objects** (Eugenio, 2026-08-18, over the "characters first" recommendation). CC0 only (Kenney / Quaternius: public domain, no attribution required, safe to redistribute). Accepted costs, stated when asked: tens of MB in the repo, and mixing packs can break style coherence — mitigated by preferring a single pack family per category. |
 
 ## The five pillars
 
