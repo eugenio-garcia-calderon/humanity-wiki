@@ -200,6 +200,43 @@ function Documento3D({ nombre }: { nombre: string }) {
   );
 }
 
+/** Tarjeta base de las cosas que se ABREN en ventana interna: enlaces,
+ *  vídeos, música, lienzos y mapas. Cada tipo tiene su cara. */
+function TarjetaMedio({ ancho, alto, fondo, barra, icono, nombre, colorNombre = '#3a4552' }: {
+  ancho: number; alto: number; fondo: string; barra: string;
+  icono: string; nombre: string; colorNombre?: string;
+}) {
+  return (
+    <Billboard position={[0, 2.1, 0]}>
+      <mesh position={[0, 0, -0.02]}>
+        <planeGeometry args={[ancho + 0.2, alto + 0.2]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+      <mesh>
+        <planeGeometry args={[ancho, alto]} />
+        <meshBasicMaterial color={fondo} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Barra superior tipo navegador, con sus tres puntos */}
+      <mesh position={[0, alto / 2 - 0.16, 0.01]}>
+        <planeGeometry args={[ancho, 0.32]} />
+        <meshBasicMaterial color={barra} toneMapped={false} />
+      </mesh>
+      {[-1, 0, 1].map(i => (
+        <mesh key={i} position={[-ancho / 2 + 0.22 + i * 0.16 + 0.16, alto / 2 - 0.16, 0.02]}>
+          <circleGeometry args={[0.045, 10]} />
+          <meshBasicMaterial color="#ffffff" toneMapped={false} transparent opacity={0.8} />
+        </mesh>
+      ))}
+      <Text position={[0, 0.1, 0.02]} fontSize={0.62} anchorX="center" anchorY="middle">
+        {icono}
+      </Text>
+      <Text position={[0, -alto / 2 + 0.3, 0.02]} fontSize={0.18} maxWidth={ancho - 0.3} color={colorNombre} anchorX="center" anchorY="middle" textAlign="center">
+        {(nombre || '').slice(0, 40)}
+      </Text>
+    </Billboard>
+  );
+}
+
 /** Poste que ancla al suelo lo que flota (nota, imagen, documento). */
 function Poste() {
   return (
@@ -210,20 +247,70 @@ function Poste() {
   );
 }
 
+/** El aspecto de un objeto del jugador, sin posición: lo usan la lista y el
+ *  FANTASMA que sigue al ratón mientras lo arrastras. */
+export function ItemVisual({ item, fase = 0 }: { item: ItemMundo; fase?: number }) {
+  return (
+    <>
+      {item.tipo === 'prop' && <PropMundo modelo={item.modelo || 'roca'} semilla={item.id} />}
+      {item.tipo === 'nota' && <><Poste /><Flota fase={fase}><Nota3D texto={item.texto || ''} /></Flota></>}
+      {item.tipo === 'imagen' && item.url && <><Poste /><Flota fase={fase}><Imagen3D url={item.url} /></Flota></>}
+      {item.tipo === 'documento' && <><Poste /><Flota fase={fase}><Documento3D nombre={item.nombre || ''} /></Flota></>}
+      {item.tipo === 'enlace' && <><Poste /><Flota fase={fase}>
+        <TarjetaMedio ancho={2.7} alto={2} fondo="#f6f8fb" barra="#64748b" icono="🌐" nombre={item.nombre || item.url || 'Enlace'} /></Flota></>}
+      {item.tipo === 'video' && <><Poste /><Flota fase={fase}>
+        <TarjetaMedio ancho={3.1} alto={1.95} fondo="#1c1c22" barra="#e0245e" icono="▶️" nombre={item.nombre || 'Vídeo'} colorNombre="#e8e8ee" /></Flota></>}
+      {item.tipo === 'musica' && <><Poste /><Flota fase={fase}>
+        <TarjetaMedio ancho={2.4} alto={2.4} fondo="#173325" barra="#1db954" icono="🎵" nombre={item.nombre || 'Música'} colorNombre="#d9f2e4" /></Flota></>}
+      {item.tipo === 'lienzo' && <><Poste /><Flota fase={fase}>
+        <TarjetaMedio ancho={2.8} alto={2.1} fondo="#faf7ff" barra="#7c3aed" icono="🎨" nombre={item.nombre || 'Lienzo'} /></Flota></>}
+      {item.tipo === 'mapa' && <><Poste /><Flota fase={fase}>
+        <TarjetaMedio ancho={2.8} alto={2.1} fondo="#eefaf1" barra="#16a34a" icono="🗺️" nombre={item.nombre || 'Mapa'} /></Flota></>}
+    </>
+  );
+}
+
+/**
+ * El fantasma de arrastre: lo que llevas agarrado, siguiendo al ratón por el
+ * suelo (petición de Eugenio: «si pincho y arrastro, el objeto se mueve»).
+ * El original se oculta mientras tanto; al soltar, se guarda donde caiga.
+ */
+export function MovilFantasma({ movil, rot, children }: {
+  movil: React.MutableRefObject<{ x: number; z: number } | null>;
+  rot: number;
+  children: React.ReactNode;
+}) {
+  const g = useRef<THREE.Group>(null);
+  useFrame(() => {
+    const gr = g.current;
+    if (!gr) return;
+    const p = movil.current;
+    gr.visible = !!p;
+    if (p) {
+      gr.position.x += (p.x - gr.position.x) * 0.5;
+      gr.position.z += (p.z - gr.position.z) * 0.5;
+    }
+  });
+  return <group ref={g} rotation-y={rot} visible={false}>{children}</group>;
+}
+
 // ---------------------------------------------------------------------------
 // Los objetos del jugador + sus hilos
 // ---------------------------------------------------------------------------
 
 /** Altura a la que sale el hilo de cada tipo de cosa. */
-const alturaHilo = (tipo: string) =>
-  tipo === 'nota' || tipo === 'documento' ? 2.1 : tipo === 'imagen' ? 2.2 : 1.2;
+const alturaHilo = (tipo: string) => (tipo === 'prop' ? 1.2 : 2.1);
 
-export function ObjetosMundo({ items, editando, onPulsar, onAbrir, resolverDestino }: {
+export function ObjetosMundo({ items, onPulsar, onAgarrar, ocultar, resolverDestino }: {
   items: ItemMundo[];
-  editando: boolean;
+  /** Pulsar un objeto abre SUS OPCIONES directamente (petición de Eugenio:
+   *  sin tener que activar antes ningún modo edición). */
   onPulsar: (sel: SeleccionMundo) => void;
-  /** Fuera del modo edición: pulsar una nota/imagen/documento lo abre para leer. */
-  onAbrir: (item: ItemMundo) => void;
+  /** Pinchar (sin soltar) un objeto: candidato a arrastre. La página decide
+   *  si es arrastre (se mueve) o clic (se abren sus opciones). */
+  onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
+  /** El id del objeto que va agarrado: no se dibuja (lo lleva el fantasma). */
+  ocultar?: string;
   /** Convierte 'agente:GA…' | 'proy:PRY…' | 'item:WM…' en una posición, o null. */
   resolverDestino: (ref: string) => { x: number; y: number; z: number } | null;
 }) {
@@ -245,28 +332,34 @@ export function ObjetosMundo({ items, editando, onPulsar, onAbrir, resolverDesti
     return lista;
   }, [items, resolverDestino]);
 
+  const selDe = (it: ItemMundo): SeleccionMundo => ({
+    clase: 'item', id: it.id, tipo: it.tipo,
+    etiqueta: it.tipo === 'prop' ? `Objeto (${it.modelo})`
+      : it.tipo === 'nota' ? 'Nota'
+        : it.tipo === 'imagen' ? 'Imagen'
+          : it.nombre || ({ documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo,
+    x: it.x, z: it.z, rot: it.rot, modelo: it.modelo, texto: it.texto, url: it.url,
+  });
   const pulsar = (e: ThreeEvent<MouseEvent>, it: ItemMundo) => {
     if (!esClic(e)) return;
     e.stopPropagation();
-    if (editando) {
-      onPulsar({
-        clase: 'item', id: it.id, tipo: it.tipo,
-        etiqueta: it.tipo === 'prop' ? `Objeto (${it.modelo})` : it.tipo === 'nota' ? 'Nota' : it.tipo === 'imagen' ? 'Imagen' : (it.nombre || 'Documento'),
-        x: it.x, z: it.z, rot: it.rot, modelo: it.modelo, texto: it.texto, url: it.url,
-      });
-    } else if (it.tipo !== 'prop') {
-      onAbrir(it);   // leer la nota, ver la imagen, abrir el documento
-    }
+    onPulsar(selDe(it));
   };
 
   return (
     <group>
-      {items.map((it, i) => (
-        <group key={it.id} position={[it.x, 0, it.z]} rotation-y={it.rot} onClick={(e) => pulsar(e, it)}>
-          {it.tipo === 'prop' && <PropMundo modelo={it.modelo || 'roca'} semilla={it.id} />}
-          {it.tipo === 'nota' && <><Poste /><Flota fase={i * 1.3}><Nota3D texto={it.texto || ''} /></Flota></>}
-          {it.tipo === 'imagen' && it.url && <><Poste /><Flota fase={i * 1.3}><Imagen3D url={it.url} /></Flota></>}
-          {it.tipo === 'documento' && <><Poste /><Flota fase={i * 1.3}><Documento3D nombre={it.nombre || ''} /></Flota></>}
+      {items.filter(it => it.id !== ocultar).map((it, i) => (
+        <group
+          key={it.id}
+          position={[it.x, 0, it.z]}
+          rotation-y={it.rot}
+          onClick={(e) => pulsar(e, it)}
+          onPointerDown={(e) => {
+            if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+            onAgarrar(selDe(it), { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY });
+          }}
+        >
+          <ItemVisual item={it} fase={i * 1.3} />
           {/* Blanco generoso para el dedo en lo que flota fino */}
           {it.tipo !== 'prop' && (
             <mesh position={[0, 2, 0]}>
@@ -299,7 +392,11 @@ export function SueloEditor({ moviendo, movil, onSuelo, onSoltar }: {
       rotation={[-Math.PI / 2, 0, 0]}
       position={[0, 0.01, 0]}
       onPointerMove={(e) => {
-        if (moviendo) movil.current = { x: e.point.x, z: e.point.z };
+        // SIEMPRE se apunta dónde está el ratón sobre el suelo, no solo en
+        // modo mover: el arrastre directo empieza en un pointermove y, si
+        // esperase al re-render del estado, un arrastre rápido soltaría el
+        // objeto en su sitio original (pasó en las pruebas).
+        movil.current = { x: e.point.x, z: e.point.z };
       }}
       onClick={(e) => {
         if (!esClic(e)) return;

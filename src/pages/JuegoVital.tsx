@@ -6,6 +6,7 @@ import {
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
+  Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -184,19 +185,33 @@ export default function JuegoVital() {
   // --- El mundo editable: un Miro en 3D (2026-08-18, petición de Eugenio) ---
   const [mundoItems, setMundoItems] = useState<ItemMundo[]>([]);
   const [overridesMundo, setOverridesMundo] = useState<OverrideMundo[]>([]);
-  const [editandoMundo, setEditandoMundo] = useState(false);
   const [selMundo, setSelMundo] = useState<SeleccionMundo | null>(null);
   const [moviendoMundo, setMoviendoMundo] = useState(false);
   const [conectando, setConectando] = useState(false);
   const [crearEn, setCrearEn] = useState<{ x: number; z: number } | null>(null);
   const [leyendo, setLeyendo] = useState<ItemMundo | null>(null);
   const [notaBorrador, setNotaBorrador] = useState('');
+  /** Mini-formulario del panel de crear: link, vídeo, música, lienzo o mapa. */
+  const [formCrear, setFormCrear] = useState<{ tipo: 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa'; url: string; nombre: string } | null>(null);
+  /** Dónde plantar el edificio si el proyecto se crea desde el suelo. */
+  const posProyecto = useRef<{ x: number; z: number } | null>(null);
+  /** Las instrucciones del teclado, comprimidas en el icono ℹ️ (petición de Eugenio). */
+  const [ayudaVisible, setAyudaVisible] = useState(false);
+  // Cerrar el panel de crear tira también su mini-formulario: si no, al
+  // reabrirlo en otro sitio aparecería el formulario a medias de antes.
+  useEffect(() => { if (!crearEn) setFormCrear(null); }, [crearEn]);
   const movilRef = useRef<{ x: number; z: number } | null>(null);
   const archivoMundoRef = useRef<HTMLInputElement>(null);
   const subiendoComo = useRef<'imagen' | 'documento'>('imagen');
   // Lo que el teclado y los clics 3D necesitan leer sin re-suscribirse.
+  // Sin modo edición: pulsar un objeto abre sus opciones directamente
+  // (petición de Eugenio). `activo` solo dice si hay sesión.
   const editorRef = useRef({ activo: false, conectando: false, sel: null as SeleccionMundo | null });
-  editorRef.current = { activo: editandoMundo, conectando, sel: selMundo };
+  editorRef.current = { activo: !!user, conectando, sel: selMundo };
+  /** Pinchado pero aún sin arrastrar: candidato a mover (o a ser solo un clic). */
+  const agarre = useRef<{ sel: SeleccionMundo; x: number; y: number } | null>(null);
+  /** El arrastre está EN MARCHA: al soltar el botón se guarda donde caiga. */
+  const arrastrando = useRef(false);
   const leyendoRef = useRef<ItemMundo | null>(null);
   leyendoRef.current = leyendo;
   const crearEnRef = useRef<{ x: number; z: number } | null>(null);
@@ -414,7 +429,6 @@ export default function JuegoVital() {
   // ------------------------------------------------------------------------
 
   const salirDelEditor = useCallback(() => {
-    setEditandoMundo(false);
     setSelMundo(null);
     setMoviendoMundo(false);
     setConectando(false);
@@ -468,6 +482,56 @@ export default function JuegoVital() {
     const nuevo = await r.json();
     setMundoItems(prev => [...prev, { ...nuevo, enlaces: [] }]);
   }, [crearEn, jugadorPos]);
+
+  /**
+   * Pinchar y ARRASTRAR mueve el objeto (petición de Eugenio). El agarre llega
+   * del lienzo al pinchar; si el ratón recorre más de 8 px, empieza el
+   * arrastre: el original se oculta, un fantasma sigue al ratón por el suelo y
+   * al soltar el botón se guarda donde caiga. Si no llega a arrastre, es un
+   * clic y abre las opciones (lo gestiona el onClick de siempre).
+   */
+  const alAgarrarMundo = useCallback((sel: SeleccionMundo, punto: { x: number; y: number }) => {
+    if (!user || interiorRef.current) return;
+    agarre.current = { sel, ...punto };
+  }, [user]);
+
+  useEffect(() => {
+    const mover = (e: PointerEvent) => {
+      const a = agarre.current;
+      if (!a || arrastrando.current) return;
+      if (Math.hypot(e.clientX - a.x, e.clientY - a.y) < 8) return;
+      // Empieza el arrastre de verdad
+      arrastrando.current = true;
+      movilRef.current = { x: a.sel.x, z: a.sel.z };
+      setSelMundo(a.sel);
+      setCrearEn(null);
+      setConectando(false);
+      setMoviendoMundo(true);
+    };
+    const soltar = () => {
+      if (arrastrando.current) {
+        const sel = editorRef.current.sel;
+        const p = movilRef.current;
+        if (sel && p) {
+          if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
+          else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
+          setSelMundo({ ...sel, x: p.x, z: p.z });
+        }
+        setMoviendoMundo(false);
+        movilRef.current = null;
+        arrastrando.current = false;
+      }
+      agarre.current = null;
+    };
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('pointercancel', soltar);
+    return () => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+      window.removeEventListener('pointercancel', soltar);
+    };
+  }, [guardarItem, guardarOverride]);
 
   /** Clic sobre una pieza o un objeto en modo edición. */
   const alPulsarMundo = useCallback((sel: SeleccionMundo) => {
@@ -547,6 +611,41 @@ export default function JuegoVital() {
     }
   }, [guardarItem, guardarOverride]);
 
+  /**
+   * Crea desde el suelo lo que vive en la PLATAFORMA y lo planta como tarjeta
+   * (petición de Eugenio): un lienzo real (grafo de conocimiento), un mapa
+   * real, o un medio (link, vídeo, música). Todo se abre luego en la ventana
+   * interna, sin salir del juego.
+   */
+  const crearDesdeForm = useCallback(async () => {
+    const f = formCrear;
+    if (!f) return;
+    setFormCrear(null);
+    if (f.tipo === 'lienzo' || f.tipo === 'mapa') {
+      const nombre = f.nombre.trim() || (f.tipo === 'lienzo' ? 'Lienzo nuevo' : 'Mapa nuevo');
+      const r = await fetch(f.tipo === 'lienzo' ? '/api/graphs' : '/api/maps', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: nombre }),
+      }).catch(() => null);
+      const j = await r?.json().catch(() => null);
+      if (!r?.ok || !j?.slug) { avisar(j?.error || 'No se ha podido crear.'); return; }
+      await crearItemMundo({
+        tipo: f.tipo, nombre,
+        url: f.tipo === 'lienzo' ? `/grafos/${j.slug}` : `/mapas/${j.slug}`,
+      });
+      avisar(`${f.tipo === 'lienzo' ? 'Lienzo' : 'Mapa'} creado y plantado. Púlsalo y dale a Abrir.`);
+      return;
+    }
+    const url = f.url.trim();
+    if (!url) { avisar('Falta la dirección (URL).'); return; }
+    await crearItemMundo({
+      tipo: f.tipo,
+      url: /^https?:\/\//.test(url) ? url : `https://${url}`,
+      nombre: f.nombre.trim() || url.replace(/^https?:\/\//, '').slice(0, 40),
+    });
+  }, [formCrear, crearItemMundo]);
+
   /** Subir una imagen o un documento y plantarlo donde se pulsó. */
   const subirAlMundo = useCallback(async (f: File | undefined) => {
     if (!f) return;
@@ -588,7 +687,7 @@ export default function JuegoVital() {
     const a = abiertos.current;
     const ed = editorRef.current;
     if (leyendoRef.current) setLeyendo(null);
-    else if (ed.activo && (ed.sel || ed.conectando)) { setSelMundo(null); setConectando(false); setMoviendoMundo(false); }
+    else if (ed.sel || ed.conectando) { setSelMundo(null); setConectando(false); setMoviendoMundo(false); }
     else if (crearEnRef.current) setCrearEn(null);
     else if (a.aspecto) setEditandoAspecto(null);
     else if (a.construyendo) setConstruyendo(null);
@@ -971,6 +1070,10 @@ export default function JuegoVital() {
       // ficha que se añada mañana quede a salvo sin tocar esto.
       if (!(e.target instanceof HTMLCanvasElement)) return;
       if (e.pointerType !== 'mouse' && e.clientX < window.innerWidth * 0.4) return;
+      // Con un objeto agarrado, arrastrar lo MUEVE a él, no a la vista. El
+      // agarre se apunta en el mismo pointerdown del lienzo, que corre antes
+      // que este oyente de window (el evento sube burbujeando).
+      if (agarre.current || arrastrando.current) return;
       id = e.pointerId;
       ultimo = { x: e.clientX, y: e.clientY };
       // Mientras arrastras mandas tú: la cámara deja de perseguir el rumbo.
@@ -1072,7 +1175,6 @@ export default function JuegoVital() {
               setConectando(false);
               return;
             }
-            if (ed.activo) return;   // editando no se entra en sitios sin querer
             entrarEnProyecto(p);
           }}
           onHablarAgente={(a) => {
@@ -1086,12 +1188,12 @@ export default function JuegoVital() {
               setConectando(false);
               return;
             }
-            if (ed.activo) return;
             setFichaAgente(a); hablarCon(a);
           }}
           mundo={{ items: mundoItems, overrides: overridesMundo }}
-          editor={{ activo: editandoMundo, moviendo: moviendoMundo, sel: selMundo }}
+          editor={{ activo: !!user, moviendo: moviendoMundo, sel: selMundo }}
           onPulsarMundo={alPulsarMundo}
+          onAgarrarMundo={alAgarrarMundo}
           onSuelo={alSuelo}
           onSoltar={alSoltar}
           onAbrirItem={(it) => setLeyendo(it)}
@@ -1163,10 +1265,36 @@ export default function JuegoVital() {
         </div>
       )}
 
-      <div className="hidden sm:block absolute top-3 right-40 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
-        <p className="text-[10px] font-bold text-slate-500">
-          WASD caminar · Shift correr · espacio saltar (dos veces: volar) · en vuelo W sube y S baja · E hablar · B bici · V volar
-        </p>
+      {/* Las instrucciones viven comprimidas en el icono ℹ️ (petición de
+          Eugenio): un botón arriba a la derecha que despliega la chuleta. */}
+      <div className="hidden sm:block absolute top-3 right-[10.5rem] z-30">
+        <button
+          onClick={() => setAyudaVisible(v => !v)}
+          title="Cómo se juega"
+          className={cn(
+            'w-9 h-9 rounded-full border flex items-center justify-center shadow transition-colors',
+            ayudaVisible ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white/90 backdrop-blur border-slate-200 text-slate-500 hover:text-emerald-700 hover:border-emerald-300',
+          )}
+        >
+          <Info className="w-4 h-4" />
+        </button>
+        {ayudaVisible && (
+          <div className="absolute right-0 mt-2 w-64 p-3.5 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-xl">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Cómo se juega</p>
+            <ul className="space-y-1 text-[11px] font-bold text-slate-600">
+              <li><span className="text-slate-900">WASD / flechas</span> — caminar</li>
+              <li><span className="text-slate-900">Shift</span> — correr</li>
+              <li><span className="text-slate-900">Espacio</span> — saltar · dos veces: volar</li>
+              <li><span className="text-slate-900">En vuelo W / S</span> — subir y bajar</li>
+              <li><span className="text-slate-900">E</span> — hablar · <span className="text-slate-900">B</span> bici · <span className="text-slate-900">V</span> nave</li>
+              <li><span className="text-slate-900">Arrastrar el mundo</span> — mirar alrededor</li>
+              <li><span className="text-slate-900">Pulsar un objeto</span> — sus opciones</li>
+              <li><span className="text-slate-900">Arrastrar un objeto</span> — moverlo</li>
+              <li><span className="text-slate-900">Pulsar el suelo</span> — crear ahí</li>
+              <li><span className="text-slate-900">Escape / ↓</span> — cerrar o salir</li>
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* --------------------------------------------------------------- */}
@@ -1244,20 +1372,19 @@ export default function JuegoVital() {
       {/* ---------------------------------------------------------------- */}
       {/* EDITOR DEL MUNDO: un Miro en 3D (petición de Eugenio)             */}
       {/* ---------------------------------------------------------------- */}
-      {user && !interior && editandoMundo && (
+      {user && !interior && (moviendoMundo || conectando) && (
         <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 bg-amber-500/95 text-white rounded-xl shadow-lg flex items-center gap-2">
           <Wrench className="w-3.5 h-3.5" />
           <p className="text-[11px] font-bold">
             {moviendoMundo ? 'Pulsa el suelo donde quieras dejarlo'
-              : conectando ? 'Pulsa el destino del hilo: otra cosa, una persona o un proyecto'
-                : 'Modo edición · pulsa un objeto para editarlo, o el suelo para crear'}
+              : 'Pulsa el destino del hilo: otra cosa, una persona o un proyecto'}
           </p>
           <button onClick={salirDelEditor} className="ml-1 text-white/80 hover:text-white"><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
 
       {/* Ficha del objeto seleccionado */}
-      {user && !interior && editandoMundo && selMundo && !moviendoMundo && !conectando && (
+      {user && !interior && selMundo && !moviendoMundo && !conectando && (
         <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[21rem] max-w-[92vw]">
           <Card className="p-3 shadow-2xl">
             <div className="flex items-center justify-between">
@@ -1291,8 +1418,22 @@ export default function JuegoVital() {
                   <Link2 className="w-3.5 h-3.5 mr-1 inline" />Conectar
                 </Button>
               )}
-              {selMundo.url && (
-                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200" onClick={() => window.open(selMundo.url!, '_blank')}>
+              {selMundo.tipo === 'imagen' && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200"
+                  onClick={() => { const it = mundoItems.find(x => x.id === selMundo.id); if (it) { setLeyendo(it); setSelMundo(null); } }}>
+                  <ImagePlus className="w-3.5 h-3.5 mr-1 inline" />Ver
+                </Button>
+              )}
+              {selMundo.url && selMundo.tipo !== 'imagen' && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200"
+                  onClick={() => {
+                    const it = mundoItems.find(x => x.id === selMundo.id);
+                    if (!it) return;
+                    // Documentos: descarga. El resto: ventana interna.
+                    if (it.tipo === 'documento') { window.open(it.url!, '_blank'); return; }
+                    setLeyendo(it);
+                    setSelMundo(null);
+                  }}>
                   <FileText className="w-3.5 h-3.5 mr-1 inline" />Abrir
                 </Button>
               )}
@@ -1305,7 +1446,7 @@ export default function JuegoVital() {
       )}
 
       {/* Panel de crear: sale al pulsar suelo vacío en modo edición */}
-      {user && !interior && editandoMundo && crearEn && (
+      {user && !interior && crearEn && (
         <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[23rem] max-w-[94vw]">
           <Card className="p-3.5 shadow-2xl">
             <div className="flex items-center justify-between">
@@ -1326,27 +1467,70 @@ export default function JuegoVital() {
             </div>
             <div className="h-px bg-slate-200 my-2.5" />
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Conocimiento</p>
-            <div className="flex gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5">
+              {([
+                { icono: <StickyNote className="w-3.5 h-3.5" />, texto: 'Nota', al: () => crearItemMundo({ tipo: 'nota', texto: '' }) },
+                { icono: <ImagePlus className="w-3.5 h-3.5" />, texto: 'Imagen', al: () => { subiendoComo.current = 'imagen'; archivoMundoRef.current?.click(); } },
+                { icono: <FileText className="w-3.5 h-3.5" />, texto: 'Documento', al: () => { subiendoComo.current = 'documento'; archivoMundoRef.current?.click(); } },
+                { icono: <Globe className="w-3.5 h-3.5" />, texto: 'Link', al: () => setFormCrear({ tipo: 'enlace', url: '', nombre: '' }) },
+                { icono: <Film className="w-3.5 h-3.5" />, texto: 'Vídeo', al: () => setFormCrear({ tipo: 'video', url: '', nombre: '' }) },
+                { icono: <Music2 className="w-3.5 h-3.5" />, texto: 'Música', al: () => setFormCrear({ tipo: 'musica', url: '', nombre: '' }) },
+              ] as const).map(b => (
+                <button key={b.texto} onClick={b.al}
+                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors">
+                  {b.icono}{b.texto}
+                </button>
+              ))}
+            </div>
+            <div className="h-px bg-slate-200 my-2.5" />
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">De la plataforma</p>
+            <div className="grid grid-cols-3 gap-1.5">
               <button
-                onClick={() => { crearItemMundo({ tipo: 'nota', texto: '' }); }}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
-              >
-                <StickyNote className="w-3.5 h-3.5" />Nota
+                onClick={() => { posProyecto.current = crearEn; setCrearEn(null); setConstruyendo('proyecto'); }}
+                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-[11px] font-bold text-slate-600 transition-colors">
+                <Building2 className="w-3.5 h-3.5" />Proyecto
               </button>
               <button
-                onClick={() => { subiendoComo.current = 'imagen'; archivoMundoRef.current?.click(); }}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
-              >
-                <ImagePlus className="w-3.5 h-3.5" />Imagen
+                onClick={() => setFormCrear({ tipo: 'lienzo', url: '', nombre: '' })}
+                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-[11px] font-bold text-slate-600 transition-colors">
+                <PenTool className="w-3.5 h-3.5" />Lienzo
               </button>
               <button
-                onClick={() => { subiendoComo.current = 'documento'; archivoMundoRef.current?.click(); }}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors"
-              >
-                <FileText className="w-3.5 h-3.5" />Documento
+                onClick={() => setFormCrear({ tipo: 'mapa', url: '', nombre: '' })}
+                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-[11px] font-bold text-slate-600 transition-colors">
+                <MapaIcono className="w-3.5 h-3.5" />Mapa
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 mt-2">La nota se escribe al seleccionarla. Todo se puede mover, conectar con hilos y eliminar después.</p>
+            {formCrear && (
+              <div className="mt-2.5 p-2.5 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1.5">
+                <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                  {{ enlace: 'Nuevo link', video: 'Vídeo (YouTube)', musica: 'Música (Spotify o similar)', lienzo: 'Nuevo lienzo', mapa: 'Nuevo mapa' }[formCrear.tipo]}
+                </p>
+                {(formCrear.tipo === 'enlace' || formCrear.tipo === 'video' || formCrear.tipo === 'musica') && (
+                  <input
+                    autoFocus
+                    value={formCrear.url}
+                    onChange={e => setFormCrear({ ...formCrear, url: e.target.value })}
+                    onKeyDown={e => { if (e.key === 'Enter') crearDesdeForm(); }}
+                    placeholder="https://…"
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-amber-300"
+                  />
+                )}
+                <input
+                  autoFocus={formCrear.tipo === 'lienzo' || formCrear.tipo === 'mapa'}
+                  value={formCrear.nombre}
+                  onChange={e => setFormCrear({ ...formCrear, nombre: e.target.value })}
+                  onKeyDown={e => { if (e.key === 'Enter') crearDesdeForm(); }}
+                  placeholder={formCrear.tipo === 'lienzo' || formCrear.tipo === 'mapa' ? 'Título' : 'Nombre visible (opcional)'}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-amber-300"
+                />
+                <div className="flex gap-1.5">
+                  <Button onClick={crearDesdeForm} className="flex-1 text-[11px] py-1.5">Crear</Button>
+                  <Button variant="ghost" onClick={() => setFormCrear(null)} className="text-[11px] py-1.5">Cancelar</Button>
+                </div>
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 mt-2">La nota se escribe al seleccionarla. Todo se puede arrastrar, conectar con hilos y eliminar; los medios se abren en una ventana sin salir del juego.</p>
           </Card>
         </div>
       )}
@@ -1358,32 +1542,80 @@ export default function JuegoVital() {
         onChange={e => { subirAlMundo(e.target.files?.[0]); e.target.value = ''; }}
       />
 
-      {/* Leer lo plantado: nota, imagen o documento, fuera del modo edición */}
-      {leyendo && (
-        <div data-ui-juego className="absolute inset-0 z-50 flex items-center justify-center px-5 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setLeyendo(null)}>
-          <Card className="p-5 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-black text-slate-900 flex items-center gap-2">
-                {leyendo.tipo === 'nota' ? <StickyNote className="w-4 h-4 text-amber-500" />
-                  : leyendo.tipo === 'imagen' ? <ImagePlus className="w-4 h-4 text-emerald-600" />
-                    : <FileText className="w-4 h-4 text-emerald-600" />}
-                {leyendo.tipo === 'nota' ? 'Nota' : leyendo.nombre || (leyendo.tipo === 'imagen' ? 'Imagen' : 'Documento')}
-              </p>
-              <Button variant="ghost" onClick={() => setLeyendo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
-            </div>
-            {leyendo.tipo === 'nota' && (
-              <p className="text-sm text-slate-700 mt-3 whitespace-pre-wrap leading-relaxed">{leyendo.texto || 'Nota vacía.'}</p>
-            )}
-            {leyendo.tipo === 'imagen' && leyendo.url && (
-              <img src={leyendo.url} alt={leyendo.nombre || 'Imagen'} className="mt-3 rounded-xl max-h-[55vh] w-full object-contain bg-slate-50" />
-            )}
-            {leyendo.tipo === 'documento' && leyendo.url && (
-              <Button onClick={() => window.open(leyendo.url!, '_blank')} className="w-full mt-4">Abrir el documento</Button>
-            )}
-            <p className="text-[10px] text-slate-400 mt-3">Plantado en tu mundo · usa la llave inglesa para moverlo o conectarlo con hilos.</p>
-          </Card>
-        </div>
-      )}
+      {/* La VENTANA INTERNA (petición de Eugenio): lo plantado se abre en una
+          pantalla central sin salir del juego — un navegador para los links,
+          el reproductor para vídeo y música, el lienzo o el mapa reales de la
+          plataforma… Pulsar fuera de la ventana la cierra. */}
+      {leyendo && (() => {
+        const esMarco = ['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo);
+        const src = (() => {
+          if (!leyendo.url) return null;
+          if (leyendo.tipo === 'video') {
+            const id = leyendo.url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1];
+            return id ? `https://www.youtube-nocookie.com/embed/${id}` : leyendo.url;
+          }
+          if (leyendo.tipo === 'musica' && leyendo.url.includes('open.spotify.com') && !leyendo.url.includes('/embed')) {
+            return leyendo.url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+          }
+          return leyendo.url;   // enlace, lienzo y mapa tal cual (los internos son de la propia web)
+        })();
+        return (
+          <div data-ui-juego className="absolute inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/50 backdrop-blur-[2px]" onClick={() => setLeyendo(null)}>
+            <Card
+              className={cn('shadow-2xl overflow-hidden flex flex-col', esMarco ? 'w-[92vw] max-w-5xl h-[82vh] p-0' : 'p-5 w-full max-w-md max-h-[80vh] overflow-y-auto')}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className={cn('flex items-center justify-between', esMarco && 'px-4 py-2.5 border-b border-slate-100')}>
+                <p className="text-sm font-black text-slate-900 flex items-center gap-2 truncate">
+                  {leyendo.tipo === 'nota' ? <StickyNote className="w-4 h-4 text-amber-500 shrink-0" />
+                    : leyendo.tipo === 'imagen' ? <ImagePlus className="w-4 h-4 text-emerald-600 shrink-0" />
+                      : leyendo.tipo === 'enlace' ? <Globe className="w-4 h-4 text-slate-500 shrink-0" />
+                        : leyendo.tipo === 'video' ? <Film className="w-4 h-4 text-rose-500 shrink-0" />
+                          : leyendo.tipo === 'musica' ? <Music2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            : leyendo.tipo === 'lienzo' ? <PenTool className="w-4 h-4 text-violet-600 shrink-0" />
+                              : leyendo.tipo === 'mapa' ? <MapaIcono className="w-4 h-4 text-emerald-600 shrink-0" />
+                                : <FileText className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  <span className="truncate">{leyendo.nombre || { nota: 'Nota', imagen: 'Imagen', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' }[leyendo.tipo] || 'Documento'}</span>
+                </p>
+                <div className="flex items-center gap-1">
+                  {esMarco && leyendo.url && (
+                    <Button variant="ghost" onClick={() => window.open(leyendo.url!, '_blank')} className="p-1.5" title="Abrir fuera del juego">
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" onClick={() => setLeyendo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+                </div>
+              </div>
+              {esMarco && src && (
+                <iframe
+                  src={src}
+                  title={leyendo.nombre || 'Contenido'}
+                  className="flex-1 w-full bg-white"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
+                />
+              )}
+              {esMarco && (
+                <p className="px-4 py-1.5 text-[10px] text-slate-400 border-t border-slate-100">
+                  Si la página se niega a cargar aquí dentro (algunas webs lo bloquean), usa el botón de abrir fuera.
+                </p>
+              )}
+              {leyendo.tipo === 'nota' && (
+                <p className="text-sm text-slate-700 mt-3 whitespace-pre-wrap leading-relaxed">{leyendo.texto || 'Nota vacía.'}</p>
+              )}
+              {leyendo.tipo === 'imagen' && leyendo.url && (
+                <img src={leyendo.url} alt={leyendo.nombre || 'Imagen'} className="mt-3 rounded-xl max-h-[55vh] w-full object-contain bg-slate-50" />
+              )}
+              {leyendo.tipo === 'documento' && leyendo.url && (
+                <Button onClick={() => window.open(leyendo.url!, '_blank')} className="w-full mt-4">Abrir el documento</Button>
+              )}
+              {!esMarco && (
+                <p className="text-[10px] text-slate-400 mt-3">Plantado en tu mundo · púlsalo para moverlo, conectarlo con hilos o eliminarlo.</p>
+              )}
+            </Card>
+          </div>
+        );
+      })()}
 
       {/* ---------------------------------------------------------------- */}
       {/* BUILDER: la barra de construcción, siempre a mano (estilo Sims)   */}
@@ -1415,18 +1647,7 @@ export default function JuegoVital() {
             >
               <Palette className="w-5 h-5" />
             </button>
-            <button
-              onClick={() => (editandoMundo ? salirDelEditor() : setEditandoMundo(true))}
-              title="Editar el mundo: pulsa cualquier objeto para moverlo, cambiarlo o eliminarlo, y el suelo para crear (notas, archivos, árboles, casas…)"
-              className={cn(
-                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
-                editandoMundo
-                  ? 'bg-amber-500 border-amber-500 text-white'
-                  : 'bg-white border-slate-200 hover:border-amber-300 text-slate-600 hover:text-amber-600',
-              )}
-            >
-              <Wrench className="w-5 h-5" />
-            </button>
+
             <div className="h-px bg-slate-200 mx-1" />
             <button
               onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
@@ -1620,7 +1841,12 @@ export default function JuegoVital() {
           onCerrar={() => setConstruyendo(null)}
           onCrear={async (d) => {
             try {
-              const nuevo = await crearAgente({ ...d, tipo: construyendo });
+              const nuevo = await crearAgente({
+                ...d, tipo: construyendo,
+                // Si vino del panel «Crear aquí», el edificio se planta ahí.
+                x: posProyecto.current?.x, z: posProyecto.current?.z,
+              });
+              posProyecto.current = null;
               setConstruyendo(null);
               avisar(`${d.nombre} ya está en tu mundo. Acércate y háblale.`);
               setFichaAgente({ ...nuevo, apariencia: nuevo.apariencia || {}, memoria: [] });
