@@ -154,3 +154,11 @@ pasó de 135 a ~400 draw calls. En escritorio no se nota; en un móvil de gama m
 primer sitio donde mirar si va a tirones. Arreglo: `InstancedMesh` por tipo de objeto
 (como ya hace `Vegetacion`), ~1 hora. No se hizo ahora para no retrasar la verificación
 visual de lo que el usuario pidió.
+
+### `public/` y las rutas de la app comparten espacio de nombres — 2026-08-18
+Cualquier carpeta creada en `public/` se sirve como estática y **gana** a la ruta del
+mismo nombre: `public/juego/` hizo que `/juego` devolviera un 301 a `/juego/` en
+producción. Hoy hay `geo/`, `illustrations/`, `knowledge/` y `modelos-juego/`, y
+ninguna colisiona. No hay nada que impida repetirlo: la salvaguarda sería una
+comprobación en el build que compare los nombres de `public/*` con las rutas de
+`App.tsx` (~30 min). Mientras tanto, la regla vive comentada en `Modelos.tsx`.

@@ -2,7 +2,7 @@
 // JUEGO VITAL — modelos 3D reales (2026-08-18, decisión de Eugenio: librería
 // descargada de personas y objetos).
 //
-// Los .glb viven en `public/juego/modelos/` y son de Kenney, CC0 (dominio
+// Los .glb viven en `public/modelos-juego/` y son de Kenney, CC0 (dominio
 // público) — ver el LICENSE.md de esa carpeta. Se cargan bajo demanda y se
 // precargan al entrar al juego, así que no bloquean el primer pintado.
 //
@@ -20,8 +20,13 @@ import * as THREE from 'three';
 // `Textures/colormap.png` en su misma carpeta. Por eso cada pack vive en su
 // propio directorio con su textura al lado: si se mezclan, unos modelos salen
 // con la paleta equivocada (y si falta, salen todos blancos).
-const PERSONAS = '/juego/modelos/personas';
-const PUEBLO = '/juego/modelos/pueblo';
+//
+// Y NO pueden vivir en `public/juego/`: esa carpeta chocaría con la ruta
+// `/juego` de la página, y el servidor de estáticos respondería a `/juego` con
+// un 301 a `/juego/` (pasó en producción el 2026-08-18). Las carpetas de
+// `public/` no deben llamarse como una ruta de la aplicación.
+const PERSONAS = '/modelos-juego/personas';
+const PUEBLO = '/modelos-juego/pueblo';
 
 /** Cuerpos disponibles para las personas del mundo. */
 export const CUERPOS = [
