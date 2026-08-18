@@ -526,6 +526,31 @@ export default function JuegoVital() {
     if (!r?.ok) avisar('No se ha podido guardar el retoque.');
   }, []);
 
+  // La PORTADA de un portal del distrito: la foto viaja en `modelo` del
+  // retoque `proy:<id>` (para las casas es el diseño; aquí, la URL de la foto).
+  const portadaProyRef = useRef<HTMLInputElement>(null);
+  const [subiendoPortadaProy, setSubiendoPortadaProy] = useState(false);
+  const subirPortadaProyecto = async (f?: File) => {
+    if (!f || !panel) return;
+    setSubiendoPortadaProy(true);
+    try {
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { avisar(js.error || 'No se ha podido subir la foto.'); return; }
+      if (!js.esImagen) { avisar('La portada tiene que ser una imagen (JPG o PNG).'); return; }
+      await guardarOverride(`proy:${panel.id}`, { modelo: js.url });
+      avisar('Portada puesta en el portal.');
+    } catch {
+      avisar('Error de red al subir la foto.');
+    } finally {
+      setSubiendoPortadaProy(false);
+    }
+  };
+
   /** Cambia un objeto del jugador y lo refleja al momento. */
   const guardarItem = useCallback(async (id: string, patch: Partial<ItemMundo>) => {
     setMundoItems(prev => prev.map(it => (it.id === id ? { ...it, ...patch } : it)));
@@ -2361,6 +2386,18 @@ export default function JuegoVital() {
               </div>
             )}
             <Button onClick={() => navigate(`/proyectos/${panel.slug}`)} className="w-full mt-3">Abrir el proyecto</Button>
+            <input
+              ref={portadaProyRef} type="file" accept="image/*" className="hidden"
+              onChange={e => { subirPortadaProyecto(e.target.files?.[0]); e.target.value = ''; }}
+            />
+            <Button
+              variant="outline"
+              onClick={() => portadaProyRef.current?.click()}
+              disabled={subiendoPortadaProy}
+              className="w-full mt-2"
+            >
+              <Camera className="w-3.5 h-3.5 mr-1.5 inline" /> {subiendoPortadaProy ? 'Subiendo…' : 'Foto de portada del portal'}
+            </Button>
           </Card>
         </div>
       )}
@@ -2566,15 +2603,21 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
   const [subiendoArchivo, setSubiendoArchivo] = useState(false);
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
   const archivoRef = useRef<HTMLInputElement>(null);
+  // La PORTADA del portal (solo proyectos): la foto del centro, en círculo
+  // con borde blanco. Local para verla al momento sin esperar la recarga.
+  const [portada, setPortada] = useState(agente.foto_url || null);
+  const [subiendoPortada, setSubiendoPortada] = useState(false);
+  const portadaRef = useRef<HTMLInputElement>(null);
 
   // Al cambiar de amigo, la ficha enseña lo suyo (el componente no se
   // desmonta entre uno y otro cuando se elige desde la lista lateral).
   useEffect(() => {
     setMemoria(agente.memoria || []);
     setArchivos(agente.archivos || []);
+    setPortada(agente.foto_url || null);
     setNota('');
     setErrorArchivo(null);
-  }, [agente.id, agente.memoria, agente.archivos]);
+  }, [agente.id, agente.memoria, agente.archivos, agente.foto_url]);
 
   /** Sube el archivo y lo guarda en el archivo del agente. */
   const anadirArchivo = async (f?: File) => {
@@ -2617,6 +2660,35 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     } catch { /* se reintenta a mano */ }
   };
 
+  /** Sube la foto de PORTADA del portal y la guarda en su foto_url. */
+  const ponerPortada = async (f?: File) => {
+    if (!f) return;
+    setErrorArchivo(null);
+    setSubiendoPortada(true);
+    try {
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { setErrorArchivo(js.error || 'No se ha podido subir.'); return; }
+      if (!js.esImagen) { setErrorArchivo('La portada tiene que ser una imagen (JPG o PNG).'); return; }
+      const r = await fetch(`/api/juego/agentes/${agente.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ foto_url: js.url }),
+      });
+      if (!r.ok) { setErrorArchivo('No se ha podido guardar la portada.'); return; }
+      setPortada(js.url);
+      await onGuardado();
+    } catch {
+      setErrorArchivo('Error de red al subir.');
+    } finally {
+      setSubiendoPortada(false);
+    }
+  };
+
   const meterInfo = async () => {
     const texto = nota.trim();
     if (!texto) return;
@@ -2635,7 +2707,7 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
   return (
     <div className="absolute top-16 right-3 z-40 w-[min(21rem,calc(100vw-1.5rem))]">
       <Card className="shadow-2xl overflow-hidden">
-        {agente.foto_url && <img src={agente.foto_url} alt="" className="w-full h-28 object-cover" />}
+        {portada && <img src={portada} alt="" className="w-full h-28 object-cover" />}
         <div className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -2759,6 +2831,22 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
               <Button variant="outline" onClick={onEditarAspecto} title="Cambiar su aspecto">
                 <Palette className="w-3.5 h-3.5" />
               </Button>
+            )}
+            {agente.tipo === 'proyecto' && (
+              <>
+                <input
+                  ref={portadaRef} type="file" accept="image/*" className="hidden"
+                  onChange={e => { ponerPortada(e.target.files?.[0]); e.target.value = ''; }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => portadaRef.current?.click()}
+                  disabled={subiendoPortada}
+                  title="Foto de portada del portal"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                </Button>
+              </>
             )}
             {agente.proyecto_slug && (
               <Button variant="outline" onClick={() => onAbrirProyecto(agente.proyecto_slug!)}>

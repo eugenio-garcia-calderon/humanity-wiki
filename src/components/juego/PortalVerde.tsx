@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
@@ -49,11 +49,55 @@ function espiral(): THREE.CanvasTexture {
 }
 
 /**
- * El portal en sí, siempre de cara a la cámara. `radio` en metros;
- * `resaltado` (hover) lo aviva. La base queda a ras de suelo.
+ * La foto de portada del portal (2026-08-18, petición de Eugenio): recortada
+ * en CÍRCULO con borde blanco, flotando en el centro de la espiral. La
+ * textura se carga a mano (una foto rota no puede tumbar el Suspense) y la
+ * geometría circular ya recorta la imagen sola por sus UVs.
  */
-export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORTAL }: {
-  radio?: number; resaltado?: boolean; color?: string;
+function FotoDePortal({ url, radio }: { url: string; radio: number }) {
+  const [tex, setTex] = useState<THREE.Texture | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    const cargador = new THREE.TextureLoader();
+    cargador.setCrossOrigin('anonymous');
+    cargador.load(url, (t) => {
+      if (!vivo) return;
+      t.colorSpace = THREE.SRGBColorSpace;
+      // Recorte centrado: la cara del círculo enseña el CENTRO de la foto
+      // aunque no sea cuadrada, sin deformarla.
+      const img = t.image as { width?: number; height?: number };
+      if (img?.width && img?.height) {
+        const prop = img.width / img.height;
+        if (prop > 1) { t.repeat.set(1 / prop, 1); t.offset.set((1 - 1 / prop) / 2, 0); }
+        else { t.repeat.set(1, prop); t.offset.set(0, (1 - prop) / 2); }
+      }
+      setTex(t);
+    }, undefined, () => { /* sin foto queda la espiral, que ya es bonita */ });
+    return () => { vivo = false; };
+  }, [url]);
+  if (!tex) return null;
+  return (
+    <group position={[0, 0, 0.05]}>
+      {/* El borde blanco que pide Eugenio */}
+      <mesh>
+        <circleGeometry args={[radio * 0.56, 40]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0, 0.01]}>
+        <circleGeometry args={[radio * 0.5, 40]} />
+        <meshBasicMaterial map={tex} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+/**
+ * El portal en sí, siempre de cara a la cámara. `radio` en metros;
+ * `resaltado` (hover) lo aviva. `fotoUrl` es su PORTADA: una foto en
+ * círculo con borde blanco en el centro de la espiral.
+ */
+export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORTAL, fotoUrl }: {
+  radio?: number; resaltado?: boolean; color?: string; fotoUrl?: string | null;
 }) {
   const giroA = useRef<THREE.Mesh>(null);
   const giroB = useRef<THREE.Mesh>(null);
@@ -95,6 +139,8 @@ export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORT
         <ringGeometry args={[radio * 0.94, radio * 1.08, 48]} />
         <meshBasicMaterial color={resaltado ? VERDE_BORDE : color} toneMapped={false} transparent opacity={0.95} />
       </mesh>
+      {/* La portada del portal, si la tiene */}
+      {fotoUrl && <FotoDePortal url={fotoUrl} radio={radio} />}
       <pointLight color={VERDE_PORTAL} intensity={resaltado ? 30 : 14} distance={radio * 6} />
     </Billboard>
   );

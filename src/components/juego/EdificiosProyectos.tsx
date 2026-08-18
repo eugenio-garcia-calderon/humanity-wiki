@@ -19,9 +19,10 @@ interface Parcela {
   x: number;
   z: number;
   color: string;
+  portada?: string | null;
 }
 
-function EdificioProyecto({ p, x, z, onEntrar, onAgarrar }: Parcela & {
+function EdificioProyecto({ p, x, z, portada, onEntrar, onAgarrar }: Parcela & {
   onEntrar: (p: ProyectoJuego) => void;
   onAgarrar?: (p: ProyectoJuego, pos: { x: number; z: number }, e: any) => void;
 }) {
@@ -32,6 +33,7 @@ function EdificioProyecto({ p, x, z, onEntrar, onAgarrar }: Parcela & {
         {(resaltado) => (
           <PortalDeProyecto
             titulo={p.titulo} tarjetas={p.tarjetas} pct={pct} resaltado={resaltado}
+            fotoUrl={portada}
             onAgarrar={onAgarrar ? (e) => onAgarrar(p, { x, z }, e) : undefined}
           />
         )}
@@ -47,13 +49,15 @@ function EdificioProyecto({ p, x, z, onEntrar, onAgarrar }: Parcela & {
  * comparten el distrito y los proyectos construidos desde el juego, y se
  * puede AGARRAR para arrastrarlo como cualquier otro objeto.
  */
-export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, resaltado, onAgarrar }: {
+export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, resaltado, onAgarrar, fotoUrl }: {
   titulo: string; tarjetas: number; pct: number; radio?: number; resaltado: boolean;
   onAgarrar?: (e: any) => void;
+  /** La portada del portal: foto en círculo con borde blanco, en el centro. */
+  fotoUrl?: string | null;
 }) {
   return (
     <group onPointerDown={onAgarrar}>
-      <PortalVerde radio={radio} resaltado={resaltado} />
+      <PortalVerde radio={radio} resaltado={resaltado} fotoUrl={fotoUrl} />
       <LuzDePortal radio={radio} />
       {/* Blanco generoso para el clic y el dedo: el aro fino era difícil de acertar */}
       <mesh position={[0, radio, 0]}>
@@ -87,8 +91,9 @@ export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, resaltado
 
 export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas, onEntrar, onAgarrar }: {
   proyectos: ProyectoJuego[];
-  /** De posicionesProyectos(): las del distrito con los arrastres aplicados. */
-  posiciones: Array<{ x: number; z: number }>;
+  /** De posicionesProyectos(): las del distrito con los arrastres aplicados
+   *  y la portada de cada portal (la foto del centro), si la tiene. */
+  posiciones: Array<{ x: number; z: number; portada?: string | null }>;
   jugadorPos: THREE.Vector3;
   medidas: React.MutableRefObject<Medidas>;
   /** Pulsar el edificio entra en él sin tener que caminar hasta allí. */
