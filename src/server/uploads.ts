@@ -56,10 +56,15 @@ const AUDIO: Record<string, string> = {
 
 const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS, ...AUDIO };
 
-/** Lo que se puede mostrar dentro de la página; el resto, descarga. */
+/** Lo que se puede mostrar dentro de la página; el resto, descarga.
+ *  El PDF pasó a verse EN LÍNEA (2026-08-18): Eugenio los planta en el mapa
+ *  3D y quiere leerlos dentro del juego. El visor de PDF del navegador corre
+ *  en su propio sandbox (sin acceso al DOM ni a las cookies), así que el
+ *  riesgo que motivó la descarga forzosa no aplica como al SVG. */
 const EN_LINEA = new Set([
   ...Object.values(IMAGENES).filter(e => e !== 'svg'),
   ...Object.values(AUDIO),
+  'pdf',
 ]);
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB

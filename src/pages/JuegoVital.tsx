@@ -617,6 +617,13 @@ export default function JuegoVital() {
       }
       return; // el pueblo semilla no es destino de hilos (aún)
     }
+    // Segundo clic sobre lo que YA está seleccionado: se abre directamente
+    // (petición de Eugenio: «no me deja verlo» — la ficha con su botón Abrir
+    // no era obvia; ahora clic = opciones, otro clic = abrir).
+    if (ed.sel?.clase === 'item' && sel.clase === 'item' && ed.sel.id === sel.id) {
+      const it = mundoItems.find(x => x.id === sel.id);
+      if (it && it.tipo !== 'prop') { setLeyendo(it); setSelMundo(null); return; }
+    }
     setSelMundo(sel);
     setCrearEn(null);
     setMoviendoMundo(false);
@@ -1033,10 +1040,17 @@ export default function JuegoVital() {
     }
     const a = agentesRef.current.find(x => x.id === id);
     if (!a) return;
+    // Un edificio de proyecto construido DESDE el juego también se entra
+    // chocando con él, igual que los del distrito (fallo que vio Eugenio:
+    // su proyecto nuevo no tenía puerta). El chat del agente sigue en la (E).
+    if (a.tipo === 'proyecto' && a.proyecto_id) {
+      const p = proyectosRef.current.find(x => x.id === a.proyecto_id);
+      if (p) { entrarEnProyecto(p); return; }
+    }
     setFichaAgente(a);
     // Sin robar el teclado: te has tropezado con él, no has decidido escribirle.
     hablarCon(a, false);
-  }, [hablarCon]);
+  }, [hablarCon, entrarEnProyecto]);
 
   /**
    * Subirse o bajarse. Al bajar del planeador NO se apaga en el aire: se pone
@@ -1318,6 +1332,12 @@ export default function JuegoVital() {
               setConectando(false);
               return;
             }
+            // Pulsar un edificio de proyecto construido desde el juego lo
+            // ABRE por dentro, como los del distrito. El chat queda en la (E).
+            if (a.tipo === 'proyecto' && a.proyecto_id) {
+              const p = proyectos.find(x => x.id === a.proyecto_id);
+              if (p) { entrarEnProyecto(p); return; }
+            }
             setFichaAgente(a); hablarCon(a);
           }}
           mundo={{ items: mundoItems, overrides: overridesMundo }}
@@ -1361,7 +1381,9 @@ export default function JuegoVital() {
           jugadorPos={jugadorPos}
           agentes={agentes}
           proyectos={proyectos}
+          items={mundoItems}
           onViajar={viajarA}
+          onCrearEn={user ? (p) => { setCrearEn(p); setSelMundo(null); setSelHilo(null); } : undefined}
         />
       )}
       <VeloViaje activo={!!viajando} destino={viajando} />
@@ -1876,8 +1898,15 @@ export default function JuegoVital() {
         // con el reproductor del navegador, no con un iframe.
         const esAudio = leyendo.tipo === 'musica' && !!leyendo.url
           && (leyendo.url.startsWith('/uploads/') || /\.(mp3|m4a|ogg|wav|aac|flac)(\?|$)/i.test(leyendo.url));
+        // Un PDF subido se LEE dentro del juego con el visor del navegador
+        // (fallo que vio Eugenio: antes el iframe disparaba una descarga).
+        // Los demás archivos subidos (docx, zip…) no tienen visor: botón de
+        // descarga. Las páginas de la plataforma (/documentos/…) sí se abren.
+        const esPdfPropio = leyendo.tipo === 'documento' && !!leyendo.url
+          && leyendo.url.startsWith('/uploads/') && /\.pdf(\?|$)/i.test(leyendo.url);
         const esMarco = !esAudio && (['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo)
-          || (leyendo.tipo === 'documento' && !!leyendo.url?.startsWith('/')));
+          || esPdfPropio
+          || (leyendo.tipo === 'documento' && !!leyendo.url?.startsWith('/documentos')));
         const src = (() => {
           if (!leyendo.url) return null;
           if (leyendo.tipo === 'video') {
@@ -1921,13 +1950,16 @@ export default function JuegoVital() {
                   <audio controls autoPlay src={leyendo.url} className="w-full" />
                 </div>
               )}
+              {/* El visor de PDF de Chrome no arranca dentro de un iframe con
+                  sandbox: para un PDF NUESTRO (mismo dominio, /uploads) el
+                  sandbox se quita — el visor ya corre aislado por su cuenta. */}
               {esMarco && src && (
                 <iframe
                   src={src}
                   title={leyendo.nombre || 'Contenido'}
                   className="flex-1 w-full bg-white"
                   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
+                  sandbox={esPdfPropio ? undefined : 'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation'}
                 />
               )}
               {esMarco && (
