@@ -717,3 +717,8 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
   2. Después decía «¡Hecho! Gala ya está flotando aquí» **sin emitir el bloque JSON**: una promesa sin efecto. Ahora el prompt dice que sin bloque no ocurre nada y que decirlo sin hacerlo es mentirle al jugador.
   3. Y cuando por fin lo emitía, **el filtro del servidor lo tiraba en silencio**: solo aceptaba `persona` y `proyecto`. Al añadir un tipo de acción hay que añadirlo también ahí; queda comentado en el código.
 - **Verificado de punta a punta**: la IA responde «Ya está, Gala aparece flotando aquí en Personas» con la acción correcta, la página crea la tarjeta de verdad en el grupo `personas` y el contador de la habitación pasa a 1. La tarjeta de prueba se retiró después.
+
+### 2026-08-18 — Correr con la barra espaciadora
+- **La barra multiplica por 3 la velocidad** a pie (8 → 24 m/s) y en bici (17 → 51 m/s), petición de Eugenio. En el planeador NO: allí la barra es lo que te hace subir, y las dos cosas no se pisan porque el personaje sabe en qué vas.
+- **Usa la animación de correr del propio modelo** (`sprint`, que los personajes de Kenney ya traen) en vez de acelerar la de andar, que se vería como una marioneta con prisa.
+- Medido en el navegador: 5,8 m/s andando y 20 m/s corriendo en la misma pasada. El cociente sale 3,45 y no 3 porque la velocidad se alcanza con una rampa suave y la muestra de andar aún no había llegado a su tope; el código multiplica exactamente por 3.
