@@ -379,11 +379,11 @@ export function registerJuegoRoutes(app: Express, db: any) {
       }
       const id = `WM${Date.now()}${Math.floor(Math.random() * 1000)}`;
       await db.execute(sql`
-        INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala)
+        INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala, proyecto_id)
         VALUES (${id}, ${req.user!.id}, ${d.tipo}, ${d.modelo || null}, ${d.texto || null},
                 ${d.url || null}, ${d.nombre || null},
                 ${Number(d.x) || 0}, ${Number(d.z) || 0}, ${Number(d.rot) || 0},
-                ${Number(d.escala) || 1})
+                ${Number(d.escala) || 1}, ${d.proyecto_id || null})
       `);
       const fila = await db.execute(sql`SELECT * FROM game_world_items WHERE id = ${id}`);
       res.json(fila.rows[0]);

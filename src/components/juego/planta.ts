@@ -14,6 +14,15 @@ import type { Agente, ItemProyecto } from './tipos';
 
 /** Radio de la sala diáfana. Cabe holgado y se ve el techo. */
 export const SALA_R = 24;
+
+/** La PLAZA del proyecto (2026-08-18, petición de Eugenio): al cruzar el
+ *  portal ya no hay sala oscura sino un prado abierto con una plaza vacía
+ *  donde plantar la información del proyecto. */
+export const PLAZA_LIM = 38;                   // hasta dónde se puede andar
+export const PLAZA_SALIDA = { x: 0, z: 30 };   // el portal verde de vuelta
+// Se aparece bien ADENTRO: apareciendo junto al portal, la cámara quedaba
+// justo encima de él y la espiral llenaba la pantalla entera.
+export const PLAZA_ENTRADA = { x: 0, z: 16 };
 /** A qué distancia del centro se abren las puertas. */
 export const PUERTA_R = 18.5;
 /** Radio de choque de una puerta: rozarla ya te mete dentro. */

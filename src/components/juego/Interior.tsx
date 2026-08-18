@@ -15,9 +15,11 @@ import { Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import {
   SALA_R, PUERTA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA,
+  PLAZA_LIM, PLAZA_SALIDA,
   posicionPuerta, posicionItem, posicionHabitante,
   agenteDeItem, habitantesDeSala, type Grupo,
 } from './planta';
+import { PortalVerde, LuzDePortal, VERDE_PORTAL } from './PortalVerde';
 import type { Agente, ItemProyecto } from './tipos';
 import { Persona3D, cuerpoDe } from './Modelos';
 import { Halo, Interactivo, Rotulo } from './Senales';
@@ -557,6 +559,114 @@ export function InteriorProyecto({ datos, onHablar }: {
       })}
 
       <Portal x={SALIDA.x} z={SALIDA.z} texto="Salir a la aldea" />
+    </group>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// LA PLAZA DEL PROYECTO (2026-08-18, petición de Eugenio): al cruzar el
+// portal verde ya no hay una sala oscura, sino un prado abierto con una
+// plaza en el centro. Alrededor de la plaza: la gente del proyecto (de pie)
+// y su conocimiento del tablero (tarjetas, fotos, textos) flotando. El resto
+// del prado está VACÍO a propósito: es donde el jugador planta la
+// información del proyecto con el editor de siempre (clic en el suelo).
+// ---------------------------------------------------------------------------
+
+export function PlazaProyecto({ datos, onHablar }: {
+  datos: DatosInterior;
+  onHablar: (a: Agente) => void;
+}) {
+  const { proyecto, items, color, agentes } = datos;
+  const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
+
+  // La gente que FORMA PARTE del proyecto, de pie en la plaza.
+  const gente = habitantesDeSala(items, 'personas', agentes, proyecto.id);
+
+  // TODO el conocimiento del tablero, junto (ya no hay habitaciones).
+  const cosas: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
+  for (const it of items) {
+    if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
+    cosas.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
+    for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
+      if (b?.tipo === 'imagen' && b.url) cosas.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
+      else if (b?.tipo === 'texto' && b.texto) cosas.push({ clave: `d:${it.id}:${i}`, tipo: 'doc', nombre: b.texto });
+    }
+  }
+
+  return (
+    <group>
+      {/* El prado. La luz y el cielo los pone la escena (ambiente de día). */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <circleGeometry args={[PLAZA_LIM + 16, 64]} />
+        <meshStandardMaterial color={PALETA.prado} roughness={0.9} />
+      </mesh>
+      {/* La plaza vacía del centro, empedrada y con el aro del proyecto */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <circleGeometry args={[10, 48]} />
+        <meshStandardMaterial color={PALETA.plaza} roughness={0.85} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+        <ringGeometry args={[9.5, 10, 64]} />
+        <meshBasicMaterial color={color} transparent opacity={0.55} toneMapped={false} />
+      </mesh>
+      {/* El camino de la entrada a la plaza */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, (PLAZA_SALIDA.z + 10) / 2]} receiveShadow>
+        <planeGeometry args={[3.4, PLAZA_SALIDA.z - 6]} />
+        <meshStandardMaterial color={PALETA.camino} roughness={0.9} />
+      </mesh>
+
+      {/* El título del proyecto y su progreso real, flotando sobre la plaza */}
+      <Billboard position={[0, 7.4, 0]}>
+        <Text fontSize={1.15} maxWidth={16} color="#ffffff" anchorX="center" anchorY="middle" textAlign="center"
+          outlineWidth={0.05} outlineColor="#1d3a24">
+          {proyecto.titulo}
+        </Text>
+        <Text position={[0, -1.15, 0]} fontSize={0.42} color="#e8f5e0" anchorX="center" anchorY="middle"
+          outlineWidth={0.02} outlineColor="#1d3a24">
+          {proyecto.tarjetas > 0
+            ? `${proyecto.hechas} de ${proyecto.tarjetas} tareas · ${Math.round(pct * 100)}%`
+            : 'Pulsa el suelo para plantar la información de este proyecto'}
+        </Text>
+      </Billboard>
+
+      {/* La gente del proyecto, de pie alrededor de la plaza */}
+      {gente.map((a, i) => {
+        const ang = (i / Math.max(gente.length, 1)) * Math.PI * 2 - Math.PI / 2;
+        return (
+          <group key={a.id} position={[Math.cos(ang) * 6.5, 0, Math.sin(ang) * 6.5]}>
+            <Habitante a={a} color={color} onHablar={onHablar} />
+          </group>
+        );
+      })}
+
+      {/* El conocimiento del tablero, en corro alrededor de la plaza */}
+      {cosas.map((cosa, i) => {
+        const ang = (i / Math.max(cosas.length, 1)) * Math.PI * 2 + 0.35;
+        const r = 13.5 + (i % 2) * 2.6;
+        const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
+        return (
+          <group key={cosa.clave} position={[x, 2.1, z]} rotation={[0, Math.atan2(-x, -z), 0]}>
+            <Flotante fase={i * 1.7}>
+              {cosa.tipo === 'tarjeta' && cosa.item && <Tarjeta item={cosa.item} color={color} />}
+              {cosa.tipo === 'foto' && cosa.url && <Foto url={cosa.url} />}
+              {cosa.tipo === 'doc' && <Documento nombre={cosa.nombre || 'Nota'} color={color} />}
+            </Flotante>
+          </group>
+        );
+      })}
+
+      {/* El portal verde de vuelta a la aldea */}
+      <group position={[PLAZA_SALIDA.x, 0, PLAZA_SALIDA.z]}>
+        <PortalVerde radio={2.1} />
+        <LuzDePortal radio={2.1} />
+        <Billboard position={[0, 5.1, 0]}>
+          <Text fontSize={0.48} color="#ffffff" anchorX="center" anchorY="middle" outlineWidth={0.02} outlineColor="#1d3a24">
+            Salir a la aldea
+          </Text>
+        </Billboard>
+        <pointLight position={[0, 2.4, 0]} color={VERDE_PORTAL} intensity={8} distance={12} />
+      </group>
     </group>
   );
 }

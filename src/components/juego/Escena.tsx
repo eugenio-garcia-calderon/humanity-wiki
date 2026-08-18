@@ -23,10 +23,9 @@ import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
 import { PantallaGrande, PANTALLA } from './Pantalla';
 import { Agentes } from './Agentes';
-import { InteriorProyecto, type DatosInterior } from './Interior';
+import { PlazaProyecto, type DatosInterior } from './Interior';
 import {
-  SALA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA, RADIO_PUERTA, RADIO_HABITANTE,
-  posicionPuerta, posicionHabitante, habitantesDeSala,
+  PLAZA_LIM, PLAZA_SALIDA, RADIO_HABITANTE, habitantesDeSala,
 } from './planta';
 
 /**
@@ -177,26 +176,22 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   const obstaculos = useRef<Obstaculo[]>([]);
   obstaculos.current = useMemo(() => {
     if (interior) {
-      if (interior.sala) {
-        const gente = habitantesDeSala(interior.items, interior.sala, interior.agentes, interior.proyecto.id);
-        return [
-          { id: 'interior:sala', ...HAB_SALIDA, radio: 2.2 },
-          // Dentro de una habitación la gente también es sólida: chocarte con
-          // alguien es ponerte a hablar con él, igual que en la aldea.
-          ...gente.map((a, i) => ({
-            id: `interior:persona:${a.id}`,
-            ...posicionHabitante(i, gente.length),
-            radio: RADIO_HABITANTE,
-          })),
-        ];
-      }
+      // La plaza del proyecto: el portal de salida y la gente son sólidos
+      // (chocar = salir / hablar). Los props plantados dentro también.
+      const gente = habitantesDeSala(interior.items, 'personas', interior.agentes, interior.proyecto.id);
       return [
-        ...interior.grupos.map((g, i) => ({
-          id: `interior:puerta:${g.id}`,
-          ...posicionPuerta(i, interior.grupos.length),
-          radio: RADIO_PUERTA,
+        { id: 'interior:salir', ...PLAZA_SALIDA, radio: 2 },
+        ...gente.map((a, i) => {
+          const ang = (i / Math.max(gente.length, 1)) * Math.PI * 2 - Math.PI / 2;
+          return {
+            id: `interior:persona:${a.id}`,
+            x: Math.cos(ang) * 6.5, z: Math.sin(ang) * 6.5,
+            radio: RADIO_HABITANTE,
+          };
+        }),
+        ...mundo.items.filter(it => it.tipo === 'prop' && it.proyecto_id === interior.proyecto.id).map(it => ({
+          id: `deco:item:${it.id}`, x: it.x, z: it.z, radio: radioProp(it.modelo),
         })),
-        { id: 'interior:salir', ...SALIDA, radio: 2.2 },
       ];
     }
     return [
@@ -227,8 +222,9 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         radio: p.radio,
       })),
       // Los props que plantó el jugador también; sus notas y documentos no
-      // (se atraviesan: son conocimiento flotando, no muros).
-      ...mundo.items.filter(it => it.tipo === 'prop').map(it => ({
+      // (se atraviesan: son conocimiento flotando, no muros). Los objetos
+      // anclados a un proyecto viven en SU plaza, no en la aldea.
+      ...mundo.items.filter(it => it.tipo === 'prop' && !it.proyecto_id).map(it => ({
         id: `deco:item:${it.id}`,
         x: it.x,
         z: it.z,
@@ -251,31 +247,57 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         if ((import.meta as any).env?.DEV) (window as any).__JV = estado;
       }}
     >
-      <Ambiente interior={!!interior} />
+      {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
+          cielo de día, ya no existe la sala oscura. */}
+      <Ambiente interior={false} />
+      <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
+      <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
+      <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
+      <directionalLight
+        ref={luzRef}
+        castShadow
+        position={[60, 95, -45]}
+        intensity={1.7}
+        color={PALETA.luzSol}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-70}
+        shadow-camera-right={70}
+        shadow-camera-top={70}
+        shadow-camera-bottom={-70}
+        shadow-camera-near={5}
+        shadow-camera-far={400}
+        shadow-bias={-0.0004}
+      />
 
       {interior ? (
-        <InteriorProyecto datos={interior} onHablar={onHablarAgente} />
+        <>
+          <PlazaProyecto datos={interior} onHablar={onHablarAgente} />
+          {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
+              aldea: pulsar, arrastrar, hilos y crear en el suelo. */}
+          <ObjetosMundo
+            items={mundo.items.filter(it => it.proyecto_id === interior.proyecto.id)}
+            onPulsar={onPulsarMundo}
+            onAgarrar={onAgarrarMundo}
+            onPulsarHilo={onPulsarHilo}
+            ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
+            resolverDestino={resolverDestino}
+          />
+          {editor.activo && (
+            <>
+              <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
+              {editor.moviendo && <MarcadorMover movil={movilRef} />}
+              {editor.moviendo && editor.sel && editor.sel.clase === 'item' && (
+                <MovilFantasma movil={movilRef} rot={editor.sel.rot}>
+                  {(() => { const it = mundo.items.find(x => x.id === editor.sel!.id); return it ? <ItemVisual item={it} /> : null; })()}
+                </MovilFantasma>
+              )}
+              {editor.sel && !editor.moviendo && editor.sel.clase === 'item' && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}
+            </>
+          )}
+        </>
       ) : (
         <>
-          <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
-          <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
-          <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
-          <directionalLight
-            ref={luzRef}
-            castShadow
-            position={[60, 95, -45]}
-            intensity={1.7}
-            color={PALETA.luzSol}
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-camera-left={-70}
-            shadow-camera-right={70}
-            shadow-camera-top={70}
-            shadow-camera-bottom={-70}
-            shadow-camera-near={5}
-            shadow-camera-far={400}
-            shadow-bias={-0.0004}
-          />
           <Aldea
             piezas={piezas}
             onPulsar={onPulsarMundo}
@@ -283,7 +305,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             ocultar={editor.moviendo && editor.sel?.clase === 'semilla' ? editor.sel.id : undefined}
           />
           <ObjetosMundo
-            items={mundo.items}
+            items={mundo.items.filter(it => !it.proyecto_id)}
             onPulsar={onPulsarMundo}
             onAgarrar={onAgarrarMundo}
             onPulsarHilo={onPulsarHilo}
@@ -320,7 +342,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         onChoque={onChoque}
         destino={destino}
         zoom={zoom}
-        limite={interior ? (interior.sala ? Math.min(HAB_ANCHO, HAB_FONDO) / 2 - 1.5 : SALA_R - 1.5) : undefined}
+        limite={interior ? PLAZA_LIM : undefined}
         aspecto={aspectoJugador}
         vehiculo={vehiculo}
         alturaVuelo={alturaVuelo}

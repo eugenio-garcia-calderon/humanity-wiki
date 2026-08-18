@@ -113,6 +113,9 @@ export interface ItemMundo {
    *  información, como las aristas de los grafos: una RELACIÓN (contexto,
    *  causa, dato…) y un texto corto — la pregunta a la que responde. */
   enlaces?: Array<{ a: string; rel?: string; texto?: string }>;
+  /** Si está puesto, el objeto vive en la PLAZA de ese proyecto, no en la
+   *  aldea (2026-08-18: los portales llevan a un mapa propio por proyecto). */
+  proyecto_id?: string | null;
 }
 
 /** Las relaciones de un hilo: las MISMAS de los grafos de conocimiento, con

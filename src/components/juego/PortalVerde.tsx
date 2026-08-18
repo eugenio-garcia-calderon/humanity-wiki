@@ -1,0 +1,112 @@
+import { useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
+import { Billboard } from '@react-three/drei';
+
+// ============================================================================
+// EL PORTAL VERDE (2026-08-18, petición de Eugenio): los proyectos ya no son
+// edificios sino portales al estilo Rick & Morty — borde verde brillante y
+// espirales girando. Se usa en el distrito, en los proyectos construidos
+// desde el juego y como salida de la plaza del proyecto.
+// ============================================================================
+
+export const VERDE_PORTAL = '#4be04b';
+const VERDE_BORDE = '#8dff6e';
+const VERDE_OSCURO = '#1e8f2f';
+const CENTRO = '#eaffc9';
+
+/**
+ * La espiral se pinta UNA vez en un canvas y se comparte entre todos los
+ * portales: girar un plano con textura cuesta nada; regenerar el dibujo, sí.
+ */
+let texturaEspiral: THREE.CanvasTexture | null = null;
+function espiral(): THREE.CanvasTexture {
+  if (texturaEspiral) return texturaEspiral;
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const ctx = c.getContext('2d')!;
+  ctx.translate(128, 128);
+  // Tres brazos que se enroscan hacia fuera, del verde claro al blanco.
+  for (let brazo = 0; brazo < 3; brazo++) {
+    ctx.rotate((Math.PI * 2) / 3);
+    for (const [ancho, color] of [[13, 'rgba(120,230,90,0.9)'], [5, 'rgba(235,255,200,0.9)']] as const) {
+      ctx.beginPath();
+      for (let t = 0; t <= 1.001; t += 0.02) {
+        const ang = t * Math.PI * 3.4;
+        const r = 10 + t * 112;
+        const x = Math.cos(ang) * r, y = Math.sin(ang) * r;
+        if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = color as string;
+      ctx.lineWidth = ancho as number;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+  }
+  texturaEspiral = new THREE.CanvasTexture(c);
+  texturaEspiral.colorSpace = THREE.SRGBColorSpace;
+  return texturaEspiral;
+}
+
+/**
+ * El portal en sí, siempre de cara a la cámara. `radio` en metros;
+ * `resaltado` (hover) lo aviva. La base queda a ras de suelo.
+ */
+export function PortalVerde({ radio = 2.6, resaltado = false, color = VERDE_PORTAL }: {
+  radio?: number; resaltado?: boolean; color?: string;
+}) {
+  const giroA = useRef<THREE.Mesh>(null);
+  const giroB = useRef<THREE.Mesh>(null);
+  const borde = useRef<THREE.Mesh>(null);
+  const tex = useMemo(() => espiral(), []);
+
+  useFrame(({ clock }, dt) => {
+    if (giroA.current) giroA.current.rotation.z -= dt * 1.5;
+    if (giroB.current) giroB.current.rotation.z += dt * 0.9;
+    if (borde.current) {
+      const s = 1 + Math.sin(clock.elapsedTime * 2.2) * 0.02 + (resaltado ? 0.05 : 0);
+      borde.current.scale.setScalar(s);
+    }
+  });
+
+  return (
+    <Billboard position={[0, radio + 0.15, 0]}>
+      {/* El fondo del charco verde */}
+      <mesh>
+        <circleGeometry args={[radio * 0.98, 48]} />
+        <meshBasicMaterial color={VERDE_OSCURO} toneMapped={false} transparent opacity={0.96} />
+      </mesh>
+      {/* El corazón claro del centro */}
+      <mesh position={[0, 0, 0.01]}>
+        <circleGeometry args={[radio * 0.42, 32]} />
+        <meshBasicMaterial color={CENTRO} toneMapped={false} transparent opacity={0.9} />
+      </mesh>
+      {/* Las DOS espirales girando en sentidos opuestos */}
+      <mesh ref={giroA} position={[0, 0, 0.02]}>
+        <circleGeometry args={[radio * 0.94, 48]} />
+        <meshBasicMaterial map={tex} transparent toneMapped={false} depthWrite={false} />
+      </mesh>
+      <mesh ref={giroB} position={[0, 0, 0.03]}>
+        <circleGeometry args={[radio * 0.7, 48]} />
+        <meshBasicMaterial map={tex} transparent opacity={0.55} toneMapped={false} depthWrite={false} />
+      </mesh>
+      {/* El borde verde brillante, latiendo */}
+      <mesh ref={borde} position={[0, 0, 0.04]}>
+        <ringGeometry args={[radio * 0.94, radio * 1.08, 48]} />
+        <meshBasicMaterial color={resaltado ? VERDE_BORDE : color} toneMapped={false} transparent opacity={0.95} />
+      </mesh>
+      <pointLight color={VERDE_PORTAL} intensity={resaltado ? 30 : 14} distance={radio * 6} />
+    </Billboard>
+  );
+}
+
+/** El charco de luz verde que el portal echa al suelo. Va FUERA del
+ *  Billboard: el suelo no gira con la cámara. */
+export function LuzDePortal({ radio = 2.6 }: { radio?: number }) {
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+      <circleGeometry args={[radio * 0.9, 32]} />
+      <meshBasicMaterial color={VERDE_PORTAL} transparent opacity={0.22} toneMapped={false} depthWrite={false} />
+    </mesh>
+  );
+}

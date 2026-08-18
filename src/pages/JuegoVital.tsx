@@ -24,7 +24,7 @@ import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
-import { ENTRADA, HAB_ENTRADA, habitantesDeSala } from '../components/juego/planta';
+import { PLAZA_ENTRADA, habitantesDeSala } from '../components/juego/planta';
 import { posicionProyecto, RADIO_EDIFICIO } from '../components/juego/mapa';
 // Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
 // esta parte del proyecto cumple la regla de «ni un hex en src/pages».
@@ -539,10 +539,12 @@ export default function JuegoVital() {
   const crearItemMundo = useCallback(async (d: Partial<ItemMundo> & { tipo: ItemMundo['tipo'] }, punto?: { x: number; z: number }) => {
     const donde = punto || crearEn || { x: jugadorPos.x + 3, z: jugadorPos.z - 3 };
     setCrearEn(null);
+    // Dentro de la plaza de un proyecto, lo creado se ancla a ESE proyecto.
+    const proyectoAncla = interiorRef.current?.proyecto.id ?? null;
     const r = await fetch('/api/juego/mundo', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...d, x: donde.x, z: donde.z }),
+      body: JSON.stringify({ ...d, x: donde.x, z: donde.z, proyecto_id: proyectoAncla }),
     }).catch(() => null);
     if (!r?.ok) { avisar('No se ha podido crear.'); return; }
     const nuevo = await r.json();
@@ -557,7 +559,7 @@ export default function JuegoVital() {
    * clic y abre las opciones (lo gestiona el onClick de siempre).
    */
   const alAgarrarMundo = useCallback((sel: SeleccionMundo, punto: { x: number; y: number }) => {
-    if (!user || interiorRef.current) return;
+    if (!user) return;
     agarre.current = { sel, ...punto };
   }, [user]);
 
@@ -573,6 +575,7 @@ export default function JuegoVital() {
   /** ¿Qué edificio de proyecto hay en este punto del suelo? Mira los del
    *  distrito y también los construidos desde el juego (agentes). */
   const proyectoEnPunto = useCallback((px: number, pz: number): ProyectoJuego | null => {
+    if (interiorRef.current) return null;   // dentro de una plaza no hay portales
     const R = RADIO_EDIFICIO + 0.8;
     const lista = proyectosRef.current;
     for (let i = 0; i < Math.min(lista.length, 12); i++) {
@@ -988,7 +991,7 @@ export default function JuegoVital() {
       setVehiculo('pie');            // dentro no se entra en bici ni volando
       alturaVuelo.current = 0;
       setInterior({ proyecto: p, grupos, items, color, sala: null, agentes: agentesRef.current });
-      destinoViaje.current = { x: ENTRADA.x, z: ENTRADA.z - 5 };
+      destinoViaje.current = { x: PLAZA_ENTRADA.x, z: PLAZA_ENTRADA.z - 4 };
     });
   }, [cambiarEscenario]);
 
@@ -1073,19 +1076,8 @@ export default function JuegoVital() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cargarAgentes]);
 
-  /** De la sala a una habitación, y de la habitación de vuelta a la sala. */
-  const irASala = useCallback((sala: string | null) => {
-    const i = interiorRef.current;
-    if (!i) return;
-    const g = i.grupos.find(x => x.id === sala);
-    cambiarEscenario(g?.label || i.proyecto.titulo, g?.color || i.color, () => {
-      setInterior({ ...i, sala });
-      // En la habitación se aparece MÁS ADENTRO: apareciendo pegado a la
-      // pared, la cámara quedaba encima de tu nuca y no se veía la sala.
-      const e = sala ? HAB_ENTRADA : ENTRADA;
-      destinoViaje.current = { x: e.x, z: e.z - (sala ? 9 : 5) };
-    });
-  }, [cambiarEscenario]);
+  // Las habitaciones ya no existen: la PLAZA del proyecto lo enseña todo
+  // junto (2026-08-18). El campo `sala` de DatosInterior queda siempre a null.
 
   /** Salir del edificio: vuelves a la aldea, delante de su puerta. */
   const salirDelProyecto = useCallback(() => {
@@ -1106,8 +1098,6 @@ export default function JuegoVital() {
   const alChocar = useCallback((id: string) => {
     // Dentro de un proyecto, lo sólido son sus puertas y su salida.
     if (id === 'interior:salir') { salirDelProyecto(); return; }
-    if (id === 'interior:sala') { irASala(null); return; }
-    if (id.startsWith('interior:puerta:')) { irASala(id.slice(16)); return; }
     // Dentro de una habitación también hay gente: chocarte con alguien es
     // ponerte a hablar con él, igual que en la aldea.
     if (id.startsWith('interior:persona:')) {
@@ -1639,7 +1629,7 @@ export default function JuegoVital() {
       )}
 
       {/* Ficha del objeto seleccionado */}
-      {user && !interior && selMundo && !moviendoMundo && !conectando && (
+      {user && selMundo && !moviendoMundo && !conectando && (
         <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[21rem] max-w-[92vw]">
           <Card className="p-3 shadow-2xl">
             <div className="flex items-center justify-between">
@@ -1770,7 +1760,7 @@ export default function JuegoVital() {
       )}
 
       {/* Panel de crear: sale al pulsar suelo vacío en modo edición */}
-      {user && !interior && crearEn && (
+      {user && crearEn && (
         <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[23rem] max-w-[94vw]">
           <Card className="p-3.5 shadow-2xl">
             <div className="flex items-center justify-between">
