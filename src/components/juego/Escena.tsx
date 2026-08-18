@@ -19,8 +19,8 @@ import { EdificiosProyectos } from './EdificiosProyectos';
 import { Agentes } from './Agentes';
 import { InteriorProyecto, type DatosInterior } from './Interior';
 import {
-  SALA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA, RADIO_PUERTA,
-  posicionPuerta,
+  SALA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA, RADIO_PUERTA, RADIO_HABITANTE,
+  posicionPuerta, posicionHabitante, habitantesDeSala,
 } from './planta';
 
 /**
@@ -110,7 +110,17 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   obstaculos.current = useMemo(() => {
     if (interior) {
       if (interior.sala) {
-        return [{ id: 'interior:sala', ...HAB_SALIDA, radio: 2.2 }];
+        const gente = habitantesDeSala(interior.items, interior.sala, interior.agentes);
+        return [
+          { id: 'interior:sala', ...HAB_SALIDA, radio: 2.2 },
+          // Dentro de una habitación la gente también es sólida: chocarte con
+          // alguien es ponerte a hablar con él, igual que en la aldea.
+          ...gente.map((a, i) => ({
+            id: `interior:persona:${a.id}`,
+            ...posicionHabitante(i, gente.length),
+            radio: RADIO_HABITANTE,
+          })),
+        ];
       }
       return [
         ...interior.grupos.map((g, i) => ({
@@ -156,7 +166,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       <Ambiente interior={!!interior} />
 
       {interior ? (
-        <InteriorProyecto datos={interior} />
+        <InteriorProyecto datos={interior} onHablar={onHablarAgente} />
       ) : (
         <>
           <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />

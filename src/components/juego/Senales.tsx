@@ -13,7 +13,7 @@
 // El clic NO se dispara si has arrastrado: en este juego arrastrar es girar la
 // cámara, y sin esa comprobación cada vez que giraras mirando a un edificio
 // acabarías entrando en él.
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Billboard, Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -21,13 +21,17 @@ import * as THREE from 'three';
 /** Píxeles de arrastre a partir de los cuales el gesto es «mirar», no «pulsar». */
 const UMBRAL_ARRASTRE = 6;
 
+/** Cuánto aguanta el resaltado tras salir el ratón, en ms. */
+const ESPERA_SALIDA = 450;
+
 /** Malla que el rayo del ratón atraviesa como si no estuviera. */
 const NO_RAYO = () => null;
 
 /** Tamaño del nombre en reposo, en metros. */
 const LETRA = 0.36;
-/** Al resaltar, qué parte del ALTO DE LA PANTALLA ocupa el nombre. */
-const FRACCION_PANTALLA = 0.075;
+/** Al resaltar, qué parte del ALTO DE LA PANTALLA ocupa el nombre.
+ *  Empezó en 0,075 y Eugenio lo bajó al 40 % de aquello: ocupaba demasiado. */
+const FRACCION_PANTALLA = 0.03;
 
 const tmpMundo = new THREE.Vector3();
 
@@ -168,13 +172,35 @@ export function Interactivo({ onPulsar, children }: {
   children: (resaltado: boolean) => React.ReactNode;
 }) {
   const [resaltado, setResaltado] = useState(false);
+  const salida = useRef<number | null>(null);
+
+  // Salir NO es inmediato: se espera un momento y se cancela si el ratón
+  // vuelve a entrar. Un muñeco son varias mallas con huecos entre medias, y
+  // sin esta espera el nombre parpadeaba —desaparecía y volvía— con solo
+  // mover un poco el ratón por encima (reportado por Eugenio). Ahora hay que
+  // irse de verdad para que se apague.
+  const cancelarSalida = () => {
+    if (salida.current !== null) { clearTimeout(salida.current); salida.current = null; }
+  };
+  useEffect(() => cancelarSalida, []);
 
   const entrar = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
+    cancelarSalida();
     setResaltado(true);
     document.body.style.cursor = 'pointer';
   };
   const salir = () => {
+    cancelarSalida();
+    salida.current = window.setTimeout(() => {
+      salida.current = null;
+      setResaltado(false);
+      document.body.style.cursor = '';
+    }, ESPERA_SALIDA);
+  };
+  /** Al pulsar sí se apaga en el acto: ya has hecho lo que venías a hacer. */
+  const apagarYa = () => {
+    cancelarSalida();
     setResaltado(false);
     document.body.style.cursor = '';
   };
@@ -183,7 +209,7 @@ export function Interactivo({ onPulsar, children }: {
     // estabas girando la cámara y esto no es un clic.
     if (e.delta > UMBRAL_ARRASTRE) return;
     e.stopPropagation();
-    salir();
+    apagarYa();
     onPulsar();
   };
 

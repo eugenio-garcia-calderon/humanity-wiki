@@ -10,6 +10,8 @@
 // proyecto (Producto, Diseño, Técnico…, con su color), que es como Eugenio ya
 // organiza su tablero. Entrar en una habitación es abrir esa carpeta.
 
+import type { Agente, ItemProyecto } from './tipos';
+
 /** Radio de la sala diáfana. Cabe holgado y se ve el techo. */
 export const SALA_R = 24;
 /** A qué distancia del centro se abren las puertas. */
@@ -43,6 +45,68 @@ export const HAB_FONDO = 26;
 /** Dónde apareces dentro de una habitación, y dónde está la puerta de vuelta. */
 export const HAB_ENTRADA = { x: 0, z: HAB_FONDO / 2 - 3 };
 export const HAB_SALIDA = { x: 0, z: HAB_FONDO / 2 - 0.5 };
+
+/**
+ * Las personas de una habitación NO flotan: están de pie, en un arco delante
+ * de ti y más cerca que las tarjetas. Entras y están ahí, como en un salón
+ * (petición de Eugenio: quería a la Anita de verdad dentro de la sala, con su
+ * avatar, no una tarjeta nueva con su nombre).
+ */
+export function posicionHabitante(i: number, n: number): { x: number; z: number } {
+  // Con una sola persona el abanico es cero: se queda justo enfrente, centrada.
+  const abanico = n > 1 ? Math.min(Math.PI * 0.8, 0.5 * (n - 1)) : 0;
+  const paso = n > 1 ? abanico / (n - 1) : 0;
+  const ang = -Math.PI / 2 - abanico / 2 + paso * i;
+  return { x: Math.cos(ang) * 5.5, z: Math.sin(ang) * 5.5 + 2 };
+}
+
+/** Radio de choque de una persona dentro de una habitación. */
+export const RADIO_HABITANTE = 1.4;
+
+// --- Quién vive en una habitación --------------------------------------------
+// Esto vive AQUÍ, y no en `Interior.tsx`, por una razón de peso: la página lo
+// necesita para contárselo a la IA, y `Interior.tsx` importa three.js. Traerlo
+// desde allí metería el motor 3D entero (~1 MB) en el paquete que descarga
+// TODO el mundo, juegue o no.
+
+/** Compara nombres sin tildes ni mayúsculas: «Anita» y «anita» son la misma. */
+const llave = (s: string) =>
+  s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+/**
+ * ¿Esta tarjeta ES una persona de tu mundo? Dos caminos:
+ *
+ * 1. El bueno: la tarjeta trae un bloque `{tipo:'agente', agente_id}`, que es
+ *    lo que se guarda desde que la IA sabe enlazar con quien ya existe.
+ * 2. El rescate: las tarjetas creadas ANTES de esto solo tienen el nombre. Si
+ *    coincide con el de alguien de tu mundo, es esa persona — así la «Anita»
+ *    que la IA duplicó pasa a ser la Anita de verdad sin tocar la base de datos.
+ */
+export function agenteDeItem(it: ItemProyecto, agentes: Agente[]): Agente | null {
+  const ref = (Array.isArray(it.bloques) ? it.bloques : [])
+    .find(b => b?.tipo === 'agente' && b.agente_id);
+  if (ref?.agente_id) return agentes.find(a => a.id === ref.agente_id) || null;
+  const k = llave(it.titulo);
+  return agentes.find(a => a.tipo === 'persona' && llave(a.nombre) === k) || null;
+}
+
+/**
+ * Quién está de pie en una habitación. Un solo sitio lo decide, y lo leen la
+ * escena (para dibujarlos), los obstáculos (para poder chocarte con ellos) y
+ * la página (para contárselo a la IA).
+ */
+export function habitantesDeSala(
+  items: ItemProyecto[], sala: string | null, agentes: Agente[],
+): Agente[] {
+  if (!sala) return [];
+  const out: Agente[] = [];
+  for (const it of items) {
+    if (it.grupo !== sala) continue;
+    const a = agenteDeItem(it, agentes);
+    if (a && !out.some(x => x.id === a.id)) out.push(a);
+  }
+  return out;
+}
 
 /**
  * Las cosas de una habitación flotan en dos arcos concéntricos delante de ti:

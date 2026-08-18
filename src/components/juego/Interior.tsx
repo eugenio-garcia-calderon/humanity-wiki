@@ -15,9 +15,13 @@ import { Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import {
   SALA_R, PUERTA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA,
-  posicionPuerta, posicionItem, type Grupo,
+  posicionPuerta, posicionItem, posicionHabitante,
+  agenteDeItem, habitantesDeSala, type Grupo,
 } from './planta';
-import type { ItemProyecto } from './tipos';
+import type { Agente, ItemProyecto } from './tipos';
+import { Persona3D, cuerpoDe } from './Modelos';
+import { Halo, Interactivo, Rotulo } from './Senales';
+import { PALETA } from './paleta';
 
 const ORO = '#f6c667';
 const CRISTAL = '#cfe4f2';
@@ -138,6 +142,62 @@ function Tarjeta({ item, color }: { item: ItemProyecto; color: string }) {
       <Text position={[-1.75, -1.12, 0.03]} fontSize={0.17} color={estado} anchorX="left" anchorY="middle">
         {item.estado === 'hecho' ? 'HECHO' : item.estado === 'en_curso' ? 'EN CURSO' : 'POR HACER'}
       </Text>
+    </group>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Personas dentro de una habitación
+// ---------------------------------------------------------------------------
+
+/**
+ * Una persona real de tu mundo, de pie en la habitación. Es el MISMO avatar
+ * que tiene en la aldea (su fenotipo y sus colores), no un muñeco genérico, y
+ * al pulsarla se abre su conversación de siempre — con su memoria.
+ */
+function Habitante({ a, color, onHablar }: {
+  a: Agente; color: string; onHablar: (a: Agente) => void;
+}) {
+  const fase = useMemo(() => Math.random() * Math.PI * 2, []);
+  const g = useRef<THREE.Group>(null);
+  useFrame((estado) => {
+    if (g.current) g.current.rotation.y = Math.sin((estado.clock.elapsedTime + fase) * 0.3) * 0.4;
+  });
+  return (
+    <group>
+      {/* Peana de luz: la persona no flota, pero su suelo sí brilla */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+        <ringGeometry args={[1.1, 1.45, 40]} />
+        <meshBasicMaterial color={color} transparent opacity={0.75} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>
+      <pointLight position={[0, 2.4, 1.4]} color={CRISTAL} intensity={16} distance={9} />
+      <Halo y={3.4} color={color} radio={0.75} />
+      <Interactivo onPulsar={() => onHablar(a)}>
+        {(resaltado) => (
+          <group>
+            <group ref={g}>
+              <Persona3D
+                cuerpo={a.apariencia?.cuerpo || cuerpoDe(a.nombre)}
+                animacion="idle"
+                aspecto={a.apariencia}
+              />
+            </group>
+            {/* Blanco generoso para el dedo. Transparente, NO invisible: lo
+                invisible se salta el rayo del ratón y no habría qué pulsar. */}
+            <mesh position={[0, 1, 0]}>
+              <cylinderGeometry args={[1.1, 1.1, 2.2, 8]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+            <Rotulo
+              y={2.8}
+              texto={a.nombre}
+              pie={a.rol || 'Pulsa para hablar'}
+              color={PALETA.robotLuz}
+              resaltado={resaltado}
+            />
+          </group>
+        )}
+      </Interactivo>
     </group>
   );
 }
@@ -349,19 +409,28 @@ export interface DatosInterior {
   color: string;
   /** null = la sala diáfana; si no, el id del grupo en el que estás. */
   sala: string | null;
+  /** La gente de tu mundo. Una tarjeta que ES una persona se dibuja como ella. */
+  agentes: Agente[];
 }
 
-export function InteriorProyecto({ datos }: { datos: DatosInterior }) {
-  const { proyecto, grupos, items, color, sala } = datos;
+export function InteriorProyecto({ datos, onHablar }: {
+  datos: DatosInterior;
+  /** Pulsar a alguien dentro de una habitación abre SU conversación. */
+  onHablar: (a: Agente) => void;
+}) {
+  const { proyecto, grupos, items, color, sala, agentes } = datos;
   const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
 
   // --- Habitación: las tarjetas de un grupo, con sus fotos y documentos
   if (sala) {
     const grupo = grupos.find(g => g.id === sala);
     const suyos = items.filter(i => i.grupo === sala);
-    // Cada tarjeta cuenta como una cosa; cada imagen suya, como otra.
+    // Las tarjetas que SON personas se sacan aparte: no se dibujan como una
+    // lámina con su nombre, sino como la persona misma, de pie en la sala.
+    const gente = habitantesDeSala(items, sala, agentes);
     const cosas: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
     for (const it of suyos) {
+      if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
       cosas.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
       for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
         if (b?.tipo === 'imagen' && b.url) cosas.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
@@ -405,13 +474,24 @@ export function InteriorProyecto({ datos }: { datos: DatosInterior }) {
           </Text>
         </Billboard>
 
-        {cosas.length === 0 && (
+        {cosas.length === 0 && gente.length === 0 && (
           <Billboard position={[0, 3.2, -4]}>
             <Text fontSize={0.5} maxWidth={16} textAlign="center" color="#8fa0b3" anchorX="center" anchorY="middle">
               Esta habitación está vacía. Todo lo que añadas a «{grupo?.label}» en el tablero aparecerá aquí flotando.
             </Text>
           </Billboard>
         )}
+
+        {/* La gente de la habitación: los mismos avatares que en la aldea, con
+            su memoria y su conversación. No son copias, son ellos. */}
+        {gente.map((a, i) => {
+          const p = posicionHabitante(i, gente.length);
+          return (
+            <group key={a.id} position={[p.x, 0, p.z]}>
+              <Habitante a={a} color={c} onHablar={onHablar} />
+            </group>
+          );
+        })}
 
         {cosas.map((cosa, i) => {
           const p = posicionItem(i, cosas.length);

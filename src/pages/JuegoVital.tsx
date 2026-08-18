@@ -16,7 +16,7 @@ import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
-import { ENTRADA, HAB_ENTRADA } from '../components/juego/planta';
+import { ENTRADA, HAB_ENTRADA, habitantesDeSala } from '../components/juego/planta';
 import { posicionProyecto } from '../components/juego/mapa';
 // Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
 // esta parte del proyecto cumple la regla de «ni un hex en src/pages».
@@ -63,6 +63,11 @@ function contextoJuego(interior: DatosInterior | null, agentes: Agente[], proyec
       sala_actual: grupo ? { id: grupo.id, label: grupo.label } : null,
       cosas_en_la_sala: grupo
         ? interior.items.filter(i => i.grupo === grupo.id).map(i => ({ titulo: i.titulo, estado: i.estado }))
+        : null,
+      // Quién está YA de pie en esta habitación. Sirve para no meter dos veces
+      // a la misma persona cuando el jugador lo pide otra vez.
+      personas_en_la_sala: grupo
+        ? habitantesDeSala(interior.items, grupo.id, agentes).map(a => ({ id: a.id, nombre: a.nombre }))
         : null,
     } : null,
   };
@@ -282,6 +287,15 @@ export default function JuegoVital() {
       // Lo que la IA propone crear se crea de verdad, junto al jugador.
       const dentro = interiorRef.current;
       for (const [i, a] of (acciones || []).entries()) {
+        // «Mete a Anita en esta sala»: se ENLAZA con la Anita que ya existe en
+        // tu mundo y aparece su avatar de verdad. Nunca se duplica a nadie
+        // (fallo reportado por Eugenio: la IA le creó una Anita nueva).
+        if (a.tipo === 'habitante' && dentro) {
+          await meterPersonaEnSala(a.grupo || dentro.sala || dentro.grupos[0]?.id, {
+            agente_id: a.agente_id, nombre: a.nombre, rol: a.rol, descripcion: a.descripcion,
+          }).catch(() => {});
+          continue;
+        }
         // Dentro de un proyecto se construye en su TABLERO: una tarjeta en el
         // grupo que corresponde, que es la habitación en la que estás.
         if (a.tipo === 'tarjeta' && dentro) {
@@ -306,6 +320,9 @@ export default function JuegoVital() {
   const crearAgente = async (d: {
     tipo: 'persona' | 'proyecto'; nombre: string; rol?: string; descripcion?: string;
     foto_url?: string; dx?: number; dz?: number;
+    /** Sitio exacto de la aldea. Hace falta cuando creas desde DENTRO de un
+     *  edificio: allí tu posición son coordenadas de la sala, no del mapa. */
+    x?: number; z?: number;
   }) => {
     const r = await fetch('/api/juego/agentes', {
       method: 'POST', credentials: 'include',
@@ -313,8 +330,8 @@ export default function JuegoVital() {
       body: JSON.stringify({
         ...d,
         // Se planta delante del jugador, donde está mirando el mundo.
-        x: jugadorPos.x + (d.dx ?? (Math.random() * 6 - 3)),
-        z: jugadorPos.z + (d.dz ?? -5),
+        x: d.x ?? (jugadorPos.x + (d.dx ?? (Math.random() * 6 - 3))),
+        z: d.z ?? (jugadorPos.z + (d.dz ?? -5)),
       }),
     });
     const j = await r.json();
@@ -434,10 +451,19 @@ export default function JuegoVital() {
       setPanel(null);
       setVehiculo('pie');            // dentro no se entra en bici ni volando
       alturaVuelo.current = 0;
-      setInterior({ proyecto: p, grupos, items, color, sala: null });
+      setInterior({ proyecto: p, grupos, items, color, sala: null, agentes: agentesRef.current });
       destinoViaje.current = { x: ENTRADA.x, z: ENTRADA.z - 5 };
     });
   }, [cambiarEscenario]);
+
+  /**
+   * La gente de tu mundo cambia (creas a alguien, le cambias el aspecto) y el
+   * interior tiene que enterarse: es de donde salen los avatares que están de
+   * pie dentro de las habitaciones.
+   */
+  useEffect(() => {
+    setInterior(prev => (prev && prev.agentes !== agentes ? { ...prev, agentes } : prev));
+  }, [agentes]);
 
   /**
    * Mete una tarjeta en una habitación del proyecto en el que estás. Es lo que
@@ -445,13 +471,21 @@ export default function JuegoVital() {
    * habitación ES un grupo del tablero, así que añadir algo aquí es añadirlo
    * allí, y aparece flotando al momento.
    */
-  const crearTarjeta = useCallback(async (grupo: string, titulo: string, resumen?: string) => {
+  const crearTarjeta = useCallback(async (
+    grupo: string, titulo: string, resumen?: string,
+    /** Contenido de la tarjeta. Con `{tipo:'agente'}` la tarjeta ES una
+     *  persona y en la habitación sale su avatar en vez de una lámina. */
+    bloques?: ItemProyecto['bloques'],
+  ) => {
     const i = interiorRef.current;
     if (!i || !titulo) return;
     const r = await fetch('/api/roadmap', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ proyecto_id: i.proyecto.id, grupo, titulo, resumen: resumen || null, estado: 'por_hacer' }),
+      body: JSON.stringify({
+        proyecto_id: i.proyecto.id, grupo, titulo, resumen: resumen || null,
+        estado: 'por_hacer', bloques: bloques || [],
+      }),
     });
     if (!r.ok) { avisar('No se ha podido añadir aquí.'); return; }
     const nueva: ItemProyecto = await r.json();
@@ -459,6 +493,44 @@ export default function JuegoVital() {
       ? { ...prev, items: [...prev.items, { ...nueva, bloques: nueva.bloques || [] }] }
       : prev));
   }, []);
+
+  /**
+   * Mete en una habitación a alguien que YA vive en tu mundo.
+   *
+   * Esto existe por un fallo que reportó Eugenio: pidió «añade a Anita en esta
+   * habitación» y la IA creó una Anita nueva, un nombre suelto en una tarjeta,
+   * en vez de traer a la de siempre. Aquí se busca a la persona real —por su
+   * id, y si no, por su nombre— y la tarjeta se guarda APUNTANDO a ella. Así
+   * dentro de la sala aparece su avatar, con su aspecto, su memoria y su
+   * conversación. Solo si de verdad no existe nadie con ese nombre se crea,
+   * una sola vez, y se enlaza esa.
+   */
+  const meterPersonaEnSala = useCallback(async (grupo: string, d: {
+    agente_id?: string; nombre: string; rol?: string; descripcion?: string;
+  }) => {
+    const i = interiorRef.current;
+    if (!i || !d?.nombre) return;
+    const k = (s: string) => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let quien = agentesRef.current.find(a => a.id === d.agente_id)
+      || agentesRef.current.find(a => a.tipo === 'persona' && k(a.nombre) === k(d.nombre));
+    if (!quien) {
+      // Estando dentro de un edificio, tu posición son coordenadas de la sala:
+      // la persona nueva se planta junto al edificio de este proyecto.
+      const idx = proyectosRef.current.findIndex(p => p.id === i.proyecto.id);
+      const pos = posicionProyecto(Math.max(0, idx));
+      const creado = await crearAgente({
+        tipo: 'persona', nombre: d.nombre, rol: d.rol, descripcion: d.descripcion,
+        x: pos.x - 7, z: pos.z + 7,
+      }).catch(() => null);
+      if (!creado?.id) { avisar(`No se ha podido traer a ${d.nombre}.`); return; }
+      quien = { ...creado, apariencia: creado.apariencia || {}, memoria: [] } as Agente;
+    }
+    await crearTarjeta(
+      grupo, quien.nombre, quien.rol || d.rol || d.descripcion || 'Persona del proyecto',
+      [{ tipo: 'agente', agente_id: quien.id, texto: quien.nombre }],
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crearTarjeta]);
 
   /** De la sala a una habitación, y de la habitación de vuelta a la sala. */
   const irASala = useCallback((sala: string | null) => {
@@ -493,6 +565,13 @@ export default function JuegoVital() {
     if (id === 'interior:salir') { salirDelProyecto(); return; }
     if (id === 'interior:sala') { irASala(null); return; }
     if (id.startsWith('interior:puerta:')) { irASala(id.slice(16)); return; }
+    // Dentro de una habitación también hay gente: chocarte con alguien es
+    // ponerte a hablar con él, igual que en la aldea.
+    if (id.startsWith('interior:persona:')) {
+      const a = agentesRef.current.find(x => x.id === id.slice(17));
+      if (a) { setFichaAgente(a); hablarCon(a, false); }
+      return;
+    }
     if (id.startsWith('proy:')) {
       const p = proyectosRef.current.find(x => `proy:${x.id}` === id);
       if (p) entrarEnProyecto(p);
