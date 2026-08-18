@@ -23,7 +23,8 @@ import * as THREE from 'three';
 import { PALETA } from './paleta';
 import { Modelo, CASAS } from './Modelos';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
-import type { ItemMundo, SeleccionMundo } from './tipos';
+import { RELACIONES_HILO, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
+import { Rotulo } from './Senales';
 
 const ORO = '#f6c667';
 const POSTIT = '#fbe28a';
@@ -32,6 +33,37 @@ const PAPEL = '#f7f3e9';
 /** El clic solo cuenta si NO venías arrastrando la cámara (mismo umbral que
  *  Senales.tsx: arrastrar es girar la vista, no pulsar). */
 const esClic = (e: ThreeEvent<MouseEvent>) => e.delta <= 6;
+
+/**
+ * Hover con la misma GRACIA que las personas y los edificios (Senales.tsx):
+ * salir no apaga en el acto — espera y se cancela si el ratón vuelve, porque
+ * una tarjeta son varias mallas con huecos y el rótulo parpadeaba.
+ */
+function useHoverEstable(): [boolean, { onPointerOver: (e: ThreeEvent<PointerEvent>) => void; onPointerOut: () => void }] {
+  const [resaltado, setResaltado] = useState(false);
+  const salida = useRef<number | null>(null);
+  const cancelar = () => { if (salida.current !== null) { clearTimeout(salida.current); salida.current = null; } };
+  useEffect(() => cancelar, []);
+  return [resaltado, {
+    onPointerOver: (e) => {
+      e.stopPropagation();
+      cancelar();
+      setResaltado(true);
+      document.body.style.cursor = 'pointer';
+    },
+    onPointerOut: () => {
+      cancelar();
+      salida.current = window.setTimeout(() => {
+        salida.current = null;
+        setResaltado(false);
+        document.body.style.cursor = '';
+      }, 450);
+    },
+  }];
+}
+
+/** Color y pregunta de una relación de hilo. */
+const relacionDe = (rel?: string) => RELACIONES_HILO.find(r => r.id === rel) || null;
 
 // ---------------------------------------------------------------------------
 // Props procedurales del catálogo (los que no salen del pack de modelos)
@@ -301,7 +333,7 @@ export function MovilFantasma({ movil, rot, children }: {
 /** Altura a la que sale el hilo de cada tipo de cosa. */
 const alturaHilo = (tipo: string) => (tipo === 'prop' ? 1.2 : 2.1);
 
-export function ObjetosMundo({ items, onPulsar, onAgarrar, ocultar, resolverDestino }: {
+export function ObjetosMundo({ items, onPulsar, onAgarrar, onPulsarHilo, ocultar, resolverDestino }: {
   items: ItemMundo[];
   /** Pulsar un objeto abre SUS OPCIONES directamente (petición de Eugenio:
    *  sin tener que activar antes ningún modo edición). */
@@ -309,14 +341,21 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, ocultar, resolverDest
   /** Pinchar (sin soltar) un objeto: candidato a arrastre. La página decide
    *  si es arrastre (se mueve) o clic (se abren sus opciones). */
   onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
+  /** Pulsar un HILO: la página abre su editor (relación, texto, eliminar). */
+  onPulsarHilo: (sel: SeleccionHilo) => void;
   /** El id del objeto que va agarrado: no se dibuja (lo lleva el fantasma). */
   ocultar?: string;
   /** Convierte 'agente:GA…' | 'proy:PRY…' | 'item:WM…' en una posición, o null. */
   resolverDestino: (ref: string) => { x: number; y: number; z: number } | null;
 }) {
-  // Los hilos de conocimiento: curvas de un objeto a lo que apunta.
+  // Los hilos de conocimiento: curvas de un objeto a lo que apunta, con el
+  // color de su RELACIÓN y su texto flotando en el punto más alto del arco
+  // (petición de Eugenio: hilos editables con información, como en los grafos).
   const hilos = useMemo(() => {
-    const lista: Array<{ clave: string; puntos: THREE.Vector3[] }> = [];
+    const lista: Array<{
+      clave: string; itemId: string; indice: number;
+      puntos: THREE.Vector3[]; cima: THREE.Vector3; color: string; texto: string | null;
+    }> = [];
     for (const it of items) {
       for (const [i, e] of (it.enlaces || []).entries()) {
         const destino = resolverDestino(e.a);
@@ -326,7 +365,14 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, ocultar, resolverDest
         const medio = a.clone().lerp(b, 0.5);
         medio.y += Math.max(2, a.distanceTo(b) * 0.18);   // arco hacia arriba
         const curva = new THREE.QuadraticBezierCurve3(a, medio, b);
-        lista.push({ clave: `${it.id}:${i}`, puntos: curva.getPoints(24) });
+        const rel = relacionDe(e.rel);
+        lista.push({
+          clave: `${it.id}:${i}`, itemId: it.id, indice: i,
+          puntos: curva.getPoints(24),
+          cima: curva.getPoint(0.5),
+          color: rel?.color || ORO,
+          texto: e.texto || rel?.label || null,
+        });
       }
     }
     return lista;
@@ -349,29 +395,94 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, ocultar, resolverDest
   return (
     <group>
       {items.filter(it => it.id !== ocultar).map((it, i) => (
-        <group
+        <ItemPulsable
           key={it.id}
-          position={[it.x, 0, it.z]}
-          rotation-y={it.rot}
+          item={it}
+          fase={i * 1.3}
           onClick={(e) => pulsar(e, it)}
-          onPointerDown={(e) => {
+          onAgarrar={(e) => {
             if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
             onAgarrar(selDe(it), { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY });
           }}
-        >
-          <ItemVisual item={it} fase={i * 1.3} />
-          {/* Blanco generoso para el dedo en lo que flota fino */}
-          {it.tipo !== 'prop' && (
-            <mesh position={[0, 2, 0]}>
-              <cylinderGeometry args={[1.6, 1.6, 3.2, 8]} />
-              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-            </mesh>
+        />
+      ))}
+      {hilos.map(h => (
+        <group key={h.clave}>
+          <Line
+            points={h.puntos}
+            color={h.color}
+            lineWidth={2.5}
+            transparent
+            opacity={0.8}
+            onClick={(e) => {
+              if (e.delta > 6) return;
+              e.stopPropagation();
+              onPulsarHilo({ itemId: h.itemId, indice: h.indice });
+            }}
+          />
+          {h.texto && (
+            <Billboard position={[h.cima.x, h.cima.y + 0.35, h.cima.z]}>
+              <Text
+                fontSize={0.34}
+                maxWidth={6}
+                textAlign="center"
+                color={h.color}
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.045}
+                outlineColor="#ffffff"
+              >
+                {h.texto.slice(0, 60)}
+              </Text>
+            </Billboard>
           )}
         </group>
       ))}
-      {hilos.map(h => (
-        <Line key={h.clave} points={h.puntos} color={ORO} lineWidth={2} transparent opacity={0.75} />
-      ))}
+    </group>
+  );
+}
+
+/** Etiqueta corta del rótulo flotante de un item al pasar el ratón. */
+const nombreDe = (it: ItemMundo) =>
+  it.tipo === 'prop' ? ({ arbol: 'Árbol', pino: 'Pino', casa: 'Casa', banco: 'Banco', farola: 'Farola', puesto: 'Puesto', pozo: 'Pozo', roca: 'Roca', arbusto: 'Arbusto' } as Record<string, string>)[it.modelo || ''] || 'Objeto'
+    : it.tipo === 'nota' ? (it.texto || 'Nota').split('\n')[0].slice(0, 40)
+      : it.nombre || ({ imagen: 'Imagen', documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo;
+
+/**
+ * Un objeto plantado, con el MISMO hover que las personas y los edificios
+ * (petición de Eugenio): al pasar el ratón, su nombre crece medido en pantalla
+ * y con la gracia de salida que evita el parpadeo.
+ */
+function ItemPulsable({ item, fase, onClick, onAgarrar }: {
+  item: ItemMundo;
+  fase: number;
+  onClick: (e: ThreeEvent<MouseEvent>) => void;
+  onAgarrar: (e: ThreeEvent<PointerEvent>) => void;
+}) {
+  const [resaltado, hover] = useHoverEstable();
+  return (
+    <group
+      position={[item.x, 0, item.z]}
+      rotation-y={item.rot}
+      onClick={onClick}
+      onPointerDown={onAgarrar}
+      {...hover}
+    >
+      <ItemVisual item={item} fase={fase} />
+      <Rotulo
+        y={item.tipo === 'prop' ? 3.2 : 4.1}
+        texto={nombreDe(item)}
+        pie="Pulsa para abrir · arrastra para mover"
+        color={ORO}
+        resaltado={resaltado}
+      />
+      {/* Blanco generoso para el dedo en lo que flota fino */}
+      {item.tipo !== 'prop' && (
+        <mesh position={[0, 2, 0]}>
+          <cylinderGeometry args={[1.6, 1.6, 3.2, 8]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      )}
     </group>
   );
 }

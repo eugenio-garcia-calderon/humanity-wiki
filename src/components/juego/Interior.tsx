@@ -457,10 +457,13 @@ export function InteriorProyecto({ datos, onHablar }: {
           <ringGeometry args={[7.4, 7.6, 64]} />
           <meshBasicMaterial color={c} transparent opacity={0.4} toneMapped={false} />
         </mesh>
-        {([[0, -HAB_FONDO / 2, 0], [-HAB_ANCHO / 2, 0, Math.PI / 2], [HAB_ANCHO / 2, 0, Math.PI / 2]] as const).map(([x, z, r], i) => (
+        {/* Los muros miran hacia DENTRO y solo se dibujan por esa cara: si la
+            cámara acaba fuera de la habitación, la pared se esfuma y sigues
+            viendo la escena (por eso la cámara ya no necesita acotarse). */}
+        {([[0, -HAB_FONDO / 2, 0], [-HAB_ANCHO / 2, 0, Math.PI / 2], [HAB_ANCHO / 2, 0, -Math.PI / 2]] as const).map(([x, z, r], i) => (
           <mesh key={i} position={[x as number, 5, z as number]} rotation={[0, r as number, 0]}>
             <planeGeometry args={[i === 0 ? HAB_ANCHO : HAB_FONDO, 10]} />
-            <meshStandardMaterial color={PARED} side={THREE.DoubleSide} roughness={0.7} />
+            <meshStandardMaterial color={PARED} roughness={0.7} />
           </mesh>
         ))}
         {/* Franja de color del grupo en la pared del fondo: dice dónde estás */}

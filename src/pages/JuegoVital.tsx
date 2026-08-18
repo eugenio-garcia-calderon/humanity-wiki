@@ -7,15 +7,16 @@ import {
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
   Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
+  Menu, Sprout, Home, Users,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import {
-  CATALOGO_PROPS,
+  CATALOGO_PROPS, RELACIONES_HILO,
   type Agente, type Camara, type Cercania, type EntradaMando, type ItemMundo,
-  type ItemProyecto, type OverrideMundo, type ProyectoJuego, type SeleccionMundo,
-  type Vehiculo,
+  type ItemProyecto, type OverrideMundo, type ProyectoJuego, type SeleccionHilo,
+  type SeleccionMundo, type Vehiculo,
 } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 import EditorAspecto from '../components/juego/EditorAspecto';
@@ -197,6 +198,20 @@ export default function JuegoVital() {
   const posProyecto = useRef<{ x: number; z: number } | null>(null);
   /** Las instrucciones del teclado, comprimidas en el icono ℹ️ (petición de Eugenio). */
   const [ayudaVisible, setAyudaVisible] = useState(false);
+  /** El hilo señalado: su editor deja cambiar relación y texto, como en los grafos. */
+  const [selHilo, setSelHilo] = useState<SeleccionHilo | null>(null);
+  /** Lo elegido en el MENÚ de crear, esperando a que pulses el suelo. */
+  const [plantando, setPlantando] = useState<(Partial<ItemMundo> & { tipo: ItemMundo['tipo'] }) | null>(null);
+  /** El menú lateral de crear (diseño del menú de objetivos del mapa). */
+  const [menuColapsado, setMenuColapsado] = useState(true);
+  const [menuPeek, setMenuPeek] = useState(false);
+  const [catAbierta, setCatAbierta] = useState<string | null>(null);
+  const [subAbierto, setSubAbierto] = useState<string | null>(null);
+  const [docsExistentes, setDocsExistentes] = useState<any[] | null>(null);
+  /** El formulario del menú (link, vídeo, música, grafo, mapa). */
+  const [formMenu, setFormMenu] = useState<{ tipo: string; url: string; nombre: string } | null>(null);
+  /** Adónde va lo subido: 'crear' lo planta ya; 'plantar' espera el clic al suelo. */
+  const subirDestino = useRef<'crear' | 'plantar'>('crear');
   // Cerrar el panel de crear tira también su mini-formulario: si no, al
   // reabrirlo en otro sitio aparecería el formulario a medias de antes.
   useEffect(() => { if (!crearEn) setFormCrear(null); }, [crearEn]);
@@ -216,6 +231,8 @@ export default function JuegoVital() {
   leyendoRef.current = leyendo;
   const crearEnRef = useRef<{ x: number; z: number } | null>(null);
   crearEnRef.current = crearEn;
+  const selHiloRef = useRef<SeleccionHilo | null>(null);
+  selHiloRef.current = selHilo;
 
   const [tactil] = useState(() =>
     typeof window !== 'undefined' &&
@@ -470,8 +487,8 @@ export default function JuegoVital() {
   }, []);
 
   /** Planta un objeto nuevo donde se pulsó el suelo. */
-  const crearItemMundo = useCallback(async (d: Partial<ItemMundo> & { tipo: ItemMundo['tipo'] }) => {
-    const donde = crearEn || { x: jugadorPos.x + 3, z: jugadorPos.z - 3 };
+  const crearItemMundo = useCallback(async (d: Partial<ItemMundo> & { tipo: ItemMundo['tipo'] }, punto?: { x: number; z: number }) => {
+    const donde = punto || crearEn || { x: jugadorPos.x + 3, z: jugadorPos.z - 3 };
     setCrearEn(null);
     const r = await fetch('/api/juego/mundo', {
       method: 'POST', credentials: 'include',
@@ -541,8 +558,11 @@ export default function JuegoVital() {
       if (sel.clase === 'item') {
         const origen = mundoItems.find(it => it.id === ed.sel!.id);
         if (origen) {
-          guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `item:${sel.id}` }] });
-          avisar('Hilo creado.');
+          const enlaces = [...(origen.enlaces || []), { a: `item:${sel.id}`, rel: 'contexto' }];
+          guardarItem(origen.id, { enlaces });
+          // El editor del hilo se abre al momento: relación, texto, eliminar.
+          setSelHilo({ itemId: origen.id, indice: enlaces.length - 1 });
+          setSelMundo(null);
         }
         setConectando(false);
         return;
@@ -555,11 +575,19 @@ export default function JuegoVital() {
     setNotaBorrador(sel.tipo === 'nota' ? (sel.texto || '') : '');
   }, [mundoItems, guardarItem]);
 
-  /** Clic en suelo vacío: crear ahí (o cerrar lo abierto). */
+  /** Clic en suelo vacío: colocar lo elegido en el menú, crear ahí, o cerrar. */
+  const plantandoRef = useRef<typeof plantando>(null);
+  plantandoRef.current = plantando;
   const alSuelo = useCallback((p: { x: number; z: number }) => {
+    const pl = plantandoRef.current;
+    if (pl) {
+      crearItemMundo(pl, p);
+      setPlantando(null);
+      return;
+    }
     if (editorRef.current.sel) { setSelMundo(null); setConectando(false); return; }
     setCrearEn(p);
-  }, []);
+  }, [crearItemMundo]);
 
   /** Soltar lo que se estaba moviendo. */
   const alSoltar = useCallback((p: { x: number; z: number }) => {
@@ -656,8 +684,54 @@ export default function JuegoVital() {
     }).catch(() => null);
     const j = await r?.json().catch(() => null);
     if (!r?.ok || !j?.url) { avisar(j?.error || 'No se ha podido subir el archivo.'); return; }
+    if (subirDestino.current === 'plantar') {
+      // Viene del menú lateral: queda en la mano, se coloca pulsando el suelo.
+      setPlantando({ tipo: subiendoComo.current, url: j.url, nombre: f.name });
+      subirDestino.current = 'crear';
+      return;
+    }
     await crearItemMundo({ tipo: subiendoComo.current, url: j.url, nombre: f.name });
   }, [crearItemMundo]);
+
+  /** El formulario del MENÚ lateral: link/vídeo/música quedan «en la mano»;
+   *  grafo y mapa se crean de verdad en la plataforma y luego se colocan. */
+  const confirmarFormMenu = useCallback(async () => {
+    const f = formMenu;
+    if (!f) return;
+    setFormMenu(null);
+    if (f.tipo === 'grafo' || f.tipo === 'mapa') {
+      const nombre = f.nombre.trim() || (f.tipo === 'grafo' ? 'Grafo nuevo' : 'Mapa nuevo');
+      const r = await fetch(f.tipo === 'grafo' ? '/api/graphs' : '/api/maps', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: nombre }),
+      }).catch(() => null);
+      const j = await r?.json().catch(() => null);
+      if (!r?.ok || !j?.slug) { avisar(j?.error || 'No se ha podido crear.'); return; }
+      setPlantando({
+        tipo: f.tipo === 'grafo' ? 'lienzo' : 'mapa', nombre,
+        url: f.tipo === 'grafo' ? `/grafos/${j.slug}` : `/mapas/${j.slug}`,
+      });
+      return;
+    }
+    const url = f.url.trim();
+    if (!url) { avisar('Falta la dirección (URL).'); return; }
+    setPlantando({
+      tipo: f.tipo as ItemMundo['tipo'],
+      url: /^https?:\/\//.test(url) ? url : `https://${url}`,
+      nombre: f.nombre.trim() || url.replace(/^https?:\/\//, '').slice(0, 40),
+    });
+  }, [formMenu]);
+
+  /** Tus documentos ya existentes en la plataforma, para plantarlos. */
+  const cargarDocsExistentes = useCallback(async () => {
+    if (!user) return;
+    const j = await fetch(`/api/publicaciones?autor=${encodeURIComponent(user.id)}&limit=200`, { credentials: 'include' })
+      .then(r => r.json()).catch(() => []);
+    setDocsExistentes(Array.isArray(j)
+      ? j.filter((w: any) => w.kind === 'documento' || w.kind === 'pagina')
+      : []);
+  }, [user]);
 
   /**
    * Acercarse a un proyecto ABRE su ficha sola, sin pulsar nada (petición de
@@ -687,6 +761,8 @@ export default function JuegoVital() {
     const a = abiertos.current;
     const ed = editorRef.current;
     if (leyendoRef.current) setLeyendo(null);
+    else if (selHiloRef.current) setSelHilo(null);
+    else if (plantandoRef.current) setPlantando(null);
     else if (ed.sel || ed.conectando) { setSelMundo(null); setConectando(false); setMoviendoMundo(false); }
     else if (crearEnRef.current) setCrearEn(null);
     else if (a.aspecto) setEditandoAspecto(null);
@@ -867,8 +943,10 @@ export default function JuegoVital() {
     const g = i.grupos.find(x => x.id === sala);
     cambiarEscenario(g?.label || i.proyecto.titulo, g?.color || i.color, () => {
       setInterior({ ...i, sala });
+      // En la habitación se aparece MÁS ADENTRO: apareciendo pegado a la
+      // pared, la cámara quedaba encima de tu nuca y no se veía la sala.
       const e = sala ? HAB_ENTRADA : ENTRADA;
-      destinoViaje.current = { x: e.x, z: e.z - 5 };
+      destinoViaje.current = { x: e.x, z: e.z - (sala ? 9 : 5) };
     });
   }, [cambiarEscenario]);
 
@@ -1169,8 +1247,10 @@ export default function JuegoVital() {
             if (ed.conectando && ed.sel?.clase === 'item') {
               const origen = mundoItems.find(it => it.id === ed.sel!.id);
               if (origen) {
-                guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `proy:${p.id}` }] });
-                avisar('Hilo creado hasta el proyecto.');
+                const enlaces = [...(origen.enlaces || []), { a: `proy:${p.id}`, rel: 'contexto' }];
+                guardarItem(origen.id, { enlaces });
+                setSelHilo({ itemId: origen.id, indice: enlaces.length - 1 });
+                setSelMundo(null);
               }
               setConectando(false);
               return;
@@ -1182,8 +1262,10 @@ export default function JuegoVital() {
             if (ed.conectando && ed.sel?.clase === 'item') {
               const origen = mundoItems.find(it => it.id === ed.sel!.id);
               if (origen) {
-                guardarItem(origen.id, { enlaces: [...(origen.enlaces || []), { a: `agente:${a.id}` }] });
-                avisar(`Hilo creado hasta ${a.nombre}.`);
+                const enlaces = [...(origen.enlaces || []), { a: `agente:${a.id}`, rel: 'contexto' }];
+                guardarItem(origen.id, { enlaces });
+                setSelHilo({ itemId: origen.id, indice: enlaces.length - 1 });
+                setSelMundo(null);
               }
               setConectando(false);
               return;
@@ -1194,6 +1276,7 @@ export default function JuegoVital() {
           editor={{ activo: !!user, moviendo: moviendoMundo, sel: selMundo }}
           onPulsarMundo={alPulsarMundo}
           onAgarrarMundo={alAgarrarMundo}
+          onPulsarHilo={(h) => { setSelHilo(h); setSelMundo(null); setCrearEn(null); }}
           onSuelo={alSuelo}
           onSoltar={alSoltar}
           onAbrirItem={(it) => setLeyendo(it)}
@@ -1235,7 +1318,7 @@ export default function JuegoVital() {
       <VeloViaje activo={!!viajando} destino={viajando} />
 
       {/* Cabecera */}
-      <div className="absolute top-3 left-3 z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
+      <div className="absolute top-3 left-3 sm:left-16 z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
         <p className="text-xs font-black text-slate-900 flex items-center gap-1.5">
           <Gamepad2 className="w-3.5 h-3.5 text-emerald-600" /> Juego Vital
         </p>
@@ -1246,7 +1329,7 @@ export default function JuegoVital() {
 
       {/* Alejar / acercar la cámara. La rueda y el pellizco hacen lo mismo. */}
       {user && (
-        <div data-ui-juego className="absolute bottom-28 right-3 sm:right-auto sm:left-3 sm:bottom-3 z-30 flex flex-col items-center gap-1 px-1.5 py-1.5 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
+        <div data-ui-juego className="absolute bottom-28 right-3 sm:right-auto sm:left-16 sm:bottom-3 z-30 flex flex-col items-center gap-1 px-1.5 py-1.5 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
           <button
             onClick={() => ajustarZoom(1 / 1.35)}
             title="Acercar"
@@ -1430,7 +1513,9 @@ export default function JuegoVital() {
                     const it = mundoItems.find(x => x.id === selMundo.id);
                     if (!it) return;
                     // Documentos: descarga. El resto: ventana interna.
-                    if (it.tipo === 'documento') { window.open(it.url!, '_blank'); return; }
+                    // Documento SUBIDO (archivo): descarga. Documento de la
+                    // plataforma (url interna): se lee en la ventana interna.
+                    if (it.tipo === 'documento' && !it.url?.startsWith('/')) { window.open(it.url!, '_blank'); return; }
                     setLeyendo(it);
                     setSelMundo(null);
                   }}>
@@ -1442,6 +1527,73 @@ export default function JuegoVital() {
               </Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* EDITOR DEL HILO (petición de Eugenio: hilos con información, como en
+          los grafos): relación con su color, texto corto y eliminar. */}
+      {user && !interior && selHilo && (() => {
+        const origen = mundoItems.find(it => it.id === selHilo.itemId);
+        const enlace = origen?.enlaces?.[selHilo.indice];
+        if (!origen || !enlace) return null;
+        const guardarEnlace = (patch: Partial<{ rel: string; texto: string }>) => {
+          const enlaces = (origen.enlaces || []).map((e, i) => (i === selHilo.indice ? { ...e, ...patch } : e));
+          guardarItem(origen.id, { enlaces });
+        };
+        return (
+          <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[23rem] max-w-[94vw]">
+            <Card className="p-3.5 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-amber-500" /> Hilo de conocimiento
+                </p>
+                <Button variant="ghost" onClick={() => setSelHilo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2.5 mb-1.5">Relación</p>
+              <div className="flex flex-wrap gap-1">
+                {RELACIONES_HILO.map(r => (
+                  <button
+                    key={r.id}
+                    onClick={() => guardarEnlace({ rel: r.id })}
+                    className={cn(
+                      'px-2 py-1 rounded-full text-[10px] font-bold border transition-colors',
+                      enlace.rel === r.id ? 'text-white' : 'text-slate-600 bg-white hover:bg-slate-50',
+                    )}
+                    style={enlace.rel === r.id ? { background: r.color, borderColor: r.color } : { borderColor: '#e2e8f0' }}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              <input
+                defaultValue={enlace.texto || ''}
+                key={`${selHilo.itemId}:${selHilo.indice}`}
+                onBlur={e => { if (e.target.value !== (enlace.texto || '')) guardarEnlace({ texto: e.target.value }); }}
+                onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                placeholder="¿Qué cuenta este hilo? (p. ej. «¿por qué importa?»)"
+                className="w-full mt-2.5 px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-amber-300"
+              />
+              <div className="flex justify-end mt-2.5">
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    const enlaces = (origen.enlaces || []).filter((_, i) => i !== selHilo.indice);
+                    guardarItem(origen.id, { enlaces });
+                    setSelHilo(null);
+                  }}>
+                  <Trash2 className="w-3.5 h-3.5 mr-1 inline" />Eliminar hilo
+                </Button>
+              </div>
+            </Card>
+          </div>
+        );
+      })()}
+
+      {/* Llevas algo del menú «en la mano»: se coloca pulsando el suelo */}
+      {user && !interior && plantando && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 bg-emerald-600/95 text-white rounded-xl shadow-lg flex items-center gap-2">
+          <Hammer className="w-3.5 h-3.5" />
+          <p className="text-[11px] font-bold">Pulsa el suelo donde quieras colocar {plantando.nombre || 'lo elegido'}</p>
+          <button onClick={() => setPlantando(null)} className="ml-1 text-white/80 hover:text-white"><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
 
@@ -1547,7 +1699,8 @@ export default function JuegoVital() {
           el reproductor para vídeo y música, el lienzo o el mapa reales de la
           plataforma… Pulsar fuera de la ventana la cierra. */}
       {leyendo && (() => {
-        const esMarco = ['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo);
+        const esMarco = ['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo)
+          || (leyendo.tipo === 'documento' && !!leyendo.url?.startsWith('/'));
         const src = (() => {
           if (!leyendo.url) return null;
           if (leyendo.tipo === 'video') {
@@ -1618,138 +1771,193 @@ export default function JuegoVital() {
       })()}
 
       {/* ---------------------------------------------------------------- */}
-      {/* BUILDER: la barra de construcción, siempre a mano (estilo Sims)   */}
+      {/* EL MENÚ DE CREAR (petición de Eugenio): colapsado en un raíl a la  */}
+      {/* izquierda, a TODA ALTURA, con el diseño del menú de objetivos del  */}
+      {/* mapa: raíl de iconos que al pasar el ratón se despliega en acordeón */}
+      {/* con sus submenús. Todo lo creable vive aquí.                       */}
       {/* ---------------------------------------------------------------- */}
-      {user && !interior && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
-          <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col gap-1.5">
-            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center px-1 flex items-center justify-center gap-1">
-              <Hammer className="w-2.5 h-2.5" /> Crear
-            </p>
-            <button
-              onClick={() => setConstruyendo('persona')}
-              title="Crear una persona de tu vida aquí"
-              className="w-11 h-11 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
+      {user && !interior && (() => {
+        const abierto = !menuColapsado || menuPeek;
+        const CATS: Array<{ id: string; icono: React.ReactNode; label: string; items: Array<{ id: string; label: string; al: () => void; sub?: boolean }> }> = [
+          {
+            id: 'naturaleza', icono: <Sprout className="w-5 h-5" />, label: 'Naturaleza',
+            items: ['arbol', 'pino', 'arbusto', 'roca'].map(m => ({
+              id: m, label: CATALOGO_PROPS.find(c => c.modelo === m)?.nombre || m,
+              al: () => setPlantando({ tipo: 'prop', modelo: m }),
+            })),
+          },
+          {
+            id: 'pueblo', icono: <Home className="w-5 h-5" />, label: 'Pueblo',
+            items: ['casa', 'banco', 'farola', 'puesto', 'pozo'].map(m => ({
+              id: m, label: CATALOGO_PROPS.find(c => c.modelo === m)?.nombre || m,
+              al: () => setPlantando({ tipo: 'prop', modelo: m }),
+            })),
+          },
+          {
+            id: 'conocimiento', icono: <StickyNote className="w-5 h-5" />, label: 'Conocimiento',
+            items: [
+              { id: 'nota', label: 'Nota', al: () => setPlantando({ tipo: 'nota', texto: '', nombre: 'la nota' }) },
+              { id: 'imagen', label: 'Imagen (subir)', al: () => { subiendoComo.current = 'imagen'; subirDestino.current = 'plantar'; archivoMundoRef.current?.click(); } },
+              { id: 'doc-subir', label: 'Documento (subir)', al: () => { subiendoComo.current = 'documento'; subirDestino.current = 'plantar'; archivoMundoRef.current?.click(); } },
+              { id: 'doc-existente', label: 'Documento existente…', al: () => { setSubAbierto(v => (v === 'docs' ? null : 'docs')); cargarDocsExistentes(); }, sub: true },
+              { id: 'enlace', label: 'Link', al: () => setFormMenu({ tipo: 'enlace', url: '', nombre: '' }) },
+              { id: 'video', label: 'Vídeo (YouTube)', al: () => setFormMenu({ tipo: 'video', url: '', nombre: '' }) },
+              { id: 'musica', label: 'Música', al: () => setFormMenu({ tipo: 'musica', url: '', nombre: '' }) },
+            ],
+          },
+          {
+            id: 'plataforma', icono: <Building2 className="w-5 h-5" />, label: 'Plataforma',
+            items: [
+              { id: 'proyecto', label: 'Proyecto', al: () => setConstruyendo('proyecto') },
+              { id: 'grafo', label: 'Grafo nuevo', al: () => setFormMenu({ tipo: 'grafo', url: '', nombre: '' }) },
+              { id: 'lienzo', label: 'Mi Conocimiento (acceso)', al: () => setPlantando({ tipo: 'lienzo', url: '/mi-conocimiento', nombre: 'Mi Conocimiento' }) },
+              { id: 'mapa', label: 'Mapa nuevo', al: () => setFormMenu({ tipo: 'mapa', url: '', nombre: '' }) },
+            ],
+          },
+          {
+            id: 'personas', icono: <UserPlus className="w-5 h-5" />, label: 'Personas',
+            items: [{ id: 'persona', label: 'Crear persona', al: () => setConstruyendo('persona') }],
+          },
+        ];
+        return (
+          <div
+            className="absolute left-0 top-0 bottom-0 z-30 w-14"
+            onMouseEnter={() => { if (menuColapsado) setMenuPeek(true); }}
+            onMouseLeave={() => setMenuPeek(false)}
+          >
+            <div className={abierto
+              ? 'absolute inset-y-0 left-0 w-[260px] bg-white/95 backdrop-blur border-r border-slate-200 shadow-2xl overflow-y-auto'
+              : 'h-full w-14 bg-white/90 backdrop-blur border-r border-slate-200 overflow-y-auto'}
             >
-              <UserPlus className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setConstruyendo('proyecto')}
-              title="Crear un proyecto aquí"
-              className="w-11 h-11 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
-            >
-              <Building2 className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
-              title="Cambiar tu aspecto: piel, pelo, ojos y ropa"
-              className="w-11 h-11 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
-            >
-              <Palette className="w-5 h-5" />
-            </button>
-
-            <div className="h-px bg-slate-200 mx-1" />
-            <button
-              onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
-              title="Habla con tu robot"
-              className="w-11 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center text-white transition-colors"
-            >
-              <Bot className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Habitantes: ir a hablar con cualquiera sin caminar */}
-          {agentes.length > 0 && (
-            <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg max-h-[34vh] overflow-y-auto w-[8.5rem]">
-              <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 px-1 mb-1">Tu mundo</p>
-              {agentes.map(a => (
+              <div className={cn('sticky top-0 z-10 bg-white/95 border-b border-slate-100 flex items-center', abierto ? 'justify-between px-4 py-3' : 'justify-center py-3')}>
+                {abierto && <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Crear</h2>}
                 <button
-                  key={a.id}
-                  onClick={() => { setFichaAgente(a); hablarCon(a); }}
-                  className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-lg hover:bg-emerald-50 text-left transition-colors"
+                  onClick={() => setMenuColapsado(c => !c)}
+                  title={menuColapsado ? 'Abrir el menú de crear' : 'Colapsar el menú'}
+                  className="relative w-9 h-9 shrink-0 rounded-full flex items-center justify-center"
                 >
-                  {a.tipo === 'persona'
-                    ? <UserPlus className="w-3 h-3 text-slate-400 shrink-0" />
-                    : <Building2 className="w-3 h-3 text-slate-400 shrink-0" />}
-                  <span className="text-[10px] font-bold text-slate-600 truncate">{a.nombre}</span>
+                  <span className="relative w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-600 shadow-lg shadow-emerald-500/40 flex items-center justify-center text-white">
+                    <Menu className="w-4 h-4" />
+                  </span>
                 </button>
-              ))}
+              </div>
+
+              {!abierto && (
+                <div className="flex flex-col items-center gap-1 py-2">
+                  {CATS.map(cat => (
+                    <button
+                      key={cat.id}
+                      title={cat.label}
+                      onClick={() => { setMenuColapsado(false); setCatAbierta(cat.id); }}
+                      className={cn('w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
+                        catAbierta === cat.id ? 'bg-slate-900 text-emerald-400' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}
+                    >
+                      {cat.icono}
+                    </button>
+                  ))}
+                  <div className="w-8 h-px bg-slate-200 my-1" />
+                  <button title="Cambiar tu aspecto" onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                    <Palette className="w-5 h-5" />
+                  </button>
+                  <button title="Habla con tu robot" onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
+                    className="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center text-white transition-colors">
+                    <Bot className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+
+              {abierto && (
+                <>
+                  {CATS.map(cat => (
+                    <div key={cat.id} className="border-b border-slate-100">
+                      <button
+                        onClick={() => { setCatAbierta(v => (v === cat.id ? null : cat.id)); setSubAbierto(null); }}
+                        className={cn('w-full flex items-center gap-2 px-4 py-3 text-left transition-colors',
+                          catAbierta === cat.id ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50')}
+                      >
+                        <span className={catAbierta === cat.id ? 'text-emerald-400' : 'text-emerald-600'}>{cat.icono}</span>
+                        <span className={cn('flex-1 font-semibold', catAbierta === cat.id ? 'text-base' : 'text-sm')}>{cat.label}</span>
+                        <ChevronDown className={cn('w-3.5 h-3.5 shrink-0 transition-transform', catAbierta === cat.id && 'rotate-180 text-white')} />
+                      </button>
+                      {catAbierta === cat.id && (
+                        <div className="bg-slate-50">
+                          {cat.items.map(item => (
+                            <div key={item.id}>
+                              <button
+                                onClick={item.al}
+                                className="w-full flex items-center gap-2 pl-6 pr-4 py-2 text-left text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                              >
+                                <span className="flex-1">{item.label}</span>
+                                {item.sub && <ChevronDown className={cn('w-3 h-3 transition-transform', subAbierto === 'docs' && 'rotate-180')} />}
+                              </button>
+                              {item.id === 'doc-existente' && subAbierto === 'docs' && (
+                                <div className="bg-slate-100 max-h-56 overflow-y-auto">
+                                  {docsExistentes === null && <p className="pl-8 pr-4 py-2 text-xs text-slate-400">Cargando…</p>}
+                                  {docsExistentes?.length === 0 && <p className="pl-8 pr-4 py-2 text-xs text-slate-400">No tienes documentos todavía.</p>}
+                                  {docsExistentes?.map((d: any) => (
+                                    <button
+                                      key={d.id}
+                                      onClick={() => setPlantando({
+                                        tipo: 'documento',
+                                        url: d.kind === 'pagina' ? `/documentos/${d.id}` : (d.config?.url || ''),
+                                        nombre: d.title || 'Documento',
+                                      })}
+                                      className="w-full flex items-center gap-1.5 pl-8 pr-4 py-1.5 text-left text-xs font-semibold text-slate-600 hover:bg-white transition-colors"
+                                    >
+                                      <FileText className="w-3 h-3 shrink-0 text-emerald-600" />
+                                      <span className="truncate">{d.title || 'Sin título'}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {formMenu && catAbierta === cat.id && ['enlace', 'video', 'musica'].includes(formMenu.tipo) && cat.id === 'conocimiento' && (
+                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} />
+                          )}
+                          {formMenu && catAbierta === cat.id && ['grafo', 'mapa'].includes(formMenu.tipo) && cat.id === 'plataforma' && (
+                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="border-b border-slate-100 px-4 py-3 flex items-center gap-2">
+                    <button onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
+                      title="Cambiar tu aspecto: piel, pelo y ropa"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 text-xs font-bold text-slate-600 transition-colors">
+                      <Palette className="w-3.5 h-3.5" />Aspecto
+                    </button>
+                    <button onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
+                      title="Habla con tu robot"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-colors">
+                      <Bot className="w-3.5 h-3.5" />Robot
+                    </button>
+                  </div>
+                  {agentes.length > 0 && (
+                    <div className="px-2 py-2">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-2 mb-1 flex items-center gap-1"><Users className="w-3 h-3" /> Tu mundo</p>
+                      {agentes.map(a => (
+                        <button
+                          key={a.id}
+                          onClick={() => { setFichaAgente(a); hablarCon(a); }}
+                          className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-emerald-50 text-left transition-colors"
+                        >
+                          {a.tipo === 'persona'
+                            ? <UserPlus className="w-3 h-3 text-slate-400 shrink-0" />
+                            : <Building2 className="w-3 h-3 text-slate-400 shrink-0" />}
+                          <span className="text-xs font-bold text-slate-600 truncate">{a.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* --------------------------------------------------------------- */}
-      {/* DENTRO DE UN PROYECTO: qué hacer con él, y a qué habitación ir.  */}
-      {/* --------------------------------------------------------------- */}
-      {interior && (
-        <>
-          <div className="absolute top-3 left-3 z-30 px-3 py-2 bg-slate-900/85 backdrop-blur border border-white/10 rounded-2xl shadow-xl max-w-[15rem]">
-            <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: interior.color }}>
-              {interior.sala
-                ? interior.grupos.find(g => g.id === interior.sala)?.label || 'Habitación'
-                : 'Dentro del proyecto'}
-            </p>
-            <p className="text-xs font-black text-white mt-0.5 leading-snug">{interior.proyecto.titulo}</p>
-            <p className="text-[10px] text-slate-400 mt-1">
-              {interior.proyecto.hechas} de {interior.proyecto.tarjetas} tareas · {interior.grupos.length} habitaciones
-            </p>
           </div>
-
-          <div data-ui-juego className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-[9.5rem] px-2 py-2 bg-slate-900/85 backdrop-blur border border-white/10 rounded-2xl shadow-xl max-h-[70vh] overflow-y-auto">
-            <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 px-1 mb-1.5">Habitaciones</p>
-            {interior.sala && (
-              <button
-                onClick={() => irASala(null)}
-                className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
-              >
-                <ArrowLeft className="w-3 h-3 text-slate-400 shrink-0" />
-                <span className="text-[10px] font-bold text-slate-300">Volver a la sala</span>
-              </button>
-            )}
-            {interior.grupos.map(g => (
-              <button
-                key={g.id}
-                onClick={() => irASala(g.id)}
-                className={cn(
-                  'w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg text-left transition-colors',
-                  interior.sala === g.id ? 'bg-white/15' : 'hover:bg-white/10',
-                )}
-              >
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: g.color }} />
-                <span className="text-[10px] font-bold text-white truncate">{g.label}</span>
-                <span className="ml-auto text-[9px] font-black text-slate-500 tabular-nums">
-                  {/* Personas cuenta a la GENTE del proyecto, no tarjetas */}
-                  {interior.items.filter(i => i.grupo === g.id).length
-                    + habitantesDeSala(interior.items, g.id, agentes, interior.proyecto.id).length}
-                </span>
-              </button>
-            ))}
-            <div className="h-px bg-white/10 my-1.5" />
-            <button
-              onClick={() => navigate(`/proyectos/${interior.proyecto.slug}`)}
-              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
-            >
-              <FolderKanban className="w-3 h-3 text-slate-400 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-300">Abrir el tablero</span>
-            </button>
-            <button
-              onClick={() => { setBocadillo(`Estás dentro de «${interior.proyecto.titulo}». Pregúntame lo que quieras sobre él.`); hablarCon(null); }}
-              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
-            >
-              <Sparkles className="w-3 h-3 text-slate-400 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-300">Hablar del proyecto</span>
-            </button>
-            <button
-              onClick={salirDelProyecto}
-              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
-            >
-              <LogOut className="w-3 h-3 text-slate-400 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-300">Salir a la aldea</span>
-            </button>
-          </div>
-        </>
-      )}
+        );
+      })()}
 
       {/* Aviso de proximidad */}
       {cercania && !interior && !panel && !fichaAgente && !bocadillo && !construyendo && (
@@ -2302,6 +2510,45 @@ function Joystick({ entrada, onAtras }: {
         className="absolute w-12 h-12 rounded-full bg-white/85 shadow-lg border border-slate-200 pointer-events-none"
         style={{ left: 32 + palanca.x, top: 32 + palanca.y }}
       />
+    </div>
+  );
+}
+
+
+/** El mini-formulario del menú lateral: URL y nombre (o solo título). */
+function FormularioMenu({ formMenu, setFormMenu, confirmar }: {
+  formMenu: { tipo: string; url: string; nombre: string };
+  setFormMenu: (f: { tipo: string; url: string; nombre: string } | null) => void;
+  confirmar: () => void;
+}) {
+  const conUrl = ['enlace', 'video', 'musica'].includes(formMenu.tipo);
+  return (
+    <div className="mx-4 my-2 p-2.5 bg-white border border-emerald-200 rounded-xl space-y-1.5">
+      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">
+        {({ enlace: 'Nuevo link', video: 'Vídeo (YouTube)', musica: 'Música', grafo: 'Grafo nuevo', mapa: 'Mapa nuevo' } as Record<string, string>)[formMenu.tipo]}
+      </p>
+      {conUrl && (
+        <input
+          autoFocus
+          value={formMenu.url}
+          onChange={e => setFormMenu({ ...formMenu, url: e.target.value })}
+          onKeyDown={e => { if (e.key === 'Enter') confirmar(); }}
+          placeholder="https://…"
+          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+        />
+      )}
+      <input
+        autoFocus={!conUrl}
+        value={formMenu.nombre}
+        onChange={e => setFormMenu({ ...formMenu, nombre: e.target.value })}
+        onKeyDown={e => { if (e.key === 'Enter') confirmar(); }}
+        placeholder={conUrl ? 'Nombre visible (opcional)' : 'Título'}
+        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+      />
+      <div className="flex gap-1.5">
+        <Button onClick={confirmar} className="flex-1 text-[11px] py-1.5">Crear y colocar</Button>
+        <Button variant="ghost" onClick={() => setFormMenu(null)} className="text-[11px] py-1.5">Cancelar</Button>
+      </div>
     </div>
   );
 }

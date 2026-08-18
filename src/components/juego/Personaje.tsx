@@ -91,6 +91,10 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       vel.current.set(0, 0, 0);
       rumbo.current = Math.PI; // mirando al norte, hacia el destino
       g.rotation.y = rumbo.current;
+      // La vista se recoloca a la clásica (detrás del personaje). Sin esto,
+      // al entrar en una habitación con la cámara girada de la aldea, te la
+      // encontrabas pegada a una pared mirando a tu nuca (fallo de Eugenio).
+      camara.current.yaw = 0;
       tocando.current = null; // el próximo contacto vuelve a contar como choque
       jugadorPos.copy(g.position);
       return;
@@ -220,16 +224,16 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     const { pitch } = camara.current;
     const cp = Math.cos(pitch);
     const sp = Math.sin(pitch);
+    // Dentro de un edificio la cámara NO se acota contra el muro: empujarla
+    // hacia dentro la dejaba clavada en tu nuca al andar pegado a la pared
+    // (fallo que vio Eugenio). En su lugar, los muros de los interiores solo
+    // se dibujan por su cara de dentro (culling): si la cámara queda al otro
+    // lado, la pared desaparece y sigues viendo la sala, como en Los Sims.
     tmpCam.set(
       g.position.x + Math.sin(yaw) * cp * dist,
       g.position.y + Math.max(1.5, sp * dist),
       g.position.z + Math.cos(yaw) * cp * dist,
     );
-    // Y si aun así se saliera (estás pegado a la pared), se mete hacia dentro.
-    if (limite) {
-      const r = Math.hypot(tmpCam.x, tmpCam.z);
-      if (r > limite) { tmpCam.x *= limite / r; tmpCam.z *= limite / r; }
-    }
     cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
     tmpMira.set(g.position.x, g.position.y + 1.6 + (zoom.current - 1) * 1.5, g.position.z);
     cam.lookAt(tmpMira);
