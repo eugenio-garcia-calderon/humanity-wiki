@@ -3,11 +3,11 @@
 // or touch joystick), moves with smoothed acceleration, faces its heading,
 // and drags the follow camera and the shadow-casting light along with it.
 // ============================================================================
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { EntradaMando } from './tipos';
-import { PALETA } from './paleta';
+import { Persona3D } from './Modelos';
 
 const VEL_MAX = 8;           // m/s — brisk walk, the map is 1 km across
 const LIMITE = 530;          // keep the player inside the 118 ha
@@ -33,6 +33,9 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }:
   // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
   // no cada fotograma mientras sigas pegado a él.
   const tocando = useRef<string | null>(null);
+  // Andar o estar quieto: el modelo trae sus propias animaciones.
+  const [andando, setAndando] = useState(false);
+  const andandoRef = useRef(false);
 
   useFrame((estado, dtBruto) => {
     const g = grupo.current;
@@ -73,13 +76,19 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }:
     }
 
     const moviendo = vel.current.lengthSq() > 0.4;
+    // El cambio andar/parar se avisa a React solo cuando cambia de verdad.
+    if (moviendo !== andandoRef.current) {
+      andandoRef.current = moviendo;
+      setAndando(moviendo);
+    }
     if (moviendo) {
       const deseo = Math.atan2(vel.current.x, vel.current.z);
       const dif = Math.atan2(Math.sin(deseo - rumbo.current), Math.cos(deseo - rumbo.current));
       rumbo.current += dif * (1 - Math.exp(-12 * dt));
       g.rotation.y = rumbo.current;
     }
-    g.position.y = moviendo ? Math.abs(Math.sin(t.current * 9)) * 0.12 : 0;
+    // El modelo tiene su propia animación de andar: ya no hace falta el
+    // botecito que simulaba el paso.
     jugadorPos.copy(g.position);
 
     // --- follow camera (fixed offset, smoothed)
@@ -102,34 +111,10 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }:
     // Spawn on the south path at the plaza edge: open view over the fountain,
     // no house blocking the camera.
     <group ref={grupo} position={[0, 0, 17]}>
-      {/* legs */}
-      {[-0.15, 0.15].map((lx, i) => (
-        <mesh key={i} castShadow position={[lx, 0.3, 0]}>
-          <boxGeometry args={[0.22, 0.6, 0.26]} />
-          <meshStandardMaterial color={PALETA.pantalon} />
-        </mesh>
-      ))}
-      {/* torso */}
-      <mesh castShadow position={[0, 1.05, 0]}>
-        <capsuleGeometry args={[0.42, 0.7, 6, 14]} />
-        <meshStandardMaterial color={PALETA.ropa} />
-      </mesh>
-      {/* arms */}
-      {[-0.55, 0.55].map((ax, i) => (
-        <mesh key={i} castShadow position={[ax, 1.05, 0]} rotation-z={ax > 0 ? -0.15 : 0.15}>
-          <capsuleGeometry args={[0.13, 0.55, 4, 8]} />
-          <meshStandardMaterial color={PALETA.ropa} />
-        </mesh>
-      ))}
-      {/* head + hair */}
-      <mesh castShadow position={[0, 1.98, 0]}>
-        <sphereGeometry args={[0.35, 16, 14]} />
-        <meshStandardMaterial color={PALETA.piel} />
-      </mesh>
-      <mesh position={[0, 2.14, -0.06]} scale={[1, 0.72, 1]}>
-        <sphereGeometry args={[0.36, 16, 14]} />
-        <meshStandardMaterial color={PALETA.pelo} />
-      </mesh>
+      {/* El modelo mira a -Z y nuestro rumbo es +Z: media vuelta. */}
+      <group rotation-y={Math.PI}>
+        <Persona3D cuerpo="character-male-a" animacion={andando ? 'walk' : 'idle'} />
+      </group>
     </group>
   );
 }

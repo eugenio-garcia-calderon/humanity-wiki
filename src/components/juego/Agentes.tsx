@@ -10,61 +10,25 @@ import * as THREE from 'three';
 import { Text, Billboard } from '@react-three/drei';
 import type { Agente, Medidas } from './tipos';
 import { PALETA } from './paleta';
-
-/** Colores estables a partir del nombre: el mismo agente se ve siempre igual. */
-function coloresDe(a: Agente): { ropa: string; pelo: string } {
-  const paletaRopa = ['#3e8f6f', '#4a6fa5', '#a5644a', '#7a4aa5', '#a5984a', '#a54a72'];
-  const paletaPelo = ['#4a3527', '#2b2320', '#6b4f2a', '#8a8a8a'];
-  let h = 0;
-  for (let i = 0; i < a.nombre.length; i++) h = (h * 31 + a.nombre.charCodeAt(i)) >>> 0;
-  return {
-    ropa: a.apariencia?.ropa || paletaRopa[h % paletaRopa.length],
-    pelo: a.apariencia?.pelo || paletaPelo[(h >> 3) % paletaPelo.length],
-  };
-}
+import { Persona3D, cuerpoDe } from './Modelos';
 
 function Persona({ a }: { a: Agente }) {
   const grupo = useRef<THREE.Group>(null);
-  const { ropa, pelo } = useMemo(() => coloresDe(a), [a]);
+  const cuerpo = useMemo(() => cuerpoDe(a.nombre), [a.nombre]);
   const fase = useMemo(() => Math.random() * Math.PI * 2, []);
 
-  // Respiración/balanceo suave: sin animación esquelética todavía (F2),
-  // pero basta para que no parezcan estatuas.
+  // Se giran despacio mirando alrededor; el modelo trae su propia animación
+  // de reposo (respira y se balancea).
   useFrame((estado) => {
     const g = grupo.current;
     if (!g) return;
-    const t = estado.clock.elapsedTime + fase;
-    g.position.y = Math.sin(t * 1.4) * 0.04;
-    g.rotation.y = Math.sin(t * 0.35) * 0.25;
+    g.rotation.y = Math.sin((estado.clock.elapsedTime + fase) * 0.3) * 0.45;
   });
 
   return (
     <group position={[a.x, 0, a.z]}>
       <group ref={grupo}>
-        {[-0.14, 0.14].map((lx, i) => (
-          <mesh key={i} castShadow position={[lx, 0.3, 0]}>
-            <boxGeometry args={[0.2, 0.6, 0.24]} />
-            <meshStandardMaterial color={PALETA.pantalon} />
-          </mesh>
-        ))}
-        <mesh castShadow position={[0, 1.02, 0]}>
-          <capsuleGeometry args={[0.4, 0.66, 6, 14]} />
-          <meshStandardMaterial color={ropa} />
-        </mesh>
-        {[-0.52, 0.52].map((ax, i) => (
-          <mesh key={i} castShadow position={[ax, 1.02, 0]} rotation-z={ax > 0 ? -0.14 : 0.14}>
-            <capsuleGeometry args={[0.12, 0.52, 4, 8]} />
-            <meshStandardMaterial color={ropa} />
-          </mesh>
-        ))}
-        <mesh castShadow position={[0, 1.92, 0]}>
-          <sphereGeometry args={[0.33, 16, 14]} />
-          <meshStandardMaterial color={PALETA.piel} />
-        </mesh>
-        <mesh position={[0, 2.07, -0.05]} scale={[1, 0.72, 1]}>
-          <sphereGeometry args={[0.34, 16, 14]} />
-          <meshStandardMaterial color={pelo} />
-        </mesh>
+        <Persona3D cuerpo={cuerpo} animacion="idle" />
       </group>
       <Billboard position={[0, 2.75, 0]}>
         <Text fontSize={0.34} color={PALETA.robotDetalle} anchorX="center" anchorY="middle" outlineWidth={0.03} outlineColor="#ffffff">
