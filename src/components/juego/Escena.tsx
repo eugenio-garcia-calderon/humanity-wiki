@@ -12,7 +12,7 @@ import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
 import type {
   Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
-  ProyectoJuego, SeleccionMundo, Vehiculo,
+  ProyectoJuego, SeleccionHilo, SeleccionMundo, Vehiculo,
 } from './tipos';
 import { ObjetosMundo, SueloEditor, MarcadorMover, AnilloSeleccion, MovilFantasma, ItemVisual } from './Editor';
 import { PiezaVisual } from './Aldea';
@@ -80,7 +80,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -108,6 +108,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onPulsarMundo: (sel: SeleccionMundo) => void;
   /** Pinchar sin soltar un objeto: si arrastras, se mueve con el ratón. */
   onAgarrarMundo: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
+  /** Pulsar un hilo dorado: se abre su editor (relación, texto, eliminar). */
+  onPulsarHilo: (sel: SeleccionHilo) => void;
   /** Clic en suelo vacío en modo edición: abrir el panel de crear ahí. */
   onSuelo: (p: { x: number; z: number }) => void;
   /** Soltar el objeto que se estaba moviendo. */
@@ -278,6 +280,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             items={mundo.items}
             onPulsar={onPulsarMundo}
             onAgarrar={onAgarrarMundo}
+            onPulsarHilo={onPulsarHilo}
             ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
             resolverDestino={resolverDestino}
           />

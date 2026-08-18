@@ -109,8 +109,28 @@ export interface ItemMundo {
   rot: number;
   escala: number;
   /** Hilos de conocimiento: a qué apunta este objeto. Cada destino es
-   *  'item:WM…', 'agente:GA…' o 'proy:PRY…'. */
-  enlaces?: Array<{ a: string }>;
+   *  'item:WM…', 'agente:GA…' o 'proy:PRY…'. Desde 2026-08-18 el hilo lleva
+   *  información, como las aristas de los grafos: una RELACIÓN (contexto,
+   *  causa, dato…) y un texto corto — la pregunta a la que responde. */
+  enlaces?: Array<{ a: string; rel?: string; texto?: string }>;
+}
+
+/** Las relaciones de un hilo: las MISMAS de los grafos de conocimiento, con
+ *  su color. Un hilo del mundo 3D y una arista del lienzo dicen lo mismo. */
+export const RELACIONES_HILO: Array<{ id: string; label: string; color: string }> = [
+  { id: 'contexto', label: 'Contexto', color: '#64748b' },
+  { id: 'causa', label: 'Causa', color: '#e11d48' },
+  { id: 'dato', label: 'Dato', color: '#0284c7' },
+  { id: 'fuente', label: 'Fuente', color: '#7c3aed' },
+  { id: 'apoya', label: 'Apoya', color: '#16a34a' },
+  { id: 'contradice', label: 'Contradice', color: '#ea580c' },
+  { id: 'matiza', label: 'Matiza', color: '#ca8a04' },
+];
+
+/** Un hilo señalado con el ratón: el objeto de origen y cuál de sus enlaces. */
+export interface SeleccionHilo {
+  itemId: string;
+  indice: number;
 }
 
 /** El catálogo de props que se pueden plantar. Vive aquí (y no en el editor
