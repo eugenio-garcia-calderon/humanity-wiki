@@ -133,6 +133,13 @@ export interface SeleccionHilo {
   indice: number;
 }
 
+/** Nunca enseñar una URL como nombre (petición de Eugenio): si lo guardado ES
+ *  una dirección (objetos de antes del enriquecido con título), se sustituye
+ *  por el genérico del tipo. Lo usan la tarjeta 3D, el rótulo del hover, la
+ *  ventana interna y el mapa 2D — un solo criterio para todos. */
+export const nombreLimpio = (nombre: string | null | undefined, generico: string): string =>
+  nombre && !/^(https?:\/\/|www\.|youtu)/i.test(nombre.trim()) ? nombre : generico;
+
 /** El catálogo de props que se pueden plantar. Vive aquí (y no en el editor
  *  3D) porque el panel de creación es HTML de la página, que NO importa three. */
 export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: string }> = [

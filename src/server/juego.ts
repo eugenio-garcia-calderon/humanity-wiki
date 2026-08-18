@@ -350,6 +350,33 @@ export function registerJuegoRoutes(app: Express, db: any) {
       if (!requiereUsuario(req, res)) return;
       const d = req.body || {};
       if (!TIPOS_MUNDO.has(d.tipo)) return res.status(400).json({ error: 'Tipo de objeto no válido.' });
+      // Un vídeo de YouTube llega con la URL pelada: se le pregunta a YouTube
+      // el TÍTULO y el CANAL por oEmbed (público, sin clave) y se guardan en
+      // `nombre` y `texto` — la tarjeta 3D enseña eso y su miniatura, nunca la
+      // URL (petición de Eugenio). Si oEmbed no contesta, el objeto se crea
+      // igual: el título ya llegará de otra pasada o lo pondrá el jugador.
+      const videoId = d.tipo === 'video' && d.url
+        ? String(d.url).match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1]
+        : null;
+      if (videoId) {
+        const urlSinNombre = !d.nombre || /^(https?:\/\/|www\.|youtu)/i.test(String(d.nombre));
+        if (urlSinNombre || !d.texto) {
+          try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 3500);
+            // La URL se normaliza al vídeo pelado: al oEmbed le sientan mal
+            // los parámetros extra de las búsquedas (pp=…, comprobado).
+            const limpia = `https://www.youtube.com/watch?v=${videoId}`;
+            const r = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(limpia)}`, { signal: ctrl.signal });
+            clearTimeout(timer);
+            if (r.ok) {
+              const meta: any = await r.json();
+              if (urlSinNombre && meta.title) d.nombre = String(meta.title).slice(0, 120);
+              if (!d.texto && meta.author_name) d.texto = String(meta.author_name).slice(0, 80);
+            }
+          } catch { /* sin metadatos también vale */ }
+        }
+      }
       const id = `WM${Date.now()}${Math.floor(Math.random() * 1000)}`;
       await db.execute(sql`
         INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala)

@@ -14,6 +14,7 @@ import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import {
   CATALOGO_PROPS, RELACIONES_HILO,
+  nombreLimpio,
   type Agente, type Camara, type Cercania, type EntradaMando, type ItemMundo,
   type ItemProyecto, type OverrideMundo, type ProyectoJuego, type SeleccionHilo,
   type SeleccionMundo, type Vehiculo,
@@ -1934,7 +1935,7 @@ export default function JuegoVital() {
                             : leyendo.tipo === 'lienzo' ? <PenTool className="w-4 h-4 text-violet-600 shrink-0" />
                               : leyendo.tipo === 'mapa' ? <MapaIcono className="w-4 h-4 text-emerald-600 shrink-0" />
                                 : <FileText className="w-4 h-4 text-emerald-600 shrink-0" />}
-                  <span className="truncate">{leyendo.nombre || { nota: 'Nota', imagen: 'Imagen', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' }[leyendo.tipo] || 'Documento'}</span>
+                  <span className="truncate">{nombreLimpio(leyendo.nombre, { nota: 'Nota', imagen: 'Imagen', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' }[leyendo.tipo] || 'Documento')}</span>
                 </p>
                 <div className="flex items-center gap-1">
                   {esMarco && leyendo.url && (

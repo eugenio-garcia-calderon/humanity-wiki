@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as THREE from 'three';
 import { Map as MapIcon, X, Maximize2, UserPlus, Building2, Bot } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import type { Agente, ProyectoJuego, ItemMundo } from './tipos';
+import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo } from './tipos';
 import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionProyecto } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
 import { PANTALLA } from './Pantalla';
@@ -119,7 +119,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
     // Los props (árboles, rocas…) no: son decorado, taparían lo importante.
     ...items.filter(it => it.tipo !== 'prop').map((it): Destino => ({
       tipo: 'item',
-      nombre: it.nombre || it.texto?.slice(0, 22) || it.tipo,
+      nombre: nombreLimpio(it.nombre, it.texto?.slice(0, 22) || it.tipo),
       x: it.x, z: it.z, color: COLOR_ITEM[it.tipo] || '#64748b',
     })),
   ], [agentes, edificiosProyecto, items]);

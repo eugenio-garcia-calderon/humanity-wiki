@@ -23,7 +23,7 @@ import * as THREE from 'three';
 import { PALETA } from './paleta';
 import { Modelo, CASAS } from './Modelos';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
-import { RELACIONES_HILO, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
+import { RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
 import { Rotulo } from './Senales';
 
 const ORO = '#f6c667';
@@ -269,6 +269,97 @@ function TarjetaMedio({ ancho, alto, fondo, barra, icono, nombre, colorNombre = 
   );
 }
 
+/**
+ * Vídeo de YouTube: la MINIATURA real, el título y las etiquetas (canal y
+ * YouTube) — la URL no se pinta en ningún sitio (petición de Eugenio).
+ * La miniatura sale de i.ytimg.com (pública y con CORS; `mqdefault` es 16:9
+ * de verdad, sin franjas negras). El título y el canal los guardó el servidor
+ * al crear el objeto preguntando al oEmbed de YouTube.
+ */
+function Video3D({ item }: { item: ItemMundo }) {
+  const id = item.url?.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1];
+  const [tex, setTex] = useState<THREE.Texture | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let vivo = true;
+    new THREE.TextureLoader().load(`https://i.ytimg.com/vi/${id}/mqdefault.jpg`, (t) => {
+      if (!vivo) return;
+      t.colorSpace = THREE.SRGBColorSpace;
+      setTex(t);
+    }, undefined, () => { /* sin miniatura queda la tarjeta oscura */ });
+    return () => { vivo = false; };
+  }, [id]);
+
+  // Un vídeo que no es de YouTube sigue con la tarjeta genérica de siempre.
+  if (!id) {
+    return <TarjetaMedio ancho={3.1} alto={1.95} fondo="#1c1c22" barra="#e0245e" icono="▶️" nombre={item.nombre || 'Vídeo'} colorNombre="#e8e8ee" />;
+  }
+
+  // Si el nombre guardado es una URL (objetos de antes del enriquecido), se
+  // esconde: mejor un genérico que enseñar la dirección.
+  const titulo = nombreLimpio(item.nombre, 'Vídeo de YouTube');
+  const canal = item.texto ? nombreLimpio(item.texto, '') || null : null;
+  const A = 3.2, IMG = 1.8;
+  const wCanal = canal ? Math.min(2.1, Math.max(0.8, canal.length * 0.095 + 0.3)) : 0;
+  const wYT = 0.88;
+  const chips = canal ? wCanal + 0.12 + wYT : wYT;
+  return (
+    <Billboard position={[0, 2.35, 0]}>
+      {/* Marco blanco que envuelve miniatura + título + etiquetas */}
+      <mesh position={[0, -0.5, -0.02]}>
+        <planeGeometry args={[A + 0.24, IMG + 1.34]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+      {/* La miniatura del vídeo */}
+      <mesh>
+        <planeGeometry args={[A, IMG]} />
+        {tex
+          ? <meshBasicMaterial key="con" map={tex} toneMapped={false} />
+          : <meshBasicMaterial key="sin" color="#1c1c22" toneMapped={false} />}
+      </mesh>
+      {/* El play de YouTube encima */}
+      <mesh position={[0, 0, 0.01]}>
+        <planeGeometry args={[0.94, 0.66]} />
+        <meshBasicMaterial color="#ff0033" toneMapped={false} transparent opacity={0.92} />
+      </mesh>
+      <mesh position={[0, 0, 0.02]}>
+        <circleGeometry args={[0.2, 3]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+      {/* El título (sin URL jamás) */}
+      <Text
+        position={[0, -IMG / 2 - 0.33, 0.02]} fontSize={0.185} maxWidth={A - 0.2}
+        color="#101828" anchorX="center" anchorY="middle" textAlign="center" lineHeight={1.18}
+      >
+        {titulo.length > 64 ? `${titulo.slice(0, 63)}…` : titulo}
+      </Text>
+      {/* Etiquetas: el canal y YouTube */}
+      <group position={[0, -IMG / 2 - 0.82, 0.02]}>
+        {canal && (
+          <group position={[-chips / 2 + wCanal / 2, 0, 0]}>
+            <mesh>
+              <planeGeometry args={[wCanal, 0.3]} />
+              <meshBasicMaterial color="#eef2f7" toneMapped={false} />
+            </mesh>
+            <Text position={[0, 0, 0.01]} fontSize={0.14} color="#3a4552" anchorX="center" anchorY="middle">
+              {canal.length > 20 ? `${canal.slice(0, 19)}…` : canal}
+            </Text>
+          </group>
+        )}
+        <group position={[chips / 2 - wYT / 2, 0, 0]}>
+          <mesh>
+            <planeGeometry args={[wYT, 0.3]} />
+            <meshBasicMaterial color="#ff0033" toneMapped={false} />
+          </mesh>
+          <Text position={[0, 0, 0.01]} fontSize={0.14} color="#ffffff" anchorX="center" anchorY="middle">
+            YouTube
+          </Text>
+        </group>
+      </group>
+    </Billboard>
+  );
+}
+
 /** Poste que ancla al suelo lo que flota (nota, imagen, documento). */
 function Poste() {
   return (
@@ -290,8 +381,7 @@ export function ItemVisual({ item, fase = 0 }: { item: ItemMundo; fase?: number 
       {item.tipo === 'documento' && <><Poste /><Flota fase={fase}><Documento3D nombre={item.nombre || ''} /></Flota></>}
       {item.tipo === 'enlace' && <><Poste /><Flota fase={fase}>
         <TarjetaMedio ancho={2.7} alto={2} fondo="#f6f8fb" barra="#64748b" icono="🌐" nombre={item.nombre || item.url || 'Enlace'} /></Flota></>}
-      {item.tipo === 'video' && <><Poste /><Flota fase={fase}>
-        <TarjetaMedio ancho={3.1} alto={1.95} fondo="#1c1c22" barra="#e0245e" icono="▶️" nombre={item.nombre || 'Vídeo'} colorNombre="#e8e8ee" /></Flota></>}
+      {item.tipo === 'video' && <><Poste /><Flota fase={fase}><Video3D item={item} /></Flota></>}
       {item.tipo === 'musica' && <><Poste /><Flota fase={fase}>
         <TarjetaMedio ancho={2.4} alto={2.4} fondo="#173325" barra="#1db954" icono="🎵" nombre={item.nombre || 'Música'} colorNombre="#d9f2e4" /></Flota></>}
       {item.tipo === 'lienzo' && <><Poste /><Flota fase={fase}>
@@ -383,7 +473,7 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, onPulsarHilo, ocultar
     etiqueta: it.tipo === 'prop' ? `Objeto (${it.modelo})`
       : it.tipo === 'nota' ? 'Nota'
         : it.tipo === 'imagen' ? 'Imagen'
-          : it.nombre || ({ documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo,
+          : nombreLimpio(it.nombre, ({ documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo),
     x: it.x, z: it.z, rot: it.rot, modelo: it.modelo, texto: it.texto, url: it.url,
   });
   const pulsar = (e: ThreeEvent<MouseEvent>, it: ItemMundo) => {
@@ -446,7 +536,7 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, onPulsarHilo, ocultar
 const nombreDe = (it: ItemMundo) =>
   it.tipo === 'prop' ? ({ arbol: 'Árbol', pino: 'Pino', casa: 'Casa', banco: 'Banco', farola: 'Farola', puesto: 'Puesto', pozo: 'Pozo', roca: 'Roca', arbusto: 'Arbusto' } as Record<string, string>)[it.modelo || ''] || 'Objeto'
     : it.tipo === 'nota' ? (it.texto || 'Nota').split('\n')[0].slice(0, 40)
-      : it.nombre || ({ imagen: 'Imagen', documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo;
+      : nombreLimpio(it.nombre, ({ imagen: 'Imagen', documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo);
 
 /**
  * Un objeto plantado, con el MISMO hover que las personas y los edificios
