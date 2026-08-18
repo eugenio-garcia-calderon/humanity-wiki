@@ -81,7 +81,7 @@ const FRASES_ROBOT = [
 export default function JuegoVital() {
   const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
-  const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0 });
+  const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0, turbo: false });
   // Hacia dónde mira la cámara. `yaw` 0 es la vista clásica por encima del
   // hombro; `pitch` 0,63 es la altura de siempre (11 arriba, 15 detrás).
   const camara = useRef<Camara>({ yaw: 0, pitch: 0.63 });
@@ -572,6 +572,9 @@ export default function JuegoVital() {
     const aplicar = () => {
       entrada.current.x = +(teclas.has('d') || teclas.has('arrowright')) - +(teclas.has('a') || teclas.has('arrowleft'));
       entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
+      // La barra hace dos cosas según dónde estés, y no se pisan: a pie y en
+      // bici te hace correr; en el planeador, subir (petición de Eugenio).
+      entrada.current.turbo = teclas.has(' ');
       mandoY.current.teclado = +teclas.has(' ') - +teclas.has('shift');
       recalcularY();
       // Seguir caminando cierra lo que haya abierto: tropezarte con alguien no
@@ -716,6 +719,8 @@ export default function JuegoVital() {
           vehiculo={vehiculo}
           alturaVuelo={alturaVuelo}
           interior={interior}
+          onEntrarProyecto={entrarEnProyecto}
+          onHablarAgente={(a) => { setFichaAgente(a); hablarCon(a); }}
           proyectos={proyectos}
           agentes={agentes}
           jugadorPos={jugadorPos}
@@ -785,7 +790,7 @@ export default function JuegoVital() {
 
       <div className="hidden sm:block absolute top-3 right-40 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
         <p className="text-[10px] font-bold text-slate-500">
-          WASD para caminar · arrastra para mirar · E hablar · ↓ salir · B bici · V volar
+          WASD caminar · espacio correr · arrastra para mirar · E hablar · ↓ salir · B bici · V volar
         </p>
       </div>
 

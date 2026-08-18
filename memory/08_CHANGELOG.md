@@ -717,3 +717,19 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
   2. Después decía «¡Hecho! Gala ya está flotando aquí» **sin emitir el bloque JSON**: una promesa sin efecto. Ahora el prompt dice que sin bloque no ocurre nada y que decirlo sin hacerlo es mentirle al jugador.
   3. Y cuando por fin lo emitía, **el filtro del servidor lo tiraba en silencio**: solo aceptaba `persona` y `proyecto`. Al añadir un tipo de acción hay que añadirlo también ahí; queda comentado en el código.
 - **Verificado de punta a punta**: la IA responde «Ya está, Gala aparece flotando aquí en Personas» con la acción correcta, la página crea la tarjeta de verdad en el grupo `personas` y el contador de la habitación pasa a 1. La tarjeta de prueba se retiró después.
+
+### 2026-08-18 — Correr con la barra espaciadora
+- **La barra multiplica por 3 la velocidad** a pie (8 → 24 m/s) y en bici (17 → 51 m/s), petición de Eugenio. En el planeador NO: allí la barra es lo que te hace subir, y las dos cosas no se pisan porque el personaje sabe en qué vas.
+- **Usa la animación de correr del propio modelo** (`sprint`, que los personajes de Kenney ya traen) en vez de acelerar la de andar, que se vería como una marioneta con prisa.
+- Medido en el navegador: 5,8 m/s andando y 20 m/s corriendo en la misma pasada. El cociente sale 3,45 y no 3 porque la velocidad se alcanza con una rampa suave y la muestra de andar aún no había llegado a su tope; el código multiplica exactamente por 3.
+
+### 2026-08-18 — Halos, clic a distancia y nombres que se leen desde lejos
+- **Pulsar entra o habla, sin caminar** (petición de Eugenio): un clic o un toque sobre el edificio de un proyecto te mete dentro, y sobre una persona abre su chat. Ya no hace falta acercarse.
+- **El clic NO se dispara si has arrastrado.** En este juego arrastrar es girar la cámara: sin esa comprobación (`delta > 6 px`), cada vez que giraras mirando a un edificio acabarías entrando en él.
+- **Halo animado sobre todo lo que tiene algo dentro**: un anillo que gira y late con tres chispas, más un haz de luz hasta el suelo, del color de la cosa. Desde el otro lado del valle se ve dónde hay algo.
+- **Al pasar por encima, el nombre pasa a medirse en PANTALLA, no en el mundo.** Es la parte que importa: a distancia `d` y campo de visión `fov`, la altura visible del mundo es `2·d·tan(fov/2)`; escalando el texto a esa altura por la fracción que queremos (7,5 % del alto de pantalla), el nombre ocupa siempre lo mismo, esté a 5 m o a 300. Un nombre «más grande» a secas seguiría siendo ilegible de lejos, que era justo el problema.
+- **Detalles que hacían falta para que funcione de verdad**:
+  - `raycast` anulado **malla a malla** en el halo: ponerlo en el grupo no sirve —el rayo recorre los hijos igual— y el haz, que envuelve al edificio, se comía los clics.
+  - El blanco de una persona es un cilindro **transparente**, no `visible={false}`: lo invisible se salta el rayo del ratón y no habría nada que acertar.
+  - El nombre resaltado va con `depthTest` apagado y sin descarte por frustum: si no, el propio edificio lo tapa y three lo descarta justo cuando lo has hecho grande para leerlo.
+- **Verificado en el navegador** a 90 m de zoom, donde el personaje mide unos pocos píxeles: al pasar por encima el cursor cambia a mano, «Javier» se lee a pantalla completa, y al pulsar se abre su ficha sin haber caminado. (Mis dos primeros intentos fallaron por un error mío de coordenadas: las capturas van a 800 px y la ventana real mide 826.)

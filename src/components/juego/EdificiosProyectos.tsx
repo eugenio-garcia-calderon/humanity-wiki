@@ -11,6 +11,7 @@ import { Text } from '@react-three/drei';
 import type { Medidas, ProyectoJuego } from './tipos';
 import { PALETA } from './paleta';
 import { posicionProyecto } from './mapa';
+import { Halo, Interactivo, Rotulo } from './Senales';
 
 interface Parcela {
   p: ProyectoJuego;
@@ -19,11 +20,31 @@ interface Parcela {
   color: string;
 }
 
-function EdificioProyecto({ p, x, z, color }: Parcela) {
+function EdificioProyecto({ p, x, z, color, onEntrar }: Parcela & { onEntrar: (p: ProyectoJuego) => void }) {
   const pct = p.tarjetas > 0 ? p.hechas / p.tarjetas : 0;
   const alto = 3 + pct * 2.4; // real progress → taller building
   return (
     <group position={[x, 0, z]}>
+      {/* Halo: dice de lejos que aquí se entra (petición de Eugenio) */}
+      <Halo y={alto + 2.6} color={color} radio={1.5} />
+      <Interactivo onPulsar={() => onEntrar(p)}>
+        {(resaltado) => (
+          <EdificioPulsable p={p} alto={alto} pct={pct} color={color} resaltado={resaltado} />
+        )}
+      </Interactivo>
+    </group>
+  );
+}
+
+/** El edificio en sí. `resaltado` es «tienes el ratón encima». */
+function EdificioPulsable({ p, alto, pct, color, resaltado }: {
+  p: ProyectoJuego; alto: number; pct: number; color: string; resaltado: boolean;
+}) {
+  return (
+    <group>
+      {/* El nombre grande al pasar por encima: se mide en pantalla, así que
+          se lee igual de cerca que desde el otro lado del valle. */}
+      <Rotulo y={alto + 4.6} texto={p.titulo} pie="Pulsa para entrar" color={color} resaltado={resaltado} />
       <mesh castShadow receiveShadow position={[0, alto / 2, 0]}>
         <boxGeometry args={[8, alto, 6]} />
         <meshStandardMaterial color={color} />
@@ -48,43 +69,51 @@ function EdificioProyecto({ p, x, z, color }: Parcela) {
         <cylinderGeometry args={[0.09, 0.09, 2.6, 8]} />
         <meshStandardMaterial color={PALETA.poste} />
       </mesh>
-      <mesh castShadow position={[0, 2.75, 4.6]}>
-        <boxGeometry args={[5.6, 1.7, 0.16]} />
-        <meshStandardMaterial color={PALETA.cartel} />
-      </mesh>
-      <Text
-        position={[0, 3.0, 4.7]}
-        fontSize={0.42}
-        maxWidth={5.1}
-        color={PALETA.robotDetalle}
-        anchorX="center"
-        anchorY="middle"
-        textAlign="center"
-      >
-        {p.titulo}
-      </Text>
-      {p.tarjetas > 0 && (
-        <group position={[0, 2.25, 4.7]}>
-          <mesh>
-            <boxGeometry args={[4.6, 0.22, 0.05]} />
-            <meshStandardMaterial color={PALETA.barraFondo} />
-          </mesh>
-          {pct > 0 && (
-            <mesh position={[-(4.6 * (1 - pct)) / 2, 0, 0.02]}>
-              <boxGeometry args={[4.6 * pct, 0.22, 0.05]} />
-              <meshStandardMaterial color={PALETA.robotLuz} emissive={PALETA.robotLuz} emissiveIntensity={0.5} />
+      <group position={[0, 2.75, 4.6]}>
+        <mesh castShadow>
+          <boxGeometry args={[5.6, 1.7, 0.16]} />
+          <meshStandardMaterial
+            color={PALETA.cartel}
+            emissive={color}
+            emissiveIntensity={resaltado ? 0.45 : 0}
+          />
+        </mesh>
+        <Text
+          position={[0, 0.25, 0.1]}
+          fontSize={0.42}
+          maxWidth={5.1}
+          color={PALETA.robotDetalle}
+          anchorX="center"
+          anchorY="middle"
+          textAlign="center"
+        >
+          {p.titulo}
+        </Text>
+        {p.tarjetas > 0 && (
+          <group position={[0, -0.5, 0.1]}>
+            <mesh>
+              <boxGeometry args={[4.6, 0.22, 0.05]} />
+              <meshStandardMaterial color={PALETA.barraFondo} />
             </mesh>
-          )}
-        </group>
-      )}
+            {pct > 0 && (
+              <mesh position={[-(4.6 * (1 - pct)) / 2, 0, 0.02]}>
+                <boxGeometry args={[4.6 * pct, 0.22, 0.05]} />
+                <meshStandardMaterial color={PALETA.robotLuz} emissive={PALETA.robotLuz} emissiveIntensity={0.5} />
+              </mesh>
+            )}
+          </group>
+        )}
+      </group>
     </group>
   );
 }
 
-export function EdificiosProyectos({ proyectos, jugadorPos, medidas }: {
+export function EdificiosProyectos({ proyectos, jugadorPos, medidas, onEntrar }: {
   proyectos: ProyectoJuego[];
   jugadorPos: THREE.Vector3;
   medidas: React.MutableRefObject<Medidas>;
+  /** Pulsar el edificio entra en él sin tener que caminar hasta allí. */
+  onEntrar: (p: ProyectoJuego) => void;
 }) {
   const parcelas = useMemo<Parcela[]>(() =>
     proyectos.slice(0, 12).map((p, i) => ({
@@ -119,7 +148,7 @@ export function EdificiosProyectos({ proyectos, jugadorPos, medidas }: {
           {proyectos.length > 0 ? 'Distrito de Proyectos' : 'Distrito de Proyectos — aún vacío'}
         </Text>
       </group>
-      {parcelas.map(b => <EdificioProyecto key={b.p.id} {...b} />)}
+      {parcelas.map(b => <EdificioProyecto key={b.p.id} {...b} onEntrar={onEntrar} />)}
     </group>
   );
 }

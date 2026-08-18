@@ -19,6 +19,8 @@ import type { Aspecto } from './aspecto';
 /** Velocidad máxima en m/s. A pie es un paseo vivo; la bici, ciclismo urbano;
  *  la Aptera, la de un coche por ciudad (el mapa mide 1 km de lado). */
 const VEL_MAX: Record<Vehiculo, number> = { pie: 8, bici: 17, aptera: 32 };
+/** Lo que multiplica la barra espaciadora a pie y en bici (petición de Eugenio). */
+const TURBO = 3;
 const LIMITE = 530;          // keep the player inside the 118 ha
 const TECHO = 130;           // altura máxima de vuelo, en metros
 const VEL_VERTICAL = 11;     // subir y bajar, en m/s
@@ -59,9 +61,11 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
   // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
   // no cada fotograma mientras sigas pegado a él.
   const tocando = useRef<string | null>(null);
-  // Andar o estar quieto: el modelo trae sus propias animaciones.
+  // Andar, correr o estar quieto: el modelo trae sus propias animaciones.
   const [andando, setAndando] = useState(false);
   const andandoRef = useRef(false);
+  const [corriendo, setCorriendo] = useState(false);
+  const corriendoRef = useRef(false);
 
   useFrame((estado, dtBruto) => {
     const g = grupo.current;
@@ -103,7 +107,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       -sx * Math.sin(yaw) + sz * Math.cos(yaw),
     );
     if (tmpObjetivo.lengthSq() > 1) tmpObjetivo.normalize();
-    tmpObjetivo.multiplyScalar(VEL_MAX[vehiculo]);
+    // Correr: la barra multiplica por 3, salvo volando — allí la barra sube.
+    const turbo = entrada.current.turbo && !vuela;
+    tmpObjetivo.multiplyScalar(VEL_MAX[vehiculo] * (turbo ? TURBO : 1));
     vel.current.lerp(tmpObjetivo, 1 - Math.exp(-(vuela ? 4 : 10) * dt));
     g.position.addScaledVector(vel.current, dt);
     const lim = limite ?? LIMITE;
@@ -138,10 +144,15 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     }
 
     const moviendo = vel.current.lengthSq() > 0.4;
-    // El cambio andar/parar se avisa a React solo cuando cambia de verdad.
+    // El cambio andar/correr/parar se avisa a React solo cuando cambia de verdad.
     if (moviendo !== andandoRef.current) {
       andandoRef.current = moviendo;
       setAndando(moviendo);
+    }
+    const corre = moviendo && turbo;
+    if (corre !== corriendoRef.current) {
+      corriendoRef.current = corre;
+      setCorriendo(corre);
     }
     if (moviendo) {
       const deseo = Math.atan2(vel.current.x, vel.current.z);
@@ -198,7 +209,10 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
         <group position={[0, vehiculo === 'bici' ? 0.45 : 0, 0]}>
           <Persona3D
             cuerpo={aspecto?.cuerpo || 'character-male-a'}
-            animacion={andando ? 'walk' : 'idle'}
+            // Los modelos de Kenney traen su propia animación de correr: se
+            // usa esa en vez de acelerar la de andar, que se vería como una
+            // marioneta con prisa.
+            animacion={andando ? (corriendo ? 'sprint' : 'walk') : 'idle'}
             aspecto={aspecto}
           />
         </group>

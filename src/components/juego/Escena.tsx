@@ -75,7 +75,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -91,6 +91,10 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   alturaVuelo: React.MutableRefObject<number>;
   /** Si está puesto, se juega DENTRO de un proyecto y la aldea no se dibuja. */
   interior: DatosInterior | null;
+  /** Clic o toque sobre un edificio de proyecto: se entra sin caminar. */
+  onEntrarProyecto: (p: ProyectoJuego) => void;
+  /** Clic o toque sobre alguien de tu mundo: se abre su chat sin acercarse. */
+  onHablarAgente: (a: Agente) => void;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
@@ -175,8 +179,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             shadow-bias={-0.0004}
           />
           <Aldea />
-          <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
-          <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} />
+          <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} onEntrar={onEntrarProyecto} />
+          <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} onHablar={onHablarAgente} />
           <Robot jugadorPos={jugadorPos} medidas={medidas} />
         </>
       )}

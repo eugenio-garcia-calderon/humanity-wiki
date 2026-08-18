@@ -13,6 +13,9 @@ export interface EntradaMando {
   x: number;
   z: number;
   y: number;
+  /** Barra espaciadora: corre. A pie y en bici multiplica la velocidad; en el
+   *  planeador no, porque allí la barra es lo que te hace subir. */
+  turbo: boolean;
 }
 
 /** Where the camera is looking. Written by the look-drag (right half of the
