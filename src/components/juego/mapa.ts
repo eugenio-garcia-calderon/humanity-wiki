@@ -217,6 +217,11 @@ export function piezasAldea(): PiezaAldea[] {
     lista.push({ seed_id: `puesto:${i}`, tipo: 'puesto', x: p.x, z: p.z, rot: p.rot, radio: 1.9 }));
   lista.push({ seed_id: 'pozo:0', tipo: 'pozo', x: POZO.x, z: POZO.z, rot: 0, radio: 1.4 });
   lista.push({ seed_id: 'carro:0', tipo: 'carro', x: CARRO.x, z: CARRO.z, rot: CARRO.rot, radio: 1.6 });
+  // El camión camperizado (2026-08-18, petición de Eugenio): aparcado junto
+  // al camino del este, morro hacia la plaza. Pieza con identidad: se pulsa,
+  // se mueve y se puede quitar como el resto del pueblo.
+  // (en 26,9 pisaba la primera casa del anillo con la escala nueva)
+  lista.push({ seed_id: 'camper:0', tipo: 'camper', x: 20, z: 7.5, rot: -0.45, radio: 4 });
   lista.push(...arbolesAldea());
   cachePiezas = lista;
   return lista;

@@ -10,6 +10,7 @@ import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
 import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles';
+import { Camper } from './Camper';
 import { Modelo, CASAS } from './Modelos';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
 // el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
@@ -20,6 +21,7 @@ import type { SeleccionMundo } from './tipos';
 const ETIQUETAS: Record<string, string> = {
   casa: 'Casa', nave: 'Nave', fuente: 'Fuente', banco: 'Banco', farola: 'Farola',
   puesto: 'Puesto del mercado', pozo: 'Pozo', carro: 'Carro', arbol: 'Árbol',
+  camper: 'Camión camperizado',
 };
 
 function seleccionDe(p: PiezaAldea): SeleccionMundo {
@@ -78,6 +80,7 @@ export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?:
     case 'puesto': return <PuestoMercado x={0} z={0} rot={0} color={PALETA.tela[indice % PALETA.tela.length]} />;
     case 'pozo': return <Pozo x={0} z={0} />;
     case 'carro': return <Carro x={0} z={0} rot={0} />;
+    case 'camper': return <Camper />;
     case 'arbol': return (
       <group scale={s}>
         <mesh castShadow position={[0, 1.1, 0]}>
@@ -454,7 +457,7 @@ export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
     <group>
       <Terreno />
       <Caminos />
-      {['fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro'].map(tipo =>
+      {['fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro', 'camper'].map(tipo =>
         de(tipo).map((p, i) => (
           <Editable key={p.seed_id} pieza={p} onPulsar={onPulsar} onAgarrar={onAgarrar}>
             <PiezaVisual pieza={p} indice={i} />
