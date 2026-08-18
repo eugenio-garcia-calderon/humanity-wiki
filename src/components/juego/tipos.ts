@@ -5,12 +5,27 @@
 // ============================================================================
 
 /** Movement input written by the keyboard handler and the touch joystick,
- *  read every frame by the character. x: -1 left … 1 right, z: -1 up … 1 down
- *  (world axes; the follow camera keeps a fixed angle so screen == world). */
+ *  read every frame by the character. x: -1 left … 1 right, z: -1 forward …
+ *  1 back, RELATIVE TO THE CAMERA (the camera turns now, so screen ≠ world;
+ *  the character rotates the vector by the camera's yaw). `y` only matters in
+ *  the flyer: -1 descends, 1 climbs. */
 export interface EntradaMando {
   x: number;
   z: number;
+  y: number;
 }
+
+/** Where the camera is looking. Written by the look-drag (right half of the
+ *  screen on mobile, mouse drag on desktop) and read every frame. `yaw` 0 is
+ *  the classic over-the-shoulder view; `pitch` is how high it hangs. */
+export interface Camara {
+  yaw: number;
+  pitch: number;
+}
+
+/** Cómo te mueves por el mundo. La bici es el doble de rápida; la Aptera es
+ *  un planeador de despegue vertical (petición de Eugenio, 2026-08-18). */
+export type Vehiculo = 'pie' | 'bici' | 'aptera';
 
 /** The slice of a real `proyectos` row that the game world needs. */
 export interface ProyectoJuego {

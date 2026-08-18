@@ -10,7 +10,7 @@ import type { Aspecto } from './aspecto';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
-import type { Agente, Cercania, EntradaMando, Medidas, ProyectoJuego } from './tipos';
+import type { Agente, Camara, Cercania, EntradaMando, Medidas, ProyectoJuego, Vehiculo } from './tipos';
 import { PALETA } from './paleta';
 import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
@@ -49,8 +49,9 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo }: {
   entrada: React.MutableRefObject<EntradaMando>;
+  camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
   /** Compartida con la página: es donde se plantan las cosas al construir. */
@@ -60,6 +61,8 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
   zoom: React.MutableRefObject<number>;
   aspectoJugador?: Aspecto;
+  vehiculo: Vehiculo;
+  alturaVuelo: React.MutableRefObject<number>;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
@@ -123,6 +126,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
       <Robot jugadorPos={jugadorPos} medidas={medidas} />
       <Personaje
         entrada={entrada}
+        camara={camara}
         jugadorPos={jugadorPos}
         luzRef={luzRef}
         obstaculos={obstaculos}
@@ -130,6 +134,8 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
         destino={destino}
         zoom={zoom}
         aspecto={aspectoJugador}
+        vehiculo={vehiculo}
+        alturaVuelo={alturaVuelo}
       />
       <Coordinador medidas={medidas} onCercania={onCercania} />
     </Canvas>

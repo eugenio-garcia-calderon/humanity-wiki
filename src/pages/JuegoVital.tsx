@@ -4,12 +4,12 @@ import * as THREE from 'three';
 import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
-  ZoomIn, ZoomOut, Palette,
+  ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
-import type { Agente, Cercania, EntradaMando, ProyectoJuego } from '../components/juego/tipos';
+import type { Agente, Camara, Cercania, EntradaMando, ProyectoJuego, Vehiculo } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
@@ -30,6 +30,10 @@ import type { Aspecto } from '../components/juego/aspecto';
 
 const Escena = lazy(() => import('../components/juego/Escena'));
 
+/** Identifica lo que tienes al lado, para recordar qué has rechazado. */
+const claveCercania = (c: Cercania) =>
+  c === null ? '' : c.tipo === 'robot' ? 'robot' : c.tipo === 'agente' ? `a:${c.agente.id}` : `p:${c.proyecto.id}`;
+
 const FRASES_ROBOT = [
   'Aquí estoy. Puedo hacerte la entrevista fundacional para llenar tu mundo, o construir lo que me pidas. Escríbeme abajo.',
   '¿Ves los edificios? Son tus proyectos reales — crecen cuando completas tareas de verdad. Pídeme lo que quieras.',
@@ -39,7 +43,10 @@ const FRASES_ROBOT = [
 export default function JuegoVital() {
   const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
-  const entrada = useRef<EntradaMando>({ x: 0, z: 0 });
+  const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0 });
+  // Hacia dónde mira la cámara. `yaw` 0 es la vista clásica por encima del
+  // hombro; `pitch` 0,63 es la altura de siempre (11 arriba, 15 detrás).
+  const camara = useRef<Camara>({ yaw: 0, pitch: 0.63 });
   // Posición del jugador, compartida con la escena: es donde se PLANTA lo que
   // se construye (como en Los Sims: te pones y creas ahí).
   const jugadorPos = useMemo(() => new THREE.Vector3(0, 0, 17), []);
@@ -60,6 +67,10 @@ export default function JuegoVital() {
   const [zoomVisible, setZoomVisible] = useState(1);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
   // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
+  // Cómo te mueves: a pie, en bici o en el planeador (petición de Eugenio).
+  const [vehiculo, setVehiculo] = useState<Vehiculo>('pie');
+  const alturaVuelo = useRef(0);
+  const [alturaVisible, setAlturaVisible] = useState(0);
   const [editandoAspecto, setEditandoAspecto] = useState<'jugador' | Agente | null>(null);
   const [aspectoBorrador, setAspectoBorrador] = useState<Aspecto>({});
   const [guardandoAspecto, setGuardandoAspecto] = useState(false);
@@ -70,6 +81,14 @@ export default function JuegoVital() {
   }, []);
   const cercaniaRef = useRef<Cercania>(null);
   cercaniaRef.current = cercania;
+  // Qué hay abierto ahora mismo, legible desde fuera de React (el teclado).
+  const abiertos = useRef({ aspecto: false, construyendo: false, ficha: false, panel: false, bocadillo: false });
+  abiertos.current = {
+    aspecto: !!editandoAspecto, construyendo: !!construyendo,
+    ficha: !!fichaAgente, panel: !!panel, bocadillo: !!bocadillo,
+  };
+  /** De qué acabas de decir «ahora no»: no se te vuelve a abrir sin alejarte. */
+  const rechazado = useRef<string | null>(null);
   const agentesRef = useRef<Agente[]>([]);
   agentesRef.current = agentes;
   const proyectosRef = useRef<ProyectoJuego[]>([]);
@@ -213,11 +232,38 @@ export default function JuegoVital() {
   /**
    * Acercarse a un proyecto ABRE su ficha sola, sin pulsar nada (petición de
    * Eugenio). Al alejarse se cierra. Con las personas no: ahí manda el choque.
+   *
+   * `rechazado` recuerda de qué acabas de decir «atrás, ahora no»: sin esto la
+   * ficha se volvería a abrir sola en el mismo fotograma, porque sigues al lado.
    */
   const alCambiarCercania = useCallback((c: Cercania) => {
     setCercania(c);
-    if (c?.tipo === 'proyecto') setPanel(c.proyecto);
+    const k = claveCercania(c);
+    if (rechazado.current !== k) rechazado.current = null;
+    if (c?.tipo === 'proyecto' && rechazado.current !== k) setPanel(c.proyecto);
     else if (c === null) setPanel(null);
+  }, []);
+
+  /**
+   * «Atrás»: la flecha abajo del teclado o tirar del joystick hacia ti cierran
+   * lo que esté abierto (petición de Eugenio: «indicando que el jugador quiere
+   * ir para atrás y no quiere esa interacción»). Devuelve true si cerró algo,
+   * para que ese mismo gesto no mueva además al personaje.
+   */
+  const irAtras = useCallback(() => {
+    // Se lee de la ref, no del estado: esto se llama desde un manejador de
+    // teclado que vive fuera del ciclo de React, y un `setX(prev => …)` no
+    // devolvería el valor a tiempo para saber si había algo abierto.
+    const a = abiertos.current;
+    if (a.aspecto) setEditandoAspecto(null);
+    else if (a.construyendo) setConstruyendo(null);
+    else if (a.ficha) setFichaAgente(null);
+    else if (a.panel) setPanel(null);
+    else if (a.bocadillo) setBocadillo(null);
+    else return false;
+    // Lo que acabas de rechazar no se reabre hasta que te alejes y vuelvas.
+    rechazado.current = claveCercania(cercaniaRef.current);
+    return true;
   }, []);
 
   /**
@@ -282,6 +328,37 @@ export default function JuegoVital() {
     hablarCon(a);
   }, [hablarCon]);
 
+  /**
+   * Subirse o bajarse. Al bajar del planeador NO se apaga en el aire: se pone
+   * a descender solo hasta tocar el suelo (aterrizaje vertical), y hasta que
+   * no aterriza no te devuelve el control a pie.
+   */
+  const montar = useCallback((v: Vehiculo) => {
+    setVehiculo(actual => {
+      if (actual === v) {
+        if (actual === 'aptera' && alturaVuelo.current > 0.3) {
+          entrada.current.y = -1;   // baja sola; al tocar suelo se desmonta
+          return actual;
+        }
+        return 'pie';
+      }
+      return v;
+    });
+  }, []);
+
+  // El planeador toca suelo: se desmonta solo y deja de descender.
+  useEffect(() => {
+    if (vehiculo !== 'aptera') { setAlturaVisible(0); return; }
+    const t = setInterval(() => {
+      setAlturaVisible(Math.round(alturaVuelo.current));
+      if (entrada.current.y === -1 && alturaVuelo.current <= 0.01) {
+        entrada.current.y = 0;
+        setVehiculo('pie');
+      }
+    }, 120);
+    return () => clearInterval(t);
+  }, [vehiculo]);
+
   const interactuar = useCallback(() => {
     const c = cercaniaRef.current;
     if (!c) return;
@@ -296,8 +373,16 @@ export default function JuegoVital() {
     }
   }, [hablarCon]);
 
-  // Teclado: WASD/flechas para andar, E para interactuar. Nunca mientras se
-  // escribe (la barra del asistente vive en esta misma página).
+  // Teclado: WASD/flechas para andar, E para interactuar, B/V para los
+  // vehículos, espacio y mayúsculas para subir y bajar volando. Nunca mientras
+  // se escribe (la barra del asistente vive en esta misma página).
+  //
+  // Las acciones se llaman a través de una ref A PROPÓSITO: si el efecto
+  // dependiera de ellas, se volvería a montar cada vez que cambia la lista de
+  // agentes, y con él se perdería el conjunto de teclas pulsadas — te quedabas
+  // subiendo para siempre porque el «soltar espacio» llegaba a otro oyente.
+  const acciones = useRef({ interactuar, irAtras, montar });
+  acciones.current = { interactuar, irAtras, montar };
   useEffect(() => {
     const teclas = new Set<string>();
     const escribiendo = (e: KeyboardEvent) => {
@@ -307,11 +392,17 @@ export default function JuegoVital() {
     const aplicar = () => {
       entrada.current.x = +(teclas.has('d') || teclas.has('arrowright')) - +(teclas.has('a') || teclas.has('arrowleft'));
       entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
+      entrada.current.y = +teclas.has(' ') - +teclas.has('shift');
     };
     const abajo = (e: KeyboardEvent) => {
       if (escribiendo(e)) return;
       const k = e.key.toLowerCase();
-      if (k === 'e') { interactuar(); return; }
+      if (k === 'e') { acciones.current.interactuar(); return; }
+      if (k === 'b') { acciones.current.montar('bici'); return; }
+      if (k === 'v') { acciones.current.montar('aptera'); return; }
+      // Atrás con algo abierto: cerrarlo y NO andar. Es el gesto de «ahora no».
+      if ((k === 'arrowdown' || k === 's') && acciones.current.irAtras()) return;
+      if (k === ' ') e.preventDefault();  // si no, la página hace scroll
       teclas.add(k); aplicar();
     };
     const arriba = (e: KeyboardEvent) => { teclas.delete(e.key.toLowerCase()); aplicar(); };
@@ -324,7 +415,61 @@ export default function JuegoVital() {
       window.removeEventListener('keyup', arriba);
       window.removeEventListener('blur', soltarTodo);
     };
-  }, [interactuar]);
+  }, []);
+
+  /**
+   * Mirar alrededor arrastrando, como en Call of Duty Mobile (petición de
+   * Eugenio): en el móvil, la MITAD DERECHA de la pantalla gira la vista
+   * mientras el joystick de la izquierda mueve al personaje; con ratón, se
+   * arrastra por cualquier parte del mundo.
+   *
+   * Girar la cámara cambia también hacia dónde andas: el mando pasa a ser
+   * relativo a la vista (lo resuelve `Personaje`).
+   */
+  useEffect(() => {
+    let id: number | null = null;
+    let ultimo = { x: 0, y: 0 };
+    let dedos = 0;
+
+    const empezar = (e: PointerEvent) => {
+      dedos++;
+      // Con dos dedos manda el pellizco del zoom, no el giro.
+      if (dedos > 1) { id = null; return; }
+      // Solo gira si el arrastre EMPIEZA sobre el lienzo 3D. Comprobarlo así
+      // —y no con una lista de paneles a excluir— hace que cualquier botón o
+      // ficha que se añada mañana quede a salvo sin tocar esto.
+      if (!(e.target instanceof HTMLCanvasElement)) return;
+      if (e.pointerType !== 'mouse' && e.clientX < window.innerWidth * 0.4) return;
+      id = e.pointerId;
+      ultimo = { x: e.clientX, y: e.clientY };
+    };
+    const mover = (e: PointerEvent) => {
+      if (id !== e.pointerId) return;
+      const dx = e.clientX - ultimo.x;
+      const dy = e.clientY - ultimo.y;
+      ultimo = { x: e.clientX, y: e.clientY };
+      const c = camara.current;
+      // Arrastrar a la derecha gira la vista a la derecha (la cámara orbita
+      // al revés que el dedo, que es lo que hace que se sienta natural).
+      c.yaw += dx * 0.006;
+      // 0,10 rad ≈ casi a ras de suelo; 1,35 ≈ casi cenital.
+      c.pitch = Math.min(1.35, Math.max(0.1, c.pitch + dy * 0.004));
+    };
+    const acabar = (e: PointerEvent) => {
+      dedos = Math.max(0, dedos - 1);
+      if (id === e.pointerId) id = null;
+    };
+    window.addEventListener('pointerdown', empezar);
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', acabar);
+    window.addEventListener('pointercancel', acabar);
+    return () => {
+      window.removeEventListener('pointerdown', empezar);
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', acabar);
+      window.removeEventListener('pointercancel', acabar);
+    };
+  }, []);
 
   // Alejar y acercar la cámara: rueda del ratón y pellizco de dos dedos.
   useEffect(() => {
@@ -376,6 +521,9 @@ export default function JuegoVital() {
       <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center"><p className="text-sm text-slate-400 animate-pulse">Construyendo tu mundo…</p></div>}>
         <Escena
           entrada={entrada}
+          camara={camara}
+          vehiculo={vehiculo}
+          alturaVuelo={alturaVuelo}
           proyectos={proyectos}
           agentes={agentes}
           jugadorPos={jugadorPos}
@@ -430,8 +578,69 @@ export default function JuegoVital() {
       )}
 
       <div className="hidden sm:block absolute top-3 right-40 z-30 px-3 py-1.5 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow">
-        <p className="text-[10px] font-bold text-slate-500">WASD para caminar · E para hablar · rueda para alejar</p>
+        <p className="text-[10px] font-bold text-slate-500">
+          WASD para caminar · arrastra para mirar · E hablar · ↓ salir · B bici · V volar
+        </p>
       </div>
+
+      {/* --------------------------------------------------------------- */}
+      {/* Vehículos, a la derecha (petición de Eugenio). En el planeador   */}
+      {/* aparecen además subir y bajar: es de despegue vertical.          */}
+      {/* --------------------------------------------------------------- */}
+      {user && (
+        <div data-ui-juego className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2">
+          <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col gap-1.5">
+            <button
+              onClick={() => montar('bici')}
+              title={vehiculo === 'bici' ? 'Bajarte de la bici' : 'Subirte a la bici (B) — el doble de rápido'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vehiculo === 'bici'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              {vehiculo === 'bici' ? <Footprints className="w-5 h-5" /> : <Bike className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => montar('aptera')}
+              title={vehiculo === 'aptera' ? 'Aterrizar' : 'Subirte al planeador Aptera (V) — despegue vertical'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vehiculo === 'aptera'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              <Plane className="w-5 h-5" />
+            </button>
+          </div>
+
+          {vehiculo === 'aptera' && (
+            <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center gap-1.5">
+              <button
+                onPointerDown={() => { entrada.current.y = 1; }}
+                onPointerUp={() => { entrada.current.y = 0; }}
+                onPointerLeave={() => { entrada.current.y = 0; }}
+                title="Subir (barra espaciadora)"
+                className="w-11 h-11 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors touch-none"
+              >
+                <ChevronUp className="w-5 h-5" />
+              </button>
+              <span className="text-[9px] font-black text-slate-400 tabular-nums">{alturaVisible} m</span>
+              <button
+                onPointerDown={() => { entrada.current.y = -1; }}
+                onPointerUp={() => { entrada.current.y = 0; }}
+                onPointerLeave={() => { entrada.current.y = 0; }}
+                title="Bajar (Mayúsculas). Al tocar el suelo te bajas."
+                className="w-11 h-11 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors touch-none"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {aviso && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
@@ -601,7 +810,7 @@ export default function JuegoVital() {
         />
       )}
 
-      {tactil && <Joystick entrada={entrada} />}
+      {tactil && <Joystick entrada={entrada} onAtras={irAtras} />}
 
       {user && tactil && vertical && (
         <div className="absolute inset-0 z-50 bg-slate-900/85 backdrop-blur-sm flex items-center justify-center px-8">
@@ -983,10 +1192,15 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
 // ---------------------------------------------------------------------------
 // Joystick virtual (móvil).
 // ---------------------------------------------------------------------------
-function Joystick({ entrada }: { entrada: React.MutableRefObject<EntradaMando> }) {
+function Joystick({ entrada, onAtras }: {
+  entrada: React.MutableRefObject<EntradaMando>;
+  /** Tirar del joystick hacia ti cierra lo que haya abierto. */
+  onAtras: () => boolean;
+}) {
   const base = useRef<HTMLDivElement>(null);
   const activo = useRef(false);
   const centro = useRef({ x: 0, y: 0 });
+  const atrasHecho = useRef(false);
   const [palanca, setPalanca] = useState({ x: 0, y: 0 });
   const MAX = 44;
 
@@ -996,6 +1210,13 @@ function Joystick({ entrada }: { entrada: React.MutableRefObject<EntradaMando> }
     let dy = e.clientY - centro.current.y;
     const l = Math.hypot(dx, dy);
     if (l > MAX) { dx = (dx / l) * MAX; dy = (dy / l) * MAX; }
+    // Tirar del todo hacia abajo es «atrás»: cierra el cuadro de diálogo. Una
+    // vez por gesto, no en bucle mientras mantienes la palanca ahí.
+    if (dy / MAX > 0.75 && Math.abs(dx) < MAX * 0.6) {
+      if (!atrasHecho.current) { atrasHecho.current = true; onAtras(); }
+    } else if (dy / MAX < 0.4) {
+      atrasHecho.current = false;
+    }
     setPalanca({ x: dx, y: dy });
     entrada.current.x = dx / MAX;
     entrada.current.z = dy / MAX;
@@ -1009,19 +1230,24 @@ function Joystick({ entrada }: { entrada: React.MutableRefObject<EntradaMando> }
   };
   const soltar = () => {
     activo.current = false;
+    atrasHecho.current = false;
     setPalanca({ x: 0, y: 0 });
     entrada.current.x = 0;
     entrada.current.z = 0;
   };
 
   return (
+    // A la IZQUIERDA desde 2026-08-18: la mitad derecha de la pantalla pasó a
+    // ser la que gira la cámara, como en COD Mobile. `data-ui-juego` evita que
+    // el arrastre del joystick mueva además la vista.
     <div
       ref={base}
+      data-ui-juego
       onPointerDown={pulsar}
       onPointerMove={mover}
       onPointerUp={soltar}
       onPointerCancel={soltar}
-      className={cn('absolute bottom-28 right-5 w-28 h-28 rounded-full bg-slate-900/15 backdrop-blur-sm border border-white/50 touch-none select-none z-30')}
+      className={cn('absolute bottom-8 left-5 w-28 h-28 rounded-full bg-slate-900/15 backdrop-blur-sm border border-white/50 touch-none select-none z-30')}
     >
       <div
         className="absolute w-12 h-12 rounded-full bg-white/85 shadow-lg border border-slate-200 pointer-events-none"
