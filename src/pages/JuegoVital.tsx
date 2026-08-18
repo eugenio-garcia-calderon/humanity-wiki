@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import type { Agente, Cercania, EntradaMando, ProyectoJuego } from '../components/juego/tipos';
+import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 
 // ============================================================================
 // JUEGO VITAL — Fase 1 «Pasear tu vida» + builder tipo Los Sims (2026-08-18).
@@ -47,6 +48,10 @@ export default function JuegoVital() {
   const [bocadillo, setBocadillo] = useState<string | null>(null);
   const [construyendo, setConstruyendo] = useState<'persona' | 'proyecto' | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  // Viaje rápido desde el mapa: la escena lee este destino y coloca al
+  // jugador; el velo tapa el salto y la cámara hace el resto.
+  const destinoViaje = useRef<{ x: number; z: number } | null>(null);
+  const [viajando, setViajando] = useState<string | null>(null);
   const cercaniaRef = useRef<Cercania>(null);
   cercaniaRef.current = cercania;
   const agentesRef = useRef<Agente[]>([]);
@@ -197,6 +202,23 @@ export default function JuegoVital() {
     else if (c === null) setPanel(null);
   }, []);
 
+  /**
+   * Viaje rápido desde el mapa. El velo tapa el salto; la cámara, que va
+   * interpolando siempre, hace un vuelo rasante hasta el destino. Al llegar,
+   * si era una persona se abre su ficha y su chat: viajar hasta alguien es ir
+   * a hablar con él.
+   */
+  const viajarA = useCallback((d: { x: number; z: number; agente?: Agente }) => {
+    setViajando(d.agente?.nombre || 'tu destino');
+    destinoViaje.current = { x: d.x, z: d.z };
+    setPanel(null);
+    setFichaAgente(null);
+    setTimeout(() => {
+      setViajando(null);
+      if (d.agente) { setFichaAgente(d.agente); hablarCon(d.agente); }
+    }, 900);
+  }, [hablarCon]);
+
   /** Chocarte con alguien es empezar a hablar con él: nada de atravesarlo. */
   const alChocar = useCallback((id: string) => {
     const a = agentesRef.current.find(x => x.id === id);
@@ -270,8 +292,20 @@ export default function JuegoVital() {
           jugadorPos={jugadorPos}
           onCercania={alCambiarCercania}
           onChoque={alChocar}
+          destino={destinoViaje}
         />
       </Suspense>
+
+      {/* Minimapa estilo GTA + viaje rápido */}
+      {user && (
+        <MiniMapa
+          jugadorPos={jugadorPos}
+          agentes={agentes}
+          proyectos={proyectos}
+          onViajar={viajarA}
+        />
+      )}
+      <VeloViaje activo={!!viajando} destino={viajando} />
 
       {/* Cabecera */}
       <div className="absolute top-3 left-3 z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">

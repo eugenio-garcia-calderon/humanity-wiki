@@ -47,7 +47,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque }: {
+export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino }: {
   entrada: React.MutableRefObject<EntradaMando>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
@@ -55,6 +55,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
   jugadorPos: THREE.Vector3;
   onCercania: (c: Cercania) => void;
   onChoque: (id: string) => void;
+  destino: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
@@ -114,6 +115,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
         luzRef={luzRef}
         obstaculos={obstaculos}
         onChoque={onChoque}
+        destino={destino}
       />
       <Coordinador medidas={medidas} onCercania={onCercania} />
     </Canvas>
