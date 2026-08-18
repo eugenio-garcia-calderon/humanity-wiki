@@ -719,6 +719,8 @@ export default function JuegoVital() {
           vehiculo={vehiculo}
           alturaVuelo={alturaVuelo}
           interior={interior}
+          onEntrarProyecto={entrarEnProyecto}
+          onHablarAgente={(a) => { setFichaAgente(a); hablarCon(a); }}
           proyectos={proyectos}
           agentes={agentes}
           jugadorPos={jugadorPos}
