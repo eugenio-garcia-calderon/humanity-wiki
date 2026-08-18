@@ -13,9 +13,12 @@
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
     "@stripe/stripe-js": "^9.12.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/mapbox-gl": "^3.5.0",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^5.0.4",
     "@xyflow/react": "^12.11.2",
     "clsx": "^2.1.1",
@@ -46,6 +49,7 @@
     "recharts": "^3.10.1",
     "stripe": "^22.4.0",
     "tailwind-merge": "^3.6.0",
+    "three": "^0.185.1",
     "vite": "^6.2.3"
   },
   "devDependencies": {

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,6 +28,7 @@ const SECCIONES_COMUN = [
 const SECCIONES_TUYO = [
   { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+  { to: '/juego', label: 'Juego Vital', icon: Gamepad2 },
 ];
 const SECCIONES_PIE = [
   { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
@@ -86,11 +87,14 @@ export default function Layout() {
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
+  // Juego Vital: mundo 3D a pantalla completa; el robot del juego ES el
+  // asistente, así que la barra de IA vive abajo como en los lienzos.
+  const isJuegoPage = location.pathname === '/juego';
   // Explorar/Mis publicaciones se fusionaron en una sola página con su propio
   // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
   // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage;
 
   if (isEmbed) {
     return (
@@ -263,7 +267,7 @@ export default function Layout() {
         <AIAssistant
           mode={
             isInicioPage ? 'inline'
-              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage ? 'bar'
+              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
                 : 'dock'
           }
         />

@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+
+// Juego Vital: la escena 3D pesa ~1 MB (three.js), así que la página entera
+// se carga en diferido — el resto de la app no paga por el motor del juego.
+const JuegoVital = lazy(() => import('./pages/JuegoVital'));
 import TerritoryProfile from './pages/TerritoryProfile';
 import ChallengeProfile from './pages/ChallengeProfile';
 import SolutionProfile from './pages/SolutionProfile';
@@ -69,6 +73,14 @@ export default function App() {
                 <Route path="grafos" element={<Grafos />} />
                 <Route path="base-de-datos" element={<BaseDeDatos />} />
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
+                <Route
+                  path="juego"
+                  element={
+                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Juego Vital…</div>}>
+                      <JuegoVital />
+                    </Suspense>
+                  }
+                />
                 <Route path="vision" element={<Vision />} />
                 <Route path="explorar" element={<Explorar />} />
                 {/* Atajo, no una página aparte: si fuera <Explorar mias /> el cambio
