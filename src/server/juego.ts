@@ -55,6 +55,13 @@ export function registerJuegoRoutes(app: Express, db: any) {
       `);
       res.json(filas.rows);
     } catch (e: any) {
+      // 42P01 = la tabla no existe todavía (código desplegado antes de aplicar
+      // la migración 0029). El mundo se enseña vacío en vez de romperse: la
+      // aldea, el robot y los proyectos siguen funcionando.
+      if (e?.code === '42P01') {
+        console.warn('game_agents no existe todavía: falta aplicar drizzle/0029_juego_agentes.sql');
+        return res.json([]);
+      }
       console.error('juego agentes error:', e);
       res.status(500).json({ error: e.message });
     }
