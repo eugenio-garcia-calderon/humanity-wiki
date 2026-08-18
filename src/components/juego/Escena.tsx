@@ -1,0 +1,91 @@
+// ============================================================================
+// JUEGO VITAL — scene composition. Default export so the page can React.lazy
+// it: this file (and everything it imports, including three.js) lives in its
+// own chunk that only game visitors download.
+// ============================================================================
+import { useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Sky } from '@react-three/drei';
+import * as THREE from 'three';
+import type { Cercania, EntradaMando, Medidas, ProyectoJuego } from './tipos';
+import { PALETA } from './paleta';
+import { Aldea } from './Aldea';
+import { Personaje } from './Personaje';
+import { Robot } from './Robot';
+import { EdificiosProyectos } from './EdificiosProyectos';
+
+/** Arbitrates what the player is close to (robot beats buildings) and only
+ *  notifies the page when the answer CHANGES — never once per frame. */
+function Coordinador({ medidas, onCercania }: {
+  medidas: React.MutableRefObject<Medidas>;
+  onCercania: (c: Cercania) => void;
+}) {
+  const ultima = useRef('');
+  useFrame(() => {
+    const m = medidas.current;
+    let c: Cercania = null;
+    if (m.robot < 4.5) c = { tipo: 'robot' };
+    else if (m.proyecto && m.proyecto.d < 8) c = { tipo: 'proyecto', proyecto: m.proyecto.p };
+    const clave = c === null ? '' : c.tipo === 'robot' ? 'robot' : `p:${c.proyecto.id}`;
+    if (clave !== ultima.current) {
+      ultima.current = clave;
+      onCercania(c);
+    }
+    // NOTE: never pass a render priority here — any useFrame priority > 0
+    // tells react-three-fiber "I'll render myself" and silently disables the
+    // automatic render loop (0 draw calls, blank canvas). Mount order already
+    // guarantees this runs after Robot/EdificiosProyectos wrote `medidas`.
+  });
+  return null;
+}
+
+export default function Escena({ entrada, proyectos, onCercania }: {
+  entrada: React.MutableRefObject<EntradaMando>;
+  proyectos: ProyectoJuego[];
+  onCercania: (c: Cercania) => void;
+}) {
+  const jugadorPos = useMemo(() => new THREE.Vector3(0, 0, 17), []);
+  const luzRef = useRef<THREE.DirectionalLight>(null);
+  const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null });
+
+  return (
+    <Canvas
+      shadows
+      dpr={[1, 1.75]}
+      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      camera={{ fov: 48, near: 0.5, far: 1400, position: [0, 11, 32] }}
+      onCreated={(estado) => {
+        estado.scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+        // Dev-only handle for in-browser scene inspection (used to debug the
+        // blank-canvas bug of 2026-08-18; harmless and useful, so it stays).
+        if ((import.meta as any).env?.DEV) (window as any).__JV = estado;
+      }}
+    >
+      <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
+      <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
+      <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
+      <directionalLight
+        ref={luzRef}
+        castShadow
+        position={[60, 95, -45]}
+        intensity={1.7}
+        color={PALETA.luzSol}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-70}
+        shadow-camera-right={70}
+        shadow-camera-top={70}
+        shadow-camera-bottom={-70}
+        shadow-camera-near={5}
+        shadow-camera-far={400}
+        shadow-bias={-0.0004}
+      />
+
+      <Aldea />
+      <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
+      <Robot jugadorPos={jugadorPos} medidas={medidas} />
+      <Personaje entrada={entrada} jugadorPos={jugadorPos} luzRef={luzRef} />
+      <Coordinador medidas={medidas} onCercania={onCercania} />
+    </Canvas>
+  );
+}

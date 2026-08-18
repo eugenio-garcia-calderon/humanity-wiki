@@ -329,3 +329,25 @@ never reach something that was merely archived by another flow.
 **What it costs.** Rule 6 no longer holds literally for knowledge windows. Anyone reasoning
 about permanence must read this entry. If the rule is ever restored, the fix is one line —
 turn the sweep off — and nothing older than 15 days would have been lost in the meantime.
+
+---
+
+## 2026-08-18 — The Juego Vital is a view, not a parallel world
+
+**Decision.** The 3D game (`/juego`, design in `10_JUEGO_VITAL.md`) renders EXISTING entities
+(projects, publications, tasks, people, challenges) and writes through the EXISTING routes.
+It gets no schema of its own until the Builder needs to persist positions (F2: `game_worlds`,
+`game_objects`). In F1 the village layout is deterministic from a seeded PRNG.
+
+**Alternative rejected.** A `game_*` schema mirroring entities into game objects. Rejected
+because every mirror table is a synchronisation bug waiting to happen, and because the
+platform already owns visibility, trash, history and roles — the game inherits them for free
+only if it reads the real rows.
+
+**What it costs.** Until F2, moving a building is impossible (layout is code). Accepted:
+walking your real life was the thing to validate first.
+
+**Also decided (product, Eugenio):** stylized HD art over photorealism; mobile+desktop from
+day 1; landscape-only play on phones; photo→3D as library-match now, paid generation later;
+person avatars ship only with the consent safeguards written in `10_JUEGO_VITAL.md`; no
+unofficial WhatsApp bridges (ban risk on his personal number) — `wa.me` deep links in F3.

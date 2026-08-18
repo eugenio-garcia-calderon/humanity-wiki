@@ -131,3 +131,19 @@ yet.** They are here so the decision can be explicit.
 - **Fix**: `requireAdmin()` on the four endpoints — 401 without a session, 403 below ADMIN. No capability was removed: editing from the UI was already admin-only.
 - **Verified after the fix**: anonymous → 401 on all three verbs, nothing created; admin with a session → 200. Checked locally and against production.
 - **What it left behind**: `server.ts` still has no authorisation *pattern*, only this guard. See "server.ts is 1.891 lines of raw SQL with no authorisation" above — new endpoints added on 2026-08-06 (`/api/db/tables`) had to call `requireAdmin` by hand.
+
+### Juego Vital F1 shortcuts — 2026-08-18
+- **World layout lives in code, not in the DB**: the village is rebuilt from a seeded PRNG on
+  every visit (`src/components/juego/paleta.ts` + `Aldea.tsx`). Fine while nothing is editable;
+  becomes real debt the moment the Builder (F2) ships. Cost to fix now: the `game_worlds` /
+  `game_objects` tables planned in `memory/10_JUEGO_VITAL.md` (~half a session).
+- **3D palette is hex-in-file**: three.js needs raw colour strings, so the "no hex in pages"
+  rule is honoured by centralising ALL world colours in `paleta.ts` (outside `src/pages/`).
+  If the UI tokens ever move to `index.css` variables, the game palette should read them.
+- **Sign text loads its font from the network** (drei `<Text>`/troika default): offline or
+  behind a strict CSP the project-building signs would render blank. Bundling a woff and
+  passing `font=` fixes it in ~15 min when it matters.
+- **`react-simple-maps` still pins React ≤18** (install needs `--legacy-peer-deps`; npm now
+  reports every React 19 consumer as "invalid"). Harmless today, but each new dependency
+  install repeats the warning noise. Replacing it is an old entry above; the game install
+  bumped React 19.0.1 → 19.2.8 without incident.

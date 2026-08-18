@@ -102,6 +102,14 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // El Juego Vital encarna este asistente en el robot: al «hablarle» al robot,
+  // la página lanza este evento y la barra recibe el foco.
+  const barInputRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const enfocar = () => barInputRef.current?.focus();
+    window.addEventListener('humanity:asistente-focus', enfocar);
+    return () => window.removeEventListener('humanity:asistente-focus', enfocar);
+  }, []);
   // Dictado por voz: al hablar, se transcribe directamente en el cuadro de texto.
   const dictationBase = useRef('');
   const { listening, supported: voiceSupported, toggle: toggleVoice } = useVoiceDictation((text, isFinal) => {
@@ -801,6 +809,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
               </button>
             )}
             <textarea
+              ref={barInputRef}
               value={input}
               onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
