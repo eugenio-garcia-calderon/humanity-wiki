@@ -683,3 +683,12 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 ### 2026-08-18 — «No se puede abrir esta página» en el móvil durante los despliegues
 - Reportado por Eugenio con captura de Chrome en iOS. Causa: al desplegar, el contenedor de la aplicación se sustituye y hay unos segundos en los que no acepta conexiones; Caddy devolvía un error al instante.
 - **Arreglo**: `lb_try_duration 20s` en el proxy. Ahora la petición **espera** reintentando en vez de fallar: se ve una carga lenta, no un error. No elimina la ventana de despliegue, la hace invisible.
+
+### 2026-08-18 — Juego Vital: chocarte con alguien ya no te deja encerrado
+- **Reportado por Eugenio**: «cuando me choco con un personaje e intento seguir caminando, no me deja escapar».
+- **La causa no era la colisión, era el teclado.** Al chocar se abría el chat de esa persona y, con él, `humanity:asistente-focus` metía el cursor en el cuadro de escribir. Desde ahí las teclas de andar cuentan como escritura (guarda de siempre para no caminar mientras escribes al asistente), así que WASD dejaba de funcionar: estabas atrapado sin poder moverte.
+- **Tres arreglos, que se complementan**:
+  1. **Un choque ya no roba el teclado.** Te has tropezado con alguien, no has decidido escribirle: se abre su ficha y su conversación, pero el cursor se queda fuera. Hablar a propósito —botón, lista «Tu mundo», tecla E o viaje rápido— sí lleva el cursor al chat, como antes.
+  2. **Seguir caminando cierra lo que haya abierto**, en cualquier dirección (antes solo cerraba «atrás»). En el móvil, cualquier empujón del joystick de más del 60 % vale.
+  3. **Escape es la salida de emergencia**: funciona incluso escribiendo — suelta el teclado del chat y cierra lo abierto.
+- **Verificado caminando de verdad**: al chocar con Javier el foco se queda en el `body` y su ficha se abre; a la siguiente repetición de la tecla la ficha se cierra sola y el personaje sigue de largo (de z=6,2 a z=−0,4, pasándole al lado). Pulsar «Javier» en la lista sí deja el cursor en el chat.

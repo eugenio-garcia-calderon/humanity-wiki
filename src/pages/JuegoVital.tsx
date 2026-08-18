@@ -169,7 +169,16 @@ export default function JuegoVital() {
 
   // --- conversación: quién habla --------------------------------------------
   /** Manda al asistente el estado del mundo y con quién se habla. */
-  const hablarCon = useCallback((agente: Agente | null) => {
+  /**
+   * Abre el chat con alguien. `enfocar` decide si además se lleva el teclado
+   * al cuadro de escribir.
+   *
+   * Cuando la conversación se abre por un CHOQUE no se enfoca, y es
+   * importante: con el cursor dentro del chat, las teclas de andar cuentan
+   * como escritura y te quedabas encerrado en la ficha de la persona con la
+   * que te habías tropezado (fallo reportado por Eugenio).
+   */
+  const hablarCon = useCallback((agente: Agente | null, enfocar = true) => {
     window.dispatchEvent(new CustomEvent('humanity:juego-contexto', {
       detail: {
         mundo: 'aldea',
@@ -179,7 +188,7 @@ export default function JuegoVital() {
         vacio: agentesRef.current.length === 0 && proyectos.length === 0,
       },
     }));
-    window.dispatchEvent(new CustomEvent('humanity:asistente-focus'));
+    if (enfocar) window.dispatchEvent(new CustomEvent('humanity:asistente-focus'));
   }, [proyectos]);
 
   // La lista lateral del chat pide hablar con alguien: si es un agente, se
@@ -340,7 +349,8 @@ export default function JuegoVital() {
     const a = agentesRef.current.find(x => x.id === id);
     if (!a) return;
     setFichaAgente(a);
-    hablarCon(a);
+    // Sin robar el teclado: te has tropezado con él, no has decidido escribirle.
+    hablarCon(a, false);
   }, [hablarCon]);
 
   /**
@@ -412,10 +422,20 @@ export default function JuegoVital() {
       entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
       mandoY.current.teclado = +teclas.has(' ') - +teclas.has('shift');
       recalcularY();
+      // Seguir caminando cierra lo que haya abierto: tropezarte con alguien no
+      // puede dejarte encerrado en su ficha. Si sigues andando, te vas.
+      if (entrada.current.x !== 0 || entrada.current.z !== 0) acciones.current.irAtras();
     };
     const abajo = (e: KeyboardEvent) => {
-      if (escribiendo(e)) return;
       const k = e.key.toLowerCase();
+      // Escape funciona SIEMPRE, incluso escribiendo: suelta el teclado del
+      // chat y cierra lo abierto. Es la salida de emergencia.
+      if (k === 'escape') {
+        (e.target as HTMLElement | null)?.blur?.();
+        acciones.current.irAtras();
+        return;
+      }
+      if (escribiendo(e)) return;
       if (k === 'e') { acciones.current.interactuar(); return; }
       if (k === 'b') { acciones.current.montar('bici'); return; }
       if (k === 'v') { acciones.current.montar('aptera'); return; }
@@ -1235,11 +1255,13 @@ function Joystick({ entrada, onAtras }: {
     let dy = e.clientY - centro.current.y;
     const l = Math.hypot(dx, dy);
     if (l > MAX) { dx = (dx / l) * MAX; dy = (dy / l) * MAX; }
-    // Tirar del todo hacia abajo es «atrás»: cierra el cuadro de diálogo. Una
-    // vez por gesto, no en bucle mientras mantienes la palanca ahí.
-    if (dy / MAX > 0.75 && Math.abs(dx) < MAX * 0.6) {
+    // Echar a andar en CUALQUIER dirección cierra lo que haya abierto:
+    // tropezarte con alguien no puede dejarte encerrado en su ficha. Salta una
+    // vez por gesto, no en bucle mientras mantienes la palanca fuera.
+    const fuerza = Math.hypot(dx, dy) / MAX;
+    if (fuerza > 0.6) {
       if (!atrasHecho.current) { atrasHecho.current = true; onAtras(); }
-    } else if (dy / MAX < 0.4) {
+    } else if (fuerza < 0.25) {
       atrasHecho.current = false;
     }
     setPalanca({ x: dx, y: dy });
