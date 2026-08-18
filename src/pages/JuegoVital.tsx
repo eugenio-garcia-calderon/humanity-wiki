@@ -25,7 +25,7 @@ import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
 import { ENTRADA, HAB_ENTRADA, habitantesDeSala } from '../components/juego/planta';
-import { posicionProyecto } from '../components/juego/mapa';
+import { posicionProyecto, RADIO_EDIFICIO } from '../components/juego/mapa';
 // Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
 // esta parte del proyecto cumple la regla de «ni un hex en src/pages».
 import { PALETA } from '../components/juego/paleta';
@@ -270,8 +270,8 @@ export default function JuegoVital() {
   // Lo que el teclado y los clics 3D necesitan leer sin re-suscribirse.
   // Sin modo edición: pulsar un objeto abre sus opciones directamente
   // (petición de Eugenio). `activo` solo dice si hay sesión.
-  const editorRef = useRef({ activo: false, conectando: false, sel: null as SeleccionMundo | null });
-  editorRef.current = { activo: !!user, conectando, sel: selMundo };
+  const editorRef = useRef({ activo: false, conectando: false, moviendo: false, sel: null as SeleccionMundo | null });
+  editorRef.current = { activo: !!user, conectando, moviendo: moviendoMundo, sel: selMundo };
   /** Pinchado pero aún sin arrastrar: candidato a mover (o a ser solo un clic). */
   const agarre = useRef<{ sel: SeleccionMundo; x: number; y: number } | null>(null);
   /** El arrastre está EN MARCHA: al soltar el botón se guarda donde caiga. */
@@ -561,6 +561,73 @@ export default function JuegoVital() {
     agarre.current = { sel, ...punto };
   }, [user]);
 
+  // --- Soltar un objeto SOBRE un edificio lo guarda EN ese proyecto ---------
+  // (petición de Eugenio, 2026-08-18): arrastras un vídeo, una nota o un PDF
+  // hasta un edificio y se convierte en una TARJETA de ese proyecto — aparece
+  // en su tablero y flotando dentro del edificio. El objeto sale del mapa
+  // (se archiva): se ha mudado adentro, no se ha copiado.
+
+  /** Los tipos que son conocimiento y pueden mudarse a un proyecto. */
+  const MUDABLES = useMemo(() => new Set(['nota', 'imagen', 'documento', 'enlace', 'video', 'musica', 'lienzo', 'mapa']), []);
+
+  /** ¿Qué edificio de proyecto hay en este punto del suelo? Mira los del
+   *  distrito y también los construidos desde el juego (agentes). */
+  const proyectoEnPunto = useCallback((px: number, pz: number): ProyectoJuego | null => {
+    const R = RADIO_EDIFICIO + 0.8;
+    const lista = proyectosRef.current;
+    for (let i = 0; i < Math.min(lista.length, 12); i++) {
+      const pos = posicionProyecto(i);
+      if (Math.hypot(px - pos.x, pz - pos.z) < R) return lista[i];
+    }
+    for (const a of agentesRef.current) {
+      if (a.tipo === 'proyecto' && a.proyecto_id && Math.hypot(px - a.x, pz - a.z) < R) {
+        const p = lista.find(x => x.id === a.proyecto_id);
+        if (p) return p;
+      }
+    }
+    return null;
+  }, []);
+
+  const guardarEnProyecto = useCallback(async (itemId: string, p: ProyectoJuego) => {
+    const it = mundoItemsRef.current.find(x => x.id === itemId);
+    if (!it) return;
+    const generico = ({ imagen: 'Imagen', documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || 'Elemento';
+    const titulo = it.tipo === 'nota'
+      ? ((it.texto || '').split('\n')[0].slice(0, 60) || 'Nota')
+      : nombreLimpio(it.nombre, generico);
+    // La tarjeta lleva el contenido en bloques: la habitación del edificio
+    // pinta `imagen` como foto flotante y `texto` como lámina.
+    const bloques: Array<{ tipo: string; texto?: string; url?: string; pie?: string }> = [];
+    if (it.tipo === 'nota' && it.texto) bloques.push({ tipo: 'texto', texto: it.texto });
+    if (it.tipo === 'imagen' && it.url) bloques.push({ tipo: 'imagen', url: it.url, pie: titulo });
+    if (it.tipo === 'video' && it.url) {
+      const vid = it.url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1];
+      if (vid) bloques.push({ tipo: 'imagen', url: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`, pie: titulo });
+    }
+    if (it.tipo !== 'nota' && it.tipo !== 'imagen' && it.url) bloques.push({ tipo: 'texto', texto: it.url });
+    const grupo = p.grupos?.find(g => g.id === 'contenido')?.id || p.grupos?.[0]?.id || 'contenido';
+    const r = await fetch('/api/roadmap', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: p.id, grupo, titulo, resumen: it.tipo !== 'nota' ? it.url : null, bloques }),
+    }).catch(() => null);
+    if (!r?.ok) {
+      const j = await r?.json().catch(() => null);
+      avisar(j?.error || `No se ha podido guardar en «${p.titulo}».`);
+      return;
+    }
+    await fetch(`/api/juego/mundo/${itemId}/archivar`, { method: 'POST', credentials: 'include' }).catch(() => null);
+    setMundoItems(prev => prev.filter(x => x.id !== itemId));
+    setSelMundo(null);
+    avisar(`Guardado en «${p.titulo}»: está en su tablero y dentro del edificio.`);
+  }, []);
+  const guardarEnProyectoRef = useRef(guardarEnProyecto);
+  guardarEnProyectoRef.current = guardarEnProyecto;
+  const proyectoEnPuntoRef = useRef(proyectoEnPunto);
+  proyectoEnPuntoRef.current = proyectoEnPunto;
+  const mudablesRef = useRef(MUDABLES);
+  mudablesRef.current = MUDABLES;
+
   useEffect(() => {
     const mover = (e: PointerEvent) => {
       const a = agarre.current;
@@ -579,9 +646,18 @@ export default function JuegoVital() {
         const sel = editorRef.current.sel;
         const p = movilRef.current;
         if (sel && p) {
-          if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
-          else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
-          setSelMundo({ ...sel, x: p.x, z: p.z });
+          // Soltarlo SOBRE un edificio de proyecto = guardarlo EN ese proyecto
+          // (solo el conocimiento: una roca no es una tarjeta).
+          const proy = sel.clase === 'item' && mudablesRef.current.has(sel.tipo)
+            ? proyectoEnPuntoRef.current(p.x, p.z)
+            : null;
+          if (proy) {
+            guardarEnProyectoRef.current(sel.id, proy);
+          } else {
+            if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
+            else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
+            setSelMundo({ ...sel, x: p.x, z: p.z });
+          }
         }
         setMoviendoMundo(false);
         movilRef.current = null;
@@ -651,6 +727,11 @@ export default function JuegoVital() {
     setMoviendoMundo(false);
     movilRef.current = null;
     if (!sel) return;
+    // También aquí (modo Mover): soltarlo sobre un edificio = guardarlo dentro.
+    if (sel.clase === 'item' && mudablesRef.current.has(sel.tipo)) {
+      const proy = proyectoEnPuntoRef.current(p.x, p.z);
+      if (proy) { guardarEnProyectoRef.current(sel.id, proy); return; }
+    }
     if (sel.clase === 'item') guardarItem(sel.id, { x: p.x, z: p.z });
     else guardarOverride(sel.id, { x: p.x, z: p.z, eliminado: false });
     setSelMundo({ ...sel, x: p.x, z: p.z });
@@ -1306,6 +1387,14 @@ export default function JuegoVital() {
           interior={interior}
           onEntrarProyecto={(p) => {
             const ed = editorRef.current;
+            // Moviendo un objeto de conocimiento: pulsar el edificio es
+            // soltarlo DENTRO — se guarda en ese proyecto (petición de Eugenio).
+            if (ed.moviendo && ed.sel?.clase === 'item' && mudablesRef.current.has(ed.sel.tipo)) {
+              guardarEnProyectoRef.current(ed.sel.id, p);
+              setMoviendoMundo(false);
+              movilRef.current = null;
+              return;
+            }
             // Conectando un hilo: el edificio del proyecto es el destino.
             if (ed.conectando && ed.sel?.clase === 'item') {
               const origen = mundoItems.find(it => it.id === ed.sel!.id);
@@ -1337,7 +1426,18 @@ export default function JuegoVital() {
             // ABRE por dentro, como los del distrito. El chat queda en la (E).
             if (a.tipo === 'proyecto' && a.proyecto_id) {
               const p = proyectos.find(x => x.id === a.proyecto_id);
-              if (p) { entrarEnProyecto(p); return; }
+              if (p) {
+                // Moviendo un objeto de conocimiento: pulsar el edificio es
+                // soltarlo DENTRO, igual que en los edificios del distrito.
+                if (ed.moviendo && ed.sel?.clase === 'item' && mudablesRef.current.has(ed.sel.tipo)) {
+                  guardarEnProyectoRef.current(ed.sel.id, p);
+                  setMoviendoMundo(false);
+                  movilRef.current = null;
+                  return;
+                }
+                entrarEnProyecto(p);
+                return;
+              }
             }
             setFichaAgente(a); hablarCon(a);
           }}
