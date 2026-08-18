@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
 import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles';
 import { Camper } from './Camper';
+import { SenalDePortal } from './Senales';
 import { Modelo, CASAS } from './Modelos';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
 // el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
@@ -61,9 +62,21 @@ function Editable({ pieza, onPulsar, onAgarrar, children }: {
       }}
     >
       {children}
+      {/* Una pieza convertida en PORTAL conserva su forma: el nombre en
+          verde y el aro son la única señal (aclaración de Eugenio). */}
+      {pieza.portalProyectoId && (
+        <SenalDePortal y={ALTO_SENAL[pieza.tipo] ?? 4.2} titulo={pieza.portalTitulo || ETIQUETAS[pieza.tipo] || 'Portal'} />
+      )}
     </group>
   );
 }
+
+/** Dónde flota el rótulo de portal de cada tipo de pieza: por encima de su
+ *  tejado, no dentro de él. */
+const ALTO_SENAL: Record<string, number> = {
+  casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6,
+  puesto: 3.6, pozo: 3.2, carro: 2.8, arbol: 6.2,
+};
 
 /** El aspecto de una pieza del pueblo, sin posición: lo usan el ensamblado y
  *  el FANTASMA que sigue al ratón mientras la arrastras. */

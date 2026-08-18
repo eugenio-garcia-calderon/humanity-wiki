@@ -82,6 +82,7 @@ export function posicionProyecto(i: number): { x: number; z: number } {
 export function posicionesProyectos(
   proyectos: Array<{ id: string }>,
   overrides: Array<{ seed_id: string; eliminado?: boolean; x: number | null; z: number | null; modelo?: string | null }>,
+  ocultos?: Set<string>,
 ): Array<{ x: number; z: number; portada: string | null; eliminado: boolean }> {
   const ov = new Map(overrides.map(o => [o.seed_id, o]));
   return proyectos.slice(0, 12).map((p, i) => {
@@ -92,7 +93,14 @@ export function posicionesProyectos(
     // `eliminado` = el jugador quitó el portal del mapa (el proyecto sigue
     // existiendo en la plataforma); las posiciones se calculan por índice
     // ANTES de filtrar para que quitar uno no recoloque a los demás.
-    return { ...base, portada: o?.modelo || null, eliminado: !!o?.eliminado };
+    // `ocultos` = proyectos ya representados por OTRO portal del mundo (un
+    // objeto, una pieza o una persona convertidos): sin esto saldrían dos
+    // puertas al mismo mapa, la suya y la espiral verde del distrito.
+    return {
+      ...base,
+      portada: o?.modelo || null,
+      eliminado: !!o?.eliminado || !!ocultos?.has(p.id),
+    };
   });
 }
 
@@ -123,6 +131,11 @@ export interface PiezaAldea {
   escala?: number;
   pino?: boolean;
   modelo?: number;
+  /** La pieza es un PORTAL sin perder su forma: lleva al mapa de este
+   *  proyecto (viaja en el retoque; lo aplica Escena al ensamblar). */
+  portalProyectoId?: string | null;
+  /** El nombre del mapa, para el rótulo flotante (lo resuelve Escena). */
+  portalTitulo?: string;
 }
 
 /** Bancos, farolas, puestos, pozo y carro de la plaza (antes en Detalles.tsx). */

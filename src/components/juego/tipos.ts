@@ -116,6 +116,9 @@ export interface ItemMundo {
   /** Si está puesto, el objeto vive en la PLAZA de ese proyecto, no en la
    *  aldea (2026-08-18: los portales llevan a un mapa propio por proyecto). */
   proyecto_id?: string | null;
+  /** Si está puesto, el objeto ES un portal SIN perder su forma (aclaración
+   *  de Eugenio): atravesarlo te lleva al mapa de ese proyecto. */
+  portal_proyecto_id?: string | null;
 }
 
 /** Las relaciones de un hilo: las MISMAS de los grafos de conocimiento, con
@@ -166,6 +169,8 @@ export interface OverrideMundo {
   z: number | null;
   rot: number | null;
   modelo: string | null;
+  /** La pieza es un portal con su forma de siempre: lleva a este proyecto. */
+  portal_proyecto_id?: string | null;
 }
 
 /** Lo que el jugador tiene seleccionado en modo edición. */

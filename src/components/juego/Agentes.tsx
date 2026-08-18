@@ -11,7 +11,7 @@ import { Text, Billboard } from '@react-three/drei';
 import type { Agente, Medidas } from './tipos';
 import { PALETA } from './paleta';
 import { Persona3D, cuerpoDe } from './Modelos';
-import { Halo, Interactivo, Rotulo } from './Senales';
+import { Halo, Interactivo, Rotulo, SenalDePortal } from './Senales';
 import { PortalDeProyecto } from './EdificiosProyectos';
 
 function Persona({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) {
@@ -30,6 +30,9 @@ function Persona({ a, onHablar }: { a: Agente; onHablar: (a: Agente) => void }) 
   return (
     <group position={[a.x, 0, a.z]}>
       <Halo y={3.4} color={PALETA.robotLuz} radio={0.75} />
+      {/* Una persona convertida en PORTAL sigue siendo un muñeco: solo lo
+          delatan su nombre en verde y el aro (aclaración de Eugenio). */}
+      {a.proyecto_id && <SenalDePortal y={4.3} titulo={a.nombre} />}
       <Interactivo onPulsar={() => onHablar(a)}>
         {(resaltado) => (
           <group>

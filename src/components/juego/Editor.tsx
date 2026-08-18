@@ -24,7 +24,7 @@ import { PALETA } from './paleta';
 import { Modelo, CASAS } from './Modelos';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
 import { RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
-import { Rotulo } from './Senales';
+import { Rotulo, SenalDePortal } from './Senales';
 
 const ORO = '#f6c667';
 const POSTIT = '#fbe28a';
@@ -560,10 +560,18 @@ function ItemPulsable({ item, fase, onClick, onAgarrar }: {
       {...hover}
     >
       <ItemVisual item={item} fase={fase} />
+      {/* Un objeto convertido en PORTAL conserva su forma: solo lo delatan
+          su nombre flotando en verde y el aro de luz (aclaración de Eugenio). */}
+      {item.portal_proyecto_id && (
+        <SenalDePortal
+          y={item.tipo === 'prop' ? (item.modelo === 'casa' ? 8.6 : 5.6) : 4.6}
+          titulo={nombreDe(item)}
+        />
+      )}
       <Rotulo
         y={item.tipo === 'prop' ? 3.2 : 4.1}
         texto={nombreDe(item)}
-        pie="Pulsa para abrir · arrastra para mover"
+        pie={item.portal_proyecto_id ? 'Atraviésalo para entrar en su mapa' : 'Pulsa para abrir · arrastra para mover'}
         color={ORO}
         resaltado={resaltado}
       />
