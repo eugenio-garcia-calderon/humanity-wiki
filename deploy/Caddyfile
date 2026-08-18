@@ -3,7 +3,17 @@
 
 humanity.wiki {
 	encode zstd gzip
-	reverse_proxy app:3000
+
+	# Durante un despliegue el contenedor `app` se sustituye y hay unos segundos
+	# en los que no acepta conexiones. Sin esto, Caddy devolvía un error al
+	# instante y el móvil enseñaba «No se puede abrir esta página» (reportado por
+	# Eugenio el 2026-08-18). Con `lb_try_duration`, la petición ESPERA hasta 20 s
+	# reintentando: el usuario ve una carga lenta en vez de un error.
+	reverse_proxy app:3000 {
+		lb_try_duration 20s
+		lb_try_interval 500ms
+		fail_duration 0
+	}
 
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
