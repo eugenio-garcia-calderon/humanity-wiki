@@ -118,7 +118,8 @@ export function PropMundo({ modelo, semilla }: { modelo: string; semilla: string
     case 'casa': {
       let h = 0;
       for (let i = 0; i < semilla.length; i++) h = (h * 31 + semilla.charCodeAt(i)) >>> 0;
-      return <Modelo nombre={CASAS[h % CASAS.length]} escala={3.2} />;
+      // Misma escala que las casas de la aldea (Aldea.tsx): 6,4 ≈ 5,3 m de alto.
+      return <Modelo nombre={CASAS[h % CASAS.length]} escala={6.4} />;
     }
     case 'banco': return <Banco x={0} z={0} rot={0} />;
     case 'farola': return <Farola x={0} z={0} />;

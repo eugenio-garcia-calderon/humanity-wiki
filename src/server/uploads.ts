@@ -113,10 +113,15 @@ export function registerUploadRoutes(app: Express, _db: any) {
     dotfiles: 'deny',
     setHeaders: (res, ruta) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'");
-      // Solo las imágenes de verdad se pintan en la página. Un PDF, un SVG o
-      // un ZIP se descargan: así nada de lo subido se ejecuta en el dominio.
       const ext = path.extname(ruta).slice(1).toLowerCase();
+      // El visor de PDF de Chrome se queda en NEGRO si la respuesta trae una
+      // CSP con default-src 'none' (bloquea el embed interno del visor), así
+      // que el PDF va sin CSP: no es HTML y el visor corre aislado.
+      if (ext !== 'pdf') {
+        res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'");
+      }
+      // Solo las imágenes de verdad se pintan en la página. Un SVG o un ZIP
+      // se descargan: así nada de lo subido se ejecuta en el dominio.
       if (!EN_LINEA.has(ext)) res.setHeader('Content-Disposition', 'attachment');
     },
   }));

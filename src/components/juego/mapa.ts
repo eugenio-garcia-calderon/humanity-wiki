@@ -201,7 +201,8 @@ export function piezasAldea(): PiezaAldea[] {
   if (cachePiezas) return cachePiezas;
   const lista: PiezaAldea[] = [];
   casasAldea().forEach((c, i) =>
-    lista.push({ seed_id: `casa:${i}`, tipo: 'casa', x: c.x, z: c.z, rot: c.rot, radio: 4.4, modelo: c.modelo }));
+    // radio 7: la casa a escala 6,4 ocupa ~10×10 m de planta.
+    lista.push({ seed_id: `casa:${i}`, tipo: 'casa', x: c.x, z: c.z, rot: c.rot, radio: 7, modelo: c.modelo }));
   NAVES.forEach((nv, i) =>
     lista.push({ seed_id: `nave:${i}`, tipo: 'nave', x: nv.x, z: nv.z, rot: 0, radio: 8.6 }));
   lista.push({ seed_id: 'fuente:0', tipo: 'fuente', x: 0, z: 0, rot: 0, radio: 2.9 });
@@ -221,7 +222,7 @@ export function piezasAldea(): PiezaAldea[] {
 /** Radio de choque de un prop creado por el jugador, según su tipo. */
 export function radioProp(modelo: string | null | undefined): number {
   switch (modelo) {
-    case 'casa': return 4.4;
+    case 'casa': return 7;
     case 'arbol': case 'pino': return 1.0;
     case 'farola': return 0.5;
     case 'banco': return 1.2;
