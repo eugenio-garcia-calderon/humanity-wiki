@@ -351,3 +351,33 @@ walking your real life was the thing to validate first.
 day 1; landscape-only play on phones; photo→3D as library-match now, paid generation later;
 person avatars ship only with the consent safeguards written in `10_JUEGO_VITAL.md`; no
 unofficial WhatsApp bridges (ban risk on his personal number) — `wa.me` deep links in F3.
+
+---
+
+## 2026-08-18 — Las migraciones las aplica el despliegue, no una persona
+
+**Decisión.** `deploy/migrate.sh` corre en cada despliegue, ANTES de reconstruir la app.
+Lleva su propio registro (`schema_migrations`, una fila por fichero de `drizzle/`), aplica
+solo lo pendiente, en orden y cada fichero dentro de una transacción. Si algo falla, el
+script sale con error, `script_stop: true` aborta el job y **el código nuevo no llega a
+arrancar**: la app vieja sigue en pie con el esquema que ya tenía.
+
+**Por qué.** Hasta hoy se aplicaban a mano por SSH después del despliegue. Ese hueco ya
+mordió: el builder del Juego Vital estuvo listo para fusionar con su tabla sin crear en
+producción, y detectarlo dependió de acordarse. Un paso manual que hay que recordar en
+cada migración no es un proceso, es una apuesta.
+
+**Línea base.** La primera ejecución marca como aplicadas todas las migraciones hasta
+`0028_presentaciones.sql` — el estado real de producción, confirmado en el changelog
+(0025/0026 el 2026-08-07; 0027 y 0028 después). Solo se hace si la tabla de registro
+acaba de nacer Y la base ya tiene esquema (`users` existe): en una base nueva y vacía no
+se marca nada y se aplica todo desde `0000`.
+
+**Alternativa descartada.** `drizzle-kit migrate` en el arranque de la app: acopla el
+esquema al ciclo de vida del contenedor (dos réplicas migrarían a la vez) y este proyecto
+ya tiene prohibido `drizzle-kit push` por colgarse en shells no interactivas.
+
+**Coste.** Las migraciones tienen que ser correctas al fusionar, no "arreglables luego a
+mano". A cambio, desplegar deja de tener un paso que solo existe en la cabeza de alguien.
+Verificado antes de tocar producción ejecutando la misma lógica contra la base local: 29
+marcadas como línea base, 0029 aplicada, y una segunda pasada sin cambios.

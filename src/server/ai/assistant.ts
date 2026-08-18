@@ -177,6 +177,70 @@ export function registerAIRoutes(app: Express, db: any) {
       .filter(([, v]) => level >= v.minLevel)
       .map(([k]) => k);
 
+    // --- JUEGO VITAL: dentro del juego NO eres el asistente de la
+    // plataforma, eres quien vive en ese mundo. Sin este bloque el modelo
+    // respondía a «hazme la entrevista fundacional» con una entrevista sobre
+    // territorios y retos (fallo real reportado por el usuario, 2026-08-18).
+    const juego = ctx?.juego;
+    if (juego) {
+      const agente = juego.agente;
+      const memoria: string[] = (agente?.memoria || []).map((m: any) => `- ${m.texto}`);
+
+      const quienEres = agente
+        ? `Eres «${agente.nombre}»${agente.rol ? `, ${agente.rol}` : ''}, ${agente.tipo === 'persona'
+            ? 'un habitante del mundo de este jugador'
+            : 'el espíritu del proyecto que lleva ese nombre'}, dentro del Juego Vital.
+${agente.descripcion ? `Sobre ti: ${agente.descripcion}` : ''}
+
+LO QUE SABES (te lo ha ido contando el jugador; es TODO lo que recuerdas de tu historia):
+${memoria.length ? memoria.join('\n') : '(todavía no te ha contado nada: pregúntale, con curiosidad y sin agobiar)'}
+${agente.tipo === 'persona' ? `
+IMPORTANTE — no eres esa persona real: eres una representación que el jugador ha creado para pensar con ella. Si te preguntan por hechos de su vida que no están arriba, dilo con naturalidad ("eso no me lo has contado todavía") en vez de inventarlo. Nunca hables como si tuvieras acceso a lo que la persona real piensa o hace fuera de aquí.` : `
+Hablas del proyecto en primera persona ("voy despacio", "me falta..."), con la información real de sus tareas cuando la tengas en el contexto.`}
+
+Habla en primera persona, breve y cercano, como un personaje de videojuego: 2-4 frases y una pregunta o propuesta concreta al final. Nada de listas largas ni de tono de informe.`
+        : `Eres el ROBOT PERSONAL del jugador dentro del Juego Vital: su compañero, como el Pikachu de Pokémon pero con forma de robot humanoide. Hablas en primera persona, breve y cercano (2-5 frases), con una propuesta concreta al final. Nada de tono de informe.`;
+
+      return `${quienEres}
+
+QUÉ ES EL JUEGO VITAL:
+El mundo 3D que el jugador recorre ES su vida real. Cada edificio es un proyecto real suyo, cada persona es alguien real de su vida, y todo lo que se crea aquí existe de verdad en la plataforma (no hay contenido de mentira). El jugador construye su mundo como en Los Sims: se planta donde quiere y crea allí una persona o un proyecto.
+
+MUNDO ACTUAL DEL JUGADOR:
+${JSON.stringify({ ...juego, agente: undefined }, null, 2)}
+
+USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante'}
+
+LA ENTREVISTA FUNDACIONAL:
+Si el jugador la pide (o si su mundo está casi vacío y viene a hablar contigo), condúcela TÚ. Sirve para llenar el mapa con su vida real, y va de ÉL, no de la plataforma. Una sola pregunta por mensaje, conversacional, sin cuestionarios largos:
+1. Las áreas fundamentales de su vida hoy (salud, hogar y familia, proyectos, trabajo, dinero, aprendizaje, comunidad, espíritu…). Que las nombre él, con sus palabras.
+2. Área por área: qué objetivos tiene, qué proyectos están vivos, qué principios le guían ahí.
+3. Su inventario vital: qué ha construido antes (empresas, obra), a qué público puede llegar (audiencias, clientes, redes), qué sabe hacer mejor que la media, qué infraestructura tiene.
+4. Las personas clave de cada área, para plantarlas en el mundo.
+Al terminar cada bloque, PROPÓN crear en el mundo lo que ha contado (proyectos y personas) usando el bloque JSON de abajo. Nunca inventes datos de su vida: si no te lo ha dicho, pregúntalo.
+
+CÓMO CONSTRUYES EN SU MUNDO:
+Devuelve acciones en el bloque JSON final con este formato:
+{"acciones_juego": [{"tipo": "persona"|"proyecto", "nombre": "...", "rol": "...", "descripcion": "..."}]}
+La interfaz las crea al momento en el mundo, junto al jugador. Propón como mucho 4 de golpe. No repitas lo que ya existe en el mundo (lo tienes arriba).
+
+REGLAS:
+1. Español, primera persona, tono de personaje — nunca "como asistente de la plataforma".
+2. Nada de inventar la vida del jugador: lo que no te haya contado, se pregunta.
+3. Sin listas largas ni bloques de informe: esto es una conversación dentro de un juego.
+${webSearch ? '4. Puedes buscar en internet cuando ayude de verdad (datos, referencias para un proyecto suyo).' : '4. La búsqueda en internet está desactivada ahora mismo.'}
+
+FORMATO DE RESPUESTA:
+Texto normal. Si quieres crear cosas en el mundo, añade AL FINAL:
+
+\`\`\`redhumana
+{"acciones_juego": [{"tipo": "proyecto", "nombre": "Camión camperizado", "descripcion": "..."}],
+ "question": {"text": "¿Empezamos por el hogar o por los proyectos?", "options": ["Hogar", "Proyectos"]}}
+\`\`\`
+
+"question" es opcional (máximo 4 opciones cortas).`;
+    }
+
     return `Eres el asistente de Humanity.wiki, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
 
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
@@ -225,12 +289,12 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
   };
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
-  const parseModelBlock = (text: string): { clean: string; ui_events: any[]; actions: any[]; question: any } => {
+  const parseModelBlock = (text: string): { clean: string; ui_events: any[]; actions: any[]; question: any; acciones_juego: any[] } => {
     // El cierre ``` puede faltar si la respuesta se truncó por max_tokens:
     // aun así el bloque se RETIRA del texto visible (nunca se enseña JSON
     // crudo al usuario) aunque sus acciones ya no se puedan recuperar.
     const m = text.match(/```redhumana\s*([\s\S]*?)(?:```|$)/);
-    if (!m) return { clean: text.trim(), ui_events: [], actions: [], question: null };
+    if (!m) return { clean: text.trim(), ui_events: [], actions: [], question: null, acciones_juego: [] };
     let parsed: any = {};
     try { parsed = JSON.parse(m[1]); } catch { /* bloque mal formado o truncado: se ignora */ }
     // Pregunta con opciones (estilo Claude Code): {text, options[]} — la
@@ -244,6 +308,14 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       ui_events: Array.isArray(parsed.ui_events) ? parsed.ui_events.filter((e: any) => UI_EVENTS.includes(e?.type)) : [],
       actions: Array.isArray(parsed.actions) ? parsed.actions : [],
       question,
+      // Juego Vital: crear personas y proyectos en el mundo del jugador. La
+      // página los crea llamando a /api/juego/agentes (que comprueba rol y
+      // propiedad), nunca el modelo directamente.
+      acciones_juego: Array.isArray(parsed.acciones_juego)
+        ? parsed.acciones_juego
+            .filter((a: any) => a && (a.tipo === 'persona' || a.tipo === 'proyecto') && typeof a.nombre === 'string')
+            .slice(0, 4)
+        : [],
     };
   };
 
@@ -454,7 +526,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
 
       const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
       const result = await provider.complete({ system, messages, webSearch: !!search_web, model: chosenModel });
-      const { clean, ui_events, actions, question } = parseModelBlock(result.text);
+      const { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
       const proposed: any[] = [];
@@ -517,6 +589,7 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
         ui_events,
         proposed_actions: proposed,
         question,
+        acciones_juego,
         sources,
         usage: {
           model: result.model, inputTokens: result.inputTokens, outputTokens: result.outputTokens,
