@@ -71,6 +71,21 @@ export default function JuegoVital() {
   const [vehiculo, setVehiculo] = useState<Vehiculo>('pie');
   const alturaVuelo = useRef(0);
   const [alturaVisible, setAlturaVisible] = useState(0);
+  // Subir/bajar tiene DOS mandos que se suman: el teclado (mantener pulsado) y
+  // los botones de pantalla (pulsar y se queda). En el móvil no se puede estar
+  // sujetando un botón mientras se conduce con el otro pulgar, así que ahí lo
+  // natural es que quede fijado hasta volver a pulsarlo.
+  const mandoY = useRef({ teclado: 0, boton: 0 });
+  const [subiendo, setSubiendo] = useState(0);
+  const recalcularY = useCallback(() => {
+    const m = mandoY.current;
+    entrada.current.y = Math.max(-1, Math.min(1, m.teclado + m.boton));
+  }, []);
+  const fijarSubida = useCallback((v: number) => {
+    mandoY.current.boton = mandoY.current.boton === v ? 0 : v;
+    setSubiendo(mandoY.current.boton);
+    recalcularY();
+  }, [recalcularY]);
   const [editandoAspecto, setEditandoAspecto] = useState<'jugador' | Agente | null>(null);
   const [aspectoBorrador, setAspectoBorrador] = useState<Aspecto>({});
   const [guardandoAspecto, setGuardandoAspecto] = useState(false);
@@ -337,27 +352,30 @@ export default function JuegoVital() {
     setVehiculo(actual => {
       if (actual === v) {
         if (actual === 'aptera' && alturaVuelo.current > 0.3) {
-          entrada.current.y = -1;   // baja sola; al tocar suelo se desmonta
+          fijarSubida(-1);          // baja sola; al tocar suelo se desmonta
           return actual;
         }
         return 'pie';
       }
       return v;
     });
-  }, []);
+  }, [fijarSubida]);
 
   // El planeador toca suelo: se desmonta solo y deja de descender.
   useEffect(() => {
-    if (vehiculo !== 'aptera') { setAlturaVisible(0); return; }
+    if (vehiculo !== 'aptera') {
+      setAlturaVisible(0);
+      mandoY.current.boton = 0;
+      setSubiendo(0);
+      recalcularY();
+      return;
+    }
     const t = setInterval(() => {
       setAlturaVisible(Math.round(alturaVuelo.current));
-      if (entrada.current.y === -1 && alturaVuelo.current <= 0.01) {
-        entrada.current.y = 0;
-        setVehiculo('pie');
-      }
+      if (entrada.current.y < 0 && alturaVuelo.current <= 0.01) setVehiculo('pie');
     }, 120);
     return () => clearInterval(t);
-  }, [vehiculo]);
+  }, [vehiculo, recalcularY]);
 
   const interactuar = useCallback(() => {
     const c = cercaniaRef.current;
@@ -392,7 +410,8 @@ export default function JuegoVital() {
     const aplicar = () => {
       entrada.current.x = +(teclas.has('d') || teclas.has('arrowright')) - +(teclas.has('a') || teclas.has('arrowleft'));
       entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
-      entrada.current.y = +teclas.has(' ') - +teclas.has('shift');
+      mandoY.current.teclado = +teclas.has(' ') - +teclas.has('shift');
+      recalcularY();
     };
     const abajo = (e: KeyboardEvent) => {
       if (escribiendo(e)) return;
@@ -619,21 +638,27 @@ export default function JuegoVital() {
           {vehiculo === 'aptera' && (
             <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center gap-1.5">
               <button
-                onPointerDown={() => { entrada.current.y = 1; }}
-                onPointerUp={() => { entrada.current.y = 0; }}
-                onPointerLeave={() => { entrada.current.y = 0; }}
-                title="Subir (barra espaciadora)"
-                className="w-11 h-11 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors touch-none"
+                onClick={() => fijarSubida(1)}
+                title="Subir. Se queda subiendo hasta que lo vuelvas a pulsar (o mantén la barra espaciadora)."
+                className={cn(
+                  'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                  subiendo === 1
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+                )}
               >
                 <ChevronUp className="w-5 h-5" />
               </button>
               <span className="text-[9px] font-black text-slate-400 tabular-nums">{alturaVisible} m</span>
               <button
-                onPointerDown={() => { entrada.current.y = -1; }}
-                onPointerUp={() => { entrada.current.y = 0; }}
-                onPointerLeave={() => { entrada.current.y = 0; }}
-                title="Bajar (Mayúsculas). Al tocar el suelo te bajas."
-                className="w-11 h-11 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors touch-none"
+                onClick={() => fijarSubida(-1)}
+                title="Bajar. Al tocar el suelo te bajas del planeador (o mantén Mayúsculas)."
+                className={cn(
+                  'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                  subiendo === -1
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+                )}
               >
                 <ChevronDown className="w-5 h-5" />
               </button>
