@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import * as THREE from 'three';
+import { cargarPaleta, clasificarMalla, pintarTextura, type Aspecto } from './aspecto';
 
 // IMPORTANTE: los .glb de Kenney NO llevan la textura dentro — apuntan a
 // `Textures/colormap.png` en su misma carpeta. Por eso cada pack vive en su
@@ -56,21 +57,76 @@ export function cuerpoDe(nombre: string): string {
  */
 // El modelo mide 0,67 unidades: a escala 2,6 queda en ~1,75 m, la estatura
 // real de un adulto en un mundo donde 1 unidad = 1 metro (medido, no estimado).
-export function Persona3D({ cuerpo, animacion = 'idle', escala = 2.6 }: {
+export function Persona3D({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
   cuerpo: string;
   animacion?: string;
   escala?: number;
+  /** Piel, pelo, ojos y ropa elegidos. Sin esto, el modelo va como viene. */
+  aspecto?: Aspecto;
 }) {
   const { scene, animations } = useGLTF(`${PERSONAS}/${cuerpo}.glb`);
   const grupo = useRef<THREE.Group>(null);
   const clon = useMemo(() => {
     const c = SkeletonUtils.clone(scene);
     c.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; }
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = true; m.receiveShadow = true;
+      // El material tal y como viene del .glb. Se guarda porque al cambiar de
+      // color hay que repintar SIEMPRE desde el original, no desde el tinte
+      // anterior (si no, cada cambio se acumularía sobre el de antes).
+      m.userData.matBase = m.material;
     });
     return c;
   }, [scene]);
   const { actions } = useAnimations(animations, grupo);
+
+  // --- Aspecto: se repinta la paleta con los colores elegidos, una textura
+  // por malla. El material se clona primero, porque los 10 cuerpos comparten
+  // el mismo por defecto y teñir uno los teñiría todos.
+  // Solo se repinta si hay algún color elegido: `cuerpo` por sí solo no cambia
+  // la textura, y montar dos lienzos de 512×512 por vecino no sale gratis.
+  const clave = aspecto && (aspecto.piel || aspecto.pelo || aspecto.ropa || aspecto.pantalon)
+    ? JSON.stringify(aspecto)
+    : '';
+  useEffect(() => {
+    if (!clave) return;
+    let vivo = true;
+    const creadas: THREE.Texture[] = [];
+    cargarPaleta(`${PERSONAS}/Textures/colormap.png`).then((base) => {
+      if (!vivo) return;
+      clon.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (!m.isMesh) return;
+        const original = m.userData.matBase as THREE.MeshStandardMaterial;
+        const lienzo = pintarTextura(base, clasificarMalla(m, base), aspecto!);
+        const t = new THREE.CanvasTexture(lienzo);
+        const fuente = original?.map;
+        if (fuente) {
+          // CLAVE: la paleta de Kenney son cuadraditos de UN píxel. Con el
+          // filtrado suave y los mipmaps que trae `CanvasTexture` por defecto,
+          // cada cuadradito se mezcla con sus vecinos y el personaje sale a
+          // rayas de colores. Se copia el muestreo del .glb, que es el bueno.
+          t.flipY = fuente.flipY;
+          t.wrapS = fuente.wrapS; t.wrapT = fuente.wrapT;
+          t.magFilter = fuente.magFilter; t.minFilter = fuente.minFilter;
+          t.generateMipmaps = fuente.generateMipmaps;
+          t.anisotropy = fuente.anisotropy;
+          t.colorSpace = fuente.colorSpace;
+        } else {
+          t.flipY = false;
+          t.colorSpace = THREE.SRGBColorSpace;
+        }
+        t.needsUpdate = true;
+        const mat = original.clone();
+        mat.map = t;
+        mat.needsUpdate = true;
+        m.material = mat;
+        creadas.push(t);
+      });
+    }).catch(() => { /* sin paleta, el modelo se ve como viene */ });
+    return () => { vivo = false; creadas.forEach(t => t.dispose()); };
+  }, [clave, clon, aspecto]);
 
   useEffect(() => {
     const a = actions[animacion];

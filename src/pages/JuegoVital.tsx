@@ -4,13 +4,15 @@ import * as THREE from 'three';
 import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
-  ZoomIn, ZoomOut,
+  ZoomIn, ZoomOut, Palette,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import type { Agente, Cercania, EntradaMando, ProyectoJuego } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
+import EditorAspecto from '../components/juego/EditorAspecto';
+import type { Aspecto } from '../components/juego/aspecto';
 
 // ============================================================================
 // JUEGO VITAL — Fase 1 «Pasear tu vida» + builder tipo Los Sims (2026-08-18).
@@ -35,7 +37,7 @@ const FRASES_ROBOT = [
 ];
 
 export default function JuegoVital() {
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
   const entrada = useRef<EntradaMando>({ x: 0, z: 0 });
   // Posición del jugador, compartida con la escena: es donde se PLANTA lo que
@@ -56,6 +58,12 @@ export default function JuegoVital() {
   // Distancia de la cámara: 1 = por encima del hombro, 6 = media aldea a la vista.
   const zoom = useRef(1);
   const [zoomVisible, setZoomVisible] = useState(1);
+  // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
+  // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
+  const [editandoAspecto, setEditandoAspecto] = useState<'jugador' | Agente | null>(null);
+  const [aspectoBorrador, setAspectoBorrador] = useState<Aspecto>({});
+  const [guardandoAspecto, setGuardandoAspecto] = useState(false);
+  const miAspecto: Aspecto = (user?.uiSettings?.juegoAspecto as Aspecto) || {};
   const ajustarZoom = useCallback((factor: number) => {
     zoom.current = Math.min(6, Math.max(0.6, zoom.current * factor));
     setZoomVisible(zoom.current);
@@ -230,6 +238,35 @@ export default function JuegoVital() {
   }, [hablarCon]);
 
   /**
+   * Guarda el aspecto donde corresponda: tus ajustes de usuario si eres tú, o
+   * la `apariencia` de esa persona si estás editando a alguien de tu mundo.
+   */
+  const guardarAspecto = async () => {
+    if (!editandoAspecto) return;
+    setGuardandoAspecto(true);
+    try {
+      if (editandoAspecto === 'jugador') {
+        await updateUiSettings({ juegoAspecto: aspectoBorrador });
+        avisar('Tu aspecto queda guardado.');
+      } else {
+        const r = await fetch(`/api/juego/agentes/${editandoAspecto.id}`, {
+          method: 'PUT', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apariencia: aspectoBorrador }),
+        });
+        if (!r.ok) { avisar('No se ha podido guardar el aspecto.'); return; }
+        await cargarAgentes();
+        avisar(`${editandoAspecto.nombre} cambia de aspecto.`);
+      }
+      setEditandoAspecto(null);
+    } catch {
+      avisar('Error de red al guardar el aspecto.');
+    } finally {
+      setGuardandoAspecto(false);
+    }
+  };
+
+  /**
    * Chocarte con algo es empezar a tratar con ello: con una persona se abre su
    * chat, con un edificio de proyecto se abre su ficha. Nada se atraviesa.
    */
@@ -346,6 +383,7 @@ export default function JuegoVital() {
           onChoque={alChocar}
           destino={destinoViaje}
           zoom={zoom}
+          aspectoJugador={editandoAspecto === 'jugador' ? aspectoBorrador : miAspecto}
         />
       </Suspense>
 
@@ -424,6 +462,13 @@ export default function JuegoVital() {
             >
               <Building2 className="w-5 h-5" />
             </button>
+            <button
+              onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
+              title="Cambiar tu aspecto: piel, pelo, ojos y ropa"
+              className="w-11 h-11 rounded-xl bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition-colors"
+            >
+              <Palette className="w-5 h-5" />
+            </button>
             <div className="h-px bg-slate-200 mx-1" />
             <button
               onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
@@ -498,6 +543,7 @@ export default function JuegoVital() {
             avisar('Quitado de tu mundo (se puede recuperar).');
           }}
           onAbrirProyecto={(slug) => navigate(`/proyectos/${slug}`)}
+          onEditarAspecto={() => { setAspectoBorrador(fichaAgente.apariencia || {}); setEditandoAspecto(fichaAgente); }}
         />
       )}
 
@@ -523,6 +569,18 @@ export default function JuegoVital() {
             <Button onClick={() => navigate(`/proyectos/${panel.slug}`)} className="w-full mt-3">Abrir el proyecto</Button>
           </Card>
         </div>
+      )}
+
+      {/* Editor de aspecto: el tuyo o el de una persona de tu mundo */}
+      {editandoAspecto && (
+        <EditorAspecto
+          titulo={editandoAspecto === 'jugador' ? 'Tu aspecto' : `Aspecto de ${editandoAspecto.nombre}`}
+          aspecto={aspectoBorrador}
+          onCambiar={setAspectoBorrador}
+          onCerrar={() => setEditandoAspecto(null)}
+          onGuardar={guardarAspecto}
+          guardando={guardandoAspecto}
+        />
       )}
 
       {/* Formulario de construcción */}
@@ -694,12 +752,13 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
 // ---------------------------------------------------------------------------
 // Ficha del agente: su memoria, meterle info, y hablar con él.
 // ---------------------------------------------------------------------------
-function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto }: {
+function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto, onEditarAspecto }: {
   agente: Agente;
   onCerrar: () => void;
   onGuardado: () => Promise<void>;
   onArchivar: () => Promise<void>;
   onAbrirProyecto: (slug: string) => void;
+  onEditarAspecto: () => void;
 }) {
   const [nota, setNota] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -897,6 +956,11 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5 inline" /> Hablar
             </Button>
+            {agente.tipo === 'persona' && (
+              <Button variant="outline" onClick={onEditarAspecto} title="Cambiar su aspecto">
+                <Palette className="w-3.5 h-3.5" />
+              </Button>
+            )}
             {agente.proyecto_slug && (
               <Button variant="outline" onClick={() => onAbrirProyecto(agente.proyecto_slug!)}>
                 <FolderKanban className="w-3.5 h-3.5" />

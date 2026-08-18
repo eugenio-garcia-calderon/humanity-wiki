@@ -6,6 +6,7 @@
 import { useMemo, useRef } from 'react';
 import type { Obstaculo } from './Personaje';
 import { posicionProyecto, RADIO_EDIFICIO } from './mapa';
+import type { Aspecto } from './aspecto';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
@@ -48,7 +49,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom }: {
+export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador }: {
   entrada: React.MutableRefObject<EntradaMando>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
@@ -58,6 +59,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
   onChoque: (id: string) => void;
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
   zoom: React.MutableRefObject<number>;
+  aspectoJugador?: Aspecto;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
@@ -127,6 +129,7 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
         onChoque={onChoque}
         destino={destino}
         zoom={zoom}
+        aspecto={aspectoJugador}
       />
       <Coordinador medidas={medidas} onCercania={onCercania} />
     </Canvas>

@@ -8,6 +8,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { EntradaMando } from './tipos';
 import { Persona3D } from './Modelos';
+import type { Aspecto } from './aspecto';
 
 const VEL_MAX = 8;           // m/s — brisk walk, the map is 1 km across
 const LIMITE = 530;          // keep the player inside the 118 ha
@@ -19,7 +20,7 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom }: {
+export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto }: {
   entrada: React.MutableRefObject<EntradaMando>;
   jugadorPos: THREE.Vector3;
   luzRef: React.RefObject<THREE.DirectionalLight | null>;
@@ -29,6 +30,8 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, d
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
   /** Cuánto se aleja la cámara: 1 = por encima del hombro, 6 = media aldea. */
   zoom: React.MutableRefObject<number>;
+  /** Tu piel, pelo, ojos, ropa y fenotipo. */
+  aspecto?: Aspecto;
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
@@ -137,7 +140,11 @@ export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque, d
     <group ref={grupo} position={[0, 0, 17]}>
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
-      <Persona3D cuerpo="character-male-a" animacion={andando ? 'walk' : 'idle'} />
+      <Persona3D
+        cuerpo={aspecto?.cuerpo || 'character-male-a'}
+        animacion={andando ? 'walk' : 'idle'}
+        aspecto={aspecto}
+      />
     </group>
   );
 }
