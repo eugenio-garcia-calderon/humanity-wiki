@@ -150,8 +150,9 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
         return <rect key={i} x={x} y={y} width={n.ancho} height={n.fondo} fill="#8fa3ad" />;
       })}
       {casas.map((c, i) => {
-        const [x, y] = aSvg(c.x - 3, c.z - 3);
-        return <rect key={i} x={x} y={y} width={6} height={6} rx={1} fill="#e8d3b4" />;
+        // 10×10: la planta real de la casa a escala 6,4 (un mapa que miente es peor).
+        const [x, y] = aSvg(c.x - 5, c.z - 5);
+        return <rect key={i} x={x} y={y} width={10} height={10} rx={1} fill="#e8d3b4" />;
       })}
       <rect
         {...(() => { const [x, y] = aSvg(DISTRITO.x0, DISTRITO.z0); return { x, y }; })()}

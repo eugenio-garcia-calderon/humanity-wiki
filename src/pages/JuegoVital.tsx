@@ -45,6 +45,8 @@ import { PALETA } from '../components/juego/paleta';
 // ============================================================================
 
 const Escena = lazy(() => import('../components/juego/Escena'));
+// PDF.js pesa: solo se baja la primera vez que se abre un PDF.
+const VisorPdf = lazy(() => import('../components/juego/VisorPdf'));
 
 /** El color del edificio de un proyecto, que es también el de su interior. */
 const PALETA_PROYECTO = PALETA.edificiosProyecto;
@@ -2086,19 +2088,23 @@ export default function JuegoVital() {
                   <audio controls autoPlay src={leyendo.url} className="w-full" />
                 </div>
               )}
-              {/* El visor de PDF de Chrome no arranca dentro de un iframe con
-                  sandbox: para un PDF NUESTRO (mismo dominio, /uploads) el
-                  sandbox se quita — el visor ya corre aislado por su cuenta. */}
-              {esMarco && src && (
+              {/* Un PDF nuestro se pinta con NUESTRO visor (PDF.js): el del
+                  navegador dentro de un iframe salía en negro en Chrome y en
+                  el móvil no existe. El resto de contenidos siguen en iframe. */}
+              {esMarco && src && (esPdfPropio ? (
+                <Suspense fallback={<p className="flex-1 grid place-items-center text-xs text-slate-400">Cargando el documento…</p>}>
+                  <VisorPdf url={src} />
+                </Suspense>
+              ) : (
                 <iframe
                   src={src}
                   title={leyendo.nombre || 'Contenido'}
                   className="flex-1 w-full bg-white"
                   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  sandbox={esPdfPropio ? undefined : 'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation'}
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
                 />
-              )}
-              {esMarco && (
+              ))}
+              {esMarco && !esPdfPropio && (
                 <p className="px-4 py-1.5 text-[10px] text-slate-400 border-t border-slate-100">
                   Si la página se niega a cargar aquí dentro (algunas webs lo bloquean), usa el botón de abrir fuera.
                 </p>

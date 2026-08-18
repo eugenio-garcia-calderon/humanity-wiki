@@ -68,7 +68,9 @@ function Editable({ pieza, onPulsar, onAgarrar, children }: {
 export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?: number }) {
   const s = pieza.escala || 1;
   switch (pieza.tipo) {
-    case 'casa': return <Modelo nombre={CASAS[(pieza.modelo ?? 0) % CASAS.length]} escala={3.2} />;
+    // A 3,2 la casa medía 2,67 m — apenas más alta que el avatar (1,86 m).
+    // A 6,4 queda en ~5,3 m: dos plantas creíbles. Radio de choque en mapa.ts.
+    case 'casa': return <Modelo nombre={CASAS[(pieza.modelo ?? 0) % CASAS.length]} escala={6.4} />;
     case 'nave': return <Nave />;
     case 'fuente': return <Fuente />;
     case 'banco': return <Banco x={0} z={0} rot={0} />;
