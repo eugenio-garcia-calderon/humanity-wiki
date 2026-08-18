@@ -7,7 +7,7 @@ import {
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
   Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
-  Menu, Sprout, Home, Users,
+  Menu, Sprout, Home, Users, Youtube, RefreshCw, Unplug, Play,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -198,6 +198,52 @@ export default function JuegoVital() {
   const posProyecto = useRef<{ x: number; z: number } | null>(null);
   /** Las instrucciones del teclado, comprimidas en el icono ℹ️ (petición de Eugenio). */
   const [ayudaVisible, setAyudaVisible] = useState(false);
+
+  // --- La gran pantalla de YouTube (2026-08-18, petición de Eugenio) ---
+  /** El panel del cine está abierto. */
+  const [pantallaYT, setPantallaYT] = useState(false);
+  /** {configurado, conectado, canal} de GET /api/youtube/estado. */
+  const [ytEstado, setYtEstado] = useState<{ configurado: boolean; conectado: boolean; canal: { titulo: string | null; foto: string | null } | null } | null>(null);
+  /** {relacionados, recientes, proyectos} o {error}. */
+  const [ytRecs, setYtRecs] = useState<any>(null);
+  const [ytCargando, setYtCargando] = useState(false);
+
+  const cargarRecsYT = useCallback(async () => {
+    setYtCargando(true);
+    try {
+      const r = await fetch('/api/youtube/recomendaciones', { credentials: 'include' });
+      setYtRecs(await r.json());
+    } catch { setYtRecs({ error: 'No se pudieron pedir las recomendaciones.' }); }
+    setYtCargando(false);
+  }, []);
+
+  const abrirPantallaYT = useCallback(async () => {
+    setPantallaYT(true);
+    try {
+      const e = await fetch('/api/youtube/estado', { credentials: 'include' }).then(r => r.json());
+      setYtEstado(e);
+      if (e.conectado) cargarRecsYT();
+    } catch { setYtEstado({ configurado: false, conectado: false, canal: null }); }
+  }, [cargarRecsYT]);
+
+  /** El OAuth va en una ventanita; cuando termina, avisa por postMessage. */
+  useEffect(() => {
+    const oir = (ev: MessageEvent) => {
+      if (ev.data === 'youtube:conectado') abrirPantallaYT();
+    };
+    window.addEventListener('message', oir);
+    return () => window.removeEventListener('message', oir);
+  }, [abrirPantallaYT]);
+
+  const conectarYT = useCallback(() => {
+    window.open('/api/youtube/conectar', 'ytoauth', 'width=520,height=680,menubar=no,toolbar=no');
+  }, []);
+
+  const desconectarYT = useCallback(async () => {
+    await fetch('/api/youtube/desconectar', { method: 'POST', credentials: 'include' });
+    setYtRecs(null);
+    abrirPantallaYT();
+  }, [abrirPantallaYT]);
   /** El hilo señalado: su editor deja cambiar relación y texto, como en los grafos. */
   const [selHilo, setSelHilo] = useState<SeleccionHilo | null>(null);
   /** Lo elegido en el MENÚ de crear, esperando a que pulses el suelo. */
@@ -217,7 +263,9 @@ export default function JuegoVital() {
   useEffect(() => { if (!crearEn) setFormCrear(null); }, [crearEn]);
   const movilRef = useRef<{ x: number; z: number } | null>(null);
   const archivoMundoRef = useRef<HTMLInputElement>(null);
-  const subiendoComo = useRef<'imagen' | 'documento'>('imagen');
+  /** Su gemelo para canciones (accept audio): comparte subirAlMundo. */
+  const audioMundoRef = useRef<HTMLInputElement>(null);
+  const subiendoComo = useRef<'imagen' | 'documento' | 'musica'>('imagen');
   // Lo que el teclado y los clics 3D necesitan leer sin re-suscribirse.
   // Sin modo edición: pulsar un objeto abre sus opciones directamente
   // (petición de Eugenio). `activo` solo dice si hay sesión.
@@ -1280,6 +1328,7 @@ export default function JuegoVital() {
           onSuelo={alSuelo}
           onSoltar={alSoltar}
           onAbrirItem={(it) => setLeyendo(it)}
+          onPantalla={abrirPantallaYT}
           movilRef={movilRef}
           proyectos={proyectos}
           agentes={agentes}
@@ -1658,9 +1707,15 @@ export default function JuegoVital() {
                 <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
                   {{ enlace: 'Nuevo link', video: 'Vídeo (YouTube)', musica: 'Música (Spotify o similar)', lienzo: 'Nuevo lienzo', mapa: 'Nuevo mapa' }[formCrear.tipo]}
                 </p>
+                {formCrear.tipo === 'musica' && (
+                  <OpcionesMusica
+                    alSubir={() => { setFormCrear(null); subiendoComo.current = 'musica'; subirDestino.current = 'crear'; audioMundoRef.current?.click(); }}
+                    alElegir={(url, nombre) => { setFormCrear(null); crearItemMundo({ tipo: 'musica', url, nombre }); }}
+                  />
+                )}
                 {(formCrear.tipo === 'enlace' || formCrear.tipo === 'video' || formCrear.tipo === 'musica') && (
                   <input
-                    autoFocus
+                    autoFocus={formCrear.tipo !== 'musica'}
                     value={formCrear.url}
                     onChange={e => setFormCrear({ ...formCrear, url: e.target.value })}
                     onKeyDown={e => { if (e.key === 'Enter') crearDesdeForm(); }}
@@ -1693,14 +1748,136 @@ export default function JuegoVital() {
         className="hidden"
         onChange={e => { subirAlMundo(e.target.files?.[0]); e.target.value = ''; }}
       />
+      <input
+        ref={audioMundoRef}
+        type="file"
+        accept="audio/*,.mp3,.m4a,.ogg,.wav,.aac,.flac"
+        className="hidden"
+        onChange={e => { subirAlMundo(e.target.files?.[0]); e.target.value = ''; }}
+      />
+
+      {/* LA GRAN PANTALLA (petición de Eugenio): conectar tu YouTube y ver
+          vídeos nuevos de tus suscripciones relacionados con tus proyectos.
+          Va en z-40: al pulsar un vídeo se abre la ventana interna (z-50)
+          POR ENCIMA, y al cerrarla vuelves aquí. */}
+      {pantallaYT && (
+        <div data-ui-juego className="absolute inset-0 z-40 flex items-center justify-center px-4 bg-slate-900/50 backdrop-blur-[2px]" onClick={() => setPantallaYT(false)}>
+          <Card className="shadow-2xl w-[92vw] max-w-4xl max-h-[84vh] p-0 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 shrink-0">
+              <p className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-red-600" /> Gran pantalla
+                {ytEstado?.canal?.titulo && (
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 ml-2">
+                    {ytEstado.canal.foto && <img src={ytEstado.canal.foto} className="w-4 h-4 rounded-full" />}
+                    {ytEstado.canal.titulo}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center gap-1">
+                {ytEstado?.conectado && (
+                  <>
+                    <Button variant="ghost" onClick={cargarRecsYT} className="p-1.5 text-[11px]" title="Actualizar">
+                      <RefreshCw className={cn('w-3.5 h-3.5', ytCargando && 'animate-spin')} />
+                    </Button>
+                    <Button variant="ghost" onClick={desconectarYT} className="p-1.5 text-[11px] text-slate-400" title="Desconectar YouTube">
+                      <Unplug className="w-3.5 h-3.5" />
+                    </Button>
+                  </>
+                )}
+                <Button variant="ghost" onClick={() => setPantallaYT(false)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
+              </div>
+            </div>
+            <div className="overflow-y-auto p-4">
+              {!ytEstado ? (
+                <p className="text-xs text-slate-400 text-center py-10">Encendiendo la pantalla…</p>
+              ) : !user ? (
+                <p className="text-xs text-slate-500 text-center py-10">Inicia sesión para conectar tu YouTube.</p>
+              ) : !ytEstado.configurado ? (
+                <div className="text-center py-8 max-w-md mx-auto">
+                  <Youtube className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-700">La conexión con YouTube está construida pero aún no activada.</p>
+                  <p className="text-xs text-slate-500 mt-2">Faltan las claves de Google en el servidor (GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET, con la API de YouTube activada). En cuanto estén, este botón funcionará solo.</p>
+                </div>
+              ) : !ytEstado.conectado ? (
+                <div className="text-center py-8 max-w-md mx-auto">
+                  <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4">
+                    <Youtube className="w-8 h-8 text-red-600" />
+                  </div>
+                  <p className="text-base font-black text-slate-900">Conecta tu YouTube</p>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    La pantalla mirará tus <strong>suscripciones</strong> y te traerá los vídeos nuevos
+                    que tengan que ver con <strong>tus proyectos</strong>. Permiso de solo lectura:
+                    no puede tocar nada de tu cuenta, y puedes desconectarla cuando quieras.
+                  </p>
+                  <Button onClick={conectarYT} className="mt-5 bg-red-600 hover:bg-red-700 text-white">
+                    <Youtube className="w-4 h-4 mr-1.5 inline" /> Conectar mi YouTube
+                  </Button>
+                </div>
+              ) : ytCargando && !ytRecs ? (
+                <p className="text-xs text-slate-400 text-center py-10">Buscando vídeos nuevos en tus suscripciones…</p>
+              ) : ytRecs?.error ? (
+                <div className="text-center py-8">
+                  <p className="text-xs text-slate-500">{ytRecs.error}</p>
+                  <Button onClick={conectarYT} variant="ghost" className="mt-3 text-xs">Reconectar YouTube</Button>
+                </div>
+              ) : ytRecs && (
+                <div className="space-y-5">
+                  {(['relacionados', 'recientes'] as const).map(seccion => {
+                    const lista = ytRecs[seccion] || [];
+                    if (!lista.length) return seccion === 'relacionados' ? (
+                      <p key={seccion} className="text-[11px] text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
+                        Ningún vídeo nuevo casa todavía con tus proyectos ({(ytRecs.proyectos || []).join(', ') || 'sin proyectos'}). Abajo van los últimos de tus suscripciones.
+                      </p>
+                    ) : null;
+                    return (
+                      <div key={seccion}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                          {seccion === 'relacionados' ? '▶ Para tus proyectos' : 'Nuevos de tus suscripciones'}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {lista.map((v: any) => (
+                            <button
+                              key={v.videoId}
+                              onClick={() => setLeyendo({ id: `yt:${v.videoId}`, tipo: 'video', modelo: null, texto: null, url: v.url, nombre: v.titulo, x: 0, z: 0, rot: 0, escala: 1 })}
+                              className="text-left rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all overflow-hidden bg-white group"
+                            >
+                              <div className="relative">
+                                {v.miniatura && <img src={v.miniatura} className="w-full aspect-video object-cover" loading="lazy" />}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/30">
+                                  <Play className="w-8 h-8 text-white drop-shadow" fill="currentColor" />
+                                </div>
+                              </div>
+                              <div className="p-2">
+                                <p className="text-[11px] font-bold text-slate-800 leading-snug line-clamp-2">{v.titulo}</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{v.canal}</p>
+                                {seccion === 'relacionados' && v.relacionadoCon?.length > 0 && (
+                                  <p className="text-[9px] font-bold text-red-500 mt-1 truncate">→ {v.relacionadoCon.join(' · ')}</p>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* La VENTANA INTERNA (petición de Eugenio): lo plantado se abre en una
           pantalla central sin salir del juego — un navegador para los links,
           el reproductor para vídeo y música, el lienzo o el mapa reales de la
           plataforma… Pulsar fuera de la ventana la cierra. */}
       {leyendo && (() => {
-        const esMarco = ['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo)
-          || (leyendo.tipo === 'documento' && !!leyendo.url?.startsWith('/'));
+        // Una canción SUBIDA (archivo propio, no un embed de otra web) se toca
+        // con el reproductor del navegador, no con un iframe.
+        const esAudio = leyendo.tipo === 'musica' && !!leyendo.url
+          && (leyendo.url.startsWith('/uploads/') || /\.(mp3|m4a|ogg|wav|aac|flac)(\?|$)/i.test(leyendo.url));
+        const esMarco = !esAudio && (['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo)
+          || (leyendo.tipo === 'documento' && !!leyendo.url?.startsWith('/')));
         const src = (() => {
           if (!leyendo.url) return null;
           if (leyendo.tipo === 'video') {
@@ -1739,6 +1916,11 @@ export default function JuegoVital() {
                   <Button variant="ghost" onClick={() => setLeyendo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
                 </div>
               </div>
+              {esAudio && leyendo.url && (
+                <div className="mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                  <audio controls autoPlay src={leyendo.url} className="w-full" />
+                </div>
+              )}
               {esMarco && src && (
                 <iframe
                   src={src}
@@ -1914,10 +2096,20 @@ export default function JuegoVital() {
                             </div>
                           ))}
                           {formMenu && catAbierta === cat.id && ['enlace', 'video', 'musica'].includes(formMenu.tipo) && cat.id === 'conocimiento' && (
-                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} />
+                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} opcionesMusica={
+                              <OpcionesMusica
+                                alSubir={() => { setFormMenu(null); subiendoComo.current = 'musica'; subirDestino.current = 'plantar'; audioMundoRef.current?.click(); }}
+                                alElegir={(url, nombre) => { setFormMenu(null); setPlantando({ tipo: 'musica', url, nombre }); }}
+                              />
+                            } />
                           )}
                           {formMenu && catAbierta === cat.id && ['grafo', 'mapa'].includes(formMenu.tipo) && cat.id === 'plataforma' && (
-                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} />
+                            <FormularioMenu formMenu={formMenu} setFormMenu={setFormMenu} confirmar={confirmarFormMenu} opcionesMusica={
+                              <OpcionesMusica
+                                alSubir={() => { setFormMenu(null); subiendoComo.current = 'musica'; subirDestino.current = 'plantar'; audioMundoRef.current?.click(); }}
+                                alElegir={(url, nombre) => { setFormMenu(null); setPlantando({ tipo: 'musica', url, nombre }); }}
+                              />
+                            } />
                           )}
                         </div>
                       )}
@@ -2515,11 +2707,13 @@ function Joystick({ entrada, onAtras }: {
 }
 
 
-/** El mini-formulario del menú lateral: URL y nombre (o solo título). */
-function FormularioMenu({ formMenu, setFormMenu, confirmar }: {
+/** El mini-formulario del menú lateral: URL y nombre (o solo título).
+ *  Para la música, `opcionesMusica` añade subir archivo y elegir de Spotify. */
+function FormularioMenu({ formMenu, setFormMenu, confirmar, opcionesMusica }: {
   formMenu: { tipo: string; url: string; nombre: string };
   setFormMenu: (f: { tipo: string; url: string; nombre: string } | null) => void;
   confirmar: () => void;
+  opcionesMusica?: React.ReactNode;
 }) {
   const conUrl = ['enlace', 'video', 'musica'].includes(formMenu.tipo);
   return (
@@ -2527,6 +2721,7 @@ function FormularioMenu({ formMenu, setFormMenu, confirmar }: {
       <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">
         {({ enlace: 'Nuevo link', video: 'Vídeo (YouTube)', musica: 'Música', grafo: 'Grafo nuevo', mapa: 'Mapa nuevo' } as Record<string, string>)[formMenu.tipo]}
       </p>
+      {formMenu.tipo === 'musica' && opcionesMusica}
       {conUrl && (
         <input
           autoFocus
@@ -2549,6 +2744,79 @@ function FormularioMenu({ formMenu, setFormMenu, confirmar }: {
         <Button onClick={confirmar} className="flex-1 text-[11px] py-1.5">Crear y colocar</Button>
         <Button variant="ghost" onClick={() => setFormMenu(null)} className="text-[11px] py-1.5">Cancelar</Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Las otras dos formas de plantar música (2026-08-18, petición de Eugenio):
+ * SUBIR una canción tuya (MP3, M4A…) o elegirla de TU Spotify. Si el Spotify
+ * no está conectado, el botón abre el OAuth en una ventanita (como YouTube).
+ * Lo usan el panel «Crear aquí» y el menú lateral, con destinos distintos.
+ */
+function OpcionesMusica({ alSubir, alElegir }: {
+  alSubir: () => void;
+  alElegir: (url: string, nombre: string) => void;
+}) {
+  const [estado, setEstado] = useState<{ configurado: boolean; conectado: boolean; cuenta: { nombre: string | null } | null } | null>(null);
+  const [eleccion, setEleccion] = useState<{ playlists: any[]; canciones: any[] } | null>(null);
+
+  const cargar = useCallback(async () => {
+    try {
+      const e = await fetch('/api/spotify/estado', { credentials: 'include' }).then(r => r.json());
+      setEstado(e);
+      if (e.conectado) {
+        const l = await fetch('/api/spotify/eleccion', { credentials: 'include' }).then(r => r.json());
+        if (l.playlists || l.canciones) setEleccion(l);
+      }
+    } catch { /* sin Spotify el formulario sigue valiendo: URL o archivo */ }
+  }, []);
+  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    const oir = (ev: MessageEvent) => { if (ev.data === 'spotify:conectado') cargar(); };
+    window.addEventListener('message', oir);
+    return () => window.removeEventListener('message', oir);
+  }, [cargar]);
+
+  return (
+    <div className="space-y-1.5">
+      <button
+        onClick={alSubir}
+        className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold text-slate-600 transition-colors"
+      >
+        <Music2 className="w-3.5 h-3.5 text-emerald-600" /> Subir una canción (MP3, M4A…)
+      </button>
+      {estado && !estado.conectado && (
+        <button
+          onClick={() => window.open('/api/spotify/conectar', 'spoauth', 'width=520,height=680,menubar=no,toolbar=no')}
+          className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold text-slate-600 transition-colors"
+        >
+          <span className="w-3.5 h-3.5 rounded-full bg-[#1DB954] text-white text-[8px] font-black flex items-center justify-center">♪</span>
+          Conectar mi Spotify
+        </button>
+      )}
+      {eleccion && (
+        <div className="max-h-44 overflow-y-auto space-y-1 border border-slate-100 rounded-lg p-1.5">
+          {eleccion.playlists.length > 0 && <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Tus playlists</p>}
+          {eleccion.playlists.map((p: any) => (
+            <button key={p.url} onClick={() => alElegir(p.url, p.nombre)}
+              className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:bg-emerald-50 text-left">
+              {p.imagen ? <img src={p.imagen} className="w-6 h-6 rounded object-cover shrink-0" /> : <Music2 className="w-4 h-4 text-slate-300 shrink-0" />}
+              <span className="text-[11px] font-bold text-slate-700 truncate">{p.nombre}</span>
+              {p.pistas != null && <span className="text-[9px] text-slate-400 ml-auto shrink-0">{p.pistas}</span>}
+            </button>
+          ))}
+          {eleccion.canciones.length > 0 && <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1 pt-1">Tus canciones guardadas</p>}
+          {eleccion.canciones.map((c: any) => (
+            <button key={c.url} onClick={() => alElegir(c.url, `${c.nombre} — ${c.artista}`)}
+              className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:bg-emerald-50 text-left">
+              {c.imagen ? <img src={c.imagen} className="w-6 h-6 rounded object-cover shrink-0" /> : <Music2 className="w-4 h-4 text-slate-300 shrink-0" />}
+              <span className="text-[11px] text-slate-700 truncate">{c.nombre} <span className="text-slate-400">· {c.artista}</span></span>
+            </button>
+          ))}
+        </div>
+      )}
+      <p className="text-[9px] text-slate-400">…o pega abajo un link de Spotify u otra web.</p>
     </div>
   );
 }

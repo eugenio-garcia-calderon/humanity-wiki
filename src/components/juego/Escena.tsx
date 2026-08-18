@@ -21,6 +21,7 @@ import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
 import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
+import { PantallaGrande, PANTALLA } from './Pantalla';
 import { Agentes } from './Agentes';
 import { InteriorProyecto, type DatosInterior } from './Interior';
 import {
@@ -80,7 +81,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -116,6 +117,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onSoltar: (p: { x: number; z: number }) => void;
   /** Fuera del modo edición: leer una nota, ver una imagen, abrir un documento. */
   onAbrirItem: (item: ItemMundo) => void;
+  /** Pulsar la gran pantalla del cine: abre el panel de YouTube. */
+  onPantalla: () => void;
   /** Última posición del ratón sobre el suelo mientras se mueve algo. */
   movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
@@ -211,6 +214,9 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         ...posicionProyecto(i),
         radio: RADIO_EDIFICIO,
       })),
+      // La gran pantalla del cine también es sólida: rebota, no abre ficha
+      // (se abre pulsándola con el ratón).
+      { id: 'deco:pantalla', x: PANTALLA.x, z: PANTALLA.z, radio: PANTALLA.radio },
       // Todo el mobiliario del pueblo es sólido y hace REBOTAR (petición de
       // Eugenio): farolas, bancos, árboles, casas… El prefijo `deco:` es lo
       // que le dice al personaje «rebota y no abras ninguna ficha».
@@ -285,6 +291,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             resolverDestino={resolverDestino}
           />
           <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} onEntrar={onEntrarProyecto} />
+          <PantallaGrande onAbrir={onPantalla} />
           <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} onHablar={onHablarAgente} />
           <Robot jugadorPos={jugadorPos} medidas={medidas} />
           {editor.activo && (
