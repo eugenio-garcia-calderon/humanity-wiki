@@ -30,7 +30,7 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto, vehiculo, alturaVuelo }: {
+export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto, vehiculo, alturaVuelo, limite }: {
   entrada: React.MutableRefObject<EntradaMando>;
   /** Hacia dónde mira la cámara. Lo escribe el arrastre de la pantalla. */
   camara: React.MutableRefObject<Camara>;
@@ -48,6 +48,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
   vehiculo: Vehiculo;
   /** Altura sobre el suelo. Compartida con la página para enseñarla en pantalla. */
   alturaVuelo: React.MutableRefObject<number>;
+  /** Hasta dónde puedes andar. Sin valor, las 118 ha; dentro de un proyecto,
+   *  el tamaño de la sala (si no, te saldrías por las paredes). */
+  limite?: number;
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
@@ -103,8 +106,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     tmpObjetivo.multiplyScalar(VEL_MAX[vehiculo]);
     vel.current.lerp(tmpObjetivo, 1 - Math.exp(-(vuela ? 4 : 10) * dt));
     g.position.addScaledVector(vel.current, dt);
-    g.position.x = THREE.MathUtils.clamp(g.position.x, -LIMITE, LIMITE);
-    g.position.z = THREE.MathUtils.clamp(g.position.z, -LIMITE, LIMITE);
+    const lim = limite ?? LIMITE;
+    g.position.x = THREE.MathUtils.clamp(g.position.x, -lim, lim);
+    g.position.z = THREE.MathUtils.clamp(g.position.z, -lim, lim);
     g.position.y = alturaVuelo.current;
 
     // --- Colisión: a la gente y a los edificios no se les atraviesa.
@@ -153,7 +157,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     // que hayas elegido arrastrando. `dist` sale de la distancia de siempre
     // (11 de alto y 15 de fondo), para que el zoom siga midiendo lo mismo.
     const cam = estado.camera;
-    const dist = 18.6 * zoom.current;
+    // Dentro de un edificio la cámara se acerca: con los 18,6 m de fuera se
+    // quedaría al otro lado de la pared y verías la sala a través del muro.
+    const dist = (limite ? Math.min(10.5, limite * 0.55) : 18.6) * zoom.current;
     const { pitch } = camara.current;
     const cp = Math.cos(pitch);
     const sp = Math.sin(pitch);
@@ -162,6 +168,11 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       g.position.y + Math.max(1.5, sp * dist),
       g.position.z + Math.cos(yaw) * cp * dist,
     );
+    // Y si aun así se saliera (estás pegado a la pared), se mete hacia dentro.
+    if (limite) {
+      const r = Math.hypot(tmpCam.x, tmpCam.z);
+      if (r > limite) { tmpCam.x *= limite / r; tmpCam.z *= limite / r; }
+    }
     cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
     tmpMira.set(g.position.x, g.position.y + 1.6 + (zoom.current - 1) * 1.5, g.position.z);
     cam.lookAt(tmpMira);

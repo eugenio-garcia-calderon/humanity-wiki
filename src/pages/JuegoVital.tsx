@@ -5,14 +5,22 @@ import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
+  ArrowLeft, LogOut,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
-import type { Agente, Camara, Cercania, EntradaMando, ProyectoJuego, Vehiculo } from '../components/juego/tipos';
+import type { Agente, Camara, Cercania, EntradaMando, ItemProyecto, ProyectoJuego, Vehiculo } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
+import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
+import type { DatosInterior } from '../components/juego/Interior';
+import { ENTRADA, HAB_ENTRADA } from '../components/juego/planta';
+import { posicionProyecto } from '../components/juego/mapa';
+// Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
+// esta parte del proyecto cumple la regla de «ni un hex en src/pages».
+import { PALETA } from '../components/juego/paleta';
 
 // ============================================================================
 // JUEGO VITAL — Fase 1 «Pasear tu vida» + builder tipo Los Sims (2026-08-18).
@@ -29,6 +37,12 @@ import type { Aspecto } from '../components/juego/aspecto';
 // ============================================================================
 
 const Escena = lazy(() => import('../components/juego/Escena'));
+
+/** El color del edificio de un proyecto, que es también el de su interior. */
+const PALETA_PROYECTO = PALETA.edificiosProyecto;
+
+/** Si un proyecto no trae grupos, al menos tiene una habitación donde entrar. */
+const GRUPOS_MINIMOS = [{ id: 'todo', label: 'Todo', color: PALETA.robotLuz }];
 
 /** Identifica lo que tienes al lado, para recordar qué has rechazado. */
 const claveCercania = (c: Cercania) =>
@@ -67,6 +81,18 @@ export default function JuegoVital() {
   const [zoomVisible, setZoomVisible] = useState(1);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
   // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
+  // --- Dentro de un proyecto (2026-08-18, petición de Eugenio: «como en
+  // Pokémon, una transición y un escenario nuevo»). `interior` manda: si está
+  // puesto, la aldea deja de dibujarse y se juega dentro del edificio.
+  const [interior, setInterior] = useState<DatosInterior | null>(null);
+  const [transicion, setTransicion] = useState<FaseTransicion>(null);
+  const [rotuloTransicion, setRotuloTransicion] = useState('');
+  const [colorTransicion, setColorTransicion] = useState('#7ba8c9');
+  /** Lo que se aplicará cuando la pantalla esté tapada del todo. */
+  const alCubrir = useRef<(() => void) | null>(null);
+  const interiorRef = useRef<DatosInterior | null>(null);
+  interiorRef.current = interior;
+
   // Cómo te mueves: a pie, en bici o en el planeador (petición de Eugenio).
   const [vehiculo, setVehiculo] = useState<Vehiculo>('pie');
   const alturaVuelo = useRef(0);
@@ -162,6 +188,8 @@ export default function JuegoVital() {
           .map((f: any): ProyectoJuego => ({
             id: f.id, slug: f.slug, titulo: f.titulo, descripcion: f.descripcion,
             tarjetas: Number(f.tarjetas) || 0, hechas: Number(f.hechas) || 0, publico: !!f.publico,
+            // Los grupos del tablero: dentro del edificio son sus habitaciones.
+            grupos: Array.isArray(f.grupos) ? f.grupos : undefined,
           })));
       })
       .catch(() => setProyectos([]));
@@ -337,13 +365,74 @@ export default function JuegoVital() {
   };
 
   /**
+   * Cambia de escenario con la transición de por medio: la pantalla se cierra,
+   * el mundo cambia por debajo y la pantalla se abre. Nunca se ve el salto.
+   */
+  const cambiarEscenario = useCallback((rotulo: string, color: string, aplicar: () => void) => {
+    setRotuloTransicion(rotulo);
+    setColorTransicion(color);
+    alCubrir.current = aplicar;
+    setTransicion('cerrando');
+  }, []);
+
+  /**
+   * Entrar en un proyecto: se piden sus tarjetas de verdad y, con ellas, se
+   * monta su interior. Las habitaciones son sus GRUPOS del tablero — entrar en
+   * una es abrir esa carpeta.
+   */
+  const entrarEnProyecto = useCallback(async (p: ProyectoJuego) => {
+    const color = PALETA_PROYECTO[p.titulo.length % PALETA_PROYECTO.length];
+    let items: ItemProyecto[] = [];
+    try {
+      const r = await fetch(`/api/roadmap?proyecto=${encodeURIComponent(p.id)}`, { credentials: 'include' });
+      if (r.ok) items = await r.json();
+    } catch { /* sin tarjetas, el interior se ve igual: habitaciones vacías */ }
+    const grupos = (p.grupos?.length ? p.grupos : GRUPOS_MINIMOS);
+    cambiarEscenario(p.titulo, color, () => {
+      setPanel(null);
+      setVehiculo('pie');            // dentro no se entra en bici ni volando
+      alturaVuelo.current = 0;
+      setInterior({ proyecto: p, grupos, items, color, sala: null });
+      destinoViaje.current = { x: ENTRADA.x, z: ENTRADA.z - 5 };
+    });
+  }, [cambiarEscenario]);
+
+  /** De la sala a una habitación, y de la habitación de vuelta a la sala. */
+  const irASala = useCallback((sala: string | null) => {
+    const i = interiorRef.current;
+    if (!i) return;
+    const g = i.grupos.find(x => x.id === sala);
+    cambiarEscenario(g?.label || i.proyecto.titulo, g?.color || i.color, () => {
+      setInterior({ ...i, sala });
+      const e = sala ? HAB_ENTRADA : ENTRADA;
+      destinoViaje.current = { x: e.x, z: e.z - 5 };
+    });
+  }, [cambiarEscenario]);
+
+  /** Salir del edificio: vuelves a la aldea, delante de su puerta. */
+  const salirDelProyecto = useCallback(() => {
+    const i = interiorRef.current;
+    if (!i) return;
+    const idx = proyectosRef.current.findIndex(p => p.id === i.proyecto.id);
+    const pos = posicionProyecto(Math.max(0, idx));
+    cambiarEscenario('Aldea', i.color, () => {
+      setInterior(null);
+      destinoViaje.current = { x: pos.x, z: pos.z + 4 };
+    });
+  }, [cambiarEscenario]);
+
+  /**
    * Chocarte con algo es empezar a tratar con ello: con una persona se abre su
-   * chat, con un edificio de proyecto se abre su ficha. Nada se atraviesa.
+   * chat, con un edificio de proyecto se ENTRA DENTRO. Nada se atraviesa.
    */
   const alChocar = useCallback((id: string) => {
+    // Dentro de un proyecto, lo sólido son sus puertas y su salida.
+    if (id === 'interior:salir') { salirDelProyecto(); return; }
+    if (id === 'interior:sala') { irASala(null); return; }
+    if (id.startsWith('interior:puerta:')) { irASala(id.slice(16)); return; }
     if (id.startsWith('proy:')) {
       const p = proyectosRef.current.find(x => `proy:${x.id}` === id);
-      if (p) setPanel(p);
+      if (p) entrarEnProyecto(p);
       return;
     }
     const a = agentesRef.current.find(x => x.id === id);
@@ -563,6 +652,7 @@ export default function JuegoVital() {
           camara={camara}
           vehiculo={vehiculo}
           alturaVuelo={alturaVuelo}
+          interior={interior}
           proyectos={proyectos}
           agentes={agentes}
           jugadorPos={jugadorPos}
@@ -574,8 +664,22 @@ export default function JuegoVital() {
         />
       </Suspense>
 
-      {/* Minimapa estilo GTA + viaje rápido */}
-      {user && (
+      {/* Transición estilo Pokémon: tapa la pantalla mientras cambia el mundo */}
+      <Transicion
+        fase={transicion}
+        color={colorTransicion}
+        titulo={rotuloTransicion}
+        onCubierto={() => {
+          alCubrir.current?.();
+          alCubrir.current = null;
+          setTransicion('abriendo');
+          setTimeout(() => setTransicion(null), 700);
+        }}
+      />
+
+      {/* Minimapa estilo GTA + viaje rápido. Dentro de un edificio no pinta
+          nada: allí el mapa es la propia sala. */}
+      {user && !interior && (
         <MiniMapa
           jugadorPos={jugadorPos}
           agentes={agentes}
@@ -625,8 +729,9 @@ export default function JuegoVital() {
       {/* --------------------------------------------------------------- */}
       {/* Vehículos, a la derecha (petición de Eugenio). En el planeador   */}
       {/* aparecen además subir y bajar: es de despegue vertical.          */}
+      {/* Dentro de un edificio no hay bici ni planeador que valgan.       */}
       {/* --------------------------------------------------------------- */}
-      {user && (
+      {user && !interior && (
         <div data-ui-juego className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2">
           <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col gap-1.5">
             <button
@@ -696,7 +801,7 @@ export default function JuegoVital() {
       {/* ---------------------------------------------------------------- */}
       {/* BUILDER: la barra de construcción, siempre a mano (estilo Sims)   */}
       {/* ---------------------------------------------------------------- */}
-      {user && (
+      {user && !interior && (
         <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
           <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col gap-1.5">
             <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center px-1 flex items-center justify-center gap-1">
@@ -754,8 +859,78 @@ export default function JuegoVital() {
         </div>
       )}
 
+      {/* --------------------------------------------------------------- */}
+      {/* DENTRO DE UN PROYECTO: qué hacer con él, y a qué habitación ir.  */}
+      {/* --------------------------------------------------------------- */}
+      {interior && (
+        <>
+          <div className="absolute top-3 left-3 z-30 px-3 py-2 bg-slate-900/85 backdrop-blur border border-white/10 rounded-2xl shadow-xl max-w-[15rem]">
+            <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: interior.color }}>
+              {interior.sala
+                ? interior.grupos.find(g => g.id === interior.sala)?.label || 'Habitación'
+                : 'Dentro del proyecto'}
+            </p>
+            <p className="text-xs font-black text-white mt-0.5 leading-snug">{interior.proyecto.titulo}</p>
+            <p className="text-[10px] text-slate-400 mt-1">
+              {interior.proyecto.hechas} de {interior.proyecto.tarjetas} tareas · {interior.grupos.length} habitaciones
+            </p>
+          </div>
+
+          <div data-ui-juego className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-[9.5rem] px-2 py-2 bg-slate-900/85 backdrop-blur border border-white/10 rounded-2xl shadow-xl max-h-[70vh] overflow-y-auto">
+            <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 px-1 mb-1.5">Habitaciones</p>
+            {interior.sala && (
+              <button
+                onClick={() => irASala(null)}
+                className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
+              >
+                <ArrowLeft className="w-3 h-3 text-slate-400 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-300">Volver a la sala</span>
+              </button>
+            )}
+            {interior.grupos.map(g => (
+              <button
+                key={g.id}
+                onClick={() => irASala(g.id)}
+                className={cn(
+                  'w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg text-left transition-colors',
+                  interior.sala === g.id ? 'bg-white/15' : 'hover:bg-white/10',
+                )}
+              >
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: g.color }} />
+                <span className="text-[10px] font-bold text-white truncate">{g.label}</span>
+                <span className="ml-auto text-[9px] font-black text-slate-500 tabular-nums">
+                  {interior.items.filter(i => i.grupo === g.id).length}
+                </span>
+              </button>
+            ))}
+            <div className="h-px bg-white/10 my-1.5" />
+            <button
+              onClick={() => navigate(`/proyectos/${interior.proyecto.slug}`)}
+              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
+            >
+              <FolderKanban className="w-3 h-3 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-300">Abrir el tablero</span>
+            </button>
+            <button
+              onClick={() => { setBocadillo(`Estás dentro de «${interior.proyecto.titulo}». Pregúntame lo que quieras sobre él.`); hablarCon(null); }}
+              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
+            >
+              <Sparkles className="w-3 h-3 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-300">Hablar del proyecto</span>
+            </button>
+            <button
+              onClick={salirDelProyecto}
+              className="w-full flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors"
+            >
+              <LogOut className="w-3 h-3 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-300">Salir a la aldea</span>
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Aviso de proximidad */}
-      {cercania && !panel && !fichaAgente && !bocadillo && !construyendo && (
+      {cercania && !interior && !panel && !fichaAgente && !bocadillo && !construyendo && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-30">
           <Button onClick={interactuar} className="shadow-xl">
             {cercania.tipo === 'robot' ? <><Bot className="w-4 h-4 mr-1.5 inline" />Hablar con tu robot{!tactil && ' (E)'}</>
