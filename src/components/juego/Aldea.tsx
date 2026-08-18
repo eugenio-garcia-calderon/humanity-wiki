@@ -32,28 +32,71 @@ function seleccionDe(p: PiezaAldea): SeleccionMundo {
 }
 
 /**
- * Envuelve una pieza del pueblo y, en modo edición, la hace pulsable para
- * seleccionarla. El umbral de arrastre es el de siempre: arrastrar es girar
- * la cámara, no pulsar.
+ * Envuelve una pieza del pueblo y la hace pulsable: un clic abre sus opciones
+ * directamente, sin activar ningún modo antes (petición de Eugenio). El umbral
+ * de arrastre es el de siempre: arrastrar es girar la cámara, no pulsar.
  */
-function Editable({ pieza, editando, onPulsar, children }: {
-  pieza: PiezaAldea; editando: boolean;
+function Editable({ pieza, onPulsar, onAgarrar, children }: {
+  pieza: PiezaAldea;
   onPulsar: (sel: SeleccionMundo) => void;
+  onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
   children: React.ReactNode;
 }) {
   return (
     <group
       position={[pieza.x, 0, pieza.z]}
       rotation-y={pieza.rot}
-      onClick={editando ? (e: ThreeEvent<MouseEvent>) => {
+      onClick={(e: ThreeEvent<MouseEvent>) => {
         if (e.delta > 6) return;
         e.stopPropagation();
         onPulsar(seleccionDe(pieza));
-      } : undefined}
+      }}
+      onPointerDown={(e: ThreeEvent<PointerEvent>) => {
+        // Pinchar y arrastrar MUEVE el objeto (petición de Eugenio). Aquí solo
+        // se avisa del agarre; la página decide si fue arrastre o clic.
+        if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+        onAgarrar(seleccionDe(pieza), { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY });
+      }}
     >
       {children}
     </group>
   );
+}
+
+/** El aspecto de una pieza del pueblo, sin posición: lo usan el ensamblado y
+ *  el FANTASMA que sigue al ratón mientras la arrastras. */
+export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?: number }) {
+  const s = pieza.escala || 1;
+  switch (pieza.tipo) {
+    case 'casa': return <Modelo nombre={CASAS[(pieza.modelo ?? 0) % CASAS.length]} escala={3.2} />;
+    case 'nave': return <Nave />;
+    case 'fuente': return <Fuente />;
+    case 'banco': return <Banco x={0} z={0} rot={0} />;
+    case 'farola': return <Farola x={0} z={0} />;
+    case 'puesto': return <PuestoMercado x={0} z={0} rot={0} color={PALETA.tela[indice % PALETA.tela.length]} />;
+    case 'pozo': return <Pozo x={0} z={0} />;
+    case 'carro': return <Carro x={0} z={0} rot={0} />;
+    case 'arbol': return (
+      <group scale={s}>
+        <mesh castShadow position={[0, 1.1, 0]}>
+          <cylinderGeometry args={[0.28, 0.45, 2.4, 6]} />
+          <meshStandardMaterial color={PALETA.tronco} />
+        </mesh>
+        {pieza.pino ? (
+          <mesh castShadow position={[0, 4.6, 0]}>
+            <coneGeometry args={[2.0, 4.8, 7]} />
+            <meshStandardMaterial color={PALETA.pino} flatShading />
+          </mesh>
+        ) : (
+          <mesh castShadow position={[0, 3.9, 0]} scale={[1, 0.85, 1]}>
+            <icosahedronGeometry args={[2.1, 0]} />
+            <meshStandardMaterial color={PALETA.hoja} flatShading />
+          </mesh>
+        )}
+      </group>
+    );
+    default: return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -243,10 +286,10 @@ function Fuente() {
 // Instanced vegetation and props (built imperatively: full control over
 // matrices/colors without TS friction, one draw call per mesh).
 // ---------------------------------------------------------------------------
-function Vegetacion({ arboles, editando, onPulsar }: {
+function Vegetacion({ arboles, onPulsar, onAgarrar }: {
   arboles: PiezaAldea[];
-  editando: boolean;
   onPulsar: (sel: SeleccionMundo) => void;
+  onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
 }) {
   const grupo = useMemo(() => {
     // Semilla 119 para arbustos, rocas y flores: antes compartían el chorro de
@@ -364,20 +407,24 @@ function Vegetacion({ arboles, editando, onPulsar }: {
     return g;
   }, [arboles]);
 
-  // El modo edición cambia sin reconstruir el bosque: se lee de una ref.
-  const editandoRef = useRef(editando);
-  editandoRef.current = editando;
-
   return (
     <primitive
       object={grupo}
       onClick={(e: ThreeEvent<MouseEvent>) => {
         const mapa = (e.object as THREE.Object3D).userData?.arboles as number[] | undefined;
-        if (!editandoRef.current || !mapa || e.instanceId == null || e.delta > 6) return;
+        if (!mapa || e.instanceId == null || e.delta > 6) return;
         const pieza = arboles[mapa[e.instanceId]];
         if (!pieza) return;
         e.stopPropagation();
         onPulsar(seleccionDe(pieza));
+      }}
+      onPointerDown={(e: ThreeEvent<PointerEvent>) => {
+        const mapa = (e.object as THREE.Object3D).userData?.arboles as number[] | undefined;
+        if (!mapa || e.instanceId == null) return;
+        const pieza = arboles[mapa[e.instanceId]];
+        if (!pieza) return;
+        if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+        onAgarrar(seleccionDe(pieza), { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY });
       }}
     />
   );
@@ -386,51 +433,35 @@ function Vegetacion({ arboles, editando, onPulsar }: {
 const EJE_Y = new THREE.Vector3(0, 1, 0);
 
 // ---------------------------------------------------------------------------
-export function Aldea({ piezas, editando, onPulsar }: {
+export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
   /** El pueblo con los retoques del jugador YA aplicados (los calcula Escena). */
   piezas: PiezaAldea[];
-  /** Modo edición: las piezas se vuelven pulsables para seleccionarlas. */
-  editando: boolean;
+  /** Un clic en cualquier pieza abre sus opciones (mover, diseño, eliminar…). */
   onPulsar: (sel: SeleccionMundo) => void;
+  /** Pinchar sin soltar: candidato a arrastre (la página decide). */
+  onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
+  /** La pieza que va agarrada: no se dibuja (la lleva el fantasma). */
+  ocultar?: string;
 }) {
-  const de = (tipo: string) => piezas.filter(p => p.tipo === tipo);
-  const arboles = useMemo(() => piezas.filter(p => p.tipo === 'arbol'), [piezas]);
+  const de = (tipo: string) => piezas.filter(p => p.tipo === tipo && p.seed_id !== ocultar);
+  const arboles = useMemo(
+    () => piezas.filter(p => p.tipo === 'arbol' && p.seed_id !== ocultar),
+    [piezas, ocultar],
+  );
   return (
     <group>
       <Terreno />
       <Caminos />
-      {de('fuente').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Fuente /></Editable>
-      ))}
-      {de('casa').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}>
-          <Modelo nombre={CASAS[(p.modelo ?? 0) % CASAS.length]} escala={3.2} />
-        </Editable>
-      ))}
-      {de('nave').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Nave /></Editable>
-      ))}
-      {de('banco').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Banco x={0} z={0} rot={0} /></Editable>
-      ))}
-      {de('farola').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Farola x={0} z={0} /></Editable>
-      ))}
-      {de('puesto').map((p, i) => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}>
-          <PuestoMercado x={0} z={0} rot={0} color={PALETA.tela[i % PALETA.tela.length]} />
-        </Editable>
-      ))}
-      {de('pozo').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Pozo x={0} z={0} /></Editable>
-      ))}
-      {de('carro').map(p => (
-        <Editable key={p.seed_id} pieza={p} editando={editando} onPulsar={onPulsar}><Carro x={0} z={0} rot={0} /></Editable>
-      ))}
+      {['fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro'].map(tipo =>
+        de(tipo).map((p, i) => (
+          <Editable key={p.seed_id} pieza={p} onPulsar={onPulsar} onAgarrar={onAgarrar}>
+            <PiezaVisual pieza={p} indice={i} />
+          </Editable>
+        )))}
       <Rio />
       <Puente />
       <Lagos />
-      <Vegetacion arboles={arboles} editando={editando} onPulsar={onPulsar} />
+      <Vegetacion arboles={arboles} onPulsar={onPulsar} onAgarrar={onAgarrar} />
       <Detalles />
     </group>
   );

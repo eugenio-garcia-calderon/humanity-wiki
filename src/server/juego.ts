@@ -321,7 +321,7 @@ export function registerJuegoRoutes(app: Express, db: any) {
   // imágenes y documentos en el mapa).
   // ==========================================================================
 
-  const TIPOS_MUNDO = new Set(['prop', 'nota', 'imagen', 'documento']);
+  const TIPOS_MUNDO = new Set(['prop', 'nota', 'imagen', 'documento', 'enlace', 'video', 'musica', 'lienzo', 'mapa']);
 
   /** GET /api/juego/mundo — tus objetos + tus retoques del pueblo semilla. */
   app.get('/api/juego/mundo', async (req: Request, res: Response) => {

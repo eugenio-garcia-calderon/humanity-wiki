@@ -14,7 +14,8 @@ import type {
   Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
   ProyectoJuego, SeleccionMundo, Vehiculo,
 } from './tipos';
-import { ObjetosMundo, SueloEditor, MarcadorMover, AnilloSeleccion } from './Editor';
+import { ObjetosMundo, SueloEditor, MarcadorMover, AnilloSeleccion, MovilFantasma, ItemVisual } from './Editor';
+import { PiezaVisual } from './Aldea';
 import { PALETA } from './paleta';
 import { Aldea } from './Aldea';
 import { Personaje } from './Personaje';
@@ -79,7 +80,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onSuelo, onSoltar, onAbrirItem, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -101,9 +102,12 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onHablarAgente: (a: Agente) => void;
   /** El mundo editable: objetos del jugador + retoques del pueblo semilla. */
   mundo: { items: ItemMundo[]; overrides: OverrideMundo[] };
-  /** Estado del modo edición (lo lleva la página; aquí solo se dibuja). */
+  /** Estado del editor directo (lo lleva la página; aquí solo se dibuja).
+   *  `activo` = hay usuario: sin sesión no se edita nada. */
   editor: { activo: boolean; moviendo: boolean; sel: SeleccionMundo | null };
   onPulsarMundo: (sel: SeleccionMundo) => void;
+  /** Pinchar sin soltar un objeto: si arrastras, se mueve con el ratón. */
+  onAgarrarMundo: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
   /** Clic en suelo vacío en modo edición: abrir el panel de crear ahí. */
   onSuelo: (p: { x: number; z: number }) => void;
   /** Soltar el objeto que se estaba moviendo. */
@@ -264,12 +268,17 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             shadow-camera-far={400}
             shadow-bias={-0.0004}
           />
-          <Aldea piezas={piezas} editando={editor.activo} onPulsar={onPulsarMundo} />
+          <Aldea
+            piezas={piezas}
+            onPulsar={onPulsarMundo}
+            onAgarrar={onAgarrarMundo}
+            ocultar={editor.moviendo && editor.sel?.clase === 'semilla' ? editor.sel.id : undefined}
+          />
           <ObjetosMundo
             items={mundo.items}
-            editando={editor.activo}
             onPulsar={onPulsarMundo}
-            onAbrir={onAbrirItem}
+            onAgarrar={onAgarrarMundo}
+            ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
             resolverDestino={resolverDestino}
           />
           <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} onEntrar={onEntrarProyecto} />
@@ -279,6 +288,14 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             <>
               <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
               {editor.moviendo && <MarcadorMover movil={movilRef} />}
+              {/* El objeto agarrado viaja con el ratón como un fantasma */}
+              {editor.moviendo && editor.sel && (
+                <MovilFantasma movil={movilRef} rot={editor.sel.rot}>
+                  {editor.sel.clase === 'item'
+                    ? (() => { const it = mundo.items.find(x => x.id === editor.sel!.id); return it ? <ItemVisual item={it} /> : null; })()
+                    : (() => { const pz = piezas.find(x => x.seed_id === editor.sel!.id); return pz ? <PiezaVisual pieza={pz} /> : null; })()}
+                </MovilFantasma>
+              )}
               {editor.sel && !editor.moviendo && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}
             </>
           )}

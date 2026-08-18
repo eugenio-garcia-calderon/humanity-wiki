@@ -99,7 +99,7 @@ export interface Agente {
  *  imagen o un documento. Vive en `game_world_items`. */
 export interface ItemMundo {
   id: string;
-  tipo: 'prop' | 'nota' | 'imagen' | 'documento';
+  tipo: 'prop' | 'nota' | 'imagen' | 'documento' | 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa';
   modelo: string | null;
   texto: string | null;
   url: string | null;
