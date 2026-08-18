@@ -335,28 +335,32 @@ export default function JuegoVital() {
     } catch { /* el mundo se juega igual sin editar */ }
   }, []);
 
+  // Fetch directo justificado: solo esta página lo usa y va parametrizado
+  // por la sesión (misma excepción que /api/explorer en el mapa). SIN límite:
+  // el distrito ya recorta a 12 por su cuenta, pero los portales con forma
+  // necesitan encontrar SU proyecto aunque sea el número 13.
+  const cargarProyectos = useCallback(async () => {
+    if (!user) return;
+    try {
+      const filas = await fetch('/api/proyectos', { credentials: 'include' }).then(r => r.json());
+      if (!Array.isArray(filas)) return;
+      setProyectos(filas
+        .filter((f: any) => f.creador_user_id === user.id)
+        .map((f: any): ProyectoJuego => ({
+          id: f.id, slug: f.slug, titulo: f.titulo, descripcion: f.descripcion,
+          tarjetas: Number(f.tarjetas) || 0, hechas: Number(f.hechas) || 0, publico: !!f.publico,
+          // Los grupos del tablero: dentro del edificio son sus habitaciones.
+          grupos: Array.isArray(f.grupos) ? f.grupos : undefined,
+        })));
+    } catch { setProyectos([]); }
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     cargarAgentes();
     cargarMundo();
-    // Fetch directo justificado: solo esta página lo usa y va parametrizado
-    // por la sesión (misma excepción que /api/explorer en el mapa).
-    fetch('/api/proyectos', { credentials: 'include' })
-      .then(r => r.json())
-      .then((filas) => {
-        if (!Array.isArray(filas)) return;
-        setProyectos(filas
-          .filter((f: any) => f.creador_user_id === user.id)
-          .slice(0, 12)
-          .map((f: any): ProyectoJuego => ({
-            id: f.id, slug: f.slug, titulo: f.titulo, descripcion: f.descripcion,
-            tarjetas: Number(f.tarjetas) || 0, hechas: Number(f.hechas) || 0, publico: !!f.publico,
-            // Los grupos del tablero: dentro del edificio son sus habitaciones.
-            grupos: Array.isArray(f.grupos) ? f.grupos : undefined,
-          })));
-      })
-      .catch(() => setProyectos([]));
-  }, [user, cargarAgentes, cargarMundo]);
+    cargarProyectos();
+  }, [user, cargarAgentes, cargarMundo, cargarProyectos]);
 
   // --- conversación: quién habla --------------------------------------------
   /** Manda al asistente el estado del mundo y con quién se habla. */
@@ -575,9 +579,9 @@ export default function JuegoVital() {
   };
 
   /**
-   * Convierte el OBJETO seleccionado en un portal con su propio mapa nuevo
-   * (petición de Eugenio). El servidor levanta el proyecto real, planta el
-   * portal en el mismo sitio y archiva el objeto (recuperable).
+   * Convierte el OBJETO seleccionado en un portal SIN cambiarle la forma
+   * (aclaración de Eugenio): el objeto se queda tal cual, con su nombre en
+   * verde encima, y atravesarlo lleva a su mapa nuevo.
    */
   const convertirItemEnPortal = async () => {
     if (!selMundo || selMundo.clase !== 'item') return;
@@ -586,10 +590,34 @@ export default function JuegoVital() {
     }).catch(() => null);
     const j = r ? await r.json().catch(() => null) : null;
     if (!r?.ok) { avisar(j?.error || 'No se ha podido convertir en portal.'); return; }
-    setMundoItems(prev => prev.filter(it => it.id !== selMundo.id));
+    setMundoItems(prev => prev.map(it => (it.id === selMundo.id ? { ...it, portal_proyecto_id: j.portal_proyecto_id } : it)));
     setSelMundo(null);
-    await cargarAgentes();
-    avisar('¡Convertido en portal! Púlsalo para entrar en su nuevo mapa.');
+    await cargarProyectos();
+    avisar('¡Ya es un portal! Atraviésalo para entrar en su mapa.');
+  };
+
+  /** Igual, para una PIEZA del pueblo (el camión camper, una casa, el pozo…). */
+  const convertirPiezaEnPortal = async () => {
+    if (!selMundo || selMundo.clase !== 'semilla') return;
+    const r = await fetch('/api/juego/mundo/semilla/convertir-en-portal', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seed_id: selMundo.id, titulo: selMundo.etiqueta }),
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (!r?.ok) { avisar(j?.error || 'No se ha podido convertir en portal.'); return; }
+    setSelMundo(null);
+    await Promise.all([cargarMundo(), cargarProyectos()]);
+    avisar('¡Ya es un portal! Atraviésalo para entrar en su mapa.');
+  };
+
+  /** Entra en el mapa de un portal con forma desde su ficha. */
+  const entrarPorPortal = (proyectoId: string | null | undefined) => {
+    const p = proyectos.find(x => x.id === proyectoId);
+    if (!p) { avisar('No encuentro su mapa. Prueba a recargar.'); return; }
+    setSelMundo(null);
+    setFichaAgente(null);
+    entrarEnProyecto(p);
   };
 
   /** Quita el PORTAL del mapa (retoque eliminado). El proyecto NO se borra:
@@ -1204,12 +1232,27 @@ export default function JuegoVital() {
       if (p) entrarEnProyecto(p);
       return;
     }
+    // Portales CON FORMA (aclaración de Eugenio): un objeto o una pieza del
+    // pueblo convertidos en portal — atravesarlos es entrar en su mapa.
+    if (id.startsWith('portalitem:')) {
+      const it = mundoItemsRef.current.find(x => x.id === id.slice(11));
+      const p = it?.portal_proyecto_id ? proyectosRef.current.find(x => x.id === it.portal_proyecto_id) : null;
+      if (p) entrarEnProyecto(p);
+      return;
+    }
+    if (id.startsWith('portalpieza:')) {
+      const ov = overridesRef.current.find(o => o.seed_id === id.slice(12));
+      const p = ov?.portal_proyecto_id ? proyectosRef.current.find(x => x.id === ov.portal_proyecto_id) : null;
+      if (p) entrarEnProyecto(p);
+      return;
+    }
     const a = agentesRef.current.find(x => x.id === id);
     if (!a) return;
     // Un edificio de proyecto construido DESDE el juego también se entra
     // chocando con él, igual que los del distrito (fallo que vio Eugenio:
-    // su proyecto nuevo no tenía puerta). El chat del agente sigue en la (E).
-    if (a.tipo === 'proyecto' && a.proyecto_id) {
+    // su proyecto nuevo no tenía puerta). Y una PERSONA convertida en portal
+    // también: chocar con ella es entrar. El chat del agente sigue en la (E).
+    if (a.proyecto_id) {
       const p = proyectosRef.current.find(x => x.id === a.proyecto_id);
       if (p) { entrarEnProyecto(p); return; }
     }
@@ -1759,12 +1802,35 @@ export default function JuegoVital() {
                   <Link2 className="w-3.5 h-3.5 mr-1 inline" />Conectar
                 </Button>
               )}
-              {/* Convertir en portal: solo el CONOCIMIENTO (los props son decorado) */}
-              {selMundo.clase === 'item' && selMundo.tipo !== 'prop' && (
-                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={convertirItemEnPortal}>
-                  <Globe className="w-3.5 h-3.5 mr-1 inline" />Portal
-                </Button>
-              )}
+              {/* Convertir en portal (aclaración de Eugenio: conserva su forma;
+                  el nombre y el aro verdes son la única señal). Si ya lo es,
+                  el botón ENTRA en su mapa. */}
+              {selMundo.clase === 'item' && (() => {
+                const it = mundoItems.find(x => x.id === selMundo.id);
+                if (it?.portal_proyecto_id) return (
+                  <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={() => entrarPorPortal(it.portal_proyecto_id)}>
+                    <Globe className="w-3.5 h-3.5 mr-1 inline" />Entrar
+                  </Button>
+                );
+                return (
+                  <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={convertirItemEnPortal}>
+                    <Globe className="w-3.5 h-3.5 mr-1 inline" />Portal
+                  </Button>
+                );
+              })()}
+              {selMundo.clase === 'semilla' && (() => {
+                const ov = overridesMundo.find(o => o.seed_id === selMundo.id);
+                if (ov?.portal_proyecto_id) return (
+                  <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={() => entrarPorPortal(ov.portal_proyecto_id)}>
+                    <Globe className="w-3.5 h-3.5 mr-1 inline" />Entrar
+                  </Button>
+                );
+                return (
+                  <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={convertirPiezaEnPortal}>
+                    <Globe className="w-3.5 h-3.5 mr-1 inline" />Portal
+                  </Button>
+                );
+              })()}
               {selMundo.tipo === 'imagen' && (
                 <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200"
                   onClick={() => { const it = mundoItems.find(x => x.id === selMundo.id); if (it) { setLeyendo(it); setSelMundo(null); } }}>
@@ -2415,7 +2481,8 @@ export default function JuegoVital() {
         <FichaAgente
           agente={fichaAgente}
           onCerrar={() => setFichaAgente(null)}
-          onGuardado={async () => { await cargarAgentes(); }}
+          onGuardado={async () => { await Promise.all([cargarAgentes(), cargarProyectos()]); }}
+          onEntrarMapa={() => entrarPorPortal(fichaAgente.proyecto_id)}
           onArchivar={async () => {
             await fetch(`/api/juego/agentes/${fichaAgente.id}/archivar`, { method: 'POST', credentials: 'include' });
             setFichaAgente(null);
@@ -2681,13 +2748,15 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
 // ---------------------------------------------------------------------------
 // Ficha del agente: su memoria, meterle info, y hablar con él.
 // ---------------------------------------------------------------------------
-function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto, onEditarAspecto }: {
+function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto, onEditarAspecto, onEntrarMapa }: {
   agente: Agente;
   onCerrar: () => void;
   onGuardado: () => Promise<void>;
   onArchivar: () => Promise<void>;
   onAbrirProyecto: (slug: string) => void;
   onEditarAspecto: () => void;
+  /** Entrar en el MAPA 3D de este portal (persona convertida). */
+  onEntrarMapa?: () => void;
 }) {
   const [nota, setNota] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -2721,9 +2790,10 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     setErrorArchivo(null);
   }, [agente.id, agente.memoria, agente.archivos, agente.foto_url, agente.nombre]);
 
-  /** Convierte la persona en un portal con su propio mapa (petición de
-   *  Eugenio). Su apariencia queda guardada por si se quiere deshacer. */
+  /** Da a la persona la capacidad de portal SIN cambiarle la forma
+   *  (aclaración de Eugenio): sigue siendo el mismo muñeco. */
   const convertirEnPortal = async () => {
+    setConvirtiendo(true);
     try {
       const r = await fetch(`/api/juego/agentes/${agente.id}/convertir-en-portal`, {
         method: 'POST', credentials: 'include',
@@ -2734,6 +2804,8 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
       onCerrar();
     } catch {
       setErrorArchivo('Error de red al convertir.');
+    } finally {
+      setConvirtiendo(false);
     }
   };
 
@@ -3024,21 +3096,17 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
             </button>
           </div>
 
-          {/* Convertir en portal (petición de Eugenio): la persona pasa a ser
-              un portal verde con su propio mapa nuevo. Dos pasos: es un
-              cambio grande (el muñeco deja de verse). */}
+          {/* Convertir en portal (aclaración de Eugenio: la persona CONSERVA
+              su forma de muñeco; solo gana el nombre en verde y que al
+              acercarte entras en su mapa). Si ya lo es, el botón entra. */}
           {agente.tipo === 'persona' && (
-            convirtiendo ? (
-              <div className="mt-2 flex items-center gap-1.5">
-                <p className="flex-1 text-[10px] text-slate-500 leading-snug">
-                  Pasará a ser un portal con su propio mapa y dejará de verse como muñeco. ¿Seguro?
-                </p>
-                <Button onClick={convertirEnPortal} className="shrink-0 text-xs px-2.5 py-1.5">Sí, convertir</Button>
-                <Button variant="ghost" onClick={() => setConvirtiendo(false)} className="shrink-0 text-xs px-2 py-1.5">No</Button>
-              </div>
+            agente.proyecto_id ? (
+              <Button variant="outline" className="w-full mt-2" onClick={onEntrarMapa}>
+                <Globe className="w-3.5 h-3.5 mr-1.5 inline" /> Entrar en su mapa
+              </Button>
             ) : (
-              <Button variant="outline" className="w-full mt-2" onClick={() => setConvirtiendo(true)}>
-                <Globe className="w-3.5 h-3.5 mr-1.5 inline" /> Convertir en portal con su propio mapa
+              <Button variant="outline" className="w-full mt-2" onClick={convertirEnPortal} disabled={convirtiendo}>
+                <Globe className="w-3.5 h-3.5 mr-1.5 inline" /> {convirtiendo ? 'Convirtiendo…' : 'Convertir en portal (mantiene su forma)'}
               </Button>
             )
           )}

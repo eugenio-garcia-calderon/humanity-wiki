@@ -130,6 +130,9 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   // El pueblo con los retoques del jugador aplicados: piezas movidas, con otro
   // diseño o eliminadas. UNA lista que comparten el dibujo, el rebote y el
   // editor — si cada uno la calculara, chocarías con una casa ya borrada.
+  // Título de cada proyecto, para los rótulos de los portales con forma.
+  const titulosProy = useMemo(() => new Map(proyectos.map(p => [p.id, p.titulo])), [proyectos]);
+
   const piezas = useMemo<PiezaAldea[]>(() => {
     const ov = new Map(mundo.overrides.map(o => [o.seed_id, o]));
     const lista: PiezaAldea[] = [];
@@ -143,15 +146,27 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         z: o.z ?? p.z,
         rot: o.rot ?? p.rot,
         modelo: o.modelo != null && o.modelo !== '' ? Number(o.modelo) : p.modelo,
+        portalProyectoId: o.portal_proyecto_id || null,
+        portalTitulo: o.portal_proyecto_id ? titulosProy.get(o.portal_proyecto_id) : undefined,
       });
     }
     return lista;
-  }, [mundo.overrides]);
+  }, [mundo.overrides, titulosProy]);
 
   // Los portales del distrito, con los ARRASTRES del jugador aplicados.
+  // `representados` = proyectos que YA tienen su portal con forma propia en
+  // el mundo (un objeto, una pieza o un agente): su espiral del distrito se
+  // oculta para no tener dos puertas al mismo mapa.
+  const representados = useMemo(() => {
+    const s = new Set<string>();
+    for (const a of agentes) if (a.proyecto_id) s.add(a.proyecto_id);
+    for (const it of mundo.items) if (it.portal_proyecto_id) s.add(it.portal_proyecto_id);
+    for (const o of mundo.overrides) if (o.portal_proyecto_id) s.add(o.portal_proyecto_id);
+    return s;
+  }, [agentes, mundo.items, mundo.overrides]);
   const posProyectos = useMemo(
-    () => posicionesProyectos(proyectos, mundo.overrides),
-    [proyectos, mundo.overrides],
+    () => posicionesProyectos(proyectos, mundo.overrides, representados),
+    [proyectos, mundo.overrides, representados],
   );
 
   // Para los hilos de conocimiento: dónde está cada cosa a la que se apunta.
@@ -224,20 +239,23 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       // Todo el mobiliario del pueblo es sólido y hace REBOTAR (petición de
       // Eugenio): farolas, bancos, árboles, casas… El prefijo `deco:` es lo
       // que le dice al personaje «rebota y no abras ninguna ficha».
+      // Una pieza convertida en PORTAL avisa del choque (entrar); las demás
+      // solo rebotan (el prefijo `deco:` silencia el aviso en Personaje).
       ...piezas.filter(p => p.radio > 0).map(p => ({
-        id: `deco:semilla:${p.seed_id}`,
+        id: p.portalProyectoId ? `portalpieza:${p.seed_id}` : `deco:semilla:${p.seed_id}`,
         x: p.x,
         z: p.z,
         radio: p.radio,
       })),
       // Los props que plantó el jugador también; sus notas y documentos no
       // (se atraviesan: son conocimiento flotando, no muros). Los objetos
-      // anclados a un proyecto viven en SU plaza, no en la aldea.
-      ...mundo.items.filter(it => it.tipo === 'prop' && !it.proyecto_id).map(it => ({
-        id: `deco:item:${it.id}`,
+      // anclados a un proyecto viven en SU plaza, no en la aldea. Un objeto
+      // convertido en PORTAL sí es sólido y avisa: chocar es entrar.
+      ...mundo.items.filter(it => !it.proyecto_id && (it.tipo === 'prop' || it.portal_proyecto_id)).map(it => ({
+        id: it.portal_proyecto_id ? `portalitem:${it.id}` : `deco:item:${it.id}`,
         x: it.x,
         z: it.z,
-        radio: radioProp(it.modelo),
+        radio: it.tipo === 'prop' ? radioProp(it.modelo) : 1.5,
       })),
     ];
   }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items]);

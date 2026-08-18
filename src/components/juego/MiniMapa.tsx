@@ -81,11 +81,17 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
 
   /** Los portales del distrito, con los arrastres del jugador aplicados. */
   const edificiosProyecto = useMemo(() => {
-    const posiciones = posicionesProyectos(proyectos, overrides);
+    // Los proyectos ya representados por un portal CON FORMA (un objeto, una
+    // pieza o una persona convertidos) no duplican espiral en el distrito.
+    const representados = new Set<string>();
+    for (const a of agentes) if (a.proyecto_id) representados.add(a.proyecto_id);
+    for (const it of items) if (it.portal_proyecto_id) representados.add(it.portal_proyecto_id);
+    for (const o of overrides) if (o.portal_proyecto_id) representados.add(o.portal_proyecto_id);
+    const posiciones = posicionesProyectos(proyectos, overrides, representados);
     // Los portales quitados del mapa tampoco salen aquí.
     return proyectos.slice(0, 12).map((p, i) => ({ p, ...posiciones[i] }))
       .filter(e => !e.eliminado);
-  }, [proyectos, overrides]);
+  }, [proyectos, overrides, agentes, items]);
 
   /**
    * El mapa grande encuadra DONDE ESTÁ TU VIDA, no las 118 ha enteras: si

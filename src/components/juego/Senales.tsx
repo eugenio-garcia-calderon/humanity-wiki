@@ -219,3 +219,38 @@ export function Interactivo({ onPulsar, children }: {
     </group>
   );
 }
+
+// ---------------------------------------------------------------------------
+// La SEÑAL DE PORTAL (2026-08-18, aclaración de Eugenio): cualquier cosa
+// —un objeto, el camión, una persona— puede SER un portal sin perder su
+// forma. Esta señal es lo único que lo delata: su nombre flotando en verde
+// y un aro de luz girando despacio en el suelo.
+// ---------------------------------------------------------------------------
+export function SenalDePortal({ y, titulo }: { y: number; titulo: string }) {
+  const aro = useRef<THREE.Mesh>(null);
+  useFrame((_, dt) => {
+    if (aro.current) aro.current.rotation.z += dt * 0.6;
+  });
+  return (
+    <group>
+      <Billboard position={[0, y, 0]}>
+        <Text fontSize={0.62} maxWidth={8} color="#c9ffb7" anchorX="center" anchorY="middle" textAlign="center"
+          outlineWidth={0.045} outlineColor="#0f3d16">
+          {titulo}
+        </Text>
+        <Text position={[0, -0.55, 0]} fontSize={0.26} color="#8dff6e" anchorX="center" anchorY="middle">
+          ◈ portal ◈
+        </Text>
+      </Billboard>
+      {/* El aro en el suelo: gira despacio, como una puerta esperando */}
+      <mesh ref={aro} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <ringGeometry args={[1.15, 1.45, 40, 1, 0, Math.PI * 1.7]} />
+        <meshBasicMaterial color="#4be04b" transparent opacity={0.55} toneMapped={false} depthWrite={false} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+        <circleGeometry args={[1.5, 32]} />
+        <meshBasicMaterial color="#4be04b" transparent opacity={0.14} toneMapped={false} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}

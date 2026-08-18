@@ -333,7 +333,8 @@ export function registerJuegoRoutes(app: Express, db: any) {
         ORDER BY created_at ASC
       `);
       const overrides = await db.execute(sql`
-        SELECT seed_id, eliminado, x, z, rot, modelo FROM game_world_overrides
+        SELECT seed_id, eliminado, x, z, rot, modelo, portal_proyecto_id
+        FROM game_world_overrides
         WHERE user_id = ${req.user.id}
       `);
       res.json({ items: items.rows, overrides: overrides.rows });
@@ -482,19 +483,19 @@ export function registerJuegoRoutes(app: Express, db: any) {
   };
 
   /**
-   * POST /api/juego/agentes/:id/convertir-en-portal — una PERSONA pasa a ser
-   * un portal: mismo agente, tipo `proyecto` y un proyecto nuevo con su
-   * nombre. Su apariencia queda guardada por si algún día se quiere deshacer.
+   * POST /api/juego/agentes/:id/convertir-en-portal — una PERSONA gana la
+   * CAPACIDAD de portal SIN cambiar de forma (aclaración de Eugenio): sigue
+   * siendo el mismo muñeco, y su proyecto_id apunta al mapa nuevo.
    */
   app.post('/api/juego/agentes/:id/convertir-en-portal', async (req: Request, res: Response) => {
     try {
       if (!requiereUsuario(req, res)) return;
       const a = await agenteMio(req, res);
       if (!a) return;
-      if (a.tipo === 'proyecto') return res.status(400).json({ error: 'Ya es un portal.' });
+      if (a.proyecto_id) return res.status(400).json({ error: 'Ya es un portal.' });
       const proyectoId = await crearProyectoDePortal(req, a.nombre);
       await db.execute(sql`
-        UPDATE game_agents SET tipo = 'proyecto', proyecto_id = ${proyectoId},
+        UPDATE game_agents SET proyecto_id = ${proyectoId},
                updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${a.id}
       `);
@@ -505,10 +506,41 @@ export function registerJuegoRoutes(app: Express, db: any) {
     }
   });
 
+  // OJO: esta ruta va ANTES de /mundo/:id/convertir-en-portal — Express
+  // prueba en orden y «semilla» encajaria en `:id` (ya paso con el retoque).
   /**
-   * POST /api/juego/mundo/:id/convertir-en-portal — un OBJETO se convierte en
-   * un portal en su mismo sitio: nace un agente-portal con su nombre y el
-   * objeto se archiva (regla 6: se puede recuperar).
+   * POST /api/juego/mundo/semilla/convertir-en-portal { seed_id, titulo } —
+   * una PIEZA del pueblo (el camión camper, una casa, el pozo…) gana la
+   * capacidad de portal sin perder su forma. El vínculo viaja en el retoque.
+   */
+  app.post('/api/juego/mundo/semilla/convertir-en-portal', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const seed = String(req.body?.seed_id || '');
+      const titulo = String(req.body?.titulo || '').trim() || 'Portal';
+      if (!seed) return res.status(400).json({ error: 'Falta la pieza.' });
+      const ya = await db.execute(sql`
+        SELECT portal_proyecto_id FROM game_world_overrides
+        WHERE user_id = ${req.user!.id} AND seed_id = ${seed}
+      `);
+      if ((ya.rows[0] as any)?.portal_proyecto_id) return res.status(400).json({ error: 'Ya es un portal.' });
+      const proyectoId = await crearProyectoDePortal(req, titulo);
+      await db.execute(sql`
+        INSERT INTO game_world_overrides (user_id, seed_id, eliminado, portal_proyecto_id)
+        VALUES (${req.user!.id}, ${seed}, false, ${proyectoId})
+        ON CONFLICT (user_id, seed_id) DO UPDATE SET
+          portal_proyecto_id = ${proyectoId}, updated_at = now()
+      `);
+      res.json({ ok: true, portal_proyecto_id: proyectoId });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/juego/mundo/:id/convertir-en-portal — un OBJETO gana la
+   * capacidad de portal SIN perder su forma: mismo objeto, con
+   * portal_proyecto_id apuntando a su mapa nuevo (migración 0036).
    */
   app.post('/api/juego/mundo/:id/convertir-en-portal', async (req: Request, res: Response) => {
     try {
@@ -519,32 +551,27 @@ export function registerJuegoRoutes(app: Express, db: any) {
       `);
       const it = r.rows[0] as any;
       if (!it) return res.status(404).json({ error: 'Ese objeto no está en tu mundo.' });
+      if (it.portal_proyecto_id) return res.status(400).json({ error: 'Ya es un portal.' });
       // Nunca una URL como título: mejor un genérico por tipo.
       const GENERICOS: Record<string, string> = {
         nota: 'Nota', imagen: 'Imagen', video: 'Vídeo', documento: 'Documento',
-        enlace: 'Enlace', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa',
+        enlace: 'Enlace', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa', prop: 'Portal',
       };
       const crudo = String(it.nombre || '').trim();
       const titulo = crudo && !/^(https?:\/\/|www\.|youtu)/i.test(crudo)
         ? crudo : (GENERICOS[it.tipo] || 'Portal');
 
       const proyectoId = await crearProyectoDePortal(req, titulo);
-      const id = `GA${Date.now()}${Math.floor(Math.random() * 1000)}`;
-      await db.execute(sql`
-        INSERT INTO game_agents (id, user_id, tipo, nombre, apariencia, proyecto_id, x, z,
-                                 created_by, updated_by)
-        VALUES (${id}, ${req.user!.id}, 'proyecto', ${titulo}, '{}'::jsonb, ${proyectoId},
-                ${it.x}, ${it.z}, ${req.user!.id}, ${req.user!.id})
-      `);
-      await db.execute(sql`
-        UPDATE game_world_items SET archived_at = now()
+      const fila = await db.execute(sql`
+        UPDATE game_world_items SET portal_proyecto_id = ${proyectoId}, updated_at = now()
         WHERE id = ${it.id} AND user_id = ${req.user!.id}
+        RETURNING *
       `);
-      const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${id}`);
       res.json(fila.rows[0]);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });
+
 
 }
