@@ -10,6 +10,7 @@ import type { Aspecto } from './aspecto';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Environment, PerformanceMonitor } from '@react-three/drei';
 import { Efectos } from './Efectos';
+import { Hierba } from './Hierba';
 import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
 import * as THREE from 'three';
 import type {
@@ -401,6 +402,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             onAgarrar={onAgarrarMundo}
             ocultar={editor.moviendo && editor.sel?.clase === 'semilla' ? editor.sel.id : undefined}
           />
+          {/* La hierba de la fase 1: cuántas matas, lo dice la calidad. */}
+          <Hierba cantidad={ajustes.hierba} />
           <ObjetosMundo
             items={mundo.items.filter(it => !it.proyecto_id)}
             onPulsar={onPulsarMundo}

@@ -42,10 +42,12 @@ export const AJUSTES: Record<NivelCalidad, {
   efectos: boolean;
   /** ¿Oclusión ambiental (el sombreado de contacto que asienta los objetos)? */
   ao: boolean;
+  /** Matas de hierba instanciadas en la aldea (fase 1). */
+  hierba: number;
 }> = {
-  alta: { dpr: [1, 2], sombras: 4096, efectos: true, ao: true },
-  media: { dpr: [1, 1.5], sombras: 2048, efectos: true, ao: false },
-  baja: { dpr: [0.8, 1], sombras: 1024, efectos: false, ao: false },
+  alta: { dpr: [1, 2], sombras: 4096, efectos: true, ao: true, hierba: 45000 },
+  media: { dpr: [1, 1.5], sombras: 2048, efectos: true, ao: false, hierba: 16000 },
+  baja: { dpr: [0.8, 1], sombras: 1024, efectos: false, ao: false, hierba: 3000 },
 };
 
 /** Un escalón menos, para la degradación automática por FPS. */

@@ -22,6 +22,7 @@ import {
 import { PortalVerde, LuzDePortal, VERDE_PORTAL } from './PortalVerde';
 import type { Agente, ItemProyecto } from './tipos';
 import { Persona3D, cuerpoDe } from './Modelos';
+import { mapasPBR } from './texturas';
 import { Halo, Interactivo, Rotulo } from './Senales';
 import { PALETA } from './paleta';
 
@@ -619,24 +620,24 @@ export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta }: {
 
   return (
     <group>
-      {/* El prado. La luz y el cielo los pone la escena (ambiente de día). */}
+      {/* El prado, con la misma hierba FOTOGRÁFICA de la aldea (fase 1). */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[PLAZA_LIM + 16, 64]} />
-        <meshStandardMaterial color={PALETA.prado} roughness={0.9} />
+        <meshStandardMaterial {...mapasPBR('hierba', ((PLAZA_LIM + 16) * 2) / 5.5)} />
       </mesh>
-      {/* La plaza vacía del centro, empedrada y con el aro del proyecto */}
+      {/* La plaza vacía del centro, ADOQUINADA de verdad, con el aro. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <circleGeometry args={[10, 48]} />
-        <meshStandardMaterial color={PALETA.plaza} roughness={0.85} />
+        <meshStandardMaterial {...mapasPBR('adoquin', 20 / 2.4)} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
         <ringGeometry args={[9.5, 10, 64]} />
         <meshBasicMaterial color={color} transparent opacity={0.55} toneMapped={false} />
       </mesh>
-      {/* El camino de la entrada a la plaza */}
+      {/* El camino de la entrada a la plaza, de grava real */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, (PLAZA_SALIDA.z + 10) / 2]} receiveShadow>
         <planeGeometry args={[3.4, PLAZA_SALIDA.z - 6]} />
-        <meshStandardMaterial color={PALETA.camino} roughness={0.9} />
+        <meshStandardMaterial {...mapasPBR('grava', 1, Math.max(1, Math.round((PLAZA_SALIDA.z - 6) / 3)))} />
       </mesh>
 
       {/* El título del proyecto y su progreso real, flotando sobre la plaza */}
