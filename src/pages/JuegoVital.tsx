@@ -574,6 +574,24 @@ export default function JuegoVital() {
     setRenombrandoProy(false);
   };
 
+  /**
+   * Convierte el OBJETO seleccionado en un portal con su propio mapa nuevo
+   * (petición de Eugenio). El servidor levanta el proyecto real, planta el
+   * portal en el mismo sitio y archiva el objeto (recuperable).
+   */
+  const convertirItemEnPortal = async () => {
+    if (!selMundo || selMundo.clase !== 'item') return;
+    const r = await fetch(`/api/juego/mundo/${selMundo.id}/convertir-en-portal`, {
+      method: 'POST', credentials: 'include',
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (!r?.ok) { avisar(j?.error || 'No se ha podido convertir en portal.'); return; }
+    setMundoItems(prev => prev.filter(it => it.id !== selMundo.id));
+    setSelMundo(null);
+    await cargarAgentes();
+    avisar('¡Convertido en portal! Púlsalo para entrar en su nuevo mapa.');
+  };
+
   /** Quita el PORTAL del mapa (retoque eliminado). El proyecto NO se borra:
    *  sigue en la página de Proyectos con todo lo suyo. */
   const quitarPortalDelMapa = async () => {
@@ -1741,6 +1759,12 @@ export default function JuegoVital() {
                   <Link2 className="w-3.5 h-3.5 mr-1 inline" />Conectar
                 </Button>
               )}
+              {/* Convertir en portal: solo el CONOCIMIENTO (los props son decorado) */}
+              {selMundo.clase === 'item' && selMundo.tipo !== 'prop' && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={convertirItemEnPortal}>
+                  <Globe className="w-3.5 h-3.5 mr-1 inline" />Portal
+                </Button>
+              )}
               {selMundo.tipo === 'imagen' && (
                 <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200"
                   onClick={() => { const it = mundoItems.find(x => x.id === selMundo.id); if (it) { setLeyendo(it); setSelMundo(null); } }}>
@@ -2681,6 +2705,8 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
   const [nombre, setNombre] = useState(agente.nombre);
   const [renombrando, setRenombrando] = useState(false);
   const [nombreBorrador, setNombreBorrador] = useState('');
+  // Convertir una persona en PORTAL: en dos pasos, que es un cambio grande.
+  const [convirtiendo, setConvirtiendo] = useState(false);
 
   // Al cambiar de amigo, la ficha enseña lo suyo (el componente no se
   // desmonta entre uno y otro cuando se elige desde la lista lateral).
@@ -2690,9 +2716,26 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     setPortada(agente.foto_url || null);
     setNombre(agente.nombre);
     setRenombrando(false);
+    setConvirtiendo(false);
     setNota('');
     setErrorArchivo(null);
   }, [agente.id, agente.memoria, agente.archivos, agente.foto_url, agente.nombre]);
+
+  /** Convierte la persona en un portal con su propio mapa (petición de
+   *  Eugenio). Su apariencia queda guardada por si se quiere deshacer. */
+  const convertirEnPortal = async () => {
+    try {
+      const r = await fetch(`/api/juego/agentes/${agente.id}/convertir-en-portal`, {
+        method: 'POST', credentials: 'include',
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setErrorArchivo(j?.error || 'No se ha podido convertir en portal.'); return; }
+      await onGuardado();
+      onCerrar();
+    } catch {
+      setErrorArchivo('Error de red al convertir.');
+    }
+  };
 
   /** Guarda el nombre nuevo del agente (persona o portal de proyecto). */
   const renombrar = async () => {
@@ -2980,6 +3023,25 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Convertir en portal (petición de Eugenio): la persona pasa a ser
+              un portal verde con su propio mapa nuevo. Dos pasos: es un
+              cambio grande (el muñeco deja de verse). */}
+          {agente.tipo === 'persona' && (
+            convirtiendo ? (
+              <div className="mt-2 flex items-center gap-1.5">
+                <p className="flex-1 text-[10px] text-slate-500 leading-snug">
+                  Pasará a ser un portal con su propio mapa y dejará de verse como muñeco. ¿Seguro?
+                </p>
+                <Button onClick={convertirEnPortal} className="shrink-0 text-xs px-2.5 py-1.5">Sí, convertir</Button>
+                <Button variant="ghost" onClick={() => setConvirtiendo(false)} className="shrink-0 text-xs px-2 py-1.5">No</Button>
+              </div>
+            ) : (
+              <Button variant="outline" className="w-full mt-2" onClick={() => setConvirtiendo(true)}>
+                <Globe className="w-3.5 h-3.5 mr-1.5 inline" /> Convertir en portal con su propio mapa
+              </Button>
+            )
+          )}
         </div>
       </Card>
     </div>

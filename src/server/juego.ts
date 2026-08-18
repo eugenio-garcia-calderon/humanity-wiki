@@ -461,4 +461,90 @@ export function registerJuegoRoutes(app: Express, db: any) {
     }
   });
 
+  // -------------------------------------------------------------------------
+  // Convertir en PORTAL (2026-08-18, petición de Eugenio): un objeto o una
+  // persona se transforma en un portal que lleva a un MAPA NUEVO. Por debajo
+  // el mapa nuevo es un proyecto real de la plataforma (mismo pilar del
+  // builder: lo del juego existe fuera del juego), así que su plaza se edita
+  // y se ancla con proyecto_id como cualquier otra.
+  // -------------------------------------------------------------------------
+
+  /** Levanta el proyecto real que hará de mapa del portal. */
+  const crearProyectoDePortal = async (req: Request, titulo: string): Promise<string> => {
+    const pid = `PRY${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const slug = `${titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'portal'}-${Math.floor(Math.random() * 1000)}`;
+    await db.execute(sql`
+      INSERT INTO proyectos (id, titulo, slug, creador_user_id, publico, created_by, updated_by)
+      VALUES (${pid}, ${titulo}, ${slug}, ${req.user!.id}, false, ${req.user!.id}, ${req.user!.id})
+    `);
+    return pid;
+  };
+
+  /**
+   * POST /api/juego/agentes/:id/convertir-en-portal — una PERSONA pasa a ser
+   * un portal: mismo agente, tipo `proyecto` y un proyecto nuevo con su
+   * nombre. Su apariencia queda guardada por si algún día se quiere deshacer.
+   */
+  app.post('/api/juego/agentes/:id/convertir-en-portal', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const a = await agenteMio(req, res);
+      if (!a) return;
+      if (a.tipo === 'proyecto') return res.status(400).json({ error: 'Ya es un portal.' });
+      const proyectoId = await crearProyectoDePortal(req, a.nombre);
+      await db.execute(sql`
+        UPDATE game_agents SET tipo = 'proyecto', proyecto_id = ${proyectoId},
+               updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${a.id}
+      `);
+      const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${a.id}`);
+      res.json(fila.rows[0]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/juego/mundo/:id/convertir-en-portal — un OBJETO se convierte en
+   * un portal en su mismo sitio: nace un agente-portal con su nombre y el
+   * objeto se archiva (regla 6: se puede recuperar).
+   */
+  app.post('/api/juego/mundo/:id/convertir-en-portal', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const r = await db.execute(sql`
+        SELECT * FROM game_world_items
+        WHERE id = ${req.params.id} AND user_id = ${req.user!.id} AND archived_at IS NULL
+      `);
+      const it = r.rows[0] as any;
+      if (!it) return res.status(404).json({ error: 'Ese objeto no está en tu mundo.' });
+      // Nunca una URL como título: mejor un genérico por tipo.
+      const GENERICOS: Record<string, string> = {
+        nota: 'Nota', imagen: 'Imagen', video: 'Vídeo', documento: 'Documento',
+        enlace: 'Enlace', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa',
+      };
+      const crudo = String(it.nombre || '').trim();
+      const titulo = crudo && !/^(https?:\/\/|www\.|youtu)/i.test(crudo)
+        ? crudo : (GENERICOS[it.tipo] || 'Portal');
+
+      const proyectoId = await crearProyectoDePortal(req, titulo);
+      const id = `GA${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      await db.execute(sql`
+        INSERT INTO game_agents (id, user_id, tipo, nombre, apariencia, proyecto_id, x, z,
+                                 created_by, updated_by)
+        VALUES (${id}, ${req.user!.id}, 'proyecto', ${titulo}, '{}'::jsonb, ${proyectoId},
+                ${it.x}, ${it.z}, ${req.user!.id}, ${req.user!.id})
+      `);
+      await db.execute(sql`
+        UPDATE game_world_items SET archived_at = now()
+        WHERE id = ${it.id} AND user_id = ${req.user!.id}
+      `);
+      const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${id}`);
+      res.json(fila.rows[0]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
 }
