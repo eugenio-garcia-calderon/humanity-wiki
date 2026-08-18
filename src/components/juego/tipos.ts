@@ -35,6 +35,8 @@ export interface Agente {
   foto_url: string | null;
   apariencia: Record<string, string>;
   memoria: Array<{ texto: string; created_at: string }>;
+  /** Su archivo: fotos y documentos que el jugador le ha dejado. */
+  archivos: Array<{ url: string; nombre: string; tipo: string; es_imagen: boolean; created_at: string }>;
   proyecto_id: string | null;
   proyecto_slug?: string | null;
   tarjetas?: number;

@@ -48,6 +48,19 @@ export const PALETA = {
   navePuerta: '#5b6a72',
   fuentePiedra: '#b8b2a4',
 
+  // Mobiliario del pueblo (pasada de detalle, 2026-08-18)
+  maderaBanco: '#9c7248',
+  hierro: '#4a5259',
+  farolLuz: '#ffe6a8',
+  tela: ['#c96f4a', '#4a83a8', '#8aa84a', '#a84a7d'],
+  lienzoBlanco: '#f4efe2',
+  ovejaLana: '#f0ece2',
+  ovejaCara: '#3a3a3a',
+  humo: '#e8e4dc',
+  seto: '#4e8f42',
+  tierra: '#8a6a48',
+  cultivo: ['#7fae4a', '#a8b04a', '#6f9c56'],
+
   // Characters
   piel: '#e8b98f',
   pelo: '#4a3527',

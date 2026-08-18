@@ -1,7 +1,8 @@
 // ============================================================================
-// JUEGO VITAL — the personal robot companion (the "Pikachu"). Hovers behind
-// the player, always faces them, and reports its distance so the page can
-// offer the "talk" interaction — which focuses the REAL AI assistant bar.
+// JUEGO VITAL — el robot personal. Vive EN LA PLAZA, junto a la fuente: es un
+// personaje del pueblo al que vas a ver, no un dron que te persigue (decisión
+// de Eugenio, 2026-08-18). Flota en su sitio, se gira hacia ti cuando te
+// acercas, y al hablarle se enfoca la barra del asistente IA de verdad.
 // ============================================================================
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -9,7 +10,8 @@ import * as THREE from 'three';
 import type { Medidas } from './tipos';
 import { PALETA } from './paleta';
 
-const tmpObjetivo = new THREE.Vector3();
+/** Su sitio en la plaza: al lado de la fuente, mirando al camino del sur. */
+export const CASA_DEL_ROBOT = { x: 5.5, z: 5.5 };
 
 export function Robot({ jugadorPos, medidas }: {
   jugadorPos: THREE.Vector3;
@@ -24,21 +26,22 @@ export function Robot({ jugadorPos, medidas }: {
     const dt = Math.min(dtBruto, 0.05);
     t.current += dt;
 
-    // trail the player at a fixed offset, hovering
-    tmpObjetivo.set(jugadorPos.x + 2.6, 0, jugadorPos.z + 2.3);
-    g.position.lerp(tmpObjetivo, 1 - Math.exp(-3.2 * dt));
+    // Se queda en su sitio, flotando y meciéndose despacio.
     g.position.y = 0.62 + Math.sin(t.current * 2.2) * 0.13;
 
-    // always face the player
-    const deseo = Math.atan2(jugadorPos.x - g.position.x, jugadorPos.z - g.position.z);
+    const d = Math.hypot(jugadorPos.x - g.position.x, jugadorPos.z - g.position.z);
+    // Si estás cerca, te mira; si no, va girando tranquilo mirando la plaza.
+    const deseo = d < 14
+      ? Math.atan2(jugadorPos.x - g.position.x, jugadorPos.z - g.position.z)
+      : Math.sin(t.current * 0.18) * 1.2;
     const dif = Math.atan2(Math.sin(deseo - g.rotation.y), Math.cos(deseo - g.rotation.y));
-    g.rotation.y += dif * (1 - Math.exp(-6 * dt));
+    g.rotation.y += dif * (1 - Math.exp(-(d < 14 ? 6 : 1.2) * dt));
 
-    medidas.current.robot = g.position.distanceTo(jugadorPos);
+    medidas.current.robot = d;
   });
 
   return (
-    <group ref={grupo} position={[3, 0.6, 21]}>
+    <group ref={grupo} position={[CASA_DEL_ROBOT.x, 0.6, CASA_DEL_ROBOT.z]}>
       {/* torso */}
       <mesh castShadow position={[0, 0.95, 0]}>
         <boxGeometry args={[0.64, 0.8, 0.42]} />

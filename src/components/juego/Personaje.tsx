@@ -16,15 +16,23 @@ const tmpObjetivo = new THREE.Vector3();
 const tmpCam = new THREE.Vector3();
 const tmpMira = new THREE.Vector3();
 
-export function Personaje({ entrada, jugadorPos, luzRef }: {
+/** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
+export interface Obstaculo { id: string; x: number; z: number; radio: number }
+
+export function Personaje({ entrada, jugadorPos, luzRef, obstaculos, onChoque }: {
   entrada: React.MutableRefObject<EntradaMando>;
   jugadorPos: THREE.Vector3;
   luzRef: React.RefObject<THREE.DirectionalLight | null>;
+  obstaculos: React.MutableRefObject<Obstaculo[]>;
+  onChoque: (id: string) => void;
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
   const rumbo = useRef(0);
   const t = useRef(0);
+  // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
+  // no cada fotograma mientras sigas pegado a él.
+  const tocando = useRef<string | null>(null);
 
   useFrame((estado, dtBruto) => {
     const g = grupo.current;
@@ -40,6 +48,29 @@ export function Personaje({ entrada, jugadorPos, luzRef }: {
     g.position.addScaledVector(vel.current, dt);
     g.position.x = THREE.MathUtils.clamp(g.position.x, -LIMITE, LIMITE);
     g.position.z = THREE.MathUtils.clamp(g.position.z, -LIMITE, LIMITE);
+
+    // --- Colisión: a la gente y a los edificios no se les atraviesa.
+    // Al tocarlos te quedas fuera de su radio y se avisa a la página, que
+    // abre su chat: chocarte con un amigo es empezar a hablar con él.
+    let choque: string | null = null;
+    for (const o of obstaculos.current) {
+      const dx = g.position.x - o.x;
+      const dz = g.position.z - o.z;
+      const d = Math.hypot(dx, dz);
+      if (d >= o.radio) continue;
+      // Empujón hacia fuera justo al borde (si cayó en el centro exacto, se
+      // sale hacia atrás para no dividir por cero).
+      const nx = d > 0.001 ? dx / d : 0;
+      const nz = d > 0.001 ? dz / d : 1;
+      g.position.x = o.x + nx * o.radio;
+      g.position.z = o.z + nz * o.radio;
+      vel.current.multiplyScalar(0.2);
+      choque = o.id;
+    }
+    if (choque !== tocando.current) {
+      tocando.current = choque;
+      if (choque) onChoque(choque);
+    }
 
     const moviendo = vel.current.lengthSq() > 0.4;
     if (moviendo) {

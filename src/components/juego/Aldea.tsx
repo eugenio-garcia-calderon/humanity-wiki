@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { PALETA, crearAzar, centroRio } from './paleta';
+import { Detalles } from './Detalles';
 
 const MITAD = 545; // half map side
 
@@ -425,6 +426,7 @@ export function Aldea() {
       <Puente />
       <Lagos />
       <Vegetacion />
+      <Detalles />
     </group>
   );
 }
