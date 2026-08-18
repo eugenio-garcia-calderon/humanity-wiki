@@ -81,12 +81,15 @@ export function posicionProyecto(i: number): { x: number; z: number } {
  */
 export function posicionesProyectos(
   proyectos: Array<{ id: string }>,
-  overrides: Array<{ seed_id: string; x: number | null; z: number | null }>,
-): Array<{ x: number; z: number }> {
+  overrides: Array<{ seed_id: string; x: number | null; z: number | null; modelo?: string | null }>,
+): Array<{ x: number; z: number; portada: string | null }> {
   const ov = new Map(overrides.map(o => [o.seed_id, o]));
   return proyectos.slice(0, 12).map((p, i) => {
     const o = ov.get(`proy:${p.id}`);
-    return o && o.x != null && o.z != null ? { x: o.x, z: o.z } : posicionProyecto(i);
+    const base = o && o.x != null && o.z != null ? { x: o.x, z: o.z } : posicionProyecto(i);
+    // La PORTADA del portal viaja en `modelo` del mismo retoque: para las
+    // casas es el índice del diseño, para un portal es la URL de su foto.
+    return { ...base, portada: o?.modelo || null };
   });
 }
 

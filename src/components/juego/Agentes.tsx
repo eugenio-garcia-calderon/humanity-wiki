@@ -68,6 +68,7 @@ function ProyectoAgente({ a, onHablar, onAgarrar }: {
             pct={pct}
             radio={2.2}
             resaltado={resaltado}
+            fotoUrl={a.foto_url}
             onAgarrar={onAgarrar ? (e) => onAgarrar(a, e) : undefined}
           />
         )}
