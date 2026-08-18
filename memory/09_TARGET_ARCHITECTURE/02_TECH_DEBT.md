@@ -147,3 +147,10 @@ yet.** They are here so the decision can be explicit.
   reports every React 19 consumer as "invalid"). Harmless today, but each new dependency
   install repeats the warning noise. Replacing it is an old entry above; the game install
   bumped React 19.0.1 → 19.2.8 without incident.
+
+### Juego Vital: mobiliario sin instanciar — 2026-08-18
+`Detalles.tsx` dibuja cada banco, farola, puesto y oveja como mallas sueltas: la escena
+pasó de 135 a ~400 draw calls. En escritorio no se nota; en un móvil de gama media es el
+primer sitio donde mirar si va a tirones. Arreglo: `InstancedMesh` por tipo de objeto
+(como ya hace `Vegetacion`), ~1 hora. No se hizo ahora para no retrasar la verificación
+visual de lo que el usuario pidió.

@@ -4,6 +4,7 @@
 // own chunk that only game visitors download.
 // ============================================================================
 import { useMemo, useRef } from 'react';
+import type { Obstaculo } from './Personaje';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
@@ -46,16 +47,29 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania }: {
+export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCercania, onChoque }: {
   entrada: React.MutableRefObject<EntradaMando>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
   /** Compartida con la página: es donde se plantan las cosas al construir. */
   jugadorPos: THREE.Vector3;
   onCercania: (c: Cercania) => void;
+  onChoque: (id: string) => void;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
+
+  // Lo sólido del mundo. En una ref para que el personaje lo lea cada
+  // fotograma sin volver a montarse cuando cambian los agentes.
+  const obstaculos = useRef<Obstaculo[]>([]);
+  obstaculos.current = useMemo(() => agentes.map(a => ({
+    id: a.id,
+    x: a.x,
+    // El edificio de un proyecto es ancho: su centro sólido está detrás de
+    // la puerta, no en el punto donde se plantó.
+    z: a.tipo === 'proyecto' ? a.z : a.z,
+    radio: a.tipo === 'proyecto' ? 4.6 : 1.1,
+  })), [agentes]);
 
   return (
     <Canvas
@@ -94,7 +108,13 @@ export default function Escena({ entrada, proyectos, agentes, jugadorPos, onCerc
       <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
       <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} />
       <Robot jugadorPos={jugadorPos} medidas={medidas} />
-      <Personaje entrada={entrada} jugadorPos={jugadorPos} luzRef={luzRef} />
+      <Personaje
+        entrada={entrada}
+        jugadorPos={jugadorPos}
+        luzRef={luzRef}
+        obstaculos={obstaculos}
+        onChoque={onChoque}
+      />
       <Coordinador medidas={medidas} onCercania={onCercania} />
     </Canvas>
   );

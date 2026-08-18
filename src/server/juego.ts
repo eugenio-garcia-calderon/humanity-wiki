@@ -169,6 +169,68 @@ export function registerJuegoRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * POST /api/juego/agentes/:id/archivos  { url, nombre, tipo, es_imagen }
+   * El archivo de cada amigo: fotos y documentos que se quedan con él. Los
+   * bytes ya están subidos por `/api/uploads`; aquí solo se guarda la ficha.
+   */
+  app.post('/api/juego/agentes/:id/archivos', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const a = await agenteMio(req, res);
+      if (!a) return;
+      const url = String(req.body?.url || '').trim();
+      // Solo rutas de nuestro propio almacén: nada de enlaces externos que
+      // luego se pinten como si fueran del jugador.
+      if (!url.startsWith('/uploads/')) {
+        return res.status(400).json({ error: 'Sube el archivo primero.' });
+      }
+      const entrada = JSON.stringify([{
+        url,
+        nombre: String(req.body?.nombre || 'archivo').slice(0, 120),
+        tipo: String(req.body?.tipo || ''),
+        es_imagen: !!req.body?.es_imagen,
+        created_at: new Date().toISOString(),
+      }]);
+      await db.execute(sql`
+        UPDATE game_agents
+        SET archivos = coalesce(archivos, '[]'::jsonb) || ${entrada}::jsonb,
+            updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${a.id}
+      `);
+      const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${a.id}`);
+      res.json(fila.rows[0]);
+    } catch (e: any) {
+      console.error('archivos agente error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** DELETE /api/juego/agentes/:id/archivos { url } — quita uno del archivo. */
+  app.delete('/api/juego/agentes/:id/archivos', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const a = await agenteMio(req, res);
+      if (!a) return;
+      const url = String(req.body?.url || '');
+      // El fichero en disco NO se borra: puede estar embebido en otro sitio.
+      await db.execute(sql`
+        UPDATE game_agents
+        SET archivos = coalesce((
+              SELECT jsonb_agg(e) FROM jsonb_array_elements(coalesce(archivos, '[]'::jsonb)) e
+              WHERE e->>'url' <> ${url}
+            ), '[]'::jsonb),
+            updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${a.id}
+      `);
+      const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${a.id}`);
+      res.json(fila.rows[0]);
+    } catch (e: any) {
+      console.error('quitar archivo error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** PUT /api/juego/agentes/:id/conversacion { conversation_id } — fija su hilo. */
   app.put('/api/juego/agentes/:id/conversacion', async (req: Request, res: Response) => {
     try {

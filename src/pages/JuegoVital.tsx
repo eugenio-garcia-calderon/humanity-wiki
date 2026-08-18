@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import * as THREE from 'three';
 import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
-  Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles,
+  Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -187,6 +187,24 @@ export default function JuegoVital() {
     return j;
   };
 
+  /**
+   * Acercarse a un proyecto ABRE su ficha sola, sin pulsar nada (petición de
+   * Eugenio). Al alejarse se cierra. Con las personas no: ahí manda el choque.
+   */
+  const alCambiarCercania = useCallback((c: Cercania) => {
+    setCercania(c);
+    if (c?.tipo === 'proyecto') setPanel(c.proyecto);
+    else if (c === null) setPanel(null);
+  }, []);
+
+  /** Chocarte con alguien es empezar a hablar con él: nada de atravesarlo. */
+  const alChocar = useCallback((id: string) => {
+    const a = agentesRef.current.find(x => x.id === id);
+    if (!a) return;
+    setFichaAgente(a);
+    hablarCon(a);
+  }, [hablarCon]);
+
   const interactuar = useCallback(() => {
     const c = cercaniaRef.current;
     if (!c) return;
@@ -245,7 +263,14 @@ export default function JuegoVital() {
   return (
     <div className="relative w-full h-full overflow-hidden bg-sky-50">
       <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center"><p className="text-sm text-slate-400 animate-pulse">Construyendo tu mundo…</p></div>}>
-        <Escena entrada={entrada} proyectos={proyectos} agentes={agentes} jugadorPos={jugadorPos} onCercania={setCercania} />
+        <Escena
+          entrada={entrada}
+          proyectos={proyectos}
+          agentes={agentes}
+          jugadorPos={jugadorPos}
+          onCercania={alCambiarCercania}
+          onChoque={alChocar}
+        />
       </Suspense>
 
       {/* Cabecera */}
@@ -571,6 +596,60 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
   const [nota, setNota] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [memoria, setMemoria] = useState(agente.memoria || []);
+  const [archivos, setArchivos] = useState(agente.archivos || []);
+  const [subiendoArchivo, setSubiendoArchivo] = useState(false);
+  const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
+  const archivoRef = useRef<HTMLInputElement>(null);
+
+  // Al cambiar de amigo, la ficha enseña lo suyo (el componente no se
+  // desmonta entre uno y otro cuando se elige desde la lista lateral).
+  useEffect(() => {
+    setMemoria(agente.memoria || []);
+    setArchivos(agente.archivos || []);
+    setNota('');
+    setErrorArchivo(null);
+  }, [agente.id, agente.memoria, agente.archivos]);
+
+  /** Sube el archivo y lo guarda en el archivo del agente. */
+  const anadirArchivo = async (f?: File) => {
+    if (!f) return;
+    setErrorArchivo(null);
+    setSubiendoArchivo(true);
+    try {
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { setErrorArchivo(js.error || 'No se ha podido subir.'); return; }
+      const r = await fetch(`/api/juego/agentes/${agente.id}/archivos`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: js.url, nombre: f.name, tipo: f.type, es_imagen: !!js.esImagen }),
+      });
+      const j = await r.json();
+      if (!r.ok) { setErrorArchivo(j.error || 'No se ha podido guardar.'); return; }
+      setArchivos(Array.isArray(j.archivos) ? j.archivos : archivos);
+      await onGuardado();
+    } catch {
+      setErrorArchivo('Error de red al subir.');
+    } finally {
+      setSubiendoArchivo(false);
+    }
+  };
+
+  const quitarArchivo = async (url: string) => {
+    try {
+      const r = await fetch(`/api/juego/agentes/${agente.id}/archivos`, {
+        method: 'DELETE', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const j = await r.json();
+      if (r.ok) { setArchivos(Array.isArray(j.archivos) ? j.archivos : archivos); await onGuardado(); }
+    } catch { /* se reintenta a mano */ }
+  };
 
   const meterInfo = async () => {
     const texto = nota.trim();
@@ -647,6 +726,60 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
                 <Plus className="w-4 h-4" />
               </button>
             </div>
+          </div>
+
+          {/* Su archivo: fotos y documentos que se quedan con él */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Su archivo ({archivos.length})
+              </p>
+              <input
+                ref={archivoRef}
+                type="file"
+                accept="image/*,application/pdf,text/csv,application/json,application/zip,.docx,.xlsx,.pptx"
+                className="hidden"
+                onChange={e => { anadirArchivo(e.target.files?.[0]); e.target.value = ''; }}
+              />
+              <button
+                onClick={() => archivoRef.current?.click()}
+                disabled={subiendoArchivo}
+                title="Añadir foto o documento"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+              >
+                <Paperclip className="w-3 h-3" /> {subiendoArchivo ? 'Subiendo…' : 'Añadir'}
+              </button>
+            </div>
+            {errorArchivo && (
+              <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2 py-1 mb-1.5">{errorArchivo}</p>
+            )}
+            {archivos.length > 0 ? (
+              <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto">
+                {archivos.slice().reverse().map(f => (
+                  <div key={f.url} className="relative group">
+                    <a href={f.url} target="_blank" rel="noreferrer" title={f.nombre} className="block">
+                      {f.es_imagen ? (
+                        <img src={f.url} alt={f.nombre} className="w-full h-14 object-cover rounded-lg border border-slate-200" />
+                      ) : (
+                        <div className="w-full h-14 rounded-lg border border-slate-200 bg-slate-50 flex flex-col items-center justify-center px-1">
+                          <FileText className="w-4 h-4 text-slate-400" />
+                          <span className="text-[8px] text-slate-500 truncate w-full text-center mt-0.5">{f.nombre}</span>
+                        </div>
+                      )}
+                    </a>
+                    <button
+                      onClick={() => quitarArchivo(f.url)}
+                      title="Quitar de su archivo"
+                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hidden group-hover:flex items-center justify-center shadow"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-400">Sin fotos ni documentos todavía.</p>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 mt-3">
