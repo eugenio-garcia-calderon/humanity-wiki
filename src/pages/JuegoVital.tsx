@@ -456,20 +456,33 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
   const [descripcion, setDescripcion] = useState('');
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [errorFoto, setErrorFoto] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const esPersona = tipo === 'persona';
 
+  // `/api/uploads` recibe los bytes EN CRUDO con `?type=<mime>`, no un
+  // FormData (mismo patrón que Documento.tsx y GrafoCanvas.tsx). Mandarlo
+  // como formulario devolvía 400 y la foto se perdía en silencio.
   const subirFoto = async (f?: File) => {
     if (!f) return;
+    setErrorFoto(null);
     setSubiendo(true);
     try {
-      const fd = new FormData();
-      fd.append('file', f);
-      const r = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: fd });
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
       const j = await r.json();
-      if (r.ok && j.url) setFotoUrl(j.url);
-    } catch { /* sin foto se crea igual */ } finally { setSubiendo(false); }
+      if (!r.ok || !j.url) { setErrorFoto(j.error || 'No se ha podido subir la foto.'); return; }
+      setFotoUrl(j.url);
+    } catch {
+      setErrorFoto('Error de red al subir la foto.');
+    } finally {
+      setSubiendo(false);
+    }
   };
 
   return (
@@ -519,6 +532,9 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
             <Camera className="w-3.5 h-3.5" />
             {subiendo ? 'Subiendo…' : fotoUrl ? 'Foto añadida ✓' : esPersona ? 'Subir una foto suya (opcional)' : 'Subir una foto del proyecto (opcional)'}
           </button>
+          {errorFoto && (
+            <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2 py-1.5">{errorFoto}</p>
+          )}
           {fotoUrl && <img src={fotoUrl} alt="" className="w-full h-28 object-cover rounded-xl" />}
         </div>
 
