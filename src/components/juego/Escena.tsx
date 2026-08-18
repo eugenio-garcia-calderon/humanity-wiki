@@ -3,11 +3,11 @@
 // it: this file (and everything it imports, including three.js) lives in its
 // own chunk that only game visitors download.
 // ============================================================================
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { Obstaculo } from './Personaje';
 import { posicionProyecto, RADIO_EDIFICIO } from './mapa';
 import type { Aspecto } from './aspecto';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Agente, Camara, Cercania, EntradaMando, Medidas, ProyectoJuego, Vehiculo } from './tipos';
@@ -17,6 +17,32 @@ import { Personaje } from './Personaje';
 import { Robot } from './Robot';
 import { EdificiosProyectos } from './EdificiosProyectos';
 import { Agentes } from './Agentes';
+import { InteriorProyecto, type DatosInterior } from './Interior';
+import {
+  SALA_R, SALIDA, HAB_ANCHO, HAB_FONDO, HAB_SALIDA, RADIO_PUERTA,
+  posicionPuerta,
+} from './planta';
+
+/**
+ * Fondo y niebla. Fuera es el cielo de siempre; dentro de un proyecto, un
+ * fondo oscuro con niebla corta, que es lo que hace que la sala se sienta
+ * cerrada y que la luz de las puertas destaque.
+ */
+function Ambiente({ interior }: { interior: boolean }) {
+  const { scene } = useThree();
+  useEffect(() => {
+    if (interior) {
+      scene.background = new THREE.Color('#0d1117');
+      // Niebla MUY larga: la sala mide 48 m de lado a lado y con una niebla
+      // corta se tragaba las puertas y el núcleo — se veía todo negro.
+      scene.fog = new THREE.Fog('#0d1117', 70, 210);
+    } else {
+      scene.background = null;
+      scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+    }
+  }, [interior, scene]);
+  return null;
+}
 
 /** Arbitrates what the player is close to (robot beats buildings) and only
  *  notifies the page when the answer CHANGES — never once per frame. */
@@ -49,7 +75,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -63,29 +89,51 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   aspectoJugador?: Aspecto;
   vehiculo: Vehiculo;
   alturaVuelo: React.MutableRefObject<number>;
+  /** Si está puesto, se juega DENTRO de un proyecto y la aldea no se dibuja. */
+  interior: DatosInterior | null;
 }) {
   const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
 
   // Lo sólido del mundo. En una ref para que el personaje lo lea cada
   // fotograma sin volver a montarse cuando cambian los agentes.
+  //
+  // Dentro de un proyecto lo sólido es otra cosa: las puertas de sus grupos y
+  // el portal de salida. Sale de `planta.ts`, el mismo sitio del que la
+  // escena saca dónde dibujarlas — si no, entrarías por una puerta que ya no
+  // está ahí.
   const obstaculos = useRef<Obstaculo[]>([]);
-  obstaculos.current = useMemo(() => [
-    ...agentes.map(a => ({
-      id: a.id,
-      x: a.x,
-      z: a.z,
-      radio: a.tipo === 'proyecto' ? RADIO_EDIFICIO : 1.1,
-    })),
-    // Los edificios de los proyectos de la Fase 1 también son sólidos: antes
-    // se atravesaban y chocar con ellos no hacía nada (fallo reportado por
-    // Eugenio). El prefijo distingue quién es quién al avisar del choque.
-    ...proyectos.slice(0, 12).map((p, i) => ({
-      id: `proy:${p.id}`,
-      ...posicionProyecto(i),
-      radio: RADIO_EDIFICIO,
-    })),
-  ], [agentes, proyectos]);
+  obstaculos.current = useMemo(() => {
+    if (interior) {
+      if (interior.sala) {
+        return [{ id: 'interior:sala', ...HAB_SALIDA, radio: 2.2 }];
+      }
+      return [
+        ...interior.grupos.map((g, i) => ({
+          id: `interior:puerta:${g.id}`,
+          ...posicionPuerta(i, interior.grupos.length),
+          radio: RADIO_PUERTA,
+        })),
+        { id: 'interior:salir', ...SALIDA, radio: 2.2 },
+      ];
+    }
+    return [
+      ...agentes.map(a => ({
+        id: a.id,
+        x: a.x,
+        z: a.z,
+        radio: a.tipo === 'proyecto' ? RADIO_EDIFICIO : 1.1,
+      })),
+      // Los edificios de los proyectos de la Fase 1 también son sólidos: antes
+      // se atravesaban y chocar con ellos no hacía nada (fallo reportado por
+      // Eugenio). El prefijo distingue quién es quién al avisar del choque.
+      ...proyectos.slice(0, 12).map((p, i) => ({
+        id: `proy:${p.id}`,
+        ...posicionProyecto(i),
+        radio: RADIO_EDIFICIO,
+      })),
+    ];
+  }, [agentes, proyectos, interior]);
 
   return (
     <Canvas
@@ -95,35 +143,43 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       camera={{ fov: 48, near: 0.5, far: 1400, position: [0, 11, 32] }}
       onCreated={(estado) => {
         estado.scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+        estado.scene.background = null;
         // Dev-only handle for in-browser scene inspection (used to debug the
         // blank-canvas bug of 2026-08-18; harmless and useful, so it stays).
         if ((import.meta as any).env?.DEV) (window as any).__JV = estado;
       }}
     >
-      <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
-      <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
-      <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
-      <directionalLight
-        ref={luzRef}
-        castShadow
-        position={[60, 95, -45]}
-        intensity={1.7}
-        color={PALETA.luzSol}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-left={-70}
-        shadow-camera-right={70}
-        shadow-camera-top={70}
-        shadow-camera-bottom={-70}
-        shadow-camera-near={5}
-        shadow-camera-far={400}
-        shadow-bias={-0.0004}
-      />
+      <Ambiente interior={!!interior} />
 
-      <Aldea />
-      <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
-      <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} />
-      <Robot jugadorPos={jugadorPos} medidas={medidas} />
+      {interior ? (
+        <InteriorProyecto datos={interior} />
+      ) : (
+        <>
+          <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
+          <ambientLight intensity={0.55} color={PALETA.luzAmbiente} />
+          <hemisphereLight intensity={0.5} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
+          <directionalLight
+            ref={luzRef}
+            castShadow
+            position={[60, 95, -45]}
+            intensity={1.7}
+            color={PALETA.luzSol}
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-left={-70}
+            shadow-camera-right={70}
+            shadow-camera-top={70}
+            shadow-camera-bottom={-70}
+            shadow-camera-near={5}
+            shadow-camera-far={400}
+            shadow-bias={-0.0004}
+          />
+          <Aldea />
+          <EdificiosProyectos proyectos={proyectos} jugadorPos={jugadorPos} medidas={medidas} />
+          <Agentes agentes={agentes} jugadorPos={jugadorPos} medidas={medidas} />
+          <Robot jugadorPos={jugadorPos} medidas={medidas} />
+        </>
+      )}
       <Personaje
         entrada={entrada}
         camara={camara}
@@ -133,11 +189,14 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         onChoque={onChoque}
         destino={destino}
         zoom={zoom}
+        limite={interior ? (interior.sala ? Math.min(HAB_ANCHO, HAB_FONDO) / 2 - 1.5 : SALA_R - 1.5) : undefined}
         aspecto={aspectoJugador}
         vehiculo={vehiculo}
         alturaVuelo={alturaVuelo}
       />
-      <Coordinador medidas={medidas} onCercania={onCercania} />
+      {/* Dentro de un proyecto no hay robot ni vecinos: el arbitraje de
+          cercanía se apaga para que no arrastre la última medida de la aldea. */}
+      {!interior && <Coordinador medidas={medidas} onCercania={onCercania} />}
     </Canvas>
   );
 }

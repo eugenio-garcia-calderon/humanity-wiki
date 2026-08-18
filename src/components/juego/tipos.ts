@@ -37,6 +37,21 @@ export interface ProyectoJuego {
   tarjetas: number;
   hechas: number;
   publico: boolean;
+  /** Los grupos del tablero. Dentro del edificio son sus habitaciones. */
+  grupos?: Array<{ id: string; label: string; color: string }>;
+}
+
+/** Una tarjeta del tablero del proyecto (`roadmap_items`), tal y como la
+ *  devuelve GET /api/roadmap?proyecto=… Sus `bloques` traen las notas y las
+ *  fotos que flotan dentro de la habitación. */
+export interface ItemProyecto {
+  id: string;
+  grupo: string;
+  titulo: string;
+  resumen: string | null;
+  estado: string;
+  prioridad: string;
+  bloques: Array<{ tipo: string; texto?: string; url?: string; pie?: string }>;
 }
 
 /** An inhabitant of the world the player built: a real person or a project.
