@@ -733,3 +733,21 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
   - El blanco de una persona es un cilindro **transparente**, no `visible={false}`: lo invisible se salta el rayo del ratón y no habría nada que acertar.
   - El nombre resaltado va con `depthTest` apagado y sin descarte por frustum: si no, el propio edificio lo tapa y three lo descarta justo cuando lo has hecho grande para leerlo.
 - **Verificado en el navegador** a 90 m de zoom, donde el personaje mide unos pocos píxeles: al pasar por encima el cursor cambia a mano, «Javier» se lee a pantalla completa, y al pulsar se abre su ficha sin haber caminado. (Mis dos primeros intentos fallaron por un error mío de coordenadas: las capturas van a 800 px y la ventana real mide 826.)
+
+### 2026-08-18 — El hover ya no parpadea, y ocupa lo que Eugenio pidió
+- **El nombre resaltado se redujo al 40 %** de lo que ocupaba (del 7,5 % al 3 % del alto de pantalla): a pantalla completa tapaba media escena.
+- **Salir del hover ya no es inmediato.** Un muñeco son varias mallas con huecos entre medias, y el nombre desaparecía y volvía con solo mover un poco el ratón por encima (reportado por Eugenio). Ahora hay 450 ms de gracia que se cancelan si el ratón vuelve a entrar: hay que marcharse de verdad para que se apague. Al pulsar sí se apaga en el acto, que es lo que se espera.
+
+### 2026-08-18 — El avatar se quedaba tieso al cambiar de fenotipo
+- **Reportado por Eugenio**: «he cambiado el estilo de mi avatar y ahora no tiene dinamismo ni efectos al moverse».
+- **Causa**: cambiar de fenotipo carga OTRO `.glb`, con otro esqueleto y otras pistas de animación, pero el componente se reutilizaba y el mezclador de animación seguía apuntando a los huesos del modelo anterior. El muñeco se quedaba clavado en su pose de reposo — ni andar, ni respirar. Recargar la página lo arreglaba, que es la firma exacta de este fallo.
+- **Arreglo**: `Persona3D` monta su modelo con `key={cuerpo}`, así que cambiar de cuerpo monta una persona nueva y limpia. Vale igual para tu avatar y para el de cualquier vecino.
+- **Medido, no mirado**: leyendo el cuaternión del hueso `arm-left` en el navegador. Antes del arreglo, tras cambiar de fenotipo, se quedaba fijo en (0, 0) mientras los otros dos vecinos seguían animando; después del arreglo se mueve igual que ellos.
+
+### 2026-08-18 — Meter en una habitación a alguien que YA existe (no un clon)
+- **Reportado por Eugenio**: dentro de la sala «Personas» del Camión camperizado pidió «añade a Anita» y la IA **creó una Anita nueva** — un nombre suelto en una tarjeta. Él quería la Anita de siempre, con su avatar.
+- **Nueva acción de la IA, `habitante`**: `{"tipo":"habitante","grupo":"personas","agente_id":"GA…","nombre":"Anita"}`. El prompt le enseña a mirar la lista de gente que ya vive en el mundo y usar SU id; solo si de verdad no existe nadie con ese nombre se crea, una vez.
+- **La tarjeta apunta a la persona** con un bloque `{tipo:'agente', agente_id}`. Dentro de la habitación deja de ser una lámina de cristal: aparece **su avatar real**, con su fenotipo y sus colores, su nombre, su halo y una peana de luz. Al pulsarla (o al chocarte con ella, como en la aldea) se abre SU conversación, con su memoria.
+- **Rescate de lo ya creado**: las tarjetas de antes solo llevan el nombre. Si coincide con el de alguien de tu mundo, se toma por esa persona — así la «Anita» duplicada pasó a ser la Anita de verdad sin tocar la base de datos.
+- **Dónde vive la regla**: en `planta.ts`, no en `Interior.tsx`. La página necesita saber quién está en la sala para contárselo a la IA, y `Interior.tsx` importa three.js: traerlo de allí metería el motor 3D (~1 MB) en el paquete que descarga todo el mundo, juegue o no.
+- **Verificado de punta a punta**: la IA devuelve la acción con el id real de Javier (nada de crear a nadie), la tarjeta se guarda con su bloque `agente`, y en la habitación aparecen Anita y Javier de pie, con sus avatares. Las tarjetas de prueba se archivaron después; el número de personas del mundo siguió siendo 2.

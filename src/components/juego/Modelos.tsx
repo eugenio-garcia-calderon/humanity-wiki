@@ -57,7 +57,19 @@ export function cuerpoDe(nombre: string): string {
  */
 // El modelo mide 0,67 unidades: a escala 2,6 queda en ~1,75 m, la estatura
 // real de un adulto en un mundo donde 1 unidad = 1 metro (medido, no estimado).
-export function Persona3D({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
+//
+// La `key` de aquí abajo NO es decorativa. Cambiar de fenotipo carga OTRO
+// .glb, con otro esqueleto y otras pistas, y el mezclador de animación se
+// quedaba apuntando a los huesos del modelo anterior: el muñeco se quedaba
+// clavado en su pose de reposo, sin andar ni respirar (fallo reportado por
+// Eugenio, «he cambiado el estilo de mi avatar y ya no tiene dinamismo al
+// moverse»; recargar la página lo arreglaba, que es la firma de este fallo).
+// Con la key, cambiar de cuerpo monta una persona nueva y limpia.
+export function Persona3D(props: Parameters<typeof PersonaModelo>[0]) {
+  return <PersonaModelo key={props.cuerpo} {...props} />;
+}
+
+function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
   cuerpo: string;
   animacion?: string;
   escala?: number;

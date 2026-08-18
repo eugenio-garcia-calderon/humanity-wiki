@@ -54,7 +54,11 @@ export interface ItemProyecto {
   resumen: string | null;
   estado: string;
   prioridad: string;
-  bloques: Array<{ tipo: string; texto?: string; url?: string; pie?: string }>;
+  /** Un bloque `{tipo:'agente', agente_id}` NO es contenido: dice que esta
+   *  tarjeta ES una persona del mundo, y entonces en la habitación aparece su
+   *  avatar de verdad en vez de una lámina de cristal (petición de Eugenio:
+   *  «me ha creado una Anita nueva; yo quiero la original, con su avatar»). */
+  bloques: Array<{ tipo: string; texto?: string; url?: string; pie?: string; agente_id?: string }>;
 }
 
 /** An inhabitant of the world the player built: a real person or a project.

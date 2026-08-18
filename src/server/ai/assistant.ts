@@ -228,12 +228,19 @@ Si el jugador la pide (o si su mundo está casi vacío y viene a hablar contigo)
 Al terminar cada bloque, PROPÓN crear en el mundo lo que ha contado (proyectos y personas) usando el bloque JSON de abajo. Nunca inventes datos de su vida: si no te lo ha dicho, pregúntalo.
 
 ${juego.dentro ? `CÓMO CONSTRUYES AQUÍ DENTRO:
-Estás DENTRO de un edificio, no en la aldea: aquí NO se crean vecinos ni edificios nuevos. Lo único que se puede añadir es contenido a las habitaciones de este proyecto, que son los grupos de su tablero:
+Estás DENTRO de un edificio, no en la aldea: aquí NO se crean vecinos ni edificios nuevos. Lo que se puede añadir es contenido a las habitaciones de este proyecto, que son los grupos de su tablero.
+
+a) UNA COSA (una tarea, una nota, un gasto, una idea):
 {"acciones_juego": [{"tipo": "tarjeta", "grupo": "<id de la habitación>", "nombre": "...", "descripcion": "..."}]}
+
+b) UNA PERSONA — «mete a Anita aquí», «añade a Gala a esta sala»:
+{"acciones_juego": [{"tipo": "habitante", "grupo": "<id de la habitación>", "agente_id": "<id de esa persona>", "nombre": "<su nombre>"}]}
+**Mira SIEMPRE la lista \`agentes\` de arriba y usa el \`id\` de la persona que ya existe.** Meter a alguien en una habitación no es crear a nadie: es traer al que ya vive en su mundo, con su cara, su memoria y su conversación. Duplicarlo es un fallo grave (le pasó a Eugenio: pidió a Anita y le apareció una Anita nueva y vacía). Solo si NO hay nadie con ese nombre en la lista, manda la acción sin \`agente_id\` y se creará una vez.
+Nunca uses "tarjeta" para una persona.
 ${juego.dentro.sala_actual
     ? `Si dice «en esta sala», «aquí» o no nombra ninguna, usa grupo "${juego.dentro.sala_actual.id}".`
     : 'Elige la habitación por su significado: una persona va a «personas», un gasto a «dinero», una idea de diseño a «diseno»…'}
-Aparece flotando en esa habitación al momento. Si te lo piden claro, hazlo y ya: nada de pedir confirmaciones ni datos que no hacen falta (para meter a alguien en una habitación basta su nombre).
+Aparece en esa habitación al momento. Si te lo piden claro, hazlo y ya: nada de pedir confirmaciones ni datos que no hacen falta (para meter a alguien basta su nombre).
 NO uses "tipo": "persona" ni "proyecto" mientras esté aquí dentro: eso planta cosas en la aldea, fuera del edificio, y no es lo que te está pidiendo.`
         : `CÓMO CONSTRUYES EN SU MUNDO:
 Devuelve acciones en el bloque JSON final con este formato:
@@ -252,12 +259,12 @@ ${webSearch ? '4. Puedes buscar en internet cuando ayude de verdad (datos, refer
 FORMATO DE RESPUESTA:
 Texto normal. Si creas algo, añade AL FINAL:
 
-${juego.dentro ? `Ejemplo real, para «añade a Gala como persona en esta sala» estando en «${juego.dentro.sala_actual?.label || 'Personas'}»:
+${juego.dentro ? `Ejemplo real, para «añade a Gala en esta sala» estando en «${juego.dentro.sala_actual?.label || 'Personas'}», con Gala ya en la lista de agentes con id GA123:
 
-Ya está: Gala flota aquí, en ${juego.dentro.sala_actual?.label || 'esta habitación'}.
+Ya está: Gala está aquí, en ${juego.dentro.sala_actual?.label || 'esta habitación'}.
 
 \`\`\`redhumana
-{"acciones_juego": [{"tipo": "tarjeta", "grupo": "${juego.dentro.sala_actual?.id || 'personas'}", "nombre": "Gala", "descripcion": "Persona del proyecto"}]}
+{"acciones_juego": [{"tipo": "habitante", "grupo": "${juego.dentro.sala_actual?.id || 'personas'}", "agente_id": "GA123", "nombre": "Gala"}]}
 \`\`\``
         : `\`\`\`redhumana
 {"acciones_juego": [{"tipo": "proyecto", "nombre": "Camión camperizado", "descripcion": "..."}],
@@ -344,7 +351,8 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       acciones_juego: Array.isArray(parsed.acciones_juego)
         ? parsed.acciones_juego
             .filter((a: any) => a
-              && (a.tipo === 'persona' || a.tipo === 'proyecto' || a.tipo === 'tarjeta')
+              && (a.tipo === 'persona' || a.tipo === 'proyecto'
+                || a.tipo === 'tarjeta' || a.tipo === 'habitante')
               && typeof a.nombre === 'string')
             .slice(0, 4)
         : [],
