@@ -7,7 +7,7 @@ import {
   ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
   Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
-  Menu, Sprout, Home, Users, Youtube, RefreshCw, Unplug, Play,
+  Menu, Sprout, Home, Users, Youtube, RefreshCw, Unplug, Play, GripHorizontal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -1263,6 +1263,40 @@ export default function JuegoVital() {
     });
   }, [cambiarEscenario]);
 
+  // ------------------------------------------------------------------
+  // LA FICHA CENTRAL DE UNA TAREA (2026-08-19, petición de Eugenio): las
+  // tarjetas del corro de la plaza se abren al pulsarlas o chocar con ellas,
+  // y dentro se edita TODO en un lienzo 2D.
+  // ------------------------------------------------------------------
+  const [fichaTarea, setFichaTarea] = useState<ItemProyecto | null>(null);
+
+  /** Guarda un cambio de la tarjeta y lo refleja en la plaza al momento. */
+  const guardarTarea = useCallback(async (id: string, patch: Record<string, unknown>) => {
+    const r = await fetch(`/api/roadmap/${id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (!r?.ok) { avisar(j?.error || 'No se ha podido guardar la tarjeta.'); return null; }
+    const actualizada: ItemProyecto = {
+      id: j.id, grupo: j.grupo, titulo: j.titulo, resumen: j.resumen,
+      estado: j.estado, prioridad: j.prioridad,
+      bloques: Array.isArray(j.bloques) ? j.bloques : [],
+    };
+    setInterior(prev => {
+      if (!prev) return prev;
+      // Si la tarjeta se ha MOVIDO a otro proyecto, sale de esta plaza.
+      if (patch.proyecto_id && patch.proyecto_id !== prev.proyecto.id) {
+        return { ...prev, items: prev.items.filter(it => it.id !== id) };
+      }
+      return { ...prev, items: prev.items.map(it => (it.id === id ? actualizada : it)) };
+    });
+    setFichaTarea(f => (f && f.id === id ? actualizada : f));
+    if (patch.estado || patch.proyecto_id) cargarProyectos();   // contadores
+    return actualizada;
+  }, [cargarProyectos]);
+
   /** Un vídeo del cine se ve en la ventana interna de siempre. */
   const verVideoCine = useCallback((v: VideoCine) => {
     setLeyendo({
@@ -1278,6 +1312,12 @@ export default function JuegoVital() {
    */
   const alChocar = useCallback((id: string) => {
     if (id === 'cine:salir') { salirCine(); return; }
+    // Chocar con una tarjeta del corro de la plaza abre su ficha central.
+    if (id.startsWith('tarjeta:')) {
+      const it = interiorRef.current?.items.find(x => x.id === id.slice(8));
+      if (it) setFichaTarea(it);
+      return;
+    }
     // Dentro de un proyecto, lo sólido son sus puertas y su salida.
     if (id === 'interior:salir') { salirDelProyecto(); return; }
     // Dentro de una habitación también hay gente: chocarte con alguien es
@@ -1597,6 +1637,7 @@ export default function JuegoVital() {
             entrarEnProyecto(p);
           }}
           onSalirProyecto={salirDelProyecto}
+          onAbrirTarjeta={(it) => setFichaTarea(it)}
           onHablarAgente={(a) => {
             const ed = editorRef.current;
             if (ed.conectando && ed.sel?.clase === 'item') {
@@ -2558,6 +2599,20 @@ export default function JuegoVital() {
         />
       )}
 
+      {/* LA FICHA CENTRAL DE UNA TAREA: lienzo 2D con todo (petición de
+          Eugenio: hover que expande, clic o choque que abre, y dentro nombre,
+          proyecto, estado y bloques libres). */}
+      {fichaTarea && interior && (
+        <FichaTarea
+          tarea={fichaTarea}
+          proyectos={proyectos}
+          proyectoActual={interior.proyecto.id}
+          onCerrar={() => setFichaTarea(null)}
+          onGuardar={guardarTarea}
+          onMovida={() => { setFichaTarea(null); avisar('Tarjeta movida a su nuevo proyecto.'); }}
+        />
+      )}
+
       {/* Panel de proyecto real (los que ya existían antes del builder) */}
       {panel && (
         <div className="absolute top-16 right-3 z-30 w-[min(20rem,calc(100vw-1.5rem))]">
@@ -3364,3 +3419,260 @@ function OpcionesMusica({ alSubir, alElegir }: {
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// La FICHA CENTRAL de una tarea (2026-08-19, petición de Eugenio): título,
+// proyecto asignado, estado, y un LIENZO 2D donde las notas, fotos, enlaces
+// y vídeos de la tarjeta se colocan libremente arrastrándolos. Todo vive en
+// `roadmap_items.bloques` (con x,y añadidos), así que la plaza 3D enseña las
+// mismas fotos y notas flotando.
+// ---------------------------------------------------------------------------
+interface BloqueLienzo { idx: number; tipo: string; texto?: string; url?: string; pie?: string; x: number; y: number }
+
+const ESTADOS_TAREA: Array<{ id: string; nombre: string; color: string }> = [
+  { id: 'por_hacer', nombre: 'Por hacer', color: '#7c8b9c' },
+  { id: 'en_curso', nombre: 'En curso', color: '#f6c667' },
+  { id: 'hecho', nombre: 'Hecho', color: '#34d399' },
+];
+
+const idYoutube = (url?: string) => url?.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1] || null;
+
+function FichaTarea({ tarea, proyectos, proyectoActual, onCerrar, onGuardar, onMovida }: {
+  tarea: ItemProyecto;
+  proyectos: ProyectoJuego[];
+  proyectoActual: string;
+  onCerrar: () => void;
+  onGuardar: (id: string, patch: Record<string, unknown>) => Promise<ItemProyecto | null>;
+  onMovida: () => void;
+}) {
+  const [titulo, setTitulo] = useState(tarea.titulo);
+  // Los bloques `agente` NO van al lienzo (dicen que la tarjeta es una
+  // persona) pero se PRESERVAN al guardar.
+  const bloquesAgente = useRef(tarea.bloques.filter(b => b.tipo === 'agente'));
+  const [bloques, setBloques] = useState<BloqueLienzo[]>(() =>
+    tarea.bloques.filter(b => b.tipo !== 'agente').map((b, i) => ({
+      idx: i, tipo: b.tipo, texto: b.texto, url: b.url, pie: b.pie,
+      x: typeof (b as any).x === 'number' ? (b as any).x : 26 + (i % 3) * 300,
+      y: typeof (b as any).y === 'number' ? (b as any).y : 26 + Math.floor(i / 3) * 200,
+    })));
+  const [pidiendo, setPidiendo] = useState<null | 'enlace' | 'video'>(null);
+  const [urlBorrador, setUrlBorrador] = useState('');
+  const [subiendo, setSubiendo] = useState(false);
+  const fotoRef = useRef<HTMLInputElement>(null);
+  const siguiente = useRef(bloques.length);
+
+  /** Persiste el lienzo entero (los agentes delante, intactos). */
+  const guardarBloques = (nuevos: BloqueLienzo[]) => {
+    setBloques(nuevos);
+    onGuardar(tarea.id, {
+      bloques: [...bloquesAgente.current, ...nuevos.map(({ idx: _i, ...b }) => b)],
+    });
+  };
+
+  const anadir = (b: Omit<BloqueLienzo, 'idx' | 'x' | 'y'>) => {
+    const i = siguiente.current++;
+    guardarBloques([...bloques, {
+      ...b, idx: i,
+      x: 40 + (i % 4) * 60, y: 40 + (i % 5) * 40,
+    }]);
+  };
+
+  const subirFoto = async (f?: File) => {
+    if (!f) return;
+    setSubiendo(true);
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json();
+      if (r.ok && j.url && j.esImagen) anadir({ tipo: 'imagen', url: j.url, pie: f.name });
+    } finally { setSubiendo(false); }
+  };
+
+  const aceptarUrl = () => {
+    const url = urlBorrador.trim();
+    if (!url || !pidiendo) return;
+    anadir({ tipo: pidiendo === 'video' ? 'video' : 'enlace', url });
+    setPidiendo(null);
+    setUrlBorrador('');
+  };
+
+  /** Arrastre libre de un bloque dentro del lienzo, con captura de puntero. */
+  const empezarArrastre = (e: React.PointerEvent, idx: number) => {
+    const objetivo = e.target as HTMLElement;
+    if (objetivo.closest('textarea, input, button, a')) return;   // editar no es arrastrar
+    e.preventDefault();
+    const el = e.currentTarget as HTMLElement;
+    el.setPointerCapture(e.pointerId);
+    const b = bloques.find(x => x.idx === idx);
+    if (!b) return;
+    const dx = e.clientX - b.x, dy = e.clientY - b.y;
+    const mover = (ev: PointerEvent) => {
+      setBloques(prev => prev.map(x => (x.idx === idx
+        ? { ...x, x: Math.max(0, ev.clientX - dx), y: Math.max(0, ev.clientY - dy) }
+        : x)));
+    };
+    const soltarB = () => {
+      el.removeEventListener('pointermove', mover as any);
+      el.removeEventListener('pointerup', soltarB as any);
+      // El estado más reciente, no el del cierre: se guarda desde el setter.
+      setBloques(prev => { guardarBloques(prev); return prev; });
+    };
+    el.addEventListener('pointermove', mover as any);
+    el.addEventListener('pointerup', soltarB as any);
+  };
+
+  return (
+    <div data-ui-juego className="absolute inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/50 backdrop-blur-[2px]" onClick={onCerrar}>
+      <Card className="w-[94vw] max-w-5xl h-[88vh] p-0 shadow-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+        {/* Cabecera: el NOMBRE de la ficha, editable en el sitio */}
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100">
+          <StickyNote className="w-4 h-4 text-emerald-600 shrink-0" />
+          <input
+            value={titulo}
+            onChange={e => setTitulo(e.target.value)}
+            onBlur={() => { const t = titulo.trim(); if (t && t !== tarea.titulo) onGuardar(tarea.id, { titulo: t }); }}
+            onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+            className="flex-1 min-w-0 text-sm font-black text-slate-900 px-2 py-1 rounded-lg border border-transparent hover:border-slate-200 focus:border-emerald-300 focus:outline-none"
+          />
+          <Button variant="ghost" onClick={onCerrar} className="p-1 shrink-0"><X className="w-3.5 h-3.5" /></Button>
+        </div>
+
+        {/* Proyecto asignado + estado */}
+        <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-slate-100">
+          <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Proyecto</label>
+          <select
+            value={proyectoActual}
+            onChange={async (e) => {
+              const destino = e.target.value;
+              if (destino === proyectoActual) return;
+              const ok = await onGuardar(tarea.id, { proyecto_id: destino });
+              if (ok) onMovida();
+            }}
+            className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-emerald-300"
+          >
+            {proyectos.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
+          </select>
+          <label className="ml-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Estado</label>
+          {ESTADOS_TAREA.map(e => (
+            <button
+              key={e.id}
+              onClick={() => onGuardar(tarea.id, { estado: e.id })}
+              className={cn(
+                'text-[11px] font-bold px-2.5 py-1 rounded-full border transition-colors',
+                tarea.estado === e.id ? 'text-white' : 'text-slate-500 border-slate-200 hover:bg-slate-50',
+              )}
+              style={tarea.estado === e.id ? { background: e.color, borderColor: e.color } : undefined}
+            >
+              {e.nombre}
+            </button>
+          ))}
+
+          {/* Añadir al lienzo */}
+          <div className="ml-auto flex items-center gap-1.5">
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+              onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
+            <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" onClick={() => anadir({ tipo: 'texto', texto: '' })}>
+              <StickyNote className="w-3.5 h-3.5 mr-1 inline" />Nota
+            </Button>
+            <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" disabled={subiendo} onClick={() => fotoRef.current?.click()}>
+              <ImagePlus className="w-3.5 h-3.5 mr-1 inline" />{subiendo ? 'Subiendo…' : 'Foto'}
+            </Button>
+            <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" onClick={() => { setPidiendo('enlace'); setUrlBorrador(''); }}>
+              <Link2 className="w-3.5 h-3.5 mr-1 inline" />Enlace
+            </Button>
+            <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" onClick={() => { setPidiendo('video'); setUrlBorrador(''); }}>
+              <Film className="w-3.5 h-3.5 mr-1 inline" />Vídeo
+            </Button>
+          </div>
+        </div>
+        {pidiendo && (
+          <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 bg-slate-50">
+            <input
+              value={urlBorrador}
+              onChange={e => setUrlBorrador(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') aceptarUrl(); if (e.key === 'Escape') setPidiendo(null); }}
+              autoFocus
+              placeholder={pidiendo === 'video' ? 'Pega el enlace del vídeo de YouTube…' : 'Pega el enlace…'}
+              className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+            />
+            <Button onClick={aceptarUrl} disabled={!urlBorrador.trim()} className="shrink-0 text-xs px-2.5 py-1.5">Añadir</Button>
+            <Button variant="ghost" onClick={() => setPidiendo(null)} className="shrink-0 p-1"><X className="w-3.5 h-3.5" /></Button>
+          </div>
+        )}
+
+        {/* EL LIENZO 2D: los bloques se arrastran libremente */}
+        <div className="flex-1 min-h-0 overflow-auto bg-slate-100"
+          style={{ backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)', backgroundSize: '22px 22px' }}>
+          <div className="relative" style={{ width: 1200, height: 800 }}>
+            {bloques.length === 0 && (
+              <p className="absolute left-1/2 top-24 -translate-x-1/2 text-xs text-slate-400">
+                Lienzo vacío: añade notas, fotos, enlaces o vídeos con los botones de arriba y colócalos arrastrando.
+              </p>
+            )}
+            {bloques.map(b => (
+              <div
+                key={b.idx}
+                onPointerDown={e => empezarArrastre(e, b.idx)}
+                className="absolute group/bloque select-none cursor-grab active:cursor-grabbing touch-none"
+                style={{ left: b.x, top: b.y }}
+              >
+                <button
+                  onClick={() => guardarBloques(bloques.filter(x => x.idx !== b.idx))}
+                  title="Quitar del lienzo"
+                  className="absolute -top-2 -right-2 z-10 w-5 h-5 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hidden group-hover/bloque:flex items-center justify-center shadow"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                {/* El asa: la nota es toda textarea y el enlace es todo <a>, así
+                    que sin esta franja no habría ningún sitio desde donde tirar. */}
+                <div
+                  title="Arrastra para mover"
+                  className="flex items-center justify-center h-4 mb-1 rounded-md bg-white/80 border border-slate-200 text-slate-400 shadow-sm"
+                >
+                  <GripHorizontal className="w-3.5 h-3.5" />
+                </div>
+                {b.tipo === 'texto' && (
+                  <textarea
+                    defaultValue={b.texto || ''}
+                    onBlur={e => {
+                      const t = e.target.value;
+                      if (t !== b.texto) guardarBloques(bloques.map(x => (x.idx === b.idx ? { ...x, texto: t } : x)));
+                    }}
+                    placeholder="Escribe la nota…"
+                    className="w-52 h-32 p-2.5 text-xs leading-relaxed rounded-xl border border-amber-200 bg-amber-100 text-amber-950 shadow resize focus:outline-none focus:border-amber-400"
+                  />
+                )}
+                {b.tipo === 'imagen' && b.url && (
+                  <img src={b.url} alt={b.pie || ''} draggable={false}
+                    className="w-56 rounded-xl border border-slate-200 shadow bg-white" />
+                )}
+                {b.tipo === 'enlace' && b.url && (
+                  <a href={b.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow text-xs text-sky-700 font-bold max-w-[16rem] truncate hover:border-sky-300">
+                    <Globe className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{(() => { try { return new URL(b.url!).hostname; } catch { return b.url; } })()}</span>
+                  </a>
+                )}
+                {b.tipo === 'video' && b.url && (
+                  <a href={b.url} target="_blank" rel="noreferrer" className="block relative w-56 rounded-xl overflow-hidden border border-slate-200 shadow bg-black">
+                    {idYoutube(b.url)
+                      ? <img src={`https://i.ytimg.com/vi/${idYoutube(b.url)}/mqdefault.jpg`} draggable={false} className="w-full" />
+                      : <div className="w-full h-28 bg-slate-800" />}
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="w-10 h-7 rounded-lg bg-red-600 flex items-center justify-center">
+                        <Play className="w-4 h-4 text-white fill-white" />
+                      </span>
+                    </span>
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+

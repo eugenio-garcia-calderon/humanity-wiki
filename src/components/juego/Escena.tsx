@@ -25,7 +25,7 @@ import { PantallaGrande } from './Pantalla';
 import { CineYouTube, CINE_LIM, CINE_SALIDA, type CategoriaCine, type VideoCine } from './Cine';
 import { PortalVerde } from './PortalVerde';
 import { Agentes } from './Agentes';
-import { PlazaProyecto, type DatosInterior } from './Interior';
+import { PlazaProyecto, cosasDePlaza, type DatosInterior } from './Interior';
 import {
   PLAZA_LIM, PLAZA_SALIDA, RADIO_HABITANTE, habitantesDeSala,
 } from './planta';
@@ -82,7 +82,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -127,6 +127,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onVerVideo?: (v: VideoCine) => void;
   onSalirCine?: () => void;
   onActualizarCine?: () => void;
+  /** Pulsar (o chocar con) una tarjeta del corro de la plaza: su ficha. */
+  onAbrirTarjeta?: (item: import('./tipos').ItemProyecto) => void;
   /** Última posición del ratón sobre el suelo mientras se mueve algo. */
   movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
@@ -213,6 +215,11 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       const gente = habitantesDeSala(interior.items, 'personas', interior.agentes, interior.proyecto.id);
       return [
         { id: 'interior:salir', ...PLAZA_SALIDA, radio: 2 },
+        // Las TARJETAS del corro: chocar con una la abre (id sin `deco:`
+        // para que Personaje avise del golpe).
+        ...cosasDePlaza(interior.items, interior.agentes)
+          .filter(c => c.tipo === 'tarjeta' && c.item)
+          .map(c => ({ id: `tarjeta:${c.item!.id}`, x: c.x, z: c.z, radio: 1.4 })),
         ...gente.map((a, i) => {
           const ang = (i / Math.max(gente.length, 1)) * Math.PI * 2 - Math.PI / 2;
           return {
@@ -313,7 +320,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         />
       ) : interior ? (
         <>
-          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} />
+          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} onAbrirTarjeta={onAbrirTarjeta} />
           {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
               aldea: pulsar, arrastrar, hilos y crear en el suelo. */}
           <ObjetosMundo

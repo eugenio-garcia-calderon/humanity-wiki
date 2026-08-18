@@ -198,8 +198,18 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       const prioridad = PRIORIDADES.has(d.prioridad) ? d.prioridad : null;
       // En un proyecto propio los grupos los define su dueño.
       const grupo = d.grupo && (proyectoId || GRUPOS.includes(d.grupo)) ? d.grupo : null;
+      // Mover la tarjeta a OTRO proyecto (2026-08-19, la ficha del juego):
+      // hay que poder editar también el proyecto de destino.
+      let nuevoProyecto: string | null = null;
+      if (d.proyecto_id && d.proyecto_id !== proyectoId) {
+        if (!(await puedeEditarProyecto(req, d.proyecto_id))) {
+          return res.status(403).json({ error: 'No puedes mover la tarjeta a ese proyecto.' });
+        }
+        nuevoProyecto = String(d.proyecto_id);
+      }
       await db.execute(sql`
         UPDATE roadmap_items SET
+          proyecto_id = COALESCE(${nuevoProyecto}, proyecto_id),
           grupo     = COALESCE(${grupo}, grupo),
           titulo    = COALESCE(${d.titulo ?? null}, titulo),
           resumen   = COALESCE(${d.resumen ?? null}, resumen),
