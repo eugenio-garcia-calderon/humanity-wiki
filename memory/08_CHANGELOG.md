@@ -706,3 +706,14 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
   3. **El suelo salía negro**. Causa: `metalness` alto **sin mapa de entorno** — un material metálico no tiene nada que reflejar y se renderiza oscuro. Bajado casi a cero, y comentado.
   4. **Las fotos salían negras**. Causa clásica de three.js: al llegar la textura, React reutilizaba el mismo material y three **no recompila el shader** de un material que nació sin mapa. Se le pone una `key` distinta para que monte uno nuevo.
 - **Verificado con una tarjeta temporal** creada y retirada después (el proyecto de Eugenio aún no tiene ninguna): en la habitación «Contenido» aparecieron las tres cosas — la tarjeta, la nota y la foto real.
+
+### 2026-08-18 — La IA sabe en qué habitación estás (y puede poner cosas en ella)
+- **Reportado por Eugenio**: dentro de la sala «Personas» de Aldea Regenerativa pidió «añade a Gala como persona en esta sala» y el asistente contestó como el asistente genérico de la plataforma: «¿quién es Gala?, ¿qué sala? Estás en /juego y no hay ninguna sala abierta».
+- **Causa raíz — el contexto del juego solo se enviaba al hablar con alguien.** Salía de `hablarCon`, así que si escribías directamente en la barra del chat sin haber hablado antes con el robot o con un vecino, el modelo no recibía NADA del juego: no sabía ni que estabas dentro de él. Ahora el contexto se manda siempre que cambia dónde estás.
+- **Y ese contexto no decía dónde estabas.** Ahora lleva `dentro`: el proyecto, sus habitaciones y en cuál estás, con lo que hay en ella. El prompt explica qué significa «esta sala» y le prohíbe preguntarlo.
+- **Nueva acción `tarjeta`**: dentro de un edificio no se crean vecinos ni edificios — se añade a su tablero. `{"tipo": "tarjeta", "grupo": "personas", "nombre": "Gala"}` crea la tarjeta en ese grupo y **aparece flotando en la habitación al momento**.
+- **Tres fallos encadenados, cada uno tapando al siguiente, encontrados probando contra la API de verdad**:
+  1. Con el contexto puesto, el modelo devolvía `tipo: "persona"` — que planta un vecino en la aldea, fuera del edificio. Dentro de un proyecto esa acción ya no se ofrece.
+  2. Después decía «¡Hecho! Gala ya está flotando aquí» **sin emitir el bloque JSON**: una promesa sin efecto. Ahora el prompt dice que sin bloque no ocurre nada y que decirlo sin hacerlo es mentirle al jugador.
+  3. Y cuando por fin lo emitía, **el filtro del servidor lo tiraba en silencio**: solo aceptaba `persona` y `proyecto`. Al añadir un tipo de acción hay que añadirlo también ahí; queda comentado en el código.
+- **Verificado de punta a punta**: la IA responde «Ya está, Gala aparece flotando aquí en Personas» con la acción correcta, la página crea la tarjeta de verdad en el grupo `personas` y el contador de la habitación pasa a 1. La tarjeta de prueba se retiró después.

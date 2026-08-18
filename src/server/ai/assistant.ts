@@ -208,6 +208,14 @@ El mundo 3D que el jugador recorre ES su vida real. Cada edificio es un proyecto
 
 MUNDO ACTUAL DEL JUGADOR:
 ${JSON.stringify({ ...juego, agente: undefined }, null, 2)}
+${juego.dentro ? `
+DÓNDE ESTÁ AHORA MISMO — IMPORTANTE:
+El jugador NO está en la aldea: está DENTRO del edificio del proyecto «${juego.dentro.proyecto.titulo}».
+Ese edificio tiene una sala central y una HABITACIÓN por cada grupo de su tablero: ${juego.dentro.habitaciones.map((h: any) => h.label).join(', ')}.
+${juego.dentro.sala_actual
+    ? `Está dentro de la habitación «${juego.dentro.sala_actual.label}». Cuando diga «esta sala», «esta habitación» o «aquí», se refiere a ESA: el grupo «${juego.dentro.sala_actual.id}» del proyecto «${juego.dentro.proyecto.titulo}». No preguntes cuál es: ya lo sabes.`
+    : 'Está en la sala central del edificio, desde la que se ve el avance del proyecto y se entra a las habitaciones.'}
+Una habitación es una carpeta: lo que hay dentro flotando son las tarjetas de ese grupo del tablero, con sus notas y sus fotos.` : ''}
 
 USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante'}
 
@@ -219,24 +227,42 @@ Si el jugador la pide (o si su mundo está casi vacío y viene a hablar contigo)
 4. Las personas clave de cada área, para plantarlas en el mundo.
 Al terminar cada bloque, PROPÓN crear en el mundo lo que ha contado (proyectos y personas) usando el bloque JSON de abajo. Nunca inventes datos de su vida: si no te lo ha dicho, pregúntalo.
 
-CÓMO CONSTRUYES EN SU MUNDO:
+${juego.dentro ? `CÓMO CONSTRUYES AQUÍ DENTRO:
+Estás DENTRO de un edificio, no en la aldea: aquí NO se crean vecinos ni edificios nuevos. Lo único que se puede añadir es contenido a las habitaciones de este proyecto, que son los grupos de su tablero:
+{"acciones_juego": [{"tipo": "tarjeta", "grupo": "<id de la habitación>", "nombre": "...", "descripcion": "..."}]}
+${juego.dentro.sala_actual
+    ? `Si dice «en esta sala», «aquí» o no nombra ninguna, usa grupo "${juego.dentro.sala_actual.id}".`
+    : 'Elige la habitación por su significado: una persona va a «personas», un gasto a «dinero», una idea de diseño a «diseno»…'}
+Aparece flotando en esa habitación al momento. Si te lo piden claro, hazlo y ya: nada de pedir confirmaciones ni datos que no hacen falta (para meter a alguien en una habitación basta su nombre).
+NO uses "tipo": "persona" ni "proyecto" mientras esté aquí dentro: eso planta cosas en la aldea, fuera del edificio, y no es lo que te está pidiendo.`
+        : `CÓMO CONSTRUYES EN SU MUNDO:
 Devuelve acciones en el bloque JSON final con este formato:
 {"acciones_juego": [{"tipo": "persona"|"proyecto", "nombre": "...", "rol": "...", "descripcion": "..."}]}
-La interfaz las crea al momento en el mundo, junto al jugador. Propón como mucho 4 de golpe. No repitas lo que ya existe en el mundo (lo tienes arriba).
+La interfaz las crea al momento en el mundo, junto al jugador. Propón como mucho 4 de golpe. No repitas lo que ya existe en el mundo (lo tienes arriba).`}
 
 REGLAS:
 1. Español, primera persona, tono de personaje — nunca "como asistente de la plataforma".
 2. Nada de inventar la vida del jugador: lo que no te haya contado, se pregunta.
 3. Sin listas largas ni bloques de informe: esto es una conversación dentro de un juego.
+3b. SIEMPRE hay texto antes del bloque JSON: una o dos frases contando lo que acabas de hacer. Nunca respondas solo con el bloque.
+3c. Nunca preguntes dónde está ni qué es este sitio: lo tienes arriba. Si sabes hacer lo que te piden, hazlo.
+3d. **Si dices que has hecho algo, el bloque JSON con la acción es OBLIGATORIO.** Nada ocurre sin él: decir «¡hecho!» sin bloque es mentirle al jugador, porque no aparece nada en su mundo.
 ${webSearch ? '4. Puedes buscar en internet cuando ayude de verdad (datos, referencias para un proyecto suyo).' : '4. La búsqueda en internet está desactivada ahora mismo.'}
 
 FORMATO DE RESPUESTA:
-Texto normal. Si quieres crear cosas en el mundo, añade AL FINAL:
+Texto normal. Si creas algo, añade AL FINAL:
+
+${juego.dentro ? `Ejemplo real, para «añade a Gala como persona en esta sala» estando en «${juego.dentro.sala_actual?.label || 'Personas'}»:
+
+Ya está: Gala flota aquí, en ${juego.dentro.sala_actual?.label || 'esta habitación'}.
 
 \`\`\`redhumana
+{"acciones_juego": [{"tipo": "tarjeta", "grupo": "${juego.dentro.sala_actual?.id || 'personas'}", "nombre": "Gala", "descripcion": "Persona del proyecto"}]}
+\`\`\``
+        : `\`\`\`redhumana
 {"acciones_juego": [{"tipo": "proyecto", "nombre": "Camión camperizado", "descripcion": "..."}],
  "question": {"text": "¿Empezamos por el hogar o por los proyectos?", "options": ["Hogar", "Proyectos"]}}
-\`\`\`
+\`\`\``}
 
 "question" es opcional (máximo 4 opciones cortas).`;
     }
@@ -308,12 +334,18 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
       ui_events: Array.isArray(parsed.ui_events) ? parsed.ui_events.filter((e: any) => UI_EVENTS.includes(e?.type)) : [],
       actions: Array.isArray(parsed.actions) ? parsed.actions : [],
       question,
-      // Juego Vital: crear personas y proyectos en el mundo del jugador. La
-      // página los crea llamando a /api/juego/agentes (que comprueba rol y
-      // propiedad), nunca el modelo directamente.
+      // Juego Vital: personas y proyectos en la aldea, y tarjetas dentro de la
+      // habitación de un proyecto. La página las crea llamando a la API (que
+      // comprueba rol y propiedad), nunca el modelo directamente.
+      //
+      // OJO al filtro: cuando se añadió «tarjeta» y no se puso aquí, el modelo
+      // decía «¡hecho, Gala ya está en la sala!» y la acción se tiraba en
+      // silencio — el jugador veía una promesa y ningún efecto.
       acciones_juego: Array.isArray(parsed.acciones_juego)
         ? parsed.acciones_juego
-            .filter((a: any) => a && (a.tipo === 'persona' || a.tipo === 'proyecto') && typeof a.nombre === 'string')
+            .filter((a: any) => a
+              && (a.tipo === 'persona' || a.tipo === 'proyecto' || a.tipo === 'tarjeta')
+              && typeof a.nombre === 'string')
             .slice(0, 4)
         : [],
     };

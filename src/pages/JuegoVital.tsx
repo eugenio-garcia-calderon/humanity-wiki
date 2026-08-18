@@ -44,6 +44,30 @@ const PALETA_PROYECTO = PALETA.edificiosProyecto;
 /** Si un proyecto no trae grupos, al menos tiene una habitación donde entrar. */
 const GRUPOS_MINIMOS = [{ id: 'todo', label: 'Todo', color: PALETA.robotLuz }];
 
+/**
+ * Todo lo que la IA necesita saber para responder como si estuviera aquí:
+ * dónde estás, qué hay en tu mundo y, si estás dentro de un proyecto, en qué
+ * habitación y qué hay en ella.
+ */
+function contextoJuego(interior: DatosInterior | null, agentes: Agente[], proyectos: ProyectoJuego[]) {
+  const grupo = interior?.sala ? interior.grupos.find(g => g.id === interior.sala) : null;
+  return {
+    mundo: interior ? 'interior_de_proyecto' : 'aldea',
+    agentes: agentes.map(a => ({ id: a.id, tipo: a.tipo, nombre: a.nombre, conversation_id: a.conversation_id })),
+    proyectos_reales: proyectos.map(p => ({ titulo: p.titulo, tareas: p.tarjetas, hechas: p.hechas })),
+    vacio: agentes.length === 0 && proyectos.length === 0,
+    // Dónde está el jugador AHORA MISMO. Es lo que da sentido a «esta sala».
+    dentro: interior ? {
+      proyecto: { id: interior.proyecto.id, titulo: interior.proyecto.titulo, slug: interior.proyecto.slug },
+      habitaciones: interior.grupos.map(g => ({ id: g.id, label: g.label })),
+      sala_actual: grupo ? { id: grupo.id, label: grupo.label } : null,
+      cosas_en_la_sala: grupo
+        ? interior.items.filter(i => i.grupo === grupo.id).map(i => ({ titulo: i.titulo, estado: i.estado }))
+        : null,
+    } : null,
+  };
+}
+
 /** Identifica lo que tienes al lado, para recordar qué has rechazado. */
 const claveCercania = (c: Cercania) =>
   c === null ? '' : c.tipo === 'robot' ? 'robot' : c.tipo === 'agente' ? `a:${c.agente.id}` : `p:${c.proyecto.id}`;
@@ -208,16 +232,27 @@ export default function JuegoVital() {
    */
   const hablarCon = useCallback((agente: Agente | null, enfocar = true) => {
     window.dispatchEvent(new CustomEvent('humanity:juego-contexto', {
-      detail: {
-        mundo: 'aldea',
-        agente,
-        agentes: agentesRef.current.map(a => ({ id: a.id, tipo: a.tipo, nombre: a.nombre, conversation_id: a.conversation_id })),
-        proyectos_reales: proyectos.map(p => ({ titulo: p.titulo, tareas: p.tarjetas, hechas: p.hechas })),
-        vacio: agentesRef.current.length === 0 && proyectos.length === 0,
-      },
+      detail: { ...contextoJuego(interiorRef.current, agentesRef.current, proyectos), agente },
     }));
     if (enfocar) window.dispatchEvent(new CustomEvent('humanity:asistente-focus'));
   }, [proyectos]);
+
+  /**
+   * El contexto del juego se manda SIEMPRE que cambia dónde estás, no solo al
+   * hablar con alguien.
+   *
+   * Antes solo se enviaba desde `hablarCon`, así que si escribías directamente
+   * en la barra del chat sin haber hablado con nadie, el asistente contestaba
+   * como el asistente genérico de la plataforma y no sabía ni que estabas en
+   * el juego (fallo reportado por Eugenio: pidió «añade a Gala como persona en
+   * esta sala» y preguntó «¿qué sala?»).
+   */
+  useEffect(() => {
+    if (!user) return;
+    window.dispatchEvent(new CustomEvent('humanity:juego-contexto', {
+      detail: contextoJuego(interior, agentes, proyectos),
+    }));
+  }, [user, interior, agentes, proyectos]);
 
   // La lista lateral del chat pide hablar con alguien: si es un agente, se
   // cambia de interlocutor sin tener que caminar hasta él.
@@ -245,7 +280,14 @@ export default function JuegoVital() {
         }).catch(() => {});
       }
       // Lo que la IA propone crear se crea de verdad, junto al jugador.
+      const dentro = interiorRef.current;
       for (const [i, a] of (acciones || []).entries()) {
+        // Dentro de un proyecto se construye en su TABLERO: una tarjeta en el
+        // grupo que corresponde, que es la habitación en la que estás.
+        if (a.tipo === 'tarjeta' && dentro) {
+          await crearTarjeta(a.grupo || dentro.sala || dentro.grupos[0]?.id, a.nombre, a.descripcion).catch(() => {});
+          continue;
+        }
         await crearAgente({
           tipo: a.tipo, nombre: a.nombre, rol: a.rol, descripcion: a.descripcion,
           dx: (i % 2 === 0 ? 4 : -4), dz: -4 - Math.floor(i / 2) * 5,
@@ -396,6 +438,27 @@ export default function JuegoVital() {
       destinoViaje.current = { x: ENTRADA.x, z: ENTRADA.z - 5 };
     });
   }, [cambiarEscenario]);
+
+  /**
+   * Mete una tarjeta en una habitación del proyecto en el que estás. Es lo que
+   * pasa cuando le dices a la IA «añade a Gala como persona en esta sala»: una
+   * habitación ES un grupo del tablero, así que añadir algo aquí es añadirlo
+   * allí, y aparece flotando al momento.
+   */
+  const crearTarjeta = useCallback(async (grupo: string, titulo: string, resumen?: string) => {
+    const i = interiorRef.current;
+    if (!i || !titulo) return;
+    const r = await fetch('/api/roadmap', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: i.proyecto.id, grupo, titulo, resumen: resumen || null, estado: 'por_hacer' }),
+    });
+    if (!r.ok) { avisar('No se ha podido añadir aquí.'); return; }
+    const nueva: ItemProyecto = await r.json();
+    setInterior(prev => (prev && prev.proyecto.id === i.proyecto.id
+      ? { ...prev, items: [...prev.items, { ...nueva, bloques: nueva.bloques || [] }] }
+      : prev));
+  }, []);
 
   /** De la sala a una habitación, y de la habitación de vuelta a la sala. */
   const irASala = useCallback((sala: string | null) => {
