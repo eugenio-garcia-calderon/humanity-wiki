@@ -9,12 +9,12 @@ import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { crearAzar, centroRio } from './paleta';
-import { PLAZA_R, LAGOS } from './mapa';
+import { LAGOS, enCamino } from './mapa';
 
 function hierbaPermitida(x: number, z: number): boolean {
-  if (Math.hypot(x, z) < PLAZA_R + 1.5) return false;               // plaza empedrada
-  if (Math.abs(z) < 7 && x > -99 && x < 133) return false;          // caminos E-O
-  if (Math.abs(x) < 7 && Math.abs(z) < 69) return false;            // caminos N-S
+  // Ni en el empedrado de la plaza, ni en las 6 sendas, ni en sus plazas.
+  if (enCamino(x, z, 1.2)) return false;
+  if (Math.abs(z) < 7 && x > -99 && x < 133) return false;          // camino E-O antiguo
   if (Math.abs(x - centroRio(z)) < 11) return false;                // río
   for (const l of LAGOS) {
     if (Math.hypot((x - l.x) / (l.rx + 4), (z - l.z) / (l.rz + 4)) < 1) return false;
