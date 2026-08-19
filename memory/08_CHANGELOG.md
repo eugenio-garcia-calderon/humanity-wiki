@@ -923,3 +923,9 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 
 ### 2026-08-19 — La cámara mira 20° más arriba (petición de Eugenio)
 - El punto de mira de la cámara orbital se eleva `dist·tan(20°)` sobre el de antes: mismo ángulo extra a cualquier distancia de zoom. Se ve horizonte y cielo en vez de tanto suelo — el personaje queda abajo en el encuadre, estilo juego de aventuras.
+
+### 2026-08-19 — Mejor caminar, bici de verdad y aeromóvil con piloto (petición de Eugenio)
+- **A pie**: la marcha sale de la VELOCIDAD real, no de la tecla — paseo (Walk) hasta 4 m/s, trote (Jog) hasta 12, esprint de ahí en adelante, y en el aire la animación de SALTO (Jump_Loop). Además la CADENCIA se acompasa a los m/s de verdad: `ritmo` va por ref y Persona3D ajusta el timeScale de la pista cada fotograma (nada de pies patinando ni zancadas de marioneta).
+- **Bici**: el personaje va SENTADO en el sillín con la postura de conducir (Driving_Loop, manos al manillar), ya no de pie sobre los pedales. Ruedas nuevas con neumático (toro), RADIOS y buje que giran exactamente lo que dicta el suelo (v/r rad/s), y BIELAS con pedales y plato girando a cadencia de desarrollo normal (~1 vuelta por cada 2,6 de rueda).
+- **Aeromóvil**: el PILOTO va visible dentro de la burbuja (a 0,42 quedaba sentado ENCIMA del fuselaje — cazado en pruebas, bajado a 0,10), la cabina es más transparente (opacidad 0,38 con reflejo del cielo), la nave ALABEA al girar con A/D en vuelo (escora 0,26 rad hacia el lado del giro) y FLOTA con un vaivén suave de hover.
+- Verificado en local: paseo/trote/esprint en la plaza, bici rodando con radios girando hasta la casa nueva, y despegue a 28 m con alas en V, rotores y piloto dentro.

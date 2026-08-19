@@ -18,33 +18,84 @@ import { PALETA } from './paleta';
 /** Radio de la rueda de la bici, en metros: una 700c real mide 0,35 m. */
 const RUEDA = 0.35;
 
-function Rueda({ x, y, z, r = RUEDA, ancho = 0.06, giro }: {
+function Rueda({ x, y, z, r = RUEDA, ancho = 0.06, giro, conRadios = false }: {
   x: number; y: number; z: number; r?: number; ancho?: number;
   giro?: React.MutableRefObject<number>;
+  /** Radios de bici: giran con la rueda y venden el movimiento de verdad. */
+  conRadios?: boolean;
 }) {
   const malla = useRef<THREE.Mesh>(null);
   useFrame(() => { if (malla.current && giro) malla.current.rotation.x = giro.current; });
   return (
     <mesh ref={malla} position={[x, y, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
-      <cylinderGeometry args={[r, r, ancho, 16]} />
+      {conRadios
+        ? <torusGeometry args={[r - 0.02, 0.02, 8, 22]} />
+        : <cylinderGeometry args={[r, r, ancho, 16]} />}
       <meshStandardMaterial color={PALETA.hierro} roughness={0.8} />
+      {conRadios && (
+        <>
+          {/* El aro exterior es un toro (neumático); esto son los RADIOS. */}
+          {[0, Math.PI / 3, (Math.PI * 2) / 3].map(a => (
+            <mesh key={a} rotation={[0, 0, 0]} rotation-x={a}>
+              <boxGeometry args={[0.012, 0.012, (r - 0.03) * 2]} />
+              <meshStandardMaterial color="#c9ced4" roughness={0.4} metalness={0.6} />
+            </mesh>
+          ))}
+          {/* El buje del centro */}
+          <mesh>
+            <cylinderGeometry args={[0.035, 0.035, 0.09, 8]} />
+            <meshStandardMaterial color="#c9ced4" roughness={0.4} metalness={0.6} />
+          </mesh>
+        </>
+      )}
     </mesh>
   );
 }
 
 /**
- * Bicicleta. El personaje va de pie encima (no hay animación de pedaleo en los
- * modelos de Kenney, así que sentarlo quedaría peor que dejarlo erguido).
+ * Bicicleta. Desde la mejora de 2026-08-19 el personaje va SENTADO en el
+ * sillín (postura de conducir, la pone Personaje) y las ruedas, radios y
+ * bielas giran a la VELOCIDAD REAL del jugador, no a un ritmo fijo.
  * Se dibuja mirando a +Z, igual que el personaje.
  */
-export function Bici({ rodando }: { rodando: boolean }) {
+export function Bici({ velocidad }: { velocidad: React.MutableRefObject<THREE.Vector3> }) {
   const giro = useRef(0);
-  useFrame((_, dt) => { if (rodando) giro.current += dt * 9; });
+  const bielas = useRef<THREE.Group>(null);
+  useFrame((_, dt) => {
+    // La rueda gira lo que dicta el suelo recorrido: v/r radianes por segundo.
+    const v = velocidad.current.length();
+    giro.current += dt * (v / RUEDA);
+    // El pedaleo va a la cadencia de un desarrollo normal (~1 vuelta de biela
+    // por cada 2,6 de rueda).
+    if (bielas.current) bielas.current.rotation.x = giro.current / 2.6;
+  });
 
   return (
     <group position={[0, 0, 0]}>
-      <Rueda x={0} y={RUEDA} z={0.55} giro={giro} />
-      <Rueda x={0} y={RUEDA} z={-0.55} giro={giro} />
+      <Rueda x={0} y={RUEDA} z={0.55} giro={giro} conRadios />
+      <Rueda x={0} y={RUEDA} z={-0.55} giro={giro} conRadios />
+      {/* Bielas y PEDALES girando en el eje del pedalier */}
+      <group position={[0, 0.36, 0.02]}>
+        {/* el plato */}
+        <mesh rotation={[0, 0, Math.PI / 2]} position={[0.05, 0, 0]}>
+          <cylinderGeometry args={[0.11, 0.11, 0.02, 18]} />
+          <meshStandardMaterial color="#c9ced4" roughness={0.35} metalness={0.65} />
+        </mesh>
+        <group ref={bielas}>
+          {[1, -1].map(lado => (
+            <group key={lado} rotation={[lado === 1 ? 0 : Math.PI, 0, 0]}>
+              <mesh position={[lado * 0.1, 0, 0.09]} rotation={[0.3, 0, 0]}>
+                <boxGeometry args={[0.03, 0.03, 0.19]} />
+                <meshStandardMaterial color={PALETA.robotDetalle} roughness={0.4} metalness={0.4} />
+              </mesh>
+              <mesh position={[lado * 0.16, 0, 0.18]}>
+                <boxGeometry args={[0.09, 0.025, 0.11]} />
+                <meshStandardMaterial color="#2b2f33" roughness={0.7} />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      </group>
       {/* Cuadro: dos tubos en diagonal y el tubo horizontal */}
       <mesh position={[0, 0.62, 0]} rotation={[0.55, 0, 0]} castShadow>
         <cylinderGeometry args={[0.035, 0.035, 1.05, 8]} />
@@ -81,16 +132,18 @@ export function Bici({ rodando }: { rodando: boolean }) {
  * `alturaVuelo` decide todo lo que se mueve: las alas se abren y los dos
  * rotores aceleran con la altura. Va por ref para no re-renderizar cada metro.
  */
-export function Aptera({ alturaVuelo, avanzando }: {
+export function Aptera({ alturaVuelo, avanzando, entrada }: {
   alturaVuelo: React.MutableRefObject<number>;
   avanzando: boolean;
+  /** El mando: con A/D en vuelo la nave ALABEA hacia el lado del giro. */
+  entrada?: React.MutableRefObject<{ x: number }>;
 }) {
   const alaIzq = useRef<THREE.Group>(null);
   const alaDer = useRef<THREE.Group>(null);
   const palas = useRef<THREE.Group[]>([]);
   const cuerpo = useRef<THREE.Group>(null);
 
-  useFrame((_, dt) => {
+  useFrame((estado, dt) => {
     const h = alturaVuelo.current;
     // 0 en el suelo, 1 en pleno vuelo: abre las alas y acelera los rotores.
     const vuelo = Math.min(1, h / 6);
@@ -101,10 +154,16 @@ export function Aptera({ alturaVuelo, avanzando }: {
     for (const p of palas.current) {
       if (p) p.rotation.y += dt * (5 + vuelo * 48);
     }
-    // Al avanzar se inclina hacia delante, como cualquier multirrotor.
     if (cuerpo.current) {
+      // Al avanzar se inclina hacia delante, como cualquier multirrotor.
       const objetivo = avanzando && h > 0.5 ? -0.16 : 0;
       cuerpo.current.rotation.x += (objetivo - cuerpo.current.rotation.x) * Math.min(1, dt * 3);
+      // ALABEO: girar con A/D en vuelo escora la nave hacia el lado del giro,
+      // como un helicóptero de verdad (mejora de 2026-08-19).
+      const alabeo = (entrada?.current.x ?? 0) * 0.26 * vuelo;
+      cuerpo.current.rotation.z += (alabeo - cuerpo.current.rotation.z) * Math.min(1, dt * 3.5);
+      // Y en el aire FLOTA: un vaivén suave de hover, nada robótico.
+      cuerpo.current.position.y = Math.sin(estado.clock.elapsedTime * 1.7) * 0.06 * vuelo;
     }
   });
 
@@ -154,10 +213,11 @@ export function Aptera({ alturaVuelo, avanzando }: {
         <coneGeometry args={[0.62, 1.5, 16]} />
         <meshStandardMaterial color={PALETA.lienzoBlanco} roughness={0.35} metalness={0.15} />
       </mesh>
-      {/* Burbuja de la cabina */}
+      {/* Burbuja de la cabina: más transparente desde que el PILOTO va
+          dentro y visible (mejora de 2026-08-19). */}
       <mesh position={[0, 1.18, 0.62]} scale={[0.72, 0.42, 0.95]}>
         <sphereGeometry args={[1, 18, 12]} />
-        <meshStandardMaterial color={PALETA.ventana} roughness={0.1} metalness={0.1} transparent opacity={0.72} />
+        <meshStandardMaterial color={PALETA.ventana} roughness={0.06} metalness={0.2} transparent opacity={0.38} envMapIntensity={1.5} />
       </mesh>
       {/* Panel solar del techo */}
       <mesh position={[0, 1.32, -0.35]} rotation={[0.06, 0, 0]} receiveShadow>
