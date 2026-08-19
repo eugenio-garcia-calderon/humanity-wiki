@@ -22,7 +22,10 @@
 // Lo que cuesta: cada ventana es una carga de la app (unos 200 ms y su memoria).
 // Con tres o cuatro ventanas es un precio que no se nota; con veinte sí.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { X, Minus, Square, Copy, Globe, Gamepad2, LayoutGrid, Plus } from 'lucide-react';
+import {
+  X, Minus, Square, Copy, Globe, Gamepad2, Map as MapIcon, Network, Compass,
+  BrainCircuit, FolderKanban, Store, Orbit, ChevronLeft, ChevronRight,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Navegador from './Navegador';
 
@@ -45,14 +48,22 @@ const BARRA = 34;          // alto de la barra de título de una ventana
 const BARRA_ARRIBA = 44;
 const MIN_AN = 320, MIN_AL = 220;
 
-/** Lo que se puede abrir de un tirón. */
-const ATAJOS: Array<{ id: string; titulo: string; clase: Ventana['clase']; destino: string; icono: React.ReactNode }> = [
-  { id: 'juego', titulo: 'Juego Vital', clase: 'app', destino: '/juego', icono: <Gamepad2 className="w-3.5 h-3.5" /> },
-  { id: 'navegador', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', icono: <Globe className="w-3.5 h-3.5" /> },
-  { id: 'mapa', titulo: 'Mapa', clase: 'app', destino: '/mapa', icono: <LayoutGrid className="w-3.5 h-3.5" /> },
-  { id: 'grafos', titulo: 'Conocimiento', clase: 'app', destino: '/grafos', icono: <LayoutGrid className="w-3.5 h-3.5" /> },
-  { id: 'mercado', titulo: 'Mercado', clase: 'app', destino: '/mercado', icono: <LayoutGrid className="w-3.5 h-3.5" /> },
-  { id: 'documentos', titulo: 'Mi conocimiento', clase: 'app', destino: '/mi-conocimiento', icono: <LayoutGrid className="w-3.5 h-3.5" /> },
+/**
+ * TODAS las secciones, en la línea de arriba (2026-08-19, petición de Eugenio:
+ * «que esté todo en la línea superior, no en un menú secundario»). Cada una
+ * abre su ventana; si ya está abierta, la trae al frente en vez de duplicarla —
+ * dos ventanas del mismo mapa no le sirven a nadie.
+ */
+const ATAJOS: Array<{ id: string; titulo: string; corto: string; clase: Ventana['clase']; destino: string; icono: React.ReactNode }> = [
+  { id: 'juego', titulo: 'Juego Vital', corto: 'Juego', clase: 'app', destino: '/juego', icono: <Gamepad2 className="w-3.5 h-3.5" /> },
+  { id: 'navegador', titulo: 'Navegador', corto: 'Web', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', icono: <Globe className="w-3.5 h-3.5" /> },
+  { id: 'mapa', titulo: 'Mapa', corto: 'Mapa', clase: 'app', destino: '/mapa', icono: <MapIcon className="w-3.5 h-3.5" /> },
+  { id: 'grafos', titulo: 'Conocimiento', corto: 'Conocimiento', clase: 'app', destino: '/grafos', icono: <Network className="w-3.5 h-3.5" /> },
+  { id: 'explorar', titulo: 'Explorar', corto: 'Explorar', clase: 'app', destino: '/explorar', icono: <Compass className="w-3.5 h-3.5" /> },
+  { id: 'documentos', titulo: 'Mi conocimiento', corto: 'Mío', clase: 'app', destino: '/mi-conocimiento', icono: <BrainCircuit className="w-3.5 h-3.5" /> },
+  { id: 'proyectos', titulo: 'Mis proyectos', corto: 'Proyectos', clase: 'app', destino: '/proyectos', icono: <FolderKanban className="w-3.5 h-3.5" /> },
+  { id: 'mercado', titulo: 'Mercado', corto: 'Mercado', clase: 'app', destino: '/mercado', icono: <Store className="w-3.5 h-3.5" /> },
+  { id: 'universo', titulo: 'Universo', corto: 'Universo', clase: 'app', destino: '/universo', icono: <Orbit className="w-3.5 h-3.5" /> },
 ];
 
 let contadorZ = 10;
@@ -73,13 +84,15 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         }
       }
     } catch { /* escritorio nuevo */ }
-    // El primer escritorio trae el juego y el navegador, que es lo que pidió.
+    // El primer escritorio trae el juego y el navegador, LOS DOS A PANTALLA
+    // COMPLETA (petición de Eugenio: «que el juego se abra en pantalla
+    // completa, y el navegador igual pero en otra ventana»). Las medidas
+    // sueltas se guardan igual: son a las que vuelve si restaura una.
     return [
-      { id: 'v1', titulo: 'Juego Vital', clase: 'app', destino: '/juego', x: 24, y: 56, an: 760, al: 520, z: 11 },
-      { id: 'v2', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', x: 500, y: 200, an: 720, al: 520, z: 12 },
+      { id: 'v1', titulo: 'Juego Vital', clase: 'app', destino: '/juego', x: 24, y: 56, an: 760, al: 520, z: 11, maximizada: true },
+      { id: 'v2', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', x: 500, y: 200, an: 720, al: 520, z: 12, maximizada: true },
     ];
   });
-  const [menu, setMenu] = useState(false);
 
   // Se guarda con retraso: arrastrar una ventana dispara decenas de cambios
   // por segundo y escribir en localStorage en cada uno cuesta fotogramas.
@@ -104,19 +117,82 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     setVentanas(vs => vs.filter(v => v.id !== id));
   }, []);
 
+  /**
+   * Abrir una sección. Dos decisiones (2026-08-19, petición de Eugenio):
+   *
+   *   - Nace A PANTALLA COMPLETA. Pidió que el juego se abriera así y que se
+   *     pasara de uno a otro con un gesto; eso es el modelo de macOS, donde
+   *     cada aplicación ocupa su pantalla y el gesto cambia de pantalla. Con
+   *     ventanitas superpuestas el gesto no significaría nada.
+   *   - Si esa sección YA está abierta, se trae al frente en vez de duplicarla.
+   *     Dos ventanas del mismo mapa no le sirven a nadie, y con las secciones
+   *     a un clic en la barra de arriba es facilísimo pulsar dos veces.
+   */
   const abrir = useCallback((a: typeof ATAJOS[number]) => {
-    setMenu(false);
-    const id = `v${Date.now().toString(36)}`;
-    // En cascada, para que la nueva no tape exactamente a la anterior.
     setVentanas(vs => {
+      const ya = vs.find(v => v.clase === a.clase && v.destino === a.destino);
+      if (ya) return vs.map(v => (v.id === ya.id ? { ...v, z: ++contadorZ, minimizada: false } : v));
       const n = vs.length;
       return [...vs, {
-        id, titulo: a.titulo, clase: a.clase, destino: a.destino,
+        id: `v${Date.now().toString(36)}`,
+        titulo: a.titulo, clase: a.clase, destino: a.destino,
         x: 40 + (n % 6) * 34, y: BARRA_ARRIBA + 16 + (n % 6) * 30,
         an: 780, al: 540, z: ++contadorZ,
+        maximizada: true,
       }];
     });
   }, []);
+
+  /**
+   * PASAR DE UNA VENTANA A OTRA CON EL TRACKPAD (petición de Eugenio: «pueda ir
+   * de uno a otro moviendo con los 4 dedos del pad del Mac»).
+   *
+   * LO QUE NO SE PUEDE: una web NO ve cuántos dedos hay en el trackpad. macOS
+   * se queda los gestos de tres y cuatro dedos para sí mismo (Mission Control,
+   * cambiar de escritorio) y nunca llegan a la página. No hay forma de
+   * detectarlos desde aquí; solo una aplicación nativa podría.
+   *
+   * LO QUE SÍ: el deslizamiento HORIZONTAL de dos dedos llega como una rueda
+   * con desplazamiento en X, y ese es el gesto equivalente. Se exige que sea
+   * claramente horizontal (más X que Y) y se deja un respiro entre cambios,
+   * porque un solo gesto manda decenas de eventos y si no saltarías cinco
+   * ventanas de una pasada.
+   */
+  const ultimoCambio = useRef(0);
+  const irA = useCallback((paso: number) => {
+    setVentanas(vs => {
+      const abiertas = vs.filter(v => !v.minimizada);
+      if (abiertas.length < 2) return vs;
+      const orden = [...abiertas].sort((a, b) => a.id.localeCompare(b.id));
+      const delante = abiertas.reduce((m, v) => (v.z > m.z ? v : m), abiertas[0]);
+      const i = orden.findIndex(v => v.id === delante.id);
+      const siguiente = orden[(i + paso + orden.length) % orden.length];
+      return vs.map(v => (v.id === siguiente.id ? { ...v, z: ++contadorZ } : v));
+    });
+  }, []);
+
+  useEffect(() => {
+    const alRodar = (e: WheelEvent) => {
+      // Dentro de un marco el evento no llega aquí; esto atiende al escritorio.
+      if (Math.abs(e.deltaX) < 40 || Math.abs(e.deltaX) < Math.abs(e.deltaY) * 1.6) return;
+      const ahora = Date.now();
+      if (ahora - ultimoCambio.current < 700) return;
+      ultimoCambio.current = ahora;
+      irA(e.deltaX > 0 ? 1 : -1);
+    };
+    const alTeclado = (e: KeyboardEvent) => {
+      // Ctrl/⌘ + flechas: el mismo salto, sin trackpad.
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); irA(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); irA(-1); }
+    };
+    window.addEventListener('wheel', alRodar, { passive: true });
+    window.addEventListener('keydown', alTeclado);
+    return () => {
+      window.removeEventListener('wheel', alRodar);
+      window.removeEventListener('keydown', alTeclado);
+    };
+  }, [irA]);
 
   /**
    * Mover y redimensionar. Un solo camino para los dos: el ratón se captura en
@@ -158,7 +234,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         <div className="absolute inset-0 grid place-items-center">
           <div className="text-center">
             <p className="text-sm font-bold text-slate-500">No hay ninguna ventana abierta.</p>
-            <p className="text-xs text-slate-400 mt-1">Ábrelas desde el botón «Abrir» de arriba.</p>
+            <p className="text-xs text-slate-400 mt-1">Ábrelas desde los botones de arriba.</p>
           </div>
         </div>
       )}
@@ -232,47 +308,62 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         </div>
       ))}
 
-      {/* La barra de ventanas, ARRIBA (2026-08-19, petición de Eugenio: «haz
-          que el menú de ventanas esté arriba»). Pegada al borde superior, se
-          lee como una sola franja con la cabecera de la app en vez de dejar
-          un menú arriba y otro abajo. */}
-      <div className="absolute left-0 right-0 top-0 h-11 flex items-center gap-1.5 px-2 bg-white/90 backdrop-blur border-b border-slate-200"
+      {/* LA LÍNEA DE ARRIBA (2026-08-19, petición de Eugenio: «que esté todo
+          en la línea superior, no en un menú secundario»). A la izquierda las
+          secciones, cada una abre su ventana a pantalla completa; a la derecha
+          las que ya están abiertas, para saltar entre ellas. */}
+      <div className="absolute left-0 right-0 top-0 h-11 flex items-center gap-1 px-2 bg-white/95 backdrop-blur border-b border-slate-200 overflow-x-auto"
         style={{ zIndex: 100000 }}>
-        <div className="relative">
-          <button
-            onClick={() => setMenu(m => !m)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black"
-          >
-            <Plus className="w-3.5 h-3.5" />Abrir
-          </button>
-          {menu && (
-            <div className="absolute top-full mt-2 left-0 w-56 p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xl">
-              {ATAJOS.map(a => (
-                <button key={a.id} onClick={() => abrir(a)}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-600">
-                  {a.icono}{a.titulo}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
+        {ATAJOS.map(a => {
+          const abierta = ventanas.find(v => v.clase === a.clase && v.destino === a.destino);
+          const delante = abierta && !abierta.minimizada
+            && abierta.z === Math.max(...ventanas.filter(v => !v.minimizada).map(v => v.z), 0);
+          return (
+            <button
+              key={a.id}
+              onClick={() => abrir(a)}
+              title={a.titulo}
+              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold shrink-0 transition-colors',
+                delante ? 'bg-slate-900 text-white'
+                  : abierta ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
+            >
+              {a.icono}
+              <span className="hidden lg:inline">{a.corto}</span>
+            </button>
+          );
+        })}
+
+        <div className="w-px h-5 bg-slate-200 mx-1 shrink-0" />
+
+        {/* Saltar de una a otra, sin trackpad */}
+        <button onClick={() => irA(-1)} title="Ventana anterior (⌘←)"
+          className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 shrink-0">
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button onClick={() => irA(1)} title="Ventana siguiente (⌘→)"
+          className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 shrink-0">
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* Lo que hay abierto: pulsar lleva a esa ventana */}
         {ventanas.map(v => (
           <button
             key={v.id}
             onClick={() => (v.minimizada ? alFrente(v.id) : cambiar(v.id, { minimizada: true }))}
-            className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border max-w-[12rem] truncate',
-              v.minimizada
-                ? 'bg-white border-slate-200 text-slate-500'
-                : 'bg-slate-100 border-slate-300 text-slate-700')}
+            title={v.titulo}
+            className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border max-w-[9rem] shrink-0',
+              v.minimizada ? 'bg-white border-slate-200 text-slate-400'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-800')}
           >
             {v.clase === 'navegador' ? <Globe className="w-3 h-3 shrink-0" /> : <Gamepad2 className="w-3 h-3 shrink-0" />}
             <span className="truncate">{v.titulo}</span>
           </button>
         ))}
 
-        <span className="ml-auto hidden md:block text-[10px] text-slate-400 pr-1">
-          Doble clic en la barra de una ventana para maximizarla
+        <span className="ml-auto hidden xl:block text-[10px] text-slate-400 pr-1 shrink-0">
+          Desliza con dos dedos para cambiar de ventana
         </span>
       </div>
     </div>
