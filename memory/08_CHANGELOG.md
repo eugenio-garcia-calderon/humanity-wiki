@@ -1118,3 +1118,10 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
 - **Lo que NO hace, escrito en el código para que nadie lo descubra chocándose**: iniciar sesión en sitios (las cookies de fuera no viajan), y la IA lee y navega pero no pulsa botones dentro de una aplicación que se dibuja sola con JavaScript. Para eso hace falta Chromium corriendo en el servidor, que es otra fase con su coste de infraestructura.
 - El escritorio trae **su propio chat** (el que ve la web) y por eso la barra de IA global no se monta ahí: dos asistentes en la misma pantalla es una pregunta sin saber a cuál se la haces.
 - Verificado en el navegador: las dos ventanas abiertas con el juego cargando dentro de la suya, Wikipedia y **dji.com** entrando por el proxy (837 KB, 152 enlaces reescritos), las hojas de estilo cargando con 200 tras el arreglo del `&amp;`, y la red interna rebotada con 400.
+
+### 2026-08-19 — Un solo menú, y arriba
+- **LA BARRA DE VENTANAS SE MUEVE ARRIBA** (petición de Eugenio: «haz que el menú de ventanas esté arriba… y así queda todo arriba limpio en un solo menú»). Estaba abajo, y con la cabecera de la app arriba había un menú en cada borde de la pantalla. Ahora las dos franjas se leen como una sola.
+- Las ventanas empiezan **por debajo** de esa barra y no se pueden meter detrás: arrastrar una hacia arriba topa con ella, y maximizar respeta su alto. Sin eso, la primera ventana que subieras taparía el botón de abrirlas.
+- **En el Escritorio, «Explorar» deja de estar en la cabecera**: ya vivía dentro de la hamburguesa, que lleva todas las secciones. Enseñarlo dos veces era justo el ruido que había que quitar. En el resto de la app no cambia nada.
+- Se queda arriba a la derecha lo que NO está en la hamburguesa —la cuenta, ajustes y salir—, porque esconderlo sería quitarte la salida de la aplicación, no limpiar la pantalla.
+- Verificado en el navegador: la franja de ventanas arriba con «Abrir» y las dos ventanas, el borde inferior vacío, y la cabecera con solo la hamburguesa y la marca.
