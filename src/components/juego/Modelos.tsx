@@ -170,9 +170,15 @@ function tinteRopaDe(cuerpo: string): THREE.Color {
   return new THREE.Color(PALETA_ROPA[h % PALETA_ROPA.length]).lerp(new THREE.Color('#ffffff'), 0.2);
 }
 
-function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritmo }: {
+function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritmo, sinCabeza = false }: {
   cuerpo: string;
   animacion?: string;
+  /** PRIMERA PERSONA (2026-08-19, petición de Eugenio: «se tienen que ver los
+   *  brazos moviéndose y las piernas»). El cuerpo se dibuja entero —brazos,
+   *  torso, piernas, con su animación— pero SIN cabeza ni pelo: la cámara va
+   *  dentro del cráneo y lo único que vería de ellos es su cara interior.
+   *  Es el truco de siempre en los juegos en primera persona. */
+  sinCabeza?: boolean;
   /** Se conserva la semántica antigua (2,6 = estatura normal): los que
    *  llaman no cambian. El humano ya mide 1,81 a escala 1. */
   escala?: number;
@@ -268,6 +274,18 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritm
     return c;
   }, [scene, ropaGltf.scene, peinadosGltf, cuerpo, genero]);
   const { actions } = useAnimations(animations, grupo);
+
+  // Cabeza y pelo dentro/fuera. Se hace con `visible` sobre el MISMO clon en
+  // vez de clonar dos veces: cambiar de vista es instantáneo y no cuesta ni
+  // memoria ni un parpadeo del modelo.
+  useEffect(() => {
+    clon.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const esCabeza = m.name.toLowerCase().includes('superhero');
+      if (esCabeza || m.userData.esPelo) m.visible = !sinCabeza;
+    });
+  }, [clon, sinCabeza]);
 
   // --- Personalización: tono de piel (clara/oscura según el color elegido),
   // tinte del pelo y tinte del TRAJE con el color de ropa del creador.

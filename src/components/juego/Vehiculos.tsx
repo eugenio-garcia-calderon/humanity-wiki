@@ -132,11 +132,15 @@ export function Bici({ velocidad }: { velocidad: React.MutableRefObject<THREE.Ve
  * `alturaVuelo` decide todo lo que se mueve: las alas se abren y los dos
  * rotores aceleran con la altura. Va por ref para no re-renderizar cada metro.
  */
-export function Aptera({ alturaVuelo, avanzando, entrada }: {
+export function Aptera({ alturaVuelo, avanzando, entrada, aparcada = false }: {
   alturaVuelo: React.MutableRefObject<number>;
   avanzando: boolean;
   /** El mando: con A/D en vuelo la nave ALABEA hacia el lado del giro. */
   entrada?: React.MutableRefObject<{ x: number }>;
+  /** APARCADA (2026-08-19, petición de Eugenio: «déjalo aparcado como el
+   *  camión como un objeto que no se mueve»): alas plegadas y rotores
+   *  QUIETOS. La misma nave que pilotas, apagada. */
+  aparcada?: boolean;
 }) {
   const alaIzq = useRef<THREE.Group>(null);
   const alaDer = useRef<THREE.Group>(null);
@@ -144,6 +148,13 @@ export function Aptera({ alturaVuelo, avanzando, entrada }: {
   const cuerpo = useRef<THREE.Group>(null);
 
   useFrame((estado, dt) => {
+    // Aparcada no se anima nada: ni rotores, ni inclinación, ni hover. Un
+    // vehículo apagado que sigue moviendo las hélices no está aparcado.
+    if (aparcada) {
+      if (alaIzq.current) alaIzq.current.rotation.z = 1.35;
+      if (alaDer.current) alaDer.current.rotation.z = -1.35;
+      return;
+    }
     const h = alturaVuelo.current;
     // 0 en el suelo, 1 en pleno vuelo: abre las alas y acelera los rotores.
     const vuelo = Math.min(1, h / 6);
