@@ -598,6 +598,10 @@ function ItemPulsable({ item, fase, onClick, onAgarrar }: {
 // El suelo del editor, el marcador de mover y el anillo de selección
 // ---------------------------------------------------------------------------
 
+/** Lo que se considera «dos clics seguidos». 500 ms: con 400 se perdía un
+ *  doble clic tranquilo, y por encima de 600 el primer clic parece colgado. */
+const VENTANA_DOBLE = 500;
+
 export function SueloEditor({ moviendo, movil, onSuelo, onSoltar }: {
   moviendo: boolean;
   /** Compartido con la página: la última posición del ratón sobre el suelo. */
@@ -605,6 +609,10 @@ export function SueloEditor({ moviendo, movil, onSuelo, onSoltar }: {
   onSuelo: (p: { x: number; z: number }) => void;
   onSoltar: (p: { x: number; z: number }) => void;
 }) {
+  /** El primer clic esperando a ver si viene un segundo. */
+  const esperaClic = useRef<number | null>(null);
+  useEffect(() => () => { if (esperaClic.current !== null) clearTimeout(esperaClic.current); }, []);
+
   return (
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
@@ -619,8 +627,27 @@ export function SueloEditor({ moviendo, movil, onSuelo, onSoltar }: {
       onClick={(e) => {
         if (!esClic(e)) return;
         const p = { x: e.point.x, z: e.point.z };
-        if (moviendo) onSoltar(movil.current || p);
-        else onSuelo(p);
+        // Soltar lo que llevas en la mano SÍ es de un solo clic: ya estabas
+        // en mitad de una acción y esperar un segundo clic sería raro.
+        if (moviendo) { onSoltar(movil.current || p); return; }
+        // Crear, en cambio, va con DOBLE clic (2026-08-19, petición de
+        // Eugenio: «que solo aparezca cuando hago doble clic»). Pisar el suelo
+        // es lo que más se hace en el juego —andar, mirar, girar la cámara— y
+        // que eso abriera un menú lo convertía en un estorbo constante.
+        if (esperaClic.current !== null) {
+          clearTimeout(esperaClic.current);
+          esperaClic.current = null;
+          onSuelo(p);
+          return;
+        }
+        esperaClic.current = window.setTimeout(() => { esperaClic.current = null; }, VENTANA_DOBLE);
+      }}
+      // El doble clic nativo del navegador, además del contador de arriba:
+      // en un ratón normal llega antes y hace el menú instantáneo.
+      onDoubleClick={(e) => {
+        if (moviendo) return;
+        if (esperaClic.current !== null) { clearTimeout(esperaClic.current); esperaClic.current = null; }
+        onSuelo({ x: e.point.x, z: e.point.z });
       }}
     >
       <planeGeometry args={[1100, 1100]} />

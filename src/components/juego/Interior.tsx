@@ -100,18 +100,52 @@ function Foto({ url, ancho = 3 }: { url: string; ancho?: number }) {
   );
 }
 
-/** Tarjeta del tablero, como una lámina de cristal con su título. */
-function Tarjeta({ item, color }: { item: ItemProyecto; color: string }) {
+/**
+ * Tarjeta del tablero como MINI TABLERO (2026-08-19, petición de Eugenio:
+ * «quiero que las notas sean como boards con preview del contenido de dentro,
+ * como mini ventana que cargan lo que hay dentro, ya sea imágenes o notas»).
+ *
+ * Antes cada bloque de una tarjeta se soltaba como un objeto SUELTO flotando
+ * al lado: una habitación con cuatro tarjetas y sus fotos era una nube de
+ * catorce cosas sin saber cuál iba con cuál. Ahora la tarjeta enseña dentro lo
+ * que lleva —la primera foto de verdad, el primer texto— y pulsarla la abre
+ * entera, como hasta ahora.
+ */
+function Tarjeta({ item, color, onAbrir }: {
+  item: ItemProyecto;
+  color: string;
+  onAbrir?: (it: ItemProyecto) => void;
+}) {
   const estado = COLOR_ESTADO[item.estado] || COLOR_ESTADO.por_hacer;
+  const bloques = Array.isArray(item.bloques) ? item.bloques : [];
+  const foto = bloques.find(b => b?.tipo === 'imagen' && b.url)?.url;
+  const nota = bloques.find(b => b?.tipo === 'texto' && b.texto)?.texto;
+  const extra = Math.max(0, bloques.filter(b => b?.tipo === 'imagen' || b?.tipo === 'texto').length - 1);
+  // Con contenido la tarjeta crece hacia abajo: la vista previa necesita
+  // sitio, y una tarjeta vacía no debe ocupar el de una llena.
+  const alto = foto || nota ? 4.5 : 2.6;
+  const [encima, setEncima] = useState(false);
+
   return (
-    <group>
-      <mesh>
-        <planeGeometry args={[4.2, 2.6]} />
+    <group
+      onPointerOver={onAbrir ? (e) => { e.stopPropagation(); setEncima(true); document.body.style.cursor = 'pointer'; } : undefined}
+      onPointerOut={onAbrir ? () => { setEncima(false); document.body.style.cursor = ''; } : undefined}
+      onClick={onAbrir ? (e) => { e.stopPropagation(); onAbrir(item); } : undefined}
+    >
+      {/* Halo al pasar por encima: dice que se puede pulsar sin un cartel. */}
+      {encima && (
+        <mesh position={[0, -(alto - 2.6) / 2, -0.02]}>
+          <planeGeometry args={[4.5, alto + 0.3]} />
+          <meshBasicMaterial color={color} toneMapped={false} transparent opacity={0.5} />
+        </mesh>
+      )}
+      <mesh position={[0, -(alto - 2.6) / 2, 0]}>
+        <planeGeometry args={[4.2, alto]} />
         <meshBasicMaterial color={PARED} transparent opacity={0.82} />
       </mesh>
       {/* Filo de color: el estado de la tarjeta, legible desde lejos */}
-      <mesh position={[-2.05, 0, 0.01]}>
-        <planeGeometry args={[0.16, 2.6]} />
+      <mesh position={[-2.05, -(alto - 2.6) / 2, 0.01]}>
+        <planeGeometry args={[0.16, alto]} />
         <meshBasicMaterial color={estado} toneMapped={false} />
       </mesh>
       <mesh position={[0, 1.36, 0.01]}>
@@ -142,9 +176,83 @@ function Tarjeta({ item, color }: { item: ItemProyecto; color: string }) {
           {item.resumen.slice(0, 120)}
         </Text>
       )}
-      <Text position={[-1.75, -1.12, 0.03]} fontSize={0.17} color={estado} anchorX="left" anchorY="middle">
+      {/* --- LA VISTA PREVIA: lo que lleva dentro, dentro. */}
+      {foto && (
+        <group position={[0, -1.35, 0.03]}>
+          <Foto url={foto} ancho={3.5} />
+        </group>
+      )}
+      {!foto && nota && (
+        <group position={[0, -1.35, 0.02]}>
+          <mesh>
+            <planeGeometry args={[3.7, 1.9]} />
+            <meshBasicMaterial color={CRISTAL} transparent opacity={0.14} />
+          </mesh>
+          <Text
+            position={[-1.75, 0.8, 0.02]}
+            fontSize={0.19}
+            maxWidth={3.4}
+            lineHeight={1.35}
+            color="#dbe4ee"
+            anchorX="left"
+            anchorY="top"
+            clipRect={[0, -1.7, 3.5, 0.1]}
+          >
+            {nota.slice(0, 260)}
+          </Text>
+        </group>
+      )}
+      {extra > 0 && (
+        <Text position={[1.85, -(alto - 2.6) - 1.12, 0.03]} fontSize={0.16} color="#8fa0b3" anchorX="right" anchorY="middle">
+          +{extra} más
+        </Text>
+      )}
+      <Text position={[-1.75, -(alto - 2.6) - 1.12, 0.03]} fontSize={0.17} color={estado} anchorX="left" anchorY="middle">
         {item.estado === 'hecho' ? 'HECHO' : item.estado === 'en_curso' ? 'EN CURSO' : 'POR HACER'}
       </Text>
+    </group>
+  );
+}
+
+/**
+ * El pedestal «+» de cada habitación (2026-08-19). Eugenio pidió LOS DOS
+ * gestos para crear una tarea: este pilar, que se ve sin que nadie te lo
+ * explique, y el doble clic en el suelo, que es el mismo gesto que fuera.
+ */
+function PedestalCrear({ color, onCrear }: { color: string; onCrear: () => void }) {
+  const [encima, setEncima] = useState(false);
+  const aro = useRef<THREE.Mesh>(null);
+  useFrame((estado) => {
+    if (aro.current) {
+      const s = 1 + Math.sin(estado.clock.elapsedTime * 2.2) * 0.06;
+      aro.current.scale.set(s, s, 1);
+    }
+  });
+  return (
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); setEncima(true); document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { setEncima(false); document.body.style.cursor = ''; }}
+      onClick={(e) => { e.stopPropagation(); onCrear(); }}
+    >
+      <mesh position={[0, 0.5, 0]}>
+        <cylinderGeometry args={[0.45, 0.6, 1, 16]} />
+        <meshStandardMaterial color={PARED} roughness={0.6} />
+      </mesh>
+      <mesh ref={aro} position={[0, 1.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.34, 0.46, 24]} />
+        <meshBasicMaterial color={color} toneMapped={false} transparent opacity={0.7} side={THREE.DoubleSide} />
+      </mesh>
+      <Billboard position={[0, 1.9, 0]}>
+        <mesh>
+          <circleGeometry args={[0.62, 28]} />
+          <meshBasicMaterial color={color} toneMapped={false} transparent opacity={encima ? 1 : 0.85} />
+        </mesh>
+        <Text position={[0, 0.02, 0.01]} fontSize={0.82} color="#0b1220" anchorX="center" anchorY="middle">+</Text>
+        <Text position={[0, -0.95, 0.01]} fontSize={0.26} color="#e6edf5" anchorX="center" anchorY="middle"
+              outlineWidth={0.02} outlineColor="#0b1220">
+          Nueva tarea
+        </Text>
+      </Billboard>
     </group>
   );
 }
@@ -416,10 +524,14 @@ export interface DatosInterior {
   agentes: Agente[];
 }
 
-export function InteriorProyecto({ datos, onHablar }: {
+export function InteriorProyecto({ datos, onHablar, onAbrirTarea, onCrearTarea }: {
   datos: DatosInterior;
   /** Pulsar a alguien dentro de una habitación abre SU conversación. */
   onHablar: (a: Agente) => void;
+  /** Pulsar una tarjeta la abre entera, para marcarla, moverla o editarla. */
+  onAbrirTarea?: (it: ItemProyecto) => void;
+  /** Crear una tarea en ESTA habitación: el pedestal «+» y el doble clic. */
+  onCrearTarea?: (grupoId: string) => void;
 }) {
   const { proyecto, grupos, items, color, sala, agentes } = datos;
   const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
@@ -431,14 +543,14 @@ export function InteriorProyecto({ datos, onHablar }: {
     // Las tarjetas que SON personas se sacan aparte: no se dibujan como una
     // lámina con su nombre, sino como la persona misma, de pie en la sala.
     const gente = habitantesDeSala(items, sala, agentes, proyecto.id);
+    // UNA cosa por tarjeta (2026-08-19). Las fotos y las notas de dentro ya
+    // no se sueltan sueltas por la sala: se ven DENTRO de su tarjeta, que es
+    // lo que las ata a algo. Antes, cuatro tarjetas con fotos eran catorce
+    // objetos flotando sin saber cuál iba con cuál.
     const cosas: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
     for (const it of suyos) {
       if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
       cosas.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
-      for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
-        if (b?.tipo === 'imagen' && b.url) cosas.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
-        else if (b?.tipo === 'texto' && b.texto) cosas.push({ clave: `d:${it.id}:${i}`, tipo: 'doc', nombre: b.texto });
-      }
     }
     const c = grupo?.color || color;
 
@@ -504,13 +616,32 @@ export function InteriorProyecto({ datos, onHablar }: {
           return (
             <group key={cosa.clave} position={[p.x, p.y, p.z]} rotation={[0, Math.atan2(-p.x, -p.z + 8), 0]}>
               <Flotante fase={i * 1.7}>
-                {cosa.tipo === 'tarjeta' && cosa.item && <Tarjeta item={cosa.item} color={c} />}
+                {cosa.tipo === 'tarjeta' && cosa.item && <Tarjeta item={cosa.item} color={c} onAbrir={onAbrirTarea} />}
                 {cosa.tipo === 'foto' && cosa.url && <Foto url={cosa.url} />}
                 {cosa.tipo === 'doc' && <Documento nombre={cosa.nombre || 'Nota'} color={c} />}
               </Flotante>
             </group>
           );
         })}
+
+        {/* CREAR una tarea, con los dos gestos que pidió Eugenio: el pedestal
+            «+» (se ve solo) y el doble clic en el suelo (el mismo gesto que
+            en la aldea). Los dos hacen exactamente lo mismo. */}
+        {onCrearTarea && sala && (
+          <>
+            <group position={[6.2, 0, 5.4]}>
+              <PedestalCrear color={c} onCrear={() => onCrearTarea(sala)} />
+            </group>
+            <mesh
+              rotation={[-Math.PI / 2, 0, 0]}
+              position={[0, 0.03, 0]}
+              onDoubleClick={(e) => { e.stopPropagation(); onCrearTarea(sala); }}
+            >
+              <planeGeometry args={[HAB_ANCHO, HAB_FONDO]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+          </>
+        )}
 
         <Portal x={HAB_SALIDA.x} z={HAB_SALIDA.z} texto="Volver a la sala" color={ORO} />
       </group>
@@ -584,14 +715,16 @@ export function cosasDePlaza(items: ItemProyecto[], agentes: Agente[]): Array<{
   clave: string; tipo: 'tarjeta' | 'foto' | 'doc';
   item?: ItemProyecto; url?: string; nombre?: string; x: number; z: number;
 }> {
+  // UNA cosa por tarjeta (2026-08-19, petición de Eugenio: «que las notas sean
+  // como boards con preview del contenido de dentro»). Las fotos y las notas
+  // de una tarjeta ya NO se sueltan sueltas por el corro: se ven dentro de su
+  // tarjeta. Antes, un proyecto con diez tarjetas con foto poblaba la plaza
+  // con veinte objetos y no se sabía cuál iba con cuál — y además cada uno
+  // era un obstáculo con el que chocabas por separado.
   const lista: Array<{ clave: string; tipo: 'tarjeta' | 'foto' | 'doc'; item?: ItemProyecto; url?: string; nombre?: string }> = [];
   for (const it of items) {
     if (agenteDeItem(it, agentes)) continue;   // esa tarjeta es una persona
     lista.push({ clave: `t:${it.id}`, tipo: 'tarjeta', item: it });
-    for (const [i, b] of (Array.isArray(it.bloques) ? it.bloques : []).entries()) {
-      if (b?.tipo === 'imagen' && b.url) lista.push({ clave: `f:${it.id}:${i}`, tipo: 'foto', url: b.url, nombre: b.pie });
-      else if (b?.tipo === 'texto' && b.texto) lista.push({ clave: `d:${it.id}:${i}`, tipo: 'doc', nombre: b.texto });
-    }
   }
   return lista.map((c, i) => {
     const ang = (i / Math.max(lista.length, 1)) * Math.PI * 2 + 0.35;
@@ -600,13 +733,16 @@ export function cosasDePlaza(items: ItemProyecto[], agentes: Agente[]): Array<{
   });
 }
 
-export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta }: {
+export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta, onCrearTarea }: {
   datos: DatosInterior;
   onHablar: (a: Agente) => void;
   /** Pulsar el portal de salida también te saca a la aldea (no solo chocar). */
   onSalir?: () => void;
   /** Pulsar (o chocar con) una tarjeta del corro: abre su ficha central. */
   onAbrirTarjeta?: (item: ItemProyecto) => void;
+  /** Crear una tarea nueva aquí: el pedestal «+» y el doble clic en el suelo
+   *  (2026-08-19, Eugenio pidió los DOS gestos). */
+  onCrearTarea?: () => void;
 }) {
   const { proyecto, items, color, agentes } = datos;
   const pct = proyecto.tarjetas > 0 ? proyecto.hechas / proyecto.tarjetas : 0;
@@ -675,13 +811,15 @@ export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta }: {
                 {(resaltado) => (
                   <group scale={resaltado ? 1.45 : 1}>
                     <Tarjeta item={cosa.item!} color={color} />
-                    {/* Blanco generoso: la lámina fina era difícil de acertar */}
-                    <mesh position={[0, 0, 0.1]}>
-                      <planeGeometry args={[4.4, 2.8]} />
+                    {/* Blanco generoso: la lámina fina era difícil de acertar.
+                        Cubre TODO el alto, que ahora depende de si la tarjeta
+                        lleva vista previa dentro. */}
+                    <mesh position={[0, -1, 0.1]}>
+                      <planeGeometry args={[4.4, 4.8]} />
                       <meshBasicMaterial transparent opacity={0} depthWrite={false} />
                     </mesh>
                     {resaltado && (
-                      <Text position={[0, -1.75, 0.05]} fontSize={0.26} color="#ffffff" anchorX="center" anchorY="middle"
+                      <Text position={[0, -3.6, 0.12]} fontSize={0.26} color="#ffffff" anchorX="center" anchorY="middle"
                         outlineWidth={0.02} outlineColor="#1d3a24">
                         Pulsa para abrir la ficha
                       </Text>
@@ -690,11 +828,28 @@ export function PlazaProyecto({ datos, onHablar, onSalir, onAbrirTarjeta }: {
                 )}
               </Interactivo>
             )}
-            {cosa.tipo === 'foto' && cosa.url && <Foto url={cosa.url} />}
-            {cosa.tipo === 'doc' && <Documento nombre={cosa.nombre || 'Nota'} color={color} />}
           </Flotante>
         </group>
       ))}
+
+      {/* CREAR una tarea sin salir del juego (2026-08-19). Los dos gestos que
+          pidió Eugenio: el pedestal «+», que se ve solo, y el doble clic en
+          el suelo, el mismo gesto que en la aldea. */}
+      {onCrearTarea && (
+        <>
+          <group position={[0, 0, 7.5]}>
+            <PedestalCrear color={color} onCrear={onCrearTarea} />
+          </group>
+          <mesh
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, 0.04, 0]}
+            onDoubleClick={(e) => { e.stopPropagation(); onCrearTarea(); }}
+          >
+            <circleGeometry args={[PLAZA_LIM + 14, 48]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+        </>
+      )}
 
       {/* El portal verde de vuelta a la aldea: chocar O PULSARLO te saca
           (petición de Eugenio: el clic en «Salir a la aldea» no hacía nada). */}

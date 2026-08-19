@@ -106,7 +106,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, vista, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, vista, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, onCrearTarea, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -155,6 +155,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   onActualizarCine?: () => void;
   /** Pulsar (o chocar con) una tarjeta del corro de la plaza: su ficha. */
   onAbrirTarjeta?: (item: import('./tipos').ItemProyecto) => void;
+  /** Crear una tarea dentro de la plaza del proyecto (2026-08-19). */
+  onCrearTarea?: () => void;
   /** Última posición del ratón sobre el suelo mientras se mueve algo. */
   movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
@@ -407,7 +409,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         />
       ) : interior ? (
         <>
-          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} onAbrirTarjeta={onAbrirTarjeta} />
+          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} onAbrirTarjeta={onAbrirTarjeta} onCrearTarea={onCrearTarea} />
           {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
               aldea: pulsar, arrastrar, hilos y crear en el suelo. */}
           <ObjetosMundo

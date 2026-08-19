@@ -11,11 +11,12 @@
 // Están en un solo sitio a propósito: añadir el número 45 es escribir un
 // `case` aquí y una línea en CATALOGO_PROPS. Nada más.
 // ============================================================================
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mapasPBR } from './texturas';
 import { MaterialAgua } from './Agua';
 import { PALETA } from './paleta';
+import { Aptera } from './Vehiculos';
 
 const MADERA = (r = 1, r2 = 1) => mapasPBR('madera', r, r2);
 const PIEDRA = (r = 1, r2 = 1) => mapasPBR('roca', r, r2);
@@ -941,9 +942,28 @@ function Pasarela() {
   );
 }
 
+/**
+ * TU APTERA, APARCADA (2026-08-19, petición de Eugenio: «hazme una réplica de
+ * mi vehículo volador y déjalo aparcado como el camión como un objeto que no
+ * se mueve»). Es exactamente la misma nave que pilotas —el mismo componente,
+ * no una copia que se quedaría desfasada al retocar el vehículo—, pero con las
+ * alas plegadas y los rotores quietos.
+ */
+function ApteraAparcada() {
+  // La altura de vuelo va por ref porque el vehículo la anima cada fotograma;
+  // aquí es una constante a 0 que nadie toca.
+  const suelo = useRef(0);
+  return (
+    <group scale={0.9}>
+      <Aptera alturaVuelo={suelo} avanzando={false} aparcada />
+    </group>
+  );
+}
+
 /** Todos los objetos del catálogo, por nombre. */
 export function ObjetoNuevo({ modelo }: { modelo: string }) {
   switch (modelo) {
+    case 'aptera': return <ApteraAparcada />;
     // Ciudad
     case 'papelera': return <Papelera />;
     case 'semaforo': return <Semaforo />;

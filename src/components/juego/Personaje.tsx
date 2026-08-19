@@ -262,7 +262,29 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       // PRIMERA PERSONA: la cámara va en tu cabeza y mira hacia donde miras.
       // Sin interpolación de posición: cualquier retraso aquí se siente como
       // mareo, porque el mundo se movería después que tú.
-      const ALTO_OJOS = 1.62;
+      // EL PLANO CERCANO. Este es el detalle que hacía invisible el cuerpo: la
+      // cámara recorta todo lo que tiene a menos de 50 cm, y tu pecho, tus
+      // brazos y tus piernas están justo ahí. En primera persona se baja a
+      // 15 cm — suficiente para verte, y lejos todavía del 0,01 que arruina
+      // la precisión de profundidad y hace parpadear la geometría lejana.
+      const cercaQuiere = 0.15;
+      if (cam.near !== cercaQuiere) { cam.near = cercaQuiere; cam.updateProjectionMatrix(); }
+
+      // EL CUERPO MIRA DONDE MIRAS TÚ. Sin esto, arrastrar el ratón giraba la
+      // vista pero dejaba el cuerpo plantado, y al mirar abajo te veías las
+      // piernas de lado, como si llevaras la cabeza torcida.
+      g.rotation.y = yaw + Math.PI;
+
+      // La cámara va donde están los ojos: 1,62 de alto y SOBRE el eje del
+      // cuerpo. Adelantarla parecía buena idea (evita ver el interior del
+      // cráneo) pero dejaba el cuerpo por detrás: al mirar abajo las piernas
+      // salían por el borde de arriba en vez de bajo tus pies. La cabeza no
+      // se dibuja, así que no hace falta adelantarla nada.
+      // 1,70 y no 1,62: el modelo mide 1,81 y sus hombros están sobre 1,50.
+      // Con los ojos a 1,62 los hombros comían el tercio inferior de la
+      // pantalla; a 1,70 quedan abajo del todo, que es donde los ve una
+      // persona de verdad.
+      const ALTO_OJOS = 1.7;
       cam.position.set(g.position.x, g.position.y + ALTO_OJOS, g.position.z);
       // `pitch` es la inclinación de la órbita (0,1 mirando al horizonte,
       // 1,45 casi cenital). Se convierte en el cabeceo de la vista: cuanto
@@ -275,6 +297,10 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       );
       cam.lookAt(tmpMira);
     } else {
+      // En tercera persona vuelve el plano cercano de siempre: con la cámara
+      // a metros del personaje no hace falta apurar, y 0,5 da más precisión
+      // de profundidad en el horizonte.
+      if (cam.near !== 0.5) { cam.near = 0.5; cam.updateProjectionMatrix(); }
       tmpCam.set(
         g.position.x + Math.sin(yaw) * cp * dist,
         g.position.y + Math.max(1.5, sp * dist),
@@ -307,9 +333,13 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     <group ref={grupo} position={[0, 0, 9.5]}>
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
-      {/* En PRIMERA persona tu propio cuerpo no se dibuja: la cámara está
-          dentro de la cabeza y solo verías el interior del modelo. */}
-      {vehiculo === 'pie' && vista === 'tercera' && (
+      {/* En PRIMERA persona el cuerpo SÍ se dibuja (2026-08-19, petición de
+          Eugenio: «se tienen que ver los brazos moviéndose y las piernas»),
+          pero SIN cabeza ni pelo: la cámara está dentro del cráneo y de ellos
+          solo vería la cara interior. Los brazos y las piernas siguen con su
+          animación de verdad, así que andar, correr y saltar se ven desde
+          dentro como en cualquier juego en primera persona. */}
+      {vehiculo === 'pie' && (
         // El Suspense propio es lo que te deja ANDAR antes de que hayan
         // bajado los 7,6 MB de animaciones: mientras tanto eres la silueta.
         // Sin él, React tira abajo la escena entera y vuelves a la pantalla
@@ -322,6 +352,7 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
             animacion={paso}
             aspecto={aspecto}
             ritmo={ritmoAnim}
+            sinCabeza={vista === 'primera'}
           />
         </Suspense>
       )}

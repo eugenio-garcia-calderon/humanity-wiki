@@ -1397,6 +1397,58 @@ export default function JuegoVital() {
     return actualizada;
   }, [cargarProyectos]);
 
+  /**
+   * CREAR UNA TAREA SIN SALIR DEL JUEGO (2026-08-19, petición de Eugenio: «no
+   * puedo crear nuevas tarjetas dentro del proyecto de forma visual»). Nace
+   * vacía y con la ficha ABIERTA: escribir el título es lo primero que haces,
+   * y así crear y rellenar son un solo gesto en vez de dos pantallas.
+   *
+   * `grupo` es la habitación donde estás; si estás en la plaza, la primera.
+   */
+  const crearTarea = useCallback(async (grupoId?: string) => {
+    const dentro = interiorRef.current;
+    if (!dentro) return;
+    const grupo = grupoId || dentro.sala || dentro.grupos[0]?.id;
+    if (!grupo) { avisar('Este proyecto no tiene habitaciones donde poner la tarea.'); return; }
+    const r = await fetch('/api/roadmap', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        proyecto_id: dentro.proyecto.id,
+        grupo,
+        titulo: 'Tarea nueva',
+        estado: 'por_hacer',
+        prioridad: 'media',
+        bloques: [],
+      }),
+    }).catch(() => null);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (!r?.ok) { avisar(j?.error || 'No se ha podido crear la tarea.'); return; }
+    const nueva: ItemProyecto = {
+      id: j.id, grupo: j.grupo, titulo: j.titulo, resumen: j.resumen,
+      estado: j.estado, prioridad: j.prioridad,
+      bloques: Array.isArray(j.bloques) ? j.bloques : [],
+    };
+    setInterior(prev => (prev ? { ...prev, items: [...prev.items, nueva] } : prev));
+    setFichaTarea(nueva);
+    cargarProyectos();
+  }, [cargarProyectos]);
+
+  /** Quitar una tarea del proyecto. El backend la ARCHIVA (regla 6): se puede
+   *  recuperar, no se destruye. */
+  const borrarTarea = useCallback(async (id: string) => {
+    const r = await fetch(`/api/roadmap/${id}`, { method: 'DELETE', credentials: 'include' }).catch(() => null);
+    if (!r?.ok) {
+      const j = r ? await r.json().catch(() => null) : null;
+      avisar(j?.error || 'No se ha podido quitar la tarea.');
+      return;
+    }
+    setInterior(prev => (prev ? { ...prev, items: prev.items.filter(it => it.id !== id) } : prev));
+    setFichaTarea(null);
+    cargarProyectos();
+    avisar('Tarea quitada del proyecto.');
+  }, [cargarProyectos]);
+
   /** Un vídeo del cine se ve en la ventana interna de siempre. */
   const verVideoCine = useCallback((v: VideoCine) => {
     setLeyendo({
@@ -1749,6 +1801,7 @@ export default function JuegoVital() {
           }}
           onSalirProyecto={salirDelProyecto}
           onAbrirTarjeta={(it) => setFichaTarea(it)}
+          onCrearTarea={() => crearTarea()}
           onHablarAgente={(a) => {
             const ed = editorRef.current;
             if (ed.conectando && ed.sel?.clase === 'item') {
@@ -2875,9 +2928,11 @@ export default function JuegoVital() {
           tarea={fichaTarea}
           proyectos={proyectos}
           proyectoActual={interior.proyecto.id}
+          grupos={interior.grupos}
           onCerrar={() => setFichaTarea(null)}
           onGuardar={guardarTarea}
           onMovida={() => { setFichaTarea(null); avisar('Tarjeta movida a su nuevo proyecto.'); }}
+          onBorrar={borrarTarea}
         />
       )}
 
@@ -3782,13 +3837,18 @@ const ESTADOS_TAREA: Array<{ id: string; nombre: string; color: string }> = [
 
 const idYoutube = (url?: string) => url?.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1] || null;
 
-function FichaTarea({ tarea, proyectos, proyectoActual, onCerrar, onGuardar, onMovida }: {
+function FichaTarea({ tarea, proyectos, proyectoActual, grupos, onCerrar, onGuardar, onMovida, onBorrar }: {
   tarea: ItemProyecto;
   proyectos: ProyectoJuego[];
   proyectoActual: string;
+  /** Las habitaciones del proyecto: mover una tarea de habitación es lo mismo
+   *  que cambiarla de columna en el tablero (2026-08-19). */
+  grupos: Array<{ id: string; label: string; color?: string }>;
   onCerrar: () => void;
   onGuardar: (id: string, patch: Record<string, unknown>) => Promise<ItemProyecto | null>;
   onMovida: () => void;
+  /** Quitarla del proyecto. Va a la papelera, no se destruye. */
+  onBorrar?: (id: string) => void;
 }) {
   const [titulo, setTitulo] = useState(tarea.titulo);
   // Los bloques `agente` NO van al lienzo (dicen que la tarjeta es una
@@ -3801,6 +3861,9 @@ function FichaTarea({ tarea, proyectos, proyectoActual, onCerrar, onGuardar, onM
       y: typeof (b as any).y === 'number' ? (b as any).y : 26 + Math.floor(i / 3) * 200,
     })));
   const [pidiendo, setPidiendo] = useState<null | 'enlace' | 'video'>(null);
+  /** Confirmación de borrado, en la propia ficha: un `confirm()` del navegador
+   *  se sale del juego y a pantalla completa ni se ve. */
+  const [borrando, setBorrando] = useState(false);
   const [urlBorrador, setUrlBorrador] = useState('');
   const [subiendo, setSubiendo] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
@@ -3899,6 +3962,18 @@ function FichaTarea({ tarea, proyectos, proyectoActual, onCerrar, onGuardar, onM
           >
             {proyectos.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
           </select>
+          {grupos.length > 0 && (
+            <>
+              <label className="ml-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Habitación</label>
+              <select
+                value={tarea.grupo}
+                onChange={(e) => onGuardar(tarea.id, { grupo: e.target.value })}
+                className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-emerald-300"
+              >
+                {grupos.map(g => <option key={g.id} value={g.id}>{g.label}</option>)}
+              </select>
+            </>
+          )}
           <label className="ml-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Estado</label>
           {ESTADOS_TAREA.map(e => (
             <button
@@ -3930,8 +4005,32 @@ function FichaTarea({ tarea, proyectos, proyectoActual, onCerrar, onGuardar, onM
             <Button variant="ghost" className="text-[11px] px-2 py-1 border border-slate-200" onClick={() => { setPidiendo('video'); setUrlBorrador(''); }}>
               <Film className="w-3.5 h-3.5 mr-1 inline" />Vídeo
             </Button>
+            {/* Borrar, separado del resto y en rojo: es la única acción de
+                aquí que quita algo. Va a la papelera, no se destruye. */}
+            {onBorrar && (
+              <Button
+                variant="ghost"
+                className="text-[11px] px-2 py-1 border border-rose-200 text-rose-600 hover:bg-rose-50 ml-1"
+                onClick={() => setBorrando(true)}
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1 inline" />Borrar
+              </Button>
+            )}
           </div>
         </div>
+        {borrando && onBorrar && (
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-rose-100 bg-rose-50">
+            <p className="text-xs text-rose-700 font-bold">¿Quitar «{tarea.titulo.slice(0, 40)}» del proyecto?</p>
+            <div className="ml-auto flex gap-1.5">
+              <Button variant="ghost" className="text-[11px] px-2.5 py-1 border border-slate-200" onClick={() => setBorrando(false)}>
+                No
+              </Button>
+              <Button className="text-[11px] px-2.5 py-1 bg-rose-600 hover:bg-rose-700" onClick={() => onBorrar(tarea.id)}>
+                Sí, quitarla
+              </Button>
+            </div>
+          </div>
+        )}
         {pidiendo && (
           <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 bg-slate-50">
             <input
