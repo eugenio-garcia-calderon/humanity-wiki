@@ -130,6 +130,11 @@ export interface ItemMundo {
     currency: string | null;
     images: string[];
     modelo?: string | null;
+    /** La PÁGINA del producto: bloques con su posición (2026-08-19). */
+    descripcion?: string | null;
+    bloques?: Array<Record<string, unknown>>;
+    /** Quién lo creó: solo esa persona (o un admin) edita su página. */
+    creador?: string | null;
   } | null;
 }
 

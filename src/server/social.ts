@@ -514,6 +514,41 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * PUT /api/products/:id/pizarra — la landing del producto (2026-08-19,
+   * petición de Eugenio). Guarda SOLO los bloques: es una ruta aparte y no un
+   * campo más del POST de arriba porque se llama en cada arrastre, y meterla
+   * en el upsert general reescribiría precio, fotos y enlaces cada vez que
+   * alguien mueve una foto un centímetro.
+   *
+   * Puede editarla QUIEN LA CREÓ, o un administrador. Cualquier otro se lleva
+   * un 403: una landing es la cara pública de un producto.
+   */
+  app.put('/api/products/:id/pizarra', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const fila = await db.execute(sql`
+        SELECT created_by FROM products WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!fila.rows.length) return res.status(404).json({ error: 'Ese producto no existe.' });
+      const suyo = (fila.rows[0] as any).created_by === req.user.id;
+      if (!suyo && (req.user.roleLevel ?? 0) < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Solo quien creó el producto puede editar su página.' });
+      }
+      const bloques = Array.isArray(req.body?.bloques) ? req.body.bloques : [];
+      await db.execute(sql`
+        UPDATE products
+        SET bloques = ${JSON.stringify(bloques)}::jsonb,
+            version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, bloques });
+    } catch (e: any) {
+      console.error('product board error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/products', async (req: Request, res: Response) => {
     try {
       const { territory_id, objective_id, indicator_id, challenge_id, category, kind, q } = req.query as any;

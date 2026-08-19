@@ -336,7 +336,9 @@ export function registerJuegoRoutes(app: Express, db: any) {
         SELECT i.*,
                CASE WHEN p.id IS NULL THEN NULL ELSE jsonb_build_object(
                  'id', p.id, 'name', p.name, 'price_cents', p.price_cents,
-                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo
+                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo,
+                 'descripcion', p.description, 'bloques', p.bloques,
+                 'creador', p.created_by
                ) END AS producto
         FROM game_world_items i
         LEFT JOIN products p
@@ -413,7 +415,9 @@ export function registerJuegoRoutes(app: Express, db: any) {
         SELECT i.*,
                CASE WHEN p.id IS NULL THEN NULL ELSE jsonb_build_object(
                  'id', p.id, 'name', p.name, 'price_cents', p.price_cents,
-                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo
+                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo,
+                 'descripcion', p.description, 'bloques', p.bloques,
+                 'creador', p.created_by
                ) END AS producto
         FROM game_world_items i
         LEFT JOIN products p ON p.id = i.producto_id AND p.archived_at IS NULL
