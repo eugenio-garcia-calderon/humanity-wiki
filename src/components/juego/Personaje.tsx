@@ -71,8 +71,13 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
   // Andar, correr o estar quieto: el modelo trae sus propias animaciones.
   const [andando, setAndando] = useState(false);
   const andandoRef = useRef(false);
-  const [corriendo, setCorriendo] = useState(false);
-  const corriendoRef = useRef(false);
+  // La MARCHA a pie sale de la velocidad real: parado, paseo, trote,
+  // esprint o en el aire (salto). Cada una es una pista distinta del modelo.
+  const [paso, setPaso] = useState('idle');
+  const pasoRef = useRef('idle');
+  // Y la CADENCIA acompasa la zancada a los m/s reales (por ref, sin
+  // re-render: la lee Persona3D cada fotograma).
+  const ritmoAnim = useRef(1);
 
   useFrame((estado, dtBruto) => {
     const g = grupo.current;
@@ -183,17 +188,30 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       if (choque) onChoque(choque);
     }
 
-    const moviendo = vel.current.lengthSq() > 0.4;
-    // El cambio andar/correr/parar se avisa a React solo cuando cambia de verdad.
+    const rapidez = vel.current.length();
+    const moviendo = rapidez > 0.65;
+    // El cambio andar/parar se avisa a React solo cuando cambia de verdad.
     if (moviendo !== andandoRef.current) {
       andandoRef.current = moviendo;
       setAndando(moviendo);
     }
-    const corre = moviendo && turbo;
-    if (corre !== corriendoRef.current) {
-      corriendoRef.current = corre;
-      setCorriendo(corre);
+    // La marcha por VELOCIDAD REAL, no por tecla: paseo hasta 4 m/s, trote
+    // hasta 12 y de ahí para arriba esprint. En el aire manda el salto. La
+    // cadencia divide por la velocidad natural de cada clip y se acota para
+    // que el turbo (24 m/s) no convierta la zancada en un aleteo.
+    const enElAire = alturaSalto.current > 0.05;
+    const pasoAhora = enElAire ? 'salto'
+      : !moviendo ? 'idle'
+        : rapidez < 4 ? 'walk'
+          : rapidez < 12 ? 'jog' : 'sprint';
+    if (pasoAhora !== pasoRef.current) {
+      pasoRef.current = pasoAhora;
+      setPaso(pasoAhora);
     }
+    ritmoAnim.current = pasoAhora === 'walk' ? THREE.MathUtils.clamp(rapidez / 2.2, 0.75, 1.5)
+      : pasoAhora === 'jog' ? THREE.MathUtils.clamp(rapidez / 5.5, 0.8, 1.5)
+        : pasoAhora === 'sprint' ? THREE.MathUtils.clamp(rapidez / 10, 0.9, 1.6)
+          : 1;
     if (moviendo) {
       const deseo = Math.atan2(vel.current.x, vel.current.z);
       const dif = Math.atan2(Math.sin(deseo - rumbo.current), Math.cos(deseo - rumbo.current));
@@ -260,24 +278,35 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     <group ref={grupo} position={[0, 0, 17]}>
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
-      {vehiculo !== 'aptera' && (
-        // En bici va de pie sobre los pedales: sin este medio metro, el
-        // personaje aparecería con las piernas dentro del cuadro.
-        <group position={[0, vehiculo === 'bici' ? 0.45 : 0, 0]}>
-          <Persona3D
-            cuerpo={aspecto?.cuerpo || 'character-male-a'}
-            // Los modelos de Kenney traen su propia animación de correr: se
-            // usa esa en vez de acelerar la de andar, que se vería como una
-            // marioneta con prisa.
-            animacion={andando ? (corriendo ? 'sprint' : 'walk') : 'idle'}
-            aspecto={aspecto}
-          />
-        </group>
+      {vehiculo === 'pie' && (
+        <Persona3D
+          cuerpo={aspecto?.cuerpo || 'character-male-a'}
+          // La marcha sale de la velocidad real (paseo/trote/esprint/salto)
+          // y el ritmo acompasa la zancada a los m/s de verdad.
+          animacion={paso}
+          aspecto={aspecto}
+          ritmo={ritmoAnim}
+        />
       )}
-      {vehiculo === 'bici' && <Bici rodando={andando} />}
+      {vehiculo === 'bici' && (
+        <>
+          {/* SENTADO en el sillín con la postura de conducir (manos al
+              manillar), no de pie sobre los pedales como antes. */}
+          <group position={[0, 0.56, -0.2]}>
+            <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+          </group>
+          <Bici velocidad={vel} />
+        </>
+      )}
       {vehiculo === 'aptera' && (
         <>
-          <Aptera alturaVuelo={alturaVuelo} avanzando={andando} />
+          {/* El PILOTO va visible dentro de la burbuja de la cabina. A 0,42
+              quedaba sentado ENCIMA del fuselaje (visto en pruebas): la
+              postura de conducir ya lleva las caderas altas. */}
+          <group position={[0, 0.1, 0.55]}>
+            <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+          </group>
+          <Aptera alturaVuelo={alturaVuelo} avanzando={andando} entrada={entrada} />
           <SombraVuelo alturaVuelo={alturaVuelo} />
         </>
       )}

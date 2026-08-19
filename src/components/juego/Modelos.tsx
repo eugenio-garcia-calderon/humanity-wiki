@@ -12,6 +12,7 @@
 // donde se miran de cerca: personas, casas y mobiliario del pueblo.
 // ============================================================================
 import { useEffect, useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import * as THREE from 'three';
@@ -64,7 +65,10 @@ const HUMANOS = '/modelos-juego/humanos';
 const PISTAS: Record<string, string> = {
   idle: 'Idle_Loop',
   walk: 'Walk_Loop',
+  jog: 'Jog_Fwd_Loop',
   sprint: 'Sprint_Loop',
+  salto: 'Jump_Loop',
+  conducir: 'Driving_Loop',
   sit: 'Sitting_Idle_Loop',
   talk: 'Idle_Talking_Loop',
   dance: 'Dance_Loop',
@@ -148,7 +152,7 @@ function tinteRopaDe(cuerpo: string): THREE.Color {
   return new THREE.Color(PALETA_ROPA[h % PALETA_ROPA.length]).lerp(new THREE.Color('#ffffff'), 0.2);
 }
 
-function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
+function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritmo }: {
   cuerpo: string;
   animacion?: string;
   /** Se conserva la semántica antigua (2,6 = estatura normal): los que
@@ -156,6 +160,9 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
   escala?: number;
   /** Piel, pelo y ropa elegidos. Sin esto, el modelo va como viene. */
   aspecto?: Aspecto;
+  /** Cadencia de la animación: 1 = la del clip. Va por ref y se aplica cada
+   *  fotograma — así el paso se acompasa a la velocidad REAL sin re-render. */
+  ritmo?: React.MutableRefObject<number>;
 }) {
   // Los 10 fenotipos antiguos se reparten entre los dos cuerpos reales: los
   // nombres con «female» van al femenino. El hash de cuerpoDe no cambia.
@@ -253,12 +260,20 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
     });
   }, [clave, clon, aspecto, humano]);
 
+  const accionViva = useRef<THREE.AnimationAction | null>(null);
   useEffect(() => {
     const a = actions[PISTAS[animacion] || animacion] || actions['Idle_Loop'];
     if (!a) return;
+    accionViva.current = a;
     a.reset().fadeIn(0.25).play();
     return () => { a.fadeOut(0.25); };
   }, [actions, animacion]);
+
+  // La cadencia se acompasa cada fotograma a lo que pida el ritmo (el paso
+  // del que anda despacio es más lento que el del que esprinta de verdad).
+  useFrame(() => {
+    if (ritmo && accionViva.current) accionViva.current.timeScale = ritmo.current;
+  });
 
   return (
     <group ref={grupo} scale={escala / 2.6}>
