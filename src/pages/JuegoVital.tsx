@@ -2042,17 +2042,34 @@ export default function JuegoVital() {
               <p className="text-xs font-black text-slate-900">Crear aquí</p>
               <Button variant="ghost" onClick={() => setCrearEn(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
             </div>
-            <div className="grid grid-cols-5 gap-1.5 mt-2.5">
-              {CATALOGO_PROPS.map(c => (
-                <button
-                  key={c.modelo}
-                  onClick={() => crearItemMundo({ tipo: 'prop', modelo: c.modelo })}
-                  className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-colors"
-                >
-                  <span className="text-lg leading-none">{c.icono}</span>
-                  <span className="text-[9px] font-bold text-slate-600">{c.nombre}</span>
-                </button>
-              ))}
+            {/* Fase 9: 54 objetos, agrupados por familia y con scroll — en una
+                rejilla plana no se encontraba nada. */}
+            <div className="max-h-[42vh] overflow-y-auto pr-0.5 mt-2.5">
+              {([
+                { grupo: undefined, titulo: 'Del pueblo' },
+                { grupo: 'ciudad', titulo: 'Ciudad' },
+                { grupo: 'bosque', titulo: 'Bosque y huerto' },
+              ] as const).map(fam => {
+                const items = CATALOGO_PROPS.filter(c => c.grupo === fam.grupo);
+                if (!items.length) return null;
+                return (
+                  <div key={fam.titulo} className="mb-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{fam.titulo}</p>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {items.map(c => (
+                        <button
+                          key={c.modelo}
+                          onClick={() => crearItemMundo({ tipo: 'prop', modelo: c.modelo })}
+                          className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-colors"
+                        >
+                          <span className="text-lg leading-none">{c.icono}</span>
+                          <span className="text-[9px] font-bold text-slate-600 text-center leading-tight">{c.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <div className="h-px bg-slate-200 my-2.5" />
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Conocimiento</p>

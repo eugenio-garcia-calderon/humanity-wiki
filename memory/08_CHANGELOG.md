@@ -950,3 +950,11 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - **BICHOS** (`Bichos`): 150 en una malla instanciada, cada uno rondando SU planta del bosque comestible. De día son mariposas y abejas doradas; de noche, luciérnagas que laten y resplandecen con el bloom de la fase 0.
 - **EL NOMBRE DE LO QUE TIENES AL LADO** (`RotuloComestible`): al acercarte a menos de 3,6 m de cualquier planta del bosque, aparece su nombre común, su nombre científico y qué da («Cerezas en junio», «Escaramujos, vitamina C»). Un bosque comestible que no te dice qué es cada cosa no enseña nada.
 - Cazado en pruebas (a las 3 de la mañana, de verdad): la noche con luna a 0,22 era una pared negra y no se podía jugar → luna a 0,6 y ambiente a 0,3.
+
+### 2026-08-19 — Fase 9: 45 objetos nuevos de ciudad y bosque
+- **`Objetos.tsx`**: 45 objetos procedurales en alta calidad, todos con las texturas fotográficas de las fases 1-3 y en escala real.
+  - **Ciudad (24)**: papelera, semáforo, señal de stop, señal informativa, marquesina de autobús (con cristal que refleja el cielo y banco corrido), quiosco, hidrante, tres contenedores de reciclaje, jardinera con plantas, fuente de beber (con agua animada), bolardo, muro de piedra, cerca de madera, escalinata, torre de agua, panel solar, bicicletero, buzón, reloj de calle de dos caras, estatua de bronce sobre pedestal, mesa de picnic y columpio.
+  - **Bosque y huerto (21)**: tronco caído con musgo, tocón, corro de setas, helecho, cañas, matorral, peñasco, charca con agua y piedras, pasarela de tablas con barandilla, hoguera encendida (con su luz), tienda de campaña, colmena, pila de leña, espantapájaros con sombrero, bancal de hortalizas, compostera, gallinero, invernadero de cristal con bancadas, molino de viento de seis palas, depósito de agua, comedero de pájaros y pasaderas de piedra.
+- **El panel «Crear aquí» se agrupa por familias** (Del pueblo · Ciudad · Bosque y huerto) con scroll: en una rejilla plana de 54 iconos no se encontraba nada.
+- Cada objeto trae su radio de choque en `RADIOS_OBJETO` (las setas y las pasaderas se pisan; el invernadero y el muro, no) y `radioProp` lo consulta primero.
+- El nombre de un objeto plantado sale ahora del CATÁLOGO: había una lista aparte con 9 nombres y todo lo nuevo se llamaba «Objeto» (cazado al plantar un quiosco de prueba, borrado después).

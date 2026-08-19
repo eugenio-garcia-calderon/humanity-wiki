@@ -5,6 +5,7 @@
 // tuviera su copia, moverías una casa en el mundo y el mapa seguiría
 // enseñándola donde estaba: un mapa que miente es peor que no tener mapa.
 import { crearAzar, centroRio } from './paleta';
+import { RADIOS_OBJETO } from './Objetos';
 
 export { centroRio };
 
@@ -323,6 +324,9 @@ export function piezasAldea(): PiezaAldea[] {
 
 /** Radio de choque de un prop creado por el jugador, según su tipo. */
 export function radioProp(modelo: string | null | undefined): number {
+  // Los objetos de la fase 9 traen el suyo en su propia tabla.
+  const nuevo = modelo ? RADIOS_OBJETO[modelo] : undefined;
+  if (nuevo !== undefined) return nuevo;
   switch (modelo) {
     case 'casa': return 7;
     case 'arbol': case 'pino': return 1.0;
