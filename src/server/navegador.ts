@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { createHmac, randomBytes } from 'node:crypto';
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
@@ -28,6 +29,25 @@ import { isIP } from 'node:net';
 // corriendo en el servidor (Chromium headless), que es otra fase con su coste
 // de infraestructura. Está escrito aquí para que nadie descubra el límite a
 // base de chocarse con él.
+
+/**
+ * EL PASE DEL DÍA (2026-08-19, fallo visto en la captura de Eugenio: las
+ * páginas salían SIN estilos y con las imágenes rotas). El porqué: la web va
+ * en un marco aislado (origen opaco) y, desde ahí, sus estilos e imágenes
+ * llegan aquí SIN la cookie de sesión — y este endpoint exigía sesión, así que
+ * el documento entraba pero todo lo que colgaba de él rebotaba con un 401.
+ *
+ * La salida no es abrir el proxy a cualquiera: es firmar cada dirección
+ * reescrita con un pase que caduca a diario. Quien tiene sesión recibe el HTML
+ * con sus recursos ya firmados; quien no, no puede fabricar la firma.
+ */
+const SECRETO = process.env.SESSION_SECRET || randomBytes(16).toString('hex');
+const tokenDia = (desfase = 0) =>
+  createHmac('sha256', SECRETO)
+    .update('navegador:' + new Date(Date.now() - desfase * 864e5).toISOString().slice(0, 10))
+    .digest('base64url').slice(0, 20);
+/** Vale el de hoy y el de ayer: una página abierta a medianoche no se rompe. */
+const paseValido = (t: string) => t === tokenDia(0) || t === tokenDia(1);
 
 /** Tope de descarga. Una página de texto no llega a 2 MB; más que eso es o un
  *  binario o un intento de tumbarnos. */
@@ -65,8 +85,9 @@ function urlValida(crudo: string): URL | null {
   } catch { return null; }
 }
 
-/** La dirección de un recurso, pasada por nuestro proxy. */
-const porElProxy = (abs: string) => `/api/navegador/ver?url=${encodeURIComponent(abs)}`;
+/** La dirección de un recurso, pasada por nuestro proxy, CON el pase del
+ *  día: es lo que deja entrar a los estilos y las imágenes sin cookie. */
+const porElProxy = (abs: string) => `/api/navegador/ver?url=${encodeURIComponent(abs)}&t=${tokenDia()}`;
 
 /**
  * Reescribe el HTML para que TODO siga pasando por nosotros: los enlaces, las
@@ -98,6 +119,10 @@ function reescribir(html: string, base: URL): string {
   // <base> propio: rompería nuestras rutas relativas.
   out = out.replace(/<base\b[^>]*>/gi, '');
 
+  // Una CSP incrustada en <meta> seguiría mandando aunque quitemos las
+  // cabeceras, y bloquearía los recursos reencaminados y nuestro script.
+  out = out.replace(/<meta[^>]+content-security-policy[^>]*>/gi, '');
+
   // Atributos de dirección: href, src, poster… y los srcset con sus tamaños.
   out = out.replace(/\s(href|src|poster|data-src)\s*=\s*("([^"]*)"|'([^']*)')/gi,
     (todo, attr, _q, dob, sim) => {
@@ -127,11 +152,32 @@ function reescribir(html: string, base: URL): string {
 <style>html{scrollbar-width:thin}</style>
 <script>
 (function(){
-  try { parent.postMessage({ navegadorHumanity: 'aqui', url: ${JSON.stringify(base.href)} }, '*'); } catch(e){}
+  var BASE = ${JSON.stringify(base.href)};
+  var TOK = ${JSON.stringify(tokenDia())};
+  var proxi = function(u){ return '/api/navegador/ver?url=' + encodeURIComponent(u) + '&t=' + TOK; };
+  try { parent.postMessage({ navegadorHumanity: 'aqui', url: BASE }, '*'); } catch(e){}
   // Los enlaces con target=_blank sacarían la web de la ventana: se quedan.
   document.addEventListener('click', function(e){
     var a = e.target && e.target.closest && e.target.closest('a');
     if (a && a.target === '_blank') a.target = '_self';
+  }, true);
+  // TODOS los formularios se reconvierten a una consulta por el proxy. No solo
+  // los GET: DuckDuckGo envía su buscador por POST, y un envío sin interceptar
+  // se escapaba del marco y aterrizaba en NUESTRA app (visto en pruebas,
+  // 2026-08-19). Los POST de verdad —iniciar sesión, pagar— ya están fuera de
+  // lo que este navegador hace, así que convertirlos a GET no pierde nada que
+  // funcionara antes.
+  document.addEventListener('submit', function(e){
+    var f = e.target;
+    if (!f || !f.getAttribute) return;
+    e.preventDefault();
+    var accion = f.getAttribute('action') || BASE;
+    var m = accion.match(/[?&]url=([^&]+)/);
+    if (m) accion = decodeURIComponent(m[1]);
+    var u;
+    try { u = new URL(accion, BASE); } catch (err) { return; }
+    u.search = new URLSearchParams(new FormData(f)).toString();
+    location.href = proxi(u.href);
   }, true);
 })();
 </script>`;
@@ -215,7 +261,11 @@ export function registerNavegadorRoutes(app: Express) {
    * de administración. Sin sesión, no: no somos un proxy abierto de internet.
    */
   app.get('/api/navegador/ver', async (req: Request, res: Response) => {
-    if (!req.user) return res.status(401).send('Inicia sesión para navegar.');
+    // Con sesión, o con el pase del día que va cosido a cada dirección
+    // reescrita (los estilos y las imágenes del marco llegan sin cookie).
+    if (!req.user && !paseValido(String(req.query.t || ''))) {
+      return res.status(401).send('Inicia sesión para navegar.');
+    }
     try {
       const { tipo, buf, final, estado } = await traer(String(req.query.url || ''));
 
