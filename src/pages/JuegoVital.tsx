@@ -8,6 +8,7 @@ import {
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
   Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
   Menu, Sprout, Home, Users, Youtube, RefreshCw, Unplug, Play, GripHorizontal,
+  ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -25,6 +26,7 @@ import Cargando from '../components/juego/Cargando';
 import { HudDinero, PanelFinanzas, useFinanzas } from '../components/juego/Finanzas';
 import { MOMENTOS, momentoDia, setMomentoDia, type MomentoDia } from '../components/juego/Vida';
 import EditorAspecto from '../components/juego/EditorAspecto';
+import { precioLegible } from '../components/juego/Producto3D';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
@@ -238,6 +240,8 @@ export default function JuegoVital() {
   const [cartelBorrador, setCartelBorrador] = useState('');
   /** Mini-formulario del panel de crear: link, vídeo, música, lienzo o mapa. */
   const [formCrear, setFormCrear] = useState<{ tipo: 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa'; url: string; nombre: string } | null>(null);
+  /** El selector de productos del Mercado, abierto sobre el panel de crear. */
+  const [eligiendoProducto, setEligiendoProducto] = useState(false);
   /** Dónde plantar el edificio si el proyecto se crea desde el suelo. */
   const posProyecto = useRef<{ x: number; z: number } | null>(null);
   /** Las instrucciones del teclado, comprimidas en el icono ℹ️ (petición de Eugenio). */
@@ -2128,6 +2132,14 @@ export default function JuegoVital() {
                   <ImagePlus className="w-3.5 h-3.5 mr-1 inline" />Ver
                 </Button>
               )}
+              {/* Un producto no tiene `url` propia (apunta a una ficha), así
+                  que necesita su propio botón para abrirse. */}
+              {selMundo.tipo === 'producto' && (
+                <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  onClick={() => { const it = mundoItems.find(x => x.id === selMundo.id); if (it) { setLeyendo(it); setSelMundo(null); } }}>
+                  <ShoppingBag className="w-3.5 h-3.5 mr-1 inline" />Ver ficha
+                </Button>
+              )}
               {selMundo.url && selMundo.tipo !== 'imagen' && (
                 <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-slate-200"
                   onClick={() => {
@@ -2290,7 +2302,33 @@ export default function JuegoVital() {
                 className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-[11px] font-bold text-slate-600 transition-colors">
                 <MapaIcono className="w-3.5 h-3.5" />Mapa
               </button>
+              {/* Un PRODUCTO del Mercado, en vitrina (2026-08-19, petición de
+                  Eugenio). No se escribe nada: se elige de una lista, porque el
+                  objeto no guarda el producto, apunta a él. */}
+              <button
+                onClick={() => { setFormCrear(null); setEligiendoProducto(true); }}
+                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-[11px] font-bold text-slate-600 transition-colors">
+                <ShoppingBag className="w-3.5 h-3.5" />Producto
+              </button>
             </div>
+
+            {eligiendoProducto && (
+              <ElegirProductoMundo
+                onCerrar={() => setEligiendoProducto(false)}
+                onElegir={p => {
+                  setEligiendoProducto(false);
+                  crearItemMundo({
+                    tipo: 'producto',
+                    producto_id: p.id,
+                    nombre: p.name,
+                    // El MODELO 3D va en `modelo`, como en los props: si el
+                    // producto tiene uno escrito se dibuja el aparato; si no,
+                    // se cae a su foto de catálogo.
+                    modelo: MODELO_3D_DE_PRODUCTO[p.id] || null,
+                  });
+                }}
+              />
+            )}
             {formCrear && (
               <div className="mt-2.5 p-2.5 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1.5">
                 <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
@@ -2500,8 +2538,9 @@ export default function JuegoVital() {
                           : leyendo.tipo === 'musica' ? <Music2 className="w-4 h-4 text-emerald-600 shrink-0" />
                             : leyendo.tipo === 'lienzo' ? <PenTool className="w-4 h-4 text-violet-600 shrink-0" />
                               : leyendo.tipo === 'mapa' ? <MapaIcono className="w-4 h-4 text-emerald-600 shrink-0" />
-                                : <FileText className="w-4 h-4 text-emerald-600 shrink-0" />}
-                  <span className="truncate">{nombreLimpio(leyendo.nombre, { nota: 'Nota', imagen: 'Imagen', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' }[leyendo.tipo] || 'Documento')}</span>
+                                : leyendo.tipo === 'producto' ? <ShoppingBag className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  : <FileText className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  <span className="truncate">{nombreLimpio(leyendo.nombre, { nota: 'Nota', imagen: 'Imagen', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa', producto: 'Producto' }[leyendo.tipo] || 'Documento')}</span>
                 </p>
                 <div className="flex items-center gap-1">
                   {esMarco && leyendo.url && (
@@ -2546,6 +2585,32 @@ export default function JuegoVital() {
               )}
               {leyendo.tipo === 'documento' && leyendo.url && (
                 <Button onClick={() => window.open(leyendo.url!, '_blank')} className="w-full mt-4">Abrir el documento</Button>
+              )}
+              {/* La ficha del producto: foto, precio y el botón al Mercado.
+                  Los datos vienen con el objeto, así que si cambias el precio
+                  en el Mercado esta ficha ya lo dice. */}
+              {leyendo.tipo === 'producto' && (
+                leyendo.producto ? (
+                  <div className="mt-3 space-y-3">
+                    {leyendo.producto.images?.[0] && (
+                      <img src={leyendo.producto.images[0]} alt={leyendo.producto.name}
+                           className="rounded-xl w-full max-h-[42vh] object-contain bg-slate-50" />
+                    )}
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="text-sm font-black text-slate-900">{leyendo.producto.name}</p>
+                      <p className="text-lg font-black text-emerald-700 shrink-0">
+                        {precioLegible(leyendo.producto.price_cents, leyendo.producto.currency || 'EUR')}
+                      </p>
+                    </div>
+                    <Button onClick={() => navigate(`/mercado?producto=${leyendo.producto!.id}`)} className="w-full">
+                      Ver la ficha completa en el Mercado
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 mt-3">
+                    Este producto ya no está en el Mercado. Puedes quitar la vitrina del mapa.
+                  </p>
+                )
               )}
               {!esMarco && (
                 <p className="text-[10px] text-slate-400 mt-3">Plantado en tu mundo · púlsalo para moverlo, conectarlo con hilos o eliminarlo.</p>
@@ -2948,6 +3013,83 @@ export default function JuegoVital() {
           </Card>
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Elegir un producto del Mercado para plantarlo en el mundo (2026-08-19)
+// ---------------------------------------------------------------------------
+/**
+ * Qué productos tienen un objeto 3D modelado a mano. Lo demás sale con su foto
+ * de catálogo sobre un panel, que es lo que permite plantar CUALQUIER producto
+ * sin haberle modelado nada.
+ *
+ * Es una tabla y no un campo de la base de datos a propósito: el modelo es
+ * código (una función que dibuja mallas), no un dato. El día que haya diez,
+ * esta tabla se convierte en una columna `modelo_3d` de `products` — hoy sería
+ * una migración para una sola fila.
+ */
+const MODELO_3D_DE_PRODUCTO: Record<string, string> = {
+  PRD_DJI_POWER_1000_V2: 'estacion-energia',
+};
+
+function ElegirProductoMundo({ onCerrar, onElegir }: {
+  onCerrar: () => void;
+  onElegir: (p: { id: string; name: string; price_cents: number | null; currency: string | null; images: string[] }) => void;
+}) {
+  const [lista, setLista] = useState<any[] | null>(null);
+  const [busca, setBusca] = useState('');
+
+  useEffect(() => {
+    fetch('/api/products?limit=60', { credentials: 'include' })
+      .then(r => r.json())
+      .then(j => setLista(Array.isArray(j) ? j : []))
+      .catch(() => setLista([]));
+  }, []);
+
+  const visibles = (lista || []).filter(p =>
+    !busca || (p.name || '').toLowerCase().includes(busca.toLowerCase()));
+
+  return (
+    <div className="mt-2.5 p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-1.5">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Producto del Mercado</p>
+        <button onClick={onCerrar} className="text-slate-400 hover:text-slate-600"><X className="w-3 h-3" /></button>
+      </div>
+      <input
+        autoFocus value={busca} onChange={e => setBusca(e.target.value)}
+        placeholder="Buscar…"
+        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+      />
+      <div className="max-h-52 overflow-y-auto space-y-1">
+        {lista === null && <p className="text-[11px] text-slate-400 py-2">Cargando el Mercado…</p>}
+        {lista !== null && !visibles.length && (
+          <p className="text-[11px] text-slate-400 py-2">No hay productos que se llamen así.</p>
+        )}
+        {visibles.map(p => (
+          <button
+            key={p.id}
+            onClick={() => onElegir(p)}
+            className="w-full flex items-center gap-2 p-1.5 rounded-lg border border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/60 text-left transition-colors"
+          >
+            {p.images?.[0]
+              ? <img src={p.images[0]} alt="" className="w-9 h-9 rounded-md object-cover bg-slate-100 shrink-0" />
+              : <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-slate-300" />
+                </div>}
+            <span className="min-w-0 flex-1">
+              <span className="block text-[11px] font-bold text-slate-700 truncate">{p.name}</span>
+              <span className="block text-[10px] text-emerald-700 font-bold">
+                {p.price_cents == null ? 'Sin precio' : `${(p.price_cents / 100).toLocaleString('es-ES')} ${p.currency === 'EUR' ? '€' : p.currency || '€'}`}
+              </span>
+            </span>
+            {MODELO_3D_DE_PRODUCTO[p.id] && (
+              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 shrink-0">3D</span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

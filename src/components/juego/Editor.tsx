@@ -23,6 +23,7 @@ import * as THREE from 'three';
 import { PALETA } from './paleta';
 import { CasaReal } from './CasaReal';
 import { ObjetoNuevo, esObjetoNuevo } from './Objetos';
+import Producto3D from './Producto3D';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
 import { CATALOGO_PROPS, RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
 import { Rotulo, SenalDePortal } from './Senales';
@@ -392,6 +393,8 @@ export function ItemVisual({ item, fase = 0 }: { item: ItemMundo; fase?: number 
         <TarjetaMedio ancho={2.8} alto={2.1} fondo="#faf7ff" barra="#7c3aed" icono="🎨" nombre={item.nombre || 'Lienzo'} /></Flota></>}
       {item.tipo === 'mapa' && <><Poste /><Flota fase={fase}>
         <TarjetaMedio ancho={2.8} alto={2.1} fondo="#eefaf1" barra="#16a34a" icono="🗺️" nombre={item.nombre || 'Mapa'} /></Flota></>}
+      {/* Un producto trae su propia peana y su propio flotar: no lleva Poste. */}
+      {item.tipo === 'producto' && <Producto3D producto={item.producto || null} fase={fase} />}
     </>
   );
 }
