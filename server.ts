@@ -16,6 +16,7 @@ import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
 import { registerUploadRoutes } from "./src/server/uploads.js";
 import { registerRoadmapRoutes } from "./src/server/roadmap.js";
 import { registerJuegoRoutes } from "./src/server/juego.js";
+import { registerFinanzasRoutes } from "./src/server/finanzas.js";
 import { registerYoutubeRoutes } from "./src/server/youtube.js";
 import { registerSpotifyRoutes } from "./src/server/spotify.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
@@ -255,6 +256,7 @@ async function startServer() {
   registerUploadRoutes(app, db);
   registerRoadmapRoutes(app, db);
   registerJuegoRoutes(app, db);
+  registerFinanzasRoutes(app, db);
   registerYoutubeRoutes(app, db);
   registerSpotifyRoutes(app, db);
 

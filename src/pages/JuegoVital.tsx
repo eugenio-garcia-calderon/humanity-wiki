@@ -20,6 +20,7 @@ import {
   type SeleccionMundo, type Vehiculo,
 } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
+import { HudDinero, PanelFinanzas, useFinanzas } from '../components/juego/Finanzas';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
@@ -134,6 +135,9 @@ export default function JuegoVital() {
   // Distancia de la cámara: 1 = por encima del hombro, 6 = media aldea a la vista.
   // Cámara CERCA por defecto (petición de Eugenio con captura): 0,5 ≈ 9 m
   // detrás del personaje, en vez de los 18,6 m de antes.
+  // Fase 10: el dinero (recursos, objetivos y presupuestos).
+  const finanzas = useFinanzas();
+  const [panelDinero, setPanelDinero] = useState(false);
   const zoom = useRef(0.5);
   const [zoomVisible, setZoomVisible] = useState(0.5);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
@@ -1721,6 +1725,24 @@ export default function JuegoVital() {
           overrides={overridesMundo}
           onViajar={viajarA}
           onCrearEn={user ? (p) => { setCrearEn(p); setSelMundo(null); setSelHilo(null); } : undefined}
+        />
+      )}
+      {/* El dinero, estilo GTA: siempre visible bajo el minimapa. Dentro de
+          un edificio tampoco: allí no se compra nada. */}
+      {user && !interior && (
+        <div className="absolute top-[188px] right-3 z-30 pointer-events-none flex justify-end">
+          <HudDinero recursos={finanzas.recursos} onAbrir={() => setPanelDinero(true)} />
+        </div>
+      )}
+      {panelDinero && (
+        <PanelFinanzas
+          recursos={finanzas.recursos}
+          objetivos={finanzas.objetivos}
+          porAnio={finanzas.porAnio}
+          proyectos={proyectos.map(p => ({ id: p.id, titulo: p.titulo }))}
+          onCerrar={() => setPanelDinero(false)}
+          onRecargar={finanzas.cargar}
+          avisar={avisar}
         />
       )}
       <VeloViaje activo={!!viajando} destino={viajando} />
