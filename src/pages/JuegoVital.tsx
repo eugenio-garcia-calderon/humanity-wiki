@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {
   Gamepad2, Bot, X, FolderKanban, Smartphone, Maximize, UserPlus, Building2,
   Hammer, MessageCircle, Plus, Trash2, Camera, Sparkles, Paperclip, FileText,
-  ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints,
+  ZoomIn, ZoomOut, Palette, Bike, Plane, ChevronUp, ChevronDown, Footprints, Eye, User,
   ArrowLeft, LogOut, Wrench, Move, RotateCw, StickyNote, ImagePlus, Link2, Shapes,
   Info, Globe, Film, Music2, Map as MapaIcono, PenTool, ExternalLink,
   Menu, Sprout, Home, Users, Youtube, RefreshCw, Unplug, Play, GripHorizontal,
@@ -142,6 +142,18 @@ export default function JuegoVital() {
   const [panelDinero, setPanelDinero] = useState(false);
   // La hora de la aldea: la tuya por defecto, o la que elijas con el botón.
   const [momento, setMomento] = useState<MomentoDia>(() => momentoDia());
+  // Tercera persona (por detrás) o primera (por tus ojos), 2026-08-19. Se
+  // recuerda entre partidas: es una preferencia, no un modo pasajero.
+  const [vista, setVista] = useState<'tercera' | 'primera'>(() => {
+    try { return localStorage.getItem('juego:vista') === 'primera' ? 'primera' : 'tercera'; } catch { return 'tercera'; }
+  });
+  const cambiarVista = useCallback(() => {
+    setVista(v => {
+      const n = v === 'tercera' ? 'primera' : 'tercera';
+      try { localStorage.setItem('juego:vista', n); } catch { /* modo privado */ }
+      return n;
+    });
+  }, []);
   const cambiarMomento = useCallback(() => {
     const i = MOMENTOS.findIndex(m => m.id === momentoDia());
     const sig = MOMENTOS[(i + 1) % MOMENTOS.length].id;
@@ -1645,6 +1657,7 @@ export default function JuegoVital() {
           vehiculo={vehiculo}
           alturaVuelo={alturaVuelo}
           interior={interior}
+          vista={vista}
           onEntrarProyecto={(p) => {
             const ed = editorRef.current;
             // Moviendo un objeto de conocimiento: pulsar el edificio es
@@ -1886,6 +1899,21 @@ export default function JuegoVital() {
               )}
             >
               <Plane className="w-5 h-5" />
+            </button>
+            {/* Primera o tercera persona (2026-08-19, petición de Eugenio). */}
+            <button
+              onClick={cambiarVista}
+              title={vista === 'tercera'
+                ? 'Ver por tus propios ojos (primera persona)'
+                : 'Verte por detrás (tercera persona)'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vista === 'primera'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              {vista === 'primera' ? <Eye className="w-5 h-5" /> : <User className="w-5 h-5" />}
             </button>
             {/* La hora del mundo. Por defecto es la tuya, pero si juegas de
                 madrugada puedes traerte el mediodía. */}

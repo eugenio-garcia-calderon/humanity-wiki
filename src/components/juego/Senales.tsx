@@ -167,12 +167,20 @@ export function Halo({ y, color, radio = 1.15, resaltado = false }: {
  * Hace pulsable lo que envuelve. Da `resaltado` a sus hijos por función para
  * que cada uno decida cómo crecer, en vez de imponer una escala global.
  */
-export function Interactivo({ onPulsar, children }: {
+export function Interactivo({ onPulsar, onOpciones, children }: {
   onPulsar: () => void;
+  /** DOBLE clic: abre la ventana de opciones de esta cosa (2026-08-19,
+   *  petición de Eugenio: «cuando haga doble clic en un objetivo, ya sea
+   *  persona, portal u otro elemento, que se abra la ventana de opciones»).
+   *  Sin esto, un doble clic era simplemente dos clics seguidos. */
+  onOpciones?: () => void;
   children: (resaltado: boolean) => React.ReactNode;
 }) {
   const [resaltado, setResaltado] = useState(false);
   const salida = useRef<number | null>(null);
+  /** El clic en espera, por si llega un segundo y hay que convertirlo en
+   *  «abrir opciones» en vez de en la acción de siempre. */
+  const esperaClic = useRef<number | null>(null);
 
   // Salir NO es inmediato: se espera un momento y se cancela si el ratón
   // vuelve a entrar. Un muñeco son varias mallas con huecos entre medias, y
@@ -182,7 +190,10 @@ export function Interactivo({ onPulsar, children }: {
   const cancelarSalida = () => {
     if (salida.current !== null) { clearTimeout(salida.current); salida.current = null; }
   };
-  useEffect(() => cancelarSalida, []);
+  useEffect(() => () => {
+    cancelarSalida();
+    if (esperaClic.current !== null) clearTimeout(esperaClic.current);
+  }, []);
 
   const entrar = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
@@ -210,7 +221,22 @@ export function Interactivo({ onPulsar, children }: {
     if (e.delta > UMBRAL_ARRASTRE) return;
     e.stopPropagation();
     apagarYa();
-    onPulsar();
+    // Sin ventana de opciones, el clic hace lo suyo YA: cero retraso.
+    if (!onOpciones) { onPulsar(); return; }
+    // Con ella, la acción normal ESPERA un cuarto de segundo por si viene un
+    // segundo clic. Es la única forma de que el doble clic abra las opciones
+    // sin que el primero te haya metido ya dentro del proyecto. 260 ms no se
+    // notan en algo que además tiene su propia transición.
+    if (esperaClic.current !== null) {
+      clearTimeout(esperaClic.current);
+      esperaClic.current = null;
+      onOpciones();
+      return;
+    }
+    esperaClic.current = window.setTimeout(() => {
+      esperaClic.current = null;
+      onPulsar();
+    }, 260);
   };
 
   return (

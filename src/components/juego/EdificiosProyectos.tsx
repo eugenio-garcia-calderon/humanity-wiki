@@ -24,14 +24,16 @@ interface Parcela {
   eliminado?: boolean;
 }
 
-function EdificioProyecto({ p, x, z, portada, onEntrar, onAgarrar }: Parcela & {
+function EdificioProyecto({ p, x, z, portada, onEntrar, onOpciones, onAgarrar }: Parcela & {
   onEntrar: (p: ProyectoJuego) => void;
+  /** Doble clic: la ficha del portal, en vez de entrar (2026-08-19). */
+  onOpciones?: (p: ProyectoJuego) => void;
   onAgarrar?: (p: ProyectoJuego, pos: { x: number; z: number }, e: any) => void;
 }) {
   const pct = p.tarjetas > 0 ? p.hechas / p.tarjetas : 0;
   return (
     <group position={[x, 0, z]}>
-      <Interactivo onPulsar={() => onEntrar(p)}>
+      <Interactivo onPulsar={() => onEntrar(p)} onOpciones={onOpciones ? () => onOpciones(p) : undefined}>
         {(resaltado) => (
           <PortalDeProyecto
             titulo={p.titulo} tarjetas={p.tarjetas} pct={pct} resaltado={resaltado}
@@ -91,7 +93,7 @@ export function PortalDeProyecto({ titulo, tarjetas, pct, radio = 2.6, resaltado
   );
 }
 
-export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas, onEntrar, onAgarrar }: {
+export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas, onEntrar, onOpciones, onAgarrar }: {
   proyectos: ProyectoJuego[];
   /** De posicionesProyectos(): las del distrito con los arrastres aplicados,
    *  la portada de cada portal (la foto del centro) y si está quitado. */
@@ -100,6 +102,10 @@ export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas,
   medidas: React.MutableRefObject<Medidas>;
   /** Pulsar el edificio entra en él sin tener que caminar hasta allí. */
   onEntrar: (p: ProyectoJuego) => void;
+  /** DOBLE clic: abre las opciones del portal en vez de entrar (petición de
+   *  Eugenio). Entrar es lo que más se hace, así que se queda en el clic
+   *  simple; lo de mover, renombrar o quitar pasa a ser el doble. */
+  onOpciones?: (p: ProyectoJuego) => void;
   /** Pinchar sin soltar: el portal se arrastra como cualquier objeto. */
   onAgarrar?: (p: ProyectoJuego, pos: { x: number; z: number }, e: any) => void;
 }) {
@@ -137,7 +143,7 @@ export function EdificiosProyectos({ proyectos, posiciones, jugadorPos, medidas,
           {proyectos.length > 0 ? 'Distrito de Proyectos' : 'Distrito de Proyectos — aún vacío'}
         </Text>
       </group>
-      {parcelas.filter(b => !b.eliminado).map(b => <EdificioProyecto key={b.p.id} {...b} onEntrar={onEntrar} onAgarrar={onAgarrar} />)}
+      {parcelas.filter(b => !b.eliminado).map(b => <EdificioProyecto key={b.p.id} {...b} onEntrar={onEntrar} onOpciones={onOpciones} onAgarrar={onAgarrar} />)}
     </group>
   );
 }

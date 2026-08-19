@@ -106,7 +106,7 @@ function Coordinador({ medidas, onCercania }: {
   return null;
 }
 
-export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, movilRef }: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, vista, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
@@ -122,6 +122,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   alturaVuelo: React.MutableRefObject<number>;
   /** Si está puesto, se juega DENTRO de un proyecto y la aldea no se dibuja. */
   interior: DatosInterior | null;
+  /** Tercera persona o primera (2026-08-19, petición de Eugenio). */
+  vista?: 'tercera' | 'primera';
   /** Clic o toque sobre un edificio de proyecto: se entra sin caminar. */
   onEntrarProyecto: (p: ProyectoJuego) => void;
   /** Clic o toque sobre el portal «Salir a la aldea» de una plaza. */
@@ -461,6 +463,13 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             jugadorPos={jugadorPos}
             medidas={medidas}
             onEntrar={onEntrarProyecto}
+            onOpciones={(p) => {
+              const pos = posProyectos.find((_, i) => proyectos[i]?.id === p.id) || posicionProyecto(0);
+              onPulsarMundo({
+                clase: 'semilla', id: `proy:${p.id}`, tipo: 'portal',
+                etiqueta: p.titulo, x: pos.x, z: pos.z, rot: 0,
+              });
+            }}
             onAgarrar={(p, pos, e) => {
               if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
               onAgarrarMundo(
@@ -538,6 +547,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         aspecto={aspectoJugador}
         vehiculo={vehiculo}
         alturaVuelo={alturaVuelo}
+        vista={vista}
       />
       {/* Dentro de un proyecto no hay robot ni vecinos: el arbitraje de
           cercanía se apaga para que no arrastre la última medida de la aldea. */}
