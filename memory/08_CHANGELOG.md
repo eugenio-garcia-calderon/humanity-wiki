@@ -958,3 +958,18 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - **El panel «Crear aquí» se agrupa por familias** (Del pueblo · Ciudad · Bosque y huerto) con scroll: en una rejilla plana de 54 iconos no se encontraba nada.
 - Cada objeto trae su radio de choque en `RADIOS_OBJETO` (las setas y las pasaderas se pisan; el invernadero y el muro, no) y `radioProp` lo consulta primero.
 - El nombre de un objeto plantado sale ahora del CATÁLOGO: había una lista aparte con 9 nombres y todo lo nuevo se llamaba «Objeto» (cazado al plantar un quiosco de prueba, borrado después).
+
+### 2026-08-19 — Fase 10: el dinero del juego (recursos, objetivos y presupuesto de cada proyecto)
+- **CONTADOR PERMANENTE ESTILO GTA** (`Finanzas.tsx` → `HudDinero`): debajo del minimapa, siempre a la vista, tu dinero total y lo que te queda cada mes (verde si sobra, rojo si falta). Un clic abre el panel.
+- **Migración `0037_finanzas.sql`**, tres tablas:
+  - `game_finanzas` — lo que TIENES: efectivo, banco, ingresos y gastos del mes, moneda. Una fila por persona, y nadie ve la de otro.
+  - `objetivos_financieros` — lo que QUIERES: ahorrar, comprar algo o llegar a un ingreso. Con cantidad, fecha límite, proyecto al que pertenece y nota.
+  - `presupuestos_proyecto` — lo que CUESTA cada proyecto: una línea por concepto y año, marcada como gasto o ingreso.
+- **`src/server/finanzas.ts`** (módulo nuevo, `server.ts` solo gana la línea de registro): GET/PUT de tus recursos, alta/edición/archivado de objetivos, alta/archivado de líneas de presupuesto y `GET /api/finanzas/resumen` con el cómputo de todos tus proyectos por año. Toda ruta comprueba la sesión; los objetivos se filtran por `user_id` y las líneas de presupuesto solo las toca quien creó el proyecto o un administrador. Se archiva (`archived_at`), no se borra.
+- **Panel «Tus finanzas»** con tres pestañas:
+  - *Lo que tengo* — editas efectivo, banco, ingresos y gastos; se ve el total y el saldo mensual.
+  - *Mis objetivos* — barra de progreso por objetivo, con botones rápidos (+50, +100, +500, −50) para ir apuntando lo que ahorras sin tener que escribir.
+  - *Presupuestos* — eliges un proyecto, añades líneas por año («2027 · furgoneta · 18.000 € · gasto») y arriba sale **el cómputo de TODO tu mundo año a año**, más el total.
+- El resumen por año dice «pones 12.000 €» o «te sobran 5.000 €» con el desglose debajo: un ingreso mostrado como «−5.000 €» se leía al revés (cazado en pruebas).
+- Los presupuestos cuelgan de los proyectos REALES del juego (tabla `proyectos`), así que lo que presupuestas aquí es lo mismo que ves como edificio en la aldea.
+- Datos de prueba borrados después de verificar: el HUD arranca en 0 € hasta que Eugenio escriba sus cifras.
