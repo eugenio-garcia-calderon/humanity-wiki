@@ -321,16 +321,28 @@ export function registerJuegoRoutes(app: Express, db: any) {
   // imágenes y documentos en el mapa).
   // ==========================================================================
 
-  const TIPOS_MUNDO = new Set(['prop', 'nota', 'imagen', 'documento', 'enlace', 'video', 'musica', 'lienzo', 'mapa']);
+  const TIPOS_MUNDO = new Set(['prop', 'nota', 'imagen', 'documento', 'enlace', 'video', 'musica', 'lienzo', 'mapa', 'producto']);
 
   /** GET /api/juego/mundo — tus objetos + tus retoques del pueblo semilla. */
   app.get('/api/juego/mundo', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.json({ items: [], overrides: [] });
+      // La ficha del PRODUCTO viaja con el objeto (2026-08-19): el mundo lo
+      // dibuja con su foto y su precio, y si el precio cambia en el Mercado
+      // cambia también en la aldea porque aquí no se copia nada, se lee.
+      // Va como LEFT JOIN y no como consulta aparte: los objetos ya vienen en
+      // una sola petición y no merece la pena partirla por dos campos.
       const items = await db.execute(sql`
-        SELECT * FROM game_world_items
-        WHERE user_id = ${req.user.id} AND archived_at IS NULL
-        ORDER BY created_at ASC
+        SELECT i.*,
+               CASE WHEN p.id IS NULL THEN NULL ELSE jsonb_build_object(
+                 'id', p.id, 'name', p.name, 'price_cents', p.price_cents,
+                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo
+               ) END AS producto
+        FROM game_world_items i
+        LEFT JOIN products p
+          ON p.id = i.producto_id AND p.archived_at IS NULL
+        WHERE i.user_id = ${req.user.id} AND i.archived_at IS NULL
+        ORDER BY i.created_at ASC
       `);
       const overrides = await db.execute(sql`
         SELECT seed_id, eliminado, x, z, rot, modelo, texto, portal_proyecto_id
@@ -378,15 +390,35 @@ export function registerJuegoRoutes(app: Express, db: any) {
           } catch { /* sin metadatos también vale */ }
         }
       }
+      // Un PRODUCTO tiene que apuntar a una ficha que exista y esté viva: sin
+      // esto se podría plantar una vitrina hacia un producto archivado, y en el
+      // mundo saldría un hueco sin explicación.
+      if (d.tipo === 'producto') {
+        const p = await db.execute(sql`
+          SELECT id FROM products WHERE id = ${d.producto_id || ''} AND archived_at IS NULL
+        `);
+        if (!p.rows.length) return res.status(400).json({ error: 'Ese producto no existe en el Mercado.' });
+      }
+
       const id = `WM${Date.now()}${Math.floor(Math.random() * 1000)}`;
       await db.execute(sql`
-        INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala, proyecto_id)
+        INSERT INTO game_world_items (id, user_id, tipo, modelo, texto, url, nombre, x, z, rot, escala, proyecto_id, producto_id)
         VALUES (${id}, ${req.user!.id}, ${d.tipo}, ${d.modelo || null}, ${d.texto || null},
                 ${d.url || null}, ${d.nombre || null},
                 ${Number(d.x) || 0}, ${Number(d.z) || 0}, ${Number(d.rot) || 0},
-                ${Number(d.escala) || 1}, ${d.proyecto_id || null})
+                ${Number(d.escala) || 1}, ${d.proyecto_id || null},
+                ${d.tipo === 'producto' ? d.producto_id : null})
       `);
-      const fila = await db.execute(sql`SELECT * FROM game_world_items WHERE id = ${id}`);
+      const fila = await db.execute(sql`
+        SELECT i.*,
+               CASE WHEN p.id IS NULL THEN NULL ELSE jsonb_build_object(
+                 'id', p.id, 'name', p.name, 'price_cents', p.price_cents,
+                 'currency', p.currency, 'images', p.images, 'modelo', i.modelo
+               ) END AS producto
+        FROM game_world_items i
+        LEFT JOIN products p ON p.id = i.producto_id AND p.archived_at IS NULL
+        WHERE i.id = ${id}
+      `);
       res.json(fila.rows[0]);
     } catch (e: any) {
       res.status(500).json({ error: e.message });

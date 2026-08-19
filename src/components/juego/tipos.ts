@@ -99,7 +99,7 @@ export interface Agente {
  *  imagen o un documento. Vive en `game_world_items`. */
 export interface ItemMundo {
   id: string;
-  tipo: 'prop' | 'nota' | 'imagen' | 'documento' | 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa';
+  tipo: 'prop' | 'nota' | 'imagen' | 'documento' | 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa' | 'producto';
   modelo: string | null;
   texto: string | null;
   url: string | null;
@@ -119,6 +119,18 @@ export interface ItemMundo {
   /** Si está puesto, el objeto ES un portal SIN perder su forma (aclaración
    *  de Eugenio): atravesarlo te lleva al mapa de ese proyecto. */
   portal_proyecto_id?: string | null;
+  /** Solo `producto`: a qué ficha del Mercado apunta la vitrina. */
+  producto_id?: string | null;
+  /** Solo `producto`: la ficha, tal como la manda el servidor con el objeto.
+   *  No se copia nada — si cambias el precio en el Mercado, cambia aquí. */
+  producto?: {
+    id: string;
+    name: string;
+    price_cents: number | null;
+    currency: string | null;
+    images: string[];
+    modelo?: string | null;
+  } | null;
 }
 
 /** Las relaciones de un hilo: las MISMAS de los grafos de conocimiento, con
