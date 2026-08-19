@@ -6,7 +6,7 @@
 // `/api/navegador/ver`, que es lo que hace posible verlo (ver `navegador.ts`
 // para el porqué: casi ninguna web se deja meter en un marco directamente).
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 /** Lo que se escribe en la barra → una dirección de verdad. Si no parece una
@@ -21,6 +21,31 @@ export function comoUrl(texto: string): string {
 }
 
 const proxy = (url: string) => `/api/navegador/ver?url=${encodeURIComponent(url)}`;
+
+/** Un vídeo tiene puerta oficial: el reproductor embebido, que trae el vídeo
+ *  directo de su CDN. El proxy jamás podría servirlo (los streams van firmados
+ *  y por rangos); el embed existe exactamente para meterse en otras webs. */
+export function reproductorDe(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const h = u.hostname.replace(/^(www|m|music)\./, '');
+    if (h === 'youtu.be') {
+      const id = u.pathname.split('/')[1];
+      return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+    }
+    if (h === 'youtube.com' || h === 'youtube-nocookie.com') {
+      const v = u.pathname === '/watch' && u.searchParams.get('v');
+      if (v) return `https://www.youtube-nocookie.com/embed/${v}`;
+      const m = u.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{6,})/);
+      if (m) return `https://www.youtube-nocookie.com/embed/${m[1]}`;
+    }
+    if (h === 'vimeo.com') {
+      const m = u.pathname.match(/^\/(\d+)/);
+      if (m) return `https://player.vimeo.com/video/${m[1]}`;
+    }
+  } catch { /* no era una dirección */ }
+  return null;
+}
 
 export default function Navegador({ inicial, onTitulo, onUrl }: {
   inicial: string;
@@ -113,6 +138,13 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
             className="flex-1 min-w-0 text-[11px] text-slate-700 focus:outline-none bg-transparent"
           />
         </form>
+        {/* La salida de emergencia: hay webs que son APLICACIONES (Gmail,
+            Instagram…) y ningún proxy de texto puede ejecutarlas. Este botón
+            abre la dirección en una pestaña del navegador de verdad. */}
+        <button onClick={() => { if (url) window.open(url, '_blank', 'noopener'); }} title="Abrir en una pestaña del navegador"
+          className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 shrink-0">
+          <ExternalLink className="w-3.5 h-3.5" />
+        </button>
         <span title="La IA del chat ve esta página"
           className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
           <Bot className="w-3 h-3" />La IA lo ve
@@ -126,10 +158,30 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
         </div>
       )}
 
-      {/* La web. `sandbox` sin `allow-same-origin`: lo de fuera se dibuja pero
-          NO puede leer nuestras cookies ni nuestra sesión aunque venga servido
-          desde nuestro dominio. Es la línea que separa «ver una web» de
-          «dejarle entrar en tu cuenta». */}
+      {/* Un vídeo va en el reproductor OFICIAL, sin nuestro sandbox: el marco
+          es de otro origen (youtube-nocookie.com), así que ya no puede tocar
+          la app, y el reproductor necesita su almacenamiento para arrancar —
+          dentro del sandbox de origen opaco se queda en negro. Es el mismo
+          embed que usa cualquier web del mundo para poner un vídeo. */}
+      {reproductorDe(url) ? (
+        <iframe
+          key={`${url}|${recarga}`}
+          src={reproductorDe(url)!}
+          title="Reproductor de vídeo"
+          onLoad={() => setCargando(false)}
+          className="flex-1 w-full border-0 bg-black"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowFullScreen
+          // Sin `no-referrer` A PROPÓSITO: YouTube exige saber qué web lo
+          // embebe (error 153 si no llega el Referer). Solo viaja nuestro
+          // origen, que es público de todos modos.
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      ) : (
+      /* La web. `sandbox` sin `allow-same-origin`: lo de fuera se dibuja pero
+         NO puede leer nuestras cookies ni nuestra sesión aunque venga servido
+         desde nuestro dominio. Es la línea que separa «ver una web» de
+         «dejarle entrar en tu cuenta». */
       <iframe
         ref={marco}
         key={`${url}|${recarga}`}
@@ -143,6 +195,7 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
         sandbox="allow-scripts allow-forms allow-popups-to-escape-sandbox"
         referrerPolicy="no-referrer"
       />
+      )}
     </div>
   );
 }
