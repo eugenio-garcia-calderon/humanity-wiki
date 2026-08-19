@@ -53,3 +53,6 @@ que anotarlos en esta tabla.
 - `humanos/*_Peasant.*`, `humanos/*_Ranger.*` + texturas T_Peasant/T_Ranger/
   T_Regular_* — "Modular Character Outfits - Fantasy" by Quaternius,
   https://quaternius.com — License: CC0 1.0 (public domain). Texturas a 1024px.
+- `humanos/Hair_*.gltf` (6 peinados: rapado, raya al lado, melena, moños,
+  rapado femenino, barba) — "Universal Base Characters / Hairstyles" by
+  Quaternius, CC0 1.0.
