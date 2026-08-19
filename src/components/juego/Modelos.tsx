@@ -76,8 +76,8 @@ const PISTAS: Record<string, string> = {
 
 /** Texturas de piel disponibles por cuerpo (el .gltf trae la oscura puesta). */
 const PIEL: Record<string, { clara: string; oscura: string }> = {
-  Superhero_Male_FullBody: { clara: 'T_Superhero_Male_Light.png', oscura: 'T_Superhero_Male_Dark.png' },
-  Superhero_Female_FullBody: { clara: 'T_Superhero_Female_Light.png', oscura: 'T_Superhero_Female_Dark_BaseColor.png' },
+  Superhero_Male_FullBody: { clara: 'T_Superhero_Male_Light.jpg', oscura: 'T_Superhero_Male_Dark.jpg' },
+  Superhero_Female_FullBody: { clara: 'T_Superhero_Female_Light.jpg', oscura: 'T_Superhero_Female_Dark_BaseColor.jpg' },
 };
 
 /** Caché de texturas de piel: la misma imagen se sube a la GPU una vez. */

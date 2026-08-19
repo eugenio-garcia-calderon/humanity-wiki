@@ -47,3 +47,17 @@ export function mapasPBR(nombre: NombreTextura, repetirX: number, repetirY = rep
 export function normalesDeAgua(repetirX: number, repetirY: number): THREE.Texture {
   return textura('/modelos-juego/texturas/agua_normales.jpg', repetirX, repetirY, false);
 }
+
+/**
+ * Suelta de la tarjeta gráfica todas las texturas del juego (2026-08-19,
+ * fase 11). El caché de arriba es lo que evita descargar cien veces el mismo
+ * adoquín, pero si no se vacía al salir del juego esos ~40 MB se quedan
+ * ocupados en el móvil hasta que recargas la pestaña. Se llama al desmontar
+ * la escena, cuando ya no hay nada pintando.
+ */
+export function liberarTexturas(): number {
+  const n = cache.size;
+  cache.forEach(t => t.dispose());
+  cache.clear();
+  return n;
+}
