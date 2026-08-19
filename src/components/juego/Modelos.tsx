@@ -143,6 +143,22 @@ function soloCabeza(nombreModelo: string, geo: THREE.BufferGeometry, cuello: num
   return g;
 }
 
+/**
+ * PEINADOS (pulido de caras, 2026-08-19): los cuerpos base van calvos — solo
+ * cejas — y eso era media cara. Cada persona recibe un peinado del pack
+ * (enganchado al hueso de la cabeza, mismo esqueleto) elegido por su hash;
+ * algunos hombres llevan además barba. El color de pelo del creador los tiñe.
+ */
+const PEINADOS_EL = [['Hair_Buzzed'], ['Hair_SimpleParted'], ['Hair_Buzzed', 'Hair_Beard'], ['Hair_SimpleParted', 'Hair_Beard']];
+const PEINADOS_ELLA = [['Hair_Long'], ['Hair_Buns'], ['Hair_BuzzedFemale'], ['Hair_Long']];
+function peinadosDe(cuerpo: string, genero: string): string[] {
+  let h = 0;
+  for (let i = 0; i < cuerpo.length; i++) h = (h * 37 + cuerpo.charCodeAt(i)) >>> 0;
+  const lista = genero === 'Female' ? PEINADOS_ELLA : PEINADOS_EL;
+  return lista[h % lista.length];
+}
+const TODOS_PEINADOS = ['Hair_Buzzed', 'Hair_SimpleParted', 'Hair_Beard', 'Hair_Long', 'Hair_Buns', 'Hair_BuzzedFemale'];
+
 /** La tela de cada persona se tiñe con una paleta FIJA de colores de ropa:
  *  da variedad y evita que el lino crudo del traje parezca piel a lo lejos. */
 const PALETA_ROPA = ['#8fa3c0', '#a8b28a', '#c9977b', '#a486a0', '#b0a284', '#96b3ab', '#c0a3a3', '#93a6b8'];
@@ -171,6 +187,9 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritm
   const traje = trajeDe(cuerpo);
   const { scene } = useGLTF(`${HUMANOS}/${humano}.gltf`);
   const ropaGltf = useGLTF(`${HUMANOS}/${genero}_${traje}.gltf`);
+  // Los 6 peinados se cargan de una vez (drei los cachea globalmente): el
+  // número de hooks no puede depender de qué peinado toque a este cuerpo.
+  const peinadosGltf = useGLTF(TODOS_PEINADOS.map(n => `${HUMANOS}/${n}.gltf`)) as unknown as { scene: THREE.Group }[];
   // Las ANIMACIONES viven en su propio .glb (el maniquí de la librería) y se
   // aplican al clon por nombre de hueso: mismo esqueleto, mismas pistas.
   const { animations } = useGLTF(`${HUMANOS}/UAL1_Standard.glb`);
@@ -221,8 +240,31 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritm
       p.userData.matBase = p.material;
       c.add(p);
     }
+
+    // --- PEINADO (pulido de caras): las mallas del pelo van montadas sobre
+    // el mismo esqueleto, así que se re-atan igual que la ropa. Sin esto los
+    // personajes iban calvos y la cara se quedaba a medias.
+    for (const nombre of peinadosDe(cuerpo, genero)) {
+      const fuente = peinadosGltf[TODOS_PEINADOS.indexOf(nombre)]?.scene;
+      if (!fuente) continue;
+      const pelo = SkeletonUtils.clone(fuente);
+      // Se recolectan ANTES de mover: añadir al cuerpo dentro del traverse
+      // saca la malla del árbol que se está recorriendo (mismo cuidado que
+      // con las prendas, arriba).
+      const mechas: THREE.SkinnedMesh[] = [];
+      pelo.traverse((o) => { if ((o as THREE.SkinnedMesh).isSkinnedMesh) mechas.push(o as THREE.SkinnedMesh); });
+      for (const sm of mechas) {
+        const nuevos = sm.skeleton.bones.map(b => huesos.get(b.name));
+        if (nuevos.some(b => !b)) continue;
+        sm.skeleton = new THREE.Skeleton(nuevos as THREE.Bone[], sm.skeleton.boneInverses);
+        sm.castShadow = true;
+        sm.userData.esPelo = true;
+        sm.userData.matBase = sm.material;
+        c.add(sm);
+      }
+    }
     return c;
-  }, [scene, ropaGltf.scene, cuerpo]);
+  }, [scene, ropaGltf.scene, peinadosGltf, cuerpo, genero]);
   const { actions } = useAnimations(animations, grupo);
 
   // --- Personalización: tono de piel (clara/oscura según el color elegido),
@@ -247,9 +289,18 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto, ritm
         // un selector de traje real en el builder.
         return;
       }
-      if (nombre.startsWith('MI_Hair') && aspecto?.pelo) {
+      if (nombre.startsWith('MI_Eyes')) {
+        // Ojos con brillo: sin esto son dos discos mates y la mirada se
+        // apaga (pulido de caras).
+        const mat = original.clone();
+        mat.roughness = 0.12;
+        mat.metalness = 0.05;
+        mat.envMapIntensity = 1.6;
+        m.material = mat;
+      } else if ((nombre.startsWith('MI_Hair') || m.userData.esPelo) && aspecto?.pelo) {
         const mat = original.clone();
         mat.color = new THREE.Color(aspecto.pelo);
+        mat.roughness = 0.62;
         m.material = mat;
       } else if (nombre.startsWith('MI_Superhero') && aspecto?.piel) {
         const mat = original.clone();
@@ -307,6 +358,7 @@ export function precargarModelos() {
   for (const t of ['Male_Peasant', 'Female_Peasant', 'Male_Ranger', 'Female_Ranger']) {
     useGLTF.preload(`${HUMANOS}/${t}.gltf`);
   }
+  for (const p of TODOS_PEINADOS) useGLTF.preload(`${HUMANOS}/${p}.gltf`);
   useGLTF.preload(`${HUMANOS}/UAL1_Standard.glb`);
   for (const m of ['fence', 'fence-low', 'planter', 'tree-large', 'tree-small', 'path-stones-long']) {
     useGLTF.preload(`${PUEBLO}/${m}.glb`);
