@@ -1,33 +1,33 @@
 // ============================================================================
-// VENTANAS (2026-08-19, petición de Eugenio: «quiero que en la APP haya
-// ventanas donde en una ventana esté el juego, en otra pueda estar otra página
-// de la app, y en otra el navegador propio»).
+// VENTANAS (2026-08-19, petición de Eugenio, afinada en tres pasos: «ventanas
+// donde en una esté el juego…», «que esté todo en la línea superior» y «solo
+// tiene que haber un menú arriba, uno solo… y en ese uno es donde deben estar
+// las ventanas en forma de iconos… no están ahí por defecto, solo las que se
+// abran desde el menú colapsado»).
 // ============================================================================
-// Un escritorio dentro de la web: ventanas que se mueven, se cambian de tamaño,
-// se maximizan y se cierran, cada una con algo dentro.
+// El escritorio ya NO tiene barra propia: la única barra es la cabecera de la
+// app. Desde su menú ☰ se abren las ventanas, y en esa misma cabecera aparecen
+// como iconos las que están abiertas (eso lo pinta Layout, hablando con este
+// gestor por `bus.ts`). Aquí solo viven las ventanas.
 //
 // LA DECISIÓN QUE MANDA SOBRE TODO LO DEMÁS: cada ventana es un `<iframe>` a
-// una ruta de la propia app, NO el componente montado aquí dentro.
+// una ruta de la propia app EN MODO EMBEBIDO (`?embed=1`), NO el componente
+// montado aquí dentro.
 //
-// Es lo que hace que esto sea posible de verdad:
-//   - El juego 3D vive en su propio contexto: su WebGL, su bucle de dibujo y
-//     su teclado no se pelean con los de otra ventana. Montarlo aquí dentro
-//     significaría dos escenas three.js en el mismo árbol de React, con un
-//     único `window` peleándose por las teclas.
-//   - Mover una ventana NO vuelve a montar lo de dentro. Con componentes, cada
-//     re-render del escritorio reiniciaría la página de dentro; con marcos,
-//     arrastras y lo de dentro ni se entera.
-//   - Una página se abre en una ventana sin tocar esa página.
+//   - `embed=1` renderiza la página SOLA, sin la cabecera ni el menú de la
+//     app. Sin él, cada ventana cargaba la app entera dentro de sí misma:
+//     cuatro barras apiladas antes de llegar al juego (captura de Eugenio).
+//   - El juego 3D vive en su propio contexto: su WebGL, su bucle y su teclado
+//     no se pelean con los de otra ventana.
+//   - Mover una ventana NO vuelve a montar lo de dentro.
 //
-// Lo que cuesta: cada ventana es una carga de la app (unos 200 ms y su memoria).
-// Con tres o cuatro ventanas es un precio que no se nota; con veinte sí.
+// Lo que cuesta: cada ventana es una carga de la app (unos 200 ms y su
+// memoria). Con tres o cuatro ventanas no se nota; con veinte sí.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  X, Minus, Square, Copy, Globe, Gamepad2, Map as MapIcon, Network, Compass,
-  BrainCircuit, FolderKanban, Store, Orbit, ChevronLeft, ChevronRight,
-} from 'lucide-react';
+import { X, Minus, Square, Copy, Globe, Gamepad2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Navegador from './Navegador';
+import { publicarVentanas, type AbrirVentana } from './bus';
 
 export interface Ventana {
   id: string;
@@ -44,27 +44,7 @@ export interface Ventana {
 
 const CLAVE = 'humanity:ventanas';
 const BARRA = 34;          // alto de la barra de título de una ventana
-/** Alto de la barra de ventanas de arriba: las ventanas empiezan por debajo. */
-const BARRA_ARRIBA = 44;
 const MIN_AN = 320, MIN_AL = 220;
-
-/**
- * TODAS las secciones, en la línea de arriba (2026-08-19, petición de Eugenio:
- * «que esté todo en la línea superior, no en un menú secundario»). Cada una
- * abre su ventana; si ya está abierta, la trae al frente en vez de duplicarla —
- * dos ventanas del mismo mapa no le sirven a nadie.
- */
-const ATAJOS: Array<{ id: string; titulo: string; corto: string; clase: Ventana['clase']; destino: string; icono: React.ReactNode }> = [
-  { id: 'juego', titulo: 'Juego Vital', corto: 'Juego', clase: 'app', destino: '/juego', icono: <Gamepad2 className="w-3.5 h-3.5" /> },
-  { id: 'navegador', titulo: 'Navegador', corto: 'Web', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', icono: <Globe className="w-3.5 h-3.5" /> },
-  { id: 'mapa', titulo: 'Mapa', corto: 'Mapa', clase: 'app', destino: '/mapa', icono: <MapIcon className="w-3.5 h-3.5" /> },
-  { id: 'grafos', titulo: 'Conocimiento', corto: 'Conocimiento', clase: 'app', destino: '/grafos', icono: <Network className="w-3.5 h-3.5" /> },
-  { id: 'explorar', titulo: 'Explorar', corto: 'Explorar', clase: 'app', destino: '/explorar', icono: <Compass className="w-3.5 h-3.5" /> },
-  { id: 'documentos', titulo: 'Mi conocimiento', corto: 'Mío', clase: 'app', destino: '/mi-conocimiento', icono: <BrainCircuit className="w-3.5 h-3.5" /> },
-  { id: 'proyectos', titulo: 'Mis proyectos', corto: 'Proyectos', clase: 'app', destino: '/proyectos', icono: <FolderKanban className="w-3.5 h-3.5" /> },
-  { id: 'mercado', titulo: 'Mercado', corto: 'Mercado', clase: 'app', destino: '/mercado', icono: <Store className="w-3.5 h-3.5" /> },
-  { id: 'universo', titulo: 'Universo', corto: 'Universo', clase: 'app', destino: '/universo', icono: <Orbit className="w-3.5 h-3.5" /> },
-];
 
 let contadorZ = 10;
 
@@ -84,18 +64,13 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         }
       }
     } catch { /* escritorio nuevo */ }
-    // El primer escritorio trae el juego y el navegador, LOS DOS A PANTALLA
-    // COMPLETA (petición de Eugenio: «que el juego se abra en pantalla
-    // completa, y el navegador igual pero en otra ventana»). Las medidas
-    // sueltas se guardan igual: son a las que vuelve si restaura una.
-    return [
-      { id: 'v1', titulo: 'Juego Vital', clase: 'app', destino: '/juego', x: 24, y: 56, an: 760, al: 520, z: 11, maximizada: true },
-      { id: 'v2', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', x: 500, y: 200, an: 720, al: 520, z: 12, maximizada: true },
-    ];
+    // SIN ventanas por defecto (petición de Eugenio): el escritorio nace
+    // vacío y solo aparece lo que abras desde el menú ☰.
+    return [];
   });
 
-  // Se guarda con retraso: arrastrar una ventana dispara decenas de cambios
-  // por segundo y escribir en localStorage en cada uno cuesta fotogramas.
+  // Se guarda con retraso: arrastrar dispara decenas de cambios por segundo y
+  // escribir en localStorage en cada uno cuesta fotogramas.
   const timer = useRef<number | null>(null);
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
@@ -103,6 +78,24 @@ export default function GestorVentanas({ onPaginaNavegador }: {
       try { localStorage.setItem(CLAVE, JSON.stringify(ventanas)); } catch { /* lleno */ }
     }, 400);
     return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [ventanas]);
+
+  // La cabecera pinta un icono por ventana: se le publica el estado cada vez
+  // que cambia (ver bus.ts — el estado vive aquí, allí solo viajan avisos).
+  useEffect(() => {
+    const publicar = () => {
+      const vivas = ventanas.filter(v => !v.minimizada);
+      const zMax = vivas.length ? Math.max(...vivas.map(v => v.z)) : -1;
+      publicarVentanas(ventanas.map(v => ({
+        id: v.id, titulo: v.titulo, clase: v.clase, destino: v.destino,
+        minimizada: !!v.minimizada, delante: !v.minimizada && v.z === zMax,
+      })));
+    };
+    publicar();
+    // La cabecera pide el estado al montarse (ver bus.ts): se le contesta con
+    // la foto actual, que este efecto refresca en cada cambio.
+    window.addEventListener('humanity:pedir-ventanas', publicar);
+    return () => window.removeEventListener('humanity:pedir-ventanas', publicar);
   }, [ventanas]);
 
   const alFrente = useCallback((id: string) => {
@@ -118,45 +111,62 @@ export default function GestorVentanas({ onPaginaNavegador }: {
   }, []);
 
   /**
-   * Abrir una sección. Dos decisiones (2026-08-19, petición de Eugenio):
-   *
-   *   - Nace A PANTALLA COMPLETA. Pidió que el juego se abriera así y que se
-   *     pasara de uno a otro con un gesto; eso es el modelo de macOS, donde
-   *     cada aplicación ocupa su pantalla y el gesto cambia de pantalla. Con
-   *     ventanitas superpuestas el gesto no significaría nada.
-   *   - Si esa sección YA está abierta, se trae al frente en vez de duplicarla.
-   *     Dos ventanas del mismo mapa no le sirven a nadie, y con las secciones
-   *     a un clic en la barra de arriba es facilísimo pulsar dos veces.
+   * Abrir una sección desde el menú ☰. Nace A PANTALLA COMPLETA (el modelo de
+   * macOS: cada cosa ocupa su pantalla y el gesto salta entre pantallas). Si ya
+   * está abierta, se trae al frente en vez de duplicarla; el navegador casa por
+   * CLASE y no por dirección, porque su destino cambia con cada página que
+   * visitas y, si no, cada pulsación abriría un navegador nuevo.
    */
-  const abrir = useCallback((a: typeof ATAJOS[number]) => {
+  const abrir = useCallback((a: AbrirVentana) => {
     setVentanas(vs => {
-      const ya = vs.find(v => v.clase === a.clase && v.destino === a.destino);
+      const ya = a.clase === 'navegador'
+        ? vs.filter(v => v.clase === 'navegador').reduce<Ventana | null>((m, v) => (!m || v.z > m.z ? v : m), null)
+        : vs.find(v => v.clase === 'app' && v.destino === a.destino);
       if (ya) return vs.map(v => (v.id === ya.id ? { ...v, z: ++contadorZ, minimizada: false } : v));
       const n = vs.length;
       return [...vs, {
         id: `v${Date.now().toString(36)}`,
         titulo: a.titulo, clase: a.clase, destino: a.destino,
-        x: 40 + (n % 6) * 34, y: BARRA_ARRIBA + 16 + (n % 6) * 30,
+        x: 40 + (n % 6) * 34, y: 16 + (n % 6) * 30,
         an: 780, al: 540, z: ++contadorZ,
         maximizada: true,
       }];
     });
   }, []);
 
+  // Los avisos del menú y de los iconos de la cabecera.
+  useEffect(() => {
+    const alAbrir = (e: Event) => abrir((e as CustomEvent).detail as AbrirVentana);
+    const alPulsar = (e: Event) => {
+      const id = (e as CustomEvent).detail as string;
+      setVentanas(vs => {
+        const v = vs.find(x => x.id === id);
+        if (!v) return vs;
+        const vivas = vs.filter(x => !x.minimizada);
+        const delante = !v.minimizada && vivas.length > 0 && v.z === Math.max(...vivas.map(x => x.z));
+        // El icono es un conmutador: traer al frente, y si ya está delante,
+        // minimizar — como la barra de tareas de toda la vida.
+        return delante
+          ? vs.map(x => (x.id === id ? { ...x, minimizada: true } : x))
+          : vs.map(x => (x.id === id ? { ...x, z: ++contadorZ, minimizada: false } : x));
+      });
+    };
+    window.addEventListener('humanity:abrir-ventana', alAbrir);
+    window.addEventListener('humanity:pulsar-ventana', alPulsar);
+    return () => {
+      window.removeEventListener('humanity:abrir-ventana', alAbrir);
+      window.removeEventListener('humanity:pulsar-ventana', alPulsar);
+    };
+  }, [abrir]);
+
   /**
-   * PASAR DE UNA VENTANA A OTRA CON EL TRACKPAD (petición de Eugenio: «pueda ir
-   * de uno a otro moviendo con los 4 dedos del pad del Mac»).
-   *
-   * LO QUE NO SE PUEDE: una web NO ve cuántos dedos hay en el trackpad. macOS
-   * se queda los gestos de tres y cuatro dedos para sí mismo (Mission Control,
-   * cambiar de escritorio) y nunca llegan a la página. No hay forma de
-   * detectarlos desde aquí; solo una aplicación nativa podría.
-   *
-   * LO QUE SÍ: el deslizamiento HORIZONTAL de dos dedos llega como una rueda
-   * con desplazamiento en X, y ese es el gesto equivalente. Se exige que sea
-   * claramente horizontal (más X que Y) y se deja un respiro entre cambios,
-   * porque un solo gesto manda decenas de eventos y si no saltarías cinco
-   * ventanas de una pasada.
+   * PASAR DE UNA VENTANA A OTRA CON EL TRACKPAD (petición de Eugenio: «con los
+   * 4 dedos del pad del Mac»). Una web NO ve cuántos dedos hay: macOS se queda
+   * los gestos de tres y cuatro dedos para sí (Mission Control) y nunca llegan
+   * a la página; solo una app nativa podría. El equivalente que SÍ llega es el
+   * deslizamiento HORIZONTAL de dos dedos (una rueda con desplazamiento en X).
+   * Se exige que sea claramente horizontal y se deja un respiro entre cambios:
+   * un solo gesto manda decenas de eventos y saltarías cinco ventanas de una.
    */
   const ultimoCambio = useRef(0);
   const irA = useCallback((paso: number) => {
@@ -173,7 +183,6 @@ export default function GestorVentanas({ onPaginaNavegador }: {
 
   useEffect(() => {
     const alRodar = (e: WheelEvent) => {
-      // Dentro de un marco el evento no llega aquí; esto atiende al escritorio.
       if (Math.abs(e.deltaX) < 40 || Math.abs(e.deltaX) < Math.abs(e.deltaY) * 1.6) return;
       const ahora = Date.now();
       if (ahora - ultimoCambio.current < 700) return;
@@ -195,10 +204,8 @@ export default function GestorVentanas({ onPaginaNavegador }: {
   }, [irA]);
 
   /**
-   * Mover y redimensionar. Un solo camino para los dos: el ratón se captura en
-   * la barra (o en la esquina) y hasta que se suelta manda ese gesto. Se usa
-   * `setPointerCapture` para que salirse de la ventana con el ratón no cancele
-   * el arrastre a mitad, que es el fallo clásico de estas cosas.
+   * Mover y redimensionar. `setPointerCapture` para que salirse de la ventana
+   * con el ratón no cancele el arrastre a mitad.
    */
   const empezarGesto = (e: React.PointerEvent, v: Ventana, modo: 'mover' | 'tamano') => {
     if (v.maximizada && modo === 'mover') return;
@@ -211,7 +218,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     const mover = (ev: PointerEvent) => {
       const dx = ev.clientX - x0, dy = ev.clientY - y0;
       if (modo === 'mover') {
-        cambiar(v.id, { x: Math.max(0, x + dx), y: Math.max(BARRA_ARRIBA, y + dy) });
+        cambiar(v.id, { x: Math.max(0, x + dx), y: Math.max(0, y + dy) });
       } else {
         cambiar(v.id, { an: Math.max(MIN_AN, an + dx), al: Math.max(MIN_AL, al + dy) });
       }
@@ -224,7 +231,6 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     el.addEventListener('pointerup', soltar);
   };
 
-  const visibles = ventanas.filter(v => !v.minimizada);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-slate-200/60"
@@ -234,19 +240,26 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         <div className="absolute inset-0 grid place-items-center">
           <div className="text-center">
             <p className="text-sm font-bold text-slate-500">No hay ninguna ventana abierta.</p>
-            <p className="text-xs text-slate-400 mt-1">Ábrelas desde los botones de arriba.</p>
+            <p className="text-xs text-slate-400 mt-1">Abre el juego, el navegador o cualquier sección desde el menú ☰ de arriba.</p>
           </div>
         </div>
       )}
 
-      {visibles.map(v => (
+      {/* Se pintan TODAS, y la minimizada solo se OCULTA: quitarla del árbol
+          desmontaría su marco y el juego se reiniciaría de cero cada vez que
+          lo minimizas (fallo visto en pruebas, 2026-08-19). */}
+      {ventanas.map(v => (
         <div
           key={v.id}
           onPointerDown={() => alFrente(v.id)}
           className="absolute flex flex-col rounded-xl overflow-hidden bg-white border border-slate-300 shadow-2xl"
-          style={v.maximizada
-            ? { left: 0, top: BARRA_ARRIBA, width: '100%', height: `calc(100% - ${BARRA_ARRIBA}px)`, zIndex: v.z }
-            : { left: v.x, top: Math.max(BARRA_ARRIBA, v.y), width: v.an, height: v.al, zIndex: v.z }}
+          style={{
+            ...(v.maximizada
+              ? { left: 0, top: 0, width: '100%', height: '100%' }
+              : { left: v.x, top: v.y, width: v.an, height: v.al }),
+            zIndex: v.z,
+            ...(v.minimizada ? { display: 'none' } : {}),
+          }}
         >
           {/* Barra de título: de aquí se tira para mover */}
           <div
@@ -284,16 +297,14 @@ export default function GestorVentanas({ onPaginaNavegador }: {
                   onUrl={u => { cambiar(v.id, { destino: u }); onPaginaNavegador?.(u); }} />
               : (
                 <iframe
-                  src={v.destino}
+                  // `embed=1`: la página SOLA, sin la cabecera de la app dentro
+                  // de la ventana (el fallo de la captura de Eugenio).
+                  src={`${v.destino}${v.destino.includes('?') ? '&' : '?'}embed=1`}
                   title={v.titulo}
                   className="w-full h-full border-0"
-                  // Misma procedencia: es NUESTRA app, con su sesión. El
-                  // navegador de fuera es el que va aislado (ver Navegador).
                   allow="autoplay; fullscreen; xr-spatial-tracking; clipboard-write"
                 />
               )}
-            {/* Tapadera durante el arrastre: sin esto, el marco se traga los
-                eventos del ratón y la ventana se queda pegada al soltar. */}
           </div>
 
           {/* Esquina de tamaño */}
@@ -307,65 +318,6 @@ export default function GestorVentanas({ onPaginaNavegador }: {
           )}
         </div>
       ))}
-
-      {/* LA LÍNEA DE ARRIBA (2026-08-19, petición de Eugenio: «que esté todo
-          en la línea superior, no en un menú secundario»). A la izquierda las
-          secciones, cada una abre su ventana a pantalla completa; a la derecha
-          las que ya están abiertas, para saltar entre ellas. */}
-      <div className="absolute left-0 right-0 top-0 h-11 flex items-center gap-1 px-2 bg-white/95 backdrop-blur border-b border-slate-200 overflow-x-auto"
-        style={{ zIndex: 100000 }}>
-
-        {ATAJOS.map(a => {
-          const abierta = ventanas.find(v => v.clase === a.clase && v.destino === a.destino);
-          const delante = abierta && !abierta.minimizada
-            && abierta.z === Math.max(...ventanas.filter(v => !v.minimizada).map(v => v.z), 0);
-          return (
-            <button
-              key={a.id}
-              onClick={() => abrir(a)}
-              title={a.titulo}
-              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold shrink-0 transition-colors',
-                delante ? 'bg-slate-900 text-white'
-                  : abierta ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
-            >
-              {a.icono}
-              <span className="hidden lg:inline">{a.corto}</span>
-            </button>
-          );
-        })}
-
-        <div className="w-px h-5 bg-slate-200 mx-1 shrink-0" />
-
-        {/* Saltar de una a otra, sin trackpad */}
-        <button onClick={() => irA(-1)} title="Ventana anterior (⌘←)"
-          className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 shrink-0">
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <button onClick={() => irA(1)} title="Ventana siguiente (⌘→)"
-          className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 shrink-0">
-          <ChevronRight className="w-4 h-4" />
-        </button>
-
-        {/* Lo que hay abierto: pulsar lleva a esa ventana */}
-        {ventanas.map(v => (
-          <button
-            key={v.id}
-            onClick={() => (v.minimizada ? alFrente(v.id) : cambiar(v.id, { minimizada: true }))}
-            title={v.titulo}
-            className={cn('flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border max-w-[9rem] shrink-0',
-              v.minimizada ? 'bg-white border-slate-200 text-slate-400'
-                : 'bg-emerald-50 border-emerald-200 text-emerald-800')}
-          >
-            {v.clase === 'navegador' ? <Globe className="w-3 h-3 shrink-0" /> : <Gamepad2 className="w-3 h-3 shrink-0" />}
-            <span className="truncate">{v.titulo}</span>
-          </button>
-        ))}
-
-        <span className="ml-auto hidden xl:block text-[10px] text-slate-400 pr-1 shrink-0">
-          Desliza con dos dedos para cambiar de ventana
-        </span>
-      </div>
     </div>
   );
 }
