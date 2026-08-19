@@ -45,7 +45,11 @@ export const AJUSTES: Record<NivelCalidad, {
   /** Matas de hierba instanciadas en la aldea (fase 1). */
   hierba: number;
 }> = {
-  alta: { dpr: [1, 2], sombras: 4096, efectos: true, ao: true, hierba: 45000 },
+  // La hierba en alta baja de 45.000 a 15.000 (2026-08-19). Medido: apagarla
+  // entera no ahorra ni un fotograma —va instanciada, la tarjeta la dibuja de
+  // una vez— pero SÍ cuesta memoria y tiempo de construirla al entrar, que es
+  // lo que de verdad se nota. A 15.000 el suelo sigue cubierto.
+  alta: { dpr: [1, 2], sombras: 4096, efectos: true, ao: true, hierba: 15000 },
   media: { dpr: [1, 1.5], sombras: 2048, efectos: true, ao: false, hierba: 16000 },
   baja: { dpr: [0.8, 1], sombras: 1024, efectos: false, ao: false, hierba: 3000 },
 };
