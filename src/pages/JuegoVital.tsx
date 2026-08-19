@@ -1456,17 +1456,23 @@ export default function JuegoVital() {
     const aplicar = () => {
       const volando = vehiculoRef.current === 'aptera';
       entrada.current.x = +(teclas.has('d') || teclas.has('arrowright')) - +(teclas.has('a') || teclas.has('arrowleft'));
-      // Pilotando la nave, W y S son SUBIR y BAJAR (petición de Eugenio) y la
-      // nave avanza sola; a pie y en bici son adelante y atrás, como siempre.
-      entrada.current.z = volando ? 0
-        : +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
+      // W y S son ADELANTE y ATRÁS SIEMPRE, también pilotando (2026-08-19,
+      // petición de Eugenio: «que el avión no se mueva hacia adelante de forma
+      // automática, sino que tengas que pulsar adelante para que avance»).
+      // Antes, en el aire, la nave avanzaba sola y W/S llevaban la altura.
+      entrada.current.z = +(teclas.has('s') || teclas.has('arrowdown')) - +(teclas.has('w') || teclas.has('arrowup'));
       // Shift corre (petición de Eugenio; antes era la barra, que ahora salta).
+      // Volando no corre: ahí Shift es BAJAR.
       entrada.current.turbo = teclas.has('shift');
+      // La ALTURA se muda a la barra (subir) y Shift (bajar), que volando no
+      // hacen otra cosa: saltar y correr son de andar. Los botones de la
+      // pantalla siguen funcionando igual.
       mandoY.current.teclado = volando
-        ? +(teclas.has('w') || teclas.has('arrowup')) - +(teclas.has('s') || teclas.has('arrowdown'))
+        ? +teclas.has(' ') - +teclas.has('shift')
         : 0;
-      // Tocar W o S pilotando cancela la subida/bajada fijada por botón: si
-      // no, el despegue automático del doble espacio te llevaría al techo.
+      // Tocar la barra o Mayúsculas pilotando cancela la subida/bajada fijada
+      // por botón: si no, el despegue automático del doble espacio te llevaría
+      // hasta el techo sin poder pararlo.
       if (volando && mandoY.current.teclado !== 0 && mandoY.current.boton !== 0) {
         fijarSubida(mandoY.current.boton);   // el toggle lo deja a cero
       }
@@ -1495,8 +1501,9 @@ export default function JuegoVital() {
         if (!e.repeat) {
           const ahora = performance.now();
           if (ahora - ultimoEspacio < 350 && vehiculoRef.current !== 'aptera') {
-            // Doble barra: a la nave y despegue vertical automático. Con W/S
-            // se toma el mando de la altura (arriba se cancela el fijado).
+            // Doble barra: a la nave y despegue vertical automático. Con la
+            // barra o Mayúsculas se toma el mando de la altura (y eso cancela
+            // la subida fijada).
             acciones.current.montar('aptera');
             fijarSubida(1);
           } else if (vehiculoRef.current !== 'aptera') {
@@ -1895,7 +1902,7 @@ export default function JuegoVital() {
             <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center gap-1.5">
               <button
                 onClick={() => fijarSubida(1)}
-                title="Subir (o mantén W). Se queda subiendo hasta que lo vuelvas a pulsar."
+                title="Subir (o mantén la barra espaciadora). Se queda subiendo hasta que lo vuelvas a pulsar."
                 className={cn(
                   'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
                   subiendo === 1
@@ -1908,7 +1915,7 @@ export default function JuegoVital() {
               <span className="text-[9px] font-black text-slate-400 tabular-nums">{alturaVisible} m</span>
               <button
                 onClick={() => fijarSubida(-1)}
-                title="Bajar (o mantén S). Al tocar el suelo te bajas del planeador."
+                title="Bajar (o mantén Mayúsculas). Al tocar el suelo te bajas del planeador."
                 className={cn(
                   'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
                   subiendo === -1

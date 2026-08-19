@@ -133,9 +133,10 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     // de la cámara para que «adelante» sea siempre adelante en la vista.
     const yaw = camara.current.yaw;
     const sx = entrada.current.x;
-    // La nave CRUZA sola: en el aire siempre avanza (se pilota con A/D y la
-    // vista, y W/S llevan la altura — petición de Eugenio). En el suelo, no.
-    const sz = vuela ? (alturaVuelo.current > 0.5 ? -1 : 0) : entrada.current.z;
+    // La nave YA NO cruza sola (2026-08-19, petición de Eugenio): avanza solo
+    // mientras mantienes adelante, igual que a pie. Antes, en cuanto
+    // despegabas, salía disparada aunque no tocaras nada.
+    const sz = entrada.current.z;
     tmpObjetivo.set(
       sx * Math.cos(yaw) + sz * Math.sin(yaw),
       0,
