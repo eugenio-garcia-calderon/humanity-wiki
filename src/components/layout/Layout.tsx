@@ -163,8 +163,13 @@ export default function Layout() {
 
         {/* El único destino principal: Explorar y Mis publicaciones eran la
             misma página con un interruptor dentro (2026-08-08) — un botón
-            de menú no debía apuntar a dos sitios que ya son uno. */}
-        <nav className="flex items-center gap-1.5 ml-1 sm:ml-4">
+            de menú no debía apuntar a dos sitios que ya son uno.
+            EN EL ESCRITORIO no se enseña (2026-08-19, petición de Eugenio:
+            «comprímelo todo en el botón de las 3 líneas, y así queda todo
+            arriba limpio en un solo menú»): allí arriba manda la barra de
+            ventanas, y dos filas de menús compitiendo es justo lo que pidió
+            quitar. Sigue estando dentro de la hamburguesa, que ya lo lleva. */}
+        <nav className={cn('items-center gap-1.5 ml-1 sm:ml-4', isEscritorioPage ? 'hidden' : 'flex')}>
           <Link
             to="/explorar"
             className={cn(
@@ -180,8 +185,10 @@ export default function Layout() {
 
         <div className="flex-1" />
 
-        {/* Acciones a la derecha */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Acciones a la derecha. En el Escritorio se queda SOLO lo que no
+            está en la hamburguesa (el ajuste de la cuenta y salir): el resto
+            baja al menú para dejar la franja de arriba limpia. */}
+        <div className={cn('items-center gap-2 shrink-0', isEscritorioPage ? 'hidden sm:flex' : 'flex')}>
           <Link
             to="/mercado"
             className="hidden sm:inline-flex items-center gap-1 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold text-[11px] px-2.5 py-1 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-all"

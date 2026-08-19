@@ -40,7 +40,9 @@ export interface Ventana {
 }
 
 const CLAVE = 'humanity:ventanas';
-const BARRA = 34;          // alto de la barra de título
+const BARRA = 34;          // alto de la barra de título de una ventana
+/** Alto de la barra de ventanas de arriba: las ventanas empiezan por debajo. */
+const BARRA_ARRIBA = 44;
 const MIN_AN = 320, MIN_AL = 220;
 
 /** Lo que se puede abrir de un tirón. */
@@ -73,8 +75,8 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     } catch { /* escritorio nuevo */ }
     // El primer escritorio trae el juego y el navegador, que es lo que pidió.
     return [
-      { id: 'v1', titulo: 'Juego Vital', clase: 'app', destino: '/juego', x: 24, y: 24, an: 760, al: 520, z: 11 },
-      { id: 'v2', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', x: 500, y: 180, an: 720, al: 520, z: 12 },
+      { id: 'v1', titulo: 'Juego Vital', clase: 'app', destino: '/juego', x: 24, y: 56, an: 760, al: 520, z: 11 },
+      { id: 'v2', titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada', x: 500, y: 200, an: 720, al: 520, z: 12 },
     ];
   });
   const [menu, setMenu] = useState(false);
@@ -110,7 +112,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
       const n = vs.length;
       return [...vs, {
         id, titulo: a.titulo, clase: a.clase, destino: a.destino,
-        x: 40 + (n % 6) * 34, y: 40 + (n % 6) * 30,
+        x: 40 + (n % 6) * 34, y: BARRA_ARRIBA + 16 + (n % 6) * 30,
         an: 780, al: 540, z: ++contadorZ,
       }];
     });
@@ -133,7 +135,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     const mover = (ev: PointerEvent) => {
       const dx = ev.clientX - x0, dy = ev.clientY - y0;
       if (modo === 'mover') {
-        cambiar(v.id, { x: Math.max(0, x + dx), y: Math.max(0, y + dy) });
+        cambiar(v.id, { x: Math.max(0, x + dx), y: Math.max(BARRA_ARRIBA, y + dy) });
       } else {
         cambiar(v.id, { an: Math.max(MIN_AN, an + dx), al: Math.max(MIN_AL, al + dy) });
       }
@@ -156,7 +158,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         <div className="absolute inset-0 grid place-items-center">
           <div className="text-center">
             <p className="text-sm font-bold text-slate-500">No hay ninguna ventana abierta.</p>
-            <p className="text-xs text-slate-400 mt-1">Ábrelas desde el botón de abajo.</p>
+            <p className="text-xs text-slate-400 mt-1">Ábrelas desde el botón «Abrir» de arriba.</p>
           </div>
         </div>
       )}
@@ -167,8 +169,8 @@ export default function GestorVentanas({ onPaginaNavegador }: {
           onPointerDown={() => alFrente(v.id)}
           className="absolute flex flex-col rounded-xl overflow-hidden bg-white border border-slate-300 shadow-2xl"
           style={v.maximizada
-            ? { left: 0, top: 0, width: '100%', height: 'calc(100% - 3rem)', zIndex: v.z }
-            : { left: v.x, top: v.y, width: v.an, height: v.al, zIndex: v.z }}
+            ? { left: 0, top: BARRA_ARRIBA, width: '100%', height: `calc(100% - ${BARRA_ARRIBA}px)`, zIndex: v.z }
+            : { left: v.x, top: Math.max(BARRA_ARRIBA, v.y), width: v.an, height: v.al, zIndex: v.z }}
         >
           {/* Barra de título: de aquí se tira para mover */}
           <div
@@ -230,8 +232,11 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         </div>
       ))}
 
-      {/* La barra de abajo: lo abierto y el botón de abrir más */}
-      <div className="absolute left-0 right-0 bottom-0 h-12 flex items-center gap-1.5 px-2 bg-white/90 backdrop-blur border-t border-slate-200"
+      {/* La barra de ventanas, ARRIBA (2026-08-19, petición de Eugenio: «haz
+          que el menú de ventanas esté arriba»). Pegada al borde superior, se
+          lee como una sola franja con la cabecera de la app en vez de dejar
+          un menú arriba y otro abajo. */}
+      <div className="absolute left-0 right-0 top-0 h-11 flex items-center gap-1.5 px-2 bg-white/90 backdrop-blur border-b border-slate-200"
         style={{ zIndex: 100000 }}>
         <div className="relative">
           <button
@@ -241,7 +246,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
             <Plus className="w-3.5 h-3.5" />Abrir
           </button>
           {menu && (
-            <div className="absolute bottom-full mb-2 left-0 w-56 p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xl">
+            <div className="absolute top-full mt-2 left-0 w-56 p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xl">
               {ATAJOS.map(a => (
                 <button key={a.id} onClick={() => abrir(a)}
                   className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-600">
@@ -266,7 +271,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
           </button>
         ))}
 
-        <span className="ml-auto text-[10px] text-slate-400 pr-1">
+        <span className="ml-auto hidden md:block text-[10px] text-slate-400 pr-1">
           Doble clic en la barra de una ventana para maximizarla
         </span>
       </div>
