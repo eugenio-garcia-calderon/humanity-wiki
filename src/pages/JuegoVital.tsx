@@ -132,8 +132,10 @@ export default function JuegoVital() {
   const destinoViaje = useRef<{ x: number; z: number } | null>(null);
   const [viajando, setViajando] = useState<string | null>(null);
   // Distancia de la cámara: 1 = por encima del hombro, 6 = media aldea a la vista.
-  const zoom = useRef(1);
-  const [zoomVisible, setZoomVisible] = useState(1);
+  // Cámara CERCA por defecto (petición de Eugenio con captura): 0,5 ≈ 9 m
+  // detrás del personaje, en vez de los 18,6 m de antes.
+  const zoom = useRef(0.5);
+  const [zoomVisible, setZoomVisible] = useState(0.5);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
   // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
   // --- Dentro de un proyecto (2026-08-18, petición de Eugenio: «como en
@@ -172,7 +174,7 @@ export default function JuegoVital() {
   const [guardandoAspecto, setGuardandoAspecto] = useState(false);
   const miAspecto: Aspecto = (user?.uiSettings?.juegoAspecto as Aspecto) || {};
   const ajustarZoom = useCallback((factor: number) => {
-    zoom.current = Math.min(6, Math.max(0.6, zoom.current * factor));
+    zoom.current = Math.min(6, Math.max(0.3, zoom.current * factor));
     setZoomVisible(zoom.current);
   }, []);
   const cercaniaRef = useRef<Cercania>(null);

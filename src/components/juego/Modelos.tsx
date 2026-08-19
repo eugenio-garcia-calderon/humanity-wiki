@@ -104,6 +104,50 @@ export function Persona3D(props: Parameters<typeof PersonaModelo>[0]) {
   return <PersonaModelo key={props.cuerpo} {...props} />;
 }
 
+/** Traje: siempre el de aldeano. El de explorador (Ranger) se probó y va con
+ *  el torso al aire — parecía otra vez el problema del desnudo. Sus .gltf se
+ *  quedan en la carpeta por si algún día hay selector de trajes. */
+function trajeDe(_cuerpo: string): 'Peasant' | 'Ranger' {
+  return 'Peasant';
+}
+
+/**
+ * El cuerpo base es la variante «Superhero» (musculosa) y los trajes están
+ * cortados para la variante «Regular»: puestos tal cual, la piel ATRAVIESA
+ * la tela (parecían desnudos con correas, fallo visto en pruebas). Arreglo
+ * de raíz: al cuerpo se le RECORTAN los triángulos por debajo del cuello —
+ * queda cabeza y cuello — y el traje pone todo lo demás (incluye manos con
+ * guantes y antebrazos remangados). El recorte se hace UNA vez por modelo y
+ * la geometría recortada se comparte entre todos los clones.
+ */
+const cacheCabezas = new Map<string, THREE.BufferGeometry>();
+function soloCabeza(nombreModelo: string, geo: THREE.BufferGeometry, cuello: number): THREE.BufferGeometry {
+  const ya = cacheCabezas.get(nombreModelo);
+  if (ya) return ya;
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const idx = geo.index!;
+  const nuevo: number[] = [];
+  for (let i = 0; i < idx.count; i += 3) {
+    const a = idx.getX(i), b = idx.getX(i + 1), c = idx.getX(i + 2);
+    // El triángulo vive si ALGÚN vértice queda por encima del cuello: la
+    // fila de la costura se conserva y el cuello no muestra un hueco.
+    if (pos.getY(a) > cuello || pos.getY(b) > cuello || pos.getY(c) > cuello) nuevo.push(a, b, c);
+  }
+  const g = geo.clone();
+  g.setIndex(nuevo);
+  cacheCabezas.set(nombreModelo, g);
+  return g;
+}
+
+/** La tela de cada persona se tiñe con una paleta FIJA de colores de ropa:
+ *  da variedad y evita que el lino crudo del traje parezca piel a lo lejos. */
+const PALETA_ROPA = ['#8fa3c0', '#a8b28a', '#c9977b', '#a486a0', '#b0a284', '#96b3ab', '#c0a3a3', '#93a6b8'];
+function tinteRopaDe(cuerpo: string): THREE.Color {
+  let h = 0;
+  for (let i = 0; i < cuerpo.length; i++) h = (h * 131 + cuerpo.charCodeAt(i)) >>> 0;
+  return new THREE.Color(PALETA_ROPA[h % PALETA_ROPA.length]).lerp(new THREE.Color('#ffffff'), 0.2);
+}
+
 function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
   cuerpo: string;
   animacion?: string;
@@ -115,8 +159,11 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
 }) {
   // Los 10 fenotipos antiguos se reparten entre los dos cuerpos reales: los
   // nombres con «female» van al femenino. El hash de cuerpoDe no cambia.
-  const humano = cuerpo.includes('female') ? 'Superhero_Female_FullBody' : 'Superhero_Male_FullBody';
+  const genero = cuerpo.includes('female') ? 'Female' : 'Male';
+  const humano = `Superhero_${genero}_FullBody`;
+  const traje = trajeDe(cuerpo);
   const { scene } = useGLTF(`${HUMANOS}/${humano}.gltf`);
+  const ropaGltf = useGLTF(`${HUMANOS}/${genero}_${traje}.gltf`);
   // Las ANIMACIONES viven en su propio .glb (el maniquí de la librería) y se
   // aplican al clon por nombre de hueso: mismo esqueleto, mismas pistas.
   const { animations } = useGLTF(`${HUMANOS}/UAL1_Standard.glb`);
@@ -130,15 +177,52 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
       // El material tal y como viene del .gltf: al personalizar se clona
       // SIEMPRE desde el original (los clones comparten materiales).
       m.userData.matBase = m.material;
+      // El CUERPO pierde todo lo que el traje va a cubrir (ver soloCabeza).
+      if (m.name.toLowerCase().includes('superhero')) {
+        m.geometry = soloCabeza(humano, m.geometry, genero === 'Female' ? 1.4 : 1.45);
+      }
     });
+    // --- VESTIR al personaje (los cuerpos base van en ropa interior, fallo
+    // reportado por Eugenio con captura). El traje viene aparte, montado
+    // sobre el MISMO esqueleto universal: se clonan sus prendas y se re-atan
+    // hueso a hueso al esqueleto del cuerpo — misma pose, misma animación.
+    const huesos = new Map<string, THREE.Bone>();
+    c.traverse((o) => { if ((o as THREE.Bone).isBone) huesos.set(o.name, o as THREE.Bone); });
+    const ropa = SkeletonUtils.clone(ropaGltf.scene);
+    const prendas: THREE.SkinnedMesh[] = [];
+    ropa.traverse((o) => { if ((o as THREE.SkinnedMesh).isSkinnedMesh) prendas.push(o as THREE.SkinnedMesh); });
+    const tinte = tinteRopaDe(cuerpo);
+    let matTela: THREE.MeshStandardMaterial | null = null;
+    for (const p of prendas) {
+      const nuevos = p.skeleton.bones.map(b => huesos.get(b.name));
+      // Un hueso que no case = el traje no es de este esqueleto: mejor en
+      // ropa interior que con la prenda rota por el suelo.
+      if (nuevos.some(b => !b)) continue;
+      p.skeleton = new THREE.Skeleton(nuevos as THREE.Bone[], p.skeleton.boneInverses);
+      p.castShadow = true; p.receiveShadow = true;
+      p.userData.esRopa = true;
+      // La TELA (material del traje) se tiñe con el color de esta persona;
+      // los antebrazos remangados (material Regular) son piel y no se tocan.
+      const mat = p.material as THREE.MeshStandardMaterial;
+      if (mat?.name?.includes('Peasant') || mat?.name?.includes('Ranger')) {
+        if (!matTela) {
+          matTela = mat.clone();
+          matTela.color = tinte;
+        }
+        p.material = matTela;
+      }
+      p.userData.matBase = p.material;
+      c.add(p);
+    }
     return c;
-  }, [scene]);
+  }, [scene, ropaGltf.scene, cuerpo]);
   const { actions } = useAnimations(animations, grupo);
 
-  // --- Personalización: tono de piel (clara/oscura según el color elegido)
-  // y tinte del pelo. La ropa es el traje del modelo (deuda anotada: teñirlo
-  // pediría una máscara de zonas en la textura).
-  const clave = aspecto && (aspecto.piel || aspecto.pelo) ? `${aspecto.piel}|${aspecto.pelo}` : '';
+  // --- Personalización: tono de piel (clara/oscura según el color elegido),
+  // tinte del pelo y tinte del TRAJE con el color de ropa del creador.
+  const clave = aspecto && (aspecto.piel || aspecto.pelo || aspecto.ropa)
+    ? `${aspecto.piel}|${aspecto.pelo}|${aspecto.ropa}`
+    : '';
   useEffect(() => {
     if (!clave) return;
     const piel = aspecto?.piel ? new THREE.Color(aspecto.piel) : null;
@@ -149,6 +233,13 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
       const original = m.userData.matBase as THREE.MeshStandardMaterial;
       if (!original) return;
       const nombre = original.name || '';
+      if (m.userData.esRopa) {
+        // El traje conserva su TELA tal cual. Se probó teñirlo con el color
+        // de ropa del creador y los tonos carne/pastel de la era Kenney
+        // dejaban la prenda color piel — parecían desnudos otra vez. Deuda:
+        // un selector de traje real en el builder.
+        return;
+      }
       if (nombre.startsWith('MI_Hair') && aspecto?.pelo) {
         const mat = original.clone();
         mat.color = new THREE.Color(aspecto.pelo);
@@ -195,9 +286,12 @@ export function Modelo({ nombre, escala = 1, rotY = 0 }: {
 
 /** Se llama al montar la escena: descarga los modelos en segundo plano. */
 export function precargarModelos() {
-  // Fase 4 del realismo: los cuerpos humanos y su librería de animaciones.
+  // Fase 4 del realismo: los cuerpos humanos, sus trajes y las animaciones.
   useGLTF.preload(`${HUMANOS}/Superhero_Male_FullBody.gltf`);
   useGLTF.preload(`${HUMANOS}/Superhero_Female_FullBody.gltf`);
+  for (const t of ['Male_Peasant', 'Female_Peasant', 'Male_Ranger', 'Female_Ranger']) {
+    useGLTF.preload(`${HUMANOS}/${t}.gltf`);
+  }
   useGLTF.preload(`${HUMANOS}/UAL1_Standard.glb`);
   for (const m of ['fence', 'fence-low', 'planter', 'tree-large', 'tree-small', 'path-stones-long']) {
     useGLTF.preload(`${PUEBLO}/${m}.glb`);

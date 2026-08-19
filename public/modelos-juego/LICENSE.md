@@ -50,3 +50,6 @@ que anotarlos en esta tabla.
   Texturas redimensionadas a 1024px.
 - `humanos/UAL1_Standard.glb` — "Universal Animation Library" by Quaternius,
   https://quaternius.com — License: CC0 1.0 (public domain).
+- `humanos/*_Peasant.*`, `humanos/*_Ranger.*` + texturas T_Peasant/T_Ranger/
+  T_Regular_* — "Modular Character Outfits - Fantasy" by Quaternius,
+  https://quaternius.com — License: CC0 1.0 (public domain). Texturas a 1024px.
