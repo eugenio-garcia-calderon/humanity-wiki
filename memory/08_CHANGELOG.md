@@ -943,3 +943,10 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - `enCamino()` es ahora la única fuente de «aquí no se planta»: la usan el suelo libre de los árboles, la hierba y la siembra comestible.
 - Cazado en pruebas: (1) el bosque nacía pegado a la plaza y aparecías DENTRO de un arbusto sin ver el ficus → claro de 24 m alrededor del centro y aparición dentro de la plaza mirando al árbol; (2) las raíces aéreas del ficus llegaban todas al suelo y parecían los barrotes de una jaula → ahora solo una de cada cuatro baja del todo, y son más finas.
 - Verificado en local: ficus con su estanque, sendas con carteles, frutos de colores en el bosque, 60 FPS.
+
+### 2026-08-19 — Fase 8: la aldea viva (día/noche con TU hora, bichos y el nombre de cada planta)
+- **CICLO DÍA/NOCHE CON LA HORA REAL** (`Vida.tsx` → `cieloDeLaHora`): no hay reloj de juego — si en tu casa son las nueve de la noche, en la aldea está anocheciendo. Amanece a las 7 y anochece a las 21 (día medio peninsular). El sol se mueve por el cielo (`Sky` recibe su posición real), cambia de color (naranja bajo, blanco alto, azul de luna de noche), y la niebla y el fondo le siguen; de noche la lejanía se cierra de 780 a 420 m. Se recalcula cada medio segundo, no cada fotograma.
+- **LAS FAROLAS SE ENCIENDEN** de noche (intensidad 0,8 → 9 y alcance 9 → 18 m, con el cristal emitiendo): de día son adorno.
+- **BICHOS** (`Bichos`): 150 en una malla instanciada, cada uno rondando SU planta del bosque comestible. De día son mariposas y abejas doradas; de noche, luciérnagas que laten y resplandecen con el bloom de la fase 0.
+- **EL NOMBRE DE LO QUE TIENES AL LADO** (`RotuloComestible`): al acercarte a menos de 3,6 m de cualquier planta del bosque, aparece su nombre común, su nombre científico y qué da («Cerezas en junio», «Escaramujos, vitamina C»). Un bosque comestible que no te dice qué es cada cosa no enseña nada.
+- Cazado en pruebas (a las 3 de la mañana, de verdad): la noche con luna a 0,22 era una pared negra y no se podía jugar → luna a 0,6 y ambiente a 0,3.
