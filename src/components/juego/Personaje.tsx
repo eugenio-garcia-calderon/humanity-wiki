@@ -8,12 +8,13 @@
 // no está en ejes del mundo, sino en ejes de la CÁMARA. Adelante es «lejos de
 // la cámara», gires hacia donde gires.
 // ============================================================================
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Camara, EntradaMando, Vehiculo } from './tipos';
 import { Persona3D } from './Modelos';
 import { Bici, Aptera, SombraVuelo } from './Vehiculos';
+import { CuerpoProvisional } from './Oleadas';
 import type { Aspecto } from './aspecto';
 
 /** Velocidad máxima en m/s. A pie es un paseo vivo; la bici, ciclismo urbano;
@@ -285,21 +286,29 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
       {vehiculo === 'pie' && (
-        <Persona3D
-          cuerpo={aspecto?.cuerpo || 'character-male-a'}
-          // La marcha sale de la velocidad real (paseo/trote/esprint/salto)
-          // y el ritmo acompasa la zancada a los m/s de verdad.
-          animacion={paso}
-          aspecto={aspecto}
-          ritmo={ritmoAnim}
-        />
+        // El Suspense propio es lo que te deja ANDAR antes de que hayan
+        // bajado los 7,6 MB de animaciones: mientras tanto eres la silueta.
+        // Sin él, React tira abajo la escena entera y vuelves a la pantalla
+        // de carga con el mundo ya montado detrás.
+        <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+          <Persona3D
+            cuerpo={aspecto?.cuerpo || 'character-male-a'}
+            // La marcha sale de la velocidad real (paseo/trote/esprint/salto)
+            // y el ritmo acompasa la zancada a los m/s de verdad.
+            animacion={paso}
+            aspecto={aspecto}
+            ritmo={ritmoAnim}
+          />
+        </Suspense>
       )}
       {vehiculo === 'bici' && (
         <>
           {/* SENTADO en el sillín con la postura de conducir (manos al
               manillar), no de pie sobre los pedales como antes. */}
           <group position={[0, 0.56, -0.2]}>
-            <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+              <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            </Suspense>
           </group>
           <Bici velocidad={vel} />
         </>
@@ -310,7 +319,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
               quedaba sentado ENCIMA del fuselaje (visto en pruebas): la
               postura de conducir ya lleva las caderas altas. */}
           <group position={[0, 0.1, 0.55]}>
-            <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+              <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            </Suspense>
           </group>
           <Aptera alturaVuelo={alturaVuelo} avanzando={andando} entrada={entrada} />
           <SombraVuelo alturaVuelo={alturaVuelo} />

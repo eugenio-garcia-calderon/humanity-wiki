@@ -36,18 +36,26 @@ export interface EstadoCielo {
 // --- La hora del mundo: la tuya, o la que tú elijas -------------------------
 // El ciclo con la hora real es bonito, pero si juegas a las cuatro de la
 // mañana solo ves una aldea a oscuras. Así que se puede forzar el momento.
-export type MomentoDia = 'auto' | 'amanecer' | 'dia' | 'tarde' | 'noche';
+export type MomentoDia = 'dorada' | 'auto' | 'amanecer' | 'dia' | 'tarde' | 'noche';
 export const MOMENTOS: { id: MomentoDia; nombre: string; icono: string; hora: number | null }[] = [
+  // La HORA DORADA es la de fábrica (2026-08-19, petición de Eugenio: «cielo
+  // azul con nubes y un atardecer en el fondo con luz dorada»). A las 20:03
+  // el sol queda a ~14° sobre el horizonte. Esa altura importa: la cámara del
+  // juego mira casi horizontal, así que con el sol más alto (lo probé a las
+  // 19:20, 24°) el oro se quedaba FUERA de encuadre y solo se veía la banda
+  // pálida del horizonte. A 14° el resplandor cae justo donde miras, y el
+  // cenit sigue azul.
+  { id: 'dorada', nombre: 'Hora dorada', icono: '🌤️', hora: 20.05 },
   { id: 'auto', nombre: 'Tu hora', icono: '🕘', hora: null },
   { id: 'amanecer', nombre: 'Amanecer', icono: '🌅', hora: 7.8 },
   { id: 'dia', nombre: 'Mediodía', icono: '☀️', hora: 14 },
-  { id: 'tarde', nombre: 'Atardecer', icono: '🌇', hora: 20.2 },
+  { id: 'tarde', nombre: 'Atardecer', icono: '🌇', hora: 20.4 },
   { id: 'noche', nombre: 'Noche', icono: '🌙', hora: 1 },
 ];
 
 const CLAVE_MOMENTO = 'juego:momento-dia';
 let momentoActual: MomentoDia =
-  (typeof localStorage !== 'undefined' && localStorage.getItem(CLAVE_MOMENTO) as MomentoDia) || 'auto';
+  (typeof localStorage !== 'undefined' && localStorage.getItem(CLAVE_MOMENTO) as MomentoDia) || 'dorada';
 
 export const momentoDia = () => momentoActual;
 export function setMomentoDia(m: MomentoDia) {
@@ -101,8 +109,13 @@ export function CicloDia({ luzRef, onCambio }: {
     // El color del sol: naranja bajo, blanco alto, azul de luna de noche.
     if (e.esNoche) colorLuz.copy(COLOR_NOCHE);
     else colorLuz.copy(COLOR_TARDE).lerp(COLOR_DIA, Math.min(1, e.luz * 1.6));
+    // La NIEBLA Y EL FONDO se quedan AZULES aunque el sol esté bajo
+    // (2026-08-19, petición de Eugenio: «cielo azul con nubes y un atardecer
+    // en el fondo»). Antes, con el sol bajo, todo el cielo se volvía naranja
+    // y el atardecer se comía el azul; el suelo de la mezcla en 0,55 deja el
+    // aire azulado y guarda el oro para el sol y las nubes del poniente.
     if (e.esNoche) colorCielo.copy(CIELO_NOCHE);
-    else colorCielo.copy(CIELO_TARDE).lerp(CIELO_DIA, Math.min(1, e.luz * 1.5));
+    else colorCielo.copy(CIELO_TARDE).lerp(CIELO_DIA, Math.min(1, 0.55 + e.luz * 1.1));
 
     const luz = luzRef.current;
     if (luz) {
@@ -111,14 +124,22 @@ export function CicloDia({ luzRef, onCambio }: {
       luz.color.copy(colorLuz);
       // Luna generosa: con 0,22 la aldea de noche era una pared negra y no
       // se podía jugar (visto en pruebas a las 3 de la mañana).
-      luz.intensity = e.esNoche ? 0.6 : 0.55 + e.luz * 1.5;
+      //
+      // Y de día, SUELO ALTO (1,15 en vez de 0,55): la fuerza de la luz ya no
+      // se desploma cuando el sol está bajo. Con la fórmula anterior la hora
+      // dorada salía en penumbra, con los árboles casi negros — y una hora
+      // dorada no es un anochecer: el suelo está bien iluminado, solo que de
+      // color miel. Lo cálido lo pone `colorLuz`, no la falta de luz.
+      luz.intensity = e.esNoche ? 0.6 : 1.15 + e.luz * 0.95;
     }
     // Niebla y fondo acompañan: de noche la lejanía se cierra.
     if (scene.fog && (scene.fog as THREE.Fog).color) {
       (scene.fog as THREE.Fog).color.copy(colorCielo);
       (scene.fog as THREE.Fog).far = e.esNoche ? 420 : 780;
     }
-    scene.environmentIntensity = e.esNoche ? 0.3 : 0.25 + e.luz * 0.5;
+    // Lo mismo con la luz REBOTADA del cielo: con 0,25 de suelo, a la hora
+    // dorada las sombras se iban a negro. 0,52 deja sombras azules abiertas.
+    scene.environmentIntensity = e.esNoche ? 0.3 : 0.52 + e.luz * 0.33;
 
     // Se avisa a la escena al hacerse de noche (farolas, bichos) y también
     // cuando el sol ha subido o bajado lo bastante como para moverlo en el

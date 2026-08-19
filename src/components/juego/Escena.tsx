@@ -8,12 +8,14 @@ import type { Obstaculo } from './Personaje';
 import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
 import type { Aspecto } from './aspecto';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Environment, PerformanceMonitor } from '@react-three/drei';
+import { Environment, PerformanceMonitor } from '@react-three/drei';
 import { Efectos } from './Efectos';
 import { Hierba } from './Hierba';
 import { CicloDia, Bichos, RotuloComestible, cieloDeLaHora, type EstadoCielo } from './Vida';
 import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
 import { liberarTexturas } from './texturas';
+import { useOleadas, Oleada } from './Oleadas';
+import { Nubes, Firmamento } from './Nubes';
 import * as THREE from 'three';
 import type {
   Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
@@ -307,6 +309,12 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
     Math.sin(cielo.azimut) * Math.cos(cielo.elevacion) * 140,
   ], [cielo]);
 
+  // CARGA POR OLEADAS (2026-08-19): 0 = suelo y plaza (con esto ya se juega),
+  // 1 = el pueblo y la gente, 2 = sendas, agua y hierba, 3 = el bosque, los
+  // bichos, las nubes y el color de cine. Cada una espera a que la anterior
+  // esté pintada. Ver `Oleadas.tsx`.
+  const oleada = useOleadas(3);
+
   // Fase 11: al salir del juego se sueltan las texturas de la tarjeta gráfica.
   // Son ~40 MB que si no se quedan ocupados hasta que recargas la pestaña, y
   // en un móvil eso es la diferencia entre que la siguiente página vaya bien
@@ -346,7 +354,15 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
           cielo de día, ya no existe la sala oscura. */}
       <Ambiente interior={!!cine} />
-      <Sky sunPosition={solPos} turbidity={cielo.esNoche ? 12 : 6} rayleigh={cielo.esNoche ? 0.6 : 2.2} />
+      {/* Turbidez BAJA (3,4 en vez de 6) y algo más de rayleigh: es lo que
+          mantiene el cenit azul mientras el sol bajo tiñe de oro el poniente.
+          Con turbidez alta el aire va cargado y el naranja sube hasta arriba,
+          que es justo lo que Eugenio no quería. */}
+      {/* EL CIELO, pintado a mano (2026-08-19). Sustituye al `<Sky>` de drei:
+          su modelo atmosférico salía blanco al pasar por la curva de cine, y
+          además venía a 450.000 m, fuera del alcance de la cámara. Ver el
+          porqué largo en `Nubes.tsx`. */}
+      <Firmamento solPos={solPos} luz={cielo.luz} esNoche={cielo.esNoche} />
       <CicloDia luzRef={luzRef} onCambio={setCielo} />
       {/* La luz ambiental REAL: un cielo fotográfico (CC0, autoalojado) que
           baña la escena — es lo que da reflejos y rebotes creíbles a los
@@ -414,16 +430,20 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         <>
           <Aldea
             piezas={piezas}
+            oleada={oleada}
             onPulsar={onPulsarMundo}
             onAgarrar={onAgarrarMundo}
             ocultar={editor.moviendo && editor.sel?.clase === 'semilla' ? editor.sel.id : undefined}
           />
           {/* La hierba de la fase 1: cuántas matas, lo dice la calidad. */}
-          <Hierba cantidad={ajustes.hierba} />
+          <Oleada n={2} actual={oleada}><Hierba cantidad={ajustes.hierba} /></Oleada>
           {/* Fase 8: mariposas de día, luciérnagas de noche, y el nombre de
-              la planta comestible que tengas al lado. */}
-          <Bichos cantidad={ajustes.efectos ? 150 : 50} esNoche={cielo.esNoche} />
-          <RotuloComestible jugadorPos={jugadorPos} />
+              la planta comestible que tengas al lado. Van con el bosque: sin
+              plantas no hay bichos que ronden nada. */}
+          <Oleada n={3} actual={oleada}>
+            <Bichos cantidad={ajustes.efectos ? 150 : 50} esNoche={cielo.esNoche} />
+            <RotuloComestible jugadorPos={jugadorPos} />
+          </Oleada>
           <ObjetosMundo
             items={mundo.items.filter(it => !it.proyecto_id)}
             onPulsar={onPulsarMundo}
@@ -466,6 +486,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
               />
             );
           })()}
+          <Oleada n={1} actual={oleada}>
           <Agentes
             agentes={agentes}
             jugadorPos={jugadorPos}
@@ -480,6 +501,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             }}
           />
           <Robot jugadorPos={jugadorPos} medidas={medidas} />
+          </Oleada>
           {editor.activo && (
             <>
               <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
@@ -516,7 +538,13 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       {/* Dentro de un proyecto no hay robot ni vecinos: el arbitraje de
           cercanía se apaga para que no arrastre la última medida de la aldea. */}
       {!interior && <Coordinador medidas={medidas} onCercania={onCercania} />}
-      <Efectos nivel={nivel} />
+      {/* Las nubes y el color de cine son lo último: el composer tarda en
+          compilar sus shaders y no vale la pena pagarlo antes de que se vea
+          el suelo. */}
+      <Oleada n={3} actual={oleada}>
+        {!interior && !cine && <Nubes esNoche={cielo.esNoche} calidad={nivel === 'alta' ? 'alta' : nivel === 'media' ? 'media' : 'baja'} />}
+        <Efectos nivel={nivel} />
+      </Oleada>
     </Canvas>
   );
 }

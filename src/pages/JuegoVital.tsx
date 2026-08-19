@@ -148,8 +148,12 @@ export default function JuegoVital() {
     setMomentoDia(sig);
     setMomento(sig);
   }, []);
-  const zoom = useRef(0.5);
-  const [zoomVisible, setZoomVisible] = useState(0.5);
+  // Cámara pegada al hombro (2026-08-19, petición de Eugenio: «que el zoom sea
+  // más próximo al personaje, así e incluso más, para que sea inmersivo»).
+  // 0,32 deja al personaje ocupando el tercio bajo de la pantalla; el mínimo
+  // baja hasta 0,14, que es casi primera persona por encima del hombro.
+  const zoom = useRef(0.32);
+  const [zoomVisible, setZoomVisible] = useState(0.32);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
   // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
   // --- Dentro de un proyecto (2026-08-18, petición de Eugenio: «como en
@@ -188,7 +192,7 @@ export default function JuegoVital() {
   const [guardandoAspecto, setGuardandoAspecto] = useState(false);
   const miAspecto: Aspecto = (user?.uiSettings?.juegoAspecto as Aspecto) || {};
   const ajustarZoom = useCallback((factor: number) => {
-    zoom.current = Math.min(6, Math.max(0.3, zoom.current * factor));
+    zoom.current = Math.min(6, Math.max(0.14, zoom.current * factor));
     setZoomVisible(zoom.current);
   }, []);
   const cercaniaRef = useRef<Cercania>(null);
@@ -1554,7 +1558,10 @@ export default function JuegoVital() {
       // al revés que el dedo, que es lo que hace que se sienta natural).
       c.yaw += dx * 0.006;
       // 0,10 rad ≈ casi a ras de suelo; 1,35 ≈ casi cenital.
-      c.pitch = Math.min(1.35, Math.max(0.1, c.pitch + dy * 0.004));
+      // El tope de arriba sube de 1,35 a 1,45 y el de abajo baja de 0,10 a
+      // -0,45: con el tope viejo no se podía levantar la vista al cielo, y
+      // ahora que hay nubes y atardecer eso es la mitad del sitio.
+      c.pitch = Math.min(1.45, Math.max(-0.45, c.pitch + dy * 0.004));
     };
     const acabar = (e: PointerEvent) => {
       dedos = Math.max(0, dedos - 1);
