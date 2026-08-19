@@ -493,6 +493,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
             agentes={agentes}
             jugadorPos={jugadorPos}
             medidas={medidas}
+            obstaculos={obstaculos}
             onHablar={onHablarAgente}
             onAgarrarProyecto={(a, e) => {
               if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;

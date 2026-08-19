@@ -1029,3 +1029,15 @@ Eugenio pidió quitar efectos innecesarios para ganar velocidad, avisando de que
 - **Migración `0038_cartel_texto.sql`**: columna `texto` en `game_world_overrides`. Al pulsar un cartel aparece un campo para llamarlo como quieras; **vaciarlo lo devuelve a su nombre de fábrica**.
 - Cazado en pruebas: **mover un cartel le borraba el nombre.** El texto tiene tres casos y no dos —no viene el campo / viene vacío / viene con texto— y con un solo parámetro SQL «no viene» y «viene vacío» eran lo mismo. Ahora lo decide un `CASE`, y renombrar + mover + vaciar se comportan como deben (comprobado los tres).
 - Verificado en el navegador: zoom de 270 m a 138 m de lado, las 28 piezas con su papelera en modo colocar, y un arrastre real guardando la posición nueva. Los datos de prueba, borrados: los 34 retoques de Eugenio siguen intactos.
+
+### 2026-08-19 — Tus amigos tienen rutina: pasean por la plaza y se sientan en los bancos
+Petición de Eugenio: «haz que las personas del juego que son los amigos se muevan como dando un paseo alrededor de la plaza o que se sienten en bancos». Hasta hoy Anita y Javier estaban CLAVADOS donde los plantaste, girando la cabeza.
+
+- **`vidaSocial.ts`** (nuevo): la rutina de cada persona, separada del dibujo para poder leerla y cambiarla sin tocar el 3D. Un ciclo de ~2-3 minutos con cuatro tramos: paseo largo → sentarse → paseo corto → pararse a mirar.
+- **La rutina es DETERMINISTA a partir del id** de cada persona: la misma persona hace siempre su mismo recorrido, a su ritmo, con su banco y su carril. No es aleatoria en cada visita — una aldea donde tus amigos aparecen cada vez en otro sitio no se siente como un sitio, se siente como un salvapantallas.
+- **El paseo**: cada uno da la vuelta a la plaza por su propio carril (entre 12 y 19 m del centro), en su sentido y a su paso (0,85-1,25 m/s, que es andar de verdad). Van HACIA su punto, no saltan a él: si venían de sentarse o los has apartado, se reincorporan andando.
+- **Sentarse**: cada persona tiene su banco asignado y se sienta a un lado del asiento (a 0,45 m, la altura real de la tabla en `Detalles.tsx`), mirando hacia donde mira el banco. Dos personas no comparten banco.
+- **Se paran cuando te acercas** (5,5 m): giran a mirarte de frente y cambian a la animación de hablar. Si estaban sentadas, te hablan desde el banco sin levantarse. Perseguir a alguien que no deja de andar para poder hablarle es lo más molesto que hay.
+- **Una persona convertida en PORTAL no se mueve**: su sitio lo manda el editor, y un portal que se va de paseo sería imposible de encontrar.
+- **El bulto con el que chocas viaja con ellos** (`POS_VIVAS`): si no, te estrellabas contra el aire donde estaba tu amigo hace un rato, y el «Hablar con…» saltaba en el sitio equivocado.
+- Verificado en el navegador: Javier caminó hasta su banco y se sentó (altura 0,45); Anita se levantó y estaba a 23 m paseando por su carril; con el jugador al lado, las dos quietas y de frente.
