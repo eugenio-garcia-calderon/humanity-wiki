@@ -11,6 +11,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Environment, PerformanceMonitor } from '@react-three/drei';
 import { Efectos } from './Efectos';
 import { Hierba } from './Hierba';
+import { CicloDia, Bichos, RotuloComestible, cieloDeLaHora, type EstadoCielo } from './Vida';
 import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
 import * as THREE from 'three';
 import type {
@@ -297,6 +298,13 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   // subir y bajar en bucle se nota más que quedarse en el escalón estable.
   const [nivel, setNivel] = useState<NivelCalidad>(() => detectarCalidad());
   const ajustes = AJUSTES[nivel];
+  // Fase 8: la hora REAL del jugador manda en el cielo de la aldea.
+  const [cielo, setCielo] = useState<EstadoCielo>(() => cieloDeLaHora());
+  const solPos = useMemo<[number, number, number]>(() => [
+    Math.cos(cielo.azimut) * Math.cos(cielo.elevacion) * 140,
+    Math.sin(cielo.elevacion) * 140,
+    Math.sin(cielo.azimut) * Math.cos(cielo.elevacion) * 140,
+  ], [cielo]);
 
   return (
     <Canvas
@@ -331,7 +339,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
           cielo de día, ya no existe la sala oscura. */}
       <Ambiente interior={!!cine} />
-      <Sky sunPosition={[120, 45, -70]} turbidity={6} rayleigh={2.2} />
+      <Sky sunPosition={solPos} turbidity={cielo.esNoche ? 12 : 6} rayleigh={cielo.esNoche ? 0.6 : 2.2} />
+      <CicloDia luzRef={luzRef} onCambio={setCielo} />
       {/* La luz ambiental REAL: un cielo fotográfico (CC0, autoalojado) que
           baña la escena — es lo que da reflejos y rebotes creíbles a los
           materiales. Las luces planas de antes bajan para dejarle sitio. */}
@@ -404,6 +413,10 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
           />
           {/* La hierba de la fase 1: cuántas matas, lo dice la calidad. */}
           <Hierba cantidad={ajustes.hierba} />
+          {/* Fase 8: mariposas de día, luciérnagas de noche, y el nombre de
+              la planta comestible que tengas al lado. */}
+          <Bichos cantidad={ajustes.efectos ? 150 : 50} esNoche={cielo.esNoche} />
+          <RotuloComestible jugadorPos={jugadorPos} />
           <ObjetosMundo
             items={mundo.items.filter(it => !it.proyecto_id)}
             onPulsar={onPulsarMundo}

@@ -13,6 +13,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PALETA, crearAzar } from './paleta';
 import { mapasPBR } from './texturas';
+import { cieloDeLaHora } from './Vida';
 
 // ---------------------------------------------------------------------------
 export function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
@@ -37,6 +38,9 @@ export function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
 }
 
 export function Farola({ x, z }: { x: number; z: number }) {
+  // Fase 8: de noche la farola ALUMBRA de verdad; de día es un adorno
+  // apagado. Se decide al montar con la hora real del jugador.
+  const noche = useMemo(() => cieloDeLaHora().esNoche, []);
   return (
     <group position={[x, 0, z]}>
       <mesh castShadow position={[0, 0.12, 0]}>
@@ -49,13 +53,13 @@ export function Farola({ x, z }: { x: number; z: number }) {
       </mesh>
       <mesh castShadow position={[0, 3.62, 0]}>
         <sphereGeometry args={[0.26, 12, 10]} />
-        <meshStandardMaterial color={PALETA.farolLuz} emissive={PALETA.farolLuz} emissiveIntensity={0.9} />
+        <meshStandardMaterial color={PALETA.farolLuz} emissive={PALETA.farolLuz} emissiveIntensity={noche ? 2.6 : 0.9} />
       </mesh>
       <mesh position={[0, 3.86, 0]}>
         <coneGeometry args={[0.34, 0.28, 8]} />
         <meshStandardMaterial color={PALETA.hierro} />
       </mesh>
-      <pointLight color={PALETA.farolLuz} intensity={0.8} distance={9} position={[0, 3.5, 0]} />
+      <pointLight color={PALETA.farolLuz} intensity={noche ? 9 : 0.8} distance={noche ? 18 : 9} position={[0, 3.5, 0]} />
     </group>
   );
 }
