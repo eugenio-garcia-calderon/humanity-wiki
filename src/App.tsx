@@ -5,6 +5,9 @@ import Layout from './components/layout/Layout';
 // Juego Vital: la escena 3D pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
 const JuegoVital = lazy(() => import('./pages/JuegoVital'));
+// El escritorio va perezoso como el juego: arrastra el gestor de ventanas y el
+// navegador, y quien no lo abre no debe pagarlos en la carga inicial.
+const Escritorio = lazy(() => import('./pages/Escritorio'));
 import TerritoryProfile from './pages/TerritoryProfile';
 import ChallengeProfile from './pages/ChallengeProfile';
 import SolutionProfile from './pages/SolutionProfile';
@@ -78,6 +81,14 @@ export default function App() {
                   element={
                     <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Juego Vital…</div>}>
                       <JuegoVital />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="escritorio"
+                  element={
+                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Abriendo el escritorio…</div>}>
+                      <Escritorio />
                     </Suspense>
                   }
                 />
