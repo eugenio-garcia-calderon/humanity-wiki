@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import * as THREE from 'three';
-import { cargarPaleta, clasificarMalla, pintarTextura, type Aspecto } from './aspecto';
+import type { Aspecto } from './aspecto';
 
 // IMPORTANTE: los .glb de Kenney NO llevan la textura dentro — apuntan a
 // `Textures/colormap.png` en su misma carpeta. Por eso cada pack vive en su
@@ -50,21 +50,56 @@ export function cuerpoDe(nombre: string): string {
   return CUERPOS[h % CUERPOS.length];
 }
 
+// ---------------------------------------------------------------------------
+// PERSONAS REALISTAS (2026-08-19, fase 4 del realismo, decisión de Eugenio:
+// «proporciones humanas reales»). Los cuerpos son los Universal Base
+// Characters de Quaternius (CC0, 1,81 m de estatura real) y las animaciones
+// vienen de su Universal Animation Library (CC0, 43 pistas): ambos comparten
+// esqueleto (huesos estilo Unreal), así que las pistas de la librería mueven
+// directamente a los personajes.
+// ---------------------------------------------------------------------------
+const HUMANOS = '/modelos-juego/humanos';
+
+/** Del nombre de animación del juego a la pista real de la librería. */
+const PISTAS: Record<string, string> = {
+  idle: 'Idle_Loop',
+  walk: 'Walk_Loop',
+  sprint: 'Sprint_Loop',
+  sit: 'Sitting_Idle_Loop',
+  talk: 'Idle_Talking_Loop',
+  dance: 'Dance_Loop',
+};
+
+/** Texturas de piel disponibles por cuerpo (el .gltf trae la oscura puesta). */
+const PIEL: Record<string, { clara: string; oscura: string }> = {
+  Superhero_Male_FullBody: { clara: 'T_Superhero_Male_Light.png', oscura: 'T_Superhero_Male_Dark.png' },
+  Superhero_Female_FullBody: { clara: 'T_Superhero_Female_Light.png', oscura: 'T_Superhero_Female_Dark_BaseColor.png' },
+};
+
+/** Caché de texturas de piel: la misma imagen se sube a la GPU una vez. */
+const cachePiel = new Map<string, THREE.Texture>();
+function texturaPiel(archivo: string, referencia?: THREE.Texture | null): THREE.Texture {
+  const ya = cachePiel.get(archivo);
+  if (ya) return ya;
+  const t = new THREE.TextureLoader().load(`${HUMANOS}/${archivo}`);
+  t.flipY = referencia ? referencia.flipY : false;
+  t.colorSpace = THREE.SRGBColorSpace;
+  if (referencia) { t.wrapS = referencia.wrapS; t.wrapT = referencia.wrapT; }
+  cachePiel.set(archivo, t);
+  return t;
+}
+
 /**
- * Una persona animada. `animacion` es el nombre de la pista del propio modelo
- * (idle, walk, sprint, sit…). Cada instancia clona el esqueleto: sin esto,
- * varias personas compartirían huesos y se moverían todas a la vez.
+ * Una persona animada con proporciones humanas REALES. `animacion` es el
+ * nombre del juego (idle, walk, sprint…), traducido a la pista de la
+ * librería. Cada instancia clona el esqueleto: sin esto, varias personas
+ * compartirían huesos y se moverían todas a la vez.
+ *
+ * La `key` de aquí abajo NO es decorativa. Cambiar de cuerpo carga OTRO
+ * modelo con otro esqueleto, y el mezclador de animación se quedaba
+ * apuntando a los huesos del anterior (fallo reportado por Eugenio en la
+ * era Kenney). Con la key, cambiar de cuerpo monta una persona nueva.
  */
-// El modelo mide 0,67 unidades: a escala 2,6 queda en ~1,75 m, la estatura
-// real de un adulto en un mundo donde 1 unidad = 1 metro (medido, no estimado).
-//
-// La `key` de aquí abajo NO es decorativa. Cambiar de fenotipo carga OTRO
-// .glb, con otro esqueleto y otras pistas, y el mezclador de animación se
-// quedaba apuntando a los huesos del modelo anterior: el muñeco se quedaba
-// clavado en su pose de reposo, sin andar ni respirar (fallo reportado por
-// Eugenio, «he cambiado el estilo de mi avatar y ya no tiene dinamismo al
-// moverse»; recargar la página lo arreglaba, que es la firma de este fallo).
-// Con la key, cambiar de cuerpo monta una persona nueva y limpia.
 export function Persona3D(props: Parameters<typeof PersonaModelo>[0]) {
   return <PersonaModelo key={props.cuerpo} {...props} />;
 }
@@ -72,11 +107,19 @@ export function Persona3D(props: Parameters<typeof PersonaModelo>[0]) {
 function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
   cuerpo: string;
   animacion?: string;
+  /** Se conserva la semántica antigua (2,6 = estatura normal): los que
+   *  llaman no cambian. El humano ya mide 1,81 a escala 1. */
   escala?: number;
-  /** Piel, pelo, ojos y ropa elegidos. Sin esto, el modelo va como viene. */
+  /** Piel, pelo y ropa elegidos. Sin esto, el modelo va como viene. */
   aspecto?: Aspecto;
 }) {
-  const { scene, animations } = useGLTF(`${PERSONAS}/${cuerpo}.glb`);
+  // Los 10 fenotipos antiguos se reparten entre los dos cuerpos reales: los
+  // nombres con «female» van al femenino. El hash de cuerpoDe no cambia.
+  const humano = cuerpo.includes('female') ? 'Superhero_Female_FullBody' : 'Superhero_Male_FullBody';
+  const { scene } = useGLTF(`${HUMANOS}/${humano}.gltf`);
+  // Las ANIMACIONES viven en su propio .glb (el maniquí de la librería) y se
+  // aplican al clon por nombre de hueso: mismo esqueleto, mismas pistas.
+  const { animations } = useGLTF(`${HUMANOS}/UAL1_Standard.glb`);
   const grupo = useRef<THREE.Group>(null);
   const clon = useMemo(() => {
     const c = SkeletonUtils.clone(scene);
@@ -84,71 +127,50 @@ function PersonaModelo({ cuerpo, animacion = 'idle', escala = 2.6, aspecto }: {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
       m.castShadow = true; m.receiveShadow = true;
-      // El material tal y como viene del .glb. Se guarda porque al cambiar de
-      // color hay que repintar SIEMPRE desde el original, no desde el tinte
-      // anterior (si no, cada cambio se acumularía sobre el de antes).
+      // El material tal y como viene del .gltf: al personalizar se clona
+      // SIEMPRE desde el original (los clones comparten materiales).
       m.userData.matBase = m.material;
     });
     return c;
   }, [scene]);
   const { actions } = useAnimations(animations, grupo);
 
-  // --- Aspecto: se repinta la paleta con los colores elegidos, una textura
-  // por malla. El material se clona primero, porque los 10 cuerpos comparten
-  // el mismo por defecto y teñir uno los teñiría todos.
-  // Solo se repinta si hay algún color elegido: `cuerpo` por sí solo no cambia
-  // la textura, y montar dos lienzos de 512×512 por vecino no sale gratis.
-  const clave = aspecto && (aspecto.piel || aspecto.pelo || aspecto.ropa || aspecto.pantalon)
-    ? JSON.stringify(aspecto)
-    : '';
+  // --- Personalización: tono de piel (clara/oscura según el color elegido)
+  // y tinte del pelo. La ropa es el traje del modelo (deuda anotada: teñirlo
+  // pediría una máscara de zonas en la textura).
+  const clave = aspecto && (aspecto.piel || aspecto.pelo) ? `${aspecto.piel}|${aspecto.pelo}` : '';
   useEffect(() => {
     if (!clave) return;
-    let vivo = true;
-    const creadas: THREE.Texture[] = [];
-    cargarPaleta(`${PERSONAS}/Textures/colormap.png`).then((base) => {
-      if (!vivo) return;
-      clon.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (!m.isMesh) return;
-        const original = m.userData.matBase as THREE.MeshStandardMaterial;
-        const lienzo = pintarTextura(base, clasificarMalla(m, base), aspecto!);
-        const t = new THREE.CanvasTexture(lienzo);
-        const fuente = original?.map;
-        if (fuente) {
-          // CLAVE: la paleta de Kenney son cuadraditos de UN píxel. Con el
-          // filtrado suave y los mipmaps que trae `CanvasTexture` por defecto,
-          // cada cuadradito se mezcla con sus vecinos y el personaje sale a
-          // rayas de colores. Se copia el muestreo del .glb, que es el bueno.
-          t.flipY = fuente.flipY;
-          t.wrapS = fuente.wrapS; t.wrapT = fuente.wrapT;
-          t.magFilter = fuente.magFilter; t.minFilter = fuente.minFilter;
-          t.generateMipmaps = fuente.generateMipmaps;
-          t.anisotropy = fuente.anisotropy;
-          t.colorSpace = fuente.colorSpace;
-        } else {
-          t.flipY = false;
-          t.colorSpace = THREE.SRGBColorSpace;
-        }
-        t.needsUpdate = true;
+    const piel = aspecto?.piel ? new THREE.Color(aspecto.piel) : null;
+    const clara = piel ? (0.299 * piel.r + 0.587 * piel.g + 0.114 * piel.b) > 0.42 : true;
+    clon.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const original = m.userData.matBase as THREE.MeshStandardMaterial;
+      if (!original) return;
+      const nombre = original.name || '';
+      if (nombre.startsWith('MI_Hair') && aspecto?.pelo) {
         const mat = original.clone();
-        mat.map = t;
+        mat.color = new THREE.Color(aspecto.pelo);
+        m.material = mat;
+      } else if (nombre.startsWith('MI_Superhero') && aspecto?.piel) {
+        const mat = original.clone();
+        mat.map = texturaPiel(PIEL[humano][clara ? 'clara' : 'oscura'], original.map);
         mat.needsUpdate = true;
         m.material = mat;
-        creadas.push(t);
-      });
-    }).catch(() => { /* sin paleta, el modelo se ve como viene */ });
-    return () => { vivo = false; creadas.forEach(t => t.dispose()); };
-  }, [clave, clon, aspecto]);
+      }
+    });
+  }, [clave, clon, aspecto, humano]);
 
   useEffect(() => {
-    const a = actions[animacion];
+    const a = actions[PISTAS[animacion] || animacion] || actions['Idle_Loop'];
     if (!a) return;
     a.reset().fadeIn(0.25).play();
     return () => { a.fadeOut(0.25); };
   }, [actions, animacion]);
 
   return (
-    <group ref={grupo} scale={escala}>
+    <group ref={grupo} scale={escala / 2.6}>
       <primitive object={clon} />
     </group>
   );
@@ -173,8 +195,10 @@ export function Modelo({ nombre, escala = 1, rotY = 0 }: {
 
 /** Se llama al montar la escena: descarga los modelos en segundo plano. */
 export function precargarModelos() {
-  for (const c of CUERPOS) useGLTF.preload(`${PERSONAS}/${c}.glb`);
-  for (const c of CASAS) useGLTF.preload(`${PUEBLO}/${c}.glb`);
+  // Fase 4 del realismo: los cuerpos humanos y su librería de animaciones.
+  useGLTF.preload(`${HUMANOS}/Superhero_Male_FullBody.gltf`);
+  useGLTF.preload(`${HUMANOS}/Superhero_Female_FullBody.gltf`);
+  useGLTF.preload(`${HUMANOS}/UAL1_Standard.glb`);
   for (const m of ['fence', 'fence-low', 'planter', 'tree-large', 'tree-small', 'path-stones-long']) {
     useGLTF.preload(`${PUEBLO}/${m}.glb`);
   }

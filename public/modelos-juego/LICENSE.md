@@ -42,3 +42,11 @@ que anotarlos en esta tabla.
   `texturas/revoco` — "Plaster 001", `texturas/ladrillo` — "Bricks 075 A",
   `texturas/chapa` — "Metal 032" — todas de https://ambientcg.com,
   License: CC0 1.0 (public domain). Recomprimidas a JPEG q70-85.
+
+## Personas realistas (fase 4 del realismo)
+
+- `humanos/Superhero_*_FullBody.*` + texturas — "Universal Base Characters"
+  by Quaternius, https://quaternius.com — License: CC0 1.0 (public domain).
+  Texturas redimensionadas a 1024px.
+- `humanos/UAL1_Standard.glb` — "Universal Animation Library" by Quaternius,
+  https://quaternius.com — License: CC0 1.0 (public domain).
