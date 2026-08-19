@@ -27,6 +27,7 @@ import { HudDinero, PanelFinanzas, useFinanzas } from '../components/juego/Finan
 import { MOMENTOS, momentoDia, setMomentoDia, type MomentoDia } from '../components/juego/Vida';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import { precioLegible } from '../components/juego/Producto3D';
+import FichaProducto from '../components/juego/FichaProducto';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
 import type { DatosInterior } from '../components/juego/Interior';
@@ -1369,6 +1370,8 @@ export default function JuegoVital() {
   // y dentro se edita TODO en un lienzo 2D.
   // ------------------------------------------------------------------
   const [fichaTarea, setFichaTarea] = useState<ItemProyecto | null>(null);
+  /** La PÁGINA de un producto (2026-08-19): se abre pulsando su vitrina. */
+  const [fichaProducto, setFichaProducto] = useState<NonNullable<ItemMundo['producto']> | null>(null);
 
   /** Guarda un cambio de la tarjeta y lo refleja en la plaza al momento. */
   const guardarTarea = useCallback(async (id: string, patch: Record<string, unknown>) => {
@@ -2189,8 +2192,13 @@ export default function JuegoVital() {
                   que necesita su propio botón para abrirse. */}
               {selMundo.tipo === 'producto' && (
                 <Button variant="ghost" className="text-[11px] px-2.5 py-1.5 border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                  onClick={() => { const it = mundoItems.find(x => x.id === selMundo.id); if (it) { setLeyendo(it); setSelMundo(null); } }}>
-                  <ShoppingBag className="w-3.5 h-3.5 mr-1 inline" />Ver ficha
+                  onClick={() => {
+                    const it = mundoItems.find(x => x.id === selMundo.id);
+                    // Directo a la PÁGINA: es lo que se quiere ver de un
+                    // producto, no un resumen con un botón para verlo.
+                    if (it?.producto) { setFichaProducto(it.producto); setSelMundo(null); }
+                  }}>
+                  <ShoppingBag className="w-3.5 h-3.5 mr-1 inline" />Ver la página
                 </Button>
               )}
               {selMundo.url && selMundo.tipo !== 'imagen' && (
@@ -2655,8 +2663,18 @@ export default function JuegoVital() {
                         {precioLegible(leyendo.producto.price_cents, leyendo.producto.currency || 'EUR')}
                       </p>
                     </div>
-                    <Button onClick={() => navigate(`/mercado?producto=${leyendo.producto!.id}`)} className="w-full">
-                      Ver la ficha completa en el Mercado
+                    <Button
+                      onClick={() => { setFichaProducto(leyendo.producto!); setLeyendo(null); }}
+                      className="w-full"
+                    >
+                      Abrir la página del producto
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate(`/mercado?producto=${leyendo.producto!.id}`)}
+                      className="w-full border border-slate-200"
+                    >
+                      Verlo en el Mercado
                     </Button>
                   </div>
                 ) : (
@@ -2923,6 +2941,31 @@ export default function JuegoVital() {
       {/* LA FICHA CENTRAL DE UNA TAREA: lienzo 2D con todo (petición de
           Eugenio: hover que expande, clic o choque que abre, y dentro nombre,
           proyecto, estado y bloques libres). */}
+      {/* LA PÁGINA DEL PRODUCTO (2026-08-19): la misma pizarra 2D que una
+          tarea, pero con botones de compra y productos relacionados. */}
+      {fichaProducto && (
+        <FichaProducto
+          producto={fichaProducto}
+          puedeEditar={!!user && (fichaProducto.creador === user.id || (user.roleLevel ?? 0) >= 4)}
+          onCerrar={() => setFichaProducto(null)}
+          onGuardar={async (bloques) => {
+            const r = await fetch(`/api/products/${fichaProducto.id}/pizarra`, {
+              method: 'PUT', credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bloques }),
+            }).catch(() => null);
+            if (!r?.ok) return false;
+            // La copia que viaja con el objeto del mundo también se actualiza:
+            // si no, cerrar y volver a abrir enseñaría la página vieja.
+            setFichaProducto(f => (f ? { ...f, bloques } : f));
+            setMundoItems(prev => prev.map(it => (it.producto?.id === fichaProducto.id
+              ? { ...it, producto: { ...it.producto!, bloques } }
+              : it)));
+            return true;
+          }}
+        />
+      )}
+
       {fichaTarea && interior && (
         <FichaTarea
           tarea={fichaTarea}

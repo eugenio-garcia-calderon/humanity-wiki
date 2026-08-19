@@ -220,7 +220,13 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     if (moviendo) {
       const deseo = Math.atan2(vel.current.x, vel.current.z);
       const dif = Math.atan2(Math.sin(deseo - rumbo.current), Math.cos(deseo - rumbo.current));
-      rumbo.current += dif * (1 - Math.exp(-(vuela ? 6 : 12) * dt));
+      // GIRO MÁS LENTO Y MÁS PRECISO (2026-08-19, petición de Eugenio: «que
+      // vaya más despacio la cámara y el personaje, para que sea más preciso
+      // el giro»). Antes el muñeco se plantaba en el rumbo nuevo en unas 8
+      // centésimas: con A/D era imposible apuntar a algo concreto, se pasaba
+      // siempre. Ahora tarda casi el doble, y ese doble es lo que te deja
+      // parar donde quieres.
+      rumbo.current += dif * (1 - Math.exp(-(vuela ? 3.5 : 7) * dt));
       g.rotation.y = rumbo.current;
       // La cámara SIGUE el giro del muñeco (petición de Eugenio): al girar con
       // A/D la vista se va poniendo sola a su espalda, como en un juego de
@@ -230,7 +236,10 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       if (!camara.current.arrastrando && sz <= 0.3) {
         const yawDeseo = rumbo.current - Math.PI;
         const dy = Math.atan2(Math.sin(yawDeseo - camara.current.yaw), Math.cos(yawDeseo - camara.current.yaw));
-        camara.current.yaw += dy * (1 - Math.exp(-(vuela ? 2.4 : 3.2) * dt));
+        // La cámara persigue el rumbo aún más despacio que el muñeco: si
+        // fuera igual de rápida, girar sería el mundo entero barriendo de
+        // golpe. Yendo por detrás, el giro se lee y se puede parar a tiempo.
+        camara.current.yaw += dy * (1 - Math.exp(-(vuela ? 1.4 : 1.9) * dt));
       }
     }
     // El modelo tiene su propia animación de andar: ya no hace falta el
