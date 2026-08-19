@@ -4,7 +4,7 @@ import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes,
-  Search, X, Wand2, PenLine, Smile,
+  Search, X, Wand2, PenLine, Smile, Paperclip,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import WindowContent from '../components/knowledge/WindowContent';
@@ -12,6 +12,7 @@ import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
 } from '../utils/bloques';
+import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import { cn } from '../utils/cn';
 
 // ============================================================================
@@ -127,6 +128,9 @@ export default function Documento() {
   const [menuDescargar, setMenuDescargar] = useState(false);
   // Editor de imágenes sobre un bloque imagen: id del bloque en edición.
   const [imagenEditando, setImagenEditando] = useState<string | null>(null);
+  /** Aviso mientras sube lo pegado (2026-08-19). Un vídeo de 40 MB tarda, y
+   *  sin aviso parece que el documento se ha quedado colgado. */
+  const [subiendo, setSubiendo] = useState<string | null>(null);
   // Contenido real de las ventanas embebidas, cargado en vivo una sola vez.
   const [ventanasEmbebidas, setVentanasEmbebidas] = useState<Record<string, any>>({});
 
@@ -295,7 +299,7 @@ export default function Documento() {
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla') textosRef.current[nuevo.id] = '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'medio') textosRef.current[nuevo.id] = '';
     setBloques(bs => {
       const i = tras ? bs.findIndex(b => b.id === tras) : -1;
       const copia = [...bs];
@@ -556,29 +560,124 @@ export default function Documento() {
     }
   };
 
-  /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
-   *  markdown de siempre — pegar una lista pega una lista de verdad. */
-  const alPegar = (b: Bloque, e: React.ClipboardEvent<HTMLDivElement>) => {
-    const texto = e.clipboardData.getData('text/plain');
-    if (!texto.includes('\n') || b.tipo === 'codigo') return; // pegado normal
-    e.preventDefault();
-    const nuevos = markdownABloques(texto);
-    if (!nuevos.length) return;
+  /**
+   * Los bloques que salen de lo pegado, cuando NO es texto suelto: una imagen,
+   * un vídeo, un PDF… Devuelve `null` si el portapapeles no traía nada de eso,
+   * para que el pegado siga su camino normal de texto.
+   *
+   * Quién decide qué es cada cosa vive en `utils/pegado.ts`, el mismo módulo
+   * que usa el lienzo: pegar el mismo PDF da lo mismo en los dos sitios.
+   */
+  const bloquesDelPortapapeles = useCallback(async (dt: DataTransfer): Promise<Bloque[] | null> => {
+    const piezas = await leerPegado(dt, (hecho, total, nombre) => {
+      setSubiendo(total > 1 ? `Subiendo ${hecho + 1} de ${total}…` : `Subiendo ${nombre.slice(0, 28)}…`);
+    });
+    const out: Bloque[] = [];
+    for (const p of piezas) {
+      const id = nuevoIdBloque();
+      switch (p.clase) {
+        case 'imagen': out.push({ id, tipo: 'imagen', url: p.url, pie: undefined }); break;
+        case 'video': out.push({ id, tipo: 'medio', medio: 'video', url: p.url, pie: p.nombre }); break;
+        case 'youtube': out.push({ id, tipo: 'medio', medio: 'youtube', medioId: p.id }); break;
+        case 'vimeo': out.push({ id, tipo: 'medio', medio: 'vimeo', medioId: p.id }); break;
+        case 'audio': out.push({ id, tipo: 'medio', medio: 'audio', url: p.url, pie: p.nombre }); break;
+        case 'pdf': out.push({ id, tipo: 'medio', medio: 'pdf', url: p.url, pie: p.nombre, medioBytes: p.bytes }); break;
+        case 'archivo': out.push({ id, tipo: 'medio', medio: 'archivo', url: p.url, pie: `${p.nombre} · ${tamanoLegible(p.bytes)}`, medioBytes: p.bytes }); break;
+        // Un enlace o un texto sueltos son texto: que los trate el camino
+        // normal, que ya sabe partir markdown en varios bloques.
+        default: return null;
+      }
+    }
+    return out.length ? out : null;
+  }, []);
+
+  /** Mete unos bloques recién creados detrás (o encima) del bloque actual.
+   *  Con `b = null` van al final del documento: es lo que hace falta cuando se
+   *  pega sin haber pinchado en ninguna línea. */
+  const insertarBloques = useCallback((b: Bloque | null, nuevos: Bloque[], vacio: boolean) => {
     for (const n of nuevos) if (n.texto !== undefined) textosRef.current[n.id] = n.texto;
-    const actual = (e.currentTarget.textContent || '').trim();
     setBloques(bs => {
+      if (!b) return [...bs, ...nuevos];
       const i = bs.findIndex(x => x.id === b.id);
       const copia = [...bs];
       // Sobre un bloque vacío lo sustituyen; con texto, van detrás.
-      copia.splice(actual ? i + 1 : i, actual ? 0 : 1, ...nuevos);
+      copia.splice(vacio ? i : i + 1, vacio ? 1 : 0, ...nuevos);
       return copia;
     });
-    if (!actual) delete textosRef.current[b.id];
+    if (b && vacio) delete textosRef.current[b.id];
     const ultimo = nuevos[nuevos.length - 1];
     setBloqueActivo(ultimo.id);
     setFocoId(ultimo.id);
     programarGuardado();
+  }, [programarGuardado]);
+
+  /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
+   *  markdown de siempre — pegar una lista pega una lista de verdad. Y desde
+   *  2026-08-19, pegar una imagen, un vídeo o un PDF crea su bloque. */
+  const alPegar = (b: Bloque, e: React.ClipboardEvent<HTMLDivElement>) => {
+    const texto = e.clipboardData.getData('text/plain');
+
+    // ¿Trae algo que NO sea texto suelto? Un archivo, una imagen copiada de
+    // una web, o un enlace que es inequívocamente un medio (YouTube, Vimeo, un
+    // .mp4, un .pdf): eso se incrusta. Un enlace normal sigue siendo un enlace.
+    const dt = e.clipboardData;
+    const url = texto.trim();
+    const enlaceDeMedio = /^https?:\/\/\S+$/i.test(url) &&
+      (!!idYoutube(url) || !!idVimeo(url) || /\.(png|jpe?g|webp|gif|avif|mp4|webm|mov|m4v|ogv|mp3|m4a|ogg|wav|aac|flac|pdf)(\?|#|$)/i.test(url));
+
+    if (dt.files?.length || dt.getData('text/html') || enlaceDeMedio) {
+      const vacio = !(e.currentTarget.textContent || '').trim();
+      // Se lanza AHORA: `clipboardData` se vacía en cuanto termina el evento,
+      // así que no se puede esperar al `await` para mirarlo.
+      bloquesDelPortapapeles(dt).then(nuevos => {
+        setSubiendo(null);
+        if (nuevos?.length) insertarBloques(b, nuevos, vacio);
+      }).catch((err: any) => {
+        setSubiendo(err.message || 'No se pudo pegar.');
+        setTimeout(() => setSubiendo(null), 5000);
+      });
+      // Se corta el pegado normal cuando SEGURO que hay algo que incrustar.
+      // Con HTML suelto (texto con formato copiado de una web) el navegador
+      // debe seguir pegando el texto: puede que no hubiera ninguna imagen.
+      if (dt.files?.length || enlaceDeMedio) { e.preventDefault(); return; }
+    }
+
+    if (!texto.includes('\n') || b.tipo === 'codigo') return; // pegado normal
+    e.preventDefault();
+    const nuevos = markdownABloques(texto);
+    if (!nuevos.length) return;
+    insertarBloques(b, nuevos, !(e.currentTarget.textContent || '').trim());
   };
+
+  /**
+   * ⌘V SIN HABER PINCHADO EN NINGUNA LÍNEA (2026-08-19). Solo el bloque activo
+   * es editable —así no se re-renderiza el documento entero en cada tecla—, y
+   * eso significa que sin un clic previo el pegado no llegaba a ningún sitio.
+   * Aquí se recoge lo que nadie ha atendido y se añade al final.
+   */
+  useEffect(() => {
+    if (!puedoEditar || generando) return;
+    const alPegarEnLaPagina = (e: ClipboardEvent) => {
+      if (enCampoDeTexto(e.target)) return;   // ya lo atiende el bloque, o es un formulario
+      if (!e.clipboardData) return;
+      const dt = e.clipboardData;
+      if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return;
+      e.preventDefault();
+      bloquesDelPortapapeles(dt).then(nuevos => {
+        setSubiendo(null);
+        if (nuevos?.length) { insertarBloques(null, nuevos, false); return; }
+        // Texto suelto: el mismo parser markdown de siempre, al final.
+        const texto = (dt.getData('text/plain') || '').trim();
+        const sueltos = texto ? markdownABloques(texto) : [];
+        if (sueltos.length) insertarBloques(null, sueltos, false);
+      }).catch((err: any) => {
+        setSubiendo(err.message || 'No se pudo pegar.');
+        setTimeout(() => setSubiendo(null), 5000);
+      });
+    };
+    window.addEventListener('paste', alPegarEnLaPagina);
+    return () => window.removeEventListener('paste', alPegarEnLaPagina);
+  }, [puedoEditar, generando, bloquesDelPortapapeles, insertarBloques]);
 
   // -- Selección múltiple -----------------------------------------------------
   const clicSeleccion = (b: Bloque, e: React.MouseEvent) => {
@@ -735,6 +834,66 @@ export default function Documento() {
         ) : null;
       }
 
+      // Vídeo, audio, PDF y archivos sueltos pegados con ⌘V (2026-08-19).
+      // Cada uno se abre DENTRO del documento; el archivo genérico es el único
+      // que se queda en enlace, porque no hay nada que reproducir.
+      if (b.tipo === 'medio') {
+        const pie = b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>;
+        if (b.medio === 'video') {
+          return (
+            <figure>
+              <video src={b.url} controls playsInline preload="metadata"
+                     className="w-full rounded-xl bg-black max-h-[70vh]" />
+              {pie}
+            </figure>
+          );
+        }
+        if (b.medio === 'youtube' || b.medio === 'vimeo') {
+          const src = b.medio === 'youtube'
+            ? `https://www.youtube.com/embed/${b.medioId}`
+            : `https://player.vimeo.com/video/${b.medioId}`;
+          return (
+            <figure>
+              <div className="aspect-video rounded-xl overflow-hidden bg-black">
+                <iframe src={src} title={b.pie || 'Vídeo'} className="w-full h-full"
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen />
+              </div>
+              {pie}
+            </figure>
+          );
+        }
+        if (b.medio === 'audio') {
+          return (
+            <figure className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <audio src={b.url} controls preload="none" className="w-full" />
+              {pie}
+            </figure>
+          );
+        }
+        if (b.medio === 'pdf') {
+          return (
+            <figure>
+              <iframe src={b.url} title={b.pie || 'PDF'}
+                      className="w-full h-[70vh] rounded-xl border border-slate-200 bg-slate-50" />
+              <figcaption className="text-xs text-slate-400 mt-1">
+                <a href={b.url} target="_blank" rel="noreferrer" className="font-bold text-sky-700 hover:underline">
+                  Abrir el PDF en una pestaña
+                </a>
+                {b.pie && <> · {b.pie}</>}
+              </figcaption>
+            </figure>
+          );
+        }
+        return (
+          <a href={b.url} target="_blank" rel="noreferrer"
+             className="flex items-center gap-2.5 px-4 py-3 border border-slate-200 rounded-xl hover:border-emerald-300 transition-colors">
+            <Paperclip className="w-4 h-4 text-slate-400 shrink-0" />
+            <span className="text-sm font-bold text-slate-700 truncate">{b.pie || 'Archivo'}</span>
+          </a>
+        );
+      }
+
       if (b.tipo === 'tabla') {
         const filas = filasRef.current[b.id] ?? b.filas ?? [['', ''], ['', '']];
         return (
@@ -867,7 +1026,7 @@ export default function Documento() {
       return <div {...comun}>{contenido}</div>;
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'medio'].includes(b.tipo);
 
     return (
       <div
@@ -974,8 +1133,12 @@ export default function Documento() {
           <span className="ml-auto" />
           {puedoEditar && !generando && (
             <>
-              <span className={cn('font-bold', guardado === 'sí' ? 'text-slate-300' : 'text-amber-600')}>
-                {guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : 'Cambios sin guardar'}
+              {/* Lo que se está pegando manda sobre el estado de guardado: es
+                  lo único que puede tardar de verdad (un vídeo son megas). */}
+              <span className={cn('font-bold', subiendo ? 'text-emerald-600' : guardado === 'sí' ? 'text-slate-300' : 'text-amber-600')}>
+                {subiendo
+                  ? subiendo
+                  : guardado === 'sí' ? 'Guardado' : guardado === 'guardando' ? 'Guardando…' : 'Cambios sin guardar'}
               </span>
               <button onClick={cambiarVisibilidad}
                 className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border transition-colors',

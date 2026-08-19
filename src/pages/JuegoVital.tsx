@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
+import { leerPegado, enCampoDeTexto, type Pegado } from '../utils/pegado';
 import {
   CATALOGO_PROPS, RELACIONES_HILO,
   nombreLimpio,
@@ -693,6 +694,66 @@ export default function JuegoVital() {
     const nuevo = await r.json();
     setMundoItems(prev => [...prev, { ...nuevo, enlaces: [] }]);
   }, [crearEn, jugadorPos]);
+
+  /**
+   * ⌘V DENTRO DEL MAPA 3D (2026-08-19, petición de Eugenio: «quiero que el
+   * command+v funcione en el Mapa 3D»). Lo que tengas copiado se PLANTA delante
+   * de ti, con la forma que le toca: una foto en su marco, un vídeo en su
+   * pantalla, un PDF en su atril, una canción en su altavoz, un texto en una
+   * nota. Quién decide qué es cada cosa es el mismo módulo que usan el lienzo y
+   * los documentos, así que pegar el mismo archivo da lo mismo en los tres
+   * sitios.
+   *
+   * No hay ventana de subida ni menú: copias y pegas, como en el escritorio.
+   */
+  const plantarPegado = useCallback(async (dt: DataTransfer) => {
+    if (!user) { avisar('Inicia sesión para pegar cosas en tu mundo.'); return; }
+    if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return;
+
+    avisar('Leyendo lo que has copiado…');
+    let piezas: Pegado[];
+    try {
+      piezas = await leerPegado(dt, (hecho, total) => {
+        avisar(total > 1 ? `Subiendo ${hecho + 1} de ${total}…` : 'Subiendo…');
+      });
+    } catch (e: any) { avisar(e.message || 'No se ha podido pegar.'); return; }
+    if (!piezas.length) return;
+
+    // Caen DELANTE del jugador, en abanico: pegar cinco fotos de golpe y que
+    // se apilen en el mismo punto sería inservible.
+    const base = { x: jugadorPos.x, z: jugadorPos.z };
+    for (let i = 0; i < piezas.length; i++) {
+      const p = piezas[i];
+      const punto = { x: base.x + 3 + (i % 3) * 2.6, z: base.z - 3 - Math.floor(i / 3) * 2.6 };
+      switch (p.clase) {
+        case 'imagen': await crearItemMundo({ tipo: 'imagen', url: p.url, nombre: p.nombre }, punto); break;
+        case 'video':  await crearItemMundo({ tipo: 'video', url: p.url, nombre: p.nombre }, punto); break;
+        // YouTube y Vimeo van con su enlace entero: el visor del juego ya sabe
+        // sacar el identificador y montar el reproductor.
+        case 'youtube':
+        case 'vimeo':  await crearItemMundo({ tipo: 'video', url: p.url, nombre: 'Vídeo' }, punto); break;
+        case 'audio':  await crearItemMundo({ tipo: 'musica', url: p.url, nombre: p.nombre }, punto); break;
+        case 'pdf':
+        case 'archivo': await crearItemMundo({ tipo: 'documento', url: p.url, nombre: p.nombre }, punto); break;
+        case 'enlace': await crearItemMundo({ tipo: 'enlace', url: p.url, nombre: p.nombre }, punto); break;
+        case 'texto':  await crearItemMundo({ tipo: 'nota', texto: p.cuerpo }, punto); break;
+      }
+    }
+    avisar(piezas.length > 1 ? `${piezas.length} cosas plantadas delante de ti.` : 'Plantado delante de ti.');
+  }, [user, jugadorPos, crearItemMundo]);
+
+  useEffect(() => {
+    const alPegar = (e: ClipboardEvent) => {
+      // El chat del robot, los renombres y cualquier formulario se quedan con
+      // SU pegado: ahí ⌘V es texto, no un objeto nuevo en el mundo.
+      if (enCampoDeTexto(e.target)) return;
+      if (!e.clipboardData) return;
+      e.preventDefault();
+      plantarPegado(e.clipboardData);
+    };
+    window.addEventListener('paste', alPegar);
+    return () => window.removeEventListener('paste', alPegar);
+  }, [plantarPegado]);
 
   /**
    * Pinchar y ARRASTRAR mueve el objeto (petición de Eugenio). El agarre llega

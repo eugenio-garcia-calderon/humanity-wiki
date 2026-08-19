@@ -33,6 +33,9 @@ const WINDOW_KINDS = new Set([
   'pagina',
   // Presentaciones estilo PowerPoint (2026-08-08): config.diapositivas.
   'presentacion',
+  // Pegar con ⌘V (2026-08-19): un PDF se lee dentro, un audio se escucha
+  // dentro. Antes los dos caían en 'enlace', es decir, en un botón de descarga.
+  'pdf', 'audio',
 ]);
 
 /** Días que algo permanece en la papelera antes de borrarse de verdad. */

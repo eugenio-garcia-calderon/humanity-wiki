@@ -124,7 +124,59 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
     }
 
     case 'video': {
+      // Tres orígenes posibles (2026-08-19): un vídeo SUBIDO (`video_url`),
+      // Vimeo, o YouTube de siempre. Se comprueban en ese orden porque el
+      // subido es el único que no depende de que un tercero siga sirviéndolo.
+      const subido = config.video_url;
+      const vimeo = config.vimeo_id;
       const id = config.youtube_id;
+
+      if (subido) {
+        // El mismo `<video>` en miniatura y en grande: en el lienzo va mudo y
+        // sin controles (cien ventanas con barra de reproducción es ruido), y
+        // `preload="metadata"` trae solo la cabecera — el primer fotograma sin
+        // descargar los 40 MB.
+        return (
+          <div className="space-y-1.5">
+            <video
+              src={subido}
+              controls={!isNode}
+              muted={isNode}
+              playsInline
+              preload="metadata"
+              onClick={isNode ? undefined : e => e.stopPropagation()}
+              className={isNode ? 'w-full h-56 object-cover rounded-lg bg-black' : 'w-full rounded-xl bg-black max-h-[70vh]'}
+            />
+            {!isNode && config.caption && <p className="text-xs text-slate-500 leading-relaxed">{config.caption}</p>}
+          </div>
+        );
+      }
+
+      if (vimeo) {
+        if (isNode) {
+          return (
+            <div className="relative h-56 rounded-lg bg-slate-900 flex items-center justify-center">
+              <PlayCircle className="w-10 h-10 text-white/80" />
+              <span className="absolute bottom-2 right-2 text-[10px] text-white/60">Vimeo</span>
+            </div>
+          );
+        }
+        return (
+          <div className="space-y-1.5">
+            <div className="aspect-video rounded-xl overflow-hidden bg-black">
+              <iframe
+                src={`https://player.vimeo.com/video/${vimeo}`}
+                title="Vídeo"
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <SourceCredit name="Vimeo" url={`https://vimeo.com/${vimeo}`} />
+          </div>
+        );
+      }
+
       if (isNode) {
         return (
           <div className="relative">
@@ -149,6 +201,57 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
         </div>
       );
     }
+
+    // El PDF se LEE dentro de la página (2026-08-19). El visor del navegador
+    // corre en su propio sandbox, sin acceso al DOM ni a nuestras cookies, y
+    // `uploads.ts` sirve los PDF en línea justamente para esto.
+    case 'pdf':
+      return (
+        <div className="space-y-1.5">
+          {isNode ? (
+            <div className="h-56 rounded-lg border border-slate-200 bg-rose-50/60 flex flex-col items-center justify-center gap-2 text-rose-700">
+              <FileText className="w-9 h-9" />
+              <span className="text-[11px] font-bold uppercase tracking-widest">PDF</span>
+              {config.description && <span className="text-[10px] text-rose-600/70">{config.description}</span>}
+            </div>
+          ) : (
+            <>
+              <iframe
+                src={config.url}
+                title="Documento PDF"
+                className="w-full h-[70vh] rounded-xl border border-slate-200 bg-slate-50"
+              />
+              <a href={config.url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
+                 className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 hover:underline">
+                <ExternalLink className="w-3.5 h-3.5" /> Abrir en una pestaña
+                {config.description && <span className="font-normal text-slate-400">· {config.description}</span>}
+              </a>
+            </>
+          )}
+        </div>
+      );
+
+    // Audio subido o enlazado: un `<audio>` no ejecuta nada, así que se
+    // reproduce en línea igual que la música del mapa 3D.
+    case 'audio':
+      return (
+        <div className="space-y-1.5">
+          <div className={cn2(
+            'rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center',
+            isNode ? 'h-56 flex-col gap-3 p-3' : 'p-4',
+          )}>
+            <PlayCircle className={isNode ? 'w-9 h-9 text-slate-400' : 'hidden'} />
+            <audio
+              src={config.url}
+              controls
+              preload="none"
+              onClick={e => e.stopPropagation()}
+              className="w-full"
+            />
+          </div>
+          {!isNode && config.description && <p className="text-xs text-slate-500">{config.description}</p>}
+        </div>
+      );
 
     case 'wikipedia':
       return (

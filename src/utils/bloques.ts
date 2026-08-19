@@ -13,7 +13,12 @@ export type TipoBloque =
   | 'parrafo' | 'titulo1' | 'titulo2' | 'titulo3'
   | 'lista' | 'numerada' | 'tarea'
   | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla'
-  | 'publicacion';
+  | 'publicacion' | 'medio';
+
+/** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
+ *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
+ *  pegar y que hay que REPRODUCIR o LEER dentro del documento, no descargar. */
+export type ClaseMedio = 'video' | 'youtube' | 'vimeo' | 'audio' | 'pdf' | 'archivo';
 
 export interface Bloque {
   id: string;
@@ -24,9 +29,14 @@ export interface Bloque {
   hecho?: boolean;
   /** Solo codigo. */
   lenguaje?: string;
-  /** Solo imagen. */
+  /** Imagen y medio. */
   url?: string;
   pie?: string;
+  /** Solo medio: qué es y, si es de una plataforma, su identificador. */
+  medio?: ClaseMedio;
+  medioId?: string;
+  /** Solo medio: tamaño del archivo subido, para el pie. */
+  medioBytes?: number;
   /** Solo tabla: la primera fila es la cabecera. */
   filas?: string[][];
   /** Solo publicacion (Fase 2): una publicación de la plataforma embebida.
@@ -185,6 +195,10 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       case 'separador': salida.push('---'); break;
       case 'codigo': salida.push('```' + (b.lenguaje || '') + '\n' + (b.texto || '') + '\n```'); break;
       case 'imagen': salida.push(`![${b.pie || ''}](${b.url || ''})`); break;
+      // Markdown no sabe de vídeo ni de PDF: un enlace es lo más fiel que se
+      // puede exportar. El tipo real no se pierde — los bloques se guardan como
+      // JSON, y el markdown solo es la descarga.
+      case 'medio': salida.push(`[${b.pie || 'Archivo'}](${b.url || ''})`); break;
       case 'publicacion': salida.push(`[${b.pubTitulo || 'Publicación'}](${b.pubUrl || ''})`); break;
       case 'tabla': {
         const filas = b.filas || [];

@@ -54,7 +54,19 @@ const AUDIO: Record<string, string> = {
   'audio/flac': 'flac',
 };
 
-const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS, ...AUDIO };
+/** Vídeo subido (2026-08-19, petición de Eugenio: «un vídeo y se hace embed»).
+ *  Se sirve EN LÍNEA para que el `<video>` lo reproduzca dentro de la página;
+ *  como el audio, es un contenedor que el navegador decodifica en su propio
+ *  sandbox y no ejecuta nada en nuestro dominio. */
+const VIDEOS: Record<string, string> = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/quicktime': 'mov',   // lo que sale de un iPhone o de QuickTime
+  'video/x-m4v': 'm4v',
+  'video/ogg': 'ogv',
+};
+
+const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS, ...AUDIO, ...VIDEOS };
 
 /** Lo que se puede mostrar dentro de la página; el resto, descarga.
  *  El PDF pasó a verse EN LÍNEA (2026-08-18): Eugenio los planta en el mapa
@@ -64,11 +76,32 @@ const TIPOS: Record<string, string> = { ...IMAGENES, ...DOCUMENTOS, ...AUDIO };
 const EN_LINEA = new Set([
   ...Object.values(IMAGENES).filter(e => e !== 'svg'),
   ...Object.values(AUDIO),
+  ...Object.values(VIDEOS),
   'pdf',
 ]);
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_AUDIO = 25 * 1024 * 1024; // 25 MB, solo para canciones
+/** El vídeo es lo más pesado que se admite. 60 MB son unos 2 minutos de móvil
+ *  a 1080p: suficiente para un clip pegado, lejos de una película. */
+const MAX_VIDEO = 60 * 1024 * 1024;
+
+/** El tope que le toca a cada tipo. */
+const topeDe = (tipo: string) =>
+  tipo in VIDEOS ? MAX_VIDEO : tipo in AUDIO ? MAX_AUDIO : MAX_BYTES;
+
+/**
+ * En qué se convierte lo subido cuando alguien lo pega. El servidor es quien
+ * sabe de verdad el tipo (decide la extensión), así que lo dice él y ni el
+ * lienzo ni el editor de documentos tienen que repetir la tabla de MIME.
+ */
+export type ClaseArchivo = 'imagen' | 'video' | 'audio' | 'pdf' | 'archivo';
+const claseDe = (tipo: string): ClaseArchivo =>
+  tipo in IMAGENES ? 'imagen'
+    : tipo in VIDEOS ? 'video'
+    : tipo in AUDIO ? 'audio'
+    : TIPOS[tipo] === 'pdf' ? 'pdf'
+    : 'archivo';
 
 /** Dónde viven los ficheros. En producción es un volumen de Docker, para que
  *  sobrevivan a cada despliegue. */
@@ -81,10 +114,10 @@ export const uploadsDir = () =>
  * devuelve la misma forma que `POST /api/uploads`. Mismo almacén, mismas
  * carpetas por mes, mismo nombre UUID: un origen único de verdad.
  */
-export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; bytes: number; type: string; esImagen: boolean } {
+export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; bytes: number; type: string; esImagen: boolean; clase: ClaseArchivo } {
   const ext = TIPOS[tipo.toLowerCase()];
   if (!ext) throw new Error(`Formato no admitido: ${tipo}`);
-  const tope = tipo.toLowerCase() in AUDIO ? MAX_AUDIO : MAX_BYTES;
+  const tope = topeDe(tipo.toLowerCase());
   if (bytes.length > tope) throw new Error(`El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.`);
   const raiz = uploadsDir();
   const ahora = new Date();
@@ -97,6 +130,7 @@ export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; byte
     bytes: bytes.length,
     type: tipo,
     esImagen: tipo in IMAGENES,
+    clase: claseDe(tipo.toLowerCase()),
   };
 }
 
@@ -128,7 +162,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
 
   app.post(
     '/api/uploads',
-    express.raw({ type: 'application/octet-stream', limit: MAX_AUDIO }),
+    express.raw({ type: 'application/octet-stream', limit: MAX_VIDEO }),
     async (req: Request, res: Response) => {
       try {
         if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para subir archivos.' });
@@ -137,7 +171,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
         const ext = TIPOS[tipo];
         if (!ext) {
           return res.status(400).json({
-            error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG), documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX) y audio (MP3, M4A, OGG, WAV, AAC, FLAC).`,
+            error: `Formato no admitido. Se aceptan imágenes (PNG, JPG, WebP, GIF, AVIF, SVG), vídeo (MP4, WebM, MOV, M4V, OGV), documentos (PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX) y audio (MP3, M4A, OGG, WAV, AAC, FLAC).`,
           });
         }
 
@@ -145,7 +179,7 @@ export function registerUploadRoutes(app: Express, _db: any) {
         if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
           return res.status(400).json({ error: 'El archivo llegó vacío.' });
         }
-        const tope = tipo in AUDIO ? MAX_AUDIO : MAX_BYTES;
+        const tope = topeDe(tipo);
         if (bytes.length > tope) {
           return res.status(413).json({ error: `El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.` });
         }
