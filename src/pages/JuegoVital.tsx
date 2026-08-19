@@ -20,7 +20,9 @@ import {
   type SeleccionMundo, type Vehiculo,
 } from '../components/juego/tipos';
 import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
+import Cargando from '../components/juego/Cargando';
 import { HudDinero, PanelFinanzas, useFinanzas } from '../components/juego/Finanzas';
+import { MOMENTOS, momentoDia, setMomentoDia, type MomentoDia } from '../components/juego/Vida';
 import EditorAspecto from '../components/juego/EditorAspecto';
 import type { Aspecto } from '../components/juego/aspecto';
 import Transicion, { type FaseTransicion } from '../components/juego/Transicion';
@@ -138,6 +140,14 @@ export default function JuegoVital() {
   // Fase 10: el dinero (recursos, objetivos y presupuestos).
   const finanzas = useFinanzas();
   const [panelDinero, setPanelDinero] = useState(false);
+  // La hora de la aldea: la tuya por defecto, o la que elijas con el botón.
+  const [momento, setMomento] = useState<MomentoDia>(() => momentoDia());
+  const cambiarMomento = useCallback(() => {
+    const i = MOMENTOS.findIndex(m => m.id === momentoDia());
+    const sig = MOMENTOS[(i + 1) % MOMENTOS.length].id;
+    setMomentoDia(sig);
+    setMomento(sig);
+  }, []);
   const zoom = useRef(0.5);
   const [zoomVisible, setZoomVisible] = useState(0.5);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
@@ -1611,7 +1621,7 @@ export default function JuegoVital() {
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-sky-50">
-      <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center"><p className="text-sm text-slate-400 animate-pulse">Construyendo tu mundo…</p></div>}>
+      <Suspense fallback={<Cargando />}>
         <Escena
           entrada={entrada}
           camara={camara}
@@ -1748,11 +1758,13 @@ export default function JuegoVital() {
       <VeloViaje activo={!!viajando} destino={viajando} />
 
       {/* Cabecera */}
-      <div className="absolute top-3 left-3 sm:left-16 z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
+      {/* left-14 en móvil: con left-3 la tarjeta se metía debajo de la barra
+          de iconos de la izquierda y no se leía el título. */}
+      <div className="absolute top-3 left-14 sm:left-16 right-[7.5rem] sm:right-auto z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
         <p className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-          <Gamepad2 className="w-3.5 h-3.5 text-emerald-600" /> Juego Vital
+          <Gamepad2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" /> Juego Vital
         </p>
-        <p className="text-[10px] text-slate-500 mt-0.5">
+        <p className="text-[10px] text-slate-500 mt-0.5 truncate">
           Aldea de {nombre} · {personas.length} {personas.length === 1 ? 'persona' : 'personas'} · {proyectosAg.length + proyectos.length} proyectos
         </p>
       </div>
@@ -1841,6 +1853,15 @@ export default function JuegoVital() {
               )}
             >
               <Plane className="w-5 h-5" />
+            </button>
+            {/* La hora del mundo. Por defecto es la tuya, pero si juegas de
+                madrugada puedes traerte el mediodía. */}
+            <button
+              onClick={cambiarMomento}
+              title={`Hora de la aldea: ${MOMENTOS.find(m => m.id === momento)?.nombre}. Pulsa para cambiarla.`}
+              className="w-11 h-11 rounded-xl border bg-white border-slate-200 hover:border-emerald-300 flex items-center justify-center text-lg transition-colors"
+            >
+              {MOMENTOS.find(m => m.id === momento)?.icono}
             </button>
           </div>
 

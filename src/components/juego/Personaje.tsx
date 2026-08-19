@@ -238,7 +238,13 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     const cam = estado.camera;
     // Dentro de un edificio la cámara se acerca: con los 18,6 m de fuera se
     // quedaría al otro lado de la pared y verías la sala a través del muro.
-    const dist = (limite ? Math.min(10.5, limite * 0.55) : 18.6) * zoom.current;
+    // En una pantalla estrecha (un móvil de pie) el mismo ángulo de cámara
+    // enseña MUCHO menos a lo ancho: con la distancia del ordenador el ficus
+    // te tapaba la plaza entera. Así que la cámara se echa atrás en
+    // proporción a lo estrecha que sea la pantalla, hasta un 55% más lejos.
+    const anchoRel = Math.min(1, estado.viewport.aspect / 1.6);
+    const porPantalla = 1 + (1 - anchoRel) * 0.55;
+    const dist = (limite ? Math.min(10.5, limite * 0.55) : 18.6) * zoom.current * porPantalla;
     const { pitch } = camara.current;
     const cp = Math.cos(pitch);
     const sp = Math.sin(pitch);

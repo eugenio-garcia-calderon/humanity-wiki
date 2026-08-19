@@ -33,9 +33,32 @@ export interface EstadoCielo {
   esNoche: boolean;
 }
 
-/** Dónde está el sol AHORA MISMO, según la hora del reloj del jugador. */
+// --- La hora del mundo: la tuya, o la que tú elijas -------------------------
+// El ciclo con la hora real es bonito, pero si juegas a las cuatro de la
+// mañana solo ves una aldea a oscuras. Así que se puede forzar el momento.
+export type MomentoDia = 'auto' | 'amanecer' | 'dia' | 'tarde' | 'noche';
+export const MOMENTOS: { id: MomentoDia; nombre: string; icono: string; hora: number | null }[] = [
+  { id: 'auto', nombre: 'Tu hora', icono: '🕘', hora: null },
+  { id: 'amanecer', nombre: 'Amanecer', icono: '🌅', hora: 7.8 },
+  { id: 'dia', nombre: 'Mediodía', icono: '☀️', hora: 14 },
+  { id: 'tarde', nombre: 'Atardecer', icono: '🌇', hora: 20.2 },
+  { id: 'noche', nombre: 'Noche', icono: '🌙', hora: 1 },
+];
+
+const CLAVE_MOMENTO = 'juego:momento-dia';
+let momentoActual: MomentoDia =
+  (typeof localStorage !== 'undefined' && localStorage.getItem(CLAVE_MOMENTO) as MomentoDia) || 'auto';
+
+export const momentoDia = () => momentoActual;
+export function setMomentoDia(m: MomentoDia) {
+  momentoActual = m;
+  try { localStorage.setItem(CLAVE_MOMENTO, m); } catch { /* modo privado */ }
+}
+
+/** Dónde está el sol AHORA MISMO: por tu reloj, o por el momento que elegiste. */
 export function cieloDeLaHora(fecha = new Date()): EstadoCielo {
-  const h = fecha.getHours() + fecha.getMinutes() / 60;
+  const forzada = MOMENTOS.find(m => m.id === momentoActual)?.hora ?? null;
+  const h = forzada ?? fecha.getHours() + fecha.getMinutes() / 60;
   // Amanece a las 7 y anochece a las 21: 14 horas de luz, como un día medio
   // en la península. Fuera de esa franja, es de noche.
   const t = (h - 7) / 14;                     // 0 al amanecer, 1 al anochecer
@@ -66,6 +89,7 @@ export function CicloDia({ luzRef, onCambio }: {
   const { scene } = useThree();
   const proximo = useRef(0);
   const ultimoNoche = useRef<boolean | null>(null);
+  const ultimaLuz = useRef(-1);
   const colorLuz = useMemo(() => new THREE.Color(), []);
   const colorCielo = useMemo(() => new THREE.Color(), []);
 
@@ -96,8 +120,13 @@ export function CicloDia({ luzRef, onCambio }: {
     }
     scene.environmentIntensity = e.esNoche ? 0.3 : 0.25 + e.luz * 0.5;
 
-    if (ultimoNoche.current !== e.esNoche) {
+    // Se avisa a la escena al hacerse de noche (farolas, bichos) y también
+    // cuando el sol ha subido o bajado lo bastante como para moverlo en el
+    // cielo. Antes solo se avisaba en el cambio noche/día, así que el sol se
+    // quedaba clavado donde estuviera al entrar.
+    if (ultimoNoche.current !== e.esNoche || Math.abs(e.luz - ultimaLuz.current) > 0.02) {
       ultimoNoche.current = e.esNoche;
+      ultimaLuz.current = e.luz;
       onCambio?.(e);
     }
   });
