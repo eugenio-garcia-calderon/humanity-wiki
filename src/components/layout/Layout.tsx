@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -29,6 +29,7 @@ const SECCIONES_TUYO = [
   { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
   { to: '/juego', label: 'Juego Vital', icon: Gamepad2 },
+  { to: '/escritorio', label: 'Escritorio', icon: AppWindow },
 ];
 const SECCIONES_PIE = [
   { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
@@ -90,11 +91,14 @@ export default function Layout() {
   // Juego Vital: mundo 3D a pantalla completa; el robot del juego ES el
   // asistente, así que la barra de IA vive abajo como en los lienzos.
   const isJuegoPage = location.pathname === '/juego';
+  // El Escritorio son ventanas: necesita todo el alto, y trae su propio chat
+  // (el que ve el navegador), así que la barra de IA de la app sobra aquí.
+  const isEscritorioPage = location.pathname === '/escritorio';
   // Explorar/Mis publicaciones se fusionaron en una sola página con su propio
   // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
   // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isEscritorioPage;
 
   if (isEmbed) {
     return (
@@ -264,13 +268,18 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
-        <AIAssistant
-          mode={
-            isInicioPage ? 'inline'
-              : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
-                : 'dock'
-          }
-        />
+        {/* El Escritorio trae SU propio chat (el que ve el navegador), así que
+            la barra global no se monta ahí: dos asistentes en la misma
+            pantalla es una pregunta sin saber a cuál se la haces. */}
+        {!isEscritorioPage && (
+          <AIAssistant
+            mode={
+              isInicioPage ? 'inline'
+                : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
+                  : 'dock'
+            }
+          />
+        )}
       </div>
 
       {!fullBleed && (
