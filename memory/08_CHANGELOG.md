@@ -920,3 +920,6 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
 - **La tela se tiñe con una paleta fija de 8 colores** (azul, oliva, teja, malva…) por hash del cuerpo: variedad entre vecinos y evita que el lino crudo parezca piel a lo lejos. El tinte con el color de ropa del creador (era Kenney) se probó y se retiró: los tonos carne/pastel dejaban la prenda color piel.
 - **Cámara por defecto CERCA** (petición con captura): zoom inicial 0,5 (≈9 m, antes 18,6 m) y mínimo de rueda bajado de 0,6 a 0,3 para acercarse aún más.
 - Verificado en local: jugador con chaleco/camisa/pantalón/botas por delante y por detrás; Anita y Javier con vestido y botas; andar y esprintar animan la ropa junto al cuerpo.
+
+### 2026-08-19 — La cámara mira 20° más arriba (petición de Eugenio)
+- El punto de mira de la cámara orbital se eleva `dist·tan(20°)` sobre el de antes: mismo ángulo extra a cualquier distancia de zoom. Se ve horizonte y cielo en vez de tanto suelo — el personaje queda abajo en el encuadre, estilo juego de aventuras.

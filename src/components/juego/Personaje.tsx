@@ -235,7 +235,14 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
       g.position.z + Math.cos(yaw) * cp * dist,
     );
     cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
-    tmpMira.set(g.position.x, g.position.y + 1.6 + (zoom.current - 1) * 1.5, g.position.z);
+    // La mirada va 20° más alta (petición de Eugenio): el punto de mira se
+    // eleva dist·tan(20°) ≈ dist·0,364 — mismo ángulo a cualquier zoom, así
+    // se ve más horizonte y cielo en vez de tanto suelo.
+    tmpMira.set(
+      g.position.x,
+      g.position.y + 1.6 + (zoom.current - 1) * 1.5 + dist * 0.364,
+      g.position.z,
+    );
     cam.lookAt(tmpMira);
 
     // --- the shadow camera is small (sharp shadows): it must travel with us
