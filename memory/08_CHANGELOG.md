@@ -999,3 +999,20 @@ Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son 
   - Oleada 0 suelo y plaza · 1 el pueblo, la gente y los proyectos · 2 sendas, agua y hierba · 3 el bosque comestible, los bichos, las nubes y el color de cine.
   - **Cuerpo provisional**: mientras bajan las animaciones eres una silueta con el color de tu ropa y **puedes andar con ella**. Cada modelo lleva su propio Suspense: sin eso, un modelo que llega tarde tira abajo la escena entera y te devuelve a la pantalla de carga con el mundo ya montado detrás.
 - Verificado en el navegador: cielo azul con nubes y poniente dorado, ficus pequeño con su estanque y sus flores, frutos a escala, y 0,3 s hasta el primer fotograma jugable.
+
+### 2026-08-19 — Medir antes de quitar: los efectos no eran el problema, y 16 MB de descarga que sobraban
+Eugenio pidió quitar efectos innecesarios para ganar velocidad, avisando de que quería los números antes. Se midieron, y el resultado cambió la decisión.
+
+**LO QUE SE MIDIÓ** (en el Mac de Eugenio, forzando la resolución hasta que la GPU fuera el cuello de botella):
+- Con todo activado, a resolución normal: **60 fps clavados**. Hubo que subir a **34,7 millones de píxeles** (16× su pantalla) para ver siquiera una diferencia, y ahí seguía a 50 fps.
+- Apagando cada cosa a esa resolución absurda: nubes **0%**, frutos (6.590) **0%**, hierba (16.000) **0%**, bichos **0%**, **las cuatro a la vez 0%**. La decoración va instanciada: la tarjeta dibuja 16.000 matas con el mismo esfuerzo que una.
+- Oclusión ambiental: **0,4 ms de 18** (2%). Va a media resolución.
+- **Quitar los efectos de pantalla EMPEORA el rendimiento**: con el composer el suavizado de bordes lo hace un pase barato (SMAA) y se apaga el del navegador; sin composer se enciende el MSAA por hardware, que a alta resolución cuesta mucho más (55 fps con efectos, 9-11 sin ellos en la misma prueba).
+
+**DECISIÓN DE EUGENIO con esos números:** no quitar ningún efecto; bajar la hierba y seguir con la carga.
+
+- **Hierba en calidad alta: 45.000 → 15.000.** No gana fotogramas (medido), pero baja memoria y tiempo de construirla al entrar, que es lo que sí se nota. El suelo sigue cubierto.
+- **EL TRAJE DE EXPLORADOR SE DESCARGABA SIN USARSE NUNCA.** `trajeDe()` devuelve siempre 'Peasant' desde que se vio que el Ranger va con el torso al aire, pero `precargarModelos()` seguía pidiendo `Male_Ranger` y `Female_Ranger`: **4,3 MB en cada visita** para nada. Ficheros borrados y el tipo de `trajeDe()` estrechado a `'Peasant'`, para que nadie pueda volver a pedir algo que no existe.
+- **MAPAS DE RELIEVE Y RUGOSIDAD A 512** (el color se queda en 1024): 12,1 MB → 1,7 MB y 2,8 MB → 1,2 MB. Son texturas que se repiten 40×40 sobre el suelo; a esa escala la mitad de resolución no se distingue, comprobado en pantalla.
+- **La carpeta del juego pasa de 46 MB a 30 MB.** Sumando lo de esta mañana (PNG → JPEG en los personajes), viene de 69 MB: **se ha quedado en menos de la mitad**.
+- Verificado en el navegador: 58 ficheros, todos 200, ningún 404 tras borrar el Ranger, y el empedrado de la plaza igual de detallado.

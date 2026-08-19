@@ -109,9 +109,11 @@ export function Persona3D(props: Parameters<typeof PersonaModelo>[0]) {
 }
 
 /** Traje: siempre el de aldeano. El de explorador (Ranger) se probó y va con
- *  el torso al aire — parecía otra vez el problema del desnudo. Sus .gltf se
- *  quedan en la carpeta por si algún día hay selector de trajes. */
-function trajeDe(_cuerpo: string): 'Peasant' | 'Ranger' {
+ *  el torso al aire — parecía otra vez el problema del desnudo, así que sus
+ *  ficheros se BORRARON el 2026-08-19: pesaban 4,3 MB y se descargaban en
+ *  cada visita sin llegar a dibujarse nunca. El tipo ya no admite 'Ranger',
+ *  para que nadie pueda pedir un fichero que no existe. */
+function trajeDe(_cuerpo: string): 'Peasant' {
   return 'Peasant';
 }
 
@@ -355,7 +357,10 @@ export function precargarModelos() {
   // Fase 4 del realismo: los cuerpos humanos, sus trajes y las animaciones.
   useGLTF.preload(`${HUMANOS}/Superhero_Male_FullBody.gltf`);
   useGLTF.preload(`${HUMANOS}/Superhero_Female_FullBody.gltf`);
-  for (const t of ['Male_Peasant', 'Female_Peasant', 'Male_Ranger', 'Female_Ranger']) {
+  // Solo el traje de aldeano. El de explorador (Ranger) se seguía PRECARGANDO
+  // aunque `trajeDe()` no lo devuelve nunca: 4,3 MB que se descargaban en
+  // cada visita para no usarse jamás (2026-08-19).
+  for (const t of ['Male_Peasant', 'Female_Peasant']) {
     useGLTF.preload(`${HUMANOS}/${t}.gltf`);
   }
   for (const p of TODOS_PEINADOS) useGLTF.preload(`${HUMANOS}/${p}.gltf`);
