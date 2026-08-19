@@ -37,7 +37,7 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto, vehiculo, alturaVuelo, limite }: {
+export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto, vehiculo, alturaVuelo, limite, vista = 'tercera' }: {
   entrada: React.MutableRefObject<EntradaMando>;
   /** Hacia dónde mira la cámara. Lo escribe el arrastre de la pantalla. */
   camara: React.MutableRefObject<Camara>;
@@ -58,6 +58,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
   /** Hasta dónde puedes andar. Sin valor, las 118 ha; dentro de un proyecto,
    *  el tamaño de la sala (si no, te saldrías por las paredes). */
   limite?: number;
+  /** Tercera persona (por detrás) o primera (por tus ojos). 2026-08-19,
+   *  petición de Eugenio. */
+  vista?: 'tercera' | 'primera';
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
@@ -255,21 +258,39 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     // (fallo que vio Eugenio). En su lugar, los muros de los interiores solo
     // se dibujan por su cara de dentro (culling): si la cámara queda al otro
     // lado, la pared desaparece y sigues viendo la sala, como en Los Sims.
-    tmpCam.set(
-      g.position.x + Math.sin(yaw) * cp * dist,
-      g.position.y + Math.max(1.5, sp * dist),
-      g.position.z + Math.cos(yaw) * cp * dist,
-    );
-    cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
-    // La mirada va 20° más alta (petición de Eugenio): el punto de mira se
-    // eleva dist·tan(20°) ≈ dist·0,364 — mismo ángulo a cualquier zoom, así
-    // se ve más horizonte y cielo en vez de tanto suelo.
-    tmpMira.set(
-      g.position.x,
-      g.position.y + 1.6 + (zoom.current - 1) * 1.5 + dist * 0.364,
-      g.position.z,
-    );
-    cam.lookAt(tmpMira);
+    if (vista === 'primera') {
+      // PRIMERA PERSONA: la cámara va en tu cabeza y mira hacia donde miras.
+      // Sin interpolación de posición: cualquier retraso aquí se siente como
+      // mareo, porque el mundo se movería después que tú.
+      const ALTO_OJOS = 1.62;
+      cam.position.set(g.position.x, g.position.y + ALTO_OJOS, g.position.z);
+      // `pitch` es la inclinación de la órbita (0,1 mirando al horizonte,
+      // 1,45 casi cenital). Se convierte en el cabeceo de la vista: cuanto
+      // más alta la órbita, más abajo miras.
+      const cabeceo = (0.63 - pitch) * 1.25;
+      tmpMira.set(
+        g.position.x - Math.sin(yaw) * 10,
+        g.position.y + ALTO_OJOS + cabeceo * 10,
+        g.position.z - Math.cos(yaw) * 10,
+      );
+      cam.lookAt(tmpMira);
+    } else {
+      tmpCam.set(
+        g.position.x + Math.sin(yaw) * cp * dist,
+        g.position.y + Math.max(1.5, sp * dist),
+        g.position.z + Math.cos(yaw) * cp * dist,
+      );
+      cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
+      // La mirada va 20° más alta (petición de Eugenio): el punto de mira se
+      // eleva dist·tan(20°) ≈ dist·0,364 — mismo ángulo a cualquier zoom, así
+      // se ve más horizonte y cielo en vez de tanto suelo.
+      tmpMira.set(
+        g.position.x,
+        g.position.y + 1.6 + (zoom.current - 1) * 1.5 + dist * 0.364,
+        g.position.z,
+      );
+      cam.lookAt(tmpMira);
+    }
 
     // --- the shadow camera is small (sharp shadows): it must travel with us
     const luz = luzRef.current;
@@ -286,7 +307,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
     <group ref={grupo} position={[0, 0, 9.5]}>
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
-      {vehiculo === 'pie' && (
+      {/* En PRIMERA persona tu propio cuerpo no se dibuja: la cámara está
+          dentro de la cabeza y solo verías el interior del modelo. */}
+      {vehiculo === 'pie' && vista === 'tercera' && (
         // El Suspense propio es lo que te deja ANDAR antes de que hayan
         // bajado los 7,6 MB de animaciones: mientras tanto eres la silueta.
         // Sin él, React tira abajo la escena entera y vuelves a la pantalla

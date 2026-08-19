@@ -5,6 +5,7 @@ import { cn } from '../../utils/cn';
 import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo, type OverrideMundo } from './tipos';
 import { MITAD, PLAZA_R, PLAZA_SEC_R, CAMINOS, SENDAS, finDeSenda, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionesProyectos, piezasAldea } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
+import { POS_VIVAS } from './Agentes';
 
 
 // ============================================================================
@@ -67,6 +68,12 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
   const [editando, setEditando] = useState(false);
   // Qué marcador se está arrastrando ahora mismo y dónde va.
   const arrastre = useRef<{ i: number; x: number; z: number } | null>(null);
+  /** El temporizador del MANTENER PULSADO: si aguantas ~280 ms sobre un
+   *  marcador, pasa a arrastrarse (2026-08-19, petición de Eugenio: «cuando
+   *  hago click y mantengo pulsado un objeto, que me deje moverlo, y cuando
+   *  hago un click que me lleve a ese portal»). Antes hacía falta entrar en
+   *  el modo «Colocar» para poder mover nada. */
+  const esperaAgarre = useRef<number | null>(null);
   const [arrastrando, setArrastrando] = useState<number | null>(null);
   // El arrastre del FONDO (mover el mapa), en coordenadas de pantalla.
   const paneo = useRef<{ px: number; py: number; cx: number; cz: number } | null>(null);
@@ -214,10 +221,16 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
       if (o?.eliminado) return [];
       return [{ tipo: 'pantalla' as const, nombre: 'Gran pantalla', x: o?.x ?? 27, z: o?.z ?? -18, color: '#ff0033' }];
     })(),
-    ...agentes.map((a): Destino => ({
-      tipo: a.tipo === 'persona' ? 'persona' : 'proyecto',
-      nombre: a.nombre, x: a.x, z: a.z, agente: a,
-    })),
+    // Dónde están AHORA, no dónde los plantaste: desde que pasean, la
+    // posición guardada es solo su punto de partida. Se lee al abrir el mapa
+    // (no cada fotograma: eso sería redibujarlo sesenta veces por segundo).
+    ...agentes.map((a): Destino => {
+      const v = POS_VIVAS.get(a.id);
+      return {
+        tipo: a.tipo === 'persona' ? 'persona' : 'proyecto',
+        nombre: a.nombre, x: v?.x ?? a.x, z: v?.z ?? a.z, agente: a,
+      };
+    }),
     ...edificiosProyecto.map((e): Destino => ({
       tipo: 'proyecto', nombre: e.p.titulo, x: e.x, z: e.z + 4,
     })),
@@ -238,7 +251,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
       x: p.x, z: p.z, color: '#94a3b8',
       edita: { clase: 'semilla', id: p.seed_id },
     })) : []),
-  ], [agentes, edificiosProyecto, items, overrides, editando, piezas]);
+  ], [agentes, edificiosProyecto, items, overrides, editando, piezas, abierto]);
 
   /** El terreno: lo mismo en el minimapa y en el mapa grande. */
   const terreno = (
@@ -338,7 +351,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                 <span className="font-medium text-slate-400 ml-1 hidden sm:inline">
                   {editando
                     ? '· arrastra para colocar · la ✕ roja quita'
-                    : '· pulsa algo para viajar · doble clic en suelo vacío para crear ahí · rueda para acercar'}
+                    : '· pulsa algo para viajar · mantenlo pulsado para moverlo · doble clic en el suelo para crear'}
                 </span>
               </p>
               <div className="flex items-center gap-1">
@@ -441,6 +454,9 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                   });
                 }}
                 onPointerUp={(e) => {
+                  // Si el «mantener pulsado» aún no había saltado, esto fue un
+                  // clic: se cancela el agarre y manda el `onClick` del marcador.
+                  if (esperaAgarre.current !== null) { clearTimeout(esperaAgarre.current); esperaAgarre.current = null; }
                   const a = arrastre.current;
                   arrastre.current = null;
                   setArrastrando(null);
@@ -498,19 +514,31 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                         key={i}
                         className={cn(editando && d.edita ? 'cursor-move' : 'cursor-pointer')}
                         onPointerDown={(e) => {
-                          // En modo edición, pinchar un marcador lo AGARRA (y
-                          // no mueve el mapa, que es lo que haría el fondo).
-                          if (!editando || !d.edita) return;
+                          if (!d.edita || !onMoverElemento) return;
                           e.stopPropagation();
-                          arrastre.current = { i, x: d.x, z: d.z };
-                          setArrastrando(i);
-                          (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+                          const svg = e.currentTarget.ownerSVGElement as SVGSVGElement | null;
+                          try { svg?.setPointerCapture(e.pointerId); } catch { /* ratón sintético */ }
+                          if (editando) {
+                            // Con el modo puesto, se agarra en el acto.
+                            arrastre.current = { i, x: d.x, z: d.z };
+                            setArrastrando(i);
+                            return;
+                          }
+                          // Sin el modo: MANTENER PULSADO agarra. Si sueltas
+                          // antes, era un clic y te lleva allí.
+                          if (esperaAgarre.current !== null) clearTimeout(esperaAgarre.current);
+                          esperaAgarre.current = window.setTimeout(() => {
+                            esperaAgarre.current = null;
+                            arrastre.current = { i, x: d.x, z: d.z };
+                            setArrastrando(i);
+                          }, 280);
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Con el editor puesto, un clic no te teletransporta:
-                          // estarías colocando cosas y saldrías disparado.
-                          if (editando) return;
+                          // Con el modo «Colocar» puesto, un clic no te
+                          // teletransporta: estarías colocando cosas y saldrías
+                          // disparado. Fuera del modo, el clic simple VIAJA.
+                          if (editando || arrastrando === i) return;
                           setSobre(null); setAbierto(false); onViajar(d);
                         }}
                         onMouseEnter={() => setSobre(i)}
