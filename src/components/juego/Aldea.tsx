@@ -16,6 +16,9 @@ import { Camper } from './Camper';
 import { PantallaVisual } from './Pantalla';
 import { SenalDePortal } from './Senales';
 import { CasaReal } from './CasaReal';
+import { Ficus } from './Ficus';
+import { Sendas } from './Sendas';
+import { BosqueComestible } from './BosqueComestible';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
 // el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
 import { MITAD, PLAZA_R, CAMINOS, LAGOS, sueloLibre, type PiezaAldea } from './mapa';
@@ -25,7 +28,7 @@ import type { SeleccionMundo } from './tipos';
 const ETIQUETAS: Record<string, string> = {
   casa: 'Casa', nave: 'Nave', fuente: 'Fuente', banco: 'Banco', farola: 'Farola',
   puesto: 'Puesto del mercado', pozo: 'Pozo', carro: 'Carro', arbol: 'Árbol',
-  camper: 'Camión camperizado', pantalla: 'Gran pantalla',
+  camper: 'Camión camperizado', pantalla: 'Gran pantalla', ficus: 'Ficus del centro',
 };
 
 function seleccionDe(p: PiezaAldea): SeleccionMundo {
@@ -77,7 +80,7 @@ function Editable({ pieza, onPulsar, onAgarrar, children }: {
 /** Dónde flota el rótulo de portal de cada tipo de pieza: por encima de su
  *  tejado, no dentro de él. */
 const ALTO_SENAL: Record<string, number> = {
-  casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6, pantalla: 9.4,
+  casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6, pantalla: 9.4, ficus: 9.5,
   puesto: 3.6, pozo: 3.2, carro: 2.8, arbol: 6.2,
 };
 
@@ -91,6 +94,8 @@ export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?:
     // El `modelo` de la pieza elige la variante, como elegía el GLTF antes.
     case 'casa': return <CasaReal variante={pieza.modelo ?? 0} />;
     case 'nave': return <Nave />;
+    // El corazón de la aldea: ficus con estanque (2026-08-19).
+    case 'ficus': return <Ficus />;
     case 'fuente': return <Fuente />;
     case 'banco': return <Banco x={0} z={0} rot={0} />;
     case 'farola': return <Farola x={0} z={0} />;
@@ -508,12 +513,16 @@ export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
     <group>
       <Terreno />
       <Caminos />
-      {['fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro', 'camper'].map(tipo =>
+      {['ficus', 'fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro', 'camper'].map(tipo =>
         de(tipo).map((p, i) => (
           <Editable key={p.seed_id} pieza={p} onPulsar={onPulsar} onAgarrar={onAgarrar}>
             <PiezaVisual pieza={p} indice={i} />
           </Editable>
         )))}
+      {/* Las 6 sendas con sus carteles y plazas temáticas, y el bosque
+          comestible que las flanquea (2026-08-19). */}
+      <Sendas />
+      <BosqueComestible />
       <Rio />
       <Puente />
       <Lagos />

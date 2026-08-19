@@ -18,9 +18,79 @@ export const PLAZA_R = 13;
 export const CAMINOS: Array<[number, number, number, number]> = [
   [70, 0, 120, 4],    // este: plaza → distrito de proyectos → puente
   [-53, 0, 86, 4],    // oeste: plaza → naves
-  [0, 38, 4, 54],     // norte
-  [0, -38, 4, 54],    // sur
 ];
+
+// ---------------------------------------------------------------------------
+// LAS SEIS SENDAS (2026-08-19, petición de Eugenio: «en la plaza pon 6 caminos
+// adoquinados... y en cada uno un cartel con el área al que te llevan, y que
+// te lleven a una plaza secundaria de esa temática»).
+//
+// Salen de la plaza central como los radios de una rueda, cada 60°. Cada una
+// tiene su tema, su color, su cartel y su plaza al final. De aquí sale TODO:
+// el empedrado, los carteles, las plazas secundarias, el bosque comestible de
+// los lados, dónde no nace la hierba y lo que dibuja el minimapa.
+// ---------------------------------------------------------------------------
+export interface Senda {
+  id: string;
+  /** Radianes. 0 = este (+x); crece hacia +z (sur en pantalla). */
+  ang: number;
+  /** Hasta dónde llega, desde el centro de la plaza. */
+  largo: number;
+  ancho: number;
+  /** Lo que hay al final: es lo que dice el cartel. */
+  tema: string;
+  /** Una línea de qué encuentras allí. */
+  pie: string;
+  color: string;
+}
+
+const G = Math.PI / 180;
+export const SENDAS: Senda[] = [
+  { id: 'proyectos', ang: 0, largo: 92, ancho: 4.6, tema: 'Distrito de proyectos', pie: 'Tus proyectos, uno por portal', color: '#7dd3fc' },
+  { id: 'huerto', ang: 60 * G, largo: 86, ancho: 4.2, tema: 'Huerto y bosque comestible', pie: 'Frutales, bayas y aromáticas', color: '#86efac' },
+  { id: 'agua', ang: 120 * G, largo: 90, ancho: 4.2, tema: 'Fuente y jardín de agua', pie: 'El agua de la aldea', color: '#93c5fd' },
+  { id: 'talleres', ang: 180 * G, largo: 88, ancho: 4.6, tema: 'Talleres y naves', pie: 'Donde se fabrica y se repara', color: '#fdba74' },
+  { id: 'encuentro', ang: 240 * G, largo: 84, ancho: 4.2, tema: 'Plaza del encuentro', pie: 'Mercado, música y vecinos', color: '#f9a8d4' },
+  { id: 'saber', ang: 300 * G, largo: 84, ancho: 4.2, tema: 'Bosque del saber', pie: 'Lectura, sombra y silencio', color: '#c4b5fd' },
+];
+
+/** Radio de cada plaza secundaria (empedrada, al final de su senda). */
+export const PLAZA_SEC_R = 9.5;
+
+/** Dónde acaba una senda: el centro de su plaza secundaria. */
+export function finDeSenda(s: Senda): { x: number; z: number } {
+  return { x: Math.cos(s.ang) * s.largo, z: Math.sin(s.ang) * s.largo };
+}
+
+/** Dónde va su cartel: a la salida de la plaza central, al borde del camino. */
+export function carteloDeSenda(s: Senda): { x: number; z: number; rot: number } {
+  const r = PLAZA_R + 3.2;
+  const lado = s.ancho / 2 + 1.5;
+  return {
+    x: Math.cos(s.ang) * r + Math.cos(s.ang + Math.PI / 2) * lado,
+    z: Math.sin(s.ang) * r + Math.sin(s.ang + Math.PI / 2) * lado,
+    // El cartel mira a quien sale de la plaza.
+    rot: -s.ang + Math.PI / 2,
+  };
+}
+
+/**
+ * ¿Este punto pisa una senda o una plaza (central o secundaria)? Lo usan el
+ * suelo libre de los árboles y la siembra de hierba: ni bosque ni matas
+ * creciendo en mitad del empedrado.
+ */
+export function enCamino(x: number, z: number, margen = 0): boolean {
+  if (Math.hypot(x, z) < PLAZA_R + margen) return true;
+  for (const s of SENDAS) {
+    const f = finDeSenda(s);
+    if (Math.hypot(x - f.x, z - f.z) < PLAZA_SEC_R + margen) return true;
+    // Distancia del punto al segmento centro → fin de senda.
+    const t = Math.max(0, Math.min(1, (x * f.x + z * f.z) / (s.largo * s.largo)));
+    const px = f.x * t, pz = f.z * t;
+    if (Math.hypot(x - px, z - pz) < s.ancho / 2 + 1.6 + margen) return true;
+  }
+  return false;
+}
 
 /** Las 4 naves industriales, al oeste. */
 export const NAVES = [-36, -12, 12, 36].map(z => ({ x: -70, z, ancho: 16, fondo: 10 }));
@@ -164,7 +234,7 @@ export function sueloLibre(x: number, z: number): boolean {
   if (Math.abs(x - centroRio(z)) < 16) return false;                // río
   if (x > -94 && x < -46 && z > -50 && z < 50) return false;        // naves
   if (Math.abs(z) < 6 && x > -98 && x < 132) return false;          // caminos E-O
-  if (Math.abs(x) < 6 && Math.abs(z) < 68) return false;            // caminos N-S
+  if (enCamino(x, z, 2)) return false;                              // las 6 sendas y sus plazas
   for (const l of LAGOS) {
     if (Math.hypot((x - l.x) / (l.rx + 8), (z - l.z) / (l.rz + 8)) < 1) return false;
   }
@@ -221,7 +291,15 @@ export function piezasAldea(): PiezaAldea[] {
     lista.push({ seed_id: `casa:${i}`, tipo: 'casa', x: c.x, z: c.z, rot: c.rot, radio: 7, modelo: c.modelo }));
   NAVES.forEach((nv, i) =>
     lista.push({ seed_id: `nave:${i}`, tipo: 'nave', x: nv.x, z: nv.z, rot: 0, radio: 8.6 }));
-  lista.push({ seed_id: 'fuente:0', tipo: 'fuente', x: 0, z: 0, rot: 0, radio: 2.9 });
+  // El corazón de la aldea (2026-08-19, petición de Eugenio): un FICUS con su
+  // estanque alrededor. Ocupa el centro que antes tenía la fuente; ella se
+  // muda a su plaza secundaria, la del agua.
+  lista.push({ seed_id: 'ficus:0', tipo: 'ficus', x: 0, z: 0, rot: 0, radio: 5.2 });
+  {
+    const agua = SENDAS.find(s => s.id === 'agua')!;
+    const f = finDeSenda(agua);
+    lista.push({ seed_id: 'fuente:0', tipo: 'fuente', x: f.x, z: f.z, rot: 0, radio: 2.9 });
+  }
   BANCOS.forEach((b, i) =>
     lista.push({ seed_id: `banco:${i}`, tipo: 'banco', x: b.x, z: b.z, rot: b.rot, radio: 1.2 }));
   FAROLAS.forEach((f, i) =>

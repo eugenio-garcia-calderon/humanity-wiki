@@ -273,9 +273,9 @@ export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onC
   });
 
   return (
-    // Spawn on the south path at the plaza edge: open view over the fountain,
-    // no house blocking the camera.
-    <group ref={grupo} position={[0, 0, 17]}>
+    // Apareces DENTRO de la plaza, mirando al ficus del centro (2026-08-19):
+    // desde aquí se ven el árbol, su estanque y las seis sendas saliendo.
+    <group ref={grupo} position={[0, 0, 9.5]}>
       {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
           vuelta que había aquí hacía que anduviera de espaldas. */}
       {vehiculo === 'pie' && (

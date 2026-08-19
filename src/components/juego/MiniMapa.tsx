@@ -3,7 +3,7 @@ import type * as THREE from 'three';
 import { Map as MapIcon, X, Maximize2, UserPlus, Building2, Bot } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { nombreLimpio, type Agente, type ProyectoJuego, type ItemMundo, type OverrideMundo } from './tipos';
-import { MITAD, PLAZA_R, CAMINOS, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionesProyectos } from './mapa';
+import { MITAD, PLAZA_R, PLAZA_SEC_R, CAMINOS, SENDAS, finDeSenda, NAVES, LAGOS, DISTRITO, casasAldea, trazadoRio, posicionesProyectos } from './mapa';
 import { CASA_DEL_ROBOT } from './Robot';
 
 
@@ -157,7 +157,24 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
         const [x, y] = aSvg(cx - w / 2, cz - l / 2);
         return <rect key={i} x={x} y={y} width={w} height={l} fill="#d9c9a3" />;
       })}
+      {/* Las 6 sendas radiales y sus plazas temáticas (2026-08-19): el mapa
+          dibuja lo MISMO que el mundo, cada una con su color de tema. */}
+      {SENDAS.map(s2 => {
+        const f = finDeSenda(s2);
+        const [x1, y1] = aSvg(0, 0);
+        const [x2, y2] = aSvg(f.x, f.z);
+        return (
+          <g key={s2.id}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#d9c9a3" strokeWidth={s2.ancho} strokeLinecap="round" />
+            <circle cx={x2} cy={y2} r={PLAZA_SEC_R} fill="#cbbfa4" />
+            <circle cx={x2} cy={y2} r={PLAZA_SEC_R} fill="none" stroke={s2.color} strokeWidth={2.4} />
+          </g>
+        );
+      })}
       <circle {...(() => { const [cx, cy] = aSvg(0, 0); return { cx, cy }; })()} r={PLAZA_R} fill="#cbbfa4" />
+      {/* El ficus y su estanque, en el centro */}
+      <circle {...(() => { const [cx, cy] = aSvg(0, 0); return { cx, cy }; })()} r={5.1} fill="#4a86a6" />
+      <circle {...(() => { const [cx, cy] = aSvg(0, 0); return { cx, cy }; })()} r={3.4} fill="#5b8a46" />
       {NAVES.map((n, i) => {
         const [x, y] = aSvg(n.x - n.ancho / 2, n.z - n.fondo / 2);
         return <rect key={i} x={x} y={y} width={n.ancho} height={n.fondo} fill="#8fa3ad" />;
