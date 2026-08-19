@@ -494,7 +494,18 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
 const EJE_Y = new THREE.Vector3(0, 1, 0);
 
 // ---------------------------------------------------------------------------
-export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
+/**
+ * En qué OLEADA entra cada familia de piezas (2026-08-19). Lo que tienes
+ * delante al aparecer va en la 0; lo que está a doscientos metros, en la
+ * última. Ver `Oleadas.tsx` para el porqué.
+ */
+const OLEADA_DE_PIEZA: Record<string, number> = {
+  ficus: 0, fuente: 0,                                   // el centro de la plaza
+  casa: 1, nave: 1, camper: 1,                           // el pueblo
+  banco: 2, farola: 2, puesto: 2, pozo: 2, carro: 2,     // el mobiliario
+};
+
+export function Aldea({ piezas, onPulsar, onAgarrar, ocultar, oleada = 9 }: {
   /** El pueblo con los retoques del jugador YA aplicados (los calcula Escena). */
   piezas: PiezaAldea[];
   /** Un clic en cualquier pieza abre sus opciones (mover, diseño, eliminar…). */
@@ -503,6 +514,8 @@ export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
   onAgarrar: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
   /** La pieza que va agarrada: no se dibuja (la lleva el fantasma). */
   ocultar?: string;
+  /** Hasta qué oleada se ha montado ya. 9 = todo (por si alguien no la pasa). */
+  oleada?: number;
 }) {
   const de = (tipo: string) => piezas.filter(p => p.tipo === tipo && p.seed_id !== ocultar);
   const arboles = useMemo(
@@ -511,23 +524,30 @@ export function Aldea({ piezas, onPulsar, onAgarrar, ocultar }: {
   );
   return (
     <group>
+      {/* Oleada 0: el suelo y el empedrado. Sin esto no hay dónde pisar, así
+          que es lo primero que se monta y lo que decide cuándo se quita la
+          pantalla de carga. */}
       <Terreno />
       <Caminos />
-      {['ficus', 'fuente', 'casa', 'nave', 'banco', 'farola', 'puesto', 'pozo', 'carro', 'camper'].map(tipo =>
-        de(tipo).map((p, i) => (
+      {Object.entries(OLEADA_DE_PIEZA).map(([tipo, cuando]) =>
+        oleada >= cuando && de(tipo).map((p, i) => (
           <Editable key={p.seed_id} pieza={p} onPulsar={onPulsar} onAgarrar={onAgarrar}>
             <PiezaVisual pieza={p} indice={i} />
           </Editable>
         )))}
-      {/* Las 6 sendas con sus carteles y plazas temáticas, y el bosque
-          comestible que las flanquea (2026-08-19). */}
-      <Sendas />
-      <BosqueComestible />
-      <Rio />
-      <Puente />
-      <Lagos />
-      <Vegetacion arboles={arboles} onPulsar={onPulsar} onAgarrar={onAgarrar} />
-      <Detalles />
+      {/* Oleada 2: las 6 sendas con sus carteles y plazas temáticas, y el
+          agua del valle. */}
+      {oleada >= 2 && <><Sendas /><Rio /><Puente /><Lagos /></>}
+      {/* Oleada 3: la vegetación. Es con diferencia lo más caro de construir
+          (~600 plantas comestibles más la arboleda) y es TODO decorado: que
+          entre la última, cuando ya llevas un rato andando. */}
+      {oleada >= 3 && (
+        <>
+          <BosqueComestible />
+          <Vegetacion arboles={arboles} onPulsar={onPulsar} onAgarrar={onAgarrar} />
+          <Detalles />
+        </>
+      )}
     </group>
   );
 }

@@ -295,7 +295,9 @@ export function piezasAldea(): PiezaAldea[] {
   // El corazón de la aldea (2026-08-19, petición de Eugenio): un FICUS con su
   // estanque alrededor. Ocupa el centro que antes tenía la fuente; ella se
   // muda a su plaza secundaria, la del agua.
-  lista.push({ seed_id: 'ficus:0', tipo: 'ficus', x: 0, z: 0, rot: 0, radio: 5.2 });
+  // El ficus encogió a la cuarta parte (2026-08-19): su choque es ahora el
+  // brocal del estanque más el arriate de flores, no los 5,2 m de antes.
+  lista.push({ seed_id: 'ficus:0', tipo: 'ficus', x: 0, z: 0, rot: 0, radio: 2.4 });
   {
     const agua = SENDAS.find(s => s.id === 'agua')!;
     const f = finDeSenda(agua);
