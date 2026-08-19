@@ -1125,3 +1125,12 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
 - **En el Escritorio, «Explorar» deja de estar en la cabecera**: ya vivía dentro de la hamburguesa, que lleva todas las secciones. Enseñarlo dos veces era justo el ruido que había que quitar. En el resto de la app no cambia nada.
 - Se queda arriba a la derecha lo que NO está en la hamburguesa —la cuenta, ajustes y salir—, porque esconderlo sería quitarte la salida de la aplicación, no limpiar la pantalla.
 - Verificado en el navegador: la franja de ventanas arriba con «Abrir» y las dos ventanas, el borde inferior vacío, y la cabecera con solo la hamburguesa y la marca.
+
+### 2026-08-19 — El Escritorio como navegación: pantalla completa y cambio con gesto
+- **TODAS LAS SECCIONES, EN LA LÍNEA DE ARRIBA** (petición de Eugenio: «que esté todo en la línea superior, no en un menú secundario»). Nueve botones directos —Juego, Web, Mapa, Conocimiento, Explorar, Mi conocimiento, Mis proyectos, Mercado y Universo—, sin desplegable. El que está delante se ve en negro; los abiertos, en gris.
+- **CADA SECCIÓN SE ABRE A PANTALLA COMPLETA, EN SU VENTANA** («que el juego se abra en pantalla completa, y el navegador igual pero en otra ventana»). Es el modelo de macOS: cada cosa ocupa su pantalla y se salta de una a otra. Con ventanitas superpuestas el gesto de cambiar no significaría nada.
+- **Pulsar una sección ya abierta la trae al frente en vez de duplicarla.** Con las secciones a un clic es facilísimo pulsar dos veces, y dos ventanas del mismo mapa no le sirven a nadie.
+- **CAMBIAR DE VENTANA CON EL TRACKPAD**: deslizamiento **horizontal de dos dedos**, con las flechas ‹ › de la barra y con **⌘←/⌘→** como alternativas.
+  - **Por qué dos dedos y no cuatro**: una web NO puede saber cuántos dedos hay en el trackpad. macOS se queda los gestos de tres y cuatro dedos para sí mismo (Mission Control, cambiar de escritorio) y **nunca llegan a la página**. No es una limitación de este código: no hay forma de detectarlos desde un navegador; solo una aplicación nativa podría. El de dos dedos sí llega —como una rueda con desplazamiento en X— y es el equivalente que sí funciona.
+  - Se exige que el gesto sea claramente horizontal y se deja 700 ms entre cambios: un solo deslizamiento manda decenas de eventos y sin eso saltarías cinco ventanas de una pasada.
+- Verificado en el navegador: los nueve botones en una sola línea, las dos ventanas naciendo a pantalla completa, y el cambio funcionando tanto con el deslizamiento como con ⌘→.
