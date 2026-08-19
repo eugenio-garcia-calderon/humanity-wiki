@@ -34,3 +34,11 @@ que anotarlos en esta tabla.
   License: CC0 1.0 (public domain). Recomprimidas a JPEG q70-85.
 - `texturas/agua_normales.jpg` — three.js examples (waternormals.jpg),
   https://github.com/mrdoob/three.js — License: MIT.
+
+## Texturas PBR de vegetación y edificios (fases 2-3 del realismo)
+
+- `texturas/corteza` — "Bark 012", `texturas/follaje` — "Moss 002",
+  `texturas/roca` — "Rock 051", `texturas/teja` — "Roofing Tiles 013 A",
+  `texturas/revoco` — "Plaster 001", `texturas/ladrillo` — "Bricks 075 A",
+  `texturas/chapa` — "Metal 032" — todas de https://ambientcg.com,
+  License: CC0 1.0 (public domain). Recomprimidas a JPEG q70-85.

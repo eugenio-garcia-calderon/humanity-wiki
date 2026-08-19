@@ -21,7 +21,7 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Billboard, Text, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { PALETA } from './paleta';
-import { Modelo, CASAS } from './Modelos';
+import { CasaReal } from './CasaReal';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
 import { RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
 import { Rotulo, SenalDePortal } from './Senales';
@@ -118,8 +118,8 @@ export function PropMundo({ modelo, semilla }: { modelo: string; semilla: string
     case 'casa': {
       let h = 0;
       for (let i = 0; i < semilla.length; i++) h = (h * 31 + semilla.charCodeAt(i)) >>> 0;
-      // Misma escala que las casas de la aldea (Aldea.tsx): 6,4 ≈ 5,3 m de alto.
-      return <Modelo nombre={CASAS[h % CASAS.length]} escala={6.4} />;
+      // Fase 3 del realismo: la misma CasaReal de la aldea, variante por id.
+      return <CasaReal variante={h % 12} />;
     }
     case 'banco': return <Banco x={0} z={0} rot={0} />;
     case 'farola': return <Farola x={0} z={0} />;

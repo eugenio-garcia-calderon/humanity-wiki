@@ -7,7 +7,10 @@
 // ============================================================================
 import * as THREE from 'three';
 
-export type NombreTextura = 'hierba' | 'tierra' | 'grava' | 'adoquin' | 'madera';
+export type NombreTextura =
+  | 'hierba' | 'tierra' | 'grava' | 'adoquin' | 'madera'
+  | 'corteza' | 'follaje' | 'roca'
+  | 'teja' | 'revoco' | 'ladrillo' | 'chapa';
 
 const cargador = new THREE.TextureLoader();
 const cache = new Map<string, THREE.Texture>();

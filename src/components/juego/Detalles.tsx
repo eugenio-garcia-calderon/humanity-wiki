@@ -12,6 +12,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PALETA, crearAzar } from './paleta';
+import { mapasPBR } from './texturas';
 
 // ---------------------------------------------------------------------------
 export function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
@@ -19,11 +20,11 @@ export function Banco({ x, z, rot }: { x: number; z: number; rot: number }) {
     <group position={[x, 0, z]} rotation-y={rot}>
       <mesh castShadow receiveShadow position={[0, 0.45, 0]}>
         <boxGeometry args={[2.2, 0.12, 0.6]} />
-        <meshStandardMaterial color={PALETA.maderaBanco} />
+        <meshStandardMaterial {...mapasPBR('madera', 2, 0.6)} color={PALETA.maderaBanco} />
       </mesh>
       <mesh castShadow position={[0, 0.82, -0.26]} rotation-x={-0.22}>
         <boxGeometry args={[2.2, 0.55, 0.1]} />
-        <meshStandardMaterial color={PALETA.maderaBanco} />
+        <meshStandardMaterial {...mapasPBR('madera', 2, 0.5)} color={PALETA.maderaBanco} />
       </mesh>
       {[-0.9, 0.9].map((px, i) => (
         <mesh key={i} castShadow position={[px, 0.22, 0]}>
@@ -40,7 +41,7 @@ export function Farola({ x, z }: { x: number; z: number }) {
     <group position={[x, 0, z]}>
       <mesh castShadow position={[0, 0.12, 0]}>
         <cylinderGeometry args={[0.28, 0.34, 0.24, 8]} />
-        <meshStandardMaterial color={PALETA.piedra} />
+        <meshStandardMaterial {...mapasPBR('roca', 0.6, 0.3)} />
       </mesh>
       <mesh castShadow position={[0, 1.8, 0]}>
         <cylinderGeometry args={[0.08, 0.11, 3.4, 8]} />
@@ -65,7 +66,7 @@ export function PuestoMercado({ x, z, rot, color }: { x: number; z: number; rot:
       {/* mostrador */}
       <mesh castShadow receiveShadow position={[0, 0.85, 0]}>
         <boxGeometry args={[3, 0.14, 1.4]} />
-        <meshStandardMaterial color={PALETA.madera} />
+        <meshStandardMaterial {...mapasPBR('madera', 2.4, 1.1)} />
       </mesh>
       {[[-1.35, -0.6], [1.35, -0.6], [-1.35, 0.6], [1.35, 0.6]].map(([px, pz], i) => (
         <mesh key={i} castShadow position={[px, 0.42, pz]}>
@@ -101,7 +102,7 @@ export function Pozo({ x, z }: { x: number; z: number }) {
     <group position={[x, 0, z]}>
       <mesh castShadow receiveShadow position={[0, 0.5, 0]}>
         <cylinderGeometry args={[1.05, 1.15, 1, 12]} />
-        <meshStandardMaterial color={PALETA.piedra} flatShading />
+        <meshStandardMaterial {...mapasPBR('roca', 2.2, 0.6)} flatShading />
       </mesh>
       <mesh position={[0, 1.0, 0]}>
         <cylinderGeometry args={[0.9, 0.9, 0.06, 12]} />
@@ -119,7 +120,7 @@ export function Pozo({ x, z }: { x: number; z: number }) {
       </mesh>
       <mesh castShadow position={[0, 2.95, 0]} rotation-y={Math.PI / 4}>
         <coneGeometry args={[1.5, 0.75, 4]} />
-        <meshStandardMaterial color={PALETA.tejados[1]} flatShading />
+        <meshStandardMaterial {...mapasPBR('teja', 1.6, 0.8)} flatShading />
       </mesh>
       <mesh castShadow position={[0, 1.9, 0]}>
         <boxGeometry args={[0.34, 0.34, 0.34]} />
@@ -134,7 +135,7 @@ export function Carro({ x, z, rot }: { x: number; z: number; rot: number }) {
     <group position={[x, 0, z]} rotation-y={rot}>
       <mesh castShadow receiveShadow position={[0, 0.75, 0]}>
         <boxGeometry args={[2.6, 0.5, 1.3]} />
-        <meshStandardMaterial color={PALETA.madera} />
+        <meshStandardMaterial {...mapasPBR('madera', 2.2, 1.1)} />
       </mesh>
       {[-0.55, 0.55].map((pz, i) => (
         <mesh key={i} castShadow position={[0.7, 0.5, pz]} rotation-x={Math.PI / 2}>
@@ -286,7 +287,7 @@ function Huerto({ x, z, azar }: { x: number; z: number; azar: () => number }) {
     <group position={[x, 0, z]}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03} receiveShadow>
         <planeGeometry args={[7, 6]} />
-        <meshStandardMaterial color={PALETA.tierra} />
+        <meshStandardMaterial {...mapasPBR('tierra', 2.4, 2)} />
       </mesh>
       {surcos.map((s, i) => (
         <mesh key={i} position={[0, 0.16, s.pz]} castShadow>
