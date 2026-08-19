@@ -218,6 +218,8 @@ export interface OverrideMundo {
   z: number | null;
   rot: number | null;
   modelo: string | null;
+  /** Rótulo propio que le ha puesto el jugador (los carteles de las sendas). */
+  texto?: string | null;
   /** La pieza es un portal con su forma de siempre: lleva a este proyecto. */
   portal_proyecto_id?: string | null;
 }

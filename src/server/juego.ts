@@ -333,7 +333,7 @@ export function registerJuegoRoutes(app: Express, db: any) {
         ORDER BY created_at ASC
       `);
       const overrides = await db.execute(sql`
-        SELECT seed_id, eliminado, x, z, rot, modelo, portal_proyecto_id
+        SELECT seed_id, eliminado, x, z, rot, modelo, texto, portal_proyecto_id
         FROM game_world_overrides
         WHERE user_id = ${req.user.id}
       `);
@@ -404,15 +404,24 @@ export function registerJuegoRoutes(app: Express, db: any) {
       const seed = String(d.seed_id || '');
       if (!seed) return res.status(400).json({ error: 'Falta el objeto a retocar.' });
       await db.execute(sql`
-        INSERT INTO game_world_overrides (user_id, seed_id, eliminado, x, z, rot, modelo)
+        INSERT INTO game_world_overrides (user_id, seed_id, eliminado, x, z, rot, modelo, texto)
         VALUES (${req.user!.id}, ${seed}, ${!!d.eliminado},
-                ${d.x ?? null}, ${d.z ?? null}, ${d.rot ?? null}, ${d.modelo ?? null})
+                ${d.x ?? null}, ${d.z ?? null}, ${d.rot ?? null}, ${d.modelo ?? null},
+                ${d.texto ?? null})
         ON CONFLICT (user_id, seed_id) DO UPDATE SET
           eliminado  = ${!!d.eliminado},
           x          = COALESCE(${d.x ?? null}::double precision, game_world_overrides.x),
           z          = COALESCE(${d.z ?? null}::double precision, game_world_overrides.z),
           rot        = COALESCE(${d.rot ?? null}::double precision, game_world_overrides.rot),
           modelo     = COALESCE(${d.modelo ?? null}, game_world_overrides.modelo),
+          -- El texto tiene TRES casos, no dos, y por eso no vale un COALESCE:
+          --   · no viene el campo  → se deja como estaba (mover o girar un
+          --     cartel no puede borrarle el nombre; pasó en pruebas)
+          --   · viene vacío        → se borra, y vuelve al nombre de fábrica
+          --   · viene con texto    → se guarda
+          texto      = CASE WHEN ${d.texto === undefined}::boolean
+                            THEN game_world_overrides.texto
+                            ELSE ${d.texto || null} END,
           updated_at = now()
       `);
       res.json({ ok: true });

@@ -221,6 +221,8 @@ export default function JuegoVital() {
   const [crearEn, setCrearEn] = useState<{ x: number; z: number } | null>(null);
   const [leyendo, setLeyendo] = useState<ItemMundo | null>(null);
   const [notaBorrador, setNotaBorrador] = useState('');
+  // Lo que se está escribiendo en el rótulo de un cartel de camino.
+  const [cartelBorrador, setCartelBorrador] = useState('');
   /** Mini-formulario del panel de crear: link, vídeo, música, lienzo o mapa. */
   const [formCrear, setFormCrear] = useState<{ tipo: 'enlace' | 'video' | 'musica' | 'lienzo' | 'mapa'; url: string; nombre: string } | null>(null);
   /** Dónde plantar el edificio si el proyecto se crea desde el suelo. */
@@ -852,6 +854,7 @@ export default function JuegoVital() {
     setCrearEn(null);
     setMoviendoMundo(false);
     setNotaBorrador(sel.tipo === 'nota' ? (sel.texto || '') : '');
+    setCartelBorrador(sel.tipo === 'cartel' ? (sel.texto || '') : '');
   }, [mundoItems, guardarItem]);
 
   /** Clic en suelo vacío: colocar lo elegido en el menú, crear ahí, o cerrar. */
@@ -1742,6 +1745,22 @@ export default function JuegoVital() {
           overrides={overridesMundo}
           onViajar={viajarA}
           onCrearEn={user ? (p) => { setCrearEn(p); setSelMundo(null); setSelHilo(null); } : undefined}
+          // Colocar y quitar desde el mapa 2D (2026-08-19, petición de
+          // Eugenio). Reutiliza los MISMOS guardados que el editor del mundo
+          // 3D: una cosa movida en el mapa está movida de verdad.
+          onMoverElemento={user ? ((sel, x, z) => {
+            if (sel.clase === 'item') guardarItem(sel.id, { x, z });
+            else guardarOverride(sel.id, { x, z, eliminado: false });
+          }) : undefined}
+          onBorrarElemento={user ? ((sel) => {
+            if (sel.clase === 'item') {
+              setMundoItems(prev => prev.filter(it => it.id !== sel.id));
+              fetch(`/api/juego/mundo/${sel.id}/archivar`, { method: 'POST', credentials: 'include' }).catch(() => {});
+            } else {
+              guardarOverride(sel.id, { eliminado: true });
+            }
+            avisar('Quitado del mapa. (Se guarda en tu mundo, no borra nada de la plataforma.)');
+          }) : undefined}
         />
       )}
       {/* El dinero, estilo GTA: siempre visible bajo el minimapa. Dentro de
@@ -1932,6 +1951,25 @@ export default function JuegoVital() {
               <p className="text-xs font-black text-slate-900 truncate">{selMundo.etiqueta}</p>
               <Button variant="ghost" onClick={() => setSelMundo(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
             </div>
+            {/* RENOMBRAR EL CARTEL (2026-08-19, petición de Eugenio). Vaciar
+                el campo lo devuelve a su nombre de fábrica. */}
+            {selMundo.clase === 'semilla' && selMundo.tipo === 'cartel' && (
+              <>
+                <input
+                  value={cartelBorrador}
+                  onChange={e => setCartelBorrador(e.target.value)}
+                  onBlur={() => {
+                    if (cartelBorrador === (selMundo.texto || '')) return;
+                    guardarOverride(selMundo.id, { texto: cartelBorrador, eliminado: false });
+                    setSelMundo({ ...selMundo, texto: cartelBorrador });
+                  }}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                  className="w-full mt-2 px-2.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-300"
+                  placeholder="Cómo quieres que se llame este camino"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Déjalo vacío para volver al nombre de siempre.</p>
+              </>
+            )}
             {selMundo.tipo === 'nota' && (
               <textarea
                 value={notaBorrador}
