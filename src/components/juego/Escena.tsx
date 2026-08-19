@@ -177,6 +177,8 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
         z: o.z ?? p.z,
         rot: o.rot ?? p.rot,
         modelo: o.modelo != null && o.modelo !== '' ? Number(o.modelo) : p.modelo,
+        // El rótulo que le haya puesto el jugador (los carteles de las sendas).
+        texto: o.texto || p.texto,
         portalProyectoId: o.portal_proyecto_id || null,
         portalTitulo: o.portal_proyecto_id ? titulosProy.get(o.portal_proyecto_id) : undefined,
       });

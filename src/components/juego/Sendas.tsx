@@ -10,7 +10,7 @@
 // ============================================================================
 import { Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
-import { SENDAS, PLAZA_R, PLAZA_SEC_R, finDeSenda, carteloDeSenda, type Senda } from './mapa';
+import { SENDAS, PLAZA_R, PLAZA_SEC_R, finDeSenda, type Senda } from './mapa';
 import { mapasPBR } from './texturas';
 import { MaterialAgua } from './Agua';
 
@@ -34,10 +34,11 @@ function Empedrado({ s }: { s: Senda }) {
  * El cartel de madera de una senda: dos postes, tablón, el nombre del área a
  * la que lleva y una línea de qué encontrarás. Va a la salida de la plaza.
  */
-function Cartel({ s }: { s: Senda }) {
-  const p = carteloDeSenda(s);
+export function Cartel({ s, texto }: { s: Senda; texto?: string }) {
+  // El título es el que le haya puesto el jugador; si no, el de fábrica.
+  const titulo = (texto || '').trim() || s.tema;
   return (
-    <group position={[p.x, 0, p.z]} rotation-y={p.rot}>
+    <group>
       {/* Los dos postes */}
       {[-0.95, 0.95].map(x => (
         <mesh key={x} position={[x, 1.05, 0]} castShadow>
@@ -61,7 +62,7 @@ function Cartel({ s }: { s: Senda }) {
           <Text position={[0, 2.06, 0]} fontSize={0.235} maxWidth={2.3} color="#fdf6e6"
             anchorX="center" anchorY="middle" textAlign="center"
             outlineWidth={0.012} outlineColor="#3a2a18">
-            {s.tema}
+            {titulo}
           </Text>
           <Text position={[0, 1.72, 0]} fontSize={0.145} maxWidth={2.3} color="#d9c9a8"
             anchorX="center" anchorY="middle" textAlign="center">
@@ -236,7 +237,9 @@ export function Sendas() {
       {SENDAS.map(s => (
         <group key={s.id}>
           <Empedrado s={s} />
-          <Cartel s={s} />
+          {/* El CARTEL ya no se dibuja aquí: desde 2026-08-19 es una pieza del
+              pueblo (`cartel:<senda>`), para que se pueda mover, quitar y
+              renombrar como cualquier otra cosa. Lo pinta `Aldea.tsx`. */}
           <PlazaSecundaria s={s} />
         </group>
       ))}

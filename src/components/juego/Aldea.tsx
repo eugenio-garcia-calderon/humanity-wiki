@@ -17,7 +17,7 @@ import { PantallaVisual } from './Pantalla';
 import { SenalDePortal } from './Senales';
 import { CasaReal } from './CasaReal';
 import { Ficus } from './Ficus';
-import { Sendas } from './Sendas';
+import { Sendas, Cartel } from './Sendas';
 import { BosqueComestible } from './BosqueComestible';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
 // el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
@@ -29,6 +29,7 @@ const ETIQUETAS: Record<string, string> = {
   casa: 'Casa', nave: 'Nave', fuente: 'Fuente', banco: 'Banco', farola: 'Farola',
   puesto: 'Puesto del mercado', pozo: 'Pozo', carro: 'Carro', arbol: 'Árbol',
   camper: 'Camión camperizado', pantalla: 'Gran pantalla', ficus: 'Ficus del centro',
+  cartel: 'Cartel del camino',
 };
 
 function seleccionDe(p: PiezaAldea): SeleccionMundo {
@@ -37,6 +38,8 @@ function seleccionDe(p: PiezaAldea): SeleccionMundo {
     etiqueta: ETIQUETAS[p.tipo] || p.tipo,
     x: p.x, z: p.z, rot: p.rot,
     modelo: p.modelo != null ? String(p.modelo) : null,
+    // El rótulo propio del cartel, para que el panel lo pueda editar.
+    texto: p.texto ?? null,
   };
 }
 
@@ -81,7 +84,7 @@ function Editable({ pieza, onPulsar, onAgarrar, children }: {
  *  tejado, no dentro de él. */
 const ALTO_SENAL: Record<string, number> = {
   casa: 8.6, nave: 9.2, camper: 4.6, fuente: 4.2, banco: 2.4, farola: 4.6, pantalla: 9.4, ficus: 9.5,
-  puesto: 3.6, pozo: 3.2, carro: 2.8, arbol: 6.2,
+  puesto: 3.6, pozo: 3.2, carro: 2.8, arbol: 6.2, cartel: 3.2,
 };
 
 /** El aspecto de una pieza del pueblo, sin posición: lo usan el ensamblado y
@@ -96,6 +99,8 @@ export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?:
     case 'nave': return <Nave />;
     // El corazón de la aldea: ficus con estanque (2026-08-19).
     case 'ficus': return <Ficus />;
+    // Los carteles de las seis sendas: pieza editable desde 2026-08-19.
+    case 'cartel': return pieza.senda ? <Cartel s={pieza.senda} texto={pieza.texto} /> : null;
     case 'fuente': return <Fuente />;
     case 'banco': return <Banco x={0} z={0} rot={0} />;
     case 'farola': return <Farola x={0} z={0} />;
@@ -503,6 +508,7 @@ const OLEADA_DE_PIEZA: Record<string, number> = {
   ficus: 0, fuente: 0,                                   // el centro de la plaza
   casa: 1, nave: 1, camper: 1,                           // el pueblo
   banco: 2, farola: 2, puesto: 2, pozo: 2, carro: 2,     // el mobiliario
+  cartel: 2,                                             // con sus sendas
 };
 
 export function Aldea({ piezas, onPulsar, onAgarrar, ocultar, oleada = 9 }: {

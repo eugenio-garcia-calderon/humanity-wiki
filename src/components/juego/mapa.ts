@@ -198,6 +198,11 @@ export interface PiezaAldea {
   rot: number;
   /** Radio de choque. 0 = no es sólida (no pasa con ninguna de serie). */
   radio: number;
+  /** Solo carteles: de qué senda son (color del tema) y qué pone en ellos.
+   *  El texto de fábrica sale de `SENDAS`; si el jugador lo ha renombrado,
+   *  Escena mete aquí el suyo. */
+  senda?: Senda;
+  texto?: string;
   /** Solo árboles: escala y si es pino. Solo casas: índice de modelo. */
   escala?: number;
   pino?: boolean;
@@ -298,6 +303,16 @@ export function piezasAldea(): PiezaAldea[] {
   // El ficus encogió a la cuarta parte (2026-08-19): su choque es ahora el
   // brocal del estanque más el arriate de flores, no los 5,2 m de antes.
   lista.push({ seed_id: 'ficus:0', tipo: 'ficus', x: 0, z: 0, rot: 0, radio: 2.4 });
+
+  // LOS SEIS CARTELES como piezas del pueblo (2026-08-19, petición de Eugenio:
+  // «que los carteles también se pueda editar su nombre y mover como el resto
+  // de elementos»). Al ser piezas con seed_id heredan GRATIS todo el editor:
+  // arrastrar, girar, quitar y volver a poner. El rótulo propio viaja en el
+  // campo `texto` del retoque.
+  for (const s of SENDAS) {
+    const c = carteloDeSenda(s);
+    lista.push({ seed_id: `cartel:${s.id}`, tipo: 'cartel', x: c.x, z: c.z, rot: c.rot, radio: 1.3, senda: s });
+  }
   {
     const agua = SENDAS.find(s => s.id === 'agua')!;
     const f = finDeSenda(agua);

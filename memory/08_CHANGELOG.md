@@ -1016,3 +1016,16 @@ Eugenio pidió quitar efectos innecesarios para ganar velocidad, avisando de que
 - **MAPAS DE RELIEVE Y RUGOSIDAD A 512** (el color se queda en 1024): 12,1 MB → 1,7 MB y 2,8 MB → 1,2 MB. Son texturas que se repiten 40×40 sobre el suelo; a esa escala la mitad de resolución no se distingue, comprobado en pantalla.
 - **La carpeta del juego pasa de 46 MB a 30 MB.** Sumando lo de esta mañana (PNG → JPEG en los personajes), viene de 69 MB: **se ha quedado en menos de la mitad**.
 - Verificado en el navegador: 58 ficheros, todos 200, ningún 404 tras borrar el Ranger, y el empedrado de la plaza igual de detallado.
+
+### 2026-08-19 — El mapa 2D se maneja como un mapa, y los carteles son tuyos
+- **ZOOM Y ARRASTRE EN EL MAPA GRANDE** (petición de Eugenio: «que el minimapa 2D se pueda hacer zoom y reordenar»). La rueda acerca **hacia donde apunta el ratón** (el punto bajo el cursor se queda quieto, como en cualquier mapa de verdad), arrastrar el fondo lo mueve, y hay cuatro botones: acercar, alejar, **centrar donde estás** y **ver todo**. El pie dice cuántos metros mide el lado de lo que ves. Mientras no toques nada sigue mandando el encuadre automático de siempre.
+- **MODO «COLOCAR»**: un interruptor en la cabecera. Con él puesto,
+  - salen **TODAS las piezas del pueblo** como marcadores (casas, naves, farolas, bancos, pozos, carros, carteles, el ficus…), no solo las personas y los proyectos — Eugenio pidió «todos» los elementos;
+  - **arrastrar un marcador lo recoloca de verdad** en el mundo 3D: guarda por las mismas rutas que el editor de la aldea, así que no hay dos verdades;
+  - cada marcador lleva una **✕ roja** que lo quita;
+  - y el clic deja de teletransportarte, que estando colocando cosas era un salto en falso.
+  Los 1.100 árboles del bosque quedan fuera de la lista: mil cien puntos no son un mapa.
+- **LOS SEIS CARTELES DE LAS SENDAS SON PIEZAS DEL PUEBLO** (petición de Eugenio: «que su nombre se pueda editar y moverlos como el resto»). Al pasar a tener `seed_id` (`cartel:<senda>`) heredan gratis TODO el editor: arrastrar, girar, quitar y volver a poner. Ya no los dibuja `Sendas`, los dibuja el ensamblado de la aldea.
+- **Migración `0038_cartel_texto.sql`**: columna `texto` en `game_world_overrides`. Al pulsar un cartel aparece un campo para llamarlo como quieras; **vaciarlo lo devuelve a su nombre de fábrica**.
+- Cazado en pruebas: **mover un cartel le borraba el nombre.** El texto tiene tres casos y no dos —no viene el campo / viene vacío / viene con texto— y con un solo parámetro SQL «no viene» y «viene vacío» eran lo mismo. Ahora lo decide un `CASE`, y renombrar + mover + vaciar se comportan como deben (comprobado los tres).
+- Verificado en el navegador: zoom de 270 m a 138 m de lado, las 28 piezas con su papelera en modo colocar, y un arrastre real guardando la posición nueva. Los datos de prueba, borrados: los 34 retoques de Eugenio siguen intactos.
