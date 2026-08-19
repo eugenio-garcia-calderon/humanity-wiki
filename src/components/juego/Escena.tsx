@@ -14,6 +14,7 @@ import { Hierba } from './Hierba';
 import { CicloDia, Bichos, RotuloComestible, cieloDeLaHora, type EstadoCielo } from './Vida';
 import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
 import { liberarTexturas } from './texturas';
+import { liberarFlora } from './flora';
 import { useOleadas, Oleada } from './Oleadas';
 import { Nubes, Firmamento } from './Nubes';
 import * as THREE from 'three';
@@ -321,7 +322,7 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
   // Son ~40 MB que si no se quedan ocupados hasta que recargas la pestaña, y
   // en un móvil eso es la diferencia entre que la siguiente página vaya bien
   // o que el navegador tire la pestaña entera.
-  useEffect(() => () => { liberarTexturas(); }, []);
+  useEffect(() => () => { liberarTexturas(); liberarFlora(); }, []);
 
   return (
     <Canvas

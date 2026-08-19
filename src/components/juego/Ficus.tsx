@@ -24,6 +24,7 @@ import * as THREE from 'three';
 import { crearAzar } from './paleta';
 import { mapasPBR } from './texturas';
 import { MaterialAgua } from './Agua';
+import { geoFlor, materialFlor } from './flora';
 
 /**
  * Cuánto se encoge el árbol (2026-08-19, petición de Eugenio: «que el ficus
@@ -323,14 +324,20 @@ function FloresDelFicus() {
 
         // La cabeza, en la punta del tallo. La lavanda y el romero van en
         // espiga, así que su cabeza es alargada; el resto, redonda.
-        const cb = esp.cabeza * (0.85 + azar() * 0.4);
-        V.set(fx + Math.sin(inc) * alto * 0.4, alto + cb * 0.6, fz);
-        M.compose(V, Q, new THREE.Vector3(cb, esp.alargada ? cb * 3.4 : cb, cb));
+        // Una flor abierta se ve por la CARA, así que es más ancha que alta.
+        // La lavanda y el romero van en espiga: esos sí se estiran a lo alto.
+        const cb = esp.cabeza * (1.9 + azar() * 0.8);
+        V.set(fx + Math.sin(inc) * alto * 0.4, alto + cb * 0.15, fz);
+        // Mira al cielo, ladeada como el tallo y girada a su aire.
+        Q.setFromEuler(new THREE.Euler(inc * 0.6, azar() * 6.28, (azar() - 0.5) * 0.5));
+        M.compose(V, Q, new THREE.Vector3(cb, esp.alargada ? cb * 1.8 : cb, cb));
         cabezas.push({ m: M.clone(), c: esp.color });
       }
     }
 
-    const matVerde = new THREE.MeshStandardMaterial({ color: '#4a6b3c', roughness: 0.88 });
+    // La mata lleva la MISMA textura de follaje que los árboles, no un verde
+    // plano: de cerca se le ve la hoja (2026-08-19).
+    const matVerde = new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 3.5, 3.5), color: '#7d9c68', roughness: 0.88 });
     const mallaMatas = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 7, 5), matVerde, matas.length);
     matas.forEach((m, i) => mallaMatas.setMatrixAt(i, m));
     mallaMatas.castShadow = true;
@@ -345,11 +352,8 @@ function FloresDelFicus() {
     tallos.forEach((m, i) => mallaTallos.setMatrixAt(i, m));
     g.add(mallaTallos);
 
-    const mallaFlores = new THREE.InstancedMesh(
-      new THREE.SphereGeometry(1, 6, 5),
-      new THREE.MeshStandardMaterial({ roughness: 0.62 }),
-      cabezas.length,
-    );
+    // Flor de cinco pétalos con su botón, no una bolita (2026-08-19).
+    const mallaFlores = new THREE.InstancedMesh(geoFlor(), materialFlor(), cabezas.length);
     cabezas.forEach((f, i) => { mallaFlores.setMatrixAt(i, f.m); mallaFlores.setColorAt(i, color.set(f.c)); });
     mallaFlores.castShadow = true;
     g.add(mallaFlores);

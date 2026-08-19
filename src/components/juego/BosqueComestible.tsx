@@ -23,6 +23,7 @@ import { crearAzar } from './paleta';
 import { mapasPBR } from './texturas';
 import { SENDAS, PLAZA_R, enCamino } from './mapa';
 import { ESPECIES, type Especie, type Porte, type HojaTipo } from './comestibles';
+import { geoFlor, materialFlor, materialFollaje } from './flora';
 
 /** Radio libre alrededor de la plaza central: ni un árbol dentro. */
 const CLARO_CENTRAL = 24;
@@ -278,7 +279,9 @@ export function BosqueComestible({ densidad = 1 }: { densidad?: number }) {
     //     instancia. Antes solo se agrupaba por porte y todos los frutales
     //     eran la misma bola; ahora un castaño y un naranjo tienen silueta
     //     distinta aunque compartan porte.
-    const matFollaje = new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 2, 1.4) });
+    // La tela ya NO es única: cada tipo de hoja tiene la suya, con su grano y
+    // su brillo (`flora.ts`). Antes un pino y una higuera compartían material,
+    // así que de cerca eran el mismo trapo verde.
     const porFamilia = new Map<string, { porte: Porte; hoja: HojaTipo; lista: Planta[] }>();
     for (const p of plantas) {
       const clave = `${p.especie.porte}|${p.especie.hojaTipo}`;
@@ -288,7 +291,7 @@ export function BosqueComestible({ densidad = 1 }: { densidad?: number }) {
     }
     const color = new THREE.Color();
     for (const { porte, hoja, lista } of porFamilia.values()) {
-      const malla = new THREE.InstancedMesh(geoCopa(porte, hoja), matFollaje, lista.length);
+      const malla = new THREE.InstancedMesh(geoCopa(porte, hoja), materialFollaje(hoja), lista.length);
       lista.forEach((p, i) => {
         const alto = p.especie.alto * p.escala;
         const copa = p.especie.copa * p.escala;
@@ -377,20 +380,24 @@ export function BosqueComestible({ densidad = 1 }: { densidad?: number }) {
           const cuantas = 5 + Math.floor(azar() * 5);
           for (let k = 0; k < cuantas; k++) {
             const m = new THREE.Matrix4();
-            const s2 = 0.09 + azar() * 0.06;
+            const s2 = 0.14 + azar() * 0.08;
             m.compose(
-              new THREE.Vector3(cx + (azar() - 0.5) * 1.5, 0.16 + azar() * 0.16, cz + (azar() - 0.5) * 1.5),
-              new THREE.Quaternion(),
-              new THREE.Vector3(s2, s2 * 0.75, s2),
+              new THREE.Vector3(cx + (azar() - 0.5) * 1.5, 0.18 + azar() * 0.16, cz + (azar() - 0.5) * 1.5),
+              // Cada flor mira a un lado y se ladea un poco: un cantero donde
+              // todas miran al cielo a la vez parece impreso, no plantado.
+              new THREE.Quaternion().setFromEuler(new THREE.Euler((azar() - 0.5) * 0.5, azar() * 6.28, (azar() - 0.5) * 0.5)),
+              new THREE.Vector3(s2, s2, s2),
             );
             petalos.push({ m, c });
           }
         }
       }
     }
+    // Flores con PÉTALOS, no bolitas (2026-08-19): cinco pétalos y su botón
+    // cálido, 15 triángulos, todas en una malla instanciada como antes.
     const mallaFlores = new THREE.InstancedMesh(
-      new THREE.SphereGeometry(1, 6, 5),
-      new THREE.MeshStandardMaterial({ roughness: 0.75 }),
+      geoFlor(),
+      materialFlor(),
       Math.max(1, petalos.length),
     );
     petalos.forEach((f, i) => { mallaFlores.setMatrixAt(i, f.m); mallaFlores.setColorAt(i, color.set(f.c)); });

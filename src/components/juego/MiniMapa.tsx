@@ -70,6 +70,10 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
   const [arrastrando, setArrastrando] = useState<number | null>(null);
   // El arrastre del FONDO (mover el mapa), en coordenadas de pantalla.
   const paneo = useRef<{ px: number; py: number; cx: number; cz: number } | null>(null);
+  // Último toque en suelo vacío: el menú de crear pide DOBLE clic (2026-08-19,
+  // petición de Eugenio). Con un solo clic saltaba al mover el mapa o al fallar
+  // un marcador por dos píxeles.
+  const ultimoSuelo = useRef<{ t: number; x: number; y: number } | null>(null);
   const svgGrande = useRef<SVGSVGElement>(null);
   /** Índice del marcador bajo el ratón: crece y resalta su nombre. */
   const [sobre, setSobre] = useState<number | null>(null);
@@ -144,6 +148,21 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
     const [sx, sz] = aSvg(v.cx - v.lado / 2, v.cz - v.lado / 2);
     return { viewBox: `${sx} ${sz} ${v.lado} ${v.lado}`, lado: v.lado };
   }, [v.cx, v.cz, v.lado]);
+
+  /** Abrir «Crear aquí» en el punto de pantalla dado. Lo llaman el doble clic
+   *  del navegador (ratón) y el conteo a mano de toques (dedo). */
+  const crearEnPunto = useCallback((clientX: number, clientY: number) => {
+    if (!onCrearEn) return;
+    const svg = svgGrande.current;
+    if (!svg) return;
+    const caja = svg.getBoundingClientRect();
+    const [vx, vy, vw, vh] = encuadre.viewBox.split(' ').map(Number);
+    setAbierto(false);
+    onCrearEn({
+      x: vx + ((clientX - caja.left) / caja.width) * vw - MITAD,
+      z: vy + ((clientY - caja.top) / caja.height) * vh - MITAD,
+    });
+  }, [onCrearEn, encuadre.viewBox]);
 
   /** Acercar o alejar. 240 m de tope de zoom (se ven las casas una a una) y
    *  el mundo entero de tope de alejar. */
@@ -319,7 +338,7 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                 <span className="font-medium text-slate-400 ml-1 hidden sm:inline">
                   {editando
                     ? '· arrastra para colocar · la ✕ roja quita'
-                    : '· pulsa algo para viajar · pulsa suelo vacío para crear ahí · rueda para acercar'}
+                    : '· pulsa algo para viajar · doble clic en suelo vacío para crear ahí · rueda para acercar'}
                 </span>
               </p>
               <div className="flex items-center gap-1">
@@ -385,6 +404,14 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                     return { lado, cx: antes.x - (antes.x - b.cx) * k, cz: antes.z - (antes.z - b.cz) * k };
                   });
                 }}
+                onDoubleClick={(e) => {
+                  // El doble clic de verdad del navegador. El conteo a mano de
+                  // más abajo se queda para el dedo, donde `dblclick` no es de
+                  // fiar; aquí manda este, que es exacto.
+                  if (editando) return;
+                  ultimoSuelo.current = null;
+                  crearEnPunto(e.clientX, e.clientY);
+                }}
                 onPointerDown={(e) => {
                   // Arrastrar el FONDO mueve el mapa. Los marcadores paran la
                   // propagación, así que esto solo salta en suelo vacío.
@@ -425,12 +452,22 @@ export default function MiniMapa({ jugadorPos, agentes, proyectos, items = [], o
                     if (d?.edita && onMoverElemento) onMoverElemento(d.edita, a.x, a.z);
                     return;
                   }
-                  // ¿Fue un clic limpio en suelo vacío? Entonces, crear ahí.
+                  // ¿Fue un clic limpio en suelo vacío? Hace falta el SEGUNDO
+                  // para abrir «Crear aquí»: con uno solo, cualquier intento de
+                  // mover el mapa o de pulsar un marcador y fallar por dos
+                  // píxeles te abría el menú sin querer.
                   const movido = p && (Math.abs(e.clientX - p.px) > 4 || Math.abs(e.clientY - p.py) > 4);
                   if (movido || !onCrearEn || editando) return;
-                  const m = aMundo(e.clientX, e.clientY);
-                  setAbierto(false);
-                  onCrearEn(m);
+                  // 500 ms es el doble clic del sistema. Con 400 se escapaban
+                  // los dobles clics tranquilos (medido: uno de 400 ms justos
+                  // se quedaba fuera por un pelo).
+                  const ahora = performance.now();
+                  const u = ultimoSuelo.current;
+                  const doble = u && ahora - u.t < 500
+                    && Math.abs(e.clientX - u.x) < 16 && Math.abs(e.clientY - u.y) < 16;
+                  if (!doble) { ultimoSuelo.current = { t: ahora, x: e.clientX, y: e.clientY }; return; }
+                  ultimoSuelo.current = null;
+                  crearEnPunto(e.clientX, e.clientY);
                 }}
               >
                 {terreno}
