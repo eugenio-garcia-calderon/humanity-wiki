@@ -15,7 +15,7 @@ import { Detalles, Banco, Farola, PuestoMercado, Pozo, Carro } from './Detalles'
 import { Camper } from './Camper';
 import { PantallaVisual } from './Pantalla';
 import { SenalDePortal } from './Senales';
-import { Modelo, CASAS } from './Modelos';
+import { CasaReal } from './CasaReal';
 // La distribución vive en mapa.ts y la comparten el mundo 3D, el minimapa,
 // el rebote y el editor: una pieza es LA MISMA en los cuatro sitios.
 import { MITAD, PLAZA_R, CAMINOS, LAGOS, sueloLibre, type PiezaAldea } from './mapa';
@@ -86,9 +86,10 @@ const ALTO_SENAL: Record<string, number> = {
 export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?: number }) {
   const s = pieza.escala || 1;
   switch (pieza.tipo) {
-    // A 3,2 la casa medía 2,67 m — apenas más alta que el avatar (1,86 m).
-    // A 6,4 queda en ~5,3 m: dos plantas creíbles. Radio de choque en mapa.ts.
-    case 'casa': return <Modelo nombre={CASAS[(pieza.modelo ?? 0) % CASAS.length]} escala={6.4} />;
+    // Fase 3 del realismo: la casa es ahora la CasaReal (materiales de foto),
+    // con la misma huella (~5,6 m de alto, radio de choque 7 en mapa.ts).
+    // El `modelo` de la pieza elige la variante, como elegía el GLTF antes.
+    case 'casa': return <CasaReal variante={pieza.modelo ?? 0} />;
     case 'nave': return <Nave />;
     case 'fuente': return <Fuente />;
     case 'banco': return <Banco x={0} z={0} rot={0} />;
@@ -135,18 +136,19 @@ export function PiezaVisual({ pieza, indice = 0 }: { pieza: PiezaAldea; indice?:
 function Nave() {
   return (
     <group>
+      {/* Fase 3 del realismo: paredes y techo de CHAPA metálica real. */}
       <mesh castShadow receiveShadow position={[0, 3.25, 0]}>
         <boxGeometry args={[16, 6.5, 10]} />
-        <meshStandardMaterial color={PALETA.nave} />
+        <meshStandardMaterial {...mapasPBR('chapa', 5, 2)} color={PALETA.nave} />
       </mesh>
       {/* barrel roof: squashed cylinder lying along X, lower half hidden in the body */}
       <mesh castShadow position={[0, 6.4, 0]} rotation-z={Math.PI / 2} scale={[1, 1, 0.55]}>
         <cylinderGeometry args={[5, 5, 16.3, 20]} />
-        <meshStandardMaterial color={PALETA.naveTecho} />
+        <meshStandardMaterial {...mapasPBR('chapa', 6, 3)} color={PALETA.naveTecho} />
       </mesh>
       <mesh position={[0, 2.4, 5.02]}>
         <planeGeometry args={[4.6, 4.8]} />
-        <meshStandardMaterial color={PALETA.navePuerta} />
+        <meshStandardMaterial {...mapasPBR('chapa', 2, 2)} color={PALETA.navePuerta} />
       </mesh>
     </group>
   );
@@ -299,7 +301,7 @@ function Fuente() {
     <group>
       <mesh castShadow position={[0, 0.35, 0]}>
         <cylinderGeometry args={[2.3, 2.5, 0.7, 20]} />
-        <meshStandardMaterial color={PALETA.fuentePiedra} />
+        <meshStandardMaterial {...mapasPBR('roca', 3, 0.6)} />
       </mesh>
       <mesh position={[0, 0.72, 0]}>
         <cylinderGeometry args={[2.0, 2.0, 0.06, 20]} />
@@ -307,7 +309,7 @@ function Fuente() {
       </mesh>
       <mesh castShadow position={[0, 1.35, 0]}>
         <cylinderGeometry args={[0.3, 0.42, 1.3, 10]} />
-        <meshStandardMaterial color={PALETA.fuentePiedra} />
+        <meshStandardMaterial {...mapasPBR('roca', 1, 0.8)} />
       </mesh>
       <mesh castShadow position={[0, 2.1, 0]}>
         <sphereGeometry args={[0.32, 12, 10]} />
@@ -346,23 +348,41 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
       mesh.setMatrixAt(i, m);
     };
 
-    // Troncos: uno por árbol. `userData.arboles` mapea instancia → índice del
-    // árbol en la lista, que es lo que hace el bosque PULSABLE en el editor.
+    // Deformación ORGÁNICA pero determinista: el bulto de cada vértice sale
+    // de su propia posición (mismo punto = mismo bulto), así la costura de la
+    // esfera no se abre y todas las instancias comparten la misma geometría.
+    const abollar = (geo: THREE.BufferGeometry, radio: number, fuerza: number) => {
+      const p = geo.attributes.position as THREE.BufferAttribute;
+      const v = new THREE.Vector3();
+      for (let i = 0; i < p.count; i++) {
+        v.set(p.getX(i), p.getY(i), p.getZ(i));
+        const d = 1 + (Math.sin(v.x * 7.3 + v.y * 5.1) * Math.cos(v.z * 6.7)) * fuerza;
+        v.normalize().multiplyScalar(radio * d);
+        p.setXYZ(i, v.x, v.y, v.z);
+      }
+      geo.computeVertexNormals();
+      return geo;
+    };
+
+    // Troncos: uno por árbol, con CORTEZA fotográfica (fase 2 del realismo).
+    // `userData.arboles` mapea instancia → índice del árbol en la lista, que
+    // es lo que hace el bosque PULSABLE en el editor.
     const troncos = new THREE.InstancedMesh(
-      new THREE.CylinderGeometry(0.28, 0.45, 2.4, 6),
-      new THREE.MeshStandardMaterial({ color: PALETA.tronco }),
+      new THREE.CylinderGeometry(0.24, 0.5, 2.6, 9),
+      new THREE.MeshStandardMaterial({ ...mapasPBR('corteza', 2, 1.6) }),
       Math.max(1, arboles.length),
     );
     troncos.userData.arboles = arboles.map((_, i) => i);
     arboles.forEach((a, i) => colocar(troncos, i, a.x, 1.1 * (a.escala || 1), a.z, a.escala || 1, azar() * Math.PI));
 
-    // Copas: pinos (conos) y frondosas (icosaedros), con su mapa de índices.
+    // Copas: pinos (conos) y frondosas (esferas abolladas), ambas vestidas
+    // con FOLLAJE fotográfico; el tinte por instancia da la variedad.
     const pinos: number[] = [];
     const hojas: number[] = [];
     arboles.forEach((a, i) => (a.pino ? pinos : hojas).push(i));
     const copaPino = new THREE.InstancedMesh(
-      new THREE.ConeGeometry(2.0, 4.8, 7),
-      new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }),
+      new THREE.ConeGeometry(2.0, 4.8, 9),
+      new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 3, 2) }),
       Math.max(1, pinos.length),
     );
     copaPino.userData.arboles = pinos;
@@ -370,11 +390,11 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
       const a = arboles[idx];
       const s = a.escala || 1;
       colocar(copaPino, i, a.x, (2.2 + 2.4) * s, a.z, s, azar() * Math.PI);
-      copaPino.setColorAt(i, color.set(azar() > 0.5 ? PALETA.pino : PALETA.pinoClaro));
+      copaPino.setColorAt(i, color.set(azar() > 0.5 ? '#9fbc8a' : '#c2d8ae'));
     });
     const copaHoja = new THREE.InstancedMesh(
-      new THREE.IcosahedronGeometry(2.1, 0),
-      new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }),
+      abollar(new THREE.SphereGeometry(1, 14, 10), 2.1, 0.16),
+      new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 3, 2) }),
       Math.max(1, hojas.length),
     );
     copaHoja.userData.arboles = hojas;
@@ -386,13 +406,13 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
       q.setFromAxisAngle(EJE_Y, azar() * Math.PI);
       m.compose(posicion, q, escala);
       copaHoja.setMatrixAt(i, m);
-      copaHoja.setColorAt(i, color.set(azar() > 0.5 ? PALETA.hoja : PALETA.hojaClara));
+      copaHoja.setColorAt(i, color.set(azar() > 0.5 ? '#ffffff' : '#cfe3b5'));
     });
 
     // Arbustos, rocas y flores: vida de suelo, sin identidad (no editables).
     const arbustos = new THREE.InstancedMesh(
-      new THREE.SphereGeometry(0.75, 8, 6),
-      new THREE.MeshStandardMaterial({ color: PALETA.arbusto, flatShading: true }),
+      abollar(new THREE.SphereGeometry(1, 10, 8), 0.75, 0.2),
+      new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 2, 1.4) }),
       220,
     );
     for (let i = 0; i < 220; i++) {
@@ -404,11 +424,12 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
       q.setFromAxisAngle(EJE_Y, azar() * Math.PI);
       m.compose(posicion, q, escala);
       arbustos.setMatrixAt(i, m);
+      arbustos.setColorAt(i, color.set(azar() > 0.5 ? '#ffffff' : '#c4d8a8'));
     }
 
     const rocas = new THREE.InstancedMesh(
-      new THREE.DodecahedronGeometry(0.7, 0),
-      new THREE.MeshStandardMaterial({ color: PALETA.piedra, flatShading: true }),
+      abollar(new THREE.DodecahedronGeometry(1, 1), 0.7, 0.3),
+      new THREE.MeshStandardMaterial({ ...mapasPBR('roca', 1.6), flatShading: true }),
       90,
     );
     for (let i = 0; i < 90; i++) {
