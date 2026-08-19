@@ -22,8 +22,9 @@ import { Billboard, Text, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { PALETA } from './paleta';
 import { CasaReal } from './CasaReal';
+import { ObjetoNuevo, esObjetoNuevo } from './Objetos';
 import { Banco, Farola, PuestoMercado, Pozo } from './Detalles';
-import { RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
+import { CATALOGO_PROPS, RELACIONES_HILO, nombreLimpio, type ItemMundo, type SeleccionHilo, type SeleccionMundo } from './tipos';
 import { Rotulo, SenalDePortal } from './Senales';
 
 const ORO = '#f6c667';
@@ -112,6 +113,8 @@ function ArbustoProc() {
 /** Un prop del catálogo, por nombre. La casa elige su modelo con el id para
  *  que dos casas creadas no salgan clónicas. */
 export function PropMundo({ modelo, semilla }: { modelo: string; semilla: string }) {
+  // Los 45 objetos de ciudad y bosque de la fase 9 viven en Objetos.tsx.
+  if (esObjetoNuevo(modelo)) return <ObjetoNuevo modelo={modelo} />;
   switch (modelo) {
     case 'arbol': return <ArbolProc pino={false} />;
     case 'pino': return <ArbolProc pino />;
@@ -535,7 +538,9 @@ export function ObjetosMundo({ items, onPulsar, onAgarrar, onPulsarHilo, ocultar
 
 /** Etiqueta corta del rótulo flotante de un item al pasar el ratón. */
 const nombreDe = (it: ItemMundo) =>
-  it.tipo === 'prop' ? ({ arbol: 'Árbol', pino: 'Pino', casa: 'Casa', banco: 'Banco', farola: 'Farola', puesto: 'Puesto', pozo: 'Pozo', roca: 'Roca', arbusto: 'Arbusto' } as Record<string, string>)[it.modelo || ''] || 'Objeto'
+  // El nombre sale del CATÁLOGO, no de una lista aparte: con 54 objetos
+  // (fase 9) una copia se queda coja al día siguiente y todo se llama «Objeto».
+  it.tipo === 'prop' ? (CATALOGO_PROPS.find(c => c.modelo === it.modelo)?.nombre || 'Objeto')
     : it.tipo === 'nota' ? (it.texto || 'Nota').split('\n')[0].slice(0, 40)
       : nombreLimpio(it.nombre, ({ imagen: 'Imagen', documento: 'Documento', enlace: 'Enlace', video: 'Vídeo', musica: 'Música', lienzo: 'Lienzo', mapa: 'Mapa' } as Record<string, string>)[it.tipo] || it.tipo);
 

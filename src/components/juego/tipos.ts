@@ -148,7 +148,8 @@ export const nombreLimpio = (nombre: string | null | undefined, generico: string
 
 /** El catálogo de props que se pueden plantar. Vive aquí (y no en el editor
  *  3D) porque el panel de creación es HTML de la página, que NO importa three. */
-export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: string }> = [
+export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: string; grupo?: string }> = [
+  // --- Lo de siempre
   { modelo: 'arbol', nombre: 'Árbol', icono: '🌳' },
   { modelo: 'pino', nombre: 'Pino', icono: '🌲' },
   { modelo: 'casa', nombre: 'Casa', icono: '🏠' },
@@ -158,6 +159,54 @@ export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: stri
   { modelo: 'pozo', nombre: 'Pozo', icono: '🪣' },
   { modelo: 'roca', nombre: 'Roca', icono: '🪨' },
   { modelo: 'arbusto', nombre: 'Arbusto', icono: '🌿' },
+  // --- CIUDAD (fase 9, 2026-08-19)
+  { modelo: 'papelera', nombre: 'Papelera', icono: '🗑️', grupo: 'ciudad' },
+  { modelo: 'semaforo', nombre: 'Semáforo', icono: '🚦', grupo: 'ciudad' },
+  { modelo: 'senal', nombre: 'Señal', icono: '🛑', grupo: 'ciudad' },
+  { modelo: 'senalazul', nombre: 'Señal info', icono: 'ℹ️', grupo: 'ciudad' },
+  { modelo: 'marquesina', nombre: 'Marquesina', icono: '🚏', grupo: 'ciudad' },
+  { modelo: 'quiosco', nombre: 'Quiosco', icono: '🏪', grupo: 'ciudad' },
+  { modelo: 'hidrante', nombre: 'Hidrante', icono: '🧯', grupo: 'ciudad' },
+  { modelo: 'contenedor', nombre: 'Contenedor', icono: '♻️', grupo: 'ciudad' },
+  { modelo: 'contenedorazul', nombre: 'Cont. papel', icono: '📦', grupo: 'ciudad' },
+  { modelo: 'contenedoramarillo', nombre: 'Cont. envases', icono: '🥫', grupo: 'ciudad' },
+  { modelo: 'jardinera', nombre: 'Jardinera', icono: '🪴', grupo: 'ciudad' },
+  { modelo: 'fuentebeber', nombre: 'Fuente', icono: '⛲', grupo: 'ciudad' },
+  { modelo: 'bolardo', nombre: 'Bolardo', icono: '🔘', grupo: 'ciudad' },
+  { modelo: 'muro', nombre: 'Muro', icono: '🧱', grupo: 'ciudad' },
+  { modelo: 'cerca', nombre: 'Cerca', icono: '🚧', grupo: 'ciudad' },
+  { modelo: 'escalera', nombre: 'Escalinata', icono: '🪜', grupo: 'ciudad' },
+  { modelo: 'torreagua', nombre: 'Torre de agua', icono: '🗼', grupo: 'ciudad' },
+  { modelo: 'panelsolar', nombre: 'Panel solar', icono: '🔆', grupo: 'ciudad' },
+  { modelo: 'bicicletero', nombre: 'Bicicletero', icono: '🚲', grupo: 'ciudad' },
+  { modelo: 'buzon', nombre: 'Buzón', icono: '📮', grupo: 'ciudad' },
+  { modelo: 'reloj', nombre: 'Reloj', icono: '🕰️', grupo: 'ciudad' },
+  { modelo: 'estatua', nombre: 'Estatua', icono: '🗿', grupo: 'ciudad' },
+  { modelo: 'mesa', nombre: 'Mesa', icono: '🪑', grupo: 'ciudad' },
+  { modelo: 'columpio', nombre: 'Columpio', icono: '🛝', grupo: 'ciudad' },
+  // --- BOSQUE Y HUERTO (fase 9)
+  { modelo: 'tronco', nombre: 'Tronco caído', icono: '🪵', grupo: 'bosque' },
+  { modelo: 'tocon', nombre: 'Tocón', icono: '🪵', grupo: 'bosque' },
+  { modelo: 'setas', nombre: 'Setas', icono: '🍄', grupo: 'bosque' },
+  { modelo: 'helecho', nombre: 'Helecho', icono: '🌿', grupo: 'bosque' },
+  { modelo: 'canas', nombre: 'Cañas', icono: '🎋', grupo: 'bosque' },
+  { modelo: 'matorral', nombre: 'Matorral', icono: '🌾', grupo: 'bosque' },
+  { modelo: 'rocagrande', nombre: 'Peñasco', icono: '🪨', grupo: 'bosque' },
+  { modelo: 'charca', nombre: 'Charca', icono: '💧', grupo: 'bosque' },
+  { modelo: 'puentetabla', nombre: 'Pasarela', icono: '🌉', grupo: 'bosque' },
+  { modelo: 'hoguera', nombre: 'Hoguera', icono: '🔥', grupo: 'bosque' },
+  { modelo: 'tienda', nombre: 'Tienda', icono: '⛺', grupo: 'bosque' },
+  { modelo: 'colmena', nombre: 'Colmena', icono: '🐝', grupo: 'bosque' },
+  { modelo: 'lena', nombre: 'Leña', icono: '🪵', grupo: 'bosque' },
+  { modelo: 'espantapajaros', nombre: 'Espantapájaros', icono: '🎃', grupo: 'bosque' },
+  { modelo: 'bancal', nombre: 'Bancal', icono: '🥬', grupo: 'bosque' },
+  { modelo: 'compost', nombre: 'Compostera', icono: '🍂', grupo: 'bosque' },
+  { modelo: 'gallinero', nombre: 'Gallinero', icono: '🐔', grupo: 'bosque' },
+  { modelo: 'invernadero', nombre: 'Invernadero', icono: '🏡', grupo: 'bosque' },
+  { modelo: 'molino', nombre: 'Molino', icono: '🌬️', grupo: 'bosque' },
+  { modelo: 'deposito', nombre: 'Depósito', icono: '🛢️', grupo: 'bosque' },
+  { modelo: 'comedero', nombre: 'Comedero', icono: '🐦', grupo: 'bosque' },
+  { modelo: 'pasarela', nombre: 'Pasaderas', icono: '⚪', grupo: 'bosque' },
 ];
 
 /** Un retoque sobre el pueblo de serie: mover, eliminar o cambiar el diseño
