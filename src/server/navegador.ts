@@ -89,6 +89,70 @@ function urlValida(crudo: string): URL | null {
  *  día: es lo que deja entrar a los estilos y las imágenes sin cookie. */
 const porElProxy = (abs: string) => `/api/navegador/ver?url=${encodeURIComponent(abs)}&t=${tokenDia()}`;
 
+// ============================================================================
+// LA SEGUNDA PARED (2026-08-20, «youtube.com no abre»): hay webs que no son
+// documentos sino APLICACIONES. El HTML de YouTube es un cascarón de ~900 KB
+// con decenas de scripts que, al arrancar, piden sus datos por su cuenta — y
+// esas peticiones no pasan por la reescritura: van contra nuestro dominio
+// (404) o contra el suyo (bloqueadas por el origen opaco). Y el vídeo viaja
+// firmado y por rangos desde googlevideo.com, algo que un proxy que guarda la
+// respuesta entera en memoria no puede servir. Un proxy de texto enseña
+// documentos; no ejecuta aplicaciones.
+//
+// La salida para YouTube es su puerta OFICIAL: el reproductor embebido
+// (youtube-nocookie.com/embed), que existe exactamente para meterse en otras
+// webs y trae el vídeo directo de Google sin pasar por aquí. El servidor solo
+// detecta que la dirección es un vídeo y se lo dice a la app, que pone el
+// reproductor. Buscar dentro de YouTube se resuelve buscando
+// «site:youtube.com …» en DuckDuckGo, que sí es un documento.
+// ============================================================================
+const esYouTube = (u: URL) =>
+  /(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/.test(u.hostname);
+
+const idYouTube = (u: URL): string | null => {
+  const h = u.hostname.replace(/^(www|m|music)\./, '');
+  if (h === 'youtu.be') return u.pathname.split('/')[1] || null;
+  if (h !== 'youtube.com' && h !== 'youtube-nocookie.com') return null;
+  if (u.pathname === '/watch') return u.searchParams.get('v');
+  const m = u.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{6,})/);
+  return m ? m[1] : null;
+};
+
+const buscarEnYouTube = (q: string) =>
+  porElProxy('https://html.duckduckgo.com/html/?q=' + encodeURIComponent('site:youtube.com ' + q));
+
+/** Página mínima que solo avisa a la app de dónde está. La app, al ver que la
+ *  dirección es un vídeo, cambia el marco por el reproductor oficial — que no
+ *  puede ir aquí dentro: este marco hereda el sandbox de origen opaco y el
+ *  reproductor necesita su almacenamiento para arrancar. */
+const paginaVideo = (u: URL) => `<!doctype html><meta charset="utf-8">
+<body style="margin:0;display:grid;place-items:center;height:100vh;font:14px system-ui;color:#64748b">
+<p>Abriendo el reproductor…</p>
+<script>try{parent.postMessage({navegadorHumanity:'aqui',url:${JSON.stringify(u.href)}},'*')}catch(e){}</script>`;
+
+/** La portada de YouTube, sustituida por algo que este navegador SÍ sabe
+ *  hacer: buscar sus vídeos (vía DuckDuckGo) y abrirlos con el reproductor. */
+const paginaYouTube = (u: URL) => `<!doctype html><meta charset="utf-8"><title>YouTube</title>
+<body style="margin:0;display:grid;place-items:center;height:100vh;font:15px system-ui;color:#334155;background:#fff">
+<div style="width:min(560px,90%);text-align:center">
+  <div style="font-size:40px;margin-bottom:8px">▶️</div>
+  <h1 style="font-size:20px;margin:0 0 6px">Buscar en YouTube</h1>
+  <p style="color:#64748b;margin:0 0 18px">YouTube es una aplicación y no se puede traer entera aquí dentro.
+  Busca un vídeo y se abrirá con el reproductor oficial.</p>
+  <form id="f"><input id="q" autofocus placeholder="¿Qué vídeo buscas?"
+    style="width:100%;box-sizing:border-box;padding:12px 16px;font-size:15px;border:1px solid #cbd5e1;border-radius:999px;outline:none"></form>
+</div>
+<script>
+try{parent.postMessage({navegadorHumanity:'aqui',url:${JSON.stringify(u.href)}},'*')}catch(e){}
+var TOK=${JSON.stringify(tokenDia())};
+document.getElementById('f').addEventListener('submit',function(e){
+  e.preventDefault();
+  var q=document.getElementById('q').value.trim();
+  if(!q)return;
+  location.href='/api/navegador/ver?url='+encodeURIComponent('https://html.duckduckgo.com/html/?q='+encodeURIComponent('site:youtube.com '+q))+'&t='+TOK;
+});
+</script>`;
+
 /**
  * Reescribe el HTML para que TODO siga pasando por nosotros: los enlaces, las
  * imágenes, los estilos. Sin esto, la primera imagen relativa (`/logo.png`) se
@@ -267,7 +331,35 @@ export function registerNavegadorRoutes(app: Express) {
       return res.status(401).send('Inicia sesión para navegar.');
     }
     try {
+      // YouTube se atiende ANTES de ir a buscar nada: su HTML no sirve aquí
+      // (ver «la segunda pared» arriba) y traerlo son 900 KB tirados.
+      let pedida = urlValida(String(req.query.url || ''));
+
+      // DuckDuckGo envuelve cada resultado en /l/?uddg=<destino>, una página
+      // que redirige CON JavaScript — y ese salto se escapa del proxy y choca
+      // contra el X-Frame-Options del destino (pantalla en blanco, visto en
+      // pruebas 2026-08-20). Se desenvuelve aquí y se va directo al destino.
+      if (pedida && /(^|\.)duckduckgo\.com$/.test(pedida.hostname) && pedida.pathname === '/l/') {
+        const destino = urlValida(pedida.searchParams.get('uddg') || '');
+        if (destino) pedida = destino;
+        if (destino && !esYouTube(destino)) return res.redirect(porElProxy(destino.href));
+      }
+      if (pedida && esYouTube(pedida)) {
+        res.setHeader('Cache-Control', 'no-store');
+        if (idYouTube(pedida)) return res.send(paginaVideo(pedida));
+        const q = pedida.searchParams.get('search_query') || pedida.searchParams.get('q');
+        if (q) return res.redirect(buscarEnYouTube(q));
+        return res.send(paginaYouTube(pedida));
+      }
+
       const { tipo, buf, final, estado } = await traer(String(req.query.url || ''));
+
+      // Un enlace puede llegar a un vídeo por redirecciones (DuckDuckGo envuelve
+      // sus resultados): se comprueba también la dirección FINAL.
+      if (/^text\/html/i.test(tipo) && idYouTube(final)) {
+        res.setHeader('Cache-Control', 'no-store');
+        return res.send(paginaVideo(final));
+      }
 
       // Nunca dejamos que la respuesta de fuera imponga sus cabeceras: ni sus
       // cookies, ni su CSP, ni su X-Frame-Options (que es justo lo que impide
@@ -309,6 +401,26 @@ export function registerNavegadorRoutes(app: Express) {
   app.get('/api/navegador/leer', async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Inicia sesión para navegar.' });
     try {
+      // Un vídeo no tiene «texto legible»: su ficha se pide por la vía oficial
+      // (oEmbed, sin clave), que da el título y el canal en unos cientos de
+      // bytes en vez del cascarón de 900 KB.
+      const pedida = urlValida(String(req.query.url || ''));
+      if (pedida && idYouTube(pedida)) {
+        let titulo: string | null = 'Vídeo de YouTube';
+        let texto = 'Un vídeo de YouTube, abierto en el reproductor oficial.';
+        try {
+          const r = await fetch('https://www.youtube.com/oembed?format=json&url=' + encodeURIComponent(pedida.href));
+          if (r.ok) {
+            const j: any = await r.json();
+            if (j.title) {
+              titulo = j.title;
+              texto = `Vídeo de YouTube: «${j.title}»${j.author_name ? `, del canal ${j.author_name}` : ''}.`;
+            }
+          }
+        } catch { /* la ficha es un extra: sin ella, el vídeo sigue abriéndose */ }
+        return res.json({ url: pedida.href, titulo, texto, recortado: false, enlaces: [] });
+      }
+
       const { tipo, buf, final } = await traer(String(req.query.url || ''));
       if (!/^text\/html/i.test(tipo)) {
         return res.json({ url: final.href, titulo: null, texto: null, tipo, enlaces: [] });
