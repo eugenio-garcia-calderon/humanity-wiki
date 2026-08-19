@@ -43,6 +43,7 @@ export const KIND_TINT: Record<string, string> = {
   enlace: '#0284c7', mapa: '#0284c7', grafica: '#eab308', ficha: '#64748b',
   cronologia: '#7c3aed', autores: '#4f46e5', documento: '#e11d48', grafo: '#059669',
   producto: '#f59e0b', soluciones: '#16a34a', texto: '#64748b',
+  pdf: '#e11d48', audio: '#7c3aed',
 };
 
 /** CSS que necesita cualquier lienzo que use el kit. */

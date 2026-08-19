@@ -16,6 +16,7 @@ import {
   CheckSquare, Table2, Rocket, Lock, Unlock,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { leerPegado, tamanoLegible, enCampoDeTexto, type Pegado } from '../utils/pegado';
 import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
 import { useHelpers } from '../contexts/DataContext';
 import { resolveEntityLink } from '../utils/entityLinks';
@@ -62,6 +63,8 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   tarea:       { label: 'Tarea',       icon: CheckSquare,    chip: 'bg-emerald-50 text-emerald-700' },
   tabla:       { label: 'Tabla',       icon: Table2,         chip: 'bg-sky-50 text-sky-700' },
   proyecto:    { label: 'Proyecto',    icon: Rocket,         chip: 'bg-indigo-50 text-indigo-700' },
+  pdf:         { label: 'PDF',         icon: FileText,       chip: 'bg-rose-50 text-rose-700' },
+  audio:       { label: 'Audio',       icon: PlayCircle,     chip: 'bg-violet-50 text-violet-700' },
 };
 
 
@@ -594,76 +597,67 @@ export function GrafoLienzo({ slug, toolbar }: {
     // punto de conexión.
   }, [data?.graph?.id]);
 
-  /** Sube el archivo y lo convierte en la ventana que corresponda. */
-  const traerArchivo = useCallback(async (f: File, pos?: { x: number; y: number }) => {
-    const esTexto = f.type.startsWith('text/plain') || /\.(md|txt)$/i.test(f.name);
-    if (esTexto) {
-      // Un .txt o .md no hace falta subirlo: su contenido ES la nota.
-      const cuerpo = (await f.text()).trim();
-      if (!cuerpo) return;
-      await crearVentana({
-        title: f.name.replace(/\.(md|txt)$/i, '').slice(0, 60) || 'Nota',
-        kind: 'texto', config: { body: cuerpo },
-      }, pos);
-      return;
-    }
-    const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: f,
-    });
-    const j = await up.json();
-    if (!up.ok) throw new Error(j.error || 'No se pudo subir el archivo.');
-    if (j.esImagen && f.type !== 'image/svg+xml') {
-      await crearVentana({
-        title: f.name.replace(/\.[^.]+$/, '').slice(0, 60) || 'Imagen',
-        kind: 'imagen', config: { image_url: j.url, caption: null },
-      }, pos);
-    } else {
-      const kb = Math.max(1, Math.round(j.bytes / 1024));
-      await crearVentana({
-        title: f.name.slice(0, 60),
-        kind: 'enlace',
-        config: { url: j.url, description: `Archivo subido · ${kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB'}` },
-      }, pos);
-    }
-  }, [crearVentana]);
-
-  /** Convierte texto suelto (o una URL) en la ventana que corresponda. */
-  const traerTexto = useCallback(async (texto: string, pos?: { x: number; y: number }) => {
-    const yt = texto.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
-    if (yt && /^https?:\/\//i.test(texto)) {
-      await crearVentana({ title: 'Vídeo', kind: 'video', config: { youtube_id: yt[1] } }, pos);
-    } else if (/^https?:\/\/\S+$/i.test(texto)) {
-      await crearVentana({ title: texto.replace(/^https?:\/\//, '').slice(0, 60), kind: 'enlace', config: { url: texto } }, pos);
-    } else {
-      await crearVentana({ title: texto.split('\n')[0].slice(0, 60) || 'Nota', kind: 'texto', config: { body: texto } }, pos);
+  /**
+   * Una pieza ya resuelta por `leerPegado` → la ventana que le toca. Quién
+   * decide QUÉ es cada cosa vive en `utils/pegado.ts`, compartido con el editor
+   * de documentos; aquí solo se decide con qué se pinta.
+   */
+  const ventanaDePegado = useCallback(async (p: Pegado, pos?: { x: number; y: number }) => {
+    switch (p.clase) {
+      case 'imagen':
+        return crearVentana({ title: p.nombre || 'Imagen', kind: 'imagen', config: { image_url: p.url, caption: null } }, pos);
+      case 'video':
+        return crearVentana({ title: p.nombre || 'Vídeo', kind: 'video', config: { video_url: p.url } }, pos);
+      case 'youtube':
+        return crearVentana({ title: 'Vídeo', kind: 'video', config: { youtube_id: p.id } }, pos);
+      case 'vimeo':
+        return crearVentana({ title: 'Vídeo', kind: 'video', config: { vimeo_id: p.id } }, pos);
+      case 'audio':
+        return crearVentana({ title: p.nombre || 'Audio', kind: 'audio', config: { url: p.url } }, pos);
+      case 'pdf':
+        return crearVentana({
+          title: p.nombre || 'Documento',
+          kind: 'pdf',
+          config: { url: p.url, description: p.bytes ? tamanoLegible(p.bytes) : null },
+        }, pos);
+      case 'archivo':
+        return crearVentana({
+          title: p.nombre || 'Archivo',
+          kind: 'enlace',
+          config: { url: p.url, description: `Archivo subido · ${tamanoLegible(p.bytes)}` },
+        }, pos);
+      case 'enlace':
+        return crearVentana({ title: p.nombre, kind: 'enlace', config: { url: p.url } }, pos);
+      case 'texto':
+        return crearVentana({ title: p.titulo, kind: 'texto', config: { body: p.cuerpo } }, pos);
     }
   }, [crearVentana]);
 
   /** El camino común de pegar y soltar. */
   const traer = useCallback(async (dt: DataTransfer, pos?: { x: number; y: number }) => {
-    const archivos = Array.from(dt.files || []);
-    if (archivos.length) {
-      setPegando(archivos.length > 1 ? `Subiendo ${archivos.length} archivos…` : 'Subiendo…');
-      try {
-        // En cascada, para que varios archivos no caigan uno encima de otro.
-        for (let i = 0; i < archivos.length; i++) {
-          await traerArchivo(archivos[i], pos ? { x: pos.x + i * 48, y: pos.y + i * 48 } : undefined);
-        }
-        setPegando(null);
-      } catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 5000); }
-      load();
-      return true;
+    // Se mira ANTES de tocar nada: si no hay nada que traer, el ⌘V debe seguir
+    // su camino normal en vez de quedar comido por el lienzo.
+    if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return false;
+
+    setPegando('Leyendo…');
+    try {
+      const piezas = await leerPegado(dt, (hecho, total, nombre) => {
+        setPegando(total > 1 ? `Subiendo ${hecho + 1} de ${total}…` : `Subiendo ${nombre.slice(0, 28)}…`);
+      });
+      if (!piezas.length) { setPegando(null); return false; }
+      setPegando(piezas.length > 1 ? `Creando ${piezas.length} elementos…` : 'Creando…');
+      // En cascada, para que varias piezas no caigan una encima de otra.
+      for (let i = 0; i < piezas.length; i++) {
+        await ventanaDePegado(piezas[i], pos ? { x: pos.x + i * 48, y: pos.y + i * 48 } : undefined);
+      }
+      setPegando(null);
+    } catch (e: any) {
+      setPegando(e.message);
+      setTimeout(() => setPegando(null), 5000);
     }
-    const texto = (dt.getData('text/plain') || '').trim();
-    if (!texto) return false;
-    setPegando('Creando…');
-    try { await traerTexto(texto, pos); setPegando(null); }
-    catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 5000); }
     load();
     return true;
-  }, [traerArchivo, traerTexto, load]);
+  }, [ventanaDePegado, load]);
 
   // Dónde está el ratón AHORA MISMO sobre el lienzo (petición del usuario,
   // 2026-08-08): Ctrl/Cmd+V no trae coordenadas propias, así que se guarda la
@@ -676,8 +670,7 @@ export function GrafoLienzo({ slug, toolbar }: {
     if (!data?.can_edit) return;
     const onPaste = async (e: ClipboardEvent) => {
       // Nunca robar el pegado de un campo de texto (el chat, los formularios).
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (enCampoDeTexto(e.target)) return;
       if (!e.clipboardData) return;
       const p = ratonEnLienzo.current && rf.current?.screenToFlowPosition(ratonEnLienzo.current);
       if (await traer(e.clipboardData, p ? { x: p.x - 160, y: p.y - 90 } : undefined)) e.preventDefault();
