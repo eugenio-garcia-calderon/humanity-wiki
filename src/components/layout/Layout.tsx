@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Heart, Settings, Check, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe,
 } from 'lucide-react';
+import { abrirVentana, pulsarVentana, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -35,6 +36,8 @@ const SECCIONES_PIE = [
   { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
   { to: '/mercado', label: 'Mercado', icon: Store },
 ];
+/** Para buscar el icono de una ventana abierta por su ruta. */
+const TODAS_SECCIONES = [...SECCIONES_COMUN, ...SECCIONES_TUYO, ...SECCIONES_PIE];
 
 export default function Layout() {
   const location = useLocation();
@@ -47,6 +50,16 @@ export default function Layout() {
   // Menú de tres líneas junto al logo: todo lo que no son los dos destinos
   // principales vive aquí (decisión del usuario, 2026-08-08).
   const [menuOpen, setMenuOpen] = useState(false);
+  // Las ventanas abiertas del Escritorio, para pintarlas como ICONOS en la
+  // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
+  // (ver bus.ts).
+  const [ventanasAbiertas, setVentanasAbiertas] = useState<VentanaEstado[]>([]);
+  useEffect(() => {
+    const f = (e: Event) => setVentanasAbiertas([...((e as CustomEvent).detail as VentanaEstado[])]);
+    window.addEventListener('humanity:ventanas', f);
+    pedirVentanas();
+    return () => window.removeEventListener('humanity:ventanas', f);
+  }, []);
   const menuRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -102,11 +115,41 @@ export default function Layout() {
 
   if (isEmbed) {
     return (
-      <div className="h-screen w-full bg-white overflow-hidden">
+      <div className="h-screen w-full bg-white overflow-hidden relative">
         <Outlet />
+        {/* El robot del juego y la barra de los lienzos SON el asistente:
+            sin esto, la página dentro de una ventana del Escritorio se
+            quedaría muda (2026-08-19). */}
+        {(isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage) && (
+          <AIAssistant mode="bar" />
+        )}
       </div>
     );
   }
+
+  /** Una entrada del menú ☰. En el ESCRITORIO no navega: abre esa sección
+   *  como VENTANA (petición de Eugenio, 2026-08-19: «no están ahí por defecto,
+   *  solo las que se abran al pinchar desde el menú colapsado»). En el resto
+   *  de la app sigue siendo un enlace normal. La entrada del propio Escritorio
+   *  siempre navega: abrirlo dentro de sí mismo sería una muñeca rusa. */
+  const entradaMenu = (x: { to: string; label: string; icon: any }) => {
+    const activo = location.pathname === x.to;
+    const clases = cn('w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors text-left',
+      activo ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50');
+    if (isEscritorioPage && x.to !== '/escritorio') {
+      return (
+        <button key={x.to} className={clases}
+          onClick={() => { abrirVentana({ titulo: x.label, clase: 'app', destino: x.to }); setMenuOpen(false); }}>
+          <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
+        </button>
+      );
+    }
+    return (
+      <Link key={x.to} to={x.to} className={clases}>
+        <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
+      </Link>
+    );
+  };
 
   return (
     <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
@@ -125,31 +168,25 @@ export default function Layout() {
 
           {menuOpen && (
             <div className="absolute top-11 left-0 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              {isEscritorioPage && (
+                <>
+                  <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Escritorio</p>
+                  <button
+                    onClick={() => { abrirVentana({ titulo: 'Navegador', clase: 'navegador', destino: 'https://es.wikipedia.org/wiki/Portada' }); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 text-left"
+                  >
+                    <Globe className="w-4 h-4 shrink-0 text-slate-400" /> Navegador
+                  </button>
+                  <div className="h-px bg-slate-100 my-1.5" />
+                </>
+              )}
               <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">El común</p>
-              {SECCIONES_COMUN.map(x => (
-                <Link key={x.to} to={x.to}
-                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
-                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
-                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-                </Link>
-              ))}
+              {SECCIONES_COMUN.map(entradaMenu)}
               <div className="h-px bg-slate-100 my-1.5" />
               <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Lo tuyo</p>
-              {SECCIONES_TUYO.map(x => (
-                <Link key={x.to} to={x.to}
-                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
-                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
-                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-                </Link>
-              ))}
+              {SECCIONES_TUYO.map(entradaMenu)}
               <div className="h-px bg-slate-100 my-1.5" />
-              {SECCIONES_PIE.map(x => (
-                <Link key={x.to} to={x.to}
-                  className={cn('flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors',
-                    location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50')}>
-                  <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-                </Link>
-              ))}
+              {SECCIONES_PIE.map(entradaMenu)}
             </div>
           )}
         </div>
@@ -160,6 +197,33 @@ export default function Layout() {
             Humanity<span className="text-emerald-600"> Wiki</span>
           </span>
         </Link>
+
+        {/* Las ventanas abiertas del Escritorio, como ICONOS (2026-08-19,
+            petición de Eugenio: «en ese uno es donde deben estar las ventanas
+            en forma de iconos para que no ocupen mucho»). Pulsar uno trae la
+            ventana; si ya está delante, la minimiza. */}
+        {isEscritorioPage && ventanasAbiertas.length > 0 && (
+          <div className="flex items-center gap-1 ml-1 overflow-x-auto">
+            {ventanasAbiertas.map(v => {
+              const Icono = v.clase === 'navegador'
+                ? Globe
+                : (TODAS_SECCIONES.find(sec => sec.to === v.destino)?.icon || AppWindow);
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => pulsarVentana(v.id)}
+                  title={v.titulo}
+                  className={cn('w-8 h-8 grid place-items-center rounded-lg border shrink-0 transition-colors',
+                    v.delante ? 'bg-slate-900 border-slate-900 text-white'
+                      : v.minimizada ? 'bg-white border-slate-200 text-slate-300 hover:text-slate-500'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
+                >
+                  <Icono className="w-4 h-4" />
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* El único destino principal: Explorar y Mis publicaciones eran la
             misma página con un interruptor dentro (2026-08-08) — un botón
