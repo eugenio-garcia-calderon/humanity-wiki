@@ -65,3 +65,9 @@ export const ordenarVentanas = (ids: string[]) =>
  *  mirando. Antes lo recogía la página «Escritorio», que ya no existe. */
 export const publicarPaginaWeb = (url: string | null) =>
   window.dispatchEvent(new CustomEvent('humanity:pagina-web', { detail: url }));
+
+/** Doble clic en una pestaña: agrandar a pantalla completa (Eugenio,
+ *  2026-08-20). Es un conmutador — si ya está a pantalla completa, vuelve a su
+ *  tamaño, que es lo que hace la barra de título de cualquier ventana. */
+export const maximizarVentana = (id: string) =>
+  window.dispatchEvent(new CustomEvent('humanity:maximizar-ventana', { detail: id }));
