@@ -1567,3 +1567,36 @@ board that lives in production, not locally).
 Verified in a real browser on a throwaway project: renaming persisted to the
 database, a dragged card came back as `en_curso`, and a card created through the
 arrow was born in `hecho`.
+
+## 2026-08-20 — Task board, phase 2: edit the text where it is
+
+Two more of the nine cards from Eugenio's **Humanity.Wiki** board: «doble click
+en un texto de una tarjeta para modificar el texto sin necesidad de abrirlo, y
+lo mismo cuando está abierto, sin tener que darle a los 3 puntitos. También
+hacer más grande el pop up».
+
+- **New `TextoEditable`**: the text *is* the field. Click and type. Enter saves,
+  Escape restores, and leaving the field also saves — someone who clicks away
+  after typing assumes it was kept, not thrown away. Multi-line keeps Enter as
+  a newline and saves with ⌘/Ctrl+Enter.
+- **Double click on a card's title** edits it without opening the card. A single
+  click already did something (open the card), so opening is now deferred 220 ms
+  and the second click cancels it — the same trick a file manager uses to
+  rename. The delay only exists when you can edit; a read-only board opens
+  instantly as before.
+- **The card became a `div role="button"`.** A `<button>` cannot legally contain
+  an `<input>`, and focus behaves badly when it does.
+- **Inside the card, title and summary are edited by clicking them.** The
+  three-dots menu and its `editandoTexto` mode are gone: they were three steps
+  to fix one word, and the menu had nothing else in it.
+- **The pop-up is now `max-w-4xl` / `92vh`** — a task with notes and screenshots
+  did not fit in half a screen.
+
+Verified in a real browser: double click opened the field and no card; a plain
+click still opened the card; the new title reached the database from the board
+and from inside the pop-up; the pop-up measures 896 px and has no three-dots.
+
+**Paused here** at Eugenio's request. Four of the nine cards remain: editable
+tags wired to the filter with `@`, people and projects on a task, drag a menu
+item onto Tareas to create a linked task, and the "Áreas" menu section with the
+14 objectives.
