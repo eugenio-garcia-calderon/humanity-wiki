@@ -44,7 +44,8 @@ const HERRAMIENTAS: NodoMenu[] = [
   { id: 'h-mundo',     label: 'Mundo 3D',  icono: Gamepad2,     destino: '/juego',     abrir: 'ventana' },
   { id: 'h-archivos',  label: 'Archivos',  icono: Database,     destino: '/archivos',  abrir: 'ventana' },
   { id: 'h-navegador', label: 'Navegador', icono: Globe,        destino: 'about:inicio' },
-  { id: 'h-explorar',  label: 'Explorar',  icono: Compass,      destino: '/explorar',  abrir: 'ventana' },
+  // «Publicaciones», no «Explorar» (Eugenio, 2026-08-20): es lo que hay dentro.
+  { id: 'h-explorar',  label: 'Publicaciones', icono: Compass,  destino: '/explorar',  abrir: 'ventana' },
 ];
 
 interface DatosMenu {
