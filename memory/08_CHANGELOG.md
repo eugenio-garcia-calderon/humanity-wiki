@@ -2031,3 +2031,46 @@ local project and is not in production at all.
 one detail and the Tester corrected me: «Camión camperizado» *does* exist in
 production as a private project. It does not leak, but it is not local-only —
 I should have checked instead of inferring it from the anonymous listing.
+
+## 2026-08-20 — B22 + B26: the AI reads the platform, and cannot claim what it did not do
+
+Two bugs the Tester found from opposite sides, and they were the same bridge
+between the model and the data: it could not READ the content (B22) and it
+narrated writes that never happened (B26).
+
+**B22 — «Pregúntame sobre cualquier cosa de la plataforma» was a promise the
+product could not keep.** Retrieval came from `ai_knowledge_chunks`, which only
+indexes the *common* knowledge (retos, soluciones, productos…) and is rebuilt by
+hand. Nobody's pages, graphs or task notes were in it. The assistant saw the
+container («this project has 3 tasks») and not the contents — «mis sensores no
+alcanzan a leer el texto interno» was literally true.
+
+New `contenidoPropio()`: a **live** search over that user's own pages and task
+cards, matching the words of the question against title *and* body (the text
+lives inside `config->bloques` / `bloques`). Live on purpose — an index you have
+to rebuild is stalest exactly when it matters, right after you write something
+and ask about it. It sends up to 4.000 characters per page rather than a
+two-line summary, because the question is usually about a figure buried in the
+middle, and trimming is precisely losing it.
+
+Verified against the Tester's own acceptance case: asked about the gap between
+the headline range and the energy balance in a page, the assistant answered
+**«54,2 km: el titular promete 120 km, pero con la batería de 4,08 kWh y 62
+Wh/km da 65,8 km»**, citing the page. That is the 4,08 kWh they asked for.
+
+**B26 — the model said «ya he clavado esa tarea» and no task existed.** The
+mechanism was not missing (the action fires, executes and lands in the right
+project — verified end to end). What was missing is that **nothing forced the
+words to match reality**:
+
+- If the reply promises an action and none arrives even after the retry, the
+  text is now **corrected**: «No he podido crearlo…». Leaving a bare «ya está»
+  is worse than an error, because the person walks away believing they have a
+  task — and is then offered menus to spend more messages on a false premise.
+- `/decide` returns `enseñar` (name + link) built from the **server's**
+  `entityId`, and the chat renders a card per thing actually created. **If the
+  card is not there, nothing was created** — no matter what the prose says.
+  (This is D13, and it makes the class of bug visible rather than silent.)
+
+The rule, in one line: **success is decided by the data that comes back, never
+by the narration.**
