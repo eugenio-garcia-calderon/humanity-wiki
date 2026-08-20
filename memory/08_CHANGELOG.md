@@ -2118,3 +2118,54 @@ Team rule adopted from this: when anyone reports a figure, say where it comes
 from — production or local, and which project or page. Three of today's
 disagreements came from comparing numbers across environments without saying
 so. It is the same rule we just gave the assistant.
+
+## 2026-08-20 — Four bugs with one disease: nowhere to put what was asked for
+
+The Tester found five failures that looked unrelated. They are one illness: **the
+platform had nowhere to store what the assistant was asked for, so the model
+filled the hole with prose.** Not «the AI lies» — «the AI was asked for something
+the product could not hold».
+
+**B34 — a task asked for as «Tecnico» was saved as «Producto».** Written without
+the accent, it did not match the label «Técnico», and the code fell back to the
+project's *first* group, silently. This is **the same `grupos[0]` defect as B13,
+which I fixed this morning in the rendering and left alive in the writing** — I
+fixed the symptom where it showed, not where it started. Matching is now
+accent- and case-insensitive, and when nothing matches it says so, listing the
+labels that do exist: «No hay ninguna etiqueta "Marketing"… (tiene: Producto,
+Diseño, Técnico…). La he dejado en "Producto".»
+
+**B32 — the card for what was created.** Two separate things. Mine existed but
+was a `<button>` with `navigate()`, so the Tester's DOM search for links found
+nothing and concluded there was no card: both of us were right. It is a real
+link now. And the action block said «Crear una tarea en un proyecto» — the kind
+of operation, not the thing — so it now leads with the title and carries the
+detail: «ZZZ medir irradiancia · Camión camperizado · Tecnico · prioridad
+alta». **With that detail, B34 would have been visible on first use** instead of
+needing three checks.
+
+**B31 — a correct figure attributed to a page that does not exist.** With the
+new source-citing rule, a false attribution is *more* dangerous than none,
+because the reader now trusts the citation. The prompt may only name pages,
+tasks and projects present in the context, by their exact title; and when it
+knows a number but not its origin, it must say so.
+
+**B23 — a map of five test sites showed the generic indicator world map.** The
+cause was not the model: **a user map could only ever be a view of the humanity
+map** (territory + level + indicator). There was no concept of a point, so the
+AI wrote the five places into the description — the only text hole it had — and
+the map kept showing something else. Maps now take points with name,
+coordinates and value, validated (no lat/lon, no point), rendered by a new
+`MapaDePuntos` with its list beside it; and if points were asked for and none
+survive validation, it refuses to publish and says why.
+A nuance found while testing: the first version was too cautious and asked for
+coordinates it plainly knows. It may now use its own knowledge for known places
+**while declaring it** («coordenadas de conocimiento general») and only ask for
+the ones it cannot place. Declaring the source is the rule; refusing to know
+things is not.
+
+**Next**: give the same test to the three capabilities not yet audited —
+`CREATE_KNOWLEDGE_GRAPH`, `ORGANIZAR_CARPETAS` and the UI events — by asking for
+something the platform cannot store and seeing whether they say so or narrate it.
+The third is the worrying one: an event with an id that does not exist fails
+invisibly by design.

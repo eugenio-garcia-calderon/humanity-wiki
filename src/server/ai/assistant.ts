@@ -406,6 +406,13 @@ CALENDARIO: la fecha de HOY la tienes más abajo, en el estado de la conversaci�
 
 GRAFOS DE CONOCIMIENTO: la lista de los ya publicados la tienes más abajo. Si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo.
 Si el usuario pide CREAR un grafo (o explorar un tema del que NO existe grafo), propón la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales. Cada window: {title, kind, config, relation, relation_label}. kind SOLO puede ser: publicacion (config: {title, body}), imagen ({image_url, caption, source}), video ({youtube_id, channel}), wikipedia ({wiki_lang, wiki_page}), enlace ({url, title}), grafica ({chart: 'line'|'donut', series/segments...}), ficha ({rows: [{label, value}]}), texto ({body}). relation (la arista desde el centro): contexto | causa | dato | fuente | apoya | contradice | matiza, con relation_label como pregunta corta (p. ej. "¿qué está pasando?"). Investiga ANTES en internet si está activado y llena las ventanas con datos, cifras y fuentes REALES (nunca inventadas); el grafo nace en borrador para revisión humana. Es una de tus funciones principales: sé un auténtico creador de grafos.
+MAPAS CON PUNTOS PROPIOS. Si te piden un mapa de SITIOS CONCRETOS (dónde se ensaya algo, dónde se mide, dónde están sus clientes), manda esos sitios en «puntos», cada uno con nombre y COORDENADAS REALES:
+{"actions": [{"type": "CREATE_MAP", "params": {"title": "Puntos de ensayo", "puntos": [{"nombre": "Plataforma Solar de Almería", "lat": 37.0913, "lon": -2.3583, "valor": "2.050 kWh/m²/año"}], "unidad": "kWh/m²/año"}}]}
+Sin «lat» y «lon» NO hay punto: escribir los sitios solo en la descripción publica un mapa que enseña otra cosa.
+De un sitio CONOCIDO (una ciudad, un circuito, una instalación que existe) pon sus coordenadas de tu propio conocimiento y dilo en la descripción del mapa: «coordenadas de conocimiento general». Eso es una fuente honesta y sirve.
+De un sitio que NO puedas situar —«la parcela de mi tío», «el punto de medida 3»— no te inventes unas coordenadas aproximadas: pídelas. Un punto en el sitio equivocado es peor que ningún punto.
+Si de cinco sitios sabes cuatro, publica los cuatro y di cuál te falta.
+
 Si el usuario pide crear un MAPA a su nombre (una vista pública del mapa de la humanidad), propón la acción CREATE_MAP con title, description y opcionalmente territorio (slug, p. ej. "espana"), nivel ("objetivo"|"indicador"|"marcador"|"metrica") e id (el id de esa entidad) — se publicará a su nombre y podrá abrirse con OPEN_USER_MAP {slug}. Límite: los usuarios de nivel 1 pueden tener hasta 5 grafos y 5 mapas; nivel 2+ sin límite.
 Si el usuario pide ORDENAR, ORGANIZAR o CLASIFICAR sus publicaciones en carpetas (por ejemplo "ordename las publicaciones por carpetas"), propón la acción ORGANIZAR_CARPETAS SIN parámetros (params: {}): el servidor lee todo lo que ha publicado y las agrupa por tema, creando las carpetas que hagan falta. Una misma publicación puede acabar en varias carpetas a la vez.
 
@@ -442,6 +449,7 @@ Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fi
 LAS CIFRAS SON SAGRADAS. Esta es una plataforma de investigación: un número inventado con unidades puestas es peor que un «no lo sé», porque parece un dato.
 
 1. CADA CIFRA QUE DES, DI DE DÓNDE SALE, entre paréntesis y corto: «90 km/día (descripción del proyecto)», «4,08 kWh (tu página “Balance energético”)». Si no puedes nombrar la fuente, es que no tienes el dato.
+1b. SOLO PUEDES NOMBRAR DOCUMENTOS QUE ESTÉN AQUÍ. Cita únicamente páginas, tareas y proyectos que aparezcan en el contexto de arriba, con su título EXACTO. Nunca digas «según la página del techo» ni «el documento de ensayos» si no está en la lista: inventar la PROCEDENCIA de un dato bueno es peor que no citarla, porque ahora quien te lee se fía de la cita. Si sabes el número pero no de dónde salió, di «este dato lo tengo, pero no sé de qué documento sale».
 2. MIRA LA UNIDAD ANTES DE USAR EL NÚMERO. En una misma frase puede haber «120 kg en vacío» y «90 km/día»: son cosas distintas y confundirlas es el error más caro que puedes cometer aquí. Kilogramos no son kilómetros.
 3. NO TE INVENTES VALORES INTERMEDIOS PARA CERRAR UN CÁLCULO. Si te falta la velocidad, el rendimiento o las horas de sol, DILO y pide el dato. Nunca elijas un valor «razonable» para que salga la cuenta: quien lea tu respuesta no puede distinguir ese número de uno medido.
 4. Si te piden un cálculo y tienes solo parte de los datos, haz la parte que puedas y di exactamente qué te falta.
@@ -1239,7 +1247,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // con enlace en vez de fiarse de lo que el modelo diga en prosa. Si no
       // hay `entityId`, no hay ficha — y esa ausencia ES la señal de que no se
       // creó nada.
-      let enseñar: { titulo: string; url: string } | null = null;
+      let enseñar: { titulo: string; url: string; detalle?: string } | null = null;
       if (result.ok && result.entityId) {
         const nombre = String(action.params?.titulo || action.params?.nombre || action.params?.title || '').trim();
         const rutas: Record<string, string> = {
@@ -1251,7 +1259,17 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           user_maps: result.slug ? `/mapas/${result.slug}` : '/mapas',
         };
         const url = rutas[result.entityType as string];
-        if (url) enseñar = { titulo: nombre || spec.description, url };
+        // El DETALLE, no solo el nombre (2026-08-20). Enseñar «tarea creada»
+        // sin decir en qué proyecto ni con qué etiqueta obliga a ir a
+        // comprobarlo a mano — que es justo lo que hizo falta para descubrir
+        // que una tarea pedida como «Técnico» se había guardado como
+        // «Producto». Si el detalle se ve, el fallo se ve.
+        const detalle = [
+          action.params?.proyecto,
+          action.params?.grupo,
+          action.params?.prioridad && action.params.prioridad !== 'media' ? `prioridad ${action.params.prioridad}` : null,
+        ].filter(Boolean).join(' · ');
+        if (url) enseñar = { titulo: nombre || spec.description, url, detalle: detalle || undefined };
       }
       res.json({ status: result.ok ? 'ejecutada' : 'fallida', ...result, enseñar });
     } catch (e: any) {
@@ -1348,10 +1366,44 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           // Config alineada con los parámetros reales de la URL del mapa
           // interactivo (Map.tsx): territorio (slug), nivel + id (el nivel
           // del explorador: objetivo/indicador/marcador/metrica + su id).
+          // PUNTOS PROPIOS (2026-08-20, el fallo del Tester: pidió cinco
+          // puntos de ensayo en España y se publicó una pieza titulada
+          // «Puntos de ensayo HELIOS ONE» que enseñaba el mapamundi genérico
+          // de Indicadores). La causa: un mapa de usuario solo sabía ser una
+          // VISTA del mapa de la humanidad — no existía el concepto de punto,
+          // así que la IA metió los cinco sitios en la descripción, que es el
+          // único hueco de texto que tenía, y el mapa siguió enseñando otra
+          // cosa.
+          //
+          // Se validan de verdad: sin coordenadas no hay punto. Un punto con
+          // lat/lon inventadas sería el mismo problema con otra cara.
+          const puntos = (Array.isArray(params.puntos) ? params.puntos : [])
+            .map((p: any) => ({
+              nombre: String(p?.nombre || p?.name || '').slice(0, 120),
+              lat: Number(p?.lat ?? p?.latitud),
+              lon: Number(p?.lon ?? p?.lng ?? p?.longitud),
+              descripcion: p?.descripcion ? String(p.descripcion).slice(0, 400) : undefined,
+              valor: p?.valor ? String(p.valor).slice(0, 60) : undefined,
+            }))
+            .filter((p: any) =>
+              p.nombre &&
+              Number.isFinite(p.lat) && p.lat >= -90 && p.lat <= 90 &&
+              Number.isFinite(p.lon) && p.lon >= -180 && p.lon <= 180)
+            .slice(0, 200);
+
+          // Si pidió puntos y no ha llegado ninguno válido, NO se publica un
+          // mapa que enseñará otra cosa: se dice. Es la misma regla que en las
+          // tareas — el éxito lo decide el dato, no el título.
+          if (Array.isArray(params.puntos) && params.puntos.length && !puntos.length) {
+            return { ok: false, error: 'No he podido colocar esos puntos: me faltan sus coordenadas. Dímelas y lo publico.' };
+          }
+
           const config = {
             territorio: params.territorio || params.territory_slug || null,
             nivel: params.nivel || params.level || null,
             id: params.id || params.entity_id || params.objective_id || null,
+            puntos: puntos.length ? puntos : undefined,
+            unidad: params.unidad ? String(params.unidad).slice(0, 40) : undefined,
           };
           await db.execute(sql`
             INSERT INTO user_maps (id, title, slug, description, creator_user_id, config, trigger_keywords, status, is_ai_generated, created_by, updated_by)
@@ -1383,12 +1435,37 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
 
           // El grupo (la etiqueta) tiene que existir en ESE proyecto, o la
           // tarjeta nace en una columna que el tablero no sabe pintar.
+          // LA ETIQUETA, EMPAREJADA SIN TILDES NI MAYÚSCULAS (2026-08-20).
+          // Pedir «grupo Tecnico» sin tilde no casaba con la etiqueta
+          // «Técnico», y la tarea caía al PRIMER grupo de la lista —Producto—
+          // en silencio. Es el mismo defecto que ya arreglé en el pintado
+          // (B13) y que seguía vivo en la escritura: elegir grupos[0] cuando
+          // no se sabe. Una tarea de ingeniería archivada como «Producto»
+          // desaparece del filtro donde la busca quien la necesita.
+          //
+          // Ahora: se compara normalizado; y si aun así no hay coincidencia NO
+          // se inventa un grupo, se avisa en la respuesta.
+          const normalizar = (t: string) => String(t || '').trim().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
           let grupo = String(params.grupo || '').trim();
+          let avisoGrupo: string | null = null;
           if (proyectoId) {
             const g = await db.execute(sql`SELECT grupos FROM proyectos WHERE id = ${proyectoId}`);
             const lista = ((g.rows[0] as any)?.grupos || []) as any[];
-            const encaja = lista.find(x => x.id === grupo || String(x.label || '').toLowerCase() === grupo.toLowerCase());
-            grupo = encaja ? encaja.id : (lista[0]?.id || 'producto');
+            const buscado = normalizar(grupo);
+            const encaja = buscado
+              ? lista.find(x => normalizar(x.id) === buscado || normalizar(x.label) === buscado)
+              : null;
+            if (encaja) {
+              grupo = encaja.id;
+            } else {
+              grupo = lista[0]?.id || 'general';
+              if (buscado) {
+                avisoGrupo = `No hay ninguna etiqueta «${String(params.grupo).trim()}» en ese proyecto`
+                  + (lista.length ? ` (tiene: ${lista.map(x => x.label).join(', ')})` : '')
+                  + `. La he dejado en «${lista[0]?.label || grupo}».`;
+              }
+            }
           } else if (!(GRUPOS as readonly string[]).includes(grupo)) {
             grupo = GRUPOS[0];
           }
@@ -1414,7 +1491,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
                     ${PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media'},
                     ${actorId}, '[]'::jsonb, 0, ${proyectoId}, ${responsable}, ${actorId}, ${actorId})
           `);
-          return { ok: true, entityId: id, entityType: 'roadmap_items' };
+          return { ok: true, entityId: id, entityType: 'roadmap_items', aviso: avisoGrupo || undefined };
         }
 
         case 'UPDATE_TAREA': {

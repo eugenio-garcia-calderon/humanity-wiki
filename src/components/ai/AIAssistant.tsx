@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
@@ -54,7 +54,7 @@ interface Message {
   /** LO QUE SE CREÓ DE VERDAD (2026-08-20). Sale del servidor, no de lo que
    *  el modelo diga: si esta lista está vacía, no se creó nada — por mucho
    *  que el texto diga «ya está». */
-  creado?: Array<{ titulo: string; url: string }>;
+  creado?: Array<{ titulo: string; url: string; detalle?: string }>;
   /** Pregunta con opciones (estilo Claude Code): botones 1/2/… + «Otro». */
   question?: { text: string; options: string[]; answered?: boolean };
   /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
@@ -698,7 +698,18 @@ export default function AIAssistant({ modo = 'panel' }: {
                     <div className="mt-3 space-y-2">
                       {m.actions.map((a: any) => (
                         <div key={a.id} className="bg-white border border-slate-200 rounded-xl p-2.5">
-                          <p className="text-[11px] font-bold text-slate-800">{a.description || a.action_type}</p>
+                          {/* QUÉ, no solo qué CLASE de operación (2026-08-20).
+                              Decía «Crear una tarea en un proyecto» y el
+                              motivo, que es el registro de la acción, no la
+                              cosa: sin el título ni el proyecto no se puede
+                              distinguir de un vistazo qué se ha hecho. */}
+                          <p className="text-[11px] font-bold text-slate-800">
+                            {a.params?.titulo || a.params?.nombre || a.params?.title || a.description || a.action_type}
+                          </p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            {a.description || a.action_type}
+                            {a.params?.proyecto ? ` · ${a.params.proyecto}` : ''}
+                          </p>
                           {a.rationale && <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">{a.rationale}</p>}
                           {!a.allowed && (
                             <p className="text-[10px] text-amber-700 mt-1">Requiere nivel {a.requiredLevel}. Tu nivel no alcanza.</p>
@@ -733,15 +744,25 @@ export default function AIAssistant({ modo = 'panel' }: {
                   {!!m.creado?.length && (
                     <div className="mt-2 space-y-1">
                       {m.creado.map((c, i) => (
-                        <button
+                        // UN ENLACE DE VERDAD, no un botón (2026-08-20). Era
+                        // un <button> con navigate(), así que no se podía
+                        // abrir en otra pestaña, no enseñaba a dónde va, y no
+                        // aparecía al buscar enlaces en la página — que es
+                        // justo como el Tester comprobó que «no había ficha».
+                        <Link
                           key={i}
-                          onClick={() => navigate(c.url)}
+                          to={c.url}
                           className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 transition-colors text-left"
                         >
                           <Check className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate flex-1">{c.titulo}</span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate">{c.titulo}</span>
+                            {c.detalle && (
+                              <span className="block text-[10px] font-normal text-emerald-700/70 truncate">{c.detalle}</span>
+                            )}
+                          </span>
                           <span className="text-emerald-600 shrink-0">abrir</span>
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   )}
