@@ -156,11 +156,17 @@ different layers on 2026-08-20, and it was always the same illness:
 | A test | A test page written by hand already contained the answer | «The AI confuses kg with km» (it did not) |
 | The web server | A missing file answered 200 with the SPA's HTML | «There are 24 MB of dead files in production» (there were none — 32 of 32 verified 404) |
 | The model | No way to say «I know this number but not its source» | It invented the source |
+| A permissions test | Test rows inserted by hand skipped the column default (`publico` defaults to TRUE) | «Anyone can read another user's private page» — the page had been created public by the test itself. Almost reported as a live leak |
 | The deploy | A deleted file answered 200 with the SPA's HTML | «24 MB of dead files need purging» — a task open for days, two sessions spent trying to execute it, and **32 of 32 deleted files verified 404**: there was nothing there |
 
 The last one is the most expensive of all: a failure that hid the *absence* of a
 problem cost a task open for days and two sessions trying to run a destructive
 command against production to fix something that did not exist.
+
+That fifth row is also a rule for us, not just for the code: **when testing
+permissions or visibility, create the test content through the product's normal
+path, never with raw SQL.** Inserting by hand skips the defaults the product
+relies on, and then you measure something other than what you meant to.
 
 All of them were cured by the same medicine in different places: B40's 404, B31's
 source-citing rule, B32's card built from the server's id, and the team's own

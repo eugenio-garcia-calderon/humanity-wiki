@@ -214,6 +214,12 @@ export function registerAIRoutes(app: Express, db: any) {
    * hay que reconstruir estaría desactualizado justo cuando más importa —
    * acabas de escribir algo y le preguntas por ello.
    */
+  /** Un identificador interno puesto presentable, para cuando no hay etiqueta:
+   *  «diseno-de-la-app» → «Diseno de la app». No recupera las tildes —eso solo
+   *  lo sabe la etiqueta— pero al menos no canta como un id de base de datos. */
+  const bonito = (id: string) =>
+    String(id || '').replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase());
+
   const contenidoPropio = async (userId: string, consulta: string) => {
     const palabras = consulta.toLowerCase()
       .replace(/[¿?¡!.,;:()"']/g, ' ')
@@ -1268,7 +1274,10 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if (result.ok && result.entityId) {
         const nombre = String(action.params?.titulo || action.params?.nombre || action.params?.title || '').trim();
         const rutas: Record<string, string> = {
-          roadmap_items: `/tareas`,
+          // A LA TAREA, no al listado (2026-08-21). Con 136 tareas, un enlace
+          // al índice es casi como no tener enlace. El listado ya sabe abrir
+          // una tarjeta concreta con `?tarea=`, y aquí tenemos su id.
+          roadmap_items: `/tareas?tarea=${result.entityId}`,
           proyectos: `/proyectos`,
           knowledge_windows: `/paginas/${result.entityId}`,
           eventos: `/calendario`,
@@ -1524,7 +1533,11 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             aviso: avisoGrupo || undefined,
             guardado: {
               proyecto: proyectoTitulo || undefined,
-              grupo: grupoEtiqueta || grupo,
+              // La ETIQUETA, nunca el identificador (2026-08-21). El id de
+              // «Diseño» es «diseno», y enseñarlo capitalizado pone «Diseno»
+              // sin tilde en la ficha. Misma familia que los «pagina» y
+              // «presentacion» en crudo de Archivos.
+              grupo: grupoEtiqueta || bonito(grupo),
               prioridad: PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media',
             },
           };
