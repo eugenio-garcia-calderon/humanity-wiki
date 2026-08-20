@@ -456,6 +456,135 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  // ==========================================================================
+  // LA MEDICIÓN (2026-08-20, paso 2 del plan de costes acordado con Eugenio)
+  // ==========================================================================
+  // La pregunta que hay que poder responder antes de tocar nada más:
+  // ¿CUÁNTO CUESTA UNA ACCIÓN CORRECTA EN CADA MODELO? Un modelo diez veces
+  // más barato que falla el triple sale caro; compararlos por precio del token
+  // es justo el error que esta pantalla existe para evitar.
+  //
+  // Se cruzan dos tablas que ya existían —`ai_usage_charges` (lo que se gastó)
+  // y `ai_proposed_actions` (lo que se acertó)— por la columna `model` que
+  // añade la migración 0051. No hay tabla nueva de métricas: duplicar el dato
+  // es garantizar que algún día los dos números se contradigan.
+  //
+  // Cada persona ve LO SUYO; un administrador ve el total de la plataforma
+  // (?todos=1), que es lo que hace falta para decidir de proveedor.
+  app.get('/api/ai/medicion', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const global = req.query.todos === '1' && req.user.roleLevel >= ROLE.ADMIN;
+      const quien = global ? null : req.user.id;
+      const dias = Math.min(Math.max(Number(req.query.dias) || 30, 1), 365);
+
+      const [gasto, acciones, porDia] = await Promise.all([
+        // Lo que se gastó, por modelo.
+        db.execute(sql`
+          SELECT model,
+                 count(*)::int AS llamadas,
+                 coalesce(sum(cost_cents), 0)::float AS coste_cents,
+                 coalesce(sum(total_cents), 0)::float AS pagado_cents,
+                 coalesce(sum(input_tokens), 0)::bigint AS entrada,
+                 coalesce(sum(output_tokens), 0)::bigint AS salida
+          FROM ai_usage_charges
+          WHERE created_at > now() - (${dias} * interval '1 day')
+            AND (${quien}::text IS NULL OR user_id = ${quien})
+          GROUP BY model
+        `),
+        // Lo que se acertó, por modelo. «Correcta» = la persona la aceptó y
+        // el servidor la ejecutó. Rechazada = dijo que no (el modelo propuso
+        // algo que no quería). Fallida = parámetros que no valían.
+        db.execute(sql`
+          SELECT model,
+                 count(*)::int AS propuestas,
+                 count(*) FILTER (WHERE status = 'ejecutada')::int AS correctas,
+                 count(*) FILTER (WHERE status = 'rechazada')::int AS rechazadas,
+                 count(*) FILTER (WHERE status = 'fallida')::int AS fallidas,
+                 count(*) FILTER (WHERE status = 'propuesta')::int AS pendientes
+          FROM ai_proposed_actions
+          WHERE created_at > now() - (${dias} * interval '1 day')
+            AND (${quien}::text IS NULL OR user_id = ${quien})
+          GROUP BY model
+        `),
+        // La curva de gasto, para ver si algo se disparó.
+        db.execute(sql`
+          SELECT date_trunc('day', created_at)::date AS dia,
+                 coalesce(sum(cost_cents), 0)::float AS coste_cents,
+                 count(*)::int AS llamadas
+          FROM ai_usage_charges
+          WHERE created_at > now() - (${dias} * interval '1 day')
+            AND (${quien}::text IS NULL OR user_id = ${quien})
+          GROUP BY 1 ORDER BY 1
+        `),
+      ]);
+
+      // Se unen por modelo en memoria: son un puñado de filas, y hacerlo en
+      // SQL con FULL OUTER JOIN sobre dos agregados se lee mucho peor.
+      const porModelo = new Map<string, any>();
+      // El proveedor devuelve el id con fecha (claude-haiku-4-5-20251001) y el
+      // catálogo usa el corto: se empareja por prefijo, igual que hace el chat.
+      const delCatalogo = (m: string) =>
+        AI_MODELS[m] || Object.entries(AI_MODELS).find(([id]) => m?.startsWith(id))?.[1];
+      const fila = (m: string) => {
+        const clave = m || '(sin modelo)';
+        if (!porModelo.has(clave)) {
+          porModelo.set(clave, {
+            model: clave,
+            etiqueta: delCatalogo(m)?.label || clave,
+            gratis: !!delCatalogo(m)?.gratis,
+            llamadas: 0, coste_cents: 0, pagado_cents: 0, entrada: 0, salida: 0,
+            propuestas: 0, correctas: 0, rechazadas: 0, fallidas: 0, pendientes: 0,
+          });
+        }
+        return porModelo.get(clave);
+      };
+      for (const g of gasto.rows as any[]) {
+        Object.assign(fila(g.model), {
+          llamadas: g.llamadas, coste_cents: g.coste_cents, pagado_cents: g.pagado_cents,
+          entrada: Number(g.entrada), salida: Number(g.salida),
+        });
+      }
+      for (const a of acciones.rows as any[]) {
+        const f = fila(a.model);
+        Object.assign(f, {
+          propuestas: a.propuestas, correctas: a.correctas,
+          rechazadas: a.rechazadas, fallidas: a.fallidas, pendientes: a.pendientes,
+        });
+      }
+
+      const modelos = [...porModelo.values()].map(f => ({
+        ...f,
+        // Las dos cifras que de verdad comparan modelos. `null` cuando todavía
+        // no hay datos: un 0% inventado se lee como «falla siempre».
+        acierto: f.propuestas ? f.correctas / f.propuestas : null,
+        // Hace falta gasto Y aciertos. Las acciones anteriores a la migración
+        // 0051 no saben de qué modelo salieron: sin llamadas que les
+        // correspondan, «0,0000 € por acción» diría «gratis» cuando lo que
+        // pasa es que no se puede saber.
+        coste_por_accion: f.correctas && f.llamadas ? f.coste_cents / f.correctas : null,
+        coste_por_llamada: f.llamadas ? f.coste_cents / f.llamadas : null,
+      })).sort((a, b) => b.coste_cents - a.coste_cents);
+
+      res.json({
+        dias,
+        global,
+        modelos,
+        porDia: porDia.rows,
+        total: {
+          coste_cents: modelos.reduce((n, m) => n + m.coste_cents, 0),
+          pagado_cents: modelos.reduce((n, m) => n + m.pagado_cents, 0),
+          llamadas: modelos.reduce((n, m) => n + m.llamadas, 0),
+          correctas: modelos.reduce((n, m) => n + m.correctas, 0),
+          propuestas: modelos.reduce((n, m) => n + m.propuestas, 0),
+        },
+      });
+    } catch (e: any) {
+      console.error('ai medicion:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/ai/conversations', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.json([]);
@@ -673,14 +802,18 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         ORDER BY views DESC LIMIT 40
       `);
 
-      const prompt = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
+      // La búsqueda web la decide el ROUTER, no el cliente: la interfaz la
+      // manda siempre encendida y es una herramienta que solo tiene Claude,
+      // así que hacerle caso mandaba cada «hola» al modelo caro.
+      const buscarWeb = eleccion.webSearch;
+      const prompt = buildSystemPrompt(context, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como
         // cacheable (ver `systemEstable` en provider.ts). En el juego llega
         // vacía y todo va como antes.
         systemEstable: prompt.estable || undefined,
-        messages, webSearch: !!search_web && providerOfModel(chosenModel) === 'claude', model: chosenModel,
+        messages, webSearch: buscarWeb && providerOfModel(chosenModel) === 'claude', model: chosenModel,
       });
       const { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
 
@@ -693,10 +826,13 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           const level = req.user?.roleLevel ?? 0;
           const allowed = level >= spec.minLevel;
           const insert = await db.execute(sql`
-            INSERT INTO ai_proposed_actions (conversation_id, user_id, action_type, entity_type, params, rationale, status)
+            INSERT INTO ai_proposed_actions (conversation_id, user_id, action_type, entity_type, params, rationale, status, model)
             VALUES (${conversationId}, ${req.user?.id || null}, ${a.type}, ${spec.entity || null},
                     ${JSON.stringify(a.params || {})}::jsonb, ${a.rationale || null},
-                    ${allowed ? 'propuesta' : 'rechazada'})
+                    ${allowed ? 'propuesta' : 'rechazada'},
+                    -- Qué modelo la propuso: es lo que permite medir el coste
+                    -- por acción correcta ahora que el router reparte.
+                    ${result.model})
             RETURNING id, action_type, entity_type, params, rationale, status
           `);
           proposed.push({
