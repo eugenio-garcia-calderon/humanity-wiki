@@ -14,7 +14,7 @@
 //   3. PROXY DE LECTURA (`/api/navegador/ver`): si el servidor no tiene
 //      Chromium, se cae a la versión de solo-documentos de antes.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X, MoreVertical, Minus, Plus as PlusIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { avisarNavegadorRemoto } from './bus';
 import { useAuth } from '../../contexts/AuthContext';
@@ -111,6 +111,39 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
   const marcoProxy = useRef<HTMLIFrameElement>(null);
   const sesionRef = useRef<string | null>(null);
   const tamanoRef = useRef({ ancho: 1024, alto: 700 });
+
+  // EL ZOOM, como en Chrome (Eugenio, 2026-08-20: «el mensaje de cookies de
+  // YouTube no se puede aceptar porque no da la pantalla para verlo […] que te
+  // permita hacer un + y un - con una lupa»).
+  //
+  // CÓMO FUNCIONA, que es la parte bonita: el zoom NO escala la imagen que
+  // llega. Lo que hace es pedirle a Chromium una VENTANA MÁS GRANDE — al 50 %,
+  // el doble de ancha y de alta— y encajarla en el mismo hueco. Así cabe el
+  // doble de página, exactamente como al alejar en un navegador de verdad, y
+  // el texto se ve nítido porque lo dibuja Chromium a ese tamaño, no lo
+  // estiramos nosotros.
+  //
+  // Por eso el zoom vive AQUÍ y el servidor no sabe nada de él: para él solo
+  // ha cambiado el tamaño de la ventana, que es algo que ya sabía hacer.
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(1);
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  /** Los saltos de Chrome. El 100 % siempre está y es donde se empieza. */
+  const PASOS = [0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+  /** El tamaño de ventana que toca para el hueco y el zoom de ahora. */
+  const tamanoParaZoom = (c: HTMLElement | null, z: number) => ({
+    ancho: Math.round((c?.clientWidth || 1024) / z),
+    alto: Math.round((c?.clientHeight || 700) / z),
+  });
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fuera = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuAbierto(false);
+    };
+    document.addEventListener('mousedown', fuera);
+    return () => document.removeEventListener('mousedown', fuera);
+  }, []);
   const autoReinicios = useRef(0);
   const urlRef = useRef(inicial);
   const tituloActual = useRef<string>('');
@@ -133,6 +166,29 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
       .catch(() => { /* un gesto perdido no es un error */ });
   }, []);
 
+  /** Cambiar el zoom: se pide a Chromium una ventana del tamaño que toca y se
+   *  guarda para que el redimensionado de la ventana lo respete. */
+  const aplicarZoom = useCallback((z: number) => {
+    setZoom(z);
+    zoomRef.current = z;
+    const { ancho, alto } = {
+      ancho: Math.round((cont.current?.clientWidth || 1024) / z),
+      alto: Math.round((cont.current?.clientHeight || 700) / z),
+    };
+    tamanoRef.current = { ancho, alto };
+    enviar({ tipo: 'tamano', ancho, alto });
+  }, [enviar]);
+
+  /** Un salto arriba o abajo por la escala de Chrome. */
+  const cambiarZoom = useCallback((paso: number) => {
+    const PASOS_L = [0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+    const i = PASOS_L.indexOf(zoomRef.current);
+    const actual = i >= 0 ? i : PASOS_L.findIndex(p => p >= zoomRef.current);
+    const siguiente = Math.min(PASOS_L.length - 1, Math.max(0, (actual < 0 ? 5 : actual) + paso));
+    aplicarZoom(PASOS_L[siguiente]);
+  }, [aplicarZoom]);
+
+
   // --- Arrancar (y rearrancar) la sesión remota -----------------------------
   useEffect(() => {
     if (modo !== 'remoto') return;
@@ -143,8 +199,7 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
     (async () => {
       try {
         const c = cont.current;
-        const ancho = Math.round(c?.clientWidth || 1024);
-        const alto = Math.round(c?.clientHeight || 700);
+        const { ancho, alto } = tamanoParaZoom(c, zoomRef.current);
         tamanoRef.current = { ancho, alto };
         const destino = reproductorDe(urlRef.current) ? 'about:blank' : urlRef.current;
         const r = await fetch('/api/navegador/remoto', {
@@ -236,7 +291,7 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
       t = setTimeout(() => {
         const c = cont.current;
         if (!c) return;
-        const ancho = Math.round(c.clientWidth), alto = Math.round(c.clientHeight);
+        const { ancho, alto } = tamanoParaZoom(c, zoomRef.current);
         if (Math.abs(ancho - tamanoRef.current.ancho) < 8 && Math.abs(alto - tamanoRef.current.alto) < 8) return;
         tamanoRef.current = { ancho, alto };
         enviar({ tipo: 'tamano', ancho, alto });
@@ -511,6 +566,43 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
           className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
           <Bot className="w-3 h-3" />La IA lo ve
         </span>
+
+        {/* LOS TRES PUNTITOS DEL NAVEGADOR: los ajustes de la ventana. De
+            momento el zoom, que es lo que hacía falta — un aviso de cookies que
+            no cabe en la pantalla no se puede aceptar, y alejando sí. */}
+        {modo === 'remoto' && !esPantallaInicio(url) && (
+          <div className="relative shrink-0" ref={menuRef}>
+            <button onClick={() => setMenuAbierto(o => !o)} title="Ajustes del navegador"
+              className={cn('w-7 h-7 grid place-items-center rounded-lg transition-colors',
+                menuAbierto ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-200')}>
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+
+            {menuAbierto && (
+              <div className="absolute top-9 right-0 w-56 bg-white border border-slate-200 shadow-2xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <p className="px-1 pb-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Zoom</p>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => cambiarZoom(-1)} disabled={zoom <= PASOS[0]}
+                    title="Alejar" className="w-8 h-8 grid place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30">
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => aplicarZoom(1)} title="Volver al 100 %"
+                    className="flex-1 h-8 grid place-items-center rounded-lg border border-slate-200 text-xs font-black text-slate-700 hover:bg-slate-50 tabular-nums">
+                    {Math.round(zoom * 100)} %
+                  </button>
+                  <button onClick={() => cambiarZoom(1)} disabled={zoom >= PASOS[PASOS.length - 1]}
+                    title="Acercar" className="w-8 h-8 grid place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30">
+                    <PlusIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <p className="mt-2 px-1 text-[10px] text-slate-400 leading-relaxed">
+                  Alejar hace que quepa más página — útil cuando un aviso de cookies
+                  no cabe entero y no deja aceptarlo.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {aviso && (
