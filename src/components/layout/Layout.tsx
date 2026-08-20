@@ -89,6 +89,21 @@ export default function Layout() {
   // Al cambiar de página, el desplegable se cierra solo.
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
+  // La otra punta del puente: lo que una ventana manda con `postMessage` se
+  // vuelve a lanzar aquí como evento normal, y el asistente lo oye igual que
+  // si hubiera pasado en esta misma página. Se comprueba el origen: solo se
+  // escucha a nuestras propias ventanas, y solo estos dos avisos.
+  useEffect(() => {
+    const alMensaje = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      const t = (e.data || {}).humanity;
+      if (t !== 'humanity:juego-contexto' && t !== 'humanity:asistente-focus') return;
+      window.dispatchEvent(new CustomEvent(t, { detail: (e.data || {}).detalle }));
+    };
+    window.addEventListener('message', alMensaje);
+    return () => window.removeEventListener('message', alMensaje);
+  }, []);
+
   // Modo embed: la app se incrusta a sí misma (p. ej. el mapa dentro de una
   // ventana de conocimiento, o cualquier sección en una ventana del Escritorio)
   // sin barra superior ni asistente.
@@ -139,12 +154,16 @@ export default function Layout() {
       <div className={cn('h-screen w-full bg-white relative',
         fullBleed ? 'overflow-hidden' : 'overflow-y-auto')}>
         <Outlet />
-        {/* El robot del juego y la barra de los lienzos SON el asistente:
-            sin esto, la página dentro de una ventana del Escritorio se
-            quedaría muda (2026-08-19). */}
-        {(isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage) && (
-          <AIAssistant mode="bar" />
-        )}
+        {/* DENTRO DE UNA VENTANA NO HAY ASISTENTE PROPIO (Eugenio, 2026-08-20:
+            «que sea coherente en todas las herramientas»). Antes cada ventana
+            montaba su propia barra de chat y acababas con dos asistentes, dos
+            historiales y dos sitios donde arreglar lo mismo. Ahora el de fuera
+            es el único, y sabe qué ventana tienes delante.
+
+            Lo que sí cruza es la voz del robot del Mundo 3D: vive aquí dentro
+            y el asistente vive fuera, así que sus avisos se reenvían a la app
+            de fuera con `postMessage`. */}
+        <PuenteAlAsistente />
       </div>
     );
   }
@@ -343,12 +362,8 @@ export default function Layout() {
           <GestorVentanas />
         </div>
 
-        <AIAssistant
-            mode={
-              isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
-                  : 'dock'
-            }
-          />
+        {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. */}
+        <AIAssistant />
       </div>
 
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra
@@ -356,4 +371,33 @@ export default function Layout() {
           y las ventanas abiertas. */}
     </div>
   );
+}
+
+/**
+ * EL PUENTE ENTRE UNA VENTANA Y EL ASISTENTE DE FUERA.
+ *
+ * El robot del Mundo 3D y los lienzos hablan por eventos del navegador
+ * (`humanity:juego-contexto`, `humanity:asistente-focus`), pero esos eventos se
+ * quedan dentro del marco. Este puente los reenvía a la app de fuera, que es
+ * donde vive el único asistente. Solo va HACIA FUERA y solo con esos dos
+ * nombres: nada de dentro puede pedirle a la app de fuera ninguna otra cosa.
+ */
+function PuenteAlAsistente() {
+  useEffect(() => {
+    const reenviar = (e: Event) => {
+      try {
+        window.parent?.postMessage({
+          humanity: (e as CustomEvent).type,
+          detalle: (e as CustomEvent).detail ?? null,
+        }, window.location.origin);
+      } catch { /* si el marco es de otro origen, no hay puente y ya está */ }
+    };
+    window.addEventListener('humanity:juego-contexto', reenviar);
+    window.addEventListener('humanity:asistente-focus', reenviar);
+    return () => {
+      window.removeEventListener('humanity:juego-contexto', reenviar);
+      window.removeEventListener('humanity:asistente-focus', reenviar);
+    };
+  }, []);
+  return null;
 }

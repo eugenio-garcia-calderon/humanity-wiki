@@ -27,7 +27,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Navegador from './Navegador';
-import { publicarVentanas, type AbrirVentana } from './bus';
+import { publicarVentanas, publicarPaginaWeb, type AbrirVentana } from './bus';
 
 export interface Ventana {
   id: string;
@@ -338,7 +338,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
             {v.clase === 'navegador'
               ? <Navegador inicial={v.destino}
                   onTitulo={t => cambiar(v.id, { titulo: t })}
-                  onUrl={u => { cambiar(v.id, { destino: u }); onPaginaNavegador?.(u); }} />
+                  onUrl={u => { cambiar(v.id, { destino: u }); onPaginaNavegador?.(u); publicarPaginaWeb(u); }} />
               : (
                 <iframe
                   // `embed=1`: la página SOLA, sin la cabecera de la app dentro

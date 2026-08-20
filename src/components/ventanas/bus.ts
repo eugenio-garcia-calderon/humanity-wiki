@@ -60,3 +60,8 @@ export const cerrarVentana = (id: string) =>
  *  no existe (ventana cerrada a la vez) simplemente se ignora. */
 export const ordenarVentanas = (ids: string[]) =>
   window.dispatchEvent(new CustomEvent('humanity:ordenar-ventanas', { detail: ids }));
+
+/** La web abierta en el navegador, para que el asistente sepa qué estás
+ *  mirando. Antes lo recogía la página «Escritorio», que ya no existe. */
+export const publicarPaginaWeb = (url: string | null) =>
+  window.dispatchEvent(new CustomEvent('humanity:pagina-web', { detail: url }));
