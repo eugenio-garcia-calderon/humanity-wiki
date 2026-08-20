@@ -68,7 +68,15 @@ export default function Lienzos() {
   const [tituloNuevo, setTituloNuevo] = useState('');
   const [guardando, setGuardando] = useState(false);
 
-  useEffect(() => { if (!user) setAmbito('comun'); }, [user]);
+  // La sesión llega DESPUÉS del primer pintado: sin esto, el estado inicial se
+  // calculaba con `user` todavía a nulo y la página abría siempre en «De la
+  // humanidad», aunque hubieras entrado con tu cuenta. Solo se corrige mientras
+  // no hayas tocado tú el interruptor.
+  const [tocado, setTocado] = useState(false);
+  useEffect(() => {
+    if (tocado) return;
+    setAmbito(user ? 'mios' : 'comun');
+  }, [user, tocado]);
 
   useEffect(() => {
     let vivo = true;
@@ -121,8 +129,13 @@ export default function Lienzos() {
     <div className="max-w-7xl mx-auto w-full">
       {/* Cabecera */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
+        {/* «Grafos» y no «Lienzos»: es el mismo cajón, y el menú dice Grafos
+            (Eugenio, 2026-08-20: «cuando haces click en grafos, que te
+            aparezcan todos los grafos del usuario, no uno en concreto»). Tu
+            lienzo personal —lo que era «Mi Conocimiento»— es una ficha más de
+            «Míos», porque un lienzo ES un grafo. */}
         <h1 className="inline-flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
-          <LayoutGrid className="w-5 h-5 text-emerald-600" /> Lienzos
+          <LayoutGrid className="w-5 h-5 text-emerald-600" /> Grafos
         </h1>
 
         {user && (
@@ -130,7 +143,7 @@ export default function Lienzos() {
             {([['mios', 'Míos'], ['comun', 'De la humanidad']] as const).map(([k, etiqueta]) => (
               <button
                 key={k}
-                onClick={() => setAmbito(k)}
+                onClick={() => { setTocado(true); setAmbito(k); }}
                 className={cn('px-3.5 py-1 rounded-full text-xs font-bold transition-colors',
                   ambito === k ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50')}
               >
@@ -147,14 +160,14 @@ export default function Lienzos() {
           <input
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar un lienzo…"
+            placeholder="Buscar un grafo…"
             className="w-40 sm:w-56 text-xs text-slate-700 bg-transparent focus:outline-none"
           />
         </div>
 
         {user && (
           <Button onClick={() => { setTituloNuevo(''); setCreando(true); }} className="inline-flex items-center gap-1.5 shrink-0">
-            <Plus className="w-4 h-4" /> Nuevo lienzo
+            <Plus className="w-4 h-4" /> Nuevo grafo
           </Button>
         )}
       </div>
@@ -171,9 +184,9 @@ export default function Lienzos() {
         <div className="py-20 text-center">
           <ImageIcon className="w-8 h-8 mx-auto text-slate-300 mb-3" />
           <p className="text-sm font-bold text-slate-500">
-            {busqueda ? 'Ningún lienzo con ese nombre.'
-              : ambito === 'mios' ? 'Todavía no has creado ningún lienzo.'
-                : 'Aún no hay lienzos publicados.'}
+            {busqueda ? 'Ningún grafo con ese nombre.'
+              : ambito === 'mios' ? 'Todavía no has creado ningún grafo.'
+                : 'Aún no hay grafos publicados.'}
           </p>
           {user && !busqueda && (
             <button onClick={() => { setTituloNuevo(''); setCreando(true); }}
@@ -195,7 +208,7 @@ export default function Lienzos() {
               <span className="w-10 h-10 rounded-full bg-emerald-600 group-hover:bg-emerald-700 text-white grid place-items-center transition-colors">
                 <Plus className="w-5 h-5" />
               </span>
-              <span className="text-xs font-black text-slate-600 group-hover:text-emerald-700">Nuevo lienzo</span>
+              <span className="text-xs font-black text-slate-600 group-hover:text-emerald-700">Nuevo grafo</span>
             </button>
           )}
 
@@ -243,7 +256,7 @@ export default function Lienzos() {
           onClick={() => !guardando && setCreando(false)}>
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-black text-slate-900">Nuevo lienzo</h2>
+              <h2 className="text-sm font-black text-slate-900">Nuevo grafo</h2>
               <button onClick={() => setCreando(false)} disabled={guardando}
                 className="ml-auto p-1 text-slate-400 hover:text-slate-600 disabled:opacity-40">
                 <X className="w-4 h-4" />
