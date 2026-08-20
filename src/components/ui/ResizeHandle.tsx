@@ -13,15 +13,20 @@ export default function ResizeHandle({
   active,
   className,
 }: {
-  onMouseDown: (e: React.MouseEvent) => void;
+  /** Se dispara con ratón, dedo o lápiz: es un `pointerdown`, no un
+   *  `mousedown` (2026-08-20, para que el asa funcione al tacto). */
+  onMouseDown: (e: React.PointerEvent) => void;
   edge: 'left' | 'right';
   active?: boolean;
   className?: string;
 }) {
   return (
     <div
-      onMouseDown={onMouseDown}
+      onPointerDown={onMouseDown}
       title="Arrastra para cambiar el ancho"
+      // Sin esto, en una pantalla táctil el navegador interpreta el arrastre
+      // como un desplazamiento de la página y se lleva el gesto.
+      style={{ touchAction: 'none' }}
       className={cn(
         'group absolute inset-y-0 w-1.5 cursor-col-resize z-20 flex items-center justify-center select-none',
         edge === 'left' ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2',

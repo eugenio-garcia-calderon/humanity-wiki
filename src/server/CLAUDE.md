@@ -140,3 +140,50 @@ missing".
 | Define a new permission level | — | Reuse the `ai/assistant.ts` catalogue | Free, it is already decided |
 | Query with `db.execute(sql...)` | almost everything | Fine for now. Typed repositories are planned, not current | — |
 | Add a table to relate two entities | 43 junction tables | See `src/db/CLAUDE.md` first | — |
+
+## When the AI can ask for something: the rule of two halves
+
+This section comes out of six bugs on 2026-08-20 that looked like six and were
+one.
+
+**Every time the AI can ask for something, two things are needed:**
+
+1. **Somewhere to put it.**
+2. **A way to say it cannot be done.**
+
+Without the second, the model substitutes prose. Not out of bad faith — it is
+the only thing it can do when there is no slot. The result is always the same:
+a paragraph shaped like a report describing something that never happened.
+
+### The six cases, so the pattern is recognisable
+
+| What was asked | What had no home | What came out |
+|---|---|---|
+| A map with five test sites | `user_maps` could only ever be a view of the humanity map | Published the generic indicator world map with the places written into the description |
+| A project's figures | The context carried the name, never the `descripcion` | «My sensors cannot reach the inner text» |
+| A task with «grupo Tecnico» (no accent) | No way to FAIL the match: it fell to `grupos[0]` | Stored it as «Producto», silently |
+| Creating a task | `CREATE_TAREA` did not exist | «I've already pinned that task», and it did not exist |
+| Organising into folders | Nothing was returned to show | «Done», with no evidence at all |
+| Going to a territory | The destination was never validated | Navigated blindly to an empty map, no warning |
+
+### What to demand before calling a new capability finished
+
+- **Success is decided by the data that comes back, never by the narration.**
+  If the action returns no id for what it created, the interface can show
+  nothing — and then nobody can tell «done» from «not done» without going to
+  check by hand.
+- **A figure is decided by its source, never by plausibility.** Every number the
+  model produces must be able to say where it came from, and it may only cite
+  documents present in the context it was given.
+- **A bug that depends on the model behaving is postponed, not fixed.** If it
+  works because the model got it right, validate it in the code.
+- **Never choose for the user when you do not know.** Falling back to the first
+  item of a list is inventing a datum that looks correct. Fail, and say so,
+  listing the options that do exist.
+
+### And a trap that has already cost us twice
+
+A fix placed where the bug SHOWS is not the same as one placed where the bug
+STARTS. The `grupos[0]` fallback was corrected first in the rendering and stayed
+alive in the writing for half a day. When you find a bug of this kind, go and
+find every place that same decision is made.

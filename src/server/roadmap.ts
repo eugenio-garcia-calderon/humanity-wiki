@@ -157,7 +157,14 @@ export function registerRoadmapRoutes(app: Express, db: any) {
         ORDER BY p.created_at DESC
         LIMIT 100
       `);
-      res.json(rows.rows);
+      // A QUIEN NO HA ENTRADO NO SE LE DA EL ID DEL CREADOR (2026-08-20).
+      // No es una fuga —los proyectos que salen son los públicos— pero un id
+      // interno de usuario no le sirve de nada a un visitante y sí sirve para
+      // relacionar cosas entre sí. Se manda el nombre, que es lo que se pinta.
+      const filas = (rows.rows as any[]).map(p => (
+        req.user ? p : { ...p, creador_user_id: undefined, created_by: undefined, updated_by: undefined }
+      ));
+      res.json(filas);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

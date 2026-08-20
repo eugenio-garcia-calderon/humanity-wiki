@@ -2028,6 +2028,20 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
+      // UN FICHERO QUE NO ESTÁ ES UN 404, NO LA PÁGINA (2026-08-20, hermano
+      // de lo de /api). El comodín contestaba index.html a TODO, así que
+      // /sitemap.xml y /manifest.json devolvían 200 con la web dentro: quien
+      // los pide es un buscador o el navegador, no una persona, y leen HTML
+      // donde esperaban XML o JSON.
+      //
+      // La regla: una dirección CON EXTENSIÓN pide un fichero concreto; sin
+      // extensión, es una ruta de la aplicación. `express.static` ya ha tenido
+      // su oportunidad justo arriba, así que si llega aquí con extensión es
+      // que no existe.
+      if (/\.[a-z0-9]{2,5}$/i.test(req.path)) {
+        res.status(404).type("txt").send("No existe ese fichero.");
+        return;
+      }
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

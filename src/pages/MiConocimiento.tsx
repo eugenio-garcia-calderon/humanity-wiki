@@ -244,12 +244,24 @@ function MiniModal({ title, fields, onSubmit, onClose }: {
     finally { setSaving(false); }
   };
 
+  /** PINCHAR FUERA NO TIRA LO ESCRITO (2026-08-20). Con doscientos caracteres
+   *  dentro, un clic en el fondo cerraba el diálogo sin preguntar y había que
+   *  reescribirlo todo. Si está vacío se cierra como siempre; si hay algo
+   *  escrito, se pregunta. La escritura de alguien no se descarta por un clic
+   *  a destiempo. */
+  const cerrarConCuidado = () => {
+    const hayAlgo = Object.values(valores).some(v => (v || '').trim());
+    if (!hayAlgo || window.confirm('¿Descartar lo que has escrito?')) onClose();
+  };
+
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+    <div role="dialog" aria-modal="true"
+      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+      onClick={cerrarConCuidado}>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-black text-slate-900 inline-flex items-center gap-1.5"><Plus className="w-4 h-4 text-emerald-600" /> {title}</h2>
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
+          <button onClick={cerrarConCuidado} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-5 space-y-3">
           {fields.map(f => (
