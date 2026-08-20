@@ -74,8 +74,19 @@ export default function Layout() {
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   // Modo embed: la app se incrusta a sí misma (p. ej. el mapa dentro de una
-  // ventana de conocimiento) sin barra superior ni asistente.
-  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
+  // ventana de conocimiento, o cualquier sección en una ventana del Escritorio)
+  // sin barra superior ni asistente.
+  //
+  // Se mira TAMBIÉN si vamos dentro de un marco, y no solo el `embed=1` de la
+  // dirección (2026-08-20, segunda vez que Eugenio ve dos menús): el parámetro
+  // se PIERDE en cuanto la página de dentro navega por su cuenta —iniciar
+  // sesión, pulsar un enlace, una redirección— y a partir de ahí la ventana
+  // volvía a pintar la app entera con su cabecera dentro de sí misma. Ir en un
+  // marco es un hecho que no se puede perder al navegar; el parámetro sí.
+  const enUnMarco = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+  const isEmbed = enUnMarco || new URLSearchParams(location.search).get('embed') === '1';
   const isMapPage = location.pathname === '/mapa';
   // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
   // completa y chat de IA como barra inferior.
