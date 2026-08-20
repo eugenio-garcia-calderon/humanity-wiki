@@ -1225,3 +1225,21 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
   - **El `inert` de las ventanas de fondo no estaba haciendo nada.** Se pasaba como cadena vacía y React la trata como FALSO (lo avisaba por consola). Es decir, el arreglo de «el juego se come las teclas» estaba puesto pero inactivo desde ayer. Ahora va como booleano.
   - **Al caer al modo lectura, el navegador volvía a la pantalla de inicio** y el clic en un favorito no iba a ningún sitio: la historia del modo lectura no se sembraba con la página actual.
 - Verificado en el navegador: los tres nombres nuevos en el menú, la pantalla de favoritos con sus cuatro tarjetas, y el clic en una llevando a la página.
+
+### 2026-08-20 — La plataforma es un juego de herramientas: fuera «Escritorio», fuera «Inicio», ventanas en todas partes
+Lote de 12 peticiones de Eugenio en una sola captura. Diez van en este cambio; las otras dos (el tablero de Mi Perfil y el rediseño del asistente) van aparte porque son features enteras.
+
+- **YA NO HAY PÁGINA «ESCRITORIO»** («elimina lo de escritorio, siempre esa funcionalidad tiene que estar; tienes que pensar la plataforma como un conjunto de herramientas/aplicaciones que te permiten hacer desde un proyecto, un grafo, un mapa o un mundo 3D y todo con la misma base de datos interconectada»). El gestor de ventanas ha dejado de ser una página para ser una **capa sobre toda la app**: sin ventanas abiertas no se ve ni captura clics, y la página de debajo funciona igual que siempre. Desde el menú ☰, **cualquier herramienta abre una ventana estés donde estés** — ya no hay que pasar primero por ningún sitio.
+- **LA VENTANA YA NO NACE POR DEBAJO DE LA PÁGINA.** Era el fallo que hacía parecer que el menú no hacía nada: la capa de ventanas va después del contenido y con z propio.
+- **LA BARRA DE ARRIBA MARCA DÓNDE ESTÁS**: la ventana que tienes delante se pinta en negro **y con su nombre**; las demás quedan como iconos de 32 px para que quepan muchas. Pulsar una la trae al frente; pulsarla otra vez la minimiza.
+- **SIN BARRA ABAJO.** Fuera el pie de página. Solo hay una barra, la de arriba.
+- **«/» YA NO ES UNA PORTADA: ES TU PERFIL** («quita el botón de inicio y la página; la página por defecto, Mi Perfil»). Borradas la página `Inicio` y la página `Contribuye`.
+- **«GEOLOCALIZACIÓN DE DATOS» → «MAPAS»**, también en la dirección: `/mapas` es el mapa y `/mis-mapas` el índice. `/mapa` redirige, así que ningún enlace viejo se rompe.
+- **GRAFOS ES UNO SOLO Y SON TODOS** («cuando haces click en grafos, que te aparezcan todos los grafos del usuario, no uno en concreto»). `/grafos` es la rejilla de fichas y **tu lienzo personal —lo que era «Mi Conocimiento»— es una ficha más**, igual que el grafo de los retos de España. Fuera del menú: un grafo es un grafo, venga de donde venga.
+- **NUEVA PÁGINA «CONFIGURACIÓN»** con el tamaño de letra, que hasta ahora vivía suelto dentro del menú.
+- **EL MERCADO ABRE LA PÁGINA DEL PRODUCTO** («que cuando le des a un producto se abra la página de ese producto, la misma que hicimos en el Mundo 3D»). Es literalmente el mismo componente: una landing es la misma cosa se llegue por el mercado o paseando por la aldea, con sus bloques, su vídeo y su botón de compra. El botón «Comprar» de la tarjeta sigue funcionando a un solo toque.
+- **DOS FALLOS REALES ARREGLADOS DE PASO**:
+  - **Una página abierta en una ventana no se podía bajar.** El modo embebido llevaba `overflow-hidden` fijo, así que cualquier página normal —tu perfil, por ejemplo— quedaba cortada por abajo. Ahora solo el lienzo y el Mundo 3D fijan el alto; el resto se desplaza.
+  - **`/grafos` salía a sangre completa y con una barra de chat pegada abajo**, porque la regla de «página de grafos» no distinguía la LISTA del LIENZO. Esa era la «barra extra» que sobraba.
+  - La lista de grafos abría siempre en «De la humanidad» aunque hubieras entrado con tu cuenta: la sesión llega después del primer pintado y el valor inicial se calculaba sin ella.
+- Verificado en el navegador con sesión real: menú limpio (sin Inicio, sin Contribuye, sin Universo, sin Mi Conocimiento), «/» llevando al perfil, dos ventanas abiertas desde el menú con la de delante marcada por su nombre, y la ficha de la DJI Power 1000 V2 abriéndose desde el Mercado con toda su pizarra.

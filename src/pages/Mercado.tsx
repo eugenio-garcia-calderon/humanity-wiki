@@ -5,6 +5,7 @@ import { useHelpers } from '../contexts/DataContext';
 import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart } from 'lucide-react';
 import { cn } from '../utils/cn';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
+import FichaProducto, { type ProductoFicha } from '../components/juego/FichaProducto';
 
 // ============================================================================
 // Mercado — Fase 5
@@ -44,8 +45,13 @@ export default function Mercado() {
   const [demands, setDemands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
+  // LA PÁGINA DEL PRODUCTO (2026-08-20, petición de Eugenio: «que cuando le des
+  // a un producto se abra la página de ese producto, la misma que hicimos en el
+  // Mundo 3D»). Es literalmente el mismo componente: una landing es la misma
+  // cosa se llegue por el mercado o paseando por la aldea.
+  const [ficha, setFicha] = useState<ProductoFicha | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const { can } = useAuth();
+  const { user, can } = useAuth();
   const { territories, objectives } = useHelpers();
 
   useEffect(() => {
@@ -222,7 +228,23 @@ export default function Mercado() {
       {!loading && tab === 'ofertas' && products.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col">
+            // La tarjeta ENTERA abre la página del producto. El botón de
+            // comprar vive dentro y para su propio clic: comprar sin haber
+            // visto la ficha sigue estando a un solo toque.
+            <div
+              key={p.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setFicha({
+                id: p.id, name: p.name,
+                price_cents: p.price_cents ?? null, currency: p.currency || 'EUR',
+                images: Array.isArray(p.images) ? p.images : [],
+                descripcion: p.description ?? null,
+                bloques: Array.isArray(p.bloques) ? p.bloques : [],
+                creador: p.created_by ?? null,
+              })}
+              onKeyDown={e => { if (e.key === 'Enter') (e.currentTarget as HTMLElement).click(); }}
+              className="text-left cursor-pointer bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                   {p.category || 'producto'}
@@ -249,7 +271,7 @@ export default function Mercado() {
               )}
               {p.price_cents != null && (
                 <button
-                  onClick={() => setCheckoutProduct(p)}
+                  onClick={e => { e.stopPropagation(); setCheckoutProduct(p); }}
                   className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
                 >
                   <ShoppingCart className="w-3.5 h-3.5" />
@@ -258,6 +280,29 @@ export default function Mercado() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* La ficha se dibuja con `absolute inset-0` (nació dentro del Mundo 3D),
+          así que aquí se le da un marco fijo a pantalla completa. */}
+      {ficha && (
+        <div className="fixed inset-0 z-[60]">
+          <FichaProducto
+            producto={ficha}
+            puedeEditar={!!user && (ficha.creador === user.id || (user.roleLevel ?? 0) >= ROLE.ADMIN)}
+            onCerrar={() => setFicha(null)}
+            onGuardar={async (bloques) => {
+              const r = await fetch(`/api/products/${ficha.id}/pizarra`, {
+                method: 'PUT', credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bloques }),
+              }).catch(() => null);
+              if (!r?.ok) return false;
+              setFicha(f => (f ? { ...f, bloques } : f));
+              setProducts(prev => prev.map(x => (x.id === ficha.id ? { ...x, bloques } : x)));
+              return true;
+            }}
+          />
         </div>
       )}
 

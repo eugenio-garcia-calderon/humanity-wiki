@@ -5,9 +5,6 @@ import Layout from './components/layout/Layout';
 // Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
 const JuegoVital = lazy(() => import('./pages/JuegoVital'));
-// El escritorio va perezoso como el juego: arrastra el gestor de ventanas y el
-// navegador, y quien no lo abre no debe pagarlos en la carga inicial.
-const Escritorio = lazy(() => import('./pages/Escritorio'));
 import TerritoryProfile from './pages/TerritoryProfile';
 import ChallengeProfile from './pages/ChallengeProfile';
 import SolutionProfile from './pages/SolutionProfile';
@@ -32,7 +29,8 @@ import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
 import Lienzos from './pages/Lienzos';
-import Inicio from './pages/Inicio';
+import Entrada from './pages/Entrada';
+import Configuracion from './pages/Configuracion';
 import BaseDeDatos from './pages/BaseDeDatos';
 import Archivos from './pages/Archivos';
 import MiConocimiento from './pages/MiConocimiento';
@@ -49,7 +47,6 @@ import AdminDesign from './pages/AdminDesign';
 import AdminUsuarios from './pages/AdminUsuarios';
 import AboutRoot from './pages/about/AboutRoot';
 import AboutScoring from './pages/about/AboutScoring';
-import Contribuye from './pages/Contribuye';
 import HazteSocio from './pages/HazteSocio';
 import SocioConfirmacion from './pages/SocioConfirmacion';
 import { AuthProvider } from './contexts/AuthContext';
@@ -72,9 +69,9 @@ export default function App() {
                     el mapa conserva su ruta /mapa (enlazada en el menú). */}
                 {/* La portada presenta las TRES formas de ver (2026-08-06).
                     La Red de Datos (antes «Grafos») vive en /red. */}
-                <Route index element={<Inicio />} />
+                <Route index element={<Entrada />} />
                 <Route path="red" element={<Grafos />} />
-                <Route path="grafos" element={<Grafos />} />
+                <Route path="grafos" element={<Lienzos />} />
                 <Route path="base-de-datos" element={<BaseDeDatos />} />
                 <Route path="archivos" element={<Archivos />} />
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
@@ -83,14 +80,6 @@ export default function App() {
                   element={
                     <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Mundo 3D…</div>}>
                       <JuegoVital />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="escritorio"
-                  element={
-                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Abriendo el escritorio…</div>}>
-                      <Escritorio />
                     </Suspense>
                   }
                 />
@@ -107,9 +96,10 @@ export default function App() {
                 <Route path="documentos/:id" element={<Documento />} />
                 <Route path="presentaciones/:id" element={<Presentacion />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
-                <Route path="lienzos" element={<Lienzos />} />
+                <Route path="lienzos" element={<Navigate to="/grafos" replace />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />
-                <Route path="mapas" element={<Mapas />} />
+                <Route path="mis-mapas" element={<Mapas />} />
+                <Route path="mapas" element={<MapPage />} />
                 <Route path="mapas/:slug" element={<UserMapa />} />
                 <Route path="incendios-espana-mapa" element={<IncendiosMapa />} />
                 <Route path="territorios/:id" element={<TerritoryProfile />} />
@@ -134,15 +124,14 @@ export default function App() {
                 <Route path="organizaciones" element={<Organizations />} />
                 <Route path="iniciativas/:id" element={<ProjectProfile />} />
                 <Route path="organizaciones/:id" element={<OrganizationProfile />} />
-            <Route path="mapa" element={<MapPage />} />
+            <Route path="mapa" element={<Navigate to="/mapas" replace />} />
                 <Route path="login" element={<Login />} />
                 <Route path="restablecer" element={<Restablecer />} />
+                <Route path="configuracion" element={<Configuracion />} />
                 <Route path="admin/design" element={<AdminDesign />} />
                 <Route path="admin/usuarios" element={<AdminUsuarios />} />
                 <Route path="sobre-red-humana" element={<AboutRoot />} />
                 <Route path="sobre-red-humana/puntuacion-territorios" element={<AboutScoring />} />
-                <Route path="contribuye" element={<Contribuye />} />
-                <Route path="Contribuye" element={<Contribuye />} />
                 <Route path="hazte-socio" element={<HazteSocio />} />
                 <Route path="socio-confirmacion" element={<SocioConfirmacion />} />
               </Route>

@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  User, LogOut, Heart, Store, Map as MapIcon, Globe2, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, LayoutGrid,
+  User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
+  Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
+import GestorVentanas from '../ventanas/GestorVentanas';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
-import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../../contexts/SettingsContext';
 import AIAssistant from '../ai/AIAssistant';
 
 // ============================================================================
@@ -19,23 +19,22 @@ import AIAssistant from '../ai/AIAssistant';
 // encuentra con el chat de IA de la parte inferior.
 
 /** Todo lo que no son los dos destinos principales. */
+// LAS HERRAMIENTAS. La plataforma es un juego de aplicaciones sobre UNA base
+// de datos: un proyecto, un grafo, un mapa o un mundo 3D son formas distintas
+// de tocar lo mismo (petición de Eugenio, 2026-08-20). Cada entrada abre una
+// VENTANA, estés donde estés — ya no hay una página «Escritorio» aparte.
 const SECCIONES_COMUN = [
-  { to: '/', label: 'Inicio', icon: Home },
-  { to: '/explorar', label: 'Explorar', icon: Compass },
-  { to: '/mapa', label: 'Geolocalización de Datos', icon: MapIcon },
-  { to: '/red', label: 'Grafos', icon: Globe2 },
-  { to: '/archivos', label: 'Archivos', icon: Database },
-  { to: '/lienzos', label: 'Lienzos', icon: LayoutGrid },
-];
-const SECCIONES_TUYO = [
-  { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
-  { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+  { to: '/grafos', label: 'Grafos', icon: Globe2 },
+  { to: '/mapas', label: 'Mapas', icon: MapIcon },
   { to: '/juego', label: 'Mundo 3D', icon: Gamepad2 },
-  { to: '/escritorio', label: 'Escritorio', icon: AppWindow },
+  { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+  { to: '/archivos', label: 'Archivos', icon: Database },
+  { to: '/explorar', label: 'Explorar', icon: Compass },
 ];
+const SECCIONES_TUYO: Array<{ to: string; label: string; icon: any }> = [];
 const SECCIONES_PIE = [
-  { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
   { to: '/mercado', label: 'Mercado', icon: Store },
+  { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
 ];
 /** Para buscar el icono de una ventana abierta por su ruta. */
 const TODAS_SECCIONES = [...SECCIONES_COMUN, ...SECCIONES_TUYO, ...SECCIONES_PIE];
@@ -45,7 +44,6 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { updateCounter } = useEdit();
-  const { fontScale, setFontScale } = useSettings();
 
   // Menú de tres líneas junto al logo: todo lo que no son los dos destinos
   // principales vive aquí (decisión del usuario, 2026-08-08).
@@ -88,32 +86,40 @@ export default function Layout() {
   })();
   const isEmbed = enUnMarco || new URLSearchParams(location.search).get('embed') === '1';
   const isMapPage = location.pathname === '/mapa';
-  // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
-  // completa y chat de IA como barra inferior.
-  const isGrafosPage = location.pathname === '/red' || location.pathname.startsWith('/grafos');
+  // El LIENZO de un grafo (`/grafos/:slug`) y la Red de Datos: a sangre
+  // completa, con el chat de IA como barra inferior.
+  //
+  // OJO: `/grafos` a secas NO entra aquí. Es la lista de fichas, una página
+  // normal — cuando entraba, salía a pantalla completa y con una barra de chat
+  // pegada abajo, que es justo la «barra extra» que sobraba (Eugenio,
+  // 2026-08-20).
+  const isGrafosPage = location.pathname === '/red' || /^\/grafos\/.+/.test(location.pathname);
   // /mapas (el grafo de mapas) es lienzo a sangre con la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
   // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
   const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
   // Mi Conocimiento: el lienzo personal — a sangre completa y con barra de IA.
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
-  // La portada monta su propia barra de IA en línea, debajo de las ventanas.
-  const isInicioPage = location.pathname === '/';
+  // Ya no hay portada: «/» redirige a tu perfil (Eugenio, 2026-08-20:
+  // «quita el botón de inicio y la página, la página por defecto Mi Perfil»).
   // Mundo 3D: a pantalla completa; el robot del mundo ES el
   // asistente, así que la barra de IA vive abajo como en los lienzos.
   const isJuegoPage = location.pathname === '/juego';
-  // El Escritorio son ventanas: necesita todo el alto, y trae su propio chat
-  // (el que ve el navegador), así que la barra de IA de la app sobra aquí.
-  const isEscritorioPage = location.pathname === '/escritorio';
   // Explorar/Mis publicaciones se fusionaron en una sola página con su propio
   // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
   // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isEscritorioPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage;
 
   if (isEmbed) {
     return (
-      <div className="h-screen w-full bg-white overflow-hidden relative">
+      // OJO con el desbordamiento: esto era `overflow-hidden` siempre, y por
+      // eso una página normal abierta en una ventana —tu perfil, por ejemplo—
+      // se quedaba cortada por abajo sin poder bajar (Eugenio, 2026-08-20:
+      // «arregla que no me deja bajar en la página»). El lienzo y el Mundo 3D
+      // sí quieren el alto exacto: ellos gestionan su propio desplazamiento.
+      <div className={cn('h-screen w-full bg-white relative',
+        fullBleed ? 'overflow-hidden' : 'overflow-y-auto')}>
         <Outlet />
         {/* El robot del juego y la barra de los lienzos SON el asistente:
             sin esto, la página dentro de una ventana del Escritorio se
@@ -125,27 +131,27 @@ export default function Layout() {
     );
   }
 
-  /** Una entrada del menú ☰. En el ESCRITORIO no navega: abre esa sección
-   *  como VENTANA (petición de Eugenio, 2026-08-19: «no están ahí por defecto,
-   *  solo las que se abran al pinchar desde el menú colapsado»). En el resto
-   *  de la app sigue siendo un enlace normal. La entrada del propio Escritorio
-   *  siempre navega: abrirlo dentro de sí mismo sería una muñeca rusa. */
-  const entradaMenu = (x: { to: string; label: string; icon: any }) => {
-    const activo = location.pathname === x.to;
+  /** Una entrada del menú ☰. SIEMPRE abre una ventana, estés donde estés
+   *  (petición de Eugenio, 2026-08-20: «que cuando haces click en una de las
+   *  apps ya se te quede arriba, sin necesidad de tener que estar en
+   *  escritorio»). Las páginas de cuenta y ajustes sí navegan: no son
+   *  herramientas, son sitios donde vas una vez. */
+  const entradaMenu = (x: { to: string; label: string; icon: any; navega?: boolean }) => {
+    const abierta = ventanasAbiertas.some(v => v.destino === x.to);
     const clases = cn('w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors text-left',
-      activo ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50');
-    if (isEscritorioPage && x.to !== '/escritorio') {
+      abierta || location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50');
+    if (x.navega) {
       return (
-        <button key={x.to} className={clases}
-          onClick={() => { abrirVentana({ titulo: x.label, clase: 'app', destino: x.to }); setMenuOpen(false); }}>
+        <Link key={x.to} to={x.to} className={clases}>
           <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-        </button>
+        </Link>
       );
     }
     return (
-      <Link key={x.to} to={x.to} className={clases}>
+      <button key={x.to} className={clases}
+        onClick={() => { abrirVentana({ titulo: x.label, clase: 'app', destino: x.to }); setMenuOpen(false); }}>
         <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-      </Link>
+      </button>
     );
   };
 
@@ -173,12 +179,7 @@ export default function Layout() {
               <button
                 onClick={() => {
                   setMenuOpen(false);
-                  const orden = { titulo: 'Navegador', clase: 'navegador' as const, destino: 'about:inicio' };
-                  if (isEscritorioPage) abrirVentana(orden);
-                  else {
-                    localStorage.setItem('humanity:abrir-al-llegar', JSON.stringify(orden));
-                    navigate('/escritorio');
-                  }
+                  abrirVentana({ titulo: 'Navegador', clase: 'navegador', destino: 'about:inicio' });
                 }}
                 className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 text-left"
               >
@@ -188,11 +189,7 @@ export default function Layout() {
               <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">El común</p>
               {SECCIONES_COMUN.map(entradaMenu)}
               <div className="h-px bg-slate-100 my-1.5" />
-              <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Lo tuyo</p>
-              {SECCIONES_TUYO.map(entradaMenu)}
-              <div className="h-px bg-slate-100 my-1.5" />
               {SECCIONES_PIE.map(entradaMenu)}
-              {entradaMenu({ to: '/contribuye', label: 'Contribuye', icon: Heart })}
 
               {/* Tu cuenta: lo que antes vivía a la derecha de la cabecera
                   (petición de Eugenio, 2026-08-20: «que no quede nada, solo
@@ -201,28 +198,14 @@ export default function Layout() {
               <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Tu cuenta</p>
               {user ? (
                 <>
-                  {entradaMenu({ to: `/personas/${user.id}`, label: `Tu perfil (${user.roleLabel})`, icon: User })}
-                  {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2 })}
+                  {entradaMenu({ to: `/personas/${user.id}`, label: `Tu perfil (${user.roleLabel})`, icon: User, navega: true })}
+                  {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2, navega: true })}
                   {/* El inventario de tablas reales. Era «Base de Datos» en el
                       menú principal; ese sitio lo ocupa ahora «Archivos» (lo
                       tuyo). Sigue vivo aquí porque es una herramienta útil de
                       administración, no una página que nadie quisiera. */}
-                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database })}
-                  <div className="px-4 py-2">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Tamaño de letra</p>
-                    <div className="flex gap-1">
-                      {(Object.keys(FONT_SCALE_LABELS) as FontScaleKey[]).map(key => (
-                        <button
-                          key={key}
-                          onClick={() => setFontScale(key)}
-                          className={cn('flex-1 px-2 py-1 rounded-lg text-[11px] font-bold border transition-colors',
-                            fontScale === key ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
-                        >
-                          {FONT_SCALE_LABELS[key]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database, navega: true })}
+                  {entradaMenu({ to: '/configuracion', label: 'Configuración', icon: Settings, navega: true })}
                   <button
                     onClick={() => { setMenuOpen(false); logout(); navigate('/'); }}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left"
@@ -231,7 +214,7 @@ export default function Layout() {
                   </button>
                 </>
               ) : (
-                entradaMenu({ to: '/login', label: 'Iniciar sesión', icon: User })
+                entradaMenu({ to: '/login', label: 'Iniciar sesión', icon: User, navega: true })
               )}
             </div>
           )}
@@ -251,7 +234,7 @@ export default function Layout() {
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
             en forma de iconos para que no ocupen mucho»). Pulsar uno trae la
             ventana; si ya está delante, la minimiza. */}
-        {isEscritorioPage && ventanasAbiertas.length > 0 && (
+        {ventanasAbiertas.length > 0 && (
           <div className="flex items-center gap-1 ml-1 overflow-x-auto">
             {ventanasAbiertas.map(v => {
               const Icono = v.clase === 'navegador'
@@ -262,12 +245,20 @@ export default function Layout() {
                   key={v.id}
                   onClick={() => pulsarVentana(v.id)}
                   title={v.titulo}
-                  className={cn('w-8 h-8 grid place-items-center rounded-lg border shrink-0 transition-colors',
-                    v.delante ? 'bg-slate-900 border-slate-900 text-white'
-                      : v.minimizada ? 'bg-white border-slate-200 text-slate-300 hover:text-slate-500'
-                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
+                  className={cn('h-8 flex items-center gap-1.5 rounded-lg border shrink-0 transition-colors',
+                    // La que estás mirando lleva NOMBRE, no solo icono
+                    // (petición de Eugenio, 2026-08-20: «que la página en la
+                    // que estás esté marcada»). Las demás siguen siendo
+                    // iconos de 32 px para que quepan muchas.
+                    v.delante ? 'px-2.5 bg-slate-900 border-slate-900 text-white' : 'w-8 justify-center',
+                    !v.delante && (v.minimizada
+                      ? 'bg-white border-slate-200 text-slate-300 hover:text-slate-500'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'))}
                 >
-                  <Icono className="w-4 h-4" />
+                  <Icono className="w-4 h-4 shrink-0" />
+                  {v.delante && (
+                    <span className="text-[11px] font-black tracking-tight max-w-[9rem] truncate">{v.titulo}</span>
+                  )}
                 </button>
               );
             })}
@@ -285,39 +276,37 @@ export default function Layout() {
           asistente se renderiza como barra inferior (dentro de la página,
           posición fija), no como columna. */}
       <div className="flex-1 flex overflow-hidden">
-        <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}>
-          <div className={fullBleed ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
-            <Outlet />
-          </div>
-        </main>
-        {/* El Escritorio trae SU propio chat (el que ve el navegador), así que
-            la barra global no se monta ahí: dos asistentes en la misma
-            pantalla es una pregunta sin saber a cuál se la haces. */}
-        {!isEscritorioPage && (
-          <AIAssistant
+        {/* La página y las ventanas comparten el MISMO hueco: así una ventana
+            maximizada tapa la página, pero nunca el panel del asistente, que
+            es la columna de al lado. */}
+        <div className="flex-1 flex flex-col relative min-w-0">
+          <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}>
+            <div className={fullBleed ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
+              <Outlet />
+            </div>
+          </main>
+
+          {/* LAS VENTANAS, SIEMPRE. Ya no hay una página «Escritorio»: el
+              gestor es una capa sobre toda la app (petición de Eugenio,
+              2026-08-20). Sin ventanas abiertas no se ve ni estorba —no
+              captura clics—, y la página de debajo funciona como siempre.
+              Va DESPUÉS de <main> y con z propio: antes, al abrir algo desde
+              el menú, la ventana nacía por debajo de la página que estabas
+              mirando y parecía que no había pasado nada. */}
+          <GestorVentanas />
+        </div>
+
+        <AIAssistant
             mode={
-              isInicioPage ? 'inline'
-                : isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
+              isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
                   : 'dock'
             }
           />
-        )}
       </div>
 
-      {!fullBleed && (
-        <footer className="h-10 border-t border-slate-100 px-4 sm:px-8 flex items-center justify-between bg-slate-50 shrink-0">
-          <div className="flex gap-6 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-             <span>humanity.wiki · Beta V1</span>
-             <span className="hidden sm:inline">Arquitectura: Sistémica-Territorial</span>
-          </div>
-          <div className="flex gap-4 items-center">
-             <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase hidden sm:inline">Sistema Operativo</span>
-             </div>
-          </div>
-        </footer>
-      )}
+      {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra
+          abajo»). Solo hay UNA barra, la de arriba, y es la que lleva el menú
+          y las ventanas abiertas. */}
     </div>
   );
 }

@@ -85,17 +85,19 @@ export default function SocioConfirmacion() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            to="/mapa"
+            to="/mapas"
             className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
           >
             <span>Explorar el Mapa Planetario</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
+          {/* «Contribuye» dejó de existir (Eugenio, 2026-08-20). El sitio
+              natural al que volver desde aquí es tu perfil. */}
           <Link
-            to="/contribuye"
+            to="/"
             className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-sm transition-colors"
           >
-            Volver a Contribuye
+            Volver a tu perfil
           </Link>
         </div>
       </div>

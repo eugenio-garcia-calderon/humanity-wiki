@@ -24,7 +24,7 @@
 // Lo que cuesta: cada ventana es una carga de la app (unos 200 ms y su
 // memoria). Con tres o cuatro ventanas no se nota; con veinte sí.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { X, Minus, Square, Copy, Globe, Gamepad2 } from 'lucide-react';
+import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Navegador from './Navegador';
 import { publicarVentanas, type AbrirVentana } from './bus';
@@ -247,18 +247,12 @@ export default function GestorVentanas({ onPaginaNavegador }: {
   };
 
 
+  // El gestor ya NO es una página: es una CAPA sobre toda la app (petición de
+  // Eugenio, 2026-08-20: «elimina lo de escritorio, siempre esa funcionalidad
+  // tiene que estar»). Sin fondo y sin capturar clics: cuando no hay ventanas,
+  // la página de debajo se usa como si esta capa no existiera.
   return (
-    <div className="absolute inset-0 overflow-hidden bg-slate-200/60"
-      style={{ backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)', backgroundSize: '26px 26px' }}>
-
-      {ventanas.length === 0 && (
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="text-center">
-            <p className="text-sm font-bold text-slate-500">No hay ninguna ventana abierta.</p>
-            <p className="text-xs text-slate-400 mt-1">Abre el juego, el navegador o cualquier sección desde el menú ☰ de arriba.</p>
-          </div>
-        </div>
-      )}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-30">
 
       {/* Se pintan TODAS, y la minimizada solo se OCULTA: quitarla del árbol
           desmontaría su marco y el juego se reiniciaría de cero cada vez que
@@ -267,7 +261,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         <div
           key={v.id}
           onPointerDown={() => alFrente(v.id)}
-          className="absolute flex flex-col rounded-xl overflow-hidden bg-white border border-slate-300 shadow-2xl"
+          className="absolute pointer-events-auto flex flex-col rounded-xl overflow-hidden bg-white border border-slate-300 shadow-2xl"
           style={{
             ...(v.maximizada
               ? { left: 0, top: 0, width: '100%', height: '100%' }
@@ -284,9 +278,12 @@ export default function GestorVentanas({ onPaginaNavegador }: {
               !v.maximizada && 'cursor-grab active:cursor-grabbing')}
             style={{ height: BARRA }}
           >
+            {/* El icono del mando valía cuando la única ventana era el Mundo
+                3D; ahora aquí se abre cualquier herramienta, así que la marca
+                neutra de ventana dice la verdad. */}
             {v.clase === 'navegador'
               ? <Globe className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              : <Gamepad2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+              : <AppWindow className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
             <span className="text-[11px] font-black text-slate-700 truncate">{v.titulo}</span>
             <div className="ml-auto flex items-center gap-0.5">
               <button onClick={() => cambiar(v.id, { minimizada: true })} title="Minimizar"
