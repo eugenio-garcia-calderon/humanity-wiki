@@ -16,6 +16,7 @@ import {
   CheckSquare, Table2, Rocket, Lock, Unlock,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import IconoElemento from '../components/ui/Icono';
 import { leerPegado, tamanoLegible, enCampoDeTexto, type Pegado } from '../utils/pegado';
 import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
 import { useHelpers } from '../contexts/DataContext';
@@ -1257,9 +1258,7 @@ export function GrafoLienzo({ slug, toolbar }: {
           >
             <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px] flex items-center gap-1.5">
               {/* El icono del esquema, junto a su nombre (Eugenio, 2026-08-20). */}
-              {(data.graph as any).icono && (
-                <span className="text-sm leading-none shrink-0">{(data.graph as any).icono}</span>
-              )}
+              <IconoElemento valor={(data.graph as any).icono} tamano={16} />
               <span className="truncate">{data.graph.title}</span>
             </h1>
             <ChevronDown className={cn('w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform', infoOpen && 'rotate-180')} />

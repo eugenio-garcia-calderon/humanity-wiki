@@ -1443,3 +1443,13 @@ Eugenio: «en la sección de personas, crea una página donde se puedan ver toda
 **CRM — DOS FORMAS DE MIRAR** («ponme diferentes formas de ver los contactos, en galería con fotos en mini tarjetas, o en tabla con las variables en las columnas»).
 - **TABLA** para trabajar —encontrar a alguien entre muchos y comparar columnas— y **GALERÍA** para reconocer por la cara, que es como funciona la memoria con la gente que ya conoces. Los mismos datos y **las mismas acciones en las dos**: cambiar de vista no puede quitarte lo que podías hacer.
 - **La elección se recuerda**: cada cual mira de una forma y no hay que repetirla cada vez.
+
+### 2026-08-20 — Una imagen puede ser el icono, y el título se edita desde la página
+- **EL ICONO PUEDE SER UNA IMAGEN, no solo un emoji** (Eugenio: «añade la opción de añadir una imagen como icono de las páginas del menú»). Botón **«Subir imagen»** en la ventanita de nombre e icono, y también en el editor de una página.
+  - **SIN MIGRACIÓN NI COLUMNA NUEVA**: los dos casos caben en la columna `icono` que ya existía. Se distinguen **mirando el valor** —lo que empieza por `/` o `http` es una dirección, lo demás es un emoji— y no con una columna «tipo» al lado, que sería un dato capaz de contradecir al otro; el día que se contradijeran, se pintaría mal.
+  - Una pieza compartida (`ui/Icono`) los pinta en el menú, en la página del proyecto, en el esquema, en la ficha de un producto y en una página. En un esquema, si el icono es una imagen, **es la portada entera**.
+- **EL TÍTULO Y EL ICONO SE CAMBIAN TAMBIÉN DESDE LA PÁGINA** («no solo desde el menú»): lápiz junto al título del proyecto, que abre **el mismo popup del menú** — renombrar algo es lo mismo se haga desde donde se haga. Y en una página, el icono se pulsa y se cambia ahí.
+- **SE ME HABÍA OLVIDADO EL ICONO EN LAS PÁGINAS**, y ahora sale junto al título como en el resto.
+- **DOS FALLOS MÍOS, CAZADOS AL PROBARLO**:
+  - **El tope de 8 caracteres partía las direcciones**: un icono de imagen se guardaba como `/uploads` y a volar. Ese tope estaba pensado solo para emojis, de cuando no había otra cosa.
+  - **Se colaba cualquier texto raro como icono.** Ahora una dirección solo vale si es **de aquí** (`/uploads/…`) o **https**, y un emoji no puede llevar `:` ni `<`. Un `javascript:` ahí no haría daño —el icono nunca entra en un enlace— pero guardar basura que parece un enlace es pedir que algún día alguien la trate como tal. Verificado: imagen propia y emoji entran; `javascript:` y una imagen de fuera se rechazan sin tocar lo que había.

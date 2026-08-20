@@ -9,8 +9,9 @@
 // EMOJIS Y NO IMÁGENES: caben en la fila, se ven igual en todas partes, no hay
 // que subir nada y el menú no paga una petición por línea.
 import { useEffect, useRef, useState } from 'react';
-import { X, Loader2, Check } from 'lucide-react';
+import { X, Loader2, Check, ImagePlus } from 'lucide-react';
 import { cn } from '../../../utils/cn';
+import Icono, { esImagen } from '../../ui/Icono';
 
 /** Los de siempre para un proyecto o una tarea, más lo que se quiera pegar. */
 const EMOJIS = [
@@ -31,8 +32,29 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
   const [texto, setTexto] = useState(nombre);
   const [elegido, setElegido] = useState<string | null>(icono || null);
   const [guardando, setGuardando] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cajaRef = useRef<HTMLDivElement>(null);
+  const fotoRef = useRef<HTMLInputElement>(null);
+
+  /** Subir una imagen como icono. Va por la misma ruta de siempre, así que no
+   *  hay un sitio nuevo donde guardar ficheros ni límites que repetir. */
+  const subirImagen = async (f?: File) => {
+    if (!f) return;
+    setSubiendo(true);
+    setError(null);
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json();
+      if (!r.ok || !j.url) { setError(j?.error || 'No se ha podido subir la imagen.'); return; }
+      setElegido(j.url);
+    } catch {
+      setError('No se ha podido subir la imagen.');
+    } finally { setSubiendo(false); }
+  };
 
   // Escape cierra, como cualquier ventanita.
   useEffect(() => {
@@ -76,8 +98,8 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
 
         <form onSubmit={e => { e.preventDefault(); guardar(); }}>
           <div className="flex items-center gap-2">
-            <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-slate-100 text-lg">
-              {elegido || '·'}
+            <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-slate-100 overflow-hidden">
+              {elegido ? <Icono valor={elegido} tamano={esImagen(elegido) ? 36 : 22} /> : <span className="text-lg text-slate-300">·</span>}
             </span>
             <input
               autoFocus
@@ -87,7 +109,19 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
             />
           </div>
 
-          <p className="mt-3 mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">Icono</p>
+          <div className="mt-3 mb-1.5 flex items-center gap-2">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Icono</p>
+            {/* UNA IMAGEN TUYA como icono, no solo emojis. Se guarda en la
+                misma columna: un icono que empieza por «/» es una dirección y
+                cualquier otra cosa es un emoji. */}
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+              onChange={e => { subirImagen(e.target.files?.[0]); e.target.value = ''; }} />
+            <button type="button" onClick={() => fotoRef.current?.click()} disabled={subiendo}
+              className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-slate-200 text-[10px] font-bold text-slate-500 hover:border-emerald-300 hover:text-emerald-700 disabled:opacity-40 transition-colors">
+              {subiendo ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
+              {subiendo ? 'Subiendo…' : 'Subir imagen'}
+            </button>
+          </div>
           <div className="grid grid-cols-8 gap-1">
             {/* «Ninguno» va el primero: quitar el icono tiene que ser tan fácil
                 como ponerlo. */}
