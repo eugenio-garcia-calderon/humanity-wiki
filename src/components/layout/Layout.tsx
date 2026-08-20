@@ -4,7 +4,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe,
 } from 'lucide-react';
-import { abrirVentana, pulsarVentana, cerrarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
+import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -67,6 +67,31 @@ export default function Layout() {
   // no deja leer los datos hasta que sueltas, y así el destino no puede saber
   // durante el gesto si tiene que apartarse.
   const arrastrando = useRef<string | null>(null);
+
+  // UN CLIC Y DOS CLICS EN LA MISMA PESTAÑA.
+  //
+  // Un clic en la pestaña que ya está delante la MINIMIZA (como la barra de
+  // tareas de toda la vida), y eso choca con el doble clic: el navegador manda
+  // clic, clic y doble clic, así que la ventana se escondía y volvía de golpe
+  // antes de agrandarse. Feo, y a pantalla completa se ve como un parpadeo.
+  //
+  // Solución: traer al frente es INMEDIATO (que es el caso normal y tiene que
+  // sentirse instantáneo) y solo se hace esperar el minimizar, que es el único
+  // que se pisa con el doble clic. Si el doble clic llega, se cancela.
+  const esperaMinimizar = useRef<number | null>(null);
+  const cancelarEspera = () => {
+    if (esperaMinimizar.current) { clearTimeout(esperaMinimizar.current); esperaMinimizar.current = null; }
+  };
+  const pulsarPestana = (v: VentanaEstado) => {
+    cancelarEspera();
+    if (!v.delante) { pulsarVentana(v.id); return; }
+    esperaMinimizar.current = window.setTimeout(() => {
+      esperaMinimizar.current = null;
+      pulsarVentana(v.id);
+    }, 220);
+  };
+  const doblePestana = (v: VentanaEstado) => { cancelarEspera(); maximizarVentana(v.id); };
+  useEffect(() => cancelarEspera, []);
   const soltarPestana = (destino: number) => {
     const id = arrastrando.current;
     arrastrando.current = null;
@@ -299,8 +324,9 @@ export default function Layout() {
                   onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
                   onDrop={e => { e.preventDefault(); soltarPestana(i); }}
                   onDragEnd={() => { arrastrando.current = null; }}
-                  onClick={() => pulsarVentana(v.id)}
-                  title={v.titulo}
+                  onClick={() => pulsarPestana(v)}
+                  onDoubleClick={() => doblePestana(v)}
+                  title={`${v.titulo} — doble clic para verla a pantalla completa`}
                   className={cn('group h-8 flex items-center gap-1.5 pl-2.5 rounded-lg border shrink-0 cursor-pointer transition-colors',
                     // La ✕ solo en la pestaña que miras (Eugenio, 2026-08-20:
                     // «para que ocupe menos»): las demás no gastan esos 20 px.

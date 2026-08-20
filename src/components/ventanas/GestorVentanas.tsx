@@ -153,6 +153,14 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     };
     // La ✕ de una pestaña de arriba.
     const alCerrar = (e: Event) => cerrar((e as CustomEvent).detail as string);
+    // Doble clic en una pestaña: a pantalla completa y al frente. Se
+    // desminimiza a la vez, porque agrandar algo que no se ve no sirve de nada.
+    const alMaximizar = (e: Event) => {
+      const id = (e as CustomEvent).detail as string;
+      setVentanas(vs => vs.map(v => (v.id === id
+        ? { ...v, maximizada: !v.maximizada, minimizada: false, z: ++contadorZ }
+        : v)));
+    };
     // Recolocar las pestañas arrastrando: llega el orden entero de ids. Se
     // reordena el ARRAY (que es lo que se publica a la barra); las z quedan
     // como estaban, porque cambiar de sitio una pestaña no cambia cuál miras.
@@ -170,6 +178,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     window.addEventListener('humanity:abrir-ventana', alAbrir);
     window.addEventListener('humanity:pulsar-ventana', alPulsar);
     window.addEventListener('humanity:cerrar-ventana', alCerrar);
+    window.addEventListener('humanity:maximizar-ventana', alMaximizar);
     window.addEventListener('humanity:ordenar-ventanas', alOrdenar);
     // El menú ☰ de CUALQUIER página puede dejar una apertura apuntada
     // («Navegador» desde fuera del Escritorio, 2026-08-20): se recoge aquí,
@@ -183,6 +192,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
       window.removeEventListener('humanity:abrir-ventana', alAbrir);
       window.removeEventListener('humanity:pulsar-ventana', alPulsar);
       window.removeEventListener('humanity:cerrar-ventana', alCerrar);
+      window.removeEventListener('humanity:maximizar-ventana', alMaximizar);
       window.removeEventListener('humanity:ordenar-ventanas', alOrdenar);
     };
   }, [abrir, cerrar]);
