@@ -21,7 +21,11 @@ export interface VentanaEstado {
   id: string;
   titulo: string;
   clase: 'app' | 'navegador';
+  /** De dónde nació la ventana (con lo que se casa al reabrirla desde el menú). */
   destino: string;
+  /** Dónde está AHORA. Es lo que decide el icono de la pestaña, igual que en
+   *  un navegador el favicon es el de la página que estás viendo. */
+  ruta?: string;
   minimizada: boolean;
   delante: boolean;
 }

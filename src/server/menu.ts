@@ -97,6 +97,114 @@ export function registerMenuRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // LA DIRECCIÓN DE UNA COSA DENTRO DEL ÁRBOL (2026-08-20, petición de Eugenio:
+  // «que tenga una URL debajo que corresponda con el árbol de donde está
+  // almacenada en la base de datos, por ejemplo humanity.wiki/eugeniolighthumanity/
+  // proyectos/camion-camper/tareas/baño»).
+  // ==========================================================================
+  // La barra de direcciones de una ventana no enseña la ruta interna de React,
+  // que no dice nada («/paginas/KWMSKJJ98PDQ»), sino DÓNDE VIVE la cosa: de
+  // quién es, de qué proyecto cuelga y qué es. Eso hay que preguntárselo a la
+  // base de datos, porque la ruta sola no lo sabe.
+  //
+  // EL NOMBRE DE USUARIO sale del correo: `eugenio@lighthumanity.org` da
+  // `eugeniolighthumanity`. Es lo que Eugenio escribió en su ejemplo y evita
+  // una columna nueva; el día que haya nombres de usuario de verdad, se cambia
+  // esta función y ya está.
+  const nombreDeUsuario = (email: string | null, id: string) => {
+    if (!email) return id.toLowerCase();
+    const [local, dominio] = email.split('@');
+    const marca = (dominio || '').split('.')[0] || '';
+    return `${local}${marca}`.replace(/[^a-z0-9]/gi, '').toLowerCase();
+  };
+
+  app.get('/api/ruta', async (req: Request, res: Response) => {
+    try {
+      const destino = String(req.query.d || '');
+      const [camino, consulta] = destino.split('?');
+      const partes = camino.split('/').filter(Boolean);
+      const params = new URLSearchParams(consulta || '');
+
+      // Segmento raíz: de quién es esto. Sin sesión no hay dueño que enseñar.
+      const segmentos: Array<{ label: string; url?: string }> = [];
+      if (req.user) {
+        const u = await db.execute(sql`SELECT email FROM users WHERE id = ${req.user.id}`);
+        segmentos.push({
+          label: nombreDeUsuario((u.rows[0] as any)?.email ?? null, req.user.id),
+          url: `/personas/${req.user.id}`,
+        });
+      }
+
+      /** Añade proyecto + tipo cuando la cosa cuelga de un proyecto. */
+      const bajoProyecto = async (proyectoId: string | null, tipo: string) => {
+        if (!proyectoId) { segmentos.push({ label: tipo }); return; }
+        const p = await db.execute(sql`SELECT titulo, slug FROM proyectos WHERE id = ${proyectoId}`);
+        const fila = p.rows[0] as any;
+        if (!fila) { segmentos.push({ label: tipo }); return; }
+        segmentos.push({ label: 'proyectos', url: '/proyectos' });
+        segmentos.push({ label: fila.slug, url: `/proyectos/${fila.slug}` });
+        segmentos.push({ label: tipo });
+      };
+
+      const trozo = (t: string) =>
+        (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+          .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'sin-nombre';
+
+      const seccion = partes[0] || '';
+      const resto = partes[1] || '';
+
+      if (seccion === 'paginas' && resto) {
+        const w = await db.execute(sql`
+          SELECT title, proyecto_id FROM knowledge_windows WHERE id = ${resto}
+        `);
+        const f = w.rows[0] as any;
+        await bajoProyecto(f?.proyecto_id ?? null, 'paginas');
+        segmentos.push({ label: trozo(f?.title || resto), url: destino });
+      } else if (seccion === 'esquemas' && resto) {
+        const g = await db.execute(sql`
+          SELECT title, slug, proyecto_id FROM knowledge_graphs WHERE slug = ${resto} OR id = ${resto}
+        `);
+        const f = g.rows[0] as any;
+        await bajoProyecto(f?.proyecto_id ?? null, 'esquemas');
+        segmentos.push({ label: f?.slug || trozo(resto), url: destino });
+      } else if (seccion === 'mapas' && resto) {
+        const m = await db.execute(sql`
+          SELECT title, slug, proyecto_id FROM user_maps WHERE slug = ${resto} OR id = ${resto}
+        `);
+        const f = m.rows[0] as any;
+        await bajoProyecto(f?.proyecto_id ?? null, 'mapas');
+        segmentos.push({ label: f?.slug || trozo(resto), url: destino });
+      } else if (seccion === 'proyectos' && resto) {
+        segmentos.push({ label: 'proyectos', url: '/proyectos' });
+        segmentos.push({ label: resto, url: destino });
+      } else if (seccion === 'tareas' && params.get('tarea')) {
+        const t = await db.execute(sql`
+          SELECT titulo, proyecto_id FROM roadmap_items WHERE id = ${params.get('tarea')}
+        `);
+        const f = t.rows[0] as any;
+        await bajoProyecto(f?.proyecto_id ?? null, 'tareas');
+        segmentos.push({ label: trozo(f?.titulo || ''), url: destino });
+      } else if (seccion === 'personas' && resto) {
+        // Un perfil ES la raíz de esa persona: no cuelga de nada tuyo.
+        const u = await db.execute(sql`SELECT email FROM users WHERE id = ${resto}`);
+        segmentos.length = 0;
+        segmentos.push({
+          label: nombreDeUsuario((u.rows[0] as any)?.email ?? null, resto),
+          url: destino,
+        });
+      } else if (seccion) {
+        // Una herramienta abierta sin nada dentro: «tú / esquemas».
+        segmentos.push({ label: seccion, url: destino });
+      }
+
+      res.json({ segmentos });
+    } catch (e: any) {
+      console.error('ruta error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // LO QUE HAY DENTRO DE UN PROYECTO
   // ==========================================================================
   // Se pide al DESPLEGAR el proyecto en el menú, no antes: el árbol entero de
