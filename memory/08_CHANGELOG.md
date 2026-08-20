@@ -1600,3 +1600,37 @@ and from inside the pop-up; the pop-up measures 896 px and has no three-dots.
 tags wired to the filter with `@`, people and projects on a task, drag a menu
 item onto Tareas to create a linked task, and the "Áreas" menu section with the
 14 objectives.
+
+## 2026-08-20 — Prompt caching: the stable half of the system prompt now costs 10%
+
+First step of the cost plan Eugenio approved: **caché → medición → contexto
+dinámico → routing → RAG**.
+
+The assistant's system prompt was one string re-sent whole with every message.
+It is now built in two parts (`buildSystemPrompt` returns `{estable, variable}`):
+
+- **`estable`** — identity, rules 1–5, the graph/map/calendar instructions and
+  the response format. Byte-identical across all calls of all users, so the
+  Anthropic cache is shared platform-wide: the first call writes it (25%
+  surcharge), every later call within the window rereads it at 10% of the input
+  price. The only interpolation allowed is `UI_EVENTS`, a server constant.
+- **`variable`** — today's date, the screen state, the user, the retrieved
+  fragments, the published-graphs list, and rules 6–8 (level, edit mode, web
+  search). Sent after the cached block, paid normally.
+
+The date had to move out of the head of the prompt: `toISOString()` changes
+every second, and one changing byte at the top would have made the cache never
+hit while still paying the 25% write surcharge on every message.
+
+`provider.ts` gained `systemEstable` on the request (Claude marks it
+`cache_control: ephemeral`; Gemini just concatenates — it has no such cache),
+prices the three input buckets (normal 100%, cache write 125%, cache read 10%),
+and reports `cacheReadTokens` in the result and in the chat `usage` payload.
+The Juego Vital prompt is not split: the character's identity is interwoven
+throughout, so there is no shared prefix worth caching.
+
+Measured live with two real messages: the second read **1,657 tokens from
+cache** and cost 0.437 céntimos vs 0.978 for the first — 55% cheaper. The
+saving grows with conversation length, and the stable block will grow the
+saving further once the retrieved context shrinks (next step: contexto
+dinámico). Test conversation, charges and session deleted afterwards.
