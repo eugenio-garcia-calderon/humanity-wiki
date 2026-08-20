@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
-  FileText, ChevronDown, CalendarDays,
+  FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -83,6 +83,17 @@ export default function Layout() {
   // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
   // (ver bus.ts).
   const [ventanasAbiertas, setVentanasAbiertas] = useState<VentanaEstado[]>([]);
+  // MODO COMPACTO (Eugenio, 2026-08-20: «haz que se pueda ocultar con un botón
+  // que haga que colapse en algo todavía más sencillo, con solo iconos de las
+  // ventanas»). Las pestañas se quedan en iconos y la barra de dirección de
+  // cada ventana desaparece: dos filas se vuelven una tira de 32 px.
+  const [compacto, setCompacto] = useState<boolean>(() => {
+    try { return localStorage.getItem('humanity:barra-compacta') === '1'; } catch { return false; }
+  });
+  const cambiarCompacto = (v: boolean) => {
+    setCompacto(v);
+    try { localStorage.setItem('humanity:barra-compacta', v ? '1' : '0'); } catch { /* lleno */ }
+  };
   const [cuentaAbierta, setCuentaAbierta] = useState(false);
   const cuentaRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -265,7 +276,11 @@ export default function Layout() {
       <div className="flex-1 flex flex-col min-w-0">
       {/* Barra superior: SOLO las ventanas abiertas. La marca y las secciones
           se han ido al menú lateral. */}
-      <header className="h-14 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 flex items-center gap-3 z-40 shrink-0 shadow-sm">
+      {/* Más baja que antes (56 → 40 px, y 32 en compacto): eran tres filas de
+          cosas para lo mismo y ahora son dos, así que cada una tiene que pesar
+          lo mínimo. */}
+      <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
+        compacto ? 'h-8' : 'h-10')}>
 
         {/* Las ventanas abiertas del Escritorio, como ICONOS (2026-08-19,
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
@@ -291,22 +306,26 @@ export default function Layout() {
                   onClick={() => pulsarPestana(v)}
                   onDoubleClick={() => doblePestana(v)}
                   title={`${v.titulo} — doble clic para verla a pantalla completa`}
-                  className={cn('group h-8 flex items-center gap-1.5 pl-2.5 rounded-lg border shrink-0 cursor-pointer transition-colors',
+                  className={cn('group flex items-center gap-1.5 rounded-lg border shrink-0 cursor-pointer transition-colors',
+                    // COMPACTO: solo el icono, un cuadrado de 24 px.
+                    compacto ? 'w-6 h-6 justify-center' : 'h-7 pl-2',
                     // La ✕ solo en la pestaña que miras (Eugenio, 2026-08-20:
                     // «para que ocupe menos»): las demás no gastan esos 20 px.
-                    v.delante ? 'pr-1' : 'pr-2.5',
+                    !compacto && (v.delante ? 'pr-1' : 'pr-2'),
                     v.delante
                       ? 'bg-slate-900 border-slate-900 text-white'
                       : v.minimizada
                         ? 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'
                         : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
                 >
-                  <Icono className="w-4 h-4 shrink-0" />
-                  <span className="text-[11px] font-black tracking-tight max-w-[8rem] truncate">{v.titulo}</span>
+                  <Icono className={cn('shrink-0', compacto ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
+                  {!compacto && (
+                    <span className="text-[11px] font-black tracking-tight max-w-[8rem] truncate">{v.titulo}</span>
+                  )}
                   {/* La ✕ de una pestaña de navegador, y SOLO en la que
                       miras. `stopPropagation` para que cerrar no cuente
                       además como pulsar la pestaña. */}
-                  {v.delante && (
+                  {v.delante && !compacto && (
                     <button
                       onClick={e => { e.stopPropagation(); cerrarVentana(v.id); }}
                       title={`Cerrar ${v.titulo}`}
@@ -323,6 +342,19 @@ export default function Layout() {
 
         <div className="flex-1" />
 
+        {/* EL BOTÓN DE COLAPSAR. Solo aparece si hay ventanas: sin ellas no hay
+            nada que encoger. */}
+        {ventanasAbiertas.length > 0 && (
+          <button
+            onClick={() => cambiarCompacto(!compacto)}
+            title={compacto ? 'Ver los nombres y la dirección' : 'Encoger a solo iconos'}
+            className={cn('grid place-items-center rounded-lg shrink-0 transition-colors',
+              compacto ? 'w-6 h-6 bg-slate-900 text-white' : 'w-7 h-7 text-slate-400 hover:bg-slate-100 hover:text-slate-700')}
+          >
+            {compacto ? <ChevronsUpDown className="w-3.5 h-3.5" /> : <ChevronsDownUp className="w-3.5 h-3.5" />}
+          </button>
+        )}
+
         {/* LA CUENTA, ARRIBA A LA DERECHA DEL TODO (Eugenio, 2026-08-20). Es
             donde la busca todo el mundo, y además es lo que hace visible de un
             vistazo si has entrado o no — que era justo lo que no se veía
@@ -333,12 +365,13 @@ export default function Layout() {
               <button
                 onClick={() => setCuentaAbierta(o => !o)}
                 title={`${user.displayName || user.email} · ${user.roleLabel}`}
-                className={cn('h-9 pl-1 pr-2 flex items-center gap-1.5 rounded-full border transition-colors',
+                className={cn('pl-1 pr-2 flex items-center gap-1.5 rounded-full border transition-colors',
+                  compacto ? 'h-6' : 'h-8',
                   cuentaAbierta ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}
               >
                 {user.avatarUrl
-                  ? <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
-                  : <span className="w-7 h-7 rounded-full bg-slate-100 grid place-items-center text-slate-400">
+                  ? <img src={user.avatarUrl} alt="" className={cn('rounded-full object-cover', compacto ? 'w-5 h-5' : 'w-6 h-6')} />
+                  : <span className={cn('rounded-full bg-slate-100 grid place-items-center text-slate-400', compacto ? 'w-5 h-5' : 'w-6 h-6')}>
                       <User className="w-3.5 h-3.5" />
                     </span>}
                 <ChevronDown className="w-3 h-3 shrink-0" />
@@ -396,7 +429,7 @@ export default function Layout() {
               Va DESPUÉS de <main> y con z propio: antes, al abrir algo desde
               el menú, la ventana nacía por debajo de la página que estabas
               mirando y parecía que no había pasado nada. */}
-          <GestorVentanas />
+          <GestorVentanas compacto={compacto} />
         </div>
 
         {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. */}

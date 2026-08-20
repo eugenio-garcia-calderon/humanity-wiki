@@ -86,10 +86,16 @@ export function reproductorDe(url: string): string | null {
   return null;
 }
 
-export default function Navegador({ inicial, onTitulo, onUrl }: {
+export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover, arrastrable }: {
   inicial: string;
   onTitulo?: (t: string) => void;
   onUrl?: (u: string) => void;
+  /** Los botones de la ventana. Desde que la barra de título desapareció por
+   *  duplicar el nombre de la pestaña (Eugenio, 2026-08-20), viven al final de
+   *  esta barra: el navegador ya tenía la suya y no hacía falta otra. */
+  controles?: React.ReactNode;
+  onMover?: (e: React.PointerEvent) => void;
+  arrastrable?: boolean;
 }) {
   const { user, updateUiSettings } = useAuth();
   const favoritos: Favorito[] = Array.isArray(user?.uiSettings?.favoritosWeb)
@@ -510,7 +516,11 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
   return (
     <div className="flex flex-col h-full">
       {/* La barra */}
-      <div className="flex items-center gap-1 px-2 py-1.5 border-b border-slate-200 bg-slate-50 shrink-0">
+      <div
+        onPointerDown={onMover}
+        className={cn('flex items-center gap-1 px-1.5 py-1 border-b border-slate-200 bg-slate-50 shrink-0 select-none',
+          arrastrable && 'cursor-grab active:cursor-grabbing')}
+      >
         <button onClick={atras} disabled={modo === 'proxy' && donde === 0} title="Atrás"
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:hover:bg-transparent">
           <ArrowLeft className="w-4 h-4" />
@@ -566,6 +576,8 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
           className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
           <Bot className="w-3 h-3" />La IA lo ve
         </span>
+
+        {controles && <div className="flex items-center gap-0.5 shrink-0">{controles}</div>}
 
         {/* LOS TRES PUNTITOS DEL NAVEGADOR: los ajustes de la ventana. De
             momento el zoom, que es lo que hacía falta — un aviso de cookies que
