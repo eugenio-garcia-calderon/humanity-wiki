@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
@@ -74,7 +74,15 @@ const ATTACHMENT_MAX_BYTES: Record<string, number> = {
   'application/pdf': 15 * 1024 * 1024,
 };
 
-export default function AIAssistant() {
+export default function AIAssistant({ modo = 'panel' }: {
+  /**
+   * `panel` — el de siempre: botón flotante + columna acoplada a la derecha.
+   * `pagina` — el MISMO chat ocupando toda una página (la herramienta «IA»
+   *   del menú, 2026-08-20). No duplica nada: reutiliza `panelBody`, que ya
+   *   servía para escritorio y móvil; lo único que cambia es el marco.
+   */
+  modo?: 'panel' | 'pagina';
+} = {}) {
   // UN SOLO ASISTENTE (Eugenio, 2026-08-20: «que sea coherente en todas las
   // herramientas»). Antes había tres formas del mismo chat —panel acoplado,
   // barra abajo en los lienzos y barra en línea en la portada— y cada una se
@@ -96,6 +104,7 @@ export default function AIAssistant() {
   const [status, setStatus] = useState<{ ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
+  const [modelosAbierto, setModelosAbierto] = useState(false);
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
@@ -283,9 +292,27 @@ export default function AIAssistant() {
 
   /** El modelo que se está usando, dicho en la cabecera y no escondido en los
    *  ajustes (Eugenio, 2026-08-20: «que se sepa qué modelo usa»). */
-  const modeloActual = selectedModel && status?.models?.[selectedModel]
-    ? status.models[selectedModel].label
-    : 'Automático';
+  /** El nombre que enseña el botón. En «Automático» dice además con cuál
+   *  contestó el último mensaje: eso es «el modelo que está utilizando», que
+   *  es justo lo que Eugenio pidió ver — con el router, cambia por mensaje. */
+  const modeloActual = (() => {
+    if (selectedModel && status?.models?.[selectedModel]) return status.models[selectedModel].label;
+    const ultimo = [...messages].reverse().find(m => m.usage?.model)?.usage?.model;
+    if (!ultimo) return 'Automático';
+    // El modelo por defecto de la plataforma (claude-sonnet-4-6) no está en el
+    // catálogo elegible, así que no tiene etiqueta: se enseña su id tal cual
+    // antes que callarse cuál respondió, que es justo lo que se pidió ver.
+    const entrada = Object.entries(status?.models || {}).find(([id]) => ultimo.startsWith(id));
+    return `Automático · ${entrada ? entrada[1].label : ultimo}`;
+  })();
+
+  // Cerrar el desplegable de modelos al pinchar en cualquier otro sitio.
+  useEffect(() => {
+    if (!modelosAbierto) return;
+    const fuera = () => setModelosAbierto(false);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [modelosAbierto]);
 
   const currentContext = () => ({
     route: location.pathname,
@@ -793,61 +820,11 @@ export default function AIAssistant() {
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
 
-              {/* Modelo de IA para tus creaciones (grafos, mapas, chat) — Fase 12 */}
-              {status?.models && (
-                <div className="pt-2 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-1">
-                    <Cpu className="w-3 h-3" /> Modelo de IA
-                  </p>
-                  <div className="space-y-1">
-                    {/* AUTOMÁTICO (2026-08-20): sin elección, el servidor manda
-                        cada mensaje al modelo que le toca por complejidad. Es
-                        la opción por defecto y la recomendada. */}
-                    <button
-                      onClick={() => setSelectedModel('')}
-                      className={cn(
-                        'w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
-                        !selectedModel ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
-                      )}
-                    >
-                      <span>
-                        <span className="font-bold text-slate-700">Automático</span>
-                        <span className="text-slate-400"> · elige el mejor para cada mensaje</span>
-                      </span>
-                      <span className="text-emerald-600 font-bold shrink-0">recomendado</span>
-                    </button>
-                    {Object.entries(status.models).map(([id, info]) => {
-                      // Sin nivel no se puede ELEGIR un modelo de pago, y se
-                      // dice en la propia fila en vez de esconder la opción:
-                      // saber qué hay es parte de querer verificarse.
-                      const bloqueado = (info.nivelMinimo ?? 0) > (user?.roleLevel ?? 0);
-                      return (
-                      <button
-                        key={id}
-                        disabled={bloqueado}
-                        onClick={() => setSelectedModel(id)}
-                        className={cn(
-                          'w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
-                          bloqueado ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed'
-                            : selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
-                        )}
-                      >
-                        <span>
-                          <span className="font-bold text-slate-700">{info.label}</span>
-                          <span className="text-slate-400"> · {info.hint}</span>
-                        </span>
-                        <span className={cn('shrink-0 font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
-                          {bloqueado ? 'verificados' : info.gratis ? 'gratis' : info.image ? 'por imagen' : 'incluido'}
-                        </span>
-                      </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                    Los modelos «gratis» los cubre la plataforma. Los premium están incluidos para usuarios verificados, con un tope mensual de uso.
-                  </p>
-                </div>
-              )}
+              {/* El selector de modelo YA NO VIVE AQUÍ (2026-08-20, petición de
+                  Eugenio: «haz que el botón del modelo aparezca abajo y te
+                  diga el nombre del modelo que está utilizando»). Está junto
+                  a la caja de escribir, que es donde se decide con qué
+                  responder. Se movió, no se duplicó. */}
 
               {!user && (
                 <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
@@ -889,6 +866,68 @@ export default function AIAssistant() {
                 >
                   {listening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />} {listening ? 'Escuchando…' : 'Dictar'}
                 </button>
+              )}
+
+              {/* EL MODELO, ABAJO Y CON SU NOMBRE (2026-08-20, petición de
+                  Eugenio). Antes el nombre estaba en letra pequeña arriba y
+                  el selector escondido en Ajustes: dos sitios para una sola
+                  cosa que se decide justo antes de escribir. */}
+              {status?.models && (
+                <div className="relative ml-auto">
+                  <button
+                    onClick={e => { e.stopPropagation(); setModelosAbierto(v => !v); }}
+                    title="Elegir el modelo de IA"
+                    className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors max-w-[11rem]',
+                      modelosAbierto ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+                  >
+                    <Cpu className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{modeloActual}</span>
+                    <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+                  </button>
+
+                  {modelosAbierto && (
+                    <div
+                      className="absolute right-0 bottom-full mb-1 z-30 w-72 max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => { setSelectedModel(''); setModelosAbierto(false); }}
+                        className={cn('w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2 mb-1',
+                          !selectedModel ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-transparent hover:bg-slate-50')}
+                      >
+                        <span>
+                          <span className="font-bold text-slate-700">Automático</span>
+                          <span className="text-slate-400"> · el mejor para cada mensaje</span>
+                        </span>
+                        <span className="text-emerald-600 font-bold shrink-0">recomendado</span>
+                      </button>
+                      {Object.entries(status.models).map(([id, info]) => {
+                        const bloqueado = (info.nivelMinimo ?? 0) > (user?.roleLevel ?? 0);
+                        return (
+                          <button
+                            key={id}
+                            disabled={bloqueado}
+                            onClick={() => { setSelectedModel(id); setModelosAbierto(false); }}
+                            className={cn('w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
+                              bloqueado ? 'border-transparent opacity-50 cursor-not-allowed'
+                                : selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-transparent hover:bg-slate-50')}
+                          >
+                            <span className="min-w-0">
+                              <span className="font-bold text-slate-700">{info.label}</span>
+                              <span className="text-slate-400"> · {info.hint}</span>
+                            </span>
+                            <span className={cn('shrink-0 font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
+                              {bloqueado ? 'verificados' : info.gratis ? 'gratis' : info.image ? 'imagen' : 'incluido'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                      <p className="text-[10px] text-slate-500 px-2 py-1.5 leading-relaxed border-t border-slate-100 mt-1">
+                        Los «gratis» los cubre la plataforma. Los premium están incluidos para usuarios verificados, con un tope mensual.
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             {attachment && (
@@ -935,6 +974,12 @@ export default function AIAssistant() {
   // Eugenio pidió que el asistente fuese el mismo en todas las herramientas.
   // Su micro y su «+» viven ahora dentro del panel.
 
+
+  // A PANTALLA COMPLETA: el mismo chat, todo el ancho, sin botón flotante ni
+  // columna redimensionable — el marco lo pone la página.
+  if (modo === 'pagina') {
+    return <div className="h-full flex flex-col bg-white">{panelBody}</div>;
+  }
 
   return (
     <>

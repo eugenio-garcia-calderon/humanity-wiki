@@ -187,6 +187,22 @@ export const topePremiumCents = () => Number(process.env.AI_TOPE_PREMIUM_CENTS |
  *  un modelo capaz. Minúsculas y sin tildes obligatorias a propósito. */
 const PIDE_ACCION = /\b(crea|crear|creame|anade|anademe|añade|añademe|apunta|apuntame|apúntame|borra|elimina|cambia|renombra|organiza|ordena|ordename|hazme|genera|generame|grafo|mapa|evento|cita|reunion|reunión|recuerda|recuerdame|recuérdame|tarea|publica|modifica)\b/i;
 
+/**
+ * ¿Este mensaje necesita mirar internet DE VERDAD?
+ *
+ * La interfaz manda `search_web: true` en todos los mensajes, y la búsqueda
+ * web es una herramienta que solo tiene Claude. Resultado: cada mensaje de un
+ * usuario verificado —«hola», «¿qué es un indicador?»— acababa en el modelo
+ * caro por una búsqueda que nadie había pedido. El router quedaba anulado
+ * justo para quien más lo usa (visto en pruebas, 2026-08-20).
+ *
+ * Así que la búsqueda se enciende cuando hace falta: se pide a propósito, o
+ * se pregunta por algo que cambia con el tiempo (noticias, precios, un año
+ * concreto). Lo demás lo contesta el contexto de la plataforma, que es lo que
+ * las propias reglas del prompt mandan priorizar.
+ */
+const PIDE_WEB = /\b(busca|buscar|búscame|buscame|internet|web|google|noticia|noticias|actualidad|hoy en día|últimas?|ultimas?|reciente|recientes|novedad|novedades|precio|precios|cuánto cuesta|cuanto cuesta|cotiza|dólar|euro hoy|20\d\d|verifica|comprueba|fuente|fuentes)\b/i;
+
 export interface EleccionDeModelo {
   model: string;
   /** gratis: modelo abierto (coste céntimos, lo absorbe la plataforma).
@@ -194,6 +210,8 @@ export interface EleccionDeModelo {
    *  de_pago: se factura al usuario con comisión, como siempre. */
   cobro: 'gratis' | 'cubierto' | 'de_pago';
   motivo: string;
+  /** Si la búsqueda web debe usarse de verdad en esta llamada. */
+  webSearch: boolean;
   /** Texto para el usuario cuando no se le da lo que pidió. */
   aviso?: string;
 }
@@ -209,54 +227,56 @@ export function elegirModelo(x: {
   abiertosListos: boolean;
 }): EleccionDeModelo {
   const premium = x.nivel >= NIVEL_PREMIUM;
+  // Buscar de verdad solo si el mensaje lo pide. Y solo Claude sabe hacerlo.
+  const buscar = !!x.webSearch && PIDE_WEB.test(x.mensaje);
 
   // Sin clave de Together todo sigue EXACTAMENTE como hoy: Claude (o lo que
   // pidan) facturado con comisión. Así este código se puede desplegar antes
   // de que exista la cuenta sin cambiar nada para nadie.
   if (!x.abiertosListos) {
-    return { model: x.pedido || CLAUDE_MODEL, cobro: 'de_pago', motivo: 'sin proveedor de modelos abiertos' };
+    return { model: x.pedido || CLAUDE_MODEL, cobro: 'de_pago', motivo: 'sin proveedor de modelos abiertos', webSearch: !!x.webSearch };
   }
 
   const claudeCubierto = (motivo: string): EleccionDeModelo =>
     x.topeAgotado
-      ? { model: 'abierto-medio', cobro: 'gratis', motivo: `${motivo}, pero tope mensual agotado`, aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
-      : { model: CLAUDE_MODEL, cobro: 'cubierto', motivo };
+      ? { model: 'abierto-medio', cobro: 'gratis', motivo: `${motivo}, pero tope mensual agotado`, webSearch: false, aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
+      : { model: CLAUDE_MODEL, cobro: 'cubierto', motivo, webSearch: buscar };
 
   // 1. ELECCIÓN MANUAL: se respeta — con la puerta del nivel.
   if (x.pedido && AI_MODELS[x.pedido]) {
     const entrada = AI_MODELS[x.pedido];
-    if (entrada.gratis) return { model: x.pedido, cobro: 'gratis', motivo: 'elegido por el usuario' };
+    if (entrada.gratis) return { model: x.pedido, cobro: 'gratis', motivo: 'elegido por el usuario', webSearch: false };
     if (x.nivel >= (entrada.nivelMinimo ?? 0)) {
       return x.topeAgotado
-        ? { model: 'abierto-medio', cobro: 'gratis', motivo: 'elegido premium, tope agotado', aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
-        : { model: x.pedido, cobro: 'cubierto', motivo: 'elegido por el usuario (premium)' };
+        ? { model: 'abierto-medio', cobro: 'gratis', motivo: 'elegido premium, tope agotado', webSearch: false, aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
+        : { model: x.pedido, cobro: 'cubierto', motivo: 'elegido por el usuario (premium)', webSearch: buscar };
     }
-    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'pidió un modelo premium sin nivel', aviso: 'Ese modelo es para usuarios verificados: he usado el Equilibrado (gratis).' };
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'pidió un modelo premium sin nivel', webSearch: false, aviso: 'Ese modelo es para usuarios verificados: he usado el Equilibrado (gratis).' };
   }
 
   // 2. PDF adjunto: solo Claude sabe leerlos.
   if (x.llevaDocumento) {
     if (premium) return claudeCubierto('lleva PDF');
-    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'PDF sin nivel premium', aviso: 'Leer PDF necesita un modelo premium (usuarios verificados): respondo sin poder abrir el documento.' };
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'PDF sin nivel premium', webSearch: false, aviso: 'Leer PDF necesita un modelo premium (usuarios verificados): respondo sin poder abrir el documento.' };
   }
 
   // 3. Búsqueda web: es una herramienta nativa de Claude; los abiertos no la
   // tienen. Para quien no es premium, el prompt ya dice que está apagada.
-  if (x.webSearch && premium) return claudeCubierto('búsqueda web');
+  if (buscar && premium) return claudeCubierto('búsqueda web');
 
   // 4. El juego va al medio: necesita personalidad y el bloque JSON, pero es
   // charla de alto volumen — quemar el tope premium ahí no tiene sentido.
-  if (x.juego) return { model: 'abierto-medio', cobro: 'gratis', motivo: 'juego' };
+  if (x.juego) return { model: 'abierto-medio', cobro: 'gratis', motivo: 'juego', webSearch: false };
 
   // 5. Complejidad: pide crear/cambiar algo, o es un mensajón.
   if (PIDE_ACCION.test(x.mensaje) || x.mensaje.length > 700) {
     if (premium) return claudeCubierto('acción o mensaje largo');
-    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'acción, sin nivel premium' };
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'acción, sin nivel premium', webSearch: false };
   }
 
   // 6. Corto y sin señales → el rápido. Lo demás → el medio.
-  if (x.mensaje.length < 180) return { model: 'abierto-rapido', cobro: 'gratis', motivo: 'pregunta corta' };
-  return { model: 'abierto-medio', cobro: 'gratis', motivo: 'conversación normal' };
+  if (x.mensaje.length < 180) return { model: 'abierto-rapido', cobro: 'gratis', motivo: 'pregunta corta', webSearch: false };
+  return { model: 'abierto-medio', cobro: 'gratis', motivo: 'conversación normal', webSearch: false };
 }
 
 // Precio del modelo por defecto de la plataforma (respuestas automáticas de

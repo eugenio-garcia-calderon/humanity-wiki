@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
-  FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown,
+  FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -59,6 +59,7 @@ function iconoDeRuta(ruta: string) {
   if (camino === '/admin/usuarios') return Users2;
   if (camino.startsWith('/tareas')) return ListChecks;
   if (camino.startsWith('/calendario')) return CalendarDays;
+  if (camino.startsWith('/ia')) return Sparkles;
   if (camino.startsWith('/persona/')) return User;
   if (camino.startsWith('/paginas')) return FileText;
   if (camino.startsWith('/esquemas')) return Globe2;
@@ -225,7 +226,10 @@ export default function Layout() {
   // El calendario ocupa el alto entero: la rejilla del mes se desplaza dentro
   // de sí misma, no arrastrando la página.
   const isCalendarioPage = location.pathname === '/calendario';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isPersonaPage || isCalendarioPage;
+  // La herramienta «IA» va a pantalla completa como el calendario: es un chat
+  // con su propio desplazamiento dentro, no un documento que se lea scrolleando.
+  const isIAPage = location.pathname.startsWith('/ia');
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isPersonaPage || isCalendarioPage || isIAPage;
 
   if (isEmbed) {
     return (
@@ -433,8 +437,11 @@ export default function Layout() {
           <GestorVentanas compacto={compacto} />
         </div>
 
-        {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. */}
-        <AIAssistant />
+        {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. En la
+            herramienta «IA» no se monta: esa página YA ES el asistente a
+            pantalla completa, y tener además su botón flotante daría dos
+            chats a la vez — el error que este proyecto ya pagó caro. */}
+        {!isIAPage && <AIAssistant />}
       </div>
 
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra

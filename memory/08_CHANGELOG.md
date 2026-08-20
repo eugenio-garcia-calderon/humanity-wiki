@@ -1701,3 +1701,49 @@ Bug of the day: an index-based edit inserted the `game_agents` join twice into
 one query («table name "ag" specified more than once») while leaving the other
 query without it. Verified live end-to-end (set Anita via API, switched to
 Javier in the real browser, cleared, bogus id rejected); test card deleted.
+
+## 2026-08-20 — Measurement, the model button at the bottom, and the «IA» tool
+
+Three of Eugenio's requests in one pass.
+
+**1. La medición** (step 2 of the cost plan). Migration `0051` adds
+`ai_proposed_actions.model`: the router means one conversation can pass through
+three models, so «which model proposed this action» could no longer be inferred
+— and pairing by timestamp would be guessing, which is precisely what
+measurement exists to stop. Rows older than the migration keep NULL and are
+reported apart rather than attributed retroactively.
+
+`GET /api/ai/medicion?dias=N[&todos=1]` crosses `ai_usage_charges` (what was
+spent) with `ai_proposed_actions` (what was right) per model, and returns
+acierto (correctas/propuestas) and **coste por acción correcta** — the figure
+that actually compares models. No metrics table: duplicating the number
+guarantees the two disagree one day. Admins can see the whole platform.
+`PanelMedicion` renders it: totals, a per-day bar, and a card per model.
+
+`coste_por_accion` is null unless the model has BOTH cost and hits — otherwise
+the pre-migration rows showed «0,0000 € por acción correcta», which reads as
+«free» when it means «unknowable».
+
+**2. El botón del modelo, abajo y con nombre.** Moved out of Ajustes (not
+duplicated) to sit beside Adjuntar/Dictar, where the decision is actually made.
+On «Automático» it names the model that answered the last message — with the
+router that changes per message, which is exactly what «el modelo que está
+utilizando» means. Uncatalogued ids (the platform default `claude-sonnet-4-6`
+has no catalogue entry) show raw rather than staying silent.
+
+**3. La herramienta «IA»** (`/ia`, menu + route + tab icon + full-bleed).
+`AIAssistant` gains `modo="pagina"`, which reuses the existing `panelBody` —
+the same block that already served desktop and mobile. No second chat: that
+would be the fourth face of the same assistant, the mistake that cost the three
+«Universo» pages. Layout does not mount the floating assistant on `/ia`,
+because that page already IS the assistant. Chat left, spending panel right;
+tabs below `lg`, where two columns do not fit.
+
+**The bug this uncovered, and it was expensive**: the UI hardcodes
+`searchWeb = true` with no toggle, and web search is a Claude-only tool — so
+rule 3 of the router sent **every** message from a verified user to Claude.
+«hola» went to the expensive model. The router now decides web search itself
+(`PIDE_WEB`: explicit asks, or freshness signals like noticias/precio/2026);
+otherwise the platform context answers, as the prompt rules already required.
+Verified live: «¿Qué es un indicador?» now lands on the free fast model.
+Router unit tests: 13 cases green.

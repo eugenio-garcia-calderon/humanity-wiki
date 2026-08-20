@@ -30,6 +30,7 @@ import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
 import Esquemas from './pages/Esquemas';
 import Tareas from './pages/Tareas';
+import IA from './pages/IA';
 import Paginas from './pages/Paginas';
 import Mensajes from './pages/Mensajes';
 import Persona from './pages/Persona';
@@ -116,6 +117,7 @@ export default function App() {
                 <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
+                <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />
