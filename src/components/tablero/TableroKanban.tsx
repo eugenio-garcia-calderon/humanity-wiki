@@ -52,6 +52,41 @@ export default function TableroKanban({
   const [abierta, setAbierta] = useState<ItemTablero | null>(null);
   const [eligiendoColumna, setEligiendoColumna] = useState(false);
 
+  // DOBLE CLIC PARA CAMBIAR EL TEXTO SIN ABRIR LA TARJETA (2026-08-20, petición
+  // de Eugenio). El problema es que un clic ya hacía algo: abrir la ficha. Así
+  // que la apertura se retrasa un suspiro y el segundo clic la cancela — es lo
+  // que hace cualquier gestor de archivos con «renombrar».
+  //
+  // El retraso solo existe si puedes editar: en un tablero que solo miras, la
+  // ficha se abre al instante como siempre.
+  const [editandoTarjeta, setEditandoTarjeta] = useState<string | null>(null);
+  const relojApertura = useRef<number | null>(null);
+
+  const cancelarApertura = () => {
+    if (relojApertura.current) { clearTimeout(relojApertura.current); relojApertura.current = null; }
+  };
+
+  const abrirConRetraso = (it: ItemTablero) => {
+    if (editandoTarjeta) return;
+    if (!puedeEditar) { setAbierta(it); return; }
+    cancelarApertura();
+    relojApertura.current = window.setTimeout(() => { relojApertura.current = null; setAbierta(it); }, 220);
+  };
+
+  useEffect(() => cancelarApertura, []);
+
+  /** Guarda el título nuevo de una tarjeta editada desde el tablero. */
+  const guardarTitulo = async (id: string, titulo: string) => {
+    try {
+      const r = await fetch(`/api/roadmap/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ titulo }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar.');
+      onRecargar();
+    } catch (e: any) { setAvisoMover(e.message); }
+  };
+
   // ARRASTRAR DE UNA COLUMNA A OTRA (2026-08-20, petición de Eugenio:
   // «permitir arrastrar tarjetas del to do list de un estado a otro como en
   // Trello»).
@@ -210,10 +245,13 @@ export default function TableroKanban({
                 {deLaColumna.map(it => {
                   const g = grupoDe(it.grupo);
                   return (
-                    <button
+                    <div
                       key={it.id}
-                      onClick={() => setAbierta(it)}
-                      draggable={puedeEditar}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => abrirConRetraso(it)}
+                      onKeyDown={e => { if (e.key === 'Enter') setAbierta(it); }}
+                      draggable={puedeEditar && editandoTarjeta !== it.id}
                       onDragStart={e => { setArrastrando(it.id); e.dataTransfer.effectAllowed = 'move'; }}
                       onDragEnd={() => { setArrastrando(null); setEncima(null); }}
                       className={cn(
@@ -230,7 +268,29 @@ export default function TableroKanban({
                         </span>
                         {it.prioridad === 'alta' && <Flame className="w-3 h-3 text-red-500 ml-auto shrink-0" />}
                       </div>
-                      <p className="text-[13px] font-black text-slate-900 leading-snug">{it.titulo}</p>
+                      {editandoTarjeta === it.id ? (
+                        <TextoEditable
+                          valor={it.titulo}
+                          arrancaAbierto
+                          editable
+                          className="text-[13px] font-black text-slate-900 leading-snug"
+                          onGuardar={n => { setEditandoTarjeta(null); guardarTitulo(it.id, n); }}
+                          onCancelar={() => setEditandoTarjeta(null)}
+                        />
+                      ) : (
+                        <p
+                          className="text-[13px] font-black text-slate-900 leading-snug"
+                          onDoubleClick={e => {
+                            if (!puedeEditar) return;
+                            e.stopPropagation();
+                            cancelarApertura();
+                            setEditandoTarjeta(it.id);
+                          }}
+                          title={puedeEditar ? 'Doble clic para cambiar el texto' : undefined}
+                        >
+                          {it.titulo}
+                        </p>
+                      )}
                       {it.resumen && (
                         <p className="text-[11px] text-slate-500 leading-relaxed mt-1 line-clamp-2">{it.resumen}</p>
                       )}
@@ -244,7 +304,7 @@ export default function TableroKanban({
                           {it.bloques?.length > 0 && <span className="ml-auto shrink-0">{it.bloques.length} nota(s)</span>}
                         </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
                 {!deLaColumna.length && (
@@ -281,24 +341,9 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
   const [error, setError] = useState<string | null>(null);
   const archivo = useRef<HTMLInputElement>(null);
 
-  // Editar el título y el resumen de la tarjeta (petición del usuario,
-  // 2026-08-08): el menú de tres puntos abre la caja de texto en el sitio,
-  // sin cambiar de ventana. Antes solo se podían cambiar estado/prioridad/
-  // notas — el título y el resumen quedaban fijos aunque fueras el admin.
-  const [menuAbierto, setMenuAbierto] = useState(false);
-  const [editandoTexto, setEditandoTexto] = useState(false);
-  const [tituloEdit, setTituloEdit] = useState(item.titulo);
-  const [resumenEdit, setResumenEdit] = useState(item.resumen || '');
-
-  useEffect(() => { setTituloEdit(item.titulo); setResumenEdit(item.resumen || ''); }, [item.titulo, item.resumen]);
-
-  useEffect(() => {
-    if (!menuAbierto) return;
-    const fuera = () => setMenuAbierto(false);
-    window.addEventListener('click', fuera);
-    return () => window.removeEventListener('click', fuera);
-  }, [menuAbierto]);
-
+  // El título y el resumen se editan pinchándolos (ver `TextoEditable`). Hasta
+  // 2026-08-20 había que pasar por un menú de tres puntos y un «modo edición»:
+  // tres pasos para corregir una palabra.
   useEffect(() => {
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
     window.addEventListener('keydown', esc);
@@ -344,7 +389,9 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onCerrar}>
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      {/* MÁS GRANDE (2026-08-20, petición de Eugenio). Una tarea con notas y
+          capturas dentro no cabía en la mitad de la pantalla. */}
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
 
         <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0"
           style={{ borderTopWidth: 4, borderTopColor: g.color }}>
@@ -352,64 +399,30 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
             <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: g.color }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: g.color }} /> {g.label}
             </span>
-            {editandoTexto ? (
-              <input
-                value={tituloEdit} onChange={e => setTituloEdit(e.target.value)} autoFocus
-                className="block w-full text-xl font-black text-slate-900 leading-tight mt-1 px-2 py-1 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-400"
-              />
-            ) : (
-              <h2 className="text-xl font-black text-slate-900 leading-tight mt-1">{item.titulo}</h2>
-            )}
+            <TextoEditable
+              valor={item.titulo}
+              editable={puedeEditar}
+              placeholder="Sin título"
+              className="text-xl font-black text-slate-900 leading-tight mt-1"
+              onGuardar={n => n && guardar({ titulo: n })}
+            />
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {puedeEditar && !editandoTexto && (
-              <div className="relative">
-                <button onClick={() => setMenuAbierto(v => !v)} title="Opciones"
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-                {menuAbierto && (
-                  <div className="absolute right-0 top-8 z-10 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1"
-                    onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={() => { setEditandoTexto(true); setMenuAbierto(false); }}
-                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar título y resumen
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {editandoTexto ? (
-              <button
-                onClick={async () => {
-                  await guardar({ titulo: tituloEdit.trim() || item.titulo, resumen: resumenEdit.trim() || null });
-                  setEditandoTexto(false);
-                }}
-                disabled={guardando}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold disabled:opacity-50"
-              >
-                <Check className="w-3.5 h-3.5" /> Guardar
-              </button>
-            ) : (
-              <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {editandoTexto ? (
-            <textarea
-              value={resumenEdit} onChange={e => setResumenEdit(e.target.value)} rows={2}
-              placeholder="Resumen breve de la tarjeta…"
-              className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm leading-relaxed resize-none focus:outline-none focus:border-emerald-300"
-            />
-          ) : (
-            item.resumen && <p className="text-sm text-slate-600 leading-relaxed">{item.resumen}</p>
-          )}
+          <TextoEditable
+            valor={item.resumen || ''}
+            editable={puedeEditar}
+            multilinea
+            placeholder="Añade un resumen…"
+            className="text-sm text-slate-600 leading-relaxed"
+            onGuardar={n => guardar({ resumen: n || null })}
+          />
 
           {/* Estado y prioridad */}
           <div className="flex flex-wrap items-center gap-2">
@@ -553,5 +566,96 @@ function NombreDeColumna({ nombre, editable, onNombre }: {
     >
       {nombre}
     </h2>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// UN TEXTO QUE SE EDITA DONDE ESTÁ (2026-08-20, petición de Eugenio: «permitir
+// hacer doble click en un texto de una tarjeta para modificar el texto de
+// dentro sin necesidad de abrirlo, y lo mismo cuando está abierto, permitir que
+// se pueda modificar los textos sin tener que darle a los 3 puntitos»).
+// ----------------------------------------------------------------------------
+// Antes había que abrir la ficha, desplegar un menú y entrar en un «modo
+// edición» que cambiaba media pantalla. Tres pasos para corregir una palabra.
+//
+// Aquí el texto ES el campo: pinchas y escribes. Enter guarda, Escape deja las
+// cosas como estaban, y salir del campo también guarda —porque quien pincha
+// fuera después de escribir da por hecho que se ha guardado, no que se ha
+// tirado a la basura.
+function TextoEditable({
+  valor, editable, multilinea, placeholder, className, arrancaAbierto, onGuardar, onCancelar,
+}: {
+  valor: string;
+  editable: boolean;
+  multilinea?: boolean;
+  placeholder?: string;
+  className?: string;
+  /** Para el doble clic de la tarjeta, que ya viene decidido desde fuera. */
+  arrancaAbierto?: boolean;
+  onGuardar: (texto: string) => void;
+  onCancelar?: () => void;
+}) {
+  const [editando, setEditando] = useState(!!arrancaAbierto);
+  const [texto, setTexto] = useState(valor);
+
+  useEffect(() => { setTexto(valor); }, [valor]);
+
+  const cerrar = (guardar: boolean) => {
+    setEditando(false);
+    const n = texto.trim();
+    if (guardar && n !== valor.trim()) onGuardar(n);
+    else { setTexto(valor); onCancelar?.(); }
+  };
+
+  if (!editable) {
+    return valor
+      ? <p className={className}>{valor}</p>
+      : <p className={cn(className, 'text-slate-300 italic')}>{placeholder}</p>;
+  }
+
+  if (editando) {
+    const comun = {
+      value: texto,
+      autoFocus: true,
+      placeholder,
+      onClick: (e: any) => e.stopPropagation(),
+      onMouseDown: (e: any) => e.stopPropagation(),
+      onChange: (e: any) => setTexto(e.target.value),
+      onBlur: () => cerrar(true),
+      className: cn(className,
+        'block w-full bg-white px-2 py-1 border border-emerald-300 rounded-lg focus:outline-none'),
+    };
+    return multilinea ? (
+      <textarea
+        {...comun}
+        rows={2}
+        // En un texto de varias líneas, Enter hace lo que hace siempre: bajar
+        // de línea. Se guarda al salir del campo o con ⌘/Ctrl+Enter.
+        onKeyDown={e => {
+          if (e.key === 'Escape') cerrar(false);
+          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) cerrar(true);
+        }}
+        className={cn(comun.className, 'resize-none')}
+      />
+    ) : (
+      <input
+        {...comun}
+        onKeyDown={e => {
+          if (e.key === 'Enter') cerrar(true);
+          if (e.key === 'Escape') cerrar(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <p
+      onClick={e => { e.stopPropagation(); setEditando(true); }}
+      title="Pincha para cambiar el texto"
+      className={cn(className, 'cursor-text rounded px-1 -mx-1 hover:bg-slate-100 transition-colors',
+        !valor && 'text-slate-300 italic')}
+    >
+      {valor || placeholder}
+    </p>
   );
 }
