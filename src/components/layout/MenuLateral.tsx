@@ -63,10 +63,19 @@ const VACIO: DatosMenu = { proyectos: [], productos: [], personas: [], organizac
 const iniciales = (t: string) =>
   t.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase()).join('') || '·';
 
-export default function MenuLateral({ colapsado, onColapsar, activo }: {
+export default function MenuLateral({ colapsado, onColapsar, activo, movil = false, onCerrar }: {
   colapsado: boolean;
   onColapsar: (v: boolean) => void;
   activo?: string;
+  /** EN MÓVIL EL MENÚ ES UN CAJÓN, NO UNA COLUMNA (2026-08-20, B41). En una
+   *  pantalla de 390 px esta columna de 240 se comía el 62% y al contenido le
+   *  quedaban 118 px útiles. Aquí dentro el cambio es pequeño a propósito: la
+   *  columna se vuelve cajón (lo coloca `Layout`, que es quien pone el fondo
+   *  oscuro) y el botón de plegar se cambia por uno de cerrar. Todo lo demás
+   *  —secciones, árbol, editar menú— es exactamente el mismo componente. */
+  movil?: boolean;
+  /** Cerrar el cajón. Solo se usa en móvil. */
+  onCerrar?: () => void;
 }) {
   const navigate = useNavigate();
   const { user, updateUiSettings } = useAuth();
@@ -391,8 +400,14 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
 
   return (
     <aside
-      className={cn('shrink-0 h-full border-r border-slate-200 bg-white flex flex-col transition-[width] duration-150',
-        colapsado ? 'w-14' : 'w-60')}
+      className={cn('shrink-0 h-full border-r border-slate-200 bg-white flex flex-col',
+        // MÓVIL: cajón. Ancho fijo cómodo pero SIEMPRE con un hueco a la
+        // derecha (`max-w-[82vw]`), porque ver un trozo de la página de debajo
+        // es lo que hace entender que esto se cierra. Sin `transition-[width]`:
+        // el cajón entra deslizándose, y las dos animaciones a la vez se ven
+        // como un tirón.
+        movil ? 'w-72 max-w-[82vw]' : 'transition-[width] duration-150',
+        !movil && (colapsado ? 'w-14' : 'w-60'))}
     >
       {/* Marca + plegar */}
       <div className={cn('h-14 shrink-0 flex items-center border-b border-slate-200',
@@ -404,12 +419,17 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
             </span>
           </button>
         )}
+        {/* EN MÓVIL NO SE PLIEGA, SE CIERRA. Plegar a 56 px de iconos es una
+            idea de escritorio: en un teléfono el menú o está o no está. El
+            botón mide 44 px, que es el mínimo que pide Apple para algo que se
+            toca con el dedo. */}
         <button
-          onClick={() => onColapsar(!colapsado)}
-          title={colapsado ? 'Abrir el menú' : 'Plegar el menú'}
-          className="w-9 h-9 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0"
+          onClick={() => (movil ? onCerrar?.() : onColapsar(!colapsado))}
+          title={movil ? 'Cerrar el menú' : colapsado ? 'Abrir el menú' : 'Plegar el menú'}
+          className={cn('grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0',
+            movil ? 'w-11 h-11' : 'w-9 h-9')}
         >
-          {colapsado ? <PanelLeftOpen className="w-4.5 h-4.5" /> : <PanelLeftClose className="w-4.5 h-4.5" />}
+          {movil ? <Cerrar className="w-5 h-5" /> : colapsado ? <PanelLeftOpen className="w-4.5 h-4.5" /> : <PanelLeftClose className="w-4.5 h-4.5" />}
         </button>
       </div>
 
