@@ -630,7 +630,7 @@ function NombreDeColumna({ nombre, editable, onNombre }: {
 // cosas como estaban, y salir del campo también guarda —porque quien pincha
 // fuera después de escribir da por hecho que se ha guardado, no que se ha
 // tirado a la basura.
-function TextoEditable({
+export function TextoEditable({
   valor, editable, multilinea, placeholder, className, arrancaAbierto, onGuardar, onCancelar,
 }: {
   valor: string;

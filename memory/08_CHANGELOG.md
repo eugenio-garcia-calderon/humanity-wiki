@@ -1788,3 +1788,24 @@ the top filter as «Pruebas Claude 1»), `@dis` offered Diseño and stripped
 itself from the title, dragging «Meta Vida» onto a project section created the
 task with its link block, and Áreas expanded AGUA into Acceso/Calidad/Consumo/
 Disponibilidad. Test card deleted and the project's 6 groups restored.
+
+## 2026-08-20 — The Tareas list becomes editable (the ninth card)
+
+The one card left half-done: «permitir editar y crear las tareas desde la
+página de tareas». Editing had been built on the *board*, not on the list.
+
+- The title of every task in `/tareas` is now edited in place (the exported
+  `TextoEditable`, same component as the board — not a second implementation).
+- A **«Añadir una tarea…»** row closes each project's list. It stays open after
+  creating: when you write one thing down, you usually write two.
+- Clicking a task's circle walks its state: por hacer → en curso → hecha → por
+  hacer. Both write optimistically and put the error on screen if the save
+  fails.
+
+All three respect `mio`, the flag the server already sends: you only edit tasks
+in projects that are yours.
+
+Verified live: created from the list, renamed in place, and advanced its state,
+each confirmed against the database. Test task deleted.
+
+**The Humanity.Wiki board is now complete — all nine cards.**
