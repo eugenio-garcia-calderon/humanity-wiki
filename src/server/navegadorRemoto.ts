@@ -138,12 +138,17 @@ async function cerrarSesion(id: string) {
 const CADENCIA_MOVIMIENTO = 30;   // ms entre fotogramas mientras algo cambia
 const CADENCIA_QUIETA = 200;      // ms entre comprobaciones con la página parada
 const RATO_DE_GESTO = 350;        // ms que se considera «aún te estás moviendo»
+/** Cuántas comprobaciones seguidas con cambios hacen falta para dar por hecho
+ *  que hay algo animándose de verdad (un vídeo, un carrusel) y no un píxel
+ *  suelto. Es la HISTÉRESIS que evita el parpadeo. */
+const CAMBIOS_PARA_MODO_RAPIDO = 4;
 
 async function bucleDePantalla(s: Sesion) {
   if (s.capturando) return;
   s.capturando = true;
   let ultimaRapida: Buffer | null = null;
   let nitidaEnviada = false;
+  let cambiosSeguidos = 0;
   try {
     while (s.cliente && sesiones.has(s.id)) {
       let cambio = false;
@@ -153,12 +158,31 @@ async function bucleDePantalla(s: Sesion) {
           type: 'jpeg', quality: 50, scale: 'css', caret: 'initial', timeout: 5000,
         });
         cambio = !ultimaRapida || !rapida.equals(ultimaRapida);
-        if (cambio) {
+        cambiosSeguidos = cambio ? cambiosSeguidos + 1 : 0;
+
+        // CUÁNDO SE VE BORROSO Y CUÁNDO NÍTIDO (arreglado 2026-08-20, Eugenio:
+        // «la buena definición de la pantalla oscila entre verse borrosa y
+        // definida cada x segundos»).
+        //
+        // Antes bastaba con que UN píxel cambiara para mandar un fotograma
+        // rápido —y por tanto borroso— y volver al nítido al instante
+        // siguiente. En una página con cualquier animación de fondo, eso es un
+        // parpadeo constante entre las dos calidades, que molesta mucho más
+        // que quedarse en cualquiera de las dos.
+        //
+        // Ahora el modo rápido se reserva para cuando de verdad hace falta
+        // fluidez: mientras TOCAS algo, o cuando la página lleva varios
+        // fotogramas seguidos cambiando (un vídeo). Un cambio suelto en una
+        // página parada va directo a nítido, sin pasar por el borroso.
+        const tocando = Date.now() - s.ultimoGesto < RATO_DE_GESTO;
+        const modoRapido = tocando || cambiosSeguidos >= CAMBIOS_PARA_MODO_RAPIDO;
+
+        if (cambio && modoRapido) {
           empujar(s, { t: 'marco', d: rapida.toString('base64') });
           ultimaRapida = rapida;
           nitidaEnviada = false;
-        } else if (!nitidaEnviada && Date.now() - s.ultimoGesto > RATO_DE_GESTO) {
-          // Quieta y sin gestos: una sola foto a plena resolución para leer.
+        } else if (cambio || !nitidaEnviada) {
+          ultimaRapida = rapida;
           const nitida = await s.page.screenshot({
             type: 'jpeg', quality: 70, scale: 'device', caret: 'initial', timeout: 5000,
           });
@@ -166,7 +190,7 @@ async function bucleDePantalla(s: Sesion) {
           nitidaEnviada = true;
         }
       } catch { /* la pestaña estaba navegando u ocupada: se reintenta */ }
-      const moviendo = cambio || Date.now() - s.ultimoGesto < RATO_DE_GESTO;
+      const moviendo = Date.now() - s.ultimoGesto < RATO_DE_GESTO || cambiosSeguidos >= CAMBIOS_PARA_MODO_RAPIDO;
       await new Promise(r => setTimeout(r, moviendo ? CADENCIA_MOVIMIENTO : CADENCIA_QUIETA));
     }
   } finally { s.capturando = false; }
@@ -331,7 +355,30 @@ export function registerNavegadorRemotoRoutes(app: Express) {
           await s.page.keyboard.press(String(e.k || '').slice(0, 40));
           break;
         case 'texto':
-          await s.page.keyboard.type(String(e.texto || '').slice(0, 2000));
+          // `insertText` en vez de `type`: mete el texto TAL CUAL, sin fingir
+          // pulsaciones. Es lo que hace que caracteres como «@» —que en un
+          // teclado español se escriben con Alt— lleguen bien, y de paso pega
+          // instantáneo en vez de letra a letra (Eugenio, 2026-08-20: «el
+          // navegador no me permite escribir el arroba»).
+          await s.page.keyboard.insertText(String(e.texto || '').slice(0, 2000));
+          break;
+        case 'copiar':
+        case 'cortar': {
+          // COPIAR Y CORTAR DE VERDAD (Eugenio, 2026-08-20: «no funciona
+          // Command X y Command C»). El Chromium remoto corre en Linux, donde
+          // el atajo es Control, no Meta: mandarle «Meta+c» no hacía nada.
+          //
+          // Y aunque funcionara, el texto acabaría en el portapapeles DEL
+          // SERVIDOR, que no le sirve de nada a nadie. Así que se lee la
+          // selección y se devuelve, para que el navegador de la persona la
+          // ponga en SU portapapeles.
+          const sel = await s.page.evaluate(() => String(window.getSelection() || '')).catch(() => '');
+          if (e.tipo === 'cortar' && sel) {
+            await s.page.keyboard.press('Control+x').catch(() => {});
+          }
+          empujar(s, { t: 'portapapeles', texto: String(sel).slice(0, 100_000) });
+          break;
+        }
           break;
         case 'navegar': {
           const destino = String(e.url || '');

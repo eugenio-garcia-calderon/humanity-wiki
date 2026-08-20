@@ -1809,3 +1809,42 @@ Verified live: created from the list, renamed in place, and advanced its state,
 each confirmed against the database. Test task deleted.
 
 **The Humanity.Wiki board is now complete — all nine cards.**
+
+## 2026-08-20 — Four bugs Eugenio hit, fixed
+
+**1. The remote browser flickered between blurry and sharp.** The loop sent a
+cheap CSS-scale (blurry on Retina) frame whenever a single pixel changed and a
+device-scale frame when still — so any background animation produced a constant
+flicker between the two qualities, which is worse than either. Fast frames are
+now reserved for when smoothness is actually needed: while you are touching
+something, or when the page has changed for `CAMBIOS_PARA_MODO_RAPIDO` (4)
+consecutive probes, i.e. a real video. **A single change on a still page now
+goes straight to sharp**, without the blurry flash.
+
+**2. «@» could not be typed.** On a Spanish keyboard `@` is Alt+2, so `altKey`
+arrived set and the handler treated it as a shortcut, sending `Alt+@` — which
+types nothing. Alt and Shift are *composition* keys, not command keys: if the
+browser already resolved which character it is, that character is sent. Only
+Ctrl and ⌘ are real shortcuts now. Single characters also go via `insertText`
+instead of `press`, which is exact for accents and composed characters.
+
+**3. ⌘C / ⌘X did nothing.** The remote Chromium runs on Linux, where the
+shortcut is Control, so `Meta+c` was a no-op — and even had it worked, the text
+would have landed in the *server's* clipboard. Both keys now ask the server for
+the current selection, which comes back over the stream and is written to the
+user's own clipboard, so it can be pasted anywhere.
+
+**4. The Notion-style editor typed backwards and deleted wrong.** The active
+block is `contentEditable` *and* React rendered its text as a child. Every
+keystroke triggers a re-render (autosave, autoformat), React rewrote the text
+node, and rewriting sends the caret to position 0 — so the next letter landed
+in front of the previous one and Backspace deleted at the start. New `TextoVivo`
+component: while a block is being edited **the DOM owns its text, not React** —
+the HTML is captured once at mount in a ref, so React never touches the
+contents again. Verified live: typing «HOLA que tal estamos» came out forwards,
+and six backspaces removed exactly «stamos».
+
+**Also**: the project page shows an initials placeholder when a project has no
+icon (the icon rendered fine — the project simply had none, so nothing appeared
+and there was nowhere to click to add one), and «Explorar» is now
+«Publicaciones» in the menu.

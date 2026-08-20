@@ -993,7 +993,7 @@ export default function Documento() {
         className: cn(CLASES_TEXTO[b.tipo], 'px-1 -mx-1 min-h-[1.4em]', editable && 'cursor-text hover:bg-slate-50/80 rounded'),
       };
 
-      const contenido = esActivo ? texto : <Inline texto={texto} />;
+      const contenido = esActivo ? <TextoVivo inicial={texto} /> : <Inline texto={texto} />;
 
       if (b.tipo === 'cita') {
         return <blockquote className="border-l-[3px] border-emerald-300 pl-3"><div {...comun}>{contenido}</div></blockquote>;
@@ -1390,4 +1390,34 @@ export default function Documento() {
       )}
     </div>
   );
+}
+
+/**
+ * EL TEXTO DEL BLOQUE QUE ESTÁS ESCRIBIENDO (arreglado 2026-08-20, Eugenio:
+ * «a veces escribe al revés, de derecha a izquierda, y el borrado no borra
+ * bien»).
+ *
+ * QUÉ PASABA: el bloque activo es `contentEditable` y además React le pintaba
+ * su texto como hijo. Al teclear, cualquier re-render —y hay uno por tecla,
+ * porque el autoguardado y el autoformato tocan estado— hacía que React
+ * REESCRIBIERA ese nodo de texto. Reescribir el nodo manda el cursor al
+ * principio, así que la siguiente letra entraba delante de la anterior: el
+ * texto salía del revés. Y Retroceso borraba donde estaba el cursor —o sea,
+ * al principio— en vez de donde tú mirabas.
+ *
+ * LA REGLA: mientras un bloque se está editando, EL DUEÑO DEL TEXTO ES EL DOM,
+ * no React. Aquí el HTML se fija una sola vez al montar (`useRef`, no una
+ * prop): como el valor no cambia entre renders, React no vuelve a tocar el
+ * contenido, y el cursor se queda donde lo dejaste. Lo que escribes se lee en
+ * `onInput` y se guarda en `textosRef`, que es de donde sale todo lo demás.
+ *
+ * El componente se monta de nuevo cada vez que activas otro bloque, así que
+ * siempre arranca con el texto correcto.
+ */
+function TextoVivo({ inicial }: { inicial: string }) {
+  // Escapado a mano: entra texto plano y tiene que salir texto plano.
+  const html = useRef(
+    inicial.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  ).current;
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
 }

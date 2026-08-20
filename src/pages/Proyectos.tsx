@@ -384,7 +384,25 @@ export function Proyecto() {
               cuando se abre, junto al título en la parte superior»). Se
               reconoce la cosa igual desde el menú que desde dentro. */}
           <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2.5 group/tit">
-            <IconoElemento valor={proyecto.icono} tamano={36} className="rounded-lg" />
+            {/* SIN ICONO TAMBIÉN SE VE ALGO (Eugenio, 2026-08-20: «sigue sin
+                aparecer la foto/icono al lado del título»). No fallaba el
+                pintado: el proyecto simplemente NO TENÍA icono, y entonces no
+                salía nada — ni un hueco donde pinchar para ponerlo. Ahora sale
+                su inicial, igual que en el menú, y pulsarla abre el mismo
+                popup de nombre e icono. */}
+            {proyecto.icono ? (
+              <IconoElemento valor={proyecto.icono} tamano={36} className="rounded-lg" />
+            ) : (
+              <button
+                onClick={() => puedoEditar && setRenombrando(true)}
+                disabled={!puedoEditar}
+                title={puedoEditar ? 'Poner un icono' : undefined}
+                className={cn('w-9 h-9 shrink-0 rounded-lg bg-slate-900 text-white grid place-items-center text-sm font-black tracking-tight',
+                  puedoEditar && 'hover:bg-emerald-600 transition-colors')}
+              >
+                {proyecto.titulo.replace(/[^\p{L}\p{N} ]/gu, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || '·'}
+              </button>
+            )}
             <span>{proyecto.titulo}</span>
             {/* CAMBIAR NOMBRE E ICONO DESDE LA PROPIA PÁGINA (Eugenio,
                 2026-08-20: «que tanto el título como el icono se puedan

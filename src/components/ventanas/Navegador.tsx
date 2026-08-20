@@ -326,6 +326,16 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
           setUrl(d.url);
           setCargando(false);
           if (d.titulo) { tituloActual.current = String(d.titulo); onTitulo?.(String(d.titulo).slice(0, 60)); }
+        } else if (d.t === 'portapapeles') {
+          // Lo copiado en la pestaña remota entra en TU portapapeles, para que
+          // puedas pegarlo donde quieras, dentro o fuera de la plataforma.
+          const t = String(d.texto || '');
+          if (t) {
+            navigator.clipboard.writeText(t)
+              .then(() => setAviso('Copiado al portapapeles.'))
+              .catch(() => setAviso('El navegador no ha dejado escribir en el portapapeles.'));
+            setTimeout(() => setAviso(null), 2500);
+          }
         } else if (d.t === 'aviso') {
           setAviso(String(d.texto || ''));
           setCargando(false);
@@ -477,14 +487,28 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
       navigator.clipboard.readText().then(t => { if (t) enviar({ tipo: 'texto', texto: t }); }).catch(() => {});
       return;
     }
+    // ⌘C y ⌘X: la selección de la pestaña remota va a TU portapapeles
+    // (Eugenio, 2026-08-20: «no funciona Command X y Command C»). El servidor
+    // lee la selección y la devuelve; el navegador la escribe aquí.
+    if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'x')) {
+      e.preventDefault();
+      enviar({ tipo: e.key.toLowerCase() === 'c' ? 'copiar' : 'cortar' });
+      return;
+    }
     // ⌘←/→ es el cambio de ventana del Escritorio: se deja pasar.
     if (e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
     if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Dead'].includes(e.key)) return;
     e.preventDefault();
     const k = e.key === ' ' ? 'Space' : e.key;
-    if (k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      // El carácter ya viene con su mayúscula o su tilde: se teclea tal cual.
-      enviar({ tipo: 'tecla', k });
+
+    // UN CARÁCTER ES UN CARÁCTER, venga como venga (Eugenio, 2026-08-20: «no
+    // me permite escribir el arroba»). En un teclado español la «@» se hace
+    // con Alt+2, así que `altKey` viene activo — y al tratarlo como atajo se
+    // mandaba «Alt+@», que no escribe nada. Alt y Shift aquí son teclas de
+    // COMPOSICIÓN, no de mando: si el navegador ya ha resuelto qué carácter
+    // es, se manda ese carácter y punto. Solo Ctrl y ⌘ son atajos de verdad.
+    if (k.length === 1 && !e.ctrlKey && !e.metaKey) {
+      enviar({ tipo: 'texto', texto: k });
       return;
     }
     const mods = [e.ctrlKey && 'Control', e.altKey && 'Alt', e.metaKey && 'Meta', e.shiftKey && k.length > 1 && 'Shift']
