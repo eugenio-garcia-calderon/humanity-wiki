@@ -216,6 +216,13 @@ export default function GestorVentanas({ onPaginaNavegador }: {
    * con el ratón no cancele el arrastre a mitad.
    */
   const empezarGesto = (e: React.PointerEvent, v: Ventana, modo: 'mover' | 'tamano') => {
+    // Los botones de la barra (minimizar, maximizar, CERRAR) viven dentro de
+    // la zona de arrastre. Sin esta salida, al pulsarlos se capturaba el
+    // puntero para la barra y el navegador entregaba el clic a la BARRA, no al
+    // botón: cerrar la ventana fallaba — y solo cuando no estaba maximizada,
+    // porque maximizada esta función ya salía antes (de ahí el «a veces»,
+    // Eugenio 2026-08-20).
+    if ((e.target as HTMLElement).closest('button')) return;
     if (v.maximizada && modo === 'mover') return;
     e.preventDefault();
     alFrente(v.id);

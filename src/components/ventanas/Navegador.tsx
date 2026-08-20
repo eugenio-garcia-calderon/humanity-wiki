@@ -242,27 +242,64 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
     const { x, y } = coords(e);
     enviar({ tipo: 'raton', accion: 'arriba', x, y, boton: e.button, cuenta: ultimoClic.current.cuenta });
   };
+  // El movimiento del ratón también se descarta si ya hay uno en vuelo: la
+  // posición es absoluta, así que perder los puntos intermedios no se nota, y
+  // evita que un arrastre llene la cola igual que hacía la rueda.
+  const moverEnVuelo = useRef(false);
   const alMover = (e: React.PointerEvent) => {
     const ahora = Date.now();
-    if (ahora - ultimoMueve.current < 30) return;
+    if (moverEnVuelo.current || ahora - ultimoMueve.current < 30) return;
     ultimoMueve.current = ahora;
     const { x, y } = coords(e);
-    enviar({ tipo: 'raton', accion: 'mueve', x, y });
+    const id = sesionRef.current;
+    if (!id) return;
+    moverEnVuelo.current = true;
+    fetch(`/api/navegador/remoto/${id}/entrada`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo: 'raton', accion: 'mueve', x, y }),
+    }).catch(() => {}).finally(() => { moverEnVuelo.current = false; });
   };
 
   // La rueda necesita un listener nativo no-pasivo para poder preventDefault:
   // si no, la página de la app se desplazaría a la vez que la remota.
+  //
+  // Y va SUMADA, no evento a evento (arreglo del tirón al desplazarse,
+  // 2026-08-20): un solo gesto del trackpad dispara decenas de eventos por
+  // segundo y, como las entradas van en cola, cada uno esperaba al viaje de
+  // ida y vuelta del anterior — la cola se llenaba y la página seguía bajando
+  // segundos después de que tú pararas. Ahora los desplazamientos se acumulan
+  // y solo hay UNO en vuelo: al llegar la respuesta se manda la suma de lo que
+  // se haya acumulado mientras tanto. Nunca se atasca y no se pierde recorrido.
+  const rueda = useRef({ dx: 0, dy: 0, x: 0, y: 0, enVuelo: false });
   useEffect(() => {
     const c = cont.current;
     if (modo !== 'remoto' || !c) return;
+
+    const soltarRueda = () => {
+      const r = rueda.current;
+      if (!r.dx && !r.dy) { r.enVuelo = false; return; }
+      const dx = r.dx, dy = r.dy, x = r.x, y = r.y;
+      r.dx = 0; r.dy = 0; r.enVuelo = true;
+      const id = sesionRef.current;
+      if (!id) { r.enVuelo = false; return; }
+      fetch(`/api/navegador/remoto/${id}/entrada`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'rueda', x, y, dx: Math.round(dx), dy: Math.round(dy) }),
+      }).catch(() => {}).finally(soltarRueda);
+    };
+
     const alRodar = (e: WheelEvent) => {
       e.preventDefault();
       const { x, y } = coords(e);
-      enviar({ tipo: 'rueda', x, y, dx: Math.round(e.deltaX), dy: Math.round(e.deltaY) });
+      const r = rueda.current;
+      r.dx += e.deltaX; r.dy += e.deltaY; r.x = x; r.y = y;
+      if (!r.enVuelo) soltarRueda();
     };
     c.addEventListener('wheel', alRodar, { passive: false });
     return () => c.removeEventListener('wheel', alRodar);
-  }, [modo, enviar]);
+  }, [modo]);
 
   const alTeclear = (e: React.KeyboardEvent) => {
     // ⌘V pega TU portapapeles en la pestaña remota.

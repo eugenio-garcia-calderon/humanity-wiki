@@ -40,6 +40,9 @@ interface Sesion {
   cliente: Response | null;
   /** Si el bucle de capturas está corriendo (uno como mucho por sesión). */
   capturando: boolean;
+  /** Cuándo tocaste algo por última vez. Mientras esté reciente, la pantalla
+   *  va en modo rápido: al desplazarte quieres fluidez, no detalle. */
+  ultimoGesto: number;
   temporizador: ReturnType<typeof setTimeout>;
   ancho: number;
   alto: number;
@@ -114,31 +117,57 @@ async function cerrarSesion(id: string) {
 }
 
 /**
- * EL BUCLE DE PANTALLA (2026-08-20, «sigue igual de mal»). El screencast de
- * Chromium entrega los fotogramas SIEMPRE al tamaño lógico (CSS) e ignora la
- * densidad de píxeles — medido en pruebas: pedidos 400×300 con escala 2,
- * llegaban a 400×300. En Retina eso es borroso POR CONSTRUCCIÓN. Las capturas
- * de pantalla (page.screenshot) sí salen a píxeles REALES del dispositivo
- * (comportamiento documentado de Playwright, scale «device»), así que la
- * pantalla en directo es esto: una captura tras otra mientras alguien mira,
- * saltándose las idénticas para no mandar lo mismo dos veces.
+ * EL BUCLE DE PANTALLA (2026-08-20). El screencast de Chromium entrega los
+ * fotogramas SIEMPRE al tamaño lógico (CSS) e ignora la densidad de píxeles
+ * —medido: pedidos 400×300 con escala 2, llegaban a 400×300—, así que en
+ * Retina era borroso POR CONSTRUCCIÓN. Las capturas sí salen a píxeles reales.
+ *
+ * Pero una captura nítida CUESTA, y por eso el desplazamiento iba a tirones
+ * («tarda en responder subir y bajar», Eugenio). Medido sobre Wikipedia a
+ * 1000×700 con pantalla Retina:
+ *
+ *     nítida (device, calidad 70) → 98 ms y 286 KB por fotograma → 10 por segundo
+ *     rápida (css,    calidad 50) → 17 ms y  85 KB por fotograma → 58 por segundo
+ *
+ * De ahí las DOS velocidades, que es como funciona cualquier escritorio
+ * remoto: mientras algo se mueve manda fotogramas RÁPIDOS (fluidez, que es lo
+ * que el ojo pide al desplazarse) y, en cuanto la página se queda quieta,
+ * manda UNA nítida (detalle, que es lo que el ojo pide al leer). Cuando no
+ * cambia nada no se manda nada.
  */
+const CADENCIA_MOVIMIENTO = 30;   // ms entre fotogramas mientras algo cambia
+const CADENCIA_QUIETA = 200;      // ms entre comprobaciones con la página parada
+const RATO_DE_GESTO = 350;        // ms que se considera «aún te estás moviendo»
+
 async function bucleDePantalla(s: Sesion) {
   if (s.capturando) return;
   s.capturando = true;
-  let ultimo: Buffer | null = null;
+  let ultimaRapida: Buffer | null = null;
+  let nitidaEnviada = false;
   try {
     while (s.cliente && sesiones.has(s.id)) {
+      let cambio = false;
       try {
-        const buf = await s.page.screenshot({
-          type: 'jpeg', quality: 70, caret: 'initial', timeout: 5000,
+        // La rápida hace de sonda: es barata y dice si algo se ha movido.
+        const rapida = await s.page.screenshot({
+          type: 'jpeg', quality: 50, scale: 'css', caret: 'initial', timeout: 5000,
         });
-        if (!ultimo || !buf.equals(ultimo)) {
-          empujar(s, { t: 'marco', d: buf.toString('base64') });
-          ultimo = buf;
+        cambio = !ultimaRapida || !rapida.equals(ultimaRapida);
+        if (cambio) {
+          empujar(s, { t: 'marco', d: rapida.toString('base64') });
+          ultimaRapida = rapida;
+          nitidaEnviada = false;
+        } else if (!nitidaEnviada && Date.now() - s.ultimoGesto > RATO_DE_GESTO) {
+          // Quieta y sin gestos: una sola foto a plena resolución para leer.
+          const nitida = await s.page.screenshot({
+            type: 'jpeg', quality: 70, scale: 'device', caret: 'initial', timeout: 5000,
+          });
+          empujar(s, { t: 'marco', d: nitida.toString('base64') });
+          nitidaEnviada = true;
         }
       } catch { /* la pestaña estaba navegando u ocupada: se reintenta */ }
-      await new Promise(r => setTimeout(r, 120));
+      const moviendo = cambio || Date.now() - s.ultimoGesto < RATO_DE_GESTO;
+      await new Promise(r => setTimeout(r, moviendo ? CADENCIA_MOVIMIENTO : CADENCIA_QUIETA));
     }
   } finally { s.capturando = false; }
 }
@@ -192,7 +221,7 @@ async function crearSesion(usuario: string, url: string, ancho: number, alto: nu
 
   const s: Sesion = {
     id: randomBytes(12).toString('base64url'),
-    usuario, context, page, cliente: null, capturando: false,
+    usuario, context, page, cliente: null, capturando: false, ultimoGesto: 0,
     temporizador: setTimeout(() => {}, 0),
     ancho, alto, escala,
   };
@@ -282,6 +311,7 @@ export function registerNavegadorRemotoRoutes(app: Express) {
     const s = sesionDe(req, res);
     if (!s) return;
     tocar(s);
+    s.ultimoGesto = Date.now();
     const e = req.body || {};
     try {
       switch (e.tipo) {
