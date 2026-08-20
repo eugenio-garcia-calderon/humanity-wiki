@@ -527,6 +527,21 @@ export default function Documento() {
   const alTeclear = (b: Bloque, e: React.KeyboardEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
 
+    // ⌘A SELECCIONA ESTE BLOQUE, NO EL DOCUMENTO ENTERO (2026-08-20). El
+    // «seleccionar todo» del navegador se lleva por delante media página; al
+    // escribir encima, el navegador borraba nodos de OTROS bloques que React
+    // creía suyos, y su siguiente `removeChild` reventaba con la pantalla en
+    // blanco. Acotarlo al bloque es además lo que hace cualquier editor.
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      const rango = document.createRange();
+      rango.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(rango);
+      return;
+    }
+
     // --- La barra «/» manda mientras está abierta ---
     if (barra && barra.bloque === b.id) {
       if (e.key === 'Escape') { e.preventDefault(); setBarra(null); return; }
@@ -1081,13 +1096,17 @@ export default function Documento() {
         className: cn(CLASES_TEXTO[b.tipo], 'px-1 -mx-1 min-h-[1.4em]', editable && 'cursor-text hover:bg-slate-50/80 rounded'),
       };
 
-      const contenido = esActivo ? <TextoVivo inicial={texto} /> : <Inline texto={texto} />;
+      /** El cuerpo del bloque. Cuando se está editando NO lleva hijos de
+       *  React (ver `BloqueEditable`); cuando solo se lee, sí. */
+      const cuerpo = (extra?: string) => esActivo
+        ? <BloqueEditable key={`${b.id}-edit`} inicial={texto} {...comun} className={cn(comun.className, extra)} />
+        : <div key={`${b.id}-ver`} {...comun} className={cn(comun.className, extra)}><Inline texto={texto} /></div>;
 
       if (b.tipo === 'cita') {
-        return <blockquote className="border-l-[3px] border-emerald-300 pl-3"><div {...comun}>{contenido}</div></blockquote>;
+        return <blockquote className="border-l-[3px] border-emerald-300 pl-3">{cuerpo()}</blockquote>;
       }
       if (b.tipo === 'codigo') {
-        return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto"><div {...comun}>{editable ? texto : texto}</div></pre>;
+        return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto">{cuerpo()}</pre>;
       }
       if (b.tipo === 'lista' || b.tipo === 'numerada') {
         // El número real se calcula contando los hermanos seguidos del mismo tipo.
@@ -1100,7 +1119,7 @@ export default function Documento() {
             <span className="text-slate-400 select-none shrink-0 w-5 text-right leading-relaxed text-[15px]">
               {b.tipo === 'lista' ? '•' : `${n}.`}
             </span>
-            <div {...comun} className={cn('flex-1 min-w-0', comun.className)}>{contenido}</div>
+            {cuerpo('flex-1 min-w-0')}
           </div>
         );
       }
@@ -1110,11 +1129,11 @@ export default function Documento() {
             <input type="checkbox" checked={!!b.hecho} disabled={!editable}
               onChange={() => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, hecho: !x.hecho } : x)); programarGuardado(); }}
               className="mt-1.5 accent-emerald-600 shrink-0" />
-            <div {...comun} className={cn('flex-1 min-w-0', comun.className, b.hecho && 'line-through text-slate-400')}>{contenido}</div>
+            {cuerpo(cn('flex-1 min-w-0', b.hecho && 'line-through text-slate-400'))}
           </div>
         );
       }
-      return <div {...comun}>{contenido}</div>;
+      return cuerpo();
     })();
 
     const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio'].includes(b.tipo);
@@ -1525,10 +1544,16 @@ export default function Documento() {
  * El componente se monta de nuevo cada vez que activas otro bloque, así que
  * siempre arranca con el texto correcto.
  */
-function TextoVivo({ inicial }: { inicial: string }) {
-  // Escapado a mano: entra texto plano y tiene que salir texto plano.
-  const html = useRef(
-    inicial.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  ).current;
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+function BloqueEditable({ inicial, ...props }: { inicial: string } & React.HTMLAttributes<HTMLDivElement>) {
+  const ref = useRef<HTMLDivElement>(null);
+  // El texto se pone UNA vez, al montar, y a mano. A partir de ahí React ni lo
+  // sabe ni le importa: para él este div está vacío.
+  useEffect(() => {
+    if (ref.current) ref.current.textContent = inicial;
+    // Sin `inicial` en las dependencias A PROPÓSITO: si volviera a entrar
+    // mientras escribes, te machacaría lo tecleado y te movería el cursor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <div ref={ref} {...props} />;
 }
+
