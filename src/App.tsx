@@ -31,6 +31,7 @@ import Mapas from './pages/Mapas';
 import Esquemas from './pages/Esquemas';
 import Tareas from './pages/Tareas';
 import Paginas from './pages/Paginas';
+import Mensajes from './pages/Mensajes';
 import Entrada from './pages/Entrada';
 import Configuracion from './pages/Configuracion';
 import BaseDeDatos from './pages/BaseDeDatos';
@@ -113,6 +114,7 @@ export default function App() {
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="paginas" element={<Paginas />} />
+                <Route path="mensajes" element={<Mensajes />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
                 {/* /paginas/nuevo?prompt=… genera con la IA en directo;
                     /paginas/:id abre uno guardado. */}

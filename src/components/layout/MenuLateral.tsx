@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database,
-  Compass, Globe, User, Plus, Package,
+  Compass, Globe, User, Plus, Package, MessageSquare,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -140,6 +140,8 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
     ...(user ? [{
       id: 'yo', label: 'Mi Perfil', icono: User,
       destino: `/personas/${user.id}`,
+    } as NodoMenu, {
+      id: 'mensajes', label: 'Mensajes', icono: MessageSquare, destino: '/mensajes',
     } as NodoMenu] : []),
     ...datos.personas.map(p => ({
       id: p.id,
