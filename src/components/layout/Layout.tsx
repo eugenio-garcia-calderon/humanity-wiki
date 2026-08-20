@@ -141,6 +141,18 @@ export default function Layout() {
   // de ir sería esconder justo lo que has pedido ver.
   useEffect(() => { setCajonAbierto(false); }, [location.pathname]);
 
+  // Y TAMBIÉN AL ABRIR ALGO DESDE EL MENÚ, aunque no cambie la dirección.
+  // Casi todas las entradas del menú no navegan: piden «abre esto» por el bus,
+  // y en móvil eso acaba en una navegación (ver GestorVentanas). Pero si ya
+  // estás en esa misma página, la ruta no cambia, el efecto de arriba no se
+  // dispara y el cajón se quedaba abierto tapando la respuesta. Visto al
+  // probarlo con el dedo: pulsar «Mi Perfil» dejaba el menú puesto encima.
+  useEffect(() => {
+    const alAbrir = () => setCajonAbierto(false);
+    window.addEventListener('humanity:abrir-ventana', alAbrir);
+    return () => window.removeEventListener('humanity:abrir-ventana', alAbrir);
+  }, []);
+
   // Y con la tecla de escape, que es donde la busca cualquiera que abra esto
   // en un portátil estrechado.
   useEffect(() => {
@@ -350,8 +362,38 @@ export default function Layout() {
       {/* Más baja que antes (56 → 40 px, y 32 en compacto): eran tres filas de
           cosas para lo mismo y ahora son dos, así que cada una tiene que pesar
           lo mínimo. */}
+      {/* LA BARRA CRECE CUANDO NO ESTÁ EL MENÚ, y es a propósito. El botón de
+          traerlo de vuelta tiene que ser grande (Eugenio, 2026-08-21), y algo
+          de 52 px no cabe en una barra de 40 sin salirse por debajo y taparle
+          el contenido a la página. Se probó primero flotando sobre la página y
+          se vio el daño en una captura: en /explorar tapaba las tres primeras
+          carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
+          ve; tapar contenido es un precio que se paga a escondidas. */}
       <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
-        compacto ? 'h-8' : 'h-10')}>
+        user && !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
+
+        {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
+            Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
+            llamativo y grande».
+
+            POR QUÉ ES GRANDE Y NO UN ICONO DISCRETO: desde que no hay estado
+            intermedio, éste es el ÚNICO camino de vuelta al menú. Antes, con
+            el semiplegado, siempre quedaba una tira de iconos que decía «el
+            menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
+            esquina sería justo el fallo que este proyecto ya tiene
+            catalogado: 83 de cada 100 botones por debajo de 24 px. */}
+        {user && !menuPuesto && (
+          <button
+            onClick={ponerMenu}
+            title="Ver el menú"
+            aria-label="Ver el menú"
+            aria-expanded={false}
+            className="h-11 shrink-0 inline-flex items-center gap-2 pl-2.5 pr-3.5 rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors"
+          >
+            <Menu className="w-6 h-6 shrink-0" />
+            <span className="text-sm font-black tracking-tight">Menú</span>
+          </button>
+        )}
 
         {/* LA MARCA CUANDO NO ESTÁ EL MENÚ. La marca vive dentro del menú
             lateral, así que al esconderlo la plataforma se quedaba sin nombre
@@ -543,41 +585,6 @@ export default function Layout() {
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra
           abajo»). Solo hay UNA barra, la de arriba, y lleva las ventanas. */}
       </div>
-
-      {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
-          Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
-          llamativo y grande».
-
-          POR QUÉ ES GRANDE Y NO UN ICONO DISCRETO: desde que no hay estado
-          intermedio, éste es el ÚNICO camino de vuelta al menú. Antes, con el
-          semiplegado, siempre quedaba una tira de iconos a la vista que decía
-          «el menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
-          esquina sería justo el fallo que este proyecto ya tiene catalogado:
-          83 de cada 100 botones por debajo de 24 px y uno solo llegando a los
-          44 que pide Apple.
-
-          Va pegado al borde izquierdo y con las esquinas redondeadas solo por
-          la derecha, que es la forma que se lee como «tira de aquí para sacar
-          el panel». Y va `fixed`, no dentro de la barra: la barra mide 40 px
-          (32 en compacto) y no puede contener algo de 52 sin empujar la
-          maqueta de todo el mundo. */}
-      {user && !menuPuesto && (
-        <button
-          onClick={ponerMenu}
-          title="Ver el menú"
-          aria-label="Ver el menú"
-          aria-expanded={false}
-          className={cn('fixed left-0 z-40 flex items-center gap-2 pl-3 pr-4 rounded-r-2xl',
-            'bg-slate-900 text-white shadow-xl shadow-slate-900/25',
-            'hover:bg-slate-800 hover:pl-4 transition-all',
-            // 52 px de alto: de sobra para el dedo. Justo debajo de la barra.
-            'h-13',
-            compacto ? 'top-11' : 'top-13')}
-        >
-          <Menu className="w-6 h-6 shrink-0" />
-          <span className="text-sm font-black tracking-tight">Menú</span>
-        </button>
-      )}
 
       {/* ══ EL CAJÓN DEL MENÚ EN MÓVIL (B41) ══════════════════════════════
           Va aquí, el último y fuera de la columna de contenido, para que se

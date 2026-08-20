@@ -7,6 +7,7 @@ import {
   ArrowLeft, Users2, Globe2, Plus,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useEsMovil } from '../hooks/useEsMovil';
 import WindowContent from '../components/knowledge/WindowContent';
 import FichaPublicacion, { type Publicacion } from '../components/knowledge/FichaPublicacion';
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
@@ -111,6 +112,7 @@ function formatosDescarga(pub: Publicacion): { id: string; label: string; accion
 
 export default function Explorar() {
   const { user } = useAuth();
+  const esMovil = useEsMovil();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -337,7 +339,14 @@ export default function Explorar() {
       {/* ------------------------------------------------------------------ */}
       {/* Carpetas: menú lateral izquierdo, solo con sesión.                  */}
       {/* ------------------------------------------------------------------ */}
-      {user && (
+      {/* EN MÓVIL ESTA COLUMNA NO CABE, Y NO ES UN DETALLE (2026-08-21, B37).
+          Son 224 px fijos que, sumados a los 240 de la barra lateral de la
+          app, dan 464 en una pantalla de 390: el panel entero se quedaba fuera
+          y sin forma de alcanzarlo — 89 elementos recortados de verdad, los
+          midió el Tester 1 con sesión. Aunque la barra de la app ya sea un
+          cajón, 224 px fijos al lado del contenido siguen sin caber.
+          Debajo, en móvil, las mismas carpetas como una tira horizontal. */}
+      {user && !esMovil && (
         <aside className="w-56 shrink-0 border-r border-slate-100 bg-slate-50/60 flex flex-col overflow-hidden">
           <div className="px-4 pt-5 pb-3 flex items-center justify-between">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Carpetas</p>
@@ -415,7 +424,88 @@ export default function Explorar() {
       {/* ------------------------------------------------------------------ */}
       {/* Contenido principal                                                */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-w-0">
+
+        {/* LAS CARPETAS EN MÓVIL: UNA TIRA, NO UNA COLUMNA (B37).
+            Una columna de 224 px se come más de la mitad de un teléfono; una
+            tira se come 48 px de alto y deja la pantalla entera para lo que
+            has venido a leer.
+
+            LLEVA SEÑAL DE QUE SE DESLIZA, y es a propósito: el fallo que el
+            Tester 1 encontró en esta misma página es que aquí ya hay tiras con
+            1.014 px de contenido escondido y NADA que lo indique. Contenido
+            alcanzable sin señal de que existe es tan inútil como el recortado.
+            Por eso el degradado del borde derecho, que solo aparece cuando de
+            verdad queda algo por ver.
+
+            Lo que NO se trae aquí: arrastrar una publicación a una carpeta y
+            el botón de borrar carpeta que sale al pasar el ratón. Las dos son
+            gestos de ratón que en un teléfono no existen; traerlos a medias
+            sería peor que dejarlos en el escritorio. */}
+        {user && esMovil && (
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100">
+            <div className="relative">
+              <div className="flex items-center gap-1.5 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <button
+                  onClick={() => setCarpetaActiva(null)}
+                  className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors',
+                    !carpetaActiva ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 shrink-0" /> Todas
+                </button>
+
+                {carpetas.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setCarpetaActiva(c)}
+                    className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors max-w-[11rem]',
+                      carpetaActiva?.id === c.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
+                  >
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: c.color || colorDe(c.id) }} />
+                    <span className="truncate">{c.nombre}</span>
+                    <span className={cn('text-[10px] font-black shrink-0', carpetaActiva?.id === c.id ? 'text-white/60' : 'text-slate-400')}>{c.piezas}</span>
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCreandoCarpeta(v => !v)}
+                  title="Nueva carpeta" aria-label="Nueva carpeta"
+                  className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-slate-100 text-slate-500 active:bg-slate-200 transition-colors"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={ordenarConIA} disabled={organizando}
+                  title="Ordenar con IA" aria-label="Ordenar con IA"
+                  className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-indigo-50 disabled:opacity-60 text-indigo-700 transition-colors"
+                >
+                  {organizando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                </button>
+              </div>
+              {/* El degradado que dice «sigue habiendo cosas». No captura
+                  toques: el dedo tiene que poder deslizar a través de él. */}
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
+            </div>
+
+            {creandoCarpeta && (
+              <form onSubmit={e => { e.preventDefault(); crearCarpeta(); }} className="px-3 pb-2 flex gap-1.5">
+                <input
+                  autoFocus value={nuevaCarpeta} onChange={e => setNuevaCarpeta(e.target.value)}
+                  placeholder="p. ej. Salud" onBlur={() => !nuevaCarpeta && setCreandoCarpeta(false)}
+                  /* `text-base` = 16 px, y no es una decisión estética: Safari
+                     de iOS hace zoom sobre la página entera al enfocar un
+                     campo con letra por debajo de 16 px, y luego te deja la
+                     página descolocada. La versión de escritorio se queda en
+                     `text-xs` porque allí eso no pasa. */
+                  className="flex-1 min-w-0 h-11 px-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:border-emerald-300 bg-white"
+                />
+                <button type="submit" className="w-11 h-11 grid place-items-center bg-slate-900 text-white rounded-xl shrink-0"><Check className="w-4 h-4" /></button>
+              </form>
+            )}
+            {avisoIA && <p className="px-3 pb-2 text-[11px] text-slate-500 leading-relaxed">{avisoIA}</p>}
+          </div>
+        )}
+
         <div className="max-w-[1500px] mx-auto px-5 sm:px-8 pt-5 pb-24">
 
           {/* Barra compacta: modo, carpeta, papelera y contador en una sola línea
