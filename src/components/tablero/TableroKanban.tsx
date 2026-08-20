@@ -42,7 +42,7 @@ export interface ItemTablero {
 export type NombresDeColumna = Partial<Record<'por_hacer' | 'en_curso' | 'hecho', string>>;
 
 export default function TableroKanban({
-  items, grupos, puedeEditar, onRecargar, onCrear, columnas, onColumnas, onGrupos,
+  items, grupos, puedeEditar, onRecargar, onCrear, columnas, onColumnas, onGrupos, abrirTarea,
 }: {
   items: ItemTablero[];
   grupos: Grupo[];
@@ -56,6 +56,9 @@ export default function TableroKanban({
   onColumnas?: (nombres: NombresDeColumna) => void;
   /** Si se pasa, se pueden crear etiquetas nuevas desde el tablero. */
   onGrupos?: (grupos: Grupo[]) => void;
+  /** Id de una tarjeta que hay que abrir nada más entrar (viene de `?tarea=`,
+   *  que es como el listado de Tareas abre una en su tablero). */
+  abrirTarea?: string;
 }) {
   const [filtro, setFiltro] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<ItemTablero | null>(null);
@@ -148,6 +151,16 @@ export default function TableroKanban({
 
   // Cuando llegan datos nuevos del servidor, la foto provisional sobra.
   useEffect(() => { setMovidas({}); }, [items]);
+
+  // La tarjeta que pidieron abrir de fuera. Se abre UNA vez, cuando llega
+  // entre los items: si se reintentara en cada carga, cerrarla la volvería a
+  // abrir sola.
+  const yaAbierta = useRef(false);
+  useEffect(() => {
+    if (yaAbierta.current || !abrirTarea) return;
+    const it = items.find(i => i.id === abrirTarea);
+    if (it) { yaAbierta.current = true; setAbierta(it); }
+  }, [abrirTarea, items]);
 
   useEffect(() => {
     if (!eligiendoColumna) return;

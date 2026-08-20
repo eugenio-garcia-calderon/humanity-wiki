@@ -6,6 +6,7 @@ import {
   elegirModelo, topePremiumCents, NIVEL_PREMIUM,
 } from './provider.js';
 import { ROLE } from '../auth.js';
+import { GRUPOS, ESTADOS, PRIORIDADES } from '../roadmap.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
 import { guardarArchivo } from '../uploads.js';
 
@@ -52,6 +53,13 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // Fase 12: mapas de usuario — vistas del mapa publicadas a nombre de la
   // persona, indexadas e integradas con el conocimiento de la plataforma.
   CREATE_MAP: { minLevel: ROLE.USER, entity: 'user_maps', description: 'Crear un mapa público a nombre del usuario' },
+  // 2026-08-20: la IA no sabía hacer las cosas de la propia plataforma —
+  // Eugenio le pidió «añade una tarea al proyecto Humanity.wiki» y no había
+  // ninguna acción para eso. Estas tres son las que se usan a diario.
+  CREATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Crear una tarea en un proyecto' },
+  UPDATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Cambiar una tarea (estado, título, responsable)' },
+  CREATE_PROYECTO: { minLevel: ROLE.USER, entity: 'proyectos',     description: 'Crear un proyecto' },
+  CREATE_PAGINA:   { minLevel: ROLE.USER, entity: 'knowledge_windows', description: 'Crear una página' },
   // 2026-08-08: "ordename las publicaciones por carpetas" — sin parámetros,
   // el servidor lee todo lo que ha publicado quien pregunta y las agrupa.
   ORGANIZAR_CARPETAS: { minLevel: ROLE.USER, entity: 'carpetas', description: 'Organizar tus publicaciones en carpetas temáticas' },
@@ -345,14 +353,37 @@ APUNTAR ALGO EN EL CALENDARIO. Si te piden una cita, una reunión, un recordator
 {"actions": [{"type": "CREATE_EVENTO", "params": {"titulo": "Reunión con el taller", "inicio": "2026-08-24T10:00:00+02:00", "fin": "2026-08-24T11:00:00+02:00"}, "rationale": "lo ha pedido"}]}
 \`\`\`
 
-Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fin, todo_el_dia, lugar, descripcion, repeticion (RRULE de iCalendar, p. ej. "FREQ=WEEKLY", si se repite).`;
+Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fin, todo_el_dia, lugar, descripcion, repeticion (RRULE de iCalendar, p. ej. "FREQ=WEEKLY", si se repite).
+
+LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando la acción en el bloque. No digas que no puedes.
+
+· CREATE_TAREA — «añade una tarea a X», «apúntame que hay que…». Parámetros:
+  titulo (obligatorio), proyecto (el NOMBRE del proyecto, tal cual lo diga),
+  resumen, grupo (la etiqueta), responsable (el nombre de una persona suya),
+  estado (por_hacer | en_curso | hecho), prioridad (alta | media | baja).
+  Sin «proyecto» la tarea queda suelta; si nombra un proyecto que no existe,
+  el servidor te lo dirá y entonces se lo cuentas.
+· UPDATE_TAREA — «marca X como hecha», «pon en curso lo del baño». Parámetros:
+  tarea (parte del título basta), estado, prioridad, titulo_nuevo, resumen.
+· CREATE_PROYECTO — titulo (obligatorio), descripcion, publico (true/false).
+· CREATE_PAGINA — titulo (obligatorio), texto (el contenido inicial).
+
+Ejemplo, para «añade una tarea de prueba en el proyecto Humanity.wiki»:
+
+\`\`\`redhumana
+{"actions": [{"type": "CREATE_TAREA", "params": {"titulo": "Tarea de prueba", "proyecto": "Humanity.wiki"}, "rationale": "lo ha pedido"}]}
+\`\`\``;
 
     // ------------------------- PARTE VARIABLE -------------------------
     // Todo lo que cambia entre mensajes vive aquí, fuera de la caché.
     const variable = `HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}).
 
+${ctx?.ultimoFallo ? `SU ÚLTIMO INTENTO SE ROMPIÓ ANTES DE LLEGARTE. Pidió «${ctx.ultimoFallo.peticion}» y el navegador falló con: ${ctx.ultimoFallo.motivo} (error ${ctx.ultimoFallo.estado}). NO te llegó ese mensaje, así que no lo respondiste. Si te pregunta qué ha fallado, cuéntale ESTO — nunca digas que no te consta ningún fallo.\n` : ''}
+${ctx?.mio ? `LO QUE TIENE ESTA PERSONA EN LA PLATAFORMA (sus proyectos, sus tareas, su gente). Cuando pregunte «mis proyectos», «mis tareas» o «qué tengo pendiente», la respuesta está AQUÍ, no en el conocimiento común de abajo. Y cuando te pida crear una tarea «en X», el proyecto es uno de estos:
+${JSON.stringify(ctx.mio, null, 2)}
+` : ''}
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
-${JSON.stringify(ctx || {}, null, 2)}
+${JSON.stringify({ ...(ctx || {}), mio: undefined }, null, 2)}
 ${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
 
 USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
@@ -806,7 +837,62 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // manda siempre encendida y es una herramienta que solo tiene Claude,
       // así que hacerle caso mandaba cada «hola» al modelo caro.
       const buscarWeb = eleccion.webSearch;
-      const prompt = buildSystemPrompt(context, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
+      // EL CONTEXTO NO PUEDE SER INFINITO. Llega del navegador con lo que
+      // tienes abierto, y una ventana con mucho dentro lo dispara: pasado el
+      // límite del servidor la petición ni entra (413 con una página HTML,
+      // que es lo que rompía el chat). Se recorta aquí, que es barato, en vez
+      // de confiar en que el cliente se porte bien.
+      // LO QUE TIENES TÚ (2026-08-20). Sin esto, preguntarle «¿qué proyectos
+      // tengo?» daba un proyecto semilla de la plataforma en vez de los suyos:
+      // el contexto recuperado son entidades del conocimiento común, y de los
+      // proyectos, tareas y personas de cada persona no sabía nada. Ahora se
+      // le da un índice corto —nombres, no contenidos— que además es lo que
+      // necesita para acertar el proyecto al que va una tarea.
+      const mio = req.user ? await (async () => {
+        try {
+          const [proy, tareas, gente, evs] = await Promise.all([
+            db.execute(sql`
+              SELECT p.id, p.titulo, p.slug,
+                     (SELECT count(*)::int FROM roadmap_items r
+                       WHERE r.proyecto_id = p.id AND r.archived_at IS NULL AND r.estado <> 'hecho') AS pendientes
+              FROM proyectos p
+              WHERE p.creador_user_id = ${req.user!.id} AND p.archived_at IS NULL AND p.deleted_at IS NULL
+              ORDER BY p.updated_at DESC NULLS LAST LIMIT 30
+            `),
+            db.execute(sql`
+              SELECT r.titulo, r.estado, p.titulo AS proyecto
+              FROM roadmap_items r LEFT JOIN proyectos p ON p.id = r.proyecto_id
+              WHERE p.creador_user_id = ${req.user!.id} AND r.archived_at IS NULL AND r.estado <> 'hecho'
+              ORDER BY r.updated_at DESC NULLS LAST LIMIT 40
+            `),
+            db.execute(sql`
+              SELECT nombre, rol FROM game_agents
+              WHERE user_id = ${req.user!.id} AND archived_at IS NULL AND tipo = 'persona' LIMIT 30
+            `),
+            db.execute(sql`
+              SELECT titulo, inicio FROM eventos
+              WHERE creador_user_id = ${req.user!.id} AND archived_at IS NULL
+                AND inicio > now() - interval '1 day'
+              ORDER BY inicio LIMIT 15
+            `),
+          ]);
+          return {
+            proyectos: proy.rows.map((p: any) => `${p.titulo} (${p.pendientes} pendientes)`),
+            tareas_pendientes: tareas.rows.map((t: any) => `${t.titulo} [${t.estado}]${t.proyecto ? ` · ${t.proyecto}` : ''}`),
+            personas: gente.rows.map((g: any) => g.rol ? `${g.nombre} (${g.rol})` : g.nombre),
+            proximos_eventos: evs.rows.map((e: any) => `${e.titulo} · ${new Date(e.inicio).toLocaleString('es-ES')}`),
+          };
+        } catch { return null; }
+      })() : null;
+
+      const contextoSano = (() => {
+        try {
+          const txt = JSON.stringify(context || {});
+          if (txt.length <= 20_000) return context;
+          return { ...context, recortado: true, aviso: 'El contexto era muy grande y se ha recortado.' };
+        } catch { return {}; }
+      })();
+      const prompt = buildSystemPrompt({ ...contextoSano, mio }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como
@@ -815,7 +901,39 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         systemEstable: prompt.estable || undefined,
         messages, webSearch: buscarWeb && providerOfModel(chosenModel) === 'claude', model: chosenModel,
       });
-      const { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
+      let { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
+
+      // «TE LO APUNTO» SIN APUNTAR NADA (2026-08-20). Es el fallo que más ha
+      // costado en este proyecto: el modelo dice que ha hecho algo y no manda
+      // el bloque, así que no se crea nada y la persona se queda pensando que
+      // sí. Se ha intentado arreglar tres veces moviendo la instrucción de
+      // sitio en el prompt, y vuelve.
+      //
+      // Así que se DETECTA en vez de confiar: si el texto promete una acción y
+      // no vino ninguna, se le pide el bloque otra vez —una sola vez, y solo
+      // el bloque—. Una segunda llamada corta es mucho más barata que una
+      // tarea que la persona cree tener y no tiene.
+      const PROMETE = /\b(te (lo|la|los|las) apunto|lo apunto|ya (está|lo tienes)|hecho|apuntad[oa]|cread[oa]|añadid[oa]|he (creado|añadido|apuntado)|queda (creado|apuntado))\b/i;
+      if (!actions.length && !acciones_juego.length && PROMETE.test(clean)) {
+        try {
+          const reintento = await provider.complete({
+            system: prompt.variable,
+            systemEstable: prompt.estable || undefined,
+            messages: [
+              ...messages,
+              { role: 'assistant', content: result.text },
+              { role: 'user', content: 'Has dicho que lo hacías pero no mandaste el bloque ```redhumana con la acción, así que no se ha creado nada. Responde AHORA solo con ese bloque, sin texto alrededor.' },
+            ],
+            model: chosenModel,
+          });
+          const segundo = parseModelBlock(reintento.text);
+          if (segundo.actions.length || segundo.acciones_juego.length) {
+            actions = segundo.actions;
+            acciones_juego = segundo.acciones_juego;
+            console.warn('[IA] bloque recuperado en el reintento:', actions.map((a: any) => a?.type));
+          }
+        } catch (e) { console.error('[IA] el reintento del bloque falló:', e); }
+      }
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
       const proposed: any[] = [];
@@ -1106,6 +1224,122 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           `);
           return { ok: true, entityId: id, entityType: 'user_maps', slug, status: 'publicado' };
         }
+        case 'CREATE_TAREA': {
+          // A QUÉ PROYECTO VA. La IA manda el nombre o el id; aquí se busca
+          // entre los TUYOS. Sin proyecto, la tarea queda suelta, que es
+          // mejor que inventarse uno.
+          let proyectoId: string | null = null;
+          const pista = String(params.proyecto || params.proyecto_id || '').trim();
+          if (pista) {
+            const p = await db.execute(sql`
+              SELECT id FROM proyectos
+              WHERE creador_user_id = ${actorId} AND archived_at IS NULL AND deleted_at IS NULL
+                AND (id = ${pista} OR slug = ${pista} OR lower(titulo) = lower(${pista})
+                     OR lower(titulo) LIKE lower(${'%' + pista + '%'}))
+              ORDER BY (lower(titulo) = lower(${pista})) DESC LIMIT 1
+            `);
+            if (!p.rows.length) return { ok: false, error: `No encuentro un proyecto tuyo que se llame «${pista}».` };
+            proyectoId = (p.rows[0] as any).id;
+          }
+          const titulo = String(params.titulo || params.nombre || '').trim();
+          if (!titulo) return { ok: false, error: 'La tarea necesita un título.' };
+
+          // El grupo (la etiqueta) tiene que existir en ESE proyecto, o la
+          // tarjeta nace en una columna que el tablero no sabe pintar.
+          let grupo = String(params.grupo || '').trim();
+          if (proyectoId) {
+            const g = await db.execute(sql`SELECT grupos FROM proyectos WHERE id = ${proyectoId}`);
+            const lista = ((g.rows[0] as any)?.grupos || []) as any[];
+            const encaja = lista.find(x => x.id === grupo || String(x.label || '').toLowerCase() === grupo.toLowerCase());
+            grupo = encaja ? encaja.id : (lista[0]?.id || 'producto');
+          } else if (!(GRUPOS as readonly string[]).includes(grupo)) {
+            grupo = GRUPOS[0];
+          }
+
+          // El responsable, si lo nombra: una de TUS personas.
+          let responsable: string | null = null;
+          const quien = String(params.responsable || '').trim();
+          if (quien) {
+            const a2 = await db.execute(sql`
+              SELECT id FROM game_agents
+              WHERE user_id = ${actorId} AND archived_at IS NULL AND lower(nombre) LIKE lower(${'%' + quien + '%'})
+              LIMIT 1
+            `);
+            responsable = a2.rows.length ? (a2.rows[0] as any).id : null;
+          }
+
+          const id = newId('RM');
+          await db.execute(sql`
+            INSERT INTO roadmap_items (id, grupo, titulo, resumen, estado, prioridad, autor_user_id,
+                                       bloques, orden, proyecto_id, responsable_agente_id, created_by, updated_by)
+            VALUES (${id}, ${grupo}, ${titulo.slice(0, 300)}, ${params.resumen || null},
+                    ${ESTADOS.has(String(params.estado)) ? String(params.estado) : 'por_hacer'},
+                    ${PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media'},
+                    ${actorId}, '[]'::jsonb, 0, ${proyectoId}, ${responsable}, ${actorId}, ${actorId})
+          `);
+          return { ok: true, entityId: id, entityType: 'roadmap_items' };
+        }
+
+        case 'UPDATE_TAREA': {
+          const pista = String(params.tarea || params.id || params.titulo || '').trim();
+          if (!pista) return { ok: false, error: 'No sé qué tarea cambiar.' };
+          // Solo tareas de proyectos tuyos: cambiar la de otro sería escribir
+          // en su tablero.
+          const t = await db.execute(sql`
+            SELECT r.id FROM roadmap_items r
+            LEFT JOIN proyectos p ON p.id = r.proyecto_id
+            WHERE r.archived_at IS NULL AND p.creador_user_id = ${actorId}
+              AND (r.id = ${pista} OR lower(r.titulo) LIKE lower(${'%' + pista + '%'}))
+            ORDER BY r.updated_at DESC NULLS LAST LIMIT 1
+          `);
+          if (!t.rows.length) return { ok: false, error: `No encuentro una tarea tuya que se llame «${pista}».` };
+          const tid = (t.rows[0] as any).id;
+          const estado = ESTADOS.has(String(params.estado)) ? String(params.estado) : null;
+          const prioridad = PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : null;
+          await db.execute(sql`
+            UPDATE roadmap_items SET
+              titulo    = COALESCE(${params.titulo_nuevo ?? null}, titulo),
+              resumen   = COALESCE(${params.resumen ?? null}, resumen),
+              estado    = COALESCE(${estado}, estado),
+              prioridad = COALESCE(${prioridad}, prioridad),
+              updated_at = now(), updated_by = ${actorId}
+            WHERE id = ${tid}
+          `);
+          return { ok: true, entityId: tid, entityType: 'roadmap_items' };
+        }
+
+        case 'CREATE_PROYECTO': {
+          const titulo = String(params.titulo || params.nombre || '').trim();
+          if (!titulo) return { ok: false, error: 'El proyecto necesita un nombre.' };
+          const id = newId('PRY');
+          const slug = `${titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 6)}`;
+          await db.execute(sql`
+            INSERT INTO proyectos (id, titulo, descripcion, slug, creador_user_id, grupos, publico, created_by, updated_by)
+            VALUES (${id}, ${titulo.slice(0, 200)}, ${params.descripcion || null}, ${slug}, ${actorId},
+                    ${JSON.stringify([
+                      { id: 'producto', label: 'Producto', color: '#7c3aed' },
+                      { id: 'diseno', label: 'Diseño', color: '#db2777' },
+                      { id: 'tecnico', label: 'Técnico', color: '#0284c7' },
+                    ])}::jsonb, ${params.publico === true}, ${actorId}, ${actorId})
+          `);
+          return { ok: true, entityId: id, entityType: 'proyectos' };
+        }
+
+        case 'CREATE_PAGINA': {
+          const titulo = String(params.titulo || params.nombre || '').trim();
+          if (!titulo) return { ok: false, error: 'La página necesita un título.' };
+          const id = newId('KW');
+          await db.execute(sql`
+            INSERT INTO knowledge_windows (id, title, kind, config, created_by, updated_by)
+            VALUES (${id}, ${titulo.slice(0, 200)}, 'documento',
+                    ${JSON.stringify({ bloques: params.texto
+                      ? [{ id: 'b1', tipo: 'parrafo', texto: String(params.texto).slice(0, 20000) }] : [] })}::jsonb,
+                    ${actorId}, ${actorId})
+          `);
+          return { ok: true, entityId: id, entityType: 'knowledge_windows' };
+        }
+
         case 'CREATE_EVENTO': {
           // La IA manda la fecha ya resuelta en ISO: interpretar «el jueves»
           // es cosa suya, que para eso sabe qué día es hoy (se lo decimos en

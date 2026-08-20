@@ -439,6 +439,7 @@ export function Proyecto() {
             items={items} grupos={grupos} puedeEditar={puedeEditar}
             onRecargar={() => cargarItems(proyecto.id)}
             onCrear={(g, estado) => setNueva({ grupo: g || grupos[0]?.id, estado })}
+            abrirTarea={new URLSearchParams(location.search).get('tarea') || undefined}
             columnas={proyecto.columnas || null}
             onColumnas={puedeEditar ? guardarColumnas : undefined}
             onGrupos={puedeEditar ? guardarGrupos : undefined}

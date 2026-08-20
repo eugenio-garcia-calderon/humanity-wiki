@@ -105,6 +105,9 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [modelosAbierto, setModelosAbierto] = useState(false);
+  /** El último intento que se rompió antes de llegar al modelo. Va en el
+   *  contexto del siguiente mensaje para que la IA sepa que falló. */
+  const ultimoFallo = useRef<{ cuando: number; estado: number; motivo: string; peticion: string } | null>(null);
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
@@ -315,6 +318,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   }, [modelosAbierto]);
 
   const currentContext = () => ({
+    // Lo que se rompió en el último intento, si fue hace poco. Es lo único
+    // que la IA no puede saber por su cuenta: pasó en el navegador.
+    ultimoFallo: ultimoFallo.current && Date.now() - ultimoFallo.current.cuando < 10 * 60_000
+      ? ultimoFallo.current : undefined,
     route: location.pathname,
     // Lo que de verdad tienes delante, que con ventanas ya no es la ruta.
     mirando: dondeEstoy,
@@ -458,9 +465,30 @@ export default function AIAssistant({ modo = 'panel' }: {
             : undefined,
         }),
       });
-      const json = await res.json();
-      if (!res.ok) {
-        setMessages(m => [...m, { role: 'assistant', content: json.error || 'No se pudo responder.', error: true }]);
+      // NUNCA SE LEE LA RESPUESTA A CIEGAS (arreglado 2026-08-20, Eugenio:
+      // «fallo al pedirle algo simple al chatbot»). El servidor no siempre
+      // contesta JSON: un cuerpo demasiado grande da un 413 con una página
+      // HTML, y un servidor reiniciándose da un 502 del proxy. Al hacer
+      // `res.json()` sin mirar, eso reventaba con «Unexpected token '<'» —
+      // un error de programador puesto delante de una persona.
+      const crudo = await res.text();
+      let json: any = null;
+      try { json = crudo ? JSON.parse(crudo) : null; } catch { /* no era JSON */ }
+
+      if (!res.ok || !json) {
+        const motivo = json?.error
+          || (res.status === 413 ? 'El mensaje llevaba demasiada información adjunta. Prueba a cerrar alguna ventana o a quitar el adjunto.'
+            : res.status === 401 ? 'Tu sesión ha caducado: vuelve a entrar.'
+            : res.status === 503 ? 'El asistente está apagado ahora mismo.'
+            : res.status >= 500 ? `El servidor no ha podido responder (error ${res.status}). Inténtalo otra vez.`
+            : `No se ha podido responder (error ${res.status}).`);
+        setMessages(m => [...m, { role: 'assistant', content: motivo, error: true }]);
+        // Y QUE LA IA SE ENTERE (Eugenio: «lo preocupante es que no sabe ni
+        // que ha fallado»). El fallo ocurre AQUÍ, en el navegador, así que el
+        // modelo no lo ve por ningún lado: si luego le preguntas «¿qué fallo
+        // has tenido?», contesta con toda la razón que no le consta nada.
+        // Se apunta, y viaja en el contexto del siguiente mensaje.
+        ultimoFallo.current = { cuando: Date.now(), estado: res.status, motivo, peticion: text.slice(0, 200) };
         return;
       }
       setConversationId(json.conversation_id);
