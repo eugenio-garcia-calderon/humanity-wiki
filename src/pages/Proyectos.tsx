@@ -25,7 +25,9 @@ export function Proyectos() {
   const navigate = useNavigate();
   const [proyectos, setProyectos] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
-  const [creando, setCreando] = useState(false);
+  // Con `?nuevo=1` el diálogo nace abierto: es lo que manda el «+» de la
+  // sección PROYECTOS del menú (2026-08-20), que antes solo traía al índice.
+  const [creando, setCreando] = useState(() => new URLSearchParams(window.location.search).get('nuevo') === '1');
 
   const cargar = () => fetch('/api/proyectos', { credentials: 'include' })
     .then(r => r.json())
@@ -130,15 +132,22 @@ function ModalNuevoProyecto({ onCerrar, onCreado }: { onCerrar: () => void; onCr
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'No se pudo crear.');
+      // Que el menú lateral se entere (2026-08-20): antes seguía diciendo
+      // «PROYECTOS 4» y el nuevo no salía hasta recargar la página entera.
+      window.dispatchEvent(new Event('humanity:menu-cambiado'));
       onCreado(j);
     } catch (e: any) { setError(e.message); setGuardando(false); }
   };
 
   return (
     <div className="fixed inset-0 bg-slate-900/45 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onCerrar}>
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+      {/* Un diálogo tiene que DECIR que lo es (2026-08-20): sin `role` ni
+          `aria-modal` un lector de pantalla lo lee como un trozo más de la
+          página y la persona no sabe que se ha abierto nada. */}
+      <div role="dialog" aria-modal="true" aria-labelledby="titulo-nuevo-proyecto"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-black text-slate-900 inline-flex items-center gap-1.5">
+          <h2 id="titulo-nuevo-proyecto" className="text-sm font-black text-slate-900 inline-flex items-center gap-1.5">
             <FolderKanban className="w-4 h-4 text-emerald-600" /> Nuevo proyecto
           </h2>
           <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
@@ -208,6 +217,15 @@ export function Proyecto() {
 
   const crearHerramienta = async (tipo: string) => {
     if (!proyecto || creando) return;
+    // UNA TAREA SE PREGUNTA ANTES DE CREARLA (2026-08-20). Este botón metía al
+    // instante una «Tarea sin título» en el tablero, sin diálogo, sin decir
+    // nada y sin poder deshacerlo — mientras el botón verde de al lado, que se
+    // llama casi igual, sí abría el formulario. Dos botones homónimos con dos
+    // comportamientos distintos. Ahora los dos abren el MISMO formulario.
+    if (tipo === 'tarea') {
+      setNueva({ grupo: grupos[0]?.id, estado: 'por_hacer' });
+      return;
+    }
     setCreando(tipo);
     try {
       const r = await fetch(`/api/proyectos/${proyecto.id}/herramienta`, {

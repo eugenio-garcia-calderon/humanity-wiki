@@ -323,7 +323,7 @@ export function registerMenuRoutes(app: Express, db: any) {
         const fila = p.rows[0] as any;
         if (!fila) { segmentos.push({ label: tipo }); return; }
         segmentos.push({ label: 'proyectos', url: '/proyectos' });
-        segmentos.push({ label: fila.slug, url: `/proyectos/${fila.slug}` });
+        segmentos.push({ label: fila.titulo || fila.slug, url: `/proyectos/${fila.slug}` });
         segmentos.push({ label: tipo });
       };
 
@@ -356,8 +356,15 @@ export function registerMenuRoutes(app: Express, db: any) {
         await bajoProyecto(f?.proyecto_id ?? null, 'mapas');
         segmentos.push({ label: f?.slug || trozo(resto), url: destino });
       } else if (seccion === 'proyectos' && resto) {
+        // EL NOMBRE DE VERDAD, NO EL SLUG (2026-08-20). La pestaña se titulaba
+        // «Ai mejoras rwkc» —el slug con las guiones quitados y la primera
+        // letra en mayúscula— en vez de «AI - MEJORAS», que es como se llama.
+        // El slug es una dirección; el título es de la persona que lo puso.
+        const pr = await db.execute(sql`
+          SELECT titulo FROM proyectos WHERE slug = ${resto} OR id = ${resto} LIMIT 1
+        `);
         segmentos.push({ label: 'proyectos', url: '/proyectos' });
-        segmentos.push({ label: resto, url: destino });
+        segmentos.push({ label: (pr.rows[0] as any)?.titulo || resto, url: destino });
       } else if (seccion === 'tareas' && params.get('tarea')) {
         const t = await db.execute(sql`
           SELECT titulo, proyecto_id FROM roadmap_items WHERE id = ${params.get('tarea')}

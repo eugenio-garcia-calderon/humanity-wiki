@@ -340,10 +340,18 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           return res.json({ id, abrir: `/mapas/${slug}` });
         }
         case 'tarea': {
+          // LA ETIQUETA TIENE QUE EXISTIR EN ESTE PROYECTO (2026-08-20). Se
+          // metía 'general' a pelo, que no está en la lista de ningún tablero:
+          // la tarjeta se pintaba con la etiqueta del primer grupo, el contador
+          // de ese grupo decía 0 y filtrando por él no aparecía. Tres sitios
+          // contando cosas distintas de la misma tarjeta.
+          const g = await db.execute(sql`SELECT grupos FROM proyectos WHERE id = ${pid}`);
+          const lista = ((g.rows[0] as any)?.grupos || []) as any[];
+          const grupo = lista[0]?.id || 'general';
           const id = nid('RI');
           await db.execute(sql`
             INSERT INTO roadmap_items (id, grupo, titulo, estado, prioridad, autor_user_id, created_by, updated_by, proyecto_id)
-            VALUES (${id}, 'general', ${titulo || 'Tarea sin título'}, 'por_hacer', 'media', ${yo}, ${yo}, ${yo}, ${pid})
+            VALUES (${id}, ${grupo}, ${titulo || 'Tarea sin título'}, 'por_hacer', 'media', ${yo}, ${yo}, ${yo}, ${pid})
           `);
           return res.json({ id, abrir: null });
         }
