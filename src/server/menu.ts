@@ -365,7 +365,7 @@ export function registerMenuRoutes(app: Express, db: any) {
         id: x.id, label: x.name, icono: x.icono, destino: `/mercado?producto=${encodeURIComponent(x.id)}`,
       })));
       rama('personas', 'Personas', 'persona', (personas.rows as any[]).map(a2 => ({
-        id: a2.id, label: a2.nombre, icono: a2.icono, destino: `/juego?agente=${encodeURIComponent(a2.id)}`, rol: a2.rol,
+        id: a2.id, label: a2.nombre, icono: a2.icono, destino: `/persona/${a2.id}`, rol: a2.rol,
       })));
 
       res.json({ ramas });

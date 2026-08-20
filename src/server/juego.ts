@@ -39,6 +39,46 @@ export function registerJuegoRoutes(app: Express, db: any) {
   };
 
   /** GET /api/juego/agentes — los agentes de TU mundo. */
+  /**
+   * GET /api/juego/agentes/:id — una sola representación, con su memoria y su
+   * conversación (2026-08-20, petición de Eugenio: «para hablar con alguien
+   * haz que no haga falta que cargue el mundo 3D»).
+   *
+   * Hablar con Anita cargaba el Mundo 3D entero —un megabyte de three.js y
+   * toda la escena— para lo que en el fondo es una ficha y un chat. Esta ruta
+   * sirve justo eso.
+   */
+  app.get('/api/juego/agentes/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const f = await db.execute(sql`
+        SELECT g.*, p.titulo AS proyecto_titulo, p.slug AS proyecto_slug
+        FROM game_agents g
+        LEFT JOIN proyectos p ON p.id = g.proyecto_id AND p.archived_at IS NULL
+        WHERE g.id = ${req.params.id} AND g.user_id = ${req.user.id} AND g.archived_at IS NULL
+      `);
+      if (!f.rows.length) return res.status(404).json({ error: 'Esa persona no está en tu mundo.' });
+      const a = f.rows[0] as any;
+
+      // Lo que os habéis dicho. Si todavía no hay hilo, la lista va vacía.
+      let mensajes: any[] = [];
+      if (a.conversation_id) {
+        const m = await db.execute(sql`
+          SELECT role, content, created_at FROM ai_messages
+          WHERE conversation_id = ${a.conversation_id}
+          ORDER BY created_at ASC LIMIT 500
+        `);
+        mensajes = (m.rows as any[]).map(x => ({
+          mio: x.role === 'user', texto: x.content, fecha: x.created_at,
+        }));
+      }
+      res.json({ agente: a, mensajes });
+    } catch (e: any) {
+      console.error('agente error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/juego/agentes', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.json([]);

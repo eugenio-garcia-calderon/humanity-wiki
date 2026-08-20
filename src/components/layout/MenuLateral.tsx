@@ -228,9 +228,11 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
       id: p.id,
       label: p.nombre,
       insignia: p.icono || iniciales(p.nombre),
-      // Una persona REAL tiene su perfil; una representación del Mundo 3D
-      // vive dentro del mundo. No son lo mismo y no llevan al mismo sitio.
-      destino: p.real ? `/personas/${p.id}` : `/juego?agente=${encodeURIComponent(p.id)}`,
+      // Una persona REAL tiene su perfil público; una representación tuya
+      // tiene su propia página, con su ficha y vuestra conversación. Antes
+      // llevaba al Mundo 3D: un megabyte de escena para lo que son una ficha y
+      // un chat (Eugenio, 2026-08-20).
+      destino: p.real ? `/personas/${p.id}` : `/persona/${p.id}`,
       // Solo se renombra la REPRESENTACIÓN. El nombre de una persona de verdad
       // lo pone ella en su perfil, no quien la tiene en su lista.
       editable: p.real ? undefined : { tipo: 'persona', id: p.id },

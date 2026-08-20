@@ -32,6 +32,7 @@ import Esquemas from './pages/Esquemas';
 import Tareas from './pages/Tareas';
 import Paginas from './pages/Paginas';
 import Mensajes from './pages/Mensajes';
+import Persona from './pages/Persona';
 import Entrada from './pages/Entrada';
 import Configuracion from './pages/Configuracion';
 import BaseDeDatos from './pages/BaseDeDatos';
@@ -115,6 +116,9 @@ export default function App() {
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="mensajes" element={<Mensajes />} />
+                {/* Una persona de TU mundo: su ficha y vuestra conversación, sin
+                    cargar el Mundo 3D entero (Eugenio, 2026-08-20). */}
+                <Route path="persona/:id" element={<Persona />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
                 {/* /paginas/nuevo?prompt=… genera con la IA en directo;
                     /paginas/:id abre uno guardado. */}

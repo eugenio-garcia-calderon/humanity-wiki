@@ -204,7 +204,11 @@ export default function Layout() {
   // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
   // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage;
+  // La ficha de una persona: perfil arriba y conversación abajo. La
+  // conversación necesita el alto real de la ventana para poder desplazarse
+  // sola; con márgenes de página, el cuadro de escribir se iría fuera.
+  const isPersonaPage = location.pathname.startsWith('/persona/');
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isPersonaPage;
 
   if (isEmbed) {
     return (
