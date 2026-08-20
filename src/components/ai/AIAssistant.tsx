@@ -51,6 +51,10 @@ interface Message {
   usage?: { model: string; totalCents: number };
   /** El router no dio lo pedido (sin nivel, tope agotado…): se enseña. */
   aviso?: string;
+  /** LO QUE SE CREÓ DE VERDAD (2026-08-20). Sale del servidor, no de lo que
+   *  el modelo diga: si esta lista está vacía, no se creó nada — por mucho
+   *  que el texto diga «ya está». */
+  creado?: Array<{ titulo: string; url: string }>;
   /** Pregunta con opciones (estilo Claude Code): botones 1/2/… + «Otro». */
   question?: { text: string; options: string[]; answered?: boolean };
   /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
@@ -515,9 +519,11 @@ export default function AIAssistant({ modo = 'panel' }: {
 
       // Modo AUTÓNOMO: las acciones permitidas se ejecutan solas (sin botones
       // de confirmación) y, si crean un grafo o un mapa, se abre directamente.
+      const creado: Array<{ titulo: string; url: string }> = [];
       for (const a of json.proposed_actions || []) {
         if (!a.autoApply || a.status !== 'propuesta') continue;
         const rj = await decideAction(a.id, 'aceptar', -1);
+        if (rj?.enseñar) creado.push(rj.enseñar);
         if (rj?.ok && rj.slug && rj.entityType === 'knowledge_graphs') {
           setMessages(m => [...m, { role: 'assistant', content: `He creado el grafo como borrador y lo estoy abriendo — revísalo y publícalo cuando quieras.` }]);
           navigate(`/esquemas/${rj.slug}`);
@@ -527,6 +533,11 @@ export default function AIAssistant({ modo = 'panel' }: {
         } else if (rj && rj.ok === false && rj.error) {
           setMessages(m => [...m, { role: 'assistant', content: rj.error, error: true }]);
         }
+      }
+      // La prueba de que existe, con su enlace. Va colgada del último mensaje,
+      // que es el que acaba de decir que lo había hecho.
+      if (creado.length) {
+        setMessages(m => m.map((x, i) => (i === m.length - 1 ? { ...x, creado } : x)));
       }
     } catch (e: any) {
       setMessages(m => [...m, { role: 'assistant', content: e.message || 'Error de red.', error: true }]);
@@ -715,6 +726,26 @@ export default function AIAssistant({ modo = 'panel' }: {
 
                   {/* El router no dio lo pedido (sin nivel, tope agotado…):
                       se dice donde se ve, no en una consola. */}
+                  {/* LO QUE SE HA CREADO, CON SU ENLACE (2026-08-20). Es la
+                      prueba: si la IA dice «ya está» y aquí no aparece nada,
+                      es que no hay nada. Antes solo quedaba la palabra del
+                      modelo, y llegó a afirmar tareas que no existían. */}
+                  {!!m.creado?.length && (
+                    <div className="mt-2 space-y-1">
+                      {m.creado.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => navigate(c.url)}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 transition-colors text-left"
+                        >
+                          <Check className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate flex-1">{c.titulo}</span>
+                          <span className="text-emerald-600 shrink-0">abrir</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {m.aviso && (
                     <p className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-800">
                       {m.aviso}

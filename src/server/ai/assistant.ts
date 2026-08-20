@@ -200,6 +200,90 @@ export function registerAIRoutes(app: Express, db: any) {
    * fecha ahí dentro y la caché no acierta nunca — y encima se paga el 25%
    * extra de escritura en cada mensaje, o sea, más caro que no tener caché.
    */
+  /**
+   * LO QUE HAY DENTRO DE TUS COSAS (2026-08-20, el fallo que el Tester llamó
+   * «la IA promete leer la plataforma y no puede»).
+   *
+   * El contexto recuperado sale de `ai_knowledge_chunks`, que solo indexa el
+   * CONOCIMIENTO COMÚN —retos, soluciones, productos…— y se reconstruye a mano.
+   * De las páginas, los grafos y las tarjetas de cada persona no sabía nada.
+   * Por eso la IA veía el continente («este proyecto tiene 3 tareas») pero no
+   * el contenido, y respondía que no alcanzaba a leer el texto: era verdad.
+   *
+   * Esto busca EN VIVO y solo en lo tuyo. En vivo a propósito: un índice que
+   * hay que reconstruir estaría desactualizado justo cuando más importa —
+   * acabas de escribir algo y le preguntas por ello.
+   */
+  const contenidoPropio = async (userId: string, consulta: string) => {
+    const palabras = consulta.toLowerCase()
+      .replace(/[¿?¡!.,;:()"']/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 3)
+      .slice(0, 8);
+    if (!palabras.length) return [];
+    // Una sola expresión para todas las palabras: basta con que aparezca una.
+    const patron = palabras.join('|');
+    try {
+      const [paginas, tareas] = await Promise.all([
+        // Páginas y ventanas: el texto vive dentro de `config`, en bloques.
+        db.execute(sql`
+          SELECT w.id, w.title, w.kind,
+                 coalesce(
+                   (SELECT string_agg(b->>'texto', ' ') FROM jsonb_array_elements(w.config->'bloques') b),
+                   w.config->>'body', ''
+                 ) AS cuerpo
+          FROM knowledge_windows w
+          WHERE w.creator_user_id = ${userId}
+            AND w.archived_at IS NULL AND w.deleted_at IS NULL
+          ORDER BY w.updated_at DESC NULLS LAST
+          LIMIT 200
+        `),
+        db.execute(sql`
+          SELECT r.id, r.titulo, r.resumen, p.titulo AS proyecto,
+                 coalesce((SELECT string_agg(b->>'texto', ' ') FROM jsonb_array_elements(r.bloques) b), '') AS notas
+          FROM roadmap_items r LEFT JOIN proyectos p ON p.id = r.proyecto_id
+          WHERE p.creador_user_id = ${userId} AND r.archived_at IS NULL
+          ORDER BY r.updated_at DESC NULLS LAST
+          LIMIT 200
+        `),
+      ]);
+
+      const re = new RegExp(patron, 'i');
+      const salida: Array<{ que: string; titulo: string; texto: string; donde: string }> = [];
+
+      for (const w of paginas.rows as any[]) {
+        const todo = `${w.title || ''} ${w.cuerpo || ''}`;
+        if (!re.test(todo)) continue;
+        salida.push({
+          que: w.kind === 'pagina' || w.kind === 'documento' ? 'página' : String(w.kind || 'ventana'),
+          titulo: w.title || 'Sin título',
+          // Se manda MUCHO texto a propósito: la pregunta suele ser por una
+          // cifra concreta que está en mitad del documento, y recortar a dos
+          // líneas es justo perderla.
+          texto: String(w.cuerpo || '').replace(/\s+/g, ' ').slice(0, 4000),
+          donde: `/paginas/${w.id}`,
+        });
+      }
+      for (const t of tareas.rows as any[]) {
+        const todo = `${t.titulo || ''} ${t.resumen || ''} ${t.notas || ''}`;
+        if (!re.test(todo)) continue;
+        salida.push({
+          que: 'tarea',
+          titulo: t.titulo,
+          texto: `${t.resumen || ''} ${t.notas || ''}`.replace(/\s+/g, ' ').slice(0, 1500),
+          donde: t.proyecto ? `proyecto ${t.proyecto}` : 'sin proyecto',
+        });
+      }
+      // Un tope de tamaño, no de número: lo que importa es no reventar el
+      // prompt, y una página larga vale más que cinco tarjetas de una línea.
+      let total = 0;
+      return salida.filter(x => (total += x.texto.length) < 24_000).slice(0, 12);
+    } catch (e) {
+      console.error('[IA] buscando en tu contenido:', e);
+      return [];
+    }
+  };
+
   const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []): { estable: string; variable: string } => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
@@ -379,11 +463,14 @@ Ejemplo, para «añade una tarea de prueba en el proyecto Humanity.wiki»:
     const variable = `HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}).
 
 ${ctx?.ultimoFallo ? `SU ÚLTIMO INTENTO SE ROMPIÓ ANTES DE LLEGARTE. Pidió «${ctx.ultimoFallo.peticion}» y el navegador falló con: ${ctx.ultimoFallo.motivo} (error ${ctx.ultimoFallo.estado}). NO te llegó ese mensaje, así que no lo respondiste. Si te pregunta qué ha fallado, cuéntale ESTO — nunca digas que no te consta ningún fallo.\n` : ''}
-${ctx?.mio ? `LO QUE TIENE ESTA PERSONA EN LA PLATAFORMA (sus proyectos, sus tareas, su gente). Cuando pregunte «mis proyectos», «mis tareas» o «qué tengo pendiente», la respuesta está AQUÍ, no en el conocimiento común de abajo. Y cuando te pida crear una tarea «en X», el proyecto es uno de estos:
+${ctx?.suyo?.length ? `EL CONTENIDO DE SUS COSAS, buscado por lo que acaba de preguntar. Esto es lo que hay ESCRITO DENTRO de sus páginas y tarjetas — cifras incluidas. Si la respuesta está aquí, respóndela CITANDO el dato y diciendo de qué página sale. NUNCA digas que no puedes leer el contenido de la plataforma: aquí lo tienes.
+${ctx.suyo.map((x: any) => `--- ${x.que}: «${x.titulo}» (${x.donde})\n${x.texto}`).join('\n\n')}
+
+` : ''}${ctx?.mio ? `LO QUE TIENE ESTA PERSONA EN LA PLATAFORMA (sus proyectos, sus tareas, su gente). Cuando pregunte «mis proyectos», «mis tareas» o «qué tengo pendiente», la respuesta está AQUÍ, no en el conocimiento común de abajo. Y cuando te pida crear una tarea «en X», el proyecto es uno de estos:
 ${JSON.stringify(ctx.mio, null, 2)}
 ` : ''}
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
-${JSON.stringify({ ...(ctx || {}), mio: undefined }, null, 2)}
+${JSON.stringify({ ...(ctx || {}), mio: undefined, suyo: undefined }, null, 2)}
 ${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
 
 USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
@@ -848,6 +935,11 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // proyectos, tareas y personas de cada persona no sabía nada. Ahora se
       // le da un índice corto —nombres, no contenidos— que además es lo que
       // necesita para acertar el proyecto al que va una tarea.
+      // Lo que hay DENTRO de sus páginas y tarjetas, buscado por lo que ha
+      // preguntado. Es lo que le faltaba a la IA para poder responder por el
+      // contenido y no solo por los títulos.
+      const suyo = req.user ? await contenidoPropio(req.user.id, String(message)) : [];
+
       const mio = req.user ? await (async () => {
         try {
           const [proy, tareas, gente, evs] = await Promise.all([
@@ -892,7 +984,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           return { ...context, recortado: true, aviso: 'El contexto era muy grande y se ha recortado.' };
         } catch { return {}; }
       })();
-      const prompt = buildSystemPrompt({ ...contextoSano, mio }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
+      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como
@@ -933,6 +1025,17 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             console.warn('[IA] bloque recuperado en el reintento:', actions.map((a: any) => a?.type));
           }
         } catch (e) { console.error('[IA] el reintento del bloque falló:', e); }
+
+        // Si tras el reintento SIGUE sin haber acción, la frase se corrige.
+        // Es la regla de fondo (2026-08-20, con el Tester y el panel): el
+        // modelo no puede afirmar que hizo algo sin que exista la cosa. Dejar
+        // el «ya está» a secas es peor que un error, porque la persona se va
+        // convencida de tener una tarea que no tiene — y encima se le ofrecen
+        // menús para seguir gastando sobre una premisa falsa.
+        if (!actions.length && !acciones_juego.length) {
+          clean = `No he podido crearlo: la acción no llegó a salir. Dímelo otra vez y lo intento.\n\n${clean}`;
+          console.warn('[IA] prometió una acción y no la mandó ni al reintento:', String(message).slice(0, 80));
+        }
       }
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
@@ -1116,7 +1219,26 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             entity_id = ${result.entityId || null}, result = ${JSON.stringify(result)}::jsonb
         WHERE id = ${action.id}
       `);
-      res.json({ status: result.ok ? 'ejecutada' : 'fallida', ...result });
+      // LO QUE HAY QUE ENSEÑAR (2026-08-20). Se devuelve cómo se llama lo
+      // creado y a dónde se va, para que la interfaz pueda enseñar una ficha
+      // con enlace en vez de fiarse de lo que el modelo diga en prosa. Si no
+      // hay `entityId`, no hay ficha — y esa ausencia ES la señal de que no se
+      // creó nada.
+      let enseñar: { titulo: string; url: string } | null = null;
+      if (result.ok && result.entityId) {
+        const nombre = String(action.params?.titulo || action.params?.nombre || action.params?.title || '').trim();
+        const rutas: Record<string, string> = {
+          roadmap_items: `/tareas`,
+          proyectos: `/proyectos`,
+          knowledge_windows: `/paginas/${result.entityId}`,
+          eventos: `/calendario`,
+          knowledge_graphs: result.slug ? `/esquemas/${result.slug}` : '/esquemas',
+          user_maps: result.slug ? `/mapas/${result.slug}` : '/mapas',
+        };
+        const url = rutas[result.entityType as string];
+        if (url) enseñar = { titulo: nombre || spec.description, url };
+      }
+      res.json({ status: result.ok ? 'ejecutada' : 'fallida', ...result, enseñar });
     } catch (e: any) {
       console.error('decide action error:', e);
       res.status(500).json({ error: e.message });
