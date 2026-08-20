@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import type { Browser, BrowserContext, Page, CDPSession } from 'playwright';
+import type { Browser, BrowserContext, Page } from 'playwright';
 import { esPublica } from './navegador';
 
 // ============================================================================
@@ -36,9 +36,10 @@ interface Sesion {
   usuario: string;
   context: BrowserContext;
   page: Page;
-  cdp: CDPSession;
   /** El SSE del cliente que está mirando la pantalla ahora (uno por sesión). */
   cliente: Response | null;
+  /** Si el bucle de capturas está corriendo (uno como mucho por sesión). */
+  capturando: boolean;
   temporizador: ReturnType<typeof setTimeout>;
   ancho: number;
   alto: number;
@@ -112,6 +113,36 @@ async function cerrarSesion(id: string) {
   quizasApagar();
 }
 
+/**
+ * EL BUCLE DE PANTALLA (2026-08-20, «sigue igual de mal»). El screencast de
+ * Chromium entrega los fotogramas SIEMPRE al tamaño lógico (CSS) e ignora la
+ * densidad de píxeles — medido en pruebas: pedidos 400×300 con escala 2,
+ * llegaban a 400×300. En Retina eso es borroso POR CONSTRUCCIÓN. Las capturas
+ * de pantalla (page.screenshot) sí salen a píxeles REALES del dispositivo
+ * (comportamiento documentado de Playwright, scale «device»), así que la
+ * pantalla en directo es esto: una captura tras otra mientras alguien mira,
+ * saltándose las idénticas para no mandar lo mismo dos veces.
+ */
+async function bucleDePantalla(s: Sesion) {
+  if (s.capturando) return;
+  s.capturando = true;
+  let ultimo: Buffer | null = null;
+  try {
+    while (s.cliente && sesiones.has(s.id)) {
+      try {
+        const buf = await s.page.screenshot({
+          type: 'jpeg', quality: 70, caret: 'initial', timeout: 5000,
+        });
+        if (!ultimo || !buf.equals(ultimo)) {
+          empujar(s, { t: 'marco', d: buf.toString('base64') });
+          ultimo = buf;
+        }
+      } catch { /* la pestaña estaba navegando u ocupada: se reintenta */ }
+      await new Promise(r => setTimeout(r, 120));
+    }
+  } finally { s.capturando = false; }
+}
+
 /** La misma pared anti-red-interna que el proxy, aplicada a las NAVEGACIONES
  *  del Chromium remoto: sin esto, escribir http://localhost:5432 en la barra
  *  pasearía por dentro del servidor. Solo se comprueban los documentos (las
@@ -159,20 +190,14 @@ async function crearSesion(usuario: string, url: string, ancho: number, alto: nu
     } catch { /* emergente ya muerta */ }
   });
 
-  const cdp = await context.newCDPSession(page);
   const s: Sesion = {
     id: randomBytes(12).toString('base64url'),
-    usuario, context, page, cdp, cliente: null,
+    usuario, context, page, cliente: null, capturando: false,
     temporizador: setTimeout(() => {}, 0),
     ancho, alto, escala,
   };
   tocar(s);
 
-  cdp.on('Page.screencastFrame', ev => {
-    // Sin el ack, Chromium deja de mandar fotogramas: es su control de flujo.
-    cdp.send('Page.screencastFrameAck', { sessionId: ev.sessionId }).catch(() => {});
-    empujar(s, { t: 'marco', d: ev.data });
-  });
   page.on('framenavigated', fr => {
     if (fr !== page.mainFrame()) return;
     empujar(s, { t: 'url', url: page.url() });
@@ -246,17 +271,9 @@ export function registerNavegadorRemotoRoutes(app: Express) {
     s.cliente = res;
     tocar(s);
     empujar(s, { t: 'url', url: s.page.url(), titulo: await s.page.title().catch(() => '') });
-    try {
-      await s.cdp.send('Page.startScreencast', {
-        format: 'jpeg', quality: 70,
-        maxWidth: Math.round(s.ancho * s.escala), maxHeight: Math.round(s.alto * s.escala),
-      });
-    } catch { /* la pestaña murió entre medias */ }
+    void bucleDePantalla(s);
     req.on('close', () => {
-      if (s.cliente === res) {
-        s.cliente = null;
-        s.cdp.send('Page.stopScreencast').catch(() => {});
-      }
+      if (s.cliente === res) s.cliente = null;
     });
   });
 
@@ -304,13 +321,6 @@ export function registerNavegadorRemotoRoutes(app: Express) {
           s.ancho = Math.min(Math.max(Number(e.ancho) || s.ancho, 320), LADO_MAX);
           s.alto = Math.min(Math.max(Number(e.alto) || s.alto, 240), LADO_MAX);
           await s.page.setViewportSize({ width: s.ancho, height: s.alto });
-          if (s.cliente) {
-            await s.cdp.send('Page.stopScreencast').catch(() => {});
-            await s.cdp.send('Page.startScreencast', {
-              format: 'jpeg', quality: 70,
-              maxWidth: Math.round(s.ancho * s.escala), maxHeight: Math.round(s.alto * s.escala),
-            }).catch(() => {});
-          }
           break;
         }
       }
