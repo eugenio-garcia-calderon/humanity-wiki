@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   X, Plus, Image as ImageIcon, Trash2, User as UserIcon,
-  CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check,
+  CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -30,15 +30,74 @@ export interface ItemTablero {
   autor_nombre: string | null; autor_email: string | null; autor_avatar: string | null;
 }
 
-export default function TableroKanban({ items, grupos, puedeEditar, onRecargar, onCrear }: {
+/** Los nombres que le haya puesto el proyecto a sus columnas. Solo rótulos:
+ *  el estado que se guarda sigue siendo por_hacer / en_curso / hecho. */
+export type NombresDeColumna = Partial<Record<'por_hacer' | 'en_curso' | 'hecho', string>>;
+
+export default function TableroKanban({
+  items, grupos, puedeEditar, onRecargar, onCrear, columnas, onColumnas,
+}: {
   items: ItemTablero[];
   grupos: Grupo[];
   puedeEditar: boolean;
   onRecargar: () => void;
-  onCrear?: (grupo: string) => void;
+  /** Abre el formulario de tarjeta nueva, ya apuntando a una columna. */
+  onCrear?: (grupo: string, estado: string) => void;
+  /** Nombres propios de las columnas. Sin esto salen los de siempre. */
+  columnas?: NombresDeColumna | null;
+  /** Si se pasa, las columnas se pueden renombrar pinchando en su texto. */
+  onColumnas?: (nombres: NombresDeColumna) => void;
 }) {
   const [filtro, setFiltro] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<ItemTablero | null>(null);
+  const [eligiendoColumna, setEligiendoColumna] = useState(false);
+
+  // ARRASTRAR DE UNA COLUMNA A OTRA (2026-08-20, petición de Eugenio:
+  // «permitir arrastrar tarjetas del to do list de un estado a otro como en
+  // Trello»).
+  //
+  // La tarjeta se mueve EN PANTALLA antes de que el servidor conteste. Un
+  // tablero en el que sueltas la tarjeta y se queda medio segundo en su sitio
+  // se siente roto, aunque acabe funcionando. Si la petición falla, vuelve
+  // sola y se dice por qué.
+  const [arrastrando, setArrastrando] = useState<string | null>(null);
+  const [encima, setEncima] = useState<string | null>(null);
+  const [movidas, setMovidas] = useState<Record<string, string>>({});
+  const [avisoMover, setAvisoMover] = useState<string | null>(null);
+
+  const soltarEn = async (estado: string) => {
+    const id = arrastrando;
+    setArrastrando(null);
+    setEncima(null);
+    if (!id) return;
+    const original = items.find(i => i.id === id);
+    if (!original || (movidas[id] || original.estado) === estado) return;
+    setMovidas(m => ({ ...m, [id]: estado }));
+    try {
+      const r = await fetch(`/api/roadmap/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ estado }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido mover.');
+      onRecargar();
+    } catch (e: any) {
+      setMovidas(m => { const { [id]: _, ...resto } = m; return resto; });
+      setAvisoMover(e.message);
+    }
+  };
+
+  // Cuando llegan datos nuevos del servidor, la foto provisional sobra.
+  useEffect(() => { setMovidas({}); }, [items]);
+
+  useEffect(() => {
+    if (!eligiendoColumna) return;
+    const fuera = () => setEligiendoColumna(false);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [eligiendoColumna]);
+
+  const estadoDe = (it: ItemTablero) => movidas[it.id] || it.estado;
+  const nombreDe = (col: { id: string; label: string }) => columnas?.[col.id as keyof NombresDeColumna] || col.label;
 
   const grupoDe = (id: string) => grupos.find(g => g.id === id) || grupos[0] || { id, label: id, color: '#64748b' };
   const visibles = useMemo(() => (filtro ? items.filter(i => i.grupo === filtro) : items), [items, filtro]);
@@ -73,31 +132,95 @@ export default function TableroKanban({ items, grupos, puedeEditar, onRecargar, 
         })}
       </div>
 
+      {/* AÑADIR UNA TAREA (2026-08-20, petición de Eugenio: «hacer el botón de
+          añadir tarea más grande y centrado en la página, y que te dé la
+          opción de ponerlo en una columna u otra»). Antes era un «+» gris del
+          tamaño de un icono, escondido en la esquina de una sola columna. */}
+      {puedeEditar && onCrear && (
+        <div className="mt-4 flex justify-center">
+          <div className="inline-flex rounded-2xl shadow-sm">
+            <button
+              onClick={() => onCrear(filtro || grupos[0]?.id, 'por_hacer')}
+              className="inline-flex items-center gap-2 pl-5 pr-4 py-2.5 rounded-l-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Añadir tarea
+            </button>
+            {/* La flecha elige columna. Un clic sigue creando en «Por hacer»,
+                que es donde va casi todo: elegir es la excepción. */}
+            <div className="relative">
+              <button
+                onClick={e => { e.stopPropagation(); setEligiendoColumna(v => !v); }}
+                title="Elegir la columna"
+                className="h-full px-2.5 rounded-r-2xl bg-emerald-600 hover:bg-emerald-700 text-white border-l border-emerald-500/60 transition-colors"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {eligiendoColumna && (
+                <div className="absolute right-0 top-full mt-1 z-30 w-44 bg-white border border-slate-200 rounded-xl shadow-xl py-1"
+                  onClick={e => e.stopPropagation()}>
+                  {COLUMNAS.map(col => (
+                    <button
+                      key={col.id}
+                      onClick={() => { setEligiendoColumna(false); onCrear(filtro || grupos[0]?.id, col.id); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2"
+                    >
+                      <col.icon className="w-3.5 h-3.5 shrink-0" style={{ color: col.color }} />
+                      {nombreDe(col)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {avisoMover && (
+        <p className="mt-3 mx-auto max-w-md px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 text-center">
+          {avisoMover}
+        </p>
+      )}
+
       {/* ---------------- KANBAN ---------------- */}
       <div className="grid md:grid-cols-3 gap-4 mt-3">
         {COLUMNAS.map(col => {
-          const deLaColumna = visibles.filter(i => i.estado === col.id);
+          const deLaColumna = visibles.filter(i => estadoDe(i) === col.id);
+          const dianaActiva = arrastrando && encima === col.id;
           return (
-            <div key={col.id} className="min-w-0">
+            <div
+              key={col.id}
+              className="min-w-0"
+              // La columna entera es la diana, no solo el hueco entre tarjetas:
+              // apuntar a una franja de dos píxeles con el ratón es un castigo.
+              onDragOver={e => { if (arrastrando) { e.preventDefault(); setEncima(col.id); } }}
+              onDragLeave={() => setEncima(c => (c === col.id ? null : c))}
+              onDrop={e => { e.preventDefault(); soltarEn(col.id); }}
+            >
               <div className="flex items-center gap-2 mb-3 px-1">
                 <col.icon className="w-4 h-4 shrink-0" style={{ color: col.color }} />
-                <h2 className="text-sm font-black text-slate-900">{col.label}</h2>
+                <NombreDeColumna
+                  nombre={nombreDe(col)}
+                  editable={!!(puedeEditar && onColumnas)}
+                  onNombre={n => onColumnas?.({ ...(columnas || {}), [col.id]: n })}
+                />
                 <span className="text-xs font-bold text-slate-400">{deLaColumna.length}</span>
-                {puedeEditar && onCrear && col.id === 'por_hacer' && (
-                  <button onClick={() => onCrear(filtro || grupos[0]?.id)} title="Añadir tarjeta"
-                    className="ml-auto p-1 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-50 transition-colors">
-                    <Plus className="w-4 h-4" />
-                  </button>
-                )}
               </div>
-              <div className="space-y-2">
+              <div className={cn('space-y-2 rounded-2xl transition-colors min-h-[4rem] p-1 -m-1',
+                dianaActiva && 'bg-emerald-50/70 ring-2 ring-emerald-300 ring-dashed')}>
                 {deLaColumna.map(it => {
                   const g = grupoDe(it.grupo);
                   return (
                     <button
                       key={it.id}
                       onClick={() => setAbierta(it)}
-                      className="w-full text-left bg-white border border-slate-200 rounded-2xl p-3.5 hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all"
+                      draggable={puedeEditar}
+                      onDragStart={e => { setArrastrando(it.id); e.dataTransfer.effectAllowed = 'move'; }}
+                      onDragEnd={() => { setArrastrando(null); setEncima(null); }}
+                      className={cn(
+                        'w-full text-left bg-white border border-slate-200 rounded-2xl p-3.5 transition-all',
+                        'hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5',
+                        puedeEditar && 'cursor-grab active:cursor-grabbing',
+                        arrastrando === it.id && 'opacity-40')}
                       style={{ borderLeftWidth: 3, borderLeftColor: g.color }}
                     >
                       <div className="flex items-center gap-1.5 mb-1.5">
@@ -381,5 +504,54 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
         )}
       </div>
     </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// EL NOMBRE DE UNA COLUMNA (2026-08-20, petición de Eugenio: «permitir cambiar
+// el nombre de las columnas de tareas al pinchar en la parte de texto»).
+// ----------------------------------------------------------------------------
+// Se edita EN EL SITIO, no en una ventanita: cambiar un rótulo de dos palabras
+// no merece abrir un formulario, y así ves el tablero mientras lo escribes.
+//
+// Vacío no se guarda. Una columna sin nombre no dice a nadie qué va dentro, y
+// el rótulo de siempre siempre es mejor que un hueco.
+function NombreDeColumna({ nombre, editable, onNombre }: {
+  nombre: string; editable: boolean; onNombre: (n: string) => void;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [texto, setTexto] = useState(nombre);
+
+  useEffect(() => { setTexto(nombre); }, [nombre]);
+
+  const cerrar = (guardar: boolean) => {
+    setEditando(false);
+    const n = texto.trim();
+    if (guardar && n && n !== nombre) onNombre(n);
+    else setTexto(nombre);
+  };
+
+  if (!editable) return <h2 className="text-sm font-black text-slate-900">{nombre}</h2>;
+
+  return editando ? (
+    <input
+      value={texto}
+      autoFocus
+      onChange={e => setTexto(e.target.value)}
+      onBlur={() => cerrar(true)}
+      onKeyDown={e => {
+        if (e.key === 'Enter') cerrar(true);
+        if (e.key === 'Escape') cerrar(false);
+      }}
+      className="min-w-0 flex-1 text-sm font-black text-slate-900 bg-white px-1.5 py-0.5 -my-0.5 border border-emerald-300 rounded-lg focus:outline-none"
+    />
+  ) : (
+    <h2
+      onClick={() => setEditando(true)}
+      title="Pincha para cambiar el nombre"
+      className="text-sm font-black text-slate-900 cursor-text hover:bg-slate-100 rounded px-1 -mx-1 transition-colors"
+    >
+      {nombre}
+    </h2>
   );
 }
