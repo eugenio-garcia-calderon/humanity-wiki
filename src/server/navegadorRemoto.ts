@@ -42,6 +42,10 @@ interface Sesion {
   temporizador: ReturnType<typeof setTimeout>;
   ancho: number;
   alto: number;
+  /** Densidad de píxeles de la pantalla del usuario (Retina = 2). Sin esto,
+   *  una pantalla Retina recibe fotogramas a la mitad de su resolución y los
+   *  estira: «el navegador se ve con baja resolución» (Eugenio, 2026-08-20). */
+  escala: number;
 }
 
 const sesiones = new Map<string, Sesion>();
@@ -126,10 +130,14 @@ async function destinoPermitido(url: string): Promise<boolean> {
   } catch { return false; }
 }
 
-async function crearSesion(usuario: string, url: string, ancho: number, alto: number): Promise<Sesion> {
+async function crearSesion(usuario: string, url: string, ancho: number, alto: number, escala: number): Promise<Sesion> {
   const navegador = await arrancarChromium();
   const context = await navegador.newContext({
     viewport: { width: ancho, height: alto },
+    // La pestaña se dibuja a la densidad de la pantalla del usuario: los
+    // fotogramas llegan con el doble de pixeles en Retina y el navegador del
+    // cliente los encoge a su sitio — nitidez de verdad, no un estirado.
+    deviceScaleFactor: escala,
     locale: 'es-ES',
     serviceWorkers: 'block',
   });
@@ -156,7 +164,7 @@ async function crearSesion(usuario: string, url: string, ancho: number, alto: nu
     id: randomBytes(12).toString('base64url'),
     usuario, context, page, cdp, cliente: null,
     temporizador: setTimeout(() => {}, 0),
-    ancho, alto,
+    ancho, alto, escala,
   };
   tocar(s);
 
@@ -209,10 +217,12 @@ export function registerNavegadorRemotoRoutes(app: Express) {
       const url = String(req.body?.url || 'about:blank');
       const ancho = Math.min(Math.max(Number(req.body?.ancho) || 1024, 320), LADO_MAX);
       const alto = Math.min(Math.max(Number(req.body?.alto) || 768, 240), LADO_MAX);
+      // Tope 2: mas alla, el peso de cada fotograma crece sin que el ojo lo note.
+      const escala = Math.min(Math.max(Number(req.body?.escala) || 1, 1), 2);
       if (!(await destinoPermitido(url))) {
         return res.status(400).json({ error: 'Esa dirección apunta a la red interna.' });
       }
-      const s = await crearSesion(req.user.id, url, ancho, alto);
+      const s = await crearSesion(req.user.id, url, ancho, alto, escala);
       res.json({ sesion: s.id });
     } catch (e: any) {
       // Lo más probable: Chromium no está instalado en esta máquina. El
@@ -238,7 +248,8 @@ export function registerNavegadorRemotoRoutes(app: Express) {
     empujar(s, { t: 'url', url: s.page.url(), titulo: await s.page.title().catch(() => '') });
     try {
       await s.cdp.send('Page.startScreencast', {
-        format: 'jpeg', quality: 55, maxWidth: s.ancho, maxHeight: s.alto,
+        format: 'jpeg', quality: 70,
+        maxWidth: Math.round(s.ancho * s.escala), maxHeight: Math.round(s.alto * s.escala),
       });
     } catch { /* la pestaña murió entre medias */ }
     req.on('close', () => {
@@ -296,7 +307,8 @@ export function registerNavegadorRemotoRoutes(app: Express) {
           if (s.cliente) {
             await s.cdp.send('Page.stopScreencast').catch(() => {});
             await s.cdp.send('Page.startScreencast', {
-              format: 'jpeg', quality: 55, maxWidth: s.ancho, maxHeight: s.alto,
+              format: 'jpeg', quality: 70,
+              maxWidth: Math.round(s.ancho * s.escala), maxHeight: Math.round(s.alto * s.escala),
             }).catch(() => {});
           }
           break;
