@@ -1430,3 +1430,16 @@ Eugenio: «en la sección de personas, crea una página donde se puedan ver toda
   - **UN FALLO CAZADO AL PROBARLO**: la consulta pedía eventos que *solaparan* con el mes, así que **una reunión semanal creada en junio no aparecía en agosto** — se quedaba fuera para siempre. Ahora los que se repiten entran siempre que hayan empezado ya, y qué veces caen se decide después, al expandir.
 - **CREAR EVENTOS HABLÁNDOLE AL ASISTENTE**: «apúntame una reunión con el taller el próximo lunes a las 10». Nueva acción `CREATE_EVENTO` (nivel 1: tu calendario no toca el conocimiento de nadie). Se le dice al modelo **qué día es hoy** para que resuelva «el lunes» él, y la fecha se comprueba al guardar — sin eso, una fecha rara acabaría en 1970.
   - **AJUSTE QUE HIZO FALTA**: la primera versión decía «te la apunto» y **no apuntaba nada**. La instrucción estaba en el bloque de contexto, lejos del formato de acciones; el modelo no la ataba con «mandar la acción». Movida junto al formato y **con un ejemplo entero**, funciona. Verificado de punta a punta: propuesta, aplicada y evento creado el lunes 24 a las 10:00.
+
+### 2026-08-20 — El calendario como el de macOS, y dos formas de ver el CRM
+**CALENDARIO** (Eugenio, con la captura del calendario de macOS).
+- **EL NÚMERO DEL DÍA, ARRIBA A LA DERECHA Y CON CONTRASTE** (13 px, negrita, `slate-800`). Antes iba a la izquierda en gris claro: en una rejilla llena, el número es lo primero que buscas y era lo que menos se veía. Hoy en **círculo rojo**, como en la captura.
+- **NÚMERO DE SEMANA ISO** a la izquierda de cada fila, y **fin de semana con fondo**: localizar el sábado sin leer la cabecera.
+- **VISTA DE AÑO**: doce meses pequeños. No caben los títulos, así que lo que se enseña es **dónde hay algo** — un punto bajo el día. Es un mapa para saltar, no para leer: pulsar un día lleva a ese día, pulsar el mes al mes.
+- **CREAR PINTANDO DÍAS**: pinchas en un día y arrastras hasta otro, y sale un evento de todo el día en ese tramo. **Y con doble clic** en un día suelto.
+  - **Un clic suelto YA NO crea nada**, a propósito: crear con un solo clic te llena el calendario de eventos vacíos sin querer. Los dos gestos que crean —doble clic y pintar— no se hacen sin querer.
+- **UN FALLO DE VERDAD, ENCONTRADO Y ARREGLADO**: al soltar se leía el tramo desde el estado de React, y **si el gesto iba rápido el estado aún no se había repintado**: se veía el valor viejo, no se creaba nada y el calendario se quedaba pintado sin responder. Ahora el tramo va también en una referencia, que siempre es la de ahora, y el manejador de «soltar» se registra una sola vez. Se escucha `pointerup` **y** `mouseup`: no todos los caminos de entrada mandan los dos, y soltar tiene que terminar el gesto siempre.
+
+**CRM — DOS FORMAS DE MIRAR** («ponme diferentes formas de ver los contactos, en galería con fotos en mini tarjetas, o en tabla con las variables en las columnas»).
+- **TABLA** para trabajar —encontrar a alguien entre muchos y comparar columnas— y **GALERÍA** para reconocer por la cara, que es como funciona la memoria con la gente que ya conoces. Los mismos datos y **las mismas acciones en las dos**: cambiar de vista no puede quitarte lo que podías hacer.
+- **La elección se recuerda**: cada cual mira de una forma y no hay que repetirla cada vez.
