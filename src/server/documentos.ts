@@ -5,6 +5,7 @@ import { completarClaudeStream, getProvider, AI_PLATFORM_FEE } from './ai/provid
 import {
   type Bloque, markdownABloques, bloquesAMarkdown, tituloDeBloques, tokenizarInline,
 } from '../utils/bloques.js';
+import { ROLE } from './auth.js';
 
 // ============================================================================
 // DOCUMENTOS estilo Notion (2026-08-08, petición del usuario) — Fase 1
@@ -182,12 +183,141 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       const titulo = String(req.body?.titulo || '').trim() || 'Documento sin título';
       const id = newId('KW');
       const bloques = [{ id: `B${Date.now().toString(36)}0`, tipo: 'parrafo', texto: '' }];
+      // Puede nacer YA dentro de un proyecto (2026-08-20). Se comprueba que
+      // ese proyecto sea tuyo: si no, la página nace suelta en vez de colarse
+      // en el proyecto de otra persona.
+      const proyecto = await proyectoTuyo(req, req.body?.proyecto_id);
       await db.execute(sql`
-        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
         VALUES (${id}, ${titulo}, 'pagina', ${JSON.stringify({ bloques })}::jsonb,
-                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id})
+                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id}, ${proyecto})
       `);
       res.json({ id });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // TODAS LAS PÁGINAS, AGRUPADAS POR PROYECTO (2026-08-20, petición de
+  // Eugenio: «crea ese lugar donde están todas las páginas ordenadas por
+  // PROYECTOS»).
+  // ==========================================================================
+  // Una página YA existe —un `knowledge_windows` de tipo 'pagina', con su
+  // editor tipo Notion en /documentos/:id—; lo que faltaba era el sitio desde
+  // el que verlas todas. Esta ruta no crea nada nuevo: reparte lo que hay.
+
+  /** El proyecto que se pide, solo si es tuyo. Devuelve null en cualquier otro
+   *  caso (no existe, es de otro, no se pidió ninguno). */
+  const proyectoTuyo = async (req: Request, id: unknown): Promise<string | null> => {
+    const pid = typeof id === 'string' && id.trim() ? id.trim() : null;
+    if (!pid || !req.user) return null;
+    const r = await db.execute(sql`
+      SELECT creador_user_id FROM proyectos WHERE id = ${pid} AND archived_at IS NULL
+    `);
+    if (!r.rows.length) return null;
+    const suyo = (r.rows[0] as any).creador_user_id === req.user.id;
+    return (suyo || (req.user.roleLevel ?? 0) >= ROLE.ADMIN) ? pid : null;
+  };
+
+  app.get('/api/paginas', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión para ver tus páginas.' });
+      const yo = req.user.id;
+      const rows = await db.execute(sql`
+        SELECT w.id, w.title, w.publico, w.created_at, w.updated_at,
+               w.config->'bloques' AS bloques,
+               w.proyecto_id, p.titulo AS proyecto_titulo, p.slug AS proyecto_slug
+        FROM knowledge_windows w
+        LEFT JOIN proyectos p ON p.id = w.proyecto_id
+                             AND p.archived_at IS NULL AND p.deleted_at IS NULL
+        WHERE w.kind = 'pagina'
+          AND w.creator_user_id = ${yo}
+          AND w.archived_at IS NULL AND w.deleted_at IS NULL
+        ORDER BY w.updated_at DESC NULLS LAST, w.created_at DESC
+      `);
+
+      // TUS PROYECTOS, TENGAN PÁGINAS O NO. Si solo se listaran los que ya
+      // tienen alguna, un proyecto vacío no aparecería y no habría forma de
+      // arrastrarle una página: la única manera de meter la primera sería
+      // crearla desde dentro. Un cajón vacío tiene que verse para poder usarlo.
+      const mios = await db.execute(sql`
+        SELECT id, titulo, slug FROM proyectos
+        WHERE creador_user_id = ${yo} AND archived_at IS NULL AND deleted_at IS NULL
+        ORDER BY titulo
+      `);
+
+      // El reparto se hace aquí: la página solo pinta.
+      const grupos = new Map<string, any>();
+      for (const p of mios.rows as any[]) {
+        grupos.set(p.id, {
+          id: p.id, sueltas: false, titulo: p.titulo,
+          url: `/proyectos/${p.slug}`, paginas: [],
+        });
+      }
+      grupos.set('__sueltas__', {
+        id: '__sueltas__', sueltas: true, titulo: 'Sueltas', url: null, paginas: [],
+      });
+      for (const w of rows.rows as any[]) {
+        // Un proyecto archivado deja su página suelta, no en un grupo fantasma.
+        const conProyecto = !!w.proyecto_id && !!w.proyecto_titulo;
+        const clave = conProyecto ? w.proyecto_id : '__sueltas__';
+        // Puede ser el proyecto de otra persona (una página movida por un
+        // administrador): entonces no está en `mios` y se añade aquí.
+        if (!grupos.has(clave)) {
+          grupos.set(clave, {
+            id: clave, sueltas: false, titulo: w.proyecto_titulo,
+            url: `/proyectos/${w.proyecto_slug}`, paginas: [],
+          });
+        }
+        const bloques: any[] = Array.isArray(w.bloques) ? w.bloques : [];
+        // Un adelanto de lo que hay dentro, para reconocerla sin abrirla: el
+        // primer texto con algo escrito y la primera imagen, si las hay.
+        const primerTexto = bloques.find(b => typeof b?.texto === 'string' && b.texto.trim())?.texto || null;
+        const primeraImagen = bloques.find(b => b?.tipo === 'imagen' && b?.url)?.url || null;
+        grupos.get(clave).paginas.push({
+          id: w.id, titulo: w.title, publica: !!w.publico,
+          fecha: w.updated_at || w.created_at,
+          bloques: bloques.length,
+          adelanto: primerTexto ? String(primerTexto).replace(/\s+/g, ' ').trim().slice(0, 140) : null,
+          imagen: primeraImagen,
+        });
+      }
+
+      // Las sueltas al final, y los proyectos con algo dentro antes que los
+      // vacíos: lo que tiene contenido es a lo que se viene.
+      const lista = [...grupos.values()].sort((a, b) => {
+        if (a.sueltas !== b.sueltas) return a.sueltas ? 1 : -1;
+        const va = a.paginas.length === 0, vb = b.paginas.length === 0;
+        if (va !== vb) return va ? 1 : -1;
+        return a.titulo.localeCompare(b.titulo, 'es');
+      });
+      res.json({ proyectos: lista });
+    } catch (e: any) {
+      console.error('list paginas error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** Mover una página a otro proyecto (o dejarla suelta con `proyecto_id: null`).
+   *  Es lo que hace el arrastrar y soltar de la página «Páginas». */
+  app.put('/api/paginas/:id/proyecto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const suya = await db.execute(sql`
+        SELECT creator_user_id FROM knowledge_windows
+        WHERE id = ${req.params.id} AND kind = 'pagina' AND archived_at IS NULL
+      `);
+      if (!suya.rows.length) return res.status(404).json({ error: 'Esa página no existe.' });
+      const mia = (suya.rows[0] as any).creator_user_id === req.user.id;
+      if (!mia && (req.user.roleLevel ?? 0) < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Esa página no es tuya.' });
+      }
+      const destino = await proyectoTuyo(req, req.body?.proyecto_id);
+      await db.execute(sql`
+        UPDATE knowledge_windows
+        SET proyecto_id = ${destino}, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, proyecto_id: destino });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

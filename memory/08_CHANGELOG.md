@@ -1283,3 +1283,14 @@ Lote de 12 peticiones de Eugenio en una sola captura. Diez van en este cambio; l
 - **TUS PROYECTOS PRIMERO Y LA HOJA DE RUTA LA ÚLTIMA, PLEGADA.** Son 112 tareas de 128: abierta taparía por completo lo tuyo, que es a lo que vienes.
 - Cada proyecto lleva **barra de avance** (hechas sobre el total) y un enlace a su tablero, que es donde se editan. Filtro por estado (todas / por hacer / en curso / hechas) y buscador.
 - Verificado con datos reales: **128 tareas en 4 proyectos**; el filtro «En curso» deja las 4 que lo están; la hoja de ruta marca 47/112.
+
+### 2026-08-20 — Sección «Páginas»: todas las que hay, ordenadas por proyecto
+- **NUEVA HERRAMIENTA «PÁGINAS»** en el menú ☰, entre Mis proyectos y Tareas. Abre como ventana igual que el resto.
+- **EL EDITOR TIPO NOTION YA ESTABA HECHO Y NO SE HA TOCADO.** Vive en `/documentos/:id` desde el 2026-08-08: «+» por línea con Texto, Título 1/2/3, Lista, Casilla, Cita, Separador, Código, **Imagen**, Tabla y Publicación, y el tirador ⋮⋮ para reordenar los bloques arrastrando. Comprobado que sigue funcionando tal cual. **Lo que faltaba era la otra mitad: el sitio desde el que verlas todas.**
+- **UNA COLUMNA, NO UNA TABLA NUEVA** (`drizzle/0043_paginas_por_proyecto.sql`): `knowledge_windows.proyecto_id`. Una página está en UN proyecto o en ninguno, así que una tabla intermedia sería la 44.ª del proyecto y además permitiría estados que no queremos (la misma página colgando de tres sitios). Con `ON DELETE SET NULL`: borrar un proyecto no se lleva por delante lo que escribiste dentro — esas páginas caen en «Sueltas».
+- **`GET /api/paginas`** reparte tus páginas por proyecto en el servidor; la página solo pinta. **`PUT /api/paginas/:id/proyecto`** las mueve, comprobando que la página es tuya y que el proyecto de destino también (si no, se queda suelta en vez de colarse en el proyecto de otro).
+- **ARRASTRAR UNA PÁGINA A OTRO PROYECTO**: sueltas la ficha sobre la cabecera del proyecto y se va con él. Verificado de punta a punta: «Notas de la asamblea de septiembre» pasó a «Camión camperizado» y quedó guardado en la base de datos.
+- **DOS DECISIONES DE COLOCACIÓN, las dos por un fallo visto al probar**:
+  - Al principio solo se listaban los proyectos que YA tenían páginas — y entonces **un proyecto vacío no aparecía y no había forma de arrastrarle nada**. Ahora se enseñan todos tus proyectos: un cajón vacío tiene que verse para poder usarlo.
+  - Pero abiertos, siete proyectos vacíos ocupaban media pantalla de huecos y empujaban tus páginas fuera de la vista. **Los vacíos nacen plegados**: una línea cada uno, y siguen valiendo como sitio donde soltar.
+- Cada ficha lleva la primera imagen de la página como portada, un adelanto del texto, cuántos bloques tiene y si es pública o privada.
