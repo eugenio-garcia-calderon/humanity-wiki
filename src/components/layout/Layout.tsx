@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
+import MenuLateral from './MenuLateral';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -19,11 +20,9 @@ import AIAssistant from '../ai/AIAssistant';
 // destinos primarios (Mapa y Grafos) y las acciones. Todo lo demás se
 // encuentra con el chat de IA de la parte inferior.
 
-/** Todo lo que no son los dos destinos principales. */
-// LAS HERRAMIENTAS. La plataforma es un juego de aplicaciones sobre UNA base
-// de datos: un proyecto, un grafo, un mapa o un mundo 3D son formas distintas
-// de tocar lo mismo (petición de Eugenio, 2026-08-20). Cada entrada abre una
-// VENTANA, estés donde estés — ya no hay una página «Escritorio» aparte.
+// EL MENÚ SE HA IDO A `MenuLateral` (2026-08-20). Lo que queda aquí es solo la
+// tabla de «qué icono lleva cada ruta», que es lo que necesitan las PESTAÑAS
+// de arriba para pintarse.
 const SECCIONES_COMUN = [
   { to: '/grafos', label: 'Grafos', icon: Globe2 },
   { to: '/mapas', label: 'Mapas', icon: MapIcon },
@@ -48,9 +47,15 @@ export default function Layout() {
   const navigate = useNavigate();
   const { updateCounter } = useEdit();
 
-  // Menú de tres líneas junto al logo: todo lo que no son los dos destinos
-  // principales vive aquí (decisión del usuario, 2026-08-08).
-  const [menuOpen, setMenuOpen] = useState(false);
+  // El menú lateral, plegado o abierto. Se recuerda en tus ajustes de usuario
+  // (jsonb, sin migración): el menú te encuentra como lo dejaste.
+  const [menuColapsado, setColapsado] = useState<boolean>(() => {
+    try { return localStorage.getItem('humanity:menu-colapsado') === '1'; } catch { return false; }
+  });
+  const setMenuColapsado = (v: boolean) => {
+    setColapsado(v);
+    try { localStorage.setItem('humanity:menu-colapsado', v ? '1' : '0'); } catch { /* lleno */ }
+  };
   // Las ventanas abiertas del Escritorio, para pintarlas como ICONOS en la
   // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
   // (ver bus.ts).
@@ -61,7 +66,6 @@ export default function Layout() {
     pedirVentanas();
     return () => window.removeEventListener('humanity:ventanas', f);
   }, []);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   // ARRASTRAR PESTAÑAS (Eugenio, 2026-08-20: «también cambiarlas de posición
   // pinchando y arrastrando»). Con `draggable` del propio navegador: son diez
@@ -105,17 +109,6 @@ export default function Layout() {
     ids.splice(destino, 0, ids.splice(desde, 1)[0]);
     ordenarVentanas(ids);
   };
-
-  useEffect(() => {
-    const fuera = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener('mousedown', fuera);
-    return () => document.removeEventListener('mousedown', fuera);
-  }, []);
-
-  // Al cambiar de página, el desplegable se cierra solo.
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   // La otra punta del puente: lo que una ventana manda con `postMessage` se
   // vuelve a lanzar aquí como evento normal, y el asistente lo oye igual que
@@ -210,99 +203,19 @@ export default function Layout() {
    *  Lo único que sigue navegando es INICIAR SESIÓN: mientras no hay sesión no
    *  hay escritorio al que volver, y entrar dentro de una ventana te deja la
    *  app de fuera sin enterarse de que ya has entrado. */
-  const entradaMenu = (x: { to: string; label: string; icon: any; navega?: boolean }) => {
-    const abierta = ventanasAbiertas.some(v => v.destino === x.to);
-    const clases = cn('w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors text-left',
-      abierta || location.pathname === x.to ? 'text-emerald-700 bg-emerald-50' : 'text-slate-700 hover:bg-slate-50');
-    if (x.navega) {
-      return (
-        <Link key={x.to} to={x.to} className={clases}>
-          <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-        </Link>
-      );
-    }
-    return (
-      <button key={x.to} className={clases}
-        onClick={() => { abrirVentana({ titulo: x.label, clase: 'app', destino: x.to }); setMenuOpen(false); }}>
-        <x.icon className="w-4 h-4 shrink-0 text-slate-400" /> {x.label}
-      </button>
-    );
-  };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
-      {/* Barra superior mínima: marca + Mapa/Grafos + acciones */}
-      <header className="h-14 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 sm:px-6 flex items-center gap-3 z-40 shrink-0 shadow-sm">
-        {/* Menú de tres líneas: todo lo demás vive aquí */}
-        <div className="relative shrink-0" ref={menuRef}>
-          <button
-            onClick={() => setMenuOpen(o => !o)}
-            title="Todas las secciones"
-            className={cn('w-9 h-9 rounded-xl flex items-center justify-center transition-colors',
-              menuOpen ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900')}
-          >
-            {menuOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
-          </button>
+    // LA FORMA DE LA APP (2026-08-20): una FILA — menú lateral a la izquierda,
+    // y a su derecha la columna de barra + contenido. Antes era una columna con
+    // el menú metido en un desplegable del botón ☰; con un árbol de proyectos
+    // dentro eso no vale, porque se cerraba en cuanto pulsabas nada.
+    <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
+      <MenuLateral colapsado={menuColapsado} onColapsar={setMenuColapsado} activo={location.pathname} />
 
-          {menuOpen && (
-            <div className="absolute top-11 left-0 w-64 max-h-[calc(100vh-70px)] overflow-y-auto bg-white border border-slate-200 shadow-2xl rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-              {/* El Navegador, SIEMPRE a un clic (petición de Eugenio,
-                  2026-08-20: «directamente en el menú, sin tener que ir
-                  primero a escritorio»). Fuera del Escritorio deja la
-                  apertura apuntada y navega; el gestor la recoge al montar. */}
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  abrirVentana({ titulo: 'Navegador', clase: 'navegador', destino: 'about:inicio' });
-                }}
-                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <Globe className="w-4 h-4 shrink-0 text-sky-600" /> Navegador
-              </button>
-              <div className="h-px bg-slate-100 my-1.5" />
-              <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">El común</p>
-              {SECCIONES_COMUN.map(entradaMenu)}
-              <div className="h-px bg-slate-100 my-1.5" />
-              {SECCIONES_PIE.map(entradaMenu)}
-
-              {/* Tu cuenta: lo que antes vivía a la derecha de la cabecera
-                  (petición de Eugenio, 2026-08-20: «que no quede nada, solo
-                  el logo»). */}
-              <div className="h-px bg-slate-100 my-1.5" />
-              <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Tu cuenta</p>
-              {user ? (
-                <>
-                  {entradaMenu({ to: `/personas/${user.id}`, label: 'Mi Perfil', icon: User })}
-                  {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2 })}
-                  {/* El inventario de tablas reales. Era «Base de Datos» en el
-                      menú principal; ese sitio lo ocupa ahora «Archivos» (lo
-                      tuyo). Sigue vivo aquí porque es una herramienta útil de
-                      administración, no una página que nadie quisiera. */}
-                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database })}
-                  {entradaMenu({ to: '/configuracion', label: 'Configuración', icon: Settings })}
-                  <button
-                    onClick={() => { setMenuOpen(false); logout(); navigate('/'); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left"
-                  >
-                    <LogOut className="w-4 h-4 shrink-0 text-slate-400" /> Cerrar sesión
-                  </button>
-                </>
-              ) : (
-                entradaMenu({ to: '/login', label: 'Iniciar sesión', icon: User, navega: true })
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Marca */}
-        <Link to="/" className="shrink-0 hover:opacity-85 transition-opacity">
-          <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
-            {/* «Wiki» plateado (petición de Eugenio, 2026-08-20): degradado
-                vertical claro en el centro — así es como se lee «metal pulido»
-                sin salirse de la paleta slate de la app. */}
-            Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
-          </span>
-        </Link>
+      <div className="flex-1 flex flex-col min-w-0">
+      {/* Barra superior: SOLO las ventanas abiertas. La marca y las secciones
+          se han ido al menú lateral. */}
+      <header className="h-14 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 flex items-center gap-3 z-40 shrink-0 shadow-sm">
 
         {/* Las ventanas abiertas del Escritorio, como ICONOS (2026-08-19,
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
@@ -396,8 +309,8 @@ export default function Layout() {
       </div>
 
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra
-          abajo»). Solo hay UNA barra, la de arriba, y es la que lleva el menú
-          y las ventanas abiertas. */}
+          abajo»). Solo hay UNA barra, la de arriba, y lleva las ventanas. */}
+      </div>
     </div>
   );
 }
