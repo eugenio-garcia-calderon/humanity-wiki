@@ -21,7 +21,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
-  Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles,
+  Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -70,6 +70,10 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   const { user, updateUiSettings } = useAuth();
   const [datos, setDatos] = useState<DatosMenu>(VACIO);
   const [plegadas, setPlegadas] = useState<Record<string, boolean>>({});
+  // LAS ÁREAS (2026-08-20): los 14 objetivos con sus indicadores. Son el mapa
+  // del conocimiento común —iguales para todo el mundo y no cambian cada
+  // día—, así que se piden una vez y ya. No dependen de la sesión.
+  const [areas, setAreas] = useState<Array<{ id: string; titulo: string; indicadores: Array<{ id: string; nombre: string }> }>>([]);
 
   // CÓMO TIENES TÚ EL MENÚ: en qué orden va cada cosa y cuánto sitio ocupa
   // cada sección. Es una preferencia TUYA, no del proyecto: que tú pongas
@@ -149,6 +153,13 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
       .catch(() => setDatos(VACIO));
   }, [user]);
 
+  useEffect(() => {
+    fetch('/api/areas')
+      .then(r => r.json())
+      .then(d => setAreas(Array.isArray(d) ? d : []))
+      .catch(() => setAreas([]));
+  }, []);
+
   // El menú se recarga cuando algo cambia por ahí fuera (creas un proyecto,
   // mueves una página): quien lo haga lanza este aviso y aquí se vuelve a
   // pedir. Sin esto habría que recargar la página para verlo.
@@ -213,6 +224,22 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   }));
 
   // --- 3. PRODUCTOS --------------------------------------------------------
+  // Un área es un objetivo, y dentro cuelgan sus indicadores: la misma cadena
+  // que ya usa toda la plataforma (Objetivo → Indicador), no un árbol nuevo.
+  const nodosAreas: NodoMenu[] = areas.map(a => ({
+    id: `area-${a.id}`,
+    label: a.titulo,
+    icono: Target,
+    destino: `/objetivos/${a.id}`,
+    abrir: 'ventana',
+    hijos: a.indicadores.map(i => ({
+      id: `ind-${i.id}`,
+      label: i.nombre,
+      destino: `/indicadores/${i.id}`,
+      abrir: 'ventana' as const,
+    })),
+  }));
+
   const nodosProductos: NodoMenu[] = datos.productos.map(p => ({
     id: p.id, label: p.nombre, icono: Package,
     insignia: p.icono || undefined,
@@ -316,7 +343,17 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           {filas('herramientas', HERRAMIENTAS)}
         </SeccionMenu>
 
-        {/* 3 — PRODUCTOS Y SERVICIOS */}
+        {/* 3 — ÁREAS: el mapa del conocimiento común */}
+        <SeccionMenu
+          titulo="Áreas" icono={Layers} colapsado={colapsado}
+          plegada={plegadas.areas !== false} onPlegar={() => plegar('areas')}
+          cuantos={areas.length}
+          alto={altos.areas} onAlto={a => guardarAlto('areas', a)}
+        >
+          {filas('areas', nodosAreas)}
+        </SeccionMenu>
+
+        {/* 4 — PRODUCTOS Y SERVICIOS */}
         <SeccionMenu
           titulo="Productos" icono={Store} colapsado={colapsado}
           plegada={!!plegadas.productos} onPlegar={() => plegar('productos')}
@@ -336,7 +373,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           {filas('productos', nodosProductos)}
         </SeccionMenu>
 
-        {/* 4 — PERSONAS Y ORGANIZACIONES */}
+        {/* 5 — PERSONAS Y ORGANIZACIONES */}
         <SeccionMenu
           titulo="Personas" icono={Users2} colapsado={colapsado}
           plegada={!!plegadas.personas} onPlegar={() => plegar('personas')}

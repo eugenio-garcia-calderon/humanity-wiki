@@ -27,6 +27,8 @@ interface Tarea {
   grupo: string | null;
   autor: string | null;
   fecha: string | null;
+  responsable?: string | null;
+  responsableFoto?: string | null;
 }
 
 interface GrupoProyecto {
@@ -91,6 +93,56 @@ export default function Tareas() {
 
   const total = useMemo(() => visibles.reduce((n, p) => n + p.tareas.length, 0), [visibles]);
 
+  // SOLTAR UN ELEMENTO DEL MENÚ AQUÍ CREA UNA TAREA (2026-08-20, petición de
+  // Eugenio: «si arrastro un elemento del menú hacia la página de tareas
+  // automáticamente se cree una tarea ligada a ese elemento; por ejemplo si
+  // arrastro un producto a la sección de tareas de un proyecto, se crea una
+  // tarea dentro de ese proyecto ligada a ese producto»).
+  //
+  // Lo que llega es lo que el menú metió en el arrastre: tipo, id, nombre y a
+  // dónde lleva. La tarea nace con SU nombre y con un enlace de vuelta, para
+  // que desde la tarea puedas ir al producto —o a la página, o a la persona—
+  // del que salió.
+  const [encima, setEncima] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  const leerElemento = (e: React.DragEvent) => {
+    const crudo = e.dataTransfer.getData('application/x-humanity-elemento');
+    if (!crudo) return null;
+    try { return JSON.parse(crudo); } catch { return null; }
+  };
+
+  const soltarEn = async (proyectoId: string | null, e: React.DragEvent) => {
+    e.preventDefault();
+    setEncima(null);
+    const el = leerElemento(e);
+    if (!el?.label) return;
+    try {
+      const r = await fetch('/api/roadmap', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({
+          proyecto_id: proyectoId,
+          titulo: el.label,
+          grupo: 'producto',
+          // Una persona arrastrada no es «una tarea llamada Anita»: es una
+          // tarea DE Anita. El resto de elementos solo dejan su enlace.
+          responsable_agente_id: el.tipo === 'persona' ? el.id : undefined,
+          bloques: el.destino ? [{ tipo: 'enlace', url: el.destino, titulo: el.label }] : [],
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'No se ha podido crear la tarea.');
+      setAviso(`Tarea creada: «${el.label}»`);
+      // Recargar para que salga donde toca, con su proyecto y su responsable.
+      const d = await (await fetch('/api/tareas', { credentials: 'include' })).json();
+      setProyectos(Array.isArray(d?.proyectos) ? d.proyectos : []);
+      setTimeout(() => setAviso(null), 4000);
+    } catch (err: any) {
+      setAviso(err.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto w-full">
       {/* Cabecera */}
@@ -133,6 +185,14 @@ export default function Tareas() {
       {error && (
         <p className="mb-4 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">{error}</p>
       )}
+      {aviso && (
+        <p className="mb-4 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">{aviso}</p>
+      )}
+      {!cargando && !error && (
+        <p className="mb-3 text-[11px] text-slate-400">
+          Arrastra aquí un proyecto, un producto, una página o una persona del menú y se crea una tarea ligada a él.
+        </p>
+      )}
 
       {cargando ? (
         <div className="py-24 grid place-items-center">
@@ -154,7 +214,14 @@ export default function Tareas() {
             const hechas = p.tareas.filter(t => t.estado === 'hecho').length;
             const pct = p.tareas.length ? Math.round((hechas / p.tareas.length) * 100) : 0;
             return (
-              <section key={p.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <section
+                key={p.id}
+                onDragOver={e => { if (e.dataTransfer.types.includes('application/x-humanity-elemento')) { e.preventDefault(); setEncima(p.id); } }}
+                onDragLeave={() => setEncima(c => (c === p.id ? null : c))}
+                onDrop={e => soltarEn(p.esHojaDeRuta ? null : p.id, e)}
+                className={cn('rounded-2xl border bg-white overflow-hidden transition-colors',
+                  encima === p.id ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-slate-200')}
+              >
                 {/* Cabecera del proyecto: pliega, cuenta y lleva al tablero */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-slate-50/70 border-b border-slate-100">
                   <button
@@ -208,6 +275,14 @@ export default function Tareas() {
                             </p>
                             {t.resumen && (
                               <p className="text-[11px] text-slate-400 leading-snug line-clamp-1 mt-0.5">{t.resumen}</p>
+                            )}
+                            {t.responsable && (
+                              <p className="text-[10px] text-slate-400 mt-0.5 inline-flex items-center gap-1">
+                                {t.responsableFoto
+                                  ? <img src={t.responsableFoto} alt="" className="w-3 h-3 rounded-full object-cover" />
+                                  : null}
+                                {t.responsable}
+                              </p>
                             )}
                           </div>
                           <div className="flex items-center gap-2 shrink-0">

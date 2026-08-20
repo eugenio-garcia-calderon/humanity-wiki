@@ -5,7 +5,7 @@ import {
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
+import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
 import IconoElemento from '../components/ui/Icono';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
@@ -256,6 +256,28 @@ export function Proyecto() {
 
   const grupos: Grupo[] = Array.isArray(proyecto.grupos) ? proyecto.grupos : [];
 
+  /** Crea una etiqueta del proyecto desde el formulario de tarjeta nueva y
+   *  devuelve su id. Si ya existe una con ese nombre, se reutiliza. */
+  const crearEtiquetaProyecto = (nombre: string): string => {
+    const id = idDeEtiqueta(nombre);
+    const yaEsta = grupos.find(g => g.id === id || g.label.toLowerCase() === nombre.trim().toLowerCase());
+    if (yaEsta) return yaEsta.id;
+    const paleta = ['#7c3aed', '#db2777', '#0284c7', '#16a34a', '#d97706', '#475569', '#dc2626', '#0891b2'];
+    guardarGrupos([...grupos, { id, label: nombre.trim().slice(0, 40), color: paleta[grupos.length % paleta.length] }]);
+    return id;
+  };
+
+  /** Guarda las etiquetas del proyecto (los «grupos» del tablero). Se pinta
+   *  antes de que conteste el servidor por lo mismo que las columnas: crear
+   *  una etiqueta y verla aparecer medio segundo después se siente roto. */
+  const guardarGrupos = (nuevos: any[]) => {
+    setProyecto((p: any) => (p ? { ...p, grupos: nuevos } : p));
+    fetch(`/api/proyectos/${proyecto.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ grupos: nuevos }),
+    }).catch(() => {});
+  };
+
   /** Guarda el nombre de una columna. Se pinta ANTES de que conteste el
    *  servidor: renombrar un rótulo y verlo tardar medio segundo se siente como
    *  si no hubiera funcionado. */
@@ -401,6 +423,7 @@ export function Proyecto() {
             onCrear={(g, estado) => setNueva({ grupo: g || grupos[0]?.id, estado })}
             columnas={proyecto.columnas || null}
             onColumnas={puedeEditar ? guardarColumnas : undefined}
+            onGrupos={puedeEditar ? guardarGrupos : undefined}
           />
         </div>
       </div>
@@ -409,6 +432,7 @@ export function Proyecto() {
         <ModalNuevaTarjeta
           proyectoId={proyecto.id} grupos={grupos}
           grupoInicial={nueva.grupo} estadoInicial={nueva.estado}
+          onCrearEtiqueta={puedeEditar ? crearEtiquetaProyecto : undefined}
           onCerrar={() => setNueva(null)}
           onCreada={() => { setNueva(null); cargarItems(proyecto.id); }}
         />
@@ -509,10 +533,12 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
   );
 }
 
-function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, onCerrar, onCreada }: {
+function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, onCrearEtiqueta, onCerrar, onCreada }: {
   proyectoId: string; grupos: Grupo[]; grupoInicial: string;
   /** En qué columna nace. Por defecto «Por hacer», que es donde va casi todo. */
   estadoInicial?: string;
+  /** Crea una etiqueta en el proyecto y devuelve su id (para el «@»). */
+  onCrearEtiqueta?: (nombre: string) => string;
   onCerrar: () => void; onCreada: () => void;
 }) {
   const [titulo, setTitulo] = useState('');
@@ -520,6 +546,26 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
   const [grupo, setGrupo] = useState(grupoInicial);
   const [prioridad, setPrioridad] = useState('media');
   const [guardando, setGuardando] = useState(false);
+
+  // EL «@» PARA ETIQUETAR MIENTRAS ESCRIBES (2026-08-20, petición de Eugenio:
+  // «hacer @algo para mencionar a una categoría, abriéndose un desplegable de
+  // las que ya hay, y si no hay una con ese nombre, se crea»).
+  //
+  // Se mira lo que hay escrito DESPUÉS del último «@» hasta el final. Cuando
+  // eliges, ese trozo desaparece del título: la etiqueta ya está puesta, y
+  // dejar «@diseño» dentro del texto sería ruido.
+  const mencion = (() => {
+    const m = titulo.match(/@([\p{L}0-9 -]*)$/u);
+    return m ? m[1] : null;
+  })();
+  const sugerencias = mencion === null ? [] : grupos.filter(g =>
+    !mencion.trim() || g.label.toLowerCase().includes(mencion.trim().toLowerCase()));
+  const hayExacta = !!mencion?.trim() && grupos.some(g => g.label.toLowerCase() === mencion.trim().toLowerCase());
+
+  const aplicarMencion = (id: string) => {
+    setGrupo(id);
+    setTitulo(t => t.replace(/@([\p{L}0-9 -]*)$/u, '').trimEnd());
+  };
   const [error, setError] = useState<string | null>(null);
   const input = 'w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300';
 
@@ -547,7 +593,30 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
           <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-5 space-y-3">
-          <input value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus className={input} placeholder="Qué hay que hacer" />
+          <div className="relative">
+            <input value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus className={input}
+              placeholder="Qué hay que hacer — escribe @ para etiquetar" />
+            {mencion !== null && (sugerencias.length > 0 || (!!mencion.trim() && !hayExacta)) && (
+              <div className="absolute left-0 right-0 top-full mt-1 z-10 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1">
+                {sugerencias.map(g => (
+                  <button key={g.id} onClick={() => aplicarMencion(g.id)}
+                    className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: g.color }} />
+                    <span className="truncate">{g.label}</span>
+                  </button>
+                ))}
+                {/* La que no existe todavía: se crea al vuelo. */}
+                {!!mencion.trim() && !hayExacta && onCrearEtiqueta && (
+                  <button
+                    onClick={() => aplicarMencion(onCrearEtiqueta(mencion.trim()))}
+                    className="w-full text-left px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50 border-t border-slate-100 mt-1 pt-2"
+                  >
+                    + Crear etiqueta «{mencion.trim()}»
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <input value={resumen} onChange={e => setResumen(e.target.value)} className={input} placeholder="Una línea de contexto (opcional)" />
           <div className="flex flex-wrap gap-1.5">
             {grupos.map(g => (
