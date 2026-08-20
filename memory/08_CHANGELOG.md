@@ -1634,3 +1634,43 @@ cache** and cost 0.437 céntimos vs 0.978 for the first — 55% cheaper. The
 saving grows with conversation length, and the stable block will grow the
 saving further once the retrieved context shrinks (next step: contexto
 dinámico). Test conversation, charges and session deleted afterwards.
+
+## 2026-08-20 — Three-tier model router: two free open models, Claude covered for verified users
+
+Steps 2 and 3 of the cost plan (open provider + router), as Eugenio decided:
+three models by complexity, the expensive one only for premium, two free.
+
+**What ships**
+
+- `TogetherProvider` in provider.ts: OpenAI-format connector (the de facto
+  standard), always streaming — Qwen3.7-Plus returns 400 without it, measured
+  live. Key via `TOGETHER_API_KEY` (or neutral `ABIERTO_API_KEY` +
+  `ABIERTO_BASE_URL` to switch provider without code).
+- Catalog: `abierto-rapido` (DeepSeek V4 Flash, $0.14/$0.28 per Mtok) and
+  `abierto-medio` (Qwen3.7-Plus, $0.32/$1.28), both `gratis` — platform
+  absorbs; user pays 0. All paid models now carry `nivelMinimo: 2`.
+- `elegirModelo()`: deterministic router (see 03_DECISIONS). Premium (level
+  2+) gets Claude covered, capped by `AI_TOPE_PREMIUM_CENTS` (300 ¢/month
+  default); over the cap it downgrades to the free medium model and says so.
+- Without the Together key everything behaves exactly as before — the router
+  only activates when the provider is ready, so the deploy is safe either way.
+  The key reached production via a GitHub secret injected into
+  `.env.production` by the deploy workflow (rotation = change secret, deploy).
+- UI: "Automático (recomendado)" option, "gratis"/"incluido"/"verificados"
+  badges per model, aviso bubble when the router downgrades, and "gratis"
+  instead of "0,0000 €" in the per-message cost line.
+- Charging: `cost_cents` is always the real cost (feeds the admin panel and
+  the monthly cap); `fee/total` are 0 for `gratis` and `cubierto`, unchanged
+  for `de_pago`.
+
+**Measured live** (all three rungs, then data deleted): short question →
+DeepSeek Flash, 0.07 ¢ platform cost; "Apúntame una reunión…" → Claude
+covered, CREATE_EVENTO proposed, 1,657 tokens read from prompt cache; long
+chat → Qwen streaming, 0.23 ¢. Router unit-tested on 12 edge cases (level
+gating, cap exhausted, PDF, web search, no-key fallback): all green.
+
+**Two bugs found while testing**: a Python-written `\b` became a literal
+backspace, so the action-verb regex never matched (rewritten); and the golden
+rule («si dices que lo has hecho, el bloque es OBLIGATORIO») moved to the END
+of the variable prompt — after the cache split it sat too far from the end and
+Claude went back to saying "te la apunto" without the block.

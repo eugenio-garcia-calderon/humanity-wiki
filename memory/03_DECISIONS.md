@@ -381,3 +381,35 @@ ya tiene prohibido `drizzle-kit push` por colgarse en shells no interactivas.
 mano". A cambio, desplegar deja de tener un paso que solo existe en la cabeza de alguien.
 Verificado antes de tocar producción ejecutando la misma lógica contra la base local: 29
 marcadas como línea base, 0029 aplicada, y una segunda pasada sin cambios.
+
+## 2026-08-20 — Open models served by Together AI, chosen over DeepSeek's own API
+
+**Decision**: the two free chat models (`abierto-rapido` = DeepSeek V4 Flash,
+`abierto-medio` = Qwen3.7-Plus) are served by Together AI.
+
+**Alternatives considered**: DeepSeek's own API (rejected: more expensive even
+off-peak — $0.22–0.44/$0.66–1.32 vs Together's $0.14/$0.28 per Mtok, only
+DeepSeek models, and data processed in China with GDPR still pending on the
+roadmap); Fireworks/Groq/DeepInfra (viable, noted as fallbacks; not worth a
+second account today); OpenRouter (useful as a testing bench, adds a fee).
+
+**Reversibility**: the connector speaks the OpenAI chat format — the de facto
+standard shared by all of the above. Switching provider is `ABIERTO_BASE_URL` +
+`ABIERTO_API_KEY` (+ per-model id overrides), no code. Catalog ids are OUR
+aliases (`abierto-*`) precisely so stored usage rows and user preferences
+survive a provider change.
+
+## 2026-08-20 — Model router: fixed rules, not an LLM choosing an LLM
+
+**Decision**: `elegirModelo()` in provider.ts routes each chat message with
+deterministic rules (manual pick → gate by level; PDF/web-search → Claude;
+action-verbs regex or >700 chars → top tier available; <180 chars → fast model;
+else medium). Premium = role level ≥ 2 (VERIFIED), Claude cost covered by the
+platform up to `AI_TOPE_PREMIUM_CENTS` (default 300 ¢/month/user), then
+auto-downgrade with a visible notice. Both decisions are Eugenio's
+(2026-08-20), including "cost included" over pay-per-use.
+
+**Alternative rejected**: a classifier LLM picking the model — one more call,
+one more cost, one more failure point, to save céntimos. Free-user actions go
+to the open medium model on purpose: the proposal/validation safety net
+(server validates, user confirms) already bounds the damage of a weaker model.
