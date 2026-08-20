@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ExternalLink, PlayCircle, BookOpen, Link2, Map as MapIcon, Quote,
@@ -15,6 +15,75 @@ import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis
 // La configuración de cada tipo está documentada en knowledge.ts (backend).
 
 const cn2 = (...cls: Array<string | false | undefined>) => cls.filter(Boolean).join(' ');
+
+// ============================================================================
+// UN MARCO QUE SOLO VIVE MIENTRAS SE VE (2026-08-21, B63)
+// ============================================================================
+// El mapa de una publicación es un `<iframe>` a una ruta de la propia
+// plataforma, o sea LA APLICACIÓN ENTERA otra vez. En la miniatura de una
+// tarjeta encima ni siquiera se puede tocar: es `pointer-events-none` y está
+// escalada. Se estaba pagando una aplicación React completa para enseñar algo
+// que a efectos del usuario es una fotografía.
+//
+// Y no es una tarjeta: en Publicaciones hay 92. Las ventanas las abre el
+// usuario de una en una; estas se abren solas según bajas. En un iPhone 12,
+// Safari mata la pestaña sin avisar al pasarse de memoria.
+//
+// Aquí el marco se MONTA al acercarse a la pantalla y se DESMONTA al alejarse,
+// así que lo que hay vivo es lo que se está mirando y no todo lo que has
+// pasado. El margen de 300 px es para que, bajando a velocidad normal, el mapa
+// ya esté cargado cuando llega a la vista.
+//
+// Por qué desmontar y no `loading="lazy"` a secas: `lazy` evita la carga
+// inicial, pero una vez cargado el marco se queda vivo para siempre. Al llegar
+// abajo del todo tendrías las 92 igualmente.
+function MarcoQueSoloViveMientrasSeVe({ src, title, className, style }: {
+  src: string; title: string; className?: string; style?: React.CSSProperties;
+}) {
+  const hueco = useRef<HTMLDivElement>(null);
+  const [cerca, setCerca] = useState(false);
+
+  useEffect(() => {
+    const el = hueco.current;
+    if (!el) return;
+    // Sin IntersectionObserver (navegador muy viejo), se monta y ya: mejor una
+    // página pesada que una página sin mapas.
+    if (typeof IntersectionObserver === 'undefined') { setCerca(true); return; }
+
+    // RED DE SEGURIDAD: SI EL OBSERVADOR NO CONTESTA, SE MONTA IGUAL.
+    // Un observador recién creado SIEMPRE entrega una primera respuesta, diga
+    // que se ve o que no. Si en un segundo y medio no ha dicho nada, es que en
+    // ese navegador no funciona — y me lo he encontrado de verdad probando
+    // esto: cero eventos sobre un elemento que estaba a la vista. Sin esta
+    // salida, el fallo sería un cuadro gris donde debería haber un mapa, para
+    // siempre. Un mapa que no aparece es peor que un mapa que pesa.
+    // No hace daño en un navegador sano: allí la primera respuesta llega en el
+    // mismo fotograma y el temporizador se cancela sin haber hecho nada.
+    let contesto = false;
+    const obs = new IntersectionObserver(
+      entradas => { contesto = true; setCerca(entradas.some(e => e.isIntersecting)); },
+      { rootMargin: '300px' },
+    );
+    obs.observe(el);
+    const red = window.setTimeout(() => { if (!contesto) setCerca(true); }, 1500);
+
+    return () => { obs.disconnect(); clearTimeout(red); };
+  }, []);
+
+  return (
+    <div ref={hueco} className="absolute inset-0">
+      {cerca
+        ? <iframe src={src} title={title} loading="lazy" className={className} style={style} />
+        : (
+          // El hueco mientras no toca: del mismo tamaño, para que la tarjeta no
+          // cambie de alto ni dé saltos al bajar.
+          <div className="w-full h-full bg-slate-100 grid place-items-center" aria-hidden>
+            <MapIcon className="w-5 h-5 text-slate-300" />
+          </div>
+        )}
+    </div>
+  );
+}
 
 const CHART_COLORS = ['#059669', '#0284c7', '#d97706', '#7c3aed', '#dc2626', '#64748b', '#0d9488'];
 
@@ -291,7 +360,7 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
       return (
         <div className="space-y-1.5">
           <div className={isNode ? 'relative h-64 rounded-lg overflow-hidden border border-slate-200' : 'relative h-[420px] rounded-xl overflow-hidden border border-slate-200'}>
-            <iframe
+            <MarcoQueSoloViveMientrasSeVe
               src={config.map_url}
               title="Mapa de indicadores"
               className={isNode ? 'w-full h-full pointer-events-none scale-[0.55] origin-top-left' : 'w-full h-full'}
