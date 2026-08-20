@@ -30,6 +30,7 @@ import {
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { iconoDeProyecto } from '../../utils/iconoDeNombre';
 import { useAuth } from '../../contexts/AuthContext';
 import { abrirVentana } from '../ventanas/bus';
 import SeccionMenu from './menu/SeccionMenu';
@@ -205,8 +206,11 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
   const nodosProyectos: NodoMenu[] = datos.proyectos.map(p => ({
     id: p.id,
     label: p.titulo,
-    // El icono que le hayas puesto manda; si no hay, sus iniciales.
-    insignia: p.icono || iniciales(p.titulo),
+    // El icono que le hayas puesto manda; si no hay, el que le toca a su
+    // nombre (D90, 2026-08-21, Eugenio: «que no sean letras»). Las iniciales
+    // se quedan para las PERSONAS, donde son una inicial de verdad y no un
+    // dibujo de lo que la cosa es.
+    insignia: iconoDeProyecto(p.icono, p.titulo),
     destino: `/proyectos/${p.slug}`,
     editable: { tipo: 'proyecto', id: p.id },
     // Los hijos se piden al desplegar, no antes.

@@ -2453,3 +2453,44 @@ The integrated browser reproduces an iPhone's *size* faithfully and its
 verified by RELOADING at each size, never by resizing live — and lazy-loading
 cannot be verified here at all. A bug reported from live-resizing in this
 browser is not a bug.
+
+
+## 2026-08-21 — D90: project icons are drawings, not letters
+
+Eugenio: «haz que los iconos sean siempre en blanco y negro y que no sean
+letras […] cuando se cree un nuevo proyecto, haz que el icono se guarde
+automáticamente en función del nombre del proyecto».
+
+A project with no icon used to show its initials. Now it shows a stroke icon
+chosen from its name.
+
+**A dictionary picks it, not the AI.** Asking a model would cost money on every
+creation, take seconds, and could return the name of an icon that does not
+exist. A dictionary is right about what it knows and wrong predictably.
+
+**No match → the generic icon.** Not a random one, and above all not «the first
+in the list» — that is the `grupos[0]` failure that cost B13 and B34. A neutral
+icon is the honest way to say «I don't know what this represents».
+
+Two things came out of *running* the dictionary rather than reasoning about it:
+«Coche ultraligero solar volador» gave a SUN, because «solar» sat above «coche»
+— the thing is the car and the rest describes it. And «Consolar a los vecinos»
+proved the word-level match works: it gives the community icon, not a sun,
+which is why «Villabosque» stays generic (it contains «bosque» but does not
+start with it, and loosening that would break «consolar»).
+
+**Nothing was migrated, deliberately.** A generic SQL migration would be a
+second copy of the dictionary, able to contradict the first the day someone
+adds a word. Instead the fallback lives in the server (`menu.ts`,
+`calendario.ts`) so every reader gets it from one implementation. The calendar
+was the third reader, found by looking for everyone who read the column rather
+than stopping at the two obvious ones.
+
+**Emoji are gone from the picker**, which is what makes it honest to replace a
+legacy emoji on a project with its stroke icon: no one can create that state
+any more. The popup previews the same icon the page shows, so the same thing
+does not have two faces depending on where you look at it.
+
+53 icons, imported one by one from `lucide-react` (already a dependency, 5.592
+icons). Only those 53 enter the bundle. They use `currentColor`, so one icon
+serves light and dark without a second version.

@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { iconoDeNombre } from '../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 
@@ -205,10 +206,13 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       // Un sufijo corto evita chocar con un proyecto homónimo de otra persona.
       const slug = `${base}-${id.slice(-4).toLowerCase()}`;
       await db.execute(sql`
-        INSERT INTO proyectos (id, titulo, descripcion, vision, slug, creador_user_id, grupos, publico, created_by, updated_by)
+        -- EL ICONO SE ELIGE SOLO a partir del nombre (D90, 2026-08-21). Si
+        -- quien crea el proyecto manda uno, manda el suyo: automático no es
+        -- obligatorio.
+        INSERT INTO proyectos (id, titulo, descripcion, vision, slug, creador_user_id, grupos, publico, icono, created_by, updated_by)
         VALUES (${id}, ${d.titulo}, ${d.descripcion || null}, ${d.vision || null}, ${slug}, ${req.user.id},
                 ${JSON.stringify(d.grupos?.length ? d.grupos : GRUPOS_POR_DEFECTO)}::jsonb,
-                ${d.publico !== false}, ${req.user.id}, ${req.user.id})
+                ${d.publico !== false}, ${d.icono || iconoDeNombre(d.titulo)}, ${req.user.id}, ${req.user.id})
       `);
       const row = await db.execute(sql`SELECT * FROM proyectos WHERE id = ${id}`);
       res.json(row.rows[0]);

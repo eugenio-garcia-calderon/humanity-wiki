@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { iconoDeNombre } from '../../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 import {
   getProvider, listProviders, providerOfModel, generarImagenNanoBanana, NANO_BANANA_CATALOG_MODEL,
@@ -1578,8 +1579,9 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           const slug = `${titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 6)}`;
           await db.execute(sql`
-            INSERT INTO proyectos (id, titulo, descripcion, slug, creador_user_id, grupos, publico, created_by, updated_by)
+            INSERT INTO proyectos (id, titulo, descripcion, slug, creador_user_id, icono, grupos, publico, created_by, updated_by)
             VALUES (${id}, ${titulo.slice(0, 200)}, ${params.descripcion || null}, ${slug}, ${actorId},
+                    ${iconoDeNombre(titulo)},
                     ${JSON.stringify([
                       { id: 'producto', label: 'Producto', color: '#7c3aed' },
                       { id: 'diseno', label: 'Diseño', color: '#db2777' },

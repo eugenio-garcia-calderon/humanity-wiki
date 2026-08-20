@@ -6,19 +6,25 @@
 // Una ventanita, no una página: renombrar algo es un gesto de dos segundos y
 // mandarte a otro sitio para eso te saca de lo que estabas haciendo.
 //
-// EMOJIS Y NO IMÁGENES: caben en la fila, se ven igual en todas partes, no hay
-// que subir nada y el menú no paga una petición por línea.
+// ICONOS DE TRAZO, NO EMOJIS (D90, 2026-08-21, Eugenio: «haz que los iconos
+// sean siempre en blanco y negro […] que no sean letras»). Los emojis los
+// pinta el sistema operativo a todo color y cada uno el suyo: no se pueden
+// teñir, no combinan entre sí y se ven distintos en cada máquina. Un icono de
+// trazo hereda el color del texto y queda igual en todas partes.
+//
+// Y AL QUITARLOS DE AQUÍ dejan de poder elegirse, que es lo que permite que la
+// pantalla no enseñe nunca uno: si se pudieran elegir y luego no se pintaran,
+// la interfaz estaría mintiendo sobre lo que acabas de guardar.
 import { useEffect, useRef, useState } from 'react';
 import { X, Loader2, Check, ImagePlus } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import Icono, { esImagen } from '../../ui/Icono';
+import { ICONOS } from '../../ui/iconosDeTrazo';
+import { PREFIJO, iconoDeProyecto } from '../../../utils/iconoDeNombre';
 
-/** Los de siempre para un proyecto o una tarea, más lo que se quiera pegar. */
-const EMOJIS = [
-  '📁', '🚐', '🏡', '🌱', '⚡', '💧', '🔥', '🗺️',
-  '📄', '📊', '🧭', '🎯', '🛠️', '🚀', '💡', '🤝',
-  '📌', '🧩', '🎨', '🔬', '💰', '📚', '⚖️', '❤️',
-];
+/** Los que se pueden elegir a mano. Son los mismos que el diccionario puede
+ *  poner solo, así que lo automático y lo elegido salen del mismo juego. */
+const ELEGIBLES = Object.keys(ICONOS).map(n => PREFIJO + n);
 
 export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCerrar }: {
   tipo: string;
@@ -30,7 +36,14 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
   onCerrar: () => void;
 }) {
   const [texto, setTexto] = useState(nombre);
-  const [elegido, setElegido] = useState<string | null>(icono || null);
+  // LO QUE SE ENSEÑA AQUÍ TIENE QUE SER LO QUE SE VE FUERA. Un proyecto con un
+  // emoji antiguo guardado se pinta con su icono de trazo en el menú y en su
+  // página (D90); si el popup siguiera enseñando el emoji, la misma cosa
+  // tendría dos caras según por dónde la mires — y elegir «guardar» sin tocar
+  // nada dejaría escrito algo distinto de lo que se ve.
+  const [elegido, setElegido] = useState<string | null>(
+    tipo === 'proyecto' ? iconoDeProyecto(icono, nombre) : (icono || null),
+  );
   const [guardando, setGuardando] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +135,7 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
               {subiendo ? 'Subiendo…' : 'Subir imagen'}
             </button>
           </div>
-          <div className="grid grid-cols-8 gap-1">
+          <div className="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto pr-0.5">
             {/* «Ninguno» va el primero: quitar el icono tiene que ser tan fácil
                 como ponerlo. */}
             <button type="button" onClick={() => setElegido(null)} title="Sin icono"
@@ -130,11 +143,11 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
                 elegido === null ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100')}>
               —
             </button>
-            {EMOJIS.map(e => (
-              <button key={e} type="button" onClick={() => setElegido(e)}
-                className={cn('h-8 rounded-lg text-base transition-colors',
-                  elegido === e ? 'bg-emerald-100 ring-2 ring-emerald-400' : 'hover:bg-slate-100')}>
-                {e}
+            {ELEGIBLES.map(v => (
+              <button key={v} type="button" onClick={() => setElegido(v)} title={v.slice(PREFIJO.length)}
+                className={cn('h-8 grid place-items-center rounded-lg text-slate-600 transition-colors',
+                  elegido === v ? 'bg-emerald-100 ring-2 ring-emerald-400 text-emerald-700' : 'hover:bg-slate-100')}>
+                <Icono valor={v} tamano={17} />
               </button>
             ))}
           </div>

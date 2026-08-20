@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
 import IconoElemento from '../components/ui/Icono';
+import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import Adjuntos from '../components/archivo/Adjuntos';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
@@ -406,22 +407,25 @@ export function Proyecto() {
             {/* SIN ICONO TAMBIÉN SE VE ALGO (Eugenio, 2026-08-20: «sigue sin
                 aparecer la foto/icono al lado del título»). No fallaba el
                 pintado: el proyecto simplemente NO TENÍA icono, y entonces no
-                salía nada — ni un hueco donde pinchar para ponerlo. Ahora sale
-                su inicial, igual que en el menú, y pulsarla abre el mismo
-                popup de nombre e icono. */}
-            {proyecto.icono ? (
-              <IconoElemento valor={proyecto.icono} tamano={36} className="rounded-lg" />
-            ) : (
-              <button
-                onClick={() => puedoEditar && setRenombrando(true)}
-                disabled={!puedoEditar}
-                title={puedoEditar ? 'Poner un icono' : undefined}
-                className={cn('w-9 h-9 shrink-0 rounded-lg bg-slate-900 text-white grid place-items-center text-sm font-black tracking-tight',
-                  puedoEditar && 'hover:bg-emerald-600 transition-colors')}
-              >
-                {proyecto.titulo.replace(/[^\p{L}\p{N} ]/gu, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || '·'}
-              </button>
-            )}
+                salía nada — ni un hueco donde pinchar para ponerlo.
+
+                LO QUE SALÍA ERA SU INICIAL, Y ESO SE SUSTITUYE (D90,
+                2026-08-21, Eugenio: «que no sean letras»). Ahora sale el icono
+                de trazo que le toca a su nombre, el mismo que en el menú, y
+                pulsarlo sigue abriendo el popup de nombre e icono. */}
+            <button
+              onClick={() => puedoEditar && setRenombrando(true)}
+              disabled={!puedoEditar}
+              title={puedoEditar ? 'Cambiar el icono' : undefined}
+              className={cn('shrink-0 grid place-items-center rounded-lg text-slate-700',
+                puedoEditar && 'hover:text-emerald-600 transition-colors')}
+            >
+              <IconoElemento
+                valor={iconoDeProyecto(proyecto.icono, proyecto.titulo)}
+                tamano={36}
+                className="rounded-lg"
+              />
+            </button>
             <span>{proyecto.titulo}</span>
             {/* CAMBIAR NOMBRE E ICONO DESDE LA PROPIA PÁGINA (Eugenio,
                 2026-08-20: «que tanto el título como el icono se puedan
