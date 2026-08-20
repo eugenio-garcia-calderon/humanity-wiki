@@ -28,7 +28,10 @@ export default function Escritorio() {
     window.addEventListener('humanity:navegador-remoto', al);
     return () => window.removeEventListener('humanity:navegador-remoto', al);
   }, []);
-  const [abierto, setAbierto] = useState(true);
+  // Cerrado al llegar (petición de Eugenio, 2026-08-20): el asistente se comía
+  // un tercio de la pantalla antes de que nadie le preguntara nada. Se abre con
+  // su botón flotante y se queda abierto mientras estés en la página.
+  const [abierto, setAbierto] = useState(false);
   const [turnos, setTurnos] = useState<Turno[]>([]);
   const [texto, setTexto] = useState('');
   const [pensando, setPensando] = useState(false);

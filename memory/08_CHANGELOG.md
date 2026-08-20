@@ -1187,3 +1187,8 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
 - **EL ARREGLO**: la pantalla en directo ya no es el screencast, sino un bucle de **capturas de pantalla** (`page.screenshot`), que SÍ salen a píxeles reales del dispositivo. Medido con el código nuevo: escala 2 → 800×600 (el doble). El bucle captura mientras alguien mira, se salta los fotogramas idénticos para no mandar lo mismo dos veces, y para cuando cierras la pestaña.
 - Verificado: `page.screenshot` con `deviceScaleFactor` 1 → 400×300; con 2 → 800×600. El cliente ya envía `escala = devicePixelRatio` (tope 2) y el `<img>` encoge la imagen grande a su hueco = nitidez real.
 - Coste honesto: una captura es más pesada que un fotograma incremental del screencast, así que el bucle va a ~8 fotogramas/segundo. Para leer y navegar va sobrado; no es para ver vídeo (eso ya va por el reproductor oficial, con sonido).
+
+### 2026-08-20 — El chat del Escritorio nace cerrado
+- **El asistente del Escritorio ya no ocupa un tercio de la pantalla al llegar** (petición de Eugenio: «que el chat de IA esté no desplegado por defecto»): arranca plegado en su botón flotante, y las ventanas usan todo el ancho. Se abre pulsando el botón y se queda abierto mientras estés en la página.
+- Los otros dos chats ya nacían cerrados: el acoplado del resto de la app (`open` en falso) y la barra de los lienzos y el juego, que solo se despliega cuando hay conversación.
+- Verificado en el navegador: Escritorio a pantalla completa con el botón verde abajo a la derecha, y el panel abriéndose al pulsarlo.
