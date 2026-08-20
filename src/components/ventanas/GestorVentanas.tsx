@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import Navegador from './Navegador';
 import BarraDireccion from './BarraDireccion';
 import { publicarVentanas, publicarPaginaWeb, type AbrirVentana } from './bus';
@@ -140,12 +141,27 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
   useEffect(() => {
     const alMensaje = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      if ((e.data || {}).humanity !== 'humanity:ruta') return;
-      const ruta = String((e.data || {}).detalle || '');
+      const aviso = (e.data || {}).humanity;
+      if (aviso !== 'humanity:ruta' && aviso !== 'humanity:gesto-navegacion') return;
       // ¿De qué ventana? La que tenga ese `contentWindow`.
       const id = Object.keys(marcos.current)
         .find(k => marcos.current[k]?.contentWindow === e.source);
-      if (!id || !ruta) return;
+      if (!id) return;
+
+      // DOS DEDOS EN EL TRACKPAD dentro de una página embebida. Llega ya
+      // resuelto en «atrás» o «adelante» (el gesto se detecta dentro, que es
+      // donde ocurre) y se atiende con el mismo historial que las flechas.
+      if (aviso === 'humanity:gesto-navegacion') {
+        const sentido = (e.data || {}).detalle === 'adelante' ? 'adelante' : 'atras';
+        // Deslizar sobre una ventana de atrás la trae al frente, igual que
+        // pincharla. Si no, quedaba raro: la de atrás cambiaba de página sin
+        // dejar de estar detrás.
+        saltarPorGesto(id, sentido);
+        return;
+      }
+
+      const ruta = String((e.data || {}).detalle || '');
+      if (!ruta) return;
 
       setVentanas(vs => vs.map(v => {
         if (v.id !== id) return v;
@@ -194,6 +210,36 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       else marco.contentWindow.history.forward();
     } catch { saltando.current[id] = undefined; }
   }, []);
+
+  /** UN DESLIZAMIENTO, UN SALTO. El aviso del gesto puede llegar por dos vías
+   *  —el puente de la página de dentro y la rueda de la propia ventana— y una
+   *  página que se ha recargado en caliente puede acabar con dos oyentes. Si
+   *  no se cierra la puerta un instante, un solo gesto retrocedería dos
+   *  páginas (visto en pruebas, 2026-08-20).
+   *
+   *  El cierre es SOLO del gesto: las flechas de la barra siguen sueltas,
+   *  porque pulsarlas tres veces seguidas para retroceder tres páginas es algo
+   *  que se hace a propósito. */
+  const ultimoGesto = useRef<Record<string, number>>({});
+  const saltarPorGesto = useCallback((id: string, sentido: 'atras' | 'adelante') => {
+    const ahora = Date.now();
+    if (ahora - (ultimoGesto.current[id] || 0) < 500) return;
+    ultimoGesto.current[id] = ahora;
+    alFrente(id);
+    irEnHistoria(id, sentido);
+  }, [alFrente, irEnHistoria]);
+
+  /** El mismo gesto, pero cuando el deslizamiento cae FUERA del marco: sobre
+   *  la barra de dirección o los bordes de la ventana. Se guarda uno por
+   *  ventana porque el detector lleva cuenta del gesto en curso y compartirlo
+   *  mezclaría deslizamientos de ventanas distintas. */
+  const detectores = useRef<Record<string, (e: WheelEvent) => void>>({});
+  const gestoDe = (id: string) => {
+    if (!detectores.current[id]) {
+      detectores.current[id] = detectorDeGesto(sentido => saltarPorGesto(id, sentido));
+    }
+    return detectores.current[id];
+  };
 
   /** Minimizar, maximizar y cerrar. Es lo único que sobrevive de la barra de
    *  título: el nombre estaba duplicado con la pestaña de arriba. */
@@ -399,6 +445,10 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
         <div
           key={v.id}
           onPointerDown={() => alFrente(v.id)}
+          // Dos dedos en el trackpad = atrás y adelante. Aquí se recogen los
+          // deslizamientos que caen sobre la ventana pero fuera del marco (la
+          // barra de dirección, los bordes); los de dentro llegan por el puente.
+          onWheel={e => gestoDe(v.id)(e.nativeEvent)}
           className="absolute pointer-events-auto flex flex-col rounded-xl overflow-hidden bg-white border border-slate-300 shadow-2xl"
           style={{
             ...(v.maximizada

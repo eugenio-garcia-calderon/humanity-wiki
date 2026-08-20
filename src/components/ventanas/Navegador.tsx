@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X, MoreVertical, Minus, Plus as PlusIcon, Sparkles, Check, ChevronDown, Inbox } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { avisarNavegadorRemoto } from './bus';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -116,6 +117,7 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
   const img = useRef<HTMLImageElement>(null);
   const marcoProxy = useRef<HTMLIFrameElement>(null);
   const sesionRef = useRef<string | null>(null);
+  const navegarRef = useRef<{ atras: () => void; alante: () => void }>({ atras: () => {}, alante: () => {} });
   const tamanoRef = useRef({ ancho: 1024, alto: 700 });
 
   // EL ZOOM, como en Chrome (Eugenio, 2026-08-20: «el mensaje de cookies de
@@ -448,8 +450,17 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
       }).catch(() => {}).finally(soltarRueda);
     };
 
+    // DOS DEDOS = ATRÁS Y ADELANTE, también aquí. Esta pestaña no es un marco
+    // sino una imagen de un Chromium que corre en el servidor, así que el
+    // gesto se decide en este lado y se traduce a su historial de verdad.
+    const gesto = detectorDeGesto(sentido => {
+      if (sentido === 'atras') navegarRef.current.atras();
+      else navegarRef.current.alante();
+    });
+
     const alRodar = (e: WheelEvent) => {
       e.preventDefault();
+      gesto(e);
       const { x, y } = coords(e);
       const r = rueda.current;
       r.dx += e.deltaX; r.dy += e.deltaY; r.x = x; r.y = y;
@@ -526,6 +537,10 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
     if (modo === 'remoto') { setCargando(true); enviar({ tipo: 'adelante' }); }
     else if (donde < historia.length - 1) { setCargando(true); setDonde(d => d + 1); }
   };
+  // El detector de dos dedos se engancha una sola vez, pero atrás y adelante
+  // se redefinen en cada pintado. Se guardan aquí para que el gesto llame
+  // siempre a los de ahora y no a los del primer pintado.
+  navegarRef.current = { atras, alante };
   const recargar = () => {
     setAviso(null);
     setCargando(true);
