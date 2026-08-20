@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
+  FileText,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -28,6 +29,7 @@ const SECCIONES_COMUN = [
   { to: '/mapas', label: 'Mapas', icon: MapIcon },
   { to: '/juego', label: 'Mundo 3D', icon: Gamepad2 },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+  { to: '/paginas', label: 'Páginas', icon: FileText },
   { to: '/tareas', label: 'Tareas', icon: ListChecks },
   { to: '/archivos', label: 'Archivos', icon: Database },
   { to: '/explorar', label: 'Explorar', icon: Compass },
