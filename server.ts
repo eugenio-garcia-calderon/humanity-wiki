@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import { registrarHistorial } from './src/server/historial';
 import path from "path";
 import fs from "fs";
 import Stripe from "stripe";
@@ -709,6 +710,12 @@ async function startServer() {
     return (result.rows[0] as any) || null;
   };
 
+  // ESCRIBIR LA INSTANTÁNEA SE HA IDO A `src/server/historial.ts` (B70,
+  // 2026-08-21). Estaba solo aquí, y por eso el editor de páginas —que guarda
+  // por su propia ruta— subía el contador de versiones sin guardar nada. Al
+  // sacarlo, los dos caminos escriben el historial con el mismo código y no
+  // pueden separarse con el tiempo. Aquí queda la parte que sí es de este
+  // fichero: qué tabla le toca a cada entidad.
   const recordHistory = async (
     entity: string,
     id: string,
@@ -718,17 +725,9 @@ async function startServer() {
   ) => {
     const table = ENTITY_TABLES[entity];
     if (!table) return;
-    const snapshot = await fetchEntityRow(table, id);
-    if (!snapshot) return;
-    await db.execute(sql`
-      INSERT INTO entity_history (entity_type, entity_id, entity_uuid, version, operation, snapshot, previous, changed_by)
-      VALUES (
-        ${entity}, ${id}, ${snapshot.uuid ?? null}, ${snapshot.version ?? 1}, ${operation},
-        ${JSON.stringify(snapshot)}::jsonb,
-        ${previous ? JSON.stringify(previous) : null}::jsonb,
-        ${changedBy}
-      )
-    `);
+    await registrarHistorial(db, {
+      entidad: entity, tabla: table, id, operacion: operation, previo: previous, actor: changedBy,
+    });
   };
 
   // Se aplica DESPUÉS del upsert, en vez de añadir version/updated_by a las

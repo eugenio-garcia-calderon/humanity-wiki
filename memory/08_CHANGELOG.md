@@ -2494,3 +2494,32 @@ does not have two faces depending on where you look at it.
 53 icons, imported one by one from `lucide-react` (already a dependency, 5.592
 icons). Only those 53 enter the bundle. They use `currentColor`, so one icon
 serves light and dark without a second version.
+
+## 2026-08-21 — B70: the page editor saves by itself and now keeps what it replaced
+
+`entity_history` was well built — full snapshot, what was there before, who
+changed it — and had exactly one writer: the generic `/api/data/:entity` route
+in `server.ts`. The page editor does not go through it. It saves with
+`PUT /api/windows/:id`, which did `version = version + 1` and never wrote a
+snapshot.
+
+That is a lie with a number attached: version 47 of a page existed as a counter
+and not as content. And the editor saves **by itself every 1,2 s**. Put the two
+together and you get: you select a paragraph, your finger slips, you type over
+it, and seconds later that is on the server and the previous text is nowhere.
+
+Snapshot writing moved to `src/server/historial.ts`, and `server.ts` now
+delegates to it, so both paths write history with the same code and cannot
+drift apart. `server.ts` lost 12 lines rather than gaining any.
+
+**Grouped, two minutes per person per page.** One snapshot per autosave would be
+~1.500 copies in half an hour of writing — nearly a megabyte per session — to
+be able to return to a thousand versions that differ by one letter. Nobody
+wants «how it was 1,2 seconds ago»; they want «how it was before I started
+writing». Two minutes leaves ~15 snapshots and ~10 KB, and always keeps the
+state before each burst.
+
+Verified on a test page of my own, never on Eugenio's: the original text is
+recoverable from `previous`, three saves inside the window collapsed to one
+row, and after ageing that row past the window a second save produced a second
+row. The generic route still records history after the delegation.

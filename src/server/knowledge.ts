@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { registrarHistorial } from './historial';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
@@ -1639,6 +1640,19 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const d = req.body || {};
       // «Convert to»: cambiar el tipo de una ventana ya creada.
       const kind = d.kind && WINDOW_KINDS.has(d.kind) ? d.kind : null;
+
+      // LO QUE HABÍA ANTES, LEÍDO ANTES (B70, 2026-08-21). Esta ruta subía el
+      // contador de versiones sin guardar ninguna instantánea: la versión 47
+      // existía como número y no como contenido, y como el editor guarda solo
+      // cada 1,2 segundos, un párrafo escrito encima de otro se llevaba el
+      // anterior sin que quedara rastro en ningún sitio.
+      //
+      // Se lee la fila entera y no solo lo que llega en la petición: el editor
+      // manda el documento completo, pero otras llamadas cambian solo el
+      // título, y guardar «lo que venía» en vez de «lo que había» dejaría
+      // huecos justo en lo que no se tocó.
+      const antes = await db.execute(sql`SELECT * FROM knowledge_windows WHERE id = ${req.params.id}`);
+
       await db.execute(sql`
         UPDATE knowledge_windows SET
           title = COALESCE(${d.title ?? null}, title),
@@ -1647,6 +1661,15 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${req.params.id}
       `);
+
+      // Se agrupa: el guardado automático dispara muchas veces por minuto y
+      // mil versiones separadas por una letra no le sirven a nadie. Ver
+      // `AGRUPAR_MINUTOS` en `historial.ts` para las cuentas.
+      await registrarHistorial(db, {
+        entidad: 'knowledge_windows', tabla: 'knowledge_windows', id: req.params.id,
+        operacion: 'update', previo: antes.rows[0] ?? null, actor: req.user!.id, agrupar: true,
+      });
+
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
