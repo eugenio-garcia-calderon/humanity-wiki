@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { TextoEditable } from '../components/tablero/TableroKanban';
+import { abrirVentana } from '../components/ventanas/bus';
 
 type Estado = 'por_hacer' | 'en_curso' | 'hecho';
 
@@ -319,16 +320,30 @@ export default function Tareas() {
                       const e = ESTADOS[t.estado] || ESTADOS.por_hacer;
                       const Icono = e.icono;
                       return (
-                        <li key={t.id} className="flex items-start gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                        <li
+                          key={t.id}
+                          // PINCHAR UNA TAREA LA ABRE (2026-08-20, Eugenio: «no
+                          // puedo hacer click en una de ellas y que se abra la
+                          // ventana»). Se abre el tablero de su proyecto con
+                          // esa tarjeta ya desplegada: es donde está todo lo
+                          // suyo —notas, responsable, fotos—, y así no hay una
+                          // segunda ficha que mantener.
+                          onClick={() => abrirVentana({
+                            titulo: p.titulo,
+                            clase: 'app',
+                            destino: `${p.url}${p.url.includes('?') ? '&' : '?'}tarea=${t.id}`,
+                          })}
+                          title="Abrir esta tarea"
+                          className="flex items-start gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors cursor-pointer">
                           <button
-                            onClick={() => p.mio && siguienteEstado(t.id, t.estado)}
+                            onClick={e => { e.stopPropagation(); if (p.mio) siguienteEstado(t.id, t.estado); }}
                             disabled={!p.mio}
                             title={p.mio ? 'Cambiar de estado' : undefined}
                             className={cn('mt-0.5 shrink-0 rounded-full', p.mio && 'hover:scale-110 transition-transform')}
                           >
                             <Icono className={cn('w-4 h-4', e.color)} />
                           </button>
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex-1" onClick={e => e.stopPropagation()}>
                             <TextoEditable
                               valor={t.titulo}
                               editable={!!p.mio}

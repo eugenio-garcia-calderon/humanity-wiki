@@ -1877,3 +1877,48 @@ Verified live: hiding Productos removed it from the sidebar, dragging Personas
 to the top reordered it, and renaming Áreas to «Mis áreas» with a 🎯 showed up
 immediately and persisted to the database. The test configuration was then
 deleted so Eugenio's menu is exactly as he left it.
+
+## 2026-08-20 — The assistant can actually do things in the app (and knows when it fails)
+
+Eugenio hit «Unexpected token '<'…» asking the chat for something simple, and —
+worse — when he asked what had gone wrong, the assistant said it had no record
+of any failure. Both halves were real bugs, and testing 24 requests found four
+more.
+
+**1. The chat parsed every response as JSON, blindly.** `res.json()` before
+checking `res.ok`. A 413 (body too large) returns an **HTML** page, so the raw
+`Unexpected token '<'` landed in front of a person. Now the body is read as
+text and parsed defensively, with a human sentence per status code.
+
+**2. The assistant could not know it had failed** — the failure happens in the
+*browser*, so nothing ever reaches the model, and «no me consta ningún fallo»
+was a correct answer to a question it could not see. The last failure is now
+kept client-side for ten minutes and travels in the context, with an explicit
+prompt line: if asked what failed, tell them THIS.
+
+**3. It had no action to create a task.** The catalogue had challenges, maps and
+graphs but nothing for the platform's own daily objects — so «añade una tarea al
+proyecto Humanity.wiki» was impossible. Added `CREATE_TAREA`, `UPDATE_TAREA`,
+`CREATE_PROYECTO` and `CREATE_PAGINA`, all resolving names the way a person says
+them («en el Camión camperizado») against **that user's own** rows.
+
+**4. «Te lo apunto» without apuntar anything, again.** Fixed three times before
+by moving the instruction around the prompt, and it kept coming back. Now it is
+**detected instead of trusted**: if the reply promises an action and no block
+arrived, the model is asked once more for the block alone. A short second call
+is far cheaper than a task someone believes they have and does not.
+
+**5. The assistant was blind to the user's own data.** «¿Qué proyectos tengo?»
+answered with a platform *seed* project, because the retrieved context is the
+common knowledge graph. The chat route now builds a short index of **your**
+projects, pending tasks, people and upcoming events. This also makes the task
+actions land in the right project.
+
+**6. Tasks in `/tareas` were not clickable.** Clicking a row now opens its
+project board with that card open (`?tarea=<id>`), so there is no second detail
+view to maintain.
+
+Tested with 24 distinct requests — basic questions, single actions, multi-step
+(«un proyecto y dentro dos tareas» → 3 actions), a project that does not exist,
+recurring events, accents, symbols — plus end-to-end execution confirming the
+rows really appear in the database. All test data deleted afterwards.

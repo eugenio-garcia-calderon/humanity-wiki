@@ -16,8 +16,8 @@ const newId = () =>
 export const GRUPOS = [
   'canvas', 'mapas', 'datos', 'social', 'mercado', 'diseno', 'ia', 'infra', 'gobernanza',
 ] as const;
-const ESTADOS = new Set(['hecho', 'en_curso', 'por_hacer']);
-const PRIORIDADES = new Set(['alta', 'media', 'baja']);
+export const ESTADOS = new Set(['hecho', 'en_curso', 'por_hacer']);
+export const PRIORIDADES = new Set(['alta', 'media', 'baja']);
 
 export function registerRoadmapRoutes(app: Express, db: any) {
 
