@@ -20,6 +20,14 @@ interface Turno { quien: 'tu' | 'ia'; texto: string }
 export default function Escritorio() {
   /** Qué web hay abierta AHORA en la ventana del navegador. */
   const [pagina, setPagina] = useState<string | null>(null);
+  /** La sesión del Chromium remoto, si la hay: con ella la IA lee la página
+   *  VIVA (el DOM real, después del JavaScript) en vez de una copia. */
+  const [sesionRemota, setSesionRemota] = useState<string | null>(null);
+  useEffect(() => {
+    const al = (e: Event) => setSesionRemota((e as CustomEvent).detail ?? null);
+    window.addEventListener('humanity:navegador-remoto', al);
+    return () => window.removeEventListener('humanity:navegador-remoto', al);
+  }, []);
   const [abierto, setAbierto] = useState(true);
   const [turnos, setTurnos] = useState<Turno[]>([]);
   const [texto, setTexto] = useState('');
@@ -42,8 +50,16 @@ export default function Escritorio() {
     try {
       let contexto = '';
       if (pagina) {
-        const r = await fetch(`/api/navegador/leer?url=${encodeURIComponent(pagina)}`, { credentials: 'include' });
-        const j = await r.json();
+        // Con Chromium remoto se lee la página VIVA; sin él, una copia fresca.
+        let j: any = null;
+        if (sesionRemota) {
+          const rv = await fetch(`/api/navegador/remoto/${sesionRemota}/leer`, { credentials: 'include' }).catch(() => null);
+          if (rv?.ok) j = await rv.json();
+        }
+        if (!j) {
+          const r = await fetch(`/api/navegador/leer?url=${encodeURIComponent(pagina)}`, { credentials: 'include' });
+          j = await r.json();
+        }
         if (!j.error) {
           contexto = [
             `[La persona está mirando esta página en el navegador de la app]`,

@@ -162,3 +162,19 @@ producción. Hoy hay `geo/`, `illustrations/`, `knowledge/` y `modelos-juego/`, 
 ninguna colisiona. No hay nada que impida repetirlo: la salvaguarda sería una
 comprobación en el build que compare los nombres de `public/*` con las rutas de
 `App.tsx` (~30 min). Mientras tanto, la regla vive comentada en `Modelos.tsx`.
+
+## Navegador remoto (Chromium) — 2026-08-20
+- **Chromium corre sin su sandbox interno** (`chromiumSandbox: false`): dentro del
+  contenedor Alpine no hay espacios de nombres de usuario y no arrancaría. El
+  aislamiento real es el del contenedor. Camino correcto: imagen con seccomp de
+  Playwright o user namespaces; ~half a day cuando el navegador tenga uso real.
+- **El filtro anti-red-interna solo mira las NAVEGACIONES** (documentos), no cada
+  subrecurso: comprobar DNS en cada imagen sería un peaje enorme y un subrecurso
+  interno no es legible desde la página. El rebinding de DNS queda como riesgo
+  teórico aceptado.
+- **La pantalla viaja sin sonido** (el screencast son JPEG). Los vídeos van por el
+  embed oficial, que sí suena. Audio de verdad = WebRTC (fase futura, tipo neko).
+- **Las sesiones no guardan cookies**: cada ventana nueva es un Chromium virgen
+  (consentimientos y logins se repiten). Mitigable con un perfil persistente por
+  usuario (`userDataDir`) — decisión de producto pendiente, tiene implicaciones de
+  privacidad y disco.

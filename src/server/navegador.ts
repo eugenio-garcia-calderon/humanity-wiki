@@ -65,7 +65,7 @@ const PRIVADAS = [
   /^127\./, /^10\./, /^192\.168\./, /^169\.254\./, /^0\./,
   /^172\.(1[6-9]|2\d|3[01])\./,
 ];
-async function esPublica(host: string): Promise<boolean> {
+export async function esPublica(host: string): Promise<boolean> {
   try {
     const ips = isIP(host) ? [host] : (await lookup(host, { all: true })).map(r => r.address);
     if (!ips.length) return false;
