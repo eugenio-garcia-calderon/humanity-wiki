@@ -1453,3 +1453,9 @@ Eugenio: «en la sección de personas, crea una página donde se puedan ver toda
 - **DOS FALLOS MÍOS, CAZADOS AL PROBARLO**:
   - **El tope de 8 caracteres partía las direcciones**: un icono de imagen se guardaba como `/uploads` y a volar. Ese tope estaba pensado solo para emojis, de cuando no había otra cosa.
   - **Se colaba cualquier texto raro como icono.** Ahora una dirección solo vale si es **de aquí** (`/uploads/…`) o **https**, y un emoji no puede llevar `:` ni `<`. Un `javascript:` ahí no haría daño —el icono nunca entra en un enlace— pero guardar basura que parece un enlace es pedir que algún día alguien la trate como tal. Verificado: imagen propia y emoji entran; `javascript:` y una imagen de fuera se rechazan sin tocar lo que había.
+
+### 2026-08-20 — Tres filas de cabecera se quedan en dos, y un botón para dejarlas en una
+Eugenio, con captura: «sobra la línea de Retos de la Humanidad xvf2, solo tiene que quedar la de arriba y la de abajo, actualmente hay 3 líneas de datos, esto no puede ser».
+- **FUERA LA BARRA DE TÍTULO DE CADA VENTANA.** Tenía razón: el nombre ya estaba en su pestaña de arriba, así que era **la misma información dos veces**. Sus botones —minimizar, maximizar, cerrar— se han ido al final de la **barra de dirección**, que es también de donde se tira ahora para mover la ventana. En el Navegador van al final de su propia barra, que ya existía.
+- **TODO MÁS BAJO**: la cabecera pasa de 56 a **40 px** (32 en compacto), las pestañas de 32 a 28, y la barra de dirección adelgaza. Eran tres filas para lo mismo; ahora que son dos, cada una tiene que pesar lo mínimo.
+- **BOTÓN DE ENCOGER** («que colapse en algo todavía más sencillo, con solo iconos de las ventanas»): las pestañas se quedan en **iconos de 24 px sin nombre**, y la barra de dirección de la ventana se reduce a una tira de 22 px con los tres botones. Es lo mínimo que puede quedar sin perder el poder cerrarla. **Se recuerda** cómo lo dejaste.

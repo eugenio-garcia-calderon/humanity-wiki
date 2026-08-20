@@ -57,7 +57,10 @@ const MIN_AN = 320, MIN_AL = 220;
 
 let contadorZ = 10;
 
-export default function GestorVentanas({ onPaginaNavegador }: {
+export default function GestorVentanas({ onPaginaNavegador, compacto = false }: {
+  /** Modo compacto: sin barra de dirección, solo el contenido. Se manda desde
+   *  la cabecera, que es donde está el botón. */
+  compacto?: boolean;
   /** Se avisa a la página de cuál es la web abierta: es lo que deja a la IA
    *  del chat SABER dónde estás mirando. */
   onPaginaNavegador?: (url: string | null) => void;
@@ -191,6 +194,25 @@ export default function GestorVentanas({ onPaginaNavegador }: {
       else marco.contentWindow.history.forward();
     } catch { saltando.current[id] = undefined; }
   }, []);
+
+  /** Minimizar, maximizar y cerrar. Es lo único que sobrevive de la barra de
+   *  título: el nombre estaba duplicado con la pestaña de arriba. */
+  const controlesDe = (v: Ventana) => (
+    <>
+      <button onClick={() => cambiar(v.id, { minimizada: true })} title="Minimizar"
+        className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500 shrink-0">
+        <Minus className="w-3.5 h-3.5" />
+      </button>
+      <button onClick={() => cambiar(v.id, { maximizada: !v.maximizada })} title={v.maximizada ? 'Restaurar' : 'Maximizar'}
+        className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500 shrink-0">
+        {v.maximizada ? <Copy className="w-3 h-3" /> : <Square className="w-3 h-3" />}
+      </button>
+      <button onClick={() => cerrar(v.id)} title="Cerrar"
+        className="w-6 h-6 grid place-items-center rounded hover:bg-rose-100 hover:text-rose-600 text-slate-500 shrink-0">
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </>
+  );
 
   const cerrar = useCallback((id: string) => {
     setVentanas(vs => vs.filter(v => v.id !== id));
@@ -386,37 +408,12 @@ export default function GestorVentanas({ onPaginaNavegador }: {
             ...(v.minimizada ? { display: 'none' } : {}),
           }}
         >
-          {/* Barra de título: de aquí se tira para mover */}
-          <div
-            onPointerDown={e => empezarGesto(e, v, 'mover')}
-            onDoubleClick={() => cambiar(v.id, { maximizada: !v.maximizada })}
-            className={cn('flex items-center gap-2 px-2.5 shrink-0 select-none touch-none border-b border-slate-200 bg-slate-50',
-              !v.maximizada && 'cursor-grab active:cursor-grabbing')}
-            style={{ height: BARRA }}
-          >
-            {/* El icono del mando valía cuando la única ventana era el Mundo
-                3D; ahora aquí se abre cualquier herramienta, así que la marca
-                neutra de ventana dice la verdad. */}
-            {v.clase === 'navegador'
-              ? <Globe className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              : <AppWindow className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
-            <span className="text-[11px] font-black text-slate-700 truncate">{v.titulo}</span>
-            <div className="ml-auto flex items-center gap-0.5">
-              <button onClick={() => cambiar(v.id, { minimizada: true })} title="Minimizar"
-                className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500">
-                <Minus className="w-3.5 h-3.5" />
-              </button>
-              <button onClick={() => cambiar(v.id, { maximizada: !v.maximizada })} title={v.maximizada ? 'Restaurar' : 'Maximizar'}
-                className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500">
-                {v.maximizada ? <Copy className="w-3 h-3" /> : <Square className="w-3 h-3" />}
-              </button>
-              <button onClick={() => cerrar(v.id)} title="Cerrar"
-                className="w-6 h-6 grid place-items-center rounded hover:bg-rose-100 hover:text-rose-600 text-slate-500">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
+          {/* SIN BARRA DE TÍTULO (Eugenio, 2026-08-20: «sobra la línea de
+              Retos de la Humanidad, actualmente hay 3 líneas de datos, esto no
+              puede ser»). Tenía razón: el nombre ya estaba en la pestaña de
+              arriba, así que era la misma información dos veces. Sus botones
+              —minimizar, maximizar, cerrar— se han ido a la barra de
+              dirección, que ahora es también de donde se tira para mover. */}
           {/* El contenido. `inert` en las ventanas de ATRÁS: el juego embebido
               coge el foco del teclado para sus controles y, si está de fondo,
               SE LO ROBA a la ventana de delante — escribías en el navegador y
@@ -431,10 +428,15 @@ export default function GestorVentanas({ onPaginaNavegador }: {
             className="flex-1 min-h-0 flex flex-col bg-white"
             inert={v.z === Math.max(...ventanas.filter(x => !x.minimizada).map(x => x.z)) ? undefined : true}
           >
-            {/* LA BARRA DE DIRECCIONES, solo en las ventanas de la app: el
-                Navegador ya trae la suya, y poner dos sería absurdo. */}
+            {/* LOS BOTONES DE LA VENTANA, que antes vivían en la barra de
+                título. Van al final de la única barra que queda. */}
             {v.clase === 'app' && (
               <BarraDireccion
+                compacto={compacto}
+                onMover={e => empezarGesto(e, v, 'mover')}
+                onDobleClic={() => cambiar(v.id, { maximizada: !v.maximizada })}
+                arrastrable={!v.maximizada}
+                controles={controlesDe(v)}
                 ruta={v.ruta || v.destino}
                 onNombre={n => { if (n && n !== v.titulo) cambiar(v.id, { titulo: n }); }}
                 puedeAtras={(v.pos ?? 0) > 0}
@@ -454,6 +456,9 @@ export default function GestorVentanas({ onPaginaNavegador }: {
           <div className="flex-1 min-h-0 relative bg-white">
             {v.clase === 'navegador'
               ? <Navegador inicial={v.destino}
+                  controles={controlesDe(v)}
+                  onMover={e => empezarGesto(e, v, 'mover')}
+                  arrastrable={!v.maximizada}
                   onTitulo={t => cambiar(v.id, { titulo: t })}
                   onUrl={u => { cambiar(v.id, { destino: u }); onPaginaNavegador?.(u); publicarPaginaWeb(u); }} />
               : (
