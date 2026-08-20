@@ -4,7 +4,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe,
 } from 'lucide-react';
-import { abrirVentana, pulsarVentana, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
+import { abrirVentana, pulsarVentana, cerrarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -59,6 +59,24 @@ export default function Layout() {
     return () => window.removeEventListener('humanity:ventanas', f);
   }, []);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // ARRASTRAR PESTAÑAS (Eugenio, 2026-08-20: «también cambiarlas de posición
+  // pinchando y arrastrando»). Con `draggable` del propio navegador: son diez
+  // elementos en una fila, no hace falta traer una librería de arrastre para
+  // esto. El id viaja en una referencia y no en `dataTransfer` porque Safari
+  // no deja leer los datos hasta que sueltas, y así el destino no puede saber
+  // durante el gesto si tiene que apartarse.
+  const arrastrando = useRef<string | null>(null);
+  const soltarPestana = (destino: number) => {
+    const id = arrastrando.current;
+    arrastrando.current = null;
+    if (!id) return;
+    const ids = ventanasAbiertas.map(v => v.id);
+    const desde = ids.indexOf(id);
+    if (desde < 0 || desde === destino) return;
+    ids.splice(destino, 0, ids.splice(desde, 1)[0]);
+    ordenarVentanas(ids);
+  };
 
   useEffect(() => {
     const fuera = (e: MouseEvent) => {
@@ -134,8 +152,17 @@ export default function Layout() {
   /** Una entrada del menú ☰. SIEMPRE abre una ventana, estés donde estés
    *  (petición de Eugenio, 2026-08-20: «que cuando haces click en una de las
    *  apps ya se te quede arriba, sin necesidad de tener que estar en
-   *  escritorio»). Las páginas de cuenta y ajustes sí navegan: no son
-   *  herramientas, son sitios donde vas una vez. */
+   *  escritorio»).
+   *
+   *  TU PERFIL TAMBIÉN, y con razón (Eugenio, 2026-08-20: «la página de mi
+   *  perfil no funciona bien como el resto de herramientas… es una página muy
+   *  importante y tiene que tener la misma funcionalidad de escritorio»). Se
+   *  había dejado navegando por creerla «un sitio donde vas una vez», y es al
+   *  revés: es a donde más se vuelve.
+   *
+   *  Lo único que sigue navegando es INICIAR SESIÓN: mientras no hay sesión no
+   *  hay escritorio al que volver, y entrar dentro de una ventana te deja la
+   *  app de fuera sin enterarse de que ya has entrado. */
   const entradaMenu = (x: { to: string; label: string; icon: any; navega?: boolean }) => {
     const abierta = ventanasAbiertas.some(v => v.destino === x.to);
     const clases = cn('w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold transition-colors text-left',
@@ -198,14 +225,14 @@ export default function Layout() {
               <p className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Tu cuenta</p>
               {user ? (
                 <>
-                  {entradaMenu({ to: `/personas/${user.id}`, label: `Tu perfil (${user.roleLabel})`, icon: User, navega: true })}
-                  {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2, navega: true })}
+                  {entradaMenu({ to: `/personas/${user.id}`, label: 'Mi Perfil', icon: User })}
+                  {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2 })}
                   {/* El inventario de tablas reales. Era «Base de Datos» en el
                       menú principal; ese sitio lo ocupa ahora «Archivos» (lo
                       tuyo). Sigue vivo aquí porque es una herramienta útil de
                       administración, no una página que nadie quisiera. */}
-                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database, navega: true })}
-                  {entradaMenu({ to: '/configuracion', label: 'Configuración', icon: Settings, navega: true })}
+                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database })}
+                  {entradaMenu({ to: '/configuracion', label: 'Configuración', icon: Settings })}
                   <button
                     onClick={() => { setMenuOpen(false); logout(); navigate('/'); }}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left"
@@ -235,31 +262,51 @@ export default function Layout() {
             en forma de iconos para que no ocupen mucho»). Pulsar uno trae la
             ventana; si ya está delante, la minimiza. */}
         {ventanasAbiertas.length > 0 && (
-          <div className="flex items-center gap-1 ml-1 overflow-x-auto">
-            {ventanasAbiertas.map(v => {
+          <div className="flex items-center gap-1 ml-1 overflow-x-auto min-w-0">
+            {ventanasAbiertas.map((v, i) => {
+              // Las de la cuenta no están en TODAS_SECCIONES (su dirección
+              // lleva tu id dentro), así que se reconocen por el principio.
               const Icono = v.clase === 'navegador'
                 ? Globe
-                : (TODAS_SECCIONES.find(sec => sec.to === v.destino)?.icon || AppWindow);
+                : v.destino.startsWith('/personas/') ? User
+                  : v.destino === '/configuracion' ? Settings
+                    : v.destino === '/admin/usuarios' ? Users2
+                      : (TODAS_SECCIONES.find(sec => sec.to === v.destino)?.icon || AppWindow);
               return (
-                <button
+                <div
                   key={v.id}
+                  draggable
+                  onDragStart={e => { arrastrando.current = v.id; e.dataTransfer.effectAllowed = 'move'; }}
+                  onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+                  onDrop={e => { e.preventDefault(); soltarPestana(i); }}
+                  onDragEnd={() => { arrastrando.current = null; }}
                   onClick={() => pulsarVentana(v.id)}
                   title={v.titulo}
-                  className={cn('h-8 flex items-center gap-1.5 rounded-lg border shrink-0 transition-colors',
-                    // La que estás mirando lleva NOMBRE, no solo icono
-                    // (petición de Eugenio, 2026-08-20: «que la página en la
-                    // que estás esté marcada»). Las demás siguen siendo
-                    // iconos de 32 px para que quepan muchas.
-                    v.delante ? 'px-2.5 bg-slate-900 border-slate-900 text-white' : 'w-8 justify-center',
-                    !v.delante && (v.minimizada
-                      ? 'bg-white border-slate-200 text-slate-300 hover:text-slate-500'
-                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'))}
+                  className={cn('group h-8 flex items-center gap-1.5 pl-2.5 rounded-lg border shrink-0 cursor-pointer transition-colors',
+                    // La ✕ solo en la pestaña que miras (Eugenio, 2026-08-20:
+                    // «para que ocupe menos»): las demás no gastan esos 20 px.
+                    v.delante ? 'pr-1' : 'pr-2.5',
+                    v.delante
+                      ? 'bg-slate-900 border-slate-900 text-white'
+                      : v.minimizada
+                        ? 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
                 >
                   <Icono className="w-4 h-4 shrink-0" />
+                  <span className="text-[11px] font-black tracking-tight max-w-[8rem] truncate">{v.titulo}</span>
+                  {/* La ✕ de una pestaña de navegador, y SOLO en la que
+                      miras. `stopPropagation` para que cerrar no cuente
+                      además como pulsar la pestaña. */}
                   {v.delante && (
-                    <span className="text-[11px] font-black tracking-tight max-w-[9rem] truncate">{v.titulo}</span>
+                    <button
+                      onClick={e => { e.stopPropagation(); cerrarVentana(v.id); }}
+                      title={`Cerrar ${v.titulo}`}
+                      className="w-5 h-5 grid place-items-center rounded shrink-0 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
