@@ -49,6 +49,8 @@ interface Message {
   attachmentName?: string;
   /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
   usage?: { model: string; totalCents: number };
+  /** El router no dio lo pedido (sin nivel, tope agotado…): se enseña. */
+  aviso?: string;
   /** Pregunta con opciones (estilo Claude Code): botones 1/2/… + «Otro». */
   question?: { text: string; options: string[]; answered?: boolean };
   /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
@@ -56,7 +58,7 @@ interface Message {
 }
 
 /** Modelo de Anthropic o Google disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
-interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; }
+interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; gratis?: boolean; nivelMinimo?: number; }
 
 interface PendingAttachment {
   name: string;
@@ -283,7 +285,7 @@ export default function AIAssistant() {
    *  ajustes (Eugenio, 2026-08-20: «que se sepa qué modelo usa»). */
   const modeloActual = selectedModel && status?.models?.[selectedModel]
     ? status.models[selectedModel].label
-    : 'Modelo de la plataforma';
+    : 'Automático';
 
   const currentContext = () => ({
     route: location.pathname,
@@ -451,6 +453,7 @@ export default function AIAssistant() {
         actions: json.proposed_actions,
         question: json.question || undefined,
         usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
+        aviso: json.aviso_modelo || undefined,
         imageUrl: json.imageUrl || undefined,
       }]);
       applyUiEvents(json.ui_events);
@@ -655,17 +658,28 @@ export default function AIAssistant() {
                     </div>
                   )}
 
-                  {/* Coste real de esta respuesta: créditos de Anthropic + comisión (Fase 12) */}
+                  {/* El router no dio lo pedido (sin nivel, tope agotado…):
+                      se dice donde se ve, no en una consola. */}
+                  {m.aviso && (
+                    <p className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-800">
+                      {m.aviso}
+                    </p>
+                  )}
+
+                  {/* Qué costó y con qué modelo. Con los gratis y el premium
+                      cubierto el total es 0: se dice «gratis», no «0,0000 €». */}
                   {m.usage && (
                     <p className="mt-2 pt-1.5 border-t border-slate-200/70 text-[9px] text-slate-400 flex items-center gap-1">
                       <Euro className="w-2.5 h-2.5" />
-                      {(m.usage.totalCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} €
-                      · {(() => {
+                      {m.usage.totalCents > 0
+                        ? `${(m.usage.totalCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} € · `
+                        : 'gratis · '}
+                      {(() => {
                         // El proveedor devuelve el ID con fecha (p. ej. claude-haiku-4-5-20251001);
                         // el catálogo usa el ID corto — se empareja por prefijo.
                         const entry = Object.entries(status?.models || {}).find(([id]) => m.usage!.model.startsWith(id));
                         return entry ? entry[1].label : m.usage!.model;
-                      })()} · incl. comisión de la plataforma
+                      })()}{m.usage.totalCents > 0 ? ' · incl. comisión de la plataforma' : ''}
                     </p>
                   )}
                 </div>
@@ -786,27 +800,51 @@ export default function AIAssistant() {
                     <Cpu className="w-3 h-3" /> Modelo de IA
                   </p>
                   <div className="space-y-1">
-                    {Object.entries(status.models).map(([id, info]) => (
+                    {/* AUTOMÁTICO (2026-08-20): sin elección, el servidor manda
+                        cada mensaje al modelo que le toca por complejidad. Es
+                        la opción por defecto y la recomendada. */}
+                    <button
+                      onClick={() => setSelectedModel('')}
+                      className={cn(
+                        'w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
+                        !selectedModel ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
+                      )}
+                    >
+                      <span>
+                        <span className="font-bold text-slate-700">Automático</span>
+                        <span className="text-slate-400"> · elige el mejor para cada mensaje</span>
+                      </span>
+                      <span className="text-emerald-600 font-bold shrink-0">recomendado</span>
+                    </button>
+                    {Object.entries(status.models).map(([id, info]) => {
+                      // Sin nivel no se puede ELEGIR un modelo de pago, y se
+                      // dice en la propia fila en vez de esconder la opción:
+                      // saber qué hay es parte de querer verificarse.
+                      const bloqueado = (info.nivelMinimo ?? 0) > (user?.roleLevel ?? 0);
+                      return (
                       <button
                         key={id}
+                        disabled={bloqueado}
                         onClick={() => setSelectedModel(id)}
                         className={cn(
                           'w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
-                          selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
+                          bloqueado ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed'
+                            : selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:border-emerald-200'
                         )}
                       >
                         <span>
                           <span className="font-bold text-slate-700">{info.label}</span>
                           <span className="text-slate-400"> · {info.hint}</span>
                         </span>
-                        <span className="text-slate-400 shrink-0">
-                          {info.image ? 'por imagen' : `$${(info.input / 100).toFixed(2)}/$${(info.output / 100).toFixed(2)} p. 1M`}
+                        <span className={cn('shrink-0 font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
+                          {bloqueado ? 'verificados' : info.gratis ? 'gratis' : info.image ? 'por imagen' : 'incluido'}
                         </span>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                    Se te factura el coste real de créditos de Anthropic más un {Math.round((status.platformFee ?? 0.5) * 100)}% de comisión de la plataforma. Precio orientativo por millón de tokens (entrada/salida).
+                    Los modelos «gratis» los cubre la plataforma. Los premium están incluidos para usuarios verificados, con un tope mensual de uso.
                   </p>
                 </div>
               )}

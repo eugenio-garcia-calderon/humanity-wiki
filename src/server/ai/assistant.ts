@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import {
   getProvider, listProviders, providerOfModel, generarImagenNanoBanana, NANO_BANANA_CATALOG_MODEL,
   type AIMessage, type AIContentBlock, AI_MODELS, AI_PLATFORM_FEE,
+  elegirModelo, topePremiumCents, NIVEL_PREMIUM,
 } from './provider.js';
 import { ROLE } from '../auth.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
@@ -368,7 +369,9 @@ REGLAS DE ESTA CONVERSACIÓN (continúan las de arriba):
 ${editMode === EDIT_MODES.MANUAL ? '7. El usuario está en modo MANUAL: puedes sugerir cambios en texto, pero NO devuelvas acciones.' : ''}
 ${webSearch
   ? '8. Tienes activada la búsqueda en internet: úsala SOLO para lo que el contexto de la plataforma no cubra (datos externos, actualidad, verificación). Prioriza siempre el contexto recuperado de la plataforma cuando exista.'
-  : '8. La búsqueda en internet está desactivada para esta pregunta: responde solo con el contexto de la plataforma y tu conocimiento general, sin inventar que has buscado nada.'}`;
+  : '8. La búsqueda en internet está desactivada para esta pregunta: responde solo con el contexto de la plataforma y tu conocimiento general, sin inventar que has buscado nada.'}
+
+REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado o creado algo, el bloque \`\`\`redhumana con la acción es OBLIGATORIO en ESTA respuesta. Sin bloque no se crea nada: decir «te lo apunto» sin bloque es mentirle al usuario.`;
 
     return { estable, variable };
   };
@@ -521,11 +524,37 @@ ${webSearch
       const { message, context, edit_mode, search_web, attachment } = req.body || {};
       if (!message) return res.status(400).json({ error: 'Falta el mensaje.' });
 
-      // Modelo elegido por el usuario (validado contra el catálogo): decide
-      // TAMBIÉN el proveedor, para que «Gemini 2.5 Flash» hable de verdad con
-      // Google y no con Claude (2026-08-08, petición del usuario: «que se
-      // pueda conectar a diferentes modelos tanto de Anthropic como de Google»).
-      const chosenModel = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
+      // Modelo pedido a mano por el usuario (validado contra el catálogo).
+      const pedido = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
+
+      // EL ROUTER (2026-08-20): con la clave de Together puesta, cada mensaje
+      // va al modelo que le toca por complejidad — ver `elegirModelo` en
+      // provider.ts, donde está la escalera entera. Sin la clave, todo sigue
+      // como siempre. El tope mensual de uso premium cubierto se mira aquí
+      // porque necesita la base de datos y el router es una función pura.
+      const nivel = req.user?.roleLevel ?? 0;
+      const abiertosListos = getProvider('together').isReady();
+      let topeAgotado = false;
+      if (abiertosListos && nivel >= NIVEL_PREMIUM && req.user) {
+        const gastado = await db.execute(sql`
+          SELECT coalesce(sum(cost_cents), 0)::float AS c FROM ai_usage_charges
+          WHERE user_id = ${req.user.id} AND total_cents = 0 AND cost_cents > 0
+            AND model NOT LIKE 'abierto-%'
+            AND created_at >= date_trunc('month', now())
+        `);
+        topeAgotado = ((gastado.rows[0] as any)?.c ?? 0) >= topePremiumCents();
+      }
+      const eleccion = elegirModelo({
+        pedido,
+        nivel,
+        mensaje: String(message),
+        llevaDocumento: attachment?.type === 'document' || attachment?.media_type === 'application/pdf',
+        webSearch: !!search_web,
+        juego: !!context?.juego,
+        topeAgotado,
+        abiertosListos,
+      });
+      const chosenModel = eleccion.model;
       // Nano Banana genera una IMAGEN, no texto: no encaja en AIProvider.complete()
       // (texto→texto), así que se trata aparte más abajo y aquí no pasa por
       // el proveedor de chat de texto.
@@ -539,7 +568,9 @@ ${webSearch
         return res.status(503).json({
           error: provider!.name === 'gemini'
             ? 'Gemini está construido pero inactivo: falta GEMINI_API_KEY en .env.'
-            : 'El asistente está construido pero inactivo: falta ANTHROPIC_API_KEY en .env.',
+            : provider!.name === 'together'
+              ? 'Los modelos abiertos están construidos pero inactivos: falta TOGETHER_API_KEY en .env.'
+              : 'El asistente está construido pero inactivo: falta ANTHROPIC_API_KEY en .env.',
           ready: false,
         });
       }
@@ -649,7 +680,7 @@ ${webSearch
         // cacheable (ver `systemEstable` en provider.ts). En el juego llega
         // vacía y todo va como antes.
         systemEstable: prompt.estable || undefined,
-        messages, webSearch: !!search_web, model: chosenModel,
+        messages, webSearch: !!search_web && providerOfModel(chosenModel) === 'claude', model: chosenModel,
       });
       const { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
 
@@ -722,18 +753,28 @@ ${webSearch
           // 10% dentro de costCents). Es el dato que dice si la caché acierta.
           cacheReadTokens: result.cacheReadTokens ?? 0,
           costCents: result.costCents, durationMs: result.durationMs,
-          feeCents: result.costCents * AI_PLATFORM_FEE,
-          totalCents: result.costCents * (1 + AI_PLATFORM_FEE),
+          // Lo que paga la persona: nada en modelos gratis y en premium cubierto.
+          feeCents: eleccion.cobro === 'de_pago' ? result.costCents * AI_PLATFORM_FEE : 0,
+          totalCents: eleccion.cobro === 'de_pago' ? result.costCents * (1 + AI_PLATFORM_FEE) : 0,
+          cobro: eleccion.cobro, motivo: eleccion.motivo,
         },
+        // Si el router no dio lo pedido (sin nivel, tope agotado), se dice.
+        aviso_modelo: eleccion.aviso || undefined,
       });
 
-      // Libro de consumo: coste de créditos + 50% de comisión, a nombre del
-      // usuario (fire-and-forget; nunca bloquea la respuesta).
+      // Libro de consumo (fire-and-forget; nunca bloquea la respuesta).
+      // `cost_cents` es SIEMPRE el coste real — es lo que ve el panel de
+      // administración y lo que alimenta el tope mensual. Lo que cambia según
+      // el router es lo que paga la persona: en los modelos gratis y en el
+      // uso premium cubierto, cero.
       if (req.user) {
+        const dePago = eleccion.cobro === 'de_pago';
         db.execute(sql`
           INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents, conversation_id)
           VALUES (${req.user.id}, 'chat', ${result.model}, ${result.inputTokens}, ${result.outputTokens},
-                  ${result.costCents}, ${result.costCents * AI_PLATFORM_FEE}, ${result.costCents * (1 + AI_PLATFORM_FEE)},
+                  ${result.costCents},
+                  ${dePago ? result.costCents * AI_PLATFORM_FEE : 0},
+                  ${dePago ? result.costCents * (1 + AI_PLATFORM_FEE) : 0},
                   ${conversationId})
         `).catch((e: any) => console.error('ai charge error:', e));
       }

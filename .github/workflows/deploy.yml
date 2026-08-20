@@ -46,6 +46,15 @@ jobs:
             cd /opt/humanity-wiki
             git fetch origin main
             git reset --hard origin/main
+            # La clave de Together (modelos abiertos gratis) viaja como secreto
+            # de GitHub y se escribe en el .env.production del servidor en cada
+            # despliegue: así rotar la clave es cambiar el secreto y desplegar,
+            # sin entrar por SSH a mano. Se borra la línea vieja y se añade la
+            # nueva para que la rotación sustituya, no acumule.
+            if [ -n "${{ secrets.TOGETHER_API_KEY }}" ]; then
+              sed -i '/^TOGETHER_API_KEY=/d' .env.production
+              echo "TOGETHER_API_KEY=${{ secrets.TOGETHER_API_KEY }}" >> .env.production
+            fi
             # Migraciones ANTES de reconstruir: si una falla, el código nuevo
             # no llega a arrancar y la app vieja sigue en pie con su esquema.
             bash deploy/migrate.sh

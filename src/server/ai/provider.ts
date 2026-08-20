@@ -98,11 +98,29 @@ const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
  *  API de Google y puede cambiar vía la variable de entorno GEMINI_IMAGE_MODEL. */
 export const NANO_BANANA_CATALOG_MODEL = 'gemini-2.5-flash-image';
 
-export const AI_MODELS: Record<string, { label: string; hint: string; input: number; output: number; image?: boolean }> = {
-  'claude-haiku-4-5': { label: 'Haiku 4.5',  hint: 'Rápido y económico',        input: 100,  output: 500 },
-  'claude-sonnet-5':  { label: 'Sonnet 5',   hint: 'Equilibrado (recomendado)', input: 300,  output: 1500 },
-  'claude-opus-5':    { label: 'Opus 5',     hint: 'Máxima capacidad',          input: 500,  output: 2500 },
-  'claude-fable-5':   { label: 'Fable 5',    hint: 'El más potente (premium)',  input: 1000, output: 5000 },
+export const AI_MODELS: Record<string, {
+  label: string; hint: string; input: number; output: number; image?: boolean;
+  /** La plataforma cubre su coste: el usuario paga 0 por usarlo. */
+  gratis?: boolean;
+  /** Nivel mínimo para elegirlo. Los de pago son para verificados (2+),
+   *  decisión de Eugenio 2026-08-20: «solo los usuarios premium pueden
+   *  utilizar el modelo más caro». Sin el campo, cualquiera. */
+  nivelMinimo?: number;
+  /** Qué conector lo sirve, cuando el prefijo del id no lo dice. */
+  proveedor?: string;
+}> = {
+  // MODELOS ABIERTOS GRATIS (2026-08-20, decisión de Eugenio: «2 modelos
+  // intermedios gratis, uno más barato y rápido y otro intermedio»). Los
+  // sirve Together AI y su coste —céntimos por millón— lo absorbe la
+  // plataforma. Los ids son NUESTROS alias, no los del proveedor: así el día
+  // que se cambie Together por otro (DeepSeek directo, Fireworks…) los
+  // registros de consumo y las preferencias guardadas siguen valiendo.
+  'abierto-rapido': { label: 'Rápido',      hint: 'Gratis · para preguntas sencillas', input: 14, output: 28,  gratis: true, proveedor: 'together' },
+  'abierto-medio':  { label: 'Equilibrado', hint: 'Gratis · el de cada día',           input: 32, output: 128, gratis: true, proveedor: 'together' },
+  'claude-haiku-4-5': { label: 'Haiku 4.5',  hint: 'Rápido y económico',        input: 100,  output: 500,  nivelMinimo: 2 },
+  'claude-sonnet-5':  { label: 'Sonnet 5',   hint: 'Premium (recomendado)',     input: 300,  output: 1500, nivelMinimo: 2 },
+  'claude-opus-5':    { label: 'Opus 5',     hint: 'Máxima capacidad',          input: 500,  output: 2500, nivelMinimo: 2 },
+  'claude-fable-5':   { label: 'Fable 5',    hint: 'El más potente',            input: 1000, output: 5000, nivelMinimo: 2 },
   // Google Gemini (2026-08-08, petición del usuario): «que se pueda conectar
   // a diferentes modelos tanto de Anthropic como de Google». El prefijo
   // `gemini-` es lo que enruta al proveedor correcto — ver `providerOfModel`.
@@ -113,8 +131,8 @@ export const AI_MODELS: Record<string, { label: string; hint: string; input: num
   // fecha para las claves nuevas ("no longer available to new users") y va
   // rotando qué modelo concreto hay detrás — comprobado en vivo con
   // GET /v1beta/models el 2026-08-08.
-  'gemini-flash-latest': { label: 'Gemini Flash', hint: 'Rápido, de Google',    input: 30,  output: 250 },
-  'gemini-pro-latest':   { label: 'Gemini Pro',   hint: 'Más capaz, de Google', input: 125, output: 1000 },
+  'gemini-flash-latest': { label: 'Gemini Flash', hint: 'Rápido, de Google',    input: 30,  output: 250,  nivelMinimo: 2 },
+  'gemini-pro-latest':   { label: 'Gemini Pro',   hint: 'Más capaz, de Google', input: 125, output: 1000, nivelMinimo: 2 },
   // Nano Banana (2026-08-08, petición del usuario): elegible en el mismo
   // selector, pero genera una IMAGEN en vez de texto — `image: true` es lo
   // que el frontend usa para no mostrarle un precio por millón de tokens que
@@ -126,11 +144,120 @@ export const AI_MODELS: Record<string, { label: string; hint: string; input: num
 
 /** Qué proveedor sabe hablar con cada modelo del catálogo. */
 export function providerOfModel(model?: string): string {
+  const enCatalogo = model && AI_MODELS[model]?.proveedor;
+  if (enCatalogo) return enCatalogo;
   return model?.startsWith('gemini-') ? 'gemini' : 'claude';
 }
 
 /** Comisión de la plataforma sobre el coste de créditos de Anthropic. */
 export const AI_PLATFORM_FEE = 0.5;
+
+// ----------------------------------------------------------------------------
+// EL ROUTER: qué modelo atiende cada mensaje
+// ----------------------------------------------------------------------------
+// (2026-08-20, decisión de Eugenio: «escogiendo entre 3 modelos según la
+// complejidad; solo los premium usan el más caro; 2 intermedios gratis».
+// Y de la conversación previa: premium = nivel VERIFIED (2+), con el coste
+// de Claude cubierto por la plataforma.)
+//
+// REGLAS FIJAS, NO OTRA IA DECIDIENDO: meter un modelo a elegir modelo sería
+// una llamada más, un coste más y un sitio más donde fallar, para ahorrar
+// céntimos. Con cuatro señales deterministas se acierta lo que importa.
+//
+// La escalera, de barato a caro:
+//   abierto-rapido  → preguntas cortas y charla (DeepSeek Flash, gratis)
+//   abierto-medio   → el de cada día, y las acciones de quien no es premium
+//                     (Qwen Plus, gratis; las acciones son seguras de delegar
+//                     porque la IA solo PROPONE: el servidor valida y la
+//                     persona confirma — la red de seguridad ya existía)
+//   Claude          → verificados (2+): acciones, adjuntos con PDF, búsqueda
+//                     web (solo Claude la tiene) y mensajes largos. Cubierto
+//                     por la plataforma HASTA UN TOPE mensual por usuario;
+//                     pasado el tope, se baja al medio y se avisa.
+
+/** Nivel a partir del cual los modelos de pago van cubiertos por la plataforma. */
+export const NIVEL_PREMIUM = 2;
+
+/** Tope mensual, en céntimos, de coste de modelos de pago cubierto a cada
+ *  usuario premium. Sin tope, un verificado intensivo costaría decenas de
+ *  euros al mes sin que nadie se entere. Cambiable por variable de entorno. */
+export const topePremiumCents = () => Number(process.env.AI_TOPE_PREMIUM_CENTS || 300);
+
+/** Señales de que el mensaje pide crear o cambiar algo — lo que más agradece
+ *  un modelo capaz. Minúsculas y sin tildes obligatorias a propósito. */
+const PIDE_ACCION = /\b(crea|crear|creame|anade|anademe|añade|añademe|apunta|apuntame|apúntame|borra|elimina|cambia|renombra|organiza|ordena|ordename|hazme|genera|generame|grafo|mapa|evento|cita|reunion|reunión|recuerda|recuerdame|recuérdame|tarea|publica|modifica)\b/i;
+
+export interface EleccionDeModelo {
+  model: string;
+  /** gratis: modelo abierto (coste céntimos, lo absorbe la plataforma).
+   *  cubierto: modelo de pago que la plataforma paga a un premium.
+   *  de_pago: se factura al usuario con comisión, como siempre. */
+  cobro: 'gratis' | 'cubierto' | 'de_pago';
+  motivo: string;
+  /** Texto para el usuario cuando no se le da lo que pidió. */
+  aviso?: string;
+}
+
+export function elegirModelo(x: {
+  pedido?: string;
+  nivel: number;
+  mensaje: string;
+  llevaDocumento?: boolean;
+  webSearch?: boolean;
+  juego?: boolean;
+  topeAgotado?: boolean;
+  abiertosListos: boolean;
+}): EleccionDeModelo {
+  const premium = x.nivel >= NIVEL_PREMIUM;
+
+  // Sin clave de Together todo sigue EXACTAMENTE como hoy: Claude (o lo que
+  // pidan) facturado con comisión. Así este código se puede desplegar antes
+  // de que exista la cuenta sin cambiar nada para nadie.
+  if (!x.abiertosListos) {
+    return { model: x.pedido || CLAUDE_MODEL, cobro: 'de_pago', motivo: 'sin proveedor de modelos abiertos' };
+  }
+
+  const claudeCubierto = (motivo: string): EleccionDeModelo =>
+    x.topeAgotado
+      ? { model: 'abierto-medio', cobro: 'gratis', motivo: `${motivo}, pero tope mensual agotado`, aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
+      : { model: CLAUDE_MODEL, cobro: 'cubierto', motivo };
+
+  // 1. ELECCIÓN MANUAL: se respeta — con la puerta del nivel.
+  if (x.pedido && AI_MODELS[x.pedido]) {
+    const entrada = AI_MODELS[x.pedido];
+    if (entrada.gratis) return { model: x.pedido, cobro: 'gratis', motivo: 'elegido por el usuario' };
+    if (x.nivel >= (entrada.nivelMinimo ?? 0)) {
+      return x.topeAgotado
+        ? { model: 'abierto-medio', cobro: 'gratis', motivo: 'elegido premium, tope agotado', aviso: 'Has llegado al tope mensual de uso premium cubierto: este mes seguirás con el modelo Equilibrado (gratis).' }
+        : { model: x.pedido, cobro: 'cubierto', motivo: 'elegido por el usuario (premium)' };
+    }
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'pidió un modelo premium sin nivel', aviso: 'Ese modelo es para usuarios verificados: he usado el Equilibrado (gratis).' };
+  }
+
+  // 2. PDF adjunto: solo Claude sabe leerlos.
+  if (x.llevaDocumento) {
+    if (premium) return claudeCubierto('lleva PDF');
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'PDF sin nivel premium', aviso: 'Leer PDF necesita un modelo premium (usuarios verificados): respondo sin poder abrir el documento.' };
+  }
+
+  // 3. Búsqueda web: es una herramienta nativa de Claude; los abiertos no la
+  // tienen. Para quien no es premium, el prompt ya dice que está apagada.
+  if (x.webSearch && premium) return claudeCubierto('búsqueda web');
+
+  // 4. El juego va al medio: necesita personalidad y el bloque JSON, pero es
+  // charla de alto volumen — quemar el tope premium ahí no tiene sentido.
+  if (x.juego) return { model: 'abierto-medio', cobro: 'gratis', motivo: 'juego' };
+
+  // 5. Complejidad: pide crear/cambiar algo, o es un mensajón.
+  if (PIDE_ACCION.test(x.mensaje) || x.mensaje.length > 700) {
+    if (premium) return claudeCubierto('acción o mensaje largo');
+    return { model: 'abierto-medio', cobro: 'gratis', motivo: 'acción, sin nivel premium' };
+  }
+
+  // 6. Corto y sin señales → el rápido. Lo demás → el medio.
+  if (x.mensaje.length < 180) return { model: 'abierto-rapido', cobro: 'gratis', motivo: 'pregunta corta' };
+  return { model: 'abierto-medio', cobro: 'gratis', motivo: 'conversación normal' };
+}
 
 // Precio del modelo por defecto de la plataforma (respuestas automáticas de
 // la IA, comentarios, etc. — no facturadas al usuario).
@@ -444,6 +571,141 @@ export async function completarClaudeStream(
 }
 
 // ----------------------------------------------------------------------------
+// Proveedor: modelos abiertos (Together AI, formato estándar de OpenAI)
+// ----------------------------------------------------------------------------
+// Sirve los modelos «abierto-*» del catálogo (2026-08-20, decisión de Eugenio:
+// dos modelos gratis cubiertos por la plataforma). Se eligió Together AI y no
+// la API directa de DeepSeek con la tabla de precios delante (2026-08-20):
+// Together cobra MENOS DE LA MITAD para el mismo modelo ($0,14/$0,28 frente a
+// $0,22–0,44/$0,66–1,32 por millón), da varias familias con una sola cuenta y
+// procesa en EE. UU. — la API de DeepSeek procesa en China, y con el RGPD
+// pendiente en la hoja de ruta eso era abrir un frente legal innecesario.
+//
+// CAMBIAR DE PROVEEDOR ES CONFIGURACIÓN, NO CÓDIGO: habla el formato de chat
+// de OpenAI, que es el estándar de facto — DeepSeek directo, Fireworks, Groq
+// y OpenRouter usan el mismo. Bastan `ABIERTO_BASE_URL` y `ABIERTO_API_KEY`
+// (con `TOGETHER_API_KEY` como nombre natural mientras sea Together), y los
+// ids reales por variable si el nuevo proveedor los llama distinto.
+const ABIERTO_BASE = () => process.env.ABIERTO_BASE_URL || 'https://api.together.xyz/v1';
+const ABIERTO_KEY = () => process.env.ABIERTO_API_KEY || process.env.TOGETHER_API_KEY || '';
+
+/** Nuestro alias de catálogo → id real en el proveedor. Alias nuestros a
+ *  propósito: los registros de consumo guardan el alias y sobreviven a un
+ *  cambio de proveedor. Ids comprobados en docs.together.ai el 2026-08-20. */
+const MODELOS_ABIERTOS: Record<string, () => string> = {
+  'abierto-rapido': () => process.env.ABIERTO_MODELO_RAPIDO || 'deepseek-ai/DeepSeek-V4-Flash-0731',
+  'abierto-medio': () => process.env.ABIERTO_MODELO_MEDIO || 'Qwen/Qwen3.7-Plus',
+};
+
+/** Bloques nuestros → contenido del formato OpenAI. Los PDF no viajan: ese
+ *  formato no los admite en el mensaje — el router manda los adjuntos con
+ *  documento a Claude antes de llegar aquí. */
+const aContenidoOpenAI = (content: string | AIContentBlock[]) => {
+  if (typeof content === 'string') return content;
+  return content.map(b => {
+    if (b.type === 'text') return { type: 'text', text: b.text };
+    if (b.type === 'image') {
+      return { type: 'image_url', image_url: { url: `data:${b.source.media_type};base64,${b.source.data}` } };
+    }
+    return { type: 'text', text: '[documento adjunto: solo los modelos premium pueden leerlo]' };
+  });
+};
+
+export class TogetherProvider implements AIProvider {
+  readonly name = 'together';
+
+  isReady(): boolean {
+    return !!ABIERTO_KEY();
+  }
+
+  async complete(req: AICompletionRequest): Promise<AICompletionResult> {
+    if (!this.isReady()) {
+      throw new Error('TOGETHER_API_KEY no está configurada. Los modelos abiertos están construidos pero inactivos.');
+    }
+    const started = Date.now();
+    const alias = req.model && MODELOS_ABIERTOS[req.model] ? req.model : 'abierto-medio';
+    const modeloReal = MODELOS_ABIERTOS[alias]();
+
+    // El system va entero como primer mensaje `system`: esta API no tiene la
+    // caché de prompts de Anthropic, así que estable y variable viajan juntos.
+    const system = req.systemEstable ? `${req.systemEstable}
+
+${req.system}` : req.system;
+
+    const res = await fetch(`${ABIERTO_BASE()}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${ABIERTO_KEY()}`,
+      },
+      body: JSON.stringify({
+        model: modeloReal,
+        max_tokens: req.maxTokens ?? 8192,
+        temperature: req.temperature ?? 0.2,
+        // SIEMPRE en streaming: algunos modelos (Qwen3.7-Plus, comprobado en
+        // vivo el 2026-08-20) devuelven 400 sin él. Se junta aquí y se
+        // entrega entero, igual que sin streaming.
+        stream: true,
+        stream_options: { include_usage: true },
+        messages: [
+          { role: 'system', content: system },
+          ...req.messages.map(m => ({ role: m.role, content: aContenidoOpenAI(m.content) })),
+        ],
+      }),
+    });
+
+    if (!res.ok || !res.body) {
+      const detail = await res.text().catch(() => '');
+      throw new Error(`Error del proveedor de modelos abiertos (${res.status}): ${detail.slice(0, 300)}`);
+    }
+
+    // El SSE del formato OpenAI: líneas `data: {json}` y un `data: [DONE]`.
+    // El consumo llega en el último trozo gracias a `include_usage`.
+    let text = '';
+    let inputTokens = 0;
+    let outputTokens = 0;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lineas = buffer.split('\n');
+      buffer = lineas.pop() || '';
+      for (const linea of lineas) {
+        if (!linea.startsWith('data:')) continue;
+        const cuerpo = linea.slice(5).trim();
+        if (cuerpo === '[DONE]') continue;
+        let ev: any;
+        try { ev = JSON.parse(cuerpo); } catch { continue; }
+        const delta = ev.choices?.[0]?.delta?.content;
+        if (typeof delta === 'string') text += delta;
+        if (ev.usage) {
+          inputTokens = ev.usage.prompt_tokens ?? inputTokens;
+          outputTokens = ev.usage.completion_tokens ?? outputTokens;
+        }
+      }
+    }
+
+    // El precio se calcula con NUESTRO alias de catálogo: es la cifra que ve
+    // el panel de costes, y es coste de la plataforma (el usuario paga 0).
+    const price = AI_MODELS[alias] || PRICE_PER_MTOK;
+    return {
+      text,
+      model: alias,
+      inputTokens,
+      outputTokens,
+      costCents:
+        (inputTokens / 1_000_000) * price.input +
+        (outputTokens / 1_000_000) * price.output,
+      durationMs: Date.now() - started,
+      webSources: [],
+    };
+  }
+}
+
+// ----------------------------------------------------------------------------
 // Registro de proveedores
 // ----------------------------------------------------------------------------
 // Añadir OpenAI/Mistral en el futuro es implementar `AIProvider` y
@@ -451,6 +713,7 @@ export async function completarClaudeStream(
 const providers: Record<string, AIProvider> = {
   claude: new ClaudeProvider(),
   gemini: new GeminiProvider(),
+  together: new TogetherProvider(),
 };
 
 export function getProvider(name?: string): AIProvider {
