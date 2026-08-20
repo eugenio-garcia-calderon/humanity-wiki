@@ -1944,3 +1944,48 @@ chat de Claude Code».
 Verified live: `/` listed all 14 types including Producto, «tit» narrowed to
 three, Enter turned the block into a Título 1 leaving no «/tit» behind, and
 `/prod` opened the picker with real products in it.
+
+## 2026-08-20 — Page editor: white screen on ⌘A, and text shown twice
+
+Two bugs from the Tester, same root cause, and the root cause was mine — the
+half-fix I shipped this morning for «typing backwards».
+
+**The root**: the editing block is `contentEditable` *and* React was still
+rendering a child into it (`TextoVivo`'s span). Two owners for the same DOM.
+The browser adds, moves and deletes nodes as you type; React keeps pointers to
+nodes it believes are its own. From there:
+
+- **B17 (white screen)** — ⌘A inside a block selected far beyond it; typing over
+  the selection made the browser delete nodes React had pointers to, and React's
+  next `removeChild` threw `NotFoundError`, taking the whole app down. The
+  person lost the block they were writing.
+- **B16 (text shown twice)** — on blur React re-rendered the read-only view
+  *next to* the text nodes the browser had created, so «PRUEBA» read
+  «PRUEBAPRUEBA». Only on screen: what was saved was always correct, as the
+  Tester confirmed.
+
+**The fix, properly this time**: `BloqueEditable` renders a div with **no React
+children at all**. The text is written once at mount through a ref. As far as
+React is concerned the element is empty, so it never reconciles inside it and
+the browser is free to do whatever it wants. Plus ⌘A is intercepted and scoped
+to the block, which is what every editor does anyway.
+
+Verified with **real keystrokes** (not synthetic events, at the Tester's
+request): typed PRUEBA, clicked away → one PRUEBA; ⌘A selected only the block,
+typed over it, clicked away → app alive, text replaced, no `removeChild` in the
+console.
+
+**Also in this batch**
+- **B1** — unknown `/api/*` routes returned **200 with the SPA's HTML**, so any
+  client asking for JSON got `<!doctype html>`. That is the same failure that
+  put «Unexpected token '<'» in front of Eugenio. Now `404 {error}`.
+- **B5** — restored desktop windows opened *on top* of whatever URL you arrived
+  at, so `/proyectos/aptera` showed the previous session's desktop and no link
+  in the platform was shareable. A path with two or more segments is a link to
+  something specific: windows come back **minimised**, one click away in the tab
+  bar.
+
+**B2 checked and NOT a bug**: `/api/proyectos` without a session returns 5
+projects and **all five are `publico: true`**. The filter (`p.publico OR
+creador = me`) is correct; no private project leaks. «Camión camperizado» is a
+local project and is not in production at all.

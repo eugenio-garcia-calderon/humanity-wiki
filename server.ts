@@ -2004,6 +2004,17 @@ async function startServer() {
     }
   });
 
+  // UNA RUTA /api QUE NO EXISTE ES UN 404, NO LA PÁGINA (2026-08-20). Debajo,
+  // el comodín de la SPA contesta index.html a TODO lo que no haya cogido
+  // nadie — incluido /api/loquesea. Resultado: el cliente pedía JSON, recibía
+  // un 200 con «<!doctype html>» y reventaba con «Unexpected token '<'»,
+  // que es exactamente el error que se llevó Eugenio a la cara en el chat.
+  // Un endpoint que no existe tiene que decirlo, y decirlo en el idioma en el
+  // que se preguntó.
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ error: "Esa dirección de la API no existe." });
+  });
+
   if (process.env.NODE_ENV !== "production") {
     // Import dinámico: vite solo existe (y solo hace falta) en desarrollo —
     // el bundle de producción nunca lo carga.

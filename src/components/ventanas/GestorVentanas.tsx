@@ -73,6 +73,18 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
         const v = JSON.parse(g) as Ventana[];
         if (Array.isArray(v) && v.length) {
           contadorZ = Math.max(10, ...v.map(x => x.z || 10)) + 1;
+          // SI VIENES POR UN ENLACE, EL ENLACE MANDA (2026-08-20). Las ventanas
+          // guardadas se restauraban siempre y se abrían ENCIMA de la página a
+          // la que acababas de entrar: abrir humanity.wiki/proyectos/aptera
+          // enseñaba el escritorio de la sesión anterior, no Aptera. Con eso,
+          // ningún enlace de la plataforma se podía compartir.
+          //
+          // Una dirección con dos tramos o más («/proyectos/aptera») es un
+          // enlace a algo concreto; «/» o «/tareas» es volver a tu escritorio.
+          // En el primer caso las ventanas vuelven MINIMIZADAS: siguen en la
+          // barra de arriba, a un clic, pero no tapan lo que venías a ver.
+          const tramos = window.location.pathname.split('/').filter(Boolean);
+          if (tramos.length >= 2) return v.map(x => ({ ...x, minimizada: true }));
           return v;
         }
       }
