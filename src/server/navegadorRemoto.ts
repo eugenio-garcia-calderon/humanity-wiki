@@ -143,51 +143,83 @@ const RATO_DE_GESTO = 350;        // ms que se considera «aún te estás movien
  *  suelto. Es la HISTÉRESIS que evita el parpadeo. */
 const CAMBIOS_PARA_MODO_RAPIDO = 4;
 
+/** Los tres modos de fotograma. Ver el porqué de cada uno dentro del bucle. */
+type Modo = 'gesto' | 'animacion' | 'quieto';
+const AJUSTES: Record<Modo, { quality: number; scale: 'css' | 'device' }> = {
+  gesto:     { quality: 40, scale: 'device' },  // tú mueves: estás leyendo, quieres nitidez
+  animacion: { quality: 50, scale: 'css' },     // se mueve solo: quieres fluidez
+  quieto:    { quality: 70, scale: 'device' },  // nada se mueve: el bueno
+};
+
 async function bucleDePantalla(s: Sesion) {
   if (s.capturando) return;
   s.capturando = true;
-  let ultimaRapida: Buffer | null = null;
+  let ultimoMarco: Buffer | null = null;
+  let ultimoModo: Modo | null = null;
   let nitidaEnviada = false;
   let cambiosSeguidos = 0;
   try {
     while (s.cliente && sesiones.has(s.id)) {
-      let cambio = false;
       try {
-        // La rápida hace de sonda: es barata y dice si algo se ha movido.
-        const rapida = await s.page.screenshot({
-          type: 'jpeg', quality: 50, scale: 'css', caret: 'initial', timeout: 5000,
-        });
-        cambio = !ultimaRapida || !rapida.equals(ultimaRapida);
-        cambiosSeguidos = cambio ? cambiosSeguidos + 1 : 0;
-
-        // CUÁNDO SE VE BORROSO Y CUÁNDO NÍTIDO (arreglado 2026-08-20, Eugenio:
-        // «la buena definición de la pantalla oscila entre verse borrosa y
-        // definida cada x segundos»).
+        // ── QUÉ CALIDAD TOCA, Y SE DECIDE ANTES DE CAPTURAR ──────────────
         //
+        // CUÁNDO SE VE BORROSO Y CUÁNDO NÍTIDO (2026-08-20, Eugenio: «la
+        // definición oscila entre verse borrosa y definida cada x segundos»).
         // Antes bastaba con que UN píxel cambiara para mandar un fotograma
-        // rápido —y por tanto borroso— y volver al nítido al instante
-        // siguiente. En una página con cualquier animación de fondo, eso es un
-        // parpadeo constante entre las dos calidades, que molesta mucho más
-        // que quedarse en cualquiera de las dos.
+        // borroso y volver al nítido al instante siguiente: en una página con
+        // cualquier animación de fondo eso es un parpadeo constante. Por eso
+        // el modo de movimiento se reserva para cuando TOCAS algo o para
+        // cuando la página lleva varios fotogramas seguidos cambiando.
         //
-        // Ahora el modo rápido se reserva para cuando de verdad hace falta
-        // fluidez: mientras TOCAS algo, o cuando la página lleva varios
-        // fotogramas seguidos cambiando (un vídeo). Un cambio suelto en una
-        // página parada va directo a nítido, sin pasar por el borroso.
+        // POR QUÉ SE PIXELABA AL DESPLAZAR (B90, 2026-08-21, Eugenio: «cuando
+        // se hace scroll down se pixela, no se refresca bien y queda fatal»).
+        // No era que la nítida no llegara: llegaba. Era que el fotograma de
+        // movimiento salía a MEDIA RESOLUCIÓN. Medido sobre Wikipedia a
+        // 1000×700 en Retina:
+        //
+        //     css    calidad 50 →  43 ms    93 KB   1000×700
+        //     device calidad 40 →  71 ms   199 KB   2000×1400
+        //     device calidad 70 →  70 ms   321 KB   2000×1400
+        //
+        // El <img> del cliente estira esos 1000×700 al hueco donde caben
+        // 2000×1400: cada píxel enviado cubre cuatro de pantalla. Eso es
+        // pixelado por construcción, y por eso pasaba SIEMPRE al desplazarse.
+        //
+        // La salida sale de la misma medición: a resolución completa la
+        // CALIDAD casi no cuesta tiempo (71 ms con 40, 70 ms con 70); lo que
+        // cuesta es dibujar el doble de píxeles. Así que mientras el usuario
+        // mueve la página se captura a resolución completa con calidad baja:
+        // se paga en kilobytes, que sobran, y no en tirones.
+        //
+        // LA MEDIA RESOLUCIÓN SE QUEDA PARA LO QUE SE ANIMA SOLO —un vídeo, un
+        // carrusel—, donde el ojo pide fluidez y no detalle y donde no hay
+        // texto que leer. Cuando eres tú quien mueve la página, estás leyendo.
         const tocando = Date.now() - s.ultimoGesto < RATO_DE_GESTO;
-        const modoRapido = tocando || cambiosSeguidos >= CAMBIOS_PARA_MODO_RAPIDO;
+        const animandose = !tocando && cambiosSeguidos >= CAMBIOS_PARA_MODO_RAPIDO;
 
-        if (cambio && modoRapido) {
-          empujar(s, { t: 'marco', d: rapida.toString('base64') });
-          ultimaRapida = rapida;
-          nitidaEnviada = false;
-        } else if (cambio || !nitidaEnviada) {
-          ultimaRapida = rapida;
-          const nitida = await s.page.screenshot({
-            type: 'jpeg', quality: 70, scale: 'device', caret: 'initial', timeout: 5000,
-          });
-          empujar(s, { t: 'marco', d: nitida.toString('base64') });
-          nitidaEnviada = true;
+        // UNA SOLA CAPTURA POR VUELTA. La captura ES la sonda: comparar dos
+        // fotogramas del mismo modo dice igual de bien si algo se ha movido, y
+        // capturar una barata solo para saberlo costaría más que el arreglo.
+        const modo: Modo = animandose ? 'animacion' : tocando ? 'gesto' : 'quieto';
+        const marco = await s.page.screenshot({ ...AJUSTES[modo], type: 'jpeg', caret: 'initial', timeout: 5000 });
+
+        // COMPARAR SOLO CONTRA UN FOTOGRAMA DEL MISMO MODO. Los tres modos dan
+        // imágenes de tamaños y calidades distintos, así que soltar el ratón
+        // cambiaría todos los bytes y parecería que la página se ha movido.
+        // Cuando el modo cambia no se sabe si hubo movimiento, y entonces no
+        // se cuenta ni a favor ni en contra: se manda el fotograma y ya.
+        const mismoModo = modo === ultimoModo && !!ultimoMarco;
+        const igual = mismoModo && marco.equals(ultimoMarco as Buffer);
+        if (mismoModo) cambiosSeguidos = igual ? 0 : cambiosSeguidos + 1;
+
+        if (!igual || !nitidaEnviada) {
+          empujar(s, { t: 'marco', d: marco.toString('base64') });
+          ultimoMarco = marco;
+          ultimoModo = modo;
+          // Solo el modo quieto manda el fotograma nítido. Mientras haya
+          // movimiento queda PENDIENTE mandar uno nítido en cuanto la página
+          // pare: eso es lo que evita quedarse en la versión de baja calidad.
+          nitidaEnviada = modo === 'quieto';
         }
       } catch { /* la pestaña estaba navegando u ocupada: se reintenta */ }
       const moviendo = Date.now() - s.ultimoGesto < RATO_DE_GESTO || cambiosSeguidos >= CAMBIOS_PARA_MODO_RAPIDO;
