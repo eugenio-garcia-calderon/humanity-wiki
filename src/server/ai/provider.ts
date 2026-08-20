@@ -27,6 +27,20 @@ export interface AIMessage {
 
 export interface AICompletionRequest {
   system: string;
+  /**
+   * LA PARTE ESTABLE DEL PROMPT DE SISTEMA (2026-08-20, para la caché de
+   * Anthropic). Si viene, va DELANTE de `system` y marcada como cacheable:
+   * la primera llamada la escribe en caché (un 25% más cara) y durante los
+   * minutos siguientes cada relectura cuesta el 10%. Como este bloque es
+   * idéntico para todos los usuarios, la caché se comparte entre todos.
+   *
+   * LA REGLA QUE NO SE PUEDE ROMPER: este texto tiene que ser IDÉNTICO byte a
+   * byte entre llamadas. Una fecha, un nombre o un contador aquí dentro y la
+   * caché no acierta nunca — pagando el 25% extra de escritura en cada
+   * mensaje, o sea, más caro que no tener caché. Todo lo que cambie entre
+   * llamadas va en `system`, que queda fuera del bloque cacheado.
+   */
+  systemEstable?: string;
   messages: AIMessage[];
   maxTokens?: number;
   temperature?: number;
@@ -44,8 +58,11 @@ export interface WebSource {
 export interface AICompletionResult {
   text: string;
   model: string;
+  /** TODA la entrada procesada: normal + escritura de caché + lectura de caché. */
   inputTokens: number;
   outputTokens: number;
+  /** Tokens releídos de la caché (ya cobrados al 10% dentro de costCents). */
+  cacheReadTokens?: number;
   /** Coste estimado en céntimos de euro (no incluye el coste de las búsquedas web, si las hubo). */
   costCents: number;
   durationMs: number;
@@ -141,7 +158,16 @@ export class ClaudeProvider implements AIProvider {
       // no cabía en 2048 y el JSON llegaba truncado sin cerrar el bloque.
       max_tokens: req.maxTokens ?? 8192,
       temperature: req.temperature ?? 0.2,
-      system: req.system,
+      // Con parte estable, el system va en DOS bloques: el estable marcado
+      // para caché y el variable detrás. El orden importa: la caché de
+      // Anthropic compara el prefijo de la petición, así que lo que cambia
+      // tiene que ir siempre al final.
+      system: req.systemEstable
+        ? [
+            { type: 'text', text: req.systemEstable, cache_control: { type: 'ephemeral' } },
+            { type: 'text', text: req.system },
+          ]
+        : req.system,
       messages: req.messages,
     };
     // Herramienta de búsqueda web nativa de Anthropic: la ejecuta el propio
@@ -186,17 +212,27 @@ export class ClaudeProvider implements AIProvider {
       }
     }
 
-    const inputTokens = json.usage?.input_tokens ?? 0;
+    // La entrada llega repartida en tres cubos, cada uno con su precio:
+    // normal (100%), escritura de caché (125%) y lectura de caché (10%).
+    // Son los precios publicados de Anthropic para prompt caching.
+    const inputNormal = json.usage?.input_tokens ?? 0;
+    const cacheWrite = json.usage?.cache_creation_input_tokens ?? 0;
+    const cacheRead = json.usage?.cache_read_input_tokens ?? 0;
     const outputTokens = json.usage?.output_tokens ?? 0;
 
     const price = AI_MODELS[model] || PRICE_PER_MTOK;
     return {
       text,
       model: json.model || model,
-      inputTokens,
+      // El total se sigue informando junto: para el panel de costes «cuánto
+      // contexto llevó este mensaje» es esta suma, venga de donde venga.
+      inputTokens: inputNormal + cacheWrite + cacheRead,
       outputTokens,
+      cacheReadTokens: cacheRead,
       costCents:
-        (inputTokens / 1_000_000) * price.input +
+        (inputNormal / 1_000_000) * price.input +
+        (cacheWrite / 1_000_000) * price.input * 1.25 +
+        (cacheRead / 1_000_000) * price.input * 0.1 +
         (outputTokens / 1_000_000) * price.output,
       durationMs: Date.now() - started,
       webSources,
@@ -237,7 +273,9 @@ export class GeminiProvider implements AIProvider {
       ? req.model : 'gemini-flash-latest';
 
     const body: Record<string, any> = {
-      systemInstruction: { parts: [{ text: req.system }] },
+      // Gemini no tiene la caché de prompts de Anthropic: la parte estable
+      // simplemente se antepone y se paga entera, como siempre.
+      systemInstruction: { parts: [{ text: req.systemEstable ? `${req.systemEstable}\n\n${req.system}` : req.system }] },
       contents: req.messages.map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: aPartesGemini(m.content),

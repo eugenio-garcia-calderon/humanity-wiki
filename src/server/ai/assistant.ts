@@ -175,7 +175,23 @@ export function registerAIRoutes(app: Express, db: any) {
   };
 
   /** Construye la instrucción de sistema con el contexto visual y el rol. */
-  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []) => {
+  /**
+   * Construye el prompt de sistema EN DOS PARTES (2026-08-20, caché de
+   * prompts; decisión de Eugenio: «caché → medición → contexto dinámico →
+   * routing → RAG», empezando por la caché).
+   *
+   *   · `estable`: idéntica byte a byte en TODAS las llamadas de TODOS los
+   *     usuarios. Es lo que Anthropic guarda en caché: la primera llamada la
+   *     escribe (25% más cara) y las siguientes la releen al 10% del precio.
+   *     Al ser común a todo el mundo, la caché se comparte entre usuarios.
+   *   · `variable`: la fecha, la pantalla, el usuario, el contexto recuperado
+   *     — todo lo que cambia entre mensajes. Va DESPUÉS, fuera de la caché.
+   *
+   * LA REGLA: nada interpolado en `estable` que cambie entre llamadas. Una
+   * fecha ahí dentro y la caché no acierta nunca — y encima se paga el 25%
+   * extra de escritura en cada mensaje, o sea, más caro que no tener caché.
+   */
+  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []): { estable: string; variable: string } => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
       .filter(([, v]) => level >= v.minLevel)
@@ -205,7 +221,10 @@ Hablas del proyecto en primera persona ("voy despacio", "me falta..."), con la i
 Habla en primera persona, breve y cercano, como un personaje de videojuego: 2-4 frases y una pregunta o propuesta concreta al final. Nada de listas largas ni de tono de informe.`
         : `Eres el ROBOT PERSONAL del jugador dentro del Juego Vital: su compañero, como el Pikachu de Pokémon pero con forma de robot humanoide. Hablas en primera persona, breve y cercano (2-5 frases), con una propuesta concreta al final. Nada de tono de informe.`;
 
-      return `${quienEres}
+      // El prompt del JUEGO no se parte: la identidad del personaje (nombre,
+      // memoria, mundo) está entretejida de principio a fin, así que no hay
+      // ningún prefijo idéntico entre usuarios que merezca la caché.
+      return { estable: '', variable: `${quienEres}
 
 QUÉ ES EL JUEGO VITAL:
 El mundo 3D que el jugador recorre ES su vida real. Cada edificio es un proyecto real suyo, cada persona es alguien real de su vida, y todo lo que se crea aquí existe de verdad en la plataforma (no hay contenido de mentira). El jugador construye su mundo como en Los Sims: se planta donde quiere y crea allí una persona o un proyecto.
@@ -278,28 +297,21 @@ Ya está: Gala se une al proyecto — la tienes de pie en la sala de Personas.
  "question": {"text": "¿Empezamos por el hogar o por los proyectos?", "options": ["Hogar", "Proyectos"]}}
 \`\`\``}
 
-"question" es opcional (máximo 4 opciones cortas).`;
+"question" es opcional (máximo 4 opciones cortas).` };
     }
 
-    return `Eres el asistente de Humanity.wiki, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
+    // ------------------------- PARTE ESTABLE -------------------------
+    // Idéntica en cada llamada. NADA interpolado aquí salvo UI_EVENTS, que es
+    // una constante del servidor (cambia solo al desplegar código nuevo, y
+    // entonces la caché se regenera una vez, como debe ser).
+    const estable = `Eres el asistente de Humanity.wiki, una plataforma que conecta el conocimiento sobre los retos de la humanidad por territorio.
 
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
 Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Necesidad → Producto → Demanda → Transacción → Iniciativa → Resultados → Caso de éxito
 
-HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}). Cuando alguien diga «el jueves», «mañana» o «la semana que viene», resuélvelo TÚ a partir de esta fecha y manda «inicio» en ISO completo con hora. Para apuntar algo en su calendario usa CREATE_EVENTO con {titulo, inicio, fin?, todo_el_dia?, lugar?, descripcion?, repeticion?}. El campo «repeticion» va en formato RRULE de iCalendar si es algo que se repite (p. ej. "FREQ=WEEKLY;BYDAY=TH").
+CALENDARIO: la fecha de HOY la tienes más abajo, en el estado de la conversación. Cuando alguien diga «el jueves», «mañana» o «la semana que viene», resuélvelo TÚ a partir de esa fecha y manda «inicio» en ISO completo con hora. Para apuntar algo en su calendario usa CREATE_EVENTO con {titulo, inicio, fin?, todo_el_dia?, lugar?, descripcion?, repeticion?}. El campo «repeticion» va en formato RRULE de iCalendar si es algo que se repite (p. ej. "FREQ=WEEKLY;BYDAY=TH").
 
-ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
-${JSON.stringify(ctx || {}, null, 2)}
-${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
-
-USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
-MODO DE EDICIÓN: ${editMode}
-
-CONTEXTO RECUPERADO DE LA PLATAFORMA (${retrieved.length} fragmentos):
-${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content || '').slice(0, 300)}`).join('\n') || '(sin coincidencias en la plataforma)'}
-
-GRAFOS DE CONOCIMIENTO PUBLICADOS (lienzos curados de un tema; si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo):
-${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
+GRAFOS DE CONOCIMIENTO: la lista de los ya publicados la tienes más abajo. Si la consulta del usuario encaja con uno, emite el evento OPEN_KNOWLEDGE_GRAPH con su slug en vez de responder largo.
 Si el usuario pide CREAR un grafo (o explorar un tema del que NO existe grafo), propón la acción CREATE_KNOWLEDGE_GRAPH con title, slug, description, trigger_keywords y hasta 12 windows iniciales. Cada window: {title, kind, config, relation, relation_label}. kind SOLO puede ser: publicacion (config: {title, body}), imagen ({image_url, caption, source}), video ({youtube_id, channel}), wikipedia ({wiki_lang, wiki_page}), enlace ({url, title}), grafica ({chart: 'line'|'donut', series/segments...}), ficha ({rows: [{label, value}]}), texto ({body}). relation (la arista desde el centro): contexto | causa | dato | fuente | apoya | contradice | matiza, con relation_label como pregunta corta (p. ej. "¿qué está pasando?"). Investiga ANTES en internet si está activado y llena las ventanas con datos, cifras y fuentes REALES (nunca inventadas); el grafo nace en borrador para revisión humana. Es una de tus funciones principales: sé un auténtico creador de grafos.
 Si el usuario pide crear un MAPA a su nombre (una vista pública del mapa de la humanidad), propón la acción CREATE_MAP con title, description y opcionalmente territorio (slug, p. ej. "espana"), nivel ("objetivo"|"indicador"|"marcador"|"metrica") e id (el id de esa entidad) — se publicará a su nombre y podrá abrirse con OPEN_USER_MAP {slug}. Límite: los usuarios de nivel 1 pueden tener hasta 5 grafos y 5 mapas; nivel 2+ sin límite.
 Si el usuario pide ORDENAR, ORGANIZAR o CLASIFICAR sus publicaciones en carpetas (por ejemplo "ordename las publicaciones por carpetas"), propón la acción ORGANIZAR_CARPETAS SIN parámetros (params: {}): el servidor lee todo lo que ha publicado y las agrupa por tema, creando las carpetas que hagan falta. Una misma publicación puede acabar en varias carpetas a la vez.
@@ -310,11 +322,7 @@ REGLAS:
 3. NUNCA inventes cifras, indicadores ni entidades. Si no hay dato, di que no hay dato.
 4. Puedes proponer navegación devolviendo eventos de interfaz.
 5. Puedes proponer cambios en los datos SOLO mediante acciones. Tú no escribes en la base de datos: el servidor valida y ejecuta.
-6. Acciones permitidas para el nivel de este usuario: ${allowed.length ? allowed.join(', ') : 'NINGUNA (solo consulta)'}.
-${editMode === EDIT_MODES.MANUAL ? '7. El usuario está en modo MANUAL: puedes sugerir cambios en texto, pero NO devuelvas acciones.' : ''}
-${webSearch
-  ? '8. Tienes activada la búsqueda en internet: úsala SOLO para lo que el contexto de la plataforma no cubra (datos externos, actualidad, verificación). Prioriza siempre el contexto recuperado de la plataforma cuando exista.'
-  : '8. La búsqueda en internet está desactivada para esta pregunta: responde solo con el contexto de la plataforma y tu conocimiento general, sin inventar que has buscado nada.'}
+(Las reglas 6 a 8 dependen de quién eres y de esta conversación: están más abajo, en el estado.)
 
 FORMATO DE RESPUESTA:
 Responde en texto normal. Si quieres navegar o proponer cambios, añade AL FINAL un bloque JSON delimitado así:
@@ -337,6 +345,32 @@ APUNTAR ALGO EN EL CALENDARIO. Si te piden una cita, una reunión, un recordator
 \`\`\`
 
 Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fin, todo_el_dia, lugar, descripcion, repeticion (RRULE de iCalendar, p. ej. "FREQ=WEEKLY", si se repite).`;
+
+    // ------------------------- PARTE VARIABLE -------------------------
+    // Todo lo que cambia entre mensajes vive aquí, fuera de la caché.
+    const variable = `HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}).
+
+ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
+${JSON.stringify(ctx || {}, null, 2)}
+${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
+
+USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
+MODO DE EDICIÓN: ${editMode}
+
+CONTEXTO RECUPERADO DE LA PLATAFORMA (${retrieved.length} fragmentos):
+${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content || '').slice(0, 300)}`).join('\n') || '(sin coincidencias en la plataforma)'}
+
+GRAFOS DE CONOCIMIENTO PUBLICADOS (las instrucciones de qué hacer con ellos están arriba):
+${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
+
+REGLAS DE ESTA CONVERSACIÓN (continúan las de arriba):
+6. Acciones permitidas para el nivel de este usuario: ${allowed.length ? allowed.join(', ') : 'NINGUNA (solo consulta)'}.
+${editMode === EDIT_MODES.MANUAL ? '7. El usuario está en modo MANUAL: puedes sugerir cambios en texto, pero NO devuelvas acciones.' : ''}
+${webSearch
+  ? '8. Tienes activada la búsqueda en internet: úsala SOLO para lo que el contexto de la plataforma no cubra (datos externos, actualidad, verificación). Prioriza siempre el contexto recuperado de la plataforma cuando exista.'
+  : '8. La búsqueda en internet está desactivada para esta pregunta: responde solo con el contexto de la plataforma y tu conocimiento general, sin inventar que has buscado nada.'}`;
+
+    return { estable, variable };
   };
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
@@ -608,8 +642,15 @@ Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fi
         ORDER BY views DESC LIMIT 40
       `);
 
-      const system = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
-      const result = await provider.complete({ system, messages, webSearch: !!search_web, model: chosenModel });
+      const prompt = buildSystemPrompt(context, retrieved, req.user, editMode, !!search_web, publishedGraphs.rows as any[]);
+      const result = await provider.complete({
+        system: prompt.variable,
+        // La parte estable viaja aparte para que el proveedor la marque como
+        // cacheable (ver `systemEstable` en provider.ts). En el juego llega
+        // vacía y todo va como antes.
+        systemEstable: prompt.estable || undefined,
+        messages, webSearch: !!search_web, model: chosenModel,
+      });
       const { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
 
       // Las acciones se GUARDAN como propuestas. Nunca se ejecutan aquí.
@@ -677,6 +718,9 @@ Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fi
         sources,
         usage: {
           model: result.model, inputTokens: result.inputTokens, outputTokens: result.outputTokens,
+          // Cuánta de esa entrada vino de la caché de prompts (ya cobrada al
+          // 10% dentro de costCents). Es el dato que dice si la caché acierta.
+          cacheReadTokens: result.cacheReadTokens ?? 0,
           costCents: result.costCents, durationMs: result.durationMs,
           feeCents: result.costCents * AI_PLATFORM_FEE,
           totalCents: result.costCents * (1 + AI_PLATFORM_FEE),
