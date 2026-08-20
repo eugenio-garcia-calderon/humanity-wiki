@@ -1988,6 +1988,13 @@ async function startServer() {
   });
 
   app.post("/api/map/territories", async (req, res) => {
+    // SE ESCAPÓ DE LA REDADA DE PR #23 (cerrada 2026-08-21). Aquella cerró las
+    // cuatro rutas de /api/data/* y esta se quedó abierta por estar 900 líneas
+    // más abajo: comprobado contra producción con un POST anónimo, que llegaba
+    // al cuerpo del manejador en vez de recibir un 401. Crear un territorio es
+    // exactamente lo mismo que crea `/api/data/territories`, así que le toca
+    // el mismo guardián.
+    if (!requireAdmin(req, res)) return;
     try {
       const { name, type, description, coordinates } = req.body;
       const [lng, lat] = coordinates;
