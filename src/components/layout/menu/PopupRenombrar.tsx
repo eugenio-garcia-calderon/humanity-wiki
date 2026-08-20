@@ -1,0 +1,121 @@
+// ============================================================================
+// CAMBIAR EL NOMBRE Y EL ICONO (2026-08-20, petición de Eugenio: «al hacer
+// hover en un elemento debe aparecer 3 puntitos […] y permitir mediante una
+// ventanita pop up cambiar el nombre e icono»).
+// ============================================================================
+// Una ventanita, no una página: renombrar algo es un gesto de dos segundos y
+// mandarte a otro sitio para eso te saca de lo que estabas haciendo.
+//
+// EMOJIS Y NO IMÁGENES: caben en la fila, se ven igual en todas partes, no hay
+// que subir nada y el menú no paga una petición por línea.
+import { useEffect, useRef, useState } from 'react';
+import { X, Loader2, Check } from 'lucide-react';
+import { cn } from '../../../utils/cn';
+
+/** Los de siempre para un proyecto o una tarea, más lo que se quiera pegar. */
+const EMOJIS = [
+  '📁', '🚐', '🏡', '🌱', '⚡', '💧', '🔥', '🗺️',
+  '📄', '📊', '🧭', '🎯', '🛠️', '🚀', '💡', '🤝',
+  '📌', '🧩', '🎨', '🔬', '💰', '📚', '⚖️', '❤️',
+];
+
+export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCerrar }: {
+  tipo: string;
+  id: string;
+  nombre: string;
+  icono?: string | null;
+  /** Se avisa con lo que quedó, para repintar sin recargar. */
+  onHecho: (nombre: string, icono: string | null) => void;
+  onCerrar: () => void;
+}) {
+  const [texto, setTexto] = useState(nombre);
+  const [elegido, setElegido] = useState<string | null>(icono || null);
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cajaRef = useRef<HTMLDivElement>(null);
+
+  // Escape cierra, como cualquier ventanita.
+  useEffect(() => {
+    const alTeclado = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
+    window.addEventListener('keydown', alTeclado);
+    return () => window.removeEventListener('keydown', alTeclado);
+  }, [onCerrar]);
+
+  const guardar = async () => {
+    const n = texto.trim();
+    if (!n) { setError('El nombre no puede quedar vacío.'); return; }
+    setGuardando(true);
+    setError(null);
+    try {
+      const r = await fetch(`/api/elemento/${tipo}/${id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: n, icono: elegido }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setError(d?.error || 'No se ha podido guardar.'); return; }
+      onHecho(n, elegido);
+      onCerrar();
+    } catch {
+      setError('No se ha podido guardar.');
+    } finally { setGuardando(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] bg-slate-900/30 backdrop-blur-[1px] grid place-items-center p-4"
+      onClick={onCerrar}>
+      <div ref={cajaRef} className="w-full max-w-xs bg-white rounded-2xl shadow-2xl p-4"
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-sm font-black text-slate-900">Nombre e icono</h2>
+          <button onClick={onCerrar} disabled={guardando}
+            className="ml-auto p-1 text-slate-400 hover:text-slate-600 disabled:opacity-40">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={e => { e.preventDefault(); guardar(); }}>
+          <div className="flex items-center gap-2">
+            <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-slate-100 text-lg">
+              {elegido || '·'}
+            </span>
+            <input
+              autoFocus
+              value={texto}
+              onChange={e => setTexto(e.target.value)}
+              className="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
+            />
+          </div>
+
+          <p className="mt-3 mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">Icono</p>
+          <div className="grid grid-cols-8 gap-1">
+            {/* «Ninguno» va el primero: quitar el icono tiene que ser tan fácil
+                como ponerlo. */}
+            <button type="button" onClick={() => setElegido(null)} title="Sin icono"
+              className={cn('h-8 rounded-lg text-[10px] font-bold transition-colors',
+                elegido === null ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100')}>
+              —
+            </button>
+            {EMOJIS.map(e => (
+              <button key={e} type="button" onClick={() => setElegido(e)}
+                className={cn('h-8 rounded-lg text-base transition-colors',
+                  elegido === e ? 'bg-emerald-100 ring-2 ring-emerald-400' : 'hover:bg-slate-100')}>
+                {e}
+              </button>
+            ))}
+          </div>
+
+          {error && (
+            <p className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800">{error}</p>
+          )}
+
+          <button type="submit" disabled={guardando || !texto.trim()}
+            className="w-full mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-40 transition-colors">
+            {guardando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            Guardar
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

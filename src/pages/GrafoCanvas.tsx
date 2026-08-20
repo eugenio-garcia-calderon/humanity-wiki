@@ -1255,7 +1255,13 @@ export function GrafoLienzo({ slug, toolbar }: {
             className="flex items-center gap-1.5 min-w-0 py-0.5"
             title={infoOpen ? 'Ocultar detalles' : 'Ver detalles del grafo'}
           >
-            <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px]">{data.graph.title}</h1>
+            <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px] flex items-center gap-1.5">
+              {/* El icono del esquema, junto a su nombre (Eugenio, 2026-08-20). */}
+              {(data.graph as any).icono && (
+                <span className="text-sm leading-none shrink-0">{(data.graph as any).icono}</span>
+              )}
+              <span className="truncate">{data.graph.title}</span>
+            </h1>
             <ChevronDown className={cn('w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform', infoOpen && 'rotate-180')} />
           </button>
         </div>

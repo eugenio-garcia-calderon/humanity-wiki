@@ -32,7 +32,17 @@ export const ROLE_LABELS: Record<number, string> = {
 };
 
 const SESSION_COOKIE = 'rh_session';
-const SESSION_DAYS = 30;
+
+// CUÁNTO DURA UNA SESIÓN. En producción, 30 días: una sesión eterna en un
+// ordenador ajeno o robado es un agujero, y 30 días ya es generoso.
+//
+// EN LOCAL, 10 AÑOS (petición de Eugenio, 2026-08-20: «haz que no se me cierre
+// la sesión nunca en este localhost»). Aquí la máquina es la suya, la base de
+// datos es de mentira y volver a entrar cada mes mientras desarrollas es una
+// molestia sin nada a cambio. La diferencia la marca `NODE_ENV`, que en el
+// servidor de verdad vale «production»: si algún día esto se despliega, vuelve
+// solo a los 30 días sin que nadie tenga que acordarse.
+const SESSION_DAYS = process.env.NODE_ENV === 'production' ? 30 : 3650;
 
 // ----------------------------------------------------------------------------
 // Contraseñas

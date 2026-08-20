@@ -45,9 +45,9 @@ const HERRAMIENTAS: NodoMenu[] = [
 ];
 
 interface DatosMenu {
-  proyectos: Array<{ id: string; titulo: string; slug: string; publico: boolean }>;
-  productos: Array<{ id: string; nombre: string }>;
-  personas: Array<{ id: string; nombre: string; real: boolean; rol?: string }>;
+  proyectos: Array<{ id: string; titulo: string; slug: string; publico: boolean; icono?: string | null }>;
+  productos: Array<{ id: string; nombre: string; icono?: string | null }>;
+  personas: Array<{ id: string; nombre: string; real: boolean; rol?: string; icono?: string | null }>;
   organizaciones: Array<{ id: string; nombre: string }>;
 }
 
@@ -106,8 +106,10 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   const nodosProyectos: NodoMenu[] = datos.proyectos.map(p => ({
     id: p.id,
     label: p.titulo,
-    insignia: iniciales(p.titulo),
+    // El icono que le hayas puesto manda; si no hay, sus iniciales.
+    insignia: p.icono || iniciales(p.titulo),
     destino: `/proyectos/${p.slug}`,
+    editable: { tipo: 'proyecto', id: p.id },
     // Los hijos se piden al desplegar, no antes.
     cargarHijos: async () => {
       const r = await fetch(`/api/proyectos/${p.id}/arbol`, { credentials: 'include' });
@@ -118,12 +120,19 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
         mapas: MapIcon, productos: Package, personas: Users2,
       };
       return d.ramas.map((rama: any) => ({
+        // La rama («Tareas») NO se renombra: es una categoría, no una cosa.
+        // Lo que cuelga de ella sí.
         id: `${p.id}-${rama.clave}`,
         label: rama.label,
         icono: ICONO[rama.clave] || FolderKanban,
         cuantos: rama.hijos.length,
         hijos: rama.hijos.map((h: any) => ({
-          id: h.id, label: h.label, icono: ICONO[rama.clave] || FolderKanban, destino: h.destino,
+          id: h.id,
+          label: h.label,
+          insignia: h.icono || undefined,
+          icono: ICONO[rama.clave] || FolderKanban,
+          destino: h.destino,
+          editable: rama.tipo ? { tipo: rama.tipo, id: h.id } : undefined,
         })),
       }));
     },
@@ -132,7 +141,9 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   // --- 3. PRODUCTOS --------------------------------------------------------
   const nodosProductos: NodoMenu[] = datos.productos.map(p => ({
     id: p.id, label: p.nombre, icono: Package,
+    insignia: p.icono || undefined,
     destino: `/mercado?producto=${encodeURIComponent(p.id)}`,
+    editable: { tipo: 'producto', id: p.id },
   }));
 
   // --- 4. PERSONAS Y ORGANIZACIONES ---------------------------------------
@@ -146,10 +157,13 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
     ...datos.personas.map(p => ({
       id: p.id,
       label: p.nombre,
-      insignia: iniciales(p.nombre),
+      insignia: p.icono || iniciales(p.nombre),
       // Una persona REAL tiene su perfil; una representación del Mundo 3D
       // vive dentro del mundo. No son lo mismo y no llevan al mismo sitio.
       destino: p.real ? `/personas/${p.id}` : `/juego?agente=${encodeURIComponent(p.id)}`,
+      // Solo se renombra la REPRESENTACIÓN. El nombre de una persona de verdad
+      // lo pone ella en su perfil, no quien la tiene en su lista.
+      editable: p.real ? undefined : { tipo: 'persona', id: p.id },
     })),
     ...datos.organizaciones.map(o => ({
       id: o.id, label: o.nombre, icono: Users2,

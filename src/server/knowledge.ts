@@ -250,7 +250,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         && !!req.user && creatorId === req.user.id;
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
-               g.created_at, g.center, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
+               g.created_at, g.center, g.icono, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
                (SELECT count(*)::int FROM graph_windows gw WHERE gw.graph_id = g.id) AS window_count,
                (SELECT w.config->>'image_url' FROM graph_windows gw JOIN knowledge_windows w ON w.id = gw.window_id
                  WHERE gw.graph_id = g.id AND w.kind = 'imagen' AND w.config->>'image_url' IS NOT NULL

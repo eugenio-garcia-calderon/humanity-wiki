@@ -78,7 +78,10 @@ export function Proyectos() {
                       {p.publico ? 'Público' : 'Privado'}
                     </span>
                   </div>
-                  <p className="text-lg font-black text-slate-900 leading-tight">{p.titulo}</p>
+                  <p className="text-lg font-black text-slate-900 leading-tight flex items-center gap-1.5">
+                    {p.icono && <span className="text-lg leading-none shrink-0">{p.icono}</span>}
+                    <span>{p.titulo}</span>
+                  </p>
                   {p.descripcion && <p className="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2">{p.descripcion}</p>}
                   <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${avance}%` }} />
@@ -215,7 +218,14 @@ export function Proyecto() {
               {proyecto.publico ? 'Proyecto público' : 'Proyecto privado'} · de {proyecto.creador_nombre || 'Anónimo'}
             </span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">{proyecto.titulo}</h1>
+          {/* EL ICONO, JUNTO AL TÍTULO (Eugenio, 2026-08-20: «haz que la
+              imagen/icono de cada elemento aparezca también en la página
+              cuando se abre, junto al título en la parte superior»). Se
+              reconoce la cosa igual desde el menú que desde dentro. */}
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
+            {proyecto.icono && <span className="text-3xl leading-none shrink-0">{proyecto.icono}</span>}
+            <span>{proyecto.titulo}</span>
+          </h1>
           {proyecto.descripcion && <p className="text-sm text-slate-500 mt-1.5">{proyecto.descripcion}</p>}
           {proyecto.vision && (
             <p className="text-sm text-slate-600 leading-relaxed mt-4 border-l-2 border-emerald-300 pl-4">{proyecto.vision}</p>
