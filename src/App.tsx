@@ -31,7 +31,7 @@ import Grafos from './pages/Grafos';
 import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
-import Universo from './pages/Universo';
+import Lienzos from './pages/Lienzos';
 import Inicio from './pages/Inicio';
 import BaseDeDatos from './pages/BaseDeDatos';
 import MiConocimiento from './pages/MiConocimiento';
@@ -105,7 +105,7 @@ export default function App() {
                 <Route path="documentos/:id" element={<Documento />} />
                 <Route path="presentaciones/:id" element={<Presentacion />} />
                 <Route path="grafos/:slug" element={<GrafoCanvas />} />
-                <Route path="universo" element={<Universo />} />
+                <Route path="lienzos" element={<Lienzos />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />
                 <Route path="mapas" element={<Mapas />} />
                 <Route path="mapas/:slug" element={<UserMapa />} />

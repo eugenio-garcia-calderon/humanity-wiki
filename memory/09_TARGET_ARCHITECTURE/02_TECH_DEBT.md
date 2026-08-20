@@ -178,3 +178,12 @@ comprobación en el build que compare los nombres de `public/*` con las rutas de
   (consentimientos y logins se repiten). Mitigable con un perfil persistente por
   usuario (`userDataDir`) — decisión de producto pendiente, tiene implicaciones de
   privacidad y disco.
+
+## Lienzos.tsx: fichas como `<button>` sueltos — 2026-08-20
+`ui/core.tsx` exporta `Button`, pensado para acciones (relleno, redondeado). Una
+ficha de 4:3 con portada no es eso, así que la página usa 6 `<button>` con clases
+propias (las dos del conmutador, la ficha de crear, el enlace del estado vacío, cada
+ficha y el cierre del modal). El patrón correcto sería un primitivo `CardButton` en
+`ui/core`: ~20 minutos hoy, y crece con cada rejilla nueva (Explorar y Mercado ya
+tienen la suya). No se hizo ahora para no mezclar un refactor de primitivos con una
+página nueva. Sin colores a mano: todo son clases de la paleta.

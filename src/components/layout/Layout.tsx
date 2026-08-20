@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  User, LogOut, Heart, Store, Map as MapIcon, Globe2, Orbit, Database,
-  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe,
+  User, LogOut, Heart, Store, Map as MapIcon, Globe2, Database,
+  Home, BrainCircuit, Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, LayoutGrid,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import { cn } from '../../utils/cn';
@@ -25,7 +25,7 @@ const SECCIONES_COMUN = [
   { to: '/mapa', label: 'Geolocalización de Datos', icon: MapIcon },
   { to: '/red', label: 'Red de Datos', icon: Globe2 },
   { to: '/base-de-datos', label: 'Base de Datos', icon: Database },
-  { to: '/universo', label: 'Universo', icon: Orbit },
+  { to: '/lienzos', label: 'Lienzos', icon: LayoutGrid },
 ];
 const SECCIONES_TUYO = [
   { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
@@ -91,10 +91,8 @@ export default function Layout() {
   // Páginas de Grafos: el inicio y las fichas de grafo. Lienzo a sangre
   // completa y chat de IA como barra inferior.
   const isGrafosPage = location.pathname === '/red' || location.pathname.startsWith('/grafos');
-  // /mapas (el grafo de mapas) y /universo también son lienzo a sangre con
-  // la barra de IA.
+  // /mapas (el grafo de mapas) es lienzo a sangre con la barra de IA.
   const isMapasPage = location.pathname === '/mapas';
-  const isUniversoPage = location.pathname.startsWith('/universo');
   // /retos-vistas: el cruce de caminos de un reto con varias vistas (grafos).
   const isRetoVistasPage = location.pathname.startsWith('/retos-vistas');
   // Mi Conocimiento: el lienzo personal — a sangre completa y con barra de IA.
@@ -111,7 +109,7 @@ export default function Layout() {
   // menú lateral de carpetas (2026-08-08): necesita el alto completo, no la
   // columna centrada con márgenes que llevan las páginas de lectura.
   const isExplorarPage = location.pathname === '/explorar' || location.pathname === '/mis-publicaciones';
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isEscritorioPage;
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isEscritorioPage;
 
   if (isEmbed) {
     return (
@@ -120,7 +118,7 @@ export default function Layout() {
         {/* El robot del juego y la barra de los lienzos SON el asistente:
             sin esto, la página dentro de una ventana del Escritorio se
             quedaría muda (2026-08-19). */}
-        {(isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage) && (
+        {(isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage) && (
           <AIAssistant mode="bar" />
         )}
       </div>
@@ -294,7 +292,7 @@ export default function Layout() {
           <AIAssistant
             mode={
               isInicioPage ? 'inline'
-                : isGrafosPage || isMapasPage || isUniversoPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
+                : isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isJuegoPage ? 'bar'
                   : 'dock'
             }
           />
