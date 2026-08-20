@@ -153,6 +153,14 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     };
     window.addEventListener('humanity:abrir-ventana', alAbrir);
     window.addEventListener('humanity:pulsar-ventana', alPulsar);
+    // El menú ☰ de CUALQUIER página puede dejar una apertura apuntada
+    // («Navegador» desde fuera del Escritorio, 2026-08-20): se recoge aquí,
+    // ya con el gestor montado.
+    const crudo = localStorage.getItem('humanity:abrir-al-llegar');
+    if (crudo) {
+      localStorage.removeItem('humanity:abrir-al-llegar');
+      try { abrir(JSON.parse(crudo) as AbrirVentana); } catch { /* orden rota: se ignora */ }
+    }
     return () => {
       window.removeEventListener('humanity:abrir-ventana', alAbrir);
       window.removeEventListener('humanity:pulsar-ventana', alPulsar);

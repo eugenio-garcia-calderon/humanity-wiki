@@ -1175,3 +1175,9 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
 
 ### 2026-08-20 — «Wiki» plateado en el logo
 - El «Wiki» de la marca deja el verde y pasa a un **degradado plateado** (petición de Eugenio: «plateado/grisáceo moderno y elegante»): vertical, claro en el centro, que es como se lee «metal pulido». Tonos slate de la paleta de la app, sin colores nuevos. Verificado en el navegador junto al «Humanity» en negro.
+
+### 2026-08-20 — Navegador en el menú, cabecera solo-logo y pantalla nítida
+- **EL NAVEGADOR, A UN CLIC DESDE CUALQUIER PÁGINA** (petición de Eugenio: «directamente en el menú, sin tener que ir primero a escritorio»): la primera entrada del menú ☰ es «Navegador». En el Escritorio abre la ventana; desde cualquier otra página deja la apertura apuntada, navega al Escritorio y el gestor la recoge al montar.
+- **LA CABECERA QUEDA EN SOLO EL LOGO** («limpia el menú principal… que no quede nada, solo el logo»): Explorar, Mercado, Contribuye, el perfil, administrar usuarios, el tamaño de letra y cerrar sesión viven ahora ORDENADOS dentro del menú ☰ — Explorar en «El común», Contribuye junto al Mercado, y una sección nueva «Tu cuenta» al final con el ajuste de letra en línea. Arriba quedan el ☰, la marca y (en el Escritorio) los iconos de las ventanas.
+- **PANTALLA REMOTA NÍTIDA** («el navegador se ve con baja resolución»): el marco enviaba fotogramas al tamaño CSS y una pantalla Retina los estiraba al doble — borroso por construcción. Ahora la pestaña remota se dibuja a la densidad de TU pantalla (devicePixelRatio, tope 2) y la calidad JPEG sube de 55 a 70: los fotogramas llegan con el doble de píxeles y el navegador los encoge a su sitio. Verificado: texto nítido en la ventana.
+- Verificado en el navegador: portada con la cabecera solo-logo, menú ☰ con las cuatro secciones ordenadas y scroll propio, y clic en «Navegador» desde la portada aterrizando en el Escritorio con DuckDuckGo ya abierto.

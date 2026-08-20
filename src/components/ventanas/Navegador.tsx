@@ -117,7 +117,9 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
         const r = await fetch('/api/navegador/remoto', {
           method: 'POST', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: destino, ancho, alto }),
+          // La densidad de TU pantalla: en Retina los fotogramas llegan al
+          // doble de resolución y se ven nítidos, no estirados.
+          body: JSON.stringify({ url: destino, ancho, alto, escala: Math.min(window.devicePixelRatio || 1, 2) }),
         });
         if (!r.ok) throw new Error((await r.json().catch(() => null))?.error || 'no disponible');
         const j = await r.json();
