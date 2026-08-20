@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, Loader2, X, Trash2, Check,
-  MapPin, FolderKanban, ListChecks, Clock,
+  MapPin, FolderKanban, ListChecks, Clock, Repeat,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,6 +41,10 @@ interface Cosa {
   estado?: string;
   prioridad?: string;
   url: string | null;
+  repeticion?: string | null;
+  /** En una repetición, el id del evento de verdad. */
+  idBase?: string;
+  esRepeticion?: boolean;
 }
 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -238,6 +242,7 @@ export default function Calendario() {
       todo_el_dia: !!editando.todoElDia,
       lugar: editando.lugar || null,
       proyecto_id: editando.proyectoId || null,
+      repeticion: editando.repeticion || null,
     };
     const r = editando.id
       ? await fetch(`/api/eventos/${editando.id}`, {
@@ -304,13 +309,16 @@ export default function Calendario() {
           e.stopPropagation();
           // Una tarea se abre donde vive; un evento se edita aquí.
           if (it.clase === 'tarea') { if (it.url) navegar(it.url); return; }
-          setEditando({ ...it });
+          // Si es una repetición, se edita EL EVENTO, no esa vez suelta: su id
+          // lleva la fecha detrás y no existe como fila.
+          setEditando({ ...it, id: (it as any).idBase || it.id });
         }}
         title={`${it.titulo}${it.proyecto ? ` · ${it.proyecto}` : ''}`}
         className={cn('w-full flex items-center gap-1 rounded px-1.5 text-left transition-opacity hover:opacity-80 cursor-grab active:cursor-grabbing',
           compacta ? 'py-0.5' : 'py-1',
           tono.fondo, tono.texto, hecha && 'opacity-50 line-through')}
       >
+        {it.esRepeticion && <Repeat className="w-2.5 h-2.5 shrink-0 opacity-60" />}
         {it.clase === 'tarea'
           ? <ListChecks className="w-3 h-3 shrink-0" />
           : it.icono
@@ -509,6 +517,26 @@ export default function Calendario() {
                 >
                   <option value="">Sin proyecto</option>
                   {proyectos.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
+                </select>
+              </div>
+
+              {/* SE REPITE (fase 3). Se guarda la REGLA, no una copia por
+                  semana: un evento semanal durante dos años serían 104 filas
+                  que mantener. La regla va en el formato de iCalendar, que es
+                  el que entienden Google y Apple. */}
+              <div className="flex items-center gap-2">
+                <Repeat className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={editando.repeticion || ''}
+                  onChange={e => setEditando(x => ({ ...x!, repeticion: e.target.value || null }))}
+                  className="flex-1 px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+                >
+                  <option value="">No se repite</option>
+                  <option value="FREQ=DAILY">Cada día</option>
+                  <option value="FREQ=WEEKLY">Cada semana</option>
+                  <option value="FREQ=WEEKLY;INTERVAL=2">Cada dos semanas</option>
+                  <option value="FREQ=MONTHLY">Cada mes</option>
+                  <option value="FREQ=YEARLY">Cada año</option>
                 </select>
               </div>
 

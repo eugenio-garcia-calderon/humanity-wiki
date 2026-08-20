@@ -257,6 +257,50 @@ export function registerPersonasRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * POST /api/personas/:id/seguimiento  { dias? }
+   * «Ya he hablado con esta persona» y, si mandas `dias`, además **crea un
+   * evento en el calendario** para volver a hacerlo.
+   *
+   * Es la integración que pedía Eugenio: el CRM no se inventa un sistema de
+   * recordatorios propio, usa el calendario que ya existe. Un recordatorio ES
+   * un evento — si tuviera su propia tabla, tendrías dos agendas.
+   */
+  app.post('/api/personas/:id/seguimiento', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    try {
+      const permiso = await mia(req, req.params.id);
+      if (permiso === null) return res.status(404).json({ error: 'Esa persona no existe.' });
+      if (!permiso) return res.status(403).json({ error: 'Esa ficha no es tuya.' });
+
+      await db.execute(sql`
+        UPDATE game_agents SET ultimo_contacto = now(), updated_at = now()
+        WHERE id = ${req.params.id}
+      `);
+
+      const dias = Number(req.body?.dias) || 0;
+      let evento: string | null = null;
+      if (dias > 0 && dias <= 365) {
+        const f = await db.execute(sql`
+          SELECT nombre, proyecto_id FROM game_agents WHERE id = ${req.params.id}
+        `);
+        const p = f.rows[0] as any;
+        evento = nuevoId('EVT');
+        await db.execute(sql`
+          INSERT INTO eventos (id, titulo, inicio, todo_el_dia, proyecto_id,
+                               creador_user_id, created_by, updated_by, icono)
+          VALUES (${evento}, ${`Hablar con ${p?.nombre || 'esa persona'}`},
+                  now() + (${dias} || ' days')::interval, true, ${p?.proyecto_id || null},
+                  ${req.user.id}, ${req.user.id}, ${req.user.id}, '🔔')
+        `);
+      }
+      res.json({ ok: true, evento });
+    } catch (e: any) {
+      console.error('seguimiento error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==========================================================================
   // LA VISTA DE 360°: TODO LO QUE TE UNE A ESA PERSONA
   // ==========================================================================
@@ -286,7 +330,7 @@ export function registerPersonasRoutes(app: Express, db: any) {
         ...(Array.isArray(persona?.proyecto_ids) ? persona.proyecto_ids : []),
       ];
 
-      const [proyectos, mensajes, eventos] = await Promise.all([
+      const [proyectos, mensajes, eventos, hilo, tareas] = await Promise.all([
         proyectoIds.length
           ? db.execute(sql`
               SELECT id, titulo, slug, icono FROM proyectos
@@ -314,6 +358,28 @@ export function registerPersonasRoutes(app: Express, db: any) {
               ORDER BY inicio LIMIT 20
             `)
           : Promise.resolve({ rows: [] }),
+        // La conversación con SU REPRESENTACIÓN (la IA). Es otra cosa que los
+        // mensajes de verdad y no hay que mezclarlas: una se la mandas a la
+        // persona, la otra te la contesta un personaje.
+        persona?.conversation_id
+          ? db.execute(sql`
+              SELECT role, content, created_at FROM ai_messages
+              WHERE conversation_id = ${persona.conversation_id}
+              ORDER BY created_at ASC LIMIT 500
+            `)
+          : Promise.resolve({ rows: [] }),
+        // Las tareas de sus proyectos: en qué andáis metidos juntos.
+        proyectoIds.length
+          ? db.execute(sql`
+              SELECT r.id, r.titulo, r.estado, r.vence_el, p.slug AS proyecto_slug
+              FROM roadmap_items r
+              LEFT JOIN proyectos p ON p.id = r.proyecto_id
+              WHERE r.archived_at IS NULL
+                AND r.proyecto_id = ANY(string_to_array(${proyectoIds.join(',')}, ','))
+              ORDER BY r.estado = 'hecho', r.vence_el NULLS LAST, r.orden
+              LIMIT 30
+            `)
+          : Promise.resolve({ rows: [] }),
       ]);
 
       res.json({
@@ -321,6 +387,10 @@ export function registerPersonasRoutes(app: Express, db: any) {
         proyectos: proyectos.rows,
         mensajes: mensajes.rows,
         eventos: eventos.rows,
+        tareas: tareas.rows,
+        conversacion: (hilo.rows as any[]).map(m => ({
+          mio: m.role === 'user', texto: m.content, fecha: m.created_at,
+        })),
         recuerdos: Array.isArray(persona?.memoria) ? persona.memoria.slice(-30).reverse() : [],
       });
     } catch (e: any) {
