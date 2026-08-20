@@ -194,7 +194,10 @@ export default function Layout() {
         {/* Marca */}
         <Link to="/" className="shrink-0 hover:opacity-85 transition-opacity">
           <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
-            Humanity<span className="text-emerald-600"> Wiki</span>
+            {/* «Wiki» plateado (petición de Eugenio, 2026-08-20): degradado
+                vertical claro en el centro — así es como se lee «metal pulido»
+                sin salirse de la paleta slate de la app. */}
+            Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
           </span>
         </Link>
 
