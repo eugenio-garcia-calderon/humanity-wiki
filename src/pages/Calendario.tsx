@@ -22,7 +22,7 @@ import {
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
 
-type Vista = 'mes' | 'semana' | 'dia';
+type Vista = 'dia' | 'semana' | 'mes' | 'anio';
 
 interface Cosa {
   clase: 'evento' | 'tarea';
@@ -73,6 +73,17 @@ const lunesDe = (d: Date) => {
 };
 
 const esHoy = (d: Date) => claveDia(d) === claveDia(new Date());
+const esFinDeSemana = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
+
+/** El número de semana ISO, como en el calendario de macOS. Es la cuenta que
+ *  usa media Europa para decir «la semana 33», y se calcula contra el jueves
+ *  de esa semana: es la regla de la norma ISO-8601. */
+function semanaISO(d: Date) {
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  x.setUTCDate(x.getUTCDate() + 4 - (x.getUTCDay() || 7));
+  const enero = new Date(Date.UTC(x.getUTCFullYear(), 0, 1));
+  return Math.ceil(((x.getTime() - enero.getTime()) / 86400000 + 1) / 7);
+}
 
 /** Un color estable por proyecto, para reconocer de un vistazo de qué es cada
  *  cosa sin tener que leer. El mismo proyecto tiene siempre el mismo color. */
@@ -107,10 +118,77 @@ export default function Calendario() {
   const arrastrando = useRef<Cosa | null>(null);
   const [encima, setEncima] = useState<string | null>(null);
 
+  // PINTAR DÍAS PARA CREAR UN EVENTO (Eugenio, 2026-08-20: «cuando pinche en
+  // un día y arrastre hacia otro día que se genere un nuevo evento en esos
+  // días, y también si hago doble click»).
+  //
+  // Un clic suelto NO crea nada: crear con un solo clic hace que se te llene
+  // el calendario de eventos vacíos sin querer. Crear es doble clic, o pintar
+  // un tramo — dos gestos que no se hacen sin querer.
+  const pintando = useRef<string | null>(null);
+  const [tramo, setTramo] = useState<{ a: string; b: string } | null>(null);
+  // EL TRAMO TAMBIÉN EN UNA REFERENCIA, y no es un capricho: al soltar hay que
+  // leer el tramo ACTUAL, y el estado de React puede no haberse repintado
+  // todavía si el gesto va rápido. Leyendo el estado desde el manejador de
+  // «soltar» se veía el valor viejo y no se creaba nada: el calendario se
+  // quedaba pintado y no pasaba nada (visto en pruebas, 2026-08-20). La
+  // referencia es siempre la de ahora.
+  const tramoRef = useRef<{ a: string; b: string } | null>(null);
+  const marcarTramo = useCallback((t: { a: string; b: string } | null) => {
+    tramoRef.current = t;
+    setTramo(t);
+  }, []);
+
+  /** ¿Está este día dentro de lo que se está pintando? */
+  const enTramo = useCallback((k: string) => {
+    if (!tramo) return false;
+    const [x, y] = tramo.a <= tramo.b ? [tramo.a, tramo.b] : [tramo.b, tramo.a];
+    return k >= x && k <= y;
+  }, [tramo]);
+
+  // Se suelta EN LA VENTANA y no en la celda: si sueltas fuera de la rejilla,
+  // el gesto tiene que terminar igual y no quedarse pintando para siempre.
+  useEffect(() => {
+    const soltar = () => {
+      const t = tramoRef.current;
+      if (!pintando.current || !t) { pintando.current = null; return; }
+      const [x, y] = t.a <= t.b ? [t.a, t.b] : [t.b, t.a];
+      pintando.current = null;
+      marcarTramo(null);
+      // Un solo día es un clic, no un tramo: lo deja para el doble clic.
+      if (x === y) return;
+      const ini = new Date(`${x}T09:00:00`);
+      const fin = new Date(`${y}T10:00:00`);
+      setEditando({
+        titulo: '', inicio: ini.toISOString(), fin: fin.toISOString(),
+        todoElDia: true, clase: 'evento',
+      });
+    };
+    // Los DOS: un ratón dispara `pointerup` y después `mouseup`, pero no todos
+    // los caminos de entrada mandan los dos. Soltar tiene que terminar el
+    // gesto siempre — si no, el calendario se queda pintado y no responde.
+    // Si llegan los dos, el segundo se encuentra el gesto ya cerrado y sale.
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('mouseup', soltar);
+    return () => {
+      window.removeEventListener('pointerup', soltar);
+      window.removeEventListener('mouseup', soltar);
+    };
+    // Sin dependencias: el manejador ya no lee estado, lee la referencia. Así
+    // se registra UNA vez y nunca puede quedarse viejo.
+  }, [marcarTramo]);
+
   /** El tramo que se pide, según la vista. En el mes se piden las 6 semanas
    *  completas de la rejilla, no solo del 1 al 31: si no, los días del mes
    *  anterior que asoman saldrían siempre vacíos. */
   const [desde, hasta, dias] = useMemo(() => {
+    if (vista === 'anio') {
+      // El año entero: del 1 de enero al 31 de diciembre. Se piden todos los
+      // eventos de una vez porque la vista los enseña todos a la vez.
+      const a0 = new Date(ancla.getFullYear(), 0, 1);
+      const a1 = new Date(ancla.getFullYear(), 11, 31);
+      return [claveDia(a0), claveDia(a1), [] as Date[]];
+    }
     if (vista === 'dia') {
       const d = new Date(ancla); d.setHours(0, 0, 0, 0);
       return [claveDia(d), claveDia(d), [d]];
@@ -176,7 +254,8 @@ export default function Calendario() {
   }, [items]);
 
   const mover = (paso: number) => {
-    if (vista === 'mes') setAncla(a => new Date(a.getFullYear(), a.getMonth() + paso, 1));
+    if (vista === 'anio') setAncla(a => new Date(a.getFullYear() + paso, 0, 1));
+    else if (vista === 'mes') setAncla(a => new Date(a.getFullYear(), a.getMonth() + paso, 1));
     else setAncla(a => sumarDias(a, paso * (vista === 'semana' ? 7 : 1)));
   };
 
@@ -290,7 +369,9 @@ export default function Calendario() {
     );
   }
 
-  const titulo = vista === 'mes'
+  const titulo = vista === 'anio'
+    ? String(ancla.getFullYear())
+    : vista === 'mes'
     ? `${MESES[ancla.getMonth()]} de ${ancla.getFullYear()}`
     : vista === 'semana'
       ? `${dias[0].getDate()} – ${dias[6].getDate()} de ${MESES[dias[6].getMonth()]}`
@@ -302,6 +383,7 @@ export default function Calendario() {
     const hecha = it.clase === 'tarea' && it.estado === 'hecho';
     return (
       <button
+        data-ficha
         draggable
         onDragStart={e => { arrastrando.current = it; e.dataTransfer.effectAllowed = 'move'; }}
         onDragEnd={() => { arrastrando.current = null; setEncima(null); }}
@@ -361,16 +443,16 @@ export default function Calendario() {
         <div className="flex-1" />
 
         <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5">
-          {(['mes', 'semana', 'dia'] as Vista[]).map(v => (
+          {(['dia', 'semana', 'mes', 'anio'] as Vista[]).map(v => (
             <button key={v} onClick={() => setVista(v)}
               className={cn('px-3 py-1 rounded-full text-xs font-bold capitalize transition-colors',
                 vista === v ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50')}>
-              {v === 'dia' ? 'día' : v}
+              {v === 'dia' ? 'día' : v === 'anio' ? 'año' : v}
             </button>
           ))}
         </div>
 
-        <button onClick={() => nuevoEn(ancla)}
+        <button onClick={() => nuevoEn(vista === 'anio' ? new Date() : ancla)}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors">
           <Plus className="w-4 h-4" /> Nuevo evento
         </button>
@@ -380,7 +462,62 @@ export default function Calendario() {
         <p className="mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 shrink-0">{error}</p>
       )}
 
-      {/* La rejilla */}
+      {/* EL AÑO ENTERO: doce meses pequeños. No caben los títulos de los
+          eventos, así que lo que se enseña es DÓNDE hay algo — un punto bajo
+          el día. Es un mapa del año para saltar, no para leer. */}
+      {vista === 'anio' ? (
+        <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 12 }, (_, m) => {
+              const primero = new Date(ancla.getFullYear(), m, 1);
+              const inicio = lunesDe(primero);
+              const celdas = Array.from({ length: 42 }, (_, i) => sumarDias(inicio, i));
+              // Se corta en la última semana con días del mes: casi ningún mes
+              // necesita las seis filas y con ellas los doce meses no caben.
+              const ultimas = celdas.filter(d => d.getMonth() === m);
+              const filas = Math.ceil((celdas.indexOf(ultimas[ultimas.length - 1]) + 1) / 7);
+              return (
+                <div key={m}>
+                  <button
+                    onClick={() => { setAncla(primero); setVista('mes'); }}
+                    className="text-sm font-black text-slate-800 capitalize hover:text-emerald-700 transition-colors mb-1"
+                  >
+                    {MESES[m]}
+                  </button>
+                  <div className="grid grid-cols-7 gap-px">
+                    {DIAS.map(x => (
+                      <span key={x} className="text-[8px] font-black uppercase text-slate-300 text-center">
+                        {x[0]}
+                      </span>
+                    ))}
+                    {celdas.slice(0, filas * 7).map(d => {
+                      const k = claveDia(d);
+                      const fuera = d.getMonth() !== m;
+                      const tiene = (porDia.get(k) || []).length > 0;
+                      return (
+                        <button
+                          key={k}
+                          onClick={() => { setAncla(d); setVista('dia'); }}
+                          className={cn('relative h-6 grid place-items-center text-[10px] font-bold rounded transition-colors tabular-nums',
+                            fuera ? 'text-slate-200'
+                              : esHoy(d) ? 'bg-rose-600 text-white'
+                                : 'text-slate-700 hover:bg-slate-100')}
+                        >
+                          {d.getDate()}
+                          {tiene && !fuera && !esHoy(d) && (
+                            <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-emerald-500" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+      /* La rejilla */
       <div className="flex-1 min-h-0 rounded-2xl border border-slate-200 bg-white overflow-hidden flex flex-col">
         {vista !== 'dia' && (
           <div className="grid grid-cols-7 border-b border-slate-100 shrink-0">
@@ -394,35 +531,63 @@ export default function Calendario() {
 
         <div className={cn('flex-1 min-h-0 overflow-y-auto',
           vista === 'mes' ? 'grid grid-cols-7 grid-rows-6' : vista === 'semana' ? 'grid grid-cols-7' : '')}>
-          {dias.map(d => {
+          {dias.map((d, i) => {
             const k = claveDia(d);
             const cosas = porDia.get(k) || [];
             const otroMes = vista === 'mes' && d.getMonth() !== ancla.getMonth();
+            const primeraColumna = vista === 'mes' && i % 7 === 0;
             return (
               <div
                 key={k}
                 onDragOver={e => { if (arrastrando.current) { e.preventDefault(); setEncima(k); } }}
                 onDragLeave={() => setEncima(c => (c === k ? null : c))}
                 onDrop={e => { e.preventDefault(); soltarEn(d); }}
-                onClick={() => nuevoEn(d)}
-                className={cn('border-b border-r border-slate-100 p-1 flex flex-col gap-0.5 cursor-pointer transition-colors',
+                // Pintar un tramo: empieza en el fondo de la celda, no encima
+                // de un evento (ahí manda el arrastre del propio evento).
+                onPointerDown={e => {
+                  if ((e.target as HTMLElement).closest('[data-ficha]')) return;
+                  pintando.current = k;
+                  marcarTramo({ a: k, b: k });
+                }}
+                // `pointerenter` Y `pointermove`: el primero es el que manda,
+                // pero no burbujea y hay ratones y trackpads que se saltan la
+                // entrada si el salto entre fotogramas es grande. Con los dos,
+                // el tramo sigue al dedo pase lo que pase.
+                onPointerEnter={() => { if (pintando.current && tramoRef.current?.b !== k) marcarTramo({ a: tramoRef.current!.a, b: k }); }}
+                onPointerMove={() => { if (pintando.current && tramoRef.current?.b !== k) marcarTramo({ a: tramoRef.current!.a, b: k }); }}
+                onDoubleClick={() => nuevoEn(d)}
+                className={cn('relative border-b border-r border-slate-100 p-1 pt-6 flex flex-col gap-0.5 cursor-pointer transition-colors select-none',
                   vista === 'dia' ? 'min-h-full' : 'min-h-[5.5rem]',
-                  otroMes && 'bg-slate-50/60',
-                  encima === k && 'bg-emerald-50 ring-2 ring-inset ring-emerald-300',
-                  !otroMes && encima !== k && 'hover:bg-slate-50/70')}
+                  // El fin de semana con fondo, como en el calendario de macOS:
+                  // localizar el sábado de un vistazo sin leer la cabecera.
+                  esFinDeSemana(d) && !otroMes && 'bg-slate-50/70',
+                  otroMes && 'bg-slate-50/40',
+                  (encima === k || enTramo(k)) && 'bg-emerald-50 ring-2 ring-inset ring-emerald-300',
+                )}
               >
-                <div className="flex items-center gap-1 px-0.5">
-                  <span className={cn('text-[11px] font-black grid place-items-center',
-                    esHoy(d) ? 'w-5 h-5 rounded-full bg-emerald-600 text-white'
-                      : otroMes ? 'text-slate-300' : 'text-slate-500')}>
-                    {d.getDate()}
+                {/* EL NÚMERO DEL DÍA, ARRIBA A LA DERECHA Y CON CONTRASTE
+                    (Eugenio, 2026-08-20, con la captura del calendario de
+                    macOS). Antes iba a la izquierda y en gris claro: en una
+                    rejilla llena, el número es lo primero que buscas y era lo
+                    que menos se veía. */}
+                <span className={cn('absolute top-1 right-1.5 text-[13px] font-bold grid place-items-center tabular-nums',
+                  esHoy(d) ? 'w-6 h-6 rounded-full bg-rose-600 text-white'
+                    : otroMes ? 'text-slate-300' : 'text-slate-800')}>
+                  {d.getDate()}
+                </span>
+
+                {/* El número de semana, a la izquierda de la primera columna. */}
+                {primeraColumna && (
+                  <span className="absolute top-1.5 left-1.5 text-[10px] font-bold text-slate-300 tabular-nums">
+                    {semanaISO(d)}
                   </span>
-                  {vista === 'dia' && (
-                    <span className="text-xs font-bold text-slate-400 capitalize">
-                      {d.toLocaleDateString('es-ES', { weekday: 'long' })}
-                    </span>
-                  )}
-                </div>
+                )}
+
+                {vista === 'dia' && (
+                  <span className="absolute top-1.5 left-2 text-xs font-bold text-slate-400 capitalize">
+                    {d.toLocaleDateString('es-ES', { weekday: 'long' })}
+                  </span>
+                )}
 
                 {/* En el mes caben tres antes de tener que resumir; si no, una
                     semana cargada rompe la altura de la fila entera. */}
@@ -438,14 +603,15 @@ export default function Calendario() {
                   </button>
                 )}
               </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
+      )}
 
       <p className="mt-2 text-[11px] text-slate-400 shrink-0">
-        Tus tareas con fecha salen aquí solas. Arrastra cualquier cosa a otro día para moverla:
-        una tarea cambia de verdad, no una copia.
+        Doble clic en un día para crear algo, o pincha y arrastra para pintar varios días.
+        Tus tareas con fecha salen solas; arrastrarlas a otro día las cambia de verdad, no una copia.
       </p>
 
       {/* Crear / editar un evento */}

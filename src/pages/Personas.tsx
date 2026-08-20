@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Users2, Search, Plus, Loader2, Star, Mail, Phone, Building2, X, Check,
   MoreHorizontal, Trash2, MessageSquare, Tag, FolderKanban, Brain, Pencil,
+  Rows3, LayoutGrid, MapPin,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
@@ -74,6 +75,23 @@ export default function Personas() {
   const [ficha, setFicha] = useState<Partial<Persona> | null>(null);
   const [nuevoGrupo, setNuevoGrupo] = useState<string | null>(null);
   const [menuFila, setMenuFila] = useState<string | null>(null);
+
+  // CÓMO SE MIRAN (Eugenio, 2026-08-20: «ponme diferentes formas de ver los
+  // contactos, en forma de galería con fotos en mini tarjetas, o en formato de
+  // tabla con las variables de cada contacto en las columnas»).
+  //
+  // Los mismos datos, dos maneras: la TABLA para trabajar —encontrar a alguien
+  // entre muchos y comparar columnas— y la GALERÍA para reconocer por la cara,
+  // que es como funciona la memoria con la gente que ya conoces. La elección
+  // se recuerda: cada cual mira de una forma y no hay que repetirla cada vez.
+  const [modo, setModo] = useState<'tabla' | 'galeria'>(() => {
+    try { return localStorage.getItem('humanity:personas-vista') === 'galeria' ? 'galeria' : 'tabla'; }
+    catch { return 'tabla'; }
+  });
+  const cambiarModo = (m: 'tabla' | 'galeria') => {
+    setModo(m);
+    try { localStorage.setItem('humanity:personas-vista', m); } catch { /* lleno */ }
+  };
 
   const cargar = useCallback(() => {
     if (!user) { setCargando(false); return; }
@@ -190,6 +208,17 @@ export default function Personas() {
 
         <div className="flex-1 min-w-[6rem]" />
 
+        <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5">
+          {([['tabla', 'Tabla', Rows3], ['galeria', 'Galería', LayoutGrid]] as const).map(([k, etiqueta, Icono]) => (
+            <button key={k} onClick={() => cambiarModo(k)} title={etiqueta}
+              className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors',
+                modo === k ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50')}>
+              <Icono className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{etiqueta}</span>
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={() => setSoloFavoritos(v => !v)}
           title="Solo las favoritas"
@@ -289,6 +318,80 @@ export default function Personas() {
               Añadir la primera →
             </button>
           )}
+        </div>
+      ) : modo === 'galeria' ? (
+        /* GALERÍA: la cara primero. Para cuando reconoces a la gente antes por
+           la foto que por el nombre — que es casi siempre. */
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {personas.map(p => (
+            <div key={p.id} className="group relative rounded-2xl border border-slate-200 bg-white overflow-hidden hover:border-emerald-300 hover:shadow-md transition-all">
+              <button onClick={() => navegar(`/persona/${p.id}`)} className="w-full text-left">
+                <div className="aspect-[4/3] bg-slate-50 grid place-items-center overflow-hidden">
+                  {p.foto_url
+                    ? <img src={p.foto_url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    : <span className="text-3xl font-black text-slate-300">{p.icono || iniciales(p.nombre)}</span>}
+                </div>
+                <div className="p-2.5">
+                  <p className="text-[13px] font-black text-slate-900 truncate flex items-center gap-1">
+                    {p.nombre}
+                    {p.favorito && <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />}
+                  </p>
+                  {(p.rol || p.empresa) && (
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {[p.rol, p.empresa].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    {p.estado && ESTADOS[p.estado] && (
+                      <span className={cn('px-1.5 py-px rounded-full border text-[8px] font-black uppercase tracking-wider', ESTADOS[p.estado].clase)}>
+                        {ESTADOS[p.estado].etiqueta}
+                      </span>
+                    )}
+                    {p.ultimo_contacto && (
+                      <span className="text-[9px] font-bold text-slate-400">{haceCuanto(p.ultimo_contacto)}</span>
+                    )}
+                  </div>
+                  {Array.isArray(p.etiquetas) && p.etiquetas.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {p.etiquetas.slice(0, 3).map(e => (
+                        <span key={e} className="px-1.5 py-px rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">{e}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </button>
+
+              {/* Las mismas acciones que en la tabla: cambiar de vista no
+                  puede quitarte lo que podías hacer. */}
+              <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5">
+                <button onClick={() => alternarFavorito(p)} title={p.favorito ? 'Quitar de favoritas' : 'Marcar favorita'}
+                  className="w-7 h-7 grid place-items-center rounded-lg bg-black/25 backdrop-blur text-white/80 hover:text-amber-300 opacity-0 group-hover:opacity-100 transition-all">
+                  <Star className={cn('w-3.5 h-3.5', p.favorito && 'fill-amber-400 text-amber-400')} />
+                </button>
+                <button onClick={() => setMenuFila(m => (m === p.id ? null : p.id))} title="Opciones"
+                  className={cn('w-7 h-7 grid place-items-center rounded-lg bg-black/25 backdrop-blur text-white/80 transition-all',
+                    menuFila === p.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}>
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {menuFila === p.id && (
+                <div className="absolute top-10 right-1.5 w-44 bg-white border border-slate-200 shadow-2xl rounded-xl py-1 z-20">
+                  <button onClick={() => { setMenuFila(null); navegar(`/persona/${p.id}`); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <MessageSquare className="w-3.5 h-3.5 text-slate-400" /> Abrir y hablar
+                  </button>
+                  <button onClick={() => { setMenuFila(null); setFicha({ ...p }); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar ficha
+                  </button>
+                  <button onClick={() => quitar(p)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left">
+                    <Trash2 className="w-3.5 h-3.5 text-slate-400" /> Quitar
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
