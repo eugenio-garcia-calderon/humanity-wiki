@@ -1273,3 +1273,13 @@ Lote de 12 peticiones de Eugenio en una sola captura. Diez van en este cambio; l
 - **DOBLE CLIC EN UNA PESTAÑA DE ARRIBA Y LA VENTANA SE AGRANDA** (petición de Eugenio: «que si hago doble click en una de ellas, se expande la ventana a pantalla completa si resulta que está en un tamaño pequeño»). Es un conmutador, como la barra de título de cualquier ventana: otro doble clic la devuelve a su tamaño. Si estaba minimizada, se desminimiza a la vez — agrandar algo que no se ve no sirve de nada.
 - **EL DETALLE QUE HABÍA QUE RESOLVER**: un clic en la pestaña que ya está delante la MINIMIZA, y eso chocaba con el doble clic — el navegador manda clic, clic y doble clic, así que la ventana se escondía y volvía de golpe antes de agrandarse; a pantalla completa se veía como un parpadeo. Ahora **traer al frente sigue siendo instantáneo** (que es el caso normal) y solo se hace esperar 220 ms el minimizar, que es el único que se pisa con el doble clic; si llega el doble clic, se cancela.
 - Verificado con ratón de verdad: ventana en tamaño pequeño → doble clic → pantalla completa; doble clic otra vez → vuelve a su tamaño; clic simple → sigue minimizando.
+
+### 2026-08-20 — Página «Tareas»: todas, agrupadas por proyecto
+- **NUEVA HERRAMIENTA «TAREAS»** en el menú ☰ (petición de Eugenio: «una página como las otras herramientas donde puedas ver todas las tareas ordenadas por PROYECTOS»). Abre como ventana igual que el resto.
+- **UNA TAREA ES UNA FILA DE `roadmap_items`**: no hay tabla nueva ni copia que mantener al día. Lo que cambia es cómo se miran — en un proyecto las ves como tablero, columna a columna; aquí las ves TODAS a la vez, repartidas por proyecto, para saber en qué andas metido sin abrir proyecto por proyecto.
+- **`GET /api/tareas`**: `GET /api/roadmap` solo sabía traer las de UN proyecto, así que una vista de conjunto habría costado una llamada por proyecto. La ruta nueva las trae todas de una vez **ya repartidas por el servidor**: la página solo pinta.
+  - **Quién ve qué**: una tarea se ve si se ve su proyecto — público, o tuyo (o eres administrador). Verificado sin sesión: solo salen los públicos.
+  - Las que no cuelgan de ningún proyecto son la hoja de ruta de humanity.wiki, que ya es pública en /vision, y van en su propio grupo.
+- **TUS PROYECTOS PRIMERO Y LA HOJA DE RUTA LA ÚLTIMA, PLEGADA.** Son 112 tareas de 128: abierta taparía por completo lo tuyo, que es a lo que vienes.
+- Cada proyecto lleva **barra de avance** (hechas sobre el total) y un enlace a su tablero, que es donde se editan. Filtro por estado (todas / por hacer / en curso / hechas) y buscador.
+- Verificado con datos reales: **128 tareas en 4 proyectos**; el filtro «En curso» deja las 4 que lo están; la hoja de ruta marca 47/112.
