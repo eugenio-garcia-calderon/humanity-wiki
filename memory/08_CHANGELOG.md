@@ -2387,3 +2387,139 @@ first, because that is what was asked for; whether you are charged, last.
 Both branches verified in the browser: the normal one against a real answer,
 and the missing-data one by stripping `costCents` from the response in the
 client so the honest path was actually exercised rather than assumed.
+## 2026-08-21 — Mobile, phase 1: a breakpoint, a drawer, and no windows on a phone
+
+The platform had no mobile design at all — the only mobile-aware code in the
+tree was the 3D game's. What existed was the desktop layout squeezed. The proof
+is the Tester's rotation test: in landscape (844px) everything fits and works,
+in portrait (390px) it breaks. At 844 the app believes it is on a computer, and
+it is right, because nothing ever told it otherwise.
+
+**`useEsMovil`** is now the one place that decides, by width (768px, Tailwind's
+`md`) and by height. The height half was not in the original design and was
+found by testing the 3D world: an iPhone 12 in landscape is 844×390 — wider
+than 768 — so rotating the phone brought the desktop sidebar back and left the
+world in 332px. Any viewport under 500px tall is a phone lying down.
+
+**B41/B3 — the sidebar becomes a drawer.** 240 fixed pixels of a 390px screen
+was 62% of the display for the menu, leaving 118 usable. On `/login` that meant
+the first screen of the platform on a phone was the one that stopped you
+getting in.
+
+**No half-collapsed state any more** (Eugenio, 2026-08-21), on desktop too: the
+56px icon rail is gone at both sizes. Since nothing is left on screen to say
+the menu still exists, the way back is a 52px button carrying the word "Menú",
+and it lives *in* the top bar, which grows to 56px while the menu is hidden. It
+floated first, and a screenshot showed it covering the first three folders of
+`/explorar`.
+
+**B21 — no lying while loading.** For the ~5 seconds the 3.7MB bundle takes,
+`user` is null and the bar was rendering "Iniciar sesión" to someone who was
+signed in: on the first contact of every visit, the platform told the user they
+had lost their work.
+
+**B28 — windows do not exist on a phone.** Every window is an iframe of the
+whole app; five were measured alive in one tab at 390px. Below the breakpoint
+`abrirVentana` becomes `navigate`, so the ten callers stay untouched and the
+branch happens in one place.
+
+**B37 — the folders panel** on `/explorar` was another 224 fixed pixels next to
+the 240 of the sidebar. On a phone the same folders are a horizontal strip.
+
+**B63 — a card's map** is an iframe of the whole app, and `/explorar` has 92
+publications, so these open themselves as you scroll rather than one at a time.
+The frame now lives only while it is near the screen.
+
+### The rule this phase is built on
+
+**The mobile branch reads the desktop's state and never writes it.** Not the
+open windows, not the menu preference. Without it, glancing at the platform
+from a phone would quietly wipe the desk you come back to — damage nobody would
+ever have attributed to the phone. Verified: two windows opened on desktop,
+survived a mobile visit and a mobile navigation untouched, and came back.
+
+### Measured, on a real session at 390×844
+
+Content lane 118px → 390. Off-screen interactive elements on `/explorar` 107
+(89 of them genuinely clipped) → 22, with one clipped and none zero-width.
+Drawer 288px with a 44×44 close button, closing on backdrop, Escape, its button
+and navigation.
+
+### What the browser here cannot test, and it matters
+
+The integrated browser reproduces an iPhone's *size* faithfully and its
+*behaviour* not at all: it fires no `resize`, no `matchMedia` change, and no
+`IntersectionObserver` callback. Anything reacting to a viewport change must be
+verified by RELOADING at each size, never by resizing live — and lazy-loading
+cannot be verified here at all. A bug reported from live-resizing in this
+browser is not a bug.
+
+
+## 2026-08-21 — D90: project icons are drawings, not letters
+
+Eugenio: «haz que los iconos sean siempre en blanco y negro y que no sean
+letras […] cuando se cree un nuevo proyecto, haz que el icono se guarde
+automáticamente en función del nombre del proyecto».
+
+A project with no icon used to show its initials. Now it shows a stroke icon
+chosen from its name.
+
+**A dictionary picks it, not the AI.** Asking a model would cost money on every
+creation, take seconds, and could return the name of an icon that does not
+exist. A dictionary is right about what it knows and wrong predictably.
+
+**No match → the generic icon.** Not a random one, and above all not «the first
+in the list» — that is the `grupos[0]` failure that cost B13 and B34. A neutral
+icon is the honest way to say «I don't know what this represents».
+
+Two things came out of *running* the dictionary rather than reasoning about it:
+«Coche ultraligero solar volador» gave a SUN, because «solar» sat above «coche»
+— the thing is the car and the rest describes it. And «Consolar a los vecinos»
+proved the word-level match works: it gives the community icon, not a sun,
+which is why «Villabosque» stays generic (it contains «bosque» but does not
+start with it, and loosening that would break «consolar»).
+
+**Nothing was migrated, deliberately.** A generic SQL migration would be a
+second copy of the dictionary, able to contradict the first the day someone
+adds a word. Instead the fallback lives in the server (`menu.ts`,
+`calendario.ts`) so every reader gets it from one implementation. The calendar
+was the third reader, found by looking for everyone who read the column rather
+than stopping at the two obvious ones.
+
+**Emoji are gone from the picker**, which is what makes it honest to replace a
+legacy emoji on a project with its stroke icon: no one can create that state
+any more. The popup previews the same icon the page shows, so the same thing
+does not have two faces depending on where you look at it.
+
+53 icons, imported one by one from `lucide-react` (already a dependency, 5.592
+icons). Only those 53 enter the bundle. They use `currentColor`, so one icon
+serves light and dark without a second version.
+
+## 2026-08-21 — B70: the page editor saves by itself and now keeps what it replaced
+
+`entity_history` was well built — full snapshot, what was there before, who
+changed it — and had exactly one writer: the generic `/api/data/:entity` route
+in `server.ts`. The page editor does not go through it. It saves with
+`PUT /api/windows/:id`, which did `version = version + 1` and never wrote a
+snapshot.
+
+That is a lie with a number attached: version 47 of a page existed as a counter
+and not as content. And the editor saves **by itself every 1,2 s**. Put the two
+together and you get: you select a paragraph, your finger slips, you type over
+it, and seconds later that is on the server and the previous text is nowhere.
+
+Snapshot writing moved to `src/server/historial.ts`, and `server.ts` now
+delegates to it, so both paths write history with the same code and cannot
+drift apart. `server.ts` lost 12 lines rather than gaining any.
+
+**Grouped, two minutes per person per page.** One snapshot per autosave would be
+~1.500 copies in half an hour of writing — nearly a megabyte per session — to
+be able to return to a thousand versions that differ by one letter. Nobody
+wants «how it was 1,2 seconds ago»; they want «how it was before I started
+writing». Two minutes leaves ~15 snapshots and ~10 KB, and always keeps the
+state before each burst.
+
+Verified on a test page of my own, never on Eugenio's: the original text is
+recoverable from `previous`, three saves inside the window collapsed to one
+row, and after ageing that row past the window a second save produced a second
+row. The generic route still records history after the delegation.

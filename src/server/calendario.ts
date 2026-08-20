@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 
 // ============================================================================
@@ -143,7 +144,11 @@ export function registerCalendarioRoutes(app: Express, db: any) {
             clase: 'evento' as const,
             id: e.id, titulo: e.titulo, descripcion: e.descripcion,
             inicio: e.inicio, fin: e.fin, todoElDia: !!e.todo_el_dia,
-            lugar: e.lugar, color: e.color, icono: e.icono || e.proyecto_icono,
+            // Si ni el evento ni su proyecto tienen icono guardado, el que
+            // le toca al nombre del proyecto (D90). Ver `menu.ts` para el
+            // porqué de no escribirlo en la base.
+            lugar: e.lugar, color: e.color,
+            icono: e.icono || (e.proyecto_titulo ? iconoDeProyecto(e.proyecto_icono, e.proyecto_titulo) : e.proyecto_icono),
             proyectoId: e.proyecto_id, proyecto: e.proyecto_titulo,
             proyectoSlug: e.proyecto_slug, repeticion: e.repeticion,
             url: null,

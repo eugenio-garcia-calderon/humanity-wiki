@@ -12,6 +12,7 @@ import { cn } from '../../utils/cn';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
+import { useEsMovil } from '../../hooks/useEsMovil';
 import AIAssistant from '../ai/AIAssistant';
 
 // ============================================================================
@@ -68,12 +69,24 @@ function iconoDeRuta(ruta: string) {
 
 export default function Layout() {
   const location = useLocation();
-  const { user, logout, refresh: refrescarSesion } = useAuth();
+  // `cargandoSesion` es lo que arregla el DESTELLO DE SESIÓN CERRADA (B21).
+  // Ver la nota larga donde se usa: mientras esto sea `true` no sabemos aún si
+  // hay sesión, y la interfaz no puede afirmar ninguna de las dos cosas.
+  const { user, loading: cargandoSesion, logout, refresh: refrescarSesion } = useAuth();
   const navigate = useNavigate();
   const { updateCounter } = useEdit();
+  const esMovil = useEsMovil();
 
-  // El menú lateral, plegado o abierto. Se recuerda en tus ajustes de usuario
-  // (jsonb, sin migración): el menú te encuentra como lo dejaste.
+  // EL CAJÓN DEL MENÚ EN MÓVIL (B41). Empieza cerrado SIEMPRE y no se recuerda,
+  // porque en un teléfono el menú abierto tapa la pantalla entera y nadie
+  // quiere empezar cada visita mirando un menú.
+  const [cajonAbierto, setCajonAbierto] = useState(false);
+
+  // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
+  // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
+  // escritorio como en móvil»). El nombre `menuColapsado` y su clave en
+  // localStorage se quedan como estaban a propósito: quien ya tenía el menú
+  // plegado se lo encuentra escondido, que es lo más parecido a lo que eligió.
   const [menuColapsado, setColapsado] = useState<boolean>(() => {
     try { return localStorage.getItem('humanity:menu-colapsado') === '1'; } catch { return false; }
   });
@@ -81,6 +94,17 @@ export default function Layout() {
     setColapsado(v);
     try { localStorage.setItem('humanity:menu-colapsado', v ? '1' : '0'); } catch { /* lleno */ }
   };
+
+  // ── UN SOLO CONCEPTO: EL MENÚ ESTÁ O NO ESTÁ ──────────────────────────────
+  // Debajo hay dos estados distintos, y es a propósito. El de escritorio se
+  // recuerda entre visitas; el de móvil no se recuerda NUNCA. Es la misma
+  // disciplina que con las ventanas: el móvil LEE las preferencias del
+  // escritorio pero no las ESCRIBE, así que mirar la plataforma desde el
+  // teléfono no te recoloca el escritorio al volver a él.
+  const menuPuesto = esMovil ? cajonAbierto : !menuColapsado;
+  const ponerMenu = () => (esMovil ? setCajonAbierto(true) : setMenuColapsado(false));
+  const esconderMenu = () => (esMovil ? setCajonAbierto(false) : setMenuColapsado(true));
+
   // Las ventanas abiertas del Escritorio, para pintarlas como ICONOS en la
   // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
   // (ver bus.ts).
@@ -111,6 +135,37 @@ export default function Layout() {
     pedirVentanas();
     return () => window.removeEventListener('humanity:ventanas', f);
   }, []);
+
+  // EL CAJÓN SE CIERRA SOLO AL IR A ALGÚN SITIO. En un teléfono el menú tapa
+  // la pantalla, así que dejarlo abierto encima de la página a la que acabas
+  // de ir sería esconder justo lo que has pedido ver.
+  useEffect(() => { setCajonAbierto(false); }, [location.pathname]);
+
+  // Y TAMBIÉN AL ABRIR ALGO DESDE EL MENÚ, aunque no cambie la dirección.
+  // Casi todas las entradas del menú no navegan: piden «abre esto» por el bus,
+  // y en móvil eso acaba en una navegación (ver GestorVentanas). Pero si ya
+  // estás en esa misma página, la ruta no cambia, el efecto de arriba no se
+  // dispara y el cajón se quedaba abierto tapando la respuesta. Visto al
+  // probarlo con el dedo: pulsar «Mi Perfil» dejaba el menú puesto encima.
+  useEffect(() => {
+    const alAbrir = () => setCajonAbierto(false);
+    window.addEventListener('humanity:abrir-ventana', alAbrir);
+    return () => window.removeEventListener('humanity:abrir-ventana', alAbrir);
+  }, []);
+
+  // Y con la tecla de escape, que es donde la busca cualquiera que abra esto
+  // en un portátil estrechado.
+  useEffect(() => {
+    if (!cajonAbierto) return;
+    const alTeclado = (e: KeyboardEvent) => { if (e.key === 'Escape') setCajonAbierto(false); };
+    window.addEventListener('keydown', alTeclado);
+    return () => window.removeEventListener('keydown', alTeclado);
+  }, [cajonAbierto]);
+
+  // AL VOLVER A ESCRITORIO, EL CAJÓN NO SE QUEDA COLGADO. Girar el teléfono o
+  // ensanchar la ventana con el cajón abierto dejaría un fondo oscuro sobre un
+  // menú que ya vuelve a ser columna: dos menús a la vez.
+  useEffect(() => { if (!esMovil) setCajonAbierto(false); }, [esMovil]);
 
   // ARRASTRAR PESTAÑAS (Eugenio, 2026-08-20: «también cambiarlas de posición
   // pinchando y arrastrando»). Con `draggable` del propio navegador: son diez
@@ -282,8 +337,23 @@ export default function Layout() {
           alguien que no tiene nada porque ni siquiera ha entrado. Sin sesión
           no hay proyectos, ni productos, ni personas: enseñar el armazón vacío
           no informa, confunde. */}
-      {user && (
-        <MenuLateral colapsado={menuColapsado} onColapsar={setMenuColapsado} activo={location.pathname} />
+      {/* EN ESCRITORIO, LA COLUMNA DE SIEMPRE. En móvil no ocupa sitio en la
+          fila: se pinta más abajo como cajón por encima del contenido (B41).
+          En una pantalla de 390 px esta columna se comía 240 y al contenido le
+          quedaban 118 px útiles: el texto salía a una palabra por línea y en
+          /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
+      {user && !esMovil && menuPuesto && (
+        <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
+      )}
+
+      {/* MIENTRAS NO SE SABE SI HAY SESIÓN, UN HUECO (B21, parte 1). Sin esto
+          la columna aparece de golpe cuando contesta el servidor y toda la
+          página da un salto lateral de 240 px. Un hueco del mismo ancho no
+          dice nada y no se mueve nada.
+          Solo cuando el menú va a estar puesto: si lo tenías escondido, no hay
+          columna que reservar y el hueco sería el salto que evitamos. */}
+      {!user && cargandoSesion && !esMovil && menuPuesto && (
+        <div aria-hidden className="shrink-0 h-full w-60 border-r border-slate-200 bg-white" />
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -292,8 +362,52 @@ export default function Layout() {
       {/* Más baja que antes (56 → 40 px, y 32 en compacto): eran tres filas de
           cosas para lo mismo y ahora son dos, así que cada una tiene que pesar
           lo mínimo. */}
+      {/* LA BARRA CRECE CUANDO NO ESTÁ EL MENÚ, y es a propósito. El botón de
+          traerlo de vuelta tiene que ser grande (Eugenio, 2026-08-21), y algo
+          de 52 px no cabe en una barra de 40 sin salirse por debajo y taparle
+          el contenido a la página. Se probó primero flotando sobre la página y
+          se vio el daño en una captura: en /explorar tapaba las tres primeras
+          carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
+          ve; tapar contenido es un precio que se paga a escondidas. */}
       <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
-        compacto ? 'h-8' : 'h-10')}>
+        user && !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
+
+        {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
+            Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
+            llamativo y grande».
+
+            POR QUÉ ES GRANDE Y NO UN ICONO DISCRETO: desde que no hay estado
+            intermedio, éste es el ÚNICO camino de vuelta al menú. Antes, con
+            el semiplegado, siempre quedaba una tira de iconos que decía «el
+            menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
+            esquina sería justo el fallo que este proyecto ya tiene
+            catalogado: 83 de cada 100 botones por debajo de 24 px. */}
+        {user && !menuPuesto && (
+          <button
+            onClick={ponerMenu}
+            title="Ver el menú"
+            aria-label="Ver el menú"
+            aria-expanded={false}
+            className="h-11 shrink-0 inline-flex items-center gap-2 pl-2.5 pr-3.5 rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors"
+          >
+            <Menu className="w-6 h-6 shrink-0" />
+            <span className="text-sm font-black tracking-tight">Menú</span>
+          </button>
+        )}
+
+        {/* LA MARCA CUANDO NO ESTÁ EL MENÚ. La marca vive dentro del menú
+            lateral, así que al esconderlo la plataforma se quedaba sin nombre
+            en ningún sitio y sin forma de volver al inicio de un toque. */}
+        {!menuPuesto && (
+          <button
+            onClick={() => navigate('/')}
+            className="min-w-0 shrink text-left hover:opacity-85 transition-opacity"
+          >
+            <span className="text-sm font-extrabold tracking-tight text-slate-900 whitespace-nowrap">
+              Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
+            </span>
+          </button>
+        )}
 
         {/* Las ventanas abiertas del Escritorio, como ICONOS (2026-08-19,
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
@@ -411,6 +525,22 @@ export default function Layout() {
                 </div>
               )}
             </>
+          ) : cargandoSesion ? (
+            /* EL DESTELLO DE SESIÓN CERRADA (B21). Aquí estaba el daño: durante
+               los ~5 segundos que tarda en cargar la aplicación, `user` todavía
+               es null y esto pintaba «Iniciar sesión» a alguien que SÍ tenía la
+               sesión abierta. En el primer contacto de cada visita, la
+               plataforma le decía al usuario que había perdido su trabajo.
+
+               No sabemos aún si hay sesión, así que no se afirma ninguna de las
+               dos cosas: un hueco de la medida exacta del botón que va a venir.
+               Y no es que /api/auth/me sea lento (tarda 0,38 s): son los 3,7 MB
+               del paquete de la aplicación en un solo trozo. Eso es otra
+               conversación; esto es no mentir mientras tanto. */
+            <div
+              aria-hidden
+              className={cn('rounded-full bg-slate-100 animate-pulse', compacto ? 'h-6 w-14' : 'h-8 w-16')}
+            />
           ) : (
             <Link to="/login"
               className="h-9 px-3 inline-flex items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
@@ -455,6 +585,43 @@ export default function Layout() {
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra
           abajo»). Solo hay UNA barra, la de arriba, y lleva las ventanas. */}
       </div>
+
+      {/* ══ EL CAJÓN DEL MENÚ EN MÓVIL (B41) ══════════════════════════════
+          Va aquí, el último y fuera de la columna de contenido, para que se
+          pinte POR ENCIMA de todo: de la página, de las ventanas y del panel
+          del asistente.
+
+          Se monta y se desmonta con `cajonAbierto` en vez de esconderse con
+          CSS. Es a propósito: el menú pide sus datos al montarse, y dejarlo
+          montado y oculto sería tener el menú entero vivo y pidiendo datos
+          en un teléfono, que es exactamente el problema que estamos
+          arreglando en las ventanas (B28).
+
+          NO SE TOCA EL ESCRITORIO: por encima de 768 px `esMovil` es false y
+          nada de este bloque llega a existir. */}
+      {user && esMovil && menuPuesto && (
+        <>
+          {/* El fondo oscuro. Tocar fuera cierra, que es lo que todo el mundo
+              intenta primero. */}
+          <div
+            onClick={() => setCajonAbierto(false)}
+            aria-hidden
+            className="fixed inset-0 z-50 bg-slate-900/40 animate-in fade-in duration-150"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú"
+            className="fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-200"
+          >
+            <MenuLateral
+              activo={location.pathname}
+              movil
+              onCerrar={esconderMenu}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

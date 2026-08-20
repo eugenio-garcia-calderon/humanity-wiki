@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 
 // ============================================================================
@@ -252,7 +253,18 @@ export function registerMenuRoutes(app: Express, db: any) {
 
       res.json({
         proyectos: (proyectos.rows as any[]).map(p => ({
-          id: p.id, titulo: p.titulo, slug: p.slug, publico: !!p.publico, icono: p.icono,
+          // EL RESPALDO VA AQUÍ Y NO EN CADA PANTALLA (D90, 2026-08-21). Los
+          // proyectos creados antes de que el icono se eligiera solo tienen la
+          // columna vacía, y quien los lee son el menú, el calendario y lo que
+          // venga después. Poniéndolo en el servidor, todos reciben el icono
+          // que le toca al nombre sin que haya que acordarse en cada sitio.
+          //
+          // NO SE ESCRIBE EN LA BASE: el diccionario vive en un solo fichero, y
+          // una migración que lo copiara en SQL sería una segunda versión del
+          // mismo criterio, capaz de contradecir a la primera. El icono que
+          // ELIJA una persona sí se guarda, y entonces manda sobre este.
+          id: p.id, titulo: p.titulo, slug: p.slug, publico: !!p.publico,
+          icono: iconoDeProyecto(p.icono, p.titulo),
         })),
         productos: (productos.rows as any[]).map(p => ({
           id: p.id, nombre: p.name, precio: p.price_cents, moneda: p.currency, tipo: p.kind, icono: p.icono,

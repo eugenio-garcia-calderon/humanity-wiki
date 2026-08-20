@@ -24,9 +24,11 @@
 // Lo que cuesta: cada ventana es una carga de la app (unos 200 ms y su
 // memoria). Con tres o cuatro ventanas no se nota; con veinte sí.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
+import { useEsMovil } from '../../hooks/useEsMovil';
 import Navegador from './Navegador';
 import BarraDireccion from './BarraDireccion';
 import { publicarVentanas, publicarPaginaWeb, type AbrirVentana } from './bus';
@@ -66,7 +68,26 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
    *  del chat SABER dónde estás mirando. */
   onPaginaNavegador?: (url: string | null) => void;
 }) {
+  // ══ EN UN TELÉFONO NO HAY VENTANAS ═══════════════════════════════════════
+  // El escritorio de ventanas no se traduce a 390 px: SE SUSTITUYE. Cada
+  // ventana es un `<iframe>` que carga la aplicación ENTERA otra vez, así que
+  // tres ventanas abiertas son tres aplicaciones React vivas en la misma
+  // pestaña. Medido en este mismo teléfono antes de escribir esto: cinco
+  // iframes a la vez, uno de ellos de una ventana restaurada de otro día.
+  // Safari de iOS mata la pestaña sin avisar al pasarse de memoria, y lo que
+  // ve el usuario es la página recargándose sola.
+  //
+  // En móvil, abrir algo es IR a ello: una pantalla completa, una sola
+  // instancia de la aplicación, cero iframes.
+  const esMovil = useEsMovil();
+  const navigate = useNavigate();
+
   const [ventanas, setVentanas] = useState<Ventana[]>(() => {
+    // EL MÓVIL NO RESTAURA EL ESCRITORIO. Restaurarlo sería revivir aquí
+    // mismo el problema que acabamos de describir: ventanas que nadie ha
+    // abierto en esta visita, vivas y pidiendo datos.
+    if (typeof window !== 'undefined' && window.matchMedia
+        && window.matchMedia('(max-width: 767px)').matches) return [];
     try {
       const g = localStorage.getItem(CLAVE);
       if (g) {
@@ -98,12 +119,18 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
   // escribir en localStorage en cada uno cuesta fotogramas.
   const timer = useRef<number | null>(null);
   useEffect(() => {
+    // EL MÓVIL LEE PERO NO ESCRIBE. Ésta es la regla que no se relaja: en
+    // móvil `ventanas` es siempre `[]`, así que sin esta salida, mirar la
+    // plataforma desde el teléfono GUARDARÍA una lista vacía y te borraría el
+    // escritorio al volver al ordenador. El daño no se lo habría atribuido
+    // nadie nunca al móvil.
+    if (esMovil) return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {
       try { localStorage.setItem(CLAVE, JSON.stringify(ventanas)); } catch { /* lleno */ }
     }, 400);
     return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [ventanas]);
+  }, [ventanas, esMovil]);
 
   // La cabecera pinta un icono por ventana: se le publica el estado cada vez
   // que cambia (ver bus.ts — el estado vive aquí, allí solo viajan avisos).
@@ -284,6 +311,22 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
    * visitas y, si no, cada pulsación abriría un navegador nuevo.
    */
   const abrir = useCallback((a: AbrirVentana) => {
+    // EN MÓVIL, ABRIR ES IR. No nace ninguna ventana: se navega, como en
+    // cualquier aplicación de teléfono. El menú, el bus de eventos y todo lo
+    // que llama a `abrirVentana` siguen igual — el corte se hace aquí, en un
+    // sitio, y no en los diez que abren cosas.
+    if (esMovil) {
+      // El «Navegador» es un navegador DENTRO de un navegador: en un teléfono
+      // que ya tiene el suyo no significa nada. Si aun así llega una dirección
+      // de verdad, se abre en una pestaña del navegador del teléfono; la
+      // página de inicio del navegador interno no tiene a dónde ir.
+      if (a.clase === 'navegador') {
+        if (/^https?:\/\//i.test(a.destino)) window.open(a.destino, '_blank', 'noopener');
+        return;
+      }
+      navigate(a.destino);
+      return;
+    }
     setVentanas(vs => {
       const ya = a.clase === 'navegador'
         ? vs.filter(v => v.clase === 'navegador').reduce<Ventana | null>((m, v) => (!m || v.z > m.z ? v : m), null)
@@ -298,7 +341,7 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
         maximizada: true,
       }];
     });
-  }, []);
+  }, [esMovil, navigate]);
 
   // Los avisos del menú y de los iconos de la cabecera.
   useEffect(() => {

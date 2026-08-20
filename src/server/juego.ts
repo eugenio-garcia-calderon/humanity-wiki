@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { iconoDeNombre } from '../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 
@@ -132,9 +133,9 @@ export function registerJuegoRoutes(app: Express, db: any) {
         const slug = `${nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
           .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'proyecto'}-${Math.floor(Math.random() * 1000)}`;
         await db.execute(sql`
-          INSERT INTO proyectos (id, titulo, descripcion, slug, creador_user_id, publico, created_by, updated_by)
+          INSERT INTO proyectos (id, titulo, descripcion, slug, creador_user_id, publico, icono, created_by, updated_by)
           VALUES (${pid}, ${nombre}, ${d.descripcion || null}, ${slug}, ${req.user!.id}, false,
-                  ${req.user!.id}, ${req.user!.id})
+                  ${iconoDeNombre(nombre)}, ${req.user!.id}, ${req.user!.id})
         `);
         proyectoId = pid;
       }
@@ -561,8 +562,8 @@ export function registerJuegoRoutes(app: Express, db: any) {
     const slug = `${titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'portal'}-${Math.floor(Math.random() * 1000)}`;
     await db.execute(sql`
-      INSERT INTO proyectos (id, titulo, slug, creador_user_id, publico, created_by, updated_by)
-      VALUES (${pid}, ${titulo}, ${slug}, ${req.user!.id}, false, ${req.user!.id}, ${req.user!.id})
+      INSERT INTO proyectos (id, titulo, slug, creador_user_id, publico, icono, created_by, updated_by)
+      VALUES (${pid}, ${titulo}, ${slug}, ${req.user!.id}, false, ${iconoDeNombre(titulo)}, ${req.user!.id}, ${req.user!.id})
     `);
     return pid;
   };

@@ -1391,14 +1391,12 @@ export default function Documento() {
 
         {/* Título del documento */}
         {editable ? (
-          <input
-            value={titulo}
-            onChange={e => { setTitulo(e.target.value); programarGuardado(); }}
-            placeholder="Título del documento"
-            className="w-full text-4xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1"
+          <TituloEditable
+            valor={titulo}
+            onCambiar={v => { setTitulo(v); programarGuardado(); }}
           />
         ) : (
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1">{titulo}</h1>
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1 break-words">{titulo}</h1>
         )}
         {autor && <p className="text-xs text-slate-400 mb-6">de {autor}</p>}
 
@@ -1573,3 +1571,64 @@ function BloqueEditable({ inicial, ...props }: { inicial: string } & React.HTMLA
   return <div ref={ref} {...props} />;
 }
 
+
+/**
+ * EL TÍTULO, QUE PARTE LÍNEA Y CRECE SOLO (2026-08-21, B47).
+ *
+ * Esto era un `<input>`, y un `<input>` NO PARTE LÍNEA NUNCA: cuando el texto
+ * no cabe, se desplaza por dentro. Con la letra de 36 px del título, en un
+ * teléfono de 390 px caben unos diez caracteres, así que «Incendios forestales
+ * en España en 2025» se veía como «Incendios forestale». En un móvil no podías
+ * ver el título de tu propia página.
+ *
+ * La salida barata era bajar la letra en móvil. No sirve: con un título largo
+ * vuelves a lo mismo un poco más tarde, y de paso el título deja de parecer un
+ * título. Lo que hace falta es que parta línea, y para eso tiene que ser un
+ * `<textarea>` — que sí parte, pero no crece solo, así que se le mide y se le
+ * pone el alto a mano.
+ *
+ * ENTER NO METE UNA LÍNEA NUEVA. Un título es UN texto que se parte solo
+ * porque no cabe, no un párrafo con saltos: si dejáramos escribir saltos, el
+ * mismo título se guardaría con «\n» dentro y saldría partido en sitios raros
+ * en el menú, en las tarjetas y en las pestañas, donde sí es un `<input>` o un
+ * `<span>`.
+ */
+function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  // Medir y ajustar. `height:auto` primero es obligatorio: sin eso
+  // `scrollHeight` nunca baja —mide el alto que ya tiene puesto— y el título
+  // crecería al escribir pero no encogería al borrar.
+  const ajustar = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
+  // Al montar y cada vez que cambia el texto. `valor` en las dependencias SÍ,
+  // al revés que en `BloqueEditable`: aquí el valor viene de React (no se
+  // escribe a mano en el DOM), y el título llega vacío y se rellena cuando
+  // contesta el servidor. Sin esto, una página recién abierta enseñaría el
+  // alto de una línea con tres líneas de título dentro.
+  useEffect(ajustar, [valor, ajustar]);
+
+  // Y al cambiar el ancho de la ventana, porque el ancho decide por cuántas
+  // líneas parte. Girar el teléfono es el caso real.
+  useEffect(() => {
+    window.addEventListener('resize', ajustar);
+    return () => window.removeEventListener('resize', ajustar);
+  }, [ajustar]);
+
+  return (
+    <textarea
+      ref={ref}
+      rows={1}
+      value={valor}
+      onChange={e => onCambiar(e.target.value)}
+      onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+      placeholder="Título del documento"
+      className="w-full text-4xl font-black tracking-tight text-slate-900 outline-none placeholder:text-slate-300 mb-1 resize-none overflow-hidden block bg-transparent leading-tight"
+    />
+  );
+}
