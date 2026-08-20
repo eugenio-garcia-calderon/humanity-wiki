@@ -1922,3 +1922,25 @@ Tested with 24 distinct requests — basic questions, single actions, multi-step
 («un proyecto y dentro dos tareas» → 3 actions), a project that does not exist,
 recurring events, accents, symbols — plus end-to-end execution confirming the
 rows really appear in the database. All test data deleted afterwards.
+
+## 2026-08-20 — «/» in the page editor, and a product block
+
+Eugenio: «en el creador de páginas añade la opción de agregar un producto, y el
+shortcut de "/" para añadir cosas, como en Notion […] y como hace este propio
+chat de Claude Code».
+
+- **`/` opens the block menu** in an empty block, filters as you keep typing
+  («/tit» → the three Títulos), moves with the arrows and picks with Enter or a
+  click. It filters `TIPOS_MENU` and calls the same `insertar` — no second
+  catalogue to keep in sync. Only in an **empty** block: mid-sentence a slash is
+  just a slash (dates, «y/o», URLs). Picking **converts** the block rather than
+  adding one, which is what Notion does and what anyone expects.
+- **New `producto` block**, cousin of `publicacion`: same fields (`entityId`,
+  `pubTitulo`, `pubUrl`) because it is the same idea — a platform object
+  embedded — and duplicating fields duplicates the bugs. It opens the existing
+  picker pointed at `/api/products`, and renders as a card linking to the
+  product in the market.
+
+Verified live: `/` listed all 14 types including Producto, «tit» narrowed to
+three, Enter turned the block into a Título 1 leaving no «/tit» behind, and
+`/prod` opened the picker with real products in it.

@@ -13,7 +13,12 @@ export type TipoBloque =
   | 'parrafo' | 'titulo1' | 'titulo2' | 'titulo3'
   | 'lista' | 'numerada' | 'tarea'
   | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla'
-  | 'publicacion' | 'medio';
+  | 'publicacion' | 'medio'
+  // 2026-08-20 (Eugenio: «en el creador de páginas añade la opción de agregar
+  // un producto»). Es primo de `publicacion`: se reutilizan sus campos
+  // (`entityId`, `pubTitulo`, `pubUrl`) porque es lo mismo —una cosa de la
+  // plataforma embebida— y duplicar campos sería duplicar los fallos.
+  | 'producto';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -200,6 +205,7 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       // JSON, y el markdown solo es la descarga.
       case 'medio': salida.push(`[${b.pie || 'Archivo'}](${b.url || ''})`); break;
       case 'publicacion': salida.push(`[${b.pubTitulo || 'Publicación'}](${b.pubUrl || ''})`); break;
+      case 'producto': salida.push(`[${b.pubTitulo || 'Producto'}](${b.pubUrl || ''})`); break;
       case 'tabla': {
         const filas = b.filas || [];
         if (!filas.length) break;

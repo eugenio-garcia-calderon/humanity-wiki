@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
-  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, ImagePlus,
+  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -45,6 +45,7 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
   { tipo: 'tabla', label: 'Tabla', icon: Table2 },
   { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
+  { tipo: 'producto', label: 'Producto', icon: Store },
 ];
 
 const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '🏛️', '💡', '🎯', '🧭', '🤝', '⚖️', '🛠️', '🗺️', '❤️'];
@@ -106,6 +107,24 @@ export default function Documento() {
   const [generando, setGenerando] = useState(esNuevo);
   const [guardado, setGuardado] = useState<'sí' | 'pendiente' | 'guardando'>('sí');
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null); // id del bloque cuyo + está abierto
+  /** El buscador está buscando PRODUCTOS, no publicaciones. */
+  const [buscaProducto, setBuscaProducto] = useState(false);
+
+  // EL MENÚ DE LA BARRA «/» (2026-08-20, petición de Eugenio: «el shortcut de
+  // "/" para añadir cosas, como en Notion […] y como hace este propio chat de
+  // Claude Code»). Escribes «/» y se despliegan las posibilidades; sigues
+  // escribiendo y se van filtrando; Enter o clic elige.
+  //
+  // Se apoya en lo que ya existe: filtra `TIPOS_MENU` y llama al mismo
+  // `insertar`. No hay un catálogo nuevo que mantener en dos sitios.
+  const [barra, setBarra] = useState<{ bloque: string; texto: string; elegido: number } | null>(null);
+  const opcionesBarra = barra
+    ? TIPOS_MENU.filter(t => {
+        const q = barra.texto.trim().toLowerCase();
+        if (!q) return true;
+        return t.label.toLowerCase().includes(q) || t.tipo.includes(q);
+      })
+    : [];
   const [focoId, setFocoId] = useState<string | null>(null);
   // Edición estilo Typora: solo el bloque ACTIVO enseña el marcado markdown
   // en crudo (**negrita**); los demás se ven ya formateados aunque estés en
@@ -290,11 +309,27 @@ export default function Documento() {
   // --------------------------------------------------------------------------
   // Operaciones de bloques
   // --------------------------------------------------------------------------
+  /** Aplica lo elegido en la barra «/». El bloque estaba vacío salvo por lo
+   *  que has tecleado tras la barra, así que se CONVIERTE en vez de crear uno
+   *  nuevo — que es lo que hace Notion y lo que espera cualquiera. */
+  const elegirDeLaBarra = (b: Bloque, tipo: TipoBloque) => {
+    setBarra(null);
+    const el = document.querySelector(`[data-bloque="${b.id}"]`) as HTMLElement | null;
+    if (el) el.textContent = '';
+    textosRef.current[b.id] = '';
+    if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla') { insertar(b.id, tipo); return; }
+    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
+    setFocoId(b.id);
+    programarGuardado();
+  };
+
   const insertar = (tras: string | null, tipo: TipoBloque) => {
     // El bloque de publicación no se inserta vacío: primero se elige QUÉ
     // publicación embeber, en el buscador.
-    if (tipo === 'publicacion') {
+    if (tipo === 'publicacion' || tipo === 'producto') {
       setMenuAbierto(null);
+      setBuscaProducto(tipo === 'producto');
       setBuscadorPub(tras ?? '');
       setBusquedaPub('');
       setResultadosPub([]);
@@ -351,9 +386,16 @@ export default function Documento() {
     const t = setTimeout(() => {
       const p = new URLSearchParams();
       if (busquedaPub.trim()) p.set('q', busquedaPub.trim());
-      fetch(`/api/publicaciones?${p}`, { credentials: 'include' })
+      const url = buscaProducto ? `/api/products?${p}` : `/api/publicaciones?${p}`;
+      fetch(url, { credentials: 'include' })
         .then(r => r.json())
-        .then(j => setResultadosPub(Array.isArray(j) ? j.filter((x: any) => x.id !== docId.current).slice(0, 12) : []))
+        .then(j => {
+          const lista = Array.isArray(j) ? j : (j?.products || j?.items || []);
+          setResultadosPub(lista
+            .filter((x: any) => x.id !== docId.current)
+            .map((x: any) => buscaProducto ? { ...x, tipo: 'producto', titulo: x.name || x.nombre } : x)
+            .slice(0, 12));
+        })
         .catch(() => setResultadosPub([]));
     }, 250);
     return () => clearTimeout(t);
@@ -363,13 +405,14 @@ export default function Documento() {
     const rutaDe: Record<string, string> = { lienzo: '/esquemas/', mapa: '/mapas/', proyecto: '/proyectos/' };
     const nuevo: Bloque = {
       id: nuevoIdBloque(),
-      tipo: 'publicacion',
+      tipo: pub.tipo === 'producto' ? 'producto' : 'publicacion',
       pubTipo: pub.tipo,
       entityId: pub.id,
       pubKind: pub.kind || pub.tipo,
       pubTitulo: pub.titulo || pub.title || 'Publicación',
       pubAutor: pub.autor_nombre || undefined,
-      pubUrl: pub.tipo === 'ventana' && pub.kind === 'pagina' ? `/paginas/${pub.id}`
+      pubUrl: pub.tipo === 'producto' ? `/mercado?producto=${pub.id}`
+        : pub.tipo === 'ventana' && pub.kind === 'pagina' ? `/paginas/${pub.id}`
         : rutaDe[pub.tipo] ? `${rutaDe[pub.tipo]}${pub.slug || pub.id}` : undefined,
     };
     setBloques(bs => {
@@ -483,6 +526,29 @@ export default function Documento() {
 
   const alTeclear = (b: Bloque, e: React.KeyboardEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
+
+    // --- La barra «/» manda mientras está abierta ---
+    if (barra && barra.bloque === b.id) {
+      if (e.key === 'Escape') { e.preventDefault(); setBarra(null); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const n = opcionesBarra.length || 1;
+        setBarra(x => x && ({ ...x, elegido: (x.elegido + (e.key === 'ArrowDown' ? 1 : n - 1)) % n }));
+        return;
+      }
+      if (e.key === 'Enter' && opcionesBarra.length) {
+        e.preventDefault();
+        elegirDeLaBarra(b, opcionesBarra[Math.min(barra.elegido, opcionesBarra.length - 1)].tipo);
+        return;
+      }
+      // Cualquier otra tecla sigue escribiendo: el filtro se recalcula en
+      // `onInput`, que es quien ve el texto ya actualizado.
+    } else if (e.key === '/' && !(el.textContent || '').trim()) {
+      // Solo en un bloque VACÍO, como Notion: en mitad de una frase, «/» es
+      // una barra y punto (fechas, «y/o», direcciones…).
+      setBarra({ bloque: b.id, texto: '', elegido: 0 });
+    }
+
     if (e.key === 'Enter' && !e.shiftKey && b.tipo !== 'codigo') {
       e.preventDefault();
       const heredan: TipoBloque[] = ['lista', 'numerada', 'tarea'];
@@ -943,6 +1009,20 @@ export default function Documento() {
       // Publicación embebida (Fase 2): una ventana enseña su contenido REAL
       // con el mismo renderer que el resto de la app; un lienzo, mapa o
       // proyecto se enseña como tarjeta que lleva a su página.
+      if (b.tipo === 'producto') {
+        return (
+          <a href={b.pubUrl || '#'}
+            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 hover:border-emerald-300 hover:-translate-y-0.5 transition-all">
+            <span className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 grid place-items-center shrink-0">
+              <Store className="w-4 h-4" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Producto</span>
+              <span className="block text-sm font-bold text-slate-800 truncate">{b.pubTitulo || 'Producto'}</span>
+            </span>
+          </a>
+        );
+      }
       if (b.tipo === 'publicacion') {
         const ventana = b.pubTipo === 'ventana' ? ventanasEmbebidas[b.entityId || ''] : undefined;
         const etiqueta = ({ ventana: b.pubKind || 'ventana', lienzo: 'lienzo', mapa: 'mapa', proyecto: 'proyecto', muro: 'muro' } as any)[b.pubTipo || ''] || 'publicación';
@@ -980,7 +1060,15 @@ export default function Documento() {
         suppressContentEditableWarning: true,
         'data-bloque': b.id,
         onInput: (e: React.FormEvent<HTMLDivElement>) => {
-          textosRef.current[b.id] = e.currentTarget.textContent || '';
+          const t = e.currentTarget.textContent || '';
+          textosRef.current[b.id] = t;
+          // Con la barra abierta, lo que escribes ES el filtro. Si borras la
+          // «/» o te vas a otra línea, se cierra sola.
+          if (barra && barra.bloque === b.id) {
+            if (!t.startsWith('/')) setBarra(null);
+            else setBarra(x => x && ({ ...x, texto: t.slice(1), elegido: 0 }));
+            return;
+          }
           autoformato(b, e.currentTarget);
           programarGuardado();
         },
@@ -1029,7 +1117,7 @@ export default function Documento() {
       return <div {...comun}>{contenido}</div>;
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'medio'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio'].includes(b.tipo);
 
     return (
       <div
@@ -1070,6 +1158,27 @@ export default function Documento() {
           </div>
         )}
         {cuerpo}
+        {/* LA BARRA «/» — las opciones, filtrándose según escribes. */}
+        {barra?.bloque === b.id && (
+          <div className="absolute left-0 top-full z-40 mt-1 w-64 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+            onMouseDown={e => e.preventDefault()}>
+            {opcionesBarra.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-slate-400 italic">Nada que empiece por «{barra.texto}».</p>
+            ) : opcionesBarra.map((t, i) => (
+              <button
+                key={t.tipo}
+                onClick={() => elegirDeLaBarra(b, t.tipo)}
+                onMouseEnter={() => setBarra(x => x && ({ ...x, elegido: i }))}
+                className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-left transition-colors',
+                  i === Math.min(barra.elegido, opcionesBarra.length - 1)
+                    ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50')}
+              >
+                <t.icon className="w-3.5 h-3.5 text-slate-400 shrink-0" /> {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {menuAbierto === b.id && (
           <div className="absolute left-0 top-full z-30 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 grid grid-cols-2 gap-0.5 w-72"
             onClick={e => e.stopPropagation()}>
@@ -1357,7 +1466,7 @@ export default function Documento() {
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 autoFocus value={busquedaPub} onChange={e => setBusquedaPub(e.target.value)}
-                placeholder="Busca la publicación que quieres insertar…"
+                placeholder={buscaProducto ? 'Busca el producto que quieres insertar…' : 'Busca la publicación que quieres insertar…'}
                 className="flex-1 text-sm outline-none"
               />
               <button onClick={() => setBuscadorPub(null)} className="p-1 text-slate-400 hover:text-slate-700">
@@ -1367,7 +1476,9 @@ export default function Documento() {
             <div className="max-h-80 overflow-y-auto p-1.5">
               {!resultadosPub.length ? (
                 <p className="text-xs text-slate-400 text-center py-8">
-                  {busquedaPub ? 'Nada con ese nombre.' : 'Escribe para buscar entre las publicaciones.'}
+                  {busquedaPub ? 'Nada con ese nombre.'
+                    : buscaProducto ? 'Escribe para buscar entre los productos.'
+                    : 'Escribe para buscar entre las publicaciones.'}
                 </p>
               ) : resultadosPub.map(p => (
                 <button
