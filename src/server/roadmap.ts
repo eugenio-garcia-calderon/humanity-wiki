@@ -224,6 +224,114 @@ export function registerRoadmapRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * DELETE /api/proyectos/:id — quitar un proyecto (2026-08-20, petición de
+   * Eugenio: «en la página de proyectos permite borrar un proyecto»).
+   *
+   * SE ARCHIVA, NO SE BORRA (regla 6 de la Constitución). Y lo que hay dentro
+   * NO SE TOCA: las tareas, páginas y esquemas que hiciste siguen existiendo y
+   * se quedan sueltos, igual que hace el `ON DELETE SET NULL` de la base de
+   * datos. Llevarse por delante meses de trabajo por archivar la carpeta que
+   * los agrupaba sería la peor sorpresa posible.
+   */
+  app.delete('/api/proyectos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      if (!(await puedeEditarProyecto(req, req.params.id))) {
+        return res.status(403).json({ error: 'Ese proyecto no es tuyo.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE proyectos SET archived_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id} AND archived_at IS NULL
+        RETURNING id
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Ese proyecto ya no existe.' });
+
+      // Lo de dentro se queda suelto, no archivado.
+      await Promise.all([
+        db.execute(sql`UPDATE knowledge_windows SET proyecto_id = NULL WHERE proyecto_id = ${req.params.id}`),
+        db.execute(sql`UPDATE knowledge_graphs SET proyecto_id = NULL WHERE proyecto_id = ${req.params.id}`),
+        db.execute(sql`UPDATE user_maps       SET proyecto_id = NULL WHERE proyecto_id = ${req.params.id}`),
+        db.execute(sql`UPDATE products        SET proyecto_id = NULL WHERE proyecto_id = ${req.params.id}`),
+      ]);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('archivar proyecto error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/proyectos/:id/herramienta   { tipo, titulo? }
+   * Crea una cosa nueva YA DENTRO del proyecto (Eugenio: «permite añadir todas
+   * las herramientas de la plataforma en esa página de proyecto»). Una sola
+   * ruta para todas: lo que cambia entre crear una página y crear un mapa es
+   * la tabla y poco más, y cinco rutas gemelas serían cinco sitios donde
+   * arreglar lo mismo.
+   *
+   * Devuelve `abrir`, que es a dónde llevarte: crear algo es querer usarlo.
+   */
+  app.post('/api/proyectos/:id/herramienta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      if (!(await puedeEditarProyecto(req, req.params.id))) {
+        return res.status(403).json({ error: 'Ese proyecto no es tuyo.' });
+      }
+      const yo = req.user.id;
+      const pid = req.params.id;
+      const titulo = String(req.body?.titulo || '').trim();
+      const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase()}`;
+      const babosa = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || nid('x').toLowerCase();
+
+      switch (req.body?.tipo) {
+        case 'pagina': {
+          const id = nid('KW');
+          const bloques = [{ id: `B${Date.now().toString(36)}0`, tipo: 'parrafo', texto: '' }];
+          await db.execute(sql`
+            INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
+            VALUES (${id}, ${titulo || 'Página sin título'}, 'pagina', ${JSON.stringify({ bloques })}::jsonb,
+                    false, ${yo}, false, ${yo}, ${yo}, ${pid})
+          `);
+          return res.json({ id, abrir: `/paginas/${id}` });
+        }
+        case 'esquema': {
+          const id = nid('KG');
+          const t = titulo || 'Esquema sin título';
+          const slug = `${babosa(t)}-${id.slice(-4).toLowerCase()}`;
+          await db.execute(sql`
+            INSERT INTO knowledge_graphs (id, title, slug, status, creator_user_id, created_by, updated_by, proyecto_id)
+            VALUES (${id}, ${t}, ${slug}, 'borrador', ${yo}, ${yo}, ${yo}, ${pid})
+          `);
+          return res.json({ id, abrir: `/esquemas/${slug}` });
+        }
+        case 'mapa': {
+          const id = nid('UM');
+          const t = titulo || 'Mapa sin título';
+          const slug = `${babosa(t)}-${id.slice(-4).toLowerCase()}`;
+          await db.execute(sql`
+            INSERT INTO user_maps (id, title, slug, status, creator_user_id, created_by, updated_by, proyecto_id)
+            VALUES (${id}, ${t}, ${slug}, 'borrador', ${yo}, ${yo}, ${yo}, ${pid})
+          `);
+          return res.json({ id, abrir: `/mapas/${slug}` });
+        }
+        case 'tarea': {
+          const id = nid('RI');
+          await db.execute(sql`
+            INSERT INTO roadmap_items (id, grupo, titulo, estado, prioridad, autor_user_id, created_by, updated_by, proyecto_id)
+            VALUES (${id}, 'general', ${titulo || 'Tarea sin título'}, 'por_hacer', 'media', ${yo}, ${yo}, ${yo}, ${pid})
+          `);
+          return res.json({ id, abrir: null });
+        }
+        default:
+          return res.status(400).json({ error: 'Esa herramienta no se puede crear aquí.' });
+      }
+    } catch (e: any) {
+      console.error('crear herramienta en proyecto error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** POST /api/roadmap — nueva tarjeta. */
   app.post('/api/roadmap', async (req: Request, res: Response) => {
     try {
