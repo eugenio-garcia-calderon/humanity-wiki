@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* EL GESTO DE ATRÁS ES NUESTRO, NO DEL NAVEGADOR (2026-08-20). Deslizar dos
+   dedos hace que Chrome se vaya de la página; aquí eso significaría salirse de
+   la plataforma entera y perder las ventanas abiertas. Se le quita a Chrome
+   para poder dárselo a la ventana que toque. */
+html, body { overscroll-behavior-x: none; }

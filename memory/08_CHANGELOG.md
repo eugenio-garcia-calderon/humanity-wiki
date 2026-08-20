@@ -1499,3 +1499,44 @@ The remote browser opens a **fresh `newContext` per session**, so logging into
 YouTube there does not survive. Making that context persistent is the change
 that would unlock transcription without paying anyone — it is not done here
 because it stores site cookies on the server and that is Eugenio's call.
+
+## 2026-08-20 — Two-finger swipe goes back and forward
+
+Petición de Eugenio: «haz que si deslizo dos dedos en el pad, la ventana pase de
+izquierda a derecha, según la dirección de deslizamiento».
+
+Two fingers right → back. Two fingers left → forward. Same direction as Chrome
+and Safari, on the window under the cursor.
+
+**Where the logic lives**: `src/utils/gestoAtrasAdelante.ts`. A swipe is not an
+event the browser gives you — it arrives as a burst of `wheel` events with
+`deltaX`, so they have to be gathered and judged. Three rules, each from a real
+failure mode:
+
+1. A gesture that *starts* vertical stays vertical. Without it, scrolling with a
+   slightly tilted finger sent you to the previous page.
+2. If something under the cursor scrolls sideways and still has room, it wins.
+   Dragging a wide table is not asking to change page.
+3. One swipe fires once. The trackpad keeps sending events by inertia for over a
+   second; without the lock a single swipe went back three pages.
+
+**Three places catch it**, because a swipe can land on three different things:
+
+- inside an embedded page → detected there and forwarded to the window manager
+  as `humanity:gesto-navegacion` (wheel events do not cross an iframe boundary);
+- on the window's own chrome → `onWheel` on the window container;
+- on the remote-browser tab → translated into the real Chromium's history.
+
+**Two details that matter**
+
+- `html, body { overscroll-behavior-x: none }` in `src/index.css`: otherwise
+  Chrome takes the gesture first and leaves the platform entirely, closing every
+  open window.
+- A 500 ms lock per window in `saltarPorGesto`. The notice can arrive twice (two
+  paths, or a hot-reloaded page left with two listeners) and one swipe would
+  then jump two pages. The arrows keep no lock: clicking back three times fast
+  is deliberate.
+
+Verified in a real browser: back ×2, forward ×2, vertical scroll ignored, a
+sideways-scrolling box keeping the gesture, and one swipe of 360 px moving
+exactly one step.

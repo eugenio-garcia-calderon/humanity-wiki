@@ -9,6 +9,7 @@ import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVe
 import GestorVentanas from '../ventanas/GestorVentanas';
 import MenuLateral from './MenuLateral';
 import { cn } from '../../utils/cn';
+import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import AIAssistant from '../ai/AIAssistant';
@@ -470,6 +471,23 @@ function PuenteAlAsistente() {
       window.removeEventListener('humanity:juego-contexto', reenviar);
       window.removeEventListener('humanity:asistente-focus', reenviar);
     };
+  }, []);
+
+  // DOS DEDOS PARA IR ATRÁS, desde dentro del marco. Los eventos de rueda de
+  // una página embebida NO salen al marco de fuera: se quedan dentro. Por eso
+  // el gesto se detecta aquí, donde de verdad ocurre, y solo se manda hacia
+  // fuera la conclusión —«atrás» o «adelante»—, que es quien tiene el historial
+  // de la ventana.
+  useEffect(() => {
+    const alRodar = detectorDeGesto(sentido => {
+      try {
+        window.parent?.postMessage(
+          { humanity: 'humanity:gesto-navegacion', detalle: sentido },
+          window.location.origin);
+      } catch { /* sin puente */ }
+    });
+    window.addEventListener('wheel', alRodar, { passive: true });
+    return () => window.removeEventListener('wheel', alRodar);
   }, []);
 
   // LA SESIÓN ES DE TODA LA APP (Eugenio, 2026-08-20: «he iniciado sesión en el
