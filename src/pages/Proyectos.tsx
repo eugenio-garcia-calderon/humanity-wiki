@@ -195,7 +195,8 @@ export function Proyecto() {
   const [proyecto, setProyecto] = useState<any>(null);
   const [items, setItems] = useState<ItemTablero[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [nueva, setNueva] = useState<string | null>(null);
+  // Qué tarjeta nueva se está creando: en qué grupo y en qué columna cae.
+  const [nueva, setNueva] = useState<{ grupo: string; estado: string } | null>(null);
   const [creando, setCreando] = useState<string | null>(null);
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
@@ -254,6 +255,17 @@ export function Proyecto() {
   if (!proyecto) return <p className="text-sm text-slate-400 text-center py-20">Cargando el proyecto…</p>;
 
   const grupos: Grupo[] = Array.isArray(proyecto.grupos) ? proyecto.grupos : [];
+
+  /** Guarda el nombre de una columna. Se pinta ANTES de que conteste el
+   *  servidor: renombrar un rótulo y verlo tardar medio segundo se siente como
+   *  si no hubiera funcionado. */
+  const guardarColumnas = (nombres: any) => {
+    setProyecto((p: any) => (p ? { ...p, columnas: nombres } : p));
+    fetch(`/api/proyectos/${proyecto.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ columnas: nombres }),
+    }).catch(() => {});
+  };
   const puedeEditar = !!user && (user.id === proyecto.creador_user_id || !!user.isAdmin);
   const total = items.length;
   const hechas = items.filter(i => i.estado === 'hecho').length;
@@ -386,14 +398,17 @@ export function Proyecto() {
           <TableroKanban
             items={items} grupos={grupos} puedeEditar={puedeEditar}
             onRecargar={() => cargarItems(proyecto.id)}
-            onCrear={g => setNueva(g || grupos[0]?.id)}
+            onCrear={(g, estado) => setNueva({ grupo: g || grupos[0]?.id, estado })}
+            columnas={proyecto.columnas || null}
+            onColumnas={puedeEditar ? guardarColumnas : undefined}
           />
         </div>
       </div>
 
       {nueva && (
         <ModalNuevaTarjeta
-          proyectoId={proyecto.id} grupos={grupos} grupoInicial={nueva}
+          proyectoId={proyecto.id} grupos={grupos}
+          grupoInicial={nueva.grupo} estadoInicial={nueva.estado}
           onCerrar={() => setNueva(null)}
           onCreada={() => { setNueva(null); cargarItems(proyecto.id); }}
         />
@@ -494,8 +509,10 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
   );
 }
 
-function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, onCerrar, onCreada }: {
+function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, onCerrar, onCreada }: {
   proyectoId: string; grupos: Grupo[]; grupoInicial: string;
+  /** En qué columna nace. Por defecto «Por hacer», que es donde va casi todo. */
+  estadoInicial?: string;
   onCerrar: () => void; onCreada: () => void;
 }) {
   const [titulo, setTitulo] = useState('');
@@ -512,7 +529,7 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, onCerrar, onCread
     try {
       const r = await fetch('/api/roadmap', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ proyecto_id: proyectoId, titulo: titulo.trim(), resumen: resumen.trim() || null, grupo, prioridad, estado: 'por_hacer' }),
+        body: JSON.stringify({ proyecto_id: proyectoId, titulo: titulo.trim(), resumen: resumen.trim() || null, grupo, prioridad, estado: estadoInicial || 'por_hacer' }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'No se pudo crear.');

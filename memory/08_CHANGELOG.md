@@ -1540,3 +1540,30 @@ failure mode:
 Verified in a real browser: back ×2, forward ×2, vertical scroll ignored, a
 sideways-scrolling box keeping the gesture, and one swipe of 360 px moving
 exactly one step.
+
+## 2026-08-20 — Task board, phase 1: drag between columns, rename them, a real add button
+
+Three of the nine cards Eugenio filed in his own **Humanity.Wiki** project (a
+board that lives in production, not locally).
+
+- **Drag a card from one column to another, like Trello.** HTML5 drag; the whole
+  column is the drop target, not the gap between cards — aiming at a two-pixel
+  strip with a mouse is a punishment. The card moves on screen *before* the
+  server answers, and comes back with a reason if the request fails: a board
+  that freezes for half a second after you drop feels broken even when it works.
+- **Rename a column by clicking its text.** Edited in place, not in a dialog.
+  Stored in the new `proyectos.columnas` jsonb (migration `0049`), per project.
+  **The states do not change**: `roadmap_items.estado` is still
+  por_hacer/en_curso/hecho, so this renames what is *read*, never what is
+  *stored* — clear the name and the defaults come back with no migration.
+  `NULL` means the names of always, so no existing board changed.
+- **The add button is now big and centred**, with an arrow that picks the
+  column. It used to be a grey `+` the size of an icon, hidden in the corner of
+  one column. A plain click still creates in "Por hacer", where almost
+  everything goes; choosing is the exception.
+
+`Vision.tsx` (the platform roadmap) passes no `onCrear`, so it is untouched.
+
+Verified in a real browser on a throwaway project: renaming persisted to the
+database, a dragged card came back as `en_curso`, and a card created through the
+arrow was born in `hecho`.

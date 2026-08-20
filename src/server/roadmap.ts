@@ -203,6 +203,24 @@ export function registerRoadmapRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * Los nombres de las tres columnas del tablero, saneados.
+   *
+   * SOLO SE ACEPTAN LAS TRES CLAVES DE SIEMPRE. El nombre lo escribe una
+   * persona, pero la clave no: si se dejara pasar cualquiera, el tablero
+   * podría acabar con una columna que ninguna tarea puede ocupar, porque el
+   * estado que se guarda sigue siendo por_hacer / en_curso / hecho.
+   */
+  const limpiarColumnas = (v: any) => {
+    if (!v || typeof v !== 'object') return null;
+    const salida: Record<string, string> = {};
+    for (const clave of ['por_hacer', 'en_curso', 'hecho']) {
+      const nombre = String(v[clave] ?? '').trim();
+      if (nombre) salida[clave] = nombre.slice(0, 40);
+    }
+    return Object.keys(salida).length ? salida : null;
+  };
+
   app.put('/api/proyectos/:id', async (req: Request, res: Response) => {
     try {
       if (!(await puedeEditarProyecto(req, req.params.id))) {
@@ -215,6 +233,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           descripcion = COALESCE(${d.descripcion ?? null}, descripcion),
           vision      = COALESCE(${d.vision ?? null}, vision),
           grupos      = COALESCE(${d.grupos ? JSON.stringify(d.grupos) : null}::jsonb, grupos),
+          columnas    = COALESCE(${d.columnas ? JSON.stringify(limpiarColumnas(d.columnas)) : null}::jsonb, columnas),
           publico     = COALESCE(${d.publico ?? null}, publico),
           updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${req.params.id}
