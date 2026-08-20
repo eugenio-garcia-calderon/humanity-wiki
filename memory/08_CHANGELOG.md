@@ -2387,3 +2387,69 @@ first, because that is what was asked for; whether you are charged, last.
 Both branches verified in the browser: the normal one against a real answer,
 and the missing-data one by stripping `costCents` from the response in the
 client so the honest path was actually exercised rather than assumed.
+## 2026-08-21 — Mobile, phase 1: a breakpoint, a drawer, and no windows on a phone
+
+The platform had no mobile design at all — the only mobile-aware code in the
+tree was the 3D game's. What existed was the desktop layout squeezed. The proof
+is the Tester's rotation test: in landscape (844px) everything fits and works,
+in portrait (390px) it breaks. At 844 the app believes it is on a computer, and
+it is right, because nothing ever told it otherwise.
+
+**`useEsMovil`** is now the one place that decides, by width (768px, Tailwind's
+`md`) and by height. The height half was not in the original design and was
+found by testing the 3D world: an iPhone 12 in landscape is 844×390 — wider
+than 768 — so rotating the phone brought the desktop sidebar back and left the
+world in 332px. Any viewport under 500px tall is a phone lying down.
+
+**B41/B3 — the sidebar becomes a drawer.** 240 fixed pixels of a 390px screen
+was 62% of the display for the menu, leaving 118 usable. On `/login` that meant
+the first screen of the platform on a phone was the one that stopped you
+getting in.
+
+**No half-collapsed state any more** (Eugenio, 2026-08-21), on desktop too: the
+56px icon rail is gone at both sizes. Since nothing is left on screen to say
+the menu still exists, the way back is a 52px button carrying the word "Menú",
+and it lives *in* the top bar, which grows to 56px while the menu is hidden. It
+floated first, and a screenshot showed it covering the first three folders of
+`/explorar`.
+
+**B21 — no lying while loading.** For the ~5 seconds the 3.7MB bundle takes,
+`user` is null and the bar was rendering "Iniciar sesión" to someone who was
+signed in: on the first contact of every visit, the platform told the user they
+had lost their work.
+
+**B28 — windows do not exist on a phone.** Every window is an iframe of the
+whole app; five were measured alive in one tab at 390px. Below the breakpoint
+`abrirVentana` becomes `navigate`, so the ten callers stay untouched and the
+branch happens in one place.
+
+**B37 — the folders panel** on `/explorar` was another 224 fixed pixels next to
+the 240 of the sidebar. On a phone the same folders are a horizontal strip.
+
+**B63 — a card's map** is an iframe of the whole app, and `/explorar` has 92
+publications, so these open themselves as you scroll rather than one at a time.
+The frame now lives only while it is near the screen.
+
+### The rule this phase is built on
+
+**The mobile branch reads the desktop's state and never writes it.** Not the
+open windows, not the menu preference. Without it, glancing at the platform
+from a phone would quietly wipe the desk you come back to — damage nobody would
+ever have attributed to the phone. Verified: two windows opened on desktop,
+survived a mobile visit and a mobile navigation untouched, and came back.
+
+### Measured, on a real session at 390×844
+
+Content lane 118px → 390. Off-screen interactive elements on `/explorar` 107
+(89 of them genuinely clipped) → 22, with one clipped and none zero-width.
+Drawer 288px with a 44×44 close button, closing on backdrop, Escape, its button
+and navigation.
+
+### What the browser here cannot test, and it matters
+
+The integrated browser reproduces an iPhone's *size* faithfully and its
+*behaviour* not at all: it fires no `resize`, no `matchMedia` change, and no
+`IntersectionObserver` callback. Anything reacting to a viewport change must be
+verified by RELOADING at each size, never by resizing live — and lazy-loading
+cannot be verified here at all. A bug reported from live-resizing in this
+browser is not a bug.

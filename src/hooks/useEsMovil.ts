@@ -24,7 +24,27 @@ import { useEffect, useState } from 'react';
  *  debajo de 768 no cabe la barra lateral de 240 px sin comerse la pantalla. */
 export const ANCHO_MOVIL = 768;
 
-const CONSULTA = `(max-width: ${ANCHO_MOVIL - 1}px)`;
+/** Y el alto, que es lo que delata a UN TELÉFONO GIRADO (2026-08-21).
+ *
+ *  Sin esto había un agujero, y lo encontré probando el Mundo 3D: un iPhone 12
+ *  en apaisado mide 844×390. Son 844 de ancho, o sea POR ENCIMA de 768, así
+ *  que la plataforma se creía en un ordenador, devolvía la barra lateral de
+ *  240 px y dejaba el mundo en 332. Girar el teléfono deshacía el arreglo
+ *  entero.
+ *
+ *  Ningún ordenador tiene 390 px de alto; ningún teléfono en apaisado pasa de
+ *  500. Una tableta apaisada (1024×768) se queda en escritorio, que es lo
+ *  correcto: ahí la barra sí cabe.
+ *
+ *  LO QUE CUESTA: una ventana de escritorio muy ancha y muy baja (1400×450,
+ *  que casi nadie tiene) también contará como móvil. El daño es pequeño —
+ *  cajón en vez de columna, con el botón «Menú» a la vista— y la alternativa
+ *  era añadir `(pointer: coarse)`, que aquí no se puede verificar porque este
+ *  navegador no emula el puntero táctil por encima de 768 px de ancho. Entre
+ *  arreglar el iPhone girado a ciertas y afinar un caso raro a ciegas, esto. */
+export const ALTO_MOVIL = 500;
+
+const CONSULTA = `(max-width: ${ANCHO_MOVIL - 1}px), (max-height: ${ALTO_MOVIL}px)`;
 
 /**
  * `true` cuando la ventana es de ancho de móvil.
