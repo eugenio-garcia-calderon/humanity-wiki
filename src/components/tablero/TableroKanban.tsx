@@ -28,6 +28,11 @@ export interface ItemTablero {
   id: string; grupo: string; titulo: string; resumen: string | null;
   estado: string; prioridad: string; bloques: any[]; proyecto_id?: string | null;
   autor_nombre: string | null; autor_email: string | null; autor_avatar: string | null;
+  /** El encargo: una de tus personas. Si falta, la ficha enseña al autor. */
+  responsable_agente_id?: string | null;
+  responsable_nombre?: string | null;
+  responsable_foto?: string | null;
+  responsable_icono?: string | null;
 }
 
 /** Los nombres que le haya puesto el proyecto a sus columnas. Solo rótulos:
@@ -296,9 +301,12 @@ export default function TableroKanban({
                       )}
                       {(it.bloques?.length > 0 || it.autor_nombre) && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-50 text-[10px] text-slate-400">
-                          {it.autor_nombre && (
+                          {(it.responsable_nombre || it.autor_nombre) && (
                             <span className="inline-flex items-center gap-1 truncate">
-                              <UserIcon className="w-2.5 h-2.5 shrink-0" />{it.autor_nombre.split(' ')[0]}
+                              {it.responsable_foto
+                                ? <img src={it.responsable_foto} alt="" className="w-3 h-3 rounded-full object-cover shrink-0" />
+                                : <UserIcon className="w-2.5 h-2.5 shrink-0" />}
+                              {(it.responsable_nombre || it.autor_nombre || '').split(' ')[0]}
                             </span>
                           )}
                           {it.bloques?.length > 0 && <span className="ml-auto shrink-0">{it.bloques.length} nota(s)</span>}
@@ -359,7 +367,11 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'No se pudo guardar.');
-      onGuardado({ ...item, ...j });
+      // El parche local va ANTES de la fila del servidor: la fila manda en las
+      // columnas reales, y el parche conserva lo que solo sabe la interfaz
+      // (el nombre y la foto del responsable recién elegido, que la fila no
+      // trae porque el PUT devuelve la tabla sin sus JOIN).
+      onGuardado({ ...item, ...patch, ...j });
     } catch (e: any) { setError(e.message); }
     finally { setGuardando(false); }
   };
@@ -447,19 +459,7 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
             </span>
           </div>
 
-          {/* Autor */}
-          <div className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-2xl">
-            {item.autor_avatar
-              ? <img src={item.autor_avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
-              : <span className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
-                  <UserIcon className="w-4 h-4" />
-                </span>}
-            <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Responsable</p>
-              <p className="text-xs font-bold text-slate-800 truncate">{item.autor_nombre || 'Sin asignar'}</p>
-              {item.autor_email && <p className="text-[10px] text-slate-400 truncate">{item.autor_email}</p>}
-            </div>
-          </div>
+          <SelectorResponsable item={item} puedeEditar={puedeEditar} onGuardar={guardar} />
 
           {/* Bloques de detalle */}
           <div className="space-y-3">
@@ -657,5 +657,110 @@ function TextoEditable({
     >
       {valor || placeholder}
     </p>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// EL RESPONSABLE DE LA TARJETA (2026-08-20, petición de Eugenio: «permite
+// cambiar el responsable de una tarea»).
+// ----------------------------------------------------------------------------
+// El responsable es una de TUS PERSONAS (Anita, Javier…), no una cuenta de la
+// plataforma: es con quienes Eugenio trabaja de verdad. Quien creó la tarjeta
+// (el autor) no se pierde: se enseña cuando no hay encargo, y el servidor lo
+// conserva siempre como historia.
+//
+// Las personas se piden AL ABRIR el selector, no al abrir la ficha: mirar una
+// tarjeta no debe costar una petición que casi nunca hace falta.
+function SelectorResponsable({ item, puedeEditar, onGuardar }: {
+  item: ItemTablero;
+  puedeEditar: boolean;
+  onGuardar: (patch: any) => Promise<void> | void;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [personas, setPersonas] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    if (!abierto || personas) return;
+    fetch('/api/personas', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setPersonas(Array.isArray(d?.personas) ? d.personas : []))
+      .catch(() => setPersonas([]));
+  }, [abierto, personas]);
+
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = () => setAbierto(false);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [abierto]);
+
+  const elegir = (p: any | null) => {
+    setAbierto(false);
+    // El nombre y la foto se ponen al momento en la ficha: esperar al viaje
+    // de red para ver a quién acabas de elegir se siente roto.
+    onGuardar({
+      responsable_agente_id: p ? p.id : null,
+      responsable_nombre: p ? p.nombre : null,
+      responsable_foto: p ? p.foto_url : null,
+      responsable_icono: p ? p.icono : null,
+    });
+  };
+
+  const nombre = item.responsable_nombre || item.autor_nombre || 'Sin asignar';
+  const esEncargo = !!item.responsable_nombre;
+  const foto = esEncargo ? item.responsable_foto : item.autor_avatar;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        disabled={!puedeEditar}
+        onClick={e => { e.stopPropagation(); setAbierto(v => !v); }}
+        title={puedeEditar ? 'Cambiar el responsable' : undefined}
+        className={cn('w-full flex items-center gap-2.5 p-3 bg-slate-50 rounded-2xl text-left',
+          puedeEditar && 'hover:bg-slate-100 transition-colors')}
+      >
+        {foto
+          ? <img src={foto} alt="" className="w-8 h-8 rounded-full object-cover" />
+          : <span className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
+              {item.responsable_icono ? <span className="text-sm">{item.responsable_icono}</span> : <UserIcon className="w-4 h-4" />}
+            </span>}
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+            Responsable{!esEncargo && item.autor_nombre ? ' · creador' : ''}
+          </p>
+          <p className="text-xs font-bold text-slate-800 truncate">{nombre}</p>
+        </div>
+        {puedeEditar && <Pencil className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+      </button>
+
+      {abierto && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-20 max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1"
+          onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => elegir(null)}
+            className="w-full text-left px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50"
+          >
+            Sin responsable
+          </button>
+          {personas === null && <p className="px-3 py-2 text-xs text-slate-400 italic">Cargando…</p>}
+          {personas?.length === 0 && <p className="px-3 py-2 text-xs text-slate-400 italic">No tienes personas todavía.</p>}
+          {personas?.map(p => (
+            <button
+              key={p.id}
+              onClick={() => elegir(p)}
+              className={cn('w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2',
+                item.responsable_agente_id === p.id && 'bg-emerald-50')}
+            >
+              {p.foto_url
+                ? <img src={p.foto_url} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                : <span className="w-5 h-5 rounded-full bg-slate-200 grid place-items-center text-[10px] shrink-0">{p.icono || p.nombre?.[0] || '?'}</span>}
+              <span className="truncate">{p.nombre}</span>
+              {p.rol && <span className="text-slate-400 font-normal truncate">· {p.rol}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

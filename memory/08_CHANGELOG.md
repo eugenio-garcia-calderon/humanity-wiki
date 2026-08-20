@@ -1674,3 +1674,30 @@ backspace, so the action-verb regex never matched (rewritten); and the golden
 rule («si dices que lo has hecho, el bloque es OBLIGATORIO») moved to the END
 of the variable prompt — after the cache split it sat too far from the end and
 Claude went back to saying "te la apunto" without the block.
+
+## 2026-08-20 — A task's responsable can be one of your personas, and can change
+
+Eugenio: «permite cambiar el responsable de una tarea» (plus the board card
+«permite añadir personas … a las tareas»).
+
+- Migration `0050`: `roadmap_items.responsable_agente_id` → a persona
+  (`game_agents`), because the people Eugenio works with (Anita, Javier…) are
+  personas, not platform accounts. `autor_user_id` is untouched: who created
+  the card is history and stays; the ficha shows the autor when there is no
+  encargo. No FK on purpose — personas archive, never delete.
+- PUT `/api/roadmap/:id` accepts `responsable_agente_id` (null clears it) and
+  verifies the persona is YOURS — assigning someone else's persona would write
+  into their world. Bogus ids get «Esa persona no existe o no es tuya».
+- Both list queries join the persona (name/photo/icon); `/api/tareas` sends
+  `responsable`/`responsableFoto` per task.
+- UI (`SelectorResponsable` in TableroKanban): the Responsable box in the
+  ficha opens a dropdown of your personas — loaded when the dropdown opens,
+  not when the ficha opens — with photos, «Sin responsable» first, and the
+  card footer now shows the responsable (photo + first name) before the autor.
+  The local patch merges into the ficha state so the new name shows instantly
+  (the PUT returns the row without its JOINs).
+
+Bug of the day: an index-based edit inserted the `game_agents` join twice into
+one query («table name "ag" specified more than once») while leaving the other
+query without it. Verified live end-to-end (set Anita via API, switched to
+Javier in the real browser, cleared, bogus id rejected); test card deleted.

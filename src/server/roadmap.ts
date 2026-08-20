@@ -39,17 +39,19 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       const proyecto = (req.query.proyecto as string) || null;
       const rows = await db.execute(sql`
         SELECT r.id, r.grupo, r.titulo, r.resumen, r.estado, r.prioridad, r.bloques, r.orden,
-               r.autor_user_id, r.proyecto_id, r.updated_at,
-               u.display_name AS autor_nombre, u.email AS autor_email, u.avatar_url AS autor_avatar
+               r.autor_user_id, r.proyecto_id, r.updated_at, r.responsable_agente_id,
+               u.display_name AS autor_nombre, u.email AS autor_email, u.avatar_url AS autor_avatar,
+               ag.nombre AS responsable_nombre, ag.foto_url AS responsable_foto, ag.icono AS responsable_icono
         FROM roadmap_items r
         LEFT JOIN users u ON u.id = r.autor_user_id
+        LEFT JOIN game_agents ag ON ag.id = r.responsable_agente_id
         WHERE r.archived_at IS NULL
           AND (${proyecto}::text IS NULL AND r.proyecto_id IS NULL
                OR r.proyecto_id = ${proyecto})
         ORDER BY r.grupo, r.orden, r.created_at
       `);
       res.json(rows.rows);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { console.error('roadmap GET:', e?.cause?.message || e); res.status(500).json({ error: e.message }); }
   });
 
   // ==========================================================================
@@ -72,11 +74,13 @@ export function registerRoadmapRoutes(app: Express, db: any) {
                r.updated_at, r.created_at, r.proyecto_id,
                p.titulo AS proyecto_titulo, p.slug AS proyecto_slug, p.publico AS proyecto_publico,
                p.creador_user_id AS proyecto_creador,
-               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               ag.nombre AS responsable_nombre, ag.foto_url AS responsable_foto
         FROM roadmap_items r
         LEFT JOIN proyectos p ON p.id = r.proyecto_id
                              AND p.archived_at IS NULL AND p.deleted_at IS NULL
         LEFT JOIN users u ON u.id = r.autor_user_id
+        LEFT JOIN game_agents ag ON ag.id = r.responsable_agente_id
         WHERE r.archived_at IS NULL
           AND (
             -- La hoja de ruta de la plataforma: sin proyecto, y pública.
@@ -106,6 +110,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           id: t.id, titulo: t.titulo, resumen: t.resumen, estado: t.estado,
           prioridad: t.prioridad, grupo: t.grupo,
           autor: t.autor_nombre, autorAvatar: t.autor_avatar,
+          responsable: t.responsable_nombre || null, responsableFoto: t.responsable_foto || null,
           fecha: t.updated_at || t.created_at,
         });
       }
@@ -406,6 +411,24 @@ export function registerRoadmapRoutes(app: Express, db: any) {
         }
         nuevoProyecto = String(d.proyecto_id);
       }
+
+      // EL RESPONSABLE (2026-08-20): una de TUS personas, o nadie. Se
+      // comprueba que la persona es tuya: poner de responsable a la persona
+      // de otro usuario sería escribir en su mundo desde el tuyo.
+      // `undefined` = no tocar; `null` o '' = quitar el responsable.
+      let responsable: string | null | undefined = undefined;
+      if ('responsable_agente_id' in d) {
+        if (!d.responsable_agente_id) {
+          responsable = null;
+        } else {
+          const ag = await db.execute(sql`
+            SELECT id FROM game_agents
+            WHERE id = ${String(d.responsable_agente_id)} AND user_id = ${req.user!.id} AND archived_at IS NULL
+          `);
+          if (!ag.rows.length) return res.status(400).json({ error: 'Esa persona no existe o no es tuya.' });
+          responsable = String(d.responsable_agente_id);
+        }
+      }
       await db.execute(sql`
         UPDATE roadmap_items SET
           proyecto_id = COALESCE(${nuevoProyecto}, proyecto_id),
@@ -415,6 +438,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           estado    = COALESCE(${estado}, estado),
           prioridad = COALESCE(${prioridad}, prioridad),
           autor_user_id = COALESCE(${d.autor_user_id ?? null}, autor_user_id),
+          responsable_agente_id = CASE WHEN ${responsable !== undefined} THEN ${responsable ?? null} ELSE responsable_agente_id END,
           bloques   = COALESCE(${d.bloques ? JSON.stringify(d.bloques) : null}::jsonb, bloques),
           orden     = COALESCE(${d.orden ?? null}, orden),
           updated_at = now(), updated_by = ${req.user!.id}
