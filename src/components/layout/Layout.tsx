@@ -77,14 +77,16 @@ export default function Layout() {
   const { updateCounter } = useEdit();
   const esMovil = useEsMovil();
 
-  // EL CAJÓN DEL MENÚ EN MÓVIL (B41). En escritorio esto no existe: el menú es
-  // una columna que siempre está. Empieza cerrado siempre —nunca se recuerda
-  // abierto— porque en un teléfono el menú abierto tapa la pantalla entera y
-  // nadie quiere empezar cada visita mirando un menú.
+  // EL CAJÓN DEL MENÚ EN MÓVIL (B41). Empieza cerrado SIEMPRE y no se recuerda,
+  // porque en un teléfono el menú abierto tapa la pantalla entera y nadie
+  // quiere empezar cada visita mirando un menú.
   const [cajonAbierto, setCajonAbierto] = useState(false);
 
-  // El menú lateral, plegado o abierto. Se recuerda en tus ajustes de usuario
-  // (jsonb, sin migración): el menú te encuentra como lo dejaste.
+  // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
+  // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
+  // escritorio como en móvil»). El nombre `menuColapsado` y su clave en
+  // localStorage se quedan como estaban a propósito: quien ya tenía el menú
+  // plegado se lo encuentra escondido, que es lo más parecido a lo que eligió.
   const [menuColapsado, setColapsado] = useState<boolean>(() => {
     try { return localStorage.getItem('humanity:menu-colapsado') === '1'; } catch { return false; }
   });
@@ -92,6 +94,17 @@ export default function Layout() {
     setColapsado(v);
     try { localStorage.setItem('humanity:menu-colapsado', v ? '1' : '0'); } catch { /* lleno */ }
   };
+
+  // ── UN SOLO CONCEPTO: EL MENÚ ESTÁ O NO ESTÁ ──────────────────────────────
+  // Debajo hay dos estados distintos, y es a propósito. El de escritorio se
+  // recuerda entre visitas; el de móvil no se recuerda NUNCA. Es la misma
+  // disciplina que con las ventanas: el móvil LEE las preferencias del
+  // escritorio pero no las ESCRIBE, así que mirar la plataforma desde el
+  // teléfono no te recoloca el escritorio al volver a él.
+  const menuPuesto = esMovil ? cajonAbierto : !menuColapsado;
+  const ponerMenu = () => (esMovil ? setCajonAbierto(true) : setMenuColapsado(false));
+  const esconderMenu = () => (esMovil ? setCajonAbierto(false) : setMenuColapsado(true));
+
   // Las ventanas abiertas del Escritorio, para pintarlas como ICONOS en la
   // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
   // (ver bus.ts).
@@ -317,17 +330,18 @@ export default function Layout() {
           En una pantalla de 390 px esta columna se comía 240 y al contenido le
           quedaban 118 px útiles: el texto salía a una palabra por línea y en
           /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
-      {user && !esMovil && (
-        <MenuLateral colapsado={menuColapsado} onColapsar={setMenuColapsado} activo={location.pathname} />
+      {user && !esMovil && menuPuesto && (
+        <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
       )}
 
       {/* MIENTRAS NO SE SABE SI HAY SESIÓN, UN HUECO (B21, parte 1). Sin esto
           la columna aparece de golpe cuando contesta el servidor y toda la
           página da un salto lateral de 240 px. Un hueco del mismo ancho no
-          dice nada y no se mueve nada. */}
-      {!user && cargandoSesion && !esMovil && (
-        <div aria-hidden className={cn('shrink-0 h-full border-r border-slate-200 bg-white',
-          menuColapsado ? 'w-14' : 'w-60')} />
+          dice nada y no se mueve nada.
+          Solo cuando el menú va a estar puesto: si lo tenías escondido, no hay
+          columna que reservar y el hueco sería el salto que evitamos. */}
+      {!user && cargandoSesion && !esMovil && menuPuesto && (
+        <div aria-hidden className="shrink-0 h-full w-60 border-r border-slate-200 bg-white" />
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -339,26 +353,10 @@ export default function Layout() {
       <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
         compacto ? 'h-8' : 'h-10')}>
 
-        {/* EL BOTÓN DEL MENÚ, SOLO EN MÓVIL (B41). En escritorio no aparece:
-            allí el menú es una columna que ya está a la vista y un botón para
-            abrir lo que está abierto no significa nada.
-            44 px de lado, que es el mínimo de Apple para algo que se toca. */}
-        {user && esMovil && (
-          <button
-            onClick={() => setCajonAbierto(true)}
-            title="Abrir el menú"
-            aria-label="Abrir el menú"
-            aria-expanded={cajonAbierto}
-            className="w-11 h-11 -ml-1 grid place-items-center rounded-lg shrink-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* LA MARCA, SOLO EN MÓVIL. Vive en el menú lateral, así que al
-            convertirlo en cajón la plataforma se quedaba sin nombre en ningún
-            sitio y sin forma de volver al inicio de un toque. */}
-        {esMovil && (
+        {/* LA MARCA CUANDO NO ESTÁ EL MENÚ. La marca vive dentro del menú
+            lateral, así que al esconderlo la plataforma se quedaba sin nombre
+            en ningún sitio y sin forma de volver al inicio de un toque. */}
+        {!menuPuesto && (
           <button
             onClick={() => navigate('/')}
             className="min-w-0 shrink text-left hover:opacity-85 transition-opacity"
@@ -546,6 +544,41 @@ export default function Layout() {
           abajo»). Solo hay UNA barra, la de arriba, y lleva las ventanas. */}
       </div>
 
+      {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
+          Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
+          llamativo y grande».
+
+          POR QUÉ ES GRANDE Y NO UN ICONO DISCRETO: desde que no hay estado
+          intermedio, éste es el ÚNICO camino de vuelta al menú. Antes, con el
+          semiplegado, siempre quedaba una tira de iconos a la vista que decía
+          «el menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
+          esquina sería justo el fallo que este proyecto ya tiene catalogado:
+          83 de cada 100 botones por debajo de 24 px y uno solo llegando a los
+          44 que pide Apple.
+
+          Va pegado al borde izquierdo y con las esquinas redondeadas solo por
+          la derecha, que es la forma que se lee como «tira de aquí para sacar
+          el panel». Y va `fixed`, no dentro de la barra: la barra mide 40 px
+          (32 en compacto) y no puede contener algo de 52 sin empujar la
+          maqueta de todo el mundo. */}
+      {user && !menuPuesto && (
+        <button
+          onClick={ponerMenu}
+          title="Ver el menú"
+          aria-label="Ver el menú"
+          aria-expanded={false}
+          className={cn('fixed left-0 z-40 flex items-center gap-2 pl-3 pr-4 rounded-r-2xl',
+            'bg-slate-900 text-white shadow-xl shadow-slate-900/25',
+            'hover:bg-slate-800 hover:pl-4 transition-all',
+            // 52 px de alto: de sobra para el dedo. Justo debajo de la barra.
+            'h-13',
+            compacto ? 'top-11' : 'top-13')}
+        >
+          <Menu className="w-6 h-6 shrink-0" />
+          <span className="text-sm font-black tracking-tight">Menú</span>
+        </button>
+      )}
+
       {/* ══ EL CAJÓN DEL MENÚ EN MÓVIL (B41) ══════════════════════════════
           Va aquí, el último y fuera de la columna de contenido, para que se
           pinte POR ENCIMA de todo: de la página, de las ventanas y del panel
@@ -559,7 +592,7 @@ export default function Layout() {
 
           NO SE TOCA EL ESCRITORIO: por encima de 768 px `esMovil` es false y
           nada de este bloque llega a existir. */}
-      {user && esMovil && cajonAbierto && (
+      {user && esMovil && menuPuesto && (
         <>
           {/* El fondo oscuro. Tocar fuera cierra, que es lo que todo el mundo
               intenta primero. */}
@@ -574,17 +607,10 @@ export default function Layout() {
             aria-label="Menú"
             className="fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-200"
           >
-            {/* `colapsado={false}` a propósito: plegar a 56 px de iconos es una
-                idea de escritorio y en un cajón no significa nada. Y por eso
-                mismo `onColapsar` no hace nada aquí — el estado de plegado del
-                escritorio no se toca desde el móvil, igual que el móvil no
-                toca las ventanas guardadas. */}
             <MenuLateral
-              colapsado={false}
-              onColapsar={() => { /* en móvil no se pliega: se cierra */ }}
               activo={location.pathname}
               movil
-              onCerrar={() => setCajonAbierto(false)}
+              onCerrar={esconderMenu}
             />
           </div>
         </>

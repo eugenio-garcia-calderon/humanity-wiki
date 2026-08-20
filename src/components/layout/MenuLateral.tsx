@@ -15,12 +15,16 @@
 // nada. Ahora es una columna que se queda, porque con un árbol de proyectos
 // dentro hay que poder mirar y volver sin que desaparezca.
 //
-// PLEGADO son 56 px de iconos, con el nombre al pasar el ratón. El estado se
-// guarda en tus ajustes, así que el menú te recuerda como lo dejaste.
+// SIN SEMIPLEGADO (2026-08-21, decisión de Eugenio: «en versión móvil el menú
+// lateral semicolapsado no queda bien, entonces vamos a hacer que se colapse
+// del todo, tanto en escritorio como en móvil»). Antes había un estado
+// intermedio de 56 px con solo iconos. Ya no: o está el menú o no está, en los
+// dos tamaños. Quien decide si se pinta es `Layout`, y es también quien pone
+// el botón grande de traerlo de vuelta.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
+  FolderKanban, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
@@ -63,18 +67,16 @@ const VACIO: DatosMenu = { proyectos: [], productos: [], personas: [], organizac
 const iniciales = (t: string) =>
   t.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase()).join('') || '·';
 
-export default function MenuLateral({ colapsado, onColapsar, activo, movil = false, onCerrar }: {
-  colapsado: boolean;
-  onColapsar: (v: boolean) => void;
+export default function MenuLateral({ activo, movil = false, onCerrar }: {
   activo?: string;
   /** EN MÓVIL EL MENÚ ES UN CAJÓN, NO UNA COLUMNA (2026-08-20, B41). En una
    *  pantalla de 390 px esta columna de 240 se comía el 62% y al contenido le
-   *  quedaban 118 px útiles. Aquí dentro el cambio es pequeño a propósito: la
-   *  columna se vuelve cajón (lo coloca `Layout`, que es quien pone el fondo
-   *  oscuro) y el botón de plegar se cambia por uno de cerrar. Todo lo demás
-   *  —secciones, árbol, editar menú— es exactamente el mismo componente. */
+   *  quedaban 118 px útiles. El cambio de aquí dentro es pequeño a propósito:
+   *  la columna se vuelve cajón —lo coloca `Layout`, que es quien pone el
+   *  fondo oscuro— y todo lo demás (secciones, árbol, editar menú) es
+   *  exactamente el mismo componente. */
   movil?: boolean;
-  /** Cerrar el cajón. Solo se usa en móvil. */
+  /** Esconder el menú. Ya no es «plegar»: ver la nota de SIN SEMIPLEGADO. */
   onCerrar?: () => void;
 }) {
   const navigate = useNavigate();
@@ -150,7 +152,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
     return puestos.map(n => (
       <div key={n.id} onDragOver={() => setEncima(n.id)}>
         <RamaMenu
-          nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir}
+          nodo={n} colapsado={false} activo={activo} onAbrir={abrir}
           arrastre={arrastreDe(clave, puestos, n)}
         />
       </div>
@@ -368,7 +370,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
       ),
       hijos: (
         <>
-          {nodosProyectos.length === 0 && !colapsado && (
+          {nodosProyectos.length === 0 && (
             <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
           )}
           {filas('proyectos', nodosProyectos)}
@@ -388,7 +390,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
       ),
       hijos: (
         <>
-          {nodosProductos.length === 0 && !colapsado && (
+          {nodosProductos.length === 0 && (
             <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
           )}
           {filas('productos', nodosProductos)}
@@ -401,35 +403,28 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
   return (
     <aside
       className={cn('shrink-0 h-full border-r border-slate-200 bg-white flex flex-col',
-        // MÓVIL: cajón. Ancho fijo cómodo pero SIEMPRE con un hueco a la
-        // derecha (`max-w-[82vw]`), porque ver un trozo de la página de debajo
-        // es lo que hace entender que esto se cierra. Sin `transition-[width]`:
-        // el cajón entra deslizándose, y las dos animaciones a la vez se ven
-        // como un tirón.
-        movil ? 'w-72 max-w-[82vw]' : 'transition-[width] duration-150',
-        !movil && (colapsado ? 'w-14' : 'w-60'))}
+        // MÓVIL: cajón. Ancho cómodo pero SIEMPRE con un hueco a la derecha
+        // (`max-w-[82vw]`), porque ver un trozo de la página de debajo es lo
+        // que hace entender que esto se cierra.
+        movil ? 'w-72 max-w-[82vw]' : 'w-60')}
     >
-      {/* Marca + plegar */}
-      <div className={cn('h-14 shrink-0 flex items-center border-b border-slate-200',
-        colapsado ? 'justify-center' : 'px-3 gap-2')}>
-        {!colapsado && (
-          <button onClick={() => navigate('/')} className="min-w-0 flex-1 text-left hover:opacity-85 transition-opacity">
-            <span className="text-sm font-extrabold tracking-tight text-slate-900">
-              Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
-            </span>
-          </button>
-        )}
-        {/* EN MÓVIL NO SE PLIEGA, SE CIERRA. Plegar a 56 px de iconos es una
-            idea de escritorio: en un teléfono el menú o está o no está. El
-            botón mide 44 px, que es el mínimo que pide Apple para algo que se
-            toca con el dedo. */}
+      {/* Marca + esconder */}
+      <div className="h-14 shrink-0 flex items-center border-b border-slate-200 px-3 gap-2">
+        <button onClick={() => navigate('/')} className="min-w-0 flex-1 text-left hover:opacity-85 transition-opacity">
+          <span className="text-sm font-extrabold tracking-tight text-slate-900">
+            Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
+          </span>
+        </button>
+        {/* ESCONDER EL MENÚ. Ya no hay «plegar»: o está o no está, en los dos
+            tamaños. 44 px de lado, que es el mínimo de Apple para el dedo —y
+            el que este proyecto incumple en 83 de cada 100 botones. */}
         <button
-          onClick={() => (movil ? onCerrar?.() : onColapsar(!colapsado))}
-          title={movil ? 'Cerrar el menú' : colapsado ? 'Abrir el menú' : 'Plegar el menú'}
-          className={cn('grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0',
-            movil ? 'w-11 h-11' : 'w-9 h-9')}
+          onClick={() => onCerrar?.()}
+          title="Esconder el menú"
+          aria-label="Esconder el menú"
+          className="w-11 h-11 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0"
         >
-          {movil ? <Cerrar className="w-5 h-5" /> : colapsado ? <PanelLeftOpen className="w-4.5 h-4.5" /> : <PanelLeftClose className="w-4.5 h-4.5" />}
+          <PanelLeftClose className="w-5 h-5" />
         </button>
       </div>
 
@@ -448,12 +443,12 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
               key={sec.clave}
               titulo={sec.titulo}
               icono={sec.icono}
-              colapsado={colapsado}
+              colapsado={false}
               plegada={sec.clave === 'areas' ? plegadas.areas !== false : !!plegadas[sec.clave]}
               onPlegar={() => plegar(sec.clave)}
               cuantos={contenido.cuantos}
               alto={altos[sec.clave]} onAlto={a => guardarAlto(sec.clave, a)}
-              accion={!colapsado ? contenido.accion : undefined}
+              accion={contenido.accion}
             >
               {contenido.hijos}
             </SeccionMenu>
@@ -465,11 +460,10 @@ export default function MenuLateral({ colapsado, onColapsar, activo, movil = fal
       <button
         onClick={() => setEditandoMenu(true)}
         title="Editar el menú"
-        className={cn('shrink-0 flex items-center gap-2 px-3 py-2.5 border-t border-slate-100 text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors',
-          colapsado && 'justify-center px-0')}
+        className="shrink-0 flex items-center gap-2 px-3 py-2.5 border-t border-slate-100 text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors"
       >
         <Settings className="w-4 h-4 shrink-0" />
-        {!colapsado && <span>Editar menú</span>}
+        <span>Editar menú</span>
       </button>
 
       {editandoMenu && (
