@@ -243,6 +243,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const creatorId = (req.query.creator_id as string) || null;
       // ?challenge=R021 — solo los grafos anclados a ese reto (sus VISTAS).
       const challengeId = (req.query.challenge as string) || null;
+      // ?personales=1 — incluye TU lienzo personal (Mi Conocimiento) en el
+      // listado. Solo vale para los tuyos: la página «Lienzos» los enseña
+      // porque son tuyos, pero nunca deben colarse en las listas del común.
+      const incluirPersonales = req.query.personales === '1'
+        && !!req.user && creatorId === req.user.id;
       const rows = await db.execute(sql`
         SELECT g.id, g.title, g.slug, g.description, g.status, g.is_ai_generated, g.views,
                g.created_at, g.center, u.display_name AS creator_name, u.avatar_url AS creator_avatar,
@@ -265,7 +270,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         LEFT JOIN users u ON u.id = g.creator_user_id
         WHERE g.archived_at IS NULL AND g.deleted_at IS NULL
           -- Los lienzos personales (Mi Conocimiento) no son parte del común.
-          AND coalesce(g.center->>'personal','') <> '1'
+          AND (${incluirPersonales} OR coalesce(g.center->>'personal','') <> '1')
           AND (${creatorId}::text IS NULL OR g.creator_user_id = ${creatorId})
           AND (${challengeId}::text IS NULL OR EXISTS (
             SELECT 1 FROM graph_entity_links gel2
