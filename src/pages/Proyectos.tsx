@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
-  Users,
+  Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -176,13 +176,65 @@ function ModalNuevoProyecto({ onCerrar, onCreado }: { onCerrar: () => void; onCr
 // ----------------------------------------------------------------------------
 // El tablero de un proyecto
 // ----------------------------------------------------------------------------
+/** Lo que se puede crear DESDE un proyecto. Es la lista de herramientas de la
+ *  plataforma que producen algo que puede vivir dentro de un proyecto — el
+ *  Navegador o Explorar no crean nada tuyo, así que no están. */
+const HERRAMIENTAS_PROYECTO: Array<{ tipo: string; label: string; icono: any }> = [
+  { tipo: 'tarea',   label: 'Tarea',   icono: ListChecks },
+  { tipo: 'pagina',  label: 'Página',  icono: FileText },
+  { tipo: 'esquema', label: 'Esquema', icono: Globe2 },
+  { tipo: 'mapa',    label: 'Mapa',    icono: MapIcon },
+];
+
 export function Proyecto() {
   const { slug } = useParams();
   const { user } = useAuth();
+  const navegar = useNavigate();
   const [proyecto, setProyecto] = useState<any>(null);
   const [items, setItems] = useState<ItemTablero[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [nueva, setNueva] = useState<string | null>(null);
+  const [creando, setCreando] = useState<string | null>(null);
+  const [borrando, setBorrando] = useState(false);
+  const [quitando, setQuitando] = useState(false);
+
+  /** Solo el dueño (o un administrador) toca el proyecto. */
+  const puedoEditar = !!user && !!proyecto
+    && (proyecto.creador_user_id === user.id || (user.roleLevel ?? 0) >= 4);
+
+  const crearHerramienta = async (tipo: string) => {
+    if (!proyecto || creando) return;
+    setCreando(tipo);
+    try {
+      const r = await fetch(`/api/proyectos/${proyecto.id}/herramienta`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setError(d?.error || 'No se ha podido crear.'); return; }
+      // El menú lateral enseña lo que cuelga de cada proyecto: que se entere.
+      window.dispatchEvent(new Event('humanity:menu-cambiado'));
+      // Crear algo es querer usarlo, así que se entra. Una tarea no tiene
+      // página propia: se queda en este tablero y basta con recargarlo.
+      if (d.abrir) navegar(d.abrir);
+      else cargarItems(proyecto.id);
+    } catch {
+      setError('No se ha podido crear.');
+    } finally { setCreando(null); }
+  };
+
+  const quitarProyecto = async () => {
+    if (!proyecto || quitando) return;
+    setQuitando(true);
+    try {
+      const r = await fetch(`/api/proyectos/${proyecto.id}`, { method: 'DELETE', credentials: 'include' });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setError(d?.error || 'No se ha podido quitar.'); return; }
+      window.dispatchEvent(new Event('humanity:menu-cambiado'));
+      navegar('/proyectos');
+    } finally { setQuitando(false); }
+  };
 
   const cargarItems = (id: string) =>
     fetch(`/api/roadmap?proyecto=${id}`, { credentials: 'include' })
@@ -206,10 +258,70 @@ export function Proyecto() {
 
   return (
     <div className="h-full overflow-y-auto">
+      {/* QUITAR EL PROYECTO. Se pregunta antes, y se dice EXACTAMENTE qué pasa
+          con lo de dentro: la sorpresa que nadie quiere es descubrir que
+          archivar la carpeta se llevó por delante meses de trabajo. */}
+      {borrando && (
+        <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
+          onClick={() => !quitando && setBorrando(false)}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
+            <h2 className="text-sm font-black text-slate-900 mb-2">¿Quitar «{proyecto.titulo}»?</h2>
+            <p className="text-[12px] text-slate-600 leading-relaxed">
+              El proyecto se archiva y desaparece de tu menú. <b>Nada de lo que hay dentro se borra</b>:
+              sus tareas, páginas, esquemas y mapas siguen existiendo y se quedan sueltos, sin proyecto.
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setBorrando(false)} disabled={quitando}
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 disabled:opacity-40 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={quitarProyecto} disabled={quitando}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold disabled:opacity-40 transition-colors">
+                {quitando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-8 pb-24">
-        <Link to="/proyectos" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Proyectos
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link to="/proyectos" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Proyectos
+          </Link>
+          <div className="flex-1" />
+
+          {/* LAS HERRAMIENTAS DE LA PLATAFORMA, AQUÍ DENTRO (Eugenio,
+              2026-08-20: «permite añadir todas las herramientas de la
+              plataforma en esa página de proyecto»). Lo que crees desde aquí
+              nace YA dentro de este proyecto, que es la diferencia con
+              crearlo desde su herramienta y moverlo después. */}
+          {puedoEditar && HERRAMIENTAS_PROYECTO.map(h => (
+            <button
+              key={h.tipo}
+              onClick={() => crearHerramienta(h.tipo)}
+              disabled={creando !== null}
+              title={`Añadir ${h.label.toLowerCase()} a este proyecto`}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 text-[11px] font-bold disabled:opacity-40 transition-colors"
+            >
+              {creando === h.tipo
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <h.icono className="w-3.5 h-3.5" />}
+              {h.label}
+            </button>
+          ))}
+
+          {puedoEditar && (
+            <button
+              onClick={() => setBorrando(true)}
+              title="Quitar este proyecto"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         <div className="max-w-3xl mt-4">
           <div className="flex items-center gap-1.5 mb-1.5">

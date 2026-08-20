@@ -17,7 +17,7 @@
 //
 // PLEGADO son 56 px de iconos, con el nombre al pasar el ratón. El estado se
 // guarda en tus ajustes, así que el menú te recuerda como lo dejaste.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
@@ -63,9 +63,79 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   activo?: string;
 }) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
   const [datos, setDatos] = useState<DatosMenu>(VACIO);
   const [plegadas, setPlegadas] = useState<Record<string, boolean>>({});
+
+  // CÓMO TIENES TÚ EL MENÚ: en qué orden va cada cosa y cuánto sitio ocupa
+  // cada sección. Es una preferencia TUYA, no del proyecto: que tú pongas
+  // «Camión camperizado» el primero no cambia el menú de nadie más. Por eso va
+  // en tus ajustes de usuario (jsonb) y no en una columna.
+  const ajustes = (user?.uiSettings || {}) as any;
+  const [orden, setOrden] = useState<Record<string, string[]>>(() => ajustes.ordenMenu || {});
+  const [altos, setAltos] = useState<Record<string, number>>(() => ajustes.altosMenu || {});
+  useEffect(() => {
+    const a = (user?.uiSettings || {}) as any;
+    if (a.ordenMenu) setOrden(a.ordenMenu);
+    if (a.altosMenu) setAltos(a.altosMenu);
+  }, [user?.id]);
+
+  /** Coloca según tu orden. Lo que no esté en la lista va detrás, en el orden
+   *  natural: algo nuevo aparece solo, sin tener que reordenar nada. */
+  const colocar = useCallback((clave: string, nodos: NodoMenu[]) => {
+    const guardado = orden[clave];
+    if (!guardado?.length) return nodos;
+    const puesto = new Map(guardado.map((id, i) => [id, i]));
+    return [...nodos].sort((x, y) =>
+      (puesto.has(x.id) ? puesto.get(x.id)! : 1e9) - (puesto.has(y.id) ? puesto.get(y.id)! : 1e9));
+  }, [orden]);
+
+  /** Guarda (optimista) el orden de una sección. */
+  const guardarOrden = (clave: string, ids: string[]) => {
+    const siguiente = { ...orden, [clave]: ids };
+    setOrden(siguiente);
+    updateUiSettings({ ordenMenu: siguiente });
+  };
+  const guardarAlto = (clave: string, alto: number) => {
+    const siguiente = { ...altos, [clave]: alto };
+    setAltos(siguiente);
+    updateUiSettings({ altosMenu: siguiente });
+  };
+
+  /** El arrastre de una sección: qué se lleva y dónde está encima. */
+  const llevando = useRef<{ clave: string; id: string } | null>(null);
+  const [encima, setEncima] = useState<string | null>(null);
+  /** Fabrica lo que necesita cada fila para poder colocarse. */
+  const arrastreDe = (clave: string, nodos: NodoMenu[], nodo: NodoMenu) => ({
+    encima: encima === nodo.id,
+    onEmpezar: () => { llevando.current = { clave, id: nodo.id }; },
+    onFin: () => { llevando.current = null; setEncima(null); },
+    onSoltar: () => {
+      const l = llevando.current;
+      llevando.current = null;
+      setEncima(null);
+      if (!l || l.clave !== clave || l.id === nodo.id) return;
+      const ids = nodos.map(n => n.id);
+      const desde = ids.indexOf(l.id);
+      const hasta = ids.indexOf(nodo.id);
+      if (desde < 0 || hasta < 0) return;
+      ids.splice(hasta, 0, ids.splice(desde, 1)[0]);
+      guardarOrden(clave, ids);
+    },
+  });
+
+  /** Pinta una sección entera con su arrastre. */
+  const filas = (clave: string, nodos: NodoMenu[]) => {
+    const puestos = colocar(clave, nodos);
+    return puestos.map(n => (
+      <div key={n.id} onDragOver={() => setEncima(n.id)}>
+        <RamaMenu
+          nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir}
+          arrastre={arrastreDe(clave, puestos, n)}
+        />
+      </div>
+    ));
+  };
 
   useEffect(() => {
     if (!user) { setDatos(VACIO); return; }
@@ -201,6 +271,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           titulo="Proyectos" icono={FolderKanban} colapsado={colapsado}
           plegada={!!plegadas.proyectos} onPlegar={() => plegar('proyectos')}
           cuantos={nodosProyectos.length}
+          alto={altos.proyectos} onAlto={a => guardarAlto('proyectos', a)}
           accion={!colapsado ? (
             <button onClick={() => abrir({ id: 'p', label: 'Mis proyectos', destino: '/proyectos' })}
               title="Ver todos los proyectos"
@@ -212,9 +283,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           {nodosProyectos.length === 0 && !colapsado && (
             <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
           )}
-          {nodosProyectos.map(n => (
-            <RamaMenu key={n.id} nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir} />
-          ))}
+          {filas('proyectos', nodosProyectos)}
         </SeccionMenu>
 
         {/* 2 — HERRAMIENTAS */}
@@ -222,10 +291,9 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           titulo="Herramientas" icono={Wrench} colapsado={colapsado}
           plegada={!!plegadas.herramientas} onPlegar={() => plegar('herramientas')}
           cuantos={HERRAMIENTAS.length}
+          alto={altos.herramientas} onAlto={a => guardarAlto('herramientas', a)}
         >
-          {HERRAMIENTAS.map(n => (
-            <RamaMenu key={n.id} nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir} />
-          ))}
+          {filas('herramientas', HERRAMIENTAS)}
         </SeccionMenu>
 
         {/* 3 — PRODUCTOS Y SERVICIOS */}
@@ -233,6 +301,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           titulo="Productos" icono={Store} colapsado={colapsado}
           plegada={!!plegadas.productos} onPlegar={() => plegar('productos')}
           cuantos={nodosProductos.length}
+          alto={altos.productos} onAlto={a => guardarAlto('productos', a)}
           accion={!colapsado ? (
             <button onClick={() => abrir({ id: 'm', label: 'Mercado', destino: '/mercado' })}
               title="Ir al Mercado"
@@ -244,9 +313,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           {nodosProductos.length === 0 && !colapsado && (
             <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
           )}
-          {nodosProductos.map(n => (
-            <RamaMenu key={n.id} nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir} />
-          ))}
+          {filas('productos', nodosProductos)}
         </SeccionMenu>
 
         {/* 4 — PERSONAS Y ORGANIZACIONES */}
@@ -254,10 +321,9 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
           titulo="Personas" icono={Users2} colapsado={colapsado}
           plegada={!!plegadas.personas} onPlegar={() => plegar('personas')}
           cuantos={nodosPersonas.length}
+          alto={altos.personas} onAlto={a => guardarAlto('personas', a)}
         >
-          {nodosPersonas.map(n => (
-            <RamaMenu key={n.id} nodo={n} colapsado={colapsado} activo={activo} onAbrir={abrir} />
-          ))}
+          {filas('personas', nodosPersonas)}
         </SeccionMenu>
       </div>
     </aside>

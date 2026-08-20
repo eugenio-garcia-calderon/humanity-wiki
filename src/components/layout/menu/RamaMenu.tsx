@@ -14,7 +14,7 @@ import { cn } from '../../../utils/cn';
 import PopupRenombrar from './PopupRenombrar';
 import type { NodoMenu } from './tipos';
 
-export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir }: {
+export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, arrastre }: {
   nodo: NodoMenu;
   /** Profundidad, solo para la sangría. */
   nivel?: number;
@@ -22,6 +22,15 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir }
   /** Ruta que se está mirando ahora, para marcar la rama. */
   activo?: string;
   onAbrir: (nodo: NodoMenu) => void;
+  /** Colocar a mano dentro de su sección. Solo lo reciben las filas de primer
+   *  nivel: lo que hay DENTRO de un proyecto ya viene con su propio orden
+   *  (una tarea se ordena en su tablero, no aquí). */
+  arrastre?: {
+    onEmpezar: () => void;
+    onSoltar: () => void;
+    onFin: () => void;
+    encima: boolean;
+  };
 }) {
   const [abierta, setAbierta] = useState(false);
   const [hijos, setHijos] = useState<NodoMenu[] | null>(nodo.hijos ?? null);
@@ -68,7 +77,19 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir }
   return (
     <div>
       <div
+        // PINCHAR Y ARRASTRAR PARA COLOCAR (Eugenio, 2026-08-20). Con el
+        // arrastre del propio navegador: son unas pocas filas por sección, no
+        // hace falta traer una librería para esto.
+        draggable={!!arrastre}
+        onDragStart={arrastre ? e => { arrastre.onEmpezar(); e.dataTransfer.effectAllowed = 'move'; } : undefined}
+        onDragOver={arrastre ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
+        onDrop={arrastre ? e => { e.preventDefault(); arrastre.onSoltar(); } : undefined}
+        onDragEnd={arrastre ? () => arrastre.onFin() : undefined}
         className={cn('group flex items-center gap-1 rounded-lg transition-colors',
+          arrastre && 'cursor-grab active:cursor-grabbing',
+          // Una línea arriba marca dónde va a caer: sin ella, arrastrar es
+          // adivinar.
+          arrastre?.encima && 'border-t-2 border-emerald-400',
           esActiva ? 'bg-emerald-50' : 'hover:bg-slate-100')}
         style={{ paddingLeft: nivel * 10 }}
       >
