@@ -687,6 +687,53 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * PUT /api/products/:id/proyecto  { proyecto_id }
+   * Mete un producto en un proyecto, o lo saca (`null`). Es lo que hace que la
+   * sección «Productos» del menú pueda colgar de cada proyecto (2026-08-20).
+   *
+   * DOS COMPROBACIONES, no una: que el producto sea tuyo Y que el proyecto de
+   * destino también. Sin la segunda, cualquiera podría colgar sus productos del
+   * proyecto de otra persona.
+   */
+  app.put('/api/products/:id/proyecto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const pr = await db.execute(sql`
+        SELECT created_by FROM products WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!pr.rows.length) return res.status(404).json({ error: 'Ese producto no existe.' });
+      const esAdmin = (req.user.roleLevel ?? 0) >= ROLE.ADMIN;
+      if ((pr.rows[0] as any).created_by !== req.user.id && !esAdmin) {
+        return res.status(403).json({ error: 'Ese producto no es tuyo.' });
+      }
+
+      const pedido = typeof req.body?.proyecto_id === 'string' && req.body.proyecto_id.trim()
+        ? req.body.proyecto_id.trim() : null;
+      let destino: string | null = null;
+      if (pedido) {
+        const p = await db.execute(sql`
+          SELECT creador_user_id FROM proyectos WHERE id = ${pedido} AND archived_at IS NULL
+        `);
+        if (!p.rows.length) return res.status(404).json({ error: 'Ese proyecto no existe.' });
+        if ((p.rows[0] as any).creador_user_id !== req.user.id && !esAdmin) {
+          return res.status(403).json({ error: 'Ese proyecto no es tuyo.' });
+        }
+        destino = pedido;
+      }
+
+      await db.execute(sql`
+        UPDATE products SET proyecto_id = ${destino},
+          version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, proyecto_id: destino });
+    } catch (e: any) {
+      console.error('product proyecto error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/products', async (req: Request, res: Response) => {
     try {
       const { territory_id, objective_id, indicator_id, challenge_id, category, kind, q } = req.query as any;
