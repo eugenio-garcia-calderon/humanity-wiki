@@ -3,11 +3,12 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
-  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes,
+  Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import WindowContent from '../components/knowledge/WindowContent';
+import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
@@ -118,6 +119,8 @@ export default function Documento() {
   // Fase 2 —
   const [portada, setPortada] = useState<string | null>(null);
   const [icono, setIcono] = useState<string | null>(null);
+  const iconoFileRef = useRef<HTMLInputElement>(null);
+  const [subiendoIcono, setSubiendoIcono] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
   const [arrastrando, setArrastrando] = useState<string | null>(null);   // id del bloque en vuelo
   const [sobreBloque, setSobreBloque] = useState<string | null>(null);   // id del bloque bajo el cursor
@@ -1193,10 +1196,13 @@ export default function Documento() {
           <div className="relative inline-block">
             <button
               onClick={() => editable && setEligiendoIcono(v => !v)}
-              className={cn('text-5xl leading-none mb-2', editable && 'hover:scale-110 transition-transform')}
+              className={cn('block mb-2', editable && 'hover:scale-110 transition-transform')}
               title={editable ? 'Cambiar icono' : undefined}
             >
-              {icono}
+              {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
+                  2026-08-20). Se distinguen mirando el valor, no con una
+                  columna aparte que pudiera contradecirlo. */}
+              <IconoElemento valor={icono} tamano={56} className="rounded-xl" />
             </button>
           </div>
         )}
@@ -1216,6 +1222,28 @@ export default function Documento() {
                       <button key={e} onClick={() => { setIcono(e); setEligiendoIcono(false); programarGuardado(); }}
                         className="text-lg hover:scale-125 transition-transform">{e}</button>
                     ))}
+                    {/* …o una imagen tuya, por la misma ruta de subida que
+                        usa todo lo demás. */}
+                    <input ref={iconoFileRef} type="file" accept="image/*" className="hidden"
+                      onChange={async e => {
+                        const f = e.target.files?.[0];
+                        e.target.value = '';
+                        if (!f) return;
+                        setSubiendoIcono(true);
+                        try {
+                          const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+                            method: 'POST', credentials: 'include',
+                            headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+                          });
+                          const j = await r.json();
+                          if (r.ok && j.url) { setIcono(j.url); setEligiendoIcono(false); programarGuardado(); }
+                        } finally { setSubiendoIcono(false); }
+                      }} />
+                    <button onClick={() => iconoFileRef.current?.click()} disabled={subiendoIcono}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-slate-200 text-[10px] font-bold text-slate-500 hover:border-emerald-300 hover:text-emerald-700 disabled:opacity-40 ml-1">
+                      {subiendoIcono ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
+                      Imagen
+                    </button>
                     <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
                       className="text-[10px] font-bold text-slate-400 hover:text-rose-500 ml-1">Quitar</button>
                   </>

@@ -7,6 +7,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
+import IconoElemento from '../components/ui/Icono';
+import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
 // PROYECTOS DE CADA PERSONA (2026-08-08, petición del usuario)
@@ -79,7 +81,7 @@ export function Proyectos() {
                     </span>
                   </div>
                   <p className="text-lg font-black text-slate-900 leading-tight flex items-center gap-1.5">
-                    {p.icono && <span className="text-lg leading-none shrink-0">{p.icono}</span>}
+                    <IconoElemento valor={p.icono} tamano={20} />
                     <span>{p.titulo}</span>
                   </p>
                   {p.descripcion && <p className="text-xs text-slate-500 leading-relaxed mt-1 line-clamp-2">{p.descripcion}</p>}
@@ -197,6 +199,7 @@ export function Proyecto() {
   const [creando, setCreando] = useState<string | null>(null);
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
+  const [renombrando, setRenombrando] = useState(false);
 
   /** Solo el dueño (o un administrador) toca el proyecto. */
   const puedoEditar = !!user && !!proyecto
@@ -261,6 +264,18 @@ export function Proyecto() {
       {/* QUITAR EL PROYECTO. Se pregunta antes, y se dice EXACTAMENTE qué pasa
           con lo de dentro: la sorpresa que nadie quiere es descubrir que
           archivar la carpeta se llevó por delante meses de trabajo. */}
+      {renombrando && proyecto && (
+        <PopupRenombrar
+          tipo="proyecto" id={proyecto.id}
+          nombre={proyecto.titulo} icono={proyecto.icono}
+          onHecho={(n, i) => {
+            setProyecto((x: any) => ({ ...x, titulo: n, icono: i }));
+            window.dispatchEvent(new Event('humanity:menu-cambiado'));
+          }}
+          onCerrar={() => setRenombrando(false)}
+        />
+      )}
+
       {borrando && (
         <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
           onClick={() => !quitando && setBorrando(false)}>
@@ -334,9 +349,21 @@ export function Proyecto() {
               imagen/icono de cada elemento aparezca también en la página
               cuando se abre, junto al título en la parte superior»). Se
               reconoce la cosa igual desde el menú que desde dentro. */}
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
-            {proyecto.icono && <span className="text-3xl leading-none shrink-0">{proyecto.icono}</span>}
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2.5 group/tit">
+            <IconoElemento valor={proyecto.icono} tamano={36} className="rounded-lg" />
             <span>{proyecto.titulo}</span>
+            {/* CAMBIAR NOMBRE E ICONO DESDE LA PROPIA PÁGINA (Eugenio,
+                2026-08-20: «que tanto el título como el icono se puedan
+                modificar no solo desde el menú sino también desde la página»).
+                Es el MISMO popup del menú: renombrar algo es lo mismo se haga
+                desde donde se haga. */}
+            {puedoEditar && (
+              <button onClick={() => setRenombrando(true)}
+                title="Cambiar el nombre o el icono"
+                className="p-1.5 rounded-lg text-slate-300 hover:text-emerald-700 hover:bg-slate-100 opacity-0 group-hover/tit:opacity-100 focus:opacity-100 transition-all">
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
           </h1>
           {proyecto.descripcion && <p className="text-sm text-slate-500 mt-1.5">{proyecto.descripcion}</p>}
           {proyecto.vision && (

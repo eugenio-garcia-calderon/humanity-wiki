@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { ChevronRight, Folder, MoreHorizontal } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import PopupRenombrar from './PopupRenombrar';
+import IconoElemento from '../../ui/Icono';
 import type { NodoMenu } from './tipos';
 
 export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, arrastre }: {
@@ -70,7 +71,7 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
         {/* Un 25 % más grandes (Eugenio, 2026-08-20): 16 px se quedaban
             pequeños, y plegado el menú el icono es lo ÚNICO que se ve. */}
         {icono
-          ? <span className="text-[16px] leading-none">{icono}</span>
+          ? <IconoElemento valor={icono} tamano={20} />
           : <Icono className="w-5 h-5" />}
       </button>
     );
@@ -117,7 +118,7 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
           className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left"
         >
           {icono
-            ? <span className="w-5 shrink-0 text-center text-[16px] leading-none">{icono}</span>
+            ? <IconoElemento valor={icono} tamano={20} />
             : <Icono className={cn('w-5 h-5 shrink-0', esActiva ? 'text-emerald-600' : 'text-slate-400')} />}
           <span className={cn('flex-1 truncate text-[13px] font-bold',
             esActiva ? 'text-emerald-700' : 'text-slate-700')}>

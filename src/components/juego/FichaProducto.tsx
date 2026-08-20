@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Card, Button } from '../ui/core';
 import { cn } from '../../utils/cn';
+import IconoElemento from '../ui/Icono';
 
 /** Un bloque de la pizarra. Mismo molde que el lienzo de una tarea. */
 export interface BloqueProducto {
@@ -178,7 +179,7 @@ export default function FichaProducto({ producto, puedeEditar, onCerrar, onGuard
               {/* El icono que le hayas puesto en el menú manda sobre el
                   genérico (Eugenio, 2026-08-20). */}
               {producto.icono
-                ? <span className="text-base leading-none shrink-0">{producto.icono}</span>
+                ? <IconoElemento valor={producto.icono} tamano={18} />
                 : <ShoppingBag className="w-4 h-4 text-emerald-600 shrink-0" />}
               {producto.name}
             </p>

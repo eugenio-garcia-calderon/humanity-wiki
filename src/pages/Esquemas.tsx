@@ -15,6 +15,7 @@ import { LayoutGrid, Plus, Search, Loader2, Image as ImageIcon, User, Eye, X } f
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
+import { esImagen } from '../components/ui/Icono';
 
 interface Esquema {
   id: string;
@@ -39,6 +40,11 @@ function Portada({ l }: { l: Esquema }) {
   // El icono que le hayas puesto manda sobre la portada automática: es una
   // decisión tuya y las automáticas son una suposición nuestra.
   if (l.icono) {
+    // Si el icono es una IMAGEN, es la portada entera; si es un emoji, va
+    // centrado sobre el fondo.
+    if (esImagen(l.icono)) {
+      return <img src={l.icono} alt="" loading="lazy" className="w-full h-full object-cover" />;
+    }
     return (
       <div className="w-full h-full grid place-items-center bg-slate-50">
         <span className="text-5xl leading-none">{l.icono}</span>

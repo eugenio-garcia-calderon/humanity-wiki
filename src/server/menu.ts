@@ -100,9 +100,31 @@ export function registerMenuRoutes(app: Express, db: any) {
 
       const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : null;
       if (nombre !== null && !nombre) return res.status(400).json({ error: 'El nombre no puede quedar vacío.' });
-      // Un emoji y poco más: si cupiera texto largo, el menú se rompería.
-      const icono = req.body?.icono === null ? null
-        : typeof req.body?.icono === 'string' ? req.body.icono.trim().slice(0, 8) : undefined;
+      // UN EMOJI O UNA IMAGEN. El tope era de 8 caracteres, pensado solo para
+      // emojis, y partía las direcciones de las imágenes por la mitad
+      // («/uploads» y a volar) — visto al añadir las imágenes, 2026-08-20.
+      //
+      // Y se comprueba QUÉ es: una dirección solo vale si es de aquí
+      // (`/uploads/…`) o https. Sin esto, cualquiera podría dejar guardado un
+      // `javascript:` o la dirección de un rastreador ajeno como icono, y el
+      // menú lo pintaría en todas partes.
+      const icono = (() => {
+        if (req.body?.icono === null) return null;
+        if (typeof req.body?.icono !== 'string') return undefined;
+        const v = req.body.icono.trim();
+        if (!v) return null;
+        if (v.startsWith('/')) return v.startsWith('/uploads/') ? v.slice(0, 300) : undefined;
+        if (/^https?:/i.test(v)) return v.startsWith('https://') ? v.slice(0, 300) : undefined;
+        // Un emoji: corto de verdad. Si cupiera texto largo aquí, el menú se
+        // rompería en cuanto alguien pegara un párrafo.
+        //
+        // Y NADA QUE PAREZCA UN ESQUEMA DE DIRECCIÓN. Un «javascript:…» aquí
+        // se pintaría como texto y no haría daño —el icono nunca se mete en un
+        // `href`—, pero guardar basura que parece un enlace es pedir que algún
+        // día alguien la trate como tal. Se rechaza y punto.
+        if (v.includes(':') || v.includes('<')) return undefined;
+        return v.slice(0, 8);
+      })();
 
       if (nombre !== null) {
         await db.execute(sql`
