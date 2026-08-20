@@ -12,9 +12,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ListChecks, Search, Loader2, ExternalLink, Lock, Circle, CircleDot,
-  CheckCircle2, ChevronDown, ChevronRight,
+  CheckCircle2, ChevronDown, ChevronRight, Plus,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { TextoEditable } from '../components/tablero/TableroKanban';
 
 type Estado = 'por_hacer' | 'en_curso' | 'hecho';
 
@@ -105,6 +106,58 @@ export default function Tareas() {
   // del que salió.
   const [encima, setEncima] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+
+  /** Cambia el título de una tarea desde el listado (Eugenio: «permitir editar
+   *  y crear las tareas desde la página de tareas»). Se pinta al momento y se
+   *  guarda detrás: corregir una palabra no debe hacerte esperar. */
+  const renombrar = async (id: string, titulo: string) => {
+    setProyectos(ps => ps.map(p => ({ ...p, tareas: p.tareas.map(t => (t.id === id ? { ...t, titulo } : t)) })));
+    try {
+      const r = await fetch(`/api/roadmap/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ titulo }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar.');
+    } catch (e: any) {
+      setAviso(e.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
+
+  /** Pasar una tarea al siguiente estado con un clic en su círculo:
+   *  por hacer → en curso → hecha → por hacer. */
+  const siguienteEstado = async (id: string, actual: Estado) => {
+    const orden: Estado[] = ['por_hacer', 'en_curso', 'hecho'];
+    const estado = orden[(orden.indexOf(actual) + 1) % orden.length];
+    setProyectos(ps => ps.map(p => ({ ...p, tareas: p.tareas.map(t => (t.id === id ? { ...t, estado } : t)) })));
+    try {
+      const r = await fetch(`/api/roadmap/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ estado }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar.');
+    } catch (e: any) {
+      setAviso(e.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
+
+  /** Crear una tarea desde el listado, en el proyecto donde pulses. */
+  const crearEn = async (proyectoId: string | null, titulo: string) => {
+    if (!titulo.trim()) return;
+    try {
+      const r = await fetch('/api/roadmap', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ proyecto_id: proyectoId, titulo: titulo.trim(), grupo: 'producto' }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido crear.');
+      const d = await (await fetch('/api/tareas', { credentials: 'include' })).json();
+      setProyectos(Array.isArray(d?.proyectos) ? d.proyectos : []);
+    } catch (e: any) {
+      setAviso(e.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
 
   const leerElemento = (e: React.DragEvent) => {
     const crudo = e.dataTransfer.getData('application/x-humanity-elemento');
@@ -267,12 +320,22 @@ export default function Tareas() {
                       const Icono = e.icono;
                       return (
                         <li key={t.id} className="flex items-start gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                          <Icono className={cn('w-4 h-4 mt-0.5 shrink-0', e.color)} />
+                          <button
+                            onClick={() => p.mio && siguienteEstado(t.id, t.estado)}
+                            disabled={!p.mio}
+                            title={p.mio ? 'Cambiar de estado' : undefined}
+                            className={cn('mt-0.5 shrink-0 rounded-full', p.mio && 'hover:scale-110 transition-transform')}
+                          >
+                            <Icono className={cn('w-4 h-4', e.color)} />
+                          </button>
                           <div className="min-w-0 flex-1">
-                            <p className={cn('text-sm font-bold leading-snug',
-                              t.estado === 'hecho' ? 'text-slate-400 line-through' : 'text-slate-800')}>
-                              {t.titulo}
-                            </p>
+                            <TextoEditable
+                              valor={t.titulo}
+                              editable={!!p.mio}
+                              onGuardar={n => n && renombrar(t.id, n)}
+                              className={cn('text-sm font-bold leading-snug',
+                                t.estado === 'hecho' ? 'text-slate-400 line-through' : 'text-slate-800')}
+                            />
                             {t.resumen && (
                               <p className="text-[11px] text-slate-400 leading-snug line-clamp-1 mt-0.5">{t.resumen}</p>
                             )}
@@ -305,6 +368,14 @@ export default function Tareas() {
                         </li>
                       );
                     })}
+                    {/* AÑADIR AQUÍ MISMO (2026-08-20: «permitir editar y crear
+                        las tareas desde la página de tareas»). Sin abrir el
+                        tablero ni cambiar de sitio. */}
+                    {p.mio && (
+                      <li className="px-4 py-2 border-t border-slate-50">
+                        <NuevaTareaEnLinea onCrear={t => crearEn(p.esHojaDeRuta ? null : p.id, t)} />
+                      </li>
+                    )}
                   </ul>
                 )}
               </section>
@@ -313,5 +384,30 @@ export default function Tareas() {
         </div>
       )}
     </div>
+  );
+}
+
+/** Una línea para añadir una tarea sin salir del listado. Se queda abierta
+ *  tras crear: cuando apuntas una cosa, casi siempre apuntas dos. */
+function NuevaTareaEnLinea({ onCrear }: { onCrear: (titulo: string) => void }) {
+  const [texto, setTexto] = useState('');
+  return (
+    <form
+      onSubmit={e => { e.preventDefault(); if (texto.trim()) { onCrear(texto); setTexto(''); } }}
+      className="flex items-center gap-2"
+    >
+      <Plus className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+      <input
+        value={texto}
+        onChange={e => setTexto(e.target.value)}
+        placeholder="Añadir una tarea…"
+        className="flex-1 min-w-0 text-sm text-slate-700 bg-transparent placeholder:text-slate-300 focus:outline-none py-0.5"
+      />
+      {texto.trim() && (
+        <button type="submit" className="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold">
+          Añadir
+        </button>
+      )}
+    </form>
   );
 }
