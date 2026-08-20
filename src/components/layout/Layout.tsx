@@ -41,6 +41,27 @@ const SECCIONES_PIE = [
 /** Para buscar el icono de una ventana abierta por su ruta. */
 const TODAS_SECCIONES = [...SECCIONES_COMUN, ...SECCIONES_TUYO, ...SECCIONES_PIE];
 
+/** Qué icono le toca a una ruta. Se mira primero la coincidencia exacta (una
+ *  herramienta abierta en su portada) y después el PREFIJO, que es lo que
+ *  identifica una cosa concreta: `/esquemas/ceuta` es un esquema. */
+function iconoDeRuta(ruta: string) {
+  const camino = ruta.split('?')[0];
+  const exacta = TODAS_SECCIONES.find(sec => sec.to === camino);
+  if (exacta) return exacta.icon;
+  const porPrefijo: Array<[string, any]> = [
+    ['/personas/', User], ['/proyectos/', FolderKanban], ['/paginas/', FileText],
+    ['/esquemas/', Globe2], ['/mapas/', MapIcon], ['/documentos/', FileText],
+    ['/organizaciones/', Users2],
+  ];
+  for (const [pre, icono] of porPrefijo) if (camino.startsWith(pre)) return icono;
+  if (camino === '/configuracion') return Settings;
+  if (camino === '/admin/usuarios') return Users2;
+  if (camino.startsWith('/tareas')) return ListChecks;
+  if (camino.startsWith('/paginas')) return FileText;
+  if (camino.startsWith('/esquemas')) return Globe2;
+  return AppWindow;
+}
+
 export default function Layout() {
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -118,6 +139,9 @@ export default function Layout() {
     const alMensaje = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
       const t = (e.data || {}).humanity;
+      // `humanity:ruta` NO se reenvía aquí: hay que saber de qué ventana viene,
+      // y eso solo lo sabe quien tiene los marcos (el gestor de ventanas), que
+      // lo escucha por su cuenta comparando `event.source` con cada iframe.
       if (t !== 'humanity:juego-contexto' && t !== 'humanity:asistente-focus') return;
       window.dispatchEvent(new CustomEvent(t, { detail: (e.data || {}).detalle }));
     };
@@ -224,14 +248,12 @@ export default function Layout() {
         {ventanasAbiertas.length > 0 && (
           <div className="flex items-center gap-1 ml-1 overflow-x-auto min-w-0">
             {ventanasAbiertas.map((v, i) => {
-              // Las de la cuenta no están en TODAS_SECCIONES (su dirección
-              // lleva tu id dentro), así que se reconocen por el principio.
-              const Icono = v.clase === 'navegador'
-                ? Globe
-                : v.destino.startsWith('/personas/') ? User
-                  : v.destino === '/configuracion' ? Settings
-                    : v.destino === '/admin/usuarios' ? Users2
-                      : (TODAS_SECCIONES.find(sec => sec.to === v.destino)?.icon || AppWindow);
+              // EL ICONO DE LA PESTAÑA ES EL DE LO QUE HAY DENTRO AHORA
+              // (Eugenio, 2026-08-20: «que la ventana muestre el icono de la
+              // página, grafo o proyecto en el que está específicamente»), no
+              // el de dónde nació — como el favicon de una pestaña de Chrome,
+              // que cambia al navegar. Por eso se mira `ruta` y no `destino`.
+              const Icono = v.clase === 'navegador' ? Globe : iconoDeRuta(v.ruta || v.destino);
               return (
                 <div
                   key={v.id}
@@ -325,6 +347,7 @@ export default function Layout() {
  * nombres: nada de dentro puede pedirle a la app de fuera ninguna otra cosa.
  */
 function PuenteAlAsistente() {
+  const location = useLocation();
   useEffect(() => {
     const reenviar = (e: Event) => {
       try {
@@ -341,5 +364,25 @@ function PuenteAlAsistente() {
       window.removeEventListener('humanity:asistente-focus', reenviar);
     };
   }, []);
+
+  // Y la RUTA: cada vez que la página de dentro navega, se lo dice a la de
+  // fuera. Es lo que llena la barra de direcciones de la ventana y lo que le
+  // da su historial de atrás/adelante — como una pestaña de un navegador.
+  useEffect(() => {
+    try {
+      // SIN el `embed=1`: es una marca nuestra de «vas dentro de un marco», no
+      // parte de la dirección. Si viajara, la de fuera la volvería a añadir al
+      // reconstruir el `src` y la ventana se recargaría en bucle, acumulando
+      // «&embed=1» sin fin (visto en pruebas, 2026-08-20).
+      const limpio = new URLSearchParams(window.location.search);
+      limpio.delete('embed');
+      const cola = limpio.toString();
+      window.parent?.postMessage({
+        humanity: 'humanity:ruta',
+        detalle: window.location.pathname + (cola ? `?${cola}` : ''),
+      }, window.location.origin);
+    } catch { /* sin puente */ }
+  }, [location.pathname, location.search]);
+
   return null;
 }

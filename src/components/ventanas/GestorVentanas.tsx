@@ -27,6 +27,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Navegador from './Navegador';
+import BarraDireccion from './BarraDireccion';
 import { publicarVentanas, publicarPaginaWeb, type AbrirVentana } from './bus';
 
 export interface Ventana {
@@ -38,6 +39,14 @@ export interface Ventana {
   destino: string;
   x: number; y: number; an: number; al: number;
   z: number;
+  /** Dónde está AHORA la ventana. `destino` no se toca: es de dónde nació, y
+   *  es con lo que se casa al volver a abrirla desde el menú. Separarlos es lo
+   *  que impide que el `src` del marco cambie y la ventana se recargue sola. */
+  ruta?: string;
+  /** El historial de esta ventana, como el de una pestaña de navegador, y en
+   *  qué punto de él estás. Es lo que dan las flechas de atrás y adelante. */
+  historia?: string[];
+  pos?: number;
   minimizada?: boolean;
   maximizada?: boolean;
 }
@@ -87,7 +96,7 @@ export default function GestorVentanas({ onPaginaNavegador }: {
       const vivas = ventanas.filter(v => !v.minimizada);
       const zMax = vivas.length ? Math.max(...vivas.map(v => v.z)) : -1;
       publicarVentanas(ventanas.map(v => ({
-        id: v.id, titulo: v.titulo, clase: v.clase, destino: v.destino,
+        id: v.id, titulo: v.titulo, clase: v.clase, destino: v.destino, ruta: v.ruta,
         minimizada: !!v.minimizada, delante: !v.minimizada && v.z === zMax,
       })));
     };
@@ -104,6 +113,68 @@ export default function GestorVentanas({ onPaginaNavegador }: {
 
   const cambiar = useCallback((id: string, patch: Partial<Ventana>) => {
     setVentanas(vs => vs.map(v => (v.id === id ? { ...v, ...patch } : v)));
+  }, []);
+
+  /** Los marcos vivos, para saber de QUÉ ventana viene cada aviso de ruta y
+   *  para poder mandarle atrás/adelante. */
+  const marcos = useRef<Record<string, HTMLIFrameElement | null>>({});
+  /** La dirección con la que ARRANCA cada marco. Se calcula una vez y no se
+   *  vuelve a tocar: si el `src` cambiara al navegar por dentro, React
+   *  recargaría el marco entero en cada paso — y el Mundo 3D empezaría de cero. */
+  const srcInicial = useRef<Record<string, string>>({});
+  const srcDe = (v: Ventana) => {
+    if (!srcInicial.current[v.id]) {
+      srcInicial.current[v.id] = `${v.destino}${v.destino.includes('?') ? '&' : '?'}embed=1`;
+    }
+    return srcInicial.current[v.id];
+  };
+  /** Cuando somos NOSOTROS quienes movemos el historial, el aviso de ruta que
+   *  llega después no es una página nueva: es el salto que acabamos de pedir.
+   *  Sin esta marca, ir atrás añadiría una entrada más en vez de retroceder. */
+  const saltando = useRef<Record<string, 'atras' | 'adelante' | undefined>>({});
+
+  // La ruta que publica cada ventana desde dentro (ver el puente en Layout).
+  useEffect(() => {
+    const alMensaje = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if ((e.data || {}).humanity !== 'humanity:ruta') return;
+      const ruta = String((e.data || {}).detalle || '');
+      // ¿De qué ventana? La que tenga ese `contentWindow`.
+      const id = Object.keys(marcos.current)
+        .find(k => marcos.current[k]?.contentWindow === e.source);
+      if (!id || !ruta) return;
+
+      setVentanas(vs => vs.map(v => {
+        if (v.id !== id) return v;
+        const historia = v.historia?.length ? v.historia : [v.destino];
+        const pos = typeof v.pos === 'number' ? v.pos : historia.length - 1;
+        const salto = saltando.current[id];
+        if (salto) {
+          saltando.current[id] = undefined;
+          return { ...v, ruta, pos: salto === 'atras' ? Math.max(0, pos - 1) : Math.min(historia.length - 1, pos + 1) };
+        }
+        if (historia[pos] === ruta) return { ...v, ruta };
+        // Página nueva: se corta lo que hubiera «hacia delante», como en
+        // cualquier navegador.
+        const nueva = [...historia.slice(0, pos + 1), ruta];
+        return { ...v, ruta, historia: nueva, pos: nueva.length - 1 };
+      }));
+    };
+    window.addEventListener('message', alMensaje);
+    return () => window.removeEventListener('message', alMensaje);
+  }, []);
+
+  /** Atrás y adelante de una ventana. Se usa el historial DEL MARCO (no se
+   *  recarga el `src`): recargar volvería a montar lo de dentro y el Mundo 3D
+   *  empezaría de cero en cada paso. */
+  const irEnHistoria = useCallback((id: string, sentido: 'atras' | 'adelante') => {
+    const marco = marcos.current[id];
+    if (!marco?.contentWindow) return;
+    saltando.current[id] = sentido;
+    try {
+      if (sentido === 'atras') marco.contentWindow.history.back();
+      else marco.contentWindow.history.forward();
+    } catch { saltando.current[id] = undefined; }
   }, []);
 
   const cerrar = useCallback((id: string) => {
@@ -342,9 +413,30 @@ export default function GestorVentanas({ onPaginaNavegador }: {
               decir, el arreglo del teclado no estaba haciendo nada hasta que se
               vio ese aviso (2026-08-20). Tiene que ser `true` o no estar. */}
           <div
-            className="flex-1 min-h-0 relative bg-white"
+            className="flex-1 min-h-0 flex flex-col bg-white"
             inert={v.z === Math.max(...ventanas.filter(x => !x.minimizada).map(x => x.z)) ? undefined : true}
           >
+            {/* LA BARRA DE DIRECCIONES, solo en las ventanas de la app: el
+                Navegador ya trae la suya, y poner dos sería absurdo. */}
+            {v.clase === 'app' && (
+              <BarraDireccion
+                ruta={v.ruta || v.destino}
+                onNombre={n => { if (n && n !== v.titulo) cambiar(v.id, { titulo: n }); }}
+                puedeAtras={(v.pos ?? 0) > 0}
+                puedeAdelante={(v.pos ?? 0) < ((v.historia?.length ?? 1) - 1)}
+                onAtras={() => irEnHistoria(v.id, 'atras')}
+                onAdelante={() => irEnHistoria(v.id, 'adelante')}
+                onRecargar={() => { const m = marcos.current[v.id]; try { m?.contentWindow?.location.reload(); } catch { /* ya está */ } }}
+                onIr={destino => {
+                  // Ir a un trozo del camino navega DENTRO del marco: así no se
+                  // recarga la app entera ni se pierde lo que haya abierto.
+                  const m = marcos.current[v.id];
+                  try { m?.contentWindow?.location.assign(`${destino}${destino.includes('?') ? '&' : '?'}embed=1`); }
+                  catch { /* de otro origen: no debería pasar */ }
+                }}
+              />
+            )}
+          <div className="flex-1 min-h-0 relative bg-white">
             {v.clase === 'navegador'
               ? <Navegador inicial={v.destino}
                   onTitulo={t => cambiar(v.id, { titulo: t })}
@@ -353,12 +445,14 @@ export default function GestorVentanas({ onPaginaNavegador }: {
                 <iframe
                   // `embed=1`: la página SOLA, sin la cabecera de la app dentro
                   // de la ventana (el fallo de la captura de Eugenio).
-                  src={`${v.destino}${v.destino.includes('?') ? '&' : '?'}embed=1`}
+                  src={srcDe(v)}
                   title={v.titulo}
                   className="w-full h-full border-0"
+                  ref={el => { marcos.current[v.id] = el; }}
                   allow="autoplay; fullscreen; xr-spatial-tracking; clipboard-write"
                 />
               )}
+            </div>
           </div>
 
           {/* Esquina de tamaño */}
