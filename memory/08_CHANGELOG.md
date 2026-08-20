@@ -1848,3 +1848,32 @@ and six backspaces removed exactly «stamos».
 icon (the icon rendered fine — the project simply had none, so nothing appeared
 and there was nowhere to click to add one), and «Explorar» is now
 «Publicaciones» in the menu.
+
+## 2026-08-20 — «Editar menú»: the sidebar sections are yours now
+
+Eugenio: «un botón de configuración del menú izquierdo, abajo a la izquierda,
+donde permita reordenar las categorías y ocultar categorías enteras o
+visibilizarlas si estaban ocultas, y cambiar el nombre e icono. El botón pondrá
+"editar menú" con un símbolo de rueda dentada.»
+
+The five sections were five hand-written JSX blocks in a fixed order. They are
+now a list: `SECCIONES_BASE` says which exist and their factory name/icon, and
+`CONTENIDOS` says what each one renders — deliberately separate, so reordering
+or hiding a section never touches what is inside it.
+
+Order, name, emoji and hidden-ness live in `ui_settings.seccionesMenu`, like the
+row order already did: it is **your** preference and changes nobody else's menu.
+Only what you actually changed is stored, so a section you never renamed keeps
+following the platform's name if it ever changes.
+
+`PopupEditarMenu` applies every change **live, behind the open dialog** — no
+save button. Reordering blind and closing to check would be guessing. Hiding
+removes nothing: the section and everything in it come back with one click,
+which is what makes hiding safe to try.
+
+`SeccionMenu` now accepts a string icon (your emoji) as well as a component.
+
+Verified live: hiding Productos removed it from the sidebar, dragging Personas
+to the top reordered it, and renaming Áreas to «Mis áreas» with a 🎯 showed up
+immediately and persisted to the database. The test configuration was then
+deleted so Eugenio's menu is exactly as he left it.
