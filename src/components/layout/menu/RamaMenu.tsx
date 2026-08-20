@@ -83,8 +83,27 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
         // PINCHAR Y ARRASTRAR PARA COLOCAR (Eugenio, 2026-08-20). Con el
         // arrastre del propio navegador: son unas pocas filas por sección, no
         // hace falta traer una librería para esto.
-        draggable={!!arrastre}
-        onDragStart={arrastre ? e => { arrastre.onEmpezar(); e.dataTransfer.effectAllowed = 'move'; } : undefined}
+        // Arrastrable SIEMPRE que sea un elemento de verdad: además de
+        // colocarlo en el menú, se puede soltar en Tareas para crear una tarea
+        // ligada a él (Eugenio, 2026-08-20: «si arrastro un elemento del menú
+        // hacia la página de tareas automáticamente se cree una tarea ligada a
+        // ese elemento»).
+        draggable={!!arrastre || !!nodo.editable}
+        onDragStart={e => {
+          arrastre?.onEmpezar();
+          e.dataTransfer.effectAllowed = 'copyMove';
+          // Quién es, para quien lo recoja fuera del menú. Va en un tipo
+          // propio: así nada más de la página confunde este arrastre con un
+          // texto suelto.
+          if (nodo.editable) {
+            e.dataTransfer.setData('application/x-humanity-elemento', JSON.stringify({
+              tipo: nodo.editable.tipo,
+              id: nodo.editable.id,
+              label: nodo.label,
+              destino: nodo.destino || null,
+            }));
+          }
+        }}
         onDragOver={arrastre ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
         onDrop={arrastre ? e => { e.preventDefault(); arrastre.onSoltar(); } : undefined}
         onDragEnd={arrastre ? () => arrastre.onFin() : undefined}

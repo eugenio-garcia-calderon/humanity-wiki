@@ -154,6 +154,44 @@ export function registerMenuRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * GET /api/areas — los 14 objetivos con sus indicadores dentro (2026-08-20,
+   * petición de Eugenio: «en el menú crea una nueva categoría que sean áreas,
+   * y que aparezcan ahí los 14 objetivos con sus subobjetivos que ya
+   * desarrollamos en un inicio»).
+   *
+   * Los «subobjetivos» son los INDICADORES: la cadena de conocimiento de la
+   * plataforma es Territorio → Objetivo → Indicador → Marcador, y esos 98
+   * indicadores son los que ya estaban desarrollados. No se inventa un nivel
+   * nuevo llamado «subobjetivo» para decir lo mismo.
+   *
+   * SIN SESIÓN TAMBIÉN: las áreas son el mapa del conocimiento común, igual
+   * para todo el mundo, no algo de nadie.
+   */
+  app.get('/api/areas', async (_req: Request, res: Response) => {
+    try {
+      const [objetivos, indicadores] = await Promise.all([
+        db.execute(sql`
+          SELECT id, title FROM objectives WHERE archived_at IS NULL ORDER BY id
+        `),
+        db.execute(sql`
+          SELECT id, name, objective_id FROM indicators
+          WHERE archived_at IS NULL ORDER BY objective_id, name
+        `),
+      ]);
+      const porObjetivo = new Map<string, any[]>();
+      for (const i of indicadores.rows as any[]) {
+        if (!porObjetivo.has(i.objective_id)) porObjetivo.set(i.objective_id, []);
+        porObjetivo.get(i.objective_id)!.push({ id: i.id, nombre: i.name });
+      }
+      res.json((objetivos.rows as any[]).map(o => ({
+        id: o.id,
+        titulo: o.title,
+        indicadores: porObjetivo.get(o.id) || [],
+      })));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/menu', async (req: Request, res: Response) => {
     // Sin sesión el menú es solo herramientas: no hay proyectos «de nadie».
     if (!req.user) return res.json({ proyectos: [], productos: [], personas: [], organizaciones: [], gruposFavoritos: [] });

@@ -1747,3 +1747,44 @@ rule 3 of the router sent **every** message from a verified user to Claude.
 otherwise the platform context answers, as the prompt rules already required.
 Verified live: «¿Qué es un indicador?» now lands on the free fast model.
 Router unit tests: 13 cases green.
+
+## 2026-08-20 — Task board, phase 3: tags, projects, drag-from-menu, and Áreas
+
+The last four cards of Eugenio's **Humanity.Wiki** board.
+
+**Etiquetas editables, conectadas al filtro, con `@`.** A task's tag IS its
+`grupo` — the same thing the top filter uses and the same thing that names the
+rooms of a project's building in the Mundo 3D. No parallel «etiqueta» concept
+was invented: two lists saying the same thing eventually disagree, and then the
+board and the 3D world show different rooms. The group chip in the ficha became
+a dropdown (`SelectorEtiqueta`) that changes the tag or creates a new one, and
+typing `@algo` in a new card's title opens the list filtered by what you typed,
+with «Crear etiqueta «algo»» when nothing matches — picking one strips the
+`@algo` from the title, because the tag is already set and leaving the text
+would be noise. New tags persist into `proyectos.grupos`, so they appear in the
+top filter immediately. **Still one tag per task**, as before.
+
+**El proyecto de una tarea.** `SelectorProyecto` in the ficha moves a card to
+another project — the server already knew how (the Mundo 3D ficha used it), but
+the board had no way to ask. The list loads when the dropdown opens, not when
+the ficha does: almost no task ever moves.
+
+**Arrastrar del menú a Tareas.** Menu rows are now draggable whenever they are a
+real element, and carry `{tipo, id, label, destino}` in a private MIME type so
+nothing else on the page mistakes the drag for loose text. Each project section
+in `/tareas` is a drop target: dropping creates a task named after the element,
+inside that project, with an `enlace` block back to it (newly rendered in the
+ficha). Dropping a **person** also sets them as responsable — a person dragged
+onto tasks means a task *for* them.
+
+**Áreas.** New menu section with the 14 objectives, each expanding to its
+indicators. `GET /api/areas` (no session needed: the areas are the common
+knowledge map, not anybody's). The «subobjetivos» are the 98 indicators that
+already existed — the platform's chain is Objetivo → Indicador → Marcador, so
+no new level was invented to say the same thing.
+
+Verified live on a throwaway card: tag changed and created (and it showed up in
+the top filter as «Pruebas Claude 1»), `@dis` offered Diseño and stripped
+itself from the title, dragging «Meta Vida» onto a project section created the
+task with its link block, and Áreas expanded AGUA into Acceso/Calidad/Consumo/
+Disponibilidad. Test card deleted and the project's 6 groups restored.

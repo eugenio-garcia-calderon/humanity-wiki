@@ -33,6 +33,8 @@ export interface ItemTablero {
   responsable_nombre?: string | null;
   responsable_foto?: string | null;
   responsable_icono?: string | null;
+  /** Para pintar el proyecto sin esperar a la lista. */
+  proyecto_titulo?: string | null;
 }
 
 /** Los nombres que le haya puesto el proyecto a sus columnas. Solo rótulos:
@@ -40,7 +42,7 @@ export interface ItemTablero {
 export type NombresDeColumna = Partial<Record<'por_hacer' | 'en_curso' | 'hecho', string>>;
 
 export default function TableroKanban({
-  items, grupos, puedeEditar, onRecargar, onCrear, columnas, onColumnas,
+  items, grupos, puedeEditar, onRecargar, onCrear, columnas, onColumnas, onGrupos,
 }: {
   items: ItemTablero[];
   grupos: Grupo[];
@@ -52,6 +54,8 @@ export default function TableroKanban({
   columnas?: NombresDeColumna | null;
   /** Si se pasa, las columnas se pueden renombrar pinchando en su texto. */
   onColumnas?: (nombres: NombresDeColumna) => void;
+  /** Si se pasa, se pueden crear etiquetas nuevas desde el tablero. */
+  onGrupos?: (grupos: Grupo[]) => void;
 }) {
   const [filtro, setFiltro] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<ItemTablero | null>(null);
@@ -79,6 +83,22 @@ export default function TableroKanban({
   };
 
   useEffect(() => cancelarApertura, []);
+
+  /** Crea una etiqueta en el proyecto y la deja lista para usarse. Devuelve
+   *  su id, o el de la que ya existiera con ese nombre — dos etiquetas con el
+   *  mismo nombre y distinto color son un lío que no aporta nada. */
+  const crearEtiqueta = (nombre: string): string => {
+    const id = idDeEtiqueta(nombre);
+    const yaEsta = grupos.find(g => g.id === id || g.label.toLowerCase() === nombre.trim().toLowerCase());
+    if (yaEsta) return yaEsta.id;
+    const nueva: Grupo = {
+      id,
+      label: nombre.trim().slice(0, 40),
+      color: COLORES_ETIQUETA[grupos.length % COLORES_ETIQUETA.length],
+    };
+    onGrupos?.([...grupos, nueva]);
+    return id;
+  };
 
   /** Guarda el título nuevo de una tarjeta editada desde el tablero. */
   const guardarTitulo = async (id: string, titulo: string) => {
@@ -328,7 +348,9 @@ export default function TableroKanban({
         <FichaFuncionalidad
           item={abierta}
           grupo={grupoDe(abierta.grupo)}
+          grupos={grupos}
           puedeEditar={puedeEditar}
+          onCrearEtiqueta={onGrupos ? crearEtiqueta : undefined}
           onCerrar={() => setAbierta(null)}
           onGuardado={it => { setAbierta(it); onRecargar(); }}
         />
@@ -340,8 +362,10 @@ export default function TableroKanban({
 // ----------------------------------------------------------------------------
 // La ficha central de una funcionalidad
 // ----------------------------------------------------------------------------
-function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado }: {
-  item: ItemTablero; grupo: Grupo; puedeEditar: boolean;
+function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtiqueta, onCerrar, onGuardado }: {
+  item: ItemTablero; grupo: Grupo; grupos: Grupo[]; puedeEditar: boolean;
+  /** Crea una etiqueta nueva en el proyecto y devuelve su id. */
+  onCrearEtiqueta?: (nombre: string) => string;
   onCerrar: () => void; onGuardado: (it: ItemTablero) => void;
 }) {
   const [texto, setTexto] = useState('');
@@ -408,9 +432,13 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
         <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0"
           style={{ borderTopWidth: 4, borderTopColor: g.color }}>
           <div className="min-w-0 flex-1">
-            <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: g.color }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: g.color }} /> {g.label}
-            </span>
+            <SelectorEtiqueta
+              grupos={grupos}
+              valor={item.grupo}
+              puedeEditar={puedeEditar}
+              onElegir={id => guardar({ grupo: id })}
+              onCrear={onCrearEtiqueta ? nombre => guardar({ grupo: onCrearEtiqueta(nombre) }) : undefined}
+            />
             <TextoEditable
               valor={item.titulo}
               editable={puedeEditar}
@@ -461,6 +489,14 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
 
           <SelectorResponsable item={item} puedeEditar={puedeEditar} onGuardar={guardar} />
 
+          {/* A QUÉ PROYECTO PERTENECE (2026-08-20, petición de Eugenio:
+              «permite añadir personas y proyectos a las tareas»). Solo cuando
+              la tarjeta ya cuelga de un proyecto: las de la hoja de ruta de la
+              plataforma no se mudan a un proyecto de nadie. */}
+          {item.proyecto_id && (
+            <SelectorProyecto item={item} puedeEditar={puedeEditar} onGuardar={guardar} />
+          )}
+
           {/* Bloques de detalle */}
           <div className="space-y-3">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Detalle</p>
@@ -471,7 +507,19 @@ function FichaFuncionalidad({ item, grupo: g, puedeEditar, onCerrar, onGuardado 
             )}
             {bloques.map((b: any, i: number) => (
               <div key={i} className="group relative">
-                {b.tipo === 'imagen' ? (
+                {b.tipo === 'enlace' ? (
+                  /* DE DÓNDE SALIÓ ESTA TAREA (2026-08-20): lo deja el
+                     arrastre desde el menú. Es un enlace de vuelta al
+                     elemento —el producto, la página, la persona—, para que
+                     la tarea no quede huérfana de su origen. */
+                  <a
+                    href={b.url}
+                    className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{b.titulo || b.url}</span>
+                  </a>
+                ) : b.tipo === 'imagen' ? (
                   <figure className="rounded-2xl overflow-hidden border border-slate-200">
                     <img src={b.url} alt={b.pie || ''} className="w-full" />
                     {b.pie && <figcaption className="text-[10px] text-slate-400 px-3 py-1.5">{b.pie}</figcaption>}
@@ -759,6 +807,199 @@ function SelectorResponsable({ item, puedeEditar, onGuardar }: {
               {p.rol && <span className="text-slate-400 font-normal truncate">· {p.rol}</span>}
             </button>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// LAS ETIQUETAS DE UNA TAREA (2026-08-20, petición de Eugenio: «permitir editar
+// las etiquetas que se le da a cada tarea, y que esté conectado con el filtro
+// superior de etiquetas […] además hacer @algo para mencionar a una categoría,
+// abriéndose un desplegable de las que ya hay, y si no hay una con ese nombre,
+// se crea»).
+// ----------------------------------------------------------------------------
+// La etiqueta de una tarea ES su grupo: lo mismo que filtra la barra de arriba
+// y lo mismo que da nombre a las habitaciones del edificio en el Mundo 3D. Por
+// eso no se inventó un concepto nuevo «etiqueta» al lado del que ya existía:
+// habrían sido dos listas para decir lo mismo, y el día que se contradijeran,
+// el mundo 3D y el tablero enseñarían cosas distintas.
+//
+// UNA POR TAREA, como hasta hoy. Una tarea vive en una habitación, no en tres.
+
+/** La paleta de las etiquetas nuevas. Se reparten en orden para que dos
+ *  seguidas no salgan del mismo color. */
+const COLORES_ETIQUETA = ['#7c3aed', '#db2777', '#0284c7', '#16a34a', '#d97706', '#475569', '#dc2626', '#0891b2'];
+
+/** «Diseño de la app» → «diseno-de-la-app». Sin tildes ni espacios: el id de
+ *  un grupo viaja en el JSON del tablero y en las salas del Mundo 3D. */
+export const idDeEtiqueta = (nombre: string) =>
+  nombre.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+
+function SelectorEtiqueta({ grupos, valor, puedeEditar, onElegir, onCrear }: {
+  grupos: Grupo[];
+  valor: string;
+  puedeEditar: boolean;
+  onElegir: (id: string) => void;
+  /** Crea una etiqueta nueva en el proyecto y la devuelve ya elegida. */
+  onCrear?: (nombre: string) => void;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [nueva, setNueva] = useState('');
+  const g = grupos.find(x => x.id === valor) || { id: valor, label: valor, color: '#64748b' };
+
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = () => { setAbierto(false); setNueva(''); };
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [abierto]);
+
+  const crear = () => {
+    const n = nueva.trim();
+    if (!n || !onCrear) return;
+    onCrear(n);
+    setNueva('');
+    setAbierto(false);
+  };
+
+  if (!puedeEditar) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: g.color }}>
+        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: g.color }} /> {g.label}
+      </span>
+    );
+  }
+
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        onClick={e => { e.stopPropagation(); setAbierto(v => !v); }}
+        title="Cambiar la etiqueta"
+        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] rounded px-1 -mx-1 hover:bg-slate-100 transition-colors"
+        style={{ color: g.color }}
+      >
+        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: g.color }} /> {g.label}
+        <ChevronDown className="w-3 h-3 opacity-60" />
+      </button>
+
+      {abierto && (
+        <div className="absolute left-0 top-full mt-1 z-30 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1"
+          onClick={e => e.stopPropagation()}>
+          {grupos.map(x => (
+            <button
+              key={x.id}
+              onClick={() => { onElegir(x.id); setAbierto(false); }}
+              className={cn('w-full text-left px-3 py-1.5 text-xs font-bold hover:bg-slate-50 flex items-center gap-2',
+                x.id === valor && 'bg-emerald-50')}
+            >
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: x.color }} />
+              <span className="truncate text-slate-700">{x.label}</span>
+            </button>
+          ))}
+          {onCrear && (
+            <div className="border-t border-slate-100 mt-1 pt-1 px-2 pb-1">
+              <input
+                value={nueva}
+                onChange={e => setNueva(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { e.preventDefault(); crear(); }
+                  if (e.key === 'Escape') { setNueva(''); setAbierto(false); }
+                }}
+                placeholder="Nueva etiqueta…"
+                className="w-full px-2 py-1 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+              />
+              {nueva.trim() && (
+                <button
+                  onClick={crear}
+                  className="w-full mt-1 px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold"
+                >
+                  Crear «{nueva.trim()}»
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </span>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// EL PROYECTO DE LA TARJETA (2026-08-20, petición de Eugenio: «permite añadir
+// personas y proyectos a las tareas»).
+// ----------------------------------------------------------------------------
+// Mover una tarea de proyecto ya lo sabía hacer el servidor —lo usa la ficha
+// del Mundo 3D— pero desde el tablero no había manera de pedirlo. La lista de
+// destinos se pide al abrir el desplegable, no al abrir la ficha: casi ninguna
+// tarea se muda, y cargarla siempre sería una petición por cada tarjeta que
+// miras.
+function SelectorProyecto({ item, puedeEditar, onGuardar }: {
+  item: ItemTablero;
+  puedeEditar: boolean;
+  onGuardar: (patch: any) => Promise<void> | void;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [proyectos, setProyectos] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    if (!abierto || proyectos) return;
+    fetch('/api/proyectos', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setProyectos(Array.isArray(d) ? d : []))
+      .catch(() => setProyectos([]));
+  }, [abierto, proyectos]);
+
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = () => setAbierto(false);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [abierto]);
+
+  const actual = proyectos?.find(p => p.id === item.proyecto_id);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        disabled={!puedeEditar}
+        onClick={e => { e.stopPropagation(); setAbierto(v => !v); }}
+        title={puedeEditar ? 'Mover a otro proyecto' : undefined}
+        className={cn('w-full flex items-center gap-2.5 p-3 bg-slate-50 rounded-2xl text-left',
+          puedeEditar && 'hover:bg-slate-100 transition-colors')}
+      >
+        <span className="w-8 h-8 rounded-xl bg-slate-900 text-white grid place-items-center shrink-0">
+          <Layers className="w-4 h-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Proyecto</p>
+          <p className="text-xs font-bold text-slate-800 truncate">
+            {actual?.titulo || item.proyecto_titulo || 'Este proyecto'}
+          </p>
+        </div>
+        {puedeEditar && <Pencil className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+      </button>
+
+      {abierto && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-20 max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1"
+          onClick={e => e.stopPropagation()}>
+          {proyectos === null && <p className="px-3 py-2 text-xs text-slate-400 italic">Cargando…</p>}
+          {proyectos?.map(p => (
+            <button
+              key={p.id}
+              onClick={() => { setAbierto(false); if (p.id !== item.proyecto_id) onGuardar({ proyecto_id: p.id, proyecto_titulo: p.titulo }); }}
+              className={cn('w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 truncate',
+                p.id === item.proyecto_id && 'bg-emerald-50')}
+            >
+              {p.titulo}
+            </button>
+          ))}
+          {proyectos?.length === 0 && <p className="px-3 py-2 text-xs text-slate-400 italic">No hay otros proyectos.</p>}
         </div>
       )}
     </div>
