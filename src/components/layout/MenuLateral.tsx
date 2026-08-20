@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database,
-  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays,
+  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -50,9 +50,10 @@ interface DatosMenu {
   productos: Array<{ id: string; nombre: string; icono?: string | null }>;
   personas: Array<{ id: string; nombre: string; real: boolean; rol?: string; icono?: string | null }>;
   organizaciones: Array<{ id: string; nombre: string }>;
+  gruposFavoritos: Array<{ id: string; nombre: string; icono: string | null; cuantos: number }>;
 }
 
-const VACIO: DatosMenu = { proyectos: [], productos: [], personas: [], organizaciones: [] };
+const VACIO: DatosMenu = { proyectos: [], productos: [], personas: [], organizaciones: [], gruposFavoritos: [] };
 
 /** Las iniciales de algo, para la insignia cuando no hay icono propio. */
 const iniciales = (t: string) =>
@@ -223,8 +224,22 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
       id: 'yo', label: 'Mi Perfil', icono: User,
       destino: `/personas/${user.id}`,
     } as NodoMenu, {
+      id: 'todas', label: 'Todas las personas', icono: Users2, destino: '/personas', abrir: 'ventana',
+    } as NodoMenu, {
       id: 'mensajes', label: 'Mensajes', icono: MessageSquare, destino: '/mensajes',
     } as NodoMenu] : []),
+    // LOS GRUPOS FAVORITOS, aquí arriba (Eugenio: «ponerlo como favoritos,
+    // entonces los grupos favoritos se añadirán»). Cada uno abre la lista ya
+    // filtrada por él.
+    ...datos.gruposFavoritos.map(g => ({
+      id: `grp-${g.id}`,
+      label: g.nombre,
+      icono: Tag,
+      insignia: g.icono || undefined,
+      cuantos: g.cuantos,
+      destino: `/personas?grupo=${encodeURIComponent(g.id)}`,
+      abrir: 'ventana' as const,
+    })),
     ...datos.personas.map(p => ({
       id: p.id,
       label: p.nombre,
