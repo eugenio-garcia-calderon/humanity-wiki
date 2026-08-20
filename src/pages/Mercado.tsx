@@ -273,6 +273,7 @@ export default function Mercado() {
                 descripcion: p.description ?? null,
                 bloques: Array.isArray(p.bloques) ? p.bloques : [],
                 creador: p.created_by ?? null,
+                icono: p.icono ?? null,
               })}
               onKeyDown={e => { if (e.key === 'Enter') (e.currentTarget as HTMLElement).click(); }}
               className="text-left cursor-pointer bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col">

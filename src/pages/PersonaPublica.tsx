@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
-  Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare,
+  Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare, Camera, Loader2,
   FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid,
 } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
@@ -102,7 +102,7 @@ function timeAgo(iso: string) {
 
 export default function PersonaPublica() {
   const { id } = useParams();
-  const { user: me, can, updateUiSettings } = useAuth();
+  const { user: me, can, updateUiSettings, updateProfile } = useAuth();
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, publications: 0 });
   const [pubs, setPubs] = useState<Publication[]>([]);
@@ -116,6 +116,57 @@ export default function PersonaPublica() {
   const [editando, setEditando] = useState(false);
   const arrastrando = useRef<string | null>(null);
   const navigate = useNavigate();
+  // EDITAR TU PROPIO PERFIL (2026-08-20, Eugenio: «que pueda agregar una foto
+  // de perfil y una descripción»). Se edita EN EL SITIO, no en otra página:
+  // ves cómo va quedando mientras escribes.
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [borrador, setBorrador] = useState({ nombre: '', bio: '', avatar: '' });
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const fotoRef = useRef<HTMLInputElement>(null);
+
+  const empezarAEditar = () => {
+    setBorrador({
+      nombre: profileUser?.display_name || profileUser?.name || '',
+      bio: profileUser?.bio || '',
+      avatar: profileUser?.avatar_url || '',
+    });
+    setEditandoPerfil(true);
+  };
+
+  const subirFoto = async (f?: File) => {
+    if (!f) return;
+    setSubiendoFoto(true);
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json();
+      if (r.ok && j.url) setBorrador(b => ({ ...b, avatar: j.url }));
+    } finally { setSubiendoFoto(false); }
+  };
+
+  const guardarPerfil = async () => {
+    setGuardandoPerfil(true);
+    try {
+      const res = await updateProfile({
+        display_name: borrador.nombre.trim() || null,
+        bio: borrador.bio.trim() || null,
+        avatar_url: borrador.avatar || null,
+      });
+      if (!res.ok) return;
+      // Se pinta ya con lo nuevo: recargar el perfil entero para ver tu propia
+      // foto sería un viaje de más.
+      setProfileUser(p => (p ? {
+        ...p,
+        display_name: borrador.nombre.trim() || null,
+        bio: borrador.bio.trim() || null,
+        avatar_url: borrador.avatar || null,
+      } : p));
+      setEditandoPerfil(false);
+    } finally { setGuardandoPerfil(false); }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -204,12 +255,54 @@ export default function PersonaPublica() {
       </div>
 
       <div className="px-4 sm:px-6 -mt-10 relative flex items-end justify-between gap-3">
-        {profileUser.avatar_url ? (
-          <img src={profileUser.avatar_url} alt="" className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md" />
-        ) : (
-          <span className="w-20 h-20 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-slate-400 shadow-md">
-            <UserIcon className="w-8 h-8" />
-          </span>
+        <div className="relative shrink-0">
+          {(editandoPerfil ? borrador.avatar : profileUser.avatar_url) ? (
+            <img src={editandoPerfil ? borrador.avatar : profileUser.avatar_url!} alt=""
+              className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md" />
+          ) : (
+            <span className="w-20 h-20 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-slate-400 shadow-md">
+              <UserIcon className="w-8 h-8" />
+            </span>
+          )}
+          {editandoPerfil && (
+            <>
+              <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
+              <button
+                onClick={() => fotoRef.current?.click()}
+                disabled={subiendoFoto}
+                title="Cambiar la foto"
+                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-900 text-white grid place-items-center shadow-lg hover:bg-slate-800 disabled:opacity-50 transition-colors"
+              >
+                {subiendoFoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Editar el tuyo: el botón vive junto a la foto, que es donde se
+            busca. */}
+        {isMe && (
+          <div className="flex items-center gap-2 pb-1">
+            {editandoPerfil ? (
+              <>
+                <button onClick={() => setEditandoPerfil(false)} disabled={guardandoPerfil}
+                  className="px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:border-slate-300 disabled:opacity-40 transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={guardarPerfil} disabled={guardandoPerfil}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 transition-colors">
+                  {guardandoPerfil ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  Guardar
+                </button>
+              </>
+            ) : (
+              <button onClick={empezarAEditar}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 transition-colors">
+                <Pencil className="w-3.5 h-3.5" /> Editar perfil
+              </button>
+            )}
+          </div>
         )}
 
         {!isMe && (
@@ -251,8 +344,34 @@ export default function PersonaPublica() {
       </div>
 
       <div className="px-4 sm:px-6 mt-3">
-        <h1 className="text-2xl font-black text-slate-900">{profileUser.display_name || profileUser.name || 'Persona'}</h1>
-        {profileUser.bio && <p className="text-sm text-slate-600 leading-relaxed mt-1.5">{profileUser.bio}</p>}
+        {editandoPerfil ? (
+          <>
+            <input
+              value={borrador.nombre}
+              onChange={e => setBorrador(b => ({ ...b, nombre: e.target.value }))}
+              placeholder="Tu nombre"
+              className="w-full text-2xl font-black text-slate-900 bg-transparent border-b border-slate-200 focus:border-emerald-400 focus:outline-none pb-1"
+            />
+            <textarea
+              value={borrador.bio}
+              onChange={e => setBorrador(b => ({ ...b, bio: e.target.value }))}
+              rows={3}
+              placeholder="Cuéntale al mundo quién eres y en qué andas."
+              className="w-full mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-emerald-300 focus:bg-white"
+            />
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-black text-slate-900">{profileUser.display_name || profileUser.name || 'Persona'}</h1>
+            {profileUser.bio
+              ? <p className="text-sm text-slate-600 leading-relaxed mt-1.5">{profileUser.bio}</p>
+              : isMe && (
+                <button onClick={empezarAEditar} className="text-sm text-slate-400 italic mt-1.5 hover:text-emerald-700 transition-colors">
+                  Añade una descripción y una foto →
+                </button>
+              )}
+          </>
+        )}
 
         <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-400">
           {profileUser.location && (

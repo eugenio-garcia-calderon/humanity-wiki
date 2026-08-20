@@ -160,8 +160,23 @@ export default function GestorVentanas({ onPaginaNavegador }: {
         return { ...v, ruta, historia: nueva, pos: nueva.length - 1 };
       }));
     };
+    // La sesión cambió fuera: que cada ventana vuelva a preguntar quién eres.
+    // Sin esto, entrar desde el Mundo 3D dejaba al resto de ventanas creyendo
+    // que seguías sin sesión hasta recargarlas a mano.
+    const alSesionFuera = () => {
+      for (const marco of Object.values(marcos.current)) {
+        try {
+          marco?.contentWindow?.postMessage(
+            { humanity: 'humanity:refresca-sesion' }, window.location.origin);
+        } catch { /* marco muerto */ }
+      }
+    };
     window.addEventListener('message', alMensaje);
-    return () => window.removeEventListener('message', alMensaje);
+    window.addEventListener('humanity:sesion-fuera', alSesionFuera);
+    return () => {
+      window.removeEventListener('message', alMensaje);
+      window.removeEventListener('humanity:sesion-fuera', alSesionFuera);
+    };
   }, []);
 
   /** Atrás y adelante de una ventana. Se usa el historial DEL MARCO (no se

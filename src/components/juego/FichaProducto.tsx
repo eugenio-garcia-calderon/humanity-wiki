@@ -42,6 +42,8 @@ export interface ProductoFicha {
   bloques?: Array<Record<string, unknown>>;
   /** Quién lo creó: solo esa persona (o un admin) puede editar la página. */
   creador?: string | null;
+  /** El emoji que se le haya puesto desde el menú. */
+  icono?: string | null;
 }
 
 const idYoutube = (url?: string) => url?.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1] || null;
@@ -173,7 +175,12 @@ export default function FichaProducto({ producto, puedeEditar, onCerrar, onGuard
           )}
           <div className="min-w-0">
             <p className="text-sm font-black text-slate-900 truncate flex items-center gap-1.5">
-              <ShoppingBag className="w-4 h-4 text-emerald-600 shrink-0" />{producto.name}
+              {/* El icono que le hayas puesto en el menú manda sobre el
+                  genérico (Eugenio, 2026-08-20). */}
+              {producto.icono
+                ? <span className="text-base leading-none shrink-0">{producto.icono}</span>
+                : <ShoppingBag className="w-4 h-4 text-emerald-600 shrink-0" />}
+              {producto.name}
             </p>
             <p className="text-[10px] text-slate-400">Página del producto</p>
           </div>

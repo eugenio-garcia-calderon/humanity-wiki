@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
-  FileText,
+  FileText, ChevronDown,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -64,7 +64,7 @@ function iconoDeRuta(ruta: string) {
 
 export default function Layout() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, refresh: refrescarSesion } = useAuth();
   const navigate = useNavigate();
   const { updateCounter } = useEdit();
 
@@ -81,6 +81,15 @@ export default function Layout() {
   // única barra de arriba. El estado vive en el gestor; aquí llega solo el eco
   // (ver bus.ts).
   const [ventanasAbiertas, setVentanasAbiertas] = useState<VentanaEstado[]>([]);
+  const [cuentaAbierta, setCuentaAbierta] = useState(false);
+  const cuentaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fuera = (e: MouseEvent) => {
+      if (cuentaRef.current && !cuentaRef.current.contains(e.target as Node)) setCuentaAbierta(false);
+    };
+    document.addEventListener('mousedown', fuera);
+    return () => document.removeEventListener('mousedown', fuera);
+  }, []);
   useEffect(() => {
     const f = (e: Event) => setVentanasAbiertas([...((e as CustomEvent).detail as VentanaEstado[])]);
     window.addEventListener('humanity:ventanas', f);
@@ -139,6 +148,14 @@ export default function Layout() {
     const alMensaje = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
       const t = (e.data || {}).humanity;
+      // Alguien entró o salió DENTRO de una ventana: se vuelve a preguntar
+      // quién eres y se avisa a las demás ventanas para que hagan lo mismo.
+      if (t === 'humanity:sesion-cambiada') {
+        refrescarSesion().then(() => {
+          window.dispatchEvent(new Event('humanity:sesion-fuera'));
+        });
+        return;
+      }
       // `humanity:ruta` NO se reenvía aquí: hay que saber de qué ventana viene,
       // y eso solo lo sabe quien tiene los marcos (el gestor de ventanas), que
       // lo escucha por su cuenta comparando `event.source` con cada iframe.
@@ -147,7 +164,7 @@ export default function Layout() {
     };
     window.addEventListener('message', alMensaje);
     return () => window.removeEventListener('message', alMensaje);
-  }, []);
+  }, [refrescarSesion]);
 
   // Modo embed: la app se incrusta a sí misma (p. ej. el mapa dentro de una
   // ventana de conocimiento, o cualquier sección en una ventana del Escritorio)
@@ -295,10 +312,57 @@ export default function Layout() {
           </div>
         )}
 
-        {/* Nada más (petición de Eugenio, 2026-08-20: «que no quede nada,
-            solo el logo»): Explorar, Mercado, Contribuye, la cuenta y los
-            ajustes viven ahora ordenados dentro del menú ☰. */}
         <div className="flex-1" />
+
+        {/* LA CUENTA, ARRIBA A LA DERECHA DEL TODO (Eugenio, 2026-08-20). Es
+            donde la busca todo el mundo, y además es lo que hace visible de un
+            vistazo si has entrado o no — que era justo lo que no se veía
+            cuando iniciabas sesión dentro del Mundo 3D. */}
+        <div className="relative shrink-0" ref={cuentaRef}>
+          {user ? (
+            <>
+              <button
+                onClick={() => setCuentaAbierta(o => !o)}
+                title={`${user.displayName || user.email} · ${user.roleLabel}`}
+                className={cn('h-9 pl-1 pr-2 flex items-center gap-1.5 rounded-full border transition-colors',
+                  cuentaAbierta ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}
+              >
+                {user.avatarUrl
+                  ? <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
+                  : <span className="w-7 h-7 rounded-full bg-slate-100 grid place-items-center text-slate-400">
+                      <User className="w-3.5 h-3.5" />
+                    </span>}
+                <ChevronDown className="w-3 h-3 shrink-0" />
+              </button>
+
+              {cuentaAbierta && (
+                <div className="absolute top-11 right-0 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <p className="px-3 pb-1.5 text-[11px] font-black text-slate-800 truncate">
+                    {user.displayName || user.email}
+                  </p>
+                  <p className="px-3 pb-2 text-[10px] text-slate-400 truncate border-b border-slate-100">{user.roleLabel}</p>
+                  <button onClick={() => { setCuentaAbierta(false); navigate(`/personas/${user.id}`); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <User className="w-3.5 h-3.5 text-slate-400" /> Mi Perfil
+                  </button>
+                  <button onClick={() => { setCuentaAbierta(false); navigate('/configuracion'); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <Settings className="w-3.5 h-3.5 text-slate-400" /> Configuración
+                  </button>
+                  <button onClick={() => { setCuentaAbierta(false); logout(); navigate('/'); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left">
+                    <LogOut className="w-3.5 h-3.5 text-slate-400" /> Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <Link to="/login"
+              className="h-9 px-3 inline-flex items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
+              <User className="w-3.5 h-3.5" /> Iniciar sesión
+            </Link>
+          )}
+        </div>
       </header>
 
       {/* Contenido + Asistente IA: fila flex real — el panel acoplado empuja
@@ -348,6 +412,7 @@ export default function Layout() {
  */
 function PuenteAlAsistente() {
   const location = useLocation();
+  const { user: usuarioActual, refresh: refrescarSesion } = useAuth();
   useEffect(() => {
     const reenviar = (e: Event) => {
       try {
@@ -364,6 +429,33 @@ function PuenteAlAsistente() {
       window.removeEventListener('humanity:asistente-focus', reenviar);
     };
   }, []);
+
+  // LA SESIÓN ES DE TODA LA APP (Eugenio, 2026-08-20: «he iniciado sesión en el
+  // Mundo 3D pero no me ha hecho eso inicio de sesión en el resto»). La cookie
+  // SÍ era compartida —es del dominio entero—, pero la app de fuera no se
+  // enteraba: había preguntado quién eras al arrancar, le dijeron «nadie», y
+  // no volvía a preguntar. Ahora la ventana avisa al entrar o salir, y fuera
+  // se vuelve a preguntar. Se manda solo el hecho de que cambió, nunca la
+  // cookie ni el token.
+  useEffect(() => {
+    try {
+      window.parent?.postMessage({
+        humanity: 'humanity:sesion-cambiada', detalle: usuarioActual?.id ?? null,
+      }, window.location.origin);
+    } catch { /* sin puente */ }
+  }, [usuarioActual?.id]);
+
+  // Y al revés: si la sesión cambia FUERA, esta ventana se entera. Llega por
+  // `postMessage` desde la app de fuera, con el origen comprobado.
+  useEffect(() => {
+    const alMensaje = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if ((e.data || {}).humanity !== 'humanity:refresca-sesion') return;
+      refrescarSesion();
+    };
+    window.addEventListener('message', alMensaje);
+    return () => window.removeEventListener('message', alMensaje);
+  }, [refrescarSesion]);
 
   // Y la RUTA: cada vez que la página de dentro navega, se lo dice a la de
   // fuera. Es lo que llena la barra de direcciones de la ventana y lo que le

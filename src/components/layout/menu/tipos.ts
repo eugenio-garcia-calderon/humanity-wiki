@@ -31,4 +31,8 @@ export interface NodoMenu {
   cuantos?: number;
   /** Color del punto de estado, si la cosa tiene estados. */
   punto?: string;
+  /** Si esto se puede renombrar, QUÉ es y con qué tabla se corresponde. Sin
+   *  esto, el nodo no enseña los tres puntos: una herramienta fija como
+   *  «Mapas» no se renombra. */
+  editable?: { tipo: string; id: string };
 }

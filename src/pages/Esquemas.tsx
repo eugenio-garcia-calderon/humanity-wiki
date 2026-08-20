@@ -29,12 +29,22 @@ interface Esquema {
   cover_image: string | null;
   cover_video_id: string | null;
   is_reto: boolean;
+  icono?: string | null;
 }
 
 /** La portada de un lienzo: su primera imagen, la miniatura de su primer
  *  vídeo, o —si no tiene ninguna— sus iniciales sobre un color estable
  *  sacado del propio título, para que cada ficha se reconozca de un vistazo. */
 function Portada({ l }: { l: Esquema }) {
+  // El icono que le hayas puesto manda sobre la portada automática: es una
+  // decisión tuya y las automáticas son una suposición nuestra.
+  if (l.icono) {
+    return (
+      <div className="w-full h-full grid place-items-center bg-slate-50">
+        <span className="text-5xl leading-none">{l.icono}</span>
+      </div>
+    );
+  }
   const src = l.cover_image
     || (l.cover_video_id ? `https://i.ytimg.com/vi/${l.cover_video_id}/mqdefault.jpg` : null);
   if (src) {

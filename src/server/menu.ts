@@ -23,7 +23,87 @@ import { sql } from 'drizzle-orm';
 // desplegarlo (`/api/proyectos/:id/arbol`, Fase 2), porque un árbol entero de
 // todos los proyectos sería una consulta enorme para enseñar cinco líneas.
 
+// ============================================================================
+// RENOMBRAR Y PONER ICONO (2026-08-20, petición de Eugenio: «permite cambiar
+// el nombre e icono desde el menú […] mediante una ventanita pop up»).
+// ============================================================================
+// Una lista blanca, no una ruta por tipo. Son siete tablas que se renombran
+// igual, y siete endpoints idénticos serían siete sitios donde arreglar el
+// mismo fallo. El precio de hacerlo genérico es que los nombres de tabla y
+// columna entran en el SQL como texto: por eso salen SOLO de este mapa fijo y
+// nunca de lo que mande nadie — es la única forma en la que `sql.raw` es
+// segura, y es la regla que ya sigue `ENTITY_TABLES` en el proyecto.
+const RENOMBRABLES: Record<string, {
+  tabla: string; nombre: string; dueno: string;
+  /** Las páginas guardan su icono dentro de `config`, no en una columna: el
+   *  editor tipo Notion lo hace así desde que se construyó. */
+  iconoEnConfig?: boolean;
+}> = {
+  proyecto: { tabla: 'proyectos',        nombre: 'titulo', dueno: 'creador_user_id' },
+  esquema:  { tabla: 'knowledge_graphs', nombre: 'title',  dueno: 'creator_user_id' },
+  mapa:     { tabla: 'user_maps',        nombre: 'title',  dueno: 'creator_user_id' },
+  producto: { tabla: 'products',         nombre: 'name',   dueno: 'created_by' },
+  tarea:    { tabla: 'roadmap_items',    nombre: 'titulo', dueno: 'autor_user_id' },
+  persona:  { tabla: 'game_agents',      nombre: 'nombre', dueno: 'user_id' },
+  pagina:   { tabla: 'knowledge_windows', nombre: 'title', dueno: 'creator_user_id', iconoEnConfig: true },
+};
+
 export function registerMenuRoutes(app: Express, db: any) {
+  /**
+   * PUT /api/elemento/:tipo/:id   { nombre?, icono? }
+   * Cambia el nombre y/o el icono de una cosa. Solo su dueño (o un
+   * administrador). Mandar `icono: null` lo quita.
+   */
+  app.put('/api/elemento/:tipo/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const def = RENOMBRABLES[req.params.tipo];
+      if (!def) return res.status(400).json({ error: 'Eso no se puede renombrar.' });
+
+      const fila = await db.execute(sql`
+        SELECT ${sql.raw(def.dueno)} AS dueno FROM ${sql.raw(def.tabla)}
+        WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!fila.rows.length) return res.status(404).json({ error: 'Eso ya no existe.' });
+      const esAdmin = (req.user.roleLevel ?? 0) >= 4;
+      if ((fila.rows[0] as any).dueno !== req.user.id && !esAdmin) {
+        return res.status(403).json({ error: 'Eso no es tuyo.' });
+      }
+
+      const nombre = typeof req.body?.nombre === 'string' ? req.body.nombre.trim() : null;
+      if (nombre !== null && !nombre) return res.status(400).json({ error: 'El nombre no puede quedar vacío.' });
+      // Un emoji y poco más: si cupiera texto largo, el menú se rompería.
+      const icono = req.body?.icono === null ? null
+        : typeof req.body?.icono === 'string' ? req.body.icono.trim().slice(0, 8) : undefined;
+
+      if (nombre !== null) {
+        await db.execute(sql`
+          UPDATE ${sql.raw(def.tabla)} SET ${sql.raw(def.nombre)} = ${nombre}, updated_at = now()
+          WHERE id = ${req.params.id}
+        `);
+      }
+      if (icono !== undefined) {
+        if (def.iconoEnConfig) {
+          await db.execute(sql`
+            UPDATE ${sql.raw(def.tabla)}
+            SET config = jsonb_set(coalesce(config, '{}'::jsonb), '{icono}', ${JSON.stringify(icono)}::jsonb),
+                updated_at = now()
+            WHERE id = ${req.params.id}
+          `);
+        } else {
+          await db.execute(sql`
+            UPDATE ${sql.raw(def.tabla)} SET icono = ${icono}, updated_at = now()
+            WHERE id = ${req.params.id}
+          `);
+        }
+      }
+      res.json({ ok: true, nombre, icono });
+    } catch (e: any) {
+      console.error('renombrar elemento error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/menu', async (req: Request, res: Response) => {
     // Sin sesión el menú es solo herramientas: no hay proyectos «de nadie».
     if (!req.user) return res.json({ proyectos: [], productos: [], personas: [], organizaciones: [] });
@@ -32,14 +112,14 @@ export function registerMenuRoutes(app: Express, db: any) {
 
       const [proyectos, productos, agentes, seguidos, orgs] = await Promise.all([
         db.execute(sql`
-          SELECT p.id, p.titulo, p.slug, p.publico
+          SELECT p.id, p.titulo, p.slug, p.publico, p.icono
           FROM proyectos p
           WHERE p.creador_user_id = ${yo} AND p.archived_at IS NULL AND p.deleted_at IS NULL
           ORDER BY p.updated_at DESC NULLS LAST, p.created_at DESC
           LIMIT 50
         `),
         db.execute(sql`
-          SELECT pr.id, pr.name, pr.price_cents, pr.currency, pr.kind
+          SELECT pr.id, pr.name, pr.price_cents, pr.currency, pr.kind, pr.icono
           FROM products pr
           WHERE pr.created_by = ${yo} AND pr.archived_at IS NULL AND pr.status = 'activo'
           ORDER BY pr.updated_at DESC NULLS LAST, pr.created_at DESC
@@ -49,7 +129,7 @@ export function registerMenuRoutes(app: Express, db: any) {
         // Son representaciones, no cuentas — la ficha lo dirá con todas las
         // letras para que nadie confunda una cosa con la otra.
         db.execute(sql`
-          SELECT a.id, a.nombre, a.rol, a.proyecto_id
+          SELECT a.id, a.nombre, a.rol, a.proyecto_id, a.icono
           FROM game_agents a
           WHERE a.user_id = ${yo} AND a.tipo = 'persona' AND a.archived_at IS NULL
           ORDER BY a.nombre
@@ -74,10 +154,10 @@ export function registerMenuRoutes(app: Express, db: any) {
 
       res.json({
         proyectos: (proyectos.rows as any[]).map(p => ({
-          id: p.id, titulo: p.titulo, slug: p.slug, publico: !!p.publico,
+          id: p.id, titulo: p.titulo, slug: p.slug, publico: !!p.publico, icono: p.icono,
         })),
         productos: (productos.rows as any[]).map(p => ({
-          id: p.id, nombre: p.name, precio: p.price_cents, moneda: p.currency, tipo: p.kind,
+          id: p.id, nombre: p.name, precio: p.price_cents, moneda: p.currency, tipo: p.kind, icono: p.icono,
         })),
         personas: [
           ...(seguidos.rows as any[]).map(u => ({
@@ -85,7 +165,7 @@ export function registerMenuRoutes(app: Express, db: any) {
             avatar: u.avatar_url, real: true,
           })),
           ...(agentes.rows as any[]).map(a => ({
-            id: a.id, nombre: a.nombre, rol: a.rol, real: false,
+            id: a.id, nombre: a.nombre, rol: a.rol, real: false, icono: a.icono,
           })),
         ],
         organizaciones: (orgs.rows as any[]).map(o => ({ id: o.id, nombre: o.name })),
@@ -231,59 +311,61 @@ export function registerMenuRoutes(app: Express, db: any) {
 
       const [tareas, paginas, esquemas, mapas, productos, personas] = await Promise.all([
         db.execute(sql`
-          SELECT id, titulo, estado FROM roadmap_items
+          SELECT id, titulo, estado, icono FROM roadmap_items
           WHERE proyecto_id = ${pid} AND archived_at IS NULL
           ORDER BY orden, created_at LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, title FROM knowledge_windows
+          SELECT id, title, config->>'icono' AS icono FROM knowledge_windows
           WHERE proyecto_id = ${pid} AND kind = 'pagina'
             AND archived_at IS NULL AND deleted_at IS NULL
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, title, slug FROM knowledge_graphs
+          SELECT id, title, slug, icono FROM knowledge_graphs
           WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, title, slug FROM user_maps
+          SELECT id, title, slug, icono FROM user_maps
           WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, name FROM products
+          SELECT id, name, icono FROM products
           WHERE proyecto_id = ${pid} AND archived_at IS NULL AND status = 'activo'
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
         `),
         db.execute(sql`
-          SELECT id, nombre, rol FROM game_agents
+          SELECT id, nombre, rol, icono FROM game_agents
           WHERE proyecto_id = ${pid} AND tipo = 'persona' AND archived_at IS NULL
           ORDER BY nombre LIMIT 100
         `),
       ]);
 
       const ramas: any[] = [];
-      const rama = (clave: string, label: string, hijos: any[]) => {
-        if (hijos.length) ramas.push({ clave, label, hijos });
+      // `tipo` es lo que le dice al menú qué se puede renombrar y contra qué
+      // tabla. Sin él, el menú tendría que adivinarlo por la ruta.
+      const rama = (clave: string, label: string, tipo: string, hijos: any[]) => {
+        if (hijos.length) ramas.push({ clave, label, tipo, hijos });
       };
-      rama('tareas', 'Tareas', (tareas.rows as any[]).map(t => ({
-        id: t.id, label: t.titulo, destino: `/tareas?tarea=${encodeURIComponent(t.id)}`, estado: t.estado,
+      rama('tareas', 'Tareas', 'tarea', (tareas.rows as any[]).map(t => ({
+        id: t.id, label: t.titulo, icono: t.icono, destino: `/tareas?tarea=${encodeURIComponent(t.id)}`, estado: t.estado,
       })));
-      rama('paginas', 'Páginas', (paginas.rows as any[]).map(w => ({
-        id: w.id, label: w.title, destino: `/paginas/${w.id}`,
+      rama('paginas', 'Páginas', 'pagina', (paginas.rows as any[]).map(w => ({
+        id: w.id, label: w.title, icono: w.icono, destino: `/paginas/${w.id}`,
       })));
-      rama('esquemas', 'Esquemas', (esquemas.rows as any[]).map(g => ({
-        id: g.id, label: g.title, destino: `/esquemas/${g.slug}`,
+      rama('esquemas', 'Esquemas', 'esquema', (esquemas.rows as any[]).map(g => ({
+        id: g.id, label: g.title, icono: g.icono, destino: `/esquemas/${g.slug}`,
       })));
-      rama('mapas', 'Mapas', (mapas.rows as any[]).map(m => ({
-        id: m.id, label: m.title, destino: `/mapas/${m.slug}`,
+      rama('mapas', 'Mapas', 'mapa', (mapas.rows as any[]).map(m => ({
+        id: m.id, label: m.title, icono: m.icono, destino: `/mapas/${m.slug}`,
       })));
-      rama('productos', 'Productos', (productos.rows as any[]).map(x => ({
-        id: x.id, label: x.name, destino: `/mercado?producto=${encodeURIComponent(x.id)}`,
+      rama('productos', 'Productos', 'producto', (productos.rows as any[]).map(x => ({
+        id: x.id, label: x.name, icono: x.icono, destino: `/mercado?producto=${encodeURIComponent(x.id)}`,
       })));
-      rama('personas', 'Personas', (personas.rows as any[]).map(a2 => ({
-        id: a2.id, label: a2.nombre, destino: `/juego?agente=${encodeURIComponent(a2.id)}`, rol: a2.rol,
+      rama('personas', 'Personas', 'persona', (personas.rows as any[]).map(a2 => ({
+        id: a2.id, label: a2.nombre, icono: a2.icono, destino: `/juego?agente=${encodeURIComponent(a2.id)}`, rol: a2.rol,
       })));
 
       res.json({ ramas });
