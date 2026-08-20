@@ -1172,3 +1172,6 @@ Petición de Eugenio: «haz que las personas del juego que son los amigos se mue
 - **Si el servidor no tiene Chromium**, el navegador cae solo al proxy de lectura de antes, con su etiqueta «lectura»: nada se rompe.
 - **Producción**: la imagen instala el Chromium del sistema (Alpine) y Playwright lo pilota (`NAVEGADOR_CHROMIUM`); el de Playwright es de glibc y no vale en musl.
 - Aviso honesto que quedará a la vista: algunas webs enseñan un desafío anti-robots al ver tráfico desde un servidor (le pasó a DuckDuckGo en pruebas). Se resuelve con los clics de la persona, como en cualquier ordenador.
+
+### 2026-08-20 — «Wiki» plateado en el logo
+- El «Wiki» de la marca deja el verde y pasa a un **degradado plateado** (petición de Eugenio: «plateado/grisáceo moderno y elegante»): vertical, claro en el centro, que es como se lee «metal pulido». Tonos slate de la paleta de la app, sin colores nuevos. Verificado en el navegador junto al «Humanity» en negro.
