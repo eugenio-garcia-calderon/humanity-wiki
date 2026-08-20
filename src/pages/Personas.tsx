@@ -110,6 +110,7 @@ export default function Personas() {
       web: ficha.web || null, ubicacion: ficha.ubicacion || null,
       estado: ficha.estado || null, descripcion: ficha.descripcion || null,
       grupo_ids: ficha.grupo_ids || [],
+      etiquetas: ficha.etiquetas || [],
     };
     const r = ficha.id
       ? await fetch(`/api/personas/${ficha.id}`, {
@@ -316,6 +317,13 @@ export default function Personas() {
                     )}
                   </span>
                   {p.rol && <span className="block text-[11px] text-slate-400 truncate">{p.rol}</span>}
+                  {Array.isArray(p.etiquetas) && p.etiquetas.length > 0 && (
+                    <span className="flex flex-wrap gap-1 mt-0.5">
+                      {p.etiquetas.slice(0, 3).map(e => (
+                        <span key={e} className="px-1.5 py-px rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">{e}</span>
+                      ))}
+                    </span>
+                  )}
                 </span>
               </button>
 
@@ -480,6 +488,24 @@ export default function Personas() {
                   </div>
                 </div>
               )}
+
+              {/* ETIQUETAS: texto libre separado por comas. Sin catálogo que
+                  mantener — en un CRM personal las etiquetas se inventan sobre
+                  la marcha, y obligar a crearlas antes es fricción para nada. */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
+                  <Tag className="w-3 h-3" /> Etiquetas
+                </p>
+                <input
+                  value={(ficha.etiquetas || []).join(', ')}
+                  onChange={e => setFicha(x => ({
+                    ...x!,
+                    etiquetas: e.target.value.split(',').map(t => t.trim()).filter(Boolean),
+                  }))}
+                  placeholder="permacultura, inversor, Madrid…"
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
+                />
+              </div>
 
               <textarea value={ficha.descripcion || ''}
                 onChange={e => setFicha(x => ({ ...x!, descripcion: e.target.value }))}

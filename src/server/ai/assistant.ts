@@ -54,6 +54,10 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // 2026-08-08: "ordename las publicaciones por carpetas" — sin parámetros,
   // el servidor lee todo lo que ha publicado quien pregunta y las agrupa.
   ORGANIZAR_CARPETAS: { minLevel: ROLE.USER, entity: 'carpetas', description: 'Organizar tus publicaciones en carpetas temáticas' },
+  // 2026-08-20, fase 3 del calendario: «apúntame una reunión el jueves a las
+  // 10». Nivel 1 como todo lo que es TUYO y solo tuyo — un evento en tu
+  // calendario no toca el conocimiento común de nadie.
+  CREATE_EVENTO: { minLevel: ROLE.USER, entity: 'eventos', description: 'Apuntar un evento en tu calendario' },
 };
 
 /**
@@ -282,6 +286,8 @@ Ya está: Gala se une al proyecto — la tienes de pie en la sala de Personas.
 CADENA DE CONOCIMIENTO DE LA PLATAFORMA:
 Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Necesidad → Producto → Demanda → Transacción → Iniciativa → Resultados → Caso de éxito
 
+HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}). Cuando alguien diga «el jueves», «mañana» o «la semana que viene», resuélvelo TÚ a partir de esta fecha y manda «inicio» en ISO completo con hora. Para apuntar algo en su calendario usa CREATE_EVENTO con {titulo, inicio, fin?, todo_el_dia?, lugar?, descripcion?, repeticion?}. El campo «repeticion» va en formato RRULE de iCalendar si es algo que se repite (p. ej. "FREQ=WEEKLY;BYDAY=TH").
+
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
 ${JSON.stringify(ctx || {}, null, 2)}
 ${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
@@ -322,7 +328,15 @@ Responde en texto normal. Si quieres navegar o proponer cambios, añade AL FINAL
 \`\`\`
 
 "question" es OPCIONAL: úsala solo cuando necesites una decisión del usuario para continuar bien (enfoque, territorio, alcance…). Máximo 4 opciones cortas y claras — la interfaz añade «Otro» automáticamente. No la uses para trivialidades: si puedes decidir con buen criterio, decide y actúa.
-Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
+Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.
+
+APUNTAR ALGO EN EL CALENDARIO. Si te piden una cita, una reunión, un recordatorio o «apúntame X el día Y», NO basta con decir que lo apuntas: hay que MANDAR LA ACCIÓN o no se crea nada. Resuelve tú la fecha a partir de la de hoy y mándala completa:
+
+\`\`\`redhumana
+{"actions": [{"type": "CREATE_EVENTO", "params": {"titulo": "Reunión con el taller", "inicio": "2026-08-24T10:00:00+02:00", "fin": "2026-08-24T11:00:00+02:00"}, "rationale": "lo ha pedido"}]}
+\`\`\`
+
+Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fin, todo_el_dia, lugar, descripcion, repeticion (RRULE de iCalendar, p. ej. "FREQ=WEEKLY", si se repite).`;
   };
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
@@ -870,6 +884,32 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
                     'publicado', false, ${actorId}, ${actorId})
           `);
           return { ok: true, entityId: id, entityType: 'user_maps', slug, status: 'publicado' };
+        }
+        case 'CREATE_EVENTO': {
+          // La IA manda la fecha ya resuelta en ISO: interpretar «el jueves»
+          // es cosa suya, que para eso sabe qué día es hoy (se lo decimos en
+          // la instrucción). Aquí solo se comprueba que sea una fecha de
+          // verdad — si no, se guardaría un evento en el año 1970.
+          const inicio = new Date(String(params.inicio || ''));
+          if (Number.isNaN(inicio.getTime())) {
+            return { ok: false, error: 'No he entendido la fecha.' };
+          }
+          const fin = params.fin ? new Date(String(params.fin)) : null;
+          if (fin && (Number.isNaN(fin.getTime()) || fin < inicio)) {
+            return { ok: false, error: 'La hora de fin no cuadra.' };
+          }
+          const id = newId('EVT');
+          await db.execute(sql`
+            INSERT INTO eventos (id, titulo, descripcion, inicio, fin, todo_el_dia, lugar,
+                                 icono, repeticion, proyecto_id, creador_user_id, created_by, updated_by)
+            VALUES (${id}, ${String(params.titulo || 'Evento').slice(0, 200)},
+                    ${params.descripcion || null}, ${inicio.toISOString()},
+                    ${fin ? fin.toISOString() : null}, ${!!params.todo_el_dia},
+                    ${params.lugar || null}, ${params.icono || null},
+                    ${params.repeticion || null}, ${params.proyecto_id || null},
+                    ${actorId}, ${actorId}, ${actorId})
+          `);
+          return { ok: true, entityId: id, entityType: 'eventos' };
         }
         case 'CREATE_CHALLENGE': {
           const id = params.id || newId('R');
