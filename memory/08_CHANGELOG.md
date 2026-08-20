@@ -1374,3 +1374,12 @@ Cuatro peticiones de Eugenio en el mismo rato.
 - **AMBAS COSAS SON TUYAS, NO DEL PROYECTO**: que tú pongas «Camión camperizado» el primero no cambia el menú de nadie más. Por eso van en tus ajustes de usuario (jsonb) y no en una columna. Verificado: orden y altura guardados y recuperados.
 - **BORRAR UN PROYECTO desde su página.** Se **archiva**, no se borra (regla 6 de la Constitución), y **lo de dentro no se toca**: sus tareas, páginas, esquemas y mapas siguen existiendo y se quedan sueltos. El aviso lo dice con todas las letras antes de confirmar — la sorpresa que nadie quiere es descubrir que archivar la carpeta se llevó meses de trabajo.
 - **TODAS LAS HERRAMIENTAS, DESDE LA PÁGINA DEL PROYECTO**: botones de Tarea, Página, Esquema y Mapa. Lo que creas ahí **nace ya dentro del proyecto**, que es la diferencia con crearlo desde su herramienta y moverlo después. Una sola ruta (`POST /api/proyectos/:id/herramienta`) para las cuatro: lo que cambia entre crear una página y crear un mapa es la tabla y poco más. Verificado: creado un esquema desde el proyecto, quedó dentro y se entró en él.
+
+### 2026-08-20 — Hablar con alguien sin cargar el Mundo 3D
+- **UNA PÁGINA POR PERSONA DE TU MUNDO** (`/persona/:id`), petición de Eugenio: «para hablar con alguien haz que no haga falta que cargue el mundo 3D, sino que haciendo click en esa persona desde el menú se abra su perfil en la parte de arriba junto con el chat de mensajes históricos en la parte de abajo».
+  - Hablar con Anita cargaba **el Mundo 3D entero** —un megabyte de three.js y toda la escena— para lo que en el fondo son una ficha y un chat. Ahora se abre al instante: **perfil arriba, conversación abajo**.
+  - **Es el MISMO chat de la plataforma**, al que se le cuenta con quién hablas. Duplicarlo aquí habría significado dos historiales y dos contadores de gasto para la misma conversación.
+  - **Se dice lo que es**: «esto es una representación que has creado tú, no la persona real». Confundir una cosa con la otra es el peor malentendido posible de toda la plataforma, así que va arriba y sin letra pequeña. Debajo, plegable, lo que recuerda.
+- **`GET /api/juego/agentes/:id`** trae la ficha y los mensajes de su hilo en una sola llamada.
+- El menú y el árbol de proyectos ya no llevan al Mundo 3D al pulsar una persona.
+- Verificado de verdad: preguntándole «¿quién eres?», Anita contesta **«Soy Anita, una habitante de tu mundo en el Juego Vital…»**, en su papel y sin cargar ninguna escena. (Conversación de prueba borrada después.)
