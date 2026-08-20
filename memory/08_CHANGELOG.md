@@ -2336,3 +2336,27 @@ Measured cost of the change, scrolling for 3 s: 11.3 → 9.3 frames/s and
 
 Also: one capture per loop instead of two. The frame is now its own change
 probe, so raising its resolution did not double the work.
+
+## 2026-08-21 — An open write route in production, closed
+
+`POST /api/map/territories` required no session. Anyone on the internet could
+insert rows into `territories`.
+
+Found while collecting facts for the tech-debt list, not by a bug report.
+Verified against production with a probe that creates nothing (empty body, so
+it throws before the INSERT):
+
+    POST https://humanity.wiki/api/map/territories  ->  500 "coordinates is not iterable"
+    POST https://humanity.wiki/api/data/challenges  ->  401
+
+The 500 is the point: the request reached the handler body. The 401 next to it
+is the control — that route does have a guard.
+
+It escaped the PR #23 sweep, which closed the four `/api/data/*` routes. This
+one does the same thing (creates a territory) but sits 900 lines further down
+in `server.ts`, and a sweep done by reading misses things in a 2.056-line file.
+Now behind the same `requireAdmin`.
+
+Every write route in the seven modules was swept for the same defect. There
+were no others: `finanzas.ts` uses `requiereSesion`, the remote-browser routes
+check session ownership, and the `auth.ts` routes are public on purpose.
