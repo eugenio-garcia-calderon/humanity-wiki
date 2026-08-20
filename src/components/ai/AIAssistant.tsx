@@ -49,7 +49,11 @@ interface Message {
   error?: boolean;
   attachmentName?: string;
   /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
-  usage?: { model: string; totalCents: number };
+  /** LO QUE COSTÓ. `totalCents` es lo que paga la persona (0 casi siempre);
+   *  `costCents` es lo que le cuesta a la plataforma, que no es lo mismo y es
+   *  justo lo que Eugenio quería ver. `undefined` significa «no registrado»,
+   *  que NO es cero: una cifra de dinero falsa es peor que un hueco. */
+  usage?: { model: string; totalCents: number; costCents?: number; durationMs?: number };
   /** El router no dio lo pedido (sin nivel, tope agotado…): se enseña. */
   aviso?: string;
   /** LO QUE SE CREÓ DE VERDAD (2026-08-20). Sale del servidor, no de lo que
@@ -61,6 +65,19 @@ interface Message {
   /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
   imageUrl?: string;
 }
+
+/** Céntimos de euro escritos para que se puedan leer. Estas cifras son
+ *  diminutas —una respuesta cuesta décimas de céntimo— y con dos decimales
+ *  fijos casi todas saldrían «0,00 ¢», que se lee como gratis y no lo es. */
+const centimos = (c: number) => {
+  if (c === 0) return '0 ¢';
+  if (c < 0.01) return '< 0,01 ¢';
+  const dec = c < 1 ? 3 : 2;
+  return c.toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + ' ¢';
+};
+
+/** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
+const segundos = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1).replace('.', ',')} s`);
 
 /** Modelo de Anthropic o Google disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
 interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; gratis?: boolean; nivelMinimo?: number; }
@@ -564,7 +581,14 @@ export default function AIAssistant({ modo = 'panel' }: {
         sources: json.sources,
         actions: json.proposed_actions,
         question: json.question || undefined,
-        usage: json.usage ? { model: json.usage.model, totalCents: json.usage.totalCents } : undefined,
+        usage: json.usage ? {
+          model: json.usage.model,
+          totalCents: json.usage.totalCents,
+          // Se copian tal cual: si el servidor no los mandó, quedan sin
+          // definir y abajo se dice «coste no registrado» en vez de un 0.
+          costCents: typeof json.usage.costCents === 'number' ? json.usage.costCents : undefined,
+          durationMs: typeof json.usage.durationMs === 'number' ? json.usage.durationMs : undefined,
+        } : undefined,
         aviso: json.aviso_modelo || undefined,
         imageUrl: json.imageUrl || undefined,
       }]);
@@ -837,20 +861,44 @@ export default function AIAssistant({ modo = 'panel' }: {
                     </p>
                   )}
 
-                  {/* Qué costó y con qué modelo. Con los gratis y el premium
-                      cubierto el total es 0: se dice «gratis», no «0,0000 €». */}
+                  {/* QUÉ COSTÓ DE VERDAD (D91, 2026-08-21, Eugenio: «que en
+                      el chat aparezca el coste de cada petición, aunque sea
+                      gratis para el usuario, que diga cuál ha sido el coste»).
+
+                      Antes esta línea ponía «gratis» y nada más. Gratis PARA
+                      TI no es gratis PARA LA PLATAFORMA, y decir solo lo
+                      segundo era decir media verdad. Ahora van las dos cosas:
+                      lo que cuesta producir la respuesta y, al lado, si a ti
+                      te la cobran o no.
+
+                      Y si no hay dato de coste se DICE. Un cero inventado en
+                      una cifra de dinero es peor que un hueco: el cero parece
+                      una medida y el hueco se ve que falta. */}
                   {m.usage && (
-                    <p className="mt-2 pt-1.5 border-t border-slate-200/70 text-[9px] text-slate-400 flex items-center gap-1">
-                      <Euro className="w-2.5 h-2.5" />
+                    <p className="mt-2 pt-1.5 border-t border-slate-200/70 text-[9px] text-slate-400 flex items-center gap-1 flex-wrap">
+                      <Euro className="w-2.5 h-2.5 shrink-0" />
+                      <span className="font-bold text-slate-500">
+                        {typeof m.usage.costCents === 'number' ? centimos(m.usage.costCents) : 'coste no registrado'}
+                      </span>
+                      <span className="text-slate-300">·</span>
+                      <span>
+                        {(() => {
+                          // El proveedor devuelve el ID con fecha (p. ej. claude-haiku-4-5-20251001);
+                          // el catálogo usa el ID corto — se empareja por prefijo.
+                          const entry = Object.entries(status?.models || {}).find(([id]) => m.usage!.model.startsWith(id));
+                          return entry ? entry[1].label : m.usage!.model;
+                        })()}
+                      </span>
+                      {typeof m.usage.durationMs === 'number' && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span>{segundos(m.usage.durationMs)}</span>
+                        </>
+                      )}
+                      <span className="text-slate-300">·</span>
                       {m.usage.totalCents > 0
-                        ? `${(m.usage.totalCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} € · `
-                        : 'gratis · '}
-                      {(() => {
-                        // El proveedor devuelve el ID con fecha (p. ej. claude-haiku-4-5-20251001);
-                        // el catálogo usa el ID corto — se empareja por prefijo.
-                        const entry = Object.entries(status?.models || {}).find(([id]) => m.usage!.model.startsWith(id));
-                        return entry ? entry[1].label : m.usage!.model;
-                      })()}{m.usage.totalCents > 0 ? ' · incl. comisión de la plataforma' : ''}
+                        ? <span>te cuesta {(m.usage.totalCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} € (incl. comisión)</span>
+                        : <span className="text-emerald-600 font-bold">gratis para ti</span>}
                     </p>
                   )}
                 </div>

@@ -2360,3 +2360,30 @@ Now behind the same `requireAdmin`.
 Every write route in the seven modules was swept for the same defect. There
 were no others: `finanzas.ts` uses `requiereSesion`, the remote-browser routes
 check session ownership, and the `auth.ts` routes are public on purpose.
+
+## 2026-08-21 — D91: the real cost of every answer, in the chat
+
+Eugenio: «quiero que en el chat de IA aparezca el coste de cada petición en la
+respuesta, aunque sea gratis para el usuario, que diga cuál ha sido el coste».
+
+The line under each answer said «gratis» and nothing else. Free *for you* is not
+free *for the platform*, and saying only the second was telling half the truth.
+
+It turned out the data already reached the browser and was being thrown away:
+the server sends `costCents`, `durationMs`, `cobro` and `motivo` on every reply,
+and the client kept only the model and `totalCents` — what the person pays,
+which is zero almost always. Nothing new had to be measured. It had to stop
+being discarded.
+
+Now: `0,074 ¢ · Rápido · 1,3 s · gratis para ti`. What it costs to produce
+first, because that is what was asked for; whether you are charged, last.
+
+- In cents, not euros. An answer costs tenths of a cent; in euros it reads
+  «0,0007 €» and nobody parses that. Under 0,01 ¢ it says «< 0,01 ¢» rather
+  than «0,00 ¢» — a rounded zero reads as free, and it is not.
+- No cost datum → «coste no registrado», never a zero. A false zero in a money
+  figure is worse than a hole: the zero looks like a measurement.
+
+Both branches verified in the browser: the normal one against a real answer,
+and the missing-data one by stripping `costCents` from the response in the
+client so the honest path was actually exercised rather than assumed.
