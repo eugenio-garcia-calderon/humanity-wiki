@@ -384,7 +384,7 @@ export default function PersonaPublica() {
       </div>
 
       {showCreateGraph && (
-        <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/grafos/${slug}`)} />
+        <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/esquemas/${slug}`)} />
       )}
 
       <div className="px-4 sm:px-6 mt-6 space-y-4">

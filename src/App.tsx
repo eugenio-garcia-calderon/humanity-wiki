@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
 // Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
@@ -28,7 +28,7 @@ import Grafos from './pages/Grafos';
 import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
-import Lienzos from './pages/Lienzos';
+import Esquemas from './pages/Esquemas';
 import Tareas from './pages/Tareas';
 import Paginas from './pages/Paginas';
 import Entrada from './pages/Entrada';
@@ -57,6 +57,19 @@ import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 
+/** `/documentos/:id` era donde vivía el editor antes de que documentos y
+ *  páginas se fundieran. Se conserva para que ningún enlace guardado se rompa. */
+function RedirigirPagina() {
+  const { id } = useParams();
+  return <Navigate to={`/paginas/${id}`} replace />;
+}
+
+/** Lo mismo con `/grafos/:slug`, que ahora es `/esquemas/:slug`. */
+function RedirigirEsquema() {
+  const { slug } = useParams();
+  return <Navigate to={`/esquemas/${slug}`} replace />;
+}
+
 export default function App() {
   return (
     <SettingsProvider>
@@ -72,8 +85,14 @@ export default function App() {
                 {/* La portada presenta las TRES formas de ver (2026-08-06).
                     La Red de Datos (antes «Grafos») vive en /red. */}
                 <Route index element={<Entrada />} />
+                {/* ESQUEMAS (2026-08-20, Eugenio: «llámalo Esquemas, y unifica
+                    todo para ese mismo nombre»). Un lienzo, un grafo y la red
+                    de datos eran la misma fila de la base de datos dibujada de
+                    tres maneras; ahora se llaman igual. Las direcciones viejas
+                    redirigen, así que ningún enlace guardado se rompe. */}
+                <Route path="esquemas" element={<Esquemas />} />
                 <Route path="red" element={<Grafos />} />
-                <Route path="grafos" element={<Lienzos />} />
+                <Route path="grafos" element={<Navigate to="/esquemas" replace />} />
                 <Route path="base-de-datos" element={<BaseDeDatos />} />
                 <Route path="archivos" element={<Archivos />} />
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
@@ -95,12 +114,18 @@ export default function App() {
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
-                {/* /documentos/nuevo?prompt=… genera con la IA en directo;
-                    /documentos/:id abre uno guardado. */}
-                <Route path="documentos/:id" element={<Documento />} />
+                {/* /paginas/nuevo?prompt=… genera con la IA en directo;
+                    /paginas/:id abre uno guardado. */}
+                {/* El editor de documentos y el de páginas son EL MISMO
+                    (Eugenio, 2026-08-20: «se fusiona con el builder de páginas,
+                    que son lo mismo a partir de ahora»), así que vive donde
+                    dice lo que es. */}
+                <Route path="paginas/:id" element={<Documento />} />
+                <Route path="documentos/:id" element={<RedirigirPagina />} />
                 <Route path="presentaciones/:id" element={<Presentacion />} />
-                <Route path="grafos/:slug" element={<GrafoCanvas />} />
-                <Route path="lienzos" element={<Navigate to="/grafos" replace />} />
+                <Route path="esquemas/:slug" element={<GrafoCanvas />} />
+                <Route path="grafos/:slug" element={<RedirigirEsquema />} />
+                <Route path="lienzos" element={<Navigate to="/esquemas" replace />} />
                 <Route path="retos-vistas/:id" element={<RetoVistas />} />
                 <Route path="mis-mapas" element={<Mapas />} />
                 <Route path="mapas" element={<MapPage />} />

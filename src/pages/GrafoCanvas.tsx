@@ -1298,7 +1298,7 @@ export function GrafoLienzo({ slug, toolbar }: {
               <div className="mt-2 pt-2 border-t border-slate-100">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Grafos relacionados</p>
                 {data.related_graphs.map((g: any) => (
-                  <Link key={g.id} to={`/grafos/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
+                  <Link key={g.id} to={`/esquemas/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
                     <Network className="w-3 h-3 shrink-0" /> {g.title}
                   </Link>
                 ))}

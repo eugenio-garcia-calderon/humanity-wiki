@@ -18,8 +18,8 @@ import { cn } from '../utils/cn';
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
 // ============================================================================
-// Una página por documento (/documentos/:id). Tres modos:
-//  - GENERÁNDOSE (/documentos/nuevo?prompt=…): la IA lo escribe en directo y
+// Una página por documento (/paginas/:id). Tres modos:
+//  - GENERÁNDOSE (/paginas/nuevo?prompt=…): la IA lo escribe en directo y
 //    se ve aparecer, como pidió el usuario («según lo va generando aparece»).
 //  - LECTURA: cualquiera con acceso lo lee.
 //  - EDICIÓN: el autor (o un admin) edita en el sitio, con un «+» por línea
@@ -176,7 +176,7 @@ export default function Documento() {
   }, [esNuevo, id, cargar]);
 
   // --------------------------------------------------------------------------
-  // Generación en directo (/documentos/nuevo?prompt=…)
+  // Generación en directo (/paginas/nuevo?prompt=…)
   // --------------------------------------------------------------------------
   const yaGenerado = useRef(false);
   useEffect(() => {
@@ -223,7 +223,7 @@ export default function Documento() {
               }
             } else if (evento === 'fin') {
               setGenerando(false);
-              navigate(`/documentos/${j.id}`, { replace: true });
+              navigate(`/paginas/${j.id}`, { replace: true });
               return;
             } else if (evento === 'error') {
               throw new Error(j.error);
@@ -231,7 +231,7 @@ export default function Documento() {
           }
         }
         // El servidor cerró sin `fin`: si al menos hay id, se abre lo guardado.
-        if (docId.current) navigate(`/documentos/${docId.current}`, { replace: true });
+        if (docId.current) navigate(`/paginas/${docId.current}`, { replace: true });
       } catch (e: any) {
         setGenerando(false);
         setError(e.message);
@@ -357,7 +357,7 @@ export default function Documento() {
   }, [buscadorPub, busquedaPub]);
 
   const embeber = (pub: any) => {
-    const rutaDe: Record<string, string> = { lienzo: '/grafos/', mapa: '/mapas/', proyecto: '/proyectos/' };
+    const rutaDe: Record<string, string> = { lienzo: '/esquemas/', mapa: '/mapas/', proyecto: '/proyectos/' };
     const nuevo: Bloque = {
       id: nuevoIdBloque(),
       tipo: 'publicacion',
@@ -366,7 +366,7 @@ export default function Documento() {
       pubKind: pub.kind || pub.tipo,
       pubTitulo: pub.titulo || pub.title || 'Publicación',
       pubAutor: pub.autor_nombre || undefined,
-      pubUrl: pub.tipo === 'ventana' && pub.kind === 'pagina' ? `/documentos/${pub.id}`
+      pubUrl: pub.tipo === 'ventana' && pub.kind === 'pagina' ? `/paginas/${pub.id}`
         : rutaDe[pub.tipo] ? `${rutaDe[pub.tipo]}${pub.slug || pub.id}` : undefined,
     };
     setBloques(bs => {
@@ -1122,8 +1122,10 @@ export default function Documento() {
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
-          <Link to={user ? '/mis-publicaciones' : '/explorar'} className="inline-flex items-center gap-1 font-bold text-slate-400 hover:text-slate-700 transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" /> Publicaciones
+          {/* Se vuelve a PÁGINAS, que es de donde vienes desde que documentos
+              y páginas son lo mismo (Eugenio, 2026-08-20). */}
+          <Link to={user ? '/paginas' : '/explorar'} className="inline-flex items-center gap-1 font-bold text-slate-400 hover:text-slate-700 transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Páginas
           </Link>
           {generando && (
             <span className="inline-flex items-center gap-1.5 text-emerald-700 font-black ml-2">

@@ -950,7 +950,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
           autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
           donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
-          ruta: w.grafo_slug ? `/grafos/${w.grafo_slug}` : null,
+          ruta: w.grafo_slug ? `/esquemas/${w.grafo_slug}` : null,
           publico: w.publico, ...comun(w),
         })),
         ...(muro.rows as any[]).map(p => ({
@@ -972,7 +972,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           autor_id: g.creator_user_id, autor_nombre: g.autor_nombre, autor_avatar: g.autor_avatar,
           donde: `${g.piezas} ${g.piezas === 1 ? 'pieza' : 'piezas'}`, donde_slug: g.slug,
           personal: g.es_personal,
-          ruta: `/grafos/${g.slug}`,
+          ruta: `/esquemas/${g.slug}`,
           publico: g.status === 'publicado', ...comun(g),
         })),
         ...(proyectos.rows as any[]).map(p => ({
@@ -1288,7 +1288,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
         autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
         donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
-        ruta: w.grafo_slug ? `/grafos/${w.grafo_slug}` : null,
+        ruta: w.grafo_slug ? `/esquemas/${w.grafo_slug}` : null,
         publico: w.publico, estado: w.estado, n_colaboradores: w.n_colaboradores,
         puedo_editar: mio(w.creator_user_id) || (!!usuarioId && w.soy_colaborador), soy_autor: mio(w.creator_user_id),
       });
@@ -1334,7 +1334,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         vistas: g.views, ia: g.is_ai_generated, fecha: g.created_at,
         autor_id: g.creator_user_id, autor_nombre: g.autor_nombre, autor_avatar: g.autor_avatar,
         donde: `${g.piezas} ${g.piezas === 1 ? 'pieza' : 'piezas'}`, donde_slug: g.slug, personal: g.es_personal,
-        ruta: `/grafos/${g.slug}`,
+        ruta: `/esquemas/${g.slug}`,
         publico: g.status === 'publicado', estado: g.estado, n_colaboradores: g.n_colaboradores,
         puedo_editar: mio(g.creator_user_id) || (!!usuarioId && g.soy_colaborador), soy_autor: mio(g.creator_user_id),
       });

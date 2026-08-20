@@ -46,14 +46,14 @@ const TIPOS: Record<string, { icono: any; etiqueta: string; color: string }> = {
   tabla: { icono: Table2, etiqueta: 'Tabla', color: 'text-teal-600' },
   tarea: { icono: CheckSquare, etiqueta: 'Tarea', color: 'text-emerald-600' },
   proyecto: { icono: FolderKanban, etiqueta: 'Proyecto', color: 'text-indigo-600' },
-  lienzo: { icono: Globe2, etiqueta: 'Lienzo', color: 'text-emerald-600' },
+  lienzo: { icono: Globe2, etiqueta: 'Esquema', color: 'text-emerald-600' },
   publicacion: { icono: MessageSquare, etiqueta: 'Publicación', color: 'text-slate-500' },
   mapa: { icono: Globe2, etiqueta: 'Mapa', color: 'text-blue-600' },
 };
 const infoTipo = (t: string) => TIPOS[t] || { icono: FileText, etiqueta: t, color: 'text-slate-400' };
 
 const ORIGENES: Record<Archivo['origen'], { etiqueta: string; icono: any }> = {
-  lienzo: { etiqueta: 'Lienzos', icono: Globe2 },
+  lienzo: { etiqueta: 'Esquemas', icono: Globe2 },
   muro: { etiqueta: 'Muro', icono: MessageSquare },
   mundo3d: { etiqueta: 'Mundo 3D', icono: Gamepad2 },
 };

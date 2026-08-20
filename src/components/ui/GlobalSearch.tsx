@@ -104,7 +104,7 @@ export default function GlobalSearch() {
   const goTo = (r: SearchResult) => {
     // Los grafos llevan su slug en el resultado (extra de NODE_TYPES).
     if (r.type === 'knowledge_graphs' && r.slug) {
-      navigate(`/grafos/${r.slug}`);
+      navigate(`/esquemas/${r.slug}`);
       setOpen(false);
       setQuery('');
       return;
@@ -163,7 +163,7 @@ export default function GlobalSearch() {
                 </p>
                 {grouped[type].map(r => {
                   const resolved = r.type === 'knowledge_graphs' && r.slug
-                    ? { label: r.label, to: `/grafos/${r.slug}` }
+                    ? { label: r.label, to: `/esquemas/${r.slug}` }
                     : r.type === 'user_maps' && r.slug
                     ? { label: r.label, to: `/mapas/${r.slug}` }
                     : resolveEntityLink(r.type, r.id, helpers);

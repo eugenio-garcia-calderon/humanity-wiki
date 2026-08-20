@@ -1026,7 +1026,7 @@ export default function JuegoVital() {
       if (!r?.ok || !j?.slug) { avisar(j?.error || 'No se ha podido crear.'); return; }
       await crearItemMundo({
         tipo: f.tipo, nombre,
-        url: f.tipo === 'lienzo' ? `/grafos/${j.slug}` : `/mapas/${j.slug}`,
+        url: f.tipo === 'lienzo' ? `/esquemas/${j.slug}` : `/mapas/${j.slug}`,
       });
       avisar(`${f.tipo === 'lienzo' ? 'Lienzo' : 'Mapa'} creado y plantado. Púlsalo y dale a Abrir.`);
       return;
@@ -1076,7 +1076,7 @@ export default function JuegoVital() {
       if (!r?.ok || !j?.slug) { avisar(j?.error || 'No se ha podido crear.'); return; }
       setPlantando({
         tipo: f.tipo === 'grafo' ? 'lienzo' : 'mapa', nombre,
-        url: f.tipo === 'grafo' ? `/grafos/${j.slug}` : `/mapas/${j.slug}`,
+        url: f.tipo === 'grafo' ? `/esquemas/${j.slug}` : `/mapas/${j.slug}`,
       });
       return;
     }
@@ -2567,7 +2567,7 @@ export default function JuegoVital() {
         // Un PDF subido se LEE dentro del juego con el visor del navegador
         // (fallo que vio Eugenio: antes el iframe disparaba una descarga).
         // Los demás archivos subidos (docx, zip…) no tienen visor: botón de
-        // descarga. Las páginas de la plataforma (/documentos/…) sí se abren.
+        // descarga. Las páginas de la plataforma (/paginas/…) sí se abren.
         const esPdfPropio = leyendo.tipo === 'documento' && !!leyendo.url
           && leyendo.url.startsWith('/uploads/') && /\.pdf(\?|$)/i.test(leyendo.url);
         const esMarco = !esAudio && (['enlace', 'video', 'musica', 'lienzo', 'mapa'].includes(leyendo.tipo)
@@ -2821,7 +2821,7 @@ export default function JuegoVital() {
                                       key={d.id}
                                       onClick={() => setPlantando({
                                         tipo: 'documento',
-                                        url: d.kind === 'pagina' ? `/documentos/${d.id}` : (d.config?.url || ''),
+                                        url: d.kind === 'pagina' ? `/paginas/${d.id}` : (d.config?.url || ''),
                                         nombre: d.title || 'Documento',
                                       })}
                                       className="w-full flex items-center gap-1.5 pl-8 pr-4 py-1.5 text-left text-xs font-semibold text-slate-600 hover:bg-white transition-colors"
