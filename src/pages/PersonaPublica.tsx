@@ -121,6 +121,13 @@ export default function PersonaPublica() {
   // EDITAR TU PROPIO PERFIL (2026-08-20, Eugenio: «que pueda agregar una foto
   // de perfil y una descripción»). Se edita EN EL SITIO, no en otra página:
   // ves cómo va quedando mientras escribes.
+  // OJO: estos tres estaban más abajo, DESPUÉS de los `return` de «cargando» y
+  // «no encontrada». Un hook detrás de un return se salta en unos pintados y en
+  // otros no, y React se rompe con «Rendered more hooks than during the
+  // previous render» (visto en pruebas, 2026-08-20). Todo hook, arriba.
+  const [menuFicha, setMenuFicha] = useState<string | null>(null);
+  const [renombrando, setRenombrando] = useState<ItemEscaparate | null>(null);
+  const [quitando, setQuitando] = useState<ItemEscaparate | null>(null);
   const [editandoPerfil, setEditandoPerfil] = useState(false);
   const [borrador, setBorrador] = useState({ nombre: '', bio: '', avatar: '' });
   const [subiendoFoto, setSubiendoFoto] = useState(false);
@@ -222,10 +229,6 @@ export default function PersonaPublica() {
    *  es una cosa de una tabla: es un sitio, y no se renombra ni se quita. */
   const tipoEditable = (t: ItemEscaparate['tipo']) =>
     t === 'grafo' ? 'esquema' : t === 'mundo' ? null : t;
-
-  const [menuFicha, setMenuFicha] = useState<string | null>(null);
-  const [renombrando, setRenombrando] = useState<ItemEscaparate | null>(null);
-  const [quitando, setQuitando] = useState<ItemEscaparate | null>(null);
 
   /** Quitar del escaparate = archivar la cosa. Se avisa de eso mismo antes. */
   const archivar = async (it: ItemEscaparate) => {
