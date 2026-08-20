@@ -2074,3 +2074,47 @@ words to match reality**:
 
 The rule, in one line: **success is decided by the data that comes back, never
 by the narration.**
+
+## 2026-08-20 — B27: the figure is decided by the source, never by plausibility
+
+Reported as «the AI invents technical data»: it answered «120 km» where the
+project says 90 km/día, apparently confusing it with «120 kg en vacío» in the
+same sentence, and quoted a speed of «45 km/h» that exists nowhere.
+
+**The reported symptom was an artefact of my own test.** The page I used to
+verify B22 was one I wrote by hand, and it contained «45 km/h» and «120 km»
+verbatim. The assistant quoted them faithfully. My mistake was the test itself:
+a page that already contains the answer proves the model can read, not that it
+will refuse to invent. **A test that cannot fail proves nothing.**
+
+**But building the real trap uncovered a genuine bug underneath**: the context
+carried only each project's *name* and pending count — never its `descripcion`
+or `vision`. The assistant could not answer about a project's characteristics
+even when its owner had written them down. Measured before touching anything:
+asked for the range it replied «no hay ningún dato… no voy a inventar un
+número» — passing, but for the wrong reason.
+
+Fixed: projects now travel with their description and vision, and the stable
+prompt gained four rules, deliberately at the end where they weigh most:
+
+1. **Name the source of every figure** — «90 km/día (descripción del
+   proyecto)». If you cannot name the source, you do not have the datum.
+2. **Read the unit before using the number.** The «120 kg en vacío» / «90
+   km/día» case is written into the prompt as a literal example: a concrete
+   example beats an abstract rule, and confusing mass with range in an
+   ultralight-vehicle project is the most expensive mistake available.
+3. **Never invent intermediate values** to close a calculation. Missing the
+   speed, the efficiency or the sun hours → say so and ask.
+4. If only part of the data is there, do the part you can and say what is
+   missing.
+
+Verified against the trap (a project whose description holds both numbers in
+one sentence): «90 km/día … (según la descripción del proyecto)», calling the
+120 kg mass; «no puedo darte el número sin la velocidad de crucero, ese dato no
+está en la plataforma»; and «no tengo ese dato», quoting what does exist. **This
+is now a fixed regression check to repeat on every prompt change.**
+
+Team rule adopted from this: when anyone reports a figure, say where it comes
+from — production or local, and which project or page. Three of today's
+disagreements came from comparing numbers across environments without saying
+so. It is the same rule we just gave the assistant.

@@ -439,6 +439,13 @@ APUNTAR ALGO EN EL CALENDARIO. Si te piden una cita, una reunión, un recordator
 
 Parámetros: titulo (obligatorio), inicio (ISO con hora y zona, obligatorio), fin, todo_el_dia, lugar, descripcion, repeticion (RRULE de iCalendar, p. ej. "FREQ=WEEKLY", si se repite).
 
+LAS CIFRAS SON SAGRADAS. Esta es una plataforma de investigación: un número inventado con unidades puestas es peor que un «no lo sé», porque parece un dato.
+
+1. CADA CIFRA QUE DES, DI DE DÓNDE SALE, entre paréntesis y corto: «90 km/día (descripción del proyecto)», «4,08 kWh (tu página “Balance energético”)». Si no puedes nombrar la fuente, es que no tienes el dato.
+2. MIRA LA UNIDAD ANTES DE USAR EL NÚMERO. En una misma frase puede haber «120 kg en vacío» y «90 km/día»: son cosas distintas y confundirlas es el error más caro que puedes cometer aquí. Kilogramos no son kilómetros.
+3. NO TE INVENTES VALORES INTERMEDIOS PARA CERRAR UN CÁLCULO. Si te falta la velocidad, el rendimiento o las horas de sol, DILO y pide el dato. Nunca elijas un valor «razonable» para que salga la cuenta: quien lea tu respuesta no puede distinguir ese número de uno medido.
+4. Si te piden un cálculo y tienes solo parte de los datos, haz la parte que puedas y di exactamente qué te falta.
+
 LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando la acción en el bloque. No digas que no puedes.
 
 · CREATE_TAREA — «añade una tarea a X», «apúntame que hay que…». Parámetros:
@@ -944,7 +951,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         try {
           const [proy, tareas, gente, evs] = await Promise.all([
             db.execute(sql`
-              SELECT p.id, p.titulo, p.slug,
+              SELECT p.id, p.titulo, p.slug, p.descripcion, p.vision,
                      (SELECT count(*)::int FROM roadmap_items r
                        WHERE r.proyecto_id = p.id AND r.archived_at IS NULL AND r.estado <> 'hecho') AS pendientes
               FROM proyectos p
@@ -969,7 +976,15 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             `),
           ]);
           return {
-            proyectos: proy.rows.map((p: any) => `${p.titulo} (${p.pendientes} pendientes)`),
+            // Con su DESCRIPCIÓN: ahí es donde vive «autonomía 90 km/día», y
+            // sin ella la IA no podía responder por las características de un
+            // proyecto aunque las tuviera escritas su dueño.
+            proyectos: proy.rows.map((p: any) => ({
+              nombre: p.titulo,
+              pendientes: p.pendientes,
+              descripcion: p.descripcion || undefined,
+              vision: p.vision ? String(p.vision).slice(0, 1200) : undefined,
+            })),
             tareas_pendientes: tareas.rows.map((t: any) => `${t.titulo} [${t.estado}]${t.proyecto ? ` · ${t.proyecto}` : ''}`),
             personas: gente.rows.map((g: any) => g.rol ? `${g.nombre} (${g.rol})` : g.nombre),
             proximos_eventos: evs.rows.map((e: any) => `${e.titulo} · ${new Date(e.inicio).toLocaleString('es-ES')}`),
