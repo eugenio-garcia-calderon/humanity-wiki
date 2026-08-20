@@ -165,14 +165,28 @@ export default function TableroKanban({
   useEffect(() => {
     if (!eligiendoColumna) return;
     const fuera = () => setEligiendoColumna(false);
+    // Escape también cierra (2026-08-20): un desplegable que solo se cierra
+    // pinchando fuera obliga a usar el ratón para deshacer algo que abriste
+    // sin querer.
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setEligiendoColumna(false); };
     window.addEventListener('click', fuera);
-    return () => window.removeEventListener('click', fuera);
+    window.addEventListener('keydown', esc);
+    return () => { window.removeEventListener('click', fuera); window.removeEventListener('keydown', esc); };
   }, [eligiendoColumna]);
 
   const estadoDe = (it: ItemTablero) => movidas[it.id] || it.estado;
   const nombreDe = (col: { id: string; label: string }) => columnas?.[col.id as keyof NombresDeColumna] || col.label;
 
-  const grupoDe = (id: string) => grupos.find(g => g.id === id) || grupos[0] || { id, label: id, color: '#64748b' };
+  /** La etiqueta de una tarjeta. Si su grupo NO está en la lista del proyecto
+   *  —porque se creó con otro, o se borró la etiqueta— se enseña ESE grupo con
+   *  un color neutro, nunca el primero de la lista (2026-08-20).
+   *
+   *  Caerse al primero era mentir: una tarjeta con grupo «general» se pintaba
+   *  «PRODUCTO» en morado, mientras el contador decía «Producto 0» y filtrar
+   *  por Producto no la encontraba. Tres sitios contando cosas distintas de la
+   *  misma tarjeta. */
+  const grupoDe = (id: string) =>
+    grupos.find(g => g.id === id) || { id, label: id || 'sin etiqueta', color: '#94a3b8' };
   const visibles = useMemo(() => (filtro ? items.filter(i => i.grupo === filtro) : items), [items, filtro]);
 
   return (
@@ -415,10 +429,21 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
 
   const bloques = Array.isArray(item.bloques) ? item.bloques : [];
 
-  const anadirTexto = () => {
+  /** El cuerpo con desplazamiento de la ficha, para poder bajar hasta la nota
+   *  recién añadida. */
+  const cuerpoRef = useRef<HTMLDivElement>(null);
+
+  const anadirTexto = async () => {
     if (!texto.trim()) return;
-    guardar({ bloques: [...bloques, { tipo: 'texto', texto: texto.trim() }] });
+    await guardar({ bloques: [...bloques, { tipo: 'texto', texto: texto.trim() }] });
     setTexto('');
+    // BAJAR HASTA LA NOTA NUEVA (2026-08-20). La nota se añadía al final de la
+    // lista, detrás del cajón de escribir que está fijo al pie: escribías,
+    // pulsabas «Añadir nota» y parecía que no había pasado nada.
+    requestAnimationFrame(() => {
+      const c = cuerpoRef.current;
+      if (c) c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' });
+    });
   };
 
   const subirImagen = async (f: File) => {
@@ -467,7 +492,7 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        <div ref={cuerpoRef} className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           <TextoEditable
             valor={item.resumen || ''}
             editable={puedeEditar}
@@ -493,11 +518,30 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
                 <c.icon className="w-3.5 h-3.5" /> {c.label}
               </button>
             ))}
-            <span className={cn('ml-auto text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full',
-              item.prioridad === 'alta' ? 'bg-red-50 text-red-700'
-                : item.prioridad === 'media' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500')}>
-              Prioridad {item.prioridad}
-            </span>
+            {/* LA PRIORIDAD SE CAMBIA (2026-08-20). Era una insignia decorativa:
+                el dato existía, se pedía al crear la tarjeta y luego no había
+                forma de tocarlo — siendo repriorizar lo que más se hace en un
+                tablero. Los mismos tres valores que el formulario de creación,
+                ni uno más. */}
+            <div className="ml-auto flex items-center gap-1">
+              {(['alta', 'media', 'baja'] as const).map(p => (
+                <button
+                  key={p}
+                  disabled={!puedeEditar || guardando}
+                  onClick={() => guardar({ prioridad: p })}
+                  title={`Prioridad ${p}`}
+                  className={cn('text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full border transition-colors',
+                    item.prioridad === p
+                      ? (p === 'alta' ? 'bg-red-50 text-red-700 border-red-200'
+                        : p === 'media' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-slate-100 text-slate-600 border-slate-200')
+                      : 'bg-white text-slate-400 border-slate-200 hover:border-slate-400',
+                    !puedeEditar && 'cursor-default')}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
 
           <SelectorResponsable item={item} puedeEditar={puedeEditar} onGuardar={guardar} />

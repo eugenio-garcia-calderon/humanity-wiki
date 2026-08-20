@@ -347,9 +347,12 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
   const CONTENIDOS: Record<string, { cuantos: number; hijos: React.ReactNode; accion?: React.ReactNode }> = {
     proyectos: {
       cuantos: nodosProyectos.length,
+      // El «+» CREA (2026-08-20). Antes solo llevaba al índice, que es lo que
+      // hace ya el nombre de la sección: un botón con un más tiene que crear
+      // algo, o no ser un más.
       accion: (
-        <button onClick={() => abrir({ id: 'p', label: 'Mis proyectos', destino: '/proyectos' })}
-          title="Ver todos los proyectos"
+        <button onClick={() => abrir({ id: 'p', label: 'Nuevo proyecto', destino: '/proyectos?nuevo=1' })}
+          title="Crear un proyecto"
           className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
           <Plus className="w-3.5 h-3.5" />
         </button>

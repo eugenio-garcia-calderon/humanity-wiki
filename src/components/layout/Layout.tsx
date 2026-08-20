@@ -276,7 +276,15 @@ export default function Layout() {
     // el menú metido en un desplegable del botón ☰; con un árbol de proyectos
     // dentro eso no vale, porque se cerraba en cuanto pulsabas nada.
     <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
-      <MenuLateral colapsado={menuColapsado} onColapsar={setMenuColapsado} activo={location.pathname} />
+      {/* EL MENÚ DE TRABAJO ES PARA QUIEN HA ENTRADO (2026-08-20). Antes se
+          pintaba igual a un visitante anónimo —hasta en /login— con «Todavía
+          no tienes proyectos» y «Todavía no ofreces nada» hablándole de tú a
+          alguien que no tiene nada porque ni siquiera ha entrado. Sin sesión
+          no hay proyectos, ni productos, ni personas: enseñar el armazón vacío
+          no informa, confunde. */}
+      {user && (
+        <MenuLateral colapsado={menuColapsado} onColapsar={setMenuColapsado} activo={location.pathname} />
+      )}
 
       <div className="flex-1 flex flex-col min-w-0">
       {/* Barra superior: SOLO las ventanas abiertas. La marca y las secciones

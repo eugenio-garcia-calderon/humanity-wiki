@@ -24,7 +24,7 @@ import { sql } from 'drizzle-orm';
 // SIEMPRE es lo del usuario que pregunta: aquí no hay listado público.
 
 /** Dónde vive cada cosa, para que la ficha sepa a dónde llevarte. */
-type Origen = 'lienzo' | 'muro' | 'mundo3d';
+type Origen = 'lienzo' | 'paginas' | 'muro' | 'mundo3d';
 
 export function registerArchivosRoutes(app: Express, db: any) {
   app.get('/api/archivos', async (req: Request, res: Response) => {
@@ -38,10 +38,12 @@ export function registerArchivosRoutes(app: Express, db: any) {
       // nacido en el chat no cuelga de ningún lienzo y también es tuyo.
       const ventanas = await db.execute(sql`
         SELECT w.id, w.title, w.kind, w.config, w.created_at, w.updated_at, w.publico,
-               g.slug AS grafo_slug, g.title AS grafo_titulo
+               g.slug AS grafo_slug, g.title AS grafo_titulo,
+               p.titulo AS proyecto_titulo, p.slug AS proyecto_slug
         FROM knowledge_windows w
         LEFT JOIN graph_windows gw ON gw.window_id = w.id
         LEFT JOIN knowledge_graphs g ON g.id = gw.graph_id AND g.archived_at IS NULL AND g.deleted_at IS NULL
+        LEFT JOIN proyectos p ON p.id = w.proyecto_id AND p.archived_at IS NULL
         WHERE w.creator_user_id = ${yo}
           AND w.archived_at IS NULL AND w.deleted_at IS NULL
           AND (${like}::text IS NULL OR w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
@@ -82,9 +84,15 @@ export function registerArchivosRoutes(app: Express, db: any) {
       const salida = [
         ...(ventanas.rows as any[]).map(w => {
           const cfg = w.config || {};
+          // DE DÓNDE VIENE DE VERDAD (2026-08-20). Todas las ventanas se
+          // marcaban «Esquemas», así que una página de un proyecto salía
+          // atribuida a un esquema al que no pertenece. Una ventana está en un
+          // esquema solo si de verdad cuelga de uno; una página es una página.
+          const esPagina = w.kind === 'pagina' || w.kind === 'documento';
+          const origen: Origen = w.grafo_slug ? 'lienzo' : esPagina ? 'paginas' : 'lienzo';
           return {
             id: w.id,
-            origen: 'lienzo' as Origen,
+            origen,
             tipo: w.kind,
             titulo: w.title || 'Sin título',
             resumen: recorta(cfg.body || cfg.descripcion || null),
@@ -94,8 +102,11 @@ export function registerArchivosRoutes(app: Express, db: any) {
             privado: w.publico === false,
             // Una ventana con lienzo se abre EN su lienzo (contexto); una
             // suelta, en su ficha.
-            abrir: w.grafo_slug ? `/esquemas/${w.grafo_slug}` : `/explorar?ventana=${w.id}`,
-            contexto: w.grafo_titulo || null,
+            abrir: w.grafo_slug ? `/esquemas/${w.grafo_slug}`
+              : esPagina ? `/paginas/${w.id}`
+              : `/explorar?ventana=${w.id}`,
+            // El contexto es dónde vive: su esquema, o su proyecto.
+            contexto: w.grafo_titulo || w.proyecto_titulo || null,
           };
         }),
         ...(muro.rows as any[]).map(p => ({

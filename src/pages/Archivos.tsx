@@ -16,13 +16,14 @@ import { useNavigate } from 'react-router-dom';
 import {
   Database, Search, Loader2, FileText, StickyNote, Image as ImageIcon, Video, Table2,
   CheckSquare, Globe2, Gamepad2, Music, MessageSquare, Lock, ExternalLink, Pencil, FolderKanban,
+  Presentation, Users2, Link as LinkIcon,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Archivo {
   id: string;
-  origen: 'lienzo' | 'muro' | 'mundo3d';
+  origen: 'lienzo' | 'paginas' | 'muro' | 'mundo3d';
   tipo: string;
   titulo: string;
   resumen: string | null;
@@ -49,11 +50,29 @@ const TIPOS: Record<string, { icono: any; etiqueta: string; color: string }> = {
   lienzo: { icono: Globe2, etiqueta: 'Esquema', color: 'text-emerald-600' },
   publicacion: { icono: MessageSquare, etiqueta: 'Publicación', color: 'text-slate-500' },
   mapa: { icono: Globe2, etiqueta: 'Mapa', color: 'text-blue-600' },
+  // Los que faltaban y salían en crudo (2026-08-20): en la fila de filtros
+  // convivían «Nota» y «Documento» con «pagina», «wikipedia», «presentacion»,
+  // «soluciones» y «autores» — los identificadores internos, tal cual.
+  pagina: { icono: FileText, etiqueta: 'Página', color: 'text-sky-600' },
+  wikipedia: { icono: Globe2, etiqueta: 'Wikipedia', color: 'text-slate-600' },
+  presentacion: { icono: Presentation, etiqueta: 'Presentación', color: 'text-orange-600' },
+  soluciones: { icono: CheckSquare, etiqueta: 'Soluciones', color: 'text-emerald-600' },
+  autores: { icono: Users2, etiqueta: 'Autores', color: 'text-indigo-600' },
+  enlace: { icono: LinkIcon, etiqueta: 'Enlace', color: 'text-blue-500' },
+  grafica: { icono: Table2, etiqueta: 'Gráfica', color: 'text-teal-600' },
+  ficha: { icono: FileText, etiqueta: 'Ficha', color: 'text-slate-600' },
 };
-const infoTipo = (t: string) => TIPOS[t] || { icono: FileText, etiqueta: t, color: 'text-slate-400' };
+/** Un tipo desconocido sale al menos con su inicial en mayúscula, nunca con el
+ *  identificador crudo: «Presentacion» se lee, «presentacion» canta. */
+const infoTipo = (t: string) => TIPOS[t] || {
+  icono: FileText,
+  etiqueta: (t || '').replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase()),
+  color: 'text-slate-400',
+};
 
 const ORIGENES: Record<Archivo['origen'], { etiqueta: string; icono: any }> = {
   lienzo: { etiqueta: 'Esquemas', icono: Globe2 },
+  paginas: { etiqueta: 'Páginas', icono: FileText },
   muro: { etiqueta: 'Muro', icono: MessageSquare },
   mundo3d: { etiqueta: 'Mundo 3D', icono: Gamepad2 },
 };

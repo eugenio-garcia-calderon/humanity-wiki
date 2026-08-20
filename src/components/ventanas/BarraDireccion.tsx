@@ -59,7 +59,11 @@ export default function BarraDireccion({
         const segs: Segmento[] = Array.isArray(d?.segmentos) ? d.segmentos : [];
         setSegmentos(segs);
         const ultimo = segs[segs.length - 1]?.label;
-        if (ultimo) onNombre?.(ultimo.replace(/-/g, ' ').replace(/^./, c => c.toUpperCase()));
+        // El servidor ya manda el nombre BUENO (el título que puso la
+        // persona). Antes se le hacía un apaño tipográfico —quitar guiones y
+        // poner mayúscula— porque llegaba el slug: eso convertía «AI - MEJORAS»
+        // en «Ai mejoras rwkc». Ya no hace falta maquillar nada.
+        if (ultimo) onNombre?.(ultimo);
       })
       // Si falla, se enseña la ruta cruda: mejor algo verdadero que un hueco.
       .catch(() => { if (vivo) setSegmentos([{ label: ruta.replace(/^\//, ''), url: ruta }]); });

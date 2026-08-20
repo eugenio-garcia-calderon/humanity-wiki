@@ -1989,3 +1989,45 @@ console.
 projects and **all five are `publico: true`**. The filter (`p.publico OR
 creador = me`) is correct; no private project leaks. «Camión camperizado» is a
 local project and is not in production at all.
+
+## 2026-08-20 — Bug batch from the Tester: menu, board and Archivos
+
+- **B3** — the work sidebar was rendered to anonymous visitors, even on
+  `/login`, telling someone who had not signed in «Todavía no tienes
+  proyectos». Without a session there is nothing to list; showing the empty
+  scaffolding does not inform, it confuses. Now it needs a session.
+- **B6** — the «+» beside PROYECTOS opened the index, which is what the section
+  name already does. It now opens the create dialog (`/proyectos?nuevo=1`).
+- **B7** — creating a project never told the sidebar, so it kept saying
+  «PROYECTOS 4» until a full reload. It dispatches `humanity:menu-cambiado`.
+- **B8** — window tabs were titled with the slug prettified («Ai mejoras rwkc»)
+  instead of the real name («AI - MEJORAS»). `/api/ruta` now returns the
+  project's title; the client stopped doing typographic repairs on a slug.
+- **B9** — the new-project dialog had no `role="dialog"` / `aria-modal`, so a
+  screen reader read it as more page.
+- **B10** — Escape now closes the column dropdown.
+- **B12 / B13, same root** — the toolbar's «Tarea» button inserted an untitled
+  task instantly with no dialog, while the green «Añadir tarea» beside it opened
+  a form: two near-homonymous buttons behaving differently. And it wrote
+  `grupo: 'general'`, which is in no project's list, so the card rendered with
+  the *first* group's label and colour while that group's counter said 0 and
+  filtering by it did not find the card — three places disagreeing about one
+  task. Now the button opens the same form, the server picks a group that
+  exists, and `grupoDe` shows the real group in grey instead of falling back to
+  `grupos[0]`. **A card can no longer lie about its label.**
+- **B15** — a new note landed behind the fixed composer; the ficha now scrolls
+  to it.
+- **B19** — every window was labelled «Esquemas», so a project's page appeared
+  attributed to a graph it does not belong to. Origin is now real: a graph if it
+  hangs from one, «Páginas» if it is a page, and the context shows its project.
+- **B20** — the type filters mixed «Nota» and «Documento» with raw ids
+  («pagina», «wikipedia», «presentacion»…). Added the missing labels, and an
+  unknown type is at least capitalised rather than printed raw.
+- **D5** — the «PRIORIDAD MEDIA» badge was decorative: the field existed and was
+  asked for at creation, but re-prioritising — the most frequent thing on a
+  board — was impossible. Three buttons, same values as the form.
+
+**B2 closed as not-a-bug** (no leak: the filter is correct). I was wrong about
+one detail and the Tester corrected me: «Camión camperizado» *does* exist in
+production as a private project. It does not leak, but it is not local-only —
+I should have checked instead of inferring it from the anonymous listing.
