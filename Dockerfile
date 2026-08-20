@@ -19,6 +19,11 @@ RUN npm run build
 FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
+# El Chromium del navegador remoto (src/server/navegadorRemoto.ts). En Alpine
+# no sirve el Chromium que descarga Playwright (es de glibc y esto es musl):
+# se instala el del sistema y se le dice a Playwright dónde está.
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont font-noto-emoji
+ENV NAVEGADOR_CHROMIUM=/usr/bin/chromium-browser
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 COPY --from=build /app/dist ./dist

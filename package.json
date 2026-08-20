@@ -40,6 +40,7 @@
     "pdfjs-dist": "^6.2.108",
     "pdfkit": "^0.19.1",
     "pg": "^8.22.0",
+    "playwright": "^1.62.1",
     "postprocessing": "^6.39.4",
     "pptxgenjs": "^4.0.1",
     "prop-types": "^15.8.1",

@@ -43,3 +43,8 @@ export const publicarVentanas = (v: VentanaEstado[]) =>
  *  las ventanas restauradas no aparecerían hasta el siguiente cambio. */
 export const pedirVentanas = () =>
   window.dispatchEvent(new Event('humanity:pedir-ventanas'));
+
+/** El navegador remoto (Chromium en el servidor) avisa de su sesión para que
+ *  el chat del Escritorio lea la página VIVA en vez de descargar una copia. */
+export const avisarNavegadorRemoto = (sesion: string | null) =>
+  window.dispatchEvent(new CustomEvent('humanity:navegador-remoto', { detail: sesion }));

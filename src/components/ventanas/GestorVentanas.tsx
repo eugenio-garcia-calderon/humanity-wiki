@@ -289,8 +289,17 @@ export default function GestorVentanas({ onPaginaNavegador }: {
             </div>
           </div>
 
-          {/* El contenido */}
-          <div className="flex-1 min-h-0 relative bg-white">
+          {/* El contenido. `inert` en las ventanas de ATRÁS: el juego embebido
+              coge el foco del teclado para sus controles y, si está de fondo,
+              SE LO ROBA a la ventana de delante — escribías en el navegador y
+              las teclas se las comía el juego (visto en pruebas, 2026-08-20).
+              Con inert sigue dibujándose y corriendo, pero no puede capturar
+              ni foco ni teclas hasta que lo traigas al frente. */}
+          <div
+            className="flex-1 min-h-0 relative bg-white"
+            // @ts-expect-error — React 18 solo acepta inert como cadena vacía.
+            inert={v.z === Math.max(...ventanas.filter(x => !x.minimizada).map(x => x.z)) ? undefined : ''}
+          >
             {v.clase === 'navegador'
               ? <Navegador inicial={v.destino}
                   onTitulo={t => cambiar(v.id, { titulo: t })}
