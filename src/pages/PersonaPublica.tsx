@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
-  Eye, EyeOff, Plus, Pencil, Check, GripVertical,
+  Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare,
   FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid,
 } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
@@ -214,6 +214,17 @@ export default function PersonaPublica() {
 
         {!isMe && (
           <div className="flex items-center gap-2 pb-1">
+            {/* ESCRIBIRLE (2026-08-20). Solo con sesión: un mensaje tiene que
+                venir de alguien. */}
+            {can(ROLE.USER) && (
+              <Link
+                to={`/mensajes?con=${id}`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                Escribir
+              </Link>
+            )}
             {can(ROLE.USER) && (
               <button
                 onClick={toggleFollow}
