@@ -67,9 +67,11 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
         className={cn('w-9 h-9 mx-auto grid place-items-center rounded-lg transition-colors shrink-0',
           esActiva ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900')}
       >
+        {/* Un 25 % más grandes (Eugenio, 2026-08-20): 16 px se quedaban
+            pequeños, y plegado el menú el icono es lo ÚNICO que se ve. */}
         {icono
-          ? <span className="text-[13px] leading-none">{icono}</span>
-          : <Icono className="w-4 h-4" />}
+          ? <span className="text-[16px] leading-none">{icono}</span>
+          : <Icono className="w-5 h-5" />}
       </button>
     );
   }
@@ -115,8 +117,8 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
           className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left"
         >
           {icono
-            ? <span className="w-4 shrink-0 text-center text-[13px] leading-none">{icono}</span>
-            : <Icono className={cn('w-4 h-4 shrink-0', esActiva ? 'text-emerald-600' : 'text-slate-400')} />}
+            ? <span className="w-5 shrink-0 text-center text-[16px] leading-none">{icono}</span>
+            : <Icono className={cn('w-5 h-5 shrink-0', esActiva ? 'text-emerald-600' : 'text-slate-400')} />}
           <span className={cn('flex-1 truncate text-[13px] font-bold',
             esActiva ? 'text-emerald-700' : 'text-slate-700')}>
             {label}

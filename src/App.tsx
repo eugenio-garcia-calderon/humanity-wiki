@@ -33,6 +33,7 @@ import Tareas from './pages/Tareas';
 import Paginas from './pages/Paginas';
 import Mensajes from './pages/Mensajes';
 import Persona from './pages/Persona';
+import Calendario from './pages/Calendario';
 import Entrada from './pages/Entrada';
 import Configuracion from './pages/Configuracion';
 import BaseDeDatos from './pages/BaseDeDatos';
@@ -114,6 +115,7 @@ export default function App() {
                 <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
+                <Route path="calendario" element={<Calendario />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="mensajes" element={<Mensajes />} />
                 {/* Una persona de TU mundo: su ficha y vuestra conversación, sin

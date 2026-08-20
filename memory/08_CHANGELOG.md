@@ -1383,3 +1383,19 @@ Cuatro peticiones de Eugenio en el mismo rato.
 - **`GET /api/juego/agentes/:id`** trae la ficha y los mensajes de su hilo en una sola llamada.
 - El menú y el árbol de proyectos ya no llevan al Mundo 3D al pulsar una persona.
 - Verificado de verdad: preguntándole «¿quién eres?», Anita contesta **«Soy Anita, una habitante de tu mundo en el Juego Vital…»**, en su papel y sin cargar ninguna escena. (Conversación de prueba borrada después.)
+
+### 2026-08-20 — CALENDARIO (fases 1 y 2), fichas del perfil con menú, e iconos más grandes
+**1. CALENDARIO** (Eugenio: «añade una herramienta más: Calendario […] que todo esté integrado, que sea un calendario TOP»).
+- **LA IDEA QUE MANDA: el calendario NO es un sitio donde se guardan cosas, es una FORMA DE MIRAR lo que ya existe**, ordenado por cuándo pasa. `GET /api/calendario` no lee una tabla: lee varias y las junta.
+  - **Los eventos** (reuniones, viajes) sí nacen aquí, porque no existía nada parecido: tabla `eventos` con inicio, fin, todo el día, lugar, proyecto y color.
+  - **Tus tareas con fecha NO se copian**: se les añade `vence_el` y el calendario las lee de donde ya viven. Copiarlas habría creado dos verdades —la del tablero y la del calendario— que se separan al primer cambio. **Mover una tarea de día en el calendario cambia la tarea de verdad**, y el tablero se entera solo.
+  - Añadir una fuente más mañana (un pago que vence, una publicación programada) es **una consulta más aquí y nada más**: ni tabla, ni copia, ni sincronización que se pueda romper.
+- **TRES VISTAS** (mes, semana, día), navegación adelante/atrás, «Hoy», crear pulsando un día, editar y borrar, y **arrastrar cualquier cosa a otro día**.
+- **SIN LIBRERÍA DE CALENDARIO**: un mes son 42 celdas y una semana son 7. Meter una dependencia de 200 KB para eso, con su forma de entender las fechas y su tema que hay que domar, cuesta más de lo que ahorra.
+- **DOS TRAMPAS DE FECHAS, evitadas a propósito**: la clave de cada día se calcula en hora LOCAL (con `toISOString()`, un evento de la 01:00 en Madrid caería en la casilla de ayer), y los campos de fecha del formulario hablan en local, no en UTC (si no, la hora aparecería desplazada al abrir el evento).
+- `drizzle/0047`: tabla `eventos` (con `timestamptz` — una reunión a las 10:00 en Madrid es a las 10:00 aunque la mires desde otro sitio) y columna `vence_el` en las tareas. La columna `repeticion` se deja creada desde ya para la fase 3, para no migrar una tabla con datos dentro.
+- Verificado con datos reales: dos tareas suyas con fecha apareciendo solas en su día, un evento creado, y una tarea arrastrada a otro día quedando cambiada en la base de datos.
+
+**2. LAS FICHAS DEL PERFIL, CON SUS TRES PUNTITOS** («que todas las tarjetas tengan los 3 puntitos cuando se hace hover y que se puedan modificar, eliminar etc»): abrir, cambiar nombre e icono, enseñar/ocultar y quitar. Usa **el mismo popup que el menú**: renombrar algo es lo mismo se haga desde donde se haga. Quitar **archiva**, y el aviso lo dice: no se borra, si te arrepientes sigue estando. El Mundo 3D no lleva puntitos — es un sitio, no una cosa de una tabla.
+
+**3. ICONOS DEL MENÚ UN 25 % MÁS GRANDES** (16 → 20 px). Plegado el menú, el icono es lo ÚNICO que se ve.

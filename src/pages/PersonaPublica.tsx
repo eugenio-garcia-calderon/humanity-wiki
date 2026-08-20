@@ -3,12 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
   Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare, Camera, Loader2,
+  MoreHorizontal, Trash2, ExternalLink,
   FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid,
 } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 import CreateGraphModal from '../components/knowledge/CreateGraphModal';
+import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
 // Perfil público — Fase 4 (interfaz)
@@ -215,6 +217,27 @@ export default function PersonaPublica() {
   // el dueño sí, apagado, porque si no no habría forma de volver a enseñarlo.
   const colocados = colocar(items, escaparate.orden);
   const visibles = isMe ? colocados : colocados.filter(x => !escaparate.ocultos.includes(x.clave));
+
+  /** El nombre que usa la ruta genérica para cada tipo de ficha. «Mundo 3D» no
+   *  es una cosa de una tabla: es un sitio, y no se renombra ni se quita. */
+  const tipoEditable = (t: ItemEscaparate['tipo']) =>
+    t === 'grafo' ? 'esquema' : t === 'mundo' ? null : t;
+
+  const [menuFicha, setMenuFicha] = useState<string | null>(null);
+  const [renombrando, setRenombrando] = useState<ItemEscaparate | null>(null);
+  const [quitando, setQuitando] = useState<ItemEscaparate | null>(null);
+
+  /** Quitar del escaparate = archivar la cosa. Se avisa de eso mismo antes. */
+  const archivar = async (it: ItemEscaparate) => {
+    const tipo = tipoEditable(it.tipo);
+    if (!tipo) return;
+    const r = await fetch(`/api/elemento/${tipo}/${it.id}`, { method: 'DELETE', credentials: 'include' })
+      .catch(() => null);
+    if (!r?.ok) return;
+    setItems(xs => xs.filter(x => x.clave !== it.clave));
+    setQuitando(null);
+    window.dispatchEvent(new Event('humanity:menu-cambiado'));
+  };
 
   /** Guarda el escaparate en tus ajustes. Optimista: se pinta ya y se manda
    *  después — colocar fichas tiene que ir a la velocidad de la mano. */
@@ -483,6 +506,50 @@ export default function PersonaPublica() {
               );
               // Editando, la ficha NO navega: el clic es para arrastrar y para
               // el ojo. Fuera de edición es un enlace normal.
+              // LOS TRES PUNTITOS DE UNA FICHA (Eugenio, 2026-08-20: «que todas
+              // las tarjetas tengan los 3 puntitos cuando se hace hover y que
+              // se puedan modificar, eliminar etc»). Solo en TU escaparate y
+              // solo en lo que es una cosa de verdad: el Mundo 3D es un sitio,
+              // no se renombra ni se quita.
+              const puedeTocarse = isMe && !!tipoEditable(it.tipo);
+              const puntitos = puedeTocarse && (
+                <div className="absolute top-2 right-2 z-20" onClick={e => e.preventDefault()}>
+                  <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuFicha(m => (m === it.clave ? null : it.clave)); }}
+                    title={`Opciones de ${it.titulo}`}
+                    className={cn('w-7 h-7 grid place-items-center rounded-lg bg-black/30 backdrop-blur text-white transition-opacity hover:bg-black/50',
+                      menuFicha === it.clave ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100')}
+                  >
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+
+                  {menuFicha === it.clave && (
+                    <div className="absolute top-9 right-0 w-44 bg-white border border-slate-200 shadow-2xl rounded-xl py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <Link to={it.url}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400" /> Abrir
+                      </Link>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); setRenombrando(it); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                        <Pencil className="w-3.5 h-3.5 text-slate-400" /> Nombre e icono
+                      </button>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); alternarOculto(it.clave); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                        {oculto ? <Eye className="w-3.5 h-3.5 text-slate-400" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                        {oculto ? 'Enseñar' : 'Ocultar'}
+                      </button>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); setQuitando(it); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left">
+                        <Trash2 className="w-3.5 h-3.5 text-slate-400" /> Quitar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+
               return editando ? (
                 <div
                   key={it.clave}
@@ -503,15 +570,55 @@ export default function PersonaPublica() {
                       {oculto ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
+                  {puntitos}
                   {cuerpo}
                 </div>
               ) : (
-                <Link key={it.clave} to={it.url} className={clases}>{cuerpo}</Link>
+                <Link key={it.clave} to={it.url} className={clases}>
+                  {puntitos}
+                  {cuerpo}
+                </Link>
               );
             })}
           </div>
         )}
       </div>
+
+      {/* El MISMO popup que el menú: renombrar una cosa es lo mismo se haga
+          desde donde se haga. */}
+      {renombrando && tipoEditable(renombrando.tipo) && (
+        <PopupRenombrar
+          tipo={tipoEditable(renombrando.tipo)!}
+          id={renombrando.id}
+          nombre={renombrando.titulo}
+          onHecho={(n) => setItems(xs => xs.map(x => (x.clave === renombrando.clave ? { ...x, titulo: n } : x)))}
+          onCerrar={() => setRenombrando(null)}
+        />
+      )}
+
+      {/* Quitar: se dice que se archiva y qué implica. */}
+      {quitando && (
+        <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
+          onClick={() => setQuitando(null)}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
+            <h2 className="text-sm font-black text-slate-900 mb-2">¿Quitar «{quitando.titulo}»?</h2>
+            <p className="text-[12px] text-slate-600 leading-relaxed">
+              Se archiva: desaparece de tu escaparate y de tu menú, pero <b>no se borra</b>.
+              Si te arrepientes, sigue estando.
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setQuitando(null)}
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={() => archivar(quitando)}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition-colors">
+                <Trash2 className="w-4 h-4" /> Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCreateGraph && (
         <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/esquemas/${slug}`)} />

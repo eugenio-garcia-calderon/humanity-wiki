@@ -54,6 +54,34 @@ export function registerMenuRoutes(app: Express, db: any) {
    * Cambia el nombre y/o el icono de una cosa. Solo su dueño (o un
    * administrador). Mandar `icono: null` lo quita.
    */
+  /**
+   * DELETE /api/elemento/:tipo/:id — quitar una cosa. Se ARCHIVA, nunca se
+   * borra de verdad (regla 6 de la Constitución): lo que desaparece de la
+   * vista sigue estando por si te arrepientes.
+   */
+  app.delete('/api/elemento/:tipo/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const def = RENOMBRABLES[req.params.tipo];
+      if (!def) return res.status(400).json({ error: 'Eso no se puede quitar.' });
+      const fila = await db.execute(sql`
+        SELECT ${sql.raw(def.dueno)} AS dueno FROM ${sql.raw(def.tabla)}
+        WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!fila.rows.length) return res.status(404).json({ error: 'Eso ya no existe.' });
+      if ((fila.rows[0] as any).dueno !== req.user.id && (req.user.roleLevel ?? 0) < 4) {
+        return res.status(403).json({ error: 'Eso no es tuyo.' });
+      }
+      await db.execute(sql`
+        UPDATE ${sql.raw(def.tabla)} SET archived_at = now() WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('archivar elemento error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.put('/api/elemento/:tipo/:id', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
