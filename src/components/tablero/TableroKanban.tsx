@@ -4,6 +4,7 @@ import {
   CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import Adjuntos from '../archivo/Adjuntos';
 
 // ============================================================================
 // TABLERO KANBAN reutilizable (2026-08-08, petición del usuario)
@@ -595,6 +596,10 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
               </div>
             ))}
           </div>
+
+          {/* Los archivos DE ESTA TAREA: el plano, la foto del montaje, la
+              hoja de medidas. Antes solo cabían notas y capturas pegadas. */}
+          <Adjuntos contenedor="tarea_id" id={item.id} puedeEditar={puedeEditar} />
 
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5">{error}</p>}
         </div>

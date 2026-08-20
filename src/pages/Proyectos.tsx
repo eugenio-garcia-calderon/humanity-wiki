@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
 import IconoElemento from '../components/ui/Icono';
+import Adjuntos from '../components/archivo/Adjuntos';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
@@ -451,6 +452,14 @@ export function Proyecto() {
         </div>
 
         <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
+
+        {/* LOS ARCHIVOS DEL PROYECTO (2026-08-21). Es el sitio donde más
+            falta hacía: un informe, una tabla de ensayos o un modelo 3D
+            colgados aquí los encuentra mañana cualquiera del proyecto, que
+            es exactamente lo que no se podía hacer. */}
+        <div className="mt-6">
+          <Adjuntos contenedor="proyecto_id" id={proyecto.id} puedeEditar={puedeEditar} />
+        </div>
 
         <div className="mt-8">
           <TableroKanban

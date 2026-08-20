@@ -15,6 +15,7 @@ import {
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import { cn } from '../utils/cn';
+import Adjuntos from '../components/archivo/Adjuntos';
 
 // ============================================================================
 // DOCUMENTO estilo Notion (2026-08-08, petición del usuario) — Fase 1
@@ -1435,6 +1436,21 @@ export default function Documento() {
             <span className="text-[10px] text-slate-300 hidden sm:inline">
               Ctrl+clic marca varios bloques · Shift+clic marca un tramo
             </span>
+          </div>
+        )}
+
+        {/* LOS ARCHIVOS DE LA PÁGINA (2026-08-21). Van al pie y no como un
+            bloque más del texto: un adjunto no es una frase dentro del
+            documento, es algo que viene CON el documento —el informe original,
+            la hoja de datos— y se quiere encontrar siempre en el mismo sitio,
+            no buscándolo entre los párrafos.
+
+            Solo si la página ya existe. Una página que aún no se ha guardado no
+            tiene de qué colgar nada, y ofrecer el botón sería prometer algo que
+            fallaría al pulsarlo. */}
+        {id && !esNuevo && (
+          <div className="mt-10">
+            <Adjuntos contenedor="pagina_id" id={id} puedeEditar={puedoEditar} />
           </div>
         )}
       </div>

@@ -2286,3 +2286,22 @@ Also in this batch: **D18**, the created-item card now links to the task itself
 (`/tareas?tarea=<id>`) and opens in a new tab, because with 136 tasks a link to
 the index is barely a link; and **B39**, the card shows the group's *label* and
 never the raw id («Diseño», not «Diseno»).
+
+## 2026-08-21 — The persistent archive gets its visible half
+
+`archivo.ts` gave files a place to live but no door to walk in through. Three
+doors now exist, all the same component (`src/components/archivo/Adjuntos.tsx`):
+the project page, the task card in the kanban, and the foot of a page in the
+editor. One component, so a bug in attaching is one bug and not three.
+
+Attaching is two calls that look like one: bytes to `/api/uploads` (which
+already knew about types and sizes), then `/api/archivo` to record what they
+hang from. Nothing that already uploaded files had to learn about containers.
+
+Also allowed `text/plain`, `text/markdown` and `.tsv` in `uploads.ts`. They are
+served as downloads like everything else, and refusing them forced you to zip a
+notes file to be able to keep it, which is absurd.
+
+On a page, the section only appears once the page exists. A page that has not
+been saved has nothing to hang a file from, and offering the button would be
+promising something that fails when pressed.
