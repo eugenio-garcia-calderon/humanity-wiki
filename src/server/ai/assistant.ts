@@ -1281,10 +1281,12 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         // comprobarlo a mano — que es justo lo que hizo falta para descubrir
         // que una tarea pedida como «Técnico» se había guardado como
         // «Producto». Si el detalle se ve, el fallo se ve.
+        const g = (result as any).guardado;
         const detalle = [
-          action.params?.proyecto,
-          action.params?.grupo,
-          action.params?.prioridad && action.params.prioridad !== 'media' ? `prioridad ${action.params.prioridad}` : null,
+          g?.proyecto ?? action.params?.proyecto,
+          g?.grupo ?? action.params?.grupo,
+          (g?.prioridad ?? action.params?.prioridad) && (g?.prioridad ?? action.params?.prioridad) !== 'media'
+            ? `prioridad ${g?.prioridad ?? action.params?.prioridad}` : null,
         ].filter(Boolean).join(' · ');
         if (url) enseñar = { titulo: nombre || spec.description, url, detalle: detalle || undefined };
       }
@@ -1435,10 +1437,12 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           // entre los TUYOS. Sin proyecto, la tarea queda suelta, que es
           // mejor que inventarse uno.
           let proyectoId: string | null = null;
+          let proyectoTitulo: string | null = null;
+          let grupoEtiqueta: string | null = null;
           const pista = String(params.proyecto || params.proyecto_id || '').trim();
           if (pista) {
             const p = await db.execute(sql`
-              SELECT id FROM proyectos
+              SELECT id, titulo FROM proyectos
               WHERE creador_user_id = ${actorId} AND archived_at IS NULL AND deleted_at IS NULL
                 AND (id = ${pista} OR slug = ${pista} OR lower(titulo) = lower(${pista})
                      OR lower(titulo) LIKE lower(${'%' + pista + '%'}))
@@ -1446,6 +1450,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             `);
             if (!p.rows.length) return { ok: false, error: `No encuentro un proyecto tuyo que se llame «${pista}».` };
             proyectoId = (p.rows[0] as any).id;
+            proyectoTitulo = (p.rows[0] as any).titulo || null;
           }
           const titulo = String(params.titulo || params.nombre || '').trim();
           if (!titulo) return { ok: false, error: 'La tarea necesita un título.' };
@@ -1475,8 +1480,10 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
               : null;
             if (encaja) {
               grupo = encaja.id;
+              grupoEtiqueta = encaja.label || encaja.id;
             } else {
               grupo = lista[0]?.id || 'general';
+              grupoEtiqueta = lista[0]?.label || grupo;
               if (buscado) {
                 avisoGrupo = `No hay ninguna etiqueta «${String(params.grupo).trim()}» en ese proyecto`
                   + (lista.length ? ` (tiene: ${lista.map(x => x.label).join(', ')})` : '')
@@ -1508,7 +1515,19 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
                     ${PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media'},
                     ${actorId}, '[]'::jsonb, 0, ${proyectoId}, ${responsable}, ${actorId}, ${actorId})
           `);
-          return { ok: true, entityId: id, entityType: 'roadmap_items', aviso: avisoGrupo || undefined };
+          // Se devuelve lo GUARDADO, no lo pedido: la ficha tiene que enseñar
+          // la realidad. Pedir «Marketing» y que la ficha ponga «Marketing»
+          // cuando por dentro quedó en «Producto» es exactamente el fallo que
+          // perseguimos, cometido por la propia ficha.
+          return {
+            ok: true, entityId: id, entityType: 'roadmap_items',
+            aviso: avisoGrupo || undefined,
+            guardado: {
+              proyecto: proyectoTitulo || undefined,
+              grupo: grupoEtiqueta || grupo,
+              prioridad: PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media',
+            },
+          };
         }
 
         case 'UPDATE_TAREA': {

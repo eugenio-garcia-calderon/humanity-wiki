@@ -141,6 +141,33 @@ missing".
 | Query with `db.execute(sql...)` | almost everything | Fine for now. Typed repositories are planned, not current | — |
 | Add a table to relate two entities | 43 junction tables | See `src/db/CLAUDE.md` first | — |
 
+## The root principle: everything must be able to say «I don't know»
+
+**Every component must be able to say «I don't know» or «that does not exist»
+in a way that is DISTINGUISHABLE from a valid result.**
+
+When a system cannot say that something is missing, the observer fills the gap
+with a guess — and the guess is usually wrong. This happened four times in four
+different layers on 2026-08-20, and it was always the same illness:
+
+| Layer | What could not say «no» | What was concluded instead |
+|---|---|---|
+| The API | `/api/proyectos` read 220 chars into the response | «Private projects are leaking» (they were not) |
+| A test | A test page written by hand already contained the answer | «The AI confuses kg with km» (it did not) |
+| The web server | A missing file answered 200 with the SPA's HTML | «There are 24 MB of dead files in production» (there were none — 32 of 32 verified 404) |
+| The model | No way to say «I know this number but not its source» | It invented the source |
+| The deploy | A deleted file answered 200 with the SPA's HTML | «24 MB of dead files need purging» — a task open for days, two sessions spent trying to execute it, and **32 of 32 deleted files verified 404**: there was nothing there |
+
+The last one is the most expensive of all: a failure that hid the *absence* of a
+problem cost a task open for days and two sessions trying to run a destructive
+command against production to fix something that did not exist.
+
+All of them were cured by the same medicine in different places: B40's 404, B31's
+source-citing rule, B32's card built from the server's id, and the team's own
+habit of stating where a figure comes from.
+
+So this is not a rule of the AI module. It is a rule of the product.
+
 ## When the AI can ask for something: the rule of two halves
 
 This section comes out of six bugs on 2026-08-20 that looked like six and were
@@ -165,6 +192,7 @@ a paragraph shaped like a report describing something that never happened.
 | Creating a task | `CREATE_TAREA` did not exist | «I've already pinned that task», and it did not exist |
 | Organising into folders | Nothing was returned to show | «Done», with no evidence at all |
 | Going to a territory | The destination was never validated | Navigated blindly to an empty map, no warning |
+| A task, «grupo Marketing» | The client guessed the artefact from a content word («dossier») | Wrote a whole document nobody asked for, and never mentioned the invalid group |
 
 ### What to demand before calling a new capability finished
 

@@ -2212,3 +2212,36 @@ problem and is untouched by this.
 **And the rule is now written into `src/server/CLAUDE.md`** as a design
 principle with the six cases as concrete examples, so whoever touches the AI
 module next does not repeat them.
+
+## 2026-08-21 — The card that lied, the word that hijacked, and a purge that was never needed
+
+**B36 — asked for a task, wrote a document.** The cause was never in the model:
+the client has a branch that detects «documento|informe|dossier…» plus intent to
+create, and *takes the request away* to write a page. «Crea una TAREA … del
+dossier de prensa» triggered it on the word «dossier» and the message never
+reached the AI. Naming the artefact is an **instruction**; the content is only
+subject matter — «una tarea», «un mapa», «un proyecto» now beat any loose word
+about the topic.
+
+**B32 — and a worse bug found while checking it.** Locally the card is an `<a>`
+with the full detail (verified in the DOM), and its class is present in the
+production bundle, so the Tester was most likely running a cached bundle. **But
+while proving that, I found my own card was lying**: asked for «grupo
+Marketing», the server correctly stored «Producto» — and the card said
+«Marketing», because it was built from what was *requested*, not what was
+*saved*. The piece that existed to make this class of bug visible had the bug
+inside it. The action now returns what it actually stored, and the server's
+notice («No hay ninguna etiqueta "Marketing"… la he dejado en "Producto"») is
+shown in the chat instead of only travelling in the response.
+
+**The purge that was never needed.** 32 files have been deleted from `public/`
+in the repository's whole history. All 32 verified against production: **32
+return 404, zero return 200.** Nothing to purge, and the deploy does not
+accumulate — the Dockerfile rebuilds `public/` from the repo into each image.
+What existed was a bug that made it impossible to know the problem did not
+exist: any missing file answered 200 with the SPA's HTML, so a 200 was read as
+«the file is still there». Fixing B40 made the symptom disappear on its own.
+
+**No destructive command was run.** A task open for days, ordered explicitly and
+inherited across two dead sessions, turned out to be an artefact of a missing
+404. This is now the fifth and most expensive case in the root-principle table.
