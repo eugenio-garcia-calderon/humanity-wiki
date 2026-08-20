@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database,
-  Compass, Globe, User, Plus, Package, MessageSquare,
+  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,6 +38,7 @@ const HERRAMIENTAS: NodoMenu[] = [
   { id: 'h-esquemas',  label: 'Esquemas',  icono: Globe2,       destino: '/esquemas',  abrir: 'ventana' },
   { id: 'h-mapas',     label: 'Mapas',     icono: MapIcon,      destino: '/mapas',     abrir: 'ventana' },
   { id: 'h-tareas',    label: 'Tareas',    icono: ListChecks,   destino: '/tareas',    abrir: 'ventana' },
+  { id: 'h-calendario', label: 'Calendario', icono: CalendarDays, destino: '/calendario', abrir: 'ventana' },
   { id: 'h-mundo',     label: 'Mundo 3D',  icono: Gamepad2,     destino: '/juego',     abrir: 'ventana' },
   { id: 'h-archivos',  label: 'Archivos',  icono: Database,     destino: '/archivos',  abrir: 'ventana' },
   { id: 'h-navegador', label: 'Navegador', icono: Globe,        destino: 'about:inicio' },

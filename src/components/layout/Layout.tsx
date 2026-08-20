@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
-  FileText, ChevronDown,
+  FileText, ChevronDown, CalendarDays,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -57,6 +57,8 @@ function iconoDeRuta(ruta: string) {
   if (camino === '/configuracion') return Settings;
   if (camino === '/admin/usuarios') return Users2;
   if (camino.startsWith('/tareas')) return ListChecks;
+  if (camino.startsWith('/calendario')) return CalendarDays;
+  if (camino.startsWith('/persona/')) return User;
   if (camino.startsWith('/paginas')) return FileText;
   if (camino.startsWith('/esquemas')) return Globe2;
   return AppWindow;
@@ -208,7 +210,10 @@ export default function Layout() {
   // conversación necesita el alto real de la ventana para poder desplazarse
   // sola; con márgenes de página, el cuadro de escribir se iría fuera.
   const isPersonaPage = location.pathname.startsWith('/persona/');
-  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isPersonaPage;
+  // El calendario ocupa el alto entero: la rejilla del mes se desplaza dentro
+  // de sí misma, no arrastrando la página.
+  const isCalendarioPage = location.pathname === '/calendario';
+  const fullBleed = isMapPage || isGrafosPage || isMapasPage || isRetoVistasPage || isMiConocimientoPage || isExplorarPage || isJuegoPage || isPersonaPage || isCalendarioPage;
 
   if (isEmbed) {
     return (
