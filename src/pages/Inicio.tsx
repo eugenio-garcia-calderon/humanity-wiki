@@ -38,7 +38,7 @@ const VISTAS: Vista[] = [
   },
   {
     to: '/red', src: '/red?embed=1',
-    label: 'Red de Datos', claim: 'El conocimiento conectado',
+    label: 'Grafos', claim: 'El conocimiento conectado',
     color: '#7c3aed', icon: Globe2,
     cifra: s => `${s.grafos} grafos · ${s.ventanas} publicaciones`,
   },

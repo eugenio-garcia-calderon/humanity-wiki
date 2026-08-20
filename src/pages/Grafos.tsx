@@ -342,7 +342,7 @@ export default function Grafos() {
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3 pr-1.5 py-1.5 flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-900">
-            <Globe2 className="w-4 h-4 text-emerald-600" /> Red de Datos
+            <Globe2 className="w-4 h-4 text-emerald-600" /> Grafos
           </span>
           <button
             onClick={openCreate}

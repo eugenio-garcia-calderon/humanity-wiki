@@ -187,3 +187,10 @@ ficha y el cierre del modal). El patrón correcto sería un primitivo `CardButto
 `ui/core`: ~20 minutos hoy, y crece con cada rejilla nueva (Explorar y Mercado ya
 tienen la suya). No se hizo ahora para no mezclar un refactor de primitivos con una
 página nueva. Sin colores a mano: todo son clases de la paleta.
+
+## Archivos: tres consultas en una ruta, sin paginar — 2026-08-20
+`GET /api/archivos` lanza tres SELECT (ventanas, muro, mundo 3D) con LIMIT 300 cada
+uno y ordena en memoria. Con las 61 filas de hoy sobra; a partir de ~1.000 por
+usuario habrá que paginar de verdad (cursor por fecha sobre una vista UNION). Se
+hizo así para no crear una vista ni una tabla nueva antes de saber cómo se usa la
+página. Coste de cambiarlo: ~1 hora, y no antes de que alguien note la espera.

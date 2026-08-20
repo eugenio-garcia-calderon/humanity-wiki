@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
-// Juego Vital: la escena 3D pesa ~1 MB (three.js), así que la página entera
+// Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
 const JuegoVital = lazy(() => import('./pages/JuegoVital'));
 // El escritorio va perezoso como el juego: arrastra el gestor de ventanas y el
@@ -34,6 +34,7 @@ import Mapas from './pages/Mapas';
 import Lienzos from './pages/Lienzos';
 import Inicio from './pages/Inicio';
 import BaseDeDatos from './pages/BaseDeDatos';
+import Archivos from './pages/Archivos';
 import MiConocimiento from './pages/MiConocimiento';
 import Vision from './pages/Vision';
 import Explorar from './pages/Explorar';
@@ -75,11 +76,12 @@ export default function App() {
                 <Route path="red" element={<Grafos />} />
                 <Route path="grafos" element={<Grafos />} />
                 <Route path="base-de-datos" element={<BaseDeDatos />} />
+                <Route path="archivos" element={<Archivos />} />
                 <Route path="mi-conocimiento" element={<MiConocimiento />} />
                 <Route
                   path="juego"
                   element={
-                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Juego Vital…</div>}>
+                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Mundo 3D…</div>}>
                       <JuegoVital />
                     </Suspense>
                   }
