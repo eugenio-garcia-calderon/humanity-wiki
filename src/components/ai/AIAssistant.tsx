@@ -461,7 +461,19 @@ export default function AIAssistant({ modo = 'panel' }: {
       // «dámelo en forma de documento»… no se responde con texto en la
       // burbuja: se abre /paginas/nuevo y el documento se ve escribirse en
       // directo, quedando guardado en las publicaciones de quien lo pidió.
+      // SI DICES QUÉ QUIERES, MANDA LO QUE DICES (2026-08-20). «Crea una
+      // TAREA … del dossier de prensa» se convertía en un DOCUMENTO: la
+      // palabra «dossier» disparaba esta rama y se llevaba la petición antes
+      // siquiera de llegar a la IA. Se pidió una tarea con todas las letras y
+      // salió una página que nadie quería, en la petición más cara de la
+      // tanda.
+      //
+      // Nombrar el artefacto es una instrucción; el contenido es solo tema. Si
+      // dices «una tarea», «un mapa», «un proyecto» o «una página», eso gana a
+      // cualquier palabra suelta del asunto.
+      const pideOtraCosa = /\b(una?\s+)?(tarea|tarjeta|mapa|proyecto|esquema|grafo|evento|cita|recordatorio)\b/i.test(text);
       const pideDocumento =
+        !pideOtraCosa &&
         /\b(documento|informe|acta|art[ií]culo|memoria|dossier|redacci[oó]n)\b/i.test(text) &&
         (wantsToCreate || /\b(dame|d[áa]melo|en forma de|como (un )?documento|convi[eé]rte\w*|p[áa]salo|redacta)\b/i.test(text));
       if (pideDocumento && user && !pendingAttachment) {
@@ -565,6 +577,13 @@ export default function AIAssistant({ modo = 'panel' }: {
         if (!a.autoApply || a.status !== 'propuesta') continue;
         const rj = await decideAction(a.id, 'aceptar', -1);
         if (rj?.enseñar) creado.push(rj.enseñar);
+        // El servidor puede tener algo que contar aunque la acción saliera
+        // bien: «esa etiqueta no existe, la he dejado en otra». Si no se
+        // enseña, la persona se queda con lo que dijo el modelo, que es lo
+        // que PIDIÓ y no lo que pasó.
+        if (rj?.aviso) {
+          setMessages(m => [...m, { role: 'assistant', content: rj.aviso, aviso: rj.aviso }]);
+        }
         if (rj?.ok && rj.slug && rj.entityType === 'knowledge_graphs') {
           setMessages(m => [...m, { role: 'assistant', content: `He creado el grafo como borrador y lo estoy abriendo — revísalo y publícalo cuando quieras.` }]);
           navigate(`/esquemas/${rj.slug}`);
