@@ -7,6 +7,7 @@ import {
   Search, X, Wand2, PenLine, Smile, Paperclip,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useEsMovil } from '../hooks/useEsMovil';
 import WindowContent from '../components/knowledge/WindowContent';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -93,6 +94,7 @@ export default function Documento() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const esMovil = useEsMovil();
 
   const esNuevo = id === 'nuevo';
   const prompt = searchParams.get('prompt') || '';
@@ -1150,24 +1152,48 @@ export default function Documento() {
         onDragOver={editable ? e => { if (arrastrando) { e.preventDefault(); setSobreBloque(b.id); } } : undefined}
         onDrop={editable ? () => soltarSobre(b.id) : undefined}
       >
+        {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
+            56 px por la izquierda, y aparecen al pasar el ratón.
+
+            EN UN TELÉFONO ESO ERA UN EDITOR DE SOLO LECTURA (2026-08-21, B47),
+            por dos motivos a la vez, y cada uno bastaba:
+             1. `opacity-0` + `group-hover`: un dedo NO hace hover, así que el
+                «+» no se enseñaba nunca.
+             2. `-left-14`: en 390 px la columna empieza sobre el píxel 40, así
+                que 56 px a su izquierda caen FUERA de la pantalla.
+            O sea que el único camino para añadir un bloque en medio de una
+            página era invisible y además inalcanzable.
+
+            En móvil, por tanto: siempre a la vista, dentro de la columna, y
+            con 44 px de lado. Y sin el asa de arrastrar, que es un gesto de
+            ratón: traerla a medias sería peor que dejarla en el escritorio. */}
         {editable && (
-          <div className="absolute -left-14 top-0.5 flex items-center opacity-0 group-hover/bloque:opacity-100 transition-opacity">
+          <div className={cn('absolute flex items-center transition-opacity',
+            esMovil
+              ? 'right-0 -top-1 z-10'
+              : '-left-14 top-0.5 opacity-0 group-hover/bloque:opacity-100')}>
             <button
               onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
               title="Añadir un bloque debajo"
-              className="p-1 text-slate-300 hover:text-emerald-600 hover:bg-slate-50 rounded-md transition-colors"
+              aria-label="Añadir un bloque debajo"
+              className={cn('rounded-md transition-colors',
+                esMovil
+                  ? 'w-11 h-11 grid place-items-center text-slate-400 bg-white/85 active:bg-slate-100'
+                  : 'p-1 text-slate-300 hover:text-emerald-600 hover:bg-slate-50')}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className={esMovil ? 'w-5 h-5' : 'w-4 h-4'} />
             </button>
-            <span
-              draggable
-              onDragStart={e => { setArrastrando(b.id); e.dataTransfer.effectAllowed = 'move'; }}
-              onDragEnd={() => { setArrastrando(null); setSobreBloque(null); }}
-              title="Arrastrar para reordenar"
-              className="p-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing"
-            >
-              <GripVertical className="w-4 h-4" />
-            </span>
+            {!esMovil && (
+              <span
+                draggable
+                onDragStart={e => { setArrastrando(b.id); e.dataTransfer.effectAllowed = 'move'; }}
+                onDragEnd={() => { setArrastrando(null); setSobreBloque(null); }}
+                title="Arrastrar para reordenar"
+                className="p-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing"
+              >
+                <GripVertical className="w-4 h-4" />
+              </span>
+            )}
           </div>
         )}
         {iaOcupada === b.id && (
@@ -1204,7 +1230,8 @@ export default function Documento() {
             onClick={e => e.stopPropagation()}>
             {TIPOS_MENU.map(t => (
               <button key={t.tipo} onClick={() => insertar(b.id, t.tipo)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors">
+                className={cn('flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors',
+                  esMovil ? 'h-11' : 'py-1.5')}>
                 <t.icon className="w-3.5 h-3.5 text-slate-400" /> {t.label}
               </button>
             ))}
