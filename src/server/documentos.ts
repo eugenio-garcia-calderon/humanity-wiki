@@ -174,7 +174,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   /**
    * POST /api/documentos   { titulo? }
    * Un documento EN BLANCO, sin IA: nace privado con un párrafo vacío y se
-   * abre en /documentos/:id para escribir a mano. Lo usa el creador de
+   * abre en /paginas/:id para escribir a mano. Lo usa el creador de
    * publicaciones de Explorar (2026-08-08).
    */
   app.post('/api/documentos', async (req: Request, res: Response) => {
@@ -202,7 +202,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   // PROYECTOS»).
   // ==========================================================================
   // Una página YA existe —un `knowledge_windows` de tipo 'pagina', con su
-  // editor tipo Notion en /documentos/:id—; lo que faltaba era el sitio desde
+  // editor tipo Notion en /paginas/:id—; lo que faltaba era el sitio desde
   // el que verlas todas. Esta ruta no crea nada nuevo: reparte lo que hay.
 
   /** El proyecto que se pide, solo si es tuyo. Devuelve null en cualquier otro

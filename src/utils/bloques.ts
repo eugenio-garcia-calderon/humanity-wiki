@@ -47,7 +47,7 @@ export interface Bloque {
   pubKind?: string;   // el kind si es una ventana (tabla, imagen, …)
   pubTitulo?: string;
   pubAutor?: string;
-  pubUrl?: string;    // /grafos/:slug, /mapas/:slug, /proyectos/:slug…
+  pubUrl?: string;    // /esquemas/:slug, /mapas/:slug, /proyectos/:slug…
 }
 
 /** Un tramo de texto con su formato resuelto — para las exportaciones (Word,

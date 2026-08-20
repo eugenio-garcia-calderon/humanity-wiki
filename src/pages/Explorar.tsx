@@ -557,7 +557,7 @@ export default function Explorar() {
                         key={clave}
                         draggable={!!user}
                         onDragStart={e => e.dataTransfer.setData('application/json', JSON.stringify({ tipo: it.tipo, id: it.id }))}
-                        onClick={() => it.kind === 'pagina' ? navigate(`/documentos/${it.id}`)
+                        onClick={() => it.kind === 'pagina' ? navigate(`/paginas/${it.id}`)
                           : it.kind === 'presentacion' ? navigate(`/presentaciones/${it.id}`)
                           : setAbierta({ pub: it, editar: false })}
                         className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"

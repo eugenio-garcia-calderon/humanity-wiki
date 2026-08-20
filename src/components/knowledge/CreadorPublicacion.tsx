@@ -16,7 +16,7 @@ import { cn } from '../../utils/cn';
 //
 // Dos caminos, mismas tuberías que ya existían:
 //  - CON IA: describes lo que quieres y se enruta a la maquinaria real —
-//    documentos al streaming de /documentos/nuevo; lienzos y mapas al chat
+//    documentos al streaming de /paginas/nuevo; lienzos y mapas al chat
 //    (/api/ai/chat en modo autónomo, aceptando la acción igual que hace el
 //    panel del asistente) que los crea de verdad y navega al resultado.
 //  - A MANO: eliges el tipo, le pones título y se llama al endpoint de
@@ -59,7 +59,7 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     setError(null);
     if (tipo === 'documento') {
       onCerrar();
-      navigate(`/documentos/nuevo?prompt=${encodeURIComponent(p)}`);
+      navigate(`/paginas/nuevo?prompt=${encodeURIComponent(p)}`);
       return;
     }
     if (tipo === 'presentacion') {
@@ -106,7 +106,7 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
         const rj = await rd.json();
         if (rj?.ok && rj.slug) {
           onCerrar();
-          navigate(rj.entityType === 'user_maps' ? `/mapas/${rj.slug}` : `/grafos/${rj.slug}`);
+          navigate(rj.entityType === 'user_maps' ? `/mapas/${rj.slug}` : `/esquemas/${rj.slug}`);
           return;
         }
         if (rj && rj.ok === false && rj.error) throw new Error(rj.error);
@@ -139,13 +139,13 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
       };
       if (tipo === 'documento') {
         const j = await llamar('/api/documentos', { titulo: t });
-        onCerrar(); navigate(`/documentos/${j.id}`);
+        onCerrar(); navigate(`/paginas/${j.id}`);
       } else if (tipo === 'presentacion') {
         const j = await llamar('/api/presentaciones', { titulo: t });
         onCerrar(); navigate(`/presentaciones/${j.id}`);
       } else if (tipo === 'lienzo') {
         const j = await llamar('/api/graphs', { title: t, status: 'borrador' });
-        onCerrar(); navigate(`/grafos/${j.slug}`);
+        onCerrar(); navigate(`/esquemas/${j.slug}`);
       } else if (tipo === 'mapa') {
         const j = await llamar('/api/maps', { title: t, status: 'borrador' });
         onCerrar(); navigate(`/mapas/${j.slug}`);

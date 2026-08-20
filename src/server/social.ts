@@ -562,7 +562,7 @@ export function registerSocialRoutes(app: Express, db: any) {
         items.push({
           clave: `grafo:${g.id}`, tipo: 'grafo', id: g.id,
           titulo: g.title, resumen: corta(g.description),
-          url: `/grafos/${g.slug}`, fecha: g.updated_at || g.created_at,
+          url: `/esquemas/${g.slug}`, fecha: g.updated_at || g.created_at,
           privado: g.status !== 'publicado' || g.personal === '1',
           dato: g.views ? `${g.views} visitas` : null,
           imagen: g.portada || (g.portada_video ? `https://i.ytimg.com/vi/${g.portada_video}/mqdefault.jpg` : null),

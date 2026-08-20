@@ -288,7 +288,7 @@ async function main() {
     WHERE slug = 'ceuta-frontera-amenazada'
   `);
 
-  console.log('Grafo de teoría de juegos sembrado: /grafos/teoria-juegos-gibraltar');
+  console.log('Grafo de teoría de juegos sembrado: /esquemas/teoria-juegos-gibraltar');
   await pool.end();
 }
 

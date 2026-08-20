@@ -1,15 +1,14 @@
 // ============================================================================
-// LIENZOS (2026-08-20, petición de Eugenio: «una página que sea LIENZOS donde
-// se vean todos los lienzos creados, al estilo el menú de Miro, con todos los
-// boards, y que puedas crear uno nuevo o abrir otro»).
+// ESQUEMAS (2026-08-20, Eugenio: «llámalo Esquemas, y unifica todo para ese
+// mismo nombre»).
 // ============================================================================
-// La lista PRÁCTICA de lienzos, que es otra cosa que «Red de Datos»: allí los
-// lienzos se ven como un cosmos conectado —bonito para entender el conjunto,
-// incómodo para buscar el tuyo de ayer—. Aquí son fichas en una rejilla, con
-// su portada, ordenadas por lo último que tocaste. Es el cajón de trabajo.
+// «Lienzo», «grafo» y «red de datos» eran tres nombres para LA MISMA FILA de
+// `knowledge_graphs`, dibujada de tres maneras. Tres nombres para una cosa es
+// como se pierde a la gente, así que ahora se llama ESQUEMA y punto.
 //
-// Un lienzo ES un grafo de conocimiento (`knowledge_graphs`): no hay un tipo
-// nuevo ni una tabla nueva. Lo que cambia es cómo se listan.
+// Esta página es el cajón de trabajo: fichas en una rejilla, con su portada,
+// ordenadas por lo último que tocaste. La vista de cosmos conectado sigue
+// existiendo en /red, pero ya no es otra cosa: es otra forma de mirar esto.
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LayoutGrid, Plus, Search, Loader2, Image as ImageIcon, User, Eye, X } from 'lucide-react';
@@ -17,7 +16,7 @@ import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { useAuth } from '../contexts/AuthContext';
 
-interface Lienzo {
+interface Esquema {
   id: string;
   title: string;
   slug: string;
@@ -35,7 +34,7 @@ interface Lienzo {
 /** La portada de un lienzo: su primera imagen, la miniatura de su primer
  *  vídeo, o —si no tiene ninguna— sus iniciales sobre un color estable
  *  sacado del propio título, para que cada ficha se reconozca de un vistazo. */
-function Portada({ l }: { l: Lienzo }) {
+function Portada({ l }: { l: Esquema }) {
   const src = l.cover_image
     || (l.cover_video_id ? `https://i.ytimg.com/vi/${l.cover_video_id}/mqdefault.jpg` : null);
   if (src) {
@@ -55,10 +54,10 @@ function Portada({ l }: { l: Lienzo }) {
   );
 }
 
-export default function Lienzos() {
+export default function Esquemas() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [lienzos, setLienzos] = useState<Lienzo[]>([]);
+  const [esquemas, setEsquemas] = useState<Esquema[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
@@ -91,20 +90,20 @@ export default function Lienzos() {
       .then(r => r.json())
       .then(d => {
         if (!vivo) return;
-        if (d?.error) { setError(d.error); setLienzos([]); return; }
-        setLienzos(Array.isArray(d) ? d : []);
+        if (d?.error) { setError(d.error); setEsquemas([]); return; }
+        setEsquemas(Array.isArray(d) ? d : []);
       })
-      .catch(() => { if (vivo) setError('No se han podido cargar los lienzos.'); })
+      .catch(() => { if (vivo) setError('No se han podido cargar los esquemas.'); })
       .finally(() => { if (vivo) setCargando(false); });
     return () => { vivo = false; };
   }, [ambito, user]);
 
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
-    if (!q) return lienzos;
-    return lienzos.filter(l =>
+    if (!q) return esquemas;
+    return esquemas.filter(l =>
       l.title.toLowerCase().includes(q) || (l.description || '').toLowerCase().includes(q));
-  }, [lienzos, busqueda]);
+  }, [esquemas, busqueda]);
 
   const crear = async () => {
     const titulo = tituloNuevo.trim();
@@ -117,11 +116,11 @@ export default function Lienzos() {
         body: JSON.stringify({ title: titulo, status: 'borrador' }),
       });
       const d = await r.json();
-      if (!r.ok || d?.error) { setError(d?.error || 'No se ha podido crear el lienzo.'); return; }
+      if (!r.ok || d?.error) { setError(d?.error || 'No se ha podido crear el esquema.'); return; }
       // Recién creado se entra directo: crear un lienzo es querer usarlo.
-      navigate(`/grafos/${d.slug}`);
+      navigate(`/esquemas/${d.slug}`);
     } catch {
-      setError('No se ha podido crear el lienzo.');
+      setError('No se ha podido crear el esquema.');
     } finally { setGuardando(false); }
   };
 
@@ -135,7 +134,7 @@ export default function Lienzos() {
             lienzo personal —lo que era «Mi Conocimiento»— es una ficha más de
             «Míos», porque un lienzo ES un grafo. */}
         <h1 className="inline-flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
-          <LayoutGrid className="w-5 h-5 text-emerald-600" /> Grafos
+          <LayoutGrid className="w-5 h-5 text-emerald-600" /> Esquemas
         </h1>
 
         {user && (
@@ -160,14 +159,14 @@ export default function Lienzos() {
           <input
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar un grafo…"
+            placeholder="Buscar un esquema…"
             className="w-40 sm:w-56 text-xs text-slate-700 bg-transparent focus:outline-none"
           />
         </div>
 
         {user && (
           <Button onClick={() => { setTituloNuevo(''); setCreando(true); }} className="inline-flex items-center gap-1.5 shrink-0">
-            <Plus className="w-4 h-4" /> Nuevo grafo
+            <Plus className="w-4 h-4" /> Nuevo esquema
           </Button>
         )}
       </div>
@@ -184,9 +183,9 @@ export default function Lienzos() {
         <div className="py-20 text-center">
           <ImageIcon className="w-8 h-8 mx-auto text-slate-300 mb-3" />
           <p className="text-sm font-bold text-slate-500">
-            {busqueda ? 'Ningún grafo con ese nombre.'
-              : ambito === 'mios' ? 'Todavía no has creado ningún grafo.'
-                : 'Aún no hay grafos publicados.'}
+            {busqueda ? 'Ningún esquema con ese nombre.'
+              : ambito === 'mios' ? 'Todavía no has creado ningún esquema.'
+                : 'Aún no hay esquemas publicados.'}
           </p>
           {user && !busqueda && (
             <button onClick={() => { setTituloNuevo(''); setCreando(true); }}
@@ -208,14 +207,14 @@ export default function Lienzos() {
               <span className="w-10 h-10 rounded-full bg-emerald-600 group-hover:bg-emerald-700 text-white grid place-items-center transition-colors">
                 <Plus className="w-5 h-5" />
               </span>
-              <span className="text-xs font-black text-slate-600 group-hover:text-emerald-700">Nuevo grafo</span>
+              <span className="text-xs font-black text-slate-600 group-hover:text-emerald-700">Nuevo esquema</span>
             </button>
           )}
 
           {visibles.map(l => (
             <button
               key={l.id}
-              onClick={() => navigate(`/grafos/${l.slug}`)}
+              onClick={() => navigate(`/esquemas/${l.slug}`)}
               className="group text-left rounded-2xl border border-slate-200 bg-white overflow-hidden hover:border-emerald-300 hover:shadow-lg transition-all"
             >
               <div className="aspect-[4/3] overflow-hidden bg-slate-50 relative">
@@ -256,7 +255,7 @@ export default function Lienzos() {
           onClick={() => !guardando && setCreando(false)}>
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-black text-slate-900">Nuevo grafo</h2>
+              <h2 className="text-sm font-black text-slate-900">Nuevo esquema</h2>
               <button onClick={() => setCreando(false)} disabled={guardando}
                 className="ml-auto p-1 text-slate-400 hover:text-slate-600 disabled:opacity-40">
                 <X className="w-4 h-4" />

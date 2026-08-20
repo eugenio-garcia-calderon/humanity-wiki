@@ -163,7 +163,7 @@ export function registerMenuRoutes(app: Express, db: any) {
         id: t.id, label: t.titulo, destino: `/tareas?tarea=${encodeURIComponent(t.id)}`, estado: t.estado,
       })));
       rama('paginas', 'Páginas', (paginas.rows as any[]).map(w => ({
-        id: w.id, label: w.title, destino: `/documentos/${w.id}`,
+        id: w.id, label: w.title, destino: `/paginas/${w.id}`,
       })));
       rama('esquemas', 'Esquemas', (esquemas.rows as any[]).map(g => ({
         id: g.id, label: g.title, destino: `/esquemas/${g.slug}`,

@@ -220,7 +220,7 @@ export default function EntityExplorerPanel({
             onNavigate={(lvl, entityId) => onNavigate(lvl as ExplorerLevel, entityId)}
             onOpenChallenge={cid => setSelectedChallengeId(prev => (prev === cid ? null : cid))}
             onOpenSolution={s => navigate(`/soluciones/${slugify(s.title)}`)}
-            onOpenGraph={slug => navigate(`/grafos/${slug}`)}
+            onOpenGraph={slug => navigate(`/esquemas/${slug}`)}
           />
 
           {/* La ficha de metodología, plegable, sobre el lienzo */}

@@ -418,7 +418,7 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
           {cover}
           {config.description && <p className="text-sm text-slate-600 leading-relaxed">{config.description}</p>}
           {config.graph_slug && (
-            <Link to={`/grafos/${config.graph_slug}`}
+            <Link to={`/esquemas/${config.graph_slug}`}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors">
               <Network className="w-4 h-4" /> Abrir grafo
             </Link>

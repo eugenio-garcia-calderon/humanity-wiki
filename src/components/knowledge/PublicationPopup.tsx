@@ -60,7 +60,7 @@ export default function PublicationPopup({ publication, graphs, onClose }: {
                 {graphs.map(g => (
                   <Link
                     key={g.slug}
-                    to={`/grafos/${g.slug}`}
+                    to={`/esquemas/${g.slug}`}
                     onClick={onClose}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
                   >

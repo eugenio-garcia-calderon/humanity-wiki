@@ -4,7 +4,7 @@
 // lugar donde están todas las páginas ordenadas por PROYECTOS»).
 // ============================================================================
 // Aquí NO hay editor: el editor tipo Notion ya existe y vive en
-// /documentos/:id — «+» por línea para meter un título, una imagen o una
+// /paginas/:id — «+» por línea para meter un título, una imagen o una
 // tabla, y el tirador ⋮⋮ para reordenar los bloques arrastrando. Esta página
 // es la otra mitad que faltaba: el sitio desde el que las ves todas.
 //
@@ -112,7 +112,7 @@ export default function Paginas() {
       const d = await r.json();
       if (!r.ok || !d?.id) { setError(d?.error || 'No se ha podido crear la página.'); return; }
       // Recién creada se entra directo: crear una página es querer escribirla.
-      navigate(`/documentos/${d.id}`);
+      navigate(`/paginas/${d.id}`);
     } catch {
       setError('No se ha podido crear la página.');
     } finally { setGuardando(false); }
@@ -262,7 +262,7 @@ export default function Paginas() {
                         draggable
                         onDragStart={e => { arrastrando.current = p.id; e.dataTransfer.effectAllowed = 'move'; }}
                         onDragEnd={() => { arrastrando.current = null; setEncima(null); }}
-                        onClick={() => navigate(`/documentos/${p.id}`)}
+                        onClick={() => navigate(`/paginas/${p.id}`)}
                         className="group text-left rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer"
                       >
                         {p.imagen && (

@@ -258,13 +258,13 @@ export default function AIAssistant() {
    *  hecho con el primer tramo de la dirección, que casi siempre acierta. */
   const nombreDeRuta = (ruta: string) => {
     const fijas: Record<string, string> = {
-      '/': 'Tu perfil', '/grafos': 'Grafos', '/mapas': 'Mapas', '/juego': 'Mundo 3D',
+      '/': 'Tu perfil', '/esquemas': 'Grafos', '/mapas': 'Mapas', '/juego': 'Mundo 3D',
       '/proyectos': 'Mis proyectos', '/archivos': 'Archivos', '/explorar': 'Explorar',
       '/mercado': 'Mercado', '/configuracion': 'Configuración', '/vision': 'Visión y hoja de ruta',
     };
     if (fijas[ruta]) return fijas[ruta];
     if (ruta.startsWith('/personas/')) return 'Un perfil';
-    if (ruta.startsWith('/grafos/')) return 'Un grafo';
+    if (ruta.startsWith('/esquemas/')) return 'Un grafo';
     if (ruta.startsWith('/proyectos/')) return 'Un proyecto';
     if (ruta.startsWith('/mapas/')) return 'Un mapa';
     const primero = ruta.split('/')[1] || '';
@@ -326,7 +326,7 @@ export default function AIAssistant() {
         case 'OPEN_SOLUTION':  navigate(`/soluciones/${p.slug || p.solutionId}`); break;
         case 'SHOW_MARKET':    navigate('/mercado'); break;
         case 'SHOW_INITIATIVES': navigate('/iniciativas'); break;
-        case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/grafos/${p.slug || p.graphId || ''}`); break;
+        case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/esquemas/${p.slug || p.graphId || ''}`); break;
         case 'OPEN_USER_MAP': navigate(`/mapas/${p.slug || p.mapId || ''}`); break;
         default: break;
       }
@@ -378,7 +378,7 @@ export default function AIAssistant() {
 
       // Documento pedido al chat (2026-08-08): «hazme un informe de…»,
       // «dámelo en forma de documento»… no se responde con texto en la
-      // burbuja: se abre /documentos/nuevo y el documento se ve escribirse en
+      // burbuja: se abre /paginas/nuevo y el documento se ve escribirse en
       // directo, quedando guardado en las publicaciones de quien lo pidió.
       const pideDocumento =
         /\b(documento|informe|acta|art[ií]culo|memoria|dossier|redacci[oó]n)\b/i.test(text) &&
@@ -388,7 +388,7 @@ export default function AIAssistant() {
           role: 'assistant',
           content: 'Abriendo el documento — lo verás escribirse en directo. Quedará guardado en tus publicaciones como borrador privado.',
         }]);
-        navigate(`/documentos/nuevo?prompt=${encodeURIComponent(text)}${conversationId ? `&conv=${conversationId}` : ''}`);
+        navigate(`/paginas/nuevo?prompt=${encodeURIComponent(text)}${conversationId ? `&conv=${conversationId}` : ''}`);
         return;
       }
 
@@ -408,7 +408,7 @@ export default function AIAssistant() {
           }
           if (g) {
             setMessages(m => [...m, { role: 'assistant', content: `Abriendo el grafo de conocimiento «${g.title}».` }]);
-            navigate(`/grafos/${g.slug}`);
+            navigate(`/esquemas/${g.slug}`);
             return;
           }
         } catch { /* si falla la resolución, se sigue con la IA */ }
@@ -462,7 +462,7 @@ export default function AIAssistant() {
         const rj = await decideAction(a.id, 'aceptar', -1);
         if (rj?.ok && rj.slug && rj.entityType === 'knowledge_graphs') {
           setMessages(m => [...m, { role: 'assistant', content: `He creado el grafo como borrador y lo estoy abriendo — revísalo y publícalo cuando quieras.` }]);
-          navigate(`/grafos/${rj.slug}`);
+          navigate(`/esquemas/${rj.slug}`);
         } else if (rj?.ok && rj.slug && rj.entityType === 'user_maps') {
           setMessages(m => [...m, { role: 'assistant', content: `He creado tu mapa y lo estoy abriendo.` }]);
           navigate(`/mapas/${rj.slug}`);

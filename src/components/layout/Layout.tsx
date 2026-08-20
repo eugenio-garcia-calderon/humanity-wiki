@@ -24,7 +24,7 @@ import AIAssistant from '../ai/AIAssistant';
 // tabla de «qué icono lleva cada ruta», que es lo que necesitan las PESTAÑAS
 // de arriba para pintarse.
 const SECCIONES_COMUN = [
-  { to: '/grafos', label: 'Grafos', icon: Globe2 },
+  { to: '/esquemas', label: 'Grafos', icon: Globe2 },
   { to: '/mapas', label: 'Mapas', icon: MapIcon },
   { to: '/juego', label: 'Mundo 3D', icon: Gamepad2 },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
@@ -140,10 +140,10 @@ export default function Layout() {
   })();
   const isEmbed = enUnMarco || new URLSearchParams(location.search).get('embed') === '1';
   const isMapPage = location.pathname === '/mapa';
-  // El LIENZO de un grafo (`/grafos/:slug`) y la Red de Datos: a sangre
+  // El LIENZO de un grafo (`/esquemas/:slug`) y la Red de Datos: a sangre
   // completa, con el chat de IA como barra inferior.
   //
-  // OJO: `/grafos` a secas NO entra aquí. Es la lista de fichas, una página
+  // OJO: `/esquemas` a secas NO entra aquí. Es la lista de fichas, una página
   // normal — cuando entraba, salía a pantalla completa y con una barra de chat
   // pegada abajo, que es justo la «barra extra» que sobraba (Eugenio,
   // 2026-08-20).

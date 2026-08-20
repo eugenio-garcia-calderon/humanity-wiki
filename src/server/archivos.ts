@@ -94,7 +94,7 @@ export function registerArchivosRoutes(app: Express, db: any) {
             privado: w.publico === false,
             // Una ventana con lienzo se abre EN su lienzo (contexto); una
             // suelta, en su ficha.
-            abrir: w.grafo_slug ? `/grafos/${w.grafo_slug}` : `/explorar?ventana=${w.id}`,
+            abrir: w.grafo_slug ? `/esquemas/${w.grafo_slug}` : `/explorar?ventana=${w.id}`,
             contexto: w.grafo_titulo || null,
           };
         }),

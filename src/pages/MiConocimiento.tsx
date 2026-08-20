@@ -347,7 +347,7 @@ function RecoPanel({ graphId, addWindow, onClose }: {
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
         {(data?.grafos || []).map((g: any) => (
           <div key={g.id} className="flex items-start justify-between gap-2 border border-emerald-100 bg-emerald-50/40 rounded-xl p-2.5">
-            <button onClick={() => navigate(`/grafos/${g.slug}`)} className="text-left min-w-0">
+            <button onClick={() => navigate(`/esquemas/${g.slug}`)} className="text-left min-w-0">
               <p className="text-[11px] font-black text-slate-900 leading-tight inline-flex items-center gap-1"><Network className="w-3 h-3 text-emerald-600 shrink-0" /> {g.title}</p>
               <p className="text-[10px] text-slate-400">{g.window_count} publicaciones · de {g.creator_name || 'Anónimo'}</p>
             </button>

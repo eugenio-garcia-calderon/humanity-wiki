@@ -358,7 +358,7 @@ export default function Grafos() {
           >
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: focusedGraph.is_reto ? '#dc2626' : '#059669' }} />
             <span className="text-xs font-black text-slate-900 max-w-[220px] truncate">{focusedGraph.title}</span>
-            <button onClick={() => navigate(`/grafos/${focusedGraph.slug}`)} title="Abrir el grafo completo"
+            <button onClick={() => navigate(`/esquemas/${focusedGraph.slug}`)} title="Abrir el grafo completo"
               className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-full hover:bg-slate-50 transition-colors">
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
@@ -394,7 +394,7 @@ export default function Grafos() {
                 {popup.win.kind}
               </span>
               <div className="flex items-center gap-1">
-                <button onClick={() => navigate(`/grafos/${popup.graph.slug}`)} title="Abrir el grafo completo"
+                <button onClick={() => navigate(`/esquemas/${popup.graph.slug}`)} title="Abrir el grafo completo"
                   className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-50 transition-colors">
                   <ExternalLink className="w-4 h-4" />
                 </button>
@@ -415,7 +415,7 @@ export default function Grafos() {
       )}
 
       {showCreate && (
-        <CreateGraphModal onClose={() => setShowCreate(false)} onCreated={slug => navigate(`/grafos/${slug}`)} />
+        <CreateGraphModal onClose={() => setShowCreate(false)} onCreated={slug => navigate(`/esquemas/${slug}`)} />
       )}
     </div>
   );
