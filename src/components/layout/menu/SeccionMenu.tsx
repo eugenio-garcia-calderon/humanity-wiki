@@ -89,7 +89,11 @@ export default function SeccionMenu({
         >
           <ChevronDown className={cn('w-3 h-3 shrink-0 text-slate-400 transition-transform',
             plegada && '-rotate-90')} />
-          <Icono className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+          {/* El icono puede ser un emoji que hayas puesto tú desde «Editar
+              menú» (2026-08-20); si no, el de siempre. */}
+          {typeof Icono === 'string'
+            ? <span className="text-[13px] leading-none shrink-0">{Icono}</span>
+            : <Icono className="w-3.5 h-3.5 shrink-0 text-slate-400" />}
           <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 truncate group-hover:text-slate-600">
             {titulo}
           </span>

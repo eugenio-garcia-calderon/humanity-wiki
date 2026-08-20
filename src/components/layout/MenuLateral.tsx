@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose, PanelLeftOpen,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
+  Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -87,6 +88,7 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
     const a = (user?.uiSettings || {}) as any;
     if (a.ordenMenu) setOrden(a.ordenMenu);
     if (a.altosMenu) setAltos(a.altosMenu);
+    if (a.seccionesMenu) setConfSecciones(a.seccionesMenu);
   }, [user?.id]);
 
   /** Coloca según tu orden. Lo que no esté en la lista va detrás, en el orden
@@ -241,6 +243,57 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
     })),
   }));
 
+  // ---- LAS SECCIONES DEL MENÚ, CONFIGURABLES -------------------------------
+  // El catálogo fijo: qué secciones existen y cómo se llaman de fábrica.
+  const SECCIONES_BASE = [
+    { clave: 'proyectos', titulo: 'Proyectos', icono: FolderKanban },
+    { clave: 'herramientas', titulo: 'Herramientas', icono: Wrench },
+    { clave: 'areas', titulo: 'Áreas', icono: Layers },
+    { clave: 'productos', titulo: 'Productos', icono: Store },
+    { clave: 'personas', titulo: 'Personas', icono: Users2 },
+  ];
+
+  // TU configuración: orden, nombres, iconos y cuáles escondes. Va en tus
+  // ajustes de usuario, como el orden de las filas: es una preferencia tuya y
+  // no cambia el menú de nadie más.
+  const [editandoMenu, setEditandoMenu] = useState(false);
+  const [confSecciones, setConfSecciones] = useState<Record<string, { titulo?: string; icono?: string; oculta?: boolean; pos?: number }>>(
+    () => ajustes.seccionesMenu || {});
+
+  const secciones = SECCIONES_BASE
+    .map((sec, i) => {
+      const c = confSecciones[sec.clave] || {};
+      return {
+        clave: sec.clave,
+        titulo: c.titulo || sec.titulo,
+        // Un emoji tuyo gana al icono de fábrica; SeccionMenu pinta los dos.
+        icono: (c.icono || sec.icono) as any,
+        oculta: !!c.oculta,
+        pos: typeof c.pos === 'number' ? c.pos : i,
+      };
+    })
+    .sort((a, b) => a.pos - b.pos);
+
+  const seccionesVisibles = secciones.filter(x => !x.oculta);
+
+  const guardarSecciones = (nuevas: typeof secciones) => {
+    const conf: Record<string, any> = {};
+    nuevas.forEach((x, i) => {
+      const base = SECCIONES_BASE.find(b => b.clave === x.clave)!;
+      conf[x.clave] = {
+        pos: i,
+        oculta: x.oculta || undefined,
+        // Solo se guarda lo que has CAMBIADO: si vuelves a poner el nombre de
+        // siempre, deja de haber nombre propio y el día que se renombre en la
+        // plataforma tú también lo verás.
+        titulo: x.titulo !== base.titulo ? x.titulo : undefined,
+        icono: typeof x.icono === 'string' ? x.icono : undefined,
+      };
+    });
+    setConfSecciones(conf);
+    updateUiSettings({ seccionesMenu: conf });
+  };
+
   const nodosProductos: NodoMenu[] = datos.productos.map(p => ({
     id: p.id, label: p.nombre, icono: Package,
     insignia: p.icono || undefined,
@@ -289,6 +342,50 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
     })),
   ];
 
+  // Qué pinta cada sección. Se separa del ORDEN a propósito: así reordenarlas
+  // o esconderlas no toca el contenido de ninguna.
+  const CONTENIDOS: Record<string, { cuantos: number; hijos: React.ReactNode; accion?: React.ReactNode }> = {
+    proyectos: {
+      cuantos: nodosProyectos.length,
+      accion: (
+        <button onClick={() => abrir({ id: 'p', label: 'Mis proyectos', destino: '/proyectos' })}
+          title="Ver todos los proyectos"
+          className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      ),
+      hijos: (
+        <>
+          {nodosProyectos.length === 0 && !colapsado && (
+            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
+          )}
+          {filas('proyectos', nodosProyectos)}
+        </>
+      ),
+    },
+    herramientas: { cuantos: HERRAMIENTAS.length, hijos: filas('herramientas', HERRAMIENTAS) },
+    areas: { cuantos: areas.length, hijos: filas('areas', nodosAreas) },
+    productos: {
+      cuantos: nodosProductos.length,
+      accion: (
+        <button onClick={() => abrir({ id: 'm', label: 'Mercado', destino: '/mercado' })}
+          title="Ir al Mercado"
+          className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
+          <Store className="w-3.5 h-3.5" />
+        </button>
+      ),
+      hijos: (
+        <>
+          {nodosProductos.length === 0 && !colapsado && (
+            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
+          )}
+          {filas('productos', nodosProductos)}
+        </>
+      ),
+    },
+    personas: { cuantos: nodosPersonas.length, hijos: filas('personas', nodosPersonas) },
+  };
+
   return (
     <aside
       className={cn('shrink-0 h-full border-r border-slate-200 bg-white flex flex-col transition-[width] duration-150',
@@ -314,76 +411,183 @@ export default function MenuLateral({ colapsado, onColapsar, activo }: {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {/* 1 — PROYECTOS, arriba del todo */}
-        <SeccionMenu
-          titulo="Proyectos" icono={FolderKanban} colapsado={colapsado}
-          plegada={!!plegadas.proyectos} onPlegar={() => plegar('proyectos')}
-          cuantos={nodosProyectos.length}
-          alto={altos.proyectos} onAlto={a => guardarAlto('proyectos', a)}
-          accion={!colapsado ? (
-            <button onClick={() => abrir({ id: 'p', label: 'Mis proyectos', destino: '/proyectos' })}
-              title="Ver todos los proyectos"
-              className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          ) : undefined}
-        >
-          {nodosProyectos.length === 0 && !colapsado && (
-            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
-          )}
-          {filas('proyectos', nodosProyectos)}
-        </SeccionMenu>
-
-        {/* 2 — HERRAMIENTAS */}
-        <SeccionMenu
-          titulo="Herramientas" icono={Wrench} colapsado={colapsado}
-          plegada={!!plegadas.herramientas} onPlegar={() => plegar('herramientas')}
-          cuantos={HERRAMIENTAS.length}
-          alto={altos.herramientas} onAlto={a => guardarAlto('herramientas', a)}
-        >
-          {filas('herramientas', HERRAMIENTAS)}
-        </SeccionMenu>
-
-        {/* 3 — ÁREAS: el mapa del conocimiento común */}
-        <SeccionMenu
-          titulo="Áreas" icono={Layers} colapsado={colapsado}
-          plegada={plegadas.areas !== false} onPlegar={() => plegar('areas')}
-          cuantos={areas.length}
-          alto={altos.areas} onAlto={a => guardarAlto('areas', a)}
-        >
-          {filas('areas', nodosAreas)}
-        </SeccionMenu>
-
-        {/* 4 — PRODUCTOS Y SERVICIOS */}
-        <SeccionMenu
-          titulo="Productos" icono={Store} colapsado={colapsado}
-          plegada={!!plegadas.productos} onPlegar={() => plegar('productos')}
-          cuantos={nodosProductos.length}
-          alto={altos.productos} onAlto={a => guardarAlto('productos', a)}
-          accion={!colapsado ? (
-            <button onClick={() => abrir({ id: 'm', label: 'Mercado', destino: '/mercado' })}
-              title="Ir al Mercado"
-              className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
-              <Store className="w-3.5 h-3.5" />
-            </button>
-          ) : undefined}
-        >
-          {nodosProductos.length === 0 && !colapsado && (
-            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
-          )}
-          {filas('productos', nodosProductos)}
-        </SeccionMenu>
-
-        {/* 5 — PERSONAS Y ORGANIZACIONES */}
-        <SeccionMenu
-          titulo="Personas" icono={Users2} colapsado={colapsado}
-          plegada={!!plegadas.personas} onPlegar={() => plegar('personas')}
-          cuantos={nodosPersonas.length}
-          alto={altos.personas} onAlto={a => guardarAlto('personas', a)}
-        >
-          {filas('personas', nodosPersonas)}
-        </SeccionMenu>
+        {/* LAS SECCIONES, EN EL ORDEN QUE TÚ QUIERAS (2026-08-20, petición de
+            Eugenio: «un botón editar menú donde permita reordenar las
+            categorías y ocultar categorías enteras […] y cambiar el nombre e
+            icono»). Antes eran cinco bloques escritos a mano en este orden;
+            ahora cada una es una entrada de esta lista y el orden, el nombre,
+            el icono y si se ve salen de tus ajustes. */}
+        {seccionesVisibles.map(sec => {
+          const contenido = CONTENIDOS[sec.clave];
+          if (!contenido) return null;
+          return (
+            <SeccionMenu
+              key={sec.clave}
+              titulo={sec.titulo}
+              icono={sec.icono}
+              colapsado={colapsado}
+              plegada={sec.clave === 'areas' ? plegadas.areas !== false : !!plegadas[sec.clave]}
+              onPlegar={() => plegar(sec.clave)}
+              cuantos={contenido.cuantos}
+              alto={altos[sec.clave]} onAlto={a => guardarAlto(sec.clave, a)}
+              accion={!colapsado ? contenido.accion : undefined}
+            >
+              {contenido.hijos}
+            </SeccionMenu>
+          );
+        })}
       </div>
+
+      {/* EDITAR MENÚ — abajo del todo a la izquierda. */}
+      <button
+        onClick={() => setEditandoMenu(true)}
+        title="Editar el menú"
+        className={cn('shrink-0 flex items-center gap-2 px-3 py-2.5 border-t border-slate-100 text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors',
+          colapsado && 'justify-center px-0')}
+      >
+        <Settings className="w-4 h-4 shrink-0" />
+        {!colapsado && <span>Editar menú</span>}
+      </button>
+
+      {editandoMenu && (
+        <PopupEditarMenu
+          secciones={secciones}
+          onCambiar={guardarSecciones}
+          onCerrar={() => setEditandoMenu(false)}
+        />
+      )}
     </aside>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// EDITAR EL MENÚ (2026-08-20, petición de Eugenio: «un botón editar menú con
+// símbolo de rueda dentada, abajo a la izquierda, donde permita reordenar las
+// categorías y ocultar categorías enteras o visibilizarlas si estaban ocultas,
+// y cambiar el nombre e icono de las categorías»).
+// ----------------------------------------------------------------------------
+// Los cambios se ven EN EL MENÚ mientras los haces, con la ventanita abierta:
+// reordenar a ciegas y cerrar para comprobar sería probar a tientas.
+//
+// Esconder no borra nada: la sección sigue ahí con todo lo suyo y vuelve con
+// un clic. Es lo que hace que esconder no dé miedo.
+const EMOJIS_SECCION = ['📁', '🛠️', '🎯', '🏪', '👥', '🌍', '💡', '📚', '⚡', '❤️', '🧭', '🔬'];
+
+function PopupEditarMenu({ secciones, onCambiar, onCerrar }: {
+  secciones: Array<{ clave: string; titulo: string; icono: any; oculta: boolean; pos: number }>;
+  onCambiar: (s: any[]) => void;
+  onCerrar: () => void;
+}) {
+  const [lista, setLista] = useState(secciones);
+  const [editando, setEditando] = useState<string | null>(null);
+  const arrastrando = useRef<number | null>(null);
+
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar(); };
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  }, [onCerrar]);
+
+  /** Cada cambio se aplica al momento: el menú de detrás se reordena mientras
+   *  miras, sin botón de guardar. */
+  const aplicar = (nueva: typeof lista) => { setLista(nueva); onCambiar(nueva); };
+
+  const mover = (desde: number, hasta: number) => {
+    if (desde === hasta) return;
+    const copia = [...lista];
+    const [x] = copia.splice(desde, 1);
+    copia.splice(hasta, 0, x);
+    aplicar(copia);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4"
+      onClick={onCerrar}>
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2">
+          <Settings className="w-4 h-4 text-emerald-600" />
+          <h2 className="text-sm font-black text-slate-900">Editar menú</h2>
+          <button onClick={onCerrar} className="ml-auto p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50">
+            <Cerrar className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-3 space-y-1.5 max-h-[60vh] overflow-y-auto">
+          {lista.map((sec, i) => (
+            <div
+              key={sec.clave}
+              draggable
+              onDragStart={() => { arrastrando.current = i; }}
+              onDragOver={e => e.preventDefault()}
+              onDrop={() => { if (arrastrando.current !== null) mover(arrastrando.current, i); arrastrando.current = null; }}
+              className={cn('rounded-2xl border p-2.5 transition-colors cursor-grab active:cursor-grabbing',
+                sec.oculta ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200')}
+            >
+              <div className="flex items-center gap-2">
+                <GripVertical className="w-4 h-4 text-slate-300 shrink-0" />
+                <span className="w-6 text-center shrink-0">
+                  {typeof sec.icono === 'string'
+                    ? <span className="text-base">{sec.icono}</span>
+                    : <sec.icono className="w-4 h-4 mx-auto text-slate-400" />}
+                </span>
+                {editando === sec.clave ? (
+                  <input
+                    autoFocus
+                    value={sec.titulo}
+                    onChange={e => aplicar(lista.map(x => x.clave === sec.clave ? { ...x, titulo: e.target.value } : x))}
+                    onBlur={() => setEditando(null)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditando(null); }}
+                    className="flex-1 min-w-0 px-2 py-1 border border-emerald-300 rounded-lg text-xs font-bold focus:outline-none"
+                  />
+                ) : (
+                  <button onClick={() => setEditando(sec.clave)}
+                    className="flex-1 min-w-0 text-left text-xs font-bold text-slate-800 truncate hover:text-emerald-700">
+                    {sec.titulo}
+                  </button>
+                )}
+                <button
+                  onClick={() => aplicar(lista.map(x => x.clave === sec.clave ? { ...x, oculta: !x.oculta } : x))}
+                  title={sec.oculta ? 'Mostrar esta sección' : 'Ocultar esta sección'}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 shrink-0"
+                >
+                  {sec.oculta ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {editando === sec.clave && (
+                <div className="mt-2 pt-2 border-t border-slate-100">
+                  <div className="flex flex-wrap gap-1">
+                    <button
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => aplicar(lista.map(x => x.clave === sec.clave ? { ...x, icono: undefined } : x))}
+                      title="Volver al icono de siempre"
+                      className="w-7 h-7 grid place-items-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
+                    {EMOJIS_SECCION.map(em => (
+                      <button
+                        key={em}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => aplicar(lista.map(x => x.clave === sec.clave ? { ...x, icono: em } : x))}
+                        className={cn('w-7 h-7 grid place-items-center rounded-lg text-base hover:bg-slate-100',
+                          sec.icono === em && 'bg-emerald-100 ring-2 ring-emerald-400')}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <p className="px-4 pb-3 text-[10px] text-slate-400 leading-relaxed">
+          Arrastra para cambiar el orden, pincha el nombre para cambiarlo o ponerle
+          un emoji, y el ojo para esconder una sección. Esconder no borra nada.
+        </p>
+      </div>
+    </div>
   );
 }
