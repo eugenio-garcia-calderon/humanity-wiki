@@ -812,6 +812,10 @@ export default function AIAssistant({ modo = 'panel' }: {
                         <Link
                           key={i}
                           to={c.url}
+                          // Se abre en otra pestaña: ir a mirar lo que acabas de
+                          // crear no debería sacarte de la conversación.
+                          target="_blank"
+                          rel="noopener"
                           className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 transition-colors text-left"
                         >
                           <Check className="w-3.5 h-3.5 shrink-0" />

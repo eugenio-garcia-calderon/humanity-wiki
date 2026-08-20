@@ -33,6 +33,13 @@ const IMAGENES: Record<string, string> = {
 const DOCUMENTOS: Record<string, string> = {
   'application/pdf': 'pdf',
   'text/csv': 'csv',
+  // Texto suelto (2026-08-21, con el archivo persistente): un README, unas
+  // notas de ensayo, un registro. Se sirven como descarga igual que el resto,
+  // así que no ejecutan nada; y no admitirlos obligaba a envolver un fichero
+  // de texto en un zip para poder guardarlo, que es absurdo.
+  'text/plain': 'txt',
+  'text/markdown': 'md',
+  'text/tab-separated-values': 'tsv',
   'application/json': 'json',
   'application/zip': 'zip',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',

@@ -2245,3 +2245,63 @@ exist: any missing file answered 200 with the SPA's HTML, so a 200 was read as
 **No destructive command was run.** A task open for days, ordered explicitly and
 inherited across two dead sessions, turned out to be an artefact of a missing
 404. This is now the fifth and most expensive case in the root-principle table.
+
+## 2026-08-21 — The archive: files that stay
+
+Eugenio approved this after the Tester's complaint, which named the gap exactly:
+«puedo enseñarle mi informe de CFD a la IA una vez, pero no dejarlo colgado del
+proyecto para que mañana lo abra otro».
+
+Uploading already worked in four places. What was missing was **memory**: a file
+went in, got used once, and could never be found again. Migration `0052` plus a
+new `archivo.ts` with three routes — attach, list, remove.
+
+Five decisions worth keeping:
+
+- **The bytes do not move.** They stay in `/data/uploads`, the Docker volume
+  that already works and lives outside the repository (verified in production
+  the same night). The table only records what each file hangs from. A second
+  store would have been a second place to lose things.
+- **A file hangs from exactly one thing** — project, task or page — and that is
+  a database CHECK, not a convention. Two containers and the row does not go in.
+- **Permissions are inherited, always.** Every query asks about the
+  *container*, never about the file, so there are no two truths that can
+  disagree. The day a project flips from private to public its files follow,
+  with nothing to migrate. Not just simple — impossible to desynchronise, which
+  is better than correct-today.
+- **Only `/uploads/` paths are accepted.** Without that, anyone could hang an
+  external URL off a project and the platform would present it as its own file.
+- **Archived, never deleted, and the bytes untouched**: a page or a chat message
+  may point at the same file, and deleting it would leave a hole in places this
+  module knows nothing about.
+
+Verified end to end with a real upload: attach → list → it comes back with name,
+class, size and who uploaded it. External URL rejected; two containers rejected.
+And the permission test on a **private project created through the product's
+normal path** — applying the rule written two hours earlier, which is exactly
+what stopped me measuring the wrong thing again: owner 200 and sees the file,
+another user 403, anonymous 403, and the other user cannot attach either.
+
+Also in this batch: **D18**, the created-item card now links to the task itself
+(`/tareas?tarea=<id>`) and opens in a new tab, because with 136 tasks a link to
+the index is barely a link; and **B39**, the card shows the group's *label* and
+never the raw id («Diseño», not «Diseno»).
+
+## 2026-08-21 — The persistent archive gets its visible half
+
+`archivo.ts` gave files a place to live but no door to walk in through. Three
+doors now exist, all the same component (`src/components/archivo/Adjuntos.tsx`):
+the project page, the task card in the kanban, and the foot of a page in the
+editor. One component, so a bug in attaching is one bug and not three.
+
+Attaching is two calls that look like one: bytes to `/api/uploads` (which
+already knew about types and sizes), then `/api/archivo` to record what they
+hang from. Nothing that already uploaded files had to learn about containers.
+
+Also allowed `text/plain`, `text/markdown` and `.tsv` in `uploads.ts`. They are
+served as downloads like everything else, and refusing them forced you to zip a
+notes file to be able to keep it, which is absurd.
+
+On a page, the section only appears once the page exists. A page that has not
+been saved has nothing to hang a file from, and offering the button would be
+promising something that fails when pressed.
