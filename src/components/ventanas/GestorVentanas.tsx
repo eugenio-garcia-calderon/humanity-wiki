@@ -310,10 +310,13 @@ export default function GestorVentanas({ onPaginaNavegador }: {
               las teclas se las comía el juego (visto en pruebas, 2026-08-20).
               Con inert sigue dibujándose y corriendo, pero no puede capturar
               ni foco ni teclas hasta que lo traigas al frente. */}
+          {/* OJO con el valor: `inert=""` React lo trata como FALSO y avisa por
+              consola («Received an empty string for a boolean attribute»). Es
+              decir, el arreglo del teclado no estaba haciendo nada hasta que se
+              vio ese aviso (2026-08-20). Tiene que ser `true` o no estar. */}
           <div
             className="flex-1 min-h-0 relative bg-white"
-            // @ts-expect-error — React 18 solo acepta inert como cadena vacía.
-            inert={v.z === Math.max(...ventanas.filter(x => !x.minimizada).map(x => x.z)) ? undefined : ''}
+            inert={v.z === Math.max(...ventanas.filter(x => !x.minimizada).map(x => x.z)) ? undefined : true}
           >
             {v.clase === 'navegador'
               ? <Navegador inicial={v.destino}

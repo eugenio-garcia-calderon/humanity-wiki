@@ -17,6 +17,7 @@ import { registerUploadRoutes } from "./src/server/uploads.js";
 import { registerRoadmapRoutes } from "./src/server/roadmap.js";
 import { registerJuegoRoutes } from "./src/server/juego.js";
 import { registerNavegadorRoutes } from "./src/server/navegador.js";
+import { registerArchivosRoutes } from "./src/server/archivos.js";
 import { registerNavegadorRemotoRoutes } from "./src/server/navegadorRemoto.js";
 import { registerFinanzasRoutes } from "./src/server/finanzas.js";
 import { registerYoutubeRoutes } from "./src/server/youtube.js";
@@ -259,6 +260,7 @@ async function startServer() {
   registerRoadmapRoutes(app, db);
   registerJuegoRoutes(app, db);
   registerNavegadorRoutes(app);
+  registerArchivosRoutes(app, db);
   registerNavegadorRemotoRoutes(app);
   registerFinanzasRoutes(app, db);
   registerYoutubeRoutes(app, db);

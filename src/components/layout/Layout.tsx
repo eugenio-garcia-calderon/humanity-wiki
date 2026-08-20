@@ -23,14 +23,14 @@ const SECCIONES_COMUN = [
   { to: '/', label: 'Inicio', icon: Home },
   { to: '/explorar', label: 'Explorar', icon: Compass },
   { to: '/mapa', label: 'Geolocalización de Datos', icon: MapIcon },
-  { to: '/red', label: 'Red de Datos', icon: Globe2 },
-  { to: '/base-de-datos', label: 'Base de Datos', icon: Database },
+  { to: '/red', label: 'Grafos', icon: Globe2 },
+  { to: '/archivos', label: 'Archivos', icon: Database },
   { to: '/lienzos', label: 'Lienzos', icon: LayoutGrid },
 ];
 const SECCIONES_TUYO = [
   { to: '/mi-conocimiento', label: 'Mi Conocimiento', icon: BrainCircuit },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
-  { to: '/juego', label: 'Juego Vital', icon: Gamepad2 },
+  { to: '/juego', label: 'Mundo 3D', icon: Gamepad2 },
   { to: '/escritorio', label: 'Escritorio', icon: AppWindow },
 ];
 const SECCIONES_PIE = [
@@ -99,7 +99,7 @@ export default function Layout() {
   const isMiConocimientoPage = location.pathname === '/mi-conocimiento';
   // La portada monta su propia barra de IA en línea, debajo de las ventanas.
   const isInicioPage = location.pathname === '/';
-  // Juego Vital: mundo 3D a pantalla completa; el robot del juego ES el
+  // Mundo 3D: a pantalla completa; el robot del mundo ES el
   // asistente, así que la barra de IA vive abajo como en los lienzos.
   const isJuegoPage = location.pathname === '/juego';
   // El Escritorio son ventanas: necesita todo el alto, y trae su propio chat
@@ -173,7 +173,7 @@ export default function Layout() {
               <button
                 onClick={() => {
                   setMenuOpen(false);
-                  const orden = { titulo: 'Navegador', clase: 'navegador' as const, destino: 'https://duckduckgo.com/' };
+                  const orden = { titulo: 'Navegador', clase: 'navegador' as const, destino: 'about:inicio' };
                   if (isEscritorioPage) abrirVentana(orden);
                   else {
                     localStorage.setItem('humanity:abrir-al-llegar', JSON.stringify(orden));
@@ -203,6 +203,11 @@ export default function Layout() {
                 <>
                   {entradaMenu({ to: `/personas/${user.id}`, label: `Tu perfil (${user.roleLabel})`, icon: User })}
                   {user.isAdmin && entradaMenu({ to: '/admin/usuarios', label: 'Administrar usuarios', icon: Users2 })}
+                  {/* El inventario de tablas reales. Era «Base de Datos» en el
+                      menú principal; ese sitio lo ocupa ahora «Archivos» (lo
+                      tuyo). Sigue vivo aquí porque es una herramienta útil de
+                      administración, no una página que nadie quisiera. */}
+                  {user.isAdmin && entradaMenu({ to: '/base-de-datos', label: 'Base de datos (tablas)', icon: Database })}
                   <div className="px-4 py-2">
                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Tamaño de letra</p>
                     <div className="flex gap-1">

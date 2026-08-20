@@ -14,9 +14,10 @@
 //   3. PROXY DE LECTURA (`/api/navegador/ver`): si el servidor no tiene
 //      Chromium, se cae a la versión de solo-documentos de antes.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { avisarNavegadorRemoto } from './bus';
+import { useAuth } from '../../contexts/AuthContext';
 
 /** Lo que se escribe en la barra → una dirección de verdad. Si no parece una
  *  dirección, se busca: es lo que espera cualquiera de una barra así. */
@@ -34,6 +35,31 @@ export function comoUrl(texto: string, buscadorReal = false): string {
 }
 
 const proxy = (url: string) => `/api/navegador/ver?url=${encodeURIComponent(url)}`;
+
+/** La pantalla de inicio del navegador. Es una dirección propia y no una
+ *  cadena vacía para que quepa en la historia como cualquier otra página. */
+export const INICIO = 'about:inicio';
+const esPantallaInicio = (u: string) => !u || u === INICIO || u === 'about:blank';
+
+export interface Favorito { url: string; titulo: string }
+
+/** Lo que ve alguien que todavía no ha guardado ninguna: los sitios que
+ *  Eugenio nombró al pedir esto. No se guardan solos —son sugerencias—, así
+ *  que el cajón sigue siendo suyo. */
+const SUGERENCIAS: Favorito[] = [
+  { url: 'https://www.youtube.com/', titulo: 'YouTube' },
+  { url: 'https://web.whatsapp.com/', titulo: 'WhatsApp Web' },
+  { url: 'https://mail.google.com/', titulo: 'Gmail' },
+  { url: 'https://calendar.google.com/', titulo: 'Calendar' },
+];
+
+/** El dominio, que es lo que identifica un sitio de un vistazo. */
+const dominio = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+
+/** El icono del sitio, servido por nuestro proxy para que no haya una
+ *  petición directa a un tercero desde la app. */
+const favicon = (u: string) =>
+  `/api/navegador/ver?url=${encodeURIComponent(`https://icons.duckduckgo.com/ip3/${dominio(u)}.ico`)}`;
 
 /** Un vídeo tiene puerta oficial: el reproductor embebido, que trae imagen y
  *  sonido directos de su CDN. Ni el proxy ni el screencast pueden darle el
@@ -65,6 +91,9 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
   onTitulo?: (t: string) => void;
   onUrl?: (u: string) => void;
 }) {
+  const { user, updateUiSettings } = useAuth();
+  const favoritos: Favorito[] = Array.isArray(user?.uiSettings?.favoritosWeb)
+    ? user!.uiSettings!.favoritosWeb : [];
   const [modo, setModo] = useState<'remoto' | 'proxy'>('remoto');
   const [sesion, setSesion] = useState<string | null>(null);
   const [reinicios, setReinicios] = useState(0);
@@ -84,6 +113,7 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
   const tamanoRef = useRef({ ancho: 1024, alto: 700 });
   const autoReinicios = useRef(0);
   const urlRef = useRef(inicial);
+  const tituloActual = useRef<string>('');
 
   useEffect(() => { setTexto(url); urlRef.current = url; onUrl?.(url); }, [url]);
 
@@ -106,6 +136,9 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
   // --- Arrancar (y rearrancar) la sesión remota -----------------------------
   useEffect(() => {
     if (modo !== 'remoto') return;
+    // En la pantalla de inicio no se levanta Chromium: sería arrancar un
+    // navegador entero (150-400 MB) para enseñar cuatro tarjetas.
+    if (esPantallaInicio(urlRef.current)) { setCargando(false); return; }
     let vivo = true;
     (async () => {
       try {
@@ -133,6 +166,12 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
       } catch {
         if (!vivo) return;
         // Sin Chromium en el servidor: el navegador de lectura de siempre.
+        // La historia del modo lectura se SIEMBRA con la página actual: si no,
+        // el efecto que sincroniza `url` con la historia la devolvía a la
+        // pantalla de inicio y el clic en un favorito no iba a ningún sitio
+        // (visto en pruebas, 2026-08-20).
+        setHistoria([urlRef.current]);
+        setDonde(0);
         setModo('proxy');
         setCargando(true);
       }
@@ -165,7 +204,7 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
         } else if (d.t === 'url' && typeof d.url === 'string' && d.url !== 'about:blank') {
           setUrl(d.url);
           setCargando(false);
-          if (d.titulo) onTitulo?.(String(d.titulo).slice(0, 60));
+          if (d.titulo) { tituloActual.current = String(d.titulo); onTitulo?.(String(d.titulo).slice(0, 60)); }
         } else if (d.t === 'aviso') {
           setAviso(String(d.texto || ''));
           setCargando(false);
@@ -323,15 +362,38 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
     enviar({ tipo: 'tecla', k: [...mods, k].join('+') });
   };
 
+  // --- Favoritos -----------------------------------------------------------
+  const enFavoritos = favoritos.some(f => f.url === url);
+  const alternarFavorito = async () => {
+    if (!user || esPantallaInicio(url)) return;
+    const nuevos = enFavoritos
+      ? favoritos.filter(f => f.url !== url)
+      // El título de la pestaña si el servidor ya lo dijo; si no, el dominio.
+      : [...favoritos, { url, titulo: tituloActual.current || dominio(url) }];
+    await updateUiSettings({ favoritosWeb: nuevos });
+  };
+
   // --- La barra ------------------------------------------------------------
   const ir = (destino: string) => {
-    const u = comoUrl(destino, modo === 'remoto');
+    const u = destino === INICIO ? INICIO : comoUrl(destino, modo === 'remoto');
     if (!u) return;
     setAviso(null);
-    setCargando(true);
+    setCargando(!esPantallaInicio(u));
     if (modo === 'remoto') {
       setUrl(u);
-      if (!reproductorDe(u)) enviar({ tipo: 'navegar', url: u });
+      // Volver al inicio cierra la pestaña remota: no tiene sentido pagar un
+      // Chromium por una pantalla de tarjetas.
+      if (esPantallaInicio(u)) {
+        const id = sesionRef.current;
+        sesionRef.current = null;
+        setSesion(null);
+        avisarNavegadorRemoto(null);
+        if (id) fetch(`/api/navegador/remoto/${id}`, { method: 'DELETE', credentials: 'include' }).catch(() => {});
+      } else if (!sesionRef.current) {
+        // Se venía del inicio: hay que levantar la sesión otra vez.
+        autoReinicios.current = 0;
+        setReinicios(n => n + 1);
+      } else if (!reproductorDe(u)) enviar({ tipo: 'navegar', url: u });
     } else {
       setHistoria(h => [...h.slice(0, donde + 1), u]);
       setDonde(d => d + 1);
@@ -402,6 +464,11 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:hover:bg-transparent">
           <ArrowRight className="w-4 h-4" />
         </button>
+        <button onClick={() => ir(INICIO)} title="Tus favoritos"
+          className={cn('w-7 h-7 grid place-items-center rounded-lg transition-colors',
+            esPantallaInicio(url) ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 hover:bg-slate-200')}>
+          <Home className="w-3.5 h-3.5" />
+        </button>
         <button onClick={recargar} title="Recargar"
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200">
           {cargando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCw className="w-3.5 h-3.5" />}
@@ -421,7 +488,16 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
         </form>
         {/* La salida de emergencia: abrir la dirección en una pestaña del
             navegador de verdad (para iniciar sesión en sitios, por ejemplo). */}
-        <button onClick={() => { if (url) window.open(url, '_blank', 'noopener'); }} title="Abrir en una pestaña del navegador"
+        {user && !esPantallaInicio(url) && (
+          <button onClick={alternarFavorito}
+            title={enFavoritos ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+            className={cn('w-7 h-7 grid place-items-center rounded-lg shrink-0 transition-colors',
+              enFavoritos ? 'text-amber-500 hover:bg-amber-50' : 'text-slate-400 hover:text-amber-500 hover:bg-slate-200')}>
+            <Star className={cn('w-3.5 h-3.5', enFavoritos && 'fill-amber-400')} />
+          </button>
+        )}
+        <button onClick={() => { if (url && !esPantallaInicio(url)) window.open(url, '_blank', 'noopener'); }}
+          title="Abrir en una pestaña del navegador"
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 shrink-0">
           <ExternalLink className="w-3.5 h-3.5" />
         </button>
@@ -448,7 +524,45 @@ export default function Navegador({ inicial, onTitulo, onUrl }: {
           sonido. Sin nuestro sandbox (es de otro origen, no puede tocar la
           app, y necesita su almacenamiento) y CON Referer (YouTube responde
           «Error 153» si no sabe quién lo embebe). */}
-      {video ? (
+      {esPantallaInicio(url) ? (
+        /* Tus sitios, en tarjetas. Es lo primero que ves al abrir el
+           navegador (petición de Eugenio, 2026-08-20). */
+        <div className="flex-1 min-h-0 overflow-y-auto bg-white p-5">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">
+            {favoritos.length ? 'Tus favoritos' : 'Para empezar'}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            {(favoritos.length ? favoritos : SUGERENCIAS).map(f => (
+              <div key={f.url} className="group relative">
+                <button
+                  onClick={() => ir(f.url)}
+                  className="w-full flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border border-slate-200 bg-white hover:border-emerald-300 hover:shadow-md transition-all"
+                >
+                  <img src={favicon(f.url)} alt="" loading="lazy"
+                    className="w-8 h-8 rounded-lg object-contain bg-slate-50"
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+                  <span className="text-[11px] font-black text-slate-700 truncate max-w-full">{f.titulo}</span>
+                  <span className="text-[9px] font-bold text-slate-400 truncate max-w-full">{dominio(f.url)}</span>
+                </button>
+                {favoritos.length > 0 && user && (
+                  <button
+                    onClick={() => updateUiSettings({ favoritosWeb: favoritos.filter(x => x.url !== f.url) })}
+                    title="Quitar de favoritos"
+                    className="absolute top-1.5 right-1.5 w-5 h-5 grid place-items-center rounded-full bg-white border border-slate-200 text-slate-300 opacity-0 group-hover:opacity-100 hover:text-rose-500 transition-all"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 text-[11px] text-slate-400 leading-relaxed">
+            {favoritos.length
+              ? 'Escribe una dirección arriba, o pulsa la estrella en cualquier página para guardarla aquí.'
+              : 'Estas son sugerencias. Abre una página y pulsa la estrella ★ de la barra para guardarla como favorita tuya.'}
+          </p>
+        </div>
+      ) : video ? (
         <iframe
           key={`${url}|${recarga}`}
           src={video}
