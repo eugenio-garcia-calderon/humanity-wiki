@@ -360,6 +360,72 @@ export function registerNavegadorRemotoRoutes(app: Express) {
     }
   });
 
+  /**
+   * POST …/:id/transcripcion — la transcripción del vídeo que hay abierto.
+   *
+   * POR QUÉ ASÍ Y NO CON UNA PETICIÓN NORMAL: se probó primero lo obvio —pedir
+   * la página de YouTube desde el servidor y bajar la pista de subtítulos que
+   * lleva dentro— y **YouTube devuelve 200 con el cuerpo vacío**, tanto desde
+   * el servidor como desde dentro de una página real (comprobado las dos
+   * veces, 2026-08-20). Esas direcciones ya no valen por sí solas.
+   *
+   * Lo que sí funciona es lo que haría una persona: abrir el panel de
+   * «Mostrar transcripción» y leerlo. Y para eso hace falta un CLIC DE VERDAD,
+   * que es justo lo que Playwright sabe dar y un `element.click()` desde la
+   * página no — de ahí que esto viva aquí, en el Chromium que ya tenemos
+   * abierto, y no en el módulo de guardar.
+   */
+  app.post('/api/navegador/remoto/:id/transcripcion', async (req: Request, res: Response) => {
+    const s = sesionDe(req, res);
+    if (!s) return;
+    tocar(s);
+    try {
+      const url = s.page.url();
+      if (!/youtube\.com|youtu\.be/.test(url)) {
+        return res.json({ texto: null, motivo: 'no es un vídeo de YouTube' });
+      }
+
+      // El botón vive en la descripción, y la descripción tarda en montarse.
+      // Se espera a que exista en vez de pulsar a ciegas: el primer intento
+      // fallaba justo por esto, no por el selector.
+      const boton = s.page.locator(
+        'button[aria-label*="ranscripci"], button[aria-label*="ranscript"]'
+      ).first();
+      try {
+        await boton.waitFor({ state: 'attached', timeout: 15000 });
+      } catch {
+        // Puede seguir escondido dentro de la descripción plegada.
+        const expandir = s.page.locator('#expand, tp-yt-paper-button#expand').first();
+        if (await expandir.count()) await expandir.click({ timeout: 3000 }).catch(() => {});
+        try { await boton.waitFor({ state: 'attached', timeout: 8000 }); }
+        catch { return res.json({ texto: null, motivo: 'ese vídeo no tiene transcripción' }); }
+      }
+
+      await boton.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => {});
+      await boton.click({ timeout: 8000 }).catch(() => {});
+
+      // El panel se llena solo, con su tiempo.
+      const seg = s.page.locator('ytd-transcript-segment-renderer').first();
+      try { await seg.waitFor({ state: 'attached', timeout: 20000 }); }
+      catch { return res.json({ texto: null, motivo: 'la transcripción no ha llegado a cargar' }); }
+
+      const texto: string = await s.page.evaluate(() => {
+        const segs = Array.from(document.querySelectorAll('ytd-transcript-segment-renderer'));
+        return segs
+          .map(x => (x.querySelector('.segment-text') as HTMLElement | null)?.innerText?.trim() || '')
+          .filter(Boolean)
+          .join(' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      });
+
+      if (!texto) return res.json({ texto: null, motivo: 'la transcripción ha salido vacía' });
+      res.json({ texto: texto.slice(0, 200_000), palabras: texto.split(/\s+/).length });
+    } catch (err: any) {
+      res.json({ texto: null, motivo: String(err?.message || err).slice(0, 120) });
+    }
+  });
+
   /** GET …/:id/leer — LO QUE LA IA VE: el DOM vivo, no una copia descargada.
    *  Es la diferencia con `/api/navegador/leer`: aquí se lee lo que hay EN la
    *  pestaña después de que la página se dibujara y tú tocaras lo que sea. */

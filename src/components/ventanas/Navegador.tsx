@@ -14,7 +14,7 @@
 //   3. PROXY DE LECTURA (`/api/navegador/ver`): si el servidor no tiene
 //      Chromium, se cae a la versión de solo-documentos de antes.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X, MoreVertical, Minus, Plus as PlusIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X, MoreVertical, Minus, Plus as PlusIcon, Sparkles, Check, ChevronDown, Inbox } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { avisarNavegadorRemoto } from './bus';
 import { useAuth } from '../../contexts/AuthContext';
@@ -142,7 +142,65 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
     ancho: Math.round((c?.clientWidth || 1024) / z),
     alto: Math.round((c?.clientHeight || 700) / z),
   });
+  // EL BOTÓN MÁGICO (Eugenio, 2026-08-20: «un botón mágico para guardar y
+  // compartir ese vídeo en una de las herramientas dentro de uno de los
+  // proyectos»). Dos velocidades en el mismo sitio:
+  //   · UN CLIC → se guarda en «Sin clasificar» y sigues viendo el vídeo.
+  //   · LA FLECHITA → eliges proyecto.
+  // Preguntar «¿dónde?» siempre es lo que hace que nadie use un botón de
+  // guardar; no preguntar nunca te deja un cajón que hay que vaciar. Las dos.
+  const [guardando, setGuardando] = useState(false);
+  const [guardado, setGuardado] = useState<null | { transcripcion: boolean; palabras: number; proyecto?: string }>(null);
+  const [eligiendoProyecto, setEligiendoProyecto] = useState(false);
+  const [misProyectos, setMisProyectos] = useState<Array<{ id: string; titulo: string; icono?: string | null }>>([]);
+  const proyectoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user || misProyectos.length) return;
+    fetch('/api/menu', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setMisProyectos(Array.isArray(d?.proyectos) ? d.proyectos : []))
+      .catch(() => setMisProyectos([]));
+  }, [user, misProyectos.length]);
+
+  const guardarEsto = useCallback(async (proyectoId?: string, tituloProyecto?: string) => {
+    if (guardando) return;
+    setEligiendoProyecto(false);
+    setGuardando(true);
+    setGuardado(null);
+    try {
+      const r = await fetch('/api/guardar-web', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: urlRef.current,
+          titulo: tituloActual.current || undefined,
+          proyecto_id: proyectoId || null,
+          // La sesión del Chromium que tienes abierto: es de donde se saca la
+          // transcripción, porque YouTube ya no la sirve de otra forma.
+          sesion: sesionRef.current || undefined,
+        }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setAviso(d?.error || 'No se ha podido guardar.'); return; }
+      setGuardado({ transcripcion: !!d.transcripcion, palabras: d.palabras || 0, proyecto: tituloProyecto });
+      // El menú enseña lo guardado dentro de cada proyecto: que se entere.
+      window.dispatchEvent(new Event('humanity:menu-cambiado'));
+      // El aviso se va solo: es una confirmación, no algo que haya que cerrar.
+      setTimeout(() => setGuardado(null), 6000);
+    } catch {
+      setAviso('No se ha podido guardar.');
+    } finally { setGuardando(false); }
+  }, [guardando]);
+
   const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fuera = (e: MouseEvent) => {
+      if (proyectoRef.current && !proyectoRef.current.contains(e.target as Node)) setEligiendoProyecto(false);
+    };
+    document.addEventListener('mousedown', fuera);
+    return () => document.removeEventListener('mousedown', fuera);
+  }, []);
   useEffect(() => {
     const fuera = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuAbierto(false);
@@ -561,6 +619,59 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
             <Star className={cn('w-3.5 h-3.5', enFavoritos && 'fill-amber-400')} />
           </button>
         )}
+        {/* GUARDAR ESTO EN LA PLATAFORMA. Solo con sesión y con una página
+            de verdad delante: en la pantalla de inicio no hay nada que
+            guardar. */}
+        {!!user && !esPantallaInicio(url) && (
+          <div className="relative flex items-center shrink-0" ref={proyectoRef}>
+            <button
+              onClick={() => guardarEsto()}
+              disabled={guardando}
+              title="Guardar esto en Humanity (un clic) — sin clasificar"
+              className={cn('h-7 pl-2 pr-1.5 inline-flex items-center gap-1 rounded-l-lg border border-r-0 text-[10px] font-black transition-colors',
+                guardado ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700')}
+            >
+              {guardando ? <Loader2 className="w-3 h-3 animate-spin" />
+                : guardado ? <Check className="w-3 h-3" />
+                  : <Sparkles className="w-3 h-3" />}
+              <span className="hidden md:inline">{guardando ? 'Guardando…' : guardado ? 'Guardado' : 'Guardar'}</span>
+            </button>
+            <button
+              onClick={() => setEligiendoProyecto(v => !v)}
+              disabled={guardando}
+              title="Guardar en un proyecto concreto"
+              className={cn('h-7 px-1 grid place-items-center rounded-r-lg border transition-colors',
+                eligiendoProyecto ? 'bg-slate-900 border-slate-900 text-white'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-300')}
+            >
+              <ChevronDown className="w-3 h-3" />
+            </button>
+
+            {eligiendoProyecto && (
+              <div className="absolute top-8 right-0 w-56 max-h-64 overflow-y-auto bg-white border border-slate-200 shadow-2xl rounded-xl py-1 z-50">
+                <p className="px-3 py-1 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  Guardar en
+                </p>
+                <button onClick={() => guardarEsto()}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                  <Inbox className="w-3.5 h-3.5 text-slate-400" /> Sin clasificar
+                </button>
+                {misProyectos.map(p => (
+                  <button key={p.id} onClick={() => guardarEsto(p.id, p.titulo)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <span className="w-4 text-center shrink-0">{p.icono && !p.icono.startsWith('/') ? p.icono : '📁'}</span>
+                    <span className="truncate">{p.titulo}</span>
+                  </button>
+                ))}
+                {!misProyectos.length && (
+                  <p className="px-3 py-2 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <button onClick={() => { if (url && !esPantallaInicio(url)) window.open(url, '_blank', 'noopener'); }}
           title="Abrir en una pestaña del navegador"
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 shrink-0">
@@ -616,6 +727,21 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
           </div>
         )}
       </div>
+
+      {/* LO QUE SE HA GUARDADO, dicho sin rodeos: si un vídeo trae
+          transcripción se dice cuántas palabras, porque eso es lo que decide
+          si luego lo vas a poder encontrar buscando. */}
+      {guardado && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border-b border-emerald-200 text-[11px] text-emerald-800">
+          <Check className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            Guardado en <b>{guardado.proyecto || 'Sin clasificar'}</b>
+            {guardado.transcripcion
+              ? <> · con transcripción ({guardado.palabras.toLocaleString('es-ES')} palabras, buscable)</>
+              : <> · sin transcripción (YouTube no la da a quien no ha iniciado sesión)</>}
+          </span>
+        </div>
+      )}
 
       {aviso && (
         <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">

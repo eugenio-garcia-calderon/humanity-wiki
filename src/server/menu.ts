@@ -372,7 +372,7 @@ export function registerMenuRoutes(app: Express, db: any) {
       const mio = fila.creador_user_id === yo || (req.user.roleLevel ?? 0) >= 4;
       if (!mio && !fila.publico) return res.status(403).json({ error: 'Ese proyecto es privado.' });
 
-      const [tareas, paginas, esquemas, mapas, productos, personas] = await Promise.all([
+      const [tareas, paginas, guardados, esquemas, mapas, productos, personas] = await Promise.all([
         db.execute(sql`
           SELECT id, titulo, estado, icono FROM roadmap_items
           WHERE proyecto_id = ${pid} AND archived_at IS NULL
@@ -383,6 +383,14 @@ export function registerMenuRoutes(app: Express, db: any) {
           WHERE proyecto_id = ${pid} AND kind = 'pagina'
             AND archived_at IS NULL AND deleted_at IS NULL
           ORDER BY updated_at DESC NULLS LAST LIMIT 100
+        `),
+        // Lo guardado de internet con el botón del navegador.
+        db.execute(sql`
+          SELECT id, title, config->>'url' AS url, config->>'youtube_id' AS youtube_id
+          FROM knowledge_windows
+          WHERE proyecto_id = ${pid} AND kind IN ('enlace', 'video') AND config ? 'url'
+            AND archived_at IS NULL AND deleted_at IS NULL
+          ORDER BY created_at DESC LIMIT 100
         `),
         db.execute(sql`
           SELECT id, title, slug, icono FROM knowledge_graphs
@@ -417,6 +425,9 @@ export function registerMenuRoutes(app: Express, db: any) {
       })));
       rama('paginas', 'Páginas', 'pagina', (paginas.rows as any[]).map(w => ({
         id: w.id, label: w.title, icono: w.icono, destino: `/paginas/${w.id}`,
+      })));
+      rama('guardados', 'Guardados', '', (guardados.rows as any[]).map(g => ({
+        id: g.id, label: g.title, destino: `/archivos?abrir=${encodeURIComponent(g.id)}`,
       })));
       rama('esquemas', 'Esquemas', 'esquema', (esquemas.rows as any[]).map(g => ({
         id: g.id, label: g.title, icono: g.icono, destino: `/esquemas/${g.slug}`,

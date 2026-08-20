@@ -1459,3 +1459,43 @@ Eugenio, con captura: «sobra la línea de Retos de la Humanidad xvf2, solo tien
 - **FUERA LA BARRA DE TÍTULO DE CADA VENTANA.** Tenía razón: el nombre ya estaba en su pestaña de arriba, así que era **la misma información dos veces**. Sus botones —minimizar, maximizar, cerrar— se han ido al final de la **barra de dirección**, que es también de donde se tira ahora para mover la ventana. En el Navegador van al final de su propia barra, que ya existía.
 - **TODO MÁS BAJO**: la cabecera pasa de 56 a **40 px** (32 en compacto), las pestañas de 32 a 28, y la barra de dirección adelgaza. Eran tres filas para lo mismo; ahora que son dos, cada una tiene que pesar lo mínimo.
 - **BOTÓN DE ENCOGER** («que colapse en algo todavía más sencillo, con solo iconos de las ventanas»): las pestañas se quedan en **iconos de 24 px sin nombre**, y la barra de dirección de la ventana se reduce a una tira de 22 px con los tres botones. Es lo mínimo que puede quedar sin perder el poder cerrarla. **Se recuerda** cómo lo dejaste.
+
+## 2026-08-20 — Magic save button: web pages and videos into a project
+
+Petición de Eugenio: «haz que cuando esté navegando en internet en youtube por
+ejemplo tenga un botón mágico para guardar y compartir ese video en uno de las
+herramientas dentro de uno de los proyecto», y después «dale a tu recomendación
+y que sea con transcripción».
+
+**What ships**
+
+- `src/server/guardar.ts` (new module): `POST /api/guardar-web` saves the page
+  you are looking at as a `knowledge_windows` row — kind `video` for YouTube,
+  kind `enlace` for anything else — optionally inside a project. `GET
+  /api/guardados` lists them.
+- `Navegador.tsx`: a ✨ button saves in one click to "Sin clasificar"; the arrow
+  next to it picks a project. A strip confirms what was saved and where.
+- `src/server/menu.ts`: the project tree grows a **Guardados** branch.
+- `src/server/navegadorRemoto.ts`: `POST …/:id/transcripcion` reads YouTube's
+  own transcript panel from the Chromium the person is already using.
+
+**Transcription: what actually happens, measured today**
+
+The obvious route — download the caption track listed in the YouTube page —
+**is dead**. `timedtext` answers `200` with **0 bytes** for every format
+(`json3`, `srv3`, `vtt`, none), from the server *and* from inside a real
+logged-out browser page. The player itself says "Subtítulos no disponibles".
+
+The transcript panel route was then tried properly, with real Playwright clicks:
+the "Mostrar transcripción" button exists and is clicked, but the panel never
+populates. Verified on three unrelated videos.
+
+Conclusion: **YouTube no longer serves captions to a session that has not
+logged in.** The code is kept because it is the right shape and starts working
+the moment a session with access is used; when there is no transcript the video
+is saved anyway, and the UI says why instead of blaming the video.
+
+The remote browser opens a **fresh `newContext` per session**, so logging into
+YouTube there does not survive. Making that context persistent is the change
+that would unlock transcription without paying anyone — it is not done here
+because it stores site cookies on the server and that is Eugenio's call.
