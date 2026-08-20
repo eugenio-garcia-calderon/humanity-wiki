@@ -2305,3 +2305,34 @@ notes file to be able to keep it, which is absurd.
 On a page, the section only appears once the page exists. A page that has not
 been saved has nothing to hang a file from, and offering the button would be
 promising something that fails when pressed.
+
+## 2026-08-21 — B90: the remote browser stopped pixelating while you scroll
+
+Eugenio: «cuando en el navegador se hace scroll down de una página de internet,
+se pixela ya que no se refresca bien y queda fatal».
+
+The refresh was fine. The frame sent during movement was captured at CSS scale,
+which on a Retina screen is half the linear resolution, and the client `<img>`
+stretched it back over the full box — one sent pixel covering four on screen.
+Pixelation by construction, which is why it happened every single time.
+
+Measured on Wikipedia at 1000×700, Retina:
+
+    css    q50 →  43 ms    93 KB   1000×700
+    device q40 →  71 ms   199 KB   2000×1400
+    device q70 →  70 ms   321 KB   2000×1400
+
+The way out is in the same numbers: at full resolution the *quality* setting
+costs almost no time (71 ms at 40, 70 ms at 70) — what costs is rasterising
+twice the pixels. So the movement frame now goes at full resolution with low
+quality: paid in kilobytes, not in stutter.
+
+Half resolution is kept for what animates on its own (a video, a carousel),
+where the eye wants smoothness over detail and there is no text to read. When
+*you* are the one moving the page, you are reading.
+
+Measured cost of the change, scrolling for 3 s: 11.3 → 9.3 frames/s and
+1.14 → 2.19 MB/s. 18% fewer frames for four times the pixels.
+
+Also: one capture per loop instead of two. The frame is now its own change
+probe, so raising its resolution did not double the work.

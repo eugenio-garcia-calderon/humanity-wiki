@@ -131,6 +131,31 @@ When a key is missing, respond 503 with a clear message instead of crashing. The
 routes do this well: "the assistant is built but inactive, `ANTHROPIC_API_KEY` is
 missing".
 
+## Test sessions: local only, announced, and cleaned in both places
+
+A row in `sessions` is a login. Inserting one by hand is entering as that user
+without their password. **In local, that is a normal development shortcut. In
+production it is never allowed** — not to verify, not to unblock yourself, not
+because it is faster. If you need a session in production, ask Eugenio and wait.
+
+Locally, three things, all of them:
+
+1. **Announce it when you create it**, not when someone finds it. One line to
+   whoever is coordinating: «created devverif123, deleting it when X is done».
+2. **Tag it**: `user_agent = 'claude-dev-verificacion'`, so anyone looking at
+   the table can tell at a glance whose it is.
+3. **Delete it from BOTH places in the same operation** — the row *and* the
+   cookie in the browser.
+
+The third one is the one that bit us on 2026-08-21. The row was deleted, the
+cookie was left behind in the shared in-app browser, and the next person to sit
+down found a state they could not explain and spent time investigating it. A
+dead cookie looks exactly like a live session and cannot say that it is not one.
+
+And prefer not to need any of this: drive verification over HTTP with the cookie
+in the header, from a script. Writing into the browser other people share also
+overwrites *their* session, which is how Eugenio got silently logged out.
+
 ## Before you change this, decide
 
 | If you are about to... | Current shortcut | Right pattern | Cost of switching now |
