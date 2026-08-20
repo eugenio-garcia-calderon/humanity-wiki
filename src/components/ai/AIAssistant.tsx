@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
@@ -155,6 +156,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   }, []);
   const interlocutor = useRef<string | null>(null);
   const { user } = useAuth();
+  // Los territorios que la app ya tiene cargados, para comprobar que un
+  // destino existe antes de navegar (B63). Si aún no han llegado, no se
+  // bloquea nada: mejor dejar pasar que impedir algo que sí existe.
+  const { territories: territorios } = useData();
 
   // HISTORIAL (Eugenio, 2026-08-20: «con historial de conversaciones»). La
   // ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde
@@ -341,15 +346,43 @@ export default function AIAssistant({ modo = 'panel' }: {
     juego: juegoCtx || undefined,
   });
 
-  /** Aplica los eventos de interfaz que devuelve el modelo. */
+  /**
+   * Aplica los eventos de interfaz que devuelve el modelo.
+   *
+   * SE COMPRUEBA QUE EL DESTINO EXISTA ANTES DE IR (2026-08-20, B63). Antes
+   * se navegaba a ciegas con el identificador que llegara: si el modelo se
+   * equivocaba, acababas en un mapa vacío y NADIE decía nada. Hoy el modelo
+   * acierta —probado con un id inventado, se negó él solo— pero eso es tener
+   * suerte, no estar protegido: un fallo que depende de que el modelo acierte
+   * está aplazado, no arreglado.
+   *
+   * Es la segunda mitad de la regla de este módulo: no basta con tener sitio
+   * donde guardar las cosas, hace falta una forma de decir que no se puede.
+   */
   const applyUiEvents = (events: any[]) => {
+    const noSePudo = (que: string) => {
+      setMessages(m => [...m, {
+        role: 'assistant',
+        content: `No he podido llevarte ahí: ${que} no existe en la plataforma.`,
+        error: true,
+      }]);
+    };
+
     for (const e of events || []) {
       const p = e.params || {};
       switch (e.type) {
         case 'OPEN_TERRITORY':
-        case 'ZOOM_TO_TERRITORY':
-          navigate(`/mapa?territorio=${encodeURIComponent(p.territorySlug || p.territoryId || '')}`);
+        case 'ZOOM_TO_TERRITORY': {
+          const t = String(p.territorySlug || p.territoryId || '');
+          // Se valida contra los territorios que la app YA tiene cargados: no
+          // hace falta preguntar al servidor para saber que algo no está.
+          if (!t) { noSePudo('ese territorio'); break; }
+          const existe = !territorios.length || territorios.some((x: any) =>
+            x.slug === t || x.id === t || String(x.name || '').toLowerCase() === t.toLowerCase());
+          if (!existe) { noSePudo(`el territorio «${t}»`); break; }
+          navigate(`/mapa?territorio=${encodeURIComponent(t)}`);
           break;
+        }
         case 'FILTER_OBJECTIVE':
           navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=objetivo&id=${p.objectiveId}`);
           break;
@@ -362,12 +395,20 @@ export default function AIAssistant({ modo = 'panel' }: {
         case 'SELECT_METRIC':
           navigate(`/mapa?territorio=${searchParams.get('territorio') || 'espana'}&nivel=metrica&id=${p.metricId}`);
           break;
-        case 'OPEN_CHALLENGE': navigate(`/retos/${p.slug || p.challengeId}`); break;
-        case 'OPEN_SOLUTION':  navigate(`/soluciones/${p.slug || p.solutionId}`); break;
+        case 'OPEN_CHALLENGE':
+          if (p.slug || p.challengeId) navigate(`/retos/${p.slug || p.challengeId}`); else noSePudo('ese reto');
+          break;
+        case 'OPEN_SOLUTION':
+          if (p.slug || p.solutionId) navigate(`/soluciones/${p.slug || p.solutionId}`); else noSePudo('esa solución');
+          break;
         case 'SHOW_MARKET':    navigate('/mercado'); break;
         case 'SHOW_INITIATIVES': navigate('/iniciativas'); break;
-        case 'OPEN_KNOWLEDGE_GRAPH': navigate(`/esquemas/${p.slug || p.graphId || ''}`); break;
-        case 'OPEN_USER_MAP': navigate(`/mapas/${p.slug || p.mapId || ''}`); break;
+        case 'OPEN_KNOWLEDGE_GRAPH':
+          if (p.slug || p.graphId) navigate(`/esquemas/${p.slug || p.graphId}`); else noSePudo('ese esquema');
+          break;
+        case 'OPEN_USER_MAP':
+          if (p.slug || p.mapId) navigate(`/mapas/${p.slug || p.mapId}`); else noSePudo('ese mapa');
+          break;
         default: break;
       }
     }

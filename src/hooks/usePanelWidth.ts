@@ -78,13 +78,18 @@ export function usePanelWidth(key: string, defaultPercent: number, opts: Options
    *  - 'left': panel anclado a la derecha (ej. Asistente IA) — arrastrar a la
    *    izquierda lo ensancha.
    */
-  const startResize = (edge: 'left' | 'right') => (e: React.MouseEvent) => {
+  // EVENTOS DE PUNTERO, NO DE RATÓN (2026-08-20). Esto escuchaba `mousemove`
+  // y `mouseup`, que un dedo no dispara: en una pantalla táctil arrastrar el
+  // borde del panel no hacía absolutamente nada. Los eventos de puntero valen
+  // para ratón, dedo y lápiz a la vez, así que no hay que duplicar nada — es
+  // el mismo cambio que ya llevan las asas de las ventanas.
+  const startResize = (edge: 'left' | 'right') => (e: React.PointerEvent | React.MouseEvent) => {
     e.preventDefault();
     setDragging(true);
     const startX = e.clientX;
     const startWidth = latestWidth.current;
 
-    const onMove = (ev: MouseEvent) => {
+    const onMove = (ev: PointerEvent | MouseEvent) => {
       const deltaPx = edge === 'right' ? ev.clientX - startX : startX - ev.clientX;
       const deltaPercent = (deltaPx / window.innerWidth) * 100;
       const next = clamp(startWidth + deltaPercent);
@@ -96,13 +101,17 @@ export function usePanelWidth(key: string, defaultPercent: number, opts: Options
       setWidthState(next);
     };
     const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
       setDragging(false);
       commit(latestWidth.current);
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    // Un dedo que se sale de la pantalla, o una llamada entrante, cancelan el
+    // gesto sin soltar: sin esto el panel se quedaría pegado al dedo.
+    window.addEventListener('pointercancel', onUp);
   };
 
   return { width, setWidth, startResize, dragging, min, max };

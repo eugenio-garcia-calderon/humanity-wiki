@@ -2169,3 +2169,46 @@ things is not.
 something the platform cannot store and seeing whether they say so or narrate it.
 The third is the worrying one: an event with an id that does not exist fails
 invisibly by design.
+
+## 2026-08-20 — Closing the queue, and the rule written down
+
+**B40** — the SPA catch-all answered `index.html` to *everything*, so
+`/sitemap.xml` and `/manifest.json` returned 200 with HTML to the crawlers and
+browsers that ask for them. A path **with an extension** asks for a file, and
+`express.static` has already had its turn above it, so if it reaches the
+wildcard the file does not exist: 404. Without an extension it is an app route,
+unchanged.
+
+**B25** — anonymous callers no longer receive `creador_user_id` (nor
+`created_by`/`updated_by`) from `/api/proyectos`. Not a leak — the projects
+listed are the public ones — but an internal user id is no use to a visitor and
+is of use for correlating people across records.
+
+**B24** — clicking outside the create dialog discarded whatever had been typed.
+It now asks first when there is something written, and closes silently when
+empty. Somebody's writing is not thrown away by a stray click.
+
+**B60** — the panel resize handle listened for `mousemove`/`mouseup`, which a
+finger never fires: dragging the edge on a touch screen did nothing at all.
+Pointer events cover mouse, finger and pen at once, plus `touch-action: none`
+so the browser does not steal the gesture as a scroll, and `pointercancel` so
+the panel does not stay glued to a finger that left the screen.
+
+**B63 — a bug that depends on the model behaving is postponed, not fixed.**
+`applyUiEvents` navigated with whatever id arrived. Tested with an invented
+territory the model refused on its own — but that is luck, not protection. The
+destination is now checked against the territories the app already has loaded
+(no extra request), empty ids never navigate, and when the target does not
+exist it says so instead of landing on an empty map in silence.
+
+**B35 — Stripe was loading on pages that sell nothing.** A static
+`import … from '@stripe/stripe-js'` injects `js.stripe.com/v3` on import, so the
+third-party script and its iframe were live on `/tareas`. Now imported
+dynamically at the moment someone actually pays. Measured: `js.stripe.com` has
+left the main bundle into a 2,6 kB chunk. **The ~1 MB the Tester measured was
+the runtime script, not the bundle** — the 3,7 MB main chunk is a separate
+problem and is untouched by this.
+
+**And the rule is now written into `src/server/CLAUDE.md`** as a design
+principle with the six cases as concrete examples, so whoever touches the AI
+module next does not repeat them.

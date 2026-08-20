@@ -1248,6 +1248,23 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // hay `entityId`, no hay ficha — y esa ausencia ES la señal de que no se
       // creó nada.
       let enseñar: { titulo: string; url: string; detalle?: string } | null = null;
+
+      // ORGANIZAR CARPETAS NO CREA UNA COSA, CREA VARIAS (2026-08-20). Y como
+      // no devuelve `entityId`, se quedaba sin ficha: la persona leía «hecho»
+      // sin una sola prueba de que se hubiera movido nada. El dato ya existía
+      // —la función devuelve las carpetas con cuántas piezas van en cada una—
+      // y solo faltaba enseñarlo.
+      if (result.ok && Array.isArray((result as any).carpetas)) {
+        const cs = (result as any).carpetas as Array<{ nombre: string; piezas: number }>;
+        enseñar = cs.length
+          ? {
+              titulo: `${cs.length} ${cs.length === 1 ? 'carpeta' : 'carpetas'}`,
+              url: '/mi-conocimiento',
+              detalle: cs.map(c => `${c.nombre} (${c.piezas})`).join(' · ').slice(0, 200),
+            }
+          : { titulo: 'No había nada que ordenar', url: '/mi-conocimiento' };
+      }
+
       if (result.ok && result.entityId) {
         const nombre = String(action.params?.titulo || action.params?.nombre || action.params?.title || '').trim();
         const rutas: Record<string, string> = {
