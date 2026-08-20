@@ -151,8 +151,26 @@ export default function GestorVentanas({ onPaginaNavegador }: {
           : vs.map(x => (x.id === id ? { ...x, z: ++contadorZ, minimizada: false } : x));
       });
     };
+    // La ✕ de una pestaña de arriba.
+    const alCerrar = (e: Event) => cerrar((e as CustomEvent).detail as string);
+    // Recolocar las pestañas arrastrando: llega el orden entero de ids. Se
+    // reordena el ARRAY (que es lo que se publica a la barra); las z quedan
+    // como estaban, porque cambiar de sitio una pestaña no cambia cuál miras.
+    const alOrdenar = (e: Event) => {
+      const ids = (e as CustomEvent).detail as string[];
+      setVentanas(vs => {
+        const porId = new Map(vs.map(v => [v.id, v]));
+        const puestas = ids.map(id => porId.get(id)).filter(Boolean) as Ventana[];
+        // Lo que no venga en la lista se conserva al final: nunca se pierde una
+        // ventana por una carrera entre abrir y arrastrar.
+        const restantes = vs.filter(v => !ids.includes(v.id));
+        return puestas.length ? [...puestas, ...restantes] : vs;
+      });
+    };
     window.addEventListener('humanity:abrir-ventana', alAbrir);
     window.addEventListener('humanity:pulsar-ventana', alPulsar);
+    window.addEventListener('humanity:cerrar-ventana', alCerrar);
+    window.addEventListener('humanity:ordenar-ventanas', alOrdenar);
     // El menú ☰ de CUALQUIER página puede dejar una apertura apuntada
     // («Navegador» desde fuera del Escritorio, 2026-08-20): se recoge aquí,
     // ya con el gestor montado.
@@ -164,8 +182,10 @@ export default function GestorVentanas({ onPaginaNavegador }: {
     return () => {
       window.removeEventListener('humanity:abrir-ventana', alAbrir);
       window.removeEventListener('humanity:pulsar-ventana', alPulsar);
+      window.removeEventListener('humanity:cerrar-ventana', alCerrar);
+      window.removeEventListener('humanity:ordenar-ventanas', alOrdenar);
     };
-  }, [abrir]);
+  }, [abrir, cerrar]);
 
   /**
    * PASAR DE UNA VENTANA A OTRA CON EL TRACKPAD (petición de Eugenio: «con los

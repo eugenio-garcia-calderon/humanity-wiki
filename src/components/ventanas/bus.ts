@@ -48,3 +48,15 @@ export const pedirVentanas = () =>
  *  el chat del Escritorio lea la página VIVA en vez de descargar una copia. */
 export const avisarNavegadorRemoto = (sesion: string | null) =>
   window.dispatchEvent(new CustomEvent('humanity:navegador-remoto', { detail: sesion }));
+
+/** Cerrar una ventana desde la barra de arriba, como la ✕ de una pestaña
+ *  (Eugenio, 2026-08-20: «permite cerrarlas desde ahí arriba como si fuese un
+ *  navegador»). */
+export const cerrarVentana = (id: string) =>
+  window.dispatchEvent(new CustomEvent('humanity:cerrar-ventana', { detail: id }));
+
+/** Recolocar las pestañas arrastrando. Viaja el orden ENTERO de ids: el gestor
+ *  no tiene que adivinar de dónde a dónde ha ido nada, y si llega un id que ya
+ *  no existe (ventana cerrada a la vez) simplemente se ignora. */
+export const ordenarVentanas = (ids: string[]) =>
+  window.dispatchEvent(new CustomEvent('humanity:ordenar-ventanas', { detail: ids }));

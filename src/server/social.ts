@@ -446,7 +446,11 @@ export function registerSocialRoutes(app: Express, db: any) {
     try {
       const u = await db.execute(sql`
         SELECT id, uuid, display_name, name, avatar_url, banner_url, bio, location, website,
-               socials, specialties, organization_id, reputation, impact_score, role_level, created_at
+               socials, specialties, organization_id, reputation, impact_score, role_level, created_at,
+               -- SOLO esta clave de los ajustes. El resto de ui_settings es
+               -- privado (favoritos del navegador, anchos de panel) y sacarlo
+               -- entero aquí lo publicaría sin querer.
+               ui_settings->'escaparate' AS escaparate
         FROM users WHERE id = ${req.params.id} AND archived_at IS NULL
       `);
       if (!u.rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -466,6 +470,140 @@ export function registerSocialRoutes(app: Express, db: any) {
         },
       });
     } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
+  // EL ESCAPARATE DE UNA PERSONA (2026-08-20, petición de Eugenio: «Mi Perfil
+  // tiene que ser un escaparate donde puedas arrastrar y soltar tus grafos,
+  // proyectos, archivos, mapas y mundos, con tu muro público»).
+  // ==========================================================================
+  // Devuelve TODO lo que esa persona ha hecho, de las cuatro tablas donde vive,
+  // en un solo formato. El orden y lo que se enseña lo decide su dueño y se
+  // guarda en `users.ui_settings->'escaparate'`; aquí solo se dice qué existe.
+  //
+  // DOS CANDADOS, no uno. Que el dueño arrastre una ficha al escaparate NO
+  // publica lo que hay detrás: una cosa privada sigue siendo privada aunque
+  // esté colocada. Para quien no eres tú, esta ruta filtra por la privacidad
+  // REAL de cada objeto (`status`, `publico`); el orden del dueño solo decide
+  // cómo se colocan las que ya podían verse. Así, tirar de una ficha nunca
+  // puede destapar sin querer un proyecto privado.
+  app.get('/api/users/:id/escaparate', async (req: Request, res: Response) => {
+    try {
+      const de = req.params.id;
+      const soyYo = req.user?.id === de || (req.user?.roleLevel ?? 0) >= ROLE.ADMIN;
+
+      const [grafos, proyectos, mapas, mundo] = await Promise.all([
+        db.execute(sql`
+          SELECT g.id, g.title, g.description, g.slug, g.status, g.views, g.updated_at, g.created_at,
+                 (g.center->>'personal') AS personal,
+                 -- La portada: la primera imagen del lienzo y, si no tiene
+                 -- ninguna, la miniatura de su primer vídeo. Misma regla que
+                 -- en la lista de Grafos, para que una cosa se vea igual esté
+                 -- donde esté.
+                 (SELECT w.config->>'image_url' FROM graph_windows gw
+                    JOIN knowledge_windows w ON w.id = gw.window_id
+                   WHERE gw.graph_id = g.id AND w.kind = 'imagen'
+                     AND w.config->>'image_url' IS NOT NULL
+                   ORDER BY w.created_at LIMIT 1) AS portada,
+                 (SELECT w.config->>'youtube_id' FROM graph_windows gw
+                    JOIN knowledge_windows w ON w.id = gw.window_id
+                   WHERE gw.graph_id = g.id AND w.kind = 'video'
+                     AND w.config->>'youtube_id' IS NOT NULL
+                   ORDER BY w.created_at LIMIT 1) AS portada_video
+          FROM knowledge_graphs g
+          WHERE g.creator_user_id = ${de} AND g.archived_at IS NULL AND g.deleted_at IS NULL
+            AND (${soyYo} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          ORDER BY g.updated_at DESC NULLS LAST, g.created_at DESC LIMIT 60
+        `),
+        db.execute(sql`
+          SELECT p.id, p.titulo, p.descripcion, p.slug, p.publico, p.updated_at, p.created_at,
+                 (SELECT count(*)::int FROM roadmap_items r
+                   WHERE r.proyecto_id = p.id AND r.archived_at IS NULL) AS tarjetas,
+                 -- La primera imagen que alguien pegó en una tarjeta del
+                 -- proyecto. jsonb_path_query_first mira dentro del array de
+                 -- bloques sin tener que traérselo entero a Node.
+                 (SELECT jsonb_path_query_first(r.bloques, '$[*] ? (@.tipo == "imagen").url') #>> '{}'
+                    FROM roadmap_items r
+                   WHERE r.proyecto_id = p.id AND r.archived_at IS NULL
+                     AND r.bloques @? '$[*] ? (@.tipo == "imagen")'
+                   ORDER BY r.orden, r.created_at LIMIT 1) AS portada
+          FROM proyectos p
+          WHERE p.creador_user_id = ${de} AND p.archived_at IS NULL AND p.deleted_at IS NULL
+            AND (${soyYo} OR p.publico)
+          ORDER BY p.updated_at DESC NULLS LAST, p.created_at DESC LIMIT 60
+        `),
+        db.execute(sql`
+          SELECT id, title, description, slug, status, views, updated_at, created_at
+          FROM user_maps
+          WHERE creator_user_id = ${de} AND archived_at IS NULL AND deleted_at IS NULL
+            AND (${soyYo} OR status = 'publicado')
+          ORDER BY updated_at DESC NULLS LAST, created_at DESC LIMIT 60
+        `),
+        // El mundo 3D no es una lista: es UN sitio. Una sola ficha, y solo si
+        // esa persona ha plantado algo en él.
+        db.execute(sql`
+          SELECT count(*)::int AS n, max(coalesce(updated_at, created_at)) AS cuando,
+                 (SELECT url FROM game_world_items i2
+                   WHERE i2.user_id = ${de} AND i2.archived_at IS NULL
+                     AND i2.tipo = 'imagen' AND i2.url IS NOT NULL
+                   ORDER BY i2.created_at DESC LIMIT 1) AS portada
+          FROM game_world_items
+          WHERE user_id = ${de} AND archived_at IS NULL AND tipo <> 'prop'
+        `),
+      ]);
+
+      const corta = (t: string | null, n = 140) =>
+        (t || '').replace(/\s+/g, ' ').trim().slice(0, n) || null;
+
+      const items: any[] = [];
+      for (const g of grafos.rows as any[]) {
+        items.push({
+          clave: `grafo:${g.id}`, tipo: 'grafo', id: g.id,
+          titulo: g.title, resumen: corta(g.description),
+          url: `/grafos/${g.slug}`, fecha: g.updated_at || g.created_at,
+          privado: g.status !== 'publicado' || g.personal === '1',
+          dato: g.views ? `${g.views} visitas` : null,
+          imagen: g.portada || (g.portada_video ? `https://i.ytimg.com/vi/${g.portada_video}/mqdefault.jpg` : null),
+        });
+      }
+      for (const p of proyectos.rows as any[]) {
+        items.push({
+          clave: `proyecto:${p.id}`, tipo: 'proyecto', id: p.id,
+          titulo: p.titulo, resumen: corta(p.descripcion),
+          url: `/proyectos/${p.slug}`, fecha: p.updated_at || p.created_at,
+          privado: !p.publico,
+          dato: p.tarjetas ? `${p.tarjetas} tarjetas` : null,
+          imagen: p.portada || null,
+        });
+      }
+      for (const m of mapas.rows as any[]) {
+        items.push({
+          clave: `mapa:${m.id}`, tipo: 'mapa', id: m.id,
+          titulo: m.title, resumen: corta(m.description),
+          url: `/mapas/${m.slug}`, fecha: m.updated_at || m.created_at,
+          privado: m.status !== 'publicado',
+          dato: m.views ? `${m.views} visitas` : null,
+          // Un mapa no guarda ninguna imagen: se queda con su color de tipo.
+          imagen: null,
+        });
+      }
+      const w = (mundo.rows[0] || {}) as any;
+      if (w.n > 0) {
+        items.push({
+          clave: 'mundo:propio', tipo: 'mundo', id: 'mundo',
+          titulo: 'Mi Mundo 3D', resumen: 'La aldea donde vive lo que voy plantando.',
+          url: '/juego', fecha: w.cuando, privado: false,
+          dato: `${w.n} cosas`,
+          imagen: w.portada || null,
+        });
+      }
+
+      items.sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+      res.json({ items });
+    } catch (e: any) {
+      console.error('escaparate error:', e);
       res.status(500).json({ error: e.message });
     }
   });
