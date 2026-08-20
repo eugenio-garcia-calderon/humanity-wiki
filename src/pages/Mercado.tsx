@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
-import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart } from 'lucide-react';
+import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart, FolderKanban } from 'lucide-react';
 import { cn } from '../utils/cn';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 import FichaProducto, { type ProductoFicha } from '../components/juego/FichaProducto';
@@ -50,6 +50,9 @@ export default function Mercado() {
   // Mundo 3D»). Es literalmente el mismo componente: una landing es la misma
   // cosa se llegue por el mercado o paseando por la aldea.
   const [ficha, setFicha] = useState<ProductoFicha | null>(null);
+  /** Tus proyectos, para poder meter el producto en uno. Se piden una vez. */
+  const [misProyectos, setMisProyectos] = useState<Array<{ id: string; titulo: string }>>([]);
+  const [proyectoDeFicha, setProyectoDeFicha] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const { user, can } = useAuth();
   const { territories, objectives } = useHelpers();
@@ -76,6 +79,34 @@ export default function Mercado() {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [tab, filters]);
+
+  useEffect(() => {
+    if (!user) { setMisProyectos([]); return; }
+    fetch('/api/menu', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setMisProyectos(Array.isArray(d?.proyectos) ? d.proyectos : []))
+      .catch(() => setMisProyectos([]));
+  }, [user]);
+
+  /** Al abrir una ficha, el selector arranca en el proyecto que ya tuviera. */
+  useEffect(() => {
+    if (!ficha) return;
+    const p = products.find(x => x.id === ficha.id);
+    setProyectoDeFicha(p?.proyecto_id || '');
+  }, [ficha, products]);
+
+  const moverProductoAProyecto = async (productoId: string, proyectoId: string) => {
+    setProyectoDeFicha(proyectoId);
+    const r = await fetch(`/api/products/${productoId}/proyecto`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: proyectoId || null }),
+    }).catch(() => null);
+    if (!r?.ok) return;
+    setProducts(prev => prev.map(x => (x.id === productoId ? { ...x, proyecto_id: proyectoId || null } : x)));
+    // El menú lateral enseña los productos por proyecto: que se entere.
+    window.dispatchEvent(new Event('humanity:menu-cambiado'));
+  };
 
   const activeFilterCount = Object.entries(filters).filter(([k, v]) => v && k !== 'q').length;
   const items = tab === 'ofertas' ? products : demands;
@@ -287,6 +318,24 @@ export default function Mercado() {
           así que aquí se le da un marco fijo a pantalla completa. */}
       {ficha && (
         <div className="fixed inset-0 z-[60]">
+          {/* EN QUÉ PROYECTO ESTÁ (2026-08-20). Va flotando sobre la ficha y no
+              dentro, para no tocar un componente que también usa el Mundo 3D.
+              Solo lo ve su dueño: es una decisión de organización, no algo que
+              deba enseñarse a quien viene a comprar. */}
+          {!!user && (ficha.creador === user.id || (user.roleLevel ?? 0) >= ROLE.ADMIN) && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-lg">
+              <FolderKanban className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Proyecto</span>
+              <select
+                value={proyectoDeFicha}
+                onChange={e => moverProductoAProyecto(ficha.id, e.target.value)}
+                className="text-xs font-bold text-slate-700 bg-transparent focus:outline-none max-w-[12rem]"
+              >
+                <option value="">Sin proyecto</option>
+                {misProyectos.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
+              </select>
+            </div>
+          )}
           <FichaProducto
             producto={ficha}
             puedeEditar={!!user && (ficha.creador === user.id || (user.roleLevel ?? 0) >= ROLE.ADMIN)}
