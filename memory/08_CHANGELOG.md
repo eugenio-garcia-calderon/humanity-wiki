@@ -1294,3 +1294,20 @@ Lote de 12 peticiones de Eugenio en una sola captura. Diez van en este cambio; l
   - Al principio solo se listaban los proyectos que YA tenían páginas — y entonces **un proyecto vacío no aparecía y no había forma de arrastrarle nada**. Ahora se enseñan todos tus proyectos: un cajón vacío tiene que verse para poder usarlo.
   - Pero abiertos, siete proyectos vacíos ocupaban media pantalla de huecos y empujaban tus páginas fuera de la vista. **Los vacíos nacen plegados**: una línea cada uno, y siguen valiendo como sitio donde soltar.
 - Cada ficha lleva la primera imagen de la página como portada, un adelanto del texto, cuántos bloques tiene y si es pública o privada.
+
+### 2026-08-20 — FASE 1 de la reestructuración: el menú lateral en 4 secciones
+Eugenio: «reestructurar toda la plataforma en 1. los proyectos, 2. las herramientas, 3. los productos de cada proyecto, 4. las personas […] divide el menú izquierdo en 4 secciones».
+
+- **LA FORMA DE LA PLATAFORMA, DICHA EN UN SITIO.** El menú deja de ser un desplegable del botón ☰ y pasa a ser una **columna que se queda**: con un árbol de proyectos dentro, un desplegable que se cierra al pulsar nada no sirve.
+  1. **PROYECTOS** arriba del todo — se despliegan y dentro está lo que les cuelga.
+  2. **HERRAMIENTAS** — Páginas, Esquemas, Mapas, Tareas, Mundo 3D, Archivos, Navegador, Explorar.
+  3. **PRODUCTOS** — lo que ofreces.
+  4. **PERSONAS** — Mi Perfil, la gente que sigues y las representaciones de tu Mundo 3D.
+- **CINCO FILAS POR SECCIÓN Y SCROLL DENTRO DE CADA UNA**, no en todo el menú: si se desplazara entero, buscar una persona te dejaría los proyectos fuera de la pantalla. La sexta fila asoma a propósito — es lo que dice «aquí hay más» sin poner un cartel.
+- **PLEGADO son 56 px de iconos** con el nombre al pasar el ratón, y se recuerda como lo dejaste.
+- **EL ÁRBOL DE UN PROYECTO**: «Aptera → Tareas (10) → Decidir para qué es…». Verificado en el navegador, que es exactamente lo que pidió Eugenio con «Camión Camperizado → Tareas → Ducha, Baño».
+  - **Los hijos se piden al desplegar, no antes** (`GET /api/proyectos/:id/arbol`): el árbol entero de siete proyectos serían 42 consultas para enseñar cinco líneas. Se paga por lo que abres, y una vez abierto se queda.
+  - **La flecha y el nombre son dos botones distintos.** En el menú de los 14 objetivos estaban unidos y por eso no se podía mirar dentro de un objetivo sin seleccionarlo.
+- **UNA PIEZA RECURSIVA EN VEZ DE CUATRO NIVELES A MANO.** El menú del mapa hacía esto con 120 líneas de JSX anidado que solo valían para objetivos → indicadores → marcadores → métricas. `RamaMenu` es recursiva: vale para cualquier profundidad sin escribir un nivel más.
+- **`drizzle/0044`: `proyecto_id` en `knowledge_graphs`, `user_maps` y `products`.** Ya lo tenían tareas, páginas y las cosas del Mundo 3D; sin estas tres el árbol no podía enseñar los esquemas ni los productos de un proyecto. Mismo criterio que en 0043: una columna, no la tabla intermedia número 44. `ON DELETE SET NULL` en las tres — borrar un proyecto no se lleva por delante lo que hiciste dentro.
+- **`GET /api/menu`** sirve poco y plano: el menú solo necesita saber QUÉ hay. Las herramientas no salen de ahí — son fijas y viven en el cliente, porque pedirle al servidor una lista que nunca cambia es un viaje por nada.
