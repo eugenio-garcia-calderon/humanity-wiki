@@ -134,11 +134,11 @@ export function registerMenuRoutes(app: Express, db: any) {
 
   app.get('/api/menu', async (req: Request, res: Response) => {
     // Sin sesión el menú es solo herramientas: no hay proyectos «de nadie».
-    if (!req.user) return res.json({ proyectos: [], productos: [], personas: [], organizaciones: [] });
+    if (!req.user) return res.json({ proyectos: [], productos: [], personas: [], organizaciones: [], gruposFavoritos: [] });
     try {
       const yo = req.user.id;
 
-      const [proyectos, productos, agentes, seguidos, orgs] = await Promise.all([
+      const [proyectos, productos, agentes, seguidos, gruposFav, orgs] = await Promise.all([
         db.execute(sql`
           SELECT p.id, p.titulo, p.slug, p.publico, p.icono
           FROM proyectos p
@@ -173,6 +173,16 @@ export function registerMenuRoutes(app: Express, db: any) {
           LIMIT 50
         `),
         db.execute(sql`
+          SELECT g.id, g.nombre, g.icono,
+                 (SELECT count(*)::int FROM game_agents a2
+                   WHERE a2.user_id = ${yo} AND a2.archived_at IS NULL
+                     AND a2.grupo_ids @> to_jsonb(array[g.id])) AS cuantos
+          FROM grupos_personas g
+          WHERE g.user_id = ${yo} AND g.favorito AND g.archived_at IS NULL
+          ORDER BY g.orden, g.nombre
+          LIMIT 20
+        `),
+        db.execute(sql`
           SELECT o.id, o.name
           FROM organizations o
           JOIN users u ON u.organization_id = o.id
@@ -197,6 +207,9 @@ export function registerMenuRoutes(app: Express, db: any) {
           })),
         ],
         organizaciones: (orgs.rows as any[]).map(o => ({ id: o.id, nombre: o.name })),
+        gruposFavoritos: (gruposFav.rows as any[]).map(g => ({
+          id: g.id, nombre: g.nombre, icono: g.icono, cuantos: g.cuantos,
+        })),
       });
     } catch (e: any) {
       console.error('menu error:', e);
