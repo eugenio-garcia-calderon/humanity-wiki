@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Minus, ChevronUp } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
+import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
 import PublicationPopup from '../knowledge/PublicationPopup';
@@ -72,18 +72,19 @@ const ATTACHMENT_MAX_BYTES: Record<string, number> = {
   'application/pdf': 15 * 1024 * 1024,
 };
 
-/** Hueco que la portada deja para la barra: el asistente se monta en el
- *  Layout (así la conversación sobrevive al cambio de página) pero se pinta
- *  ahí dentro mediante un portal. */
-export const ANCLA_IA_EN_LINEA = 'ancla-ia-en-linea';
-
-export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' | 'inline' }) {
+export default function AIAssistant() {
+  // UN SOLO ASISTENTE (Eugenio, 2026-08-20: «que sea coherente en todas las
+  // herramientas»). Antes había tres formas del mismo chat —panel acoplado,
+  // barra abajo en los lienzos y barra en línea en la portada— y cada una se
+  // comportaba distinto. Ahora es siempre el panel lateral, con su botón
+  // flotante abajo a la derecha. La barra de abajo desaparece: su micro y su
+  // «+» viven dentro del panel.
+  const mode = 'dock' as const;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [anclaEnLinea, setAnclaEnLinea] = useState<HTMLElement | null>(null);
   // Por defecto AUTÓNOMO y con internet: el chat crea lo que se le pide sin
   // pedir confirmación y busca siempre que lo necesite (decisión del usuario,
   // 2026-08-05). Ambos siguen siendo configurables en los ajustes.
@@ -106,7 +107,9 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   // la página lanza este evento y la barra recibe el foco.
   const barInputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    const enfocar = () => { setMinimizado(false); barInputRef.current?.focus(); };
+    // El robot del Mundo 3D pide la palabra: se ABRE el panel (antes esto
+    // desminimizaba la barra de abajo, que ya no existe).
+    const enfocar = () => { setOpen(true); setTimeout(() => barInputRef.current?.focus(), 60); };
     window.addEventListener('humanity:asistente-focus', enfocar);
     return () => window.removeEventListener('humanity:asistente-focus', enfocar);
   }, []);
@@ -115,7 +118,6 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   // agente con el que se habla; cada agente tiene su propio hilo, así que al
   // cambiar de interlocutor se cambia de conversación.
   const [juegoCtx, setJuegoCtx] = useState<any>(null);
-  const [minimizado, setMinimizado] = useState(false);
   useEffect(() => {
     const alContexto = (e: Event) => {
       const d = (e as CustomEvent).detail || null;
@@ -127,15 +129,38 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         setConversationId(nuevaConv);
         setMessages([]);
         if (nuevaConv) cargarConversacion(nuevaConv);
-        setMinimizado(false);
+        setOpen(true);
       }
     };
     window.addEventListener('humanity:juego-contexto', alContexto);
     return () => window.removeEventListener('humanity:juego-contexto', alContexto);
   }, []);
   const interlocutor = useRef<string | null>(null);
+  const { user } = useAuth();
+
+  // HISTORIAL (Eugenio, 2026-08-20: «con historial de conversaciones»). La
+  // ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde
+  // enseñarlo. Se pide al abrir el cajón y después de cada respuesta, para
+  // que la conversación de ahora aparezca en la lista con su título.
   const [listaAbierta, setListaAbierta] = useState(false);
-  /** Con quién hablas ahora mismo: se enseña en la cabecera y al minimizar. */
+  const [historial, setHistorial] = useState<Array<{ id: string; title: string | null; message_count: number; updated_at: string }>>([]);
+  const cargarHistorial = useCallback(() => {
+    if (!user) { setHistorial([]); return; }
+    fetch('/api/ai/conversations', { credentials: 'include' })
+      .then(r => r.json())
+      .then(j => setHistorial(Array.isArray(j) ? j : []))
+      .catch(() => setHistorial([]));
+  }, [user]);
+  useEffect(() => { if (listaAbierta) cargarHistorial(); }, [listaAbierta, cargarHistorial]);
+
+  const olvidarConversacion = async (id: string) => {
+    setHistorial(h => h.filter(c => c.id !== id));
+    await fetch(`/api/ai/conversations/${id}`, { method: 'DELETE', credentials: 'include' }).catch(() => null);
+    // Si era la abierta, se empieza una en blanco: quedarse dentro de algo que
+    // ya no está en el historial es la forma más rápida de perder un mensaje.
+    if (id === conversationId) { setConversationId(null); setMessages([]); }
+  };
+  /** Con quién hablas ahora mismo, en la cabecera del panel. */
   const tituloInterlocutor = juegoCtx?.agente?.nombre
     || (juegoCtx ? 'Tu robot' : 'Asistente de Conocimiento');
 
@@ -160,7 +185,6 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
     toggleVoice();
   };
 
-  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -194,10 +218,6 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
 
-  useEffect(() => {
-    setAnclaEnLinea(mode === 'inline' ? document.getElementById(ANCLA_IA_EN_LINEA) : null);
-  }, [mode, location.pathname]);
-
   // Fast-path del buscador de grafos: al escribir en la barra, se consultan
   // los grafos publicados que coinciden (sin gastar una llamada a la IA).
   useEffect(() => {
@@ -215,8 +235,62 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   }, [input, mode]);
 
   /** Estado visual actual, tomado de la URL: es lo que ve el usuario ahora. */
+  // QUÉ ESTÁS MIRANDO (Eugenio, 2026-08-20: «que la IA vea en la página que
+  // estás»). El escritorio publica sus ventanas y la web abierta en el
+  // navegador; aquí solo se escucha. Con las ventanas, «la página en la que
+  // estás» ya no es la ruta de fondo: es la ventana de delante.
+  const [ventanas, setVentanas] = useState<Array<{ titulo: string; destino: string; delante: boolean; minimizada: boolean }>>([]);
+  const [paginaWeb, setPaginaWeb] = useState<string | null>(null);
+  useEffect(() => {
+    const alVentanas = (e: Event) => setVentanas(((e as CustomEvent).detail as any[]) || []);
+    const alWeb = (e: Event) => setPaginaWeb(((e as CustomEvent).detail as string) || null);
+    window.addEventListener('humanity:ventanas', alVentanas);
+    window.addEventListener('humanity:pagina-web', alWeb);
+    pedirVentanas();
+    return () => {
+      window.removeEventListener('humanity:ventanas', alVentanas);
+      window.removeEventListener('humanity:pagina-web', alWeb);
+    };
+  }, []);
+  const ventanaDelante = ventanas.find(v => v.delante) || null;
+  /** El nombre de una ruta en cristiano. Enseñar «/personas/U_ADMIN_EUGENIO»
+   *  a quien no programa no dice nada. Lo que no esté aquí cae a un nombre
+   *  hecho con el primer tramo de la dirección, que casi siempre acierta. */
+  const nombreDeRuta = (ruta: string) => {
+    const fijas: Record<string, string> = {
+      '/': 'Tu perfil', '/grafos': 'Grafos', '/mapas': 'Mapas', '/juego': 'Mundo 3D',
+      '/proyectos': 'Mis proyectos', '/archivos': 'Archivos', '/explorar': 'Explorar',
+      '/mercado': 'Mercado', '/configuracion': 'Configuración', '/vision': 'Visión y hoja de ruta',
+    };
+    if (fijas[ruta]) return fijas[ruta];
+    if (ruta.startsWith('/personas/')) return 'Un perfil';
+    if (ruta.startsWith('/grafos/')) return 'Un grafo';
+    if (ruta.startsWith('/proyectos/')) return 'Un proyecto';
+    if (ruta.startsWith('/mapas/')) return 'Un mapa';
+    const primero = ruta.split('/')[1] || '';
+    return primero ? primero[0].toUpperCase() + primero.slice(1) : 'La portada';
+  };
+  /** Lo que se enseña en el panel: dónde cree la IA que estás. */
+  const dondeEstoy = juegoCtx
+    ? (juegoCtx?.agente?.nombre ? `Hablando con ${juegoCtx.agente.nombre}` : 'En el Mundo 3D')
+    : ventanaDelante
+      ? (ventanaDelante.destino.startsWith('about:') || paginaWeb
+        ? `Navegador · ${(paginaWeb || '').replace(/^https?:\/\//, '').split('/')[0] || 'inicio'}`
+        : ventanaDelante.titulo)
+      : nombreDeRuta(location.pathname);
+
+  /** El modelo que se está usando, dicho en la cabecera y no escondido en los
+   *  ajustes (Eugenio, 2026-08-20: «que se sepa qué modelo usa»). */
+  const modeloActual = selectedModel && status?.models?.[selectedModel]
+    ? status.models[selectedModel].label
+    : 'Modelo de la plataforma';
+
   const currentContext = () => ({
     route: location.pathname,
+    // Lo que de verdad tienes delante, que con ventanas ya no es la ruta.
+    mirando: dondeEstoy,
+    ventanas: ventanas.filter(v => !v.minimizada).map(v => ({ titulo: v.titulo, destino: v.destino, delante: v.delante })),
+    paginaWeb: paginaWeb || undefined,
     territorio: searchParams.get('territorio'),
     nivel: searchParams.get('nivel'),
     entidadSeleccionada: searchParams.get('id'),
@@ -361,6 +435,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         return;
       }
       setConversationId(json.conversation_id);
+      if (listaAbierta) cargarHistorial();
       // Juego Vital: el hilo pertenece al agente con el que se habla, y lo que
       // la IA propone crear (personas, proyectos) lo construye la página
       // llamando al backend con sus comprobaciones de rol.
@@ -616,31 +691,71 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
   // monta uno de los dos a la vez, según `isDesktop`.
   const panelBody = (
     <>
-      {/* Cabecera */}
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-black text-slate-900 leading-none">Asistente</p>
-                <p className="text-[10px] text-slate-400 truncate">
-                  {status?.ready ? 'Conectado' : 'Inactivo — falta clave de API'}
-                </p>
+      {/* Cabecera: quién te habla, con qué modelo y DÓNDE ESTÁS. Ese último
+          dato es el que hace ver de un vistazo que la IA sabe qué tienes
+          delante (Eugenio, 2026-08-20: «que la IA vea en la página que
+          estás»), sin tener que preguntárselo para comprobarlo. */}
+          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-slate-900 leading-none truncate">{tituloInterlocutor}</p>
+                  <p className="text-[10px] text-slate-400 truncate">
+                    {status?.ready ? modeloActual : 'Inactivo — falta clave de API'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => setListaAbierta(v => !v)} title="Historial de conversaciones"
+                  className={cn('p-1.5 rounded-lg transition-colors', listaAbierta ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+                <button onClick={() => { newConversation(); setListaAbierta(false); }} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
+                  <Plus className="w-4 h-4" />
+                </button>
+                <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+                  <Settings2 className="w-4 h-4" />
+                </button>
+                <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={newConversation} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
-                <Plus className="w-4 h-4" />
-              </button>
-              <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
-                <Settings2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <p className="mt-2 inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-500">
+              <Eye className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">Viendo: {dondeEstoy}</span>
+            </p>
           </div>
+
+          {/* HISTORIAL */}
+          {listaAbierta && (
+            <div className="border-b border-slate-100 bg-white max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
+              {!user ? (
+                <p className="px-4 py-3 text-[11px] text-slate-400">Inicia sesión para guardar tus conversaciones.</p>
+              ) : historial.length === 0 ? (
+                <p className="px-4 py-3 text-[11px] text-slate-400">Todavía no hay conversaciones guardadas.</p>
+              ) : historial.map(c => (
+                <div key={c.id}
+                  className={cn('group flex items-center gap-2 px-4 py-2 border-b border-slate-50 last:border-0 transition-colors',
+                    c.id === conversationId ? 'bg-emerald-50' : 'hover:bg-slate-50')}>
+                  <button onClick={() => { cargarConversacion(c.id); setListaAbierta(false); }}
+                    className="flex-1 min-w-0 text-left">
+                    <p className="text-[12px] font-bold text-slate-700 truncate">{c.title || 'Sin título'}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {c.message_count} mensajes · {new Date(c.updated_at).toLocaleDateString('es-ES')}
+                    </p>
+                  </button>
+                  <button onClick={() => olvidarConversacion(c.id)} title="Quitar del historial"
+                    className="shrink-0 p-1 rounded text-slate-300 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Configuración: permisos de edición */}
           {showSettings && (
@@ -752,6 +867,7 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
             )}
             <div className="flex items-end gap-2">
               <textarea
+                ref={barInputRef}
                 value={input}
                 onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
@@ -776,184 +892,11 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
     </>
   );
 
-  // ==========================================================================
-  // MODO BARRA (páginas de Grafos): el chat/buscador vive centrado abajo,
-  // siempre desplegado — es la puerta de entrada al conocimiento.
-  // ==========================================================================
-  if (mode === 'bar' || mode === 'inline') {
-    // En línea: la misma barra, pero dentro del flujo de la página (la
-    // portada la coloca justo debajo de las tres ventanas).
-    const enLinea = mode === 'inline';
-    const contenido = (
-      <div className={enLinea ? 'w-full' : 'fixed bottom-0 left-0 right-0 z-40 pointer-events-none'}>
-        <div className={cn('mx-auto w-full max-w-2xl pointer-events-auto', !enLinea && 'px-4 pb-4')}>
-          {(messages.length > 0 || busy) && (
-            minimizado ? (
-              /* Minimizado: una pastilla que dice con quién hablabas y cuánto
-                 llevabais dicho, sin tapar el mundo (petición del usuario). */
-              <button
-                onClick={() => setMinimizado(false)}
-                className="mb-2 inline-flex items-center gap-2 px-3 py-1.5 bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg text-[11px] font-bold text-slate-600 hover:text-emerald-700 transition-colors"
-              >
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                {tituloInterlocutor} · {messages.length} mensajes
-                <ChevronUp className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <div className="mb-2 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
-                <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 min-w-0">
-                    <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
-                    <span className="truncate">{tituloInterlocutor}</span>
-                  </span>
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    {juegoCtx && (
-                      <button
-                        onClick={() => setListaAbierta(v => !v)}
-                        title="Tus conversaciones"
-                        className={cn('p-1 rounded transition-colors', listaAbierta ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-emerald-600')}
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button onClick={newConversation} title="Nueva conversación" className="p-1 text-slate-400 hover:text-emerald-600 rounded transition-colors">
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => setMinimizado(true)} title="Minimizar" className="p-1 text-slate-400 hover:text-slate-900 rounded transition-colors">
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex">
-                  {/* Listado lateral: tus conversaciones agrupadas por personas
-                      y proyectos del mundo (petición del usuario). */}
-                  {juegoCtx && listaAbierta && (
-                    <div className="w-40 shrink-0 border-r border-slate-100 bg-slate-50/50 max-h-[42vh] overflow-y-auto py-2">
-                      {(['robot', 'persona', 'proyecto'] as const).map(grupo => {
-                        const items = grupo === 'robot'
-                          ? [{ id: 'robot', nombre: 'Tu robot', conversation_id: juegoCtx.conversation_id }]
-                          : (juegoCtx.agentes || []).filter((a: any) => a.tipo === grupo);
-                        if (!items.length) return null;
-                        return (
-                          <div key={grupo} className="mb-1">
-                            <p className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-slate-400">
-                              {grupo === 'robot' ? 'Compañero' : grupo === 'persona' ? 'Personas' : 'Proyectos'}
-                            </p>
-                            {items.map((a: any) => (
-                              <button
-                                key={a.id}
-                                onClick={() => window.dispatchEvent(new CustomEvent('humanity:juego-hablar', { detail: { id: a.id } }))}
-                                className={cn('w-full text-left px-2.5 py-1.5 text-[11px] font-bold truncate transition-colors',
-                                  interlocutor.current === a.id ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 hover:bg-white')}
-                              >
-                                {a.nombre}
-                              </button>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <div ref={scrollRef} className="flex-1 min-w-0 max-h-[42vh] overflow-y-auto px-4 py-4 space-y-4">
-                    {conversationInner}
-                  </div>
-                </div>
-              </div>
-            )
-          )}
+  // La barra de abajo (modos `bar` e `inline`) se ha retirado el 2026-08-20:
+  // eran otras dos caras del mismo chat, cada una con su comportamiento, y
+  // Eugenio pidió que el asistente fuese el mismo en todas las herramientas.
+  // Su micro y su «+» viven ahora dentro del panel.
 
-          {/* Grafos que coinciden con lo escrito: fast-path sin gastar IA */}
-          {graphMatches.length > 0 && (
-            <div className="mb-2 flex flex-wrap justify-center gap-1.5 animate-in fade-in duration-150">
-              {graphMatches.map(g => (
-                <button
-                  key={g.slug}
-                  onClick={() => { setInput(''); setGraphMatches([]); navigate(`/grafos/${g.slug}`); }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold shadow-lg hover:bg-emerald-700 transition-colors"
-                >
-                  <Network className="w-3 h-3" /> {g.title}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {attachment && (
-            <div className="mb-2 flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 shadow">
-              {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
-              <span className="truncate flex-1">{attachment.name}</span>
-              <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-          {attachError && (
-            <p className="mb-2 text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5 shadow">{attachError}</p>
-          )}
-
-          {/* Barra de entrada */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 flex items-end gap-1.5">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ATTACHMENT_ACCEPT}
-              onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title="Añadir — subir imagen o PDF"
-              className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
-                attachment ? 'bg-emerald-50 border-emerald-300 text-emerald-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-            {voiceSupported && (
-              <button
-                onClick={handleMicClick}
-                title={listening ? 'Detener dictado' : 'Dictar por voz'}
-                className={cn('shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center transition-colors',
-                  listening ? 'bg-red-50 border-red-300 text-red-600 animate-pulse' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300')}
-              >
-                {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-            )}
-            <textarea
-              ref={barInputRef}
-              value={input}
-              onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-              rows={1}
-              placeholder="Busca un tema o pregunta a la IA — p. ej. «Ceuta frontera amenaza»"
-              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
-            />
-            <button
-              onClick={() => send()}
-              disabled={busy || !input.trim()}
-              className="shrink-0 w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-          {status && !status.ready && (
-            <p className="mt-1.5 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-relaxed shadow">
-              {status.message}
-            </p>
-          )}
-        </div>
-
-        {popupPub && (
-          <div className="pointer-events-auto">
-            <PublicationPopup
-              publication={popupPub.publication}
-              graphs={popupPub.graphs || []}
-              onClose={() => setPopupPub(null)}
-            />
-          </div>
-        )}
-      </div>
-    );
-    return enLinea ? (anclaEnLinea ? createPortal(contenido, anclaEnLinea) : null) : contenido;
-  }
 
   return (
     <>
@@ -963,7 +906,9 @@ export default function AIAssistant({ mode = 'dock' }: { mode?: 'dock' | 'bar' |
         <button
           onClick={() => setOpen(true)}
           title="Asistente de Humanity.wiki"
-          className="fixed bottom-20 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+          // Abajo del todo a la derecha (Eugenio, 2026-08-20). Antes iba a
+          // `bottom-20` para dejar hueco a la barra de chat, que ya no existe.
+          className="fixed bottom-6 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
         >
           <Sparkles className="w-6 h-6" />
         </button>

@@ -284,6 +284,7 @@ Territorio → Objetivo → Indicador → Marcador → Reto → Solución → Ne
 
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
 ${JSON.stringify(ctx || {}, null, 2)}
+${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
 
 USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
 MODO DE EDICIÓN: ${editMode}
@@ -417,12 +418,38 @@ Eventos de interfaz válidos: ${UI_EVENTS.join(', ')}.`;
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  // Las conversaciones son PRIVADAS. Esta ruta devolvía los mensajes de
+  // cualquier id sin comprobar de quién era: con un id a mano se leía el chat
+  // de otra persona. Se comprueba la dueña antes de contestar (encontrado al
+  // rehacer el asistente, 2026-08-20).
   app.get('/api/ai/conversations/:id/messages', async (req: Request, res: Response) => {
     try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const duena = await db.execute(sql`
+        SELECT user_id FROM ai_conversations WHERE id = ${req.params.id}
+      `);
+      if (!duena.rows.length) return res.status(404).json({ error: 'Esa conversación no existe.' });
+      if ((duena.rows[0] as any).user_id !== req.user.id) {
+        return res.status(403).json({ error: 'Esa conversación no es tuya.' });
+      }
       const rows = await db.execute(sql`
         SELECT * FROM ai_messages WHERE conversation_id = ${req.params.id} ORDER BY created_at ASC
       `);
       res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quitar una conversación del historial. Se ARCHIVA, no se borra. */
+  app.delete('/api/ai/conversations/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const r = await db.execute(sql`
+        UPDATE ai_conversations SET archived_at = now()
+        WHERE id = ${req.params.id} AND user_id = ${req.user.id} AND archived_at IS NULL
+        RETURNING id
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Esa conversación no existe o no es tuya.' });
+      res.json({ ok: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
