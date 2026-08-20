@@ -53,6 +53,78 @@ export function registerRoadmapRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // TODAS LAS TAREAS, AGRUPADAS POR PROYECTO (2026-08-20, petición de Eugenio:
+  // «una página donde puedas ver todas las tareas ordenadas por PROYECTOS»).
+  // ==========================================================================
+  // `GET /api/roadmap` solo sabe traer las de UN proyecto (o las de la hoja de
+  // ruta, que no tienen proyecto). Para una vista de conjunto haría falta una
+  // llamada por proyecto; esta ruta las trae todas de una vez, ya repartidas.
+  //
+  // QUIÉN VE QUÉ: una tarea se ve si se ve su proyecto — público, o tuyo. Las
+  // que no cuelgan de ningún proyecto son la hoja de ruta de humanity.wiki,
+  // que ya es pública en /vision, y van en su propio grupo.
+  app.get('/api/tareas', async (req: Request, res: Response) => {
+    try {
+      const yo = req.user?.id || null;
+      const esAdmin = (req.user?.roleLevel ?? 0) >= ROLE.ADMIN;
+      const rows = await db.execute(sql`
+        SELECT r.id, r.grupo, r.titulo, r.resumen, r.estado, r.prioridad, r.orden,
+               r.updated_at, r.created_at, r.proyecto_id,
+               p.titulo AS proyecto_titulo, p.slug AS proyecto_slug, p.publico AS proyecto_publico,
+               p.creador_user_id AS proyecto_creador,
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
+        FROM roadmap_items r
+        LEFT JOIN proyectos p ON p.id = r.proyecto_id
+                             AND p.archived_at IS NULL AND p.deleted_at IS NULL
+        LEFT JOIN users u ON u.id = r.autor_user_id
+        WHERE r.archived_at IS NULL
+          AND (
+            -- La hoja de ruta de la plataforma: sin proyecto, y pública.
+            r.proyecto_id IS NULL
+            -- O un proyecto que puedas ver.
+            OR (p.id IS NOT NULL AND (${esAdmin} OR p.publico OR p.creador_user_id = ${yo}))
+          )
+        ORDER BY r.orden, r.created_at
+      `);
+
+      // Se reparte aquí y no en el cliente: la página solo tiene que pintar.
+      const grupos = new Map<string, any>();
+      for (const t of rows.rows as any[]) {
+        const clave = t.proyecto_id || '__hoja_de_ruta__';
+        if (!grupos.has(clave)) {
+          grupos.set(clave, {
+            id: clave,
+            esHojaDeRuta: !t.proyecto_id,
+            titulo: t.proyecto_titulo || 'Hoja de ruta de humanity.wiki',
+            url: t.proyecto_slug ? `/proyectos/${t.proyecto_slug}` : '/vision',
+            publico: t.proyecto_id ? !!t.proyecto_publico : true,
+            mio: !!yo && t.proyecto_creador === yo,
+            tareas: [],
+          });
+        }
+        grupos.get(clave).tareas.push({
+          id: t.id, titulo: t.titulo, resumen: t.resumen, estado: t.estado,
+          prioridad: t.prioridad, grupo: t.grupo,
+          autor: t.autor_nombre, autorAvatar: t.autor_avatar,
+          fecha: t.updated_at || t.created_at,
+        });
+      }
+
+      // Tus proyectos primero, la hoja de ruta la última: lo tuyo es a lo que
+      // vienes, y la hoja de ruta son 112 tareas que taparían todo lo demás.
+      const lista = [...grupos.values()].sort((a, b) => {
+        if (a.esHojaDeRuta !== b.esHojaDeRuta) return a.esHojaDeRuta ? 1 : -1;
+        if (a.mio !== b.mio) return a.mio ? -1 : 1;
+        return a.titulo.localeCompare(b.titulo, 'es');
+      });
+      res.json({ proyectos: lista });
+    } catch (e: any) {
+      console.error('list tareas error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // PROYECTOS DE CADA PERSONA (2026-08-08, petición del usuario)
   // ==========================================================================
   // El mismo tablero que lleva la hoja de ruta de humanity.wiki, pero para lo

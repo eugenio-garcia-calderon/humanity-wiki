@@ -29,6 +29,7 @@ import GrafoCanvas from './pages/GrafoCanvas';
 import UserMapa from './pages/UserMapa';
 import Mapas from './pages/Mapas';
 import Lienzos from './pages/Lienzos';
+import Tareas from './pages/Tareas';
 import Entrada from './pages/Entrada';
 import Configuracion from './pages/Configuracion';
 import BaseDeDatos from './pages/BaseDeDatos';
@@ -90,6 +91,7 @@ export default function App() {
                     al tocar el interruptor De la Humanidad/Mías (2026-08-08). */}
                 <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
                 <Route path="proyectos" element={<Proyectos />} />
+                <Route path="tareas" element={<Tareas />} />
                 <Route path="proyectos/:slug" element={<Proyecto />} />
                 {/* /documentos/nuevo?prompt=… genera con la IA en directo;
                     /documentos/:id abre uno guardado. */}
