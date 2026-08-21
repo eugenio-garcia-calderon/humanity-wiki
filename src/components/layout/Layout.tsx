@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
-  FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles,
+  FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
 } from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -431,6 +431,32 @@ export default function Layout() {
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
             en forma de iconos para que no ocupen mucho»). Pulsar uno trae la
             ventana; si ya está delante, la minimiza. */}
+        {/* ══ LA PESTAÑA DE INICIO, SIEMPRE ═══════════════════════════════
+            (2026-08-22, Eugenio: «cuando se cierren todas las páginas que
+            aparezca arriba una pestaña de inicio, que te lleve a la página de
+            inicio, y esa pestaña no se puede cerrar, está siempre abierta»).
+
+            NO SE PUEDE CERRAR A PROPÓSITO: es el suelo. Con todas las ventanas
+            cerradas la barra se quedaba vacía y no había forma de volver al
+            inicio desde arriba — había que buscarla en el menú o en la barra
+            de abajo. Una pestaña fija cuesta 24 px y quita ese callejón.
+
+            No es una ventana: no está en el gestor, no se arrastra y no se
+            minimiza. Es un enlace con forma de pestaña. */}
+        <button
+          onClick={() => navigate('/')}
+          title="Inicio"
+          aria-current={location.pathname === '/' ? 'page' : undefined}
+          className={cn('flex items-center gap-1.5 rounded-lg border shrink-0 ml-1 transition-colors',
+            compacto ? 'w-6 h-6 justify-center' : 'h-7 px-2',
+            location.pathname === '/'
+              ? 'bg-slate-900 border-slate-900 text-white'
+              : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
+        >
+          <Home className={cn('shrink-0', compacto ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
+          {!compacto && <span className="text-[11px] font-black tracking-tight">Inicio</span>}
+        </button>
+
         {ventanasAbiertas.length > 0 && (
           <div className="flex items-center gap-1 ml-1 overflow-x-auto min-w-0">
             {ventanasAbiertas.map((v, i) => {

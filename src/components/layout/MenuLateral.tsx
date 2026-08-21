@@ -319,7 +319,16 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
   // --- 4. PERSONAS Y ORGANIZACIONES ---------------------------------------
   const nodosPersonas: NodoMenu[] = [
     ...(user ? [{
-      id: 'yo', label: 'Mi Perfil', icono: User,
+      // TU PERFIL SE NAVEGA, NO SE ABRE EN UNA VENTANA (2026-08-22, Eugenio:
+      // «pincho en mi imagen en el menú, y le doy a perfil, y no me lleva a mi
+      // perfil»). Sí llevaba: abría una ventana con el perfil dentro, y si
+      // estaba minimizada o detrás no pasaba nada visible. Desde fuera eso es
+      // exactamente «no funciona».
+      //
+      // Tu perfil no es una herramienta que se consulte al lado de otra cosa;
+      // es un sitio al que se VA. Las herramientas siguen abriéndose en
+      // ventana, que es para lo que están.
+      id: 'yo', label: 'Mi Perfil', icono: User, abrir: 'navegar',
       destino: `/personas/${user.id}`,
     } as NodoMenu, {
       id: 'todas', label: 'Todas las personas', icono: Users2, destino: '/personas', abrir: 'ventana',

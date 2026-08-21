@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { PREFIJO } from '../utils/iconoDeNombre';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 
@@ -48,6 +49,21 @@ const RENOMBRABLES: Record<string, {
   persona:  { tabla: 'game_agents',      nombre: 'nombre', dueno: 'user_id' },
   pagina:   { tabla: 'knowledge_windows', nombre: 'title', dueno: 'creator_user_id', iconoEnConfig: true },
 };
+
+/** Los nombres de icono que se pueden guardar. Se listan aquí y no se
+ *  importan de `iconosDeTrazo.ts` porque ese fichero trae lucide-react, que es
+ *  React, y esto es el servidor. La lista corta es el precio de no meter la
+ *  interfaz en el backend; si algún día se separan, lo que pasa es que un
+ *  icono nuevo se rechaza al guardarlo — visible al instante, no silencioso. */
+const NOMBRES_DE_ICONO = new Set([
+  'Box', 'Truck', 'Sun', 'Ship', 'Home', 'Trees', 'Droplet', 'Zap', 'Map', 'Car',
+  'Plane', 'Rocket', 'Wallet', 'HeartPulse', 'BookOpen', 'Wrench', 'Cpu', 'Camera',
+  'Music', 'Utensils', 'Sprout', 'Recycle', 'Wind', 'Building2', 'Users', 'Target',
+  'Lightbulb', 'Globe2', 'GraduationCap', 'Bike', 'Tent', 'Hammer', 'FlaskConical',
+  'Bot', 'ShoppingBag', 'Briefcase', 'Calendar', 'PawPrint', 'Fish', 'Mountain',
+  'Waves', 'Factory', 'Battery', 'Bed', 'Shirt', 'Pill', 'Scale', 'Landmark',
+  'Palette', 'Newspaper', 'Video', 'Wifi', 'Train',
+]);
 
 export function registerMenuRoutes(app: Express, db: any) {
   /**
@@ -116,6 +132,20 @@ export function registerMenuRoutes(app: Express, db: any) {
         if (!v) return null;
         if (v.startsWith('/')) return v.startsWith('/uploads/') ? v.slice(0, 300) : undefined;
         if (/^https?:/i.test(v)) return v.startsWith('https://') ? v.slice(0, 300) : undefined;
+        // UN ICONO DE TRAZO (2026-08-22). Desde D90 un icono puede ser
+        // «lucide:Truck», y esta comprobación lo tiraba: rechaza todo lo que
+        // lleve dos puntos, que era lo correcto cuando lo único con dos puntos
+        // era un «javascript:». El servidor contestaba `ok: true` y no
+        // guardaba nada — de ahí que cambiar el icono desde la página del
+        // proyecto no se viera en el menú: no es que el menú no se enterara,
+        // es que no había nada de qué enterarse.
+        //
+        // Se admite el prefijo Y SE COMPRUEBA EL NOMBRE contra la lista real,
+        // que es lo que hace que esto no sea volver a abrir la puerta: solo
+        // pasan los nombres que el diccionario puede pintar.
+        if (v.startsWith(PREFIJO)) {
+          return NOMBRES_DE_ICONO.has(v.slice(PREFIJO.length)) ? v : undefined;
+        }
         // Un emoji: corto de verdad. Si cupiera texto largo aquí, el menú se
         // rompería en cuanto alguien pegara un párrafo.
         //

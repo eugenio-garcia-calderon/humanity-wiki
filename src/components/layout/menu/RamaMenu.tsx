@@ -8,7 +8,7 @@
 // Plegado el menú (solo iconos), una rama NO se despliega: no hay sitio para
 // enseñar hijos en 56 px. Se pinta el icono con su nombre en el `title`, que
 // es lo que sale al pasar el ratón por encima.
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, Folder, MoreHorizontal } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import PopupRenombrar from './PopupRenombrar';
@@ -41,6 +41,23 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
   // esperar a que el menú entero se vuelva a pedir.
   const [label, setLabel] = useState(nodo.label);
   const [icono, setIcono] = useState<string | null>(nodo.insignia ?? null);
+
+  // …PERO SI CAMBIAN DESDE FUERA, HAY QUE HACERLES CASO (2026-08-22, Eugenio:
+  // «he cambiado el icono de la página de proyecto desde la propia página y no
+  // se ha actualizado al instante el icono del menú lateral»).
+  //
+  // El valor inicial de un `useState` se lee UNA vez, al montar. Cambiar el
+  // icono desde la página del proyecto sí refrescaba el menú —el evento
+  // llegaba y `/api/menu` devolvía el icono nuevo— pero esta copia local
+  // seguía con el viejo y ganaba al pintar. El menú tenía el dato correcto y
+  // enseñaba el incorrecto.
+  //
+  // Es la misma familia que los bugs de anoche: dos sitios donde vive la misma
+  // verdad. Aquí no se puede quitar el estado local —es lo que hace que el
+  // cambio se vea al instante sin esperar a la red— así que se sincroniza: lo
+  // de fuera manda en cuanto llega.
+  useEffect(() => { setLabel(nodo.label); }, [nodo.label]);
+  useEffect(() => { setIcono(nodo.insignia ?? null); }, [nodo.insignia]);
 
   const puedeDesplegar = !!nodo.cargarHijos || !!(hijos && hijos.length);
   const Icono = nodo.icono || Folder;

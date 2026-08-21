@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
+import { useEsMovil } from '../hooks/useEsMovil';
 import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import Adjuntos from '../components/archivo/Adjuntos';
@@ -154,7 +155,7 @@ function ModalNuevoProyecto({ onCerrar, onCreado }: { onCerrar: () => void; onCr
           </h2>
           <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
         </div>
-        <div className="p-5 space-y-3">
+        <div className="p-5 space-y-3 flex-1 overflow-y-auto">
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nombre</label>
             <input value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus className={input} placeholder="p. ej. Reforestar mi comarca" />
@@ -174,7 +175,7 @@ function ModalNuevoProyecto({ onCerrar, onCreado }: { onCerrar: () => void; onCr
           </label>
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5">{error}</p>}
         </div>
-        <div className="px-5 py-3.5 border-t border-slate-100 flex justify-end gap-2">
+        <div className="px-5 py-3.5 border-t border-slate-100 flex justify-end gap-2 shrink-0">
           <button onClick={onCerrar} className="px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
           <button onClick={crear} disabled={guardando}
             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-40">
@@ -596,6 +597,9 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
   const [grupo, setGrupo] = useState(grupoInicial);
   const [prioridad, setPrioridad] = useState('media');
   const [guardando, setGuardando] = useState(false);
+  /** «hecho» durante el instante de la confirmación, antes de cerrar. */
+  const [hecho, setHecho] = useState(false);
+  const esMovil = useEsMovil();
 
   // EL «@» PARA ETIQUETAR MIENTRAS ESCRIBES (2026-08-20, petición de Eugenio:
   // «hacer @algo para mencionar a una categoría, abriéndose un desplegable de
@@ -619,6 +623,14 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
   const [error, setError] = useState<string | null>(null);
   const input = 'w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300';
 
+  // ESCAPE CIERRA. Con el fondo pulsable fuera, hacía falta un atajo: es el
+  // gesto que todo el mundo prueba para salir de un panel.
+  useEffect(() => {
+    const alTecla = (e: KeyboardEvent) => { if (e.key === 'Escape' && !guardando && !hecho) onCerrar(); };
+    window.addEventListener('keydown', alTecla);
+    return () => window.removeEventListener('keydown', alTecla);
+  }, [guardando, hecho, onCerrar]);
+
   const crear = async () => {
     if (!titulo.trim()) { setError('La tarjeta necesita un título.'); return; }
     setGuardando(true); setError(null);
@@ -629,14 +641,38 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'No se pudo crear.');
-      onCreada();
+      // SE CONFIRMA ANTES DE CERRAR (2026-08-22, Eugenio: «haz una animación
+      // chula y elegante de refuerzo positivo cuando se dé a guardar que
+      // confirme que se ha guardado correctamente»). Cerrar en seco deja la
+      // duda de si se guardó: 900 ms de tic verde la quitan, y además dan
+      // tiempo a ver dónde ha caído la tarjeta al aparecer detrás.
+      setHecho(true);
+      setTimeout(() => onCreada(), 900);
     } catch (e: any) { setError(e.message); setGuardando(false); }
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/45 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onCerrar}>
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+    // ══ YA NO ES UN CUADRO EN MEDIO ═══════════════════════════════════════════
+    // (2026-08-22, Eugenio: «cuando escribo en la tarjeta es muy fácil que se
+    // cierre cuando muevo el ratón pinchando, y el texto que estaba
+    // escribiendo se pierde […] haz que en ordenador se abra una ventana
+    // lateral derecha para crear la tarjeta, y que en móvil sea a pantalla
+    // completa»).
+    //
+    // POR QUÉ SE CERRABA: el fondo oscuro tenía un `onClick` que cerraba, y un
+    // clic se cuenta donde SE SUELTA el ratón. Al seleccionar texto dentro del
+    // campo y arrastrar un poco de más, sueltas fuera → clic en el fondo →
+    // adiós a lo escrito. No era un fallo raro: seleccionar una palabra en un
+    // cuadro estrecho lo provoca casi siempre.
+    //
+    // El panel lateral lo arregla de raíz porque NO HAY FONDO QUE PULSAR. Se
+    // cierra con la cruz, con Escape o con «Cancelar»: los tres son gestos
+    // deliberados, y ninguno se hace sin querer al soltar el ratón.
+    <div className={cn('fixed z-[9999] bg-white flex flex-col animate-in duration-200',
+      esMovil
+        ? 'inset-0 slide-in-from-bottom'
+        : 'top-0 right-0 bottom-0 w-[26rem] border-l border-slate-200 shadow-2xl slide-in-from-right')}>
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
           <h2 className="text-sm font-black text-slate-900 inline-flex items-center gap-1.5">
             <Plus className="w-4 h-4 text-emerald-600" /> Nueva tarjeta
           </h2>
@@ -644,7 +680,13 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
         </div>
         <div className="p-5 space-y-3">
           <div className="relative">
-            <input value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus className={input}
+            {/* TRES LÍNEAS, NO UNA (Eugenio). En una sola línea un título de
+                diez palabras se lee por una ventanilla, y para releerlo hay
+                que moverse con las flechas. Enter sigue guardando; para un
+                salto de línea, Mayúsculas+Enter. */}
+            <textarea value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus rows={3}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); crear(); } }}
+              className={cn(input, 'resize-none leading-snug')}
               placeholder="Qué hay que hacer — escribe @ para etiquetar" />
             {mencion !== null && (sugerencias.length > 0 || (!!mencion.trim() && !hayExacta)) && (
               <div className="absolute left-0 right-0 top-full mt-1 z-10 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1">
@@ -667,7 +709,8 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
               </div>
             )}
           </div>
-          <input value={resumen} onChange={e => setResumen(e.target.value)} className={input} placeholder="Una línea de contexto (opcional)" />
+          <textarea value={resumen} onChange={e => setResumen(e.target.value)} rows={3}
+            className={cn(input, 'resize-none leading-snug')} placeholder="El contexto que haga falta (opcional)" />
           <div className="flex flex-wrap gap-1.5">
             {grupos.map(g => (
               <button key={g.id} onClick={() => setGrupo(g.id)}
@@ -693,11 +736,37 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
         <div className="px-5 py-3.5 border-t border-slate-100 flex justify-end gap-2">
           <button onClick={onCerrar} className="px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
           <button onClick={crear} disabled={guardando}
-            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-40">
-            {guardando ? 'Creando…' : 'Añadir'}
+            className={cn('px-3.5 py-2 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-100',
+              hecho ? 'bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40')}>
+            {hecho ? 'Guardada' : guardando ? 'Creando…' : 'Añadir'}
           </button>
         </div>
+
+        {/* ══ EL REFUERZO: UN TIC QUE SE DIBUJA ════════════════════════════
+            No es un cartel que aparece: el círculo crece y el tic se DIBUJA de
+            un trazo, que es lo que hace que se lea como «hecho» y no como
+            «aviso». Dura lo que dura la sensación —900 ms— y se va solo.
+
+            `pointer-events-none` a propósito: es una confirmación, no un paso
+            más. Nada que haya que cerrar. */}
+        {hecho && (
+          <div className="absolute inset-0 grid place-items-center bg-white/80 backdrop-blur-[2px] pointer-events-none animate-in fade-in duration-200">
+            <div className="flex flex-col items-center gap-3">
+              <svg viewBox="0 0 52 52" className="w-20 h-20">
+                <circle cx="26" cy="26" r="24" fill="none" stroke="#10b981" strokeWidth="2.5"
+                  strokeDasharray="151" strokeDashoffset="151" strokeLinecap="round"
+                  style={{ animation: 'tic-circulo .45s cubic-bezier(.65,0,.45,1) forwards', transformOrigin: '50% 50%', transform: 'rotate(-90deg)' }} />
+                <path d="M15 27 l8 8 l15 -16" fill="none" stroke="#10b981" strokeWidth="3.5"
+                  strokeLinecap="round" strokeLinejoin="round"
+                  strokeDasharray="40" strokeDashoffset="40"
+                  style={{ animation: 'tic-trazo .3s cubic-bezier(.65,0,.45,1) .4s forwards' }} />
+              </svg>
+              <p className="text-sm font-black text-emerald-700 animate-in fade-in slide-in-from-bottom-1 duration-300 delay-300 fill-mode-both">
+                Tarjeta guardada
+              </p>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
   );
 }

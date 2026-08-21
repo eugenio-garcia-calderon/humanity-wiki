@@ -3135,3 +3135,78 @@ positioning classes is how you get a value that is present and not applied.
 And a reminder to me: my first check said the circles were gone and they were
 not — I read the page 11 s in, before the fetch resolved. Looking again beat
 "fixing" something that already worked.
+
+## 2026-08-22 — The card panel, the home tab, and two things that said «done» without doing it
+
+### The card that lost what you were writing
+
+Eugenio: «cuando escribo en la tarjeta es muy fácil que se cierre cuando muevo
+el ratón pinchando, y el texto que estaba escribiendo se pierde».
+
+**The dark backdrop had an `onClick` that closed it, and a click counts where
+you RELEASE the mouse.** Select a word inside the field, drag a few pixels too
+far, release outside → click on the backdrop → everything typed is gone. Not a
+rare case: selecting text in a narrow box causes it almost every time.
+
+It is a side panel now — right-hand column on a desktop, full screen on a phone
+— which fixes it at the root because **there is no backdrop to click**. It
+closes with the ✕, with Escape or with «Cancelar»: three deliberate gestures,
+none of which happens by accident on mouse-up. Verified with the exact gesture:
+press inside, release outside, and the text is still there.
+
+Both fields are three lines instead of one. A ten-word title read through a
+one-line slot has to be scrolled with the arrow keys to be re-read.
+
+**And it confirms before closing.** A circle draws itself and a tick strokes
+across it in 900 ms. Drawn, not popped: something that draws itself reads as an
+action completing, something that appears reads as a warning, and warnings get
+dismissed without being read. It animates `stroke-dashoffset`, which runs on the
+GPU without relaying out the page — a confirmation that stutters on a cheap
+phone is worse than none. Respects `prefers-reduced-motion`.
+
+### «Mi Perfil» did work — as a window nobody could see
+
+Eugenio: «pincho en mi imagen en el menú, y le doy a perfil, y no me lleva a mi
+perfil». It *did* take you there: it opened your profile in a **window**, and if
+that window was minimised or behind, nothing visible happened. From the outside
+that is exactly «it does not work». Your profile is a place you GO to, not a
+tool you consult beside something else, so it navigates now.
+
+`/` no longer redirects to your profile either — the home page is Publicaciones.
+`Entrada` stays alive at `/entrada` so saved links do not die in a 404; what
+changed is where it points.
+
+### A home tab that cannot be closed
+
+With every window closed the tab strip was empty and there was no way back to
+the start from up there. A fixed tab costs 24 px and removes that dead end. It
+is not a window: not in the manager, not draggable, not minimisable — a link
+shaped like a tab.
+
+### The icon that would not save, and the menu that could not know
+
+Eugenio: «he cambiado el icono de la página de proyecto y no se ha actualizado
+al instante el icono del menú lateral».
+
+Two bugs stacked, and the second was hiding behind the first.
+
+**The server answered `ok: true` and saved nothing.** The icon validator rejects
+anything containing a colon — correct back when the only thing with a colon was
+a `javascript:` — and since D90 an icon can be `lucide:Truck`. So the value was
+dropped silently. The menu was not failing to notice: **there was nothing to
+notice.** Stroke icons are allowed now, with the name checked against the real
+list, so the door stays shut for everything else.
+
+**And `RamaMenu` copied the icon into local state on mount and never looked
+again.** That state exists so the change shows instantly without waiting for the
+network, so it cannot be removed — it is synchronised instead. Two places
+holding the same truth, again.
+
+Verified end to end: changing the icon on the project page turned the sidebar
+from `lucide-truck` to `lucide-rocket` with no reload. Eugenio's 🚐 was restored
+afterwards.
+
+### And the search button lost its black
+
+Black is reserved for saying *where you are*. With the search button black by
+default there were two black things at once and neither meant anything.
