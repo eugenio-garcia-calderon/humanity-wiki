@@ -72,6 +72,12 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       const esAdmin = (req.user?.roleLevel ?? 0) >= ROLE.ADMIN;
       const rows = await db.execute(sql`
         SELECT r.id, r.grupo, r.titulo, r.resumen, r.estado, r.prioridad, r.orden,
+               -- LA FECHA DE VENCIMIENTO NO SALÍA DE AQUÍ (2026-08-21). La
+               -- columna existe desde hace tiempo y el calendario la lee, pero
+               -- esta ruta nunca la seleccionaba: la página de tareas recibía
+               -- un campo llamado «fecha» que era la de MODIFICACIÓN, y una
+               -- tarea con plazo se veía igual que una sin él.
+               r.vence_el,
                r.updated_at, r.created_at, r.proyecto_id,
                p.titulo AS proyecto_titulo, p.slug AS proyecto_slug, p.publico AS proyecto_publico,
                p.creador_user_id AS proyecto_creador,
@@ -112,7 +118,11 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           prioridad: t.prioridad, grupo: t.grupo,
           autor: t.autor_nombre, autorAvatar: t.autor_avatar,
           responsable: t.responsable_nombre || null, responsableFoto: t.responsable_foto || null,
-          fecha: t.updated_at || t.created_at,
+          // Dos fechas distintas con dos nombres distintos: cuándo VENCE y
+          // cuándo se TOCÓ por última vez. Antes iban las dos bajo el mismo
+          // nombre, `fecha`, y ganaba la que no importaba.
+          vence: t.vence_el || null,
+          actualizada: t.updated_at || t.created_at,
         });
       }
 
