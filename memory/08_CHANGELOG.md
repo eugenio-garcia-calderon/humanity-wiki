@@ -2722,3 +2722,41 @@ it was computed on is indistinguishable from an invented one.
 
 Marked «≈» on purpose: the real cost depends on how much the model answers and
 how well the cache hits. The exact, measured figure is the one under each reply.
+
+## 2026-08-21 — Pending tasks: nine improvements, starting with a date nobody could see
+
+Eugenio: «mejora las tareas pendientes».
+
+**The due date existed and the page never received it.** `roadmap_items.vence_el`
+has been there for a while and the calendar reads it, but `GET /api/tareas`
+never selected it. What the page called `fecha` was `updated_at` — when it was
+last *touched*, not when it is *due*. A task with a deadline looked exactly like
+one without. Two different dates now travel under two different names: `vence`
+and `actualizada`.
+
+**And there was no way to set one, which is why 0 of 128 tasks had a date.** The
+route existed — the calendar uses it — but nothing in the task list reached it.
+Not that nobody wanted deadlines: nobody could add one. The date badge *is* the
+control now; the field sits over it, transparent, so a tap opens the browser's
+own date picker without adding another button to a crowded row.
+
+The other seven:
+
+- **Said in words, not in numbers.** «vencida hace 3 días», «vence hoy», «en 5
+  días». A plazo answers *«am I going to make it?»*, and `2026-08-19` makes you
+  do the subtraction yourself.
+- **Sorted by urgency.** Overdue first, then soonest, then priority, done last.
+  They used to come in creation order, so an overdue task could sit twentieth.
+- **Overdue count at the top**, and per project even when the project is folded
+  — with eight lists closed, a delay did not exist until you opened the one
+  holding it.
+- **Filter by priority** and **«solo las mías»**. Only the state filter existed,
+  and with 128 tasks across eight projects «todas» is not a working view.
+- **The header says what is LEFT**, not «3/10» — which makes you subtract to
+  learn the thing you actually want.
+- **The empty state names the filter that is hiding things.** «Ninguna tarea con
+  esos criterios» does not tell you which of the four to undo.
+
+Verified in the browser: setting a past date showed «vencida hace 3 días», the
+top counter went to «1 vencida», and the row persisted to the database. The test
+date was then removed — it was one of Eugenio's tasks, not mine.

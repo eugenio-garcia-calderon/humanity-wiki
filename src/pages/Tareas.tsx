@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ListChecks, Search, Loader2, ExternalLink, Lock, Circle, CircleDot,
-  CheckCircle2, ChevronDown, ChevronRight, Plus,
+  CheckCircle2, ChevronDown, ChevronRight, Plus, CalendarDays,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { TextoEditable } from '../components/tablero/TableroKanban';
@@ -28,7 +28,10 @@ interface Tarea {
   prioridad: string | null;
   grupo: string | null;
   autor: string | null;
-  fecha: string | null;
+  /** Cuándo VENCE (día, sin hora). Distinta de `actualizada`, que es cuándo
+   *  se tocó por última vez: confundirlas era enseñar la que no importa. */
+  vence: string | null;
+  actualizada: string | null;
   responsable?: string | null;
   responsableFoto?: string | null;
 }
@@ -49,6 +52,49 @@ const ESTADOS: Record<Estado, { etiqueta: string; icono: any; color: string; pun
   hecho:     { etiqueta: 'Hecha',     icono: CheckCircle2, color: 'text-emerald-600', punto: 'bg-emerald-500' },
 };
 
+/** Los días que faltan para una fecha, contando por DÍAS y no por horas: una
+ *  tarea que vence hoy a las 23:00 vence hoy, no «en 0,4 días». */
+const diasHasta = (iso: string) => {
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const d = new Date(iso); d.setHours(0, 0, 0, 0);
+  return Math.round((d.getTime() - hoy.getTime()) / 86400000);
+};
+
+/** «vencida hace 3 días», «hoy», «mañana», «en 5 días», «12 mar».
+ *
+ *  EN PALABRAS Y NO EN NÚMEROS porque lo que se quiere saber de un plazo es si
+ *  llegas, no qué día del calendario es. «2026-08-19» obliga a restar mentalmente;
+ *  «vencida hace 2 días» no. */
+const cuandoVence = (iso: string) => {
+  const n = diasHasta(iso);
+  if (n < -1) return { texto: `vencida hace ${-n} días`, urgencia: 'vencida' as const };
+  if (n === -1) return { texto: 'venció ayer', urgencia: 'vencida' as const };
+  if (n === 0) return { texto: 'vence hoy', urgencia: 'hoy' as const };
+  if (n === 1) return { texto: 'vence mañana', urgencia: 'pronto' as const };
+  if (n <= 7) return { texto: `en ${n} días`, urgencia: 'pronto' as const };
+  return {
+    texto: new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
+    urgencia: 'lejos' as const,
+  };
+};
+
+const COLOR_VENCE = {
+  vencida: 'text-rose-600 bg-rose-50 border-rose-200',
+  hoy:     'text-amber-700 bg-amber-50 border-amber-200',
+  pronto:  'text-slate-600 bg-slate-50 border-slate-200',
+  lejos:   'text-slate-400 bg-white border-slate-200',
+};
+
+/** Para ordenar: lo urgente arriba. Las hechas al fondo pase lo que pase, y
+ *  las que no tienen plazo detrás de las que sí — una fecha es un compromiso y
+ *  una tarea sin fecha no compite con una que vence mañana. */
+const PESO_PRIORIDAD: Record<string, number> = { alta: 0, media: 1, baja: 2 };
+const paraOrdenar = (t: Tarea) => [
+  t.estado === 'hecho' ? 1 : 0,
+  t.vence ? diasHasta(t.vence) : 99999,
+  PESO_PRIORIDAD[t.prioridad || 'media'] ?? 1,
+];
+
 const PRIORIDAD: Record<string, string> = {
   alta: 'text-rose-600 bg-rose-50 border-rose-200',
   media: 'text-amber-700 bg-amber-50 border-amber-200',
@@ -61,6 +107,10 @@ export default function Tareas() {
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState<'todas' | Estado>('todas');
+  /** Filtros que faltaban: por prioridad y «solo lo que llevo yo». Con 128
+   *  tareas repartidas en ocho proyectos, «todas» no es una vista de trabajo. */
+  const [prioridad, setPrioridad] = useState<'todas' | 'alta' | 'media' | 'baja'>('todas');
+  const [soloMias, setSoloMias] = useState(false);
   // La hoja de ruta de la plataforma trae 112 tareas: si naciera abierta,
   // taparía los proyectos de la persona, que es a lo que se viene.
   const [plegados, setPlegados] = useState<Record<string, boolean>>({ __hoja_de_ruta__: true });
@@ -84,14 +134,31 @@ export default function Tareas() {
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     return proyectos
+      .filter(p => !soloMias || p.mio)
       .map(p => ({
         ...p,
-        tareas: p.tareas.filter(t =>
-          (filtro === 'todas' || t.estado === filtro) &&
-          (!q || t.titulo.toLowerCase().includes(q) || (t.resumen || '').toLowerCase().includes(q))),
+        tareas: p.tareas
+          .filter(t =>
+            (filtro === 'todas' || t.estado === filtro) &&
+            (prioridad === 'todas' || (t.prioridad || 'media') === prioridad) &&
+            (!q || t.titulo.toLowerCase().includes(q) || (t.resumen || '').toLowerCase().includes(q)))
+          // ORDENADAS POR URGENCIA, no por el orden en que se crearon. Antes
+          // salían como vinieran, así que una vencida podía estar la última de
+          // veinte. Ver `paraOrdenar`.
+          .sort((a, b) => {
+            const [x, y] = [paraOrdenar(a), paraOrdenar(b)];
+            for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i];
+            return 0;
+          }),
       }))
       .filter(p => p.tareas.length > 0);
-  }, [proyectos, busqueda, filtro]);
+  }, [proyectos, busqueda, filtro, prioridad, soloMias]);
+
+  /** Cuántas van con retraso, en todo lo que estás viendo. Es el número que
+   *  hace falta antes de decidir por dónde empezar. */
+  const vencidas = useMemo(
+    () => visibles.reduce((n, p) => n + p.tareas.filter(t => t.estado !== 'hecho' && t.vence && diasHasta(t.vence) < 0).length, 0),
+    [visibles]);
 
   const total = useMemo(() => visibles.reduce((n, p) => n + p.tareas.length, 0), [visibles]);
 
@@ -119,6 +186,24 @@ export default function Tareas() {
         body: JSON.stringify({ titulo }),
       });
       if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar.');
+    } catch (e: any) {
+      setAviso(e.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
+
+  /** PONER PLAZO SIN SALIR DE AQUÍ (2026-08-21). La ruta ya existía —la usa
+   *  el calendario— pero desde la lista de tareas no había forma de llegar a
+   *  ella, y por eso 0 de las 128 tareas tenían fecha: no es que nadie la
+   *  quisiera, es que no se podía poner. */
+  const ponerVence = async (id: string, vence: string | null) => {
+    setProyectos(ps => ps.map(p => ({ ...p, tareas: p.tareas.map(t => (t.id === id ? { ...t, vence } : t)) })));
+    try {
+      const r = await fetch(`/api/tareas/${id}/vence`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ vence_el: vence }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar la fecha.');
     } catch (e: any) {
       setAviso(e.message);
       setTimeout(() => setAviso(null), 5000);
@@ -209,6 +294,15 @@ export default function Tareas() {
             {total} {total === 1 ? 'tarea' : 'tareas'} en {visibles.length} {visibles.length === 1 ? 'proyecto' : 'proyectos'}
           </span>
         )}
+        {/* LAS QUE VAN CON RETRASO, DICHAS Y NO ESCONDIDAS. Es el número que
+            hace falta antes de decidir por dónde empezar, y estaba repartido
+            entre ocho listas plegadas. */}
+        {!cargando && vencidas > 0 && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-black text-rose-600">
+            <CalendarDays className="w-3 h-3" />
+            {vencidas} {vencidas === 1 ? 'vencida' : 'vencidas'}
+          </span>
+        )}
 
         <div className="flex-1 min-w-[8rem]" />
 
@@ -224,6 +318,31 @@ export default function Tareas() {
             </button>
           ))}
         </div>
+
+        {/* FILTRAR POR PRIORIDAD Y POR QUIÉN LA LLEVA (2026-08-21). Antes solo
+            se podía filtrar por estado, y con 128 tareas en ocho proyectos
+            «todas» no es una vista con la que se pueda trabajar. */}
+        <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5">
+          {([['todas', 'Toda prioridad'], ['alta', 'Alta'], ['media', 'Media'], ['baja', 'Baja']] as const).map(([k, etiqueta]) => (
+            <button
+              key={k}
+              onClick={() => setPrioridad(k)}
+              className={cn('px-2.5 py-1 rounded-full text-xs font-bold transition-colors',
+                prioridad === k ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50')}
+            >
+              {etiqueta}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setSoloMias(v => !v)}
+          title="Enseñar solo los proyectos que has creado tú"
+          className={cn('px-3 py-1.5 rounded-full border text-xs font-bold transition-colors',
+            soloMias ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300')}
+        >
+          Solo las mías
+        </button>
 
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 focus-within:border-emerald-300">
           <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -256,8 +375,15 @@ export default function Tareas() {
         <div className="py-20 text-center">
           <ListChecks className="w-8 h-8 mx-auto text-slate-300 mb-3" />
           <p className="text-sm font-bold text-slate-500">
-            {busqueda || filtro !== 'todas'
-              ? 'Ninguna tarea con esos criterios.'
+            {/* DECIR QUÉ FILTRO ESTÁ ESCONDIENDO LAS COSAS. «Ninguna tarea con
+                esos criterios» no dice cuál de los cuatro filtros quitar. */}
+            {busqueda || filtro !== 'todas' || prioridad !== 'todas' || soloMias
+              ? `Ninguna tarea ${[
+                  busqueda && `que diga «${busqueda}»`,
+                  filtro !== 'todas' && `en «${ESTADOS[filtro].etiqueta}»`,
+                  prioridad !== 'todas' && `de prioridad ${prioridad}`,
+                  soloMias && 'en tus proyectos',
+                ].filter(Boolean).join(', ')}.`
               : 'Todavía no hay tareas. Crea un proyecto y empieza a llenarlo.'}
           </p>
         </div>
@@ -293,6 +419,17 @@ export default function Tareas() {
                         <Lock className="w-2.5 h-2.5" /> Privado
                       </span>
                     )}
+                    {/* LO VENCIDO SE VE CON EL PROYECTO PLEGADO (2026-08-21).
+                        Antes, con las ocho listas cerradas, un retraso no
+                        existía hasta que abrías la que lo tenía dentro. */}
+                    {(() => {
+                      const n = p.tareas.filter(t => t.estado !== 'hecho' && t.vence && diasHasta(t.vence) < 0).length;
+                      return n ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-100 text-[9px] font-black uppercase tracking-wider text-rose-700 shrink-0">
+                          <CalendarDays className="w-2.5 h-2.5" /> {n} vencida{n === 1 ? '' : 's'}
+                        </span>
+                      ) : null;
+                    })()}
                   </button>
 
                   {/* Cuánto llevas: la barra dice más de un vistazo que «3 de 10» */}
@@ -300,8 +437,12 @@ export default function Tareas() {
                     <div className="w-24 h-1.5 rounded-full bg-slate-200 overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 tabular-nums">
-                      {hechas}/{p.tareas.length}
+                    {/* «3/10» obliga a restar para saber qué queda, que es lo
+                        que uno mira. Se dice lo que falta, y lo hecho al lado. */}
+                    <span className="text-[10px] font-bold text-slate-400 tabular-nums whitespace-nowrap">
+                      {p.tareas.length - hechas === 0
+                        ? 'todo hecho'
+                        : `${p.tareas.length - hechas} por hacer`}
                     </span>
                   </div>
 
@@ -334,7 +475,7 @@ export default function Tareas() {
                             destino: `${p.url}${p.url.includes('?') ? '&' : '?'}tarea=${t.id}`,
                           })}
                           title="Abrir esta tarea"
-                          className="flex items-start gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors cursor-pointer">
+                          className="group/fila flex items-start gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors cursor-pointer">
                           <button
                             onClick={e => { e.stopPropagation(); if (p.mio) siguienteEstado(t.id, t.estado); }}
                             disabled={!p.mio}
@@ -364,6 +505,35 @@ export default function Tareas() {
                             )}
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
+                            {/* CUÁNDO VENCE, EN PALABRAS (2026-08-21). La
+                                columna existía y esta página no la pedía: una
+                                tarea con plazo se veía igual que una sin él.
+                                Se pinta antes que el grupo y la prioridad
+                                porque es lo que decide por dónde empiezas. */}
+                            {(t.vence || p.mio) && t.estado !== 'hecho' && (() => {
+                              const v = t.vence ? cuandoVence(t.vence) : null;
+                              // Si la tarea es tuya, la insignia ES el control:
+                              // el campo de fecha va encima, transparente, para
+                              // que un toque abra el calendario del navegador
+                              // sin añadir un botón más a una fila ya llena.
+                              return (
+                                <span className={cn('relative inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider',
+                                  v ? COLOR_VENCE[v.urgencia] : 'text-slate-300 bg-white border-dashed border-slate-200 opacity-0 group-hover/fila:opacity-100 transition-opacity')}>
+                                  <CalendarDays className="w-2.5 h-2.5" />
+                                  {v ? v.texto : 'poner plazo'}
+                                  {p.mio && (
+                                    <input
+                                      type="date"
+                                      value={t.vence || ''}
+                                      title={v ? 'Cambiar el plazo' : 'Poner un plazo'}
+                                      onClick={e => e.stopPropagation()}
+                                      onChange={e => ponerVence(t.id, e.target.value || null)}
+                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                  )}
+                                </span>
+                              );
+                            })()}
                             {t.grupo && (
                               <span className="hidden sm:inline text-[9px] font-black uppercase tracking-wider text-slate-400">
                                 {t.grupo}
