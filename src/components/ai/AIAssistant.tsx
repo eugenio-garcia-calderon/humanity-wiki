@@ -1500,7 +1500,7 @@ export default function AIAssistant({ modo = 'panel' }: {
                   es la puerta principal de esta plataforma. Crear se va al
                   extremo: se usa menos veces al día que buscar. */}
               <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
-                onClick={() => navigate('/explorar')} />
+                onClick={() => navigate('/')} />
               <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
                 onClick={() => navigate('/proyectos')} />
 

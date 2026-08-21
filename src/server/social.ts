@@ -353,6 +353,66 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * GET /api/circulos — las personas que salen arriba de la portada.
+   *
+   * (2026-08-21, Eugenio: «aparecerán círculos modo Instagram de las personas
+   * que tienes agregadas, y si no tienes agregado a nadie te aparecen canales
+   * relevantes a los que siga mucha gente».)
+   *
+   * DOS LISTAS DISTINTAS Y SE DICE CUÁL ES CUÁL. Si sigues a alguien, salen
+   * los tuyos. Si no sigues a nadie, salen los que más publican y más
+   * seguidores tienen — pero la respuesta trae `origen`, para que la pantalla
+   * pueda poner «Sugerencias» encima y no hacerte creer que ya sigues a gente
+   * que no conoces. Un círculo sugerido y uno tuyo se ven igual; la diferencia
+   * la tiene que decir la interfaz.
+   *
+   * SIN INVENTAR RELEVANCIA. «Canales relevantes» aquí es, medible: cuánta
+   * gente les sigue y cuánto han publicado. No hay ningún otro dato con el que
+   * ordenar, y ordenar por algo que no se tiene sería fingir un criterio.
+   */
+  app.get('/api/circulos', async (req: Request, res: Response) => {
+    try {
+      const yo = req.user?.id || null;
+      const conteos = sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto,
+               (SELECT count(*)::int FROM follows f WHERE f.entity_type = 'users' AND f.entity_id = u.id) AS seguidores,
+               (SELECT count(*)::int FROM publications p
+                 WHERE p.author_user_id = u.id AND p.archived_at IS NULL AND p.deleted_at IS NULL)
+             + (SELECT count(*)::int FROM knowledge_windows w
+                 WHERE w.creator_user_id = u.id AND w.archived_at IS NULL AND w.deleted_at IS NULL AND w.publico) AS publicaciones
+        FROM users u
+      `;
+
+      if (yo) {
+        const mios = await db.execute(sql`
+          WITH gente AS (${conteos})
+          SELECT g.* FROM gente g
+          JOIN follows f ON f.entity_type = 'users' AND f.entity_id = g.id AND f.follower_user_id = ${yo}
+          ORDER BY g.publicaciones DESC, g.nombre
+          LIMIT 20
+        `);
+        if (mios.rows.length) return res.json({ origen: 'seguidos', personas: mios.rows });
+      }
+
+      // Nadie seguido todavía: los que más se siguen y más publican. Se
+      // excluye a quien mira —seguirte a ti mismo no es una sugerencia— y a
+      // quien no ha publicado nada, porque un círculo vacío no lleva a ningún
+      // sitio.
+      const sugeridos = await db.execute(sql`
+        WITH gente AS (${conteos})
+        SELECT g.* FROM gente g
+        WHERE (${yo}::text IS NULL OR g.id <> ${yo}) AND g.publicaciones > 0
+        ORDER BY g.seguidores DESC, g.publicaciones DESC, g.nombre
+        LIMIT 20
+      `);
+      res.json({ origen: 'sugeridos', personas: sugeridos.rows });
+    } catch (e: any) {
+      console.error('circulos:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.post('/api/save', async (req: Request, res: Response) => {
     try {
       if (!requireLevel(req, res, ROLE.USER)) return;
