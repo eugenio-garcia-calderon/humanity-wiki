@@ -3094,3 +3094,44 @@ reactions, saves, reports, notifications and the follow, all back to zero.
   words «Menú» and «Humanity Wiki» are gone: three lines is the most recognised
   icon on a screen, and the name was taking the width the open windows need.
   Both names stay in `title`/`aria-label`.
+
+## 2026-08-22 — Your own work on the home page, and where the panels open
+
+Eugenio: «la página de publicaciones, aparte de los globos de personas y una
+serie de publicaciones, también tiene que aparecer los proyectos de uno mismo y
+tareas pendientes» · «la parte de buscar con IA tiene que abrirte la pantalla
+completa en el móvil y en el ordenador una pantalla lateral derecha; la parte de
+crear también».
+
+**The home page was about other people** — who you follow and what they
+published. The half that is yours was missing, and it is the only half that
+tells you whether there is something to do today. Now: your projects with what
+is left in each, and the five tasks that come first.
+
+**First what is due**, not the first five that turn up: a home page showing five
+random tasks is decoration; one showing the three that slip this week is a tool.
+It reuses `/api/tareas`, which already splits by project and resolves
+permissions — a new endpoint for the home page would be a second way of
+answering the same question.
+
+**Where the panels open, by screen.** Closed it is always the bottom bar. Open:
+on a phone the whole screen (a third of 812 px does not fit an answer with a
+table in it), on a desktop the right-hand column, full height — there is width
+to spare and what is scarce is height, and the page you were reading stays in
+front while you ask about it. Measured: 375×768 with the bar left visible, and
+420×800 pinned right with `main` reserving 420 px.
+
+Both use the *same* box with the same conversation inside. Two JSX branches
+would be two places to fix the same bug.
+
+### A bug I made and then measured
+
+The mobile gap was an inline `bottom: 44` on an element whose classes also
+position it. The attribute was there in the DOM and the computed value came back
+`0px`: the panel ate the bar. Moved to a class (`bottom-11`), and it measures 44
+px of gap. **One mechanism per property** — mixing an inline style with
+positioning classes is how you get a value that is present and not applied.
+
+And a reminder to me: my first check said the circles were gone and they were
+not — I read the page 11 s in, before the fetch resolved. Looking again beat
+"fixing" something that already worked.

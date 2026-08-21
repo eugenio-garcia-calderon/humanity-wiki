@@ -604,7 +604,7 @@ export default function Layout() {
               cuando el chat está cerrado, así que en reposo no cuesta nada. */}
           <main
             key={updateCounter}
-            style={{ paddingBottom: 'var(--hueco-muelle, 0px)' }}
+            style={{ paddingBottom: 'var(--hueco-muelle, 0px)', paddingRight: 'var(--hueco-lateral, 0px)' }}
             className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}
           >
             <div className={fullBleed ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>

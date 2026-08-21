@@ -225,12 +225,18 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  el pulgar sin robarle sitio a la página. Se bajó de 52 a 46 px
    *  (2026-08-21, Eugenio: «haz más compacto el menú de arriba») — el icono y
    *  su nombre caben igual y la página gana 6 px en cada pantalla. */
+  /** 44 px, que en Tailwind es `bottom-11`. Si se cambia uno hay que cambiar
+   *  el otro: están atados a mano porque una clase no puede leer una
+   *  constante. */
   const ALTO_BARRA = 44;
   /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
    *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
    *  hueco: con dos banderas podrían estar abiertos a la vez y taparse. */
   const [panelMuelle, setPanelMuelle] = useState<null | 'chat' | 'crear'>(null);
   const [alturaMuelle, setAlturaMuelle] = useState(33);   // % de la pantalla
+  /** El ancho del lateral en el ordenador. 420 px es lo que cabe una respuesta
+   *  con una tabla de tres columnas sin partirla, medido con la del camión. */
+  const [anchoLateral, setAnchoLateral] = useState(420);
   const [arrastrandoMuelle, setArrastrandoMuelle] = useState(false);
   const [historialALaVista, setHistorialALaVista] = useState(false);
   const [modelosAbierto, setModelosAbierto] = useState(false);
@@ -1127,11 +1133,18 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  arrastre. */
   useEffect(() => {
     const raiz = document.documentElement;
-    // Cerrada también ocupa: la barra existe siempre, así que el hueco
-    // también. Ponerlo a 0 al cerrar sería tapar el final de cada página.
-    raiz.style.setProperty('--hueco-muelle', open ? `${alturaMuelle}vh` : `${ALTO_BARRA}px`);
-    return () => raiz.style.setProperty('--hueco-muelle', '0px');
-  }, [open, alturaMuelle]);
+    // ABAJO SIEMPRE LA BARRA, que existe esté abierto o no: ponerlo a 0 al
+    // cerrar taparía el final de cada página.
+    raiz.style.setProperty('--hueco-muelle', `${ALTO_BARRA}px`);
+    // Y A LA DERECHA, el lateral cuando lo hay. En el teléfono no se reserva
+    // nada: allí el panel ocupa la pantalla entera y no hay página detrás que
+    // proteger.
+    raiz.style.setProperty('--hueco-lateral', open && !esMovil ? `${anchoLateral}px` : '0px');
+    return () => {
+      raiz.style.setProperty('--hueco-muelle', '0px');
+      raiz.style.setProperty('--hueco-lateral', '0px');
+    };
+  }, [open, esMovil, anchoLateral]);
 
   /** Arrastrar el borde de arriba para cambiar la altura. Se escucha en la
    *  ventana y no en el borde: si el ratón va más rápido que el repintado, el
@@ -1485,9 +1498,38 @@ export default function AIAssistant({ modo = 'panel' }: {
       {(
         <div
           {...zonaSoltar}
-          className={cn('fixed inset-x-0 bottom-0 z-[9998] flex flex-col bg-white border-t border-slate-200 transition-[height] duration-200',
-            open ? 'shadow-2xl' : 'shadow-lg')}
-          style={open ? { height: `${alturaMuelle}vh`, minHeight: 240 } : { height: ALTO_BARRA }}
+          // ══ DÓNDE SE ABRE, SEGÚN LA PANTALLA (2026-08-22, Eugenio: «la
+          //    parte de buscar con IA tiene que abrirte la pantalla completa
+          //    en el móvil y en el ordenador una pantalla lateral derecha; la
+          //    parte de crear también»). ═══════════════════════════════════
+          //
+          // CERRADO ES SIEMPRE LA BARRA DE ABAJO, en los dos. Lo que cambia es
+          // lo que pasa al abrir: en un teléfono ocupa la pantalla entera,
+          // porque un tercio de 812 px no da para leer una respuesta con una
+          // tabla dentro; en un ordenador se va al lateral derecho, porque ahí
+          // sobra ancho y lo que NO sobra es alto — y así la página que estás
+          // mirando sigue delante mientras preguntas por ella.
+          //
+          // Se hace con clases y no con dos ramas de JSX a propósito: son la
+          // misma caja con la misma conversación dentro. Dos ramas serían dos
+          // sitios donde arreglar el mismo fallo, que es de lo que veníamos.
+          className={cn('fixed z-[9998] flex flex-col bg-white transition-all duration-200',
+            !open
+              ? 'inset-x-0 bottom-0 border-t border-slate-200 shadow-lg'
+              : esMovil
+                // Teléfono: todo, menos la barra de abajo — que se deja a la
+                // vista para poder cerrar sin buscar una cruz. El hueco va por
+                // CLASE y no por estilo en línea: mezclar los dos aquí hizo
+                // que el `bottom` de la línea no llegara a aplicarse y el
+                // panel se comiera la barra. Un solo mecanismo por propiedad.
+                ? 'inset-x-0 top-0 bottom-11 shadow-2xl'
+                // Ordenador: columna a la derecha, del alto entero.
+                : 'top-0 right-0 bottom-0 border-l border-slate-200 shadow-2xl')}
+          style={
+            !open ? { height: ALTO_BARRA }
+              : esMovil ? undefined
+                : { width: `${anchoLateral}px` }
+          }
         >
           {/* ── CERRADO: la barra ───────────────────────────────────────────
               SIEMPRE ESTÁ, y por eso es una barra y no un botón: lo que se

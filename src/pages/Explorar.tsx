@@ -14,6 +14,7 @@ import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import { OBJETIVOS, hablaDe } from '../utils/objetivos';
 import CirculosDePersonas from '../components/social/CirculosDePersonas';
+import TuTrabajo from '../components/social/TuTrabajo';
 
 // ============================================================================
 // PUBLICACIONES — Explorar + Mis publicaciones fusionadas (2026-08-08)
@@ -621,6 +622,12 @@ export default function Explorar() {
                   objetivos porque la portada es de gente: primero a quién
                   sigues, luego de qué va lo que hay. */}
               <CirculosDePersonas />
+
+              {/* LO TUYO, DESPUÉS DE LA GENTE Y ANTES DE LO DEMÁS (2026-08-22).
+                  La portada tenía a los otros —a quién sigues y qué han
+                  publicado— y le faltaba la mitad que es tuya, que es la única
+                  que te dice si hay algo que hacer hoy. */}
+              <TuTrabajo />
 
               {/* ══ LOS 14 OBJETIVOS, EN UNA TIRA ═══════════════════════════
                   (2026-08-21, Eugenio: «pon un submenú superior como el de
