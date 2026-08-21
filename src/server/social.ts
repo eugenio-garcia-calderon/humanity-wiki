@@ -698,6 +698,9 @@ export function registerSocialRoutes(app: Express, db: any) {
       const u = await db.execute(sql`
         SELECT id, uuid, display_name, name, avatar_url, banner_url, bio, location, website,
                socials, specialties, organization_id, reputation, impact_score, role_level, created_at,
+               -- Las tres ubicaciones y los objetivos elegidos (2026-08-22).
+               coalesce(ubicaciones, '[]'::jsonb) AS ubicaciones,
+               coalesce(objetivos,   '[]'::jsonb) AS objetivos,
                -- SOLO esta clave de los ajustes. El resto de ui_settings es
                -- privado (favoritos del navegador, anchos de panel) y sacarlo
                -- entero aquí lo publicaría sin querer.

@@ -162,6 +162,15 @@ function rowToUser(r: any): AuthUser {
 // ----------------------------------------------------------------------------
 // Registro de rutas
 // ----------------------------------------------------------------------------
+/** Los 14 objetivos que existen. Se comprueba contra esto y no contra la base
+ *  en cada guardado: son catorce filas fijas desde que existe la plataforma, y
+ *  una consulta por perfil guardado para verificar una constante es un viaje
+ *  que no lleva a nada. */
+const OBJETIVOS_VALIDOS = new Set([
+  'O001', 'O002', 'O003', 'O004', 'O005', 'O006', 'O007',
+  'O008', 'O009', 'O010', 'O011', 'O012', 'O013', 'O014',
+]);
+
 export function registerAuthRoutes(app: Express, db: any) {
 
   // Middleware: resuelve req.user a partir de la cookie de sesión. Se monta
@@ -392,6 +401,14 @@ export function registerAuthRoutes(app: Express, db: any) {
           website = COALESCE(${d.website ?? null}, website),
           socials = COALESCE(${d.socials ? JSON.stringify(d.socials) : null}::jsonb, socials),
           specialties = COALESCE(${d.specialties ? JSON.stringify(d.specialties) : null}::jsonb, specialties),
+          -- HASTA TRES UBICACIONES, Y EL TOPE SE APLICA AQUÍ (2026-08-22). Si
+          -- solo lo comprobara la pantalla, cualquiera podría mandar treinta
+          -- desde fuera y el perfil de otro se llenaría de banderas. El límite
+          -- va donde no se puede saltar.
+          ubicaciones = COALESCE(${d.ubicaciones ? JSON.stringify((d.ubicaciones as any[]).slice(0, 3)) : null}::jsonb, ubicaciones),
+          -- LOS OBJETIVOS, FILTRADOS CONTRA EL CATÁLOGO REAL. Solo entran ids
+          -- que existen: uno inventado se pintaría como un hueco sin nombre.
+          objetivos = COALESCE(${d.objetivos ? JSON.stringify((d.objetivos as any[]).filter(o => OBJETIVOS_VALIDOS.has(String(o))).slice(0, 14)) : null}::jsonb, objetivos),
           organization_id = COALESCE(${d.organization_id ?? null}, organization_id),
           version = version + 1,
           updated_at = now(),

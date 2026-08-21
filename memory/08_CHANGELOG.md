@@ -3210,3 +3210,56 @@ afterwards.
 
 Black is reserved for saying *where you are*. With the search button black by
 default there were two black things at once and neither meant anything.
+
+## 2026-08-22 — The tabs, the logo, and a profile that fits on one screen
+
+### Tabs
+
+Closing one now brings **the tab to its left** forward. Before, closing left
+nothing focused: you stared at whatever was behind, which was usually nothing.
+The left one and not the last used — in a row of tabs, what the eye expects when
+one closes is its neighbour moving in.
+
+And a **red ✕ to the left of the strip** closes them all, with a confirmation
+that says how many. Closing eight windows in one click does not undo, and a red
+✕ next to other small ✕s gets pressed by accident. «8» is a number that stops
+you; «close all» is not.
+
+### The logo
+
+Eugenio sent it. One SVG for the sidebar, the top bar and the favicon — one file,
+so they cannot end up different. SVG rather than PNG so it reads the same at
+20 px in the menu and at 180 in a browser tab. The header carries only the mark;
+the sidebar keeps the mark *and* the name, because that is the one place the
+platform says what it is called, and removing it from both would leave it
+nameless everywhere. Both go home.
+
+### The profile, rebuilt
+
+> «quita la portada de fondo. Sube la foto hasta la esquina superior izquierda y pon el nombre al lado de la foto» · «quita lo de siguiendo y seguidores y lo de publicaciones» · «pon en grande una fila de PROYECTOS […] PUBLICACIONES […] PRODUCTOS» · «haz que sea compacto y que se vea todo esto en una sola pantalla»
+
+**Compact means removing, not shrinking.** What makes it fit is not smaller
+type: it is that 160 px of gradient banner went, and the three counters went.
+Measured: everything asked for ends at 487 px on an 800 px screen.
+
+- **The counters are gone.** On a platform that is starting, «0 seguidores» on
+  everybody's profile informs nobody and discourages whoever just arrived. The
+  data is still there — the home page uses it to suggest who to follow — what
+  went is the scoreboard.
+- **Three rows.** Three cards across on a desktop; on a phone 68% of the width,
+  so the next one peeks. That peek is what says *there is more*: a row ending
+  exactly at the edge looks finished, and nobody swipes what looks finished.
+- **Hover lifts and enlarges** the whole card, not just its image.
+- **Up to three locations**, chosen from the real territory catalogue rather than
+  typed, so «Madrid» is *the* Madrid of the platform and not a loose string. The
+  cap is enforced on the server: if only the screen checked it, thirty could be
+  sent from outside. At three the search box disappears and says why — a search
+  box that stops responding looks broken.
+- **The 14 objectives**, pickable, shown between the name and the description.
+  They say what someone is about before a paragraph does, in the platform's own
+  vocabulary — the same fourteen that filter the home page. Ids are filtered
+  against the real catalogue on save: an invented one would paint as a nameless
+  gap.
+
+Verified end to end: added «Comunidad de Madrid» and AGUA, saved, and both
+appear under the name. Eugenio's profile was restored to empty afterwards.

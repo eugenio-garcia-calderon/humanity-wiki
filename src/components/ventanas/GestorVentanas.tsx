@@ -300,8 +300,29 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
   );
 
   const cerrar = useCallback((id: string) => {
-    setVentanas(vs => vs.filter(v => v.id !== id));
+    setVentanas(vs => {
+      const i = vs.findIndex(v => v.id === id);
+      const quedan = vs.filter(v => v.id !== id);
+      // AL CERRAR, SE PASA A LA DE LA IZQUIERDA (2026-08-22, Eugenio: «cuando
+      // se cierra una página, haz que se muestre la página inmediatamente a su
+      // izquierda»). Antes cerrabas y no venía ninguna al frente: te quedabas
+      // mirando lo que hubiera detrás, que casi siempre no era nada.
+      //
+      // La de la izquierda y no la última usada: en una fila de pestañas, lo
+      // que el ojo espera al cerrar una es que se acerque su vecina. Si cierras
+      // la primera, la de su derecha pasa a ser la primera y esa es la que
+      // toca.
+      if (i === -1 || !quedan.length) return quedan;
+      const vecina = quedan[Math.max(0, i - 1)];
+      return quedan.map(v => (v.id === vecina.id
+        ? { ...v, minimizada: false, z: ++contadorZ }
+        : v));
+    });
   }, []);
+
+  /** Cerrar TODAS de golpe (2026-08-22). Con ocho pestañas abiertas, cerrarlas
+   *  una a una son ocho gestos para llegar a una mesa limpia. */
+  const cerrarTodas = useCallback(() => setVentanas([]), []);
 
   /**
    * Abrir una sección desde el menú ☰. Nace A PANTALLA COMPLETA (el modelo de
@@ -386,7 +407,9 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
     };
     window.addEventListener('humanity:abrir-ventana', alAbrir);
     window.addEventListener('humanity:pulsar-ventana', alPulsar);
+    const alCerrarTodas = () => cerrarTodas();
     window.addEventListener('humanity:cerrar-ventana', alCerrar);
+    window.addEventListener('humanity:cerrar-todas', alCerrarTodas);
     window.addEventListener('humanity:maximizar-ventana', alMaximizar);
     window.addEventListener('humanity:ordenar-ventanas', alOrdenar);
     // El menú ☰ de CUALQUIER página puede dejar una apertura apuntada
@@ -401,6 +424,7 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       window.removeEventListener('humanity:abrir-ventana', alAbrir);
       window.removeEventListener('humanity:pulsar-ventana', alPulsar);
       window.removeEventListener('humanity:cerrar-ventana', alCerrar);
+      window.removeEventListener('humanity:cerrar-todas', alCerrarTodas);
       window.removeEventListener('humanity:maximizar-ventana', alMaximizar);
       window.removeEventListener('humanity:ordenar-ventanas', alOrdenar);
     };
