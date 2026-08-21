@@ -59,6 +59,10 @@ export const avisarNavegadorRemoto = (sesion: string | null) =>
 export const cerrarVentana = (id: string) =>
   window.dispatchEvent(new CustomEvent('humanity:cerrar-ventana', { detail: id }));
 
+/** Cerrar todas las ventanas de golpe (2026-08-22). */
+export const cerrarTodasLasVentanas = () =>
+  window.dispatchEvent(new Event('humanity:cerrar-todas'));
+
 /** Recolocar las pestañas arrastrando. Viaja el orden ENTERO de ids: el gestor
  *  no tiene que adivinar de dónde a dónde ha ido nada, y si llega un id que ya
  *  no existe (ventana cerrada a la vez) simplemente se ignora. */

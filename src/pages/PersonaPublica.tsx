@@ -4,10 +4,14 @@ import {
   User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
   Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare, Camera, Loader2,
   MoreHorizontal, Trash2, ExternalLink,
-  FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid,
+  FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid, Megaphone, Store,
 } from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
+import { OBJETIVOS } from '../utils/objetivos';
+import FilaDelPerfil from '../components/social/FilaDelPerfil';
+import Icono from '../components/ui/Icono';
+import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 import CreateGraphModal from '../components/knowledge/CreateGraphModal';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
@@ -25,6 +29,10 @@ interface ProfileUser {
   name: string | null;
   avatar_url: string | null;
   banner_url: string | null;
+  /** Hasta tres territorios del catálogo (2026-08-22). */
+  ubicaciones?: Array<{ id: string; nombre: string }>;
+  /** Los objetivos que le interesan, por id. */
+  objetivos?: string[];
   bio: string | null;
   location: string | null;
   website: string | null;
@@ -108,6 +116,8 @@ export default function PersonaPublica() {
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, publications: 0 });
   const [pubs, setPubs] = useState<Publication[]>([]);
+  const [proyectos, setProyectos] = useState<Array<{ id: string; titulo: string; url: string; icono: string | null; pendientes: number }>>([]);
+  const [productos, setProductos] = useState<Array<{ id: string; nombre: string; precio: number | null; imagen: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
   const [supportStep, setSupportStep] = useState<'amount' | 'checkout' | null>(null);
@@ -129,7 +139,14 @@ export default function PersonaPublica() {
   const [renombrando, setRenombrando] = useState<ItemEscaparate | null>(null);
   const [quitando, setQuitando] = useState<ItemEscaparate | null>(null);
   const [editandoPerfil, setEditandoPerfil] = useState(false);
-  const [borrador, setBorrador] = useState({ nombre: '', bio: '', avatar: '' });
+  const [borrador, setBorrador] = useState<{
+    nombre: string; bio: string; avatar: string;
+    ubicaciones: Array<{ id: string; nombre: string }>; objetivos: string[];
+  }>({ nombre: '', bio: '', avatar: '', ubicaciones: [], objetivos: [] });
+  /** El catálogo de territorios, solo mientras editas: son 242 filas y no
+   *  tiene sentido traerlas a quien solo viene a mirar un perfil. */
+  const [territorios, setTerritorios] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [buscaSitio, setBuscaSitio] = useState('');
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
@@ -139,8 +156,14 @@ export default function PersonaPublica() {
       nombre: profileUser?.display_name || profileUser?.name || '',
       bio: profileUser?.bio || '',
       avatar: profileUser?.avatar_url || '',
+      ubicaciones: profileUser?.ubicaciones || [],
+      objetivos: profileUser?.objetivos || [],
     });
     setEditandoPerfil(true);
+    if (!territorios.length) {
+      fetch('/api/data/territories').then(r => r.json())
+        .then(j => setTerritorios(Array.isArray(j) ? j : [])).catch(() => {});
+    }
   };
 
   const subirFoto = async (f?: File) => {
@@ -163,6 +186,8 @@ export default function PersonaPublica() {
         display_name: borrador.nombre.trim() || null,
         bio: borrador.bio.trim() || null,
         avatar_url: borrador.avatar || null,
+        ubicaciones: borrador.ubicaciones,
+        objetivos: borrador.objetivos,
       });
       if (!res.ok) return;
       // Se pinta ya con lo nuevo: recargar el perfil entero para ver tu propia
@@ -172,6 +197,8 @@ export default function PersonaPublica() {
         display_name: borrador.nombre.trim() || null,
         bio: borrador.bio.trim() || null,
         avatar_url: borrador.avatar || null,
+        ubicaciones: borrador.ubicaciones,
+        objetivos: borrador.objetivos,
       } : p));
       setEditandoPerfil(false);
     } finally { setGuardandoPerfil(false); }
@@ -185,8 +212,21 @@ export default function PersonaPublica() {
       fetch(`/api/users/${id}/profile`).then(r => r.json()),
       fetch(`/api/publications?author_id=${id}`).then(r => r.json()),
       fetch(`/api/users/${id}/escaparate`, { credentials: 'include' }).then(r => r.json()),
-    ]).then(([profileJson, pubsJson, escJson]) => {
+      // LAS TRES FILAS NUEVAS (2026-08-22). Se piden a la vez que lo demás y
+      // no una detrás de otra: en serie, el perfil tardaría lo que tarde la
+      // más lenta MÁS lo que tarden las otras dos.
+      fetch('/api/tareas', { credentials: 'include' }).then(r => r.json()).catch(() => null),
+      fetch('/api/products', { credentials: 'include' }).then(r => r.json()).catch(() => null),
+    ]).then(([profileJson, pubsJson, escJson, tareasJson, prodsJson]) => {
       if (cancelled) return;
+      setProyectos(((tareasJson?.proyectos || []) as any[])
+        .filter(p => !p.esHojaDeRuta && p.mio)
+        .map(p => ({ id: p.id, titulo: p.titulo, url: p.url, icono: p.icono || null,
+                     pendientes: (p.tareas || []).filter((t: any) => t.estado !== 'hecho').length })));
+      setProductos(((Array.isArray(prodsJson) ? prodsJson : []) as any[])
+        .filter(x => x.seller_user_id === id || x.vendedor_id === id)
+        .map(x => ({ id: x.id, nombre: x.name || x.nombre, precio: x.price_cents ?? x.precio ?? null,
+                     imagen: (x.images || x.imagenes || [])[0] || null })));
       setProfileUser(profileJson.user || null);
       setStats(profileJson.stats || { followers: 0, following: 0, publications: 0 });
       setPubs(Array.isArray(pubsJson) ? pubsJson : []);
@@ -274,20 +314,25 @@ export default function PersonaPublica() {
     // Más ancho que antes (era `max-w-2xl`): desde que el perfil es un
     // escaparate, la columna estrecha dejaba las fichas del tamaño de un sello.
     <div className="animate-in fade-in duration-500 pb-16 max-w-4xl mx-auto">
-      <div className="relative h-32 sm:h-40 rounded-3xl bg-gradient-to-br from-emerald-100 via-teal-50 to-indigo-100 overflow-hidden">
-        {profileUser.banner_url && (
-          <img src={profileUser.banner_url} alt="" className="w-full h-full object-cover" />
-        )}
-      </div>
+      {/* ══ SIN PORTADA, Y LA FOTO ARRIBA DEL TODO ═══════════════════════════
+          (2026-08-22, Eugenio: «quita la portada de fondo. Sube la foto hasta
+          la esquina superior izquierda y pon el nombre al lado de la foto, en
+          versión móvil también».)
 
-      <div className="px-4 sm:px-6 -mt-10 relative flex items-end justify-between gap-3">
+          La portada eran 160 px de degradado sin información antes de la
+          primera cosa que se puede leer. En un teléfono era media pantalla
+          gastada en decorado, y lo que se pidió es que TODO quepa sin bajar.
+
+          La foto y el nombre en la misma fila en los dos tamaños: en móvil
+          también, dicho expresamente. */}
+      <div className="px-4 sm:px-6 pt-3 relative flex items-center gap-3">
         <div className="relative shrink-0">
           {(editandoPerfil ? borrador.avatar : profileUser.avatar_url) ? (
             <img src={editandoPerfil ? borrador.avatar : profileUser.avatar_url!} alt=""
-              className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md" />
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-slate-100" />
           ) : (
-            <span className="w-20 h-20 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-slate-400 shadow-md">
-              <UserIcon className="w-8 h-8" />
+            <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 ring-2 ring-slate-100">
+              <UserIcon className="w-7 h-7 sm:w-8 sm:h-8" />
             </span>
           )}
           {editandoPerfil && (
@@ -306,10 +351,37 @@ export default function PersonaPublica() {
           )}
         </div>
 
+        {/* EL NOMBRE, AL LADO DE LA FOTO. Antes iba debajo, que con la portada
+            quitada dejaba la fila de la foto medio vacía. */}
+        <div className="min-w-0 flex-1">
+          {editandoPerfil ? (
+            <input
+              value={borrador.nombre}
+              onChange={e => setBorrador(b => ({ ...b, nombre: e.target.value }))}
+              placeholder="Tu nombre"
+              className="w-full text-xl sm:text-2xl font-black text-slate-900 bg-transparent border-b border-slate-200 focus:border-emerald-400 focus:outline-none pb-0.5"
+            />
+          ) : (
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight truncate">
+              {profileUser.display_name || profileUser.name || 'Persona'}
+            </h1>
+          )}
+          {/* LAS TRES UBICACIONES, bajo el nombre. */}
+          {(profileUser.ubicaciones?.length || 0) > 0 && !editandoPerfil && (
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400">
+              {profileUser.ubicaciones!.map(u => (
+                <span key={u.id} className="inline-flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />{u.nombre}
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
+
         {/* Editar el tuyo: el botón vive junto a la foto, que es donde se
             busca. */}
         {isMe && (
-          <div className="flex items-center gap-2 pb-1">
+          <div className="flex items-center gap-2 shrink-0">
             {editandoPerfil ? (
               <>
                 <button onClick={() => setEditandoPerfil(false)} disabled={guardandoPerfil}
@@ -332,7 +404,7 @@ export default function PersonaPublica() {
         )}
 
         {!isMe && (
-          <div className="flex items-center gap-2 pb-1">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
             {/* ESCRIBIRLE (2026-08-20). Solo con sesión: un mensaje tiene que
                 venir de alguien. */}
             {can(ROLE.USER) && (
@@ -369,15 +441,118 @@ export default function PersonaPublica() {
         )}
       </div>
 
-      <div className="px-4 sm:px-6 mt-3">
+      <div className="px-4 sm:px-6 mt-2">
+        {/* LOS OBJETIVOS QUE TE IMPORTAN, entre el nombre y la descripción
+            (2026-08-22, Eugenio: «permite al usuario escoger entre los 14
+            objetivos los que más le interesen y aparecerán en su perfil encima
+            de la descripción y debajo del nombre»).
+
+            Dicen de qué va alguien antes de leer un párrafo, y además lo dicen
+            en el vocabulario de la plataforma: son los mismos catorce con los
+            que se filtra la portada. */}
+        {!editandoPerfil && (profileUser.objetivos?.length || 0) > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {OBJETIVOS.filter(o => profileUser.objetivos!.includes(o.id)).map(o => (
+              <span key={o.id}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                <o.icono className="w-3 h-3" /> {o.titulo}
+              </span>
+            ))}
+          </div>
+        )}
+        {editandoPerfil && (
+          <div className="mb-3 space-y-3">
+            {/* ══ HASTA TRES SITIOS ═══════════════════════════════════════
+                Se eligen del catálogo real de territorios, no se escriben a
+                mano: así «Madrid» es EL Madrid de la plataforma y no una
+                cadena de texto que nadie puede cruzar con nada.
+
+                EL TOPE SE DICE Y SE VE. Al llegar a tres desaparece el
+                buscador y se explica por qué; un buscador que no responde
+                parece roto. */}
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mb-1.5">
+                Dónde estás — hasta 3
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-1.5">
+                {borrador.ubicaciones.map(u => (
+                  <span key={u.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800">
+                    <MapPin className="w-3 h-3" /> {u.nombre}
+                    <button onClick={() => setBorrador(b => ({ ...b, ubicaciones: b.ubicaciones.filter(x => x.id !== u.id) }))}
+                      title="Quitar" className="p-0.5 rounded-full hover:bg-emerald-100">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {borrador.ubicaciones.length < 3 ? (
+                <div className="relative">
+                  <input
+                    value={buscaSitio}
+                    onChange={e => setBuscaSitio(e.target.value)}
+                    placeholder="Busca un territorio…"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-300"
+                  />
+                  {buscaSitio.trim().length >= 2 && (() => {
+                    const q = buscaSitio.trim().toLowerCase();
+                    const hall = territorios
+                      .filter(t => t.name.toLowerCase().includes(q) && !borrador.ubicaciones.some(u => u.id === t.id))
+                      .slice(0, 8);
+                    return (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-20 max-h-52 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1">
+                        {hall.length === 0 ? (
+                          // NO EXISTE, Y SE DICE. Un desplegable vacío deja la
+                          // duda de si aún está buscando.
+                          <p className="px-3 py-2 text-[11px] text-slate-400">
+                            No hay ningún territorio que se llame «{buscaSitio.trim()}».
+                          </p>
+                        ) : hall.map(t => (
+                          <button key={t.id}
+                            onClick={() => { setBorrador(b => ({ ...b, ubicaciones: [...b.ubicaciones, { id: t.id, nombre: t.name }] })); setBuscaSitio(''); }}
+                            className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="truncate">{t.name}</span>
+                            <span className="ml-auto text-[9px] uppercase tracking-wider text-slate-300">{t.type}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <p className="text-[10px] text-slate-400">Tres es el máximo. Quita uno para añadir otro.</p>
+              )}
+            </div>
+
+            {/* LOS OBJETIVOS QUE TE IMPORTAN. Los catorce a la vista y se
+                encienden; un desplegable escondería justo la pregunta que se
+                está haciendo, que es «¿cuáles son los míos?». */}
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mb-1.5">
+                Qué te importa
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {OBJETIVOS.map(o => {
+                  const puesto = borrador.objetivos.includes(o.id);
+                  return (
+                    <button key={o.id}
+                      onClick={() => setBorrador(b => ({
+                        ...b,
+                        objetivos: puesto ? b.objetivos.filter(x => x !== o.id) : [...b.objetivos, o.id],
+                      }))}
+                      className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors',
+                        puesto ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400')}>
+                      <o.icono className="w-3 h-3" /> {o.titulo}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {editandoPerfil ? (
           <>
-            <input
-              value={borrador.nombre}
-              onChange={e => setBorrador(b => ({ ...b, nombre: e.target.value }))}
-              placeholder="Tu nombre"
-              className="w-full text-2xl font-black text-slate-900 bg-transparent border-b border-slate-200 focus:border-emerald-400 focus:outline-none pb-1"
-            />
             <textarea
               value={borrador.bio}
               onChange={e => setBorrador(b => ({ ...b, bio: e.target.value }))}
@@ -388,7 +563,6 @@ export default function PersonaPublica() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-black text-slate-900">{profileUser.display_name || profileUser.name || 'Persona'}</h1>
             {profileUser.bio
               ? <p className="text-sm text-slate-600 leading-relaxed mt-1.5">{profileUser.bio}</p>
               : isMe && (
@@ -413,11 +587,65 @@ export default function PersonaPublica() {
           )}
         </div>
 
-        <div className="flex items-center gap-5 mt-4 pt-4 border-t border-slate-100 text-sm">
-          <span><b className="text-slate-900">{stats.publications}</b> <span className="text-slate-400">publicaciones</span></span>
-          <span><b className="text-slate-900">{stats.followers}</b> <span className="text-slate-400">seguidores</span></span>
-          <span><b className="text-slate-900">{stats.following}</b> <span className="text-slate-400">siguiendo</span></span>
-        </div>
+        {/* LOS CONTADORES SE FUERON (2026-08-22, Eugenio: «quita lo de siguiendo
+            y seguidores y lo de publicaciones, los números esos fuera»). En una
+            plataforma que empieza, «0 seguidores» en el perfil de todo el mundo
+            no informa de nada y desanima a quien acaba de llegar. Los datos
+            siguen ahí —los usan los círculos de la portada para sugerir a
+            quién seguir—; lo que se quita es el marcador. */}
+      </div>
+
+      {/* ══ LAS TRES FILAS ══════════════════════════════════════════════════
+          (2026-08-22, Eugenio: «pon en grande una fila de PROYECTOS […] otra de
+          PUBLICACIONES […] y una tercera de PRODUCTOS», y «haz que sea compacto
+          y que se vea todo esto en una sola pantalla sin necesidad de hacer
+          scroll down».)
+
+          COMPACTO ES QUITAR, NO ENCOGER. Lo que hace que quepa no es letra más
+          pequeña: es que se fue la portada de 160 px y se fueron los tres
+          contadores. Lo que queda —foto, nombre, objetivos, descripción y tres
+          filas— entra en una pantalla porque hay menos cosas, no porque estén
+          apretadas. */}
+      <div className="px-4 sm:px-6 mt-4 space-y-4">
+        <FilaDelPerfil
+          titulo="Proyectos" icono={<FolderKanban className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no tienes proyectos. Crea el primero →' : 'Sin proyectos públicos.'}
+          onCrear={isMe ? () => navigate('/proyectos') : undefined}
+          elementos={proyectos.map(p => ({
+            id: p.id, titulo: p.titulo,
+            detalle: p.pendientes === 0 ? 'todo hecho' : `${p.pendientes} por hacer`,
+            color: 'linear-gradient(135deg,#0f766e,#1e3a8a)',
+            icono: <Icono valor={iconoDeProyecto(p.icono, p.titulo)} tamano={26} />,
+            onAbrir: () => navigate(p.url),
+          }))}
+        />
+
+        <FilaDelPerfil
+          titulo="Publicaciones" icono={<Megaphone className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no has publicado nada. Publica lo primero →' : 'Sin publicaciones.'}
+          onCrear={isMe ? () => navigate('/explorar') : undefined}
+          elementos={pubs.map(pb => ({
+            id: pb.id, titulo: pb.title || 'Sin título',
+            detalle: pb.body ? String(pb.body).slice(0, 60) : null,
+            color: 'linear-gradient(135deg,#7c3aed,#db2777)',
+            icono: <Megaphone className="w-6 h-6" />,
+            onAbrir: () => navigate('/explorar'),
+          }))}
+        />
+
+        <FilaDelPerfil
+          titulo="Productos" icono={<Store className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no vendes nada. Pon tu primer producto →' : 'Sin productos.'}
+          onCrear={isMe ? () => navigate('/mercado') : undefined}
+          elementos={productos.map(pr => ({
+            id: pr.id, titulo: pr.nombre,
+            detalle: pr.precio != null ? `${(pr.precio / 100).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €` : null,
+            imagen: pr.imagen,
+            color: 'linear-gradient(135deg,#d97706,#b91c1c)',
+            icono: <Store className="w-6 h-6" />,
+            onAbrir: () => navigate('/mercado'),
+          }))}
+        />
       </div>
 
       {/* EL ESCAPARATE. Todo lo que esta persona ha hecho —grafos, proyectos,

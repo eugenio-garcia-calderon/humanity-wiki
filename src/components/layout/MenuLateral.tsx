@@ -423,8 +423,16 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
     >
       {/* Marca + esconder */}
       <div className="h-14 shrink-0 flex items-center border-b border-slate-200 px-3 gap-2">
-        <button onClick={() => navigate('/')} className="min-w-0 flex-1 text-left hover:opacity-85 transition-opacity">
-          <span className="text-sm font-extrabold tracking-tight text-slate-900">
+        {/* EL LOGO Y EL NOMBRE, Y LOS DOS LLEVAN AL INICIO (2026-08-22,
+            Eugenio: «utiliza este logo para la web, tanto en el menú como en el
+            favicon, si alguien lo pulsa le lleva a inicio»). Aquí dentro el
+            nombre SÍ se queda: es el único sitio donde la plataforma dice cómo
+            se llama, y quitarlo de los dos la dejaría sin nombre en ninguna
+            parte. Arriba, en la barra, va solo el logo por sitio. */}
+        <button onClick={() => navigate('/')} title="Ir al inicio"
+          className="min-w-0 flex-1 text-left flex items-center gap-2 hover:opacity-85 transition-opacity">
+          <img src="/logo.svg" alt="" className="w-7 h-7 rounded-lg shrink-0" />
+          <span className="text-sm font-extrabold tracking-tight text-slate-900 truncate">
             Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
           </span>
         </button>

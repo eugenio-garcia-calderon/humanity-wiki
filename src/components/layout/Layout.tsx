@@ -5,7 +5,7 @@ import {
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
 } from 'lucide-react';
-import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
+import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import MenuLateral from './MenuLateral';
 import Campana from '../social/Campana';
@@ -123,6 +123,7 @@ export default function Layout() {
   };
   const [cuentaAbierta, setCuentaAbierta] = useState(false);
   const cuentaRef = useRef<HTMLDivElement>(null);
+  const [confirmarCerrarTodas, setConfirmarCerrarTodas] = useState(false);
   useEffect(() => {
     const fuera = (e: MouseEvent) => {
       if (cuentaRef.current && !cuentaRef.current.contains(e.target as Node)) setCuentaAbierta(false);
@@ -397,9 +398,12 @@ export default function Layout() {
             onClick={() => navigate('/')}
             title="Humanity Wiki — ir al inicio"
             aria-label="Humanity Wiki — ir al inicio"
-            className="shrink-0 w-7 h-7 grid place-items-center rounded-lg bg-slate-900 text-white hover:bg-emerald-600 transition-colors"
+            className="shrink-0 w-7 h-7 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
           >
-            <Globe className="w-4 h-4" />
+            {/* EL LOGO DE VERDAD (2026-08-22, Eugenio lo mandó). Antes era un
+                globo genérico de la librería de iconos, que es lo que se pone
+                cuando no hay marca. Ahora hay marca. */}
+            <img src="/logo.svg" alt="" className="w-full h-full" />
           </button>
         )}
 
@@ -456,6 +460,54 @@ export default function Layout() {
           <Home className={cn('shrink-0', compacto ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
           {!compacto && <span className="text-[11px] font-black tracking-tight">Inicio</span>}
         </button>
+
+        {/* CERRARLAS TODAS (2026-08-22, Eugenio: «añade en la parte izquierda
+            una x con fondito rojo que si pinchas te dé la opción de cerrar
+            todas las ventanas abiertas»). Va a la izquierda de las pestañas,
+            pegada a la de Inicio, porque es la operación que las afecta a
+            todas y no a ninguna en concreto.
+
+            PIDE CONFIRMACIÓN, y por eso el rojo. Cerrar ocho ventanas de un
+            clic no se deshace, y una ✕ roja junto a otras ✕ pequeñas se pulsa
+            sin querer. Se enseña cuántas se van a cerrar: «8» es un número que
+            frena y «cerrar todas» no. */}
+        {ventanasAbiertas.length > 1 && (
+          <div className="relative shrink-0 ml-1">
+            <button
+              onClick={() => setConfirmarCerrarTodas(v => !v)}
+              title={`Cerrar las ${ventanasAbiertas.length} ventanas`}
+              aria-label={`Cerrar las ${ventanasAbiertas.length} ventanas`}
+              className={cn('grid place-items-center rounded-lg border transition-colors',
+                compacto ? 'w-6 h-6' : 'w-7 h-7',
+                confirmarCerrarTodas
+                  ? 'bg-rose-600 border-rose-600 text-white'
+                  : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100')}
+            >
+              <X className={cn(compacto ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
+            </button>
+            {confirmarCerrarTodas && (
+              <div className="absolute left-0 top-full mt-1 z-50 w-52 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                <p className="text-[11px] text-slate-600 leading-snug px-1 pb-2">
+                  ¿Cerrar las {ventanasAbiertas.length} ventanas abiertas?
+                </p>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => setConfirmarCerrarTodas(false)}
+                    className="flex-1 px-2 py-1.5 rounded-lg border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    No
+                  </button>
+                  <button
+                    onClick={() => { cerrarTodasLasVentanas(); setConfirmarCerrarTodas(false); }}
+                    className="flex-1 px-2 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold"
+                  >
+                    Cerrar todas
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {ventanasAbiertas.length > 0 && (
           <div className="flex items-center gap-1 ml-1 overflow-x-auto min-w-0">
