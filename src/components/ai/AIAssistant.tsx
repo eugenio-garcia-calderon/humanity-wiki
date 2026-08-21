@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon} from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -99,6 +99,21 @@ const costeEstimado = (
 /** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
 const segundos = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1).replace('.', ',')} s`);
 
+/** LO QUE SE PUEDE CREAR, y adónde lleva cada uno. Son destinos que EXISTEN y
+ *  donde esa creación se hace de verdad: comprobado uno a uno antes de
+ *  ponerlos, porque un atajo que te deja en una página donde no se puede crear
+ *  nada es peor que no tener atajo. */
+const HERRAMIENTAS_CREAR: Array<{ label: string; destino: string; icono: any }> = [
+  { label: 'Proyecto',    destino: '/proyectos',  icono: FolderKanban },
+  { label: 'Tarea',       destino: '/tareas',     icono: ListChecks },
+  { label: 'Página',      destino: '/paginas',    icono: FileText },
+  { label: 'Esquema',     destino: '/esquemas',   icono: Share2 },
+  { label: 'Mapa',        destino: '/mis-mapas',  icono: MapIcon },
+  { label: 'Publicación', destino: '/explorar',   icono: Megaphone },
+  { label: 'Persona',     destino: '/personas',   icono: Users2 },
+  { label: 'Evento',      destino: '/calendario', icono: CalendarDays },
+];
+
 /** Modelo de Anthropic o Google disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
 interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; gratis?: boolean; nivelMinimo?: number; }
 
@@ -172,6 +187,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   /** Lo que mide la barra cuando está cerrada. 52 px es una fila tocable con
    *  el pulgar sin robarle sitio a la página. */
   const ALTO_BARRA = 52;
+  /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
+   *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
+   *  hueco: con dos banderas podrían estar abiertos a la vez y taparse. */
+  const [panelMuelle, setPanelMuelle] = useState<null | 'chat' | 'crear'>(null);
   const [alturaMuelle, setAlturaMuelle] = useState(33);   // % de la pantalla
   const [arrastrandoMuelle, setArrastrandoMuelle] = useState(false);
   const [historialALaVista, setHistorialALaVista] = useState(false);
@@ -196,7 +215,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   useEffect(() => {
     // El robot del Mundo 3D pide la palabra: se ABRE el panel (antes esto
     // desminimizaba la barra de abajo, que ya no existe).
-    const enfocar = () => { setOpen(true); setTimeout(() => barInputRef.current?.focus(), 60); };
+    const enfocar = () => { setOpen(true); setPanelMuelle('chat'); setTimeout(() => barInputRef.current?.focus(), 60); };
     window.addEventListener('humanity:asistente-focus', enfocar);
     return () => window.removeEventListener('humanity:asistente-focus', enfocar);
   }, []);
@@ -217,6 +236,7 @@ export default function AIAssistant({ modo = 'panel' }: {
         setMessages([]);
         if (nuevaConv) cargarConversacion(nuevaConv);
         setOpen(true);
+        setPanelMuelle('chat');
       }
     };
     window.addEventListener('humanity:juego-contexto', alContexto);
@@ -294,7 +314,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   useEffect(() => {
     const onPrefill = (e: Event) => {
       const text = (e as CustomEvent).detail;
-      if (typeof text === 'string') { setInput(text); setOpen(true); }
+      if (typeof text === 'string') { setInput(text); setOpen(true); setPanelMuelle('chat'); }
     };
     window.addEventListener('ai:prefill', onPrefill);
     return () => window.removeEventListener('ai:prefill', onPrefill);
@@ -303,7 +323,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Abrir desde fuera SIN escribir nada. Lo usa el botón de la barra en el
   // teléfono (B91): el mismo asistente, otra puerta de entrada.
   useEffect(() => {
-    const abrir = () => setOpen(true);
+    const abrir = () => { setOpen(true); setPanelMuelle('chat'); };
     window.addEventListener('ai:abrir', abrir);
     return () => window.removeEventListener('ai:abrir', abrir);
   }, []);
@@ -1427,29 +1447,105 @@ export default function AIAssistant({ modo = 'panel' }: {
               pidió es un menú abajo que se despliegue, no algo que aparezca.
               Escribir aquí lo abre solo — la puerta de entrada al chat es la
               caja de escribir, que es lo que uno busca. */}
+          {/* ── TRES BOTONES, COMO EN EL MÓVIL DE YOUTUBE ────────────────────
+              (2026-08-21, Eugenio, con una captura de YouTube: «pon 3 botones,
+              el de buscar con la lupa a la derecha, y ahí se abre el CHATBOT.
+              El de "+" en el centro y ahí aparecen un visor de las
+              herramientas para crear o subir. Y el botón de CASA en la
+              izquierda que te lleva a la página de proyectos»).
+
+              POR QUÉ FUNCIONA ESA FORMA Y NO OTRA: son los tres verbos de la
+              plataforma —volver, crear y preguntar— y están donde el pulgar
+              llega sin recolocar la mano. El «+» va en el centro y es el único
+              con fondo, porque crear es lo que más se hace y lo que más cuesta
+              encontrar hoy: cada cosa se crea en la página de su tipo, y hay
+              que saber a cuál ir antes de poder empezar. */}
           {!open && (
-            <button
-              onClick={() => setOpen(true)}
-              className="flex-1 flex items-center gap-2.5 px-3 text-left hover:bg-slate-50 transition-colors"
-            >
-              <span className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 grid place-items-center text-white">
-                <Sparkles className="w-4 h-4" />
-              </span>
-              <span className="flex-1 min-w-0 text-sm text-slate-400 truncate">
-                Pregunta a la IA, o pídele que haga algo…
-              </span>
-              {/* Cuántas conversaciones tienes, para que el historial no sea
-                  un botón que no se sabe si lleva a algo. */}
-              {historial.length > 0 && (
-                <span className="hidden sm:inline text-[10px] font-bold text-slate-300 shrink-0">
-                  {historial.length} {historial.length === 1 ? 'conversación' : 'conversaciones'}
-                </span>
-              )}
-              <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
-            </button>
+            <nav className="flex-1 grid grid-cols-3 items-center">
+              <button
+                onClick={() => navigate('/proyectos')}
+                title="Ir a tus proyectos"
+                className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
+              >
+                {/* EL MISMO ICONO QUE LA SECCIÓN «PROYECTOS» DEL MENÚ
+                    (2026-08-21, Eugenio, señalando el del menú lateral).
+                    Empecé con una casa por copiar a YouTube, pero aquí este
+                    botón no lleva a un inicio: lleva a los proyectos, y la
+                    misma cosa tiene que tener la misma cara en los dos sitios
+                    o parecen dos destinos distintos. */}
+                <FolderKanban className="w-5 h-5" />
+                <span className="text-[9px] font-bold">Proyectos</span>
+              </button>
+
+              <button
+                onClick={() => { setOpen(true); setPanelMuelle('crear'); }}
+                title="Crear algo nuevo"
+                className="justify-self-center w-11 h-8 rounded-full bg-slate-900 text-white grid place-items-center hover:bg-emerald-600 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
+                title="Preguntar a la IA"
+                className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
+              >
+                <Search className="w-5 h-5" />
+                <span className="text-[9px] font-bold">Preguntar</span>
+              </button>
+            </nav>
           )}
 
-          {open && <>
+          {/* ── EL VISOR DE «CREAR» ──────────────────────────────────────────
+              CADA BOTÓN LLEVA DONDE ESO SE CREA DE VERDAD. Hoy cada cosa se
+              crea dentro de la página de su tipo, así que esto no inventa
+              formularios nuevos: es el atajo que faltaba para no tener que
+              saberse de memoria en qué página vive cada creación.
+
+              LO QUE NO ESTÁ, NO ESTÁ. No hay «subir un archivo» suelto, porque
+              un fichero necesita colgar de algo —proyecto, tarea o página— y
+              uno sin dueño es exactamente el problema que arreglamos hoy. Se
+              sube desde la cosa a la que pertenece, y por eso aquí se lleva al
+              proyecto. */}
+          {open && panelMuelle === 'crear' && (
+            <div className="flex-1 min-h-0 overflow-y-auto p-3">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Crear</p>
+                <button onClick={() => { setOpen(false); setPanelMuelle(null); }} title="Cerrar"
+                  className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {HERRAMIENTAS_CREAR.map(h => (
+                  <button
+                    key={h.destino}
+                    onClick={() => { navigate(h.destino); setOpen(false); setPanelMuelle(null); }}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 transition-colors"
+                  >
+                    <h.icono className="w-5 h-5 text-slate-500" />
+                    <span className="text-[10px] font-bold text-slate-600 text-center leading-tight">{h.label}</span>
+                  </button>
+                ))}
+                {/* Pedírselo a la IA es otra forma de crear, y muchas veces la
+                    más rápida: «créame una tarea para el viernes». */}
+                <button
+                  onClick={() => setPanelMuelle('chat')}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-colors"
+                >
+                  <Sparkles className="w-5 h-5 text-emerald-600" />
+                  <span className="text-[10px] font-bold text-emerald-700 text-center leading-tight">Pedírselo a la IA</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* SI NO HAY PANEL ELEGIDO, EL CHAT. Tres sitios abren el muelle
+              sin decir cuál —enfocar la caja, rellenarla desde otra página, el
+              evento `ai:abrir`— y con una comprobación estricta se abriría un
+              muelle vacío. Se arregla en los tres sitios Y aquí: el que falle
+              primero no deja al usuario mirando un hueco blanco. */}
+          {open && panelMuelle !== 'crear' && <>
           {/* El borde de arriba se arrastra para cambiar la altura. Es una
               barra de 10 px y no una línea de 1: en un dedo, una línea de un
               píxel no se puede coger. */}

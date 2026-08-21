@@ -2869,3 +2869,35 @@ visible without opening anything, because whether the AI may touch your data is
 not a detail.
 
 Verified: sending from the new composer answered, with its cost line.
+
+## 2026-08-21 — Three buttons at the bottom, like a phone app
+
+Eugenio, with a screenshot of YouTube's mobile bar: «pon 3 botones, el de
+buscar con la lupa a la derecha, y ahí se abre el CHATBOT. El de "+" en el
+centro y ahí aparecen un visor de las herramientas para crear o subir. Y el
+botón de CASA en la izquierda que te lleva a la página de proyectos».
+
+The bar was a single «Pregunta a la IA…» field. Now it is three: **Proyectos**
+on the left, **+** in the middle, **preguntar** on the right — the three verbs
+of the platform (go back, make, ask), where a thumb reaches without moving the
+hand. The + is the only one with a filled background, because creating is what
+is done most and what is hardest to find today.
+
+**The + opens a viewer of what can be made**, and every button lands where that
+thing is actually created — checked one by one before adding them. An entry
+that leaves you on a page where nothing can be created is worse than no entry.
+
+**There is no loose «upload a file»**, deliberately. A file has to hang from
+something — a project, a task, a page — and one with no owner is exactly the
+problem fixed earlier today. You upload from the thing it belongs to, so the
+viewer takes you to the project.
+
+**The icon is the menu's, not a house.** It started as YouTube's house; Eugenio
+pointed at the sidebar's «Proyectos» section. This button does not lead to a
+home, it leads to projects, and the same thing has to wear the same face in
+both places or it reads as two destinations.
+
+**And an empty dock is now impossible.** Three places open it without saying
+which panel — focusing the box, prefilling from another page, the `ai:abrir`
+event — and a strict check would have opened a blank white gap. Fixed in all
+three places *and* in the render: no panel chosen means the chat.
