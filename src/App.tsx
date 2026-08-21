@@ -89,7 +89,14 @@ export default function App() {
                     el mapa conserva su ruta /mapa (enlazada en el menú). */}
                 {/* La portada presenta las TRES formas de ver (2026-08-06).
                     La Red de Datos (antes «Grafos») vive en /red. */}
-                <Route index element={<Entrada />} />
+                {/* LA PORTADA ES PUBLICACIONES (2026-08-21, Eugenio: «la
+                    página de publicaciones será a partir de ahora la página de
+                    inicio»). Antes la raíz era `Entrada`, que a quien no había
+                    entrado le mandaba directo a /login: la plataforma no
+                    enseñaba nada antes de pedir la cuenta. Ahora lo primero
+                    que se ve es lo que la gente ha publicado. */}
+                <Route index element={<Explorar />} />
+                <Route path="entrada" element={<Entrada />} />
                 {/* ESQUEMAS (2026-08-20, Eugenio: «llámalo Esquemas, y unifica
                     todo para ese mismo nombre»). Un lienzo, un grafo y la red
                     de datos eran la misma fila de la base de datos dibujada de

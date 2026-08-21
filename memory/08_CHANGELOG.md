@@ -3000,3 +3000,35 @@ creating moves to the edge, because it happens fewer times a day than asking.
 
 46 px instead of 52, with 18 px icons and smaller labels. Six pixels back to
 every page, on every screen.
+
+## 2026-08-21 — Publicaciones is the home page, with people at the top
+
+Eugenio, with an Instagram screenshot: «la página de publicaciones será a partir
+de ahora la página de inicio, y ahí tienen que aparecer las publicaciones pero
+antes aparecerán círculos modo Instagram de las personas que tienes agregadas, y
+si no tienes agregado a nadie te aparecen canales relevantes a los que siga
+mucha gente».
+
+The root used to be `Entrada`, which sent anyone not logged in straight to
+`/login`: the platform showed nothing before asking for an account. Now the
+first thing anyone sees is what people have published. `Entrada` keeps its own
+address at `/entrada`, so nothing that linked to it breaks.
+
+**The circles say whether they are yours or suggestions.** A circle of someone
+you follow and one of someone you do not look identical, so the difference has
+to be stated: «A quien sigues» or «Gente a la que seguir», plus a coloured ring
+versus a dashed grey one. Without that, the home page would make you believe you
+have a network you do not have.
+
+**«Relevant» is measured, not asserted**: how many people follow them and how
+much they have published. There is no other datum to sort by, and sorting by
+something you do not have would be faking a criterion. Each suggestion shows its
+follower count — the reason it is there — or its publication count when nobody
+follows them yet.
+
+Both branches verified: with nobody followed, 6 suggestions ordered by
+followers; after following one person, «seguidos» with exactly that person. The
+follow used for the test was removed.
+
+Nothing to show means nothing to occupy: on an empty platform the strip does not
+render at all, rather than a row of placeholders.

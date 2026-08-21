@@ -13,6 +13,7 @@ import FichaPublicacion, { type Publicacion } from '../components/knowledge/Fich
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import { OBJETIVOS, hablaDe } from '../utils/objetivos';
+import CirculosDePersonas from '../components/social/CirculosDePersonas';
 
 // ============================================================================
 // PUBLICACIONES — Explorar + Mis publicaciones fusionadas (2026-08-08)
@@ -616,6 +617,11 @@ export default function Explorar() {
                   buscador filtra por título lo que ya se ha cargado. Una sola
                   fila compacta y pegajosa; los tipos se desplazan en horizontal
                   en vez de envolver en varias líneas (2026-08-08). */}
+              {/* LAS PERSONAS, ANTES QUE NADA (2026-08-21). Van encima de los
+                  objetivos porque la portada es de gente: primero a quién
+                  sigues, luego de qué va lo que hay. */}
+              <CirculosDePersonas />
+
               {/* ══ LOS 14 OBJETIVOS, EN UNA TIRA ═══════════════════════════
                   (2026-08-21, Eugenio: «pon un submenú superior como el de
                   YouTube donde aparezcan los 14 objetivos uno al lado del otro
