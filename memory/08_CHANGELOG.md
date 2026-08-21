@@ -2817,3 +2817,24 @@ of padding on `main` with the dock open, 0 with it closed.
 
 Verified end to end: sending a message from inside the dock got an answer with
 its cost line, at both widths.
+
+## 2026-08-21 — The dock is always there, which is what «menú inferior» meant
+
+Eugenio, minutes after the previous deploy: «no veo el menú de abajo».
+
+The deploy was fine — `--hueco-muelle` was in the production bundle. The bug was
+my reading of the request. He asked for a **menu** along the bottom «con
+capacidad de desplegarse hacia arriba a 1/3 de pantalla»: something that is
+always there and *expands*. I built something that *appears* when you open the
+chat, so unless you clicked the sparkles button there was nothing at the bottom
+to see.
+
+Now the bar is always at the bottom, 52 px, edge to edge, with the writing box
+in it. Tapping it expands to a third of the screen. Measured: 52 px closed, 268
+px open on a 812 px phone (0,33), and the layout reserves both — 52 px of
+padding closed, 268 px open, so nothing is ever hidden underneath.
+
+Two doors were removed in the process, both mine from earlier today: the
+floating button, and the AI button in the top bar (B91). Both existed to open a
+panel that was not visible; with the bar always present they were second doors
+to a room whose door is already open — and the top one was far from the thumb.

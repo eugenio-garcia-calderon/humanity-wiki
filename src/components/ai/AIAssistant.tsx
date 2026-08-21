@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -169,6 +169,9 @@ export default function AIAssistant({ modo = 'panel' }: {
   // arrastrar el borde de arriba para cambiarlo, entre un cuarto y tres
   // cuartos: menos de un cuarto no cabe una respuesta y más de tres cuartos ya
   // es tapar la aplicación, que es lo que veníamos a evitar.
+  /** Lo que mide la barra cuando está cerrada. 52 px es una fila tocable con
+   *  el pulgar sin robarle sitio a la página. */
+  const ALTO_BARRA = 52;
   const [alturaMuelle, setAlturaMuelle] = useState(33);   // % de la pantalla
   const [arrastrandoMuelle, setArrastrandoMuelle] = useState(false);
   const [historialALaVista, setHistorialALaVista] = useState(false);
@@ -1057,7 +1060,9 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  arrastre. */
   useEffect(() => {
     const raiz = document.documentElement;
-    raiz.style.setProperty('--hueco-muelle', open ? `${alturaMuelle}vh` : '0px');
+    // Cerrada también ocupa: la barra existe siempre, así que el hueco
+    // también. Ponerlo a 0 al cerrar sería tapar el final de cada página.
+    raiz.style.setProperty('--hueco-muelle', open ? `${alturaMuelle}vh` : `${ALTO_BARRA}px`);
     return () => raiz.style.setProperty('--hueco-muelle', '0px');
   }, [open, alturaMuelle]);
 
@@ -1385,26 +1390,11 @@ export default function AIAssistant({ modo = 'panel' }: {
 
   return (
     <>
-      {/* Botón flotante permanente: se mantiene fijo aunque el panel esté
-          acoplado, ya que no forma parte de la columna con ancho real.
-
-          EN EL TELÉFONO NO SALE (B91, 2026-08-21): 56×56 flotando sobre una
-          pantalla de 375 px caían encima del contenido —medido en /personas,
-          tapando la etiqueta de una tarjeta, y en el editor tapando el texto—.
-          Ahí el botón vive en la barra de arriba, donde ocupa sitio de verdad
-          en vez de robárselo a la página. Lo pinta `Layout.tsx` y avisa por el
-          evento `ai:abrir`. */}
-      {!open && !esMovil && (
-        <button
-          onClick={() => setOpen(true)}
-          title="Asistente de Humanity.wiki"
-          // Abajo del todo a la derecha (Eugenio, 2026-08-20). Antes iba a
-          // `bottom-20` para dejar hueco a la barra de chat, que ya no existe.
-          className="fixed bottom-6 right-6 z-[9998] w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-        >
-          <Sparkles className="w-6 h-6" />
-        </button>
-      )}
+      {/* EL BOTÓN FLOTANTE SE RETIRÓ (2026-08-21). Existía para abrir un
+          panel que no se veía; ahora el muelle está SIEMPRE abajo, así que un
+          botón flotante encima sería una segunda puerta a una habitación que
+          ya tiene la puerta abierta — y volvería a tapar contenido, que es lo
+          que costó B91. */}
 
       {/* ══ EL MUELLE ═══════════════════════════════════════════════════════
           De lado a lado, pegado abajo, y SIEMPRE presente cuando el chat está
@@ -1416,12 +1406,41 @@ export default function AIAssistant({ modo = 'panel' }: {
           que es el fallo que acabamos de arreglar con el botón de la IA (B91).
           `Layout.tsx` lee esta misma altura y le deja hueco al final de la
           página, así que nada queda debajo. */}
-      {open && (
+      {(
         <div
           {...zonaSoltar}
-          className="fixed inset-x-0 bottom-0 z-[9998] flex flex-col bg-white border-t border-slate-200 shadow-2xl animate-in slide-in-from-bottom duration-200"
-          style={{ height: `${alturaMuelle}vh`, minHeight: 240 }}
+          className={cn('fixed inset-x-0 bottom-0 z-[9998] flex flex-col bg-white border-t border-slate-200 transition-[height] duration-200',
+            open ? 'shadow-2xl' : 'shadow-lg')}
+          style={open ? { height: `${alturaMuelle}vh`, minHeight: 240 } : { height: ALTO_BARRA }}
         >
+          {/* ── CERRADO: la barra ───────────────────────────────────────────
+              SIEMPRE ESTÁ, y por eso es una barra y no un botón: lo que se
+              pidió es un menú abajo que se despliegue, no algo que aparezca.
+              Escribir aquí lo abre solo — la puerta de entrada al chat es la
+              caja de escribir, que es lo que uno busca. */}
+          {!open && (
+            <button
+              onClick={() => setOpen(true)}
+              className="flex-1 flex items-center gap-2.5 px-3 text-left hover:bg-slate-50 transition-colors"
+            >
+              <span className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 grid place-items-center text-white">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <span className="flex-1 min-w-0 text-sm text-slate-400 truncate">
+                Pregunta a la IA, o pídele que haga algo…
+              </span>
+              {/* Cuántas conversaciones tienes, para que el historial no sea
+                  un botón que no se sabe si lleva a algo. */}
+              {historial.length > 0 && (
+                <span className="hidden sm:inline text-[10px] font-bold text-slate-300 shrink-0">
+                  {historial.length} {historial.length === 1 ? 'conversación' : 'conversaciones'}
+                </span>
+              )}
+              <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
+            </button>
+          )}
+
+          {open && <>
           {/* El borde de arriba se arrastra para cambiar la altura. Es una
               barra de 10 px y no una línea de 1: en un dedo, una línea de un
               píxel no se puede coger. */}
@@ -1466,6 +1485,7 @@ export default function AIAssistant({ modo = 'panel' }: {
             <div className="flex-1 min-w-0 flex flex-col">{panelBody}</div>
           </div>
           {avisoSoltar}
+          </>}
         </div>
       )}
     </>
