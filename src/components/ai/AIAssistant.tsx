@@ -134,6 +134,8 @@ export default function AIAssistant({ modo = 'panel' }: {
   const ultimoFallo = useRef<{ cuando: number; estado: number; motivo: string; peticion: string } | null>(null);
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
+  /** Hay un fichero encima del panel, esperando a que lo sueltes. */
+  const [soltando, setSoltando] = useState(false);
   // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
   const [graphMatches, setGraphMatches] = useState<Array<{ slug: string; title: string; score: number }>>([]);
   // Pop-up central: la publicación real que responde a la pregunta.
@@ -462,6 +464,74 @@ export default function AIAssistant({ modo = 'panel' }: {
     reader.onerror = () => setAttachError('No se pudo leer el archivo.');
     reader.readAsDataURL(file);
   };
+
+  // ══ ARRASTRAR UN FICHERO AL CHAT (2026-08-21, petición de Eugenio: «haz que
+  // al arrastrar un archivo pdf al chatbot se adjunte») ══════════════════════
+  //
+  // Adjuntar YA FUNCIONABA: el clip de abajo acepta imágenes y PDF hasta 15 MB
+  // y `handleFileSelect` hace la validación, la lectura y el aviso de error.
+  // Lo único que faltaba era el GESTO. Por eso esto no valida nada por su
+  // cuenta y se limita a entregarle el fichero a esa misma función: si algún
+  // día cambia lo que se admite, cambia en un sitio y aquí no hay nada que
+  // tocar. Y por eso también se aceptan imágenes además de PDF — es lo mismo
+  // que ya acepta el clip, y rechazar por aquí lo que el clip admite sería
+  // una incoherencia que el usuario notaría antes que nosotros.
+  //
+  // `types.includes('Files')` es lo que distingue arrastrar un FICHERO de
+  // arrastrar texto seleccionado o un enlace, que en un chat pasa a menudo y
+  // no debe encender la zona de soltar.
+  const traeFicheros = (e: React.DragEvent) => e.dataTransfer?.types?.includes('Files');
+
+  // El contador es la parte fea y necesaria: `dragleave` salta también al
+  // pasar de un hijo a otro DENTRO del panel, así que sin contar entradas y
+  // salidas el aviso parpadea mientras mueves el fichero por encima.
+  const profundidadArrastre = useRef(0);
+
+  const zonaSoltar = {
+    onDragEnter: (e: React.DragEvent) => {
+      if (!traeFicheros(e)) return;
+      e.preventDefault();
+      profundidadArrastre.current += 1;
+      setSoltando(true);
+    },
+    onDragOver: (e: React.DragEvent) => {
+      if (!traeFicheros(e)) return;
+      // Sin este `preventDefault` el navegador se queda el fichero y ABRE EL
+      // PDF en la pestaña, tirando la conversación por el camino.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    },
+    onDragLeave: (e: React.DragEvent) => {
+      if (!traeFicheros(e)) return;
+      profundidadArrastre.current = Math.max(0, profundidadArrastre.current - 1);
+      if (profundidadArrastre.current === 0) setSoltando(false);
+    },
+    onDrop: (e: React.DragEvent) => {
+      if (!traeFicheros(e)) return;
+      e.preventDefault();
+      profundidadArrastre.current = 0;
+      setSoltando(false);
+      // Solo el primero: el adjunto del chat es uno, no una lista. Soltar
+      // cinco y quedarse con uno en silencio sería mentir, así que se dice.
+      const ficheros = Array.from(e.dataTransfer.files || []);
+      if (!ficheros.length) return;
+      handleFileSelect(ficheros[0]);
+      if (ficheros.length > 1) {
+        setAttachError(`Solo se puede adjuntar un archivo por mensaje: se ha cogido «${ficheros[0].name}».`);
+      }
+    },
+  };
+
+  /** El aviso que se pinta encima del panel mientras traes un fichero. */
+  const avisoSoltar = soltando ? (
+    <div className="absolute inset-0 z-50 pointer-events-none grid place-items-center bg-emerald-50/90 border-2 border-dashed border-emerald-400 rounded-lg">
+      <div className="flex flex-col items-center gap-2 text-emerald-700">
+        <Paperclip className="w-7 h-7" />
+        <p className="text-sm font-black">Suelta para adjuntarlo</p>
+        <p className="text-[11px] font-bold text-emerald-600">PDF hasta 15 MB · imágenes hasta 5 MB</p>
+      </div>
+    </div>
+  ) : null;
 
   const send = async (overrideText?: string) => {
     const text = (typeof overrideText === 'string' ? overrideText : input).trim();
@@ -1212,19 +1282,22 @@ export default function AIAssistant({ modo = 'panel' }: {
           normal (ver Layout.tsx), no un elemento `fixed`. */}
       {open && isDesktop && (
         <div
+          {...zonaSoltar}
           className="relative h-full shrink-0 bg-white border-l border-slate-200 shadow-xl flex flex-col animate-in fade-in duration-150"
           style={{ width: `${width}%` }}
         >
           <ResizeHandle onMouseDown={startResize('left')} edge="left" active={dragging} />
           {panelBody}
+          {avisoSoltar}
         </div>
       )}
 
       {/* Móvil: un 20% de una pantalla estrecha es inutilizable, así que ahí
           se mantiene como cajón a pantalla completa. */}
       {open && !isDesktop && (
-        <div className="fixed inset-0 z-[9998] bg-white flex flex-col animate-in slide-in-from-right duration-200">
+        <div {...zonaSoltar} className="fixed inset-0 z-[9998] bg-white flex flex-col animate-in slide-in-from-right duration-200">
           {panelBody}
+          {avisoSoltar}
         </div>
       )}
     </>
