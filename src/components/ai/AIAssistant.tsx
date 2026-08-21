@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon} from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass} from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -98,6 +98,28 @@ const costeEstimado = (
 
 /** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
 const segundos = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1).replace('.', ',')} s`);
+
+/** Un botón del muelle. Uno solo para los cuatro: cinco copias del mismo
+ *  bloque serían cinco sitios donde arreglar el mismo detalle. El icono es
+ *  SIEMPRE el mismo que usa esa sección en el menú lateral — si la misma cosa
+ *  lleva dos caras, parecen dos destinos. */
+function BotonMuelle({ icono: Icono, label, titulo, onClick }: {
+  icono: any; label: string; titulo: string; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={titulo}
+      aria-label={titulo}
+      className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
+    >
+      <Icono className="w-5 h-5" />
+      {/* En pantallas muy estrechas el texto de cinco botones no cabe: se
+          queda el icono, que con el `title` sigue diciendo qué es. */}
+      <span className="text-[9px] font-bold hidden min-[360px]:block truncate max-w-full px-0.5">{label}</span>
+    </button>
+  );
+}
 
 /** LO QUE SE PUEDE CREAR, y adónde lleva cada uno. Son destinos que EXISTEN y
  *  donde esa creación se hace de verdad: comprobado uno a uno antes de
@@ -1461,38 +1483,30 @@ export default function AIAssistant({ modo = 'panel' }: {
               encontrar hoy: cada cosa se crea en la página de su tipo, y hay
               que saber a cuál ir antes de poder empezar. */}
           {!open && (
-            <nav className="flex-1 grid grid-cols-3 items-center">
-              <button
-                onClick={() => navigate('/proyectos')}
-                title="Ir a tus proyectos"
-                className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
-              >
-                {/* EL MISMO ICONO QUE LA SECCIÓN «PROYECTOS» DEL MENÚ
-                    (2026-08-21, Eugenio, señalando el del menú lateral).
-                    Empecé con una casa por copiar a YouTube, pero aquí este
-                    botón no lleva a un inicio: lleva a los proyectos, y la
-                    misma cosa tiene que tener la misma cara en los dos sitios
-                    o parecen dos destinos distintos. */}
-                <FolderKanban className="w-5 h-5" />
-                <span className="text-[9px] font-bold">Proyectos</span>
-              </button>
+            <nav className="flex-1 grid grid-cols-5 items-center">
+              {/* CINCO, Y EL «+» EN EL CENTRO. Con cinco huecos el central cae
+                  justo en el medio, que es donde tiene que estar lo que más se
+                  usa. Con cuatro habría quedado descentrado y con seis los
+                  botones bajarían de 44 px de ancho, que es el mínimo para un
+                  pulgar. */}
+              <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
+                onClick={() => navigate('/proyectos')} />
+              <BotonMuelle icono={Compass} label="Publicaciones" titulo="Ver las publicaciones"
+                onClick={() => navigate('/explorar')} />
 
               <button
                 onClick={() => { setOpen(true); setPanelMuelle('crear'); }}
                 title="Crear algo nuevo"
+                aria-label="Crear algo nuevo"
                 className="justify-self-center w-11 h-8 rounded-full bg-slate-900 text-white grid place-items-center hover:bg-emerald-600 transition-colors"
               >
                 <Plus className="w-5 h-5" />
               </button>
 
-              <button
-                onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
-                title="Preguntar a la IA"
-                className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
-              >
-                <Search className="w-5 h-5" />
-                <span className="text-[9px] font-bold">Preguntar</span>
-              </button>
+              <BotonMuelle icono={MessageSquare} label="Mensajes" titulo="Tus mensajes con personas"
+                onClick={() => navigate('/mensajes')} />
+              <BotonMuelle icono={Search} label="Preguntar" titulo="Preguntar a la IA"
+                onClick={() => { setOpen(true); setPanelMuelle('chat'); }} />
             </nav>
           )}
 
