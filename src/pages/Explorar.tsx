@@ -12,6 +12,7 @@ import WindowContent from '../components/knowledge/WindowContent';
 import FichaPublicacion, { type Publicacion } from '../components/knowledge/FichaPublicacion';
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
+import { OBJETIVOS, hablaDe } from '../utils/objetivos';
 
 // ============================================================================
 // PUBLICACIONES — Explorar + Mis publicaciones fusionadas (2026-08-08)
@@ -129,6 +130,8 @@ export default function Explorar() {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [tipo, setTipo] = useState<string>('Todo');
+  /** El objetivo elegido en la tira de arriba, o null para «Todos». */
+  const [objetivo, setObjetivo] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   const [verPapelera, setVerPapelera] = useState(false);
@@ -208,8 +211,17 @@ export default function Explorar() {
       const q = busqueda.trim().toLowerCase();
       lista = lista.filter(i => i.titulo.toLowerCase().includes(q));
     }
+    // POR OBJETIVO. Se filtra AQUÍ y no en el servidor porque no hay nada que
+    // preguntarle: una publicación no tiene vínculo con ningún objetivo, así
+    // que esto es buscar sus palabras en lo que ya está cargado. Ver
+    // `src/utils/objetivos.ts` para por qué se dice «habla de» y no
+    // «pertenece a».
+    if (objetivo) {
+      const o = OBJETIVOS.find(x => x.id === objetivo);
+      if (o) lista = lista.filter(i => hablaDe(`${i.titulo} ${(i as any).resumen || ''} ${(i as any).descripcion || ''}`, o));
+    }
     return lista;
-  }, [items, tipo, carpetaActiva, busqueda]);
+  }, [items, tipo, carpetaActiva, busqueda, objetivo]);
 
   const accion = async (url: string, opciones: RequestInit) => {
     const r = await fetch(url, { credentials: 'include', ...opciones });
@@ -604,7 +616,49 @@ export default function Explorar() {
                   buscador filtra por título lo que ya se ha cargado. Una sola
                   fila compacta y pegajosa; los tipos se desplazan en horizontal
                   en vez de envolver en varias líneas (2026-08-08). */}
-              <div className="sticky top-0 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
+              {/* ══ LOS 14 OBJETIVOS, EN UNA TIRA ═══════════════════════════
+                  (2026-08-21, Eugenio: «pon un submenú superior como el de
+                  YouTube donde aparezcan los 14 objetivos uno al lado del otro
+                  y que se pueda hacer scroll lateral para verlos todos en
+                  móvil»).
+
+                  SE DESPLAZA A LO ANCHO Y NO SE PARTE EN LÍNEAS: catorce
+                  pastillas en un teléfono serían cuatro filas, y cuatro filas
+                  de filtros encima del contenido es más filtro que contenido.
+                  Así ocupa una sola línea siempre, en el móvil y en el
+                  ordenador.
+
+                  ES UNA BÚSQUEDA POR TEMA, NO UNA CATEGORÍA. Hoy nada une una
+                  publicación con un objetivo, así que estas pastillas buscan
+                  las palabras del objetivo dentro del título y el texto. Se
+                  dice en la pantalla cuando no encuentra nada, para que no
+                  parezca que «no hay nada de AGUA» cuando lo que pasa es que
+                  nadie lo ha escrito así. */}
+              <div className="sticky top-0 z-30 bg-white/95 backdrop-blur -mx-2 px-2 pt-1 pb-1.5">
+                <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <button
+                    onClick={() => setObjetivo(null)}
+                    className={cn('shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors',
+                      !objetivo ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                  >
+                    Todos
+                  </button>
+                  {OBJETIVOS.map(o => (
+                    <button
+                      key={o.id}
+                      onClick={() => setObjetivo(v => (v === o.id ? null : o.id))}
+                      title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
+                      className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
+                        objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                    >
+                      <o.icono className="w-3.5 h-3.5 shrink-0" />
+                      {o.titulo}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sticky top-10 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
                 <div className="relative flex-1 min-w-[140px] max-w-xs shrink-0">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                   <input
@@ -633,7 +687,9 @@ export default function Explorar() {
                 <div className="text-center py-24">
                   <LayoutGrid className="w-8 h-8 text-slate-300 mx-auto mb-3" />
                   <p className="text-sm text-slate-400">
-                    {carpetaActiva ? 'Esta carpeta está vacía. Arrastra una tarjeta hasta ella, o usa «Guardar en».'
+                    {objetivo
+                      ? `Ninguna publicación habla de ${(OBJETIVOS.find(o => o.id === objetivo)?.titulo || '').toLowerCase()} todavía.`
+                      : carpetaActiva ? 'Esta carpeta está vacía. Arrastra una tarjeta hasta ella, o usa «Guardar en».'
                       : busqueda ? `Nada sobre «${busqueda}».`
                         : modo === 'mias' ? 'Todavía no has publicado nada.' : 'Aún no hay publicaciones.'}
                   </p>

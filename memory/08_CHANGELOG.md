@@ -2962,3 +2962,41 @@ recognised icon on a screen and the word bought nothing — and moved next to th
 account. The avatar lost its chevron and its pill; the photo *is* the button,
 bigger (36 px) now that it does not share the space. Both names stay in
 `title`/`aria-label`, so a screen reader still says them.
+
+## 2026-08-21 — The 14 objectives across the top of Publicaciones
+
+Eugenio: «pon un submenú superior como el de YouTube donde aparezcan los 14
+objetivos uno al lado del otro y que se pueda hacer scroll lateral para verlos
+todos en móvil».
+
+One strip, one line, scrolling sideways: 1.665 px of chips inside 335 px of
+phone. Fourteen chips wrapping would be four rows of filters above the content
+— more filter than content.
+
+**It is a search by topic, not a category, and it is said that way.** Nothing
+today links a publication to an objective: that table does not exist. So the
+chips look for the objective's words in the title and body — «agua», «hídric»,
+«riego», «acuífer»… When one finds nothing it says «Ninguna publicación habla de
+agua todavía», so it never reads as «there is nothing about water» when what
+happened is that nobody wrote it that way. Calling it a category would be
+claiming a classification nobody made.
+
+Measured: AGUA takes 92 publications down to 4, and they are about water.
+
+The icon map lived inside `Objectives.tsx`. Needed in two places now, so it
+moved to `src/utils/objetivos.ts` and that page imports it — copying it would
+have left two lists that drift the day someone changes one icon.
+
+## 2026-08-21 — The bottom bar, reordered and tighter
+
+Eugenio: «haz más compacto el menú […] cambia la posición de buscar, y ponla en
+el centro, y la de crear donde estaba la de buscar. Cambia el icono de mensajes
+por el de dos personas […] que se vea que es red social. Y el de publicaciones,
+ponlo a la izquierda del todo y cámbialo por el icono de casa».
+
+Inicio · Proyectos · **buscar** · Red · Crear. Search takes the centre — the
+most repeated gesture belongs in the spot the thumb finds without looking — and
+creating moves to the edge, because it happens fewer times a day than asking.
+
+46 px instead of 52, with 18 px icons and smaller labels. Six pixels back to
+every page, on every screen.

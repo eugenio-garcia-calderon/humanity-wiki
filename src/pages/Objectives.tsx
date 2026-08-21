@@ -10,6 +10,7 @@ import { slugify } from '../utils/slugify';
 import { challengeLinkTo } from '../utils/entityLinks';
 import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { OBJETIVOS } from '../utils/objetivos';
 
 const typeLabels: Record<string, string> = {
   'planet': 'Mundo',
@@ -21,22 +22,12 @@ const typeLabels: Record<string, string> = {
   'aldea': 'Aldea'
 };
 
-const iconMap: Record<string, any> = {
-  'AGUA': Droplets,
-  'ALIMENTACIÓN': Wheat,
-  'VIVIENDA': HomeIcon,
-  'SALUD': HeartPulse,
-  'CONVIVENCIA': Users,
-  'ECOSISTEMAS': TreePine,
-  'EDUCACIÓN': GraduationCap,
-  'MOVILIDAD': Car,
-  'ENERGÍA': Zap,
-  'TECNOLOGÍA': Cpu,
-  'EMPLEO': Briefcase,
-  'GOBERNANZA': Landmark,
-  'ECONOMÍA': Coins,
-  'CULTURA': Palette,
-};
+// EL MAPA DE ICONOS SE FUE A `src/utils/objetivos.ts` (2026-08-21). Hacía
+// falta también en Publicaciones, y copiarlo habría dejado dos listas que se
+// separan el día que alguien cambie un icono en una sola de ellas.
+const iconMap: Record<string, any> = Object.fromEntries(
+  OBJETIVOS.map(o => [o.titulo, o.icono]),
+);
 
 const territoryTypes = ['country', 'region', 'municipality', 'comunidad_vecinos', 'aldea'];
 
