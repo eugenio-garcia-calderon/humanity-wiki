@@ -482,36 +482,11 @@ export default function Layout() {
           </button>
         )}
 
-        {/* ══ LA IA, EN LA BARRA Y NO FLOTANDO (B91, 2026-08-21) ═══════════
-            El botón de la IA era `fixed` abajo a la derecha, 56×56. En el
-            escritorio sobra sitio; en un teléfono de 375 px caía justo encima
-            del contenido. Medido en /personas: el botón en (295, 732) y
-            debajo, la etiqueta «PROYECTO» de la tarjeta del coche solar. En el
-            editor de páginas tapaba el texto del párrafo.
-
-            ES EL MISMO CASO QUE LA PASTILLA DEL MENÚ, y se resuelve igual,
-            porque la razón que se escribió entonces sigue siendo cierta:
-            «crecer 16 px una sola vez es un precio que se paga donde se ve;
-            tapar contenido es un precio que se paga a escondidas». Aquí ni
-            siquiera hay que crecer: la barra ya está y el botón cabe.
-
-            SOLO EN EL TELÉFONO. En el escritorio sigue flotando, donde nunca
-            ha estorbado y donde la esquina está vacía. */}
-        {user && esMovil && !isIAPage && (
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('ai:abrir'))}
-            title="Asistente de Humanity.wiki"
-            aria-label="Abrir el asistente de IA"
-            // DEL TAMAÑO DE UN DEDO. La barra mide 56 px en el teléfono, así
-            // que caben 44, que es lo que hay que tocar sin apuntar. Este
-            // proyecto ya tiene catalogado que 83 de cada 100 botones se
-            // quedan por debajo de 24 px; no se añade el 84.
-            className={cn('shrink-0 ml-auto grid place-items-center rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 text-white shadow-md shadow-emerald-500/25 transition-transform active:scale-95',
-              !menuPuesto ? 'w-11 h-11' : compacto ? 'w-7 h-7' : 'w-9 h-9')}
-          >
-            <Sparkles className={cn(!menuPuesto ? 'w-6 h-6' : compacto ? 'w-4 h-4' : 'w-5 h-5')} />
-          </button>
-        )}
+        {/* EL BOTÓN DE LA IA SE FUE DE AQUÍ (2026-08-21). Estuvo unas horas
+            en esta barra, mientras el chat era un panel que había que abrir.
+            Desde que el chat vive en un muelle SIEMPRE presente abajo, este
+            botón era la segunda puerta a una habitación con la puerta ya
+            abierta — y encima la de arriba, lejos del pulgar. */}
 
         {/* LA CUENTA, ARRIBA A LA DERECHA DEL TODO (Eugenio, 2026-08-20). Es
             donde la busca todo el mundo, y además es lo que hace visible de un
