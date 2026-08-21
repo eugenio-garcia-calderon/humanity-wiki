@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
@@ -126,6 +127,7 @@ export default function AIAssistant({ modo = 'panel' }: {
   const [status, setStatus] = useState<{ ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
+  const esMovil = useEsMovil();
   const [modelosAbierto, setModelosAbierto] = useState(false);
   /** El último intento que se rompió antes de llegar al modelo. Va en el
    *  contexto del siguiente mensaje para que la IA sepa que falló. */
@@ -248,6 +250,14 @@ export default function AIAssistant({ modo = 'panel' }: {
     };
     window.addEventListener('ai:prefill', onPrefill);
     return () => window.removeEventListener('ai:prefill', onPrefill);
+  }, []);
+
+  // Abrir desde fuera SIN escribir nada. Lo usa el botón de la barra en el
+  // teléfono (B91): el mismo asistente, otra puerta de entrada.
+  useEffect(() => {
+    const abrir = () => setOpen(true);
+    window.addEventListener('ai:abrir', abrir);
+    return () => window.removeEventListener('ai:abrir', abrir);
   }, []);
 
   useEffect(() => {
@@ -1176,8 +1186,15 @@ export default function AIAssistant({ modo = 'panel' }: {
   return (
     <>
       {/* Botón flotante permanente: se mantiene fijo aunque el panel esté
-          acoplado, ya que no forma parte de la columna con ancho real. */}
-      {!open && (
+          acoplado, ya que no forma parte de la columna con ancho real.
+
+          EN EL TELÉFONO NO SALE (B91, 2026-08-21): 56×56 flotando sobre una
+          pantalla de 375 px caían encima del contenido —medido en /personas,
+          tapando la etiqueta de una tarjeta, y en el editor tapando el texto—.
+          Ahí el botón vive en la barra de arriba, donde ocupa sitio de verdad
+          en vez de robárselo a la página. Lo pinta `Layout.tsx` y avisa por el
+          evento `ai:abrir`. */}
+      {!open && !esMovil && (
         <button
           onClick={() => setOpen(true)}
           title="Asistente de Humanity.wiki"

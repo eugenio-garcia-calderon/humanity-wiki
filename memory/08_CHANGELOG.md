@@ -2523,3 +2523,35 @@ Verified on a test page of my own, never on Eugenio's: the original text is
 recoverable from `previous`, three saves inside the window collapsed to one
 row, and after ageing that row past the window a second save produced a second
 row. The generic route still records history after the delegation.
+
+## 2026-08-21 — B91: the AI button stops covering content on a phone
+
+The assistant's button was `fixed` at the bottom right, 56×56. On a desktop
+there is room; on a 375 px phone it landed on top of the content. Measured on
+`/personas`: the button at (295, 732), and directly under it the «PROYECTO»
+label of a project card. In the page editor it covered paragraph text.
+
+**Same case as the menu pill, resolved the same way**, because the reason
+written down then is still true: «crecer 16 px una sola vez es un precio que se
+paga donde se ve; tapar contenido es un precio que se paga a escondidas». Here
+nothing even has to grow — the bar is already there and the button fits.
+
+On a phone it now lives in the top bar, taking real layout space, and opens the
+same assistant through a new `ai:abrir` event. On a desktop it still floats,
+where it has never been in the way.
+
+44×44, because the bar is 56 px tall on a phone and that is what a thumb hits
+without aiming. This project already has «83 of every 100 buttons under 24 px»
+catalogued; this is not number 84.
+
+### A limit of our own test browser, worth writing down
+
+The in-app browser does **not** emit `resize` or `matchMedia` `change` events
+when the viewport is changed programmatically — measured: `innerWidth` went
+375 → 1280 with 0 events on both listeners. So a component reading
+`useEsMovil` keeps the previous branch until the page is reloaded.
+
+This means **rotating a phone cannot be verified here**, by anyone. Reading the
+hook, the code is correct. A stale branch after a programmatic resize is the
+harness, not the product — and a reload at each size is the only honest way to
+check a responsive branch with these tools.
