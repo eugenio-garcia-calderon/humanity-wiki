@@ -5,3 +5,24 @@
    la plataforma entera y perder las ventanas abiertas. Se le quita a Chrome
    para poder dárselo a la ventana que toque. */
 html, body { overscroll-behavior-x: none; }
+
+/* ============================================================================
+   EL TIC DE «GUARDADO» (2026-08-22, Eugenio: «haz una animación chula y
+   elegante de refuerzo positivo cuando se dé a guardar»)
+   ============================================================================
+   Dos trazos que se DIBUJAN, no dos formas que aparecen. La diferencia importa:
+   algo que se dibuja se lee como una acción que acaba de completarse; algo que
+   aparece de golpe se lee como un aviso, y los avisos se cierran sin mirarlos.
+
+   Se hace con `stroke-dashoffset` porque anima en la tarjeta gráfica y no
+   provoca recálculo de la maqueta: en un teléfono flojo, una confirmación que
+   va a tirones es peor que ninguna. */
+@keyframes tic-circulo { to { stroke-dashoffset: 0; } }
+@keyframes tic-trazo   { to { stroke-dashoffset: 0; } }
+
+/* Quien haya pedido menos movimiento en su sistema ve el tic ya dibujado, sin
+   recorrido. La confirmación sigue estando; lo que se quita es el viaje. */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes tic-circulo { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
+  @keyframes tic-trazo   { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
+}

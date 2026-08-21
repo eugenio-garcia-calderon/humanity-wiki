@@ -1568,8 +1568,14 @@ export default function AIAssistant({ modo = 'panel' }: {
                 onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
                 title="Preguntar a la IA"
                 aria-label="Preguntar a la IA"
+                // SIN FONDO NEGRO (2026-08-22, Eugenio: «no pongas un fondo
+                // negro en el botón de buscar»). El negro se reserva para
+                // decir DÓNDE ESTÁS; si el de buscar lo lleva siempre, hay dos
+                // cosas negras a la vez y ninguna de las dos significa nada.
                 className={cn('justify-self-center rounded-full grid place-items-center transition-colors w-12 h-9 sm:w-11 sm:h-8',
-                  open && panelMuelle !== 'crear' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-emerald-600')}
+                  open && panelMuelle !== 'crear'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-emerald-700')}
               >
                 <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
               </button>
