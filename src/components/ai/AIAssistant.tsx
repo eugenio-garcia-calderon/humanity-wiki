@@ -153,6 +153,25 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
   const esMovil = useEsMovil();
+  // ══ EL MUELLE DE ABAJO (2026-08-21, Eugenio: «que crees un menú inferior de
+  //    lado a lado donde esté el chat de IA con capacidad de desplegarse hacia
+  //    arriba a 1/3 de pantalla […] y ahí tener el historial de chats a un
+  //    lado también»). ═════════════════════════════════════════════════════
+  //
+  // POR QUÉ ABAJO Y DE LADO A LADO: el chat era una columna a la derecha en el
+  // escritorio y un cajón a pantalla completa en el móvil — dos maquetas
+  // distintas para lo mismo. Abajo es una sola, y es donde la mano ya está en
+  // un teléfono.
+  //
+  // DOS ALTURAS, no un tamaño libre: cerrado es una barra donde escribir sin
+  // que tape nada; abierto ocupa un tercio de la pantalla, que es lo que se
+  // pidió y lo que deja ver la página de detrás mientras hablas. Se puede
+  // arrastrar el borde de arriba para cambiarlo, entre un cuarto y tres
+  // cuartos: menos de un cuarto no cabe una respuesta y más de tres cuartos ya
+  // es tapar la aplicación, que es lo que veníamos a evitar.
+  const [alturaMuelle, setAlturaMuelle] = useState(33);   // % de la pantalla
+  const [arrastrandoMuelle, setArrastrandoMuelle] = useState(false);
+  const [historialALaVista, setHistorialALaVista] = useState(false);
   const [modelosAbierto, setModelosAbierto] = useState(false);
   /** El último intento que se rompió antes de llegar al modelo. Va en el
    *  contexto del siguiente mensaje para que la IA sepa que falló. */
@@ -211,7 +230,6 @@ export default function AIAssistant({ modo = 'panel' }: {
   // ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde
   // enseñarlo. Se pide al abrir el cajón y después de cada respuesta, para
   // que la conversación de ahora aparezca en la lista con su título.
-  const [listaAbierta, setListaAbierta] = useState(false);
   const [historial, setHistorial] = useState<Array<{ id: string; title: string | null; message_count: number; updated_at: string }>>([]);
   const cargarHistorial = useCallback(() => {
     if (!user) { setHistorial([]); return; }
@@ -220,7 +238,7 @@ export default function AIAssistant({ modo = 'panel' }: {
       .then(j => setHistorial(Array.isArray(j) ? j : []))
       .catch(() => setHistorial([]));
   }, [user]);
-  useEffect(() => { if (listaAbierta) cargarHistorial(); }, [listaAbierta, cargarHistorial]);
+  useEffect(() => { if (open) cargarHistorial(); }, [open, cargarHistorial]);
 
   const olvidarConversacion = async (id: string) => {
     setHistorial(h => h.filter(c => c.id !== id));
@@ -671,7 +689,7 @@ export default function AIAssistant({ modo = 'panel' }: {
         return;
       }
       setConversationId(json.conversation_id);
-      if (listaAbierta) cargarHistorial();
+      cargarHistorial();
       // Juego Vital: el hilo pertenece al agente con el que se habla, y lo que
       // la IA propone crear (personas, proyectos) lo construye la página
       // llamando al backend con sus comprobaciones de rol.
@@ -1027,6 +1045,82 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Contenido del panel, compartido entre el acople de escritorio (columna
   // real junto al mapa) y el cajón a pantalla completa de móvil — solo se
   // monta uno de los dos a la vez, según `isDesktop`.
+  /** EL MUELLE LE DEJA SITIO A LA PÁGINA (2026-08-21). Un elemento fijo abajo
+   *  tapa lo que haya debajo, que es exactamente el fallo que se acaba de
+   *  arreglar con el botón de la IA (B91). Se publica la altura en una
+   *  variable de CSS y el armazón la usa como hueco al final del contenido, así
+   *  que la última fila de una tabla siempre se puede leer.
+   *
+   *  Va por variable y no por un estado compartido porque el armazón y el
+   *  asistente son hermanos, no padre e hijo: subir este número hasta el
+   *  ancestro común obligaría a repintar toda la aplicación en cada píxel del
+   *  arrastre. */
+  useEffect(() => {
+    const raiz = document.documentElement;
+    raiz.style.setProperty('--hueco-muelle', open ? `${alturaMuelle}vh` : '0px');
+    return () => raiz.style.setProperty('--hueco-muelle', '0px');
+  }, [open, alturaMuelle]);
+
+  /** Arrastrar el borde de arriba para cambiar la altura. Se escucha en la
+   *  ventana y no en el borde: si el ratón va más rápido que el repintado, el
+   *  puntero se sale del borde y el arrastre se quedaría colgado. */
+  useEffect(() => {
+    if (!arrastrandoMuelle) return;
+    const mover = (e: PointerEvent) => {
+      const pct = ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
+      setAlturaMuelle(Math.min(75, Math.max(25, pct)));
+    };
+    const soltar = () => setArrastrandoMuelle(false);
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+    // `pointercancel` también: en un teléfono, una llamada entrante o un gesto
+    // del sistema cancelan el puntero sin soltar, y sin esto el borde se
+    // quedaría pegado al dedo.
+    window.addEventListener('pointercancel', soltar);
+    return () => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+      window.removeEventListener('pointercancel', soltar);
+    };
+  }, [arrastrandoMuelle]);
+
+  /** La lista de conversaciones, para el lado del muelle. Es el MISMO dato que
+   *  el desplegable de la cabecera; lo que cambia es dónde se enseña. */
+  const listaHistorial = (
+    <div className="h-full overflow-y-auto">
+      <div className="px-3 py-2 flex items-center justify-between gap-2 border-b border-slate-100">
+        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Conversaciones</p>
+        <button onClick={() => { newConversation(); }} title="Nueva conversación"
+          className="p-1 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-white transition-colors">
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      {!user ? (
+        <p className="px-3 py-3 text-[11px] text-slate-400">Inicia sesión para guardar tus conversaciones.</p>
+      ) : historial.length === 0 ? (
+        <p className="px-3 py-3 text-[11px] text-slate-400">Todavía no hay conversaciones.</p>
+      ) : historial.map(c => (
+        <div key={c.id}
+          className={cn('group flex items-center gap-1 px-2 py-1.5 border-b border-slate-50 transition-colors',
+            c.id === conversationId ? 'bg-emerald-50' : 'hover:bg-white')}>
+          <button onClick={() => { cargarConversacion(c.id); setHistorialALaVista(false); }}
+            className="min-w-0 flex-1 text-left">
+            <span className="block text-[11px] font-bold text-slate-700 truncate">
+              {c.title || 'Sin título'}
+            </span>
+            <span className="block text-[9px] text-slate-400">
+              {c.message_count} {c.message_count === 1 ? 'mensaje' : 'mensajes'}
+            </span>
+          </button>
+          <button onClick={() => olvidarConversacion(c.id)} title="Quitar del historial"
+            className="p-1 rounded text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all">
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
   const panelBody = (
     <>
       {/* Cabecera: quién te habla, con qué modelo y DÓNDE ESTÁS. Ese último
@@ -1047,11 +1141,15 @@ export default function AIAssistant({ modo = 'panel' }: {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => setListaAbierta(v => !v)} title="Historial de conversaciones"
-                  className={cn('p-1.5 rounded-lg transition-colors', listaAbierta ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+                {/* En pantalla ancha el historial ya está a la izquierda del
+                    muelle, así que este botón solo hace falta en el teléfono,
+                    donde se abre encima. Dos botones para lo mismo a la vez
+                    sería enseñar dos puertas a la misma habitación. */}
+                <button onClick={() => setHistorialALaVista(v => !v)} title="Historial de conversaciones"
+                  className={cn('md:hidden p-1.5 rounded-lg transition-colors', historialALaVista ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
                   <MessageSquare className="w-4 h-4" />
                 </button>
-                <button onClick={() => { newConversation(); setListaAbierta(false); }} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
+                <button onClick={() => { newConversation(); setHistorialALaVista(false); }} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
                   <Plus className="w-4 h-4" />
                 </button>
                 <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
@@ -1068,32 +1166,12 @@ export default function AIAssistant({ modo = 'panel' }: {
             </p>
           </div>
 
-          {/* HISTORIAL */}
-          {listaAbierta && (
-            <div className="border-b border-slate-100 bg-white max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
-              {!user ? (
-                <p className="px-4 py-3 text-[11px] text-slate-400">Inicia sesión para guardar tus conversaciones.</p>
-              ) : historial.length === 0 ? (
-                <p className="px-4 py-3 text-[11px] text-slate-400">Todavía no hay conversaciones guardadas.</p>
-              ) : historial.map(c => (
-                <div key={c.id}
-                  className={cn('group flex items-center gap-2 px-4 py-2 border-b border-slate-50 last:border-0 transition-colors',
-                    c.id === conversationId ? 'bg-emerald-50' : 'hover:bg-slate-50')}>
-                  <button onClick={() => { cargarConversacion(c.id); setListaAbierta(false); }}
-                    className="flex-1 min-w-0 text-left">
-                    <p className="text-[12px] font-bold text-slate-700 truncate">{c.title || 'Sin título'}</p>
-                    <p className="text-[10px] text-slate-400">
-                      {c.message_count} mensajes · {new Date(c.updated_at).toLocaleDateString('es-ES')}
-                    </p>
-                  </button>
-                  <button onClick={() => olvidarConversacion(c.id)} title="Quitar del historial"
-                    className="shrink-0 p-1 rounded text-slate-300 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* EL DESPLEGABLE DEL HISTORIAL SE RETIRÓ (2026-08-21): ahora la
+              lista vive a un lado del muelle, fija en pantalla ancha y
+              deslizante en el teléfono. Tener las dos era enseñar dos puertas
+              a la misma habitación, y una de ellas empujaba la conversación
+              hacia abajo cada vez que se abría. */}
+
 
           {/* Configuración: permisos de edición */}
           {showSettings && (
@@ -1328,27 +1406,65 @@ export default function AIAssistant({ modo = 'panel' }: {
         </button>
       )}
 
-      {/* Escritorio: columna real acoplada junto al mapa, redimensionable y
-          con el ancho grabado en la cuenta del usuario. No se superpone: al
-          abrirse, empuja el contenido de <main> porque es un hermano flex
-          normal (ver Layout.tsx), no un elemento `fixed`. */}
-      {open && isDesktop && (
+      {/* ══ EL MUELLE ═══════════════════════════════════════════════════════
+          De lado a lado, pegado abajo, y SIEMPRE presente cuando el chat está
+          abierto: la misma maqueta en el teléfono y en el ordenador. Antes
+          eran dos —columna a la derecha en escritorio, cajón a pantalla
+          completa en móvil— y eran dos sitios donde arreglar lo mismo.
+
+          RESERVA SU SITIO EN LA PÁGINA. Un elemento fijo abajo tapa contenido,
+          que es el fallo que acabamos de arreglar con el botón de la IA (B91).
+          `Layout.tsx` lee esta misma altura y le deja hueco al final de la
+          página, así que nada queda debajo. */}
+      {open && (
         <div
           {...zonaSoltar}
-          className="relative h-full shrink-0 bg-white border-l border-slate-200 shadow-xl flex flex-col animate-in fade-in duration-150"
-          style={{ width: `${width}%` }}
+          className="fixed inset-x-0 bottom-0 z-[9998] flex flex-col bg-white border-t border-slate-200 shadow-2xl animate-in slide-in-from-bottom duration-200"
+          style={{ height: `${alturaMuelle}vh`, minHeight: 240 }}
         >
-          <ResizeHandle onMouseDown={startResize('left')} edge="left" active={dragging} />
-          {panelBody}
-          {avisoSoltar}
-        </div>
-      )}
+          {/* El borde de arriba se arrastra para cambiar la altura. Es una
+              barra de 10 px y no una línea de 1: en un dedo, una línea de un
+              píxel no se puede coger. */}
+          <div
+            onPointerDown={e => { e.preventDefault(); setArrastrandoMuelle(true); }}
+            title="Arrastra para cambiar la altura"
+            className={cn('h-2.5 shrink-0 cursor-ns-resize grid place-items-center touch-none',
+              arrastrandoMuelle ? 'bg-emerald-100' : 'hover:bg-slate-100')}
+          >
+            <span className="w-10 h-1 rounded-full bg-slate-300" />
+          </div>
 
-      {/* Móvil: un 20% de una pantalla estrecha es inutilizable, así que ahí
-          se mantiene como cajón a pantalla completa. */}
-      {open && !isDesktop && (
-        <div {...zonaSoltar} className="fixed inset-0 z-[9998] bg-white flex flex-col animate-in slide-in-from-right duration-200">
-          {panelBody}
+          <div className="flex-1 min-h-0 flex">
+            {/* EL HISTORIAL, A UN LADO. En pantalla ancha es una columna fija;
+                en un teléfono se abre encima, porque quitarle 200 px de ancho
+                a una pantalla de 375 dejaría la conversación en un canal. */}
+            <aside className="hidden md:flex w-52 shrink-0 flex-col border-r border-slate-100 bg-slate-50/60">
+              {listaHistorial}
+            </aside>
+            {historialALaVista && (
+              <>
+                {/* TOCAR FUERA LO CIERRA. Sin esto, la única salida era volver
+                    al mismo botón que lo abrió, que está DEBAJO del panel: se
+                    abría algo que tapaba su propio interruptor. */}
+                <button
+                  aria-label="Cerrar el historial"
+                  onClick={() => setHistorialALaVista(false)}
+                  className="md:hidden absolute inset-0 top-2.5 z-10 bg-slate-900/20"
+                />
+                <div className="md:hidden absolute inset-y-0 left-0 top-2.5 w-64 z-20 bg-white border-r border-slate-200 shadow-xl flex flex-col">
+                  <div className="flex-1 min-h-0">{listaHistorial}</div>
+                  <button
+                    onClick={() => setHistorialALaVista(false)}
+                    className="shrink-0 px-3 py-2 border-t border-slate-100 text-[11px] font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 inline-flex items-center gap-1.5"
+                  >
+                    <X className="w-3.5 h-3.5" /> Cerrar el historial
+                  </button>
+                </div>
+              </>
+            )}
+
+            <div className="flex-1 min-w-0 flex flex-col">{panelBody}</div>
+          </div>
           {avisoSoltar}
         </div>
       )}
