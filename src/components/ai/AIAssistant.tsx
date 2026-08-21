@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass} from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound} from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -112,12 +112,12 @@ function BotonMuelle({ icono: Icono, label, titulo, onClick }: {
       onClick={onClick}
       title={titulo}
       aria-label={titulo}
-      className="h-full flex flex-col items-center justify-center gap-0.5 text-slate-500 hover:text-emerald-700 transition-colors"
+      className="h-full flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-emerald-700 transition-colors"
     >
-      <Icono className="w-5 h-5" />
+      <Icono className="w-[18px] h-[18px]" />
       {/* En pantallas muy estrechas el texto de cinco botones no cabe: se
           queda el icono, que con el `title` sigue diciendo qué es. */}
-      <span className="text-[9px] font-bold hidden min-[360px]:block truncate max-w-full px-0.5">{label}</span>
+      <span className="text-[8px] font-bold hidden min-[360px]:block truncate max-w-full px-0.5 leading-none">{label}</span>
     </button>
   );
 }
@@ -208,8 +208,10 @@ export default function AIAssistant({ modo = 'panel' }: {
   // cuartos: menos de un cuarto no cabe una respuesta y más de tres cuartos ya
   // es tapar la aplicación, que es lo que veníamos a evitar.
   /** Lo que mide la barra cuando está cerrada. 52 px es una fila tocable con
-   *  el pulgar sin robarle sitio a la página. */
-  const ALTO_BARRA = 52;
+   *  el pulgar sin robarle sitio a la página. Se bajó de 52 a 46 px
+   *  (2026-08-21, Eugenio: «haz más compacto el menú de arriba») — el icono y
+   *  su nombre caben igual y la página gana 6 px en cada pantalla. */
+  const ALTO_BARRA = 46;
   /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
    *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
    *  hueco: con dos banderas podrían estar abiertos a la vez y taparse. */
@@ -1491,29 +1493,30 @@ export default function AIAssistant({ modo = 'panel' }: {
               que saber a cuál ir antes de poder empezar. */}
           {!open && (
             <nav className="flex-1 grid grid-cols-5 items-center">
-              {/* CINCO, Y EL «+» EN EL CENTRO. Con cinco huecos el central cae
-                  justo en el medio, que es donde tiene que estar lo que más se
-                  usa. Con cuatro habría quedado descentrado y con seis los
-                  botones bajarían de 44 px de ancho, que es el mínimo para un
-                  pulgar. */}
+              {/* EL ORDEN LO PIDIÓ EUGENIO Y TIENE SENTIDO DE LECTURA
+                  (2026-08-21): casa · proyectos · BUSCAR · mensajes · crear.
+                  Buscar va en el centro, que es el sitio del gesto más
+                  repetido, y ocupa el hueco grande porque preguntarle a la IA
+                  es la puerta principal de esta plataforma. Crear se va al
+                  extremo: se usa menos veces al día que buscar. */}
+              <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
+                onClick={() => navigate('/explorar')} />
               <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
                 onClick={() => navigate('/proyectos')} />
-              <BotonMuelle icono={Compass} label="Publicaciones" titulo="Ver las publicaciones"
-                onClick={() => navigate('/explorar')} />
 
               <button
-                onClick={() => { setOpen(true); setPanelMuelle('crear'); }}
-                title="Crear algo nuevo"
-                aria-label="Crear algo nuevo"
+                onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
+                title="Preguntar a la IA"
+                aria-label="Preguntar a la IA"
                 className="justify-self-center w-11 h-8 rounded-full bg-slate-900 text-white grid place-items-center hover:bg-emerald-600 transition-colors"
               >
-                <Plus className="w-5 h-5" />
+                <Search className="w-5 h-5" />
               </button>
 
-              <BotonMuelle icono={MessageSquare} label="Mensajes" titulo="Tus mensajes con personas"
+              <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
                 onClick={() => navigate('/mensajes')} />
-              <BotonMuelle icono={Search} label="Preguntar" titulo="Preguntar a la IA"
-                onClick={() => { setOpen(true); setPanelMuelle('chat'); }} />
+              <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
+                onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
             </nav>
           )}
 
