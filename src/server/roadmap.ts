@@ -80,6 +80,9 @@ export function registerRoadmapRoutes(app: Express, db: any) {
                r.vence_el,
                r.updated_at, r.created_at, r.proyecto_id,
                p.titulo AS proyecto_titulo, p.slug AS proyecto_slug, p.publico AS proyecto_publico,
+               -- El icono, para la portada (2026-08-22): sin él, los proyectos
+               -- de la página de inicio saldrian sin cara.
+               p.icono AS proyecto_icono,
                p.creador_user_id AS proyecto_creador,
                u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
                ag.nombre AS responsable_nombre, ag.foto_url AS responsable_foto
@@ -109,6 +112,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
             titulo: t.proyecto_titulo || 'Hoja de ruta de humanity.wiki',
             url: t.proyecto_slug ? `/proyectos/${t.proyecto_slug}` : '/vision',
             publico: t.proyecto_id ? !!t.proyecto_publico : true,
+            icono: t.proyecto_icono || null,
             mio: !!yo && t.proyecto_creador === yo,
             tareas: [],
           });
