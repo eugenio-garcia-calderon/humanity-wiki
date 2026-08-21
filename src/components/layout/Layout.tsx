@@ -590,7 +590,16 @@ export default function Layout() {
             maximizada tapa la página, pero nunca el panel del asistente, que
             es la columna de al lado. */}
         <div className="flex-1 flex flex-col relative min-w-0">
-          <main key={updateCounter} className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}>
+          {/* EL HUECO DEL MUELLE DE LA IA (2026-08-21). El chat vive pegado
+              abajo y es `fixed`, así que sin esto taparía el final de cada
+              página — la última fila de una tabla, el último párrafo. La
+              altura la publica `AIAssistant` en `--hueco-muelle` y vale 0
+              cuando el chat está cerrado, así que en reposo no cuesta nada. */}
+          <main
+            key={updateCounter}
+            style={{ paddingBottom: 'var(--hueco-muelle, 0px)' }}
+            className={`flex-1 flex flex-col overflow-y-auto bg-white relative min-w-0 ${fullBleed ? '' : 'p-4 sm:p-8'}`}
+          >
             <div className={fullBleed ? 'w-full h-full' : 'max-w-7xl mx-auto w-full'}>
               <Outlet />
             </div>

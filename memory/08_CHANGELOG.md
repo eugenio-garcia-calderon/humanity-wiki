@@ -2784,3 +2784,36 @@ a graph of my own — `previous` holds the old title, `snapshot` the new one.
 click cycles alta → media → baja. You could filter by priority and not set it,
 which is half a tool. And «media» was never painted, so on your own task there
 was nothing to click — now there always is, faded until you hover.
+
+## 2026-08-21 — The AI moves to a dock along the bottom
+
+Eugenio: «que crees un menú inferior de lado a lado donde esté el chat de IA con
+capacidad de desplegarse hacia arriba a 1/3 de pantalla, vigilando que en
+versión móvil sea útil, y ahí tener el historial de chats a un lado».
+
+The chat used to be **two different layouts for the same thing**: a resizable
+column on the right on desktop, a full-screen drawer on mobile. Two places to
+fix the same bug. Now it is one dock along the bottom, edge to edge, on both.
+
+- **A third of the screen**, measured: 0,33 on a 1280×800 desktop and 0,33 on a
+  375×812 phone. Drag the top edge to change it, between a quarter and three
+  quarters — under a quarter an answer does not fit, over three quarters you are
+  covering the app, which is what this came to avoid.
+- **The history lives to one side**, as asked. A fixed 208 px column from 768 px
+  up; on a phone it slides over, because taking 200 px of width from a 375 px
+  screen would leave the conversation in a gutter.
+- **It closes by tapping outside**, and has its own «Cerrar el historial». The
+  first version could only be closed with the same button that opened it — and
+  that button sits *underneath* the panel. It opened something that covered its
+  own switch.
+- **The old dropdown is gone.** Two doors to the same room, and one of them
+  pushed the conversation down every time it opened.
+
+**And it reserves its own space.** A fixed element at the bottom covers what is
+under it — the exact bug fixed hours earlier with the AI button (B91). The dock
+publishes its height in `--hueco-muelle` and the layout leaves that much room at
+the end of the page, so the last row of a table stays readable. Measured: 235 px
+of padding on `main` with the dock open, 0 with it closed.
+
+Verified end to end: sending a message from inside the dock got an answer with
+its cost line, at both widths.

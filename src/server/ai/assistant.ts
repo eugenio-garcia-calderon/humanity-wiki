@@ -34,6 +34,43 @@ export const EDIT_MODES = {
   AUTO: 'autonomo',     // aplica directamente lo que su rol le permita
 } as const;
 
+/**
+ * LA FECHA QUE MANDA EL MODELO, VALIDADA AQUÍ (2026-08-21).
+ *
+ * Se acepta «2026-09-01», y también «hoy», «mañana» y «en 5 días», porque es
+ * como se pide un plazo hablando. Lo que NO se acepta es cualquier otra cosa:
+ * si no se entiende se devuelve el motivo y quien llama lo dice en voz alta,
+ * en vez de guardar una fecha inventada. Un plazo equivocado es peor que
+ * ninguno: uno te deja tranquilo el día que tenías que entregar.
+ */
+export function fechaPedida(v: any): { fecha: string | null; error?: string } | undefined {
+  if (v === null) return { fecha: null };            // «quítale el plazo»
+  if (typeof v !== 'string' || !v.trim()) return undefined;
+  const t = v.trim().toLowerCase();
+  const dia = (n: number) => {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+    // Que la fecha EXISTA: «2026-02-31» encaja con el patrón y no es un día.
+    const d = new Date(t + 'T12:00:00');
+    if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== t) {
+      return { fecha: null, error: `«${v}» no es una fecha que exista.` };
+    }
+    return { fecha: t };
+  }
+  if (t === 'hoy') return { fecha: dia(0) };
+  if (t === 'manana' || t === 'mañana') return { fecha: dia(1) };
+  if (t === 'pasado manana' || t === 'pasado mañana') return { fecha: dia(2) };
+  const enDias = t.match(/^en (\d{1,3}) d[ií]as?$/);
+  if (enDias) return { fecha: dia(Number(enDias[1])) };
+  const enSemanas = t.match(/^en (\d{1,2}) semanas?$/);
+  if (enSemanas) return { fecha: dia(Number(enSemanas[1]) * 7) };
+  return { fecha: null, error: `No he entendido «${v}» como fecha, así que va sin plazo.` };
+}
+
 /** Acciones que el agente sabe ejecutar, con el nivel mínimo que exigen. */
 const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; description: string }> = {
   CREATE_PUBLICATION: { minLevel: ROLE.USER,      entity: 'publications', description: 'Crear una publicación' },
@@ -466,11 +503,15 @@ LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando l
 · CREATE_TAREA — «añade una tarea a X», «apúntame que hay que…». Parámetros:
   titulo (obligatorio), proyecto (el NOMBRE del proyecto, tal cual lo diga),
   resumen, grupo (la etiqueta), responsable (el nombre de una persona suya),
-  estado (por_hacer | en_curso | hecho), prioridad (alta | media | baja).
+  estado (por_hacer | en_curso | hecho), prioridad (alta | media | baja),
+  vence (cuándo hay que tenerla: «2026-09-01», «hoy», «mañana», «en 5 días»).
   Sin «proyecto» la tarea queda suelta; si nombra un proyecto que no existe,
-  el servidor te lo dirá y entonces se lo cuentas.
-· UPDATE_TAREA — «marca X como hecha», «pon en curso lo del baño». Parámetros:
-  tarea (parte del título basta), estado, prioridad, titulo_nuevo, resumen.
+  el servidor te lo dirá y entonces se lo cuentas. Pon «vence» SOLO si te dan
+  un plazo: no te lo inventes, que una fecha equivocada deja tranquilo a
+  alguien el día que tenía que entregar.
+· UPDATE_TAREA — «marca X como hecha», «pon en curso lo del baño», «ponle
+  plazo el viernes». Parámetros: tarea (parte del título basta), estado,
+  prioridad, titulo_nuevo, resumen, vence (mismo formato; null lo quita).
 · CREATE_PROYECTO — titulo (obligatorio), descripcion, publico (true/false).
 · CREATE_PAGINA — titulo (obligatorio), texto (el contenido inicial).
 
@@ -1566,13 +1607,18 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           }
 
           const id = newId('RM');
+          // EL PLAZO, ENTENDIDO AQUÍ Y NO POR EL MODELO. Si manda algo que no
+          // es una fecha, la tarea se crea igual y se DICE que va sin plazo,
+          // en vez de guardar un día inventado.
+          const plazo = fechaPedida(params.vence);
           await db.execute(sql`
             INSERT INTO roadmap_items (id, grupo, titulo, resumen, estado, prioridad, autor_user_id,
-                                       bloques, orden, proyecto_id, responsable_agente_id, created_by, updated_by)
+                                       bloques, orden, proyecto_id, responsable_agente_id, vence_el, created_by, updated_by)
             VALUES (${id}, ${grupo}, ${titulo.slice(0, 300)}, ${params.resumen || null},
                     ${ESTADOS.has(String(params.estado)) ? String(params.estado) : 'por_hacer'},
                     ${PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : 'media'},
-                    ${actorId}, '[]'::jsonb, 0, ${proyectoId}, ${responsable}, ${actorId}, ${actorId})
+                    ${actorId}, '[]'::jsonb, 0, ${proyectoId}, ${responsable},
+                    ${plazo?.fecha ?? null}::date, ${actorId}, ${actorId})
           `);
           // Se devuelve lo GUARDADO, no lo pedido: la ficha tiene que enseñar
           // la realidad. Pedir «Marketing» y que la ficha ponga «Marketing»
@@ -1580,9 +1626,12 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           // perseguimos, cometido por la propia ficha.
           return {
             ok: true, entityId: id, entityType: 'roadmap_items',
-            aviso: avisoGrupo || undefined,
+            // Dos avisos posibles —el grupo y el plazo— y los dos importan:
+            // quedarse con uno escondería el otro.
+            aviso: [avisoGrupo, plazo?.error].filter(Boolean).join(' ') || undefined,
             guardado: {
               proyecto: proyectoTitulo || undefined,
+              vence: plazo?.fecha || undefined,
               // La ETIQUETA, nunca el identificador (2026-08-21). El id de
               // «Diseño» es «diseno», y enseñarlo capitalizado pone «Diseno»
               // sin tilde en la ficha. Misma familia que los «pagina» y
@@ -1609,16 +1658,28 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           const tid = (t.rows[0] as any).id;
           const estado = ESTADOS.has(String(params.estado)) ? String(params.estado) : null;
           const prioridad = PRIORIDADES.has(String(params.prioridad)) ? String(params.prioridad) : null;
+          const plazo = fechaPedida(params.vence);
+          // TRES CASOS, NO DOS: no lo toques / ponle esta fecha / quítalo. Se
+          // resuelve fuera de la consulta porque «dejarlo como está» no es un
+          // valor, es no escribir la columna.
+          const trozoPlazo = plazo === undefined
+            ? sql``
+            : sql`vence_el = ${plazo.fecha}::date,`;
           await db.execute(sql`
             UPDATE roadmap_items SET
               titulo    = COALESCE(${params.titulo_nuevo ?? null}, titulo),
               resumen   = COALESCE(${params.resumen ?? null}, resumen),
               estado    = COALESCE(${estado}, estado),
               prioridad = COALESCE(${prioridad}, prioridad),
+              ${trozoPlazo}
               updated_at = now(), updated_by = ${actorId}
             WHERE id = ${tid}
           `);
-          return { ok: true, entityId: tid, entityType: 'roadmap_items' };
+          return {
+            ok: true, entityId: tid, entityType: 'roadmap_items',
+            aviso: plazo?.error || undefined,
+            guardado: plazo?.fecha ? { vence: plazo.fecha } : undefined,
+          };
         }
 
         case 'CREATE_PROYECTO': {
