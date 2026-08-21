@@ -557,9 +557,44 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
   // ==========================================================================
   // 2. CONVERSACIÓN
   // ==========================================================================
-  app.get('/api/ai/status', (_req: Request, res: Response) => {
+  /**
+   * EL TAMAÑO DE UNA PETICIÓN TÍPICA, para poder estimar lo que cuesta cada
+   * modelo ANTES de elegirlo (2026-08-21, Eugenio: «en el listado para elegir
+   * el modelo de IA no aparece el coste estimado de las peticiones»).
+   *
+   * SALE DE LO QUE DE VERDAD HA PASADO, no de una cifra inventada. Primero se
+   * miran las peticiones DE ESTA PERSONA; si aún no tiene bastantes, las de la
+   * plataforma; y si la base está vacía, un tamaño declarado. Se devuelve
+   * SIEMPRE de dónde viene, porque «tu media» y «una suposición» son dos cosas
+   * distintas y la pantalla tiene que poder decir cuál está enseñando.
+   */
+  const tamanoTipico = async (userId: string | null) => {
+    const medir = async (donde: any) => {
+      const r = await db.execute(sql`
+        SELECT avg(input_tokens)::float AS entrada, avg(output_tokens)::float AS salida, count(*)::int AS n
+        FROM ai_usage_charges
+        WHERE kind = 'chat' AND created_at > now() - interval '30 days' ${donde}
+      `);
+      return r.rows[0] as any;
+    };
+    try {
+      if (userId) {
+        const mio = await medir(sql`AND user_id = ${userId}`);
+        // Con menos de tres llamadas la media es la de una sola conversación
+        // rara, no la de cómo escribe esta persona.
+        if (mio && mio.n >= 3) return { entrada: Math.round(mio.entrada), salida: Math.round(mio.salida), origen: 'tuyo' as const, n: mio.n };
+      }
+      const todos = await medir(sql``);
+      if (todos && todos.n >= 3) return { entrada: Math.round(todos.entrada), salida: Math.round(todos.salida), origen: 'plataforma' as const, n: todos.n };
+    } catch { /* si falla la consulta se cae al tamaño declarado */ }
+    // Nada que medir todavía: se declara el supuesto en vez de callarlo.
+    return { entrada: 5000, salida: 500, origen: 'supuesto' as const, n: 0 };
+  };
+
+  app.get('/api/ai/status', async (req: Request, res: Response) => {
     const provider = (() => { try { return getProvider(); } catch { return null; } })();
     res.json({
+      tamanoTipico: await tamanoTipico(req.user?.id || null),
       ready: !!provider?.isReady(),
       providers: listProviders(),
       // Mensaje explícito para que quede claro por qué no responde.

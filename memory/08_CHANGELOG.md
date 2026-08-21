@@ -2613,3 +2613,112 @@ without being able to store a task in a made-up place.
 
 Long messages (over 300 characters), PDFs and web search stay with Claude: the
 battery says nothing about those because it did not measure them.
+## 2026-08-21 — User databases, layer 1: columns that know what they hold
+
+Until today there was no user database. There were pages with blocks and a
+board with 18 fields written into the code, and the editor's "table" block is
+plain text — nothing in it knows that 620 is a number, so it cannot be summed,
+sorted, compared or validated. This is the first of three layers: types, then
+relations, then formulas and aggregates.
+
+Three tables — `bd_tablas`, `bd_columnas`, `bd_filas` — and `src/server/bd.ts`.
+Five column types and no more: text, number, date, single select, checkbox. The
+criterion for choosing them was not "the most used" but the ones that change
+what the system can **calculate or validate**; email, phone and link are text
+with an icon and a regex, and they block nobody.
+
+### The decisions that cannot be changed afterwards
+
+**A column is identified by its `id`, never by its name**, and so is every
+option of a select. Cells are stored as `{"<column id>": value}`. The case that
+settles it comes from the acceptance criterion: in the solar shipyard a
+"Sentido" column with options "Mayor mejor" / "Menor mejor" decides which
+direction a trial is compared in. If an option were identified by its text,
+renaming it would silently invert a verdict — a wrong figure presented as a
+right one, which is the worst failure this layer can have. Verified: renaming
+both a column and an option left every stored value untouched.
+
+**Column definitions are real rows, not jsonb.** Migration 0049 stores the
+board's columns as jsonb and is right to: they are three labels that only mean
+something inside their project and are never queried on their own. This is the
+opposite case — these definitions are queried across rows, need identity, and
+will be referenced by formulas. The *values* do go in jsonb, because a row's
+cells are always read together.
+
+**A row has a body from day one** (`pagina_id`). Each supplier in the shipyard
+is a page holding its contract and its minutes, and that is half the value. If
+rows ship as "cells only", giving them a body later means migrating data that
+already belongs to users.
+
+**Values are stored typed.** `"620,50"` is stored as the number `620.5`, a date
+as ISO text. Not "everything as a string, we will convert later": that leaves
+layer 3 guessing types on every read, and a parser where there should be a sum.
+
+**A cell is never a bare `null` on the way out.** It is always labelled —
+`vacia`, `ok`, `sin_calcular`, `error`. Only the first two can occur today, and
+the contract still ships with all four: adding the other two later would mean
+changing every client already written against layer 1. Emptying a cell is also
+distinct from storing a zero.
+
+**Permissions are asked of the containing project, never of the table or the
+row**, the same shape as `archivo.ts`, so two contradicting truths about who
+sees what cannot exist.
+
+### Deliberately absent
+
+Relations, formulas, aggregates, saved views, saved sort and filter, multi
+select, person and file columns. All cheap once this model exists and expensive
+before it. When relations arrive there will be **one generic links table**, not
+one per relation: `CLAUDE.md` forbids new junction tables (43 of 115 already)
+and a relation layer is literally a junction-table generator. Stored once, with
+an index on both sides, and the reverse direction is a query — never a second
+row that can contradict the first.
+
+### The model was tested on paper before the migration
+
+Can it express `roadmap_items`, the board's 18 fixed fields? Fifteen of the
+eighteen in layer 1; the three that remain — author, project, assignee — are
+relations, which is exactly layer 2, and nothing here blocks them.
+
+### Verified against the running API
+
+Five types created and an invented one refused. Writing "seiscientos" into a
+number fails with the column named rather than storing a zero; a malformed date
+and an option that does not exist fail the same way, and a failing cell aborts
+the whole write so half a row is never saved. No session reads nothing and
+writes nothing. Deleting a row goes to the 15-day bin. History goes through
+`historial.ts` rather than a second way of writing it. All test data removed
+afterwards.
+
+
+## 2026-08-21 — The model picker says what each request will cost
+
+Eugenio: «en el listado para elegir el modelo de IA no aparece el coste
+estimado de las peticiones, soluciónalo».
+
+The list said «gratis» or «incluido». That answers *«will I be charged?»*, not
+*«what is this worth?»* — two different questions, and choosing a model needs
+both. The catalogue already held prices, but in cents per **million** tokens,
+which is a unit nobody can picture: «300» looks nothing like the cost of asking
+a question.
+
+Each row now shows what one of **your** requests would cost with that model:
+
+    Rápido        ≈ 0,127 ¢     gratis para ti
+    Equilibrado   ≈ 0,313 ¢     gratis para ti
+    Sonnet 5      ≈ 3,03 ¢      incluido
+    Fable 5       ≈ 10,11 ¢     incluido
+
+An 80× spread that was invisible a moment ago.
+
+**The estimate comes from what actually happened, not from a made-up figure.**
+`/api/ai/status` measures the average size of a chat request over the last 30
+days: this person's own first, the platform's if they have fewer than three (a
+mean over one odd conversation is not how someone writes), and a declared
+assumption only if the table is empty. It always returns *where the number came
+from*, and the picker says so underneath — «Calculado sobre tus 140 últimas
+peticiones (~8.418 de entrada y 339 de salida)». A figure that cannot say what
+it was computed on is indistinguishable from an invented one.
+
+Marked «≈» on purpose: the real cost depends on how much the model answers and
+how well the cache hits. The exact, measured figure is the one under each reply.
