@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { avisar, duenoDe, avisarMenciones } from './avisos';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { aiReplyToComment } from './knowledge.js';
@@ -297,6 +298,33 @@ export function registerSocialRoutes(app: Express, db: any) {
       `);
       res.json(row.rows[0]);
 
+      // AVISAR (2026-08-21). Va DESPUÉS de responder y sin `await` en el
+      // camino de la respuesta: quien comenta no tiene que esperar a que
+      // suene la campana de otro.
+      const padre = (req.body || {}).parent_comment_id || null;
+      void (async () => {
+        if (padre) {
+          // Responder avisa a quien escribió el comentario, no al dueño de la
+          // publicación: son dos conversaciones distintas.
+          await avisar(db, {
+            paraQuien: await duenoDe(db, 'comments', padre), dePartede: req.user!.id,
+            tipo: 'respuesta', entidadTipo: 'publications', entidadId: req.params.id,
+            datos: { comentario: id, texto: String(body).slice(0, 140) },
+          });
+        } else {
+          await avisar(db, {
+            paraQuien: await duenoDe(db, 'publications', req.params.id), dePartede: req.user!.id,
+            tipo: 'comentario', entidadTipo: 'publications', entidadId: req.params.id,
+            datos: { comentario: id, texto: String(body).slice(0, 140) },
+          });
+        }
+        await avisarMenciones(db, {
+          texto: String(body), dePartede: req.user!.id,
+          entidadTipo: 'publications', entidadId: req.params.id,
+          datos: { comentario: id, texto: String(body).slice(0, 140) },
+        });
+      })();
+
       // La IA de Conocimiento responde también en el Muro (en segundo plano).
       if (req.user!.id !== 'U_IA_CONOCIMIENTO') {
         void aiReplyToComment(db, {
@@ -348,6 +376,14 @@ export function registerSocialRoutes(app: Express, db: any) {
         VALUES (${req.user!.id}, ${entity_type}, ${entity_id}, ${kind})
       `);
       res.json({ reacted: true });
+      // Solo al PONER la reacción, nunca al quitarla: «a alguien ya no le
+      // gusta lo tuyo» no es una noticia que nadie quiera recibir.
+      void (async () => {
+        await avisar(db, {
+          paraQuien: await duenoDe(db, entity_type, entity_id), dePartede: req.user!.id,
+          tipo: 'reaccion', entidadTipo: entity_type, entidadId: entity_id, datos: { kind },
+        });
+      })();
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -427,6 +463,12 @@ export function registerSocialRoutes(app: Express, db: any) {
       }
       await db.execute(sql`INSERT INTO saves (user_id, entity_type, entity_id) VALUES (${req.user!.id}, ${entity_type}, ${entity_id})`);
       res.json({ saved: true });
+      void (async () => {
+        await avisar(db, {
+          paraQuien: await duenoDe(db, entity_type, entity_id), dePartede: req.user!.id,
+          tipo: 'guardado', entidadTipo: entity_type, entidadId: entity_id,
+        });
+      })();
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -456,9 +498,135 @@ export function registerSocialRoutes(app: Express, db: any) {
         VALUES (${req.user!.id}, ${entity_type}, ${entity_id})
       `);
       res.json({ following: true });
+      // Solo cuando se sigue a una PERSONA: seguir un reto o un indicador no
+      // tiene a quién avisar.
+      if (entity_type === 'users') {
+        void avisar(db, {
+          paraQuien: entity_id, dePartede: req.user!.id,
+          tipo: 'seguidor', entidadTipo: 'users', entidadId: req.user!.id,
+        });
+      }
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LO QUE LE FALTABA A LA RED SOCIAL (2026-08-21)
+  // ══════════════════════════════════════════════════════════════════════════
+  // Se podía comentar, responder, reaccionar, guardar, seguir y denunciar. No
+  // se podía: corregir un comentario, borrarlo, reaccionar a un comentario,
+  // ver quién sigue a quién, ver lo que has guardado, ni saber cuántos avisos
+  // tienes sin leer. Todo eso son cosas que la gente da por hechas y cuya
+  // ausencia no se reporta como fallo: simplemente se deja de usar.
+
+  /** Corregir un comentario propio. Una errata no debería obligar a borrar y
+   *  volver a escribir, que además pierde las respuestas colgadas debajo. */
+  app.put('/api/comments/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const body = String((req.body || {}).body || '').trim();
+      if (!body) return res.status(400).json({ error: 'El comentario no puede quedar vacío.' });
+      const c = await db.execute(sql`SELECT author_user_id FROM comments WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!c.rows.length) return res.status(404).json({ error: 'Ese comentario no existe.' });
+      // Un administrador puede BORRAR lo de otro, pero no reescribirlo: poner
+      // palabras en boca de alguien no es moderar.
+      if ((c.rows[0] as any).author_user_id !== req.user!.id) {
+        return res.status(403).json({ error: 'Solo quien lo escribió puede editarlo.' });
+      }
+      await db.execute(sql`
+        UPDATE comments SET body = ${body}, updated_at = now(), updated_by = ${req.user!.id},
+                            version = coalesce(version, 1) + 1
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, body, editado: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quitar un comentario. Se ARCHIVA (regla 6 de la Constitución): las
+   *  respuestas que cuelgan de él siguen existiendo y no se quedan huérfanas. */
+  app.delete('/api/comments/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const c = await db.execute(sql`SELECT author_user_id FROM comments WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!c.rows.length) return res.status(404).json({ error: 'Ese comentario no existe.' });
+      const suyo = (c.rows[0] as any).author_user_id === req.user!.id;
+      if (!suyo && (req.user!.roleLevel ?? 0) < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Solo quien lo escribió o un administrador pueden quitarlo.' });
+      }
+      await db.execute(sql`UPDATE comments SET archived_at = now() WHERE id = ${req.params.id}`);
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quién sigue a alguien, y a quién sigue. Dos listas que toda red social
+   *  tiene y que aquí solo existían como un número en el perfil. */
+  app.get('/api/users/:id/seguidores', async (req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto, f.created_at
+        FROM follows f JOIN users u ON u.id = f.follower_user_id
+        WHERE f.entity_type = 'users' AND f.entity_id = ${req.params.id}
+        ORDER BY f.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get('/api/users/:id/siguiendo', async (req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto, f.created_at
+        FROM follows f JOIN users u ON u.id = f.entity_id
+        WHERE f.entity_type = 'users' AND f.follower_user_id = ${req.params.id}
+        ORDER BY f.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Lo que has guardado. Se podía guardar y no había forma de volver a
+   *  encontrarlo: exactamente el mismo defecto que tenían los archivos. */
+  app.get('/api/guardados', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const rows = await db.execute(sql`
+        SELECT s.entity_type, s.entity_id, s.created_at,
+               coalesce(p.title, w.title, g.title, m.title) AS titulo,
+               coalesce(u1.display_name, u2.display_name, u3.display_name, u4.display_name) AS autor
+        FROM saves s
+        LEFT JOIN publications p      ON s.entity_type = 'publications'      AND p.id = s.entity_id AND p.archived_at IS NULL
+        LEFT JOIN knowledge_windows w ON s.entity_type = 'knowledge_windows' AND w.id = s.entity_id AND w.archived_at IS NULL
+        LEFT JOIN knowledge_graphs g  ON s.entity_type = 'knowledge_graphs'  AND g.id = s.entity_id AND g.archived_at IS NULL
+        LEFT JOIN user_maps m         ON s.entity_type = 'user_maps'         AND m.id = s.entity_id AND m.archived_at IS NULL
+        LEFT JOIN users u1 ON u1.id = p.author_user_id
+        LEFT JOIN users u2 ON u2.id = w.creator_user_id
+        LEFT JOIN users u3 ON u3.id = g.creator_user_id
+        LEFT JOIN users u4 ON u4.id = m.creator_user_id
+        WHERE s.user_id = ${req.user!.id}
+        ORDER BY s.created_at DESC LIMIT 100
+      `);
+      // LO QUE YA NO EXISTE SE DICE, no se esconde. Si guardaste algo y quien
+      // lo escribió lo archivó, la fila sigue aquí con `titulo` a null: la
+      // pantalla puede decir «ya no está» en vez de enseñar un hueco.
+      res.json(rows.rows.map((r: any) => ({ ...r, existe: !!r.titulo })));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quién ha reaccionado a algo. «12 apoyos» sin poder ver quiénes es un
+   *  número; con la lista es gente. */
+  app.get('/api/reacciones', async (req: Request, res: Response) => {
+    try {
+      const { entity_type, entity_id } = req.query as any;
+      if (!entity_type || !entity_id) return res.status(400).json({ error: 'Faltan entity_type y entity_id.' });
+      const rows = await db.execute(sql`
+        SELECT r.kind, u.id, u.display_name AS nombre, u.avatar_url AS foto, r.created_at
+        FROM reactions r LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.entity_type = ${entity_type} AND r.entity_id = ${entity_id}
+        ORDER BY r.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   app.get('/api/notifications', async (req: Request, res: Response) => {
@@ -474,9 +642,32 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  /** Cuántos sin leer. Es lo único que la campana necesita saber, y pedir las
+   *  50 notificaciones enteras cada minuto para contarlas sería traerse una
+   *  lista para mirar un número. */
+  app.get('/api/notifications/sin-leer', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.json({ n: 0 });
+      const r = await db.execute(sql`
+        SELECT count(*)::int AS n FROM notifications WHERE user_id = ${req.user.id} AND read_at IS NULL
+      `);
+      res.json({ n: (r.rows[0] as any).n });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   app.post('/api/notifications/read', async (req: Request, res: Response) => {
     try {
       if (!requireAuth(req, res)) return;
+      // Con `id` se marca UNA; sin él, todas. Marcar todas al abrir la campana
+      // haría desaparecer las que no has llegado a leer.
+      const uno = (req.body || {}).id;
+      if (uno) {
+        await db.execute(sql`
+          UPDATE notifications SET read_at = now()
+          WHERE id = ${Number(uno)} AND user_id = ${req.user!.id} AND read_at IS NULL
+        `);
+        return res.json({ success: true });
+      }
       await db.execute(sql`UPDATE notifications SET read_at = now() WHERE user_id = ${req.user!.id} AND read_at IS NULL`);
       res.json({ success: true });
     } catch (e: any) {

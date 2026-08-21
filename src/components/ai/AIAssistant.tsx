@@ -104,20 +104,34 @@ const segundos = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixe
  *  bloque serían cinco sitios donde arreglar el mismo detalle. El icono es
  *  SIEMPRE el mismo que usa esa sección en el menú lateral — si la misma cosa
  *  lleva dos caras, parecen dos destinos. */
-function BotonMuelle({ icono: Icono, label, titulo, onClick }: {
-  icono: any; label: string; titulo: string; onClick: () => void;
+function BotonMuelle({ icono: Icono, label, titulo, onClick, activo }: {
+  icono: any; label: string; titulo: string; onClick: () => void; activo?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       title={titulo}
       aria-label={titulo}
-      className="h-full flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-emerald-700 transition-colors"
+      aria-current={activo ? 'page' : undefined}
+      className="h-full flex flex-col items-center justify-center gap-0.5 group"
     >
-      <Icono className="w-[18px] h-[18px]" />
+      {/* DÓNDE ESTÁS, EN NEGRO (2026-08-21, Eugenio: «que se resalte sobre
+          fondo negro solo aquel icono donde estés navegando»). Una barra de
+          cinco destinos sin marcar cuál es el de ahora obliga a mirar el
+          contenido para saber dónde estás. El fondo va SOLO en el icono y no
+          en toda la columna: una pastilla del ancho del botón sería una barra
+          de cinco cuadrados. */}
+      <span className={cn('grid place-items-center rounded-full transition-colors',
+        // +25% en el móvil (Eugenio): 22 px de icono en 34 de caja. Por encima
+        // de 640 px se queda en el tamaño de antes, donde el ratón apunta solo.
+        'w-[34px] h-[34px] sm:w-8 sm:h-8',
+        activo ? 'bg-slate-900 text-white' : 'text-slate-500 group-hover:bg-slate-100 group-hover:text-emerald-700')}>
+        <Icono className="w-[22px] h-[22px] sm:w-[18px] sm:h-[18px]" />
+      </span>
       {/* En pantallas muy estrechas el texto de cinco botones no cabe: se
           queda el icono, que con el `title` sigue diciendo qué es. */}
-      <span className="text-[8px] font-bold hidden min-[360px]:block truncate max-w-full px-0.5 leading-none">{label}</span>
+      <span className={cn('text-[8px] font-bold hidden min-[360px]:block truncate max-w-full px-0.5 leading-none',
+        activo ? 'text-slate-900' : 'text-slate-500')}>{label}</span>
     </button>
   );
 }
@@ -211,7 +225,7 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  el pulgar sin robarle sitio a la página. Se bajó de 52 a 46 px
    *  (2026-08-21, Eugenio: «haz más compacto el menú de arriba») — el icono y
    *  su nombre caben igual y la página gana 6 px en cada pantalla. */
-  const ALTO_BARRA = 46;
+  const ALTO_BARRA = 44;
   /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
    *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
    *  hueco: con dos banderas podrían estar abiertos a la vez y taparse. */
@@ -321,6 +335,8 @@ export default function AIAssistant({ modo = 'panel' }: {
   };
 
   const location = useLocation();
+  /** La ruta de ahora, para marcar en negro el botón donde estás. */
+  const ruta = location.pathname;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -1500,22 +1516,27 @@ export default function AIAssistant({ modo = 'panel' }: {
                   es la puerta principal de esta plataforma. Crear se va al
                   extremo: se usa menos veces al día que buscar. */}
               <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
+                activo={ruta === '/' || ruta.startsWith('/explorar')}
                 onClick={() => navigate('/')} />
               <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
+                activo={ruta.startsWith('/proyectos')}
                 onClick={() => navigate('/proyectos')} />
 
               <button
                 onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
                 title="Preguntar a la IA"
                 aria-label="Preguntar a la IA"
-                className="justify-self-center w-11 h-8 rounded-full bg-slate-900 text-white grid place-items-center hover:bg-emerald-600 transition-colors"
+                className={cn('justify-self-center rounded-full grid place-items-center transition-colors w-12 h-9 sm:w-11 sm:h-8',
+                  open && panelMuelle !== 'crear' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-emerald-600')}
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
               </button>
 
               <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
+                activo={ruta.startsWith('/mensajes') || ruta.startsWith('/personas')}
                 onClick={() => navigate('/mensajes')} />
               <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
+                activo={open && panelMuelle === 'crear'}
                 onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
             </nav>
           )}

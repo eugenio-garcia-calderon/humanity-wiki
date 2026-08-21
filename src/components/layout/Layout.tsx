@@ -8,6 +8,7 @@ import {
 import { abrirVentana, pulsarVentana, cerrarVentana, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import MenuLateral from './MenuLateral';
+import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useAuth } from '../../contexts/AuthContext';
@@ -382,25 +383,49 @@ export default function Layout() {
             menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
             esquina sería justo el fallo que este proyecto ya tiene
             catalogado: 83 de cada 100 botones por debajo de 24 px. */}
-        {/* EL BOTÓN DEL MENÚ SE FUE A LA DERECHA (2026-08-21, Eugenio:
-            «el menú de arriba a la izquierda, quítale el nombre Menú, y ponlo
-            arriba a la derecha del todo, junto a la foto de perfil»). Ahora
-            está justo antes de la cuenta, más abajo en este mismo fichero. */}
+        {/* LA MARCA, SOLO EL LOGO (2026-08-21, Eugenio: «quita la palabra
+            humanity.wiki, pon solo el logo minimalista»). El nombre completo
+            vive dentro del menú lateral; aquí arriba, con el menú escondido,
+            lo que hace falta es una tecla de vuelta al inicio, y para eso una
+            marca de 28 px basta. La palabra se llevaba el ancho que necesitan
+            las ventanas abiertas de al lado.
 
-
-        {/* LA MARCA CUANDO NO ESTÁ EL MENÚ. La marca vive dentro del menú
-            lateral, así que al esconderlo la plataforma se quedaba sin nombre
-            en ningún sitio y sin forma de volver al inicio de un toque. */}
+            EL NOMBRE NO SE PIERDE: sigue en el `title` y en el `aria-label`,
+            así que un lector de pantalla lo dice igual que antes. */}
         {!menuPuesto && (
           <button
             onClick={() => navigate('/')}
-            className="min-w-0 shrink text-left hover:opacity-85 transition-opacity"
+            title="Humanity Wiki — ir al inicio"
+            aria-label="Humanity Wiki — ir al inicio"
+            className="shrink-0 w-7 h-7 grid place-items-center rounded-lg bg-slate-900 text-white hover:bg-emerald-600 transition-colors"
           >
-            <span className="text-sm font-extrabold tracking-tight text-slate-900 whitespace-nowrap">
-              Humanity<span className="bg-gradient-to-b from-slate-500 via-slate-300 to-slate-600 bg-clip-text text-transparent"> Wiki</span>
-            </span>
+            <Globe className="w-4 h-4" />
           </button>
         )}
+
+        {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
+            Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a
+            la izquierda, y el logo de Humanity Wiki a la izquierda del menú
+            colapsable». Y sin la palabra «Menú»: tres rayas es el icono más
+            reconocido que hay en una pantalla.
+
+            SIGUE SIENDO GRANDE. Desde que no hay estado intermedio del menú,
+            éste es el ÚNICO camino de vuelta, y este proyecto ya tiene
+            catalogado que 83 de cada 100 de sus botones bajan de 24 px. */}
+        {user && !menuPuesto && (
+          <button
+            onClick={ponerMenu}
+            title="Ver el menú"
+            aria-label="Ver el menú"
+            aria-expanded={false}
+            className={cn('shrink-0 grid place-items-center rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors',
+              compacto ? 'w-8 h-8' : 'w-10 h-10')}
+          >
+            <Menu className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
+          </button>
+        )}
+
+
 
         {/* Las ventanas abiertas del Escritorio, como ICONOS (2026-08-19,
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
@@ -485,24 +510,15 @@ export default function Layout() {
             donde la busca todo el mundo, y además es lo que hace visible de un
             vistazo si has entrado o no — que era justo lo que no se veía
             cuando iniciabas sesión dentro del Mundo 3D. */}
-        {/* ══ MENÚ Y CUENTA, JUNTOS A LA DERECHA ══════════════════════════
-            SIN LA PALABRA «MENÚ». El icono de tres rayas es el más reconocido
-            que existe en una pantalla; la palabra al lado no añadía nada y
-            ocupaba el sitio que hacía falta para juntar aquí las dos cosas de
-            la esquina. El nombre sigue en el `title` y en el `aria-label`, así
-            que quien navegue con lector de pantalla lo sigue oyendo. */}
-        {user && !menuPuesto && (
-          <button
-            onClick={ponerMenu}
-            title="Ver el menú"
-            aria-label="Ver el menú"
-            aria-expanded={false}
-            className={cn('shrink-0 ml-auto grid place-items-center rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors',
-              compacto ? 'w-8 h-8' : 'w-11 h-11')}
-          >
-            <Menu className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
-          </button>
-        )}
+        {/* EL MENÚ VOLVIÓ A LA IZQUIERDA (2026-08-21, Eugenio: «vuelve a
+            poner el menú colapsable superior a la izquierda»). Estuvo un rato
+            a la derecha; a la izquierda es donde lo busca la mano y donde no
+            compite con la cuenta. Está más arriba en este mismo fichero. */}
+        {/* LA CAMPANA, JUNTO A LA CUENTA (2026-08-21, Eugenio: «crea una
+            campanita arriba a la derecha en el menú»). Va antes de la foto
+            porque es lo que cambia: la cuenta siempre está, los avisos van y
+            vienen, y lo que cambia se mira primero. */}
+        <Campana compacto={compacto} />
 
         <div className="relative shrink-0" ref={cuentaRef}>
           {user ? (

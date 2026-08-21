@@ -3032,3 +3032,65 @@ follow used for the test was removed.
 
 Nothing to show means nothing to occupy: on an empty platform the strip does not
 render at all, rather than a row of placeholders.
+
+## 2026-08-21 — The social layer, and a notifications table that had been empty for months
+
+Eugenio: «trabajo en toda la parte de red social, enumera todas las
+funcionalidades […] implementa las que falten, y testéalas todas, gestiona
+también el tema de notificaciones, crea una campanita arriba a la derecha».
+
+**`notifications` had zero rows.** The table existed, the endpoint to read it
+existed, and exactly one place wrote to it — telling followers of a mentioned
+entity. Commenting, replying, reacting, following and saving notified nobody. A
+social network where nobody finds out about anything is a noticeboard.
+
+`src/server/avisos.ts` is the single writer, the same lesson as `historial.ts`:
+if every route writes its own, every route ends up writing them differently and
+one day one forgets. Routes say what happened; this decides who hears about it.
+
+- **Nobody is notified of their own actions.** Commenting on your own
+  publication is not news, and a bell that rings for what you just did teaches
+  people to ignore it. Verified: 0 notifications where sender = recipient.
+- **The sender's name is stored in the notification**, not resolved on read. If
+  they rename tomorrow, today's notice still says what happened today.
+- **`duenoDe` returns null when it does not know**, and then nobody is notified.
+  A notice that reaches the wrong person is worse than one that never arrives.
+
+### What was missing, and now is not
+
+Editing a comment, deleting one (archived, so replies underneath do not become
+orphans), the followers and following lists, seeing what you saved, seeing who
+reacted, the unread count, and marking one notice read instead of all of them.
+
+Marking everything read just by opening the bell would make the ones you had not
+got to read disappear.
+
+### The bell
+
+Polls only the *count*, once a minute; the list is fetched on open. Pulling
+fifty notices every minute to paint a «3» is buying a list to look at a number.
+
+### 31 tests, two people, one real bug
+
+The battery uses two accounts because with one you cannot verify any
+notification at all — you are never notified of your own actions.
+
+Test 09 caught a real bug: `= ANY(${lista}::text[])` looks natural and the
+driver sends the array as a quoted string, so Postgres tries to read `{"a","b"}`
+where there is `a,b` and dies in `array_in`. **The route answered 200 either
+way.** Without that test, @mentions would have shipped notifying nobody, silently.
+
+31/31 pass. Every test row removed afterwards: publications, comments,
+reactions, saves, reports, notifications and the follow, all back to zero.
+
+## 2026-08-21 — Where you are, in black; the corner rearranged
+
+- **The bottom bar marks the page you are on** in black — five destinations with
+  none marked makes you read the content to know where you are. The black sits
+  on the icon only; a pill the width of the button would be a row of squares.
+- **Icons 25% bigger on a phone** (22 px in a 34 px target), unchanged above
+  640 px where a mouse aims for you. The bar itself is 44 px, down from 52.
+- **The menu button is back on the left**, with the logo to its left, and the
+  words «Menú» and «Humanity Wiki» are gone: three lines is the most recognised
+  icon on a screen, and the name was taking the width the open windows need.
+  Both names stay in `title`/`aria-label`.
