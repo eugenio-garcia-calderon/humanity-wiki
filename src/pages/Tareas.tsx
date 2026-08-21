@@ -210,6 +210,25 @@ export default function Tareas() {
     }
   };
 
+  /** CAMBIAR LA PRIORIDAD SIN ABRIR NADA (2026-08-21). Igual que el estado,
+   *  que ya se cambiaba con un clic en su círculo: rota alta → media → baja.
+   *  Se podía filtrar por prioridad pero no ponerla, que es media herramienta. */
+  const siguientePrioridad = async (id: string, actual: string | null) => {
+    const orden = ['alta', 'media', 'baja'];
+    const prioridad = orden[(orden.indexOf(actual || 'media') + 1) % orden.length];
+    setProyectos(ps => ps.map(p => ({ ...p, tareas: p.tareas.map(t => (t.id === id ? { ...t, prioridad } : t)) })));
+    try {
+      const r = await fetch(`/api/roadmap/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ prioridad }),
+      });
+      if (!r.ok) throw new Error((await r.json())?.error || 'No se ha podido guardar la prioridad.');
+    } catch (e: any) {
+      setAviso(e.message);
+      setTimeout(() => setAviso(null), 5000);
+    }
+  };
+
   /** Pasar una tarea al siguiente estado con un clic en su círculo:
    *  por hacer → en curso → hecha → por hacer. */
   const siguienteEstado = async (id: string, actual: Estado) => {
@@ -539,11 +558,22 @@ export default function Tareas() {
                                 {t.grupo}
                               </span>
                             )}
-                            {t.prioridad && t.prioridad !== 'media' && (
-                              <span className={cn('px-1.5 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider',
-                                PRIORIDAD[t.prioridad] || PRIORIDAD.baja)}>
-                                {t.prioridad}
-                              </span>
+                            {/* La prioridad «media» no se pintaba nunca, así que
+                                en una tarea tuya no había dónde pulsar para
+                                cambiarla. Ahora, si es tuya, siempre hay algo
+                                que tocar; si no lo es, se sigue callando la
+                                media, que no aporta. */}
+                            {(p.mio || (t.prioridad && t.prioridad !== 'media')) && (
+                              <button
+                                onClick={e => { e.stopPropagation(); if (p.mio) siguientePrioridad(t.id, t.prioridad); }}
+                                disabled={!p.mio}
+                                title={p.mio ? 'Cambiar la prioridad' : undefined}
+                                className={cn('px-1.5 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider transition-transform',
+                                  PRIORIDAD[t.prioridad || 'media'] || PRIORIDAD.baja,
+                                  p.mio && 'hover:scale-105',
+                                  p.mio && (!t.prioridad || t.prioridad === 'media') && 'opacity-40 group-hover/fila:opacity-100')}>
+                                {t.prioridad || 'media'}
+                              </button>
                             )}
                             <span className={cn('hidden sm:inline-flex items-center gap-1 text-[10px] font-bold', e.color)}>
                               <span className={cn('w-1.5 h-1.5 rounded-full', e.punto)} />

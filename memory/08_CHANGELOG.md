@@ -2760,3 +2760,27 @@ The other seven:
 Verified in the browser: setting a past date showed «vencida hace 3 días», the
 top counter went to «1 vencida», and the row persisted to the database. The test
 date was then removed — it was one of Eugenio's tasks, not mine.
+
+## 2026-08-21 — Six more: a phantom entity, history on three more routes, priority from the list
+
+**A `PUT` on something that does not exist created it.** `/api/data/:entity/:id`
+does an upsert, so `PUT /api/data/challenges/ID_MAL` answered 200 and created a
+challenge titled «Nuevo Reto». A mistyped id — or a screen pointing at something
+already archived — left a phantom entity in the database that nobody asked for,
+while whoever wrote it believed they had edited something else. Now a 404 that
+says which id does not exist and that POST is the way to create. Verified both
+ways: the PUT 404s and creates nothing; the POST still creates.
+
+**Three more routes that changed things without keeping what they replaced.**
+B70 fixed the page editor; the same defect lived on in `PUT /api/graphs/:id` and
+in the shared publication-edit route, which touches windows, graphs and maps.
+The defect was never in the page route — it was that snapshots were only written
+from `/api/data/*`. All of them now go through `historial.ts`, so there is one
+implementation and no second format to drift. Not grouped: these are saved when
+someone presses a button, not every 1,2 s like the editor. Verified end to end on
+a graph of my own — `previous` holds the old title, `snapshot` the new one.
+
+**Priority can be changed from the task list**, the way state already could:
+click cycles alta → media → baja. You could filter by priority and not set it,
+which is half a tool. And «media» was never painted, so on your own task there
+was nothing to click — now there always is, faded until you hover.

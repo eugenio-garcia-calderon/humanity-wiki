@@ -587,6 +587,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         return res.status(403).json({ error: 'Solo el creador del grafo o un administrador pueden editarlo.' });
       }
       const d = req.body || {};
+      // Igual que las páginas (B70): esta ruta también subía el contador de
+      // versiones sin guardar ninguna. Un grafo no se autoguarda cada segundo,
+      // así que no se agrupa: cada cambio pedido a mano deja su instantánea.
+      const antes = await db.execute(sql`SELECT * FROM knowledge_graphs WHERE id = ${req.params.id}`);
       await db.execute(sql`
         UPDATE knowledge_graphs SET
           title = COALESCE(${d.title ?? null}, title),
@@ -597,6 +601,10 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           version = version + 1, updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${req.params.id}
       `);
+      await registrarHistorial(db, {
+        entidad: 'knowledge_graphs', tabla: 'knowledge_graphs', id: req.params.id,
+        operacion: 'update', previo: antes.rows[0] ?? null, actor: req.user!.id,
+      });
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
@@ -1110,6 +1118,19 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
       if (estado) await guardarMeta(tipo, id, yo, { estado });
 
+      // LO QUE HABÍA ANTES, TAMBIÉN POR ESTA PUERTA (2026-08-21). Esta ruta
+      // edita ventanas, grafos y mapas —las tres con historial— y ninguna lo
+      // escribía. Es el mismo defecto de B70 en otro camino: el defecto no
+      // estaba en la ruta de las páginas, estaba en que la instantánea solo se
+      // guardaba desde `/api/data/*`.
+      const TABLA_DE: Record<string, string | null> = {
+        ventana: 'knowledge_windows', lienzo: 'knowledge_graphs', mapa: 'user_maps',
+      };
+      const tablaHist = TABLA_DE[tipo] || null;
+      const antesHist = tablaHist
+        ? (await db.execute(sql`SELECT * FROM ${sql.raw(tablaHist)} WHERE id = ${id}`)).rows[0] ?? null
+        : null;
+
       if (tipo === 'ventana') {
         await db.execute(sql`
           UPDATE knowledge_windows SET
@@ -1156,6 +1177,15 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
             updated_at = now(), updated_by = ${yo}
           WHERE id = ${id}
         `);
+      }
+
+      // Una sola llamada para las tres tablas con historial. Sin agrupar: aquí
+      // se guarda cuando alguien pulsa, no cada segundo como en el editor.
+      if (tablaHist) {
+        await registrarHistorial(db, {
+          entidad: tablaHist, tabla: tablaHist, id,
+          operacion: 'update', previo: antesHist, actor: yo,
+        });
       }
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }

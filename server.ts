@@ -760,6 +760,21 @@ async function startServer() {
       const entityTable = ENTITY_TABLES[entity];
       const previous = entityTable ? await fetchEntityRow(entityTable, id) : null;
 
+      // UN PUT SOBRE ALGO QUE NO EXISTE ES UN 404, NO UNA CREACIÓN (2026-08-21).
+      // Estas rutas hacen upsert, así que `PUT /api/data/challenges/ID_MAL`
+      // devolvía 200 y CREABA un reto titulado «Nuevo Reto». Un identificador
+      // mal tecleado —o una pantalla apuntando a algo ya archivado— dejaba una
+      // entidad fantasma en la base sin que nadie lo pidiera, y quien la
+      // escribió creía haber editado otra cosa.
+      //
+      // Solo se exige en PUT, que es «cambia esto». El POST sin id sigue
+      // creando, que es lo que significa.
+      if (req.method === 'PUT' && req.params.id && entityTable && !previous) {
+        return res.status(404).json({
+          error: `No existe ningún elemento «${req.params.id}» en ${entity}. Si querías crearlo, usa POST.`,
+        });
+      }
+
       if (entity === "territories") {
         await db.execute(sql`
           INSERT INTO territories (id, name, type, parent_id, description, population, area_km2)
