@@ -2689,3 +2689,36 @@ the whole write so half a row is never saved. No session reads nothing and
 writes nothing. Deleting a row goes to the 15-day bin. History goes through
 `historial.ts` rather than a second way of writing it. All test data removed
 afterwards.
+
+
+## 2026-08-21 — The model picker says what each request will cost
+
+Eugenio: «en el listado para elegir el modelo de IA no aparece el coste
+estimado de las peticiones, soluciónalo».
+
+The list said «gratis» or «incluido». That answers *«will I be charged?»*, not
+*«what is this worth?»* — two different questions, and choosing a model needs
+both. The catalogue already held prices, but in cents per **million** tokens,
+which is a unit nobody can picture: «300» looks nothing like the cost of asking
+a question.
+
+Each row now shows what one of **your** requests would cost with that model:
+
+    Rápido        ≈ 0,127 ¢     gratis para ti
+    Equilibrado   ≈ 0,313 ¢     gratis para ti
+    Sonnet 5      ≈ 3,03 ¢      incluido
+    Fable 5       ≈ 10,11 ¢     incluido
+
+An 80× spread that was invisible a moment ago.
+
+**The estimate comes from what actually happened, not from a made-up figure.**
+`/api/ai/status` measures the average size of a chat request over the last 30
+days: this person's own first, the platform's if they have fewer than three (a
+mean over one odd conversation is not how someone writes), and a declared
+assumption only if the table is empty. It always returns *where the number came
+from*, and the picker says so underneath — «Calculado sobre tus 140 últimas
+peticiones (~8.418 de entrada y 339 de salida)». A figure that cannot say what
+it was computed on is indistinguishable from an invented one.
+
+Marked «≈» on purpose: the real cost depends on how much the model answers and
+how well the cache hits. The exact, measured figure is the one under each reply.

@@ -77,6 +77,25 @@ const centimos = (c: number) => {
   return c.toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + ' ¢';
 };
 
+/** Lo que costaría una petición típica con ese modelo, en céntimos.
+ *
+ *  Los precios del catálogo vienen en céntimos por MILLÓN de tokens, que es
+ *  una unidad que no le dice nada a nadie: «300» no se parece a lo que cuesta
+ *  escribirle una pregunta. Aquí se convierte a lo que de verdad se paga por
+ *  UNA petición del tamaño que tú sueles mandar.
+ *
+ *  Es una ESTIMACIÓN y se marca como tal con «≈». El coste real depende de
+ *  cuánto conteste el modelo y de cuánto acierte la caché, y por eso debajo de
+ *  cada respuesta se enseña el coste medido, que ese sí es exacto. */
+const costeEstimado = (
+  info: AIModelInfo,
+  t?: { entrada: number; salida: number },
+) => {
+  const tam = t || { entrada: 5000, salida: 500 };
+  const c = (tam.entrada * (info.input || 0) + tam.salida * (info.output || 0)) / 1_000_000;
+  return '≈ ' + centimos(c);
+};
+
 /** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
 const segundos = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1).replace('.', ',')} s`);
 
@@ -124,7 +143,13 @@ export default function AIAssistant({ modo = 'panel' }: {
   const [editMode, setEditMode] = useState<EditMode>('autonomo');
   const [searchWeb] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [status, setStatus] = useState<{ ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number } | null>(null);
+  const [status, setStatus] = useState<{
+    ready: boolean; message: string; models?: Record<string, AIModelInfo>; platformFee?: number;
+    /** El tamaño de una petición típica, para estimar el coste de cada modelo
+     *  antes de elegirlo. `origen` dice de dónde sale: de tus propias
+     *  peticiones, de las de la plataforma, o de un supuesto declarado. */
+    tamanoTipico?: { entrada: number; salida: number; origen: 'tuyo' | 'plataforma' | 'supuesto'; n: number };
+  } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
   const esMovil = useEsMovil();
@@ -1188,13 +1213,40 @@ export default function AIAssistant({ modo = 'panel' }: {
                               <span className="font-bold text-slate-700">{info.label}</span>
                               <span className="text-slate-400"> · {info.hint}</span>
                             </span>
-                            <span className={cn('shrink-0 font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
-                              {bloqueado ? 'verificados' : info.gratis ? 'gratis' : info.image ? 'imagen' : 'incluido'}
+                            <span className="shrink-0 text-right">
+                              {/* LO QUE CUESTA CADA PETICIÓN, ANTES DE ELEGIR
+                                  (2026-08-21, Eugenio: «en el listado para
+                                  elegir el modelo de IA no aparece el coste
+                                  estimado de las peticiones»). Antes solo
+                                  decía «gratis» o «incluido», que responde a
+                                  «¿me lo cobran?» y no a «¿cuánto vale?». Son
+                                  dos preguntas distintas y aquí hacen falta
+                                  las dos: la de arriba, el precio; la de
+                                  abajo, quién lo paga. */}
+                              <span className="block font-bold text-slate-600 tabular-nums">
+                                {info.image ? '—' : costeEstimado(info, status.tamanoTipico)}
+                              </span>
+                              <span className={cn('block text-[9px] font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
+                                {bloqueado ? 'verificados' : info.gratis ? 'gratis para ti' : info.image ? 'imagen' : 'incluido'}
+                              </span>
                             </span>
                           </button>
                         );
                       })}
                       <p className="text-[10px] text-slate-500 px-2 py-1.5 leading-relaxed border-t border-slate-100 mt-1">
+                        {/* DE DÓNDE SALE LA ESTIMACIÓN. Una cifra sin decir
+                            sobre qué está calculada no se distingue de una
+                            inventada, y por eso se dice siempre. */}
+                        {(() => {
+                          const t = status.tamanoTipico;
+                          if (!t) return null;
+                          const base = t.origen === 'tuyo'
+                            ? `Calculado sobre tus ${t.n} últimas peticiones`
+                            : t.origen === 'plataforma'
+                              ? 'Calculado sobre las peticiones de la plataforma (aún no tienes suficientes)'
+                              : 'Todavía no hay peticiones que medir: se supone un mensaje corriente';
+                          return <>{base} (~{t.entrada.toLocaleString('es-ES')} de entrada y {t.salida.toLocaleString('es-ES')} de salida). </>;
+                        })()}
                         Los «gratis» los cubre la plataforma. Los premium están incluidos para usuarios verificados, con un tope mensual.
                       </p>
                     </div>
