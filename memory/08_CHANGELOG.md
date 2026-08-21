@@ -2929,3 +2929,36 @@ for `ZZZ%`: graphs, pages, tasks, projects, maps, publications — all zero.
 
 The lesson is the night's own rule pointed at me: **an error in the response is
 not proof that nothing happened.** Cleanup has to check the table, not the reply.
+
+## 2026-08-21 — The assistant's tables are tables now, and the corner is two things
+
+Eugenio, with a screenshot: «creo que el asistente intenta hacer tabla, pero no
+salen bien, arréglalo». Plus: «el menú de arriba a la izquierda, quítale el
+nombre Menú, y ponlo arriba a la derecha del todo, junto a la foto de perfil; en
+la foto de perfil elimina la flecha lateral y deja solo la foto».
+
+**The replies were painted as plain text.** The AI does write tables, and well —
+they arrived as `| Parámetro | Challenger | Cruiser |` with a row of dashes
+under them. A comparison table is exactly where the format *is* the information:
+three columns show at a glance what a list of pipes does not show at all.
+
+`Markdown.tsx` renders tables, headings, bold, italics, inline code, bullet and
+numbered lists, and rules. **Anything it does not recognise is printed as-is** —
+a renderer that guesses wrong is worse than one that does not interpret, because
+the second at least lets you read the original. Tables scroll sideways inside
+their own box so a four-column table does not push the conversation off a phone.
+
+*Your* messages are still printed verbatim: if you type an asterisk it is an
+asterisk. Interpreting what the user wrote would be changing what they said.
+
+**No library, and not by preference.** `react-markdown` + `remark-gfm` was
+tried; npm refuses it because `react-simple-maps` pins React 18 and the project
+is on 19. That conflict predates this, and forcing it with `--legacy-peer-deps`
+changes how the whole tree resolves while someone else is working in the same
+repo. When it is fixed, this file can be thrown away for the library.
+
+**The corner:** the menu button lost the word «Menú» — three lines is the most
+recognised icon on a screen and the word bought nothing — and moved next to the
+account. The avatar lost its chevron and its pill; the photo *is* the button,
+bigger (36 px) now that it does not share the space. Both names stay in
+`title`/`aria-label`, so a screen reader still says them.
