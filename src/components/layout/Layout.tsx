@@ -382,18 +382,11 @@ export default function Layout() {
             menú sigue aquí»; ahora no queda nada. Un icono de 20 px en una
             esquina sería justo el fallo que este proyecto ya tiene
             catalogado: 83 de cada 100 botones por debajo de 24 px. */}
-        {user && !menuPuesto && (
-          <button
-            onClick={ponerMenu}
-            title="Ver el menú"
-            aria-label="Ver el menú"
-            aria-expanded={false}
-            className="h-11 shrink-0 inline-flex items-center gap-2 pl-2.5 pr-3.5 rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors"
-          >
-            <Menu className="w-6 h-6 shrink-0" />
-            <span className="text-sm font-black tracking-tight">Menú</span>
-          </button>
-        )}
+        {/* EL BOTÓN DEL MENÚ SE FUE A LA DERECHA (2026-08-21, Eugenio:
+            «el menú de arriba a la izquierda, quítale el nombre Menú, y ponlo
+            arriba a la derecha del todo, junto a la foto de perfil»). Ahora
+            está justo antes de la cuenta, más abajo en este mismo fichero. */}
+
 
         {/* LA MARCA CUANDO NO ESTÁ EL MENÚ. La marca vive dentro del menú
             lateral, así que al esconderlo la plataforma se quedaba sin nombre
@@ -492,22 +485,45 @@ export default function Layout() {
             donde la busca todo el mundo, y además es lo que hace visible de un
             vistazo si has entrado o no — que era justo lo que no se veía
             cuando iniciabas sesión dentro del Mundo 3D. */}
+        {/* ══ MENÚ Y CUENTA, JUNTOS A LA DERECHA ══════════════════════════
+            SIN LA PALABRA «MENÚ». El icono de tres rayas es el más reconocido
+            que existe en una pantalla; la palabra al lado no añadía nada y
+            ocupaba el sitio que hacía falta para juntar aquí las dos cosas de
+            la esquina. El nombre sigue en el `title` y en el `aria-label`, así
+            que quien navegue con lector de pantalla lo sigue oyendo. */}
+        {user && !menuPuesto && (
+          <button
+            onClick={ponerMenu}
+            title="Ver el menú"
+            aria-label="Ver el menú"
+            aria-expanded={false}
+            className={cn('shrink-0 ml-auto grid place-items-center rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors',
+              compacto ? 'w-8 h-8' : 'w-11 h-11')}
+          >
+            <Menu className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
+          </button>
+        )}
+
         <div className="relative shrink-0" ref={cuentaRef}>
           {user ? (
             <>
               <button
                 onClick={() => setCuentaAbierta(o => !o)}
                 title={`${user.displayName || user.email} · ${user.roleLabel}`}
-                className={cn('pl-1 pr-2 flex items-center gap-1.5 rounded-full border transition-colors',
-                  compacto ? 'h-6' : 'h-8',
-                  cuentaAbierta ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}
+                className={cn('block rounded-full transition-all',
+                  cuentaAbierta ? 'ring-2 ring-slate-900 ring-offset-1' : 'hover:ring-2 hover:ring-slate-200')}
               >
+                {/* SOLO LA FOTO (2026-08-21, Eugenio: «en la foto de perfil
+                    elimina la flecha lateral y deja solo la foto»). Una foto
+                    redonda en la esquina ya se entiende como «tu cuenta» sin
+                    que nadie tenga que explicarlo, y la flecha obligaba a
+                    llevar un borde y un relleno alrededor para que no quedara
+                    suelta. Sin ella, la foto es el botón. */}
                 {user.avatarUrl
-                  ? <img src={user.avatarUrl} alt="" className={cn('rounded-full object-cover', compacto ? 'w-5 h-5' : 'w-6 h-6')} />
-                  : <span className={cn('rounded-full bg-slate-100 grid place-items-center text-slate-400', compacto ? 'w-5 h-5' : 'w-6 h-6')}>
-                      <User className="w-3.5 h-3.5" />
+                  ? <img src={user.avatarUrl} alt="" className={cn('rounded-full object-cover', compacto ? 'w-7 h-7' : 'w-9 h-9')} />
+                  : <span className={cn('rounded-full bg-slate-100 grid place-items-center text-slate-400', compacto ? 'w-7 h-7' : 'w-9 h-9')}>
+                      <User className="w-4 h-4" />
                     </span>}
-                <ChevronDown className="w-3 h-3 shrink-0" />
               </button>
 
               {cuentaAbierta && (

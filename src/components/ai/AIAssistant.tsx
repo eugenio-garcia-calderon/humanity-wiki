@@ -10,6 +10,7 @@ import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
 import PublicationPopup from '../knowledge/PublicationPopup';
 import { cn } from '../../utils/cn';
+import Markdown from './Markdown';
 
 // ============================================================================
 // Asistente IA — panel acoplado (Fase 9, redimensionado en Fase 10)
@@ -862,9 +863,9 @@ export default function AIAssistant({ modo = 'panel' }: {
 
             {messages.map((m, i) => (
               <div key={i} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
-                <div className={cn('max-w-[92%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
-                  m.role === 'user' ? 'bg-emerald-600 text-white'
-                    : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                <div className={cn('max-w-[92%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+                  m.role === 'user' ? 'bg-emerald-600 text-white whitespace-pre-wrap'
+                    : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200 whitespace-pre-wrap'
                     : 'bg-slate-100 text-slate-800')}>
                   {m.attachmentName && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/20 px-1.5 py-0.5 rounded mb-1">
@@ -872,7 +873,13 @@ export default function AIAssistant({ modo = 'panel' }: {
                     </span>
                   )}
                   {m.attachmentName && <br />}
-                  {m.content}
+                  {/* LO QUE ESCRIBE LA IA SE PINTA; lo que escribes TÚ, no.
+                      Tu mensaje es tuyo tal cual: si escribes un asterisco es
+                      un asterisco, no una cursiva. Interpretar el texto del
+                      usuario sería cambiarle lo que ha dicho. */}
+                  {m.role === 'assistant' && !m.error
+                    ? <Markdown texto={m.content} />
+                    : m.content}
 
                   {/* Imagen generada por Nano Banana */}
                   {m.imageUrl && (
