@@ -1128,48 +1128,43 @@ export default function AIAssistant({ modo = 'panel' }: {
 
   const panelBody = (
     <>
-      {/* Cabecera: quién te habla, con qué modelo y DÓNDE ESTÁS. Ese último
-          dato es el que hace ver de un vistazo que la IA sabe qué tienes
-          delante (Eugenio, 2026-08-20: «que la IA vea en la página que
-          estás»), sin tener que preguntárselo para comprobarlo. */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shrink-0">
-                  <Sparkles className="w-4 h-4" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-black text-slate-900 leading-none truncate">{tituloInterlocutor}</p>
-                  <p className="text-[10px] text-slate-400 truncate">
-                    {status?.ready ? modeloActual : 'Inactivo — falta clave de API'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                {/* En pantalla ancha el historial ya está a la izquierda del
-                    muelle, así que este botón solo hace falta en el teléfono,
-                    donde se abre encima. Dos botones para lo mismo a la vez
-                    sería enseñar dos puertas a la misma habitación. */}
-                <button onClick={() => setHistorialALaVista(v => !v)} title="Historial de conversaciones"
-                  className={cn('md:hidden p-1.5 rounded-lg transition-colors', historialALaVista ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
-                  <MessageSquare className="w-4 h-4" />
-                </button>
-                <button onClick={() => { newConversation(); setHistorialALaVista(false); }} title="Nueva conversación" className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-white transition-colors">
-                  <Plus className="w-4 h-4" />
-                </button>
-                <button onClick={() => setShowSettings(v => !v)} title="Configuración" className={cn('p-1.5 rounded-lg transition-colors', showSettings ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
-                  <Settings2 className="w-4 h-4" />
-                </button>
-                <button onClick={() => setOpen(false)} title="Cerrar" className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <p className="mt-2 inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-500">
-              <Eye className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">Viendo: {dondeEstoy}</span>
-            </p>
-          </div>
+      {/* ══ SIN CABECERA (2026-08-21, Eugenio: «las configuraciones que
+          tienes arriba quítalas, y pon todo abajo de forma minimalista y que
+          entonces se quede más espacio para ver las respuestas»). ══════════
+
+          Había un bloque de 90 px con el nombre del asistente, el modelo, una
+          píldora de «Viendo: …» y cuatro botones. En un muelle de un tercio de
+          pantalla eso era un tercio del muelle gastado en decirte dónde
+          estabas. Lo que valía la pena se ha bajado a la fila de abajo (el
+          modelo) o se ha quedado en un solo botón (cerrar); lo demás se ha
+          ido.
+
+          «VIENDO: …» NO SE PIERDE, SE ENCOGE. Que la IA sepa qué página tienes
+          delante era un arreglo pedido —y hay que poder comprobarlo—, así que
+          se dice en una línea de una línea, no en una tarjeta. */}
+      <div className="shrink-0 px-3 py-1.5 flex items-center gap-2 border-b border-slate-100 bg-slate-50/60">
+        <span className="inline-flex items-center gap-1 min-w-0 text-[10px] font-bold text-slate-400">
+          <Eye className="w-3 h-3 text-emerald-600 shrink-0" />
+          <span className="truncate">{dondeEstoy}</span>
+        </span>
+        <div className="ml-auto flex items-center gap-0.5 shrink-0">
+          {/* En el teléfono el historial se abre encima; en pantalla ancha ya
+              está a la izquierda y este botón no sale. */}
+          <button onClick={() => setHistorialALaVista(v => !v)} title="Historial de conversaciones"
+            className={cn('md:hidden w-7 h-7 grid place-items-center rounded-lg transition-colors',
+              historialALaVista ? 'text-emerald-600 bg-white' : 'text-slate-400 hover:text-slate-700 hover:bg-white')}>
+            <MessageSquare className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => { newConversation(); setHistorialALaVista(false); }} title="Nueva conversación"
+            className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-white transition-colors">
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setOpen(false)} title="Cerrar el chat"
+            className="w-7 h-7 grid place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
           {/* EL DESPLEGABLE DEL HISTORIAL SE RETIRÓ (2026-08-21): ahora la
               lista vive a un lado del muelle, fija en pantalla ancha y
@@ -1179,49 +1174,92 @@ export default function AIAssistant({ modo = 'panel' }: {
 
 
           {/* Configuración: permisos de edición */}
-          {showSettings && (
-            <div className="px-4 py-3 border-b border-slate-100 bg-white space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Permisos de edición</p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(Object.keys(EDIT_MODE_LABELS) as EditMode[]).map(m => (
-                  <button
-                    key={m}
-                    onClick={() => setEditMode(m)}
-                    className={cn(
-                      'px-2 py-2 rounded-lg text-[11px] font-bold border transition-colors',
-                      editMode === m
-                        ? 'bg-emerald-600 text-white border-emerald-600'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
-                    )}
-                  >
-                    {EDIT_MODE_LABELS[m].label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-[10px] text-slate-500 leading-relaxed">{EDIT_MODE_LABELS[editMode].hint}</p>
-
-              {/* El selector de modelo YA NO VIVE AQUÍ (2026-08-20, petición de
-                  Eugenio: «haz que el botón del modelo aparezca abajo y te
-                  diga el nombre del modelo que está utilizando»). Está junto
-                  a la caja de escribir, que es donde se decide con qué
-                  responder. Se movió, no se duplicó. */}
-
-              {!user && (
-                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                  Sin sesión iniciada, el asistente solo puede consultar información. No podrá modificar nada.
-                </p>
-              )}
-            </div>
-          )}
+          {/* LOS AJUSTES YA NO SON UN PANEL (2026-08-21). Lo único que había
+              dentro eran los permisos de edición, y empujaban la conversación
+              hacia abajo cada vez que se abrían. Ahora están en la fila de
+              abajo, junto a lo demás que se decide justo antes de escribir. */}
 
           {/* Conversación */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {conversationInner}
           </div>
 
-          {/* Entrada */}
-          <div className="border-t border-slate-100 p-3 space-y-2 bg-white">
-            <div className="flex items-center gap-2">
+          {/* ══ LA FILA DE ABAJO, MÍNIMA (2026-08-21, Eugenio: «con el botón
+              de "+" para los archivos, un icono minimalista para el micro, y
+              el modelo, todo abajo del todo […] y que entonces se quede más
+              espacio para ver las respuestas»). ═══════════════════════════
+
+              LA CAJA VA PRIMERO Y LOS CONTROLES DEBAJO, no al revés. Lo que
+              se hace aquí es escribir; adjuntar y elegir modelo son cosas de
+              antes o de después. Al ponerlos encima, cada vez que mirabas
+              dónde escribir tenías que saltarte tres botones.
+
+              Y SOLO ICONOS. «Adjuntar», «Dictar» y el nombre del modelo con
+              su etiqueta ocupaban dos líneas de un panel que mide un tercio
+              de pantalla; eso son dos líneas menos de respuesta. El nombre
+              del modelo se queda —es un dato, no una etiqueta— y las palabras
+              se van al `title`, donde no roban sitio. */}
+          <div className="border-t border-slate-100 px-3 pt-2.5 pb-2 space-y-2 bg-white">
+            {attachment && (
+              <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
+                {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
+                <span className="truncate flex-1">{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+            {attachError && (
+              <p className="text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">{attachError}</p>
+            )}
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={barInputRef}
+                value={input}
+                onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                rows={2}
+                placeholder={selectedModel === 'gemini-2.5-flash-image' ? 'Describe la imagen que quieres generar…' : 'Escribe tu pregunta…'}
+                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
+              />
+              <button
+                onClick={() => send()}
+                disabled={busy || !input.trim()}
+                className="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1">
+              {/* LOS PERMISOS, PRIMERO. Es lo que decide si la IA puede tocar
+                  tus datos o solo sugerir, así que se ve sin abrir nada — pero
+                  en texto pequeño, no en un panel de tres botones. */}
+              <div className="relative">
+                <button
+                  onClick={e => { e.stopPropagation(); setShowSettings(v => !v); }}
+                  title={EDIT_MODE_LABELS[editMode].hint}
+                  className={cn('px-2 py-1.5 rounded-lg text-[11px] font-bold transition-colors',
+                    showSettings ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700')}
+                >
+                  {EDIT_MODE_LABELS[editMode].label}
+                </button>
+                {showSettings && (
+                  <div className="absolute left-0 bottom-full mb-1 z-30 w-64 bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+                    onClick={e => e.stopPropagation()}>
+                    {(Object.keys(EDIT_MODE_LABELS) as EditMode[]).map(m => (
+                      <button key={m}
+                        onClick={() => { setEditMode(m); setShowSettings(false); }}
+                        className={cn('w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition-colors',
+                          editMode === m ? 'bg-emerald-50' : 'hover:bg-slate-50')}
+                      >
+                        <span className="block font-bold text-slate-700">{EDIT_MODE_LABELS[m].label}</span>
+                        <span className="block text-[10px] text-slate-400 leading-snug">{EDIT_MODE_LABELS[m].hint}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -1231,20 +1269,22 @@ export default function AIAssistant({ modo = 'panel' }: {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                title="Adjuntar imagen o PDF"
-                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
-                  attachment ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+                title="Adjuntar una imagen o un PDF"
+                aria-label="Adjuntar una imagen o un PDF"
+                className={cn('w-8 h-8 grid place-items-center rounded-lg transition-colors',
+                  attachment ? 'bg-emerald-50 text-emerald-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}
               >
-                <Paperclip className="w-3 h-3" /> Adjuntar
+                <Plus className="w-4 h-4" />
               </button>
               {voiceSupported && (
                 <button
                   onClick={handleMicClick}
-                  title={listening ? 'Detener dictado' : 'Dictar por voz'}
-                  className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors',
-                    listening ? 'bg-red-50 border-red-300 text-red-700 animate-pulse' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+                  title={listening ? 'Detener el dictado' : 'Dictar por voz'}
+                  aria-label={listening ? 'Detener el dictado' : 'Dictar por voz'}
+                  className={cn('w-8 h-8 grid place-items-center rounded-lg transition-colors',
+                    listening ? 'bg-red-50 text-red-600 animate-pulse' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}
                 >
-                  {listening ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />} {listening ? 'Escuchando…' : 'Dictar'}
+                  {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </button>
               )}
 
@@ -1257,10 +1297,9 @@ export default function AIAssistant({ modo = 'panel' }: {
                   <button
                     onClick={e => { e.stopPropagation(); setModelosAbierto(v => !v); }}
                     title="Elegir el modelo de IA"
-                    className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-colors max-w-[11rem]',
-                      modelosAbierto ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300')}
+                    className={cn('inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold transition-colors max-w-[10rem]',
+                      modelosAbierto ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700')}
                   >
-                    <Cpu className="w-3 h-3 shrink-0" />
                     <span className="truncate">{modeloActual}</span>
                     <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
                   </button>
@@ -1336,36 +1375,6 @@ export default function AIAssistant({ modo = 'panel' }: {
                   )}
                 </div>
               )}
-            </div>
-            {attachment && (
-              <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
-                {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
-                <span className="truncate flex-1">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-            {attachError && (
-              <p className="text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">{attachError}</p>
-            )}
-            <div className="flex items-end gap-2">
-              <textarea
-                ref={barInputRef}
-                value={input}
-                onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-                rows={2}
-                placeholder={selectedModel === 'gemini-2.5-flash-image' ? 'Describe la imagen que quieres generar…' : 'Escribe tu pregunta…'}
-                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
-              />
-              <button
-                onClick={() => send()}
-                disabled={busy || !input.trim()}
-                className="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
             </div>
             {status && !status.ready && (
               <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-relaxed">

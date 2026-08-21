@@ -2838,3 +2838,34 @@ Two doors were removed in the process, both mine from earlier today: the
 floating button, and the AI button in the top bar (B91). Both existed to open a
 panel that was not visible; with the bar always present they were second doors
 to a room whose door is already open — and the top one was far from the thumb.
+
+## 2026-08-21 — One minimal row at the bottom, and the header gone
+
+Eugenio, with a screenshot of Claude Code's own composer: «con el botón de "+"
+para los archivos, un icono minimalista para el micro, y el modelo, todo abajo
+del todo, las configuraciones que tienes arriba quítalas […] y que entonces se
+quede más espacio para ver las respuestas».
+
+**The writing box goes first and the controls under it**, not the other way
+round. What you do here is write; attaching and picking a model are things from
+before or after. With them on top, every time you looked for where to write you
+had to skip three buttons.
+
+**Icons, not labels.** «Adjuntar», «Dictar» and the model with its badge took
+two lines of a panel that is a third of the screen — two lines less of answer.
+The model name stays, because it is a datum and not a label; the words moved to
+the tooltip, where they cost nothing.
+
+**The header is gone.** It was a 90 px block with the assistant's name, the
+model, a «Viendo: …» pill and four buttons: a third of the dock spent telling
+you where you were. It is now a 41 px strip with «Viendo» as one line and three
+small icons. The «Viendo» itself is kept — knowing the AI can see your page was
+a requested fix and it has to stay checkable — but it is a line, not a card.
+
+**The settings panel is gone too.** The only thing in it was the edit
+permissions, and it pushed the conversation down every time it opened. They are
+now the first item of the bottom row, exactly where the reference puts them —
+visible without opening anything, because whether the AI may touch your data is
+not a detail.
+
+Verified: sending from the new composer answered, with its cost line.
