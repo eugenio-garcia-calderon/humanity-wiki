@@ -2555,3 +2555,61 @@ This means **rotating a phone cannot be verified here**, by anyone. Reading the
 hook, the code is correct. A stale branch after a programmatic resize is the
 harness, not the product — and a reload at each size is the only honest way to
 check a responsive branch with these tools.
+
+## 2026-08-21 — D92: cheap models for ordinary actions, and three premium models that never worked
+
+Eugenio: «intentar utilizar modelos baratos para tareas simples de creación
+estándar de tareas y otras».
+
+### First, two bugs the battery uncovered before it measured anything
+
+**Sonnet 5, Opus 5 and Fable 5 returned a 400 on every single request** —
+`temperature is deprecated for this model`. Three of the four premium models in
+the picker failed always, not sometimes. The Claude 5 family removed the
+sampling knobs (`temperature`, `top_p`, `top_k`); depth is set with
+`output_config.effort`. `SIN_TEMPERATURA` is an explicit list, not a prefix
+rule: taking temperature away from the default Sonnet 4.6 would change
+behaviour for everyone with nobody asking for it. All four now answer.
+
+**Asking for a model that does not exist got a different one, silently.** It
+happened to me: the battery used a stale id, the router quietly fell back, and
+I was one step from reporting that the good model failed all five tests when it
+had never been called. Now the reply says «No existe ningún modelo «X». He
+respondido con Y». A different model changes the cost and the quality of the
+answer; not saying so is the interface asserting something that did not happen.
+
+### The battery, and two tests of mine that were wrong
+
+Five tests, from the five bugs of 2026-08-20: create the task for real in its
+project and group; «Tecnico» without the accent landing in Técnico; a
+non-existent group warned about, valid ones listed, and where it ended up
+stated; «una TAREA» being a task and not a page; and the 120 kg / 90 km trap.
+
+Run against Claude **as a control** — a test the good model cannot pass is
+measuring the test, not the model. It scored 0/5, and both reasons were mine:
+the battery never sent `edit_mode`, so the assistant sat in manual mode where
+the prompt *forbids* returning actions; and the invalid-group test read the
+model's prose instead of the server's answer. The server does exactly the right
+thing — «No hay ninguna etiqueta «Marketing» (tiene: Producto, Diseño,
+Técnico…). La he dejado en «Producto»» — which is the house rule verbatim:
+success is decided by the data that comes back, never by the narration.
+
+### The result
+
+Three consecutive rounds, five tests each:
+
+    claude-sonnet-5   5/5   10,63 ¢
+    abierto-medio     5/5    1,05 ¢     15/15 across three rounds
+    abierto-rapido    5/5    0,46 ¢     15/15 across three rounds
+
+Short, ordinary actions now go to the free model. Through the router, with no
+model forced, the same five pass at **0,93 ¢ against 10,63 ¢** — the same
+result for a eleventh of the cost per correct action (0,19 ¢ vs 2,13 ¢).
+
+**What makes this safe is not that the model gets it right — it is that the
+guard rails are in the server.** The invalid group is caught by the code that
+executes, not by the model's prose. A worse model can write a worse sentence
+without being able to store a task in a made-up place.
+
+Long messages (over 300 characters), PDFs and web search stay with Claude: the
+battery says nothing about those because it did not measure them.

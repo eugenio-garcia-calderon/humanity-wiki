@@ -796,6 +796,17 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // Modelo pedido a mano por el usuario (validado contra el catálogo).
       const pedido = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
 
+      // SI PIDES UN MODELO QUE NO EXISTE, SE DICE (2026-08-21). Antes se
+      // ignoraba en silencio y respondía otro: me pasó a mí mismo pasando la
+      // batería de D92 con un identificador viejo, y estuve a punto de
+      // concluir que el modelo bueno fallaba las cinco pruebas cuando lo que
+      // pasaba es que nunca llegó a usarse. Un modelo distinto del pedido
+      // cambia el coste y la calidad de la respuesta: callarlo es la interfaz
+      // afirmando algo que no ha ocurrido.
+      const modeloInventado = typeof req.body?.model === 'string' && !AI_MODELS[req.body.model]
+        ? String(req.body.model).slice(0, 60)
+        : null;
+
       // EL ROUTER (2026-08-20): con la clave de Together puesta, cada mensaje
       // va al modelo que le toca por complejidad — ver `elegirModelo` en
       // provider.ts, donde está la escalera entera. Sin la clave, todo sigue
@@ -1145,8 +1156,11 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           totalCents: eleccion.cobro === 'de_pago' ? result.costCents * (1 + AI_PLATFORM_FEE) : 0,
           cobro: eleccion.cobro, motivo: eleccion.motivo,
         },
-        // Si el router no dio lo pedido (sin nivel, tope agotado), se dice.
-        aviso_modelo: eleccion.aviso || undefined,
+        // Si el router no dio lo pedido (sin nivel, tope agotado, o el que
+        // pediste no existe), se dice.
+        aviso_modelo: modeloInventado
+          ? `No existe ningún modelo «${modeloInventado}». He respondido con ${result.model}.`
+          : eleccion.aviso || undefined,
       });
 
       // Libro de consumo (fire-and-forget; nunca bloquea la respuesta).

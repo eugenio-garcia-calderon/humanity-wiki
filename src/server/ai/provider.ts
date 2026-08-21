@@ -269,7 +269,34 @@ export function elegirModelo(x: {
   if (x.juego) return { model: 'abierto-medio', cobro: 'gratis', motivo: 'juego', webSearch: false };
 
   // 5. Complejidad: pide crear/cambiar algo, o es un mensajón.
+  //
+  // LAS ACCIONES CORTAS Y CORRIENTES VAN AL BARATO (D92, 2026-08-21, Eugenio:
+  // «intentar utilizar modelos baratos para tareas simples de creación
+  // estándar de tareas y otras»).
+  //
+  // NO SE HIZO A CIEGAS. Crear una tarea es justo donde estalló todo el 20 de
+  // agosto —B26, B32, B34, B36— así que antes de bajarlo se le pasó al modelo
+  // barato la misma batería que verificó aquellos arreglos: crear la tarea de
+  // verdad en su proyecto y grupo; «Tecnico» sin tilde acabando en Técnico;
+  // grupo inexistente avisado, con los válidos enumerados y diciendo dónde la
+  // dejó; «una TAREA» siendo tarea y no página; y la trampa de 120 kg / 90 km.
+  // Resultado, tres rondas seguidas: 15 de 15 en «Equilibrado» y 15 de 15 en
+  // «Rápido», igual que Claude. Y coste de las cinco pruebas: 10,63 ¢ con
+  // Claude, 1,05 ¢ con el Equilibrado.
+  //
+  // LO QUE HACE QUE ESTO SEA SEGURO no es que el modelo acierte, sino que las
+  // barreras están en el SERVIDOR: el grupo inválido lo caza el código al
+  // ejecutar, no la prosa del modelo. Por eso un modelo peor puede fallar la
+  // redacción sin poder guardar una tarea en un sitio inventado.
+  //
+  // LO LARGO Y LO ADJUNTO SIGUE SIENDO DE CLAUDE. Un mensaje de más de 300
+  // caracteres suele traer varias cosas a la vez, y ahí la batería no dice
+  // nada porque no lo midió.
   if (PIDE_ACCION.test(x.mensaje) || x.mensaje.length > 700) {
+    const accionCorriente = x.mensaje.length <= 300 && !x.llevaDocumento && !buscar;
+    if (accionCorriente) {
+      return { model: 'abierto-medio', cobro: 'gratis', motivo: 'acción corta y corriente', webSearch: false };
+    }
     if (premium) return claudeCubierto('acción o mensaje largo');
     return { model: 'abierto-medio', cobro: 'gratis', motivo: 'acción, sin nivel premium', webSearch: false };
   }
@@ -282,6 +309,29 @@ export function elegirModelo(x: {
 // Precio del modelo por defecto de la plataforma (respuestas automáticas de
 // la IA, comentarios, etc. — no facturadas al usuario).
 const PRICE_PER_MTOK = { input: 300, output: 1500 }; // céntimos de € por millón
+
+/**
+ * MODELOS DE ANTHROPIC QUE RECHAZAN `temperature` (2026-08-21, D92).
+ *
+ * Se descubrió con la batería de pruebas: pedir Sonnet 5 devolvía
+ * `400 · «temperature is deprecated for this model»` y NINGUNA respuesta. O
+ * sea que el selector ofrecía cuatro modelos premium y tres de ellos fallaban
+ * siempre — no a veces: siempre.
+ *
+ * En la familia 5 los mandos de muestreo (`temperature`, `top_p`, `top_k`)
+ * están retirados; la profundidad se controla con `output_config.effort`. Los
+ * anteriores —Haiku 4.5 y el Sonnet 4.6 que la plataforma usa por defecto— los
+ * siguen aceptando, así que la lista es EXPLÍCITA y no una regla por prefijo:
+ * quitarle la temperatura al modelo por defecto cambiaría el comportamiento de
+ * todo el mundo sin que nadie lo haya pedido.
+ */
+const SIN_TEMPERATURA = new Set([
+  'claude-sonnet-5', 'claude-opus-5', 'claude-fable-5',
+  'claude-opus-4-8', 'claude-opus-4-7',
+]);
+
+/** ¿A este modelo se le puede mandar `temperature` sin que devuelva un 400? */
+export const admiteTemperatura = (model: string) => !SIN_TEMPERATURA.has(model);
 
 export class ClaudeProvider implements AIProvider {
   readonly name = 'claude';
@@ -301,10 +351,11 @@ export class ClaudeProvider implements AIProvider {
 
     const body: Record<string, any> = {
       model,
+      // La temperatura solo va si el modelo la admite: ver `SIN_TEMPERATURA`.
+      ...(admiteTemperatura(model) ? { temperature: req.temperature ?? 0.2 } : {}),
       // 8192: crear un grafo entero (ventanas+aristas en el bloque de acciones)
       // no cabía en 2048 y el JSON llegaba truncado sin cerrar el bloque.
       max_tokens: req.maxTokens ?? 8192,
-      temperature: req.temperature ?? 0.2,
       // Con parte estable, el system va en DOS bloques: el estable marcado
       // para caché y el variable detrás. El orden importa: la caché de
       // Anthropic compara el prefijo de la petición, así que lo que cambia
@@ -545,7 +596,7 @@ export async function completarClaudeStream(
     body: JSON.stringify({
       model,
       max_tokens: req.maxTokens ?? 8192,
-      temperature: 0.3,
+      ...(admiteTemperatura(model) ? { temperature: 0.3 } : {}),
       system: req.system,
       messages: req.messages,
       stream: true,
