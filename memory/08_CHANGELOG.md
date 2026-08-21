@@ -2901,3 +2901,31 @@ both places or it reads as two destinations.
 which panel — focusing the box, prefilling from another page, the `ai:abrir`
 event — and a strict check would have opened a blank white gap. Fixed in all
 three places *and* in the render: no panel chosen means the chat.
+
+## 2026-08-21 — Five buttons at the bottom
+
+Eugenio, twice in a row: «vamos a añadir un cuarto botón […] el de publicaciones
+con su mismo icono» and «falta uno más, el de mensajes».
+
+Proyectos · Publicaciones · **+** · Mensajes · Preguntar. Five slots put the +
+exactly in the middle, which is where the most-used thing belongs; with four it
+would sit off-centre, and with six each button would drop under 44 px wide,
+which is the minimum for a thumb.
+
+Every icon is the one that section already uses in the sidebar — `FolderKanban`,
+`Compass`, `MessageSquare`. If the same thing wears two faces it reads as two
+destinations.
+
+The five share **one** `BotonMuelle`: five copies of the same block would be
+five places to fix the same detail. Under 360 px the labels hide and the icons
+stay, with the name still in the tooltip.
+
+### And a leftover of mine, found in the screenshot
+
+A "ZZZ grafo de prueba" was sitting in Eugenio's showcase. It came from a POST I
+had read as failed — the response carried a query error, so I assumed nothing
+was created and moved on. It had been created. Deleted, and every table swept
+for `ZZZ%`: graphs, pages, tasks, projects, maps, publications — all zero.
+
+The lesson is the night's own rule pointed at me: **an error in the response is
+not proof that nothing happened.** Cleanup has to check the table, not the reply.
