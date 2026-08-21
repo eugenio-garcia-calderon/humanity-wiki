@@ -1164,10 +1164,19 @@ export default function Documento() {
             O sea que el único camino para añadir un bloque en medio de una
             página era invisible y además inalcanzable.
 
-            En móvil, por tanto: siempre a la vista, dentro de la columna, y
-            con 44 px de lado. Y sin el asa de arrastrar, que es un gesto de
-            ratón: traerla a medias sería peor que dejarla en el escritorio. */}
-        {editable && (
+            En móvil, por tanto: dentro de la columna y con 44 px de lado. Y
+            sin el asa de arrastrar, que es un gesto de ratón: traerla a medias
+            sería peor que dejarla en el escritorio.
+
+            SOLO EN EL BLOQUE EN EL QUE ESTÁS, y esto es una corrección sobre
+            la marcha: al probarlo con una página de verdad se vio que un «+»
+            permanente en cada bloque TAPA EL TEXTO, porque en 390 px no hay
+            margen libre donde ponerlo. Es el mismo error que ya cometimos con
+            la pastilla del menú encima de las carpetas: un flotante pagando su
+            precio a escondidas. Enseñarlo solo en el bloque activo es lo que
+            hace el ratón con el hover, traducido a lo que un dedo sí tiene:
+            dónde estás tocando. */}
+        {editable && (!esMovil || bloqueActivo === b.id) && (
           <div className={cn('absolute flex items-center transition-opacity',
             esMovil
               ? 'right-0 -top-1 z-10'
@@ -1237,12 +1246,14 @@ export default function Documento() {
             ))}
             {esBloqueTexto && (
               <button onClick={() => iaMejorar(b)}
-                className="col-span-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 text-left transition-colors">
+                className={cn('col-span-2 flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 text-left transition-colors',
+                  esMovil ? 'h-11' : 'py-1.5')}>
                 <Wand2 className="w-3.5 h-3.5" /> Mejorar este texto con IA
               </button>
             )}
             <button onClick={() => { eliminar(b.id); setMenuAbierto(null); }}
-              className="col-span-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 text-left transition-colors">
+              className={cn('col-span-2 flex items-center gap-2 px-2.5 rounded-lg text-xs font-bold text-rose-500 hover:bg-rose-50 text-left transition-colors',
+                esMovil ? 'h-11' : 'py-1.5')}>
               <Trash2 className="w-3.5 h-3.5" /> Eliminar este bloque
             </button>
           </div>
