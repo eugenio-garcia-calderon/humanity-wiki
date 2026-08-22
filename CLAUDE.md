@@ -231,6 +231,13 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   agent arrived. Those users could not delete their account at all, and could not
   cancel a deletion either. A thorough battery of tests on one case says nothing
   about the case you did not think of.
+- **Two correct verifications do not verify the seam.** On 2026-08-22 one agent
+  wrote the public account-deletion page by reading the other's code, and the other
+  tested the deletion job without reading the page. Both halves were right. The page
+  promised the tombstone would read "Usuario eliminado" and the job wrote "Cuenta
+  borrada" — the one word anyone would ever see, on a page shown to Apple and Google
+  as a commitment. When your work meets someone else's, one of you has to check the
+  join, out loud, and say which of the two is wrong.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
