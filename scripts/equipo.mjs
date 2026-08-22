@@ -57,8 +57,16 @@ function quienSoy() {
   return porCarpeta || porFichero || null;
 }
 
-function leer() {
+function leer(conRed = true) {
   // Si no hay red, seguimos con lo último que tengamos. Nunca bloqueamos por eso.
+  if (!conRed) {
+    const local = gitSilencioso(['show', `origin/${RAMA}:${FICHERO}`]);
+    if (!local) return { reservas: [], base: null, sinRed: true };
+    try {
+      const datos = JSON.parse(local);
+      return { reservas: Array.isArray(datos.reservas) ? datos.reservas : [], base: null, sinRed: true };
+    } catch { return { reservas: [], base: null, sinRed: true }; }
+  }
   // Con tope de tiempo: el 2026-08-22 este fetch dejó colgado un gancho de commit
   // dos minutos. Un guardia que se queda pensando bloquea más de lo que protege.
   gitSilencioso(['fetch', '-q', 'origin', `+refs/heads/${RAMA}:refs/remotes/origin/${RAMA}`], { timeout: 8000 });
@@ -143,11 +151,26 @@ if (orden === 'quien') {
 // Lo llama el gancho de post-commit. Nunca falla ni bloquea: solo recuerda.
 if (orden === 'recordar') {
   if (!yo) process.exit(0);
-  const { reservas } = leer();
+  // Sin `fetch`: esto corre después de CADA commit y con nueve agentes serían
+  // muchas idas al remoto. Con lo último que tengamos basta para recordar.
+  const { reservas } = leer(false);
   const mias = reservas.filter((r) => r.agente === yo && !caducada(r));
-  if (mias.length) {
-    console.log(`\n(${yo}: tienes ${mias.length} reserva(s). Suéltalas al fusionar: node scripts/equipo.mjs soltar --todo)`);
-    for (const r of mias) console.log(`   ${r.ruta}  — hace ${haceCuanto(r.desde)}`);
+  if (!mias.length) process.exit(0);
+  // Muerta = sobre ese fichero no te queda nada sin fusionar. Es un hecho; el
+  // tiempo solo es una pista, y una reserva de dos horas puede estar viva.
+  const muerta = (ruta) =>
+    gitSilencioso(['diff', '--quiet', 'origin/main', '--', ruta], { timeout: 8000 }) !== null;
+  const muertas = mias.filter((r) => muerta(r.ruta));
+  const vivas2 = mias.filter((r) => !muertas.includes(r));
+  console.log(`\n(${yo}: tienes ${mias.length} reserva(s))`);
+  if (muertas.length) {
+    console.log('   MUERTAS — ya fusionado, suéltalas:');
+    for (const r of muertas) console.log(`     ${r.ruta}   — hace ${haceCuanto(r.desde)}`);
+    console.log(`   node scripts/equipo.mjs soltar ${muertas.map((r) => r.ruta).join(' ')}`);
+  }
+  if (vivas2.length) {
+    console.log('   en uso:');
+    for (const r of vivas2) console.log(`     ${r.ruta}   — hace ${haceCuanto(r.desde)}`);
   }
   process.exit(0);
 }
