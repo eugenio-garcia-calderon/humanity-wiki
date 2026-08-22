@@ -268,6 +268,9 @@ export function registerSocialRoutes(app: Express, db: any) {
         FROM publications p
         LEFT JOIN users u ON u.id = p.author_user_id
         WHERE p.archived_at IS NULL AND p.status = 'publicada'
+          -- BLOQUEO (2026-08-22). En el muro sin sesión no hace falta: quien no
+          -- ha entrado no ha bloqueado a nadie, y por eso solo va en esta rama.
+          AND NOT bloqueado_entre(${req.user.id}, p.author_user_id)
         ORDER BY relevance DESC, p.created_at DESC
         LIMIT ${limit}
       `);
@@ -342,10 +345,16 @@ export function registerSocialRoutes(app: Express, db: any) {
 
   app.get('/api/publications/:id/comments', async (req: Request, res: Response) => {
     try {
+      // BLOQUEO (2026-08-22). Los comentarios son la mitad de esto que se
+      // olvida: filtrar el muro y dejar los comentarios significa que la
+      // persona a la que bloqueaste te sigue hablando debajo de cada
+      // publicación, que desde fuera se lee como que el bloqueo no funciona.
+      const yo = req.user?.id || null;
       const rows = await db.execute(sql`
         SELECT c.*, u.display_name AS author_name, u.avatar_url AS author_avatar
         FROM comments c LEFT JOIN users u ON u.id = c.author_user_id
         WHERE c.publication_id = ${req.params.id} AND c.archived_at IS NULL
+          AND NOT bloqueado_entre(${yo}::text, c.author_user_id)
         ORDER BY c.created_at ASC
       `);
       res.json(rows.rows);
@@ -481,6 +490,17 @@ export function registerSocialRoutes(app: Express, db: any) {
       if (!entity_type || !entity_id) return res.status(400).json({ error: 'Faltan entity_type y entity_id.' });
       if (entity_type === 'users' && entity_id === req.user!.id) {
         return res.status(400).json({ error: 'No puedes seguirte a ti mismo.' });
+      }
+      // BLOQUEO (2026-08-22). El disparador de la migración 0091 borra los
+      // seguimientos que YA existían al bloquear; esto impide crear uno nuevo
+      // después. Sin las dos mitades, bloquear y volver a seguir deja el
+      // bloqueo puesto y el seguimiento vivo, que es un estado que no
+      // significa nada y que nadie sabría explicar mirando la pantalla.
+      if (entity_type === 'users') {
+        const b = await db.execute(sql`SELECT bloqueado_entre(${req.user!.id}, ${entity_id}) AS hay`);
+        if ((b.rows[0] as any)?.hay) {
+          return res.status(403).json({ error: 'No puedes seguir a esta persona.' });
+        }
       }
       const existing = await db.execute(sql`
         SELECT 1 FROM follows WHERE follower_user_id = ${req.user!.id}

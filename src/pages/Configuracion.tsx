@@ -10,6 +10,7 @@ import { cn } from '../utils/cn';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { BorrarCuenta } from '../components/cuenta/BorrarCuenta';
+import { Bloqueados } from '../components/cuenta/Bloqueados';
 
 export default function Configuracion() {
   const { fontScale, setFontScale } = useSettings();
@@ -48,6 +49,7 @@ export default function Configuracion() {
       {/* Y lo de la cuenta, al final y separado: lo de arriba se toca a menudo,
           esto se toca una vez en la vida. */}
       <div className="mt-6 space-y-6">
+        <Bloqueados />
         <BorrarCuenta />
       </div>
     </div>

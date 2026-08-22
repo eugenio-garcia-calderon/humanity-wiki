@@ -852,6 +852,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           ))
           AND (w.publico OR w.creator_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR w.creator_user_id = ${autor})
+          -- BLOQUEO (2026-08-22). Una línea por consulta, y la regla vive en
+          -- bloqueado_entre (migracion 0091) para que las cinco digan lo mismo.
+          -- Con la sesion cerrada usuarioId es NULL, el EXISTS da falso y no
+          -- filtra nada: quien no ha entrado no ha bloqueado a nadie.
+          AND NOT bloqueado_entre(${usuarioId}::text, w.creator_user_id)
           AND (${like}::text IS NULL OR w.title ILIKE ${like} OR w.config->>'body' ILIKE ${like})
         ORDER BY w.id, w.created_at DESC
         LIMIT ${limit}
@@ -872,6 +877,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           -- valor antiguo o vacío.
           AND (coalesce(p.visibility,'publica') <> 'privada' OR p.author_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR p.author_user_id = ${autor})
+          AND NOT bloqueado_entre(${usuarioId}::text, p.author_user_id)
           AND (${like}::text IS NULL OR p.title ILIKE ${like} OR p.body ILIKE ${like})
         ORDER BY p.created_at DESC
         LIMIT ${limit}
@@ -895,6 +901,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           AND (g.status = 'publicado' OR g.creator_user_id = ${usuarioId}::text)
           AND (${incluirPersonales} OR coalesce(g.center->>'personal','') <> '1')
           AND (${autor}::text IS NULL OR g.creator_user_id = ${autor})
+          AND NOT bloqueado_entre(${usuarioId}::text, g.creator_user_id)
           AND (${like}::text IS NULL OR g.title ILIKE ${like} OR g.description ILIKE ${like})
         ORDER BY g.created_at DESC
         LIMIT ${limit}
@@ -915,6 +922,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         WHERE p.archived_at IS NULL AND p.deleted_at IS NULL
           AND (p.publico OR p.creador_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR p.creador_user_id = ${autor})
+          AND NOT bloqueado_entre(${usuarioId}::text, p.creador_user_id)
           AND (${like}::text IS NULL OR p.titulo ILIKE ${like} OR p.descripcion ILIKE ${like})
         ORDER BY p.created_at DESC
         LIMIT ${limit}
@@ -935,6 +943,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         WHERE m.archived_at IS NULL AND m.deleted_at IS NULL
           AND (m.status = 'publicado' OR m.creator_user_id = ${usuarioId}::text)
           AND (${autor}::text IS NULL OR m.creator_user_id = ${autor})
+          AND NOT bloqueado_entre(${usuarioId}::text, m.creator_user_id)
           AND (${like}::text IS NULL OR m.title ILIKE ${like} OR m.description ILIKE ${like})
         ORDER BY m.created_at DESC
         LIMIT ${limit}
