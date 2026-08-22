@@ -3666,3 +3666,34 @@ called that» rather than showing an empty grid.
 (+363 KB raw). Loading all 5.592 would add some 3 MB for icons nobody will ever
 scroll past; loading them on demand would make the sidebar wait for a download
 before drawing an icon that is already chosen.
+
+---
+
+## 2026-08-22 (VI) — The first nine notes turn green
+
+Eugenio: «las tareas del hormiguero que estén ya hechas por ti o por el
+programador 2, ponlas como hechas en la plataforma».
+
+**Done through a migration, not through the API**, and the reason matters: a
+note's state is only moved by an admin with a session, and hand-making a session
+in production is entering as someone else without their password — forbidden
+here, and rightly. The other option was SSH plus psql by hand, which leaves no
+trace anyone can review. A migration goes in the repository, is read before it
+runs, runs once, and stays in the history.
+
+**Each note carries what was done**, not just a green dot. A dot says «done» and
+not what; the written answer means that in a month it can be read without
+digging for the commit — and if something was understood wrong, it shows up
+straight away.
+
+Marked **one by one by id**, never with `WHERE estado = 'esperando'`: that would
+also have turned green any note written in the meantime. Verified locally with
+the nine real ids plus a tenth standing in for a new note — the nine change, the
+tenth does not.
+
+What was verified where, so the green means something: the 16 px rule and the
+board's attachments were checked **on humanity.wiki**; the routes for importing
+contacts and for renaming a column answer 401 there rather than 404, which is
+what says they are deployed; the rest — the notifications panel, the menu
+button, the icon picker — needs a session to see and was verified locally on the
+same commit that is now in production.
