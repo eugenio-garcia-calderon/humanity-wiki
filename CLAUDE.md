@@ -177,6 +177,11 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   with `image/png` and SVG bytes inside. Two green status codes over two different
   failures. Load the thing the way the browser loads it — `Image()` and
   `onload`/`onerror` — and count.
+- **Changing what something does includes changing what it says it does.** On
+  2026-08-22 a screen still promised "the photo opens in the editor before it is
+  saved" hours after that stopped being true — written by the same agent who changed
+  the behaviour. A sentence that describes what the program no longer does teaches
+  people not to read the screen, and after that no warning works either.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
