@@ -34,6 +34,8 @@ type Producto = {
   kind: string; modality?: string | null; billing_period?: string | null;
   stock: number | null; status: string; images: any;
   envio_centimos: number | null; created_at: string;
+  /** Solo tiene sentido en una descarga: si el archivo que se entrega está subido. */
+  con_archivo?: boolean;
 };
 
 export default function Comercio() {
@@ -61,6 +63,33 @@ export default function Comercio() {
     } catch { setError('red'); setProductos([]); }
   }
   useEffect(() => { cargar(); }, []);
+
+  // ADJUNTAR (O CAMBIAR) EL ARCHIVO DE UNA DESCARGA (2026-08-22). Se sube a la
+  // zona privada y se guarda su URL en el producto; a partir de ahí, cada
+  // pedido pagado de ese producto puede descargarlo desde /pedido.
+  async function adjuntarArchivo(id: string, f: File) {
+    const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'application/octet-stream')}&privado=1`, {
+      method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.url) { window.alert(j.error || 'No se ha podido subir el archivo.'); return; }
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archivo_digital: j.url }),
+    });
+    cargar();
+  }
+
+  // MARCAR UN PEDIDO (2026-08-22): la ruta existía desde la fase 6 y la
+  // pantalla no la usaba — «sin enviar» se quedaba así para siempre.
+  async function marcarPedido(id: string, estado: string) {
+    const seguimiento = estado === 'enviado' ? (window.prompt('Número de seguimiento (opcional):') || null) : null;
+    await fetch(`/api/publicar/mis-ventas/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado, seguimiento }),
+    });
+    cargar();
+  }
 
   async function retirar(id: string, nombre: string) {
     if (!window.confirm(`¿Retirar «${nombre}» de la venta?\n\nDeja de verse en tu tienda. Los pedidos que ya tenga se conservan.`)) return;
@@ -154,9 +183,23 @@ export default function Comercio() {
                         · {p.stock <= 0 ? 'agotado' : `${p.stock} en stock`}
                       </span>}
                       {p.status === 'tienda' && <span className="text-slate-400">· solo en tu tienda</span>}
+                      {p.kind === 'digital' && (
+                        p.con_archivo
+                          ? <span className="text-emerald-700">· archivo listo</span>
+                          : <span className="text-amber-700 font-bold">· SIN ARCHIVO: se cobra y no se entrega</span>
+                      )}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    {p.kind === 'digital' && (
+                      <label aria-label={p.con_archivo ? 'Cambiar el archivo' : 'Subir el archivo'}
+                             title={p.con_archivo ? 'Cambiar el archivo que se entrega' : 'Subir el archivo que se entrega'}
+                             className={`w-11 h-11 grid place-items-center rounded-xl cursor-pointer hover:bg-slate-100 ${p.con_archivo ? '' : 'bg-amber-50'}`}>
+                        <input type="file" className="hidden"
+                          onChange={e => { const f = e.target.files?.[0]; if (f) adjuntarArchivo(p.id, f); e.target.value = ''; }} />
+                        <Download className={`w-4 h-4 ${p.con_archivo ? 'text-slate-500' : 'text-amber-700'}`} />
+                      </label>
+                    )}
                     {handle && (
                       <a href={`https://${handle}.humanity.wiki/producto/${p.id}`} target="_blank" rel="noopener noreferrer"
                          aria-label="Ver la ficha" title="Ver la ficha pública"
@@ -211,6 +254,20 @@ export default function Comercio() {
                     {p.estado}
                   </span>
                 </div>
+                {(p.estado === 'pagado' || p.estado === 'enviado') && (
+                  <div className="mt-2 flex gap-2">
+                    {p.estado === 'pagado' && (
+                      <button onClick={() => marcarPedido(p.id, 'enviado')}
+                        className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                        Marcar enviado
+                      </button>
+                    )}
+                    <button onClick={() => marcarPedido(p.id, 'entregado')}
+                      className="h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                      Marcar entregado
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

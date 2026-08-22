@@ -460,10 +460,16 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
 
         const ids = carrito.map(l => l[0]);
         const productos = (await db.execute(sql`
-          SELECT id, name, created_by, price_cents FROM products
+          SELECT id, name, created_by, price_cents, kind FROM products
           WHERE id = ANY(string_to_array(${ids.join(',')}, ','))
         `)).rows as any[];
         if (productos.length === 0) break;
+        // UN PEDIDO SOLO DE DESCARGAS NACE ENTREGADO (2026-08-22, entrega de lo
+        // digital): no hay caja que mandar ni «enviado» que marcar — lo que se
+        // compró está disponible en el pedido desde el segundo uno. Si hay
+        // una sola cosa física en el carrito, el pedido es de los que se
+        // envían y sigue el camino normal.
+        const todoDigital = productos.every(p => (p.kind || 'fisico') === 'digital');
 
         const correo = session.customer_details?.email || session.customer_email || null;
         const vendedorId = session.metadata!.vendedor_id || productos[0].created_by || null;
@@ -547,7 +553,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                     ${(session.currency || 'eur').toUpperCase()},
                     NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
                     ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
-                    ${vendedorId}, 'pagado', ${session.id}, ${txId})
+                    ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${session.id}, ${txId})
             ON CONFLICT (stripe_session_id) DO NOTHING
             RETURNING id
           `);
