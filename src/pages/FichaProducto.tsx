@@ -79,15 +79,34 @@ export default function FichaProducto({ handle }: { handle: string }) {
   const fotos: string[] = Array.isArray(p.imagenes) && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
   const sePuede = p.precio_centimos && !(p.stock !== null && p.stock <= 0);
 
+  // PAGAR CON PUNTOS TAMBIÉN DESDE «COMPRAR AHORA» (2026-08-22, Eugenio: «el
+  // botón de comprar ahora te lleva directamente a Stripe, MAL»). El mismo
+  // control que la cesta: el servidor dice si está activo y cuánto saldo hay,
+  // y solo se enseña si este producto acepta puntos.
+  const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
+  const [usarPuntos, setUsarPuntos] = useState('');
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
+  }, []);
+  const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  const maxPuntos = caja?.saldo != null && p?.precio_centimos
+    ? Math.floor(Math.min(caja.saldo, (p.precio_centimos / 100) * caja.puntos_por_euro) * 100) / 100
+    : 0;
+
   async function comprar() {
     setComprando(true); setError(null);
     try {
       const r = await fetch('/api/publicar/comprar', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ producto_id: p.id, cantidad: 1, volver_a: window.location.href }),
+        body: JSON.stringify({
+          producto_id: p.id, cantidad: 1, volver_a: window.location.href,
+          ...(caja?.activo && p.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
+        }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.url) { setError(j.error || 'No se ha podido abrir el pago.'); setComprando(false); return; }
+      // Pagado entero con puntos: no hay Stripe, vuelve aquí con el código y
+      // la confirmación la pinta la cesta (que también vive en esta página).
       window.location.href = j.url;
     } catch { setError('No hay conexión con el servidor.'); setComprando(false); }
   }
@@ -145,6 +164,24 @@ export default function FichaProducto({ handle }: { handle: string }) {
 
           {cobro?.abierto && sePuede && (
             <div className="mt-5 space-y-2">
+              {caja?.activo && caja.con_sesion && caja.saldo != null && p.acepta_puntos && p.modalidad !== 'suscripcion' && (
+                <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/60">
+                  <div className="flex items-center justify-between gap-3">
+                    <label htmlFor="ficha-puntos" className="text-xs font-bold text-amber-900">
+                      Pagar con puntos <span className="font-normal text-amber-700">(tienes {caja.saldo.toLocaleString('es-ES', { maximumFractionDigits: 2 })})</span>
+                    </label>
+                    <button type="button" onClick={() => setUsarPuntos(String(maxPuntos))} className="text-[11px] font-bold text-amber-800 underline">usar el máximo</button>
+                  </div>
+                  <input id="ficha-puntos" inputMode="decimal" value={usarPuntos} onChange={e => setUsarPuntos(e.target.value)} placeholder="0"
+                    className="mt-1.5 w-32 h-10 px-3 rounded-lg border border-amber-200 bg-white text-sm" />
+                  {puntosPedidos > 0 && (
+                    <p className="mt-1 text-[11px] text-amber-800">
+                      −{dinero(Math.min(p.precio_centimos || 0, Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)))} de descuento
+                      {Math.min(puntosPedidos, maxPuntos) >= (p.precio_centimos || 0) / 100 * caja.puntos_por_euro ? ' — se paga entero con puntos, sin tarjeta' : ''}.
+                    </p>
+                  )}
+                </div>
+              )}
               <button type="button" onClick={comprar} disabled={comprando}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-black disabled:opacity-60">
                 {comprando ? 'Abriendo el pago…'
@@ -203,20 +240,122 @@ export default function FichaProducto({ handle }: { handle: string }) {
         </section>
       )}
 
-      {/* Las opiniones son la fase 3 y todavía no existen. Se dice, en vez de
-          dejar un hueco: quien mira sabe que no es que nadie haya opinado
-          mal, es que todavía no se puede opinar. */}
-      <section className="mt-8 pt-6 border-t border-slate-100 max-w-2xl">
-        <h2 className="text-lg font-black text-slate-900 mb-2 flex items-center gap-2">
-          <Star className="w-4 h-4 text-slate-300" /> Opiniones
-        </h2>
-        <p className="text-sm text-slate-400">
-          Todavía no se pueden dejar opiniones aquí. Está en camino.
-        </p>
-      </section>
+      <Opiniones productoId={p.id} />
 
       <Cesta tienda={handle} />
     </Marco>
+  );
+}
+
+/**
+ * OPINIONES (2026-08-22, fase 3 del plan de comercio). Estrellas de 1 a 5 y
+ * un texto opcional; cualquiera con sesión opina, pero la marca «compra
+ * verificada» la pone el servidor solo a quien tiene un pedido pagado de
+ * este producto — y esa marca es la única que pesa en el reparto de puntos.
+ * Una persona, una opinión: volver a enviar sobreescribe la tuya.
+ */
+function Opiniones({ productoId }: { productoId: string }) {
+  const [datos, setDatos] = useState<{ media: number | null; n: number; verificadas: number; resenas: any[] } | null>(null);
+  const [sesion, setSesion] = useState<boolean | null>(null);
+  const [estrellas, setEstrellas] = useState(0);
+  const [texto, setTexto] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  const cargar = () => {
+    fetch(`/api/publicar/producto/${encodeURIComponent(productoId)}/resenas`)
+      .then(r => r.json()).then(j => { if (Array.isArray(j?.resenas)) setDatos(j); }).catch(() => {});
+  };
+  useEffect(() => {
+    cargar();
+    fetch('/api/auth/me').then(r => r.json()).then(j => setSesion(!!j?.user)).catch(() => setSesion(false));
+  }, [productoId]);
+
+  const enviar = async () => {
+    if (!estrellas) { setAviso('Elige de 1 a 5 estrellas.'); return; }
+    setEnviando(true); setAviso(null);
+    try {
+      const r = await fetch(`/api/publicar/producto/${encodeURIComponent(productoId)}/resena`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estrellas, texto }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setAviso(j.error || 'No se ha podido guardar.'); return; }
+      setAviso(j.compra_verificada ? 'Guardada, con la marca de compra verificada.' : 'Guardada. Como no consta una compra tuya, irá sin la marca de compra verificada.');
+      setTexto(''); setEstrellas(0); cargar();
+    } catch { setAviso('No hay conexión con el servidor.'); }
+    finally { setEnviando(false); }
+  };
+
+  const Estrellas = ({ n, tam = 'w-4 h-4' }: { n: number; tam?: string }) => (
+    <span className="inline-flex items-center gap-0.5" aria-label={`${n} de 5 estrellas`}>
+      {[1, 2, 3, 4, 5].map(i => <Star key={i} className={`${tam} ${i <= n ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`} />)}
+    </span>
+  );
+
+  return (
+    <section className="mt-8 pt-6 border-t border-slate-100 max-w-2xl">
+      <h2 className="text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
+        <Star className="w-4 h-4 text-amber-400" /> Opiniones
+        {datos && datos.n > 0 && (
+          <span className="text-sm font-bold text-slate-500 ml-1">
+            {datos.media?.toLocaleString('es-ES')} · {datos.n} {datos.n === 1 ? 'opinión' : 'opiniones'}
+            {datos.verificadas > 0 && <span className="text-emerald-700"> · {datos.verificadas} con compra verificada</span>}
+          </span>
+        )}
+      </h2>
+      {datos && datos.n === 0 && <p className="text-sm text-slate-400">Nadie ha opinado todavía. Sé quien empiece.</p>}
+
+      {datos && datos.resenas.length > 0 && (
+        <ul className="mt-3 space-y-3">
+          {datos.resenas.map((r, i) => (
+            <li key={i} className="p-3 rounded-2xl border border-slate-100 bg-slate-50/60">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Estrellas n={r.estrellas} />
+                <span className="text-xs font-bold text-slate-700">{r.autor}</span>
+                {r.compra_verificada && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                    <Check className="w-3 h-3" /> compra verificada
+                  </span>
+                )}
+                {r.mia && <span className="text-[10px] font-bold text-slate-400">· tuya</span>}
+                <span className="text-[11px] text-slate-400 ml-auto">{new Date(r.fecha).toLocaleDateString('es-ES')}</span>
+              </div>
+              {r.texto && <p className="mt-1.5 text-sm text-slate-700 leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>{r.texto}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {sesion === false && (
+        <p className="mt-4 text-sm text-slate-500">
+          <Link to="/login" className="font-bold text-emerald-700 hover:underline">Entra</Link> para dejar tu opinión.
+        </p>
+      )}
+      {sesion && (
+        <div className="mt-4 p-4 rounded-2xl border border-slate-200">
+          <p className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">Tu opinión</p>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map(i => (
+              <button key={i} type="button" onClick={() => setEstrellas(i)} aria-label={`${i} estrellas`}
+                className="w-9 h-9 grid place-items-center rounded-lg hover:bg-amber-50">
+                <Star className={`w-6 h-6 ${i <= estrellas ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`} />
+              </button>
+            ))}
+          </div>
+          <textarea value={texto} onChange={e => setTexto(e.target.value)} rows={3} maxLength={2000}
+            placeholder="¿Qué tal? (opcional)"
+            className="mt-2 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-emerald-400 focus:outline-none" />
+          <div className="mt-2 flex items-center gap-3">
+            <button type="button" onClick={enviar} disabled={enviando}
+              className="h-10 px-4 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-50">
+              {enviando ? 'Guardando…' : 'Publicar opinión'}
+            </button>
+            {aviso && <p className="text-xs font-bold text-slate-600">{aviso}</p>}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

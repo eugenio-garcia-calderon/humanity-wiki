@@ -36,6 +36,7 @@ import type { Express } from 'express';
 import { registrarGuardia } from './seguridad/guardia.js';
 import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
 import { registrarTransparencia } from './seguridad/transparencia.js';
+import { registrarAnclajeAutomatico } from './seguridad/anclaje.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
@@ -101,6 +102,15 @@ export const MODULOS: Modulo[] = [
         + 'de las personas y no nuestras, y para eso tiene que llegar antes que la ruta de '
         + '`server.ts` que las serviría. Lo que sí se permite, lo anota en el registro sellado. '
         + 'No decide permisos: eso lo hacen las rutas.',
+  },
+
+  {
+    nombre: 'seguridad/anclaje',
+    montar: (app, db) => registrarAnclajeAutomatico(app, db),
+    nota: 'No registra rutas: publica una vez al día, FUERA de aquí, el resumen de lo anotado en el '
+        + 'registro sellado. Es lo que convierte «verificable por nosotros» en «verificable por '
+        + 'cualquiera», y lo único que sale son 32 bytes. El sitio en la lista da igual; está aquí '
+        + 'para que se vea que existe.',
   },
 
   {

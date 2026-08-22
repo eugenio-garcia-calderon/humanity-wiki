@@ -24,6 +24,7 @@
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
+import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos } from './puntos';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -317,7 +318,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, description, price_cents, currency, images, kind,
                modality, billing_period, stock, warranty, return_policy, category,
-               envio_centimos, envio_gratis_desde_centimos, envio_plazo
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
+               (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
+               (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas
         FROM products
         WHERE id = ${String(req.params.id)} AND archived_at IS NULL
       `);
@@ -351,6 +354,12 @@ export function registerPublicarRoutes(app: Express, db: any) {
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
+        // Las opiniones, resumidas: media en estrellas (1-5) y cuántas. `null`
+        // = nadie ha opinado, que no es lo mismo que cero estrellas.
+        valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
+        // Si el vendedor acepta cobrar en puntos (y el interruptor está
+        // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
+        acepta_puntos: !!p.acepta_puntos,
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
@@ -366,6 +375,288 @@ export function registerPublicarRoutes(app: Express, db: any) {
           hace_falta: (p.kind || '') === 'fisico',
         },
       });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * CÓMO VAN MIS VENTAS — `GET /api/publicar/mis-ventas/resumen` (2026-08-22,
+   * fase 10 del plan de comercio, la parte que no necesita nada nuevo: leer
+   * los pedidos que ya existen y contarlos bien).
+   *
+   * Este mes (pedidos, euros cobrados, puntos cobrados, sin enviar), la serie
+   * de los últimos 6 meses y lo más vendido. Los euros son `importe_centimos`
+   * del pedido (lo que pagó el comprador por tarjeta, envío incluido) y los
+   * puntos `puntos_usados`: dos columnas, dos números, nunca sumados entre sí.
+   * Pedidos devueltos y cancelados no cuentan como venta.
+   */
+  app.get('/api/publicar/mis-ventas/resumen', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const uid = req.user.id;
+      const [mes, serie, top, sinEnviar] = await Promise.all([
+        db.execute(sql`
+          SELECT count(*)::int AS pedidos,
+                 coalesce(sum(importe_centimos), 0)::int AS euros_centimos,
+                 coalesce(sum(puntos_usados), 0)::float AS puntos
+          FROM pedidos
+          WHERE vendedor_user_id = ${uid} AND estado NOT IN ('cancelado', 'devuelto')
+            AND created_at >= date_trunc('month', now())
+        `),
+        db.execute(sql`
+          SELECT to_char(date_trunc('month', created_at), 'YYYY-MM') AS mes,
+                 count(*)::int AS pedidos,
+                 coalesce(sum(importe_centimos), 0)::int AS euros_centimos,
+                 coalesce(sum(puntos_usados), 0)::float AS puntos
+          FROM pedidos
+          WHERE vendedor_user_id = ${uid} AND estado NOT IN ('cancelado', 'devuelto')
+            AND created_at >= date_trunc('month', now()) - interval '5 months'
+          GROUP BY 1 ORDER BY 1
+        `),
+        db.execute(sql`
+          SELECT x.producto_id, max(x.nombre) AS nombre, sum(x.unidades)::int AS unidades
+          FROM (
+            SELECT pl.producto_id, pl.producto_nombre AS nombre, pl.unidades
+            FROM pedido_lineas pl JOIN pedidos pd ON pd.id = pl.pedido_id
+            WHERE pd.vendedor_user_id = ${uid} AND pd.estado NOT IN ('cancelado', 'devuelto')
+            UNION ALL
+            -- Pedidos de antes del carrito: una sola cosa, sin líneas.
+            SELECT pd.producto_id, pd.producto_nombre, coalesce(pd.unidades, 1)
+            FROM pedidos pd
+            WHERE pd.vendedor_user_id = ${uid} AND pd.estado NOT IN ('cancelado', 'devuelto')
+              AND NOT EXISTS (SELECT 1 FROM pedido_lineas pl WHERE pl.pedido_id = pd.id)
+          ) x
+          WHERE x.producto_id IS NOT NULL
+          GROUP BY x.producto_id ORDER BY unidades DESC LIMIT 5
+        `),
+        db.execute(sql`SELECT count(*)::int AS n FROM pedidos WHERE vendedor_user_id = ${uid} AND estado = 'pagado'`),
+      ]);
+      res.json({
+        mes: mes.rows[0],
+        serie: serie.rows,
+        mas_vendido: top.rows,
+        sin_enviar: Number((sinEnviar.rows[0] as any)?.n ?? 0),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // CUPONES DEL VENDEDOR (2026-08-22, fase 7 del plan de comercio)
+  // ==========================================================================
+  /** Mis cupones. */
+  app.get('/api/publicar/mis-cupones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo, created_at
+        FROM cupones WHERE vendedor_user_id = ${req.user.id} ORDER BY created_at DESC
+      `);
+      res.json(r.rows);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Crear un cupón: { codigo, tipo 'porcentaje'|'fijo', valor, minimo_centimos?, caduca?, usos_max? } */
+  app.post('/api/publicar/mis-cupones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const b = req.body || {};
+      const codigo = String(b.codigo || '').trim().toUpperCase().replace(/\s+/g, '');
+      if (!/^[A-Z0-9\-_]{3,24}$/.test(codigo)) return res.status(400).json({ error: 'El código: de 3 a 24 letras o números, sin espacios.' });
+      const tipo = b.tipo === 'fijo' ? 'fijo' : 'porcentaje';
+      const valor = Math.round(Number(b.valor));
+      if (!Number.isFinite(valor) || valor <= 0 || (tipo === 'porcentaje' && valor > 100)) {
+        return res.status(400).json({ error: tipo === 'porcentaje' ? 'El porcentaje va de 1 a 100.' : 'El importe tiene que ser mayor que cero.' });
+      }
+      const minimo = Math.max(0, Math.round(Number(b.minimo_centimos) || 0));
+      const caduca = b.caduca ? new Date(String(b.caduca)) : null;
+      if (caduca && Number.isNaN(caduca.getTime())) return res.status(400).json({ error: 'La fecha de caducidad no se entiende.' });
+      const usosMax = b.usos_max === null || b.usos_max === undefined || b.usos_max === '' ? null : Math.max(1, Math.round(Number(b.usos_max) || 1));
+      const id = 'CUP' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+      try {
+        await db.execute(sql`
+          INSERT INTO cupones (id, vendedor_user_id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max)
+          VALUES (${id}, ${req.user.id}, ${codigo}, ${tipo}, ${valor}, ${minimo}, ${caduca ? caduca.toISOString() : null}, ${usosMax})
+        `);
+      } catch (e: any) {
+        // pg dice 23505 en el error o en su `cause` según quién lo envuelva;
+        // se mira en los dos y también en el texto, que es lo que no cambia.
+        const texto = `${e?.message || ''} ${e?.cause?.message || ''}`;
+        if (String(e?.code) === '23505' || String(e?.cause?.code) === '23505' || /duplicate key|unique/i.test(texto)) {
+          return res.status(409).json({ error: 'Ya tienes un cupón con ese código.' });
+        }
+        throw e;
+      }
+      res.json({ id, codigo, tipo, valor, minimo_centimos: minimo, caduca_at: caduca, usos_max: usosMax, usos: 0, activo: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Activar / desactivar un cupón mío. Nunca se borra: los pedidos lo citan. */
+  app.put('/api/publicar/mis-cupones/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        UPDATE cupones SET activo = ${!!req.body?.activo}, updated_at = now()
+        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        RETURNING id, activo
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese cupón no es tuyo o no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿VALE ESTE CÓDIGO PARA ESTA CESTA? — `POST /api/publicar/cupon/comprobar`
+   * { codigo, lineas: [{ producto_id, cantidad }] } → { valido, descuento_centimos, motivo }
+   * Lo mismo que comprueba el cobro, pero sin cobrar: para que la cesta diga
+   * el descuento ANTES de pulsar pagar. Sin sesión: quien compra sin cuenta
+   * también tiene cupones.
+   */
+  app.post('/api/publicar/cupon/comprobar', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.body?.codigo || '').trim().toUpperCase();
+      const lineas: any[] = Array.isArray(req.body?.lineas) ? req.body.lineas : [];
+      if (!codigo || !lineas.length) return res.json({ valido: false, descuento_centimos: 0, motivo: 'Escribe un código.' });
+      const ids = lineas.map(l => String(l?.producto_id || '')).filter(Boolean);
+      const productos = (await db.execute(sql`
+        SELECT id, price_cents, created_by FROM products
+        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+      `)).rows as any[];
+      const vendedores = new Set(productos.map(p => p.created_by));
+      if (vendedores.size !== 1) return res.json({ valido: false, descuento_centimos: 0, motivo: 'El cupón es de una sola tienda.' });
+      const vendedorId = productos[0].created_by;
+      const subtotal = lineas.reduce((n, l) => {
+        const p = productos.find(x => x.id === String(l.producto_id));
+        return n + (p?.price_cents || 0) * Math.max(1, Math.min(99, Number(l.cantidad) || 1));
+      }, 0);
+      const c = (await db.execute(sql`
+        SELECT codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo
+        FROM cupones WHERE vendedor_user_id = ${vendedorId} AND codigo = ${codigo}
+      `)).rows[0] as any;
+      const motivo = !c ? 'Ese código no existe en esta tienda.'
+        : !c.activo ? 'Ese código ya no está activo.'
+        : c.caduca_at && new Date(c.caduca_at).getTime() < Date.now() ? 'Ese código ha caducado.'
+        : c.usos_max !== null && Number(c.usos) >= Number(c.usos_max) ? 'Ese código ya se ha usado todas las veces posibles.'
+        : subtotal < Number(c.minimo_centimos || 0) ? `Pide una compra mínima de ${(Number(c.minimo_centimos) / 100).toFixed(2)} €.`
+        : null;
+      if (motivo) return res.json({ valido: false, descuento_centimos: 0, motivo });
+      const descuento = c.tipo === 'porcentaje'
+        ? Math.min(subtotal, Math.round((subtotal * Math.min(100, Number(c.valor))) / 100))
+        : Math.min(subtotal, Number(c.valor));
+      res.json({ valido: true, descuento_centimos: descuento, codigo: c.codigo, motivo: null });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿SE PUEDE PAGAR CON PUNTOS AQUÍ, Y CON CUÁNTOS? — `GET /api/publicar/puntos-en-caja`
+   * Lo pregunta la cesta antes de pintar el control. `activo` lo decide el
+   * servidor (interruptor PUNTOS_DESCUENTO); `saldo` solo con sesión.
+   */
+  app.get('/api/publicar/puntos-en-caja', async (req: Request, res: Response) => {
+    try {
+      const activo = puntosDescuentoActivo();
+      let saldo: number | null = null;
+      if (activo && req.user) {
+        saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
+      }
+      res.json({ activo, con_sesion: !!req.user, saldo, puntos_por_euro: puntosPorEuro() });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // RESEÑAS DE PRODUCTO (2026-08-22, fase 3 del plan de comercio, Programador 7)
+  // ==========================================================================
+  // Sin tabla nueva: la estrella vive en `ratings` (entity_type 'products',
+  // score 0-10 = estrellas × 2) y el texto en `comments` (entity_type
+  // 'products'). Una persona, una reseña: la estrella se sobreescribe y el
+  // texto anterior se archiva cuando llega el nuevo.
+  //
+  // «COMPRA VERIFICADA» ES LO QUE PESA. Cualquiera con sesión puede opinar,
+  // pero solo la reseña de quien tiene un pedido pagado de ese producto lleva
+  // la marca — y solo esas cuentan en el reparto del bote. La pregunta de
+  // seguridad de siempre: ¿quién puede subir este número desde fuera? Con la
+  // marca, solo quien pagó. El vendedor no puede reseñarse a sí mismo.
+  const compraVerificada = async (productoId: string, userId: string, email: string | null) => {
+    const r = await db.execute(sql`
+      SELECT 1 FROM pedidos pd
+      LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+      WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+        AND (pd.producto_id = ${productoId} OR pl.producto_id = ${productoId})
+        AND (pd.comprador_user_id = ${userId} OR (${email}::text IS NOT NULL AND lower(pd.comprador_email) = lower(${email})))
+      LIMIT 1
+    `);
+    return r.rows.length > 0;
+  };
+
+  /** GET /api/publicar/producto/:id/resenas — públicas; `mia` si hay sesión. */
+  app.get('/api/publicar/producto/:id/resenas', async (req: Request, res: Response) => {
+    try {
+      const pid = String(req.params.id);
+      const lista = await db.execute(sql`
+        SELECT r.user_id, r.score, r.created_at, r.updated_at,
+               coalesce(u.display_name, u.name, 'Alguien') AS autor,
+               u.avatar_url AS avatar,
+               (SELECT c.body FROM comments c
+                 WHERE c.entity_type = 'products' AND c.entity_id = r.entity_id
+                   AND c.author_user_id = r.user_id AND c.archived_at IS NULL
+                 ORDER BY c.created_at DESC LIMIT 1) AS texto,
+               EXISTS (
+                 SELECT 1 FROM pedidos pd LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+                 WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+                   AND (pd.producto_id = r.entity_id OR pl.producto_id = r.entity_id)
+                   AND (pd.comprador_user_id = r.user_id OR lower(pd.comprador_email) = lower(u.email))
+               ) AS compra_verificada
+        FROM ratings r LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.entity_type = 'products' AND r.entity_id = ${pid}
+        ORDER BY r.updated_at DESC NULLS LAST, r.created_at DESC
+        LIMIT 100
+      `);
+      const filas = (lista.rows as any[]).map(f => ({
+        autor: f.autor, avatar: f.avatar || null,
+        estrellas: Math.round(Number(f.score) / 2),
+        texto: f.texto || null,
+        compra_verificada: !!f.compra_verificada,
+        fecha: f.updated_at || f.created_at,
+        mia: !!req.user && f.user_id === req.user.id,
+      }));
+      const n = filas.length;
+      const media = n ? Math.round((filas.reduce((s, f) => s + f.estrellas, 0) / n) * 10) / 10 : null;
+      res.json({ media, n, verificadas: filas.filter(f => f.compra_verificada).length, resenas: filas });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/publicar/producto/:id/resena  { estrellas 1-5, texto? } */
+  app.post('/api/publicar/producto/:id/resena', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra para dejar tu opinión.' });
+      const pid = String(req.params.id);
+      const estrellas = Math.round(Number(req.body?.estrellas));
+      const texto = String(req.body?.texto || '').trim().slice(0, 2000);
+      if (!Number.isFinite(estrellas) || estrellas < 1 || estrellas > 5) {
+        return res.status(400).json({ error: 'Elige de 1 a 5 estrellas.' });
+      }
+      const p = (await db.execute(sql`SELECT id, created_by FROM products WHERE id = ${pid} AND archived_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+      if (p.created_by === req.user.id) return res.status(403).json({ error: 'No puedes reseñar lo que vendes tú.' });
+
+      await db.execute(sql`
+        INSERT INTO ratings (user_id, entity_type, entity_id, score)
+        VALUES (${req.user.id}, 'products', ${pid}, ${estrellas * 2})
+        ON CONFLICT (user_id, entity_type, entity_id)
+        DO UPDATE SET score = EXCLUDED.score, updated_at = now()
+      `);
+      // El texto anterior se archiva (nunca se borra) y entra el nuevo.
+      await db.execute(sql`
+        UPDATE comments SET archived_at = now()
+        WHERE entity_type = 'products' AND entity_id = ${pid} AND author_user_id = ${req.user.id} AND archived_at IS NULL
+      `);
+      if (texto) {
+        await db.execute(sql`
+          INSERT INTO comments (id, entity_type, entity_id, publication_id, author_user_id, body, created_by, updated_by)
+          VALUES (${'CMT' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase()},
+                  'products', ${pid}, NULL, ${req.user.id}, ${texto}, ${req.user.id}, ${req.user.id})
+        `);
+      }
+      const verificada = await compraVerificada(pid, req.user.id, req.user.email || null);
+      res.json({ success: true, estrellas, compra_verificada: verificada });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -457,7 +748,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
-               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo
+               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
         FROM products
         WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
           AND archived_at IS NULL
@@ -531,9 +822,123 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const reparte = !!vendedor?.charges_enabled;
       const comision = Math.round((subtotal * COMISION_BPS) / 10000);
 
+      // ══ CUPÓN DEL VENDEDOR (2026-08-22, fase 7 del plan) ═══════════════
+      // Un código del vendedor de TODA la cesta (ya se ha exigido un solo
+      // vendedor). Se valida aquí mismo — activo, no caducado, con usos, con
+      // el mínimo — y se rebaja del subtotal antes que los puntos. Si no vale,
+      // no se cobra a ciegas con otro precio: se dice y se para.
+      let cuponCent = 0;
+      let cuponRow: any = null;
+      const codigoCupon = String(cuerpo.cupon || '').trim().toUpperCase();
+      if (codigoCupon) {
+        if (suscripcion) return res.status(400).json({ error: 'Una suscripción no admite cupón.' });
+        cuponRow = (await db.execute(sql`
+          SELECT id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo
+          FROM cupones WHERE vendedor_user_id = ${vendedorId} AND codigo = ${codigoCupon}
+        `)).rows[0] as any;
+        const motivo = !cuponRow ? 'Ese código no existe en esta tienda.'
+          : !cuponRow.activo ? 'Ese código ya no está activo.'
+          : cuponRow.caduca_at && new Date(cuponRow.caduca_at).getTime() < Date.now() ? 'Ese código ha caducado.'
+          : cuponRow.usos_max !== null && Number(cuponRow.usos) >= Number(cuponRow.usos_max) ? 'Ese código ya se ha usado todas las veces posibles.'
+          : subtotal < Number(cuponRow.minimo_centimos || 0) ? `Ese código pide una compra mínima de ${(Number(cuponRow.minimo_centimos) / 100).toFixed(2)} €.`
+          : null;
+        if (motivo) return res.status(400).json({ error: motivo, cupon: false });
+        cuponCent = cuponRow.tipo === 'porcentaje'
+          ? Math.min(subtotal, Math.round((subtotal * Math.min(100, Number(cuponRow.valor))) / 100))
+          : Math.min(subtotal, Number(cuponRow.valor));
+      }
+
+      // ══ PUNTOS EN EL CARRITO (2026-08-22, interruptor PUNTOS_DESCUENTO) ══
+      // El comprador con sesión puede pagar con puntos la parte de la cesta
+      // cuyos productos ACEPTAN puntos (lo marca cada vendedor), hasta el
+      // 100 % de esa parte. El envío siempre va en euros. El vendedor cobra
+      // esos puntos por el libro (pagarConPuntos). Si el total en euros se
+      // queda en cero, no se abre Stripe: el pedido nace aquí mismo.
+      let puntosUsados = 0;
+      let descuentoCentimos = 0;
+      const pidePuntos = Number(cuerpo.usar_puntos) || 0;
+      if (pidePuntos > 0) {
+        if (!puntosDescuentoActivo()) {
+          return res.status(403).json({ error: 'Pagar con puntos todavía no está activado en esta tienda.' });
+        }
+        if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para pagar con puntos.' });
+        if (suscripcion) return res.status(400).json({ error: 'Una suscripción no se paga con puntos.' });
+        if (req.user.id === vendedorId) return res.status(400).json({ error: 'No puedes comprarte a ti con puntos.' });
+        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+        if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
+        const saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
+        const tasa = puntosPorEuro();
+        // Los puntos cubren como mucho lo que acepta puntos y queda por
+        // pagar después del cupón: un descuento no se paga dos veces.
+        const topePuntos = Math.floor(Math.min(saldo, (Math.min(aceptan, subtotal - cuponCent) / 100) * tasa) * 100) / 100;
+        puntosUsados = Math.min(Math.round(pidePuntos * 100) / 100, topePuntos);
+        if (puntosUsados <= 0) return res.status(400).json({ error: 'No tienes puntos suficientes para usar aquí.' });
+        descuentoCentimos = Math.min(aceptan, Math.round((puntosUsados / tasa) * 100));
+      }
+      const totalEuros = subtotal - cuponCent - descuentoCentimos + (envioCobrado || 0);
+      // La comisión va sobre lo que de verdad se cobra en euros por los
+      // productos (sin envío), no sobre el precio de etiqueta.
+      const comisionReal = Math.round((Math.max(0, subtotal - cuponCent - descuentoCentimos) * COMISION_BPS) / 10000);
+
+      if (puntosUsados > 0 && totalEuros <= 0) {
+        // TODO EN PUNTOS: sin pasarela. El pedido se crea aquí, y el cobro
+        // en puntos se hace en la misma llamada; si el libro dice que no
+        // (saldo cambió), no hay pedido.
+        const pedidoId = 'PED' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+        const codigo = Math.random().toString(36).replace(/[^a-hj-np-z2-9]/g, '').slice(0, 8).toUpperCase().padEnd(8, '7');
+        const resumen = lineas.length === 1 ? lineas[0].p.name : `${lineas[0].p.name} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
+        const todoDigital = lineas.every(l => (l.p.kind || '') === 'digital');
+        await db.execute(sql`
+          INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades, importe_centimos, envio_centimos, moneda,
+                               comprador_user_id, comprador_email, comprador_nombre, vendedor_user_id, estado)
+          VALUES (${pedidoId}, ${codigo}, ${lineas.length === 1 ? lineas[0].p.id : null}, ${resumen},
+                  ${lineas.length === 1 ? lineas[0].unidades : null}, 0, 0, ${moneda.toUpperCase()},
+                  ${req.user!.id}, ${req.user!.email || null}, ${req.user!.displayName || null},
+                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'})
+        `);
+        const ok = await pagarConPuntos(db, req.user!.id, vendedorId, puntosUsados, pedidoId);
+        if (!ok) {
+          await db.execute(sql`DELETE FROM pedidos WHERE id = ${pedidoId} AND puntos_usados = 0`);
+          return res.status(409).json({ error: 'Tu saldo de puntos ha cambiado y ya no alcanza. Vuelve a intentarlo.' });
+        }
+        if (cuponRow) {
+          await db.execute(sql`UPDATE cupones SET usos = usos + 1, updated_at = now() WHERE id = ${cuponRow.id}`);
+          await db.execute(sql`UPDATE pedidos SET cupon_codigo = ${cuponRow.codigo}, descuento_centimos = ${cuponCent} WHERE id = ${pedidoId}`);
+        }
+        for (const l of lineas) {
+          await db.execute(sql`
+            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos)
+            VALUES (${'PLN' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
+                    ${pedidoId}, ${l.p.id}, ${l.p.name}, ${l.unidades}, ${l.p.price_cents})
+          `);
+          if (l.llevaCuenta) {
+            await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
+          }
+        }
+        return res.json({
+          pagado_con_puntos: true, codigo, puntos_usados: puntosUsados,
+          subtotal_centimos: subtotal, descuento_centimos: descuentoCentimos, envio_centimos: envioCobrado,
+          url: `${destino}${destino.includes('?') ? '&' : '?'}compra=hecha&pedido=${codigo}`,
+        });
+      }
+
+      // PARTE EN PUNTOS + RESTO EN EUROS: un cupón de Stripe por el importe
+      // exacto del descuento, y los puntos viajan en los metadatos para que el
+      // webhook los cobre al confirmar el pago (nunca antes: una sesión
+      // abandonada no mueve puntos).
       const stripe = getStripe();
+      // Un solo cupón de Stripe con la suma de las dos rebajas (la del
+      // vendedor y la de los puntos), con el nombre que se verá en el recibo.
+      const rebajaTotal = descuentoCentimos + cuponCent;
+      const cupon = rebajaTotal > 0
+        ? await stripe.coupons.create({
+            amount_off: rebajaTotal, currency: moneda, duration: 'once',
+            name: [cuponRow ? `Cupón ${cuponRow.codigo}` : '', puntosUsados > 0 ? `${puntosUsados} puntos` : ''].filter(Boolean).join(' + '),
+          })
+        : null;
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
+        ...(cupon ? { discounts: [{ coupon: cupon.id }] } : {}),
         ui_mode: 'hosted',
         line_items: lineas.map(l => ({
           price_data: {
@@ -559,13 +964,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
         } : {}),
         ...(reparte && !suscripcion ? {
           payment_intent_data: {
-            application_fee_amount: comision,
+            application_fee_amount: comisionReal,
             transfer_data: { destination: vendedor.stripe_account_id },
           },
         } : {}),
         metadata: {
           kind: 'compra_publica',
           vendedor_id: vendedorId || '',
+          puntos: puntosUsados > 0 ? String(puntosUsados) : '',
+          buyer_id: puntosUsados > 0 && req.user ? req.user.id : '',
+          cupon_id: cuponRow ? String(cuponRow.id) : '',
+          cupon_codigo: cuponRow ? String(cuponRow.codigo) : '',
+          cupon_centimos: cuponCent > 0 ? String(cuponCent) : '',
           envio_centimos: envioCobrado === null ? '' : String(envioCobrado),
           // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
           // pedido sin volver a preguntarle al navegador — que para entonces
@@ -600,6 +1010,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         envio_centimos: envioCobrado,
         pide_direccion: esFisico,
         lineas: lineas.length,
+        puntos_usados: puntosUsados, descuento_centimos: descuentoCentimos,
+        cupon: cuponRow ? cuponRow.codigo : null, cupon_centimos: cuponCent,
       });
     } catch (e: any) {
       console.error('comprar publico:', e);
@@ -641,7 +1053,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos,
       } = req.body || {};
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
@@ -703,7 +1115,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
                               modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
-                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital)
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
@@ -715,7 +1127,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
                 ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
                 ${String(envio_plazo || '').trim() || null},
-                ${clase === 'digital' ? archivo : null})
+                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true})
       `);
 
       res.json({
@@ -756,6 +1168,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, price_cents, currency, kind, stock, status, images,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at,
+               (archivo_digital IS NOT NULL) AS con_archivo, acepta_puntos,
+               (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
+               (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas,
                (archivo_digital IS NOT NULL) AS con_archivo
         FROM products
         WHERE created_by = ${req.user.id} AND archived_at IS NULL
@@ -798,6 +1213,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           archivo_digital = CASE
             WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
             ELSE archivo_digital END,
+          acepta_puntos = CASE WHEN ${b.acepta_puntos !== undefined} THEN ${!!b.acepta_puntos} ELSE acepta_puntos END,
           updated_by = ${req.user.id},
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
@@ -829,18 +1245,39 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * Devuelve las líneas, y en cada línea digital con archivo, la URL de
    * descarga (que vuelve a pedir el correo: la llave viaja con el enlace).
    */
+  /**
+   * ¿YA EXISTE MI PEDIDO? — `GET /api/publicar/pedido-por-sesion/:sesion`
+   * Al volver de Stripe la página solo sabe el id de la sesión de pago; el
+   * pedido lo crea el webhook un instante después. La confirmación pregunta
+   * aquí hasta que aparece. Solo devuelve el código: con él y el correo (o la
+   * sesión de quien compró) se consulta el resto.
+   */
+  app.get('/api/publicar/pedido-por-sesion/:sesion', async (req: Request, res: Response) => {
+    try {
+      const sid = String(req.params.sesion || '').trim();
+      if (!sid.startsWith('cs_')) return res.status(400).json({ error: 'Esa sesión de pago no se entiende.' });
+      const r = await db.execute(sql`SELECT codigo FROM pedidos WHERE stripe_session_id = ${sid}`);
+      if (!r.rows[0]) return res.status(404).json({ pendiente: true, error: 'Todavía estamos confirmando el pago.' });
+      res.json({ codigo: (r.rows[0] as any).codigo });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) {
+      // Dos llaves: el correo, o la sesión de quien compró con cuenta.
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) {
         return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
       }
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
+               moneda, estado, seguimiento, created_at, updated_at, direccion_envio,
+               puntos_usados, cupon_codigo, descuento_centimos, comprador_email
         FROM pedidos
-        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
+        WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
       `);
       const p = r.rows[0] as any;
       if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
@@ -867,6 +1304,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         ciudad: p.direccion_envio?.city || null,
         hecho_el: p.created_at,
         cambiado_el: p.updated_at,
+        // Lo que se pagó con puntos y con cupón, para que la confirmación y
+        // «¿dónde está lo mío?» lo digan sin consultar el libro.
+        puntos_usados: Number(p.puntos_usados || 0),
+        cupon: p.cupon_codigo || null,
+        descuento_centimos: Number(p.descuento_centimos || 0),
         // Un pedido sin nada físico no se envía: la pantalla no debe pintar
         // «enviado» como un paso pendiente que nunca llegará.
         solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital'),
@@ -880,7 +1322,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // no es digital (nada que descargar), es digital pero el vendedor
           // no subió el archivo (se dice), o el pedido no está vivo.
           descarga: l.kind === 'digital' && l.con_archivo && vivo
-            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}?correo=${encodeURIComponent(correo)}`
+            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}${correo ? `?correo=${encodeURIComponent(correo)}` : ''}`
             : null,
           sin_archivo: l.kind === 'digital' && !l.con_archivo,
         })),
@@ -901,13 +1343,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
+      // Dos llaves válidas: el correo del pedido, o la SESIÓN de quien lo
+      // compró con cuenta (2026-08-22: la confirmación de compra enseña las
+      // descargas sin pedir el correo a quien acaba de pagar con su sesión).
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
       const r = await db.execute(sql`
         SELECT pr.archivo_digital, l.producto_nombre, p.estado
         FROM pedidos p
         JOIN pedido_lineas l ON l.pedido_id = p.id AND l.id = ${String(req.params.lineaId)}
         JOIN products pr ON pr.id = l.producto_id
-        WHERE p.codigo = ${codigo} AND lower(p.comprador_email) = ${correo}
+        WHERE p.codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(p.comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND p.comprador_user_id = ${quien}))
           AND coalesce(pr.kind, 'fisico') = 'digital'
       `);
       const fila = r.rows[0] as any;

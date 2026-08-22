@@ -59,15 +59,30 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   const { anadir } = useCarrito(tienda || 'general');
   useEffect(() => { setFotoRota(false); setCompra({ fase: 'quieto' }); setAnadido(false); }, [id]);
 
+  // PAGAR CON PUNTOS DESDE «COMPRAR» (2026-08-22, Eugenio). El servidor dice
+  // si está activo; solo se enseña si el producto acepta puntos y hay sesión.
+  const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
+  const [usarPuntos, setUsarPuntos] = useState('');
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
+  }, []);
+  const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+
   async function comprar() {
     setCompra({ fase: 'abriendo' });
     try {
+      const precioCent = Number(p?.precio_centimos || 0);
+      const maxPuntos = caja?.saldo != null && precioCent
+        ? Math.floor(Math.min(caja.saldo, (precioCent / 100) * caja.puntos_por_euro) * 100) / 100 : 0;
       const r = await fetch('/api/publicar/comprar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // De dónde sale y a dónde vuelve: a esta misma tienda. El servidor no
         // se fía de esto y comprueba que sea una dirección suya.
-        body: JSON.stringify({ producto_id: id, cantidad: 1, volver_a: window.location.href }),
+        body: JSON.stringify({
+          producto_id: id, cantidad: 1, volver_a: window.location.href,
+          ...(caja?.activo && p?.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
+        }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.url) {
@@ -171,6 +186,11 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
               // Sin precio no se inventa un cero: se dice que hay que
               // preguntar. Un cero diría «gratis», que es otra cosa.
               : <span className="text-sm font-bold text-slate-500">Precio a consultar</span>}
+            {p.valoracion?.n > 0 && (
+              <span className="text-xs font-bold text-amber-600" title={`${p.valoracion.n} opiniones`}>
+                ★ {Number(p.valoracion.media).toLocaleString('es-ES')} ({p.valoracion.n})
+              </span>
+            )}
             <Disponibilidad stock={p.stock} />
           </div>
 
@@ -178,6 +198,17 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
 
           {cobro === true && puedeComprarse(p) && (
             <div className="mt-3">
+              {caja?.activo && caja.con_sesion && caja.saldo != null && p.acepta_puntos && p.modalidad !== 'suscripcion' && (
+                <div className="mb-2 p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-amber-900">Pagar con puntos <span className="font-normal text-amber-700">(tienes {caja.saldo.toLocaleString('es-ES', { maximumFractionDigits: 2 })})</span></span>
+                  <input inputMode="decimal" value={usarPuntos} onChange={e => setUsarPuntos(e.target.value)} placeholder="0" aria-label="Puntos a usar"
+                    className="w-24 h-9 px-2 rounded-lg border border-amber-200 bg-white text-sm" />
+                  <button type="button" className="text-[11px] font-bold text-amber-800 underline"
+                    onClick={() => setUsarPuntos(String(Math.floor(Math.min(caja.saldo!, ((p.precio_centimos || 0) / 100) * caja.puntos_por_euro) * 100) / 100))}>
+                    usar el máximo
+                  </button>
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
                   className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold

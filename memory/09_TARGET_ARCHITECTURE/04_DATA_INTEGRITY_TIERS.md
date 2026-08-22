@@ -159,7 +159,29 @@ the phase that protects against our own code being wrong:
 > **Verifiable by:** the application, with its own credentials, failing to
 > `UPDATE registro_sellado` and failing to `DROP TABLE`.
 
-### Phase D — Publish the proof where we cannot reach it
+### Phase D — Publish the proof where we cannot reach it · **built 2026-08-22**
+
+> `src/server/seguridad/anclaje.ts`. Once a day the Merkle root of everything
+> recorded that day — 32 bytes, nothing else — goes to three OpenTimestamps
+> calendars, and their receipts are stored whole: without the receipt, the date
+> is just another claim of ours. `GET /api/seguridad/anclajes` serves them
+> **without a session**, because the entire point is that somebody who does not
+> trust us can check without asking us for anything.
+>
+> **Three states, because they are three different things:** *calculado* (the
+> root exists here and proves nothing to anyone), *enviado* (a calendar has it
+> and returned a receipt) and *confirmado* (the receipt completed with the
+> Bitcoin attestation, which needs asking again about an hour later — not built,
+> and not pretended).
+>
+> The test's point is not that it works when everything is up: it is that **when
+> no calendar answers, the day is NOT marked as published**. A day marked
+> anchored without a receipt is a proof that does not exist, and you find that
+> out the day you need to show it.
+>
+> It anchors **yesterday**, never today: today is still growing, and anchoring
+> half a day would leave two different roots for one date with no way to say
+> which is the day's root.
 
 The daily Merkle root to OpenTimestamps (Bitcoin) — free, no wallet, verifiable by
 anyone. Only the salted root travels: EDPB Guidelines 02/2025 v2.0 (final,

@@ -129,6 +129,9 @@ const MOTIVO_LABEL: Record<string, string> = {
   transferencia_enviada: 'Enviado a otra persona',
   transferencia_recibida: 'Recibido de otra persona',
   saldo_inicial: 'Apertura del libro',
+  gasto_servicio: 'Servicio de la plataforma',
+  compra_con_puntos: 'Compra en el mercado pagada con puntos',
+  venta_en_puntos: 'Venta cobrada en puntos',
 };
 
 /**
@@ -313,8 +316,13 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
   const srv = gasto.servidores;
   const oficial = gasto.ia.oficial_anthropic;
   const interno = gasto.ia.interno;
+  // LOS MODELOS ABIERTOS TAMBIÉN CUESTAN (2026-08-22). Con la facturación
+  // oficial de Anthropic conectada, esta suma era «lo oficial + Google» y el
+  // gasto en modelos abiertos —los que la plataforma regala al usuario— no
+  // aparecía en ningún sitio: ni en el total ni en el desglose. Son gratis
+  // PARA EL USUARIO, no para la casa.
   const iaMes = oficial.estado === 'ok'
-    ? oficial.mes_actual_eur + interno.mes_actual.google_eur
+    ? oficial.mes_actual_eur + interno.mes_actual.google_eur + interno.mes_actual.abiertos_eur
     : interno.mes_actual.total_eur;
   // Si hay consumo real del mes (token de Hetzner), «Este mes» suma lo
   // consumido de verdad; si solo hay precio fijo, suma el precio mensual.
@@ -400,6 +408,10 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
             <div className="flex items-center">
               <span className="text-slate-600 font-bold">Google (Gemini)</span>
               <span className="text-slate-900 font-black ml-auto">{eur(interno.mes_actual.google_eur)}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-slate-600 font-bold">Modelos abiertos (Together)</span>
+              <span className="text-slate-900 font-black ml-auto">{eur(interno.mes_actual.abiertos_eur)}</span>
             </div>
           </div>
           <p className="text-[10px] text-slate-400 mt-3 leading-relaxed">

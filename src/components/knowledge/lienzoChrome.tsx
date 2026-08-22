@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
-import { Handle, Position, NodeResizer } from '@xyflow/react';
+import { Handle, Position, NodeResizer, ViewportPortal } from '@xyflow/react';
 import { RotateCw } from 'lucide-react';
+import type { Guia } from '../../utils/alineacion';
 
 // ============================================================================
 // CROMADO DE SELECCIÓN — el marco estilo Miro (2026-08-08, petición del usuario)
@@ -144,5 +145,39 @@ export function MarcoSeleccion({ visible, radio = 16 }: { visible: boolean; radi
         zIndex: 4,
       }}
     />
+  );
+}
+
+/**
+ * GUÍAS DE ALINEACIÓN (2026-08-22) — las líneas rosas que salen al arrastrar
+ * cuando la pieza que llevas se pone a la altura de otra. Es lo que convierte
+ * «colocar a ojo» en «colocar bien» sin tener que abrir ninguna barra.
+ *
+ * Van dentro de `ViewportPortal`, así que se dibujan en coordenadas DEL
+ * LIENZO y se mueven y escalan con él. El grosor llega ya dividido por el
+ * zoom: una línea de 1,5 px de pantalla, esté donde esté el zoom.
+ */
+export function GuiasAlineado({ guias, grosor = 1.5 }: { guias: Guia[]; grosor?: number }) {
+  if (!guias.length) return null;
+  return (
+    <ViewportPortal>
+      {guias.map((g, i) => (
+        <div
+          key={`${g.eje}-${g.v}-${i}`}
+          className="pointer-events-none"
+          style={g.eje === 'x'
+            ? {
+                position: 'absolute', zIndex: 30, background: '#ec4899',
+                left: g.v, top: g.desde, width: grosor, height: g.hasta - g.desde,
+                transform: `translateX(${-grosor / 2}px)`,
+              }
+            : {
+                position: 'absolute', zIndex: 30, background: '#ec4899',
+                top: g.v, left: g.desde, height: grosor, width: g.hasta - g.desde,
+                transform: `translateY(${-grosor / 2}px)`,
+              }}
+        />
+      ))}
+    </ViewportPortal>
   );
 }

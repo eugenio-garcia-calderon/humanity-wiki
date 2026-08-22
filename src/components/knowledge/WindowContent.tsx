@@ -51,11 +51,18 @@ function MarcoQueSoloViveMientrasSeVe({ src, title, className, style }: {
 
     // RED DE SEGURIDAD: SI EL OBSERVADOR NO CONTESTA, SE MONTA IGUAL.
     // Un observador recién creado SIEMPRE entrega una primera respuesta, diga
-    // que se ve o que no. Si en un segundo y medio no ha dicho nada, es que en
-    // ese navegador no funciona — y me lo he encontrado de verdad probando
-    // esto: cero eventos sobre un elemento que estaba a la vista. Sin esta
-    // salida, el fallo sería un cuadro gris donde debería haber un mapa, para
-    // siempre. Un mapa que no aparece es peor que un mapa que pesa.
+    // que se ve o que no. Si en un segundo y medio no ha dicho nada, algo pasa
+    // en ese navegador, y sin esta salida el fallo sería un cuadro gris donde
+    // debería haber un mapa, para siempre. Un mapa que no aparece es peor que
+    // un mapa que pesa.
+    //
+    // AQUÍ ANTES DECÍA QUE ME HABÍA ENCONTRADO UN NAVEGADOR DONDE EL OBSERVADOR
+    // NO FUNCIONA. Era falso y lo escribí yo. Lo que me encontré fueron cero
+    // eventos sobre un elemento que yo creía a la vista, y la causa era que la
+    // PESTAÑA ESTABA OCULTA: una pestaña oculta no intersecta nada y detiene
+    // `requestAnimationFrame`. El observador estaba bien; la medición no.
+    // La red se queda igualmente —es barata y protege de lo que no sé—, pero
+    // no como prueba de que ningún navegador cumpla, porque no la tengo.
     // No hace daño en un navegador sano: allí la primera respuesta llega en el
     // mismo fotograma y el temporizador se cancela sin haber hecho nada.
     let contesto = false;

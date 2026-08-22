@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../utils/subir';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType, ConnectionMode,
-  useNodesState, useEdgesState, useInternalNode, getStraightPath,
+  ReactFlow, Background, MiniMap, Handle, Position, MarkerType, ConnectionMode,
+  useNodesState, useEdgesState, useInternalNode, useStore, getStraightPath,
   BaseEdge, EdgeLabelRenderer,
   type Node, type Edge, type NodeProps, type EdgeProps, type InternalNode,
-  type ReactFlowInstance,
+  type ReactFlowInstance, type OnSelectionChangeParams,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -26,9 +26,16 @@ import WindowContent from '../components/knowledge/WindowContent';
 import RatingWidget from '../components/knowledge/RatingWidget';
 import EntityComments from '../components/knowledge/EntityComments';
 import AddWindowPanel from '../components/knowledge/AddWindowPanel';
-import { PuntosConexion, TiradorRotar, TiradoresTamano, MarcoSeleccion } from '../components/knowledge/lienzoChrome';
+import { PuntosConexion, TiradorRotar, TiradoresTamano, MarcoSeleccion, GuiasAlineado } from '../components/knowledge/lienzoChrome';
 import BarraElemento from '../components/knowledge/BarraElemento';
+import BarraSeleccion from '../components/knowledge/BarraSeleccion';
+import BarraLienzo, { type ModoLienzo } from '../components/knowledge/BarraLienzo';
 import RecortarImagen from '../components/knowledge/RecortarImagen';
+import { useHistorial } from '../hooks/useHistorial';
+import {
+  alinear, repartir, igualar, guiasDeArrastre,
+  type Caja, type Guia, type Alineacion, type Reparto, type Igualado,
+} from '../utils/alineacion';
 
 // ============================================================================
 // Lienzo de un Grafo de Conocimiento (Fase 11, rediseño 11c-11e)
@@ -347,6 +354,10 @@ function VentanaNode({ data, selected }: NodeProps<any>) {
   const puedeGestionar = !!onGeometria;
   const puedeDeformar = puedeGestionar && !win.locked;
   const marcado = !!selected;
+  // Con VARIOS marcados manda la barra de la selección (alinear, repartir…) y
+  // las barras de cada elemento se callan: doce barras a la vez no son doce
+  // veces más útiles, son ruido que tapa el lienzo.
+  const variosMarcados = useStore(s => s.nodes.filter(n => n.selected).length > 1);
   // Si tiene tamaño guardado manda ese; si no, el natural de su tipo.
   const aMedida = win.w != null || win.h != null;
   return (
@@ -365,15 +376,15 @@ function VentanaNode({ data, selected }: NodeProps<any>) {
       {puedeDeformar && (
         <>
           <TiradoresTamano
-            visible={marcado}
+            visible={marcado && !variosMarcados}
             minW={isMedia ? 220 : 180}
             minH={140}
             onFin={(w, h) => onGeometria(win.id, { w, h })}
           />
           <MarcoSeleccion visible={marcado} />
-          <PuntosConexion visible={marcado} />
+          <PuntosConexion visible={marcado && !variosMarcados} />
           <TiradorRotar
-            visible={marcado}
+            visible={marcado && !variosMarcados}
             rot={win.rot || 0}
             onCambio={g => onGeometria(win.id, { rot: g }, true)}
             onFin={g => onGeometria(win.id, { rot: g })}
@@ -383,7 +394,7 @@ function VentanaNode({ data, selected }: NodeProps<any>) {
       {win.locked && marcado && (
         <div className="absolute inset-0 rounded-2xl border-2 border-amber-400 pointer-events-none z-[5]" />
       )}
-      {marcado && acciones && <BarraElemento win={win} acciones={acciones(win)} />}
+      {marcado && !variosMarcados && acciones && <BarraElemento win={win} acciones={acciones(win)} />}
       {/* Crecer desde aquí: nace un elemento nuevo YA conectado a este. */}
       {onConnectFrom && (
         <button
@@ -441,6 +452,52 @@ function SueloNode({ data }: NodeProps<any>) {
 
 const nodeTypes = { centro: CenterNode, relacion: RelacionNode, ventana: VentanaNode, suelo: SueloNode };
 const edgeTypes = { flotante: FloatingEdge };
+
+// ----------------------------------------------------------------------------
+// Geometría de una pieza colocada: lo que viaja a `PUT /layout` y lo que el
+// historial devuelve para deshacerlo.
+// ----------------------------------------------------------------------------
+export interface CambioGeom {
+  id: string;
+  x?: number; y?: number;
+  w?: number | null; h?: number | null;
+  rot?: number; z?: number; locked?: boolean;
+}
+
+/**
+ * Cómo está AHORA una ventana en los mismos campos que trae el cambio — o
+ * sea, lo que hay que reenviar para deshacerlo.
+ *
+ * Los huecos se rellenan con el valor neutro (0, false) y NUNCA con `null`:
+ * la ruta de guardado usa `COALESCE`, donde `null` significa «no lo toques»,
+ * así que deshacer un giro de una tarjeta que nunca se había girado no habría
+ * hecho nada.
+ */
+function valoresDe(w: any, cambio: CambioGeom): CambioGeom {
+  const prev: CambioGeom = { id: cambio.id };
+  if (cambio.x !== undefined) prev.x = w.x ?? 0;
+  if (cambio.y !== undefined) prev.y = w.y ?? 0;
+  // En w/h el `null` SÍ es un valor: significa «el tamaño natural de su tipo»,
+  // y la ruta lo distingue del «no lo toques».
+  if (cambio.w !== undefined) prev.w = w.w ?? null;
+  if (cambio.h !== undefined) prev.h = w.h ?? null;
+  if (cambio.rot !== undefined) prev.rot = w.rot ?? 0;
+  if (cambio.z !== undefined) prev.z = w.z ?? 0;
+  if (cambio.locked !== undefined) prev.locked = !!w.locked;
+  return prev;
+}
+
+/** El nombre del paso, que es lo que se lee en el globo de «Deshacer: …». */
+function etiquetaDe(patch: { w?: any; h?: any; rot?: any; z?: any; locked?: any }): string {
+  if (patch.locked !== undefined) return patch.locked ? 'Bloquear' : 'Desbloquear';
+  if (patch.rot !== undefined) return 'Girar';
+  if (patch.z !== undefined) return 'Cambiar de capa';
+  if (patch.w !== undefined || patch.h !== undefined) return 'Cambiar el tamaño';
+  return 'Mover';
+}
+
+/** «3 elementos» / «un elemento» — para las etiquetas del historial. */
+const cuantos = (n: number) => (n === 1 ? 'un elemento' : `${n} elementos`);
 
 // ----------------------------------------------------------------------------
 // Modal para conectar dos ventanas existentes.
@@ -550,6 +607,45 @@ export function GrafoLienzo({ slug, toolbar }: {
   const [activeBranch, setActiveBranch] = useState<{ edgeId: number; relation: string; label: string } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  // ==========================================================================
+  // NIVEL MIRO (2026-08-22, Eugenio: «hasta llegar al nivel de MIRO»)
+  // ==========================================================================
+  // Lo que faltaba para trabajar de verdad sobre un mural y que hoy se añade:
+  // deshacer/rehacer, atajos de teclado, marcar varias piezas y hacerles algo
+  // a todas a la vez, guías de alineación al arrastrar y rejilla.
+  //
+  // Nada de esto necesita servidor nuevo: `PUT /api/graphs/:id/layout` ya
+  // acepta una LISTA de piezas con x, y, w, h, rot, z y bloqueo, así que
+  // alinear veinte tarjetas es una sola llamada — y deshacerlo, otra.
+  const [modo, setModo] = useState<ModoLienzo>('seleccion');
+  const [espacio, setEspacio] = useState(false);
+  const [rejilla, setRejilla] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [atajos, setAtajos] = useState(false);
+  const [marcados, setMarcados] = useState<string[]>([]);
+  const [guias, setGuias] = useState<Guia[]>([]);
+  const [grosorGuia, setGrosorGuia] = useState(1.5);
+  const historial = useHistorial();
+  // `registrar` no cambia de identidad; el objeto entero sí (lleva los
+  // contadores). Se usa el estable en las dependencias.
+  const registrarPaso = historial.registrar;
+
+  // El `data` y la selección más recientes, legibles desde cualquier callback.
+  // Los atajos de teclado se enganchan UNA vez: sin esto verían el estado del
+  // primer pintado y borrarían la selección de entonces, no la de ahora.
+  const datosRef = useRef<any>(null);
+  datosRef.current = data;
+  const marcadosRef = useRef<string[]>([]);
+  marcadosRef.current = marcados;
+  const ramaRef = useRef<any>(null);
+  ramaRef.current = activeBranch;
+  /** Lo que había ANTES de la interacción en curso (girar, empujar con las
+   *  flechas): esos gestos pintan muchas veces y guardan una sola. */
+  const antesDelGesto = useRef<Record<string, any>>({});
+  /** Cuánto habría que corregir al soltar para encajar con la guía. */
+  const enganche = useRef<{ dx: number; dy: number }>({ dx: 0, dy: 0 });
+  const empujeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(() => {
     fetch(`/api/graphs/${slug}`, { credentials: 'include' })
@@ -937,26 +1033,85 @@ export function GrafoLienzo({ slug, toolbar }: {
     return () => clearTimeout(t);
   }, [nodes, fitView]);
 
+  // --------------------------------------------------------------------------
+  // GEOMETRÍA EN LOTE + HISTORIAL
+  // --------------------------------------------------------------------------
   /**
-   * Guarda tamaño, giro, capa o bloqueo de una ventana en ESTE lienzo.
-   * `soloEnPantalla` sirve para el giro en curso: se pinta al momento y solo
-   * se manda al servidor al soltar, para no bombardearlo con cada grado.
+   * Escribe la geometría de UNA O VARIAS piezas: se pinta al momento y se
+   * manda al servidor en UNA sola llamada. Mover treinta tarjetas eran antes
+   * treinta peticiones —o, peor, una sola y las otras veintinueve perdidas al
+   * recargar—; ahora es una.
+   *
+   * `soloEnPantalla` es para los gestos en curso (girar, empujar con las
+   * flechas): pintan en cada cuadro y guardan una vez al terminar. La primera
+   * vista previa de cada pieza apunta cómo estaba, que es lo que después
+   * deshace el paso entero y no solo el último grado.
    */
+  const aplicarGeometria = useCallback((cambios: CambioGeom[], soloEnPantalla = false) => {
+    if (!cambios.length) return;
+    const porId: Record<string, CambioGeom> = Object.fromEntries(cambios.map(c => [c.id, c]));
+    if (soloEnPantalla) {
+      for (const c of cambios) {
+        if (antesDelGesto.current[c.id]) continue;
+        const w = (datosRef.current?.windows || []).find((x: any) => x.id === c.id);
+        if (w) antesDelGesto.current[c.id] = valoresDe(w, c);
+      }
+    }
+    setData((d: any) => d && ({
+      ...d,
+      windows: d.windows.map((w: any) => {
+        const c = porId[w.id];
+        if (!c) return w;
+        const { id: _ignorado, ...resto } = c;
+        return { ...w, ...resto };
+      }),
+    }));
+    if (soloEnPantalla || !datosRef.current?.graph?.id) return;
+    fetch(`/api/graphs/${datosRef.current.graph.id}/layout`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({
+        positions: cambios.map(({ id, ...resto }) => ({ window_id: id, ...resto })),
+      }),
+    }).catch(() => {});
+  }, []);
+
+  /** Cómo estaban las mismas piezas y los mismos campos ANTES del cambio. */
+  const comoEstaban = useCallback((cambios: CambioGeom[]): CambioGeom[] => {
+    const ws: Record<string, any> = Object.fromEntries(
+      (datosRef.current?.windows || []).map((w: any) => [w.id, w]));
+    return cambios.map(c => {
+      // Lo apuntado al empezar el gesto solo vale si habla de los MISMOS
+      // campos; si no, se lee lo que hay ahora.
+      const previo = antesDelGesto.current[c.id];
+      const mismos = previo && Object.keys(previo)
+        .every(k => k === 'id' || (c as any)[k] !== undefined);
+      return mismos ? previo : valoresDe(ws[c.id] || {}, c);
+    });
+  }, []);
+
+  /** Guardar Y dejarlo deshecho de un Ctrl+Z. */
+  const conHistorial = useCallback((etiqueta: string, cambios: CambioGeom[]) => {
+    if (!cambios.length) return;
+    const antes = comoEstaban(cambios);
+    antesDelGesto.current = {};
+    aplicarGeometria(cambios);
+    registrarPaso({
+      etiqueta,
+      deshacer: () => aplicarGeometria(antes),
+      rehacer: () => aplicarGeometria(cambios),
+    });
+  }, [aplicarGeometria, comoEstaban, registrarPaso]);
+
+  /** Tamaño, giro, capa o bloqueo de UNA ventana (lo que piden sus tiradores). */
   const guardarGeometria = useCallback((
     winId: string,
     patch: { w?: number | null; h?: number | null; rot?: number; z?: number; locked?: boolean },
     soloEnPantalla = false,
   ) => {
-    setData((d: any) => d && ({
-      ...d,
-      windows: d.windows.map((w: any) => (w.id === winId ? { ...w, ...patch } : w)),
-    }));
-    if (soloEnPantalla || !data?.graph?.id) return;
-    fetch(`/api/graphs/${data.graph.id}/layout`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ positions: [{ window_id: winId, ...patch }] }),
-    }).catch(() => {});
-  }, [data?.graph?.id]);
+    const cambio: CambioGeom = { id: winId, ...patch };
+    if (soloEnPantalla) return aplicarGeometria([cambio], true);
+    conHistorial(etiquetaDe(patch), [cambio]);
+  }, [aplicarGeometria, conHistorial]);
 
   /**
    * Guarda posición, tamaño o bloqueo de un círculo de relación (petición del
@@ -1082,25 +1237,71 @@ export function GrafoLienzo({ slug, toolbar }: {
     load();
   }, [data?.can_edit, data?.graph?.id, load]);
 
-  const onNodeDragStop = useCallback((_: any, node: Node) => {
-    if (!data?.can_edit) return;
-    if (node.type === 'relacion') {
-      const edgeId = Number(node.id.replace('rel-', ''));
-      guardarGeometriaArista(edgeId, { pos: node.position });
+  // --------------------------------------------------------------------------
+  // ARRASTRAR: guías de alineación y colocación de TODO lo que se mueve
+  // --------------------------------------------------------------------------
+  /** El rectángulo que ocupa un nodo EN PANTALLA (ya con el imán aplicado). */
+  const cajaDeNodo = useCallback((n: Node): Caja => ({
+    id: n.id,
+    x: n.position.x, y: n.position.y,
+    w: (n as any).measured?.width ?? (n as any).width ?? 320,
+    h: (n as any).measured?.height ?? (n as any).height ?? 220,
+  }), []);
+
+  /**
+   * Mientras arrastras UNA pieza salen las líneas rosas en cuanto se pone a la
+   * altura de otra —borde con borde o centro con centro—, igual que en Miro.
+   * Con varias piezas a la vez no se dibujan: seis guías cruzadas no orientan,
+   * confunden.
+   */
+  const onNodeDrag = useCallback((_: any, node: Node, arrastrados: Node[]) => {
+    if (!datosRef.current?.can_edit || node.type !== 'ventana' || arrastrados.length > 1) {
+      if (guias.length) { setGuias([]); enganche.current = { dx: 0, dy: 0 }; }
       return;
     }
-    if (node.type !== 'ventana') return;
-    setData((d: any) => ({
-      ...d,
-      windows: d.windows.map((w: any) => w.id === node.id ? { ...w, x: node.position.x, y: node.position.y } : w),
+    const z = rf.current?.getZoom() ?? 1;
+    const otras = (rf.current?.getNodes() || [])
+      .filter(n => n.type === 'ventana' && n.id !== node.id)
+      .map(cajaDeNodo);
+    // La tolerancia se pide en píxeles DE PANTALLA: a zoom 0,2 un margen fijo
+    // de 6 unidades del lienzo sería invisible y no engancharía nunca.
+    const r = guiasDeArrastre(cajaDeNodo(node), otras, 6 / z);
+    enganche.current = { dx: r.dx, dy: r.dy };
+    setGrosorGuia(g => (Math.abs(g - 1.5 / z) > 0.01 ? 1.5 / z : g));
+    setGuias(prev => (prev.length === r.guias.length
+      && prev.every((g, i) => g.eje === r.guias[i].eje && g.v === r.guias[i].v)
+      ? prev : r.guias));
+  }, [cajaDeNodo, guias.length]);
+
+  /**
+   * Al soltar. Dos arreglos de fondo respecto a lo que había:
+   *  · Se guardan TODAS las piezas que se han movido, no solo aquella de la
+   *    que tirabas. Con varias marcadas, las demás volvían a su sitio al
+   *    recargar — el trabajo se perdía sin avisar.
+   *  · Se aplica el enganche de la guía, así que la línea rosa que veías es
+   *    exactamente donde queda.
+   */
+  const onNodeDragStop = useCallback((_: any, node: Node, arrastrados: Node[]) => {
+    setGuias([]);
+    if (!datosRef.current?.can_edit) return;
+    const { dx, dy } = enganche.current;
+    enganche.current = { dx: 0, dy: 0 };
+
+    const movidos = (arrastrados?.length ? arrastrados : [node]);
+    // Los círculos de relación guardan su sitio en `graph_edges.layout`.
+    for (const n of movidos.filter(n => n.type === 'relacion')) {
+      guardarGeometriaArista(Number(n.id.replace('rel-', '')), { pos: n.position });
+    }
+    const ventanas = movidos.filter(n => n.type === 'ventana');
+    if (!ventanas.length) return;
+    const solaUna = ventanas.length === 1;
+    const cambios: CambioGeom[] = ventanas.map(n => ({
+      id: n.id,
+      x: Math.round(n.position.x + (solaUna ? dx : 0)),
+      y: Math.round(n.position.y + (solaUna ? dy : 0)),
     }));
-    fetch(`/api/graphs/${data.graph.id}/layout`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ positions: [{ window_id: node.id, x: node.position.x, y: node.position.y }] }),
-    }).catch(() => {});
-  }, [data, guardarGeometriaArista]);
+    conHistorial(`Mover ${cuantos(ventanas.length)}`, cambios);
+  }, [guardarGeometriaArista, conHistorial]);
 
   const patchWindow = (winId: string, patch: any) => {
     setData((d: any) => ({
@@ -1142,6 +1343,246 @@ export function GrafoLienzo({ slug, toolbar }: {
     if (m) openEdge(Number(m[1]));
   }, [openEdge]);
 
+  // ==========================================================================
+  // MARCAR VARIOS Y HACERLES ALGO A TODOS
+  // ==========================================================================
+  const alCambiarSeleccion = useCallback(({ nodes: ns }: OnSelectionChangeParams) => {
+    const ids = ns.filter(n => n.type === 'ventana').map(n => n.id);
+    // Misma lista, mismo array: React Flow avisa a cada arrastre y sin esto
+    // el lienzo se repintaba entero mientras mueves.
+    setMarcados(prev => (prev.length === ids.length && prev.every((v, i) => v === ids[i]) ? prev : ids));
+  }, []);
+
+  /** Marcar a mano: 'todo', 'nada' o una lista concreta. */
+  const marcar = useCallback((que: string[] | 'todo' | 'nada') => {
+    setNodes(ns => ns.map(n => ({
+      ...n,
+      selected: que === 'nada' ? false
+        : que === 'todo' ? n.type === 'ventana'
+        : que.includes(n.id),
+    })));
+  }, [setNodes]);
+
+  /**
+   * Los rectángulos de lo marcado. La POSICIÓN sale de lo guardado y el
+   * TAMAÑO de lo medido en pantalla: el lienzo tiene un imán anti-solape que
+   * separa las tarjetas al pintarlas, y alinear sobre lo que se ve dejaría
+   * guardadas unas coordenadas que no están alineadas.
+   */
+  const cajasMarcadas = useCallback((): Caja[] => {
+    const medida: Record<string, any> = Object.fromEntries((rf.current?.getNodes() || []).map(n => [n.id, n]));
+    return (datosRef.current?.windows || [])
+      .filter((w: any) => marcadosRef.current.includes(w.id) && !w.locked)
+      .map((w: any) => ({
+        id: w.id, x: w.x ?? 0, y: w.y ?? 0,
+        w: w.w ?? medida[w.id]?.measured?.width ?? 320,
+        h: w.h ?? medida[w.id]?.measured?.height ?? 220,
+      }));
+  }, []);
+
+  const alinearMarcados = useCallback((modo: Alineacion) => {
+    conHistorial('Alinear', alinear(cajasMarcadas(), modo));
+  }, [cajasMarcadas, conHistorial]);
+
+  const repartirMarcados = useCallback((eje: Reparto) => {
+    conHistorial('Repartir', repartir(cajasMarcadas(), eje));
+  }, [cajasMarcadas, conHistorial]);
+
+  const igualarMarcados = useCallback((que: Igualado) => {
+    conHistorial('Igualar el tamaño', igualar(cajasMarcadas(), que));
+  }, [cajasMarcadas, conHistorial]);
+
+  const bloquearMarcados = useCallback((v: boolean) => {
+    const ids = marcadosRef.current;
+    if (!ids.length) return;
+    conHistorial(`${v ? 'Bloquear' : 'Desbloquear'} ${cuantos(ids.length)}`,
+      ids.map(id => ({ id, locked: v })));
+  }, [conHistorial]);
+
+  /** Las flechas del teclado. Se pinta en cada tecla y se guarda UNA vez al
+   *  parar: si no, mantener pulsada una flecha serían cien peticiones y cien
+   *  pasos de historial que habría que deshacer uno a uno. */
+  const empujar = useCallback((dx: number, dy: number) => {
+    const ws = (datosRef.current?.windows || [])
+      .filter((w: any) => marcadosRef.current.includes(w.id) && !w.locked);
+    if (!ws.length) return;
+    aplicarGeometria(ws.map((w: any) => ({
+      id: w.id, x: Math.round((w.x ?? 0) + dx), y: Math.round((w.y ?? 0) + dy),
+    })), true);
+    if (empujeTimer.current) clearTimeout(empujeTimer.current);
+    empujeTimer.current = setTimeout(() => {
+      const ids = new Set(ws.map((w: any) => w.id));
+      const ahora = (datosRef.current?.windows || [])
+        .filter((w: any) => ids.has(w.id))
+        .map((w: any) => ({ id: w.id, x: w.x, y: w.y }));
+      conHistorial(`Mover ${cuantos(ahora.length)}`, ahora);
+    }, 450);
+  }, [aplicarGeometria, conHistorial]);
+
+  const duplicarMarcados = useCallback(async () => {
+    const d = datosRef.current;
+    if (!d?.graph?.id) return;
+    const ws = d.windows.filter((w: any) => marcadosRef.current.includes(w.id));
+    if (!ws.length) return;
+
+    const copiar = async () => {
+      const nuevos: string[] = [];
+      const geo: CambioGeom[] = [];
+      for (const w of ws) {
+        const res = await fetch(`/api/graphs/${d.graph.id}/windows`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({
+            title: `${w.title} (copia)`, kind: w.kind, config: w.config,
+            x: (w.x || 0) + 60, y: (w.y || 0) + 60,
+          }),
+        });
+        if (!res.ok) continue;
+        const j = await res.json();
+        if (!j?.id) continue;
+        nuevos.push(j.id);
+        // Crear no acepta tamaño ni giro: se copian después, todos de una vez.
+        geo.push({ id: j.id, w: w.w ?? null, h: w.h ?? null, rot: w.rot ?? 0, z: w.z ?? 0 });
+      }
+      if (geo.length) aplicarGeometria(geo);
+      load();
+      return nuevos;
+    };
+
+    let creados = await copiar();
+    registrarPaso({
+      etiqueta: `Duplicar ${cuantos(ws.length)}`,
+      deshacer: async () => {
+        for (const id of creados) {
+          await fetch(`/api/graphs/${d.graph.id}/windows/${id}`, { method: 'DELETE', credentials: 'include' });
+        }
+        load();
+      },
+      rehacer: async () => { creados = await copiar(); },
+    });
+  }, [aplicarGeometria, load, registrarPaso]);
+
+  /**
+   * Quitar del lienzo lo marcado. Como en el resto de la herramienta, quitar
+   * NO borra el conocimiento: se deshace la colocación y la ventana sigue en
+   * la base de datos y en los demás lienzos. Deshacerlo la vuelve a colocar
+   * donde estaba, con su tamaño, su giro y sus conexiones.
+   */
+  const quitarMarcados = useCallback(async () => {
+    const d = datosRef.current;
+    if (!d?.graph?.id) return;
+    const ventanas = d.windows.filter((w: any) => marcadosRef.current.includes(w.id) && !w.locked);
+    if (!ventanas.length) return;
+    const ids = new Set(ventanas.map((w: any) => w.id));
+    const aristas = (d.edges || []).filter((e: any) =>
+      ids.has(e.to_window_id) || (e.from_window_id && ids.has(e.from_window_id)));
+
+    const quitar = async () => {
+      for (const w of ventanas) {
+        await fetch(`/api/graphs/${d.graph.id}/windows/${w.id}`, { method: 'DELETE', credentials: 'include' });
+      }
+      marcar('nada');
+      load();
+    };
+    const devolver = async () => {
+      for (const w of ventanas) {
+        await fetch(`/api/graphs/${d.graph.id}/windows`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({ window_id: w.id, x: w.x ?? 0, y: w.y ?? 0 }),
+        });
+      }
+      aplicarGeometria(ventanas.map((w: any) => ({
+        id: w.id, w: w.w ?? null, h: w.h ?? null, rot: w.rot ?? 0, z: w.z ?? 0, locked: !!w.locked,
+      })));
+      for (const e of aristas) {
+        await fetch(`/api/graphs/${d.graph.id}/edges`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({
+            from_window_id: e.from_window_id, to_window_id: e.to_window_id,
+            relation: e.relation, label: e.label, description: e.description,
+          }),
+        }).catch(() => {});
+      }
+      load();
+    };
+
+    await quitar();
+    setPegando(`${ventanas.length > 1 ? 'Quitados' : 'Quitado'} del lienzo — ⌘Z lo devuelve`);
+    setTimeout(() => setPegando(null), 4000);
+    registrarPaso({ etiqueta: `Quitar ${cuantos(ventanas.length)}`, deshacer: devolver, rehacer: quitar });
+  }, [aplicarGeometria, load, marcar, registrarPaso]);
+
+  // ==========================================================================
+  // ATAJOS DE TECLADO
+  // ==========================================================================
+  // Se enganchan UNA vez y leen el estado por referencia: si dependieran del
+  // estado se volverían a enganchar en cada movimiento del ratón.
+  const { deshacer, rehacer, olvidar } = historial;
+  useEffect(() => { olvidar(); }, [slug, olvidar]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (enCampoDeTexto(e.target)) return;
+      const meta = e.metaKey || e.ctrlKey;
+      const k = e.key;
+
+      // --- Lo que puede hacer cualquiera, mire o edite ---
+      if (k === ' ' && !meta) { setEspacio(true); e.preventDefault(); return; }
+      if (k === '?') { setAtajos(true); e.preventDefault(); return; }
+      if (meta && k === '0') { rf.current?.zoomTo(1, { duration: 200 }); e.preventDefault(); return; }
+      if (meta && k === '1') { fitView({ padding: 0.12, duration: 300 }); e.preventDefault(); return; }
+      if (k === 'Escape') {
+        marcar('nada'); setSelected(null); setSelectedEdge(null);
+        if (ramaRef.current) clearBranch();
+        return;
+      }
+
+      // --- Lo que solo puede hacer quien edita ---
+      if (!datosRef.current?.can_edit) return;
+      if (meta && (k === 'z' || k === 'Z')) { e.preventDefault(); (e.shiftKey ? rehacer : deshacer)(); return; }
+      if (meta && (k === 'y' || k === 'Y')) { e.preventDefault(); rehacer(); return; }
+      if (meta && (k === 'a' || k === 'A')) { e.preventDefault(); marcar('todo'); return; }
+      if (meta && (k === 'd' || k === 'D')) { e.preventDefault(); duplicarMarcados(); return; }
+      if (!marcadosRef.current.length) return;
+      if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); quitarMarcados(); return; }
+      if ((k === 'l' || k === 'L') && !meta) {
+        e.preventDefault();
+        const ws = (datosRef.current.windows || []).filter((w: any) => marcadosRef.current.includes(w.id));
+        bloquearMarcados(!ws.every((w: any) => w.locked));
+        return;
+      }
+      if (k.startsWith('Arrow')) {
+        e.preventDefault();
+        const paso = e.shiftKey ? 10 : 1;
+        empujar(
+          k === 'ArrowLeft' ? -paso : k === 'ArrowRight' ? paso : 0,
+          k === 'ArrowUp' ? -paso : k === 'ArrowDown' ? paso : 0,
+        );
+      }
+    };
+    const alSoltar = (e: KeyboardEvent) => { if (e.key === ' ') setEspacio(false); };
+    // Si el foco se va de la ventana con el espacio pulsado, la mano se
+    // quedaría enganchada para siempre.
+    const alPerderFoco = () => setEspacio(false);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', alSoltar);
+    window.addEventListener('blur', alPerderFoco);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', alSoltar);
+      window.removeEventListener('blur', alPerderFoco);
+    };
+  }, [fitView, marcar, clearBranch, deshacer, rehacer, duplicarMarcados, quitarMarcados, bloquearMarcados, empujar]);
+
+  const cambiarZoom = useCallback((d: 'mas' | 'menos' | 'cien') => {
+    if (d === 'mas') rf.current?.zoomIn({ duration: 150 });
+    else if (d === 'menos') rf.current?.zoomOut({ duration: 150 });
+    else rf.current?.zoomTo(1, { duration: 200 });
+  }, []);
+
+  const alMoverLienzo = useCallback((_: any, vp: { zoom: number }) => {
+    setZoom(z => (Math.abs(z - vp.zoom) > 0.005 ? vp.zoom : z));
+  }, []);
+
   if (error) {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3 text-center p-8">
@@ -1152,6 +1593,10 @@ export function GrafoLienzo({ slug, toolbar }: {
     );
   }
   if (!data) return <p className="text-sm text-slate-400 py-16 text-center">Cargando grafo…</p>;
+
+  // Con la mano: quien solo mira, quien ha elegido la herramienta mano, y
+  // quien tiene el espacio pulsado (la mano de toda la vida, prestada).
+  const modoMano = !data.can_edit || modo === 'mano' || espacio;
 
   const meta = selected ? (KIND_META[selected.kind] || KIND_META.texto) : null;
   const edgeRel = selectedEdge ? (RELATION_STYLE[selectedEdge.relation] || RELATION_STYLE.contexto) : null;
@@ -1172,9 +1617,12 @@ export function GrafoLienzo({ slug, toolbar }: {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
+        onSelectionChange={alCambiarSeleccion}
         onEdgeClick={onEdgeClick}
-        onInit={inst => { rf.current = inst; }}
+        onMove={alMoverLienzo}
+        onInit={inst => { rf.current = inst; setZoom(inst.getZoom()); }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesConnectable={!!data.can_edit}
@@ -1183,6 +1631,21 @@ export function GrafoLienzo({ slug, toolbar }: {
         onConnect={onConnect}
         elementsSelectable
         elevateNodesOnSelect={false}
+        // EL GESTO DEL RATÓN (2026-08-22). En modo selección, arrastrar sobre
+        // el vacío DIBUJA UN RECTÁNGULO —como en Miro— y el lienzo se mueve
+        // con la rueda, el botón central o el espacio. En modo mano, o cuando
+        // solo se mira, arrastrar mueve el lienzo y no hay nada que marcar.
+        panOnDrag={modoMano ? true : [1, 2]}
+        selectionOnDrag={!modoMano}
+        selectionKeyCode="Shift"
+        // Mayús para ir sumando piezas a la selección, que es lo que hace todo
+        // el mundo; ⌘/Ctrl también, por si vienes de otra herramienta.
+        multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
+        // El teclado lo lleva el lienzo entero (ver los atajos): dejar que
+        // React Flow borre por su cuenta se saltaría el historial.
+        deleteKeyCode={null}
+        snapToGrid={rejilla}
+        snapGrid={[16, 16]}
         fitView
         fitViewOptions={{ padding: 0.12 }}
         minZoom={0.12}
@@ -1190,9 +1653,44 @@ export function GrafoLienzo({ slug, toolbar }: {
         proOptions={{ hideAttribution: true }}
       >
         <Background gap={24} size={1.5} color="#e2e8f0" />
-        <Controls position="bottom-left" showInteractive={false} />
         <MiniMap position="top-right" pannable zoomable className="!w-40 !h-28" />
+        <GuiasAlineado guias={guias} grosor={grosorGuia} />
+        {data.can_edit && marcados.length > 1 && (
+          <BarraSeleccion
+            ids={marcados}
+            bloqueados={(data.windows || []).filter((w: any) => marcados.includes(w.id) && w.locked).length}
+            acciones={{
+              alinear: alinearMarcados,
+              repartir: repartirMarcados,
+              igualar: igualarMarcados,
+              bloquear: bloquearMarcados,
+              duplicar: duplicarMarcados,
+              quitar: quitarMarcados,
+            }}
+          />
+        )}
       </ReactFlow>
+
+      <BarraLienzo
+        modo={modo}
+        onModo={setModo}
+        puedeEditar={!!data.can_edit}
+        rejilla={rejilla}
+        onRejilla={setRejilla}
+        zoom={zoom}
+        onZoom={cambiarZoom}
+        onEncajar={() => fitView({ padding: 0.12, duration: 300 })}
+        atajos={atajos}
+        onAtajos={setAtajos}
+        historial={{
+          puedeDeshacer: historial.puedeDeshacer,
+          puedeRehacer: historial.puedeRehacer,
+          proximoDeshacer: historial.proximoDeshacer,
+          proximoRehacer: historial.proximoRehacer,
+          deshacer: () => { historial.deshacer(); },
+          rehacer: () => { historial.rehacer(); },
+        }}
+      />
 
       {/* Herramientas de creación (solo creador o admin) */}
       {toolbar && data.can_edit && toolbar({

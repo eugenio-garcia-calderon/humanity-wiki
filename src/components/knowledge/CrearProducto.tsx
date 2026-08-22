@@ -49,6 +49,24 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [subiendo, setSubiendo] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
+  /** SUBIR UNA FOTO DESDE EL MÓVIL (2026-08-22): hasta hoy había que pegar la
+   *  dirección de una imagen que ya estuviera en internet — que es pedirle al
+   *  vendedor que tenga web antes de tener tienda. Va a la zona pública de
+   *  subidas (una foto de producto es para enseñarla). */
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  async function subirFoto(f: File) {
+    setSubiendoFoto(true); setError(null);
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'image/jpeg')}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.url) { setError(j.error || 'No se ha podido subir la foto.'); return; }
+      setFotos(prev => [...prev, j.url].slice(0, 8));
+    } catch { setError('No hay conexión con el servidor.'); }
+    finally { setSubiendoFoto(false); }
+  }
+
   async function subirArchivo(f: File) {
     setSubiendo(true); setError(null);
     try {
@@ -222,7 +240,12 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
             </Campo>
           )}
 
-          <Campo etiqueta="Fotos" ayuda="Pega la dirección de una imagen">
+          <Campo etiqueta="Fotos" ayuda="Sube una del móvil, o pega la dirección de una imagen">
+            <label className={`mb-2 flex items-center justify-center gap-2 h-12 rounded-xl border border-dashed text-sm cursor-pointer ${subiendoFoto ? 'border-slate-200 text-slate-400' : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'}`}>
+              <input type="file" accept="image/*" className="hidden" disabled={subiendoFoto || fotos.length >= 8}
+                onChange={e => { const f = e.target.files?.[0]; if (f) subirFoto(f); e.target.value = ''; }} />
+              {subiendoFoto ? <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo la foto…</> : <><Plus className="w-4 h-4" /> Subir una foto</>}
+            </label>
             <div className="flex gap-2">
               <input value={fotoNueva} onChange={e => setFotoNueva(e.target.value)}
                 placeholder="https://…"

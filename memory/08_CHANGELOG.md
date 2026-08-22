@@ -5248,3 +5248,197 @@ public statics still 200; mis-ventas 401 without session and the list with it;
 external URL rejected, private accepted; PUT estado works. `tsc` clean. Not
 verified in a browser: the subdomain-only `/pedido` page (no subdomain on
 localhost) — its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Product reviews, and only verified purchases weigh (Programador 7, economy & market)
+
+Plan fase 3. No new table: the stars live in `ratings` (entity_type 'products',
+score 0-10 = stars × 2) and the text in `comments` (entity_type 'products').
+One person, one review — resubmitting overwrites the stars and archives the
+previous text. The seller cannot review their own product (403).
+
+`GET /api/publicar/producto/:id/resenas` (public: media, n, verificadas,
+list with «compra verificada» computed by the server from paid orders by user
+id or by e-mail) · `POST /api/publicar/producto/:id/resena` {estrellas 1-5,
+texto?} (session) · the public product route and the seller's list carry
+`valoracion` / `media_estrellas` + `n_resenas`.
+
+**What weighs in the monthly pot:** only reviews with a verified purchase
+and ≥ 7/10 — prog4's question applied again: anyone with accounts could raise
+an unverified count from outside; only someone who paid can raise this one.
+
+UI: the Opiniones section on the product page (stars picker + text, the
+verified badge, «tuya»), the ★ average next to the price in the product
+block and in Comercio's product rows.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after): buyer
+5★ → compra_verificada true; non-buyer 3★ → false; seller → 403; no session
+→ 401; 6★ → 400; list media/n/verificadas right; overwrite kept n at 1 and
+replaced the text; public product route and seller list carry the average;
+the reparto simulation counts the verified ≥ 7 review for the seller. An
+archived demo account correctly got 401 (its session resolves to nobody).
+`tsc` clean. Not opened in a browser: the product page lives on the
+subdomain, which localhost has no way to emulate — its data contract is what
+was tested.
+
+---
+
+## 2026-08-22 — Points in the cart, behind a switch that is off (Programador 7, economy & market)
+
+Eugenio's decision: points usable as a market discount up to 100%. Built behind
+`PUNTOS_DESCUENTO` (off in production) with one design decision written where
+it can be read (0089): **the seller is paid in points for the part paid in
+points** — a buyer→seller transfer in the ledger (`compra_con_puntos` /
+`venta_en_puntos`, entity = the order) — and in euros for the rest. The
+platform does not pay discounts out of its own cash; the point keeps
+circulating as what it buys. Because of that, **each seller opts in per
+product** (`products.acepta_puntos`, default off): the pilot's "limited range
+of products" is literally what sellers mark.
+
+Checkout (`POST /api/publicar/comprar`, `usar_puntos`): session required,
+never for subscriptions, never to yourself; only lines whose product accepts
+points can be paid with them; the server caps at min(balance, accepting
+subtotal); shipping is always euros. If euros left is zero → no Stripe: the
+order is created right there and the points move in the same call (if the
+ledger says no, the order is rolled back, 409). Otherwise a Stripe coupon for
+the exact discount and the points in the session metadata; the webhook moves
+the points after payment — never before. `pedidos.puntos_usados` says what
+each order paid in points. `GET /api/publicar/puntos-en-caja` tells the cart
+whether it can offer the control and with how much.
+
+UI: the cart shows "Pagar con puntos" (with balance, "usar el máximo", the
+computed discount) only when the server says so; Comercio gets a per-product
+"acepta puntos" toggle.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): no session → 401; non-accepting product → 400; all-points purchase
+→ order born `entregado` (digital) with puntos_usados 5, buyer 100→95, seller
+100→105, two ledger rows; mixed cart asking 10 → capped to 5 (only the
+accepting line), Stripe test session created with the 5,00 € coupon. `tsc`
+clean. Not tested: the webhook leg for the mixed cart (needs a completed
+Stripe payment) — its code path is the same pagarConPuntos() the all-points
+path exercised.
+
+---
+
+## 2026-08-22 — Upload the photo, and see how sales are going (Programador 7, economy & market)
+
+Two small things sellers feel every day.
+
+**Photos from the phone.** CrearProducto only accepted a pasted image URL — asking
+a seller to have a website before having a shop. Now a "Subir una foto" control
+sends the file to the public upload zone (`POST /api/uploads`) and adds the
+returned URL to the gallery (max 8). The URL field stays for who prefers it.
+
+**How are my sales going.** `GET /api/publicar/mis-ventas/resumen` (session):
+this month's orders, euros charged and points charged (two numbers, never
+added together), pending-to-ship count, the last six months and the five
+best-selling products (from `pedido_lineas`, plus pre-cart single-product
+orders). Cancelled and returned orders are not sales. Comercio shows it at the
+top of the Pedidos tab.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, rows and
+the uploaded test PNG removed): 401 without session; 2 paid/delivered orders of
+a seeded trio (the cancelled one excluded) → 2 orders, 31,00 €, 5 points, 1 to
+ship, best seller ×3 (2 from lines + 1 pre-cart); PNG upload → public URL
+served as image/png. `tsc` clean. The Comercio panel itself was not opened in a
+browser (the shared automation browser would have needed a seller session);
+its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Seller coupons (Programador 7, economy & market)
+
+Plan fase 7. `cupones` (0090): a seller's code with percentage or fixed amount,
+minimum purchase, expiry and max uses; `pedidos.cupon_codigo` +
+`descuento_centimos` record what each order got. **The discount is the
+seller's**: it comes off their price and the platform fee is computed on what
+is actually charged in euros (`comisionReal`). Neither the platform nor the
+points pay for it.
+
+Seller: `GET/POST /api/publicar/mis-cupones`, `PUT …/:id` (activate/deactivate;
+never deleted — orders cite them), and a Cupones panel in Comercio. Cart:
+`POST /api/publicar/cupon/comprobar` says the discount BEFORE paying (no
+session needed: guests have coupons too), the cesta has the code field, and
+`comprar` takes `cupon`. Order of rebates: coupon first, then points on what
+is left — a discount is never paid twice. One Stripe coupon carries the sum
+of both rebates; uses are counted after payment (webhook) or in the same call
+for all-points purchases — never when a session is merely opened.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after, balances
+restored): create 10%/2 uses → 200; duplicate → 409 (after fixing the pg error
+detection: code 23505 may sit on `cause`); bad code → 400; list 401 without
+session; comprobar valid → 1,00 € on a 10 € item, unknown → "no existe";
+comprar with coupon → Stripe test session with the coupon; coupon + 9 points
+→ all paid in one call: order `entregado`, puntos_usados 9, cupon VERANO10,
+descuento 100, uses 1/2, buyer 100→91, seller 100→109; deactivate →
+comprobar says "ya no está activo". `tsc` clean. Comercio's panel and the
+cesta field were not opened in a browser (subdomain + seller session); their
+data contracts are what was tested.
+
+---
+
+## 2026-08-22 — The session now travels to the shops (Programador 7)
+
+Found while preparing Eugenio's first real test of points in the cart: the
+session cookie was host-only (`humanity.wiki`), and the cart only lives on the
+shop subdomains (`nombre.humanity.wiki`). Anyone logged in was an anonymous
+visitor there — no «pagar con puntos», no «compra verificada», no buyer id on
+orders. With `COOKIE_DOMAIN=.humanity.wiki` in the environment (set in
+production), `setSessionCookie` emits the cookie for the whole domain and
+expires the legacy host-only one; `clearSessionCookie` expires both variants,
+so "cerrar sesión" does not leave a second session stuck on the main domain.
+Without the variable nothing changes (local, other deployments).
+
+Verified on 3007 over HTTP with the variable set: logout emits two Set-Cookie
+headers (plain + Domain), register emits the Domain cookie plus the expired
+plain one; test user removed. `tsc` clean. Also today, at Eugenio's request:
+`PUNTOS_DESCUENTO=on` in production (app recreated, health OK), +500 points to
+his admin account via an `ajuste_admin` entry, and two PRUEBA products of the
+`claude-dos` shop opted into points so there is something to buy with them.
+
+---
+
+## 2026-08-22 — Eugenio's first real test: two things that were MAL (Programador 7)
+
+He tested points in production and found two holes, both real:
+
+**«Comprar ahora» went straight to Stripe.** The points control only lived in
+the cart. Now the product page (`FichaProducto`) and the product block inside
+pages (`ProductoPublico`) show «Pagar con puntos (tienes X)» next to the buy
+button when the server says points are active, there is a session and the
+product accepts points; the direct buy sends `usar_puntos` and, when the price
+is fully covered, comes back without Stripe.
+
+**No confirmation after paying with points — back to the product page, nothing
+said.** `CompraHecha`, inside `Cesta` (which lives on every shop page, where
+the return lands): on `?compra=hecha&pedido=CODE` (all-points) or
+`?compra=hecha&sesion=cs_…` (back from Stripe; it polls
+`GET /api/publicar/pedido-por-sesion/:sesion` until the webhook has created
+the order, up to 8 tries) it shows a ✓, the order code to keep, each line
+with its Descargar button, what was paid with card/points/coupon, «Ver mi
+pedido» and «Seguir en la tienda». `?compra=cancelada` shows a plain "Pago
+cancelado, no se ha cobrado nada". The order lookup and the download route
+now accept the buyer's SESSION as a key besides the e-mail, so someone who
+just paid with their account is not asked for their e-mail; `/pedido?codigo=`
+pre-fills and searches on its own.
+
+Verified on 3007 over HTTP (session tagged and deleted after, balances
+restored): direct buy with 4 points → `pagado_con_puntos`, code, URL with
+`compra=hecha&pedido`; order by session without e-mail → lines with a download
+URL without e-mail; download by session → 200 PDF bytes; no session and no
+e-mail → 400 on both; pedido-por-sesion → 404 pendiente / 400 malformed. `tsc`
+clean. **Not seen in a browser**: the overlay and the buy-now control render
+only on a shop subdomain, which localhost cannot emulate — the contracts they
+consume are what was tested; Eugenio's next pass is the visual check.
+### 2026-08-22 — TURN de Cloudflare: las llamadas difíciles también conectan (Programador 8)
+- **Decisión de Eugenio**: contratar el TURN de Cloudflare en vez de levantar un `coturn` propio. Con esto se cierra la deuda «10-15 % de las llamadas no conectan» que quedó abierta esta misma mañana al entregar Telecomunicaciones.
+- **La escalera, que ya la hacía el navegador y ahora está escrita donde se ve**: `host` (mismo wifi) → `srflx` con STUN (redes distintas, sigue siendo directo, gratis) → `relay` con TURN (solo cuando no hay camino, y es el único que cuesta). No son tres modos alternativos: STUN es *cómo* se consigue el P2P, no una alternativa a él. El navegador los prueba a la vez y se queda con el más barato que funcione.
+- **Las credenciales no viven en el código del navegador**: `GET /api/telecom/hielo` se las pide a Cloudflare con la llave de la cuenta, que solo existe en el servidor. Duran dos horas y se guardan una en memoria — con veinte pestañas abiertas eso es un viaje a Cloudflare por hora, no veinte por minuto. Una credencial fija en el cliente la copia cualquiera con las herramientas de desarrollo, y su tráfico lo paga Eugenio.
+- **Si Cloudflare falla, el teléfono no se cae**: 401, tardanza de más de cuatro segundos o servidor inexistente devuelven STUN solo, con una línea en el registro cada cinco minutos como mucho. Se pierden las llamadas que ya fallaban ayer; las otras nueve de cada diez siguen. Probados los tres fallos contra un Cloudflare de mentira.
+- **`llamadas.via` (migración 0086)**: cada llamada apunta por cuál de los tres caminos fue. No es telemetría por gusto: de los tres, uno se factura, y sin esto la primera noticia del gasto sería la factura. **No se guarda ninguna IP** — el tipo de camino, y nada más.
+- **`GET /api/telecom/gasto`** (nivel 4): cuántas llamadas hubo en 30 días, cuántas se retransmitieron, cuántos minutos y una estimación en GB y en dólares. Sale en la cabecera de «Últimas llamadas», **solo para quien administra**: a un miembro no le sirve saber que falta un servidor que él no puede contratar, y si su llamada falla el panel se lo dice en ese momento.
+- **Precio consultado el 2026-08-22**: 1.000 GB de salida al mes gratis, 0,05 $/GB después. Una hora de videollamada retransmitida ronda 1 GB; una de voz, 45 MB. A la escala de hoy esto es gratis, y cuando deje de serlo se verá venir en `/api/telecom/gasto` antes que en la factura.
+- **Lo que falta y no es código**: dos secretos en GitHub — `CLOUDFLARE_TURN_KEY_ID` y `CLOUDFLARE_TURN_API_TOKEN`. El workflow los escribe en `.env.production` en cada despliegue, igual que `TOGETHER_API_KEY`. El servicio `app` los recibe por `env_file`, así que no hay que tocar el `docker-compose`. **Cómo saber que han entrado**: el aviso ámbar «Sin retransmisión contratada» desaparece de la página Teléfono.
+- **Pruebas**: `scripts/probar-camino-llamada.ts` (nueve casos de clasificación, incluido el `selected` de Firefox, sin navegador) y cuatro comprobaciones nuevas en `scripts/probar-telecom.mjs` — 29 en verde de punta a punta.

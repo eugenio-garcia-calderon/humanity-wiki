@@ -14,6 +14,7 @@ registro.ts       the sealed record: append-only, hash-chained, signed, verifiab
 sellar.ts         drains the outbox into the sealed record, and answers "is this row still the one we sealed?"
 selladoAutomatico.ts  runs that drain every two minutes, inside the server
 transparencia.ts  what an administrator may look at, and what looking leaves behind
+anclaje.ts        publishes the day's root outside, where we cannot reach it
 ```
 
 Migrations: `drizzle/0070_registro_sellado.sql` (the record) and
@@ -54,7 +55,7 @@ green is worse than no test.
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
 | Capture from the database | Triggers on 25 tier-3 tables write to an outbox, and `selladoAutomatico.ts` drains it every two minutes from inside the server — first pass on boot, so a restart never leaves anything stranded |
 | Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
-| Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
+| Anchoring | **Built**: the daily root goes to three OpenTimestamps calendars and their receipts are stored. `GET /api/seguridad/anclajes`, no session needed. The first real anchor happens the day after this ships, because it anchors *yesterday* |
 
 Saying it plainly costs nothing and prevents the expensive mistake: believing
 these are protecting something they are not yet wired to.
