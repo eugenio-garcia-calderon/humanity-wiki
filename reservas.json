@@ -77,6 +77,12 @@
       "ruta": "src/components/ai/PanelMedicion.tsx",
       "motivo": "enseñar lo que cuesta el chat abierto",
       "desde": "2026-08-22T13:03:43.033Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
+      "motivo": "Fase 2: la camara pregunta donde guardar en vez de abrir el editor",
+      "desde": "2026-08-22T13:05:59.642Z"
     }
   ]
 }
