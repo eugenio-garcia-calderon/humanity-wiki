@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { guardian, REGLAS, anotarFallo, ipDe } from './limites/index.js';
 
 // ============================================================================
 // PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
@@ -112,25 +113,47 @@ export const puntosPorEuro = () => Math.max(0.0001, Number(process.env.PUNTOS_PO
  * transferencias): si el comprador ya no tiene saldo, no ocurre nada y
  * devuelve false — quien llama decide qué hacer (no cobrar, o cobrar en euros).
  */
+/** La cuenta de la plataforma en el libro (migración 0093) y la comisión en
+ *  puntos: 2,5 % por defecto — la mitad del 5 % de las ventas en euros
+ *  (Eugenio, 2026-08-23: «un 50 % de descuento en la comisión cuando utilizan
+ *  un sistema de intercambio de puntos en vez de moneda fiat»). */
+export const CUENTA_PLATAFORMA = 'U_PLATAFORMA';
+export const comisionPuntosBps = () => Math.max(0, Math.min(10000, Number(process.env.PUNTOS_COMISION_BPS ?? 250)));
+
 export async function pagarConPuntos(db: any, compradorId: string, vendedorId: string, puntos: number, pedidoId: string): Promise<boolean> {
   const importe = Math.round(puntos * 100) / 100;
   if (!Number.isFinite(importe) || importe <= 0 || compradorId === vendedorId) return false;
+  // La comisión sale de lo que recibe el vendedor, nunca de lo que paga el
+  // comprador: el precio es el precio. Tres apuntes, un pedido como entidad.
+  const comision = Math.round(importe * comisionPuntosBps()) / 10000;
+  const comisionRedondeada = Math.round(comision * 100) / 100;
+  const netoVendedor = Math.round((importe - comisionRedondeada) * 100) / 100;
   let ok = false;
   await db.transaction(async (tx: any) => {
-    await tx.execute(sql`SELECT id FROM users WHERE id IN (${compradorId}, ${vendedorId}) ORDER BY id FOR UPDATE`);
+    await tx.execute(sql`SELECT id FROM users WHERE id IN (${compradorId}, ${vendedorId}, ${CUENTA_PLATAFORMA}) ORDER BY id FOR UPDATE`);
     const cobro = await tx.execute(sql`
       UPDATE users SET puntos = puntos - ${importe} WHERE id = ${compradorId} AND puntos >= ${importe} RETURNING puntos
     `);
     if (!cobro.rows.length) return;
-    await tx.execute(sql`UPDATE users SET puntos = puntos + ${importe} WHERE id = ${vendedorId}`);
+    await tx.execute(sql`UPDATE users SET puntos = puntos + ${netoVendedor} WHERE id = ${vendedorId}`);
     await tx.execute(sql`
       INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
       VALUES (${newId()}, ${compradorId}, ${-importe}, 'compra_con_puntos', 'pedidos', ${pedidoId})
     `);
     await tx.execute(sql`
       INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
-      VALUES (${newId()}, ${vendedorId}, ${importe}, 'venta_en_puntos', 'pedidos', ${pedidoId})
+      VALUES (${newId()}, ${vendedorId}, ${netoVendedor}, 'venta_en_puntos', 'pedidos', ${pedidoId})
     `);
+    if (comisionRedondeada > 0) {
+      // Si la cuenta de la plataforma no existiera (migración sin aplicar), el
+      // UPDATE no toca filas y el INSERT fallaría por la clave foránea: mejor
+      // que falle la transacción entera a que se esfume la comisión en silencio.
+      await tx.execute(sql`UPDATE users SET puntos = puntos + ${comisionRedondeada} WHERE id = ${CUENTA_PLATAFORMA}`);
+      await tx.execute(sql`
+        INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+        VALUES (${newId()}, ${CUENTA_PLATAFORMA}, ${comisionRedondeada}, 'comision_puntos', 'pedidos', ${pedidoId})
+      `);
+    }
     await tx.execute(sql`UPDATE pedidos SET puntos_usados = ${importe}, updated_at = now() WHERE id = ${pedidoId}`);
     ok = true;
   });
@@ -446,9 +469,13 @@ export function registerPuntosRoutes(app: Express, db: any) {
    * (descontar, abonar, dos apuntes del libro), no ocurre ninguno. Una
    * transferencia a medias es dinero creado o destruido.
    */
-  app.post('/api/puntos/transferir', async (req: Request, res: Response) => {
+  // Con freno por cuenta (regla `transferencia` de src/server/limites): diez
+  // envíos seguidos gratis, luego espera creciente. Cada envío, salga bien o
+  // mal, cuenta como intento — lo que se frena es el bucle, no a la persona.
+  app.post('/api/puntos/transferir', guardian(REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      void anotarFallo(db, REGLAS.transferencia, ipDe(req), req.user.id, true);
       if (!transferenciasActivas()) {
         return res.status(403).json({ error: 'Las transferencias de puntos todavía no están activadas. Se anunciará en /tokenomics antes de encenderlas.' });
       }
