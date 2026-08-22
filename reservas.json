@@ -71,12 +71,6 @@
       "ruta": "src/components/juego/Interior.tsx",
       "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
       "desde": "2026-08-22T19:48:13.489Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/knowledge/DialogoCompartir.tsx",
-      "motivo": "dominio propio en compartir",
-      "desde": "2026-08-22T19:57:36.310Z"
     }
   ]
 }
