@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
 import { useCarrito } from '../../hooks/useCarrito';
 
@@ -25,8 +25,23 @@ export default function Cesta({ tienda }: { tienda: string }) {
   const [abierta, setAbierta] = useState(false);
   const [pagando, setPagando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // PUNTOS EN LA CESTA (2026-08-22). El servidor dice si está activo y cuánto
+  // saldo hay; aquí solo se enseña el control cuando puede usarse, y lo que
+  // se manda es cuántos puntos quiere gastar la persona — el servidor acota.
+  const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
+  const [usarPuntos, setUsarPuntos] = useState('');
+  useEffect(() => {
+    if (!abierta) return;
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
+  }, [abierta]);
 
   if (lineas.length === 0) return null;
+
+  const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  const maxPuntos = caja?.saldo != null
+    ? Math.floor(Math.min(caja.saldo, (subtotal / 100) * caja.puntos_por_euro) * 100) / 100
+    : 0;
+  const descuentoCent = caja ? Math.min(subtotal, Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)) : 0;
 
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
@@ -40,9 +55,17 @@ export default function Cesta({ tienda }: { tienda: string }) {
         body: JSON.stringify({
           lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
           volver_a: window.location.href,
+          ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
+      if (r.ok && j.pagado_con_puntos) {
+        // Todo pagado con puntos: no hay pasarela. La cesta SÍ se vacía aquí,
+        // porque la compra ya está hecha — y se va a la tienda con el código.
+        vaciar();
+        window.location.href = j.url;
+        return;
+      }
       if (!r.ok || !j.url) {
         // El motivo se enseña tal cual: «de la miel solo quedan 2» es lo que
         // hace falta saber para arreglarlo. Un «ha habido un error» obligaría
@@ -130,6 +153,27 @@ export default function Cesta({ tienda }: { tienda: string }) {
               <p className="mt-1 text-[11px] text-slate-400">
                 El envío se calcula al pagar, cuando sepamos a dónde va.
               </p>
+
+              {caja?.activo && caja.con_sesion && caja.saldo != null && (
+                <div className="mt-3 p-3 rounded-xl border border-amber-200 bg-amber-50/60">
+                  <div className="flex items-center justify-between gap-3">
+                    <label htmlFor="cesta-puntos" className="text-xs font-bold text-amber-900">
+                      Pagar con puntos <span className="font-normal text-amber-700">(tienes {caja.saldo.toLocaleString('es-ES', { maximumFractionDigits: 2 })})</span>
+                    </label>
+                    <button type="button" onClick={() => setUsarPuntos(String(maxPuntos))}
+                      className="text-[11px] font-bold text-amber-800 underline">usar el máximo</button>
+                  </div>
+                  <input id="cesta-puntos" inputMode="decimal" value={usarPuntos}
+                    onChange={e => setUsarPuntos(e.target.value)} placeholder="0"
+                    className="mt-1.5 w-32 h-10 px-3 rounded-lg border border-amber-200 bg-white text-sm" />
+                  {puntosPedidos > 0 && (
+                    <p className="mt-1 text-[11px] text-amber-800">
+                      −{dinero(descuentoCent)} de descuento{puntosPedidos > maxPuntos ? ` (máximo ${maxPuntos.toLocaleString('es-ES')} puntos aquí)` : ''}.
+                      Solo lo que el vendedor acepta en puntos puede pagarse así; el envío va siempre en euros.
+                    </p>
+                  )}
+                </div>
+              )}
 
               {error && <p className="mt-3 text-xs font-bold text-rose-600">{error}</p>}
 

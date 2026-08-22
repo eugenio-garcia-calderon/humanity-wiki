@@ -2,7 +2,7 @@ import type { Express, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
-import { otorgarPuntos } from './puntos.js';
+import { otorgarPuntos, pagarConPuntos } from './puntos.js';
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -571,6 +571,19 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                         ${prod?.name || 'Producto retirado'}, ${unid},
                         ${precio || prod?.price_cents || 0})
               `);
+            }
+            // LA PARTE PAGADA CON PUNTOS (2026-08-22): el comprador ya pagó en
+            // euros el resto; ahora los puntos pasan al vendedor por el
+            // libro. Si el saldo ya no alcanza (se lo gastó entre abrir el
+            // pago y terminarlo), NO se rompe el pedido: se canta, y el
+            // vendedor verá puntos_usados = 0 con el importe en euros ya
+            // rebajado — un caso raro que se revisa a mano, no un 500 a
+            // Stripe que repetiría el webhook para siempre.
+            const puntosPagados = Number(session.metadata!.puntos || 0) || 0;
+            const compradorId = session.metadata!.buyer_id || null;
+            if (puntosPagados > 0 && compradorId && vendedorId) {
+              const ok = await pagarConPuntos(db, compradorId, vendedorId, puntosPagados, pedidoId).catch((e: any) => { console.error('[puntos] pago con puntos fallido:', e?.message); return false; });
+              if (!ok) console.error(`[puntos] el pedido ${pedidoId} esperaba ${puntosPagados} puntos de ${compradorId} y no se pudieron cobrar: revisar a mano.`);
             }
           }
         }

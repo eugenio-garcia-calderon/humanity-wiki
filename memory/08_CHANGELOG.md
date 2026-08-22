@@ -5281,3 +5281,41 @@ archived demo account correctly got 401 (its session resolves to nobody).
 `tsc` clean. Not opened in a browser: the product page lives on the
 subdomain, which localhost has no way to emulate — its data contract is what
 was tested.
+
+---
+
+## 2026-08-22 — Points in the cart, behind a switch that is off (Programador 7, economy & market)
+
+Eugenio's decision: points usable as a market discount up to 100%. Built behind
+`PUNTOS_DESCUENTO` (off in production) with one design decision written where
+it can be read (0089): **the seller is paid in points for the part paid in
+points** — a buyer→seller transfer in the ledger (`compra_con_puntos` /
+`venta_en_puntos`, entity = the order) — and in euros for the rest. The
+platform does not pay discounts out of its own cash; the point keeps
+circulating as what it buys. Because of that, **each seller opts in per
+product** (`products.acepta_puntos`, default off): the pilot's "limited range
+of products" is literally what sellers mark.
+
+Checkout (`POST /api/publicar/comprar`, `usar_puntos`): session required,
+never for subscriptions, never to yourself; only lines whose product accepts
+points can be paid with them; the server caps at min(balance, accepting
+subtotal); shipping is always euros. If euros left is zero → no Stripe: the
+order is created right there and the points move in the same call (if the
+ledger says no, the order is rolled back, 409). Otherwise a Stripe coupon for
+the exact discount and the points in the session metadata; the webhook moves
+the points after payment — never before. `pedidos.puntos_usados` says what
+each order paid in points. `GET /api/publicar/puntos-en-caja` tells the cart
+whether it can offer the control and with how much.
+
+UI: the cart shows "Pagar con puntos" (with balance, "usar el máximo", the
+computed discount) only when the server says so; Comercio gets a per-product
+"acepta puntos" toggle.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): no session → 401; non-accepting product → 400; all-points purchase
+→ order born `entregado` (digital) with puntos_usados 5, buyer 100→95, seller
+100→105, two ledger rows; mixed cart asking 10 → capped to 5 (only the
+accepting line), Stripe test session created with the 5,00 € coupon. `tsc`
+clean. Not tested: the webhook leg for the mixed cart (needs a completed
+Stripe payment) — its code path is the same pagarConPuntos() the all-points
+path exercised.
