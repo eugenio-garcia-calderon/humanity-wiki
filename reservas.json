@@ -149,6 +149,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "el atajo ?atajo=crear del manifiesto tiene que abrir el creador",
       "desde": "2026-08-22T19:38:52.948Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/JuegoVital.tsx",
+      "motivo": "techo del mundo 3D: avisar mientras construyes",
+      "desde": "2026-08-22T19:39:41.340Z"
     }
   ]
 }
