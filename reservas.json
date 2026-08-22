@@ -155,6 +155,12 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "etiquetas de los motivos nuevos del libro",
       "desde": "2026-08-22T21:37:31.718Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "confirmacion de compra + comprar ahora con puntos (Eugenio)",
+      "desde": "2026-08-22T21:38:07.276Z"
     }
   ]
 }
