@@ -28,13 +28,9 @@
  * reloading, so there has to be a way out that does not need a developer.
  */
 
-const VERSION = "hw-v2";
+const VERSION = "hw-v1";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
-const MEDIA = `${VERSION}-media`;
-// Images, styles and fonts only, and no more than this many. Enough for the
-// icons and the maps you actually opened; not enough to quietly eat a phone.
-const MAX_MEDIA = 60;
 
 // Only the things that are useless to miss. The app's own code lives under
 // /assets/ with a hash, and gets cached as it is used instead of guessed here.
@@ -129,44 +125,16 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Everything else: network wins, cache is the parachute — but only for things
-  // worth keeping. The first version cached every same-origin GET, and the
-  // browser showed what that means: Vite's dev modules, a user's uploaded photo
-  // and a multi-megabyte GeoJSON all landed in the cache. An unbounded cache is
-  // a disk leak the user cannot see, so this keeps a whitelist and a ceiling.
-  const cacheable =
-    req.destination === "image" ||
-    req.destination === "style" ||
-    req.destination === "font";
-
-  if (!cacheable) {
-    event.respondWith(fetch(req).catch(() => caches.match(req)));
-    return;
-  }
-
+  // Everything else: network wins, cache is the parachute.
   event.respondWith(
     fetch(req)
       .then((res) => {
         if (res.ok && res.type === "basic") {
           const copy = res.clone();
-          caches.open(MEDIA).then(async (c) => {
-            await c.put(req, copy);
-            await recortar(c, MAX_MEDIA);
-          });
+          caches.open(SHELL).then((c) => c.put(req, copy));
         }
         return res;
       })
       .catch(() => caches.match(req)),
   );
 });
-
-// Oldest-first trim. Crude on purpose: the Cache API has no size or date, so the
-// insertion order of keys() is the only signal available without keeping a
-// parallel index that could drift out of sync with the cache itself.
-async function recortar(cache, maximo) {
-  const claves = await cache.keys();
-  if (claves.length <= maximo) return;
-  for (const k of claves.slice(0, claves.length - maximo)) {
-    await cache.delete(k);
-  }
-}
