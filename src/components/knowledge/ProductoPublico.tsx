@@ -39,12 +39,17 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   // idénticas. Mientras no se sepa, no se pinta botón — enseñar uno y
   // quitarlo medio segundo después es peor que tardar medio segundo.
   const [cobro, setCobro] = useState<boolean | null>(null);
+  const [enPruebas, setEnPruebas] = useState(false);
   useEffect(() => {
-    if (cobroConocido !== null) { setCobro(cobroConocido); return; }
+    if (cobroConocido !== null) { setCobro(cobroConocido); setEnPruebas(pruebasConocido); return; }
     let vivo = true;
     fetch('/api/publicar/cobro')
-      .then(r => r.ok ? r.json() : { abierto: false })
-      .then(j => { if (!vivo) return; cobroConocido = !!j.abierto; setCobro(cobroConocido); })
+      .then(r => r.ok ? r.json() : { abierto: false, pruebas: false })
+      .then(j => {
+        if (!vivo) return;
+        cobroConocido = !!j.abierto; pruebasConocido = !!j.pruebas;
+        setCobro(cobroConocido); setEnPruebas(pruebasConocido);
+      })
       .catch(() => vivo && setCobro(false));
     return () => { vivo = false; };
   }, []);
@@ -198,6 +203,16 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
               {compra.fase === 'error' && (
                 <p className="mt-1.5 text-xs font-bold text-rose-600">{compra.motivo}</p>
               )}
+              {/* El aviso va JUNTO AL BOTÓN, no arriba del todo: quien pulsa
+                  mira el botón, no la cabecera. Y lo dice con palabras que se
+                  entienden sin saber qué es Stripe — «tienda en pruebas» sólo
+                  lo entiende quien ya sabía el problema. */}
+              {enPruebas && (
+                <p className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  <b>Esta tienda todavía no cobra.</b> Es una prueba: no se te va a cobrar
+                  nada y una tarjeta de verdad será rechazada.
+                </p>
+              )}
               <p className="mt-1.5 text-[11px] text-slate-400">
                 Pago seguro con tarjeta. No hace falta cuenta.
                 {p.envio?.hace_falta && p.envio?.centimos !== null && ' La dirección se pide al pagar.'}
@@ -298,3 +313,4 @@ function Envio({ envio, moneda, precio }: { envio: any; moneda: string; precio: 
 
 /** Se pregunta una vez por carga de página, no una vez por producto. */
 let cobroConocido: boolean | null = null;
+let pruebasConocido = false;

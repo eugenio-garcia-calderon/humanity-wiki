@@ -166,9 +166,9 @@ export default function FichaProducto({ handle }: { handle: string }) {
                   dice ANTES de pulsar. Desaparece solo cuando se pongan las
                   claves de verdad: lo decide el servidor, no esta pantalla. */}
               {cobro.pruebas && (
-                <p className="text-[11px] text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-                  <b>Tienda en pruebas.</b> Los pagos no son reales todavía y una tarjeta
-                  de verdad será rechazada.
+                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  <b>Esta tienda todavía no cobra.</b> Es una prueba: no se te va a cobrar nada
+                  y una tarjeta de verdad será rechazada.
                 </p>
               )}
               <p className="text-[11px] text-slate-400">
