@@ -94,6 +94,9 @@ data for measured data is the most expensive error made in this project so far.
 6. **Creating a new junction table** (`thing_a_thing_b`): there are already 43. See `src/db/CLAUDE.md`.
 7. **`git push --force` on `main`**: Eugenio edits files directly in the GitHub web UI. Always `git fetch` + `merge` before pushing.
 8. **Adding anything new to `server.ts`**: it is frozen. See `src/server/CLAUDE.md`.
+   One authorised exception: the `PORT` line reads the environment (2026-08-22),
+   so two people can run the platform at once. **Programador 1 on 3000,
+   Programador 2 on 3001.**
 
 ## When something can be done fast or done right
 
