@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, FileQuestion } from 'lucide-react';
 import BloquesLectura from '../components/knowledge/BloquesLectura';
+import Cesta from '../components/knowledge/Cesta';
 
 // ============================================================================
 // LA CARA PÚBLICA DE UNA PÁGINA — `/@nombre/pagina` (2026-08-22)
@@ -136,6 +137,10 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
           Publicado en <b>humanity.wiki</b> — el conocimiento de la humanidad, en común
         </Link>
       </footer>
+
+      {/* Sólo dentro de una tienda, y sólo si hay algo dentro: la cesta se
+          esconde sola cuando está vacía. */}
+      {handleFijo && <Cesta tienda={handleFijo} />}
     </Marco>
   );
 }

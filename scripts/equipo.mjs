@@ -175,6 +175,20 @@ if (orden === 'reservar') {
   process.exit(0);
 }
 
+// Solo para el Dashboard: soltar lo de un agente que Eugenio ha parado. Una
+// reserva de un agente apagado bloquea a los vivos hasta que caduca a las 4 h.
+if (orden === 'liberar') {
+  const quien = (resto[0] || '').toLowerCase();
+  if (!quien) { console.error('Dime de quién:  liberar prog5'); process.exit(1); }
+  const { reservas } = leer();
+  const quedan = reservas.filter((r) => r.agente !== quien);
+  const soltadas = reservas.length - quedan.length;
+  if (!soltadas) { console.log(`${quien} no tenía nada reservado.`); process.exit(0); }
+  if (!escribir(quedan, `${yo} libera las reservas de ${quien} (agente parado)`)) process.exit(1);
+  console.log(`Liberadas ${soltadas} reserva(s) de ${quien}.`);
+  process.exit(0);
+}
+
 if (orden === 'soltar') {
   const { reservas } = leer();
   const todo = resto.includes('--todo');
