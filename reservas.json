@@ -101,6 +101,12 @@
       "ruta": "src/App.tsx",
       "motivo": "Veracidad fase 4: rutas /debates",
       "desde": "2026-08-22T18:34:23.256Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": ".env.example",
+      "motivo": "documentar las dos llaves del TURN de Cloudflare",
+      "desde": "2026-08-22T18:34:26.699Z"
     }
   ]
 }
