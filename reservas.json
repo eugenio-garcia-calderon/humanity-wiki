@@ -17,6 +17,24 @@
       "ruta": "drizzle/0075_precios_servicio.sql",
       "motivo": "rama A: tabla de precios de la cesta",
       "desde": "2026-08-22T15:15:21.885Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/auth.ts",
+      "motivo": "resolver el conflicto del borrado de cuenta con los limites de prog6",
+      "desde": "2026-08-22T16:29:07.595Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "drizzle/0080_telecomunicaciones.sql",
+      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
+      "desde": "2026-08-22T16:31:37.338Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/mensajes.ts",
+      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
+      "desde": "2026-08-22T16:31:41.218Z"
     }
   ]
 }
