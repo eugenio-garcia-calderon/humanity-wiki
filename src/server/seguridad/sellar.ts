@@ -44,7 +44,7 @@ async function ultimoSellado(db: any): Promise<number> {
  */
 export async function sellarPendientes(db: any, limite = 500): Promise<Resumen> {
   const pendientes = (await db.execute(sql`
-    SELECT id, momento, tabla, operacion, clave, huella_nueva, huella_vieja, actor_bd
+    SELECT id, momento, tabla, operacion, clave, huella_nueva, huella_vieja, actor_bd, txid
     FROM registro_pendiente WHERE sellado_at IS NULL
     ORDER BY id ASC LIMIT ${limite}
   `)).rows as any[];
@@ -78,6 +78,10 @@ export async function sellarPendientes(db: any, limite = 500): Promise<Resumen> 
         clave: p.clave ?? null,
         huella_nueva: p.huella_nueva ?? null,
         huella_vieja: p.huella_vieja ?? null,
+        // Las filas que se escribieron en la misma transacción comparten este
+        // número. Es lo que hace demostrable que una transferencia son sus dos
+        // apuntes y no dos hechos sueltos.
+        tx: String(p.txid),
         momento: new Date(p.momento).toISOString(),
       },
     });

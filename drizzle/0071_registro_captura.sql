@@ -57,6 +57,12 @@ CREATE TABLE IF NOT EXISTS registro_pendiente (
   -- declara la conexión. Un `psql` a mano y el servidor no se parecen aquí, y
   -- esa diferencia es justo lo que interesa ver.
   actor_bd       TEXT         NOT NULL,
+  -- El número de transacción de PostgreSQL. Es lo que permite demostrar que
+  -- dos filas se escribieron JUNTAS o no se escribió ninguna — que en un libro
+  -- de puntos es la diferencia entre «Ana le dio 10 a Luis» y dos apuntes
+  -- sueltos que podrían no tener nada que ver. Sin esto, el registro cuenta dos
+  -- hechos donde hubo uno.
+  txid           BIGINT       NOT NULL DEFAULT txid_current(),
   sellado_at     TIMESTAMPTZ
 );
 
@@ -87,9 +93,10 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  INSERT INTO registro_pendiente (tabla, operacion, clave, huella_nueva, huella_vieja, actor_bd)
+  INSERT INTO registro_pendiente (tabla, operacion, clave, huella_nueva, huella_vieja, actor_bd, txid)
   VALUES (TG_TABLE_NAME, TG_OP, clave_fila, huella_n, huella_v,
-          current_user || '@' || coalesce(nullif(current_setting('application_name', true), ''), 'sin-nombre'));
+          current_user || '@' || coalesce(nullif(current_setting('application_name', true), ''), 'sin-nombre'),
+          txid_current());
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;

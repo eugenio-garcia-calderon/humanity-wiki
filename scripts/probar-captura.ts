@@ -84,12 +84,36 @@ try {
   const sinCambio = await pool.query(`SELECT count(*)::int AS n FROM registro_pendiente`);
   comprobar('un UPDATE que no cambia nada no ensucia el registro', sinCambio.rows[0].n === 2);
 
+  console.log('\nDOS APUNTES DE LA MISMA TRANSACCIÓN');
+  // El caso del libro de puntos: una transferencia son dos filas o no es nada.
+  await pool.query(`INSERT INTO users VALUES ('U_ANA','ana@ejemplo.invalid',1), ('U_LUIS','luis@ejemplo.invalid',1)`);
+  await pool.query('BEGIN');
+  await pool.query(`UPDATE users SET role_level = 2 WHERE id = 'U_ANA'`);
+  await pool.query(`UPDATE users SET role_level = 3 WHERE id = 'U_LUIS'`);
+  await pool.query('COMMIT');
+  const juntas = await pool.query(
+    `SELECT txid FROM registro_pendiente WHERE clave IN ('U_ANA','U_LUIS') AND operacion = 'UPDATE'`);
+  comprobar('las dos filas de una misma transacción comparten número de transacción',
+    juntas.rows.length === 2 && juntas.rows[0].txid === juntas.rows[1].txid,
+    JSON.stringify(juntas.rows));
+  const sueltas = await pool.query(
+    `SELECT txid FROM registro_pendiente WHERE clave = 'U_PRUEBA' AND operacion = 'UPDATE' LIMIT 1`);
+  comprobar('y no lo comparten con las que se escribieron aparte',
+    sueltas.rows[0].txid !== juntas.rows[0].txid);
+
   console.log('\nSELLAR');
   const r1 = await sellarPendientes(db);
-  comprobar('se sellan los dos', r1.sellados === 2 && r1.huecos === 0, JSON.stringify(r1));
+  // Seis: el alta y el ascenso de U_PRUEBA, las dos altas de Ana y Luis (un
+  // INSERT de dos filas son dos capturas, una por fila) y sus dos cambios.
+  comprobar('se sellan las seis capturas que hay', r1.sellados === 6 && r1.huecos === 0, JSON.stringify(r1));
   const v1 = verificarCadena(await leerCadena(db), publicas);
   comprobar('la cadena queda VERIFICADA y firmada',
     v1.estado === 'VERIFICADA' && v1.firmas.estado === 'VALIDAS', JSON.stringify(v1.firmas));
+  const mismaTx = (await pool.query(
+    `SELECT datos ->> 'tx' AS tx FROM registro_sellado
+     WHERE clase = 'dato' AND datos ->> 'clave' IN ('U_ANA','U_LUIS') AND datos ->> 'operacion' = 'UPDATE'`)).rows;
+  comprobar('y el sello conserva que esas dos filas fueron la misma transacción',
+    mismaTx.length === 2 && mismaTx[0].tx === mismaTx[1].tx, JSON.stringify(mismaTx));
   const r2 = await sellarPendientes(db);
   comprobar('sellar otra vez no duplica nada', r2.sellados === 0);
 
