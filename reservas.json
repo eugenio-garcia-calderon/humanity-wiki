@@ -133,12 +133,6 @@
       "desde": "2026-08-22T21:36:25.815Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/pages/Vision.tsx",
-      "motivo": "etiquetas de los motivos nuevos del libro",
-      "desde": "2026-08-22T21:37:31.718Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/knowledge/WindowContent.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
