@@ -78,6 +78,14 @@ self.addEventListener("install", (event) => {
   );
 });
 
+// The home screen's own data. Warmed once, on activate, for one reason: a
+// service worker does not control the page that installs it, so every request
+// the app fires on that first visit goes straight past this file and is never
+// copied. Without the warm-up the platform only survives an aeroplane from the
+// *second* visit on — and the first visit is exactly when somebody adds it to
+// their home screen and then tries it. Three requests, once per version.
+const CALENTAR = ["/api/publicaciones", "/api/proyectos", "/api/circulos"];
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -86,6 +94,23 @@ self.addEventListener("activate", (event) => {
         names.filter((n) => !n.startsWith(VERSION)).map((n) => caches.delete(n)),
       );
       await self.clients.claim();
+
+      const c = await caches.open(DATOS);
+      await Promise.all(
+        CALENTAR.map(async (ruta) => {
+          try {
+            // Same-origin credentials, so this sees what the person sees: their
+            // own feed, not a logged-out one.
+            const res = await fetch(ruta, { credentials: "same-origin" });
+            if (!res.ok) return;
+            const cabeceras = new Headers(res.headers);
+            cabeceras.set("X-Cacheado-En", new Date().toISOString());
+            await c.put(ruta, new Response(await res.blob(), { status: 200, headers: cabeceras }));
+          } catch {
+            // No network while activating: nothing to warm, and nothing broken.
+          }
+        }),
+      );
     })(),
   );
 });
@@ -116,13 +141,25 @@ self.addEventListener("fetch", (event) => {
           // were data would be the same lie in another costume.
           if (res.ok) {
             const copia = res.clone();
-            caches.open(DATOS).then(async (c) => {
-              const cuerpo = await copia.blob();
-              const cabeceras = new Headers(copia.headers);
-              cabeceras.set("X-Cacheado-En", new Date().toISOString());
-              await c.put(req, new Response(cuerpo, { status: 200, headers: cabeceras }));
-              await recortar(c, MAX_DATOS);
-            });
+            // waitUntil, NOT fire-and-forget. Without it the browser is free to
+            // kill the worker the moment the response reaches the page, and the
+            // copy is never written. That is exactly what happened: /api/data/*
+            // landed in the cache and the feed (/api/publicaciones, /api/proyectos)
+            // did not, seemingly at random, and offline the home screen said
+            // "0 publicaciones".
+            event.waitUntil(
+              (async () => {
+                const c = await caches.open(DATOS);
+                const cuerpo = await copia.blob();
+                const cabeceras = new Headers(copia.headers);
+                cabeceras.set("X-Cacheado-En", new Date().toISOString());
+                await c.put(req, new Response(cuerpo, { status: 200, headers: cabeceras }));
+                await recortar(c, MAX_DATOS);
+              })().catch(() => {
+                // A cache that cannot be written is a slower app, never a broken
+                // one: the live response has already gone to the page.
+              }),
+            );
           }
           return res;
         })
@@ -146,7 +183,7 @@ self.addEventListener("fetch", (event) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(SHELL).then((c) => c.put("/", copy));
+          event.waitUntil(caches.open(SHELL).then((c) => c.put("/", copy)).catch(() => {}));
           return res;
         })
         .catch(async () => {
@@ -175,7 +212,7 @@ self.addEventListener("fetch", (event) => {
           fetch(req).then((res) => {
             if (res.ok) {
               const copy = res.clone();
-              caches.open(ASSETS).then((c) => c.put(req, copy));
+              event.waitUntil(caches.open(ASSETS).then((c) => c.put(req, copy)).catch(() => {}));
             }
             return res;
           }),
@@ -204,10 +241,15 @@ self.addEventListener("fetch", (event) => {
       .then((res) => {
         if (res.ok && res.type === "basic") {
           const copy = res.clone();
-          caches.open(MEDIA).then(async (c) => {
-            await c.put(req, copy);
-            await recortar(c, MAX_MEDIA);
-          });
+          event.waitUntil(
+            caches
+              .open(MEDIA)
+              .then(async (c) => {
+                await c.put(req, copy);
+                await recortar(c, MAX_MEDIA);
+              })
+              .catch(() => {}),
+          );
         }
         return res;
       })
