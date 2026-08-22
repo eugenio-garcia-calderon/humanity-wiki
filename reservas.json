@@ -7,46 +7,10 @@
       "desde": "2026-08-22T20:46:22.224Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/server/bloqueos.ts",
-      "motivo": "bloquear a una persona: ultimo requisito de Apple",
-      "desde": "2026-08-22T20:46:22.224Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/auth.ts",
       "motivo": "cookie de sesion valida en los subdominios (Eugenio: probar puntos en el carrito)",
       "desde": "2026-08-22T20:51:15.124Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
-      "desde": "2026-08-22T20:53:42.878Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/server/social.ts",
-      "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
-      "desde": "2026-08-22T20:53:54.603Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/server/mensajes.ts",
-      "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
-      "desde": "2026-08-22T20:53:58.607Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/moderacion/Denunciar.tsx",
-      "motivo": "bloquear a una persona: interfaz",
-      "desde": "2026-08-22T21:03:04.906Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/Configuracion.tsx",
-      "motivo": "bloquear a una persona: interfaz",
-      "desde": "2026-08-22T21:03:09.023Z"
     },
     {
       "agente": "prog3",
