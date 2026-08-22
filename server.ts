@@ -2078,26 +2078,56 @@ async function startServer() {
         WHERE ct.territory_id = ${id}
       `);
       
-      const populatedChallenges = await Promise.all(challengesResult.rows.map(async (c: any) => {
-        const solutionsResult = await db.execute(sql`
-          SELECT s.*
-          FROM solutions s
-          JOIN challenge_solutions cs ON s.id = cs.solution_id
-          WHERE cs.challenge_id = ${c.id}
-        `);
-        
-        const objectivesResult = await db.execute(sql`
-          SELECT o.*
-          FROM objectives o
-          JOIN challenge_objectives co ON o.id = co.objective_id
-          WHERE co.challenge_id = ${c.id}
-        `);
-        
-        return {
-          ...c,
-          solutions: solutionsResult.rows,
-          objectives: objectivesResult.rows
-        };
+      // ══ DOS CONSULTAS, NO DOS POR RETO ═══════════════════════════════════
+      // Esto era un `Promise.all` que lanzaba DOS consultas por cada reto. Con
+      // los retos que tiene España hoy salían **53 consultas para abrir una
+      // ficha** — medido por `/api/medicion/rutas`, no estimado. Es el patrón
+      // que crece con los datos sin que nadie lo note: con cuatro retos son
+      // nueve consultas y va rápido; con cuatrocientos son ochocientas y la
+      // página se cae sola.
+      //
+      // Ahora son dos consultas para todos los retos, y el reparto se hace en
+      // memoria. `IN ${array}` es el patrón que ya usa `getSolutionsForChallenges`
+      // aquí al lado: el controlador lo expande a una lista de parámetros.
+      //
+      // SE CONSERVA EXACTAMENTE LO QUE DEVOLVÍA: `s.*` y `o.*` enteros, sin
+      // filtrar archivados, y un reto sin soluciones sigue trayendo `[]`. Esto
+      // es un cambio de CÓMO se pide, no de QUÉ se enseña.
+      const idsDeRetos = challengesResult.rows.map((c: any) => c.id);
+      const solucionesPorReto = new Map<string, any[]>();
+      const objetivosPorReto = new Map<string, any[]>();
+      if (idsDeRetos.length) {
+        const [sols, objs] = await Promise.all([
+          db.execute(sql`
+            SELECT cs.challenge_id, s.*
+            FROM solutions s
+            JOIN challenge_solutions cs ON s.id = cs.solution_id
+            WHERE cs.challenge_id IN ${idsDeRetos}
+          `),
+          db.execute(sql`
+            SELECT co.challenge_id, o.*
+            FROM objectives o
+            JOIN challenge_objectives co ON o.id = co.objective_id
+            WHERE co.challenge_id IN ${idsDeRetos}
+          `),
+        ]);
+        // `challenge_id` se quita de cada fila: venía solo para poder repartir,
+        // y dejarlo cambiaría la forma de lo que se devuelve.
+        for (const fila of sols.rows as any[]) {
+          const { challenge_id, ...solucion } = fila;
+          if (!solucionesPorReto.has(challenge_id)) solucionesPorReto.set(challenge_id, []);
+          solucionesPorReto.get(challenge_id)!.push(solucion);
+        }
+        for (const fila of objs.rows as any[]) {
+          const { challenge_id, ...objetivo } = fila;
+          if (!objetivosPorReto.has(challenge_id)) objetivosPorReto.set(challenge_id, []);
+          objetivosPorReto.get(challenge_id)!.push(objetivo);
+        }
+      }
+      const populatedChallenges = challengesResult.rows.map((c: any) => ({
+        ...c,
+        solutions: solucionesPorReto.get(c.id) || [],
+        objectives: objetivosPorReto.get(c.id) || [],
       }));
       
       // DE DÓNDE SALEN SUS CIFRAS (2026-08-22). La ficha de un territorio es
