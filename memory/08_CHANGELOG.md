@@ -4041,3 +4041,69 @@ finding out from the invoice. It is the house rule applied to money.
 Cached prefixes are not only cheaper, they are **faster**: the provider skips
 recomputing them, so the answer starts sooner. The saving and the wait improve
 together.
+## 2026-08-22 · PWA: installable, offline, and honest about it (Programador 3)
+
+The platform can now be added to an iPhone's home screen and opened without a
+network. Three pieces:
+
+**Installable.** `manifest.webmanifest` plus PNG icons. The `apple-touch-icon`
+pointed at `/logo.svg` and iOS does not accept SVG there, so adding to the home
+screen produced a blank icon. Icons are generated from
+`public/iconos/fuente-cuadrado.svg` — square and opaque on purpose, because iOS
+applies its own rounded mask and a source that is already rounded leaves dark
+corners inside the crop. Verified by reading the corner pixel: alpha 255.
+
+**Offline.** `public/sw.js`. Verified with the dev server stopped and again with
+a production build: the app boots from cache, assets included.
+
+**Offline WITH YOUR DATA, and this reverses an earlier decision.** The first
+version refused to cache `/api/*` at all, to avoid showing stale data as if it
+were live. Eugenio asked for his projects to be readable on a plane, so the rule
+changed — but the reason it existed did not:
+
+- The network always wins while it works. A cached answer can never shadow a live
+  one; the copy is only returned when the request actually failed.
+- Every parachute answer is stamped `X-Desde-Cache: 1` and `X-Cacheado-En`.
+- `src/avisoSinConexion.ts` reads those headers and shows a banner saying how old
+  the copy is. It wraps `fetch` rather than living in a component, because the
+  data is read from dozens of screens and none of them should have to remember.
+- GET only. Nothing that writes is ever cached.
+
+Verified with the server stopped: 4 projects returned, stamped, banner visible,
+and an endpoint never requested online still fails instead of inventing a copy.
+
+**Camera.** New "Cámara" type in the create "+": photo or video, uploaded to the
+platform. On a phone `capture` opens the system camera — it records video and
+needs no separate permission; on a desktop, where the attribute is ignored, the
+photo path uses a live `getUserMedia` preview (`src/components/ui/CapturaCamara.tsx`).
+The choice asks the browser what it can do, not how wide the screen is. Server
+side needed nothing: video MIME types and `kind: 'video'` windows already existed.
+
+NOT VERIFIED, and stated as such: the live camera preview (permission denied in
+the automation browser) and "Add to Home Screen" itself, which needs real Safari
+over real HTTPS.
+
+### Follow-up, same session — making the install findable (Programador 3)
+
+`src/avisoInstalar.ts`. On iOS the browser never offers to install a web app:
+there is no `beforeinstallprompt`, and Share → Add to Home Screen is buried in a
+sheet. An app nobody can find how to install is the same as one that cannot be.
+So: a one-time card, on iOS Safari only, never when already running standalone,
+silent for 30 days once dismissed.
+
+Also `CapturaCamara.tsx`: `window.isSecureContext` is now checked first. Without
+https, `navigator.mediaDevices` does not exist at all, and the previous message
+("this browser does not allow the camera") blamed the browser for a missing
+padlock. It now says which one it is.
+
+Still unverified by me, and only verifiable on Eugenio's own devices: the install
+card on a real iPhone, and the live camera preview (permission is denied in the
+automation browser).
+
+**Correction, found by looking at it on a 375px screen:** both overlays were
+anchored to `bottom: 0` and were sitting *behind* the platform's fixed mobile
+navigation bar (`z-index: 9999`). The offline banner was invisible on the exact
+device it exists for, and the install card had its only button covered. Fixed in
+`src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
+instead of hard-coding today's 44px — that bar is mobile-only and belongs to
+another file, so a copied number would rot in silence.
