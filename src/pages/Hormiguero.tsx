@@ -22,7 +22,12 @@ interface Incidencia {
   titulo: string;
   detalle: string | null;
   clase: 'fallo' | 'mejora';
-  estado: 'esperando' | 'bloqueada' | 'hecha';
+  estado: 'propuesta' | 'esperando' | 'bloqueada' | 'hecha';
+  /** La escribió alguien del equipo (un administrador o un programador IA), o
+   *  alguien de fuera. Es una foto del momento de escribirla. */
+  de_admin?: boolean;
+  /** Quién movió el estado o contestó: una persona o un programador IA. */
+  respondido_por?: string | null;
   necesita: string | null;
   respuesta: string | null;
   autor_user_id: string | null;
@@ -36,6 +41,11 @@ interface Incidencia {
 interface Adjunto { id: string; url: string; nombre: string; clase: string; bytes: number | string }
 
 const SEMAFORO = {
+  // GRIS Y NO UN COLOR DEL SEMÁFORO (2026-08-22, Eugenio: «las creadas por
+  // otros usuarios cada X tiempo las revisaremos para que yo las apruebe»). Una
+  // propuesta no está en la cola de trabajo: está esperando una DECISIÓN. Si
+  // llevara rojo parecería que alguien va tarde con ella.
+  propuesta: { punto: 'bg-slate-300',  texto: 'text-slate-500',  fondo: 'bg-slate-50 border-slate-200',   label: 'Por aprobar' },
   esperando: { punto: 'bg-rose-500',   texto: 'text-rose-700',   fondo: 'bg-rose-50 border-rose-200',     label: 'Esperando' },
   bloqueada: { punto: 'bg-amber-500',  texto: 'text-amber-800',  fondo: 'bg-amber-50 border-amber-200',   label: 'Te necesita' },
   hecha:     { punto: 'bg-emerald-500', texto: 'text-emerald-700', fondo: 'bg-emerald-50 border-emerald-200', label: 'Hecha' },
@@ -217,7 +227,7 @@ export default function Hormiguero() {
       )}
 
       <div className="flex items-center gap-1.5 mb-3 overflow-x-auto [scrollbar-width:none]">
-        {([['todas', 'Todas'], ['bloqueada', SEMAFORO.bloqueada.label], ['esperando', SEMAFORO.esperando.label], ['hecha', SEMAFORO.hecha.label]] as const).map(([k, t]) => (
+        {([['todas', 'Todas'], ['bloqueada', SEMAFORO.bloqueada.label], ['esperando', SEMAFORO.esperando.label], ['propuesta', SEMAFORO.propuesta.label], ['hecha', SEMAFORO.hecha.label]] as const).map(([k, t]) => (
           <button key={k} onClick={() => setFiltro(k)}
             className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors',
               filtro === k ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>
@@ -285,8 +295,18 @@ export default function Hormiguero() {
                     )}
 
                     <p className="text-[10px] text-slate-300 mt-1">
-                      {i.clase === 'fallo' ? 'Fallo' : 'Idea'} · {i.autor_nombre || 'Alguien'} ·{' '}
+                      {i.clase === 'fallo' ? 'Fallo' : 'Idea'} · {i.autor_nombre || 'Alguien'}
+                      {/* DE DÓNDE VIENE (2026-08-22). «Del equipo» es lo que se
+                          atiende directo; lo que entra por el buzón pasa antes
+                          por una decisión. Se dice en la propia nota para que no
+                          haya que deducirlo del color. */}
+                      {i.de_admin === false && <span className="text-slate-400"> · propuesta de fuera</span>}
+                      {' · '}
                       {new Date(i.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      {/* QUIÉN LA CONTESTÓ. Con dos programadores IA trabajando
+                          a la vez, «hecha» sin decir por quién es justo lo que
+                          hay que poder distinguir. */}
+                      {i.respondido_por && <span className="text-slate-400"> · lo lleva {i.respondido_por}</span>}
                     </p>
                   </div>
 
@@ -296,6 +316,16 @@ export default function Hormiguero() {
                         verdad está hecho. */}
                     {esAdmin && (
                       <>
+                        {/* APROBAR: pasar una propuesta a la cola de trabajo.
+                            Solo sale en las que están por aprobar; en las demás
+                            sería un botón más que no hace nada nuevo. */}
+                        {i.estado === 'propuesta' && (
+                          <button onClick={() => cambiar(i, { estado: 'esperando' })}
+                            title="Aprobarla: pasa a la cola de trabajo"
+                            className="inline-flex items-center gap-1 px-2 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-colors">
+                            <Check className="w-3.5 h-3.5" /> Aprobar
+                          </button>
+                        )}
                         <button onClick={() => cambiar(i, { estado: 'esperando' })} title="Esperando"
                           className={cn('w-7 h-7 grid place-items-center rounded-lg transition-colors',
                             i.estado === 'esperando' ? 'bg-rose-100 text-rose-700' : 'text-slate-300 hover:bg-slate-100')}>
