@@ -89,6 +89,12 @@
       "ruta": "src/pages/FichaProducto.tsx",
       "motivo": "fase 2 economia: resenas de productos",
       "desde": "2026-08-22T20:03:15.412Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/ProductoPublico.tsx",
+      "motivo": "fase 2 economia: resenas de productos",
+      "desde": "2026-08-22T20:03:19.214Z"
     }
   ]
 }
