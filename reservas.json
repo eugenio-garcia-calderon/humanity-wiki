@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog7",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "menu de informacion (i) arriba a la derecha",
-      "desde": "2026-08-22T13:50:24.279Z"
-    }
-  ]
+  "reservas": []
 }
