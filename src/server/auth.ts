@@ -106,14 +106,39 @@ function parseCookies(header: string | undefined): Record<string, string> {
 /** La huella de un token de un solo uso. Se guarda esto, nunca el token. */
 const huellaDeToken = (t: string) => crypto.createHash('sha256').update(t, 'utf8').digest('hex');
 
+/**
+ * LA SESIÓN VALE TAMBIÉN EN LAS TIENDAS (2026-08-22, Programador 7, a petición
+ * de Eugenio al probar los puntos en el carrito). La cookie nacía solo para
+ * `humanity.wiki`, así que en `nombre.humanity.wiki` — donde vive la cesta —
+ * cualquiera con sesión era un anónimo: ni «pagar con puntos» ni «compra
+ * verificada» podían existir allí. Con `COOKIE_DOMAIN=.humanity.wiki` en el
+ * entorno, la cookie se emite para todo el dominio y sus subdominios. Sin esa
+ * variable (desarrollo, otros despliegues) no cambia nada.
+ *
+ * Las dos cookies — la antigua de solo `humanity.wiki` y la nueva de dominio —
+ * pueden convivir en un navegador que ya tenía sesión. Por eso al poner la
+ * nueva se CADUCA la antigua, y al cerrar sesión se caducan las dos: si no,
+ * alguien pulsaría «cerrar sesión» y seguiría dentro en el dominio principal.
+ */
+const dominioCookie = () => (process.env.COOKIE_DOMAIN || '').trim();
+
 function setSessionCookie(res: Response, token: string, maxAgeSeconds: number) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie',
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`);
+  const base = `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
+  const dom = dominioCookie();
+  if (!dom) { res.setHeader('Set-Cookie', base); return; }
+  res.setHeader('Set-Cookie', [
+    `${base}; Domain=${dom}`,
+    // La de solo-host, caducada: que no quede una segunda sesión pegada.
+    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`,
+  ]);
 }
 
 function clearSessionCookie(res: Response) {
-  res.setHeader('Set-Cookie', `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const dom = dominioCookie();
+  const sinDominio = `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`;
+  res.setHeader('Set-Cookie', dom ? [sinDominio, `${sinDominio}; Domain=${dom}`] : sinDominio);
 }
 
 // ----------------------------------------------------------------------------
