@@ -177,6 +177,19 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   with `image/png` and SVG bytes inside. Two green status codes over two different
   failures. Load the thing the way the browser loads it — `Image()` and
   `onload`/`onerror` — and count.
+- **To find out what the browser downloaded, ask the browser.** Searching the
+  startup bundle for a chunk's filename returns **zero even when the chunk is
+  there** — Vite does not leave those names as string literals. Load the page and
+  read `performance.getEntriesByType('resource')`: that tells you what was
+  actually fetched, which is the question you meant to ask. The same list also
+  separates what is yours from what is a third party's, and on 2026-08-22 that is
+  how the home page turned out to call `es.wikipedia.org` and `img.youtube.com`
+  on every first visit.
+- **Measure in the place the answer lives.** A count of 96 requests on a first
+  visit was 85 dev-server modules that do not exist in production; and the
+  automation browser's `IntersectionObserver` delivers **no events at all**, so
+  nothing about lazy loading can be concluded from it. Before quoting a number,
+  ask whether the environment you measured in is the one the number is about.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.

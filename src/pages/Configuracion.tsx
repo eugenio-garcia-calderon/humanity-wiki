@@ -9,6 +9,7 @@ import { Settings, Check, Type } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
+import { BorrarCuenta } from '../components/cuenta/BorrarCuenta';
 
 export default function Configuracion() {
   const { fontScale, setFontScale } = useSettings();
@@ -43,6 +44,12 @@ export default function Configuracion() {
           ))}
         </div>
       </section>
+
+      {/* Y lo de la cuenta, al final y separado: lo de arriba se toca a menudo,
+          esto se toca una vez en la vida. */}
+      <div className="mt-6 space-y-6">
+        <BorrarCuenta />
+      </div>
     </div>
   );
 }

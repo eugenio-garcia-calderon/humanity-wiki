@@ -27,6 +27,26 @@ import { quienEscribe } from './agentesIA';
 const ESTADOS = new Set(['propuesta', 'esperando', 'bloqueada', 'hecha']);
 const CLASES = new Set(['fallo', 'mejora']);
 
+// ══ LOS DOS TABLEROS (2026-08-22, prog6) ════════════════════════════════════
+// Eugenio: «hay cuatro cosas de seguridad en el hormiguero […] trasládalas ahí
+// para limpiar el hormiguero, que es un tema para el público».
+//
+// El Hormiguero lo lee cualquiera. Cuatro notas abiertas ahí decían en texto
+// llano que el login no tiene límite de intentos y que la aplicación entra a la
+// base de datos como superusuario: un mapa para quien quiera aprovecharlo, en
+// la página que más se mira.
+//
+// Es una columna y no un tablero nuevo porque toda la maquinaria de aquí
+// —estados, adjuntos, permisos, el token de los agentes— vale igual para las
+// dos. Lo único que cambia es quién lo ve.
+//
+// `servidores` (2026-08-22, Eugenio: «pondrás un kanban como el del hormiguero
+// con las tareas que tienes pendientes») es LO CONTRARIO de `seguridad`: se
+// enseña a todo el mundo a propósito, junto al coste real de las máquinas. Por
+// eso el candado de abajo nombra a `seguridad` y no a «todo lo que no sea
+// general» — lo que se esconde se decide una por una, no por descarte.
+const AREAS = new Set(['general', 'seguridad', 'servidores']);
+
 const nuevoId = () => `INC${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 
 export function registerIncidenciasRoutes(app: Express, db: any) {
@@ -34,8 +54,56 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
    *
    *  SIN FILTRO POR AUTOR: esto no es la bandeja de nadie, es un tablero
    *  común. Ver lo que ya reportó otro es lo que evita reportarlo dos veces. */
-  app.get('/api/incidencias', async (_req: Request, res: Response) => {
+  app.get('/api/incidencias', async (req: Request, res: Response) => {
     try {
+      // Sin decir nada se devuelve el Hormiguero de siempre. Un cliente viejo
+      // que no conozca `area` sigue viendo exactamente lo que veía — menos las
+      // de seguridad, que es el objetivo.
+      const area = AREAS.has(String(req.query.area)) ? String(req.query.area) : 'general';
+
+      // ══ EL TABLERO DE SEGURIDAD NO SE ENSEÑA A CUALQUIERA ════════════════
+      // Un tablero de seguridad es, literalmente, LA LISTA DE POR DÓNDE
+      // ENTRAR. Si esto heredara la visibilidad del Hormiguero —que no pide ni
+      // sesión— publicaríamos los agujeros conocidos a quien pase por ahí.
+      //
+      // Lo comprueba EL SERVIDOR y no la pantalla: una página que decide qué
+      // enseñar no protege nada, porque la respuesta ya viajó entera al
+      // navegador y basta con mirarla. Aviso de prog4 al revisar esto, y tiene
+      // razón: es la única parte de este cambio que no es aditiva.
+      if (area === 'seguridad') {
+        const quien = await quienEscribe(req, db);
+        if (!quien) return res.status(401).json({ error: 'Inicia sesión.' });
+        if (!quien.admin) return res.status(403).json({ error: 'Este tablero es del equipo.' });
+
+        // ══ Y ESTO INCLUYE A LOS PROGRAMADORES IA, A PROPÓSITO ═════════════
+        // `quienEscribe` devuelve `admin: true` para un agente con su token,
+        // así que cualquiera de nosotros lee este tablero entero. Es lo que se
+        // quiere —somos quienes trabajamos estas notas— pero **cambia el
+        // alcance del token** y por eso queda escrito aquí, señalado por prog4:
+        //
+        // Hasta hoy, lo peor que conseguía un token robado era dejar el
+        // Hormiguero con un color equivocado. Desde hoy también abre la lista
+        // de por dónde entrar. Si algún día se decide lo contrario, la línea
+        // es `quien.clase === 'persona' && quien.admin` — y entonces ningún
+        // agente puede trabajar estas notas, que es el precio.
+        //
+        // ══ PERO CADA LECTURA CON TOKEN DEJA RASTRO ════════════════════════
+        // Propuesto por prog4, y es mejor que cerrar la puerta: no le quita el
+        // acceso a nadie y convierte «no lo podemos impedir» en «lo veríamos».
+        // Un token robado que se ponga a leer la lista de agujeros aparece
+        // aquí, con nombre y hora.
+        //
+        // En el registro del servidor mientras no exista otro sitio. Cuando
+        // aterrice el libro sellado de prog4 (#231), esto pasa a
+        // `anotar(db, { clase: 'lectura_seguridad', actor: quien.id, … })` y
+        // entonces el rastro es una fila que no se puede reescribir.
+        //
+        // Solo los agentes: una persona administradora que abre su tablero no
+        // es un evento, y anotar lo normal es cómo se entierra lo raro.
+        if (quien.clase === 'agente') {
+          console.log(`[seguridad] tablero leído por el agente ${quien.nombre} (${quien.id}) — ${new Date().toISOString()}`);
+        }
+      }
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto,
           -- ══ LOS ADJUNTOS, EN LA MISMA CONSULTA ═══════════════════════════
@@ -57,7 +125,7 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
             WHERE a.incidencia_id = i.id AND a.archived_at IS NULL
           ), '[]'::json) AS adjuntos
         FROM incidencias i LEFT JOIN users u ON u.id = i.autor_user_id
-        WHERE i.archived_at IS NULL
+        WHERE i.archived_at IS NULL AND i.area = ${area}
         ORDER BY
           -- EL ORDEN DICE QUÉ MIRAR ANTES:
           --   0 · bloqueada  — parada esperando a una persona. Enterrarla entre
@@ -90,6 +158,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       const titulo = String(req.body?.titulo || '').trim();
       if (!titulo) return res.status(400).json({ error: 'Cuéntame en una línea qué pasa.' });
       const clase = CLASES.has(String(req.body?.clase)) ? String(req.body.clase) : 'fallo';
+      // El tablero de seguridad NO recibe notas de fuera del equipo: una
+      // propuesta anónima ahí sería un sitio público donde escribir lo que se
+      // ha encontrado, que es exactamente lo que estamos quitando del
+      // Hormiguero. De fuera, todo entra en `general`.
+      const areaPedida = AREAS.has(String(req.body?.area)) ? String(req.body.area) : 'general';
       const id = nuevoId();
 
       // ══ DE QUIÉN VIENE DECIDE DÓNDE ENTRA (2026-08-22) ═══════════════════
@@ -106,11 +179,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       const estadoInicial = delEquipo ? 'esperando' : 'propuesta';
       await db.execute(sql`
         INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id, respondido_por,
-                                 de_admin, estado)
+                                 de_admin, estado, area)
         VALUES (${id}, ${titulo.slice(0, 300)}, ${req.body?.detalle || null}, ${clase},
                 ${quien.clase === 'persona' ? quien.id : null},
                 ${quien.clase === 'agente' ? quien.nombre : null},
-                ${delEquipo}, ${estadoInicial})
+                ${delEquipo}, ${estadoInicial}, ${delEquipo ? areaPedida : 'general'})
       `);
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto
@@ -155,6 +228,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
 
       const d = req.body || {};
       const estado = admin && ESTADOS.has(String(d.estado)) ? String(d.estado) : null;
+      // MOVER UNA NOTA DE TABLERO. Solo un administrador, y por eso no está
+      // junto a `titulo` y `detalle`: cambiar el área de una nota decide quién
+      // puede volver a verla. Mover algo a `seguridad` lo esconde del público;
+      // moverlo a `general` lo publica. Lo segundo es lo peligroso.
+      const areaNueva = admin && AREAS.has(String(d.area)) ? String(d.area) : null;
       if (d.estado && !admin) {
         return res.status(403).json({ error: 'El estado lo cambia quien programa.' });
       }
@@ -169,6 +247,7 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
           titulo    = COALESCE(${suya && !i.respuesta ? (d.titulo ?? null) : null}, titulo),
           detalle   = COALESCE(${suya ? (d.detalle ?? null) : null}, detalle),
           estado    = COALESCE(${estado}, estado),
+          area      = COALESCE(${areaNueva}, area),
           necesita  = COALESCE(${admin ? (d.necesita ?? null) : null}, necesita),
           respuesta = COALESCE(${admin ? (d.respuesta ?? null) : null}, respuesta),
           -- QUIÉN LO HA MOVIDO. Con dos agentes trabajando a la vez, «hecha» sin
@@ -242,7 +321,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
           -- es una decisión pendiente, y son dos cosas que se atienden en
           -- momentos distintos.
           count(*) FILTER (WHERE estado = 'propuesta')::int AS propuestas
-        FROM incidencias WHERE archived_at IS NULL
+        -- SOLO EL HORMIGUERO. El punto de la hormiga lo ve cualquiera, así
+        -- que si contara también las de seguridad, ese número diría cuántos
+        -- agujeros abiertos hay a quien no puede ver ni uno. Un contador
+        -- también filtra información.
+        FROM incidencias WHERE archived_at IS NULL AND area = 'general'
       `);
       res.json(r.rows[0]);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
