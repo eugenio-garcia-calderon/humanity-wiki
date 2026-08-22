@@ -2,6 +2,17 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
 import { registrarRegaloBienvenida } from './puntos.js';
+// ══ LOS LÍMITES DE INTENTOS (2026-08-22, prog6) ══════════════════════════════
+// Van aquí y no en la lista de módulos por dos razones que no son de estilo:
+//
+//  1. En Express el orden es comportamiento. Un guardián registrado DESPUÉS de
+//     la ruta que protege no llega a ejecutarse nunca: la ruta contesta antes.
+//     `registerAuthRoutes` se monta desde `server.ts`, así que el guardián
+//     tiene que nacer con ella.
+//  2. Y sobre todo: el guardián solo sabe frenar. Quien sabe si la contraseña
+//     era buena es la ruta, y por eso cada una avisa con `anotarFallo` o
+//     `levantarFreno`. Eso no se puede montar desde fuera.
+import { REGLAS, guardian, ipDe, anotarFallo, levantarFreno } from './limites/index.js';
 
 // ============================================================================
 // Módulo de autenticación — Fase 2
@@ -235,7 +246,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // --------------------------------------------------------------------------
   // POST /api/auth/register
   // --------------------------------------------------------------------------
-  app.post('/api/auth/register', async (req: Request, res: Response) => {
+  app.post('/api/auth/register', guardian(REGLAS.registro, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password, name } = req.body || {};
       if (!email || !password) {
@@ -248,6 +259,10 @@ export function registerAuthRoutes(app: Express, db: any) {
 
       const existing = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${normalizedEmail}`);
       if (existing.rows.length > 0) {
+        // Este 409 dice «ese correo ya está registrado», y repetido en serie es
+        // una forma de averiguar quién tiene cuenta aquí. Frenarlo es el motivo
+        // de que el registro tenga límite, no el registro en sí.
+        await anotarFallo(db, REGLAS.registro, ipDe(req), normalizedEmail, true);
         return res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
       }
 
@@ -346,7 +361,10 @@ export function registerAuthRoutes(app: Express, db: any) {
   // --------------------------------------------------------------------------
   // POST /api/auth/login
   // --------------------------------------------------------------------------
-  app.post('/api/auth/login', async (req: Request, res: Response) => {
+  // El guardián primero: si toca esperar, la ruta ni se ejecuta. La cuenta que
+  // se mira es la que viene en el cuerpo, para que el freno sea por cuenta Y
+  // por IP y no solo por una de las dos.
+  app.post('/api/auth/login', guardian(REGLAS.login, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body || {};
       if (!email || !password) {
@@ -362,8 +380,19 @@ export function registerAuthRoutes(app: Express, db: any) {
       // como si la contraseña es incorrecta, para no revelar qué emails están
       // registrados.
       if (!row || !verifyPassword(String(password), row.password_hash)) {
+        // Se anota si existía o no la cuenta: distingue «se equivocó de
+        // contraseña» de «está probando a ver qué correos hay dados de alta»,
+        // que son dos ataques distintos. Al que intenta no se le dice nada
+        // diferente — el mensaje y el coste siguen siendo los mismos.
+        await anotarFallo(db, REGLAS.login, ipDe(req), normalizedEmail, !!row);
         return res.status(401).json({ error: 'Email o contraseña incorrectos.' });
       }
+
+      // ACERTÓ: se levanta el freno, y SOLO el freno. `intentos_fallidos` no se
+      // toca. Si se limpiara, quien prueba mil contraseñas y acierta la última
+      // se llevaría borrado su propio rastro — que es justo el caso que hay que
+      // poder ver después.
+      levantarFreno(REGLAS.login, ipDe(req), normalizedEmail);
 
       // ══ VOLVER CANCELA EL BORRADO ══════════════════════════════════════
       // La papelera de 15 días no es un plazo administrativo: es que alguien
@@ -619,7 +648,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // pendiente de configurar un proveedor. En desarrollo, el token se devuelve
   // en la respuesta para poder probar el flujo de extremo a extremo; en
   // producción NUNCA debe devolverse (ver comprobación de NODE_ENV).
-  app.post('/api/auth/password/forgot', async (req: Request, res: Response) => {
+  app.post('/api/auth/password/forgot', guardian(REGLAS.restablecer, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const email = String((req.body || {}).email || '').trim().toLowerCase();
       const result = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${email} AND archived_at IS NULL`);
@@ -628,6 +657,15 @@ export function registerAuthRoutes(app: Express, db: any) {
       // Respuesta idéntica exista o no la cuenta: no se revela qué emails
       // están registrados.
       const genericResponse: any = { success: true, message: 'Si existe una cuenta con ese email, recibirás instrucciones.' };
+
+      // AQUÍ SE CUENTA CADA PETICIÓN, ACIERTE O NO, y es la única puerta donde
+      // se hace así. En las otras dos «fallo» es equivocarse; aquí no hay nada
+      // que acertar: pedir el enlace cien veces seguidas es el abuso, exista la
+      // cuenta o no. Y como la respuesta es idéntica en los dos casos, contar
+      // solo una de las ramas convertiría el freno en la pista que la respuesta
+      // se cuida de no dar.
+      await anotarFallo(db, REGLAS.restablecer, ipDe(req), email, !!row);
+
       if (!row) return res.json(genericResponse);
 
       const token = crypto.randomBytes(32).toString('hex');

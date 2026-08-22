@@ -48,7 +48,15 @@ server in the nightly backup.
 
 **The email is stored as-is, on purpose.** Without it you cannot answer "was
 this account attacked?", which is the entire point. It is not a secret the
-`users` table does not already hold.
+`users` table does not already hold — *while the account exists*.
+
+**When it stops existing, call `olvidarCuenta(db, correo)`** from the final
+deletion, not from the request: during the 15-day window the person can come
+back and their trail has to be intact. It nulls the email and keeps the IP,
+the timestamp and the count — "how many attempts came from that IP" is still
+the signal of an attack and belongs to nobody. Without this, someone who asked
+to be forgotten stays in this table forever, and since 2026-08-22 leaves the
+server in the nightly backup. Spotted by prog1 while reviewing.
 
 **A failed audit write does not block the request.** Losing one line of the
 trail is bad; being unable to log into the platform because a log row could not
