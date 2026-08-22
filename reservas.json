@@ -47,6 +47,24 @@
       "ruta": "drizzle/0088_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
       "desde": "2026-08-22T19:10:40.908Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "drizzle/0091_bloqueos.sql",
+      "motivo": "bloquear a una persona: ultimo requisito de Apple",
+      "desde": "2026-08-22T20:46:22.224Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/bloqueos.ts",
+      "motivo": "bloquear a una persona: ultimo requisito de Apple",
+      "desde": "2026-08-22T20:46:22.224Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "bloquear a una persona: ultimo requisito de Apple",
+      "desde": "2026-08-22T20:46:22.224Z"
     }
   ]
 }
