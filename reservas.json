@@ -5,12 +5,6 @@
       "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
       "motivo": "Programador 3: tipo Camara (foto y video) en el creador",
       "desde": "2026-08-22T11:30:42.250Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "memory/11_PLAN_TIENDAS.md",
-      "motivo": "plan de tiendas en subdominio",
-      "desde": "2026-08-22T11:35:50.997Z"
     }
   ]
 }
