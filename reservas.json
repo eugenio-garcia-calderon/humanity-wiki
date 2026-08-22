@@ -83,6 +83,12 @@
       "ruta": "src/server/social.ts",
       "motivo": "las denuncias no las lee nadie: hacen falta rutas para revisarlas",
       "desde": "2026-08-22T16:57:06.578Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "scripts/vaciar-cuentas.mjs",
+      "motivo": "borrar el telefono al vaciar una cuenta (columna nueva de telecom)",
+      "desde": "2026-08-22T17:04:27.061Z"
     }
   ]
 }
