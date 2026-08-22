@@ -343,6 +343,30 @@ export default function AIAssistant({ modo = 'panel' }: {
    */
   const [creador, setCreador] = useState<'camara' | 'muro' | 'documento' | 'lienzo' | 'mapa' | 'proyecto' | null>(null);
 
+  /*
+   * LOS ATAJOS DEL MANIFIESTO (2026-08-22). Al mantener pulsado el icono de la
+   * aplicación —en Android, y en iOS al instalarla— salen accesos directos:
+   * «Crear algo», «Mis proyectos», «Contar algo que falla». Los dos últimos son
+   * rutas normales; éste tiene que ABRIR el creador, y por eso existe este
+   * efecto.
+   *
+   * Sin él, el atajo te dejaría en la portada y parecería que no ha hecho nada
+   * — un atajo que promete una cosa y hace otra, que es el fallo que este
+   * proyecto ya lleva cuatro veces catalogado el mismo día.
+   *
+   * SE LIMPIA LA DIRECCIÓN después de usarlo: si se quedara, recargar la página
+   * volvería a abrir el creador y compartir la dirección se lo abriría a otro.
+   */
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('atajo') === 'crear') {
+      setCreador('camara');
+      p.delete('atajo');
+      const limpia = window.location.pathname + (p.toString() ? `?${p}` : '');
+      window.history.replaceState({}, '', limpia);
+    }
+  }, []);
+
   const ALTO_BARRA = 44;
   /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
    *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
