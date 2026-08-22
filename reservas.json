@@ -17,6 +17,12 @@
       "ruta": "drizzle/0075_precios_servicio.sql",
       "motivo": "rama A: tabla de precios de la cesta",
       "desde": "2026-08-22T15:15:21.885Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "../../../../../../../../../../../tmp/prueba-identidad.txt",
+      "motivo": "prueba de identidad desde la carpeta nueva",
+      "desde": "2026-08-22T17:27:53.679Z"
     }
   ]
 }
