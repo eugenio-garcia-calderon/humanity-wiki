@@ -131,12 +131,6 @@
       "ruta": "src/components/knowledge/DialogoCompartir.tsx",
       "motivo": "dominio propio en compartir",
       "desde": "2026-08-22T19:57:36.310Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: entrega de lo digital + rutas de pedidos restauradas",
-      "desde": "2026-08-22T19:59:03.626Z"
     }
   ]
 }
