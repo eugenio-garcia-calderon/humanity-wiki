@@ -13,6 +13,30 @@
       "desde": "2026-08-22T15:00:30.483Z"
     },
     {
+      "agente": "prog3",
+      "ruta": "src/components/ventanas/bus.ts",
+      "motivo": "el logo no lleva a inicio con ventanas abiertas",
+      "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/ventanas/GestorVentanas.tsx",
+      "motivo": "el logo no lleva a inicio con ventanas abiertas",
+      "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "el logo no lleva a inicio con ventanas abiertas",
+      "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/MenuLateral.tsx",
+      "motivo": "el logo no lleva a inicio con ventanas abiertas",
+      "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
       "agente": "prog7",
       "ruta": "drizzle/0083_precios_servicio.sql",
       "motivo": "precios de la cesta (renumerada desde 0077, que ya existe en main)",
@@ -35,6 +59,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "ref 0077→0083",
       "desde": "2026-08-22T18:21:44.045Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "ref 0077→0083",
+      "desde": "2026-08-22T18:21:47.775Z"
     }
   ]
 }
