@@ -113,6 +113,11 @@ Read `equipo/REPARTO.md` before your first commit of the session. The short vers
   several people's work.** Say it and wait for your turn before merging to `main`.
 - Before starting anything: `git fetch` and read the last few hours of the log.
   Somebody may have done it already.
+- **Close every browser tab the moment you stop looking at it**, in that same turn —
+  not at the end of the task — and `preview_stop` any server you are no longer
+  watching. Measured on 2026-08-22: a browser costs ~0.5 GB, three agents held
+  1.68 GB across 42 processes while the machine had 0.30 GB free. The forgotten
+  tab, not the agent, is what closes the app and takes the whole team down.
 
 ## When something can be done fast or done right
 

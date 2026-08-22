@@ -84,7 +84,21 @@ esté hecha.
 | Fusionar a `main` sin avisar | `main` despliega, y el despliegue hace `git reset --hard origin/main` en el servidor |
 | `git add -A` o `git add .` sin mirar antes qué entra | Así se versionó `.agente` el 2026-08-22: un fichero de identidad local acabó en el repositorio y **git lo reponía en la copia de todos** en cada checkout. Dos agentes decían llamarse igual y nadie lo había escrito. `git status` primero, y añadir por nombre |
 
-## 5 · Una PR por programador, y el despliegue por turnos
+## 5 · El navegador: se cierra en cuanto dejas de mirarlo
+
+Norma de Eugenio (2026-08-22), y no se negocia: **cada uno navega cuando lo
+necesita, y cierra la pestaña en cuanto termina de mirarla.**
+
+| | |
+|---|---|
+| Cuándo se cierra | En el mismo turno en que dejas de usarla. No «al final de la tarea» |
+| Cómo | `tabs_close` con su `tabId`. Si no te queda ninguna, el panel se cierra solo |
+| Nunca | Dejar una pestaña abierta «por si acaso», ni un servidor de vista previa que ya no miras (`preview_stop`) |
+| Antes de entregar | Cero pestañas tuyas abiertas |
+| Por qué | Medido el 2026-08-22 en el Mac de Eugenio: **cada navegador ~0,5 GB, 42 procesos y 1,68 GB entre tres agentes**, con 0,30 GB libres en la máquina. El navegador olvidado, no el agente, es lo que cierra la aplicación y os tumba a todos a la vez |
+| Y `/explorar` | No la abras si no es tu tarea: son 12 copias de la plataforma dentro de sí misma |
+
+## 6 · Una PR por programador, y el despliegue por turnos
 
 Norma de Eugenio (2026-08-22): **cada programador abre su propia PR, y no se
 despliega fusionando el código de varios a la vez.**
@@ -103,7 +117,7 @@ atrás sin llevarse por delante el trabajo de los otros dos.
 
 `develop` sirve para integrar y para probar. **No es lo que se despliega.**
 
-## 6 · Cuando dos han hecho lo mismo
+## 7 · Cuando dos han hecho lo mismo
 
 Ya pasó y se resolvió bien: se comparan las dos soluciones **con datos**, sobrevive
 la mejor y el otro retira su commit. No gana quien llegó antes ni quien tiene más
