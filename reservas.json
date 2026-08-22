@@ -43,12 +43,6 @@
       "desde": "2026-08-22T13:13:19.916Z"
     },
     {
-      "agente": "prog4",
-      "ruta": "package.json",
-      "motivo": "P4: tres ordenes npm de comprobacion de seguridad",
-      "desde": "2026-08-22T13:26:22.428Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "movil: objetivos tactiles de 36px en la cesta",
