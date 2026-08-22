@@ -32,3 +32,19 @@ Si dudas, pregunta «¿eres el Dashboard?» antes de pedir turno. Cuesta un mens
 | Se pide para | **Cualquier** PR a `main`, aunque sea una línea de changelog. `main` despliega |
 | Al pedirlo se dice | Si tu PR es **aditiva** o **cambia lo que ve todo el mundo mañana** — y en el segundo caso, con la frase de Eugenio que lo pidió |
 | Al terminar | Se avisa de que el run cerró, para que entre el siguiente |
+
+## Si el Dashboard no existe
+
+Pasa: la aplicación se reinicia y su sesión desaparece. El 2026-08-22 un agente se
+encontró con tres PRs listas y sin nadie a quien pedir turno. Lo que hizo, y es lo
+correcto:
+
+1. `gh run list` antes de cada una, para ver que no hay ningún despliegue en curso.
+2. **De una en una**, esperando a que cierre el run de la anterior.
+3. Verificar cada una en producción antes de seguir con la siguiente.
+4. **Contarlo después**, entero, al Dashboard que aparezca — incluida la parte que
+   no equivale a un turno: se ve la cola de GitHub, no a quién estaba a punto de
+   darse paso.
+
+Eso no es saltarse el turno: es lo más parecido que hay cuando no hay a quién
+pedírselo. Lo que no vale es hacerlo y no decirlo.
