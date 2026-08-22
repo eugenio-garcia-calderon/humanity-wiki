@@ -89,6 +89,12 @@ function escribir(reservas, mensaje) {
     const commit = git(['commit-tree', arbol, ...padres, '-m', mensaje]);
     const empujado = gitSilencioso(['push', '-q', 'origin', `${commit}:refs/heads/${RAMA}`], { timeout: 20000 });
     if (empujado !== null) return true;
+    // El push puede fallar y aun así estar ya guardado lo que queríamos (otro
+    // agente empujó lo mismo, o el remoto lo aceptó y cortó la respuesta). Antes
+    // de dar por perdida una liberación, comprobamos el estado de verdad.
+    const { reservas: ahora } = leer();
+    const igual = JSON.stringify(ahora) === JSON.stringify(reservas);
+    if (igual) return true;
     if (intento === 3) {
       console.error('No he podido guardar la reserva (¿sin red, o alguien empujando a la vez?).');
       return false;
