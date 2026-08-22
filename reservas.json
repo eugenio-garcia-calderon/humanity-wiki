@@ -53,18 +53,6 @@
       "ruta": "CLAUDE.md",
       "motivo": "la trampa del fallo armado para otro dia",
       "desde": "2026-08-22T16:05:26.213Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/App.tsx",
-      "motivo": "ruta y enlace de Mi cuenta (borrar cuenta)",
-      "desde": "2026-08-22T16:15:24.403Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "ruta y enlace de Mi cuenta (borrar cuenta)",
-      "desde": "2026-08-22T16:15:24.403Z"
     }
   ]
 }
