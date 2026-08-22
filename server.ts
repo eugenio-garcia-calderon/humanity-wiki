@@ -14,6 +14,7 @@ import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
+import { registerMedicionRoutes, medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
@@ -268,11 +269,24 @@ async function startServer() {
   app.use('/api/ai/chat', express.json({ limit: '20mb' }));
   app.use(express.json());
 
+  // 1.45 MEDICIÓN (2026-08-22). Va ANTES que todo lo demás porque mide el
+  // tiempo que espera quien pide, no el del trozo del medio. Y envuelve `db`
+  // para saber cuánto de ese tiempo se fue esperando a la base de datos y en
+  // cuántas consultas — que es lo que convierte «tarda 400 ms» en una
+  // decisión. Ver `src/server/medicion.ts`.
+  medirBaseDeDatos(db);
+  medirPeticiones(app);
+
   // 1.5 AUTENTICACIÓN (Fase 2). Se monta justo después de express.json() y
   // antes que el resto de la API, porque instala el middleware que resuelve
   // `req.user` a partir de la cookie de sesión — todos los endpoints
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
+
+  // Las rutas que ENSEÑAN la medición van aquí, después de la autenticación:
+  // comprueban que quien mira es administrador, y `req.user` lo instala la
+  // línea de arriba. El cronómetro en sí se montó antes (1.45).
+  registerMedicionRoutes(app, db);
 
   // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
   // Van después de la autenticación porque dependen de `req.user`
@@ -479,10 +493,42 @@ async function startServer() {
     }
   };
 
-  app.get("/api/data/territories", (req, res) => getTable("territories", res));
+  // ══ QUE EL BORDE RESPONDA POR NOSOTROS ═══════════════════════════════════
+  // Fase 3 de la optimización. Medido en producción: `/api/data/*` y
+  // `/api/geo/*` salían **sin ninguna cabecera de caché**, así que Cloudflare
+  // no podía guardar nada y CADA visita llegaba hasta Node y hasta Postgres.
+  // Los ficheros de código sí estaban bien (`immutable`, un año); los datos,
+  // no.
+  //
+  // A un millón de visitas, esto es la diferencia entre que el borde conteste
+  // casi todo o que lo conteste la máquina. Es la mejora más barata que queda:
+  // una petición que responde Cloudflare no gasta ni CPU, ni conexión del
+  // pool, ni consulta.
+  //
+  // ── LA CONDICIÓN, Y ES LA ÚNICA QUE IMPORTA ────────────────────────────
+  // `public` significa «esta respuesta vale para cualquiera». Si una de estas
+  // rutas empezara algún día a mirar `req.user`, el borde le serviría a una
+  // persona lo que se calculó para otra. **Comprobado uno por uno antes de
+  // marcarlas: ninguna de las trece lee la sesión.** Quien añada una lectura
+  // de `req.user` a cualquiera de ellas tiene que quitar esta llamada en el
+  // mismo cambio, y por eso la marca está en la ruta y no en un middleware
+  // que las agrupe: se ve al lado del código que podría romperla.
+  //
+  // ── POR QUÉ UN MINUTO Y NO UNA HORA ───────────────────────────────────────
+  // Porque quien edita un objetivo tiene que verlo cambiar. Un minuto absorbe
+  // la avalancha (mil visitas en ese minuto son UNA consulta) y sigue
+  // sintiéndose inmediato. `stale-while-revalidate` hace el resto: pasado el
+  // minuto el borde sirve lo viejo AL INSTANTE y refresca por detrás, así que
+  // nadie espera nunca a que se recalcule.
+  const cachePublica = (res: Response, segundos: number) => {
+    res.set('Cache-Control', `public, max-age=${segundos}, stale-while-revalidate=${segundos * 5}`);
+  };
+
+  app.get("/api/data/territories", (req, res) => { cachePublica(res, 60); return getTable("territories", res); });
   
   app.get("/api/data/objectives", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`SELECT * FROM objectives WHERE archived_at IS NULL`);
       const territoryIdsResult = await db.execute(sql`SELECT id FROM territories WHERE archived_at IS NULL`);
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
@@ -526,6 +572,7 @@ async function startServer() {
   
   app.get("/api/data/challenges", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT c.*, 
           COALESCE(json_agg(DISTINCT ct.territory_id) FILTER (WHERE ct.territory_id IS NOT NULL), '[]') as territory_ids,
@@ -542,6 +589,7 @@ async function startServer() {
   
   app.get("/api/data/solutions", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT s.*,
           COALESCE(json_agg(DISTINCT sc.cause_id) FILTER (WHERE sc.cause_id IS NOT NULL), '[]') as cause_ids,
@@ -558,6 +606,7 @@ async function startServer() {
   
   app.get("/api/data/causes", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT c.*,
           COALESCE(json_agg(DISTINCT cc.challenge_id) FILTER (WHERE cc.challenge_id IS NOT NULL), '[]') as challenge_ids
@@ -572,6 +621,7 @@ async function startServer() {
   
   app.get("/api/data/projects", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT p.*,
           COALESCE(json_agg(DISTINCT pc.challenge_id) FILTER (WHERE pc.challenge_id IS NOT NULL), '[]') as challenge_ids,
@@ -592,6 +642,7 @@ async function startServer() {
   
   app.get("/api/data/organizations", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT o.*,
           COALESCE(json_agg(DISTINCT oo.objective_id) FILTER (WHERE oo.objective_id IS NOT NULL), '[]') as objective_ids,
@@ -608,6 +659,7 @@ async function startServer() {
 
   app.get("/api/data/indicators", async (req, res) => {
     try {
+      cachePublica(res, 60);
       // National (España) observation only — per-territory breakdowns for the map
       // come from /api/geo/territories/{polygons,centroids} via indicatorScores.
       const territoryId = (req.query.territoryId as string) || 'T003';
@@ -625,6 +677,7 @@ async function startServer() {
 
   app.get("/api/data/markers", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const indicatorId = req.query.indicatorId as string | undefined;
       const result = indicatorId
         ? await db.execute(sql`
@@ -645,6 +698,7 @@ async function startServer() {
 
   app.get("/api/data/metrics", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const markerId = req.query.markerId as string | undefined;
       const result = markerId
         ? await db.execute(sql`
@@ -1344,6 +1398,7 @@ async function startServer() {
   // 1. POLYGONS ENDPOINT serving GeoJSON features mapped to territory IDs
   app.get("/api/geo/territories/polygons", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const zoom = parseFloat(req.query.zoom as string) || 2;
       const typeStr = (req.query.type as string) || null;
       const parentIdStr = (req.query.parentId as string) || null;
@@ -1471,6 +1526,7 @@ async function startServer() {
   // 2. CENTROIDS ENDPOINT returning territory centroids with objective progress
   app.get("/api/geo/territories/centroids", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const zoom = parseFloat(req.query.zoom as string) || 2;
       const typeStr = (req.query.type as string) || null;
       const parentIdStr = (req.query.parentId as string) || null;
@@ -1912,6 +1968,7 @@ async function startServer() {
   // 4. VECTOR TILES ENDPOINT (PostGIS ST_AsMVT for Vector Tile Mapbox Serving)
   app.get("/api/geo/tiles/:z/:x/:y.pbf", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const z = parseInt(req.params.z, 10);
       const x = parseInt(req.params.x, 10);
       const y = parseInt(req.params.y, 10);

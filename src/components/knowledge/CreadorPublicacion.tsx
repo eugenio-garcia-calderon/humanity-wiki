@@ -91,6 +91,19 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
     if (abierto && tipoInicial) { setTipo(tipoInicial); setError(null); }
   }, [abierto, tipoInicial]);
 
+  /*
+   * SI YA ELEGISTE LA HERRAMIENTA, NO TE LA VUELVO A PREGUNTAR (2026-08-22).
+   *
+   * Eugenio pulsaba «Cámara» en el «+» y aterrizaba en una rejilla de ocho
+   * herramientas con Cámara marcada: un paso que no avanza nada, ocho
+   * decisiones ya tomadas ocupando media pantalla, y la acción de verdad
+   * empujada por debajo del pliegue. La rejilla sigue estando, detrás de
+   * «Cambiar de herramienta», para quien entre por el botón verde de la portada
+   * y todavía no sepa qué quiere hacer.
+   */
+  const [verRejilla, setVerRejilla] = useState(!tipoInicial);
+  useEffect(() => { if (abierto) setVerRejilla(!tipoInicial); }, [abierto, tipoInicial]);
+
   if (!abierto) return null;
 
   const elegido = TIPOS.find(t => t.tipo === tipo)!;
@@ -304,7 +317,17 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
               </div>
             )}
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+            {!verRejilla && (
+              <button
+                type="button"
+                onClick={() => setVerRejilla(true)}
+                className="mt-3 text-xs font-semibold text-slate-400 hover:text-slate-700 underline underline-offset-2 min-h-[44px]"
+              >
+                Cambiar de herramienta
+              </button>
+            )}
+
+            <div className={cn('grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4', !verRejilla && 'hidden')}>
               {TIPOS.map(t => (
                 <button key={t.tipo} onClick={() => { setTipo(t.tipo); setError(null); }}
                   className={cn('text-left p-3 rounded-2xl border transition-all',
@@ -349,12 +372,23 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
               </p>
               {tipo === 'camara' ? (
                 <>
-                  <input
-                    value={titulo} onChange={e => setTitulo(e.target.value)}
-                    placeholder="Título (opcional)"
-                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
-                  />
-                  <div className="mt-2 grid grid-cols-2 gap-2">
+                  {/*
+                      DOS BOTONES, SÓLIDOS Y ARRIBA (2026-08-22, Eugenio: «la UX
+                      de darle a cámara y que aparezca así es terrible»).
+
+                      Lo que había: dos recuadros de línea DISCONTINUA y gris. El
+                      borde discontinuo es el idioma de «arrastra aquí un
+                      fichero» —un gesto que en un móvil no existe— y gris sobre
+                      blanco se lee como desactivado. El resultado era que la
+                      única acción de la pantalla parecía una zona rota.
+
+                      Y el título iba ANTES: te pedía nombrar una foto que aún no
+                      habías hecho, estando de pie con el móvil delante de la
+                      cosa que querías fotografiar. Ahora se pregunta después, en
+                      el selector de destino, que además ya lo rellena solo con
+                      el nombre del fichero.
+                  */}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     {/* En el móvil, `capture` abre la cámara del sistema: es la
                         que ya sabe grabar vídeo y no pide un permiso aparte. En
                         un portátil el atributo se ignora, así que la foto va por
@@ -364,23 +398,23 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
                       type="button"
                       onClick={() => (CAPTURA_NATIVA ? entradaFoto.current?.click() : setCamaraAbierta(true))}
                       disabled={ocupado !== null}
-                      className="min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-500 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-60 transition-colors"
+                      className="min-h-[56px] flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl bg-emerald-600 text-white font-semibold text-sm shadow-sm hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-60 transition-colors"
                     >
-                      {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                      {ocupado === 'mano' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
                       Hacer una foto
                     </button>
                     <button
                       type="button"
                       onClick={() => entradaVideo.current?.click()}
                       disabled={ocupado !== null}
-                      className="min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-500 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-60 transition-colors"
+                      className="min-h-[56px] flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold text-sm shadow-sm hover:bg-slate-800 active:bg-slate-700 disabled:opacity-60 transition-colors"
                     >
-                      {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                      {ocupado === 'mano' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Video className="w-5 h-5" />}
                       Grabar un vídeo
                     </button>
                   </div>
                   <p className="mt-2 text-[11px] text-slate-400">
-                    La foto se abre en el editor antes de guardarse. El vídeo se sube tal cual.
+                    Después te preguntamos dónde guardarla.
                   </p>
                   <input
                     ref={entradaFoto} type="file" accept="image/*" capture="environment" className="hidden"
