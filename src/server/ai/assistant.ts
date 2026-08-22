@@ -1392,7 +1392,26 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         ].filter(Boolean).join(' · ');
         if (url) enseñar = { titulo: nombre || spec.description, url, detalle: detalle || undefined };
       }
-      res.json({ status: result.ok ? 'ejecutada' : 'fallida', ...result, enseñar });
+      // ══ EL ESTADO DE LA EJECUCIÓN VA EL ÚLTIMO ══════════════════════════
+      // (2026-08-22, encontrado por la prueba automática de las acciones.)
+      //
+      // Estaba el PRIMERO, y `...result` lo pisaba: crear un grafo devuelve
+      // `status: 'borrador'` y crear un mapa `status: 'publicado'`, así que la
+      // respuesta salía diciendo «borrador» donde tenía que decir «ejecutada».
+      // La pantalla pinta en verde lo que pone «ejecutada» y en gris lo demás:
+      // dos acciones que SÍ se habían ejecutado se enseñaban en gris, como si
+      // no hubiera pasado nada.
+      //
+      // Es la regla de la casa otra vez: nadie podía distinguir «se hizo» de
+      // «no se hizo» en esas dos. El estado de la ENTIDAD sigue viajando, con
+      // su nombre propio, que es lo que tenía que haber tenido desde el
+      // principio — dos cosas distintas no pueden llamarse igual.
+      res.json({
+        ...result,
+        estadoEntidad: (result as any).status,
+        status: result.ok ? 'ejecutada' : 'fallida',
+        enseñar,
+      });
     } catch (e: any) {
       console.error('decide action error:', e);
       res.status(500).json({ error: e.message });

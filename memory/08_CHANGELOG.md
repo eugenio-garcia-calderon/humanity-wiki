@@ -3868,3 +3868,56 @@ Sixteen routes opened one after another in the browser: none blank, no
 chunk-loading errors, no exceptions. 86 chunks now instead of 9, and the total
 grew by 100 KB — which is the point: the total is no longer what anyone waits
 for.
+
+---
+
+## 2026-08-22 (X) — The AI's actions, tested for the first time
+
+The assistant does not only answer: it **creates things**. Nineteen actions — a
+task, a project, a publication, a page, an event, a challenge… — and until today
+whether they still worked was checked by trying a few by hand. The ones nobody
+tried, nobody knew were alive.
+
+`npm run probar:acciones` now runs all of them in about ten seconds.
+
+### What it checks, and what it refuses to check
+
+**It does not read what the AI says. It looks for the row in the database.**
+
+That distinction is the whole reason it exists. The three failures this project
+already paid for were the same kind: «ya te he fijado esa tarea» with no task,
+«he organizado las carpetas» with no evidence, and a task filed under the wrong
+label in silence. A test that read the answer would have passed all three.
+
+It also does **not** call the model: the action is handed to the platform
+already proposed, exactly as when someone presses «aceptar». Going through the
+model would cost money on every run and fail at random depending on what came
+back — and a test that fails on its own stops being read within a week.
+
+### What it found
+
+Two of the four «failures» in the first run were **my own wrong expectations**,
+and that is worth saying: the test sent `fecha`+`hora` for an event when the
+model is told to send `inicio` in ISO; and it demanded that a non-existent label
+be *refused*, when the platform's choice — place the task and **say where** — is
+the better one. Both were fixed in the test, not in the platform.
+
+One was real. `res.json({ status: …, ...result })` had the execution status
+**first**, so it was overwritten: creating a graph returns `status: 'borrador'`
+and a map `status: 'publicado'`, so the response said «borrador» where it should
+have said «ejecutada». The screen paints green only what says «ejecutada» — two
+actions that *had* run were shown in grey, as if nothing had happened. Nobody
+could tell «it happened» from «it didn't» in those two. The entity's own state
+now travels under its own name, `estadoEntidad`, which is what it should have
+had from the start: two different things cannot share one name.
+
+### What is locked in from now on
+
+The twelve create actions each produce a row that is verified to exist by id;
+and four rules that must keep holding: a non-existent label is placed **but
+announced**, a project that is not yours is refused, a task with no title is
+refused, and permission is re-checked **at execution**, not only when proposed.
+
+Cleans up after itself: user, session, proposed actions and every row created —
+verified zero left behind. Refuses to run against anything but the local
+database.
