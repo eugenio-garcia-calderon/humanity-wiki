@@ -38,8 +38,9 @@ const raiz = git(['rev-parse', '--show-toplevel']);
 // este sistema, un agente escribió su `.agente` en las tres copias de trabajo y las
 // tres decían lo mismo. La carpeta no se puede falsificar por descuido.
 function porLaCarpeta() {
-  const m = raiz.match(/\/\.claude\/worktrees\/(prog\d)$/);
-  if (m) return m[1];
+  // Cualquier copia de trabajo se llama como su carpeta: prog2, prog3, dashboard…
+  const m = raiz.match(/\/\.claude\/worktrees\/([A-Za-z0-9_.-]+)$/);
+  if (m) return m[1].toLowerCase();
   const principal = gitSilencioso(['rev-parse', '--path-format=absolute', '--git-common-dir']);
   if (principal && path.dirname(principal) === raiz) return 'prog1'; // la raíz es de prog1
   return null;
