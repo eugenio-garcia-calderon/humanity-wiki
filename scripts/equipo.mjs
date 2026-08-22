@@ -129,10 +129,26 @@ if (orden === 'quien') {
   if (sinRed) console.log('(sin acceso al remoto: puede que esto no esté al día)');
   if (!vivas.length) console.log('No hay nada reservado.');
   for (const r of vivas) {
-    console.log(`${r.agente.padEnd(6)} ${r.ruta}   — ${r.motivo || 'sin motivo'} (hace ${haceCuanto(r.desde)})`);
+    // Media hora es mucho para un fichero compartido: el 2026-08-22 tres agentes
+    // esperaron por reservas que su dueño ya no usaba y no recordaba tener.
+    const vieja = (Date.now() - new Date(r.desde).getTime()) / 60000 > 30;
+    const marca = vieja ? ' ← lleva rato, ¿sigues usándolo?' : '';
+    console.log(`${r.agente.padEnd(6)} ${r.ruta}   — ${r.motivo || 'sin motivo'} (hace ${haceCuanto(r.desde)})${marca}`);
   }
   const olvidadas = reservas.filter(caducada);
   if (olvidadas.length) console.log(`\n(${olvidadas.length} reserva(s) caducada(s), ya no bloquean)`);
+  process.exit(0);
+}
+
+// Lo llama el gancho de post-commit. Nunca falla ni bloquea: solo recuerda.
+if (orden === 'recordar') {
+  if (!yo) process.exit(0);
+  const { reservas } = leer();
+  const mias = reservas.filter((r) => r.agente === yo && !caducada(r));
+  if (mias.length) {
+    console.log(`\n(${yo}: tienes ${mias.length} reserva(s). Suéltalas al fusionar: node scripts/equipo.mjs soltar --todo)`);
+    for (const r of mias) console.log(`   ${r.ruta}  — hace ${haceCuanto(r.desde)}`);
+  }
   process.exit(0);
 }
 
