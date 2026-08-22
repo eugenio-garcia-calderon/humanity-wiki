@@ -5432,3 +5432,68 @@ e-mail → 400 on both; pedido-por-sesion → 404 pendiente / 400 malformed. `ts
 clean. **Not seen in a browser**: the overlay and the buy-now control render
 only on a shop subdomain, which localhost cannot emulate — the contracts they
 consume are what was tested; Eugenio's next pass is the visual check.
+
+### 2026-08-22 — The AI chat is a search box first (prog8)
+
+Eugenio: «quiero que el chat de IA sea buscador first, y que no haga una
+consulta a la IA cuando alguien está buscando algo dentro de la App».
+
+**It was the other way round.** Searching only happened when the sentence
+literally started with «busca», «enséñame» or «qué hay sobre» (`queBuscar`);
+everything else — including typing the name of a product, a challenge or a
+person — was paid as a model call. Two other non-AI shortcuts existed in
+`AIAssistant.tsx` (graph typeahead, publication/graph resolve) and **both were
+dead code**: they bail out with `if (mode === 'dock')`, and `mode` has been the
+constant `'dock'` since the assistant was unified.
+
+What it does now, in `src/components/ai/AIAssistant.tsx`:
+
+- **`queHacer(texto, modo, hayAdjunto)`** replaces `queBuscar` and inverts the
+  default: it searches *unless* it can see this is not a search — a verb that
+  asks for work (crea, escribe, resume, explica, compara…), more than 12 words,
+  an attachment, or the mode switch set to IA. Pure and module-level so the
+  thing that decides whether a message costs money can be read and tested
+  without mounting the app.
+- **Explanation questions are a *demanding* search** (`exigente`): «¿qué es
+  X?», «¿por qué…?», «¿cómo…?» still search first, but only a result **named
+  like the question** (equal, prefix or containing the phrase) is allowed to
+  answer; otherwise the AI does. Without that bar, «¿qué es el zzqxvon de las
+  praderas?» came back with seven publications whose only likeness was the word
+  «qué».
+- **Zero results is no longer a dead end**: a topic gets «there is nothing
+  published about X» plus the «Preguntárselo a la IA» button; a *question*
+  escalates to the AI on its own, saying so in the thread and marking the
+  message with «Buscado primero en la plataforma · sin resultados».
+- **Typeahead while you type**: debounced 220 ms, previous request aborted,
+  results shown above the box with arrows/Enter/Escape. Reaching a page from
+  here spends nothing at all — not even the search-on-send.
+- **A Buscar/IA switch next to the box**, default Buscar, remembered in
+  `localStorage`. The send button shows a magnifier when what is written will
+  be searched and the paper plane when it will call the model: what it is going
+  to cost is visible *before* pressing, not in the invoice.
+- **Broken links fixed**: results of a type with no page linked to `/buscar?q=`,
+  a route that **does not exist** — every one of them landed on «página no
+  encontrada». They are now shown disabled with «sin ficha», and
+  `knowledge_graphs`/`user_maps` got their real `slug` routes.
+
+In `src/server/graph.ts` (`GET /api/search`), needed because the first result
+is now *the* answer and not a suggestion:
+
+- **Word matching for multi-word queries.** With `ILIKE '%whole phrase%'`,
+  «agua en Madrid» returned **nothing** — and nothing is what sends the user to
+  spend a model call. Now any significant word (≥3 letters, filler and question
+  words dropped) is enough to match, and rows matching more of them rank first.
+- **`ORDER BY` at last**: exact name, then prefix, then whole phrase, then how
+  many words matched, then shortest title. It was not only cosmetic: with
+  `LIMIT 5` per type the exact match could be cut off — searching «Agua» and
+  not seeing the challenge called «Agua». `q` travels as a bound parameter;
+  only column names (from `NODE_TYPES`) are interpolated.
+
+Verified on 3008 against the local database: search («retos del agua», «agua en
+Madrid») answers with results and **no `/api/ai/chat` call at all** — only
+`/api/search`; «¿por qué los nitratos no bajan solos?» answers with the
+publication of that exact name; «¿qué es el zzqxvon de las praderas?» finds
+nothing, says so and escalates to the model (answered in 8,5 s, «menos de
+0,01 €»); the IA switch silences the typeahead and forces the model; ↓ + Enter
+on a suggestion opens `/retos/R001`. 17-case table for `queHacer` run in node,
+all green. `tsc` clean.

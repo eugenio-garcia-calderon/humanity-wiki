@@ -323,11 +323,85 @@ export function registerGraphRoutes(app: Express, db: any) {
       const pattern = `%${q}%`;
       const results: any[] = [];
 
+      // ══ BUSCAR POR PALABRAS, NO SOLO POR LA FRASE ENTERA ═════════════════
+      // (2026-08-22, «buscador first»: el chat busca antes de gastar IA.)
+      //
+      // Con `ILIKE '%frase entera%'`, «agua en Madrid» no encuentra NADA: no
+      // hay ningún título que contenga esas tres palabras seguidas en ese
+      // orden. Y cero resultados, ahora que buscar es lo primero, es lo que
+      // manda al usuario a gastar una llamada al modelo. Así que si la
+      // búsqueda trae varias palabras, vale con que aparezca alguna de ellas
+      // — y las que traigan más, salen antes.
+      //
+      // Las palabras de relleno («de», «en», «la»…) se caen: exigirlas o
+      // premiarlas es ordenar por gramática en vez de por tema.
+      const VACIAS = new Set([
+        'los', 'las', 'del', 'una', 'unos', 'unas', 'con', 'por', 'para', 'sobre',
+        'más', 'mas', 'este', 'esta', 'esto', 'ese', 'esa', 'sus', 'sin', 'entre',
+        'desde', 'hasta', 'todo', 'toda', 'todos', 'todas',
+        // LAS DE PREGUNTAR, TAMBIÉN. «¿Qué es el zumbido de las praderas?»
+        // encontraba media plataforma porque «qué» está en un montón de
+        // títulos: la palabra con la que se pregunta no es el tema por el que
+        // se pregunta.
+        'que', 'qué', 'cual', 'cuál', 'cuales', 'cuáles', 'como', 'cómo',
+        'cuando', 'cuándo', 'donde', 'dónde', 'quien', 'quién', 'quienes',
+        'son', 'ser', 'está', 'esta', 'están', 'hay', 'tiene', 'tienen', 'hacer']);
+      const palabras = q.toLowerCase()
+        .replace(/[^\wáéíóúñü\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 3 && !VACIAS.has(w))
+        .slice(0, 8);
+
+      // Una sola palabra no necesita nada de esto: la frase Y la palabra son
+      // lo mismo, y la consulta se queda como estaba.
+      const porPalabras = palabras.length > 1;
+      const patrones = sql`ARRAY[${sql.join(palabras.map(w => sql`${'%' + w + '%'}`), sql.raw(', '))}]`;
+
+      /** Cuántas de las palabras buscadas aparecen en este título. Es lo que
+       *  convierte «alguna de ellas» en un orden con sentido. */
+      const cuantasCoinciden = (col: any) =>
+        sql.join(palabras.map(w => sql`(CASE WHEN ${col} ILIKE ${'%' + w + '%'} THEN 1 ELSE 0 END)`), sql.raw(' + '));
+
+      // ══ Y EL MEJOR PRIMERO, DENTRO DEL LÍMITE ════════════════════════════
+      // Sin `ORDER BY` esto devolvía las cinco filas que la base de datos
+      // tuviera a mano, y el orden de una tabla no es ningún orden. El
+      // problema no era solo estético: con `LIMIT 5` por tipo, **la
+      // coincidencia exacta podía quedarse fuera** — buscar «Agua» y no ver el
+      // reto que se llama «Agua», porque cinco títulos que la contienen
+      // llegaron antes. Ordenar dentro de la consulta es lo único que arregla
+      // eso; ordenar después, en el navegador, solo ordena lo que ya se salvó.
+      //
+      // El criterio, de mejor a peor: se llama exactamente así, empieza por
+      // ello, contiene la frase entera, y luego cuántas palabras sueltas trae.
+      // A igualdad, el título más corto, que es el más específico.
+      //
+      // `q` VA COMO PARÁMETRO, NUNCA PEGADO AL TEXTO DE LA CONSULTA. Lo que se
+      // pega con `sql.raw` es solo el nombre de la columna, que sale de
+      // NODE_TYPES —una constante de este fichero—, jamás lo que ha escrito
+      // quien busca. Escapar comillas a mano en un buscador público es la
+      // forma clásica de acabar teniendo una inyección.
+      const orden = (label: string) => {
+        const col = sql.raw(`n.${label}`);
+        return sql`
+          CASE
+            WHEN lower(${col}) = lower(${q}) THEN 0
+            WHEN lower(${col}) LIKE lower(${q}) || '%' THEN 1
+            WHEN ${col} ILIKE ${pattern} THEN 2
+            ELSE 3
+          END,
+          ${porPalabras ? sql`(${cuantasCoinciden(col)}) DESC,` : sql``}
+          length(${col})
+        `;
+      };
+
       for (const [type, def] of Object.entries(NODE_TYPES)) {
+        const col = sql.raw(`n.${def.label}`);
         const rows = await db.execute(sql`
           SELECT ${sql.raw(nodeSelect(type))}
           FROM ${sql.raw(def.table)} n
-          WHERE n.archived_at IS NULL AND n.${sql.raw(def.label)} ILIKE ${pattern}
+          WHERE n.archived_at IS NULL
+            AND (${col} ILIKE ${pattern}${porPalabras ? sql` OR ${col} ILIKE ANY(${patrones})` : sql``})
+          ORDER BY ${orden(def.label)}
           LIMIT ${limitPerType}
         `);
         for (const r of rows.rows) results.push({ ...r, type });
@@ -337,7 +411,17 @@ export function registerGraphRoutes(app: Express, db: any) {
       const pubs = await db.execute(sql`
         SELECT id, uuid, COALESCE(title, left(body, 80)) AS label, 'publications' AS type
         FROM publications
-        WHERE archived_at IS NULL AND status = 'publicada' AND (title ILIKE ${pattern} OR body ILIKE ${pattern})
+        WHERE archived_at IS NULL AND status = 'publicada'
+          AND (title ILIKE ${pattern} OR body ILIKE ${pattern}${porPalabras
+            ? sql` OR title ILIKE ANY(${patrones}) OR body ILIKE ANY(${patrones})`
+            : sql``})
+        -- Lo que lo lleva en el TÍTULO antes que lo que solo lo menciona en el
+        -- cuerpo: una publicación que se llama como lo que buscas es casi
+        -- siempre la que buscabas.
+        ORDER BY
+          (CASE WHEN title ILIKE ${pattern} THEN 0 ELSE 1 END),
+          ${porPalabras ? sql`(${cuantasCoinciden(sql.raw('title'))}) DESC,` : sql``}
+          length(COALESCE(title, body))
         LIMIT ${limitPerType}
       `);
       for (const r of pubs.rows) {
