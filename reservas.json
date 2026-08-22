@@ -161,12 +161,6 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
       "desde": "2026-08-22T22:27:51.751Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "drizzle/0095_cuenta_plataforma_archivada.sql",
-      "motivo": "P4: sacar U_PLATAFORMA de todos los listados, a peticion de prog7",
-      "desde": "2026-08-22T22:37:53.982Z"
     }
   ]
 }
