@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand} from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX} from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -71,4 +71,14 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // es tan parte de la plataforma como lo que hace.
   { ruta: 'usabilidad', titulo: 'Usabilidad', icono: Hand,
     componente: lazy(() => import('./pages/Usabilidad')) },
+
+  // Cómo borrar tu cuenta. LA EXIGE GOOGLE PLAY: una dirección pública,
+  // alcanzable sin la aplicación y sin sesión, que explique el borrado. Sin
+  // ella la ficha de Play no se aprueba.
+  //
+  // ESTA RUTA NO SE CAMBIA. Se pega en la ficha de la tienda, y moverla obliga
+  // a volver a pasar revisión. Si algún día hay que moverla, se deja una
+  // redirección, nunca un 404.
+  { ruta: 'borrar-cuenta', titulo: 'Borrar tu cuenta', icono: UserX,
+    componente: lazy(() => import('./pages/BorrarCuentaPublica')) },
 ];
