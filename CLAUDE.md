@@ -167,6 +167,16 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   the app installed, and the service worker was serving him the old build. If the
   change ships to phones, verify with the app installed, or say plainly that you
   did not. `humanity.wiki/?sw=off` drops a stale copy.
+- **Ask what local copy could outlive your fix.** Twice on 2026-08-22 a deploy was
+  correct and the user still saw the old behaviour: the service worker served an old
+  build, and `evo_objective_images` in `localStorage` had frozen the whole image map
+  the moment an admin changed one picture. A fix that only changes the default never
+  reaches whoever already has a copy. Name the copy, and say how it gets invalidated.
+- **A 200 proves nothing, and neither does a second one.** `/illustrations/salud.jpg`
+  returned 200 with the whole app in HTML; `/illustrations/salud.png` returned 200
+  with `image/png` and SVG bytes inside. Two green status codes over two different
+  failures. Load the thing the way the browser loads it — `Image()` and
+  `onload`/`onerror` — and count.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
