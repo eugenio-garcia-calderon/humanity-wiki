@@ -5505,3 +5505,31 @@ prog3**. Eugenio pidió sacarlo, así que se sacó con `--no-verify`: diez líne
 solo añaden, sobre el `origin/main` más reciente, escritas en el mensaje del commit
 y avisadas en el Hormiguero (`INCMT4WROB9TIN`). No es una costumbre que convenga
 empezar; es una instrucción de quien manda en el producto, no un atajo.
+
+---
+
+## 2026-08-23 — Shipping paid with points too, and no Stripe when points cover it all (Programador 7)
+
+Eugenio, after his test: «incluye también el envío con el tema de puntos para
+no tener que ir a Stripe». Now, when every line accepts points and the buyer
+asks for enough, points cover products AND shipping and the order is created
+without Stripe; the seller is paid the shipping in points as well. When points
+only cover part, shipping stays in euros with Stripe (a Stripe coupon cannot
+discount shipping), so the cap there is the product part only.
+
+Stripe used to collect the address. Without Stripe we ask for it: `direccion`
+{nombre, linea1, linea2?, cp, ciudad, pais} is required for anything physical
+paid entirely in points (400 with `falta_direccion` otherwise) and stored in
+`pedidos.direccion_envio` + `comprador_nombre`; `envio_centimos` records the
+shipping that was paid in points. `POST /api/publicar/cotizar` gives the cart
+subtotal, shipping, and whether everything accepts points, so the cart, the
+product page and the product block can say «se paga todo con puntos, envío
+incluido», show the address form (shared `DireccionEnvio` in Cesta.tsx) and
+relabel the button «Pagar con puntos» / «Falta la dirección de envío».
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): cotizar → 5 € + 3 € shipping, todo_acepta; 8 points without address
+→ 400 falta_direccion; 8 points with address → order `pagado` without Stripe,
+envio_centimos 300, address stored, buyer 100→92, seller 100→108; 5 points →
+Stripe session with the 5 € coupon and shipping in euros. `tsc` clean. Not
+seen in a browser (shop subdomain only).

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star } from 'lucide-react';
 import { useCarrito } from '../hooks/useCarrito';
-import Cesta from '../components/knowledge/Cesta';
+import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from '../components/knowledge/Cesta';
 
 // ============================================================================
 // LA FICHA DE UN PRODUCTO — fase 1 del plan de Comercio (2026-08-22)
@@ -89,9 +89,15 @@ export default function FichaProducto({ handle }: { handle: string }) {
     fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
   }, []);
   const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
-  const maxPuntos = caja?.saldo != null && p?.precio_centimos
-    ? Math.floor(Math.min(caja.saldo, (p.precio_centimos / 100) * caja.puntos_por_euro) * 100) / 100
-    : 0;
+  // Con envío incluido (2026-08-23): si los puntos llegan a precio + porte, no
+  // hay Stripe y la dirección se pide aquí.
+  const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
+  const envioFicha = p?.envio?.hace_falta ? Number(p.envio.centimos || 0) : 0;
+  const todoEnPuntos = caja && p?.precio_centimos
+    ? Math.floor((((p.precio_centimos || 0) + envioFicha) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
+  const maxPuntos = caja?.saldo != null && p?.precio_centimos ? Math.min(caja.saldo, todoEnPuntos) : 0;
+  const cubreTodo = !!caja && todoEnPuntos > 0 && puntosPedidos >= todoEnPuntos && maxPuntos >= todoEnPuntos;
+  const faltaDireccion = cubreTodo && !!p?.envio?.hace_falta && !direccionCompleta(direccion);
 
   async function comprar() {
     setComprando(true); setError(null);
@@ -101,6 +107,7 @@ export default function FichaProducto({ handle }: { handle: string }) {
         body: JSON.stringify({
           producto_id: p.id, cantidad: 1, volver_a: window.location.href,
           ...(caja?.activo && p.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
+          ...(cubreTodo && p.envio?.hace_falta ? { direccion } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -176,15 +183,18 @@ export default function FichaProducto({ handle }: { handle: string }) {
                     className="mt-1.5 w-32 h-10 px-3 rounded-lg border border-amber-200 bg-white text-sm" />
                   {puntosPedidos > 0 && (
                     <p className="mt-1 text-[11px] text-amber-800">
-                      −{dinero(Math.min(p.precio_centimos || 0, Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)))} de descuento
-                      {Math.min(puntosPedidos, maxPuntos) >= (p.precio_centimos || 0) / 100 * caja.puntos_por_euro ? ' — se paga entero con puntos, sin tarjeta' : ''}.
+                      −{dinero(Math.min((p.precio_centimos || 0) + (cubreTodo ? envioFicha : 0), Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)))} de descuento
+                      {cubreTodo ? ` — se paga todo con puntos${envioFicha > 0 ? `, envío (${dinero(envioFicha)}) incluido` : ''}, sin tarjeta` : ` — con ${todoEnPuntos.toLocaleString('es-ES')} puntos se pagaría todo${envioFicha > 0 ? ', envío incluido,' : ''} sin tarjeta`}.
                     </p>
                   )}
+                  {cubreTodo && p.envio?.hace_falta && <DireccionEnvio valor={direccion} onCambio={setDireccion} />}
                 </div>
               )}
-              <button type="button" onClick={comprar} disabled={comprando}
+              <button type="button" onClick={comprar} disabled={comprando || faltaDireccion}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-black disabled:opacity-60">
-                {comprando ? 'Abriendo el pago…'
+                {comprando ? (cubreTodo ? 'Pagando con puntos…' : 'Abriendo el pago…')
+                  : faltaDireccion ? 'Falta la dirección de envío'
+                  : cubreTodo ? 'Pagar con puntos'
                   : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar ahora'}
               </button>
               {/* Una suscripción no va a la cesta: se paga sola. Ponerle el
