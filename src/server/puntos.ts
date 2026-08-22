@@ -300,9 +300,27 @@ export function registerPuntosRoutes(app: Express, db: any) {
           WHERE i.created_at >= ${desde}::date AND i.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
         ),
         res AS (
-          SELECT v.creator_user_id AS uid, count(*)::int AS n FROM ratings r JOIN ventanas v ON v.id = r.entity_id
-          WHERE r.entity_type = 'knowledge_windows' AND r.score >= 7
-            AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+          -- Reseñas positivas (≥ 7/10) de publicaciones…
+          SELECT uid, sum(n)::int AS n FROM (
+            SELECT v.creator_user_id AS uid, count(*)::int AS n FROM ratings r JOIN ventanas v ON v.id = r.entity_id
+            WHERE r.entity_type = 'knowledge_windows' AND r.score >= 7
+              AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+            UNION ALL
+            -- …y de PRODUCTOS, solo con COMPRA VERIFICADA: una reseña que pesa
+            -- en el reparto tiene que venir de alguien que pagó — si no, es
+            -- un número que cualquiera sube desde fuera con cuentas.
+            SELECT p.created_by AS uid, count(*)::int AS n
+            FROM ratings r JOIN products p ON p.id = r.entity_id LEFT JOIN users u ON u.id = r.user_id
+            WHERE r.entity_type = 'products' AND r.score >= 7
+              AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month')
+              AND EXISTS (
+                SELECT 1 FROM pedidos pd LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+                WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+                  AND (pd.producto_id = p.id OR pl.producto_id = p.id)
+                  AND (pd.comprador_user_id = r.user_id OR lower(pd.comprador_email) = lower(u.email))
+              )
+            GROUP BY p.created_by
+          ) x GROUP BY uid
         )
         SELECT u.id AS uid,
                coalesce(vv.n, 0)::int AS vistas_validas,

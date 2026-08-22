@@ -323,7 +323,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, description, price_cents, currency, images, kind,
                modality, billing_period, stock, warranty, return_policy, category,
-               envio_centimos, envio_gratis_desde_centimos, envio_plazo
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo,
+               (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
+               (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas
         FROM products
         WHERE id = ${String(req.params.id)} AND archived_at IS NULL
       `);
@@ -357,6 +359,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
+        // Las opiniones, resumidas: media en estrellas (1-5) y cuántas. `null`
+        // = nadie ha opinado, que no es lo mismo que cero estrellas.
+        valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
@@ -372,6 +377,105 @@ export function registerPublicarRoutes(app: Express, db: any) {
           hace_falta: (p.kind || '') === 'fisico',
         },
       });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // RESEÑAS DE PRODUCTO (2026-08-22, fase 3 del plan de comercio, Programador 7)
+  // ==========================================================================
+  // Sin tabla nueva: la estrella vive en `ratings` (entity_type 'products',
+  // score 0-10 = estrellas × 2) y el texto en `comments` (entity_type
+  // 'products'). Una persona, una reseña: la estrella se sobreescribe y el
+  // texto anterior se archiva cuando llega el nuevo.
+  //
+  // «COMPRA VERIFICADA» ES LO QUE PESA. Cualquiera con sesión puede opinar,
+  // pero solo la reseña de quien tiene un pedido pagado de ese producto lleva
+  // la marca — y solo esas cuentan en el reparto del bote. La pregunta de
+  // seguridad de siempre: ¿quién puede subir este número desde fuera? Con la
+  // marca, solo quien pagó. El vendedor no puede reseñarse a sí mismo.
+  const compraVerificada = async (productoId: string, userId: string, email: string | null) => {
+    const r = await db.execute(sql`
+      SELECT 1 FROM pedidos pd
+      LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+      WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+        AND (pd.producto_id = ${productoId} OR pl.producto_id = ${productoId})
+        AND (pd.comprador_user_id = ${userId} OR (${email}::text IS NOT NULL AND lower(pd.comprador_email) = lower(${email})))
+      LIMIT 1
+    `);
+    return r.rows.length > 0;
+  };
+
+  /** GET /api/publicar/producto/:id/resenas — públicas; `mia` si hay sesión. */
+  app.get('/api/publicar/producto/:id/resenas', async (req: Request, res: Response) => {
+    try {
+      const pid = String(req.params.id);
+      const lista = await db.execute(sql`
+        SELECT r.user_id, r.score, r.created_at, r.updated_at,
+               coalesce(u.display_name, u.name, 'Alguien') AS autor,
+               u.avatar_url AS avatar,
+               (SELECT c.body FROM comments c
+                 WHERE c.entity_type = 'products' AND c.entity_id = r.entity_id
+                   AND c.author_user_id = r.user_id AND c.archived_at IS NULL
+                 ORDER BY c.created_at DESC LIMIT 1) AS texto,
+               EXISTS (
+                 SELECT 1 FROM pedidos pd LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+                 WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+                   AND (pd.producto_id = r.entity_id OR pl.producto_id = r.entity_id)
+                   AND (pd.comprador_user_id = r.user_id OR lower(pd.comprador_email) = lower(u.email))
+               ) AS compra_verificada
+        FROM ratings r LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.entity_type = 'products' AND r.entity_id = ${pid}
+        ORDER BY r.updated_at DESC NULLS LAST, r.created_at DESC
+        LIMIT 100
+      `);
+      const filas = (lista.rows as any[]).map(f => ({
+        autor: f.autor, avatar: f.avatar || null,
+        estrellas: Math.round(Number(f.score) / 2),
+        texto: f.texto || null,
+        compra_verificada: !!f.compra_verificada,
+        fecha: f.updated_at || f.created_at,
+        mia: !!req.user && f.user_id === req.user.id,
+      }));
+      const n = filas.length;
+      const media = n ? Math.round((filas.reduce((s, f) => s + f.estrellas, 0) / n) * 10) / 10 : null;
+      res.json({ media, n, verificadas: filas.filter(f => f.compra_verificada).length, resenas: filas });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/publicar/producto/:id/resena  { estrellas 1-5, texto? } */
+  app.post('/api/publicar/producto/:id/resena', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra para dejar tu opinión.' });
+      const pid = String(req.params.id);
+      const estrellas = Math.round(Number(req.body?.estrellas));
+      const texto = String(req.body?.texto || '').trim().slice(0, 2000);
+      if (!Number.isFinite(estrellas) || estrellas < 1 || estrellas > 5) {
+        return res.status(400).json({ error: 'Elige de 1 a 5 estrellas.' });
+      }
+      const p = (await db.execute(sql`SELECT id, created_by FROM products WHERE id = ${pid} AND archived_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+      if (p.created_by === req.user.id) return res.status(403).json({ error: 'No puedes reseñar lo que vendes tú.' });
+
+      await db.execute(sql`
+        INSERT INTO ratings (user_id, entity_type, entity_id, score)
+        VALUES (${req.user.id}, 'products', ${pid}, ${estrellas * 2})
+        ON CONFLICT (user_id, entity_type, entity_id)
+        DO UPDATE SET score = EXCLUDED.score, updated_at = now()
+      `);
+      // El texto anterior se archiva (nunca se borra) y entra el nuevo.
+      await db.execute(sql`
+        UPDATE comments SET archived_at = now()
+        WHERE entity_type = 'products' AND entity_id = ${pid} AND author_user_id = ${req.user.id} AND archived_at IS NULL
+      `);
+      if (texto) {
+        await db.execute(sql`
+          INSERT INTO comments (id, entity_type, entity_id, publication_id, author_user_id, body, created_by, updated_by)
+          VALUES (${'CMT' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase()},
+                  'products', ${pid}, NULL, ${req.user.id}, ${texto}, ${req.user.id}, ${req.user.id})
+        `);
+      }
+      const verificada = await compraVerificada(pid, req.user.id, req.user.email || null);
+      res.json({ success: true, estrellas, compra_verificada: verificada });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -762,6 +866,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, price_cents, currency, kind, stock, status, images,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at,
+               (archivo_digital IS NOT NULL) AS con_archivo,
+               (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
+               (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas,
                (archivo_digital IS NOT NULL) AS con_archivo
         FROM products
         WHERE created_by = ${req.user.id} AND archived_at IS NULL

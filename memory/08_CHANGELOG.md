@@ -5248,3 +5248,36 @@ public statics still 200; mis-ventas 401 without session and the list with it;
 external URL rejected, private accepted; PUT estado works. `tsc` clean. Not
 verified in a browser: the subdomain-only `/pedido` page (no subdomain on
 localhost) — its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Product reviews, and only verified purchases weigh (Programador 7, economy & market)
+
+Plan fase 3. No new table: the stars live in `ratings` (entity_type 'products',
+score 0-10 = stars × 2) and the text in `comments` (entity_type 'products').
+One person, one review — resubmitting overwrites the stars and archives the
+previous text. The seller cannot review their own product (403).
+
+`GET /api/publicar/producto/:id/resenas` (public: media, n, verificadas,
+list with «compra verificada» computed by the server from paid orders by user
+id or by e-mail) · `POST /api/publicar/producto/:id/resena` {estrellas 1-5,
+texto?} (session) · the public product route and the seller's list carry
+`valoracion` / `media_estrellas` + `n_resenas`.
+
+**What weighs in the monthly pot:** only reviews with a verified purchase
+and ≥ 7/10 — prog4's question applied again: anyone with accounts could raise
+an unverified count from outside; only someone who paid can raise this one.
+
+UI: the Opiniones section on the product page (stars picker + text, the
+verified badge, «tuya»), the ★ average next to the price in the product
+block and in Comercio's product rows.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after): buyer
+5★ → compra_verificada true; non-buyer 3★ → false; seller → 403; no session
+→ 401; 6★ → 400; list media/n/verificadas right; overwrite kept n at 1 and
+replaced the text; public product route and seller list carry the average;
+the reparto simulation counts the verified ≥ 7 review for the seller. An
+archived demo account correctly got 401 (its session resolves to nobody).
+`tsc` clean. Not opened in a browser: the product page lives on the
+subdomain, which localhost has no way to emulate — its data contract is what
+was tested.

@@ -36,6 +36,8 @@ type Producto = {
   envio_centimos: number | null; created_at: string;
   /** Solo tiene sentido en una descarga: si el archivo que se entrega está subido. */
   con_archivo?: boolean;
+  /** Opiniones: media en estrellas (1-5) y cuántas; null/0 = nadie ha opinado. */
+  media_estrellas?: number | null; n_resenas?: number;
 };
 
 export default function Comercio() {
@@ -183,6 +185,9 @@ export default function Comercio() {
                         · {p.stock <= 0 ? 'agotado' : `${p.stock} en stock`}
                       </span>}
                       {p.status === 'tienda' && <span className="text-slate-400">· solo en tu tienda</span>}
+                      {Number(p.n_resenas) > 0 && (
+                        <span className="text-amber-600 font-bold">· ★ {Number(p.media_estrellas).toLocaleString('es-ES')} ({p.n_resenas})</span>
+                      )}
                       {p.kind === 'digital' && (
                         p.con_archivo
                           ? <span className="text-emerald-700">· archivo listo</span>
