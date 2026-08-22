@@ -17,6 +17,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "copias de seguridad: entrada de las dos PRs",
       "desde": "2026-08-22T14:30:32.980Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "server.ts",
+      "motivo": "la ficha de territorio hace 53 consultas: agruparlas",
+      "desde": "2026-08-22T14:31:54.297Z"
     }
   ]
 }
