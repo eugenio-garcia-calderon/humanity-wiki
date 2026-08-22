@@ -4944,7 +4944,7 @@ what they said.
 Then «create the system so that when MiCA arrives only small adjustments are
 needed». Three pieces, the shapes MiCA will ask for, built now:
 
-- **Published prices with history** (`drizzle/0077`, `tokenomics_precios`):
+- **Published prices with history** (`drizzle/0083`, `tokenomics_precios`):
   price per service unit in points, append-only by trigger (changing a price
   is inserting a row), public at `GET /api/tokenomics/precios` with the whole
   history. Seeded with the page's orientative basket; admin endpoint inserts

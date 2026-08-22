@@ -230,7 +230,7 @@ export function registerPuntosRoutes(app: Express, db: any) {
    * POST /api/admin/tokenomics/precios  { servicio, nombre, unidad, puntos, nota? }
    * Publicar un precio nuevo. NUNCA edita: inserta una fila con
    * `vigente_desde = now()` y quién la publicó — la historia es de
-   * solo-añadir por disparador (0077), igual que el libro.
+   * solo-añadir por disparador (0083), igual que el libro.
    */
   app.post('/api/admin/tokenomics/precios', async (req: Request, res: Response) => {
     try {
