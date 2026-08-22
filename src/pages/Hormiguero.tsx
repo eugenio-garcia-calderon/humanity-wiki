@@ -14,6 +14,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare, Paperclip, X, ImageIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { IconoFeedback } from '../components/ui/IconoFeedback';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { subirArchivo } from '../utils/subir';
 
@@ -148,10 +149,15 @@ export default function Hormiguero() {
   return (
     <div className="max-w-3xl mx-auto w-full animate-in fade-in duration-300">
       <div className="flex flex-wrap items-center gap-3 mb-5">
+        {/* FEEDBACK, antes «Hormiguero» (2026-08-22, Eugenio: «pon la palabra
+            Feedback en el menú… y llama a esa página FEEDBACK para recoger el
+            feedback de los usuarios»).
+            El nombre viejo lo entendía quien ya estaba dentro; a quien entra
+            hoy, «hormiguero» no le dice dónde contar que algo no funciona. */}
         <h1 className="text-xl font-black tracking-tight text-slate-900 inline-flex items-center gap-2">
-          <Bug className="w-5 h-5 text-emerald-600" /> Hormiguero
+          <IconoFeedback className="w-5 h-5 text-emerald-600" /> Feedback
         </h1>
-        <p className="text-xs text-slate-400">Lo que falla y lo que falta. Aquí se habla con quien programa.</p>
+        <p className="text-xs text-slate-400">Lo que falla y lo que falta. Cuéntalo aquí y llega a quien programa.</p>
       </div>
 
       {/* ANOTAR. Arriba y siempre abierto: si hubiera que pulsar «nuevo» para

@@ -5,7 +5,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
- Bug, PanelLeftOpen, Info,} from 'lucide-react';
+ PanelLeftOpen, Info,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -13,6 +13,7 @@ import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
+import { IconoFeedback } from '../ui/IconoFeedback';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -673,14 +674,22 @@ export default function Layout() {
           title={incidencias.bloqueadas
             ? `${incidencias.bloqueadas} ${incidencias.bloqueadas === 1 ? 'nota necesita' : 'notas necesitan'} algo tuyo`
             : 'Lo que falla y lo que falta'}
-          aria-label="Hormiguero: lo que falla y lo que falta"
-          className={cn('relative grid place-items-center rounded-lg transition-colors shrink-0',
-            compacto ? 'w-7 h-7' : 'w-9 h-9',
+          aria-label="Feedback: lo que falla y lo que falta"
+          /* CON LA PALABRA AL LADO (2026-08-22, Eugenio: «pon la palabra
+             Feedback en el menú, al lado del icono»). Un icono solo obliga a
+             adivinar o a dejar el dedo encima esperando el globo de ayuda —y en
+             un móvil no hay globo de ayuda, así que ahí simplemente no se sabe
+             qué es. Con la palabra deja de haber adivinanza.
+             En la barra estrecha la palabra se oculta: ahí no cabe, y es el
+             único sitio donde el icono va solo. */
+          className={cn('relative flex items-center gap-1.5 rounded-lg transition-colors shrink-0',
+            compacto ? 'w-7 h-7 justify-center' : 'h-9 px-2.5',
             location.pathname === '/hormiguero'
               ? 'bg-slate-900 text-white'
               : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
         >
-          <Bug className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          <IconoFeedback className={cn('shrink-0', compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          {!compacto && <span className="text-xs font-bold">Feedback</span>}
           {incidencias.bloqueadas > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
               {incidencias.bloqueadas > 9 ? '9+' : incidencias.bloqueadas}
