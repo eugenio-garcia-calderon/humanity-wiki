@@ -47,12 +47,6 @@
       "ruta": "drizzle/0088_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
       "desde": "2026-08-22T19:10:40.908Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "deploy/Caddyfile",
-      "motivo": "HSTS corto en dominios de terceros",
-      "desde": "2026-08-22T20:09:14.210Z"
     }
   ]
 }
