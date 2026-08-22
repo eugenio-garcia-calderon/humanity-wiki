@@ -431,7 +431,32 @@ the author's own. Both invent a datum to fill a box, and an invented datum that
 looks correct is exactly the failure this project has paid for most (see the
 `grupos[0]` fallback, 2026-08-20).
 
-**Status**: divergence from the constitution, **pending Eugenio's confirmation**.
+**Status**: divergence from the constitution, **confirmed by Eugenio on 2026-08-22**.
 `docs/` is not touched — the specification is his. If he prefers the rule kept,
 the fix is one migration (`SET NOT NULL` plus a global territory row) and no
 application code.
+
+---
+
+## 2026-08-22 — Who opens a debate, and who closes it
+
+**Context**: the veracity area needed a permission level for each operation, and
+`src/server/CLAUDE.md` says to reuse the catalogue rather than invent a policy
+per endpoint.
+
+**Decision**, confirmed by Eugenio the same day:
+
+| Operation | Level | Why |
+|---|---|---|
+| Open a debate, argue, cite a source | 1 (USER) | Same standing as publishing. A thesis asserts nothing about the commons: it asks. What it costs to be wrong is an argument against, which is what the thing is for |
+| Close or reopen a debate | 3 (KNOWLEDGE) | Saying "this discussion is over" is a judgement about the commons |
+| Move the veracity badge to verificada / disputada / refutada | 3 (KNOWLEDGE), **and never your own argument** | Signing your own claim as verified is not a review, it is an assertion with extra steps. An admin is not exempt: the rule is about who wrote it, not about rank |
+| Move it to sin_fuente / con_fuente | **nobody** | Those two follow the citations. A hand that could set them would make the badge say something the sources do not |
+
+**Alternative rejected**: level 2 (VERIFIED) to open a debate. It would have made
+the area quiet by default, and a debate with nobody in it is worth less than a
+wrong debate somebody corrects.
+
+**Consequence**: `refutada` and `disputada` demand a written reason. Marking
+something false without saying why leaves the author nothing to answer and the
+reader nothing to check — the same rule as citing a source for a figure.

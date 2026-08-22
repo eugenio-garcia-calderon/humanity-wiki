@@ -5147,3 +5147,41 @@ commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
 113.40 entirely to the one author with success (3 interactions, 6 positive
 reviews), totals summing back to the pot; 403 without admin. Depends on
 `vistas_validas` (PR #260) being in place.
+
+### 2026-08-22 — Veracidad, fases 2 y 4: ya se puede debatir
+
+Eugenio dio el sí a las dos decisiones abiertas y pidió seguir por donde
+recomendara. Recomendé juntar la fase 4 con la 2 en una sola entrega, y por qué:
+la pantalla sin el sello enseña afirmaciones sin decir qué se sabe de ellas, y el
+sello sin pantalla no lo ve nadie. Separadas, ninguna de las dos sirve todavía.
+
+- **`/debates` y `/debates/:slug`**: la lista de lo que se discute y la pantalla
+  del debate — la tesis arriba, y debajo **a favor** y **en contra** en dos
+  columnas (y **matiza** cuando lo hay), cada argumento con sus fuentes, sus
+  respuestas anidadas y su sello. Se argumenta y se cita **sin salir de la
+  pantalla**: si hay que ir a otro sitio a escribir, no se escribe.
+- **`<SelloVeracidad>`**: sin fuente · con fuente · verificada · disputada ·
+  refutada, con las mismas palabras en cualquier pantalla de la plataforma.
+  **«Sin fuente» es gris y no rojo**: no está mal, está sin comprobar — si todo
+  lo que falta llevara rojo, el rojo dejaría de significar nada. Y un estado que
+  el componente no reconoce **no se pinta como el primero de la lista**: eso
+  sería inventarse un dato.
+- **La escalera ya tiene firma** (`drizzle/0088`): quién movió el sello, cuándo y
+  por qué. `verificada` sin decir por quién es exactamente el tipo de afirmación
+  que esta área existe para no aceptar. Texto y no clave foránea, como
+  `incidencias.respondido_por`: la firma sobrevive al borrado de la cuenta.
+- **Tres reglas del servidor, no de la pantalla**: revisar es nivel 3; **nadie
+  revisa su propio argumento** (ni un administrador — la regla es sobre quién lo
+  escribió, no sobre el rango); y `refutada`/`disputada` **exigen motivo**, porque
+  marcar algo como falso sin decir por qué deja al autor sin nada que responder.
+  `sin_fuente` y `con_fuente` no se pueden poner a mano: las deciden las citas.
+- **Verificado**: 12 comprobaciones nuevas en verde con dos usuarios de prueba
+  (uno de nivel 3), más las 25 de la fase 1. En el navegador: el debate de
+  muestra con sus cuatro argumentos, la respuesta anidada, el sello verificado
+  con su fuente y el disputado con su motivo. Todo lo de prueba, borrado.
+- **Tablero**: 8 tarjetas en verde de 30 (eran 2).
+
+**Lo que NO está**: el enlace permanente a un argumento concreto (fase 4), el
+plegado por tramos de un hilo largo (fase 3) y la votación (fase 5) — por eso un
+argumento dice todavía «Sin votos» y no un número. Y no se ha comprobado en un
+móvil.
