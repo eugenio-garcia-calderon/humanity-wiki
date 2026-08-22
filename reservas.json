@@ -77,12 +77,6 @@
       "ruta": "src/pages/Mensajes.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:13.263Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/BorrarCuentaPublica.tsx",
-      "motivo": "corregir: el paso 3 no vale para cuentas de Google",
-      "desde": "2026-08-22T16:52:28.498Z"
     }
   ]
 }
