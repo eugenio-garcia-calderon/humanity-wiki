@@ -23,6 +23,9 @@
 // uno.
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
+import { rutaLocalDeUpload } from './uploads';
+import { createReadStream, existsSync } from 'node:fs';
+import path from 'node:path';
 // `server.ts` está congelado (prohibición 8), así que una ruta nueva no puede
 // registrarse allí. Se cuelga de este módulo, que ya está registrado. El
 // fichero se mantiene aparte porque el asunto es otro: esto publica páginas,
@@ -644,8 +647,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo,
+        garantia, devoluciones, imagenes, periodo, archivo_digital,
       } = req.body || {};
+      // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
+      const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
 
       const nom = String(nombre || '').trim();
       if (!nom) return res.status(400).json({ error: 'Ponle un nombre.' });
@@ -704,7 +709,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
                               modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
-                              envio_centimos, envio_gratis_desde_centimos, envio_plazo)
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
@@ -715,7 +720,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${JSON.stringify(fotos)}::jsonb, ${estado}, ${req.user.id}, ${req.user.id},
                 ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
                 ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
-                ${String(envio_plazo || '').trim() || null})
+                ${String(envio_plazo || '').trim() || null},
+                ${clase === 'digital' ? archivo : null})
       `);
 
       res.json({
@@ -755,7 +761,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const r = await db.execute(sql`
         SELECT id, name, price_cents, currency, kind, stock, status, images,
-               envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at,
+               (archivo_digital IS NOT NULL) AS con_archivo
         FROM products
         WHERE created_by = ${req.user.id} AND archived_at IS NULL
         ORDER BY created_at DESC
@@ -791,12 +798,189 @@ export function registerPublicarRoutes(app: Express, db: any) {
           envio_gratis_desde_centimos = CASE WHEN ${b.envio_gratis_desde_centimos !== undefined} THEN ${num(b.envio_gratis_desde_centimos)} ELSE envio_gratis_desde_centimos END,
           envio_plazo = COALESCE(${b.envio_plazo !== undefined ? String(b.envio_plazo).trim() || null : null}, envio_plazo),
           archived_at = CASE WHEN ${b.retirar === true} THEN now() ELSE archived_at END,
+          -- El archivo de un producto digital: solo URLs de NUESTRA zona
+          -- privada. Una URL externa aquí sería «entregar» un enlace que no
+          -- controlamos, y una pública de /uploads sería regalar el archivo.
+          archivo_digital = CASE
+            WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
+            ELSE archivo_digital END,
           updated_by = ${req.user.id},
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
-        RETURNING id, name, price_cents, stock, status, archived_at
+        RETURNING id, name, price_cents, stock, status, archived_at, (archivo_digital IS NOT NULL) AS con_archivo
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ══ LOS PEDIDOS, DE VUELTA (2026-08-22, Programador 7) ═══════════════════
+  // Las tres rutas de la fase 6 —«¿dónde está lo mío?», «¿qué tengo que
+  // enviar?» y «marcar como enviado»— DESAPARECIERON en el commit del carrito
+  // (747b82c): la pantalla /pedido y la pestaña Pedidos de /comercio las
+  // siguieron llamando y producción contestaba 404 a las dos. Se reponen aquí
+  // tal como eran, con dos añadidos: las LÍNEAS del pedido (desde el carrito un
+  // pedido tiene varias) y la DESCARGA de lo digital, que es lo que faltaba
+  // para que «se cobra y se entrega» sea verdad.
+
+  /**
+   * ¿DÓNDE ESTÁ LO MÍO? — `GET /api/publicar/pedido/:codigo?correo=`
+   *
+   * Quien compró sin cuenta no tiene un «mis pedidos»: el código es su llave,
+   * y el correo la segunda llave — con 8 caracteres, sin correo alguien podría
+   * probar códigos hasta leer la dirección de un desconocido. La respuesta es
+   * 404 tanto si el código no existe como si el correo no cuadra: decir «el
+   * código existe pero el correo no» ya confirmaría el código.
+   *
+   * Devuelve las líneas, y en cada línea digital con archivo, la URL de
+   * descarga (que vuelve a pedir el correo: la llave viaja con el enlace).
+   */
+  app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.query.correo || '').toLowerCase().trim();
+      if (!codigo || !correo) {
+        return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
+      }
+      const r = await db.execute(sql`
+        SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
+               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
+        FROM pedidos
+        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
+      `);
+      const p = r.rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
+
+      const lineas = (await db.execute(sql`
+        SELECT l.id, l.producto_nombre, l.unidades, l.precio_unitario_centimos,
+               coalesce(pr.kind, 'fisico') AS kind,
+               (pr.archivo_digital IS NOT NULL) AS con_archivo
+        FROM pedido_lineas l LEFT JOIN products pr ON pr.id = l.producto_id
+        WHERE l.pedido_id = ${p.id}
+        ORDER BY l.created_at
+      `)).rows as any[];
+      const vivo = !['cancelado', 'devuelto'].includes(p.estado);
+
+      res.json({
+        codigo: p.codigo,
+        producto: p.producto_nombre,
+        unidades: Number(p.unidades),
+        importe_centimos: Number(p.importe_centimos),
+        envio_centimos: Number(p.envio_centimos),
+        moneda: p.moneda,
+        estado: p.estado,
+        seguimiento: p.seguimiento || null,
+        ciudad: p.direccion_envio?.city || null,
+        hecho_el: p.created_at,
+        cambiado_el: p.updated_at,
+        // Un pedido sin nada físico no se envía: la pantalla no debe pintar
+        // «enviado» como un paso pendiente que nunca llegará.
+        solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital'),
+        lineas: lineas.map(l => ({
+          id: l.id,
+          producto: l.producto_nombre,
+          unidades: Number(l.unidades),
+          precio_unitario_centimos: Number(l.precio_unitario_centimos),
+          digital: l.kind === 'digital',
+          // `null` con tres significados distinguibles desde la pantalla:
+          // no es digital (nada que descargar), es digital pero el vendedor
+          // no subió el archivo (se dice), o el pedido no está vivo.
+          descarga: l.kind === 'digital' && l.con_archivo && vivo
+            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}?correo=${encodeURIComponent(correo)}`
+            : null,
+          sin_archivo: l.kind === 'digital' && !l.con_archivo,
+        })),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * LA DESCARGA — `GET /api/publicar/pedido/:codigo/descarga/:lineaId?correo=`
+   *
+   * La única puerta por la que sale un archivo de la zona privada. Comprueba
+   * las dos llaves (código + correo), que la línea sea de ESE pedido, que el
+   * producto sea digital y tenga archivo, y que el pedido no esté cancelado ni
+   * devuelto. Se sirve siempre como descarga (Content-Disposition), con el
+   * nombre del producto y no el UUID del disco.
+   */
+  app.get('/api/publicar/pedido/:codigo/descarga/:lineaId', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.query.correo || '').toLowerCase().trim();
+      if (!codigo || !correo) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
+      const r = await db.execute(sql`
+        SELECT pr.archivo_digital, l.producto_nombre, p.estado
+        FROM pedidos p
+        JOIN pedido_lineas l ON l.pedido_id = p.id AND l.id = ${String(req.params.lineaId)}
+        JOIN products pr ON pr.id = l.producto_id
+        WHERE p.codigo = ${codigo} AND lower(p.comprador_email) = ${correo}
+          AND coalesce(pr.kind, 'fisico') = 'digital'
+      `);
+      const fila = r.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'No hay ninguna descarga con ese código y ese correo.' });
+      if (['cancelado', 'devuelto'].includes(fila.estado)) {
+        return res.status(410).json({ error: 'Este pedido se canceló o se devolvió; la descarga ya no está disponible.' });
+      }
+      if (!fila.archivo_digital) {
+        return res.status(409).json({ error: 'Quien vende todavía no ha subido el archivo de este producto. Escríbele: tu pedido está pagado.' });
+      }
+      const ruta = rutaLocalDeUpload(fila.archivo_digital);
+      if (!ruta || !existsSync(ruta)) {
+        console.error(`[comercio] archivo digital ausente en disco para ${codigo}/${req.params.lineaId}: ${fila.archivo_digital}`);
+        return res.status(404).json({ error: 'El archivo no está donde debería. Avisa a quien vende: tu pedido está pagado.' });
+      }
+      const ext = path.extname(ruta);
+      const nombre = String(fila.producto_nombre || 'descarga').replace(/[^\p{L}\p{N} ._-]/gu, '').trim().slice(0, 80) || 'descarga';
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(nombre + ext)}`);
+      res.setHeader('Cache-Control', 'private, no-store');
+      createReadStream(ruta).pipe(res);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿QUÉ TENGO QUE ENVIAR? — `GET /api/publicar/mis-ventas`
+   * Con sesión: los pedidos de quien vende, y solo los suyos. Aquí sí va la
+   * dirección entera, que es lo que hay que escribir en la caja.
+   */
+  app.get('/api/publicar/mis-ventas', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
+               moneda, comprador_email, comprador_nombre, direccion_envio,
+               estado, seguimiento, created_at
+        FROM pedidos
+        WHERE vendedor_user_id = ${req.user.id}
+        ORDER BY created_at DESC
+        LIMIT 200
+      `);
+      res.json({ pedidos: r.rows });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * MARCAR UN PEDIDO — `PUT /api/publicar/mis-ventas/:id` { estado?, seguimiento?, nota? }
+   * Solo quien lo vendió. El `WHERE vendedor_user_id` no es un adorno: sin él,
+   * cualquiera con sesión podría marcar como entregado el pedido de otro.
+   */
+  app.put('/api/publicar/mis-ventas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const { estado, seguimiento, nota } = req.body || {};
+      const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
+      if (estado && !VALIDOS.includes(estado)) return res.status(400).json({ error: 'Ese estado no existe.' });
+      const r = await db.execute(sql`
+        UPDATE pedidos SET
+          estado = COALESCE(${estado || null}, estado),
+          seguimiento = COALESCE(${seguimiento ?? null}, seguimiento),
+          nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
+          updated_at = now()
+        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        RETURNING codigo, estado, seguimiento
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });

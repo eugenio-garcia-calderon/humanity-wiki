@@ -40,7 +40,27 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [envio, setEnvio] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotoNueva, setFotoNueva] = useState('');
+  // EL ARCHIVO DE UNA DESCARGA (2026-08-22): se sube a la zona privada de
+  // subidas (`?privado=1`) en cuanto se elige, y lo que se guarda en el
+  // producto es su URL interna. Nadie lo verá por esa URL: solo quien pague,
+  // desde su pedido. Sin archivo, el producto se crea igual —se avisa en
+  // Comercio— pero lo que se cobre no se podrá entregar hasta subirlo.
+  const [archivo, setArchivo] = useState<{ url: string; nombre: string } | null>(null);
+  const [subiendo, setSubiendo] = useState(false);
   const [guardando, setGuardando] = useState(false);
+
+  async function subirArchivo(f: File) {
+    setSubiendo(true); setError(null);
+    try {
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'application/octet-stream')}&privado=1`, {
+        method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.url) { setError(j.error || 'No se ha podido subir el archivo.'); return; }
+      setArchivo({ url: j.url, nombre: f.name });
+    } catch { setError('No hay conexión con el servidor.'); }
+    finally { setSubiendo(false); }
+  }
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -84,6 +104,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           stock: tipo === 'fisico' && stock.trim() !== '' ? Number(stock) : null,
           envio_centimos: tipo === 'fisico' && envio.trim() !== '' ? aCentimos(envio) : null,
           imagenes: fotos,
+          archivo_digital: tipo === 'digital' && archivo ? archivo.url : undefined,
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -183,6 +204,23 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
               placeholder="De dónde sale, cómo es, qué tamaño tiene…"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 text-base leading-relaxed focus:border-emerald-400 focus:outline-none resize-y" />
           </Campo>
+
+          {tipo === 'digital' && (
+            <Campo etiqueta="El archivo que se entrega" ayuda="PDF, ZIP, audio, vídeo… Solo lo descarga quien lo compre, desde su pedido">
+              <label className="flex items-center gap-3 h-12 px-3 rounded-xl border border-dashed border-slate-300 text-sm cursor-pointer hover:border-emerald-400">
+                <input type="file" className="hidden" disabled={subiendo}
+                  onChange={e => { const f = e.target.files?.[0]; if (f) subirArchivo(f); e.target.value = ''; }} />
+                {subiendo
+                  ? <span className="text-slate-400">Subiendo…</span>
+                  : archivo
+                    ? <span className="text-emerald-700 font-bold truncate">✓ {archivo.nombre}</span>
+                    : <span className="text-slate-500">Elegir archivo…</span>}
+              </label>
+              {!archivo && !subiendo && (
+                <p className="mt-1.5 text-xs text-amber-700">Sin archivo, lo que se cobre no se podrá entregar. Puedes subirlo luego desde Comercio.</p>
+              )}
+            </Campo>
+          )}
 
           <Campo etiqueta="Fotos" ayuda="Pega la dirección de una imagen">
             <div className="flex gap-2">

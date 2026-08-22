@@ -5147,3 +5147,42 @@ commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
 113.40 entirely to the one author with success (3 interactions, 6 positive
 reviews), totals summing back to the pot; 403 without admin. Depends on
 `vistas_validas` (PR #260) being in place.
+
+---
+
+## 2026-08-22 — Digital products are delivered, and the order routes are back (Programador 7, economy & market)
+
+Two things in one PR because they live in the same routes.
+
+**The order routes had vanished.** `GET /api/publicar/pedido/:codigo`,
+`GET /api/publicar/mis-ventas` and `PUT /api/publicar/mis-ventas/:id` were
+written in the Phase 6 orders commit and dropped by the Phase 7 cart rewrite of
+`publicar.ts` — the pages kept calling them. In production: a buyer looking up
+their order always got "no está", and a seller's Pedidos tab was always empty.
+Verified against production before touching anything: both routes answered
+404. Restored, now cart-aware (`lineas`), and the seller screen finally uses the
+PUT: «Marcar enviado» / «Marcar entregado» buttons.
+
+**Digital delivery** (plan fase 8: «hoy un PDF se cobra y no se entrega»):
+- `products.archivo_digital` (0087): the file's URL in a PRIVATE upload zone.
+  `guardarArchivo(…, { privado: true })` writes under `/uploads/privado/…`,
+  and that prefix is 404 BEFORE the static mount — the file never leaves by URL.
+- It leaves only through `GET /api/publicar/pedido/:codigo/descarga/:lineaId?correo=`:
+  code + e-mail must match, the order must be alive, the line must belong,
+  the product must have a file. Streamed as an attachment named after the
+  product. 409 with a clear message when the seller never attached a file.
+- The order lookup returns `lineas` with `descarga` URLs and `solo_digital`;
+  the buyer page lists downloads and skips the "enviado" step for downloads.
+- A cart that is all digital is born `entregado` in the webhook: nothing to ship.
+- Seller side: CrearProducto uploads the file for a digital product (with the
+  warning if missing), Comercio shows «Con archivo» / «Sin archivo» and lets
+  you attach or replace one. Only `/uploads/privado/` URLs are accepted —
+  an external URL is silently ignored, a public upload URL too.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after): order
+lookup with lines; download 200 with attachment and the right bytes; 409 for
+the line without file; 404 with the wrong e-mail; the private URL 404 direct,
+public statics still 200; mis-ventas 401 without session and the list with it;
+external URL rejected, private accepted; PUT estado works. `tsc` clean. Not
+verified in a browser: the subdomain-only `/pedido` page (no subdomain on
+localhost) — its data contract is what was tested.
