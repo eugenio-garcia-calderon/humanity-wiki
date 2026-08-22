@@ -15,6 +15,8 @@
 // representación se leen de donde ya viven. Una persona no es una copia de
 // datos, es un cruce.
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import ImportarContactos from '../components/social/ImportarContactos';
+import { enlaceWhatsApp, telefonoLegible } from '../utils/telefono';
 import { useNavigate } from 'react-router-dom';
 import {
   Users2, Search, Plus, Loader2, Star, Mail, Phone, Building2, X, Check,
@@ -75,6 +77,40 @@ export default function Personas() {
   const [ficha, setFicha] = useState<Partial<Persona> | null>(null);
   const [nuevoGrupo, setNuevoGrupo] = useState<string | null>(null);
   const [menuFila, setMenuFila] = useState<string | null>(null);
+  /** ══ AÑADIR A UN PROYECTO DESDE AQUÍ (2026-08-22, hormiguero #7: «poder
+   *  agregarles a proyectos») ══════════════════════════════════════════════
+   *  Se podía ya, pero solo desde la página del proyecto: había que saber a qué
+   *  proyecto ibas antes de elegir a la persona. Al revés —estás mirando a
+   *  alguien y quieres meterlo en algo— no había camino.
+   *
+   *  LOS PROYECTOS SE PIDEN UNA VEZ, al abrir el primer submenú: cargarlos al
+   *  entrar sería una llamada por cada visita a Personas para algo que se usa
+   *  de vez en cuando. */
+  const [misProyectos, setMisProyectos] = useState<Array<{ id: string; titulo: string }> | null>(null);
+  const [anadiendoA, setAnadiendoA] = useState<string | null>(null);
+
+  const abrirProyectos = useCallback(async (personaId: string) => {
+    setAnadiendoA(personaId);
+    if (misProyectos) return;
+    try {
+      const r = await fetch('/api/proyectos', { credentials: 'include' });
+      const j = await r.json();
+      setMisProyectos(Array.isArray(j) ? j.map((x: any) => ({ id: x.id, titulo: x.titulo })) : []);
+    } catch { setMisProyectos([]); }
+  }, [misProyectos]);
+
+  const meterEnProyecto = async (personaId: string, proyectoId: string) => {
+    setAnadiendoA(null); setMenuFila(null);
+    const r = await fetch(`/api/juego/agentes/${personaId}/proyectos`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: proyectoId }),
+    });
+    // SE DICE SI NO HA ENTRADO. Un menú que se cierra sin más deja creyendo que
+    // la persona ya está dentro del proyecto.
+    if (!r.ok) setError('No se ha podido añadir a ese proyecto.');
+    else cargar();
+  };
 
   // CÓMO SE MIRAN (Eugenio, 2026-08-20: «ponme diferentes formas de ver los
   // contactos, en forma de galería con fotos en mini tarjetas, o en formato de
@@ -218,6 +254,11 @@ export default function Personas() {
             </button>
           ))}
         </div>
+
+        {/* TRAERSE LA AGENDA (2026-08-22, hormiguero #7). Va aquí, en Personas,
+            porque es donde vive la gente: importar contactos es añadir personas,
+            no una herramienta aparte. */}
+        <ImportarContactos onImportado={cargar} />
 
         <button
           onClick={() => setSoloFavoritos(v => !v)}
@@ -380,6 +421,40 @@ export default function Personas() {
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
                     <MessageSquare className="w-3.5 h-3.5 text-slate-400" /> Abrir y hablar
                   </button>
+                  {/* ESCRIBIRLE POR WHATSAPP (2026-08-22, hormiguero #7). Abre
+                      la conversación con esa persona; el mensaje lo escribe y
+                      lo envía ella, que es lo único que se puede hacer sin una
+                      cuenta de empresa aprobada por Meta. El porqué largo está
+                      en `utils/telefono.ts`.
+
+                      SOLO SI HAY NÚMERO: sin él no hay a dónde ir, y un botón
+                      apagado en cada fila enseña a no mirarlos. */}
+                  {enlaceWhatsApp(p.telefono) && (
+                    <a href={enlaceWhatsApp(p.telefono)!} target="_blank" rel="noreferrer"
+                      onClick={() => setMenuFila(null)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 text-left">
+                      <Phone className="w-3.5 h-3.5" /> WhatsApp
+                    </a>
+                  )}
+                  {/* AÑADIR A UN PROYECTO. El submenú se abre sobre el
+                      mismo menú: son pocos proyectos y así no hay que
+                      recordar de quién era el menú de al lado. */}
+                  <button onClick={() => abrirProyectos(p.id)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <FolderKanban className="w-3.5 h-3.5 text-slate-400" /> Añadir a un proyecto
+                  </button>
+                  {anadiendoA === p.id && (
+                    <div className="max-h-40 overflow-y-auto border-t border-slate-100 mt-1 pt-1">
+                      {misProyectos === null && <p className="px-3 py-2 text-[11px] text-slate-400">Cargando…</p>}
+                      {misProyectos?.length === 0 && <p className="px-3 py-2 text-[11px] text-slate-400">No tienes proyectos.</p>}
+                      {misProyectos?.map(pr => (
+                        <button key={pr.id} onClick={() => meterEnProyecto(p.id, pr.id)}
+                          className="w-full px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left truncate">
+                          {pr.titulo}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <button onClick={() => { setMenuFila(null); setFicha({ ...p }); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
                     <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar ficha
@@ -442,7 +517,10 @@ export default function Personas() {
                   </a>
                 )}
                 {p.telefono && (
-                  <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 shrink-0 text-slate-300" />{p.telefono}</p>
+                  <p className="flex items-center gap-1 truncate">
+                    <Phone className="w-3 h-3 shrink-0 text-slate-300" />
+                    {telefonoLegible(p.telefono)}
+                  </p>
                 )}
               </div>
 
@@ -494,6 +572,32 @@ export default function Personas() {
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
                       <MessageSquare className="w-3.5 h-3.5 text-slate-400" /> Abrir y hablar
                     </button>
+                    {enlaceWhatsApp(p.telefono) && (
+                      <a href={enlaceWhatsApp(p.telefono)!} target="_blank" rel="noreferrer"
+                        onClick={() => setMenuFila(null)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 text-left">
+                        <Phone className="w-3.5 h-3.5" /> WhatsApp
+                      </a>
+                    )}
+                    {/* AÑADIR A UN PROYECTO. El submenú se abre sobre el
+                        mismo menú: son pocos proyectos y así no hay que
+                        recordar de quién era el menú de al lado. */}
+                    <button onClick={() => abrirProyectos(p.id)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                      <FolderKanban className="w-3.5 h-3.5 text-slate-400" /> Añadir a un proyecto
+                    </button>
+                    {anadiendoA === p.id && (
+                      <div className="max-h-40 overflow-y-auto border-t border-slate-100 mt-1 pt-1">
+                        {misProyectos === null && <p className="px-3 py-2 text-[11px] text-slate-400">Cargando…</p>}
+                        {misProyectos?.length === 0 && <p className="px-3 py-2 text-[11px] text-slate-400">No tienes proyectos.</p>}
+                        {misProyectos?.map(pr => (
+                          <button key={pr.id} onClick={() => meterEnProyecto(p.id, pr.id)}
+                            className="w-full px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left truncate">
+                            {pr.titulo}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <button onClick={() => { setMenuFila(null); setFicha({ ...p }); }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
                       <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar ficha

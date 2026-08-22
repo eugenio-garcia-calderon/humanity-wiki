@@ -3473,3 +3473,196 @@ upload request in `src/` today.
 The rest is listed with numbers and left alone on purpose: 547 bare buttons, 89
 hex colours, 9 copies of «close when you click outside». Doing them all in one
 sweep would produce a diff nobody can review.
+
+---
+
+## 2026-08-22 (III) — Hormiguero #1: two ways a table could lie about a number
+
+Eugenio's first note: «revisar creación de tablas y sus funcionalidades, y
+buscar bugs y resolverlos». Reviewed end to end against the running server —
+creating tables, all the column types, validation, formulas, aggregates across
+relations, views, permissions and deletion. Most of it held: writing text into a
+number is refused, a formula that names a missing column errors instead of
+guessing, an aggregate over nothing is empty and not zero, calculated columns
+cannot be written by hand, cycles are caught on create *and* on edit, and a
+deleted row leaves its link saying «(ya no existe)».
+
+Two things did lie, and both in the same way — producing a believable number
+instead of admitting a problem.
+
+### Renaming a column silently broke every formula that used it
+
+`Precio` = 100, `ConIVA` = `{Precio} * 1.21` = 121. Rename `Precio` to `Coste`
+— a cosmetic gesture — and ConIVA turns into «No hay ninguna columna que se
+llame Precio». In a table with fifteen formulas, one rename breaks all fifteen.
+
+Formulas address columns **by name**, so the stored text was the only reference
+and it stopped pointing anywhere. Now renaming rewrites the formulas of that
+table, in the one place where a column changes name, and answers how many it
+touched — an application that rewrites what a person typed cannot do it
+silently. The discarded alternative (storing ids and translating for display) is
+argued in `src/server/bd/renombrar.ts`.
+
+### Two columns could share a name, and `{Importe}` picked one
+
+Nothing stopped a second column called `Importe`, and the name→id map simply
+kept the last one. The formula then computed with whichever won the ordering and
+returned a perfectly plausible number. It is the `grupos[0]` fallback again:
+choosing for the user when you don't know.
+
+Now duplicates are refused on create and on rename, with a message that says
+why. And for tables that already had one, the formula answers «hay más de una
+columna que se llama así» instead of choosing.
+
+**A third bug appeared while testing the fix**, which is why it was worth
+testing rather than reasoning: when the old name *was* duplicated, the rewrite
+happily rewrote the formulas that meant the *other* column. Renaming one of two
+`Importe` now leaves every formula alone — which is also the right answer,
+because with one `Importe` left they resolve correctly on their own. And the
+check has to be made *before* the update: read afterwards, the old name is gone
+and the count comes back as one.
+
+Test data and the local verification session were deleted afterwards.
+
+---
+
+## 2026-08-22 (IV) — Hormiguero #2 to #6 and #8
+
+Working the board top-down, so as not to collide with the other session, which
+comes up from the bottom.
+
+### #2 · The home page
+
+- **The «Humanidad / Mías» switch is gone.** It split the front page in two and
+  made you choose one before seeing anything — and the «Mías» half is what your
+  own profile already is. The *mode* stays alive in the address (`?mias=1`),
+  because that is what «Mis publicaciones» and the link from your profile use:
+  removing the mode as well would have left those two pointing nowhere.
+- **No heading over the circles.** A row of round faces already says what it is.
+  What the heading actually added — following vs suggestion — is in the ring:
+  coloured if you follow them, dashed grey if it is a suggestion.
+- **The tasks are out.** They went in yesterday so the home page would say
+  whether there was anything to do today. Right idea, wrong place: five tasks
+  with their deadlines above the publications turn a front page into an inbox,
+  and the first thing you see on entering ends up being what you owe. Projects
+  stay — they are somewhere to go, not a debt.
+
+### #3 · The notifications panel on a phone
+
+It hung off the bell with `absolute right-0`, and the bell is pinned to the
+right edge: on a 375 px screen a 304 px panel came out lopsided, its left text
+almost against the frame. On a phone it is now `fixed` and centred on the
+screen, with the same margin on both sides and a height that cannot overflow.
+Fixed rather than absolute on purpose: absolute rides the header's scrolling.
+On a wide screen nothing changed — it still hangs from the bell.
+
+### #4 · The header
+
+The permanent «Inicio» tab was already gone in the previous deploy. The other
+half of the note: **the menu button no longer has a black background.** It was
+the darkest pill in the whole bar and pulled the eye to the corner; and black
+means something else here — «you are here» — which is not what a button that
+opens a menu is.
+
+### #5 and #8 · «The screen isn't fixed, it slides sideways»
+
+Two notes, one cause, and it was not the page: it was Safari. On iOS, tapping a
+field whose text is **under 16 px** makes the browser zoom in so it can be
+read — and once zoomed, the whole page can be dragged sideways. From outside it
+looks exactly as he described it: «se ha hecho como zoom» and «no está fija».
+Nearly every field in the platform is 14 px, so it happened on every form.
+
+The cure is the type size, not the zoom: fields go to 16 px on phone-width
+screens and Safari stops zooming because it no longer needs to. The other way
+out — `maximum-scale=1` — takes pinch-zoom away from everybody, including the
+people who need it to read.
+
+Measured first: the page itself does **not** overflow horizontally (`scrollWidth
+== clientWidth == 375`), which is what ruled out a stray wide element and
+pointed at the zoom.
+
+### #6 · Attaching files when you report something
+
+Half of what fails is easier to show than to describe. The form now takes files,
+holds them until the note exists — an attachment has to hang from something, and
+while you are typing that something has no id yet — and uploads them right
+after. If one fails it says which and why; the note is already saved, so nothing
+is undone, but staying quiet would leave you thinking the screenshot arrived.
+Images show as thumbnails in the note; anything else, as a named link.
+
+Reuses the `archivos` table, adding `incidencia_id` as a fourth container rather
+than a new table: an attachment is the same thing wherever it hangs from.
+Reading the board is open to anyone; **attaching is limited to the note's author
+or an admin** — without that line, anybody with a session could hang files on
+someone else's note.
+
+**And a bug came out of it**: `archivos` has a check constraint demanding
+exactly one container, and it still counted three. The first attempt failed with
+«violates check constraint». Migration `0056` brings it up to four — worth
+knowing, because the same trap waits for the fifth.
+
+---
+
+## 2026-08-22 (V) — Hormiguero #7 and #9
+
+### #7 · Phone contacts, projects and WhatsApp
+
+«Crear un sistema para sincronizar los contactos de mi teléfono y poder
+agregarles a proyectos, y también mandarles mensajes a través de WhatsApp, sea
+como sea.»
+
+**What a web page can and cannot do with an address book**, because it decides
+the shape of this:
+
+- No web page can read the address book on its own. The person picks the
+  contacts and the browser hands over only those.
+- The browser's **contact picker** (`navigator.contacts`) does exactly that with
+  a system screen. It exists in Chrome on Android; on the iPhone it does not.
+- A **.vcf file** is exported by any phone and can be read anywhere.
+
+So there are two ways in: the picker where the browser has it, and .vcf always.
+With only one of them, half the platform is locked out — the picker leaves out
+every iPhone, the file alone gives up the convenience. Which one you are seeing,
+and why, is written under the button: otherwise from an iPhone it looks broken.
+
+**Nothing gets duplicated**: contacts are matched by **number**, never by name.
+«Ana», «Ana Ruiz» and «Ana trabajo» are one person if the number is one; two
+«Juan» with different numbers are two. And a re-import never overwrites a name
+you typed here — «Ana (obras)» stays «Ana (obras)».
+
+The number is normalised in **one** place (`utils/telefono.ts`) for every path —
+typed by hand, imported, or edited — because «600 12 34 56» and «+34600123456»
+would otherwise be two people the next time the agenda is imported. Verified
+with nine cases including `+1 415 555 2671` and rubbish input, which returns
+`null` rather than a plausible-looking number.
+
+**WhatsApp** opens the conversation with `wa.me`. Sending *without* the person
+pressing send needs an approved WhatsApp Business account, Meta-reviewed
+templates and a per-message cost; `wa.me` works today, on the phone and on the
+desktop, without a company account, and the platform never touches anyone's
+messages.
+
+**Adding to projects** existed already, but only from the project's own page —
+you had to know the project before choosing the person. Now it is also in the
+person's menu, the way round he described it.
+
+### #9 · The icon library, from 53 to 988
+
+Fifty-three were the ones the automatic dictionary could return. For picking by
+hand that is very few — there was no sailboat, no guitar, no paw print.
+
+The list is **generated from the package**, not hand-written: lucide's 5.592
+icons minus the families that do not name a *thing* — arrows, chevrons,
+alignments, squares, charts, «Off» and «Check» states — which inflate the
+catalogue without adding anything anyone would choose for their project.
+
+**With a search box**, which is the part that makes it usable: with 53 you chose
+by looking; with 988 you have to be able to ask by name. Without it, widening
+the list would have made the picker worse. It says «in English» in the
+placeholder, because the icons are named in English, and it answers «none is
+called that» rather than showing an empty grid.
+
+**What it costs, with a number**: the app bundle goes from 5,87 MB to 6,24 MB
+(+363 KB raw). Loading all 5.592 would add some 3 MB for icons nobody will ever
+scroll past; loading them on demand would make the sidebar wait for a download
+before drawing an icon that is already chosen.

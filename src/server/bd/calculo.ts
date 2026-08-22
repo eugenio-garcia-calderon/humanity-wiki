@@ -24,7 +24,7 @@
 // delante a quien decírselo y todavía no hay datos que dependan de ello.
 import { sql } from 'drizzle-orm';
 import { type Celda, error, celdasDe } from './celdas';
-import { compilar, evaluar, type Contexto } from './formulas';
+import { compilar, evaluar, AMBIGUO, type Contexto } from './formulas';
 import { calcularAgregado, type ConfigAgregado } from './agregados';
 
 export type ColumnaCalc = {
@@ -208,8 +208,25 @@ export async function calcularTabla(
   },
 ): Promise<{ porFila: Record<string, Record<string, Celda>>; ciclo?: string[] }> {
   const { columnas, filas } = opciones;
+  // ══ DOS COLUMNAS CON EL MISMO NOMBRE NO SE RESUELVEN A LA BUENA ══════════
+  // (2026-08-22, encontrado revisando las tablas.)
+  //
+  // Las fórmulas nombran columnas por su nombre. Si dos se llaman «Importe»,
+  // este mapa se quedaba con la última y `{Importe}` calculaba en silencio con
+  // una de las dos —la que ganara el orden— sin que nada lo dijera. Es el mismo
+  // fallo que el `grupos[0]` de agosto: elegir por el usuario cuando no se sabe
+  // produce un resultado creíble y equivocado.
+  //
+  // Ahora un nombre repetido se marca con `AMBIGUO` y el evaluador contesta
+  // «hay dos columnas que se llaman así». Las rutas ya impiden crear el
+  // segundo, pero esto tiene que aguantar igual: las tablas que ya existían
+  // pudieron quedarse con nombres repetidos, y ahí lo honesto es decirlo, no
+  // seguir eligiendo.
   const porNombre: Record<string, string> = {};
-  for (const c of columnas) porNombre[c.nombre.toLowerCase()] = c.id;
+  for (const c of columnas) {
+    const clave = c.nombre.toLowerCase();
+    porNombre[clave] = clave in porNombre ? AMBIGUO : c.id;
+  }
 
   const r = ordenar(columnas, porNombre);
   const porFila: Record<string, Record<string, Celda>> = {};

@@ -562,22 +562,30 @@ export default function Explorar() {
               <Plus className="w-3.5 h-3.5" /> Crear
             </button>
 
-            <div className="inline-flex p-0.5 bg-slate-100 rounded-lg shrink-0">
+            {/* ══ FUERA EL INTERRUPTOR «HUMANIDAD / MÍAS» ═══════════════════
+                (2026-08-22, hormiguero: «quita el filtro de publicaciones Mías
+                y de Otros»).
+
+                Partía la portada en dos mitades y obligaba a elegir una antes
+                de ver nada — y la mitad «Mías» es la que uno ya tiene en su
+                perfil. Sin él, el inicio enseña todo lo que hay, que es lo que
+                se espera de una portada.
+
+                EL MODO SIGUE EXISTIENDO, en la dirección (`?mias=1`): es lo
+                que usan «Mis publicaciones» del menú y el enlace desde tu
+                perfil. Lo que se ha ido es el botón, no el sitio. Si además se
+                hubiera quitado el modo, esos dos enlaces habrían dejado de
+                llevar a ninguna parte. */}
+            {modo === 'mias' && (
               <button
                 onClick={() => cambiarModo('humanidad')}
-                className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all',
-                  modo === 'humanidad' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}
+                title="Ver todo lo que hay publicado"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-black shrink-0"
               >
-                <Globe2 className="w-3.5 h-3.5" /> Humanidad
+                <Users2 className="w-3.5 h-3.5" /> Solo mías
+                <X className="w-3 h-3 opacity-70" />
               </button>
-              <button
-                onClick={() => cambiarModo('mias')}
-                className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all',
-                  modo === 'mias' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800')}
-              >
-                <Users2 className="w-3.5 h-3.5" /> Mías
-              </button>
-            </div>
+            )}
 
             {carpetaActiva && (
               <button onClick={() => setCarpetaActiva(null)}

@@ -50,9 +50,14 @@ export default function CirculosDePersonas() {
 
   return (
     <div className="mb-3">
-      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mb-2 px-0.5">
-        {sugeridos ? 'Gente a la que seguir' : 'A quien sigues'}
-      </p>
+      {/* SIN RÓTULO ENCIMA (2026-08-22, hormiguero: «elimina elementos
+          innecesarios como descripciones encima de los círculos de
+          personas»). Una fila de caras redondas ya dice lo que es, igual que
+          en cualquier teléfono; el rótulo gastaba una línea para nombrarlo.
+
+          LO QUE DECÍA NO SE PIERDE: el anillo de color distingue a quien sigues
+          (de color) de una sugerencia (gris punteado), que era la única
+          información que el rótulo añadía de verdad. */}
       <div className="flex items-start gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {datos.personas.map(p => (
           <button

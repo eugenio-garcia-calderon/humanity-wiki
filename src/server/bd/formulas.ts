@@ -216,6 +216,11 @@ export type Contexto = {
   porNombre: Record<string, string>;
 };
 
+/** La marca que ocupa el sitio de un id cuando DOS columnas comparten nombre.
+ *  No es un id válido a propósito: cualquier sitio que la trate como tal fallará
+ *  a la vista en vez de calcular con la columna equivocada. */
+export const AMBIGUO = '__AMBIGUO__';
+
 export function evaluar(nodo: Nodo, ctx: Contexto): Celda {
   switch (nodo.n) {
     case 'num': return valor(nodo.v);
@@ -223,6 +228,10 @@ export function evaluar(nodo: Nodo, ctx: Contexto): Celda {
 
     case 'col': {
       const id = ctx.porNombre[nodo.v.toLowerCase()];
+      // DOS COLUMNAS CON ESE NOMBRE: no se elige una. Ver `calculo.ts`.
+      if (id === AMBIGUO) {
+        return error(`Hay más de una columna que se llama «${nodo.v}»: cámbiale el nombre a una para saber a cuál te refieres.`);
+      }
       // Una columna que no existe es un ERROR, no un vacío. Tratarla como vacía
       // haría que una fórmula con el nombre mal escrito diera un resultado
       // creíble en vez de avisar.

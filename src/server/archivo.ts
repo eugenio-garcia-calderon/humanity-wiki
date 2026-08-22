@@ -22,14 +22,17 @@ import { sql } from 'drizzle-orm';
 
 const nuevoId = () => `ARCH${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-type Contenedor = { campo: 'proyecto_id' | 'tarea_id' | 'pagina_id'; id: string };
+type Contenedor = { campo: 'proyecto_id' | 'tarea_id' | 'pagina_id' | 'incidencia_id'; id: string };
 
-/** Cuál de los tres contenedores viene en la petición. Exactamente uno. */
+/** Cuál de los cuatro contenedores viene en la petición. Exactamente uno. */
 function contenedorDe(o: any): Contenedor | null {
   const pares: Array<[Contenedor['campo'], any]> = [
     ['proyecto_id', o?.proyecto_id],
     ['tarea_id', o?.tarea_id],
     ['pagina_id', o?.pagina_id],
+    // 2026-08-22: una nota del hormiguero. La cuarta y la más simple de todas,
+    // porque el tablero es común: lo ve cualquiera y solo escribe su autor.
+    ['incidencia_id', o?.incidencia_id],
   ];
   const puestos = pares.filter(([, v]) => !!v);
   if (puestos.length !== 1) return null;
@@ -77,6 +80,22 @@ export function registerArchivoRoutes(app: Express, db: any) {
       return t.publico ? null : 'Ese proyecto es privado.';
     }
 
+    if (c.campo === 'incidencia_id') {
+      // ══ UNA NOTA DEL HORMIGUERO ══════════════════════════════════════════
+      // El tablero es común y se LEE sin condiciones: es la lista de lo que
+      // falla, y esconderla no ayudaría a nadie. Adjuntar es otra cosa: solo
+      // quien escribió la nota, o quien programa. Sin esa línea, cualquiera con
+      // sesión podría colgar ficheros en la nota de otro.
+      const r = await db.execute(sql`
+        SELECT autor_user_id FROM incidencias WHERE id = ${c.id} AND archived_at IS NULL
+      `);
+      const n = r.rows[0] as any;
+      if (!n) return 'Esa nota no existe.';
+      if (!escribir) return null;
+      if (n.autor_user_id === yo || admin) return null;
+      return 'Esa nota no es tuya.';
+    }
+
     const r = await db.execute(sql`
       SELECT creator_user_id, publico FROM knowledge_windows
       WHERE id = ${c.id} AND archived_at IS NULL AND deleted_at IS NULL
@@ -119,12 +138,13 @@ export function registerArchivoRoutes(app: Express, db: any) {
       const id = nuevoId();
       await db.execute(sql`
         INSERT INTO archivos (id, url, nombre, mime, bytes, clase, descripcion, subido_por,
-                              proyecto_id, tarea_id, pagina_id)
+                              proyecto_id, tarea_id, pagina_id, incidencia_id)
         VALUES (${id}, ${url}, ${nombre}, ${String(d.mime)}, ${Number(d.bytes) || 0},
                 ${String(d.clase || 'archivo')}, ${d.descripcion || null}, ${req.user.id},
                 ${c.campo === 'proyecto_id' ? c.id : null},
                 ${c.campo === 'tarea_id' ? c.id : null},
-                ${c.campo === 'pagina_id' ? c.id : null})
+                ${c.campo === 'pagina_id' ? c.id : null},
+                ${c.campo === 'incidencia_id' ? c.id : null})
       `);
       const fila = await db.execute(sql`SELECT * FROM archivos WHERE id = ${id}`);
       res.json(fila.rows[0]);

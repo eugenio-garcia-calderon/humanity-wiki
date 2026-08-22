@@ -434,7 +434,13 @@ export default function Layout() {
             title="Ver el menú"
             aria-label="Ver el menú"
             aria-expanded={false}
-            className={cn('shrink-0 grid place-items-center rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors',
+            // SIN FONDO NEGRO (2026-08-22, hormiguero: «el icono del menú no
+            // debería tener fondo negro»). Era la pastilla más oscura de toda
+            // la barra y tiraba del ojo a la esquina, cuando lo que hay que
+            // mirar está en el centro. Además el negro significa otra cosa en
+            // esta plataforma —«aquí estás»—, y un botón que abre el menú no es
+            // un sitio donde se esté.
+            className={cn('shrink-0 grid place-items-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors',
               compacto ? 'w-8 h-8' : 'w-10 h-10')}
           >
             {/* EL MISMO DIBUJO QUE EL DE ESCONDERLO, DEL REVÉS (2026-08-22,

@@ -40,6 +40,7 @@ import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnla
 import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { compilar } from './bd/formulas';
+import { renombrarEnConfig } from './bd/renombrar';
 import { OPERACIONES } from './bd/agregados';
 import { filtrar, ordenarFilas, agrupar, OPERADORES, type Filtro, type Orden } from './bd/vistas';
 
@@ -148,6 +149,32 @@ export function registerBdRoutes(app: Express, db: any) {
     for (const o of otras as any[]) porNombre[String(o.nombre).toLowerCase()] = o.id;
     porNombre[nueva.nombre.toLowerCase()] = nueva.id;
     return detectaCiclo(otras as any[], nueva as any, porNombre);
+  };
+
+  /** ══ NO PUEDE HABER DOS COLUMNAS CON EL MISMO NOMBRE ═══════════════════
+   *  (2026-08-22, encontrado revisando las tablas.)
+   *
+   *  El nombre de una columna no es una etiqueta: es la DIRECCIÓN con la que la
+   *  nombran las fórmulas (`{Importe} * 1.21`). Con dos «Importe» en la misma
+   *  tabla, una fórmula calcula con una de las dos —la que gane el orden— y
+   *  devuelve un número perfectamente creíble que puede ser el equivocado.
+   *
+   *  Se comprueba al crear y al renombrar, que son los dos únicos sitios donde
+   *  puede aparecer un repetido. Comparando en minúsculas, porque así es como
+   *  las resuelve el evaluador: «importe» e «Importe» son la misma dirección.
+   *
+   *  Devuelve el mensaje del fallo, o `null` si el nombre está libre. */
+  const nombreRepetido = async (tablaId: string, nombre: string, exceptoId?: string) => {
+    const limpio = String(nombre || '').trim().toLowerCase();
+    if (!limpio) return null;
+    const r = await db.execute(sql`
+      SELECT id FROM bd_columnas
+      WHERE tabla_id = ${tablaId} AND archived_at IS NULL AND lower(nombre) = ${limpio}
+    `);
+    const choca = (r.rows as any[]).some(c => c.id !== exceptoId);
+    return choca
+      ? `Ya hay una columna que se llama «${String(nombre).trim()}». Las fórmulas las nombran por el nombre, así que dos iguales harían que un cálculo no supiera a cuál se refiere.`
+      : null;
   };
 
   const columnasDe = async (tablaId: string) => {
@@ -332,6 +359,8 @@ export function registerBdRoutes(app: Express, db: any) {
       const tipo = String(d.tipo || 'texto') as Tipo;
       if (!TIPOS.includes(tipo)) return res.status(400).json({ error: `Tipo no válido. Los de esta capa son: ${TIPOS.join(', ')}.` });
       if (!d.nombre || !String(d.nombre).trim()) return res.status(400).json({ error: 'La columna necesita un nombre.' });
+      const repetido = await nombreRepetido(req.params.id, d.nombre);
+      if (repetido) return res.status(400).json({ error: repetido });
 
       // CADA OPCIÓN LLEVA SU PROPIO `id`, generado aquí y no derivado del
       // texto: si el id saliera del nombre, renombrar la opción cambiaría su
@@ -412,16 +441,75 @@ export function registerBdRoutes(app: Express, db: any) {
         if (malo) return res.status(400).json({ error: malo });
       }
 
+      const nombreNuevo = d.nombre ? String(d.nombre).trim().slice(0, 120) : null;
+      // SE MIRA ANTES DE ESCRIBIR. Consultado después, el nombre viejo ya no
+      // existe en la tabla y la cuenta sale 1: la comprobación se creía buena y
+      // reescribía igual (visto en pruebas, 2026-08-22).
+      const eraAmbiguo = nombreNuevo
+        ? ((await db.execute(sql`
+            SELECT count(*)::int AS n FROM bd_columnas
+            WHERE tabla_id = ${col.tabla_id} AND archived_at IS NULL
+              AND lower(nombre) = ${String(col.nombre).toLowerCase()}
+          `)).rows[0] as any)?.n > 1
+        : false;
+      if (nombreNuevo && nombreNuevo.toLowerCase() !== String(col.nombre).toLowerCase()) {
+        const choca = await nombreRepetido(col.tabla_id, nombreNuevo, col.id);
+        if (choca) return res.status(400).json({ error: choca });
+      }
+
       await db.execute(sql`
         UPDATE bd_columnas SET
-          nombre   = COALESCE(${d.nombre ? String(d.nombre).trim().slice(0, 120) : null}, nombre),
+          nombre   = COALESCE(${nombreNuevo}, nombre),
           opciones = COALESCE(${opciones ? JSON.stringify(opciones) : null}::jsonb, opciones),
           config   = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}
       `);
-      res.json({ ok: true });
+
+      // ══ RENOMBRAR NO PUEDE APAGAR LOS CÁLCULOS (2026-08-22) ═══════════════
+      // Una fórmula nombra sus columnas por el nombre —`{Precio} * 1.21`—, así
+      // que al renombrar «Precio» todas las que la usaban se quedaban en
+      // «No hay ninguna columna que se llame Precio». El aviso era honesto,
+      // pero el gesto es cosmético y no puede tener ese precio: en una tabla
+      // con quince fórmulas las rompía las quince de golpe.
+      //
+      // Se reescriben aquí, en el único sitio donde una columna cambia de
+      // nombre. El porqué largo y la alternativa descartada (guardar ids en vez
+      // de nombres) están en `bd/renombrar.ts`.
+      let formulasArregladas = 0;
+      // SI EL NOMBRE VIEJO ESTABA REPETIDO, NO SE REESCRIBE NADA.
+      //
+      // Encontrado probando el arreglo (2026-08-22): en una tabla con dos
+      // columnas «Importe» —posible en las tablas creadas antes de que se
+      // impidieran los repetidos—, renombrar una de las dos reescribía TODAS
+      // las fórmulas que decían `{Importe}`, incluidas las que se referían a la
+      // otra. Se arreglaba una y se rompían las demás.
+      //
+      // Con el nombre repetido no se puede saber a cuál apuntaba cada fórmula,
+      // así que no se toca ninguna: dejarlas como están es además lo correcto,
+      // porque al quedar solo una columna con ese nombre vuelven a resolverse
+      // solas y sin ambigüedad.
+      if (nombreNuevo && nombreNuevo !== col.nombre && !eraAmbiguo) {
+        const calc = await db.execute(sql`
+          SELECT id, config FROM bd_columnas
+          WHERE tabla_id = ${col.tabla_id} AND archived_at IS NULL
+            AND tipo IN ('formula', 'condicional')
+        `);
+        for (const otra of calc.rows as any[]) {
+          const nueva = renombrarEnConfig(otra.config, col.nombre, nombreNuevo);
+          if (!nueva) continue;   // esa fórmula no la nombraba
+          await db.execute(sql`
+            UPDATE bd_columnas SET config = ${JSON.stringify(nueva)}::jsonb, updated_at = now()
+            WHERE id = ${otra.id}
+          `);
+          formulasArregladas++;
+        }
+      }
+      // Se dice CUÁNTAS se han tocado. Que la aplicación reescriba fórmulas por
+      // su cuenta sin decirlo sería un cambio invisible en algo que la persona
+      // escribió a mano.
+      res.json({ ok: true, formulasArregladas });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
