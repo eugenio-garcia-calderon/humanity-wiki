@@ -225,6 +225,12 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   edit history, and the e-mail address of people asking to be forgotten sitting in a
   rate-limit log. Before storing a value, ask what it looks like in a backup a month
   from now — and whether deleting the account can reach it there.
+- **Before you verify a path, count how many there are.** On 2026-08-22 the
+  account-deletion endpoint was checked end to end with eight cases — and all eight
+  were password accounts, on a platform that has had Google sign-in since before the
+  agent arrived. Those users could not delete their account at all, and could not
+  cancel a deletion either. A thorough battery of tests on one case says nothing
+  about the case you did not think of.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
