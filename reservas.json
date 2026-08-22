@@ -79,6 +79,12 @@
       "desde": "2026-08-22T20:48:23.438Z"
     },
     {
+      "agente": "prog7",
+      "ruta": "src/server/auth.ts",
+      "motivo": "cookie de sesion valida en los subdominios (Eugenio: probar puntos en el carrito)",
+      "desde": "2026-08-22T20:51:15.124Z"
+    },
+    {
       "agente": "prog1",
       "ruta": "src/server/gasto.ts",
       "motivo": "el gasto en modelos abiertos se contaba como Anthropic, y desaparecia del total",
@@ -95,6 +101,18 @@
       "ruta": "vite.config.ts",
       "motivo": "poder probar dominios propios en local",
       "desde": "2026-08-22T20:52:47.989Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: sesion en los subdominios",
+      "desde": "2026-08-22T20:53:32.921Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
+      "desde": "2026-08-22T20:53:42.878Z"
     }
   ]
 }
