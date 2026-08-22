@@ -4617,3 +4617,30 @@ reemplazar: son unas líneas en `src/server/roadmap.ts`, área de Programador 1.
 **No verificado:** ninguna de las dos pantallas, las dos detrás del inicio de
 sesión. Sí verificada, con una petición real, la regla del servidor que explica
 el filtro.
+
+---
+
+## 2026-08-22 — The view route was a mint, and it is closed (Programador 7, found by 4)
+
+`POST /api/windows/:id/view` required no session and granted the window's
+author 0.01 points PER CALL: a curl loop fabricated internal money into any
+chosen account — 10,000 calls, 100 points. Found by Programador 4 reading the
+deployed code (note INCMT4IXIUD3UC), deliberately without calling the route.
+
+Three locks now, `views` still counts for everyone (counting is not paying):
+no session → no minting (the 2026-08-08 promise was «when OTHER USERS view
+it»); self-views still don't mint; and a per-window daily minting cap counted
+from the ledger itself (`PUNTOS_VISTA_TOPE_DIA`, 50 cents-of-point/day
+default) — with accounts required, inflating a window hits the ceiling and
+leaves named traces.
+
+Verified locally: 5 sessionless views minted nothing; 3 with a session minted
+exactly 3 cents; 58 total attempts stopped at exactly 50 entries. Test
+session was tagged `claude-dev-verificacion` and deleted; balances, views
+counter and ledger rows restored (trigger disabled/re-enabled for cleanup —
+local only).
+
+Agreed with prog4 and written in /tokenomics/tareas: the day the monthly pot
+pays out over counted views, `views` (raw, displayed) and valid views (one
+per person, session required) must be TWO numbers, and the pot only reads
+the second. PUNTOS_TRANSFERENCIA stays off until this fix is deployed.
