@@ -41,6 +41,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "el logo no lleva a inicio con ventanas abiertas",
       "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0083_precios_servicio.sql",
+      "motivo": "precios de la cesta (renumerada desde 0077, que ya existe en main)",
+      "desde": "2026-08-22T18:21:18.651Z"
     }
   ]
 }
