@@ -194,12 +194,23 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
 
   /** DELETE — se archiva, como todo aquí (regla 6 de la Constitución). */
   app.delete('/api/incidencias/:id', async (req: Request, res: Response) => {
-    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    // UN PROGRAMADOR IA PUEDE RETIRAR LAS SUYAS, y solo las suyas (2026-08-22).
+    // Encontrado al probar el token contra producción: un agente podía abrir
+    // una nota y luego no tenía forma de retirarla, así que una abierta por
+    // error se quedaba en el tablero de todos para siempre. Deshacer lo que uno
+    // acaba de hacer no es un permiso de más: es la otra mitad del que ya tenía.
+    const quien = await quienEscribe(req, db);
+    if (!quien) return res.status(401).json({ error: 'Inicia sesión.' });
     try {
-      const fila = await db.execute(sql`SELECT autor_user_id FROM incidencias WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      const fila = await db.execute(sql`SELECT autor_user_id, respondido_por FROM incidencias WHERE id = ${req.params.id} AND archived_at IS NULL`);
       const i = fila.rows[0] as any;
       if (!i) return res.status(404).json({ error: 'Esa nota no existe.' });
-      if (i.autor_user_id !== req.user.id && (req.user.roleLevel ?? 0) < 4) {
+      // Un agente no tiene fila en `users`: su autoría vive en el nombre con el
+      // que la abrió.
+      const suya = quien.clase === 'agente'
+        ? i.respondido_por === quien.nombre
+        : i.autor_user_id === quien.id;
+      if (!suya && !quien.admin) {
         return res.status(403).json({ error: 'Esa nota no es tuya.' });
       }
       await db.execute(sql`UPDATE incidencias SET archived_at = now() WHERE id = ${req.params.id}`);

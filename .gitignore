@@ -16,3 +16,21 @@ secrets/
 *.pem
 *.key
 uploads/
+
+# ============================================================================
+# CERTIFICADOS Y CLAVES PRIVADAS — NUNCA AL REPOSITORIO (2026-08-22)
+# ============================================================================
+# La clave privada de un certificado es una credencial: quien la tiene puede
+# hacerse pasar por este servidor. Esta carpeta apareció DENTRO del repositorio
+# y sin ignorar; no llegó a subirse, pero estaba a un `git add -A` de acabar en
+# GitHub para siempre —y un secreto publicado no se arregla borrándolo, se
+# arregla revocándolo y generando otro.
+#
+# Lo correcto es que estos ficheros NO vivan aquí dentro. Mientras estén, al
+# menos que git no los vea.
+SLL Certificate Cloudfare/
+*.pem
+*.key
+*.p12
+*.pfx
+origin-cert*

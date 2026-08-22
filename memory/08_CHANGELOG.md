@@ -3755,3 +3755,42 @@ role *today* would rewrite the past for anyone who gets promoted.
 Verified end to end: an agent's note enters as team work and is attributed; a
 level-1 user's note enters as a proposal; that user cannot approve their own;
 an agent can, and the note keeps saying it came from outside.
+
+---
+
+## 2026-08-22 (VIII) — The two agents exist, and one gap that only production showed
+
+Eugenio: «dale esa información del usuario al programador 2, créale su usuario
+propio y que no lo olvide, meterlo en MEMORY».
+
+Both agents now exist **in production**: `Claude 1` / `claude1@lighthumanity.org`
+and `Claude 2` / `claude2@lighthumanity.org`. Created by running the script
+inside the app container — the only place with `pg` — with the database
+credentials read from the db container, never typed anywhere.
+
+**The keys never crossed a screen.** The script's output was written to a file
+on the server, the values piped straight into the local `.env` (gitignored), and
+the file deleted. What was printed was the length of each value, which proves it
+is there without showing it. They are not in `memory/` either: house rule 4
+forbids copying secrets there, so the memory says *where* they live and *what
+they open*, not what they are.
+
+Programmer 2 had declined to create its own account, and was right to — it was
+not their decision to make. Once it was Eugenio's instruction to me, it was.
+
+### The gap production found
+
+Testing the token against production revealed something local testing had not:
+an agent could **open** a note and then had no way to **retract** it — the
+`DELETE` route only ever looked at `req.user`. So a note opened by mistake would
+sit on everyone's board forever, and my own test note had to be removed from the
+database by hand.
+
+Undoing what you have just done is not an extra permission: it is the other half
+of the one you already had. Agents can now archive their own notes and only
+their own, recognised by `respondido_por` — an agent has no row in `users`, so
+its authorship lives in the name it opened the note with.
+
+Verified against humanity.wiki: creating a note with the token answers 200 and
+lands as team work attributed to «Claude 1»; creating a project with the same
+token answers 401. The test note was removed and the board is back to its nine.
