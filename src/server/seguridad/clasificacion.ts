@@ -86,6 +86,7 @@ export const CLASIFICACION: Clase[] = [
   c('entity_history', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'lo que había antes de cada cambio; quien altera un dato querrá alterar esto'),
   c('registro_sellado', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el registro sellado; su integridad es lo único que hace verificable todo lo demás'),
   c('registro_anclajes', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los resúmenes diarios publicados fuera: la prueba que enseñaríamos a un auditor'),
+  c('registro_pendiente', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el buzón de cambios aún sin sellar; borrar una nota de aquí es esconder un cambio, y por eso los huecos de su secuencia se anotan'),
   c('schema_migrations', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué forma tiene la base de datos; mentir aquí hace que una migración se salte'),
 
   // ── EL BIEN COMÚN MEDIDO ──────────────────────────────────────────────────

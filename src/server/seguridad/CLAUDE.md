@@ -11,18 +11,22 @@ guardia.ts        the table, applied, before any route sees the request
 cifrado.ts        envelope encryption: one key per record, key destruction = deletion
 firma.ts          Ed25519: proves WE wrote it, which the hash chain cannot
 registro.ts       the sealed record: append-only, hash-chained, signed, verifiable by anyone
+sellar.ts         drains the outbox into the sealed record, and answers "is this row still the one we sealed?"
 ```
 
-Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
+Migrations: `drizzle/0070_registro_sellado.sql` (the record) and
+`drizzle/0071_registro_captura.sql` (the database-level capture).
 
-Migration: `drizzle/0070_registro_sellado.sql`.
+Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
 ## The commands
 
 ```bash
 npm run seguridad:permisos       # is every write route declared? fails the build if not
 npm run seguridad:clasificacion  # is every table classified? fails the build if not
-npm run seguridad:probar         # the four test scripts
+npm run seguridad:probar         # the five test scripts
+node --env-file=.env scripts/sellar.mjs              # seal what is pending
+node --env-file=.env scripts/sellar.mjs users U_X    # is that row still the one we sealed?
 npx tsx scripts/probar-registro.ts   # creates a throwaway database, and drops it
 ```
 
@@ -40,6 +44,7 @@ green is worse than no test.
 | The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
+| Capture from the database | Triggers on 25 tier-3 tables write to an outbox; `sellar.mjs` chains and signs it. **Not applied to production**, and nothing runs it on a schedule yet |
 | Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
 
 Saying it plainly costs nothing and prevents the expensive mistake: believing
@@ -90,6 +95,8 @@ a deploy — that is the point of having the two modes.
 | Let confidentiality raise the tier | You end up signing and anchoring private chats while public indicators stay unsigned | Confidentiality decides encryption, integrity and authenticity decide the tier |
 | Put personal data on a chain, even hashed | EDPB Guidelines 02/2025 v2.0 (7 July 2026): a hash of personal data is still personal data | Only the salted daily root leaves |
 | Trust the `registro_sellado` triggers as security | They stop the accident, not somebody with rights to drop them | The chain, and phase 2's external anchor |
+| Add a table to the capture list without measuring | Every write to it becomes one sealed, signed, serialised entry. On a high-volume table that is a queue that never drains | Measure first; the exclusions in `0071` each carry their reason |
+| Seal inside the trigger | A signing failure would break an ordinary save, and security that breaks people's work gets removed | The outbox, drained by `sellar.mjs` outside the request |
 
 ## The honest limit of all of this
 
