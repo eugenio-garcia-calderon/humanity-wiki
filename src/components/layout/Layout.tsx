@@ -937,6 +937,17 @@ function PuenteAlAsistente() {
   // se vuelve a preguntar. Se manda solo el hecho de que cambió, nunca la
   // cookie ni el token.
   useEffect(() => {
+    // FUERA DE UNA VENTANA, `window.parent` ES UNO MISMO (2026-08-22). Sin
+    // iframe no hay app de fuera a la que avisar, y este `postMessage` se lo
+    // mandaba a su propia ventana: el oyente de arriba lo recogía y volvía a
+    // preguntar quién eres, por nada. Medido en Chrome con la sesión abierta:
+    // 8 de los mensajes venían literalmente de sí misma, y seguían llegando
+    // uno por segundo indefinidamente.
+    //
+    // Hoy eso no cuesta red —el arranque acaba y las peticiones paran—, pero
+    // deja un oyente despertándose cada segundo para nada, y al primero que le
+    // cuelgue un `fetch` se le convierte en una petición por segundo.
+    if (window.parent === window) return;
     try {
       window.parent?.postMessage({
         humanity: 'humanity:sesion-cambiada', detalle: usuarioActual?.id ?? null,
