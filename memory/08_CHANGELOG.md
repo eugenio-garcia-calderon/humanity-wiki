@@ -4323,3 +4323,17 @@ in Programador 1's area and has been passed to them.
 **Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
 create accounts or type passwords. Both endpoints were read in source rather
 than exercised. Phase 1 was checked in the browser.
+
+---
+
+## 2026-08-22 — The info «i» menu, top right (Programador 7)
+
+The pages that explain the platform — `/sobre-red-humana` and its scoring
+subpage — existed and nothing in the interface linked to them. A new `Info`
+button in the top bar of `Layout.tsx` (before the ant, after the window strip)
+opens a small dropdown listing them. Same open/close pattern as the account
+menu: `useCerrarAlPulsarFuera`, same dropdown styling.
+
+Why before the ant: first understand the platform, then ask things of the
+team. Verified in the browser on port 3007 (menu opens, both links navigate,
+button highlights on those routes). `tsc --noEmit` clean.
