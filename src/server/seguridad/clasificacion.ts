@@ -87,6 +87,7 @@ export const CLASIFICACION: Clase[] = [
   c('registro_sellado', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el registro sellado; su integridad es lo único que hace verificable todo lo demás'),
   c('registro_anclajes', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los resúmenes diarios publicados fuera: la prueba que enseñaríamos a un auditor'),
   // ── LO QUE NACIÓ EL 2026-08-22 POR LA TARDE ───────────────────────────────
+  c('vistas_validas', 'ALTA', 'MEDIA', 'ALTA', 'MEDIA', 'una vista por persona, ventana y dia: es el contador que ACUNA puntos, asi que meter filas aqui es fabricar dinero'),
   c('intentos_fallidos', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'el rastro de quién ha probado a entrar y desde dónde: es la prueba de un ataque y a la vez dice dónde vive la gente'),
   c('llamadas', 'MEDIA', 'ALTA', 'ALTA', 'MEDIA', 'quién ha llamado a quién y cuándo: cambia poco si se toca, dice muchísimo si se lee'),
   c('textos_editables', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los textos de las páginas públicas: es lo que la plataforma dice de sí misma'),
