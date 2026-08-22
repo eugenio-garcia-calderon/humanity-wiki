@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog4",
-      "ruta": "package.json",
-      "motivo": "P4: ordenes npm de clasificacion y pruebas",
-      "desde": "2026-08-22T13:54:37.689Z"
-    },
-    {
-      "agente": "prog4",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "P4: entrada de capas por relevancia",
       "desde": "2026-08-22T13:55:25.925Z"
