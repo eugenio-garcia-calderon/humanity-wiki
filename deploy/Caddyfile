@@ -25,6 +25,29 @@ humanity.wiki {
 	# Estáticos con hash de Vite: cachear un año en el navegador/Cloudflare.
 	@assets path /assets/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# ── EL SERVICE WORKER NO SE CACHEA (2026-08-22) ─────────────────────────
+	# `express.static` mandaba `max-age=14400` para todo, y medido en
+	# producción Cloudflare lo estaba cacheando de verdad
+	# (`cf-cache-status: REVALIDATED`). Para un fichero cualquiera da igual;
+	# para `sw.js` no:
+	#
+	#   · Un service worker es lo único que un usuario NO puede quitarse
+	#     recargando. Si sale uno roto, cuatro horas de caché en el borde son
+	#     cuatro horas sin poder arreglarlo por despliegue.
+	#   · La salida de emergencia (`?sw=off`) también pasa por aquí.
+	#
+	# `no-cache` no significa «no lo guardes»: significa «pregunta siempre
+	# antes de usarlo». Es un 304 de nada cada vez, y a cambio un arreglo
+	# urgente llega en el acto.
+	#
+	# El registro ya usa `updateViaCache: 'none'`, que hace que el navegador
+	# ignore esta cabecera AL COMPROBAR si el worker cambió. Esto es lo otro:
+	# lo que impide que Cloudflare sirva un `sw.js` viejo a quien llega por
+	# primera vez después de un despliegue. Son dos cosas distintas y hacen
+	# falta las dos.
+	@sinCache path /sw.js /manifest.webmanifest
+	header @sinCache Cache-Control "no-cache"
 }
 
 # ============================================================================
@@ -73,6 +96,11 @@ humanity.wiki {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
+
+	# Misma razón que arriba: un subdominio sirve la misma aplicación, así que
+	# sirve el mismo `sw.js` y necesita la misma regla.
+	@sinCacheSub path /sw.js /manifest.webmanifest
+	header @sinCacheSub Cache-Control "no-cache"
 }
 
 # www.humanity.wiki se redirige en el BORDE de Cloudflare (Redirect Rule
