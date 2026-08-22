@@ -37,10 +37,10 @@
       "desde": "2026-08-22T14:57:53.433Z"
     },
     {
-      "agente": "prog5",
-      "ruta": "src/App.tsx",
-      "motivo": "Veracidad: página, menú de información y grupo del tablero",
-      "desde": "2026-08-22T15:00:07.566Z"
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "revision prog4: tope dentro de la transaccion, cierres ordenados, cuadre avisar",
+      "desde": "2026-08-22T15:00:08.148Z"
     }
   ]
 }
