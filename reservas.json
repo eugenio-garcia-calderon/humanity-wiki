@@ -29,18 +29,6 @@
       "ruta": "deploy/CLAUDE.md",
       "motivo": "nota del inodo del montaje, junto a la del Caddyfile",
       "desde": "2026-08-22T14:11:13.203Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "UX de la camara: sin rejilla, botones solidos, texto honesto",
-      "desde": "2026-08-22T14:12:57.408Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
-      "motivo": "UX de la camara: sin rejilla, botones solidos, texto honesto",
-      "desde": "2026-08-22T14:12:57.408Z"
     }
   ]
 }
