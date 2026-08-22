@@ -143,6 +143,12 @@
       "ruta": "src/server/roadmap.ts",
       "motivo": "publicaciones dentro de un proyecto",
       "desde": "2026-08-22T23:08:33.198Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "public/sw.js",
+      "motivo": "URGENTE: el sw clona la conexion SSE y la app se congela",
+      "desde": "2026-08-22T23:09:29.617Z"
     }
   ]
 }
