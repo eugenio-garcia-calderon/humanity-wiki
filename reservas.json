@@ -53,6 +53,12 @@
       "ruta": "equipo/DASHBOARD.md",
       "motivo": "para que se me pueda verificar en quien",
       "desde": "2026-08-22T18:57:30.855Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "drizzle/0086_por_donde_fue_la_llamada.sql",
+      "motivo": "TURN: el 0083 ya estaba cogido en main",
+      "desde": "2026-08-22T19:04:10.133Z"
     }
   ]
 }
