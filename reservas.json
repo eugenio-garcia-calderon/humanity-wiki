@@ -103,16 +103,28 @@
       "desde": "2026-08-22T19:09:14.603Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/pages/MiPedido.tsx",
-      "motivo": "fase 1 economia: entrega de lo digital",
-      "desde": "2026-08-22T19:09:21.135Z"
+      "agente": "visor3d",
+      "ruta": "src/components/juego/texturas.ts",
+      "motivo": "Visor 3D: bajar la RAM (texturas, cielo, modelos)",
+      "desde": "2026-08-22T19:09:23.905Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/components/knowledge/CrearProducto.tsx",
-      "motivo": "fase 1 economia: entrega de lo digital",
-      "desde": "2026-08-22T19:09:27.541Z"
+      "agente": "visor3d",
+      "ruta": "src/components/juego/Escena.tsx",
+      "motivo": "Visor 3D: bajar la RAM (texturas, cielo, modelos)",
+      "desde": "2026-08-22T19:09:23.905Z"
+    },
+    {
+      "agente": "visor3d",
+      "ruta": "src/components/juego/Modelos.tsx",
+      "motivo": "Visor 3D: bajar la RAM (texturas, cielo, modelos)",
+      "desde": "2026-08-22T19:09:23.905Z"
+    },
+    {
+      "agente": "visor3d",
+      "ruta": "src/components/juego/calidad.ts",
+      "motivo": "Visor 3D: bajar la RAM (texturas, cielo, modelos)",
+      "desde": "2026-08-22T19:09:23.905Z"
     }
   ]
 }
