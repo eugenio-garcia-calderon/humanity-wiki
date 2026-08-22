@@ -41,6 +41,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "el logo no lleva a inicio con ventanas abiertas",
       "desde": "2026-08-22T18:13:04.616Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/paginasInfo.ts",
+      "motivo": "entrada tokenomics + enMenu para subpaginas (rebase #220/#235 sobre el registro)",
+      "desde": "2026-08-22T18:14:53.006Z"
     }
   ]
 }
