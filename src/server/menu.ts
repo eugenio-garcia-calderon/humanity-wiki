@@ -538,6 +538,10 @@ export function registerMenuRoutes(app: Express, db: any) {
           FROM publications
           WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
             AND (coalesce(visibility,'publica') <> 'privada' OR author_user_id = ${yo})
+            -- BLOQUEO (0091): en un proyecto compartido, lo que publique alguien
+            -- a quien he bloqueado no me sale. Sin esta línea el bloqueo se lee
+            -- como que no funciona, y es lo último que le quedaba a Apple.
+            AND NOT bloqueado_entre(${yo}::text, author_user_id)
           ORDER BY created_at DESC LIMIT 100
         `),
       ]);

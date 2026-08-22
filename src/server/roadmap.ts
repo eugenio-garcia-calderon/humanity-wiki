@@ -571,6 +571,11 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           AND p.archived_at IS NULL AND p.deleted_at IS NULL
           -- Una publicación privada la ve su autor y nadie más, esté donde esté.
           AND (coalesce(p.visibility,'publica') <> 'privada' OR p.author_user_id = ${req.user?.id || null}::text)
+          -- BLOQUEO. La regla vive en bloqueado_entre (migracion 0091) para que
+          -- todos los listados digan lo mismo; este es el séptimo que la usa.
+          -- Sin sesión el primer argumento es NULL, la función da falso y no
+          -- filtra nada: quien no ha entrado no ha bloqueado a nadie.
+          AND NOT bloqueado_entre(${req.user?.id || null}::text, p.author_user_id)
         ORDER BY p.created_at DESC
         LIMIT 200
       `);
