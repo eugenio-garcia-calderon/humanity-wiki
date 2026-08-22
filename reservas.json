@@ -77,6 +77,12 @@
       "ruta": "src/pages/Mensajes.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:13.263Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "denunciar en el menu de la tarjeta, y un texto que quedo mintiendo",
+      "desde": "2026-08-22T16:55:05.394Z"
     }
   ]
 }
