@@ -53,7 +53,9 @@ const TERCEROS = [
   { quien: 'Stripe', que: 'Solo si pagas o donas', porque: 'Procesa el pago. Los datos de tu tarjeta van a Stripe, no a nosotros: aquí no se guarda ningún número de tarjeta.' },
   { quien: 'YouTube y Vimeo', que: 'Tu IP, al ver un vídeo incrustado', porque: 'Es el reproductor. YouTube se carga desde su dominio sin cookies, que es la versión que no te sigue.' },
   { quien: 'Spotify', que: 'Solo si conectas tu cuenta a mano', porque: 'Para enseñarte tu música. Si no la conectas, no existe.' },
-  { quien: 'Hetzner', que: 'Todo, como servidor', porque: 'Es donde vive la plataforma. Los servidores están en Alemania, dentro de la Unión Europea.' },
+  { quien: 'Hetzner', que: 'Todo, como servidor', porque: 'Es la empresa alemana donde vive la plataforma: la base de datos y los ficheros que subes están en sus máquinas.' },
+  { quien: 'Cloudflare', que: 'Tu IP y tu petición, en cada visita', porque: 'Está delante de la web: acelera la carga y para ataques. Toda visita pasa por ahí antes de llegar a nuestro servidor.' },
+  { quien: 'Un segundo proveedor de almacenamiento', que: 'La copia de seguridad diaria de la base de datos', porque: 'Guardar la copia en el mismo sitio que el original no protege de perder el servidor. Por eso sale fuera.' },
 ];
 
 export default function Privacidad() {
@@ -165,10 +167,11 @@ export default function Privacidad() {
           <Server className="w-4 h-4 text-slate-400" /> Dónde está
         </h2>
         <p className="text-sm text-slate-600 leading-relaxed">
-          En servidores de Hetzner <strong>en Alemania</strong>, dentro de la
-          Unión Europea. Algunos de los servicios de la lista de arriba
-          —Anthropic, Google, Stripe— tratan datos fuera de la Unión Europea, con
-          las garantías que exige la normativa europea.
+          En servidores de <strong>Hetzner</strong>, una empresa alemana, con
+          <strong> Cloudflare</strong> por delante. Algunos de los servicios de la
+          lista de arriba —Anthropic, Google, Stripe, Cloudflare— tratan datos
+          fuera de la Unión Europea, con las garantías que exige la normativa
+          europea.
         </p>
       </section>
 
@@ -180,8 +183,10 @@ export default function Privacidad() {
       <section className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-5">
         <h2 className="text-sm font-black text-amber-900 mb-2">Falta por completar</h2>
         <p className="text-sm text-amber-900/80 leading-relaxed">
-          Los datos de la sociedad responsable —nombre, domicilio y una dirección
-          de contacto para ejercer tus derechos— aún no están aquí. Preferimos
+          Faltan los datos de la sociedad responsable —nombre, domicilio y una
+          dirección de contacto para ejercer tus derechos—, el <strong>país
+          exacto</strong> donde están los servidores y el <strong>nombre del
+          proveedor</strong> que guarda las copias de seguridad. Preferimos
           decirlo a poner algo que no sea exacto. Mientras tanto, escríbenos desde{' '}
           <Link to="/hormiguero" className="font-bold underline">Feedback</Link>{' '}
           y llega a una persona.

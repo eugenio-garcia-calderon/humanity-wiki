@@ -124,3 +124,83 @@ server, unprompted, and both answers are better than the questions:
 The **Bloquear** action on a person, **desbloquear** in Configuración, and a hook
 from the report dialog — reporting somebody is the moment they also want to stop
 seeing them.
+
+---
+
+# The privacy half (2026-08-22, app/UX agent)
+
+Nobody had looked at this and it blocks both submissions. **There was no privacy
+policy at all**: no route, no file, no text in the repo. App Store Connect will
+not let you submit without a URL that answers, and neither will the Play listing.
+
+Now at **`humanity.wiki/privacidad`**. Like `/borrar-cuenta`, **that path never
+moves** — it is pasted into both listings and changing it means going through
+review again.
+
+## The inventory, measured not remembered
+
+Both stores' forms — Play's **Data safety**, Apple's **privacy labels** — are
+declarations, and a mismatch with what the app actually does is grounds for
+removal. So every line came from reading the schema and the code.
+
+| Where | What it holds |
+|---|---|
+| `users` | email, name, display_name, handle, avatar, banner, bio, location, website, socials, specialties, telefono, google_id, password_hash, puntos, ubicaciones, objetivos, ui_settings, last_login_at |
+| `sessions` | **ip**, **user_agent**, per device |
+| `intentos_fallidos` | **ip**, for rate limiting |
+| `game_agents` | email, telefono, ubicacion — of *contacts a user types in*, which is third-party personal data |
+| `pedidos` | comprador_email |
+| `ai_conversations` / `ai_messages` | what people ask the assistant |
+| uploads | the photos and videos people take, on disk |
+
+**Trackers: zero.** A grep for Analytics, gtag, GTM, Plausible, PostHog,
+Mixpanel, Segment, the Facebook pixel, Hotjar and Sentry across all of `src/` and
+`index.html` returns nothing. **Cookies: one**, `rh_session`. That is why there is
+no cookie banner, and it is worth defending — it makes both forms trivial to fill
+honestly.
+
+## Two third parties nobody had decided on, fixed before the text was written
+
+- **Four `youtube.com/embed`** (which sets a tracking cookie) while four other
+  places already used `youtube-nocookie.com`. One decision, applied in half the
+  places. All four switched.
+- **`transparenttextures.com`**, fetched on every visit to an objective or a
+  challenge for a decorative background at 10% opacity — handing that visitor's
+  IP to a third party for a texture you can barely see. Now drawn in code
+  (`src/utils/texturaCubos.ts`). Measured after: an objective page makes **zero**
+  third-party requests, where it made one before.
+
+**A privacy policy does not describe the app you wish you had.** If writing one
+turns up something you would rather not have to declare, the app is what changes.
+
+## Answers for Play's Data safety form
+
+| Question | Answer |
+|---|---|
+| Does the app collect or share user data? | Yes |
+| Is data encrypted in transit? | Yes (HTTPS everywhere, Cloudflare Full strict) |
+| Can users request deletion? | Yes — in-app, and `humanity.wiki/borrar-cuenta` |
+| Personal info | Name, Email, User IDs, Phone (optional), Address/approximate location (optional) — collected, not shared, for app functionality; optional ones are optional |
+| Photos and videos | Collected, not shared, for app functionality |
+| Messages | Collected, not shared — direct messages between users |
+| App activity | Collected, not shared — what the user creates |
+| Device or other IDs | **No** |
+| Advertising / marketing | **No** |
+| Analytics | **No** |
+| Location (precise) | **No** — only what a person types |
+| Financial info | **No** — card data goes to Stripe, never to us |
+
+The one that needs Eugenio's eye: Play counts sending text to an AI provider as
+**sharing** with a third party. Declare Anthropic under "App activity → shared,
+for app functionality".
+
+## Still open, and why
+
+| What | Blocked on |
+|---|---|
+| The controller's identity, address and contact | **Eugenio** — the company details. Said in amber *on the page* rather than invented |
+| The exact country of the servers | Not written down anywhere in the repo. Hetzner is German; the datacentre region is a config value |
+| Which provider holds the off-site backups | `COPIAS_REMOTO_CUBO`, set at deploy time, not in the repo |
+
+None of these were guessed. A privacy policy that states something false about
+who answers for your data is exactly the thing that should not exist.
