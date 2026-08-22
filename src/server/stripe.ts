@@ -420,6 +420,52 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             ON CONFLICT DO NOTHING
           `);
         }
+      } else if (kind === 'compra_publica') {
+        // UNA COMPRA HECHA SIN CUENTA (fase 3 del plan de tiendas).
+        //
+        // No hay `payer_user_id` porque no hay comprador registrado, y la
+        // columna admite nulo a propósito: dejarlo vacío dice «esta compra la
+        // hizo alguien de fuera», que es verdad. Inventar un usuario para
+        // rellenarlo sería crear una persona que no existe.
+        //
+        // El correo llega de Stripe, no del navegador: es el que la pasarela
+        // ha verificado al cobrar, no uno que alguien escribiera en un campo.
+        const productId = session.metadata!.product_id;
+        const unidades = Number(session.metadata!.quantity) || 1;
+        const product = (await db.execute(sql`SELECT * FROM products WHERE id = ${productId}`)).rows[0];
+        if (!product) break;
+
+        const correo = session.customer_details?.email || session.customer_email || null;
+        const txId = newId2('TRX');
+        await db.execute(sql`
+          INSERT INTO transactions (id, kind, status, amount_cents, currency, platform_fee_cents,
+                                    payer_user_id, payee_user_id, stripe_payment_intent_id,
+                                    stripe_checkout_session_id, concept)
+          VALUES (${txId}, 'compra', 'pagado', ${session.amount_total || product.price_cents},
+                  ${(session.currency || 'eur').toUpperCase()}, 0,
+                  NULL, ${product.created_by || null},
+                  ${(session.payment_intent as string) || null}, ${session.id},
+                  ${`Compra de ${product.name}${unidades > 1 ? ` x${unidades}` : ''}${correo ? ` — ${correo}` : ''}`})
+          ON CONFLICT (id) DO NOTHING
+        `);
+        await db.execute(sql`
+          INSERT INTO transaction_links (transaction_id, entity_type, entity_id)
+          VALUES (${txId}, 'products', ${productId})
+          ON CONFLICT DO NOTHING
+        `);
+
+        // EL STOCK SE DESCUENTA AQUÍ Y NO ANTES (fase 5, adelantada porque una
+        // compra sin cuenta sin descontar vendería lo mismo dos veces).
+        // Aquí es donde el dinero ha entrado de verdad: una sesión de pago
+        // abierta y abandonada no debe reservar nada.
+        //
+        // `GREATEST(0, ...)` para que dos pagos que lleguen a la vez no dejen
+        // el stock en negativo, y `stock IS NOT NULL` para no empezar a llevar
+        // la cuenta a quien decidió no llevarla.
+        await db.execute(sql`
+          UPDATE products SET stock = GREATEST(0, stock - ${unidades})
+          WHERE id = ${productId} AND stock IS NOT NULL
+        `);
       } else if (kind === 'puntos') {
         // El saldo solo se acredita AQUÍ, en la confirmación real del pago
         // (no al crear la sesión de checkout) — así un pago abandonado o

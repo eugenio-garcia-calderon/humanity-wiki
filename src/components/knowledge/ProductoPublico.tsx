@@ -12,17 +12,16 @@ import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff } from 'lucide-react';
 // compra eso, y quien lo pulsaba salía de la tienda al mercado global con los
 // productos de todos los demás.
 //
-// ── LO QUE ESTA TARJETA NO HACE TODAVÍA, Y POR QUÉ ──────────────────────────
-// No tiene botón de comprar. No es un olvido: hoy `POST
-// /api/stripe/checkout/product` exige sesión, así que un visitante sin cuenta
-// recibiría un 401 después de pulsar. Un botón que falla al final es peor que
-// no tenerlo, porque desperdicia la decisión de comprar. Llega en la fase 3,
-// que es la que abre la compra sin cuenta.
+// ── EL BOTÓN DE COMPRAR (fase 3) ────────────────────────────────────────────
+// Ya existe, porque ya se puede pagar sin cuenta. Antes no lo puse a
+// propósito: el pago exigía sesión y el botón habría fallado JUSTO DESPUÉS de
+// que alguien decidiera comprar, que es el peor momento para fallar.
 //
-// Mientras tanto la tarjeta dice la verdad completa: qué es, cuánto cuesta, si
-// queda, qué garantía tiene y cómo se devuelve.
+// No aparece cuando no puede funcionar: sin precio no hay botón sino «precio a
+// consultar», y agotado tampoco. Un botón que se puede pulsar es una promesa.
 
 type Estado = 'cargando' | 'ok' | 'no-existe' | 'fallo';
+type Compra = { fase: 'quieto' } | { fase: 'abriendo' } | { fase: 'error'; motivo: string };
 
 export default function ProductoPublico({ id, titulo }: { id: string; titulo?: string }) {
   const [estado, setEstado] = useState<Estado>('cargando');
@@ -31,7 +30,32 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   // producto son enlaces a otro sitio, y ese sitio no le debe nada a esta
   // página. Sin esto, el navegador pinta el icono roto encima de la tarjeta.
   const [fotoRota, setFotoRota] = useState(false);
-  useEffect(() => { setFotoRota(false); }, [id]);
+  const [compra, setCompra] = useState<Compra>({ fase: 'quieto' });
+  useEffect(() => { setFotoRota(false); setCompra({ fase: 'quieto' }); }, [id]);
+
+  async function comprar() {
+    setCompra({ fase: 'abriendo' });
+    try {
+      const r = await fetch('/api/publicar/comprar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // De dónde sale y a dónde vuelve: a esta misma tienda. El servidor no
+        // se fía de esto y comprueba que sea una dirección suya.
+        body: JSON.stringify({ producto_id: id, cantidad: 1, volver_a: window.location.href }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.url) {
+        // El motivo se enseña tal cual lo da el servidor cuando lo da: «se ha
+        // agotado» o «solo quedan 2» es información que quien compra necesita,
+        // y taparla con un «ha habido un error» sería mentir por comodidad.
+        setCompra({ fase: 'error', motivo: j.error || 'No se ha podido abrir el pago.' });
+        return;
+      }
+      window.location.href = j.url;
+    } catch {
+      setCompra({ fase: 'error', motivo: 'No hay conexión con el servidor.' });
+    }
+  }
 
   useEffect(() => {
     let vivo = true;
@@ -113,6 +137,22 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
             <Disponibilidad stock={p.stock} />
           </div>
 
+          {puedeComprarse(p) && (
+            <div className="mt-3">
+              <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
+                className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold
+                           disabled:opacity-60 disabled:cursor-wait">
+                {compra.fase === 'abriendo' ? 'Abriendo el pago…' : 'Comprar'}
+              </button>
+              {compra.fase === 'error' && (
+                <p className="mt-1.5 text-xs font-bold text-rose-600">{compra.motivo}</p>
+              )}
+              <p className="mt-1.5 text-[11px] text-slate-400">
+                Pago seguro con tarjeta. No hace falta cuenta.
+              </p>
+            </div>
+          )}
+
           {(p.garantia || p.devoluciones) && (
             <ul className="mt-3 space-y-1">
               {p.garantia && (
@@ -149,4 +189,17 @@ function Disponibilidad({ stock }: { stock: number | null }) {
     </span>;
   }
   return <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Disponible</span>;
+}
+
+/**
+ * ¿Se puede comprar esto ahora mismo?
+ *
+ * Sin precio, no: hay que preguntar. Agotado, tampoco. Y `stock === null`
+ * SÍ se puede comprar — quien no lleva la cuenta no está agotado, y ese es
+ * justamente el caso de casi todo lo que hay hoy en el catálogo.
+ */
+function puedeComprarse(p: any): boolean {
+  if (!p.precio_centimos) return false;
+  if (p.stock !== null && p.stock <= 0) return false;
+  return true;
 }

@@ -22,6 +22,7 @@
 // (usuario, slug): es exactamente para lo que sirve dar un subdominio a cada
 // uno.
 import type { Express, Request, Response } from 'express';
+import { getStripe } from './stripe';
 import { sql } from 'drizzle-orm';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
@@ -338,6 +339,110 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * COMPRAR SIN CUENTA — `POST /api/publicar/comprar`
+   *
+   * Fase 3 del plan de tiendas, y la que decide si esto es una tienda o un
+   * escaparate. Hasta hoy, comprar exigía sesión: quien llegaba a la tienda de
+   * alguien por un enlace tenía que registrarse en una plataforma de la que no
+   * había oído hablar ANTES de poder pagar doce euros de miel. Eso no es una
+   * fricción, es una puerta cerrada — y quien la encuentra no se registra, se
+   * va.
+   *
+   * ── POR QUÉ NO REUTILIZA `/api/stripe/checkout/product` ────────────────────
+   * Aquella ruta exige sesión y guarda `buyer_id` en los metadatos, porque
+   * nació para el mercado de dentro. Aquí no hay comprador con cuenta. Es la
+   * misma pasarela y la misma comisión, pero la identidad del comprador es un
+   * correo, no una fila de `users`.
+   *
+   * ── QUÉ SE COMPRUEBA ANTES DE COBRAR ──────────────────────────────────────
+   * Que el producto exista, que tenga precio y que quede stock. Cobrar primero
+   * y descubrir después que no había es la peor forma de conocer a un cliente.
+   * El descuento de stock NO se hace aquí: se hace cuando Stripe confirma el
+   * pago, porque una sesión abierta y abandonada no debe reservar nada.
+   *
+   * ── A DÓNDE VUELVE ────────────────────────────────────────────────────────
+   * A la tienda de donde salió, no al dominio principal. Quien compra en
+   * `nombre.humanity.wiki` termina ahí; mandarlo a `humanity.wiki/mercado`
+   * sería sacarlo de la tienda justo al pagar.
+   */
+  app.post('/api/publicar/comprar', async (req: Request, res: Response) => {
+    try {
+      const { producto_id, cantidad, volver_a } = req.body || {};
+      const unidades = Math.max(1, Math.min(99, Number(cantidad) || 1));
+
+      const p = (await db.execute(sql`
+        SELECT id, name, description, price_cents, currency, stock, created_by, modality, billing_period
+        FROM products WHERE id = ${String(producto_id || '')} AND archived_at IS NULL
+      `)).rows[0] as any;
+
+      if (!p) return res.status(404).json({ error: 'Ese producto ya no está a la venta.' });
+      if (!p.price_cents) {
+        return res.status(400).json({ error: 'Este producto no tiene precio: hay que preguntar antes de comprarlo.' });
+      }
+      // `null` sigue sin ser cero: quien no lleva la cuenta del stock puede
+      // vender, quien la lleva y está a cero no.
+      if (p.stock !== null && p.stock !== undefined && Number(p.stock) < unidades) {
+        return res.status(409).json({
+          error: Number(p.stock) <= 0 ? 'Se ha agotado.' : `Solo quedan ${p.stock}.`,
+          stock: Number(p.stock),
+        });
+      }
+
+      // La vuelta se limita al propio sitio: aceptar una dirección cualquiera
+      // del cuerpo de la petición convertiría esto en un trampolín para mandar
+      // a la gente a donde quiera quien monte el enlace.
+      const destino = destinoSeguro(volver_a);
+
+      const vendedor = p.created_by
+        ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${p.created_by}`)).rows[0] as any
+        : null;
+      const reparte = !!vendedor?.charges_enabled;
+      const comision = Math.round((p.price_cents * unidades * COMISION_BPS) / 10000);
+      const suscripcion = p.modality === 'suscripcion';
+
+      const stripe = getStripe();
+      const sesion = await stripe.checkout.sessions.create({
+        mode: suscripcion ? 'subscription' : 'payment',
+        // Alojada en Stripe, no incrustada: la incrustada necesita que la
+        // página monte el componente de Stripe, y esta página se sirve a
+        // alguien sin cuenta y sin la aplicación cargada.
+        ui_mode: 'hosted',
+        line_items: [{
+          price_data: {
+            currency: (p.currency || 'EUR').toLowerCase(),
+            product_data: { name: p.name, description: p.description || undefined },
+            unit_amount: p.price_cents,
+            ...(suscripcion ? { recurring: { interval: p.billing_period === 'anual' ? 'year' : 'month' } } : {}),
+          },
+          quantity: unidades,
+        }],
+        // El correo es lo único que se le pide: es lo que hace falta para
+        // mandarle el recibo y para que el vendedor sepa a quién responder.
+        ...(suscripcion ? {} : { customer_creation: 'always' as const }),
+        ...(reparte && !suscripcion ? {
+          payment_intent_data: {
+            application_fee_amount: comision,
+            transfer_data: { destination: vendedor.stripe_account_id },
+          },
+        } : {}),
+        metadata: {
+          kind: 'compra_publica',
+          product_id: p.id,
+          quantity: String(unidades),
+          vendedor_id: p.created_by || '',
+        },
+        success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${destino}?compra=cancelada`,
+      });
+
+      res.json({ url: sesion.url, reparte, comision_centimos: comision });
+    } catch (e: any) {
+      console.error('comprar publico:', e);
+      res.status(500).json({ error: 'No se ha podido abrir el pago. Inténtalo dentro de un momento.' });
+    }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
@@ -371,4 +476,26 @@ function primerTexto(config: any): string | null {
     if (t) return t.length > 160 ? t.slice(0, 160) + '…' : t;
   }
   return null;
+}
+
+/** La misma comisión que cobra el mercado de dentro. Una sola cifra. */
+const COMISION_BPS = Number(process.env.PLATFORM_FEE_BPS || 500);
+
+/**
+ * A dónde puede volver el comprador después de pagar.
+ *
+ * Sólo direcciones de este sitio. Si se aceptara la que venga en la petición,
+ * cualquiera podría montar un enlace de compra que devuelve a su propia página
+ * —con el aspecto de haber pasado por humanity.wiki— y usarlo para engañar.
+ */
+function destinoSeguro(propuesta: unknown): string {
+  const base = process.env.APP_URL || 'https://humanity.wiki';
+  if (typeof propuesta !== 'string' || !propuesta) return base;
+  try {
+    const u = new URL(propuesta);
+    const anfitrion = u.hostname.toLowerCase();
+    const valido = anfitrion === 'humanity.wiki' || anfitrion.endsWith('.humanity.wiki');
+    if (!valido || u.protocol !== 'https:') return base;
+    return u.origin + u.pathname;
+  } catch { return base; }
 }
