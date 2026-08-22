@@ -34,95 +34,21 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
+import { TIPOS, tipar, type Tipo } from './bd/tipos';
+import { celdasDe, type Celda } from './bd/celdas';
+import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, type Apuntado } from './bd/enlaces';
+import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeFicheros, type Fichero } from './bd/ficheros';
+import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
+import { compilar } from './bd/formulas';
+import { OPERACIONES } from './bd/agregados';
+import { filtrar, ordenarFilas, agrupar, OPERADORES, type Filtro, type Orden } from './bd/vistas';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-/** Los cinco de la capa 1. El criterio no ha sido «los más usados» sino los que
- *  cambian lo que el sistema puede CALCULAR O VALIDAR. Correo, teléfono y
- *  enlace son texto con un icono y una expresión regular: no habilitan nada. */
-const TIPOS = ['texto', 'numero', 'fecha', 'seleccion', 'casilla'] as const;
-type Tipo = typeof TIPOS[number];
-
-// ── CELDAS ──────────────────────────────────────────────────────────────────
-
-export type Celda =
-  | { estado: 'vacia' }
-  | { estado: 'ok'; valor: string | number | boolean }
-  | { estado: 'sin_calcular' }
-  | { estado: 'error'; mensaje: string };
-
-const VACIA: Celda = { estado: 'vacia' };
-
-/**
- * Convierte lo que llega del cliente al valor YA TIPADO que se guarda, o dice
- * que no vale.
- *
- * Se guarda un número como número de JSON y una fecha como texto ISO, nunca
- * «todo cadena que ya se convertirá»: si se guardara como texto, las fórmulas
- * de la capa 3 tendrían que adivinar el tipo en cada lectura y acabaríamos
- * escribiendo un analizador donde debería haber una suma.
- *
- * Devuelve `{ ok: true, valor }` donde `valor === undefined` significa BORRAR
- * la celda (dejarla vacía), que es distinto de guardar un cero o una cadena
- * vacía — y es justamente la distinción que esta capa existe para sostener.
- */
-export function tipar(tipo: Tipo, bruto: any, opciones: any[]): { ok: true; valor: any } | { ok: false; error: string } {
-  // Vaciar una celda. `false` y `0` NO entran aquí a propósito: son valores.
-  if (bruto === null || bruto === undefined || bruto === '') return { ok: true, valor: undefined };
-
-  switch (tipo) {
-    case 'texto':
-      return { ok: true, valor: String(bruto).slice(0, 10000) };
-
-    case 'numero': {
-      // `Number('')` es 0 y `Number(' ')` también: por eso el vacío se ha
-      // resuelto antes de llegar aquí. Aquí un texto que no es número es un
-      // error que se cuenta, no un cero que se inventa.
-      const n = typeof bruto === 'number' ? bruto : Number(String(bruto).replace(',', '.').trim());
-      if (!Number.isFinite(n)) return { ok: false, error: 'No es un número.' };
-      return { ok: true, valor: n };
-    }
-
-    case 'fecha': {
-      // Se guarda AAAA-MM-DD, sin hora ni zona horaria. Una fecha de
-      // vencimiento no tiene hora, y arrastrar zona horaria hace que la misma
-      // fecha se vea distinta según quién la mire.
-      const t = String(bruto).trim();
-      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
-      if (!m) return { ok: false, error: 'La fecha tiene que ser AAAA-MM-DD.' };
-      const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00Z`);
-      if (Number.isNaN(d.getTime())) return { ok: false, error: 'Esa fecha no existe.' };
-      return { ok: true, valor: `${m[1]}-${m[2]}-${m[3]}` };
-    }
-
-    case 'seleccion': {
-      // SE GUARDA EL `id` DE LA OPCIÓN, NUNCA SU TEXTO. Si se guardara el
-      // texto, renombrar «Mayor mejor» cambiaría el significado de todas las
-      // filas que la tuvieran — y en el astillero eso invierte el veredicto de
-      // un ensayo sin que nadie se entere.
-      const id = String(bruto);
-      if (!opciones.some(o => o?.id === id)) return { ok: false, error: 'Esa opción no existe en la columna.' };
-      return { ok: true, valor: id };
-    }
-
-    case 'casilla':
-      return { ok: true, valor: bruto === true || bruto === 'true' };
-
-    default:
-      return { ok: false, error: 'Tipo de columna desconocido.' };
-  }
-}
-
-/** La forma en que una fila sale hacia fuera: nunca un `null` pelado. */
-export function celdasDe(valores: Record<string, any>, columnas: Array<{ id: string }>): Record<string, Celda> {
-  const salida: Record<string, Celda> = {};
-  for (const c of columnas) {
-    const v = valores?.[c.id];
-    // Clave ausente = celda vacía. Ojo: `false` y `0` SÍ son valores.
-    salida[c.id] = v === undefined || v === null ? VACIA : { estado: 'ok', valor: v };
-  }
-  return salida;
-}
+// Se re-exportan: hasta la fase 1 vivían en este fichero.
+export { tipar, TIPOS } from './bd/tipos';
+export { celdasDe } from './bd/celdas';
+export type { Celda } from './bd/celdas';
 
 // ── RUTAS ───────────────────────────────────────────────────────────────────
 
@@ -162,6 +88,67 @@ export function registerBdRoutes(app: Express, db: any) {
     if (t.proyecto_id ? t.proyecto_publico : false) return { tabla: t };
     return { error: 'No tienes acceso a esa tabla.', codigo: 403 };
   }
+
+  /**
+   * ¿Vale esta columna calculada? Devuelve el motivo por el que no, o `null`.
+   *
+   * Comprueba tres cosas, y las tres tienen que decirse en el momento de
+   * definir: que la fórmula se entienda, que el agregado sepa por dónde mirar,
+   * y que no se cree un cálculo circular. Un ciclo descubierto al evaluar sería
+   * un bucle infinito en producción.
+   */
+  const validarCalculada = async (tablaId: string, nueva: { id: string; nombre: string; tipo: string; config: any }): Promise<string | null> => {
+    const otras = await columnasDe(tablaId);
+
+    if (nueva.tipo === 'formula' || nueva.tipo === 'condicional') {
+      const texto = nueva.tipo === 'formula' ? String(nueva.config?.formula || '') : reglasAFormula(nueva.config);
+      const c = compilar(texto);
+      if ('error' in c) return `La fórmula no se entiende: ${c.error}`;
+      // Que las columnas que nombra existan. Sin esto, una fórmula con un
+      // nombre mal escrito se guardaría y fallaría en cada celda al leer.
+      const nombres = new Set(otras.map((o: any) => String(o.nombre).toLowerCase()));
+      nombres.add(nueva.nombre.toLowerCase());
+      for (const n of c.columnas) {
+        if (!nombres.has(n.toLowerCase())) return `La fórmula nombra una columna que no existe: «${n}».`;
+      }
+    }
+
+    if (nueva.tipo === 'agregado') {
+      const cfg = nueva.config || {};
+      if (!cfg.columna_relacion) return 'Un agregado necesita saber por qué relación mirar.';
+      if (!OPERACIONES.includes(cfg.operacion)) return `Operación no válida. Las que hay: ${OPERACIONES.join(', ')}.`;
+      // LA COLUMNA DE RELACIÓN PUEDE VIVIR EN LA OTRA TABLA, y esto costó un
+      // fallo real: con `direccion: 'destino'` («quién me apunta a mí») la
+      // relación está en la tabla HIJA, no en ésta. Buscarla solo aquí hacía
+      // imposible el caso más útil de todos — el proveedor que suma lo de sus
+      // componentes.
+      const rr = await db.execute(sql`
+        SELECT id, tipo, tabla_id, config FROM bd_columnas
+        WHERE id = ${cfg.columna_relacion} AND archived_at IS NULL
+      `);
+      const rel = rr.rows[0] as any;
+      if (!rel) return 'Esa columna de relación no existe.';
+      if (rel.tipo !== 'relacion') return 'El agregado tiene que apoyarse en una columna de relación.';
+      const haciaDestino = cfg.direccion === 'destino';
+      if (haciaDestino) {
+        // Si miro quién me apunta, esa relación tiene que apuntar A ESTA tabla.
+        const destino = (rel.config || {}).tabla_destino;
+        if (destino && destino !== tablaId) {
+          return 'Esa relación no apunta a esta tabla, así que nadie llegaría por ella.';
+        }
+      } else if (rel.tabla_id !== tablaId) {
+        return 'Para seguir tus propios enlaces, la relación tiene que ser de esta tabla.';
+      }
+      if (cfg.operacion !== 'contar' && !cfg.columna_destino) {
+        return 'Di qué campo de la otra tabla hay que resumir.';
+      }
+    }
+
+    const porNombre: Record<string, string> = {};
+    for (const o of otras as any[]) porNombre[String(o.nombre).toLowerCase()] = o.id;
+    porNombre[nueva.nombre.toLowerCase()] = nueva.id;
+    return detectaCiclo(otras as any[], nueva as any, porNombre);
+  };
 
   const columnasDe = async (tablaId: string) => {
     const r = await db.execute(sql`
@@ -207,19 +194,94 @@ export function registerBdRoutes(app: Express, db: any) {
         ORDER BY orden, created_at
       `);
 
+      // Los enlaces de TODAS las filas en un viaje, no uno por fila: con 500
+      // filas y tres columnas de relación, ir de una en una serían 1.500
+      // consultas por cada pintada de la tabla.
+      const filas = f.rows as any[];
+      const enlaces = await enlacesDe(db, filas.map(x => x.id));
+      const ficheros = await ficherosDe(db, filas.map(x => x.id));
+      const columnasQueApuntan = columnas.filter(c => CLASE_DE_TIPO[c.tipo]);
+      const columnasConFicheros = columnas.filter(c => CLASE_FICHERO[c.tipo]);
+
+      const preparadas = filas.map(fila => {
+          const celdas = celdasDe(fila.valores || {}, columnas);
+          // Las columnas que apuntan no guardan nada en el jsonb: su valor sale
+          // de `bd_enlaces`. Se sobrescriben aquí para que quien lee no tenga
+          // que saber de dónde viene cada una.
+          const suyos = enlaces[fila.id] || {};
+          const apuntados: Record<string, Apuntado[]> = {};
+          for (const c of columnasQueApuntan) {
+            celdas[c.id] = celdaDeEnlaces(suyos[c.id]);
+            if (suyos[c.id]) apuntados[c.id] = suyos[c.id];
+          }
+          // Lo mismo con los ficheros: la celda guarda identificadores y los
+          // datos para poder enseñarlos van aparte.
+          const susFich = ficheros[fila.id] || {};
+          const archivos: Record<string, Fichero[]> = {};
+          for (const c of columnasConFicheros) {
+            celdas[c.id] = celdaDeFicheros(susFich[c.id]);
+            if (susFich[c.id]) archivos[c.id] = susFich[c.id];
+          }
+          return {
+            id: fila.id,
+            pagina_id: fila.pagina_id,
+            orden: fila.orden,
+            celdas,
+            archivos,
+            // Los nombres de lo apuntado, aparte: la celda guarda identificadores
+            // y esto es lo que hace falta para poder enseñarlos sin otra vuelta.
+            apuntados,
+          };
+      });
+
+      // LAS COLUMNAS CALCULADAS, EN ORDEN. Se hace aquí, con la tabla entera
+      // delante, y no celda a celda: un agregado necesita mirar la otra tabla
+      // completa, así que fila a fila serían tantas consultas como filas. Y el
+      // orden importa porque un cálculo puede leer otro cálculo — ver
+      // `bd/calculo.ts`.
+      const { porFila, ciclo } = await calcularTabla(db, {
+        columnas: columnas as any[],
+        filas: preparadas.map(f => ({ id: f.id, celdas: f.celdas })),
+      });
+      for (const f of preparadas) Object.assign(f.celdas, porFila[f.id] || {});
+
+      // ORDENAR Y FILTRAR VA DESPUÉS DE CALCULAR. Tiene que ser así: la mitad
+      // de las columnas —fórmulas y agregados— no existen en la base de datos,
+      // así que «ordena por dinero comprometido» es imposible en SQL. Ver la
+      // nota de coste en `bd/vistas.ts`.
+      let visibles = preparadas;
+      let vista: any = null;
+      if (req.query.vista) {
+        const v = await db.execute(sql`
+          SELECT * FROM bd_vistas WHERE id = ${String(req.query.vista)} AND tabla_id = ${req.params.id} AND archived_at IS NULL
+        `);
+        vista = v.rows[0] || null;
+      }
+      const filtros: Filtro[] = vista?.filtros || (req.query.filtros ? JSON.parse(String(req.query.filtros)) : []);
+      const ordenPor: Orden[] = vista?.orden_por || (req.query.orden ? JSON.parse(String(req.query.orden)) : []);
+      visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
+
+      const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);
+      const grupos = agrupadoPor ? agrupar(visibles, agrupadoPor) : null;
+
       res.json({
         tabla: {
           id: permiso.tabla.id, titulo: permiso.tabla.titulo, icono: permiso.tabla.icono,
           descripcion: permiso.tabla.descripcion, proyecto_id: permiso.tabla.proyecto_id,
         },
         columnas,
-        filas: (f.rows as any[]).map(fila => ({
-          id: fila.id,
-          pagina_id: fila.pagina_id,
-          orden: fila.orden,
-          // Celdas etiquetadas, nunca `null` pelado. Ver la nota de arriba.
-          celdas: celdasDe(fila.valores || {}, columnas),
-        })),
+        ...(vista ? { vista: { id: vista.id, nombre: vista.nombre, ocultas: vista.ocultas } } : {}),
+        // Se dice CUÁNTAS había antes de filtrar. Sin ese número, una vista con
+        // un filtro puesto y otra sin él se ven igual de completas y nadie sabe
+        // que está mirando un trozo.
+        total: preparadas.length,
+        mostradas: visibles.length,
+        ...(grupos ? { grupos } : {}),
+        // Si hay un cálculo circular se dice en la respuesta, además de en cada
+        // celda afectada: la pantalla tiene que poder avisar arriba, no solo
+        // enseñar celdas rojas sin explicación.
+        ...(ciclo ? { ciclo } : {}),
+        filas: visibles,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -282,8 +344,17 @@ export function registerBdRoutes(app: Express, db: any) {
           })).filter((o: any) => o.label)
         : [];
 
-      const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${req.params.id}`);
+      // UNA COLUMNA CALCULADA SE VALIDA AL CREARLA, no al leerla. Si la
+      // fórmula no se entiende o el cálculo es circular, se dice ahora — que es
+      // cuando hay alguien delante a quien decírselo y todavía no hay datos que
+      // dependan de ello.
       const id = nid('BDC');
+      if (esCalculada(tipo)) {
+        const malo = await validarCalculada(req.params.id, { id, nombre: String(d.nombre).trim(), tipo, config: d.config || {} });
+        if (malo) return res.status(400).json({ error: malo });
+      }
+
+      const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_columnas WHERE tabla_id = ${req.params.id}`);
       await db.execute(sql`
         INSERT INTO bd_columnas (id, tabla_id, nombre, tipo, opciones, config, orden)
         VALUES (${id}, ${req.params.id}, ${String(d.nombre).trim().slice(0, 120)}, ${tipo},
@@ -327,10 +398,25 @@ export function registerBdRoutes(app: Express, db: any) {
           })).filter((o: any) => o.label)
         : null;
 
+      // LA CONFIGURACIÓN TAMBIÉN SE PUEDE CAMBIAR, y faltaba: sin esto, elegir
+      // «enséñalo como moneda» en una fórmula ya creada no hacía nada, y no
+      // había forma de corregir una fórmula mal escrita salvo borrar la columna
+      // y perder sus datos.
+      // Se valida igual que al crear: cambiar una fórmula puede introducir un
+      // cálculo circular exactamente igual que crearla.
+      if (d.config && esCalculada(col.tipo)) {
+        const malo = await validarCalculada(col.tabla_id, {
+          id: col.id, nombre: d.nombre ? String(d.nombre).trim() : col.nombre,
+          tipo: col.tipo, config: d.config,
+        });
+        if (malo) return res.status(400).json({ error: malo });
+      }
+
       await db.execute(sql`
         UPDATE bd_columnas SET
           nombre   = COALESCE(${d.nombre ? String(d.nombre).trim().slice(0, 120) : null}, nombre),
           opciones = COALESCE(${opciones ? JSON.stringify(opciones) : null}::jsonb, opciones),
+          config   = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}
@@ -354,6 +440,55 @@ export function registerBdRoutes(app: Express, db: any) {
 
       await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${req.params.id}`);
       res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ── LAS VISTAS ────────────────────────────────────────────────────────────
+
+  app.get('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
+    try {
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      // Las de la tabla (`usuario_id` nulo) y las MÍAS. Las de otros no: una
+      // vista personal es de quien la hizo.
+      const r = await db.execute(sql`
+        SELECT id, nombre, forma, orden_por, filtros, ocultas, agrupar_por, usuario_id, orden
+        FROM bd_vistas
+        WHERE tabla_id = ${req.params.id} AND archived_at IS NULL
+          AND (usuario_id IS NULL OR usuario_id = ${req.user?.id || null})
+        ORDER BY orden, created_at
+      `);
+      res.json(r.rows);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  app.post('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const d = req.body || {};
+      if (!d.nombre || !String(d.nombre).trim()) return res.status(400).json({ error: 'La vista necesita un nombre.' });
+
+      // Los filtros se validan al guardarlos. Un operador inventado guardado
+      // aquí no fallaría al escribir, fallaría al mirar la tabla — y entonces
+      // nadie sabría de dónde vino.
+      const filtros = Array.isArray(d.filtros) ? d.filtros : [];
+      for (const f of filtros) {
+        if (!OPERADORES.includes(f?.operador)) {
+          return res.status(400).json({ error: `Filtro no válido: «${f?.operador}». Los que hay: ${OPERADORES.join(', ')}.` });
+        }
+      }
+
+      const id = nid('BDV');
+      await db.execute(sql`
+        INSERT INTO bd_vistas (id, tabla_id, nombre, usuario_id, forma, orden_por, filtros, ocultas, agrupar_por)
+        VALUES (${id}, ${req.params.id}, ${String(d.nombre).trim().slice(0, 120)},
+                ${d.compartida ? null : req.user!.id}, ${String(d.forma || 'tabla')},
+                ${JSON.stringify(d.orden_por || [])}::jsonb, ${JSON.stringify(filtros)}::jsonb,
+                ${JSON.stringify(d.ocultas || [])}::jsonb, ${d.agrupar_por || null})
+      `);
+      res.json({ id });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -398,10 +533,50 @@ export function registerBdRoutes(app: Express, db: any) {
       const valores = { ...(fila.valores || {}) };
       const fallos: Array<{ columna: string; error: string }> = [];
 
+      // Los enlaces se aplican DESPUÉS de validar todo, por lo mismo que las
+      // celdas normales: si algo no vale, no se escribe media fila.
+      const enlacesPendientes: Array<{ colId: string; clase: any; destinos: string[] }> = [];
+      const ficherosPendientes: Array<{ colId: string; ids: string[] }> = [];
+
       for (const [colId, bruto] of Object.entries(entrantes)) {
         const col = porId.get(colId);
         if (!col) { fallos.push({ columna: colId, error: 'Esa columna no existe en la tabla.' }); continue; }
-        const r = tipar(col.tipo as Tipo, bruto, col.opciones || []);
+
+        // ¿Es una columna que APUNTA? Entonces no va al jsonb: va a `bd_enlaces`.
+        const clase = CLASE_DE_TIPO[col.tipo];
+        if (clase) {
+          const lista = bruto === null || bruto === undefined || bruto === ''
+            ? []
+            : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
+          const varios = !!(col.config || {}).varios;
+          if (!varios && lista.length > 1) {
+            fallos.push({ columna: colId, error: 'Esta columna admite un solo elemento.' });
+            continue;
+          }
+          // Se COMPRUEBA aquí y se ESCRIBE después de que todo haya validado.
+          const comp = await comprobarEnlaces(db, clase, lista);
+          if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+          enlacesPendientes.push({ colId, clase, destinos: lista });
+          continue;
+        }
+
+        // ¿Es una columna de FICHEROS? Entonces tampoco va al jsonb.
+        const claseFich = CLASE_FICHERO[col.tipo];
+        if (claseFich) {
+          const lista = bruto === null || bruto === undefined || bruto === ''
+            ? []
+            : (Array.isArray(bruto) ? bruto : [bruto]).map(String);
+          if (!(col.config || {}).varios && lista.length > 1) {
+            fallos.push({ columna: colId, error: 'Esta columna admite un solo archivo.' });
+            continue;
+          }
+          const comp = await comprobarFicheros(db, claseFich, lista, req.user!.id, (req.user!.roleLevel ?? 0) >= 4);
+          if ('error' in comp) { fallos.push({ columna: colId, error: comp.error }); continue; }
+          ficherosPendientes.push({ colId, ids: lista });
+          continue;
+        }
+
+        const r = tipar(col.tipo as Tipo, bruto, col.opciones || [], col.config || {});
         // `'error' in r` en vez de `!r.ok`: este proyecto no compila con
         // `strict`, y sin él TypeScript no estrecha la unión por el campo
         // discriminante. Con la comprobación de presencia funciona igual en
@@ -411,7 +586,18 @@ export function registerBdRoutes(app: Express, db: any) {
         else valores[colId] = r.valor;
       }
 
+      // NADA se escribe si algo falla: ni celdas ni enlaces. Media fila guardada
+      // es peor que una escritura rechazada, porque nadie sabe qué mitad entró.
       if (fallos.length) return res.status(400).json({ error: 'Hay celdas que no se pueden guardar.', fallos });
+
+      for (const p of ficherosPendientes) {
+        await guardarFicheros(db, { columnaId: p.colId, filaId: fila.id, archivoIds: p.ids });
+      }
+      for (const p of enlacesPendientes) {
+        await guardarEnlaces(db, {
+          columnaId: p.colId, filaId: fila.id, clase: p.clase, destinos: p.destinos, actor: req.user!.id,
+        });
+      }
 
       // El historial se engancha al módulo que ya existe (`historial.ts`) en vez
       // de escribir una segunda forma de guardarlo. Se agrupa porque la rejilla
@@ -427,7 +613,16 @@ export function registerBdRoutes(app: Express, db: any) {
         UPDATE bd_filas SET valores = ${JSON.stringify(valores)}::jsonb, updated_by = ${req.user!.id}, updated_at = now()
         WHERE id = ${req.params.id}
       `);
-      res.json({ celdas: celdasDe(valores, columnas) });
+      const trasEscribir = celdasDe(valores, columnas);
+      const enlacesAhora = await enlacesDe(db, [fila.id]);
+      for (const c of columnas) {
+        if (CLASE_DE_TIPO[c.tipo]) trasEscribir[c.id] = celdaDeEnlaces((enlacesAhora[fila.id] || {})[c.id]);
+      }
+      const fichAhora = await ficherosDe(db, [fila.id]);
+      for (const c of columnas) {
+        if (CLASE_FICHERO[c.tipo]) trasEscribir[c.id] = celdaDeFicheros((fichAhora[fila.id] || {})[c.id]);
+      }
+      res.json({ celdas: trasEscribir, apuntados: enlacesAhora[fila.id] || {}, archivos: fichAhora[fila.id] || {} });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

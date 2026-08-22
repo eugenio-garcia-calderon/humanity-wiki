@@ -13,6 +13,11 @@ export type TipoBloque =
   | 'parrafo' | 'titulo1' | 'titulo2' | 'titulo3'
   | 'lista' | 'numerada' | 'tarea'
   | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla'
+  // `basedatos` SUSTITUYE a `tabla` para lo nuevo. `tabla` se queda porque hay
+  // páginas que la usan: convertir texto plano a columnas tipadas obliga a
+  // adivinar el tipo de cada columna, y adivinar mal destruiría datos de
+  // alguien. Las viejas siguen viéndose; las nuevas nacen ya como base de datos.
+  | 'basedatos'
   | 'publicacion' | 'medio'
   // 2026-08-20 (Eugenio: «en el creador de páginas añade la opción de agregar
   // un producto»). Es primo de `publicacion`: se reutilizan sus campos
