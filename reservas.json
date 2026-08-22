@@ -49,10 +49,16 @@
       "desde": "2026-08-22T15:00:11.376Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
-      "motivo": "Fase B: navegar al proyecto tras guardar en una tarea",
-      "desde": "2026-08-22T15:00:19.378Z"
+      "agente": "prog5",
+      "ruta": "src/server/roadmap.ts",
+      "motivo": "Veracidad: página, menú de información y grupo del tablero",
+      "desde": "2026-08-22T15:00:17.848Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "src/pages/Vision.tsx",
+      "motivo": "Veracidad: página, menú de información y grupo del tablero",
+      "desde": "2026-08-22T15:00:21.607Z"
     }
   ]
 }
