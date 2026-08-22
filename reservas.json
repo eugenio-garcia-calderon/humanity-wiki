@@ -89,6 +89,12 @@
       "ruta": "drizzle/0087_entrega_digital.sql",
       "motivo": "fase 1 economia: entrega de lo digital",
       "desde": "2026-08-22T19:08:57.822Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/stripe.ts",
+      "motivo": "fase 1 economia: entrega de lo digital",
+      "desde": "2026-08-22T19:09:07.534Z"
     }
   ]
 }
