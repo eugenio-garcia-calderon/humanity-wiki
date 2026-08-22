@@ -239,6 +239,27 @@ if (orden === 'liberar') {
 if (orden === 'soltar') {
   const { reservas } = leer();
   const todo = resto.includes('--todo');
+  // `--todo` a secas suelta solo las MUERTAS: el 2026-08-22 se llevó por delante
+  // una reserva viva de otro trabajo en curso. Para soltarlo todo de verdad,
+  // `--todo --forzar`, que ya es una decisión y no un descuido.
+  const forzar = resto.includes('--forzar');
+  if (todo && !forzar) {
+    const muerta = (ruta) =>
+      gitSilencioso(['diff', '--quiet', 'origin/main', '--', ruta], { timeout: 8000 }) !== null;
+    const mias = reservas.filter((r) => r.agente === yo && !caducada(r));
+    const vivas2 = mias.filter((r) => !muerta(r.ruta));
+    if (vivas2.length) {
+      console.log('No suelto estas, que aún tienen trabajo tuyo sin fusionar:');
+      for (const r of vivas2) console.log(`   ${r.ruta}   — hace ${haceCuanto(r.desde)}`);
+      console.log('Para soltarlas igualmente: soltar --todo --forzar\n');
+    }
+    const quedan2 = reservas.filter((r) => r.agente !== yo || vivas2.includes(r));
+    const soltadas2 = reservas.length - quedan2.length;
+    if (!soltadas2) { console.log('No había ninguna muerta que soltar.'); process.exit(0); }
+    if (!escribir(quedan2, `${yo} suelta ${soltadas2} reserva(s) muerta(s)`)) process.exit(1);
+    console.log(`Soltadas ${soltadas2} reserva(s) muerta(s).`);
+    process.exit(0);
+  }
   const rutas = todo ? [] : relativos(resto);
   const quedan = reservas.filter((r) => {
     if (r.agente !== yo) return true;

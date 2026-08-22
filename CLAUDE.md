@@ -218,6 +218,13 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   automation browser's `IntersectionObserver` delivers **no events at all**, so
   nothing about lazy loading can be concluded from it. Before quoting a number,
   ask whether the environment you measured in is the one the number is about.
+- **What you keep "just in case" leaves the building every night.** Since backups
+  started on 2026-08-22, anything stored in the database is copied off the server
+  daily. Three times that same day something kept for a good reason turned out to be
+  a copy of something that should not travel: password-reset tokens in the clear, an
+  edit history, and the e-mail address of people asking to be forgotten sitting in a
+  rate-limit log. Before storing a value, ask what it looks like in a backup a month
+  from now — and whether deleting the account can reach it there.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
