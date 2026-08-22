@@ -4392,3 +4392,17 @@ apaño, yo quiero que funcione sin esa url cutre»):
   the switcher is precisely the case that matters. A visible page is left alone
   and gets the "Actualizar" button instead, which is a person deciding rather
   than a deploy deciding for them.
+
+---
+
+## 2026-08-22 — The info «i» menu, top right (Programador 7)
+
+The pages that explain the platform — `/sobre-red-humana` and its scoring
+subpage — existed and nothing in the interface linked to them. A new `Info`
+button in the top bar of `Layout.tsx` (before the ant, after the window strip)
+opens a small dropdown listing them. Same open/close pattern as the account
+menu: `useCerrarAlPulsarFuera`, same dropdown styling.
+
+Why before the ant: first understand the platform, then ask things of the
+team. Verified in the browser on port 3007 (menu opens, both links navigate,
+button highlights on those routes). `tsc --noEmit` clean.

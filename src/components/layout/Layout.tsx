@@ -5,7 +5,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
- Bug, PanelLeftOpen,} from 'lucide-react';
+ Bug, PanelLeftOpen, Info, BadgeCheck,} from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import VentanaLateral from '../ventanas/VentanaLateral';
@@ -125,6 +125,10 @@ export default function Layout() {
   };
   const [cuentaAbierta, setCuentaAbierta] = useState(false);
   const cuentaRef = useRef<HTMLDivElement>(null);
+  /** El menú de información (i): las páginas que explican la plataforma
+   *  — qué es, cómo puntúa territorios, cómo puntúa territorios. */
+  const [infoAbierta, setInfoAbierta] = useState(false);
+  const infoRef = useRef<HTMLDivElement>(null);
   const [confirmarCerrarTodas, setConfirmarCerrarTodas] = useState(false);
   /** Cuántas notas del hormiguero necesitan algo de una persona. Solo el
    *  número, como la campana: pedir el tablero entero para pintar un punto es
@@ -138,6 +142,7 @@ export default function Layout() {
     return () => clearInterval(t);
   }, [location.pathname]);
   useCerrarAlPulsarFuera(cuentaRef, cuentaAbierta, () => setCuentaAbierta(false));
+  useCerrarAlPulsarFuera(infoRef, infoAbierta, () => setInfoAbierta(false));
   useEffect(() => {
     const f = (e: Event) => setVentanasAbiertas([...((e as CustomEvent).detail as VentanaEstado[])]);
     window.addEventListener('humanity:ventanas', f);
@@ -614,6 +619,41 @@ export default function Layout() {
             EL PUNTO ES NARANJA CUANDO ALGO TE NECESITA A TI, y solo entonces.
             Si también se pintara por lo que está esperando a que lo programen,
             estaría encendido siempre y dejaría de significar nada. */}
+        {/* ══ THE INFO «i» MENU ═══════════════════════════════════════════
+            (2026-08-22, Eugenio asked for an information menu top right.)
+
+            Groups the pages that EXPLAIN the platform — what it is, how it
+            scores territories — which until today had no visible door:
+            /sobre-red-humana existed and nothing linked to it. It goes
+            BEFORE the ant: first understand, then ask. */}
+        <div className="relative shrink-0" ref={infoRef}>
+          <button
+            onClick={() => setInfoAbierta(o => !o)}
+            title="Información sobre la plataforma"
+            aria-label="Información sobre la plataforma"
+            className={cn('grid place-items-center rounded-lg transition-colors',
+              compacto ? 'w-7 h-7' : 'w-9 h-9',
+              infoAbierta || location.pathname.startsWith('/sobre-red-humana')
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
+          >
+            <Info className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          </button>
+          {infoAbierta && (
+            <div className="absolute top-11 right-0 w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <p className="px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Información</p>
+              <button onClick={() => { setInfoAbierta(false); navigate('/sobre-red-humana'); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                <Globe className="w-3.5 h-3.5 text-slate-400" /> Sobre Humanity.wiki
+              </button>
+              <button onClick={() => { setInfoAbierta(false); navigate('/sobre-red-humana/puntuacion-territorios'); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                <BadgeCheck className="w-3.5 h-3.5 text-slate-400" /> Puntuación de territorios
+              </button>
+            </div>
+          )}
+        </div>
+
         <button
           onClick={() => navigate('/hormiguero')}
           title={incidencias.bloqueadas
