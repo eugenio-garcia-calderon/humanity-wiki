@@ -25,12 +25,6 @@
       "desde": "2026-08-22T15:00:42.846Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "registrar la ruta de herramientas",
-      "desde": "2026-08-22T15:07:17.510Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0075_precios_servicio.sql",
       "motivo": "rama A: tabla de precios de la cesta",
