@@ -65,12 +65,6 @@
       "ruta": "drizzle/0075_area_incidencias.sql",
       "motivo": "página de seguridad: columna area en incidencias",
       "desde": "2026-08-22T15:00:42.846Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada de la revision de prog4 (paso dado por prog3)",
-      "desde": "2026-08-22T15:07:03.326Z"
     }
   ]
 }
