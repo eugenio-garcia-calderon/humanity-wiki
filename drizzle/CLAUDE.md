@@ -16,6 +16,25 @@ Write the index in the same migration that declares the key. **This failure neve
 announces itself**: nothing breaks, `tsc` stays clean, review sees nothing. It only
 shows up under traffic, which is the worst moment to find it.
 
+## The number is a label, not a promise
+
+**A migration may only depend on another that is already in production**, never on
+one with a lower number. `migrate.sh` sorts by name *within one deploy*; between
+deploys, what decides is the order the deploys went out.
+
+Measured in production on 2026-08-22:
+
+```
+0079_veracidad_tablero.sql      15:52:25
+0078_veracidad_debates.sql      15:52:24
+0077_textos_editables.sql       16:10:44   <-- eighteen minutes later
+0076_intentos_fallidos.sql      15:41:40
+```
+
+0078 and 0079 ran before 0077, and nothing was broken: they went out in an earlier
+deploy. That is not a bug to fix, it is how it works — but it means "the 0080 runs
+after the 0079" is only true if they travel together or if 0079 shipped first.
+
 ## Numbering
 
 One migration per number, and the number is the order they run in. Two agents
