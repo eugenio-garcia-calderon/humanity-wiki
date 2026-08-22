@@ -1,18 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog7",
-      "ruta": "drizzle/0073_transferencias_puntos.sql",
-      "motivo": "piloto de puntos: numero 0073",
-      "desde": "2026-08-22T15:00:26.288Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "drizzle/0074_libro_solo_anadir.sql",
-      "motivo": "piloto de puntos: numero 0074",
-      "desde": "2026-08-22T15:00:30.483Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/ventanas/bus.ts",
       "motivo": "el logo no lleva a inicio con ventanas abiertas",
@@ -83,6 +71,12 @@
       "ruta": "equipo/DASHBOARD.md",
       "motivo": "para que se me pueda verificar en quien",
       "desde": "2026-08-22T18:57:30.855Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada del TURN de Cloudflare",
+      "desde": "2026-08-22T19:01:47.558Z"
     }
   ]
 }
