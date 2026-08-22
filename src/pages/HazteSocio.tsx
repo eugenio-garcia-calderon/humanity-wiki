@@ -212,24 +212,38 @@ export default function HazteSocio() {
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleStartCheckout} className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                      Correo electrónico
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="tu@correo.org"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    ¿Ya tienes cuenta en Humanity.wiki? <Link to="/login" className="text-emerald-600 font-semibold underline">Inicia sesión</Link>
+                /* HACERSE SOCIO PIDE ENTRAR ANTES (2026-08-22).
+                   Aquí había un campo de correo y se podía pagar sin cuenta. Dos
+                   problemas, y el segundo es el grave:
+
+                   · La membresía se apuntaba a un identificador inventado en el
+                     navegador (`anon_<hora>`), que no es de nadie. Se cobraba y
+                     no le quedaba a ninguna cuenta: cero usuarios así hay hoy en
+                     producción, o sea que ese camino nunca dio una membresía
+                     usable.
+                   · Y esa cuenta la elegía QUIEN LLAMABA, así que se podía
+                     apuntar a otro un cobro recurrente que no había pedido.
+
+                   Lo segundo ya está cerrado en el servidor. Esto es la otra
+                   mitad: no ofrecer un botón que va a fallar después de que
+                   alguien decida pagar. */
+                <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-bold text-slate-800">Entra en tu cuenta primero</p>
+                  <p className="mt-1 text-xs text-slate-600">
+                    La membresía se abona a una cuenta, así que necesitamos saber a cuál.
+                    Es un minuto y no se pierde nada de lo que estás viendo.
                   </p>
-                </form>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link to="/login?volver=/hazte-socio"
+                      className="h-11 leading-[2.75rem] px-4 rounded-xl bg-slate-900 text-white text-sm font-bold">
+                      Entrar
+                    </Link>
+                    <Link to="/login?crear=1&volver=/hazte-socio"
+                      className="h-11 leading-[2.75rem] px-4 rounded-xl border border-slate-300 text-sm font-bold text-slate-700">
+                      Crear una cuenta
+                    </Link>
+                  </div>
+                </div>
               )}
 
               {error && (
@@ -241,7 +255,10 @@ export default function HazteSocio() {
             </div>
 
             <div>
-              <button
+              {/* Sin sesión no hay botón: arriba está el camino que sí lleva a
+                  algún sitio. Un botón que falla justo después de decidir pagar
+                  es peor que no tenerlo. */}
+              {user && <button
                 onClick={handleStartCheckout}
                 disabled={loading}
                 className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
@@ -254,7 +271,7 @@ export default function HazteSocio() {
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
-              </button>
+              </button>}
               <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 mt-4">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Pago procesado de forma segura con Stripe Checkout</span>

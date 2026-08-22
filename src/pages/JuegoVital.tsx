@@ -1,5 +1,4 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { subirArchivo } from '../utils/subir';
 import { useNavigate, Link } from 'react-router-dom';
 import * as THREE from 'three';
 import {
@@ -26,6 +25,7 @@ import MiniMapa, { VeloViaje } from '../components/juego/MiniMapa';
 import Cargando from '../components/juego/Cargando';
 import { HudDinero, PanelFinanzas, useFinanzas } from '../components/juego/Finanzas';
 import { MOMENTOS, momentoDia, setMomentoDia, type MomentoDia } from '../components/juego/Vida';
+import EditorAspecto from '../components/juego/EditorAspecto';
 import { precioLegible } from '../components/juego/Producto3D';
 import FichaProducto from '../components/juego/FichaProducto';
 import type { Aspecto } from '../components/juego/aspecto';
@@ -122,11 +122,7 @@ export default function JuegoVital() {
   const entrada = useRef<EntradaMando>({ x: 0, z: 0, y: 0, turbo: false, salto: false });
   // Hacia dónde mira la cámara. `yaw` 0 es la vista clásica por encima del
   // hombro; `pitch` 0,63 es la altura de siempre (11 arriba, 15 detrás).
-  // `pitch` 0,95 (antes 0,63): MÁS CENITAL, como pidió Eugenio para el visor
-  // — desde arriba se ve el anillo entero y se entiende que las cosas están
-  // repartidas en círculo. Sigue sin ser del todo cenital a propósito: en
-  // vertical puro los portales se verían de canto y sus previas no se leerían.
-  const camara = useRef<Camara>({ yaw: 0, pitch: 0.95 });
+  const camara = useRef<Camara>({ yaw: 0, pitch: 0.63 });
   // Posición del jugador, compartida con la escena: es donde se PLANTA lo que
   // se construye (como en Los Sims: te pones y creas ahí).
   const jugadorPos = useMemo(() => new THREE.Vector3(0, 0, 17), []);
@@ -168,19 +164,12 @@ export default function JuegoVital() {
     setMomentoDia(sig);
     setMomento(sig);
   }, []);
-  // ══ LA CÁMARA, ATRÁS Y ARRIBA (2026-08-22) ═══════════════════════════════
-  // Eugenio: «quiero que la vista sea algo más cenital y que se pueda ver un
-  // poco desde arriba lo que hay al otro lado de los portales».
-  //
-  // Estaba en 0,32 —pegada al hombro, «para que sea inmersivo»— y eso era lo
-  // que pedía una aldea que se recorría a pie. En un visor con las cosas
-  // repartidas en círculo, esa cámara enseña un portal y nada más: hay que dar
-  // la vuelta entera para saber qué hay. A 1 se ve el anillo completo de una
-  // vez, que es para lo que se ha puesto en círculo. Medido en pantalla con
-  // cuatro portales: a 1 se salían los del norte; a 1,45 entra el anillo
-  // entero con sitio para las previas.
-  const zoom = useRef(1.45);
-  const [zoomVisible, setZoomVisible] = useState(1.45);
+  // Cámara pegada al hombro (2026-08-19, petición de Eugenio: «que el zoom sea
+  // más próximo al personaje, así e incluso más, para que sea inmersivo»).
+  // 0,32 deja al personaje ocupando el tercio bajo de la pantalla; el mínimo
+  // baja hasta 0,14, que es casi primera persona por encima del hombro.
+  const zoom = useRef(0.32);
+  const [zoomVisible, setZoomVisible] = useState(0.32);
   // Tu aspecto vive en tus ajustes de usuario; el de cada persona, en su
   // propia `apariencia`. Quién editas ahora mismo: 'jugador' o un agente.
   // --- Dentro de un proyecto (2026-08-18, petición de Eugenio: «como en
@@ -214,6 +203,10 @@ export default function JuegoVital() {
     setSubiendo(mandoY.current.boton);
     recalcularY();
   }, [recalcularY]);
+  const [editandoAspecto, setEditandoAspecto] = useState<'jugador' | Agente | null>(null);
+  const [aspectoBorrador, setAspectoBorrador] = useState<Aspecto>({});
+  const [guardandoAspecto, setGuardandoAspecto] = useState(false);
+  const miAspecto: Aspecto = (user?.uiSettings?.juegoAspecto as Aspecto) || {};
   const ajustarZoom = useCallback((factor: number) => {
     zoom.current = Math.min(6, Math.max(0.14, zoom.current * factor));
     setZoomVisible(zoom.current);
@@ -223,7 +216,7 @@ export default function JuegoVital() {
   // Qué hay abierto ahora mismo, legible desde fuera de React (el teclado).
   const abiertos = useRef({ aspecto: false, construyendo: false, ficha: false, panel: false, bocadillo: false });
   abiertos.current = {
-    aspecto: false, construyendo: !!construyendo,
+    aspecto: !!editandoAspecto, construyendo: !!construyendo,
     ficha: !!fichaAgente, panel: !!panel, bocadillo: !!bocadillo,
   };
   /** De qué acabas de decir «ahora no»: no se te vuelve a abrir sin alejarte. */
@@ -591,8 +584,13 @@ export default function JuegoVital() {
     if (!f || !panel) return;
     setSubiendoPortadaProy(true);
     try {
-      const js = await subirArchivo(f);
-      if (js.error) { avisar(js.error); return; }
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { avisar(js.error || 'No se ha podido subir la foto.'); return; }
       if (!js.esImagen) { avisar('La portada tiene que ser una imagen (JPG o PNG).'); return; }
       await guardarOverride(`proy:${panel.id}`, { modelo: js.url });
       avisar('Portada puesta en el portal.');
@@ -1045,8 +1043,13 @@ export default function JuegoVital() {
   /** Subir una imagen o un documento y plantarlo donde se pulsó. */
   const subirAlMundo = useCallback(async (f: File | undefined) => {
     if (!f) return;
-    const j = await subirArchivo(f);
-    if (j.error) { avisar(j.error); return; }
+    const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: f,
+    }).catch(() => null);
+    const j = await r?.json().catch(() => null);
+    if (!r?.ok || !j?.url) { avisar(j?.error || 'No se ha podido subir el archivo.'); return; }
     if (subirDestino.current === 'plantar') {
       // Viene del menú lateral: queda en la mano, se coloca pulsando el suelo.
       setPlantando({ tipo: subiendoComo.current, url: j.url, nombre: f.name });
@@ -1128,6 +1131,7 @@ export default function JuegoVital() {
     else if (plantandoRef.current) setPlantando(null);
     else if (ed.sel || ed.conectando) { setSelMundo(null); setConectando(false); setMoviendoMundo(false); }
     else if (crearEnRef.current) setCrearEn(null);
+    else if (a.aspecto) setEditandoAspecto(null);
     else if (a.construyendo) setConstruyendo(null);
     else if (a.ficha) setFichaAgente(null);
     else if (a.panel) setPanel(null);
@@ -1154,6 +1158,35 @@ export default function JuegoVital() {
       if (d.agente) { setFichaAgente(d.agente); hablarCon(d.agente); }
     }, 900);
   }, [hablarCon]);
+
+  /**
+   * Guarda el aspecto donde corresponda: tus ajustes de usuario si eres tú, o
+   * la `apariencia` de esa persona si estás editando a alguien de tu mundo.
+   */
+  const guardarAspecto = async () => {
+    if (!editandoAspecto) return;
+    setGuardandoAspecto(true);
+    try {
+      if (editandoAspecto === 'jugador') {
+        await updateUiSettings({ juegoAspecto: aspectoBorrador });
+        avisar('Tu aspecto queda guardado.');
+      } else {
+        const r = await fetch(`/api/juego/agentes/${editandoAspecto.id}`, {
+          method: 'PUT', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apariencia: aspectoBorrador }),
+        });
+        if (!r.ok) { avisar('No se ha podido guardar el aspecto.'); return; }
+        await cargarAgentes();
+        avisar(`${editandoAspecto.nombre} cambia de aspecto.`);
+      }
+      setEditandoAspecto(null);
+    } catch {
+      avisar('Error de red al guardar el aspecto.');
+    } finally {
+      setGuardandoAspecto(false);
+    }
+  };
 
   /**
    * Cambia de escenario con la transición de por medio: la pantalla se cierra,
@@ -1741,7 +1774,10 @@ export default function JuegoVital() {
         <Escena
           entrada={entrada}
           camara={camara}
+          vehiculo={vehiculo}
+          alturaVuelo={alturaVuelo}
           interior={interior}
+          vista={vista}
           onEntrarProyecto={(p) => {
             const ed = editorRef.current;
             // Moviendo un objeto de conocimiento: pulsar el edificio es
@@ -1822,6 +1858,7 @@ export default function JuegoVital() {
           onChoque={alChocar}
           destino={destinoViaje}
           zoom={zoom}
+          aspectoJugador={editandoAspecto === 'jugador' ? aspectoBorrador : miAspecto}
         />
       </Suspense>
 
@@ -1892,10 +1929,10 @@ export default function JuegoVital() {
           de iconos de la izquierda y no se leía el título. */}
       <div className="absolute top-3 left-14 sm:left-16 right-[7.5rem] sm:right-auto z-30 px-3 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg">
         <p className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-          <Gamepad2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" /> Visor 3D
+          <Gamepad2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" /> Juego Vital
         </p>
         <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-          {nombre} · {personas.length} {personas.length === 1 ? 'persona' : 'personas'} · {proyectosAg.length + proyectos.length} proyectos
+          Aldea de {nombre} · {personas.length} {personas.length === 1 ? 'persona' : 'personas'} · {proyectosAg.length + proyectos.length} proyectos
         </p>
       </div>
 
@@ -1952,17 +1989,95 @@ export default function JuegoVital() {
         )}
       </div>
 
-      {/* ══ FUERA LA BICI, EL PLANEADOR Y LA PRIMERA PERSONA ══════════════
-          (2026-08-22, Eugenio: «elimina el tema de la bici y del avión»).
+      {/* --------------------------------------------------------------- */}
+      {/* Vehículos, a la derecha (petición de Eugenio). En el planeador   */}
+      {/* aparecen además subir y bajar: es de despegue vertical.          */}
+      {/* Dentro de un edificio no hay bici ni planeador que valgan.       */}
+      {/* --------------------------------------------------------------- */}
+      {user && !interior && (
+        <div data-ui-juego className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2">
+          <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col gap-1.5">
+            <button
+              onClick={() => montar('bici')}
+              title={vehiculo === 'bici' ? 'Bajarte de la bici' : 'Subirte a la bici (B) — el doble de rápido'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vehiculo === 'bici'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              {vehiculo === 'bici' ? <Footprints className="w-5 h-5" /> : <Bike className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => montar('aptera')}
+              title={vehiculo === 'aptera' ? 'Aterrizar' : 'Subirte al planeador Aptera (V) — despegue vertical'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vehiculo === 'aptera'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              <Plane className="w-5 h-5" />
+            </button>
+            {/* Primera o tercera persona (2026-08-19, petición de Eugenio). */}
+            <button
+              onClick={cambiarVista}
+              title={vista === 'tercera'
+                ? 'Ver por tus propios ojos (primera persona)'
+                : 'Verte por detrás (tercera persona)'}
+              className={cn(
+                'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                vista === 'primera'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+              )}
+            >
+              {vista === 'primera' ? <Eye className="w-5 h-5" /> : <User className="w-5 h-5" />}
+            </button>
+            {/* La hora del mundo. Por defecto es la tuya, pero si juegas de
+                madrugada puedes traerte el mediodía. */}
+            <button
+              onClick={cambiarMomento}
+              title={`Hora de la aldea: ${MOMENTOS.find(m => m.id === momento)?.nombre}. Pulsa para cambiarla.`}
+              className="w-11 h-11 rounded-xl border bg-white border-slate-200 hover:border-emerald-300 flex items-center justify-center text-lg transition-colors"
+            >
+              {MOMENTOS.find(m => m.id === momento)?.icono}
+            </button>
+          </div>
 
-          Existían para cruzar 118 hectáreas de aldea: a pie eran cuatro
-          minutos de un extremo a otro, y volando se veía el conjunto. El visor
-          mide 120 metros y se ve entero desde la primera pantalla, así que un
-          vehículo aquí solo sería un botón más que aprenderse.
-
-          Con ellos se va la primera persona —sin cuerpo no hay «tus ojos»— y
-          la hora del mundo: no hay cielo al que cambiarle la luz. El zoom, el
-          minimapa y el editor siguen donde estaban. */}
+          {vehiculo === 'aptera' && (
+            <div className="px-2 py-2 bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-lg flex flex-col items-center gap-1.5">
+              <button
+                onClick={() => fijarSubida(1)}
+                title="Subir (o mantén la barra espaciadora). Se queda subiendo hasta que lo vuelvas a pulsar."
+                className={cn(
+                  'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                  subiendo === 1
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+                )}
+              >
+                <ChevronUp className="w-5 h-5" />
+              </button>
+              <span className="text-[9px] font-black text-slate-400 tabular-nums">{alturaVisible} m</span>
+              <button
+                onClick={() => fijarSubida(-1)}
+                title="Bajar (o mantén Mayúsculas). Al tocar el suelo te bajas del planeador."
+                className={cn(
+                  'w-11 h-11 rounded-xl border flex items-center justify-center transition-colors',
+                  subiendo === -1
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700',
+                )}
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {aviso && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xl animate-in fade-in slide-in-from-top-2">
@@ -2662,6 +2777,10 @@ export default function JuegoVital() {
                     </button>
                   ))}
                   <div className="w-8 h-px bg-slate-200 my-1" />
+                  <button title="Cambiar tu aspecto" onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                    <Palette className="w-5 h-5" />
+                  </button>
                   <button title="Habla con tu robot" onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
                     className="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center text-white transition-colors">
                     <Bot className="w-5 h-5" />
@@ -2736,6 +2855,11 @@ export default function JuegoVital() {
                     </div>
                   ))}
                   <div className="border-b border-slate-100 px-4 py-3 flex items-center gap-2">
+                    <button onClick={() => { setAspectoBorrador(miAspecto); setEditandoAspecto('jugador'); }}
+                      title="Cambiar tu aspecto: piel, pelo y ropa"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 text-xs font-bold text-slate-600 transition-colors">
+                      <Palette className="w-3.5 h-3.5" />Aspecto
+                    </button>
                     <button onClick={() => { setBocadillo('Dime «hazme la entrevista fundacional» y empezamos por tus áreas de vida.'); hablarCon(null); }}
                       title="Habla con tu robot"
                       className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-colors">
@@ -2810,6 +2934,7 @@ export default function JuegoVital() {
             avisar('Quitado de tu mundo (se puede recuperar).');
           }}
           onAbrirProyecto={(slug) => navigate(`/proyectos/${slug}`)}
+          onEditarAspecto={() => { setAspectoBorrador(fichaAgente.apariencia || {}); setEditandoAspecto(fichaAgente); }}
         />
       )}
 
@@ -2922,10 +3047,17 @@ export default function JuegoVital() {
         </div>
       )}
 
-      {/* EL EDITOR DE ASPECTO SE HA IDO (2026-08-22). Elegía piel, pelo, ropa
-          y fenotipo de un cuerpo humano; ahora cada persona es un haz de luz y
-          su color sale de su identificador, siempre el mismo. Un editor que
-          cambia algo que ya no se dibuja es un botón que miente. */}
+      {/* Editor de aspecto: el tuyo o el de una persona de tu mundo */}
+      {editandoAspecto && (
+        <EditorAspecto
+          titulo={editandoAspecto === 'jugador' ? 'Tu aspecto' : `Aspecto de ${editandoAspecto.nombre}`}
+          aspecto={aspectoBorrador}
+          onCambiar={setAspectoBorrador}
+          onCerrar={() => setEditandoAspecto(null)}
+          onGuardar={guardarAspecto}
+          guardando={guardandoAspecto}
+        />
+      )}
 
       {/* Formulario de construcción */}
       {construyendo && (
@@ -2958,7 +3090,7 @@ export default function JuegoVital() {
             <Smartphone className="w-10 h-10 text-emerald-400 mx-auto rotate-90" />
             <p className="text-sm font-black text-white mt-4">Gira el móvil</p>
             <p className="text-xs text-slate-300 mt-2 max-w-[16rem] mx-auto leading-relaxed">
-              El Visor 3D se recorre en horizontal, con el mando a la izquierda y el espacio por delante.
+              El Juego Vital se juega en horizontal, con el joystick a la izquierda y el mundo por delante.
             </p>
             <Button onClick={jugarHorizontal} className="mt-4">
               <Maximize className="w-3.5 h-3.5 mr-1.5 inline" /> Pantalla completa
@@ -2971,9 +3103,9 @@ export default function JuegoVital() {
         <div className="absolute inset-0 z-40 bg-slate-900/30 backdrop-blur-[2px] flex items-center justify-center px-5">
           <Card className="p-6 max-w-sm text-center">
             <Gamepad2 className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
-            <p className="text-sm font-black text-slate-900">El Visor 3D es tu espacio</p>
+            <p className="text-sm font-black text-slate-900">El Juego Vital es tu mundo</p>
             <p className="text-xs text-slate-500 mt-2">
-              Tus proyectos, tus publicaciones y quién anda en ellos, puestos en un espacio que se recorre. Inicia sesión para entrar en el tuyo.
+              Tu vida real — proyectos, personas, historia — como una aldea que construyes y recorres. Inicia sesión para entrar en la tuya.
             </p>
             <Link to="/login" className="block mt-4"><Button className="w-full">Iniciar sesión</Button></Link>
           </Card>
@@ -3086,8 +3218,14 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
     setErrorFoto(null);
     setSubiendo(true);
     try {
-      const j = await subirArchivo(f);
-      if (j.error) { setErrorFoto(j.error); return; }
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const j = await r.json();
+      if (!r.ok || !j.url) { setErrorFoto(j.error || 'No se ha podido subir la foto.'); return; }
       setFotoUrl(j.url);
     } catch {
       setErrorFoto('Error de red al subir la foto.');
@@ -3172,12 +3310,13 @@ function FormularioCrear({ tipo, onCerrar, onCrear }: {
 // ---------------------------------------------------------------------------
 // Ficha del agente: su memoria, meterle info, y hablar con él.
 // ---------------------------------------------------------------------------
-function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto, onEntrarMapa }: {
+function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto, onEditarAspecto, onEntrarMapa }: {
   agente: Agente;
   onCerrar: () => void;
   onGuardado: () => Promise<void>;
   onArchivar: () => Promise<void>;
   onAbrirProyecto: (slug: string) => void;
+  onEditarAspecto: () => void;
   /** Entrar en el MAPA 3D de este portal (persona convertida). */
   onEntrarMapa?: () => void;
 }) {
@@ -3257,8 +3396,13 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     setErrorArchivo(null);
     setSubiendoArchivo(true);
     try {
-      const js = await subirArchivo(f);
-      if (js.error) { setErrorArchivo(js.error); return; }
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { setErrorArchivo(js.error || 'No se ha podido subir.'); return; }
       const r = await fetch(`/api/juego/agentes/${agente.id}/archivos`, {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -3293,8 +3437,13 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
     setErrorArchivo(null);
     setSubiendoPortada(true);
     try {
-      const js = await subirArchivo(f);
-      if (js.error) { setErrorArchivo(js.error); return; }
+      const s = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: f,
+      });
+      const js = await s.json();
+      if (!s.ok || !js.url) { setErrorArchivo(js.error || 'No se ha podido subir.'); return; }
       if (!js.esImagen) { setErrorArchivo('La portada tiene que ser una imagen (JPG o PNG).'); return; }
       const r = await fetch(`/api/juego/agentes/${agente.id}`, {
         method: 'PUT', credentials: 'include',
@@ -3474,6 +3623,11 @@ function FichaAgente({ agente, onCerrar, onGuardado, onArchivar, onAbrirProyecto
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5 inline" /> Hablar
             </Button>
+            {agente.tipo === 'persona' && (
+              <Button variant="outline" onClick={onEditarAspecto} title="Cambiar su aspecto">
+                <Palette className="w-3.5 h-3.5" />
+              </Button>
+            )}
             {agente.tipo === 'proyecto' && (
               <>
                 <input
@@ -3778,8 +3932,12 @@ function FichaTarea({ tarea, proyectos, proyectoActual, grupos, onCerrar, onGuar
     if (!f) return;
     setSubiendo(true);
     try {
-      const j = await subirArchivo(f);
-      if (j.url && j.esImagen) anadir({ tipo: 'imagen', url: j.url, pie: f.name });
+      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+      });
+      const j = await r.json();
+      if (r.ok && j.url && j.esImagen) anadir({ tipo: 'imagen', url: j.url, pie: f.name });
     } finally { setSubiendo(false); }
   };
 

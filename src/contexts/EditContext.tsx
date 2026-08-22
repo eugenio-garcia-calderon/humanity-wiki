@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { EditModal } from '../components/ui/EditModal';
-import { useData } from './DataContext';
+import { useDataSinPedir } from './DataContext';
 
 interface EditModalState {
   isOpen: boolean;
@@ -35,7 +35,11 @@ function getEntityTypeFromTitle(title: string, data: any): string {
 }
 
 export const EditProvider = ({ children }: { children: React.ReactNode }) => {
-  const { saveEntity, deleteEntity, refetchData } = useData();
+  // SOLO LAS FUNCIONES, no los datos: por eso `useDataSinPedir`. Este
+  // proveedor envuelve la aplicación entera, así que con `useData()` normal
+  // bastaba con existir para que los ocho catálogos se descargaran en cada
+  // visita — sin que nadie los mirara.
+  const { saveEntity, deleteEntity, refetchData } = useDataSinPedir();
   const [modalState, setModalState] = useState<EditModalState>({
     isOpen: false,
     title: '',

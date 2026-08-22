@@ -49,6 +49,7 @@ const Indicators = lazy(() => import('./pages/Indicators'));
 const MapPage = lazy(() => import('./pages/Map'));
 const Mapas = lazy(() => import('./pages/Mapas'));
 const Mensajes = lazy(() => import('./pages/Mensajes'));
+const Telefono = lazy(() => import('./pages/Telefono'));
 const Mercado = lazy(() => import('./pages/Mercado'));
 const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
 const Muro = lazy(() => import('./pages/Muro'));
@@ -70,16 +71,19 @@ const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
 const MiPedido = lazy(() => import('./pages/MiPedido'));
+const FichaProducto = lazy(() => import('./pages/FichaProducto'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
 const Tareas = lazy(() => import('./pages/Tareas'));
 const Territories = lazy(() => import('./pages/Territories'));
 const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
 const UserMapa = lazy(() => import('./pages/UserMapa'));
+import { PAGINAS_INFO } from './paginasInfo';
 const Vision = lazy(() => import('./pages/Vision'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
@@ -89,6 +93,7 @@ import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { TextosProvider } from './components/ui/TextoEditable';
 
 /** `/documentos/:id` era donde vivía el editor antes de que documentos y
  *  páginas se fundieran. Se conserva para que ningún enlace guardado se rompa. */
@@ -162,6 +167,10 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               llamada «pedido» se comería esta pantalla. Lo fijo gana a lo
               variable, pero sólo si existe: mejor declararlo. */}
           <Route path="pedido" element={<MiPedido />} />
+          {/* La ficha de un producto. Va antes que `:slug` porque `producto`
+              es fijo y `:slug` variable: si no se declarara, una tienda con
+              una página llamada «producto» se comería todas las fichas. */}
+          <Route path="producto/:producto" element={<FichaProducto handle={handle} />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -211,7 +220,18 @@ export default function App() {
                 <DataProvider>
                   <EditProvider>
                     <DesignProvider>
-                      <Layout />
+                      {/* LOS TEXTOS EDITABLES POR UN ADMINISTRADOR (2026-08-22).
+                          El Programador 1 escribió el proveedor, el componente,
+                          la tabla y las rutas, y verificó las rutas — pero el
+                          proveedor no llegó a enchufarse a la aplicación, así
+                          que la pieza estaba publicada y muerta. Se ve al ir a
+                          usarla, no al escribirla, y por eso lo enchufa quien
+                          llegó después. Va DENTRO de `AuthProvider` (mira si
+                          eres administrador para enseñar el lápiz) y FUERA de
+                          `Layout`, que es quien pinta las páginas. */}
+                      <TextosProvider>
+                        <Layout />
+                      </TextosProvider>
                     </DesignProvider>
                   </EditProvider>
                 </DataProvider>
@@ -248,6 +268,17 @@ export default function App() {
                   }
                 />
                 <Route path="vision" element={<Vision />} />
+
+                {/* LAS PÁGINAS DE LA «i», DESDE SU LISTA (2026-08-22). Añadir
+                    una es una línea en `src/paginasInfo.ts` y ningún cambio
+                    aquí — que es lo que evita cuatro PRs sobre este fichero la
+                    misma tarde. Las que ya tenían ruta propia (vision,
+                    sobre-red-humana) no traen componente y no se montan dos
+                    veces. */}
+                {PAGINAS_INFO.filter(p => p.componente).map(p => {
+                  const Pagina = p.componente!;
+                  return <Route key={p.ruta} path={p.ruta} element={<Pagina />} />;
+                })}
                 <Route path="explorar" element={<Explorar />} />
                 {/* Atajo, no una página aparte: si fuera <Explorar mias /> el cambio
                     de ruta desmontaría el componente y perdería la carpeta abierta
@@ -256,12 +287,14 @@ export default function App() {
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="hormiguero" element={<Hormiguero />} />
+                <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="mensajes" element={<Mensajes />} />
+                <Route path="telefono" element={<Telefono />} />
                 {/* Una persona de TU mundo: su ficha y vuestra conversación, sin
                     cargar el Mundo 3D entero (Eugenio, 2026-08-20). */}
                 <Route path="persona/:id" element={<Persona />} />

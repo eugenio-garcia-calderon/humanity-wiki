@@ -23,7 +23,13 @@ export type TipoBloque =
   // un producto»). Es primo de `publicacion`: se reutilizan sus campos
   // (`entityId`, `pubTitulo`, `pubUrl`) porque es lo mismo —una cosa de la
   // plataforma embebida— y duplicar campos sería duplicar los fallos.
-  | 'producto';
+  | 'producto'
+  // 2026-08-22, bloques de tienda (fase 9 de tiendas, fase 2 de Comercio).
+  // Se pintan desde entonces, pero hasta hoy sólo se podían crear escribiendo
+  // el JSON a mano: no estaban en el menú ni en este tipo. Un bloque que sólo
+  // sabe poner quien conoce la base de datos no existe para quien usa la
+  // aplicación.
+  | 'portada' | 'rejilla' | 'columnas' | 'franja';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede

@@ -4459,3 +4459,351 @@ local** para poder mirarlo, y lo restauré en cuanto tuve la captura (`{!user ?`
 de vuelta, cero apariciones de `{false ?`, `tsc` limpio). Nunca salió de este
 ordenador y no entró en ningún commit. Se deja escrito porque un atajo así, sin
 contarlo, es exactamente cómo un candado desaparece sin que nadie lo decida.
+
+## 2026-08-22 — One name per thing, and a sweep that found two more lies
+
+The last item of the UX list. «Imagen» and «Cámara» were the same tool under two
+names — both end in an uploaded photo and the same destination step, and they
+differed only in where the photo came from. «Al muro» here was «Publicación» in
+the `+`.
+
+| | Antes | Ahora |
+|---|---|---|
+| Publicar en el muro | «Al muro» aquí, «Publicación» en el `+` | **Publicación** en los dos |
+| Foto | Dos herramientas casi idénticas | **Cámara**, una, con tres procedencias: hacer foto · grabar vídeo · elegir del carrete |
+
+The name is **Cámara** and not something tidier like «Foto o vídeo» because that
+is the word Eugenio used and the one already in the `+`. Renaming it to my own
+coinage would have created the very inconsistency this change removes.
+
+### The sweep, and why it mattered
+
+Merging the two tools deleted a screen — and with it a second copy of this
+afternoon's lie: **«Elegir una foto — se abrirá el editor»**. I had changed the
+behaviour, fixed the one string I remembered, and missed this one. A third turned
+up in a doc comment: «Imagen: se sube el original y se abre el editor encima».
+
+Three copies of the same false claim, from one behaviour change. So the rule
+written this morning needs its second half: changing what something does includes
+changing what it *says* it does — **and the text is never in one place. Grep for
+it.** Fixing the string you happen to remember is how a screen ends up
+contradicting itself in the corner nobody reopened.
+
+Swept `src/components/knowledge/` and `CapturaCamara.tsx` for anything still
+describing the automatic editor: clean.
+
+## 2026-08-22 · La base de datos pasa de cero copias a dos capas (prog6)
+
+**Antes de hoy no había ninguna copia de seguridad.** La casilla
+`Backups de BD a R2 con pgBackRest` de `docs/13_DEPLOY.md` llevaba sin marcar
+desde principios de agosto y no existía ni un `pg_dump` en el repositorio: los
+datos de producción vivían en un único volumen de un único servidor.
+
+**Capa 1 — volcado diario en el servidor** (PR #223, ya en producción). Servicio
+`copias` en `docker-compose.prod.yml`, misma imagen que `db` porque `pg_dump`
+tiene que ser de la versión del Postgres del que lee. Un volcado por día en
+cuanto el contenedor puede —no a hora fija, para que un reinicio no se salte el
+día—, comprobado con `pg_restore --list` **antes** de que se le ponga el nombre
+bueno, y se tira si trae menos de 50 objetos. Se guardan 14 diarias y el día 1
+de cada mes durante 6 meses.
+
+**Capa 2 — sacarlo fuera de Hetzner** (esta PR). Petición de Eugenio el mismo
+día: «hagamos el volcado de copia de base de datos fuera de hetzner y olvidemos
+lo otro de momento de la foto» — es decir, **la foto de disco de Hetzner queda
+aparcada, no elegida**. Servicio `copias-remoto` con `rclone` que sube cada
+volcado nuevo a un cubo compatible con S3 (pensado para Cloudflare R2). **Copia,
+nunca sincroniza**: un espejo borraría fuera lo que se borrara dentro, que es
+justo de lo que esto protege.
+
+Dos decisiones que conviene no deshacer sin pensarlas:
+
+- **El aviso de que se ha dejado de hacer.** El fallo peligroso de una copia no
+  es que falle, es que deje de hacerse en silencio. Los dos contenedores salen
+  `unhealthy` si la última tiene más de 36 h. Pero `copias-remoto` **sin
+  configurar sale sano**: un contenedor eternamente en rojo enseña a ignorar el
+  rojo.
+- **`restaurar.sh probar`.** Restaura en una base aparte, cuenta y la borra. Es
+  la diferencia entre tener un fichero y tener una copia de seguridad.
+
+Verificado en producción el mismo día: primer volcado real de 1262 KB y 884
+objetos, **restaurado** con 126 tablas / 14 usuarios / 242 territorios,
+**idénticos a la base viva**.
+
+Queda pendiente y es decisión de Eugenio, no técnica: **los volcados no van
+cifrados** y ahora además viajan a otro proveedor. Cifrarlos es fácil; lo
+difícil es dónde vive la llave, y una copia que no se puede descifrar es peor
+que ninguna.
+### And then the offline test came back blank (same day, Programador 3)
+
+I changed the service worker twice today, so I re-ran the thing it exists for:
+load once, stop the server, reload. **Blank page.** The title rendered — the
+shell HTML came from the cache — and nothing else did.
+
+**Why.** `PRECACHE` never included the app's own code. The comment above it said,
+with total confidence, that hashed files «se guardan según se usan, en vez de
+adivinarlos aquí». That is wrong for exactly one visit, and it is the visit that
+matters: **a service worker does not control the page that installs it**, so on
+the first load the app's JavaScript goes straight past it and is never copied.
+Somebody who installs the app and gets on the metro that afternoon is precisely
+that case.
+
+It had been passing until now only because my own testing reloaded several
+times. A real person does not.
+
+**Fix, reusing something already there.** `scripts/sellar-sw.mjs` already stamped
+the entry bundle's name into `sw.js` so a deploy would change the worker. It now
+writes the whole boot set — entry module and stylesheet — into a `BUILD` array
+the worker precaches on install. One line doing both jobs: version detection and
+precache. The names cannot be hard-coded because they change every build, which
+is why this has to come from the build and not from the file.
+
+Verified: fresh install, **one** load, server stopped, reload → the app opens
+with 83 publicaciones and the banner «copia guardada hace 1 minuto». That is the
+exact sequence that was blank ten minutes earlier.
+
+**The lesson is the same one as this morning, in a different costume.** A comment
+asserting why something is safe is not evidence that it is. That one had been
+sitting there since the first version, sounding reasonable, describing a
+guarantee the code never made.
+
+## 2026-08-22 — A photo into a task, from both ends
+
+Eugenio: «te debe permitir meterla en uno de tus proyectos, y dentro de tus
+proyectos en alguna tarea», y «desde una tarea directamente tiene que haber la
+posibilidad de subir una foto o video a la tarea».
+
+**Half of it already existed and I checked before building.** A task already
+accepted an image (`TableroKanban.tsx`, block `{tipo:'imagen'}`), and there was
+already an `<Adjuntos>` panel for files. What was missing was video, and — the
+one that matters on a phone — `capture`, so the button opened the camera instead
+of the camera roll. The real case is standing in front of the thing: the
+half-built rig, the fault. Sending you to the roll means leaving, shooting in
+another app, and coming back.
+
+| | |
+|---|---|
+| Ficha de tarea | Tres botones: **Foto · Vídeo · Carrete**. Los dos primeros con `capture="environment"`; el tercero sin él, que es el camino para lo que ya tienes hecho |
+| Bloques | Se pinta `tipo: 'video'`, con `playsInline` — sin eso un iPhone se lleva el vídeo a pantalla completa y te saca de la tarea |
+| Selector de destino | Nueva sección **«Añadir a una tarea»**: proyecto → tarea, en dos pasos |
+
+### Corrijo un razonamiento mío de esta misma tarde
+
+La primera versión del selector dejó fuera los proyectos, con este argumento:
+«un proyecto es un tablero de tarjetas, meter una foto ahí sería inventarle una
+tarjeta que nadie ha pedido». Estaba mal planteado: **la foto no va al tablero,
+va dentro de una tarea concreta**, que es donde ocurre el trabajo. La foto del
+montaje pertenece a «Medidas reales del chasis», no al proyecto entero. Y no hay
+que inventar nada: una tarea ya guarda sus notas en `bloques`.
+
+### Una prueba en producción que encontró un fallo de diseño
+
+Intenté escribir un bloque de prueba en una tarea real con la cuenta de agente,
+para verificar el guardado de verdad en vez de leyéndolo. **403**: `PUT
+/api/roadmap/:id` responde «Solo quien creó el proyecto puede editar sus
+tarjetas». El proyecto quedó intacto —0 bloques antes, 0 después— y el fallo que
+destapó era mío: `/api/proyectos` devuelve también los públicos de otras
+personas, así que el selector iba a ofrecer destinos que rechazarían al usuario
+**después** de elegir y esperar. Ahora solo salen los propios.
+
+### Deuda consciente, con su número
+
+Guardar en una tarea lee sus `bloques` y reescribe la lista entera, porque el
+endpoint reemplaza el campo. Si otra persona añade una nota en esos dos
+segundos, se pierde la suya. Con una tarea que estás mirando tú, con el móvil en
+la mano, el riesgo es pequeño; deja de serlo en cuanto varias personas trabajen
+sobre la misma tarea. Lo correcto es un endpoint que **añada** en vez de
+reemplazar: son unas líneas en `src/server/roadmap.ts`, área de Programador 1.
+
+**No verificado:** ninguna de las dos pantallas, las dos detrás del inicio de
+sesión. Sí verificada, con una petición real, la regla del servidor que explica
+el filtro.
+
+---
+
+## 2026-08-22 — The view route was a mint, and it is closed (Programador 7, found by 4)
+
+`POST /api/windows/:id/view` required no session and granted the window's
+author 0.01 points PER CALL: a curl loop fabricated internal money into any
+chosen account — 10,000 calls, 100 points. Found by Programador 4 reading the
+deployed code (note INCMT4IXIUD3UC), deliberately without calling the route.
+
+Three locks now, `views` still counts for everyone (counting is not paying):
+no session → no minting (the 2026-08-08 promise was «when OTHER USERS view
+it»); self-views still don't mint; and a per-window daily minting cap counted
+from the ledger itself (`PUNTOS_VISTA_TOPE_DIA`, 50 cents-of-point/day
+default) — with accounts required, inflating a window hits the ceiling and
+leaves named traces.
+
+Verified locally: 5 sessionless views minted nothing; 3 with a session minted
+exactly 3 cents; 58 total attempts stopped at exactly 50 entries. Test
+session was tagged `claude-dev-verificacion` and deleted; balances, views
+counter and ledger rows restored (trigger disabled/re-enabled for cleanup —
+local only).
+
+Agreed with prog4 and written in /tokenomics/tareas: the day the monthly pot
+pays out over counted views, `views` (raw, displayed) and valid views (one
+per person, session required) must be TWO numbers, and the pot only reads
+the second. PUNTOS_TRANSFERENCIA stays off until this fix is deployed.
+
+## 2026-08-22 · Dos tableros nuevos, y el candado que hace que uno sirva (prog6)
+
+**Seis notas del Feedback decían en texto llano, a la vista de cualquiera, por
+dónde entrar en la plataforma**: que el login no tenía límite de intentos, que
+la aplicación se conecta a la base de datos como superusuario, que falta
+`Content-Security-Policy`, que los ficheros subidos se sirven sin comprobar
+sesión y que había una ruta fabricando puntos sin pedir sesión.
+
+Eugenio: «hay cuatro cosas de seguridad en el hormiguero, traslada ahí esas
+cuestiones para limpiar el hormiguero, que es un tema para el público». Y
+aparte: «vas a crear una página en (i) donde pondrás tu visión y estrategia de
+los servidores […] de forma transparente a nivel de coste […] y un kanban como
+el del hormiguero con las tareas que tienes pendientes».
+
+**Una columna `area` en `incidencias`, no un tablero nuevo** (migración `0075`).
+La maquinaria del Feedback ya resuelve estados, adjuntos, permisos, el token de
+los agentes y el archivado; un tablero paralelo habría sido una segunda lista
+que nadie mira, y las notas de seguridad son justo las que no pueden acabar
+ahí. Tres tableros: `general`, `seguridad` y `servidores`.
+
+**El candado está en el servidor, en cinco puertas.** Ver el tablero, crear,
+mover una nota de tablero, el contador del botón de la hormiga —un número
+también filtra: diría cuántos agujeros hay a quien no puede ver ninguno— y los
+adjuntos. Esa quinta la encontró prog4 revisando, y es la que convierte un
+candado en un candado: **la nota quedaba escondida y su adjunto no**, porque
+`express.static` sirve `/uploads` sin comprobar sesión. Comprobado contra
+producción, no deducido. El tablero de seguridad no admite adjuntos y dice por
+qué.
+
+Y una decisión escrita en vez de tapada: **un programador IA con su token lee
+el tablero de seguridad**, porque somos quienes trabajamos esas notas. Eso
+amplía lo que vale un token robado —antes, un color equivocado; ahora, la lista
+de por dónde entrar—, así que cada lectura con token **deja rastro con nombre y
+hora** (idea de prog4: no le quita el acceso a nadie y convierte «no lo podemos
+impedir» en «lo veríamos»).
+
+**El candado nombra `seguridad` explícitamente y no «todo lo que no sea
+general»**, porque el tercer tablero, `servidores`, es público a propósito. Lo
+que se esconde se decide uno por uno, nunca por descarte.
+
+**`/api/gasto` dejaba caer reconocimiento.** Llevaba abierto desde el 8 de
+agosto y estaba bien porque solo lo leía la pestaña de Visión; la página nueva
+lo pone en una pantalla pública. Aviso de prog2, y medido: no daba IP ni
+nombres de contenedor, pero sí el nombre de la máquina, el modelo exacto
+(`CPX42`, o sea 8 núcleos y 16 GB — cuánta máquina hay que tumbar) y los avisos
+de «falta tal variable», que llevan dentro los nombres de nuestras claves. Los
+euros siguen públicos: es la transparencia que pidió Eugenio y no sirve para
+atacar nada. Filtrado **al salir** y no al guardar, para no tener dos cachés
+que se desincronicen.
+
+**Y los límites de peticiones** (`src/server/limites/`, migración `0076`), que
+**entran pero no están conectados a ninguna ruta todavía**: `auth.ts` es de
+prog1. Cinco reglas acordadas con prog4, y las dos que importan son las que
+salieron de discutirlas: quien acierta la contraseña no paga el retraso de los
+que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— y
+**dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
+fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
+la última se lleva borrado su propio rastro.
+### 2026-08-22 — Veracity, phase 1 of 10: a debate is a tree
+
+Eugenio opened a new area and put programmer 5 on it: *«un sistema de veracidad
+dentro de la APP para que lo que la gente publique sea información coherente con
+la otra información que hay, y poder generar un espectro de visiones sobre una
+verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate en
+Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
+it is all data — no screen uses it yet.
+
+- **Three tables** (`drizzle/0078_veracidad_debates.sql`): `debates` (the thesis
+  under discussion), `argumentos` (the tree hanging off it) and
+  `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
+  is a `parent_id`, and a source belongs to what it cites.
+- **Why not the knowledge graph, which already has `apoya`/`contradice`**: a
+  graph edge carries no stance, no weight and no evidence, and a graph node can
+  hang from several parents — the moment it does, the reader no longer knows
+  what is being argued about. A debate is a tree on purpose. Phase 7 will *draw*
+  debates on the existing canvas; the model stays separate.
+- **`src/server/veracidad.ts`**: list and read (the whole tree and all its
+  sources in three queries, never one per node), open a debate, argue, cite,
+  withdraw a citation, archive. Level 1 to open or argue — the same standing as
+  publishing; level 3 to close a debate, because that is a judgement about the
+  commons.
+- **Depth is derived from the parent, never sent by the client**, so no request
+  can flatten or graft a branch; a parent belonging to another debate is
+  rejected, and the thread stops at 12 levels with a message that says to open
+  its own debate instead.
+- **`impacto` is NULL until somebody votes, and 0 only when people voted and it
+  moves nobody.** Initialising it to 0 would make a brand-new argument look like
+  a rejected one — the house rule that every component must be able to say «I
+  don't know» distinguishably.
+- **The only automatic step of the veracity ladder is `sin_fuente` →
+  `con_fuente`**, and it reverses when the last source is withdrawn. Everything
+  above that is a human judgement and belongs to phase 2, not to pasting a link.
+- **Verified against the local server on port 3004: 25 checks, 25 green** —
+  including 401 without a session, an invented `postura` rejected *listing the
+  valid ones*, a cross-debate parent, the tree nested three levels deep, the
+  badge going up and back down with the source, and an archived argument leaving
+  the tree without leaving the database. One bug found and fixed on the way:
+  `= ANY(array)` through the Drizzle template reached Postgres as a record, so
+  every read of a debate answered 500. The test user and both test debates were
+  deleted in the same session.
+
+### 2026-08-22 — Veracidad: su página en la «i», con sus principios y su tablero
+
+Eugenio: *«genera una página en el menú superior derecho, donde pone "i"
+información, y ahí añade el Veracidad, como página donde pongamos los principios
+y tecnologías que usamos para esto; haz un kanban con todas las tareas que
+tenemos hacia adelante, copia el modelo de Hormiguero»*.
+
+- **`/veracidad`**: qué es esto en dos párrafos, **seis principios** (no hay una
+  verdad publicada sino un espectro de visiones; un debate es un árbol; lo que no
+  tiene fuente lo dice; lo que pesa lo decide la gente; cerrar no borra al que
+  perdió; todo puede decir «no lo sé») y **seis piezas** de con qué está hecho —
+  y casi ninguna es nueva: el vocabulario del grafo, el lienzo del grafo, la
+  tabla de puntuaciones que ya existía.
+- **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
+  que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
+  tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
+  (migración 0079, décimo grupo), así que las mismas tarjetas salen también en
+  «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
+  varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
+  que saber en cuál está.
+- **La entrada del menú es una línea** en `src/paginasInfo.ts`, la lista que
+  salió antes en la PR #241.
+- Verificado en el navegador: el menú (i) abre con Veracidad, la página carga,
+  el tablero pinta 30 tarjetas repartidas en 2 hechas / 1 en curso / 27 por
+  hacer, y las 25 comprobaciones de la API de la fase 1 siguen en verde con el
+  módulo ya registrado en el servidor.
+
+**Lo que no está**: `server.ts` lleva las dos líneas que registran el módulo,
+pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
+suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
+de ruta), pero las rutas de debates no existen.
+
+### 2026-08-22 — Telecomunicaciones: mensajes en vivo, llamadas y videollamadas (Programador 8)
+Petición de Eugenio: «quiero que esta plataforma sustituya a WhatsApp, que se pueda enviar mensajes y hacer llamadas y videollamadas compartiendo pantalla etc. Y que con un número de la persona le puedas encontrar en la base de datos y enviarle un mensaje o llamarle, y le saltará en su aplicación».
+
+**El cable** (`src/server/telecomHub.ts`). Una conexión abierta por aparato (SSE, `GET /api/telecom/conexion`), que es lo que permite al servidor hablarle a alguien sin que lo pida: por ahí llegan los mensajes, la presencia y el timbre. Se eligió SSE y no WebSockets por tres motivos, en orden de peso: un WebSocket se engancha al servidor HTTP y eso obliga a tocar `server.ts`, que está congelado; no añade dependencia (`ws` son 40 KB); y atraviesa Cloudflare y cualquier proxy porque es un GET que no termina. Cuesta que es de una sola dirección — el cliente contesta por POST, que para señalización son cuatro mensajes. **Una persona son varios aparatos**: cada conexión tiene su identificador y la señalización va a uno concreto, o la pestaña olvidada en el trabajo contesta a una negociación que no es suya.
+
+**Las llamadas** (`src/server/telecom.ts`, `src/telecom/motor.ts`). WebRTC: el audio y el vídeo van de un navegador al otro, cifrados de extremo a extremo y **sin pasar por Hetzner**. El servidor solo presenta a los dos navegadores y comprueba que quien manda una señal es de verdad parte de esa llamada. Coste de una llamada en servidor: cero.
+
+**Lo que se añadió a los mensajes**: aparecen solos, dos marcas de verificación (entregado / leído), «está escribiendo…», punto verde de presencia, fotos, archivos y notas de voz. Y botones de llamar y videollamar en la propia conversación.
+
+**Buscar por número** (`GET /api/telecom/buscar`). Exacto y de uno en uno, nunca una lista, con freno de 40 búsquedas cada diez minutos: una búsqueda parcial sería un listín telefónico de toda la plataforma servido por la puerta de atrás. Y el cruce de la agenda importada con la gente registrada (`GET /api/telecom/mis-contactos`), que es la función que hizo grande a WhatsApp: no buscas a nadie, abres y tu gente ya está.
+
+**Base de datos** (`drizzle/0080_telecomunicaciones.sql`): `users.telefono` (normalizado, único) y `telefono_buscable`; `mensajes` gana `entregado_at` y los cuatro campos del adjunto; tabla `llamadas` con las siete formas de acabar una llamada. El contenido de una llamada no se guarda en ninguna parte.
+
+**Dos fallos que encontró la prueba automática y que no se habrían visto a ojo**:
+1. *Cuatro carriles en vez de dos.* Quien contesta no debe crear sus transceptores: los crea la oferta al aplicarla. Cuando los creaban los dos, quien contestaba acababa con cuatro y los suyos no transmitían — una llamada que conecta y enseña la cara de uno solo.
+2. *El acuse de lectura llegaba antes que el propio mensaje.* El servidor empuja el mensaje a la otra persona antes de contestar a quien lo envía; si ella lo lee en ese instante, el «leído» llega cuando el mensaje todavía tiene su identificador provisional. Ahora las marcas huérfanas se guardan y se aplican al bautizarlo.
+
+**Verificación** (`scripts/probar-telecom.mjs`): dos navegadores de verdad con dos sesiones distintas, que se crean y se archivan solos. Pasa: presencia, búsqueda por número, mensaje en vivo, las dos marcas, timbre en la otra aplicación, negociación completa (los dos envían y reciben audio y vídeo, dos carriles y ni uno más), silenciar, compartir pantalla, colgar y el historial. **Lo que no se ha podido comprobar**: el apretón de manos final (ICE) no se completa en este Mac — se probó con dos conexiones dentro de una misma página, sin nada de esta aplicación por medio, y también falla. Que el audio suene entre dos personas hay que verlo entre dos aparatos de verdad.
+
+### 2026-08-22 — Telecomunicaciones: las tres decisiones de privacidad (Programador 8)
+El coordinador paró la fusión con dos preguntas que no tenían respuesta técnica, y tenía razón. Quedan resueltas así:
+
+**¿Puede alguien comprobar si una persona está aquí escribiendo su número?** No, y ya no se puede por ninguna de las tres puertas. La búsqueda devuelve lo mismo —`persona: null`— si el número no existe y si existe pero su dueño ha apagado «que me encuentren»: no se distingue. Llamar por número usa el mismo filtro. Y la tercera puerta, que estaba abierta y no se había visto: al poner tu número, el mensaje «ese número ya está en otra cuenta» **confirmaba que esa persona tiene cuenta**. Ahora dice que no se puede usar y adónde escribir, sin confirmar nada, con un tope de cinco cambios de número por hora.
+
+**¿Puede alguien llamarte sin conocerte?** Ya no, y esta es la que más importa. Aquí es peor que en WhatsApp y no al revés: en WhatsApp hace falta tu número, que tiene quien tú se lo diste; aquí cada persona tiene su página pública con su identificador a la vista, así que cualquiera podía hacer sonar el teléfono de cualquiera sin tener su número. `users.llamadas_de` (migración `0082`) admite `todos`, `conocidos` y `nadie`, y **viene puesto en `conocidos`**: quien ya se ha escrito contigo, a quien tienes en tu agenda importada, o a quien sigues. A un desconocido le sale «escríbele un mensaje primero», que es el camino que ya existía — un mensaje no despierta a nadie, un timbre sí. Se elige en la propia página de Teléfono, al lado del número, porque es la otra mitad de la misma decisión.
+
+**¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
+
+También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
