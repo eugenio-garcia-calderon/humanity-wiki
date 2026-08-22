@@ -143,6 +143,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "P4: entrada de la proteccion frente a administradores",
       "desde": "2026-08-22T19:37:58.126Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "registrar dominios propios",
+      "desde": "2026-08-22T19:38:11.743Z"
     }
   ]
 }
