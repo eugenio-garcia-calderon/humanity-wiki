@@ -53,12 +53,6 @@
       "ruta": "CLAUDE.md",
       "motivo": "la trampa del fallo armado para otro dia",
       "desde": "2026-08-22T16:05:26.213Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "drizzle/CLAUDE.md",
-      "motivo": "el numero no garantiza el orden de aplicacion",
-      "desde": "2026-08-22T16:15:15.817Z"
     }
   ]
 }
