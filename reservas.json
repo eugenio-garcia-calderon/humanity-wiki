@@ -173,6 +173,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "una linea: registrar el modulo agenda",
       "desde": "2026-08-22T22:22:06.756Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0091_comision_en_puntos.sql",
+      "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
+      "desde": "2026-08-22T22:23:29.017Z"
     }
   ]
 }
