@@ -131,6 +131,12 @@
       "ruta": "src/server/avisos.ts",
       "motivo": "telecomunicaciones: aviso de llamada perdida",
       "desde": "2026-08-22T16:09:39.435Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "telecomunicaciones: llamada perdida en la campana",
+      "desde": "2026-08-22T16:09:43.253Z"
     }
   ]
 }
