@@ -19,12 +19,6 @@
       "desde": "2026-08-22T14:31:54.297Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/components/layout/MenuLateral.tsx",
-      "motivo": "entrada Comercio en el menu",
-      "desde": "2026-08-22T14:48:47.122Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "src/server/roadmap.ts",
       "motivo": "Veracidad: página, menú de información y grupo del tablero",
