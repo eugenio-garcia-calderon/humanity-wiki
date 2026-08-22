@@ -185,6 +185,12 @@
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
       "desde": "2026-08-22T21:41:27.977Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
+      "desde": "2026-08-22T21:41:31.680Z"
     }
   ]
 }
