@@ -312,7 +312,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
     try {
       const r = await db.execute(sql`
         SELECT id, name, description, price_cents, currency, images, kind,
-               modality, billing_period, stock, warranty, return_policy, category
+               modality, billing_period, stock, warranty, return_policy, category,
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo
         FROM products
         WHERE id = ${String(req.params.id)} AND archived_at IS NULL
       `);
@@ -335,6 +336,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
+        // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
+        // coste que aparece al final es la primera causa de carrito
+        // abandonado, y en una tienda de una persona es peor: parece un truco.
+        envio: {
+          // `null` = no lo ha configurado, y entonces no se ofrece envío.
+          // `0` = gratis dicho a propósito. No son lo mismo.
+          centimos: p.envio_centimos === null || p.envio_centimos === undefined ? null : Number(p.envio_centimos),
+          gratis_desde_centimos: p.envio_gratis_desde_centimos === null || p.envio_gratis_desde_centimos === undefined
+            ? null : Number(p.envio_gratis_desde_centimos),
+          plazo: p.envio_plazo || null,
+          // Un archivo no se envía por mensajero. Se dice aquí para que la
+          // tarjeta no tenga que adivinarlo del tipo.
+          hace_falta: (p.kind || '') === 'fisico',
+        },
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -372,7 +387,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const unidades = Math.max(1, Math.min(99, Number(cantidad) || 1));
 
       const p = (await db.execute(sql`
-        SELECT id, name, description, price_cents, currency, stock, created_by, modality, billing_period
+        SELECT id, name, description, price_cents, currency, stock, created_by, modality, billing_period,
+               kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo
         FROM products WHERE id = ${String(producto_id || '')} AND archived_at IS NULL
       `)).rows[0] as any;
 
@@ -401,6 +417,28 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const comision = Math.round((p.price_cents * unidades * COMISION_BPS) / 10000);
       const suscripcion = p.modality === 'suscripcion';
 
+      // ── EL ENVÍO ────────────────────────────────────────────────────────
+      // Sólo para lo que se envía de verdad. Un producto digital que pidiera
+      // la dirección de casa estaría pidiendo un dato que no necesita, y eso
+      // es lo que hace desconfiar a quien compra.
+      const esFisico = (p.kind || '') === 'fisico';
+      const envioBase = p.envio_centimos === null || p.envio_centimos === undefined
+        ? null : Number(p.envio_centimos);
+      const total = p.price_cents * unidades;
+      const umbral = p.envio_gratis_desde_centimos === null || p.envio_gratis_desde_centimos === undefined
+        ? null : Number(p.envio_gratis_desde_centimos);
+      const envioCobrado = envioBase === null ? null
+        : (umbral !== null && total >= umbral ? 0 : envioBase);
+
+      const opcionesEnvio = esFisico && envioCobrado !== null ? [{
+        shipping_rate_data: {
+          type: 'fixed_amount' as const,
+          fixed_amount: { amount: envioCobrado, currency: (p.currency || 'EUR').toLowerCase() },
+          display_name: envioCobrado === 0 ? 'Envío gratis' : 'Envío',
+          ...(p.envio_plazo ? { delivery_estimate: undefined } : {}),
+        },
+      }] : undefined;
+
       const stripe = getStripe();
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
@@ -420,6 +458,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // El correo es lo único que se le pide: es lo que hace falta para
         // mandarle el recibo y para que el vendedor sepa a quién responder.
         ...(suscripcion ? {} : { customer_creation: 'always' as const }),
+        // La dirección sólo se pide si hay algo que llevar a algún sitio.
+        ...(esFisico ? {
+          shipping_address_collection: { allowed_countries: [...PAISES_DE_ENVIO] },
+          ...(opcionesEnvio ? { shipping_options: opcionesEnvio } : {}),
+        } : {}),
         ...(reparte && !suscripcion ? {
           payment_intent_data: {
             application_fee_amount: comision,
@@ -431,12 +474,17 @@ export function registerPublicarRoutes(app: Express, db: any) {
           product_id: p.id,
           quantity: String(unidades),
           vendedor_id: p.created_by || '',
+          envio_centimos: envioCobrado === null ? '' : String(envioCobrado),
         },
         success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`,
         cancel_url: `${destino}?compra=cancelada`,
       });
 
-      res.json({ url: sesion.url, reparte, comision_centimos: comision });
+      res.json({
+        url: sesion.url, reparte, comision_centimos: comision,
+        envio_centimos: envioCobrado,
+        pide_direccion: esFisico,
+      });
     } catch (e: any) {
       console.error('comprar publico:', e);
       res.status(500).json({ error: 'No se ha podido abrir el pago. Inténtalo dentro de un momento.' });
@@ -499,3 +547,17 @@ function destinoSeguro(propuesta: unknown): string {
     return u.origin + u.pathname;
   } catch { return base; }
 }
+
+/**
+ * A dónde se puede enviar hoy.
+ *
+ * España y la Unión Europea. No es una limitación técnica: es que un envío
+ * fuera de la UE lleva aduana, declaración e impuestos en destino, y ofrecerlo
+ * sin resolver eso sería vender un envío que el vendedor no puede cumplir.
+ * Cuando alguien lo necesite, se amplía aquí y se resuelve la aduana entonces.
+ */
+const PAISES_DE_ENVIO = [
+  'ES', 'PT', 'FR', 'IT', 'DE', 'NL', 'BE', 'LU', 'IE', 'AT', 'DK', 'SE',
+  'FI', 'PL', 'CZ', 'SK', 'SI', 'HR', 'HU', 'RO', 'BG', 'GR', 'EE', 'LV',
+  'LT', 'MT', 'CY',
+] as const;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff } from 'lucide-react';
+import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff, Truck } from 'lucide-react';
 
 // ============================================================================
 // UN PRODUCTO EN UNA PÁGINA PÚBLICA — fase 2 del plan de tiendas (2026-08-22)
@@ -137,6 +137,8 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
             <Disponibilidad stock={p.stock} />
           </div>
 
+          <Envio envio={p.envio} moneda={p.moneda} precio={p.precio_centimos} />
+
           {puedeComprarse(p) && (
             <div className="mt-3">
               <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
@@ -149,6 +151,7 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
               )}
               <p className="mt-1.5 text-[11px] text-slate-400">
                 Pago seguro con tarjeta. No hace falta cuenta.
+                {p.envio?.hace_falta && p.envio?.centimos !== null && ' La dirección se pide al pagar.'}
               </p>
             </div>
           )}
@@ -202,4 +205,44 @@ function puedeComprarse(p: any): boolean {
   if (!p.precio_centimos) return false;
   if (p.stock !== null && p.stock <= 0) return false;
   return true;
+}
+
+/**
+ * EL ENVÍO SE DICE ANTES DE COMPRAR, NO EN LA ÚLTIMA PANTALLA.
+ *
+ * Un coste que aparece al final es la primera causa de carrito abandonado, y
+ * en la tienda de una persona es peor que una pérdida: parece un truco.
+ *
+ * Los tres casos de `centimos` son tres frases distintas, y por eso no se
+ * colapsan: `null` es «no lo ha configurado» —no se promete nada—, `0` es
+ * «gratis» dicho a propósito, y cualquier otro número es lo que cuesta.
+ */
+function Envio({ envio, moneda, precio }: { envio: any; moneda: string; precio: number | null }) {
+  if (!envio?.hace_falta) return null;
+
+  const dinero = (c: number) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda || 'EUR' }).format(c / 100);
+
+  let texto: string;
+  if (envio.centimos === null) {
+    // Ni «gratis» ni una cifra inventada: la verdad, que es que hay que
+    // hablarlo. Prometer un envío que quien vende no ha configurado sería
+    // comprometerle a algo que no ha dicho.
+    texto = 'Envío a acordar con quien lo vende';
+  } else if (envio.centimos === 0) {
+    texto = 'Envío gratis';
+  } else if (envio.gratis_desde_centimos !== null && precio !== null && precio >= envio.gratis_desde_centimos) {
+    texto = 'Envío gratis';
+  } else if (envio.gratis_desde_centimos !== null) {
+    texto = `Envío ${dinero(envio.centimos)} · gratis desde ${dinero(envio.gratis_desde_centimos)}`;
+  } else {
+    texto = `Envío ${dinero(envio.centimos)}`;
+  }
+
+  return (
+    <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+      <Truck className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+      {texto}{envio.plazo ? ` · ${envio.plazo}` : ''}
+    </p>
+  );
 }
