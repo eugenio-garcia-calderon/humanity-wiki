@@ -167,6 +167,12 @@
       "ruta": "src/server/publicar.ts",
       "motivo": "devolver indexable y slug al abrir compartir",
       "desde": "2026-08-22T22:10:26.062Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/Cesta.tsx",
+      "motivo": "envio pagado con puntos + direccion sin Stripe (Eugenio)",
+      "desde": "2026-08-22T22:12:04.291Z"
     }
   ]
 }
