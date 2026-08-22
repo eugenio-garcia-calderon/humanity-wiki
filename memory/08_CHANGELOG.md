@@ -5345,3 +5345,34 @@ ship, best seller ×3 (2 from lines + 1 pre-cart); PNG upload → public URL
 served as image/png. `tsc` clean. The Comercio panel itself was not opened in a
 browser (the shared automation browser would have needed a seller session);
 its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Seller coupons (Programador 7, economy & market)
+
+Plan fase 7. `cupones` (0090): a seller's code with percentage or fixed amount,
+minimum purchase, expiry and max uses; `pedidos.cupon_codigo` +
+`descuento_centimos` record what each order got. **The discount is the
+seller's**: it comes off their price and the platform fee is computed on what
+is actually charged in euros (`comisionReal`). Neither the platform nor the
+points pay for it.
+
+Seller: `GET/POST /api/publicar/mis-cupones`, `PUT …/:id` (activate/deactivate;
+never deleted — orders cite them), and a Cupones panel in Comercio. Cart:
+`POST /api/publicar/cupon/comprobar` says the discount BEFORE paying (no
+session needed: guests have coupons too), the cesta has the code field, and
+`comprar` takes `cupon`. Order of rebates: coupon first, then points on what
+is left — a discount is never paid twice. One Stripe coupon carries the sum
+of both rebates; uses are counted after payment (webhook) or in the same call
+for all-points purchases — never when a session is merely opened.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after, balances
+restored): create 10%/2 uses → 200; duplicate → 409 (after fixing the pg error
+detection: code 23505 may sit on `cause`); bad code → 400; list 401 without
+session; comprobar valid → 1,00 € on a 10 € item, unknown → "no existe";
+comprar with coupon → Stripe test session with the coupon; coupon + 9 points
+→ all paid in one call: order `entregado`, puntos_usados 9, cupon VERANO10,
+descuento 100, uses 1/2, buyer 100→91, seller 100→109; deactivate →
+comprobar says "ya no está activo". `tsc` clean. Comercio's panel and the
+cesta field were not opened in a browser (subdomain + seller session); their
+data contracts are what was tested.

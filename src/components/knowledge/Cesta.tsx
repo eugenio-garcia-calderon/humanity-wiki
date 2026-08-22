@@ -30,6 +30,25 @@ export default function Cesta({ tienda }: { tienda: string }) {
   // se manda es cuántos puntos quiere gastar la persona — el servidor acota.
   const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
   const [usarPuntos, setUsarPuntos] = useState('');
+  // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
+  // pagar, para que la cesta diga el descuento y no lo adivine.
+  const [cupon, setCupon] = useState('');
+  const [cuponOk, setCuponOk] = useState<{ codigo: string; descuento_centimos: number } | null>(null);
+  const [cuponAviso, setCuponAviso] = useState<string | null>(null);
+  async function comprobarCupon() {
+    setCuponAviso(null); setCuponOk(null);
+    const codigo = cupon.trim().toUpperCase();
+    if (!codigo) return;
+    try {
+      const r = await fetch('/api/publicar/cupon/comprobar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo, lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })) }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (j.valido) setCuponOk({ codigo: j.codigo, descuento_centimos: j.descuento_centimos });
+      else setCuponAviso(j.motivo || 'Ese código no vale aquí.');
+    } catch { setCuponAviso('No hay conexión con el servidor.'); }
+  }
   useEffect(() => {
     if (!abierta) return;
     fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
@@ -56,6 +75,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
           lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
           volver_a: window.location.href,
           ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
+          ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -153,6 +173,21 @@ export default function Cesta({ tienda }: { tienda: string }) {
               <p className="mt-1 text-[11px] text-slate-400">
                 El envío se calcula al pagar, cuando sepamos a dónde va.
               </p>
+
+              <div className="mt-3">
+                <div className="flex gap-2">
+                  <input value={cupon} onChange={e => { setCupon(e.target.value); setCuponOk(null); setCuponAviso(null); }}
+                    placeholder="Código de descuento" aria-label="Código de descuento"
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); comprobarCupon(); } }}
+                    className="flex-1 h-10 px-3 rounded-lg border border-slate-200 text-sm uppercase" />
+                  <button type="button" onClick={comprobarCupon} disabled={!cupon.trim()}
+                    className="h-10 px-3 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 disabled:opacity-40">
+                    Aplicar
+                  </button>
+                </div>
+                {cuponOk && <p className="mt-1 text-[11px] font-bold text-emerald-700">Cupón {cuponOk.codigo}: −{dinero(cuponOk.descuento_centimos)}</p>}
+                {cuponAviso && <p className="mt-1 text-[11px] font-bold text-rose-600">{cuponAviso}</p>}
+              </div>
 
               {caja?.activo && caja.con_sesion && caja.saldo != null && (
                 <div className="mt-3 p-3 rounded-xl border border-amber-200 bg-amber-50/60">

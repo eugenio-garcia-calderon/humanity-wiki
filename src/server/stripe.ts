@@ -579,6 +579,17 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             // vendedor verá puntos_usados = 0 con el importe en euros ya
             // rebajado — un caso raro que se revisa a mano, no un 500 a
             // Stripe que repetiría el webhook para siempre.
+            // EL CUPÓN DEL VENDEDOR (2026-08-22): cuenta el uso y deja en el
+            // pedido qué código se aplicó y cuánto rebajó. Después de pagar,
+            // nunca al abrir la sesión: un cupón no se gasta en un intento.
+            if (session.metadata!.cupon_id) {
+              await db.execute(sql`UPDATE cupones SET usos = usos + 1, updated_at = now() WHERE id = ${session.metadata!.cupon_id}`);
+              await db.execute(sql`
+                UPDATE pedidos SET cupon_codigo = ${session.metadata!.cupon_codigo || null},
+                                   descuento_centimos = ${Number(session.metadata!.cupon_centimos || 0) || 0}
+                WHERE id = ${pedidoId}
+              `);
+            }
             const puntosPagados = Number(session.metadata!.puntos || 0) || 0;
             const compradorId = session.metadata!.buyer_id || null;
             if (puntosPagados > 0 && compradorId && vendedorId) {
