@@ -21,36 +21,20 @@
 // bueno «porque seguramente lo sea» es justo lo que hay que evitar.
 import { AlertTriangle, CheckCircle2, Sigma, HelpCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { origenDe, ETIQUETA_ORIGEN, type OrigenDelDato } from '../../utils/origenDelDato';
 
-export type OrigenDelDato = 'medido' | 'estimado' | 'simulado' | 'desconocido';
+export { origenDe };
+export type { OrigenDelDato };
 
-const ESTILO: Record<OrigenDelDato, {
-  texto: string; explicacion: string; clase: string; Icono: any;
-}> = {
-  medido: {
-    texto: 'Medido',
-    explicacion: 'Sale de una fuente citada y verificable.',
-    clase: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Icono: CheckCircle2,
-  },
-  estimado: {
-    texto: 'Estimado',
-    explicacion: 'Dato real, pero calculado a partir de otro — no medido aquí.',
-    clase: 'bg-sky-50 text-sky-700 border-sky-200',
-    Icono: Sigma,
-  },
-  simulado: {
-    texto: 'Simulado',
-    explicacion: 'Cifra inventada para poder enseñar la plataforma. No sirve para decidir ni para citar.',
-    clase: 'bg-rose-50 text-rose-700 border-rose-300',
-    Icono: AlertTriangle,
-  },
-  desconocido: {
-    texto: 'Sin fuente',
-    explicacion: 'No consta de dónde sale. Trátalo como no comprobado.',
-    clase: 'bg-amber-50 text-amber-800 border-amber-200',
-    Icono: HelpCircle,
-  },
+// AQUÍ SOLO VIVE EL ASPECTO. El nombre («Simulado») y la explicación viven en
+// `src/utils/origenDelDato.ts`, junto a la regla que decide cuál es cuál.
+// Estuvieron escritos también aquí durante un día: dos textos sobre lo mismo
+// que se separan la primera vez que alguien reformule uno.
+const ESTILO: Record<OrigenDelDato, { clase: string; Icono: any }> = {
+  medido:      { clase: 'bg-emerald-50 text-emerald-700 border-emerald-200', Icono: CheckCircle2 },
+  estimado:    { clase: 'bg-sky-50 text-sky-700 border-sky-200',             Icono: Sigma },
+  simulado:    { clase: 'bg-rose-50 text-rose-700 border-rose-300',          Icono: AlertTriangle },
+  desconocido: { clase: 'bg-amber-50 text-amber-800 border-amber-200',       Icono: HelpCircle },
 };
 
 export default function MarcaOrigen({ origen, tamano = 'normal', className }: {
@@ -64,7 +48,8 @@ export default function MarcaOrigen({ origen, tamano = 'normal', className }: {
   // esconde la marca, porque esconderla es lo que la cifra parecía antes.
   const clave: OrigenDelDato =
     origen === 'medido' || origen === 'estimado' || origen === 'simulado' ? origen : 'desconocido';
-  const { texto, explicacion, clase, Icono } = ESTILO[clave];
+  const { clase, Icono } = ESTILO[clave];
+  const { corto: texto, explicacion } = ETIQUETA_ORIGEN[clave];
 
   return (
     <span

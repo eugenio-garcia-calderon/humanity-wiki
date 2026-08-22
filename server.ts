@@ -1,5 +1,8 @@
 import express, { Request, Response, NextFunction } from "express";
-import { origenDeVarios } from "./src/server/origenDelDato.js";
+import { origenDe, peorOrigen, type OrigenDelDato } from "./src/utils/origenDelDato.js";
+// Las puntuaciones de objetivo salieron de aquí a un módulo compartido para
+// que la IA pueda usar EXACTAMENTE el mismo cálculo que las pantallas.
+import { getObjectivesForTerritory } from "./src/utils/puntuacionesDeObjetivo.js";
 import { registrarHistorial } from './src/server/historial';
 import path from "path";
 import fs from "fs";
@@ -7,7 +10,7 @@ import Stripe from "stripe";
 import geoip from "geoip-lite";
 import { db } from "./src/db/index.js";
 import { territories, projects, challenges, organizations } from "./src/db/schema.js";
-import { territories as seedTerritories, objectives as seedObjectives } from "./src/data/seed.js";
+import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
@@ -483,6 +486,7 @@ async function startServer() {
       const result = await db.execute(sql`SELECT * FROM objectives WHERE archived_at IS NULL`);
       const territoryIdsResult = await db.execute(sql`SELECT id FROM territories WHERE archived_at IS NULL`);
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
       // Build progress_by_territory per objective from the same
@@ -492,17 +496,27 @@ async function startServer() {
       // territory (including e.g. España, and the Madrid municipios) showing
       // 0% in the objectives grid regardless of their real data.
       const progressByObjective: Record<string, Record<string, number | null>> = {};
-      for (const { id } of result.rows as any[]) progressByObjective[id] = {};
+      // Y de dónde sale cada porcentaje, con la misma forma. Viaja junto al
+      // número para que la rejilla de objetivos no tenga que averiguarlo: sin
+      // esto, un 92 % inventado se pinta igual que uno medido.
+      const origenByObjective: Record<string, Record<string, string>> = {};
+      for (const { id } of result.rows as any[]) { progressByObjective[id] = {}; origenByObjective[id] = {}; }
       for (const { id: tid } of territoryIdsResult.rows as any[]) {
-        const scores = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const scores = getObjectivesForTerritory(
+          tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[tid] || {}, origenes,
+        );
         for (const [key, objId] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
           if (progressByObjective[objId]) progressByObjective[objId][tid] = (scores as any)[key];
+          if (origenByObjective[objId] && origenes[key]) origenByObjective[objId][tid] = origenes[key];
         }
       }
 
       const mapped = result.rows.map((r: any) => ({
         ...r,
-        progress_by_territory: progressByObjective[r.id] || {}
+        progress_by_territory: progressByObjective[r.id] || {},
+        origen_by_territory: origenByObjective[r.id] || {}
       }));
       res.json(mapped);
     } catch (e: any) {
@@ -1240,14 +1254,6 @@ async function startServer() {
     return geoFilesCache[filename];
   };
 
-  // Keys that have historical mock progress data in src/data/seed.ts and keep
-  // defaulting to a neutral 50 when a territory isn't listed there (legacy
-  // behavior, preserved as-is). Newer objectives have no mock data at all, so
-  // they correctly report "Sin datos" (null) until real data is added — see
-  // the 2026-08-03 decision in memory/03_DECISIONS.md about never fabricating
-  // scores for objectives that don't have any.
-  const LEGACY_MOCK_OBJECTIVE_KEYS = new Set(['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas']);
-
   // Static metadata (id/objective_id/weight) for every indicator, cached for
   // the life of the process — used to weight-average indicator scores up
   // into an objective score for territories with no legacy mock entry (see
@@ -1261,57 +1267,6 @@ async function startServer() {
       }));
     }
     return indicatorsMetaCache;
-  };
-
-  // Helper to retrieve objective scores for any territory ID. Loops over every
-  // objective in OBJECTIVE_ID_BY_KEY instead of hardcoding one lookup per
-  // objective, so adding a new objective there is enough on its own — no
-  // changes needed here.
-  //
-  // Score priority per objective: (1) the legacy mock progress_by_territory
-  // entry in src/data/seed.ts, if present — preserved as-is for territories
-  // that already rely on it; (2) otherwise a weighted average of that
-  // objective's own indicators' real indicator_observations for this
-  // territory (using each indicator's `weight`, defaulting to an equal split
-  // if unset) — this is what makes territories seeded ONLY with real
-  // indicator data (e.g. the Madrid municipios) show a correct roll-up
-  // instead of "Sin datos"; (3) a neutral 50 for the 6 original objectives
-  // with neither (legacy behavior), or null ("Sin datos") for newer ones.
-  const getObjectivesForTerritory = (
-    tid: string,
-    indicatorScoresForTid: Record<string, number> = {},
-    indicatorsMeta: { id: string; objectiveId: string; weight: number | null }[] = []
-  ): Record<string, number | null> => {
-    const result: Record<string, number | null> = {};
-    let sum = 0;
-    let count = 0;
-    for (const [key, id] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
-      const seedEntry = seedObjectives.find(o => o.id === id);
-      const raw = seedEntry?.progress_by_territory?.[tid];
-      let value: number | null;
-      if (raw != null) {
-        value = raw;
-      } else {
-        const objIndicators = indicatorsMeta.filter(i => i.objectiveId === id);
-        let weightedSum = 0;
-        let weightTotal = 0;
-        for (const ind of objIndicators) {
-          const score = indicatorScoresForTid[ind.id];
-          if (score != null) {
-            const w = ind.weight != null ? ind.weight : (1 / objIndicators.length);
-            weightedSum += score * w;
-            weightTotal += w;
-          }
-        }
-        value = weightTotal > 0
-          ? Math.round(weightedSum / weightTotal)
-          : (LEGACY_MOCK_OBJECTIVE_KEYS.has(key) ? 50 : null);
-      }
-      result[key] = value;
-      if (value != null) { sum += value; count++; }
-    }
-    result.overall = count > 0 ? Math.round(sum / count) : null;
-    return result;
   };
 
   // Helper to retrieve real indicator scores (from indicator_observations) grouped by territory
@@ -1330,32 +1285,46 @@ async function startServer() {
   };
 
   /**
+   * La `source` de cada observación, por territorio y por indicador.
+   *
+   * Va aparte de `getIndicatorScoresByTerritory` a propósito: quien solo
+   * quiera pintar el número no paga esta consulta, y quien vaya a decir de
+   * dónde sale no tiene que adivinarlo.
+   */
+  const getIndicatorSourcesByTerritory = async (): Promise<Record<string, Record<string, string | null>>> => {
+    const result = await db.execute(sql`
+      SELECT territory_id, indicator_id, source
+      FROM indicator_observations
+      WHERE score IS NOT NULL
+    `);
+    const map: Record<string, Record<string, string | null>> = {};
+    for (const row of result.rows as any[]) {
+      if (!map[row.territory_id]) map[row.territory_id] = {};
+      map[row.territory_id][row.indicator_id] = row.source ?? null;
+    }
+    return map;
+  };
+
+  /**
    * ══ DE DÓNDE SALE CADA PUNTUACIÓN (2026-08-22) ═════════════════════════════
    * Medido contra la base de datos: de 20.557 observaciones, 20.499 están
    * SIMULADAS — «Excel Municipios Madrid (simulado)» y «IA — número aleatorio».
    * El 99,7 %. Todas declaran su fuente y ninguna pantalla lo decía.
    *
-   * El origen viaja junto a la puntuación, no como un adorno que cada pantalla
-   * tenga que acordarse de pintar: así lo reciben ya dicho el mapa, la ficha
-   * del territorio y cualquier cosa que se construya después.
+   * AQUÍ HUBO UN `getOrigenByTerritory` Y DURÓ UN DÍA. Resumía las fuentes de
+   * las OBSERVACIONES de un territorio, y con eso se marcaba el mapa y la
+   * ficha… que no enseñan observaciones: enseñan las catorce puntuaciones de
+   * objetivo. En España las dos cosas no coinciden —sus observaciones de agua
+   * son reales, pero los porcentajes salen escritos a mano de
+   * `src/data/seed.ts`— así que la ficha ponía «MEDIDO» encima de catorce
+   * números inventados. Una marca que describe una cifra distinta de la que
+   * tiene al lado es peor que no poner ninguna: da confianza sobre lo que no
+   * la merece.
    *
-   * MANDA EL PEOR de los que componen un territorio (`origenDeVarios`): una
-   * puntuación media con un solo indicador inventado dentro no es una
-   * puntuación medida.
+   * Por eso el origen sale ahora de `getObjectivesForTerritory`, en la misma
+   * rama que decide el número. Es la regla de la casa: el origen viaja CON el
+   * dato, y describe EXACTAMENTE el dato que se pinta.
    */
-  const getOrigenByTerritory = async (): Promise<Record<string, string>> => {
-    const result = await db.execute(sql`
-      SELECT territory_id, array_agg(DISTINCT coalesce(source, '')) AS fuentes
-      FROM indicator_observations
-      WHERE score IS NOT NULL
-      GROUP BY territory_id
-    `);
-    const map: Record<string, string> = {};
-    for (const row of result.rows as any[]) {
-      map[row.territory_id] = origenDeVarios(row.fuentes || []);
-    }
-    return map;
-  };
 
   // Helper to retrieve real marker scores (from marker_observations) grouped by territory
   const getMarkerScoresByTerritory = async (): Promise<Record<string, Record<string, number>>> => {
@@ -1458,22 +1427,33 @@ async function startServer() {
 
       // Populate objective scores directly onto polygon properties
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
-      const origenByTerritory = await getOrigenByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
-        const objs = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const objs = getObjectivesForTerritory(
+          tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[tid] || {}, origenes,
+        );
         return {
           ...f,
           properties: {
             ...f.properties,
             objectives: objs,
+            objectivesOrigen: origenes,
             indicatorScores: indicatorScoresByTerritory[tid] || {},
             markerScores: markerScoresByTerritory[tid] || {},
-            // Sin observaciones no hay origen que dar: «desconocido» y no un
+            // EL ORIGEN DESCRIBE LO QUE SE PINTA, y lo que se pinta son estas
+            // catorce puntuaciones de objetivo. Al principio se marcaba con el
+            // origen de las OBSERVACIONES del territorio, y en España salía
+            // «medido» encima de catorce números escritos a mano en
+            // `src/data/seed.ts`: una marca que tranquiliza sobre una cifra
+            // distinta de la que describe es peor que ninguna marca.
+            // Sin puntuaciones no hay origen que dar: «desconocido», nunca un
             // silencio que el mapa interprete como bueno.
-            origenDato: origenByTerritory[tid] || 'desconocido'
+            origenDato: peorOrigen(Object.values(origenes)) || 'desconocido'
           }
         };
       });
@@ -1521,15 +1501,19 @@ async function startServer() {
       });
 
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
-      const origenByTerritory = await getOrigenByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
       const features = filtered.map(t => {
         // Was a second, hand-duplicated copy of getObjectivesForTerritory's
         // averaging logic — now calls the same helper the polygons endpoint
         // uses, so both endpoints automatically agree for every objective.
-        const objectivesForTerritory = getObjectivesForTerritory(t.id, indicatorScoresByTerritory[t.id] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const objectivesForTerritory = getObjectivesForTerritory(
+          t.id, indicatorScoresByTerritory[t.id] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[t.id] || {}, origenes,
+        );
 
         return {
           type: "Feature",
@@ -1545,9 +1529,10 @@ async function startServer() {
             parent_id: t.parent_id,
             description: t.description,
             objectives: objectivesForTerritory,
+            objectivesOrigen: origenes,
             indicatorScores: indicatorScoresByTerritory[t.id] || {},
             markerScores: markerScoresByTerritory[t.id] || {},
-            origenDato: origenByTerritory[t.id] || 'desconocido',
+            origenDato: peorOrigen(Object.values(origenes)) || 'desconocido',
             challenges: t.active_challenges || []
           }
         };
@@ -1717,15 +1702,23 @@ async function startServer() {
 
         const objKey = OBJECTIVE_KEY_BY_ID[id];
         const territoryIndicatorScoresResult = await db.execute(sql`
-          SELECT indicator_id, score FROM indicator_observations WHERE territory_id = ${territoryId} AND score IS NOT NULL
+          SELECT indicator_id, score, source FROM indicator_observations WHERE territory_id = ${territoryId} AND score IS NOT NULL
         `);
         const territoryIndicatorScores: Record<string, number> = {};
-        for (const r of territoryIndicatorScoresResult.rows as any[]) territoryIndicatorScores[r.indicator_id] = r.score;
-        const scores = getObjectivesForTerritory(territoryId, territoryIndicatorScores, await getIndicatorsMeta());
+        const territoryIndicatorSources: Record<string, string | null> = {};
+        for (const r of territoryIndicatorScoresResult.rows as any[]) {
+          territoryIndicatorScores[r.indicator_id] = r.score;
+          territoryIndicatorSources[r.indicator_id] = r.source ?? null;
+        }
+        const origenes: Record<string, OrigenDelDato> = {};
+        const scores = getObjectivesForTerritory(
+          territoryId, territoryIndicatorScores, await getIndicatorsMeta(),
+          territoryIndicatorSources, origenes,
+        );
         const score = objKey ? (scores as any)[objKey] : null;
 
         const indicatorsResult = await db.execute(sql`
-          SELECT i.id, i.name, io.score
+          SELECT i.id, i.name, io.score, io.source
           FROM indicators i
           LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
           WHERE i.objective_id = ${id} AND i.archived_at IS NULL
@@ -1748,8 +1741,12 @@ async function startServer() {
           territory,
           score: score ?? null,
           hasData: score != null,
+          // De dónde sale esa puntuación. Sin esto, el lienzo del explorador
+          // pinta un 92 % simulado exactamente igual que uno medido.
+          origenDato: objKey ? (origenes[objKey] ?? null) : null,
           children: indicatorsResult.rows.map((r: any) => ({
-            level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
+            level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null,
+            origenDato: r.score != null ? origenDe(r.source) : null
           })),
           challenges: challengesResult.rows,
           solutions: solutionsRows
@@ -1798,6 +1795,7 @@ async function startServer() {
           territory,
           observation,
           hasData: !!observation,
+          origenDato: observation ? origenDe((observation as any).source) : null,
           children: markersResult.rows.map((r: any) => ({
             level: "marcador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
           })),
@@ -1858,6 +1856,7 @@ async function startServer() {
           territory,
           observation,
           hasData: !!observation,
+          origenDato: observation ? origenDe((observation as any).source) : null,
           children: metricsResult.rows.map((r: any) => ({
             level: "metrica", id: r.id, name: r.name, score: null, hasData: r.worst_level != null, riskLevel: r.worst_level ?? null
           })),
@@ -2047,16 +2046,31 @@ async function startServer() {
       // DE DÓNDE SALEN SUS CIFRAS (2026-08-22). La ficha de un territorio es
       // donde alguien se queda mirando los números un rato — y donde puede
       // apuntarlos. Si son inventados, aquí es donde tiene que decirlo.
-      const fuentes = await db.execute(sql`
-        SELECT DISTINCT coalesce(source, '') AS fuente
+      //
+      // Se marca el origen de LAS CATORCE PUNTUACIONES QUE SE VEN, no el de
+      // las observaciones sueltas del territorio: en España las observaciones
+      // de agua son reales, pero los porcentajes de objetivo que enseña esta
+      // ficha están escritos a mano en `src/data/seed.ts`. Marcarla «medido»
+      // por lo primero era tranquilizar sobre lo segundo.
+      const obsDelTerritorio = await db.execute(sql`
+        SELECT indicator_id, score, source
         FROM indicator_observations
         WHERE territory_id = ${id} AND score IS NOT NULL
       `);
-      const origenDato = origenDeVarios((fuentes.rows as any[]).map(r => r.fuente));
+      const puntuaciones: Record<string, number> = {};
+      const fuentesPorIndicador: Record<string, string | null> = {};
+      for (const r of obsDelTerritorio.rows as any[]) {
+        puntuaciones[r.indicator_id] = r.score;
+        fuentesPorIndicador[r.indicator_id] = r.source ?? null;
+      }
+      const origenes: Record<string, OrigenDelDato> = {};
+      getObjectivesForTerritory(String(id), puntuaciones, await getIndicatorsMeta(), fuentesPorIndicador, origenes);
+      const origenDato = peorOrigen(Object.values(origenes));
 
       res.json({
         ...territory,
         origenDato,
+        objectivesOrigen: origenes,
         challenges: populatedChallenges
       });
       
