@@ -161,6 +161,12 @@
       "ruta": "src/pages/ChallengeProfile.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
       "desde": "2026-08-22T21:41:39.710Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": ".github/workflows/deploy.yml",
+      "motivo": "aceptar el nombre que quedó guardado para la clave de R2",
+      "desde": "2026-08-22T21:44:05.556Z"
     }
   ]
 }
