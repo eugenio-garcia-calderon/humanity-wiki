@@ -214,6 +214,11 @@ if (admin) {
     try { await pool.query(`DELETE FROM registro_sellado WHERE n = 1`); }
     catch { paro = true; }
     comprobar('un DELETE por descuido tampoco', paro);
+    paro = false;
+    try { await pool.query(`TRUNCATE registro_sellado`); }
+    catch { paro = true; }
+    comprobar('y un TRUNCATE, que es el que se cuela: no hay filas que recorrer', paro,
+      'un disparador FOR EACH ROW no se dispara con TRUNCATE; hace falta uno de sentencia');
 
     // Y ahora, quien SÍ tiene permisos: se quita el disparador y se manipula.
     // Es exactamente el ataque contra el que la cadena de huellas existe.
