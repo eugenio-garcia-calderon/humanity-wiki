@@ -284,11 +284,28 @@ export async function leerCadena(db: any, desde = 1, hasta?: number) {
 
 /** Calcula el resumen de un día. Calcular no es publicar: esto deja
  *  `publicado_en` a NULL, y hasta que alguien lo publique el verificador tiene
- *  que seguir diciendo «todavía no está anclado». */
+ *  que seguir diciendo «todavía no está anclado».
+ *
+ *  ── EL DÍA ES EN UTC, Y ESTÁ DICHO A PROPÓSITO ──────────────────────────
+ *  `momento` es un `timestamptz`; comparado contra un `date` a secas, Postgres
+ *  usa la zona horaria DE LA SESIÓN para decidir dónde empieza el día. Hoy esa
+ *  zona es UTC en producción, así que esto no cambia nada — y por eso mismo es
+ *  el momento de fijarlo: mañana alguien pone `timezone` en la conexión y las
+ *  raíces empiezan a incluir otras filas, en silencio.
+ *
+ *  UTC y no la hora de Madrid porque el cambio de hora deja un día de 23 horas
+ *  y otro de 25: una hora que aparece en dos raíces, o en ninguna. Un tercero
+ *  que quiera comprobar esto dentro de veinte años no sabe qué zona horaria
+ *  teníamos; sí sabe qué es UTC.
+ *
+ *  **Solo se puede decidir una vez.** En cuanto un día esté anclado, mover la
+ *  frontera cambia qué filas entran en las raíces siguientes, y entonces «la»
+ *  raíz de un día pasa a tener dos respuestas posibles. */
 export async function calcularAnclajeDelDia(db: any, dia: string) {
   const r = await db.execute(sql`
     SELECT n, huella FROM registro_sellado
-    WHERE momento >= ${dia}::date AND momento < (${dia}::date + interval '1 day')
+    WHERE momento >= (${dia}::date)::timestamp AT TIME ZONE 'UTC'
+      AND momento <  (${dia}::date + interval '1 day')::timestamp AT TIME ZONE 'UTC'
     ORDER BY n ASC
   `);
   const filas = r.rows as any[];
