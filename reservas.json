@@ -13,6 +13,12 @@
       "desde": "2026-08-22T14:27:05.609Z"
     },
     {
+      "agente": "prog1",
+      "ruta": "server.ts",
+      "motivo": "la ficha de territorio hace 53 consultas: agruparlas",
+      "desde": "2026-08-22T14:31:54.297Z"
+    },
+    {
       "agente": "prog5",
       "ruta": "src/server/roadmap.ts",
       "motivo": "Veracidad: página, menú de información y grupo del tablero",
@@ -77,12 +83,6 @@
       "ruta": "src/server/gasto.ts",
       "motivo": "quitar reconocimiento de la máquina de la respuesta pública",
       "desde": "2026-08-22T15:28:03.057Z"
-    },
-    {
-      "agente": "prog6",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "páginas de Seguridad y Servidores",
-      "desde": "2026-08-22T15:37:39.650Z"
     }
   ]
 }
