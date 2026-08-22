@@ -261,8 +261,13 @@ paso('Ya se han escrito: ahora la videollamada sí entra');
 await b.p.getByRole('button', { name: 'Videollamada' }).click();
 await a.p.waitForSelector('text=te está llamando', { timeout: 10000 });
 comprobar(true, 'A Ana le salta la llamada en su aplicación');
+// Descolgar una videollamada sin enseñarse. Solo sale en las de vídeo:
+// ofrecerlo en una de voz sería un botón que no hace nada distinto del de al
+// lado, y dos botones que hacen lo mismo obligan a pensar cuál es cuál.
+comprobar(await a.p.getByRole('button', { name: 'Descolgar solo con voz, sin cámara' }).isVisible().catch(() => false),
+  'Se puede descolgar una videollamada sin cámara');
 await a.p.screenshot({ path: CAPTURAS + '/1-llamada-entrante.png' });
-await a.p.getByRole('button', { name: 'Descolgar' }).click();
+await a.p.getByRole('button', { name: 'Descolgar', exact: true }).click();
 
 // Esperar a que el reloj de la llamada corra: eso solo pasa cuando la conexión
 // directa entre los dos navegadores está establecida de verdad.
@@ -294,6 +299,44 @@ comprobar((await a.p.locator('[role=dialog]').count()) > 0 && (await b.p.locator
   'Los dos ven la pantalla de la llamada');
 
 await b.p.screenshot({ path: CAPTURAS + '/2-panel-de-llamada.png' });
+
+paso('La llamada cuenta cómo va (2026-08-23)');
+// LAS BARRITAS TARDAN, y es correcto que tarden: la calidad se mide comparando
+// dos lecturas separadas dos segundos, así que antes de eso lo honrado es no
+// pintar nada en vez de inventarse un verde.
+await a.p.waitForTimeout(5000);
+const cobertura = a.p.locator('[role=dialog] [role=img][aria-label*="conexión" i]').first();
+comprobar(await cobertura.isVisible().catch(() => false),
+  `Salen las barritas de cobertura (${await cobertura.getAttribute('aria-label').catch(() => '—')})`);
+
+// El navegador de pruebas emite un pitido continuo por el micrófono falso, así
+// que el detector de voz da «hablando» siempre. Eso, que suena a limitación,
+// es justo lo que hace comprobable el aviso más útil de todos.
+comprobar(await a.p.locator('[role=dialog] video').first().evaluate(() => true).catch(() => false),
+  'El panel sigue en pie mientras se mide');
+
+paso('El aviso de hablar con el micrófono cerrado');
+await a.p.getByRole('button', { name: 'Silenciar el micrófono' }).click();
+await a.p.waitForTimeout(1200);
+comprobar(await a.p.getByText('Estás hablando con el micrófono cerrado').isVisible().catch(() => false),
+  'Se avisa de que hablas con el micrófono cerrado');
+await a.p.screenshot({ path: CAPTURAS + '/6-avisos-en-la-llamada.png' });
+await a.p.getByRole('button', { name: 'Volver a hablar' }).click();
+await a.p.waitForTimeout(800);
+comprobar(!(await a.p.getByText('Estás hablando con el micrófono cerrado').isVisible().catch(() => false)),
+  'El aviso desaparece al volver a abrir el micrófono');
+
+paso('Elegir por dónde entra y por dónde sale');
+await a.p.getByRole('button', { name: 'Elegir micrófono, cámara y altavoz' }).click();
+await a.p.waitForTimeout(700);
+const menu = a.p.locator('[role=menu]');
+comprobar(await menu.isVisible().catch(() => false), 'Se abre el menú de aparatos');
+comprobar(await menu.getByText('Micrófono', { exact: false }).first().isVisible().catch(() => false),
+  'El menú lista micrófonos');
+await a.p.keyboard.press('Escape');
+await a.p.waitForTimeout(400);
+comprobar(!(await menu.isVisible().catch(() => false)), 'Se cierra con Escape sin colgar la llamada');
+comprobar(await a.p.locator('[role=dialog]').isVisible(), 'Y la llamada sigue en pie');
 
 paso('Silenciar el micrófono');
 await a.p.getByRole('button', { name: 'Silenciar el micrófono' }).click();

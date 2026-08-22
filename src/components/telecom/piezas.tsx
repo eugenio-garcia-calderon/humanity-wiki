@@ -15,7 +15,7 @@ export function BotonRedondo({
   icono: any;
   etiqueta: string;
   onClick: () => void;
-  tono?: 'neutro' | 'colgar' | 'contestar' | 'apagado';
+  tono?: 'neutro' | 'colgar' | 'contestar' | 'apagado' | 'claro';
   grande?: boolean;
   activo?: boolean;
 }) {
@@ -36,6 +36,11 @@ export function BotonRedondo({
         // mundo. Tiene que gritar, no camuflarse.
         tono === 'apagado' && 'bg-rose-100 text-rose-700 hover:bg-rose-200',
         tono === 'neutro' && 'bg-white/15 text-white hover:bg-white/25 backdrop-blur',
+        // `neutro` es blanco translúcido: se ve sobre el vídeo oscuro del panel
+        // y **desaparece** sobre la tarjeta blanca del timbre. `claro` es el
+        // mismo botón para fondo claro; sin él, «Solo voz» era un botón
+        // invisible con su etiqueta debajo.
+        tono === 'claro' && 'bg-slate-100 text-slate-600 hover:bg-slate-200',
       )}
     >
       <Icono className={grande ? 'w-6 h-6' : 'w-5 h-5'} />
@@ -64,5 +69,67 @@ export function Cara({ nombre, avatar, tam = 'md' }: { nombre: string; avatar?: 
     <span className={cn(clases, 'rounded-full bg-slate-200 text-slate-600 grid place-items-center font-black shrink-0')}>
       {iniciales || '?'}
     </span>
+  );
+}
+
+// ── LAS BARRITAS DE COBERTURA ───────────────────────────────────────────────
+// Tres barras, como las del móvil, y por la misma razón: es el único dibujo que
+// todo el mundo ya sabe leer sin que nadie se lo explique. Un número («2,4 % de
+// pérdida») no lo entiende nadie que no sepa qué es un paquete, y un semáforo de
+// colores sin forma no se distingue si no distingues los colores.
+//
+// Por eso las barras cambian de ALTURA además de color: quien no ve bien el
+// rojo y el verde sigue viendo que hay una barra encendida en vez de tres.
+export function Cobertura({ calidad, className }: { calidad: string; className?: string }) {
+  if (calidad === 'sin-datos') return null;
+  const encendidas = calidad === 'buena' ? 3 : calidad === 'regular' ? 2 : 1;
+  const color =
+    calidad === 'buena' ? 'bg-emerald-400'
+    : calidad === 'regular' ? 'bg-amber-400'
+    : 'bg-rose-400';
+  const titulo =
+    calidad === 'buena' ? 'La conexión va bien'
+    : calidad === 'regular' ? 'La conexión va justa: puede que se corte alguna palabra'
+    : 'La conexión va mal: se están perdiendo palabras';
+  return (
+    <span
+      className={cn('inline-flex items-end gap-[2px] h-3', className)}
+      title={titulo}
+      role="img"
+      aria-label={titulo}
+    >
+      {[0, 1, 2].map(i => (
+        <span
+          key={i}
+          className={cn(
+            'w-[3px] rounded-[1px] transition-colors',
+            i === 0 ? 'h-1.5' : i === 1 ? 'h-2.5' : 'h-3',
+            i < encendidas ? color : 'bg-white/25',
+          )}
+        />
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Una frase que aparece encima de la llamada cuando pasa algo.
+ *
+ * Un solo sitio para los tres avisos —conexión mala, reconectando, y el error
+ * suelto— porque si cada uno se pintara donde le tocara acabarían solapándose:
+ * la conexión se pone mala JUSTO antes de reconectar, siempre.
+ */
+export function Aviso({ tono, children }: { tono: 'malo' | 'aviso'; children: any }) {
+  return (
+    <p
+      role="status"
+      className={cn(
+        'px-3 py-1.5 rounded-full text-[11px] font-bold text-center shadow-lg backdrop-blur',
+        'animate-in fade-in slide-in-from-top-1 duration-200',
+        tono === 'malo' ? 'bg-rose-500/95 text-white' : 'bg-amber-400/95 text-slate-900',
+      )}
+    >
+      {children}
+    </p>
   );
 }
