@@ -36,6 +36,13 @@ export const TIPOS_FUENTE = [
   'estudio', 'informe', 'noticia', 'dato', 'documento', 'observacion', 'otra',
 ] as const;
 
+/**
+ * The rungs a person decides. `sin_fuente` and `con_fuente` are missing on
+ * purpose: those two follow the citations, and a hand that could set them would
+ * make the badge say something the sources do not.
+ */
+export const VERACIDADES_REVISABLES = ['verificada', 'disputada', 'refutada'] as const;
+
 /** What a source may be attached to today. */
 export const ENTIDADES_CITABLES = ['debate', 'argumento'] as const;
 
@@ -178,6 +185,7 @@ export function registerVeracidadRoutes(app: Express, db: any) {
 
       const args = await db.execute(sql`
         SELECT a.id, a.debate_id, a.parent_id, a.postura, a.texto, a.profundidad, a.veracidad,
+               a.veracidad_por, a.veracidad_en, a.veracidad_motivo,
                a.impacto, a.votos, a.autor_user_id, a.is_ai_generated, a.created_at, a.updated_at,
                u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
         FROM argumentos a
@@ -519,6 +527,60 @@ export function registerVeracidadRoutes(app: Express, db: any) {
       res.status(201).json({ id });
     } catch (e: any) {
       console.error('fuente POST:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PUT /api/argumentos/:id/veracidad — a reviewer moves the badge.
+   *
+   * Level 3 (KNOWLEDGE), and never the author of the claim: signing off your
+   * own argument as verified is not a review, it is an assertion with extra
+   * steps. `sin_fuente` and `con_fuente` are not on offer here — those two the
+   * sources decide by themselves, and letting a person set them by hand would
+   * make the badge say something the citations do not.
+   */
+  app.put('/api/argumentos/:id/veracidad', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.KNOWLEDGE)) return;
+      const { veracidad, motivo } = req.body || {};
+      if (!valorValido(res, 'veracidad', veracidad, VERACIDADES_REVISABLES)) return;
+
+      const previo = (await db.execute(sql`
+        SELECT * FROM argumentos WHERE id = ${req.params.id} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (!previo) return res.status(404).json({ error: 'Ese argumento no existe.' });
+
+      // An admin is not exempt: the rule is about who wrote it, not about rank.
+      if (previo.autor_user_id === req.user!.id) {
+        return res.status(403).json({
+          error: 'No puedes revisar tu propio argumento. Pídeselo a otra persona de nivel Conocimiento.',
+        });
+      }
+      // Saying something is false without saying why leaves the author nothing
+      // to answer and the reader nothing to check.
+      if ((veracidad === 'refutada' || veracidad === 'disputada') && !motivo?.trim()) {
+        return res.status(400).json({
+          error: 'Di por qué. Marcar algo como refutado o disputado sin motivo no se puede responder ni comprobar.',
+        });
+      }
+
+      await db.execute(sql`
+        UPDATE argumentos SET
+          veracidad = ${veracidad},
+          veracidad_por = ${req.user!.displayName || req.user!.email || req.user!.id},
+          veracidad_en = now(),
+          veracidad_motivo = ${motivo?.trim() || null},
+          version = version + 1, updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${req.params.id}
+      `);
+      await registrarHistorial(db, {
+        entidad: 'argumento', tabla: 'argumentos', id: req.params.id, operacion: 'update',
+        previo, actor: req.user!.id,
+      });
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('veracidad PUT:', e?.cause?.message || e);
       res.status(500).json({ error: e.message });
     }
   });
