@@ -4807,3 +4807,26 @@ El coordinador paró la fusión con dos preguntas que no tenían respuesta técn
 **¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
 
 También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
+
+---
+
+## 2026-08-22 — One valid view per person, window and day (Programador 7)
+
+The ceiling #242 left, in prog4's number: one account could mint the 50-cent
+cap on every window it owns, every day — a thousand own windows, 500 points
+a day. Now `vistas_validas` (0084: window, user, day; primary key on the
+three) is inserted inside the mint transaction with ON CONFLICT DO NOTHING,
+and minting happens only when the row was actually inserted. The same attack
+drops to ~0.10/day and stops paying.
+
+Two counters, on purpose: `knowledge_windows.views` is the raw number shown
+to everyone (anyone can raise it, it pays nobody); `vistas_validas` is the
+number that WEIGHS — it mints today and it is what the monthly pot will read
+when Eugenio's success-weighted distribution is built. Not a junction table
+in the sense of the 43-table rule: a dated fact log like the ledger, holding
+nothing about the view except that it happened.
+
+Verified locally: 10 concurrent session views of one window plus 3 without
+a session → exactly 1 valid view, 1 ledger entry, +0.01 to the author. Test
+session tagged claude-dev-verificacion and deleted; rows, balance and view
+counter restored.
