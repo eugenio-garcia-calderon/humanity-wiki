@@ -13,6 +13,12 @@ import { useCarrito } from '../../hooks/useCarrito';
 // pone Stripe al saber a dónde va, así que prometer aquí un total sería
 // prometer un número que puede cambiar en la pantalla siguiente. Enseñar un
 // total que luego sube es la forma más rápida de que alguien cierre la página.
+//
+// ── TODO LO QUE SE TOCA MIDE 44 px ──────────────────────────────────────────
+// Salió a 36 y estaba mal. Es el mínimo que Apple lleva pidiendo desde 2010, y
+// aquí importa más que en otras pantallas: «uno menos» y «quitar» están a dos
+// dedos de distancia, y fallar el tiro no molesta —borra la línea—. Quien lo
+// sufre es alguien comprando con una mano en el autobús.
 
 export default function Cesta({ tienda }: { tienda: string }) {
   const { lineas, unidades, subtotal, cambiar, quitar, vaciar } = useCarrito(tienda);
@@ -78,8 +84,8 @@ export default function Cesta({ tienda }: { tienda: string }) {
           <div className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-slate-900">Tu cesta</h2>
-              <button type="button" onClick={() => setAbierta(false)}
-                      className="w-9 h-9 grid place-items-center rounded-xl hover:bg-slate-100">
+              <button type="button" onClick={() => setAbierta(false)} aria-label="Cerrar la cesta"
+                      className="w-11 h-11 grid place-items-center rounded-xl hover:bg-slate-100">
                 <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
@@ -94,18 +100,20 @@ export default function Cesta({ tienda }: { tienda: string }) {
                   <div className="flex items-center gap-1 shrink-0">
                     <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1)}
                             aria-label="Uno menos"
-                            className="w-9 h-9 grid place-items-center rounded-lg border border-slate-200">
+                            className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
                       <Minus className="w-3.5 h-3.5 text-slate-600" />
                     </button>
                     <span className="w-7 text-center text-sm font-bold tabular-nums">{l.cantidad}</span>
                     <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad + 1)}
                             aria-label="Uno más"
-                            className="w-9 h-9 grid place-items-center rounded-lg border border-slate-200">
+                            className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
                       <Plus className="w-3.5 h-3.5 text-slate-600" />
                     </button>
                   </div>
+                  {/* Separado del «uno menos» con `ml-1`: pegados, un dedo que
+                      falla el menos borra la línea entera. */}
                   <button type="button" onClick={() => quitar(l.producto_id)} aria-label="Quitar"
-                          className="w-9 h-9 grid place-items-center rounded-lg hover:bg-slate-100 shrink-0">
+                          className="w-11 h-11 ml-1 grid place-items-center rounded-lg hover:bg-slate-100 shrink-0">
                     <X className="w-3.5 h-3.5 text-slate-400" />
                   </button>
                 </li>
@@ -135,7 +143,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 Pago seguro con tarjeta. No hace falta cuenta.
               </p>
               <button type="button" onClick={vaciar}
-                      className="mt-3 w-full text-xs font-bold text-slate-400 hover:text-slate-600">
+                      className="mt-2 w-full h-11 text-xs font-bold text-slate-400 hover:text-slate-600">
                 Vaciar la cesta
               </button>
             </div>
