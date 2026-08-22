@@ -15,8 +15,9 @@
 // conocidos, no — para eso está el tablero de seguridad, que pide permiso.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Server, Loader2 } from 'lucide-react';
+import { ArrowLeft, Server, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import Tablero from '../../components/tablero/Tablero';
+import { cn } from '../../utils/cn';
 
 interface Gasto {
   actualizado: string;
@@ -27,6 +28,14 @@ interface Gasto {
     total_mes_eur?: number;
     consumo_mes_eur?: number;
     servidores?: { nombre: string; tipo: string; eur_mes: number; consumo_eur?: number }[];
+  };
+  copias?: {
+    hay: boolean;
+    ultima?: string;
+    objetos?: number;
+    fuera: 'ok' | 'sin_configurar' | 'error' | 'desconocido';
+    fuera_ultima?: string;
+    copias_fuera?: number;
   };
 }
 
@@ -44,6 +53,7 @@ export default function Servidores() {
   }, []);
 
   const s = gasto?.servidores;
+  const c = gasto?.copias;
 
   return (
     <div className="max-w-3xl mx-auto space-y-10">
@@ -107,6 +117,84 @@ export default function Servidores() {
               Se actualiza cada {gasto.cache_horas} h. Última lectura:{' '}
               {new Date(gasto.actualizado).toLocaleString('es-ES')}.
             </p>
+          </>
+        )}
+      </section>
+
+      {/* ══ LAS COPIAS DE SEGURIDAD ═══════════════════════════════════════════
+          Eugenio, 2026-08-22: «mete esta info de las copias de seguridad en la
+          parte de información».
+
+          NO ES UN CARTEL, ES UN DATO: lo que sale aquí lo lee el servidor de
+          los ficheros que escriben los propios servicios de copia, así que el
+          día que dejen de hacerse, esta sección lo dirá sola. Una página que
+          promete copias sin mirar si existen es peor que no tener página. */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6">
+        <h2 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400">
+          <ShieldCheck className="w-4 h-4" /> Las copias de seguridad
+        </h2>
+
+        {!c ? (
+          <p className="mt-4 text-sm text-slate-500">Ahora mismo no se puede leer el estado de las copias.</p>
+        ) : (
+          <>
+            <p className="mt-3 text-slate-700 leading-relaxed">
+              Todo lo que se escribe en esta plataforma se copia entera{' '}
+              <strong>una vez al día</strong>, y cada copia se comprueba antes de
+              darla por buena. Se guardan las de los últimos <strong>14 días</strong>{' '}
+              y la del día 1 de cada mes durante <strong>6 meses</strong>.
+            </p>
+
+            <ul className="mt-4 space-y-2 text-sm">
+              <li className="flex items-start gap-2">
+                <span className={cn('mt-1.5 w-2 h-2 shrink-0 rounded-full', c.hay ? 'bg-emerald-500' : 'bg-rose-500')} />
+                <span className="text-slate-700">
+                  {c.hay
+                    ? <>Copia del día hecha y comprobada{c.objetos ? <> — {c.objetos.toLocaleString('es-ES')} elementos dentro</> : null}</>
+                    : <>No hay copia del día. <strong>Esto es un problema y el equipo lo ve</strong></>}
+                  {c.ultima && <span className="block text-[11px] text-slate-400">
+                    Última: {new Date(c.ultima).toLocaleString('es-ES')}
+                  </span>}
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className={cn('mt-1.5 w-2 h-2 shrink-0 rounded-full',
+                  c.fuera === 'ok' ? 'bg-emerald-500' : c.fuera === 'error' ? 'bg-rose-500' : 'bg-amber-500')} />
+                <span className="text-slate-700">
+                  {c.fuera === 'ok' ? (
+                    <>
+                      <strong>Las copias salen del servidor.</strong> Se guardan además en
+                      un proveedor distinto{c.copias_fuera ? <>, donde hay {c.copias_fuera}</> : null}
+                      <span className="block text-[11px] text-slate-400">
+                        Una copia guardada en la misma máquina que protege no protege de
+                        perder la máquina.
+                      </span>
+                    </>
+                  ) : c.fuera === 'sin_configurar' ? (
+                    <>Las copias todavía <strong>no salen del servidor</strong>: se hacen, pero viven donde viven los datos</>
+                  ) : c.fuera === 'error' ? (
+                    <>La copia fuera del servidor <strong>está fallando</strong>. El equipo lo ve</>
+                  ) : (
+                    <>No se puede saber si las copias están saliendo del servidor</>
+                  )}
+                </span>
+              </li>
+            </ul>
+
+            {/* La frase que de verdad importa, y la que casi nadie puede decir. */}
+            <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
+              <strong>Y se restauran.</strong> No basta con guardar un fichero: hay que
+              poder abrirlo. Cada copia se comprueba al hacerla, y la vuelta entera
+              —traerla de fuera y volcarla— se ha hecho a mano y funcionó.
+            </p>
+
+            {c.fuera !== 'ok' && (
+              <p className="mt-3 flex items-start gap-2 text-[11px] text-amber-700">
+                <AlertTriangle className="mt-0.5 w-3.5 h-3.5 shrink-0" />
+                Esta sección dice lo que hay, no lo que nos gustaría que hubiera.
+              </p>
+            )}
           </>
         )}
       </section>
