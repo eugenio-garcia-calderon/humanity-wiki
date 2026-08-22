@@ -83,6 +83,12 @@
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "fase 2 economia: resenas de productos",
       "desde": "2026-08-22T20:03:26.889Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: resenas de productos",
+      "desde": "2026-08-22T20:08:07.232Z"
     }
   ]
 }
