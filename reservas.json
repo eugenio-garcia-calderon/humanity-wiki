@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "servicios y suscripciones en el alta",
-      "desde": "2026-08-22T14:45:43.341Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "entrada Comercio en el menu",
       "desde": "2026-08-22T14:48:47.122Z"
@@ -35,6 +29,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "libro solo-anadir y cuadre nocturno (acuerdo con prog4)",
       "desde": "2026-08-22T14:52:49.934Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "el limite de 10 productos se queda corto",
+      "desde": "2026-08-22T14:54:57.833Z"
     }
   ]
 }
