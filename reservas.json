@@ -53,6 +53,12 @@
       "ruta": "drizzle/0089_puntos_en_el_carrito.sql",
       "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
       "desde": "2026-08-22T20:12:45.563Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
+      "desde": "2026-08-22T20:12:49.364Z"
     }
   ]
 }
