@@ -46,6 +46,43 @@ services:
       timeout: 5s
       retries: 3
 
+  # Copias de seguridad de la base de datos (2026-08-22). Un volcado al día,
+  # comprobado, en un volumen del servidor — que es lo que la copia de disco de
+  # Hetzner se lleva luego fuera de la máquina. Cómo restaurarlo y por qué está
+  # hecho así: `deploy/copias/CLAUDE.md`.
+  #
+  # Misma imagen que `db` a propósito: `pg_dump` tiene que ser de la misma
+  # versión que el Postgres del que lee, o se niega a trabajar.
+  copias:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    # Sin esto, la imagen intentaría arrancar un Postgres suyo. Aquí solo
+    # queremos sus herramientas de cliente.
+    entrypoint: ["/bin/bash", "/opt/copias/copias.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${SQL_ADMIN_USER:-humanity}
+      PGPASSWORD: ${SQL_ADMIN_PASSWORD:?falta SQL_ADMIN_PASSWORD}
+      PGDATABASE: ${SQL_DB_NAME:-humanity}
+      COPIAS_DIR: /copias
+      COPIAS_DIAS: ${COPIAS_DIAS:-14}
+      COPIAS_MESES: ${COPIAS_MESES:-6}
+    volumes:
+      - ./deploy/copias:/opt/copias:ro
+      - copias:/copias
+    depends_on:
+      db:
+        condition: service_healthy
+    # El fallo peligroso de una copia no es que falle: es que deje de hacerse
+    # sin que nadie se entere. Si la última tiene más de 36 h, el contenedor
+    # sale como `unhealthy` en `docker ps`.
+    healthcheck:
+      test: ["CMD", "bash", "/opt/copias/salud.sh"]
+      interval: 15m
+      timeout: 30s
+      retries: 2
+      start_period: 5m
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -69,6 +106,9 @@ services:
 
 volumes:
   pgdata:
+  # Los volcados. Van en un volumen y no dentro del contenedor por lo mismo que
+  # `uploads`: un despliegue rehace el contenedor y se los llevaría por delante.
+  copias:
   uploads:
   caddy_data:
   caddy_config:
