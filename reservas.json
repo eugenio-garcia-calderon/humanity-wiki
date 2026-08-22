@@ -151,12 +151,6 @@
       "desde": "2026-08-22T21:37:31.718Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/pages/MiPedido.tsx",
-      "motivo": "confirmacion de compra + comprar ahora con puntos (Eugenio)",
-      "desde": "2026-08-22T21:38:14.879Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/knowledge/WindowContent.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
