@@ -74,9 +74,26 @@ prefiero un choque ocasional a tres agentes bloqueados.
 
 ## 3 · Áreas propias (para no hacer dos veces lo mismo)
 
-| | Programador 1 | Programador 2 | Programador 3 |
-|---|---|---|---|
-| **Suyo** | `src/server/**`, `src/db/**`, IA y chatbot, hormiguero, Tablas | páginas públicas, subdominios, compartir, despliegue e infraestructura (`deploy/**`, Caddy, certificados), móvil | PWA (`public/sw.js`, `src/pwa.ts`), instalación en iOS, cámara, sin conexión |
+| | Suyo |
+|---|---|
+| **Programador 1** | `src/server/**`, `src/db/**`, IA y chatbot, hormiguero, Tablas |
+| **Programador 2** | páginas públicas, subdominios, compartir, tiendas, **Caddy y certificados**, móvil |
+| **Programador 3** | PWA (`public/sw.js`, `src/pwa.ts`), instalación en iOS, cámara, sin conexión |
+| **Programador 4** | seguridad e integridad: `src/server/seguridad/**`, cifrado, registro sellado, clasificación de tablas |
+| **Programador 6** | escalabilidad: copias de seguridad de la base de datos, `cluster`, límites de peticiones (`src/server/limites/**`), subida de ficheros a almacenamiento de objetos, y los servicios que añada a `docker-compose.prod.yml` |
+| **Programador 7** | economía del punto: páginas informativas de tokenomics. **Nada que mueva dinero o saldos sin firma de Eugenio** |
+
+**El reparto de infraestructura, decidido el 2026-08-22** porque prog6 lo preguntó
+en vez de tocarlo: **prog2 se queda con Caddy, certificados, subdominios y el
+propio despliegue**; **prog6 se lleva la infraestructura de escalabilidad** —
+copias de seguridad, almacenamiento de objetos y los servicios nuevos del
+`docker-compose.prod.yml`. Las tres tareas de escalabilidad son una sola
+conversación y repartidas entre dos se cuentan mal. Cuando los dos tengan que
+tocar `docker-compose.prod.yml`, manda la reserva y se avisan.
+
+**Los límites de peticiones van en un módulo nuevo** (`src/server/limites/`), no
+dentro de `server.ts`, que sigue congelado. Registrarlo es **una línea**, y esa
+línea se pide a prog1, que es su área — igual que hizo prog4 con su guardián.
 
 Si tu tarea cae en el área de otro, **no la hagas**: dísela. Y antes de empezar
 cualquier cosa, `git fetch` y mira el registro de las últimas horas — puede que ya
