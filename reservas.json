@@ -23,6 +23,12 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "portada personalizable y quitar la columna de carpetas",
       "desde": "2026-08-22T16:21:04.408Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/auth.ts",
+      "motivo": "resolver el conflicto del borrado de cuenta con los limites de prog6",
+      "desde": "2026-08-22T16:29:07.595Z"
     }
   ]
 }
