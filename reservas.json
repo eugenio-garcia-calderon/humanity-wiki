@@ -53,12 +53,6 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "rehacer #235 sobre main",
       "desde": "2026-08-22T18:18:37.668Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entradas del piloto (#235 rehecha sobre el registro)",
-      "desde": "2026-08-22T18:19:35.329Z"
     }
   ]
 }
