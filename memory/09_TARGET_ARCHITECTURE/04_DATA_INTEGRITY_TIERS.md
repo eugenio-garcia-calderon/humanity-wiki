@@ -181,7 +181,18 @@ nothing.
 
 > **Verifiable by:** the same person being unable to approve their own proposal.
 
-### Phase F — Where the content came from
+### Phase F — Where the content came from, and who may read it
+
+> **Added 2026-08-22, measured against production:** `/uploads` is served by
+> `express.static` with **no session check at all** — a file returns `200` with no
+> cookie. Found while reviewing the new security board: the note can be hidden and
+> **its attachment cannot**. It applies to every private document anybody uploads,
+> not only to security notes.
+>
+> Closing it is not a patch, it is a decision table: a profile photo is public, a
+> document inside a private project is not, and today both live in the same
+> folder served the same way. That table comes before the code. Note
+> `INCMT4IJNSRHCM`.
 
 For a platform whose value is that its data is trustworthy, provenance is not a
 luxury:
