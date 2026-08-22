@@ -53,6 +53,12 @@
       "ruta": "drizzle/0090_cupones.sql",
       "motivo": "fase 5 economia: cupones de descuento del vendedor",
       "desde": "2026-08-22T20:27:44.264Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "fase 5 economia: cupones de descuento del vendedor",
+      "desde": "2026-08-22T20:27:48.680Z"
     }
   ]
 }
