@@ -42,8 +42,20 @@ question, not as a fact, because assuming it is what turns into a rejection.
 | What | Where it would come from |
 |---|---|
 | A contact e-mail for exercising data rights | Eugenio. The postal address above is legally sufficient, an address people actually write to is better |
-| The country the servers physically run in | A Hetzner config value, not in this repo. Hetzner is a German company; the datacentre region is a separate question |
 | Which provider holds the off-site backups | `COPIAS_REMOTO_CUBO`, set at deploy time |
+
+## Where the servers are: **Germany**
+
+Confirmed by Eugenio, 2026-08-23. It is not written in any config file in this
+repo, so **this line is the only record of it** — which is exactly why the
+privacy page could not state it before and why it belongs here rather than in
+the one page that needed it.
+
+It matters beyond the privacy text: an origin inside the EU is what makes the
+transfer story simple. Note that **Cloudflare sits in front**, and a CDN
+terminates the connection at the edge nearest the visitor, which may be outside
+the EU. The page says both things separately instead of collapsing them into
+"we are in Europe", because they are two different facts.
 
 See `memory/10_TIENDAS.md` for the store submission state and the measured data
 inventory behind the privacy page.
