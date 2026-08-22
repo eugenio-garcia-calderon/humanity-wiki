@@ -155,6 +155,12 @@
       "ruta": "entrada: buscador first",
       "motivo": "",
       "desde": "2026-08-22T22:02:24.745Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/DialogoCompartir.tsx",
+      "motivo": "dominio y buscadores fuera de la puerta del handle",
+      "desde": "2026-08-22T22:08:37.492Z"
     }
   ]
 }
