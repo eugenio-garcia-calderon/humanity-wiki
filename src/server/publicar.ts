@@ -332,6 +332,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         tipo: p.kind || null,
         modalidad: p.modality || null,
         periodo: p.billing_period || null,
+        // Una suscripción no cabe en una cesta: el cobro la rechaza si va con
+        // cualquier otra cosa, porque un pago único y una cuota mensual no
+        // tienen un «total» que signifique nada. Se dice AQUÍ para que la
+        // tarjeta no pinte un botón que iba a fallar.
+        se_puede_encestar: (p.modality || 'unico') !== 'suscripcion',
         // El stock que se enseña es el que se puede COMPRAR: lo que hay
         // menos lo que otra persona está pagando ahora mismo. Enseñar el
         // bruto pondría «queda 1» a alguien que va a recibir un «se ha

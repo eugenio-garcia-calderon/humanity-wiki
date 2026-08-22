@@ -182,12 +182,13 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
                 <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
                   className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold
                              disabled:opacity-60 disabled:cursor-wait">
-                  {compra.fase === 'abriendo' ? 'Abriendo el pago…' : 'Comprar'}
+                  {compra.fase === 'abriendo' ? 'Abriendo el pago…'
+                  : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar'}
                 </button>
                 {/* «Añadir» sólo dentro de una tienda: fuera de un subdominio
                     no hay cesta a la que añadir ni un vendedor único al que
                     pagarle todo junto. */}
-                {tienda && (
+                {tienda && p.se_puede_encestar !== false && (
                   <button type="button"
                     onClick={() => {
                       anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
