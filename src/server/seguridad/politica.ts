@@ -1,0 +1,337 @@
+// ============================================================================
+// QUIÉN PUEDE ESCRIBIR QUÉ — LA TABLA ÚNICA (fase 0, 2026-08-22)
+// ============================================================================
+// Eugenio: «esta herramienta la van a utilizar altos directivos y gobiernos y
+// no puede ser corrompible». El plan entero está en
+// `memory/09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`.
+//
+// EL PROBLEMA QUE RESUELVE ESTE FICHERO, MEDIDO. La plataforma tiene 150 rutas
+// que escriben. Casi todas comprueban permisos, pero cada una lo hace con su
+// propio ayudante (`requireAdmin`, `requiereSesion`, `puedeConTabla`,
+// `sesionDe`…), así que la pregunta «¿están todas autorizadas?» solo tiene
+// respuesta si una persona lee 150 trozos de código. Una pregunta así se acaba
+// respondiendo mal, y con gobiernos dentro eso no es deuda técnica: es el suelo.
+//
+// Aquí esa pregunta pasa a tener respuesta de máquina:
+// `node scripts/auditar-permisos.mjs` compara ESTA tabla con las rutas que hay
+// de verdad en el código, y falla si aparece una que nadie ha declarado.
+//
+// ── LAS TRES RESPUESTAS, TAMBIÉN AQUÍ ──────────────────────────────────────
+// Regla de la casa: todo componente tiene que poder decir «no lo sé» de forma
+// distinguible de un resultado válido. Por eso existe el guardián `revisar`:
+// significa «el análisis vio esto, pero NINGUNA PERSONA lo ha confirmado».
+// No es un aprobado y no se comporta como tal — `guardia.ts` no exige nada en
+// esas rutas, se limita a dejarlas como están.
+//
+// **El número de rutas `revisar` es el trabajo pendiente de la fase 0, y tiene
+// que llegar a cero.** Sale en la última línea de la auditoría.
+//
+// ── POR QUÉ DECLARAR Y NO DEDUCIR ──────────────────────────────────────────
+// Un análisis automático puede decir qué comprueba una ruta HOY. No puede decir
+// qué DEBERÍA comprobar: eso es una decisión, y una decisión no se deduce del
+// código que se quiere auditar. Si se dedujera, una ruta mal protegida se
+// auto-declararía correcta y la auditoría diría que todo está bien.
+
+/** Qué hace falta para poder escribir por una ruta. */
+export type Guardia =
+  /** Abierta a propósito: no puede exigir sesión porque es la puerta de entrada. */
+  | { tipo: 'publica'; porque: string }
+  /** No hay sesión, pero sí una firma que se verifica (Stripe). */
+  | { tipo: 'firma'; porque: string }
+  /** Cualquiera que haya iniciado sesión. */
+  | { tipo: 'sesion' }
+  /** Nivel mínimo de rol: 1 usuario · 2 verificado · 3 conocimiento · 4 administrador. */
+  | { tipo: 'nivel'; minimo: 1 | 2 | 3 | 4 }
+  /** Ser el dueño de la cosa, o tener `minimo` (por defecto, administrador). */
+  | { tipo: 'propietario'; minimo?: 1 | 2 | 3 | 4 }
+  /** Sesión de persona O token de programador IA. */
+  | { tipo: 'agente' }
+  /** NADIE LO HA REVISADO TODAVÍA. No es un aprobado: es un «no lo sé». */
+  | { tipo: 'revisar'; detectado: string };
+
+export interface Entrada {
+  m: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  ruta: string;
+  guardia: Guardia;
+  /** Por qué es ese nivel y no otro. Solo en las revisadas a mano. */
+  nota?: string;
+}
+
+/** Las revisadas a mano el 2026-08-22, leyendo el código de cada una.
+ *  El resto están más abajo, marcadas `revisar`. */
+const REVISADAS: Entrada[] = [
+  // ── La puerta de entrada ──────────────────────────────────────────────
+  { m: 'POST', ruta: '/api/auth/login', guardia: { tipo: 'publica', porque: 'es el propio inicio de sesión' } },
+  { m: 'POST', ruta: '/api/auth/register', guardia: { tipo: 'publica', porque: 'alta de cuenta nueva' } },
+  { m: 'POST', ruta: '/api/auth/google', guardia: { tipo: 'publica', porque: 'inicio de sesión con Google' } },
+  { m: 'POST', ruta: '/api/auth/password/forgot', guardia: { tipo: 'publica', porque: 'quien la ha olvidado no puede tener sesión' } },
+  { m: 'POST', ruta: '/api/auth/password/reset', guardia: { tipo: 'publica', porque: 'lleva su propio testigo de un solo uso, con caducidad' },
+    nota: 'auth.ts:532 — el permiso es el token del correo, no la sesión' },
+  { m: 'POST', ruta: '/api/auth/logout', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/auth/password/change', guardia: { tipo: 'sesion' }, nota: 'exige además la contraseña actual' },
+  { m: 'PUT', ruta: '/api/auth/me', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/auth/ui-settings', guardia: { tipo: 'sesion' } },
+
+  // ── Administración de personas: lo más sensible que hay ────────────────
+  { m: 'POST', ruta: '/api/admin/users', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/admin/users/:id/role', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'auth.ts:624 — cambiar el rol de alguien es cambiar quién manda' },
+  { m: 'POST', ruta: '/api/admin/users/:id/archivar', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/admin/users/:id/restaurar', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/admin/users/:id/reset-link', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'genera un enlace que abre la cuenta de otro: nivel 4 y registrado' },
+
+  // ── Dinero y puntos ───────────────────────────────────────────────────
+  { m: 'POST', ruta: '/api/admin/users/:id/puntos', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'puntos.ts:70 — HOY CREA PUNTOS DE LA NADA, sin tope ni contrapartida. La fase 1 le pone doble partida; el nivel 4 no es suficiente por sí solo' },
+  { m: 'POST', ruta: '/api/stripe/checkout/puntos', guardia: { tipo: 'sesion' }, nota: 'stripe.ts:265 — requireAuth; el saldo solo se acredita en el webhook' },
+  { m: 'POST', ruta: '/api/stripe/checkout/product', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/stripe/checkout/support', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/stripe/refunds', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'stripe.ts:299 — solo quien cobró, o un administrador' },
+  { m: 'POST', ruta: '/api/stripe/connect/onboard', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/stripe/connect/dashboard-link', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/stripe/connect/disconnect', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/stripe/webhook', guardia: { tipo: 'firma', porque: 'lo llama Stripe, no una persona; se verifica la firma del evento' } },
+  { m: 'POST', ruta: '/api/stripe/create-checkout-session', guardia: { tipo: 'sesion' },
+    nota: 'HOY LA IDENTIDAD SALE DEL CUERPO, NO DE LA SESIÓN: server.ts:326 coge `userId` y `email` de req.body y los mete en la metadata de Stripe; el webhook (server.ts:142) da de alta la membresía con ese user_id. Quien paga elige a qué cuenta se le abona. Declarada como sesión a propósito: el id tiene que venir de req.user.id. Está en server.ts, congelado — hablarlo con el Programador 1' },
+
+  // ── El núcleo de datos: territorios, indicadores, retos ────────────────
+  { m: 'POST', ruta: '/api/data/:entity', guardia: { tipo: 'nivel', minimo: 4 }, nota: 'server.ts:1088 requireAdmin. Estuvo abierta (PR #23)' },
+  { m: 'PUT', ruta: '/api/data/:entity/:id', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/data/:entity/:id', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/data/:entity/:id/restore', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/map/territories', guardia: { tipo: 'nivel', minimo: 4 } },
+
+  // ── El hormiguero: personas con sesión y programadores IA ──────────────
+  { m: 'POST', ruta: '/api/incidencias', guardia: { tipo: 'agente' },
+    nota: 'de un admin o de un agente entra en «esperando»; de cualquier otro, en «propuesta»' },
+  { m: 'PUT', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' } },
+  { m: 'DELETE', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' }, nota: 'solo la propia, o admin' },
+
+  // ── El navegador remoto: cada sesión es un Chromium de verdad ──────────
+  { m: 'POST', ruta: '/api/navegador/remoto', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/navegador/remoto/:id/entrada', guardia: { tipo: 'propietario' },
+    nota: 'navegadorRemoto.ts:305 — comprueba que la sesión es TUYA. Sin eso, un usuario movería el ratón de otro' },
+  { m: 'POST', ruta: '/api/navegador/remoto/:id/transcripcion', guardia: { tipo: 'propietario' } },
+  { m: 'DELETE', ruta: '/api/navegador/remoto/:id', guardia: { tipo: 'propietario' } },
+
+  // ── Las finanzas del Juego Vital: son de cada jugador ──────────────────
+  { m: 'PUT', ruta: '/api/finanzas', guardia: { tipo: 'sesion' }, nota: 'finanzas.ts:73 — escribe SIEMPRE sobre la fila del usuario de la sesión' },
+  { m: 'POST', ruta: '/api/finanzas/objetivos', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/finanzas/objetivos/:id', guardia: { tipo: 'propietario' } },
+  { m: 'DELETE', ruta: '/api/finanzas/objetivos/:id', guardia: { tipo: 'propietario' } },
+  { m: 'POST', ruta: '/api/juego/mundo', guardia: { tipo: 'sesion' }, nota: 'juego.ts:497 requiereUsuario' },
+
+  // ══ LO QUE ENTRÓ EL 2026-08-22 POR LA TARDE ═════════════════════════════
+  // Veinticinco rutas nuevas de otros cinco programadores en una tarde. Las
+  // cazó la auditoría al fusionar `main`, que es exactamente para lo que está:
+  // ninguna se declaró sola, y ninguna pudo entrar sin que alguien dijera qué
+  // permiso le toca.
+  { m: 'POST', ruta: '/api/auth/borrar-cuenta', guardia: { tipo: 'sesion' },
+    nota: 'auth.ts:585 — pide además la contraseña actual: borrar tu cuenta no puede depender solo de una cookie robada' },
+  { m: 'POST', ruta: '/api/auth/cancelar-borrado', guardia: { tipo: 'publica', porque: 'la cuenta está en cuenta atrás y su sesión ya no vale: se identifica con correo y contraseña' } },
+  { m: 'POST', ruta: '/api/medicion/reiniciar', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/publicar/comprar', guardia: { tipo: 'publica', porque: 'comprar en una tienda pública no exige cuenta, como en cualquier tienda' },
+    nota: 'publicar.ts:425 — los precios salen de la base de datos, nunca del cuerpo, y el pedido lo crea el aviso de Stripe. Detrás de COBRO_ENCENDIDO. Pide límite de peticiones: sin cuenta de por medio, un bucle reserva existencias que nadie va a comprar' },
+  { m: 'POST', ruta: '/api/publicar/mis-productos', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/publicar/mis-productos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/reports/:id', guardia: { tipo: 'nivel', minimo: 3 },
+    nota: 'resolver una denuncia es moderar: nivel 3, y queda quién la cerró' },
+  { m: 'PUT', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'los textos de las páginas públicas son la voz de la plataforma' },
+  { m: 'DELETE', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 } },
+
+  // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
+  // comprueba además que quien llama es una de las dos puntas.
+  { m: 'PUT', ruta: '/api/telecom/mi-numero', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/telecom/privacidad', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/contestar', guardia: { tipo: 'propietario' },
+    nota: 'telecom.ts:616 — solo contesta a quien va dirigida la llamada' },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/colgar', guardia: { tipo: 'propietario' },
+    nota: 'cuelga cualquiera de las dos puntas, y nadie más' },
+  { m: 'POST', ruta: '/api/telecom/senal', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/pantalla', guardia: { tipo: 'propietario' } },
+  { m: 'POST', ruta: '/api/telecom/escribiendo', guardia: { tipo: 'sesion' } },
+
+  // Veracidad: debates, argumentos y fuentes. Escribir pide cuenta; tocar lo
+  // ya escrito, ser su autor.
+  { m: 'POST', ruta: '/api/debates', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/debates/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/debates/:id/argumentos', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/argumentos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/argumentos/:id/archivar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/debates/:id/archivar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/veracidad/fuentes', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'de dónde sale una afirmación: lo puede aportar cualquiera con cuenta, y queda su nombre' },
+  { m: 'DELETE', ruta: '/api/veracidad/fuentes/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+];
+
+/** Generadas del análisis del código, SIN revisar por una persona.
+ *  Bajar este número a cero es el trabajo pendiente de la fase 0. */
+const SIN_REVISAR: Entrada[] = [
+  { m: 'DELETE', ruta: '/api/ai/conversations/:id', guardia: { tipo: 'propietario' },
+    nota: 'el WHERE lleva user_id: borrar la conversacion de otro no encuentra nada' },
+  { m: 'POST', ruta: '/api/ai/chat', guardia: { tipo: 'publica', porque: 'el chat sin sesion es una DECISION de Eugenio del 2026-08-22, sin limite de preguntas gratis. Lo que falta no es sesion: es un techo de gasto diario de la plataforma. Ver la migracion 0066 y la nota del hormiguero' } },
+  { m: 'POST', ruta: '/api/ai/generar-imagen', guardia: { tipo: 'sesion' },
+    nota: 'cuesta dinero de verdad y se apunta en ai_usage_charges a nombre de quien la pide' },
+  { m: 'POST', ruta: '/api/ai/actions/:id/decide', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'aprobar lo que la IA propone: solo quien lo pidio, o un administrador' },
+  { m: 'POST', ruta: '/api/ai/admin/reindex', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/archivo', guardia: { tipo: 'sesion' } },
+  { m: 'DELETE', ruta: '/api/archivo/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/bd/tablas', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'bd.ts — la tabla nace dentro de un proyecto: su creador, o un administrador' },
+  { m: 'POST', ruta: '/api/bd/tablas/:id/columnas', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'bd.ts:80 puedeConTabla — el ayudante que el analisis automatico no sabe leer' },
+  { m: 'PUT', ruta: '/api/bd/columnas/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'cambiar el tipo de una columna reinterpreta todo lo guardado en ella' },
+  { m: 'DELETE', ruta: '/api/bd/columnas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/bd/tablas/:id/vistas', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'una vista no cambia datos: basta con poder ver la tabla' },
+  { m: 'POST', ruta: '/api/bd/tablas/:id/filas', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/bd/filas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/bd/filas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/eventos', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/eventos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/eventos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/tareas/:id/vence', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/ai/documento', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/documentos', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/paginas/:id/proyecto', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/presentaciones', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/ai/presentacion', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/ventanas', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/ai/documento-bloque', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/finanzas/presupuestos', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'las cifras economicas de un proyecto: su dueno, o un administrador' },
+  { m: 'DELETE', ruta: '/api/finanzas/presupuestos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/guardar-web', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/juego/agentes', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/juego/agentes/importar', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/juego/agentes/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'juego.ts:31 agenteMio — el agente vive en el mundo de una persona' },
+  { m: 'POST', ruta: '/api/juego/agentes/:id/memoria', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/juego/agentes/:id/archivos', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/juego/agentes/:id/archivos', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/juego/agentes/:id/conversacion', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/juego/agentes/:id/archivar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/juego/agentes/:id/proyectos', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/juego/mundo/semilla', guardia: { tipo: 'sesion' },
+    nota: 'escribe siempre sobre la fila de quien llama; no acepta un user_id de fuera' },
+  { m: 'PUT', ruta: '/api/juego/mundo/:id', guardia: { tipo: 'propietario' },
+    nota: 'el WHERE lleva user_id: el id de otro no encuentra nada' },
+  { m: 'POST', ruta: '/api/juego/mundo/:id/archivar', guardia: { tipo: 'propietario' } },
+  { m: 'POST', ruta: '/api/juego/agentes/:id/convertir-en-portal', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/juego/mundo/semilla/convertir-en-portal', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/juego/mundo/:id/convertir-en-portal', guardia: { tipo: 'propietario' } },
+  { m: 'POST', ruta: '/api/maps', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/graphs', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/graphs/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/graphs/:id/layout', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/graphs/:id/windows/:windowId', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/windows/:id/papelera', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/windows/:id/restaurar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/knowledge/personal', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PATCH', ruta: '/api/publicaciones/:tipo/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'knowledge.ts:1059 accesoPublicacion — autor o colaborador; cambiar la visibilidad, solo el autor' },
+  { m: 'DELETE', ruta: '/api/publicaciones/:tipo/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/publicaciones/:tipo/:id/restaurar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/publicaciones/:tipo/:id/colaboradores', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'decidir quién más puede escribir: solo el autor, nunca un colaborador' },
+  { m: 'POST', ruta: '/api/carpetas', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/carpetas/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'knowledge.ts:1457 propiaCarpeta — del dueño y de nadie más, ni siquiera de un administrador' },
+  { m: 'DELETE', ruta: '/api/carpetas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/publicaciones/:tipo/:id/carpetas', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/carpetas/auto-organizar', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/graphs/:id/windows', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/windows/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/windows/:id/view', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'HOY NO EXIGE NADA Y REGALA PUNTOS: knowledge.ts:1707 suma 0,01 puntos al autor por cada llamada, sin sesion. Los puntos se compran a 100 = 100 EUR, asi que es fabricar dinero desde fuera. Declarada como nivel 1 a proposito: al pasar el guardian a exigir, se cierra. Ver nota del hormiguero.' },
+  { m: 'PUT', ruta: '/api/graphs/:id/entity-links', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/graphs/:id/edges', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/graphs/:id/edges/:edgeId', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/graphs/:id/edges/:edgeId/invertir', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/graphs/:id/edges/:edgeId', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/rate', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'una valoración por persona y cosa; el voto es de quien lo emite' },
+  { m: 'POST', ruta: '/api/comments', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'habla con su nombre delante: nivel 1 y autoría registrada' },
+  { m: 'POST', ruta: '/api/mensajes', guardia: { tipo: 'sesion' },
+    nota: 'no deja escribirse a uno mismo; el remitente sale de la sesion, nunca del cuerpo' },
+  { m: 'DELETE', ruta: '/api/elemento/:tipo/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/elemento/:tipo/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/personas', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'la agenda de cada uno: la ficha nace a su nombre' },
+  { m: 'PUT', ruta: '/api/personas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/personas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/grupos-personas', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/grupos-personas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/grupos-personas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/personas/:id/seguimiento', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/publicar/handle', guardia: { tipo: 'sesion' },
+    nota: 'el nombre publico con el que se conoce a alguien: se comprueba que este libre y solo se cambia el propio' },
+  { m: 'PUT', ruta: '/api/publicar/paginas/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'publicar una pagina la saca de dentro: solo su creador' },
+  { m: 'DELETE', ruta: '/api/publicar/paginas/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/proyectos', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/proyectos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/proyectos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/proyectos/:id/herramienta', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/roadmap', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'las tarjetas son del proyecto: manda quien lo creo' },
+  { m: 'PUT', ruta: '/api/roadmap/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/roadmap/:id', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'roadmap.ts:489 requireAdmin, y no el creador del proyecto como en las otras dos' },
+  { m: 'PUT', ruta: '/api/textos/:pagina/:clave', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'los textos de las paginas publicas son la VOZ de la plataforma: nivel 4 y queda quien lo cambio' },
+  { m: 'POST', ruta: '/api/publications', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/publications/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'social.ts — solo su autor, o un administrador' },
+  { m: 'POST', ruta: '/api/publications/:id/comments', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/react', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'una reaccion por persona y cosa; se apunta a nombre de quien reacciona' },
+  { m: 'POST', ruta: '/api/save', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'POST', ruta: '/api/follow', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'no deja seguirse a uno mismo' },
+  { m: 'PUT', ruta: '/api/comments/:id', guardia: { tipo: 'propietario', minimo: 4 },
+    nota: 'lo dicho es de quien lo dijo' },
+  { m: 'DELETE', ruta: '/api/comments/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/notifications/read', guardia: { tipo: 'propietario' },
+    nota: 'marca leidas SOLO las tuyas: el SQL filtra por user_id, mandar el id de otro no hace nada' },
+  { m: 'POST', ruta: '/api/report', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'denunciar exige tener cuenta: una denuncia anonima no se puede contrastar con nadie' },
+  { m: 'POST', ruta: '/api/products', guardia: { tipo: 'nivel', minimo: 2 },
+    nota: 'crear en el mercado pide cuenta verificada, segun el catalogo de niveles' },
+  { m: 'PUT', ruta: '/api/products/:id/pizarra', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/products/:id/proyecto', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/demands', guardia: { tipo: 'nivel', minimo: 2 } },
+  { m: 'POST', ruta: '/api/needs', guardia: { tipo: 'nivel', minimo: 2 } },
+  { m: 'POST', ruta: '/api/spotify/desconectar', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/youtube/desconectar', guardia: { tipo: 'sesion' } },
+];
+
+export const POLITICA: Entrada[] = [...REVISADAS, ...SIN_REVISAR];
+
+/** `/api/juego/agentes/:id/memoria` → expresión que casa con la ruta real. */
+const aRegExp = (ruta: string) =>
+  new RegExp('^' + ruta.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/:[^/]+/g, '[^/]+') + '/?$');
+
+const compilada = POLITICA.map((e) => ({ ...e, re: aRegExp(e.ruta) }));
+
+/** Qué dice la tabla de esta petición. `undefined` = no está declarada, que
+ *  para la auditoría es un fallo y para el guardián es un «no lo sé». */
+export function politicaDe(metodo: string, ruta: string): Entrada | undefined {
+  const m = metodo.toUpperCase();
+  // Primero la coincidencia exacta: `/api/admin/users` no debe caer en
+  // `/api/admin/users/:id/…`, y el orden del array no debería decidir eso.
+  return (
+    compilada.find((e) => e.m === m && e.ruta === ruta) ||
+    compilada.find((e) => e.m === m && e.re.test(ruta))
+  );
+}
+
+/** Cuántas hay sin revisar. Es la cifra que la fase 0 tiene que llevar a cero. */
+export const cuentaSinRevisar = () => POLITICA.filter((e) => e.guardia.tipo === 'revisar').length;
