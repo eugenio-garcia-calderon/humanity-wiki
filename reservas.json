@@ -95,12 +95,6 @@
       "ruta": "src/contexts/DataContext.tsx",
       "motivo": "fase 4: los 8 catalogos solo cuando alguien los pide",
       "desde": "2026-08-22T15:16:33.599Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada rama A",
-      "desde": "2026-08-22T15:20:51.714Z"
     }
   ]
 }
