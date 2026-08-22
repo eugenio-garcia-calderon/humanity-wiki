@@ -867,10 +867,21 @@ const MINUTOS_DE_RESERVA = 30;
  *  es casi siempre un error o alguien probando, no una compra. */
 const MAX_LINEAS = 20;
 
-/** Cuántos productos puede tener a la venta quien todavía no está
- *  verificado. Un límite se sube cuando alguien lo necesita; una puerta
- *  cerrada sólo se puede abrir del todo. */
-const MAX_PRODUCTOS_SIN_VERIFICAR = 10;
+/**
+ * Cuántos productos puede tener a la venta quien todavía no está verificado.
+ *
+ * Empezó en 10 con el argumento de que «un límite se sube cuando alguien lo
+ * necesita». Alguien lo necesitó **el mismo día**: montar una tienda de
+ * prueba realista —seis mieles, tres servicios y tres planes de suscripción—
+ * lo agotó antes de terminar. Una SaaS con tres planes y dos servicios ya va
+ * por cinco sin haber vendido nada.
+ *
+ * 30 es una tienda pequeña de verdad y sigue acotando el abuso: quien intente
+ * llenar esto de basura con treinta piezas se ve igual de lejos y se retira
+ * igual de rápido. El número no protege de nada que 10 no protegiera; sólo
+ * estorbaba a quien iba en serio.
+ */
+const MAX_PRODUCTOS_SIN_VERIFICAR = 30;
 
 /**
  * ¿Se puede pagar ya?
