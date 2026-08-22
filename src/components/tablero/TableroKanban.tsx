@@ -3,6 +3,7 @@ import { subirArchivo } from '../../utils/subir';
 import {
   X, Plus, Image as ImageIcon, Trash2, User as UserIcon,
   CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check, ChevronDown,
+  Camera, Video,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Adjuntos from '../archivo/Adjuntos';
@@ -401,6 +402,8 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const archivo = useRef<HTMLInputElement>(null);
+  const archivoVideo = useRef<HTMLInputElement>(null);
+  const archivoCarrete = useRef<HTMLInputElement>(null);
 
   // El título y el resumen se editan pinchándolos (ver `TextoEditable`). Hasta
   // 2026-08-20 había que pasar por un menú de tres puntos y un «modo edición»:
@@ -448,12 +451,24 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
     });
   };
 
-  const subirImagen = async (f: File) => {
+  /*
+   * Foto o vídeo, y desde la cámara (2026-08-22, Eugenio: «desde una tarea
+   * directamente tiene que haber la posibilidad de subir una foto o video a la
+   * tarea»).
+   *
+   * Subir una imagen ya existía; lo que faltaba era el vídeo y, sobre todo, que
+   * en un móvil se abriera LA CÁMARA en vez del carrete. El caso real es estar
+   * delante de la cosa —el montaje a medio hacer, la avería— y querer dejarlo
+   * apuntado en la tarea. Mandarte al carrete te obliga a salir, hacer la foto
+   * en otra aplicación y volver.
+   */
+  const subirMedio = async (f: File) => {
     setGuardando(true); setError(null);
     try {
       const sub = await subirArchivo(f);
       if (sub.error) throw new Error(sub.error);
-      await guardar({ bloques: [...bloques, { tipo: 'imagen', url: sub.url, pie: f.name }] });
+      const tipo = f.type.startsWith('video/') ? 'video' : 'imagen';
+      await guardar({ bloques: [...bloques, { tipo, url: sub.url, pie: f.name }] });
     } catch (e: any) { setError(e.message); setGuardando(false); }
   };
 
@@ -579,6 +594,13 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
                     <img src={b.url} alt={b.pie || ''} className="w-full" />
                     {b.pie && <figcaption className="text-[10px] text-slate-400 px-3 py-1.5">{b.pie}</figcaption>}
                   </figure>
+                ) : b.tipo === 'video' ? (
+                  <figure className="rounded-2xl overflow-hidden border border-slate-200">
+                    {/* `playsInline`: sin esto un iPhone se lleva el vídeo a
+                        pantalla completa al darle al play y te saca de la tarea. */}
+                    <video src={b.url} controls playsInline preload="metadata" className="w-full bg-black" />
+                    {b.pie && <figcaption className="text-[10px] text-slate-400 px-3 py-1.5">{b.pie}</figcaption>}
+                  </figure>
                 ) : (
                   <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 rounded-2xl p-3.5">
                     {b.texto}
@@ -609,11 +631,26 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
               className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300"
             />
             <div className="flex items-center gap-2">
-              <input ref={archivo} type="file" accept="image/*" className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) subirImagen(f); e.target.value = ''; }} />
-              <button onClick={() => archivo.current?.click()} disabled={guardando}
+              {/* `capture="environment"` abre la cámara del sistema en un móvil,
+                  con la trasera; en un ordenador el atributo se ignora y sale el
+                  diálogo de ficheros, que allí es lo correcto. */}
+              <input ref={archivo} type="file" accept="image/*" capture="environment" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) subirMedio(f); e.target.value = ''; }} />
+              <input ref={archivoVideo} type="file" accept="video/*" capture="environment" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) subirMedio(f); e.target.value = ''; }} />
+              <input ref={archivoCarrete} type="file" accept="image/*,video/*" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) subirMedio(f); e.target.value = ''; }} />
+              <button onClick={() => archivo.current?.click()} disabled={guardando} title="Hacer una foto"
                 className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-white transition-colors disabled:opacity-40">
-                <ImageIcon className="w-3.5 h-3.5" /> Imagen
+                <Camera className="w-3.5 h-3.5" /> Foto
+              </button>
+              <button onClick={() => archivoVideo.current?.click()} disabled={guardando} title="Grabar un vídeo"
+                className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-white transition-colors disabled:opacity-40">
+                <Video className="w-3.5 h-3.5" /> Vídeo
+              </button>
+              <button onClick={() => archivoCarrete.current?.click()} disabled={guardando} title="Elegir del carrete"
+                className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-white transition-colors disabled:opacity-40">
+                <ImageIcon className="w-3.5 h-3.5" /> Carrete
               </button>
               <button onClick={anadirTexto} disabled={guardando || !texto.trim()}
                 className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-40">
