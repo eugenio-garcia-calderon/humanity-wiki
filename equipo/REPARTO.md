@@ -15,13 +15,25 @@ Son tres problemas distintos y cada uno tiene su remedio.
 
 | Agente | Carpeta | Rama | Puerto |
 |---|---|---|---|
-| **Programador 1** | la raíz del repositorio | `prog1/…` | 3000 |
+| **Programador 1** | `.claude/worktrees/prog1` | `prog1/…` | 3000 |
 | **Programador 2** | `.claude/worktrees/prog2` | `prog2/…` | 3001 |
 | **Programador 3** | `.claude/worktrees/prog3` | `prog3/…` | 3002 |
 
 Son *worktrees* de git: carpetas separadas con ficheros separados, un solo
 repositorio detrás. Lo que uno guarda sin commitear **no existe** para los demás,
 así que ya no hay forma de borrárselo.
+
+**La raíz no es la copia de trabajo de nadie** (desde el 2026-08-22 por la tarde).
+Solo integración. Eso convierte «la raíz tiene cambios sin guardar» en el aviso
+mismo: esa tarde un agente estuvo trabajando dentro de la copia de otro y se vio
+**por casualidad**, porque el dueño buscaba otra cosa.
+
+Al montar una copia nueva, dos detalles que ahorran una tarde:
+
+| | |
+|---|---|
+| `.env` | **Enlace simbólico** a la raíz, no una copia. Los secretos siguen viviendo en un solo fichero: el día que haya que rotarlos, se rota uno |
+| `node_modules` | El `.gitignore` dice `node_modules/` con barra, y eso solo tapa carpetas — para git un enlace simbólico es un fichero. Va en `.git/info/exclude`, que es local. Si te sale `?? node_modules` en el `status`, es esto |
 
 **Nadie entra en la carpeta de otro.** Ni para mirar: para ver el código de otro
 está `git show`, `git diff` y las ramas.
