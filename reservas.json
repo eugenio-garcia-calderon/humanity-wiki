@@ -161,6 +161,18 @@
       "ruta": "src/pages/ChallengeProfile.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
       "desde": "2026-08-22T21:41:39.710Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/graph.ts",
+      "motivo": "",
+      "desde": "2026-08-22T21:45:01.084Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "buscador first: ordenar los resultados de /api/search",
+      "motivo": "",
+      "desde": "2026-08-22T21:45:01.084Z"
     }
   ]
 }
