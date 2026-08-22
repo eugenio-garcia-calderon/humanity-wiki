@@ -79,12 +79,6 @@
       "desde": "2026-08-22T15:23:07.320Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "una linea: Como van las herramientas",
-      "desde": "2026-08-22T15:25:23.530Z"
-    },
-    {
       "agente": "prog6",
       "ruta": "src/server/gasto.ts",
       "motivo": "quitar reconocimiento de la máquina de la respuesta pública",
