@@ -131,12 +131,6 @@
       "ruta": "src/components/juego/texturas.ts",
       "motivo": "la misma foto se subia a la GPU hasta 8 veces: 690 MB",
       "desde": "2026-08-22T18:45:55.447Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "equipo/DASHBOARD.md",
-      "motivo": "quien concede el turno",
-      "desde": "2026-08-22T18:55:17.642Z"
     }
   ]
 }
