@@ -32,7 +32,7 @@ import {
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
 import { useAuth } from '../../contexts/AuthContext';
-import { abrirVentana } from '../ventanas/bus';
+import { minimizarTodas, abrirVentana } from '../ventanas/bus';
 import SeccionMenu from './menu/SeccionMenu';
 import RamaMenu from './menu/RamaMenu';
 import type { NodoMenu } from './menu/tipos';
@@ -439,7 +439,9 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
             nombre SÍ se queda: es el único sitio donde la plataforma dice cómo
             se llama, y quitarlo de los dos la dejaría sin nombre en ninguna
             parte. Arriba, en la barra, va solo el logo por sitio. */}
-        <button onClick={() => navigate('/')} title="Ir al inicio"
+        {/* Las mismas dos cosas que el logo de la barra: navegar Y apartar las
+            ventanas, que si no tapan el inicio al que acabas de ir. */}
+        <button onClick={() => { minimizarTodas(); navigate('/'); }} title="Ir al inicio"
           className="min-w-0 flex-1 text-left flex items-center gap-2 hover:opacity-85 transition-opacity">
           <img src="/logo.svg" alt="" className="w-7 h-7 rounded-lg shrink-0" />
           <span className="text-sm font-extrabold tracking-tight text-slate-900 truncate">
