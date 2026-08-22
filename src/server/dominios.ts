@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { promises as dns } from 'node:dns';
 
 // ============================================================================
 // DOMINIO PROPIO PARA UNA PÁGINA — como en Notion (2026-08-22)
@@ -72,18 +73,43 @@ export function registerDominiosRoutes(app: Express, db: any) {
    */
   app.get('/api/dominios/permitido', async (req: Request, res: Response) => {
     try {
-      const d = normalizarDominio(req.query.host);
+      // ── LOS DOS NOMBRES, A PROPÓSITO ──────────────────────────────────
+      // Caddy llama con `?domain=`. Yo lo había escrito leyendo `?host=` y mis
+      // pruebas pasaban porque las hacía yo mismo con `?host=` — o sea, probé
+      // el lado equivocado de la conversación. Lo vio prog6 revisando.
+      //
+      // Fallaba hacia el lado seguro (nunca habría emitido un certificado en
+      // vez de emitir de más), pero habría significado que **ningún dominio
+      // propio funcionara jamás**, y sin ningún error visible.
+      //
+      // Se aceptan los dos y así deja de importar cuál manda esta versión.
+      const d = normalizarDominio(req.query.domain ?? req.query.host);
       if (!d) return res.status(403).send('no');
+
       const r = await db.execute(sql`
         SELECT 1 FROM dominios_paginas
         WHERE dominio = ${d} AND estado IN ('pendiente', 'activo')
         LIMIT 1
       `);
       if (!r.rows[0]) return res.status(403).send('no');
+
+      // ── Y QUE EL DNS APUNTE AQUÍ DE VERDAD ────────────────────────────
+      // Estar reclamado NO es ser suyo. Reclamar es un formulario con sesión
+      // de nivel 1, y el registro está abierto: cualquiera podía escribir
+      // trescientos dominios ajenos, hacer que pidiéramos trescientos
+      // certificados, fallar las trescientas validaciones y agotar el cupo de
+      // Let's Encrypt —dejando sin certificado a los dominios buenos y a las
+      // renovaciones de la casa—. Es exactamente el daño que este `ask` decía
+      // evitar, entrando por la otra puerta. Lo vio prog6 revisando.
+      //
+      // Así que se comprueba lo mismo que va a comprobar Let's Encrypt un
+      // segundo después. Hacerlo aquí convierte un fallo caro en un 403 gratis.
+      if (!(await apuntaAqui(d))) return res.status(403).send('no');
+
       res.status(200).send('ok');
     } catch {
-      // Ante la duda, NO. Un fallo de base de datos no puede convertirse en
-      // «emite certificados para lo que sea».
+      // Ante la duda, NO. Un fallo de base de datos o de DNS no puede
+      // convertirse en «emite certificados para lo que sea».
       res.status(403).send('no');
     }
   });
@@ -99,7 +125,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
    */
   app.get('/api/dominios/resolver', async (req: Request, res: Response) => {
     try {
-      const d = normalizarDominio(req.query.host);
+      const d = normalizarDominio(req.query.host ?? req.query.domain);
       if (!d) return res.status(404).json({ error: 'Dominio no válido.' });
 
       const dom = (await db.execute(sql`
@@ -276,4 +302,53 @@ export function registerDominiosRoutes(app: Express, db: any) {
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
+}
+
+/**
+ * ¿El DNS de este dominio apunta a esta máquina?
+ *
+ * Es la misma pregunta que hará Let's Encrypt al validar. Hacerla antes evita
+ * pedir certificados condenados a fallar, que es lo que agota el cupo.
+ *
+ * ── LA CACHÉ ES CORTA Y GUARDA TAMBIÉN LOS «NO» ─────────────────────────────
+ * Sesenta segundos. Guardar sólo los «sí» dejaría abierta la puerta de golpear
+ * con dominios que fallan: cada intento sería una consulta de DNS nueva. Y no
+ * puede ser larga, porque quien acaba de configurar su DNS quiere que funcione
+ * ya, no dentro de una hora.
+ */
+const cacheDns = new Map<string, { apunta: boolean; hasta: number }>();
+const VIDA_CACHE_MS = 60_000;
+
+async function apuntaAqui(dominio: string): Promise<boolean> {
+  const ahora = Date.now();
+  const guardado = cacheDns.get(dominio);
+  if (guardado && guardado.hasta > ahora) return guardado.apunta;
+
+  // Nuestras direcciones. Se leen del entorno para que cambiar de máquina no
+  // sea buscar una IP escrita a mano en un fichero de código.
+  const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
+    .split(',').map(x => x.trim()).filter(Boolean);
+
+  let apunta = false;
+  try {
+    // `www.` también vale: quien pone el CNAME en `www` y no toca la raíz
+    // tiene el dominio apuntando aquí igualmente.
+    const [v4, cname] = await Promise.allSettled([
+      dns.resolve4(dominio),
+      dns.resolveCname(dominio),
+    ]);
+    if (v4.status === 'fulfilled' && v4.value.some(ip => nuestras.includes(ip))) apunta = true;
+    if (!apunta && cname.status === 'fulfilled') {
+      apunta = cname.value.some(c => c.replace(/\.$/, '').toLowerCase().endsWith('humanity.wiki'));
+    }
+  } catch {
+    apunta = false;
+  }
+
+  // Se guarda el resultado sea cual sea: ver la nota de arriba.
+  cacheDns.set(dominio, { apunta, hasta: ahora + VIDA_CACHE_MS });
+  // Un mapa que sólo crece es una fuga. Con mil entradas se vacía entero: son
+  // sesenta segundos de caché, no un índice que haya que conservar.
+  if (cacheDns.size > 1000) cacheDns.clear();
+  return apunta;
 }

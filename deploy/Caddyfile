@@ -173,7 +173,19 @@ humanity.wiki {
 	}
 
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		# ── UN DÍA, NO UN AÑO, Y ES IMPORTANTE (2026-08-22) ──────────────────
+		# Aquí abajo el dominio NO ES NUESTRO. `Strict-Transport-Security` dice
+		# al navegador «a este dominio, sólo por HTTPS, durante este tiempo», y
+		# eso NO SE PUEDE DESHACER desde fuera.
+		#
+		# Con un año: alguien retira su dominio de la plataforma, se lo lleva a
+		# otro sitio sin HTTPS, y los navegadores que pasaron por aquí se niegan
+		# a abrirlo durante meses. Nosotros ya no lo servimos, así que el
+		# problema sería suyo y no podríamos arreglarlo.
+		#
+		# Un día protege igual mientras está aquí y caduca solo si se va. Lo vio
+		# prog6 revisando esto antes de que saliera.
+		Strict-Transport-Security "max-age=86400"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
