@@ -40,7 +40,10 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
   const [estado, setEstado] = useState<Estado>({ publico: publicoInicial, slug: null, handle: null });
   const [handle, setHandle] = useState('');
   const [slug, setSlug] = useState('');
-  const [indexable, setIndexable] = useState(true);
+  // `null` = TODAVÍA NO SE HA PREGUNTADO, y no es lo mismo que «no». Empezaba
+  // en `true`, o sea que publicar mandaba la página a Google sin que nadie lo
+  // decidiera — justo lo contrario de preguntar.
+  const [indexable, setIndexable] = useState<boolean | null>(null);
   const [compruebaHandle, setCompruebaHandle] = useState<{ libre: boolean; motivo: string | null } | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -54,7 +57,32 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
       .then(r => r.json())
       .then(j => { if (j.user?.handle) { setEstado(e => ({ ...e, handle: j.user.handle })); setHandle(j.user.handle); } })
       .catch(() => {});
-  }, []);
+
+    // Y CÓMO ESTÁ COMPARTIDA DE VERDAD. Antes esta pantalla no lo leía: daba
+    // por hecho que sí a los buscadores, así que quien había dicho que no
+    // reabría el diálogo y se veía marcado el «sí».
+    fetch(`/api/publicar/estado/${paginaId}`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!j) return;
+        // EL NOMBRE DEL ESPACIO SALE DE AQUÍ, y es la causa de un fallo que
+        // Eugenio vio el 2026-08-23: `/api/auth/me` NO devuelve `handle`, así
+        // que esta pantalla creía que nadie lo tenía nunca. Resultado: te pedía
+        // reservar un nombre que ya era tuyo, y como el resto del diálogo
+        // colgaba de esa condición, escondía las direcciones, los buscadores y
+        // el dominio propio a quien ya lo tenía todo.
+        setEstado(e => ({
+          ...e,
+          publico: j.publico,
+          slug: j.slug ?? e.slug,
+          handle: j.handle ?? e.handle,
+        }));
+        if (j.handle) setHandle(j.handle);
+        setIndexable(j.indexable);
+        if (j.slug) setSlug(j.slug);
+      })
+      .catch(() => {});
+  }, [paginaId]);
 
   /** Comprueba el nombre MIENTRAS se escribe. Sin esto, la única forma de saber
    *  si está libre es intentar guardarlo y que falle, que es la peor. */
@@ -88,7 +116,10 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
     const r = await fetch(`/api/publicar/paginas/${paginaId}`, {
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable }),
+      // Si todavía no ha contestado, se publica SIN indexar. La asimetría lo
+      // decide: estar en Google se tarda días en deshacer, y no estarlo se
+      // arregla con un clic. Ante la duda, la opción reversible.
+      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable: indexable === true }),
     });
     const j = await r.json();
     setOcupado(false);
@@ -226,26 +257,67 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
                 </div>
               </div>
 
-              {/* Y si además tiene un dominio comprado, puede vivir ahí. */}
-              <DominioPropio paginaId={paginaId} />
-
-              <label className="flex items-start gap-2 pt-1">
-                <input type="checkbox" checked={indexable} className="mt-0.5"
-                  onChange={async e => {
-                    setIndexable(e.target.checked);
-                    await fetch(`/api/publicar/paginas/${paginaId}`, {
-                      method: 'PUT', credentials: 'include',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ publico: true, indexable: e.target.checked }),
-                    });
-                  }} />
-                <span className="text-[11px] text-slate-600 leading-relaxed">
-                  <b>Que aparezca en Google.</b> Publicar y ser encontrable son cosas distintas:
-                  puedes mandar el enlace a tres personas sin que la página acabe en un buscador.
-                </span>
-              </label>
             </div>
           )}
+
+          {/* ── LOS BUSCADORES, PREGUNTADO Y NO SUPUESTO ───────────────────────
+              Eugenio, 2026-08-23: «configura el tema de indexación en buscadores
+              como google, preguntando al usuario si quiere».
+
+              Antes era una casilla marcada de antemano, escondida al final y
+              DENTRO del bloque que exige haber reservado el nombre del espacio.
+              O sea: quien publicaba sin reservar nombre acababa en Google sin
+              que nadie se lo preguntara, y sin ver siquiera la casilla.
+
+              Ahora son dos botones y hay que elegir. Publicar y ser encontrable
+              son decisiones distintas: se le puede mandar un enlace a tres
+              personas sin que la página acabe en un buscador. */}
+          {estado.publico && (
+            <div className="p-3 rounded-xl border border-slate-200 bg-white">
+              <p className="text-xs font-black text-slate-800">¿Quieres que aparezca en Google?</p>
+              <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">
+                Publicar y ser encontrable son cosas distintas. Puedes mandar el enlace
+                a quien quieras sin que la página acabe en un buscador.
+                {indexable === null && <><br /><b className="text-slate-600">De momento no aparece.</b> Elige.</>}
+              </p>
+              <div className="mt-2 flex gap-2">
+                {([[true, 'Sí, que la encuentren'], [false, 'No, solo con el enlace']] as const).map(([v, t]) => (
+                  <button key={String(v)} type="button"
+                    onClick={async () => {
+                      setIndexable(v);
+                      await fetch(`/api/publicar/paginas/${paginaId}`, {
+                        method: 'PUT', credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ publico: true, indexable: v }),
+                      });
+                    }}
+                    className={`flex-1 h-11 rounded-xl text-xs font-bold border transition-colors ${
+                      indexable === v
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {/* Google tarda en soltar lo que ya indexó, y decirlo evita el
+                  «lo he puesto en no y sigue saliendo» de dentro de dos días. */}
+              {indexable === false && (
+                <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
+                  Si ya estaba indexada, Google puede tardar días en quitarla.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* ── TU PROPIO DOMINIO ──────────────────────────────────────────────
+              Fuera del bloque de arriba a propósito. Estaba dentro, y ese bloque
+              exige haber reservado el nombre del espacio — así que quien no lo
+              había reservado NO VEÍA esta opción y no había forma de saber que
+              existía.
+              Y no hace falta: un dominio propio apuntando a una página no usa
+              el nombre del espacio para nada. Son dos direcciones distintas
+              para lo mismo, no una encima de la otra. */}
+          {estado.publico && <DominioPropio paginaId={paginaId} />}
 
           {fallo && (
             <div className="flex items-start gap-2 p-2.5 rounded-xl bg-rose-50 text-rose-700">
