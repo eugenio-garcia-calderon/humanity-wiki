@@ -3473,3 +3473,53 @@ upload request in `src/` today.
 The rest is listed with numbers and left alone on purpose: 547 bare buttons, 89
 hex colours, 9 copies of «close when you click outside». Doing them all in one
 sweep would produce a diff nobody can review.
+
+---
+
+## 2026-08-22 (III) — Hormiguero #1: two ways a table could lie about a number
+
+Eugenio's first note: «revisar creación de tablas y sus funcionalidades, y
+buscar bugs y resolverlos». Reviewed end to end against the running server —
+creating tables, all the column types, validation, formulas, aggregates across
+relations, views, permissions and deletion. Most of it held: writing text into a
+number is refused, a formula that names a missing column errors instead of
+guessing, an aggregate over nothing is empty and not zero, calculated columns
+cannot be written by hand, cycles are caught on create *and* on edit, and a
+deleted row leaves its link saying «(ya no existe)».
+
+Two things did lie, and both in the same way — producing a believable number
+instead of admitting a problem.
+
+### Renaming a column silently broke every formula that used it
+
+`Precio` = 100, `ConIVA` = `{Precio} * 1.21` = 121. Rename `Precio` to `Coste`
+— a cosmetic gesture — and ConIVA turns into «No hay ninguna columna que se
+llame Precio». In a table with fifteen formulas, one rename breaks all fifteen.
+
+Formulas address columns **by name**, so the stored text was the only reference
+and it stopped pointing anywhere. Now renaming rewrites the formulas of that
+table, in the one place where a column changes name, and answers how many it
+touched — an application that rewrites what a person typed cannot do it
+silently. The discarded alternative (storing ids and translating for display) is
+argued in `src/server/bd/renombrar.ts`.
+
+### Two columns could share a name, and `{Importe}` picked one
+
+Nothing stopped a second column called `Importe`, and the name→id map simply
+kept the last one. The formula then computed with whichever won the ordering and
+returned a perfectly plausible number. It is the `grupos[0]` fallback again:
+choosing for the user when you don't know.
+
+Now duplicates are refused on create and on rename, with a message that says
+why. And for tables that already had one, the formula answers «hay más de una
+columna que se llama así» instead of choosing.
+
+**A third bug appeared while testing the fix**, which is why it was worth
+testing rather than reasoning: when the old name *was* duplicated, the rewrite
+happily rewrote the formulas that meant the *other* column. Renaming one of two
+`Importe` now leaves every formula alone — which is also the right answer,
+because with one `Importe` left they resolve correctly on their own. And the
+check has to be made *before* the update: read afterwards, the old name is gone
+and the count comes back as one.
+
+Test data and the local verification session were deleted afterwards.
