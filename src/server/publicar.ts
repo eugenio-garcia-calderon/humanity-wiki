@@ -387,93 +387,153 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * `nombre.humanity.wiki` termina ahí; mandarlo a `humanity.wiki/mercado`
    * sería sacarlo de la tienda justo al pagar.
    */
+  /**
+   * COMPRAR SIN CUENTA, UNA COSA O VARIAS — `POST /api/publicar/comprar`
+   *
+   * Fase 3 (comprar sin cuenta) y fase 7 (carrito). Acepta las dos formas:
+   *   { producto_id, cantidad }              una sola cosa
+   *   { lineas: [{ producto_id, cantidad }] } un carrito
+   *
+   * ── POR QUÉ NO REUTILIZA `/api/stripe/checkout/product` ────────────────────
+   * Aquella ruta exige sesión y guarda `buyer_id`, porque nació para el
+   * mercado de dentro. Aquí no hay comprador con cuenta: su identidad es un
+   * correo, no una fila de `users`.
+   *
+   * ── TODO DEL MISMO VENDEDOR ───────────────────────────────────────────────
+   * Un pago va a UNA cuenta de Stripe. Mezclar dos vendedores en un cobro
+   * obligaría a repartir el dinero entre dos destinos, y si uno de los dos no
+   * ha terminado su alta, el otro cobraría por él. Se rechaza y se dice por
+   * qué, en vez de cobrar y repartir mal.
+   *
+   * ── EL ENVÍO SE COBRA UNA VEZ ─────────────────────────────────────────────
+   * Tres tarros del mismo sitio van en la misma caja. Se cobra el envío más
+   * caro de lo que se lleva, no la suma: sumarlos cobraría tres portes por un
+   * paquete.
+   */
   app.post('/api/publicar/comprar', async (req: Request, res: Response) => {
     try {
-      const { producto_id, cantidad, volver_a } = req.body || {};
-      const unidades = Math.max(1, Math.min(99, Number(cantidad) || 1));
+      const cuerpo = req.body || {};
+      // Las dos formas acaban siendo la misma lista.
+      const crudas: any[] = Array.isArray(cuerpo.lineas) && cuerpo.lineas.length
+        ? cuerpo.lineas
+        : [{ producto_id: cuerpo.producto_id, cantidad: cuerpo.cantidad }];
 
-      const p = (await db.execute(sql`
-        SELECT id, name, description, price_cents, currency, stock, created_by, modality, billing_period,
-               kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo
-        FROM products WHERE id = ${String(producto_id || '')} AND archived_at IS NULL
-      `)).rows[0] as any;
-
-      if (!p) return res.status(404).json({ error: 'Ese producto ya no está a la venta.' });
-      if (!p.price_cents) {
-        return res.status(400).json({ error: 'Este producto no tiene precio: hay que preguntar antes de comprarlo.' });
+      if (crudas.length > MAX_LINEAS) {
+        return res.status(400).json({ error: `No se pueden comprar más de ${MAX_LINEAS} cosas distintas de una vez.` });
       }
-      // `null` sigue sin ser cero: quien no lleva la cuenta del stock puede
-      // vender, quien la lleva y está a cero no.
-      //
-      // Y lo disponible NO es la columna: es la columna menos lo que otras
-      // personas están pagando en este momento. Sin restar las reservas, dos
-      // compradores del último tarro pasan los dos esta comprobación.
-      const llevaCuenta = p.stock !== null && p.stock !== undefined;
-      const disponible = llevaCuenta ? Number(p.stock) - await reservado(db, p.id) : null;
-      if (disponible !== null && disponible < unidades) {
-        return res.status(409).json({
-          error: disponible <= 0 ? 'Se ha agotado.' : `Solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
-          stock: Math.max(0, disponible),
+
+      // Un mismo producto repetido en el carrito se suma en una sola línea: si
+      // no, se reservaría dos veces y el stock se comprobaría contra sí mismo.
+      const pedidas = new Map<string, number>();
+      for (const l of crudas) {
+        const id = String(l?.producto_id || '').trim();
+        if (!id) continue;
+        const n = Math.max(1, Math.min(99, Number(l?.cantidad) || 1));
+        pedidas.set(id, Math.min(99, (pedidas.get(id) || 0) + n));
+      }
+      if (pedidas.size === 0) return res.status(400).json({ error: 'No has elegido nada.' });
+
+      const productos = (await db.execute(sql`
+        SELECT id, name, description, price_cents, currency, stock, created_by, modality,
+               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo
+        FROM products
+        WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
+          AND archived_at IS NULL
+      `)).rows as any[];
+
+      // Se comprueba TODO antes de cobrar NADA. Cobrar la mitad de un carrito
+      // y descubrir en la segunda línea que no había es peor que no cobrar.
+      const lineas: any[] = [];
+      for (const [id, unidades] of pedidas) {
+        const p = productos.find(x => x.id === id);
+        if (!p) return res.status(404).json({ error: 'Una de las cosas que llevas ya no está a la venta.', producto_id: id });
+        if (!p.price_cents) {
+          return res.status(400).json({ error: `«${p.name}» no tiene precio: hay que preguntar antes de comprarlo.`, producto_id: id });
+        }
+        const llevaCuenta = p.stock !== null && p.stock !== undefined;
+        const disponible = llevaCuenta ? Number(p.stock) - await reservado(db, p.id) : null;
+        if (disponible !== null && disponible < unidades) {
+          return res.status(409).json({
+            error: disponible <= 0
+              ? `«${p.name}» se ha agotado.`
+              : `De «${p.name}» solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
+            producto_id: id, stock: Math.max(0, disponible),
+          });
+        }
+        lineas.push({ p, unidades, llevaCuenta });
+      }
+
+      const vendedores = new Set(lineas.map(l => l.p.created_by || ''));
+      if (vendedores.size > 1) {
+        return res.status(400).json({
+          error: 'Todo lo que se paga junto tiene que ser de la misma persona. Haz un pago por cada tienda.',
         });
       }
 
-      // La vuelta se limita al propio sitio: aceptar una dirección cualquiera
-      // del cuerpo de la petición convertiría esto en un trampolín para mandar
-      // a la gente a donde quiera quien monte el enlace.
-      const destino = destinoSeguro(volver_a);
+      // Una suscripción no se mezcla con nada: se cobra sola y con su
+      // periodicidad. Un pago único y una cuota mensual en la misma sesión no
+      // tienen un «total» que signifique algo.
+      const suscripciones = lineas.filter(l => l.p.modality === 'suscripcion');
+      if (suscripciones.length && lineas.length > 1) {
+        return res.status(400).json({ error: 'Una suscripción se paga por separado.' });
+      }
+      const suscripcion = suscripciones.length === 1;
 
-      const vendedor = p.created_by
-        ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${p.created_by}`)).rows[0] as any
+      const moneda = (lineas[0].p.currency || 'EUR').toLowerCase();
+      if (lineas.some(l => (l.p.currency || 'EUR').toLowerCase() !== moneda)) {
+        return res.status(400).json({ error: 'No se pueden pagar juntas cosas en monedas distintas.' });
+      }
+
+      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const destino = destinoSeguro(cuerpo.volver_a);
+      const esFisico = lineas.some(l => (l.p.kind || '') === 'fisico');
+
+      // El porte más caro de lo que se lleva, no la suma: va todo en una caja.
+      // Y si CUALQUIERA de las líneas tiene umbral de envío gratis y el
+      // subtotal lo pasa, sale gratis: quien puso el umbral está diciendo «a
+      // partir de aquí lo pago yo».
+      const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
+      const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
+      const gratisPorUmbral = fisicas.some(l =>
+        l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined &&
+        subtotal >= Number(l.p.envio_gratis_desde_centimos));
+      const envioCobrado = !esFisico ? null
+        : conPorte.length === 0 ? null
+        : gratisPorUmbral ? 0
+        : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
+
+      const vendedorId = lineas[0].p.created_by;
+      const vendedor = vendedorId
+        ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${vendedorId}`)).rows[0] as any
         : null;
       const reparte = !!vendedor?.charges_enabled;
-      const comision = Math.round((p.price_cents * unidades * COMISION_BPS) / 10000);
-      const suscripcion = p.modality === 'suscripcion';
-
-      // ── EL ENVÍO ────────────────────────────────────────────────────────
-      // Sólo para lo que se envía de verdad. Un producto digital que pidiera
-      // la dirección de casa estaría pidiendo un dato que no necesita, y eso
-      // es lo que hace desconfiar a quien compra.
-      const esFisico = (p.kind || '') === 'fisico';
-      const envioBase = p.envio_centimos === null || p.envio_centimos === undefined
-        ? null : Number(p.envio_centimos);
-      const total = p.price_cents * unidades;
-      const umbral = p.envio_gratis_desde_centimos === null || p.envio_gratis_desde_centimos === undefined
-        ? null : Number(p.envio_gratis_desde_centimos);
-      const envioCobrado = envioBase === null ? null
-        : (umbral !== null && total >= umbral ? 0 : envioBase);
-
-      const opcionesEnvio = esFisico && envioCobrado !== null ? [{
-        shipping_rate_data: {
-          type: 'fixed_amount' as const,
-          fixed_amount: { amount: envioCobrado, currency: (p.currency || 'EUR').toLowerCase() },
-          display_name: envioCobrado === 0 ? 'Envío gratis' : 'Envío',
-          ...(p.envio_plazo ? { delivery_estimate: undefined } : {}),
-        },
-      }] : undefined;
+      const comision = Math.round((subtotal * COMISION_BPS) / 10000);
 
       const stripe = getStripe();
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
-        // Alojada en Stripe, no incrustada: la incrustada necesita que la
-        // página monte el componente de Stripe, y esta página se sirve a
-        // alguien sin cuenta y sin la aplicación cargada.
         ui_mode: 'hosted',
-        line_items: [{
+        line_items: lineas.map(l => ({
           price_data: {
-            currency: (p.currency || 'EUR').toLowerCase(),
-            product_data: { name: p.name, description: p.description || undefined },
-            unit_amount: p.price_cents,
-            ...(suscripcion ? { recurring: { interval: p.billing_period === 'anual' ? 'year' : 'month' } } : {}),
+            currency: moneda,
+            product_data: { name: l.p.name, description: l.p.description || undefined },
+            unit_amount: l.p.price_cents,
+            ...(suscripcion ? { recurring: { interval: l.p.billing_period === 'anual' ? 'year' as const : 'month' as const } } : {}),
           },
-          quantity: unidades,
-        }],
-        // El correo es lo único que se le pide: es lo que hace falta para
-        // mandarle el recibo y para que el vendedor sepa a quién responder.
+          quantity: l.unidades,
+        })),
         ...(suscripcion ? {} : { customer_creation: 'always' as const }),
-        // La dirección sólo se pide si hay algo que llevar a algún sitio.
         ...(esFisico ? {
           shipping_address_collection: { allowed_countries: [...PAISES_DE_ENVIO] },
-          ...(opcionesEnvio ? { shipping_options: opcionesEnvio } : {}),
+          ...(envioCobrado !== null ? {
+            shipping_options: [{
+              shipping_rate_data: {
+                type: 'fixed_amount' as const,
+                fixed_amount: { amount: envioCobrado, currency: moneda },
+                display_name: envioCobrado === 0 ? 'Envío gratis' : 'Envío',
+              },
+            }],
+          } : {}),
         } : {}),
         ...(reparte && !suscripcion ? {
           payment_intent_data: {
@@ -483,149 +543,46 @@ export function registerPublicarRoutes(app: Express, db: any) {
         } : {}),
         metadata: {
           kind: 'compra_publica',
-          product_id: p.id,
-          quantity: String(unidades),
-          vendedor_id: p.created_by || '',
+          vendedor_id: vendedorId || '',
           envio_centimos: envioCobrado === null ? '' : String(envioCobrado),
+          // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
+          // pedido sin volver a preguntarle al navegador — que para entonces
+          // ya no está.
+          lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.p.price_cents])),
+          // Se conservan para los pedidos de una sola cosa, que es lo que ya
+          // existía y sigue funcionando igual.
+          product_id: lineas.length === 1 ? lineas[0].p.id : '',
+          quantity: lineas.length === 1 ? String(lineas[0].unidades) : '',
         },
         success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`,
         cancel_url: `${destino}?compra=cancelada`,
-        // Media hora para pagar. Es lo que dura la reserva del stock: pasado
-        // ese rato el tarro vuelve al escaparate, y la sesión tiene que morir
-        // a la vez o alguien pagaría algo que ya no está reservado.
         expires_at: Math.floor(Date.now() / 1000) + MINUTOS_DE_RESERVA * 60,
       });
 
-      // La reserva se anota DESPUÉS de que Stripe acepte: si la creación de
-      // la sesión falla, no queda stock retenido por una compra que nunca
-      // existió. Sólo se anota si se lleva la cuenta del stock; a quien no la
-      // lleva no hay nada que reservarle.
-      if (llevaCuenta) {
+      // Las reservas se anotan DESPUÉS de que Stripe acepte: si la sesión
+      // falla, no queda stock retenido por una compra que nunca existió.
+      for (const l of lineas) {
+        if (!l.llevaCuenta) continue;
         await db.execute(sql`
           INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at)
-          VALUES (${'RSV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase()},
-                  ${p.id}, ${unidades}, ${sesion.id}, 'abierta',
+          VALUES (${'RSV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
+                  ${l.p.id}, ${l.unidades}, ${sesion.id}, 'abierta',
                   now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval)
-          ON CONFLICT (stripe_session_id) DO NOTHING
+          ON CONFLICT (stripe_session_id, producto_id) DO NOTHING
         `);
       }
 
       res.json({
         url: sesion.url, reparte, comision_centimos: comision,
+        subtotal_centimos: subtotal,
         envio_centimos: envioCobrado,
         pide_direccion: esFisico,
+        lineas: lineas.length,
       });
     } catch (e: any) {
       console.error('comprar publico:', e);
       res.status(500).json({ error: 'No se ha podido abrir el pago. Inténtalo dentro de un momento.' });
     }
-  });
-
-  /**
-   * ¿DÓNDE ESTÁ LO MÍO? — `GET /api/publicar/pedido/:codigo`
-   *
-   * Fase 6. Quien compró sin cuenta no tiene un «mis pedidos» donde mirar, así
-   * que el código es su llave. Se le da al pagar y le llega en el recibo.
-   *
-   * ── POR QUÉ TAMBIÉN PIDE EL CORREO ────────────────────────────────────────
-   * El código sólo tiene 8 caracteres. Sin una segunda cosa que sepa quien
-   * compró, alguien podría probar códigos hasta dar con uno y leer el nombre y
-   * la dirección de casa de un desconocido. Con el correo, acertar los dos a
-   * la vez deja de ser cuestión de insistir.
-   *
-   * Y la respuesta es la misma —404— tanto si el código no existe como si el
-   * correo no cuadra. Decir «ese código existe pero el correo no es» ya
-   * confirmaría que el código existe, que es justo lo que no se quiere
-   * confirmar.
-   */
-  app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
-    try {
-      const codigo = String(req.params.codigo || '').toUpperCase().trim();
-      const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) {
-        return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
-      }
-
-      const r = await db.execute(sql`
-        SELECT codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
-        FROM pedidos
-        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
-      `);
-      const p = r.rows[0] as any;
-      if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
-
-      res.json({
-        codigo: p.codigo,
-        producto: p.producto_nombre,
-        unidades: Number(p.unidades),
-        importe_centimos: Number(p.importe_centimos),
-        envio_centimos: Number(p.envio_centimos),
-        moneda: p.moneda,
-        estado: p.estado,
-        // `null` y no una cadena vacía: «todavía no hay número de seguimiento»
-        // no es «el número de seguimiento es ''».
-        seguimiento: p.seguimiento || null,
-        // La ciudad, no la calle. Basta para que quien mira reconozca que es
-        // su pedido, y una dirección completa en una página que se abre con un
-        // código de ocho letras es más de lo que hace falta enseñar.
-        ciudad: p.direccion_envio?.city || null,
-        hecho_el: p.created_at,
-        cambiado_el: p.updated_at,
-      });
-    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
-
-  /**
-   * ¿QUÉ TENGO QUE ENVIAR? — `GET /api/publicar/mis-ventas`
-   *
-   * La otra mitad de la fase 6. Con sesión, porque aquí sí hay una cuenta: la
-   * de quien vende. Devuelve SUS pedidos y sólo los suyos, y aquí sí va la
-   * dirección entera, que es lo que hay que escribir en la caja.
-   */
-  app.get('/api/publicar/mis-ventas', async (req: Request, res: Response) => {
-    try {
-      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
-      const r = await db.execute(sql`
-        SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, comprador_email, comprador_nombre, direccion_envio,
-               estado, seguimiento, created_at
-        FROM pedidos
-        WHERE vendedor_user_id = ${req.user.id}
-        ORDER BY created_at DESC
-        LIMIT 200
-      `);
-      res.json({ pedidos: r.rows });
-    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
-  });
-
-  /**
-   * MARCAR UN PEDIDO COMO ENVIADO — `PUT /api/publicar/mis-ventas/:id`
-   *
-   * Sólo quien lo vendió, y sólo hacia adelante en los estados que tienen
-   * sentido. El `WHERE vendedor_user_id` no es un adorno: sin él, cualquiera
-   * con sesión podría marcar como entregado el pedido de otro.
-   */
-  app.put('/api/publicar/mis-ventas/:id', async (req: Request, res: Response) => {
-    try {
-      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
-      const { estado, seguimiento, nota } = req.body || {};
-      const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
-      if (estado && !VALIDOS.includes(estado)) {
-        return res.status(400).json({ error: 'Ese estado no existe.' });
-      }
-      const r = await db.execute(sql`
-        UPDATE pedidos SET
-          estado = COALESCE(${estado || null}, estado),
-          seguimiento = COALESCE(${seguimiento ?? null}, seguimiento),
-          nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
-          updated_at = now()
-        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
-        RETURNING codigo, estado, seguimiento
-      `);
-      if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
-      res.json(r.rows[0]);
-    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
@@ -701,6 +658,10 @@ const PAISES_DE_ENVIO = [
 
 /** Media hora para pagar: lo que dura la reserva y lo que dura la sesión. */
 const MINUTOS_DE_RESERVA = 30;
+
+/** Cuántas cosas distintas caben en un pago. Un carrito de cincuenta líneas
+ *  es casi siempre un error o alguien probando, no una compra. */
+const MAX_LINEAS = 20;
 
 /**
  * Cuántas unidades de este producto está pagando alguien AHORA MISMO.

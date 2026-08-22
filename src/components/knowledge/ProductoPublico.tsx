@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff, Truck } from 'lucide-react';
+import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff, Truck, Check } from 'lucide-react';
+import { useCarrito } from '../../hooks/useCarrito';
+import { subdominioDeUsuario } from '../../utils/subdominio';
 
 // ============================================================================
 // UN PRODUCTO EN UNA PÁGINA PÚBLICA — fase 2 del plan de tiendas (2026-08-22)
@@ -31,7 +33,12 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   // página. Sin esto, el navegador pinta el icono roto encima de la tarjeta.
   const [fotoRota, setFotoRota] = useState(false);
   const [compra, setCompra] = useState<Compra>({ fase: 'quieto' });
-  useEffect(() => { setFotoRota(false); setCompra({ fase: 'quieto' }); }, [id]);
+  const [anadido, setAnadido] = useState(false);
+  // El carrito es de ESTA tienda. Fuera de un subdominio no hay tienda a la
+  // que pertenecer, así que tampoco hay cesta: sólo compra directa.
+  const tienda = subdominioDeUsuario();
+  const { anadir } = useCarrito(tienda || 'general');
+  useEffect(() => { setFotoRota(false); setCompra({ fase: 'quieto' }); setAnadido(false); }, [id]);
 
   async function comprar() {
     setCompra({ fase: 'abriendo' });
@@ -141,11 +148,28 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
 
           {puedeComprarse(p) && (
             <div className="mt-3">
-              <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
-                className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold
-                           disabled:opacity-60 disabled:cursor-wait">
-                {compra.fase === 'abriendo' ? 'Abriendo el pago…' : 'Comprar'}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
+                  className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold
+                             disabled:opacity-60 disabled:cursor-wait">
+                  {compra.fase === 'abriendo' ? 'Abriendo el pago…' : 'Comprar'}
+                </button>
+                {/* «Añadir» sólo dentro de una tienda: fuera de un subdominio
+                    no hay cesta a la que añadir ni un vendedor único al que
+                    pagarle todo junto. */}
+                {tienda && (
+                  <button type="button"
+                    onClick={() => {
+                      anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
+                      setAnadido(true);
+                      window.setTimeout(() => setAnadido(false), 1600);
+                    }}
+                    className="h-11 px-4 rounded-xl border border-slate-300 text-sm font-bold text-slate-700
+                               hover:border-slate-400 flex items-center gap-1.5">
+                    {anadido ? <><Check className="w-4 h-4 text-emerald-600" /> Añadido</> : 'Añadir a la cesta'}
+                  </button>
+                )}
+              </div>
               {compra.fase === 'error' && (
                 <p className="mt-1.5 text-xs font-bold text-rose-600">{compra.motivo}</p>
               )}

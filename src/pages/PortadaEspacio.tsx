@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, FileText, UserX } from 'lucide-react';
+import Cesta from '../components/knowledge/Cesta';
 
 // ============================================================================
 // LA CASA DE UNA PERSONA — `nombre.humanity.wiki` a secas (2026-08-22)
@@ -116,6 +117,10 @@ export default function PortadaEspacio({ handle }: { handle: string }) {
           Publicado en <b>humanity.wiki</b>
         </a>
       </footer>
+
+      {/* La cesta sobrevive al ir de una página a otra dentro de la tienda:
+          por eso está también aquí y no sólo en la página de producto. */}
+      <Cesta tienda={handle} />
     </Marco>
   );
 }

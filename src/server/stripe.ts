@@ -436,7 +436,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           `);
         }
       } else if (kind === 'compra_publica') {
-        // UNA COMPRA HECHA SIN CUENTA (fase 3 del plan de tiendas).
+        // UNA COMPRA HECHA SIN CUENTA — fases 3, 5, 6 y 7 del plan de tiendas.
         //
         // No hay `payer_user_id` porque no hay comprador registrado, y la
         // columna admite nulo a propósito: dejarlo vacío dice «esta compra la
@@ -445,80 +445,128 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         //
         // El correo llega de Stripe, no del navegador: es el que la pasarela
         // ha verificado al cobrar, no uno que alguien escribiera en un campo.
-        const productId = session.metadata!.product_id;
-        const unidades = Number(session.metadata!.quantity) || 1;
-        const product = (await db.execute(sql`SELECT * FROM products WHERE id = ${productId}`)).rows[0];
-        if (!product) break;
+
+        // Qué llevaba el carrito. Se guardó en los metadatos al abrir el pago
+        // porque para cuando llega este aviso el navegador ya no está, y
+        // volver a calcularlo desde `products` daría los precios de HOY, no
+        // los del momento de comprar.
+        let carrito: [string, number, number][] = [];
+        try { carrito = JSON.parse(session.metadata!.lineas || '[]'); } catch { carrito = []; }
+        if (carrito.length === 0 && session.metadata!.product_id) {
+          // Compras de una sola cosa hechas antes de que existiera el carrito.
+          carrito = [[session.metadata!.product_id, Number(session.metadata!.quantity) || 1, 0]];
+        }
+        if (carrito.length === 0) break;
+
+        const ids = carrito.map(l => l[0]);
+        const productos = (await db.execute(sql`
+          SELECT id, name, created_by, price_cents FROM products
+          WHERE id = ANY(string_to_array(${ids.join(',')}, ','))
+        `)).rows as any[];
+        if (productos.length === 0) break;
 
         const correo = session.customer_details?.email || session.customer_email || null;
+        const vendedorId = session.metadata!.vendedor_id || productos[0].created_by || null;
+
+        // El resumen legible: lo que se enseña en una lista de pedidos sin
+        // tener que consultar las líneas de cada uno.
+        const primero = productos.find(x => x.id === carrito[0][0]);
+        const resumen = carrito.length === 1
+          ? (primero?.name || 'Compra')
+          : `${primero?.name || 'Compra'} y ${carrito.length - 1} ${carrito.length === 2 ? 'cosa más' : 'cosas más'}`;
+
         const txId = newId2('TRX');
         await db.execute(sql`
           INSERT INTO transactions (id, kind, status, amount_cents, currency, platform_fee_cents,
                                     payer_user_id, payee_user_id, stripe_payment_intent_id,
                                     stripe_checkout_session_id, concept)
-          VALUES (${txId}, 'compra', 'pagado', ${session.amount_total || product.price_cents},
+          VALUES (${txId}, 'compra', 'pagado', ${session.amount_total || 0},
                   ${(session.currency || 'eur').toUpperCase()}, 0,
-                  NULL, ${product.created_by || null},
+                  NULL, ${vendedorId},
                   ${(session.payment_intent as string) || null}, ${session.id},
-                  ${`Compra de ${product.name}${unidades > 1 ? ` x${unidades}` : ''}${correo ? ` — ${correo}` : ''}`})
+                  ${`Compra de ${resumen}${correo ? ` — ${correo}` : ''}`})
           ON CONFLICT (id) DO NOTHING
         `);
-        await db.execute(sql`
-          INSERT INTO transaction_links (transaction_id, entity_type, entity_id)
-          VALUES (${txId}, 'products', ${productId})
-          ON CONFLICT DO NOTHING
-        `);
+        for (const [pid] of carrito) {
+          await db.execute(sql`
+            INSERT INTO transaction_links (transaction_id, entity_type, entity_id)
+            VALUES (${txId}, 'products', ${pid})
+            ON CONFLICT DO NOTHING
+          `);
+        }
 
-        // EL STOCK SE DESCUENTA AQUÍ, Y SOLO UNA VEZ POR COMPRA.
-        //
+        // ── STOCK: SE DESCUENTA AQUÍ, Y SOLO UNA VEZ POR COMPRA ────────────
         // La reserva se creó al abrir el pago (fase 5) y aquí se cierra. El
-        // `WHERE estado = 'abierta'` es lo que hace que esto sea idempotente:
-        // Stripe reenvía los avisos cuando duda de que hayan llegado, y sin
-        // esa condición el mismo tarro se descontaría dos y tres veces.
+        // `WHERE estado = 'abierta'` es lo que hace esto idempotente: Stripe
+        // reenvía los avisos cuando duda de que hayan llegado, y sin esa
+        // condición el mismo tarro se descontaría dos y tres veces.
         //
-        // Si no descuenta nada —porque ya estaba confirmada— no se toca el
-        // stock. Es la diferencia entre «esta compra es nueva» y «esto ya lo
-        // había contado», y tienen que poder distinguirse.
-        const cerrada = await db.execute(sql`
+        // Se cierran TODAS las líneas de esta sesión de una vez, y `RETURNING`
+        // dice cuáles eran nuevas. Si no vuelve ninguna, este aviso ya se
+        // había procesado y no se toca nada más.
+        const cerradas = await db.execute(sql`
           UPDATE reservas_stock SET estado = 'confirmada', updated_at = now()
           WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
-          RETURNING unidades
+          RETURNING producto_id, unidades
         `);
-        const yaContada = cerrada.rows.length === 0;
+        const habiaReservas = (await db.execute(sql`
+          SELECT 1 FROM reservas_stock WHERE stripe_session_id = ${session.id} LIMIT 1
+        `)).rows.length > 0;
+        // Si no había reservas es que ningún producto llevaba la cuenta del
+        // stock; entonces «nueva» se decide por si ya existe el pedido.
+        const yaContada = habiaReservas
+          ? cerradas.rows.length === 0
+          : (await db.execute(sql`SELECT 1 FROM pedidos WHERE stripe_session_id = ${session.id} LIMIT 1`)).rows.length > 0;
 
-        // ── EL PEDIDO (fase 6) ────────────────────────────────────────
-        // Sólo si esta compra es nueva. Con `yaContada` se evita que un aviso
-        // repetido de Stripe cree dos pedidos del mismo tarro, que es peor que
-        // descontar dos veces el stock: son dos cajas saliendo por la puerta.
         if (!yaContada) {
+          for (const fila of cerradas.rows as any[]) {
+            // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva,
+            // y `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
+            // decidió no llevarla.
+            await db.execute(sql`
+              UPDATE products SET stock = GREATEST(0, stock - ${Number(fila.unidades)})
+              WHERE id = ${fila.producto_id} AND stock IS NOT NULL
+            `);
+          }
+
+          // ── EL PEDIDO Y SUS LÍNEAS (fases 6 y 7) ───────────────────────
           const envioCent = Number(session.metadata!.envio_centimos || 0) || 0;
           const d = session.customer_details;
           const envio = (session as any).shipping_details || (session as any).shipping || null;
-          await db.execute(sql`
+          const pedidoId = newId2('PED');
+          const creado = await db.execute(sql`
             INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades,
                                  importe_centimos, envio_centimos, moneda,
                                  comprador_user_id, comprador_email, comprador_nombre,
                                  direccion_envio, vendedor_user_id, estado,
                                  stripe_session_id, transaction_id)
-            VALUES (${newId2('PED')}, ${codigoDePedido()}, ${productId}, ${product.name}, ${unidades},
-                    ${session.amount_total || product.price_cents}, ${envioCent},
+            VALUES (${pedidoId}, ${codigoDePedido()},
+                    ${carrito.length === 1 ? carrito[0][0] : null}, ${resumen},
+                    ${carrito.length === 1 ? carrito[0][1] : null},
+                    ${session.amount_total || 0}, ${envioCent},
                     ${(session.currency || 'eur').toUpperCase()},
                     NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
                     ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
-                    ${product.created_by || null}, 'pagado',
-                    ${session.id}, ${txId})
+                    ${vendedorId}, 'pagado', ${session.id}, ${txId})
             ON CONFLICT (stripe_session_id) DO NOTHING
+            RETURNING id
           `);
-        }
 
-        if (!yaContada) {
-          // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva, y
-          // `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
-          // decidió no llevarla.
-          await db.execute(sql`
-            UPDATE products SET stock = GREATEST(0, stock - ${unidades})
-            WHERE id = ${productId} AND stock IS NOT NULL
-          `);
+          // Sólo si el pedido es nuevo de verdad: el `ON CONFLICT` de arriba
+          // no devuelve nada cuando ya existía, y sin esta comprobación las
+          // líneas se duplicarían aunque el pedido no.
+          if (creado.rows[0]) {
+            for (const [pid, unid, precio] of carrito) {
+              const prod = productos.find(x => x.id === pid);
+              await db.execute(sql`
+                INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre,
+                                           unidades, precio_unitario_centimos)
+                VALUES (${newId2('PLN')}, ${pedidoId}, ${pid},
+                        ${prod?.name || 'Producto retirado'}, ${unid},
+                        ${precio || prod?.price_cents || 0})
+              `);
+            }
+          }
         }
       } else if (kind === 'puntos') {
         // El saldo solo se acredita AQUÍ, en la confirmación real del pago
