@@ -61,6 +61,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
+import { registerTextosRoutes } from './textos.js';
 
 /**
  * Un módulo de la API.
@@ -122,6 +123,12 @@ export const MODULOS: Modulo[] = [
   { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
   { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
   { nombre: 'veracidad', montar: (app, db) => registerVeracidadRoutes(app, db) },
+  {
+    nombre: 'textos',
+    montar: (app, db) => registerTextosRoutes(app, db),
+    nota: 'Los textos de las páginas de información, editables por un administrador. '
+        + 'Comprueba el nivel, así que necesita `req.user`: después de la autenticación.',
+  },
 ];
 
 /**
