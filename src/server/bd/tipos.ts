@@ -20,6 +20,10 @@ export const TIPOS = [
   'texto_largo', 'url', 'email', 'telefono',
   'moneda', 'porcentaje', 'duracion', 'valoracion',
   'seleccion_multiple',
+  // Fase 2: los que APUNTAN. No pasan por `tipar()` — su valor no vive en el
+  // jsonb de la fila sino en `bd_enlaces`, y la ruta los desvía antes. Están en
+  // esta lista porque es la que dice qué tipos de columna existen.
+  'persona', 'proyecto', 'publicacion', 'relacion',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -208,6 +212,13 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
       unicos.sort((a, b) => (orden.get(a) ?? 1e9) - (orden.get(b) ?? 1e9));
       return ok(unicos);
     }
+
+    case 'persona': case 'proyecto': case 'publicacion': case 'relacion':
+      // No debería llegar aquí nunca: la ruta desvía las columnas que apuntan a
+      // `bd/enlaces.ts` antes de llamar a esta función. Si llega, es un fallo
+      // nuestro y se dice, en vez de guardar el identificador como si fuera
+      // texto y crear una celda que parece un enlace y no lo es.
+      return mal('Esta columna guarda enlaces: no se escribe como un valor.');
 
     default:
       return mal('Tipo de columna desconocido.');
