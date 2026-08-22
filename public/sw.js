@@ -34,11 +34,12 @@
  *    quiero que funcione sin esa url cutre».
  *
  *    So the new worker takes over immediately, throws away the stale code
- *    caches, and RELOADS its clients. The mixing problem is avoided not by
- *    waiting but by reloading: after `activate` nothing old is left running.
- *    A person may see the app refresh once, right after a deploy. That is the
- *    price, it is paid once, and it is far cheaper than a phone that can never
- *    update.
+ *    caches, and reloads its clients — but only the ones nobody is looking at.
+ *    A page you can see is never reloaded under you: it gets the "Actualizar"
+ *    button instead (`src/avisoVersionNueva.ts`), because a deploy must not be
+ *    allowed to throw away what somebody is typing. A hidden page — an installed
+ *    app in the switcher, which is the case that matters — is reloaded, and by
+ *    the time you look at it again it is already the new version.
  *
  * KILL SWITCH: loading any page with `?sw=off` unregisters this worker and wipes
  * its caches. A bad service worker is the one bug a user cannot clear by
@@ -112,12 +113,23 @@ self.addEventListener("activate", (event) => {
       );
       await self.clients.claim();
 
-      // AND RELOAD WHOEVER IS STILL RUNNING THE OLD CODE. This is the part that
-      // repairs a stuck install with nobody typing anything: it needs no
-      // cooperation from the page, which matters because the stale page is
-      // exactly the code that cannot be trusted to update itself.
+      // AND RELOAD WHOEVER IS STILL RUNNING THE OLD CODE — BUT NEVER A PAGE
+      // SOMEBODY IS LOOKING AT.
+      //
+      // Reloading repairs a stuck install without asking the page for help,
+      // which matters because the stale page is exactly the code that cannot be
+      // trusted to update itself. But it also throws away whatever is typed and
+      // not yet saved, and this team deployed fifteen times in four hours: a
+      // long publication would be lost by somebody else's deploy.
+      //
+      // So the rule is: a HIDDEN page is reloaded — nobody is typing into a page
+      // they cannot see, and this is exactly the case that matters, an installed
+      // app sitting in the switcher. A VISIBLE page is left alone, and
+      // `avisoVersionNueva.ts` offers it the "Actualizar" button instead, which
+      // is a person deciding rather than a deploy deciding for them.
       const abiertos = await self.clients.matchAll({ type: "window" });
       for (const c of abiertos) {
+        if (c.visibilityState === "visible" || c.focused) continue;
         try {
           await c.navigate(c.url);
         } catch {

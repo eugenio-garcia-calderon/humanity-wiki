@@ -4381,5 +4381,14 @@ apaño, yo quiero que funcione sin esa url cutre»):
   change, from a file the page never loads. It reads `dist/index.html` now.
 - `sw.js` v4 reverses the no-`skipWaiting` rule: it takes over at once, drops the
   stale code caches and reloads its clients. Waiting for every tab to close never
-  happens on a phone. A person may see one refresh after a deploy; that is
-  cheaper than an install that can never update.
+  happens on a phone.
+
+  **But it never reloads a page somebody is looking at**, and the first draft
+  did. Caught in review: three hours earlier I had refused to auto-reload with
+  the argument «eso tira lo que estés escribiendo», and then wrote exactly that
+  into the worker. This team deployed fifteen times in four hours; a long
+  publication would have been lost by somebody else's deploy. A hidden page is
+  reloaded — nobody types into a page they cannot see, and an installed app in
+  the switcher is precisely the case that matters. A visible page is left alone
+  and gets the "Actualizar" button instead, which is a person deciding rather
+  than a deploy deciding for them.
