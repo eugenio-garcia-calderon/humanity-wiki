@@ -5397,3 +5397,38 @@ plain one; test user removed. `tsc` clean. Also today, at Eugenio's request:
 `PUNTOS_DESCUENTO=on` in production (app recreated, health OK), +500 points to
 his admin account via an `ajuste_admin` entry, and two PRUEBA products of the
 `claude-dos` shop opted into points so there is something to buy with them.
+
+---
+
+## 2026-08-22 — Eugenio's first real test: two things that were MAL (Programador 7)
+
+He tested points in production and found two holes, both real:
+
+**«Comprar ahora» went straight to Stripe.** The points control only lived in
+the cart. Now the product page (`FichaProducto`) and the product block inside
+pages (`ProductoPublico`) show «Pagar con puntos (tienes X)» next to the buy
+button when the server says points are active, there is a session and the
+product accepts points; the direct buy sends `usar_puntos` and, when the price
+is fully covered, comes back without Stripe.
+
+**No confirmation after paying with points — back to the product page, nothing
+said.** `CompraHecha`, inside `Cesta` (which lives on every shop page, where
+the return lands): on `?compra=hecha&pedido=CODE` (all-points) or
+`?compra=hecha&sesion=cs_…` (back from Stripe; it polls
+`GET /api/publicar/pedido-por-sesion/:sesion` until the webhook has created
+the order, up to 8 tries) it shows a ✓, the order code to keep, each line
+with its Descargar button, what was paid with card/points/coupon, «Ver mi
+pedido» and «Seguir en la tienda». `?compra=cancelada` shows a plain "Pago
+cancelado, no se ha cobrado nada". The order lookup and the download route
+now accept the buyer's SESSION as a key besides the e-mail, so someone who
+just paid with their account is not asked for their e-mail; `/pedido?codigo=`
+pre-fills and searches on its own.
+
+Verified on 3007 over HTTP (session tagged and deleted after, balances
+restored): direct buy with 4 points → `pagado_con_puntos`, code, URL with
+`compra=hecha&pedido`; order by session without e-mail → lines with a download
+URL without e-mail; download by session → 200 PDF bytes; no session and no
+e-mail → 400 on both; pedido-por-sesion → 404 pendiente / 400 malformed. `tsc`
+clean. **Not seen in a browser**: the overlay and the buy-now control render
+only on a shop subdomain, which localhost cannot emulate — the contracts they
+consume are what was tested; Eugenio's next pass is the visual check.
