@@ -1,36 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "dashboard",
-      "ruta": "equipo/DASHBOARD.md",
-      "motivo": "para que se me pueda verificar en quien",
-      "desde": "2026-08-22T18:57:30.855Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "src/server/ai/assistant.ts",
-      "motivo": "P4: cerrar lectura de conversaciones ajenas por conversation_id (fuga)",
-      "desde": "2026-08-22T19:07:06.273Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/GrafoCanvas.tsx",
-      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
-      "desde": "2026-08-22T19:08:17.988Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/lienzoChrome.tsx",
-      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
-      "desde": "2026-08-22T19:08:17.988Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/knowledge/BarraElemento.tsx",
-      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
-      "desde": "2026-08-22T19:08:17.988Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "drizzle/0088_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
@@ -161,6 +131,18 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
       "desde": "2026-08-22T22:27:51.751Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "drizzle/0096_publicaciones_en_proyecto.sql",
+      "motivo": "publicaciones dentro de un proyecto",
+      "desde": "2026-08-22T23:08:33.198Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "src/server/roadmap.ts",
+      "motivo": "publicaciones dentro de un proyecto",
+      "desde": "2026-08-22T23:08:33.198Z"
     }
   ]
 }
