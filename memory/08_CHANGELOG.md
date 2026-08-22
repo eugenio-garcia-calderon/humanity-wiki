@@ -4943,3 +4943,26 @@ that only fails sometimes is a test that gets ignored.
 The guard warns, no route encrypts, nothing writes to the sealed record, and
 `CLAVE_FIRMA_REGISTRO` is not set anywhere — so entries would be written unsigned,
 and they say so rather than pretending. Phase B is what attaches it.
+
+---
+
+## 2026-08-22 — One valid view per person, window and day (Programador 7)
+
+The ceiling #242 left, in prog4's number: one account could mint the 50-cent
+cap on every window it owns, every day — a thousand own windows, 500 points
+a day. Now `vistas_validas` (0084: window, user, day; primary key on the
+three) is inserted inside the mint transaction with ON CONFLICT DO NOTHING,
+and minting happens only when the row was actually inserted. The same attack
+drops to ~0.10/day and stops paying.
+
+Two counters, on purpose: `knowledge_windows.views` is the raw number shown
+to everyone (anyone can raise it, it pays nobody); `vistas_validas` is the
+number that WEIGHS — it mints today and it is what the monthly pot will read
+when Eugenio's success-weighted distribution is built. Not a junction table
+in the sense of the 43-table rule: a dated fact log like the ledger, holding
+nothing about the view except that it happened.
+
+Verified locally: 10 concurrent session views of one window plus 3 without
+a session → exactly 1 valid view, 1 ledger entry, +0.01 to the author. Test
+session tagged claude-dev-verificacion and deleted; rows, balance and view
+counter restored.
