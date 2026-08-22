@@ -1,0 +1,41 @@
+-- LA CUENTA DE LA PLATAFORMA NO PUEDE TENER UN CORREO POR EL QUE SE ENTRE
+-- (2026-08-23, Programador 4 — seguridad)
+--
+-- La migración 0093 crea `U_PLATAFORMA`, la fila de `users` que recibe el 2,5 %
+-- de comisión en puntos. Está bien pensada y dice lo correcto: «no entra, no
+-- tiene contraseña válida». `password_hash = 'no-entra'` cierra la puerta de la
+-- contraseña.
+--
+-- Pero entrar no es solo la contraseña. Quedaban dos puertas abiertas, las dos
+-- por el correo `plataforma@humanity.wiki`:
+--
+--   1. GOOGLE. `auth.ts` vincula por correo: quien entre con Google desde una
+--      cuenta con esa dirección se convierte en `U_PLATAFORMA` y se sienta
+--      encima del saldo de comisiones de la plataforma. `email_verified` ya
+--      está a `true`, así que ni eso hace falta.
+--   2. RESTABLECER CONTRASEÑA. El testigo se manda a ese buzón; quien lo reciba
+--      se pone la contraseña que quiera y `no-entra` deja de importar.
+--
+-- ── POR QUÉ NO ES UNA ALARMA, Y AUN ASÍ SE ARREGLA HOY ─────────────────────
+-- Comprobado el 2026-08-23: **humanity.wiki no tiene registros MX**, así que
+-- hoy el dominio no recibe correo y ninguna de las dos puertas se puede
+-- empujar. Esto no es un agujero abierto: es un agujero ARMADO, esperando al
+-- día en que alguien configure el correo del dominio — un día normal de trabajo
+-- en el que nadie estará pensando en la cuenta de las comisiones.
+--
+-- Es el mismo patrón que el webhook de Stripe que regalaba membresías: nunca
+-- había fallado porque nunca había habido un pago. Las pruebas no encuentran
+-- estos, porque no pasa nada. Leer, sí.
+--
+-- ── EL ARREGLO ────────────────────────────────────────────────────────────
+-- `.invalid` está reservado por el RFC 2606 exactamente para esto: es un dominio
+-- que no puede existir ni resolver, así que ninguna de las dos puertas tiene a
+-- dónde mandar nada. No cambia nada de lo que 0093 quería; hace verdad lo que
+-- 0093 ya decía de sí misma.
+--
+-- El correo de esta fila no se usa en ningún sitio: no se le escribe, no entra,
+-- no sale en listados. Si prog7 le encontrara un uso, se revierte en una línea.
+UPDATE users
+SET email = 'plataforma@humanity.invalid',
+    email_verified = false
+WHERE id = 'U_PLATAFORMA';
