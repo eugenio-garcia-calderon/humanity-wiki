@@ -86,18 +86,41 @@ database, key id in every entry so rotation never turns old entries into
 
 > **Verifiable by:** `npm run seguridad:clasificacion` · `npm run seguridad:probar`
 
-### Phase B — Attach it to the real writes
+### Phase B — Attach it to the real writes · **built 2026-08-22, not applied to production**
 
-Today none of this touches production data. Tier 2+ writes must append to the
-sealed record, tier 3 writes must be signed, and there must be a nightly job that
-verifies and reports **VERIFICADA / ALTERADA / NO SÉ**.
+I planned to wire this into the same middleware layer as the permission guard.
+**That was the wrong place, and building it showed why.** A record written by the
+application records what the application does — and the likeliest way to corrupt
+data here does not go through the application at all: it is somebody with the
+database password writing an `UPDATE` by hand. Middleware cannot see that.
 
-The wiring goes in one place — the same middleware layer as the permission guard
-— and never sprinkled through 150 handlers: a control that each route has to
-remember is a control that some route forgets.
+So the capture happens in the database itself (`drizzle/0071_registro_captura.sql`):
+`AFTER` triggers on 25 tier-3 tables drop a note in an outbox, and `sellar.mjs`
+drains it into the sealed record, chained and signed, outside the request. Two
+processes rather than one because they fail for different reasons — a signing
+failure must never break somebody's save, or the security gets removed.
 
-> **Verifiable by:** editing a row by hand in a staging database and having the
-> alert name the entry within a minute.
+What is stored is the **hash of the row, not the row**: enough to prove tampering,
+it keeps this from becoming a second copy of the database, and it is the same size
+whether one field changed or a hundred. `entity_history` still holds the previous
+content; this answers a different question — *is this the same thing that was
+there?*
+
+Deleting a note from the outbox before it is sealed leaves a mark: the id is a
+sequence, so a missing number is sealed as a gap with its exact range.
+
+`verificar.mjs` runs the chain check plus a **random** sample of rows — random and
+not recent, because whoever tampers does it in an old quiet corner. Exit 0 / 1
+(altered) / 2 (cannot tell), and it notifies nobody on its own: whoever schedules
+it decides what an alarm is.
+
+> **Verified by:** `scripts/probar-captura.ts` — 19 checks written entirely in raw
+> SQL, never touching the application, including the one that matters: disable the
+> trigger, change the row underneath, and the row's hash no longer matches what was
+> sealed.
+>
+> **Still missing:** applying it to production, a schedule that runs it, and
+> `CLAVE_FIRMA_REGISTRO` existing so the entries are signed.
 
 ### Phase C — Take the power away from the application
 
