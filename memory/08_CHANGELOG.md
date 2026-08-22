@@ -4745,3 +4745,35 @@ it is all data — no screen uses it yet.
   `= ANY(array)` through the Drizzle template reached Postgres as a record, so
   every read of a debate answered 500. The test user and both test debates were
   deleted in the same session.
+
+### 2026-08-22 — Veracidad: su página en la «i», con sus principios y su tablero
+
+Eugenio: *«genera una página en el menú superior derecho, donde pone "i"
+información, y ahí añade el Veracidad, como página donde pongamos los principios
+y tecnologías que usamos para esto; haz un kanban con todas las tareas que
+tenemos hacia adelante, copia el modelo de Hormiguero»*.
+
+- **`/veracidad`**: qué es esto en dos párrafos, **seis principios** (no hay una
+  verdad publicada sino un espectro de visiones; un debate es un árbol; lo que no
+  tiene fuente lo dice; lo que pesa lo decide la gente; cerrar no borra al que
+  perdió; todo puede decir «no lo sé») y **seis piezas** de con qué está hecho —
+  y casi ninguna es nueva: el vocabulario del grafo, el lienzo del grafo, la
+  tabla de puntuaciones que ya existía.
+- **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
+  que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
+  tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
+  (migración 0066, décimo grupo), así que las mismas tarjetas salen también en
+  «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
+  varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
+  que saber en cuál está.
+- **La entrada del menú es una línea** en `src/paginasInfo.ts`, la lista que
+  salió antes en la PR #241.
+- Verificado en el navegador: el menú (i) abre con Veracidad, la página carga,
+  el tablero pinta 30 tarjetas repartidas en 2 hechas / 1 en curso / 27 por
+  hacer, y las 25 comprobaciones de la API de la fase 1 siguen en verde con el
+  módulo ya registrado en el servidor.
+
+**Lo que no está**: `server.ts` lleva las dos líneas que registran el módulo,
+pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
+suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
+de ruta), pero las rutas de debates no existen.

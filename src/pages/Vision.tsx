@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Compass, Layers, Map as MapIcon, Table2, Users, Store, Palette, Sparkles,
   Shield, Scale, FolderKanban, ArrowUpRight, Pencil, Check, X, Coins,
-  Sparkle, TrendingUp, ShoppingBag, Server, Cpu, RefreshCw, Receipt,
+  Sparkle, TrendingUp, ShoppingBag, Server, Cpu, RefreshCw, Receipt, MessagesSquare,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -38,11 +38,12 @@ const GRUPOS: Grupo[] = [
   { id: 'ia', label: 'La IA', color: '#4f46e5', desc: 'Modelos, agentes y veracidad' },
   { id: 'infra', label: 'Datos y seguridad', color: '#475569', desc: 'Almacenamiento e infraestructura' },
   { id: 'gobernanza', label: 'Gobernanza', color: '#b91c1c', desc: 'Veracidad, licencias y decisiones' },
+  { id: 'veracidad', label: 'Veracidad', color: '#7e22ce', desc: 'Debates, argumentos y fuentes' },
 ];
 
 const ICONOS: Record<string, any> = {
   canvas: Layers, mapas: MapIcon, datos: Table2, social: Users, mercado: Store,
-  diseno: Palette, ia: Sparkles, infra: Shield, gobernanza: Scale,
+  diseno: Palette, ia: Sparkles, infra: Shield, gobernanza: Scale, veracidad: MessagesSquare,
 };
 
 const DEFECTOS: Record<string, string> = {
