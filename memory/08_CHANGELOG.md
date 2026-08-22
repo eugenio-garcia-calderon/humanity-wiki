@@ -4419,3 +4419,43 @@ right there), which is exactly why production had to be checked at 375px.
 Fix: below `sm` the panel pins to the viewport (`fixed inset-x-2`); from `sm`
 up the original button-aligned layout returns. Measured after: 8..367 on a
 375px screen, desktop unchanged.
+## 2026-08-22 — The camera screen, taken apart
+
+Eugenio, with a screenshot: «la UX de darle a camara y que aparezca así es
+terrible, no cumple las reglas internacionales de UI y UX, piensa por que».
+
+He was right, and the worst item was mine from three hours earlier.
+
+| Qué estaba mal | Qué rompía |
+|---|---|
+| Elegías Cámara en el «+» y aterrizabas en una rejilla de ocho herramientas con Cámara marcada | Hick, y progressive disclosure. Un paso que no avanza |
+| La acción real quedaba por debajo del pliegue | Fitts, y la guía de Apple: lo principal donde llega el pulgar |
+| Los dos botones eran recuadros de línea **discontinua** y gris | El borde discontinuo es «arrastra aquí un fichero», un gesto que no existe en un móvil. Gris sobre blanco se lee como desactivado |
+| Pedía el título **antes** de hacer la foto | El título es metadato: va después del contenido, y ya se rellena solo |
+| **«La foto se abre en el editor antes de guardarse»** | Falso desde esa misma tarde: yo cambié el comportamiento y no repasé lo que decía la pantalla |
+| «Al muro» aquí, «Publicación» en el «+»; «Imagen» y «Cámara» casi lo mismo | Nielsen 4, consistencia |
+
+### Lo peor de la lista es el texto
+
+Un texto que describe algo que el programa ya no hace es peor que no tener
+texto: enseña a no leer la pantalla. Y no llegó por descuido ajeno — lo dejé yo
+al cambiar el comportamiento sin repasar la interfaz que lo describía. **Cambiar
+lo que hace algo incluye cambiar lo que dice que hace.**
+
+### Qué cambia
+
+Rejilla oculta tras «Cambiar de herramienta» cuando llegas con la herramienta ya
+elegida; dos botones **sólidos** de 68px, verde y negro, sin scroll; el título
+sale de aquí y se pregunta en el selector de destino; y el texto dice lo que
+ocurre de verdad: «Después te preguntamos dónde guardarla».
+
+Pendiente, en su propio cambio: unificar «Al muro»/«Publicación» y fundir
+«Imagen» con «Cámara», que son dos nombres para lo mismo.
+
+### Cómo se verificó, y una nota de higiene
+
+Ese paso vive detrás del inicio de sesión, así que **salté el candado en la copia
+local** para poder mirarlo, y lo restauré en cuanto tuve la captura (`{!user ?`
+de vuelta, cero apariciones de `{false ?`, `tsc` limpio). Nunca salió de este
+ordenador y no entró en ningún commit. Se deja escrito porque un atajo así, sin
+contarlo, es exactamente cómo un candado desaparece sin que nadie lo decida.
