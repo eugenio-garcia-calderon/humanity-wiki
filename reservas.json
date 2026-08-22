@@ -80,12 +80,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "scripts/vaciar-cuentas.mjs",
-      "motivo": "borrar el telefono al vaciar una cuenta (columna nueva de telecom)",
-      "desde": "2026-08-22T17:04:27.061Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "drizzle/0082_quien_puede_llamarte.sql",
       "motivo": "privacidad: quien puede llamarte",
       "desde": "2026-08-22T17:07:36.361Z"
