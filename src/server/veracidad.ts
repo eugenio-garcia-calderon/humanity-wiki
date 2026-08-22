@@ -18,7 +18,7 @@ import { registrarHistorial } from './historial.js';
 // argument answers exactly one claim, and that constraint is the whole point —
 // it is what lets a reader arrive at message 300 and still know what is being
 // argued about. The knowledge graph next door is deliberately not a tree, which
-// is why this is not built on top of it (drizzle/0065 has the long version).
+// is why this is not built on top of it (drizzle/0078 has the long version).
 
 const newId = (prefix: string) =>
   `${prefix}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296)

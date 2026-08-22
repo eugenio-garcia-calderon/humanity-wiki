@@ -4712,7 +4712,7 @@ verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate 
 Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
 it is all data — no screen uses it yet.
 
-- **Three tables** (`drizzle/0065_veracidad_debates.sql`): `debates` (the thesis
+- **Three tables** (`drizzle/0078_veracidad_debates.sql`): `debates` (the thesis
   under discussion), `argumentos` (the tree hanging off it) and
   `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
   is a `parent_id`, and a source belongs to what it cites.
@@ -4762,7 +4762,7 @@ tenemos hacia adelante, copia el modelo de Hormiguero»*.
 - **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
   que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
   tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
-  (migración 0066, décimo grupo), así que las mismas tarjetas salen también en
+  (migración 0079, décimo grupo), así que las mismas tarjetas salen también en
   «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
   varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
   que saber en cuál está.

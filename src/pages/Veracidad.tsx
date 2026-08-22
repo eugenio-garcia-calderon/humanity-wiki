@@ -220,7 +220,7 @@ export default function Veracidad() {
             <p className="text-sm text-slate-500 font-bold">El tablero está vacío.</p>
             <p className="text-xs text-slate-400 mt-1">
               Las tarjetas viven en la hoja de ruta, en el grupo «veracidad».
-              Si no sale ninguna, es que la migración 0066 no se ha aplicado en este servidor.
+              Si no sale ninguna, es que la migración 0079 no se ha aplicado en este servidor.
             </p>
           </Card>
         ) : (

@@ -434,11 +434,11 @@ export const stripeEvents = pgTable('stripe_events', {
 // We can define Drizzle relations below as needed for easy querying
 
 // ============================================================================
-// VERACIDAD: debates, argumentos y fuentes (2026-08-22, drizzle/0065)
+// VERACIDAD: debates, argumentos y fuentes (2026-08-22, drizzle/0078)
 // ============================================================================
 // A debate is a TREE, not a graph: every argument answers exactly one claim,
 // which is what keeps a 300-message disagreement readable. See
-// memory/13_VERACIDAD.md for the ten phases and drizzle/0065 for the reasoning
+// memory/13_VERACIDAD.md for the ten phases and drizzle/0078 for the reasoning
 // behind each column.
 
 export const debates = pgTable('debates', {
