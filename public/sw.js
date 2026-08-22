@@ -7,10 +7,16 @@
  *
  * BEFORE YOU CHANGE THIS, DECIDE — the three rules that matter:
  *
- * 1. `/api/*` IS NEVER CACHED. Not "cached briefly", never. A cached API answer
- *    is a stale number shown as if it were live, and this project has spent two
- *    nights killing exactly that: a thing that claims to be true when it is not.
- *    Offline you get a clean network error, which the app can say out loud.
+ * 1. `/api/*` IS KEPT, BUT ONLY EVER SERVED WHEN THE NETWORK FAILED, AND NEVER
+ *    SILENTLY. The first version refused to cache the API at all, to avoid the
+ *    thing this project has spent two nights killing: data that claims to be
+ *    current when it is not. But refusing to cache means offline shows nothing,
+ *    and Eugenio wants his projects readable on a plane.
+ *    So: the network always wins while it works — a cached answer can never
+ *    shadow a live one. The copy only appears when the request actually failed,
+ *    and it arrives stamped with `X-Desde-Cache: 1` and the time it was taken,
+ *    so the app can say "saved 3 hours ago" instead of pretending it is now.
+ *    Only GET, and never anything that writes.
  *
  * 2. HASHED ASSETS ARE CACHE-FIRST, EVERYTHING ELSE IS NETWORK-FIRST. Files under
  *    /assets/ carry a content hash in the name, so a given URL can never change
@@ -28,10 +34,15 @@
  * reloading, so there has to be a way out that does not need a developer.
  */
 
-const VERSION = "hw-v2";
+const VERSION = "hw-v3";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 const MEDIA = `${VERSION}-media`;
+// Your own data — projects, pages, tasks — kept only so a plane is not a wall.
+// 200 answers is plenty for what one person actually opens, and small enough
+// that nobody wakes up with a full phone.
+const DATOS = `${VERSION}-datos`;
+const MAX_DATOS = 200;
 // Images, styles and fonts only, and no more than this many. Enough for the
 // icons and the maps you actually opened; not enough to quietly eat a phone.
 const MAX_MEDIA = 60;
@@ -81,8 +92,39 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // third parties are theirs
-  if (url.pathname.startsWith("/api/")) return; // rule 1: never
   if (url.searchParams.has("sw") && url.searchParams.get("sw") === "off") return;
+
+  // The API: network always wins; the copy is only a parachute (rule 1).
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          // Only keep what is safe to show later. An error page cached as if it
+          // were data would be the same lie in another costume.
+          if (res.ok) {
+            const copia = res.clone();
+            caches.open(DATOS).then(async (c) => {
+              const cuerpo = await copia.blob();
+              const cabeceras = new Headers(copia.headers);
+              cabeceras.set("X-Cacheado-En", new Date().toISOString());
+              await c.put(req, new Response(cuerpo, { status: 200, headers: cabeceras }));
+              await recortar(c, MAX_DATOS);
+            });
+          }
+          return res;
+        })
+        .catch(async () => {
+          const guardado = await caches.match(req);
+          if (!guardado) throw new TypeError("Sin conexión y sin copia guardada");
+          // Stamped, so nobody downstream can mistake this for a live answer.
+          const cuerpo = await guardado.blob();
+          const cabeceras = new Headers(guardado.headers);
+          cabeceras.set("X-Desde-Cache", "1");
+          return new Response(cuerpo, { status: 200, headers: cabeceras });
+        }),
+    );
+    return;
+  }
 
   // Navigations: network first so a deploy is visible immediately; the cached
   // shell only appears when the network actually failed.

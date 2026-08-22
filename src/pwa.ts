@@ -12,8 +12,14 @@
  * out for a user stuck on a bad worker, and it works without a developer.
  */
 
+import { vigilarSinConexion } from "./avisoSinConexion";
+
 export function registrarPWA() {
   if (!("serviceWorker" in navigator)) return;
+
+  // El aviso se monta siempre que haya service worker: es lo que impide que una
+  // copia guardada se lea como si fuera de ahora.
+  vigilarSinConexion();
 
   const params = new URLSearchParams(location.search);
   const pedido = params.get("sw");
