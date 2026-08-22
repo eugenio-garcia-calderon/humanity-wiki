@@ -143,6 +143,9 @@ CREATE TABLE IF NOT EXISTS argumentos (
 -- una publicación, sin migración nueva.
 CREATE TABLE IF NOT EXISTS veracidad_fuentes (
   id            text PRIMARY KEY,
+  -- Regla 5 de la Constitución, igual que las otras dos: identificador
+  -- permanente. Una fuente es conocimiento tanto como lo que sostiene.
+  uuid          uuid NOT NULL DEFAULT gen_random_uuid() UNIQUE,
   entidad_tipo  text NOT NULL,
   entidad_id    text NOT NULL,
 
@@ -189,3 +192,21 @@ CREATE INDEX IF NOT EXISTS debates_entidad_idx
 -- «Las fuentes de esto».
 CREATE INDEX IF NOT EXISTS veracidad_fuentes_entidad_idx
   ON veracidad_fuentes (entidad_tipo, entidad_id) WHERE archived_at IS NULL;
+
+-- ── LAS CLAVES FORÁNEAS TAMBIÉN QUIEREN SU ÍNDICE ───────────────────────────
+-- Aviso del programador 1 (2026-08-22), que ese mismo día puso los 94 que le
+-- faltaban al resto de la plataforma: sin índice, PostgreSQL recorre la tabla
+-- ENTERA cada vez que comprueba una clave foránea — al borrar una persona, al
+-- borrar un territorio, y al borrar un argumento con hijos. Medido por él sobre
+-- 2.000.000 de filas: 59,3 ms → 1,3 ms.
+--
+-- Con las filas de hoy no se nota nada. Se ponen ahora porque añadir un índice
+-- a una tabla viva bloquea escrituras, y a una tabla vacía no cuesta nada.
+--
+-- El índice de arriba `argumentos_debate_idx` NO sirve para esto: empieza por
+-- `debate_id`, así que una búsqueda solo por `parent_id` no puede usarlo.
+CREATE INDEX IF NOT EXISTS argumentos_parent_idx ON argumentos (parent_id);
+CREATE INDEX IF NOT EXISTS argumentos_autor_idx ON argumentos (autor_user_id);
+CREATE INDEX IF NOT EXISTS debates_autor_idx ON debates (autor_user_id);
+CREATE INDEX IF NOT EXISTS debates_territorio_idx ON debates (territory_id);
+CREATE INDEX IF NOT EXISTS veracidad_fuentes_autor_idx ON veracidad_fuentes (autor_user_id);
