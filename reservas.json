@@ -17,12 +17,6 @@
       "ruta": "server.ts",
       "motivo": "fase 2 de optimización: medir el tiempo de cada ruta",
       "desde": "2026-08-22T14:09:01.073Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "memory/13_PLAN_COMERCIO.md",
-      "motivo": "plan de la herramienta Comercio",
-      "desde": "2026-08-22T14:15:46.535Z"
     }
   ]
 }
