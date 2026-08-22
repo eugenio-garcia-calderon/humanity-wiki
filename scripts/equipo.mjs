@@ -59,7 +59,9 @@ function quienSoy() {
 
 function leer() {
   // Si no hay red, seguimos con lo último que tengamos. Nunca bloqueamos por eso.
-  gitSilencioso(['fetch', '-q', 'origin', `+refs/heads/${RAMA}:refs/remotes/origin/${RAMA}`]);
+  // Con tope de tiempo: el 2026-08-22 este fetch dejó colgado un gancho de commit
+  // dos minutos. Un guardia que se queda pensando bloquea más de lo que protege.
+  gitSilencioso(['fetch', '-q', 'origin', `+refs/heads/${RAMA}:refs/remotes/origin/${RAMA}`], { timeout: 8000 });
   const crudo = gitSilencioso(['show', `origin/${RAMA}:${FICHERO}`]);
   if (!crudo) return { reservas: [], base: null, sinRed: true };
   const base = gitSilencioso(['rev-parse', `origin/${RAMA}`]);
@@ -85,7 +87,7 @@ function escribir(reservas, mensaje) {
     const arbol = git(['mktree'], { input: `100644 blob ${blob}\t${FICHERO}\n` });
     const padres = base ? ['-p', base] : [];
     const commit = git(['commit-tree', arbol, ...padres, '-m', mensaje]);
-    const empujado = gitSilencioso(['push', '-q', 'origin', `${commit}:refs/heads/${RAMA}`]);
+    const empujado = gitSilencioso(['push', '-q', 'origin', `${commit}:refs/heads/${RAMA}`], { timeout: 20000 });
     if (empujado !== null) return true;
     if (intento === 3) {
       console.error('No he podido guardar la reserva (¿sin red, o alguien empujando a la vez?).');
