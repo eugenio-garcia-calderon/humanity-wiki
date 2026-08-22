@@ -71,12 +71,6 @@
       "ruta": "equipo/DASHBOARD.md",
       "motivo": "para que se me pueda verificar en quien",
       "desde": "2026-08-22T18:57:30.855Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada del TURN de Cloudflare",
-      "desde": "2026-08-22T19:01:47.558Z"
     }
   ]
 }
