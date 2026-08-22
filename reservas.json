@@ -80,12 +80,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/juego/Nubes.tsx",
-      "motivo": "menos nubes: el mundo es mas pequeno",
-      "desde": "2026-08-22T18:41:04.902Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/juego/Hierba.tsx",
       "motivo": "el cesped, al tamano del mundo nuevo",
       "desde": "2026-08-22T18:41:47.475Z"
