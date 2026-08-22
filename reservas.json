@@ -77,6 +77,12 @@
       "ruta": "drizzle/0082_quien_puede_llamarte.sql",
       "motivo": "privacidad: quien puede llamarte",
       "desde": "2026-08-22T17:07:36.361Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/vaciar-cuentas.mjs",
+      "motivo": "guardian: que falle cuando aparezca una columna sin clasificar",
+      "desde": "2026-08-22T17:15:58.569Z"
     }
   ]
 }
