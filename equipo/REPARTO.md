@@ -100,7 +100,7 @@ edita de verdad, al contrario: resérvalo mientras trabajas en él.
 | **Programador 3** | PWA (`public/sw.js`, `src/pwa.ts`), instalación en iOS, cámara, sin conexión |
 | **Programador 4** | seguridad e integridad: `src/server/seguridad/**`, cifrado, registro sellado, clasificación de tablas |
 | **Programador 6** | escalabilidad: copias de seguridad de la base de datos, `cluster`, límites de peticiones (`src/server/limites/**`), subida de ficheros a almacenamiento de objetos, y los servicios que añada a `docker-compose.prod.yml` |
-| **Programador 7** | economía del punto: páginas informativas de tokenomics. **Nada que mueva dinero o saldos sin firma de Eugenio** |
+| **Programador 7** | **economía y mercado, todo** (Eugenio, 2026-08-22 noche: «eres el agente Económico y de Mercado, esto incluye todo»): puntos y tokenomics (`src/server/puntos.ts`, libro, precios, reparto), comercio (`src/pages/Comercio.tsx`, `FichaProducto.tsx`, `MiPedido.tsx`, `Mercado.tsx`, `components/knowledge/{Cesta,CrearProducto,ProductoPublico}.tsx`, `hooks/useCarrito.ts`), pagos (`src/server/stripe.ts`, `finanzas.ts`, `components/stripe/**`), pedidos, devoluciones, entrega de lo digital, cupones y descuentos, reseñas de productos, analítica de venta, y los planes `memory/13_PLAN_COMERCIO.md` y la parte de compra de `memory/11_PLAN_TIENDAS.md`. La tienda como PÁGINA en el subdominio (maquetación, portadas) sigue siendo de prog2. **Nada que mueva dinero o saldos reales sin interruptor apagado y firma de Eugenio** |
 
 **El reparto de infraestructura, decidido el 2026-08-22** porque prog6 lo preguntó
 en vez de tocarlo: **prog2 se queda con Caddy, certificados, subdominios y el
