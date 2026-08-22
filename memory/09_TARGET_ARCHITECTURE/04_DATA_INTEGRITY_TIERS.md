@@ -124,6 +124,18 @@ it decides what an alarm is.
 
 ### Phase C — Take the power away from the application
 
+> **Measured in production, 2026-08-22, read-only:** the application connects as
+> `humanity`, and that role is a **superuser**. It owns the tables, can create
+> roles, and bypasses row-level security. Every one of the 150 write routes runs
+> with full power over the database, and no grant we could revoke would change
+> it while the role stays super. `scripts/auditar-privilegios.mjs` prints this in
+> one command and reads only the catalogue — it writes nothing.
+>
+> This also decides the order: **making the role non-super comes before every
+> other control in this phase**, because until then the triggers, the revoked
+> privileges and the append-only record are all things the application could
+> undo by accident.
+
 State of the art here is not cryptography, it is **least privilege**, and this is
 the phase that protects against our own code being wrong:
 
