@@ -80,12 +80,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/juego/Hierba.tsx",
-      "motivo": "el cesped, al tamano del mundo nuevo",
-      "desde": "2026-08-22T18:41:47.475Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/juego/texturas.ts",
       "motivo": "la misma foto se subia a la GPU hasta 8 veces: 690 MB",
       "desde": "2026-08-22T18:45:55.447Z"
