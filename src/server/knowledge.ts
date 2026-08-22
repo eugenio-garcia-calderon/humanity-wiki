@@ -1710,15 +1710,41 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         UPDATE knowledge_windows SET views = views + 1 WHERE id = ${req.params.id}
         RETURNING creator_user_id, publico
       `);
-      // «Ganar céntimos de punto cuando contribuyen con una publicación
-      // pública... y es vista por otros usuarios» (2026-08-08). No se
-      // distingue visitante único — cada vista suma un céntimo de punto a
-      // quien la escribió, salvo que se esté viendo a sí mismo.
+      // ══ LA CECA CERRADA (2026-08-22, hallazgo de prog4, nota
+      // INCMT4IXIUD3UC) ═══════════════════════════════════════════════════
+      // Esta ruta acuñaba 0,01 puntos POR LLAMADA y SIN SESIÓN: un bucle de
+      // curl fabricaba dinero interno en la cuenta que eligiera — 10.000
+      // llamadas, 100 puntos. Tres candados ahora, y el contador `views`
+      // sigue subiendo para todo el mundo (contar no es pagar):
+      //
+      //  1. SIN SESIÓN NO SE ACUÑA. La promesa original (2026-08-08) era
+      //     «cuando otros usuarios ven la publicación» — un visitante sin
+      //     cuenta ni siquiera es distinguible de un bucle.
+      //  2. El autor viéndose a sí mismo tampoco (ya estaba).
+      //  3. TOPE DE ACUÑACIÓN POR VENTANA Y DÍA, contado desde el propio
+      //     libro (`movimientos_puntos`), no desde un contador aparte que
+      //     pudiera contradecirlo — la misma decisión que el tope diario de
+      //     transferencias. `PUNTOS_VISTA_TOPE_DIA` céntimos-de-punto/día
+      //     por ventana (50 por defecto): con cuentas de por medio, inflar
+      //     una ventana choca con el techo y deja rastro con nombre.
+      //
+      // Pendiente y anotado en /tokenomics/tareas: separar contar y pagar
+      // del todo (vistas válidas por persona + reparto sobre lo contado).
+      // Ese día `views` será solo el número que se enseña, nunca el que
+      // decide dinero.
       const fila = w.rows[0] as any;
-      if (fila?.publico && fila.creator_user_id && fila.creator_user_id !== req.user?.id) {
-        await otorgarPuntos(db, fila.creator_user_id, 0.01, 'vista_publicacion', {
-          entidadTipo: 'knowledge_windows', entidadId: req.params.id,
-        }).catch(() => {});
+      if (req.user && fila?.publico && fila.creator_user_id && fila.creator_user_id !== req.user.id) {
+        const topeCentimos = Number(process.env.PUNTOS_VISTA_TOPE_DIA || 50);
+        const hoy = await db.execute(sql`
+          SELECT count(*)::int AS n FROM movimientos_puntos
+          WHERE motivo = 'vista_publicacion' AND entidad_tipo = 'knowledge_windows'
+            AND entidad_id = ${req.params.id} AND created_at > now() - interval '24 hours'
+        `);
+        if (Number((hoy.rows[0] as any)?.n ?? 0) < topeCentimos) {
+          await otorgarPuntos(db, fila.creator_user_id, 0.01, 'vista_publicacion', {
+            entidadTipo: 'knowledge_windows', entidadId: req.params.id,
+          }).catch(() => {});
+        }
       }
       res.json({ success: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
