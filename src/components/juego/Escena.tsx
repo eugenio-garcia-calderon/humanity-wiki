@@ -1,91 +1,82 @@
 // ============================================================================
-// EL VISOR 3D — la escena (2026-08-22)
+// JUEGO VITAL — scene composition. Default export so the page can React.lazy
+// it: this file (and everything it imports, including three.js) lives in its
+// own chunk that only game visitors download.
 // ============================================================================
-// Eugenio: «vamos a hacer un cambio drástico en el Mundo 3D […] ahora no será
-// un mundo hiperrealista sino un mundo muy simplificado, con un centro y
-// alrededor […] es todo como la sala del arquitecto de Matrix, con pantallas
-// alrededor. Elimina toda la historia de las casas, árboles, elementos de
-// decoración inútiles, y dejas solo los elementos que realmente son proyectos».
-//
-// QUÉ ERA ESTO ANTES, para entender el tamaño del cambio: una aldea de 118
-// hectáreas con casas, un bosque comestible, un río, sendas, nubes con ciclo
-// día/noche, mariposas de día y luciérnagas de noche, un cielo HDRI, sombras
-// en cascada, un composer de efectos, cuatro oleadas de carga y tres niveles
-// de calidad que bajaban solos si caían los FPS. Todo eso existía para que
-// pareciera un sitio de verdad.
-//
-// Y ESA ERA LA TRAMPA. Lo que se venía a mirar —los proyectos, quién anda en
-// ellos, lo publicado— estaba repartido entre la decoración, y encontrar algo
-// era pasear. Un visor no es un paseo: es un sitio donde lo que hay se ve de
-// una vez. Un centro, un anillo, y cada cosa en su sitio.
-//
-// LAS TRES REGLAS DE LO QUE QUEDA:
-//   1. NADA DE LUZ. Ni sombras, ni sol, ni niebla de color, ni composer. Todos
-//      los materiales son básicos (ver `visor/Piezas.tsx`).
-//   2. TODO EQUIDISTANTE. Nada se coloca «a mano»: la posición sale del anillo
-//      (`visor/anillo.ts`), que es el mismo que usan las colisiones y el
-//      minimapa. Cuando cada uno calculaba su sitio, mover algo dejaba las
-//      colisiones apuntando al hueco viejo.
-//   3. TODAS LAS SALAS SON IGUALES. Cambia lo que hay en el anillo, no la sala.
-//
-// LO QUE SE HA CONSERVADO A PROPÓSITO: el editor (crear, mover, hilos), el
-// minimapa, los productos —la DJI y el camión camperizado siguen siendo
-// objetos con su ficha—, los portales, el viaje rápido y el cine de YouTube.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Billboard, Text } from '@react-three/drei';
-import * as THREE from 'three';
 import type { Obstaculo } from './Personaje';
-import { Personaje } from './Personaje';
+import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO, piezasAldea, radioProp, type PiezaAldea } from './mapa';
+import type { Aspecto } from './aspecto';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Environment, PerformanceMonitor } from '@react-three/drei';
+import { Efectos } from './Efectos';
+import { Hierba } from './Hierba';
+import { CicloDia, Bichos, RotuloComestible, cieloDeLaHora, type EstadoCielo } from './Vida';
+import { detectarCalidad, bajarNivel, AJUSTES, type NivelCalidad } from './calidad';
+import { liberarTexturas } from './texturas';
+import { liberarFlora } from './flora';
+import { useOleadas, Oleada } from './Oleadas';
+import { Nubes, Firmamento } from './Nubes';
+import * as THREE from 'three';
 import type {
   Agente, Camara, Cercania, EntradaMando, ItemMundo, Medidas, OverrideMundo,
-  ProyectoJuego, SeleccionHilo, SeleccionMundo,
+  ProyectoJuego, SeleccionHilo, SeleccionMundo, Vehiculo,
 } from './tipos';
 import { ObjetosMundo, SueloEditor, MarcadorMover, AnilloSeleccion, MovilFantasma, ItemVisual } from './Editor';
+import { PiezaVisual } from './Aldea';
+import { PALETA } from './paleta';
+import { Aldea } from './Aldea';
+import { Personaje } from './Personaje';
+import { Robot } from './Robot';
+import { EdificiosProyectos } from './EdificiosProyectos';
+import { PantallaGrande } from './Pantalla';
 import { CineYouTube, CINE_LIM, CINE_SALIDA, type CategoriaCine, type VideoCine } from './Cine';
-import type { DatosInterior } from './Interior';
-import { anillo, enAnillo, miraAlCentro, radioAnillo } from './visor/anillo';
-import { AnilloGuia, HazDeLuz, Pantalla, Portal, SueloBlanco, TINTA, colorDePersona } from './visor/Piezas';
-import { COLOR_SECCION, PORTALES_INICIO, SALAS, type ClaveSala } from './visor/salas';
+import { PortalVerde } from './PortalVerde';
+import { Agentes } from './Agentes';
+import { PlazaProyecto, cosasDePlaza, type DatosInterior } from './Interior';
+import {
+  PLAZA_LIM, PLAZA_SALIDA, RADIO_HABITANTE, habitantesDeSala,
+} from './planta';
 
-/** Radio de una cosa del anillo, para las colisiones. Todas miden lo mismo
- *  porque todas son la misma pieza: eso es lo que hace que el anillo sea
- *  equidistante de verdad y no solo en el dibujo. */
-const RADIO_PIEZA = 3;
-/** Dónde está el portal de vuelta en cada sala: al sur, junto al centro.
- *
- *  DENTRO DEL ANILLO Y NO EN ÉL (2026-08-22, visto en pruebas): a 15 m caía
- *  casi encima de los portales de un anillo de diez proyectos y se leían dos
- *  nombres superpuestos. A 8 está claramente en el corro interior, que además
- *  es lo que dice lo que es: la salida no es una cosa más de las que has
- *  venido a ver.
- *
- *  Y SIEMPRE EN EL MISMO SITIO en todas las salas — buscar la salida en un
- *  lugar distinto en cada una es cómo uno se queda encerrado. */
-const VUELTA = { x: 0, z: 8 };
-
-/** El fondo: blanco, y sin niebla. Es lo primero que hay que quitar del mundo
- *  viejo — una niebla de color tiñe el blanco a los veinte metros. */
-function Ambiente({ dentroDelCine }: { dentroDelCine: boolean }) {
+/**
+ * Fondo y niebla. Fuera es el cielo de siempre; dentro de un proyecto, un
+ * fondo oscuro con niebla corta, que es lo que hace que la sala se sienta
+ * cerrada y que la luz de las puertas destaque.
+ */
+function Ambiente({ interior }: { interior: boolean }) {
   const { scene } = useThree();
   useEffect(() => {
-    if (dentroDelCine) {
-      // El cine sigue siendo una sala a oscuras: es lo único que se salva del
-      // mundo anterior, y para ver una pantalla hace falta que esté oscuro.
+    if (interior) {
       scene.background = new THREE.Color('#0d1117');
+      // Niebla MUY larga: la sala mide 48 m de lado a lado y con una niebla
+      // corta se tragaba las puertas y el núcleo — se veía todo negro.
       scene.fog = new THREE.Fog('#0d1117', 70, 210);
+      // El cine es una sala oscura: la luz del cielo HDRI casi no entra.
       scene.environmentIntensity = 0.22;
     } else {
-      scene.background = new THREE.Color(TINTA.suelo);
-      scene.fog = null;
-      scene.environmentIntensity = 1;
+      scene.background = null;
+      scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+      scene.environmentIntensity = 0.6;
     }
-  }, [dentroDelCine, scene]);
+  }, [interior, scene]);
   return null;
 }
 
-/** Arbitra a qué te has acercado y solo avisa cuando la respuesta CAMBIA,
- *  nunca una vez por fotograma. */
+/** El vigilante de FPS con periodo de gracia: los primeros segundos de juego
+ *  siempre van a trompicones (compilar shaders, subir texturas) y no deben
+ *  costar un escalón de calidad. */
+function VigilanteDeCalidad({ onBajar }: { onBajar: () => void }) {
+  const [listo, setListo] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setListo(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
+  if (!listo) return null;
+  return <PerformanceMonitor flipflops={2} onDecline={onBajar} />;
+}
+
+/** Arbitrates what the player is close to (robot beats buildings) and only
+ *  notifies the page when the answer CHANGES — never once per frame. */
 function Coordinador({ medidas, onCercania }: {
   medidas: React.MutableRefObject<Medidas>;
   onCercania: (c: Cercania) => void;
@@ -94,318 +85,319 @@ function Coordinador({ medidas, onCercania }: {
   useFrame(() => {
     const m = medidas.current;
     let c: Cercania = null;
+    // Un habitante creado por el jugador gana al robot: si te has acercado a
+    // alguien, es con él con quien quieres hablar.
     if (m.agente && m.agente.d < 5) c = { tipo: 'agente', agente: m.agente.a };
-    const firma = c ? `${c.tipo}:${'agente' in c ? c.agente.id : ''}` : '';
-    if (firma !== ultima.current) {
-      ultima.current = firma;
+    else if (m.robot < 4.5) c = { tipo: 'robot' };
+    else if (m.proyecto && m.proyecto.d < 8) c = { tipo: 'proyecto', proyecto: m.proyecto.p };
+    const clave = c === null ? ''
+      : c.tipo === 'robot' ? 'robot'
+        : c.tipo === 'agente' ? `a:${c.agente.id}`
+          : `p:${c.proyecto.id}`;
+    if (clave !== ultima.current) {
+      ultima.current = clave;
       onCercania(c);
     }
+    // NOTE: never pass a render priority here — any useFrame priority > 0
+    // tells react-three-fiber "I'll render myself" and silently disables the
+    // automatic render loop (0 draw calls, blank canvas). Mount order already
+    // guarantees this runs after Robot/EdificiosProyectos wrote `medidas`.
   });
   return null;
 }
 
-/** El rótulo del centro de la sala: dónde estás y qué hay aquí.
- *
- *  EN EL CENTRO Y NO EN UNA ESQUINA DE LA PANTALLA: en un espacio blanco todas
- *  las direcciones se parecen, y este cartel es la referencia que dice dónde
- *  está el medio. Además es lo primero que se ve al entrar por un portal. */
-function Centro({ nombre, descripcion }: { nombre: string; descripcion: string }) {
-  return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
-        <ringGeometry args={[2.4, 2.5, 48]} />
-        <meshBasicMaterial color={TINTA.lineaFuerte} />
-      </mesh>
-      <Billboard position={[0, 3.4, 0]}>
-        <Text fontSize={1.05} color={TINTA.texto} anchorX="center" anchorY="middle" maxWidth={16}>
-          {nombre}
-        </Text>
-        <Text position={[0, -0.95, 0]} fontSize={0.44} color={TINTA.contorno} anchorX="center" anchorY="middle" maxWidth={18}>
-          {descripcion}
-        </Text>
-      </Billboard>
-    </group>
-  );
-}
-
-export default function Escena({
-  entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom,
-  interior, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor,
-  onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem,
-  onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, movilRef,
-  onAbrirTarjeta, onCrearTarea,
-}: {
+export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos, onCercania, onChoque, destino, zoom, aspectoJugador, vehiculo, alturaVuelo, interior, vista, onEntrarProyecto, onSalirProyecto, onHablarAgente, mundo, editor, onPulsarMundo, onAgarrarMundo, onPulsarHilo, onSuelo, onSoltar, onAbrirItem, onPantalla, cine, onVerVideo, onSalirCine, onActualizarCine, onAbrirTarjeta, onCrearTarea, movilRef }: {
   entrada: React.MutableRefObject<EntradaMando>;
   camara: React.MutableRefObject<Camara>;
   proyectos: ProyectoJuego[];
   agentes: Agente[];
+  /** Compartida con la página: es donde se plantan las cosas al construir. */
   jugadorPos: THREE.Vector3;
   onCercania: (c: Cercania) => void;
   onChoque: (id: string) => void;
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
   zoom: React.MutableRefObject<number>;
-  /** Si está puesto, se está DENTRO de un proyecto concreto: su sala. */
+  aspectoJugador?: Aspecto;
+  vehiculo: Vehiculo;
+  alturaVuelo: React.MutableRefObject<number>;
+  /** Si está puesto, se juega DENTRO de un proyecto y la aldea no se dibuja. */
   interior: DatosInterior | null;
+  /** Tercera persona o primera (2026-08-19, petición de Eugenio). */
+  vista?: 'tercera' | 'primera';
+  /** Clic o toque sobre un edificio de proyecto: se entra sin caminar. */
   onEntrarProyecto: (p: ProyectoJuego) => void;
+  /** Clic o toque sobre el portal «Salir a la aldea» de una plaza. */
   onSalirProyecto?: () => void;
+  /** Clic o toque sobre alguien de tu mundo: se abre su chat sin acercarse. */
   onHablarAgente: (a: Agente) => void;
+  /** El mundo editable: objetos del jugador + retoques del pueblo semilla. */
   mundo: { items: ItemMundo[]; overrides: OverrideMundo[] };
+  /** Estado del editor directo (lo lleva la página; aquí solo se dibuja).
+   *  `activo` = hay usuario: sin sesión no se edita nada. */
   editor: { activo: boolean; moviendo: boolean; sel: SeleccionMundo | null };
   onPulsarMundo: (sel: SeleccionMundo) => void;
+  /** Pinchar sin soltar un objeto: si arrastras, se mueve con el ratón. */
   onAgarrarMundo: (sel: SeleccionMundo, punto: { x: number; y: number }) => void;
+  /** Pulsar un hilo dorado: se abre su editor (relación, texto, eliminar). */
   onPulsarHilo: (sel: SeleccionHilo) => void;
+  /** Clic en suelo vacío en modo edición: abrir el panel de crear ahí. */
   onSuelo: (p: { x: number; z: number }) => void;
+  /** Soltar el objeto que se estaba moviendo. */
   onSoltar: (p: { x: number; z: number }) => void;
+  /** Fuera del modo edición: leer una nota, ver una imagen, abrir un documento. */
   onAbrirItem: (item: ItemMundo) => void;
+  /** Pulsar la gran pantalla del cine: entrar en la sala 3D. */
   onPantalla: () => void;
+  /** Si está puesto, se está DENTRO del cine del agente de YouTube. */
   cine: { estado: string; categorias: CategoriaCine[] } | null;
   onVerVideo?: (v: VideoCine) => void;
   onSalirCine?: () => void;
   onActualizarCine?: () => void;
-  movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
-  /** Pulsar una tarjeta del proyecto: su ficha. */
+  /** Pulsar (o chocar con) una tarjeta del corro de la plaza: su ficha. */
   onAbrirTarjeta?: (item: import('./tipos').ItemProyecto) => void;
-  /** Crear una tarea dentro de la sala del proyecto. */
+  /** Crear una tarea dentro de la plaza del proyecto (2026-08-19). */
   onCrearTarea?: () => void;
+  /** Última posición del ratón sobre el suelo mientras se mueve algo. */
+  movilRef: React.MutableRefObject<{ x: number; z: number } | null>;
 }) {
+  const luzRef = useRef<THREE.DirectionalLight>(null);
   const medidas = useRef<Medidas>({ robot: Infinity, proyecto: null, agente: null });
 
-  // ══ EN QUÉ SALA ESTÁS ═════════════════════════════════════════════════════
-  // Vive AQUÍ y no en la página a propósito: entrar en «Proyectos» no cambia
-  // de dirección ni pide nada al servidor, son los mismos datos ya cargados
-  // puestos en otro anillo. Solo entrar en un proyecto concreto sube a la
-  // página (`onEntrarProyecto`), porque eso sí trae sus tarjetas y su gente.
-  const [sala, setSala] = useState<ClaveSala>('inicio');
-  // Al entrar en un proyecto, la sala de sección se olvida: al salir vuelves a
-  // «Proyectos», que es de donde entraste, y no al inicio.
-  const salaDeVuelta = useRef<ClaveSala>('proyectos');
+  // El pueblo con los retoques del jugador aplicados: piezas movidas, con otro
+  // diseño o eliminadas. UNA lista que comparten el dibujo, el rebote y el
+  // editor — si cada uno la calculara, chocarías con una casa ya borrada.
+  // Título de cada proyecto, para los rótulos de los portales con forma.
+  const titulosProy = useMemo(() => new Map(proyectos.map(p => [p.id, p.titulo])), [proyectos]);
 
-  const personas = useMemo(() => agentes.filter(a => a.tipo === 'persona'), [agentes]);
-  const publicaciones = useMemo(
-    () => mundo.items.filter(it => !it.proyecto_id && ['nota', 'documento', 'imagen', 'enlace', 'lienzo', 'mapa'].includes(it.tipo)),
-    [mundo.items],
-  );
-  const herramientas = useMemo(
-    () => mundo.items.filter(it => !it.proyecto_id && ['prop', 'producto', 'video', 'musica'].includes(it.tipo)),
-    [mundo.items],
-  );
-
-  /** Qué hay al otro lado de cada portal, en colores, para su previa cenital.
-   *  Sale de los MISMOS datos que la sala de destino: si aquí se ven tres
-   *  puntos, allí hay tres cosas. No puede desincronizarse. */
-  const previaDe = useCallback((clave: ClaveSala): string[] => {
-    const color = COLOR_SECCION[clave];
-    const n = clave === 'proyectos' ? proyectos.length
-      : clave === 'personas' ? personas.length
-        : clave === 'publicaciones' ? publicaciones.length
-          : clave === 'herramientas' ? herramientas.length : 0;
-    if (clave === 'personas') return personas.slice(0, 12).map(p => colorDePersona(p.id));
-    return Array.from({ length: Math.min(n, 12) }, () => color);
-  }, [proyectos.length, personas, publicaciones.length, herramientas.length]);
-
-  // ══ LO QUE HAY EN EL ANILLO DE ESTA SALA ══════════════════════════════════
-  // Una sola lista, y de ella salen el dibujo, las colisiones y el minimapa.
-  interface Pieza {
-    clase: 'portal-seccion' | 'proyecto' | 'persona' | 'cosa' | 'tarjeta';
-    id: string;
-    nombre: string;
-    subtitulo?: string;
-    color: string;
-    portada?: string | null;
-    previa?: string[];
-    x: number; z: number; rot: number;
-    datos?: any;
-  }
-
-  const piezas = useMemo<Pieza[]>(() => {
-    // Dentro de un proyecto: su gente y sus cosas (la página ya las trae).
-    if (interior) {
-      // SU GENTE Y SUS TARJETAS, EN EL MISMO ANILLO (Eugenio: «en una sala de
-      // proyecto, si hay personas asociadas estarán en esa sala»). Las
-      // personas primero: son lo que se ha pedido que se vea, y así caen
-      // enfrente de quien entra.
-      const gente = interior.agentes.filter(a => a.tipo === 'persona');
-      const pendientes = interior.items.filter(it => it.estado !== 'hecho');
-      const total = gente.length + pendientes.length;
-      const dePersonas: Pieza[] = gente.map((a, i) => {
-        const p = enAnillo(i, Math.max(total, 1));
-        return {
-          clase: 'persona' as const, id: a.id, nombre: a.nombre,
-          subtitulo: a.rol || undefined, color: colorDePersona(a.id),
-          x: p.x, z: p.z, rot: miraAlCentro(p), datos: a,
-        };
-      });
-      const deTarjetas: Pieza[] = pendientes.map((it, j) => {
-        const p = enAnillo(gente.length + j, Math.max(total, 1));
-        return {
-          clase: 'tarjeta' as const, id: it.id, nombre: it.titulo,
-          subtitulo: it.resumen || undefined, color: interior.color || COLOR_SECCION.proyectos,
-          x: p.x, z: p.z, rot: miraAlCentro(p), datos: it,
-        };
-      });
-      return [...dePersonas, ...deTarjetas];
-    }
-    if (sala === 'inicio') {
-      const n = PORTALES_INICIO.length;
-      return PORTALES_INICIO.map((clave, i) => {
-        const p = enAnillo(i, n);
-        return {
-          clase: 'portal-seccion' as const, id: clave, nombre: SALAS[clave].nombre,
-          color: COLOR_SECCION[clave], previa: previaDe(clave),
-          x: p.x, z: p.z, rot: miraAlCentro(p),
-        };
+  const piezas = useMemo<PiezaAldea[]>(() => {
+    const ov = new Map(mundo.overrides.map(o => [o.seed_id, o]));
+    const lista: PiezaAldea[] = [];
+    for (const p of piezasAldea()) {
+      const o = ov.get(p.seed_id);
+      if (!o) { lista.push(p); continue; }
+      if (o.eliminado) continue;
+      lista.push({
+        ...p,
+        x: o.x ?? p.x,
+        z: o.z ?? p.z,
+        rot: o.rot ?? p.rot,
+        modelo: o.modelo != null && o.modelo !== '' ? Number(o.modelo) : p.modelo,
+        // El rótulo que le haya puesto el jugador (los carteles de las sendas).
+        texto: o.texto || p.texto,
+        portalProyectoId: o.portal_proyecto_id || null,
+        portalTitulo: o.portal_proyecto_id ? titulosProy.get(o.portal_proyecto_id) : undefined,
       });
     }
-    if (sala === 'proyectos') {
-      const n = proyectos.length;
-      return proyectos.map((pr, i) => {
-        const p = enAnillo(i, Math.max(n, 1));
-        // La previa de un proyecto: su gente. Es lo que se pidió que hubiera
-        // dentro de su sala, así que es lo que tiene que asomar por su puerta.
-        const suGente = agentes.filter(a => a.tipo === 'persona' && (a.proyecto_ids || []).includes(pr.id));
-        return {
-          clase: 'proyecto' as const, id: pr.id, nombre: pr.titulo,
-          subtitulo: `${pr.tarjetas - pr.hechas} por hacer`,
-          color: COLOR_SECCION.proyectos,
-          previa: suGente.slice(0, 12).map(a => colorDePersona(a.id)),
-          x: p.x, z: p.z, rot: miraAlCentro(p), datos: pr,
-        };
-      });
-    }
-    if (sala === 'personas') {
-      const n = personas.length;
-      return personas.map((a, i) => {
-        const p = enAnillo(i, Math.max(n, 1));
-        return {
-          clase: 'persona' as const, id: a.id, nombre: a.nombre,
-          subtitulo: a.rol || undefined, color: colorDePersona(a.id),
-          x: p.x, z: p.z, rot: miraAlCentro(p), datos: a,
-        };
-      });
-    }
-    const cosas = sala === 'publicaciones' ? publicaciones : herramientas;
-    const n = cosas.length;
-    return cosas.map((it, i) => {
-      const p = enAnillo(i, Math.max(n, 1));
-      return {
-        clase: 'cosa' as const, id: it.id, nombre: it.nombre || it.texto?.slice(0, 40) || 'Sin nombre',
-        subtitulo: it.tipo, color: COLOR_SECCION[sala],
-        portada: it.tipo === 'imagen' ? it.url : null,
-        x: p.x, z: p.z, rot: miraAlCentro(p), datos: it,
-      };
-    });
-  }, [sala, interior, proyectos, personas, publicaciones, herramientas, agentes, previaDe]);
-
-  const radio = useMemo(() => radioAnillo(Math.max(piezas.length, 1)), [piezas.length]);
-
-  // ══ LO SÓLIDO ════════════════════════════════════════════════════════════
-  // De la MISMA lista que se dibuja. Es la regla 2 de arriba, y es lo que
-  // impide chocar con lo que ya no está.
-  const obstaculos = useRef<Obstaculo[]>([]);
-  obstaculos.current = useMemo(() => {
-    if (cine) return [{ id: 'cine:salir', ...CINE_SALIDA, radio: 2 }];
-    const lista: Obstaculo[] = piezas.map(p => ({
-      id: p.clase === 'proyecto' ? `proy:${p.id}`
-        : p.clase === 'portal-seccion' ? `sala:${p.id}`
-          : p.clase === 'persona' ? p.id
-            : p.clase === 'tarjeta' ? `tarjeta:${p.id}`
-              : `deco:item:${p.id}`,
-      x: p.x, z: p.z, radio: RADIO_PIEZA,
-    }));
-    // El portal de vuelta, en todas las salas menos en el inicio (de allí no
-    // se vuelve a ningún sitio: es el suelo del recorrido).
-    if (sala !== 'inicio' || interior) lista.push({ id: 'visor:volver', ...VUELTA, radio: 2 });
     return lista;
-  }, [piezas, sala, interior, cine]);
+  }, [mundo.overrides, titulosProy]);
 
-  /** Para los hilos de conocimiento: dónde está cada cosa a la que se apunta. */
+  // Los portales del distrito, con los ARRASTRES del jugador aplicados.
+  // `representados` = proyectos que YA tienen su portal con forma propia en
+  // el mundo (un objeto, una pieza o un agente): su espiral del distrito se
+  // oculta para no tener dos puertas al mismo mapa.
+  const representados = useMemo(() => {
+    const s = new Set<string>();
+    for (const a of agentes) if (a.proyecto_id) s.add(a.proyecto_id);
+    for (const it of mundo.items) if (it.portal_proyecto_id) s.add(it.portal_proyecto_id);
+    for (const o of mundo.overrides) if (o.portal_proyecto_id) s.add(o.portal_proyecto_id);
+    return s;
+  }, [agentes, mundo.items, mundo.overrides]);
+  const posProyectos = useMemo(
+    () => posicionesProyectos(proyectos, mundo.overrides, representados),
+    [proyectos, mundo.overrides, representados],
+  );
+
+  // Para los hilos de conocimiento: dónde está cada cosa a la que se apunta.
   const resolverDestino = useCallback((ref: string) => {
-    const busca = (id: string) => piezas.find(p => p.id === id);
     if (ref.startsWith('item:')) {
       const it = mundo.items.find(x => x.id === ref.slice(5));
       return it ? { x: it.x, y: 1.8, z: it.z } : null;
     }
     if (ref.startsWith('agente:')) {
-      const p = busca(ref.slice(7));
-      return p ? { x: p.x, y: 2.2, z: p.z } : null;
+      const a = agentes.find(x => x.id === ref.slice(7));
+      if (!a) return null;
+      if (a.tipo === 'proyecto') return { x: a.x, y: 3.5, z: a.z };
+      return { x: a.x, y: 1.8, z: a.z };
     }
     if (ref.startsWith('proy:')) {
-      const p = busca(ref.slice(5));
-      return p ? { x: p.x, y: 3.4, z: p.z } : null;
+      const i = proyectos.findIndex(x => x.id === ref.slice(5));
+      if (i < 0 || !posProyectos[i]) return null;
+      return { x: posProyectos[i].x, y: 4, z: posProyectos[i].z };
     }
     return null;
-  }, [piezas, mundo.items]);
+  }, [mundo.items, agentes, proyectos, posProyectos]);
 
-  // ══ ENTRAR Y SALIR ═══════════════════════════════════════════════════════
-  const entrarEn = useCallback((clave: ClaveSala) => {
-    setSala(clave);
-    salaDeVuelta.current = clave;
-    // Apareces al sur del centro, mirando al anillo: la misma llegada en todas
-    // las salas. Sin esto entrarías donde estabas en la sala anterior, que
-    // puede ser el borde del mundo.
-    destino.current = { x: 0, z: 4 };
-  }, [destino]);
-
-  const volver = useCallback(() => {
-    if (interior) { onSalirProyecto?.(); return; }
-    setSala('inicio');
-    destino.current = { x: 0, z: 4 };
-  }, [interior, onSalirProyecto, destino]);
-
-  /** El choque avisa a la página, salvo cuando es cosa de la escena (entrar en
-   *  una sala o volver): eso se resuelve aquí y no sube. */
-  const alChocar = useCallback((id: string) => {
-    if (id === 'visor:volver') { volver(); return; }
-    if (id.startsWith('sala:')) { entrarEn(id.slice(5) as ClaveSala); return; }
-    onChoque(id);
-  }, [volver, entrarEn, onChoque]);
-
-  // AL SALIR DE UN PROYECTO SE VUELVE A «PROYECTOS», no al inicio: es de donde
-  // se entró. Y esto tiene que mirar el paso de «estaba dentro» a «ya no»,
-  // no el valor de `interior` a secas — al montar la escena `interior` ya es
-  // null, y sin la comparación el visor arrancaba directamente en la sala de
-  // proyectos en vez de en la de inicio (visto en pruebas, 2026-08-22).
-  const estabaDentro = useRef(false);
-  useEffect(() => {
-    if (interior) { estabaDentro.current = true; salaDeVuelta.current = 'proyectos'; return; }
-    if (estabaDentro.current) {
-      estabaDentro.current = false;
-      setSala(salaDeVuelta.current);
-      destino.current = { x: 0, z: 4 };
+  // Lo sólido del mundo. En una ref para que el personaje lo lea cada
+  // fotograma sin volver a montarse cuando cambian los agentes.
+  //
+  // Dentro de un proyecto lo sólido es otra cosa: las puertas de sus grupos y
+  // el portal de salida. Sale de `planta.ts`, el mismo sitio del que la
+  // escena saca dónde dibujarlas — si no, entrarías por una puerta que ya no
+  // está ahí.
+  const obstaculos = useRef<Obstaculo[]>([]);
+  obstaculos.current = useMemo(() => {
+    if (cine) {
+      return [{ id: 'cine:salir', ...CINE_SALIDA, radio: 2 }];
     }
-  }, [interior, destino]);
+    if (interior) {
+      // La plaza del proyecto: el portal de salida y la gente son sólidos
+      // (chocar = salir / hablar). Los props plantados dentro también.
+      const gente = habitantesDeSala(interior.items, 'personas', interior.agentes, interior.proyecto.id);
+      return [
+        { id: 'interior:salir', ...PLAZA_SALIDA, radio: 2 },
+        // Las TARJETAS del corro: chocar con una la abre (id sin `deco:`
+        // para que Personaje avise del golpe).
+        ...cosasDePlaza(interior.items, interior.agentes)
+          .filter(c => c.tipo === 'tarjeta' && c.item)
+          .map(c => ({ id: `tarjeta:${c.item!.id}`, x: c.x, z: c.z, radio: 1.4 })),
+        ...gente.map((a, i) => {
+          const ang = (i / Math.max(gente.length, 1)) * Math.PI * 2 - Math.PI / 2;
+          return {
+            id: `interior:persona:${a.id}`,
+            x: Math.cos(ang) * 6.5, z: Math.sin(ang) * 6.5,
+            radio: RADIO_HABITANTE,
+          };
+        }),
+        ...mundo.items.filter(it => it.tipo === 'prop' && it.proyecto_id === interior.proyecto.id).map(it => ({
+          id: `deco:item:${it.id}`, x: it.x, z: it.z, radio: radioProp(it.modelo),
+        })),
+      ];
+    }
+    return [
+      ...agentes.map(a => ({
+        id: a.id,
+        x: a.x,
+        z: a.z,
+        radio: a.tipo === 'proyecto' ? RADIO_EDIFICIO : 1.1,
+      })),
+      // Los edificios de los proyectos de la Fase 1 también son sólidos: antes
+      // se atravesaban y chocar con ellos no hacía nada (fallo reportado por
+      // Eugenio). El prefijo distingue quién es quién al avisar del choque.
+      ...proyectos.slice(0, 12).map((p, i) => ({
+        id: `proy:${p.id}`,
+        ...(posProyectos[i] || posicionProyecto(i)),
+        radio: RADIO_EDIFICIO,
+        // Un portal quitado del mapa tampoco choca (radio 0 = se ignora).
+      })).filter((_, i) => !posProyectos[i]?.eliminado),
+      // Todo el mobiliario del pueblo es sólido y hace REBOTAR (petición de
+      // Eugenio): farolas, bancos, árboles, casas… El prefijo `deco:` es lo
+      // que le dice al personaje «rebota y no abras ninguna ficha».
+      // Una pieza convertida en PORTAL avisa del choque (entrar); las demás
+      // solo rebotan (el prefijo `deco:` silencia el aviso en Personaje).
+      ...piezas.filter(p => p.radio > 0).map(p => ({
+        id: p.portalProyectoId ? `portalpieza:${p.seed_id}` : `deco:semilla:${p.seed_id}`,
+        x: p.x,
+        z: p.z,
+        radio: p.radio,
+      })),
+      // Los props que plantó el jugador también; sus notas y documentos no
+      // (se atraviesan: son conocimiento flotando, no muros). Los objetos
+      // anclados a un proyecto viven en SU plaza, no en la aldea. Un objeto
+      // convertido en PORTAL sí es sólido y avisa: chocar es entrar.
+      ...mundo.items.filter(it => !it.proyecto_id && (it.tipo === 'prop' || it.portal_proyecto_id)).map(it => ({
+        id: it.portal_proyecto_id ? `portalitem:${it.id}` : `deco:item:${it.id}`,
+        x: it.x,
+        z: it.z,
+        radio: it.tipo === 'prop' ? radioProp(it.modelo) : 1.5,
+      })),
+    ];
+  }, [agentes, proyectos, posProyectos, interior, piezas, mundo.items, cine]);
 
-  const def = interior
-    ? { nombre: interior.proyecto.titulo, descripcion: `${piezas.length} ${piezas.length === 1 ? 'persona' : 'personas'} en este proyecto` }
-    : SALAS[sala];
+  // Nivel de calidad: se detecta una vez al montar y solo puede BAJAR (si los
+  // FPS caen de forma sostenida, PerformanceMonitor avisa). Nunca sube solo:
+  // subir y bajar en bucle se nota más que quedarse en el escalón estable.
+  const [nivel, setNivel] = useState<NivelCalidad>(() => detectarCalidad());
+  const ajustes = AJUSTES[nivel];
+  // Fase 8: la hora REAL del jugador manda en el cielo de la aldea.
+  const [cielo, setCielo] = useState<EstadoCielo>(() => cieloDeLaHora());
+  const solPos = useMemo<[number, number, number]>(() => [
+    Math.cos(cielo.azimut) * Math.cos(cielo.elevacion) * 140,
+    Math.sin(cielo.elevacion) * 140,
+    Math.sin(cielo.azimut) * Math.cos(cielo.elevacion) * 140,
+  ], [cielo]);
+
+  // CARGA POR OLEADAS (2026-08-19): 0 = suelo y plaza (con esto ya se juega),
+  // 1 = el pueblo y la gente, 2 = sendas, agua y hierba, 3 = el bosque, los
+  // bichos, las nubes y el color de cine. Cada una espera a que la anterior
+  // esté pintada. Ver `Oleadas.tsx`.
+  const oleada = useOleadas(3);
+
+  // Fase 11: al salir del juego se sueltan las texturas de la tarjeta gráfica.
+  // Son ~40 MB que si no se quedan ocupados hasta que recargas la pestaña, y
+  // en un móvil eso es la diferencia entre que la siguiente página vaya bien
+  // o que el navegador tire la pestaña entera.
+  useEffect(() => () => { liberarTexturas(); liberarFlora(); }, []);
 
   return (
     <Canvas
-      // SIN SOMBRAS. No es un ajuste de calidad: es que no hay ninguna luz que
-      // las proyecte, y dejarlo activado reservaría un mapa de sombras que
-      // nadie usa.
-      shadows={false}
-      dpr={[1, 2]}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
-      // MÁS CENITAL (Eugenio: «quiero que la vista sea algo más cenital»): la
-      // cámara arranca más alta y más atrás que en la aldea (11 y 32). Desde
-      // aquí se ve el anillo entero de una vez, que es la gracia de que las
-      // cosas estén repartidas en círculo.
-      camera={{ fov: 46, near: 0.5, far: 600, position: [0, 26, 34] }}
+      // «percentage» = PCF a secas: en este three el PCFSoft clásico está
+      // retirado (el renderer lo degrada solo, avisando por consola). El
+      // borde suave lo pone el radio de penumbra de la luz, más abajo.
+      shadows="percentage"
+      dpr={ajustes.dpr}
+      // Con el composer de efectos el antialias del navegador no pinta nada
+      // (lo hace SMAA); en calidad baja no hay composer y sí se necesita.
+      gl={{ antialias: !ajustes.efectos, powerPreference: 'high-performance' }}
+      camera={{ fov: 48, near: 0.5, far: 1400, position: [0, 11, 32] }}
       onCreated={(estado) => {
-        // Sin curva de cine: aquí no hay rango dinámico que comprimir, y la
-        // ACES apagaba el blanco a un gris perla.
-        estado.gl.toneMapping = THREE.NoToneMapping;
-        estado.scene.background = new THREE.Color(TINTA.suelo);
-        estado.scene.fog = null;
+        // Color «de cine»: curva ACES con algo más de exposición. Con el
+        // composer activo esto lo pisa el efecto ToneMapping (Efectos.tsx);
+        // aquí queda para la calidad baja, que va sin composer.
+        estado.gl.toneMapping = THREE.ACESFilmicToneMapping;
+        estado.gl.toneMappingExposure = 1.12;
+        estado.scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+        estado.scene.background = null;
+        // Dev-only handle for in-browser scene inspection (used to debug the
+        // blank-canvas bug of 2026-08-18; harmless and useful, so it stays).
         if ((import.meta as any).env?.DEV) (window as any).__JV = estado;
       }}
     >
-      <Ambiente dentroDelCine={!!cine} />
-      {/* Una ambiental y nada más. Los materiales del visor son básicos y ni
-          la miran; está para los objetos del editor y los productos, que sí
-          son modelos de verdad y sin luz saldrían negros. */}
-      <ambientLight intensity={1.15} />
+      {/* Baja un escalón de calidad si los FPS caen de verdad (dos rachas).
+          Espera unos segundos antes de vigilar: la carga inicial (compilar
+          materiales, cargar el cielo) siempre da un bajón que no cuenta. */}
+      {nivel !== 'baja' && (
+        <VigilanteDeCalidad onBajar={() => setNivel(bajarNivel)} />
+      )}
+      {/* La plaza del proyecto es EXTERIOR (petición de Eugenio): siempre
+          cielo de día, ya no existe la sala oscura. */}
+      <Ambiente interior={!!cine} />
+      {/* Turbidez BAJA (3,4 en vez de 6) y algo más de rayleigh: es lo que
+          mantiene el cenit azul mientras el sol bajo tiñe de oro el poniente.
+          Con turbidez alta el aire va cargado y el naranja sube hasta arriba,
+          que es justo lo que Eugenio no quería. */}
+      {/* EL CIELO, pintado a mano (2026-08-19). Sustituye al `<Sky>` de drei:
+          su modelo atmosférico salía blanco al pasar por la curva de cine, y
+          además venía a 450.000 m, fuera del alcance de la cámara. Ver el
+          porqué largo en `Nubes.tsx`. */}
+      <Firmamento solPos={solPos} luz={cielo.luz} esNoche={cielo.esNoche} />
+      <CicloDia luzRef={luzRef} onCambio={setCielo} />
+      {/* La luz ambiental REAL: un cielo fotográfico (CC0, autoalojado) que
+          baña la escena — es lo que da reflejos y rebotes creíbles a los
+          materiales. Las luces planas de antes bajan para dejarle sitio. */}
+      <Environment files="/modelos-juego/cielo/dia_despejado_1k.hdr" />
+      <ambientLight intensity={0.18} color={PALETA.luzAmbiente} />
+      <hemisphereLight intensity={0.25} color={PALETA.luzCielo} groundColor={PALETA.luzSuelo} />
+      <directionalLight
+        // Al cambiar el lado del mapa de sombras three no lo reconstruye
+        // solo: la key fuerza una luz nueva cuando cambia el nivel.
+        key={`sol-${nivel}`}
+        ref={luzRef}
+        castShadow
+        position={[60, 95, -45]}
+        intensity={1.9}
+        color={PALETA.luzSol}
+        shadow-mapSize-width={ajustes.sombras}
+        shadow-mapSize-height={ajustes.sombras}
+        shadow-camera-left={-48}
+        shadow-camera-right={48}
+        shadow-camera-top={48}
+        shadow-camera-bottom={-48}
+        shadow-camera-near={5}
+        shadow-camera-far={400}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.03}
+        shadow-radius={4}
+      />
 
       {cine ? (
         <CineYouTube
@@ -415,114 +407,19 @@ export default function Escena({
           onActualizar={() => onActualizarCine?.()}
           onSalir={() => onSalirCine?.()}
         />
-      ) : (
+      ) : interior ? (
         <>
-          <SueloBlanco />
-          <AnilloGuia radio={radio} />
-          <Centro nombre={def.nombre} descripcion={def.descripcion} />
-
-          {piezas.map(p => {
-            if (p.clase === 'portal-seccion') {
-              return (
-                <Portal
-                  key={p.id} x={p.x} z={p.z} rot={p.rot}
-                  nombre={p.nombre} contenido={p.previa || []} color={p.color}
-                  onEntrar={() => entrarEn(p.id as ClaveSala)}
-                />
-              );
-            }
-            if (p.clase === 'proyecto') {
-              return (
-                <Portal
-                  key={p.id} x={p.x} z={p.z} rot={p.rot}
-                  nombre={p.nombre} contenido={p.previa || []} color={p.color}
-                  onEntrar={() => onEntrarProyecto(p.datos as ProyectoJuego)}
-                  onAgarrar={(e: any) => {
-                    if (e.nativeEvent?.button) return;
-                    onAgarrarMundo(
-                      { clase: 'semilla', id: `proy:${p.id}`, tipo: 'portal', etiqueta: p.nombre, x: p.x, z: p.z, rot: 0 },
-                      { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
-                    );
-                  }}
-                />
-              );
-            }
-            if (p.clase === 'persona') {
-              return (
-                <HazDeLuz
-                  key={p.id} x={p.x} z={p.z} color={p.color}
-                  nombre={p.nombre}
-                  onPulsar={() => onHablarAgente(p.datos as Agente)}
-                />
-              );
-            }
-            return (
-              <Pantalla
-                key={p.id} x={p.x} z={p.z} rot={p.rot}
-                titulo={p.nombre} subtitulo={p.subtitulo} portada={p.portada}
-                color={p.color}
-                onPulsar={() => (p.clase === 'tarjeta'
-                  ? onAbrirTarjeta?.(p.datos)
-                  : onAbrirItem(p.datos as ItemMundo))}
-              />
-            );
-          })}
-
-          {/* EL PORTAL DE VUELTA. En todas las salas menos en el inicio, y
-              siempre en el mismo sitio: al sur, justo detrás de donde
-              apareces. */}
-          {(sala !== 'inicio' || interior) && (
-            <Portal
-              x={VUELTA.x} z={VUELTA.z} rot={Math.PI}
-              nombre="Volver"
-              contenido={interior ? previaDe('proyectos') : PORTALES_INICIO.map(c => COLOR_SECCION[c])}
-              onEntrar={volver}
-            />
-          )}
-
-          {/* CREAR UNA TAREA, en el centro de la sala del proyecto: donde
-              siempre estuvo el pedestal «+» de la plaza. Es la única cosa que
-              se crea desde dentro del 3D sin pasar por el editor. */}
-          {interior && onCrearTarea && (
-            <group position={[0, 0, -4]} onClick={(e) => { e.stopPropagation(); onCrearTarea(); }}>
-              <mesh position={[0, 1.1, 0]}>
-                <boxGeometry args={[1.5, 0.16, 0.16]} />
-                <meshBasicMaterial color={COLOR_SECCION.proyectos} />
-              </mesh>
-              <mesh position={[0, 1.1, 0]}>
-                <boxGeometry args={[0.16, 1.5, 0.16]} />
-                <meshBasicMaterial color={COLOR_SECCION.proyectos} />
-              </mesh>
-              <Billboard position={[0, 2.3, 0]}>
-                <Text fontSize={0.38} color={TINTA.contorno} anchorX="center" anchorY="middle">Nueva tarea</Text>
-              </Billboard>
-            </group>
-          )}
-
-          {/* SI LA SALA ESTÁ VACÍA, SE DICE. Un anillo sin nada es
-              indistinguible de una carga a medias, y quien entra no sabe si
-              esperar o si es que no tiene nada todavía. */}
-          {piezas.length === 0 && (
-            <Billboard position={[0, 1.6, -6]}>
-              <Text fontSize={0.5} color={TINTA.contorno} anchorX="center" anchorY="middle" maxWidth={20}>
-                Aquí todavía no hay nada tuyo.
-              </Text>
-            </Billboard>
-          )}
-
-          {/* LO QUE HAYAS PLANTADO TÚ sigue exactamente donde lo dejaste: los
-              objetos del editor no se recolocan en el anillo. El anillo es
-              para lo que la plataforma ordena sola; lo que tú pusiste a mano
-              en un sitio, en ese sitio se queda. */}
+          <PlazaProyecto datos={interior} onHablar={onHablarAgente} onSalir={onSalirProyecto} onAbrirTarjeta={onAbrirTarjeta} onCrearTarea={onCrearTarea} />
+          {/* Lo plantado DENTRO de este proyecto, con el mismo editor de la
+              aldea: pulsar, arrastrar, hilos y crear en el suelo. */}
           <ObjetosMundo
-            items={mundo.items.filter(it => (interior ? it.proyecto_id === interior.proyecto.id : !it.proyecto_id))}
+            items={mundo.items.filter(it => it.proyecto_id === interior.proyecto.id)}
             onPulsar={onPulsarMundo}
             onAgarrar={onAgarrarMundo}
             onPulsarHilo={onPulsarHilo}
             ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
             resolverDestino={resolverDestino}
           />
-
           {editor.activo && (
             <>
               <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
@@ -532,36 +429,138 @@ export default function Escena({
                   {(() => { const it = mundo.items.find(x => x.id === editor.sel!.id); return it ? <ItemVisual item={it} /> : null; })()}
                 </MovilFantasma>
               )}
+              {editor.sel && !editor.moviendo && editor.sel.clase === 'item' && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          <Aldea
+            piezas={piezas}
+            oleada={oleada}
+            onPulsar={onPulsarMundo}
+            onAgarrar={onAgarrarMundo}
+            ocultar={editor.moviendo && editor.sel?.clase === 'semilla' ? editor.sel.id : undefined}
+          />
+          {/* La hierba de la fase 1: cuántas matas, lo dice la calidad. */}
+          <Oleada n={2} actual={oleada}><Hierba cantidad={ajustes.hierba} /></Oleada>
+          {/* Fase 8: mariposas de día, luciérnagas de noche, y el nombre de
+              la planta comestible que tengas al lado. Van con el bosque: sin
+              plantas no hay bichos que ronden nada. */}
+          <Oleada n={3} actual={oleada}>
+            <Bichos cantidad={ajustes.efectos ? 150 : 50} esNoche={cielo.esNoche} />
+            <RotuloComestible jugadorPos={jugadorPos} />
+          </Oleada>
+          <ObjetosMundo
+            items={mundo.items.filter(it => !it.proyecto_id)}
+            onPulsar={onPulsarMundo}
+            onAgarrar={onAgarrarMundo}
+            onPulsarHilo={onPulsarHilo}
+            ocultar={editor.moviendo && editor.sel?.clase === 'item' ? editor.sel.id : undefined}
+            resolverDestino={resolverDestino}
+          />
+          <EdificiosProyectos
+            proyectos={proyectos}
+            posiciones={posProyectos}
+            jugadorPos={jugadorPos}
+            medidas={medidas}
+            onEntrar={onEntrarProyecto}
+            onOpciones={(p) => {
+              const pos = posProyectos.find((_, i) => proyectos[i]?.id === p.id) || posicionProyecto(0);
+              onPulsarMundo({
+                clase: 'semilla', id: `proy:${p.id}`, tipo: 'portal',
+                etiqueta: p.titulo, x: pos.x, z: pos.z, rot: 0,
+              });
+            }}
+            onAgarrar={(p, pos, e) => {
+              if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+              onAgarrarMundo(
+                { clase: 'semilla', id: `proy:${p.id}`, tipo: 'portal', etiqueta: p.titulo, x: pos.x, z: pos.z, rot: 0 },
+                { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+              );
+            }}
+          />
+          {/* La gran pantalla vive como pieza (pantalla:0): posición con los
+              arrastres aplicados; ocultada si va agarrada (la lleva el
+              fantasma). El clic entra al cine; pinchar sin soltar la mueve. */}
+          {(() => {
+            const pz = piezas.find(p => p.seed_id === 'pantalla:0');
+            if (!pz || (editor.moviendo && editor.sel?.clase === 'semilla' && editor.sel.id === 'pantalla:0')) return null;
+            return (
+              <PantallaGrande
+                x={pz.x} z={pz.z} rot={pz.rot}
+                onAbrir={onPantalla}
+                onAgarrar={(e) => {
+                  if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+                  onAgarrarMundo(
+                    { clase: 'semilla', id: 'pantalla:0', tipo: 'pantalla', etiqueta: 'Gran pantalla', x: pz.x, z: pz.z, rot: pz.rot },
+                    { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+                  );
+                }}
+              />
+            );
+          })()}
+          <Oleada n={1} actual={oleada}>
+          <Agentes
+            agentes={agentes}
+            jugadorPos={jugadorPos}
+            medidas={medidas}
+            obstaculos={obstaculos}
+            onHablar={onHablarAgente}
+            onAgarrarProyecto={(a, e) => {
+              if (e.nativeEvent.button !== undefined && e.nativeEvent.button !== 0) return;
+              onAgarrarMundo(
+                { clase: 'semilla', id: `agente:${a.id}`, tipo: 'portal', etiqueta: a.nombre, x: a.x, z: a.z, rot: 0 },
+                { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY },
+              );
+            }}
+          />
+          <Robot jugadorPos={jugadorPos} medidas={medidas} />
+          </Oleada>
+          {editor.activo && (
+            <>
+              <SueloEditor moviendo={editor.moviendo} movil={movilRef} onSuelo={onSuelo} onSoltar={onSoltar} />
+              {editor.moviendo && <MarcadorMover movil={movilRef} />}
+              {/* El objeto agarrado viaja con el ratón como un fantasma */}
+              {editor.moviendo && editor.sel && (
+                <MovilFantasma movil={movilRef} rot={editor.sel.rot}>
+                  {editor.sel.clase === 'item'
+                    ? (() => { const it = mundo.items.find(x => x.id === editor.sel!.id); return it ? <ItemVisual item={it} /> : null; })()
+                    : editor.sel.tipo === 'portal'
+                      ? <PortalVerde radio={2.4} />
+                      : (() => { const pz = piezas.find(x => x.seed_id === editor.sel!.id); return pz ? <PiezaVisual pieza={pz} /> : null; })()}
+                </MovilFantasma>
+              )}
               {editor.sel && !editor.moviendo && <AnilloSeleccion x={editor.sel.x} z={editor.sel.z} />}
             </>
           )}
         </>
       )}
-
       <Personaje
         entrada={entrada}
         camara={camara}
         jugadorPos={jugadorPos}
+        luzRef={luzRef}
         obstaculos={obstaculos}
-        onChoque={alChocar}
+        onChoque={onChoque}
         destino={destino}
         zoom={zoom}
-        limite={cine ? CINE_LIM : radio + 26}
+        limite={cine ? CINE_LIM : interior ? PLAZA_LIM : undefined}
+        aspecto={aspectoJugador}
+        vehiculo={vehiculo}
+        alturaVuelo={alturaVuelo}
+        vista={vista}
       />
+      {/* Dentro de un proyecto no hay robot ni vecinos: el arbitraje de
+          cercanía se apaga para que no arrastre la última medida de la aldea. */}
       {!interior && <Coordinador medidas={medidas} onCercania={onCercania} />}
-      {/* La gran pantalla del cine, en el centro de «Herramientas»: es una
-          herramienta más y ahí es donde se busca. */}
-      {!cine && !interior && sala === 'herramientas' && (
-        <group position={[0, 0, -radio * 0.45]} onClick={(e) => { e.stopPropagation(); onPantalla(); }}>
-          <mesh position={[0, 3, 0]}>
-            <planeGeometry args={[9, 5]} />
-            <meshBasicMaterial color={TINTA.texto} />
-          </mesh>
-          <Billboard position={[0, 6.4, 0]}>
-            <Text fontSize={0.5} color={TINTA.texto} anchorX="center" anchorY="middle">Cine</Text>
-          </Billboard>
-        </group>
-      )}
+      {/* Las nubes y el color de cine son lo último: el composer tarda en
+          compilar sus shaders y no vale la pena pagarlo antes de que se vea
+          el suelo. */}
+      <Oleada n={3} actual={oleada}>
+        {!interior && !cine && <Nubes esNoche={cielo.esNoche} calidad={nivel === 'alta' ? 'alta' : nivel === 'media' ? 'media' : 'baja'} />}
+        <Efectos nivel={nivel} />
+      </Oleada>
     </Canvas>
   );
 }
