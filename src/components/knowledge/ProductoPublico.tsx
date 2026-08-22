@@ -34,6 +34,20 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   const [fotoRota, setFotoRota] = useState(false);
   const [compra, setCompra] = useState<Compra>({ fase: 'quieto' });
   const [anadido, setAnadido] = useState(false);
+  // ¿Está abierta la compra en esta instalación? Se pregunta una vez y se
+  // guarda para toda la página: si no, seis productos harían seis preguntas
+  // idénticas. Mientras no se sepa, no se pinta botón — enseñar uno y
+  // quitarlo medio segundo después es peor que tardar medio segundo.
+  const [cobro, setCobro] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (cobroConocido !== null) { setCobro(cobroConocido); return; }
+    let vivo = true;
+    fetch('/api/publicar/cobro')
+      .then(r => r.ok ? r.json() : { abierto: false })
+      .then(j => { if (!vivo) return; cobroConocido = !!j.abierto; setCobro(cobroConocido); })
+      .catch(() => vivo && setCobro(false));
+    return () => { vivo = false; };
+  }, []);
   // El carrito es de ESTA tienda. Fuera de un subdominio no hay tienda a la
   // que pertenecer, así que tampoco hay cesta: sólo compra directa.
   const tienda = subdominioDeUsuario();
@@ -146,7 +160,7 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
 
           <Envio envio={p.envio} moneda={p.moneda} precio={p.precio_centimos} />
 
-          {puedeComprarse(p) && (
+          {cobro === true && puedeComprarse(p) && (
             <div className="mt-3">
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
@@ -270,3 +284,6 @@ function Envio({ envio, moneda, precio }: { envio: any; moneda: string; precio: 
     </p>
   );
 }
+
+/** Se pregunta una vez por carga de página, no una vez por producto. */
+let cobroConocido: boolean | null = null;

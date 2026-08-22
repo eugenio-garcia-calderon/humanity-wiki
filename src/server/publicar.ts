@@ -412,6 +412,19 @@ export function registerPublicarRoutes(app: Express, db: any) {
    */
   app.post('/api/publicar/comprar', async (req: Request, res: Response) => {
     try {
+      // ── EL INTERRUPTOR DEL COBRO ────────────────────────────────────────
+      // Todo lo de vender salió en dos despliegues: primero lo que sólo
+      // ENSEÑA (la ficha de producto, la portada, la maquetación) y después lo
+      // que COBRA. Mientras el segundo no esté encendido, esta ruta no existe
+      // para nadie — y el botón tampoco se pinta, porque `GET
+      // /api/publicar/cobro` se lo dice al navegador.
+      //
+      // Es la norma de Eugenio del 2026-08-22: un despliegue, un cambio. Con
+      // dinero de por medio, un despliegue que enseña y cobra a la vez deja
+      // sin saber cuál de los dos rompió algo.
+      if (!COBRO_ENCENDIDO) {
+        return res.status(503).json({ error: 'La compra todavía no está abierta en esta tienda.' });
+      }
       const cuerpo = req.body || {};
       // Las dos formas acaban siendo la misma lista.
       const crudas: any[] = Array.isArray(cuerpo.lineas) && cuerpo.lineas.length
@@ -684,6 +697,17 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * ¿ESTÁ ABIERTA LA COMPRA? — `GET /api/publicar/cobro`
+   *
+   * Lo pregunta la ficha de producto antes de pintar el botón. Sin esto, el
+   * botón saldría igual y fallaría al pulsarlo, que es exactamente lo que se
+   * evitó en la fase 2: un botón que se puede pulsar es una promesa.
+   */
+  app.get('/api/publicar/cobro', (_req: Request, res: Response) => {
+    res.json({ abierto: COBRO_ENCENDIDO });
+  });
+
   /** Lo que tengo a la venta. Con sesión: son mis cosas. */
   app.get('/api/publicar/mis-productos', async (req: Request, res: Response) => {
     try {
@@ -818,6 +842,16 @@ const MAX_LINEAS = 20;
  *  verificado. Un límite se sube cuando alguien lo necesita; una puerta
  *  cerrada sólo se puede abrir del todo. */
 const MAX_PRODUCTOS_SIN_VERIFICAR = 10;
+
+/**
+ * ¿Se puede pagar ya?
+ *
+ * Apagado por defecto **a propósito**: así el despliegue que lleva las fichas
+ * de producto y la maquetación no lleva de tapadillo el cobro. Se enciende
+ * poniendo `TIENDAS_COBRO=1` en el `.env.production` del servidor, que es un
+ * cambio de una línea y su propio despliegue.
+ */
+const COBRO_ENCENDIDO = process.env.TIENDAS_COBRO === '1';
 
 /**
  * Cuántas unidades de este producto está pagando alguien AHORA MISMO.
