@@ -15,7 +15,7 @@ Son tres problemas distintos y cada uno tiene su remedio.
 
 | Agente | Carpeta | Rama | Puerto |
 |---|---|---|---|
-| **Programador 1** | la raíz del repositorio | `develop` | 3000 |
+| **Programador 1** | la raíz del repositorio | `prog1/…` | 3000 |
 | **Programador 2** | `.claude/worktrees/prog2` | `prog2/…` | 3001 |
 | **Programador 3** | `.claude/worktrees/prog3` | `prog3/…` | 3002 |
 
@@ -75,7 +75,26 @@ esté hecha.
 | Tocar ficheros del área de otro sin reservarlos | dos soluciones al mismo problema, y una se tira |
 | Fusionar a `main` sin avisar | `main` despliega, y el despliegue hace `git reset --hard origin/main` en el servidor |
 
-## 5 · Cuando dos han hecho lo mismo
+## 5 · Una PR por programador, y el despliegue por turnos
+
+Norma de Eugenio (2026-08-22): **cada programador abre su propia PR, y no se
+despliega fusionando el código de varios a la vez.**
+
+| | |
+|---|---|
+| De dónde sale la PR | de **tu** rama `progN/…`, nunca de `develop` con lo de todos dentro |
+| Adónde va | a `main`, que es lo que despliega |
+| Quién la abre y la fusiona | **tú**, la tuya, y solo la tuya |
+| Antes de fusionar | lo dices y **esperas** a que te den el turno. Avisar no es pedir |
+| Cuántas a la vez | una. Si otro está desplegando, esperas a que termine |
+
+Por qué: el 2026-08-22 la PR #200 salió a producción con trabajo de los tres
+mezclado. Cuando algo se rompe así, no se sabe de quién es ni se puede volver
+atrás sin llevarse por delante el trabajo de los otros dos.
+
+`develop` sirve para integrar y para probar. **No es lo que se despliega.**
+
+## 6 · Cuando dos han hecho lo mismo
 
 Ya pasó y se resolvió bien: se comparan las dos soluciones **con datos**, sobrevive
 la mejor y el otro retira su commit. No gana quien llegó antes ni quien tiene más
