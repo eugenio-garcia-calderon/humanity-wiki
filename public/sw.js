@@ -46,7 +46,7 @@
  * reloading, so there has to be a way out that does not need a developer.
  */
 
-const VERSION = "hw-v4";
+const VERSION = "hw-v5";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 const MEDIA = `${VERSION}-media`;
@@ -187,6 +187,35 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return; // third parties are theirs
   if (url.searchParams.has("sw") && url.searchParams.get("sw") === "off") return;
 
+  // ── NUNCA TOCAR UNA RESPUESTA QUE NO TERMINA (2026-08-23) ─────────────────
+  // ESTE FUE MI FALLO Y CONGELÓ LA APLICACIÓN DE EUGENIO. `hw-v4` metía toda
+  // respuesta de `/api/` por la rama de abajo, que hace `res.clone()` y luego
+  // `await copia.blob()` dentro de un `event.waitUntil`. Sobre
+  // `/api/telecom/conexion` —que es Server-Sent Events, `text/event-stream`, y
+  // **no termina nunca por diseño**— eso hace dos cosas, las dos malas:
+  //
+  //   1. `blob()` no se resuelve JAMÁS, así que el `waitUntil` queda pendiente
+  //      para siempre. Uno por conexión, por pestaña.
+  //   2. Clonar una respuesta en streaming obliga al navegador a GUARDAR TODO
+  //      el flujo en memoria para poder dárselo a las dos ramas. Un flujo que
+  //      no acaba es memoria que no para de crecer.
+  //
+  // Con varias pestañas abiertas y 8 GB de RAM, eso es exactamente lo que se
+  // ve desde fuera: «la aplicación se queda constantemente, a veces recargando,
+  // durante minutos». Reproducido en el navegador ejecutando la misma línea que
+  // ejecuta este fichero: sigue colgada a los 8 segundos.
+  //
+  // SE FILTRA POR LA PETICIÓN, NO POR LA RESPUESTA, y a propósito: para cuando
+  // la respuesta llega ya la hemos interceptado, y el daño de clonar está
+  // hecho. `EventSource` manda siempre `Accept: text/event-stream`, así que
+  // esto vale para el chat de hoy y para cualquier flujo que alguien añada
+  // mañana sin acordarse de este comentario.
+  //
+  // `return` sin `respondWith` = el navegador la trata como si no hubiera
+  // service worker. Es lo correcto: una conexión permanente no se guarda en
+  // caché ni sirve de nada sin red.
+  if ((req.headers.get("accept") || "").includes("text/event-stream")) return;
+
   // The API: network always wins; the copy is only a parachute (rule 1).
   if (url.pathname.startsWith("/api/")) {
     // NOT the public-page endpoints. Those answer the same to everybody, so a
@@ -203,7 +232,12 @@ self.addEventListener("fetch", (event) => {
         .then((res) => {
           // Only keep what is safe to show later. An error page cached as if it
           // were data would be the same lie in another costume.
-          if (res.ok) {
+          // EL SEGUNDO CINTURÓN. Lo de arriba mira la petición; esto mira la
+          // respuesta, por si algún día algo devuelve un flujo sin pedirlo con
+          // la cabecera `Accept`. Clonar es lo que cuesta caro, así que la
+          // decisión se toma ANTES de clonar, nunca después.
+          const tipo = res.headers.get("content-type") || "";
+          if (res.ok && !tipo.includes("text/event-stream")) {
             const copia = res.clone();
             // waitUntil, NOT fire-and-forget. Without it the browser is free to
             // kill the worker the moment the response reaches the page, and the
