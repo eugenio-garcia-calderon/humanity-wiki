@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/server/puntos.ts",
-      "motivo": "transferencias de puntos con interruptor apagado",
-      "desde": "2026-08-22T14:39:59.935Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/pages/Vision.tsx",
       "motivo": "UI de enviar puntos",
       "desde": "2026-08-22T14:40:04.095Z"
