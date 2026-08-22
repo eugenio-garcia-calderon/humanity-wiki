@@ -34,95 +34,15 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
+import { TIPOS, tipar, type Tipo } from './bd/tipos';
+import { celdasDe, type Celda } from './bd/celdas';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-/** Los cinco de la capa 1. El criterio no ha sido «los más usados» sino los que
- *  cambian lo que el sistema puede CALCULAR O VALIDAR. Correo, teléfono y
- *  enlace son texto con un icono y una expresión regular: no habilitan nada. */
-const TIPOS = ['texto', 'numero', 'fecha', 'seleccion', 'casilla'] as const;
-type Tipo = typeof TIPOS[number];
-
-// ── CELDAS ──────────────────────────────────────────────────────────────────
-
-export type Celda =
-  | { estado: 'vacia' }
-  | { estado: 'ok'; valor: string | number | boolean }
-  | { estado: 'sin_calcular' }
-  | { estado: 'error'; mensaje: string };
-
-const VACIA: Celda = { estado: 'vacia' };
-
-/**
- * Convierte lo que llega del cliente al valor YA TIPADO que se guarda, o dice
- * que no vale.
- *
- * Se guarda un número como número de JSON y una fecha como texto ISO, nunca
- * «todo cadena que ya se convertirá»: si se guardara como texto, las fórmulas
- * de la capa 3 tendrían que adivinar el tipo en cada lectura y acabaríamos
- * escribiendo un analizador donde debería haber una suma.
- *
- * Devuelve `{ ok: true, valor }` donde `valor === undefined` significa BORRAR
- * la celda (dejarla vacía), que es distinto de guardar un cero o una cadena
- * vacía — y es justamente la distinción que esta capa existe para sostener.
- */
-export function tipar(tipo: Tipo, bruto: any, opciones: any[]): { ok: true; valor: any } | { ok: false; error: string } {
-  // Vaciar una celda. `false` y `0` NO entran aquí a propósito: son valores.
-  if (bruto === null || bruto === undefined || bruto === '') return { ok: true, valor: undefined };
-
-  switch (tipo) {
-    case 'texto':
-      return { ok: true, valor: String(bruto).slice(0, 10000) };
-
-    case 'numero': {
-      // `Number('')` es 0 y `Number(' ')` también: por eso el vacío se ha
-      // resuelto antes de llegar aquí. Aquí un texto que no es número es un
-      // error que se cuenta, no un cero que se inventa.
-      const n = typeof bruto === 'number' ? bruto : Number(String(bruto).replace(',', '.').trim());
-      if (!Number.isFinite(n)) return { ok: false, error: 'No es un número.' };
-      return { ok: true, valor: n };
-    }
-
-    case 'fecha': {
-      // Se guarda AAAA-MM-DD, sin hora ni zona horaria. Una fecha de
-      // vencimiento no tiene hora, y arrastrar zona horaria hace que la misma
-      // fecha se vea distinta según quién la mire.
-      const t = String(bruto).trim();
-      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
-      if (!m) return { ok: false, error: 'La fecha tiene que ser AAAA-MM-DD.' };
-      const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00Z`);
-      if (Number.isNaN(d.getTime())) return { ok: false, error: 'Esa fecha no existe.' };
-      return { ok: true, valor: `${m[1]}-${m[2]}-${m[3]}` };
-    }
-
-    case 'seleccion': {
-      // SE GUARDA EL `id` DE LA OPCIÓN, NUNCA SU TEXTO. Si se guardara el
-      // texto, renombrar «Mayor mejor» cambiaría el significado de todas las
-      // filas que la tuvieran — y en el astillero eso invierte el veredicto de
-      // un ensayo sin que nadie se entere.
-      const id = String(bruto);
-      if (!opciones.some(o => o?.id === id)) return { ok: false, error: 'Esa opción no existe en la columna.' };
-      return { ok: true, valor: id };
-    }
-
-    case 'casilla':
-      return { ok: true, valor: bruto === true || bruto === 'true' };
-
-    default:
-      return { ok: false, error: 'Tipo de columna desconocido.' };
-  }
-}
-
-/** La forma en que una fila sale hacia fuera: nunca un `null` pelado. */
-export function celdasDe(valores: Record<string, any>, columnas: Array<{ id: string }>): Record<string, Celda> {
-  const salida: Record<string, Celda> = {};
-  for (const c of columnas) {
-    const v = valores?.[c.id];
-    // Clave ausente = celda vacía. Ojo: `false` y `0` SÍ son valores.
-    salida[c.id] = v === undefined || v === null ? VACIA : { estado: 'ok', valor: v };
-  }
-  return salida;
-}
+// Se re-exportan: hasta la fase 1 vivían en este fichero.
+export { tipar, TIPOS } from './bd/tipos';
+export { celdasDe } from './bd/celdas';
+export type { Celda } from './bd/celdas';
 
 // ── RUTAS ───────────────────────────────────────────────────────────────────
 
@@ -401,7 +321,7 @@ export function registerBdRoutes(app: Express, db: any) {
       for (const [colId, bruto] of Object.entries(entrantes)) {
         const col = porId.get(colId);
         if (!col) { fallos.push({ columna: colId, error: 'Esa columna no existe en la tabla.' }); continue; }
-        const r = tipar(col.tipo as Tipo, bruto, col.opciones || []);
+        const r = tipar(col.tipo as Tipo, bruto, col.opciones || [], col.config || {});
         // `'error' in r` en vez de `!r.ok`: este proyecto no compila con
         // `strict`, y sin él TypeScript no estrecha la unión por el campo
         // discriminante. Con la comprobación de presencia funciona igual en
