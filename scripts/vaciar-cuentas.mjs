@@ -80,7 +80,13 @@ try {
         `UPDATE users SET
            email          = 'borrado-' || gen_random_uuid()::text || '@cuenta.invalid',
            name           = NULL,
-           display_name   = 'Cuenta borrada',
+           -- «Usuario eliminado», no «Cuenta borrada»: es lo que la página
+           -- pública promete que va a aparecer firmando sus cosas, y es una
+           -- página que se enseña a App Store y a Google Play como compromiso.
+           -- Además el texto es mejor: habla de una persona que se fue, no de
+           -- una fila de una tabla. Lo cazó el Programador 3 pidiendo que se
+           -- comparara la promesa con lo que el programa hace de verdad.
+           display_name   = 'Usuario eliminado',
            avatar_url     = NULL,
            banner_url     = NULL,
            bio            = NULL,
