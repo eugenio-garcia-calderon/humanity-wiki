@@ -181,3 +181,31 @@ export function guardian(regla: Regla, cuentaDe: (req: Request) => string | null
     }
   };
 }
+
+/**
+ * Alguien pidió que le borraran la cuenta: se le quita el nombre del rastro.
+ *
+ * ══ POR QUÉ EXISTE ESTO (2026-08-22, aviso de prog1) ═════════════════════════
+ * `intentos_fallidos` guarda el correo en claro, porque sin él no se puede
+ * responder «¿atacaron esta cuenta?», que es para lo que existe la tabla. Pero
+ * el borrado de cuenta vacía la fila de `users` a los 15 días, y **el correo
+ * seguiría aquí para siempre**: una persona que pidió ser olvidada, y no lo fue
+ * del todo. Desde que hay copias diarias, además, eso sale del servidor todas
+ * las noches.
+ *
+ * SE BORRA EL NOMBRE, NO LA FILA. La IP, la fecha y el recuento se quedan:
+ * «cuántos intentos vinieron de esa IP» sigue siendo la señal de un ataque y no
+ * es de nadie en particular. Lo que se pierde es poder decir a qué cuenta
+ * apuntaban — de una cuenta que ya no existe.
+ *
+ * Se llama desde el borrado DEFINITIVO, no al pedirlo: durante los 15 días la
+ * persona puede volver, y entonces su rastro tiene que seguir entero.
+ */
+export async function olvidarCuenta(db: any, correo: string): Promise<number> {
+  const { sql } = await import('drizzle-orm');
+  const r = await db.execute(sql`
+    UPDATE intentos_fallidos SET cuenta = NULL
+    WHERE lower(cuenta) = ${String(correo).trim().toLowerCase()}
+  `);
+  return r.rowCount ?? 0;
+}
