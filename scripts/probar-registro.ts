@@ -175,7 +175,7 @@ if (admin) {
   const pool = new pg.Pool(conexion(BD_PRUEBA));
   const db = drizzle(pool);
   try {
-    const migracion = fs.readFileSync(path.join(import.meta.dirname, '../drizzle/0064_registro_sellado.sql'), 'utf8');
+    const migracion = fs.readFileSync(path.join(import.meta.dirname, '../drizzle/0070_registro_sellado.sql'), 'utf8');
     await pool.query(migracion);
     comprobar('la migración se aplica sobre una base de datos vacía', true);
 

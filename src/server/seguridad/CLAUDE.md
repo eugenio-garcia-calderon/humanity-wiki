@@ -10,7 +10,7 @@ registro.ts   append-only, hash-chained, signed; and the verifier
 firma.ts      Ed25519: proves WE wrote it, which the hash chain cannot
 ```
 
-Migration: `drizzle/0064_registro_sellado.sql` — two new tables,
+Migration: `drizzle/0070_registro_sellado.sql` — two new tables,
 `registro_sellado` and `registro_anclajes`.
 
 ## This PR changes no behaviour
