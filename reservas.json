@@ -67,12 +67,6 @@
       "desde": "2026-08-22T12:10:37.437Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "fase 6 tiendas: pedidos",
-      "desde": "2026-08-22T12:20:28.845Z"
-    },
-    {
       "agente": "prog1",
       "ruta": "src/components/explorer/EntityExplorerPanel.tsx",
       "motivo": "marca de origen del dato en el explorador",
