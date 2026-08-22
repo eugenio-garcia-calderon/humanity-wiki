@@ -197,6 +197,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: envio pagado con puntos",
       "desde": "2026-08-22T22:16:25.519Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "envio con puntos (paso de prog2)",
+      "desde": "2026-08-22T22:18:16.402Z"
     }
   ]
 }
