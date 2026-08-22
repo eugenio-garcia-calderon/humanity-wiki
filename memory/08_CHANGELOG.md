@@ -5166,7 +5166,7 @@ sello sin pantalla no lo ve nadie. Separadas, ninguna de las dos sirve todavía.
   lo que falta llevara rojo, el rojo dejaría de significar nada. Y un estado que
   el componente no reconoce **no se pinta como el primero de la lista**: eso
   sería inventarse un dato.
-- **La escalera ya tiene firma** (`drizzle/0085`): quién movió el sello, cuándo y
+- **La escalera ya tiene firma** (`drizzle/0088`): quién movió el sello, cuándo y
   por qué. `verificada` sin decir por quién es exactamente el tipo de afirmación
   que esta área existe para no aceptar. Texto y no clave foránea, como
   `incidencias.respondido_por`: la firma sobrevive al borrado de la cuenta.
