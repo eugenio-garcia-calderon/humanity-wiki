@@ -97,6 +97,22 @@ try {
            ubicaciones    = '[]'::jsonb,
            objetivos      = '[]'::jsonb,
            handle         = NULL,
+           -- EL TELÉFONO TAMBIÉN SE VA (2026-08-22, Programador 8, con la capa
+           -- de telecomunicaciones). Sin estas dos líneas, una cuenta vaciada
+           -- seguiría apareciendo al buscar por su número y seguiría
+           -- recibiendo llamadas; y peor: el número queda pillado para
+           -- siempre por el índice único, así que su dueño no podría usarlo
+           -- en una cuenta nueva.
+           telefono          = NULL,
+           telefono_buscable = false,
+           -- Y EL TELÉFONO SE CIERRA DEL TODO. Se puede llamar a alguien por su
+           -- identificador, no solo por su número, y la página pública de una
+           -- cuenta vaciada sigue existiendo con su «Usuario eliminado». Sin
+           -- esta línea, alguien podría seguir llamando a una cuenta que ya no
+           -- es de nadie: no se conectaría nunca, pero dejaría llamadas
+           -- perdidas y avisos para una persona que se fue. «nadie» y no NULL:
+           -- la columna no admite nulos y además lleva su restricción.
+           llamadas_de       = 'nadie',
            google_id      = NULL,
            password_hash  = NULL,
            email_verified = false,
@@ -110,6 +126,11 @@ try {
       // sirviendo para entrar en una cuenta que ya no es de nadie.
       await cliente.query('UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [r.id]);
       await cliente.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [r.id]);
+      // EL HISTORIAL DE LLAMADAS NO SE TOCA, y es a propósito (2026-08-22): al
+      // otro lado de cada llamada hay otra persona y ese historial es suyo.
+      // Se comporta igual que los mensajes, que tampoco se borran: el nombre
+      // ya ha pasado a «Usuario eliminado» con la anonimización de arriba, que
+      // es lo que hay que quitar de en medio.
       await cliente.query('COMMIT');
       console.log(`  vaciada: ${r.id}`);
     } catch (e) {
