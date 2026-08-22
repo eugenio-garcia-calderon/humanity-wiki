@@ -25,6 +25,27 @@ one protects the account owner right now, the other lets you see the attack
 afterwards, including the attack that succeeded. This is the house rule: two
 different truths never collapse into one number.
 
+## Rate is not failure
+
+`anotarFallo` brakes **and** leaves a row in `intentos_fallidos`. `ritmo` brakes
+and writes nothing. The brake cannot tell them apart; the trail must.
+
+prog7's correction, 2026-08-22, wiring the guard onto point transfers: sending
+points eleven times in a row is not a failure, it is nobody doing that by hand.
+With only `anotarFallo` the choice was to leave the rate unguarded or to file
+legitimate activity in the failure log — and the second is worse than it looks,
+because that table is the record of attacks and filling it with correct
+transfers is exactly how the line that matters gets buried.
+
+| Use | When |
+|---|---|
+| `anotarFallo` | Something went wrong. Brake and record |
+| `ritmo` | Something went right, too fast. Brake only |
+| `levantarFreno` | Something went right and should clear the brake — a correct password |
+
+Note the third is not the opposite of the second: a login clears its brake on
+success, a transfer does not. That is the route's decision, not the module's.
+
 ## Where each counter lives
 
 | | Where | Why |

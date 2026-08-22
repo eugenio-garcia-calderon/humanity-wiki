@@ -140,6 +140,39 @@ export async function anotarFallo(
   }
 }
 
+/** Un intento que salió BIEN pero cuenta para el ritmo: sube el freno y NO
+ *  escribe nada en `intentos_fallidos`.
+ *
+ *  ══ POR QUÉ EXISTE, Y ES UNA CORRECCIÓN DE PROG7 ═══════════════════════════
+ *  Este módulo nació para el login, donde «frenar» y «fallar» son lo mismo: se
+ *  frena a quien se equivoca. Pero un límite de RITMO es otra cosa — enviar
+ *  puntos once veces seguidas no es un fallo, es que nadie hace eso a mano.
+ *
+ *  Con solo `anotarFallo` había que elegir entre dos cosas malas: no frenar el
+ *  ritmo, o meter actividad legítima en `intentos_fallidos`. Lo segundo es peor
+ *  de lo que parece: esa tabla es el rastro de los ataques, y llenarla de
+ *  transferencias correctas es exactamente cómo se entierra la línea que
+ *  importa. Anotar lo normal es cómo lo raro pasa desapercibido.
+ *
+ *  Así que se separan las dos verdades, que es la regla de la casa:
+ *    · `anotarFallo` — algo salió mal. Frena Y deja rastro.
+ *    · `ritmo`       — algo salió bien pero va demasiado rápido. Solo frena.
+ *
+ *  El freno no distingue: para él son lo mismo. Lo que cambia es qué queda
+ *  escrito, y eso es lo que alguien va a leer dentro de seis meses. */
+export function ritmo(regla: Regla, ip: string, cuenta?: string | null): void {
+  const ahora = Date.now();
+  for (const k of [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])]) {
+    const f = freno.get(k) || { fallos: 0, hasta: 0 };
+    f.fallos += 1;
+    if (f.fallos > regla.gracia) {
+      const segundos = Math.min(regla.baseSegundos * 2 ** (f.fallos - regla.gracia - 1), regla.topeSegundos);
+      f.hasta = ahora + segundos * 1000;
+    }
+    freno.set(k, f);
+  }
+}
+
 /** Salió bien: se levanta EL FRENO, y solo el freno.
  *
  *  `intentos_fallidos` NO SE TOCA. Es la regla 4, y es la que hace que el
