@@ -89,7 +89,7 @@ export default function ProjectsPage() {
                     className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-emerald-500 hover:shadow-md transition-all h-full flex flex-col relative group cursor-pointer"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('.admin-menu-trigger')) return;
-                      navigate(`/proyectos/${slugify(project.name)}`);
+                      navigate(`/iniciativas/${slugify(project.name)}`);
                     }}
                   >
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity admin-menu-trigger z-10">
@@ -177,7 +177,7 @@ export default function ProjectsPage() {
                     className="bg-slate-50 border border-slate-200 rounded-2xl p-5 hover:border-slate-300 hover:shadow-md transition-all h-full flex flex-col relative group cursor-pointer"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('.admin-menu-trigger')) return;
-                      navigate(`/proyectos/${slugify(project.name)}`);
+                      navigate(`/iniciativas/${slugify(project.name)}`);
                     }}
                   >
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity admin-menu-trigger z-10">

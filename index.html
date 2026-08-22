@@ -4,6 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Humanity.wiki</title>
+    <!-- El favicon: el mismo SVG que el logo del menú (2026-08-22). Un solo
+         fichero para los dos sitios, así que no pueden acabar distintos. -->
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="theme-color" content="#2b2258" />
+
+    <!-- PWA (2026-08-22, Programador 3).
+         El `apple-touch-icon` apuntaba a `/logo.svg`: iOS NO admite SVG ahí, así
+         que al añadir a la pantalla de inicio el icono salía en blanco. Tiene que
+         ser un PNG de 180, cuadrado y opaco — iOS pone su propia máscara
+         redondeada encima, y si la fuente ya viene redondeada quedan esquinas
+         oscuras dentro del recorte. Por eso los iconos se generan de
+         `public/iconos/fuente-cuadrado.svg` y no del logo. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/iconos/icono-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Humanity" />
   </head>
   <body>
     <div id="root"></div>

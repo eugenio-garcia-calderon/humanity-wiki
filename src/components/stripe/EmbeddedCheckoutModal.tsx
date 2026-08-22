@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { X, ShieldCheck } from 'lucide-react';
 
 // ============================================================================
@@ -35,7 +34,14 @@ export default function EmbeddedCheckoutModal({ createSession, title, onClose }:
         const publishableKey = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY;
         if (!publishableKey) throw new Error('Falta VITE_STRIPE_PUBLISHABLE_KEY en el cliente.');
 
-        const stripe = await loadStripe(publishableKey);
+        // STRIPE SE CARGA AQUÍ, NO AL ARRANCAR LA APP (2026-08-20). Con el
+          // import arriba, el paquete entraba en el paquete principal Y su
+          // script se inyectaba en TODAS las páginas: el Tester encontró el
+          // iframe de Stripe vivo en /tareas, una pantalla que no vende nada.
+          // Son ~1 MB de red y un marco de terceros en cada pantalla, por algo
+          // que solo hace falta cuando alguien va a pagar.
+          const { loadStripe } = await import('@stripe/stripe-js');
+          const stripe = await loadStripe(publishableKey);
         if (!stripe) throw new Error('No se pudo cargar el SDK de Stripe.');
 
         // El SDK de Stripe se carga en tiempo de ejecución desde su propio

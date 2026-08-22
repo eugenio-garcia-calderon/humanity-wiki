@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { otorgarPuntos } from './puntos.js';
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -254,6 +255,37 @@ export function registerStripeRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // PUNTOS DE HUMANITY.WIKI — comprar más saldo (2026-08-08, petición del usuario)
+  // ==========================================================================
+  /** 100 puntos por 100 €: el paquete que pidió el usuario, de momento el único. */
+  const PAQUETE_PUNTOS = { puntos: 100, amount_cents: 10000 };
+
+  app.post('/api/stripe/checkout/puntos', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const stripe = getStripe();
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        ui_mode: 'embedded',
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: { name: `${PAQUETE_PUNTOS.puntos} Puntos de Humanity.wiki` },
+            unit_amount: PAQUETE_PUNTOS.amount_cents,
+          },
+          quantity: 1,
+        }],
+        metadata: { kind: 'puntos', buyer_id: req.user!.id, puntos: String(PAQUETE_PUNTOS.puntos) },
+        return_url: `${APP_URL}/vision?compra=completada&session_id={CHECKOUT_SESSION_ID}`,
+      });
+      res.json({ clientSecret: session.client_secret, sessionId: session.id });
+    } catch (e: any) {
+      console.error('checkout puntos error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // REEMBOLSOS
   // ==========================================================================
   app.post('/api/stripe/refunds', async (req: Request, res: Response) => {
@@ -361,6 +393,21 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
   const newId2 = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase()}`;
 
   switch (event.type) {
+    // UNA SESIÓN DE PAGO QUE MUERE SIN PAGAR SUELTA LO QUE RETENÍA.
+    //
+    // Sin esto, quien abre el pago y cierra la pestaña deja el último tarro
+    // invisible durante media hora. La reserva caduca sola por su `expira_at`,
+    // pero enterarse por Stripe la suelta EN EL ACTO, que es la diferencia
+    // entre «vuelve enseguida» y «vuelve cuando ya se ha ido».
+    case 'checkout.session.expired': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await db.execute(sql`
+        UPDATE reservas_stock SET estado = 'liberada', updated_at = now()
+        WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
+      `);
+      break;
+    }
+
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const kind = session.metadata?.kind;
@@ -388,6 +435,146 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             ON CONFLICT DO NOTHING
           `);
         }
+      } else if (kind === 'compra_publica') {
+        // UNA COMPRA HECHA SIN CUENTA — fases 3, 5, 6 y 7 del plan de tiendas.
+        //
+        // No hay `payer_user_id` porque no hay comprador registrado, y la
+        // columna admite nulo a propósito: dejarlo vacío dice «esta compra la
+        // hizo alguien de fuera», que es verdad. Inventar un usuario para
+        // rellenarlo sería crear una persona que no existe.
+        //
+        // El correo llega de Stripe, no del navegador: es el que la pasarela
+        // ha verificado al cobrar, no uno que alguien escribiera en un campo.
+
+        // Qué llevaba el carrito. Se guardó en los metadatos al abrir el pago
+        // porque para cuando llega este aviso el navegador ya no está, y
+        // volver a calcularlo desde `products` daría los precios de HOY, no
+        // los del momento de comprar.
+        let carrito: [string, number, number][] = [];
+        try { carrito = JSON.parse(session.metadata!.lineas || '[]'); } catch { carrito = []; }
+        if (carrito.length === 0 && session.metadata!.product_id) {
+          // Compras de una sola cosa hechas antes de que existiera el carrito.
+          carrito = [[session.metadata!.product_id, Number(session.metadata!.quantity) || 1, 0]];
+        }
+        if (carrito.length === 0) break;
+
+        const ids = carrito.map(l => l[0]);
+        const productos = (await db.execute(sql`
+          SELECT id, name, created_by, price_cents FROM products
+          WHERE id = ANY(string_to_array(${ids.join(',')}, ','))
+        `)).rows as any[];
+        if (productos.length === 0) break;
+
+        const correo = session.customer_details?.email || session.customer_email || null;
+        const vendedorId = session.metadata!.vendedor_id || productos[0].created_by || null;
+
+        // El resumen legible: lo que se enseña en una lista de pedidos sin
+        // tener que consultar las líneas de cada uno.
+        const primero = productos.find(x => x.id === carrito[0][0]);
+        const resumen = carrito.length === 1
+          ? (primero?.name || 'Compra')
+          : `${primero?.name || 'Compra'} y ${carrito.length - 1} ${carrito.length === 2 ? 'cosa más' : 'cosas más'}`;
+
+        const txId = newId2('TRX');
+        await db.execute(sql`
+          INSERT INTO transactions (id, kind, status, amount_cents, currency, platform_fee_cents,
+                                    payer_user_id, payee_user_id, stripe_payment_intent_id,
+                                    stripe_checkout_session_id, concept)
+          VALUES (${txId}, 'compra', 'pagado', ${session.amount_total || 0},
+                  ${(session.currency || 'eur').toUpperCase()}, 0,
+                  NULL, ${vendedorId},
+                  ${(session.payment_intent as string) || null}, ${session.id},
+                  ${`Compra de ${resumen}${correo ? ` — ${correo}` : ''}`})
+          ON CONFLICT (id) DO NOTHING
+        `);
+        for (const [pid] of carrito) {
+          await db.execute(sql`
+            INSERT INTO transaction_links (transaction_id, entity_type, entity_id)
+            VALUES (${txId}, 'products', ${pid})
+            ON CONFLICT DO NOTHING
+          `);
+        }
+
+        // ── STOCK: SE DESCUENTA AQUÍ, Y SOLO UNA VEZ POR COMPRA ────────────
+        // La reserva se creó al abrir el pago (fase 5) y aquí se cierra. El
+        // `WHERE estado = 'abierta'` es lo que hace esto idempotente: Stripe
+        // reenvía los avisos cuando duda de que hayan llegado, y sin esa
+        // condición el mismo tarro se descontaría dos y tres veces.
+        //
+        // Se cierran TODAS las líneas de esta sesión de una vez, y `RETURNING`
+        // dice cuáles eran nuevas. Si no vuelve ninguna, este aviso ya se
+        // había procesado y no se toca nada más.
+        const cerradas = await db.execute(sql`
+          UPDATE reservas_stock SET estado = 'confirmada', updated_at = now()
+          WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
+          RETURNING producto_id, unidades
+        `);
+        const habiaReservas = (await db.execute(sql`
+          SELECT 1 FROM reservas_stock WHERE stripe_session_id = ${session.id} LIMIT 1
+        `)).rows.length > 0;
+        // Si no había reservas es que ningún producto llevaba la cuenta del
+        // stock; entonces «nueva» se decide por si ya existe el pedido.
+        const yaContada = habiaReservas
+          ? cerradas.rows.length === 0
+          : (await db.execute(sql`SELECT 1 FROM pedidos WHERE stripe_session_id = ${session.id} LIMIT 1`)).rows.length > 0;
+
+        if (!yaContada) {
+          for (const fila of cerradas.rows as any[]) {
+            // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva,
+            // y `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
+            // decidió no llevarla.
+            await db.execute(sql`
+              UPDATE products SET stock = GREATEST(0, stock - ${Number(fila.unidades)})
+              WHERE id = ${fila.producto_id} AND stock IS NOT NULL
+            `);
+          }
+
+          // ── EL PEDIDO Y SUS LÍNEAS (fases 6 y 7) ───────────────────────
+          const envioCent = Number(session.metadata!.envio_centimos || 0) || 0;
+          const d = session.customer_details;
+          const envio = (session as any).shipping_details || (session as any).shipping || null;
+          const pedidoId = newId2('PED');
+          const creado = await db.execute(sql`
+            INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades,
+                                 importe_centimos, envio_centimos, moneda,
+                                 comprador_user_id, comprador_email, comprador_nombre,
+                                 direccion_envio, vendedor_user_id, estado,
+                                 stripe_session_id, transaction_id)
+            VALUES (${pedidoId}, ${codigoDePedido()},
+                    ${carrito.length === 1 ? carrito[0][0] : null}, ${resumen},
+                    ${carrito.length === 1 ? carrito[0][1] : null},
+                    ${session.amount_total || 0}, ${envioCent},
+                    ${(session.currency || 'eur').toUpperCase()},
+                    NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
+                    ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
+                    ${vendedorId}, 'pagado', ${session.id}, ${txId})
+            ON CONFLICT (stripe_session_id) DO NOTHING
+            RETURNING id
+          `);
+
+          // Sólo si el pedido es nuevo de verdad: el `ON CONFLICT` de arriba
+          // no devuelve nada cuando ya existía, y sin esta comprobación las
+          // líneas se duplicarían aunque el pedido no.
+          if (creado.rows[0]) {
+            for (const [pid, unid, precio] of carrito) {
+              const prod = productos.find(x => x.id === pid);
+              await db.execute(sql`
+                INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre,
+                                           unidades, precio_unitario_centimos)
+                VALUES (${newId2('PLN')}, ${pedidoId}, ${pid},
+                        ${prod?.name || 'Producto retirado'}, ${unid},
+                        ${precio || prod?.price_cents || 0})
+              `);
+            }
+          }
+        }
+      } else if (kind === 'puntos') {
+        // El saldo solo se acredita AQUÍ, en la confirmación real del pago
+        // (no al crear la sesión de checkout) — así un pago abandonado o
+        // fallido nunca regala puntos.
+        await otorgarPuntos(db, session.metadata!.buyer_id, Number(session.metadata!.puntos) || 0, 'compra', {
+          stripeSessionId: session.id,
+        });
       } else if (kind === 'support') {
         const supportId = newId2('SUP');
         const recurring = session.metadata?.recurring === '1';
@@ -448,4 +635,22 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
     default:
       break;
   }
+}
+
+/**
+ * El código que se le da a quien compra: `MIEL-7K3Q2`.
+ *
+ * Sin `I`, `O`, `0` ni `1`. Un código de pedido se lee en voz alta por
+ * teléfono y se copia a mano de un correo, y esas cuatro son las que se
+ * confunden entre sí. Perder un pedido por un cero leído como una o es un
+ * fallo evitable con una línea.
+ */
+function codigoDePedido(): string {
+  const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) out += '-';
+    out += LETRAS[Math.floor(Math.random() * LETRAS.length)];
+  }
+  return out;
 }

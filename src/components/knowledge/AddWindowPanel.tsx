@@ -20,17 +20,25 @@ const KINDS: Array<{ kind: string; label: string }> = [
   { kind: 'wikipedia', label: 'Wikipedia' },
   { kind: 'grafo', label: 'Otro grafo' },
   { kind: 'producto', label: 'Producto del Mercado' },
+  { kind: 'tarea', label: 'Tarea' },
+  { kind: 'tabla', label: 'Tabla' },
+  { kind: 'proyecto', label: 'Proyecto' },
 ];
 
 const RELATIONS = ['contexto', 'causa', 'dato', 'fuente', 'apoya', 'contradice', 'matiza'];
 
-export default function AddWindowPanel({ graphId, onClose, onAdded }: {
+export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind, from }: {
   graphId: string;
   onClose: () => void;
   onAdded: () => void;
+  /** Herramienta preseleccionada (la barra de Mi Conocimiento abre directo). */
+  initialKind?: string;
+  /** Si llega, la ventana nueva se conecta a ESA ventana en vez de al centro
+   *  — es el «+» que sale al pasar el ratón por un nodo del lienzo. */
+  from?: { id: string; title: string; pos?: { x: number; y: number } } | null;
 }) {
   const { user } = useAuth();
-  const [kind, setKind] = useState('publicacion');
+  const [kind, setKind] = useState(initialKind || 'publicacion');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('');
@@ -126,6 +134,33 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
           },
         };
       }
+      case 'tarea':
+        if (!title.trim()) { setError('La tarea necesita un título.'); return null; }
+        return {
+          title: title.trim(),
+          config: { done: false, due: url.trim() || null, notes: body.trim() || null },
+        };
+      case 'tabla':
+        return {
+          title: title.trim() || 'Tabla',
+          config: {
+            cols: [
+              { id: 'c1', name: 'Nombre', type: 'text' },
+              { id: 'c2', name: 'Valor', type: 'text' },
+            ],
+            rows: [],
+          },
+        };
+      case 'proyecto':
+        if (!title.trim()) { setError('El proyecto necesita un nombre.'); return null; }
+        return {
+          title: title.trim(),
+          config: {
+            status: 'en_marcha',
+            goal: body.trim() || null,
+            steps: [],
+          },
+        };
       default:
         return null;
     }
@@ -141,14 +176,15 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
       // Colocación inicial: en el anillo exterior, en un ángulo aleatorio —
       // el creador la arrastra después y la posición queda grabada.
       const ang = Math.random() * 2 * Math.PI;
+      const cerca = from?.pos;
       const res = await fetch(`/api/graphs/${graphId}/windows`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           title: w.title, kind, config: w.config,
-          x: Math.round(Math.cos(ang) * 640) - 128,
-          y: Math.round(Math.sin(ang) * 500) - 110,
+          x: cerca ? Math.round(cerca.x + Math.cos(ang) * 430) : Math.round(Math.cos(ang) * 640) - 128,
+          y: cerca ? Math.round(cerca.y + Math.sin(ang) * 330) : Math.round(Math.sin(ang) * 500) - 110,
         }),
       });
       const json = await res.json();
@@ -158,7 +194,7 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ from_window_id: null, to_window_id: json.id, relation, label: edgeLabel.trim() || null }),
+          body: JSON.stringify({ from_window_id: from?.id ?? null, to_window_id: json.id, relation, label: edgeLabel.trim() || null }),
         });
       }
       onAdded();
@@ -177,7 +213,8 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-emerald-600" /> Nueva Ventana de Conocimiento
+            <Plus className="w-4 h-4 text-emerald-600" />
+            {from ? 'Conectar algo nuevo' : 'Nueva Ventana de Conocimiento'}
           </h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-500 transition-colors">
             <X className="w-4 h-4" />
@@ -264,12 +301,24 @@ export default function AddWindowPanel({ graphId, onClose, onAdded }: {
           {kind === 'wikipedia' && (
             <input value={wikiPage} onChange={e => setWikiPage(e.target.value)} placeholder="Título exacto de la página, ej. Ceuta" className={input} />
           )}
+          {kind === 'tarea' && (
+            <>
+              <input type="date" value={url} onChange={e => setUrl(e.target.value)} className={input} title="Fecha límite (opcional)" />
+              <textarea value={body} onChange={e => setBody(e.target.value)} rows={2} placeholder="Notas (opcional)" className={cn(input, 'resize-none')} />
+            </>
+          )}
+          {kind === 'proyecto' && (
+            <textarea value={body} onChange={e => setBody(e.target.value)} rows={3} placeholder="¿Qué quiere conseguir este proyecto?" className={cn(input, 'resize-none')} />
+          )}
+          {kind === 'tabla' && (
+            <p className="text-xs text-slate-400">Se crea con columnas Nombre y Valor — luego añades filas y columnas desde la propia ventana.</p>
+          )}
 
           {/* Conexión con el centro */}
           <div className="border-t border-slate-100 pt-3 space-y-2">
             <label className="flex items-center gap-2 text-xs text-slate-600">
               <input type="checkbox" checked={connectCenter} onChange={e => setConnectCenter(e.target.checked)} className="accent-emerald-600" />
-              Conectar al centro del grafo
+              {from ? <>Conectar con «<b className="font-bold">{from.title}</b>»</> : 'Conectar al centro del grafo'}
             </label>
             {connectCenter && (
               <div className="grid grid-cols-2 gap-2">

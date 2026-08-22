@@ -3,7 +3,17 @@
 
 humanity.wiki {
 	encode zstd gzip
-	reverse_proxy app:3000
+
+	# Durante un despliegue el contenedor `app` se sustituye y hay unos segundos
+	# en los que no acepta conexiones. Sin esto, Caddy devolvía un error al
+	# instante y el móvil enseñaba «No se puede abrir esta página» (reportado por
+	# Eugenio el 2026-08-18). Con `lb_try_duration`, la petición ESPERA hasta 20 s
+	# reintentando: el usuario ve una carga lenta en vez de un error.
+	reverse_proxy app:3000 {
+		lb_try_duration 20s
+		lb_try_interval 500ms
+		fail_duration 0
+	}
 
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -13,18 +23,99 @@ humanity.wiki {
 	}
 
 	# Estáticos con hash de Vite: cachear un año en el navegador/Cloudflare.
+	#
+	# EL `>` NO ES DECORACIÓN. Sin él, Caddy AÑADE la cabecera en vez de
+	# sustituirla, y la respuesta sale con DOS `Cache-Control`: la suya y la
+	# que ya venía de `express.static`. Cloudflare se queda con la del origen,
+	# así que esta regla llevaba puesta desde agosto sin hacer nada — medido el
+	# 2026-08-22 contra el origen: `cache-control: public, max-age=31536000,
+	# immutable` y debajo `cache-control: public, max-age=0`.
 	@assets path /assets/*
-	header @assets Cache-Control "public, max-age=31536000, immutable"
+	header @assets >Cache-Control "public, max-age=31536000, immutable"
+
+	# ── EL SERVICE WORKER NO SE CACHEA (2026-08-22) ─────────────────────────
+	# `express.static` mandaba `max-age=14400` para todo, y medido en
+	# producción Cloudflare lo estaba cacheando de verdad
+	# (`cf-cache-status: REVALIDATED`). Para un fichero cualquiera da igual;
+	# para `sw.js` no:
+	#
+	#   · Un service worker es lo único que un usuario NO puede quitarse
+	#     recargando. Si sale uno roto, cuatro horas de caché en el borde son
+	#     cuatro horas sin poder arreglarlo por despliegue.
+	#   · La salida de emergencia (`?sw=off`) también pasa por aquí.
+	#
+	# `no-cache` no significa «no lo guardes»: significa «pregunta siempre
+	# antes de usarlo». Es un 304 de nada cada vez, y a cambio un arreglo
+	# urgente llega en el acto.
+	#
+	# El registro ya usa `updateViaCache: 'none'`, que hace que el navegador
+	# ignore esta cabecera AL COMPROBAR si el worker cambió. Esto es lo otro:
+	# lo que impide que Cloudflare sirva un `sw.js` viejo a quien llega por
+	# primera vez después de un despliegue. Son dos cosas distintas y hacen
+	# falta las dos.
+	# El `>` sustituye en vez de añadir: ver la nota de los estáticos.
+	@sinCache path /sw.js /manifest.webmanifest
+	header @sinCache >Cache-Control "no-cache"
 }
 
-www.humanity.wiki {
-	redir https://humanity.wiki{uri} permanent
-}
+# ============================================================================
+# LOS SUBDOMINIOS DE CADA USUARIO — PREPARADO, SIN ACTIVAR (2026-08-22)
+# ============================================================================
+# `luzyhumanidad.humanity.wiki/mi-pagina`. La plataforma ya reserva el nombre de
+# cada espacio y sabe resolver `<nombre>/<pagina>`; lo único que falta es la
+# entrega, y son DOS COSAS QUE NO ESTÁN EN ESTE REPOSITORIO:
+#
+#   1. Un registro DNS comodín `*` en Cloudflare, apuntando a este servidor.
+#   2. Un certificado que cubra `*.humanity.wiki` EN ESTE ORIGEN. Cloudflare ya
+#      cubre el tramo navegador↔Cloudflare con su Universal SSL, pero el modo
+#      «Full (strict)» exige que este Caddy también presente uno válido.
+#
+# POR QUÉ UN CERTIFICADO DE ORIGEN DE CLOUDFLARE Y NO LET'S ENCRYPT: un
+# certificado comodín de Let's Encrypt obliga a validar por DNS, lo que exige
+# una clave de API de Cloudflare guardada aquí y una compilación de Caddy con su
+# complemento. Y el comentario de más abajo recuerda lo que pasó en agosto:
+# añadir `www` quemó el cupo de 5 fallos por hora. El certificado de origen dura
+# 15 años, no depende de ninguna validación y no tiene cupo.
+#
+# ACTIVADO el 2026-08-22. El certificado de origen está en
+# `deploy/certs/` del servidor, que docker-compose monta en
+# `/etc/caddy/certs`. Los ficheros NO están en el repositorio y sobreviven al
+# `git reset --hard` del despliegue porque están ignorados.
+#
+# SI ALGUNA VEZ HAY QUE DESACTIVARLO: volver a comentar este bloque. Lo que
+# NUNCA se hace es al revés —dejarlo activo sin los ficheros—, porque entonces
+# Caddy no arranca y eso no tumba los subdominios: tumba humanity.wiki entera.
 
-# --- TEMPORAL hasta que humanity.wiki apunte a Cloudflare (nameservers en
-# --- tránsito): dominio público inmediato vía sslip.io → esta IP.
-# --- Retirar este bloque cuando el dominio real esté activo.
-167-233-245-191.sslip.io {
+*.humanity.wiki {
 	encode zstd gzip
-	reverse_proxy app:3000
+	tls /etc/caddy/certs/origen.pem /etc/caddy/certs/origen.key
+
+	# Al mismo sitio que el dominio principal: la aplicación distingue el
+	# espacio por la cabecera `Host`, que Caddy ya reenvía. Un segundo
+	# servicio para esto sería otro sitio donde arreglar lo mismo.
+	reverse_proxy app:3000 {
+		lb_try_duration 20s
+		lb_try_interval 500ms
+		fail_duration 0
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Misma razón que arriba: un subdominio sirve la misma aplicación, así que
+	# sirve el mismo `sw.js` y necesita la misma regla.
+	@sinCacheSub path /sw.js /manifest.webmanifest
+	header @sinCacheSub >Cache-Control "no-cache"
 }
+
+# www.humanity.wiki se redirige en el BORDE de Cloudflare (Redirect Rule
+# «WWW to Root», cert Universal SSL de Cloudflare) — aquí no se sirve ni se
+# pide certificado para www. El bloque anterior quemaba el cupo de Let's
+# Encrypt (5 fallos/hora) porque algunos centros de Cloudflare devolvían 404
+# al validador durante la propagación inicial del subdominio (2026-08-07).
+#
+# El bloque temporal 167-233-245-191.sslip.io se retiró el 2026-08-07: el
+# dominio humanity.wiki quedó activo en Cloudflare ese día.

@@ -1,1 +1,61 @@
 @import "tailwindcss";
+
+/* EL GESTO DE ATRÁS ES NUESTRO, NO DEL NAVEGADOR (2026-08-20). Deslizar dos
+   dedos hace que Chrome se vaya de la página; aquí eso significaría salirse de
+   la plataforma entera y perder las ventanas abiertas. Se le quita a Chrome
+   para poder dárselo a la ventana que toque. */
+html, body { overscroll-behavior-x: none; }
+
+/* ============================================================================
+   EL ZOOM DEL IPHONE AL ESCRIBIR (2026-08-22, hormiguero: «en la página de
+   hormiguero en versión móvil se ha hecho como zoom y la pantalla se desliza a
+   izquierda y derecha, no está fija del todo» y «en la versión móvil no está
+   fija la pantalla, se desliza de forma lateral al pulsar y arrastrar»)
+   ============================================================================
+   No era la página: era Safari. En iOS, tocar un campo cuya letra mide MENOS de
+   16 px hace que el navegador acerque la pantalla para que se pueda leer — y
+   una vez acercada, la página entera se puede arrastrar a los lados. Desde
+   fuera se ve exactamente como lo contó: «se ha hecho como zoom» y «no está
+   fija».
+
+   Los campos de esta plataforma son de 14 px (`text-sm`) casi todos, así que
+   pasaba en cada formulario: al anotar algo en el hormiguero, al escribirle a
+   la IA, al poner el título de una tarjeta.
+
+   LA CURA ES LA LETRA, NO EL ZOOM. La otra salida —`maximum-scale=1` en el
+   viewport— le quita a cualquiera la posibilidad de acercar la pantalla con dos
+   dedos, incluida la gente que lo necesita para leer. Se arregla subiendo la
+   letra a 16 px en los campos, solo en pantallas de móvil: Safari deja de
+   acercar porque ya no hace falta, y de paso se escribe más cómodo.
+
+   Solo en pantallas táctiles estrechas: en el ordenador, 14 px en un campo
+   está bien y aquí no se toca nada. */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select,
+  [contenteditable='true'] {
+    font-size: 16px;
+  }
+}
+
+/* ============================================================================
+   EL TIC DE «GUARDADO» (2026-08-22, Eugenio: «haz una animación chula y
+   elegante de refuerzo positivo cuando se dé a guardar»)
+   ============================================================================
+   Dos trazos que se DIBUJAN, no dos formas que aparecen. La diferencia importa:
+   algo que se dibuja se lee como una acción que acaba de completarse; algo que
+   aparece de golpe se lee como un aviso, y los avisos se cierran sin mirarlos.
+
+   Se hace con `stroke-dashoffset` porque anima en la tarjeta gráfica y no
+   provoca recálculo de la maqueta: en un teléfono flojo, una confirmación que
+   va a tirones es peor que ninguna. */
+@keyframes tic-circulo { to { stroke-dashoffset: 0; } }
+@keyframes tic-trazo   { to { stroke-dashoffset: 0; } }
+
+/* Quien haya pedido menos movimiento en su sistema ve el tic ya dibujado, sin
+   recorrido. La confirmación sigue estando; lo que se quita es el viaje. */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes tic-circulo { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
+  @keyframes tic-trazo   { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 0; } }
+}

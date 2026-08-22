@@ -1,0 +1,21 @@
+<!--
+  VARIANTE «MASKABLE» (2026-08-22, Programador 3).
+  Igual que la cuadrada pero con el dibujo al 60% y centrado, dejando un 20%
+  de margen por lado. Android recorta el icono con formas distintas según el
+  fabricante — círculo, cuadrado, gota — y sin ese margen el anillo se corta.
+  La zona segura es el círculo central del 80%: todo lo que importa vive ahí.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Humanity Wiki">
+  <rect width="256" height="256" fill="#2b2258"/>
+  <g transform="translate(51.2 51.2) scale(0.6)">
+    <g fill="none" stroke="#f5e626" stroke-width="30" stroke-linecap="butt">
+      <path d="M128 38a90 90 0 0 1 63.6 26.4"/>
+      <path d="M217.6 90.4A90 90 0 0 1 218 165"/>
+      <path d="M191.6 191.6A90 90 0 0 1 128 218"/>
+      <path d="M64.4 191.6A90 90 0 0 1 38 128"/>
+      <path d="M38.4 90.4A90 90 0 0 1 64.4 64.4"/>
+    </g>
+    <circle cx="128" cy="128" r="52" fill="#6b5e2a"/>
+    <circle cx="128" cy="128" r="36" fill="#f5e626"/>
+  </g>
+</svg>

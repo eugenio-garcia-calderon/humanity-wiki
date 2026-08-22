@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
-import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart } from 'lucide-react';
+import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart, FolderKanban } from 'lucide-react';
 import { cn } from '../utils/cn';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
+import FichaProducto, { type ProductoFicha } from '../components/juego/FichaProducto';
 
 // ============================================================================
 // Mercado — Fase 5
@@ -44,8 +45,16 @@ export default function Mercado() {
   const [demands, setDemands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
+  // LA PÁGINA DEL PRODUCTO (2026-08-20, petición de Eugenio: «que cuando le des
+  // a un producto se abra la página de ese producto, la misma que hicimos en el
+  // Mundo 3D»). Es literalmente el mismo componente: una landing es la misma
+  // cosa se llegue por el mercado o paseando por la aldea.
+  const [ficha, setFicha] = useState<ProductoFicha | null>(null);
+  /** Tus proyectos, para poder meter el producto en uno. Se piden una vez. */
+  const [misProyectos, setMisProyectos] = useState<Array<{ id: string; titulo: string }>>([]);
+  const [proyectoDeFicha, setProyectoDeFicha] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const { can } = useAuth();
+  const { user, can } = useAuth();
   const { territories, objectives } = useHelpers();
 
   useEffect(() => {
@@ -70,6 +79,34 @@ export default function Mercado() {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [tab, filters]);
+
+  useEffect(() => {
+    if (!user) { setMisProyectos([]); return; }
+    fetch('/api/menu', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setMisProyectos(Array.isArray(d?.proyectos) ? d.proyectos : []))
+      .catch(() => setMisProyectos([]));
+  }, [user]);
+
+  /** Al abrir una ficha, el selector arranca en el proyecto que ya tuviera. */
+  useEffect(() => {
+    if (!ficha) return;
+    const p = products.find(x => x.id === ficha.id);
+    setProyectoDeFicha(p?.proyecto_id || '');
+  }, [ficha, products]);
+
+  const moverProductoAProyecto = async (productoId: string, proyectoId: string) => {
+    setProyectoDeFicha(proyectoId);
+    const r = await fetch(`/api/products/${productoId}/proyecto`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proyecto_id: proyectoId || null }),
+    }).catch(() => null);
+    if (!r?.ok) return;
+    setProducts(prev => prev.map(x => (x.id === productoId ? { ...x, proyecto_id: proyectoId || null } : x)));
+    // El menú lateral enseña los productos por proyecto: que se entere.
+    window.dispatchEvent(new Event('humanity:menu-cambiado'));
+  };
 
   const activeFilterCount = Object.entries(filters).filter(([k, v]) => v && k !== 'q').length;
   const items = tab === 'ofertas' ? products : demands;
@@ -222,7 +259,24 @@ export default function Mercado() {
       {!loading && tab === 'ofertas' && products.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col">
+            // La tarjeta ENTERA abre la página del producto. El botón de
+            // comprar vive dentro y para su propio clic: comprar sin haber
+            // visto la ficha sigue estando a un solo toque.
+            <div
+              key={p.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setFicha({
+                id: p.id, name: p.name,
+                price_cents: p.price_cents ?? null, currency: p.currency || 'EUR',
+                images: Array.isArray(p.images) ? p.images : [],
+                descripcion: p.description ?? null,
+                bloques: Array.isArray(p.bloques) ? p.bloques : [],
+                creador: p.created_by ?? null,
+                icono: p.icono ?? null,
+              })}
+              onKeyDown={e => { if (e.key === 'Enter') (e.currentTarget as HTMLElement).click(); }}
+              className="text-left cursor-pointer bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                   {p.category || 'producto'}
@@ -249,7 +303,7 @@ export default function Mercado() {
               )}
               {p.price_cents != null && (
                 <button
-                  onClick={() => setCheckoutProduct(p)}
+                  onClick={e => { e.stopPropagation(); setCheckoutProduct(p); }}
                   className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
                 >
                   <ShoppingCart className="w-3.5 h-3.5" />
@@ -258,6 +312,47 @@ export default function Mercado() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* La ficha se dibuja con `absolute inset-0` (nació dentro del Mundo 3D),
+          así que aquí se le da un marco fijo a pantalla completa. */}
+      {ficha && (
+        <div className="fixed inset-0 z-[60]">
+          {/* EN QUÉ PROYECTO ESTÁ (2026-08-20). Va flotando sobre la ficha y no
+              dentro, para no tocar un componente que también usa el Mundo 3D.
+              Solo lo ve su dueño: es una decisión de organización, no algo que
+              deba enseñarse a quien viene a comprar. */}
+          {!!user && (ficha.creador === user.id || (user.roleLevel ?? 0) >= ROLE.ADMIN) && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-lg">
+              <FolderKanban className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Proyecto</span>
+              <select
+                value={proyectoDeFicha}
+                onChange={e => moverProductoAProyecto(ficha.id, e.target.value)}
+                className="text-xs font-bold text-slate-700 bg-transparent focus:outline-none max-w-[12rem]"
+              >
+                <option value="">Sin proyecto</option>
+                {misProyectos.map(p => <option key={p.id} value={p.id}>{p.titulo}</option>)}
+              </select>
+            </div>
+          )}
+          <FichaProducto
+            producto={ficha}
+            puedeEditar={!!user && (ficha.creador === user.id || (user.roleLevel ?? 0) >= ROLE.ADMIN)}
+            onCerrar={() => setFicha(null)}
+            onGuardar={async (bloques) => {
+              const r = await fetch(`/api/products/${ficha.id}/pizarra`, {
+                method: 'PUT', credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bloques }),
+              }).catch(() => null);
+              if (!r?.ok) return false;
+              setFicha(f => (f ? { ...f, bloques } : f));
+              setProducts(prev => prev.map(x => (x.id === ficha.id ? { ...x, bloques } : x)));
+              return true;
+            }}
+          />
         </div>
       )}
 

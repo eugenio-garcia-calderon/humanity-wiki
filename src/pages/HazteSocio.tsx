@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { Heart, ShieldCheck, Sparkles, Check, ArrowRight, Lock, UserCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -64,6 +63,13 @@ export default function HazteSocio() {
 
       (async () => {
         try {
+          // STRIPE SE CARGA AQUÍ, NO AL ARRANCAR LA APP (2026-08-20). Con el
+          // import arriba, el paquete entraba en el paquete principal Y su
+          // script se inyectaba en TODAS las páginas: el Tester encontró el
+          // iframe de Stripe vivo en /tareas, una pantalla que no vende nada.
+          // Son ~1 MB de red y un marco de terceros en cada pantalla, por algo
+          // que solo hace falta cuando alguien va a pagar.
+          const { loadStripe } = await import('@stripe/stripe-js');
           const stripe = await loadStripe(publishableKey);
           if (!stripe) throw new Error('No se pudo cargar el SDK de Stripe.');
 

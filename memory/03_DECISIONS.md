@@ -302,3 +302,114 @@
 - **Decisión tomada**: invertir el orden de la comprobación en los dos sitios: probar primero `createEmbeddedCheckoutPage` (el nombre nuevo) y caer a `initEmbeddedCheckout` solo si aquel no existe.
 - **Motivo para documentarlo con este detalle**: es un fallo que ya existía en `HazteSocio.tsx` desde antes de esta sesión (no lo introduje yo), simplemente nunca se había ejercitado con el SDK real en esta fase del proyecto. Al encontrarlo en el componente nuevo, se corrigió también en el existente por ser exactamente la misma causa raíz — dejarlo sin corregir habría sido dejar conscientemente un flujo de pago roto sabiendo la causa exacta.
 - **Consecuencias**: cualquier integración futura con Stripe que use detección de métodos por `typeof` debe tener en cuenta que el SDK cargado en el navegador no es el paquete de `node_modules` — su API real solo se conoce probándola en directo.
+
+## 2026-08-08 — A recycle bin, as an explicit exception to Constitution rule 6
+
+**Context.** Rule 6 of `docs/99_CONSTITUTION.md` forbids deleting knowledge: everything is
+archived with `archived_at` and kept forever. Building the Miro-style canvas, Eugenio was
+asked what «Borrar» should do in the element menu.
+
+**His decision (verbatim).** «Cuando se borra del lienzo, sigue como elemento disponible en
+la base de datos, pero también se le da al usuario la opción de borrar definitivamente de la
+base de datos. Cuando lo borras, se va a la papelera de reciclaje durante 15 días, y luego se
+elimina definitivamente.»
+
+**What was built.** Two distinct actions, deliberately worded so nobody destroys anything by
+accident:
+- **Quitar del lienzo** — deletes only the placement (`graph_windows` row) and this canvas's
+  edges. The window stays in the database and on every other canvas. Reversible by re-linking.
+- **Borrar** — sets `knowledge_windows.deleted_at`. A daily sweep hard-deletes anything past
+  15 days, first releasing its foreign keys (placements, edges, ratings, comments).
+
+**Why `deleted_at` and not `archived_at`.** They mean different things and mixing them would
+be dangerous: `archived_at` is editorial withdrawal kept forever; `deleted_at` is «the person
+asked for this to disappear». Keeping them in separate columns guarantees the purge sweep can
+never reach something that was merely archived by another flow.
+
+**What it costs.** Rule 6 no longer holds literally for knowledge windows. Anyone reasoning
+about permanence must read this entry. If the rule is ever restored, the fix is one line —
+turn the sweep off — and nothing older than 15 days would have been lost in the meantime.
+
+---
+
+## 2026-08-18 — The Juego Vital is a view, not a parallel world
+
+**Decision.** The 3D game (`/juego`, design in `10_JUEGO_VITAL.md`) renders EXISTING entities
+(projects, publications, tasks, people, challenges) and writes through the EXISTING routes.
+It gets no schema of its own until the Builder needs to persist positions (F2: `game_worlds`,
+`game_objects`). In F1 the village layout is deterministic from a seeded PRNG.
+
+**Alternative rejected.** A `game_*` schema mirroring entities into game objects. Rejected
+because every mirror table is a synchronisation bug waiting to happen, and because the
+platform already owns visibility, trash, history and roles — the game inherits them for free
+only if it reads the real rows.
+
+**What it costs.** Until F2, moving a building is impossible (layout is code). Accepted:
+walking your real life was the thing to validate first.
+
+**Also decided (product, Eugenio):** stylized HD art over photorealism; mobile+desktop from
+day 1; landscape-only play on phones; photo→3D as library-match now, paid generation later;
+person avatars ship only with the consent safeguards written in `10_JUEGO_VITAL.md`; no
+unofficial WhatsApp bridges (ban risk on his personal number) — `wa.me` deep links in F3.
+
+---
+
+## 2026-08-18 — Las migraciones las aplica el despliegue, no una persona
+
+**Decisión.** `deploy/migrate.sh` corre en cada despliegue, ANTES de reconstruir la app.
+Lleva su propio registro (`schema_migrations`, una fila por fichero de `drizzle/`), aplica
+solo lo pendiente, en orden y cada fichero dentro de una transacción. Si algo falla, el
+script sale con error, `script_stop: true` aborta el job y **el código nuevo no llega a
+arrancar**: la app vieja sigue en pie con el esquema que ya tenía.
+
+**Por qué.** Hasta hoy se aplicaban a mano por SSH después del despliegue. Ese hueco ya
+mordió: el builder del Juego Vital estuvo listo para fusionar con su tabla sin crear en
+producción, y detectarlo dependió de acordarse. Un paso manual que hay que recordar en
+cada migración no es un proceso, es una apuesta.
+
+**Línea base.** La primera ejecución marca como aplicadas todas las migraciones hasta
+`0028_presentaciones.sql` — el estado real de producción, confirmado en el changelog
+(0025/0026 el 2026-08-07; 0027 y 0028 después). Solo se hace si la tabla de registro
+acaba de nacer Y la base ya tiene esquema (`users` existe): en una base nueva y vacía no
+se marca nada y se aplica todo desde `0000`.
+
+**Alternativa descartada.** `drizzle-kit migrate` en el arranque de la app: acopla el
+esquema al ciclo de vida del contenedor (dos réplicas migrarían a la vez) y este proyecto
+ya tiene prohibido `drizzle-kit push` por colgarse en shells no interactivas.
+
+**Coste.** Las migraciones tienen que ser correctas al fusionar, no "arreglables luego a
+mano". A cambio, desplegar deja de tener un paso que solo existe en la cabeza de alguien.
+Verificado antes de tocar producción ejecutando la misma lógica contra la base local: 29
+marcadas como línea base, 0029 aplicada, y una segunda pasada sin cambios.
+
+## 2026-08-20 — Open models served by Together AI, chosen over DeepSeek's own API
+
+**Decision**: the two free chat models (`abierto-rapido` = DeepSeek V4 Flash,
+`abierto-medio` = Qwen3.7-Plus) are served by Together AI.
+
+**Alternatives considered**: DeepSeek's own API (rejected: more expensive even
+off-peak — $0.22–0.44/$0.66–1.32 vs Together's $0.14/$0.28 per Mtok, only
+DeepSeek models, and data processed in China with GDPR still pending on the
+roadmap); Fireworks/Groq/DeepInfra (viable, noted as fallbacks; not worth a
+second account today); OpenRouter (useful as a testing bench, adds a fee).
+
+**Reversibility**: the connector speaks the OpenAI chat format — the de facto
+standard shared by all of the above. Switching provider is `ABIERTO_BASE_URL` +
+`ABIERTO_API_KEY` (+ per-model id overrides), no code. Catalog ids are OUR
+aliases (`abierto-*`) precisely so stored usage rows and user preferences
+survive a provider change.
+
+## 2026-08-20 — Model router: fixed rules, not an LLM choosing an LLM
+
+**Decision**: `elegirModelo()` in provider.ts routes each chat message with
+deterministic rules (manual pick → gate by level; PDF/web-search → Claude;
+action-verbs regex or >700 chars → top tier available; <180 chars → fast model;
+else medium). Premium = role level ≥ 2 (VERIFIED), Claude cost covered by the
+platform up to `AI_TOPE_PREMIUM_CENTS` (default 300 ¢/month/user), then
+auto-downgrade with a visible notice. Both decisions are Eugenio's
+(2026-08-20), including "cost included" over pay-per-use.
+
+**Alternative rejected**: a classifier LLM picking the model — one more call,
+one more cost, one more failure point, to save céntimos. Free-user actions go
+to the open medium model on purpose: the proposal/validation safety net
+(server validates, user confirms) already bounds the damage of a weaker model.

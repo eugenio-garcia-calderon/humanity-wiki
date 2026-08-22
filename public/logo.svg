@@ -1,0 +1,21 @@
+<!--
+  EL LOGO DE HUMANITY WIKI (2026-08-22, dado por Eugenio).
+  Un anillo abierto amarillo sobre azul noche, con un núcleo dentro: la
+  humanidad rodeando un centro común, con la abertura que deja entrar.
+  Va como SVG y no como PNG para que valga igual a 20 px en el menú que a 180
+  en el favicon de una pestaña, sin pesar más ni verse borroso.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Humanity Wiki">
+  <rect width="256" height="256" rx="56" fill="#2b2258"/>
+  <!-- El anillo, partido en cuatro arcos con hueco entre ellos. -->
+  <g fill="none" stroke="#f5e626" stroke-width="30" stroke-linecap="butt">
+    <path d="M128 38a90 90 0 0 1 63.6 26.4"/>
+    <path d="M217.6 90.4A90 90 0 0 1 218 165"/>
+    <path d="M191.6 191.6A90 90 0 0 1 128 218"/>
+    <path d="M64.4 191.6A90 90 0 0 1 38 128"/>
+    <path d="M38.4 90.4A90 90 0 0 1 64.4 64.4"/>
+  </g>
+  <!-- El núcleo: anillo oscuro y centro amarillo. -->
+  <circle cx="128" cy="128" r="52" fill="#6b5e2a"/>
+  <circle cx="128" cy="128" r="36" fill="#f5e626"/>
+</svg>

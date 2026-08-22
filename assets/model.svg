@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1152 380" width="1152" height="380" role="img" aria-label="One model, four levels: Objective, Indicator, Marker, Metric">
+  <!-- All presentation is set with attributes rather than an embedded stylesheet:
+       GitHub sanitizes SVG, and a stripped stylesheet would render every label
+       black on a dark background. Font stack is generic for the same reason. -->
+  <g font-family="Helvetica, Arial, sans-serif">
+
+    <rect width="1152" height="380" rx="14" fill="#0b1120"/>
+
+    <text x="48" y="50" font-size="11" font-weight="bold" letter-spacing="3.2" fill="#64748b">HUMANITY.WIKI</text>
+    <text x="48" y="88" font-size="30" font-weight="bold" fill="#f1f5f9">One model, four levels</text>
+
+    <!-- ============================= OBJECTIVE ============================ -->
+    <rect x="48" y="124" width="240" height="170" rx="10" fill="#131f38"/>
+    <rect x="48" y="124" width="240" height="3" fill="#7c3aed"/>
+    <text x="72" y="158" font-size="10" font-weight="bold" letter-spacing="2.2" fill="#a78bfa">OBJECTIVE</text>
+    <text x="72" y="192" font-size="27" font-weight="bold" fill="#f1f5f9">14</text>
+    <text x="72" y="218" font-size="14" font-weight="bold" fill="#cbd5e1">e.g. Water</text>
+    <line x1="72" y1="236" x2="264" y2="236" stroke="#26334d" stroke-width="1"/>
+    <text x="72" y="256" font-size="11" fill="#7c8899">A systemic challenge, scored</text>
+    <text x="72" y="272" font-size="11" fill="#7c8899">0-100 for every territory.</text>
+
+    <path d="M 298 201 L 308 209 L 298 217" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- ============================= INDICATOR ============================ -->
+    <rect x="320" y="124" width="240" height="170" rx="10" fill="#131f38"/>
+    <rect x="320" y="124" width="240" height="3" fill="#0284c7"/>
+    <text x="344" y="158" font-size="10" font-weight="bold" letter-spacing="2.2" fill="#38bdf8">INDICATOR</text>
+    <text x="344" y="192" font-size="27" font-weight="bold" fill="#f1f5f9">98</text>
+    <text x="344" y="218" font-size="14" font-weight="bold" fill="#cbd5e1">e.g. Quality</text>
+    <line x1="344" y1="236" x2="536" y2="236" stroke="#26334d" stroke-width="1"/>
+    <text x="344" y="256" font-size="11" fill="#7c8899">A measurable dimension of</text>
+    <text x="344" y="272" font-size="11" fill="#7c8899">that challenge, with a weight.</text>
+
+    <path d="M 570 201 L 580 209 L 570 217" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- ============================== MARKER ============================== -->
+    <rect x="592" y="124" width="240" height="170" rx="10" fill="#131f38"/>
+    <rect x="592" y="124" width="240" height="3" fill="#2563eb"/>
+    <text x="616" y="158" font-size="10" font-weight="bold" letter-spacing="2.2" fill="#60a5fa">MARKER</text>
+    <text x="616" y="192" font-size="27" font-weight="bold" fill="#f1f5f9">7</text>
+    <text x="616" y="218" font-size="14" font-weight="bold" fill="#cbd5e1">e.g. Purity</text>
+    <line x1="616" y1="236" x2="808" y2="236" stroke="#26334d" stroke-width="1"/>
+    <text x="616" y="256" font-size="11" fill="#7c8899">A sub-component that feeds</text>
+    <text x="616" y="272" font-size="11" fill="#7c8899">the indicator's score.</text>
+
+    <path d="M 842 201 L 852 209 L 842 217" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- ============================== METRIC ============================== -->
+    <rect x="864" y="124" width="240" height="170" rx="10" fill="#131f38"/>
+    <rect x="864" y="124" width="240" height="3" fill="#dc2626"/>
+    <text x="888" y="158" font-size="10" font-weight="bold" letter-spacing="2.2" fill="#f87171">METRIC</text>
+    <text x="888" y="192" font-size="27" font-weight="bold" fill="#f1f5f9">8</text>
+    <text x="888" y="218" font-size="14" font-weight="bold" fill="#cbd5e1">e.g. Nitrates<tspan dx="6" font-size="11" fill="#64748b">mg/L</tspan></text>
+    <line x1="888" y1="236" x2="1080" y2="236" stroke="#26334d" stroke-width="1"/>
+    <text x="888" y="256" font-size="11" fill="#7c8899">A physical variable, read at</text>
+    <text x="888" y="272" font-size="11" fill="#7c8899">a real monitoring station.</text>
+
+    <!-- =============================== FOOTER ============================= -->
+    <line x1="48" y1="322" x2="1104" y2="322" stroke="#1c2941" stroke-width="1"/>
+    <text x="48" y="352" font-size="12" fill="#94a3b8">Every level resolves to a score per territory<tspan dx="4" font-weight="bold" fill="#e2e8f0">or to an explicit "No data".</tspan><tspan dx="6" fill="#94a3b8">A missing number is never inherited, estimated or invented.</tspan></text>
+
+  </g>
+</svg>

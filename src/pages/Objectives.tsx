@@ -10,6 +10,9 @@ import { slugify } from '../utils/slugify';
 import { challengeLinkTo } from '../utils/entityLinks';
 import { MapPin, X, ArrowRight, ArrowDown, Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, ChevronDown, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { OBJETIVOS } from '../utils/objetivos';
+import MarcaOrigen, { AvisoDatoSimulado } from '../components/ui/OrigenDelDato';
+import { peorOrigen, type OrigenDelDato } from '../utils/origenDelDato';
 
 const typeLabels: Record<string, string> = {
   'planet': 'Mundo',
@@ -21,22 +24,12 @@ const typeLabels: Record<string, string> = {
   'aldea': 'Aldea'
 };
 
-const iconMap: Record<string, any> = {
-  'AGUA': Droplets,
-  'ALIMENTACIÓN': Wheat,
-  'VIVIENDA': HomeIcon,
-  'SALUD': HeartPulse,
-  'CONVIVENCIA': Users,
-  'ECOSISTEMAS': TreePine,
-  'EDUCACIÓN': GraduationCap,
-  'MOVILIDAD': Car,
-  'ENERGÍA': Zap,
-  'TECNOLOGÍA': Cpu,
-  'EMPLEO': Briefcase,
-  'GOBERNANZA': Landmark,
-  'ECONOMÍA': Coins,
-  'CULTURA': Palette,
-};
+// EL MAPA DE ICONOS SE FUE A `src/utils/objetivos.ts` (2026-08-21). Hacía
+// falta también en Publicaciones, y copiarlo habría dejado dos listas que se
+// separan el día que alguien cambie un icono en una sola de ellas.
+const iconMap: Record<string, any> = Object.fromEntries(
+  OBJETIVOS.map(o => [o.titulo, o.icono]),
+);
 
 const territoryTypes = ['country', 'region', 'municipality', 'comunidad_vecinos', 'aldea'];
 
@@ -134,6 +127,23 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
   };
 
   const selectedTerritory = territories.find(t => t.id === selectedTerritoryId);
+  // De dónde salen las cifras de ESTE territorio: manda la peor de sus catorce
+  // puntuaciones. Cada objetivo trae la suya del servidor, decidida en la misma
+  // rama que decidió el número.
+  const origenDelTerritorio = peorOrigen(
+    objectives
+      .map(o => o.origen_by_territory?.[selectedTerritoryId] as OrigenDelDato | undefined)
+      .filter(Boolean) as OrigenDelDato[],
+  );
+  // SE MARCA LA EXCEPCIÓN, NO LA REGLA. Con la advertencia arriba y catorce
+  // pastillas rojas idénticas debajo, en dos días nadie mira ninguna de las
+  // quince: el exceso de aviso se aprende a ignorar igual que el defecto. Así
+  // que la pastilla solo sale cuando ese objetivo NO vale lo que dice la
+  // cabecera — que es justo la información que la cabecera no puede dar.
+  const marcaSiDifiere = (o: any): OrigenDelDato | undefined => {
+    const suyo = o.origen_by_territory?.[selectedTerritoryId] as OrigenDelDato | undefined;
+    return suyo && suyo !== origenDelTerritorio ? suyo : undefined;
+  };
 
   return (
     <div key={updateCounter} className={cn("animate-in fade-in duration-500 pb-12", embeddedTerritoryId ? "space-y-4" : "space-y-8")}>
@@ -184,6 +194,14 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
               {!embeddedTerritoryId && <p className="text-xs font-bold uppercase tracking-widest opacity-60 mt-1 text-slate-500">
                 {typeLabels[selectedTerritory?.type || '']}
               </p>}
+              {/* Embebida en el mapa no se repite: la ficha de fuera ya lo dice,
+                  y decirlo dos veces en la misma pantalla lo convierte en ruido. */}
+              {!embeddedTerritoryId && (
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sus cifras</span>
+                  <MarcaOrigen origen={origenDelTerritorio} tamano="pequeno" />
+                </div>
+              )}
               {selectedTerritory?.is_ai_generated && (
                 <p
                   className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full"
@@ -238,12 +256,19 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
         )}
       </div>
 
+      {!embeddedTerritoryId && <AvisoDatoSimulado origen={origenDelTerritorio} />}
+
       {/* Objectives Grid */}
       {embeddedTerritoryId ? (
         <div className="grid grid-cols-3 gap-2">
           {objectives.map(obj => {
             const Icon = iconMap[obj.title] || TreePine;
-            const progress = obj.progress_by_territory?.[selectedTerritoryId] || 0;
+            // SIN DATO NO ES CERO. `|| 0` convertía «no hay dato» en un 0 %
+            // con su barra vacía: España aparecía puntuando cero en Educación,
+            // Movilidad, Energía, Tecnología, Empleo y Gobernanza, que es una
+            // afirmación mucho peor que una cifra simulada. `null` significa
+            // que no hay nada, y así se dice.
+            const progress = obj.progress_by_territory?.[selectedTerritoryId] ?? null;
             return (
               <div key={obj.id} className="relative group">
                 <button
@@ -256,10 +281,13 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
                   <span className="text-[11px] font-bold uppercase tracking-tight text-slate-700 leading-tight line-clamp-1 w-full">{obj.title}</span>
                   <div className="w-full flex items-center gap-1.5">
                     <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }} />
+                      {progress != null && <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }} />}
                     </div>
-                    <span className="text-[10px] font-black text-emerald-600 shrink-0">{progress}%</span>
+                    {progress != null
+                      ? <span className="text-[10px] font-black text-emerald-600 shrink-0">{progress}%</span>
+                      : <span className="text-[9px] font-bold text-slate-400 shrink-0 uppercase">Sin datos</span>}
                   </div>
+                  {marcaSiDifiere(obj) && <MarcaOrigen origen={marcaSiDifiere(obj)} tamano="pequeno" />}
                 </button>
                 {user?.isAdmin && (
                   <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -317,7 +345,8 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
             <div key={obj.id} className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm relative overflow-visible group transition-all">
                 {(() => {
     const Icon = iconMap[obj.title] || TreePine;
-    const progress = obj.progress_by_territory?.[selectedTerritoryId] || 0;
+    // Ver arriba: sin dato no es cero.
+    const progress = obj.progress_by_territory?.[selectedTerritoryId] ?? null;
 
     return (
       <div className={cn("flex flex-col items-center", isExpanded ? "mb-6" : "")}>
@@ -331,11 +360,16 @@ export default function Objectives({ embeddedTerritoryId, onSelectObjective }: {
               <div className="flex flex-col items-end ml-4 pl-4 border-l border-slate-200">
                 <div className="flex items-center gap-3">
                   <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }}></div>
+                    {progress != null && <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }}></div>}
                   </div>
-                  <span className="text-xl font-black text-emerald-600 leading-none">{progress}%</span>
+                  {progress != null
+                    ? <span className="text-xl font-black text-emerald-600 leading-none">{progress}%</span>
+                    : <span className="text-sm font-bold text-slate-400 leading-none uppercase">Sin datos</span>}
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Progreso</span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Progreso</span>
+                  {marcaSiDifiere(obj) && <MarcaOrigen origen={marcaSiDifiere(obj)} tamano="pequeno" />}
+                </div>
               </div>
               
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">

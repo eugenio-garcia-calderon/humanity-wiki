@@ -65,7 +65,7 @@ export default function OrganizationProfile() {
             <h2 className="text-xl font-bold tracking-tight text-slate-900 border-b border-slate-100 pb-2">Proyectos Relacionados</h2>
             <div className="grid grid-cols-1 gap-4">
               {orgProjects.length > 0 ? orgProjects.map(proj => (
-                <Link to={`/proyectos/${slugify(proj.name)}`} key={proj.id} className="block p-4 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors">
+                <Link to={`/iniciativas/${slugify(proj.name)}`} key={proj.id} className="block p-4 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors">
                   <h3 className="font-bold text-slate-900">{proj.name}</h3>
                   <p className="text-sm text-slate-500 line-clamp-2">{proj.description}</p>
                 </Link>

@@ -1,0 +1,23 @@
+<!--
+  FUENTE DE LOS ICONOS DE LA PWA (2026-08-22, Programador 3).
+  Es el logo de la casa con DOS cambios, y los dos tienen motivo:
+  1. Sin esquinas redondeadas (rx=0). iOS y Android aplican SU PROPIA máscara
+     encima; si la fuente ya viene redondeada, quedan esquinas oscuras dentro
+     del recorte del sistema. El icono se entrega cuadrado y que recorte quien
+     lo pinte.
+  2. Sin transparencia. Un apple-touch-icon con alfa se compone sobre negro.
+  No se toca `public/logo.svg`: ese sigue siendo el logo para el menú y la
+  pestaña, donde las esquinas redondeadas sí las queremos.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Humanity Wiki">
+  <rect width="256" height="256" fill="#2b2258"/>
+  <g fill="none" stroke="#f5e626" stroke-width="30" stroke-linecap="butt">
+    <path d="M128 38a90 90 0 0 1 63.6 26.4"/>
+    <path d="M217.6 90.4A90 90 0 0 1 218 165"/>
+    <path d="M191.6 191.6A90 90 0 0 1 128 218"/>
+    <path d="M64.4 191.6A90 90 0 0 1 38 128"/>
+    <path d="M38.4 90.4A90 90 0 0 1 64.4 64.4"/>
+  </g>
+  <circle cx="128" cy="128" r="52" fill="#6b5e2a"/>
+  <circle cx="128" cy="128" r="36" fill="#f5e626"/>
+</svg>

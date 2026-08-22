@@ -1,22 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { MoreVertical, Edit2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 
 export function AdminMenu({ onEdit, className }: { onEdit?: () => void, className?: string }) {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useCerrarAlPulsarFuera(menuRef, isOpen, () => setIsOpen(false));
 
   if (!user?.isAdmin) return null;
 

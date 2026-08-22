@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
+import { registrarRegaloBienvenida } from './puntos.js';
 
 // ============================================================================
 // Módulo de autenticación — Fase 2
@@ -31,7 +32,17 @@ export const ROLE_LABELS: Record<number, string> = {
 };
 
 const SESSION_COOKIE = 'rh_session';
-const SESSION_DAYS = 30;
+
+// CUÁNTO DURA UNA SESIÓN. En producción, 30 días: una sesión eterna en un
+// ordenador ajeno o robado es un agujero, y 30 días ya es generoso.
+//
+// EN LOCAL, 10 AÑOS (petición de Eugenio, 2026-08-20: «haz que no se me cierre
+// la sesión nunca en este localhost»). Aquí la máquina es la suya, la base de
+// datos es de mentira y volver a entrar cada mes mientras desarrollas es una
+// molestia sin nada a cambio. La diferencia la marca `NODE_ENV`, que en el
+// servidor de verdad vale «production»: si algún día esto se despliega, vuelve
+// solo a los 30 días sin que nadie tenga que acordarse.
+const SESSION_DAYS = process.env.NODE_ENV === 'production' ? 30 : 3650;
 
 // ----------------------------------------------------------------------------
 // Contraseñas
@@ -151,6 +162,15 @@ function rowToUser(r: any): AuthUser {
 // ----------------------------------------------------------------------------
 // Registro de rutas
 // ----------------------------------------------------------------------------
+/** Los 14 objetivos que existen. Se comprueba contra esto y no contra la base
+ *  en cada guardado: son catorce filas fijas desde que existe la plataforma, y
+ *  una consulta por perfil guardado para verificar una constante es un viaje
+ *  que no lleva a nada. */
+const OBJETIVOS_VALIDOS = new Set([
+  'O001', 'O002', 'O003', 'O004', 'O005', 'O006', 'O007',
+  'O008', 'O009', 'O010', 'O011', 'O012', 'O013', 'O014',
+]);
+
 export function registerAuthRoutes(app: Express, db: any) {
 
   // Middleware: resuelve req.user a partir de la cookie de sesión. Se monta
@@ -226,6 +246,10 @@ export function registerAuthRoutes(app: Express, db: any) {
         VALUES (${id}, ${normalizedEmail}, ${name || null}, ${name || null},
                 ${hashPassword(String(password))}, ${ROLE.USER}, true, ${id})
       `);
+      // El regalo de bienvenida: `users.puntos` ya nace en 100 por el valor
+      // por defecto de la columna (migración 0026) — no se vuelve a sumar
+      // aquí, solo se deja su justificante en el libro de movimientos.
+      await registrarRegaloBienvenida(db, id);
 
       await createSession(req, res, id);
       const result = await db.execute(sql`SELECT * FROM users WHERE id = ${id}`);
@@ -293,6 +317,7 @@ export function registerAuthRoutes(app: Express, db: any) {
           VALUES (${id}, ${email}, ${info.name || null}, ${info.name || null},
                   ${info.picture || null}, ${googleId}, ${ROLE.USER}, true, ${id})
         `);
+        await registrarRegaloBienvenida(db, id);
         row = (await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)).rows[0];
       }
 
@@ -376,6 +401,14 @@ export function registerAuthRoutes(app: Express, db: any) {
           website = COALESCE(${d.website ?? null}, website),
           socials = COALESCE(${d.socials ? JSON.stringify(d.socials) : null}::jsonb, socials),
           specialties = COALESCE(${d.specialties ? JSON.stringify(d.specialties) : null}::jsonb, specialties),
+          -- HASTA TRES UBICACIONES, Y EL TOPE SE APLICA AQUÍ (2026-08-22). Si
+          -- solo lo comprobara la pantalla, cualquiera podría mandar treinta
+          -- desde fuera y el perfil de otro se llenaría de banderas. El límite
+          -- va donde no se puede saltar.
+          ubicaciones = COALESCE(${d.ubicaciones ? JSON.stringify((d.ubicaciones as any[]).slice(0, 3)) : null}::jsonb, ubicaciones),
+          -- LOS OBJETIVOS, FILTRADOS CONTRA EL CATÁLOGO REAL. Solo entran ids
+          -- que existen: uno inventado se pintaría como un hueco sin nombre.
+          objetivos = COALESCE(${d.objetivos ? JSON.stringify((d.objetivos as any[]).filter(o => OBJETIVOS_VALIDOS.has(String(o))).slice(0, 14)) : null}::jsonb, objetivos),
           organization_id = COALESCE(${d.organization_id ?? null}, organization_id),
           version = version + 1,
           updated_at = now(),
@@ -530,10 +563,57 @@ export function registerAuthRoutes(app: Express, db: any) {
       }
       const result = await db.execute(sql`
         SELECT id, uuid, email, name, display_name, role_level, email_verified,
-               reputation, impact_score, last_login_at, created_at, archived_at
+               reputation, impact_score, puntos, last_login_at, created_at, archived_at
         FROM users ORDER BY created_at DESC
       `);
       res.json(result.rows);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/admin/users   { email, name?, role_level? }
+   * Un administrador da de alta una cuenta directamente, sin que la persona
+   * tenga que pasar por /login → «Crear una cuenta» (petición del usuario:
+   * «tampoco me deja registrar usuarios nuevos desde esa página siendo
+   * ADMIN»). Nace con una contraseña aleatoria que NUNCA se transmite en
+   * claro: en su lugar se genera de una vez el mismo enlace de
+   * restablecimiento que usa «Contraseña» en el resto de la tabla, listo
+   * para copiar y entregar. No crea sesión — el navegador del admin sigue
+   * siendo el del admin.
+   */
+  app.post('/api/admin/users', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ error: 'Escribe un email válido.' });
+      }
+      const name = String(req.body?.name || '').trim() || null;
+      const roleLevel = [0, 1, 2, 3, 4].includes(Number(req.body?.role_level)) ? Number(req.body.role_level) : ROLE.USER;
+
+      const existente = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${email}`);
+      if (existente.rows.length > 0) {
+        return res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
+      }
+
+      const id = `U${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      await db.execute(sql`
+        INSERT INTO users (id, email, name, display_name, password_hash, role_level, email_verified, created_by, updated_by)
+        VALUES (${id}, ${email}, ${name}, ${name},
+                ${hashPassword(crypto.randomBytes(24).toString('hex'))}, ${roleLevel}, true, ${req.user.id}, ${req.user.id})
+      `);
+      await registrarRegaloBienvenida(db, id);
+
+      const token = crypto.randomBytes(32).toString('hex');
+      await db.execute(sql`
+        INSERT INTO password_resets (token, user_id, expires_at)
+        VALUES (${token}, ${id}, now() + interval '24 hours')
+      `);
+      res.json({ id, email, url: `/restablecer?token=${token}`, caduca_horas: 24 });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -559,6 +639,74 @@ export function registerAuthRoutes(app: Express, db: any) {
         WHERE id = ${req.params.id}
       `);
       res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/admin/users/:id/reset-link
+   * Un administrador genera un enlace de restablecimiento para entregárselo
+   * al usuario por el canal que sea (no hay proveedor de correo todavía).
+   * Reutiliza la misma tabla y la misma página /restablecer que el flujo de
+   * «he olvidado mi contraseña»; el token caduca en 24 h.
+   */
+  app.post('/api/admin/users/:id/reset-link', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const fila = await db.execute(sql`SELECT id, email FROM users WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!fila.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado.' });
+      const token = crypto.randomBytes(32).toString('hex');
+      await db.execute(sql`
+        INSERT INTO password_resets (token, user_id, expires_at)
+        VALUES (${token}, ${req.params.id}, now() + interval '24 hours')
+      `);
+      res.json({ url: `/restablecer?token=${token}`, caduca_horas: 24, email: (fila.rows[0] as any).email });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/admin/users/:id/archivar  y  /restaurar
+   * «Borrar» un usuario es archivarlo (regla 6 de la Constitución: nunca un
+   * DELETE a secas): no puede volver a entrar —login, Google y attachUser
+   * filtran archived_at— y sus sesiones abiertas se revocan al momento, pero
+   * lo que publicó no se destruye. Restaurar deshace todo salvo las sesiones.
+   */
+  app.post('/api/admin/users/:id/archivar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      if (req.params.id === req.user.id) {
+        return res.status(400).json({ error: 'No puedes borrarte a ti mismo.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE users SET archived_at = now(), version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id} AND archived_at IS NULL RETURNING email
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado (o ya estaba borrado).' });
+      await db.execute(sql`UPDATE sessions SET revoked_at = now() WHERE user_id = ${req.params.id} AND revoked_at IS NULL`);
+      res.json({ success: true, email: (r.rows[0] as any).email });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/users/:id/restaurar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE users SET archived_at = NULL, version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id} AND archived_at IS NOT NULL RETURNING email
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado (o no estaba borrado).' });
+      res.json({ success: true, email: (r.rows[0] as any).email });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }

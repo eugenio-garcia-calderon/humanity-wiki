@@ -2,11 +2,20 @@ import { useHelpers } from '../contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
 
 import { getColorForScore } from '../utils/scoreColor';
+import MarcaOrigen from '../components/ui/OrigenDelDato';
+import { origenDe, origenDeVarios } from '../utils/origenDelDato';
 
 export default function Indicators() {
   const { objectives, indicators, loading } = useHelpers();
   const navigate = useNavigate();
   if (loading) return <div>Cargando...</div>;
+
+  // El origen del conjunto: manda el peor de los que se están enseñando
+  // (`origenDeVarios`). Una rejilla con un solo indicador inventado dentro no
+  // es una rejilla de datos medidos.
+  const origenDeTodo = origenDeVarios(
+    indicators.filter((i: any) => i.score != null).map((i: any) => i.source),
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -15,6 +24,10 @@ export default function Indicators() {
         <p className="text-sm text-slate-500 max-w-2xl">
           Indicadores que componen la puntuación de cada objetivo, agrupados por objetivo y con el dato asociado a cada territorio.
         </p>
+        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          <span>Sus cifras</span>
+          <MarcaOrigen origen={origenDeTodo} tamano="pequeno" />
+        </div>
       </div>
 
       <div className="flex flex-col gap-12">
@@ -41,7 +54,15 @@ export default function Indicators() {
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">INDICADOR</span>
                         {indicator.score != null && (
-                          <span className="text-sm font-black" style={{ color }}>{indicator.score}%</span>
+                          <span className="flex items-center gap-1.5">
+                            {/* Solo la excepción: la cabecera ya dice lo que valen
+                                todas. Cuarenta y dos pastillas iguales no informan
+                                de nada y enseñan a no mirarlas. */}
+                            {origenDe(indicator.source) !== origenDeTodo && (
+                              <MarcaOrigen origen={origenDe(indicator.source)} tamano="pequeno" />
+                            )}
+                            <span className="text-sm font-black" style={{ color }}>{indicator.score}%</span>
+                          </span>
                         )}
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">

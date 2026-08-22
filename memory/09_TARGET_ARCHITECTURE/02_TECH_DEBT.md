@@ -51,9 +51,22 @@ yet.** They are here so the decision can be explicit.
 - **Cost later**: the only part of the backend not following the modular pattern. Every new line there is a line that will have to be moved.
 - **Rule until fixed**: frozen. Everything new goes into a module under `src/server/`.
 
+### Two new endpoints were added to the frozen `server.ts` (2026-08-06)
+- **What**: `GET /api/db/tables` and `GET /api/db/tables/:name`, for the Base de Datos page, went into `server.ts` — which `src/server/CLAUDE.md` says is frozen ("new endpoints go in a module here"). They belong in a small `src/server/database.ts`.
+- **Why it happened**: they read the `pg_class` catalogue, which felt like it belonged next to the other raw-SQL routes. That is not a reason, it is a habit.
+- **Cost to fix**: ~15 min. They are self-contained: two handlers, two constants (`SENSITIVE_COLUMNS`, `HIDDEN_TABLES`) and the `requireAdmin` guard, plus one `registerDatabaseRoutes(app, db)` line.
+- **Cost later**: `server.ts` grows past 1.900 lines and the "frozen" rule loses its force — the next person reads it as advisory.
+- **Note**: the same day, `getSolutionsForChallenges` inside `server.ts` was extended with `challenge_ids`. That one is a fix in place to existing code, which the rule allows.
+
 ### `schema.ts` declares 39 of the 92 tables
 - **What**: everything social, marketplace, initiatives and AI exists only as raw SQL, untyped.
 - **Cost later**: queries have no types, and `drizzle-kit generate` does not know those tables exist.
+
+### `memory/02_DATABASE.md` stopped tracking reality around Fase 8
+- **What**: it documents the original scientific/territory schema only. Everything from knowledge graphs onward — `knowledge_graphs`, `knowledge_windows`, `graph_windows`, `graph_edges`, `graph_entity_links`, `publications`, `user_maps`, `proyectos`, `roadmap_items`, `publicacion_meta`, `carpetas`, `carpeta_publicaciones`, the `ai_*` tables, `products`/`demands`/`needs` — is undocumented there, even though every migration since has followed the "update `memory/02_DATABASE.md` in the same change" rule for the *new* tables only, on top of an already-stale base.
+- **Why it happened this time (2026-08-08)**: adding 0023/0024's three tables to this file would have made it look current when the other ~30 tables added since Fase 9 still aren't in it — a partial patch would have been more misleading than useful.
+- **Cost to fix**: a real afternoon — walk every migration since 0012 and reconcile. `drizzle/` is the source of truth in the meantime; `01_TARGET_SCHEMA.md` documents where the model is *heading*, not what exists today.
+- **Rule until fixed**: don't trust `02_DATABASE.md`'s table list. Read the migrations, or query `information_schema.tables`.
 
 ### `PORT` is hardcoded to 3000
 - **What**: `server.ts:59`. The `PORT` variable in `.env.production` is ignored.
@@ -137,3 +150,66 @@ yet.** They are here so the decision can be explicit.
 - **Fix**: `requireAdmin()` on the four endpoints — 401 without a session, 403 below ADMIN. No capability was removed: editing from the UI was already admin-only.
 - **Verified after the fix**: anonymous → 401 on all three verbs, nothing created; admin with a session → 200. Checked locally and against production.
 - **What it left behind**: `server.ts` still has no authorisation *pattern*, only this guard. See "server.ts is 1.891 lines of raw SQL with no authorisation" above — new endpoints added on 2026-08-06 (`/api/db/tables`) had to call `requireAdmin` by hand.
+
+### Juego Vital F1 shortcuts — 2026-08-18
+- **World layout lives in code, not in the DB**: the village is rebuilt from a seeded PRNG on
+  every visit (`src/components/juego/paleta.ts` + `Aldea.tsx`). Fine while nothing is editable;
+  becomes real debt the moment the Builder (F2) ships. Cost to fix now: the `game_worlds` /
+  `game_objects` tables planned in `memory/10_JUEGO_VITAL.md` (~half a session).
+- **3D palette is hex-in-file**: three.js needs raw colour strings, so the "no hex in pages"
+  rule is honoured by centralising ALL world colours in `paleta.ts` (outside `src/pages/`).
+  If the UI tokens ever move to `index.css` variables, the game palette should read them.
+- **Sign text loads its font from the network** (drei `<Text>`/troika default): offline or
+  behind a strict CSP the project-building signs would render blank. Bundling a woff and
+  passing `font=` fixes it in ~15 min when it matters.
+- **`react-simple-maps` still pins React ≤18** (install needs `--legacy-peer-deps`; npm now
+  reports every React 19 consumer as "invalid"). Harmless today, but each new dependency
+  install repeats the warning noise. Replacing it is an old entry above; the game install
+  bumped React 19.0.1 → 19.2.8 without incident.
+
+### Juego Vital: mobiliario sin instanciar — 2026-08-18
+`Detalles.tsx` dibuja cada banco, farola, puesto y oveja como mallas sueltas: la escena
+pasó de 135 a ~400 draw calls. En escritorio no se nota; en un móvil de gama media es el
+primer sitio donde mirar si va a tirones. Arreglo: `InstancedMesh` por tipo de objeto
+(como ya hace `Vegetacion`), ~1 hora. No se hizo ahora para no retrasar la verificación
+visual de lo que el usuario pidió.
+
+### `public/` y las rutas de la app comparten espacio de nombres — 2026-08-18
+Cualquier carpeta creada en `public/` se sirve como estática y **gana** a la ruta del
+mismo nombre: `public/juego/` hizo que `/juego` devolviera un 301 a `/juego/` en
+producción. Hoy hay `geo/`, `illustrations/`, `knowledge/` y `modelos-juego/`, y
+ninguna colisiona. No hay nada que impida repetirlo: la salvaguarda sería una
+comprobación en el build que compare los nombres de `public/*` con las rutas de
+`App.tsx` (~30 min). Mientras tanto, la regla vive comentada en `Modelos.tsx`.
+
+## Navegador remoto (Chromium) — 2026-08-20
+- **Chromium corre sin su sandbox interno** (`chromiumSandbox: false`): dentro del
+  contenedor Alpine no hay espacios de nombres de usuario y no arrancaría. El
+  aislamiento real es el del contenedor. Camino correcto: imagen con seccomp de
+  Playwright o user namespaces; ~half a day cuando el navegador tenga uso real.
+- **El filtro anti-red-interna solo mira las NAVEGACIONES** (documentos), no cada
+  subrecurso: comprobar DNS en cada imagen sería un peaje enorme y un subrecurso
+  interno no es legible desde la página. El rebinding de DNS queda como riesgo
+  teórico aceptado.
+- **La pantalla viaja sin sonido** (el screencast son JPEG). Los vídeos van por el
+  embed oficial, que sí suena. Audio de verdad = WebRTC (fase futura, tipo neko).
+- **Las sesiones no guardan cookies**: cada ventana nueva es un Chromium virgen
+  (consentimientos y logins se repiten). Mitigable con un perfil persistente por
+  usuario (`userDataDir`) — decisión de producto pendiente, tiene implicaciones de
+  privacidad y disco.
+
+## Lienzos.tsx: fichas como `<button>` sueltos — 2026-08-20
+`ui/core.tsx` exporta `Button`, pensado para acciones (relleno, redondeado). Una
+ficha de 4:3 con portada no es eso, así que la página usa 6 `<button>` con clases
+propias (las dos del conmutador, la ficha de crear, el enlace del estado vacío, cada
+ficha y el cierre del modal). El patrón correcto sería un primitivo `CardButton` en
+`ui/core`: ~20 minutos hoy, y crece con cada rejilla nueva (Explorar y Mercado ya
+tienen la suya). No se hizo ahora para no mezclar un refactor de primitivos con una
+página nueva. Sin colores a mano: todo son clases de la paleta.
+
+## Archivos: tres consultas en una ruta, sin paginar — 2026-08-20
+`GET /api/archivos` lanza tres SELECT (ventanas, muro, mundo 3D) con LIMIT 300 cada
+uno y ordena en memoria. Con las 61 filas de hoy sobra; a partir de ~1.000 por
+usuario habrá que paginar de verdad (cursor por fecha sobre una vista UNION). Se
+hizo así para no crear una vista ni una tabla nueva antes de saber cómo se usa la
+página. Coste de cambiarlo: ~1 hora, y no antes de que alguien note la espera.

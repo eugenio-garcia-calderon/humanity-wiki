@@ -52,8 +52,9 @@ Legitimate exception: an endpoint that only one page uses, is parameterised by t
 URL, and would be pointless to preload. `/api/explorer/:level/:id` on the map is the
 canonical example. If you take the exception, say so in a comment on the line.
 
-Current state, measured 2026-08-06: `Universo.tsx` has 3 raw fetches, `Mapas.tsx`
-and `RetoVistas.tsx` one each. None of them are the legitimate exception.
+Current state, measured 2026-08-06: `Mapas.tsx` and `RetoVistas.tsx` have one raw
+fetch each. Neither is the legitimate exception. (`Universo.tsx` had 3; the page was
+deleted on 2026-08-20 — Eugenio: "ya no sirve".)
 
 ## Styling
 
@@ -61,7 +62,8 @@ Use the primitives in `src/components/ui/`. Never a bare `<button>`, never a hex
 colour. Full rules in `src/components/ui/CLAUDE.md`.
 
 Measured 2026-08-06: **117 bare `<button>` elements and 24 hex colours** across the
-project. `Universo.tsx` alone introduced 15 hex values. `ui/core.tsx` exports 3
+project. (`Universo.tsx` alone had introduced 15 hex values; deleted 2026-08-20.)
+`ui/core.tsx` exports 3
 primitives and only 10 of 34 pages import them.
 
 This is the single cheapest thing to fix in the whole repo and it gets worse with
@@ -69,8 +71,10 @@ every page.
 
 ## When a new visualisation deserves its own page
 
-This is the decision that has cost the most churn. Three "Universo" pages were built
-and two were deleted (`c1bf725`).
+This is the decision that has cost the most churn. Three "Universo" pages were built,
+two were deleted (`c1bf725`) — and on 2026-08-20 the survivor went too, because the
+idea itself stopped being useful. Four pages built, zero left: the cost of deciding
+"new page" before "new view".
 
 **It deserves its own page when** it has its own URL worth sharing, its own data
 shape, and someone would arrive at it directly.

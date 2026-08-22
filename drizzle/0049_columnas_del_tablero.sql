@@ -1,0 +1,23 @@
+-- ============================================================================
+-- LAS COLUMNAS DEL TABLERO SON DE CADA PROYECTO (2026-08-20, petición de
+-- Eugenio: «permitir cambiar el nombre de las columnas de tareas al pinchar en
+-- la parte de texto»).
+-- ============================================================================
+-- Hasta hoy las tres columnas —Por hacer / En curso / Hecho— estaban escritas
+-- en el código. Servían para todo el mundo porque nadie podía cambiarlas.
+--
+-- SE GUARDAN COMO jsonb Y NO COMO TABLA NUEVA, por lo mismo que los `grupos`
+-- que ya viven aquí al lado: son tres etiquetas que solo tienen sentido dentro
+-- de su proyecto, nunca se consultan por separado y nadie va a buscar «todos
+-- los proyectos cuya segunda columna se llame X». Una tabla `columnas` con su
+-- clave ajena sería la relación número 44 de este esquema a cambio de nada.
+--
+-- LOS ESTADOS NO CAMBIAN. `roadmap_items.estado` sigue siendo por_hacer /
+-- en_curso / hecho: esto renombra lo que SE LEE, no lo que se guarda. Así una
+-- tarea sigue significando lo mismo aunque cambies el rótulo, y el día que
+-- quites el nombre personalizado vuelven los de siempre sin migrar nada.
+--
+-- NULL = los nombres de siempre. Es lo que tendrán todos los proyectos que ya
+-- existen, así que esta migración no cambia ni una pantalla hasta que alguien
+-- renombre algo a propósito.
+ALTER TABLE proyectos ADD COLUMN IF NOT EXISTS columnas jsonb;
