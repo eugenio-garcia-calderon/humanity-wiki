@@ -717,14 +717,35 @@ export function registerSocialRoutes(app: Express, db: any) {
     try {
       if (!requireLevel(req, res, ROLE.KNOWLEDGE)) return;
       const estado = String(req.query.estado || '').trim();
+      // SE TRAE EL TÍTULO DE LO DENUNCIADO, no solo su identificador. Sin esto
+      // la pantalla enseña «knowledge_windows / KWMSIVNH» y hay que abrir cada
+      // cosa en otra pestaña para saber qué se ha denunciado: una revisión de
+      // diez segundos se convierte en una de dos minutos, y una cola que cuesta
+      // dos minutos por elemento es una cola que se deja para mañana. Que es
+      // exactamente lo que esto viene a evitar.
+      //
+      // Un tipo que no esté aquí sale con `titulo` en `null` y la pantalla
+      // enseña el identificador: **no se inventa un título**. Añadir un tipo
+      // nuevo es un `LEFT JOIN` más y una entrada en el `COALESCE`.
       const r = await db.execute(sql`
         SELECT c.id, c.entity_type, c.entity_id, c.reason, c.status,
                c.created_at, c.reviewed_at,
                quien.display_name AS denunciante,
-               revisor.display_name AS revisado_por
+               revisor.display_name AS revisado_por,
+               COALESCE(kw.title, ch.title, so.title, pu.title, left(co.body, 140)) AS titulo,
+               -- Si lo denunciado ya no está —archivado o en la papelera— la
+               -- denuncia sigue existiendo y hay que poder cerrarla sabiendo
+               -- que el contenido ya no se ve.
+               COALESCE(kw.archived_at, ch.archived_at, so.archived_at, pu.archived_at, co.archived_at) IS NOT NULL
+                 OR COALESCE(kw.deleted_at, pu.deleted_at) IS NOT NULL AS ya_retirado
         FROM content_reports c
         LEFT JOIN users quien   ON quien.id   = c.reporter_user_id
         LEFT JOIN users revisor ON revisor.id = c.reviewed_by
+        LEFT JOIN knowledge_windows kw ON c.entity_type = 'knowledge_windows' AND kw.id = c.entity_id
+        LEFT JOIN challenges        ch ON c.entity_type = 'challenges'        AND ch.id = c.entity_id
+        LEFT JOIN solutions         so ON c.entity_type = 'solutions'         AND so.id = c.entity_id
+        LEFT JOIN publications      pu ON c.entity_type = 'publications'      AND pu.id = c.entity_id
+        LEFT JOIN comments          co ON c.entity_type = 'comments'          AND co.id = c.entity_id
         WHERE (${estado || null}::text IS NULL OR c.status = ${estado || null})
         -- Las abiertas primero, y dentro de cada grupo las más antiguas: una
         -- denuncia que lleva una semana esperando importa más que la de ahora.
