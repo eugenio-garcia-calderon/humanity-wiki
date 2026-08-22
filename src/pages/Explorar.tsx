@@ -4,7 +4,7 @@ import {
   Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2, Plus,
+  ArrowLeft, Users2, Globe2, Plus, Flag,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -13,6 +13,7 @@ import FichaPublicacion, { type Publicacion } from '../components/knowledge/Fich
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
+import { Denunciar } from '../components/moderacion/Denunciar';
 import {
   leerPortada, PORTADA_POR_DEFECTO, type IdBloque, type Portada,
 } from '../components/portada/portadaBloques';
@@ -156,6 +157,7 @@ export default function Explorar() {
    */
   const portada: Portada = user ? leerPortada(user.uiSettings?.portada) : PORTADA_POR_DEFECTO;
   const [personalizando, setPersonalizando] = useState(false);
+  const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string } | null>(null);
 
   // -- Carpetas --
   const [carpetas, setCarpetas] = useState<Carpeta[]>([]);
@@ -755,6 +757,18 @@ export default function Explorar() {
                       className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
                       <Download className="w-3.5 h-3.5 text-slate-400" /> Descargar
                       </button>
+                      {/* DENUNCIAR: solo sobre lo de otros. Denunciarte a ti
+                          mismo no es una acción, es una confusión — y quien
+                          quiera quitar lo suyo tiene «Eliminar» ahí debajo. */}
+                      {user && !it.soy_autor && (
+                      <>
+                      <div className="h-px bg-slate-100 my-1" />
+                      <button onClick={() => { setMenuAbierto(null); setDenunciando({ tipo: it.tipo, id: it.id, titulo: it.titulo }); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-700 inline-flex items-center gap-2">
+                      <Flag className="w-3.5 h-3.5 text-slate-400" /> Denunciar
+                      </button>
+                      </>
+                      )}
                       {it.soy_autor && (
                       <>
                       <div className="h-px bg-slate-100 my-1" />
@@ -788,7 +802,7 @@ export default function Explorar() {
                       </button>
                       );
                       }) : (
-                      <p className="px-3 py-1.5 text-[11px] text-slate-400">Crea una carpeta primero, en el menú de la izquierda.</p>
+                      <p className="px-3 py-1.5 text-[11px] text-slate-400">Crea una carpeta primero: enciende «Tus carpetas» en el botón «Tu portada».</p>
                       )}
                       </div>
                       )}
@@ -860,6 +874,15 @@ export default function Explorar() {
       )}
 
       <CreadorPublicacion abierto={creadorAbierto} onCerrar={() => setCreadorAbierto(false)} />
+
+      {denunciando && (
+        <Denunciar
+          tipo={denunciando.tipo}
+          id={denunciando.id}
+          titulo={denunciando.titulo}
+          onCerrar={() => setDenunciando(null)}
+        />
+      )}
 
       {personalizando && (
         <PersonalizarPortada
