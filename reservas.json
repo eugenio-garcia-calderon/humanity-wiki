@@ -11,6 +11,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "unificar nombres: Al muro/Publicacion, e Imagen/Camara",
       "desde": "2026-08-22T14:22:30.064Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "docker-compose.prod.yml",
+      "motivo": "segundo servicio: copia de los volcados fuera de Hetzner",
+      "desde": "2026-08-22T14:25:04.998Z"
     }
   ]
 }
