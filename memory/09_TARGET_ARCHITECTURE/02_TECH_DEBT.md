@@ -35,6 +35,12 @@ yet.** They are here so the decision can be explicit.
 - **What is still pending, and it is not code**: `CLOUDFLARE_TURN_KEY_ID` and `CLOUDFLARE_TURN_API_TOKEN`. Both travel to `.env.production` as GitHub secrets, same pattern as `TOGETHER_API_KEY`. Until they exist the platform behaves exactly as before and says so in the Teléfono page — to administrators only.
 - **What it will cost**: Cloudflare gives 1,000 GB/month of egress and charges $0.05/GB after that (checked 2026-08-22). A relayed video call is roughly 1 GB/hour, a voice call 45 MB/hour, and only ~1 call in 10 gets relayed. `GET /api/telecom/gasto` counts the real ones instead of guessing.
 
+### Nothing checks the deploy script's syntax until it runs in production
+- **What**: the `script:` block inside `.github/workflows/deploy.yml` is bash, but nothing parses it as bash. YAML validity says nothing about it. Three of us now write env vars into `.env.production` from that one block, each with the same `if … fi` shape.
+- **How it bit** (2026-08-22): merging prog6's R2 keys next to prog8's TURN keys dropped one `fi` — both blocks ended with the same line, so git kept a single one as common context and left an `if` unclosed. Valid YAML, readable diff, green everything. It would have failed in bash, on the server, in the step that is already touching production.
+- **The fix is one step, ten seconds per deploy**: extract the `script:` block and run `bash -n` on it before the `ssh-action` step. Turns "breaks in production halfway through" into "the PR goes red".
+- **Whose**: the workflow belongs to Programador 6 (infrastructure). Found and worked around by Programador 8, not fixed — the missing `fi` is back and verified, the check that would have caught it is not there yet.
+
 ### Nobody has ever run a call through a real TURN server
 - **What**: every path in the credential code is tested — including a stubbed Cloudflare, a 401, a 4-second timeout and a dead host — and the classification of the three paths has its own test with nine cases (`scripts/probar-camino-llamada.ts`). But no call has actually been relayed, because that needs the keys and two machines on hostile networks.
 - **How it will be known**: the first relayed call writes `retransmitida` into `llamadas.via` and shows up in `GET /api/telecom/gasto`. If a month passes with keys configured and that counter stays at zero, either nobody is on a hard network or the wiring is wrong — and both are worth knowing.
