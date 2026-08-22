@@ -65,6 +65,12 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:01.848Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/layout/MenuLateral.tsx",
+      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
+      "desde": "2026-08-22T16:32:05.861Z"
     }
   ]
 }
