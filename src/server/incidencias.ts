@@ -210,7 +210,18 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       const suya = quien.clase === 'agente'
         ? i.respondido_por === quien.nombre
         : i.autor_user_id === quien.id;
-      if (!suya && !quien.admin) {
+      // UN AGENTE SOLO RETIRA LAS SUYAS, aunque para el resto de esta ruta
+      // cuente como quien programa (2026-08-22, encontrado probándolo en
+      // producción: Claude 2 pudo retirar una nota de Claude 1, porque
+      // `admin` es verdadero para los dos y el permiso de administrador se
+      // comía la comprobación de autoría).
+      //
+      // Mover un estado es reversible y queda firmado; retirar una nota la
+      // quita del tablero de TODOS. Que un agente pueda borrar lo que ha
+      // escrito Eugenio no lo pidió nadie, y es justo lo que el alcance corto
+      // venía a evitar. Una persona administradora sí puede: es su tablero.
+      const puedeRetirar = quien.clase === 'agente' ? suya : (suya || quien.admin);
+      if (!puedeRetirar) {
         return res.status(403).json({ error: 'Esa nota no es tuya.' });
       }
       await db.execute(sql`UPDATE incidencias SET archived_at = now() WHERE id = ${req.params.id}`);
