@@ -182,6 +182,7 @@ blocked on code:
 | **Asymmetric, not a shared passphrase** | The server carries only the **public** key: it can encrypt every dump and **cannot decrypt any of them**. Steal the server, get the backups, open none |
 | Where the private key lives | **Not on the server and not in any `.env`.** Eugenio's password manager, plus an offline copy kept somewhere else |
 | Split, rather than in one place | Three shares, any two reconstruct it (Shamir). Then it survives one person losing theirs, and no single person can open the backups alone |
+| The wrapped per-file key | Travels **inside** the `age` file, and that is safe here only because it is wrapped with the public key: the thing that unwraps it exists nowhere on the server and nowhere in the bucket. In the envelope pattern prog4 uses for field data, where the wrapping key is reachable, the rule is the opposite — key and payload never share a file or a bucket, or whoever takes one takes both |
 | The step that decides whether any of this is worth anything | A **test restore with the real key, before we start trusting it**. An encrypted backup nobody has restored is two beliefs stacked on one |
 
 **The decision is Eugenio's, and it is not technical: if that private key is
