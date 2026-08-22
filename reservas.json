@@ -95,6 +95,12 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "la palabra Feedback y su icono en el menu",
       "desde": "2026-08-22T15:25:57.573Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "src/server/gasto.ts",
+      "motivo": "quitar reconocimiento de la máquina de la respuesta pública",
+      "desde": "2026-08-22T15:28:03.057Z"
     }
   ]
 }
