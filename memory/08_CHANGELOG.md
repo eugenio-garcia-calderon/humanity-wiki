@@ -5533,3 +5533,37 @@ restored): cotizar → 5 € + 3 € shipping, todo_acepta; 8 points without add
 envio_centimos 300, address stored, buyer 100→92, seller 100→108; 5 points →
 Stripe session with the 5 € coupon and shipping in euros. `tsc` clean. Not
 seen in a browser (shop subdomain only).
+
+---
+
+## 2026-08-23 — Points are transferable, sellers are asked, and the commission in points is half (Programador 7)
+
+Eugenio, on the tokenomics page still saying «No es transferible»: «queremos que
+sean transferibles los puntos». Decided and done:
+
+- **`PUNTOS_TRANSFERENCIA=on` in production** (app recreated, health OK): people
+  can send points to each other (daily cap, one transaction, ledger entries).
+  The page, the white paper and the task list now say so, dated; the fourth
+  negation became the one that really holds the design: «No se canjea por
+  euros».
+- **Sellers are asked.** CrearProducto shows, next to the price in euros, its
+  equivalent in points and a checkbox «Acepto cobrar en puntos» with the deal
+  spelled out: the buyer's points go to the seller, and the platform commission
+  is **half** — 2.5 % in points versus 5 % in euros.
+- **The commission in points exists.** 0093: a platform account in the ledger
+  (`U_PLATAFORMA`, not a person, cannot log in) and motive `comision_puntos`.
+  `pagarConPuntos` now writes three entries per sale: buyer −100 %, seller
+  +97.5 %, platform +2.5 % (`PUNTOS_COMISION_BPS`, 250 default), pedido as
+  entity, one transaction. The price is the price: the commission comes out
+  of the seller's side, never added to the buyer.
+- **A brake on the transfer route** (prog6's module, rule `transferencia`):
+  the daily cap limits how much, not how many times; ten sends in a row are
+  free, then 20 s, 40 s… up to an hour, keyed by account. Every send counts as
+  an attempt on purpose — what is braked is the loop, not the person.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after,
+balances restored, platform account back to 0): a 4-point purchase → buyer
+100→96, seller 100→103.90, platform 0→0.10, three ledger rows; twelve
+consecutive transfers → eleven 200 and the twelfth 429. `tsc` clean. prog6
+took a named dump before the migration (`antes-de-0093-comision-en-puntos`).
+Not seen in a browser (shop subdomain / CrearProducto modal).

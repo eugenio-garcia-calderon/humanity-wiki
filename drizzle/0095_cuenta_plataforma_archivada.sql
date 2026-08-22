@@ -1,0 +1,35 @@
+-- LA CUENTA DE LA PLATAFORMA NACE ARCHIVADA (2026-08-23, Programador 4, a
+-- petición de prog7 — economía)
+--
+-- Continúa la 0094. Aquella cerró las dos puertas por las que se podía ENTRAR
+-- en `U_PLATAFORMA` (Google vincula por correo; restablecer contraseña manda un
+-- testigo a ese buzón). Esta la saca de donde no pinta nada.
+--
+-- `U_PLATAFORMA` no es una persona: es la cuenta que recibe el 2,5 % de
+-- comisión cuando una venta se cobra en puntos. Con `archived_at` a nulo salía
+-- —o podía salir— en la búsqueda de personas, en «a quién sigo», como
+-- destinataria de un mensaje y, la que más molesta, **como destinataria válida
+-- de una transferencia de puntos**: la ruta de prog7 resuelve destinatarios con
+-- `archived_at IS NULL`. Alguien podía mandarle puntos a un buzón que no lee
+-- nadie y del que no salen.
+--
+-- ── LO QUE COMPROBÉ ANTES DE HACERLO, PORQUE ARCHIVAR SUENA A BORRAR ───────
+-- Archivar una cuenta que guarda dinero es exactamente el sitio donde conviene
+-- no fiarse de que «funciona». Tres cosas, leídas, no supuestas:
+--
+--   1. **La comisión sigue llegando.** `puntos.ts:133` y `:151` bloquean y
+--      acreditan POR ID (`WHERE id = 'U_PLATAFORMA'`), sin mirar `archived_at`.
+--      El apunte del libro tampoco lo filtra.
+--   2. **No entra en el camino del borrado.** `scripts/vaciar-cuentas.mjs`
+--      elige por `deleted_at IS NOT NULL`, nunca por `archived_at`. Son dos
+--      columnas distintas y solo la primera vacía la cuenta. Si fueran la
+--      misma, esta migración se llevaría por delante el saldo de comisiones a
+--      los quince días, y nadie lo vería venir.
+--   3. **Refuerza lo de la 0094.** `auth.ts:236` (`attachUser`) filtra
+--      `archived_at IS NULL`, así que aunque alguien consiguiera una sesión de
+--      esta cuenta, no se la daría por buena.
+--
+-- Dicho de otra forma: el saldo entra, no sale, y la cuenta no aparece.
+UPDATE users
+SET archived_at = now()
+WHERE id = 'U_PLATAFORMA' AND archived_at IS NULL;
