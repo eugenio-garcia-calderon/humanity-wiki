@@ -23,6 +23,12 @@
       "ruta": "src/components/ui/OrigenDelDato.tsx",
       "motivo": "marca de origen del dato (fichero nuevo)",
       "desde": "2026-08-22T11:54:08.627Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Map.tsx",
+      "motivo": "marca de origen del dato en la ficha del territorio",
+      "desde": "2026-08-22T11:55:23.181Z"
     }
   ]
 }
