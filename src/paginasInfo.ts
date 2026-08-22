@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, type LucideIcon } from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon } from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -38,6 +38,8 @@ export interface PaginaInfo {
 }
 
 export const PAGINAS_INFO: PaginaInfo[] = [
+  { ruta: 'veracidad', titulo: 'Veracidad', icono: Scale,
+    componente: lazy(() => import('./pages/Veracidad')) },
   { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
   { ruta: 'sobre-red-humana/puntuacion-territorios', titulo: 'Puntuación de territorios', icono: BadgeCheck },
   // Qué hace cada herramienta y QUÉ LE FALTA, con las cifras leídas de la base
