@@ -43,7 +43,9 @@ export function Nubes({ esNoche = false, calidad = 'alta' }: {
 
   // Cuántas nubes según la máquina. En una tarjeta floja las nubes son lo
   // primero que se puede recortar sin que el sitio deje de ser el sitio.
-  const cuantas = calidad === 'alta' ? 14 : calidad === 'media' ? 9 : 5;
+  // Menos nubes (2026-08-22): con el mundo en 95 de medio lado y la niebla a
+  // 200, las de fuera no se veían — se dibujaban igual.
+  const cuantas = calidad === 'alta' ? 7 : calidad === 'media' ? 5 : 3;
   const cuantasBajas = calidad === 'alta' ? 7 : calidad === 'media' ? 5 : 3;
 
   const { altas, bajas } = useMemo(() => {
@@ -53,7 +55,7 @@ export function Nubes({ esNoche = false, calidad = 'alta' }: {
       // Repartidas en corona alrededor de la aldea, entre 120 y 340 m, para
       // que siempre haya cielo con algo mires donde mires.
       const a = (i / cuantas) * Math.PI * 2 + azar() * 0.7;
-      const r = 95 + azar() * 165;
+      const r = 70 + azar() * 90;
       altas.push({
         // Altura 38-72 m, no 62-108. La cámara del juego mira casi
         // horizontal: con las nubes más arriba quedaban FUERA de encuadre y
