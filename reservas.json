@@ -17,6 +17,12 @@
       "ruta": "drizzle/0075_precios_servicio.sql",
       "motivo": "rama A: tabla de precios de la cesta",
       "desde": "2026-08-22T15:15:21.885Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/vaciar-cuentas.mjs",
+      "motivo": "guardian: que falle cuando aparezca una columna de users sin clasificar",
+      "desde": "2026-08-22T17:22:19.500Z"
     }
   ]
 }
