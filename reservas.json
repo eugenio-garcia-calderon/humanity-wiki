@@ -65,6 +65,30 @@
       "ruta": "src/server/ai/assistant.ts",
       "motivo": "P4: cerrar lectura de conversaciones ajenas por conversation_id (fuga)",
       "desde": "2026-08-22T19:07:06.273Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/GrafoCanvas.tsx",
+      "motivo": "",
+      "desde": "2026-08-22T19:07:48.671Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/lienzoChrome.tsx",
+      "motivo": "",
+      "desde": "2026-08-22T19:07:48.671Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/knowledge/BarraElemento.tsx",
+      "motivo": "",
+      "desde": "2026-08-22T19:07:48.671Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
+      "motivo": "",
+      "desde": "2026-08-22T19:07:48.671Z"
     }
   ]
 }
