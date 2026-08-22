@@ -83,12 +83,6 @@
       "ruta": "src/pages/BorrarCuentaPublica.tsx",
       "motivo": "corregir: el paso 3 no vale para cuentas de Google",
       "desde": "2026-08-22T16:52:28.498Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "dos verificaciones correctas no verifican la costura",
-      "desde": "2026-08-22T16:53:19.035Z"
     }
   ]
 }
