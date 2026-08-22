@@ -161,6 +161,12 @@
       "ruta": "src/components/knowledge/DialogoCompartir.tsx",
       "motivo": "dominio y buscadores fuera de la puerta del handle",
       "desde": "2026-08-22T22:08:37.492Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "devolver indexable y slug al abrir compartir",
+      "desde": "2026-08-22T22:10:26.062Z"
     }
   ]
 }
