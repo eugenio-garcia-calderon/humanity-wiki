@@ -50,12 +50,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
-      "desde": "2026-08-22T20:12:49.364Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/stripe.ts",
       "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
       "desde": "2026-08-22T20:12:53.150Z"
