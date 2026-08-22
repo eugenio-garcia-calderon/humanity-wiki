@@ -350,8 +350,20 @@ export function registerAuthRoutes(app: Express, db: any) {
         row = (await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)).rows[0];
       }
 
+      // VOLVER CANCELA EL BORRADO, TAMBIÉN POR AQUÍ. Sin esto, quien entró con
+      // Google podría pedir el borrado y no tener forma de arrepentirse: la
+      // papelera de 15 días existiría para él en la base de datos y no en la
+      // práctica. Misma regla que en el inicio de sesión con contraseña.
+      let recuperada = false;
+      if ((row as any).deleted_at && !(row as any).anonimizado_en) {
+        await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${(row as any).id}`);
+        (row as any).deleted_at = null;
+        recuperada = true;
+        console.warn('[cuenta] borrado cancelado al entrar con Google:', (row as any).id);
+      }
+
       await createSession(req, res, (row as any).id);
-      res.json({ user: rowToUser(row) });
+      res.json({ user: rowToUser(row), ...(recuperada ? { borrado_cancelado: true } : {}) });
     } catch (e: any) {
       console.error('google login error:', e);
       res.status(500).json({ error: e.message });
@@ -573,15 +585,50 @@ export function registerAuthRoutes(app: Express, db: any) {
   app.post('/api/auth/borrar-cuenta', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-      const { password } = req.body || {};
-      if (!password) {
-        return res.status(400).json({ error: 'Escribe tu contraseña para confirmar que eres tú.' });
-      }
-      const r = await db.execute(sql`SELECT id, password_hash, deleted_at FROM users WHERE id = ${req.user.id}`);
+      const { password, correo } = req.body || {};
+      const r = await db.execute(sql`SELECT id, email, password_hash, deleted_at FROM users WHERE id = ${req.user.id}`);
       const row = r.rows[0] as any;
       if (!row) return res.status(404).json({ error: 'Esa cuenta ya no existe.' });
-      if (!verifyPassword(String(password), row.password_hash)) {
-        return res.status(401).json({ error: 'La contraseña no es correcta.' });
+
+      // ══ QUIEN ENTRÓ CON GOOGLE NO TIENE CONTRASEÑA ═══════════════════════
+      // Este endpoint salió pidiendo `password` y comprobándola siempre. Para
+      // una cuenta de Google `password_hash` es `null`, `verifyPassword`
+      // devuelve `false` con cualquier cosa, y el resultado era que **esas
+      // personas no podían borrar su cuenta por ninguna vía** — con el añadido
+      // de que el mensaje les decía «la contraseña no es correcta» sobre una
+      // contraseña que nunca tuvieron. Lo encontró el Programador 3 leyendo el
+      // código desplegado.
+      //
+      // Y no es un caso raro: **Apple exige el borrado desde dentro de la
+      // aplicación**. Si una parte de los usuarios no puede, el requisito
+      // sigue incumplido y el rechazo llega igual.
+      //
+      // ── POR QUÉ EL CORREO Y NO «CREA UNA CONTRASEÑA PRIMERO» ─────────────
+      // Escribir tu propio correo es fricción equivalente: hay que teclear algo
+      // que solo tú sabes que es tuyo, y no se puede hacer con un formulario
+      // ajeno cargado a traición. Obligar a inventarse una credencial NUEVA
+      // como paso previo a marcharse es justo el patrón oscuro que estas normas
+      // de tienda existen para evitar.
+      const conContrasena = !!row.password_hash;
+      if (conContrasena) {
+        if (!password) {
+          return res.status(400).json({ error: 'Escribe tu contraseña para confirmar que eres tú.', pide: 'contrasena' });
+        }
+        if (!verifyPassword(String(password), row.password_hash)) {
+          return res.status(401).json({ error: 'La contraseña no es correcta.' });
+        }
+      } else {
+        // El mensaje DICE cuál es la confirmación que hace falta, en vez de
+        // dejar a la pantalla adivinarla.
+        if (!correo) {
+          return res.status(400).json({
+            error: 'Esta cuenta entra con Google y no tiene contraseña. Escribe tu correo para confirmar.',
+            pide: 'correo',
+          });
+        }
+        if (String(correo).trim().toLowerCase() !== String(row.email).trim().toLowerCase()) {
+          return res.status(401).json({ error: 'Ese correo no es el de esta cuenta.' });
+        }
       }
       // Pedirlo dos veces no hace nada nuevo, y sobre todo NO reinicia la
       // cuenta atrás: si no, quien insistiera se alejaría del vaciado en vez
@@ -624,6 +671,11 @@ export function registerAuthRoutes(app: Express, db: any) {
       `);
       const row = r.rows[0] as any;
       if (!row || !verifyPassword(String(password), row.password_hash)) {
+        // Una cuenta de Google no tiene contraseña, así que por aquí no puede
+        // cancelar nada — y no hace falta: entrar con Google lo cancela solo,
+        // igual que entrar con contraseña. Esta ruta existe para una pantalla
+        // que pregunte «¿seguro?» sin navegar a otro sitio, no como único
+        // camino.
         return res.status(401).json({ error: 'Email o contraseña incorrectos.' });
       }
       // Ya vaciada: no hay nada que cancelar y no se puede deshacer. Se dice
