@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/App.tsx",
-      "motivo": "prueba del sistema",
-      "desde": "2026-08-22T11:23:44.959Z"
-    }
-  ]
+  "reservas": []
 }
