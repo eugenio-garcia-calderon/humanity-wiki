@@ -29,12 +29,6 @@
       "ruta": "src/server/auth.ts",
       "motivo": "borrado de cuenta: obligatorio para App Store y Google Play",
       "desde": "2026-08-22T16:25:54.273Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "lo que se guarda por si acaso sale en la copia de cada noche",
-      "desde": "2026-08-22T16:27:22.600Z"
     }
   ]
 }
