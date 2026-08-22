@@ -16,6 +16,7 @@ takes **one logical dump per UTC day**, verifies it, and rotates.
 ```
 /copias/humanity-2026-08-22.dump   custom format (-Fc), compressed, restorable table by table
 /copias/estado.json                how the last run went — the healthcheck reads this
+/copias/estado-remoto.json         same, for the off-site copy
 ```
 
 Kept: the **14 most recent** dumps, plus **every 1st-of-month for 6 months**.
@@ -44,9 +45,55 @@ and nobody has to SSH in to install it.
 | Do you know it works? | ❌ not until you restore it | ✅ `restaurar.sh probar` |
 | Consistency | crash-consistent, like a power cut | consistent by definition |
 
-The dumps sit on the server disk **on purpose**: the Hetzner snapshot then
-carries them off the machine for free. Neither covers losing the Hetzner
-account itself — that needs a copy at another provider, and it is not built.
+**Superseded the same day.** Eugenio parked the snapshot and asked for the dump
+to leave Hetzner instead — see the next section. The dumps still land on the
+server disk first; `copias-remoto` is what takes them off it.
+
+## Off Hetzner: the `copias-remoto` service
+
+Eugenio, 2026-08-22: *«hagamos el volcado de copia de base de datos fuera de
+hetzner y olvidemos lo otro de momento de la foto»*. The Hetzner snapshot idea
+above is **parked**, not chosen.
+
+A second container (`rclone/rclone`) copies every new dump to an S3-compatible
+bucket at another provider. It shares the `copias` volume and does nothing else.
+
+**It copies, it never syncs.** `rclone sync` would make the remote a mirror of
+the local directory — so a bug that emptied `/copias` would erase the off-site
+copy too, which is the exact thing this protects against. `rclone copy` only
+adds. At ~1.3 MB/day that is ~475 MB/year against R2's 10 GB free tier: decades
+before it matters. When it does, prune by hand, deliberately.
+
+**Unconfigured, it stays healthy and idle.** A container permanently red teaches
+people to ignore red, and then nobody looks the day it means something. Missing
+configuration is said in the log and reported to Eugenio, not screamed forever
+in `docker ps`.
+
+### Turning it on (Eugenio's part — needs an account, so it is not ours)
+
+1. Cloudflare dashboard → **R2** → create bucket, e.g. `humanity-copias`.
+   Same account as the DNS; 10 GB free; no egress charge.
+2. **Manage R2 API Tokens** → create one scoped to **that bucket only**, with
+   read **and** write. Read as well as write: a token that cannot read cannot
+   verify, and an unverifiable backup is a guess.
+3. Copy the Access Key ID, the Secret and the S3 endpoint into
+   `/opt/humanity-wiki/.env.production` (see `.env.production.example` for the
+   four `COPIAS_REMOTO_*` lines). That file is gitignored and survives deploys.
+4. `docker compose -f docker-compose.prod.yml --env-file .env.production up -d copias-remoto`
+
+Then check it took:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail 5 copias-remoto
+# want: "al día: N volcado(s) en fuera:humanity-copias"
+```
+
+**The secret must never reach a versioned file, a `memory/` note or an agent's
+transcript.** Eugenio pastes it into `.env.production` himself.
+
+Any S3-compatible provider works — change `COPIAS_REMOTO_PROVEEDOR` and the
+endpoint. R2 was picked because he already has the Cloudflare account, and
+because a backup on Hetzner does not protect against losing Hetzner.
 
 ## Restoring
 
@@ -66,14 +113,14 @@ half in another.
 
 ## Before you change this, decide
 
-**If you edit `copias.sh` or `salud.sh`, the container will not pick it up on
+**If you edit any script in this folder, the container will not pick it up on
 its own.** They come in through a bind mount, and `up -d` has no reason to
 recreate a service whose definition did not change — the same trap the Caddyfile
 hit on 2026-08-22, written up in `deploy/CLAUDE.md`. After a deploy that touches
 these:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.production restart copias
+docker compose -f docker-compose.prod.yml --env-file .env.production restart copias copias-remoto
 ```
 
 Baking the scripts into an image instead would remove that footgun and cost a
@@ -81,7 +128,8 @@ Dockerfile plus a build on every deploy. Bind mount was chosen because the
 scripts change rarely; if they start changing often, switch.
 
 **The `.dump` files are not encrypted.** They hold every user's data. They are
-readable by anyone with root on the server or with a Hetzner snapshot. Adding
+readable by anyone with root on the server — and now by anyone holding the R2
+token, which widens the blast radius rather than narrowing it. Adding
 `age`/GPG is one line in `copias.sh` and one more secret to not lose — and a
 backup you cannot decrypt is worse than no backup, so it needs a real key
 custody decision first. Not made. Raised with Eugenio 2026-08-22.
@@ -101,6 +149,17 @@ created and dropped for the test (Eugenio's `evolucion_humanidad` untouched):
 - the healthcheck passes when fresh and fails in all three bad states (stale,
   failed, never run);
 - the compose file parses and the other three services are unchanged.
+
+Verified 2026-08-22 for `copias-remoto`, with **real rclone** against a local
+remote (no Docker, so the container itself is again unverified):
+
+- only `humanity-*.dump` goes up — `estado.json` stayed behind;
+- **deleting a dump locally did not delete the remote one**, which is the whole
+  point of `copy` over `sync`;
+- an unreachable destination lands in `error` and the healthcheck fails;
+- a destination that answers but holds nothing also fails, instead of reporting
+  a cheerful success on an empty bucket;
+- unconfigured stays healthy and idle, as designed.
 
 **Not verified: the container itself.** There is no Docker on the Mac this was
 written on, and `postgis/postgis:17-3.5` publishes no arm64 build anyway. The

@@ -4459,3 +4459,45 @@ local** para poder mirarlo, y lo restauré en cuanto tuve la captura (`{!user ?`
 de vuelta, cero apariciones de `{false ?`, `tsc` limpio). Nunca salió de este
 ordenador y no entró en ningún commit. Se deja escrito porque un atajo así, sin
 contarlo, es exactamente cómo un candado desaparece sin que nadie lo decida.
+
+## 2026-08-22 · La base de datos pasa de cero copias a dos capas (prog6)
+
+**Antes de hoy no había ninguna copia de seguridad.** La casilla
+`Backups de BD a R2 con pgBackRest` de `docs/13_DEPLOY.md` llevaba sin marcar
+desde principios de agosto y no existía ni un `pg_dump` en el repositorio: los
+datos de producción vivían en un único volumen de un único servidor.
+
+**Capa 1 — volcado diario en el servidor** (PR #223, ya en producción). Servicio
+`copias` en `docker-compose.prod.yml`, misma imagen que `db` porque `pg_dump`
+tiene que ser de la versión del Postgres del que lee. Un volcado por día en
+cuanto el contenedor puede —no a hora fija, para que un reinicio no se salte el
+día—, comprobado con `pg_restore --list` **antes** de que se le ponga el nombre
+bueno, y se tira si trae menos de 50 objetos. Se guardan 14 diarias y el día 1
+de cada mes durante 6 meses.
+
+**Capa 2 — sacarlo fuera de Hetzner** (esta PR). Petición de Eugenio el mismo
+día: «hagamos el volcado de copia de base de datos fuera de hetzner y olvidemos
+lo otro de momento de la foto» — es decir, **la foto de disco de Hetzner queda
+aparcada, no elegida**. Servicio `copias-remoto` con `rclone` que sube cada
+volcado nuevo a un cubo compatible con S3 (pensado para Cloudflare R2). **Copia,
+nunca sincroniza**: un espejo borraría fuera lo que se borrara dentro, que es
+justo de lo que esto protege.
+
+Dos decisiones que conviene no deshacer sin pensarlas:
+
+- **El aviso de que se ha dejado de hacer.** El fallo peligroso de una copia no
+  es que falle, es que deje de hacerse en silencio. Los dos contenedores salen
+  `unhealthy` si la última tiene más de 36 h. Pero `copias-remoto` **sin
+  configurar sale sano**: un contenedor eternamente en rojo enseña a ignorar el
+  rojo.
+- **`restaurar.sh probar`.** Restaura en una base aparte, cuenta y la borra. Es
+  la diferencia entre tener un fichero y tener una copia de seguridad.
+
+Verificado en producción el mismo día: primer volcado real de 1262 KB y 884
+objetos, **restaurado** con 126 tablas / 14 usuarios / 242 territorios,
+**idénticos a la base viva**.
+
+Queda pendiente y es decisión de Eugenio, no técnica: **los volcados no van
+cifrados** y ahora además viajan a otro proveedor. Cifrarlos es fácil; lo
+difícil es dónde vive la llave, y una copia que no se puede descifrar es peor
+que ninguna.
