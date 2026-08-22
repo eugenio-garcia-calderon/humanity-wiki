@@ -7,12 +7,6 @@
       "desde": "2026-08-22T11:30:42.250Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog3: entrada de la PWA",
-      "desde": "2026-08-22T11:40:42.169Z"
-    },
-    {
       "agente": "prog1",
       "ruta": "server.ts",
       "motivo": "marcar el origen del dato en las puntuaciones que sirve",
