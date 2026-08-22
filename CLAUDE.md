@@ -98,6 +98,22 @@ data for measured data is the most expensive error made in this project so far.
    so two people can run the platform at once. **Programador 1 on 3000,
    Programador 2 on 3001.**
 
+## Three of you work here at once
+
+Read `equipo/REPARTO.md` before your first commit of the session. The short version:
+
+- Your working copy, your branch, your port. Nobody enters anybody else's folder.
+  Programador 1: the repo root, `prog1/…`, port 3000. Programador 2:
+  `.claude/worktrees/prog2`, `prog2/…`, 3001. Programador 3:
+  `.claude/worktrees/prog3`, `prog3/…`, 3002.
+- Claim a shared file before touching it: `node scripts/equipo.mjs reservar <file>
+  --motivo "…"`, and `soltar` when done. `quien` shows who holds what. A pre-commit
+  hook stops a commit carrying someone else's claimed file.
+- **One PR per programmer, from your own branch, and never a deploy that mixes
+  several people's work.** Say it and wait for your turn before merging to `main`.
+- Before starting anything: `git fetch` and read the last few hours of the log.
+  Somebody may have done it already.
+
 ## When something can be done fast or done right
 
 This project moves fast and that is a feature. Your job is not to slow it down, it

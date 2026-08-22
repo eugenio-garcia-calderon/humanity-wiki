@@ -3989,3 +3989,55 @@ that is not there.
 through the fast model. It matters when there are a hundred people using the
 chat daily. What it does buy today is that the saving is *visible*: from now on
 the cost table can show whether the cache is hitting at all.
+
+---
+
+## 2026-08-22 (XII) — The context cache, rebuilt for hundreds of thousands of chats
+
+Eugenio: «piensa en cómo hacerlo para mejorar la UX y piensa en cuando tengamos
+cientos de miles de chats al día».
+
+Measured on the local server, three questions in one conversation:
+
+| Petición | Entrada | Releída de caché |
+|---|---|---|
+| 1ª | 5.720 | 0 (escribe la caché) |
+| 2ª | 5.754 | **5.719 — 99 %** |
+| 3ª | 5.785 | **5.753 — 99 %** |
+
+**−89,5 % per request from the second message on.** At 100.000 chats a day that
+is ~403 €/día → ~115 €/día; at 500.000, ~2.014 → ~573.
+
+### What was breaking it
+
+**A timestamp with milliseconds.** The variable block opened with `HOY ES …
+(2026-08-22T10:15:33.123Z)`. Caching compares *prefixes*: one differing byte and
+everything after it is billed in full — including the entire conversation
+history, re-sent and re-charged on every single turn. The date now carries the
+day only. The model never needed the millisecond: it resolves «el jueves» from
+the day.
+
+### Three tiers instead of two
+
+| Capa | Qué lleva | Cambia |
+|---|---|---|
+| 1 · global | las instrucciones de la plataforma | nunca — su caché **se comparte entre todos los usuarios** |
+| 2 · de la persona | sus proyectos, su gente, su nivel, los grafos | cuando crea algo |
+| 3 · variable | la fecha, la pantalla, lo recuperado, la pregunta | cada mensaje |
+
+Ordered least- to most-volatile, which is not a preference: a stable block
+placed after a volatile one is never cached. Anthropic allows four cache
+markers and one was in use; there are now two. Together needs no marker — its
+cache is automatic by prefix, so **the order is the marker**.
+
+### And it can now say whether it is working
+
+`cache_read_tokens` is recorded with every charge. Until today a broken cache
+and a perfect one left an identical record, and at this volume that means
+finding out from the invoice. It is the house rule applied to money.
+
+### For the person using it
+
+Cached prefixes are not only cheaper, they are **faster**: the provider skips
+recomputing them, so the answer starts sooner. The saving and the wait improve
+together.
