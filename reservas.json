@@ -61,28 +61,10 @@
       "desde": "2026-08-22T20:46:22.224Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/main.tsx",
-      "motivo": "dominio propio: montar la app del dominio",
-      "desde": "2026-08-22T20:48:23.438Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/AplicacionDeDominio.tsx",
-      "motivo": "dominio propio: montar la app del dominio",
-      "desde": "2026-08-22T20:48:23.438Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/auth.ts",
       "motivo": "cookie de sesion valida en los subdominios (Eugenio: probar puntos en el carrito)",
       "desde": "2026-08-22T20:51:15.124Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "vite.config.ts",
-      "motivo": "poder probar dominios propios en local",
-      "desde": "2026-08-22T20:52:47.989Z"
     },
     {
       "agente": "prog3",
