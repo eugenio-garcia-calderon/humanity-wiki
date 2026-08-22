@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare, Paperclip, X, ImageIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { IconoFeedback } from '../components/ui/IconoFeedback';
+import { ColaDenuncias } from '../components/moderacion/ColaDenuncias';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { subirArchivo } from '../utils/subir';
 
@@ -55,6 +56,23 @@ const SEMAFORO = {
 export default function Hormiguero() {
   const { user, can } = useAuth();
   const esAdmin = can(ROLE.ADMIN);
+  /*
+   * LAS DENUNCIAS, EN SU PROPIA PESTAÑA Y SOLO PARA QUIEN PUEDE REVISARLAS.
+   * Nivel 3 y no administrador: una cola que se para cuando duerme una persona
+   * no es una cola, es un cuello. Quien no llega a ese nivel no ve la pestaña,
+   * así que no descubre que existe un sitio al que no puede entrar.
+   */
+  const puedeModerar = can(ROLE.KNOWLEDGE);
+  const [pestana, setPestana] = useState<'notas' | 'denuncias'>('notas');
+  const [denunciasAbiertas, setDenunciasAbiertas] = useState(0);
+
+  useEffect(() => {
+    if (!puedeModerar) return;
+    fetch('/api/reports/cuenta', { credentials: 'include' })
+      .then(r => r.json())
+      .then(j => setDenunciasAbiertas(Number(j?.abiertas) || 0))
+      .catch(() => {});
+  }, [puedeModerar, pestana]);
   const [lista, setLista] = useState<Incidencia[] | null>(null);
   const [titulo, setTitulo] = useState('');
   const [detalle, setDetalle] = useState('');
@@ -159,6 +177,34 @@ export default function Hormiguero() {
         </h1>
         <p className="text-xs text-slate-400">Lo que falla y lo que falta. Cuéntalo aquí y llega a quien programa.</p>
       </div>
+
+      {/* Dos listas, no una. «Algo falla» y «alguien ha denunciado esto» se leen
+          distinto y se atienden distinto — y la denuncia lleva un reloj que la
+          nota no lleva. Juntas se entierran las dos. */}
+      {puedeModerar && (
+        <div className="flex items-center gap-1.5 mb-4">
+          {([['notas', 'Lo que falla'], ['denuncias', 'Denuncias']] as const).map(([k, t]) => (
+            <button key={k} onClick={() => setPestana(k)}
+              className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+                pestana === k ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>
+              {t}
+              {k === 'denuncias' && denunciasAbiertas > 0 && (
+                <span className={cn('min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black grid place-items-center',
+                  pestana === k ? 'bg-white text-slate-900' : 'bg-rose-500 text-white')}>
+                  {denunciasAbiertas > 9 ? '9+' : denunciasAbiertas}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {pestana === 'denuncias' && puedeModerar && <ColaDenuncias />}
+
+      {/* Y la lista de siempre, que es la pestaña por defecto y la única
+          que ve quien no puede moderar. */}
+      {pestana === 'notas' && (
+      <>
 
       {/* ANOTAR. Arriba y siempre abierto: si hubiera que pulsar «nuevo» para
           que apareciera el cuadro, la mitad de lo que molesta no se anotaría —
@@ -366,6 +412,8 @@ export default function Hormiguero() {
             );
           })}
         </ul>
+      )}
+      </>
       )}
     </div>
   );
