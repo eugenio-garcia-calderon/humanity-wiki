@@ -1490,6 +1490,39 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * CÓMO ESTÁ COMPARTIDA ESTA PÁGINA — `GET /api/publicar/estado/:id`
+   *
+   * Lo que la pantalla de compartir necesita saber al ABRIRSE: si está
+   * publicada, con qué dirección, y si se dijo que sí o que no a los
+   * buscadores.
+   *
+   * Sin esto la pantalla suponía. Y suponía que sí: quien había elegido «no
+   * aparecer en Google» reabría el diálogo y veía «Sí» marcado, con lo que un
+   * clic descuidado en cualquier otra cosa podía volver a indexarla. Una
+   * pantalla que no lee el estado real acaba escribiéndolo mal.
+   */
+  app.get('/api/publicar/estado/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT w.publico, w.indexable, w.slug, u.handle
+        FROM knowledge_windows w
+        JOIN users u ON u.id = w.creator_user_id
+        WHERE w.id = ${String(req.params.id)} AND w.creator_user_id = ${req.user.id}
+      `);
+      const w = r.rows[0] as any;
+      if (!w) return res.status(404).json({ error: 'Esa página no es tuya o no existe.' });
+      res.json({
+        publico: !!w.publico,
+        // `null` cuando nunca se ha publicado: «no se ha decidido» no es lo
+        // mismo que «se dijo que no», y la pantalla los enseña distinto.
+        indexable: w.publico ? !!w.indexable : null,
+        slug: w.slug, handle: w.handle,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
