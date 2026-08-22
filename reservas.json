@@ -17,66 +17,6 @@
       "ruta": "drizzle/0075_precios_servicio.sql",
       "motivo": "rama A: tabla de precios de la cesta",
       "desde": "2026-08-22T15:15:21.885Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "drizzle/0080_telecomunicaciones.sql",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:31:37.338Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/mensajes.ts",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:31:41.218Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:31:47.361Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/uploads.ts",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:31:51.126Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:31:54.774Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:32:01.848Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/layout/MenuLateral.tsx",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:32:05.861Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/social/Campana.tsx",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:32:09.623Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/Mensajes.tsx",
-      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
-      "desde": "2026-08-22T16:32:13.263Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "drizzle/0082_quien_puede_llamarte.sql",
-      "motivo": "privacidad: quien puede llamarte",
-      "desde": "2026-08-22T17:07:36.361Z"
     }
   ]
 }
