@@ -4,7 +4,6 @@ import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { getProvider } from './ai/provider.js';
 import { graphLimitReached } from './ai/assistant.js';
-import { otorgarPuntos } from './puntos.js';
 
 // ============================================================================
 // Grafos de Conocimiento — Fase 11
@@ -1732,18 +1731,39 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       // del todo (vistas válidas por persona + reparto sobre lo contado).
       // Ese día `views` será solo el número que se enseña, nunca el que
       // decide dinero.
+      // `views` puede subirlo cualquiera Y NO PAGA A NADIE — cierto el
+      // 2026-08-22, y es una decisión de ese día, no una propiedad del
+      // sistema: el día que el reparto del bote mire vistas, esta frase deja
+      // de ser verdad y harán falta DOS contadores (bruto vs válidas).
       const fila = w.rows[0] as any;
       if (req.user && fila?.publico && fila.creator_user_id && fila.creator_user_id !== req.user.id) {
         const topeCentimos = Number(process.env.PUNTOS_VISTA_TOPE_DIA || 50);
-        const hoy = await db.execute(sql`
-          SELECT count(*)::int AS n FROM movimientos_puntos
-          WHERE motivo = 'vista_publicacion' AND entidad_tipo = 'knowledge_windows'
-            AND entidad_id = ${req.params.id} AND created_at > now() - interval '24 hours'
-        `);
-        if (Number((hoy.rows[0] as any)?.n ?? 0) < topeCentimos) {
-          await otorgarPuntos(db, fila.creator_user_id, 0.01, 'vista_publicacion', {
-            entidadTipo: 'knowledge_windows', entidadId: req.params.id,
-          }).catch(() => {});
+        const ventanaId = req.params.id;
+        const creadorId = fila.creator_user_id;
+        // Contar y acuñar EN UNA TRANSACCIÓN, con la fila del creador
+        // cerrada primero: sin esto, dos vistas a la vez leen el mismo 49 y
+        // acuñan las dos (revisión de prog4 — el mismo patrón que el tope de
+        // transferencias). Y si el apunte falla, se CANTA con ventana y
+        // persona: dinero prometido y no pagado en silencio no es un error
+        // menor, es un descuadre de palabra.
+        try {
+          await db.transaction(async (tx: any) => {
+            await tx.execute(sql`SELECT id FROM users WHERE id = ${creadorId} FOR UPDATE`);
+            const hoy = await tx.execute(sql`
+              SELECT count(*)::int AS n FROM movimientos_puntos
+              WHERE motivo = 'vista_publicacion' AND entidad_tipo = 'knowledge_windows'
+                AND entidad_id = ${ventanaId} AND created_at > now() - interval '24 hours'
+            `);
+            if (Number((hoy.rows[0] as any)?.n ?? 0) >= topeCentimos) return;
+            await tx.execute(sql`UPDATE users SET puntos = puntos + 0.01 WHERE id = ${creadorId}`);
+            await tx.execute(sql`
+              INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+              VALUES (${'MP' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase()},
+                      ${creadorId}, 0.01, 'vista_publicacion', 'knowledge_windows', ${ventanaId})
+            `);
+          });
+        } catch (err: any) {
+          console.error(`[puntos] vista sin acuñar en ventana ${ventanaId} para ${creadorId}: ${err?.message}`);
         }
       }
       res.json({ success: true });
