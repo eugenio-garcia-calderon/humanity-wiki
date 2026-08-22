@@ -17,6 +17,12 @@
       "ruta": "src/hooks/useCerrarAlPulsarFuera.ts",
       "motivo": "unificar cerrar-al-pulsar-fuera en un solo hook",
       "desde": "2026-08-22T13:12:54.136Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/ui/AdminMenu.tsx",
+      "motivo": "unificar cerrar-al-pulsar-fuera en un solo hook",
+      "desde": "2026-08-22T13:12:58.269Z"
     }
   ]
 }
