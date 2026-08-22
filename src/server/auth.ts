@@ -2,6 +2,17 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
 import { registrarRegaloBienvenida } from './puntos.js';
+// ══ LOS LÍMITES DE INTENTOS (2026-08-22, prog6) ══════════════════════════════
+// Van aquí y no en la lista de módulos por dos razones que no son de estilo:
+//
+//  1. En Express el orden es comportamiento. Un guardián registrado DESPUÉS de
+//     la ruta que protege no llega a ejecutarse nunca: la ruta contesta antes.
+//     `registerAuthRoutes` se monta desde `server.ts`, así que el guardián
+//     tiene que nacer con ella.
+//  2. Y sobre todo: el guardián solo sabe frenar. Quien sabe si la contraseña
+//     era buena es la ruta, y por eso cada una avisa con `anotarFallo` o
+//     `levantarFreno`. Eso no se puede montar desde fuera.
+import { REGLAS, guardian, ipDe, anotarFallo, levantarFreno } from './limites/index.js';
 
 // ============================================================================
 // Módulo de autenticación — Fase 2
@@ -32,6 +43,11 @@ export const ROLE_LABELS: Record<number, string> = {
 };
 
 const SESSION_COOKIE = 'rh_session';
+
+/** La papelera de una cuenta borrada. Mismo plazo que la de la Constitución
+ *  para el conocimiento: si el contenido se puede recuperar 15 días, la cuenta
+ *  que lo escribió también. */
+export const DIAS_PAPELERA_CUENTA = 15;
 
 // CUÁNTO DURA UNA SESIÓN. En producción, 30 días: una sesión eterna en un
 // ordenador ajeno o robado es un agujero, y 30 días ya es generoso.
@@ -193,6 +209,12 @@ export function registerAuthRoutes(app: Express, db: any) {
           AND s.revoked_at IS NULL
           AND s.expires_at > now()
           AND u.archived_at IS NULL
+          -- UNA CUENTA EN LA PAPELERA NO TIENE SESIÓN. Al pedir el borrado se
+          -- revocan todas, pero esto es el cinturón: si alguna sobreviviera
+          -- —otro dispositivo, una carrera— seguiría dando acceso a una cuenta
+          -- que su dueño ha pedido borrar. Volver se hace por la puerta, con
+          -- contraseña, que es lo que cancela el borrado a propósito.
+          AND u.deleted_at IS NULL
       `);
       const row = result.rows[0];
       if (row) {
@@ -224,7 +246,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // --------------------------------------------------------------------------
   // POST /api/auth/register
   // --------------------------------------------------------------------------
-  app.post('/api/auth/register', async (req: Request, res: Response) => {
+  app.post('/api/auth/register', guardian(REGLAS.registro, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password, name } = req.body || {};
       if (!email || !password) {
@@ -237,6 +259,10 @@ export function registerAuthRoutes(app: Express, db: any) {
 
       const existing = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${normalizedEmail}`);
       if (existing.rows.length > 0) {
+        // Este 409 dice «ese correo ya está registrado», y repetido en serie es
+        // una forma de averiguar quién tiene cuenta aquí. Frenarlo es el motivo
+        // de que el registro tenga límite, no el registro en sí.
+        await anotarFallo(db, REGLAS.registro, ipDe(req), normalizedEmail, true);
         return res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
       }
 
@@ -324,8 +350,20 @@ export function registerAuthRoutes(app: Express, db: any) {
         row = (await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)).rows[0];
       }
 
+      // VOLVER CANCELA EL BORRADO, TAMBIÉN POR AQUÍ. Sin esto, quien entró con
+      // Google podría pedir el borrado y no tener forma de arrepentirse: la
+      // papelera de 15 días existiría para él en la base de datos y no en la
+      // práctica. Misma regla que en el inicio de sesión con contraseña.
+      let recuperada = false;
+      if ((row as any).deleted_at && !(row as any).anonimizado_en) {
+        await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${(row as any).id}`);
+        (row as any).deleted_at = null;
+        recuperada = true;
+        console.warn('[cuenta] borrado cancelado al entrar con Google:', (row as any).id);
+      }
+
       await createSession(req, res, (row as any).id);
-      res.json({ user: rowToUser(row) });
+      res.json({ user: rowToUser(row), ...(recuperada ? { borrado_cancelado: true } : {}) });
     } catch (e: any) {
       console.error('google login error:', e);
       res.status(500).json({ error: e.message });
@@ -335,7 +373,10 @@ export function registerAuthRoutes(app: Express, db: any) {
   // --------------------------------------------------------------------------
   // POST /api/auth/login
   // --------------------------------------------------------------------------
-  app.post('/api/auth/login', async (req: Request, res: Response) => {
+  // El guardián primero: si toca esperar, la ruta ni se ejecuta. La cuenta que
+  // se mira es la que viene en el cuerpo, para que el freno sea por cuenta Y
+  // por IP y no solo por una de las dos.
+  app.post('/api/auth/login', guardian(REGLAS.login, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body || {};
       if (!email || !password) {
@@ -351,11 +392,39 @@ export function registerAuthRoutes(app: Express, db: any) {
       // como si la contraseña es incorrecta, para no revelar qué emails están
       // registrados.
       if (!row || !verifyPassword(String(password), row.password_hash)) {
+        // Se anota si existía o no la cuenta: distingue «se equivocó de
+        // contraseña» de «está probando a ver qué correos hay dados de alta»,
+        // que son dos ataques distintos. Al que intenta no se le dice nada
+        // diferente — el mensaje y el coste siguen siendo los mismos.
+        await anotarFallo(db, REGLAS.login, ipDe(req), normalizedEmail, !!row);
         return res.status(401).json({ error: 'Email o contraseña incorrectos.' });
       }
 
+      // ACERTÓ: se levanta el freno, y SOLO el freno. `intentos_fallidos` no se
+      // toca. Si se limpiara, quien prueba mil contraseñas y acierta la última
+      // se llevaría borrado su propio rastro — que es justo el caso que hay que
+      // poder ver después.
+      levantarFreno(REGLAS.login, ipDe(req), normalizedEmail);
+
+      // ══ VOLVER CANCELA EL BORRADO ══════════════════════════════════════
+      // La papelera de 15 días no es un plazo administrativo: es que alguien
+      // borre su cuenta un mal día y vuelva el jueves. Que entrar la recupere,
+      // **sin un paso más y sin tener que pedirlo a nadie**, es lo que la hace
+      // de verdad reversible.
+      //
+      // Solo llega aquí quien ha puesto su contraseña bien, así que cancelarlo
+      // no lo puede hacer otro. Y pasados los 15 días la cuenta ya está vacía:
+      // no hay contraseña con la que entrar, así que este camino ya no existe.
+      let recuperada = false;
+      if (row.deleted_at && !row.anonimizado_en) {
+        await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${row.id}`);
+        row.deleted_at = null;
+        recuperada = true;
+        console.warn('[cuenta] borrado cancelado al volver a entrar:', row.id);
+      }
+
       await createSession(req, res, row.id);
-      res.json({ user: rowToUser(row) });
+      res.json({ user: rowToUser(row), ...(recuperada ? { borrado_cancelado: true } : {}) });
     } catch (e: any) {
       console.error('login error:', e);
       res.status(500).json({ error: e.message });
@@ -496,13 +565,142 @@ export function registerAuthRoutes(app: Express, db: any) {
   });
 
   // --------------------------------------------------------------------------
+  // BORRAR LA CUENTA — obligatorio en App Store y Google Play (2026-08-22)
+  // --------------------------------------------------------------------------
+  // Una aplicación que deja crear cuenta y no deja borrarla se rechaza. Esto
+  // bloqueaba el lanzamiento en las dos tiendas.
+  //
+  // Lo decidió Eugenio así: el contenido se anonimiza y **se queda** —nadie
+  // pierde lo que construyó encima de lo que escribió otro— y hay papelera de
+  // 15 días. La fila no se borra: **49 tablas apuntan a `users`**, y borrarla
+  // se llevaría por delante proyectos, mensajes y los comentarios que otras
+  // personas dejaron debajo. Se vacía, que es lo que la ley pide.
+  //
+  // ── POR QUÉ PIDE LA CONTRASEÑA OTRA VEZ ─────────────────────────────────
+  // Un `POST` sin fricción es un borrado por accidente y, peor, un borrado
+  // ajeno: bastaría con que alguien te hiciera cargar una página con un
+  // formulario apuntando aquí. Volver a escribir la contraseña demuestra que
+  // quien lo pide está delante del teclado. Es la misma razón por la que
+  // cambiar una contraseña pide la anterior.
+  app.post('/api/auth/borrar-cuenta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const { password, correo } = req.body || {};
+      const r = await db.execute(sql`SELECT id, email, password_hash, deleted_at FROM users WHERE id = ${req.user.id}`);
+      const row = r.rows[0] as any;
+      if (!row) return res.status(404).json({ error: 'Esa cuenta ya no existe.' });
+
+      // ══ QUIEN ENTRÓ CON GOOGLE NO TIENE CONTRASEÑA ═══════════════════════
+      // Este endpoint salió pidiendo `password` y comprobándola siempre. Para
+      // una cuenta de Google `password_hash` es `null`, `verifyPassword`
+      // devuelve `false` con cualquier cosa, y el resultado era que **esas
+      // personas no podían borrar su cuenta por ninguna vía** — con el añadido
+      // de que el mensaje les decía «la contraseña no es correcta» sobre una
+      // contraseña que nunca tuvieron. Lo encontró el Programador 3 leyendo el
+      // código desplegado.
+      //
+      // Y no es un caso raro: **Apple exige el borrado desde dentro de la
+      // aplicación**. Si una parte de los usuarios no puede, el requisito
+      // sigue incumplido y el rechazo llega igual.
+      //
+      // ── POR QUÉ EL CORREO Y NO «CREA UNA CONTRASEÑA PRIMERO» ─────────────
+      // Escribir tu propio correo es fricción equivalente: hay que teclear algo
+      // que solo tú sabes que es tuyo, y no se puede hacer con un formulario
+      // ajeno cargado a traición. Obligar a inventarse una credencial NUEVA
+      // como paso previo a marcharse es justo el patrón oscuro que estas normas
+      // de tienda existen para evitar.
+      const conContrasena = !!row.password_hash;
+      if (conContrasena) {
+        if (!password) {
+          return res.status(400).json({ error: 'Escribe tu contraseña para confirmar que eres tú.', pide: 'contrasena' });
+        }
+        if (!verifyPassword(String(password), row.password_hash)) {
+          return res.status(401).json({ error: 'La contraseña no es correcta.' });
+        }
+      } else {
+        // El mensaje DICE cuál es la confirmación que hace falta, en vez de
+        // dejar a la pantalla adivinarla.
+        if (!correo) {
+          return res.status(400).json({
+            error: 'Esta cuenta entra con Google y no tiene contraseña. Escribe tu correo para confirmar.',
+            pide: 'correo',
+          });
+        }
+        if (String(correo).trim().toLowerCase() !== String(row.email).trim().toLowerCase()) {
+          return res.status(401).json({ error: 'Ese correo no es el de esta cuenta.' });
+        }
+      }
+      // Pedirlo dos veces no hace nada nuevo, y sobre todo NO reinicia la
+      // cuenta atrás: si no, quien insistiera se alejaría del vaciado en vez
+      // de acercarse.
+      if (row.deleted_at) {
+        return res.json({ ok: true, ya_estaba: true, dias: DIAS_PAPELERA_CUENTA });
+      }
+
+      await db.execute(sql`
+        UPDATE users SET deleted_at = now(), updated_at = now() WHERE id = ${row.id}
+      `);
+      // Todas las sesiones fuera, en todos sus dispositivos. Una cuenta que se
+      // está borrando no puede quedarse abierta en el móvil de nadie.
+      await db.execute(sql`
+        UPDATE sessions SET revoked_at = now() WHERE user_id = ${row.id} AND revoked_at IS NULL
+      `);
+      clearSessionCookie(res);
+      console.warn('[cuenta] borrado pedido:', row.id);
+      res.json({
+        ok: true,
+        dias: DIAS_PAPELERA_CUENTA,
+        mensaje: `Tu cuenta se borrará en ${DIAS_PAPELERA_CUENTA} días. Si vuelves a entrar antes, se cancela.`,
+      });
+    } catch (e: any) {
+      console.error('borrar cuenta:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Cancelar sin llegar a entrar del todo. `POST /api/auth/login` ya lo cancela
+  // por su cuenta; esto existe para una pantalla que diga «has pedido borrar tu
+  // cuenta, ¿seguro?» sin obligar a navegar a otro sitio. Pide la contraseña
+  // por lo mismo que el borrado.
+  app.post('/api/auth/cancelar-borrado', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body || {};
+      if (!email || !password) return res.status(400).json({ error: 'Email y contraseña son obligatorios.' });
+      const r = await db.execute(sql`
+        SELECT * FROM users WHERE lower(email) = ${String(email).trim().toLowerCase()} AND archived_at IS NULL
+      `);
+      const row = r.rows[0] as any;
+      if (!row || !verifyPassword(String(password), row.password_hash)) {
+        // Una cuenta de Google no tiene contraseña, así que por aquí no puede
+        // cancelar nada — y no hace falta: entrar con Google lo cancela solo,
+        // igual que entrar con contraseña. Esta ruta existe para una pantalla
+        // que pregunte «¿seguro?» sin navegar a otro sitio, no como único
+        // camino.
+        return res.status(401).json({ error: 'Email o contraseña incorrectos.' });
+      }
+      // Ya vaciada: no hay nada que cancelar y no se puede deshacer. Se dice
+      // claro en vez de fingir que ha funcionado.
+      if (row.anonimizado_en) {
+        return res.status(410).json({ error: 'Esa cuenta ya se borró y no se puede recuperar.' });
+      }
+      if (!row.deleted_at) return res.json({ ok: true, ya_estaba: true });
+
+      await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${row.id}`);
+      console.warn('[cuenta] borrado cancelado:', row.id);
+      res.json({ ok: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
   // Recuperación de contraseña
   // --------------------------------------------------------------------------
   // Estructura completa y funcional salvo el envío del correo, que queda
   // pendiente de configurar un proveedor. En desarrollo, el token se devuelve
   // en la respuesta para poder probar el flujo de extremo a extremo; en
   // producción NUNCA debe devolverse (ver comprobación de NODE_ENV).
-  app.post('/api/auth/password/forgot', async (req: Request, res: Response) => {
+  app.post('/api/auth/password/forgot', guardian(REGLAS.restablecer, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const email = String((req.body || {}).email || '').trim().toLowerCase();
       const result = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${email} AND archived_at IS NULL`);
@@ -511,6 +709,15 @@ export function registerAuthRoutes(app: Express, db: any) {
       // Respuesta idéntica exista o no la cuenta: no se revela qué emails
       // están registrados.
       const genericResponse: any = { success: true, message: 'Si existe una cuenta con ese email, recibirás instrucciones.' };
+
+      // AQUÍ SE CUENTA CADA PETICIÓN, ACIERTE O NO, y es la única puerta donde
+      // se hace así. En las otras dos «fallo» es equivocarse; aquí no hay nada
+      // que acertar: pedir el enlace cien veces seguidas es el abuso, exista la
+      // cuenta o no. Y como la respuesta es idéntica en los dos casos, contar
+      // solo una de las ramas convertiría el freno en la pista que la respuesta
+      // se cuida de no dar.
+      await anotarFallo(db, REGLAS.restablecer, ipDe(req), email, !!row);
+
       if (!row) return res.json(genericResponse);
 
       const token = crypto.randomBytes(32).toString('hex');

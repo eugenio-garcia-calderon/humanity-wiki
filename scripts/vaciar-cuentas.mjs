@@ -1,0 +1,123 @@
+#!/usr/bin/env node
+// ============================================================================
+// VACIAR LAS CUENTAS QUE PIDIERON BORRARSE HACE MÁS DE 15 DÍAS (2026-08-22)
+// ============================================================================
+// La segunda mitad del borrado de cuenta. La primera —marcar `deleted_at` y
+// cerrar las sesiones— la hace la propia aplicación al pulsar el botón. Esto
+// es lo que pasa **cuando se cumple el plazo**, y corre solo todos los días
+// (`.github/workflows/vaciar-cuentas.yml`): nadie tiene que acordarse.
+//
+// ── QUÉ SE VACÍA Y QUÉ NO ─────────────────────────────────────────────────
+// SE VACÍA lo que identifica a una persona: nombre, correo, avatar, banner,
+// biografía, ubicación, web, redes, `google_id`, `handle` y la contraseña.
+//
+// NO SE TOCA nada de lo que escribió. Medido: **49 tablas apuntan a `users`**.
+// Sus proyectos, sus publicaciones y los comentarios que otros dejaron debajo
+// se quedan, a nombre de una cuenta sin persona detrás. Es lo que decidió
+// Eugenio y es lo que la ley pide: que desaparezcan sus datos personales, no
+// que se lleve por delante el trabajo de los demás.
+//
+// ── EL CORREO NO PUEDE QUEDARSE EN NULL ───────────────────────────────────
+// `users.email` es `NOT NULL` y tiene dos índices únicos. Dos cuentas vaciadas
+// chocarían, y la segunda persona que borrara su cuenta se encontraría con que
+// no se ejecutó. Se pone `borrado-<uuid>@cuenta.invalid`: único por el uuid,
+// **irreversible** porque el uuid no tiene ninguna relación con el correo de
+// antes (no es un hash: no se puede probar contra una lista), y `.invalid`
+// está reservado por la RFC 2606 para no existir nunca.
+//
+// ── SE PUEDE VOLVER A PASAR SIN MIEDO ─────────────────────────────────────
+// Solo toca filas con `deleted_at` cumplido y `anonimizado_en IS NULL`. Al
+// terminar, esa fila ya no vuelve a entrar. Correrlo dos veces el mismo día no
+// hace nada la segunda.
+import pg from 'pg';
+
+const DIAS = 15;
+
+const cliente = new pg.Client(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL }
+    : {
+        host: process.env.PGHOST || 'localhost',
+        port: Number(process.env.PGPORT) || 5432,
+        database: process.env.PGDATABASE,
+        user: process.env.PGUSER,
+        password: process.env.PGPASSWORD,
+      },
+);
+
+const seco = process.argv.includes('--en-seco');
+
+await cliente.connect();
+try {
+  const { rows } = await cliente.query(
+    `SELECT id, deleted_at FROM users
+     WHERE deleted_at IS NOT NULL
+       AND anonimizado_en IS NULL
+       AND deleted_at < now() - ($1 || ' days')::interval
+     ORDER BY deleted_at`,
+    [String(DIAS)],
+  );
+
+  if (!rows.length) {
+    console.log(`Ninguna cuenta cumple los ${DIAS} días. Nada que vaciar.`);
+    process.exit(0);
+  }
+
+  console.log(`Cuentas que cumplen los ${DIAS} días: ${rows.length}`);
+  for (const r of rows) console.log(`  ${r.id}  (lo pidió el ${new Date(r.deleted_at).toISOString().slice(0, 10)})`);
+
+  if (seco) {
+    console.log('\n--en-seco: no se ha tocado nada.');
+    process.exit(0);
+  }
+
+  for (const r of rows) {
+    // Una transacción por cuenta: si una falla, las demás se vacían igual y
+    // el fallo se ve con su id al lado en vez de perderse en un error global.
+    try {
+      await cliente.query('BEGIN');
+      await cliente.query(
+        `UPDATE users SET
+           email          = 'borrado-' || gen_random_uuid()::text || '@cuenta.invalid',
+           name           = NULL,
+           -- «Usuario eliminado», no «Cuenta borrada»: es lo que la página
+           -- pública promete que va a aparecer firmando sus cosas, y es una
+           -- página que se enseña a App Store y a Google Play como compromiso.
+           -- Además el texto es mejor: habla de una persona que se fue, no de
+           -- una fila de una tabla. Lo cazó el Programador 3 pidiendo que se
+           -- comparara la promesa con lo que el programa hace de verdad.
+           display_name   = 'Usuario eliminado',
+           avatar_url     = NULL,
+           banner_url     = NULL,
+           bio            = NULL,
+           location       = NULL,
+           website        = NULL,
+           socials        = '{}'::jsonb,
+           specialties    = '[]'::jsonb,
+           ubicaciones    = '[]'::jsonb,
+           objetivos      = '[]'::jsonb,
+           handle         = NULL,
+           google_id      = NULL,
+           password_hash  = NULL,
+           email_verified = false,
+           anonimizado_en = now(),
+           updated_at     = now()
+         WHERE id = $1 AND anonimizado_en IS NULL`,
+        [r.id],
+      );
+      // Y que no quede ninguna puerta abierta ni ningún enlace de recuperación
+      // vivo: si no, un correo de restablecer pedido antes del borrado seguiría
+      // sirviendo para entrar en una cuenta que ya no es de nadie.
+      await cliente.query('UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [r.id]);
+      await cliente.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [r.id]);
+      await cliente.query('COMMIT');
+      console.log(`  vaciada: ${r.id}`);
+    } catch (e) {
+      await cliente.query('ROLLBACK');
+      console.error(`  FALLÓ ${r.id}: ${e.message}`);
+      process.exitCode = 1;
+    }
+  }
+} finally {
+  await cliente.end();
+}
