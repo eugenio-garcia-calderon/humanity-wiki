@@ -19,6 +19,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import AIAssistant from '../ai/AIAssistant';
+import CapaTelecom from '../telecom/CapaTelecom';
 
 // ============================================================================
 // Layout — barra superior mínima (2026-08-05, decisión del usuario)
@@ -812,6 +813,14 @@ export default function Layout() {
             pantalla completa, y tener además su botón flotante daría dos
             chats a la vez — el error que este proyecto ya pagó caro. */}
         {!isIAPage && <AIAssistant />}
+
+        {/* EL TELÉFONO, EN TODA LA APLICACIÓN (2026-08-22). Va aquí y no en la
+            pantalla de Mensajes porque una llamada tiene que sonar estés donde
+            estés. Y va SOLO en este lado del `if`, no en el de las ventanas
+            incrustadas: cada ventana es un iframe con su propia copia de la
+            aplicación, y montarlo allí también significaría cuatro conexiones
+            abiertas por persona y el mismo timbre sonando cuatro veces. */}
+        <CapaTelecom />
       </div>
 
       {/* Sin pie de página (Eugenio, 2026-08-20: «que no haya otra barra

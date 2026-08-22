@@ -11,7 +11,19 @@ social.ts        publications, feed, reactions, follows, products, demands, need
 stripe.ts        Connect, product checkout, refunds, seller dashboard
 ai/provider.ts   AI provider abstraction (Anthropic today)
 ai/assistant.ts  the assistant, action catalogue, usage accounting
+telecom.ts       live messages, presence, calls and video calls (WebRTC signalling)
+telecomHub.ts    the open connection per device (SSE). Other modules push through it
 ```
+
+**`telecomHub.ts` is a dependency, not a module**: it registers no routes. It holds
+one open response per connected device and exports `enviarA(userId, evento)`. Any
+module that needs to reach a person *right now* — `mensajes.ts` does — imports that
+function. It is the only shared mutable state in the server, and it is deliberate:
+a connection cannot live in the database.
+
+**Never put anything that swallows `/api` before `telecom` in the module list.**
+`GET /api/telecom/conexion` is a response that never ends; a catch-all in front of
+it turns every phone in the platform off.
 
 ## Which port each of us runs on
 
