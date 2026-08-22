@@ -4,7 +4,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
-} from 'lucide-react';
+ Bug,} from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import MenuLateral from './MenuLateral';
@@ -124,6 +124,17 @@ export default function Layout() {
   const [cuentaAbierta, setCuentaAbierta] = useState(false);
   const cuentaRef = useRef<HTMLDivElement>(null);
   const [confirmarCerrarTodas, setConfirmarCerrarTodas] = useState(false);
+  /** Cuántas notas del hormiguero necesitan algo de una persona. Solo el
+   *  número, como la campana: pedir el tablero entero para pintar un punto es
+   *  traerse una lista para mirar un color. */
+  const [incidencias, setIncidencias] = useState({ bloqueadas: 0, esperando: 0 });
+  useEffect(() => {
+    const pedir = () => fetch('/api/incidencias/cuenta', { credentials: 'include' })
+      .then(r => r.json()).then(j => setIncidencias({ bloqueadas: j?.bloqueadas || 0, esperando: j?.esperando || 0 })).catch(() => {});
+    pedir();
+    const t = setInterval(pedir, 60000);
+    return () => clearInterval(t);
+  }, [location.pathname]);
   useEffect(() => {
     const fuera = (e: MouseEvent) => {
       if (cuentaRef.current && !cuentaRef.current.contains(e.target as Node)) setCuentaAbierta(false);
@@ -596,6 +607,34 @@ export default function Layout() {
             campanita arriba a la derecha en el menú»). Va antes de la foto
             porque es lo que cambia: la cuenta siempre está, los avisos van y
             vienen, y lo que cambia se mira primero. */}
+        {/* ══ LA HORMIGA ══════════════════════════════════════════════════
+            (2026-08-22, Eugenio: «crea un botón que sea de una hormiga en el
+            menú superior junto a las notificaciones, y ahí permite al usuario
+            crear tareas para el equipo de desarrollo».)
+
+            EL PUNTO ES NARANJA CUANDO ALGO TE NECESITA A TI, y solo entonces.
+            Si también se pintara por lo que está esperando a que lo programen,
+            estaría encendido siempre y dejaría de significar nada. */}
+        <button
+          onClick={() => navigate('/hormiguero')}
+          title={incidencias.bloqueadas
+            ? `${incidencias.bloqueadas} ${incidencias.bloqueadas === 1 ? 'nota necesita' : 'notas necesitan'} algo tuyo`
+            : 'Lo que falla y lo que falta'}
+          aria-label="Hormiguero: lo que falla y lo que falta"
+          className={cn('relative grid place-items-center rounded-lg transition-colors shrink-0',
+            compacto ? 'w-7 h-7' : 'w-9 h-9',
+            location.pathname === '/hormiguero'
+              ? 'bg-slate-900 text-white'
+              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
+        >
+          <Bug className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          {incidencias.bloqueadas > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
+              {incidencias.bloqueadas > 9 ? '9+' : incidencias.bloqueadas}
+            </span>
+          )}
+        </button>
+
         <Campana compacto={compacto} />
 
         <div className="relative shrink-0" ref={cuentaRef}>

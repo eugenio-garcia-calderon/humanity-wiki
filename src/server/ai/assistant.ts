@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm';
 import {
   getProvider, listProviders, providerOfModel, generarImagenNanoBanana, NANO_BANANA_CATALOG_MODEL,
   type AIMessage, type AIContentBlock, AI_MODELS, AI_PLATFORM_FEE,
-  elegirModelo, topePremiumCents, NIVEL_PREMIUM,
+  elegirModelo, topePremiumCents, NIVEL_PREMIUM, NIVELES_MODELO,
 } from './provider.js';
 import { ROLE } from '../auth.js';
 import { GRUPOS, ESTADOS, PRIORIDADES } from '../roadmap.js';
@@ -646,6 +646,8 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       actionCatalog: ACTION_CATALOG,
       uiEvents: UI_EVENTS,
       models: AI_MODELS,
+      // La vista por niveles del mismo catálogo: es lo que enseña el selector.
+      niveles: NIVELES_MODELO,
       platformFee: AI_PLATFORM_FEE,
     });
   });

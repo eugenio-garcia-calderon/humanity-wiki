@@ -42,22 +42,26 @@ export function Proyectos() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-24">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 mb-2 inline-flex items-center gap-1.5">
-              <FolderKanban className="w-3 h-3" /> Proyectos
-            </p>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900">Tus tableros</h1>
-            <p className="text-sm text-slate-500 mt-1.5 max-w-xl">
-              El mismo tablero que lleva la hoja de ruta de humanity.wiki, para lo que quieras
-              organizar: tus grupos, tus tarjetas, y el detalle de cada una con imágenes y notas.
-            </p>
-          </div>
+      <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-8 pb-24">
+        {/* EL TÍTULO, UNA VEZ (2026-08-22, Eugenio: «no le llames Tus
+            Tableros, simplemente deja el título de Proyectos, una vez arriba
+            simple, y quita la descripción, y junto al nombre deja el botón de
+            +Crear Nuevo»).
+
+            Antes había DOS títulos: «Proyectos» arriba en pequeño y «Tus
+            tableros» debajo en grande, más un párrafo explicando qué es un
+            tablero. Tres líneas para decir dónde estás, en la página donde uno
+            entra veinte veces al día ya sabiéndolo. El botón se sube al lado
+            del nombre porque es lo único que se hace desde aquí aparte de
+            entrar en uno. */}
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 inline-flex items-center gap-2">
+            <FolderKanban className="w-6 h-6 text-slate-400" /> Proyectos
+          </h1>
           {user && (
             <button onClick={() => setCreando(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-black shadow transition-colors">
-              <Plus className="w-4 h-4" /> Nuevo proyecto
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Crear nuevo
             </button>
           )}
         </div>

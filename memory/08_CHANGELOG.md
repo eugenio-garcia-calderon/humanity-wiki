@@ -3263,3 +3263,94 @@ Measured: everything asked for ends at 487 px on an 800 px screen.
 
 Verified end to end: added «Comunidad de Madrid» and AGUA, saved, and both
 appear under the name. Eugenio's profile was restored to empty afterwards.
+
+---
+
+## 2026-08-22 — The anthill, and the chat stops eating the screen
+
+Eugenio, in one message: a channel to report what breaks, the bottom bar
+disappearing when the chat opens, the Proyectos page saying its title twice, a
+sidebar drawn two different ways, the chat history taking half the panel, and a
+model list nobody could choose from.
+
+### The anthill (`/hormiguero`)
+
+A shared board for what fails and what is missing, reachable from the bug icon
+next to the bell. Three colours and each one means one thing: **red** waiting,
+**amber** blocked on a person — and it says *on what*, **green** done.
+
+- **Amber cannot be silent.** `PUT` refuses `estado: 'bloqueada'` without
+  `necesita`. A blocked item that does not say what it needs is the reason
+  someone has to ask on another channel, which is what this replaces.
+- **The status belongs to whoever programs** (admin). If the person who opened
+  a note could tick it done, the board would stop describing what is done.
+- **The dot on the button counts only the blocked ones.** If it also counted
+  what is waiting to be built it would be lit permanently and mean nothing.
+- Archive, never delete. Every route checks the session; the state changes check
+  the role.
+
+### The bottom bar and the panel were the same element
+
+Opening the chat made the navigation vanish, so you had to close the chat to
+change section. They were one element changing height. Now they are two
+siblings: the panel opens above, the bar stays below, on the phone and on the
+desktop alike.
+
+### The chat
+
+- **Half the screen**, not 420 px. Fixed pixels are a third of a laptop and a
+  sixth of a big monitor — the same narrow column on a screen with room to
+  spare. Three presets (33/50/66 %), a draggable edge, saved in your settings.
+- **The history is put away**: a narrow rail that peeks on hover and stays on
+  click. It was 208 px of a 420 px panel for a list you open once in a while.
+- **«Viendo: …» is gone.** It was built to check the AI receives the page as
+  context, and it proved it. Checking something once is not a reason to show it
+  forever: it spent a line telling you about the page you already have in front.
+- **Searching no longer spends AI.** «Busca publicaciones sobre el agua» has an
+  exact answer in the database, and running it through a model makes it worse
+  twice: it costs money and returns prose *about* the results instead of the
+  results. Now it answers with the links and says it did not use the AI — with a
+  button to ask the AI anyway. The verb decides, never a word from the topic:
+  «¿por qué se contamina el agua?» still goes to the model. That distinction is
+  the same bug that once turned «create a task» into a document nobody asked for.
+- **Publications open from a link** (`/explorar?abrir=…`). There is no route per
+  publication — they open as a card over the list — and if it is not there any
+  more the page says so instead of doing nothing, which from outside looks like
+  a broken link.
+
+### The model selector: five choices, not nine model names
+
+«Haiku 4.5», «Fable 5», «gemini-pro-latest» only help you choose if you already
+know who makes them and what they cost. What is being decided here is how much
+to spend and on what: **simple / medium / high**, plus **images** and **video**.
+The catalogue is untouched — the automatic router still picks among all nine —
+this is a *view* of it, so the price shown is the price charged.
+
+- **Prices in euros**, one unit everywhere («0,03 € por mensaje»). Two units for
+  the same money on one screen is how you end up wrong by a factor of a hundred.
+  Under a cent it says «menos de 0,01 €», which is true and is not zero.
+- **«Incluido» next to each one**: what it costs and who pays are two questions
+  and both need answering.
+- **Video is shown, switched off, with the reason.** Hiding it would leave the
+  person who asked unable to tell «ignored» from «coming»; showing it as if it
+  worked would be a button that does nothing.
+- «Autónomo» is now **«Permite editar»**: the first describes the AI, the second
+  describes what you are letting it do to your things, which is the actual choice.
+
+### Two pages that said the same thing twice
+
+- **Proyectos**: one title, and «+ Crear nuevo» beside it. It had two headings
+  and a paragraph explaining what a board is, on the page you enter twenty times
+  a day already knowing.
+- **The sidebar**: one style. Project icons came through `Icono` (stroke 1.75,
+  the text's colour); every other section was painted by hand at `text-slate-400`
+  and stroke 2 — thicker and paler, in rows sitting one on top of the other. The
+  colour now lives on the row, so icon and label always match, and the row is
+  what knows whether it is the active one.
+
+Verified locally end to end: the anthill API (create, block without saying what
+is needed → refused, block saying it → accepted, count), the tier list served by
+`/api/ai/status`, the search answering with links and no AI, a publication
+opening from its link, and the bar staying put with the chat open. The test
+session (`claude-dev-verificacion`) and the test note were deleted; no cookie was
+ever written into the shared browser.

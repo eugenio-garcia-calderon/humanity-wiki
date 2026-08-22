@@ -797,3 +797,59 @@ export function getProvider(name?: string): AIProvider {
 export function listProviders() {
   return Object.values(providers).map(p => ({ name: p.name, ready: p.isReady() }));
 }
+
+// ============================================================================
+// LOS NIVELES DEL SELECTOR (2026-08-22, Eugenio: «las opciones, deja escoger
+// entre 3: modelo sencillo, medio, alto. Y pon uno especial de generación de
+// imágenes, y otro de generación de vídeos»).
+// ============================================================================
+// EL CATÁLOGO NO ES EL MENÚ. Arriba hay nueve modelos con sus nombres de
+// fábrica —«Haiku 4.5», «Fable 5», «gemini-pro-latest»— y esos nombres solo
+// significan algo si ya sabes quién los hace y cuánto valen. Para elegir hace
+// falta otra cosa: cuánto quieres gastarte y en qué. Eso son tres niveles.
+//
+// El catálogo sigue entero y se sigue usando: el router automático elige entre
+// los nueve, y quien ya tenga guardado un modelo concreto lo conserva. Esto es
+// una VISTA del catálogo, no un catálogo nuevo — si fuera otra lista, un día
+// diría un precio que la de arriba ya no cobra.
+export interface NivelModelo {
+  clave: 'sencillo' | 'medio' | 'alto' | 'imagen' | 'video';
+  label: string;
+  /** Qué modelo del catálogo hay detrás. `null` = todavía no hay ninguno. */
+  modelo: string | null;
+  /** Para qué sirve, en una línea. Va debajo del nombre, con el precio. */
+  para: string;
+  /** Por qué no se puede elegir todavía. Solo cuando `modelo` es null.
+   *
+   *  UNA OPCIÓN QUE NO EXISTE TIENE QUE PODER DECIRLO. La alternativa era no
+   *  enseñar «vídeos» hasta tenerlo, y entonces quien lo pidió no sabe si se
+   *  ignoró o está por llegar; o enseñarlo como si funcionara, y entonces se
+   *  pulsa y no pasa nada. Se enseña, apagado, con el motivo escrito. */
+  porQueNo?: string;
+}
+
+export const NIVELES_MODELO: NivelModelo[] = [
+  {
+    clave: 'sencillo', label: 'Modelo sencillo', modelo: 'abierto-rapido',
+    para: 'Preguntas cortas, buscar algo, charlar.',
+  },
+  {
+    clave: 'medio', label: 'Modelo medio', modelo: 'abierto-medio',
+    para: 'El de cada día: crear cosas, resumir, organizar.',
+  },
+  {
+    clave: 'alto', label: 'Modelo alto', modelo: 'claude-sonnet-5',
+    para: 'Textos largos, documentos y razonar de verdad.',
+  },
+  {
+    clave: 'imagen', label: 'Generar imágenes', modelo: NANO_BANANA_CATALOG_MODEL,
+    para: 'Dibuja una imagen a partir de lo que le describas.',
+  },
+  {
+    clave: 'video', label: 'Generar vídeos', modelo: null,
+    para: 'Crear un vídeo a partir de una descripción.',
+    // Ningún conector de esta plataforma genera vídeo hoy. Decirlo es más
+    // barato que dejar un botón que no hace nada.
+    porQueNo: 'Todavía no hay ningún generador de vídeo conectado.',
+  },
+];
