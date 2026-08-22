@@ -23,6 +23,12 @@
       "ruta": "src/App.tsx",
       "motivo": "rutas libro blanco y tareas de tokenomics",
       "desde": "2026-08-22T14:39:55.869Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "transferencias de puntos con interruptor apagado",
+      "desde": "2026-08-22T14:39:59.935Z"
     }
   ]
 }
