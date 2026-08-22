@@ -30,7 +30,12 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [tipo, setTipo] = useState<'fisico' | 'digital'>('fisico');
+  // Cuatro formas de vender, no dos. Un servicio no se envía ni se descarga, y
+  // una suscripción se cobra otra vez cada mes — que en el cobro es un modo
+  // distinto, no un matiz. Con dos opciones no se podía dar de alta ni una
+  // asesoría ni una SaaS: sólo lo que cabe en una caja.
+  const [tipo, setTipo] = useState<'fisico' | 'digital' | 'servicio' | 'suscripcion'>('fisico');
+  const [periodo, setPeriodo] = useState<'mensual' | 'trimestral' | 'anual'>('mensual');
   const [stock, setStock] = useState('');
   const [envio, setEnvio] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
@@ -72,7 +77,11 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           descripcion: descripcion.trim() || null,
           precio_centimos: cent,
           tipo,
-          stock: stock.trim() === '' ? null : Number(stock),
+          periodo: tipo === 'suscripcion' ? periodo : undefined,
+          // Sólo lo que se envía lleva stock y porte. Un servicio con «quedan
+          // 3» significaría otra cosa —tres plazas— y una suscripción con
+          // stock no significa nada.
+          stock: tipo === 'fisico' && stock.trim() !== '' ? Number(stock) : null,
           envio_centimos: tipo === 'fisico' && envio.trim() !== '' ? aCentimos(envio) : null,
           imagenes: fotos,
         }),
@@ -107,8 +116,25 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
               className="w-full h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
           </Campo>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Campo etiqueta="Precio">
+          <Campo etiqueta="Qué vendes exactamente">
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                ['fisico', 'Algo que se envía'],
+                ['digital', 'Una descarga'],
+                ['servicio', 'Un servicio'],
+                ['suscripcion', 'Una suscripción'],
+              ] as const).map(([v, t]) => (
+                <button key={v} type="button" onClick={() => setTipo(v)}
+                  className={`h-11 rounded-xl text-sm font-bold border ${tipo === v ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600'}`}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </Campo>
+
+          <div className={tipo === 'fisico' ? 'grid grid-cols-2 gap-3' : ''}>
+            <Campo etiqueta={tipo === 'suscripcion' ? 'Cuánto cada vez' : 'Precio'}
+                   ayuda={tipo === 'servicio' ? 'Déjalo en blanco si depende del caso' : undefined}>
               <div className="relative">
                 <input value={precio} onChange={e => setPrecio(e.target.value)}
                   inputMode="decimal" placeholder="12,50"
@@ -116,23 +142,30 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
               </div>
             </Campo>
-            <Campo etiqueta="Cuántos tienes" ayuda="En blanco = no llevas la cuenta">
-              <input value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ''))}
-                inputMode="numeric" placeholder="—"
-                className="w-full h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
-            </Campo>
+            {/* El stock sólo tiene sentido en lo que se envía: «quedan 3» en un
+                servicio querría decir tres plazas, que es otra cosa, y en una
+                suscripción no quiere decir nada. */}
+            {tipo === 'fisico' && (
+              <Campo etiqueta="Cuántos tienes" ayuda="En blanco = no llevas la cuenta">
+                <input value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric" placeholder="—"
+                  className="w-full h-12 px-3 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
+              </Campo>
+            )}
           </div>
 
-          <Campo etiqueta="Qué es">
-            <div className="flex gap-2">
-              {([['fisico', 'Algo que se envía'], ['digital', 'Una descarga']] as const).map(([v, t]) => (
-                <button key={v} type="button" onClick={() => setTipo(v)}
-                  className={`flex-1 h-11 rounded-xl text-sm font-bold border ${tipo === v ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600'}`}>
-                  {t}
-                </button>
-              ))}
-            </div>
-          </Campo>
+          {tipo === 'suscripcion' && (
+            <Campo etiqueta="Cada cuánto se cobra">
+              <div className="flex gap-2">
+                {([['mensual', 'Al mes'], ['trimestral', 'Al trimestre'], ['anual', 'Al año']] as const).map(([v, t]) => (
+                  <button key={v} type="button" onClick={() => setPeriodo(v)}
+                    className={`flex-1 h-11 rounded-xl text-sm font-bold border ${periodo === v ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 text-slate-600'}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </Campo>
+          )}
 
           {tipo === 'fisico' && (
             <Campo etiqueta="Envío" ayuda="En blanco = lo acuerdas con quien compre">

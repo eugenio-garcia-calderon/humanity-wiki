@@ -45,6 +45,11 @@ const HERRAMIENTAS: NodoMenu[] = [
   { id: 'h-mapas',     label: 'Mapas',     icono: MapIcon,      destino: '/mapas',     abrir: 'ventana' },
   { id: 'h-tareas',    label: 'Tareas',    icono: ListChecks,   destino: '/tareas',    abrir: 'ventana' },
   { id: 'h-tablas',    label: 'Tablas',    icono: Table2,       destino: '/tablas',    abrir: 'ventana' },
+  // Vender estaba repartido en tres sitios: el Mercado común, el creador de
+  // páginas y ningún sitio para los pedidos. Aquí está lo que vendes y lo que
+  // te han comprado (Eugenio, 2026-08-22: «pon una herramienta nueva que sea
+  // Comercio… la quiero en el menú lateral junto al resto de herramientas»).
+  { id: 'h-comercio',  label: 'Comercio',  icono: Store,        destino: '/comercio',  abrir: 'ventana' },
   // El MISMO asistente de la columna derecha, a pantalla completa (2026-08-20).
   { id: 'h-ia',        label: 'IA',        icono: Sparkles,     destino: '/ia',        abrir: 'ventana' },
   { id: 'h-calendario', label: 'Calendario', icono: CalendarDays, destino: '/calendario', abrir: 'ventana' },
