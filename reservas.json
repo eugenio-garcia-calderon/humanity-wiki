@@ -83,12 +83,6 @@
       "ruta": "server.ts",
       "motivo": "Veracidad: dos lineas de registro del modulo",
       "desde": "2026-08-22T15:39:31.433Z"
-    },
-    {
-      "agente": "prog6",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada de los dos tableros y los limites",
-      "desde": "2026-08-22T15:40:18.983Z"
     }
   ]
 }
