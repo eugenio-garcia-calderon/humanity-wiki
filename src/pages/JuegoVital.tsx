@@ -36,6 +36,7 @@ import { posicionProyecto, posicionesProyectos, RADIO_EDIFICIO } from '../compon
 // Los colores del mundo viven en `paleta.ts`, fuera de las páginas: es como
 // esta parte del proyecto cumple la regla de «ni un hex en src/pages».
 import { PALETA } from '../components/juego/paleta';
+import { estadoDelTecho, TIPOS_CON_FOTO, TECHO_COSAS } from '../utils/limitesDelMundo';
 
 // ============================================================================
 // JUEGO VITAL — Fase 1 «Pasear tu vida» + builder tipo Los Sims (2026-08-18).
@@ -235,6 +236,13 @@ export default function JuegoVital() {
   const [moviendoMundo, setMoviendoMundo] = useState(false);
   const [conectando, setConectando] = useState(false);
   const [crearEn, setCrearEn] = useState<{ x: number; z: number } | null>(null);
+  /**
+   * Cuánto mundo llevas construido. Se mira MIENTRAS construyes —el panel de
+   * «Crear aquí» lo enseña siempre— y no al guardar: un techo que solo aparece
+   * al final borra trabajo ya hecho. La regla vive en `limitesDelMundo.ts`,
+   * compartida con el servidor, que es quien la aplica de verdad.
+   */
+  const techo = useMemo(() => estadoDelTecho(mundoItems), [mundoItems]);
   const [leyendo, setLeyendo] = useState<ItemMundo | null>(null);
   const [notaBorrador, setNotaBorrador] = useState('');
   // Lo que se está escribiendo en el rótulo de un cartel de camino.
@@ -695,7 +703,14 @@ export default function JuegoVital() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...d, x: donde.x, z: donde.z, proyecto_id: proyectoAncla }),
     }).catch(() => null);
-    if (!r?.ok) { avisar('No se ha podido crear.'); return; }
+    if (!r?.ok) {
+      // Si el que frena es el techo, el servidor manda la frase buena: dice
+      // cuál de los dos números te ha parado y qué hacer. Perderla y poner
+      // «No se ha podido crear» convertiría un motivo en un misterio.
+      const fallo = await r?.json().catch(() => null);
+      avisar(fallo?.error || 'No se ha podido crear.');
+      return;
+    }
     const nuevo = await r.json();
     setMundoItems(prev => [...prev, { ...nuevo, enlaces: [] }]);
   }, [crearEn, jugadorPos]);
@@ -2296,9 +2311,22 @@ export default function JuegoVital() {
         <div data-ui-juego className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40 w-[23rem] max-w-[94vw]">
           <Card className="p-3.5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-black text-slate-900">Crear aquí</p>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-xs font-black text-slate-900">Crear aquí</p>
+                <span className={`text-[10px] font-bold tabular-nums ${
+                  techo.nivel === 'lleno' ? 'text-rose-600'
+                  : techo.nivel === 'aviso' ? 'text-amber-600' : 'text-slate-400'}`}>
+                  {techo.cosas}/{TECHO_COSAS}
+                </span>
+              </div>
               <Button variant="ghost" onClick={() => setCrearEn(null)} className="p-1"><X className="w-3.5 h-3.5" /></Button>
             </div>
+            {techo.mensaje && (
+              <p className={`mt-2 rounded-lg px-2 py-1.5 text-[10px] font-bold leading-snug ${
+                techo.nivel === 'lleno' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
+                {techo.mensaje}
+              </p>
+            )}
             {/* Fase 9: 54 objetos, agrupados por familia y con scroll — en una
                 rejilla plana no se encontraba nada. */}
             <div className="max-h-[42vh] overflow-y-auto pr-0.5 mt-2.5">
@@ -2317,7 +2345,8 @@ export default function JuegoVital() {
                         <button
                           key={c.modelo}
                           onClick={() => crearItemMundo({ tipo: 'prop', modelo: c.modelo })}
-                          className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-colors"
+                          disabled={techo.nivel === 'lleno' && techo.motivo === 'cosas'}
+                          className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-colors disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent"
                         >
                           <span className="text-lg leading-none">{c.icono}</span>
                           <span className="text-[9px] font-bold text-slate-600 text-center leading-tight">{c.nombre}</span>
@@ -2332,15 +2361,19 @@ export default function JuegoVital() {
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Conocimiento</p>
             <div className="grid grid-cols-3 gap-1.5">
               {([
-                { icono: <StickyNote className="w-3.5 h-3.5" />, texto: 'Nota', al: () => crearItemMundo({ tipo: 'nota', texto: '' }) },
-                { icono: <ImagePlus className="w-3.5 h-3.5" />, texto: 'Imagen', al: () => { subiendoComo.current = 'imagen'; archivoMundoRef.current?.click(); } },
-                { icono: <FileText className="w-3.5 h-3.5" />, texto: 'Documento', al: () => { subiendoComo.current = 'documento'; archivoMundoRef.current?.click(); } },
-                { icono: <Globe className="w-3.5 h-3.5" />, texto: 'Link', al: () => setFormCrear({ tipo: 'enlace', url: '', nombre: '' }) },
-                { icono: <Film className="w-3.5 h-3.5" />, texto: 'Vídeo', al: () => setFormCrear({ tipo: 'video', url: '', nombre: '' }) },
-                { icono: <Music2 className="w-3.5 h-3.5" />, texto: 'Música', al: () => setFormCrear({ tipo: 'musica', url: '', nombre: '' }) },
+                // `tipo` no es decoración: es lo que decide si esto gasta una
+                // foto de la GPU o no. `nota`, `documento`, `enlace` y `musica`
+                // se dibujan con color plano y texto, así que no cuentan.
+                { icono: <StickyNote className="w-3.5 h-3.5" />, texto: 'Nota', tipo: 'nota', al: () => crearItemMundo({ tipo: 'nota', texto: '' }) },
+                { icono: <ImagePlus className="w-3.5 h-3.5" />, texto: 'Imagen', tipo: 'imagen', al: () => { subiendoComo.current = 'imagen'; archivoMundoRef.current?.click(); } },
+                { icono: <FileText className="w-3.5 h-3.5" />, texto: 'Documento', tipo: 'documento', al: () => { subiendoComo.current = 'documento'; archivoMundoRef.current?.click(); } },
+                { icono: <Globe className="w-3.5 h-3.5" />, texto: 'Link', tipo: 'enlace', al: () => setFormCrear({ tipo: 'enlace', url: '', nombre: '' }) },
+                { icono: <Film className="w-3.5 h-3.5" />, texto: 'Vídeo', tipo: 'video', al: () => setFormCrear({ tipo: 'video', url: '', nombre: '' }) },
+                { icono: <Music2 className="w-3.5 h-3.5" />, texto: 'Música', tipo: 'musica', al: () => setFormCrear({ tipo: 'musica', url: '', nombre: '' }) },
               ] as const).map(b => (
                 <button key={b.texto} onClick={b.al}
-                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors">
+                  disabled={techo.nivel === 'lleno' && (techo.motivo === 'cosas' || TIPOS_CON_FOTO.has(b.tipo))}
+                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-[11px] font-bold text-slate-600 transition-colors disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent">
                   {b.icono}{b.texto}
                 </button>
               ))}
