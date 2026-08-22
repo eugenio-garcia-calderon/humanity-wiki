@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { normalizarTelefono } from '../utils/telefono';
 import { sql } from 'drizzle-orm';
 
 // ============================================================================
@@ -111,7 +112,7 @@ export function registerPersonasRoutes(app: Express, db: any) {
         INSERT INTO game_agents (id, user_id, tipo, nombre, rol, empresa, email, telefono,
                                  descripcion, estado, created_by, updated_by, x, z)
         VALUES (${id}, ${req.user.id}, 'persona', ${nombre}, ${req.body?.rol || null},
-                ${req.body?.empresa || null}, ${req.body?.email || null}, ${req.body?.telefono || null},
+                ${req.body?.empresa || null}, ${req.body?.email || null}, ${normalizarTelefono(req.body?.telefono)},
                 ${req.body?.descripcion || null}, ${req.body?.estado || null},
                 ${req.user.id}, ${req.user.id}, 0, 0)
       `);
@@ -134,7 +135,13 @@ export function registerPersonasRoutes(app: Express, db: any) {
 
       for (const campo of CAMPOS) {
         if (d[campo] === undefined) continue;
-        const valor = d[campo] === '' ? null : d[campo];
+        let valor = d[campo] === '' ? null : d[campo];
+        // EL TELÉFONO SE GUARDA SIEMPRE IGUAL (2026-08-22). Se escribe desde
+        // aquí y se importa desde la agenda; si cada camino lo guardara como
+        // viniera, «600 12 34 56» y «+34600123456» serían dos personas
+        // distintas al reimportar los contactos. Un solo normalizador para los
+        // dos caminos, en `utils/telefono.ts`.
+        if (campo === 'telefono' && valor) valor = normalizarTelefono(valor) ?? valor;
         // `sql.raw` solo con nombres de la lista blanca de arriba, nunca con
         // lo que mande nadie.
         await db.execute(sql`

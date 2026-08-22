@@ -3600,3 +3600,69 @@ someone else's note.
 exactly one container, and it still counted three. The first attempt failed with
 «violates check constraint». Migration `0056` brings it up to four — worth
 knowing, because the same trap waits for the fifth.
+
+---
+
+## 2026-08-22 (V) — Hormiguero #7 and #9
+
+### #7 · Phone contacts, projects and WhatsApp
+
+«Crear un sistema para sincronizar los contactos de mi teléfono y poder
+agregarles a proyectos, y también mandarles mensajes a través de WhatsApp, sea
+como sea.»
+
+**What a web page can and cannot do with an address book**, because it decides
+the shape of this:
+
+- No web page can read the address book on its own. The person picks the
+  contacts and the browser hands over only those.
+- The browser's **contact picker** (`navigator.contacts`) does exactly that with
+  a system screen. It exists in Chrome on Android; on the iPhone it does not.
+- A **.vcf file** is exported by any phone and can be read anywhere.
+
+So there are two ways in: the picker where the browser has it, and .vcf always.
+With only one of them, half the platform is locked out — the picker leaves out
+every iPhone, the file alone gives up the convenience. Which one you are seeing,
+and why, is written under the button: otherwise from an iPhone it looks broken.
+
+**Nothing gets duplicated**: contacts are matched by **number**, never by name.
+«Ana», «Ana Ruiz» and «Ana trabajo» are one person if the number is one; two
+«Juan» with different numbers are two. And a re-import never overwrites a name
+you typed here — «Ana (obras)» stays «Ana (obras)».
+
+The number is normalised in **one** place (`utils/telefono.ts`) for every path —
+typed by hand, imported, or edited — because «600 12 34 56» and «+34600123456»
+would otherwise be two people the next time the agenda is imported. Verified
+with nine cases including `+1 415 555 2671` and rubbish input, which returns
+`null` rather than a plausible-looking number.
+
+**WhatsApp** opens the conversation with `wa.me`. Sending *without* the person
+pressing send needs an approved WhatsApp Business account, Meta-reviewed
+templates and a per-message cost; `wa.me` works today, on the phone and on the
+desktop, without a company account, and the platform never touches anyone's
+messages.
+
+**Adding to projects** existed already, but only from the project's own page —
+you had to know the project before choosing the person. Now it is also in the
+person's menu, the way round he described it.
+
+### #9 · The icon library, from 53 to 988
+
+Fifty-three were the ones the automatic dictionary could return. For picking by
+hand that is very few — there was no sailboat, no guitar, no paw print.
+
+The list is **generated from the package**, not hand-written: lucide's 5.592
+icons minus the families that do not name a *thing* — arrows, chevrons,
+alignments, squares, charts, «Off» and «Check» states — which inflate the
+catalogue without adding anything anyone would choose for their project.
+
+**With a search box**, which is the part that makes it usable: with 53 you chose
+by looking; with 988 you have to be able to ask by name. Without it, widening
+the list would have made the picker worse. It says «in English» in the
+placeholder, because the icons are named in English, and it answers «none is
+called that» rather than showing an empty grid.
+
+**What it costs, with a number**: the app bundle goes from 5,87 MB to 6,24 MB
+(+363 KB raw). Loading all 5.592 would add some 3 MB for icons nobody will ever
+scroll past; loading them on demand would make the sidebar wait for a download
+before drawing an icon that is already chosen.

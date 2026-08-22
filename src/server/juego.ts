@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { iconoDeNombre } from '../utils/iconoDeNombre';
+import { normalizarTelefono } from '../utils/telefono';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 
@@ -142,15 +143,100 @@ export function registerJuegoRoutes(app: Express, db: any) {
 
       await db.execute(sql`
         INSERT INTO game_agents (id, user_id, tipo, nombre, rol, descripcion, foto_url,
-                                 apariencia, proyecto_id, x, z, created_by, updated_by)
+                                 apariencia, proyecto_id, x, z, telefono, telefono_origen,
+                                 created_by, updated_by)
         VALUES (${id}, ${req.user!.id}, ${tipo}, ${nombre}, ${d.rol || null}, ${d.descripcion || null},
                 ${d.foto_url || null}, ${JSON.stringify(d.apariencia || {})}::jsonb, ${proyectoId},
-                ${Number(d.x) || 0}, ${Number(d.z) || 0}, ${req.user!.id}, ${req.user!.id})
+                ${Number(d.x) || 0}, ${Number(d.z) || 0},
+                ${normalizarTelefono(d.telefono)}, ${d.telefono ? 'escrito' : null},
+                ${req.user!.id}, ${req.user!.id})
       `);
       const fila = await db.execute(sql`SELECT * FROM game_agents WHERE id = ${id}`);
       res.json(fila.rows[0]);
     } catch (e: any) {
       console.error('crear agente error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * POST /api/juego/agentes/importar   { contactos: [{ nombre, telefono }] }
+   *
+   * ══ TRAERSE LA AGENDA DEL TELÉFONO (2026-08-22) ═══════════════════════════
+   * Eugenio, en el hormiguero: «crear un sistema para sincronizar los contactos
+   * de mi teléfono y poder agregarles a proyectos, y también mandarles mensajes
+   * a través de WhatsApp, sea como sea».
+   *
+   * EL SERVIDOR NO LEE NINGUNA AGENDA, y no puede: los contactos los elige la
+   * persona en su propio teléfono —con el selector de contactos del navegador o
+   * exportando un .vcf— y aquí llegan ya elegidos. Es la única forma honesta:
+   * la plataforma nunca ve más contactos que los que se le entregan.
+   *
+   * NO DUPLICA. Se casa por NÚMERO, no por nombre: «Ana», «Ana Ruiz» y «Ana
+   * trabajo» son la misma persona si el número es el mismo, y dos «Juan» con
+   * números distintos son dos. Casar por nombre es cómo una agenda acaba con la
+   * misma persona cuatro veces.
+   *
+   * A QUIEN YA ESTÁ, NO SE LE PISA EL NOMBRE. Si tú le pusiste «Ana (obras)» y
+   * en tu agenda es «Ana Ruiz», se queda el tuyo: lo que escribiste aquí es una
+   * decisión, y una importación no puede deshacerla sin avisar.
+   */
+  app.post('/api/juego/agentes/importar', async (req: Request, res: Response) => {
+    try {
+      if (!requiereUsuario(req, res)) return;
+      const brutos = Array.isArray(req.body?.contactos) ? req.body.contactos : null;
+      if (!brutos) return res.status(400).json({ error: 'Mándame una lista de contactos.' });
+      if (brutos.length > 500) return res.status(400).json({ error: 'Máximo 500 contactos de una vez.' });
+
+      // Se limpian y se quitan los repetidos DENTRO de la propia lista: una
+      // agenda trae el mismo número con dos etiquetas más veces de lo que
+      // parece.
+      const vistos = new Set<string>();
+      const contactos: Array<{ nombre: string; telefono: string }> = [];
+      for (const c of brutos) {
+        const nombre = String(c?.nombre || '').trim().slice(0, 120);
+        const telefono = normalizarTelefono(c?.telefono);
+        if (!nombre || !telefono || vistos.has(telefono)) continue;
+        vistos.add(telefono);
+        contactos.push({ nombre, telefono });
+      }
+      if (!contactos.length) {
+        // SE DICE QUE NO ENTRÓ NINGUNO. Un «listo» con cero importados es la
+        // clase de respuesta que deja a alguien buscando a su gente por el
+        // mundo sin saber que nunca llegó.
+        return res.json({ nuevos: 0, actualizados: 0, ignorados: brutos.length, error: 'Ninguno traía nombre y número a la vez.' });
+      }
+
+      const yaEstan = await db.execute(sql`
+        SELECT id, telefono FROM game_agents
+        WHERE user_id = ${req.user!.id} AND archived_at IS NULL AND telefono IS NOT NULL
+      `);
+      const porTelefono = new Map((yaEstan.rows as any[]).map(r => [String(r.telefono), r.id]));
+
+      let nuevos = 0, actualizados = 0;
+      for (const c of contactos) {
+        const id = porTelefono.get(c.telefono);
+        if (id) {
+          // Ya lo tienes: solo se marca de dónde vino. El nombre no se toca.
+          await db.execute(sql`
+            UPDATE game_agents SET telefono_origen = 'agenda', updated_at = now(), updated_by = ${req.user!.id}
+            WHERE id = ${id}
+          `);
+          actualizados++;
+          continue;
+        }
+        const nuevo = `GA${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        await db.execute(sql`
+          INSERT INTO game_agents (id, user_id, tipo, nombre, telefono, telefono_origen,
+                                   apariencia, x, z, created_by, updated_by)
+          VALUES (${nuevo}, ${req.user!.id}, 'persona', ${c.nombre}, ${c.telefono}, 'agenda',
+                  '{}'::jsonb, 0, 0, ${req.user!.id}, ${req.user!.id})
+        `);
+        nuevos++;
+      }
+      res.json({ nuevos, actualizados, ignorados: brutos.length - contactos.length });
+    } catch (e: any) {
+      console.error('importar contactos:', e);
       res.status(500).json({ error: e.message });
     }
   });
@@ -171,6 +257,11 @@ export function registerJuegoRoutes(app: Express, db: any) {
           apariencia  = ${JSON.stringify(d.apariencia !== undefined ? d.apariencia : a.apariencia)}::jsonb,
           x           = ${d.x !== undefined ? Number(d.x) : a.x},
           z           = ${d.z !== undefined ? Number(d.z) : a.z},
+          -- El teléfono se puede escribir a mano o borrar (mandando ''). Pasa
+          -- por el mismo normalizador que la importación: así el número de una
+          -- persona está escrito igual venga de donde venga, que es lo que
+          -- permite reconocerla al reimportar la agenda.
+          telefono    = ${d.telefono !== undefined ? normalizarTelefono(d.telefono) : a.telefono},
           updated_at  = now(),
           updated_by  = ${req.user!.id}
         WHERE id = ${a.id}
