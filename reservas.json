@@ -43,22 +43,10 @@
       "desde": "2026-08-22T15:28:03.057Z"
     },
     {
-      "agente": "prog6",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "páginas de Seguridad y Servidores",
-      "desde": "2026-08-22T15:37:39.650Z"
-    },
-    {
       "agente": "dashboard",
       "ruta": "CLAUDE.md",
       "motivo": "la trampa del fallo armado para otro dia",
       "desde": "2026-08-22T16:05:26.213Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/Configuracion.tsx",
-      "motivo": "seccion de borrar la cuenta",
-      "desde": "2026-08-22T16:16:09.603Z"
     }
   ]
 }
