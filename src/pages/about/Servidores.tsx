@@ -87,10 +87,14 @@ export default function Servidores() {
             </p>
 
             <ul className="mt-4 divide-y divide-slate-100 text-sm">
-              {(s.servidores || []).map(m => (
-                <li key={m.nombre} className="flex items-baseline justify-between py-2">
+              {(s.servidores || []).map((m, n) => (
+                <li key={n} className="flex items-baseline justify-between py-2">
+                  {/* El modelo de máquina solo llega si quien mira es del
+                      equipo: a los demás el servidor lo quita, porque decir
+                      «CPX42» es decir cuánta máquina hay que tumbar. */}
                   <span className="font-semibold text-slate-700">
-                    {m.nombre} <span className="font-normal text-slate-400">· {m.tipo}</span>
+                    {m.nombre}
+                    {m.tipo && <span className="font-normal text-slate-400"> · {m.tipo}</span>}
                   </span>
                   <span className="tabular-nums text-slate-600">{eur(m.eur_mes)}/mes</span>
                 </li>
