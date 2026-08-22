@@ -49,12 +49,6 @@
       "desde": "2026-08-22T18:21:23.530Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "vistas validas en la ruta de vistas",
-      "desde": "2026-08-22T18:21:27.176Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "drizzle/0083_por_donde_fue_la_llamada.sql",
       "motivo": "TURN de Cloudflare: medir por donde va cada llamada",
