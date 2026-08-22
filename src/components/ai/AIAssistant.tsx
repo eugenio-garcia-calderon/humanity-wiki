@@ -73,9 +73,12 @@ interface Message {
   imageUrl?: string;
   /** Lo que ha encontrado el buscador interno, cuando la pregunta era una
    *  búsqueda y no ha hecho falta la IA. */
-  resultados?: Array<{ id: string; uuid?: string; label: string; type: string }>;
+  resultados?: ResultadoBusqueda[];
   /** El texto original, para poder preguntárselo a la IA de todos modos. */
   reintentarIA?: string;
+  /** Se buscó primero, no había nada, y por eso contesta la IA. Se enseña:
+   *  que una respuesta cueste dinero no puede ser una sorpresa. */
+  buscadoAntes?: string;
 }
 
 /** EN EUROS, NO EN CÉNTIMOS (2026-08-22, Eugenio: «pon el precio estimado en
@@ -115,19 +118,80 @@ const costeEstimado = (
   return '≈ ' + euros(c);
 };
 
+/** Una fila de /api/search. `slug` solo viene en grafos y mapas. */
+interface ResultadoBusqueda {
+  id: string; uuid?: string; label: string; type: string; slug?: string;
+}
+
+/** Los tipos que se enseñan primero cuando todo empata. Las publicaciones
+ *  delante porque son lo que la gente escribe, y los grafos y mapas detrás de
+ *  ellas porque son lo que la gente construye; las tablas del grafo general
+ *  van al final, que casi nunca es lo que se buscaba al escribir un nombre. */
+const ORDEN_DE_TIPO = [
+  'publications', 'knowledge_graphs', 'user_maps', 'knowledge_windows',
+  'challenges', 'solutions', 'products', 'users', 'organizations', 'projects',
+  'initiatives', 'territories', 'indicators', 'objectives',
+];
+
+/** El mejor resultado primero, y «el mejor» se dice con reglas, no a ojo:
+ *  el que se llama exactamente como lo escrito, luego el que empieza por ello,
+ *  luego el que lo contiene, y a igualdad el título más corto (el más corto es
+ *  el más específico: «Agua» antes que «Agua, saneamiento y algo más»).
+ *
+ *  Esto importa ahora más que antes: cuando buscar es lo primero, el primer
+ *  resultado es LA respuesta, y hasta hoy el orden era el que devolviera la
+ *  base de datos, que no es ninguno. */
+const ordenarResultados = (rs: ResultadoBusqueda[], q: string): ResultadoBusqueda[] => {
+  const t = q.trim().toLowerCase();
+  const punto = (r: ResultadoBusqueda) => {
+    const l = String(r.label || '').toLowerCase();
+    if (l === t) return 0;
+    if (l.startsWith(t)) return 1;
+    // «Empieza una palabra por esto» sin expresiones regulares: el `\b` de
+    // JavaScript no considera letra a la «á», así que «águila» no casaría con
+    // su propia palabra. Buscar « agua» encuentra el principio de palabra.
+    if (l.includes(' ' + t)) return 2;
+    if (l.includes(t)) return 3;
+    // NO ESTÁ LA FRASE ENTERA: entonces cuenta cuántas de sus palabras están.
+    // «Retos del agua en Madrid» no es el título de nada, pero el que se llame
+    // «Escasez de agua en Madrid» se parece mucho más que el que solo diga
+    // «agua». Sin esto, todo lo que no fuera la frase exacta empataba a cero y
+    // el orden lo decidía la longitud del título, que no significa nada.
+    // De tres letras para arriba, igual que en el servidor: contar si «en» o
+    // «la» aparecen dentro de un título no dice nada de si trata del tema.
+    const palabras = t.split(/\s+/).filter(p => p.length >= 3);
+    return 4 + palabras.filter(p => !l.includes(p)).length;
+  };
+  const orden = (r: ResultadoBusqueda) => {
+    const i = ORDEN_DE_TIPO.indexOf(r.type);
+    return i === -1 ? ORDEN_DE_TIPO.length : i;
+  };
+  return [...rs].sort((a, b) =>
+    punto(a) - punto(b) || orden(a) - orden(b) ||
+    String(a.label || '').length - String(b.label || '').length);
+};
+
 /** Cómo se llama cada tipo del buscador en cristiano, y adónde lleva.
  *
  *  LO QUE NO SE SABE ADÓNDE LLEVA, NO SE INVENTA: si el tipo no está aquí, el
- *  enlace va al buscador general en vez de a una dirección construida a ojo
- *  que acabaría en una página vacía. */
+ *  resultado se enseña SIN enlace y con un «sin ficha» al lado, en vez de con
+ *  una dirección construida a ojo. Antes el comodín era `/buscar?q=…`, una
+ *  ruta que **no existe en la aplicación**: cada resultado de un tipo sin
+ *  ficha llevaba a la página de «no encontrada». Un enlace roto es peor que
+ *  ningún enlace, porque además parece que la culpa es tuya por pinchar. */
 const NOMBRE_DE_TIPO: Record<string, string> = {
   publications: 'publicación', challenges: 'reto', solutions: 'solución',
   projects: 'proyecto', organizations: 'organización', products: 'producto',
   territories: 'territorio', objectives: 'objetivo', indicators: 'indicador',
   causes: 'causa', users: 'persona',
+  // Los tipos que ya devuelve /api/search y aquí no tenían nombre: salían con
+  // su nombre de tabla en inglés («knowledge_graphs») encima del resultado.
+  knowledge_graphs: 'grafo', knowledge_windows: 'ventana', user_maps: 'mapa',
+  initiatives: 'iniciativa', needs: 'necesidad', demands: 'demanda',
+  markers: 'marcador', metrics: 'métrica', success_cases: 'caso de éxito',
 };
 
-const RUTA_DE_TIPO: Record<string, (r: any) => string> = {
+const RUTA_DE_TIPO: Record<string, (r: any) => string | null> = {
   // Una publicación no tiene ruta propia: se abre en su ficha, encima de la
   // lista de Explorar. `q` deja la lista filtrada por su título, para que la
   // publicación esté cargada cuando la ficha vaya a buscarla.
@@ -140,42 +204,144 @@ const RUTA_DE_TIPO: Record<string, (r: any) => string> = {
   objectives: r => `/objetivos/${r.id}`,
   indicators: r => `/indicadores/${r.id}`,
   users: r => `/personas/${r.id}`,
+  // Grafos y mapas se abren por su `slug`, que /api/search ya devuelve entre
+  // los campos extra. Sin slug no hay dirección posible: mejor sin enlace.
+  knowledge_graphs: r => (r.slug ? `/esquemas/${r.slug}` : null),
+  user_maps: r => (r.slug ? `/mapas/${r.slug}` : null),
 };
 
-const rutaDeResultado = (r: { id: string; uuid?: string; type: string; label: string }) =>
-  RUTA_DE_TIPO[r.type]?.(r) || `/buscar?q=${encodeURIComponent(r.label)}`;
+/** La dirección de un resultado, o `null` si ese tipo no tiene ficha propia. */
+const rutaDeResultado = (r: { id: string; uuid?: string; type: string; label: string; slug?: string }) =>
+  RUTA_DE_TIPO[r.type]?.(r) || null;
 
-/** ══ ¿ESTO ES BUSCAR, O ES PREGUNTAR? ═══════════════════════════════════════
- *  (2026-08-22, Eugenio: «haz que en el chat también sea un buscador de
- *  publicaciones relacionadas, y que no tire de IA para cosas que sean
- *  búsquedas de publicaciones internas»).
+/** ══ BUSCADOR PRIMERO ═══════════════════════════════════════════════════════
+ *  (2026-08-22, Eugenio: «quiero que el chat de IA sea buscador first, y que
+ *  no haga una consulta a la IA cuando alguien está buscando algo dentro de
+ *  la App»).
  *
- *  Devuelve QUÉ hay que buscar, o `null` si esto no es una búsqueda. Nunca
- *  «quizás»: si no está claro, es null y va a la IA. Equivocarse hacia la IA
- *  cuesta unas décimas de céntimo; equivocarse hacia el buscador es contestar
- *  una lista de enlaces a quien preguntaba otra cosa.
+ *  HASTA HOY ERA AL REVÉS, y por eso casi nunca buscaba: solo se buscaba si la
+ *  frase empezaba literalmente por «busca», «enséñame» o «qué hay sobre»; todo
+ *  lo demás —incluido escribir el nombre de un producto, de un reto o de una
+ *  persona— se pagaba como una llamada a un modelo. Escribir «nitratos Madrid»
+ *  no es conversar: es buscar, y la respuesta exacta está en la base de datos.
  *
- *  SOLO CUANDO EL VERBO LO DICE. «Busca publicaciones sobre el agua» es una
- *  búsqueda; «¿por qué se contamina el agua?» no lo es, aunque las dos hablen
- *  del agua. Lo que decide es el verbo del principio, no las palabras del
- *  tema — que es exactamente el fallo que ya nos costó un documento que nadie
- *  pidió: una palabra suelta del asunto secuestrando la intención.
+ *  Ahora el orden es el contrario: **se busca salvo que se vea que NO es una
+ *  búsqueda**. Lo que manda a la IA es pedirle algo que la base de datos no
+ *  tiene:
  *
- *  Y NUNCA CUANDO SE PIDE CREAR ALGO. «Busca un hueco y créame una tarea» no
- *  es una búsqueda de publicaciones. */
-const queBuscar = (texto: string): string | null => {
+ *    1. un verbo que pide trabajo — crea, escribe, resume, explica, compara…
+ *    2. una frase larga: nadie busca con quince palabras
+ *    3. un adjunto: un PDF no se busca, se lee
+ *    4. que lo pidas tú, con el interruptor que hay junto a la caja
+ *
+ *  Y AL REVÉS QUE ANTES, EQUIVOCARSE HACIA EL BUSCADOR YA NO ES GRAVE, porque
+ *  buscar dejó de ser un callejón sin salida: si no hay resultados y la frase
+ *  era una pregunta, pasa sola a la IA (con una línea diciendo por qué), y en
+ *  cualquier caso queda el botón de «Preguntárselo a la IA». Lo que se ahorra
+ *  es la llamada que no hacía falta; lo que no se pierde es la respuesta. */
+
+/** Verbos que piden trabajo a un modelo: eso no lo contesta una tabla. */
+const VERBOS_DE_IA = /(^|\s)(crea|créa\w*|crear|créame|creame|haz|hazme|genera|génera\w*|escribe|escríbeme|escribeme|redacta|resume|resúme\w*|explica|explíca\w*|analiza|analíza\w*|compara|compára\w*|traduce|tradúce\w*|calcula|calcúla\w*|opina|aconséjame|aconsejame|ayúdame|ayudame|corrige|mejora|propón|propon|sugiere|inventa|imagina|convierte|convi[eé]rte\w*|dibuja|diseña|disena|programa|simula|planifica|recomiéndame|recomiendame)(\s|$)/i;
+
+/** Una frase de más de esto no es una búsqueda: es una petición. El límite es
+ *  generoso a propósito — «retos del agua en la Comunidad de Madrid 2026» son
+ *  ocho palabras y sigue siendo buscar. */
+const MAX_PALABRAS_DE_BUSQUEDA = 12;
+
+/** ¿La frase pide una respuesta, o solo nombra un tema? Esto NO decide ir a la
+ *  IA —buscar sigue siendo lo primero—: decide qué pasa cuando la búsqueda no
+ *  encuentra nada. A una pregunta sin resultados se le contesta; a un tema sin
+ *  resultados se le dice que no hay nada publicado, que es la respuesta. */
+const ES_PREGUNTA = /[?]|^\s*¿|(^|\s)(por\s?qué|para\s?qué|qué|quién|quien|cómo|cuándo|dónde|cuál|cuáles|cuánt\w+)(\s|$)/i;
+
+/** ══ LA PREGUNTA QUE PIDE UNA EXPLICACIÓN, NO UNA LISTA ══════════════════
+ *  «¿Qué es la eutrofización?» y «¿por qué no bajan los nitratos?» no son
+ *  búsquedas: nadie espera una lista de fichas, se espera una respuesta. Pero
+ *  tampoco son automáticamente para la IA — puede haber una publicación que se
+ *  llame exactamente así, y entonces enseñarla es mejor y más barato que
+ *  redactar una respuesta nueva sobre lo mismo.
+ *
+ *  Así que también se busca primero, pero **con el listón alto**: solo vale un
+ *  resultado que se llame como lo preguntado (igual, que empiece por ello o
+ *  que lo contenga entero). Si no hay nada así, contesta la IA.
+ *
+ *  Sin este listón pasaba lo que se vio al probarlo: «¿qué es el zzqxvon de
+ *  las praderas?» devolvía siete publicaciones cuyo único parecido era la
+ *  palabra «qué». Un buscador que siempre encuentra algo no está encontrando:
+ *  está rellenando. */
+// El «¿» cuenta como principio de frase: sin él, «¿por qué…?» no casaba con
+// «(^|\s)por qué» —el signo de apertura no es ni el principio ni un espacio—
+// y la pregunta más típica en español se quedaba fuera de su propia regla.
+const PIDE_EXPLICACION = /(^|[\s¿])(por\s?qu[ée]|porqu[ée]|para\s?qu[ée]|c[óo]mo)(\s|$)/i;
+const PIDE_DEFINICION = /^\s*[¿]?\s*(qu[ée]|cu[áa]les?)\s+(es|son|significa\w*|quiere\s+decir)(\s|$)/i;
+
+/** Lo que hay que buscar de verdad: la frase sin la parte que solo dice «estoy
+ *  buscando». «Enséñame las publicaciones sobre el agua» se busca como
+ *  «agua» — con la frase entera, un `ILIKE %…%` no encuentra nunca nada,
+ *  porque ningún título contiene esas palabras seguidas.
+ *
+ *  SI DE TANTO QUITAR NO QUEDA NADA, SE BUSCA LA FRASE ENTERA. «Productos» a
+ *  secas es una búsqueda legítima, y una regla de limpieza que la convierta en
+ *  la cadena vacía convierte una búsqueda buena en cero resultados. */
+const terminoDeBusqueda = (texto: string): string => {
+  const original = texto.trim().replace(/^[¿¡]+/, '').replace(/[?!¿¡.…]+$/, '').trim();
+  let t = original;
+  const quitar = [
+    /^(?:busca(?:r|me)?|encuentra|enséñame|ensename|muéstrame|muestrame|dame|lista(?:me)?|ver|abre|ábreme|abreme|necesito|quiero|estoy buscando)\s+/i,
+    /^(?:ll[ée]vame|ir)\s+(?:a|al|a la)\s+/i,
+    /^(?:qu[ée]|cu[áa]les?)\s+(?:hay|existen?|ten[ée]is|tenemos|tiene[n]?)\s+(?:publicad\w+\s+)?/i,
+    // «¿Qué es la eutrofización?» se busca como «eutrofización»: la pregunta
+    // sobra para buscar, y estorba — «qué» aparece en media plataforma.
+    /^(?:qu[ée]|cu[áa]les?|qui[ée]n(?:es)?)\s+(?:es|son|significa\w*|quiere\s+decir)\s+/i,
+    /^(?:por\s?qu[ée]|para\s?qu[ée]|c[óo]mo)\s+/i,
+    /^(?:d[óo]nde)\s+(?:est[áa]|encuentro|puedo ver|veo)\s+/i,
+    /^(?:l[ao]s?\s+|un[ao]s?\s+)?(?:publicaci\w+|publis|contenidos?|art[ií]culos?|p[áa]ginas?|fichas?|resultados?|informaci[óo]n)\s+/i,
+    /^(?:el|la|los|las|un|una|unos|unas)\s+/i,
+    /^(?:municipios?|territorios?|retos?|problemas?|soluciones?|productos?|personas?|organizaciones?|proyectos?|iniciativas?|indicadores?|objetivos?|grafos?|mapas?|esquemas?)\s+(?:de|del|en|sobre)\s+/i,
+    /^(?:sobre|de|del|acerca de|relacionad\w+ con|que hablen de|en)\s+/i,
+  ];
+  // DOS PASADAS, porque los recortes se destapan unos a otros: en «busca
+  // publicaciones sobre el agua», hasta que no se quita «sobre» no queda «el»
+  // al principio — y buscar «el agua» encuentra bastante menos que «agua».
+  for (let pasada = 0; pasada < 2; pasada++) {
+    for (const r of quitar) {
+      const limpio = t.replace(r, '').trim();
+      // Cada recorte solo vale si deja algo que buscar.
+      if (limpio.length >= 2) t = limpio;
+    }
+  }
+  return t.length >= 2 ? t : original;
+};
+
+type Intencion =
+  /** `exigente`: es una pregunta de explicación, así que solo vale un
+   *  resultado que se llame como lo preguntado. Si no lo hay, contesta la IA. */
+  | { que: 'buscar'; termino: string; exigente: boolean }
+  | { que: 'preguntar' };
+
+/** ¿Este resultado se llama como lo que se ha buscado? Es el listón de las
+ *  preguntas de explicación: igual, que empiece por ello, o que lo contenga
+ *  entero. Parecerse en una palabra suelta no cuenta. */
+const coincidenciaFuerte = (label: string, termino: string) => {
+  const l = String(label || '').toLowerCase();
+  const t = termino.trim().toLowerCase();
+  return !!t && (l === t || l.startsWith(t) || l.includes(t));
+};
+
+/** Qué hacer con lo que se ha escrito. Es una función pura y está fuera del
+ *  componente a propósito: lo que decide si algo cuesta dinero tiene que
+ *  poder leerse —y probarse— sin montar media aplicación. */
+const queHacer = (texto: string, modo: 'buscar' | 'ia', hayAdjunto: boolean): Intencion => {
   const t = texto.trim();
-  if (t.length < 4 || t.length > 120) return null;
-  // Crear, explicar, resumir, comparar… eso es para la IA, diga lo que diga
-  // el resto de la frase.
-  if (/\b(crea|créa\w*|crear|hazme|haz\s|genera|génera\w*|escribe|redacta|resume|explica|analiza|compara|traduce|calcula)\b/i.test(t)) return null;
-  const m = t.match(/^\s*(?:busca(?:me)?|buscar|encuentra|enséñame|ensename|muéstrame|muestrame|dame|lista(?:me)?)\s+(?:las?\s+|los?\s+)?(?:publicaciones?|publis|contenidos?|artículos?|articulos?|páginas?|paginas?)?\s*(?:sobre|de|acerca de|relacionad\w+ con|que hablen de)?\s*(.+)$/i)
-    || t.match(/^\s*(?:publicaciones?|contenidos?)\s+(?:sobre|de|acerca de)\s+(.+)$/i)
-    || t.match(/^\s*¿?qué\s+hay\s+(?:publicado\s+)?sobre\s+(.+?)\??$/i);
-  if (!m) return null;
-  const q = m[1].replace(/[?¿.!]+$/, '').trim();
-  // Menos de dos letras no es un tema, y el buscador tampoco lo aceptaría.
-  return q.length >= 2 ? q : null;
+  if (!t) return { que: 'preguntar' };
+  // El interruptor gana a cualquier adivinanza: si has dicho IA, es IA.
+  if (modo === 'ia') return { que: 'preguntar' };
+  if (hayAdjunto) return { que: 'preguntar' };
+  if (VERBOS_DE_IA.test(t)) return { que: 'preguntar' };
+  if (t.split(/\s+/).length > MAX_PALABRAS_DE_BUSQUEDA) return { que: 'preguntar' };
+  const termino = terminoDeBusqueda(t);
+  if (termino.length < 2) return { que: 'preguntar' };
+  return { que: 'buscar', termino, exigente: PIDE_EXPLICACION.test(t) || PIDE_DEFINICION.test(t) };
 };
 
 /** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
@@ -399,13 +565,36 @@ export default function AIAssistant({ modo = 'panel' }: {
   const [attachError, setAttachError] = useState<string | null>(null);
   /** Hay un fichero encima del panel, esperando a que lo sueltes. */
   const [soltando, setSoltando] = useState(false);
-  // Modo barra (páginas de Grafos): grafos que coinciden con lo que se escribe.
-  const [graphMatches, setGraphMatches] = useState<Array<{ slug: string; title: string; score: number }>>([]);
+  // ══ EL BUSCADOR, MIENTRAS ESCRIBES ═══════════════════════════════════════
+  // Lo que hay en la plataforma que coincide con lo que llevas escrito. Es la
+  // mitad visible del «buscador primero»: si lo que buscas aparece aquí antes
+  // de darle a enviar, no llegas a gastar una llamada a la IA — ni siquiera la
+  // del buscador. (Sustituye al antiguo `graphMatches`, que solo miraba grafos
+  // y encima estaba MUERTO: su efecto salía por la puerta de atrás con
+  // `if (mode === 'dock') return`, y `mode` es siempre 'dock' desde que hay un
+  // solo asistente.)
+  const [sugerencias, setSugerencias] = useState<ResultadoBusqueda[]>([]);
+  const [buscandoSugerencias, setBuscandoSugerencias] = useState(false);
+  /** Cuál está marcada con el teclado. -1 = ninguna. */
+  const [sugerenciaActiva, setSugerenciaActiva] = useState(-1);
+  /** Se han descartado a mano (Escape): no vuelven hasta que cambie el texto. */
+  const [sugerenciasOcultas, setSugerenciasOcultas] = useState(false);
+  /** Buscar o preguntar. EMPIEZA EN «BUSCAR» a propósito: es lo que casi
+   *  siempre se quiere dentro de la aplicación, y es lo que no cuesta dinero.
+   *  Se recuerda en el navegador porque quien viene a preguntar suele volver a
+   *  preguntar, y quien viene a buscar, a buscar. */
+  const [modoEntrada, setModoEntrada] = useState<'buscar' | 'ia'>(
+    () => (localStorage.getItem('chat:modo') === 'ia' ? 'ia' : 'buscar'));
+  useEffect(() => { localStorage.setItem('chat:modo', modoEntrada); }, [modoEntrada]);
   // Pop-up central: la publicación real que responde a la pregunta.
   const [popupPub, setPopupPub] = useState<{ publication: any; graphs: any[] } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** La búsqueda en vuelo, para poder cancelarla. Sin esto, escribir deprisa
+   *  deja cinco respuestas en carrera y gana la que vuelva la última, que no
+   *  tiene por qué ser la de lo último que escribiste. */
+  const abortarSugerencias = useRef<AbortController | null>(null);
   // El Juego Vital encarna este asistente en el robot: al «hablarle» al robot,
   // la página lanza este evento y la barra recibe el foco.
   const barInputRef = useRef<HTMLTextAreaElement>(null);
@@ -575,21 +764,53 @@ export default function AIAssistant({ modo = 'panel' }: {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
 
-  // Fast-path del buscador de grafos: al escribir en la barra, se consultan
-  // los grafos publicados que coinciden (sin gastar una llamada a la IA).
+  // ══ SE BUSCA MIENTRAS ESCRIBES, NO AL ENVIAR ═════════════════════════════
+  // (2026-08-22, Eugenio: «buscador first»). La forma más barata de no gastar
+  // una llamada a la IA es que lo que buscabas ya esté delante antes de pulsar
+  // enviar. Cuesta una consulta a la base de datos por pausa al teclear.
+  //
+  // NO SE BUSCA CUANDO NO SE ESTÁ BUSCANDO: en modo IA, con un adjunto puesto
+  // o cuando la frase empieza por un verbo de los que piden trabajo, esto se
+  // calla. Un desplegable de resultados encima de «escríbeme un resumen» es
+  // ruido tapando la caja donde escribes.
   useEffect(() => {
-    if (mode === 'dock') return;
-    const q = input.trim();
-    if (q.length < 3) { setGraphMatches([]); return; }
+    setSugerenciasOcultas(false);
+    setSugerenciaActiva(-1);
+    const intencion = queHacer(input, modoEntrada, !!attachment);
+    if (intencion.que !== 'buscar' || intencion.termino.length < 2) {
+      setSugerencias([]);
+      setBuscandoSugerencias(false);
+      return;
+    }
+    const q = intencion.termino;
+    const exigente = intencion.exigente;
+    setBuscandoSugerencias(true);
     if (resolveTimer.current) clearTimeout(resolveTimer.current);
     resolveTimer.current = setTimeout(() => {
-      fetch(`/api/graphs/resolve?q=${encodeURIComponent(q)}`)
+      abortarSugerencias.current?.abort();
+      const ctrl = new AbortController();
+      abortarSugerencias.current = ctrl;
+      fetch(`/api/search?q=${encodeURIComponent(q)}&limit=4`, { credentials: 'include', signal: ctrl.signal })
         .then(r => r.json())
-        .then(json => setGraphMatches(Array.isArray(json.matches) ? json.matches : []))
-        .catch(() => setGraphMatches([]));
-    }, 250);
+        // EN EL DESPLEGABLE SOLO LO QUE SE PUEDE ABRIR. Aquí no se viene a
+        // enterarse de que algo existe: se viene a llegar de un clic, y una
+        // fila «sin ficha» ocupa el sitio de una a la que sí se puede ir. En
+        // los resultados del mensaje enviado sí salen, apagadas, porque allí
+        // el que existan es parte de la respuesta.
+        .then(json => setSugerencias(
+          ordenarResultados(Array.isArray(json.results) ? json.results : [], q)
+            .filter(r => rutaDeResultado(r))
+            // Mismo listón que al enviar: si la frase pide una explicación,
+            // aquí solo aparece lo que se llama como lo preguntado. Colgar
+            // siete resultados de parecido lejano encima de una pregunta es
+            // sugerir que la plataforma tiene la respuesta cuando no la tiene.
+            .filter(r => !exigente || coincidenciaFuerte(r.label, q))
+            .slice(0, 6)))
+        .catch(() => { if (!ctrl.signal.aborted) setSugerencias([]); })
+        .finally(() => { if (!ctrl.signal.aborted) setBuscandoSugerencias(false); });
+    }, 220);
     return () => { if (resolveTimer.current) clearTimeout(resolveTimer.current); };
-  }, [input, mode]);
+  }, [input, modoEntrada, attachment]);
 
   /** Estado visual actual, tomado de la URL: es lo que ve el usuario ahora. */
   // QUÉ ESTÁS MIRANDO (Eugenio, 2026-08-20: «que la IA vea en la página que
@@ -657,6 +878,24 @@ export default function AIAssistant({ modo = 'panel' }: {
     const entrada = Object.entries(status?.models || {}).find(([id]) => ultimo.startsWith(id));
     return `automático · ${entrada ? entrada[1].label : ultimo}`;
   })();
+
+  /** Qué va a pasar si pulsas enviar AHORA MISMO. Se calcula en cada pintado
+   *  —es una expresión regular sobre una frase corta, no cuesta nada— y sirve
+   *  para que el botón de enviar enseñe una lupa cuando va a buscar y un avión
+   *  cuando va a costar dinero. Saber lo que va a pasar ANTES de pulsar es la
+   *  mitad de «buscador primero»: la otra mitad es que casi siempre busque. */
+  const vaABuscar = queHacer(input, modoEntrada, !!attachment).que === 'buscar';
+
+  /** Abrir un resultado del desplegable: es la salida más barata de todas,
+   *  porque ni siquiera llega a enviarse un mensaje. */
+  const abrirResultado = (r: ResultadoBusqueda) => {
+    const destino = rutaDeResultado(r);
+    if (!destino) return;
+    setInput('');
+    setSugerencias([]);
+    setSugerenciaActiva(-1);
+    navigate(destino);
+  };
 
   // Cerrar el desplegable de modelos al pinchar en cualquier otro sitio.
   useEffect(() => {
@@ -850,46 +1089,76 @@ export default function AIAssistant({ modo = 'panel' }: {
     const pendingAttachment = attachment;
     setInput('');
     setAttachment(null);
-    setGraphMatches([]);
+    setSugerencias([]);
+    setSugerenciaActiva(-1);
     setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
     setBusy(true);
     try {
-      // ══ BUSCAR NO GASTA IA ═══════════════════════════════════════════════
-      // (2026-08-22, Eugenio: «que no tire de IA para cosas que sean
-      // búsquedas de publicaciones internas»).
+      // ══ BUSCAR PRIMERO, Y BUSCAR CASI SIEMPRE ════════════════════════════
+      // (2026-08-22, Eugenio: «quiero que el chat de IA sea buscador first, y
+      // que no haga una consulta a la IA cuando alguien está buscando algo
+      // dentro de la App»). La regla entera está explicada arriba, en
+      // `queHacer`; aquí solo se aplica.
       //
-      // «Busca publicaciones sobre el agua» tiene una respuesta exacta en la
-      // base de datos, y pasarla por un modelo la empeora dos veces: cuesta
-      // dinero y devuelve una redacción sobre unos resultados en vez de los
-      // resultados. Aquí se contesta con lo que hay publicado, con sus
-      // enlaces, y se dice que no ha hecho falta la IA.
+      // «Nitratos Madrid» tiene una respuesta exacta en la base de datos, y
+      // pasarla por un modelo la empeora dos veces: cuesta dinero y devuelve
+      // una redacción SOBRE unos resultados en vez de los resultados.
       //
-      // SI NO HAY NADA, SE DICE QUE NO HAY NADA y se ofrece preguntárselo a la
-      // IA. Cero resultados es una respuesta —«esto no está publicado»— y
-      // disfrazarla de conversación sería lo de siempre: no poder distinguir
-      // «no existe» de «no lo he encontrado».
-      const busqueda = queBuscar(text);
-      if (busqueda) {
-        const r = await fetch(`/api/search?q=${encodeURIComponent(busqueda)}&limit=8`, { credentials: 'include' });
-        const j = await r.json();
-        const todos: any[] = Array.isArray(j?.results) ? j.results : [];
-        const pubs = todos.filter(x => x.type === 'publications');
-        // Las publicaciones primero, que es lo que se ha pedido; lo demás
-        // detrás, porque buscar «agua» y que no salga el reto del agua sería
-        // esconder lo que sí hay.
-        const orden = [...pubs, ...todos.filter(x => x.type !== 'publications')].slice(0, 8);
+      // SI NO HAY NADA, DEPENDE DE LO QUE HUBIERAS ESCRITO:
+      //  · un tema («nitratos Madrid») → se dice que no hay nada publicado,
+      //    que es una respuesta de verdad y no un fallo;
+      //  · una pregunta («¿qué pasa con los nitratos?») → pasa sola a la IA.
+      //    Contestar «no hay resultados» a quien preguntaba algo es un
+      //    callejón sin salida: el usuario reescribe la frase y acaba
+      //    costando más que haber preguntado a la primera.
+      const intencion = queHacer(text, modoEntrada, !!pendingAttachment);
+      if (intencion.que === 'buscar') {
+        const termino = intencion.termino;
+        let encontrados: ResultadoBusqueda[] = [];
+        try {
+          const r = await fetch(`/api/search?q=${encodeURIComponent(termino)}&limit=6`, { credentials: 'include' });
+          const j = await r.json();
+          encontrados = ordenarResultados(Array.isArray(j?.results) ? j.results : [], termino).slice(0, 8);
+        } catch {
+          // Si el buscador se cae, no se deja al usuario sin respuesta: sigue
+          // hacia la IA, que es exactamente lo que hacía antes de todo esto.
+          encontrados = [];
+        }
+        // EL LISTÓN DE LAS PREGUNTAS DE EXPLICACIÓN. Con `exigente`, parecerse
+        // en una palabra no basta: o hay algo que se llama como lo preguntado,
+        // o esto es una pregunta y la contesta la IA.
+        if (intencion.exigente && !encontrados.some(r => coincidenciaFuerte(r.label, termino))) {
+          encontrados = [];
+        }
+        if (encontrados.length) {
+          setMessages(m => [...m, {
+            role: 'assistant',
+            content: `Esto es lo que hay en la plataforma sobre «${termino}».`,
+            resultados: encontrados,
+            // El botón para insistir: buscar es lo primero, pero no puede ser
+            // lo único, o una pregunta mal empezada se quedaría sin respuesta.
+            reintentarIA: text,
+          }]);
+          setBusy(false);
+          return;
+        }
+        if (!ES_PREGUNTA.test(text)) {
+          setMessages(m => [...m, {
+            role: 'assistant',
+            content: `No hay nada en la plataforma sobre «${termino}». Puedes preguntárselo a la IA si quieres que te lo explique ella.`,
+            reintentarIA: text,
+          }]);
+          setBusy(false);
+          return;
+        }
+        // Era una pregunta y no hay nada publicado: se dice en voz alta que
+        // ahora sí se va a gastar IA, y por qué. Que algo cueste dinero no
+        // debería ser una sorpresa que se descubre en la factura.
         setMessages(m => [...m, {
           role: 'assistant',
-          content: orden.length
-            ? `Esto es lo que hay publicado sobre «${busqueda}».`
-            : `No hay nada publicado sobre «${busqueda}». Puedes preguntárselo a la IA si quieres que te lo explique ella.`,
-          resultados: orden.length ? orden : undefined,
-          // El botón para insistir: buscar es lo primero, pero no puede ser lo
-          // único, o una pregunta mal empezada se quedaría sin respuesta.
-          reintentarIA: text,
+          content: `No hay nada publicado sobre «${termino}» — te lo contesto yo.`,
+          buscadoAntes: termino,
         }]);
-        setBusy(false);
-        return;
       }
 
       // Fast-path (modo barra), en este orden (petición del usuario):
@@ -1270,22 +1539,48 @@ export default function AIAssistant({ modo = 'panel' }: {
                       describe. */}
                   {!!m.resultados?.length && (
                     <div className="mt-2 space-y-1">
-                      {m.resultados.map((r, i) => (
-                        <Link
-                          key={`${r.type}-${r.id}-${i}`}
-                          to={rutaDeResultado(r)}
-                          target="_blank"
-                          rel="noopener"
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
-                        >
-                          <Search className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                          <span className="min-w-0 flex-1 truncate">{r.label}</span>
-                          <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
-                            {NOMBRE_DE_TIPO[r.type] || r.type}
-                          </span>
-                        </Link>
-                      ))}
+                      {m.resultados.map((r, i) => {
+                        const destino = rutaDeResultado(r);
+                        // SIN FICHA NO HAY ENLACE. Un tipo del que no sabemos
+                        // la dirección se enseña igual —existe, y saberlo es
+                        // información— pero apagado y dicho: antes esto era un
+                        // enlace a `/buscar`, una ruta que no existe, y el
+                        // clic terminaba en «página no encontrada».
+                        if (!destino) return (
+                          <div key={`${r.type}-${r.id}-${i}`}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-dashed border-slate-200 text-[11px] font-bold text-slate-400">
+                            <Search className="w-3.5 h-3.5 shrink-0 text-slate-300" />
+                            <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider">sin ficha</span>
+                          </div>
+                        );
+                        return (
+                          <Link
+                            key={`${r.type}-${r.id}-${i}`}
+                            to={destino}
+                            target="_blank"
+                            rel="noopener"
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
+                          >
+                            <Search className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                            <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                              {NOMBRE_DE_TIPO[r.type] || r.type}
+                            </span>
+                          </Link>
+                        );
+                      })}
                     </div>
+                  )}
+
+                  {/* SE BUSCÓ ANTES Y NO HABÍA NADA. La línea explica por qué
+                      esta respuesta sí ha costado dinero: no es un capricho
+                      del chat, es que la plataforma no tenía la respuesta. */}
+                  {m.buscadoAntes && (
+                    <p className="mt-2 text-[10px] text-slate-400 flex items-center gap-1.5">
+                      <Search className="w-3 h-3 shrink-0" />
+                      Buscado primero en la plataforma · sin resultados
+                    </p>
                   )}
 
                   {/* SIN GASTAR IA, Y CON LA PUERTA ABIERTA. Se dice que esto
@@ -1606,22 +1901,122 @@ export default function AIAssistant({ modo = 'panel' }: {
             {attachError && (
               <p className="text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">{attachError}</p>
             )}
+            {/* ══ LO QUE HAY EN LA PLATAFORMA, MIENTRAS ESCRIBES ═══════════
+                (2026-08-22, Eugenio: «buscador first»).
+
+                Aparece encima de la caja, pegado a ella, como en cualquier
+                buscador: lo que se busca al buscar es LLEGAR, y llegar de un
+                clic desde aquí no gasta ni la llamada del buscador. Con
+                flechas se recorre, con Intro se abre, con Escape se quita. */}
+            {!sugerenciasOcultas && sugerencias.length > 0 && (
+              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                <p className="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 flex items-center gap-1.5">
+                  <Search className="w-3 h-3" />
+                  En la plataforma · sin gastar IA
+                </p>
+                {sugerencias.map((r, i) => {
+                  const destino = rutaDeResultado(r);
+                  return (
+                    <button
+                      key={`${r.type}-${r.id}-${i}`}
+                      onClick={() => abrirResultado(r)}
+                      onMouseEnter={() => setSugerenciaActiva(i)}
+                      disabled={!destino}
+                      className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 text-left text-[11px] font-bold transition-colors',
+                        !destino ? 'text-slate-400 cursor-default'
+                          : i === sugerenciaActiva ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50')}
+                    >
+                      <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                      <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                        {destino ? (NOMBRE_DE_TIPO[r.type] || r.type) : 'sin ficha'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ══ BUSCAR O PREGUNTAR, DICHO Y NO ADIVINADO ══════════════════
+                El interruptor vive donde se escribe y **empieza en Buscar**,
+                que es lo que casi siempre se quiere dentro de la aplicación y
+                además es lo que no cuesta dinero.
+
+                Está a la vista y no escondido en los ajustes porque es la
+                única forma de que «no gasta IA» sea una promesa comprobable:
+                se ve en qué modo estás antes de escribir, no después de
+                mirar la factura. Y en modo Buscar la aplicación sigue sabiendo
+                distinguir un «escríbeme un resumen» —eso va a la IA igual— :
+                el interruptor decide lo dudoso, no lo evidente. */}
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center rounded-lg bg-slate-100 p-0.5 shrink-0">
+                {([['buscar', 'Buscar', 'Busca en la plataforma. No gasta IA.'],
+                   ['ia', 'IA', 'Pregunta al modelo. Cada respuesta cuesta dinero.']] as const).map(([m, etiqueta, ayuda]) => (
+                  <button
+                    key={m}
+                    onClick={() => setModoEntrada(m)}
+                    title={ayuda}
+                    aria-pressed={modoEntrada === m}
+                    className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold transition-colors',
+                      modoEntrada === m ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+                  >
+                    {m === 'buscar' ? <Search className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
+                    {etiqueta}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[10px] text-slate-400 truncate hidden sm:inline">
+                {modoEntrada === 'buscar'
+                  ? 'Primero busco aquí dentro; solo pregunto a la IA si no hay nada.'
+                  : 'Va directo al modelo, aunque la respuesta estuviera publicada.'}
+              </span>
+            </div>
+
             <div className="flex items-end gap-2">
               <textarea
                 ref={barInputRef}
                 value={input}
                 onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                onKeyDown={e => {
+                  // El desplegable manda mientras está abierto: las flechas lo
+                  // recorren e Intro abre lo marcado. Si no hay nada marcado,
+                  // Intro hace lo de siempre — enviar.
+                  const hayLista = !sugerenciasOcultas && sugerencias.length > 0;
+                  if (hayLista && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                    e.preventDefault();
+                    setSugerenciaActiva(i => {
+                      const n = sugerencias.length;
+                      if (e.key === 'ArrowDown') return i + 1 >= n ? -1 : i + 1;
+                      return i <= -1 ? n - 1 : i - 1;
+                    });
+                    return;
+                  }
+                  if (e.key === 'Escape' && hayLista) { e.preventDefault(); setSugerenciasOcultas(true); return; }
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (hayLista && sugerenciaActiva >= 0) { abrirResultado(sugerencias[sugerenciaActiva]); return; }
+                    send();
+                  }
+                }}
                 rows={2}
-                placeholder={selectedModel === 'gemini-2.5-flash-image' ? 'Describe la imagen que quieres generar…' : 'Escribe tu pregunta…'}
+                placeholder={selectedModel === 'gemini-2.5-flash-image' ? 'Describe la imagen que quieres generar…'
+                  : modoEntrada === 'buscar' ? 'Busca en la plataforma o pregunta…'
+                  : 'Escribe tu pregunta…'}
                 className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-300 focus:bg-white transition-colors"
               />
               <button
                 onClick={() => send()}
                 disabled={busy || !input.trim()}
-                className="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                // LA LUPA AVISA DE QUE ESTO NO VA A COSTAR NADA. El mismo
+                // botón con dos caras: lupa cuando lo escrito se va a buscar,
+                // avión cuando va a llamar al modelo.
+                title={vaABuscar ? 'Buscar en la plataforma — no gasta IA' : 'Preguntar a la IA'}
+                aria-label={vaABuscar ? 'Buscar en la plataforma' : 'Preguntar a la IA'}
+                className={cn('shrink-0 w-10 h-10 rounded-xl text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed transition-colors',
+                  vaABuscar ? 'bg-slate-800 hover:bg-slate-900' : 'bg-emerald-600 hover:bg-emerald-700')}
               >
-                <Send className="w-4 h-4" />
+                {buscandoSugerencias && vaABuscar
+                  ? <Search className="w-4 h-4 opacity-60 animate-pulse" />
+                  : vaABuscar ? <Search className="w-4 h-4" /> : <Send className="w-4 h-4" />}
               </button>
             </div>
 
