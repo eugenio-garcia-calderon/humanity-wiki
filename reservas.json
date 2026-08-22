@@ -47,12 +47,6 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "entrada tokenomics + enMenu para subpaginas (rebase #220/#235 sobre el registro)",
       "desde": "2026-08-22T18:14:53.006Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada tokenomics (#220 rehecha sobre el registro)",
-      "desde": "2026-08-22T18:17:55.355Z"
     }
   ]
 }
