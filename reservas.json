@@ -71,6 +71,12 @@
       "ruta": "src/components/juego/Interior.tsx",
       "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
       "desde": "2026-08-22T19:48:13.489Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/contexts/AuthContext.tsx",
+      "motivo": "un refresh de sesion dispara 4 peticiones: user cambia de identidad sin cambiar de contenido",
+      "desde": "2026-08-22T20:01:33.398Z"
     }
   ]
 }
