@@ -53,12 +53,6 @@
       "ruta": "CLAUDE.md",
       "motivo": "la trampa del fallo armado para otro dia",
       "desde": "2026-08-22T16:05:26.213Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "devolver herramientas a su fichero",
-      "desde": "2026-08-22T16:12:55.058Z"
     }
   ]
 }
