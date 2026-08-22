@@ -167,6 +167,12 @@
       "ruta": "drizzle/0092_llave_de_agenda.sql",
       "motivo": "importar contactos desde el iPhone con un atajo (0091 lo tiene prog3)",
       "desde": "2026-08-22T22:13:42.049Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "src/server/gasto.ts",
+      "motivo": "estado de las copias en la pagina de Servidores",
+      "desde": "2026-08-22T22:19:14.077Z"
     }
   ]
 }
