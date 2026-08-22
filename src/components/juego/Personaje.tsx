@@ -1,46 +1,34 @@
 // ============================================================================
-// EL QUE RECORRE EL VISOR — antes «el personaje» (2026-08-22)
-// ============================================================================
-// Eugenio: «elimina los personajes y haz que sea como un espíritu azul y verde,
-// un haz de luz que se mueve flotando; no puede subir ni bajar, solo se mueve
-// en el plano XY» y «elimina el tema de la bici y del avión».
-//
-// LO QUE SE FUE, Y POR QUÉ EL FICHERO ES LA MITAD: con la altura fuera se van
-// de golpe el salto, la gravedad, el aterrizaje, el techo de vuelo, la
-// pregunta de «¿choco con esto o paso por encima?», las tres velocidades por
-// vehículo y las cuatro marchas de animación (parado, paseo, trote, esprint).
-// No es que se hayan borrado: es que sin altura ni vehículos NO EXISTEN. Un
-// mundo con menos reglas tiene menos sitios donde equivocarse.
-//
-// Lo que se queda intacto: el mando, la cámara orbital, el viaje rápido del
-// minimapa, las colisiones y el aviso de choque —que es lo que abre las fichas
-// y entra por los portales—. Todo eso no dependía de tener piernas.
-//
-// (Lo de antes, para quien busque el historial: third-person character. Reads the shared input ref (keyboard
+// JUEGO VITAL — third-person character. Reads the shared input ref (keyboard
 // or touch joystick), moves with smoothed acceleration, faces its heading,
 // and drags the follow camera and the shadow-casting light along with it.
 //
 // Desde 2026-08-18 la cámara GIRA (petición de Eugenio: «como en Call of Duty,
 // mover el avatar o mover la vista»). Eso cambia una cosa de fondo: el mando ya
 // no está en ejes del mundo, sino en ejes de la CÁMARA. Adelante es «lejos de
-// la cámara», gires hacia donde gires.)
+// la cámara», gires hacia donde gires.
 // ============================================================================
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { Camara, EntradaMando } from './tipos';
-import { Espiritu } from './visor/Espiritu';
+import type { Camara, EntradaMando, Vehiculo } from './tipos';
+import { Persona3D } from './Modelos';
+import { Bici, Aptera, SombraVuelo } from './Vehiculos';
+import { CuerpoProvisional } from './Oleadas';
+import type { Aspecto } from './aspecto';
 
-/** Velocidad, en m/s. Un paseo vivo: el anillo entero se cruza en unos
- *  segundos y sigue dando tiempo a leer las pantallas al pasar. */
-const VELOCIDAD = 9;
-/** Lo que multiplica Shift (petición de Eugenio: «si pulso Shift va más
- *  rápido»). */
+/** Velocidad máxima en m/s. A pie es un paseo vivo; la bici, ciclismo urbano;
+ *  la Aptera, la de un coche por ciudad (el mapa mide 1 km de lado). */
+const VEL_MAX: Record<Vehiculo, number> = { pie: 8, bici: 17, aptera: 32 };
+/** Lo que multiplica Shift a pie y en bici (petición de Eugenio: «si pulso
+ *  Shift el muñeco va más rápido»; antes era la barra, que ahora salta). */
 const TURBO = 3;
-/** Hasta dónde llega el suelo. Antes eran 530 m —118 hectáreas de aldea—;
- *  ahora la sala más grande cabe de sobra en 120, y un límite honesto evita
- *  pasear diez minutos por un blanco donde no hay nada. */
-const LIMITE = 120;
+/** Salto: velocidad inicial y gravedad. Da un brinco de ~1,3 m. */
+const VEL_SALTO = 7.2;
+const GRAVEDAD = 20;
+const LIMITE = 530;          // keep the player inside the 118 ha
+const TECHO = 130;           // altura máxima de vuelo, en metros
+const VEL_VERTICAL = 11;     // subir y bajar, en m/s
 
 const tmpObjetivo = new THREE.Vector3();
 const tmpCam = new THREE.Vector3();
@@ -49,36 +37,57 @@ const tmpMira = new THREE.Vector3();
 /** Algo sólido del mundo: no se atraviesa, y chocar con ello «llama». */
 export interface Obstaculo { id: string; x: number; z: number; radio: number }
 
-export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, destino, zoom, limite }: {
+export function Personaje({ entrada, camara, jugadorPos, luzRef, obstaculos, onChoque, destino, zoom, aspecto, vehiculo, alturaVuelo, limite, vista = 'tercera' }: {
   entrada: React.MutableRefObject<EntradaMando>;
   /** Hacia dónde mira la cámara. Lo escribe el arrastre de la pantalla. */
   camara: React.MutableRefObject<Camara>;
   jugadorPos: THREE.Vector3;
+  luzRef: React.RefObject<THREE.DirectionalLight | null>;
   obstaculos: React.MutableRefObject<Obstaculo[]>;
   onChoque: (id: string) => void;
-  /** Viaje rápido desde el minimapa: se pone aquí y apareces allí. */
+  /** Viaje rápido desde el mapa: se pone aquí y el personaje aparece allí. */
   destino: React.MutableRefObject<{ x: number; z: number } | null>;
-  /** Cuánto se aleja la cámara. */
+  /** Cuánto se aleja la cámara: 1 = por encima del hombro, 6 = media aldea. */
   zoom: React.MutableRefObject<number>;
-  /** Hasta dónde llega esta sala. Sin valor, el límite general. */
+  /** Tu piel, pelo, ropa y fenotipo. */
+  aspecto?: Aspecto;
+  /** A pie, en bici o en el planeador. */
+  vehiculo: Vehiculo;
+  /** Altura sobre el suelo. Compartida con la página para enseñarla en pantalla. */
+  alturaVuelo: React.MutableRefObject<number>;
+  /** Hasta dónde puedes andar. Sin valor, las 118 ha; dentro de un proyecto,
+   *  el tamaño de la sala (si no, te saldrías por las paredes). */
   limite?: number;
+  /** Tercera persona (por detrás) o primera (por tus ojos). 2026-08-19,
+   *  petición de Eugenio. */
+  vista?: 'tercera' | 'primera';
 }) {
   const grupo = useRef<THREE.Group>(null);
   const vel = useRef(new THREE.Vector3());
+  // El salto: velocidad vertical y altura sobre el suelo, solo a pie o en bici.
+  const velSalto = useRef(0);
+  const alturaSalto = useRef(0);
   // Apareces mirando al norte, hacia la plaza (rumbo 0 sería de espaldas a ella).
   const rumbo = useRef(Math.PI);
   // Con quién estás chocando AHORA: el aviso salta una vez por encontronazo,
   // no cada fotograma mientras sigas pegado a él.
   const tocando = useRef<string | null>(null);
-  // Quieto o moviéndose. Es lo único que el espíritu necesita saber de sí
-  // mismo: sus velos giran más deprisa cuando avanzas.
+  // Andar, correr o estar quieto: el modelo trae sus propias animaciones.
   const [andando, setAndando] = useState(false);
   const andandoRef = useRef(false);
+  // La MARCHA a pie sale de la velocidad real: parado, paseo, trote,
+  // esprint o en el aire (salto). Cada una es una pista distinta del modelo.
+  const [paso, setPaso] = useState('idle');
+  const pasoRef = useRef('idle');
+  // Y la CADENCIA acompasa la zancada a los m/s reales (por ref, sin
+  // re-render: la lee Persona3D cada fotograma).
+  const ritmoAnim = useRef(1);
 
   useFrame((estado, dtBruto) => {
     const g = grupo.current;
     if (!g) return;
     const dt = Math.min(dtBruto, 0.05); // tab-switch spikes must not teleport
+    const vuela = vehiculo === 'aptera';
 
     // --- Viaje rápido: apareces junto al destino, mirándolo. La cámara NO
     // salta: sigue interpolando, así que hace un vuelo rasante por encima de
@@ -87,7 +96,7 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
     if (d) {
       destino.current = null;
       // Se llega por el sur, a 5 m: distancia de conversación sin empotrarse.
-      g.position.set(d.x, 0, d.z + 5);
+      g.position.set(d.x, alturaVuelo.current, d.z + 5);
       vel.current.set(0, 0, 0);
       rumbo.current = Math.PI; // mirando al norte, hacia el destino
       g.rotation.y = rumbo.current;
@@ -100,9 +109,28 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
       return;
     }
 
-    // NI ALTURA NI SALTO: el espíritu vive en el plano (Eugenio). La `y` se
-    // queda en 0 siempre y por eso no hay nada que calcular aquí.
-    entrada.current.salto = false;
+    // --- Altura: solo el planeador sube. Al bajarte, desciende solo hasta el
+    // suelo, que es el «aterrizaje vertical».
+    const subida = vuela ? entrada.current.y : -1;
+    alturaVuelo.current = THREE.MathUtils.clamp(
+      alturaVuelo.current + subida * VEL_VERTICAL * dt, 0, vuela ? TECHO : 0,
+    );
+
+    // --- Salto (petición de Eugenio: la barra salta). Solo a pie o en bici:
+    // volando la altura ya la llevan W y S.
+    if (!vuela) {
+      if (entrada.current.salto && alturaSalto.current <= 0) velSalto.current = VEL_SALTO;
+      entrada.current.salto = false;   // un toque = UN salto, no uno por frame
+      if (alturaSalto.current > 0 || velSalto.current > 0) {
+        alturaSalto.current = Math.max(0, alturaSalto.current + velSalto.current * dt);
+        velSalto.current -= GRAVEDAD * dt;
+        if (alturaSalto.current <= 0) velSalto.current = 0;
+      }
+    } else {
+      entrada.current.salto = false;
+      alturaSalto.current = 0;
+      velSalto.current = 0;
+    }
 
     // --- Movimiento. El mando viene en ejes de PANTALLA; se gira con el rumbo
     // de la cámara para que «adelante» sea siempre adelante en la vista.
@@ -119,21 +147,21 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
     );
     if (tmpObjetivo.lengthSq() > 1) tmpObjetivo.normalize();
     // Correr: Shift multiplica por 3, salvo volando.
-    const turbo = entrada.current.turbo;
-    tmpObjetivo.multiplyScalar(VELOCIDAD * (turbo ? TURBO : 1));
-    vel.current.lerp(tmpObjetivo, 1 - Math.exp(-10 * dt));
+    const turbo = entrada.current.turbo && !vuela;
+    tmpObjetivo.multiplyScalar(VEL_MAX[vehiculo] * (turbo ? TURBO : 1));
+    vel.current.lerp(tmpObjetivo, 1 - Math.exp(-(vuela ? 4 : 10) * dt));
     g.position.addScaledVector(vel.current, dt);
     const lim = limite ?? LIMITE;
     g.position.x = THREE.MathUtils.clamp(g.position.x, -lim, lim);
     g.position.z = THREE.MathUtils.clamp(g.position.z, -lim, lim);
-    g.position.y = 0;
+    g.position.y = alturaVuelo.current + alturaSalto.current;
 
     // --- Colisión: a la gente y a los edificios no se les atraviesa.
     // Al tocarlos te quedas fuera de su radio y se avisa a la página, que
     // abre su chat: chocarte con un amigo es empezar a hablar con él.
     // Volando por encima de los tejados no chocas con nada: pasas por arriba.
     let choque: string | null = null;
-    {
+    if (alturaVuelo.current < 4) {
       for (const o of obstaculos.current) {
         const dx = g.position.x - o.x;
         const dz = g.position.z - o.z;
@@ -172,6 +200,23 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
       andandoRef.current = moviendo;
       setAndando(moviendo);
     }
+    // La marcha por VELOCIDAD REAL, no por tecla: paseo hasta 4 m/s, trote
+    // hasta 12 y de ahí para arriba esprint. En el aire manda el salto. La
+    // cadencia divide por la velocidad natural de cada clip y se acota para
+    // que el turbo (24 m/s) no convierta la zancada en un aleteo.
+    const enElAire = alturaSalto.current > 0.05;
+    const pasoAhora = enElAire ? 'salto'
+      : !moviendo ? 'idle'
+        : rapidez < 4 ? 'walk'
+          : rapidez < 12 ? 'jog' : 'sprint';
+    if (pasoAhora !== pasoRef.current) {
+      pasoRef.current = pasoAhora;
+      setPaso(pasoAhora);
+    }
+    ritmoAnim.current = pasoAhora === 'walk' ? THREE.MathUtils.clamp(rapidez / 2.2, 0.75, 1.5)
+      : pasoAhora === 'jog' ? THREE.MathUtils.clamp(rapidez / 5.5, 0.8, 1.5)
+        : pasoAhora === 'sprint' ? THREE.MathUtils.clamp(rapidez / 10, 0.9, 1.6)
+          : 1;
     if (moviendo) {
       const deseo = Math.atan2(vel.current.x, vel.current.z);
       const dif = Math.atan2(Math.sin(deseo - rumbo.current), Math.cos(deseo - rumbo.current));
@@ -181,7 +226,7 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
       // centésimas: con A/D era imposible apuntar a algo concreto, se pasaba
       // siempre. Ahora tarda casi el doble, y ese doble es lo que te deja
       // parar donde quieres.
-      rumbo.current += dif * (1 - Math.exp(-7 * dt));
+      rumbo.current += dif * (1 - Math.exp(-(vuela ? 3.5 : 7) * dt));
       g.rotation.y = rumbo.current;
       // La cámara SIGUE el giro del muñeco (petición de Eugenio): al girar con
       // A/D la vista se va poniendo sola a su espalda, como en un juego de
@@ -194,7 +239,7 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
         // La cámara persigue el rumbo aún más despacio que el muñeco: si
         // fuera igual de rápida, girar sería el mundo entero barriendo de
         // golpe. Yendo por detrás, el giro se lee y se puede parar a tiempo.
-        camara.current.yaw += dy * (1 - Math.exp(-1.9 * dt));
+        camara.current.yaw += dy * (1 - Math.exp(-(vuela ? 1.4 : 1.9) * dt));
       }
     }
     // El modelo tiene su propia animación de andar: ya no hace falta el
@@ -205,19 +250,15 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
     // que hayas elegido arrastrando. `dist` sale de la distancia de siempre
     // (11 de alto y 15 de fondo), para que el zoom siga midiendo lo mismo.
     const cam = estado.camera;
-    // LA MISMA DISTANCIA EN TODAS LAS SALAS (2026-08-22). Antes, `limite`
-    // acercaba la cámara a 10,5 m: era para las salas cerradas de antes, donde
-    // con la distancia de fuera la cámara se quedaba al otro lado de la pared.
-    // Ya no hay paredes, y ese acercamiento dejaba el visor con un portal
-    // ocupando la pantalla entera (visto en pruebas). Ahora la distancia es
-    // siempre la misma y quien quiera acercarse tiene la rueda.
-    //
-    // En una pantalla estrecha (un móvil de pie) el mismo ángulo enseña MUCHO
-    // menos a lo ancho, así que la cámara se echa atrás en proporción, hasta
-    // un 55% más lejos.
+    // Dentro de un edificio la cámara se acerca: con los 18,6 m de fuera se
+    // quedaría al otro lado de la pared y verías la sala a través del muro.
+    // En una pantalla estrecha (un móvil de pie) el mismo ángulo de cámara
+    // enseña MUCHO menos a lo ancho: con la distancia del ordenador el ficus
+    // te tapaba la plaza entera. Así que la cámara se echa atrás en
+    // proporción a lo estrecha que sea la pantalla, hasta un 55% más lejos.
     const anchoRel = Math.min(1, estado.viewport.aspect / 1.6);
     const porPantalla = 1 + (1 - anchoRel) * 0.55;
-    const dist = 26 * zoom.current * porPantalla;
+    const dist = (limite ? Math.min(10.5, limite * 0.55) : 18.6) * zoom.current * porPantalla;
     const { pitch } = camara.current;
     const cp = Math.cos(pitch);
     const sp = Math.sin(pitch);
@@ -226,10 +267,45 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
     // (fallo que vio Eugenio). En su lugar, los muros de los interiores solo
     // se dibujan por su cara de dentro (culling): si la cámara queda al otro
     // lado, la pared desaparece y sigues viendo la sala, como en Los Sims.
-    // SOLO TERCERA PERSONA (2026-08-22). La primera persona se ha ido con el
-    // cuerpo: sin piernas ni brazos que ver, «tus ojos» era una cámara a ras
-    // de suelo en una sala que se entiende desde arriba.
+    if (vista === 'primera') {
+      // PRIMERA PERSONA: la cámara va en tu cabeza y mira hacia donde miras.
+      // Sin interpolación de posición: cualquier retraso aquí se siente como
+      // mareo, porque el mundo se movería después que tú.
+      // EL PLANO CERCANO. Este es el detalle que hacía invisible el cuerpo: la
+      // cámara recorta todo lo que tiene a menos de 50 cm, y tu pecho, tus
+      // brazos y tus piernas están justo ahí. En primera persona se baja a
+      // 15 cm — suficiente para verte, y lejos todavía del 0,01 que arruina
+      // la precisión de profundidad y hace parpadear la geometría lejana.
+      const cercaQuiere = 0.15;
+      if (cam.near !== cercaQuiere) { cam.near = cercaQuiere; cam.updateProjectionMatrix(); }
 
+      // EL CUERPO MIRA DONDE MIRAS TÚ. Sin esto, arrastrar el ratón giraba la
+      // vista pero dejaba el cuerpo plantado, y al mirar abajo te veías las
+      // piernas de lado, como si llevaras la cabeza torcida.
+      g.rotation.y = yaw + Math.PI;
+
+      // La cámara va donde están los ojos: 1,62 de alto y SOBRE el eje del
+      // cuerpo. Adelantarla parecía buena idea (evita ver el interior del
+      // cráneo) pero dejaba el cuerpo por detrás: al mirar abajo las piernas
+      // salían por el borde de arriba en vez de bajo tus pies. La cabeza no
+      // se dibuja, así que no hace falta adelantarla nada.
+      // 1,70 y no 1,62: el modelo mide 1,81 y sus hombros están sobre 1,50.
+      // Con los ojos a 1,62 los hombros comían el tercio inferior de la
+      // pantalla; a 1,70 quedan abajo del todo, que es donde los ve una
+      // persona de verdad.
+      const ALTO_OJOS = 1.7;
+      cam.position.set(g.position.x, g.position.y + ALTO_OJOS, g.position.z);
+      // `pitch` es la inclinación de la órbita (0,1 mirando al horizonte,
+      // 1,45 casi cenital). Se convierte en el cabeceo de la vista: cuanto
+      // más alta la órbita, más abajo miras.
+      const cabeceo = (0.63 - pitch) * 1.25;
+      tmpMira.set(
+        g.position.x - Math.sin(yaw) * 10,
+        g.position.y + ALTO_OJOS + cabeceo * 10,
+        g.position.z - Math.cos(yaw) * 10,
+      );
+      cam.lookAt(tmpMira);
+    } else {
       // En tercera persona vuelve el plano cercano de siempre: con la cámara
       // a metros del personaje no hace falta apurar, y 0,5 da más precisión
       // de profundidad en el horizonte.
@@ -240,22 +316,81 @@ export function Personaje({ entrada, camara, jugadorPos, obstaculos, onChoque, d
         g.position.z + Math.cos(yaw) * cp * dist,
       );
       cam.position.lerp(tmpCam, 1 - Math.exp(-6 * dt));
-      // SE MIRA AL SUELO, NO AL HORIZONTE (2026-08-22). Antes el punto de
-      // mira se elevaba `dist·tan(20°)` para ver más cielo: tenía sentido con
-      // un cielo que mirar. Aquí lo que hay que ver es el anillo, que está en
-      // el suelo, y esos 20° lo empujaban fuera de la pantalla.
-      tmpMira.set(g.position.x, g.position.y + 1.4, g.position.z);
+      // La mirada va 20° más alta (petición de Eugenio): el punto de mira se
+      // eleva dist·tan(20°) ≈ dist·0,364 — mismo ángulo a cualquier zoom, así
+      // se ve más horizonte y cielo en vez de tanto suelo.
+      tmpMira.set(
+        g.position.x,
+        g.position.y + 1.6 + (zoom.current - 1) * 1.5 + dist * 0.364,
+        g.position.z,
+      );
       cam.lookAt(tmpMira);
-    // Ya no se arrastra ninguna luz: en el visor no hay sol ni sombras que
-    // mover con el jugador (`Piezas.tsx` explica por qué).
+    }
+
+    // --- the shadow camera is small (sharp shadows): it must travel with us
+    const luz = luzRef.current;
+    if (luz) {
+      luz.position.set(g.position.x + 60, 95 + alturaVuelo.current, g.position.z - 45);
+      luz.target.position.set(g.position.x, 0, g.position.z);
+      luz.target.updateMatrixWorld();
+    }
   });
 
   return (
-    // Apareces cerca del centro, mirando al primero del anillo. A 6 m y no a
-    // 9,5: el anillo está centrado en el origen, así que cuanto más cerca del
-    // centro empieces, más entero se ve de una vez.
-    <group ref={grupo} position={[0, 0, 6]}>
-      <Espiritu moviendo={andando} />
+    // Apareces DENTRO de la plaza, mirando al ficus del centro (2026-08-19):
+    // desde aquí se ven el árbol, su estanque y las seis sendas saliendo.
+    <group ref={grupo} position={[0, 0, 9.5]}>
+      {/* El modelo de Kenney ya mira hacia +Z, que es nuestro rumbo 0: la media
+          vuelta que había aquí hacía que anduviera de espaldas. */}
+      {/* En PRIMERA persona el cuerpo SÍ se dibuja (2026-08-19, petición de
+          Eugenio: «se tienen que ver los brazos moviéndose y las piernas»),
+          pero SIN cabeza ni pelo: la cámara está dentro del cráneo y de ellos
+          solo vería la cara interior. Los brazos y las piernas siguen con su
+          animación de verdad, así que andar, correr y saltar se ven desde
+          dentro como en cualquier juego en primera persona. */}
+      {vehiculo === 'pie' && (
+        // El Suspense propio es lo que te deja ANDAR antes de que hayan
+        // bajado los 7,6 MB de animaciones: mientras tanto eres la silueta.
+        // Sin él, React tira abajo la escena entera y vuelves a la pantalla
+        // de carga con el mundo ya montado detrás.
+        <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+          <Persona3D
+            cuerpo={aspecto?.cuerpo || 'character-male-a'}
+            // La marcha sale de la velocidad real (paseo/trote/esprint/salto)
+            // y el ritmo acompasa la zancada a los m/s de verdad.
+            animacion={paso}
+            aspecto={aspecto}
+            ritmo={ritmoAnim}
+            sinCabeza={vista === 'primera'}
+          />
+        </Suspense>
+      )}
+      {vehiculo === 'bici' && (
+        <>
+          {/* SENTADO en el sillín con la postura de conducir (manos al
+              manillar), no de pie sobre los pedales como antes. */}
+          <group position={[0, 0.56, -0.2]}>
+            <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+              <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            </Suspense>
+          </group>
+          <Bici velocidad={vel} />
+        </>
+      )}
+      {vehiculo === 'aptera' && (
+        <>
+          {/* El PILOTO va visible dentro de la burbuja de la cabina. A 0,42
+              quedaba sentado ENCIMA del fuselaje (visto en pruebas): la
+              postura de conducir ya lleva las caderas altas. */}
+          <group position={[0, 0.1, 0.55]}>
+            <Suspense fallback={<CuerpoProvisional color={aspecto?.ropa || '#3e8f6f'} />}>
+              <Persona3D cuerpo={aspecto?.cuerpo || 'character-male-a'} animacion="conducir" aspecto={aspecto} />
+            </Suspense>
+          </group>
+          <Aptera alturaVuelo={alturaVuelo} avanzando={andando} entrada={entrada} />
+          <SombraVuelo alturaVuelo={alturaVuelo} />
+        </>
+      )}
     </group>
   );
 }
