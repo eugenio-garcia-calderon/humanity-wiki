@@ -46,29 +46,34 @@ humanity.wiki {
 # añadir `www` quemó el cupo de 5 fallos por hora. El certificado de origen dura
 # 15 años, no depende de ninguna validación y no tiene cupo.
 #
-# PARA ACTIVARLO, cuando las dos cosas de arriba estén hechas: descomentar este
-# bloque, dejar el certificado en /etc/caddy/origen.pem y su clave en
-# /etc/caddy/origen.key, y recargar Caddy. No hay que tocar la aplicación.
+# ACTIVADO el 2026-08-22. El certificado de origen está en
+# `deploy/certs/` del servidor, que docker-compose monta en
+# `/etc/caddy/certs`. Los ficheros NO están en el repositorio y sobreviven al
+# `git reset --hard` del despliegue porque están ignorados.
 #
-# *.humanity.wiki {
-# 	encode zstd gzip
-# 	tls /etc/caddy/origen.pem /etc/caddy/origen.key
-#
-# 	# Al mismo sitio que el dominio principal: la aplicación distingue el
-# 	# espacio por la cabecera `Host`, que Caddy ya reenvía. Un segundo
-# 	# servicio para esto sería otro sitio donde arreglar lo mismo.
-# 	reverse_proxy app:3000 {
-# 		lb_try_duration 20s
-# 		lb_try_interval 500ms
-# 		fail_duration 0
-# 	}
-#
-# 	header {
-# 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-# 		X-Content-Type-Options "nosniff"
-# 		Referrer-Policy "strict-origin-when-cross-origin"
-# 	}
-# }
+# SI ALGUNA VEZ HAY QUE DESACTIVARLO: volver a comentar este bloque. Lo que
+# NUNCA se hace es al revés —dejarlo activo sin los ficheros—, porque entonces
+# Caddy no arranca y eso no tumba los subdominios: tumba humanity.wiki entera.
+
+*.humanity.wiki {
+	encode zstd gzip
+	tls /etc/caddy/certs/origen.pem /etc/caddy/certs/origen.key
+
+	# Al mismo sitio que el dominio principal: la aplicación distingue el
+	# espacio por la cabecera `Host`, que Caddy ya reenvía. Un segundo
+	# servicio para esto sería otro sitio donde arreglar lo mismo.
+	reverse_proxy app:3000 {
+		lb_try_duration 20s
+		lb_try_interval 500ms
+		fail_duration 0
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
 
 # www.humanity.wiki se redirige en el BORDE de Cloudflare (Redirect Rule
 # «WWW to Root», cert Universal SSL de Cloudflare) — aquí no se sirve ni se
