@@ -95,6 +95,12 @@
       "ruta": "src/pages/FichaProducto.tsx",
       "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
       "desde": "2026-08-22T20:13:11.910Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/DominioPropio.tsx",
+      "motivo": "avisar del minuto de espera",
+      "desde": "2026-08-22T20:16:38.529Z"
     }
   ]
 }
