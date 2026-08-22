@@ -62,12 +62,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/juego/mapa.ts",
-      "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
-      "desde": "2026-08-22T18:32:21.544Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/juego/Aldea.tsx",
       "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
       "desde": "2026-08-22T18:32:25.350Z"
