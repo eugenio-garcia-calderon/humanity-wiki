@@ -137,6 +137,12 @@
       "ruta": "src/components/juego/Editor.tsx",
       "motivo": "techo del mundo 3D: avisar mientras construyes, no al guardar",
       "desde": "2026-08-22T19:37:00.191Z"
+    },
+    {
+      "agente": "prog4",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "P4: entrada de la proteccion frente a administradores",
+      "desde": "2026-08-22T19:37:58.126Z"
     }
   ]
 }
