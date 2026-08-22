@@ -137,9 +137,13 @@ export default function ImportarContactos({ onImportado }: { onImportado?: () =>
       {!resultado && !error && !haySelector() && (
         // POR QUÉ NO HAY BOTÓN DE AGENDA EN ESTE APARATO. Sin esta línea, quien
         // entre desde un iPhone creerá que le falta algo.
+        //
+        // Y NO SE LE MANDA AL FICHERO COMO ANTES (2026-08-23): en el iPhone hay
+        // dos caminos sin exportar nada —encender el selector, o un Atajo— y
+        // decirle «expórtate un .vcf» era mandarle al peor de los tres.
         <p className="text-[10px] text-slate-400 max-w-[19rem] leading-snug">
-          Tu navegador no deja leer la agenda (el iPhone no lo permite). Expórtala
-          a un archivo .vcf desde Contactos y suéltalo aquí.
+          Este navegador no abre la agenda por su cuenta. En el iPhone se arregla
+          sin exportar nada: mira <b className="text-slate-500">Desde el iPhone</b>, aquí debajo.
         </p>
       )}
     </div>
