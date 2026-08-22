@@ -47,12 +47,6 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "entrada tokenomics + enMenu para subpaginas (rebase #220/#235 sobre el registro)",
       "desde": "2026-08-22T18:14:53.006Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/App.tsx",
-      "motivo": "rebase #220: quitar mis rutas manuales, queda la version de main",
-      "desde": "2026-08-22T18:14:57.602Z"
     }
   ]
 }
