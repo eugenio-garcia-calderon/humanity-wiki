@@ -139,12 +139,6 @@
       "desde": "2026-08-22T19:37:00.191Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "registrar dominios propios",
-      "desde": "2026-08-22T19:38:11.743Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "public/manifest.webmanifest",
       "motivo": "lo que Play necesita: id, atajos, categorias, capturas",
