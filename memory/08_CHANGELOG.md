@@ -4807,6 +4807,142 @@ El coordinador paró la fusión con dos preguntas que no tenían respuesta técn
 **¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
 
 También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
+## 2026-08-22 (XIII) — Security phase 0: the floor under "it cannot be corrupted"
+
+Eugenio opened a fourth programmer with a brief of his own: *«esta herramienta
+la van a utilizar altos directivos y gobiernos y no puede ser corrompible»*, with
+blockchain and internal cryptography for the points and for the data, on the
+Linux Foundation stack.
+
+The strategy is `09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`. Its
+uncomfortable conclusion decided the order of the work: **four fifths of
+"incorruptible" is bought in phases 0-2, and none of those three is a
+blockchain.** A chain closes exactly one attack — the operator of the database,
+which is us — and only once it is anchored where we cannot reach it.
+
+### What was measured first, because none of it was known
+
+| | |
+|---|---|
+| Write routes | **150**. An automated scan finds an explicit role check in 67, a session check in 59, nothing visible in 24 |
+| Of those 24 | almost all *are* guarded, by helpers the scan cannot read (`requireAdmin`, `puedeConTabla`, `sesionDe`) |
+| Encrypted at rest | **nothing**. The only cryptography in the product is password hashing and agent-token fingerprints |
+| Signing secrets | in `.env` on the server and in the container's environment |
+| The points balance | is the truth; `movimientos_puntos` is a receipt written beside it, and `ajuste_admin` mints points with no counter-entry |
+
+**The finding is not "24 open routes". It is that the machine cannot tell.**
+With no shared policy module, "is every write authorised?" is answerable only by
+a human reading 150 handlers, and that question eventually gets answered wrong.
+
+### What now exists
+
+- **`src/server/seguridad/politica.ts`** — one table, 150 routes declared. 40
+  reviewed by hand with the reason for each level; the other 110 are declared as
+  `revisar`, which is a third answer and not a pass. That number reaching zero is
+  the rest of phase 0.
+- **`npm run seguridad:permisos`** — the question, answered by a machine. Fails
+  on a route nobody declared, or a table entry whose route no longer exists.
+- **`src/server/seguridad/guardia.ts`** — the table applied, registered in
+  `server.ts` (one line) in **`avisar` mode**: it logs what it would have
+  rejected and rejects nothing. `SEGURIDAD_MODO=exigir` turns it on without a
+  deploy. Verified on port 3003: in `avisar` the route's own message reaches the
+  caller; in `exigir` the guard answers first; public routes and `GET` are never
+  touched.
+- **`src/server/seguridad/cifrado.ts`** — envelope encryption, one key per
+  record, and the wrapped key returned *separately* so it lives in its own table.
+  That separation is what makes destroying a key delete the data in copies that
+  were already made, which is the only erasure that works on backups.
+- **`drizzle/0064_registro_sellado.sql` + `registro.ts`** — a record that only
+  grows and is hash-chained. The verifier names the first broken entry *and the
+  kind* of break: editing a row and deleting one are different failures. Two
+  simultaneous writers cannot fork the chain — a unique index on `huella_previa`
+  settles it in the database, where they can actually see each other.
+
+### The part that is worth saying out loud
+
+The `UPDATE`/`DELETE` triggers on the sealed record are **hygiene, not
+security**. They stop the accident and the 3am shortcut. The test proves it by
+disabling the trigger, editing a row the way an insider with rights would, and
+showing the verifier catches it and points at the exact entry.
+
+And all of it is verifiable *by us*, on our own machine. Against someone who can
+rewrite the database and recompute every hash at leisure, it is worth nothing —
+only phase 2 closes that, by publishing a daily root where we cannot reach it.
+Until that runs, the honest answer to "can this be corrupted?" is **not yet
+fully**, and the difference between saying that and not saying it is the
+difference between security and the appearance of it.
+
+Nothing here is wired to production data yet: the guard warns, the encryption is
+not used by any route, and nothing writes to the sealed record. Said plainly to
+prevent the expensive mistake of believing they protect something they are not
+yet attached to.
+
+---
+
+## 2026-08-22 (XIV) — Layers of protection based on how much a datum matters
+
+Eugenio: *«céntrate en que nadie pueda corromper los datos, vamos a generar
+capas de seguridad en base al nivel de relevancia de un dato o contenido»*. The
+points/token side moved to another conversation.
+
+Full plan and phases: `09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
+
+### The decision that had never been written down
+
+Protecting all 129 tables at maximum is not safer: it is slower, costlier, and
+it is how alerts stop being read. Protecting "the important ones" without saying
+which those are is worse — everyone pictures a different set.
+
+So every table now carries **four separate grades**, the ENS dimensions (RD
+311/2022): integrity, confidentiality, traceability, authenticity. Four instead
+of one label, because of the case that decides the whole design:
+
+> **The commons indicators are public and are the gravest thing that can be
+> corrupted here.** With a single "criticality" label they either get encrypted
+> for no reason, or left unprotected.
+
+The tier is **computed** from the grades, never written by hand. Raising
+something's protection means arguing that it matters more.
+
+| Tier | What it gets, cumulatively | Tables |
+|---|---|---|
+| 3 | signed entries, encryption where confidentiality is high, two-person rule, immediate alarm | **40** |
+| 2 | every write appended to the sealed record, daily root anchored outside | **68** |
+| 1 | authorised route, archive never delete, full history | **18** |
+| 0 | recomputable from its source | **3** |
+
+`npm run seguridad:clasificacion` fails the build on any table nobody has
+classified. Five people work in this repo and tables appear daily; the day one is
+created is the day somebody still remembers what it was for.
+
+### Signatures, because the chain cannot prove authorship
+
+The hash chain proves nothing has changed since it was written. It does **not**
+prove we wrote it: anyone who can write to the table can forge a whole coherent
+chain from scratch. Every entry is now signed with Ed25519 and a key that is not
+in the database.
+
+The test shows exactly what that buys: an entry edited **and its hashes
+recomputed all the way down** passes every chain check, and the signature still
+catches it.
+
+Rotation is in from the first day — each signature carries the id of the key that
+made it, so an entry signed by a previous key answers `NO SÉ` instead of being
+accused of tampering. That distinction is the difference between a verifier
+people trust and one they switch off.
+
+### A bug the tests found, not production
+
+With three retries and no wait, five simultaneous writers starved each other on
+the unique index that keeps the chain from forking. Now eight tries with a short
+uneven wait, and the test pushes ten at once instead of five: a concurrency test
+that only fails sometimes is a test that gets ignored.
+
+### Still attached to nothing
+
+The guard warns, no route encrypts, nothing writes to the sealed record, and
+`CLAVE_FIRMA_REGISTRO` is not set anywhere — so entries would be written unsigned,
+and they say so rather than pretending. Phase B is what attaches it.
 
 ---
 
