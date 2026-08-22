@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, ShieldAlert, Server, type LucideIcon } from 'lucide-react';
+import { Globe, BadgeCheck, ShieldAlert, Server, Scale, type LucideIcon } from 'lucide-react';
 
 // ============================================================================
 // LAS PÁGINAS DE LA «i» (2026-08-22)
@@ -40,6 +40,8 @@ export interface PaginaInfo {
 }
 
 export const PAGINAS_INFO: PaginaInfo[] = [
+  { ruta: 'veracidad', titulo: 'Veracidad', icono: Scale,
+    componente: lazy(() => import('./pages/Veracidad')) },
   { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
   { ruta: 'sobre-red-humana/puntuacion-territorios', titulo: 'Puntuación de territorios', icono: BadgeCheck },
 

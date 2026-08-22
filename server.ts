@@ -41,6 +41,7 @@ import { registerMensajesRoutes } from "./src/server/mensajes.js";
 import { registerCalendarioRoutes } from "./src/server/calendario.js";
 import { registerPersonasRoutes } from "./src/server/personas.js";
 import { registerGuardarRoutes } from "./src/server/guardar.js";
+import { registerVeracidadRoutes } from "./src/server/veracidad.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -328,6 +329,7 @@ async function startServer() {
   registerCalendarioRoutes(app, db);
   registerPersonasRoutes(app, db);
   registerGuardarRoutes(app, db);
+  registerVeracidadRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {

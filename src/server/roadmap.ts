@@ -16,6 +16,10 @@ const newId = () =>
 
 export const GRUPOS = [
   'canvas', 'mapas', 'datos', 'social', 'mercado', 'diseno', 'ia', 'infra', 'gobernanza',
+  // Tenth group (2026-08-22): the veracity area — debates, arguments and
+  // sources. It lives in the SAME board on purpose, so there is never a
+  // second list of what is pending. See memory/13_VERACIDAD.md.
+  'veracidad',
 ] as const;
 export const ESTADOS = new Set(['hecho', 'en_curso', 'por_hacer']);
 export const PRIORIDADES = new Set(['alta', 'media', 'baja']);
