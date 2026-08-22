@@ -4107,3 +4107,37 @@ device it exists for, and the install card had its only button covered. Fixed in
 `src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
 instead of hard-coding today's 44px — that bar is mobile-only and belongs to
 another file, so a copied number would rot in silence.
+
+### Tested for real, and three defects it found (Programador 3)
+
+Ran the platform in production mode (`NODE_ENV=production`, `dist/`) on 3002 and
+tried it with the server switched off. That test is the whole reason to trust any
+of the above, and it broke three ways:
+
+1. **Every cache write was fire-and-forget.** `caches.open(...).then(...)` with no
+   `event.waitUntil` lets the browser kill the worker the instant the response
+   reaches the page. The result looked random: `/api/data/*` was saved, the feed
+   (`/api/publicaciones`, `/api/proyectos`) was not, and offline the home screen
+   said **"0 publicaciones"**. All four writes are now inside `waitUntil`.
+
+2. **The first visit cached nothing of the feed.** A service worker does not
+   control the page that installs it, so every request the app fires on that
+   first load goes straight past it. The platform only worked on a plane from the
+   *second* visit — and the first visit is exactly when somebody adds it to their
+   home screen and then tries it. `activate` now warms three endpoints.
+
+3. **`huecoInferior()` swept every element in the DOM** calling `getComputedStyle`
+   and `getBoundingClientRect` on each, wired to `resize`, which fires dozens of
+   times while a phone rotates. Replaced with one `elementsFromPoint` at the
+   bottom edge, plus a 150 ms debounce.
+
+**Result with the server stopped:** the app opens, shows 84 publicaciones and the
+real feed, and the banner reads "estás viendo una copia guardada hace menos de un
+minuto" sitting at `calc(44px + env(safe-area-inset-bottom))` — clear of the
+navigation bar.
+
+**A note on where this was verified.** The in-app automation browser fails *every*
+request a service worker handles — a fifteen-line worker that does nothing but
+`fetch(event.request)` fails there too. Everything above was therefore checked in
+real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
+live camera preview) is still only verifiable by Eugenio on his own device.

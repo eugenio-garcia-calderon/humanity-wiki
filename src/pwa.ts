@@ -10,6 +10,27 @@
  *
  * `?sw=off` unregisters and wipes the caches, on any environment. That is the way
  * out for a user stuck on a bad worker, and it works without a developer.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * HOW TO TEST THIS, AND WHERE NOT TO (read before you debug anything here)
+ *
+ * **The in-app automation browser cannot run a service worker.** Every request a
+ * worker handles fails there with `net::ERR_FAILED`, while the same URL loads
+ * fine with `?sw=off`. This is not your code: a fifteen-line worker whose only
+ * body is `fetch(event.request)` fails there too. Half a session was spent
+ * hunting a bug that did not exist. **Use real Chrome.**
+ *
+ * And test with the server actually stopped, in production mode:
+ *
+ *   NODE_ENV=production PORT=3002 node --env-file=.env \
+ *     ../../node_modules/.bin/tsx server.ts
+ *
+ * then kill it and reload. Everything that has gone wrong with this feature went
+ * wrong only in that state: cache writes lost because they sat outside
+ * `event.waitUntil`, and a first visit that cached nothing because a worker does
+ * not control the page that installs it. Neither is visible while the server is
+ * up, and both made the app open empty on a plane.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { vigilarSinConexion } from "./avisoSinConexion";
