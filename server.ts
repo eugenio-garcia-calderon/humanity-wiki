@@ -15,6 +15,7 @@ import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
 import { registerMedicionRoutes, medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
+import { registerTextosRoutes } from "./src/server/textos.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
@@ -288,6 +289,10 @@ async function startServer() {
   // comprueban que quien mira es administrador, y `req.user` lo instala la
   // línea de arriba. El cronómetro en sí se montó antes (1.45).
   registerMedicionRoutes(app, db);
+
+  // Los textos de las páginas de información, editables por un administrador
+  // (2026-08-22). Va después de la autenticación porque comprueba el nivel.
+  registerTextosRoutes(app, db);
 
   // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
   // Van después de la autenticación porque dependen de `req.user`
