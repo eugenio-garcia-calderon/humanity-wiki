@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/pages/MiPedido.tsx",
-      "motivo": "fase 1 economia: entrega de lo digital",
-      "desde": "2026-08-22T19:09:21.135Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "fase 1 economia: entrega de lo digital",
       "desde": "2026-08-22T19:09:27.541Z"
