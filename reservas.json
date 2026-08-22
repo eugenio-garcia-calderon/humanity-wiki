@@ -179,6 +179,12 @@
       "ruta": "src/pages/FichaProducto.tsx",
       "motivo": "envio pagado con puntos + direccion sin Stripe (Eugenio)",
       "desde": "2026-08-22T22:12:08.428Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/ProductoPublico.tsx",
+      "motivo": "envio pagado con puntos + direccion sin Stripe (Eugenio)",
+      "desde": "2026-08-22T22:12:12.466Z"
     }
   ]
 }
