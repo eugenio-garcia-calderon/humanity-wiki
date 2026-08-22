@@ -38,12 +38,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/pages/Home.tsx",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:22.486Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/Indicators.tsx",
       "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
       "desde": "2026-08-22T12:10:26.181Z"
