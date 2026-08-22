@@ -137,6 +137,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "telecomunicaciones: llamada perdida en la campana",
       "desde": "2026-08-22T16:09:43.253Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/uploads.ts",
+      "motivo": "telecomunicaciones: notas de voz (audio/webm)",
+      "desde": "2026-08-22T16:09:46.815Z"
     }
   ]
 }
