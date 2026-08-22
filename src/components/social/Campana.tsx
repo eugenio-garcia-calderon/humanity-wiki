@@ -138,7 +138,26 @@ export default function Campana({ compacto }: { compacto?: boolean }) {
       {abierta && (
         <div
           onClick={e => e.stopPropagation()}
-          className="absolute right-0 top-full mt-1 w-[19rem] max-h-[26rem] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+          className={cn(
+            'overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150',
+            // ══ EN EL MÓVIL, CENTRADA Y FIJA ═══════════════════════════════
+            // (2026-08-22, hormiguero: «la ventanita que se abre de
+            // notificaciones no está centrada en versión móvil»).
+            //
+            // Colgaba de la campana con `absolute right-0`, y la campana está
+            // pegada al borde derecho: en una pantalla de 375 px, un panel de
+            // 304 px salía descentrado y rozando el borde, con el texto de la
+            // izquierda casi contra el marco.
+            //
+            // En el teléfono pasa a ser `fixed` y centrada en la PANTALLA, con
+            // el mismo margen a los dos lados y un alto que nunca se sale.
+            // Fija y no absoluta a propósito: absoluta la arrastra el
+            // desplazamiento de la cabecera y se va de la vista.
+            'fixed left-1/2 -translate-x-1/2 top-[3.25rem] w-[calc(100vw-1.5rem)] max-w-[22rem] max-h-[70vh]',
+            // En pantalla ancha se queda como estaba: colgando de la campana,
+            // que es donde el ojo la busca cuando hay sitio de sobra.
+            'sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-full sm:mt-1 sm:w-[19rem] sm:max-h-[26rem]',
+          )}
         >
           <div className="sticky top-0 bg-white px-3 py-2 flex items-center justify-between gap-2 border-b border-slate-100">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Notificaciones</p>

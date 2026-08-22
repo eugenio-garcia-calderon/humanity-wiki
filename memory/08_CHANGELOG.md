@@ -3523,3 +3523,80 @@ check has to be made *before* the update: read afterwards, the old name is gone
 and the count comes back as one.
 
 Test data and the local verification session were deleted afterwards.
+
+---
+
+## 2026-08-22 (IV) — Hormiguero #2 to #6 and #8
+
+Working the board top-down, so as not to collide with the other session, which
+comes up from the bottom.
+
+### #2 · The home page
+
+- **The «Humanidad / Mías» switch is gone.** It split the front page in two and
+  made you choose one before seeing anything — and the «Mías» half is what your
+  own profile already is. The *mode* stays alive in the address (`?mias=1`),
+  because that is what «Mis publicaciones» and the link from your profile use:
+  removing the mode as well would have left those two pointing nowhere.
+- **No heading over the circles.** A row of round faces already says what it is.
+  What the heading actually added — following vs suggestion — is in the ring:
+  coloured if you follow them, dashed grey if it is a suggestion.
+- **The tasks are out.** They went in yesterday so the home page would say
+  whether there was anything to do today. Right idea, wrong place: five tasks
+  with their deadlines above the publications turn a front page into an inbox,
+  and the first thing you see on entering ends up being what you owe. Projects
+  stay — they are somewhere to go, not a debt.
+
+### #3 · The notifications panel on a phone
+
+It hung off the bell with `absolute right-0`, and the bell is pinned to the
+right edge: on a 375 px screen a 304 px panel came out lopsided, its left text
+almost against the frame. On a phone it is now `fixed` and centred on the
+screen, with the same margin on both sides and a height that cannot overflow.
+Fixed rather than absolute on purpose: absolute rides the header's scrolling.
+On a wide screen nothing changed — it still hangs from the bell.
+
+### #4 · The header
+
+The permanent «Inicio» tab was already gone in the previous deploy. The other
+half of the note: **the menu button no longer has a black background.** It was
+the darkest pill in the whole bar and pulled the eye to the corner; and black
+means something else here — «you are here» — which is not what a button that
+opens a menu is.
+
+### #5 and #8 · «The screen isn't fixed, it slides sideways»
+
+Two notes, one cause, and it was not the page: it was Safari. On iOS, tapping a
+field whose text is **under 16 px** makes the browser zoom in so it can be
+read — and once zoomed, the whole page can be dragged sideways. From outside it
+looks exactly as he described it: «se ha hecho como zoom» and «no está fija».
+Nearly every field in the platform is 14 px, so it happened on every form.
+
+The cure is the type size, not the zoom: fields go to 16 px on phone-width
+screens and Safari stops zooming because it no longer needs to. The other way
+out — `maximum-scale=1` — takes pinch-zoom away from everybody, including the
+people who need it to read.
+
+Measured first: the page itself does **not** overflow horizontally (`scrollWidth
+== clientWidth == 375`), which is what ruled out a stray wide element and
+pointed at the zoom.
+
+### #6 · Attaching files when you report something
+
+Half of what fails is easier to show than to describe. The form now takes files,
+holds them until the note exists — an attachment has to hang from something, and
+while you are typing that something has no id yet — and uploads them right
+after. If one fails it says which and why; the note is already saved, so nothing
+is undone, but staying quiet would leave you thinking the screenshot arrived.
+Images show as thumbnails in the note; anything else, as a named link.
+
+Reuses the `archivos` table, adding `incidencia_id` as a fourth container rather
+than a new table: an attachment is the same thing wherever it hangs from.
+Reading the board is open to anyone; **attaching is limited to the note's author
+or an admin** — without that line, anybody with a session could hang files on
+someone else's note.
+
+**And a bug came out of it**: `archivos` has a check constraint demanding
+exactly one container, and it still counted three. The first attempt failed with
+«violates check constraint». Migration `0056` brings it up to four — worth
+knowing, because the same trap waits for the fifth.

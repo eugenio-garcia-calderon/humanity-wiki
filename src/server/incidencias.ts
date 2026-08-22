@@ -30,7 +30,25 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
   app.get('/api/incidencias', async (_req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto
+        SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto,
+          -- ══ LOS ADJUNTOS, EN LA MISMA CONSULTA ═══════════════════════════
+          -- (2026-08-22, hormiguero: «permite adjuntar archivos cuando se
+          -- reporta un bug»).
+          --
+          -- Van aquí y no en una llamada por nota: el tablero tiene decenas de
+          -- notas y pedir los ficheros de cada una serían decenas de viajes
+          -- para pintar una pantalla. Una captura pesa; su ficha no.
+          --
+          -- COALESCE a lista vacía: así «no tiene adjuntos» es una lista de
+          -- cero y no un «null» que cada cliente tenga que recordar
+          -- comprobar.
+          COALESCE((
+            SELECT json_agg(json_build_object(
+                     'id', a.id, 'url', a.url, 'nombre', a.nombre,
+                     'clase', a.clase, 'bytes', a.bytes) ORDER BY a.created_at)
+            FROM archivos a
+            WHERE a.incidencia_id = i.id AND a.archived_at IS NULL
+          ), '[]'::json) AS adjuntos
         FROM incidencias i LEFT JOIN users u ON u.id = i.autor_user_id
         WHERE i.archived_at IS NULL
         ORDER BY

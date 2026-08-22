@@ -11,10 +11,11 @@
 // LO NARANJA VA ARRIBA, y lo ordena el servidor. Es lo único de esta lista que
 // está parado esperando a una persona; enterrarlo entre lo demás es cómo se
 // quedan las cosas paradas una semana sin que nadie lo sepa.
-import { useEffect, useState } from 'react';
-import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bug, Lightbulb, Plus, Loader2, Check, Hand, Circle, Trash2, MessageSquare, Paperclip, X, ImageIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth, ROLE } from '../contexts/AuthContext';
+import { subirArchivo } from '../utils/subir';
 
 interface Incidencia {
   id: string;
@@ -27,7 +28,12 @@ interface Incidencia {
   autor_user_id: string | null;
   autor_nombre: string | null;
   created_at: string;
+  /** Capturas y ficheros colgados de esta nota. Siempre una lista: vacía si no
+   *  tiene ninguno, nunca `null` (lo garantiza la consulta del servidor). */
+  adjuntos?: Adjunto[];
 }
+
+interface Adjunto { id: string; url: string; nombre: string; clase: string; bytes: number | string }
 
 const SEMAFORO = {
   esperando: { punto: 'bg-rose-500',   texto: 'text-rose-700',   fondo: 'bg-rose-50 border-rose-200',     label: 'Esperando' },
@@ -45,6 +51,18 @@ export default function Hormiguero() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<'todas' | Incidencia['estado']>('todas');
+  /** ══ LOS FICHEROS QUE ACOMPAÑAN A LO QUE ESTÁS ANOTANDO ═════════════════
+   *  (2026-08-22, hormiguero: «permite adjuntar archivos cuando se reporta un
+   *  bug»). La mitad de los fallos se cuentan mejor con una captura que con un
+   *  párrafo.
+   *
+   *  SE QUEDAN EN LA MANO HASTA QUE LA NOTA EXISTE. Un adjunto cuelga de algo,
+   *  y mientras escribes ese algo todavía no tiene id. Así que se guardan aquí
+   *  y se suben justo después de crearla: si la creación falla, no queda un
+   *  fichero suelto en el servidor sin dueño. */
+  const [enLaMano, setEnLaMano] = useState<File[]>([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const elegir = useRef<HTMLInputElement>(null);
 
   const cargar = () => fetch('/api/incidencias', { credentials: 'include' })
     .then(r => r.json()).then(j => setLista(Array.isArray(j) ? j : [])).catch(() => setLista([]));
@@ -62,8 +80,32 @@ export default function Hormiguero() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || 'No se ha podido anotar.');
-      setLista(l => [j, ...(l || [])]);
-      setTitulo(''); setDetalle('');
+
+      // Y AHORA LOS FICHEROS, con la nota ya creada y con id.
+      const adjuntos: Adjunto[] = [];
+      if (enLaMano.length) {
+        setSubiendo(true);
+        for (const f of enLaMano) {
+          const sub = await subirArchivo(f);
+          if (sub.error) { setError(`«${f.name}» no se ha podido subir: ${sub.error}`); continue; }
+          const c = await fetch('/api/archivo', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              incidencia_id: j.id, url: sub.url, nombre: f.name,
+              mime: sub.type, bytes: sub.bytes, clase: sub.clase,
+            }),
+          });
+          // SE DICE SI UN FICHERO SE QUEDA FUERA. La nota ya está anotada, así
+          // que no se deshace nada; pero callarlo dejaría a quien reporta
+          // creyendo que la captura ha llegado.
+          if (c.ok) adjuntos.push(await c.json());
+          else setError(`«${f.name}» se ha subido pero no se ha podido colgar de la nota.`);
+        }
+        setSubiendo(false);
+      }
+      setLista(l => [{ ...j, adjuntos }, ...(l || [])]);
+      setTitulo(''); setDetalle(''); setEnLaMano([]);
     } catch (e: any) { setError(e.message); } finally { setGuardando(false); }
   };
 
@@ -127,10 +169,44 @@ export default function Hormiguero() {
             className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none leading-snug focus:outline-none focus:border-emerald-300"
           />
           {error && <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-2.5 py-1.5">{error}</p>}
-          <div className="flex justify-end">
-            <button onClick={crear} disabled={guardando || !titulo.trim()}
+          {/* LO QUE LLEVA ADJUNTO, antes de anotarlo. Cada uno con su ✕: si
+              te has equivocado de captura, quitarla no puede obligarte a
+              empezar de nuevo. */}
+          {enLaMano.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {enLaMano.map((f, i) => (
+                <span key={`${f.name}-${i}`}
+                  className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-600 max-w-full">
+                  {f.type.startsWith('image/') ? <ImageIcon className="w-3 h-3 shrink-0 text-slate-400" /> : <Paperclip className="w-3 h-3 shrink-0 text-slate-400" />}
+                  <span className="truncate max-w-[10rem]">{f.name}</span>
+                  <button onClick={() => setEnLaMano(l => l.filter((_, j) => j !== i))}
+                    title="Quitarlo" className="p-0.5 rounded text-slate-400 hover:text-rose-600">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2">
+            <input
+              ref={elegir} type="file" multiple className="hidden"
+              onChange={e => {
+                setEnLaMano(l => [...l, ...Array.from(e.target.files || [])]);
+                // Se limpia el input: sin esto, elegir DOS VECES el mismo
+                // fichero no dispara el evento la segunda.
+                e.target.value = '';
+              }}
+            />
+            <button onClick={() => elegir.current?.click()}
+              title="Adjuntar una captura o un archivo"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-500 hover:border-emerald-300 hover:text-emerald-700 text-sm font-bold transition-colors">
+              <Paperclip className="w-4 h-4" /> Adjuntar
+            </button>
+            <button onClick={crear} disabled={guardando || subiendo || !titulo.trim()}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-40 transition-colors">
-              {guardando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Anotar
+              {guardando || subiendo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {subiendo ? 'Subiendo…' : 'Anotar'}
             </button>
           </div>
         </div>
@@ -183,6 +259,29 @@ export default function Hormiguero() {
                       <p className="mt-1.5 inline-flex items-start gap-1.5 text-[11px] text-slate-600">
                         <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-px text-slate-400" /> {i.respuesta}
                       </p>
+                    )}
+
+                    {/* ══ LO QUE SE ADJUNTÓ ═════════════════════════════════
+                        Las imágenes se ven; lo demás es un enlace con su
+                        nombre. Una captura de un fallo hay que MIRARLA, y
+                        obligar a abrirla en otra pestaña para eso es pedirle
+                        un clic a quien ya se ha tomado la molestia de
+                        adjuntarla. */}
+                    {!!i.adjuntos?.length && (
+                      <div className="flex flex-wrap items-start gap-2 mt-2">
+                        {i.adjuntos.map(a => (a.clase === 'imagen' ? (
+                          <a key={a.id} href={a.url} target="_blank" rel="noreferrer" title={a.nombre}>
+                            <img src={a.url} alt={a.nombre} loading="lazy"
+                              className="h-24 w-auto max-w-[12rem] object-cover rounded-lg border border-slate-200 hover:border-emerald-300 transition-colors" />
+                          </a>
+                        ) : (
+                          <a key={a.id} href={a.url} target="_blank" rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-slate-200 text-[11px] font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors">
+                            <Paperclip className="w-3 h-3 text-slate-400" />
+                            <span className="truncate max-w-[12rem]">{a.nombre}</span>
+                          </a>
+                        )))}
+                      </div>
                     )}
 
                     <p className="text-[10px] text-slate-300 mt-1">
