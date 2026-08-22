@@ -173,6 +173,12 @@
       "ruta": "buscador first: ordenar los resultados de /api/search",
       "motivo": "",
       "desde": "2026-08-22T21:45:01.084Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/paginasInfo.ts",
+      "motivo": "privacidad: la pagina que exigen las dos tiendas",
+      "desde": "2026-08-22T21:45:21.692Z"
     }
   ]
 }
