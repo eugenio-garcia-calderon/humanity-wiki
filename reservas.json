@@ -119,6 +119,12 @@
       "ruta": "src/server/publicar.ts",
       "motivo": "fase 1 economia: entrega de lo digital (pedido + producto)",
       "desde": "2026-08-22T19:10:13.056Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "drizzle/0088_veracidad_revision.sql",
+      "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
+      "desde": "2026-08-22T19:10:40.908Z"
     }
   ]
 }
