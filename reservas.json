@@ -119,30 +119,6 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
       "desde": "2026-08-22T22:23:56.659Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "drizzle/0096_publicaciones_en_proyecto.sql",
-      "motivo": "publicaciones dentro de un proyecto",
-      "desde": "2026-08-22T23:08:33.198Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "src/server/roadmap.ts",
-      "motivo": "publicaciones dentro de un proyecto",
-      "desde": "2026-08-22T23:08:33.198Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "src/server/menu.ts",
-      "motivo": "dashboard: publicaciones dentro del proyecto",
-      "desde": "2026-08-22T23:17:55.753Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "src/pages/Proyectos.tsx",
-      "motivo": "dashboard: publicaciones dentro del proyecto",
-      "desde": "2026-08-22T23:17:55.753Z"
     }
   ]
 }
