@@ -149,6 +149,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "el atajo ?atajo=crear del manifiesto tiene que abrir el creador",
       "desde": "2026-08-22T19:38:52.948Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "deploy/Caddyfile",
+      "motivo": "dominios propios: certificado bajo demanda",
+      "desde": "2026-08-22T19:39:00.154Z"
     }
   ]
 }
