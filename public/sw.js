@@ -24,17 +24,28 @@
  *    could change under the same URL, so the network wins and the cache is only
  *    the fallback.
  *
- * 3. NO `skipWaiting()`. A new worker waits for every tab to close before taking
- *    over. Swapping the code under a running app mid-session mixes old HTML with
- *    new assets, which is the classic way a PWA breaks in a way nobody can
- *    reproduce. Slower to roll out, impossible to corrupt.
+ * 3. `skipWaiting()` — REVERSED ON 2026-08-22, AND HERE IS WHY. The first
+ *    version refused it: a worker that takes over mid-session can mix old HTML
+ *    with new assets, which is the classic unreproducible PWA bug. But waiting
+ *    for every tab to close never happens on a phone — an installed app resumes
+ *    from the switcher for days — and the result was worse than the thing being
+ *    avoided: Eugenio's iPhone sat three deploys behind, and the only way out
+ *    was asking him to type `?sw=off` into Safari. His answer: «es un apaño, yo
+ *    quiero que funcione sin esa url cutre».
+ *
+ *    So the new worker takes over immediately, throws away the stale code
+ *    caches, and RELOADS its clients. The mixing problem is avoided not by
+ *    waiting but by reloading: after `activate` nothing old is left running.
+ *    A person may see the app refresh once, right after a deploy. That is the
+ *    price, it is paid once, and it is far cheaper than a phone that can never
+ *    update.
  *
  * KILL SWITCH: loading any page with `?sw=off` unregisters this worker and wipes
  * its caches. A bad service worker is the one bug a user cannot clear by
  * reloading, so there has to be a way out that does not need a developer.
  */
 
-const VERSION = "hw-v3";
+const VERSION = "hw-v4";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 const MEDIA = `${VERSION}-media`;
@@ -86,6 +97,12 @@ self.addEventListener("install", (event) => {
 // their home screen and then tries it. Three requests, once per version.
 const CALENTAR = ["/api/publicaciones", "/api/proyectos", "/api/circulos"];
 
+self.addEventListener("install", () => {
+  // Take over as soon as this worker is ready instead of waiting for every tab
+  // to close. See rule 3: on a phone that wait never ends.
+  self.skipWaiting();
+});
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -94,6 +111,20 @@ self.addEventListener("activate", (event) => {
         names.filter((n) => !n.startsWith(VERSION)).map((n) => caches.delete(n)),
       );
       await self.clients.claim();
+
+      // AND RELOAD WHOEVER IS STILL RUNNING THE OLD CODE. This is the part that
+      // repairs a stuck install with nobody typing anything: it needs no
+      // cooperation from the page, which matters because the stale page is
+      // exactly the code that cannot be trusted to update itself.
+      const abiertos = await self.clients.matchAll({ type: "window" });
+      for (const c of abiertos) {
+        try {
+          await c.navigate(c.url);
+        } catch {
+          // Safari does not always allow navigate(); the page then picks up the
+          // new build on its next navigation, which is no worse than before.
+        }
+      }
 
       const c = await caches.open(DATOS);
       await Promise.all(
