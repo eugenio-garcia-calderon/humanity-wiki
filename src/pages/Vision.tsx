@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Compass, Layers, Map as MapIcon, Table2, Users, Store, Palette, Sparkles,
   Shield, Scale, FolderKanban, ArrowUpRight, Pencil, Check, X, Coins,
-  Sparkle, TrendingUp, ShoppingBag, Server, Cpu, RefreshCw, Receipt, MessagesSquare,
+  Sparkle, TrendingUp, ShoppingBag, Server, Cpu, RefreshCw, Receipt, MessagesSquare, Send,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -126,7 +126,87 @@ const MOTIVO_LABEL: Record<string, string> = {
   vista_publicacion: 'Vista de una publicación tuya',
   gasto_ia: 'Uso de la IA',
   ajuste_admin: 'Ajuste',
+  transferencia_enviada: 'Enviado a otra persona',
+  transferencia_recibida: 'Recibido de otra persona',
+  saldo_inicial: 'Apertura del libro',
 };
+
+/**
+ * ENVIAR PUNTOS A OTRA PERSONA (2026-08-22, Eugenio: «se intercambiarán
+ * entre ellos» — piloto). El formulario vive plegado tras un botón: enviar
+ * es menos frecuente que mirar el saldo, y un formulario siempre abierto
+ * convertiría la tarjeta del saldo en un panel de operaciones.
+ *
+ * El servidor decide si la función está encendida (`PUNTOS_TRANSFERENCIA`);
+ * aquí solo se enseña el error tal cual llega — incluida la frase de que las
+ * transferencias aún no están activadas, que es información, no un fallo.
+ */
+function EnviarPuntos({ onEnviado }: { onEnviado: () => void }) {
+  const [abierto, setAbierto] = useState(false);
+  const [para, setPara] = useState('');
+  const [cantidad, setCantidad] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [resultado, setResultado] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  const enviar = async () => {
+    setEnviando(true); setResultado(null);
+    try {
+      const res = await fetch('/api/puntos/transferir', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ para: para.trim(), cantidad: Number(cantidad.replace(',', '.')) }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setResultado({ ok: false, texto: json.error || 'No se pudo enviar.' }); return; }
+      setResultado({ ok: true, texto: `Enviados ${Number(json.cantidad).toLocaleString('es-ES', { minimumFractionDigits: 2 })} puntos a ${json.enviado_a}.` });
+      setPara(''); setCantidad('');
+      onEnviado();
+    } catch {
+      setResultado({ ok: false, texto: 'No se pudo enviar. Prueba otra vez.' });
+    } finally { setEnviando(false); }
+  };
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => { setAbierto(o => !o); setResultado(null); }}
+        className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-amber-300 hover:bg-amber-50 text-amber-800 rounded-xl text-xs font-black transition-colors"
+      >
+        <Send className="w-3.5 h-3.5" /> Enviar puntos a alguien
+      </button>
+      {abierto && (
+        <div className="mt-3 p-4 bg-white border border-amber-200 rounded-2xl space-y-2.5">
+          <label className="block">
+            <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">Para (su correo o su nombre exacto)</span>
+            <input
+              value={para} onChange={e => setPara(e.target.value)}
+              placeholder="nombre@correo.com"
+              className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">Cantidad de puntos</span>
+            <input
+              value={cantidad} onChange={e => setCantidad(e.target.value)}
+              inputMode="decimal" placeholder="5"
+              className="mt-1 w-32 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </label>
+          <button
+            onClick={enviar}
+            disabled={enviando || !para.trim() || !cantidad.trim()}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 text-white rounded-xl text-xs font-black transition-colors"
+          >
+            {enviando ? 'Enviando…' : 'Enviar'}
+          </button>
+          {resultado && (
+            <p className={cn('text-xs font-bold', resultado.ok ? 'text-emerald-700' : 'text-rose-600')}>{resultado.texto}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** La pestaña Economía: qué son los puntos, y tu saldo si has iniciado sesión. */
 function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
@@ -170,6 +250,8 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
           >
             <ShoppingBag className="w-3.5 h-3.5" /> Comprar 100 puntos por 100 €
           </button>
+
+          <EnviarPuntos onEnviado={cargarSaldo} />
 
           {!!saldo?.movimientos?.length && (
             <div className="mt-5 pt-4 border-t border-amber-100 space-y-1.5">

@@ -62,7 +62,7 @@ const BLOQUES: { titulo: string; nota?: string; tareas: { texto: string; estado:
       { texto: 'Construir el reparto mensual sobre esos parámetros: cálculo del bote, pesos del éxito, avisos de caducidad e inactividad', estado: 'pendiente' },
       { texto: 'Caducidad y pérdida por inactividad: reflejarlas en los términos de uso ANTES de activarlas — quitar saldo sin condiciones escritas es un pleito servido', estado: 'legal' },
       { texto: 'Venta de puntos ENTRE personas (mercado secundario del punto): solo con dictamen legal delante — es distinta de donarlos, que va en el piloto', estado: 'legal' },
-      { texto: 'Contar y pagar como dos cosas: vistas VÁLIDAS (una por persona y ventana, con sesión) separadas del contador bruto, y el reparto solo lee las válidas. El número que lo prioriza (prog4): hoy el techo de acuñación real es 0,50 puntos × ventanas propias al día — mil ventanas propias son 500 puntos/día; con una vista por persona, el mismo ataque baja a ~0,10', estado: 'pendiente' },
+      { texto: 'Contar y pagar como dos cosas: vistas VÁLIDAS (una por persona, ventana y día, con sesión) separadas del contador bruto; solo las válidas acuñan y solo ellas leerá el reparto. Construido (vistas_validas): el techo de acuñación baja de 0,50 puntos × ventanas propias/día a ~0,10', estado: 'en_revision' },
       { texto: 'Política de cese ordenado: qué pasa con los saldos si la plataforma cierra', estado: 'decision' },
     ],
   },

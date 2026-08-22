@@ -96,7 +96,9 @@ export function Hierba({ cantidad }: { cantidad: number }) {
       intentos++;
       // Sesgo hacia el pueblo: es donde está el jugador casi siempre.
       const ang = azar() * Math.PI * 2;
-      const r = 10 + Math.pow(azar(), 1.6) * 210;
+      // Radio del césped: 210 era para el mundo viejo. Con MITAD = 95, la
+      // hierba que caía más allá de 90 no la pisaba nadie (2026-08-22).
+      const r = 10 + Math.pow(azar(), 1.6) * 78;
       const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
       if (!hierbaPermitida(x, z)) continue;
       const esc = 0.75 + azar() * 0.85;

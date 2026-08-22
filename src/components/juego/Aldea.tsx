@@ -273,7 +273,9 @@ function Terreno() {
           cada ~5,5 m; los parches tintados de siempre disimulan la
           repetición a lo lejos. */}
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[1100, 1100]} />
+        {/* El suelo, del tamaño del mundo (2026-08-22): era 1100×1100 para un
+            mundo de 545 de medio lado. Con MITAD = 95 sobra con 220. */}
+        <planeGeometry args={[220, 220]} />
         <meshStandardMaterial {...mapasPBR('hierba', 200)} />
       </mesh>
       {parches.map((p, i) => (
@@ -420,14 +422,19 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
     });
 
     // Arbustos, rocas y flores: vida de suelo, sin identidad (no editables).
+    // ══ MENOS PAJA, Y DENTRO DEL MUNDO (2026-08-22) ═════════════════════
+    // Eran 220 arbustos, 90 rocas y 260 flores repartidos por 1.040 metros —
+    // el 97 % caía donde nadie va. Con el mundo en 190 de lado, la misma
+    // densidad visual se consigue con una fracción: lo que se ve alrededor de
+    // la plaza es lo mismo, y lo que había en el descampado no lo miraba nadie.
     const arbustos = new THREE.InstancedMesh(
       abollar(new THREE.SphereGeometry(1, 10, 8), 0.75, 0.2),
       new THREE.MeshStandardMaterial({ ...mapasPBR('follaje', 2, 1.4) }),
-      220,
+      60,
     );
-    for (let i = 0; i < 220; i++) {
+    for (let i = 0; i < 60; i++) {
       let x = 0, z = 0, intentos = 0;
-      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
+      do { x = (azar() - 0.5) * 175; z = (azar() - 0.5) * 175; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
       const s = 0.6 + azar() * 0.9;
       posicion.set(x, 0.45 * s, z);
       escala.set(s, s * 0.7, s);
@@ -440,11 +447,11 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
     const rocas = new THREE.InstancedMesh(
       abollar(new THREE.DodecahedronGeometry(1, 1), 0.7, 0.3),
       new THREE.MeshStandardMaterial({ ...mapasPBR('roca', 1.6), flatShading: true }),
-      90,
+      26,
     );
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 26; i++) {
       let x = 0, z = 0, intentos = 0;
-      do { x = (azar() - 0.5) * 1040; z = (azar() - 0.5) * 1040; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
+      do { x = (azar() - 0.5) * 175; z = (azar() - 0.5) * 175; intentos++; } while (!sueloLibre(x, z) && intentos < 8);
       const s = 0.4 + azar() * 1.1;
       colocar(rocas, i, x, 0.3 * s, z, s, azar() * Math.PI);
     }
@@ -452,11 +459,11 @@ function Vegetacion({ arboles, onPulsar, onAgarrar }: {
     const flores = new THREE.InstancedMesh(
       new THREE.SphereGeometry(0.14, 6, 5),
       new THREE.MeshStandardMaterial({ color: '#ffffff' }),
-      260,
+      120,
     );
-    for (let i = 0; i < 260; i++) {
-      const x = (azar() - 0.5) * 320;
-      const z = (azar() - 0.5) * 320;
+    for (let i = 0; i < 120; i++) {
+      const x = (azar() - 0.5) * 150;
+      const z = (azar() - 0.5) * 150;
       colocar(flores, i, x, 0.12, z, 0.8 + azar() * 0.6, 0);
       flores.setColorAt(i, color.set(PALETA.flor[Math.floor(azar() * PALETA.flor.length)]));
     }
