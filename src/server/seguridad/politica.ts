@@ -123,6 +123,12 @@ const REVISADAS: Entrada[] = [
   { m: 'DELETE', ruta: '/api/finanzas/objetivos/:id', guardia: { tipo: 'propietario' } },
   { m: 'POST', ruta: '/api/juego/mundo', guardia: { tipo: 'sesion' }, nota: 'juego.ts:497 requiereUsuario' },
 
+  // ══ LO QUE ENTRÓ EL 2026-08-22 POR LA NOCHE ═════════════════════════════
+  { m: 'POST', ruta: '/api/admin/tokenomics/precios', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'a qué precio se venden los puntos: cambiarlo cambia lo que vale el dinero de dentro' },
+  { m: 'POST', ruta: '/api/puntos/transferir', guardia: { tipo: 'sesion' },
+    nota: 'puntos.ts — el emisor sale de la sesión, nunca del cuerpo; detrás de PUNTOS_TRANSFERENCIA, apagado hasta que Eugenio lo encienda' },
+
   // ══ LO QUE ENTRÓ EL 2026-08-22 POR LA TARDE ═════════════════════════════
   // Veinticinco rutas nuevas de otros cinco programadores en una tarde. Las
   // cazó la auditoría al fusionar `main`, que es exactamente para lo que está:

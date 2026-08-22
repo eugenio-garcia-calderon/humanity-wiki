@@ -33,9 +33,38 @@ I went looking for a leak and did not find one:
 - Agent accounts are level 1 by design, and the agent token opens the hormiguero
   and nothing else.
 
-So the AI is not today's problem. What is missing is that **nothing stops a
-future route from handing it somebody else's content**: the rule lives in the
-habits of whoever writes the query. That is what the audit in §5 is for.
+So the AI's *retrieval* was not the problem. **Its conversations were.**
+
+Writing the audit that checks this found one: `POST /api/ai/chat` took
+`conversation_id` from the request **body** and used it as given — loading that
+conversation's last twelve messages as the model's context and writing the new
+ones into it. Send somebody else's id and the assistant answers you using what
+they told it, and your messages land in their history.
+
+And the ids were guessable: timestamp in base 36 plus a number between 0 and
+1295. Knowing the second somebody chatted leaves ~1.300 combinations, and the
+route needs no session and has no rate limit.
+
+Closed with two locks, and both are needed: a conversation with an owner who is
+not you is silently replaced by a new one (never an error — «that conversation
+is not yours» would confirm it exists), and new conversations get an
+unguessable id.
+
+What remains, said plainly: for an **anonymous** conversation its id is the only
+credential there is. It can no longer be guessed; somebody who finds one written
+down still gets in. Closing that requires the anonymous chat to stop existing,
+and that is Eugenio's call.
+
+**And so it does not come back:** `scripts/auditar-contexto-ia.mjs` fails the
+build if any query in the AI module reads a table with personal content without
+filtering by its owner. Legitimate exceptions are *declared* with a
+`// contexto-ia:` comment next to the query — never deduced. It is green today.
+
+It is the **fourth** appearance of the same shape in one day: identity taken
+from what the caller sends instead of from the session (prog1's login link,
+prog7's daily cap, the Stripe membership, and this). That is not four mistakes;
+it is a habit, and it deserves a line in the house rules rather than four
+separate fixes.
 
 ## 3. What shipped today, and exactly what it does not do
 

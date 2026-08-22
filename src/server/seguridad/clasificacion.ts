@@ -64,6 +64,7 @@ export const CLASIFICACION: Clase[] = [
   c('sessions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'una fila insertada aquí ES entrar como esa persona, sin su contraseña'),
   c('password_resets', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un testigo válido abre la cuenta de otro'),
   c('agentes_ia', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'las llaves de los programadores IA'),
+  c('dominios_paginas', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'que dominio de internet apunta a la pagina de quien: cambiar una fila manda el trafico de otro a otra parte'),
   c('handles_reservados', 'ALTA', 'BAJA', 'MEDIA', 'ALTA', 'el nombre público con el que se conoce a alguien: cambiarlo es suplantarlo'),
   c('memberships', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'da acceso pagado; cambiarla es regalar o quitar lo que alguien compró'),
 

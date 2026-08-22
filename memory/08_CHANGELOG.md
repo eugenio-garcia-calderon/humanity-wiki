@@ -5147,3 +5147,65 @@ commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
 113.40 entirely to the one author with success (3 interactions, 6 positive
 reviews), totals summing back to the pot; 403 without admin. Depends on
 `vistas_validas` (PR #260) being in place.
+
+---
+
+## 2026-08-22 (XV) — Protecting people's data from the people who run the platform
+
+Eugenio, in one line: *«haz lo que falte para que los datos de los usuarios
+estén seguros incluso protegidos de los administradores e IAs»*.
+
+Full write-up, with the four levels and what each one costs:
+`09_TARGET_ARCHITECTURE/06_PROTECT_FROM_ADMINS.md`.
+
+### What an administrator could do, measured before writing anything
+
+`GET /api/db/tables/:name` served **the full contents of any table** from the
+platform's own screen — private conversations, the finances people write into
+their Juego Vital, the rows of the tables they create. Two clicks, no trace.
+And level 4 is a single role: moderating a reported comment and reading two
+strangers' conversation are the same number.
+
+### And the AI, which came out better than expected — except for one thing
+
+The index the assistant searches holds only the commons and published posts, and
+**every** query for "your things" filters by the asker's id. Nobody can pull
+somebody else's page through the assistant.
+
+**Its conversations were another matter.** `POST /api/ai/chat` took
+`conversation_id` from the request **body** and used it as given: it loaded that
+conversation's last twelve messages as the model's context and wrote the new ones
+into it. Send somebody else's id and the assistant answers you out of what they
+told it. And the ids were guessable — timestamp in base 36 plus a number between
+0 and 1295 — on a route with no session and no rate limit.
+
+Closed with two locks, both needed: a conversation whose owner is not the caller
+is **silently** replaced by a new one (silently on purpose: «that conversation is
+not yours» would confirm it exists), and new conversations get 16 random bytes.
+
+### What ships
+
+| | |
+|---|---|
+| Twelve tables | No longer served by the generic browser **to anyone, administrator included**, each with its reason in the code |
+| Everything else privileged | Recorded in the sealed record, chained and signed, **where whoever did it cannot erase it** |
+| `GET /api/seguridad/miradas` | **Any account** can read that log. A surveillance log only its subjects cannot read is not surveillance |
+| `GET /api/seguridad/dato/:tabla/:id?motivo=…` | The owner's key: one row, a written reason, **recorded before the read — and if it cannot be recorded, there is no read** |
+| `scripts/auditar-contexto-ia.mjs` | Fails the build if any AI query reads personal content without an owner filter. Exceptions are *declared* with a comment, never deduced |
+
+### The sentence that matters
+
+**What this makes impossible is not looking. It is looking in silence.**
+
+An administrator still reaches most of that content through the normal screens,
+and whoever has the database password skips all of it. Only end-to-end
+encryption makes it impossible — and it costs the person their content if they
+lose their password. That decision is Eugenio's, written up with a
+recommendation: start with private messages, and only those.
+
+### The fourth time today
+
+Identity taken from what the caller sends instead of from the session: prog1's
+login link, prog7's daily cap, the Stripe membership, and this. Four in one day
+is not four mistakes, it is a habit — and it belongs in the house rules rather
+than in four separate fixes.

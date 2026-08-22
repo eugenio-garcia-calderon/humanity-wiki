@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import crypto from 'node:crypto';
 import { iconoDeNombre } from '../../utils/iconoDeNombre';
 import { sql } from 'drizzle-orm';
 import {
@@ -29,6 +30,12 @@ import { slugify } from '../../utils/slugify.js';
 // su confirmación explícita.
 
 const newId = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase()}`;
+
+/** El identificador de una conversación NO es como los demás: mientras el chat
+ *  sin cuenta exista, es lo único que separa la conversación de una persona de
+ *  la de cualquiera. `newId` lleva dentro la hora en que se creó y solo 1.296
+ *  variantes: adivinable. Esto no. (2026-08-22, prog4) */
+const nuevoIdConversacion = () => 'CONV' + crypto.randomBytes(16).toString('base64url');
 
 /** Modos de permiso de edición pedidos por el usuario. */
 export const EDIT_MODES = {
@@ -936,6 +943,8 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
   app.get('/api/ai/conversations/:id/messages', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      // contexto-ia: esta consulta ES la comprobación de dueño; lee el user_id
+      // para compararlo con quien pregunta, no para enseñar contenido.
       const duena = await db.execute(sql`
         SELECT user_id FROM ai_conversations WHERE id = ${req.params.id}
       `);
@@ -943,6 +952,8 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if ((duena.rows[0] as any).user_id !== req.user.id) {
         return res.status(403).json({ error: 'Esa conversación no es tuya.' });
       }
+      // contexto-ia: el dueño se comprueba tres líneas más arriba y se sale con
+      // un 403 si no coincide; aquí ya no puede llegar una conversación ajena.
       const rows = await db.execute(sql`
         SELECT * FROM ai_messages WHERE conversation_id = ${req.params.id} ORDER BY created_at ASC
       `);
@@ -1066,10 +1077,43 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
 
       const editMode = Object.values(EDIT_MODES).includes(edit_mode) ? edit_mode : EDIT_MODES.MANUAL;
 
-      // Conversación (se crea si no existe)
+      // ══ LA CONVERSACIÓN ES DE QUIEN LA EMPEZÓ (2026-08-22, prog4) ═══════
+      // `conversation_id` llega en el CUERPO de la petición, y hasta hoy se
+      // usaba tal cual: se cargaban sus últimos doce mensajes como contexto del
+      // modelo y se le añadían los nuevos. Es decir, mandando el identificador
+      // de otra persona se le podía preguntar a la IA por lo que ella había
+      // contado, y de paso escribir dentro de su conversación.
+      //
+      // Y los identificadores viejos se adivinan: eran la marca de tiempo en
+      // base 36 más un número entre 0 y 1295. Conocer el minuto en que alguien
+      // habló deja unas decenas de millones de combinaciones, y esta ruta no
+      // pide sesión ni tiene límite de peticiones.
+      //
+      // Dos cierres, y hacen falta los dos:
+      //  1. Si la conversación tiene dueño y no eres tú, NO se usa: se empieza
+      //     una nueva. No se contesta con un error, a propósito — un «esa
+      //     conversación no es tuya» confirmaría que existe.
+      //  2. Las nuevas nacen con un identificador imposible de adivinar.
+      //
+      // Queda un resto dicho a las claras: para una conversación ANÓNIMA, su
+      // identificador es la única credencial que hay. Con la 2 ya no se puede
+      // adivinar; quien se lo encuentre escrito en algún sitio, entra. Cerrarlo
+      // del todo exige que el chat sin cuenta deje de existir, y eso es una
+      // decisión de Eugenio, no mía.
       let conversationId = req.body.conversation_id as string | undefined;
+      if (conversationId) {
+        // contexto-ia: esta consulta ES la comprobación de dueño que cierra la
+        // lectura de conversaciones ajenas; si no coincide se empieza una nueva.
+        const duena = await db.execute(sql`
+          SELECT user_id FROM ai_conversations WHERE id = ${conversationId}
+        `);
+        const fila = duena.rows[0] as any;
+        const suya = !fila
+          || (fila.user_id ?? null) !== (req.user?.id ?? null);
+        if (suya) conversationId = undefined;
+      }
       if (!conversationId) {
-        conversationId = newId('CONV');
+        conversationId = nuevoIdConversacion();
         await db.execute(sql`
           INSERT INTO ai_conversations (id, user_id, title, edit_mode)
           VALUES (${conversationId}, ${req.user?.id || null}, ${String(message).slice(0, 80)}, ${editMode})
@@ -1115,7 +1159,9 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // RAG
       const retrieved = await retrieveContext(String(message));
 
-      // Historial reciente
+      // Historial reciente.
+      // contexto-ia: `conversationId` ya está comprobado arriba — si no era de
+      // quien pregunta, se sustituyó por una conversación nueva y vacía.
       const history = await db.execute(sql`
         SELECT role, content FROM ai_messages
         WHERE conversation_id = ${conversationId} ORDER BY created_at DESC LIMIT 12
@@ -1991,9 +2037,16 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
         return res.status(403).json({ error: 'Requiere nivel de administrador.' });
       }
+      // contexto-ia: de aquí para abajo es el panel de un administrador y son
+      // RECUENTOS —cuántas conversaciones, cuánto ha costado—, nunca contenido
+      // de nadie. Filtrar por dueño no tendría sentido: la pregunta es del
+      // conjunto.
       const [convs, msgs, cost, gaps, actions, topEntities] = await Promise.all([
+        // contexto-ia: recuento del conjunto, sin contenido de nadie.
         db.execute(sql`SELECT count(*)::int AS n FROM ai_conversations`),
+        // contexto-ia: recuento del conjunto, sin contenido de nadie.
         db.execute(sql`SELECT count(*)::int AS n FROM ai_messages`),
+        // contexto-ia: suma de costes del conjunto; no lee lo que nadie escribió.
         db.execute(sql`
           SELECT COALESCE(sum(cost_cents), 0) AS total,
                  COALESCE(sum(cost_cents) FILTER (WHERE created_at > now() - interval '1 day'), 0) AS today,
@@ -2004,6 +2057,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         `),
         db.execute(sql`SELECT question, occurrences, last_seen_at FROM ai_knowledge_gaps WHERE status = 'abierto' ORDER BY occurrences DESC, last_seen_at DESC LIMIT 20`),
         db.execute(sql`SELECT status, count(*)::int AS n FROM ai_proposed_actions GROUP BY status`),
+        // contexto-ia: qué entidades se citan más, en agregado; sin contenido.
         db.execute(sql`
           SELECT e AS entity, count(*)::int AS n
           FROM ai_messages, jsonb_array_elements_text(entities_used) AS e
