@@ -74,6 +74,18 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
         const quien = await quienEscribe(req, db);
         if (!quien) return res.status(401).json({ error: 'Inicia sesión.' });
         if (!quien.admin) return res.status(403).json({ error: 'Este tablero es del equipo.' });
+
+        // ══ Y ESTO INCLUYE A LOS PROGRAMADORES IA, A PROPÓSITO ═════════════
+        // `quienEscribe` devuelve `admin: true` para un agente con su token,
+        // así que cualquiera de nosotros lee este tablero entero. Es lo que se
+        // quiere —somos quienes trabajamos estas notas— pero **cambia el
+        // alcance del token** y por eso queda escrito aquí, señalado por prog4:
+        //
+        // Hasta hoy, lo peor que conseguía un token robado era dejar el
+        // Hormiguero con un color equivocado. Desde hoy también abre la lista
+        // de por dónde entrar. Si algún día se decide lo contrario, la línea
+        // es `quien.clase === 'persona' && quien.admin` — y entonces ningún
+        // agente puede trabajar estas notas, que es el precio.
       }
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto,
