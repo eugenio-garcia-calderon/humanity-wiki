@@ -86,6 +86,23 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
         // de por dónde entrar. Si algún día se decide lo contrario, la línea
         // es `quien.clase === 'persona' && quien.admin` — y entonces ningún
         // agente puede trabajar estas notas, que es el precio.
+        //
+        // ══ PERO CADA LECTURA CON TOKEN DEJA RASTRO ════════════════════════
+        // Propuesto por prog4, y es mejor que cerrar la puerta: no le quita el
+        // acceso a nadie y convierte «no lo podemos impedir» en «lo veríamos».
+        // Un token robado que se ponga a leer la lista de agujeros aparece
+        // aquí, con nombre y hora.
+        //
+        // En el registro del servidor mientras no exista otro sitio. Cuando
+        // aterrice el libro sellado de prog4 (#231), esto pasa a
+        // `anotar(db, { clase: 'lectura_seguridad', actor: quien.id, … })` y
+        // entonces el rastro es una fila que no se puede reescribir.
+        //
+        // Solo los agentes: una persona administradora que abre su tablero no
+        // es un evento, y anotar lo normal es cómo se entierra lo raro.
+        if (quien.clase === 'agente') {
+          console.log(`[seguridad] tablero leído por el agente ${quien.nombre} (${quien.id}) — ${new Date().toISOString()}`);
+        }
       }
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto,
