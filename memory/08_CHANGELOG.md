@@ -4141,3 +4141,126 @@ request a service worker handles — a fifteen-line worker that does nothing but
 `fetch(event.request)` fails there too. Everything above was therefore checked in
 real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
 live camera preview) is still only verifiable by Eugenio on his own device.
+
+---
+
+## 2026-08-22 · Say which figures are measured and which were invented (PR #203, #204, #207)
+
+`CLAUDE.md` opens by saying that mistaking simulated data for measured data is
+the most expensive error made in this project. It was still live, in the most
+literal way possible: **no screen said which was which.**
+
+Counted against the database: of 20.557 indicator observations, **20.499 are
+simulated** — the 179 Madrid municipios («Excel Municipios Madrid (simulado)»)
+and the 32 European countries («IA — número aleatorio»). Every row already
+declared its source. Nothing read it.
+
+Three changes went out, in this order, and each one found the next.
+
+### #203 — the mark exists
+
+`src/utils/origenDelDato.ts` classifies a source into four states, and the
+fourth is the one that matters: `desconocido`. The tempting shortcut is to
+treat "no source written" as measured — most good data arrives without
+decoration — and that is exactly presenting as certain what nobody has checked.
+**If it does not say, we say it does not say.**
+
+Red for `simulado`, and not a discreet grey, because a discreet mark is learned
+away in two days. The damage here is not confusion for a minute: it is somebody
+citing an invented figure in front of people who decide with it.
+
+### #204 — the mark reaches everything, and two worse things surface
+
+Half a platform marked is a promise the other half breaks: once you have seen
+the red warning on one screen, its absence elsewhere reads as "this one is
+real". So it went to the AI assistant, the objectives grid, the indicator list,
+the indicator sheet and the explorer canvas.
+
+Two things came out of that work, both worse than what it set out to fix:
+
+**1. The mark described a different number from the one beside it.** The map
+classified a territory by the sources of its *observations*, then painted its
+fourteen *objective* percentages. For Spain those disagree: its water
+observations are real (INE, MITECO, FAO — 41 of them) but the percentages came
+from a hand-written table in `src/data/seed.ts`. The sheet said **MEDIDO over
+fourteen invented numbers.** A mark that reassures about the wrong figure is
+worse than no mark, because now it vouches for it.
+
+Fixed by deciding the origin **in the same branch that decides the number**,
+and by moving `getObjectivesForTerritory` out of `server.ts` into
+`src/utils/puntuacionesDeObjetivo.ts` so the assistant runs the same
+calculation the screens do instead of forming a second opinion. That is the
+recurring failure of this house — two truths about the same thing — and it had
+appeared here twice in one afternoon.
+
+**2. `|| 0` turned "no data" into a score of zero.** Spain read **0%** in
+Education, Mobility, Energy, Technology, Employment and Governance. Saying a
+country scores zero is a stronger claim than any simulated figure. Now it says
+«Sin datos» — 8 cases on that page alone.
+
+**The mark is rationed on purpose.** The rule is stated once at the top and the
+pill only appears on a figure that does *not* match it. Fourteen identical red
+badges teach people to stop looking, which is the same failure as saying
+nothing, reached from the other side.
+
+### #207 — a real measurement beats the hand-written table
+
+Eugenio's call, and the priority had been backwards. The seed table exists to
+**fill in** where there is no data, and it won every time. Spain's 41 real
+observations were sitting in the database, loaded, reaching no screen.
+
+    AGUA          98 → 74    (medido)
+    ALIMENTACIÓN  86 → 75    (medido)
+    CONVIVENCIA   85 → 65    (medido)
+    ECOSISTEMAS   76 → 67    (medido)
+    VIVIENDA      67 → 67    (medido — same number, different provenance)
+    SALUD         91 → 91    (still simulado: its one indicator has no
+                              observation for Spain, so the fallback is right)
+
+**The drop is the point.** 98% was flattering and made up; 74% is what the
+measurements say.
+
+The rule is deliberately narrow: **a real figure wins over any filler; between
+two fillers, nothing moves.** Simulated observations do not beat the seed
+table — there is no reason to prefer one invention over another, and flipping
+them would have churned the numbers of 179 municipios and 32 countries for
+nothing.
+
+### Where it stands
+
+**3.118 of 3.140 objective scores are still simulated — 99,3%.** The 99,7%
+figure quoted earlier was about observations; the percentages people actually
+look at were 100% simulated until #207 and are now 99,3%.
+
+**Verified in the browser, never by a 200** — the deploy serves the whole
+application for any route, so a status code proves nothing about a screen. Each
+of the three was checked by reading the rendered page and taking a screenshot
+of production.
+
+---
+
+## 2026-08-22 · Count what the open chat costs, and leave it open (PR #208)
+
+`POST /api/ai/chat` answers without a session. That is intentional — the prompt
+itself calls whoever asks «visitante no registrado» — and Eugenio decided today
+that it stays that way, **with no limit on free questions**.
+
+The other half of the hormiguero note (`INCMT4B2B9K1P9`) was not a decision, it
+was a hole: the INSERT into `ai_usage_charges` sat inside `if (req.user)`, so
+every anonymous question was paid for and left no trace. The cost panel showed
+less than the invoice, and the gap grew exactly with usage — the kind of thing
+you find out from the bank statement.
+
+**Not setting a limit is a decision. Not being able to see it is not.**
+
+- `user_id` becomes nullable (migration `0066`). NULL means what it looks like:
+  nobody was signed in. An "anonymous" user row would have been worse — every
+  user count on the platform would then include a person who does not exist.
+- Nobody is billed: `fee_cents` and `total_cents` stay at zero.
+- The admin panel gains one number: what visitors without an account have cost.
+  It is `null`, not zero, when the question was not asked — zero would claim
+  nobody has used it.
+
+Verified end to end locally: one anonymous request wrote a row with
+`user_id = null`, `cost_cents = 0,061`, `total_cents = 0`, and the panel's query
+returns it. The test row was deleted afterwards.
