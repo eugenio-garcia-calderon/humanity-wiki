@@ -52,6 +52,24 @@ habits of whoever writes the query. That is what the audit in §5 is for.
    not only administrators. A surveillance log only its subjects cannot read is
    not surveillance of anything.
 
+### The owner keeps a key, and it is written down
+
+Closing the door on administrators is right. Closing it on the person who owns
+the platform **without leaving him a documented key** is how somebody ends up in
+`psql` at three in the morning, where nothing is recorded at all. So the key
+exists, and it is narrow on purpose:
+
+`GET /api/seguridad/dato/:tabla/:id?motivo=…`
+
+| | |
+|---|---|
+| One row, by its id | Never a whole table |
+| A written reason, at least 20 characters | Stored forever, next to the name of whoever asked |
+| **Recorded before the read, and if it cannot be recorded, there is no read** | That order is the whole mechanism: the record is not a side effect of looking, it is the permission to look |
+| The answer says so | «This query has been recorded with your name and your reason, where it cannot be deleted, and anybody with an account can see it» |
+
+What this makes impossible is not looking. It is **looking in silence**.
+
 **What it does not do, said plainly.** An administrator can still reach most of
 that content through the product's normal screens, and anybody with the database
 password skips all of it. What changed is that **looking stopped being free**:

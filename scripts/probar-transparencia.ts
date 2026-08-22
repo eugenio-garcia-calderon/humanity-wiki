@@ -23,10 +23,12 @@ const dbFalsa = {
   execute: async (q: any) => {
     const texto = JSON.stringify(q?.queryChunks ?? q ?? '');
     if (texto.includes('nextval')) return { rows: [{ n: anotaciones.length + 1 }] };
+    if (texto.includes('information_schema.columns')) return { rows: [{ n: 1 }] };
+    if (texto.includes('SELECT * FROM')) return { rows: [{ id: 'M1', texto: 'contenido privado' }] };
     if (texto.includes('INSERT INTO registro_sellado')) {
       // La clase viaja como parámetro dentro de la plantilla de drizzle; se
       // busca en el texto entero en vez de adivinar su forma interna.
-      const clase = texto.match(/lectura_(denegada|privilegiada)/)?.[0];
+      const clase = texto.match(/lectura_(denegada|privilegiada|con_motivo)/)?.[0];
       anotaciones.push(String(clase ?? 'anotación sin clase reconocida'));
       return { rows: [] };
     }
@@ -87,6 +89,38 @@ try {
   comprobar('y un usuario normal pidiendo lo mismo NO llena el registro',
     anotaciones.length === 0,
     'la ruta le va a decir que no; anotar cada intento fallido enterraría lo que importa');
+
+  console.log('\nLA LLAVE DEL DUEÑO');
+  anotaciones.length = 0;
+  usuario = { id: 'U_ADMIN', roleLevel: 4 };
+  const sinMotivo = await pedir('/api/seguridad/dato/mensajes/M1');
+  comprobar('sin motivo escrito no se lee nada',
+    sinMotivo.estado === 400 && !sinMotivo.cuerpo.fila, JSON.stringify(sinMotivo.cuerpo).slice(0, 90));
+  comprobar('y no se anota un intento vacío como si fuera una consulta',
+    anotaciones.length === 0);
+
+  const corto = await pedir('/api/seguridad/dato/mensajes/M1?motivo=' + encodeURIComponent('mirar'));
+  comprobar('un motivo de una palabra tampoco vale', corto.estado === 400);
+
+  const conMotivo = await pedir('/api/seguridad/dato/mensajes/M1?motivo='
+    + encodeURIComponent('denuncia 412: comprobar si el mensaje contiene una amenaza'));
+  comprobar('con motivo suficiente sí se lee, y devuelve la fila',
+    conMotivo.estado === 200 && conMotivo.cuerpo.fila?.id === 'M1', JSON.stringify(conMotivo.cuerpo).slice(0, 90));
+  comprobar('queda anotado con su motivo ANTES de leer',
+    anotaciones.includes('lectura_con_motivo'), JSON.stringify(anotaciones));
+  comprobar('y se le dice a quien mira que ha quedado anotado',
+    String(conMotivo.cuerpo.aviso || '').includes('no se puede borrar'));
+
+  usuario = { id: 'U_NORMAL', roleLevel: 1 };
+  const noAdmin = await pedir('/api/seguridad/dato/mensajes/M1?motivo='
+    + encodeURIComponent('curiosidad sana, quiero leer esto de aqui'));
+  comprobar('un usuario normal no tiene esta llave', noAdmin.estado === 403);
+
+  usuario = { id: 'U_ADMIN', roleLevel: 4 };
+  const otraTabla = await pedir('/api/seguridad/dato/territories/T001?motivo='
+    + encodeURIComponent('esto deberia ir por el navegador de siempre'));
+  comprobar('la llave es solo para lo apartado, no un atajo para todo',
+    otraTabla.estado === 400);
 
   console.log('\nLA LISTA');
   comprobar('todo lo apartado dice por qué lo está',
