@@ -393,6 +393,21 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
   const newId2 = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase()}`;
 
   switch (event.type) {
+    // UNA SESIÓN DE PAGO QUE MUERE SIN PAGAR SUELTA LO QUE RETENÍA.
+    //
+    // Sin esto, quien abre el pago y cierra la pestaña deja el último tarro
+    // invisible durante media hora. La reserva caduca sola por su `expira_at`,
+    // pero enterarse por Stripe la suelta EN EL ACTO, que es la diferencia
+    // entre «vuelve enseguida» y «vuelve cuando ya se ha ido».
+    case 'checkout.session.expired': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      await db.execute(sql`
+        UPDATE reservas_stock SET estado = 'liberada', updated_at = now()
+        WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
+      `);
+      break;
+    }
+
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const kind = session.metadata?.kind;
@@ -454,18 +469,32 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           ON CONFLICT DO NOTHING
         `);
 
-        // EL STOCK SE DESCUENTA AQUÍ Y NO ANTES (fase 5, adelantada porque una
-        // compra sin cuenta sin descontar vendería lo mismo dos veces).
-        // Aquí es donde el dinero ha entrado de verdad: una sesión de pago
-        // abierta y abandonada no debe reservar nada.
+        // EL STOCK SE DESCUENTA AQUÍ, Y SOLO UNA VEZ POR COMPRA.
         //
-        // `GREATEST(0, ...)` para que dos pagos que lleguen a la vez no dejen
-        // el stock en negativo, y `stock IS NOT NULL` para no empezar a llevar
-        // la cuenta a quien decidió no llevarla.
-        await db.execute(sql`
-          UPDATE products SET stock = GREATEST(0, stock - ${unidades})
-          WHERE id = ${productId} AND stock IS NOT NULL
+        // La reserva se creó al abrir el pago (fase 5) y aquí se cierra. El
+        // `WHERE estado = 'abierta'` es lo que hace que esto sea idempotente:
+        // Stripe reenvía los avisos cuando duda de que hayan llegado, y sin
+        // esa condición el mismo tarro se descontaría dos y tres veces.
+        //
+        // Si no descuenta nada —porque ya estaba confirmada— no se toca el
+        // stock. Es la diferencia entre «esta compra es nueva» y «esto ya lo
+        // había contado», y tienen que poder distinguirse.
+        const cerrada = await db.execute(sql`
+          UPDATE reservas_stock SET estado = 'confirmada', updated_at = now()
+          WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
+          RETURNING unidades
         `);
+        const yaContada = cerrada.rows.length === 0;
+
+        if (!yaContada) {
+          // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva, y
+          // `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
+          // decidió no llevarla.
+          await db.execute(sql`
+            UPDATE products SET stock = GREATEST(0, stock - ${unidades})
+            WHERE id = ${productId} AND stock IS NOT NULL
+          `);
+        }
       } else if (kind === 'puntos') {
         // El saldo solo se acredita AQUÍ, en la confirmación real del pago
         // (no al crear la sesión de checkout) — así un pago abandonado o

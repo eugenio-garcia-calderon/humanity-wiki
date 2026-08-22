@@ -332,7 +332,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
         tipo: p.kind || null,
         modalidad: p.modality || null,
         periodo: p.billing_period || null,
-        stock: p.stock === null || p.stock === undefined ? null : Number(p.stock),
+        // El stock que se enseña es el que se puede COMPRAR: lo que hay
+        // menos lo que otra persona está pagando ahora mismo. Enseñar el
+        // bruto pondría «queda 1» a alguien que va a recibir un «se ha
+        // agotado» treinta segundos después.
+        stock: p.stock === null || p.stock === undefined
+          ? null
+          : Math.max(0, Number(p.stock) - await reservado(db, p.id)),
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
@@ -398,10 +404,16 @@ export function registerPublicarRoutes(app: Express, db: any) {
       }
       // `null` sigue sin ser cero: quien no lleva la cuenta del stock puede
       // vender, quien la lleva y está a cero no.
-      if (p.stock !== null && p.stock !== undefined && Number(p.stock) < unidades) {
+      //
+      // Y lo disponible NO es la columna: es la columna menos lo que otras
+      // personas están pagando en este momento. Sin restar las reservas, dos
+      // compradores del último tarro pasan los dos esta comprobación.
+      const llevaCuenta = p.stock !== null && p.stock !== undefined;
+      const disponible = llevaCuenta ? Number(p.stock) - await reservado(db, p.id) : null;
+      if (disponible !== null && disponible < unidades) {
         return res.status(409).json({
-          error: Number(p.stock) <= 0 ? 'Se ha agotado.' : `Solo quedan ${p.stock}.`,
-          stock: Number(p.stock),
+          error: disponible <= 0 ? 'Se ha agotado.' : `Solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
+          stock: Math.max(0, disponible),
         });
       }
 
@@ -478,7 +490,25 @@ export function registerPublicarRoutes(app: Express, db: any) {
         },
         success_url: `${destino}?compra=hecha&sesion={CHECKOUT_SESSION_ID}`,
         cancel_url: `${destino}?compra=cancelada`,
+        // Media hora para pagar. Es lo que dura la reserva del stock: pasado
+        // ese rato el tarro vuelve al escaparate, y la sesión tiene que morir
+        // a la vez o alguien pagaría algo que ya no está reservado.
+        expires_at: Math.floor(Date.now() / 1000) + MINUTOS_DE_RESERVA * 60,
       });
+
+      // La reserva se anota DESPUÉS de que Stripe acepte: si la creación de
+      // la sesión falla, no queda stock retenido por una compra que nunca
+      // existió. Sólo se anota si se lleva la cuenta del stock; a quien no la
+      // lleva no hay nada que reservarle.
+      if (llevaCuenta) {
+        await db.execute(sql`
+          INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at)
+          VALUES (${'RSV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase()},
+                  ${p.id}, ${unidades}, ${sesion.id}, 'abierta',
+                  now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval)
+          ON CONFLICT (stripe_session_id) DO NOTHING
+        `);
+      }
 
       res.json({
         url: sesion.url, reparte, comision_centimos: comision,
@@ -561,3 +591,23 @@ const PAISES_DE_ENVIO = [
   'FI', 'PL', 'CZ', 'SK', 'SI', 'HR', 'HU', 'RO', 'BG', 'GR', 'EE', 'LV',
   'LT', 'MT', 'CY',
 ] as const;
+
+/** Media hora para pagar: lo que dura la reserva y lo que dura la sesión. */
+const MINUTOS_DE_RESERVA = 30;
+
+/**
+ * Cuántas unidades de este producto está pagando alguien AHORA MISMO.
+ *
+ * Sólo cuentan las reservas abiertas y sin caducar. Las caducadas no se
+ * borran —dicen que hubo un intento, y eso es información— pero dejan de
+ * retener en cuanto pasa su hora, sin que nadie tenga que limpiarlas: la
+ * condición está en la propia consulta.
+ */
+async function reservado(db: any, productoId: string): Promise<number> {
+  const r = await db.execute(sql`
+    SELECT COALESCE(SUM(unidades), 0) AS n
+    FROM reservas_stock
+    WHERE producto_id = ${productoId} AND estado = 'abierta' AND expira_at > now()
+  `);
+  return Number(r.rows[0]?.n || 0);
+}
