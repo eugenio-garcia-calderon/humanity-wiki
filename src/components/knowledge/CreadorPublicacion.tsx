@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { subirArchivo } from '../../utils/subir';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   X, Sparkles, FileText, Network, Map as MapIcon, FolderKanban,
   MessageSquare, Loader2, ArrowRight, MonitorPlay, Image as ImageIcon,
+  Camera, Video,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import EditorImagen from './EditorImagen';
+import { CapturaCamara } from '../ui/CapturaCamara';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -23,7 +25,15 @@ import { cn } from '../../utils/cn';
 //  - A MANO: eliges el tipo, le pones título y se llama al endpoint de
 //    creación de ese tipo (los mismos POST de siempre), abriéndolo al crear.
 
-type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'imagen' | 'proyecto' | 'muro';
+type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'imagen' | 'camara' | 'proyecto' | 'muro';
+
+// ¿Sabe este navegador abrir la cámara desde un `<input type=file>`?
+// En un móvil sí, y es el mejor camino: es la cámara del sistema, graba vídeo y
+// no pide un permiso aparte. En un portátil el atributo se ignora y saldría el
+// diálogo de ficheros, así que ahí usamos la vista en vivo. Se pregunta por la
+// capacidad, no por el tamaño de la pantalla: una ventana estrecha en un
+// ordenador sigue sin tener cámara trasera.
+const CAPTURA_NATIVA = typeof document !== 'undefined' && 'capture' in document.createElement('input');
 
 const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string; conIA: boolean }[] = [
   { tipo: 'documento', label: 'Documento', icon: FileText, descripcion: 'Página estilo Notion con bloques, tablas e imágenes', conIA: true },
@@ -31,6 +41,7 @@ const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string;
   { tipo: 'lienzo', label: 'Lienzo', icon: Network, descripcion: 'Pizarra infinita con ventanas conectadas', conIA: true },
   { tipo: 'mapa', label: 'Mapa', icon: MapIcon, descripcion: 'Mapa con indicadores sobre el territorio', conIA: true },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon, descripcion: 'Sube una foto y edítala: recorte, filtros, texto…', conIA: false },
+  { tipo: 'camara', label: 'Cámara', icon: Camera, descripcion: 'Haz una foto o graba un vídeo aquí mismo y súbelo', conIA: false },
   { tipo: 'proyecto', label: 'Proyecto', icon: FolderKanban, descripcion: 'Tablero de tarjetas por hacer / en curso / hecho', conIA: false },
   { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
@@ -46,6 +57,10 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
   const [error, setError] = useState<string | null>(null);
   // Editor de imágenes: la foto subida esperando a editarse/guardarse.
   const [imagenEnEdicion, setImagenEnEdicion] = useState<string | null>(null);
+  // Cámara en vivo: solo se usa donde `capture` no sirve, o sea en un ordenador.
+  const [camaraAbierta, setCamaraAbierta] = useState(false);
+  const entradaFoto = useRef<HTMLInputElement | null>(null);
+  const entradaVideo = useRef<HTMLInputElement | null>(null);
 
   if (!abierto) return null;
 
@@ -180,6 +195,41 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     }
   };
 
+  /*
+   * Cámara: una foto sigue el mismo camino que «Imagen» — se sube y se abre el
+   * editor, para no tener dos formas distintas de acabar con una foto dentro.
+   * Un vídeo no se edita: se sube y se crea la ventana directamente.
+   *
+   * El servidor ya aceptaba vídeo antes de esto (mp4, webm, y el .mov que sale
+   * de un iPhone) y la ventana `kind: 'video'` con `config.video_url` ya
+   * existía. Aquí no se ha tocado nada del servidor: sólo faltaba la puerta.
+   */
+  const subirVideo = async (archivo: File) => {
+    setError(null);
+    setOcupado('mano');
+    try {
+      const sub = await subirArchivo(archivo);
+      if (sub.error) throw new Error(sub.error);
+      const r = await fetch('/api/ventanas', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'video',
+          titulo: titulo.trim() || archivo.name.replace(/\.[^.]+$/, '') || 'Vídeo sin título',
+          config: { video_url: sub.url },
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'No se ha podido guardar el vídeo.');
+      onCerrar();
+      navigate('/mis-publicaciones');
+    } catch (e: any) {
+      fallo(e.message);
+    } finally {
+      setOcupado(null);
+    }
+  };
+
   const guardarImagenEditada = async (url: string) => {
     try {
       const r = await fetch('/api/ventanas', {
@@ -259,7 +309,51 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                 {elegido.conIA ? 'O créalo tú desde cero' : 'Créalo tú'}
               </p>
-              {tipo === 'imagen' ? (
+              {tipo === 'camara' ? (
+                <>
+                  <input
+                    value={titulo} onChange={e => setTitulo(e.target.value)}
+                    placeholder="Título (opcional)"
+                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
+                  />
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {/* En el móvil, `capture` abre la cámara del sistema: es la
+                        que ya sabe grabar vídeo y no pide un permiso aparte. En
+                        un portátil el atributo se ignora, así que la foto va por
+                        la vista en vivo y el vídeo se queda en elegir fichero —
+                        grabar vídeo desde el navegador es otra obra. */}
+                    <button
+                      type="button"
+                      onClick={() => (CAPTURA_NATIVA ? entradaFoto.current?.click() : setCamaraAbierta(true))}
+                      disabled={ocupado !== null}
+                      className="min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-500 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-60 transition-colors"
+                    >
+                      {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                      Hacer una foto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => entradaVideo.current?.click()}
+                      disabled={ocupado !== null}
+                      className="min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-500 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-60 transition-colors"
+                    >
+                      {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                      Grabar un vídeo
+                    </button>
+                  </div>
+                  <p className="mt-2 text-[11px] text-slate-400">
+                    La foto se abre en el editor antes de guardarse. El vídeo se sube tal cual.
+                  </p>
+                  <input
+                    ref={entradaFoto} type="file" accept="image/*" capture="environment" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirParaEditar(f); }}
+                  />
+                  <input
+                    ref={entradaVideo} type="file" accept="video/*" capture="environment" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirVideo(f); }}
+                  />
+                </>
+              ) : tipo === 'imagen' ? (
                 <>
                   <input
                     value={titulo} onChange={e => setTitulo(e.target.value)}
@@ -302,6 +396,13 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
           </div>
         )}
       </div>
+
+      {camaraAbierta && (
+        <CapturaCamara
+          onCaptura={f => { setCamaraAbierta(false); subirParaEditar(f); }}
+          onCerrar={() => setCamaraAbierta(false)}
+        />
+      )}
 
       {imagenEnEdicion && (
         <EditorImagen
