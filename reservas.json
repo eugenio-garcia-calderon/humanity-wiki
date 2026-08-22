@@ -155,12 +155,6 @@
       "ruta": "src/pages/JuegoVital.tsx",
       "motivo": "techo del mundo 3D: avisar mientras construyes",
       "desde": "2026-08-22T19:39:41.340Z"
-    },
-    {
-      "agente": "prog6",
-      "ruta": ".github/workflows/deploy.yml",
-      "motivo": "las cuatro llaves de R2 al .env.production",
-      "desde": "2026-08-22T19:46:27.293Z"
     }
   ]
 }
