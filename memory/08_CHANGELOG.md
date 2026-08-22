@@ -4777,3 +4777,192 @@ tenemos hacia adelante, copia el modelo de Hormiguero»*.
 pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
 suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
 de ruta), pero las rutas de debates no existen.
+
+### 2026-08-22 — Telecomunicaciones: mensajes en vivo, llamadas y videollamadas (Programador 8)
+Petición de Eugenio: «quiero que esta plataforma sustituya a WhatsApp, que se pueda enviar mensajes y hacer llamadas y videollamadas compartiendo pantalla etc. Y que con un número de la persona le puedas encontrar en la base de datos y enviarle un mensaje o llamarle, y le saltará en su aplicación».
+
+**El cable** (`src/server/telecomHub.ts`). Una conexión abierta por aparato (SSE, `GET /api/telecom/conexion`), que es lo que permite al servidor hablarle a alguien sin que lo pida: por ahí llegan los mensajes, la presencia y el timbre. Se eligió SSE y no WebSockets por tres motivos, en orden de peso: un WebSocket se engancha al servidor HTTP y eso obliga a tocar `server.ts`, que está congelado; no añade dependencia (`ws` son 40 KB); y atraviesa Cloudflare y cualquier proxy porque es un GET que no termina. Cuesta que es de una sola dirección — el cliente contesta por POST, que para señalización son cuatro mensajes. **Una persona son varios aparatos**: cada conexión tiene su identificador y la señalización va a uno concreto, o la pestaña olvidada en el trabajo contesta a una negociación que no es suya.
+
+**Las llamadas** (`src/server/telecom.ts`, `src/telecom/motor.ts`). WebRTC: el audio y el vídeo van de un navegador al otro, cifrados de extremo a extremo y **sin pasar por Hetzner**. El servidor solo presenta a los dos navegadores y comprueba que quien manda una señal es de verdad parte de esa llamada. Coste de una llamada en servidor: cero.
+
+**Lo que se añadió a los mensajes**: aparecen solos, dos marcas de verificación (entregado / leído), «está escribiendo…», punto verde de presencia, fotos, archivos y notas de voz. Y botones de llamar y videollamar en la propia conversación.
+
+**Buscar por número** (`GET /api/telecom/buscar`). Exacto y de uno en uno, nunca una lista, con freno de 40 búsquedas cada diez minutos: una búsqueda parcial sería un listín telefónico de toda la plataforma servido por la puerta de atrás. Y el cruce de la agenda importada con la gente registrada (`GET /api/telecom/mis-contactos`), que es la función que hizo grande a WhatsApp: no buscas a nadie, abres y tu gente ya está.
+
+**Base de datos** (`drizzle/0080_telecomunicaciones.sql`): `users.telefono` (normalizado, único) y `telefono_buscable`; `mensajes` gana `entregado_at` y los cuatro campos del adjunto; tabla `llamadas` con las siete formas de acabar una llamada. El contenido de una llamada no se guarda en ninguna parte.
+
+**Dos fallos que encontró la prueba automática y que no se habrían visto a ojo**:
+1. *Cuatro carriles en vez de dos.* Quien contesta no debe crear sus transceptores: los crea la oferta al aplicarla. Cuando los creaban los dos, quien contestaba acababa con cuatro y los suyos no transmitían — una llamada que conecta y enseña la cara de uno solo.
+2. *El acuse de lectura llegaba antes que el propio mensaje.* El servidor empuja el mensaje a la otra persona antes de contestar a quien lo envía; si ella lo lee en ese instante, el «leído» llega cuando el mensaje todavía tiene su identificador provisional. Ahora las marcas huérfanas se guardan y se aplican al bautizarlo.
+
+**Verificación** (`scripts/probar-telecom.mjs`): dos navegadores de verdad con dos sesiones distintas, que se crean y se archivan solos. Pasa: presencia, búsqueda por número, mensaje en vivo, las dos marcas, timbre en la otra aplicación, negociación completa (los dos envían y reciben audio y vídeo, dos carriles y ni uno más), silenciar, compartir pantalla, colgar y el historial. **Lo que no se ha podido comprobar**: el apretón de manos final (ICE) no se completa en este Mac — se probó con dos conexiones dentro de una misma página, sin nada de esta aplicación por medio, y también falla. Que el audio suene entre dos personas hay que verlo entre dos aparatos de verdad.
+
+### 2026-08-22 — Telecomunicaciones: las tres decisiones de privacidad (Programador 8)
+El coordinador paró la fusión con dos preguntas que no tenían respuesta técnica, y tenía razón. Quedan resueltas así:
+
+**¿Puede alguien comprobar si una persona está aquí escribiendo su número?** No, y ya no se puede por ninguna de las tres puertas. La búsqueda devuelve lo mismo —`persona: null`— si el número no existe y si existe pero su dueño ha apagado «que me encuentren»: no se distingue. Llamar por número usa el mismo filtro. Y la tercera puerta, que estaba abierta y no se había visto: al poner tu número, el mensaje «ese número ya está en otra cuenta» **confirmaba que esa persona tiene cuenta**. Ahora dice que no se puede usar y adónde escribir, sin confirmar nada, con un tope de cinco cambios de número por hora.
+
+**¿Puede alguien llamarte sin conocerte?** Ya no, y esta es la que más importa. Aquí es peor que en WhatsApp y no al revés: en WhatsApp hace falta tu número, que tiene quien tú se lo diste; aquí cada persona tiene su página pública con su identificador a la vista, así que cualquiera podía hacer sonar el teléfono de cualquiera sin tener su número. `users.llamadas_de` (migración `0082`) admite `todos`, `conocidos` y `nadie`, y **viene puesto en `conocidos`**: quien ya se ha escrito contigo, a quien tienes en tu agenda importada, o a quien sigues. A un desconocido le sale «escríbele un mensaje primero», que es el camino que ya existía — un mensaje no despierta a nadie, un timbre sí. Se elige en la propia página de Teléfono, al lado del número, porque es la otra mitad de la misma decisión.
+
+**¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
+
+También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
+## 2026-08-22 (XIII) — Security phase 0: the floor under "it cannot be corrupted"
+
+Eugenio opened a fourth programmer with a brief of his own: *«esta herramienta
+la van a utilizar altos directivos y gobiernos y no puede ser corrompible»*, with
+blockchain and internal cryptography for the points and for the data, on the
+Linux Foundation stack.
+
+The strategy is `09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`. Its
+uncomfortable conclusion decided the order of the work: **four fifths of
+"incorruptible" is bought in phases 0-2, and none of those three is a
+blockchain.** A chain closes exactly one attack — the operator of the database,
+which is us — and only once it is anchored where we cannot reach it.
+
+### What was measured first, because none of it was known
+
+| | |
+|---|---|
+| Write routes | **150**. An automated scan finds an explicit role check in 67, a session check in 59, nothing visible in 24 |
+| Of those 24 | almost all *are* guarded, by helpers the scan cannot read (`requireAdmin`, `puedeConTabla`, `sesionDe`) |
+| Encrypted at rest | **nothing**. The only cryptography in the product is password hashing and agent-token fingerprints |
+| Signing secrets | in `.env` on the server and in the container's environment |
+| The points balance | is the truth; `movimientos_puntos` is a receipt written beside it, and `ajuste_admin` mints points with no counter-entry |
+
+**The finding is not "24 open routes". It is that the machine cannot tell.**
+With no shared policy module, "is every write authorised?" is answerable only by
+a human reading 150 handlers, and that question eventually gets answered wrong.
+
+### What now exists
+
+- **`src/server/seguridad/politica.ts`** — one table, 150 routes declared. 40
+  reviewed by hand with the reason for each level; the other 110 are declared as
+  `revisar`, which is a third answer and not a pass. That number reaching zero is
+  the rest of phase 0.
+- **`npm run seguridad:permisos`** — the question, answered by a machine. Fails
+  on a route nobody declared, or a table entry whose route no longer exists.
+- **`src/server/seguridad/guardia.ts`** — the table applied, registered in
+  `server.ts` (one line) in **`avisar` mode**: it logs what it would have
+  rejected and rejects nothing. `SEGURIDAD_MODO=exigir` turns it on without a
+  deploy. Verified on port 3003: in `avisar` the route's own message reaches the
+  caller; in `exigir` the guard answers first; public routes and `GET` are never
+  touched.
+- **`src/server/seguridad/cifrado.ts`** — envelope encryption, one key per
+  record, and the wrapped key returned *separately* so it lives in its own table.
+  That separation is what makes destroying a key delete the data in copies that
+  were already made, which is the only erasure that works on backups.
+- **`drizzle/0064_registro_sellado.sql` + `registro.ts`** — a record that only
+  grows and is hash-chained. The verifier names the first broken entry *and the
+  kind* of break: editing a row and deleting one are different failures. Two
+  simultaneous writers cannot fork the chain — a unique index on `huella_previa`
+  settles it in the database, where they can actually see each other.
+
+### The part that is worth saying out loud
+
+The `UPDATE`/`DELETE` triggers on the sealed record are **hygiene, not
+security**. They stop the accident and the 3am shortcut. The test proves it by
+disabling the trigger, editing a row the way an insider with rights would, and
+showing the verifier catches it and points at the exact entry.
+
+And all of it is verifiable *by us*, on our own machine. Against someone who can
+rewrite the database and recompute every hash at leisure, it is worth nothing —
+only phase 2 closes that, by publishing a daily root where we cannot reach it.
+Until that runs, the honest answer to "can this be corrupted?" is **not yet
+fully**, and the difference between saying that and not saying it is the
+difference between security and the appearance of it.
+
+Nothing here is wired to production data yet: the guard warns, the encryption is
+not used by any route, and nothing writes to the sealed record. Said plainly to
+prevent the expensive mistake of believing they protect something they are not
+yet attached to.
+
+---
+
+## 2026-08-22 (XIV) — Layers of protection based on how much a datum matters
+
+Eugenio: *«céntrate en que nadie pueda corromper los datos, vamos a generar
+capas de seguridad en base al nivel de relevancia de un dato o contenido»*. The
+points/token side moved to another conversation.
+
+Full plan and phases: `09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
+
+### The decision that had never been written down
+
+Protecting all 129 tables at maximum is not safer: it is slower, costlier, and
+it is how alerts stop being read. Protecting "the important ones" without saying
+which those are is worse — everyone pictures a different set.
+
+So every table now carries **four separate grades**, the ENS dimensions (RD
+311/2022): integrity, confidentiality, traceability, authenticity. Four instead
+of one label, because of the case that decides the whole design:
+
+> **The commons indicators are public and are the gravest thing that can be
+> corrupted here.** With a single "criticality" label they either get encrypted
+> for no reason, or left unprotected.
+
+The tier is **computed** from the grades, never written by hand. Raising
+something's protection means arguing that it matters more.
+
+| Tier | What it gets, cumulatively | Tables |
+|---|---|---|
+| 3 | signed entries, encryption where confidentiality is high, two-person rule, immediate alarm | **40** |
+| 2 | every write appended to the sealed record, daily root anchored outside | **68** |
+| 1 | authorised route, archive never delete, full history | **18** |
+| 0 | recomputable from its source | **3** |
+
+`npm run seguridad:clasificacion` fails the build on any table nobody has
+classified. Five people work in this repo and tables appear daily; the day one is
+created is the day somebody still remembers what it was for.
+
+### Signatures, because the chain cannot prove authorship
+
+The hash chain proves nothing has changed since it was written. It does **not**
+prove we wrote it: anyone who can write to the table can forge a whole coherent
+chain from scratch. Every entry is now signed with Ed25519 and a key that is not
+in the database.
+
+The test shows exactly what that buys: an entry edited **and its hashes
+recomputed all the way down** passes every chain check, and the signature still
+catches it.
+
+Rotation is in from the first day — each signature carries the id of the key that
+made it, so an entry signed by a previous key answers `NO SÉ` instead of being
+accused of tampering. That distinction is the difference between a verifier
+people trust and one they switch off.
+
+### A bug the tests found, not production
+
+With three retries and no wait, five simultaneous writers starved each other on
+the unique index that keeps the chain from forking. Now eight tries with a short
+uneven wait, and the test pushes ten at once instead of five: a concurrency test
+that only fails sometimes is a test that gets ignored.
+
+### Still attached to nothing
+
+The guard warns, no route encrypts, nothing writes to the sealed record, and
+`CLAVE_FIRMA_REGISTRO` is not set anywhere — so entries would be written unsigned,
+and they say so rather than pretending. Phase B is what attaches it.
+
+---
+
+## 2026-08-22 — One valid view per person, window and day (Programador 7)
+
+The ceiling #242 left, in prog4's number: one account could mint the 50-cent
+cap on every window it owns, every day — a thousand own windows, 500 points
+a day. Now `vistas_validas` (0084: window, user, day; primary key on the
+three) is inserted inside the mint transaction with ON CONFLICT DO NOTHING,
+and minting happens only when the row was actually inserted. The same attack
+drops to ~0.10/day and stops paying.
+
+Two counters, on purpose: `knowledge_windows.views` is the raw number shown
+to everyone (anyone can raise it, it pays nobody); `vistas_validas` is the
+number that WEIGHS — it mints today and it is what the monthly pot will read
+when Eugenio's success-weighted distribution is built. Not a junction table
+in the sense of the 43-table rule: a dated fact log like the ledger, holding
+nothing about the view except that it happened.
+
+Verified locally: 10 concurrent session views of one window plus 3 without
+a session → exactly 1 valid view, 1 ledger entry, +0.01 to the author. Test
+session tagged claude-dev-verificacion and deleted; rows, balance and view
+counter restored.

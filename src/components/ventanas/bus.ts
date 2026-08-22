@@ -101,3 +101,24 @@ export interface AbrirLateral {
 
 export const abrirLateral = (a: AbrirLateral) =>
   window.dispatchEvent(new CustomEvent('humanity:abrir-lateral', { detail: a }));
+
+/*
+ * APARTAR TODAS LAS VENTANAS, SIN CERRAR NINGUNA (2026-08-22, Eugenio: «cuando
+ * hago click en Humanity Wiki me lleve a INICIO "/" y ahora no ocurre cuando
+ * hay otras pestañas abierto, esto es terrible»).
+ *
+ * QUÉ PASABA. El logo SÍ navegaba: `navigate('/')` funcionaba perfectamente. Lo
+ * que no pasaba es que se viera, porque las ventanas del escritorio se pintan
+ * ENCIMA de la página y no se enteran de que la ruta ha cambiado. Desde fuera es
+ * indistinguible de un botón roto — y por eso «esto es terrible» es la
+ * descripción correcta: un botón que hace su trabajo y no lo parece es peor que
+ * uno que no lo hace, porque lo pulsas más veces.
+ *
+ * POR QUÉ MINIMIZAR Y NO CERRAR. Cerrar tira el escritorio de alguien por
+ * pulsar el logo, y `humanity:cerrar-todas` ya existe para cuando eso es lo que
+ * se quiere. Minimizar es exactamente lo que la propia aplicación ya hacía al
+ * entrar por un enlace de dos tramos: «siguen en la barra de arriba, a un clic,
+ * pero no tapan lo que venías a ver». Mismo caso, misma respuesta.
+ */
+export const minimizarTodas = () =>
+  window.dispatchEvent(new Event('humanity:minimizar-todas'));

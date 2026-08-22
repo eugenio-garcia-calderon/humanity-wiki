@@ -33,6 +33,7 @@
 // aún antes, porque mide el tiempo que espera quien pide.
 import type { Express } from 'express';
 
+import { registrarGuardia } from './seguridad/guardia.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
@@ -62,6 +63,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
+import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
 /**
@@ -77,6 +79,17 @@ export type Modulo = {
 };
 
 export const MODULOS: Modulo[] = [
+  {
+    nombre: 'seguridad/guardia',
+    montar: app => registrarGuardia(app),
+    nota: 'EL PRIMERO DE LA LISTA, y aquí el orden importa más que en ningún otro sitio: '
+        + 'mira TODAS las escrituras de la API contra la tabla de permisos, así que un módulo '
+        + 'montado antes que él quedaría fuera de la comprobación sin que nadie lo notara. '
+        + 'Va después de `registerAuthRoutes` como todos —necesita `req.user` para saber el nivel— '
+        + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
+        + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
+  },
+
   {
     nombre: 'medicion',
     montar: (app, db) => registerMedicionRoutes(app, db),
@@ -134,6 +147,15 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registerTextosRoutes(app, db),
     nota: 'Los textos de las páginas de información, editables por un administrador. '
         + 'Comprueba el nivel, así que necesita `req.user`: después de la autenticación.',
+  },
+
+  {
+    nombre: 'telecom',
+    montar: (app, db) => registerTelecomRoutes(app, db),
+    nota: 'Mensajes en vivo, llamadas y videollamadas. DESPUÉS de la autenticación: '
+        + 'todas sus rutas empiezan por «¿quién eres?». Su conexión abierta (SSE) es una '
+        + 'respuesta que no termina nunca, así que cualquier cosa que capture «/api» '
+        + 'entero tiene que ir después de esta línea, no antes.',
   },
 ];
 

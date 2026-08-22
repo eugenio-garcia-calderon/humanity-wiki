@@ -49,6 +49,7 @@ const Indicators = lazy(() => import('./pages/Indicators'));
 const MapPage = lazy(() => import('./pages/Map'));
 const Mapas = lazy(() => import('./pages/Mapas'));
 const Mensajes = lazy(() => import('./pages/Mensajes'));
+const Telefono = lazy(() => import('./pages/Telefono'));
 const Mercado = lazy(() => import('./pages/Mercado'));
 const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
 const Muro = lazy(() => import('./pages/Muro'));
@@ -92,6 +93,7 @@ import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { TextosProvider } from './components/ui/TextoEditable';
 
 /** `/documentos/:id` era donde vivía el editor antes de que documentos y
  *  páginas se fundieran. Se conserva para que ningún enlace guardado se rompa. */
@@ -218,7 +220,18 @@ export default function App() {
                 <DataProvider>
                   <EditProvider>
                     <DesignProvider>
-                      <Layout />
+                      {/* LOS TEXTOS EDITABLES POR UN ADMINISTRADOR (2026-08-22).
+                          El Programador 1 escribió el proveedor, el componente,
+                          la tabla y las rutas, y verificó las rutas — pero el
+                          proveedor no llegó a enchufarse a la aplicación, así
+                          que la pieza estaba publicada y muerta. Se ve al ir a
+                          usarla, no al escribirla, y por eso lo enchufa quien
+                          llegó después. Va DENTRO de `AuthProvider` (mira si
+                          eres administrador para enseñar el lápiz) y FUERA de
+                          `Layout`, que es quien pinta las páginas. */}
+                      <TextosProvider>
+                        <Layout />
+                      </TextosProvider>
                     </DesignProvider>
                   </EditProvider>
                 </DataProvider>
@@ -281,6 +294,7 @@ export default function App() {
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="mensajes" element={<Mensajes />} />
+                <Route path="telefono" element={<Telefono />} />
                 {/* Una persona de TU mundo: su ficha y vuestra conversación, sin
                     cargar el Mundo 3D entero (Eugenio, 2026-08-20). */}
                 <Route path="persona/:id" element={<Persona />} />

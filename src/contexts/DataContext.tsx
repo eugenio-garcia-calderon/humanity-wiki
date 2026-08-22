@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 
 type DataContextType = {
   territories: any[];
@@ -11,6 +11,9 @@ type DataContextType = {
   indicators: any[];
   loading: boolean;
   refetchData: () => Promise<void>;
+  /** Pide los catálogos si nadie los ha pedido todavía. La llama `useData()`
+   *  por su cuenta: ningún componente tiene que acordarse. */
+  asegurar: () => void;
   saveEntity: (entity: string, data: any) => Promise<void>;
   deleteEntity: (entity: string, id: string) => Promise<void>;
 };
@@ -26,12 +29,13 @@ const DataContext = createContext<DataContextType>({
   indicators: [],
   loading: true,
   refetchData: async () => {},
+  asegurar: () => {},
   saveEntity: async () => {},
   deleteEntity: async () => {}
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
-  const [data, setData] = useState<Omit<DataContextType, 'loading' | 'refetchData' | 'saveEntity' | 'deleteEntity'>>({
+  const [data, setData] = useState<Omit<DataContextType, 'loading' | 'refetchData' | 'saveEntity' | 'deleteEntity' | 'asegurar'>>({
     territories: [],
     objectives: [],
     challenges: [],
@@ -77,18 +81,60 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     await refetchData();
   };
 
-  useEffect(() => {
+  // ══ LOS OCHO CATÁLOGOS, SOLO CUANDO ALGUIEN LOS PIDE (2026-08-22) ═══════
+  // Esto era un `useEffect` de arranque: al entrar en humanity.wiki, **por
+  // cualquier puerta**, salían ocho peticiones a la vez. Medido en producción,
+  // en frío: entre 311 y 537 ms cada una.
+  //
+  // Y la portada —`Explorar`, que es por donde entra casi todo el mundo— **no
+  // usa ni una de las ocho**: comprobado, no llama a `useData` ni a
+  // `useHelpers`. Los territorios, los objetivos y los indicadores hacen falta
+  // en el mapa y en objetivos, no en el muro de publicaciones.
+  //
+  // Ahora los pide el primero que los necesita. Quien no abra esas pantallas no
+  // los descarga nunca, y quien las abra los tiene igual que antes: `loading`
+  // se comporta exactamente igual, porque quien los pide es quien los estaba
+  // esperando.
+  //
+  // ── POR QUÉ SE DISPARA DESDE `useData` Y NO DESDE CADA PÁGINA ─────────────
+  // Porque una regla que hay que recordar se olvida. Si dependiera de que cada
+  // página llame a `asegurar()`, la primera que se escriba sin llamarla
+  // enseñará listas vacías sin decir por qué. Al colgarlo del propio hook,
+  // pedir los datos y usarlos son la misma acción.
+  const pedido = useRef(false);
+  const asegurar = useCallback(() => {
+    if (pedido.current) return;
+    pedido.current = true;
     refetchData().finally(() => setLoading(false));
   }, []);
 
   return (
-    <DataContext.Provider value={{ ...data, loading, refetchData, saveEntity, deleteEntity }}>
+    <DataContext.Provider value={{ ...data, loading, refetchData, saveEntity, deleteEntity, asegurar }}>
       {children}
     </DataContext.Provider>
   );
 };
 
-export const useData = () => useContext(DataContext);
+export const useData = () => {
+  const ctx = useContext(DataContext);
+  // Usar los datos ES pedirlos. Ver el porqué en el proveedor.
+  useEffect(() => { ctx.asegurar(); }, [ctx.asegurar]);
+  return ctx;
+};
+
+/**
+ * Los mismos datos, **sin pedirlos**.
+ *
+ * Para quien los usa si están y sigue funcionando si no. El caso real es el
+ * asistente de IA: mira los territorios solo para comprobar que un destino
+ * existe antes de navegar, y su propio código ya dice qué hacer si no han
+ * llegado — «mejor dejar pasar que impedir algo que sí existe».
+ *
+ * Ese detalle costaba las ocho peticiones de arranque a TODO el mundo: el
+ * asistente se monta en todas las páginas, así que con `useData()` normal los
+ * catálogos se pedían siempre aunque nadie fuera a abrir el mapa.
+ */
+export const useDataSinPedir = () => useContext(DataContext);
 
 export const useHelpers = () => {
   const data = useData();

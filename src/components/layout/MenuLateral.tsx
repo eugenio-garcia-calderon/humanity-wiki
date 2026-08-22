@@ -27,12 +27,12 @@ import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
-  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
+  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
 import { useAuth } from '../../contexts/AuthContext';
-import { abrirVentana } from '../ventanas/bus';
+import { minimizarTodas, abrirVentana } from '../ventanas/bus';
 import SeccionMenu from './menu/SeccionMenu';
 import RamaMenu from './menu/RamaMenu';
 import type { NodoMenu } from './menu/tipos';
@@ -340,6 +340,10 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       id: 'todas', label: 'Todas las personas', icono: Users2, destino: '/personas', abrir: 'ventana',
     } as NodoMenu, {
       id: 'mensajes', label: 'Mensajes', icono: MessageSquare, destino: '/mensajes',
+    } as NodoMenu, {
+      // EL TELÉFONO VA JUNTO A MENSAJES porque es lo mismo visto de otra
+      // manera: a la misma persona se le escribe o se le llama (2026-08-22).
+      id: 'telefono', label: 'Teléfono', icono: Phone, destino: '/telefono',
     } as NodoMenu] : []),
     // LOS GRUPOS FAVORITOS, aquí arriba (Eugenio: «ponerlo como favoritos,
     // entonces los grupos favoritos se añadirán»). Cada uno abre la lista ya
@@ -435,7 +439,9 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
             nombre SÍ se queda: es el único sitio donde la plataforma dice cómo
             se llama, y quitarlo de los dos la dejaría sin nombre en ninguna
             parte. Arriba, en la barra, va solo el logo por sitio. */}
-        <button onClick={() => navigate('/')} title="Ir al inicio"
+        {/* Las mismas dos cosas que el logo de la barra: navegar Y apartar las
+            ventanas, que si no tapan el inicio al que acabas de ir. */}
+        <button onClick={() => { minimizarTodas(); navigate('/'); }} title="Ir al inicio"
           className="min-w-0 flex-1 text-left flex items-center gap-2 hover:opacity-85 transition-opacity">
           <img src="/logo.svg" alt="" className="w-7 h-7 rounded-lg shrink-0" />
           <span className="text-sm font-extrabold tracking-tight text-slate-900 truncate">
