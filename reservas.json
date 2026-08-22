@@ -59,6 +59,12 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "fuera de un iframe window.parent es uno mismo: la app se manda el aviso de sesion a si misma",
       "desde": "2026-08-22T20:08:27.372Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "deploy/Caddyfile",
+      "motivo": "HSTS corto en dominios de terceros",
+      "desde": "2026-08-22T20:09:14.210Z"
     }
   ]
 }
