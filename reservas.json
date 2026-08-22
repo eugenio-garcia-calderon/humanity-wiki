@@ -85,12 +85,6 @@
       "desde": "2026-08-22T20:52:47.989Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: sesion en los subdominios",
-      "desde": "2026-08-22T20:53:32.921Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/server/knowledge.ts",
       "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
@@ -203,6 +197,12 @@
       "ruta": "src/pages/ChallengeProfile.tsx",
       "motivo": "privacidad: quitar terceros que rastrean (YouTube con cookies, transparenttextures)",
       "desde": "2026-08-22T21:41:39.710Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: confirmacion de compra y comprar ahora con puntos",
+      "desde": "2026-08-22T21:42:17.816Z"
     }
   ]
 }
