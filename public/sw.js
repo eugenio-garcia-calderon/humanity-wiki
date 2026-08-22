@@ -24,17 +24,29 @@
  *    could change under the same URL, so the network wins and the cache is only
  *    the fallback.
  *
- * 3. NO `skipWaiting()`. A new worker waits for every tab to close before taking
- *    over. Swapping the code under a running app mid-session mixes old HTML with
- *    new assets, which is the classic way a PWA breaks in a way nobody can
- *    reproduce. Slower to roll out, impossible to corrupt.
+ * 3. `skipWaiting()` — REVERSED ON 2026-08-22, AND HERE IS WHY. The first
+ *    version refused it: a worker that takes over mid-session can mix old HTML
+ *    with new assets, which is the classic unreproducible PWA bug. But waiting
+ *    for every tab to close never happens on a phone — an installed app resumes
+ *    from the switcher for days — and the result was worse than the thing being
+ *    avoided: Eugenio's iPhone sat three deploys behind, and the only way out
+ *    was asking him to type `?sw=off` into Safari. His answer: «es un apaño, yo
+ *    quiero que funcione sin esa url cutre».
+ *
+ *    So the new worker takes over immediately, throws away the stale code
+ *    caches, and reloads its clients — but only the ones nobody is looking at.
+ *    A page you can see is never reloaded under you: it gets the "Actualizar"
+ *    button instead (`src/avisoVersionNueva.ts`), because a deploy must not be
+ *    allowed to throw away what somebody is typing. A hidden page — an installed
+ *    app in the switcher, which is the case that matters — is reloaded, and by
+ *    the time you look at it again it is already the new version.
  *
  * KILL SWITCH: loading any page with `?sw=off` unregisters this worker and wipes
  * its caches. A bad service worker is the one bug a user cannot clear by
  * reloading, so there has to be a way out that does not need a developer.
  */
 
-const VERSION = "hw-v3";
+const VERSION = "hw-v4";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 const MEDIA = `${VERSION}-media`;
@@ -86,6 +98,12 @@ self.addEventListener("install", (event) => {
 // their home screen and then tries it. Three requests, once per version.
 const CALENTAR = ["/api/publicaciones", "/api/proyectos", "/api/circulos"];
 
+self.addEventListener("install", () => {
+  // Take over as soon as this worker is ready instead of waiting for every tab
+  // to close. See rule 3: on a phone that wait never ends.
+  self.skipWaiting();
+});
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -94,6 +112,31 @@ self.addEventListener("activate", (event) => {
         names.filter((n) => !n.startsWith(VERSION)).map((n) => caches.delete(n)),
       );
       await self.clients.claim();
+
+      // AND RELOAD WHOEVER IS STILL RUNNING THE OLD CODE — BUT NEVER A PAGE
+      // SOMEBODY IS LOOKING AT.
+      //
+      // Reloading repairs a stuck install without asking the page for help,
+      // which matters because the stale page is exactly the code that cannot be
+      // trusted to update itself. But it also throws away whatever is typed and
+      // not yet saved, and this team deployed fifteen times in four hours: a
+      // long publication would be lost by somebody else's deploy.
+      //
+      // So the rule is: a HIDDEN page is reloaded — nobody is typing into a page
+      // they cannot see, and this is exactly the case that matters, an installed
+      // app sitting in the switcher. A VISIBLE page is left alone, and
+      // `avisoVersionNueva.ts` offers it the "Actualizar" button instead, which
+      // is a person deciding rather than a deploy deciding for them.
+      const abiertos = await self.clients.matchAll({ type: "window" });
+      for (const c of abiertos) {
+        if (c.visibilityState === "visible" || c.focused) continue;
+        try {
+          await c.navigate(c.url);
+        } catch {
+          // Safari does not always allow navigate(); the page then picks up the
+          // new build on its next navigation, which is no worse than before.
+        }
+      }
 
       const c = await caches.open(DATOS);
       await Promise.all(
