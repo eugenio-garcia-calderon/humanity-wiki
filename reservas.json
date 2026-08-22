@@ -19,12 +19,6 @@
       "desde": "2026-08-22T15:15:21.885Z"
     },
     {
-      "agente": "prog1",
-      "ruta": "src/server/auth.ts",
-      "motivo": "resolver el conflicto del borrado de cuenta con los limites de prog6",
-      "desde": "2026-08-22T16:29:07.595Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "drizzle/0080_telecomunicaciones.sql",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
@@ -83,6 +77,12 @@
       "ruta": "src/pages/Mensajes.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:13.263Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/auth.ts",
+      "motivo": "quien entro con Google no puede borrar su cuenta",
+      "desde": "2026-08-22T16:36:01.329Z"
     }
   ]
 }
