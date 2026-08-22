@@ -42,7 +42,7 @@ green is worse than no test.
 |---|---|
 | The classification | **129 of 129 tables**: 40 tier 3, 68 tier 2, 18 tier 1, 3 recomputable |
 | Signatures | Ed25519 with key rotation built in. **`CLAVE_FIRMA_REGISTRO` is not set anywhere**, so entries are written unsigned and say so |
-| The policy table | 150 routes declared. **40 reviewed by hand, 110 still `revisar`** |
+| The policy table | **150 of 150 reviewed by hand**, each with the reason for its level. Zero left as `revisar` |
 | The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
@@ -53,16 +53,34 @@ green is worse than no test.
 Saying it plainly costs nothing and prevents the expensive mistake: believing
 these are protecting something they are not yet wired to.
 
-## `revisar` is the third answer, not a pass
+## `revisar` is the third answer, not a pass — and it is at zero
 
 A route marked `revisar` means *the scan saw a guard and no person has confirmed
 it is the right one*. The guard deliberately enforces nothing on those routes.
 
-**Bringing that number to zero is the remaining work of phase 0.** Reviewing one
-means opening the handler, reading what it actually checks, deciding what it
-*should* check, and replacing the entry with a real `guardia` plus a `nota`
-saying why that level and not another. Do not batch-convert them: a policy
-deduced from the code being audited certifies whatever the code already does.
+**That number reached zero on 2026-08-22.** All 150 were read by hand, one at a
+time, and each carries the level it should have plus, where the reason is not
+obvious, why.
+
+Keep it at zero the same way: a new write route fails the build until it is
+declared, and declaring it means reading the handler rather than copying the one
+above. **Never batch-convert:** a policy deduced from the code being audited
+certifies whatever that code already does.
+
+### What the reading found that no scan could
+
+Three routes were declared as what they **should** be rather than what they are,
+because reading them showed the difference:
+
+| Route | What reading it showed |
+|---|---|
+| `POST /api/windows/:id/view` | Minted 0,01 points per call **with no session**. Points are bought at 100 for 100 €. Fixed by prog7 in PR #242 |
+| `POST /api/stripe/create-checkout-session` | Takes `userId` and `email` **from the request body**, and the webhook grants the membership to that id. Whoever pays chooses which account gets it |
+| `POST /api/ai/chat` | Open without a session **by Eugenio's decision**, with no limit on free questions. What is missing is not a session: it is a daily ceiling on what the platform will spend |
+
+For an automated scan all three looked identical to the fifteen harmless routes
+around them: "no visible check". The difference is what the handler *does with
+the money*, and that only shows by reading it.
 
 ## Turning the guard on
 
