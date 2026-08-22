@@ -10,6 +10,7 @@ import { territories as seedTerritories, objectives as seedObjectives } from "./
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
+import { registrarGuardia } from "./src/server/seguridad/guardia.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
@@ -269,6 +270,14 @@ async function startServer() {
   // `req.user` a partir de la cookie de sesión — todos los endpoints
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
+
+  // 1.55 EL GUARDIÁN DE PERMISOS (fase 0 de seguridad, 2026-08-22).
+  // Va aquí y no antes porque necesita `req.user` ya resuelto, y aquí y no
+  // después porque tiene que ver TODAS las escrituras de la API.
+  // Arranca en modo `avisar`: anota lo que habría rechazado y no rechaza nada.
+  // Se pasa a exigir con SEGURIDAD_MODO=exigir, sin desplegar.
+  // Ver src/server/seguridad/CLAUDE.md.
+  registrarGuardia(app);
 
   // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
   // Van después de la autenticación porque dependen de `req.user`

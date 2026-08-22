@@ -3989,3 +3989,75 @@ that is not there.
 through the fast model. It matters when there are a hundred people using the
 chat daily. What it does buy today is that the saving is *visible*: from now on
 the cost table can show whether the cache is hitting at all.
+
+---
+
+## 2026-08-22 (XIII) — Security phase 0: the floor under "it cannot be corrupted"
+
+Eugenio opened a fourth programmer with a brief of his own: *«esta herramienta
+la van a utilizar altos directivos y gobiernos y no puede ser corrompible»*, with
+blockchain and internal cryptography for the points and for the data, on the
+Linux Foundation stack.
+
+The strategy is `09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`. Its
+uncomfortable conclusion decided the order of the work: **four fifths of
+"incorruptible" is bought in phases 0-2, and none of those three is a
+blockchain.** A chain closes exactly one attack — the operator of the database,
+which is us — and only once it is anchored where we cannot reach it.
+
+### What was measured first, because none of it was known
+
+| | |
+|---|---|
+| Write routes | **150**. An automated scan finds an explicit role check in 67, a session check in 59, nothing visible in 24 |
+| Of those 24 | almost all *are* guarded, by helpers the scan cannot read (`requireAdmin`, `puedeConTabla`, `sesionDe`) |
+| Encrypted at rest | **nothing**. The only cryptography in the product is password hashing and agent-token fingerprints |
+| Signing secrets | in `.env` on the server and in the container's environment |
+| The points balance | is the truth; `movimientos_puntos` is a receipt written beside it, and `ajuste_admin` mints points with no counter-entry |
+
+**The finding is not "24 open routes". It is that the machine cannot tell.**
+With no shared policy module, "is every write authorised?" is answerable only by
+a human reading 150 handlers, and that question eventually gets answered wrong.
+
+### What now exists
+
+- **`src/server/seguridad/politica.ts`** — one table, 150 routes declared. 40
+  reviewed by hand with the reason for each level; the other 110 are declared as
+  `revisar`, which is a third answer and not a pass. That number reaching zero is
+  the rest of phase 0.
+- **`npm run seguridad:permisos`** — the question, answered by a machine. Fails
+  on a route nobody declared, or a table entry whose route no longer exists.
+- **`src/server/seguridad/guardia.ts`** — the table applied, registered in
+  `server.ts` (one line) in **`avisar` mode**: it logs what it would have
+  rejected and rejects nothing. `SEGURIDAD_MODO=exigir` turns it on without a
+  deploy. Verified on port 3003: in `avisar` the route's own message reaches the
+  caller; in `exigir` the guard answers first; public routes and `GET` are never
+  touched.
+- **`src/server/seguridad/cifrado.ts`** — envelope encryption, one key per
+  record, and the wrapped key returned *separately* so it lives in its own table.
+  That separation is what makes destroying a key delete the data in copies that
+  were already made, which is the only erasure that works on backups.
+- **`drizzle/0064_registro_sellado.sql` + `registro.ts`** — a record that only
+  grows and is hash-chained. The verifier names the first broken entry *and the
+  kind* of break: editing a row and deleting one are different failures. Two
+  simultaneous writers cannot fork the chain — a unique index on `huella_previa`
+  settles it in the database, where they can actually see each other.
+
+### The part that is worth saying out loud
+
+The `UPDATE`/`DELETE` triggers on the sealed record are **hygiene, not
+security**. They stop the accident and the 3am shortcut. The test proves it by
+disabling the trigger, editing a row the way an insider with rights would, and
+showing the verifier catches it and points at the exact entry.
+
+And all of it is verifiable *by us*, on our own machine. Against someone who can
+rewrite the database and recompute every hash at leisure, it is worth nothing —
+only phase 2 closes that, by publishing a daily root where we cannot reach it.
+Until that runs, the honest answer to "can this be corrupted?" is **not yet
+fully**, and the difference between saying that and not saying it is the
+difference between security and the appearance of it.
+
+Nothing here is wired to production data yet: the guard warns, the encryption is
+not used by any route, and nothing writes to the sealed record. Said plainly to
+prevent the expensive mistake of believing they protect something they are not
+yet attached to.
