@@ -90,6 +90,20 @@ jobs:
               echo "COPIAS_REMOTO_CLAVE_ID=$CLAVE_ID"                                       >> .env.production
               echo "COPIAS_REMOTO_CLAVE_SECRETA=${{ secrets.COPIAS_REMOTO_CLAVE_SECRETA }}" >> .env.production
             fi
+            # Las dos llaves del TURN de Cloudflare, por el mismo camino y por
+            # el mismo motivo (2026-08-22). Son las que hacen que conecten las
+            # llamadas que no encuentran ruta directa —entre un 10 % y un 15 %,
+            # las de redes de empresa y algunas móviles—. Si no están, la
+            # aplicación arranca igual y sirve solo STUN: no se cae nada, esas
+            # llamadas concretas no conectan y se dice en pantalla.
+            if [ -n "${{ secrets.CLOUDFLARE_TURN_KEY_ID }}" ]; then
+              sed -i '/^CLOUDFLARE_TURN_KEY_ID=/d' .env.production
+              echo "CLOUDFLARE_TURN_KEY_ID=${{ secrets.CLOUDFLARE_TURN_KEY_ID }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.CLOUDFLARE_TURN_API_TOKEN }}" ]; then
+              sed -i '/^CLOUDFLARE_TURN_API_TOKEN=/d' .env.production
+              echo "CLOUDFLARE_TURN_API_TOKEN=${{ secrets.CLOUDFLARE_TURN_API_TOKEN }}" >> .env.production
+            fi
             # Migraciones ANTES de reconstruir: si una falla, el código nuevo
             # no llega a arrancar y la app vieja sigue en pie con su esquema.
             bash deploy/migrate.sh
