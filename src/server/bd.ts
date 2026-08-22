@@ -398,10 +398,25 @@ export function registerBdRoutes(app: Express, db: any) {
           })).filter((o: any) => o.label)
         : null;
 
+      // LA CONFIGURACIÓN TAMBIÉN SE PUEDE CAMBIAR, y faltaba: sin esto, elegir
+      // «enséñalo como moneda» en una fórmula ya creada no hacía nada, y no
+      // había forma de corregir una fórmula mal escrita salvo borrar la columna
+      // y perder sus datos.
+      // Se valida igual que al crear: cambiar una fórmula puede introducir un
+      // cálculo circular exactamente igual que crearla.
+      if (d.config && esCalculada(col.tipo)) {
+        const malo = await validarCalculada(col.tabla_id, {
+          id: col.id, nombre: d.nombre ? String(d.nombre).trim() : col.nombre,
+          tipo: col.tipo, config: d.config,
+        });
+        if (malo) return res.status(400).json({ error: malo });
+      }
+
       await db.execute(sql`
         UPDATE bd_columnas SET
           nombre   = COALESCE(${d.nombre ? String(d.nombre).trim().slice(0, 120) : null}, nombre),
           opciones = COALESCE(${opciones ? JSON.stringify(opciones) : null}::jsonb, opciones),
+          config   = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
           orden    = COALESCE(${typeof d.orden === 'number' ? d.orden : null}, orden),
           updated_at = now()
         WHERE id = ${req.params.id}

@@ -38,6 +38,28 @@ const FICHEROS = new Set(['imagen', 'video', 'documento']);
 export function formatear(c: Celda, col: Columna, extra?: { apuntados?: any[]; archivos?: any[] }): string {
   if (c.estado !== 'ok') return '';
   const v = c.valor;
+
+  // UNA COLUMNA CALCULADA NO TIENE TIPO PROPIO, así que no sabría cómo
+  // enseñarse: multiplicar euros por unidades daba «360000» pelado. Se mira el
+  // formato que haya elegido quien la creó, y si no eligió ninguno, al menos se
+  // separan los miles — un número de siete cifras sin separar no lo lee nadie.
+  if (CALCULADOS.has(col.tipo)) {
+    if (typeof v === 'boolean') return v ? 'Sí' : 'No';
+    if (typeof v !== 'number') return String(v);
+    const f = col.config?.formato;
+    if (f === 'moneda') {
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: col.config?.moneda || 'EUR' }).format(v);
+    }
+    if (f === 'porcentaje') {
+      return new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 2 }).format(v);
+    }
+    if (f === 'duracion') {
+      const h = Math.floor(v / 3600), m = Math.floor((v % 3600) / 60);
+      return `${h}:${String(m).padStart(2, '0')}`;
+    }
+    return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 4 }).format(v);
+  }
+
   switch (col.tipo) {
     case 'moneda': {
       const m = col.config?.moneda || 'EUR';
