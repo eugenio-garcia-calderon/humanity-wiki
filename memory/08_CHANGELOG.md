@@ -4807,3 +4807,343 @@ El coordinador paró la fusión con dos preguntas que no tenían respuesta técn
 **¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
 
 También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
+## 2026-08-22 (XIII) — Security phase 0: the floor under "it cannot be corrupted"
+
+Eugenio opened a fourth programmer with a brief of his own: *«esta herramienta
+la van a utilizar altos directivos y gobiernos y no puede ser corrompible»*, with
+blockchain and internal cryptography for the points and for the data, on the
+Linux Foundation stack.
+
+The strategy is `09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`. Its
+uncomfortable conclusion decided the order of the work: **four fifths of
+"incorruptible" is bought in phases 0-2, and none of those three is a
+blockchain.** A chain closes exactly one attack — the operator of the database,
+which is us — and only once it is anchored where we cannot reach it.
+
+### What was measured first, because none of it was known
+
+| | |
+|---|---|
+| Write routes | **150**. An automated scan finds an explicit role check in 67, a session check in 59, nothing visible in 24 |
+| Of those 24 | almost all *are* guarded, by helpers the scan cannot read (`requireAdmin`, `puedeConTabla`, `sesionDe`) |
+| Encrypted at rest | **nothing**. The only cryptography in the product is password hashing and agent-token fingerprints |
+| Signing secrets | in `.env` on the server and in the container's environment |
+| The points balance | is the truth; `movimientos_puntos` is a receipt written beside it, and `ajuste_admin` mints points with no counter-entry |
+
+**The finding is not "24 open routes". It is that the machine cannot tell.**
+With no shared policy module, "is every write authorised?" is answerable only by
+a human reading 150 handlers, and that question eventually gets answered wrong.
+
+### What now exists
+
+- **`src/server/seguridad/politica.ts`** — one table, 150 routes declared. 40
+  reviewed by hand with the reason for each level; the other 110 are declared as
+  `revisar`, which is a third answer and not a pass. That number reaching zero is
+  the rest of phase 0.
+- **`npm run seguridad:permisos`** — the question, answered by a machine. Fails
+  on a route nobody declared, or a table entry whose route no longer exists.
+- **`src/server/seguridad/guardia.ts`** — the table applied, registered in
+  `server.ts` (one line) in **`avisar` mode**: it logs what it would have
+  rejected and rejects nothing. `SEGURIDAD_MODO=exigir` turns it on without a
+  deploy. Verified on port 3003: in `avisar` the route's own message reaches the
+  caller; in `exigir` the guard answers first; public routes and `GET` are never
+  touched.
+- **`src/server/seguridad/cifrado.ts`** — envelope encryption, one key per
+  record, and the wrapped key returned *separately* so it lives in its own table.
+  That separation is what makes destroying a key delete the data in copies that
+  were already made, which is the only erasure that works on backups.
+- **`drizzle/0064_registro_sellado.sql` + `registro.ts`** — a record that only
+  grows and is hash-chained. The verifier names the first broken entry *and the
+  kind* of break: editing a row and deleting one are different failures. Two
+  simultaneous writers cannot fork the chain — a unique index on `huella_previa`
+  settles it in the database, where they can actually see each other.
+
+### The part that is worth saying out loud
+
+The `UPDATE`/`DELETE` triggers on the sealed record are **hygiene, not
+security**. They stop the accident and the 3am shortcut. The test proves it by
+disabling the trigger, editing a row the way an insider with rights would, and
+showing the verifier catches it and points at the exact entry.
+
+And all of it is verifiable *by us*, on our own machine. Against someone who can
+rewrite the database and recompute every hash at leisure, it is worth nothing —
+only phase 2 closes that, by publishing a daily root where we cannot reach it.
+Until that runs, the honest answer to "can this be corrupted?" is **not yet
+fully**, and the difference between saying that and not saying it is the
+difference between security and the appearance of it.
+
+Nothing here is wired to production data yet: the guard warns, the encryption is
+not used by any route, and nothing writes to the sealed record. Said plainly to
+prevent the expensive mistake of believing they protect something they are not
+yet attached to.
+
+---
+
+## 2026-08-22 (XIV) — Layers of protection based on how much a datum matters
+
+Eugenio: *«céntrate en que nadie pueda corromper los datos, vamos a generar
+capas de seguridad en base al nivel de relevancia de un dato o contenido»*. The
+points/token side moved to another conversation.
+
+Full plan and phases: `09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
+
+### The decision that had never been written down
+
+Protecting all 129 tables at maximum is not safer: it is slower, costlier, and
+it is how alerts stop being read. Protecting "the important ones" without saying
+which those are is worse — everyone pictures a different set.
+
+So every table now carries **four separate grades**, the ENS dimensions (RD
+311/2022): integrity, confidentiality, traceability, authenticity. Four instead
+of one label, because of the case that decides the whole design:
+
+> **The commons indicators are public and are the gravest thing that can be
+> corrupted here.** With a single "criticality" label they either get encrypted
+> for no reason, or left unprotected.
+
+The tier is **computed** from the grades, never written by hand. Raising
+something's protection means arguing that it matters more.
+
+| Tier | What it gets, cumulatively | Tables |
+|---|---|---|
+| 3 | signed entries, encryption where confidentiality is high, two-person rule, immediate alarm | **40** |
+| 2 | every write appended to the sealed record, daily root anchored outside | **68** |
+| 1 | authorised route, archive never delete, full history | **18** |
+| 0 | recomputable from its source | **3** |
+
+`npm run seguridad:clasificacion` fails the build on any table nobody has
+classified. Five people work in this repo and tables appear daily; the day one is
+created is the day somebody still remembers what it was for.
+
+### Signatures, because the chain cannot prove authorship
+
+The hash chain proves nothing has changed since it was written. It does **not**
+prove we wrote it: anyone who can write to the table can forge a whole coherent
+chain from scratch. Every entry is now signed with Ed25519 and a key that is not
+in the database.
+
+The test shows exactly what that buys: an entry edited **and its hashes
+recomputed all the way down** passes every chain check, and the signature still
+catches it.
+
+Rotation is in from the first day — each signature carries the id of the key that
+made it, so an entry signed by a previous key answers `NO SÉ` instead of being
+accused of tampering. That distinction is the difference between a verifier
+people trust and one they switch off.
+
+### A bug the tests found, not production
+
+With three retries and no wait, five simultaneous writers starved each other on
+the unique index that keeps the chain from forking. Now eight tries with a short
+uneven wait, and the test pushes ten at once instead of five: a concurrency test
+that only fails sometimes is a test that gets ignored.
+
+### Still attached to nothing
+
+The guard warns, no route encrypts, nothing writes to the sealed record, and
+`CLAVE_FIRMA_REGISTRO` is not set anywhere — so entries would be written unsigned,
+and they say so rather than pretending. Phase B is what attaches it.
+
+---
+
+## 2026-08-22 — One valid view per person, window and day (Programador 7)
+
+The ceiling #242 left, in prog4's number: one account could mint the 50-cent
+cap on every window it owns, every day — a thousand own windows, 500 points
+a day. Now `vistas_validas` (0084: window, user, day; primary key on the
+three) is inserted inside the mint transaction with ON CONFLICT DO NOTHING,
+and minting happens only when the row was actually inserted. The same attack
+drops to ~0.10/day and stops paying.
+
+Two counters, on purpose: `knowledge_windows.views` is the raw number shown
+to everyone (anyone can raise it, it pays nobody); `vistas_validas` is the
+number that WEIGHS — it mints today and it is what the monthly pot will read
+when Eugenio's success-weighted distribution is built. Not a junction table
+in the sense of the 43-table rule: a dated fact log like the ledger, holding
+nothing about the view except that it happened.
+
+Verified locally: 10 concurrent session views of one window plus 3 without
+a session → exactly 1 valid view, 1 ledger entry, +0.01 to the author. Test
+session tagged claude-dev-verificacion and deleted; rows, balance and view
+counter restored.
+
+---
+
+## 2026-08-22 — /tokenomics, rebuilt on the pages registry (Programador 7, PR #220)
+
+The public tokenomics page, now as ONE line in `src/paginasInfo.ts` instead
+of edits in `App.tsx` and `Layout.tsx` — the Dashboard's request once five
+programmers needed the same menu. The white paper draft and the task list
+hang off it as views (`?vista=libro-blanco`, `?vista=tareas`): the house
+pattern for "a different way of looking at the same place", and it keeps the
+(i) menu at one Tokenomics entry without touching any contested file.
+
+What the page says (all verified in the browser on 3007, menu entry and both
+views included): what exists today (internal balance + ledger), the service
+basket as declared intention (read from the public prices API when the #235
+server lands, static fallback otherwise), the capacity-not-ownership design
+principle, the four negations, the three-phase roadmap where only phase A
+exists, the distribution model Eugenio decided (50% of the platform's
+commission, success-weighted, 10-year expiry, 24-month dormancy, no euro
+redemption, market discounts up to 100%), the white paper draft with its
+[PENDIENTE] gaps, and the task list with rama A decided and the remaining
+mint ceiling stated with prog4's number.
+
+
+---
+
+## 2026-08-22 — Point transfers behind a switch, white paper draft, task list (Programador 7)
+
+Eugenio decided points WILL be transferable and asked for a ~1000-user pilot.
+Three pieces, all on `prog7/token-piloto`, none live until his sign-off:
+
+**Transfers** (`drizzle/0070`, `src/server/puntos.ts`, `src/pages/Vision.tsx`):
+`POST /api/puntos/transferir` — recipient by email or exact display name,
+amount rounded to cents, daily cap per sender (`PUNTOS_TRANSFERENCIA_TOPE_DIA`,
+100 default) counted from the ledger itself, and the four writes (debit,
+credit, two ledger rows) in ONE transaction — a half-done transfer is money
+created or destroyed. Balance check inside the debit UPDATE (`puntos >=`),
+plus a DB-level `CHECK (puntos >= 0) NOT VALID` so the database has the last
+word without breaking legacy rows. **The whole route sits behind
+`PUNTOS_TRANSFERENCIA=on`, off in production** — same doctrine as
+TIENDAS_COBRO: value moves when Eugenio says so, not when a deploy lands.
+UI: a folded "Enviar puntos" form in the Economía tab of /vision.
+
+Verified against the local DB end to end: valid send (name and email),
+insufficient balance (rolled back cleanly), self-send, unknown recipient,
+zero/rounding, daily cap, no session — and the UI form itself (sent 1 point,
+confirmation with recipient's name, balance refreshed). Test users and all
+their rows deleted afterwards.
+
+**White paper draft** (`/tokenomics/libro-blanco`): MiCA Annex I structure in
+plain Spanish, every future claim conditional, gaps marked [PENDIENTE],
+banner saying it is a draft reviewed by no authority.
+
+**Task list** (`/tokenomics/tareas`): pilot → economic base → legal → chain →
+public trading, each task with its real status. The «cotizar» fork is stated
+honestly: crypto trading platform (CASP, still utility) vs stock exchange
+(MiFID security, incompatible with this design) — a decision for the issuer
+and their lawyer, not for the team.
+
+---
+
+## 2026-08-22 — One book, one seal: the ledger becomes append-only and rules the balance (Programador 7 + 4)
+
+The Dashboard flagged a collision: transfers write ledger entries while
+Programador 4 ships `registro_sellado`. The agreed answer — «un libro, un
+sello»: `movimientos_puntos` stays the ONE accounting book (the truth);
+prog4's sealed registry stores only row hashes chained in order (the proof).
+No amounts in the seal, so the two can never disagree on figures; the chain
+still proves no entry was rewritten. Capture happens by DATABASE trigger on
+prog4's side (his 0071), so even a 3am psql edit gets caught — an app-level
+API call would only seal what the app writes.
+
+My side of the deal, in `drizzle/0072` and `puntos.ts`:
+
+- **Append-only ledger**: a DB trigger rejects UPDATE/DELETE on
+  `movimientos_puntos` — a correction is a contrary entry, never an edit.
+  Enforced in the database because the app connects as the admin role, so
+  REVOKE alone would not bind. Verified: both UPDATE and DELETE raise.
+- **The book rules the balance**: `users.puntos` is now a derived cache.
+  `cuadrarPuntos()` compares column vs ledger sum per user, logs every
+  mismatch loudly and reposts the column from the book. Daily timer +
+  `GET /api/admin/puntos/cuadre`. Verified: planted a 42-vs-100 mismatch,
+  first pass reported and repaired it, second pass came back clean.
+- **Backfill first**: accounts created by direct SQL (the AI-programmer
+  script) had the DEFAULT 100 with no receipt; 0072 re-runs the 0026
+  backfill so the first cuadre doesn't read a real gift as a discrepancy.
+
+Honest limit, stated by prog4 and repeated here: between commit and seal
+there is a window; a deleted capture note leaves a numbered gap in his
+registry — visible, but its content unrecoverable. Narrowed by running his
+sealer frequently; transfers stay behind the off switch regardless.
+
+---
+
+## 2026-08-22 — prog4's review of the transfer ledger, all six points taken (Programador 7)
+
+Three blockers, three recommendations, all applied:
+
+1. **TRUNCATE bypassed the append-only trigger** — row triggers never fire
+   on TRUNCATE. Added a statement-level BEFORE TRUNCATE trigger (0074).
+   Reading this file made prog4 find and fix the identical hole in his own
+   registro_sellado.
+2. **The backfill decided people's money** — a flat 100-point receipt plus
+   ledger-driven repair would have rewritten any account whose truth wasn't
+   exactly 100. Replaced with an OPENING ENTRY (`saldo_inicial`) equal to
+   column-minus-ledger for every unsquared account: the first cuadre is
+   clean by construction and nobody's balance changes. Verified with a
+   250-point SQL-created account.
+3. **The daily cap was checked outside the transaction** — two simultaneous
+   requests read the same "sent today" and both passed. Moved inside the
+   transaction after the debit locks the sender row. Verified: two
+   concurrent 60-point sends, exactly one passed.
+4. Deadlock: both user rows now locked in id order before any update.
+5. The 24h timer would never fire on a daily-restart container: now runs at
+   startup + every 6h.
+6. Cuadre is born in AVISAR mode: reports always, repairs only with
+   `PUNTOS_CUADRE_REPARA=on` (verified both modes). TODO left to wire
+   descuadre detection into prog4's registry once #231 merges.
+
+Migrations renumbered 0070→0073, 0072→0074 (prog4 owns 0070-0072; the
+Dashboard's rule: reserve the migration filename the moment you pick the
+number — done for both).
+
+---
+
+## 2026-08-22 — Rama A decided; the MiCA-shaped pieces of the point system (Programador 7)
+
+Eugenio resolved the trading fork: **rama A** — if the token ever trades
+publicly, it is on a crypto-asset platform under MiCA and stays a utility
+token; it will NOT list on a stock exchange (if capital is ever raised there,
+the issuing entity lists, never the token). The task page's fork banner became
+a decision banner and the rama B tasks were removed; the file header keeps
+what they said.
+
+Then «create the system so that when MiCA arrives only small adjustments are
+needed». Three pieces, the shapes MiCA will ask for, built now:
+
+- **Published prices with history** (`drizzle/0083`, `tokenomics_precios`):
+  price per service unit in points, append-only by trigger (changing a price
+  is inserting a row), public at `GET /api/tokenomics/precios` with the whole
+  history. Seeded with the page's orientative basket; admin endpoint inserts
+  new prices, never edits.
+- **Supply from the book**: `GET /api/tokenomics/resumen` — points in
+  circulation and per-motive breakdown, computed from the ledger, public
+  without a session. What a white paper cites instead of promising
+  transparency.
+- **One spend gate**: `cobrarServicio()` in `puntos.ts` — balance check plus
+  ledger entry (`gasto_servicio`, service key in entidad_tipo) in one
+  transaction with the row locked. When services start charging they call
+  this; when the token arrives, "burn" is this same function.
+
+/tokenomics now reads prices and circulation from the public API (static
+basket as fallback) and shows a live figures section. Verified on 3007: both
+endpoints, 403 without admin on price publishing, price UPDATE rejected by
+trigger, page rendering API prices and the 905,5-point local circulation.
+
+---
+
+## 2026-08-22 — The monthly distribution, as a simulation that pays nobody (Programador 7)
+
+`GET /api/admin/tokenomics/reparto?mes=YYYY-MM` computes Eugenio's
+distribution with the month's real numbers and writes nothing: pot = 50% of
+the platform's commission on paid transactions (the commission, never the
+gross — it comes out of what the platform earns, not sellers' money); a
+fixed half split equally among verified users (level ≥ 2); a variable half
+split by publication success — valid views ×1, interactions (reactions +
+comments) ×1, positive reviews (score ≥ 7) ×3, all weights and the
+euro→point rate (`PUNTOS_POR_EURO`, 1 today) declared in the response. Only
+numbers that cannot be inflated from outside count: `vistas_validas`, never
+the raw counter. If nobody had measurable success, the variable part is
+reported as unallocated rather than silently split: splitting it equally
+would invent merit.
+
+Born as a simulation on purpose, like the reconciliation and prog4's guard:
+months of real figures before a single line moves a balance. The day it is
+switched on, paying is walking this same list with otorgarPuntos and a new
+motive — the list does not change. Verified on the local DB: 453.60 € of
+commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
+113.40 entirely to the one author with success (3 interactions, 6 positive
+reviews), totals summing back to the pot; 403 without admin. Depends on
+`vistas_validas` (PR #260) being in place.

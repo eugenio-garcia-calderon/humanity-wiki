@@ -33,6 +33,8 @@
 // aún antes, porque mide el tiempo que espera quien pide.
 import type { Express } from 'express';
 
+import { registrarGuardia } from './seguridad/guardia.js';
+import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
@@ -77,6 +79,26 @@ export type Modulo = {
 };
 
 export const MODULOS: Modulo[] = [
+  {
+    nombre: 'seguridad/guardia',
+    montar: app => registrarGuardia(app),
+    nota: 'EL PRIMERO DE LA LISTA, y aquí el orden importa más que en ningún otro sitio: '
+        + 'mira TODAS las escrituras de la API contra la tabla de permisos, así que un módulo '
+        + 'montado antes que él quedaría fuera de la comprobación sin que nadie lo notara. '
+        + 'Va después de `registerAuthRoutes` como todos —necesita `req.user` para saber el nivel— '
+        + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
+        + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
+  },
+
+  {
+    nombre: 'seguridad/sellado',
+    montar: (app, db) => registrarSelladoAutomatico(app, db),
+    nota: 'No registra ninguna ruta: vacía cada dos minutos el buzón de cambios que llenan los '
+        + 'disparadores de la base de datos, encadenando y firmando. Sale JUNTO con esos disparadores '
+        + 'a propósito: ponerlos sin nada que vacíe el buzón es un grifo con el desagüe tapado. '
+        + 'El sitio en la lista da igual; está aquí para que se vea que existe.',
+  },
+
   {
     nombre: 'medicion',
     montar: (app, db) => registerMedicionRoutes(app, db),
