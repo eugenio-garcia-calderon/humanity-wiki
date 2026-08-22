@@ -127,12 +127,6 @@
       "desde": "2026-08-22T22:23:56.659Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/pages/Proyectos.tsx",
-      "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
-      "desde": "2026-08-22T22:27:51.751Z"
-    },
-    {
       "agente": "dashboard",
       "ruta": "drizzle/0096_publicaciones_en_proyecto.sql",
       "motivo": "publicaciones dentro de un proyecto",
@@ -143,12 +137,6 @@
       "ruta": "src/server/roadmap.ts",
       "motivo": "publicaciones dentro de un proyecto",
       "desde": "2026-08-22T23:08:33.198Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "public/sw.js",
-      "motivo": "URGENTE: el sw clona la conexion SSE y la app se congela",
-      "desde": "2026-08-22T23:09:29.617Z"
     }
   ]
 }
