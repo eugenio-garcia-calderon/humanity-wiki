@@ -5506,6 +5506,67 @@ solo añaden, sobre el `origin/main` más reciente, escritas en el mensaje del c
 y avisadas en el Hormiguero (`INCMT4WROB9TIN`). No es una costumbre que convenga
 empezar; es una instrucción de quien manda en el producto, no un atajo.
 
+---
+
+## 2026-08-23 — Shipping paid with points too, and no Stripe when points cover it all (Programador 7)
+
+Eugenio, after his test: «incluye también el envío con el tema de puntos para
+no tener que ir a Stripe». Now, when every line accepts points and the buyer
+asks for enough, points cover products AND shipping and the order is created
+without Stripe; the seller is paid the shipping in points as well. When points
+only cover part, shipping stays in euros with Stripe (a Stripe coupon cannot
+discount shipping), so the cap there is the product part only.
+
+Stripe used to collect the address. Without Stripe we ask for it: `direccion`
+{nombre, linea1, linea2?, cp, ciudad, pais} is required for anything physical
+paid entirely in points (400 with `falta_direccion` otherwise) and stored in
+`pedidos.direccion_envio` + `comprador_nombre`; `envio_centimos` records the
+shipping that was paid in points. `POST /api/publicar/cotizar` gives the cart
+subtotal, shipping, and whether everything accepts points, so the cart, the
+product page and the product block can say «se paga todo con puntos, envío
+incluido», show the address form (shared `DireccionEnvio` in Cesta.tsx) and
+relabel the button «Pagar con puntos» / «Falta la dirección de envío».
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): cotizar → 5 € + 3 € shipping, todo_acepta; 8 points without address
+→ 400 falta_direccion; 8 points with address → order `pagado` without Stripe,
+envio_centimos 300, address stored, buyer 100→92, seller 100→108; 5 points →
+Stripe session with the 5 € coupon and shipping in euros. `tsc` clean. Not
+seen in a browser (shop subdomain only).
+
+---
+
+## 2026-08-23 — Points are transferable, sellers are asked, and the commission in points is half (Programador 7)
+
+Eugenio, on the tokenomics page still saying «No es transferible»: «queremos que
+sean transferibles los puntos». Decided and done:
+
+- **`PUNTOS_TRANSFERENCIA=on` in production** (app recreated, health OK): people
+  can send points to each other (daily cap, one transaction, ledger entries).
+  The page, the white paper and the task list now say so, dated; the fourth
+  negation became the one that really holds the design: «No se canjea por
+  euros».
+- **Sellers are asked.** CrearProducto shows, next to the price in euros, its
+  equivalent in points and a checkbox «Acepto cobrar en puntos» with the deal
+  spelled out: the buyer's points go to the seller, and the platform commission
+  is **half** — 2.5 % in points versus 5 % in euros.
+- **The commission in points exists.** 0093: a platform account in the ledger
+  (`U_PLATAFORMA`, not a person, cannot log in) and motive `comision_puntos`.
+  `pagarConPuntos` now writes three entries per sale: buyer −100 %, seller
+  +97.5 %, platform +2.5 % (`PUNTOS_COMISION_BPS`, 250 default), pedido as
+  entity, one transaction. The price is the price: the commission comes out
+  of the seller's side, never added to the buyer.
+- **A brake on the transfer route** (prog6's module, rule `transferencia`):
+  the daily cap limits how much, not how many times; ten sends in a row are
+  free, then 20 s, 40 s… up to an hour, keyed by account. Every send counts as
+  an attempt on purpose — what is braked is the loop, not the person.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after,
+balances restored, platform account back to 0): a 4-point purchase → buyer
+100→96, seller 100→103.90, platform 0→0.10, three ledger rows; twelve
+consecutive transfers → eleven 200 and the twelfth 429. `tsc` clean. prog6
+took a named dump before the migration (`antes-de-0093-comision-en-puntos`).
+Not seen in a browser (shop subdomain / CrearProducto modal).
 ### 2026-08-23 — La llamada por fin cuenta lo que está pasando (Programador 8)
 - **El problema que se cierra**: una llamada perfecta y otra que perdía uno de cada cinco paquetes se veían exactamente iguales. La aplicación lo sabía y no lo decía, y eso convierte un problema de red en una discusión entre dos personas: «¿me oyes?» «sí, ¿y tú?».
 - **Barritas de cobertura** (`src/telecom/calidad.ts`): tres barras como las del móvil, porque es el único dibujo que todo el mundo sabe leer sin explicación. Se miden pérdida de paquetes, ida y vuelta y nerviosismo, **por tramos y no en total** — con acumulados, una llamada que empezó mal seguiría en rojo veinte minutos después de haberse arreglado. Solo audio: el vídeo pierde paquetes constantemente sin que se note.

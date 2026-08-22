@@ -21,6 +21,35 @@ import { useCarrito } from '../../hooks/useCarrito';
 // sufre es alguien comprando con una mano en el autobús.
 
 /**
+ * LA DIRECCIÓN CUANDO NO HAY STRIPE (2026-08-23, Eugenio: «incluye también el
+ * envío con el tema de puntos para no tener que ir a Stripe»). Si los puntos
+ * cubren todo y hay algo físico, Stripe no interviene y la dirección la
+ * pedimos nosotros. Compartido por la cesta, la ficha y el bloque de producto.
+ */
+export type Direccion = { nombre: string; linea1: string; linea2: string; cp: string; ciudad: string; pais: string };
+export const DIRECCION_VACIA: Direccion = { nombre: '', linea1: '', linea2: '', cp: '', ciudad: '', pais: 'ES' };
+export const direccionCompleta = (d: Direccion) => !!(d.nombre.trim() && d.linea1.trim() && d.cp.trim() && d.ciudad.trim());
+export function DireccionEnvio({ valor, onCambio }: { valor: Direccion; onCambio: (d: Direccion) => void }) {
+  const campo = (k: keyof Direccion, placeholder: string, ancho = 'w-full', label?: string) => (
+    <input value={valor[k]} onChange={e => onCambio({ ...valor, [k]: e.target.value })} placeholder={placeholder} aria-label={label || placeholder}
+      className={`${ancho} h-10 px-3 rounded-lg border border-slate-200 text-sm`} />
+  );
+  return (
+    <div className="mt-3 p-3 rounded-xl border border-slate-200 bg-white space-y-2">
+      <p className="text-xs font-bold text-slate-700">¿A dónde lo enviamos?</p>
+      {campo('nombre', 'Nombre y apellidos')}
+      {campo('linea1', 'Calle, número, piso')}
+      {campo('linea2', 'Más señas (opcional)')}
+      <div className="flex gap-2">
+        {campo('cp', 'Código postal', 'w-32')}
+        {campo('ciudad', 'Ciudad', 'flex-1')}
+        {campo('pais', 'País', 'w-16', 'País (código de dos letras)')}
+      </div>
+    </div>
+  );
+}
+
+/**
  * LA CONFIRMACIÓN DE COMPRA (2026-08-22, Eugenio: «no hay pantalla de
  * confirmación de que todo ha ido bien, y me devuelve a la página de
  * producto, MAL»). Vive en la cesta porque la cesta está en todas las páginas
@@ -139,6 +168,17 @@ export default function Cesta({ tienda }: { tienda: string }) {
   // se manda es cuántos puntos quiere gastar la persona — el servidor acota.
   const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
   const [usarPuntos, setUsarPuntos] = useState('');
+  // La cotización (envío incluido) para saber si los puntos pueden cubrirlo
+  // todo (2026-08-23); y la dirección, por si entonces hay que enviar algo.
+  const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean } | null>(null);
+  const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
+  useEffect(() => {
+    if (!abierta || lineas.length === 0) return;
+    fetch('/api/publicar/cotizar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })) }),
+    }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
+  }, [abierta, lineas.map(l => `${l.producto_id}:${l.cantidad}`).join('|')]);
   // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
   // pagar, para que la cesta diga el descuento y no lo adivine.
   const [cupon, setCupon] = useState('');
@@ -170,10 +210,16 @@ export default function Cesta({ tienda }: { tienda: string }) {
   if (lineas.length === 0) return <CompraHecha tienda={tienda} />;
 
   const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
-  const maxPuntos = caja?.saldo != null
-    ? Math.floor(Math.min(caja.saldo, (subtotal / 100) * caja.puntos_por_euro) * 100) / 100
-    : 0;
-  const descuentoCent = caja ? Math.min(subtotal, Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)) : 0;
+  // Hasta dónde llegan los puntos: la parte que acepta puntos (menos el cupón)
+  // y, si TODO acepta puntos, también el envío — entonces no hace falta Stripe.
+  const envioCent = cotiza?.envio_centimos || 0;
+  const aceptaCent = cotiza ? cotiza.acepta_puntos_centimos : subtotal;
+  const parteProductos = Math.max(0, Math.min(aceptaCent, subtotal - (cuponOk?.descuento_centimos || 0)));
+  const todoEnPuntos = caja ? Math.floor(((parteProductos + (cotiza?.todo_acepta_puntos ? envioCent : 0)) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
+  const maxPuntos = caja?.saldo != null ? Math.min(caja.saldo, todoEnPuntos) : 0;
+  const cubreTodo = !!caja && !!cotiza?.todo_acepta_puntos && puntosPedidos >= todoEnPuntos && maxPuntos >= todoEnPuntos && todoEnPuntos > 0;
+  const descuentoCent = caja ? Math.min(parteProductos + (cubreTodo ? envioCent : 0), Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)) : 0;
+  const faltaDireccion = cubreTodo && !!cotiza?.es_fisico && !direccionCompleta(direccion);
 
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
@@ -189,6 +235,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
           volver_a: window.location.href,
           ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
+          ...(cubreTodo && cotiza?.es_fisico ? { direccion } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -318,19 +365,25 @@ export default function Cesta({ tienda }: { tienda: string }) {
                   {puntosPedidos > 0 && (
                     <p className="mt-1 text-[11px] text-amber-800">
                       −{dinero(descuentoCent)} de descuento{puntosPedidos > maxPuntos ? ` (máximo ${maxPuntos.toLocaleString('es-ES')} puntos aquí)` : ''}.
-                      Solo lo que el vendedor acepta en puntos puede pagarse así; el envío va siempre en euros.
+                      {cubreTodo
+                        ? ` Se paga todo con puntos${envioCent > 0 ? `, envío (${dinero(envioCent)}) incluido` : ''}: sin tarjeta.`
+                        : cotiza?.todo_acepta_puntos
+                          ? ` Con ${todoEnPuntos.toLocaleString('es-ES')} puntos se pagaría todo${envioCent > 0 ? ', envío incluido,' : ''} sin tarjeta.`
+                          : ' Solo lo que el vendedor acepta en puntos puede pagarse así; el resto y el envío van con tarjeta.'}
                     </p>
                   )}
+                  {cubreTodo && cotiza?.es_fisico && <DireccionEnvio valor={direccion} onCambio={setDireccion} />}
                 </div>
               )}
 
               {error && <p className="mt-3 text-xs font-bold text-rose-600">{error}</p>}
 
-              <button type="button" onClick={pagar} disabled={pagando}
+              <button type="button" onClick={pagar} disabled={pagando || faltaDireccion}
                 className="mt-4 w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-bold disabled:opacity-60">
                 {pagando
-                  ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Abriendo el pago…</span>
-                  : 'Pagar'}
+                  ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {cubreTodo ? 'Pagando con puntos…' : 'Abriendo el pago…'}</span>
+                  : faltaDireccion ? 'Falta la dirección de envío'
+                  : cubreTodo ? 'Pagar con puntos' : 'Pagar'}
               </button>
               <p className="mt-2 text-center text-[11px] text-slate-400">
                 Pago seguro con tarjeta. No hace falta cuenta.
