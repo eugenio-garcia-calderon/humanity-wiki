@@ -12,7 +12,8 @@
     "start": "node dist/server.cjs",
     "probar:acciones": "node --env-file=.env scripts/probar-acciones-ia.mjs",
     "seguridad:permisos": "node scripts/auditar-permisos.mjs",
-    "seguridad:probar": "tsx scripts/probar-politica.ts && tsx scripts/probar-cifrado.ts && tsx scripts/probar-registro.ts"
+    "seguridad:probar": "tsx scripts/probar-politica.ts && tsx scripts/probar-clasificacion.ts && tsx scripts/probar-cifrado.ts && tsx scripts/probar-registro.ts",
+    "seguridad:clasificacion": "node scripts/auditar-clasificacion.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

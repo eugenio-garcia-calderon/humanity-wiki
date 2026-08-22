@@ -4061,3 +4061,70 @@ Nothing here is wired to production data yet: the guard warns, the encryption is
 not used by any route, and nothing writes to the sealed record. Said plainly to
 prevent the expensive mistake of believing they protect something they are not
 yet attached to.
+
+---
+
+## 2026-08-22 (XIV) — Layers of protection based on how much a datum matters
+
+Eugenio: *«céntrate en que nadie pueda corromper los datos, vamos a generar
+capas de seguridad en base al nivel de relevancia de un dato o contenido»*. The
+points/token side moved to another conversation.
+
+Full plan and phases: `09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
+
+### The decision that had never been written down
+
+Protecting all 129 tables at maximum is not safer: it is slower, costlier, and
+it is how alerts stop being read. Protecting "the important ones" without saying
+which those are is worse — everyone pictures a different set.
+
+So every table now carries **four separate grades**, the ENS dimensions (RD
+311/2022): integrity, confidentiality, traceability, authenticity. Four instead
+of one label, because of the case that decides the whole design:
+
+> **The commons indicators are public and are the gravest thing that can be
+> corrupted here.** With a single "criticality" label they either get encrypted
+> for no reason, or left unprotected.
+
+The tier is **computed** from the grades, never written by hand. Raising
+something's protection means arguing that it matters more.
+
+| Tier | What it gets, cumulatively | Tables |
+|---|---|---|
+| 3 | signed entries, encryption where confidentiality is high, two-person rule, immediate alarm | **40** |
+| 2 | every write appended to the sealed record, daily root anchored outside | **68** |
+| 1 | authorised route, archive never delete, full history | **18** |
+| 0 | recomputable from its source | **3** |
+
+`npm run seguridad:clasificacion` fails the build on any table nobody has
+classified. Five people work in this repo and tables appear daily; the day one is
+created is the day somebody still remembers what it was for.
+
+### Signatures, because the chain cannot prove authorship
+
+The hash chain proves nothing has changed since it was written. It does **not**
+prove we wrote it: anyone who can write to the table can forge a whole coherent
+chain from scratch. Every entry is now signed with Ed25519 and a key that is not
+in the database.
+
+The test shows exactly what that buys: an entry edited **and its hashes
+recomputed all the way down** passes every chain check, and the signature still
+catches it.
+
+Rotation is in from the first day — each signature carries the id of the key that
+made it, so an entry signed by a previous key answers `NO SÉ` instead of being
+accused of tampering. That distinction is the difference between a verifier
+people trust and one they switch off.
+
+### A bug the tests found, not production
+
+With three retries and no wait, five simultaneous writers starved each other on
+the unique index that keeps the chain from forking. Now eight tries with a short
+uneven wait, and the test pushes ten at once instead of five: a concurrency test
+that only fails sometimes is a test that gets ignored.
+
+### Still attached to nothing
+
+The guard warns, no route encrypts, nothing writes to the sealed record, and
+`CLAVE_FIRMA_REGISTRO` is not set anywhere — so entries would be written unsigned,
+and they say so rather than pretending. Phase B is what attaches it.

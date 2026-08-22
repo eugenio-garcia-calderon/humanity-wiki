@@ -5,19 +5,24 @@ Programador 4 on 2026-08-22. Read that document before changing anything here:
 the order of the phases is the argument, and it is not arbitrary.
 
 ```
-politica.ts    the single table: who may write what, and why
-guardia.ts     the table, applied, before any route sees the request
-cifrado.ts     envelope encryption: one key per record, key destruction = deletion
-registro.ts    the sealed record: append-only, hash-chained, verifiable by anyone
+clasificacion.ts  how much each of the 129 tables matters, and the tier that follows
+politica.ts       the single table: who may write what, and why
+guardia.ts        the table, applied, before any route sees the request
+cifrado.ts        envelope encryption: one key per record, key destruction = deletion
+firma.ts          Ed25519: proves WE wrote it, which the hash chain cannot
+registro.ts       the sealed record: append-only, hash-chained, signed, verifiable by anyone
 ```
+
+Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
 Migration: `drizzle/0064_registro_sellado.sql`.
 
-## The three commands
+## The commands
 
 ```bash
-npm run seguridad:permisos    # is every write route declared? fails the build if not
-npm run seguridad:probar      # the three test scripts
+npm run seguridad:permisos       # is every write route declared? fails the build if not
+npm run seguridad:clasificacion  # is every table classified? fails the build if not
+npm run seguridad:probar         # the four test scripts
 npx tsx scripts/probar-registro.ts   # creates a throwaway database, and drops it
 ```
 
@@ -29,6 +34,8 @@ green is worse than no test.
 
 | Piece | State |
 |---|---|
+| The classification | **129 of 129 tables**: 40 tier 3, 68 tier 2, 18 tier 1, 3 recomputable |
+| Signatures | Ed25519 with key rotation built in. **`CLAVE_FIRMA_REGISTRO` is not set anywhere**, so entries are written unsigned and say so |
 | The policy table | 150 routes declared. **40 reviewed by hand, 110 still `revisar`** |
 | The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
@@ -79,6 +86,8 @@ a deploy — that is the point of having the two modes.
 | Mark many routes as reviewed at once | A policy deduced from the audited code always passes | Review one at a time, and write the `nota` |
 | Change `SEPARADOR`, `textoDe` or the Merkle rule | **Every hash ever written changes**, and the whole record reads as tampered | Never. Add a new version tag and keep reading the old one |
 | Store the wrapped key in the same row as the data | A backup carries both, and destroying the key never reaches that copy | Its own table, which is what gets purged |
+| Write a tier by hand in `clasificacion.ts` | The tier is computed; a hand-written one hides the argument about why it matters | Change the grades, and say why in `porque` |
+| Let confidentiality raise the tier | You end up signing and anchoring private chats while public indicators stay unsigned | Confidentiality decides encryption, integrity and authenticity decide the tier |
 | Put personal data on a chain, even hashed | EDPB Guidelines 02/2025 v2.0 (7 July 2026): a hash of personal data is still personal data | Only the salted daily root leaves |
 | Trust the `registro_sellado` triggers as security | They stop the accident, not somebody with rights to drop them | The chain, and phase 2's external anchor |
 
