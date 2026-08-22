@@ -55,12 +55,6 @@
       "desde": "2026-08-22T20:01:33.398Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "fase 2 economia: resenas de productos",
-      "desde": "2026-08-22T20:03:26.889Z"
-    },
-    {
       "agente": "prog1",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "fuera de un iframe window.parent es uno mismo: la app se manda el aviso de sesion a si misma",
