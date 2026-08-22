@@ -26,6 +26,15 @@ working the same afternoon will pick the same number — **check `drizzle/` agai
 applied and the order between them is whatever the filesystem lists first. That is
 a coincidence, not an order.
 
+**Reserve the file name the moment you pick a number**, before writing the SQL:
+
+```
+node scripts/equipo.mjs reservar drizzle/0075_lo_que_sea.sql --motivo "para qué"
+```
+
+The claim system already prevents this and nobody was using it for numbers. Four
+collisions happened on 2026-08-22 for want of one command.
+
 **It already happened on 2026-08-22**, with five agents working in parallel:
 
 | Number | Files |
