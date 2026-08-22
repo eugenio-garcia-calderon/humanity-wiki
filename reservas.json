@@ -161,24 +161,6 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "privacidad: la pagina que exigen las dos tiendas",
       "desde": "2026-08-22T21:45:21.692Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "P4: dejar escrito el anclaje de la fase D, ya en produccion",
-      "desde": "2026-08-22T21:52:13.453Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "src/server/seguridad/CLAUDE.md",
-      "motivo": "P4: dejar escrito el anclaje de la fase D, ya en produccion",
-      "desde": "2026-08-22T21:52:13.453Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md",
-      "motivo": "P4: dejar escrito el anclaje de la fase D, ya en produccion",
-      "desde": "2026-08-22T21:52:13.453Z"
     }
   ]
 }
