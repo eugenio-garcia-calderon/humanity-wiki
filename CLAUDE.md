@@ -238,6 +238,14 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   borrada" — the one word anyone would ever see, on a page shown to Apple and Google
   as a commitment. When your work meets someone else's, one of you has to check the
   join, out loud, and say which of the two is wrong.
+  **The seam has an owner, and it is whoever arrives second.** Whoever builds against
+  a contract that already exists is the one who can see whether the contract tells
+  the truth. Three of these surfaced on 2026-08-22 — a tombstone that said one thing
+  and wrote another, a page describing a menu that had been removed two hours
+  earlier, and `POST /api/report` answering "kept for review" since migration 0009
+  with no screen ever reading the table. Nobody lied in any of the three. Every rule
+  above says how to check your own half better; not one of them would have caught
+  these.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
