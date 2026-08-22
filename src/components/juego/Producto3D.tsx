@@ -18,10 +18,11 @@
 //
 // Modelar cada producto a mano no escala; la foto sí. Por eso el modelo es la
 // excepción bonita y la foto es el camino por defecto.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard, Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { useFoto } from './texturas';
 
 /** Lo que el mundo necesita saber de un producto para dibujarlo. */
 export interface ProductoJuego3D {
@@ -170,16 +171,9 @@ const MODELOS: Record<string, React.ComponentType> = {
 // ---------------------------------------------------------------------------
 /** La foto del catálogo sobre un panel, para los productos sin modelo. */
 function FotoDeProducto({ url }: { url: string }) {
-  const [tex, setTex] = useState<THREE.Texture | null>(null);
-  useEffect(() => {
-    let vivo = true;
-    new THREE.TextureLoader().load(url, t => {
-      if (!vivo) return;
-      t.colorSpace = THREE.SRGBColorSpace;
-      setTex(t);
-    }, undefined, () => { /* sin foto queda el panel */ });
-    return () => { vivo = false; };
-  }, [url]);
+  // Un producto puesto en el mundo y abierto en su vitrina son el mismo
+  // catálogo: una sola subida a la tarjeta, no una por sitio.
+  const tex = useFoto(url);
   const img = tex?.image as { width?: number; height?: number } | undefined;
   const prop = img?.width && img?.height ? img.height / img.width : 1;
   const ancho = 1.5;

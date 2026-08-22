@@ -5148,6 +5148,255 @@ commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
 reviews), totals summing back to the pot; 403 without admin. Depends on
 `vistas_validas` (PR #260) being in place.
 
+---
+
+## 2026-08-22 (XV) — Protecting people's data from the people who run the platform
+
+Eugenio, in one line: *«haz lo que falte para que los datos de los usuarios
+estén seguros incluso protegidos de los administradores e IAs»*.
+
+Full write-up, with the four levels and what each one costs:
+`09_TARGET_ARCHITECTURE/06_PROTECT_FROM_ADMINS.md`.
+
+### What an administrator could do, measured before writing anything
+
+`GET /api/db/tables/:name` served **the full contents of any table** from the
+platform's own screen — private conversations, the finances people write into
+their Juego Vital, the rows of the tables they create. Two clicks, no trace.
+And level 4 is a single role: moderating a reported comment and reading two
+strangers' conversation are the same number.
+
+### And the AI, which came out better than expected — except for one thing
+
+The index the assistant searches holds only the commons and published posts, and
+**every** query for "your things" filters by the asker's id. Nobody can pull
+somebody else's page through the assistant.
+
+**Its conversations were another matter.** `POST /api/ai/chat` took
+`conversation_id` from the request **body** and used it as given: it loaded that
+conversation's last twelve messages as the model's context and wrote the new ones
+into it. Send somebody else's id and the assistant answers you out of what they
+told it. And the ids were guessable — timestamp in base 36 plus a number between
+0 and 1295 — on a route with no session and no rate limit.
+
+Closed with two locks, both needed: a conversation whose owner is not the caller
+is **silently** replaced by a new one (silently on purpose: «that conversation is
+not yours» would confirm it exists), and new conversations get 16 random bytes.
+
+### What ships
+
+| | |
+|---|---|
+| Twelve tables | No longer served by the generic browser **to anyone, administrator included**, each with its reason in the code |
+| Everything else privileged | Recorded in the sealed record, chained and signed, **where whoever did it cannot erase it** |
+| `GET /api/seguridad/miradas` | **Any account** can read that log. A surveillance log only its subjects cannot read is not surveillance |
+| `GET /api/seguridad/dato/:tabla/:id?motivo=…` | The owner's key: one row, a written reason, **recorded before the read — and if it cannot be recorded, there is no read** |
+| `scripts/auditar-contexto-ia.mjs` | Fails the build if any AI query reads personal content without an owner filter. Exceptions are *declared* with a comment, never deduced |
+
+### The sentence that matters
+
+**What this makes impossible is not looking. It is looking in silence.**
+
+An administrator still reaches most of that content through the normal screens,
+and whoever has the database password skips all of it. Only end-to-end
+encryption makes it impossible — and it costs the person their content if they
+lose their password. That decision is Eugenio's, written up with a
+recommendation: start with private messages, and only those.
+
+### The fourth time today
+
+Identity taken from what the caller sends instead of from the session: prog1's
+login link, prog7's daily cap, the Stripe membership, and this. Four in one day
+is not four mistakes, it is a habit — and it belongs in the house rules rather
+than in four separate fixes.
+
+---
+
+## 2026-08-22 — Digital products are delivered, and the order routes are back (Programador 7, economy & market)
+
+Two things in one PR because they live in the same routes.
+
+**The order routes had vanished.** `GET /api/publicar/pedido/:codigo`,
+`GET /api/publicar/mis-ventas` and `PUT /api/publicar/mis-ventas/:id` were
+written in the Phase 6 orders commit and dropped by the Phase 7 cart rewrite of
+`publicar.ts` — the pages kept calling them. In production: a buyer looking up
+their order always got "no está", and a seller's Pedidos tab was always empty.
+Verified against production before touching anything: both routes answered
+404. Restored, now cart-aware (`lineas`), and the seller screen finally uses the
+PUT: «Marcar enviado» / «Marcar entregado» buttons.
+
+**Digital delivery** (plan fase 8: «hoy un PDF se cobra y no se entrega»):
+- `products.archivo_digital` (0087): the file's URL in a PRIVATE upload zone.
+  `guardarArchivo(…, { privado: true })` writes under `/uploads/privado/…`,
+  and that prefix is 404 BEFORE the static mount — the file never leaves by URL.
+- It leaves only through `GET /api/publicar/pedido/:codigo/descarga/:lineaId?correo=`:
+  code + e-mail must match, the order must be alive, the line must belong,
+  the product must have a file. Streamed as an attachment named after the
+  product. 409 with a clear message when the seller never attached a file.
+- The order lookup returns `lineas` with `descarga` URLs and `solo_digital`;
+  the buyer page lists downloads and skips the "enviado" step for downloads.
+- A cart that is all digital is born `entregado` in the webhook: nothing to ship.
+- Seller side: CrearProducto uploads the file for a digital product (with the
+  warning if missing), Comercio shows «Con archivo» / «Sin archivo» and lets
+  you attach or replace one. Only `/uploads/privado/` URLs are accepted —
+  an external URL is silently ignored, a public upload URL too.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after): order
+lookup with lines; download 200 with attachment and the right bytes; 409 for
+the line without file; 404 with the wrong e-mail; the private URL 404 direct,
+public statics still 200; mis-ventas 401 without session and the list with it;
+external URL rejected, private accepted; PUT estado works. `tsc` clean. Not
+verified in a browser: the subdomain-only `/pedido` page (no subdomain on
+localhost) — its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Product reviews, and only verified purchases weigh (Programador 7, economy & market)
+
+Plan fase 3. No new table: the stars live in `ratings` (entity_type 'products',
+score 0-10 = stars × 2) and the text in `comments` (entity_type 'products').
+One person, one review — resubmitting overwrites the stars and archives the
+previous text. The seller cannot review their own product (403).
+
+`GET /api/publicar/producto/:id/resenas` (public: media, n, verificadas,
+list with «compra verificada» computed by the server from paid orders by user
+id or by e-mail) · `POST /api/publicar/producto/:id/resena` {estrellas 1-5,
+texto?} (session) · the public product route and the seller's list carry
+`valoracion` / `media_estrellas` + `n_resenas`.
+
+**What weighs in the monthly pot:** only reviews with a verified purchase
+and ≥ 7/10 — prog4's question applied again: anyone with accounts could raise
+an unverified count from outside; only someone who paid can raise this one.
+
+UI: the Opiniones section on the product page (stars picker + text, the
+verified badge, «tuya»), the ★ average next to the price in the product
+block and in Comercio's product rows.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after): buyer
+5★ → compra_verificada true; non-buyer 3★ → false; seller → 403; no session
+→ 401; 6★ → 400; list media/n/verificadas right; overwrite kept n at 1 and
+replaced the text; public product route and seller list carry the average;
+the reparto simulation counts the verified ≥ 7 review for the seller. An
+archived demo account correctly got 401 (its session resolves to nobody).
+`tsc` clean. Not opened in a browser: the product page lives on the
+subdomain, which localhost has no way to emulate — its data contract is what
+was tested.
+
+---
+
+## 2026-08-22 — Points in the cart, behind a switch that is off (Programador 7, economy & market)
+
+Eugenio's decision: points usable as a market discount up to 100%. Built behind
+`PUNTOS_DESCUENTO` (off in production) with one design decision written where
+it can be read (0089): **the seller is paid in points for the part paid in
+points** — a buyer→seller transfer in the ledger (`compra_con_puntos` /
+`venta_en_puntos`, entity = the order) — and in euros for the rest. The
+platform does not pay discounts out of its own cash; the point keeps
+circulating as what it buys. Because of that, **each seller opts in per
+product** (`products.acepta_puntos`, default off): the pilot's "limited range
+of products" is literally what sellers mark.
+
+Checkout (`POST /api/publicar/comprar`, `usar_puntos`): session required,
+never for subscriptions, never to yourself; only lines whose product accepts
+points can be paid with them; the server caps at min(balance, accepting
+subtotal); shipping is always euros. If euros left is zero → no Stripe: the
+order is created right there and the points move in the same call (if the
+ledger says no, the order is rolled back, 409). Otherwise a Stripe coupon for
+the exact discount and the points in the session metadata; the webhook moves
+the points after payment — never before. `pedidos.puntos_usados` says what
+each order paid in points. `GET /api/publicar/puntos-en-caja` tells the cart
+whether it can offer the control and with how much.
+
+UI: the cart shows "Pagar con puntos" (with balance, "usar el máximo", the
+computed discount) only when the server says so; Comercio gets a per-product
+"acepta puntos" toggle.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): no session → 401; non-accepting product → 400; all-points purchase
+→ order born `entregado` (digital) with puntos_usados 5, buyer 100→95, seller
+100→105, two ledger rows; mixed cart asking 10 → capped to 5 (only the
+accepting line), Stripe test session created with the 5,00 € coupon. `tsc`
+clean. Not tested: the webhook leg for the mixed cart (needs a completed
+Stripe payment) — its code path is the same pagarConPuntos() the all-points
+path exercised.
+
+---
+
+## 2026-08-22 — Upload the photo, and see how sales are going (Programador 7, economy & market)
+
+Two small things sellers feel every day.
+
+**Photos from the phone.** CrearProducto only accepted a pasted image URL — asking
+a seller to have a website before having a shop. Now a "Subir una foto" control
+sends the file to the public upload zone (`POST /api/uploads`) and adds the
+returned URL to the gallery (max 8). The URL field stays for who prefers it.
+
+**How are my sales going.** `GET /api/publicar/mis-ventas/resumen` (session):
+this month's orders, euros charged and points charged (two numbers, never
+added together), pending-to-ship count, the last six months and the five
+best-selling products (from `pedido_lineas`, plus pre-cart single-product
+orders). Cancelled and returned orders are not sales. Comercio shows it at the
+top of the Pedidos tab.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, rows and
+the uploaded test PNG removed): 401 without session; 2 paid/delivered orders of
+a seeded trio (the cancelled one excluded) → 2 orders, 31,00 €, 5 points, 1 to
+ship, best seller ×3 (2 from lines + 1 pre-cart); PNG upload → public URL
+served as image/png. `tsc` clean. The Comercio panel itself was not opened in a
+browser (the shared automation browser would have needed a seller session);
+its data contract is what was tested.
+
+---
+
+## 2026-08-22 — Seller coupons (Programador 7, economy & market)
+
+Plan fase 7. `cupones` (0090): a seller's code with percentage or fixed amount,
+minimum purchase, expiry and max uses; `pedidos.cupon_codigo` +
+`descuento_centimos` record what each order got. **The discount is the
+seller's**: it comes off their price and the platform fee is computed on what
+is actually charged in euros (`comisionReal`). Neither the platform nor the
+points pay for it.
+
+Seller: `GET/POST /api/publicar/mis-cupones`, `PUT …/:id` (activate/deactivate;
+never deleted — orders cite them), and a Cupones panel in Comercio. Cart:
+`POST /api/publicar/cupon/comprobar` says the discount BEFORE paying (no
+session needed: guests have coupons too), the cesta has the code field, and
+`comprar` takes `cupon`. Order of rebates: coupon first, then points on what
+is left — a discount is never paid twice. One Stripe coupon carries the sum
+of both rebates; uses are counted after payment (webhook) or in the same call
+for all-points purchases — never when a session is merely opened.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after, balances
+restored): create 10%/2 uses → 200; duplicate → 409 (after fixing the pg error
+detection: code 23505 may sit on `cause`); bad code → 400; list 401 without
+session; comprobar valid → 1,00 € on a 10 € item, unknown → "no existe";
+comprar with coupon → Stripe test session with the coupon; coupon + 9 points
+→ all paid in one call: order `entregado`, puntos_usados 9, cupon VERANO10,
+descuento 100, uses 1/2, buyer 100→91, seller 100→109; deactivate →
+comprobar says "ya no está activo". `tsc` clean. Comercio's panel and the
+cesta field were not opened in a browser (subdomain + seller session); their
+data contracts are what was tested.
+
+---
+
+## 2026-08-22 — The session now travels to the shops (Programador 7)
+
+Found while preparing Eugenio's first real test of points in the cart: the
+session cookie was host-only (`humanity.wiki`), and the cart only lives on the
+shop subdomains (`nombre.humanity.wiki`). Anyone logged in was an anonymous
+visitor there — no «pagar con puntos», no «compra verificada», no buyer id on
+orders. With `COOKIE_DOMAIN=.humanity.wiki` in the environment (set in
+production), `setSessionCookie` emits the cookie for the whole domain and
+expires the legacy host-only one; `clearSessionCookie` expires both variants,
+so "cerrar sesión" does not leave a second session stuck on the main domain.
+Without the variable nothing changes (local, other deployments).
+
+Verified on 3007 over HTTP with the variable set: logout emits two Set-Cookie
+headers (plain + Domain), register emits the Domain cookie plus the expired
+plain one; test user removed. `tsc` clean. Also today, at Eugenio's request:
+`PUNTOS_DESCUENTO=on` in production (app recreated, health OK), +500 points to
+his admin account via an `ajuste_admin` entry, and two PRUEBA products of the
+`claude-dos` shop opted into points so there is something to buy with them.
 ### 2026-08-22 — TURN de Cloudflare: las llamadas difíciles también conectan (Programador 8)
 - **Decisión de Eugenio**: contratar el TURN de Cloudflare en vez de levantar un `coturn` propio. Con esto se cierra la deuda «10-15 % de las llamadas no conectan» que quedó abierta esta misma mañana al entregar Telecomunicaciones.
 - **La escalera, que ya la hacía el navegador y ahora está escrita donde se ve**: `host` (mismo wifi) → `srflx` con STUN (redes distintas, sigue siendo directo, gratis) → `relay` con TURN (solo cuando no hay camino, y es el único que cuesta). No son tres modos alternativos: STUN es *cómo* se consigue el P2P, no una alternativa a él. El navegador los prueba a la vez y se queda con el más barato que funcione.

@@ -95,6 +95,48 @@ export async function cobrarServicio(
   return restante;
 }
 
+// ============================================================================
+// PUNTOS EN EL CARRITO (2026-08-22, decisión de Eugenio: descuento en el
+// mercado hasta el 100 %). Interruptor `PUNTOS_DESCUENTO`, apagado en
+// producción. El vendedor cobra en puntos lo que el comprador paga en puntos:
+// una transferencia en el libro, con el pedido como entidad.
+// ============================================================================
+export const puntosDescuentoActivo = () => process.env.PUNTOS_DESCUENTO === 'on';
+/** Cuántos puntos vale un euro de precio al pagar en el carrito (1 hoy: el
+ *  precio de venta publicado). Se lee al usar, no al arrancar. */
+export const puntosPorEuro = () => Math.max(0.0001, Number(process.env.PUNTOS_POR_EURO || 1));
+
+/**
+ * Mueve `puntos` del comprador al vendedor por un pedido, EN UNA TRANSACCIÓN
+ * con las dos filas cerradas en orden de id (el mismo patrón que las
+ * transferencias): si el comprador ya no tiene saldo, no ocurre nada y
+ * devuelve false — quien llama decide qué hacer (no cobrar, o cobrar en euros).
+ */
+export async function pagarConPuntos(db: any, compradorId: string, vendedorId: string, puntos: number, pedidoId: string): Promise<boolean> {
+  const importe = Math.round(puntos * 100) / 100;
+  if (!Number.isFinite(importe) || importe <= 0 || compradorId === vendedorId) return false;
+  let ok = false;
+  await db.transaction(async (tx: any) => {
+    await tx.execute(sql`SELECT id FROM users WHERE id IN (${compradorId}, ${vendedorId}) ORDER BY id FOR UPDATE`);
+    const cobro = await tx.execute(sql`
+      UPDATE users SET puntos = puntos - ${importe} WHERE id = ${compradorId} AND puntos >= ${importe} RETURNING puntos
+    `);
+    if (!cobro.rows.length) return;
+    await tx.execute(sql`UPDATE users SET puntos = puntos + ${importe} WHERE id = ${vendedorId}`);
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+      VALUES (${newId()}, ${compradorId}, ${-importe}, 'compra_con_puntos', 'pedidos', ${pedidoId})
+    `);
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+      VALUES (${newId()}, ${vendedorId}, ${importe}, 'venta_en_puntos', 'pedidos', ${pedidoId})
+    `);
+    await tx.execute(sql`UPDATE pedidos SET puntos_usados = ${importe}, updated_at = now() WHERE id = ${pedidoId}`);
+    ok = true;
+  });
+  return ok;
+}
+
 /**
  * Solo el justificante del regalo de bienvenida — el saldo de 100 ya lo puso
  * el DEFAULT de `users.puntos` al crear la fila (migración 0026), así que
@@ -300,9 +342,27 @@ export function registerPuntosRoutes(app: Express, db: any) {
           WHERE i.created_at >= ${desde}::date AND i.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
         ),
         res AS (
-          SELECT v.creator_user_id AS uid, count(*)::int AS n FROM ratings r JOIN ventanas v ON v.id = r.entity_id
-          WHERE r.entity_type = 'knowledge_windows' AND r.score >= 7
-            AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+          -- Reseñas positivas (≥ 7/10) de publicaciones…
+          SELECT uid, sum(n)::int AS n FROM (
+            SELECT v.creator_user_id AS uid, count(*)::int AS n FROM ratings r JOIN ventanas v ON v.id = r.entity_id
+            WHERE r.entity_type = 'knowledge_windows' AND r.score >= 7
+              AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+            UNION ALL
+            -- …y de PRODUCTOS, solo con COMPRA VERIFICADA: una reseña que pesa
+            -- en el reparto tiene que venir de alguien que pagó — si no, es
+            -- un número que cualquiera sube desde fuera con cuentas.
+            SELECT p.created_by AS uid, count(*)::int AS n
+            FROM ratings r JOIN products p ON p.id = r.entity_id LEFT JOIN users u ON u.id = r.user_id
+            WHERE r.entity_type = 'products' AND r.score >= 7
+              AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month')
+              AND EXISTS (
+                SELECT 1 FROM pedidos pd LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id
+                WHERE pd.estado NOT IN ('cancelado', 'devuelto')
+                  AND (pd.producto_id = p.id OR pl.producto_id = p.id)
+                  AND (pd.comprador_user_id = r.user_id OR lower(pd.comprador_email) = lower(u.email))
+              )
+            GROUP BY p.created_by
+          ) x GROUP BY uid
         )
         SELECT u.id AS uid,
                coalesce(vv.n, 0)::int AS vistas_validas,

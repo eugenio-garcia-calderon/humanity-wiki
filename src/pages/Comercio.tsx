@@ -34,12 +34,19 @@ type Producto = {
   kind: string; modality?: string | null; billing_period?: string | null;
   stock: number | null; status: string; images: any;
   envio_centimos: number | null; created_at: string;
+  /** Solo tiene sentido en una descarga: si el archivo que se entrega está subido. */
+  con_archivo?: boolean;
+  /** Opiniones: media en estrellas (1-5) y cuántas; null/0 = nadie ha opinado. */
+  media_estrellas?: number | null; n_resenas?: number;
+  /** El vendedor acepta cobrar este producto en puntos (total o en parte). */
+  acepta_puntos?: boolean;
 };
 
 export default function Comercio() {
   const [productos, setProductos] = useState<Producto[] | null>(null);
   const [limite, setLimite] = useState<number | null>(null);
   const [pedidos, setPedidos] = useState<any[]>([]);
+  const [resumen, setResumen] = useState<any>(null);
   const [creando, setCreando] = useState(false);
   const [handle, setHandle] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +54,14 @@ export default function Comercio() {
 
   async function cargar() {
     try {
-      const [rp, rv, rm] = await Promise.all([
+      const [rp, rv, rm, rr] = await Promise.all([
         fetch('/api/publicar/mis-productos'),
         fetch('/api/publicar/mis-ventas'),
         fetch('/api/auth/me'),
+        fetch('/api/publicar/mis-ventas/resumen'),
       ]);
+      // El resumen de ventas es opcional: si falla, la lista sigue saliendo.
+      rr.json().then(j => { if (j && !j.error) setResumen(j); }).catch(() => {});
       if (rp.status === 401) { setError('sesion'); setProductos([]); return; }
       const jp = await rp.json();
       setProductos(jp.productos || []);
@@ -61,6 +71,41 @@ export default function Comercio() {
     } catch { setError('red'); setProductos([]); }
   }
   useEffect(() => { cargar(); }, []);
+
+  // ADJUNTAR (O CAMBIAR) EL ARCHIVO DE UNA DESCARGA (2026-08-22). Se sube a la
+  // zona privada y se guarda su URL en el producto; a partir de ahí, cada
+  // pedido pagado de ese producto puede descargarlo desde /pedido.
+  async function adjuntarArchivo(id: string, f: File) {
+    const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'application/octet-stream')}&privado=1`, {
+      method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f,
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.url) { window.alert(j.error || 'No se ha podido subir el archivo.'); return; }
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archivo_digital: j.url }),
+    });
+    cargar();
+  }
+
+  async function aceptarPuntos(id: string, valor: boolean) {
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acepta_puntos: valor }),
+    });
+    cargar();
+  }
+
+  // MARCAR UN PEDIDO (2026-08-22): la ruta existía desde la fase 6 y la
+  // pantalla no la usaba — «sin enviar» se quedaba así para siempre.
+  async function marcarPedido(id: string, estado: string) {
+    const seguimiento = estado === 'enviado' ? (window.prompt('Número de seguimiento (opcional):') || null) : null;
+    await fetch(`/api/publicar/mis-ventas/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado, seguimiento }),
+    });
+    cargar();
+  }
 
   async function retirar(id: string, nombre: string) {
     if (!window.confirm(`¿Retirar «${nombre}» de la venta?\n\nDeja de verse en tu tienda. Los pedidos que ya tenga se conservan.`)) return;
@@ -154,9 +199,35 @@ export default function Comercio() {
                         · {p.stock <= 0 ? 'agotado' : `${p.stock} en stock`}
                       </span>}
                       {p.status === 'tienda' && <span className="text-slate-400">· solo en tu tienda</span>}
+                      {Number(p.n_resenas) > 0 && (
+                        <span className="text-amber-600 font-bold">· ★ {Number(p.media_estrellas).toLocaleString('es-ES')} ({p.n_resenas})</span>
+                      )}
+                      {/* Cobrar en puntos: lo decide cada vendedor, producto a
+                          producto. Es el «abanico limitado» del piloto. */}
+                      {p.modality !== 'suscripcion' && (
+                        <button type="button" onClick={() => aceptarPuntos(p.id, !p.acepta_puntos)}
+                          className={`px-2 h-6 rounded-full text-[10px] font-black uppercase tracking-wide ${p.acepta_puntos ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'}`}
+                          title={p.acepta_puntos ? 'Acepta puntos: pulsa para dejar de aceptarlos' : 'No acepta puntos: pulsa para aceptarlos'}>
+                          {p.acepta_puntos ? '● acepta puntos' : '○ sin puntos'}
+                        </button>
+                      )}
+                      {p.kind === 'digital' && (
+                        p.con_archivo
+                          ? <span className="text-emerald-700">· archivo listo</span>
+                          : <span className="text-amber-700 font-bold">· SIN ARCHIVO: se cobra y no se entrega</span>
+                      )}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    {p.kind === 'digital' && (
+                      <label aria-label={p.con_archivo ? 'Cambiar el archivo' : 'Subir el archivo'}
+                             title={p.con_archivo ? 'Cambiar el archivo que se entrega' : 'Subir el archivo que se entrega'}
+                             className={`w-11 h-11 grid place-items-center rounded-xl cursor-pointer hover:bg-slate-100 ${p.con_archivo ? '' : 'bg-amber-50'}`}>
+                        <input type="file" className="hidden"
+                          onChange={e => { const f = e.target.files?.[0]; if (f) adjuntarArchivo(p.id, f); e.target.value = ''; }} />
+                        <Download className={`w-4 h-4 ${p.con_archivo ? 'text-slate-500' : 'text-amber-700'}`} />
+                      </label>
+                    )}
                     {handle && (
                       <a href={`https://${handle}.humanity.wiki/producto/${p.id}`} target="_blank" rel="noopener noreferrer"
                          aria-label="Ver la ficha" title="Ver la ficha pública"
@@ -177,6 +248,7 @@ export default function Comercio() {
                 {productos.length} de {limite}. Para tener más, verifica tu cuenta.
               </p>
             )}
+            <Cupones />
           </>
         )
       ) : (
@@ -185,6 +257,39 @@ export default function Comercio() {
             Todavía no te ha comprado nadie.
           </p>
         ) : (
+          <>
+          {/* CÓMO VAN LAS VENTAS (2026-08-22): lo que un vendedor mira antes
+              que la lista — este mes, los últimos meses y lo más vendido.
+              Euros y puntos son dos números y se enseñan como dos. */}
+          {resumen && (
+            <div className="mb-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Este mes</p>
+                  <p className="text-xl font-black text-slate-900">{resumen.mes?.pedidos ?? 0} <span className="text-xs font-bold text-slate-400">pedidos</span></p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Cobrado</p>
+                  <p className="text-xl font-black text-slate-900">{dinero(resumen.mes?.euros_centimos ?? 0, 'EUR')}</p>
+                  {Number(resumen.mes?.puntos) > 0 && <p className="text-[11px] font-bold text-amber-700">+ {Number(resumen.mes.puntos).toLocaleString('es-ES')} puntos</p>}
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Sin enviar</p>
+                  <p className={`text-xl font-black ${resumen.sin_enviar > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{resumen.sin_enviar}</p>
+                </div>
+              </div>
+              {resumen.serie?.length > 1 && (
+                <p className="mt-3 text-[11px] text-slate-500">
+                  Últimos meses: {resumen.serie.map((s: any) => `${s.mes.slice(5)}/${s.mes.slice(2, 4)} · ${s.pedidos} (${dinero(s.euros_centimos, 'EUR')})`).join(' — ')}
+                </p>
+              )}
+              {resumen.mas_vendido?.length > 0 && (
+                <p className="mt-1.5 text-[11px] text-slate-500">
+                  Lo más vendido: {resumen.mas_vendido.map((m: any) => `${m.nombre} ×${m.unidades}`).join(' · ')}
+                </p>
+              )}
+            </div>
+          )}
           <ul className="space-y-2">
             {pedidos.map(p => (
               <li key={p.id} className="p-3 rounded-2xl border border-slate-200 bg-white">
@@ -211,9 +316,24 @@ export default function Comercio() {
                     {p.estado}
                   </span>
                 </div>
+                {(p.estado === 'pagado' || p.estado === 'enviado') && (
+                  <div className="mt-2 flex gap-2">
+                    {p.estado === 'pagado' && (
+                      <button onClick={() => marcarPedido(p.id, 'enviado')}
+                        className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                        Marcar enviado
+                      </button>
+                    )}
+                    <button onClick={() => marcarPedido(p.id, 'entregado')}
+                      className="h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                      Marcar entregado
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
+          </>
         )
       )}
 
@@ -224,6 +344,88 @@ export default function Comercio() {
         />
       )}
     </Marco>
+  );
+}
+
+/**
+ * CUPONES (2026-08-22, fase 7 del plan): el vendedor crea códigos de
+ * descuento — porcentaje o importe fijo, mínimo, caducidad, número de usos —
+ * y los apaga cuando quiere. Nunca se borran: los pedidos los citan.
+ */
+function Cupones() {
+  const [lista, setLista] = useState<any[] | null>(null);
+  const [abierto, setAbierto] = useState(false);
+  const [codigo, setCodigo] = useState('');
+  const [tipo, setTipo] = useState<'porcentaje' | 'fijo'>('porcentaje');
+  const [valor, setValor] = useState('');
+  const [usosMax, setUsosMax] = useState('');
+  const [caduca, setCaduca] = useState('');
+  const [aviso, setAviso] = useState<string | null>(null);
+  const cargar = () => fetch('/api/publicar/mis-cupones').then(r => r.json()).then(j => Array.isArray(j) && setLista(j)).catch(() => {});
+  useEffect(() => { cargar(); }, []);
+  const crear = async () => {
+    setAviso(null);
+    const v = tipo === 'fijo' ? Math.round(Number(valor.replace(',', '.')) * 100) : Number(valor);
+    const r = await fetch('/api/publicar/mis-cupones', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo, tipo, valor: v, usos_max: usosMax || null, caduca: caduca || null }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setAviso(j.error || 'No se ha podido crear.'); return; }
+    setCodigo(''); setValor(''); setUsosMax(''); setCaduca(''); setAbierto(false); cargar();
+  };
+  const alternar = async (id: string, activo: boolean) => {
+    await fetch(`/api/publicar/mis-cupones/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activo }) });
+    cargar();
+  };
+  return (
+    <section className="mt-6 pt-4 border-t border-slate-100">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-black text-slate-800">Cupones de descuento</h3>
+        <button type="button" onClick={() => setAbierto(o => !o)}
+          className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+          {abierto ? 'Cerrar' : 'Nuevo cupón'}
+        </button>
+      </div>
+      {abierto && (
+        <div className="mt-3 p-3 rounded-2xl border border-slate-200 space-y-2">
+          <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="CÓDIGO (p. ej. VERANO10)"
+            className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm uppercase" />
+          <div className="flex gap-2 flex-wrap">
+            <select value={tipo} onChange={e => setTipo(e.target.value as any)} className="h-10 px-2 rounded-lg border border-slate-200 text-sm">
+              <option value="porcentaje">% de descuento</option>
+              <option value="fijo">€ de descuento</option>
+            </select>
+            <input value={valor} onChange={e => setValor(e.target.value)} inputMode="decimal" placeholder={tipo === 'fijo' ? '5,00' : '10'}
+              className="w-24 h-10 px-3 rounded-lg border border-slate-200 text-sm" />
+            <input value={usosMax} onChange={e => setUsosMax(e.target.value)} inputMode="numeric" placeholder="Usos máx."
+              className="w-24 h-10 px-3 rounded-lg border border-slate-200 text-sm" />
+            <input type="date" value={caduca} onChange={e => setCaduca(e.target.value)} aria-label="Caduca el"
+              className="h-10 px-2 rounded-lg border border-slate-200 text-sm" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={crear} disabled={!codigo.trim() || !valor.trim()}
+              className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-bold disabled:opacity-40">Crear</button>
+            {aviso && <p className="text-xs font-bold text-rose-600">{aviso}</p>}
+          </div>
+        </div>
+      )}
+      {lista && lista.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {lista.map(c => (
+            <li key={c.id} className="flex items-center gap-3 text-xs">
+              <span className={`font-mono font-black ${c.activo ? 'text-slate-800' : 'text-slate-400 line-through'}`}>{c.codigo}</span>
+              <span className="text-slate-500">{c.tipo === 'porcentaje' ? `${c.valor} %` : `${(Number(c.valor) / 100).toFixed(2)} €`}</span>
+              <span className="text-slate-400">· {c.usos}{c.usos_max ? `/${c.usos_max}` : ''} usos{c.caduca_at ? ` · hasta ${new Date(c.caduca_at).toLocaleDateString('es-ES')}` : ''}</span>
+              <button type="button" onClick={() => alternar(c.id, !c.activo)} className="ml-auto text-[11px] font-bold text-slate-500 underline">
+                {c.activo ? 'desactivar' : 'activar'}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {lista && lista.length === 0 && !abierto && <p className="mt-2 text-xs text-slate-400">Sin cupones todavía.</p>}
+    </section>
   );
 }
 

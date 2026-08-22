@@ -24,6 +24,7 @@
 // que existan.
 // ============================================================================
 import * as THREE from 'three';
+import { useEffect, useState } from 'react';
 
 export type NombreTextura =
   | 'hierba' | 'tierra' | 'grava' | 'adoquin' | 'madera'
@@ -96,6 +97,81 @@ export function normalesDeAgua(repetirX: number, repetirY: number): THREE.Textur
   return textura('/modelos-juego/texturas/agua_normales.jpg', repetirX, repetirY, false);
 }
 
+
+// ── Y LAS FOTOS DE LA GENTE, QUE ERAN EL MISMO FALLO SIN LA CACHÉ ──────────
+// Lo de arriba arregló las texturas del SUELO. Las fotos que pone la gente
+// —una imagen clavada en el suelo, la miniatura de un vídeo, la foto de un
+// producto, un cuadro dentro de una casa— seguían cargándose con un
+// `new THREE.TextureLoader()` propio en cada sitio: cuatro copias del mismo
+// código, y ninguna caché. La misma foto puesta en dos sitios se subía dos
+// veces a la tarjeta, y nadie lo veía porque **se ve exactamente igual**.
+//
+// Un producto puesto en el mundo Y abierto en su vitrina son dos subidas de
+// la misma imagen. Con el techo de 40 fotos por mundo, eso es la diferencia
+// entre 40 subidas y bastantes más.
+
+/** Una textura por URL, compartida por todos los sitios donde salga esa foto. */
+const fotos = new Map<string, THREE.Texture>();
+/** URLs que ya se sabe que no están: no se vuelven a pedir en cada montaje. */
+const fallidas = new Set<string>();
+/** Quién espera a que llegue cada foto. */
+const esperando = new Map<string, Set<() => void>>();
+
+/**
+ * PIDE una foto. Si ya está —o ya viene de camino— no vuelve a pedirla.
+ *
+ * Va aparte del hook a propósito. Lo que hay que poder probar es LA CACHÉ
+ * («¿se sube esta foto una vez o tres?»), y eso no debería exigir montar React
+ * para averiguarlo. Es la misma separación que faltaba en el fallo de los
+ * 690 MB: una cosa es la identidad de la imagen y otra cómo se presenta.
+ *
+ * `avisar` se llama cuando la foto llega o cuando se sabe que no está.
+ * Devuelve la función de darse de baja.
+ */
+export function pedirFoto(url: string, avisar: () => void): () => void {
+  if (fotos.has(url) || fallidas.has(url)) { avisar(); return () => {}; }
+
+  const cola = esperando.get(url);
+  if (cola) { cola.add(avisar); return () => cola.delete(avisar); }
+
+  const nueva = new Set<() => void>([avisar]);
+  esperando.set(url, nueva);
+  const terminar = () => { esperando.delete(url); for (const f of [...nueva]) f(); };
+  new THREE.TextureLoader().load(
+    url,
+    t => { t.colorSpace = THREE.SRGBColorSpace; fotos.set(url, t); terminar(); },
+    undefined,
+    () => { fallidas.add(url); terminar(); },
+  );
+  return () => nueva.delete(avisar);
+}
+
+/**
+ * La foto de una URL, cargada UNA vez pase lo que pase.
+ *
+ * Devuelve `null` mientras no ha llegado y `null` también si no está — el que
+ * llama enseña su marco vacío en los dos casos, que es lo que hacían ya las
+ * cuatro copias de código que esto sustituye. No los distingue porque ninguna
+ * de las cuatro los distinguía; si algún día hace falta separarlos, hay que
+ * añadir un estado, no adivinarlo desde `null`.
+ *
+ * No se libera al desmontar: la textura es compartida, y soltarla porque un
+ * sitio deje de verla dejaría en blanco a los demás. Se sueltan todas juntas
+ * en `liberarTexturas()`, al salir del juego.
+ */
+export function useFoto(url: string | null | undefined): THREE.Texture | null {
+  const [, repintar] = useState(0);
+  useEffect(() => {
+    if (!url) return;
+    let vivo = true;
+    return pedirFoto(url, () => { if (vivo) repintar(n => n + 1); });
+  }, [url]);
+  return url ? fotos.get(url) ?? null : null;
+}
+
+/** Cuántas fotos de gente hay ahora en la tarjeta. Para medir, no para decidir. */
+export function fotosEnMemoria(): number { return fotos.size; }
+
 /**
  * Suelta de la tarjeta gráfica todas las texturas del juego (2026-08-19,
  * fase 11). El caché de arriba es lo que evita descargar cien veces el mismo
@@ -107,10 +183,17 @@ export function liberarTexturas(): number {
   // Se sueltan las IMÁGENES: son las que ocupan la tarjeta. Soltar un clon no
   // libera nada —comparte la `source` con su original— así que lo que hay que
   // vaciar sin falta es `imagenes`; los clones se van con ellas.
-  const n = imagenes.size;
+  const n = imagenes.size + fotos.size;
   imagenes.forEach(t => t.dispose());
   imagenes.clear();
   variantes.clear();
   pendientes.clear();
+  // Y las fotos de la gente, que antes no las soltaba nadie: cada componente
+  // se llevaba su textura al desmontarse sin liberarla, así que se quedaban
+  // en la tarjeta hasta recargar la pestaña.
+  fotos.forEach(t => t.dispose());
+  fotos.clear();
+  fallidas.clear();
+  esperando.clear();
   return n;
 }

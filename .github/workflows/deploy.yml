@@ -55,6 +55,33 @@ jobs:
               sed -i '/^TOGETHER_API_KEY=/d' .env.production
               echo "TOGETHER_API_KEY=${{ secrets.TOGETHER_API_KEY }}" >> .env.production
             fi
+            # Las llaves de Cloudflare R2, donde viven las copias de seguridad
+            # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
+            # camino que la de Together: el secreto vive en GitHub, nunca en el
+            # repositorio ni en el contexto de un agente, y se reescribe en cada
+            # despliegue — así rotarlo es cambiar el secreto y volver a
+            # desplegar, sin entrar por SSH.
+            #
+            # EL BORRADO VA FUERA DEL `if`, y es a propósito: si algún día se
+            # quitan estos secretos de GitHub, las líneas viejas tienen que
+            # DESAPARECER del servidor. Rotar una llave también es poder
+            # quitarla; si el borrado viviera dentro, una llave retirada seguiría
+            # viva en el `.env.production` para siempre.
+            #
+            # Y UNA SOLA CONDICIÓN PARA LAS CUATRO: o están todas o no está
+            # ninguna. Media configuración es peor que ninguna — el servicio lo
+            # intentaría, fallaría, y saldría en rojo por un motivo que no es el
+            # de verdad. Sin ellas, `copias-remoto` arranca, dice en su registro
+            # que está sin configurar y espera sin romper nada.
+            for v in COPIAS_REMOTO_CUBO COPIAS_REMOTO_ENDPOINT COPIAS_REMOTO_CLAVE_ID COPIAS_REMOTO_CLAVE_SECRETA; do
+              sed -i "/^$v=/d" .env.production
+            done
+            if [ -n "${{ secrets.COPIAS_REMOTO_CLAVE_ID }}" ]; then
+              echo "COPIAS_REMOTO_CUBO=${{ secrets.COPIAS_REMOTO_CUBO }}"                   >> .env.production
+              echo "COPIAS_REMOTO_ENDPOINT=${{ secrets.COPIAS_REMOTO_ENDPOINT }}"           >> .env.production
+              echo "COPIAS_REMOTO_CLAVE_ID=${{ secrets.COPIAS_REMOTO_CLAVE_ID }}"           >> .env.production
+              echo "COPIAS_REMOTO_CLAVE_SECRETA=${{ secrets.COPIAS_REMOTO_CLAVE_SECRETA }}" >> .env.production
+            fi
             # Las dos llaves del TURN de Cloudflare, por el mismo camino y por
             # el mismo motivo (2026-08-22). Son las que hacen que conecten las
             # llamadas que no encuentran ruta directa —entre un 10 % y un 15 %,

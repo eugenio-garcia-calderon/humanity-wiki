@@ -50,6 +50,8 @@ import { registerArchivoRoutes } from './archivo.js';
 import { registerIncidenciasRoutes } from './incidencias.js';
 import { registerBdRoutes } from './bd.js';
 import { registerPublicarRoutes } from './publicar.js';
+import { registerHerramientasRoutes } from './herramientas.js';
+import { registerDominiosRoutes } from './dominios.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
 import { registerYoutubeRoutes } from './youtube.js';
@@ -129,6 +131,15 @@ export const MODULOS: Modulo[] = [
   { nombre: 'juego', montar: (app, db) => registerJuegoRoutes(app, db) },
   { nombre: 'navegador', montar: app => registerNavegadorRoutes(app) },
   { nombre: 'archivos', montar: (app, db) => registerArchivosRoutes(app, db) },
+  // Estaba colgado de `publicar` porque `server.ts` no se podía tocar. Vuelve
+  // aquí el mismo día que existe esta lista: un apaño que funciona es el que
+  // se queda diez meses, y el peligro no es que falle, es que nadie recuerde
+  // por qué está donde está.
+  { nombre: 'herramientas', montar: (app, db) => registerHerramientasRoutes(app, db) },
+  // Dominios propios. Lleva la ruta que Caddy consulta ANTES de emitir un
+  // certificado, así que si este módulo no monta, nadie puede estrenar un
+  // dominio nuevo — pero los que ya tienen certificado siguen funcionando.
+  { nombre: 'dominios', montar: (app, db) => registerDominiosRoutes(app, db) },
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
