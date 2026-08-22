@@ -1,4 +1,8 @@
 import express, { Request, Response, NextFunction } from "express";
+import { origenDe, peorOrigen, type OrigenDelDato } from "./src/utils/origenDelDato.js";
+// Las puntuaciones de objetivo salieron de aquí a un módulo compartido para
+// que la IA pueda usar EXACTAMENTE el mismo cálculo que las pantallas.
+import { getObjectivesForTerritory } from "./src/utils/puntuacionesDeObjetivo.js";
 import { registrarHistorial } from './src/server/historial';
 import path from "path";
 import fs from "fs";
@@ -6,37 +10,16 @@ import Stripe from "stripe";
 import geoip from "geoip-lite";
 import { db } from "./src/db/index.js";
 import { territories, projects, challenges, organizations } from "./src/db/schema.js";
-import { territories as seedTerritories, objectives as seedObjectives } from "./src/data/seed.js";
+import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
-import { registrarGuardia } from "./src/server/seguridad/guardia.js";
-import { registerGraphRoutes } from "./src/server/graph.js";
-import { registerSocialRoutes } from "./src/server/social.js";
-import { registerAIRoutes } from "./src/server/ai/assistant.js";
-import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
-import { registerUploadRoutes } from "./src/server/uploads.js";
-import { registerRoadmapRoutes } from "./src/server/roadmap.js";
-import { registerJuegoRoutes } from "./src/server/juego.js";
-import { registerNavegadorRoutes } from "./src/server/navegador.js";
-import { registerArchivosRoutes } from "./src/server/archivos.js";
-import { registerArchivoRoutes } from "./src/server/archivo.js";
-import { registerIncidenciasRoutes } from "./src/server/incidencias.js";
-import { registerBdRoutes } from "./src/server/bd.js";
-import { registerPublicarRoutes } from "./src/server/publicar.js";
-import { registerNavegadorRemotoRoutes } from "./src/server/navegadorRemoto.js";
-import { registerFinanzasRoutes } from "./src/server/finanzas.js";
-import { registerYoutubeRoutes } from "./src/server/youtube.js";
-import { registerSpotifyRoutes } from "./src/server/spotify.js";
+// LOS MÓDULOS VIVEN EN UNA LISTA (2026-08-22). Añadir uno ya no es reservar
+// este fichero: es una línea en `src/server/modulos.ts`, en la PR de quien lo
+// escribe. Ver allí por qué el ORDEN de esa lista es comportamiento y no estilo.
+import { montarModulos } from "./src/server/modulos.js";
+import { medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
-import { registerPuntosRoutes } from "./src/server/puntos.js";
-import { registerGastoRoutes } from "./src/server/gasto.js";
-import { registerDocumentosRoutes } from "./src/server/documentos.js";
-import { registerMenuRoutes } from "./src/server/menu.js";
-import { registerMensajesRoutes } from "./src/server/mensajes.js";
-import { registerCalendarioRoutes } from "./src/server/calendario.js";
-import { registerPersonasRoutes } from "./src/server/personas.js";
-import { registerGuardarRoutes } from "./src/server/guardar.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -139,7 +122,39 @@ async function startServer() {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id || session.client_reference_id || "anonymous";
+
+        // ── ESTE CASO ES SOLO PARA LAS MEMBRESÍAS (2026-08-22) ────────────
+        // Encontrado por prog4 revisando otro arreglo. Este `case` creaba una
+        // membresía de socio para CUALQUIER `checkout.session.completed`, y al
+        // final del mismo manejador corre `handleMarketplaceWebhookEvent`, que
+        // es quien distingue por `metadata.kind`. Los dos para el mismo evento.
+        //
+        // O sea: comprar cien puntos te hacía además socio. Y comprar un
+        // producto. Y apoyar a un creador. No había pasado nunca porque no ha
+        // habido eventos de pago —la única fila de membresías es una prueba
+        // del 4 de agosto—, pero se dispararía solo el día que se pusieran las
+        // claves de Stripe de verdad, que es justo el día en que nadie estaría
+        // mirando esto.
+        //
+        // `source: 'red_humana'` sin `kind` es como se marcan las sesiones de
+        // membresía creadas hasta hoy. Se acepta para que una sesión abierta
+        // ANTES de este despliegue termine bien; lo nuevo lleva además
+        // `kind: 'membresia'`.
+        const clase = session.metadata?.kind;
+        const esMembresia = clase === 'membresia'
+          || (!clase && session.metadata?.source === 'red_humana');
+        if (!esMembresia) break;
+
+        // Y sin una cuenta a la que abonarla, NO se crea. Antes ponía
+        // `"anonymous"`, que fabricaba una fila de membresía activa a nombre de
+        // un usuario que no existe y se leía como resultado válido. «No sé de
+        // quién es esto» tiene que poder decirse distinto de «es de fulano»:
+        // es la regla de esta casa y esa línea la rompía.
+        const userId = session.metadata?.user_id || session.client_reference_id;
+        if (!userId) {
+          console.error('[Stripe Webhook] Membresía sin cuenta a la que abonarla; no se crea. Sesión:', session.id);
+          break;
+        }
         const customerId = (session.customer as string) || null;
         const subscriptionId = (session.subscription as string) || null;
         const membershipType = session.metadata?.membership_type || "socio_regular";
@@ -265,65 +280,61 @@ async function startServer() {
   app.use('/api/ai/chat', express.json({ limit: '20mb' }));
   app.use(express.json());
 
+  // 1.45 MEDICIÓN (2026-08-22). Va ANTES que todo lo demás porque mide el
+  // tiempo que espera quien pide, no el del trozo del medio. Y envuelve `db`
+  // para saber cuánto de ese tiempo se fue esperando a la base de datos y en
+  // cuántas consultas — que es lo que convierte «tarda 400 ms» en una
+  // decisión. Ver `src/server/medicion.ts`.
+  medirBaseDeDatos(db);
+  medirPeticiones(app);
+
   // 1.5 AUTENTICACIÓN (Fase 2). Se monta justo después de express.json() y
   // antes que el resto de la API, porque instala el middleware que resuelve
   // `req.user` a partir de la cookie de sesión — todos los endpoints
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
 
-  // 1.55 EL GUARDIÁN DE PERMISOS (fase 0 de seguridad, 2026-08-22).
-  // Va aquí y no antes porque necesita `req.user` ya resuelto, y aquí y no
-  // después porque tiene que ver TODAS las escrituras de la API.
-  // Arranca en modo `avisar`: anota lo que habría rechazado y no rechaza nada.
-  // Se pasa a exigir con SEGURIDAD_MODO=exigir, sin desplegar.
-  // Ver src/server/seguridad/CLAUDE.md.
-  registrarGuardia(app);
-
-  // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
-  // Van después de la autenticación porque dependen de `req.user`
-  // para aplicar los niveles de rol.
-  registerGraphRoutes(app, db);
-  registerSocialRoutes(app, db);
-
-  // 1.65 GRAFOS DE CONOCIMIENTO (Fase 11): lienzos curados de ventanas de
-  // conocimiento con creador, valoración 0-10 y resolución por palabras clave.
-  registerKnowledgeRoutes(app, db);
-  registerUploadRoutes(app, db);
-  registerRoadmapRoutes(app, db);
-  registerJuegoRoutes(app, db);
-  registerNavegadorRoutes(app);
-  registerArchivosRoutes(app, db);
-  registerArchivoRoutes(app, db);
-  registerIncidenciasRoutes(app, db);
-  registerBdRoutes(app, db);
-  registerPublicarRoutes(app, db);
-  registerNavegadorRemotoRoutes(app);
-  registerFinanzasRoutes(app, db);
-  registerYoutubeRoutes(app, db);
-  registerSpotifyRoutes(app, db);
-
-  // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
-  // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de
-  // fallar de forma opaca.
-  registerAIRoutes(app, db);
-
-  // 1.8 ECONOMÍA Y MERCADO (Fase 6): Connect, checkout embebido de
-  // productos, apoyo a creadores y reembolsos. Coexiste con el flujo de
-  // socios/membresía de abajo, que no se modifica.
-  registerStripeRoutes(app, db);
-  registerPuntosRoutes(app, db);
-  registerGastoRoutes(app, db);
-  registerDocumentosRoutes(app, db);
-  registerMenuRoutes(app, db);
-  registerMensajesRoutes(app, db);
-  registerCalendarioRoutes(app, db);
-  registerPersonasRoutes(app, db);
-  registerGuardarRoutes(app, db);
+  // ── TODOS LOS MÓDULOS DE LA API ──────────────────────────────────────────
+  // Van DESPUÉS de `registerAuthRoutes` porque casi todos dependen de que
+  // `req.user` exista para aplicar los niveles de rol. El orden dentro de la
+  // lista se conserva tal cual estaba aquí: en Express montar antes o después
+  // cambia el comportamiento, y hoy eso costó un 403 con una sesión válida.
+  montarModulos(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
     try {
-      const { userId, email, membershipType = "socio_regular" } = req.body;
+      // ── A QUIÉN SE LE ABONA LA MEMBRESÍA (2026-08-22) ─────────────────
+      // Antes salía de `req.body.userId`: quien llamaba decía a qué cuenta
+      // apuntar la membresía. Cualquiera podía pagar y ponérsela a otro, o
+      // apuntar a otro un cobro recurrente que no había pedido. Es dinero de
+      // verdad, no puntos internos.
+      //
+      // Ahora la cuenta la decide EL SERVIDOR desde la sesión. Lo que venga en
+      // el cuerpo se ignora. Sin sesión no hay cuenta a la que abonar, y se
+      // dice: pagar primero y no saber de quién es la membresía después es
+      // peor que pedir que entre antes.
+      //
+      // El correo se toma también de la sesión por el mismo motivo: con un
+      // correo ajeno se puede enganchar el pago al cliente de Stripe de otra
+      // persona.
+      const { membershipType = "socio_regular" } = req.body;
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Entra en tu cuenta antes de hacerte socio: si no, no sabríamos a quién abonarle la membresía.",
+        });
+      }
+      // Si un cliente viejo sigue mandando un id, y no es el suyo, se le dice.
+      // Ignorarlo en silencio dejaría a alguien creyendo que ha comprado la
+      // membresía para otra persona y descubriéndolo por un cobro raro tres
+      // semanas después. Silencio es peor que error (prog4, revisando esto).
+      if (req.body?.userId && req.body.userId !== req.user.id) {
+        return res.status(400).json({
+          error: "La membresía se abona a la cuenta con la que has entrado. Si querías regalarla, todavía no se puede.",
+        });
+      }
+      const userId = req.user.id;
+      const email = req.user.email;
       const stripe = getStripe();
 
       let customerId: string | undefined;
@@ -376,7 +387,11 @@ async function startServer() {
         mode: "subscription",
         return_url: returnUrl,
         metadata: {
-          user_id: userId || "anonymous",
+          // `kind` para que el manejador del webhook sepa que este pago es una
+          // membresía y no un producto, unos puntos o un apoyo: los cuatro
+          // llegan por el mismo evento.
+          kind: "membresia",
+          user_id: userId,
           membership_type: membershipType,
           source: "red_humana",
         },
@@ -484,13 +499,46 @@ async function startServer() {
     }
   };
 
-  app.get("/api/data/territories", (req, res) => getTable("territories", res));
+  // ══ QUE EL BORDE RESPONDA POR NOSOTROS ═══════════════════════════════════
+  // Fase 3 de la optimización. Medido en producción: `/api/data/*` y
+  // `/api/geo/*` salían **sin ninguna cabecera de caché**, así que Cloudflare
+  // no podía guardar nada y CADA visita llegaba hasta Node y hasta Postgres.
+  // Los ficheros de código sí estaban bien (`immutable`, un año); los datos,
+  // no.
+  //
+  // A un millón de visitas, esto es la diferencia entre que el borde conteste
+  // casi todo o que lo conteste la máquina. Es la mejora más barata que queda:
+  // una petición que responde Cloudflare no gasta ni CPU, ni conexión del
+  // pool, ni consulta.
+  //
+  // ── LA CONDICIÓN, Y ES LA ÚNICA QUE IMPORTA ────────────────────────────
+  // `public` significa «esta respuesta vale para cualquiera». Si una de estas
+  // rutas empezara algún día a mirar `req.user`, el borde le serviría a una
+  // persona lo que se calculó para otra. **Comprobado uno por uno antes de
+  // marcarlas: ninguna de las trece lee la sesión.** Quien añada una lectura
+  // de `req.user` a cualquiera de ellas tiene que quitar esta llamada en el
+  // mismo cambio, y por eso la marca está en la ruta y no en un middleware
+  // que las agrupe: se ve al lado del código que podría romperla.
+  //
+  // ── POR QUÉ UN MINUTO Y NO UNA HORA ───────────────────────────────────────
+  // Porque quien edita un objetivo tiene que verlo cambiar. Un minuto absorbe
+  // la avalancha (mil visitas en ese minuto son UNA consulta) y sigue
+  // sintiéndose inmediato. `stale-while-revalidate` hace el resto: pasado el
+  // minuto el borde sirve lo viejo AL INSTANTE y refresca por detrás, así que
+  // nadie espera nunca a que se recalcule.
+  const cachePublica = (res: Response, segundos: number) => {
+    res.set('Cache-Control', `public, max-age=${segundos}, stale-while-revalidate=${segundos * 5}`);
+  };
+
+  app.get("/api/data/territories", (req, res) => { cachePublica(res, 60); return getTable("territories", res); });
   
   app.get("/api/data/objectives", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`SELECT * FROM objectives WHERE archived_at IS NULL`);
       const territoryIdsResult = await db.execute(sql`SELECT id FROM territories WHERE archived_at IS NULL`);
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
       // Build progress_by_territory per objective from the same
@@ -500,17 +548,27 @@ async function startServer() {
       // territory (including e.g. España, and the Madrid municipios) showing
       // 0% in the objectives grid regardless of their real data.
       const progressByObjective: Record<string, Record<string, number | null>> = {};
-      for (const { id } of result.rows as any[]) progressByObjective[id] = {};
+      // Y de dónde sale cada porcentaje, con la misma forma. Viaja junto al
+      // número para que la rejilla de objetivos no tenga que averiguarlo: sin
+      // esto, un 92 % inventado se pinta igual que uno medido.
+      const origenByObjective: Record<string, Record<string, string>> = {};
+      for (const { id } of result.rows as any[]) { progressByObjective[id] = {}; origenByObjective[id] = {}; }
       for (const { id: tid } of territoryIdsResult.rows as any[]) {
-        const scores = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const scores = getObjectivesForTerritory(
+          tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[tid] || {}, origenes,
+        );
         for (const [key, objId] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
           if (progressByObjective[objId]) progressByObjective[objId][tid] = (scores as any)[key];
+          if (origenByObjective[objId] && origenes[key]) origenByObjective[objId][tid] = origenes[key];
         }
       }
 
       const mapped = result.rows.map((r: any) => ({
         ...r,
-        progress_by_territory: progressByObjective[r.id] || {}
+        progress_by_territory: progressByObjective[r.id] || {},
+        origen_by_territory: origenByObjective[r.id] || {}
       }));
       res.json(mapped);
     } catch (e: any) {
@@ -520,6 +578,7 @@ async function startServer() {
   
   app.get("/api/data/challenges", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT c.*, 
           COALESCE(json_agg(DISTINCT ct.territory_id) FILTER (WHERE ct.territory_id IS NOT NULL), '[]') as territory_ids,
@@ -536,6 +595,7 @@ async function startServer() {
   
   app.get("/api/data/solutions", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT s.*,
           COALESCE(json_agg(DISTINCT sc.cause_id) FILTER (WHERE sc.cause_id IS NOT NULL), '[]') as cause_ids,
@@ -552,6 +612,7 @@ async function startServer() {
   
   app.get("/api/data/causes", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT c.*,
           COALESCE(json_agg(DISTINCT cc.challenge_id) FILTER (WHERE cc.challenge_id IS NOT NULL), '[]') as challenge_ids
@@ -566,6 +627,7 @@ async function startServer() {
   
   app.get("/api/data/projects", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT p.*,
           COALESCE(json_agg(DISTINCT pc.challenge_id) FILTER (WHERE pc.challenge_id IS NOT NULL), '[]') as challenge_ids,
@@ -586,6 +648,7 @@ async function startServer() {
   
   app.get("/api/data/organizations", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const result = await db.execute(sql`
         SELECT o.*,
           COALESCE(json_agg(DISTINCT oo.objective_id) FILTER (WHERE oo.objective_id IS NOT NULL), '[]') as objective_ids,
@@ -602,6 +665,7 @@ async function startServer() {
 
   app.get("/api/data/indicators", async (req, res) => {
     try {
+      cachePublica(res, 60);
       // National (España) observation only — per-territory breakdowns for the map
       // come from /api/geo/territories/{polygons,centroids} via indicatorScores.
       const territoryId = (req.query.territoryId as string) || 'T003';
@@ -619,6 +683,7 @@ async function startServer() {
 
   app.get("/api/data/markers", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const indicatorId = req.query.indicatorId as string | undefined;
       const result = indicatorId
         ? await db.execute(sql`
@@ -639,6 +704,7 @@ async function startServer() {
 
   app.get("/api/data/metrics", async (req, res) => {
     try {
+      cachePublica(res, 60);
       const markerId = req.query.markerId as string | undefined;
       const result = markerId
         ? await db.execute(sql`
@@ -1248,14 +1314,6 @@ async function startServer() {
     return geoFilesCache[filename];
   };
 
-  // Keys that have historical mock progress data in src/data/seed.ts and keep
-  // defaulting to a neutral 50 when a territory isn't listed there (legacy
-  // behavior, preserved as-is). Newer objectives have no mock data at all, so
-  // they correctly report "Sin datos" (null) until real data is added — see
-  // the 2026-08-03 decision in memory/03_DECISIONS.md about never fabricating
-  // scores for objectives that don't have any.
-  const LEGACY_MOCK_OBJECTIVE_KEYS = new Set(['agua', 'alimentacion', 'vivienda', 'salud', 'convivencia', 'ecosistemas']);
-
   // Static metadata (id/objective_id/weight) for every indicator, cached for
   // the life of the process — used to weight-average indicator scores up
   // into an objective score for territories with no legacy mock entry (see
@@ -1269,57 +1327,6 @@ async function startServer() {
       }));
     }
     return indicatorsMetaCache;
-  };
-
-  // Helper to retrieve objective scores for any territory ID. Loops over every
-  // objective in OBJECTIVE_ID_BY_KEY instead of hardcoding one lookup per
-  // objective, so adding a new objective there is enough on its own — no
-  // changes needed here.
-  //
-  // Score priority per objective: (1) the legacy mock progress_by_territory
-  // entry in src/data/seed.ts, if present — preserved as-is for territories
-  // that already rely on it; (2) otherwise a weighted average of that
-  // objective's own indicators' real indicator_observations for this
-  // territory (using each indicator's `weight`, defaulting to an equal split
-  // if unset) — this is what makes territories seeded ONLY with real
-  // indicator data (e.g. the Madrid municipios) show a correct roll-up
-  // instead of "Sin datos"; (3) a neutral 50 for the 6 original objectives
-  // with neither (legacy behavior), or null ("Sin datos") for newer ones.
-  const getObjectivesForTerritory = (
-    tid: string,
-    indicatorScoresForTid: Record<string, number> = {},
-    indicatorsMeta: { id: string; objectiveId: string; weight: number | null }[] = []
-  ): Record<string, number | null> => {
-    const result: Record<string, number | null> = {};
-    let sum = 0;
-    let count = 0;
-    for (const [key, id] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
-      const seedEntry = seedObjectives.find(o => o.id === id);
-      const raw = seedEntry?.progress_by_territory?.[tid];
-      let value: number | null;
-      if (raw != null) {
-        value = raw;
-      } else {
-        const objIndicators = indicatorsMeta.filter(i => i.objectiveId === id);
-        let weightedSum = 0;
-        let weightTotal = 0;
-        for (const ind of objIndicators) {
-          const score = indicatorScoresForTid[ind.id];
-          if (score != null) {
-            const w = ind.weight != null ? ind.weight : (1 / objIndicators.length);
-            weightedSum += score * w;
-            weightTotal += w;
-          }
-        }
-        value = weightTotal > 0
-          ? Math.round(weightedSum / weightTotal)
-          : (LEGACY_MOCK_OBJECTIVE_KEYS.has(key) ? 50 : null);
-      }
-      result[key] = value;
-      if (value != null) { sum += value; count++; }
-    }
-    result.overall = count > 0 ? Math.round(sum / count) : null;
-    return result;
   };
 
   // Helper to retrieve real indicator scores (from indicator_observations) grouped by territory
@@ -1336,6 +1343,48 @@ async function startServer() {
     }
     return map;
   };
+
+  /**
+   * La `source` de cada observación, por territorio y por indicador.
+   *
+   * Va aparte de `getIndicatorScoresByTerritory` a propósito: quien solo
+   * quiera pintar el número no paga esta consulta, y quien vaya a decir de
+   * dónde sale no tiene que adivinarlo.
+   */
+  const getIndicatorSourcesByTerritory = async (): Promise<Record<string, Record<string, string | null>>> => {
+    const result = await db.execute(sql`
+      SELECT territory_id, indicator_id, source
+      FROM indicator_observations
+      WHERE score IS NOT NULL
+    `);
+    const map: Record<string, Record<string, string | null>> = {};
+    for (const row of result.rows as any[]) {
+      if (!map[row.territory_id]) map[row.territory_id] = {};
+      map[row.territory_id][row.indicator_id] = row.source ?? null;
+    }
+    return map;
+  };
+
+  /**
+   * ══ DE DÓNDE SALE CADA PUNTUACIÓN (2026-08-22) ═════════════════════════════
+   * Medido contra la base de datos: de 20.557 observaciones, 20.499 están
+   * SIMULADAS — «Excel Municipios Madrid (simulado)» y «IA — número aleatorio».
+   * El 99,7 %. Todas declaran su fuente y ninguna pantalla lo decía.
+   *
+   * AQUÍ HUBO UN `getOrigenByTerritory` Y DURÓ UN DÍA. Resumía las fuentes de
+   * las OBSERVACIONES de un territorio, y con eso se marcaba el mapa y la
+   * ficha… que no enseñan observaciones: enseñan las catorce puntuaciones de
+   * objetivo. En España las dos cosas no coinciden —sus observaciones de agua
+   * son reales, pero los porcentajes salen escritos a mano de
+   * `src/data/seed.ts`— así que la ficha ponía «MEDIDO» encima de catorce
+   * números inventados. Una marca que describe una cifra distinta de la que
+   * tiene al lado es peor que no poner ninguna: da confianza sobre lo que no
+   * la merece.
+   *
+   * Por eso el origen sale ahora de `getObjectivesForTerritory`, en la misma
+   * rama que decide el número. Es la regla de la casa: el origen viaja CON el
+   * dato, y describe EXACTAMENTE el dato que se pinta.
+   */
 
   // Helper to retrieve real marker scores (from marker_observations) grouped by territory
   const getMarkerScoresByTerritory = async (): Promise<Record<string, Record<string, number>>> => {
@@ -1355,6 +1404,7 @@ async function startServer() {
   // 1. POLYGONS ENDPOINT serving GeoJSON features mapped to territory IDs
   app.get("/api/geo/territories/polygons", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const zoom = parseFloat(req.query.zoom as string) || 2;
       const typeStr = (req.query.type as string) || null;
       const parentIdStr = (req.query.parentId as string) || null;
@@ -1438,18 +1488,33 @@ async function startServer() {
 
       // Populate objective scores directly onto polygon properties
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
-        const objs = getObjectivesForTerritory(tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const objs = getObjectivesForTerritory(
+          tid, indicatorScoresByTerritory[tid] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[tid] || {}, origenes,
+        );
         return {
           ...f,
           properties: {
             ...f.properties,
             objectives: objs,
+            objectivesOrigen: origenes,
             indicatorScores: indicatorScoresByTerritory[tid] || {},
-            markerScores: markerScoresByTerritory[tid] || {}
+            markerScores: markerScoresByTerritory[tid] || {},
+            // EL ORIGEN DESCRIBE LO QUE SE PINTA, y lo que se pinta son estas
+            // catorce puntuaciones de objetivo. Al principio se marcaba con el
+            // origen de las OBSERVACIONES del territorio, y en España salía
+            // «medido» encima de catorce números escritos a mano en
+            // `src/data/seed.ts`: una marca que tranquiliza sobre una cifra
+            // distinta de la que describe es peor que ninguna marca.
+            // Sin puntuaciones no hay origen que dar: «desconocido», nunca un
+            // silencio que el mapa interprete como bueno.
+            origenDato: peorOrigen(Object.values(origenes)) || 'desconocido'
           }
         };
       });
@@ -1467,6 +1532,7 @@ async function startServer() {
   // 2. CENTROIDS ENDPOINT returning territory centroids with objective progress
   app.get("/api/geo/territories/centroids", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const zoom = parseFloat(req.query.zoom as string) || 2;
       const typeStr = (req.query.type as string) || null;
       const parentIdStr = (req.query.parentId as string) || null;
@@ -1497,6 +1563,7 @@ async function startServer() {
       });
 
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
+      const indicatorSourcesByTerritory = await getIndicatorSourcesByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
@@ -1504,7 +1571,11 @@ async function startServer() {
         // Was a second, hand-duplicated copy of getObjectivesForTerritory's
         // averaging logic — now calls the same helper the polygons endpoint
         // uses, so both endpoints automatically agree for every objective.
-        const objectivesForTerritory = getObjectivesForTerritory(t.id, indicatorScoresByTerritory[t.id] || {}, indicatorsMeta);
+        const origenes: Record<string, OrigenDelDato> = {};
+        const objectivesForTerritory = getObjectivesForTerritory(
+          t.id, indicatorScoresByTerritory[t.id] || {}, indicatorsMeta,
+          indicatorSourcesByTerritory[t.id] || {}, origenes,
+        );
 
         return {
           type: "Feature",
@@ -1520,8 +1591,10 @@ async function startServer() {
             parent_id: t.parent_id,
             description: t.description,
             objectives: objectivesForTerritory,
+            objectivesOrigen: origenes,
             indicatorScores: indicatorScoresByTerritory[t.id] || {},
             markerScores: markerScoresByTerritory[t.id] || {},
+            origenDato: peorOrigen(Object.values(origenes)) || 'desconocido',
             challenges: t.active_challenges || []
           }
         };
@@ -1691,15 +1764,23 @@ async function startServer() {
 
         const objKey = OBJECTIVE_KEY_BY_ID[id];
         const territoryIndicatorScoresResult = await db.execute(sql`
-          SELECT indicator_id, score FROM indicator_observations WHERE territory_id = ${territoryId} AND score IS NOT NULL
+          SELECT indicator_id, score, source FROM indicator_observations WHERE territory_id = ${territoryId} AND score IS NOT NULL
         `);
         const territoryIndicatorScores: Record<string, number> = {};
-        for (const r of territoryIndicatorScoresResult.rows as any[]) territoryIndicatorScores[r.indicator_id] = r.score;
-        const scores = getObjectivesForTerritory(territoryId, territoryIndicatorScores, await getIndicatorsMeta());
+        const territoryIndicatorSources: Record<string, string | null> = {};
+        for (const r of territoryIndicatorScoresResult.rows as any[]) {
+          territoryIndicatorScores[r.indicator_id] = r.score;
+          territoryIndicatorSources[r.indicator_id] = r.source ?? null;
+        }
+        const origenes: Record<string, OrigenDelDato> = {};
+        const scores = getObjectivesForTerritory(
+          territoryId, territoryIndicatorScores, await getIndicatorsMeta(),
+          territoryIndicatorSources, origenes,
+        );
         const score = objKey ? (scores as any)[objKey] : null;
 
         const indicatorsResult = await db.execute(sql`
-          SELECT i.id, i.name, io.score
+          SELECT i.id, i.name, io.score, io.source
           FROM indicators i
           LEFT JOIN indicator_observations io ON io.indicator_id = i.id AND io.territory_id = ${territoryId}
           WHERE i.objective_id = ${id} AND i.archived_at IS NULL
@@ -1722,8 +1803,12 @@ async function startServer() {
           territory,
           score: score ?? null,
           hasData: score != null,
+          // De dónde sale esa puntuación. Sin esto, el lienzo del explorador
+          // pinta un 92 % simulado exactamente igual que uno medido.
+          origenDato: objKey ? (origenes[objKey] ?? null) : null,
           children: indicatorsResult.rows.map((r: any) => ({
-            level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
+            level: "indicador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null,
+            origenDato: r.score != null ? origenDe(r.source) : null
           })),
           challenges: challengesResult.rows,
           solutions: solutionsRows
@@ -1772,6 +1857,7 @@ async function startServer() {
           territory,
           observation,
           hasData: !!observation,
+          origenDato: observation ? origenDe((observation as any).source) : null,
           children: markersResult.rows.map((r: any) => ({
             level: "marcador", id: r.id, name: r.name, score: r.score ?? null, hasData: r.score != null, riskLevel: null
           })),
@@ -1832,6 +1918,7 @@ async function startServer() {
           territory,
           observation,
           hasData: !!observation,
+          origenDato: observation ? origenDe((observation as any).source) : null,
           children: metricsResult.rows.map((r: any) => ({
             level: "metrica", id: r.id, name: r.name, score: null, hasData: r.worst_level != null, riskLevel: r.worst_level ?? null
           })),
@@ -1887,6 +1974,7 @@ async function startServer() {
   // 4. VECTOR TILES ENDPOINT (PostGIS ST_AsMVT for Vector Tile Mapbox Serving)
   app.get("/api/geo/tiles/:z/:x/:y.pbf", async (req, res) => {
     try {
+      cachePublica(res, 300);
       const z = parseInt(req.params.z, 10);
       const x = parseInt(req.params.x, 10);
       const y = parseInt(req.params.y, 10);
@@ -1996,30 +2084,86 @@ async function startServer() {
         WHERE ct.territory_id = ${id}
       `);
       
-      const populatedChallenges = await Promise.all(challengesResult.rows.map(async (c: any) => {
-        const solutionsResult = await db.execute(sql`
-          SELECT s.*
-          FROM solutions s
-          JOIN challenge_solutions cs ON s.id = cs.solution_id
-          WHERE cs.challenge_id = ${c.id}
-        `);
-        
-        const objectivesResult = await db.execute(sql`
-          SELECT o.*
-          FROM objectives o
-          JOIN challenge_objectives co ON o.id = co.objective_id
-          WHERE co.challenge_id = ${c.id}
-        `);
-        
-        return {
-          ...c,
-          solutions: solutionsResult.rows,
-          objectives: objectivesResult.rows
-        };
+      // ══ DOS CONSULTAS, NO DOS POR RETO ═══════════════════════════════════
+      // Esto era un `Promise.all` que lanzaba DOS consultas por cada reto. Con
+      // los retos que tiene España hoy salían **53 consultas para abrir una
+      // ficha** — medido por `/api/medicion/rutas`, no estimado. Es el patrón
+      // que crece con los datos sin que nadie lo note: con cuatro retos son
+      // nueve consultas y va rápido; con cuatrocientos son ochocientas y la
+      // página se cae sola.
+      //
+      // Ahora son dos consultas para todos los retos, y el reparto se hace en
+      // memoria. `IN ${array}` es el patrón que ya usa `getSolutionsForChallenges`
+      // aquí al lado: el controlador lo expande a una lista de parámetros.
+      //
+      // SE CONSERVA EXACTAMENTE LO QUE DEVOLVÍA: `s.*` y `o.*` enteros, sin
+      // filtrar archivados, y un reto sin soluciones sigue trayendo `[]`. Esto
+      // es un cambio de CÓMO se pide, no de QUÉ se enseña.
+      const idsDeRetos = challengesResult.rows.map((c: any) => c.id);
+      const solucionesPorReto = new Map<string, any[]>();
+      const objetivosPorReto = new Map<string, any[]>();
+      if (idsDeRetos.length) {
+        const [sols, objs] = await Promise.all([
+          db.execute(sql`
+            SELECT cs.challenge_id, s.*
+            FROM solutions s
+            JOIN challenge_solutions cs ON s.id = cs.solution_id
+            WHERE cs.challenge_id IN ${idsDeRetos}
+          `),
+          db.execute(sql`
+            SELECT co.challenge_id, o.*
+            FROM objectives o
+            JOIN challenge_objectives co ON o.id = co.objective_id
+            WHERE co.challenge_id IN ${idsDeRetos}
+          `),
+        ]);
+        // `challenge_id` se quita de cada fila: venía solo para poder repartir,
+        // y dejarlo cambiaría la forma de lo que se devuelve.
+        for (const fila of sols.rows as any[]) {
+          const { challenge_id, ...solucion } = fila;
+          if (!solucionesPorReto.has(challenge_id)) solucionesPorReto.set(challenge_id, []);
+          solucionesPorReto.get(challenge_id)!.push(solucion);
+        }
+        for (const fila of objs.rows as any[]) {
+          const { challenge_id, ...objetivo } = fila;
+          if (!objetivosPorReto.has(challenge_id)) objetivosPorReto.set(challenge_id, []);
+          objetivosPorReto.get(challenge_id)!.push(objetivo);
+        }
+      }
+      const populatedChallenges = challengesResult.rows.map((c: any) => ({
+        ...c,
+        solutions: solucionesPorReto.get(c.id) || [],
+        objectives: objetivosPorReto.get(c.id) || [],
       }));
       
+      // DE DÓNDE SALEN SUS CIFRAS (2026-08-22). La ficha de un territorio es
+      // donde alguien se queda mirando los números un rato — y donde puede
+      // apuntarlos. Si son inventados, aquí es donde tiene que decirlo.
+      //
+      // Se marca el origen de LAS CATORCE PUNTUACIONES QUE SE VEN, no el de
+      // las observaciones sueltas del territorio: en España las observaciones
+      // de agua son reales, pero los porcentajes de objetivo que enseña esta
+      // ficha están escritos a mano en `src/data/seed.ts`. Marcarla «medido»
+      // por lo primero era tranquilizar sobre lo segundo.
+      const obsDelTerritorio = await db.execute(sql`
+        SELECT indicator_id, score, source
+        FROM indicator_observations
+        WHERE territory_id = ${id} AND score IS NOT NULL
+      `);
+      const puntuaciones: Record<string, number> = {};
+      const fuentesPorIndicador: Record<string, string | null> = {};
+      for (const r of obsDelTerritorio.rows as any[]) {
+        puntuaciones[r.indicator_id] = r.score;
+        fuentesPorIndicador[r.indicator_id] = r.source ?? null;
+      }
+      const origenes: Record<string, OrigenDelDato> = {};
+      getObjectivesForTerritory(String(id), puntuaciones, await getIndicatorsMeta(), fuentesPorIndicador, origenes);
+      const origenDato = peorOrigen(Object.values(origenes));
+
       res.json({
         ...territory,
+        origenDato,
+        objectivesOrigen: origenes,
         challenges: populatedChallenges
       });
       

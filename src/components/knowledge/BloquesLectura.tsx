@@ -1,6 +1,8 @@
 import { FileText, Paperclip } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
+import ProductoPublico from './ProductoPublico';
+import { Portada, RejillaProductos, Columnas, Franja } from './BloquesMaqueta';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -182,7 +184,29 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       // La tabla de verdad, en modo mirar. `Rejilla` ya sabe no dejar escribir.
       return b.tablaId ? <Rejilla tablaId={b.tablaId} editable={false} alto={520} /> : null;
 
+    // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────
+    // Sólo se ven al leer. En el editor se siguen tratando como bloques
+    // normales, así que una página con portada se puede seguir editando sin
+    // que el editor sepa dibujarla todavía.
+    case 'portada':
+      return <Portada b={b} />;
+
+    case 'rejilla':
+      return <RejillaProductos b={b} />;
+
+    case 'columnas':
+      return <Columnas b={b} Dentro={BloquesLectura} />;
+
+    case 'franja':
+      return <Franja b={b} Dentro={BloquesLectura} />;
+
     case 'producto':
+      // Ficha de verdad: foto, precio y disponibilidad. Ver `ProductoPublico`
+      // para por qué todavía no lleva botón de comprar.
+      return b.entityId
+        ? <ProductoPublico id={b.entityId} titulo={b.pubTitulo || b.texto} />
+        : null;
+
     case 'publicacion':
     case 'ventana':
       // Ver la nota de arriba: título y destino, no la ficha entera.

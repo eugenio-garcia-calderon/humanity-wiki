@@ -27,7 +27,7 @@ import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
-  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
+  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
@@ -45,6 +45,11 @@ const HERRAMIENTAS: NodoMenu[] = [
   { id: 'h-mapas',     label: 'Mapas',     icono: MapIcon,      destino: '/mapas',     abrir: 'ventana' },
   { id: 'h-tareas',    label: 'Tareas',    icono: ListChecks,   destino: '/tareas',    abrir: 'ventana' },
   { id: 'h-tablas',    label: 'Tablas',    icono: Table2,       destino: '/tablas',    abrir: 'ventana' },
+  // Vender estaba repartido en tres sitios: el Mercado común, el creador de
+  // páginas y ningún sitio para los pedidos. Aquí está lo que vendes y lo que
+  // te han comprado (Eugenio, 2026-08-22: «pon una herramienta nueva que sea
+  // Comercio… la quiero en el menú lateral junto al resto de herramientas»).
+  { id: 'h-comercio',  label: 'Comercio',  icono: Store,        destino: '/comercio',  abrir: 'ventana' },
   // El MISMO asistente de la columna derecha, a pantalla completa (2026-08-20).
   { id: 'h-ia',        label: 'IA',        icono: Sparkles,     destino: '/ia',        abrir: 'ventana' },
   { id: 'h-calendario', label: 'Calendario', icono: CalendarDays, destino: '/calendario', abrir: 'ventana' },
@@ -335,6 +340,10 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       id: 'todas', label: 'Todas las personas', icono: Users2, destino: '/personas', abrir: 'ventana',
     } as NodoMenu, {
       id: 'mensajes', label: 'Mensajes', icono: MessageSquare, destino: '/mensajes',
+    } as NodoMenu, {
+      // EL TELÉFONO VA JUNTO A MENSAJES porque es lo mismo visto de otra
+      // manera: a la misma persona se le escribe o se le llama (2026-08-22).
+      id: 'telefono', label: 'Teléfono', icono: Phone, destino: '/telefono',
     } as NodoMenu] : []),
     // LOS GRUPOS FAVORITOS, aquí arriba (Eugenio: «ponerlo como favoritos,
     // entonces los grupos favoritos se añadirán»). Cada uno abre la lista ya

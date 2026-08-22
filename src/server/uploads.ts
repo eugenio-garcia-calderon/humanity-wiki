@@ -59,6 +59,12 @@ const AUDIO: Record<string, string> = {
   'audio/x-wav': 'wav',
   'audio/aac': 'aac',
   'audio/flac': 'flac',
+  // LO QUE GRABA UN NAVEGADOR (2026-08-22, notas de voz). `MediaRecorder` no
+  // devuelve MP3 en ninguna parte: Chrome y Firefox graban Opus dentro de un
+  // contenedor WebM, y Safari graban AAC dentro de MP4 (que ya estaba arriba).
+  // Sin esta línea, una nota de voz grabada en Chrome se rechazaba con
+  // «formato no admitido» y no había forma de mandarla.
+  'audio/webm': 'weba',
 };
 
 /** Vídeo subido (2026-08-19, petición de Eugenio: «un vídeo y se hace embed»).
@@ -174,7 +180,11 @@ export function registerUploadRoutes(app: Express, _db: any) {
       try {
         if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para subir archivos.' });
 
-        const tipo = String(req.query.type || '').toLowerCase();
+        // EL TIPO VIENE CON APELLIDOS Y AQUÍ ESTORBAN. Un `MediaRecorder`
+        // declara «audio/webm;codecs=opus», y la tabla de arriba habla de
+        // familias, no de códecs: el códec lo decodifica el navegador de quien
+        // escucha, no nosotros. Se corta en el punto y coma. (2026-08-22)
+        const tipo = String(req.query.type || '').toLowerCase().split(';')[0].trim();
         const ext = TIPOS[tipo];
         if (!ext) {
           return res.status(400).json({

@@ -38,8 +38,9 @@ const raiz = git(['rev-parse', '--show-toplevel']);
 // este sistema, un agente escribió su `.agente` en las tres copias de trabajo y las
 // tres decían lo mismo. La carpeta no se puede falsificar por descuido.
 function porLaCarpeta() {
-  const m = raiz.match(/\/\.claude\/worktrees\/(prog\d)$/);
-  if (m) return m[1];
+  // Cualquier copia de trabajo se llama como su carpeta: prog2, prog3, dashboard…
+  const m = raiz.match(/\/\.claude\/worktrees\/([A-Za-z0-9_.-]+)$/);
+  if (m) return m[1].toLowerCase();
   const principal = gitSilencioso(['rev-parse', '--path-format=absolute', '--git-common-dir']);
   if (principal && path.dirname(principal) === raiz) return 'prog1'; // la raíz es de prog1
   return null;
@@ -171,6 +172,20 @@ if (orden === 'reservar') {
   for (const ruta of rutas) vivas.push({ agente: yo, ruta, motivo, desde: ahora });
   if (!escribir(vivas, `${yo} reserva ${rutas.join(', ')}`)) process.exit(1);
   console.log(`Reservado por ${yo}: ${rutas.join(', ')}`);
+  process.exit(0);
+}
+
+// Solo para el Dashboard: soltar lo de un agente que Eugenio ha parado. Una
+// reserva de un agente apagado bloquea a los vivos hasta que caduca a las 4 h.
+if (orden === 'liberar') {
+  const quien = (resto[0] || '').toLowerCase();
+  if (!quien) { console.error('Dime de quién:  liberar prog5'); process.exit(1); }
+  const { reservas } = leer();
+  const quedan = reservas.filter((r) => r.agente !== quien);
+  const soltadas = reservas.length - quedan.length;
+  if (!soltadas) { console.log(`${quien} no tenía nada reservado.`); process.exit(0); }
+  if (!escribir(quedan, `${yo} libera las reservas de ${quien} (agente parado)`)) process.exit(1);
+  console.log(`Liberadas ${soltadas} reserva(s) de ${quien}.`);
   process.exit(0);
 }
 

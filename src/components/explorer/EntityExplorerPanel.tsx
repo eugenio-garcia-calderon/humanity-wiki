@@ -7,6 +7,7 @@ import { useEdit } from '../../contexts/EditContext';
 import { useAuth } from '../../contexts/AuthContext';
 import CauseDonutChart from './CauseDonutChart';
 import ExplorerGraphCanvas from './ExplorerGraphCanvas';
+import MarcaOrigen from '../ui/OrigenDelDato';
 
 // ============================================================================
 // EXPLORADOR DEL MAPA — ahora es un GRAFO (2026-08-06, petición del usuario)
@@ -186,6 +187,10 @@ export default function EntityExplorerPanel({
         <button onClick={onClearFilter} className="font-bold text-slate-400 hover:text-emerald-600 transition-colors flex items-center gap-1">
           <MapPin className="w-3 h-3" /> {data?.territory?.name || '...'}
         </button>
+        {/* De dónde sale la cifra que se está mirando. El lienzo pinta el
+            porcentaje en la esfera central: sin esto, un 92 % inventado y uno
+            medido son el mismo dibujo. */}
+        {data?.origenDato && <MarcaOrigen origen={data.origenDato} tamano="pequeno" className="ml-1" />}
         {breadcrumb.map((crumb, i) => {
           const isLast = i === breadcrumb.length - 1;
           return (

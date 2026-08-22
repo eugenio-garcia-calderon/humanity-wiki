@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../../utils/subir';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   X, Sparkles, FileText, Network, Map as MapIcon, FolderKanban,
   MessageSquare, Loader2, ArrowRight, MonitorPlay, Image as ImageIcon,
+  Camera, Video, CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import EditorImagen from './EditorImagen';
+import { CapturaCamara } from '../ui/CapturaCamara';
+import { DestinoCaptura, type Captura } from './DestinoCaptura';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -23,29 +26,86 @@ import { cn } from '../../utils/cn';
 //  - A MANO: eliges el tipo, le pones título y se llama al endpoint de
 //    creación de ese tipo (los mismos POST de siempre), abriéndolo al crear.
 
-type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'imagen' | 'proyecto' | 'muro';
+type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'camara' | 'proyecto' | 'muro';
+
+// ¿Sabe este navegador abrir la cámara desde un `<input type=file>`?
+// En un móvil sí, y es el mejor camino: es la cámara del sistema, graba vídeo y
+// no pide un permiso aparte. En un portátil el atributo se ignora y saldría el
+// diálogo de ficheros, así que ahí usamos la vista en vivo. Se pregunta por la
+// capacidad, no por el tamaño de la pantalla: una ventana estrecha en un
+// ordenador sigue sin tener cámara trasera.
+const CAPTURA_NATIVA = typeof document !== 'undefined' && 'capture' in document.createElement('input');
 
 const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string; conIA: boolean }[] = [
   { tipo: 'documento', label: 'Documento', icon: FileText, descripcion: 'Página estilo Notion con bloques, tablas e imágenes', conIA: true },
   { tipo: 'presentacion', label: 'Presentación', icon: MonitorPlay, descripcion: 'Frames horizontales estilo PowerPoint, exportable a .pptx', conIA: true },
   { tipo: 'lienzo', label: 'Lienzo', icon: Network, descripcion: 'Pizarra infinita con ventanas conectadas', conIA: true },
   { tipo: 'mapa', label: 'Mapa', icon: MapIcon, descripcion: 'Mapa con indicadores sobre el territorio', conIA: true },
-  { tipo: 'imagen', label: 'Imagen', icon: ImageIcon, descripcion: 'Sube una foto y edítala: recorte, filtros, texto…', conIA: false },
+  // «Imagen» y «Cámara» eran la misma herramienta con dos nombres: las dos
+  // acaban en una foto subida y en el mismo selector de destino, y sólo se
+  // diferenciaban en de dónde sale la foto. Ahora es una, con las tres
+  // procedencias dentro. (2026-08-22, Nielsen 4: un nombre, una cosa.)
+  { tipo: 'camara', label: 'Cámara', icon: Camera, descripcion: 'Haz una foto o un vídeo, o cógelos del carrete', conIA: false },
   { tipo: 'proyecto', label: 'Proyecto', icon: FolderKanban, descripcion: 'Tablero de tarjetas por hacer / en curso / hecho', conIA: false },
-  { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
+  { tipo: 'muro', label: 'Publicación', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
 
-export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boolean; onCerrar: () => void }) {
+/*
+ * `tipoInicial` (2026-08-22): con qué pestaña se abre. Lo necesita el panel del
+ * «+» de la barra de abajo, que es donde Eugenio pulsa en el móvil: allí
+ * «Cámara» y «Publicación» son dos entradas distintas y cada una tiene que
+ * abrir su parte, no dejarte en la primera y que la busques.
+ */
+export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
+  abierto: boolean; onCerrar: () => void; tipoInicial?: TipoCreable;
+}) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tipo, setTipo] = useState<TipoCreable>('documento');
+  const [tipo, setTipo] = useState<TipoCreable>(tipoInicial ?? 'documento');
   const [prompt, setPrompt] = useState('');
   const [titulo, setTitulo] = useState('');
   const [cuerpo, setCuerpo] = useState('');
   const [ocupado, setOcupado] = useState<'ia' | 'mano' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Editor de imágenes: la foto subida esperando a editarse/guardarse.
+  // Editor de imágenes: solo si LO PIDES desde el selector de destino.
   const [imagenEnEdicion, setImagenEnEdicion] = useState<string | null>(null);
+  // La foto o el vídeo recién subidos, esperando a que digas dónde van.
+  const [capturaPendiente, setCapturaPendiente] = useState<Captura | null>(null);
+  /*
+   * HECHO, SIN ECHARTE DE AQUÍ (2026-08-22, Eugenio: «cuando le doy a crear
+   * publicación, te lleva a la página de publicaciones, y esto hay que
+   * mejorarlo y crear diferentemente desde la ventana de creación»).
+   *
+   * Crear un documento o un lienzo SÍ debe llevarte a él: lo siguiente que vas
+   * a hacer es escribir dentro. Una publicación no: ya está terminada al
+   * crearla, y mandarte a un listado te obliga a volver andando si querías
+   * publicar otra cosa. Así que se queda aquí, te lo confirma, y tú decides si
+   * la abres o si sigues creando.
+   */
+  const [creado, setCreado] = useState<{ texto: string; ruta: string } | null>(null);
+  // Cámara en vivo: solo se usa donde `capture` no sirve, o sea en un ordenador.
+  const [camaraAbierta, setCamaraAbierta] = useState(false);
+  const entradaFoto = useRef<HTMLInputElement | null>(null);
+  const entradaVideo = useRef<HTMLInputElement | null>(null);
+
+  // Reabrir con otra herramienta desde el «+» tiene que cambiar la pestaña: el
+  // componente no se desmonta entre una apertura y otra.
+  useEffect(() => {
+    if (abierto && tipoInicial) { setTipo(tipoInicial); setError(null); }
+  }, [abierto, tipoInicial]);
+
+  /*
+   * SI YA ELEGISTE LA HERRAMIENTA, NO TE LA VUELVO A PREGUNTAR (2026-08-22).
+   *
+   * Eugenio pulsaba «Cámara» en el «+» y aterrizaba en una rejilla de ocho
+   * herramientas con Cámara marcada: un paso que no avanza nada, ocho
+   * decisiones ya tomadas ocupando media pantalla, y la acción de verdad
+   * empujada por debajo del pliegue. La rejilla sigue estando, detrás de
+   * «Cambiar de herramienta», para quien entre por el botón verde de la portada
+   * y todavía no sepa qué quiere hacer.
+   */
+  const [verRejilla, setVerRejilla] = useState(!tipoInicial);
+  useEffect(() => { if (abierto) setVerRejilla(!tipoInicial); }, [abierto, tipoInicial]);
 
   if (!abierto) return null;
 
@@ -155,7 +215,8 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
         onCerrar(); navigate(`/proyectos/${j.slug}`);
       } else {
         await llamar('/api/publications', { title: t || null, body: cuerpo.trim() || null });
-        onCerrar(); navigate('/muro');
+        setTitulo(''); setCuerpo('');
+        setCreado({ texto: 'Publicado en el muro.', ruta: '/muro' });
       }
     } catch (e: any) {
       fallo(e.message);
@@ -164,21 +225,42 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     }
   };
 
-  /** Imagen: se sube el original y se abre el editor encima. */
-  const subirParaEditar = async (archivo: File) => {
+  /*
+   * Sube la foto y PREGUNTA DÓNDE VA (2026-08-22, Eugenio: «que no te salte el
+   * editor por defecto, sino que sea tal cual como está y que luego te
+   * pregunte dónde guardarla»). Antes esto abría el editor de imagen sin que
+   * nadie lo hubiera pedido: la foto ya estaba bien y lo que faltaba era el
+   * destino. Editar sigue estando, un botón dentro del selector.
+   */
+  const subirCaptura = async (archivo: File, tipo: 'imagen' | 'video') => {
     setError(null);
     setOcupado('mano');
     try {
       const sub = await subirArchivo(archivo);
       if (sub.error) throw new Error(sub.error);
       if (!titulo.trim()) setTitulo(archivo.name.replace(/\.[^.]+$/, ''));
-      setImagenEnEdicion(sub.url);
+      setCapturaPendiente({ url: sub.url, tipo, nombre: archivo.name });
     } catch (e: any) {
       fallo(e.message);
     } finally {
       setOcupado(null);
     }
   };
+
+  /** «Imagen»: subir una del carrete sigue el mismo camino que la cámara. */
+  const subirParaEditar = (archivo: File) => subirCaptura(archivo, 'imagen');
+
+  /*
+   * Un vídeo va por el mismo sitio que una foto: se sube y se pregunta dónde.
+   *
+   * OJO, LÍMITE REAL DEL SERVIDOR: `POST /api/ventanas` solo admite
+   * `kind: 'imagen'` (lista blanca en `src/server/documentos.ts`, área de
+   * Programador 1), así que un vídeo NO puede ser todavía una publicación
+   * suelta — falla con 400. En un lienzo sí entra, porque
+   * `POST /api/graphs/:id/windows` no tiene esa lista. El selector lo dice con
+   * esas palabras en vez de soltar un «no se ha podido».
+   */
+  const subirVideo = (archivo: File) => subirCaptura(archivo, 'video');
 
   const guardarImagenEditada = async (url: string) => {
     try {
@@ -216,7 +298,38 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
         ) : (
           <div className="px-6 pb-6">
             {/* Qué crear */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+            {/* HECHO. Se queda a la vista aquí dentro en vez de mandarte a un
+                listado: si querías publicar dos cosas seguidas, ahora puedes. */}
+            {creado && (
+              <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <p className="text-sm font-medium text-emerald-900 flex-1 min-w-0">{creado.texto}</p>
+                <button
+                  onClick={() => { const r = creado.ruta; setCreado(null); onCerrar(); navigate(r); }}
+                  className="text-sm font-semibold text-emerald-700 underline underline-offset-2 min-h-[44px] px-1"
+                >
+                  Verlo
+                </button>
+                <button
+                  onClick={() => setCreado(null)}
+                  className="text-sm font-semibold text-slate-500 min-h-[44px] px-1"
+                >
+                  Crear otra
+                </button>
+              </div>
+            )}
+
+            {!verRejilla && (
+              <button
+                type="button"
+                onClick={() => setVerRejilla(true)}
+                className="mt-3 text-xs font-semibold text-slate-400 hover:text-slate-700 underline underline-offset-2 min-h-[44px]"
+              >
+                Cambiar de herramienta
+              </button>
+            )}
+
+            <div className={cn('grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4', !verRejilla && 'hidden')}>
               {TIPOS.map(t => (
                 <button key={t.tipo} onClick={() => { setTipo(t.tipo); setError(null); }}
                   className={cn('text-left p-3 rounded-2xl border transition-all',
@@ -259,19 +372,69 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                 {elegido.conIA ? 'O créalo tú desde cero' : 'Créalo tú'}
               </p>
-              {tipo === 'imagen' ? (
+              {tipo === 'camara' ? (
                 <>
-                  <input
-                    value={titulo} onChange={e => setTitulo(e.target.value)}
-                    placeholder="Título de la imagen (opcional)"
-                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
-                  />
-                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-colors">
-                    {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-                    Elegir una foto — se abrirá el editor
+                  {/*
+                      DOS BOTONES, SÓLIDOS Y ARRIBA (2026-08-22, Eugenio: «la UX
+                      de darle a cámara y que aparezca así es terrible»).
+
+                      Lo que había: dos recuadros de línea DISCONTINUA y gris. El
+                      borde discontinuo es el idioma de «arrastra aquí un
+                      fichero» —un gesto que en un móvil no existe— y gris sobre
+                      blanco se lee como desactivado. El resultado era que la
+                      única acción de la pantalla parecía una zona rota.
+
+                      Y el título iba ANTES: te pedía nombrar una foto que aún no
+                      habías hecho, estando de pie con el móvil delante de la
+                      cosa que querías fotografiar. Ahora se pregunta después, en
+                      el selector de destino, que además ya lo rellena solo con
+                      el nombre del fichero.
+                  */}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {/* En el móvil, `capture` abre la cámara del sistema: es la
+                        que ya sabe grabar vídeo y no pide un permiso aparte. En
+                        un portátil el atributo se ignora, así que la foto va por
+                        la vista en vivo y el vídeo se queda en elegir fichero —
+                        grabar vídeo desde el navegador es otra obra. */}
+                    <button
+                      type="button"
+                      onClick={() => (CAPTURA_NATIVA ? entradaFoto.current?.click() : setCamaraAbierta(true))}
+                      disabled={ocupado !== null}
+                      className="min-h-[56px] flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl bg-emerald-600 text-white font-semibold text-sm shadow-sm hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-60 transition-colors"
+                    >
+                      {ocupado === 'mano' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
+                      Hacer una foto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => entradaVideo.current?.click()}
+                      disabled={ocupado !== null}
+                      className="min-h-[56px] flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold text-sm shadow-sm hover:bg-slate-800 active:bg-slate-700 disabled:opacity-60 transition-colors"
+                    >
+                      {ocupado === 'mano' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Video className="w-5 h-5" />}
+                      Grabar un vídeo
+                    </button>
+                  </div>
+                  {/* Y el carrete, que antes era una herramienta aparte
+                      llamada «Imagen». Va debajo y en gris porque hacerla ahora
+                      es lo que trae aquí a alguien con el móvil en la mano. */}
+                  <label className="mt-2 min-h-[44px] flex items-center justify-center gap-2 px-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 cursor-pointer hover:border-emerald-300 hover:text-emerald-700 transition-colors">
+                    <ImageIcon className="w-4 h-4" />
+                    Elegir del carrete
                     <input type="file" accept="image/*" className="hidden"
-                      onChange={e => e.target.files?.[0] && subirParaEditar(e.target.files[0])} />
+                      onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirCaptura(f, 'imagen'); }} />
                   </label>
+                  <p className="mt-2 text-[11px] text-slate-400">
+                    Después te preguntamos dónde guardarla.
+                  </p>
+                  <input
+                    ref={entradaFoto} type="file" accept="image/*" capture="environment" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirParaEditar(f); }}
+                  />
+                  <input
+                    ref={entradaVideo} type="file" accept="video/*" capture="environment" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirVideo(f); }}
+                  />
                 </>
               ) : (
                 <>
@@ -302,6 +465,41 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
           </div>
         )}
       </div>
+
+      {camaraAbierta && (
+        <CapturaCamara
+          onCaptura={f => { setCamaraAbierta(false); subirCaptura(f, 'imagen'); }}
+          onCerrar={() => setCamaraAbierta(false)}
+        />
+      )}
+
+      {capturaPendiente && (
+        <DestinoCaptura
+          captura={capturaPendiente}
+          onEditar={capturaPendiente.tipo === 'imagen'
+            ? () => { setImagenEnEdicion(capturaPendiente.url); setCapturaPendiente(null); }
+            : undefined}
+          onListo={destino => {
+            setCapturaPendiente(null);
+            if (destino.tipo === 'lienzo') {
+              // A un lienzo sí se va: quieres verla colocada.
+              onCerrar();
+              navigate(`/esquemas/${destino.slug}`);
+              return;
+            }
+            if (destino.tipo === 'tarea') {
+              // Y al tablero del proyecto, que es donde está la tarea que
+              // acabas de alimentar.
+              onCerrar();
+              navigate(`/proyectos/${destino.proyecto}`);
+              return;
+            }
+            setTitulo('');
+            setCreado({ texto: 'Guardado en tus publicaciones.', ruta: '/mis-publicaciones' });
+          }}
+          onCerrar={() => setCapturaPendiente(null)}
+        />
+      )}
 
       {imagenEnEdicion && (
         <EditorImagen

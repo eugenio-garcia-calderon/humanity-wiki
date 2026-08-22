@@ -41,6 +41,20 @@ export interface AICompletionRequest {
    * llamadas va en `system`, que queda fuera del bloque cacheado.
    */
   systemEstable?: string;
+  /** ══ LA CAPA DE EN MEDIO (2026-08-22) ══════════════════════════════════
+   *  Lo de ESTA persona: sus proyectos, su gente, su nivel, los grafos
+   *  publicados. Cambia cuando crea algo —cada muchos mensajes—, no en cada
+   *  frase.
+   *
+   *  Existe porque la caché de los proveedores compara PREFIJOS: solo se
+   *  aprovecha lo que va antes del primer byte distinto. Con dos capas
+   *  (global + todo lo demás), cualquier cambio minúsculo tiraba abajo el
+   *  resto. Con tres, el tramo de la persona sobrevive a que cambie la
+   *  pregunta, la pantalla o el contexto recuperado.
+   *
+   *  A escala esto es lo que decide la factura: en una conversación de veinte
+   *  mensajes, este tramo se manda veinte veces. */
+  systemDePersona?: string;
   messages: AIMessage[];
   maxTokens?: number;
   temperature?: number;
@@ -367,9 +381,26 @@ export class ClaudeProvider implements AIProvider {
       // para caché y el variable detrás. El orden importa: la caché de
       // Anthropic compara el prefijo de la petición, así que lo que cambia
       // tiene que ir siempre al final.
+      // TRES BLOQUES Y DOS MARCAS DE CACHÉ (2026-08-22). Anthropic admite
+      // hasta cuatro marcas; hasta hoy se usaba una sola.
+      //
+      //   1. estable    — idéntico para TODO el mundo. Su caché se comparte
+      //                   entre usuarios: cuantas más personas, más aciertos.
+      //   2. dePersona  — lo suyo. Se guarda por usuario y sobrevive a que
+      //                   cambie la pregunta.
+      //   3. variable   — la fecha, la pantalla, lo recuperado. Nunca se marca:
+      //                   marcarlo costaría el 25% de escritura para no
+      //                   acertar jamás.
+      //
+      // El orden es el de MENOS a MÁS volátil, y no es una preferencia: la
+      // caché lee el prefijo, así que un tramo estable colocado detrás de uno
+      // volátil no se guarda nunca.
       system: req.systemEstable
         ? [
             { type: 'text', text: req.systemEstable, cache_control: { type: 'ephemeral' } },
+            ...(req.systemDePersona
+              ? [{ type: 'text', text: req.systemDePersona, cache_control: { type: 'ephemeral' } }]
+              : []),
             { type: 'text', text: req.system },
           ]
         : req.system,
@@ -480,7 +511,7 @@ export class GeminiProvider implements AIProvider {
     const body: Record<string, any> = {
       // Gemini no tiene la caché de prompts de Anthropic: la parte estable
       // simplemente se antepone y se paga entera, como siempre.
-      systemInstruction: { parts: [{ text: req.systemEstable ? `${req.systemEstable}\n\n${req.system}` : req.system }] },
+      systemInstruction: { parts: [{ text: [req.systemEstable, req.systemDePersona, req.system].filter(Boolean).join('\n\n') }] },
       contents: req.messages.map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: aPartesGemini(m.content),
@@ -719,9 +750,9 @@ export class TogetherProvider implements AIProvider {
     // (El comentario anterior decía que esta API no tenía caché de prompts. Era
     // cierto para el mecanismo EXPLÍCITO de Anthropic —marcar un bloque— y
     // falso para lo que hay: una caché de prefijos que no hay que pedir.)
-    const system = req.systemEstable ? `${req.systemEstable}
-
-${req.system}` : req.system;
+    // Las tres capas, de menos a más volátil, en una sola cadena: aquí la
+    // caché es de prefijo y no hay marcas que poner — el ORDEN es la marca.
+    const system = [req.systemEstable, req.systemDePersona, req.system].filter(Boolean).join('\n\n');
 
     const res = await fetch(`${ABIERTO_BASE()}/chat/completions`, {
       method: 'POST',

@@ -16,9 +16,40 @@ yet.** They are here so the decision can be explicit.
 
 ## Urgent: active risk, not debt
 
-*(empty — the unauthenticated-writes hole was fixed on 2026-08-06, see "Resolved")*
+### Google API key exposed in the public repository — needs an action in Google Cloud
+- **What**: `firebase-applet-config.json` carried the API key and OAuth client id of the Google project `inteligencia-colectiva-489419`. It arrived with the AI Studio scaffold in the initial commit (2026-08-01) and **nothing in the app ever imported it**. The file was removed on 2026-08-06.
+- **Why deleting the file is not the fix**: this repository is **public**, and the key was readable for five days. It remains in the git history. Bots that scrape GitHub for keys will already have it.
+- **Severity, honestly**: Firebase web API keys are designed to be public and identify a project rather than authorise access, so by itself this is low severity. The real risk is if the key is **unrestricted**, because then it reaches any other Google API enabled on that project. `metadata.json` declared `MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API`, so a Gemini quota or billing charge is the plausible abuse path.
+- **Action required, and only Eugenio can do it** (it is his Google account): in the Google Cloud console, delete or restrict that API key, and check the project's billing for unexpected usage.
+- **Status**: file removed from the repo. **Key rotation pending.** This entry stays here until that is confirmed.
+
+*(The unauthenticated-writes hole was fixed on 2026-08-06 — see "Resolved".)*
 
 ---
+
+## Telecommunications (2026-08-22)
+
+### No TURN server: 10-15% of calls will not connect
+- **What**: calls use STUN only. When both people are behind a symmetric NAT — corporate networks, some mobile carriers — the two browsers see each other, greet each other and never find a path. Measured industry figure is 10-15% of connection attempts.
+- **What it costs to fix**: `coturn` on the existing Hetzner box, 5-10 EUR/month of bandwidth, or a paid service. **The code is already ready**: `GET /api/telecom/hielo` reads `TURN_URL`, `TURN_USUARIO` and `TURN_CLAVE` from the environment and hands them to the browser. Three variables and it works.
+- **Why it was left**: it is the difference between shipping calls today and shipping them next week, and the failure is honest — the person is told "no se ha podido conectar, suele pasar en redes de empresa" instead of watching a spinner forever.
+- **Decided by**: Programador 8, not yet by Eugenio.
+
+### A phone number is declared, not proven
+- **What**: `PUT /api/telecom/mi-numero` takes your word for it. There is no SMS provider contracted, so nothing stops somebody from claiming a number that is not theirs and receiving the calls meant for its owner.
+- **What limits it today**: the number is unique across the platform (a database index), so whoever claims it first holds it, and it takes a logged-in account — it is not anonymous.
+- **What it costs to fix**: an SMS provider and a six-digit code. Cents per message.
+- **Where it is said out loud**: on the Teléfono page itself, in an amber box. It is not hidden.
+- **Decided by**: Programador 8, not yet by Eugenio.
+
+### A call does not survive a server restart, and that is on purpose
+- **What**: live calls are held in memory (`vivas` in `src/server/telecom.ts`), not in the database. A deploy drops every call in progress.
+- **Why it is not worth fixing**: the open connections die with the process anyway and both browsers find out immediately. Persisting the state would buy nothing, and it would cost a database round trip on every one of the ~30 signalling messages a call negotiation fires in its first two seconds.
+- **What does get persisted**: the `llamadas` row — who called whom, when, how long, how it ended.
+
+### Group calls are not built
+- **What**: one to one only. Three people in a call needs either a mesh (every browser sends to every other, which stops working above four) or an SFU — a server that receives one stream and fans it out, which is real infrastructure and real money.
+- **Why now**: nobody asked for it yet, and the one-to-one path is what replaces WhatsApp for the thing Eugenio described.
 
 ## Data integrity
 
@@ -85,8 +116,9 @@ yet.** They are here so the decision can be explicit.
 - **Cost to fix**: low. Vite config plus dynamic `import()` on the map and graph pages.
 
 ### Dead dependencies
-- **What**: `firebase`, `firebase-admin`, `@google/genai`, `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports. AI Studio scaffold leftovers, along with `firebase-applet-config.json` and `metadata.json`.
-- **Cost**: install weight and confusion ("do we use Firebase?"). Removing them is 10 minutes.
+- **What**: `leaflet`, `react-leaflet`, `d3-geo`, `motion` with 0 imports. AI Studio scaffold leftovers.
+- **Cost**: install weight and confusion. They do not affect the bundle, because code that is never imported is never bundled. Removing them is 10 minutes.
+- **Partly done 2026-08-06**: `firebase`, `firebase-admin` and `@google/genai` removed, along with `firebase-applet-config.json` and `metadata.json`. The remaining four are still here because `react-simple-maps` (which *is* used) is the reason `--legacy-peer-deps` exists, and untangling that deserves its own pass.
 
 ### Two lockfiles
 - **What**: `bun.lock` and `package-lock.json` coexist. The Dockerfile uses `npm ci`.

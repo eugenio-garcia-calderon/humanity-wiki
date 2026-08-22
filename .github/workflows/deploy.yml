@@ -59,6 +59,20 @@ jobs:
             # no llega a arrancar y la app vieja sigue en pie con su esquema.
             bash deploy/migrate.sh
             docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+            # CADDY SE RECREA SIEMPRE, Y NO ES POR CAPRICHO (2026-08-22).
+            #
+            # Su configuración entra por un montaje de UN FICHERO
+            # (`./deploy/Caddyfile`). `git reset --hard` no edita ese fichero:
+            # lo SUSTITUYE, y el contenedor sigue viendo el inodo viejo. Como
+            # la definición del servicio no cambia, `up -d` tampoco lo recrea.
+            #
+            # Resultado: un cambio en el Caddyfile se desplegaba, salía en
+            # verde, y no llegaba nunca. Medido ese día — el fichero del
+            # servidor tenía la regla nueva y el contenedor no. Se descubrió
+            # porque la cabecera no cambió; podría haber sido el bloque de los
+            # subdominios, y entonces habría parecido que el certificado
+            # fallaba.
+            docker compose -f docker-compose.prod.yml --env-file .env.production up -d --force-recreate caddy
             docker image prune -f
             # Espera y comprobación de salud: si la app no responde, el job falla.
             sleep 10

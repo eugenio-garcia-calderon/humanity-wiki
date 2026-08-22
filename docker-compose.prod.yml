@@ -46,6 +46,80 @@ services:
       timeout: 5s
       retries: 3
 
+  # Copias de seguridad de la base de datos (2026-08-22). Un volcado al día,
+  # comprobado, en un volumen del servidor — que es lo que la copia de disco de
+  # Hetzner se lleva luego fuera de la máquina. Cómo restaurarlo y por qué está
+  # hecho así: `deploy/copias/CLAUDE.md`.
+  #
+  # Misma imagen que `db` a propósito: `pg_dump` tiene que ser de la misma
+  # versión que el Postgres del que lee, o se niega a trabajar.
+  copias:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    # Sin esto, la imagen intentaría arrancar un Postgres suyo. Aquí solo
+    # queremos sus herramientas de cliente.
+    entrypoint: ["/bin/bash", "/opt/copias/copias.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${SQL_ADMIN_USER:-humanity}
+      PGPASSWORD: ${SQL_ADMIN_PASSWORD:?falta SQL_ADMIN_PASSWORD}
+      PGDATABASE: ${SQL_DB_NAME:-humanity}
+      COPIAS_DIR: /copias
+      COPIAS_DIAS: ${COPIAS_DIAS:-14}
+      COPIAS_MESES: ${COPIAS_MESES:-6}
+    volumes:
+      - ./deploy/copias:/opt/copias:ro
+      - copias:/copias
+    depends_on:
+      db:
+        condition: service_healthy
+    # El fallo peligroso de una copia no es que falle: es que deje de hacerse
+    # sin que nadie se entere. Si la última tiene más de 36 h, el contenedor
+    # sale como `unhealthy` en `docker ps`.
+    healthcheck:
+      test: ["CMD", "bash", "/opt/copias/salud.sh"]
+      interval: 15m
+      timeout: 30s
+      retries: 2
+      start_period: 5m
+
+  # Se lleva los volcados FUERA de Hetzner (2026-08-22, petición de Eugenio).
+  # `copias` protege del error humano; esto protege de perder el servidor o la
+  # cuenta, que es lo que una copia en la misma máquina no puede cubrir.
+  #
+  # SIN CREDENCIALES NO HACE NADA y sale sano igualmente: se queda esperando y
+  # lo dice en el registro. Configurarlo es rellenar las cuatro variables
+  # `COPIAS_REMOTO_*` de `.env.production` y reiniciar este servicio.
+  copias-remoto:
+    image: rclone/rclone:1
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/opt/copias/remoto.sh"]
+    environment:
+      COPIAS_DIR: /copias
+      COPIAS_REMOTO_CUBO: ${COPIAS_REMOTO_CUBO:-}
+      # rclone se configura entero por variables de entorno: no hay fichero de
+      # configuración que mantener ni secreto que acabe en el repositorio.
+      RCLONE_CONFIG_FUERA_TYPE: s3
+      RCLONE_CONFIG_FUERA_PROVIDER: ${COPIAS_REMOTO_PROVEEDOR:-Cloudflare}
+      RCLONE_CONFIG_FUERA_ENDPOINT: ${COPIAS_REMOTO_ENDPOINT:-}
+      RCLONE_CONFIG_FUERA_ACCESS_KEY_ID: ${COPIAS_REMOTO_CLAVE_ID:-}
+      RCLONE_CONFIG_FUERA_SECRET_ACCESS_KEY: ${COPIAS_REMOTO_CLAVE_SECRETA:-}
+      RCLONE_CONFIG_FUERA_NO_CHECK_BUCKET: "true"
+    volumes:
+      - ./deploy/copias:/opt/copias:ro
+      # Solo lectura: este servicio sube lo que hay, no le toca nada a nadie.
+      # La única excepción es su propio fichero de estado, y por eso el volumen
+      # no puede ir entero en `:ro`.
+      - copias:/copias
+    depends_on:
+      - copias
+    healthcheck:
+      test: ["CMD", "sh", "/opt/copias/salud-remoto.sh"]
+      interval: 15m
+      timeout: 60s
+      retries: 2
+      start_period: 2m
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -69,6 +143,9 @@ services:
 
 volumes:
   pgdata:
+  # Los volcados. Van en un volumen y no dentro del contenedor por lo mismo que
+  # `uploads`: un despliegue rehace el contenedor y se los llevaría por delante.
+  copias:
   uploads:
   caddy_data:
   caddy_config:

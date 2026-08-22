@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NodeToolbar, Position } from '@xyflow/react';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import {
   ArrowLeftRight, Download, Crop, MessageSquare, Lock, Unlock, Sparkles,
   MoreVertical, Copy, ArrowUp, ArrowDown, Trash2, Type, Plus, Check, X,
@@ -73,12 +74,7 @@ export default function BarraElemento({ win, acciones }: { win: any; acciones: A
 
   /** Cierra cualquier desplegable al pulsar fuera de la barra. */
   const caja = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!menu) return;
-    const fuera = (e: MouseEvent) => { if (caja.current && !caja.current.contains(e.target as Node)) setMenu(null); };
-    document.addEventListener('mousedown', fuera);
-    return () => document.removeEventListener('mousedown', fuera);
-  }, [menu]);
+  useCerrarAlPulsarFuera(caja, !!menu, () => setMenu(null));
 
   return (
     <NodeToolbar isVisible position={Position.Top} offset={16}>

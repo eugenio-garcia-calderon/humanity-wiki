@@ -1,0 +1,173 @@
+// ============================================================================
+// LA LISTA DE MÓDULOS (2026-08-22)
+// ============================================================================
+// Registrar un módulo era **una reserva de `server.ts`**. En una sola hora ese
+// fichero tuvo tres reservas seguidas —prog5, prog1 y prog2— por tres cosas
+// que no se tocaban entre sí, y antes de eso alguien tuvo que colgar
+// `/api/herramientas` de `publicar.ts`, donde no le corresponde, solo para no
+// entrar. Eso no es disciplina: es una cola disfrazada de norma.
+//
+// Y encima `server.ts` está congelado (prohibición 8 del `CLAUDE.md` de la
+// raíz), pero todo el mundo escribía en él igual, porque era el único sitio
+// donde se podía enchufar un módulo. Una prohibición que hay que saltarse para
+// trabajar deja de proteger nada.
+//
+// Ahora los módulos viven aquí. **Añadir uno es una línea en esta lista**, en
+// la PR de quien lo escribe, sin reservar nada de nadie.
+//
+// ── EL ORDEN DE ESTA LISTA ES COMPORTAMIENTO, NO ESTILO ────────────────────
+// En Express, montar antes o después cambia lo que pasa. Hoy mismo costó un
+// 403 con una sesión de nivel 4 perfectamente válida: la ruta se registraba
+// antes de que `registerAuthRoutes` hubiera instalado `req.user`, así que para
+// ella no había nadie identificado.
+//
+// Por eso esta lista **no se ordena alfabéticamente y no se reordena por
+// gusto**. Se añade al final del grupo que corresponda. Donde hay una
+// dependencia de verdad, está escrita al lado — que es mejor que vivir en la
+// cabeza de quien lo montó.
+//
+// ── LO QUE NO ESTÁ AQUÍ, Y POR QUÉ ─────────────────────────────────────────
+// `registerAuthRoutes` se queda en `server.ts`: instala el middleware del que
+// dependen todos los demás, así que no es un elemento de la lista, es la
+// condición para que la lista funcione. Y el cronómetro de la medición se monta
+// aún antes, porque mide el tiempo que espera quien pide.
+import type { Express } from 'express';
+
+import { registrarGuardia } from './seguridad/guardia.js';
+import { registerMedicionRoutes } from './medicion.js';
+import { registerGraphRoutes } from './graph.js';
+import { registerSocialRoutes } from './social.js';
+import { registerAIRoutes } from './ai/assistant.js';
+import { registerKnowledgeRoutes } from './knowledge.js';
+import { registerUploadRoutes } from './uploads.js';
+import { registerRoadmapRoutes } from './roadmap.js';
+import { registerJuegoRoutes } from './juego.js';
+import { registerNavegadorRoutes } from './navegador.js';
+import { registerArchivosRoutes } from './archivos.js';
+import { registerArchivoRoutes } from './archivo.js';
+import { registerIncidenciasRoutes } from './incidencias.js';
+import { registerBdRoutes } from './bd.js';
+import { registerPublicarRoutes } from './publicar.js';
+import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
+import { registerFinanzasRoutes } from './finanzas.js';
+import { registerYoutubeRoutes } from './youtube.js';
+import { registerSpotifyRoutes } from './spotify.js';
+import { registerStripeRoutes } from './stripe.js';
+import { registerPuntosRoutes } from './puntos.js';
+import { registerGastoRoutes } from './gasto.js';
+import { registerDocumentosRoutes } from './documentos.js';
+import { registerMenuRoutes } from './menu.js';
+import { registerMensajesRoutes } from './mensajes.js';
+import { registerCalendarioRoutes } from './calendario.js';
+import { registerPersonasRoutes } from './personas.js';
+import { registerGuardarRoutes } from './guardar.js';
+import { registerVeracidadRoutes } from './veracidad.js';
+import { registerTelecomRoutes } from './telecom.js';
+import { registerTextosRoutes } from './textos.js';
+
+/**
+ * Un módulo de la API.
+ *
+ * `nota` no es adorno: es donde se dice **por qué está donde está**, si es que
+ * el sitio importa. Si no dice nada, es que da igual y se puede mover.
+ */
+export type Modulo = {
+  nombre: string;
+  montar: (app: Express, db: any) => void;
+  nota?: string;
+};
+
+export const MODULOS: Modulo[] = [
+  {
+    nombre: 'seguridad/guardia',
+    montar: app => registrarGuardia(app),
+    nota: 'EL PRIMERO DE LA LISTA, y aquí el orden importa más que en ningún otro sitio: '
+        + 'mira TODAS las escrituras de la API contra la tabla de permisos, así que un módulo '
+        + 'montado antes que él quedaría fuera de la comprobación sin que nadie lo notara. '
+        + 'Va después de `registerAuthRoutes` como todos —necesita `req.user` para saber el nivel— '
+        + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
+        + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
+  },
+
+  {
+    nombre: 'medicion',
+    montar: (app, db) => registerMedicionRoutes(app, db),
+    nota: 'DESPUÉS de la autenticación: comprueba que quien mira es administrador, '
+        + 'y `req.user` lo instala `registerAuthRoutes`. El cronómetro se monta antes, en `server.ts`.',
+  },
+
+  // Grafo de conocimiento, red social y mercado (fases 3-5). Van después de la
+  // autenticación porque dependen de `req.user` para los niveles de rol.
+  { nombre: 'graph', montar: (app, db) => registerGraphRoutes(app, db) },
+  { nombre: 'social', montar: (app, db) => registerSocialRoutes(app, db) },
+
+  // Grafos de conocimiento (fase 11) y todo lo que se apoya en ellos.
+  { nombre: 'knowledge', montar: (app, db) => registerKnowledgeRoutes(app, db) },
+  { nombre: 'uploads', montar: (app, db) => registerUploadRoutes(app, db) },
+  { nombre: 'roadmap', montar: (app, db) => registerRoadmapRoutes(app, db) },
+  { nombre: 'juego', montar: (app, db) => registerJuegoRoutes(app, db) },
+  { nombre: 'navegador', montar: app => registerNavegadorRoutes(app) },
+  { nombre: 'archivos', montar: (app, db) => registerArchivosRoutes(app, db) },
+  { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
+  { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
+  { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
+  { nombre: 'publicar', montar: (app, db) => registerPublicarRoutes(app, db) },
+  { nombre: 'navegadorRemoto', montar: app => registerNavegadorRemotoRoutes(app) },
+  { nombre: 'finanzas', montar: (app, db) => registerFinanzasRoutes(app, db) },
+  { nombre: 'youtube', montar: (app, db) => registerYoutubeRoutes(app, db) },
+  { nombre: 'spotify', montar: (app, db) => registerSpotifyRoutes(app, db) },
+
+  {
+    nombre: 'ai',
+    montar: (app, db) => registerAIRoutes(app, db),
+    nota: 'Se enruta siempre. Sin ANTHROPIC_API_KEY responde 503 con un mensaje claro, '
+        + 'en vez de fallar de forma opaca.',
+  },
+
+  // Economía y mercado (fase 6): Connect, checkout embebido, apoyo a creadores
+  // y reembolsos. Convive con el flujo de socios que sigue en `server.ts`.
+  { nombre: 'stripe', montar: (app, db) => registerStripeRoutes(app, db) },
+  { nombre: 'puntos', montar: (app, db) => registerPuntosRoutes(app, db) },
+  { nombre: 'gasto', montar: (app, db) => registerGastoRoutes(app, db) },
+  { nombre: 'documentos', montar: (app, db) => registerDocumentosRoutes(app, db) },
+  { nombre: 'menu', montar: (app, db) => registerMenuRoutes(app, db) },
+  { nombre: 'mensajes', montar: (app, db) => registerMensajesRoutes(app, db) },
+  { nombre: 'calendario', montar: (app, db) => registerCalendarioRoutes(app, db) },
+  { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
+  { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
+  { nombre: 'veracidad', montar: (app, db) => registerVeracidadRoutes(app, db) },
+  {
+    nombre: 'textos',
+    montar: (app, db) => registerTextosRoutes(app, db),
+    nota: 'Los textos de las páginas de información, editables por un administrador. '
+        + 'Comprueba el nivel, así que necesita `req.user`: después de la autenticación.',
+  },
+
+  {
+    nombre: 'telecom',
+    montar: (app, db) => registerTelecomRoutes(app, db),
+    nota: 'Mensajes en vivo, llamadas y videollamadas. DESPUÉS de la autenticación: '
+        + 'todas sus rutas empiezan por «¿quién eres?». Su conexión abierta (SSE) es una '
+        + 'respuesta que no termina nunca, así que cualquier cosa que capture «/api» '
+        + 'entero tiene que ir después de esta línea, no antes.',
+  },
+];
+
+/**
+ * Monta todos, en el orden de la lista.
+ *
+ * Si uno revienta al montarse, **se dice cuál y se para**. Un servidor que
+ * arranca con la mitad de la API en pie es peor que uno que no arranca: la
+ * mitad que falta se manifiesta como 404 sueltos, y un 404 no dice que el
+ * módulo no llegó a montarse.
+ */
+export function montarModulos(app: Express, db: any) {
+  for (const m of MODULOS) {
+    try {
+      m.montar(app, db);
+    } catch (e: any) {
+      console.error(`[modulos] «${m.nombre}» no se ha podido montar:`, e?.message || e);
+      throw e;
+    }
+  }
+}

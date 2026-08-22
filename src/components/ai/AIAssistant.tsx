@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight } from 'lucide-react';
-import { useData } from '../../contexts/DataContext';
+import CreadorPublicacion from '../knowledge/CreadorPublicacion';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight, Camera } from 'lucide-react';
+import { useDataSinPedir } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
@@ -220,13 +221,31 @@ function BotonMuelle({ icono: Icono, label, titulo, onClick, activo }: {
  *  donde esa creación se hace de verdad: comprobado uno a uno antes de
  *  ponerlos, porque un atajo que te deja en una página donde no se puede crear
  *  nada es peor que no tener atajo. */
-const HERRAMIENTAS_CREAR: Array<{ label: string; destino: string; icono: any }> = [
+/*
+ * LAS HERRAMIENTAS DEL «+» (revisado 2026-08-22).
+ *
+ * Hasta hoy todas hacían lo mismo: llevarte a una página y dejarte allí. Eugenio,
+ * con la aplicación instalada en su iPhone: «el botón de cámara va en las
+ * herramientas de crear "+"» y «cuando le doy a crear publicación, te lleva a la
+ * página de publicaciones, y esto hay que mejorarlo y crear diferentemente desde
+ * la ventana de creación».
+ *
+ * Tenía razón en las dos, y yo me había equivocado de sitio: puse la cámara en el
+ * cuadro que abre el botón verde de la portada, no aquí. En el móvil, el «+» de
+ * la barra de abajo es el sitio donde se pulsa.
+ *
+ * Así que una entrada puede hacer dos cosas: `destino` te lleva a una página
+ * (para lo que de verdad vive en otra pantalla), o `crear` abre el creador ya
+ * puesto en esa herramienta, sin salir de donde estás.
+ */
+const HERRAMIENTAS_CREAR: Array<{ label: string; icono: any; destino?: string; crear?: 'camara' | 'muro' | 'documento' | 'lienzo' | 'mapa' | 'proyecto' }> = [
+  { label: 'Cámara',      crear: 'camara',        icono: Camera },
+  { label: 'Publicación', crear: 'muro',          icono: Megaphone },
   { label: 'Proyecto',    destino: '/proyectos',  icono: FolderKanban },
   { label: 'Tarea',       destino: '/tareas',     icono: ListChecks },
   { label: 'Página',      destino: '/paginas',    icono: FileText },
   { label: 'Esquema',     destino: '/esquemas',   icono: Share2 },
   { label: 'Mapa',        destino: '/mis-mapas',  icono: MapIcon },
-  { label: 'Publicación', destino: '/explorar',   icono: Megaphone },
   { label: 'Persona',     destino: '/personas',   icono: Users2 },
   { label: 'Evento',      destino: '/calendario', icono: CalendarDays },
 ];
@@ -316,6 +335,14 @@ export default function AIAssistant({ modo = 'panel' }: {
   /** 44 px, que en Tailwind es `bottom-11`. Si se cambia uno hay que cambiar
    *  el otro: están atados a mano porque una clase no puede leer una
    *  constante. */
+  /*
+   * Con qué herramienta se abre el creador desde el «+», o `null` si está
+   * cerrado. Se monta AQUÍ y no en cada página porque el «+» de la barra de
+   * abajo está en todas: es la única forma de que «Cámara» funcione estés donde
+   * estés, sin mandarte antes a otra pantalla.
+   */
+  const [creador, setCreador] = useState<'camara' | 'muro' | 'documento' | 'lienzo' | 'mapa' | 'proyecto' | null>(null);
+
   const ALTO_BARRA = 44;
   /** QUÉ HAY DESPLEGADO: nada, el chat, o el visor de herramientas. Es un
    *  solo estado y no dos banderas, porque los dos paneles ocupan el MISMO
@@ -429,7 +456,11 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Los territorios que la app ya tiene cargados, para comprobar que un
   // destino existe antes de navegar (B63). Si aún no han llegado, no se
   // bloquea nada: mejor dejar pasar que impedir algo que sí existe.
-  const { territories: territorios } = useData();
+  // SIN PEDIRLOS: si ya están, se usan; si no, el `if` de abajo deja pasar.
+  // Con `useData()` normal, el asistente —que se monta en TODAS las páginas—
+  // hacía que los ocho catálogos se descargaran en cada visita, incluida la
+  // portada, que no usa ninguno.
+  const { territories: territorios } = useDataSinPedir();
 
   // HISTORIAL (Eugenio, 2026-08-20: «con historial de conversaciones»). La
   // ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde
@@ -1361,7 +1392,13 @@ export default function AIAssistant({ modo = 'panel' }: {
     const raiz = document.documentElement;
     // ABAJO SIEMPRE LA BARRA, que existe esté abierto o no: ponerlo a 0 al
     // cerrar taparía el final de cada página.
-    raiz.style.setProperty('--hueco-muelle', `${ALTO_BARRA}px`);
+    // MÁS EL BORDE DEL TELÉFONO (2026-08-22, Eugenio, con la aplicación ya
+    // instalada en su iPhone: «el menú inferior en PWA está demasiado pegado a
+    // la parte inferior»). Instalada a pantalla completa no hay barra de Safari
+    // debajo, así que la de la aplicación queda encima de la rayita del iPhone.
+    // `env(safe-area-inset-bottom)` vale 0 en el navegador y ~34px instalada:
+    // una sola regla para los dos casos.
+    raiz.style.setProperty('--hueco-muelle', `calc(${ALTO_BARRA}px + env(safe-area-inset-bottom))`);
     // Y A LA DERECHA, el lateral cuando lo hay. En el teléfono no se reserva
     // nada: allí el panel ocupa la pantalla entera y no hay página detrás que
     // proteger.
@@ -1806,9 +1843,20 @@ export default function AIAssistant({ modo = 'panel' }: {
           permite cambiar de sección sin tener que cerrar el chat primero —y
           sin ella, con el chat abierto la aplicación se quedaba sin
           navegación. */}
+      {/* El creador, servido desde el «+». `key` fuerza que se reinicie al
+          cambiar de herramienta, para no heredar el título de la anterior. */}
+      <CreadorPublicacion
+        key={creador || 'cerrado'}
+        abierto={!!creador}
+        tipoInicial={creador || undefined}
+        onCerrar={() => setCreador(null)}
+      />
+
       <nav
         className="fixed inset-x-0 bottom-0 z-[9999] bg-white border-t border-slate-200 shadow-lg grid grid-cols-5 items-center"
-        style={{ height: ALTO_BARRA }}
+        // El alto es el de los botones; el hueco del iPhone se añade DEBAJO con
+        // padding, para que los iconos no se encojan al instalarla.
+        style={{ height: ALTO_BARRA, boxSizing: 'content-box', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* EL ORDEN LO PIDIÓ EUGENIO Y TIENE SENTIDO DE LECTURA
             (2026-08-21): casa · proyectos · BUSCAR · mensajes · crear.
@@ -1926,8 +1974,13 @@ export default function AIAssistant({ modo = 'panel' }: {
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {HERRAMIENTAS_CREAR.map(h => (
                   <button
-                    key={h.destino}
-                    onClick={() => { navigate(h.destino); setOpen(false); setPanelMuelle(null); }}
+                    key={h.label}
+                    onClick={() => {
+                      setOpen(false);
+                      setPanelMuelle(null);
+                      if (h.crear) setCreador(h.crear);
+                      else if (h.destino) navigate(h.destino);
+                    }}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 transition-colors"
                   >
                     <h.icono className="w-5 h-5 text-slate-500" />

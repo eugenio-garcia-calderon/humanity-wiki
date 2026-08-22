@@ -1,0 +1,49 @@
+# ============================================================================
+# VACIAR LAS CUENTAS BORRADAS, SOLO, TODOS LOS DÍAS (2026-08-22)
+# ============================================================================
+# La segunda mitad del borrado de cuenta que exigen App Store y Google Play.
+# La aplicación marca la cuenta al pulsar el botón; esto es lo que pasa cuando
+# se cumplen los 15 días, y corre sin que nadie se acuerde.
+#
+# POR QUÉ AQUÍ Y NO EN EL SERVIDOR. Por lo mismo que la papelera del código:
+# en el Mac haría falta que estuviera encendido el día que toca. GitHub corre
+# esto aunque no haya nadie delante — y a diferencia de la papelera, aquí NO se
+# commitea nada: lo que cambia está en la base de datos, y el registro de lo
+# que se hizo queda en el propio historial de esta ejecución.
+#
+# NO SE EJECUTA CONTRA NADA SI FALTA EL SECRETO. Sin `DB_URL_PRODUCCION` el
+# trabajo se salta entero y lo dice, en vez de conectarse a algo por defecto.
+# Un programa que borra datos no debe adivinar contra qué base de datos corre.
+name: Vaciar las cuentas borradas
+
+on:
+  schedule:
+    # 04:40 UTC, un rato después de la papelera del código, para que dos
+    # trabajos que tocan cosas distintas no compartan minuto.
+    - cron: '40 4 * * *'
+  # Y a mano, para poder comprobarlo sin esperar un día.
+  workflow_dispatch:
+
+jobs:
+  vaciar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar el conector de Postgres
+        run: npm install pg --no-save
+
+      - name: Vaciar las que cumplan los 15 días
+        env:
+          DATABASE_URL: ${{ secrets.DB_URL_PRODUCCION }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Falta el secreto DB_URL_PRODUCCION: no se ejecuta nada."
+            echo "Se configura en Ajustes → Secrets → Actions del repositorio."
+            exit 0
+          fi
+          node scripts/vaciar-cuentas.mjs

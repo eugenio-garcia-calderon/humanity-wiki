@@ -19,6 +19,7 @@ import { cn } from '../../utils/cn';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { avisarNavegadorRemoto } from './bus';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 
 /** Lo que se escribe en la barra → una dirección de verdad. Si no parece una
  *  dirección, se busca: es lo que espera cualquiera de una barra así. */
@@ -196,20 +197,8 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
   }, [guardando]);
 
   const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const fuera = (e: MouseEvent) => {
-      if (proyectoRef.current && !proyectoRef.current.contains(e.target as Node)) setEligiendoProyecto(false);
-    };
-    document.addEventListener('mousedown', fuera);
-    return () => document.removeEventListener('mousedown', fuera);
-  }, []);
-  useEffect(() => {
-    const fuera = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuAbierto(false);
-    };
-    document.addEventListener('mousedown', fuera);
-    return () => document.removeEventListener('mousedown', fuera);
-  }, []);
+  useCerrarAlPulsarFuera(proyectoRef, eligiendoProyecto, () => setEligiendoProyecto(false));
+  useCerrarAlPulsarFuera(menuRef, menuAbierto, () => setMenuAbierto(false));
   const autoReinicios = useRef(0);
   const urlRef = useRef(inicial);
   const tituloActual = useRef<string>('');

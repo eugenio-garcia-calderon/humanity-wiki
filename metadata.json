@@ -1,8 +1,0 @@
-{
-  "name": "Plataforma Evolución Humanidad",
-  "description": "Una plataforma visual para comprender y explorar los grandes retos sistémicos de la humanidad, sus causas, soluciones y proyectos.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

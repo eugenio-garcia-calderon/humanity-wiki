@@ -25,8 +25,13 @@
 ### Fase 6 — Economía (activa en modo test, pendiente de producción)
 Checkout embebido, Stripe Connect, webhooks, reembolsos y panel financiero,
 todo construido y verificado en modo test. Pendiente, acción del usuario:
-- `STRIPE_WEBHOOK_SECRET` real (hoy vacío — la firma no se verifica; probado
-  con eventos sintéticos enviados directamente al endpoint).
+- **Bloqueante antes de activar cobros reales**: configurar `STRIPE_WEBHOOK_SECRET`
+  en el `.env` del servidor, cogiéndolo del panel de Stripe. Sin él la verificación
+  de firma del webhook no puede funcionar. Está probado con eventos sintéticos, así
+  que solo falta el valor real.
+  > Detalle operativo no documentado aquí a propósito: este repositorio es
+  > **público**. El estado exacto de la verificación de firma se comprueba en el
+  > servidor, no se publica.
 - Activar Stripe Connect una vez en `dashboard.stripe.com/connect`.
 - Cuando se quiera pasar a producción: las claves `_LIVE` ya están aportadas
   y aparcadas sin activar en `.env`.

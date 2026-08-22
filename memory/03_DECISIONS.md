@@ -413,3 +413,25 @@ auto-downgrade with a visible notice. Both decisions are Eugenio's
 one more cost, one more failure point, to save céntimos. Free-user actions go
 to the open medium model on purpose: the proposal/validation safety net
 (server validates, user confirms) already bounds the damage of a weaker model.
+
+---
+
+## 2026-08-22 — A debate may have no territory
+
+**Context**: constitution rule 3 says every entity belongs to a territory. The
+veracity area (`memory/13_VERACIDAD.md`) stores debates, and a thesis like «is
+nuclear the fastest way to decarbonise» is not Spanish or Andalusian.
+
+**Decision**: `debates.territory_id` is nullable, and NULL means *global* — not
+a territory that is missing, but a debate that has none. A debate about a
+territory's water still carries its territory and is found by it.
+
+**Alternative rejected**: forcing a territory and defaulting to the world or to
+the author's own. Both invent a datum to fill a box, and an invented datum that
+looks correct is exactly the failure this project has paid for most (see the
+`grupos[0]` fallback, 2026-08-20).
+
+**Status**: divergence from the constitution, **pending Eugenio's confirmation**.
+`docs/` is not touched — the specification is his. If he prefers the rule kept,
+the fix is one migration (`SET NOT NULL` plus a global territory row) and no
+application code.

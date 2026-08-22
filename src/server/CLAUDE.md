@@ -11,7 +11,19 @@ social.ts        publications, feed, reactions, follows, products, demands, need
 stripe.ts        Connect, product checkout, refunds, seller dashboard
 ai/provider.ts   AI provider abstraction (Anthropic today)
 ai/assistant.ts  the assistant, action catalogue, usage accounting
+telecom.ts       live messages, presence, calls and video calls (WebRTC signalling)
+telecomHub.ts    the open connection per device (SSE). Other modules push through it
 ```
+
+**`telecomHub.ts` is a dependency, not a module**: it registers no routes. It holds
+one open response per connected device and exports `enviarA(userId, evento)`. Any
+module that needs to reach a person *right now* — `mensajes.ts` does — imports that
+function. It is the only shared mutable state in the server, and it is deliberate:
+a connection cannot live in the database.
+
+**Never put anything that swallows `/api` before `telecom` in the module list.**
+`GET /api/telecom/conexion` is a response that never ends; a catch-all in front of
+it turns every phone in the platform off.
 
 ## Which port each of us runs on
 
@@ -106,13 +118,20 @@ CREATE_PUBLICATION, CREATE_KNOWLEDGE_GRAPH,
 CREATE_MAP                                    level 1
 ```
 
-Use those numbers. Do not invent a new policy per endpoint. Note the current oddity:
-the AI is **more** restricted than the REST API, because the legacy `/api/data/*`
-write routes check nothing at all.
+Use those numbers for per-entity endpoints. Do not invent a new policy per endpoint.
 
-That policy belongs in one shared module used by both the routes and the assistant.
-Extracting it is the first item in
-`memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+**Current state after PR #25**: the generic `/api/data/*` write routes and the
+`/api/db/*` browser go through `requireAdmin` (`server.ts:1019`), which demands
+level 4 for everything. That is stricter than the catalogue above and it costs
+nothing today, because editing from the UI is already admin-only.
+
+It stops being enough the moment a level-2 verified user is meant to create a
+challenge from the interface. At that point the generic endpoint has to move to the
+graduated levels, and that policy belongs in **one shared module** used by the
+routes, the assistant and the UI. Until then, `requireAdmin` is the right call and
+the guard is copied by hand into each new route.
+
+See the `server.ts` entry in `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
 
 ## Reading rules
 
@@ -303,3 +322,23 @@ A fix placed where the bug SHOWS is not the same as one placed where the bug
 STARTS. The `grupos[0]` fallback was corrected first in the rendering and stayed
 alive in the writing for half a day. When you find a bug of this kind, go and
 find every place that same decision is made.
+
+## Editable page texts (`textos.ts`, 2026-08-22)
+
+Eugenio: *«permite a los ADMIN editar todos los textos de esas páginas de
+información»*. One piece for the five people who need it, rather than five ways
+of editing a paragraph.
+
+- **The default text stays in the component, not in the table.** `textos_editables`
+  holds only what somebody changed. A page with an empty table renders in full,
+  and deleting a row *is* the undo — no code needed for it.
+- **One language, and it is a decision.** `clave → valor`, no `idioma` column.
+  The platform is entirely in Spanish and translation is not planned; a column
+  nobody uses is guessing the future and charging for it up front. If languages
+  ever arrive the key becomes `(clave, idioma)` with `'es'` backfilled — a short
+  migration. Written down so it reads as a decision and not an oversight.
+- **Keys are written for a person to read**: `servidores.intro`, never `texto_17`.
+  The day somebody sees an odd paragraph in production, the key is the only thing
+  that helps them find it.
+- **The pencil hiding is convenience; the server is the security.** The level is
+  checked on every `PUT` and `DELETE`. Anyone can call the route by hand.

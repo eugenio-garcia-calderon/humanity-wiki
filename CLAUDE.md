@@ -88,7 +88,7 @@ data for measured data is the most expensive error made in this project so far.
 
 1. **`drizzle-kit push`**: hangs in a non-interactive shell and kills the session. Use `generate` + `psql -f`.
 2. **Deleting knowledge by accident**: archive with `archived_at`. Constitution rule 6 (v1.1) does allow the creator to ask for permanent deletion — that path goes through the 15-day recycle bin (`deleted_at`), never a bare DELETE.
-3. **A write route without a role check**: this already happened and there is an open hole in production because of it.
+3. **A write route without a role check**: the generic write endpoints shipped with no check at all and had to be closed on 2026-08-06 (PR #25). Every new write route calls `requireAdmin` or `requireLevel`. See `src/server/CLAUDE.md`.
 4. **Real secrets in versioned files**, and never copied into `memory/`. To check whether a key is configured, read `process.env.X` at runtime; never print its value.
 5. **Hex colours and bare `<button>` in pages**: use `src/components/ui/`.
 6. **Creating a new junction table** (`thing_a_thing_b`): there are already 43. See `src/db/CLAUDE.md`.
@@ -113,6 +113,11 @@ Read `equipo/REPARTO.md` before your first commit of the session. The short vers
   several people's work.** Say it and wait for your turn before merging to `main`.
 - Before starting anything: `git fetch` and read the last few hours of the log.
   Somebody may have done it already.
+- **Close every browser tab the moment you stop looking at it**, in that same turn —
+  not at the end of the task — and `preview_stop` any server you are no longer
+  watching. Measured on 2026-08-22: a browser costs ~0.5 GB, three agents held
+  1.68 GB across 42 processes while the machine had 0.30 GB free. The forgotten
+  tab, not the agent, is what closes the app and takes the whole team down.
 
 ## When something can be done fast or done right
 
@@ -155,6 +160,36 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
 
 ## Before calling something done
 
+- **Check from the client the user actually uses.** A 200 does not prove a screen
+  exists — and reading the rendered page does not prove it either, if you read it
+  from a different client than theirs. On 2026-08-22 four PRs were verified by
+  screenshot in the automation browser and Eugenio still saw none of them: he has
+  the app installed, and the service worker was serving him the old build. If the
+  change ships to phones, verify with the app installed, or say plainly that you
+  did not. `humanity.wiki/?sw=off` drops a stale copy.
+- **Ask what local copy could outlive your fix.** Twice on 2026-08-22 a deploy was
+  correct and the user still saw the old behaviour: the service worker served an old
+  build, and `evo_objective_images` in `localStorage` had frozen the whole image map
+  the moment an admin changed one picture. A fix that only changes the default never
+  reaches whoever already has a copy. Name the copy, and say how it gets invalidated.
+- **A 200 proves nothing, and neither does a second one.** `/illustrations/salud.jpg`
+  returned 200 with the whole app in HTML; `/illustrations/salud.png` returned 200
+  with `image/png` and SVG bytes inside. Two green status codes over two different
+  failures. Load the thing the way the browser loads it — `Image()` and
+  `onload`/`onerror` — and count.
+- **To find out what the browser downloaded, ask the browser.** Searching the
+  startup bundle for a chunk's filename returns **zero even when the chunk is
+  there** — Vite does not leave those names as string literals. Load the page and
+  read `performance.getEntriesByType('resource')`: that tells you what was
+  actually fetched, which is the question you meant to ask. The same list also
+  separates what is yours from what is a third party's, and on 2026-08-22 that is
+  how the home page turned out to call `es.wikipedia.org` and `img.youtube.com`
+  on every first visit.
+- **Measure in the place the answer lives.** A count of 96 requests on a first
+  visit was 85 dev-server modules that do not exist in production; and the
+  automation browser's `IntersectionObserver` delivers **no events at all**, so
+  nothing about lazy loading can be concluded from it. Before quoting a number,
+  ask whether the environment you measured in is the one the number is about.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.

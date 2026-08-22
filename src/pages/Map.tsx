@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MarcaOrigen, { AvisoDatoSimulado } from '../components/ui/OrigenDelDato';
 import { Link, useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
@@ -32,6 +33,9 @@ async function loadTerritoryDetail(tid: string) {
         area: data.area_km2 || 0,
         challenges: data.challenges,
         isAiGenerated: !!data.is_ai_generated,
+        // De dónde salen sus puntuaciones. Sin esto, un territorio con las
+        // cifras inventadas se ve igual que uno medido por el INE.
+        origenDato: data.origenDato || 'desconocido',
       };
     }
   } catch (e) {
@@ -555,6 +559,22 @@ export default function MapPage() {
             />
           ) : (
             <div className="p-4 sm:p-6">
+              {/* DE DÓNDE SALEN ESTAS CIFRAS (2026-08-22). Va ARRIBA, antes de
+                  las puntuaciones y no debajo: quien mira un número decide en
+                  el primer segundo si se lo cree. Un aviso al final llega tarde.
+
+                  De 20.557 observaciones de la plataforma, 20.499 están
+                  simuladas — los municipios de Madrid y los países europeos—.
+                  Hasta hoy se veían igual que las 58 que salen del INE. */}
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    Sus cifras
+                  </span>
+                  <MarcaOrigen origen={selectedTerritory.origenDato} />
+                </div>
+                <AvisoDatoSimulado origen={selectedTerritory.origenDato} />
+              </div>
               <div className="flex justify-end mb-2">
                 <button
                   onClick={() => {

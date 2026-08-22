@@ -16,9 +16,10 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 
 interface Aviso {
   id: number;
@@ -40,6 +41,9 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   seguidor:          { icono: UserPlus,        frase: n => `${n} ha empezado a seguirte` },
   guardado:          { icono: Bookmark,        frase: n => `${n} ha guardado algo tuyo` },
   nueva_publicacion: { icono: FileText,        frase: n => `${n} ha publicado algo nuevo` },
+  // Telecomunicaciones (2026-08-22).
+  mensaje:           { icono: Send,            frase: n => `${n} te ha escrito` },
+  llamada_perdida:   { icono: PhoneMissed,     frase: n => `Llamada perdida de ${n}` },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -60,6 +64,10 @@ const destinoDe = (a: Aviso): string | null => {
   if (a.entity_type === 'publications') return `/explorar`;
   if (a.entity_type === 'knowledge_windows') return `/paginas/${a.entity_id}`;
   if (a.entity_type === 'proyectos') return `/proyectos`;
+  // Una llamada perdida lleva al teléfono, y un mensaje a esa conversación
+  // concreta — no a la bandeja, que te obligaría a buscar de quién era.
+  if (a.entity_type === 'llamadas') return `/telefono`;
+  if (a.entity_type === 'mensajes') return a.payload?.de ? `/mensajes?con=${a.payload.de}` : `/mensajes`;
   return null;
 };
 
@@ -89,12 +97,12 @@ export default function Campana({ compacto }: { compacto?: boolean }) {
       .then(r => r.json())
       .then(j => setAvisos(Array.isArray(j) ? j : []))
       .catch(() => setAvisos([]));
-    const cerrar = (e: MouseEvent) => {
-      if (caja.current && !caja.current.contains(e.target as Node)) setAbierta(false);
-    };
-    window.addEventListener('click', cerrar);
-    return () => window.removeEventListener('click', cerrar);
   }, [abierta]);
+
+  // ESTA ERA LA RARA DE LAS SIETE: escuchaba `click` en `window`, que se
+  // dispara al SOLTAR el botón, así que el mismo clic que abría el panel podía
+  // cerrarlo antes de que se viera. Ahora usa lo mismo que las demás.
+  useCerrarAlPulsarFuera(caja, abierta, () => setAbierta(false));
 
   const abrirAviso = async (a: Aviso) => {
     if (!a.read_at) {

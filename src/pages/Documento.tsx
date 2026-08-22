@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
+  LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
@@ -21,6 +22,7 @@ import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '.
 import PortadaPdf from '../components/ui/PortadaPdf';
 import { abrirLateral } from '../components/ventanas/bus';
 import { cn } from '../utils/cn';
+import CrearProducto from '../components/knowledge/CrearProducto';
 // La tabla de estilos de los bloques vive en el LECTOR, y el editor la
 // importa de allí. Una sola definición: lo que se escribe y lo que se
 // publica tienen que verse igual, y con dos copias el fallo sale siempre en
@@ -62,6 +64,12 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'tabla', label: 'Tabla de texto', icon: Table2 },
   { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
   { tipo: 'producto', label: 'Producto', icon: Store },
+  // LOS BLOQUES DE TIENDA (fase 2 de Comercio). Existían y se podían pintar
+  // desde el 2026-08-22, pero no había forma de ponerlos: sólo entraban
+  // escribiendo el JSON a mano. Un bloque que sólo sabe crear quien conoce la
+  // base de datos no existe para quien usa la aplicación.
+  { tipo: 'portada', label: 'Portada de tienda', icon: LayoutTemplate },
+  { tipo: 'rejilla', label: 'Rejilla de productos', icon: LayoutGrid },
 ];
 
 const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '🏛️', '💡', '🎯', '🧭', '🤝', '⚖️', '🛠️', '🗺️', '❤️'];
@@ -155,6 +163,7 @@ export default function Documento() {
   const [archivoEncima, setArchivoEncima] = useState(false);
   /** Qué bloque tiene abierto su menú de tres puntos. */
   const [menuMedio, setMenuMedio] = useState<string | null>(null);
+  const [creandoProducto, setCreandoProducto] = useState(false);
   const [buscadorPub, setBuscadorPub] = useState<string | null>(null);   // id del bloque tras el que insertar ('' = al final)
   const [busquedaPub, setBusquedaPub] = useState('');
   const [resultadosPub, setResultadosPub] = useState<any[]>([]);
@@ -1792,6 +1801,18 @@ export default function Documento() {
         ) : null;
       })()}
 
+      {creandoProducto && (
+        <CrearProducto
+          onCancelar={() => setCreandoProducto(false)}
+          onCreado={p => {
+            setCreandoProducto(false);
+            // Se inserta en el mismo bloque que estaba esperando, para que
+            // crear y colocar sean un solo gesto y no dos pantallas.
+            embeber({ id: p.id, tipo: 'producto', titulo: p.nombre, kind: 'producto' });
+          }}
+        />
+      )}
+
       {/* Buscador de publicaciones para embeber (Fase 2) */}
       {buscadorPub !== null && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-start justify-center pt-24 px-5"
@@ -1809,11 +1830,29 @@ export default function Documento() {
                 <X className="w-4 h-4" />
               </button>
             </div>
+            {/* CREAR UNO NUEVO SIN SALIR DE AQUÍ (fase 2 de Comercio).
+                Antes esto era un buscador que para casi todo el mundo no
+                encontraba nada, porque no había ninguna pantalla donde crear
+                productos. Buscar algo que no existe y no poder crearlo es un
+                callejón sin salida. */}
+            {buscaProducto && (
+              <button
+                onClick={() => setCreandoProducto(true)}
+                className="w-full flex items-center gap-2.5 px-4 py-3 border-b border-slate-100 hover:bg-emerald-50 text-left transition-colors">
+                <span className="w-7 h-7 rounded-lg bg-slate-900 grid place-items-center shrink-0">
+                  <Plus className="w-4 h-4 text-white" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-black text-slate-800">Crear un producto nuevo</span>
+                  <span className="block text-[10px] text-slate-400">Nombre y precio bastan; lo demás se rellena luego</span>
+                </span>
+              </button>
+            )}
             <div className="max-h-80 overflow-y-auto p-1.5">
               {!resultadosPub.length ? (
                 <p className="text-xs text-slate-400 text-center py-8">
                   {busquedaPub ? 'Nada con ese nombre.'
-                    : buscaProducto ? 'Escribe para buscar entre los productos.'
+                    : buscaProducto ? 'Busca entre tus productos, o crea uno arriba.'
                     : 'Escribe para buscar entre las publicaciones.'}
                 </p>
               ) : resultadosPub.map(p => (

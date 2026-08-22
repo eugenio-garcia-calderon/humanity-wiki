@@ -3992,6 +3992,821 @@ the cost table can show whether the cache is hitting at all.
 
 ---
 
+## 2026-08-22 (XII) — The context cache, rebuilt for hundreds of thousands of chats
+
+Eugenio: «piensa en cómo hacerlo para mejorar la UX y piensa en cuando tengamos
+cientos de miles de chats al día».
+
+Measured on the local server, three questions in one conversation:
+
+| Petición | Entrada | Releída de caché |
+|---|---|---|
+| 1ª | 5.720 | 0 (escribe la caché) |
+| 2ª | 5.754 | **5.719 — 99 %** |
+| 3ª | 5.785 | **5.753 — 99 %** |
+
+**−89,5 % per request from the second message on.** At 100.000 chats a day that
+is ~403 €/día → ~115 €/día; at 500.000, ~2.014 → ~573.
+
+### What was breaking it
+
+**A timestamp with milliseconds.** The variable block opened with `HOY ES …
+(2026-08-22T10:15:33.123Z)`. Caching compares *prefixes*: one differing byte and
+everything after it is billed in full — including the entire conversation
+history, re-sent and re-charged on every single turn. The date now carries the
+day only. The model never needed the millisecond: it resolves «el jueves» from
+the day.
+
+### Three tiers instead of two
+
+| Capa | Qué lleva | Cambia |
+|---|---|---|
+| 1 · global | las instrucciones de la plataforma | nunca — su caché **se comparte entre todos los usuarios** |
+| 2 · de la persona | sus proyectos, su gente, su nivel, los grafos | cuando crea algo |
+| 3 · variable | la fecha, la pantalla, lo recuperado, la pregunta | cada mensaje |
+
+Ordered least- to most-volatile, which is not a preference: a stable block
+placed after a volatile one is never cached. Anthropic allows four cache
+markers and one was in use; there are now two. Together needs no marker — its
+cache is automatic by prefix, so **the order is the marker**.
+
+### And it can now say whether it is working
+
+`cache_read_tokens` is recorded with every charge. Until today a broken cache
+and a perfect one left an identical record, and at this volume that means
+finding out from the invoice. It is the house rule applied to money.
+
+### For the person using it
+
+Cached prefixes are not only cheaper, they are **faster**: the provider skips
+recomputing them, so the answer starts sooner. The saving and the wait improve
+together.
+## 2026-08-22 · PWA: installable, offline, and honest about it (Programador 3)
+
+The platform can now be added to an iPhone's home screen and opened without a
+network. Three pieces:
+
+**Installable.** `manifest.webmanifest` plus PNG icons. The `apple-touch-icon`
+pointed at `/logo.svg` and iOS does not accept SVG there, so adding to the home
+screen produced a blank icon. Icons are generated from
+`public/iconos/fuente-cuadrado.svg` — square and opaque on purpose, because iOS
+applies its own rounded mask and a source that is already rounded leaves dark
+corners inside the crop. Verified by reading the corner pixel: alpha 255.
+
+**Offline.** `public/sw.js`. Verified with the dev server stopped and again with
+a production build: the app boots from cache, assets included.
+
+**Offline WITH YOUR DATA, and this reverses an earlier decision.** The first
+version refused to cache `/api/*` at all, to avoid showing stale data as if it
+were live. Eugenio asked for his projects to be readable on a plane, so the rule
+changed — but the reason it existed did not:
+
+- The network always wins while it works. A cached answer can never shadow a live
+  one; the copy is only returned when the request actually failed.
+- Every parachute answer is stamped `X-Desde-Cache: 1` and `X-Cacheado-En`.
+- `src/avisoSinConexion.ts` reads those headers and shows a banner saying how old
+  the copy is. It wraps `fetch` rather than living in a component, because the
+  data is read from dozens of screens and none of them should have to remember.
+- GET only. Nothing that writes is ever cached.
+
+Verified with the server stopped: 4 projects returned, stamped, banner visible,
+and an endpoint never requested online still fails instead of inventing a copy.
+
+**Camera.** New "Cámara" type in the create "+": photo or video, uploaded to the
+platform. On a phone `capture` opens the system camera — it records video and
+needs no separate permission; on a desktop, where the attribute is ignored, the
+photo path uses a live `getUserMedia` preview (`src/components/ui/CapturaCamara.tsx`).
+The choice asks the browser what it can do, not how wide the screen is. Server
+side needed nothing: video MIME types and `kind: 'video'` windows already existed.
+
+NOT VERIFIED, and stated as such: the live camera preview (permission denied in
+the automation browser) and "Add to Home Screen" itself, which needs real Safari
+over real HTTPS.
+
+### Follow-up, same session — making the install findable (Programador 3)
+
+`src/avisoInstalar.ts`. On iOS the browser never offers to install a web app:
+there is no `beforeinstallprompt`, and Share → Add to Home Screen is buried in a
+sheet. An app nobody can find how to install is the same as one that cannot be.
+So: a one-time card, on iOS Safari only, never when already running standalone,
+silent for 30 days once dismissed.
+
+Also `CapturaCamara.tsx`: `window.isSecureContext` is now checked first. Without
+https, `navigator.mediaDevices` does not exist at all, and the previous message
+("this browser does not allow the camera") blamed the browser for a missing
+padlock. It now says which one it is.
+
+Still unverified by me, and only verifiable on Eugenio's own devices: the install
+card on a real iPhone, and the live camera preview (permission is denied in the
+automation browser).
+
+**Correction, found by looking at it on a 375px screen:** both overlays were
+anchored to `bottom: 0` and were sitting *behind* the platform's fixed mobile
+navigation bar (`z-index: 9999`). The offline banner was invisible on the exact
+device it exists for, and the install card had its only button covered. Fixed in
+`src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
+instead of hard-coding today's 44px — that bar is mobile-only and belongs to
+another file, so a copied number would rot in silence.
+
+### Tested for real, and three defects it found (Programador 3)
+
+Ran the platform in production mode (`NODE_ENV=production`, `dist/`) on 3002 and
+tried it with the server switched off. That test is the whole reason to trust any
+of the above, and it broke three ways:
+
+1. **Every cache write was fire-and-forget.** `caches.open(...).then(...)` with no
+   `event.waitUntil` lets the browser kill the worker the instant the response
+   reaches the page. The result looked random: `/api/data/*` was saved, the feed
+   (`/api/publicaciones`, `/api/proyectos`) was not, and offline the home screen
+   said **"0 publicaciones"**. All four writes are now inside `waitUntil`.
+
+2. **The first visit cached nothing of the feed.** A service worker does not
+   control the page that installs it, so every request the app fires on that
+   first load goes straight past it. The platform only worked on a plane from the
+   *second* visit — and the first visit is exactly when somebody adds it to their
+   home screen and then tries it. `activate` now warms three endpoints.
+
+3. **`huecoInferior()` swept every element in the DOM** calling `getComputedStyle`
+   and `getBoundingClientRect` on each, wired to `resize`, which fires dozens of
+   times while a phone rotates. Replaced with one `elementsFromPoint` at the
+   bottom edge, plus a 150 ms debounce.
+
+**Result with the server stopped:** the app opens, shows 84 publicaciones and the
+real feed, and the banner reads "estás viendo una copia guardada hace menos de un
+minuto" sitting at `calc(44px + env(safe-area-inset-bottom))` — clear of the
+navigation bar.
+
+**A note on where this was verified.** The in-app automation browser fails *every*
+request a service worker handles — a fifteen-line worker that does nothing but
+`fetch(event.request)` fails there too. Everything above was therefore checked in
+real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
+live camera preview) is still only verifiable by Eugenio on his own device.
+
+---
+
+## 2026-08-22 · Say which figures are measured and which were invented (PR #203, #204, #207)
+
+`CLAUDE.md` opens by saying that mistaking simulated data for measured data is
+the most expensive error made in this project. It was still live, in the most
+literal way possible: **no screen said which was which.**
+
+Counted against the database: of 20.557 indicator observations, **20.499 are
+simulated** — the 179 Madrid municipios («Excel Municipios Madrid (simulado)»)
+and the 32 European countries («IA — número aleatorio»). Every row already
+declared its source. Nothing read it.
+
+Three changes went out, in this order, and each one found the next.
+
+### #203 — the mark exists
+
+`src/utils/origenDelDato.ts` classifies a source into four states, and the
+fourth is the one that matters: `desconocido`. The tempting shortcut is to
+treat "no source written" as measured — most good data arrives without
+decoration — and that is exactly presenting as certain what nobody has checked.
+**If it does not say, we say it does not say.**
+
+Red for `simulado`, and not a discreet grey, because a discreet mark is learned
+away in two days. The damage here is not confusion for a minute: it is somebody
+citing an invented figure in front of people who decide with it.
+
+### #204 — the mark reaches everything, and two worse things surface
+
+Half a platform marked is a promise the other half breaks: once you have seen
+the red warning on one screen, its absence elsewhere reads as "this one is
+real". So it went to the AI assistant, the objectives grid, the indicator list,
+the indicator sheet and the explorer canvas.
+
+Two things came out of that work, both worse than what it set out to fix:
+
+**1. The mark described a different number from the one beside it.** The map
+classified a territory by the sources of its *observations*, then painted its
+fourteen *objective* percentages. For Spain those disagree: its water
+observations are real (INE, MITECO, FAO — 41 of them) but the percentages came
+from a hand-written table in `src/data/seed.ts`. The sheet said **MEDIDO over
+fourteen invented numbers.** A mark that reassures about the wrong figure is
+worse than no mark, because now it vouches for it.
+
+Fixed by deciding the origin **in the same branch that decides the number**,
+and by moving `getObjectivesForTerritory` out of `server.ts` into
+`src/utils/puntuacionesDeObjetivo.ts` so the assistant runs the same
+calculation the screens do instead of forming a second opinion. That is the
+recurring failure of this house — two truths about the same thing — and it had
+appeared here twice in one afternoon.
+
+**2. `|| 0` turned "no data" into a score of zero.** Spain read **0%** in
+Education, Mobility, Energy, Technology, Employment and Governance. Saying a
+country scores zero is a stronger claim than any simulated figure. Now it says
+«Sin datos» — 8 cases on that page alone.
+
+**The mark is rationed on purpose.** The rule is stated once at the top and the
+pill only appears on a figure that does *not* match it. Fourteen identical red
+badges teach people to stop looking, which is the same failure as saying
+nothing, reached from the other side.
+
+### #207 — a real measurement beats the hand-written table
+
+Eugenio's call, and the priority had been backwards. The seed table exists to
+**fill in** where there is no data, and it won every time. Spain's 41 real
+observations were sitting in the database, loaded, reaching no screen.
+
+    AGUA          98 → 74    (medido)
+    ALIMENTACIÓN  86 → 75    (medido)
+    CONVIVENCIA   85 → 65    (medido)
+    ECOSISTEMAS   76 → 67    (medido)
+    VIVIENDA      67 → 67    (medido — same number, different provenance)
+    SALUD         91 → 91    (still simulado: its one indicator has no
+                              observation for Spain, so the fallback is right)
+
+**The drop is the point.** 98% was flattering and made up; 74% is what the
+measurements say.
+
+The rule is deliberately narrow: **a real figure wins over any filler; between
+two fillers, nothing moves.** Simulated observations do not beat the seed
+table — there is no reason to prefer one invention over another, and flipping
+them would have churned the numbers of 179 municipios and 32 countries for
+nothing.
+
+### Where it stands
+
+**3.118 of 3.140 objective scores are still simulated — 99,3%.** The 99,7%
+figure quoted earlier was about observations; the percentages people actually
+look at were 100% simulated until #207 and are now 99,3%.
+
+**Verified in the browser, never by a 200** — the deploy serves the whole
+application for any route, so a status code proves nothing about a screen. Each
+of the three was checked by reading the rendered page and taking a screenshot
+of production.
+
+---
+
+## 2026-08-22 · Count what the open chat costs, and leave it open (PR #208)
+
+`POST /api/ai/chat` answers without a session. That is intentional — the prompt
+itself calls whoever asks «visitante no registrado» — and Eugenio decided today
+that it stays that way, **with no limit on free questions**.
+
+The other half of the hormiguero note (`INCMT4B2B9K1P9`) was not a decision, it
+was a hole: the INSERT into `ai_usage_charges` sat inside `if (req.user)`, so
+every anonymous question was paid for and left no trace. The cost panel showed
+less than the invoice, and the gap grew exactly with usage — the kind of thing
+you find out from the bank statement.
+
+**Not setting a limit is a decision. Not being able to see it is not.**
+
+- `user_id` becomes nullable (migration `0066`). NULL means what it looks like:
+  nobody was signed in. An "anonymous" user row would have been worse — every
+  user count on the platform would then include a person who does not exist.
+- Nobody is billed: `fee_cents` and `total_cents` stay at zero.
+- The admin panel gains one number: what visitors without an account have cost.
+  It is `null`, not zero, when the question was not asked — zero would claim
+  nobody has used it.
+
+Verified end to end locally: one anonymous request wrote a row with
+`user_id = null`, `cost_cents = 0,061`, `total_cents = 0`, and the panel's query
+returns it. The test row was deleted afterwards.
+
+## 2026-08-22 — Three things Eugenio hit with the app installed on his iPhone
+
+He installed it, used it, and sent a screenshot. All three are the same kind of
+bug: the app doing something nobody asked for.
+
+### 1 · The bottom bar sat on the home indicator
+
+Installed full-screen there is no Safari bar underneath, so the platform's own
+navigation ended up on the iPhone's home line. `env(safe-area-inset-bottom)` is
+0 in a browser and ~34px installed, so one rule covers both. It goes on as
+`paddingBottom` with `boxSizing: content-box` — added *below* the buttons, so
+the icons do not shrink when you install it — and `--hueco-muelle` (which
+`Layout.tsx` uses to keep page content clear of the bar) became
+`calc(44px + env(safe-area-inset-bottom))`.
+
+`src/anclajeInferior.ts` needed no change: it measures the bar's real height
+rather than copying a number, so the offline banner followed on its own.
+
+### 2 · The camera opened an image editor nobody asked for
+
+Eugenio: «cuando te lleva a cámara que no te salta el editor por defecto, sino
+que sea tal cual como está y que luego te pregunte dónde guardarla».
+
+You took a photo and got luz/contraste/filtros on top of it. The photo was
+already fine; the only thing missing was where it went. New
+`src/components/knowledge/DestinoCaptura.tsx`: the shot as it is, a title, and a
+destination — a canvas of yours, or a standalone publication. **Editing became a
+button you press.** Video takes the same path.
+
+Canvases and not the "proyectos" board: a project is a board of cards (to
+do / doing / done), so dropping a photo there would invent a card nobody asked
+for. A canvas is where image and video windows already live.
+
+### 3 · Creating a publication threw you onto the publications list
+
+`navigate('/mis-publicaciones')` after every save. Creating a document or a
+canvas *should* take you there — the next thing you do is write inside it. A
+publication is finished the moment you create it, and being sent to a list means
+walking back if you wanted to publish two things. It now confirms in place, with
+"Verlo" and "Crear otra".
+
+### A correction to the entry above this one
+
+**The video path shipped in #205 never worked.** It posts `kind: 'video'` to
+`POST /api/ventanas`, which whitelists `['imagen']` only
+(`src/server/documentos.ts:418`): it returned 400 every time. The earlier entry
+claimed "el servidor ya aceptaba vídeo antes de esto" — that was written without
+checking, and it was false.
+
+What is true, and checked in source this time: `POST /api/graphs/:id/windows`
+does accept `video` (`WINDOW_KINDS`, `src/server/knowledge.ts:28`), so a video
+lands in a canvas today. As a standalone publication the selector says exactly
+that instead of a generic failure. Adding `'video'` to the whitelist is one line
+in Programador 1's area and has been passed to them.
+
+**Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
+create accounts or type passwords. Both endpoints were read in source rather
+than exercised. Phase 1 was checked in the browser.
+
+## 2026-08-22 — I fixed the camera in the wrong place, twice, and blamed the cache
+
+Eugenio, after two deploys: «no ha cambiado nada en humanity.wiki del tema de
+camara», then «igual te está faltando hacer el deploy amigo», then «humanity.wiki
+en version movil sigue sin mostrar las mejoras».
+
+I checked the served bundle each time, found my code in it, and told him his
+phone was holding a stale copy. **It was not.** I then reproduced the supposed
+staleness and it did not reproduce: a client controlled by the old worker picks
+up a new bundle on an ordinary navigation, because the navigate branch is
+network-first.
+
+**The real cause.** His words were `el boton de camara va en las herramientas de
+crear '+'`. The `+` in the bottom bar opens a panel in `AIAssistant.tsx` that
+renders `HERRAMIENTAS_CREAR` — eight tools, each of which *navigates to a page*.
+I put the camera in `CreadorPublicacion`, the dialog behind the green button on
+the home feed. Different component. He was pressing the one I had not touched.
+
+The same panel is where his third complaint lives, in plain sight:
+`{ label: 'Publicación', destino: '/explorar' }` — a navigation to the
+publications page, which is exactly what he asked me to stop doing. I "fixed" it
+in the other component.
+
+### What changed
+
+`HERRAMIENTAS_CREAR` entries can now either navigate (`destino`) or open the
+creator in place (`crear`), and `CreadorPublicacion` takes a `tipoInicial` so it
+opens on the right tool. **Cámara** is the first entry; **Publicación** opens the
+creator instead of leaving the page. The creator is mounted from the bar itself,
+because the `+` exists on every screen and that is the only way Cámara works
+wherever you are.
+
+Verified in a browser, not by reading: the panel lists Cámara first, clicking it
+opens the creator without changing the route, and Publicación does the same.
+(Logged out it shows «Inicia sesión para crear publicaciones», which is correct.)
+
+### The lesson, which is the expensive part
+
+I was told plainly where the button went, built it somewhere else, and then spent
+two rounds defending the deploy instead of opening the screen he was describing.
+Checking that my code is in the bundle proves the deploy worked. It proves
+nothing about whether the code is where the person is looking. **Open the screen
+they named.**
+
+### Kept anyway: the app can now repair itself
+
+The staleness theory was wrong, but two things found while chasing it are worth
+keeping, and they close the `?sw=off` workaround Eugenio rightly refused («es un
+apaño, yo quiero que funcione sin esa url cutre»):
+
+- `scripts/sellar-sw.mjs` stamps the built entry bundle's name into `dist/sw.js`,
+  so a deploy that changes the app also changes the worker and the browser has a
+  reason to re-install it. The first version listed `dist/assets/` and picked the
+  first `index-*.js`, which was a chunk, not the entry — a stamp that would never
+  change, from a file the page never loads. It reads `dist/index.html` now.
+- `sw.js` v4 reverses the no-`skipWaiting` rule: it takes over at once, drops the
+  stale code caches and reloads its clients. Waiting for every tab to close never
+  happens on a phone.
+
+  **But it never reloads a page somebody is looking at**, and the first draft
+  did. Caught in review: three hours earlier I had refused to auto-reload with
+  the argument «eso tira lo que estés escribiendo», and then wrote exactly that
+  into the worker. This team deployed fifteen times in four hours; a long
+  publication would have been lost by somebody else's deploy. A hidden page is
+  reloaded — nobody types into a page they cannot see, and an installed app in
+  the switcher is precisely the case that matters. A visible page is left alone
+  and gets the "Actualizar" button instead, which is a person deciding rather
+  than a deploy deciding for them.
+
+---
+
+## 2026-08-22 — The info «i» menu, top right (Programador 7)
+
+The pages that explain the platform — `/sobre-red-humana` and its scoring
+subpage — existed and nothing in the interface linked to them. A new `Info`
+button in the top bar of `Layout.tsx` (before the ant, after the window strip)
+opens a small dropdown listing them. Same open/close pattern as the account
+menu: `useCerrarAlPulsarFuera`, same dropdown styling.
+
+Why before the ant: first understand the platform, then ask things of the
+team. Verified in the browser on port 3007 (menu opens, both links navigate,
+button highlights on those routes). `tsc --noEmit` clean.
+
+---
+
+## 2026-08-22 — The (i) dropdown fell off a 375px screen (Programador 7)
+
+Found verifying #221 in production on mobile, as the Dashboard asked: the
+panel is `right-0` — right-aligned to the BUTTON — and on a phone the button
+is not at the right edge, so the panel started at x = −33. Local desktop and
+the logged-in local mobile view never showed it (the button sits further
+right there), which is exactly why production had to be checked at 375px.
+Fix: below `sm` the panel pins to the viewport (`fixed inset-x-2`); from `sm`
+up the original button-aligned layout returns. Measured after: 8..367 on a
+375px screen, desktop unchanged.
+## 2026-08-22 — The camera screen, taken apart
+
+Eugenio, with a screenshot: «la UX de darle a camara y que aparezca así es
+terrible, no cumple las reglas internacionales de UI y UX, piensa por que».
+
+He was right, and the worst item was mine from three hours earlier.
+
+| Qué estaba mal | Qué rompía |
+|---|---|
+| Elegías Cámara en el «+» y aterrizabas en una rejilla de ocho herramientas con Cámara marcada | Hick, y progressive disclosure. Un paso que no avanza |
+| La acción real quedaba por debajo del pliegue | Fitts, y la guía de Apple: lo principal donde llega el pulgar |
+| Los dos botones eran recuadros de línea **discontinua** y gris | El borde discontinuo es «arrastra aquí un fichero», un gesto que no existe en un móvil. Gris sobre blanco se lee como desactivado |
+| Pedía el título **antes** de hacer la foto | El título es metadato: va después del contenido, y ya se rellena solo |
+| **«La foto se abre en el editor antes de guardarse»** | Falso desde esa misma tarde: yo cambié el comportamiento y no repasé lo que decía la pantalla |
+| «Al muro» aquí, «Publicación» en el «+»; «Imagen» y «Cámara» casi lo mismo | Nielsen 4, consistencia |
+
+### Lo peor de la lista es el texto
+
+Un texto que describe algo que el programa ya no hace es peor que no tener
+texto: enseña a no leer la pantalla. Y no llegó por descuido ajeno — lo dejé yo
+al cambiar el comportamiento sin repasar la interfaz que lo describía. **Cambiar
+lo que hace algo incluye cambiar lo que dice que hace.**
+
+### Qué cambia
+
+Rejilla oculta tras «Cambiar de herramienta» cuando llegas con la herramienta ya
+elegida; dos botones **sólidos** de 68px, verde y negro, sin scroll; el título
+sale de aquí y se pregunta en el selector de destino; y el texto dice lo que
+ocurre de verdad: «Después te preguntamos dónde guardarla».
+
+Pendiente, en su propio cambio: unificar «Al muro»/«Publicación» y fundir
+«Imagen» con «Cámara», que son dos nombres para lo mismo.
+
+### Cómo se verificó, y una nota de higiene
+
+Ese paso vive detrás del inicio de sesión, así que **salté el candado en la copia
+local** para poder mirarlo, y lo restauré en cuanto tuve la captura (`{!user ?`
+de vuelta, cero apariciones de `{false ?`, `tsc` limpio). Nunca salió de este
+ordenador y no entró en ningún commit. Se deja escrito porque un atajo así, sin
+contarlo, es exactamente cómo un candado desaparece sin que nadie lo decida.
+
+## 2026-08-22 — One name per thing, and a sweep that found two more lies
+
+The last item of the UX list. «Imagen» and «Cámara» were the same tool under two
+names — both end in an uploaded photo and the same destination step, and they
+differed only in where the photo came from. «Al muro» here was «Publicación» in
+the `+`.
+
+| | Antes | Ahora |
+|---|---|---|
+| Publicar en el muro | «Al muro» aquí, «Publicación» en el `+` | **Publicación** en los dos |
+| Foto | Dos herramientas casi idénticas | **Cámara**, una, con tres procedencias: hacer foto · grabar vídeo · elegir del carrete |
+
+The name is **Cámara** and not something tidier like «Foto o vídeo» because that
+is the word Eugenio used and the one already in the `+`. Renaming it to my own
+coinage would have created the very inconsistency this change removes.
+
+### The sweep, and why it mattered
+
+Merging the two tools deleted a screen — and with it a second copy of this
+afternoon's lie: **«Elegir una foto — se abrirá el editor»**. I had changed the
+behaviour, fixed the one string I remembered, and missed this one. A third turned
+up in a doc comment: «Imagen: se sube el original y se abre el editor encima».
+
+Three copies of the same false claim, from one behaviour change. So the rule
+written this morning needs its second half: changing what something does includes
+changing what it *says* it does — **and the text is never in one place. Grep for
+it.** Fixing the string you happen to remember is how a screen ends up
+contradicting itself in the corner nobody reopened.
+
+Swept `src/components/knowledge/` and `CapturaCamara.tsx` for anything still
+describing the automatic editor: clean.
+
+## 2026-08-22 · La base de datos pasa de cero copias a dos capas (prog6)
+
+**Antes de hoy no había ninguna copia de seguridad.** La casilla
+`Backups de BD a R2 con pgBackRest` de `docs/13_DEPLOY.md` llevaba sin marcar
+desde principios de agosto y no existía ni un `pg_dump` en el repositorio: los
+datos de producción vivían en un único volumen de un único servidor.
+
+**Capa 1 — volcado diario en el servidor** (PR #223, ya en producción). Servicio
+`copias` en `docker-compose.prod.yml`, misma imagen que `db` porque `pg_dump`
+tiene que ser de la versión del Postgres del que lee. Un volcado por día en
+cuanto el contenedor puede —no a hora fija, para que un reinicio no se salte el
+día—, comprobado con `pg_restore --list` **antes** de que se le ponga el nombre
+bueno, y se tira si trae menos de 50 objetos. Se guardan 14 diarias y el día 1
+de cada mes durante 6 meses.
+
+**Capa 2 — sacarlo fuera de Hetzner** (esta PR). Petición de Eugenio el mismo
+día: «hagamos el volcado de copia de base de datos fuera de hetzner y olvidemos
+lo otro de momento de la foto» — es decir, **la foto de disco de Hetzner queda
+aparcada, no elegida**. Servicio `copias-remoto` con `rclone` que sube cada
+volcado nuevo a un cubo compatible con S3 (pensado para Cloudflare R2). **Copia,
+nunca sincroniza**: un espejo borraría fuera lo que se borrara dentro, que es
+justo de lo que esto protege.
+
+Dos decisiones que conviene no deshacer sin pensarlas:
+
+- **El aviso de que se ha dejado de hacer.** El fallo peligroso de una copia no
+  es que falle, es que deje de hacerse en silencio. Los dos contenedores salen
+  `unhealthy` si la última tiene más de 36 h. Pero `copias-remoto` **sin
+  configurar sale sano**: un contenedor eternamente en rojo enseña a ignorar el
+  rojo.
+- **`restaurar.sh probar`.** Restaura en una base aparte, cuenta y la borra. Es
+  la diferencia entre tener un fichero y tener una copia de seguridad.
+
+Verificado en producción el mismo día: primer volcado real de 1262 KB y 884
+objetos, **restaurado** con 126 tablas / 14 usuarios / 242 territorios,
+**idénticos a la base viva**.
+
+Queda pendiente y es decisión de Eugenio, no técnica: **los volcados no van
+cifrados** y ahora además viajan a otro proveedor. Cifrarlos es fácil; lo
+difícil es dónde vive la llave, y una copia que no se puede descifrar es peor
+que ninguna.
+### And then the offline test came back blank (same day, Programador 3)
+
+I changed the service worker twice today, so I re-ran the thing it exists for:
+load once, stop the server, reload. **Blank page.** The title rendered — the
+shell HTML came from the cache — and nothing else did.
+
+**Why.** `PRECACHE` never included the app's own code. The comment above it said,
+with total confidence, that hashed files «se guardan según se usan, en vez de
+adivinarlos aquí». That is wrong for exactly one visit, and it is the visit that
+matters: **a service worker does not control the page that installs it**, so on
+the first load the app's JavaScript goes straight past it and is never copied.
+Somebody who installs the app and gets on the metro that afternoon is precisely
+that case.
+
+It had been passing until now only because my own testing reloaded several
+times. A real person does not.
+
+**Fix, reusing something already there.** `scripts/sellar-sw.mjs` already stamped
+the entry bundle's name into `sw.js` so a deploy would change the worker. It now
+writes the whole boot set — entry module and stylesheet — into a `BUILD` array
+the worker precaches on install. One line doing both jobs: version detection and
+precache. The names cannot be hard-coded because they change every build, which
+is why this has to come from the build and not from the file.
+
+Verified: fresh install, **one** load, server stopped, reload → the app opens
+with 83 publicaciones and the banner «copia guardada hace 1 minuto». That is the
+exact sequence that was blank ten minutes earlier.
+
+**The lesson is the same one as this morning, in a different costume.** A comment
+asserting why something is safe is not evidence that it is. That one had been
+sitting there since the first version, sounding reasonable, describing a
+guarantee the code never made.
+
+## 2026-08-22 — A photo into a task, from both ends
+
+Eugenio: «te debe permitir meterla en uno de tus proyectos, y dentro de tus
+proyectos en alguna tarea», y «desde una tarea directamente tiene que haber la
+posibilidad de subir una foto o video a la tarea».
+
+**Half of it already existed and I checked before building.** A task already
+accepted an image (`TableroKanban.tsx`, block `{tipo:'imagen'}`), and there was
+already an `<Adjuntos>` panel for files. What was missing was video, and — the
+one that matters on a phone — `capture`, so the button opened the camera instead
+of the camera roll. The real case is standing in front of the thing: the
+half-built rig, the fault. Sending you to the roll means leaving, shooting in
+another app, and coming back.
+
+| | |
+|---|---|
+| Ficha de tarea | Tres botones: **Foto · Vídeo · Carrete**. Los dos primeros con `capture="environment"`; el tercero sin él, que es el camino para lo que ya tienes hecho |
+| Bloques | Se pinta `tipo: 'video'`, con `playsInline` — sin eso un iPhone se lleva el vídeo a pantalla completa y te saca de la tarea |
+| Selector de destino | Nueva sección **«Añadir a una tarea»**: proyecto → tarea, en dos pasos |
+
+### Corrijo un razonamiento mío de esta misma tarde
+
+La primera versión del selector dejó fuera los proyectos, con este argumento:
+«un proyecto es un tablero de tarjetas, meter una foto ahí sería inventarle una
+tarjeta que nadie ha pedido». Estaba mal planteado: **la foto no va al tablero,
+va dentro de una tarea concreta**, que es donde ocurre el trabajo. La foto del
+montaje pertenece a «Medidas reales del chasis», no al proyecto entero. Y no hay
+que inventar nada: una tarea ya guarda sus notas en `bloques`.
+
+### Una prueba en producción que encontró un fallo de diseño
+
+Intenté escribir un bloque de prueba en una tarea real con la cuenta de agente,
+para verificar el guardado de verdad en vez de leyéndolo. **403**: `PUT
+/api/roadmap/:id` responde «Solo quien creó el proyecto puede editar sus
+tarjetas». El proyecto quedó intacto —0 bloques antes, 0 después— y el fallo que
+destapó era mío: `/api/proyectos` devuelve también los públicos de otras
+personas, así que el selector iba a ofrecer destinos que rechazarían al usuario
+**después** de elegir y esperar. Ahora solo salen los propios.
+
+### Deuda consciente, con su número
+
+Guardar en una tarea lee sus `bloques` y reescribe la lista entera, porque el
+endpoint reemplaza el campo. Si otra persona añade una nota en esos dos
+segundos, se pierde la suya. Con una tarea que estás mirando tú, con el móvil en
+la mano, el riesgo es pequeño; deja de serlo en cuanto varias personas trabajen
+sobre la misma tarea. Lo correcto es un endpoint que **añada** en vez de
+reemplazar: son unas líneas en `src/server/roadmap.ts`, área de Programador 1.
+
+**No verificado:** ninguna de las dos pantallas, las dos detrás del inicio de
+sesión. Sí verificada, con una petición real, la regla del servidor que explica
+el filtro.
+
+---
+
+## 2026-08-22 — The view route was a mint, and it is closed (Programador 7, found by 4)
+
+`POST /api/windows/:id/view` required no session and granted the window's
+author 0.01 points PER CALL: a curl loop fabricated internal money into any
+chosen account — 10,000 calls, 100 points. Found by Programador 4 reading the
+deployed code (note INCMT4IXIUD3UC), deliberately without calling the route.
+
+Three locks now, `views` still counts for everyone (counting is not paying):
+no session → no minting (the 2026-08-08 promise was «when OTHER USERS view
+it»); self-views still don't mint; and a per-window daily minting cap counted
+from the ledger itself (`PUNTOS_VISTA_TOPE_DIA`, 50 cents-of-point/day
+default) — with accounts required, inflating a window hits the ceiling and
+leaves named traces.
+
+Verified locally: 5 sessionless views minted nothing; 3 with a session minted
+exactly 3 cents; 58 total attempts stopped at exactly 50 entries. Test
+session was tagged `claude-dev-verificacion` and deleted; balances, views
+counter and ledger rows restored (trigger disabled/re-enabled for cleanup —
+local only).
+
+Agreed with prog4 and written in /tokenomics/tareas: the day the monthly pot
+pays out over counted views, `views` (raw, displayed) and valid views (one
+per person, session required) must be TWO numbers, and the pot only reads
+the second. PUNTOS_TRANSFERENCIA stays off until this fix is deployed.
+
+## 2026-08-22 · Dos tableros nuevos, y el candado que hace que uno sirva (prog6)
+
+**Seis notas del Feedback decían en texto llano, a la vista de cualquiera, por
+dónde entrar en la plataforma**: que el login no tenía límite de intentos, que
+la aplicación se conecta a la base de datos como superusuario, que falta
+`Content-Security-Policy`, que los ficheros subidos se sirven sin comprobar
+sesión y que había una ruta fabricando puntos sin pedir sesión.
+
+Eugenio: «hay cuatro cosas de seguridad en el hormiguero, traslada ahí esas
+cuestiones para limpiar el hormiguero, que es un tema para el público». Y
+aparte: «vas a crear una página en (i) donde pondrás tu visión y estrategia de
+los servidores […] de forma transparente a nivel de coste […] y un kanban como
+el del hormiguero con las tareas que tienes pendientes».
+
+**Una columna `area` en `incidencias`, no un tablero nuevo** (migración `0075`).
+La maquinaria del Feedback ya resuelve estados, adjuntos, permisos, el token de
+los agentes y el archivado; un tablero paralelo habría sido una segunda lista
+que nadie mira, y las notas de seguridad son justo las que no pueden acabar
+ahí. Tres tableros: `general`, `seguridad` y `servidores`.
+
+**El candado está en el servidor, en cinco puertas.** Ver el tablero, crear,
+mover una nota de tablero, el contador del botón de la hormiga —un número
+también filtra: diría cuántos agujeros hay a quien no puede ver ninguno— y los
+adjuntos. Esa quinta la encontró prog4 revisando, y es la que convierte un
+candado en un candado: **la nota quedaba escondida y su adjunto no**, porque
+`express.static` sirve `/uploads` sin comprobar sesión. Comprobado contra
+producción, no deducido. El tablero de seguridad no admite adjuntos y dice por
+qué.
+
+Y una decisión escrita en vez de tapada: **un programador IA con su token lee
+el tablero de seguridad**, porque somos quienes trabajamos esas notas. Eso
+amplía lo que vale un token robado —antes, un color equivocado; ahora, la lista
+de por dónde entrar—, así que cada lectura con token **deja rastro con nombre y
+hora** (idea de prog4: no le quita el acceso a nadie y convierte «no lo podemos
+impedir» en «lo veríamos»).
+
+**El candado nombra `seguridad` explícitamente y no «todo lo que no sea
+general»**, porque el tercer tablero, `servidores`, es público a propósito. Lo
+que se esconde se decide uno por uno, nunca por descarte.
+
+**`/api/gasto` dejaba caer reconocimiento.** Llevaba abierto desde el 8 de
+agosto y estaba bien porque solo lo leía la pestaña de Visión; la página nueva
+lo pone en una pantalla pública. Aviso de prog2, y medido: no daba IP ni
+nombres de contenedor, pero sí el nombre de la máquina, el modelo exacto
+(`CPX42`, o sea 8 núcleos y 16 GB — cuánta máquina hay que tumbar) y los avisos
+de «falta tal variable», que llevan dentro los nombres de nuestras claves. Los
+euros siguen públicos: es la transparencia que pidió Eugenio y no sirve para
+atacar nada. Filtrado **al salir** y no al guardar, para no tener dos cachés
+que se desincronicen.
+
+**Y los límites de peticiones** (`src/server/limites/`, migración `0076`), que
+**entran pero no están conectados a ninguna ruta todavía**: `auth.ts` es de
+prog1. Cinco reglas acordadas con prog4, y las dos que importan son las que
+salieron de discutirlas: quien acierta la contraseña no paga el retraso de los
+que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— y
+**dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
+fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
+la última se lleva borrado su propio rastro.
+### 2026-08-22 — Veracity, phase 1 of 10: a debate is a tree
+
+Eugenio opened a new area and put programmer 5 on it: *«un sistema de veracidad
+dentro de la APP para que lo que la gente publique sea información coherente con
+la otra información que hay, y poder generar un espectro de visiones sobre una
+verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate en
+Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
+it is all data — no screen uses it yet.
+
+- **Three tables** (`drizzle/0078_veracidad_debates.sql`): `debates` (the thesis
+  under discussion), `argumentos` (the tree hanging off it) and
+  `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
+  is a `parent_id`, and a source belongs to what it cites.
+- **Why not the knowledge graph, which already has `apoya`/`contradice`**: a
+  graph edge carries no stance, no weight and no evidence, and a graph node can
+  hang from several parents — the moment it does, the reader no longer knows
+  what is being argued about. A debate is a tree on purpose. Phase 7 will *draw*
+  debates on the existing canvas; the model stays separate.
+- **`src/server/veracidad.ts`**: list and read (the whole tree and all its
+  sources in three queries, never one per node), open a debate, argue, cite,
+  withdraw a citation, archive. Level 1 to open or argue — the same standing as
+  publishing; level 3 to close a debate, because that is a judgement about the
+  commons.
+- **Depth is derived from the parent, never sent by the client**, so no request
+  can flatten or graft a branch; a parent belonging to another debate is
+  rejected, and the thread stops at 12 levels with a message that says to open
+  its own debate instead.
+- **`impacto` is NULL until somebody votes, and 0 only when people voted and it
+  moves nobody.** Initialising it to 0 would make a brand-new argument look like
+  a rejected one — the house rule that every component must be able to say «I
+  don't know» distinguishably.
+- **The only automatic step of the veracity ladder is `sin_fuente` →
+  `con_fuente`**, and it reverses when the last source is withdrawn. Everything
+  above that is a human judgement and belongs to phase 2, not to pasting a link.
+- **Verified against the local server on port 3004: 25 checks, 25 green** —
+  including 401 without a session, an invented `postura` rejected *listing the
+  valid ones*, a cross-debate parent, the tree nested three levels deep, the
+  badge going up and back down with the source, and an archived argument leaving
+  the tree without leaving the database. One bug found and fixed on the way:
+  `= ANY(array)` through the Drizzle template reached Postgres as a record, so
+  every read of a debate answered 500. The test user and both test debates were
+  deleted in the same session.
+
+### 2026-08-22 — Veracidad: su página en la «i», con sus principios y su tablero
+
+Eugenio: *«genera una página en el menú superior derecho, donde pone "i"
+información, y ahí añade el Veracidad, como página donde pongamos los principios
+y tecnologías que usamos para esto; haz un kanban con todas las tareas que
+tenemos hacia adelante, copia el modelo de Hormiguero»*.
+
+- **`/veracidad`**: qué es esto en dos párrafos, **seis principios** (no hay una
+  verdad publicada sino un espectro de visiones; un debate es un árbol; lo que no
+  tiene fuente lo dice; lo que pesa lo decide la gente; cerrar no borra al que
+  perdió; todo puede decir «no lo sé») y **seis piezas** de con qué está hecho —
+  y casi ninguna es nueva: el vocabulario del grafo, el lienzo del grafo, la
+  tabla de puntuaciones que ya existía.
+- **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
+  que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
+  tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
+  (migración 0079, décimo grupo), así que las mismas tarjetas salen también en
+  «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
+  varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
+  que saber en cuál está.
+- **La entrada del menú es una línea** en `src/paginasInfo.ts`, la lista que
+  salió antes en la PR #241.
+- Verificado en el navegador: el menú (i) abre con Veracidad, la página carga,
+  el tablero pinta 30 tarjetas repartidas en 2 hechas / 1 en curso / 27 por
+  hacer, y las 25 comprobaciones de la API de la fase 1 siguen en verde con el
+  módulo ya registrado en el servidor.
+
+**Lo que no está**: `server.ts` lleva las dos líneas que registran el módulo,
+pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
+suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
+de ruta), pero las rutas de debates no existen.
+
+### 2026-08-22 — Telecomunicaciones: mensajes en vivo, llamadas y videollamadas (Programador 8)
+Petición de Eugenio: «quiero que esta plataforma sustituya a WhatsApp, que se pueda enviar mensajes y hacer llamadas y videollamadas compartiendo pantalla etc. Y que con un número de la persona le puedas encontrar en la base de datos y enviarle un mensaje o llamarle, y le saltará en su aplicación».
+
+**El cable** (`src/server/telecomHub.ts`). Una conexión abierta por aparato (SSE, `GET /api/telecom/conexion`), que es lo que permite al servidor hablarle a alguien sin que lo pida: por ahí llegan los mensajes, la presencia y el timbre. Se eligió SSE y no WebSockets por tres motivos, en orden de peso: un WebSocket se engancha al servidor HTTP y eso obliga a tocar `server.ts`, que está congelado; no añade dependencia (`ws` son 40 KB); y atraviesa Cloudflare y cualquier proxy porque es un GET que no termina. Cuesta que es de una sola dirección — el cliente contesta por POST, que para señalización son cuatro mensajes. **Una persona son varios aparatos**: cada conexión tiene su identificador y la señalización va a uno concreto, o la pestaña olvidada en el trabajo contesta a una negociación que no es suya.
+
+**Las llamadas** (`src/server/telecom.ts`, `src/telecom/motor.ts`). WebRTC: el audio y el vídeo van de un navegador al otro, cifrados de extremo a extremo y **sin pasar por Hetzner**. El servidor solo presenta a los dos navegadores y comprueba que quien manda una señal es de verdad parte de esa llamada. Coste de una llamada en servidor: cero.
+
+**Lo que se añadió a los mensajes**: aparecen solos, dos marcas de verificación (entregado / leído), «está escribiendo…», punto verde de presencia, fotos, archivos y notas de voz. Y botones de llamar y videollamar en la propia conversación.
+
+**Buscar por número** (`GET /api/telecom/buscar`). Exacto y de uno en uno, nunca una lista, con freno de 40 búsquedas cada diez minutos: una búsqueda parcial sería un listín telefónico de toda la plataforma servido por la puerta de atrás. Y el cruce de la agenda importada con la gente registrada (`GET /api/telecom/mis-contactos`), que es la función que hizo grande a WhatsApp: no buscas a nadie, abres y tu gente ya está.
+
+**Base de datos** (`drizzle/0080_telecomunicaciones.sql`): `users.telefono` (normalizado, único) y `telefono_buscable`; `mensajes` gana `entregado_at` y los cuatro campos del adjunto; tabla `llamadas` con las siete formas de acabar una llamada. El contenido de una llamada no se guarda en ninguna parte.
+
+**Dos fallos que encontró la prueba automática y que no se habrían visto a ojo**:
+1. *Cuatro carriles en vez de dos.* Quien contesta no debe crear sus transceptores: los crea la oferta al aplicarla. Cuando los creaban los dos, quien contestaba acababa con cuatro y los suyos no transmitían — una llamada que conecta y enseña la cara de uno solo.
+2. *El acuse de lectura llegaba antes que el propio mensaje.* El servidor empuja el mensaje a la otra persona antes de contestar a quien lo envía; si ella lo lee en ese instante, el «leído» llega cuando el mensaje todavía tiene su identificador provisional. Ahora las marcas huérfanas se guardan y se aplican al bautizarlo.
+
+**Verificación** (`scripts/probar-telecom.mjs`): dos navegadores de verdad con dos sesiones distintas, que se crean y se archivan solos. Pasa: presencia, búsqueda por número, mensaje en vivo, las dos marcas, timbre en la otra aplicación, negociación completa (los dos envían y reciben audio y vídeo, dos carriles y ni uno más), silenciar, compartir pantalla, colgar y el historial. **Lo que no se ha podido comprobar**: el apretón de manos final (ICE) no se completa en este Mac — se probó con dos conexiones dentro de una misma página, sin nada de esta aplicación por medio, y también falla. Que el audio suene entre dos personas hay que verlo entre dos aparatos de verdad.
+
+### 2026-08-22 — Telecomunicaciones: las tres decisiones de privacidad (Programador 8)
+El coordinador paró la fusión con dos preguntas que no tenían respuesta técnica, y tenía razón. Quedan resueltas así:
+
+**¿Puede alguien comprobar si una persona está aquí escribiendo su número?** No, y ya no se puede por ninguna de las tres puertas. La búsqueda devuelve lo mismo —`persona: null`— si el número no existe y si existe pero su dueño ha apagado «que me encuentren»: no se distingue. Llamar por número usa el mismo filtro. Y la tercera puerta, que estaba abierta y no se había visto: al poner tu número, el mensaje «ese número ya está en otra cuenta» **confirmaba que esa persona tiene cuenta**. Ahora dice que no se puede usar y adónde escribir, sin confirmar nada, con un tope de cinco cambios de número por hora.
+
+**¿Puede alguien llamarte sin conocerte?** Ya no, y esta es la que más importa. Aquí es peor que en WhatsApp y no al revés: en WhatsApp hace falta tu número, que tiene quien tú se lo diste; aquí cada persona tiene su página pública con su identificador a la vista, así que cualquiera podía hacer sonar el teléfono de cualquiera sin tener su número. `users.llamadas_de` (migración `0082`) admite `todos`, `conocidos` y `nadie`, y **viene puesto en `conocidos`**: quien ya se ha escrito contigo, a quien tienes en tu agenda importada, o a quien sigues. A un desconocido le sale «escríbele un mensaje primero», que es el camino que ya existía — un mensaje no despierta a nadie, un timbre sí. Se elige en la propia página de Teléfono, al lado del número, porque es la otra mitad de la misma decisión.
+
+**¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
+
+También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
 ## 2026-08-22 (XIII) — Security phase 0: the floor under "it cannot be corrupted"
 
 Eugenio opened a fourth programmer with a brief of his own: *«esta herramienta
