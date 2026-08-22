@@ -585,6 +585,157 @@ export function registerPublicarRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * VENDER LO TUYO SIN PERMISO ESPECIAL — fase 8 del plan de tiendas
+   *
+   * Crear un producto exigía nivel 2, y el motivo era bueno: `POST
+   * /api/products` mete cosas en el MERCADO COMÚN, colgadas de territorios,
+   * retos y soluciones. Eso es conocimiento compartido y se protege.
+   *
+   * Pero vender tu propia miel en tu propia tienda no es eso. Nadie tiene que
+   * verificarte para poner un tarro a la venta en tu casa, igual que nadie te
+   * verifica para escribir una página.
+   *
+   * ── LO QUE SE ABRE Y LO QUE SIGUE CERRADO ─────────────────────────────────
+   * Lo que se crea aquí nace con `status = 'tienda'`: sale en TU tienda y
+   * **no** en el mercado común, porque `GET /api/products` sólo mira los
+   * `activo`. Así la puerta del mercado sigue exactamente donde estaba —no la
+   * he tocado— y aun así puedes vender desde el primer día.
+   *
+   * Colgar un producto de un territorio o de un reto sigue siendo nivel 2.
+   * Eso sí es escribir en lo de todos.
+   *
+   * ── EL LÍMITE ─────────────────────────────────────────────────────────────
+   * Diez productos mientras no estés verificado. No es desconfianza: es que un
+   * límite se puede subir cuando alguien lo necesita, y una puerta cerrada
+   * sólo se puede abrir del todo. Diez tarros son una tienda; mil son otra
+   * cosa y merecen una conversación.
+   */
+  app.post('/api/publicar/mis-productos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const nivel = req.user.roleLevel ?? 0;
+
+      const {
+        nombre, descripcion, precio_centimos, moneda, tipo, categoria,
+        stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
+        garantia, devoluciones, imagenes,
+      } = req.body || {};
+
+      const nom = String(nombre || '').trim();
+      if (!nom) return res.status(400).json({ error: 'Ponle un nombre.' });
+      if (nom.length > 200) return res.status(400).json({ error: 'El nombre es demasiado largo.' });
+
+      // El precio puede faltar —«precio a consultar» es una respuesta válida—
+      // pero si viene tiene que ser un número entero de céntimos y positivo.
+      // Un precio negativo sería pagarle a quien compra.
+      let precio: number | null = null;
+      if (precio_centimos !== null && precio_centimos !== undefined && precio_centimos !== '') {
+        precio = Math.round(Number(precio_centimos));
+        if (!Number.isFinite(precio) || precio < 0) {
+          return res.status(400).json({ error: 'El precio no es un número válido.' });
+        }
+      }
+
+      if (nivel < 2) {
+        const n = (await db.execute(sql`
+          SELECT COUNT(*) AS n FROM products
+          WHERE created_by = ${req.user.id} AND archived_at IS NULL
+        `)).rows[0] as any;
+        if (Number(n.n) >= MAX_PRODUCTOS_SIN_VERIFICAR) {
+          return res.status(409).json({
+            error: `De momento puedes tener ${MAX_PRODUCTOS_SIN_VERIFICAR} productos. Para tener más, verifica tu cuenta.`,
+            limite: MAX_PRODUCTOS_SIN_VERIFICAR,
+          });
+        }
+      }
+
+      const id = 'PRD' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+      // `tienda` para quien no está verificado; `activo` para quien sí, que es
+      // lo que ya podía hacer por la otra puerta.
+      const estado = nivel >= 2 ? 'activo' : 'tienda';
+      const fotos = Array.isArray(imagenes) ? imagenes.filter((x: any) => typeof x === 'string').slice(0, 8) : [];
+
+      await db.execute(sql`
+        INSERT INTO products (id, name, description, category, price_cents, currency, kind,
+                              stock, warranty, return_policy, images, status, created_by, updated_by,
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo)
+        VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
+                ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
+                ${String(moneda || 'EUR').toUpperCase()},
+                ${tipo === 'digital' ? 'digital' : 'fisico'},
+                ${stock === null || stock === undefined || stock === '' ? null : Math.max(0, Math.round(Number(stock) || 0))},
+                ${String(garantia || '').trim() || null}, ${String(devoluciones || '').trim() || null},
+                ${JSON.stringify(fotos)}::jsonb, ${estado}, ${req.user.id}, ${req.user.id},
+                ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
+                ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
+                ${String(envio_plazo || '').trim() || null})
+      `);
+
+      res.json({
+        id, estado,
+        // Se dice en la respuesta, no se deja que lo descubra al no verlo en
+        // el mercado: quien vende tiene derecho a saber dónde sale su cosa.
+        en_el_mercado_comun: estado === 'activo',
+        aviso: estado === 'tienda'
+          ? 'Está a la venta en tu tienda. Para que salga también en el mercado común, verifica tu cuenta.'
+          : null,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Lo que tengo a la venta. Con sesión: son mis cosas. */
+  app.get('/api/publicar/mis-productos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT id, name, price_cents, currency, kind, stock, status, images,
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at
+        FROM products
+        WHERE created_by = ${req.user.id} AND archived_at IS NULL
+        ORDER BY created_at DESC
+      `);
+      res.json({
+        productos: r.rows,
+        limite: (req.user.roleLevel ?? 0) >= 2 ? null : MAX_PRODUCTOS_SIN_VERIFICAR,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * CAMBIAR O RETIRAR LO MÍO.
+   *
+   * El `WHERE created_by` no es un adorno: sin él, cualquiera con sesión
+   * podría cambiarle el precio a otro. Y retirar es `archived_at`, nunca
+   * borrar: hay pedidos que apuntan a este producto y tienen que seguir
+   * diciendo qué se vendió (regla 2 de la casa).
+   */
+  app.put('/api/publicar/mis-productos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const b = req.body || {};
+      const num = (v: any) => v === null || v === undefined || v === '' ? null : Math.max(0, Math.round(Number(v) || 0));
+
+      const r = await db.execute(sql`
+        UPDATE products SET
+          name = COALESCE(${b.nombre ? String(b.nombre).trim() : null}, name),
+          description = COALESCE(${b.descripcion !== undefined ? String(b.descripcion).trim() : null}, description),
+          price_cents = COALESCE(${num(b.precio_centimos)}, price_cents),
+          stock = CASE WHEN ${b.stock !== undefined} THEN ${num(b.stock)} ELSE stock END,
+          envio_centimos = CASE WHEN ${b.envio_centimos !== undefined} THEN ${num(b.envio_centimos)} ELSE envio_centimos END,
+          envio_gratis_desde_centimos = CASE WHEN ${b.envio_gratis_desde_centimos !== undefined} THEN ${num(b.envio_gratis_desde_centimos)} ELSE envio_gratis_desde_centimos END,
+          envio_plazo = COALESCE(${b.envio_plazo !== undefined ? String(b.envio_plazo).trim() || null : null}, envio_plazo),
+          archived_at = CASE WHEN ${b.retirar === true} THEN now() ELSE archived_at END,
+          updated_by = ${req.user.id},
+          updated_at = now()
+        WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
+        RETURNING id, name, price_cents, stock, status, archived_at
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
@@ -662,6 +813,11 @@ const MINUTOS_DE_RESERVA = 30;
 /** Cuántas cosas distintas caben en un pago. Un carrito de cincuenta líneas
  *  es casi siempre un error o alguien probando, no una compra. */
 const MAX_LINEAS = 20;
+
+/** Cuántos productos puede tener a la venta quien todavía no está
+ *  verificado. Un límite se sube cuando alguien lo necesita; una puerta
+ *  cerrada sólo se puede abrir del todo. */
+const MAX_PRODUCTOS_SIN_VERIFICAR = 10;
 
 /**
  * Cuántas unidades de este producto está pagando alguien AHORA MISMO.
