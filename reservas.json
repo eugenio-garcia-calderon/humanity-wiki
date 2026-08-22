@@ -89,12 +89,6 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "una linea: Borrar tu cuenta",
       "desde": "2026-08-22T16:37:23.902Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "antes de verificar un camino, contar cuantos hay",
-      "desde": "2026-08-22T16:39:25.501Z"
     }
   ]
 }
