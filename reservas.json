@@ -47,12 +47,6 @@
       "ruta": "drizzle/0088_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
       "desde": "2026-08-22T19:10:40.908Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "fase 5 economia: cupones de descuento del vendedor",
-      "desde": "2026-08-22T20:28:01.259Z"
     }
   ]
 }
