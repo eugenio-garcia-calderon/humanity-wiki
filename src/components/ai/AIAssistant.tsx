@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound} from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -39,7 +39,11 @@ type EditMode = 'manual' | 'aceptar' | 'autonomo';
 const EDIT_MODE_LABELS: Record<EditMode, { label: string; hint: string }> = {
   manual:   { label: 'Manual',   hint: 'La IA solo sugiere. No propone cambios aplicables.' },
   aceptar:  { label: 'Aceptar',  hint: 'La IA propone cambios y tú confirmas cada uno.' },
-  autonomo: { label: 'Autónomo', hint: 'La IA aplica directamente lo que tu rol permita.' },
+  // «PERMITE EDITAR», NO «AUTÓNOMO» (2026-08-22, Eugenio: «cambia el título de
+  // Autónomo y pon "Permite Editar"»). «Autónomo» describe a la IA; lo que hace
+  // falta saber es qué le estás dejando hacer a TUS cosas, que es lo que
+  // decide esta casilla.
+  autonomo: { label: 'Permite editar', hint: 'La IA cambia tus cosas directamente, hasta donde tu rol permita.' },
 };
 
 interface Message {
@@ -66,24 +70,37 @@ interface Message {
   question?: { text: string; options: string[]; answered?: boolean };
   /** Imagen generada por Nano Banana, cuando el modelo elegido es de imagen. */
   imageUrl?: string;
+  /** Lo que ha encontrado el buscador interno, cuando la pregunta era una
+   *  búsqueda y no ha hecho falta la IA. */
+  resultados?: Array<{ id: string; uuid?: string; label: string; type: string }>;
+  /** El texto original, para poder preguntárselo a la IA de todos modos. */
+  reintentarIA?: string;
 }
 
-/** Céntimos de euro escritos para que se puedan leer. Estas cifras son
- *  diminutas —una respuesta cuesta décimas de céntimo— y con dos decimales
- *  fijos casi todas saldrían «0,00 ¢», que se lee como gratis y no lo es. */
-const centimos = (c: number) => {
-  if (c === 0) return '0 ¢';
-  if (c < 0.01) return '< 0,01 ¢';
-  const dec = c < 1 ? 3 : 2;
-  return c.toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + ' ¢';
+/** EN EUROS, NO EN CÉNTIMOS (2026-08-22, Eugenio: «pon el precio estimado en
+ *  céntimos de euro, tipo 0,02 euros, no pongas 2 céntimos, que lías»).
+ *
+ *  Dos unidades para el mismo dinero en la misma pantalla obligan a convertir
+ *  mentalmente antes de comparar, y ahí es donde uno se equivoca de factor
+ *  cien. Una sola unidad, la que se usa para todo lo demás: el euro.
+ *
+ *  Y CUANDO ES DEMASIADO PEQUEÑO, SE DICE. Una respuesta corriente cuesta
+ *  milésimas: con dos decimales saldría «0,00 €» en casi todas, que se lee
+ *  como gratis y no lo es. Por debajo del céntimo se escribe «menos de
+ *  0,01 €», que es verdad y no se confunde con cero. */
+const euros = (c: number) => {
+  const e = c / 100;
+  if (e === 0) return '0 €';
+  if (e < 0.01) return 'menos de 0,01 €';
+  return e.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 };
 
-/** Lo que costaría una petición típica con ese modelo, en céntimos.
+/** Lo que costaría una petición típica con ese modelo.
  *
  *  Los precios del catálogo vienen en céntimos por MILLÓN de tokens, que es
  *  una unidad que no le dice nada a nadie: «300» no se parece a lo que cuesta
  *  escribirle una pregunta. Aquí se convierte a lo que de verdad se paga por
- *  UNA petición del tamaño que tú sueles mandar.
+ *  UN mensaje del tamaño que tú sueles mandar.
  *
  *  Es una ESTIMACIÓN y se marca como tal con «≈». El coste real depende de
  *  cuánto conteste el modelo y de cuánto acierte la caché, y por eso debajo de
@@ -94,7 +111,70 @@ const costeEstimado = (
 ) => {
   const tam = t || { entrada: 5000, salida: 500 };
   const c = (tam.entrada * (info.input || 0) + tam.salida * (info.output || 0)) / 1_000_000;
-  return '≈ ' + centimos(c);
+  return '≈ ' + euros(c);
+};
+
+/** Cómo se llama cada tipo del buscador en cristiano, y adónde lleva.
+ *
+ *  LO QUE NO SE SABE ADÓNDE LLEVA, NO SE INVENTA: si el tipo no está aquí, el
+ *  enlace va al buscador general en vez de a una dirección construida a ojo
+ *  que acabaría en una página vacía. */
+const NOMBRE_DE_TIPO: Record<string, string> = {
+  publications: 'publicación', challenges: 'reto', solutions: 'solución',
+  projects: 'proyecto', organizations: 'organización', products: 'producto',
+  territories: 'territorio', objectives: 'objetivo', indicators: 'indicador',
+  causes: 'causa', users: 'persona',
+};
+
+const RUTA_DE_TIPO: Record<string, (r: any) => string> = {
+  // Una publicación no tiene ruta propia: se abre en su ficha, encima de la
+  // lista de Explorar. `q` deja la lista filtrada por su título, para que la
+  // publicación esté cargada cuando la ficha vaya a buscarla.
+  publications: r => `/explorar?abrir=${encodeURIComponent(r.id)}&q=${encodeURIComponent(r.label.slice(0, 40))}`,
+  challenges: r => `/retos/${r.id}`,
+  solutions: r => `/soluciones/${r.id}`,
+  organizations: r => `/organizaciones/${r.id}`,
+  products: r => `/mercado?producto=${encodeURIComponent(r.id)}`,
+  territories: r => `/territorios/${r.id}`,
+  objectives: r => `/objetivos/${r.id}`,
+  indicators: r => `/indicadores/${r.id}`,
+  users: r => `/personas/${r.id}`,
+};
+
+const rutaDeResultado = (r: { id: string; uuid?: string; type: string; label: string }) =>
+  RUTA_DE_TIPO[r.type]?.(r) || `/buscar?q=${encodeURIComponent(r.label)}`;
+
+/** ══ ¿ESTO ES BUSCAR, O ES PREGUNTAR? ═══════════════════════════════════════
+ *  (2026-08-22, Eugenio: «haz que en el chat también sea un buscador de
+ *  publicaciones relacionadas, y que no tire de IA para cosas que sean
+ *  búsquedas de publicaciones internas»).
+ *
+ *  Devuelve QUÉ hay que buscar, o `null` si esto no es una búsqueda. Nunca
+ *  «quizás»: si no está claro, es null y va a la IA. Equivocarse hacia la IA
+ *  cuesta unas décimas de céntimo; equivocarse hacia el buscador es contestar
+ *  una lista de enlaces a quien preguntaba otra cosa.
+ *
+ *  SOLO CUANDO EL VERBO LO DICE. «Busca publicaciones sobre el agua» es una
+ *  búsqueda; «¿por qué se contamina el agua?» no lo es, aunque las dos hablen
+ *  del agua. Lo que decide es el verbo del principio, no las palabras del
+ *  tema — que es exactamente el fallo que ya nos costó un documento que nadie
+ *  pidió: una palabra suelta del asunto secuestrando la intención.
+ *
+ *  Y NUNCA CUANDO SE PIDE CREAR ALGO. «Busca un hueco y créame una tarea» no
+ *  es una búsqueda de publicaciones. */
+const queBuscar = (texto: string): string | null => {
+  const t = texto.trim();
+  if (t.length < 4 || t.length > 120) return null;
+  // Crear, explicar, resumir, comparar… eso es para la IA, diga lo que diga
+  // el resto de la frase.
+  if (/\b(crea|créa\w*|crear|hazme|haz\s|genera|génera\w*|escribe|redacta|resume|explica|analiza|compara|traduce|calcula)\b/i.test(t)) return null;
+  const m = t.match(/^\s*(?:busca(?:me)?|buscar|encuentra|enséñame|ensename|muéstrame|muestrame|dame|lista(?:me)?)\s+(?:las?\s+|los?\s+)?(?:publicaciones?|publis|contenidos?|artículos?|articulos?|páginas?|paginas?)?\s*(?:sobre|de|acerca de|relacionad\w+ con|que hablen de)?\s*(.+)$/i)
+    || t.match(/^\s*(?:publicaciones?|contenidos?)\s+(?:sobre|de|acerca de)\s+(.+)$/i)
+    || t.match(/^\s*¿?qué\s+hay\s+(?:publicado\s+)?sobre\s+(.+?)\??$/i);
+  if (!m) return null;
+  const q = m[1].replace(/[?¿.!]+$/, '').trim();
+  // Menos de dos letras no es un tema, y el buscador tampoco lo aceptaría.
+  return q.length >= 2 ? q : null;
 };
 
 /** 23400 → «23 s». Lo que tardó, que es la otra mitad de lo que cuesta algo. */
@@ -154,6 +234,13 @@ const HERRAMIENTAS_CREAR: Array<{ label: string; destino: string; icono: any }> 
 /** Modelo de Anthropic o Google disponible para elegir (Fase 12), con precio por 1M tokens en céntimos de €. */
 interface AIModelInfo { label: string; hint: string; input: number; output: number; image?: boolean; gratis?: boolean; nivelMinimo?: number; }
 
+/** Un nivel del selector: sencillo, medio, alto, imágenes o vídeos. Lo define
+ *  el servidor (`NIVELES_MODELO`) para que el precio que se enseña salga del
+ *  mismo catálogo que luego se cobra. */
+interface NivelModelo {
+  clave: string; label: string; modelo: string | null; para: string; porQueNo?: string;
+}
+
 interface PendingAttachment {
   name: string;
   mediaType: string;
@@ -201,6 +288,7 @@ export default function AIAssistant({ modo = 'panel' }: {
      *  antes de elegirlo. `origen` dice de dónde sale: de tus propias
      *  peticiones, de las de la plataforma, o de un supuesto declarado. */
     tamanoTipico?: { entrada: number; salida: number; origen: 'tuyo' | 'plataforma' | 'supuesto'; n: number };
+    niveles?: NivelModelo[];
   } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
@@ -234,11 +322,24 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  hueco: con dos banderas podrían estar abiertos a la vez y taparse. */
   const [panelMuelle, setPanelMuelle] = useState<null | 'chat' | 'crear'>(null);
   const [alturaMuelle, setAlturaMuelle] = useState(33);   // % de la pantalla
-  /** El ancho del lateral en el ordenador. 420 px es lo que cabe una respuesta
-   *  con una tabla de tres columnas sin partirla, medido con la del camión. */
-  const [anchoLateral, setAnchoLateral] = useState(420);
   const [arrastrandoMuelle, setArrastrandoMuelle] = useState(false);
   const [historialALaVista, setHistorialALaVista] = useState(false);
+  /** ══ EL HISTORIAL, GUARDADO ══════════════════════════════════════════════
+   *  (2026-08-22, Eugenio: «haz que el historial de la chatIA de
+   *  conversaciones quede guardado por defecto, y que se despliegue solo si
+   *  haces click o hover con el ratón, y se semidespliega mientras mantienes
+   *  el hover»).
+   *
+   *  Ocupaba 208 px fijos de una columna de 420: la mitad del chat gastada en
+   *  una lista que se mira una vez cada muchas. Ahora es una tira estrecha; se
+   *  asoma al pasar el ratón y se queda si pinchas.
+   *
+   *  DOS ESTADOS Y NO UNO, a propósito: pasar el ratón ENSEÑA, pinchar FIJA.
+   *  Con uno solo, mover el ratón por encima sin querer dejaría la lista
+   *  abierta comiéndose el chat, o pinchar no serviría de nada porque se
+   *  cerraría al apartar el ratón. */
+  const [historialFijo, setHistorialFijo] = useState(false);
+  const [historialAsomado, setHistorialAsomado] = useState(false);
   const [modelosAbierto, setModelosAbierto] = useState(false);
   /** El último intento que se rompió antes de llegar al modelo. Va en el
    *  contexto del siguiente mensaje para que la IA sepa que falló. */
@@ -288,7 +389,43 @@ export default function AIAssistant({ modo = 'panel' }: {
     return () => window.removeEventListener('humanity:juego-contexto', alContexto);
   }, []);
   const interlocutor = useRef<string | null>(null);
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
+
+  /** ══ EL ANCHO DEL LATERAL, LA MITAD DE LA PANTALLA ═════════════════════
+   *  (2026-08-22, Eugenio: «que la ventana de chatIA ocupe el 50% de la
+   *  pantalla y se pueda con un selector ensanchar o reducir el ancho»).
+   *
+   *  Eran 420 px fijos: en un portátil de 1280 eso es un tercio, y en un
+   *  monitor de 2560 es una sexta parte —la misma columna estrecha en una
+   *  pantalla que sobra por todas partes—. En porcentaje se comporta igual en
+   *  las dos, que es lo que uno espera de «la mitad».
+   *
+   *  SE GUARDA EN TUS AJUSTES, no en el componente: si se olvidara al cerrar,
+   *  habría que recolocarlo cada vez, y entonces el selector molesta más de lo
+   *  que sirve. */
+  const anchoGuardado = (user as any)?.uiSettings?.anchoChatIA;
+  const [anchoPct, setAnchoPct] = useState<number>(
+    typeof anchoGuardado === 'number' ? anchoGuardado : 50);
+  useEffect(() => {
+    if (typeof anchoGuardado === 'number' && anchoGuardado !== anchoPct) setAnchoPct(anchoGuardado);
+    // Solo cuando llega el usuario: después manda lo que estés arrastrando.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anchoGuardado]);
+  /** Los píxeles que toca hoy. Con un mínimo de 320: por debajo, una respuesta
+   *  con una tabla de tres columnas se parte y deja de leerse. */
+  const [anchoVentana, setAnchoVentana] = useState(() => window.innerWidth);
+  useEffect(() => {
+    const alRedimensionar = () => setAnchoVentana(window.innerWidth);
+    window.addEventListener('resize', alRedimensionar);
+    return () => window.removeEventListener('resize', alRedimensionar);
+  }, []);
+  const anchoLateral = Math.max(320, Math.round(anchoVentana * (anchoPct / 100)));
+  /** Cambiar el ancho y recordarlo. Se guarda al SOLTAR, no en cada píxel. */
+  const guardarAncho = (pct: number) => {
+    const v = Math.min(80, Math.max(25, Math.round(pct)));
+    setAnchoPct(v);
+    if (user) updateUiSettings({ anchoChatIA: v }).catch(() => {});
+  };
   // Los territorios que la app ya tiene cargados, para comprobar que un
   // destino existe antes de navegar (B63). Si aún no han llegado, no se
   // bloquea nada: mejor dejar pasar que impedir algo que sí existe.
@@ -450,14 +587,20 @@ export default function AIAssistant({ modo = 'panel' }: {
    *  contestó el último mensaje: eso es «el modelo que está utilizando», que
    *  es justo lo que Eugenio pidió ver — con el router, cambia por mensaje. */
   const modeloActual = (() => {
-    if (selectedModel && status?.models?.[selectedModel]) return status.models[selectedModel].label;
+    // El nombre del NIVEL, que es el que se eligió, y no el del modelo que
+    // hay detrás: elegiste «medio», no «abierto-medio».
+    if (selectedModel) {
+      const nivel = (status?.niveles || []).find(n => n.modelo === selectedModel);
+      if (nivel) return nivel.label.replace(/^Modelo /, '');
+      if (status?.models?.[selectedModel]) return status.models[selectedModel].label;
+    }
     const ultimo = [...messages].reverse().find(m => m.usage?.model)?.usage?.model;
-    if (!ultimo) return 'Automático';
+    if (!ultimo) return 'automático';
     // El modelo por defecto de la plataforma (claude-sonnet-4-6) no está en el
     // catálogo elegible, así que no tiene etiqueta: se enseña su id tal cual
     // antes que callarse cuál respondió, que es justo lo que se pidió ver.
     const entrada = Object.entries(status?.models || {}).find(([id]) => ultimo.startsWith(id));
-    return `Automático · ${entrada ? entrada[1].label : ultimo}`;
+    return `automático · ${entrada ? entrada[1].label : ultimo}`;
   })();
 
   // Cerrar el desplegable de modelos al pinchar en cualquier otro sitio.
@@ -656,6 +799,44 @@ export default function AIAssistant({ modo = 'panel' }: {
     setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
     setBusy(true);
     try {
+      // ══ BUSCAR NO GASTA IA ═══════════════════════════════════════════════
+      // (2026-08-22, Eugenio: «que no tire de IA para cosas que sean
+      // búsquedas de publicaciones internas»).
+      //
+      // «Busca publicaciones sobre el agua» tiene una respuesta exacta en la
+      // base de datos, y pasarla por un modelo la empeora dos veces: cuesta
+      // dinero y devuelve una redacción sobre unos resultados en vez de los
+      // resultados. Aquí se contesta con lo que hay publicado, con sus
+      // enlaces, y se dice que no ha hecho falta la IA.
+      //
+      // SI NO HAY NADA, SE DICE QUE NO HAY NADA y se ofrece preguntárselo a la
+      // IA. Cero resultados es una respuesta —«esto no está publicado»— y
+      // disfrazarla de conversación sería lo de siempre: no poder distinguir
+      // «no existe» de «no lo he encontrado».
+      const busqueda = queBuscar(text);
+      if (busqueda) {
+        const r = await fetch(`/api/search?q=${encodeURIComponent(busqueda)}&limit=8`, { credentials: 'include' });
+        const j = await r.json();
+        const todos: any[] = Array.isArray(j?.results) ? j.results : [];
+        const pubs = todos.filter(x => x.type === 'publications');
+        // Las publicaciones primero, que es lo que se ha pedido; lo demás
+        // detrás, porque buscar «agua» y que no salga el reto del agua sería
+        // esconder lo que sí hay.
+        const orden = [...pubs, ...todos.filter(x => x.type !== 'publications')].slice(0, 8);
+        setMessages(m => [...m, {
+          role: 'assistant',
+          content: orden.length
+            ? `Esto es lo que hay publicado sobre «${busqueda}».`
+            : `No hay nada publicado sobre «${busqueda}». Puedes preguntárselo a la IA si quieres que te lo explique ella.`,
+          resultados: orden.length ? orden : undefined,
+          // El botón para insistir: buscar es lo primero, pero no puede ser lo
+          // único, o una pregunta mal empezada se quedaría sin respuesta.
+          reintentarIA: text,
+        }]);
+        setBusy(false);
+        return;
+      }
+
       // Fast-path (modo barra), en este orden (petición del usuario):
       // 1º una PREGUNTA que coincide con una publicación existente abre esa
       //    publicación en un pop-up central (la plataforma responde con su
@@ -1024,6 +1205,51 @@ export default function AIAssistant({ modo = 'panel' }: {
                       prueba: si la IA dice «ya está» y aquí no aparece nada,
                       es que no hay nada. Antes solo quedaba la palabra del
                       modelo, y llegó a afirmar tareas que no existían. */}
+                  {/* ══ LO QUE HA ENCONTRADO EL BUSCADOR ══════════════════
+                      (2026-08-22, Eugenio: «haz que el chat también sea un
+                      buscador de publicaciones relacionadas»).
+
+                      Enlaces de verdad, no una redacción sobre ellos: lo que
+                      se busca al buscar es llegar, y una lista que se pueda
+                      abrir en otra pestaña llega antes que un párrafo que los
+                      describe. */}
+                  {!!m.resultados?.length && (
+                    <div className="mt-2 space-y-1">
+                      {m.resultados.map((r, i) => (
+                        <Link
+                          key={`${r.type}-${r.id}-${i}`}
+                          to={rutaDeResultado(r)}
+                          target="_blank"
+                          rel="noopener"
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
+                        >
+                          <Search className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                          <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                          <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                            {NOMBRE_DE_TIPO[r.type] || r.type}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* SIN GASTAR IA, Y CON LA PUERTA ABIERTA. Se dice que esto
+                      ha salido de la base de datos —para que no parezca que lo
+                      ha redactado un modelo— y se deja preguntárselo a la IA
+                      igualmente: buscar va primero, pero no puede ser la única
+                      salida. */}
+                  {m.reintentarIA && (
+                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] text-slate-400">Buscado en la plataforma · sin gastar IA</span>
+                      <button
+                        onClick={() => send(`${m.reintentarIA} (respóndeme tú)`)}
+                        className="text-[10px] font-black text-emerald-700 hover:underline"
+                      >
+                        Preguntárselo a la IA
+                      </button>
+                    </div>
+                  )}
+
                   {!!m.creado?.length && (
                     <div className="mt-2 space-y-1">
                       {m.creado.map((c, i) => (
@@ -1077,7 +1303,7 @@ export default function AIAssistant({ modo = 'panel' }: {
                     <p className="mt-2 pt-1.5 border-t border-slate-200/70 text-[9px] text-slate-400 flex items-center gap-1 flex-wrap">
                       <Euro className="w-2.5 h-2.5 shrink-0" />
                       <span className="font-bold text-slate-500">
-                        {typeof m.usage.costCents === 'number' ? centimos(m.usage.costCents) : 'coste no registrado'}
+                        {typeof m.usage.costCents === 'number' ? euros(m.usage.costCents) : 'coste no registrado'}
                       </span>
                       <span className="text-slate-300">·</span>
                       <span>
@@ -1175,6 +1401,15 @@ export default function AIAssistant({ modo = 'panel' }: {
     <div className="h-full overflow-y-auto">
       <div className="px-3 py-2 flex items-center justify-between gap-2 border-b border-slate-100">
         <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Conversaciones</p>
+        {/* Guardarlo otra vez. Solo sale cuando está fijo: en el asomado, el
+            historial se cierra solo al apartar el ratón. */}
+        {historialFijo && (
+          <button onClick={() => { setHistorialFijo(false); setHistorialAsomado(false); }}
+            title="Guardar el historial"
+            className="ml-auto p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+            <PanelLeftClose className="w-3.5 h-3.5" />
+          </button>
+        )}
         <button onClick={() => { newConversation(); }} title="Nueva conversación"
           className="p-1 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-white transition-colors">
           <Plus className="w-3.5 h-3.5" />
@@ -1208,26 +1443,44 @@ export default function AIAssistant({ modo = 'panel' }: {
 
   const panelBody = (
     <>
-      {/* ══ SIN CABECERA (2026-08-21, Eugenio: «las configuraciones que
-          tienes arriba quítalas, y pon todo abajo de forma minimalista y que
-          entonces se quede más espacio para ver las respuestas»). ══════════
+      {/* ══ LA FILA DE ARRIBA, SOLO BOTONES ══════════════════════════════
+          FUERA «VIENDO: …» (2026-08-22, Eugenio: «quita lo de la vista de lo
+          que está viendo la IA, no sirve»). Era una línea diciendo qué página
+          tenías delante. Se puso para poder comprobar que la IA recibía el
+          contexto —y valió para eso— pero comprobar algo una vez no es motivo
+          para enseñarlo siempre: al que usa el chat le ocupa una línea en cada
+          pantalla para contarle algo que ya sabe, porque la página la tiene
+          delante. El contexto se le sigue mandando a la IA; lo que se quita es
+          el cartel.
 
-          Había un bloque de 90 px con el nombre del asistente, el modelo, una
-          píldora de «Viendo: …» y cuatro botones. En un muelle de un tercio de
-          pantalla eso era un tercio del muelle gastado en decirte dónde
-          estabas. Lo que valía la pena se ha bajado a la fila de abajo (el
-          modelo) o se ha quedado en un solo botón (cerrar); lo demás se ha
-          ido.
-
-          «VIENDO: …» NO SE PIERDE, SE ENCOGE. Que la IA sepa qué página tienes
-          delante era un arreglo pedido —y hay que poder comprobarlo—, así que
-          se dice en una línea de una línea, no en una tarjeta. */}
+          Los botones se quedan: son la única salida del panel. */}
       <div className="shrink-0 px-3 py-1.5 flex items-center gap-2 border-b border-slate-100 bg-slate-50/60">
-        <span className="inline-flex items-center gap-1 min-w-0 text-[10px] font-bold text-slate-400">
-          <Eye className="w-3 h-3 text-emerald-600 shrink-0" />
-          <span className="truncate">{dondeEstoy}</span>
-        </span>
         <div className="ml-auto flex items-center gap-0.5 shrink-0">
+          {/* ══ EL SELECTOR DE ANCHO ═══════════════════════════════════════
+              (2026-08-22, Eugenio: «que la ventana de chatIA ocupe el 50% de
+              la pantalla y se pueda con un selector ensanchar o reducir el
+              ancho»).
+
+              TRES ANCHOS Y NO UNA RUEDA: un tercio, la mitad y dos tercios. Es
+              lo que de verdad se elige —«que quepa la página de detrás» o «que
+              quepa la respuesta»—, y con tres botones se acierta a la primera.
+              Quien quiera un valor exacto tiene el borde izquierdo, que se
+              arrastra. Solo en el ordenador: en el teléfono ocupa todo. */}
+          {!esMovil && (
+            <span className="hidden md:inline-flex items-center rounded-lg bg-white border border-slate-200 p-0.5 mr-1">
+              {[{ p: 33, t: 'Un tercio' }, { p: 50, t: 'La mitad' }, { p: 66, t: 'Dos tercios' }].map(o => (
+                <button
+                  key={o.p}
+                  onClick={() => guardarAncho(o.p)}
+                  title={`Ancho: ${o.t.toLowerCase()} de la pantalla`}
+                  className={cn('px-1.5 py-0.5 rounded text-[10px] font-black transition-colors',
+                    Math.abs(anchoPct - o.p) < 4 ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700')}
+                >
+                  {o.p}%
+                </button>
+              ))}
+            </span>
+          )}
           {/* En el teléfono el historial se abre encima; en pantalla ancha ya
               está a la izquierda y este botón no sale. */}
           <button onClick={() => setHistorialALaVista(v => !v)} title="Historial de conversaciones"
@@ -1377,65 +1630,113 @@ export default function AIAssistant({ modo = 'panel' }: {
                   <button
                     onClick={e => { e.stopPropagation(); setModelosAbierto(v => !v); }}
                     title="Elegir el modelo de IA"
-                    className={cn('inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold transition-colors max-w-[10rem]',
+                    className={cn('inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold transition-colors max-w-[12rem]',
                       modelosAbierto ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700')}
                   >
+                    {/* CON LA PALABRA «MODELO» DELANTE (2026-08-22, Eugenio:
+                        «pon el contexto con la palabra Modelo en el selector
+                        de modelo de IA»). Suelto, «Equilibrado» al lado de un
+                        micrófono y un clip no dice de qué es ajuste. */}
+                    <span className="text-slate-400 font-black shrink-0">Modelo</span>
                     <span className="truncate">{modeloActual}</span>
                     <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
                   </button>
 
                   {modelosAbierto && (
                     <div
-                      className="absolute right-0 bottom-full mb-1 z-30 w-72 max-h-80 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+                      className="absolute right-0 bottom-full mb-1 z-30 w-80 max-h-[26rem] overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1.5"
                       onClick={e => e.stopPropagation()}
                     >
+                      {/* ══ CINCO OPCIONES, NO NUEVE MODELOS ═══════════════════
+                          (2026-08-22, Eugenio: «las opciones, deja escoger
+                          entre 3: modelo sencillo, medio, alto. Y pon uno
+                          especial de generación de imágenes, y otro de
+                          generación de vídeos»).
+
+                          Antes salía el catálogo entero con sus nombres de
+                          fábrica —Haiku 4.5, Fable 5, gemini-pro-latest—, que
+                          solo sirven para elegir si ya sabes quién los hace y
+                          cuánto valen. Lo que se decide aquí es cuánto quieres
+                          gastarte y en qué, y eso son estas cinco. */}
                       <button
                         onClick={() => { setSelectedModel(''); setModelosAbierto(false); }}
-                        className={cn('w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2 mb-1',
+                        className={cn('w-full text-left px-2.5 py-2 rounded-lg border transition-colors mb-1',
                           !selectedModel ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-transparent hover:bg-slate-50')}
                       >
-                        <span>
-                          <span className="font-bold text-slate-700">Automático</span>
-                          <span className="text-slate-400"> · el mejor para cada mensaje</span>
+                        <span className="flex items-center gap-2">
+                          <span className="text-[12px] font-black text-slate-800">Cambio automático de modelo</span>
+                          <span className="ml-auto text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">
+                            recomendado
+                          </span>
                         </span>
-                        <span className="text-emerald-600 font-bold shrink-0">recomendado</span>
+                        <span className="block text-[10px] text-slate-500 leading-snug mt-0.5">
+                          Para cada mensaje se usa el más barato que sirva. Incluido, no te cuesta nada.
+                        </span>
                       </button>
-                      {Object.entries(status.models).map(([id, info]) => {
-                        const bloqueado = (info.nivelMinimo ?? 0) > (user?.roleLevel ?? 0);
+
+                      {(status.niveles || []).map(n => {
+                        const info = n.modelo ? status.models?.[n.modelo] : undefined;
+                        const bloqueado = !!info && (info.nivelMinimo ?? 0) > (user?.roleLevel ?? 0);
+                        // NO SE PUEDE ELEGIR SI NO HAY NADA DETRÁS, y se dice
+                        // por qué. Un botón apagado sin motivo se lee como un
+                        // fallo de la aplicación.
+                        const noHay = !n.modelo || !info;
+                        const elegido = !!n.modelo && selectedModel === n.modelo;
                         return (
                           <button
-                            key={id}
-                            disabled={bloqueado}
-                            onClick={() => { setSelectedModel(id); setModelosAbierto(false); }}
-                            className={cn('w-full text-left px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors flex items-center justify-between gap-2',
-                              bloqueado ? 'border-transparent opacity-50 cursor-not-allowed'
-                                : selectedModel === id ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-transparent hover:bg-slate-50')}
+                            key={n.clave}
+                            disabled={noHay || bloqueado}
+                            onClick={() => { if (n.modelo) { setSelectedModel(n.modelo); setModelosAbierto(false); } }}
+                            className={cn('w-full text-left px-2.5 py-2 rounded-lg border transition-colors',
+                              noHay || bloqueado ? 'border-transparent opacity-55 cursor-not-allowed'
+                                : elegido ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-transparent hover:bg-slate-50')}
                           >
-                            <span className="min-w-0">
-                              <span className="font-bold text-slate-700">{info.label}</span>
-                              <span className="text-slate-400"> · {info.hint}</span>
-                            </span>
-                            <span className="shrink-0 text-right">
-                              {/* LO QUE CUESTA CADA PETICIÓN, ANTES DE ELEGIR
-                                  (2026-08-21, Eugenio: «en el listado para
-                                  elegir el modelo de IA no aparece el coste
-                                  estimado de las peticiones»). Antes solo
-                                  decía «gratis» o «incluido», que responde a
-                                  «¿me lo cobran?» y no a «¿cuánto vale?». Son
-                                  dos preguntas distintas y aquí hacen falta
-                                  las dos: la de arriba, el precio; la de
-                                  abajo, quién lo paga. */}
-                              <span className="block font-bold text-slate-600 tabular-nums">
-                                {info.image ? '—' : costeEstimado(info, status.tamanoTipico)}
-                              </span>
-                              <span className={cn('block text-[9px] font-bold', info.gratis ? 'text-emerald-600' : 'text-slate-400')}>
-                                {bloqueado ? 'verificados' : info.gratis ? 'gratis para ti' : info.image ? 'imagen' : 'incluido'}
+                            <span className="flex items-center gap-2">
+                              <span className="text-[12px] font-black text-slate-800">{n.label}</span>
+                              {/* QUIÉN LO PAGA, AL LADO DEL NOMBRE (Eugenio:
+                                  «pon también los que están incluidos y que
+                                  quede claro»). «Incluido» y el precio
+                                  contestan dos preguntas distintas: cuánto
+                                  vale y si te lo cobran. Hacen falta las dos. */}
+                              <span className={cn('ml-auto shrink-0 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full',
+                                noHay ? 'text-slate-400 bg-slate-100'
+                                  : bloqueado ? 'text-amber-700 bg-amber-100'
+                                    : 'text-emerald-700 bg-emerald-100')}>
+                                {noHay ? 'todavía no' : bloqueado ? 'solo verificados' : 'incluido'}
                               </span>
                             </span>
+                            <span className="block text-[10px] text-slate-500 leading-snug mt-0.5">
+                              {n.porQueNo || n.para}
+                            </span>
+                            {!noHay && (
+                              <span className="block text-[10px] font-bold text-slate-600 tabular-nums mt-0.5">
+                                {info!.image
+                                  // Nano Banana se cobra por imagen y ese
+                                  // precio no está medido todavía: se dice,
+                                  // en vez de enseñar un 0 que parecería
+                                  // gratis.
+                                  ? 'Se cobra por imagen, no por mensaje'
+                                  : `${costeEstimado(info!, status.tamanoTipico)} por mensaje`}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
-                      <p className="text-[10px] text-slate-500 px-2 py-1.5 leading-relaxed border-t border-slate-100 mt-1">
+
+                      {/* EL QUE YA TENÍAS ELEGIDO, si no es ninguno de estos.
+                          Se queda a la vista para poder quitarlo: esconderlo
+                          dejaría el chat usando un modelo que el selector no
+                          nombra por ningún lado. */}
+                      {selectedModel && !(status.niveles || []).some(n => n.modelo === selectedModel) && (
+                        <div className="mt-1 pt-1 border-t border-slate-100 px-2.5 py-1.5 text-[10px] text-slate-500 leading-snug">
+                          Ahora mismo tienes elegido <b className="text-slate-700">{status.models?.[selectedModel]?.label || selectedModel}</b>,
+                          que ya no está en la lista.{' '}
+                          <button onClick={() => { setSelectedModel(''); setModelosAbierto(false); }}
+                            className="font-black text-emerald-700 hover:underline">Volver al automático</button>
+                        </div>
+                      )}
+
+                      <p className="text-[10px] text-slate-500 px-2.5 py-1.5 leading-relaxed border-t border-slate-100 mt-1">
                         {/* DE DÓNDE SALE LA ESTIMACIÓN. Una cifra sin decir
                             sobre qué está calculada no se distingue de una
                             inventada, y por eso se dice siempre. */}
@@ -1443,13 +1744,13 @@ export default function AIAssistant({ modo = 'panel' }: {
                           const t = status.tamanoTipico;
                           if (!t) return null;
                           const base = t.origen === 'tuyo'
-                            ? `Calculado sobre tus ${t.n} últimas peticiones`
+                            ? `Calculado sobre tus ${t.n} últimas preguntas`
                             : t.origen === 'plataforma'
-                              ? 'Calculado sobre las peticiones de la plataforma (aún no tienes suficientes)'
-                              : 'Todavía no hay peticiones que medir: se supone un mensaje corriente';
-                          return <>{base} (~{t.entrada.toLocaleString('es-ES')} de entrada y {t.salida.toLocaleString('es-ES')} de salida). </>;
+                              ? 'Calculado sobre las preguntas de la plataforma (aún no tienes suficientes)'
+                              : 'Todavía no hay preguntas que medir: se supone un mensaje corriente';
+                          return <>{base}. </>;
                         })()}
-                        Los «gratis» los cubre la plataforma. Los premium están incluidos para usuarios verificados, con un tope mensual.
+                        Todo esto lo paga la plataforma: «incluido» quiere decir que a ti no se te cobra. El modelo alto tiene un tope al mes.
                       </p>
                     </div>
                   )}
@@ -1495,7 +1796,59 @@ export default function AIAssistant({ modo = 'panel' }: {
           que es el fallo que acabamos de arreglar con el botón de la IA (B91).
           `Layout.tsx` lee esta misma altura y le deja hueco al final de la
           página, así que nada queda debajo. */}
-      {(
+      {/* ══ LA BARRA DE ABAJO, SIEMPRE ══════════════════════════════════════
+          (2026-08-22, Eugenio: «está desapareciendo el menú de abajo cuando
+          abro el chat, también cuando abro crear»).
+
+          Antes la barra y el panel eran EL MISMO elemento cambiando de altura,
+          así que abrir uno hacía desaparecer la otra. Ahora son dos hermanos:
+          el panel se abre encima y la barra sigue debajo. Eso es lo que
+          permite cambiar de sección sin tener que cerrar el chat primero —y
+          sin ella, con el chat abierto la aplicación se quedaba sin
+          navegación. */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-[9999] bg-white border-t border-slate-200 shadow-lg grid grid-cols-5 items-center"
+        style={{ height: ALTO_BARRA }}
+      >
+        {/* EL ORDEN LO PIDIÓ EUGENIO Y TIENE SENTIDO DE LECTURA
+            (2026-08-21): casa · proyectos · BUSCAR · mensajes · crear.
+            Buscar va en el centro, que es el sitio del gesto más
+            repetido, y ocupa el hueco grande porque preguntarle a la IA
+            es la puerta principal de esta plataforma. Crear se va al
+            extremo: se usa menos veces al día que buscar. */}
+        <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
+          activo={ruta === '/' || ruta.startsWith('/explorar')}
+          onClick={() => navigate('/')} />
+        <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
+          activo={ruta.startsWith('/proyectos')}
+          onClick={() => navigate('/proyectos')} />
+
+        <button
+          onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
+          title="Preguntar a la IA"
+          aria-label="Preguntar a la IA"
+          // SIN FONDO NEGRO (2026-08-22, Eugenio: «no pongas un fondo
+          // negro en el botón de buscar»). El negro se reserva para
+          // decir DÓNDE ESTÁS; si el de buscar lo lleva siempre, hay dos
+          // cosas negras a la vez y ninguna de las dos significa nada.
+          className={cn('justify-self-center rounded-full grid place-items-center transition-colors w-12 h-9 sm:w-11 sm:h-8',
+            open && panelMuelle !== 'crear'
+              ? 'bg-slate-900 text-white'
+              : 'text-slate-500 hover:bg-slate-100 hover:text-emerald-700')}
+        >
+          <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
+        </button>
+
+        <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
+          activo={ruta.startsWith('/mensajes') || ruta.startsWith('/personas')}
+          onClick={() => navigate('/mensajes')} />
+        <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
+          activo={open && panelMuelle === 'crear'}
+          onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
+      
+      </nav>
+
+      {open && (
         <div
           {...zonaSoltar}
           // ══ DÓNDE SE ABRE, SEGÚN LA PANTALLA (2026-08-22, Eugenio: «la
@@ -1514,9 +1867,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           // misma caja con la misma conversación dentro. Dos ramas serían dos
           // sitios donde arreglar el mismo fallo, que es de lo que veníamos.
           className={cn('fixed z-[9998] flex flex-col bg-white transition-all duration-200',
-            !open
-              ? 'inset-x-0 bottom-0 border-t border-slate-200 shadow-lg'
-              : esMovil
+            esMovil
                 // Teléfono: todo, menos la barra de abajo — que se deja a la
                 // vista para poder cerrar sin buscar una cruz. El hueco va por
                 // CLASE y no por estilo en línea: mezclar los dos aquí hizo
@@ -1524,71 +1875,34 @@ export default function AIAssistant({ modo = 'panel' }: {
                 // panel se comiera la barra. Un solo mecanismo por propiedad.
                 ? 'inset-x-0 top-0 bottom-11 shadow-2xl'
                 // Ordenador: columna a la derecha, del alto entero.
-                : 'top-0 right-0 bottom-0 border-l border-slate-200 shadow-2xl')}
-          style={
-            !open ? { height: ALTO_BARRA }
-              : esMovil ? undefined
-                : { width: `${anchoLateral}px` }
-          }
+                // Ordenador: columna a la derecha. También se para en la
+                // barra: es la misma de siempre, va por encima (z mayor), y un
+                // panel que le pasara por debajo escondería sus botones justo
+                // en la esquina donde caen.
+                : 'top-0 right-0 bottom-11 border-l border-slate-200 shadow-2xl')}
+          style={esMovil ? undefined : { width: `${anchoLateral}px` }}
         >
-          {/* ── CERRADO: la barra ───────────────────────────────────────────
-              SIEMPRE ESTÁ, y por eso es una barra y no un botón: lo que se
-              pidió es un menú abajo que se despliegue, no algo que aparezca.
-              Escribir aquí lo abre solo — la puerta de entrada al chat es la
-              caja de escribir, que es lo que uno busca. */}
-          {/* ── TRES BOTONES, COMO EN EL MÓVIL DE YOUTUBE ────────────────────
-              (2026-08-21, Eugenio, con una captura de YouTube: «pon 3 botones,
-              el de buscar con la lupa a la derecha, y ahí se abre el CHATBOT.
-              El de "+" en el centro y ahí aparecen un visor de las
-              herramientas para crear o subir. Y el botón de CASA en la
-              izquierda que te lleva a la página de proyectos»).
-
-              POR QUÉ FUNCIONA ESA FORMA Y NO OTRA: son los tres verbos de la
-              plataforma —volver, crear y preguntar— y están donde el pulgar
-              llega sin recolocar la mano. El «+» va en el centro y es el único
-              con fondo, porque crear es lo que más se hace y lo que más cuesta
-              encontrar hoy: cada cosa se crea en la página de su tipo, y hay
-              que saber a cuál ir antes de poder empezar. */}
-          {!open && (
-            <nav className="flex-1 grid grid-cols-5 items-center">
-              {/* EL ORDEN LO PIDIÓ EUGENIO Y TIENE SENTIDO DE LECTURA
-                  (2026-08-21): casa · proyectos · BUSCAR · mensajes · crear.
-                  Buscar va en el centro, que es el sitio del gesto más
-                  repetido, y ocupa el hueco grande porque preguntarle a la IA
-                  es la puerta principal de esta plataforma. Crear se va al
-                  extremo: se usa menos veces al día que buscar. */}
-              <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
-                activo={ruta === '/' || ruta.startsWith('/explorar')}
-                onClick={() => navigate('/')} />
-              <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
-                activo={ruta.startsWith('/proyectos')}
-                onClick={() => navigate('/proyectos')} />
-
-              <button
-                onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
-                title="Preguntar a la IA"
-                aria-label="Preguntar a la IA"
-                // SIN FONDO NEGRO (2026-08-22, Eugenio: «no pongas un fondo
-                // negro en el botón de buscar»). El negro se reserva para
-                // decir DÓNDE ESTÁS; si el de buscar lo lleva siempre, hay dos
-                // cosas negras a la vez y ninguna de las dos significa nada.
-                className={cn('justify-self-center rounded-full grid place-items-center transition-colors w-12 h-9 sm:w-11 sm:h-8',
-                  open && panelMuelle !== 'crear'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-emerald-700')}
-              >
-                <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
-              </button>
-
-              <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
-                activo={ruta.startsWith('/mensajes') || ruta.startsWith('/personas')}
-                onClick={() => navigate('/mensajes')} />
-              <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
-                activo={open && panelMuelle === 'crear'}
-                onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
-            </nav>
+          {/* EL BORDE IZQUIERDO SE ARRASTRA. Los tres botones de arriba son
+              para elegir rápido; esto es para afinar. 6 px de ancho, que es lo
+              mínimo que el ratón coge sin pelearse, y se guarda al soltar. */}
+          {!esMovil && (
+            <div
+              onPointerDown={e => {
+                e.preventDefault();
+                const mover = (ev: PointerEvent) =>
+                  setAnchoPct(Math.min(80, Math.max(25, ((window.innerWidth - ev.clientX) / window.innerWidth) * 100)));
+                const soltar = (ev: PointerEvent) => {
+                  window.removeEventListener('pointermove', mover);
+                  window.removeEventListener('pointerup', soltar);
+                  guardarAncho(((window.innerWidth - ev.clientX) / window.innerWidth) * 100);
+                };
+                window.addEventListener('pointermove', mover);
+                window.addEventListener('pointerup', soltar);
+              }}
+              title="Arrastra para cambiar el ancho"
+              className="absolute inset-y-0 -left-1 w-2 cursor-ew-resize z-30 hover:bg-emerald-200/60 transition-colors"
+            />
           )}
-
           {/* ── EL VISOR DE «CREAR» ──────────────────────────────────────────
               CADA BOTÓN LLEVA DONDE ESO SE CREA DE VERDAD. Hoy cada cosa se
               crea dentro de la página de su tipo, así que esto no inventa
@@ -1655,8 +1969,53 @@ export default function AIAssistant({ modo = 'panel' }: {
             {/* EL HISTORIAL, A UN LADO. En pantalla ancha es una columna fija;
                 en un teléfono se abre encima, porque quitarle 200 px de ancho
                 a una pantalla de 375 dejaría la conversación en un canal. */}
-            <aside className="hidden md:flex w-52 shrink-0 flex-col border-r border-slate-100 bg-slate-50/60">
-              {listaHistorial}
+            <aside
+              onMouseEnter={() => setHistorialAsomado(true)}
+              onMouseLeave={() => setHistorialAsomado(false)}
+              className={cn('hidden md:flex relative shrink-0 flex-col border-r border-slate-100 bg-slate-50/60 transition-[width] duration-200',
+                historialFijo ? 'w-52' : 'w-10')}
+            >
+              {historialFijo ? (
+                listaHistorial
+              ) : (
+                <>
+                  {/* LA TIRA. Un botón para fijarlo y el número de
+                      conversaciones que hay: sin el número, una tira vacía y
+                      una tira con veinte charlas dentro se ven igual. */}
+                  <button
+                    onClick={() => setHistorialFijo(true)}
+                    title="Historial de conversaciones"
+                    className="w-full py-2 grid place-items-center text-slate-400 hover:text-emerald-700 hover:bg-white transition-colors"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </button>
+                  {historial.length > 0 && (
+                    <span className="text-[9px] font-black text-slate-300 text-center">{historial.length}</span>
+                  )}
+                  <button
+                    onClick={() => newConversation()}
+                    title="Nueva conversación"
+                    className="mt-1 w-full py-2 grid place-items-center text-slate-400 hover:text-emerald-700 hover:bg-white transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+
+                  {/* SEMIDESPLEGADO: se asoma ENCIMA de la conversación, no
+                      empujándola. Si empujara, el texto que estás leyendo se
+                      movería solo por pasar el ratón cerca del borde. */}
+                  {historialAsomado && (
+                    <div className="absolute inset-y-0 left-0 w-48 z-20 bg-white border-r border-slate-200 shadow-2xl flex flex-col">
+                      <div className="flex-1 min-h-0">{listaHistorial}</div>
+                      <button
+                        onClick={() => setHistorialFijo(true)}
+                        className="shrink-0 px-3 py-2 border-t border-slate-100 text-[10px] font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 inline-flex items-center gap-1.5"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" /> Dejarlo abierto
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </aside>
             {historialALaVista && (
               <>

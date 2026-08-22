@@ -130,7 +130,10 @@ export default function Explorar() {
 
   const [items, setItems] = useState<Publicacion[]>([]);
   const [cargando, setCargando] = useState(true);
-  const [busqueda, setBusqueda] = useState('');
+  // El buscador arranca con lo que traiga la dirección (`?q=`): es lo que
+  // permite que un enlace de fuera —el buscador del chat— deje esta lista ya
+  // filtrada por lo que se buscó.
+  const [busqueda, setBusqueda] = useState(() => searchParams.get('q') || '');
   const [tipo, setTipo] = useState<string>('Todo');
   /** El objetivo elegido en la tira de arriba, o null para «Todos». */
   const [objetivo, setObjetivo] = useState<string | null>(null);
@@ -195,6 +198,32 @@ export default function Explorar() {
       .catch(() => setPapelera([]));
 
   useEffect(() => { if (modo === 'mias' && user) cargarPapelera(); }, [modo, user]);
+
+  // ══ ABRIR UNA PUBLICACIÓN DESDE FUERA ═════════════════════════════════════
+  // (2026-08-22) El buscador del chat devuelve publicaciones y hay que poder
+  // pinchar en una. No hay ruta propia por publicación —se abren en una ficha
+  // encima de esta lista—, así que la dirección es esta misma con `?abrir=`.
+  //
+  // SI NO ESTÁ, SE DICE. Puede haberse archivado, o no entrar en el filtro de
+  // ahora; entonces sale un aviso en vez de dejar la lista quieta, que desde
+  // fuera se ve igual que un enlace roto.
+  const [noEncontrada, setNoEncontrada] = useState(false);
+  const pedida = searchParams.get('abrir');
+  useEffect(() => {
+    if (!pedida || cargando) return;
+    const p = items.find(i => i.id === pedida);
+    if (p) {
+      setAbierta({ pub: p, editar: false });
+      setNoEncontrada(false);
+      // Se quita de la dirección: si se quedara, cerrar la ficha y recargar
+      // la volvería a abrir sola.
+      const q = new URLSearchParams(searchParams); q.delete('abrir');
+      setSearchParams(q, { replace: true });
+    } else {
+      setNoEncontrada(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedida, cargando, items]);
 
   // Cerrar cualquier menú/popover flotante al pulsar fuera.
   useEffect(() => {
@@ -858,6 +887,16 @@ export default function Explorar() {
           )}
         </div>
       </div>
+
+      {noEncontrada && (
+        <div className="mx-auto max-w-5xl px-4 mb-3">
+          <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+            No he podido abrir esa publicación aquí: puede estar archivada, o quedar fuera de lo que estás viendo ahora.{' '}
+            <button onClick={() => { setNoEncontrada(false); const q = new URLSearchParams(searchParams); q.delete('abrir'); setSearchParams(q, { replace: true }); }}
+              className="font-black underline">Entendido</button>
+          </p>
+        </div>
+      )}
 
       {abierta && (
         <FichaPublicacion

@@ -481,9 +481,11 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       <button
         onClick={() => setEditandoMenu(true)}
         title="Editar el menú"
-        className="shrink-0 flex items-center gap-2 px-3 py-2.5 border-t border-slate-100 text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+        // Misma letra y mismo trazo que una fila del menú: es una fila más,
+        // solo que vive abajo.
+        className="shrink-0 flex items-center gap-2 px-3.5 py-2.5 border-t border-slate-100 text-[13px] font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
       >
-        <Settings className="w-4 h-4 shrink-0" />
+        <Settings strokeWidth={1.75} className="shrink-0" style={{ width: 20, height: 20 }} />
         <span>Editar menú</span>
       </button>
 

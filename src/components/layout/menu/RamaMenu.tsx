@@ -5,6 +5,21 @@
 // «Tareas», que despliega «Ducha». Es la generalización del menú de los 14
 // objetivos del mapa, que hacía esto con cuatro niveles escritos a mano.
 //
+// TODAS LAS FILAS SE VEN IGUAL (2026-08-22, Eugenio: «haz que el menú
+// izquierdo sea homogéneo en cuanto al color y grosor de los iconos y las
+// letras, utiliza como referencia el estilo de los proyectos»).
+//
+// Había dos maneras de pintar el mismo icono. Los de los PROYECTOS venían por
+// `insignia` y los dibujaba `Icono`: trazo 1,75 y el color del texto, o sea
+// oscuros. Los de las demás secciones venían por `icono` y se pintaban a mano
+// con `text-slate-400` y el trazo 2 de fábrica: más gordos y más pálidos. Dos
+// caminos, dos aspectos, en filas que están una encima de otra.
+//
+// Ahora hay UN estilo: 20 px, trazo 1,75, y el color lo pone la fila —no el
+// icono— así que icono y letra siempre van del mismo color. Lo pone la fila
+// porque es la fila la que sabe si está activa; si lo decidiera cada icono,
+// habría que acordarse de cambiarlo en dos sitios cada vez.
+//
 // Plegado el menú (solo iconos), una rama NO se despliega: no hay sitio para
 // enseñar hijos en 56 px. Se pinta el icono con su nombre en el `title`, que
 // es lo que sale al pasar el ratón por encima.
@@ -89,7 +104,7 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
             pequeños, y plegado el menú el icono es lo ÚNICO que se ve. */}
         {icono
           ? <IconoElemento valor={icono} tamano={20} />
-          : <Icono className="w-5 h-5" />}
+          : <Icono strokeWidth={1.75} style={{ width: 20, height: 20 }} />}
       </button>
     );
   }
@@ -151,15 +166,14 @@ export default function RamaMenu({ nodo, nivel = 0, colapsado, activo, onAbrir, 
         <button
           onClick={() => (nodo.destino ? onAbrir(nodo) : alternar())}
           title={label}
-          className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left"
+          // EL COLOR SE PONE AQUÍ, UNA VEZ, y lo heredan el icono y la letra.
+          className={cn('flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left',
+            esActiva ? 'text-emerald-700' : 'text-slate-700')}
         >
           {icono
             ? <IconoElemento valor={icono} tamano={20} />
-            : <Icono className={cn('w-5 h-5 shrink-0', esActiva ? 'text-emerald-600' : 'text-slate-400')} />}
-          <span className={cn('flex-1 truncate text-[13px] font-bold',
-            esActiva ? 'text-emerald-700' : 'text-slate-700')}>
-            {label}
-          </span>
+            : <Icono strokeWidth={1.75} className="shrink-0" style={{ width: 20, height: 20 }} />}
+          <span className="flex-1 truncate text-[13px] font-bold">{label}</span>
           {nodo.punto && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', nodo.punto)} />}
           {typeof nodo.cuantos === 'number' && nodo.cuantos > 0 && (
             <span className="text-[10px] font-bold text-slate-400 shrink-0">{nodo.cuantos}</span>
