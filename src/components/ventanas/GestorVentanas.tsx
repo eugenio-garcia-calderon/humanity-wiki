@@ -438,8 +438,11 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
     window.addEventListener('humanity:abrir-ventana', alAbrir);
     window.addEventListener('humanity:pulsar-ventana', alPulsar);
     const alCerrarTodas = () => cerrarTodas();
+    // Apartarlas sin perderlas: se quedan en la barra de arriba, a un clic.
+    const alMinimizarTodas = () => setVentanas(vs => vs.map(v => ({ ...v, minimizada: true })));
     window.addEventListener('humanity:cerrar-ventana', alCerrar);
     window.addEventListener('humanity:cerrar-todas', alCerrarTodas);
+    window.addEventListener('humanity:minimizar-todas', alMinimizarTodas);
     window.addEventListener('humanity:maximizar-ventana', alMaximizar);
     window.addEventListener('humanity:ordenar-ventanas', alOrdenar);
     // El menú ☰ de CUALQUIER página puede dejar una apertura apuntada
@@ -455,6 +458,7 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       window.removeEventListener('humanity:pulsar-ventana', alPulsar);
       window.removeEventListener('humanity:cerrar-ventana', alCerrar);
       window.removeEventListener('humanity:cerrar-todas', alCerrarTodas);
+      window.removeEventListener('humanity:minimizar-todas', alMinimizarTodas);
       window.removeEventListener('humanity:maximizar-ventana', alMaximizar);
       window.removeEventListener('humanity:ordenar-ventanas', alOrdenar);
     };
