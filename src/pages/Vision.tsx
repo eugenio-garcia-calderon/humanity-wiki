@@ -132,6 +132,7 @@ const MOTIVO_LABEL: Record<string, string> = {
   gasto_servicio: 'Servicio de la plataforma',
   compra_con_puntos: 'Compra en el mercado pagada con puntos',
   venta_en_puntos: 'Venta cobrada en puntos',
+  comision_puntos: 'Comisión de la plataforma (en puntos)',
 };
 
 /**

@@ -46,7 +46,7 @@ const SECCIONES: { titulo: string; parrafos: string[] }[] = [
     titulo: '4 · Cómo se obtiene y cómo circula',
     parrafos: [
       'Se obtiene al crear la cuenta (regalo de bienvenida), cuando otras personas ven tus publicaciones públicas, y comprándolo dentro de la plataforma. El precio de venta se publica en cada momento y puede cambiar; ninguna compra pasada garantiza el precio de las siguientes.',
-      'Piloto de transferencias [PENDIENTE de activación por decisión del emisor]: durante una fase de prueba con un grupo limitado de usuarios (~1.000), los puntos podrán enviarse entre cuentas de la plataforma, con un tope diario por persona y quedando cada envío anotado en el libro de movimientos de las dos cuentas. Fuera de la plataforma el punto no circula.',
+      'Transferencias entre personas (activadas el 23 de agosto de 2026 como piloto, por decisión del emisor): los puntos pueden enviarse entre cuentas de la plataforma, con un tope diario por persona y quedando cada envío anotado en el libro de movimientos de las dos cuentas. También pueden pagar compras en el mercado cuando el vendedor acepta puntos; en ese caso la plataforma retiene una comisión en puntos (2,5 %, la mitad de la comisión de las ventas en euros) que queda anotada en su propia cuenta del libro. Fuera de la plataforma el punto no circula y nunca se canjea por euros.',
       'El abanico de productos y servicios que aceptan puntos durante el piloto es limitado y está publicado dentro de la plataforma. [PENDIENTE: la lista concreta del piloto la decide el emisor.]',
     ],
   },

@@ -53,7 +53,11 @@ const NO_ES = [
   { titulo: 'No es una inversión', texto: 'No promete revalorizarse ni da derecho a beneficios. Existe para usarse dentro de la plataforma.' },
   { titulo: 'No es propiedad de hardware', texto: 'El diseño ancla el punto a la capacidad que producen las máquinas (guardar, procesar), nunca a poseer un porcentaje de un servidor.' },
   { titulo: 'No es dinero electrónico ni un criptoactivo', texto: 'No circula fuera de la plataforma y hoy no existe ningún token emitido en ninguna cadena.' },
-  { titulo: 'No es transferible entre personas', texto: 'Los puntos no se pueden enviar a otra cuenta. Si algún día cambiara, se anunciaría aquí antes, con su marco legal delante.' },
+  // Hasta el 2026-08-23 esta tarjeta decía «No es transferible entre personas».
+  // Eugenio decidió que sí lo sea (piloto): se pueden enviar puntos a otra
+  // cuenta de la plataforma y pagar con ellos en el mercado. Lo que sigue sin
+  // existir, y es la negación que de verdad sostiene el diseño, es el canje.
+  { titulo: 'No se canjea por euros', texto: 'Los puntos se pueden enviar a otras personas de la plataforma y gastar en ella (servicios y mercado), pero nunca se cambian de vuelta a euros: es lo que los mantiene como vale de uso y no como medio de pago.' },
 ];
 
 const FASES = [
@@ -134,7 +138,10 @@ export default function Tokenomics() {
         <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
           Un sistema de puntos <strong>interno</strong>, sin blockchain. Al crear tu cuenta recibes
           un regalo de bienvenida; ganas céntimos de punto cuando otras personas ven tus
-          publicaciones públicas; puedes comprar más; y cada movimiento queda anotado con su
+          publicaciones públicas; puedes comprar más; desde el 23 de agosto de 2026 puedes
+          <strong> enviarlos a otras personas</strong> de la plataforma (piloto, con tope diario) y
+          <strong> pagar con ellos en el mercado</strong> cuando el vendedor los acepta — el vendedor
+          cobra en puntos con la comisión de la plataforma a la mitad; y cada movimiento queda anotado con su
           motivo en tu libro de movimientos. Los usos del punto — almacenamiento, cómputo,
           modelos avanzados de IA, descuentos — <strong>se están construyendo</strong>: se irán
           activando uno a uno y esta página lo reflejará cuando cada uno sea real.
