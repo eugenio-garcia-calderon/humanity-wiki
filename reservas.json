@@ -79,12 +79,6 @@
       "desde": "2026-08-22T18:35:04.124Z"
     },
     {
-      "agente": "prog1",
-      "ruta": "src/components/juego/texturas.ts",
-      "motivo": "la misma foto se subia a la GPU hasta 8 veces: 690 MB",
-      "desde": "2026-08-22T18:45:55.447Z"
-    },
-    {
       "agente": "dashboard",
       "ruta": "equipo/DASHBOARD.md",
       "motivo": "para que se me pueda verificar en quien",
