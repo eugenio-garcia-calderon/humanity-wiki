@@ -35,6 +35,7 @@
 
 import { vigilarSinConexion } from "./avisoSinConexion";
 import { ofrecerInstalacion } from "./avisoInstalar";
+import { vigilarVersion } from "./avisoVersionNueva";
 
 export function registrarPWA() {
   if (!("serviceWorker" in navigator)) return;
@@ -42,6 +43,13 @@ export function registrarPWA() {
   // El aviso se monta siempre que haya service worker: es lo que impide que una
   // copia guardada se lea como si fuera de ahora.
   vigilarSinConexion();
+
+  // Y QUE LA APLICACIÓN SEPA CUÁNDO SE HA QUEDADO VIEJA. Sin esto, una copia
+  // guardada puede enseñar la versión de ayer indefinidamente. Pasó el
+  // 2026-08-22: tres despliegues en verde, el código demostrablemente en el
+  // fichero que servía el servidor, y el iPhone de Eugenio enseñando todavía la
+  // aplicación de antes — «no ha cambiado nada».
+  vigilarVersion();
 
   // Y el empujón para instalarla en un iPhone, que es el único sitio donde el
   // navegador no lo ofrece por su cuenta.
@@ -68,7 +76,10 @@ export function registrarPWA() {
   // assets the first paint needs.
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/sw.js", { scope: "/" })
+      // `updateViaCache: "none"`: el servidor manda `Cache-Control: max-age=14400`
+      // para /sw.js, o sea que un arreglo urgente en el worker tardaría cuatro
+      // horas en llegar a un móvil. Así el navegador lo pide siempre de verdad.
+      .register("/sw.js", { scope: "/", updateViaCache: "none" })
       .then((r) => console.info("[pwa] activo, ámbito", r.scope))
       .catch((e) => console.warn("[pwa] no se pudo registrar:", e.message));
   });
