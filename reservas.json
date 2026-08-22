@@ -77,6 +77,12 @@
       "ruta": "src/contexts/AuthContext.tsx",
       "motivo": "un refresh de sesion dispara 4 peticiones: user cambia de identidad sin cambiar de contenido",
       "desde": "2026-08-22T20:01:33.398Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "fase 2 economia: resenas de productos",
+      "desde": "2026-08-22T20:03:10.654Z"
     }
   ]
 }
