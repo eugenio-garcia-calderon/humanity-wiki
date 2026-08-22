@@ -34,3 +34,7 @@ SLL Certificate Cloudfare/
 *.p12
 *.pfx
 origin-cert*
+
+# Certificado de origen de Cloudflare: nunca al repositorio
+deploy/certs/*
+!deploy/certs/LEEME.txt

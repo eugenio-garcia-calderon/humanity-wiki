@@ -3795,6 +3795,40 @@ Verified against humanity.wiki: creating a note with the token answers 200 and
 lands as team work attributed to «Claude 1»; creating a project with the same
 token answers 401. The test note was removed and the board is back to its nine.
 
+## 2026-08-22 — A published page finally has a page (Programador 2)
+
+The publishing API was finished and the addresses worked, but **there was no
+screen behind them**. `/@handle/slug` answered HTTP 200 because the server hands
+the whole SPA back for any path, so the test "does the address work?" passed
+while the visitor got the application instead of the page. It is the project's
+own documented trap — a 200 that means nothing was found — and it took opening
+the URL in a browser to see it.
+
+- **New** `src/pages/PaginaPublica.tsx`: the reader's view. Title, author, date,
+  content, and a link home. It renders **outside `Layout`**: whoever arrives has
+  no account and no projects, and the work sidebar is not their life (B3, B41).
+- **New** `src/components/knowledge/BloquesLectura.tsx`: read-only block
+  rendering. `Documento.tsx` knows how to paint blocks but only as an editor,
+  tangled with the active block, autosave and cursor focus across 1.974 lines.
+  `CLASES_TEXTO` now lives in the reader and the editor imports it from there:
+  one definition, so a heading cannot end up a different size on the public page
+  than in the editor.
+- **Routing**: React Router 7 does not allow a fixed prefix glued to a parameter
+  inside one segment (`/@:handle` is not a valid path), so the route is
+  `:arroba/:slug` and the `@` is checked inside. Verified that real two-segment
+  routes still win: `/proyectos/:slug` renders the project page, not this one.
+- **`DataProvider`, `EditProvider` and `DesignProvider` moved inside the
+  `Layout` route.** They wrapped the whole application, so opening a shared page
+  fired the eight workshop loads — territories, objectives, challenges,
+  solutions, projects, organizations, causes, indicators. Measured on the page
+  itself: **10 calls before, 2 after** (the resolver and `auth/me`).
+
+Verified in the browser at 1280 and at 375 px: content renders, the missing-page
+branch says so, `robots` follows the author's choice, no horizontal overflow
+(text lane 335 px of 375). `npx tsc --noEmit` clean, `npm run build` passes.
+
+Still open: the subdomain `nombre.humanity.wiki` answers **525** because the
+Cloudflare origin certificate is not on the server yet. The path address works.
 ---
 
 ## 2026-08-22 (IX) — The web gets light: 1.137 KB → 324 KB to open it
