@@ -3921,3 +3921,37 @@ refused, and permission is re-checked **at execution**, not only when proposed.
 Cleans up after itself: user, session, proposed actions and every row created —
 verified zero left behind. Refuses to run against anything but the local
 database.
+
+---
+
+## 2026-08-22 (XI) — The open models' cache: it existed, and nobody was reading it
+
+The third item on the list was «add prompt caching for Together». Checking
+their documentation first changed the task: **their cache is automatic.** No
+parameter, no header, no toggle — the provider keeps the *prefixes* of what you
+send and bills at a reduced rate whatever matches something still warm. Only the
+longest common prefix counts: from the first differing byte, full price.
+
+So there was nothing to switch on. What there was:
+
+- **A comment that said the opposite.** «esta API no tiene la caché de prompts
+  de Anthropic» was true of Anthropic's *explicit* mechanism and false about
+  what actually happens. Anyone reading it would have concluded the stable/
+  variable split was pointless here — and moved the date to the top.
+- **The split was already right, by luck of a rule written for another
+  provider.** The stable part goes first and the date, the user and the context
+  after it. That is exactly what a prefix cache needs. Now the file says so, so
+  nobody undoes it.
+- **Nobody was reading what came back.** The provider reports how much it reread
+  from cache and we ignored it. Without that number the cache could be working —
+  or not — and the cost panel would say the same either way.
+
+Now the reread tokens are read, recorded and **billed at their own price**
+(`cacheado` in the catalogue, ≈1/10 of input). If the field is missing, the full
+price is charged: better for the panel to overstate than to promise a saving
+that is not there.
+
+**Honest size of it**: at today's volume this saves céntimos — 44 requests
+through the fast model. It matters when there are a hundred people using the
+chat daily. What it does buy today is that the saving is *visible*: from now on
+the cost table can show whether the cache is hitting at all.
