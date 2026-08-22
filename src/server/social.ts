@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { avisar, duenoDe, avisarMenciones } from './avisos';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { aiReplyToComment } from './knowledge.js';
@@ -297,6 +298,33 @@ export function registerSocialRoutes(app: Express, db: any) {
       `);
       res.json(row.rows[0]);
 
+      // AVISAR (2026-08-21). Va DESPUÉS de responder y sin `await` en el
+      // camino de la respuesta: quien comenta no tiene que esperar a que
+      // suene la campana de otro.
+      const padre = (req.body || {}).parent_comment_id || null;
+      void (async () => {
+        if (padre) {
+          // Responder avisa a quien escribió el comentario, no al dueño de la
+          // publicación: son dos conversaciones distintas.
+          await avisar(db, {
+            paraQuien: await duenoDe(db, 'comments', padre), dePartede: req.user!.id,
+            tipo: 'respuesta', entidadTipo: 'publications', entidadId: req.params.id,
+            datos: { comentario: id, texto: String(body).slice(0, 140) },
+          });
+        } else {
+          await avisar(db, {
+            paraQuien: await duenoDe(db, 'publications', req.params.id), dePartede: req.user!.id,
+            tipo: 'comentario', entidadTipo: 'publications', entidadId: req.params.id,
+            datos: { comentario: id, texto: String(body).slice(0, 140) },
+          });
+        }
+        await avisarMenciones(db, {
+          texto: String(body), dePartede: req.user!.id,
+          entidadTipo: 'publications', entidadId: req.params.id,
+          datos: { comentario: id, texto: String(body).slice(0, 140) },
+        });
+      })();
+
       // La IA de Conocimiento responde también en el Muro (en segundo plano).
       if (req.user!.id !== 'U_IA_CONOCIMIENTO') {
         void aiReplyToComment(db, {
@@ -348,7 +376,75 @@ export function registerSocialRoutes(app: Express, db: any) {
         VALUES (${req.user!.id}, ${entity_type}, ${entity_id}, ${kind})
       `);
       res.json({ reacted: true });
+      // Solo al PONER la reacción, nunca al quitarla: «a alguien ya no le
+      // gusta lo tuyo» no es una noticia que nadie quiera recibir.
+      void (async () => {
+        await avisar(db, {
+          paraQuien: await duenoDe(db, entity_type, entity_id), dePartede: req.user!.id,
+          tipo: 'reaccion', entidadTipo: entity_type, entidadId: entity_id, datos: { kind },
+        });
+      })();
     } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * GET /api/circulos — las personas que salen arriba de la portada.
+   *
+   * (2026-08-21, Eugenio: «aparecerán círculos modo Instagram de las personas
+   * que tienes agregadas, y si no tienes agregado a nadie te aparecen canales
+   * relevantes a los que siga mucha gente».)
+   *
+   * DOS LISTAS DISTINTAS Y SE DICE CUÁL ES CUÁL. Si sigues a alguien, salen
+   * los tuyos. Si no sigues a nadie, salen los que más publican y más
+   * seguidores tienen — pero la respuesta trae `origen`, para que la pantalla
+   * pueda poner «Sugerencias» encima y no hacerte creer que ya sigues a gente
+   * que no conoces. Un círculo sugerido y uno tuyo se ven igual; la diferencia
+   * la tiene que decir la interfaz.
+   *
+   * SIN INVENTAR RELEVANCIA. «Canales relevantes» aquí es, medible: cuánta
+   * gente les sigue y cuánto han publicado. No hay ningún otro dato con el que
+   * ordenar, y ordenar por algo que no se tiene sería fingir un criterio.
+   */
+  app.get('/api/circulos', async (req: Request, res: Response) => {
+    try {
+      const yo = req.user?.id || null;
+      const conteos = sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto,
+               (SELECT count(*)::int FROM follows f WHERE f.entity_type = 'users' AND f.entity_id = u.id) AS seguidores,
+               (SELECT count(*)::int FROM publications p
+                 WHERE p.author_user_id = u.id AND p.archived_at IS NULL AND p.deleted_at IS NULL)
+             + (SELECT count(*)::int FROM knowledge_windows w
+                 WHERE w.creator_user_id = u.id AND w.archived_at IS NULL AND w.deleted_at IS NULL AND w.publico) AS publicaciones
+        FROM users u
+      `;
+
+      if (yo) {
+        const mios = await db.execute(sql`
+          WITH gente AS (${conteos})
+          SELECT g.* FROM gente g
+          JOIN follows f ON f.entity_type = 'users' AND f.entity_id = g.id AND f.follower_user_id = ${yo}
+          ORDER BY g.publicaciones DESC, g.nombre
+          LIMIT 20
+        `);
+        if (mios.rows.length) return res.json({ origen: 'seguidos', personas: mios.rows });
+      }
+
+      // Nadie seguido todavía: los que más se siguen y más publican. Se
+      // excluye a quien mira —seguirte a ti mismo no es una sugerencia— y a
+      // quien no ha publicado nada, porque un círculo vacío no lleva a ningún
+      // sitio.
+      const sugeridos = await db.execute(sql`
+        WITH gente AS (${conteos})
+        SELECT g.* FROM gente g
+        WHERE (${yo}::text IS NULL OR g.id <> ${yo}) AND g.publicaciones > 0
+        ORDER BY g.seguidores DESC, g.publicaciones DESC, g.nombre
+        LIMIT 20
+      `);
+      res.json({ origen: 'sugeridos', personas: sugeridos.rows });
+    } catch (e: any) {
+      console.error('circulos:', e?.cause?.message || e);
       res.status(500).json({ error: e.message });
     }
   });
@@ -367,6 +463,12 @@ export function registerSocialRoutes(app: Express, db: any) {
       }
       await db.execute(sql`INSERT INTO saves (user_id, entity_type, entity_id) VALUES (${req.user!.id}, ${entity_type}, ${entity_id})`);
       res.json({ saved: true });
+      void (async () => {
+        await avisar(db, {
+          paraQuien: await duenoDe(db, entity_type, entity_id), dePartede: req.user!.id,
+          tipo: 'guardado', entidadTipo: entity_type, entidadId: entity_id,
+        });
+      })();
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -396,9 +498,135 @@ export function registerSocialRoutes(app: Express, db: any) {
         VALUES (${req.user!.id}, ${entity_type}, ${entity_id})
       `);
       res.json({ following: true });
+      // Solo cuando se sigue a una PERSONA: seguir un reto o un indicador no
+      // tiene a quién avisar.
+      if (entity_type === 'users') {
+        void avisar(db, {
+          paraQuien: entity_id, dePartede: req.user!.id,
+          tipo: 'seguidor', entidadTipo: 'users', entidadId: req.user!.id,
+        });
+      }
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LO QUE LE FALTABA A LA RED SOCIAL (2026-08-21)
+  // ══════════════════════════════════════════════════════════════════════════
+  // Se podía comentar, responder, reaccionar, guardar, seguir y denunciar. No
+  // se podía: corregir un comentario, borrarlo, reaccionar a un comentario,
+  // ver quién sigue a quién, ver lo que has guardado, ni saber cuántos avisos
+  // tienes sin leer. Todo eso son cosas que la gente da por hechas y cuya
+  // ausencia no se reporta como fallo: simplemente se deja de usar.
+
+  /** Corregir un comentario propio. Una errata no debería obligar a borrar y
+   *  volver a escribir, que además pierde las respuestas colgadas debajo. */
+  app.put('/api/comments/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const body = String((req.body || {}).body || '').trim();
+      if (!body) return res.status(400).json({ error: 'El comentario no puede quedar vacío.' });
+      const c = await db.execute(sql`SELECT author_user_id FROM comments WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!c.rows.length) return res.status(404).json({ error: 'Ese comentario no existe.' });
+      // Un administrador puede BORRAR lo de otro, pero no reescribirlo: poner
+      // palabras en boca de alguien no es moderar.
+      if ((c.rows[0] as any).author_user_id !== req.user!.id) {
+        return res.status(403).json({ error: 'Solo quien lo escribió puede editarlo.' });
+      }
+      await db.execute(sql`
+        UPDATE comments SET body = ${body}, updated_at = now(), updated_by = ${req.user!.id},
+                            version = coalesce(version, 1) + 1
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, body, editado: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quitar un comentario. Se ARCHIVA (regla 6 de la Constitución): las
+   *  respuestas que cuelgan de él siguen existiendo y no se quedan huérfanas. */
+  app.delete('/api/comments/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const c = await db.execute(sql`SELECT author_user_id FROM comments WHERE id = ${req.params.id} AND archived_at IS NULL`);
+      if (!c.rows.length) return res.status(404).json({ error: 'Ese comentario no existe.' });
+      const suyo = (c.rows[0] as any).author_user_id === req.user!.id;
+      if (!suyo && (req.user!.roleLevel ?? 0) < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Solo quien lo escribió o un administrador pueden quitarlo.' });
+      }
+      await db.execute(sql`UPDATE comments SET archived_at = now() WHERE id = ${req.params.id}`);
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quién sigue a alguien, y a quién sigue. Dos listas que toda red social
+   *  tiene y que aquí solo existían como un número en el perfil. */
+  app.get('/api/users/:id/seguidores', async (req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto, f.created_at
+        FROM follows f JOIN users u ON u.id = f.follower_user_id
+        WHERE f.entity_type = 'users' AND f.entity_id = ${req.params.id}
+        ORDER BY f.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get('/api/users/:id/siguiendo', async (req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT u.id, u.display_name AS nombre, u.avatar_url AS foto, f.created_at
+        FROM follows f JOIN users u ON u.id = f.entity_id
+        WHERE f.entity_type = 'users' AND f.follower_user_id = ${req.params.id}
+        ORDER BY f.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Lo que has guardado. Se podía guardar y no había forma de volver a
+   *  encontrarlo: exactamente el mismo defecto que tenían los archivos. */
+  app.get('/api/guardados', async (req: Request, res: Response) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const rows = await db.execute(sql`
+        SELECT s.entity_type, s.entity_id, s.created_at,
+               coalesce(p.title, w.title, g.title, m.title) AS titulo,
+               coalesce(u1.display_name, u2.display_name, u3.display_name, u4.display_name) AS autor
+        FROM saves s
+        LEFT JOIN publications p      ON s.entity_type = 'publications'      AND p.id = s.entity_id AND p.archived_at IS NULL
+        LEFT JOIN knowledge_windows w ON s.entity_type = 'knowledge_windows' AND w.id = s.entity_id AND w.archived_at IS NULL
+        LEFT JOIN knowledge_graphs g  ON s.entity_type = 'knowledge_graphs'  AND g.id = s.entity_id AND g.archived_at IS NULL
+        LEFT JOIN user_maps m         ON s.entity_type = 'user_maps'         AND m.id = s.entity_id AND m.archived_at IS NULL
+        LEFT JOIN users u1 ON u1.id = p.author_user_id
+        LEFT JOIN users u2 ON u2.id = w.creator_user_id
+        LEFT JOIN users u3 ON u3.id = g.creator_user_id
+        LEFT JOIN users u4 ON u4.id = m.creator_user_id
+        WHERE s.user_id = ${req.user!.id}
+        ORDER BY s.created_at DESC LIMIT 100
+      `);
+      // LO QUE YA NO EXISTE SE DICE, no se esconde. Si guardaste algo y quien
+      // lo escribió lo archivó, la fila sigue aquí con `titulo` a null: la
+      // pantalla puede decir «ya no está» en vez de enseñar un hueco.
+      res.json(rows.rows.map((r: any) => ({ ...r, existe: !!r.titulo })));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** Quién ha reaccionado a algo. «12 apoyos» sin poder ver quiénes es un
+   *  número; con la lista es gente. */
+  app.get('/api/reacciones', async (req: Request, res: Response) => {
+    try {
+      const { entity_type, entity_id } = req.query as any;
+      if (!entity_type || !entity_id) return res.status(400).json({ error: 'Faltan entity_type y entity_id.' });
+      const rows = await db.execute(sql`
+        SELECT r.kind, u.id, u.display_name AS nombre, u.avatar_url AS foto, r.created_at
+        FROM reactions r LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.entity_type = ${entity_type} AND r.entity_id = ${entity_id}
+        ORDER BY r.created_at DESC LIMIT 100
+      `);
+      res.json(rows.rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   app.get('/api/notifications', async (req: Request, res: Response) => {
@@ -414,9 +642,32 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  /** Cuántos sin leer. Es lo único que la campana necesita saber, y pedir las
+   *  50 notificaciones enteras cada minuto para contarlas sería traerse una
+   *  lista para mirar un número. */
+  app.get('/api/notifications/sin-leer', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.json({ n: 0 });
+      const r = await db.execute(sql`
+        SELECT count(*)::int AS n FROM notifications WHERE user_id = ${req.user.id} AND read_at IS NULL
+      `);
+      res.json({ n: (r.rows[0] as any).n });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   app.post('/api/notifications/read', async (req: Request, res: Response) => {
     try {
       if (!requireAuth(req, res)) return;
+      // Con `id` se marca UNA; sin él, todas. Marcar todas al abrir la campana
+      // haría desaparecer las que no has llegado a leer.
+      const uno = (req.body || {}).id;
+      if (uno) {
+        await db.execute(sql`
+          UPDATE notifications SET read_at = now()
+          WHERE id = ${Number(uno)} AND user_id = ${req.user!.id} AND read_at IS NULL
+        `);
+        return res.json({ success: true });
+      }
       await db.execute(sql`UPDATE notifications SET read_at = now() WHERE user_id = ${req.user!.id} AND read_at IS NULL`);
       res.json({ success: true });
     } catch (e: any) {
@@ -446,7 +697,14 @@ export function registerSocialRoutes(app: Express, db: any) {
     try {
       const u = await db.execute(sql`
         SELECT id, uuid, display_name, name, avatar_url, banner_url, bio, location, website,
-               socials, specialties, organization_id, reputation, impact_score, role_level, created_at
+               socials, specialties, organization_id, reputation, impact_score, role_level, created_at,
+               -- Las tres ubicaciones y los objetivos elegidos (2026-08-22).
+               coalesce(ubicaciones, '[]'::jsonb) AS ubicaciones,
+               coalesce(objetivos,   '[]'::jsonb) AS objetivos,
+               -- SOLO esta clave de los ajustes. El resto de ui_settings es
+               -- privado (favoritos del navegador, anchos de panel) y sacarlo
+               -- entero aquí lo publicaría sin querer.
+               ui_settings->'escaparate' AS escaparate
         FROM users WHERE id = ${req.params.id} AND archived_at IS NULL
       `);
       if (!u.rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -466,6 +724,140 @@ export function registerSocialRoutes(app: Express, db: any) {
         },
       });
     } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
+  // EL ESCAPARATE DE UNA PERSONA (2026-08-20, petición de Eugenio: «Mi Perfil
+  // tiene que ser un escaparate donde puedas arrastrar y soltar tus grafos,
+  // proyectos, archivos, mapas y mundos, con tu muro público»).
+  // ==========================================================================
+  // Devuelve TODO lo que esa persona ha hecho, de las cuatro tablas donde vive,
+  // en un solo formato. El orden y lo que se enseña lo decide su dueño y se
+  // guarda en `users.ui_settings->'escaparate'`; aquí solo se dice qué existe.
+  //
+  // DOS CANDADOS, no uno. Que el dueño arrastre una ficha al escaparate NO
+  // publica lo que hay detrás: una cosa privada sigue siendo privada aunque
+  // esté colocada. Para quien no eres tú, esta ruta filtra por la privacidad
+  // REAL de cada objeto (`status`, `publico`); el orden del dueño solo decide
+  // cómo se colocan las que ya podían verse. Así, tirar de una ficha nunca
+  // puede destapar sin querer un proyecto privado.
+  app.get('/api/users/:id/escaparate', async (req: Request, res: Response) => {
+    try {
+      const de = req.params.id;
+      const soyYo = req.user?.id === de || (req.user?.roleLevel ?? 0) >= ROLE.ADMIN;
+
+      const [grafos, proyectos, mapas, mundo] = await Promise.all([
+        db.execute(sql`
+          SELECT g.id, g.title, g.description, g.slug, g.status, g.views, g.updated_at, g.created_at,
+                 (g.center->>'personal') AS personal,
+                 -- La portada: la primera imagen del lienzo y, si no tiene
+                 -- ninguna, la miniatura de su primer vídeo. Misma regla que
+                 -- en la lista de Grafos, para que una cosa se vea igual esté
+                 -- donde esté.
+                 (SELECT w.config->>'image_url' FROM graph_windows gw
+                    JOIN knowledge_windows w ON w.id = gw.window_id
+                   WHERE gw.graph_id = g.id AND w.kind = 'imagen'
+                     AND w.config->>'image_url' IS NOT NULL
+                   ORDER BY w.created_at LIMIT 1) AS portada,
+                 (SELECT w.config->>'youtube_id' FROM graph_windows gw
+                    JOIN knowledge_windows w ON w.id = gw.window_id
+                   WHERE gw.graph_id = g.id AND w.kind = 'video'
+                     AND w.config->>'youtube_id' IS NOT NULL
+                   ORDER BY w.created_at LIMIT 1) AS portada_video
+          FROM knowledge_graphs g
+          WHERE g.creator_user_id = ${de} AND g.archived_at IS NULL AND g.deleted_at IS NULL
+            AND (${soyYo} OR (g.status = 'publicado' AND coalesce(g.center->>'personal','') <> '1'))
+          ORDER BY g.updated_at DESC NULLS LAST, g.created_at DESC LIMIT 60
+        `),
+        db.execute(sql`
+          SELECT p.id, p.titulo, p.descripcion, p.slug, p.publico, p.updated_at, p.created_at,
+                 (SELECT count(*)::int FROM roadmap_items r
+                   WHERE r.proyecto_id = p.id AND r.archived_at IS NULL) AS tarjetas,
+                 -- La primera imagen que alguien pegó en una tarjeta del
+                 -- proyecto. jsonb_path_query_first mira dentro del array de
+                 -- bloques sin tener que traérselo entero a Node.
+                 (SELECT jsonb_path_query_first(r.bloques, '$[*] ? (@.tipo == "imagen").url') #>> '{}'
+                    FROM roadmap_items r
+                   WHERE r.proyecto_id = p.id AND r.archived_at IS NULL
+                     AND r.bloques @? '$[*] ? (@.tipo == "imagen")'
+                   ORDER BY r.orden, r.created_at LIMIT 1) AS portada
+          FROM proyectos p
+          WHERE p.creador_user_id = ${de} AND p.archived_at IS NULL AND p.deleted_at IS NULL
+            AND (${soyYo} OR p.publico)
+          ORDER BY p.updated_at DESC NULLS LAST, p.created_at DESC LIMIT 60
+        `),
+        db.execute(sql`
+          SELECT id, title, description, slug, status, views, updated_at, created_at
+          FROM user_maps
+          WHERE creator_user_id = ${de} AND archived_at IS NULL AND deleted_at IS NULL
+            AND (${soyYo} OR status = 'publicado')
+          ORDER BY updated_at DESC NULLS LAST, created_at DESC LIMIT 60
+        `),
+        // El mundo 3D no es una lista: es UN sitio. Una sola ficha, y solo si
+        // esa persona ha plantado algo en él.
+        db.execute(sql`
+          SELECT count(*)::int AS n, max(coalesce(updated_at, created_at)) AS cuando,
+                 (SELECT url FROM game_world_items i2
+                   WHERE i2.user_id = ${de} AND i2.archived_at IS NULL
+                     AND i2.tipo = 'imagen' AND i2.url IS NOT NULL
+                   ORDER BY i2.created_at DESC LIMIT 1) AS portada
+          FROM game_world_items
+          WHERE user_id = ${de} AND archived_at IS NULL AND tipo <> 'prop'
+        `),
+      ]);
+
+      const corta = (t: string | null, n = 140) =>
+        (t || '').replace(/\s+/g, ' ').trim().slice(0, n) || null;
+
+      const items: any[] = [];
+      for (const g of grafos.rows as any[]) {
+        items.push({
+          clave: `grafo:${g.id}`, tipo: 'grafo', id: g.id,
+          titulo: g.title, resumen: corta(g.description),
+          url: `/esquemas/${g.slug}`, fecha: g.updated_at || g.created_at,
+          privado: g.status !== 'publicado' || g.personal === '1',
+          dato: g.views ? `${g.views} visitas` : null,
+          imagen: g.portada || (g.portada_video ? `https://i.ytimg.com/vi/${g.portada_video}/mqdefault.jpg` : null),
+        });
+      }
+      for (const p of proyectos.rows as any[]) {
+        items.push({
+          clave: `proyecto:${p.id}`, tipo: 'proyecto', id: p.id,
+          titulo: p.titulo, resumen: corta(p.descripcion),
+          url: `/proyectos/${p.slug}`, fecha: p.updated_at || p.created_at,
+          privado: !p.publico,
+          dato: p.tarjetas ? `${p.tarjetas} tarjetas` : null,
+          imagen: p.portada || null,
+        });
+      }
+      for (const m of mapas.rows as any[]) {
+        items.push({
+          clave: `mapa:${m.id}`, tipo: 'mapa', id: m.id,
+          titulo: m.title, resumen: corta(m.description),
+          url: `/mapas/${m.slug}`, fecha: m.updated_at || m.created_at,
+          privado: m.status !== 'publicado',
+          dato: m.views ? `${m.views} visitas` : null,
+          // Un mapa no guarda ninguna imagen: se queda con su color de tipo.
+          imagen: null,
+        });
+      }
+      const w = (mundo.rows[0] || {}) as any;
+      if (w.n > 0) {
+        items.push({
+          clave: 'mundo:propio', tipo: 'mundo', id: 'mundo',
+          titulo: 'Mi Visor 3D', resumen: 'El espacio donde se ven mis proyectos y quién anda en ellos.',
+          url: '/juego', fecha: w.cuando, privado: false,
+          dato: `${w.n} cosas`,
+          imagen: w.portada || null,
+        });
+      }
+
+      items.sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+      res.json({ items });
+    } catch (e: any) {
+      console.error('escaparate error:', e);
       res.status(500).json({ error: e.message });
     }
   });
@@ -510,6 +902,88 @@ export function registerSocialRoutes(app: Express, db: any) {
       res.json(row.rows[0]);
     } catch (e: any) {
       console.error('create product error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PUT /api/products/:id/pizarra — la landing del producto (2026-08-19,
+   * petición de Eugenio). Guarda SOLO los bloques: es una ruta aparte y no un
+   * campo más del POST de arriba porque se llama en cada arrastre, y meterla
+   * en el upsert general reescribiría precio, fotos y enlaces cada vez que
+   * alguien mueve una foto un centímetro.
+   *
+   * Puede editarla QUIEN LA CREÓ, o un administrador. Cualquier otro se lleva
+   * un 403: una landing es la cara pública de un producto.
+   */
+  app.put('/api/products/:id/pizarra', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const fila = await db.execute(sql`
+        SELECT created_by FROM products WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!fila.rows.length) return res.status(404).json({ error: 'Ese producto no existe.' });
+      const suyo = (fila.rows[0] as any).created_by === req.user.id;
+      if (!suyo && (req.user.roleLevel ?? 0) < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Solo quien creó el producto puede editar su página.' });
+      }
+      const bloques = Array.isArray(req.body?.bloques) ? req.body.bloques : [];
+      await db.execute(sql`
+        UPDATE products
+        SET bloques = ${JSON.stringify(bloques)}::jsonb,
+            version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, bloques });
+    } catch (e: any) {
+      console.error('product board error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PUT /api/products/:id/proyecto  { proyecto_id }
+   * Mete un producto en un proyecto, o lo saca (`null`). Es lo que hace que la
+   * sección «Productos» del menú pueda colgar de cada proyecto (2026-08-20).
+   *
+   * DOS COMPROBACIONES, no una: que el producto sea tuyo Y que el proyecto de
+   * destino también. Sin la segunda, cualquiera podría colgar sus productos del
+   * proyecto de otra persona.
+   */
+  app.put('/api/products/:id/proyecto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const pr = await db.execute(sql`
+        SELECT created_by FROM products WHERE id = ${req.params.id} AND archived_at IS NULL
+      `);
+      if (!pr.rows.length) return res.status(404).json({ error: 'Ese producto no existe.' });
+      const esAdmin = (req.user.roleLevel ?? 0) >= ROLE.ADMIN;
+      if ((pr.rows[0] as any).created_by !== req.user.id && !esAdmin) {
+        return res.status(403).json({ error: 'Ese producto no es tuyo.' });
+      }
+
+      const pedido = typeof req.body?.proyecto_id === 'string' && req.body.proyecto_id.trim()
+        ? req.body.proyecto_id.trim() : null;
+      let destino: string | null = null;
+      if (pedido) {
+        const p = await db.execute(sql`
+          SELECT creador_user_id FROM proyectos WHERE id = ${pedido} AND archived_at IS NULL
+        `);
+        if (!p.rows.length) return res.status(404).json({ error: 'Ese proyecto no existe.' });
+        if ((p.rows[0] as any).creador_user_id !== req.user.id && !esAdmin) {
+          return res.status(403).json({ error: 'Ese proyecto no es tuyo.' });
+        }
+        destino = pedido;
+      }
+
+      await db.execute(sql`
+        UPDATE products SET proyecto_id = ${destino},
+          version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      res.json({ ok: true, proyecto_id: destino });
+    } catch (e: any) {
+      console.error('product proyecto error:', e);
       res.status(500).json({ error: e.message });
     }
   });

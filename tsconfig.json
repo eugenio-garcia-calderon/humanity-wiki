@@ -22,5 +22,10 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  // LA PAPELERA NO SE COMPILA (2026-08-22). Lo que hay dentro está retirado
+  // a propósito y la mitad de sus imports ya no existen: comprobarlo sería
+  // pedirle al compilador que valide código que hemos decidido no tener.
+  // Se borra solo a los 30 días (`scripts/papelera.mjs`).
+  "exclude": ["papelera", "dist", "node_modules"]
 }

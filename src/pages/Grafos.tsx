@@ -1,23 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ReactFlow, Background, BackgroundVariant, Controls, Handle, Position, MarkerType,
-  useNodesState, useEdgesState, useStore, BaseEdge, getStraightPath,
-  type Node, type Edge, type NodeProps, type EdgeProps, type ReactFlowInstance,
+  ReactFlow, Background, BackgroundVariant, Controls, MarkerType,
+  useNodesState, useEdgesState,
+  type Node, type Edge, type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-  Network, Eye, AppWindow, User as UserIcon, Plus, Flame, PlayCircle, Sparkles,
-  X, ExternalLink, ZoomIn, Globe2,
+  Network, Eye, AppWindow, User as UserIcon, Plus, Flame,
+  X, ExternalLink, Globe2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import CreateGraphModal from '../components/knowledge/CreateGraphModal';
 import WindowContent from '../components/knowledge/WindowContent';
 import { cn } from '../utils/cn';
 import { relStyle } from '../utils/relationStyle';
+import {
+  SPHERE, CENTER_SPHERE, REL_CIRCLE, REVEAL, ESFERA_CSS,
+  esferaNodeTypes, esferaEdgeTypes, constelacion, relacionesPorVentana, KIND_TINT,
+  type EsferaData,
+} from '../components/knowledge/esferaKit';
 
 // ============================================================================
-// GRAFOS — la PIZARRA INFINITA (2026-08-06, petición del usuario)
+// RED DE DATOS — la PIZARRA INFINITA (2026-08-06, petición del usuario)
 // ============================================================================
 // No hay tarjetas ni páginas que se abran: hay UN solo lienzo infinito.
 // Cada grafo es una ESFERA con su previsualización (portada, título, pulso).
@@ -26,29 +31,17 @@ import { relStyle } from '../utils/relationStyle';
 // se colapsan de nuevo dentro de la esfera y vuelves a la visión general.
 // Solo se cambia de página al entrar en una publicación concreta o al abrir
 // el grafo completo para editarlo.
+//
+// El lenguaje visual (esferas, satélites, círculos de categoría, membrana,
+// electricidad) vive en `components/knowledge/esferaKit` — lo comparte con el
+// explorador del mapa, para que sea el MISMO y no una copia parecida.
 
-const SPHERE = 340;          // diámetro de la esfera de un grafo
-const CENTER_SPHERE = 380;   // diámetro del núcleo
 const ORBIT_X = 1050;        // semieje horizontal del anillo (elipse: la
 const ORBIT_Y = 640;         // pantalla es más ancha que alta)
-// La ESFERA que envuelve a todos los grafos (petición del usuario): una
-// membrana elíptica —una esfera vista en perspectiva— con el núcleo dentro.
+// La ESFERA que envuelve a todos los grafos: una membrana elíptica con el
+// núcleo dentro.
 const SHELL_X = ORBIT_X + SPHERE / 2 + 130;
 const SHELL_Y = ORBIT_Y + SPHERE / 2 + 165;
-const REL_CIRCLE = 86;       // círculo de la categoría de conocimiento
-const WIN_SCALE = 0.3;       // las posiciones del grafo original, encogidas
-const REVEAL = 0.46;         // zoom a partir del cual emergen las publicaciones
-
-/** Etiqueta compensada por zoom: se lee igual de lejos que de cerca
- *  (como los nombres de ciudad en un mapa). */
-const labelScale = (zoom: number) => Math.min(3.4, Math.max(1, 0.85 / Math.max(zoom, 0.05)));
-
-const KIND_TINT: Record<string, string> = {
-  publicacion: '#059669', imagen: '#7c3aed', video: '#dc2626', wikipedia: '#475569',
-  enlace: '#0284c7', mapa: '#0284c7', grafica: '#eab308', ficha: '#64748b',
-  cronologia: '#7c3aed', autores: '#4f46e5', documento: '#e11d48', grafo: '#059669',
-  producto: '#f59e0b', soluciones: '#16a34a', texto: '#64748b',
-};
 
 interface GraphRow {
   id: string; title: string; slug: string; description: string | null;
@@ -58,306 +51,22 @@ interface GraphRow {
   center?: { short?: string; annex_of?: string } | null;
 }
 
-function Handles() {
-  const style = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0, pointerEvents: 'none' as const };
-  return (
-    <>
-      <Handle type="source" position={Position.Top} style={style} />
-      <Handle type="target" position={Position.Top} style={style} />
-    </>
-  );
-}
+/** Un grafo, contado en el vocabulario de las esferas. */
+const esferaDeGrafo = (g: GraphRow): EsferaData => ({
+  title: g.title,
+  short: g.center?.short || (g.is_reto ? 'Reto' : 'Grafo'),
+  cover: g.cover_image,
+  videoId: g.cover_video_id,
+  accent: g.is_reto ? '#dc2626' : '#059669',
+  kind: g.is_reto ? 'reto' : 'grafo',
+  windows: g.window_count,
+  views: g.views,
+  ai: g.is_ai_generated,
+  author: g.creator_name,
+});
 
-const useZoom = () => useStore(s => s.transform[2]);
-
-// ----------------------------------------------------------------------------
-// Núcleo de la pizarra.
-// ----------------------------------------------------------------------------
-function NucleoNode({ data }: NodeProps<any>) {
-  const d = data as any;
-  const zoom = useZoom();
-  return (
-    <div
-      className="relative flex flex-col items-center justify-center text-center cursor-pointer select-none"
-      style={{ width: CENTER_SPHERE, height: CENTER_SPHERE }}
-      title="Ver toda la pizarra"
-    >
-      <Handles />
-      <div className="absolute inset-0 rounded-full"
-        style={{
-          background: `radial-gradient(circle at 32% 28%, ${d.accent}dd 0%, #0f172a 62%, #020617 100%)`,
-          border: '3px solid rgba(255,255,255,0.85)',
-          boxShadow: `0 0 70px ${d.accent}55, 0 25px 50px -12px rgb(0 0 0 / 0.35)`,
-        }} />
-      {/* el núcleo ya es grande: se compensa poco para no desbordarlo */}
-      <div className="relative z-10 px-8" style={{ transform: `scale(${Math.min(1.5, labelScale(zoom))})` }}>
-        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/70">{d.sublabel}</p>
-        <p className="text-2xl font-black text-white uppercase leading-none tracking-tight mt-1.5">{d.label}</p>
-        <p className={cn('text-[10px] text-white/60 mt-2.5 leading-snug transition-opacity duration-300', zoom >= REVEAL && 'opacity-0')}>
-          acércate a una esfera —<br />el conocimiento se despliega
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Esfera de un grafo: previsualización redonda. Al acercarse, se abre.
-// ----------------------------------------------------------------------------
-function EsferaNode({ data }: NodeProps<any>) {
-  const d = data as any;
-  const g: GraphRow = d.graph;
-  const zoom = useZoom();
-  const open = d.forceOpen || zoom >= REVEAL;
-  const ls = labelScale(zoom);
-  const cover = g.cover_image || (g.cover_video_id ? `https://img.youtube.com/vi/${g.cover_video_id}/hqdefault.jpg` : null);
-  const accent = g.is_reto ? '#dc2626' : '#059669';
-  return (
-    <div
-      className="group relative flex flex-col items-center justify-center text-center cursor-pointer select-none transition-transform duration-300 ease-out hover:scale-105"
-      style={{ width: SPHERE, height: SPHERE }}
-      title={open ? 'Ver toda la pizarra' : `Acercarse a «${g.title}» — clic para hacer zoom`}
-    >
-      <Handles />
-      {/* la esfera: portada recortada en círculo */}
-      <div
-        className="absolute inset-0 rounded-full overflow-hidden"
-        style={{
-          border: `4px solid ${accent}`,
-          boxShadow: `0 0 45px ${accent}44, 0 18px 30px -10px rgb(0 0 0 / 0.35)`,
-          background: cover ? '#0f172a' : `radial-gradient(circle at 32% 28%, ${accent} 0%, #0f172a 70%)`,
-        }}
-      >
-        {cover && (
-          <>
-            <img src={cover} alt="" loading="lazy"
-              className="w-full h-full object-cover opacity-70 group-hover:opacity-85 group-hover:scale-110 transition-all duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-slate-950/20" />
-          </>
-        )}
-        {!cover && !g.cover_video_id && <Network className="absolute inset-0 m-auto w-10 h-10 text-white/25" />}
-        {!cover && g.cover_video_id && <PlayCircle className="absolute inset-0 m-auto w-10 h-10 text-white/40" />}
-      </div>
-
-      {/* dentro de la esfera solo la identidad visual: al alejarte, el
-          título sería ilegible — vive fuera, con escala compensada. */}
-      <div className="relative z-10">
-        <span className={cn('inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.16em] px-2.5 py-1 rounded-full max-w-[240px]',
-          g.is_reto ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white')}
-          style={{ transform: `scale(${ls})` }}>
-          {g.is_reto ? <Flame className="w-3 h-3 shrink-0" /> : <Network className="w-3 h-3 shrink-0" />}
-          <span className="truncate">{g.center?.short || (g.is_reto ? 'Reto' : 'Grafo')}</span>
-        </span>
-      </div>
-
-      {/* etiqueta bajo la esfera: legible a cualquier distancia */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none"
-        style={{ top: SPHERE + 14, width: SPHERE * 1.5, transform: `translateX(-50%) scale(${ls})`, transformOrigin: 'top center' }}
-      >
-        <p className="text-[15px] font-black text-slate-900 leading-tight line-clamp-2">{g.title}</p>
-        <div className="flex items-center justify-center gap-2.5 mt-1 text-[10px] text-slate-400">
-          <span className="inline-flex items-center gap-0.5"><AppWindow className="w-3 h-3" />{g.window_count}</span>
-          <span className="inline-flex items-center gap-0.5"><Eye className="w-3 h-3" />{g.views}</span>
-          {g.is_ai_generated && <Sparkles className="w-3 h-3 text-amber-500" />}
-          {g.creator_name && <span className="truncate max-w-[130px]">{g.creator_name}</span>}
-        </div>
-        <span className={cn('inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-[0.2em] transition-opacity',
-          open ? 'opacity-0' : 'text-emerald-600 opacity-0 group-hover:opacity-100')}>
-          <ZoomIn className="w-3 h-3" /> desplegar
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Publicación desplegada: aparece al acercarse, se colapsa al alejarse.
-// ----------------------------------------------------------------------------
-function VentanaNode({ data }: NodeProps<any>) {
-  const d = data as any;
-  const w = d.win;
-  const zoom = useZoom();
-  // Enfocar un grafo lo despliega SIEMPRE: al abrirse, su constelación
-  // ocupa mucho y el zoom de encuadre puede caer bajo el umbral.
-  const open = d.forceOpen || zoom >= REVEAL;
-  const tint = KIND_TINT[w.kind] || '#64748b';
-
-  // SEMI-DESPLIEGUE (petición del usuario): colapsada, la publicación no
-  // desaparece — se convierte en un satélite en miniatura pegado a su
-  // esfera, para que se VEA que ahí hay información agregada. Con hover
-  // sobre la esfera, los satélites se abren un poco más (invitan al clic).
-  // d.dx/d.dy = desplazamiento del centro de la tarjeta respecto al centro
-  // de su esfera; el satélite viaja a un anillo fijo alrededor de ella,
-  // esquivando el arco inferior donde vive el título.
-  const dist = Math.hypot(d.dx, d.dy) || 1;
-  let ang = Math.atan2(d.dy, d.dx);
-  const lo = Math.PI * 0.32, hi = Math.PI * 0.68; // arco del título, abajo
-  if (ang > lo && ang < hi) ang = ang < Math.PI / 2 ? lo : hi;
-  // Compensación por zoom: de lejos los satélites crecen un poco para
-  // seguir viéndose (señal de que hay información agregada ahí).
-  const comp = Math.min(2.4, Math.max(1, 0.42 / Math.max(zoom, 0.05)));
-  const miniScale = (d.hoverPreview ? 0.34 : 0.16) * comp;
-  const ringR = (d.hoverPreview ? 262 : 208) + (comp - 1) * 55;
-  const tx = Math.cos(ang) * ringR - d.dx;
-  const ty = Math.sin(ang) * ringR - d.dy;
-
-  return (
-    <div
-      className="w-64 bg-white rounded-2xl overflow-hidden transition-all ease-out"
-      style={{
-        opacity: open ? 1 : d.hoverPreview ? 1 : 0.9,
-        transform: open ? 'translate(0px, 0px) scale(1)' : `translate(${tx}px, ${ty}px) scale(${miniScale})`,
-        transitionDuration: '450ms',
-        pointerEvents: open ? 'auto' : 'none',
-        border: `1.5px solid ${tint}55`,
-        boxShadow: `0 0 24px ${tint}22, 0 10px 20px -8px rgb(0 0 0 / 0.18)`,
-        cursor: 'pointer',
-      }}
-      title={w.title}
-    >
-      <Handles />
-      <div className="px-3 pt-2.5 flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tint }} />
-        <span className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: tint }}>{w.kind}</span>
-        {w.is_ai_generated && <Sparkles className="w-2.5 h-2.5 text-amber-500 ml-auto" />}
-      </div>
-      <div className="px-3 pt-1">
-        <p className="text-[13px] font-black text-slate-900 leading-tight line-clamp-2">{w.title}</p>
-      </div>
-      <div className="px-3 py-2">
-        <WindowContent kind={w.kind} config={w.config} variant="node" />
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// La ESFERA que lo envuelve todo: la membrana del conocimiento común.
-// ----------------------------------------------------------------------------
-function EnvolturaNode({ data }: NodeProps<any>) {
-  const d = data as any;
-  return (
-    <div
-      className="pointer-events-none rounded-[50%]"
-      style={{
-        width: (d?.rx ?? SHELL_X) * 2, height: (d?.ry ?? SHELL_Y) * 2,
-        border: '2px solid rgba(16,185,129,0.35)',
-        background: 'radial-gradient(ellipse at 42% 32%, rgba(255,255,255,0.9) 0%, rgba(236,253,245,0.55) 45%, rgba(219,234,254,0.35) 78%, rgba(224,231,255,0.15) 100%)',
-        boxShadow: 'inset -30px -40px 90px rgba(15,23,42,0.06), inset 30px 40px 90px rgba(255,255,255,0.9), 0 0 70px rgba(16,185,129,0.12)',
-      }}
-    >
-      <Handles />
-      {/* brillo de esfera */}
-      <div
-        className="absolute rounded-[50%]"
-        style={{
-          left: '14%', top: '9%', width: '30%', height: '22%',
-          background: 'radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, transparent 70%)',
-        }}
-      />
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Círculo de relación: la CATEGORÍA de conocimiento que une el grafo con
-// cada publicación (contexto, causa, dato, fuente, apoya, contradice, matiza).
-// ----------------------------------------------------------------------------
-function RelacionNode({ data }: NodeProps<any>) {
-  const d = data as any;
-  const rel = relStyle(d.relation);
-  const zoom = useZoom();
-  const open = d.forceOpen || zoom >= REVEAL;
-  return (
-    <div
-      className="rounded-full flex flex-col items-center justify-center text-center px-2 transition-all ease-out"
-      style={{
-        width: REL_CIRCLE, height: REL_CIRCLE,
-        backgroundColor: rel.bg,
-        border: '3px solid rgba(255,255,255,0.92)',
-        boxShadow: `0 0 20px ${rel.color}55, 0 8px 14px -6px rgb(0 0 0 / 0.25)`,
-        opacity: open ? 1 : 0,
-        transform: open ? 'scale(1)' : 'scale(0.3)',
-        transitionDuration: '450ms',
-        pointerEvents: 'none',
-      }}
-      title={d.label || rel.label}
-    >
-      <Handles />
-      <p className="text-[8px] font-black uppercase tracking-[0.16em] opacity-80" style={{ color: rel.text }}>
-        {rel.label}
-      </p>
-      {d.label && (
-        <p className="text-[9px] font-black uppercase leading-tight tracking-wide break-words w-full" style={{ color: rel.text }}>
-          {d.label}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/** Arista que aparece y desaparece con las publicaciones: cuando están
- *  colapsadas, la vista general queda limpia (solo esferas). Abierta,
- *  lleva un flujo animado de partículas (conexiones VIVAS). */
-function FadeEdge({ id, sourceX, sourceY, targetX, targetY, style, markerEnd, data }: EdgeProps) {
-  const zoom = useZoom();
-  const open = (data as any)?.forceOpen || zoom >= REVEAL;
-  const [path] = getStraightPath({ sourceX, sourceY, targetX, targetY });
-  const stroke = (style as any)?.stroke || '#64748b';
-  return (
-    <>
-      <BaseEdge
-        id={id}
-        path={path}
-        markerEnd={open ? markerEnd : undefined}
-        interactionWidth={0}
-        style={{ ...style, opacity: open ? (style as any)?.opacity ?? 1 : 0, transition: 'opacity 450ms ease-out' }}
-      />
-      {open && (
-        <path
-          d={path}
-          fill="none"
-          stroke={stroke}
-          strokeWidth={Math.max(1.5, Number((style as any)?.strokeWidth || 1.5))}
-          strokeLinecap="round"
-          style={{ strokeDasharray: '2 12', animation: 'esferaFlujo 1.6s linear infinite', opacity: 0.9, pointerEvents: 'none' }}
-        />
-      )}
-    </>
-  );
-}
-
-/** La ELECTRICIDAD del conocimiento: la línea del núcleo «Retos de España»
- *  a cada reto. Su GROSOR y la velocidad/densidad del flujo de partículas
- *  dependen de la intensidad y relevancia actual del reto (visitas y
- *  volumen de conocimiento) — se ve de un vistazo qué reto late más. */
-function FlujoEdge({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps) {
-  const d = data as any;
-  const t = Math.max(0, Math.min(1, d?.t ?? 0.5)); // relevancia 0..1
-  const color = d?.accent || '#059669';
-  const [path] = getStraightPath({ sourceX, sourceY, targetX, targetY });
-  const width = 2 + t * 7;                    // más relevante = más gorda
-  const dur = (2.6 - t * 2).toFixed(2);       // más relevante = más rápida
-  const dash = t > 0.66 ? '3 10' : t > 0.33 ? '3 14' : '2 18'; // y más densa
-  return (
-    <>
-      <BaseEdge id={id} path={path} interactionWidth={0} style={{ stroke: color, strokeWidth: width, opacity: 0.28, pointerEvents: 'none' }} />
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={Math.max(2, width * 0.6)}
-        strokeLinecap="round"
-        style={{ strokeDasharray: dash, animation: `esferaFlujo ${dur}s linear infinite`, opacity: 0.95, filter: `drop-shadow(0 0 ${2 + t * 4}px ${color})`, pointerEvents: 'none' }}
-      />
-    </>
-  );
-}
-
-const edgeTypes = { fade: FadeEdge, flujo: FlujoEdge };
-
-const nodeTypes = { nucleo: NucleoNode, esfera: EsferaNode, ventana: VentanaNode, envoltura: EnvolturaNode, relacion: RelacionNode };
+const nodeTypes = esferaNodeTypes;
+const edgeTypes = esferaEdgeTypes;
 
 export default function Grafos() {
   const [graphs, setGraphs] = useState<GraphRow[]>([]);
@@ -497,7 +206,7 @@ export default function Grafos() {
         id: `esf-${g.id}`, type: 'esfera',
         position: { x: cx - SPHERE / 2, y: cy - SPHERE / 2 },
         draggable: false, selectable: false, zIndex: 20,
-        data: { graph: g, onFocus: focusGraph, forceOpen: focused === g.id },
+        data: { graph: g, esfera: esferaDeGrafo(g), desplegable: true, forceOpen: focused === g.id },
       });
       // Un anexo no cuelga del núcleo: cuelga de su grafo padre, porque es
       // otra lectura del mismo reto, no un reto de España aparte.
@@ -513,57 +222,15 @@ export default function Grafos() {
       // Las publicaciones del grafo, con su disposición original encogida
       // y centrada en la esfera: la misma constelación, en miniatura.
       const wins = (g.windows || []).slice(0, 14);
-      const n = wins.length;
 
       // Anti-solape: las tarjetas se repelen entre sí y ninguna puede
-      // taparle la cara a su esfera (mismo imán que en el lienzo del grafo).
-      const CW = 256, CH = 190, PAD = 26;
-      const INNER = SPHERE / 2 + 130;
-      const boxes = wins.map((w: any, j: number) => {
-        const hasPos = Number.isFinite(w.x) && Number.isFinite(w.y) && (w.x !== 0 || w.y !== 0);
-        const wa = -Math.PI / 2 + (2 * Math.PI * j) / Math.max(n, 1);
-        return {
-          x: (hasPos ? w.x * WIN_SCALE : Math.cos(wa) * 620) - CW / 2,
-          y: (hasPos ? w.y * WIN_SCALE : Math.sin(wa) * 480) - CH / 2,
-        };
-      });
-      for (let it = 0; it < 120; it++) {
-        let moved = false;
-        for (let a = 0; a < boxes.length; a++) {
-          for (let b = a + 1; b < boxes.length; b++) {
-            const A = boxes[a], B = boxes[b];
-            const dx = A.x - B.x, dy = A.y - B.y;
-            const ox = CW + PAD - Math.abs(dx), oy = CH + PAD - Math.abs(dy);
-            if (ox > 0 && oy > 0) {
-              moved = true;
-              if (ox < oy) { const s = ((dx || (a - b)) >= 0 ? 1 : -1) * ox / 2; A.x += s; B.x -= s; }
-              else { const s = ((dy || (a - b)) >= 0 ? 1 : -1) * oy / 2; A.y += s; B.y -= s; }
-            }
-          }
-        }
-        for (const A of boxes) {
-          const nx = Math.max(A.x, Math.min(0, A.x + CW));
-          const ny = Math.max(A.y, Math.min(0, A.y + CH));
-          const dist = Math.hypot(nx, ny);
-          if (dist < INNER) {
-            moved = true;
-            const ccx = A.x + CW / 2, ccy = A.y + CH / 2;
-            const cd = Math.hypot(ccx, ccy) || 1;
-            const push = INNER - dist + 10;
-            A.x += (ccx / cd) * push;
-            A.y += (ccy / cd) * push;
-          }
-        }
-        if (!moved) break;
-      }
+      // taparle la cara a su esfera (el imán compartido del kit).
+      const { boxes, cw: CW, ch: CH } = constelacion(wins, SPHERE / 2 + 130);
 
       // La CATEGORÍA de conocimiento con la que el grafo sostiene cada
       // publicación (contexto, causa, dato…), tomada de las aristas del
       // centro del grafo original.
-      const relByWindow: Record<string, any> = {};
-      for (const e of (g.edges || [])) {
-        if (!e.from_window_id && e.to_window_id) relByWindow[e.to_window_id] = e;
-      }
+      const relByWindow = relacionesPorVentana(g.edges);
 
       wins.forEach((w: any, j: number) => {
         ns.push({
@@ -638,14 +305,7 @@ export default function Grafos() {
 
   return (
     <div className="relative w-full h-full bg-slate-50">
-      <style>{`
-        @keyframes esferaFlujo { to { stroke-dashoffset: -26; } }
-        /* En la Esfera se hace clic en las ESFERAS y en las publicaciones,
-           nunca en una línea. React Flow da a cada arista un trazo de clic
-           ancho que, al converger muchas en cada esfera, se comía el clic
-           y el zoom al reto no llegaba a ocurrir. */
-        .react-flow__edge, .react-flow__edge-path, .react-flow__edge-interaction { pointer-events: none !important; }
-      `}</style>
+      <style>{ESFERA_CSS}</style>
       {loading ? (
         <p className="text-sm text-slate-400 py-16 text-center">Cargando la pizarra…</p>
       ) : (
@@ -682,7 +342,7 @@ export default function Grafos() {
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-full shadow-lg pl-3 pr-1.5 py-1.5 flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-900">
-            <Globe2 className="w-4 h-4 text-emerald-600" /> Red de Datos
+            <Globe2 className="w-4 h-4 text-emerald-600" /> Grafos
           </span>
           <button
             onClick={openCreate}
@@ -698,7 +358,7 @@ export default function Grafos() {
           >
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: focusedGraph.is_reto ? '#dc2626' : '#059669' }} />
             <span className="text-xs font-black text-slate-900 max-w-[220px] truncate">{focusedGraph.title}</span>
-            <button onClick={() => navigate(`/grafos/${focusedGraph.slug}`)} title="Abrir el grafo completo"
+            <button onClick={() => navigate(`/esquemas/${focusedGraph.slug}`)} title="Abrir el grafo completo"
               className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-full hover:bg-slate-50 transition-colors">
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
@@ -734,7 +394,7 @@ export default function Grafos() {
                 {popup.win.kind}
               </span>
               <div className="flex items-center gap-1">
-                <button onClick={() => navigate(`/grafos/${popup.graph.slug}`)} title="Abrir el grafo completo"
+                <button onClick={() => navigate(`/esquemas/${popup.graph.slug}`)} title="Abrir el grafo completo"
                   className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-50 transition-colors">
                   <ExternalLink className="w-4 h-4" />
                 </button>
@@ -755,7 +415,7 @@ export default function Grafos() {
       )}
 
       {showCreate && (
-        <CreateGraphModal onClose={() => setShowCreate(false)} onCreated={slug => navigate(`/grafos/${slug}`)} />
+        <CreateGraphModal onClose={() => setShowCreate(false)} onCreated={slug => navigate(`/esquemas/${slug}`)} />
       )}
     </div>
   );

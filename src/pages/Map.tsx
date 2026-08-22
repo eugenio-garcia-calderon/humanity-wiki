@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import MarcaOrigen, { AvisoDatoSimulado } from '../components/ui/OrigenDelDato';
 import { Link, useSearchParams } from 'react-router-dom';
 import HumanityMap, { ObjectiveKey } from '../components/HumanityMap';
 import Objectives from './Objectives';
 import EntityExplorerPanel, { ExplorerLevel, BreadcrumbEntry } from '../components/explorer/EntityExplorerPanel';
-import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Menu, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette } from 'lucide-react';
+import { MapPin, X, Check, Droplet, Wheat, Home, Heart, Users, Leaf, Layers, ChevronDown, Menu, GraduationCap, Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Maximize2, Minimize2 } from 'lucide-react';
 import { mapService } from '../services/MapService';
 import { useHelpers } from '../contexts/DataContext';
 import { slugify } from '../utils/slugify';
@@ -32,6 +33,9 @@ async function loadTerritoryDetail(tid: string) {
         area: data.area_km2 || 0,
         challenges: data.challenges,
         isAiGenerated: !!data.is_ai_generated,
+        // De dónde salen sus puntuaciones. Sin esto, un territorio con las
+        // cifras inventadas se ve igual que uno medido por el INE.
+        origenDato: data.origenDato || 'desconocido',
       };
     }
   } catch (e) {
@@ -69,6 +73,9 @@ export default function MapPage() {
   // (ver 04_ROADMAP.md, petición de ensanchar/estrechar todas las ventanas).
   const { width: filtrosWidth, startResize: startResizeFiltros, dragging: draggingFiltros } =
     usePanelWidth('filtros', 16, { min: 10, max: 30 });
+  // Pantalla completa del explorador: las esferas piden sitio y el panel se
+  // queda corto (petición del usuario).
+  const [explorerFull, setExplorerFull] = useState(false);
   const { width: explorerWidth, startResize: startResizeExplorer, dragging: draggingExplorer } =
     usePanelWidth('explorer', 40, { min: 25, max: 60 });
   const [searchParams, setSearchParams] = useSearchParams();
@@ -520,10 +527,23 @@ export default function MapPage() {
 
       {/* COLUMN 2 (~2/5 por defecto, redimensionable): permanent territory panel (replaces the old floating panel) */}
       <div
-        className="relative h-full overflow-y-auto bg-white border-r border-slate-200 shrink-0"
-        style={{ width: `${explorerWidth}%` }}
+        className={`relative h-full overflow-y-auto bg-white border-r border-slate-200 ${
+          explorerFull ? 'flex-1 min-w-0' : 'shrink-0'
+        }`}
+        style={explorerFull ? undefined : { width: `${explorerWidth}%` }}
       >
-        <ResizeHandle onMouseDown={startResizeExplorer('right')} edge="right" active={draggingExplorer} />
+        {!explorerFull && (
+          <ResizeHandle onMouseDown={startResizeExplorer('right')} edge="right" active={draggingExplorer} />
+        )}
+        {selectedTerritory && currentExplorerLevel && currentExplorerId && (
+          <button
+            onClick={() => setExplorerFull(f => !f)}
+            title={explorerFull ? 'Volver al mapa' : 'Ver a pantalla completa'}
+            className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full bg-white border border-slate-200 shadow-lg flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors"
+          >
+            {explorerFull ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+        )}
         {selectedTerritory ? (
           currentExplorerLevel && currentExplorerId ? (
             <EntityExplorerPanel
@@ -539,6 +559,22 @@ export default function MapPage() {
             />
           ) : (
             <div className="p-4 sm:p-6">
+              {/* DE DÓNDE SALEN ESTAS CIFRAS (2026-08-22). Va ARRIBA, antes de
+                  las puntuaciones y no debajo: quien mira un número decide en
+                  el primer segundo si se lo cree. Un aviso al final llega tarde.
+
+                  De 20.557 observaciones de la plataforma, 20.499 están
+                  simuladas — los municipios de Madrid y los países europeos—.
+                  Hasta hoy se veían igual que las 58 que salen del INE. */}
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    Sus cifras
+                  </span>
+                  <MarcaOrigen origen={selectedTerritory.origenDato} />
+                </div>
+                <AvisoDatoSimulado origen={selectedTerritory.origenDato} />
+              </div>
               <div className="flex justify-end mb-2">
                 <button
                   onClick={() => {
@@ -568,7 +604,7 @@ export default function MapPage() {
 
       {/* COLUMN 3: the map — fills whatever width remains after columns 1 and 2,
           so it reclaims the space freed when the filters menu collapses. */}
-      <div className="flex-1 min-w-0 h-full relative">
+      <div className={`flex-1 min-w-0 h-full relative ${explorerFull ? 'hidden' : ''}`}>
         <HumanityMap
           onFeatureClick={handleFeatureClick}
           onMapClick={() => setSelectedTerritory(null)}

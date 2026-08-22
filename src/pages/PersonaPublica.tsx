@@ -1,10 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network, Eye, AppWindow, Plus, Sparkles, Star } from 'lucide-react';
+import {
+  User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
+  Eye, EyeOff, Plus, Pencil, Check, GripVertical, MessageSquare, Camera, Loader2,
+  MoreHorizontal, Trash2, ExternalLink,
+  FolderKanban, Map as MapIcon, Gamepad2, Lock, LayoutGrid, Megaphone, Store,
+} from 'lucide-react';
 import { useAuth, ROLE } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
+import { OBJETIVOS } from '../utils/objetivos';
+import FilaDelPerfil from '../components/social/FilaDelPerfil';
+import Icono from '../components/ui/Icono';
+import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 import CreateGraphModal from '../components/knowledge/CreateGraphModal';
+import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
 // Perfil público — Fase 4 (interfaz)
@@ -19,6 +30,10 @@ interface ProfileUser {
   name: string | null;
   avatar_url: string | null;
   banner_url: string | null;
+  /** Hasta tres territorios del catálogo (2026-08-22). */
+  ubicaciones?: Array<{ id: string; nombre: string }>;
+  /** Los objetivos que le interesan, por id. */
+  objetivos?: string[];
   bio: string | null;
   location: string | null;
   website: string | null;
@@ -36,6 +51,56 @@ interface Publication {
   comment_count: number;
 }
 
+// ============================================================================
+// EL ESCAPARATE (2026-08-20, petición de Eugenio: «Mi Perfil tiene que ser un
+// escaparate donde puedas arrastrar y soltar tus grafos, proyectos, archivos,
+// mapas y mundos, con tu muro público, un botón de editar y poder enseñar u
+// ocultar cada tarjeta»).
+// ============================================================================
+// Las fichas las sirve `GET /api/users/:id/escaparate`, que lee las cuatro
+// tablas donde vive lo de una persona. Aquí solo se COLOCAN: el orden y lo
+// oculto se guardan en tus ajustes de usuario (jsonb), sin migración.
+//
+// Ojo con lo que significa «ocultar»: es una decisión de ESCAPARATE, no de
+// privacidad. Lo privado ya lo filtra el servidor antes de llegar aquí, así
+// que enseñar una ficha nunca publica nada que no lo estuviera.
+
+interface ItemEscaparate {
+  clave: string;
+  tipo: 'grafo' | 'proyecto' | 'mapa' | 'mundo';
+  id: string;
+  titulo: string;
+  resumen: string | null;
+  url: string;
+  fecha: string | null;
+  privado: boolean;
+  dato: string | null;
+  /** La portada: la primera imagen de dentro (o la miniatura de su vídeo).
+   *  Si no hay ninguna, la ficha se queda con el color de su tipo. */
+  imagen: string | null;
+}
+
+interface Escaparate { orden: string[]; ocultos: string[] }
+
+const PINTA: Record<ItemEscaparate['tipo'], { etiqueta: string; icono: any; fondo: string; texto: string }> = {
+  grafo:    { etiqueta: 'Grafo',    icono: Network,     fondo: 'from-emerald-600 via-teal-700 to-indigo-800', texto: 'text-emerald-200' },
+  proyecto: { etiqueta: 'Proyecto', icono: FolderKanban, fondo: 'from-amber-500 via-orange-600 to-rose-700',  texto: 'text-amber-100' },
+  mapa:     { etiqueta: 'Mapa',     icono: MapIcon,     fondo: 'from-sky-600 via-blue-700 to-indigo-800',     texto: 'text-sky-200' },
+  mundo:    { etiqueta: 'Mundo 3D', icono: Gamepad2,    fondo: 'from-violet-600 via-purple-700 to-fuchsia-800', texto: 'text-violet-200' },
+};
+
+/** Coloca las fichas según el orden guardado. Lo que no esté en la lista va
+ *  detrás, en el orden natural (lo último que tocaste primero): así, una cosa
+ *  nueva aparece sola sin tener que volver a ordenar nada. */
+function colocar(items: ItemEscaparate[], orden: string[]): ItemEscaparate[] {
+  const puesto = new Map(orden.map((c, i) => [c, i]));
+  return [...items].sort((a, b) => {
+    const ia = puesto.has(a.clave) ? puesto.get(a.clave)! : Number.MAX_SAFE_INTEGER;
+    const ib = puesto.has(b.clave) ? puesto.get(b.clave)! : Number.MAX_SAFE_INTEGER;
+    return ia - ib;
+  });
+}
+
 const SUPPORT_AMOUNTS = [500, 1000, 2500]; // céntimos
 
 function timeAgo(iso: string) {
@@ -48,17 +113,93 @@ function timeAgo(iso: string) {
 
 export default function PersonaPublica() {
   const { id } = useParams();
-  const { user: me, can } = useAuth();
+  const { user: me, can, updateUiSettings, updateProfile } = useAuth();
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, publications: 0 });
   const [pubs, setPubs] = useState<Publication[]>([]);
+  const [proyectos, setProyectos] = useState<Array<{ id: string; titulo: string; url: string; icono: string | null; pendientes: number }>>([]);
+  const [productos, setProductos] = useState<Array<{ id: string; nombre: string; precio: number | null; imagen: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
   const [supportStep, setSupportStep] = useState<'amount' | 'checkout' | null>(null);
   const [supportAmount, setSupportAmount] = useState(SUPPORT_AMOUNTS[0]);
-  const [graphs, setGraphs] = useState<any[]>([]);
   const [showCreateGraph, setShowCreateGraph] = useState(false);
+  const [items, setItems] = useState<ItemEscaparate[]>([]);
+  const [escaparate, setEscaparate] = useState<Escaparate>({ orden: [], ocultos: [] });
+  const [editando, setEditando] = useState(false);
+  const arrastrando = useRef<string | null>(null);
   const navigate = useNavigate();
+  // EDITAR TU PROPIO PERFIL (2026-08-20, Eugenio: «que pueda agregar una foto
+  // de perfil y una descripción»). Se edita EN EL SITIO, no en otra página:
+  // ves cómo va quedando mientras escribes.
+  // OJO: estos tres estaban más abajo, DESPUÉS de los `return` de «cargando» y
+  // «no encontrada». Un hook detrás de un return se salta en unos pintados y en
+  // otros no, y React se rompe con «Rendered more hooks than during the
+  // previous render» (visto en pruebas, 2026-08-20). Todo hook, arriba.
+  const [menuFicha, setMenuFicha] = useState<string | null>(null);
+  const [renombrando, setRenombrando] = useState<ItemEscaparate | null>(null);
+  const [quitando, setQuitando] = useState<ItemEscaparate | null>(null);
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [borrador, setBorrador] = useState<{
+    nombre: string; bio: string; avatar: string;
+    ubicaciones: Array<{ id: string; nombre: string }>; objetivos: string[];
+  }>({ nombre: '', bio: '', avatar: '', ubicaciones: [], objetivos: [] });
+  /** El catálogo de territorios, solo mientras editas: son 242 filas y no
+   *  tiene sentido traerlas a quien solo viene a mirar un perfil. */
+  const [territorios, setTerritorios] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [buscaSitio, setBuscaSitio] = useState('');
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const fotoRef = useRef<HTMLInputElement>(null);
+
+  const empezarAEditar = () => {
+    setBorrador({
+      nombre: profileUser?.display_name || profileUser?.name || '',
+      bio: profileUser?.bio || '',
+      avatar: profileUser?.avatar_url || '',
+      ubicaciones: profileUser?.ubicaciones || [],
+      objetivos: profileUser?.objetivos || [],
+    });
+    setEditandoPerfil(true);
+    if (!territorios.length) {
+      fetch('/api/data/territories').then(r => r.json())
+        .then(j => setTerritorios(Array.isArray(j) ? j : [])).catch(() => {});
+    }
+  };
+
+  const subirFoto = async (f?: File) => {
+    if (!f) return;
+    setSubiendoFoto(true);
+    try {
+      const sub = await subirArchivo(f);
+      if (sub.url) setBorrador(b => ({ ...b, avatar: sub.url }));
+    } finally { setSubiendoFoto(false); }
+  };
+
+  const guardarPerfil = async () => {
+    setGuardandoPerfil(true);
+    try {
+      const res = await updateProfile({
+        display_name: borrador.nombre.trim() || null,
+        bio: borrador.bio.trim() || null,
+        avatar_url: borrador.avatar || null,
+        ubicaciones: borrador.ubicaciones,
+        objetivos: borrador.objetivos,
+      });
+      if (!res.ok) return;
+      // Se pinta ya con lo nuevo: recargar el perfil entero para ver tu propia
+      // foto sería un viaje de más.
+      setProfileUser(p => (p ? {
+        ...p,
+        display_name: borrador.nombre.trim() || null,
+        bio: borrador.bio.trim() || null,
+        avatar_url: borrador.avatar || null,
+        ubicaciones: borrador.ubicaciones,
+        objetivos: borrador.objetivos,
+      } : p));
+      setEditandoPerfil(false);
+    } finally { setGuardandoPerfil(false); }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -67,13 +208,31 @@ export default function PersonaPublica() {
     Promise.all([
       fetch(`/api/users/${id}/profile`).then(r => r.json()),
       fetch(`/api/publications?author_id=${id}`).then(r => r.json()),
-      fetch(`/api/graphs?creator_id=${id}`, { credentials: 'include' }).then(r => r.json()),
-    ]).then(([profileJson, pubsJson, graphsJson]) => {
+      fetch(`/api/users/${id}/escaparate`, { credentials: 'include' }).then(r => r.json()),
+      // LAS TRES FILAS NUEVAS (2026-08-22). Se piden a la vez que lo demás y
+      // no una detrás de otra: en serie, el perfil tardaría lo que tarde la
+      // más lenta MÁS lo que tarden las otras dos.
+      fetch('/api/tareas', { credentials: 'include' }).then(r => r.json()).catch(() => null),
+      fetch('/api/products', { credentials: 'include' }).then(r => r.json()).catch(() => null),
+    ]).then(([profileJson, pubsJson, escJson, tareasJson, prodsJson]) => {
       if (cancelled) return;
+      setProyectos(((tareasJson?.proyectos || []) as any[])
+        .filter(p => !p.esHojaDeRuta && p.mio)
+        .map(p => ({ id: p.id, titulo: p.titulo, url: p.url, icono: p.icono || null,
+                     pendientes: (p.tareas || []).filter((t: any) => t.estado !== 'hecho').length })));
+      setProductos(((Array.isArray(prodsJson) ? prodsJson : []) as any[])
+        .filter(x => x.seller_user_id === id || x.vendedor_id === id)
+        .map(x => ({ id: x.id, nombre: x.name || x.nombre, precio: x.price_cents ?? x.precio ?? null,
+                     imagen: (x.images || x.imagenes || [])[0] || null })));
       setProfileUser(profileJson.user || null);
       setStats(profileJson.stats || { followers: 0, following: 0, publications: 0 });
       setPubs(Array.isArray(pubsJson) ? pubsJson : []);
-      setGraphs(Array.isArray(graphsJson) ? graphsJson : []);
+      setItems(Array.isArray(escJson?.items) ? escJson.items : []);
+      const e = profileJson.user?.escaparate;
+      setEscaparate({
+        orden: Array.isArray(e?.orden) ? e.orden : [],
+        ocultos: Array.isArray(e?.ocultos) ? e.ocultos : [],
+      });
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [id]);
@@ -98,25 +257,162 @@ export default function PersonaPublica() {
 
   const isMe = me?.id === id;
 
-  return (
-    <div className="animate-in fade-in duration-500 pb-16 max-w-2xl mx-auto">
-      <div className="relative h-32 sm:h-40 rounded-3xl bg-gradient-to-br from-emerald-100 via-teal-50 to-indigo-100 overflow-hidden">
-        {profileUser.banner_url && (
-          <img src={profileUser.banner_url} alt="" className="w-full h-full object-cover" />
-        )}
-      </div>
+  // Lo colocado, ya en orden. Quien no es el dueño no ve lo que él ha ocultado;
+  // el dueño sí, apagado, porque si no no habría forma de volver a enseñarlo.
+  const colocados = colocar(items, escaparate.orden);
+  const visibles = isMe ? colocados : colocados.filter(x => !escaparate.ocultos.includes(x.clave));
 
-      <div className="px-4 sm:px-6 -mt-10 relative flex items-end justify-between gap-3">
-        {profileUser.avatar_url ? (
-          <img src={profileUser.avatar_url} alt="" className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md" />
-        ) : (
-          <span className="w-20 h-20 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center text-slate-400 shadow-md">
-            <UserIcon className="w-8 h-8" />
-          </span>
+  /** El nombre que usa la ruta genérica para cada tipo de ficha. «Mundo 3D» no
+   *  es una cosa de una tabla: es un sitio, y no se renombra ni se quita. */
+  const tipoEditable = (t: ItemEscaparate['tipo']) =>
+    t === 'grafo' ? 'esquema' : t === 'mundo' ? null : t;
+
+  /** Quitar del escaparate = archivar la cosa. Se avisa de eso mismo antes. */
+  const archivar = async (it: ItemEscaparate) => {
+    const tipo = tipoEditable(it.tipo);
+    if (!tipo) return;
+    const r = await fetch(`/api/elemento/${tipo}/${it.id}`, { method: 'DELETE', credentials: 'include' })
+      .catch(() => null);
+    if (!r?.ok) return;
+    setItems(xs => xs.filter(x => x.clave !== it.clave));
+    setQuitando(null);
+    window.dispatchEvent(new Event('humanity:menu-cambiado'));
+  };
+
+  /** Guarda el escaparate en tus ajustes. Optimista: se pinta ya y se manda
+   *  después — colocar fichas tiene que ir a la velocidad de la mano. */
+  const guardar = (e: Escaparate) => {
+    setEscaparate(e);
+    updateUiSettings({ escaparate: e });
+  };
+
+  const soltar = (destino: number) => {
+    const clave = arrastrando.current;
+    arrastrando.current = null;
+    if (!clave) return;
+    const claves = colocados.map(x => x.clave);
+    const desde = claves.indexOf(clave);
+    if (desde < 0 || desde === destino) return;
+    claves.splice(destino, 0, claves.splice(desde, 1)[0]);
+    guardar({ ...escaparate, orden: claves });
+  };
+
+  const alternarOculto = (clave: string) => {
+    const ocultos = escaparate.ocultos.includes(clave)
+      ? escaparate.ocultos.filter(c => c !== clave)
+      : [...escaparate.ocultos, clave];
+    // Al ocultar por primera vez se congela el orden actual: si no, la ficha
+    // que apagas cambiaría de sitio sola la próxima vez que entres.
+    const orden = escaparate.orden.length ? escaparate.orden : colocados.map(x => x.clave);
+    guardar({ orden, ocultos });
+  };
+
+  return (
+    // Más ancho que antes (era `max-w-2xl`): desde que el perfil es un
+    // escaparate, la columna estrecha dejaba las fichas del tamaño de un sello.
+    <div className="animate-in fade-in duration-500 pb-16 max-w-4xl mx-auto">
+      {/* ══ SIN PORTADA, Y LA FOTO ARRIBA DEL TODO ═══════════════════════════
+          (2026-08-22, Eugenio: «quita la portada de fondo. Sube la foto hasta
+          la esquina superior izquierda y pon el nombre al lado de la foto, en
+          versión móvil también».)
+
+          La portada eran 160 px de degradado sin información antes de la
+          primera cosa que se puede leer. En un teléfono era media pantalla
+          gastada en decorado, y lo que se pidió es que TODO quepa sin bajar.
+
+          La foto y el nombre en la misma fila en los dos tamaños: en móvil
+          también, dicho expresamente. */}
+      <div className="px-4 sm:px-6 pt-3 relative flex items-center gap-3">
+        <div className="relative shrink-0">
+          {(editandoPerfil ? borrador.avatar : profileUser.avatar_url) ? (
+            <img src={editandoPerfil ? borrador.avatar : profileUser.avatar_url!} alt=""
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-slate-100" />
+          ) : (
+            <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 ring-2 ring-slate-100">
+              <UserIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+            </span>
+          )}
+          {editandoPerfil && (
+            <>
+              <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { subirFoto(e.target.files?.[0]); e.target.value = ''; }} />
+              <button
+                onClick={() => fotoRef.current?.click()}
+                disabled={subiendoFoto}
+                title="Cambiar la foto"
+                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-900 text-white grid place-items-center shadow-lg hover:bg-slate-800 disabled:opacity-50 transition-colors"
+              >
+                {subiendoFoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* EL NOMBRE, AL LADO DE LA FOTO. Antes iba debajo, que con la portada
+            quitada dejaba la fila de la foto medio vacía. */}
+        <div className="min-w-0 flex-1">
+          {editandoPerfil ? (
+            <input
+              value={borrador.nombre}
+              onChange={e => setBorrador(b => ({ ...b, nombre: e.target.value }))}
+              placeholder="Tu nombre"
+              className="w-full text-xl sm:text-2xl font-black text-slate-900 bg-transparent border-b border-slate-200 focus:border-emerald-400 focus:outline-none pb-0.5"
+            />
+          ) : (
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight truncate">
+              {profileUser.display_name || profileUser.name || 'Persona'}
+            </h1>
+          )}
+          {/* LAS TRES UBICACIONES, bajo el nombre. */}
+          {(profileUser.ubicaciones?.length || 0) > 0 && !editandoPerfil && (
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400">
+              {profileUser.ubicaciones!.map(u => (
+                <span key={u.id} className="inline-flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />{u.nombre}
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
+
+        {/* Editar el tuyo: el botón vive junto a la foto, que es donde se
+            busca. */}
+        {isMe && (
+          <div className="flex items-center gap-2 shrink-0">
+            {editandoPerfil ? (
+              <>
+                <button onClick={() => setEditandoPerfil(false)} disabled={guardandoPerfil}
+                  className="px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:border-slate-300 disabled:opacity-40 transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={guardarPerfil} disabled={guardandoPerfil}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 transition-colors">
+                  {guardandoPerfil ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  Guardar
+                </button>
+              </>
+            ) : (
+              <button onClick={empezarAEditar}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 transition-colors">
+                <Pencil className="w-3.5 h-3.5" /> Editar perfil
+              </button>
+            )}
+          </div>
         )}
 
         {!isMe && (
-          <div className="flex items-center gap-2 pb-1">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+            {/* ESCRIBIRLE (2026-08-20). Solo con sesión: un mensaje tiene que
+                venir de alguien. */}
+            {can(ROLE.USER) && (
+              <Link
+                to={`/mensajes?con=${id}`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                Escribir
+              </Link>
+            )}
             {can(ROLE.USER) && (
               <button
                 onClick={toggleFollow}
@@ -142,9 +438,137 @@ export default function PersonaPublica() {
         )}
       </div>
 
-      <div className="px-4 sm:px-6 mt-3">
-        <h1 className="text-2xl font-black text-slate-900">{profileUser.display_name || profileUser.name || 'Persona'}</h1>
-        {profileUser.bio && <p className="text-sm text-slate-600 leading-relaxed mt-1.5">{profileUser.bio}</p>}
+      <div className="px-4 sm:px-6 mt-2">
+        {/* LOS OBJETIVOS QUE TE IMPORTAN, entre el nombre y la descripción
+            (2026-08-22, Eugenio: «permite al usuario escoger entre los 14
+            objetivos los que más le interesen y aparecerán en su perfil encima
+            de la descripción y debajo del nombre»).
+
+            Dicen de qué va alguien antes de leer un párrafo, y además lo dicen
+            en el vocabulario de la plataforma: son los mismos catorce con los
+            que se filtra la portada. */}
+        {!editandoPerfil && (profileUser.objetivos?.length || 0) > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {OBJETIVOS.filter(o => profileUser.objetivos!.includes(o.id)).map(o => (
+              <span key={o.id}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                <o.icono className="w-3 h-3" /> {o.titulo}
+              </span>
+            ))}
+          </div>
+        )}
+        {editandoPerfil && (
+          <div className="mb-3 space-y-3">
+            {/* ══ HASTA TRES SITIOS ═══════════════════════════════════════
+                Se eligen del catálogo real de territorios, no se escriben a
+                mano: así «Madrid» es EL Madrid de la plataforma y no una
+                cadena de texto que nadie puede cruzar con nada.
+
+                EL TOPE SE DICE Y SE VE. Al llegar a tres desaparece el
+                buscador y se explica por qué; un buscador que no responde
+                parece roto. */}
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mb-1.5">
+                Dónde estás — hasta 3
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-1.5">
+                {borrador.ubicaciones.map(u => (
+                  <span key={u.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800">
+                    <MapPin className="w-3 h-3" /> {u.nombre}
+                    <button onClick={() => setBorrador(b => ({ ...b, ubicaciones: b.ubicaciones.filter(x => x.id !== u.id) }))}
+                      title="Quitar" className="p-0.5 rounded-full hover:bg-emerald-100">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {borrador.ubicaciones.length < 3 ? (
+                <div className="relative">
+                  <input
+                    value={buscaSitio}
+                    onChange={e => setBuscaSitio(e.target.value)}
+                    placeholder="Busca un territorio…"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-300"
+                  />
+                  {buscaSitio.trim().length >= 2 && (() => {
+                    const q = buscaSitio.trim().toLowerCase();
+                    const hall = territorios
+                      .filter(t => t.name.toLowerCase().includes(q) && !borrador.ubicaciones.some(u => u.id === t.id))
+                      .slice(0, 8);
+                    return (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-20 max-h-52 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-1">
+                        {hall.length === 0 ? (
+                          // NO EXISTE, Y SE DICE. Un desplegable vacío deja la
+                          // duda de si aún está buscando.
+                          <p className="px-3 py-2 text-[11px] text-slate-400">
+                            No hay ningún territorio que se llame «{buscaSitio.trim()}».
+                          </p>
+                        ) : hall.map(t => (
+                          <button key={t.id}
+                            onClick={() => { setBorrador(b => ({ ...b, ubicaciones: [...b.ubicaciones, { id: t.id, nombre: t.name }] })); setBuscaSitio(''); }}
+                            className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="truncate">{t.name}</span>
+                            <span className="ml-auto text-[9px] uppercase tracking-wider text-slate-300">{t.type}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <p className="text-[10px] text-slate-400">Tres es el máximo. Quita uno para añadir otro.</p>
+              )}
+            </div>
+
+            {/* LOS OBJETIVOS QUE TE IMPORTAN. Los catorce a la vista y se
+                encienden; un desplegable escondería justo la pregunta que se
+                está haciendo, que es «¿cuáles son los míos?». */}
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mb-1.5">
+                Qué te importa
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {OBJETIVOS.map(o => {
+                  const puesto = borrador.objetivos.includes(o.id);
+                  return (
+                    <button key={o.id}
+                      onClick={() => setBorrador(b => ({
+                        ...b,
+                        objetivos: puesto ? b.objetivos.filter(x => x !== o.id) : [...b.objetivos, o.id],
+                      }))}
+                      className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors',
+                        puesto ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400')}>
+                      <o.icono className="w-3 h-3" /> {o.titulo}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editandoPerfil ? (
+          <>
+            <textarea
+              value={borrador.bio}
+              onChange={e => setBorrador(b => ({ ...b, bio: e.target.value }))}
+              rows={3}
+              placeholder="Cuéntale al mundo quién eres y en qué andas."
+              className="w-full mt-2 text-sm text-slate-600 leading-relaxed bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-emerald-300 focus:bg-white"
+            />
+          </>
+        ) : (
+          <>
+            {profileUser.bio
+              ? <p className="text-sm text-slate-600 leading-relaxed mt-1.5">{profileUser.bio}</p>
+              : isMe && (
+                <button onClick={empezarAEditar} className="text-sm text-slate-400 italic mt-1.5 hover:text-emerald-700 transition-colors">
+                  Añade una descripción y una foto →
+                </button>
+              )}
+          </>
+        )}
 
         <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-400">
           {profileUser.location && (
@@ -160,53 +584,272 @@ export default function PersonaPublica() {
           )}
         </div>
 
-        <div className="flex items-center gap-5 mt-4 pt-4 border-t border-slate-100 text-sm">
-          <span><b className="text-slate-900">{stats.publications}</b> <span className="text-slate-400">publicaciones</span></span>
-          <span><b className="text-slate-900">{stats.followers}</b> <span className="text-slate-400">seguidores</span></span>
-          <span><b className="text-slate-900">{stats.following}</b> <span className="text-slate-400">siguiendo</span></span>
-        </div>
+        {/* LOS CONTADORES SE FUERON (2026-08-22, Eugenio: «quita lo de siguiendo
+            y seguidores y lo de publicaciones, los números esos fuera»). En una
+            plataforma que empieza, «0 seguidores» en el perfil de todo el mundo
+            no informa de nada y desanima a quien acaba de llegar. Los datos
+            siguen ahí —los usan los círculos de la portada para sugerir a
+            quién seguir—; lo que se quita es el marcador. */}
       </div>
 
-      {/* Grafos de Conocimiento: la carta de presentación de la persona —
-          en qué está trabajando, contado de forma conectada. */}
+      {/* ══ LAS TRES FILAS ══════════════════════════════════════════════════
+          (2026-08-22, Eugenio: «pon en grande una fila de PROYECTOS […] otra de
+          PUBLICACIONES […] y una tercera de PRODUCTOS», y «haz que sea compacto
+          y que se vea todo esto en una sola pantalla sin necesidad de hacer
+          scroll down».)
+
+          COMPACTO ES QUITAR, NO ENCOGER. Lo que hace que quepa no es letra más
+          pequeña: es que se fue la portada de 160 px y se fueron los tres
+          contadores. Lo que queda —foto, nombre, objetivos, descripción y tres
+          filas— entra en una pantalla porque hay menos cosas, no porque estén
+          apretadas. */}
+      <div className="px-4 sm:px-6 mt-4 space-y-4">
+        <FilaDelPerfil
+          titulo="Proyectos" icono={<FolderKanban className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no tienes proyectos. Crea el primero →' : 'Sin proyectos públicos.'}
+          onCrear={isMe ? () => navigate('/proyectos') : undefined}
+          elementos={proyectos.map(p => ({
+            id: p.id, titulo: p.titulo,
+            detalle: p.pendientes === 0 ? 'todo hecho' : `${p.pendientes} por hacer`,
+            color: 'linear-gradient(135deg,#0f766e,#1e3a8a)',
+            icono: <Icono valor={iconoDeProyecto(p.icono, p.titulo)} tamano={26} />,
+            onAbrir: () => navigate(p.url),
+          }))}
+        />
+
+        <FilaDelPerfil
+          titulo="Publicaciones" icono={<Megaphone className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no has publicado nada. Publica lo primero →' : 'Sin publicaciones.'}
+          onCrear={isMe ? () => navigate('/explorar') : undefined}
+          elementos={pubs.map(pb => ({
+            id: pb.id, titulo: pb.title || 'Sin título',
+            detalle: pb.body ? String(pb.body).slice(0, 60) : null,
+            color: 'linear-gradient(135deg,#7c3aed,#db2777)',
+            icono: <Megaphone className="w-6 h-6" />,
+            onAbrir: () => navigate('/explorar'),
+          }))}
+        />
+
+        <FilaDelPerfil
+          titulo="Productos" icono={<Store className="w-3.5 h-3.5" />}
+          vacio={isMe ? 'Todavía no vendes nada. Pon tu primer producto →' : 'Sin productos.'}
+          onCrear={isMe ? () => navigate('/mercado') : undefined}
+          elementos={productos.map(pr => ({
+            id: pr.id, titulo: pr.nombre,
+            detalle: pr.precio != null ? `${(pr.precio / 100).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €` : null,
+            imagen: pr.imagen,
+            color: 'linear-gradient(135deg,#d97706,#b91c1c)',
+            icono: <Store className="w-6 h-6" />,
+            onAbrir: () => navigate('/mercado'),
+          }))}
+        />
+      </div>
+
+      {/* EL ESCAPARATE. Todo lo que esta persona ha hecho —grafos, proyectos,
+          mapas y su Mundo 3D— en fichas que su dueño coloca a mano. */}
       <div className="px-4 sm:px-6 mt-6">
         <div className="flex items-center justify-between gap-2 mb-3">
           <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
-            <Network className="w-4 h-4 text-emerald-600" /> Grafos de Conocimiento
+            <LayoutGrid className="w-4 h-4 text-emerald-600" /> Escaparate
           </h2>
           {isMe && (
-            <button onClick={() => setShowCreateGraph(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold transition-colors">
-              <Plus className="w-3 h-3" /> Crear grafo
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => setShowCreateGraph(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 hover:border-emerald-300 text-slate-600 rounded-full text-xs font-bold transition-colors">
+                <Plus className="w-3 h-3" /> Nuevo grafo
+              </button>
+              <button
+                onClick={() => setEditando(v => !v)}
+                className={cn('inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
+                  editando ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    : 'bg-white border border-slate-200 hover:border-emerald-300 text-slate-600')}
+              >
+                {editando ? <><Check className="w-3 h-3" /> Listo</> : <><Pencil className="w-3 h-3" /> Editar</>}
+              </button>
+            </div>
           )}
         </div>
-        {graphs.length === 0 && (
-          <p className="text-xs text-slate-400 italic mb-2">
-            {isMe ? 'Todavía no has creado ningún grafo — tu primer grafo será tu carta de presentación.' : 'Todavía no ha publicado ningún grafo.'}
+
+        {editando && (
+          <p className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 leading-relaxed">
+            Arrastra las fichas para colocarlas y usa el ojo para enseñarlas u ocultarlas.
+            Se guarda solo. Ocultar es una decisión de escaparate: lo privado sigue siendo
+            privado lo pongas donde lo pongas.
           </p>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {graphs.map(g => (
-            <Link key={g.id} to={`/grafos/${g.slug}`}
-              className="group bg-gradient-to-br from-emerald-600 via-teal-700 to-indigo-800 text-white rounded-2xl p-4 shadow hover:shadow-lg transition-all relative overflow-hidden">
-              <Network className="absolute top-3 right-3 w-6 h-6 text-white/30" />
-              <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-emerald-200 mb-1">Grafo de Conocimiento</p>
-              <h3 className="text-base font-black leading-tight line-clamp-2">{g.title}</h3>
-              <div className="flex items-center gap-3 mt-2.5 text-[10px] text-white/70">
-                {g.rating?.avg != null && <span className="inline-flex items-center gap-0.5"><Star className="w-3 h-3 fill-amber-300 text-amber-300" />{g.rating.avg.toFixed(1)}</span>}
-                <span className="inline-flex items-center gap-0.5"><Eye className="w-3 h-3" />{g.views}</span>
-                <span className="inline-flex items-center gap-0.5"><AppWindow className="w-3 h-3" />{g.window_count} ventanas</span>
-                {g.status === 'borrador' && <span className="bg-white/20 px-1.5 py-0.5 rounded-full font-bold uppercase">Borrador</span>}
-                {g.is_ai_generated && <span className="inline-flex items-center gap-0.5 bg-amber-400/30 px-1.5 py-0.5 rounded-full font-bold uppercase"><Sparkles className="w-2.5 h-2.5" />IA</span>}
-              </div>
-            </Link>
-          ))}
-        </div>
+
+        {visibles.length === 0 ? (
+          <p className="text-xs text-slate-400 italic mb-2">
+            {isMe
+              ? 'Tu escaparate está vacío — crea un grafo, un proyecto o un mapa y aparecerá aquí.'
+              : 'Todavía no ha puesto nada en su escaparate.'}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {visibles.map((it, i) => {
+              const pinta = PINTA[it.tipo];
+              const Icono = pinta.icono;
+              const oculto = escaparate.ocultos.includes(it.clave);
+              // LA PORTADA (Eugenio, 2026-08-20: «que cada ficha tenga una
+              // imagen de preview de lo que hay dentro»). Va a sangre, con un
+              // degradado oscuro de abajo arriba para que el texto se lea
+              // encima de cualquier foto. Sin imagen, manda el color del tipo:
+              // así todas las fichas tienen la misma silueta, con foto o sin
+              // ella, y la rejilla no se rompe.
+              const cuerpo = (
+                <>
+                  {it.imagen && (
+                    <img src={it.imagen} alt="" loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                  <div className={cn('absolute inset-0',
+                    it.imagen
+                      ? 'bg-gradient-to-t from-slate-950/95 via-slate-950/55 to-slate-950/10'
+                      : cn('bg-gradient-to-br', pinta.fondo))} />
+                  <div className="relative h-full flex flex-col justify-end">
+                    <Icono className="absolute top-0 right-0 w-6 h-6 text-white/40" />
+                    <p className={cn('text-[8px] font-bold uppercase tracking-[0.25em] mb-1',
+                      it.imagen ? 'text-white/70' : pinta.texto)}>
+                      {pinta.etiqueta}
+                    </p>
+                    <h3 className="text-base font-black leading-tight line-clamp-2 pr-7">{it.titulo}</h3>
+                    {it.resumen && !it.imagen && (
+                      <p className="text-[11px] text-white/70 leading-snug line-clamp-2 mt-1">{it.resumen}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-2.5 text-[10px] text-white/70">
+                      {it.dato && <span>{it.dato}</span>}
+                      {it.privado && (
+                        <span className="inline-flex items-center gap-0.5 bg-white/20 px-1.5 py-0.5 rounded-full font-bold uppercase">
+                          <Lock className="w-2.5 h-2.5" /> Privado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </>
+              );
+              const clases = cn(
+                'group relative block text-left aspect-[16/10] text-white rounded-2xl p-4 shadow transition-all overflow-hidden bg-slate-800',
+                editando ? 'cursor-grab active:cursor-grabbing' : 'hover:shadow-lg',
+                oculto && 'opacity-40',
+              );
+              // Editando, la ficha NO navega: el clic es para arrastrar y para
+              // el ojo. Fuera de edición es un enlace normal.
+              // LOS TRES PUNTITOS DE UNA FICHA (Eugenio, 2026-08-20: «que todas
+              // las tarjetas tengan los 3 puntitos cuando se hace hover y que
+              // se puedan modificar, eliminar etc»). Solo en TU escaparate y
+              // solo en lo que es una cosa de verdad: el Mundo 3D es un sitio,
+              // no se renombra ni se quita.
+              const puedeTocarse = isMe && !!tipoEditable(it.tipo);
+              const puntitos = puedeTocarse && (
+                <div className="absolute top-2 right-2 z-20" onClick={e => e.preventDefault()}>
+                  <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuFicha(m => (m === it.clave ? null : it.clave)); }}
+                    title={`Opciones de ${it.titulo}`}
+                    className={cn('w-7 h-7 grid place-items-center rounded-lg bg-black/30 backdrop-blur text-white transition-opacity hover:bg-black/50',
+                      menuFicha === it.clave ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100')}
+                  >
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+
+                  {menuFicha === it.clave && (
+                    <div className="absolute top-9 right-0 w-44 bg-white border border-slate-200 shadow-2xl rounded-xl py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <Link to={it.url}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400" /> Abrir
+                      </Link>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); setRenombrando(it); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                        <Pencil className="w-3.5 h-3.5 text-slate-400" /> Nombre e icono
+                      </button>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); alternarOculto(it.clave); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                        {oculto ? <Eye className="w-3.5 h-3.5 text-slate-400" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                        {oculto ? 'Enseñar' : 'Ocultar'}
+                      </button>
+                      <button
+                        onClick={e => { e.preventDefault(); setMenuFicha(null); setQuitando(it); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left">
+                        <Trash2 className="w-3.5 h-3.5 text-slate-400" /> Quitar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+
+              return editando ? (
+                <div
+                  key={it.clave}
+                  draggable
+                  onDragStart={e => { arrastrando.current = it.clave; e.dataTransfer.effectAllowed = 'move'; }}
+                  onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+                  onDrop={e => { e.preventDefault(); soltar(i); }}
+                  onDragEnd={() => { arrastrando.current = null; }}
+                  className={clases}
+                >
+                  <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
+                    <GripVertical className="w-4 h-4 text-white/50" />
+                    <button
+                      onClick={() => alternarOculto(it.clave)}
+                      title={oculto ? 'Enseñar en el escaparate' : 'Ocultar del escaparate'}
+                      className="w-6 h-6 grid place-items-center rounded bg-white/15 hover:bg-white/30 transition-colors"
+                    >
+                      {oculto ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  {puntitos}
+                  {cuerpo}
+                </div>
+              ) : (
+                <Link key={it.clave} to={it.url} className={clases}>
+                  {puntitos}
+                  {cuerpo}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
 
+      {/* El MISMO popup que el menú: renombrar una cosa es lo mismo se haga
+          desde donde se haga. */}
+      {renombrando && tipoEditable(renombrando.tipo) && (
+        <PopupRenombrar
+          tipo={tipoEditable(renombrando.tipo)!}
+          id={renombrando.id}
+          nombre={renombrando.titulo}
+          onHecho={(n) => setItems(xs => xs.map(x => (x.clave === renombrando.clave ? { ...x, titulo: n } : x)))}
+          onCerrar={() => setRenombrando(null)}
+        />
+      )}
+
+      {/* Quitar: se dice que se archiva y qué implica. */}
+      {quitando && (
+        <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
+          onClick={() => setQuitando(null)}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
+            <h2 className="text-sm font-black text-slate-900 mb-2">¿Quitar «{quitando.titulo}»?</h2>
+            <p className="text-[12px] text-slate-600 leading-relaxed">
+              Se archiva: desaparece de tu escaparate y de tu menú, pero <b>no se borra</b>.
+              Si te arrepientes, sigue estando.
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setQuitando(null)}
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={() => archivar(quitando)}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition-colors">
+                <Trash2 className="w-4 h-4" /> Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCreateGraph && (
-        <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/grafos/${slug}`)} />
+        <CreateGraphModal onClose={() => setShowCreateGraph(false)} onCreated={slug => navigate(`/esquemas/${slug}`)} />
       )}
 
       <div className="px-4 sm:px-6 mt-6 space-y-4">

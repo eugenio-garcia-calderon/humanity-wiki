@@ -425,3 +425,3901 @@ Tres causas encadenadas, las tres reales (el clic NUNCA funcionó de verdad: las
 - **Los nodos de reto dicen su nombre (petición)**: dentro de cada esfera ya no pone «RETO» sino **«Incendios»**, **«Frontera Ceuta»**, **«Estrecho Gibraltar»**, «Vivienda» (`center.short` en la base de datos, aplicado en local y en producción).
 - **Nodos ANEXOS (petición)**: «Teoría de juegos del Estrecho de Gibraltar» deja de ser un reto de España aparte — se llama **«Estrecho Gibraltar»** y cuelga de **«Frontera Ceuta»** (`center.annex_of`), con su propia línea de energía padre→anexo. Un anexo es otra lectura del mismo reto, no un reto nuevo.
 - **La membrana se ajusta a lo que hay**: la esfera envolvente ya no tiene tamaño fijo, se calcula a partir de las esferas reales — así ningún grafo, tampoco un anexo colgado por fuera del anillo, queda fuera de la esfera común.
+
+### 2026-08-06 — Portada: tres VENTANAS VIVAS + barra de IA bajo ellas
+- **Se van el título y el subtítulo (petición)**: la portada entra directa a las tres formas de mirar. Sin manifiesto: la propia página es el argumento.
+- **Ventanas vivas, no ilustraciones (petición)**: dentro de cada tarjeta se carga **la página de verdad** en un `<iframe>` con `?embed=1` (el modo sin barra superior ni asistente que ya existía), dibujada a 1440 px de ancho lógico y encogida con `transform: scale()` para caber exacta. Un `ResizeObserver` mide el hueco, así encaja con cualquier pantalla. Se ve la base de datos real, el grafo real y el mapa real — no una idea de ellos.
+- **Hover que invita (petición)**: al pasar el ratón, la tarjeta se levanta, crece un 4,5 % con un halo de su color y **la ventana se amplía** (zoom del ×1,16 sobre el contenido, recortado por el marco). Se ve más de lo que hay dentro justo antes de entrar.
+- **Tarjetas más grandes y sin descripción (petición)**: la ventana ocupa `clamp(230px, 40vh, 460px)`; debajo solo quedan el rótulo, el nombre y **los datos** (92 tablas / 4 grafos · 47 publicaciones / 242 territorios · 98 indicadores).
+- **Orden (petición)**: **Base de Datos** a la izquierda del todo, luego Red de Datos y Geolocalización de Datos — del dato en crudo al dato conectado y al dato situado.
+- **La barra de IA, justo debajo de las tres ventanas (petición)**: nuevo modo `inline` del asistente. Para no perder la conversación al cambiar de página, el asistente se sigue montando en el `Layout` y se **pinta dentro de la portada con un portal de React** (`ANCLA_IA_EN_LINEA`); el buscador rápido de grafos funciona igual que en la barra inferior.
+- **Coste consciente**: son tres instancias de la aplicación en la misma pantalla. Se arrancan **escalonadas** (0 / 0,7 / 1,4 s) para que no compitan por la red, el `<iframe>` no captura el ratón (el clic es de la tarjeta entera) y queda fuera del árbol de accesibilidad. A cambio, la portada carga el bundle tres veces desde la caché del navegador.
+- **Pendiente de decisión**: `/api/db/tables` es solo de administrador, así que un visitante sin sesión ve el aviso «solo administradores» en la ventana de Base de Datos en vez del inventario. Abrir el inventario (nombres y recuentos, NO el contenido de las filas) es un cambio de una línea; el esquema ya es público en el repositorio.
+
+### 2026-08-06 — El explorador del mapa deja de ser texto y pasa a ser un GRAFO
+- **La ficha central se convierte en un lienzo (petición)**: la entidad que miras ya no es una columna de tarjetas apiladas, es un NODO. Le baja una conexión desde su **objetivo** (así sabes que estás dentro de Ecosistemas), y de ella cuelgan hacia abajo sus **retos en rojo** y, de cada reto, **sus soluciones en verde**. Nuevo `src/components/explorer/ExplorerGraphCanvas.tsx` (React Flow); `EntityExplorerPanel` queda como el que trae los datos y monta el lienzo.
+- **El dato vive dentro del nodo**: lo que era la tarjeta «Datos en España» (barra + 78% + fuente) está ahora en el propio nodo central; la metodología y las unidades son una ficha lateral unida por una línea de puntos; los indicadores/marcadores/métricas hijos son una columna a la derecha por la que se sigue bajando de nivel. En el nivel de métrica, las **estaciones de medición** ocupan esa columna con su nivel de riesgo.
+- **Previsualización del grafo de conocimiento (petición)**: el reto que tiene grafo —hoy Incendios— lleva **dentro del nodo la ventana viva de ese grafo** (`/grafos/<slug>?embed=1` encogido con `ResizeObserver`), con «11 publicaciones · clic para abrir el grafo». Un segundo clic abre el grafo entero.
+- **Ventanas dinámicas (petición)**: el lienzo contiene más de lo que se ve y el encuadre viaja al trozo que toca. Por defecto encuadra la **espina** (objetivo → entidad → retos); al hacer clic en un reto vuela a **ese reto y sus soluciones**; al cambiar de nivel en el menú de la izquierda se reconstruye y se reencuadra; y si arrastras el borde del panel, se reencuadra también (`ResizeObserver`). Botón «Ver todo» para soltar el foco.
+- **Backend, dos datos que faltaban**: `getSolutionsForChallenges` (server.ts) devuelve ahora `challenge_ids` por solución —sin eso no se sabe de qué reto cuelga cada una— y `GET /api/graphs` (knowledge.ts) devuelve `challenge_ids` por grafo, para emparejar reto↔grafo en una sola consulta en vez de una por reto.
+- **Se conserva lo que ya había**: el rastro de migas, el gráfico de causas del reto (ahora en un panel sobre el lienzo), los botones de administrador para crear reto/solución y el menú de editar dentro de cada nodo.
+- **Verificado en el navegador con clics reales**: en `indicador/Bosques` sale Ecosistemas arriba, Bosques 78% al centro, Contaminación aire con 3 soluciones e Incendios con 8 y su grafo dentro; el clic en Incendios enfoca su rama; el clic en Ecosistemas sube a `nivel=objetivo` y el lienzo se rehace con los 8 indicadores y los 4 retos del objetivo.
+
+### 2026-08-06 — Rehecho: el explorador del mapa ES la Red de Datos
+Aviso del usuario: la primera versión (tarjetas rectangulares con el grafo metido en un `<iframe>`) no mantenía «las funcionalidades y la estética que ya hemos desarrollado en la página de Red de Datos». Rehecho de raíz, y esta vez compartiendo el código en vez de imitarlo.
+
+- **Nuevo `src/components/knowledge/esferaKit.tsx`**: el lenguaje visual de la Red de Datos sale de `Grafos.tsx` y pasa a ser un módulo — esferas con portada recortada, satélites semi-desplegados, círculos de categoría de conocimiento, membrana envolvente, arista `flujo` (electricidad por relevancia), arista `fade`, el imán anti-solape (`constelacion`) y el pop-up de publicación. **`Grafos.tsx` lo importa igual que el mapa**: si mañana cambia una esfera, cambia en los dos sitios. La Red de Datos quedó verificada intacta tras el cambio.
+- **El explorador del mapa, reescrito sobre el kit** (decisiones del usuario, las cuatro recomendadas):
+  - **Órbita, no árbol**: la entidad que miras (Bosques) es el NÚCLEO dentro de la membrana, con su dato del territorio dentro; sus **retos orbitan en rojo**, los **hijos de la jerarquía en un anillo interior azul** con su puntuación, y el **objetivo del que vienes** se posa como esfera sobre la membrana, arriba, con la electricidad bajando hacia el núcleo.
+  - **Despliegue real, sin iframe**: al acercarte o hacer clic en un reto, las **publicaciones reales de su grafo** emergen a su alrededor con sus **círculos de categoría** (contexto, causa, dato, fuente…). Fuera el `<iframe>`: más rápido, navegable y con la misma estética. `GET /api/graphs?with_windows=1` trae las ventanas y aristas de todos los grafos de una vez.
+  - **Soluciones orbitando su reto**, en verde, en un anillo que crece con cuántas hay para que no se monten; sus nombres aparecen al acercarte (de lejos son puntos verdes, no una maraña de texto).
+  - **Pantalla completa**: botón que expande el explorador a todo el ancho ocultando el mapa, y otro para volver.
+- **La órbita se adapta al hueco**: el lienzo vive en una columna que puede ser estrecha y alta (junto al mapa) o ancha y baja (a pantalla completa). Una elipse fija se salía en un caso y desperdiciaba sitio en el otro, así que el anillo toma la forma del contenedor (`ResizeObserver`) y el grafo se reencuadra.
+- **Ventanas dinámicas**: por defecto se encuadra el corazón (objetivo, núcleo, retos e hijos); al hacer clic en un reto se vuela a ese reto con sus soluciones y sus publicaciones; el botón «Ver todo» suelta el foco; y cada clic en el menú de la izquierda reconstruye y reencuadra.
+- **Verificado con clics reales**: en Bosques, el núcleo con su 78% y los dos retos con sus soluciones; el clic en Incendios despliega sus 11 publicaciones reales (gráficas, mapas, vídeos, fichas) con sus círculos de categoría; en Ecosistemas, los 8 indicadores en el anillo interior con sus puntuaciones y los 4 retos alrededor; la pantalla completa oculta el mapa y devuelve el sitio.
+
+### 2026-08-07 — Fase 21: MI CONOCIMIENTO — el lienzo infinito personal
+La otra mitad de la plataforma (petición del usuario): el común agrega el conocimiento de todos; **Mi Conocimiento** es el espacio propio de cada persona — un lienzo infinito estilo Miro/Notion donde TODO lo que creas cuelga de tu nombre y se guarda en la base de datos GENERAL, no en un silo.
+
+- **El usuario es la raíz**: `/mi-conocimiento` asegura un grafo personal por usuario (`POST /api/knowledge/personal`, `center.personal='1'`, status borrador) cuyo centro es «Conocimiento de <nombre>». Cada cosa creada se conecta a él con un círculo de categoría — la rama «creado por Eugenio García-Calderón Huerta» que pedía la visión. Los lienzos personales quedan EXCLUIDOS del común (listado y buscador).
+- **El mismo motor, no otro**: `GrafoCanvas` se hace reutilizable (`GrafoLienzo({slug, toolbar})`) — Mi Conocimiento monta el lienzo real de los grafos (arrastrar con persistencia, pop-ups, valoraciones, comentarios, conexiones semánticas) y le superpone su barra. `/grafos/:slug` intacto (verificado: 21 nodos en Incendios).
+- **Barra de herramientas estilo Miro** (14 herramientas, vertical, con tooltips): nuevo grafo (real + tarjeta-portal), nuevo mapa (`user_maps` + ventana), nuevo producto (fila real en `products` + ventana), proyecto, tarea, tabla, texto, publicación, imagen, vídeo, enlace/documento, Wikipedia, modo conectar y el recomendador.
+- **Tres tipos de ventana nuevos** (migración 0019, aplicada en local y producción): `tarea` (checkbox que se marca desde el pop-up y guarda al instante — verificado hasta la fila en la BD), `tabla` (rejilla editable tipo Notion: columnas renombrables, añadir/borrar filas y columnas, celdas que guardan al escribir) y `proyecto` (estado idea/en marcha/terminado + pasos con checklist). `WindowContent` ahora acepta `onConfigChange` para ventanas editables por su dueño.
+- **El RECOMENDADOR — todos los «Notion» conectados**: panel «El común ya sabe…» con búsqueda; enseña el calibre («Sobre incendios hay ya 1 grafo, 4 publicaciones, 1 reto y 2 soluciones de 2 autores») y sugerencias concretas (`GET /api/knowledge/related`). «Conectar» una publicación REUTILIZA la ventana original (`window_id`): la misma pieza vive en dos lienzos sin duplicarse — verificado: `KW_INC_CAUSAS` en 2 lienzos, una sola fila. Grafos → tarjeta-portal; retos/soluciones → enlace.
+- **Verificado e2e con clics reales**: crear tarea desde la barra → cuelga del usuario vía círculo CONTEXTO → marcarla «Hecha» en el pop-up → `config.done=true` en la BD → tachada en el lienzo; recomendador con «incendios» → Conectado ✓ → la ventana aparece con círculo DATO; el común sigue con sus 4 grafos, sin el personal.
+- **Pendiente consciente**: subir imagen como ARCHIVO (hoy por URL — no hay almacenamiento de ficheros en el servidor); «nuevo mapa» crea el mapa real pero su ventana muestra el mapa general (no hay editor de mapas propios todavía); las tablas no se editan aún en la miniatura del lienzo, solo en el pop-up.
+
+### 2026-08-07 — humanity.wiki PUBLICADA en su dominio real
+- El usuario completó el traslado del dominio a Cloudflare (nameservers activos, proxy naranja). El certificado Let's Encrypt del apex se emitió vía HTTP-01 a través del proxy tras reiniciar Caddy (llevaba días en pausa de reintentos porque el dominio no resolvía).
+- **https://humanity.wiki responde 200** con la web y la API completas. `www.humanity.wiki` redirige al apex; su certificado quedó en reintento automático (la validación secundaria de Let's Encrypt recibía 404 de algunos centros de Cloudflare aún propagando el subdominio) — Caddy lo reintenta solo con backoff.
+- Retirado el bloque temporal `167-233-245-191.sslip.io` del `deploy/Caddyfile` (era el plan desde que se creó). Los enlaces antiguos a esa URL dejan de funcionar; el dominio real es la única puerta.
+- Pendiente del usuario en Cloudflare (no bloquea): revisar que el modo SSL sea «Full (strict)» y, si quiere, activar «Always Use HTTPS». Pendiente nuestro: actualizar el origen autorizado del login de Google cuando se cree la credencial.
+
+### 2026-08-07 — Lienzo: crecer desde un nodo y PEGAR (imágenes, texto, enlaces)
+- **Crear conectado desde cualquier nodo (petición)**: al pasar el ratón por una ventana aparece un **«+»** en su esquina; abre «Conectar algo nuevo» con los 11 tipos (publicación, texto, enlace, vídeo, imagen, Wikipedia, otro grafo, producto, tarea, tabla, proyecto) y la arista sale de ESA ventana, no del centro — así el conocimiento crece en cadena, no en estrella. La ventana nueva nace al lado de su origen. El mismo botón está dentro del pop-up de una ventana abierta («Conectar algo nuevo»), que es el otro camino natural.
+- **Pegar en el lienzo (petición)**: `Ctrl/Cmd+V` sobre el lienzo crea la ventana que toque — una **imagen** del portapapeles se sube y se convierte en ventana `imagen`; un enlace de **YouTube** en `video`; cualquier otra **URL** en `enlace`; y el **texto suelto** en una nota. Todo queda conectado al centro con su círculo de categoría. Nunca roba el pegado de un campo de texto (el chat, los formularios).
+- **Nuevo módulo `src/server/uploads.ts`**: `POST /api/uploads` (solo con sesión) + servido estático de `/uploads`. Los ficheros van a **disco**, no a la base de datos: una captura pegada ronda 1-3 MB y `GET /api/graphs?with_windows=1` trae las ventanas de TODOS los grafos a la vez — en `config` habría hecho esa respuesta de megabytes. El cuerpo viaja como bytes crudos (`application/octet-stream`), lo que evita el +33% de base64 y esquiva el `express.json()` global de 100 kB sin tocar el `server.ts` congelado (solo su línea de registro, que es el acoplamiento permitido).
+- **Seguridad de la subida**: solo imágenes de una lista blanca; **la extensión la decide el servidor** a partir del tipo declarado, nunca el nombre del navegador; nombre UUID; tope de 10 MB; y los ficheros se sirven con `nosniff` + CSP restrictiva para que un SVG subido no pueda ejecutar nada en el dominio.
+- **Volumen de Docker `uploads`** en `docker-compose.prod.yml`: sin él, cada despliegue borraría las imágenes.
+- **Verificado e2e con eventos de pegado reales**: imagen → subida (2.942 bytes), fichero en disco, servida con 200/image-png y ventana creada; texto → nota; URL de Wikipedia → enlace; y el «+» sobre «Imagen pegada» → tarea conectada con categoría `contexto` (comprobado en la base de datos). Subida sin sesión → 401.
+
+### 2026-08-07 — Arrastrar archivos al lienzo (además de pegarlos)
+Continuación de «pegar en el lienzo»: ahora también se puede **soltar un archivo arrastrándolo** desde el escritorio, y cae EN EL PUNTO donde lo sueltas (`screenToFlowPosition` de React Flow), no en un sitio aleatorio — la diferencia entre un lienzo y un formulario.
+
+- **Velo de «Suelta aquí»** mientras arrastras sobre el lienzo, con un contador de `dragenter`/`dragleave` para que no parpadee al pasar por encima de los nodos hijos.
+- **Cada archivo se convierte en lo que le corresponde**: imagen → ventana `imagen` visible; PDF, CSV, JSON, ZIP, DOCX, XLSX, PPTX → se suben y quedan como `enlace` descargable con su tamaño; `.txt` y `.md` → **no se suben**, se lee su contenido y se convierte en nota (`texto`). Varios archivos a la vez caen en cascada, desplazados 48 px, para no apilarse.
+- **Pegar y soltar comparten camino** (`traer()`): un enlace de YouTube es vídeo, cualquier otra URL es enlace, y el texto suelto es nota — igual se pegue o se arrastre.
+- **Seguridad del almacén**: `uploads.ts` acepta ahora documentos además de imágenes, pero **solo las imágenes de verdad se sirven en línea**; PDF, SVG, ZIP y compañía salen con `Content-Disposition: attachment`, así nada de lo subido se ejecuta en el dominio. Verificado en local: el PNG sale `image/png` inline y el PDF con `attachment`.
+- **Verificado con arrastres reales** (eventos `dragenter`/`dragover`/`drop` con `DataTransfer`): PNG + PDF soltados juntos → dos ventanas en el punto del soltar (380,107 y 428,155), la imagen se ve y el PDF descarga; un `.md` soltado → nota con su contenido en (50,318) y **cero ficheros `.md` en disco**.
+
+### 2026-08-08 — Visión y hoja de ruta, proyectos de cada persona, y el menú de dos puertas
+- **Constitución v1.1 (autorizado por Eugenio)**: la regla 6 pasa de «nunca se elimina conocimiento» a «no se elimina por accidente, pero quien lo creó puede pedir su borrado definitivo»: papelera de 15 días y después se elimina de verdad. Actualizados `CLAUDE.md` y `src/server/CLAUDE.md` para que la regla escrita y el código digan lo mismo.
+- **Página «Visión y hoja de ruta»** (`/vision`): para qué existe humanity.wiki y el tablero operativo de qué está hecho, qué se está haciendo y qué falta. **112 tarjetas** repartidas en **9 grupos** — el lienzo, los mapas, las bases de datos, la red social, el mercado, diseño y UI, la IA, datos y seguridad, y **gobernanza y veracidad** (grupo que propuse: es el corazón de una wiki que quiere competir con Wikipedia y no estaba en la lista). Hoy: 47 hechas, 3 en curso, 62 por hacer.
+- **Ficha de cada funcionalidad**: al pulsar una tarjeta se abre en el centro con su grupo, su estado (cambiable), su prioridad, **su responsable con nombre y correo**, y un detalle al que se le añaden **notas de texto e imágenes** (las imágenes usan el mismo almacén que el lienzo).
+- **Proyectos de cada persona** (`/proyectos`, `/proyectos/:slug`): el MISMO tablero, para lo que cada cual quiera organizar. Cada proyecto trae su visión, sus propios grupos con color, y público o privado. El tablero salió a `components/tablero/TableroKanban` y lo comparten la hoja de ruta y los proyectos — un solo sitio que mantener.
+- **El menú se reduce a dos puertas** (petición del usuario): **Explorar** (todo lo que ha publicado todo el mundo) y **Mis publicaciones** (lo tuyo). Todo lo demás —Inicio, Geolocalización, Red de Datos, Base de Datos, Universo, Mi Conocimiento, Mis proyectos, Visión y Mercado— pasa a un **desplegable de tres líneas junto al logo**, agrupado en «El común» y «Lo tuyo».
+- **Nuevo `GET /api/publicaciones`**: reúne en un solo listado las ventanas de conocimiento de los grafos públicos y las publicaciones del muro, con su autor y dónde viven. Los lienzos personales solo asoman para su dueño. Es lo que alimenta las dos páginas nuevas.
+- **Verificado**: 112 tarjetas servidas y agrupadas; la ficha abre con responsable y detalle; Explorar lista 58 publicaciones de 7 autores con buscador y filtros por tipo; «Mis publicaciones» 37; el desplegable muestra las 9 secciones.
+
+### 2026-08-08 — «Todo es una publicación»: mapas incluidos, editable, con carpetas y organización por IA
+Continuación del mismo día: un mapa, un lienzo, un proyecto, un documento son todos publicaciones — se editan si eres su autor (o colaborador), se hacen públicas o privadas, y se archivan en una papelera de 15 días. Y ahora se organizan en carpetas personales, arrastrando o pidiéndoselo a la IA.
+
+- **Migración 0023**: `knowledge_windows.publico` (las ventanas antes no podían ser privadas); `deleted_at` en `knowledge_graphs`, `proyectos`, `publications` y `user_maps` (papelera para los cinco tipos, no solo las ventanas); tabla `publicacion_meta` (`tipo`, `entity_id`, `estado` en_desarrollo/terminado, `colaboradores` jsonb) — sigue la forma de `graph_entity_links`, no una tabla nueva por tipo.
+- **El Mapa de Indicadores de la Humanidad deja de estar pintado a mano**: era un nodo fijo en `Mapas.tsx` que decía «de Eugenio García-Calderón Huerta» sin existir en ninguna tabla. `seed-mapa-principal.ts` lo convierte en una fila real de `user_maps` (`config.principal = true`), a nombre de `eugenio@lighthumanity.org`, editable como cualquier otra.
+- **Tres rutas comunes para los cinco tipos** (`src/server/knowledge.ts`): `PATCH /api/publicaciones/:tipo/:id` (título, contenido, público/privado, en_desarrollo/terminado — el lienzo personal no se puede publicar entero, solo sus piezas), `DELETE .../:tipo/:id` (papelera) y `.../restaurar`. Permisos resueltos en el servidor y viajan en cada tarjeta (`puedo_editar`, `soy_autor`) para que el lápiz, el candado y la papelera nunca dependan de que el frontend adivine.
+- **Colaboradores**: `GET`/`PUT /api/publicaciones/:tipo/:id/colaboradores` por correo — un colaborador puede editar el contenido pero no cambiar la visibilidad ni borrar (eso es solo del autor o un administrador).
+- **Papelera unificada**: `GET /api/papelera` junta los cinco tipos con `UNION ALL` y el barrido diario (`vaciarPapelera`) suelta primero las claves ajenas de cada tabla (aristas, colocaciones, valoraciones, comentarios, `publicacion_meta`, tarjetas de proyecto) antes de la baja definitiva a los 15 días.
+- **Migración 0024 — carpetas personales**: `carpetas` (por usuario) + `carpeta_publicaciones` (`carpeta_id`, `tipo`, `entity_id` — de nuevo una sola tabla para los cinco tipos, con índice único `(user_id, lower(nombre))`). Son carpetas de MARCADORES: cualquier publicación visible, propia o ajena, se guarda en las tuyas sin tocar su autoría.
+- **`autoOrganizarCarpetas(db, userId)`**: función exportada de `knowledge.ts` (no un cierre interno, para poder importarla desde `ai/assistant.ts` sin duplicarla) que lee tus publicaciones, le pide a Claude que las agrupe por tema (JSON `{carpetas:[{nombre,indices}]}`), crea las carpetas que falten —por nombre, sin duplicar— y las rellena. La usan tanto el botón «Ordenar con IA» (`POST /api/carpetas/auto-organizar`) como la acción `ORGANIZAR_CARPETAS` del catálogo del asistente, para que pedirlo por chat («ordename las publicaciones por carpetas») funcione igual.
+- **Explorar + Mis publicaciones, fusionadas** (`src/pages/Explorar.tsx`): un interruptor grande y centrado arriba —«De la Humanidad» / «Mías»— sustituye la distinción por página; `/explorar` y `/mis-publicaciones` siguen existiendo como atajos que abren la misma página con el interruptor en una posición distinta. Los cuatro tipos que la gente construye (Mapas, Lienzos, Proyectos, Bases de datos) pasan al principio de los filtros.
+- **Menú lateral de carpetas** (solo con sesión): crear, arrastrar una tarjeta hasta una carpeta (HTML5 drag & drop, con aro verde al pasar por encima), entrar en una carpeta para ver solo lo que contiene, borrar carpeta (lo de dentro no se borra). Cada tarjeta trae en su menú de tres puntos «Guardar en…» (casillas por carpeta) y «Descargar» (Markdown siempre; CSV si es una tabla; el archivo original si tiene uno subido; JSON siempre) — generado en el cliente con `Blob`+`URL.createObjectURL`, sin endpoint nuevo.
+- **`FichaPublicacion.tsx` (nuevo)**: la ventana central al pulsar una tarjeta, con edición de título/contenido, Hacer pública/privada, Marcar terminada, Colaboradores y Eliminar — todo condicionado a `puedo_editar`/`soy_autor`.
+- **Fallo reportado y corregido en el mismo día**: al guardar un cambio en la ficha, el título editado no se veía hasta cerrar y reabrir — la vista de lectura leía `pub.titulo` (la prop congelada del momento en que se abrió) en vez del valor recién guardado. Arreglado separando «lo guardado» (`guardado.titulo`/`guardado.texto`/`guardado.config`, que se actualiza tras cada PATCH con éxito) de la prop original; Cancelar también vuelve a lo guardado, no al valor con el que se abrió la ficha, para no deshacer un guardado previo de la misma sesión de edición.
+- **Verificado en el navegador con eventos reales** (clics, `DragEvent`+`DataTransfer`, envío de formulario): carpeta «Incendios» creada → arrastrar el Mapa de Indicadores hasta ella → `PUT .../carpetas` confirmado en la BD; entrar en la carpeta → «1 dentro»; menú «Descargar» → `Blob` de 195 bytes `text/markdown` generado; **«Ordenar con IA» con la API real de Claude** → 8 carpetas temáticas creadas (Vivienda 13, Incendios 9 —fusionó con la ya creada, sin duplicar—, Ceuta 8, Geopolítica 3, Conocimiento 4, Mapas 5, Multimedia 5, Datos 4); edición de título con guardado inmediato visible sin reabrir.
+
+### 2026-08-08 — Círculos de relación editables, pegado libre, orden del Kanban
+- **Los círculos CONTEXTO/DATO/CAUSA… se pueden arrastrar, redimensionar y bloquear** (petición del usuario: «permíteme modificarlos… como si fuesen un elemento más»). No hizo falta tocar el servidor: la migración 0020 ya había añadido `graph_edges.layout` y `.locked` pensando en esto (Fase 4, hasta hoy sin usar). El círculo lee `layout.pos`/`layout.size` si existen y si no cae en el anillo calculado de siempre; `TiradoresTamano` gana un `keepAspectRatio` para que el redimensionado no lo ovale; un candado propio (no la `BarraElemento` de las ventanas, que no encaja con una conexión) bloquea/desbloquea igual que en las ventanas.
+  - Verificado: seleccionar un círculo muestra sus 8 tiradores + 4 puntos de conexión; bloquear hace un `PUT /api/graphs/:id/edges/:id` real (`locked` pasa a `true` en la BD) y le quita al momento la clase `draggable` y los tiradores; escribir `layout.size` directamente y recargar lo renderiza al tamaño pedido sin errores. El arrastre en sí no se pudo ejercitar con eventos sintéticos en este entorno de pruebas (React Flow usa un sistema de arrastre basado en punteros que ignora los `PointerEvent` generados por script, algo ya comprobado igual en una ventana YA confirmada arrastrable en sesiones anteriores — no es un fallo nuevo, es un límite de la herramienta de verificación).
+- **Pegar en el lienzo ya no engancha nada al núcleo** (petición del usuario: «esto no me gusta»): `crearVentana` dejó de mandar la arista `contexto` automática que creaba toda pieza pegada o soltada. Y Ctrl/Cmd+V cae **donde está el ratón**, no en un punto fijo: un `onMouseMove` en el lienzo guarda la última posición vista (en un ref, no en estado, para no re-renderizar en cada pixel) y `onPaste` la traduce a coordenadas del lienzo con `screenToFlowPosition`. Arrastrar un archivo ya caía donde se soltaba; ahora los dos caminos —pegar y soltar— se comportan igual: libres, sin conexión.
+- **Tablero Kanban: Por hacer a la izquierda, Hecho a la derecha** (antes al revés) — el flujo de lectura natural. Afecta a `/vision` y a los proyectos de cada persona, que comparten `TableroKanban`.
+- **Verificado que el tablero de Visión ya es de Eugenio**: `puedeEditar={!!user?.isAdmin}` en el frontend y `ROLE.ADMIN` en `roadmap.ts` — como es el único administrador, el tablero ya sólo lo puede tocar él con sesión iniciada. No hizo falta cambiar nada.
+
+### 2026-08-08 — IA multi-proveedor (Gemini + Nano Banana), textos editables de Visión, sistema de puntos
+- **Tarjetas de la hoja de ruta editables desde el propio Kanban**: `FichaFuncionalidad` (`TableroKanban.tsx`) gana un menú de tres puntos con «Editar título y resumen» — título y resumen se vuelven `<input>`/`<textarea>` in situ, con Guardar/Cancelar; usa el `PUT /api/roadmap/:id` que ya existía, no hizo falta tocar el backend.
+- **Capa de proveedor extendida a Google Gemini** (`src/server/ai/provider.ts`): `GeminiProvider implements AIProvider` habla por REST con `generativelanguage.googleapis.com/v1beta`; `providerOfModel(model)` enruta por el prefijo `gemini-`. El resto del sistema sigue sin conocer el SDK concreto, tal y como pide `docs/`. Catálogo `AI_MODELS` ampliado con `gemini-flash-latest` y `gemini-pro-latest` — alias «-latest» y no una versión fechada, porque Google bloquea los IDs con fecha para claves nuevas ("no longer available to new users"); comprobado en vivo contra `GET /v1beta/models` con la clave real.
+- **Nano Banana (`gemini-2.5-flash-image`) elegible en el selector de modelos del chat**, con `image: true` en su entrada del catálogo para que el frontend le muestre «por imagen» en vez de un precio por millón de tokens que no le corresponde. `generarImagenNanoBanana(prompt)` es una función aparte de `AIProvider.complete()` (que es texto→texto) porque pide `generationConfig.responseModalities:['IMAGE']` — no encajaba en la interfaz sin forzarla. `POST /api/ai/chat` detecta el modelo elegido antes de tocar el proveedor de texto, genera la imagen, la guarda con `guardarArchivo` (mismo almacén que una imagen pegada a mano) y la devuelve como `imageUrl`; `AIAssistant.tsx` la pinta con un `<img>` dentro de la burbuja de respuesta. Coste no facturado todavía (`ai_usage_charges` con todos los campos de coste a 0, tipo `'imagen'`) — hueco conocido, no un error.
+- **Textos de Visión editables por el administrador**: tabla `page_texts` (`pagina`, `clave`, `valor` — migración 0025) + `GET/PUT /api/textos/:pagina/:clave` en `roadmap.ts` (el PUT exige `requireAdmin`). `TextoEditable` en `Vision.tsx` muestra un lápiz al pasar el ratón solo para `eugenio@lighthumanity.org`, con textarea y Guardar/Cancelar. Se añadió el párrafo de estrategia pedido («agregar todas las herramientas… una sola base de conocimiento universal») como uno de estos textos, no como copia fija.
+- **Sistema de Puntos de Humanity.wiki** (migración 0026): `users.puntos numeric(12,2) DEFAULT 100` — al ser un `ALTER TABLE` con `DEFAULT`, Postgres (PG11+) lo aplica también a las filas ya existentes sin un `UPDATE` aparte («fast default»), así que los 7 usuarios de entonces y cualquiera nuevo arrancan con 100 puntos sin backfill. `movimientos_puntos` es el libro mayor (motivo `regalo_bienvenida`/`compra`/`vista_publicacion`/`gasto_ia`/`ajuste_admin`); `otorgarPuntos()` en `src/server/puntos.ts` es el ÚNICO sitio que toca `users.puntos`, siempre junto con su fila de movimiento. Los puntos llevan decimales: ver una publicación pública ajena abona 0,01 puntos a quien la creó (`POST /api/windows/:id/view`). Compra de 100 puntos por 100€ vía Stripe Checkout embebido (`POST /api/stripe/checkout/puntos`, reutilizando `EmbeddedCheckoutModal`), acreditados solo en el webhook `checkout.session.completed` — nunca al crear la sesión, para no abonar pagos abandonados. Pestaña «Economía» nueva en `/vision` con saldo, botón de compra y movimientos recientes, con sus textos también editables vía `page_texts`.
+- **Verificado**: `GET /api/ai/status` devuelve los 7 modelos incluyendo Nano Banana; `POST /api/ai/chat` con `model:"gemini-2.5-flash-image"` genera un PNG real servido en `/uploads/...` (200 OK); en el navegador, elegir Nano Banana en el panel de ajustes del chat cambia el placeholder a «Describe la imagen que quieres generar…» y el resultado aparece inline en la conversación. Pendiente: migrar 0025/0026 a producción y añadir `GEMINI_API_KEY` al `.env.production`.
+
+### 2026-08-08 — Carpeta que no se pierde, lienzo personal publicable, cuadro de gasto, Explorar compacto
+- **La carpeta abierta ya no se pierde al cambiar Humanidad↔Mías** (fallo reportado por el usuario): el interruptor navegaba entre `/explorar` y `/mis-publicaciones`, dos rutas con dos instancias distintas de `Explorar` — el cambio de ruta desmontaba el componente y con él la carpeta activa. Ahora el modo vive en la query string de una sola ruta (`/explorar?mias=1`, `setSearchParams` con `replace`) y `/mis-publicaciones` es solo un `<Navigate>` que redirige ahí; el componente nunca se desmonta. Verificado: abrir «Incendios» (9 dentro) → pulsar Mías → la carpeta sigue abierta con su contenido.
+- **El lienzo personal se puede publicar del tirón** (petición del usuario, que se topó con el aviso «Tu lienzo personal no se publica entero»): eliminado el bloqueo del `PATCH /api/publicaciones/lienzo/:id` que devolvía 400 cuando `personal = '1'`. La protección era de una época en que el lienzo personal no tenía control de visibilidad propio; hoy publicar es una decisión explícita del dueño desde su ficha, igual que en cualquier otro lienzo. Verificado: PATCH `publico:true` → 200 y `status = 'publicado'` en la BD.
+- **Explorar compacto** (petición del usuario: «que las publicaciones estén mucho más arriba»): el interruptor grande centrado + su subtítulo + la fila de Papelera/contador (tres bloques apilados, ~200px) se funden en UNA fila: interruptor pequeño a la izquierda, chip de la carpeta activa (con su flecha de volver), Papelera y contador a la derecha. El buscador y los 12 tipos pasan de dos filas envueltas a una sola con scroll horizontal en los chips. Misma funcionalidad, la rejilla de tarjetas empieza donde antes estaba el interruptor.
+- **Pestaña «Gasto» en Visión** (petición del usuario): cuadro de mando del coste real de la plataforma, junto a Economía. Módulo nuevo `src/server/gasto.ts` (+1 línea de registro en `server.ts`): `GET /api/gasto` con caché en memoria de `GASTO_CACHE_HORAS` horas (6 por defecto) — «tiempo real» sin llamar a las APIs externas en cada visita; un administrador puede forzar con `?refrescar=1`. Tres fuentes: **Hetzner Cloud API** (precio mensual real por servidor; necesita `HETZNER_API_TOKEN`), **API de administración de Anthropic** (facturación oficial del mes; necesita `ANTHROPIC_ADMIN_KEY`, distinta de la clave del chat) y el **libro interno `ai_usage_charges`** (cada llamada real a la IA con su coste estimado — siempre disponible; Gemini se estima siempre así porque Google no da API sencilla de gasto). La pestaña muestra el total del mes, tarjeta por proveedor con desglose y un historial mensual con barras; los conectores sin clave aparecen como «sin conectar» con el aviso de qué falta (solo visible para el administrador). Verificado con datos reales: 0,42 € de Anthropic este mes desde el libro interno.
+- **Visión: un solo bloque de texto editable** (petición del usuario, tras editar él mismo los textos en vivo y quedar tres bloques con solo «.»): la página deja los cuatro `TextoEditable` de párrafos en uno (`parrafo_1`, que admite varios párrafos con líneas en blanco); las filas `parrafo_2/3/estrategia` se borraron de `page_texts` local. El texto vigente de `parrafo_1` es el que escribió Eugenio, no el por defecto del código.
+- **Producción**: migraciones 0025 y 0026 aplicadas (8 usuarios con 100,00 puntos y su justificante), `GEMINI_API_KEY` añadida a `.env.production`, PR #46 fusionado y desplegado. Verificado en humanity.wiki: los 7 modelos (Nano Banana incluido) en `/api/ai/status`, `/api/gasto` respondiendo con datos del libro interno.
+
+### 2026-08-08 — Página de administración de usuarios + restablecer contraseña
+- **`/admin/usuarios`** (petición del usuario): solo administradores. Lista todos los usuarios con su rol (desplegable que usa el `PUT /api/admin/users/:id/role` que ya existía — un admin no puede bajarse a sí mismo), su saldo de puntos, un campo «±puntos» que llama al nuevo `POST /api/admin/users/:id/puntos` (motivo `ajuste_admin`, pasa por `otorgarPuntos` como todo lo demás) y un botón «Contraseña» que genera un enlace de restablecimiento con el nuevo `POST /api/admin/users/:id/reset-link` (24 h de caducidad) y lo copia al portapapeles — se entrega a mano porque sigue sin haber proveedor de correo. Acceso: icono de personas junto a la etiqueta de rol en la cabecera, visible solo para admins.
+- **`/restablecer` por fin existe**: `Login.tsx` enlazaba a esa ruta desde el flujo «he olvidado mi contraseña» pero la página nunca se creó — el enlace daba 404. Ahora es un formulario mínimo (token de la URL + contraseña nueva dos veces) contra el `POST /api/auth/password/reset` que ya existía.
+- `GET /api/admin/users` ahora devuelve también `puntos`.
+- **Verificado de extremo a extremo con un usuario de prueba desechable** (creado por registro real y archivado al acabar): +5,5 puntos → saldo 105,50 en la BD; enlace generado → `POST password/reset` con su token → login con la contraseña nueva 200, con la vieja 401.
+- Nota del mismo día: eugenio@lighthumanity.org **ya era administrador** en producción (la petición «que tenga la misma categoría que administracion@lighthumanity.org» no requirió cambios: esa segunda cuenta no existe en la base de datos). Con el visto bueno del usuario, eugeniogarcia30@gmail.com (su cuenta de Google) pasó también a nivel 4 en producción.
+
+### 2026-08-08 — Documentos estilo Notion, Fase 1: el chat escribe documentos en directo
+- **Modelo de datos**: un documento es una ventana `kind='pagina'` (migración 0027 amplía el CHECK de kinds) cuyo contenido vive en `config.bloques`. Al ser una ventana hereda gratis visibilidad, colaboradores, carpetas y papelera. El parser markdown↔bloques (`src/utils/bloques.ts`) lo comparten cliente y servidor a propósito: lo que se ve generándose y lo que queda guardado no pueden divergir. Tipos de bloque: párrafo, títulos 1-3, lista, numerada, casilla, cita, separador, código, imagen y tabla.
+- **Generación en directo**: `POST /api/ai/documento` (módulo nuevo `src/server/documentos.ts`, +1 línea en server.ts) responde por SSE — `inicio` con el id de la ventana recién creada (privada, del que la pide), `delta` por cada trozo según Claude lo escribe (`completarClaudeStream` en provider.ts, solo Claude: Gemini no lo necesita todavía), y `fin` cuando el SERVIDOR ya guardó bloques+título — si el navegador se cierra a mitad, el documento queda guardado igual. Si la petición viene del chat, los últimos 10 mensajes de la conversación acompañan al encargo («dámelo en forma de documento» necesita saber qué es «lo»). El primer H1 pasa a ser el título de la ventana y se retira de los bloques para no duplicarse.
+- **Página `/documentos/:id`** (`Documento.tsx`): lectura para cualquiera con acceso (negritas, cursivas, enlaces, código, tablas renderizadas de verdad), edición para el autor/admin al estilo **Typora**: solo el bloque ACTIVO enseña el markdown en crudo; el resto se ve formateado y un clic lo activa. «+» al pasar el ratón por cada bloque con el menú de los 12 tipos (y eliminar); Enter crea el siguiente bloque (las listas heredan su tipo; Enter en un ítem vacío lo convierte en párrafo, como Notion); Backspace en vacío borra; autoguardado con 1,2 s de calma vía el `PUT /api/windows/:id` que ya existía; título editable; interruptor Pública/Privada; descarga a Markdown. Los textos vivos van en refs, no en estado — re-renderizar un contentEditable por tecla rompería el cursor.
+- **El chat detecta la intención** (AIAssistant): «hazme un informe…», «redacta un acta…», «dámelo en forma de documento» → navega a `/documentos/nuevo?prompt=…&conv=…` sin gastar una llamada de chat; «¿qué es un documento?» NO dispara. Funciona también en el panel acoplado.
+- **`GET /api/windows/:id`** nuevo (una ventana suelta con permisos resueltos) y **arreglo de fondo en `/api/publicaciones`**: el `JOIN graph_windows` exigía que toda ventana estuviera colocada en un lienzo — pasa a `LEFT JOIN`, porque los documentos nacen sueltos. Explorar: los kinds `pagina` entran en el filtro «Documentos», su tarjeta enseña las primeras líneas y el clic abre `/documentos/:id`.
+- **Verificado de extremo a extremo con la API real**: informe sobre incendios 2025 generado en streaming visible (títulos, negritas y una tabla apareciendo en directo), guardado como `KWMSKG9OVGZZ` privado, reabierto con formato correcto (15 negritas, 1 tabla, 0 asteriscos literales), edición Typora activada por clic con autoguardado confirmado en la BD, y presente en Mis publicaciones.
+- Pendiente (Fase 2, apalabrado con el usuario): insertar mapas/grafos/publicaciones como bloques embebidos, portada e icono, reordenar arrastrando, IA dentro del documento, y exportar a PDF, Word y PNG (Markdown ya está).
+
+### 2026-08-08 — Documentos, Fase 2: embeds, portada, arrastre, IA interna y exportaciones
+- **Bloque `publicacion`**: desde el «+» → Publicación se abre un buscador (la misma `/api/publicaciones`) y la elegida queda embebida. Una VENTANA enseña su contenido real con `WindowContent` (el mismo renderer de toda la app, cargado en vivo con el `GET /api/windows/:id` de la Fase 1); un lienzo/mapa/proyecto se enseña como tarjeta con su título y autor que navega a su página. El bloque guarda lo mínimo para pintarse (`pubTipo`, `entityId`, `pubTitulo`, `pubUrl`…) capturado al insertar.
+- **Portada e icono estilo Notion**: `config.portada` (imagen subida por `/api/uploads`) y `config.icono` (emoji de una paleta de 16, cambiable pulsándolo). Botones discretos «Añadir icono / Añadir portada» solo en edición.
+- **Reordenar arrastrando**: tirador ⋮⋮ junto al «+» de cada bloque (drag & drop HTML5, como las carpetas de Explorar); el bloque en vuelo se atenúa y el destino enseña una guía. Verificado con `DragEvent`+`DataTransfer` reales y el orden nuevo confirmado en la BD.
+- **IA dentro del documento** (`POST /api/ai/documento-bloque`, solo autor/admin): «Mejorar este texto con IA» en el menú de cada bloque de texto (reescribe el bloque con el documento entero como contexto; velo de «reescribiendo…» encima) y «Continuar con IA» al pie (añade 1-3 secciones nuevas coherentes — en la prueba real pasó de 36 a 54 bloques). Ambas pasan por `provider.complete` y se apuntan en `ai_usage_charges` (kind `documento`).
+- **Exportar**: menú de descarga con 4 formatos — Markdown (cliente, de F1), **Word** (`GET /api/documentos/:id/docx`, paquete `docx`: títulos, listas numeradas de verdad, tablas, imágenes locales, hipervínculos), **PDF** (`GET /api/documentos/:id/pdf`, `pdfkit`: fuentes Helvetica, tablas con reglas, imágenes) y **PNG** (html2canvas con `import()` dinámico — solo lo descarga quien exporta). El marcado inline pasa por `tokenizarInline` (nuevo en `bloques.ts`) para convertirse en negritas/cursivas reales, no asteriscos. Verificado: docx empieza por `PK` (11 KB), pdf por `%PDF-` (6,5 KB), chunk de html2canvas cargado bajo demanda sin errores.
+- **Fallo encontrado y corregido — cierre obsoleto en el autoguardado**: el temporizador de 1,2 s capturaba el estado de ANTES del cambio, así que el icono no se guardaba nunca, el título perdía su última letra y un bloque recién insertado podía no guardarse hasta el siguiente cambio. Ahora `guardarAhora` lee SIEMPRE de refs (`bloquesRef`, `metaRef`) que un efecto mantiene al día. Los textos ya iban por refs desde F1 — por eso la F1 pasó su verificación: solo se probó teclear en bloques existentes.
+- Dependencias nuevas: `docx`, `pdfkit` (servidor; el bundle usa `--packages=external`, así que resuelven desde node_modules en la imagen), `html2canvas` (cliente, troceado aparte por Vite).
+
+### 2026-08-08 — Gasto de servidores sin API: importe fijo configurable
+- El usuario preguntó qué API de Hetzner faltaba en la pestaña Gasto y apuntó bien: para un servidor fijo no hace falta ninguna. `gastoHetzner()` acepta ahora `SERVIDOR_COSTE_EUR_MES` como vía sin token: si está configurada, la sección Servidores sale en `ok` con ese importe, etiquetado «importe fijo configurado a mano». `HETZNER_API_TOKEN` queda como mejora opcional (precios en vivo, se actualiza solo si el servidor cambia).
+- La máquina identificada por sus specs vía SSH (8 vCPU, 16 GB, 320 GB, nbg1): se estimó CX42 a 16,90 €/mes, pero **el usuario corrigió con la consola de Hetzner en la mano: es un CPX42 (AMD) a 69,49 €/mes** — buena lección sobre estimar precios desde specs en vez de mirar la factura. `SERVIDOR_COSTE_EUR_MES=69.49` en los dos `.env` y etiqueta CPX42.
+
+### 2026-08-08 — Creador de publicaciones en Explorar + consumo real del servidor
+- **Botón «Crear» en Explorar** (petición del usuario): primero en la barra compacta, abre `CreadorPublicacion.tsx` — un cuadro con los cinco tipos de primera clase (Documento, Lienzo, Mapa, Proyecto, Al muro) y dos caminos que reutilizan las tuberías existentes:
+  - **«Pídeselo a la IA»** (documento/lienzo/mapa): documentos van al streaming de `/documentos/nuevo`; lienzos y mapas se piden a `/api/ai/chat` en modo autónomo y se acepta su acción (`/api/ai/actions/:id/decide`) — la misma pauta del panel del asistente — navegando al resultado. Verificado con la API real: «La sequía en la cuenca del Segura» generó un grafo completo (~12 ventanas conectadas por causas/datos/soluciones) y abrió su canvas.
+  - **«O créalo tú desde cero»**: título → el POST de siempre de cada tipo (`/api/graphs`, `/api/maps`, `/api/proyectos`, `/api/publications`) y un `POST /api/documentos` nuevo para el documento en blanco (nace privado con un párrafo vacío). Verificado: documento creado y abierto editable.
+- **Consumo real del servidor preparado** (petición del usuario: «quiero que dé el consumo de 7,69 €»): `gastoHetzner()` con token calcula ahora también `consumo_mes_eur` — horas encendido este mes × precio/hora con el mensual como techo, la misma cuenta del «Usage» de la consola de Hetzner — y la pestaña Gasto lo enseña como dato protagonista con el precio mensual de referencia; «Este mes» suma el consumo real cuando existe. **Pendiente de que el usuario cree el HETZNER_API_TOKEN** (solo lectura) en su consola: sin él, sigue el importe fijo.
+
+### 2026-08-08 — Editor de documentos: selección múltiple y comportamiento Notion de verdad
+- **Selección múltiple** (petición del usuario: «seleccionar varios bloques y eliminarlos de golpe»): Ctrl/Cmd+clic marca bloques sueltos, Shift+clic marca el tramo desde el último marcado (funciona sobre CUALQUIER tipo de bloque — el `onClickCapture` del envoltorio corta la navegación de los embeds). Anillo esmeralda en lo marcado y barra flotante inferior «N bloques · Eliminar»; Supr/Backspace borra la selección y Esc la deshace. Pista discreta al pie del editor.
+- **Y el pulido pendiente del editor** («mejora además el editor, lo que tienes pendiente»):
+  - **Enter parte el texto por el cursor** (antes siempre creaba un bloque vacío): lo de después baja al bloque nuevo con el cursor a su inicio. `posicionCaret` nuevo en el efecto de foco para colocar el cursor en un punto exacto.
+  - **Backspace al principio de un bloque fusiona con el anterior**, dejando el cursor en la juntura — antes solo borraba bloques vacíos.
+  - **Atajos markdown al teclear**: `# `, `## `, `### `, `- `, `1. `, `> `, `[] ` y ``` ` `` convierten el bloque al vuelo (solo desde párrafo), quitando el prefijo.
+  - **Pegar varias líneas crea varios bloques** pasando por `markdownABloques` — pegar una lista pega una lista de verdad; sobre un bloque vacío lo sustituyen, con texto van detrás.
+  - **PDF: tablas con formato y salto de página** (el pendiente declarado en la Fase 2): el marcado inline de cada celda se respeta (negritas/cursivas/código vía `tokenizarInline`, tramo a tramo con `continued`) y una tabla larga salta de página fila a fila repitiendo la cabecera.
+- Verificado en navegador con eventos reales: 2 bloques marcados y eliminados de golpe (BD 54→52), «## » convirtió un párrafo en Título 2, Enter en el carácter 9 partió el bloque con el cursor al inicio del nuevo, Backspace fusionó de vuelta con el cursor en la juntura (offset 9), un pegado de 4 líneas markdown creó 4 bloques (lista incluida), y el PDF con el renderer nuevo sigue firmando `%PDF-`.
+
+### 2026-08-08 — Editor de imágenes + presentaciones con frames horizontales
+- **Editor de imágenes** (`EditorImagen.tsx`, sin dependencias — un canvas con pila de deshacer): recortar arrastrando, rotar 90°, voltear H/V, deslizadores de luz/contraste/color, 6 presets (B/N, Sepia, Cálida, Fría, Dramática…), texto encima con tamaño/color, pincel a mano alzada, y Guardar sube el PNG a `/api/uploads`. Tres entradas: el creador de publicaciones (tipo **Imagen**: subes una foto → editor → queda como publicación suelta vía el nuevo `POST /api/ventanas`), el botón «Editar imagen» al pasar el ratón por cualquier bloque imagen de un documento, y (dentro) el flujo de portada.
+- **Presentaciones estilo PowerPoint pero con FRAMES HORIZONTALES** (rediseñado en caliente por el usuario: «sobre un lienzo con frames horizontales que serán las diapositivas»): kind `presentacion` (migración 0028, aplicada en local y producción) con `config.diapositivas` — elementos (texto/imagen/forma) posicionados en un lienzo lógico de 960×540. La página `/presentaciones/:id` enseña TODOS los frames en fila (scroll horizontal, como Figma): se edita en el sitio — arrastrar, redimensionar por la esquina, doble clic para el texto, barra con Texto/Imagen/Rectángulo/Círculo + negrita/alineación/tamaño/color, duplicar y borrar frames, frame activo con aro esmeralda. **Modo Presentar** a pantalla completa (flechas/espacio/Esc) y **exportar .pptx de verdad** con pptxgenjs (import() solo al exportar): cada frame, una página.
+- **IA**: `POST /api/ai/presentacion` — la IA redacta título + 5-9 diapositivas con puntos (JSON estricto) y se convierten en elementos colocados; en el creador, el tipo Presentación tiene su «Pídeselo a la IA». `POST /api/presentaciones` crea una en blanco con portada.
+- Explorar: filtro «Presentaciones», la tarjeta enseña la miniatura del primer frame + recuento, y el clic abre el editor. `WindowContent` gana el caso `presentacion`.
+- **Fallo encontrado y corregido en la verificación**: el editor de imágenes vive dentro del modal del creador, cuyo fondo se cierra al hacer clic fuera — cualquier clic dentro del editor burbujeaba hasta ese fondo y lo cerraba todo sin guardar. `stopPropagation` en la raíz del editor.
+- Verificado con la API real: presentación de 9 frames generada por IA («Los retos del agua en España») y abierta en el lienzo de frames; arrastre de un elemento persistido en la BD (80,190 → movido → devuelto); doble clic editó el subtítulo y quedó guardado; Presentar navegó 1→2 con flechas y salió con Esc; chunk de pptxgenjs cargado bajo demanda sin errores de consola; imagen de prueba subida → preset Dramática → guardada como publicación con su `image_url`.
+
+### 2026-08-08 — Administración: borrar (archivar) y restaurar usuarios
+- Petición del usuario: «permíteme como ADMIN borrar usuarios». Siguiendo la regla 6 de la Constitución, «borrar» = archivar: `POST /api/admin/users/:id/archivar` pone `archived_at`, revoca todas sus sesiones al momento y el login/Google/attachUser ya lo rechazan (todos filtran `archived_at IS NULL` desde siempre). Nada de lo publicado se destruye. `POST /api/admin/users/:id/restaurar` lo deshace. Un admin no puede borrarse a sí mismo.
+- En `/admin/usuarios`: papelera roja por fila (con confirmación que explica exactamente qué pasa) y botón «Restaurar» en las filas archivadas, que ya salían atenuadas con su etiqueta.
+
+### 2026-08-10 — El botón de borrar «no funcionaba» + alta directa de usuarios + acceso a registrarse más visible
+- **Diagnóstico del botón de borrar** (petición del usuario: «el botón de borrar usuarios registrados no funciona»): el backend estaba bien (`POST /api/admin/users/:id/archivar` respondía correctamente), pero `borrar()` dependía de `window.confirm()` — y Chrome puede silenciar por completo los diálogos nativos con su casilla «Evitar que este sitio cree más cuadros de diálogo», dejando el clic sin ningún efecto visible y sin ningún error que lo delate. Sustituido por un modal propio en React (`confirmando` + `ejecutarBorrado`), que no depende de una API del navegador que el propio navegador puede desactivar. De paso, los cinco handlers de la página (`cambiarRol`, `darPuntos`, `borrar`, `restaurar`, `generarEnlace`) que hacían `fetch` sin `try/catch` ahora atrapan cualquier fallo de red y lo muestran con `avisar()` — antes fallaban en silencio absoluto.
+- **Alta de usuarios desde el panel de admin** (petición del usuario: «tampoco me deja registrar usuarios nuevos desde esa página siendo ADMIN»): no existía ningún camino para esto. `POST /api/admin/users` (nivel 4, `src/server/auth.ts`) da de alta la cuenta con una contraseña aleatoria que nunca se transmite en claro — en su lugar genera de una vez el mismo enlace de restablecimiento de 24h que ya usa el botón «Contraseña» del resto de la tabla — y **no** abre sesión en el navegador del admin (a diferencia de `/api/auth/register`, que si se reutilizara tal cual habría colado al admin como el usuario recién creado). Formulario «Nuevo usuario» en `AdminUsuarios.tsx`: email, nombre opcional, rol; el enlace se copia solo al portapapeles al crear.
+- **Acceso a «Crear una cuenta» más visible desde `/login`** (petición del usuario): ya existía el cambio a modo registro, pero enterrado como un botón gris más entre otros dos iguales. Ahora, en modo login, es una caja destacada («¿Todavía no tienes cuenta? → Crear una cuenta») separada de «He olvidado mi contraseña», que queda como enlace secundario pequeño.
+- **Aviso de proceso**: `npm run dev` (`tsx server.ts`, sin `--watch`) no reinicia el proceso Express al tocar archivos del backend — el HMR de Vite recarga la página en el navegador pero la ruta nueva seguía sin existir hasta reiniciar el servidor a mano. Detectado porque `POST /api/admin/users` devolvía 404 pese a estar bien registrada; confirmado y corregido reiniciando el proceso.
+- Verificado en navegador con clics reales (no eventos inyectados): modal de borrado con Cancelar (no borra) y con Borrar (archiva de verdad, aviso y fila atenuada con «Restaurar»); usuario de prueba creado por el formulario de admin y visible en la lista al instante.
+
+### 2026-08-18 — Juego Vital, Fase 1 «Pasear tu vida»: tu vida real como mundo 3D
+- **Diseño completo acordado con el usuario** y registrado en `memory/10_JUEGO_VITAL.md`: el juego es la TERCERA vista sobre las entidades reales (tras lienzo y explorador) — cada edificio/objeto/personaje ES una entidad de la BD, nada existe solo en el juego. Decisiones cerradas: estilo **estilizado HD low-poly** (referencia Wind Waker/Animal Crossing; el fotorrealismo tipo COD Mobile queda descartado explícitamente como inalcanzable), empezar por «Pasear tu vida», híbrido biblioteca+generación para foto→3D, y **móvil + ordenador desde el día 1** (elección del usuario sobre mi recomendación de escritorio-primero). En móvil se juega EN HORIZONTAL (petición: «como en COD Mobile»): aviso de girar el móvil en vertical + botón de pantalla completa que en Android bloquea la orientación (iOS no lo permite jamás — el aviso es el único camino).
+- **Página `/juego`** (menú «Lo tuyo» → Juego Vital, a sangre completa, asistente en modo barra): la aldea semilla del usuario — 14 casas alrededor de una plaza con fuente, río serpenteante con puente de madera, 4 naves, 2 lagos y ~1.100 árboles instanciados sobre 118 ha (1090×1090 m, 1 unidad = 1 m) — todo procedural low-poly con semilla determinista (mismo mundo en cada visita, sin tablas nuevas todavía; la persistencia llega con el Builder de F2).
+- **Personaje en 3ª persona** (WASD/flechas + joystick táctil virtual), cámara de seguimiento suave, sombras que viajan con el jugador (la cámara de sombras es pequeña para que sean nítidas). **El robot compañero** flota y te sigue; al acercarte e interactuar, habla con bocadillo y **enfoca la barra del asistente IA real** (evento `humanity:asistente-focus` — el robot ES el asistente de siempre, con su búsqueda en internet y multimodal). **Tus proyectos reales** (`GET /api/proyectos`, los tuyos) se levantan como edificios en el Distrito de Proyectos: el edificio CRECE con el progreso real del kanban, el cartel lleva el título real y una barra de progreso; al acercarte, panel con descripción, tareas hechas y «Abrir el proyecto».
+- **Motor**: three.js + React Three Fiber + drei (nuevas dependencias; npm subió React de 19.0.1 a 19.2.8 de paso). Todo el motor vive en un chunk aparte cargado en diferido (`Escena-*.js`, 1,03 MB / 290 KB gzip): el bundle principal no engordó nada. `frustumCulled = false` en los instanciados (su caja envolvente ignora las posiciones de las instancias: bosques enteros desaparecían según el ángulo), `dpr` limitado a 1,75 para móvil.
+- **Dos bugs encontrados y arreglados en la verificación**: (1) «Invalid hook call» al montar la escena — caché de optimización de Vite (`node_modules/.vite`) mezclando el React antiguo con el nuevo tras instalar el motor; se limpia la caché y desaparece. (2) **Lienzo en blanco con 0 draw calls** pese a escena y cámara correctas: el `Coordinador` usaba `useFrame(cb, 1)` — en React Three Fiber CUALQUIER prioridad > 0 significa «yo renderizo por mi cuenta» y desactiva el render automático en silencio. Quitar la prioridad lo arregló (135 draw calls, ~150.000 triángulos). Queda avisado en un comentario en el código.
+- **Limitación del entorno de verificación, no del juego**: el panel de navegador de la sesión limita `requestAnimationFrame` a ~1 fps (pestaña sin foco), así que el movimiento se probó con teletransporte + fotogramas sueltos; interacciones, paneles, foco del asistente y render verificados de verdad. El joystick táctil no es ejercitable aquí (el emulador no expone `pointer: coarse`); su detección cubre `pointer: coarse` + `ontouchstart` + `maxTouchPoints` para los móviles reales.
+- Dos proyectos reales creados en la BD local durante la prueba («Camión camperizado», «Aldea Regenerativa») — son de verdad del usuario y se quedan.
+
+### 2026-08-18 — Juego Vital: builder tipo Los Sims, agentes con memoria y chat por interlocutor
+- **El fallo que lo motivó todo** (reportado por el usuario con la conversación delante): al pedirle al robot «hazme la entrevista fundacional», respondía como el asistente genérico de la plataforma — una entrevista sobre territorios y retos. Causa: `/juego` no mandaba NADA en el `context` del asistente, así que el modelo no sabía que estaba dentro de un juego. Arreglado con un bloque de sistema propio (`ctx.juego` en `buildSystemPrompt`): dentro del juego el modelo ya no es «el asistente de Humanity.wiki», es el robot del jugador o el agente con el que habla, con guion de entrevista fundacional (áreas de vida → objetivos/proyectos/principios → inventario vital → personas clave), tono de personaje (2-5 frases, una pregunta al final) y prohibición explícita de inventar la vida del jugador. Verificado con la API real: la misma frase que fallaba ahora abre la entrevista por las áreas de vida y reconoce lo que ya hay en el mapa.
+- **Builder tipo Los Sims** (petición: «que yo pueda crear personas y proyectos como en los SIMS»): barra de construcción permanente a la izquierda del mundo. Te plantas donde quieras y creas ahí una **persona** (alguien real de tu vida) o un **proyecto** — se planta a tus pies, con nombre flotando. Formulario con nombre, rol, descripción y **foto opcional** (reutiliza `/api/uploads`). Crear un proyecto crea además el **proyecto real** en la plataforma con su kanban (pilar «todo es real»).
+- **Cada cosa creada es un AGENTE con memoria propia** (migración 0029 `game_agents`; `src/server/juego.ts` con comprobación de rol y de propiedad en todas las escrituras, archivado en vez de borrado): ficha con «Lo que sabe», campo para **meterle info** que se acumula (`POST /api/juego/agentes/:id/memoria`), y su **propia conversación** (`conversation_id`). Al hablar con él, su memoria viaja en el contexto: responde como él y solo con lo que le has contado. Las personas llevan siempre la etiqueta «Representación creada por ti. No es la persona real ni habla por ella» (salvaguardas de `memory/10_JUEGO_VITAL.md`).
+- **La IA construye el mundo**: nuevo bloque `acciones_juego` en la respuesta del modelo (`{tipo, nombre, rol, descripcion}`, máx. 4). La página las crea llamando al backend —que valida rol y propiedad—, nunca el modelo directamente. Verificado: «mis áreas son Salud, Hogar y familia, Emprendimiento» devolvió las cuatro creaciones correctas.
+- **Chat rehecho** (peticiones del usuario): **minimizar** a una pastilla que dice con quién hablabas y cuántos mensajes lleváis, y **listado lateral de conversaciones agrupado en Compañero / Personas / Proyectos** — al elegir a alguien se cambia de interlocutor y se carga SU hilo (`GET /api/ai/conversations/:id/messages`), sin tener que caminar hasta él. La cabecera dice siempre con quién hablas.
+- **Fallo encontrado en la verificación**: el Enter en el campo «cuéntale algo» se escapaba de la ficha y la página acababa navegando fuera; corregido con `preventDefault` + `stopPropagation`.
+- Verificado en navegador con clics reales: persona «Javier · asesor técnico» plantada en el mundo (aparece en 3D con su nombre y en la lista «Tu mundo»), memoria guardada y devuelta por la API, rutas nuevas protegidas (401 sin sesión), y las dos conversaciones de IA de arriba con la API real.
+- **Las migraciones dejan de aplicarse a mano** (elección del usuario entre las tres opciones que le planteé): `deploy/migrate.sh` corre dentro del despliegue, antes de reconstruir la app. Registro propio en `schema_migrations`, solo lo pendiente, en orden, cada fichero en su transacción; si falla, el job aborta y el código nuevo no arranca. La primera ejecución marca como aplicadas las migraciones hasta `0028_presentaciones.sql` (estado real de producción según este mismo changelog) y en una base vacía aplica todo desde `0000`. Probado antes de tocar producción con la misma lógica contra la base local: 29 marcadas, 0029 aplicada, segunda pasada sin cambios. Ver `memory/03_DECISIONS.md`.
+- **Arreglada la subida de fotos del builder** (reportado por el usuario al usarlo): la mandaba como `FormData`, pero `/api/uploads` recibe los bytes EN CRUDO con `?type=<mime>` y `Content-Type: application/octet-stream` (como ya hacían `Documento.tsx` y `GrafoCanvas.tsx`). El servidor devolvía 400 «Formato no admitido» y, como el `catch` se lo tragaba, la foto desaparecía sin decir nada. Ahora usa el patrón correcto y **enseña el error si falla**, en vez de fallar en silencio. Comprobado lado a lado en el navegador: la forma antigua → 400; la nueva → 200, imagen guardada, servida como `image/png` y visible en la ficha de la persona.
+
+### 2026-08-18 — Juego Vital: archivo por amigo, colisiones, apertura automática y un pueblo con detalle
+- **Cada amigo guarda su archivo** (petición: «con cada amigo pueda guardar diversas fotos y documentos»): migración 0030 añade `archivos` jsonb a `game_agents` (mismo patrón que `memoria`, sin tabla nueva). `POST/DELETE /api/juego/agentes/:id/archivos` con comprobación de rol y propiedad, y solo acepta rutas de nuestro propio almacén (`/uploads/…`), nunca enlaces externos. En la ficha: rejilla con miniaturas de las fotos y tarjetas para los documentos, botón «Añadir» y quitar al pasar el ratón. Al quitar uno NO se borra el fichero en disco: puede estar embebido en otro sitio.
+- **Ya no atraviesas a la gente** (petición: «que no los atraviese, sino que se abra el chat»): `Personaje` recibe los obstáculos del mundo y, al tocarlos, te deja justo en el borde en vez de pasar a través. Chocar con alguien **abre su ficha y su chat**, una vez por encontronazo (no cada fotograma). Radios: 1,1 m una persona, 4,6 m un edificio de proyecto. Verificado: teletransportado encima de Javier, el juego me dejó a exactamente 1,10 m y abrió su ficha.
+- **Acercarse a un proyecto abre su cuadro solo**, sin pulsar nada (petición explícita); al alejarte se cierra. Verificado delante del distrito: panel abierto sin botón de por medio.
+- **El robot ya no te persigue**: vive en la plaza junto a la fuente, como un vecino más. Se gira hacia ti cuando te acercas y mira alrededor cuando estás lejos. Sigue siendo el asistente de IA real.
+- **El pueblo tiene vida** (petición: «añade más detalles a todos los objetos»): `Detalles.tsx` — farolas que iluminan, bancos, mercadillo con toldos de colores, pozo con polea, carro de heno, tendederos con ropa, vallas, huertos con surcos, humo saliendo de las chimeneas y un rebaño de ovejas que pasta y se mueve. Todo procedural y con la misma paleta: sin descargas ni dependencias nuevas. Los puestos se recolocaron al noreste tras verlos tapando la salida en la primera prueba.
+- **Coste medido**: la escena pasa de 135 a ~400 draw calls (~165.000 triángulos). Bien en ordenador; anotado en deuda técnica para instanciar el mobiliario si el móvil sufre.
+
+### 2026-08-18 — Juego Vital: modelos 3D reales (librería CC0 de Kenney)
+- **Decisión de Eugenio** entre tres opciones: librería descargada completa, personas y objetos (sobre mi recomendación de empezar solo por personas). Costes aceptados y avisados: decenas de MB en el repositorio y riesgo de romper la coherencia de estilo al mezclar packs — mitigado usando un solo pack por categoría.
+- **Packs descargados y revisados** (509 modelos en total): Mini Characters, City Kit Suburban 2.0, Nature Kit y Furniture Kit. **Todos CC0 (dominio público)**, verificado leyendo el `License.txt` de cada uno. Se copiaron solo los 28 que se usan (**3,8 MB**), con su licencia documentada en `public/juego/modelos/LICENSE.md`.
+- **Personas de verdad**: los 10 cuerpos de Kenney vienen **con esqueleto y 32 animaciones** (`idle`, `walk`, `sprint`, `sit`, gestos…). El jugador anda con animación real al moverse y vuelve a reposo al parar; las personas del mundo respiran en reposo y se giran mirando alrededor. Cada agente recibe siempre el mismo cuerpo (hash de su nombre). Los esqueletos se clonan con `SkeletonUtils`: sin eso, todas las personas compartirían huesos y se moverían a la vez.
+- **Casas de verdad**: las 14 casas de la aldea son 12 modelos distintos del City Kit, en lugar de la caja con tejado piramidal.
+- **Fallo encontrado y corregido**: al principio todo salía **blanco**. Los `.glb` de Kenney NO llevan la textura dentro: apuntan a `Textures/colormap.png` en su misma carpeta, y yo solo había copiado los `.glb`. Además cada pack trae SU colormap, así que compartir carpeta habría mezclado paletas. Solución: un directorio por pack (`personas/`, `pueblo/`) con su textura al lado, y comentado en el código para que no vuelva a pasar.
+- **Escala medida, no estimada**: el primer intento dejó personajes de 1,17 m. Midiendo la caja del modelo en el navegador (0,67 unidades) se ajustó la escala a 2,6 → ~1,75 m, estatura real en un mundo donde 1 unidad = 1 metro.
+- **El bosque sigue siendo procedural a propósito**: los ~1.100 árboles son una malla instanciada de una sola llamada de dibujo; cambiarlos por 1.100 modelos sueltos hundiría el móvil. Los modelos se usan donde se miran de cerca.
+- **Peso**: el paquete del motor bajó de 1.034 KB a 751 KB (216 KB comprimido) y los modelos (3,8 MB) se sirven aparte, se descargan una vez y quedan en la caché del navegador.
+
+### 2026-08-18 — Juego Vital: minimapa estilo GTA con viaje rápido
+- **Minimapa arriba a la derecha** (petición de Eugenio), siempre visible y **siguiéndote como en GTA**: enseña 240 m a tu alrededor con la plaza, los caminos, el río, las casas, las naves y los marcadores de tu gente y tus proyectos.
+- **Al pulsarlo se despliega el mapa completo en 2D**, y desde ahí **pinchas en cualquier persona o proyecto y viajas hasta él**. Al llegar, si es una persona se abre su ficha y su chat: viajar hasta alguien es ir a hablar con él.
+- **La animación del viaje sale gratis y queda bien**: el jugador aparece a 5 m del destino mirándolo, pero la cámara NO salta — sigue interpolando, así que hace un vuelo rasante por encima de la aldea hasta alcanzarte, con un velo oscuro y «Viajando a…» encima. Verificado: de la plaza (0, 17) al Camión camperizado (61, −27), ~64 m, y de vuelta hasta Javier con su ficha abierta.
+- **Un solo origen para la distribución** (`mapa.ts`): casas, caminos, plaza, naves, lagos, río y distrito los leen AHORA el mundo 3D y el mapa 2D. Si cada uno tuviera su copia, movería una casa y el mapa seguiría enseñándola donde estaba — un mapa que miente es peor que no tener mapa.
+- **Dibujado en SVG, no en el lienzo 3D**: nítido a cualquier tamaño, los marcadores son botones de verdad (pulsables con el dedo, accesibles) y no le cuesta un fotograma al motor. El punto del jugador y el encuadre se actualizan escribiendo atributos a mano en cada fotograma: meterlos en el estado de React sería re-renderizar el mapa 60 veces por segundo para mover un círculo.
+- **Dos ajustes tras verlo**: el mapa grande enseñaba las 118 ha enteras y la aldea salía del tamaño de un sello — ahora **encuadra donde está tu vida** y se ajusta solo según crece tu mundo; y los nombres se pisaban cuando dos sitios caían cerca (Javier sobre Anita) — ahora **se apilan con un hilo** hasta su marcador.
+- **Fallo mío detectado al verificar en producción, y corregido**: al meter los modelos en `public/juego/modelos/` creé una carpeta `public/juego/` que **choca con la ruta `/juego` de la página**. El servidor de estáticos respondía a `/juego` con un **301 a `/juego/`** (la app cargaba igual, pero con un salto de más y la URL cambiada). Modelos movidos a `public/modelos-juego/`. **Regla que queda apuntada en el código: ninguna carpeta de `public/` puede llamarse como una ruta de la aplicación.**
+
+### 2026-08-18 — Juego Vital: edificios sólidos, avatar mirando bien y zoom de cámara
+- **Chocar con el edificio de un proyecto ya abre su ficha** (fallo reportado por Eugenio). Causa: los edificios de la Fase 1 (los que salen de `/api/proyectos`) nunca se añadieron a la lista de obstáculos — solo estaban las personas y los proyectos creados con el builder. Se atravesaban y el choque no existía. Ahora son sólidos (radio 4,6 m) y el choque abre su panel; el prefijo `proy:` en el identificador distingue un edificio de un agente. Verificado: metido a propósito dentro del edificio, el juego me dejó a 4,60 m y abrió «Abrir el proyecto».
+- **De paso, la posición de esos edificios estaba copiada en TRES sitios** (mundo 3D, obstáculos y minimapa). Ahora sale de `posicionProyecto()` en `mapa.ts`, como ya pasaba con las casas.
+- **El avatar andaba de espaldas** (reportado por Eugenio): le había puesto media vuelta suponiendo que el modelo miraba hacia atrás, y mira hacia adelante. Comprobado en el navegador poniéndolo a rotación 0 y acercando la cámara: se le ve la cara, así que su frente es +Z y el rumbo ya lo orienta bien. Quitada la media vuelta; al aparecer mira al norte, hacia la plaza.
+- **Zoom de cámara en tercera persona** (petición de Eugenio: «ver el mapa desde más lejos»): rueda del ratón, pellizco de dos dedos en móvil y botones en pantalla con la distancia en metros. De 9 a 90 m; al alejarte la cámara mira más arriba para que se abra el mundo en vez de quedarte mirándote los pies. La rueda no hace zoom cuando el cursor está sobre un panel o el chat (ahí hace scroll, que es lo que se espera).
+
+### 2026-08-18 — Juego Vital: piel, pelo, ropa y fenotipo de cada persona
+- **Editor de aspecto** (petición de Eugenio: «cambiar el color del pelo, piel, ojos y fenotipo de cada personaje»). Se abre desde la paleta de la barra de crear para tu propio avatar, y desde la ficha de cada persona de tu mundo. Fenotipo (10 cuerpos), piel (6 tonos), pelo (8), ropa (8) y pantalón (8). Se guarda en `uiSettings.juegoAspecto` para ti y en `apariencia` del agente para cada persona.
+- **Los ojos NO se pueden cambiar, y por eso el control ya no está.** En estos modelos los ojos no tienen color propio en la paleta: van dibujados con el tono de la cara. Dejar el selector habría sido un botón que no hace nada, o peor, que tiñe el pelo.
+- **Cómo funciona**: los modelos de Kenney comparten UNA textura (`colormap.png`), una paleta donde cada parte del cuerpo apunta a un cuadradito de color. No hay un material por «pelo» o por «piel». Se leen las coordenadas de textura y la altura de cada vértice, se clasifica qué colores son piel, pelo, ropa, pantalón y zapatos, y se pinta una copia de la paleta cambiando solo esos. Se conserva la **luminosidad** de cada tono, así que el sombreado del modelo sobrevive al cambio de color.
+- **Una textura por malla, no una por muñeco.** Los modelos usan LOS MISMOS grises para el pelo (en la cabeza) y para el pantalón (en el cuerpo). Con una sola tabla para todo el personaje ganaba el primero que apareciera y el otro se quedaba sin teñir. Mirando cada malla por separado, el mismo gris puede ser pelo arriba y pantalón abajo.
+- **El fallo que costó encontrarlo, y que conviene no repetir: `THREE.Color` trabaja en espacio LINEAL.** `new THREE.Color('#2f4858').getHSL()` devuelve la luz en lineal; al volver a bytes y escribirlos en un lienzo 2D —que es sRGB— aquel azul acababa en (5,10,16), casi negro. Con todos los colores así, el personaje salía a franjas oscuras. La conversión HSL se hace ahora a mano, en sRGB. **Regla: nada de `THREE.Color` para calcular píxeles que van a un `<canvas>`.**
+- **Detección de la piel medida, no estimada**: en la paleta real los tonos de piel van de (179,99,67) a (239,186,148) y nunca llegan a 255; los naranjas puros (255,149,47 … 255,208,97) son pelo y ropa. El corte `r < 250` es lo que los separa.
+- **Verificado con números, no a ojo** (me equivoqué al juzgar una captura pequeña y lo comprobé leyendo píxeles): eligiendo Mujer A + piel clara + pelo blanco + camiseta verde + pantalón azul desde la interfaz, la textura de la cabeza queda en (249,248,246) pelo y (246,211,181) piel — `#f5d0b0` es (245,208,176) — y la del cuerpo en (72,109,162) pantalón y (65,151,117) camiseta.
+- **No se repinta si no hay ningún color elegido**: montar dos lienzos de 512×512 por cada vecino del pueblo no sale gratis.
+
+### 2026-08-18 — Juego Vital: cámara libre, «atrás» para cerrar, bici y planeador Aptera
+- **La cámara se mueve, como en Call of Duty Mobile** (petición de Eugenio). En el móvil, la **mitad derecha** de la pantalla gira la vista mientras el joystick de la izquierda mueve al personaje; con ratón se arrastra por cualquier parte del mundo. El joystick pasa de la derecha a la **izquierda**, que es lo que ya prometía el aviso de «gira el móvil» y lo que exige tener el mirar a la derecha.
+- **Cambio de fondo que esto obliga**: el mando deja de estar en ejes del mundo y pasa a ser **relativo a la cámara**. «Adelante» es alejarse de la cámara, gires hacia donde gires. Antes la vista era fija y pantalla y mundo coincidían.
+- **La cámara solo gira si el arrastre EMPIEZA sobre el lienzo 3D.** Comprobarlo así —y no con una lista de paneles a excluir— hace que cualquier botón o ficha que se añada mañana quede a salvo sin tocar nada.
+- **«Atrás» cierra el cuadro de diálogo** (petición de Eugenio: «indicando que el jugador quiere ir para atrás y no quiere esa interacción»). Flecha abajo o S en el teclado, y tirar del joystick hacia ti en el móvil. Ese mismo gesto no mueve además al personaje.
+  - Lo que rechazas **no se te vuelve a abrir solo**: hasta ahora la ficha de un proyecto se reabría en el mismo fotograma porque seguías al lado. Se recuerda qué has rechazado y se olvida al alejarte.
+- **Bici** (botón a la derecha, o B): 17 m/s en vez de 8. El personaje va de pie sobre los pedales — los modelos de Kenney no tienen animación de pedaleo, y sentarlo quedaría peor.
+- **Planeador «Aptera»** (botón a la derecha, o V): despegue y aterrizaje verticales, hasta 130 m de altura y 32 m/s. Volando por encima de 4 m no chocas con nada: pasas por encima de los tejados. Al bajar, cuando toca el suelo te bajas solo. Lleva sombra en el suelo, sin la cual no se sabe a qué altura vas.
+  - **Subir y bajar se pulsan y se quedan fijados**, no hay que mantener el dedo. En el móvil no se puede sujetar un botón mientras conduces con el otro pulgar. Con teclado sí es mantener pulsado (espacio y mayúsculas), que ahí es lo natural; los dos mandos se suman.
+  - **Los dos vehículos van hechos con geometría, no con modelos descargados**: la librería CC0 que usamos no trae bicicleta, y de la Aptera no existe —ni puede existir— un modelo libre, porque es el diseño de un coche real de una empresa real. Lo que hay es una versión estilizada con el mismo lenguaje visual del resto del mundo: silueta de gota, tres ruedas y panel solar. La versión voladora con rotores es invención para el juego; **la Aptera de verdad no vuela**.
+- **Fallo encontrado al verificar el vuelo**: el efecto del teclado se volvía a montar cada vez que cambiaba la lista de agentes, y con él se perdía el conjunto de teclas pulsadas — soltabas el espacio y el planeador seguía subiendo, porque el «soltar» llegaba a otro oyente. Ahora el efecto se monta UNA vez y llama a las acciones a través de una ref.
+- **Verificado midiendo, no a ojo**: despegue hasta 7 m, soltar y quedarse ahí, descenso hasta 0 y desmontaje automático; el giro de cámara cambia la posición de la cámara alrededor del jugador manteniendo la distancia (18,6 m a zoom 1).
+
+### 2026-08-18 — «No se puede abrir esta página» en el móvil durante los despliegues
+- Reportado por Eugenio con captura de Chrome en iOS. Causa: al desplegar, el contenedor de la aplicación se sustituye y hay unos segundos en los que no acepta conexiones; Caddy devolvía un error al instante.
+- **Arreglo**: `lb_try_duration 20s` en el proxy. Ahora la petición **espera** reintentando en vez de fallar: se ve una carga lenta, no un error. No elimina la ventana de despliegue, la hace invisible.
+
+### 2026-08-18 — Juego Vital: chocarte con alguien ya no te deja encerrado
+- **Reportado por Eugenio**: «cuando me choco con un personaje e intento seguir caminando, no me deja escapar».
+- **La causa no era la colisión, era el teclado.** Al chocar se abría el chat de esa persona y, con él, `humanity:asistente-focus` metía el cursor en el cuadro de escribir. Desde ahí las teclas de andar cuentan como escritura (guarda de siempre para no caminar mientras escribes al asistente), así que WASD dejaba de funcionar: estabas atrapado sin poder moverte.
+- **Tres arreglos, que se complementan**:
+  1. **Un choque ya no roba el teclado.** Te has tropezado con alguien, no has decidido escribirle: se abre su ficha y su conversación, pero el cursor se queda fuera. Hablar a propósito —botón, lista «Tu mundo», tecla E o viaje rápido— sí lleva el cursor al chat, como antes.
+  2. **Seguir caminando cierra lo que haya abierto**, en cualquier dirección (antes solo cerraba «atrás»). En el móvil, cualquier empujón del joystick de más del 60 % vale.
+  3. **Escape es la salida de emergencia**: funciona incluso escribiendo — suelta el teclado del chat y cierra lo abierto.
+- **Verificado caminando de verdad**: al chocar con Javier el foco se queda en el `body` y su ficha se abre; a la siguiente repetición de la tecla la ficha se cierra sola y el personaje sigue de largo (de z=6,2 a z=−0,4, pasándole al lado). Pulsar «Javier» en la lista sí deja el cursor en el chat.
+
+### 2026-08-18 — Juego Vital: entrar DENTRO de un proyecto, estilo Pokémon
+- **Chocar con el edificio de un proyecto ya no abre una ficha: te mete dentro** (petición de Eugenio). Antes hay una **transición de pantalla estilo Pokémon**: un fogonazo y una malla de rombos que nace en el centro y lo cubre todo, con el nombre del proyecto encima. La transición no es adorno: existe para tapar el cambio de escenario, que es exactamente para lo que la inventaron los Pokémon. Va en HTML sobre el lienzo, así el mundo 3D puede cambiar por debajo.
+- **La sala diáfana**: planta circular de 48 m, muro de cristal esmerilado con montantes, techo luminoso, anillos de luz girando en el suelo y, en el centro, un **núcleo holográfico que respira** con un aro que se llena según las tareas hechas de verdad. Encima flota el nombre del proyecto y su avance.
+- **Las habitaciones son los GRUPOS del tablero**, no una invención: `proyectos.grupos` (Producto, Diseño, Técnico, Contenido, Personas, Dinero) con su propio color. Cada puerta lleva su nombre, su color y cuántas tarjetas tiene. Entrar por una puerta es abrir esa carpeta.
+- **Dentro de una habitación flota lo que hay de verdad**: cada `roadmap_item` de ese grupo como una lámina con su título, su resumen y su estado en color; cada bloque de texto como una hoja; y **cada imagen de sus bloques como una foto de verdad**, con marco luminoso. Todo se balancea despacio en dos arcos, a la altura de la vista.
+- **Una sola planta** (`planta.ts`) define dónde está cada puerta y cada cosa: lo leen la escena (para dibujar) y los obstáculos (para chocar). Misma regla que `mapa.ts` con la aldea — si estuviera duplicado, entrarías por una puerta que ya no está.
+- **Dentro no hay bici ni planeador ni minimapa**: se entra a pie, y el mapa es la propia sala. A la derecha aparece la lista de habitaciones y qué hacer con el proyecto (abrir el tablero, hablar con la IA de él, salir).
+- **Cuatro cosas que se vieron feas y se arreglaron mirando, no suponiendo**:
+  1. **La cámara se quedaba fuera de la sala** y se veía todo a través del muro (una franja negra enorme era un montante). Dentro se acerca a 10,5 m y, si aun así saliera, se mete hacia dentro.
+  2. **La niebla se comía la sala**: con 22-70 m no se veían ni las puertas ni el núcleo. Ahora 70-210.
+  3. **El suelo salía negro**. Causa: `metalness` alto **sin mapa de entorno** — un material metálico no tiene nada que reflejar y se renderiza oscuro. Bajado casi a cero, y comentado.
+  4. **Las fotos salían negras**. Causa clásica de three.js: al llegar la textura, React reutilizaba el mismo material y three **no recompila el shader** de un material que nació sin mapa. Se le pone una `key` distinta para que monte uno nuevo.
+- **Verificado con una tarjeta temporal** creada y retirada después (el proyecto de Eugenio aún no tiene ninguna): en la habitación «Contenido» aparecieron las tres cosas — la tarjeta, la nota y la foto real.
+
+### 2026-08-18 — La IA sabe en qué habitación estás (y puede poner cosas en ella)
+- **Reportado por Eugenio**: dentro de la sala «Personas» de Aldea Regenerativa pidió «añade a Gala como persona en esta sala» y el asistente contestó como el asistente genérico de la plataforma: «¿quién es Gala?, ¿qué sala? Estás en /juego y no hay ninguna sala abierta».
+- **Causa raíz — el contexto del juego solo se enviaba al hablar con alguien.** Salía de `hablarCon`, así que si escribías directamente en la barra del chat sin haber hablado antes con el robot o con un vecino, el modelo no recibía NADA del juego: no sabía ni que estabas dentro de él. Ahora el contexto se manda siempre que cambia dónde estás.
+- **Y ese contexto no decía dónde estabas.** Ahora lleva `dentro`: el proyecto, sus habitaciones y en cuál estás, con lo que hay en ella. El prompt explica qué significa «esta sala» y le prohíbe preguntarlo.
+- **Nueva acción `tarjeta`**: dentro de un edificio no se crean vecinos ni edificios — se añade a su tablero. `{"tipo": "tarjeta", "grupo": "personas", "nombre": "Gala"}` crea la tarjeta en ese grupo y **aparece flotando en la habitación al momento**.
+- **Tres fallos encadenados, cada uno tapando al siguiente, encontrados probando contra la API de verdad**:
+  1. Con el contexto puesto, el modelo devolvía `tipo: "persona"` — que planta un vecino en la aldea, fuera del edificio. Dentro de un proyecto esa acción ya no se ofrece.
+  2. Después decía «¡Hecho! Gala ya está flotando aquí» **sin emitir el bloque JSON**: una promesa sin efecto. Ahora el prompt dice que sin bloque no ocurre nada y que decirlo sin hacerlo es mentirle al jugador.
+  3. Y cuando por fin lo emitía, **el filtro del servidor lo tiraba en silencio**: solo aceptaba `persona` y `proyecto`. Al añadir un tipo de acción hay que añadirlo también ahí; queda comentado en el código.
+- **Verificado de punta a punta**: la IA responde «Ya está, Gala aparece flotando aquí en Personas» con la acción correcta, la página crea la tarjeta de verdad en el grupo `personas` y el contador de la habitación pasa a 1. La tarjeta de prueba se retiró después.
+
+### 2026-08-18 — Correr con la barra espaciadora
+- **La barra multiplica por 3 la velocidad** a pie (8 → 24 m/s) y en bici (17 → 51 m/s), petición de Eugenio. En el planeador NO: allí la barra es lo que te hace subir, y las dos cosas no se pisan porque el personaje sabe en qué vas.
+- **Usa la animación de correr del propio modelo** (`sprint`, que los personajes de Kenney ya traen) en vez de acelerar la de andar, que se vería como una marioneta con prisa.
+- Medido en el navegador: 5,8 m/s andando y 20 m/s corriendo en la misma pasada. El cociente sale 3,45 y no 3 porque la velocidad se alcanza con una rampa suave y la muestra de andar aún no había llegado a su tope; el código multiplica exactamente por 3.
+
+### 2026-08-18 — Halos, clic a distancia y nombres que se leen desde lejos
+- **Pulsar entra o habla, sin caminar** (petición de Eugenio): un clic o un toque sobre el edificio de un proyecto te mete dentro, y sobre una persona abre su chat. Ya no hace falta acercarse.
+- **El clic NO se dispara si has arrastrado.** En este juego arrastrar es girar la cámara: sin esa comprobación (`delta > 6 px`), cada vez que giraras mirando a un edificio acabarías entrando en él.
+- **Halo animado sobre todo lo que tiene algo dentro**: un anillo que gira y late con tres chispas, más un haz de luz hasta el suelo, del color de la cosa. Desde el otro lado del valle se ve dónde hay algo.
+- **Al pasar por encima, el nombre pasa a medirse en PANTALLA, no en el mundo.** Es la parte que importa: a distancia `d` y campo de visión `fov`, la altura visible del mundo es `2·d·tan(fov/2)`; escalando el texto a esa altura por la fracción que queremos (7,5 % del alto de pantalla), el nombre ocupa siempre lo mismo, esté a 5 m o a 300. Un nombre «más grande» a secas seguiría siendo ilegible de lejos, que era justo el problema.
+- **Detalles que hacían falta para que funcione de verdad**:
+  - `raycast` anulado **malla a malla** en el halo: ponerlo en el grupo no sirve —el rayo recorre los hijos igual— y el haz, que envuelve al edificio, se comía los clics.
+  - El blanco de una persona es un cilindro **transparente**, no `visible={false}`: lo invisible se salta el rayo del ratón y no habría nada que acertar.
+  - El nombre resaltado va con `depthTest` apagado y sin descarte por frustum: si no, el propio edificio lo tapa y three lo descarta justo cuando lo has hecho grande para leerlo.
+- **Verificado en el navegador** a 90 m de zoom, donde el personaje mide unos pocos píxeles: al pasar por encima el cursor cambia a mano, «Javier» se lee a pantalla completa, y al pulsar se abre su ficha sin haber caminado. (Mis dos primeros intentos fallaron por un error mío de coordenadas: las capturas van a 800 px y la ventana real mide 826.)
+
+### 2026-08-18 — El hover ya no parpadea, y ocupa lo que Eugenio pidió
+- **El nombre resaltado se redujo al 40 %** de lo que ocupaba (del 7,5 % al 3 % del alto de pantalla): a pantalla completa tapaba media escena.
+- **Salir del hover ya no es inmediato.** Un muñeco son varias mallas con huecos entre medias, y el nombre desaparecía y volvía con solo mover un poco el ratón por encima (reportado por Eugenio). Ahora hay 450 ms de gracia que se cancelan si el ratón vuelve a entrar: hay que marcharse de verdad para que se apague. Al pulsar sí se apaga en el acto, que es lo que se espera.
+
+### 2026-08-18 — El avatar se quedaba tieso al cambiar de fenotipo
+- **Reportado por Eugenio**: «he cambiado el estilo de mi avatar y ahora no tiene dinamismo ni efectos al moverse».
+- **Causa**: cambiar de fenotipo carga OTRO `.glb`, con otro esqueleto y otras pistas de animación, pero el componente se reutilizaba y el mezclador de animación seguía apuntando a los huesos del modelo anterior. El muñeco se quedaba clavado en su pose de reposo — ni andar, ni respirar. Recargar la página lo arreglaba, que es la firma exacta de este fallo.
+- **Arreglo**: `Persona3D` monta su modelo con `key={cuerpo}`, así que cambiar de cuerpo monta una persona nueva y limpia. Vale igual para tu avatar y para el de cualquier vecino.
+- **Medido, no mirado**: leyendo el cuaternión del hueso `arm-left` en el navegador. Antes del arreglo, tras cambiar de fenotipo, se quedaba fijo en (0, 0) mientras los otros dos vecinos seguían animando; después del arreglo se mueve igual que ellos.
+
+### 2026-08-18 — Meter en una habitación a alguien que YA existe (no un clon)
+- **Reportado por Eugenio**: dentro de la sala «Personas» del Camión camperizado pidió «añade a Anita» y la IA **creó una Anita nueva** — un nombre suelto en una tarjeta. Él quería la Anita de siempre, con su avatar.
+- **Nueva acción de la IA, `habitante`**: `{"tipo":"habitante","grupo":"personas","agente_id":"GA…","nombre":"Anita"}`. El prompt le enseña a mirar la lista de gente que ya vive en el mundo y usar SU id; solo si de verdad no existe nadie con ese nombre se crea, una vez.
+- **La tarjeta apunta a la persona** con un bloque `{tipo:'agente', agente_id}`. Dentro de la habitación deja de ser una lámina de cristal: aparece **su avatar real**, con su fenotipo y sus colores, su nombre, su halo y una peana de luz. Al pulsarla (o al chocarte con ella, como en la aldea) se abre SU conversación, con su memoria.
+- **Rescate de lo ya creado**: las tarjetas de antes solo llevan el nombre. Si coincide con el de alguien de tu mundo, se toma por esa persona — así la «Anita» duplicada pasó a ser la Anita de verdad sin tocar la base de datos.
+- **Dónde vive la regla**: en `planta.ts`, no en `Interior.tsx`. La página necesita saber quién está en la sala para contárselo a la IA, y `Interior.tsx` importa three.js: traerlo de allí metería el motor 3D (~1 MB) en el paquete que descarga todo el mundo, juegue o no.
+- **Verificado de punta a punta**: la IA devuelve la acción con el id real de Javier (nada de crear a nadie), la tarjeta se guarda con su bloque `agente`, y en la habitación aparecen Anita y Javier de pie, con sus avatares. Las tarjetas de prueba se archivaron después; el número de personas del mundo siguió siendo 2.
+
+### 2026-08-18 — Vuelo pilotable, salto, rebotes y cámara que te sigue
+- **Controles nuevos** (peticiones de Eugenio): Shift corre (×3, medido 26,8 m/s frente a 8,8 andando), la barra salta (~1,35 m), y DOS toques de barra montan la nave y despegan solos. Pilotando, **W sube y S baja** y la nave **avanza sola en crucero** (32 m/s medidos): se dirige con A/D y con la vista. Aterrizar es mantener S; al tocar el suelo te bajas.
+- **La nave saca alas al despegar**, al estilo del V-Coptr Falcon: dos brazos en V con UN rotor en el extremo de cada uno. En el suelo van plegadas en vertical; el despliegue es el gesto del despegue.
+- **La cámara sigue el giro del muñeco**: al girar con A/D se va colocando sola a su espalda, como en un juego de conducción. Mientras arrastras con el ratón o el dedo mandas tú, y andando hacia atrás no se da la vuelta (marearía).
+- **Todo el mobiliario del pueblo hace REBOTAR**: farolas, bancos, árboles (los ~1.100), casas, naves, fuente, puestos, pozo y carro son sólidos, reflejan la velocidad al chocar (con pérdida de energía) y NO abren ninguna ficha. Verificado plantándose dentro de la fuente: el empuje deja al jugador exactamente en el radio de colisión (2,9 m) sin abrir nada. Los proyectos y las personas siguen abriendo su ficha al chocar, como siempre.
+
+### 2026-08-18 — El mundo se edita como un Miro en 3D
+- **Modo edición** (llave inglesa en la barra CREAR): pulsar cualquier pieza del pueblo —casa, árbol, farola, banco, nave, fuente, puesto, pozo, carro— la selecciona con un aro y abre su ficha: **Mover** (el objeto se suelta donde pulses el suelo, con un marcador que sigue al ratón), **Girar**, **Diseño** (las casas rotan entre los 12 modelos; los árboles alternan frondoso/pino) y **Eliminar**. Pulsar suelo vacío abre el panel **Crear aquí** con el catálogo (9 props) y el conocimiento: **Nota**, **Imagen** y **Documento** (subida real por /api/uploads).
+- **Notas, imágenes y documentos flotan en 3D** anclados con un poste, con bamboleo suave. Fuera del modo edición, pulsarlos los ABRE: la nota se lee entera, la imagen se ve grande y el documento se descarga. Las notas se escriben desde su ficha de selección.
+- **Hilos de conocimiento**: desde la ficha de un objeto, «Conectar» + pulsar el destino tira una curva dorada hasta otra cosa plantada, una persona o el edificio de un proyecto. Es el grafo de conocimiento, pero paseable.
+- **La IA vive en el mismo mundo**: nueva acción `nota` («apúntame que mañana llamo al taller» → clava la nota junto al jugador) y el contexto lleva `plantado_en_el_mapa`, así que puede responder «¿qué notas tengo?» sin inventar. Verificado contra la API real.
+- **Persistencia**: `game_world_items` (objetos, con `enlaces` jsonb) y `game_world_overrides` (retoques del pueblo semilla por `seed_id`), migración 0031. El pueblo pasó a tener IDENTIDAD pieza a pieza en `mapa.ts` (`piezasAldea()`, `arbolesAldea()` con la MISMA semilla 118 y el mismo orden de consumo del azar: el bosque no se replantó); dibujo, rebote, clic y retoques hablan del mismo objeto. Los arbustos, rocas y flores pasaron a semilla propia (119): se recolocaron una vez y no son editables.
+- **Cazado en pruebas**: `PUT /mundo/semilla` devolvía 404 — Express prueba las rutas en orden de registro y «semilla» encajaba en `/mundo/:id`. La ruta fija va ANTES; queda comentado.
+
+### 2026-08-18 — Las personas FORMAN PARTE de los proyectos (fuera del kanban)
+- **Reportado por Eugenio** (con captura): Anita salía como TARJETA «por hacer» en el tablero del Camión camperizado. Una persona no es una tarea pendiente.
+- **Membresía real**: `game_agents.proyecto_ids` (jsonb, migración 0031) — una persona puede estar en varios proyectos. La migración RESCATA los datos: las tarjetas-persona (por bloque `agente` o por nombre en el grupo «personas») se convierten en membresía y se archivan. Verificado con Anita: quedó miembro y su tarjeta salió del tablero.
+- **Sección «Personas del proyecto»** en la página del proyecto, encima del kanban: chips con avatar, rol, quitar con la X y «+ Añadir» con la gente de tu mundo. Privada: solo la ve el creador (las personas de tu mundo son representaciones tuyas).
+- **En el 3D**, los miembros están DE PIE en la sala «Personas» del edificio, con su avatar real; la puerta y el panel lateral cuentan personas, no tarjetas. La IA (`habitante`) ahora UNE al proyecto en vez de crear tarjetas, y `en_proyectos` en su contexto le dice quién está ya dentro. Verificado contra la API real: devuelve el id del Javier existente, sin duplicar a nadie.
+
+### 2026-08-18 — Edición directa: pulsar da opciones, arrastrar mueve
+- **Ya no hay «modo edición»** (petición de Eugenio): pulsar CUALQUIER objeto —casa, árbol, farola, nota, vídeo…— abre directamente su ficha de opciones, y **pinchar y arrastrar lo mueve** con un fantasma que sigue al ratón; al soltar se guarda donde cae. Arrastrar en vacío sigue girando la cámara: el agarre del objeto se apunta en el mismo pointerdown del lienzo, que corre antes que el oyente de la cámara en window.
+- **Cazado en pruebas**: el suelo solo apuntaba el ratón cuando el estado «moviendo» ya había re-renderizado; en un arrastre rápido el objeto se soltaba en su sitio original. El suelo apunta ahora el puntero SIEMPRE.
+- **Las instrucciones del teclado viven comprimidas en un icono ℹ️** arriba a la derecha (petición de Eugenio): despliega la chuleta entera, incluida la edición directa.
+
+### 2026-08-18 — Más cosas plantables + la ventana interna
+- **El panel «Crear aquí» crece** (petición de Eugenio): además de props, nota, imagen y documento, ahora se plantan **links, vídeos (YouTube), música (Spotify o similar), lienzos, mapas y proyectos**. El lienzo y el mapa se crean DE VERDAD en la plataforma (POST /api/graphs y /api/maps) y quedan plantados apuntando a su página; el proyecto abre el formulario de siempre y su edificio se levanta justo donde pulsaste el suelo.
+- **La ventana interna**: darle a «Abrir» sobre cualquiera de estos reproduce SIN salir del juego — una pantalla central con el navegador del link, el reproductor de YouTube (youtube-nocookie), el embed de Spotify, o el lienzo/mapa reales de la plataforma. Pulsar fuera de la ventana la cierra; hay botón de «abrir fuera» porque algunas webs se niegan a cargar dentro de un marco. Verificado con un vídeo real: la tarjeta 3D con su ▶ en el mundo, ficha con Abrir, y el vídeo cargando dentro del juego.
+- Migración 0032: el check de tipos de `game_world_items` admite los nuevos. Recordatorio pagado en las pruebas: el backend NO se recarga en caliente — el Set de tipos del servidor seguía siendo el viejo hasta reiniciar.
+
+### 2026-08-18 — Hilos con información, menú CREAR lateral y cámara de interiores
+- **Los hilos dorados llevan información, como las aristas de los grafos** (petición de Eugenio): pulsar un hilo abre su ficha con las 7 RELACIONES de los grafos (contexto, causa, dato, fuente, apoya, contradice, matiza — cada una con su color, `RELACIONES_HILO` en tipos.ts), un texto corto («la pregunta a la que responde») y «Eliminar hilo». El hilo se pinta del color de su relación y el texto flota en su punto más alto. Al conectar dos cosas la ficha se abre sola para rellenarla. Verificado en navegador: clic en hilo real → ficha → relación «Causa» → el arco se puso rojo y guardó por PUT.
+- **Plantar documentos YA existentes**: en «Crear aquí» y en el menú lateral, «Mis documentos» lista tus documentos y páginas reales (GET /api/publicaciones filtrado) y los planta apuntando a su URL. Los grafos también se crean desde el juego (POST /api/graphs) y quedan plantados.
+- **El hover estable (450 ms de gracia + rótulo) funciona en TODO lo plantado**: notas, imágenes, documentos, tarjetas de medios y props usan el mismo `useHoverEstable` + `Rotulo` de las señales de la aldea («Pulsa para abrir · arrastra para mover»).
+- **El menú CREAR es ahora un panel lateral izquierdo a toda altura** con el diseño del menú de objetivos del mapa: carril estrecho de iconos que se expande en acordeón con submenús — Naturaleza, Pueblo, Conocimiento, Plataforma y Personas — más Aspecto, Robot y «Tu mundo» con tus agentes. Pulsar suelo sigue abriendo el «Crear aquí» completo con todo lo plantable.
+- **La cámara dentro de los edificios, arreglada de raíz** (lo reportó Eugenio: se quedaba pegada a la nuca al andar junto a la pared). Fuera el acotado que la empujaba hacia dentro del muro; ahora los interiores se dibujan SOLO por su cara interna (culling, como Los Sims): si la cámara queda al otro lado de la pared, la pared desaparece y sigues viendo la sala entera. Además, al teletransportarte la cámara se recoloca detrás del muñeco (yaw 0). Verificado en navegador: entrar en el Camión, bordear la pared en giro — el muñeco se ve siempre a distancia útil, sin primeros planos de espalda.
+- **Cazado en pruebas**: el panel del hilo quedaba abierto tras un teletransporte y, al cerrarse, su input re-guardaba el texto viejo por el blur. Sin arreglo de código (solo pasa editando por API por debajo), pero apuntado aquí por si reaparece.
+
+### 2026-08-18 — Gran pantalla de YouTube, Spotify y canciones subidas
+- **La GRAN PANTALLA** (petición de Eugenio): un cine al aire libre entre la plaza y el distrito (`Pantalla.tsx`, obstáculo `deco:pantalla`), con play rojo que late y rótulo al pasar el ratón. Pulsarla abre su panel: conectar tu cuenta de YouTube (OAuth de Google, ventanita emergente + postMessage) y ver **vídeos nuevos de tus suscripciones relacionados con TUS proyectos**.
+- **Cómo recomienda** (`src/server/youtube.ts`): las suscripciones salen de la API oficial (dato privado, por eso el OAuth, permiso solo-lectura); los vídeos de cada canal salen del **RSS público** de YouTube (sin gastar cuota); la relación con los proyectos es por palabras clave del título/descripción/tarjetas (normalizadas sin tildes, stopwords es/en). Dos listas: «Para tus proyectos» (con el porqué) y «Nuevos de tus suscripciones». Caché de 10 min por usuario. Pulsar un vídeo lo reproduce en la ventana interna (youtube-nocookie).
+- **Música: 3 maneras de plantarla** (petición de Eugenio): pegar un link (como antes), **SUBIR una canción** (MP3/M4A/OGG/WAV/AAC/FLAC, hasta 25 MB, se reproduce con `<audio>` en la ventana interna — verificado subiendo un WAV real de punta a punta), o **elegirla de TU Spotify** (`src/server/spotify.ts`, OAuth igual que YouTube): tus playlists y canciones guardadas salen en el propio formulario de crear música (los dos: panel «Crear aquí» y menú lateral, componente `OpcionesMusica`).
+- **Tokens**: `youtube_accounts` (0033) y `spotify_accounts` (0034), una fila por usuario, refresh automático al caducar. Son credenciales: desconectar BORRA la fila (y revoca en Google; Spotify no tiene endpoint de revocación — se quita del todo en spotify.com/account/apps). Registrados en server.ts con la línea única del patrón de módulos.
+- **PENDIENTE DE EUGENIO para activarlo en producción** (los paneles avisan solos mientras tanto, patrón 503): en Google Cloud añadir `GOOGLE_CLIENT_SECRET` + activar «YouTube Data API v3» + dar de alta el redirect `https://humanity.wiki/api/youtube/callback` en el cliente OAuth del login; en developer.spotify.com crear una app con redirect `https://humanity.wiki/api/spotify/callback` y poner `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET`. Todo va en `.env.production` del servidor. `APP_URL` debe estar puesto a `https://humanity.wiki`.
+
+### 2026-08-18 — Puertas para los edificios del juego, PDF legible y el mapa 2D como creador
+- **Reportado por Eugenio (4 cosas):** su proyecto nuevo no tenía puerta, el vídeo/grafo «no se abrían», el PDF subido no se podía leer, y quería el mapa 2D interactivo como creador completo.
+- **Los edificios construidos DESDE el juego ya se entran**: un agente de tipo proyecto con `proyecto_id` abre su interior al chocar con él y al pulsarlo, igual que los edificios del distrito. El chat con el agente sigue disponible con la (E). Verificado entrando en su «Inversiones» de la plaza.
+- **El PDF subido se LEE dentro del juego**: `/uploads` servía los PDF con descarga forzosa (`Content-Disposition: attachment`) y el iframe de la ventana interna se quedaba en blanco/descargando. Ahora el PDF va EN LÍNEA (el visor del navegador corre en su propio sandbox; el motivo de seguridad de la descarga forzosa era para SVG/ZIP, que siguen igual) y su iframe va SIN sandbox (el visor de Chrome no arranca dentro de un iframe con sandbox). Verificado con su «Poliza Seguro.PDF»: cabecera limpia y visor cargando.
+- **Clic = opciones, OTRO clic = abrir**: pulsar un objeto ya seleccionado lo abre directamente (nota, imagen, vídeo, PDF, grafo…). El «Abrir» de la ficha sigue estando, pero ya no es imprescindible descubrirlo. (El vídeo y el grafo en sí YA abrían — verificado con los suyos: el reproductor y el lienzo cargan en la ventana interna; lo confuso era el camino.)
+- **El mapa 2D es ahora un creador completo** (petición de Eugenio): enseña TODO (personas, proyectos, robot, gran pantalla y lo plantado — cuadraditos con el color de su tipo, los props de decorado no); **hover** con crecimiento y resalte del nombre; **clic en algo = viajar hasta ello**; **clic en suelo vacío = abre «Crear aquí» EN ESE PUNTO** del mundo (verificado: nota plantada a 70 m del jugador desde el mapa). Leyenda con «Plantado» y cursor de cruz.
+
+### 2026-08-18 — Los vídeos de YouTube con su miniatura, título y etiquetas
+- **Petición de Eugenio**: las tarjetas de vídeo enseñaban la URL pelada. Ahora la tarjeta 3D es la **miniatura real** del vídeo (i.ytimg.com/mqdefault, 16:9 sin franjas, con CORS) con el play rojo encima, el **título** debajo y dos **etiquetas**: el canal y «YouTube». La URL no se pinta en ningún sitio.
+- **De dónde salen los datos**: al crear un vídeo, el backend (POST /api/juego/mundo) pregunta al **oEmbed público de YouTube** (sin clave) y guarda título→`nombre` y canal→`texto`. La URL se normaliza al vídeo pelado antes de preguntar: al oEmbed le sientan mal los parámetros de búsqueda (pp=…, comprobado con el vídeo real de Eugenio). Si oEmbed no contesta, el objeto se crea igual.
+- **`nombreLimpio()` en tipos.ts**: un solo criterio para no enseñar nunca una URL como nombre — lo usan la tarjeta 3D, el rótulo del hover, la ficha de opciones, la ventana interna y el mapa 2D. Los vídeos creados ANTES del enriquecido enseñan «Vídeo de YouTube» en vez de la dirección; en local se rellenaron por oEmbed (el V-Coptr de Eugenio ya tiene su título y su canal).
+
+### 2026-08-18 — Arrastrar un objeto a un edificio lo guarda EN ese proyecto
+- **Petición de Eugenio**: arrastras un vídeo (o nota, imagen, PDF, link, música, lienzo, mapa) hasta un edificio de proyecto y **se convierte en una TARJETA de ese proyecto** — aparece en su tablero (grupo «contenido» si existe) y flotando dentro del edificio. El objeto SALE del mapa (se archiva): se ha mudado adentro, no copiado. Los props (árboles, rocas) no se mudan: son decorado.
+- **Tres caminos al mismo sitio**: (1) soltar el arrastre sobre el edificio — el punto de suelta se compara con los edificios del distrito Y los construidos desde el juego (`proyectoEnPunto`, radio edificio +0,8); (2) modo Mover + pulsar el suelo junto al edificio; (3) modo Mover + **pulsar el edificio mismo** — antes ese clic te metía dentro; con un objeto en la mano ahora significa «guárdalo aquí» (editorRef ganó el campo `moviendo`).
+- **Qué lleva la tarjeta**: título real del objeto (nunca URL), resumen con el link, y bloques que la habitación 3D ya sabe pintar — la miniatura del vídeo como foto flotante, el texto de la nota como lámina. Verificado de punta a punta: Mover + clic al edificio «Inversiones» → tarjeta con miniatura + link en grupo contenido, objeto archivado del mapa, y limpiada tras la prueba.
+- Nota: si el punto de suelta de un arrastre cae JUSTO detrás del edificio (el rayo del ratón sobrepasa el tejado), el objeto se queda ahí al lado — con volver a arrastrarlo o usar Mover+clic al edificio, dentro.
+
+### 2026-08-18 — Los proyectos son PORTALES verdes y dentro hay una plaza abierta
+- **Portales estilo Rick & Morty** (petición de Eugenio): los edificios de proyecto —del distrito Y los construidos desde el juego— son ahora portales verdes: espiral pintada una vez en canvas y compartida por todos, DOS discos girando en sentidos opuestos, corazón claro, borde verde latiendo y charco de luz al suelo (`PortalVerde.tsx`). Mantienen TODO: hover con rótulo medido en pantalla, título flotante con su barra de progreso real, clic para entrar, choque para entrar y colisión de rebote.
+- **Dentro: un mapa abierto con una plaza vacía** (petición de Eugenio, sustituye a la sala oscura con habitaciones): prado a cielo abierto (`PlazaProyecto` en Interior.tsx), plaza empedrada con el aro del color del proyecto, el título y el progreso flotando encima, la GENTE del proyecto de pie alrededor, el conocimiento del tablero (tarjetas, fotos, textos) en corro, y el portal verde de salida. Ya no hay habitaciones: `sala` queda siempre a null y las puertas/salas se retiraron de obstáculos y choques.
+- **La plaza se EDITA como la aldea**: clic al suelo abre «Crear aquí» y lo plantado queda ANCLADO al proyecto — `game_world_items.proyecto_id` (migración 0035): dentro se ven solo los suyos, en la aldea solo los que no tienen proyecto. Verificado de punta a punta: nota plantada en la plaza de «Inversiones» con proyecto_id correcto, invisible al salir a la aldea.
+- **Cazado en pruebas**: apareciendo junto al portal de salida, la cámara quedaba justo encima de él y la espiral (Billboard, siempre de cara) llenaba la pantalla — `PLAZA_ENTRADA` se metió más adentro (z 16).
+- Deuda anotada: los objetos de proyecto no salen aún en el mapa 2D (enseña solo los de la aldea), y la IA (`plantado_en_el_mapa`) no distingue plaza de aldea. Ambas cosas caben en una pasada corta si Eugenio las quiere.
+
+### 2026-08-18 — Un solo título (más grande) por portal, y los portales se arrastran
+- **Un solo texto encima de cada portal** (petición de Eugenio: se apilaban el rótulo del hover y el título fijo): fuera el Rotulo — queda SOLO el título en grande (0,95 → 1,16 al pasar el ratón, contorno verde oscuro) con su barra de progreso debajo.
+- **Los portales se ARRASTRAN como cualquier objeto** (petición de Eugenio): pinchar sin soltar y mover. Persistencia en dos sitios según el portal: los del DISTRITO guardan su posición en `game_world_overrides` con seed_id `proy:<id>` (sin migración: la tabla ya valía), y los construidos DESDE el juego guardan x,z en su propia fila de `game_agents` (el PUT ya lo aceptaba). `posicionesProyectos()` en mapa.ts es la única fuente: dibujo, obstáculos, minimapa, salida del proyecto y soltar-encima-para-archivar leen de ahí. El fantasma del arrastre es el propio portal; al soltarlo NO se abre ficha (un portal no tiene Girar/Diseño/Eliminar). El clic sin arrastre sigue entrando.
+- **Cazado en pruebas (dos veces)**: los eventos de puntero sintéticos de la verificación llevaban offsetX=0 y react-three-fiber apunta con offsetX — los primeros arrastres de prueba cayeron en la esquina de la pantalla y movieron el VÍDEO de Eugenio (restaurado a su zona, ~(20,-9)) en vez del portal. Con los offsets forzados, el arrastre real quedó verificado: el portal-agente se movió de (15.8,-13.9) a (4.4,-4.2), guardó por PUT y se restauró a su sitio exacto.
+
+### 2026-08-18 — Cada portal puede llevar su FOTO de portada en el centro
+- **Petición de Eugenio**: subir una foto a cada portal y que aparezca en el centro como portada, contenida en un círculo con borde blanco.
+- **La foto en el portal** (`FotoDePortal` en PortalVerde.tsx): círculo blanco (radio×0,56) y encima la foto recortada en círculo (radio×0,5), centrada sin deformar (recorte por repeat/offset de la textura según la proporción). La textura se carga a mano con crossOrigin: una foto rota no tumba la escena — simplemente queda la espiral.
+- **Dónde se guarda, según el portal**: los construidos DESDE el juego usan su `game_agents.foto_url` de siempre (el PUT ya lo aceptaba); los del DISTRITO viajan en `modelo` del retoque `proy:<id>` de `game_world_overrides` (para una casa es el diseño, para un portal es la URL de su foto — sin migración). `posicionesProyectos()` devuelve ahora también la `portada` y por ahí la reciben dibujo y minimapa sin tocar nada más.
+- **Dos botones de subida**: en la ficha del agente-proyecto, un botón de cámara junto a HABLAR (la foto además encabeza la ficha al momento); en el panel del proyecto del distrito, «Foto de portada del portal» debajo de «Abrir el proyecto». Ambos exigen imagen (JPG/PNG…), suben por /api/uploads y avisan si falla.
+- Verificado de punta a punta con el portal «Inversiones» de Eugenio: subida real por el input del botón → foto en el centro del portal con su borde blanco, actualizada EN VIVO sin recargar; y su `foto_url` restaurado a null al terminar (todo lo suyo intacto). El portal de salida de la plaza queda sin foto a propósito.
+
+### 2026-08-18 — El PDF se lee de verdad (visor propio) y las casas a tamaño de casa
+- **Reportado por Eugenio (2 cosas)**: la pantalla se quedaba EN NEGRO al abrir su PDF, y las casas eran diminutas al lado de los avatares.
+- **PDF en negro, dos culpables**: (1) la CSP `default-src 'none'` que `/uploads` ponía a TODO bloqueaba el embed interno del visor de PDF de Chrome — los PDF van ahora sin esa cabecera (siguen con nosniff; el resto de archivos la conservan); (2) aunque la cabecera esté bien, el visor nativo dentro de un iframe es una lotería (en móvil ni existe). Solución de fondo: **visor PROPIO con PDF.js** (`VisorPdf.tsx`, lazy: solo se descarga al abrir un PDF) — cada página pintada en canvas, nítido en retina, tope 50 páginas, y si algo falla un aviso con el botón de abrir fuera. Verificado con la póliza real de Eugenio: se lee dentro del juego incluso en un navegador SIN visor de PDF.
+- **Casas al doble** (petición de Eugenio): medidas en la escena, la casa entera medía 2,67 m frente a un avatar de 1,86 m. Escala 3,2 → 6,4 (~5,3 m, dos plantas creíbles) en la aldea y en las casas creadas por el jugador; radio de choque 4,4 → 7; el mapa 2D pinta su cuadrado a 10×10 m para no mentir. Verificado paseando entre ellas.
+- pdfjs-dist entra como dependencia (npm install con --legacy-peer-deps por el conflicto viejo de react-simple-maps con React 19).
+
+### 2026-08-18 — Salir de la plaza con un clic, y renombrar/quitar portales desde su diálogo
+- **Reportado por Eugenio**: pinchar en «Salir a la aldea» dentro de una plaza no hacía nada (solo salía chocando con el portal). El portal de salida era decoración: ahora va envuelto en `Interactivo` con blanco invisible generoso — clic = salir (`onSalir` nuevo en PlazaProyecto → `onSalirProyecto` en Escena → `salirDelProyecto`). El choque sigue funcionando igual. Verificado: entrar al portal del distrito, clic en la espiral de salida, de vuelta en la aldea.
+- **Petición de Eugenio**: el diálogo de un portal debía tener también eliminar y cambiar de nombre. En el panel del proyecto del DISTRITO: «Cambiar el nombre» (edita el título REAL del proyecto por PUT /api/proyectos/:id — el permiso lo comprueba el servidor) y «Quitar el portal del mapa» (retoque `proy:<id>` con `eliminado`; el proyecto NO se borra y el panel lo avisa). En la FICHA del portal construido en el juego: lápiz junto al nombre (PUT del agente; la papelera de quitar ya existía). El lápiz sirve también para renombrar personas.
+- `posicionesProyectos()` devuelve ahora `eliminado` y lo respetan dibujo, medidas de cercanía, obstáculos y mapa 2D — las posiciones se calculan por índice ANTES de filtrar para que quitar un portal no recoloque a los demás. Reversible: PUT del retoque con eliminado:false lo devuelve (comprobado en la verificación, todo lo de Eugenio restaurado).
+
+### 2026-08-18 — El camión camperizado 4x4, aparcado en la aldea
+- **Petición de Eugenio (con foto de referencia)**: un camión camperizado 3D con máximo detalle, en el mapa. `Camper.tsx`: modelo procedural inspirado en su foto (Iveco de expedición) — cabina bronce con capó de lámina negra, calandra con lamas y faros, parachoques negro con cabrestante, gancho y quitamiedos plateado, matrícula, retrovisores, estribos, baca de cabina con barra LED y travesaños LIMA, antena; célula marrón con cantos y línea de techo negros, 4 ventanas enmarcadas, trampilla lateral, puerta trasera, escalera, pilotos rojos, faldones con cofres; techo con panel solar sobre soportes, claraboya y baca trasera lima; ruedas de taco con banda blanca y llanta. Sin descargas: geometría pura, carga instantánea.
+- **Aparcado junto al camino del este** (x 20, z 7,5): pieza del pueblo con identidad (`camper:0` en piezasAldea, radio 4) — chocas con él, lo pulsas («Camión camperizado»: Mover/Girar/Eliminar) y se recoloca como cualquier pieza. Cazado al integrarlo: el ensamblado de Aldea dibuja una LISTA FIJA de tipos y el camper no estaba — el tipo nuevo hay que añadirlo también ahí, no solo en piezasAldea (y a 26,9 pisaba la primera casa del anillo con la escala nueva).
+- Durante la verificación un clic de prueba plantó una nota vacía sin querer; archivada — los 5 objetos de Eugenio quedan exactos.
+
+### 2026-08-18 — Convertir un objeto o una persona en un PORTAL con su propio mapa
+- **Petición de Eugenio**: que cualquier objeto o persona pueda convertirse en un portal que lleva a un mapa nuevo. Por debajo el mapa nuevo es un PROYECTO real de la plataforma (el pilar del builder: lo del juego existe fuera), así que la plaza nueva se edita y ancla con proyecto_id como cualquier otra, y aparece en la página de Proyectos.
+- **Dos rutas nuevas en juego.ts**: `POST /api/juego/mundo/:id/convertir-en-portal` (objeto → nace un agente-portal con su nombre en su mismo sitio y el objeto se archiva, recuperable; si el nombre parece una URL se usa un genérico por tipo) y `POST /api/juego/agentes/:id/convertir-en-portal` (persona → mismo agente pasa a tipo `proyecto` con proyecto nuevo; su apariencia queda guardada por si se quiere deshacer). Helper compartido `crearProyectoDePortal`.
+- **Dos botones**: en la ficha del objeto, «Portal» en verde junto a Conectar (solo conocimiento, no props de decorado); en la ficha de una persona, «Convertir en portal con su propio mapa» con confirmación en dos pasos (es un cambio grande: el muñeco deja de verse).
+- Verificado de punta a punta con una persona y una nota DE PRUEBA: ambas se convirtieron, los dos portales aparecieron en la plaza y entrar en uno llevó a su mapa nuevo vacío. Todo lo de prueba limpiado después (agentes archivados, proyectos borrados de la BD local); Anita, Javier y los 5 objetos de Eugenio intactos.
+- Nota: la BD local de esta máquina es un Postgres nativo en 5432 (`evolucion_humanidad`, usuario del sistema), no el Docker del CLAUDE.md.
+
+### 2026-08-19 — Portales con FORMA propia: cualquier cosa puede ser un portal sin dejar de ser lo que es
+- **Aclaración de Eugenio sobre la conversión**: convertir en portal NO cambia la forma. El camión sigue siendo el camión, la persona sigue siendo su muñeco — solo ganan su nombre flotando en verde con «◈ portal ◈» debajo, un aro de luz girando en el suelo (`SenalDePortal` en Senales.tsx) y la capacidad: ATRAVESARLOS te lleva a su mapa.
+- **Migración 0036**: `portal_proyecto_id` en `game_world_items` y `game_world_overrides` (las personas reutilizan `game_agents.proyecto_id`, que ya existía). Tres rutas: convertir un objeto, una pieza del pueblo (POST /mundo/semilla/convertir-en-portal — registrada ANTES de /mundo/:id/…: «semilla» encaja en `:id`, la trampa conocida volvió a morder) o una persona (ahora sin tocar su tipo). El mapa nuevo sigue siendo un proyecto real.
+- **Choque = entrar**: los portales con forma llevan ids `portalitem:`/`portalpieza:` en obstáculos (el prefijo `deco:` silencia el aviso en Personaje) y una persona con proyecto_id también entra al chocar. Botón «Portal» en la ficha de objetos Y de piezas del pueblo (si ya lo es, «Entrar»); en la ficha de persona, un solo paso (ya no es destructivo) y «Entrar en su mapa».
+- **Sin puertas duplicadas**: un proyecto ya representado por un portal con forma no pinta su espiral verde en el distrito ni en el mapa 2D (`ocultos` en posicionesProyectos, reutilizando el mecanismo `eliminado` que conserva posiciones). Esto también quita el duplicado histórico del agente «Inversiones». `cargarProyectos` ya no recorta a 12 (el distrito recorta por su cuenta).
+- Verificado con el CAMIÓN (el ejemplo de Eugenio): conserva su forma con el rótulo verde encima, y chocar con él te mete en su mapa. Decisión: su portal quedó enlazado al proyecto REAL «Camión camperizado» (no a un mapa nuevo duplicado); el proyecto de prueba se borró.
+- Deuda anotada: no hay botón «dejar de ser portal» (deshacer = tocar la BD), y convertir siempre crea un mapa NUEVO — elegir un proyecto existente como destino sería la siguiente pasada.
+
+### 2026-08-19 — La gran pantalla se mueve, y por dentro es el CINE del agente de YouTube
+- **Petición de Eugenio (2 cosas)**: que el cine de YouTube se mueva como cualquier objeto, y que dentro haya un agente de YouTube que recomiende vídeos sobre las temáticas de los portales, ordenados en 3D por categorías con miniatura y tema.
+- **La pantalla es ahora la pieza `pantalla:0`** (piezasAldea): se arrastra y su posición persiste como la de una casa (verificado con arrastre real: el retoque guardó (33.5,-15.2); restaurada a fábrica tras la prueba). Su marcador del mapa 2D la sigue. `PantallaVisual` separado para el fantasma del arrastre; el obstáculo especial deco:pantalla desaparece (la pieza choca sola). Clic = ENTRAR al cine; pinchar sin soltar = mover.
+- **El cine por dentro** (`Cine.tsx`): sala oscura con aro rojo, el AGENTE DE YOUTUBE (robot rojo con pantalla-cara y play; pulsar = recargar recomendaciones), y las categorías EN ARCO alrededor: cada portal/proyecto es una temática con su rótulo en color y sus vídeos en rejilla — tarjeta con miniatura real (i.ytimg, con el truco de la `key` para el material que nace sin mapa, como Imagen3D), título y canal; pulsar la tarjeta abre el vídeo en la ventana interna. Portal verde de salida (chocar o pulsar) que te deja junto a la pantalla.
+- **Backend**: el cálculo de recomendaciones se extrae a `calcularRecs()` (compartido) y nace `GET /api/youtube/cine`: agrupa los vídeos por el proyecto con el que casaron (`relacionadoCon`) + una categoría «Novedades»; sin cuenta conectada devuelve `sin_conexion` (la sala lo explica y abre el panel con el botón de conectar); `?demo=1` solo fuera de producción enseña una sala de muestra (así se verificó la disposición sin claves de Google).
+- Cazado en pruebas: la entrada aparecía sobre el portal de salida (misma trampa que la plaza → spawn a z 6) y dos categorías con el mismo nombre («Inversiones» ×2) rompían las keys de React → key con índice.
+- Nota: en el mundo de Eugenio ya hay un portal hecho por él (su imagen «Aptera light humanity.png») — la conversión en portales la está usando de verdad.
+
+### 2026-08-19 — La ficha de cada tarea es un LIENZO 2D: hover, clic o choque para abrirla
+- **Petición de Eugenio**: que las fichas flotantes de las tareas de un proyecto se expandan al pasar el ratón, que al pinchar o al chocarte con ellas se abra una ventana central, y que dentro se pueda cambiar el nombre, el proyecto, el estado y añadir fotos, enlaces, vídeos y notas en un lienzo 2D.
+- **En la plaza**: `cosasDePlaza()` (Interior.tsx) es ahora la única fuente de posiciones del anillo de tarjetas — la usan el dibujo Y los obstáculos de Escena, así que chocar con una tarjeta (`tarjeta:<id>`) abre su ficha igual que pincharla. Hover = la tarjeta crece (×1,45) con el letrero «Pulsa para abrir la ficha».
+- **La ficha central (`FichaTarea` en JuegoVital.tsx)**: nombre editable en la cabecera, selector de proyecto (mover la tarjeta de proyecto — con comprobación de permisos en el backend), chips de estado (Por hacer / En curso / Hecho), y el LIENZO cuadriculado: +Nota (post-it amarillo), +Foto (sube a /api/uploads), +Enlace (píldora con el dominio) y +Vídeo (miniatura real de YouTube). Todo se arrastra y las posiciones x,y se guardan en los `bloques` jsonb de roadmap_items; los bloques `agente` existentes se conservan intactos.
+- **Backend** (roadmap.ts): el PUT acepta `proyecto_id` con `puedeEditarProyecto` sobre el destino — mover una tarjeta a un proyecto ajeno da 403.
+- Cazado en pruebas: los bloques no se podían arrastrar — la nota es toda un `textarea` y el enlace todo un `<a>`, y el arrastre ignora esos elementos para no pisar la edición. Arreglo: un ASA con puntitos encima de cada bloque desde donde tirar.
+- Verificado de punta a punta con una tarjeta DE PRUEBA en el juego real: choque abre la ficha, hover expande, clic abre, estado a «En curso» pinta la tarjeta 3D, renombrar actualiza el rótulo 3D, los 4 tipos de bloque se crean y persisten, el arrastre guarda (100,80)→(408,281), y mover a otro proyecto cierra la ficha con aviso y la tarjeta desaparece de la plaza conservando sus bloques. Tarjeta y foto de prueba borradas después; el mundo de Eugenio intacto.
+- Deuda menor: el contador «X de Y tareas» del cartel de la plaza no se refresca al mover una tarjeta hasta volver a entrar.
+
+### 2026-08-19 — Realismo, fase 0: luz de cine, cielo real y calidad automática
+- **Arranca el plan de realismo por fases** que Eugenio aprobó (personas «realistas de videojuego», ordenador primero): fase 0 = la luz. Es el cambio que más se nota por esfuerzo: mismo mundo, iluminación de verdad.
+- **Cielo HDRI real (CC0, autoalojado)**: `public/modelos-juego/cielo/dia_despejado_1k.hdr` (Poly Haven, 1,1 MB, licencia registrada en LICENSE.md) baña la escena como luz ambiental — reflejos y rebotes creíbles. Las luces planas de antes bajan de intensidad para dejarle sitio.
+- **Efectos de imagen** (`Efectos.tsx`, librería @react-three/postprocessing + peer postprocessing): oclusión ambiental N8AO (el sombreado de contacto que asienta los objetos), bloom con umbral 1.05 (solo brilla lo que se sale del rango: el aro de los portales ahora RESPLANDECE de verdad, PortalVerde multiplica su color ×1.9), curva ACES como efecto final (el composer apaga el tone mapping del renderer — cazado en pruebas con toneMapping=0), viñeta suave y SMAA.
+- **Calidad automática** (`calidad.ts`): alta/media/baja según aparato (móvil, núcleos, memoria), con `?calidad=` para forzar (queda guardado). Ajustes por nivel en un solo sitio: densidad de píxeles, lado del mapa de sombras (4096/2048/1024), efectos sí/no, AO solo en alta. `VigilanteDeCalidad` (PerformanceMonitor con 6 s de gracia: el pico de carga inicial no cuenta) baja un escalón si los FPS caen de verdad; nunca sube solo.
+- **Sombras**: en este three el PCFSoft clásico está RETIRADO (el renderer lo degrada solo a PCF avisando) — se pide `shadows="percentage"` y el borde suave lo pone `shadow-radius=4`; cámara de sombras más ceñida (±48) y normalBias 0.03. La luz lleva `key` por nivel: three no reconstruye el mapa de sombras al cambiarle el tamaño.
+- Verificado en local: aldea y plaza interior con la luz nueva, consola limpia, portal de salida de la plaza funcionando; en el panel embebido la calidad alta va a ~40 FPS y el vigilante la baja a media (~60 FPS) — el sistema haciendo su trabajo.
+- Deuda menor: el cine no se verificó visualmente en esta tanda (mismo Canvas; su intensidad de ambiente baja a 0.22).
+
+### 2026-08-19 — Realismo, fase 1: el suelo es de verdad (cada adoquín, cada piedra)
+- **Texturas fotográficas PBR** (CC0, ambientCG; ~12 MB tras recomprimir): hierba, tierra, grava, adoquín y madera, cada una con su relieve (normal) y su rugosidad, cargadas por `texturas.ts` (caché: misma foto+repetición = una sola subida a GPU). La plaza de la aldea Y la de cada proyecto quedan adoquinadas de verdad; los caminos son grava piedra a piedra (repetición calculada del tamaño de cada tramo); el puente tiene vetas de madera reales.
+- **Agua viva** (`Agua.tsx`): un material compartido para río, lagos y fuente — mapa de olas (MIT, three.js) desplazándose con el tiempo sobre un material casi espejo que refleja el cielo HDRI de la fase 0. El río corre más deprisa que los lagos.
+- **Hierba 3D** (`Hierba.tsx`): miles de matas de tres hojas en UNA malla instanciada, mecidas por el viento desde el shader (fase por posición, balanceo con el cuadrado de la altura). Cantidad por calidad (45.000/16.000/3.000). Solo nacen donde tiene sentido (`hierbaPermitida`): ni plaza, ni caminos, ni río, ni lagos; con sesgo de densidad hacia el pueblo.
+- La cinta del río ganó UVs (no tenía: las texturas no se podían mapear).
+- Verificado en local paseando: plaza adoquinada, caminos de grava, río con puente de madera y agua reflejando, hierba meciéndose — 60 FPS en calidad media en el panel embebido.
+
+### 2026-08-19 — Realismo, fases 2 y 3: vegetación y edificios con materiales de foto
+- **Fase 2 (vegetación)**: los ~1.100 árboles instanciados visten CORTEZA fotográfica en el tronco (9 caras, más redondo) y FOLLAJE real en las copas — las frondosas ya no son icosaedros: esferas ABOLLADAS con deformación determinista por posición (misma costura, misma geometría compartida). Arbustos con el mismo follaje y tinte variado; rocas irregulares (dodecaedro subdividido + abolladura) con piedra fotográfica — la primera (Rock035, pizarra) salía casi negra y se cambió por granito claro (Rock051).
+- **Fase 3 (edificios)**: nace `CasaReal.tsx` — zócalo de piedra, muros revocados (tinte por variante), tejado a dos aguas de TEJA árabe con caballete y alero, hastiales, chimenea de ladrillo visto, puerta de madera con pomo y 6 ventanas con marco blanco y cristal que refleja el cielo. Sustituye a los GLTF estilizados en la aldea Y en las casas que planta el jugador (PropMundo), misma huella (radio 7). Naves con chapa metálica real; fuente de piedra; banco/puesto/carro de madera real; pozo de piedra con tejadillo de teja; huertos de tierra real (Detalles.tsx).
+- Descubrimiento al verificar: Eugenio ELIMINÓ 12 de las 14 casas del anillo en su mundo (overrides `eliminado`) y conserva 2 movidas por él — las dos son ya CasaReal. Sus datos, su diseño: no se toca nada.
+- 7 texturas nuevas CC0 (ambientCG, licencias registradas): corteza, follaje, roca, teja, revoco, ladrillo, chapa. Total de texturas del juego ~21 MB.
+- Verificado en local: bosque con troncos de corteza y rocas de granito, arbustos musgosos, casa nueva renderizando con sus ventanas, 60 FPS estables en el panel embebido.
+
+### 2026-08-19 — Realismo, fase 4: personas con proporciones humanas REALES
+- **Cuerpos**: Universal Base Characters de Quaternius (CC0) — humano masculino y femenino de 1,81 m con traje, pelo y ojos como materiales separados. **Animaciones**: Universal Animation Library de Quaternius (CC0, 43 pistas) — mismo esqueleto (huesos estilo Unreal), así que las pistas del maniquí mueven directamente a los personajes por nombre de hueso. Descargadas de itch.io por el flujo anónimo (curl: download_url → página → file/<id> → CDN).
+- **Persona3D reescrito** (Modelos.tsx): los 10 fenotipos Kenney antiguos se reparten entre los dos cuerpos reales (nombres con «female» → femenino; el hash de cuerpoDe no cambia, nadie cambia de género por sorpresa). Traducción de animaciones del juego a pistas UAL (idle→Idle_Loop, walk→Walk_Loop, sprint→Sprint_Loop, sit→Sitting_Idle_Loop…) con Idle_Loop de reserva. Escala normalizada: la semántica antigua (2,6 = estatura normal) se conserva dividiendo — los tres puntos de uso (Personaje, Agentes, Interior) no cambian ni una línea.
+- **Personalización adaptada**: el color de piel elegido decide entre la textura clara y la oscura (por luminancia, umbral 0,42); el color de pelo tiñe el material del pelo. DEUDA: el color de ropa/pantalón ya no aplica (el traje es una sola textura con la piel; teñirlo pediría una máscara de zonas) — anotar en 02_TECH_DEBT.
+- El repintado de paleta Kenney (cargarPaleta/pintarTextura de aspecto.ts) queda sin uso desde Modelos; se conserva el módulo por si el builder lo referencia.
+- ~22 MB de assets nuevos (modelos + texturas a 1024px + librería de animaciones).
+- Verificado en local: Anita, Javier y el jugador son ya humanos de proporción real en pose natural; andar reproduce la zancada sin patinar (las pistas Standard son in-place); chocar con una persona sigue abriendo su ficha.
+
+### 2026-08-19 — Personas VESTIDAS y cámara cercana (arreglo con captura de Eugenio)
+- **Fallo reportado**: los cuerpos base de la fase 4 iban en ropa interior («¡están desnudos!»). Se integra el pack «Modular Character Outfits - Fantasy» de Quaternius (CC0): trajes completos de ALDEANO montados sobre el MISMO esqueleto universal. Al clonar cada persona, las prendas se re-atan hueso a hueso al esqueleto del cuerpo (`SkeletonUtils` + `THREE.Skeleton` con los huesos del cuerpo y los boneInverses de la prenda).
+- **Dos trampas cazadas por el camino**: (1) el traje referencia texturas `T_Regular_*` (antebrazos remangados y manos) que no estaban copiadas — salían blancas; (2) lo gordo: los trajes están cortados para el cuerpo «Regular» y el pack gratuito solo trae el «Superhero» musculoso — la piel ATRAVESABA la tela y seguían pareciendo desnudos con correas. Arreglo de raíz en `soloCabeza()`: al cuerpo se le recortan los triángulos por debajo del cuello (queda cabeza+cuello, umbral 1,45 m hombre / 1,40 mujer) y el traje pone todo lo demás, manos con guantes incluidas. Recorte una vez por modelo, geometría compartida entre clones.
+- El traje de EXPLORADOR (Ranger) se descartó como traje por defecto: va con el torso al aire. Sus .gltf quedan en la carpeta para un futuro selector de trajes.
+- **La tela se tiñe con una paleta fija de 8 colores** (azul, oliva, teja, malva…) por hash del cuerpo: variedad entre vecinos y evita que el lino crudo parezca piel a lo lejos. El tinte con el color de ropa del creador (era Kenney) se probó y se retiró: los tonos carne/pastel dejaban la prenda color piel.
+- **Cámara por defecto CERCA** (petición con captura): zoom inicial 0,5 (≈9 m, antes 18,6 m) y mínimo de rueda bajado de 0,6 a 0,3 para acercarse aún más.
+- Verificado en local: jugador con chaleco/camisa/pantalón/botas por delante y por detrás; Anita y Javier con vestido y botas; andar y esprintar animan la ropa junto al cuerpo.
+
+### 2026-08-19 — La cámara mira 20° más arriba (petición de Eugenio)
+- El punto de mira de la cámara orbital se eleva `dist·tan(20°)` sobre el de antes: mismo ángulo extra a cualquier distancia de zoom. Se ve horizonte y cielo en vez de tanto suelo — el personaje queda abajo en el encuadre, estilo juego de aventuras.
+
+### 2026-08-19 — Mejor caminar, bici de verdad y aeromóvil con piloto (petición de Eugenio)
+- **A pie**: la marcha sale de la VELOCIDAD real, no de la tecla — paseo (Walk) hasta 4 m/s, trote (Jog) hasta 12, esprint de ahí en adelante, y en el aire la animación de SALTO (Jump_Loop). Además la CADENCIA se acompasa a los m/s de verdad: `ritmo` va por ref y Persona3D ajusta el timeScale de la pista cada fotograma (nada de pies patinando ni zancadas de marioneta).
+- **Bici**: el personaje va SENTADO en el sillín con la postura de conducir (Driving_Loop, manos al manillar), ya no de pie sobre los pedales. Ruedas nuevas con neumático (toro), RADIOS y buje que giran exactamente lo que dicta el suelo (v/r rad/s), y BIELAS con pedales y plato girando a cadencia de desarrollo normal (~1 vuelta por cada 2,6 de rueda).
+- **Aeromóvil**: el PILOTO va visible dentro de la burbuja (a 0,42 quedaba sentado ENCIMA del fuselaje — cazado en pruebas, bajado a 0,10), la cabina es más transparente (opacidad 0,38 con reflejo del cielo), la nave ALABEA al girar con A/D en vuelo (escora 0,26 rad hacia el lado del giro) y FLOTA con un vaivén suave de hover.
+- Verificado en local: paseo/trote/esprint en la plaza, bici rodando con radios girando hasta la casa nueva, y despegue a 28 m con alas en V, rotores y piloto dentro.
+
+### 2026-08-19 — Pulido de CARAS: peinados, piel a 2K y ojos con brillo
+- **El fallo de base**: los cuerpos base van CALVOS (solo cejas) — media cara faltaba. Ahora cada persona recibe un peinado del pack (6 disponibles: rapado, raya al lado, melena, moños, rapado femenino y barba), elegido por el hash de su cuerpo: los hombres pueden llevar barba, las mujeres melena o moños. Se enganchan al esqueleto igual que la ropa (re-atado hueso a hueso) y el color de pelo del creador los tiñe.
+- **Piel a 2048px**: las cuatro texturas de piel volvieron a su resolución original (se habían quedado a 1024 en la compresión de la fase 4); la cara se ve nítida de cerca.
+- **Ojos con brillo**: rugosidad 0,12 y reflejo del entorno — antes eran dos discos mates y la mirada se apagaba.
+- Cazado en pruebas: añadir las mallas del pelo DENTRO del `traverse` del propio árbol lo mutaba mientras se recorría y tumbaba el contexto WebGL (pantalla en blanco, «Context Lost»). Se recolectan primero y se mueven después, igual que ya se hacía con las prendas.
+
+### 2026-08-19 — Fase 7: el ficus del centro, seis sendas temáticas y un bosque comestible ibérico
+- **EL FICUS CON SU ESTANQUE** (`Ficus.tsx`): el corazón de la aldea. Bajo y anchísimo como un ficus de verdad (6,8 m de alto por 7,2 m de copa), con cuatro cosas que lo hacen creíble: raíces TABULARES que ensanchan el pie, 66 ramas RECURSIVAS (tronco → 5 madres → 3 hijas → 3 nietas), raíces AÉREAS colgando y una copa de 135 racimos en capas (no una bola: se ve luz entre el follaje). Alrededor, un estanque con brocal de piedra, islote de tierra, nenúfares y el agua con olas de la fase 1. Todo instanciado: 4 llamadas de dibujo. La fuente vieja se muda a su plaza del agua.
+- **SEIS SENDAS RADIALES** (`mapa.ts` → `SENDAS`, `Sendas.tsx`): cada 60°, empedradas, cada una con su CARTEL de madera a la salida de la plaza (nombre del área y qué encuentras, legible por las dos caras) y su PLAZA SECUNDARIA al final, con su propio corazón: pérgola con parra (huerto), estanque (agua), yunque (talleres), corro de bancos con hoguera (encuentro), atril de lectura (saber) e hito de piedra (proyectos). El minimapa dibuja lo mismo, con el color de cada tema.
+- **BOSQUE COMESTIBLE IBÉRICO** (`comestibles.ts` + `BosqueComestible.tsx`): **48 especies reales** de la península con su nombre científico, porte, altura, color de hoja, color de fruto y qué da — de nogal, castaño, encina y pino piñonero a zarzamora, arándano, alcaparra, romero y tomillo. Se siembran a los dos lados de las seis sendas en TRES ESTRATOS como en agricultura sintrópica (aromáticas al borde, frutales en medio, árboles grandes al fondo), repartiendo las especies en ronda para que salgan todas. Con frutos visibles y manchas de flores para polinizadores. ~600 plantas en 11 mallas instanciadas.
+- `enCamino()` es ahora la única fuente de «aquí no se planta»: la usan el suelo libre de los árboles, la hierba y la siembra comestible.
+- Cazado en pruebas: (1) el bosque nacía pegado a la plaza y aparecías DENTRO de un arbusto sin ver el ficus → claro de 24 m alrededor del centro y aparición dentro de la plaza mirando al árbol; (2) las raíces aéreas del ficus llegaban todas al suelo y parecían los barrotes de una jaula → ahora solo una de cada cuatro baja del todo, y son más finas.
+- Verificado en local: ficus con su estanque, sendas con carteles, frutos de colores en el bosque, 60 FPS.
+
+### 2026-08-19 — Fase 8: la aldea viva (día/noche con TU hora, bichos y el nombre de cada planta)
+- **CICLO DÍA/NOCHE CON LA HORA REAL** (`Vida.tsx` → `cieloDeLaHora`): no hay reloj de juego — si en tu casa son las nueve de la noche, en la aldea está anocheciendo. Amanece a las 7 y anochece a las 21 (día medio peninsular). El sol se mueve por el cielo (`Sky` recibe su posición real), cambia de color (naranja bajo, blanco alto, azul de luna de noche), y la niebla y el fondo le siguen; de noche la lejanía se cierra de 780 a 420 m. Se recalcula cada medio segundo, no cada fotograma.
+- **LAS FAROLAS SE ENCIENDEN** de noche (intensidad 0,8 → 9 y alcance 9 → 18 m, con el cristal emitiendo): de día son adorno.
+- **BICHOS** (`Bichos`): 150 en una malla instanciada, cada uno rondando SU planta del bosque comestible. De día son mariposas y abejas doradas; de noche, luciérnagas que laten y resplandecen con el bloom de la fase 0.
+- **EL NOMBRE DE LO QUE TIENES AL LADO** (`RotuloComestible`): al acercarte a menos de 3,6 m de cualquier planta del bosque, aparece su nombre común, su nombre científico y qué da («Cerezas en junio», «Escaramujos, vitamina C»). Un bosque comestible que no te dice qué es cada cosa no enseña nada.
+- Cazado en pruebas (a las 3 de la mañana, de verdad): la noche con luna a 0,22 era una pared negra y no se podía jugar → luna a 0,6 y ambiente a 0,3.
+
+### 2026-08-19 — Fase 9: 45 objetos nuevos de ciudad y bosque
+- **`Objetos.tsx`**: 45 objetos procedurales en alta calidad, todos con las texturas fotográficas de las fases 1-3 y en escala real.
+  - **Ciudad (24)**: papelera, semáforo, señal de stop, señal informativa, marquesina de autobús (con cristal que refleja el cielo y banco corrido), quiosco, hidrante, tres contenedores de reciclaje, jardinera con plantas, fuente de beber (con agua animada), bolardo, muro de piedra, cerca de madera, escalinata, torre de agua, panel solar, bicicletero, buzón, reloj de calle de dos caras, estatua de bronce sobre pedestal, mesa de picnic y columpio.
+  - **Bosque y huerto (21)**: tronco caído con musgo, tocón, corro de setas, helecho, cañas, matorral, peñasco, charca con agua y piedras, pasarela de tablas con barandilla, hoguera encendida (con su luz), tienda de campaña, colmena, pila de leña, espantapájaros con sombrero, bancal de hortalizas, compostera, gallinero, invernadero de cristal con bancadas, molino de viento de seis palas, depósito de agua, comedero de pájaros y pasaderas de piedra.
+- **El panel «Crear aquí» se agrupa por familias** (Del pueblo · Ciudad · Bosque y huerto) con scroll: en una rejilla plana de 54 iconos no se encontraba nada.
+- Cada objeto trae su radio de choque en `RADIOS_OBJETO` (las setas y las pasaderas se pisan; el invernadero y el muro, no) y `radioProp` lo consulta primero.
+- El nombre de un objeto plantado sale ahora del CATÁLOGO: había una lista aparte con 9 nombres y todo lo nuevo se llamaba «Objeto» (cazado al plantar un quiosco de prueba, borrado después).
+
+### 2026-08-19 — Fase 10: el dinero del juego (recursos, objetivos y presupuesto de cada proyecto)
+- **CONTADOR PERMANENTE ESTILO GTA** (`Finanzas.tsx` → `HudDinero`): debajo del minimapa, siempre a la vista, tu dinero total y lo que te queda cada mes (verde si sobra, rojo si falta). Un clic abre el panel.
+- **Migración `0037_finanzas.sql`**, tres tablas:
+  - `game_finanzas` — lo que TIENES: efectivo, banco, ingresos y gastos del mes, moneda. Una fila por persona, y nadie ve la de otro.
+  - `objetivos_financieros` — lo que QUIERES: ahorrar, comprar algo o llegar a un ingreso. Con cantidad, fecha límite, proyecto al que pertenece y nota.
+  - `presupuestos_proyecto` — lo que CUESTA cada proyecto: una línea por concepto y año, marcada como gasto o ingreso.
+- **`src/server/finanzas.ts`** (módulo nuevo, `server.ts` solo gana la línea de registro): GET/PUT de tus recursos, alta/edición/archivado de objetivos, alta/archivado de líneas de presupuesto y `GET /api/finanzas/resumen` con el cómputo de todos tus proyectos por año. Toda ruta comprueba la sesión; los objetivos se filtran por `user_id` y las líneas de presupuesto solo las toca quien creó el proyecto o un administrador. Se archiva (`archived_at`), no se borra.
+- **Panel «Tus finanzas»** con tres pestañas:
+  - *Lo que tengo* — editas efectivo, banco, ingresos y gastos; se ve el total y el saldo mensual.
+  - *Mis objetivos* — barra de progreso por objetivo, con botones rápidos (+50, +100, +500, −50) para ir apuntando lo que ahorras sin tener que escribir.
+  - *Presupuestos* — eliges un proyecto, añades líneas por año («2027 · furgoneta · 18.000 € · gasto») y arriba sale **el cómputo de TODO tu mundo año a año**, más el total.
+- El resumen por año dice «pones 12.000 €» o «te sobran 5.000 €» con el desglose debajo: un ingreso mostrado como «−5.000 €» se leía al revés (cazado en pruebas).
+- Los presupuestos cuelgan de los proyectos REALES del juego (tabla `proyectos`), así que lo que presupuestas aquí es lo mismo que ves como edificio en la aldea.
+- Datos de prueba borrados después de verificar: el HUD arranca en 0 € hasta que Eugenio escriba sus cifras.
+
+### 2026-08-19 — Fase 11: que entre rápido, que no se coma la memoria y que se vea en el móvil
+- **LAS TEXTURAS DE LOS PERSONAJES PESABAN 28 MB Y AHORA PESAN 4,5**: eran PNG de 1K y 2K sin canal alfa real (comprobado uno a uno). Convertidas a JPEG (calidad 92 en los mapas de relieve, 85 en el resto) y las de 2K bajadas a 1K, que es de sobra para verlas en tercera persona. Los `.gltf` apuntan ya al `.jpg`. **La carpeta del juego pasa de 69 MB a 46 MB**: 23 MB menos la primera vez que entras.
+- **PANTALLA DE CARGA DE VERDAD** (`Cargando.tsx`): un ficus dibujado, la barra con el porcentaje REAL (`useProgress` escucha al cargador de three.js), el número de piezas que faltan, qué se está cargando dicho en cristiano («las animaciones», «los adoquines de la plaza») y nueve consejos que van rotando para aprender a jugar mientras esperas. Antes era una línea de texto gris y parecía que la web se había colgado.
+- **ELIGES LA HORA DE LA ALDEA** (botón del sol, a la derecha): Tu hora · Amanecer · Mediodía · Atardecer · Noche. El ciclo con tu reloj real sigue siendo lo de fábrica, pero si juegas de madrugada ya no estás obligado a ver la aldea a oscuras. La elección se recuerda.
+- **EL SOL SE MOVÍA SOLO AL ANOCHECER**: la escena únicamente se enteraba del cambio noche/día, así que durante todo el día el sol se quedaba clavado donde estuviera al entrar. Ahora también avisa cuando la luz cambia lo bastante.
+- **AL SALIR DEL JUEGO SE SUELTA LA MEMORIA DE VÍDEO** (`liberarTexturas`): ~40 MB que se quedaban ocupados hasta recargar la pestaña. Verificado que salir y volver a entrar reconstruye el mundo entero (641 mallas, 160 con textura).
+- **MÓVIL**: (1) en una pantalla estrecha la cámara se echa hasta un 55% más atrás, en proporción a la forma de la pantalla — con la distancia del ordenador el ficus te tapaba la plaza entera; (2) la tarjeta «Juego Vital» se metía debajo de la barra de iconos de la izquierda y no se leía el título; (3) la pantalla de carga se salía del ancho y los botones se le montaban encima.
+
+### 2026-08-19 — Cámara pegada, ficus pequeño con flores, árboles con su hoja, cielo de verdad y carga por oleadas
+- **CÁMARA INMERSIVA** (petición de Eugenio: «que el zoom sea más próximo al personaje, así e incluso más»): el zoom de fábrica pasa de 0,5 a 0,32 —más cerca que en su captura— y el mínimo de 0,3 a 0,14, casi por encima del hombro. El tope de inclinación sube de 1,35 a 1,45 y baja a −0,45: **antes no se podía levantar la vista al cielo**, y ahora que hay cielo eso importa.
+- **EL FICUS, CUATRO VECES MÁS PEQUEÑO** (`FICUS_ESCALA = 0.25`): de 6,4 m a 1,6 m. El esqueleto se sigue generando a tamaño natural y se encoge al colocarlo, así que no se pierde ni una rama. El estanque NO se encoge a la cuarta parte sino a 0,45 (4,1 m de agua): a la cuarta parte quedaba un charco en el que la copa no cabía. Su radio de choque baja de 5,2 a 2,4 m.
+- **ANILLO DE FLORES** alrededor del brocal: 46 matas de seis especies de jardín mediterráneo (lavanda, geranio, caléndula, margarita, romero, clavel), ~450 piezas en tres mallas instanciadas, sobre un arriate de tierra.
+- **CADA ESPECIE CON SU HOJA** (`hojaTipo` en las 49 comestibles): aguja, coriácea, lanceolada, ovalada, dentada, compuesta, palmeada, abanico o carnosa — los tipos botánicos reales. La copa se construye con un PERFIL distinto por tipo de hoja, así que el pino piñonero es una sombrilla, el castaño tiene el borde aserrado, el nogal es aireado y la palmera un penacho. Antes todos los frutales eran la misma bola con otro color.
+- **FRUTOS A TAMAÑO REAL**: se dibujaban **×12**, así que una manzana medía un metro (se ve en la captura que mandó Eugenio). Ahora van a su tamaño de verdad y se compensa con 30-40 por árbol en vez de 10: la mancha de color se lee igual y de cerca son frutas, no globos.
+- **TODOS LOS ÁRBOLES UN 33% MÁS PEQUEÑOS** (`MENGUA_ARBOLES = 0.67`, una sola línea): encogen a la vez la copa, el tronco, el choque, los bichos y el rótulo.
+- **EL CIELO ERA UN FALLO, NO UN AJUSTE.** El `<Sky>` de drei venía con su cúpula a **450.000 m** y la cámara solo ve hasta 1.400: el cielo caía entero fuera de alcance y no se dibujaba nunca. Lo blanco de arriba no era cielo, era lienzo vacío — por eso salía igual de pálido a cualquier hora. Y aun corrigiendo la distancia, su modelo atmosférico (Preetham) devuelve luminancias tan altas que la curva de cine las aplasta a blanco: probados turbidez, rayleigh y exposición uno a uno, sin resultado.
+  - **Cielo pintado a mano** (`Firmamento`): cúpula de 900 m con tres colores (cenit, horizonte y el oro del poniente) y `toneMapped={false}`, que es lo que hace que el color elegido sea el que se ve. Azul arriba, resplandor dorado derramándose por el horizonte hacia el sol y disco solar; el bloom sigue poniendo el halo.
+  - **NUBES** (`Nubes`): cúmulos con su vientre gris repartidos por el valle y un banco bajo teñido de oro sobre el poniente. Textura CC0 **autoalojada**: drei se la baja de un CDN externo, lo que metía una petición fuera de humanity.wiki en cada partida.
+  - **HORA DORADA de fábrica** (20:03, sol a 14°): esa altura importa porque la cámara mira casi horizontal — a 24° el oro se quedaba fuera de encuadre.
+  - **La luz ya no se apaga con el sol bajo**: el suelo de intensidad sube de 0,55 a 1,15 y el de luz rebotada de 0,25 a 0,52. Con la fórmula vieja la hora dorada salía en penumbra con los árboles negros, y una hora dorada no es un anochecer: lo cálido lo pone el color, no la falta de luz.
+- **CARGA POR OLEADAS** (petición de Eugenio: «que no tarde tanto en cargar, con la técnica de los juegos grandes para no cargar todo si no hace falta»), en `Oleadas.tsx`:
+  - **Se juega en 0,3 s.** Antes había que esperar a que estuviera TODO: las catorce casas, los seiscientos árboles, los cuarenta y cinco objetos, las seis plazas y los 7,6 MB de animaciones. Ahora se monta primero lo mínimo (suelo, plaza, luz, cámara y tu personaje), se pinta, y el resto entra en oleadas mientras ya estás andando. Cada oleada espera a que la anterior esté PINTADA y el navegador esté ocioso, así que ninguna congela la imagen.
+  - Oleada 0 suelo y plaza · 1 el pueblo, la gente y los proyectos · 2 sendas, agua y hierba · 3 el bosque comestible, los bichos, las nubes y el color de cine.
+  - **Cuerpo provisional**: mientras bajan las animaciones eres una silueta con el color de tu ropa y **puedes andar con ella**. Cada modelo lleva su propio Suspense: sin eso, un modelo que llega tarde tira abajo la escena entera y te devuelve a la pantalla de carga con el mundo ya montado detrás.
+- Verificado en el navegador: cielo azul con nubes y poniente dorado, ficus pequeño con su estanque y sus flores, frutos a escala, y 0,3 s hasta el primer fotograma jugable.
+
+### 2026-08-19 — Medir antes de quitar: los efectos no eran el problema, y 16 MB de descarga que sobraban
+Eugenio pidió quitar efectos innecesarios para ganar velocidad, avisando de que quería los números antes. Se midieron, y el resultado cambió la decisión.
+
+**LO QUE SE MIDIÓ** (en el Mac de Eugenio, forzando la resolución hasta que la GPU fuera el cuello de botella):
+- Con todo activado, a resolución normal: **60 fps clavados**. Hubo que subir a **34,7 millones de píxeles** (16× su pantalla) para ver siquiera una diferencia, y ahí seguía a 50 fps.
+- Apagando cada cosa a esa resolución absurda: nubes **0%**, frutos (6.590) **0%**, hierba (16.000) **0%**, bichos **0%**, **las cuatro a la vez 0%**. La decoración va instanciada: la tarjeta dibuja 16.000 matas con el mismo esfuerzo que una.
+- Oclusión ambiental: **0,4 ms de 18** (2%). Va a media resolución.
+- **Quitar los efectos de pantalla EMPEORA el rendimiento**: con el composer el suavizado de bordes lo hace un pase barato (SMAA) y se apaga el del navegador; sin composer se enciende el MSAA por hardware, que a alta resolución cuesta mucho más (55 fps con efectos, 9-11 sin ellos en la misma prueba).
+
+**DECISIÓN DE EUGENIO con esos números:** no quitar ningún efecto; bajar la hierba y seguir con la carga.
+
+- **Hierba en calidad alta: 45.000 → 15.000.** No gana fotogramas (medido), pero baja memoria y tiempo de construirla al entrar, que es lo que sí se nota. El suelo sigue cubierto.
+- **EL TRAJE DE EXPLORADOR SE DESCARGABA SIN USARSE NUNCA.** `trajeDe()` devuelve siempre 'Peasant' desde que se vio que el Ranger va con el torso al aire, pero `precargarModelos()` seguía pidiendo `Male_Ranger` y `Female_Ranger`: **4,3 MB en cada visita** para nada. Ficheros borrados y el tipo de `trajeDe()` estrechado a `'Peasant'`, para que nadie pueda volver a pedir algo que no existe.
+- **MAPAS DE RELIEVE Y RUGOSIDAD A 512** (el color se queda en 1024): 12,1 MB → 1,7 MB y 2,8 MB → 1,2 MB. Son texturas que se repiten 40×40 sobre el suelo; a esa escala la mitad de resolución no se distingue, comprobado en pantalla.
+- **La carpeta del juego pasa de 46 MB a 30 MB.** Sumando lo de esta mañana (PNG → JPEG en los personajes), viene de 69 MB: **se ha quedado en menos de la mitad**.
+- Verificado en el navegador: 58 ficheros, todos 200, ningún 404 tras borrar el Ranger, y el empedrado de la plaza igual de detallado.
+
+### 2026-08-19 — El mapa 2D se maneja como un mapa, y los carteles son tuyos
+- **ZOOM Y ARRASTRE EN EL MAPA GRANDE** (petición de Eugenio: «que el minimapa 2D se pueda hacer zoom y reordenar»). La rueda acerca **hacia donde apunta el ratón** (el punto bajo el cursor se queda quieto, como en cualquier mapa de verdad), arrastrar el fondo lo mueve, y hay cuatro botones: acercar, alejar, **centrar donde estás** y **ver todo**. El pie dice cuántos metros mide el lado de lo que ves. Mientras no toques nada sigue mandando el encuadre automático de siempre.
+- **MODO «COLOCAR»**: un interruptor en la cabecera. Con él puesto,
+  - salen **TODAS las piezas del pueblo** como marcadores (casas, naves, farolas, bancos, pozos, carros, carteles, el ficus…), no solo las personas y los proyectos — Eugenio pidió «todos» los elementos;
+  - **arrastrar un marcador lo recoloca de verdad** en el mundo 3D: guarda por las mismas rutas que el editor de la aldea, así que no hay dos verdades;
+  - cada marcador lleva una **✕ roja** que lo quita;
+  - y el clic deja de teletransportarte, que estando colocando cosas era un salto en falso.
+  Los 1.100 árboles del bosque quedan fuera de la lista: mil cien puntos no son un mapa.
+- **LOS SEIS CARTELES DE LAS SENDAS SON PIEZAS DEL PUEBLO** (petición de Eugenio: «que su nombre se pueda editar y moverlos como el resto»). Al pasar a tener `seed_id` (`cartel:<senda>`) heredan gratis TODO el editor: arrastrar, girar, quitar y volver a poner. Ya no los dibuja `Sendas`, los dibuja el ensamblado de la aldea.
+- **Migración `0038_cartel_texto.sql`**: columna `texto` en `game_world_overrides`. Al pulsar un cartel aparece un campo para llamarlo como quieras; **vaciarlo lo devuelve a su nombre de fábrica**.
+- Cazado en pruebas: **mover un cartel le borraba el nombre.** El texto tiene tres casos y no dos —no viene el campo / viene vacío / viene con texto— y con un solo parámetro SQL «no viene» y «viene vacío» eran lo mismo. Ahora lo decide un `CASE`, y renombrar + mover + vaciar se comportan como deben (comprobado los tres).
+- Verificado en el navegador: zoom de 270 m a 138 m de lado, las 28 piezas con su papelera en modo colocar, y un arrastre real guardando la posición nueva. Los datos de prueba, borrados: los 34 retoques de Eugenio siguen intactos.
+
+### 2026-08-19 — Tus amigos tienen rutina: pasean por la plaza y se sientan en los bancos
+Petición de Eugenio: «haz que las personas del juego que son los amigos se muevan como dando un paseo alrededor de la plaza o que se sienten en bancos». Hasta hoy Anita y Javier estaban CLAVADOS donde los plantaste, girando la cabeza.
+
+- **`vidaSocial.ts`** (nuevo): la rutina de cada persona, separada del dibujo para poder leerla y cambiarla sin tocar el 3D. Un ciclo de ~2-3 minutos con cuatro tramos: paseo largo → sentarse → paseo corto → pararse a mirar.
+- **La rutina es DETERMINISTA a partir del id** de cada persona: la misma persona hace siempre su mismo recorrido, a su ritmo, con su banco y su carril. No es aleatoria en cada visita — una aldea donde tus amigos aparecen cada vez en otro sitio no se siente como un sitio, se siente como un salvapantallas.
+- **El paseo**: cada uno da la vuelta a la plaza por su propio carril (entre 12 y 19 m del centro), en su sentido y a su paso (0,85-1,25 m/s, que es andar de verdad). Van HACIA su punto, no saltan a él: si venían de sentarse o los has apartado, se reincorporan andando.
+- **Sentarse**: cada persona tiene su banco asignado y se sienta a un lado del asiento (a 0,45 m, la altura real de la tabla en `Detalles.tsx`), mirando hacia donde mira el banco. Dos personas no comparten banco.
+- **Se paran cuando te acercas** (5,5 m): giran a mirarte de frente y cambian a la animación de hablar. Si estaban sentadas, te hablan desde el banco sin levantarse. Perseguir a alguien que no deja de andar para poder hablarle es lo más molesto que hay.
+- **Una persona convertida en PORTAL no se mueve**: su sitio lo manda el editor, y un portal que se va de paseo sería imposible de encontrar.
+- **El bulto con el que chocas viaja con ellos** (`POS_VIVAS`): si no, te estrellabas contra el aire donde estaba tu amigo hace un rato, y el «Hablar con…» saltaba en el sitio equivocado.
+- Verificado en el navegador: Javier caminó hasta su banco y se sentó (altura 0,45); Anita se levantó y estaba a 23 m paseando por su carril; con el jugador al lado, las dos quietas y de frente.
+
+### 2026-08-19 — Hoja y flor de verdad, el avión ya no vuela solo, y el mapa pide doble clic
+- **CADA TIPO DE HOJA TIENE SU TELA** (`flora.ts`). Hasta hoy las ~600 plantas del bosque compartían UN material con la misma repetición: daba igual que un pino tenga acículas de dos centímetros y una higuera hojas de un palmo, la tela era idéntica. Ahora hay diez, una por tipo botánico, con su grano y su brillo: la acícula muy fina y mate (repetición 7×5), la hoja coriácea del naranjo cerosa y brillante (3,4×2,4 y rugosidad 0,52), la palmeada de la higuera grande y suelta (1,5×1,1), la palma con las fibras a lo largo (2,2×4,4). El relieve se nota más en la hoja grande y menos en la aguja, donde a esa escala solo sería ruido. **Medido en el navegador: 14 telas distintas donde antes había una.**
+- **LAS FLORES YA NO SON BOLITAS.** Eran esferas de color plano, sin textura: de cerca, plastilina. Ahora son una flor de verdad —cinco pétalos y su botón— en una geometría de 15 triángulos, con el corazón teñido de cálido en los propios vértices, así que una flor rosa tiene el centro anaranjado sin gastar un material más. Siguen cabiendo todas en una malla instanciada (4.021 flores en tres mallas). Cada una mira a un lado y se ladea: un cantero donde todas miran al cielo a la vez parece impreso, no plantado.
+- **La mata verde del arriate del ficus** lleva ahora la textura de follaje, no un verde plano.
+- **EL AVIÓN YA NO AVANZA SOLO** (petición de Eugenio). Antes, en cuanto despegabas, salía disparado aunque no tocaras nada. Ahora W/adelante avanza y S frena, igual que a pie; la ALTURA se muda a la **barra espaciadora** (subir) y **Mayúsculas** (bajar), que volando no hacían otra cosa. Los botones de pantalla siguen igual. **Medido: 0 metros sin tocar nada, 29 metros en 2,5 s pulsando adelante.**
+- **EL MENÚ DE CREAR PIDE DOBLE CLIC** (petición de Eugenio). Con un solo clic saltaba al intentar mover el mapa o al fallar un marcador por dos píxeles. Se usa el `dblclick` del navegador para el ratón —que es exacto— y un conteo a mano de 500 ms para el dedo, donde `dblclick` no es de fiar.
+- Cazado midiendo: la ventana del conteo a mano estaba en 400 ms y un doble clic tranquilo de 400 ms justos se quedaba fuera por un pelo. Subida a 500, que es la del sistema.
+
+### 2026-08-19 — Doble clic para las opciones, mantener pulsado para mover, y primera persona
+- **DOBLE CLIC SOBRE UN PORTAL = SUS OPCIONES** (petición de Eugenio: «cuando haga doble clic en un objetivo, ya sea persona, portal u otro elemento, que se abra la ventana de opciones»). El clic simple sigue entrando en el proyecto, que es lo que más se hace; el doble abre mover, girar, portal y eliminar. Las personas y los objetos plantados ya abrían su ficha con un clic, así que ahí no cambia nada.
+  - Para que el doble clic funcione **el clic simple tiene que esperar**: si entrara al proyecto al primero, el segundo caería ya dentro. `Interactivo` retrasa 260 ms la acción normal **solo cuando hay ventana de opciones**; todo lo demás sigue respondiendo al instante, sin un milisegundo de más.
+- **EN EL MAPA 2D, MANTENER PULSADO MUEVE** (petición de Eugenio: «cuando hago click y mantengo pulsado un objeto, que me deje moverlo, y cuando hago un click que me lleve a ese portal»). Ya no hace falta entrar en el modo «Colocar»: aguantas 280 ms sobre cualquier cosa y se arrastra; sueltas antes y te lleva allí. El modo «Colocar» se queda para ver TODAS las piezas del pueblo a la vez y para las papeleras.
+- **PRIMERA PERSONA** (botón nuevo en el menú de la derecha, junto a la bici y el planeador). La cámara se pone en tus ojos a 1,62 m, mira hacia donde miras y **tu cuerpo deja de dibujarse** — desde dentro solo verías el interior de tu propia cabeza. Sin interpolación de posición: cualquier retraso ahí se siente como mareo, porque el mundo se movería después que tú. La elección se recuerda entre partidas.
+- **En el mapa, la gente sale donde está AHORA**, no donde la plantaste. Desde que pasean, su posición guardada es solo el punto de partida: viajar a Javier te llevaba a (0, 17) mientras él estaba sentado en (9,4, −7,3). Se lee al abrir el mapa, no cada fotograma.
+- Verificado en el navegador: el doble clic abre «Aldea Regenerativa» con Mover/Girar/Portal/Eliminar sin entrar; el clic corto en el mapa viaja y el largo arrastra; y la cámara en primera persona a 1,62 m con el cuerpo fuera de escena.
+
+### 2026-08-19 — ⌘V pega lo que sea, donde sea
+- **PEGAR CON ⌘V EN LOS TRES SITIOS** (petición de Eugenio: «que haga ⌘V y se pegue en el formato que sea, ya sea una imagen, un vídeo y se hace embed, un archivo pdf, etc.» y «quiero que el ⌘V funcione en el Mapa 3D»). Copias algo y lo pegas: **en el lienzo** (grafos y Mi Conocimiento) nace la ventana que le toca, **en un documento** nace el bloque, y **en el Mapa 3D** el objeto se planta delante de ti con su forma — la foto en su marco, el vídeo en su pantalla, el PDF en su atril, la canción en su altavoz.
+- **Un solo sitio decide qué es cada cosa**: `src/utils/pegado.ts`. Antes cada pantalla tenía su propia tabla de formatos, así que el mismo PDF daba resultados distintos según dónde lo soltases. Ahora los tres preguntan al mismo módulo, y el mismo camino sirve para pegar y para arrastrar.
+- **Lo que reconoce**: imágenes, **vídeo subido** (MP4, WebM, MOV, M4V, OGV — nuevo, antes ni se aceptaba), audio, PDF, cualquier otro archivo, YouTube, **Vimeo** (nuevo), una URL de imagen o de vídeo suelta, y texto.
+- **Un PDF ya no es un botón de descarga.** Se lee dentro de la página, en el visor del navegador — que corre aislado, sin acceso a la web ni a las cookies. Igual el audio: se escucha en el sitio. Dos tipos de ventana nuevos (`pdf`, `audio`) y la migración `0039` que los admite.
+- **Copiar una imagen DESDE UNA WEB también funciona.** Chrome no pone el archivo en el portapapeles, pone el HTML del trozo copiado; sin leerlo, pegar una foto de una página daba una nota vacía.
+- **En un documento, ⌘V funciona sin haber pinchado en ninguna línea.** Solo la línea activa es editable —así no se redibuja el documento entero en cada tecla—, y eso hacía que el pegado no llegara a ningún sitio si no habías hecho clic antes. Ahora lo que nadie atiende se añade al final.
+- **En un documento, un enlace de YouTube se incrusta; uno normal sigue siendo un enlace.** Solo se convierte lo que es inequívocamente un medio: YouTube, Vimeo, o una URL acabada en `.mp4`, `.pdf`, `.jpg`…
+- Nunca se le roba el ⌘V a un campo de texto: el chat del robot, los formularios y la propia línea que estás escribiendo siguen pegando texto.
+- Tope del vídeo subido: 60 MB (unos 2 minutos de móvil a 1080p).
+- Verificado en el navegador los tres sitios: en el lienzo los 7 casos (PNG, MP4, PDF, MP3, YouTube, Vimeo, URL de imagen); en un documento imagen + PDF incrustado + vídeo de YouTube reproduciéndose + texto; y en el Mapa 3D los 6 (imagen, documento, música, vídeo, enlace y nota) plantados delante del jugador.
+
+### 2026-08-19 — Productos en el Mapa 3D + la DJI Power 1000 V2 en el Mercado
+- **LA DJI POWER 1000 V2, EN EL MERCADO** (petición de Eugenio). Datos reales de la web oficial de DJI y precio de DJI Store Iberia (agosto 2026): 1024 Wh, batería LFP, 2600 W de salida continua, 0→80 % en 37 minutos, 26 dB, 14,2 kg, 4000 ciclos conservando más del 80 % de capacidad, ampliable a 11 264 Wh. **649 €**, garantía 2 años, 4 fotos.
+  - **Las fotos se ENLAZAN al CDN de DJI, no se copian a nuestro servidor.** Son suyas; enlazarlas deja la propiedad donde está. Si esto llega a venderse de verdad hay que sustituirlas por fotos propias o con permiso de DJI — está escrito en la migración.
+- **PRODUCTOS EN EL MAPA 3D**: un tipo de objeto nuevo, `producto`, que se planta desde el menú → «De la plataforma» → **Producto**, eligiendo de una lista del Mercado. Sale como una **VITRINA**: peana de luz, el objeto flotando y girando (una vuelta cada 14 s), y el nombre con el precio delante. Pulsarlo abre su ficha con la foto, el precio y el botón al Mercado.
+- **El objeto 3D de la estación de energía**, escrito a mano con geometría: cuerpo, asa, panel frontal hundido, pantalla encendida con «1024Wh», dos tomas de corriente europeas, dos USB-C, dos USB-A, rejillas laterales y la tira de luz inferior. Son 14 mallas que el navegador construye en un fotograma — un modelo descargado pesaría megas y el juego ya va justo de carga.
+- **Dos formas de dibujar un producto, y esa es toda la arquitectura**: si tiene un modelo escrito (`estacion-energia`) se construye en 3D; si no, se cae a su **foto de catálogo** sobre un panel flotante. Así se puede plantar CUALQUIER producto desde el primer día sin haberle modelado nada. Modelar a mano no escala; la foto sí.
+- **La vitrina no copia el producto, apunta a él.** El precio y la foto viajan con el objeto desde el servidor (LEFT JOIN en `/api/juego/mundo`): si cambias el precio en el Mercado, cambia también en la aldea. Y si el producto se archiva, la vitrina lo dice en vez de quedar como un hueco invisible.
+- Migración `0039` (ya desplegada) y **`0040`**: `producto` en los tipos de objeto, columna `producto_id` con clave foránea a `products`, y la ficha de la DJI.
+- Verificado en el navegador: la vitrina plantada, girando, con «DJI Power 1000 V2 · 649 €» y su pantalla verde; el botón «Ver ficha» abriendo la ficha con la foto real de DJI; y el producto listado en el Mercado bajo la categoría «energia».
+
+**Deuda anotada**: qué producto tiene modelo 3D vive en una tabla del código (`MODELO_3D_DE_PRODUCTO` en `JuegoVital.tsx`), no en la base de datos, porque el modelo ES código —una función que dibuja mallas— y hoy hay uno solo. Cuando haya diez, se convierte en una columna `modelo_3d` de `products`: unos 20 minutos entonces, contra una migración hoy para una única fila.
+
+### 2026-08-19 — Doble clic para crear, primera persona con cuerpo, la Aptera aparcada y las tareas por dentro
+- **EL MENÚ DE CREAR YA NO SALE AL PRIMER CLIC** (petición de Eugenio: «haz que solo aparezca cuando hago doble clic»). Pisar el suelo es lo que más se hace en el juego —andar, mirar, girar la cámara— y que eso abriera un menú lo convertía en un estorbo constante. **Soltar** lo que llevas en la mano sigue siendo de un solo clic: ya estabas en mitad de una acción.
+- **PRIMERA PERSONA CON BRAZOS Y PIERNAS** (petición de Eugenio). Tu cuerpo se dibuja entero, con su animación de verdad, **sin cabeza ni pelo** — la cámara está dentro del cráneo y de ellos solo vería la cara interior. Es el truco de siempre en los juegos en primera persona.
+  - **Lo que lo hacía invisible no era el cuerpo, era la cámara**: recortaba todo lo que tenía a menos de 50 cm, y tu pecho, tus brazos y tus piernas están justo ahí. En primera persona ese recorte baja a 15 cm; en tercera vuelve a 50, donde da más precisión en el horizonte.
+  - Ojos a 1,70 (el modelo mide 1,81 y sus hombros están sobre 1,50: a 1,62 los hombros comían el tercio inferior de la pantalla). Y **el cuerpo gira con la vista**: sin eso, arrastrar el ratón te dejaba mirando de lado con las piernas torcidas.
+- **TU APTERA, APARCADA** (petición de Eugenio: «hazme una réplica de mi vehículo volador y déjalo aparcado como el camión»). Es **el mismo componente que pilotas**, no una copia que se quedaría desfasada al retocar el vehículo, con las alas plegadas y los rotores quietos. Está al lado del camión y **es el portal de un proyecto nuevo, «Aptera», con 10 tareas pendientes** como punto de partida: para qué es, medidas del chasis, autonomía, los cuatro rotores, el panel solar, qué dice la ley, el primer vuelo, quién sabe de esto y cuánto cuesta llegar al prototipo.
+- **CREAR TAREAS DENTRO DE UN PROYECTO, SIN SALIR DEL JUEGO** (petición de Eugenio: «no puedo crear nuevas tarjetas dentro del proyecto de forma visual»). Los **dos** gestos que eligió: un **pedestal «+»** que se ve sin que nadie te lo explique, y **doble clic en el suelo**, el mismo gesto que en la aldea. La tarea nace con la ficha ya abierta: crear y rellenar son un solo gesto en vez de dos pantallas.
+- **Y a una tarea ya creada se le puede hacer todo desde dentro**: marcarla hecha, **cambiarla de habitación** (nuevo), cambiarle el título y el texto, y **borrarla** (nuevo — va a la papelera, no se destruye, con la confirmación en la propia ficha porque un `confirm()` del navegador no se ve a pantalla completa).
+- **LAS TARJETAS SON MINI TABLEROS CON SU CONTENIDO DENTRO** (petición de Eugenio: «que las notas sean como boards con preview del contenido de dentro, como mini ventana»). Antes cada foto y cada nota de una tarjeta se soltaba como un objeto SUELTO flotando al lado: un proyecto con diez tarjetas con foto poblaba la plaza con veinte cosas sin saber cuál iba con cuál — y cada una era un obstáculo con el que chocabas por separado. Ahora la tarjeta enseña dentro su primera foto o su primer texto, dice «+N más» si lleva más, y pulsarla (o chocar con ella) la abre entera como hasta ahora.
+- Migración `0041`: el proyecto Aptera, sus 10 tareas y la nave aparcada. Va condicionada a que exista el usuario, así que en una base limpia no hace nada en vez de reventar.
+- Verificado en el navegador: un clic en el suelo no abre nada y el doble sí (con Aptera y Producto ya en el menú); las piernas y los brazos visibles en primera persona; y crear → marcar hecha → cambiar de habitación → renombrar → borrar, los cinco con respuesta 200.
+
+### 2026-08-19 — La página de un producto, y el giro más lento
+- **PULSAR UN PRODUCTO EN EL MAPA 3D ABRE SU PÁGINA** (petición de Eugenio: «que se abra una ventana como la de las tareas, como si fuese una nueva página, donde el admin de ese producto puede añadir información y reorganizarla en esa pizarra 2D: vídeos, fotos, botones de compra, productos relacionados…»). Es la **misma pizarra** que la ficha de una tarea: bloques sueltos que se arrastran y se guardan solos.
+- **Seis tipos de bloque**: texto, foto (subida), vídeo de YouTube, enlace, **botón de compra** (grande y verde, con su texto y su destino) y **producto relacionado** (una tarjeta de otro producto del Mercado, que pide su precio al abrir — así el relacionado enseña el precio de HOY, no el del día que se puso).
+- **Se abre en modo LECTURA aunque puedas editarla.** Editar se activa con un botón. Entrar directamente en modo edición hace que el primer clic mueva algo sin querer, y una landing es lo que enseñas a otros. Quien no es el dueño no ve ni asas ni botones.
+- **La lógica se ha copiado, no el componente.** Una tarea y un producto comparten el gesto de arrastrar, pero no los tipos de bloque (una tarea no tiene botón de comprar) ni los permisos (una tarea es tuya; una landing es la cara pública de algo que se vende). Fusionarlos habría obligado a llenar el componente de condicionales por cada diferencia.
+- **La landing de la DJI Power 1000 V2 viene montada** con esa lógica: 10 bloques con sus datos reales, sus fotos, el botón de compra a DJI Store Iberia y el enlace a la ficha oficial.
+- Guardar es una ruta aparte (`PUT /api/products/:id/pizarra`) y no un campo más del alta de producto: se llama en cada arrastre, y meterla en el alta reescribiría precio, fotos y enlaces cada vez que alguien mueve una foto un centímetro. Solo la edita quien creó el producto, o un administrador.
+- **EL GIRO ES MÁS LENTO Y MÁS PRECISO** (petición de Eugenio: «que vaya más despacio la cámara y el personaje, para que sea más preciso el giro»). El muñeco tardaba unas 8 centésimas en plantarse en el rumbo nuevo: con A/D era imposible apuntar a algo concreto, siempre te pasabas. Ahora tarda casi el doble (12 → 7), y **la cámara persigue aún más despacio** (3,2 → 1,9): si fuera igual de rápida, girar sería el mundo entero barriendo de golpe.
+- Migración `0042`: la columna `bloques` de los productos, el dueño de la DJI y su landing.
+- Verificado: la pizarra llega al juego con sus 10 bloques y sus 4 tipos, y guardar por la API la persiste y se puede restaurar.
+
+### 2026-08-19 — El Escritorio: ventanas, navegador propio y la IA que lo ve
+- **VENTANAS EN LA APP** (petición de Eugenio: «en una ventana el juego, en otra otra página de la app, y en otra el navegador propio»). Ruta nueva `/escritorio`: ventanas que se mueven, se cambian de tamaño, se minimizan, se maximizan (doble clic en su barra) y se cierran, con barra de tareas abajo y la distribución guardada entre visitas.
+- **Cada ventana es un marco a una ruta de la app, NO el componente montado dentro.** Es lo que hace esto posible: el juego 3D vive en su propio contexto (su WebGL, su bucle, su teclado, sin pelearse con otra ventana), y **mover una ventana no vuelve a montar lo de dentro** — con componentes, cada re-render del escritorio reiniciaría la página. Cuesta una carga de la app por ventana (~200 ms); con tres o cuatro no se nota.
+- **UN NAVEGADOR DE VERDAD DENTRO DE LA APP.** Barra de direcciones (escribe una web o busca), atrás, adelante y recargar.
+  - **La pared, dicha de frente**: un `<iframe>` no puede abrir la mayoría de webs. Google, Amazon y casi cualquier sitio grande mandan `X-Frame-Options: DENY`, y el navegador se niega a pintarlos dentro de otra página. No es un fallo nuestro: es una defensa contra el clickjacking y funciona. **La salida es traer la página por el servidor**, quitarle esas cabeceras y reescribir todos sus enlaces para que sigan pasando por nosotros. Eso es `src/server/navegador.ts`.
+  - **La IA VE la página**: `/api/navegador/leer` devuelve el título, el texto y los enlaces de lo que estás mirando, y el chat del escritorio se lo pasa al asistente antes de preguntarle. Preguntar «resúmemela» funciona sobre la web que tienes delante.
+- **Dos fallos encontrados y arreglados durante la construcción**:
+  - **Wikipedia salía sin estilos.** `&amp;` dentro de un atributo HTML es un `&`; sin deshacer eso, `load.php?lang=es&amp;modules=…` se pedía con un parámetro llamado «amp;modules» y el servidor de enfrente devolvía otra cosa. Media web se ve mal por esto.
+  - **El JavaScript de fuera estaba bloqueado** «por seguridad», y eso dejaba las páginas a medio dibujar. Lo que las hace seguras no es bloquearlo: es que el marco va con `sandbox="allow-scripts"` **sin** `allow-same-origin`, así que la web vive en un origen opaco y no puede leer nuestras cookies ni el DOM de la app. Los dos permisos juntos sí serían peligrosos; este par es el correcto.
+- **SSRF cerrado**: se resuelve el DNS y se comprueba la IP de verdad antes de ir a buscar nada, así que `?url=http://127.0.0.1:5432` o la dirección de metadatos de la nube rebotan con un 400. Sin eso, el proxy sería una puerta a la máquina.
+- **Lo que NO hace, escrito en el código para que nadie lo descubra chocándose**: iniciar sesión en sitios (las cookies de fuera no viajan), y la IA lee y navega pero no pulsa botones dentro de una aplicación que se dibuja sola con JavaScript. Para eso hace falta Chromium corriendo en el servidor, que es otra fase con su coste de infraestructura.
+- El escritorio trae **su propio chat** (el que ve la web) y por eso la barra de IA global no se monta ahí: dos asistentes en la misma pantalla es una pregunta sin saber a cuál se la haces.
+- Verificado en el navegador: las dos ventanas abiertas con el juego cargando dentro de la suya, Wikipedia y **dji.com** entrando por el proxy (837 KB, 152 enlaces reescritos), las hojas de estilo cargando con 200 tras el arreglo del `&amp;`, y la red interna rebotada con 400.
+
+### 2026-08-19 — Un solo menú, y arriba
+- **LA BARRA DE VENTANAS SE MUEVE ARRIBA** (petición de Eugenio: «haz que el menú de ventanas esté arriba… y así queda todo arriba limpio en un solo menú»). Estaba abajo, y con la cabecera de la app arriba había un menú en cada borde de la pantalla. Ahora las dos franjas se leen como una sola.
+- Las ventanas empiezan **por debajo** de esa barra y no se pueden meter detrás: arrastrar una hacia arriba topa con ella, y maximizar respeta su alto. Sin eso, la primera ventana que subieras taparía el botón de abrirlas.
+- **En el Escritorio, «Explorar» deja de estar en la cabecera**: ya vivía dentro de la hamburguesa, que lleva todas las secciones. Enseñarlo dos veces era justo el ruido que había que quitar. En el resto de la app no cambia nada.
+- Se queda arriba a la derecha lo que NO está en la hamburguesa —la cuenta, ajustes y salir—, porque esconderlo sería quitarte la salida de la aplicación, no limpiar la pantalla.
+- Verificado en el navegador: la franja de ventanas arriba con «Abrir» y las dos ventanas, el borde inferior vacío, y la cabecera con solo la hamburguesa y la marca.
+
+### 2026-08-19 — El Escritorio como navegación: pantalla completa y cambio con gesto
+- **TODAS LAS SECCIONES, EN LA LÍNEA DE ARRIBA** (petición de Eugenio: «que esté todo en la línea superior, no en un menú secundario»). Nueve botones directos —Juego, Web, Mapa, Conocimiento, Explorar, Mi conocimiento, Mis proyectos, Mercado y Universo—, sin desplegable. El que está delante se ve en negro; los abiertos, en gris.
+- **CADA SECCIÓN SE ABRE A PANTALLA COMPLETA, EN SU VENTANA** («que el juego se abra en pantalla completa, y el navegador igual pero en otra ventana»). Es el modelo de macOS: cada cosa ocupa su pantalla y se salta de una a otra. Con ventanitas superpuestas el gesto de cambiar no significaría nada.
+- **Pulsar una sección ya abierta la trae al frente en vez de duplicarla.** Con las secciones a un clic es facilísimo pulsar dos veces, y dos ventanas del mismo mapa no le sirven a nadie.
+- **CAMBIAR DE VENTANA CON EL TRACKPAD**: deslizamiento **horizontal de dos dedos**, con las flechas ‹ › de la barra y con **⌘←/⌘→** como alternativas.
+  - **Por qué dos dedos y no cuatro**: una web NO puede saber cuántos dedos hay en el trackpad. macOS se queda los gestos de tres y cuatro dedos para sí mismo (Mission Control, cambiar de escritorio) y **nunca llegan a la página**. No es una limitación de este código: no hay forma de detectarlos desde un navegador; solo una aplicación nativa podría. El de dos dedos sí llega —como una rueda con desplazamiento en X— y es el equivalente que sí funciona.
+  - Se exige que el gesto sea claramente horizontal y se deja 700 ms entre cambios: un solo deslizamiento manda decenas de eventos y sin eso saltarías cinco ventanas de una pasada.
+- Verificado en el navegador: los nueve botones en una sola línea, las dos ventanas naciendo a pantalla completa, y el cambio funcionando tanto con el deslizamiento como con ⌘→.
+
+### 2026-08-19 — Un solo menú de verdad: el ☰ abre ventanas y la barra las enseña como iconos
+- **UNA SOLA BARRA ARRIBA** (petición de Eugenio, tercera vuelta al diseño: «solo tiene que haber un menú arriba, uno solo… y en ese uno es donde deben estar las ventanas en forma de iconos… no están ahí por defecto, solo las que se abran desde el menú colapsado»). La segunda fila de secciones desaparece: en el Escritorio, la cabecera de la app ES la única barra.
+- **El menú ☰ abre ventanas.** En el Escritorio, pulsar cualquier sección del menú colapsado ya no navega: abre esa sección como VENTANA a pantalla completa. Arriba del menú aparece además el **Navegador**. En el resto de la app el menú sigue navegando como siempre. La entrada del propio Escritorio siempre navega: abrirlo dentro de sí mismo sería una muñeca rusa.
+- **Las ventanas abiertas son ICONOS en esa única barra**, junto a la marca. El de delante va en negro; pulsarlo minimiza; pulsar otro lo trae. El escritorio **nace vacío**: solo existe lo que abras.
+- **El fallo gordo de la captura de Eugenio**: cada ventana cargaba la app ENTERA dentro de sí misma — cabecera, menú y todo, cuatro barras apiladas antes de llegar al juego. Ahora las ventanas cargan la ruta en modo embebido (`?embed=1`), que renderiza la página sola. Y el modo embebido ahora monta también la barra del asistente en las páginas que la llevan: el robot del juego ES el asistente, y sin eso el juego dentro de una ventana se quedaba mudo.
+- **Minimizar ya no desmonta la ventana** (fallo visto en pruebas): se oculta con `display:none` y el marco sigue vivo — minimizar el juego y volver ya no lo reinicia de cero.
+- **El botón del navegador casa por clase, no por dirección**: su destino cambia con cada página que visitas, y sin esto cada pulsación abría un navegador nuevo.
+- La cabecera y el gestor se hablan por `src/components/ventanas/bus.ts`: eventos del navegador, sin contexto global nuevo — el estado sigue viviendo en un solo sitio. La cabecera PIDE el estado al montarse porque React ejecuta los efectos del hijo antes que los del padre y, si no, los iconos de las ventanas restauradas no aparecerían hasta el siguiente cambio.
+- Verificado en el navegador: escritorio vacío al llegar; el juego y el navegador abiertos desde el menú, a pantalla completa y con `embed=1`; los iconos en la única barra con el de delante en negro; el conmutador visible→minimizado (vivo)→visible tres veces seguidas; y el gesto horizontal + ⌘←/→ siguen saltando entre ventanas.
+
+### 2026-08-19 — El navegador propio, arreglado: pase diario y buscadores internos
+- **EL FALLO DE LA CAPTURA DE EUGENIO** («el navegador no funciona bien»: DuckDuckGo sin estilos, sin logos, todo texto plano): el marco del navegador corre en un origen OPACO —esa es justo la barrera que protege la sesión— y por eso sus peticiones de CSS e imágenes llegaban al proxy SIN la cookie de sesión, que las rechazaba con 401. La página llegaba; su ropa, no.
+- **El arreglo: un pase diario.** Cada recurso reescrito lleva ahora `&t=` con una firma HMAC del día (válida hoy y ayer, 20 caracteres, derivada de `SESSION_SECRET` sin escribir ningún secreto nuevo). `/ver` acepta sesión O pase; sin ninguna de las dos sigue siendo 401 — no se ha abierto un proxy público, solo se ha dejado pasar a los recursos de las páginas que un usuario con sesión ya pidió. `/leer` (lo que lee la IA) sigue exigiendo sesión siempre.
+- **Los buscadores internos de las páginas ya funcionan.** DuckDuckGo envía su buscador por **POST**, y ese envío sin interceptar se escapaba del marco y aterrizaba en NUESTRA app (visto en pruebas). Ahora el script inyectado intercepta TODOS los formularios y los reconvierte en una consulta GET a través del proxy — los POST de verdad (iniciar sesión, pagar) ya estaban fuera de lo que este navegador hace, así que no se pierde nada que funcionara.
+- También se quita el CSP que viene DENTRO del HTML (`<meta http-equiv>`): ya quitábamos el de las cabeceras, pero Wikipedia y otros lo traen también en el cuerpo y bloqueaba los estilos reescritos.
+- Verificado en el navegador: DuckDuckGo con estilos, logos y favicons dentro de la ventana; búsqueda escrita en el buscador DE la página («aptera solar car») interceptada y navegada por el proxy con la barra de direcciones y el título actualizados; CSS con 200 sin cookie pero con pase; sin cookie y sin pase, 401.
+
+### 2026-08-20 — YouTube en el navegador: el reproductor oficial, no el proxy
+- **EL PORQUÉ DEL FALLO** («youtube.com no abre»): hay una segunda pared además del X-Frame-Options. Hay webs que no son documentos sino APLICACIONES: el HTML de YouTube es un cascarón de ~900 KB con 44 scripts que al arrancar pide sus datos por su cuenta —peticiones que no pasan por la reescritura y rebotan— y el vídeo viaja firmado y por rangos desde googlevideo.com, imposible para un proxy que guarda la respuesta en memoria. Un proxy de texto enseña documentos; no ejecuta aplicaciones.
+- **La salida es la puerta oficial: el reproductor embebido.** Cualquier dirección de vídeo (watch, youtu.be, shorts) abre el player de youtube-nocookie.com, el mismo que usa cualquier web del mundo: el vídeo llega directo de Google, con imagen y sonido, sin pasar por nuestro servidor. Verificado reproduciéndose dentro de la ventana.
+- **Buscar en YouTube funciona buscando «site:youtube.com» en DuckDuckGo** (que sí es un documento): la portada de youtube.com se sustituye por una página nuestra con su buscador, y `/results?search_query=…` redirige a esa búsqueda. Clic en un resultado → reproductor. La ficha del vídeo para la IA llega por oEmbed (título y canal en unos cientos de bytes, sin clave).
+- **DuckDuckGo envuelve cada resultado en `/l/?uddg=…`**, una página que redirige CON JavaScript — ese salto se escapaba del proxy y chocaba contra el X-Frame-Options del destino (pantalla en blanco). Ahora el servidor desenvuelve el destino y navega directo. Arregla el clic en CUALQUIER resultado de DuckDuckGo, no solo los de YouTube.
+- **El embed va SIN nuestro sandbox y CON Referer**: es de otro origen (no puede tocar la app) y necesita su almacenamiento y saber quién lo embebe — sin Referer, YouTube responde «Error 153» (visto en pruebas).
+- **Botón «abrir fuera» en la barra del navegador**: hay webs-aplicación que ningún proxy de texto puede ejecutar (Gmail, Instagram…). El botón abre la dirección en una pestaña del navegador de verdad, en vez de dejar que descubras el límite chocándote con él.
+- Verificado en el navegador: youtube.com → página de búsqueda; búsqueda «aptera solar car» → resultados; clic → reproductor oficial con el vídeo REPRODUCIÉNDOSE (fotogramas en movimiento); dirección de watch pegada en la barra → reproductor; Wikipedia sigue entrando por el proxy (200, reescrita).
+
+### 2026-08-20 — Chromium en el servidor: el navegador de verdad («dale a Chromium»)
+- **UN NAVEGADOR COMPLETO CORRE EN EL SERVIDOR** y la ventana de la app enseña su pantalla en directo: fotogramas JPEG por SSE (`Page.startScreencast`) y los clics, la rueda y el teclado del usuario viajan de vuelta y se inyectan en la pestaña (Playwright). YouTube entero, Google, cualquier web con JavaScript: verificado navegando el youtube.com real (consentimiento rechazado con un clic, portada, buscador con sugerencias en vivo) y el duckduckgo.com completo.
+- **La IA lee la página VIVA**: `/api/navegador/remoto/:id/leer` devuelve el DOM real (texto y enlaces DESPUÉS del JavaScript), no una copia descargada. El chat del Escritorio lo usa automáticamente cuando hay sesión remota (aviso por el bus de ventanas).
+- **Los vídeos siguen yendo por el reproductor oficial**: el screencast no lleva sonido (son imágenes), así que una dirección de vídeo cambia el marco por el embed de YouTube, que sí suena. Chromium se aparca en blanco mientras tanto.
+- **Los gestos van en cola**: cada tecla en su propia petición suelta podía adelantarse a la anterior y «aptera» llegaba como «aapret» (visto en pruebas). Ahora una entrada no sale hasta que la anterior llegó.
+- **Ventanas de atrás, `inert`** (fallo encontrado probando): el juego embebido coge el foco del teclado para sus controles y SE LO ROBABA a la ventana de delante — escribías en el navegador y las teclas se las comía el juego. Con `inert` el juego sigue corriendo de fondo pero no puede capturar ni foco ni teclas hasta traerlo al frente.
+- **Costes y topes, dichos de frente**: cada sesión es un Chromium real (150–400 MB de RAM) → tope de 2 sesiones, cierre a los 3 min sin uso, y el propio Chromium se apaga al minuto de quedarse solo. Cerrar la ventana cierra la pestaña del servidor. Sin sesión → 401; cada sesión pertenece a su usuario.
+- **Anti-red-interna también aquí**: las navegaciones del Chromium remoto pasan por el mismo filtro de IPs privadas que el proxy (con caché de DNS); escribir localhost:5432 en la barra rebota.
+- **Si el servidor no tiene Chromium**, el navegador cae solo al proxy de lectura de antes, con su etiqueta «lectura»: nada se rompe.
+- **Producción**: la imagen instala el Chromium del sistema (Alpine) y Playwright lo pilota (`NAVEGADOR_CHROMIUM`); el de Playwright es de glibc y no vale en musl.
+- Aviso honesto que quedará a la vista: algunas webs enseñan un desafío anti-robots al ver tráfico desde un servidor (le pasó a DuckDuckGo en pruebas). Se resuelve con los clics de la persona, como en cualquier ordenador.
+
+### 2026-08-20 — «Wiki» plateado en el logo
+- El «Wiki» de la marca deja el verde y pasa a un **degradado plateado** (petición de Eugenio: «plateado/grisáceo moderno y elegante»): vertical, claro en el centro, que es como se lee «metal pulido». Tonos slate de la paleta de la app, sin colores nuevos. Verificado en el navegador junto al «Humanity» en negro.
+
+### 2026-08-20 — Navegador en el menú, cabecera solo-logo y pantalla nítida
+- **EL NAVEGADOR, A UN CLIC DESDE CUALQUIER PÁGINA** (petición de Eugenio: «directamente en el menú, sin tener que ir primero a escritorio»): la primera entrada del menú ☰ es «Navegador». En el Escritorio abre la ventana; desde cualquier otra página deja la apertura apuntada, navega al Escritorio y el gestor la recoge al montar.
+- **LA CABECERA QUEDA EN SOLO EL LOGO** («limpia el menú principal… que no quede nada, solo el logo»): Explorar, Mercado, Contribuye, el perfil, administrar usuarios, el tamaño de letra y cerrar sesión viven ahora ORDENADOS dentro del menú ☰ — Explorar en «El común», Contribuye junto al Mercado, y una sección nueva «Tu cuenta» al final con el ajuste de letra en línea. Arriba quedan el ☰, la marca y (en el Escritorio) los iconos de las ventanas.
+- **PANTALLA REMOTA NÍTIDA** («el navegador se ve con baja resolución»): el marco enviaba fotogramas al tamaño CSS y una pantalla Retina los estiraba al doble — borroso por construcción. Ahora la pestaña remota se dibuja a la densidad de TU pantalla (devicePixelRatio, tope 2) y la calidad JPEG sube de 55 a 70: los fotogramas llegan con el doble de píxeles y el navegador los encoge a su sitio. Verificado: texto nítido en la ventana.
+- Verificado en el navegador: portada con la cabecera solo-logo, menú ☰ con las cuatro secciones ordenadas y scroll propio, y clic en «Navegador» desde la portada aterrizando en el Escritorio con DuckDuckGo ya abierto.
+
+### 2026-08-20 — El navegador borroso, arreglado de raíz («sigue igual de mal»)
+- **POR QUÉ EL CAMBIO ANTERIOR NO BASTÓ**: el screencast de Chromium (`Page.startScreencast`) entrega los fotogramas SIEMPRE al tamaño lógico (CSS) e **ignora `deviceScaleFactor`** — medido: pedíamos 400×300 con escala 2 y llegaban 400×300. En una pantalla Retina eso es borroso por construcción, y subir la calidad JPEG no lo tocaba.
+- **EL ARREGLO**: la pantalla en directo ya no es el screencast, sino un bucle de **capturas de pantalla** (`page.screenshot`), que SÍ salen a píxeles reales del dispositivo. Medido con el código nuevo: escala 2 → 800×600 (el doble). El bucle captura mientras alguien mira, se salta los fotogramas idénticos para no mandar lo mismo dos veces, y para cuando cierras la pestaña.
+- Verificado: `page.screenshot` con `deviceScaleFactor` 1 → 400×300; con 2 → 800×600. El cliente ya envía `escala = devicePixelRatio` (tope 2) y el `<img>` encoge la imagen grande a su hueco = nitidez real.
+- Coste honesto: una captura es más pesada que un fotograma incremental del screencast, así que el bucle va a ~8 fotogramas/segundo. Para leer y navegar va sobrado; no es para ver vídeo (eso ya va por el reproductor oficial, con sonido).
+
+### 2026-08-20 — El chat del Escritorio nace cerrado
+- **El asistente del Escritorio ya no ocupa un tercio de la pantalla al llegar** (petición de Eugenio: «que el chat de IA esté no desplegado por defecto»): arranca plegado en su botón flotante, y las ventanas usan todo el ancho. Se abre pulsando el botón y se queda abierto mientras estés en la página.
+- Los otros dos chats ya nacían cerrados: el acoplado del resto de la app (`open` en falso) y la barra de los lienzos y el juego, que solo se despliega cuando hay conversación.
+- Verificado en el navegador: Escritorio a pantalla completa con el botón verde abajo a la derecha, y el panel abriéndose al pulsarlo.
+
+### 2026-08-20 — Navegador: desplazamiento fluido y cerrar que no falla
+- **EL TIRÓN AL SUBIR Y BAJAR tenía DOS causas, las dos medidas.**
+  1. **La cola de entradas se atascaba.** Un solo gesto del trackpad dispara decenas de eventos de rueda por segundo y cada uno esperaba el viaje de ida y vuelta del anterior: la página seguía desplazándose segundos después de que tú pararas. Ahora los desplazamientos se SUMAN y solo hay uno en vuelo — al llegar la respuesta se manda el acumulado. No se atasca y no se pierde recorrido. Lo mismo con el movimiento del ratón (la posición es absoluta: perder puntos intermedios no se nota).
+  2. **Cada fotograma nítido costaba demasiado.** Medido sobre Wikipedia a 1000×700 en pantalla Retina: nítido 98 ms y 286 KB (10 por segundo); rápido 17 ms y 85 KB (58 por segundo). Ahora la pantalla va a **dos velocidades**, como cualquier escritorio remoto: mientras algo se mueve manda fotogramas rápidos (fluidez, que es lo que el ojo pide al desplazarse) y, en cuanto se queda quieta, manda UNA nítida a plena resolución (detalle, que es lo que pide al leer). Con la página parada no se manda nada.
+- Medido de punta a punta tras el arreglo: **primer fotograma a los 102 ms** del gesto, 12,7 por segundo a 96 KB durante el desplazamiento, y la nítida de 378 KB al parar.
+- **CERRAR LA VENTANA YA NO FALLA** («a veces da fallos al cerrar»): los botones de la barra de título viven dentro de la zona de arrastre, así que al pulsarlos se capturaba el puntero para la barra y el navegador entregaba el clic a la BARRA, no al botón. Y pasaba solo con la ventana NO maximizada, porque maximizada el arrastre ya salía antes — de ahí el «a veces». Ahora el arrastre se aparta cuando el gesto empieza sobre un botón.
+- Verificado en el navegador: ventana restaurada (el caso que fallaba) cerrándose a la primera.
+
+### 2026-08-20 — Dos menús otra vez: el modo embebido ya no se pierde al navegar
+- **UNA VENTANA VOLVÍA A PINTAR LA APP ENTERA DENTRO** (captura de Eugenio: la ventana «Iniciar sesión» con su propia cabecera dentro, dos menús). La causa: el modo embebido dependía de un parámetro en la dirección (`embed=1`), y ese parámetro **se pierde en cuanto la página de dentro navega por su cuenta** — al iniciar sesión, al pulsar un enlace, en cualquier redirección. A partir de ahí la ventana ya no se sabía ventana.
+- **El arreglo: la app mira si va DENTRO DE UN MARCO**, no un parámetro. Ir en un marco es un hecho que no se puede perder al navegar; el parámetro sí. El `embed=1` se mantiene como refuerzo (la comprobación es un O), así que nada de lo que ya funcionaba cambia.
+- Verificado en el navegador: ventana «Iniciar sesión» con una sola cabecera —la general— y **navegando por dentro** (Iniciar sesión → Crear cuenta) sigue sin duplicarse, que es justo lo que el parámetro no aguantaba.
+
+### 2026-08-20 — Página «Lienzos» (estilo Miro) y adiós a «Universo»
+- **NUEVA PÁGINA «LIENZOS»** en el menú ☰ (petición de Eugenio: «al estilo el menú de Miro, con todos los boards, y que puedas crear uno nuevo o abrir otro»). Es la lista PRÁCTICA, que es otra cosa que «Red de Datos»: allí los lienzos son un cosmos conectado —bonito para ver el conjunto, incómodo para encontrar el tuyo de ayer—; aquí son fichas en rejilla con su portada. El cajón de trabajo.
+  - **Portada automática**: la primera imagen del lienzo, o la miniatura de su primer vídeo, o —si no tiene ninguna— sus iniciales sobre un color estable sacado del título, para que cada ficha se reconozca de un vistazo sin pedirle nada al autor.
+  - **Míos / De la humanidad**, buscador por nombre, y **«Nuevo lienzo» como primera ficha de la rejilla** (lo que más se repite es empezar uno; buscarlo al final obliga a recorrer todo lo demás). Se crea pidiendo solo el nombre, nace **borrador** (solo tú lo ves) y se entra directo: crear un lienzo es querer usarlo.
+  - Un lienzo ES un grafo de conocimiento: no hay tabla nueva ni tipo nuevo, solo otra forma de listarlos.
+- **`GET /api/graphs?personales=1`**: incluye TU lienzo personal (Mi Conocimiento) en el listado. Solo vale para los tuyos —lo comprueba el servidor cruzando `creator_id` con tu sesión—, así que nunca se cuela en las listas del común. Verificado: «Míos» pasa de 6 a 7 lienzos con la bandera; el común con la bandera puesta y sin sesión sigue sin traer ninguno personal.
+- **«UNIVERSO» BORRADO** (petición de Eugenio: «ya no sirve»): fuera del menú, fuera de las rutas y borrado el fichero. Con él se van sus 3 llamadas sueltas a la API y sus 15 colores a mano, que eran la mayor concentración de deuda de estilo del proyecto. Se deja constancia en `src/pages/CLAUDE.md`: de las cuatro páginas «Universo» que se construyeron no queda ninguna — es el coste de decidir «página nueva» antes que «vista nueva».
+
+### 2026-08-20 — Archivos, favoritos del navegador y tres renombres
+- **«JUEGO VITAL» → «MUNDO 3D»**, **«RED DE DATOS» → «GRAFOS»** y **«BASE DE DATOS» → «ARCHIVOS»** (petición de Eugenio). El inventario de tablas que ocupaba «Base de Datos» no se pierde: baja a «Tu cuenta» como «Base de datos (tablas)», solo para administradores — sigue siendo una herramienta útil, solo que no la puerta principal.
+- **PÁGINA «ARCHIVOS»: tu cajón único.** Lo tuyo está repartido en tres sitios porque cada uno nació para algo distinto, y eso está bien: `knowledge_windows` (lienzos y chat), `publications` (muro) y `game_world_items` (lo que plantas en el Mundo 3D). `GET /api/archivos` LEE las tres y devuelve una sola lista por fecha. **Está sincronizado por construcción**: no hay copia que mantener al día, se lee siempre la fuente. Verificado con datos reales: **61 archivos** — 52 de lienzos, 7 del Mundo 3D (la nota de la calefacción, la DJI, el vídeo del dron, la foto del Aptera…) y 2 del muro.
+  - Es una TABLA compacta, no una rejilla: aquí no vienes a mirar, vienes a encontrar algo concreto entre muchas cosas, y en una fila caben el tipo, el nombre, dónde está y cuándo lo tocaste. Filtros por origen y por tipo (solo los tipos que existen de verdad en lo tuyo), buscador, y cada fila abre la cosa DONDE VIVE, que es donde ya se puede editar.
+- **MIS PROYECTOS YA INCLUÍA LOS DEL MUNDO 3D** y se ha comprobado en vez de suponerlo: el mundo escribe en la misma tabla `proyectos`, y el listado devuelve los 7, entre ellos «Meta Vida» e «Inversiones», creados desde el mundo. No hacía falta tocar nada.
+- **FAVORITOS EN EL NAVEGADOR** («por las páginas de internet favoritas del usuario, que las pueda guardar y que aparezcan en forma de tarjeta al abrir NAVEGADOR»): el navegador abre en una pantalla de inicio con tus sitios en tarjetas; pulsas una y entra. La estrella ★ de la barra guarda o quita la página que estés viendo. Se guardan en tus ajustes de usuario (jsonb), así que **no hizo falta ninguna migración**. Quien no tenga ninguna ve como sugerencias los cuatro que nombró Eugenio (YouTube, WhatsApp Web, Gmail, Calendar) — son sugerencias, no se guardan solas.
+  - **La pantalla de inicio NO levanta Chromium**: sería arrancar un navegador entero (150–400 MB) para enseñar cuatro tarjetas. Se abre al entrar en la primera página, y al volver al inicio se cierra.
+- **DOS FALLOS REALES CAZADOS DE PASO**:
+  - **El `inert` de las ventanas de fondo no estaba haciendo nada.** Se pasaba como cadena vacía y React la trata como FALSO (lo avisaba por consola). Es decir, el arreglo de «el juego se come las teclas» estaba puesto pero inactivo desde ayer. Ahora va como booleano.
+  - **Al caer al modo lectura, el navegador volvía a la pantalla de inicio** y el clic en un favorito no iba a ningún sitio: la historia del modo lectura no se sembraba con la página actual.
+- Verificado en el navegador: los tres nombres nuevos en el menú, la pantalla de favoritos con sus cuatro tarjetas, y el clic en una llevando a la página.
+
+### 2026-08-20 — La plataforma es un juego de herramientas: fuera «Escritorio», fuera «Inicio», ventanas en todas partes
+Lote de 12 peticiones de Eugenio en una sola captura. Diez van en este cambio; las otras dos (el tablero de Mi Perfil y el rediseño del asistente) van aparte porque son features enteras.
+
+- **YA NO HAY PÁGINA «ESCRITORIO»** («elimina lo de escritorio, siempre esa funcionalidad tiene que estar; tienes que pensar la plataforma como un conjunto de herramientas/aplicaciones que te permiten hacer desde un proyecto, un grafo, un mapa o un mundo 3D y todo con la misma base de datos interconectada»). El gestor de ventanas ha dejado de ser una página para ser una **capa sobre toda la app**: sin ventanas abiertas no se ve ni captura clics, y la página de debajo funciona igual que siempre. Desde el menú ☰, **cualquier herramienta abre una ventana estés donde estés** — ya no hay que pasar primero por ningún sitio.
+- **LA VENTANA YA NO NACE POR DEBAJO DE LA PÁGINA.** Era el fallo que hacía parecer que el menú no hacía nada: la capa de ventanas va después del contenido y con z propio.
+- **LA BARRA DE ARRIBA MARCA DÓNDE ESTÁS**: la ventana que tienes delante se pinta en negro **y con su nombre**; las demás quedan como iconos de 32 px para que quepan muchas. Pulsar una la trae al frente; pulsarla otra vez la minimiza.
+- **SIN BARRA ABAJO.** Fuera el pie de página. Solo hay una barra, la de arriba.
+- **«/» YA NO ES UNA PORTADA: ES TU PERFIL** («quita el botón de inicio y la página; la página por defecto, Mi Perfil»). Borradas la página `Inicio` y la página `Contribuye`.
+- **«GEOLOCALIZACIÓN DE DATOS» → «MAPAS»**, también en la dirección: `/mapas` es el mapa y `/mis-mapas` el índice. `/mapa` redirige, así que ningún enlace viejo se rompe.
+- **GRAFOS ES UNO SOLO Y SON TODOS** («cuando haces click en grafos, que te aparezcan todos los grafos del usuario, no uno en concreto»). `/grafos` es la rejilla de fichas y **tu lienzo personal —lo que era «Mi Conocimiento»— es una ficha más**, igual que el grafo de los retos de España. Fuera del menú: un grafo es un grafo, venga de donde venga.
+- **NUEVA PÁGINA «CONFIGURACIÓN»** con el tamaño de letra, que hasta ahora vivía suelto dentro del menú.
+- **EL MERCADO ABRE LA PÁGINA DEL PRODUCTO** («que cuando le des a un producto se abra la página de ese producto, la misma que hicimos en el Mundo 3D»). Es literalmente el mismo componente: una landing es la misma cosa se llegue por el mercado o paseando por la aldea, con sus bloques, su vídeo y su botón de compra. El botón «Comprar» de la tarjeta sigue funcionando a un solo toque.
+- **DOS FALLOS REALES ARREGLADOS DE PASO**:
+  - **Una página abierta en una ventana no se podía bajar.** El modo embebido llevaba `overflow-hidden` fijo, así que cualquier página normal —tu perfil, por ejemplo— quedaba cortada por abajo. Ahora solo el lienzo y el Mundo 3D fijan el alto; el resto se desplaza.
+  - **`/grafos` salía a sangre completa y con una barra de chat pegada abajo**, porque la regla de «página de grafos» no distinguía la LISTA del LIENZO. Esa era la «barra extra» que sobraba.
+  - La lista de grafos abría siempre en «De la humanidad» aunque hubieras entrado con tu cuenta: la sesión llega después del primer pintado y el valor inicial se calculaba sin ella.
+- Verificado en el navegador con sesión real: menú limpio (sin Inicio, sin Contribuye, sin Universo, sin Mi Conocimiento), «/» llevando al perfil, dos ventanas abiertas desde el menú con la de delante marcada por su nombre, y la ficha de la DJI Power 1000 V2 abriéndose desde el Mercado con toda su pizarra.
+
+### 2026-08-20 — Mi Perfil es un escaparate, y la barra de arriba son pestañas de verdad
+- **MI PERFIL SE ABRE COMO VENTANA, COMO TODO LO DEMÁS** (Eugenio: «la página de mi perfil no funciona bien como el resto de herramientas… es una página muy importante y tiene que tener la misma funcionalidad de escritorio»). Estaba dejada como enlace por creerla «un sitio donde vas una vez»; es al revés, es a donde más se vuelve. Igual Administrar usuarios, Base de datos y Configuración. Lo único que sigue navegando es **Iniciar sesión**: sin sesión no hay escritorio al que volver, y entrar dentro de una ventana dejaría a la app de fuera sin enterarse.
+- **LA BARRA DE ARRIBA ES UNA BARRA DE PESTAÑAS**:
+  - **Todas llevan su nombre**, no solo la seleccionada.
+  - **Se cierran desde arriba**, como en un navegador. La ✕ aparece **solo en la pestaña activa** («para que ocupe menos»): las demás se ahorran esos 20 px.
+  - **Se recolocan arrastrando**. Con el arrastre del propio navegador: son diez elementos en una fila, no hacía falta traer una librería.
+- **EL ESCAPARATE DE MI PERFIL** («un escaparate donde puedas arrastrar y soltar tus grafos, proyectos, archivos, mapas y mundos, con tu muro público, un botón de editar y poder enseñar u ocultar cada tarjeta»):
+  - **`GET /api/users/:id/escaparate`** reúne en un solo formato lo que esa persona tiene en las cuatro tablas donde vive: grafos, proyectos, mapas y **una sola ficha para su Mundo 3D** (un mundo no es una lista, es un sitio). Medido con datos reales: **17 fichas para el dueño, 11 para un desconocido**.
+  - **DOS CANDADOS, no uno.** Arrastrar una ficha al escaparate **no publica** lo que hay detrás: el servidor filtra por la privacidad real de cada objeto (`status`, `publico`) y el orden del dueño solo decide cómo se colocan las que ya se podían ver. Así, colocar una ficha nunca puede destapar sin querer un proyecto privado. Verificado: sin sesión no aparecen ni los proyectos privados ni el lienzo personal.
+  - **El orden y lo oculto se guardan en tus ajustes de usuario** (jsonb): sin migración. El perfil público expone **solo esa clave**, no los ajustes enteros — dentro hay cosas privadas como los favoritos del navegador. Comprobado en la respuesta real: sale `escaparate` y nada más.
+  - **Botón «Editar»**: aparecen el asa para arrastrar y el ojo para enseñar/ocultar. Se guarda solo. Ocultar es una decisión de escaparate, no de privacidad, y así se dice en la propia página.
+  - **PORTADA EN CADA FICHA** («que cada ficha tenga una imagen de preview de lo que hay dentro»): la primera imagen de dentro y, si no la hay, la miniatura de su primer vídeo — grafos, proyectos (mirando dentro de los bloques de sus tarjetas con `jsonb_path_query_first`, sin traerse el JSON a Node) y el Mundo 3D. Va a sangre con un degradado oscuro encima para que el texto se lea sobre cualquier foto; sin imagen manda el color del tipo. **Misma silueta con foto o sin ella**, así la rejilla no se rompe.
+  - El perfil pasa de `max-w-2xl` a `max-w-4xl` y a tres columnas: en la columna estrecha las fichas quedaban del tamaño de un sello.
+
+### 2026-08-20 — Un solo asistente, con historial, y que ve la ventana que tienes delante
+Último punto del lote de doce (Eugenio: «mejor panel lateral, historial de conversaciones, saber qué modelo usa, coherente en todas las herramientas, icono de chat abajo a la derecha, integrar la barra de abajo —micro y «+»— en la barra lateral común, y que la IA vea en la página que estás»).
+
+- **HABÍA TRES ASISTENTES, AHORA HAY UNO.** El mismo chat existía en tres formas —panel lateral, barra abajo en los lienzos y barra en línea en la portada—, cada una con su comportamiento. Se han retirado las dos barras (unas 180 líneas) y queda **el panel lateral, el mismo en todas las herramientas**, con su botón flotante **abajo a la derecha** (antes iba más arriba para dejar hueco a la barra que ya no existe). **El micro y el «+» viven ahora dentro del panel**, que es lo que se pedía.
+- **DENTRO DE UNA VENTANA YA NO HAY UN SEGUNDO ASISTENTE.** Antes cada ventana montaba su propia barra de chat: acababas con dos asistentes, dos historiales y dos sitios donde arreglar lo mismo. Ahora el de fuera es el único.
+  - **La voz del robot del Mundo 3D sigue llegando**: vive dentro del marco y el asistente vive fuera, así que sus avisos se reenvían con `postMessage`. Solo van **hacia fuera** y solo con esos dos nombres, y quien recibe **comprueba el origen**: nada de dentro de una ventana puede pedirle a la app de fuera ninguna otra cosa.
+- **LA IA VE LO QUE TIENES DELANTE.** Con ventanas, «la página en la que estás» ya no es la ruta de fondo: es la ventana de delante. Ahora se le manda `mirando`, la lista de `ventanas` abiertas con cuál está delante, y `paginaWeb` si tienes el navegador abierto. **En la cabecera del panel se lee «Viendo: …»**, con el nombre en cristiano (no `/personas/U_ADMIN_EUGENIO`), para que se vea que lo sabe sin tener que preguntárselo. Comprobado de verdad: con el Mercado abierto y preguntándole «¿qué tengo abierto ahora mismo?», responde **«Tienes abierta la ventana Mercado»**.
+- **HISTORIAL DE CONVERSACIONES**: cajón en la cabecera con tus conversaciones (título, número de mensajes y fecha), pulsas una y la retomas; la ✕ la quita del historial. La ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde enseñarlo. Se **archiva**, no se borra.
+- **EL MODELO, A LA VISTA** en la cabecera, en vez de escondido dentro de los ajustes.
+- **AGUJERO DE PRIVACIDAD CERRADO** (encontrado al rehacer esto): `GET /api/ai/conversations/:id/messages` devolvía los mensajes de **cualquier** conversación sin comprobar de quién era — con un id a mano se leía el chat de otra persona. Ahora comprueba la dueña. Verificado: **401 sin sesión, 403 con la sesión de otro, 200 con la del dueño**.
+
+### 2026-08-20 — Doble clic en una pestaña: a pantalla completa
+- **DOBLE CLIC EN UNA PESTAÑA DE ARRIBA Y LA VENTANA SE AGRANDA** (petición de Eugenio: «que si hago doble click en una de ellas, se expande la ventana a pantalla completa si resulta que está en un tamaño pequeño»). Es un conmutador, como la barra de título de cualquier ventana: otro doble clic la devuelve a su tamaño. Si estaba minimizada, se desminimiza a la vez — agrandar algo que no se ve no sirve de nada.
+- **EL DETALLE QUE HABÍA QUE RESOLVER**: un clic en la pestaña que ya está delante la MINIMIZA, y eso chocaba con el doble clic — el navegador manda clic, clic y doble clic, así que la ventana se escondía y volvía de golpe antes de agrandarse; a pantalla completa se veía como un parpadeo. Ahora **traer al frente sigue siendo instantáneo** (que es el caso normal) y solo se hace esperar 220 ms el minimizar, que es el único que se pisa con el doble clic; si llega el doble clic, se cancela.
+- Verificado con ratón de verdad: ventana en tamaño pequeño → doble clic → pantalla completa; doble clic otra vez → vuelve a su tamaño; clic simple → sigue minimizando.
+
+### 2026-08-20 — Página «Tareas»: todas, agrupadas por proyecto
+- **NUEVA HERRAMIENTA «TAREAS»** en el menú ☰ (petición de Eugenio: «una página como las otras herramientas donde puedas ver todas las tareas ordenadas por PROYECTOS»). Abre como ventana igual que el resto.
+- **UNA TAREA ES UNA FILA DE `roadmap_items`**: no hay tabla nueva ni copia que mantener al día. Lo que cambia es cómo se miran — en un proyecto las ves como tablero, columna a columna; aquí las ves TODAS a la vez, repartidas por proyecto, para saber en qué andas metido sin abrir proyecto por proyecto.
+- **`GET /api/tareas`**: `GET /api/roadmap` solo sabía traer las de UN proyecto, así que una vista de conjunto habría costado una llamada por proyecto. La ruta nueva las trae todas de una vez **ya repartidas por el servidor**: la página solo pinta.
+  - **Quién ve qué**: una tarea se ve si se ve su proyecto — público, o tuyo (o eres administrador). Verificado sin sesión: solo salen los públicos.
+  - Las que no cuelgan de ningún proyecto son la hoja de ruta de humanity.wiki, que ya es pública en /vision, y van en su propio grupo.
+- **TUS PROYECTOS PRIMERO Y LA HOJA DE RUTA LA ÚLTIMA, PLEGADA.** Son 112 tareas de 128: abierta taparía por completo lo tuyo, que es a lo que vienes.
+- Cada proyecto lleva **barra de avance** (hechas sobre el total) y un enlace a su tablero, que es donde se editan. Filtro por estado (todas / por hacer / en curso / hechas) y buscador.
+- Verificado con datos reales: **128 tareas en 4 proyectos**; el filtro «En curso» deja las 4 que lo están; la hoja de ruta marca 47/112.
+
+### 2026-08-20 — Sección «Páginas»: todas las que hay, ordenadas por proyecto
+- **NUEVA HERRAMIENTA «PÁGINAS»** en el menú ☰, entre Mis proyectos y Tareas. Abre como ventana igual que el resto.
+- **EL EDITOR TIPO NOTION YA ESTABA HECHO Y NO SE HA TOCADO.** Vive en `/documentos/:id` desde el 2026-08-08: «+» por línea con Texto, Título 1/2/3, Lista, Casilla, Cita, Separador, Código, **Imagen**, Tabla y Publicación, y el tirador ⋮⋮ para reordenar los bloques arrastrando. Comprobado que sigue funcionando tal cual. **Lo que faltaba era la otra mitad: el sitio desde el que verlas todas.**
+- **UNA COLUMNA, NO UNA TABLA NUEVA** (`drizzle/0043_paginas_por_proyecto.sql`): `knowledge_windows.proyecto_id`. Una página está en UN proyecto o en ninguno, así que una tabla intermedia sería la 44.ª del proyecto y además permitiría estados que no queremos (la misma página colgando de tres sitios). Con `ON DELETE SET NULL`: borrar un proyecto no se lleva por delante lo que escribiste dentro — esas páginas caen en «Sueltas».
+- **`GET /api/paginas`** reparte tus páginas por proyecto en el servidor; la página solo pinta. **`PUT /api/paginas/:id/proyecto`** las mueve, comprobando que la página es tuya y que el proyecto de destino también (si no, se queda suelta en vez de colarse en el proyecto de otro).
+- **ARRASTRAR UNA PÁGINA A OTRO PROYECTO**: sueltas la ficha sobre la cabecera del proyecto y se va con él. Verificado de punta a punta: «Notas de la asamblea de septiembre» pasó a «Camión camperizado» y quedó guardado en la base de datos.
+- **DOS DECISIONES DE COLOCACIÓN, las dos por un fallo visto al probar**:
+  - Al principio solo se listaban los proyectos que YA tenían páginas — y entonces **un proyecto vacío no aparecía y no había forma de arrastrarle nada**. Ahora se enseñan todos tus proyectos: un cajón vacío tiene que verse para poder usarlo.
+  - Pero abiertos, siete proyectos vacíos ocupaban media pantalla de huecos y empujaban tus páginas fuera de la vista. **Los vacíos nacen plegados**: una línea cada uno, y siguen valiendo como sitio donde soltar.
+- Cada ficha lleva la primera imagen de la página como portada, un adelanto del texto, cuántos bloques tiene y si es pública o privada.
+
+### 2026-08-20 — FASE 1 de la reestructuración: el menú lateral en 4 secciones
+Eugenio: «reestructurar toda la plataforma en 1. los proyectos, 2. las herramientas, 3. los productos de cada proyecto, 4. las personas […] divide el menú izquierdo en 4 secciones».
+
+- **LA FORMA DE LA PLATAFORMA, DICHA EN UN SITIO.** El menú deja de ser un desplegable del botón ☰ y pasa a ser una **columna que se queda**: con un árbol de proyectos dentro, un desplegable que se cierra al pulsar nada no sirve.
+  1. **PROYECTOS** arriba del todo — se despliegan y dentro está lo que les cuelga.
+  2. **HERRAMIENTAS** — Páginas, Esquemas, Mapas, Tareas, Mundo 3D, Archivos, Navegador, Explorar.
+  3. **PRODUCTOS** — lo que ofreces.
+  4. **PERSONAS** — Mi Perfil, la gente que sigues y las representaciones de tu Mundo 3D.
+- **CINCO FILAS POR SECCIÓN Y SCROLL DENTRO DE CADA UNA**, no en todo el menú: si se desplazara entero, buscar una persona te dejaría los proyectos fuera de la pantalla. La sexta fila asoma a propósito — es lo que dice «aquí hay más» sin poner un cartel.
+- **PLEGADO son 56 px de iconos** con el nombre al pasar el ratón, y se recuerda como lo dejaste.
+- **EL ÁRBOL DE UN PROYECTO**: «Aptera → Tareas (10) → Decidir para qué es…». Verificado en el navegador, que es exactamente lo que pidió Eugenio con «Camión Camperizado → Tareas → Ducha, Baño».
+  - **Los hijos se piden al desplegar, no antes** (`GET /api/proyectos/:id/arbol`): el árbol entero de siete proyectos serían 42 consultas para enseñar cinco líneas. Se paga por lo que abres, y una vez abierto se queda.
+  - **La flecha y el nombre son dos botones distintos.** En el menú de los 14 objetivos estaban unidos y por eso no se podía mirar dentro de un objetivo sin seleccionarlo.
+- **UNA PIEZA RECURSIVA EN VEZ DE CUATRO NIVELES A MANO.** El menú del mapa hacía esto con 120 líneas de JSX anidado que solo valían para objetivos → indicadores → marcadores → métricas. `RamaMenu` es recursiva: vale para cualquier profundidad sin escribir un nivel más.
+- **`drizzle/0044`: `proyecto_id` en `knowledge_graphs`, `user_maps` y `products`.** Ya lo tenían tareas, páginas y las cosas del Mundo 3D; sin estas tres el árbol no podía enseñar los esquemas ni los productos de un proyecto. Mismo criterio que en 0043: una columna, no la tabla intermedia número 44. `ON DELETE SET NULL` en las tres — borrar un proyecto no se lleva por delante lo que hiciste dentro.
+- **`GET /api/menu`** sirve poco y plano: el menú solo necesita saber QUÉ hay. Las herramientas no salen de ahí — son fijas y viven en el cliente, porque pedirle al servidor una lista que nunca cambia es un viaje por nada.
+
+### 2026-08-20 — FASE 2: «Esquemas», y documentos y páginas se funden
+- **TRES NOMBRES PARA UNA COSA, AHORA UNO: «ESQUEMAS»** (Eugenio: «llámalo Esquemas, y unifica todo para ese mismo nombre»). «Lienzo», «grafo» y «red de datos» eran la MISMA fila de `knowledge_graphs` dibujada de tres maneras. Tres nombres para lo mismo es como se pierde a la gente.
+  - `/esquemas` es el cajón de fichas y `/esquemas/:slug` el esquema abierto. `/grafos`, `/grafos/:slug` y `/lienzos` **redirigen**, así que ningún enlace guardado se rompe. La redirección conserva el identificador: `/grafos/ceuta` acaba en `/esquemas/ceuta`, no en la lista.
+  - `Lienzos.tsx` pasa a llamarse `Esquemas.tsx`. 26 ficheros tocados de una vez, con cuidado de NO tocar `/api/graphs`, que es otra cosa.
+- **EL EDITOR DE DOCUMENTOS Y EL DE PÁGINAS ERAN EL MISMO Y AHORA LO DICEN** (Eugenio: «el builder de documentos se fusiona con el builder de páginas, que son lo mismo a partir de ahora»). El editor vive en **`/paginas/:id`**; `/documentos/:id` redirige conservando el identificador. La flecha de volver lleva a Páginas, que es de donde vienes.
+  - Ojo al renombrar: `/api/documentos` **sigue llamándose así** —es la ruta que crea una página— y se dejó fuera del reemplazo a propósito.
+- **«Documentos» desaparece como concepto**: lo que son ficheros vive en **Archivos**, y lo que se escribe, en **Páginas**. En Archivos, la etiqueta «Lienzos» pasa a «Esquemas».
+- Verificado en el navegador: `/grafos` acaba en `/esquemas` con la página titulada «Esquemas», y `/documentos/KWMSKJJ98PDQ` acaba en `/paginas/KWMSKJJ98PDQ` con el editor abierto.
+
+### 2026-08-20 — FASE 3: las ventanas son pestañas de Chrome de verdad
+Eugenio: «haz exactamente como en Chrome, que la ventana muestre el icono de la página, grafo o proyecto en el que está específicamente, y que tenga una URL debajo que corresponda con el árbol de donde está almacenada en la base de datos […] permite que aparezca las flechas de adelante y atrás».
+
+- **BARRA DE DIRECCIONES EN CADA VENTANA**, con **atrás, adelante y recargar**. La dirección NO es la ruta interna de React —«/paginas/KWMSKJJ98PDQ» no le dice nada a nadie— sino **dónde vive la cosa en el árbol**: `humanity.wiki/eugeniolighthumanity/proyectos/camion-camperizado-kkff/paginas/notas-de-la-asamblea-de-septiembre`. Eso hay que preguntárselo a la base de datos (`GET /api/ruta`), porque la ruta sola no lo sabe.
+  - **Cada trozo del camino es pulsable**, como las migas de pan de GitHub: pulsar el proyecto te lleva al proyecto, sin recargar la ventana.
+  - **El nombre de usuario sale del correo**: `eugenio@lighthumanity.org` → `eugeniolighthumanity`, que es exactamente lo que Eugenio escribió en su ejemplo. Sin columna nueva; el día que haya nombres de usuario de verdad, se cambia una función.
+- **HISTORIAL POR VENTANA**, como una pestaña: se guarda por dónde has pasado y en qué punto estás. Atrás y adelante usan el historial DEL MARCO (no se recarga el `src`): recargar volvería a montar lo de dentro y el Mundo 3D empezaría de cero en cada paso.
+- **EL ICONO Y EL NOMBRE DE LA PESTAÑA SIGUEN A LA PÁGINA**, como el favicon de Chrome: abres una página y ves el icono de página; navegas al proyecto y cambian el icono y el nombre. Antes eran los de donde nació la ventana y no se movían.
+- **UN FALLO SERIO CAZADO AL PROBARLO**: la ventana **se recargaba en bucle acumulando `&embed=1`** (50 entradas de basura en el historial en segundos). Dos causas encadenadas: la ruta que publicaba la ventana incluía el `embed=1`, y el `src` del marco se recalculaba desde ella, así que cada aviso provocaba otra recarga. Arreglado por los dos lados: la marca `embed` **no viaja**, y el `src` **se calcula una sola vez** por ventana y no vuelve a tocarse — navegar por dentro es cosa del marco, no de React. Para eso `destino` (de dónde nació) y `ruta` (dónde está ahora) son campos distintos.
+- Verificado en el navegador: la dirección completa del árbol, pulsar el proyecto para navegar, atrás para volver, y las flechas activándose y apagándose como toca.
+
+### 2026-08-20 — FASE 4: un producto vive dentro de un proyecto
+- **`PUT /api/products/:id/proyecto`** mete un producto en un proyecto o lo saca. **Dos comprobaciones, no una**: que el producto sea tuyo Y que el proyecto de destino también — sin la segunda, cualquiera podría colgar sus productos del proyecto de otra persona.
+- **EL SELECTOR VIVE EN LA FICHA DEL PRODUCTO**, flotando encima y no dentro: `FichaProducto` la usa también el Mundo 3D y no había por qué tocarla. **Solo lo ve su dueño**: en qué proyecto está una cosa es una decisión de organización, no algo que enseñar a quien viene a comprar.
+- **El menú lateral se entera solo**: al cambiar el proyecto se lanza `humanity:menu-cambiado` y la sección de Productos se repinta sin recargar.
+- Verificado de punta a punta: la DJI Power pasó a «Camión camperizado» y el árbol del proyecto pasó a enseñar **Tareas → Lavabo, Ducha, Baño Seco, Sofa** y **Productos → DJI Power 1000 V2**. Que es, literalmente, el ejemplo que puso Eugenio. (Se dejó como estaba después de comprobarlo.)
+
+### 2026-08-20 — FASE 5: mensajería entre personas, y los agentes se acuerdan
+Eugenio: «haz mensajería entre personas, pero que el agente de Anita y el agente de Eugenio memoricen el contenido resumido del mensaje para no perder esa memoria».
+
+- **HASTA HOY SOLO SE HABLABA CON LA IA.** Ahora dos personas de verdad pueden escribirse: bandeja en `/mensajes`, botón **«Escribir»** en el perfil de cualquiera, y la entrada «Mensajes» en la sección Personas del menú.
+- **CADA MENSAJE DEJA HUELLA EN LOS DOS AGENTES**, que es la vuelta de tuerca que pedía Eugenio. En el Mundo 3D cada cual tiene representaciones de la gente que conoce, y esas representaciones tienen memoria; una conversación por aquí se les perdería, y son justo ellas las que deberían saberlo. Al enviar, se apunta un resumen **en los dos lados**: en el agente que representa a Anita dentro del mundo de Eugenio, y en el que representa a Eugenio dentro del de Anita. El puente es la columna `persona_user_id`, que ya existía. Verificado: enviado un mensaje, la memoria del agente pasó a contener «Eugenio García-Calderón Huerta escribió: "Hola Anita, ¿nos vemos el jueves…"».
+- **DECISIÓN QUE CUESTA DINERO, TOMADA A PROPÓSITO: el «resumen» NO llama a la IA.** Se recorta el mensaje y se apunta quién lo dijo y cuándo. Resumir de verdad sería una llamada al modelo **por cada mensaje enviado**, dinero real y en el camino crítico del envío, y para un mensaje corto no aporta nada. Es una función de tres líneas: si algún día interesa, se cambia ahí.
+- **Se dice en la pantalla**, junto al nombre de la conversación: «Vuestros agentes recuerdan esto». Una cosa así no debe pasar a escondidas.
+- **`drizzle/0045`: tabla `mensajes`, SIN tabla de conversación.** Un mensaje sabe de quién es y para quién va; la conversación es «todos los mensajes entre estos dos» y sale de un índice con `least/greatest`, que sirve en los dos sentidos. Una tabla de conversaciones sería la 44.ª del proyecto sin aportar nada mientras hablen dos. El día que haya grupos, se añade entonces.
+- **UN FALLO CAZADO AL PROBAR**: la bandeja agrupaba primero y pedía los nombres después con `id = ANY(<lista>)`. **Eso no funciona**: una lista de JavaScript viaja como un parámetro suelto, no como un array de Postgres, y la consulta revienta. Se unió la tabla de personas dentro de la misma consulta — se arregla y además es un viaje menos.
+
+### 2026-08-20 — Renombrar desde el menú, sesión transversal, perfil editable
+Cuatro peticiones de Eugenio en el mismo rato.
+
+**1. NOMBRE E ICONO DESDE EL MENÚ** («al hacer hover en un elemento debe aparecer 3 puntitos […] y permitir mediante una ventanita pop up cambiar el nombre e icono»).
+- Los tres puntitos salen **solo al pasar el ratón** y **solo en lo que se puede renombrar**: si estuvieran siempre, cada fila llevaría un botón compitiendo con su propio nombre. Con `opacity` y no `hidden`, para que no salte el ancho al aparecer.
+- **Una rama como «Tareas» NO se renombra**: es una categoría, no una cosa. Lo que cuelga de ella sí. Y de una persona real tampoco: su nombre lo pone ella en su perfil, no quien la tiene en su lista.
+- **`PUT /api/elemento/:tipo/:id`, una sola ruta para siete tablas.** Siete endpoints idénticos serían siete sitios donde arreglar el mismo fallo. El precio es que los nombres de tabla entran en el SQL como texto: por eso salen **solo de un mapa fijo** y nunca de lo que mande nadie, que es la única forma en que `sql.raw` es segura y la regla que ya sigue `ENTITY_TABLES`.
+- **`drizzle/0046`: columna `icono`** en proyectos, esquemas, mapas, productos, tareas y agentes. **El icono es de LA COSA, no de quien la mira**: si le pones 🚐 al camión, quien vea ese proyecto ve el 🚐. Guardarlo en los ajustes de usuario habría sido más barato y habría hecho que cada cual viera un icono distinto para lo mismo. **Las páginas quedan fuera a propósito**: ya guardan su icono en `config->>'icono'` desde el editor tipo Notion, y una columna crearía dos sitios para el mismo dato.
+- **EL ICONO SALE TAMBIÉN EN LA PÁGINA** («junto al título en la parte superior»): en el proyecto, en el esquema abierto, en la ficha del producto y en las rejillas. En un esquema, el icono que elijas **manda sobre la portada automática**: es una decisión tuya y la portada es una suposición nuestra.
+
+**2. LA SESIÓN ES DE TODA LA APP** («he iniciado sesión en el Mundo 3D pero no me ha hecho eso inicio de sesión en el resto»). La cookie **sí** era compartida —es del dominio entero—; lo que fallaba es que la app de fuera había preguntado quién eras al arrancar, le dijeron «nadie», y no volvía a preguntar. Ahora la ventana avisa al entrar o salir, fuera se vuelve a preguntar, y desde fuera se avisa a **todas las demás ventanas** para que hagan lo mismo. Viaja solo el hecho de que cambió, nunca la cookie ni el token, y siempre con el origen comprobado. Verificado: sesión iniciada dentro de una ventana → el menú se llenó y apareció el avatar arriba, sin recargar nada.
+
+**3. LA CUENTA, ARRIBA A LA DERECHA DEL TODO.** Avatar con desplegable (Mi Perfil, Configuración, Cerrar sesión), o «Iniciar sesión» si no hay. Es donde la busca todo el mundo, y además hace visible de un vistazo si has entrado — que era justo lo que no se veía.
+
+**4. FOTO Y DESCRIPCIÓN EN TU PERFIL.** Se edita **en el sitio**, no en otra página: ves cómo queda mientras escribes. La foto sube por la ruta de siempre. Si no tienes descripción, tu propio perfil te lo dice con un enlace en vez de dejar un hueco.
+
+**5. LA SESIÓN NO CADUCA EN LOCAL** («haz que no se me cierre la sesión nunca en este localhost»): 10 años en local, **30 días en producción**. La diferencia la marca `NODE_ENV`, así que el servidor de verdad vuelve solo a los 30 días sin que nadie tenga que acordarse. Las 12 sesiones locales que ya tenía se han alargado también.
+
+### 2026-08-20 — Colocar el menú a mano, y un proyecto que se gestiona desde su página
+- **ARRASTRAR PARA COLOCAR** («permite pinchar y mantener pinchado para arrastrar y cambiar de orden los elementos del menú»). Funciona en las cuatro secciones. Una línea verde marca dónde va a caer: sin ella, arrastrar es adivinar.
+  - **Solo las filas de primer nivel.** Lo que hay DENTRO de un proyecto ya tiene su propio orden — una tarea se coloca en su tablero, no aquí, y dos ordenaciones peleándose por lo mismo es como se pierden los datos.
+- **ESTIRAR UNA SECCIÓN** («que el espacio que ocupan se pueda ampliar o reducir arrastrando la línea que los separa»). La raya de abajo de cada sección es un tirador; doble clic la devuelve al tamaño de siempre. Cuánto sitio merece cada sección depende de en qué andes metido, y eso no lo puede decidir quien programa.
+  - **Se toca el estilo a mano durante el gesto y solo se avisa a React al soltar**: pasar por el estado en cada píxel repinta el menú entero sesenta veces por segundo, y guardar en cada movimiento serían cien escrituras por arrastre.
+- **AMBAS COSAS SON TUYAS, NO DEL PROYECTO**: que tú pongas «Camión camperizado» el primero no cambia el menú de nadie más. Por eso van en tus ajustes de usuario (jsonb) y no en una columna. Verificado: orden y altura guardados y recuperados.
+- **BORRAR UN PROYECTO desde su página.** Se **archiva**, no se borra (regla 6 de la Constitución), y **lo de dentro no se toca**: sus tareas, páginas, esquemas y mapas siguen existiendo y se quedan sueltos. El aviso lo dice con todas las letras antes de confirmar — la sorpresa que nadie quiere es descubrir que archivar la carpeta se llevó meses de trabajo.
+- **TODAS LAS HERRAMIENTAS, DESDE LA PÁGINA DEL PROYECTO**: botones de Tarea, Página, Esquema y Mapa. Lo que creas ahí **nace ya dentro del proyecto**, que es la diferencia con crearlo desde su herramienta y moverlo después. Una sola ruta (`POST /api/proyectos/:id/herramienta`) para las cuatro: lo que cambia entre crear una página y crear un mapa es la tabla y poco más. Verificado: creado un esquema desde el proyecto, quedó dentro y se entró en él.
+
+### 2026-08-20 — Hablar con alguien sin cargar el Mundo 3D
+- **UNA PÁGINA POR PERSONA DE TU MUNDO** (`/persona/:id`), petición de Eugenio: «para hablar con alguien haz que no haga falta que cargue el mundo 3D, sino que haciendo click en esa persona desde el menú se abra su perfil en la parte de arriba junto con el chat de mensajes históricos en la parte de abajo».
+  - Hablar con Anita cargaba **el Mundo 3D entero** —un megabyte de three.js y toda la escena— para lo que en el fondo son una ficha y un chat. Ahora se abre al instante: **perfil arriba, conversación abajo**.
+  - **Es el MISMO chat de la plataforma**, al que se le cuenta con quién hablas. Duplicarlo aquí habría significado dos historiales y dos contadores de gasto para la misma conversación.
+  - **Se dice lo que es**: «esto es una representación que has creado tú, no la persona real». Confundir una cosa con la otra es el peor malentendido posible de toda la plataforma, así que va arriba y sin letra pequeña. Debajo, plegable, lo que recuerda.
+- **`GET /api/juego/agentes/:id`** trae la ficha y los mensajes de su hilo en una sola llamada.
+- El menú y el árbol de proyectos ya no llevan al Mundo 3D al pulsar una persona.
+- Verificado de verdad: preguntándole «¿quién eres?», Anita contesta **«Soy Anita, una habitante de tu mundo en el Juego Vital…»**, en su papel y sin cargar ninguna escena. (Conversación de prueba borrada después.)
+
+### 2026-08-20 — CALENDARIO (fases 1 y 2), fichas del perfil con menú, e iconos más grandes
+**1. CALENDARIO** (Eugenio: «añade una herramienta más: Calendario […] que todo esté integrado, que sea un calendario TOP»).
+- **LA IDEA QUE MANDA: el calendario NO es un sitio donde se guardan cosas, es una FORMA DE MIRAR lo que ya existe**, ordenado por cuándo pasa. `GET /api/calendario` no lee una tabla: lee varias y las junta.
+  - **Los eventos** (reuniones, viajes) sí nacen aquí, porque no existía nada parecido: tabla `eventos` con inicio, fin, todo el día, lugar, proyecto y color.
+  - **Tus tareas con fecha NO se copian**: se les añade `vence_el` y el calendario las lee de donde ya viven. Copiarlas habría creado dos verdades —la del tablero y la del calendario— que se separan al primer cambio. **Mover una tarea de día en el calendario cambia la tarea de verdad**, y el tablero se entera solo.
+  - Añadir una fuente más mañana (un pago que vence, una publicación programada) es **una consulta más aquí y nada más**: ni tabla, ni copia, ni sincronización que se pueda romper.
+- **TRES VISTAS** (mes, semana, día), navegación adelante/atrás, «Hoy», crear pulsando un día, editar y borrar, y **arrastrar cualquier cosa a otro día**.
+- **SIN LIBRERÍA DE CALENDARIO**: un mes son 42 celdas y una semana son 7. Meter una dependencia de 200 KB para eso, con su forma de entender las fechas y su tema que hay que domar, cuesta más de lo que ahorra.
+- **DOS TRAMPAS DE FECHAS, evitadas a propósito**: la clave de cada día se calcula en hora LOCAL (con `toISOString()`, un evento de la 01:00 en Madrid caería en la casilla de ayer), y los campos de fecha del formulario hablan en local, no en UTC (si no, la hora aparecería desplazada al abrir el evento).
+- `drizzle/0047`: tabla `eventos` (con `timestamptz` — una reunión a las 10:00 en Madrid es a las 10:00 aunque la mires desde otro sitio) y columna `vence_el` en las tareas. La columna `repeticion` se deja creada desde ya para la fase 3, para no migrar una tabla con datos dentro.
+- Verificado con datos reales: dos tareas suyas con fecha apareciendo solas en su día, un evento creado, y una tarea arrastrada a otro día quedando cambiada en la base de datos.
+
+**2. LAS FICHAS DEL PERFIL, CON SUS TRES PUNTITOS** («que todas las tarjetas tengan los 3 puntitos cuando se hace hover y que se puedan modificar, eliminar etc»): abrir, cambiar nombre e icono, enseñar/ocultar y quitar. Usa **el mismo popup que el menú**: renombrar algo es lo mismo se haga desde donde se haga. Quitar **archiva**, y el aviso lo dice: no se borra, si te arrepientes sigue estando. El Mundo 3D no lleva puntitos — es un sitio, no una cosa de una tabla.
+
+**3. ICONOS DEL MENÚ UN 25 % MÁS GRANDES** (16 → 20 px). Plegado el menú, el icono es lo ÚNICO que se ve.
+
+### 2026-08-20 — Zoom en el navegador, y un fallo de React que rompía Mi Perfil
+- **ZOOM EN EL NAVEGADOR, como en Chrome** (Eugenio: «el mensaje de cookies de YouTube no se puede aceptar porque no da la pantalla para verlo, y no se puede hacer scroll down»). Botón de **⋯ en la barra** con − / porcentaje / +, por los mismos saltos que Chrome (33 %…200 %) y **100 % por defecto**. Pulsar el porcentaje vuelve al 100 %.
+  - **CÓMO FUNCIONA, que es lo que lo hace bueno: el zoom NO estira la imagen.** Le pide a Chromium una **ventana más grande** —al 75 %, un tercio más ancha y alta— y la encaja en el mismo hueco. Cabe más página, exactamente como al alejar en un navegador de verdad, y **el texto se ve nítido** porque lo dibuja Chromium a ese tamaño en vez de estirarlo aquí.
+  - Por eso **el servidor no sabe nada del zoom**: para él solo ha cambiado el tamaño de la ventana, que ya sabía hacer. Y los clics siguen cayendo donde toca sin tocar nada, porque las coordenadas ya se calculaban contra ese mismo tamaño.
+  - Verificado con el aviso de cookies de YouTube: al 100 % los botones quedan fuera de la pantalla; al 75 % **cabe entero con «Rechazar todo», «Aceptar todo» y «Más opciones»**. (No se pulsó ninguno: esa elección es de Eugenio.)
+- **FALLO REAL CAZADO Y ARREGLADO**: al añadir los tres puntitos a las fichas del perfil dejé tres `useState` **debajo de los `return` de «cargando»**. Un hook detrás de un return se ejecuta en unos pintados y en otros no, y React se rompe entero («Rendered more hooks than during the previous render»): **Mi Perfil se quedaba en blanco**. Todos los hooks arriba, y comprobado que no queda ninguno después del primer return.
+
+### 2026-08-20 — PERSONAS: el CRM (fases 1 y 2)
+Eugenio: «en la sección de personas, crea una página donde se puedan ver todas […] permite crear grupos […] y ponerlo como favoritos […] esto es como un CRM, tienes que tener complejidad de datos como Salesforce permitiendo conectarlo todo con las herramientas y proyectos».
+
+- **LA DECISIÓN QUE SOSTIENE TODO LO DEMÁS: NO HAY TABLA DE CONTACTOS NUEVA.** En la plataforma ya había tres cosas llamadas «persona» —`users` (cuentas reales), `organizations` y `game_agents` (la gente de TU mundo)— y la tercera **ya era un fichero de contactos**: la creas tú, tiene memoria, puede apuntar a una cuenta real y ya colgaba de proyectos. Crear una tabla `contactos` al lado habría sido **la cuarta cosa llamada persona en el mismo producto**, que es exactamente el error que costó cuatro páginas «Universo» borradas. Se le añadió lo que le faltaba y punto.
+- **`drizzle/0048`**: datos de contacto (correo, teléfono, empresa, web, dónde está), **estado** (nuevo / hablando / trabajando / en pausa / cerrado — lo que convierte una agenda en un CRM: no «quién es» sino «qué toca»), favorito, etiquetas y grupos. Más la tabla `grupos_personas`.
+  - **Los grupos van en un array `jsonb`, no en una tabla intermedia**, siguiendo el precedente que ya existe en esa misma tabla (`proyecto_ids`): una persona está en tres o cuatro grupos, no en tres mil, y una tabla más sería la 44.ª. Con índice GIN, «quién está en este grupo» sigue siendo rápido.
+- **ES UNA TABLA, NO UNA REJILLA DE TARJETAS.** A un CRM no vienes a mirar caras: vienes a encontrar a alguien concreto y a comparar filas. Buscador por nombre, empresa, cargo o correo; filtro por grupo; filtro de favoritas.
+- **LOS GRUPOS FAVORITOS SE AÑADEN AL MENÚ LATERAL**, como pidió: la estrella de cada grupo lo sube a la sección Personas, con su cuenta, y al pulsarlo abre la lista ya filtrada.
+- **LO QUE HACE QUE SEA UN CRM Y NO UNA AGENDA**: la columna «Conexión» enseña de un vistazo lo que une a esa persona con el resto de la plataforma —su proyecto, cuántos mensajes os habéis escrito, cuánto recuerda su representación— y `GET /api/personas/:id/todo` devuelve la vista de 360°. **Nada de eso se guarda aquí: se cruza al preguntar**, de las tablas donde ya vive. Añadir una fuente mañana es una consulta más.
+- Verificado de punta a punta: grupo «Aldea» creado, marcado favorito y **apareciendo en el menú lateral**; ficha de Anita con empresa, correo, estado «trabajando» y su grupo, todo guardado. (Datos de prueba borrados después.)
+
+### 2026-08-20 — FASE 3 del CRM y FASE 3 del Calendario
+**CRM — la ficha de 360°.**
+- `/persona/:id` deja de ser «perfil arriba, chat abajo» y pasa a ser la ficha completa: **a la izquierda quién es y QUÉ OS UNE** (sus proyectos, las tareas de esos proyectos, lo que hay en el calendario, los mensajes de verdad y lo que recuerda su representación); **a la derecha, hablar**. Nada de lo de la izquierda se guarda ahí: se cruza al preguntar.
+- **EL SEGUIMIENTO, que es la pregunta que un CRM tiene que responder sin que se la hagas**: «hablasteis hace X», **en rojo pasado un mes**. Y al pulsarlo: «acabamos de hablar» o «recuérdamelo en una semana / dos / un mes / tres meses».
+  - **EL RECORDATORIO SE CREA EN EL CALENDARIO, no en un sistema propio.** Si el CRM tuviera sus propios avisos, tendrías dos agendas. Verificado: pedir «en una semana» creó el evento «🔔 Hablar con Javier» siete días después y apuntó la fecha del último contacto.
+- **ETIQUETAS** en la ficha y en la tabla. Texto libre separado por comas, sin catálogo que mantener: en un CRM personal las etiquetas se inventan sobre la marcha, y obligar a crearlas antes es fricción para nada.
+
+**CALENDARIO — repeticiones y crear eventos hablando.**
+- **EVENTOS QUE SE REPITEN**: cada día, cada semana, cada dos semanas, cada mes, cada año. **Se guarda UNA fila con su regla, no una fila por repetición**: un evento semanal durante dos años serían 104 filas que crear, mantener y borrar a la vez. La regla va en **formato RRULE de iCalendar**, el que entienden Google Calendar y Apple, así que el día que haga falta importar o exportar ya se habla el mismo idioma. Con **tope duro de 800 vueltas** al expandir: una regla rota no puede colgar el servidor.
+  - **UN FALLO CAZADO AL PROBARLO**: la consulta pedía eventos que *solaparan* con el mes, así que **una reunión semanal creada en junio no aparecía en agosto** — se quedaba fuera para siempre. Ahora los que se repiten entran siempre que hayan empezado ya, y qué veces caen se decide después, al expandir.
+- **CREAR EVENTOS HABLÁNDOLE AL ASISTENTE**: «apúntame una reunión con el taller el próximo lunes a las 10». Nueva acción `CREATE_EVENTO` (nivel 1: tu calendario no toca el conocimiento de nadie). Se le dice al modelo **qué día es hoy** para que resuelva «el lunes» él, y la fecha se comprueba al guardar — sin eso, una fecha rara acabaría en 1970.
+  - **AJUSTE QUE HIZO FALTA**: la primera versión decía «te la apunto» y **no apuntaba nada**. La instrucción estaba en el bloque de contexto, lejos del formato de acciones; el modelo no la ataba con «mandar la acción». Movida junto al formato y **con un ejemplo entero**, funciona. Verificado de punta a punta: propuesta, aplicada y evento creado el lunes 24 a las 10:00.
+
+### 2026-08-20 — El calendario como el de macOS, y dos formas de ver el CRM
+**CALENDARIO** (Eugenio, con la captura del calendario de macOS).
+- **EL NÚMERO DEL DÍA, ARRIBA A LA DERECHA Y CON CONTRASTE** (13 px, negrita, `slate-800`). Antes iba a la izquierda en gris claro: en una rejilla llena, el número es lo primero que buscas y era lo que menos se veía. Hoy en **círculo rojo**, como en la captura.
+- **NÚMERO DE SEMANA ISO** a la izquierda de cada fila, y **fin de semana con fondo**: localizar el sábado sin leer la cabecera.
+- **VISTA DE AÑO**: doce meses pequeños. No caben los títulos, así que lo que se enseña es **dónde hay algo** — un punto bajo el día. Es un mapa para saltar, no para leer: pulsar un día lleva a ese día, pulsar el mes al mes.
+- **CREAR PINTANDO DÍAS**: pinchas en un día y arrastras hasta otro, y sale un evento de todo el día en ese tramo. **Y con doble clic** en un día suelto.
+  - **Un clic suelto YA NO crea nada**, a propósito: crear con un solo clic te llena el calendario de eventos vacíos sin querer. Los dos gestos que crean —doble clic y pintar— no se hacen sin querer.
+- **UN FALLO DE VERDAD, ENCONTRADO Y ARREGLADO**: al soltar se leía el tramo desde el estado de React, y **si el gesto iba rápido el estado aún no se había repintado**: se veía el valor viejo, no se creaba nada y el calendario se quedaba pintado sin responder. Ahora el tramo va también en una referencia, que siempre es la de ahora, y el manejador de «soltar» se registra una sola vez. Se escucha `pointerup` **y** `mouseup`: no todos los caminos de entrada mandan los dos, y soltar tiene que terminar el gesto siempre.
+
+**CRM — DOS FORMAS DE MIRAR** («ponme diferentes formas de ver los contactos, en galería con fotos en mini tarjetas, o en tabla con las variables en las columnas»).
+- **TABLA** para trabajar —encontrar a alguien entre muchos y comparar columnas— y **GALERÍA** para reconocer por la cara, que es como funciona la memoria con la gente que ya conoces. Los mismos datos y **las mismas acciones en las dos**: cambiar de vista no puede quitarte lo que podías hacer.
+- **La elección se recuerda**: cada cual mira de una forma y no hay que repetirla cada vez.
+
+### 2026-08-20 — Una imagen puede ser el icono, y el título se edita desde la página
+- **EL ICONO PUEDE SER UNA IMAGEN, no solo un emoji** (Eugenio: «añade la opción de añadir una imagen como icono de las páginas del menú»). Botón **«Subir imagen»** en la ventanita de nombre e icono, y también en el editor de una página.
+  - **SIN MIGRACIÓN NI COLUMNA NUEVA**: los dos casos caben en la columna `icono` que ya existía. Se distinguen **mirando el valor** —lo que empieza por `/` o `http` es una dirección, lo demás es un emoji— y no con una columna «tipo» al lado, que sería un dato capaz de contradecir al otro; el día que se contradijeran, se pintaría mal.
+  - Una pieza compartida (`ui/Icono`) los pinta en el menú, en la página del proyecto, en el esquema, en la ficha de un producto y en una página. En un esquema, si el icono es una imagen, **es la portada entera**.
+- **EL TÍTULO Y EL ICONO SE CAMBIAN TAMBIÉN DESDE LA PÁGINA** («no solo desde el menú»): lápiz junto al título del proyecto, que abre **el mismo popup del menú** — renombrar algo es lo mismo se haga desde donde se haga. Y en una página, el icono se pulsa y se cambia ahí.
+- **SE ME HABÍA OLVIDADO EL ICONO EN LAS PÁGINAS**, y ahora sale junto al título como en el resto.
+- **DOS FALLOS MÍOS, CAZADOS AL PROBARLO**:
+  - **El tope de 8 caracteres partía las direcciones**: un icono de imagen se guardaba como `/uploads` y a volar. Ese tope estaba pensado solo para emojis, de cuando no había otra cosa.
+  - **Se colaba cualquier texto raro como icono.** Ahora una dirección solo vale si es **de aquí** (`/uploads/…`) o **https**, y un emoji no puede llevar `:` ni `<`. Un `javascript:` ahí no haría daño —el icono nunca entra en un enlace— pero guardar basura que parece un enlace es pedir que algún día alguien la trate como tal. Verificado: imagen propia y emoji entran; `javascript:` y una imagen de fuera se rechazan sin tocar lo que había.
+
+### 2026-08-20 — Tres filas de cabecera se quedan en dos, y un botón para dejarlas en una
+Eugenio, con captura: «sobra la línea de Retos de la Humanidad xvf2, solo tiene que quedar la de arriba y la de abajo, actualmente hay 3 líneas de datos, esto no puede ser».
+- **FUERA LA BARRA DE TÍTULO DE CADA VENTANA.** Tenía razón: el nombre ya estaba en su pestaña de arriba, así que era **la misma información dos veces**. Sus botones —minimizar, maximizar, cerrar— se han ido al final de la **barra de dirección**, que es también de donde se tira ahora para mover la ventana. En el Navegador van al final de su propia barra, que ya existía.
+- **TODO MÁS BAJO**: la cabecera pasa de 56 a **40 px** (32 en compacto), las pestañas de 32 a 28, y la barra de dirección adelgaza. Eran tres filas para lo mismo; ahora que son dos, cada una tiene que pesar lo mínimo.
+- **BOTÓN DE ENCOGER** («que colapse en algo todavía más sencillo, con solo iconos de las ventanas»): las pestañas se quedan en **iconos de 24 px sin nombre**, y la barra de dirección de la ventana se reduce a una tira de 22 px con los tres botones. Es lo mínimo que puede quedar sin perder el poder cerrarla. **Se recuerda** cómo lo dejaste.
+
+## 2026-08-20 — Magic save button: web pages and videos into a project
+
+Petición de Eugenio: «haz que cuando esté navegando en internet en youtube por
+ejemplo tenga un botón mágico para guardar y compartir ese video en uno de las
+herramientas dentro de uno de los proyecto», y después «dale a tu recomendación
+y que sea con transcripción».
+
+**What ships**
+
+- `src/server/guardar.ts` (new module): `POST /api/guardar-web` saves the page
+  you are looking at as a `knowledge_windows` row — kind `video` for YouTube,
+  kind `enlace` for anything else — optionally inside a project. `GET
+  /api/guardados` lists them.
+- `Navegador.tsx`: a ✨ button saves in one click to "Sin clasificar"; the arrow
+  next to it picks a project. A strip confirms what was saved and where.
+- `src/server/menu.ts`: the project tree grows a **Guardados** branch.
+- `src/server/navegadorRemoto.ts`: `POST …/:id/transcripcion` reads YouTube's
+  own transcript panel from the Chromium the person is already using.
+
+**Transcription: what actually happens, measured today**
+
+The obvious route — download the caption track listed in the YouTube page —
+**is dead**. `timedtext` answers `200` with **0 bytes** for every format
+(`json3`, `srv3`, `vtt`, none), from the server *and* from inside a real
+logged-out browser page. The player itself says "Subtítulos no disponibles".
+
+The transcript panel route was then tried properly, with real Playwright clicks:
+the "Mostrar transcripción" button exists and is clicked, but the panel never
+populates. Verified on three unrelated videos.
+
+Conclusion: **YouTube no longer serves captions to a session that has not
+logged in.** The code is kept because it is the right shape and starts working
+the moment a session with access is used; when there is no transcript the video
+is saved anyway, and the UI says why instead of blaming the video.
+
+The remote browser opens a **fresh `newContext` per session**, so logging into
+YouTube there does not survive. Making that context persistent is the change
+that would unlock transcription without paying anyone — it is not done here
+because it stores site cookies on the server and that is Eugenio's call.
+
+## 2026-08-20 — Two-finger swipe goes back and forward
+
+Petición de Eugenio: «haz que si deslizo dos dedos en el pad, la ventana pase de
+izquierda a derecha, según la dirección de deslizamiento».
+
+Two fingers right → back. Two fingers left → forward. Same direction as Chrome
+and Safari, on the window under the cursor.
+
+**Where the logic lives**: `src/utils/gestoAtrasAdelante.ts`. A swipe is not an
+event the browser gives you — it arrives as a burst of `wheel` events with
+`deltaX`, so they have to be gathered and judged. Three rules, each from a real
+failure mode:
+
+1. A gesture that *starts* vertical stays vertical. Without it, scrolling with a
+   slightly tilted finger sent you to the previous page.
+2. If something under the cursor scrolls sideways and still has room, it wins.
+   Dragging a wide table is not asking to change page.
+3. One swipe fires once. The trackpad keeps sending events by inertia for over a
+   second; without the lock a single swipe went back three pages.
+
+**Three places catch it**, because a swipe can land on three different things:
+
+- inside an embedded page → detected there and forwarded to the window manager
+  as `humanity:gesto-navegacion` (wheel events do not cross an iframe boundary);
+- on the window's own chrome → `onWheel` on the window container;
+- on the remote-browser tab → translated into the real Chromium's history.
+
+**Two details that matter**
+
+- `html, body { overscroll-behavior-x: none }` in `src/index.css`: otherwise
+  Chrome takes the gesture first and leaves the platform entirely, closing every
+  open window.
+- A 500 ms lock per window in `saltarPorGesto`. The notice can arrive twice (two
+  paths, or a hot-reloaded page left with two listeners) and one swipe would
+  then jump two pages. The arrows keep no lock: clicking back three times fast
+  is deliberate.
+
+Verified in a real browser: back ×2, forward ×2, vertical scroll ignored, a
+sideways-scrolling box keeping the gesture, and one swipe of 360 px moving
+exactly one step.
+
+## 2026-08-20 — Task board, phase 1: drag between columns, rename them, a real add button
+
+Three of the nine cards Eugenio filed in his own **Humanity.Wiki** project (a
+board that lives in production, not locally).
+
+- **Drag a card from one column to another, like Trello.** HTML5 drag; the whole
+  column is the drop target, not the gap between cards — aiming at a two-pixel
+  strip with a mouse is a punishment. The card moves on screen *before* the
+  server answers, and comes back with a reason if the request fails: a board
+  that freezes for half a second after you drop feels broken even when it works.
+- **Rename a column by clicking its text.** Edited in place, not in a dialog.
+  Stored in the new `proyectos.columnas` jsonb (migration `0049`), per project.
+  **The states do not change**: `roadmap_items.estado` is still
+  por_hacer/en_curso/hecho, so this renames what is *read*, never what is
+  *stored* — clear the name and the defaults come back with no migration.
+  `NULL` means the names of always, so no existing board changed.
+- **The add button is now big and centred**, with an arrow that picks the
+  column. It used to be a grey `+` the size of an icon, hidden in the corner of
+  one column. A plain click still creates in "Por hacer", where almost
+  everything goes; choosing is the exception.
+
+`Vision.tsx` (the platform roadmap) passes no `onCrear`, so it is untouched.
+
+Verified in a real browser on a throwaway project: renaming persisted to the
+database, a dragged card came back as `en_curso`, and a card created through the
+arrow was born in `hecho`.
+
+## 2026-08-20 — Task board, phase 2: edit the text where it is
+
+Two more of the nine cards from Eugenio's **Humanity.Wiki** board: «doble click
+en un texto de una tarjeta para modificar el texto sin necesidad de abrirlo, y
+lo mismo cuando está abierto, sin tener que darle a los 3 puntitos. También
+hacer más grande el pop up».
+
+- **New `TextoEditable`**: the text *is* the field. Click and type. Enter saves,
+  Escape restores, and leaving the field also saves — someone who clicks away
+  after typing assumes it was kept, not thrown away. Multi-line keeps Enter as
+  a newline and saves with ⌘/Ctrl+Enter.
+- **Double click on a card's title** edits it without opening the card. A single
+  click already did something (open the card), so opening is now deferred 220 ms
+  and the second click cancels it — the same trick a file manager uses to
+  rename. The delay only exists when you can edit; a read-only board opens
+  instantly as before.
+- **The card became a `div role="button"`.** A `<button>` cannot legally contain
+  an `<input>`, and focus behaves badly when it does.
+- **Inside the card, title and summary are edited by clicking them.** The
+  three-dots menu and its `editandoTexto` mode are gone: they were three steps
+  to fix one word, and the menu had nothing else in it.
+- **The pop-up is now `max-w-4xl` / `92vh`** — a task with notes and screenshots
+  did not fit in half a screen.
+
+Verified in a real browser: double click opened the field and no card; a plain
+click still opened the card; the new title reached the database from the board
+and from inside the pop-up; the pop-up measures 896 px and has no three-dots.
+
+**Paused here** at Eugenio's request. Four of the nine cards remain: editable
+tags wired to the filter with `@`, people and projects on a task, drag a menu
+item onto Tareas to create a linked task, and the "Áreas" menu section with the
+14 objectives.
+
+## 2026-08-20 — Prompt caching: the stable half of the system prompt now costs 10%
+
+First step of the cost plan Eugenio approved: **caché → medición → contexto
+dinámico → routing → RAG**.
+
+The assistant's system prompt was one string re-sent whole with every message.
+It is now built in two parts (`buildSystemPrompt` returns `{estable, variable}`):
+
+- **`estable`** — identity, rules 1–5, the graph/map/calendar instructions and
+  the response format. Byte-identical across all calls of all users, so the
+  Anthropic cache is shared platform-wide: the first call writes it (25%
+  surcharge), every later call within the window rereads it at 10% of the input
+  price. The only interpolation allowed is `UI_EVENTS`, a server constant.
+- **`variable`** — today's date, the screen state, the user, the retrieved
+  fragments, the published-graphs list, and rules 6–8 (level, edit mode, web
+  search). Sent after the cached block, paid normally.
+
+The date had to move out of the head of the prompt: `toISOString()` changes
+every second, and one changing byte at the top would have made the cache never
+hit while still paying the 25% write surcharge on every message.
+
+`provider.ts` gained `systemEstable` on the request (Claude marks it
+`cache_control: ephemeral`; Gemini just concatenates — it has no such cache),
+prices the three input buckets (normal 100%, cache write 125%, cache read 10%),
+and reports `cacheReadTokens` in the result and in the chat `usage` payload.
+The Juego Vital prompt is not split: the character's identity is interwoven
+throughout, so there is no shared prefix worth caching.
+
+Measured live with two real messages: the second read **1,657 tokens from
+cache** and cost 0.437 céntimos vs 0.978 for the first — 55% cheaper. The
+saving grows with conversation length, and the stable block will grow the
+saving further once the retrieved context shrinks (next step: contexto
+dinámico). Test conversation, charges and session deleted afterwards.
+
+## 2026-08-20 — Three-tier model router: two free open models, Claude covered for verified users
+
+Steps 2 and 3 of the cost plan (open provider + router), as Eugenio decided:
+three models by complexity, the expensive one only for premium, two free.
+
+**What ships**
+
+- `TogetherProvider` in provider.ts: OpenAI-format connector (the de facto
+  standard), always streaming — Qwen3.7-Plus returns 400 without it, measured
+  live. Key via `TOGETHER_API_KEY` (or neutral `ABIERTO_API_KEY` +
+  `ABIERTO_BASE_URL` to switch provider without code).
+- Catalog: `abierto-rapido` (DeepSeek V4 Flash, $0.14/$0.28 per Mtok) and
+  `abierto-medio` (Qwen3.7-Plus, $0.32/$1.28), both `gratis` — platform
+  absorbs; user pays 0. All paid models now carry `nivelMinimo: 2`.
+- `elegirModelo()`: deterministic router (see 03_DECISIONS). Premium (level
+  2+) gets Claude covered, capped by `AI_TOPE_PREMIUM_CENTS` (300 ¢/month
+  default); over the cap it downgrades to the free medium model and says so.
+- Without the Together key everything behaves exactly as before — the router
+  only activates when the provider is ready, so the deploy is safe either way.
+  The key reached production via a GitHub secret injected into
+  `.env.production` by the deploy workflow (rotation = change secret, deploy).
+- UI: "Automático (recomendado)" option, "gratis"/"incluido"/"verificados"
+  badges per model, aviso bubble when the router downgrades, and "gratis"
+  instead of "0,0000 €" in the per-message cost line.
+- Charging: `cost_cents` is always the real cost (feeds the admin panel and
+  the monthly cap); `fee/total` are 0 for `gratis` and `cubierto`, unchanged
+  for `de_pago`.
+
+**Measured live** (all three rungs, then data deleted): short question →
+DeepSeek Flash, 0.07 ¢ platform cost; "Apúntame una reunión…" → Claude
+covered, CREATE_EVENTO proposed, 1,657 tokens read from prompt cache; long
+chat → Qwen streaming, 0.23 ¢. Router unit-tested on 12 edge cases (level
+gating, cap exhausted, PDF, web search, no-key fallback): all green.
+
+**Two bugs found while testing**: a Python-written `\b` became a literal
+backspace, so the action-verb regex never matched (rewritten); and the golden
+rule («si dices que lo has hecho, el bloque es OBLIGATORIO») moved to the END
+of the variable prompt — after the cache split it sat too far from the end and
+Claude went back to saying "te la apunto" without the block.
+
+## 2026-08-20 — A task's responsable can be one of your personas, and can change
+
+Eugenio: «permite cambiar el responsable de una tarea» (plus the board card
+«permite añadir personas … a las tareas»).
+
+- Migration `0050`: `roadmap_items.responsable_agente_id` → a persona
+  (`game_agents`), because the people Eugenio works with (Anita, Javier…) are
+  personas, not platform accounts. `autor_user_id` is untouched: who created
+  the card is history and stays; the ficha shows the autor when there is no
+  encargo. No FK on purpose — personas archive, never delete.
+- PUT `/api/roadmap/:id` accepts `responsable_agente_id` (null clears it) and
+  verifies the persona is YOURS — assigning someone else's persona would write
+  into their world. Bogus ids get «Esa persona no existe o no es tuya».
+- Both list queries join the persona (name/photo/icon); `/api/tareas` sends
+  `responsable`/`responsableFoto` per task.
+- UI (`SelectorResponsable` in TableroKanban): the Responsable box in the
+  ficha opens a dropdown of your personas — loaded when the dropdown opens,
+  not when the ficha opens — with photos, «Sin responsable» first, and the
+  card footer now shows the responsable (photo + first name) before the autor.
+  The local patch merges into the ficha state so the new name shows instantly
+  (the PUT returns the row without its JOINs).
+
+Bug of the day: an index-based edit inserted the `game_agents` join twice into
+one query («table name "ag" specified more than once») while leaving the other
+query without it. Verified live end-to-end (set Anita via API, switched to
+Javier in the real browser, cleared, bogus id rejected); test card deleted.
+
+## 2026-08-20 — Measurement, the model button at the bottom, and the «IA» tool
+
+Three of Eugenio's requests in one pass.
+
+**1. La medición** (step 2 of the cost plan). Migration `0051` adds
+`ai_proposed_actions.model`: the router means one conversation can pass through
+three models, so «which model proposed this action» could no longer be inferred
+— and pairing by timestamp would be guessing, which is precisely what
+measurement exists to stop. Rows older than the migration keep NULL and are
+reported apart rather than attributed retroactively.
+
+`GET /api/ai/medicion?dias=N[&todos=1]` crosses `ai_usage_charges` (what was
+spent) with `ai_proposed_actions` (what was right) per model, and returns
+acierto (correctas/propuestas) and **coste por acción correcta** — the figure
+that actually compares models. No metrics table: duplicating the number
+guarantees the two disagree one day. Admins can see the whole platform.
+`PanelMedicion` renders it: totals, a per-day bar, and a card per model.
+
+`coste_por_accion` is null unless the model has BOTH cost and hits — otherwise
+the pre-migration rows showed «0,0000 € por acción correcta», which reads as
+«free» when it means «unknowable».
+
+**2. El botón del modelo, abajo y con nombre.** Moved out of Ajustes (not
+duplicated) to sit beside Adjuntar/Dictar, where the decision is actually made.
+On «Automático» it names the model that answered the last message — with the
+router that changes per message, which is exactly what «el modelo que está
+utilizando» means. Uncatalogued ids (the platform default `claude-sonnet-4-6`
+has no catalogue entry) show raw rather than staying silent.
+
+**3. La herramienta «IA»** (`/ia`, menu + route + tab icon + full-bleed).
+`AIAssistant` gains `modo="pagina"`, which reuses the existing `panelBody` —
+the same block that already served desktop and mobile. No second chat: that
+would be the fourth face of the same assistant, the mistake that cost the three
+«Universo» pages. Layout does not mount the floating assistant on `/ia`,
+because that page already IS the assistant. Chat left, spending panel right;
+tabs below `lg`, where two columns do not fit.
+
+**The bug this uncovered, and it was expensive**: the UI hardcodes
+`searchWeb = true` with no toggle, and web search is a Claude-only tool — so
+rule 3 of the router sent **every** message from a verified user to Claude.
+«hola» went to the expensive model. The router now decides web search itself
+(`PIDE_WEB`: explicit asks, or freshness signals like noticias/precio/2026);
+otherwise the platform context answers, as the prompt rules already required.
+Verified live: «¿Qué es un indicador?» now lands on the free fast model.
+Router unit tests: 13 cases green.
+
+## 2026-08-20 — Task board, phase 3: tags, projects, drag-from-menu, and Áreas
+
+The last four cards of Eugenio's **Humanity.Wiki** board.
+
+**Etiquetas editables, conectadas al filtro, con `@`.** A task's tag IS its
+`grupo` — the same thing the top filter uses and the same thing that names the
+rooms of a project's building in the Mundo 3D. No parallel «etiqueta» concept
+was invented: two lists saying the same thing eventually disagree, and then the
+board and the 3D world show different rooms. The group chip in the ficha became
+a dropdown (`SelectorEtiqueta`) that changes the tag or creates a new one, and
+typing `@algo` in a new card's title opens the list filtered by what you typed,
+with «Crear etiqueta «algo»» when nothing matches — picking one strips the
+`@algo` from the title, because the tag is already set and leaving the text
+would be noise. New tags persist into `proyectos.grupos`, so they appear in the
+top filter immediately. **Still one tag per task**, as before.
+
+**El proyecto de una tarea.** `SelectorProyecto` in the ficha moves a card to
+another project — the server already knew how (the Mundo 3D ficha used it), but
+the board had no way to ask. The list loads when the dropdown opens, not when
+the ficha does: almost no task ever moves.
+
+**Arrastrar del menú a Tareas.** Menu rows are now draggable whenever they are a
+real element, and carry `{tipo, id, label, destino}` in a private MIME type so
+nothing else on the page mistakes the drag for loose text. Each project section
+in `/tareas` is a drop target: dropping creates a task named after the element,
+inside that project, with an `enlace` block back to it (newly rendered in the
+ficha). Dropping a **person** also sets them as responsable — a person dragged
+onto tasks means a task *for* them.
+
+**Áreas.** New menu section with the 14 objectives, each expanding to its
+indicators. `GET /api/areas` (no session needed: the areas are the common
+knowledge map, not anybody's). The «subobjetivos» are the 98 indicators that
+already existed — the platform's chain is Objetivo → Indicador → Marcador, so
+no new level was invented to say the same thing.
+
+Verified live on a throwaway card: tag changed and created (and it showed up in
+the top filter as «Pruebas Claude 1»), `@dis` offered Diseño and stripped
+itself from the title, dragging «Meta Vida» onto a project section created the
+task with its link block, and Áreas expanded AGUA into Acceso/Calidad/Consumo/
+Disponibilidad. Test card deleted and the project's 6 groups restored.
+
+## 2026-08-20 — The Tareas list becomes editable (the ninth card)
+
+The one card left half-done: «permitir editar y crear las tareas desde la
+página de tareas». Editing had been built on the *board*, not on the list.
+
+- The title of every task in `/tareas` is now edited in place (the exported
+  `TextoEditable`, same component as the board — not a second implementation).
+- A **«Añadir una tarea…»** row closes each project's list. It stays open after
+  creating: when you write one thing down, you usually write two.
+- Clicking a task's circle walks its state: por hacer → en curso → hecha → por
+  hacer. Both write optimistically and put the error on screen if the save
+  fails.
+
+All three respect `mio`, the flag the server already sends: you only edit tasks
+in projects that are yours.
+
+Verified live: created from the list, renamed in place, and advanced its state,
+each confirmed against the database. Test task deleted.
+
+**The Humanity.Wiki board is now complete — all nine cards.**
+
+## 2026-08-20 — Four bugs Eugenio hit, fixed
+
+**1. The remote browser flickered between blurry and sharp.** The loop sent a
+cheap CSS-scale (blurry on Retina) frame whenever a single pixel changed and a
+device-scale frame when still — so any background animation produced a constant
+flicker between the two qualities, which is worse than either. Fast frames are
+now reserved for when smoothness is actually needed: while you are touching
+something, or when the page has changed for `CAMBIOS_PARA_MODO_RAPIDO` (4)
+consecutive probes, i.e. a real video. **A single change on a still page now
+goes straight to sharp**, without the blurry flash.
+
+**2. «@» could not be typed.** On a Spanish keyboard `@` is Alt+2, so `altKey`
+arrived set and the handler treated it as a shortcut, sending `Alt+@` — which
+types nothing. Alt and Shift are *composition* keys, not command keys: if the
+browser already resolved which character it is, that character is sent. Only
+Ctrl and ⌘ are real shortcuts now. Single characters also go via `insertText`
+instead of `press`, which is exact for accents and composed characters.
+
+**3. ⌘C / ⌘X did nothing.** The remote Chromium runs on Linux, where the
+shortcut is Control, so `Meta+c` was a no-op — and even had it worked, the text
+would have landed in the *server's* clipboard. Both keys now ask the server for
+the current selection, which comes back over the stream and is written to the
+user's own clipboard, so it can be pasted anywhere.
+
+**4. The Notion-style editor typed backwards and deleted wrong.** The active
+block is `contentEditable` *and* React rendered its text as a child. Every
+keystroke triggers a re-render (autosave, autoformat), React rewrote the text
+node, and rewriting sends the caret to position 0 — so the next letter landed
+in front of the previous one and Backspace deleted at the start. New `TextoVivo`
+component: while a block is being edited **the DOM owns its text, not React** —
+the HTML is captured once at mount in a ref, so React never touches the
+contents again. Verified live: typing «HOLA que tal estamos» came out forwards,
+and six backspaces removed exactly «stamos».
+
+**Also**: the project page shows an initials placeholder when a project has no
+icon (the icon rendered fine — the project simply had none, so nothing appeared
+and there was nowhere to click to add one), and «Explorar» is now
+«Publicaciones» in the menu.
+
+## 2026-08-20 — «Editar menú»: the sidebar sections are yours now
+
+Eugenio: «un botón de configuración del menú izquierdo, abajo a la izquierda,
+donde permita reordenar las categorías y ocultar categorías enteras o
+visibilizarlas si estaban ocultas, y cambiar el nombre e icono. El botón pondrá
+"editar menú" con un símbolo de rueda dentada.»
+
+The five sections were five hand-written JSX blocks in a fixed order. They are
+now a list: `SECCIONES_BASE` says which exist and their factory name/icon, and
+`CONTENIDOS` says what each one renders — deliberately separate, so reordering
+or hiding a section never touches what is inside it.
+
+Order, name, emoji and hidden-ness live in `ui_settings.seccionesMenu`, like the
+row order already did: it is **your** preference and changes nobody else's menu.
+Only what you actually changed is stored, so a section you never renamed keeps
+following the platform's name if it ever changes.
+
+`PopupEditarMenu` applies every change **live, behind the open dialog** — no
+save button. Reordering blind and closing to check would be guessing. Hiding
+removes nothing: the section and everything in it come back with one click,
+which is what makes hiding safe to try.
+
+`SeccionMenu` now accepts a string icon (your emoji) as well as a component.
+
+Verified live: hiding Productos removed it from the sidebar, dragging Personas
+to the top reordered it, and renaming Áreas to «Mis áreas» with a 🎯 showed up
+immediately and persisted to the database. The test configuration was then
+deleted so Eugenio's menu is exactly as he left it.
+
+## 2026-08-20 — The assistant can actually do things in the app (and knows when it fails)
+
+Eugenio hit «Unexpected token '<'…» asking the chat for something simple, and —
+worse — when he asked what had gone wrong, the assistant said it had no record
+of any failure. Both halves were real bugs, and testing 24 requests found four
+more.
+
+**1. The chat parsed every response as JSON, blindly.** `res.json()` before
+checking `res.ok`. A 413 (body too large) returns an **HTML** page, so the raw
+`Unexpected token '<'` landed in front of a person. Now the body is read as
+text and parsed defensively, with a human sentence per status code.
+
+**2. The assistant could not know it had failed** — the failure happens in the
+*browser*, so nothing ever reaches the model, and «no me consta ningún fallo»
+was a correct answer to a question it could not see. The last failure is now
+kept client-side for ten minutes and travels in the context, with an explicit
+prompt line: if asked what failed, tell them THIS.
+
+**3. It had no action to create a task.** The catalogue had challenges, maps and
+graphs but nothing for the platform's own daily objects — so «añade una tarea al
+proyecto Humanity.wiki» was impossible. Added `CREATE_TAREA`, `UPDATE_TAREA`,
+`CREATE_PROYECTO` and `CREATE_PAGINA`, all resolving names the way a person says
+them («en el Camión camperizado») against **that user's own** rows.
+
+**4. «Te lo apunto» without apuntar anything, again.** Fixed three times before
+by moving the instruction around the prompt, and it kept coming back. Now it is
+**detected instead of trusted**: if the reply promises an action and no block
+arrived, the model is asked once more for the block alone. A short second call
+is far cheaper than a task someone believes they have and does not.
+
+**5. The assistant was blind to the user's own data.** «¿Qué proyectos tengo?»
+answered with a platform *seed* project, because the retrieved context is the
+common knowledge graph. The chat route now builds a short index of **your**
+projects, pending tasks, people and upcoming events. This also makes the task
+actions land in the right project.
+
+**6. Tasks in `/tareas` were not clickable.** Clicking a row now opens its
+project board with that card open (`?tarea=<id>`), so there is no second detail
+view to maintain.
+
+Tested with 24 distinct requests — basic questions, single actions, multi-step
+(«un proyecto y dentro dos tareas» → 3 actions), a project that does not exist,
+recurring events, accents, symbols — plus end-to-end execution confirming the
+rows really appear in the database. All test data deleted afterwards.
+
+## 2026-08-20 — «/» in the page editor, and a product block
+
+Eugenio: «en el creador de páginas añade la opción de agregar un producto, y el
+shortcut de "/" para añadir cosas, como en Notion […] y como hace este propio
+chat de Claude Code».
+
+- **`/` opens the block menu** in an empty block, filters as you keep typing
+  («/tit» → the three Títulos), moves with the arrows and picks with Enter or a
+  click. It filters `TIPOS_MENU` and calls the same `insertar` — no second
+  catalogue to keep in sync. Only in an **empty** block: mid-sentence a slash is
+  just a slash (dates, «y/o», URLs). Picking **converts** the block rather than
+  adding one, which is what Notion does and what anyone expects.
+- **New `producto` block**, cousin of `publicacion`: same fields (`entityId`,
+  `pubTitulo`, `pubUrl`) because it is the same idea — a platform object
+  embedded — and duplicating fields duplicates the bugs. It opens the existing
+  picker pointed at `/api/products`, and renders as a card linking to the
+  product in the market.
+
+Verified live: `/` listed all 14 types including Producto, «tit» narrowed to
+three, Enter turned the block into a Título 1 leaving no «/tit» behind, and
+`/prod` opened the picker with real products in it.
+
+## 2026-08-20 — Page editor: white screen on ⌘A, and text shown twice
+
+Two bugs from the Tester, same root cause, and the root cause was mine — the
+half-fix I shipped this morning for «typing backwards».
+
+**The root**: the editing block is `contentEditable` *and* React was still
+rendering a child into it (`TextoVivo`'s span). Two owners for the same DOM.
+The browser adds, moves and deletes nodes as you type; React keeps pointers to
+nodes it believes are its own. From there:
+
+- **B17 (white screen)** — ⌘A inside a block selected far beyond it; typing over
+  the selection made the browser delete nodes React had pointers to, and React's
+  next `removeChild` threw `NotFoundError`, taking the whole app down. The
+  person lost the block they were writing.
+- **B16 (text shown twice)** — on blur React re-rendered the read-only view
+  *next to* the text nodes the browser had created, so «PRUEBA» read
+  «PRUEBAPRUEBA». Only on screen: what was saved was always correct, as the
+  Tester confirmed.
+
+**The fix, properly this time**: `BloqueEditable` renders a div with **no React
+children at all**. The text is written once at mount through a ref. As far as
+React is concerned the element is empty, so it never reconciles inside it and
+the browser is free to do whatever it wants. Plus ⌘A is intercepted and scoped
+to the block, which is what every editor does anyway.
+
+Verified with **real keystrokes** (not synthetic events, at the Tester's
+request): typed PRUEBA, clicked away → one PRUEBA; ⌘A selected only the block,
+typed over it, clicked away → app alive, text replaced, no `removeChild` in the
+console.
+
+**Also in this batch**
+- **B1** — unknown `/api/*` routes returned **200 with the SPA's HTML**, so any
+  client asking for JSON got `<!doctype html>`. That is the same failure that
+  put «Unexpected token '<'» in front of Eugenio. Now `404 {error}`.
+- **B5** — restored desktop windows opened *on top* of whatever URL you arrived
+  at, so `/proyectos/aptera` showed the previous session's desktop and no link
+  in the platform was shareable. A path with two or more segments is a link to
+  something specific: windows come back **minimised**, one click away in the tab
+  bar.
+
+**B2 checked and NOT a bug**: `/api/proyectos` without a session returns 5
+projects and **all five are `publico: true`**. The filter (`p.publico OR
+creador = me`) is correct; no private project leaks. «Camión camperizado» is a
+local project and is not in production at all.
+
+## 2026-08-20 — Bug batch from the Tester: menu, board and Archivos
+
+- **B3** — the work sidebar was rendered to anonymous visitors, even on
+  `/login`, telling someone who had not signed in «Todavía no tienes
+  proyectos». Without a session there is nothing to list; showing the empty
+  scaffolding does not inform, it confuses. Now it needs a session.
+- **B6** — the «+» beside PROYECTOS opened the index, which is what the section
+  name already does. It now opens the create dialog (`/proyectos?nuevo=1`).
+- **B7** — creating a project never told the sidebar, so it kept saying
+  «PROYECTOS 4» until a full reload. It dispatches `humanity:menu-cambiado`.
+- **B8** — window tabs were titled with the slug prettified («Ai mejoras rwkc»)
+  instead of the real name («AI - MEJORAS»). `/api/ruta` now returns the
+  project's title; the client stopped doing typographic repairs on a slug.
+- **B9** — the new-project dialog had no `role="dialog"` / `aria-modal`, so a
+  screen reader read it as more page.
+- **B10** — Escape now closes the column dropdown.
+- **B12 / B13, same root** — the toolbar's «Tarea» button inserted an untitled
+  task instantly with no dialog, while the green «Añadir tarea» beside it opened
+  a form: two near-homonymous buttons behaving differently. And it wrote
+  `grupo: 'general'`, which is in no project's list, so the card rendered with
+  the *first* group's label and colour while that group's counter said 0 and
+  filtering by it did not find the card — three places disagreeing about one
+  task. Now the button opens the same form, the server picks a group that
+  exists, and `grupoDe` shows the real group in grey instead of falling back to
+  `grupos[0]`. **A card can no longer lie about its label.**
+- **B15** — a new note landed behind the fixed composer; the ficha now scrolls
+  to it.
+- **B19** — every window was labelled «Esquemas», so a project's page appeared
+  attributed to a graph it does not belong to. Origin is now real: a graph if it
+  hangs from one, «Páginas» if it is a page, and the context shows its project.
+- **B20** — the type filters mixed «Nota» and «Documento» with raw ids
+  («pagina», «wikipedia», «presentacion»…). Added the missing labels, and an
+  unknown type is at least capitalised rather than printed raw.
+- **D5** — the «PRIORIDAD MEDIA» badge was decorative: the field existed and was
+  asked for at creation, but re-prioritising — the most frequent thing on a
+  board — was impossible. Three buttons, same values as the form.
+
+**B2 closed as not-a-bug** (no leak: the filter is correct). I was wrong about
+one detail and the Tester corrected me: «Camión camperizado» *does* exist in
+production as a private project. It does not leak, but it is not local-only —
+I should have checked instead of inferring it from the anonymous listing.
+
+## 2026-08-20 — B22 + B26: the AI reads the platform, and cannot claim what it did not do
+
+Two bugs the Tester found from opposite sides, and they were the same bridge
+between the model and the data: it could not READ the content (B22) and it
+narrated writes that never happened (B26).
+
+**B22 — «Pregúntame sobre cualquier cosa de la plataforma» was a promise the
+product could not keep.** Retrieval came from `ai_knowledge_chunks`, which only
+indexes the *common* knowledge (retos, soluciones, productos…) and is rebuilt by
+hand. Nobody's pages, graphs or task notes were in it. The assistant saw the
+container («this project has 3 tasks») and not the contents — «mis sensores no
+alcanzan a leer el texto interno» was literally true.
+
+New `contenidoPropio()`: a **live** search over that user's own pages and task
+cards, matching the words of the question against title *and* body (the text
+lives inside `config->bloques` / `bloques`). Live on purpose — an index you have
+to rebuild is stalest exactly when it matters, right after you write something
+and ask about it. It sends up to 4.000 characters per page rather than a
+two-line summary, because the question is usually about a figure buried in the
+middle, and trimming is precisely losing it.
+
+Verified against the Tester's own acceptance case: asked about the gap between
+the headline range and the energy balance in a page, the assistant answered
+**«54,2 km: el titular promete 120 km, pero con la batería de 4,08 kWh y 62
+Wh/km da 65,8 km»**, citing the page. That is the 4,08 kWh they asked for.
+
+**B26 — the model said «ya he clavado esa tarea» and no task existed.** The
+mechanism was not missing (the action fires, executes and lands in the right
+project — verified end to end). What was missing is that **nothing forced the
+words to match reality**:
+
+- If the reply promises an action and none arrives even after the retry, the
+  text is now **corrected**: «No he podido crearlo…». Leaving a bare «ya está»
+  is worse than an error, because the person walks away believing they have a
+  task — and is then offered menus to spend more messages on a false premise.
+- `/decide` returns `enseñar` (name + link) built from the **server's**
+  `entityId`, and the chat renders a card per thing actually created. **If the
+  card is not there, nothing was created** — no matter what the prose says.
+  (This is D13, and it makes the class of bug visible rather than silent.)
+
+The rule, in one line: **success is decided by the data that comes back, never
+by the narration.**
+
+## 2026-08-20 — B27: the figure is decided by the source, never by plausibility
+
+Reported as «the AI invents technical data»: it answered «120 km» where the
+project says 90 km/día, apparently confusing it with «120 kg en vacío» in the
+same sentence, and quoted a speed of «45 km/h» that exists nowhere.
+
+**The reported symptom was an artefact of my own test.** The page I used to
+verify B22 was one I wrote by hand, and it contained «45 km/h» and «120 km»
+verbatim. The assistant quoted them faithfully. My mistake was the test itself:
+a page that already contains the answer proves the model can read, not that it
+will refuse to invent. **A test that cannot fail proves nothing.**
+
+**But building the real trap uncovered a genuine bug underneath**: the context
+carried only each project's *name* and pending count — never its `descripcion`
+or `vision`. The assistant could not answer about a project's characteristics
+even when its owner had written them down. Measured before touching anything:
+asked for the range it replied «no hay ningún dato… no voy a inventar un
+número» — passing, but for the wrong reason.
+
+Fixed: projects now travel with their description and vision, and the stable
+prompt gained four rules, deliberately at the end where they weigh most:
+
+1. **Name the source of every figure** — «90 km/día (descripción del
+   proyecto)». If you cannot name the source, you do not have the datum.
+2. **Read the unit before using the number.** The «120 kg en vacío» / «90
+   km/día» case is written into the prompt as a literal example: a concrete
+   example beats an abstract rule, and confusing mass with range in an
+   ultralight-vehicle project is the most expensive mistake available.
+3. **Never invent intermediate values** to close a calculation. Missing the
+   speed, the efficiency or the sun hours → say so and ask.
+4. If only part of the data is there, do the part you can and say what is
+   missing.
+
+Verified against the trap (a project whose description holds both numbers in
+one sentence): «90 km/día … (según la descripción del proyecto)», calling the
+120 kg mass; «no puedo darte el número sin la velocidad de crucero, ese dato no
+está en la plataforma»; and «no tengo ese dato», quoting what does exist. **This
+is now a fixed regression check to repeat on every prompt change.**
+
+Team rule adopted from this: when anyone reports a figure, say where it comes
+from — production or local, and which project or page. Three of today's
+disagreements came from comparing numbers across environments without saying
+so. It is the same rule we just gave the assistant.
+
+## 2026-08-20 — Four bugs with one disease: nowhere to put what was asked for
+
+The Tester found five failures that looked unrelated. They are one illness: **the
+platform had nowhere to store what the assistant was asked for, so the model
+filled the hole with prose.** Not «the AI lies» — «the AI was asked for something
+the product could not hold».
+
+**B34 — a task asked for as «Tecnico» was saved as «Producto».** Written without
+the accent, it did not match the label «Técnico», and the code fell back to the
+project's *first* group, silently. This is **the same `grupos[0]` defect as B13,
+which I fixed this morning in the rendering and left alive in the writing** — I
+fixed the symptom where it showed, not where it started. Matching is now
+accent- and case-insensitive, and when nothing matches it says so, listing the
+labels that do exist: «No hay ninguna etiqueta "Marketing"… (tiene: Producto,
+Diseño, Técnico…). La he dejado en "Producto".»
+
+**B32 — the card for what was created.** Two separate things. Mine existed but
+was a `<button>` with `navigate()`, so the Tester's DOM search for links found
+nothing and concluded there was no card: both of us were right. It is a real
+link now. And the action block said «Crear una tarea en un proyecto» — the kind
+of operation, not the thing — so it now leads with the title and carries the
+detail: «ZZZ medir irradiancia · Camión camperizado · Tecnico · prioridad
+alta». **With that detail, B34 would have been visible on first use** instead of
+needing three checks.
+
+**B31 — a correct figure attributed to a page that does not exist.** With the
+new source-citing rule, a false attribution is *more* dangerous than none,
+because the reader now trusts the citation. The prompt may only name pages,
+tasks and projects present in the context, by their exact title; and when it
+knows a number but not its origin, it must say so.
+
+**B23 — a map of five test sites showed the generic indicator world map.** The
+cause was not the model: **a user map could only ever be a view of the humanity
+map** (territory + level + indicator). There was no concept of a point, so the
+AI wrote the five places into the description — the only text hole it had — and
+the map kept showing something else. Maps now take points with name,
+coordinates and value, validated (no lat/lon, no point), rendered by a new
+`MapaDePuntos` with its list beside it; and if points were asked for and none
+survive validation, it refuses to publish and says why.
+A nuance found while testing: the first version was too cautious and asked for
+coordinates it plainly knows. It may now use its own knowledge for known places
+**while declaring it** («coordenadas de conocimiento general») and only ask for
+the ones it cannot place. Declaring the source is the rule; refusing to know
+things is not.
+
+**Next**: give the same test to the three capabilities not yet audited —
+`CREATE_KNOWLEDGE_GRAPH`, `ORGANIZAR_CARPETAS` and the UI events — by asking for
+something the platform cannot store and seeing whether they say so or narrate it.
+The third is the worrying one: an event with an id that does not exist fails
+invisibly by design.
+
+## 2026-08-20 — Closing the queue, and the rule written down
+
+**B40** — the SPA catch-all answered `index.html` to *everything*, so
+`/sitemap.xml` and `/manifest.json` returned 200 with HTML to the crawlers and
+browsers that ask for them. A path **with an extension** asks for a file, and
+`express.static` has already had its turn above it, so if it reaches the
+wildcard the file does not exist: 404. Without an extension it is an app route,
+unchanged.
+
+**B25** — anonymous callers no longer receive `creador_user_id` (nor
+`created_by`/`updated_by`) from `/api/proyectos`. Not a leak — the projects
+listed are the public ones — but an internal user id is no use to a visitor and
+is of use for correlating people across records.
+
+**B24** — clicking outside the create dialog discarded whatever had been typed.
+It now asks first when there is something written, and closes silently when
+empty. Somebody's writing is not thrown away by a stray click.
+
+**B60** — the panel resize handle listened for `mousemove`/`mouseup`, which a
+finger never fires: dragging the edge on a touch screen did nothing at all.
+Pointer events cover mouse, finger and pen at once, plus `touch-action: none`
+so the browser does not steal the gesture as a scroll, and `pointercancel` so
+the panel does not stay glued to a finger that left the screen.
+
+**B63 — a bug that depends on the model behaving is postponed, not fixed.**
+`applyUiEvents` navigated with whatever id arrived. Tested with an invented
+territory the model refused on its own — but that is luck, not protection. The
+destination is now checked against the territories the app already has loaded
+(no extra request), empty ids never navigate, and when the target does not
+exist it says so instead of landing on an empty map in silence.
+
+**B35 — Stripe was loading on pages that sell nothing.** A static
+`import … from '@stripe/stripe-js'` injects `js.stripe.com/v3` on import, so the
+third-party script and its iframe were live on `/tareas`. Now imported
+dynamically at the moment someone actually pays. Measured: `js.stripe.com` has
+left the main bundle into a 2,6 kB chunk. **The ~1 MB the Tester measured was
+the runtime script, not the bundle** — the 3,7 MB main chunk is a separate
+problem and is untouched by this.
+
+**And the rule is now written into `src/server/CLAUDE.md`** as a design
+principle with the six cases as concrete examples, so whoever touches the AI
+module next does not repeat them.
+
+## 2026-08-21 — The card that lied, the word that hijacked, and a purge that was never needed
+
+**B36 — asked for a task, wrote a document.** The cause was never in the model:
+the client has a branch that detects «documento|informe|dossier…» plus intent to
+create, and *takes the request away* to write a page. «Crea una TAREA … del
+dossier de prensa» triggered it on the word «dossier» and the message never
+reached the AI. Naming the artefact is an **instruction**; the content is only
+subject matter — «una tarea», «un mapa», «un proyecto» now beat any loose word
+about the topic.
+
+**B32 — and a worse bug found while checking it.** Locally the card is an `<a>`
+with the full detail (verified in the DOM), and its class is present in the
+production bundle, so the Tester was most likely running a cached bundle. **But
+while proving that, I found my own card was lying**: asked for «grupo
+Marketing», the server correctly stored «Producto» — and the card said
+«Marketing», because it was built from what was *requested*, not what was
+*saved*. The piece that existed to make this class of bug visible had the bug
+inside it. The action now returns what it actually stored, and the server's
+notice («No hay ninguna etiqueta "Marketing"… la he dejado en "Producto"») is
+shown in the chat instead of only travelling in the response.
+
+**The purge that was never needed.** 32 files have been deleted from `public/`
+in the repository's whole history. All 32 verified against production: **32
+return 404, zero return 200.** Nothing to purge, and the deploy does not
+accumulate — the Dockerfile rebuilds `public/` from the repo into each image.
+What existed was a bug that made it impossible to know the problem did not
+exist: any missing file answered 200 with the SPA's HTML, so a 200 was read as
+«the file is still there». Fixing B40 made the symptom disappear on its own.
+
+**No destructive command was run.** A task open for days, ordered explicitly and
+inherited across two dead sessions, turned out to be an artefact of a missing
+404. This is now the fifth and most expensive case in the root-principle table.
+
+## 2026-08-21 — The archive: files that stay
+
+Eugenio approved this after the Tester's complaint, which named the gap exactly:
+«puedo enseñarle mi informe de CFD a la IA una vez, pero no dejarlo colgado del
+proyecto para que mañana lo abra otro».
+
+Uploading already worked in four places. What was missing was **memory**: a file
+went in, got used once, and could never be found again. Migration `0052` plus a
+new `archivo.ts` with three routes — attach, list, remove.
+
+Five decisions worth keeping:
+
+- **The bytes do not move.** They stay in `/data/uploads`, the Docker volume
+  that already works and lives outside the repository (verified in production
+  the same night). The table only records what each file hangs from. A second
+  store would have been a second place to lose things.
+- **A file hangs from exactly one thing** — project, task or page — and that is
+  a database CHECK, not a convention. Two containers and the row does not go in.
+- **Permissions are inherited, always.** Every query asks about the
+  *container*, never about the file, so there are no two truths that can
+  disagree. The day a project flips from private to public its files follow,
+  with nothing to migrate. Not just simple — impossible to desynchronise, which
+  is better than correct-today.
+- **Only `/uploads/` paths are accepted.** Without that, anyone could hang an
+  external URL off a project and the platform would present it as its own file.
+- **Archived, never deleted, and the bytes untouched**: a page or a chat message
+  may point at the same file, and deleting it would leave a hole in places this
+  module knows nothing about.
+
+Verified end to end with a real upload: attach → list → it comes back with name,
+class, size and who uploaded it. External URL rejected; two containers rejected.
+And the permission test on a **private project created through the product's
+normal path** — applying the rule written two hours earlier, which is exactly
+what stopped me measuring the wrong thing again: owner 200 and sees the file,
+another user 403, anonymous 403, and the other user cannot attach either.
+
+Also in this batch: **D18**, the created-item card now links to the task itself
+(`/tareas?tarea=<id>`) and opens in a new tab, because with 136 tasks a link to
+the index is barely a link; and **B39**, the card shows the group's *label* and
+never the raw id («Diseño», not «Diseno»).
+
+## 2026-08-21 — The persistent archive gets its visible half
+
+`archivo.ts` gave files a place to live but no door to walk in through. Three
+doors now exist, all the same component (`src/components/archivo/Adjuntos.tsx`):
+the project page, the task card in the kanban, and the foot of a page in the
+editor. One component, so a bug in attaching is one bug and not three.
+
+Attaching is two calls that look like one: bytes to `/api/uploads` (which
+already knew about types and sizes), then `/api/archivo` to record what they
+hang from. Nothing that already uploaded files had to learn about containers.
+
+Also allowed `text/plain`, `text/markdown` and `.tsv` in `uploads.ts`. They are
+served as downloads like everything else, and refusing them forced you to zip a
+notes file to be able to keep it, which is absurd.
+
+On a page, the section only appears once the page exists. A page that has not
+been saved has nothing to hang a file from, and offering the button would be
+promising something that fails when pressed.
+
+## 2026-08-21 — B90: the remote browser stopped pixelating while you scroll
+
+Eugenio: «cuando en el navegador se hace scroll down de una página de internet,
+se pixela ya que no se refresca bien y queda fatal».
+
+The refresh was fine. The frame sent during movement was captured at CSS scale,
+which on a Retina screen is half the linear resolution, and the client `<img>`
+stretched it back over the full box — one sent pixel covering four on screen.
+Pixelation by construction, which is why it happened every single time.
+
+Measured on Wikipedia at 1000×700, Retina:
+
+    css    q50 →  43 ms    93 KB   1000×700
+    device q40 →  71 ms   199 KB   2000×1400
+    device q70 →  70 ms   321 KB   2000×1400
+
+The way out is in the same numbers: at full resolution the *quality* setting
+costs almost no time (71 ms at 40, 70 ms at 70) — what costs is rasterising
+twice the pixels. So the movement frame now goes at full resolution with low
+quality: paid in kilobytes, not in stutter.
+
+Half resolution is kept for what animates on its own (a video, a carousel),
+where the eye wants smoothness over detail and there is no text to read. When
+*you* are the one moving the page, you are reading.
+
+Measured cost of the change, scrolling for 3 s: 11.3 → 9.3 frames/s and
+1.14 → 2.19 MB/s. 18% fewer frames for four times the pixels.
+
+Also: one capture per loop instead of two. The frame is now its own change
+probe, so raising its resolution did not double the work.
+
+## 2026-08-21 — An open write route in production, closed
+
+`POST /api/map/territories` required no session. Anyone on the internet could
+insert rows into `territories`.
+
+Found while collecting facts for the tech-debt list, not by a bug report.
+Verified against production with a probe that creates nothing (empty body, so
+it throws before the INSERT):
+
+    POST https://humanity.wiki/api/map/territories  ->  500 "coordinates is not iterable"
+    POST https://humanity.wiki/api/data/challenges  ->  401
+
+The 500 is the point: the request reached the handler body. The 401 next to it
+is the control — that route does have a guard.
+
+It escaped the PR #23 sweep, which closed the four `/api/data/*` routes. This
+one does the same thing (creates a territory) but sits 900 lines further down
+in `server.ts`, and a sweep done by reading misses things in a 2.056-line file.
+Now behind the same `requireAdmin`.
+
+Every write route in the seven modules was swept for the same defect. There
+were no others: `finanzas.ts` uses `requiereSesion`, the remote-browser routes
+check session ownership, and the `auth.ts` routes are public on purpose.
+
+## 2026-08-21 — D91: the real cost of every answer, in the chat
+
+Eugenio: «quiero que en el chat de IA aparezca el coste de cada petición en la
+respuesta, aunque sea gratis para el usuario, que diga cuál ha sido el coste».
+
+The line under each answer said «gratis» and nothing else. Free *for you* is not
+free *for the platform*, and saying only the second was telling half the truth.
+
+It turned out the data already reached the browser and was being thrown away:
+the server sends `costCents`, `durationMs`, `cobro` and `motivo` on every reply,
+and the client kept only the model and `totalCents` — what the person pays,
+which is zero almost always. Nothing new had to be measured. It had to stop
+being discarded.
+
+Now: `0,074 ¢ · Rápido · 1,3 s · gratis para ti`. What it costs to produce
+first, because that is what was asked for; whether you are charged, last.
+
+- In cents, not euros. An answer costs tenths of a cent; in euros it reads
+  «0,0007 €» and nobody parses that. Under 0,01 ¢ it says «< 0,01 ¢» rather
+  than «0,00 ¢» — a rounded zero reads as free, and it is not.
+- No cost datum → «coste no registrado», never a zero. A false zero in a money
+  figure is worse than a hole: the zero looks like a measurement.
+
+Both branches verified in the browser: the normal one against a real answer,
+and the missing-data one by stripping `costCents` from the response in the
+client so the honest path was actually exercised rather than assumed.
+## 2026-08-21 — Mobile, phase 1: a breakpoint, a drawer, and no windows on a phone
+
+The platform had no mobile design at all — the only mobile-aware code in the
+tree was the 3D game's. What existed was the desktop layout squeezed. The proof
+is the Tester's rotation test: in landscape (844px) everything fits and works,
+in portrait (390px) it breaks. At 844 the app believes it is on a computer, and
+it is right, because nothing ever told it otherwise.
+
+**`useEsMovil`** is now the one place that decides, by width (768px, Tailwind's
+`md`) and by height. The height half was not in the original design and was
+found by testing the 3D world: an iPhone 12 in landscape is 844×390 — wider
+than 768 — so rotating the phone brought the desktop sidebar back and left the
+world in 332px. Any viewport under 500px tall is a phone lying down.
+
+**B41/B3 — the sidebar becomes a drawer.** 240 fixed pixels of a 390px screen
+was 62% of the display for the menu, leaving 118 usable. On `/login` that meant
+the first screen of the platform on a phone was the one that stopped you
+getting in.
+
+**No half-collapsed state any more** (Eugenio, 2026-08-21), on desktop too: the
+56px icon rail is gone at both sizes. Since nothing is left on screen to say
+the menu still exists, the way back is a 52px button carrying the word "Menú",
+and it lives *in* the top bar, which grows to 56px while the menu is hidden. It
+floated first, and a screenshot showed it covering the first three folders of
+`/explorar`.
+
+**B21 — no lying while loading.** For the ~5 seconds the 3.7MB bundle takes,
+`user` is null and the bar was rendering "Iniciar sesión" to someone who was
+signed in: on the first contact of every visit, the platform told the user they
+had lost their work.
+
+**B28 — windows do not exist on a phone.** Every window is an iframe of the
+whole app; five were measured alive in one tab at 390px. Below the breakpoint
+`abrirVentana` becomes `navigate`, so the ten callers stay untouched and the
+branch happens in one place.
+
+**B37 — the folders panel** on `/explorar` was another 224 fixed pixels next to
+the 240 of the sidebar. On a phone the same folders are a horizontal strip.
+
+**B63 — a card's map** is an iframe of the whole app, and `/explorar` has 92
+publications, so these open themselves as you scroll rather than one at a time.
+The frame now lives only while it is near the screen.
+
+### The rule this phase is built on
+
+**The mobile branch reads the desktop's state and never writes it.** Not the
+open windows, not the menu preference. Without it, glancing at the platform
+from a phone would quietly wipe the desk you come back to — damage nobody would
+ever have attributed to the phone. Verified: two windows opened on desktop,
+survived a mobile visit and a mobile navigation untouched, and came back.
+
+### Measured, on a real session at 390×844
+
+Content lane 118px → 390. Off-screen interactive elements on `/explorar` 107
+(89 of them genuinely clipped) → 22, with one clipped and none zero-width.
+Drawer 288px with a 44×44 close button, closing on backdrop, Escape, its button
+and navigation.
+
+### What the browser here cannot test, and it matters
+
+The integrated browser reproduces an iPhone's *size* faithfully and its
+*behaviour* not at all: it fires no `resize`, no `matchMedia` change, and no
+`IntersectionObserver` callback. Anything reacting to a viewport change must be
+verified by RELOADING at each size, never by resizing live — and lazy-loading
+cannot be verified here at all. A bug reported from live-resizing in this
+browser is not a bug.
+
+
+## 2026-08-21 — D90: project icons are drawings, not letters
+
+Eugenio: «haz que los iconos sean siempre en blanco y negro y que no sean
+letras […] cuando se cree un nuevo proyecto, haz que el icono se guarde
+automáticamente en función del nombre del proyecto».
+
+A project with no icon used to show its initials. Now it shows a stroke icon
+chosen from its name.
+
+**A dictionary picks it, not the AI.** Asking a model would cost money on every
+creation, take seconds, and could return the name of an icon that does not
+exist. A dictionary is right about what it knows and wrong predictably.
+
+**No match → the generic icon.** Not a random one, and above all not «the first
+in the list» — that is the `grupos[0]` failure that cost B13 and B34. A neutral
+icon is the honest way to say «I don't know what this represents».
+
+Two things came out of *running* the dictionary rather than reasoning about it:
+«Coche ultraligero solar volador» gave a SUN, because «solar» sat above «coche»
+— the thing is the car and the rest describes it. And «Consolar a los vecinos»
+proved the word-level match works: it gives the community icon, not a sun,
+which is why «Villabosque» stays generic (it contains «bosque» but does not
+start with it, and loosening that would break «consolar»).
+
+**Nothing was migrated, deliberately.** A generic SQL migration would be a
+second copy of the dictionary, able to contradict the first the day someone
+adds a word. Instead the fallback lives in the server (`menu.ts`,
+`calendario.ts`) so every reader gets it from one implementation. The calendar
+was the third reader, found by looking for everyone who read the column rather
+than stopping at the two obvious ones.
+
+**Emoji are gone from the picker**, which is what makes it honest to replace a
+legacy emoji on a project with its stroke icon: no one can create that state
+any more. The popup previews the same icon the page shows, so the same thing
+does not have two faces depending on where you look at it.
+
+53 icons, imported one by one from `lucide-react` (already a dependency, 5.592
+icons). Only those 53 enter the bundle. They use `currentColor`, so one icon
+serves light and dark without a second version.
+
+## 2026-08-21 — B70: the page editor saves by itself and now keeps what it replaced
+
+`entity_history` was well built — full snapshot, what was there before, who
+changed it — and had exactly one writer: the generic `/api/data/:entity` route
+in `server.ts`. The page editor does not go through it. It saves with
+`PUT /api/windows/:id`, which did `version = version + 1` and never wrote a
+snapshot.
+
+That is a lie with a number attached: version 47 of a page existed as a counter
+and not as content. And the editor saves **by itself every 1,2 s**. Put the two
+together and you get: you select a paragraph, your finger slips, you type over
+it, and seconds later that is on the server and the previous text is nowhere.
+
+Snapshot writing moved to `src/server/historial.ts`, and `server.ts` now
+delegates to it, so both paths write history with the same code and cannot
+drift apart. `server.ts` lost 12 lines rather than gaining any.
+
+**Grouped, two minutes per person per page.** One snapshot per autosave would be
+~1.500 copies in half an hour of writing — nearly a megabyte per session — to
+be able to return to a thousand versions that differ by one letter. Nobody
+wants «how it was 1,2 seconds ago»; they want «how it was before I started
+writing». Two minutes leaves ~15 snapshots and ~10 KB, and always keeps the
+state before each burst.
+
+Verified on a test page of my own, never on Eugenio's: the original text is
+recoverable from `previous`, three saves inside the window collapsed to one
+row, and after ageing that row past the window a second save produced a second
+row. The generic route still records history after the delegation.
+
+## 2026-08-21 — B91: the AI button stops covering content on a phone
+
+The assistant's button was `fixed` at the bottom right, 56×56. On a desktop
+there is room; on a 375 px phone it landed on top of the content. Measured on
+`/personas`: the button at (295, 732), and directly under it the «PROYECTO»
+label of a project card. In the page editor it covered paragraph text.
+
+**Same case as the menu pill, resolved the same way**, because the reason
+written down then is still true: «crecer 16 px una sola vez es un precio que se
+paga donde se ve; tapar contenido es un precio que se paga a escondidas». Here
+nothing even has to grow — the bar is already there and the button fits.
+
+On a phone it now lives in the top bar, taking real layout space, and opens the
+same assistant through a new `ai:abrir` event. On a desktop it still floats,
+where it has never been in the way.
+
+44×44, because the bar is 56 px tall on a phone and that is what a thumb hits
+without aiming. This project already has «83 of every 100 buttons under 24 px»
+catalogued; this is not number 84.
+
+### A limit of our own test browser, worth writing down
+
+The in-app browser does **not** emit `resize` or `matchMedia` `change` events
+when the viewport is changed programmatically — measured: `innerWidth` went
+375 → 1280 with 0 events on both listeners. So a component reading
+`useEsMovil` keeps the previous branch until the page is reloaded.
+
+This means **rotating a phone cannot be verified here**, by anyone. Reading the
+hook, the code is correct. A stale branch after a programmatic resize is the
+harness, not the product — and a reload at each size is the only honest way to
+check a responsive branch with these tools.
+
+## 2026-08-21 — D92: cheap models for ordinary actions, and three premium models that never worked
+
+Eugenio: «intentar utilizar modelos baratos para tareas simples de creación
+estándar de tareas y otras».
+
+### First, two bugs the battery uncovered before it measured anything
+
+**Sonnet 5, Opus 5 and Fable 5 returned a 400 on every single request** —
+`temperature is deprecated for this model`. Three of the four premium models in
+the picker failed always, not sometimes. The Claude 5 family removed the
+sampling knobs (`temperature`, `top_p`, `top_k`); depth is set with
+`output_config.effort`. `SIN_TEMPERATURA` is an explicit list, not a prefix
+rule: taking temperature away from the default Sonnet 4.6 would change
+behaviour for everyone with nobody asking for it. All four now answer.
+
+**Asking for a model that does not exist got a different one, silently.** It
+happened to me: the battery used a stale id, the router quietly fell back, and
+I was one step from reporting that the good model failed all five tests when it
+had never been called. Now the reply says «No existe ningún modelo «X». He
+respondido con Y». A different model changes the cost and the quality of the
+answer; not saying so is the interface asserting something that did not happen.
+
+### The battery, and two tests of mine that were wrong
+
+Five tests, from the five bugs of 2026-08-20: create the task for real in its
+project and group; «Tecnico» without the accent landing in Técnico; a
+non-existent group warned about, valid ones listed, and where it ended up
+stated; «una TAREA» being a task and not a page; and the 120 kg / 90 km trap.
+
+Run against Claude **as a control** — a test the good model cannot pass is
+measuring the test, not the model. It scored 0/5, and both reasons were mine:
+the battery never sent `edit_mode`, so the assistant sat in manual mode where
+the prompt *forbids* returning actions; and the invalid-group test read the
+model's prose instead of the server's answer. The server does exactly the right
+thing — «No hay ninguna etiqueta «Marketing» (tiene: Producto, Diseño,
+Técnico…). La he dejado en «Producto»» — which is the house rule verbatim:
+success is decided by the data that comes back, never by the narration.
+
+### The result
+
+Three consecutive rounds, five tests each:
+
+    claude-sonnet-5   5/5   10,63 ¢
+    abierto-medio     5/5    1,05 ¢     15/15 across three rounds
+    abierto-rapido    5/5    0,46 ¢     15/15 across three rounds
+
+Short, ordinary actions now go to the free model. Through the router, with no
+model forced, the same five pass at **0,93 ¢ against 10,63 ¢** — the same
+result for a eleventh of the cost per correct action (0,19 ¢ vs 2,13 ¢).
+
+**What makes this safe is not that the model gets it right — it is that the
+guard rails are in the server.** The invalid group is caught by the code that
+executes, not by the model's prose. A worse model can write a worse sentence
+without being able to store a task in a made-up place.
+
+Long messages (over 300 characters), PDFs and web search stay with Claude: the
+battery says nothing about those because it did not measure them.
+## 2026-08-21 — User databases, layer 1: columns that know what they hold
+
+Until today there was no user database. There were pages with blocks and a
+board with 18 fields written into the code, and the editor's "table" block is
+plain text — nothing in it knows that 620 is a number, so it cannot be summed,
+sorted, compared or validated. This is the first of three layers: types, then
+relations, then formulas and aggregates.
+
+Three tables — `bd_tablas`, `bd_columnas`, `bd_filas` — and `src/server/bd.ts`.
+Five column types and no more: text, number, date, single select, checkbox. The
+criterion for choosing them was not "the most used" but the ones that change
+what the system can **calculate or validate**; email, phone and link are text
+with an icon and a regex, and they block nobody.
+
+### The decisions that cannot be changed afterwards
+
+**A column is identified by its `id`, never by its name**, and so is every
+option of a select. Cells are stored as `{"<column id>": value}`. The case that
+settles it comes from the acceptance criterion: in the solar shipyard a
+"Sentido" column with options "Mayor mejor" / "Menor mejor" decides which
+direction a trial is compared in. If an option were identified by its text,
+renaming it would silently invert a verdict — a wrong figure presented as a
+right one, which is the worst failure this layer can have. Verified: renaming
+both a column and an option left every stored value untouched.
+
+**Column definitions are real rows, not jsonb.** Migration 0049 stores the
+board's columns as jsonb and is right to: they are three labels that only mean
+something inside their project and are never queried on their own. This is the
+opposite case — these definitions are queried across rows, need identity, and
+will be referenced by formulas. The *values* do go in jsonb, because a row's
+cells are always read together.
+
+**A row has a body from day one** (`pagina_id`). Each supplier in the shipyard
+is a page holding its contract and its minutes, and that is half the value. If
+rows ship as "cells only", giving them a body later means migrating data that
+already belongs to users.
+
+**Values are stored typed.** `"620,50"` is stored as the number `620.5`, a date
+as ISO text. Not "everything as a string, we will convert later": that leaves
+layer 3 guessing types on every read, and a parser where there should be a sum.
+
+**A cell is never a bare `null` on the way out.** It is always labelled —
+`vacia`, `ok`, `sin_calcular`, `error`. Only the first two can occur today, and
+the contract still ships with all four: adding the other two later would mean
+changing every client already written against layer 1. Emptying a cell is also
+distinct from storing a zero.
+
+**Permissions are asked of the containing project, never of the table or the
+row**, the same shape as `archivo.ts`, so two contradicting truths about who
+sees what cannot exist.
+
+### Deliberately absent
+
+Relations, formulas, aggregates, saved views, saved sort and filter, multi
+select, person and file columns. All cheap once this model exists and expensive
+before it. When relations arrive there will be **one generic links table**, not
+one per relation: `CLAUDE.md` forbids new junction tables (43 of 115 already)
+and a relation layer is literally a junction-table generator. Stored once, with
+an index on both sides, and the reverse direction is a query — never a second
+row that can contradict the first.
+
+### The model was tested on paper before the migration
+
+Can it express `roadmap_items`, the board's 18 fixed fields? Fifteen of the
+eighteen in layer 1; the three that remain — author, project, assignee — are
+relations, which is exactly layer 2, and nothing here blocks them.
+
+### Verified against the running API
+
+Five types created and an invented one refused. Writing "seiscientos" into a
+number fails with the column named rather than storing a zero; a malformed date
+and an option that does not exist fail the same way, and a failing cell aborts
+the whole write so half a row is never saved. No session reads nothing and
+writes nothing. Deleting a row goes to the 15-day bin. History goes through
+`historial.ts` rather than a second way of writing it. All test data removed
+afterwards.
+
+
+## 2026-08-21 — The model picker says what each request will cost
+
+Eugenio: «en el listado para elegir el modelo de IA no aparece el coste
+estimado de las peticiones, soluciónalo».
+
+The list said «gratis» or «incluido». That answers *«will I be charged?»*, not
+*«what is this worth?»* — two different questions, and choosing a model needs
+both. The catalogue already held prices, but in cents per **million** tokens,
+which is a unit nobody can picture: «300» looks nothing like the cost of asking
+a question.
+
+Each row now shows what one of **your** requests would cost with that model:
+
+    Rápido        ≈ 0,127 ¢     gratis para ti
+    Equilibrado   ≈ 0,313 ¢     gratis para ti
+    Sonnet 5      ≈ 3,03 ¢      incluido
+    Fable 5       ≈ 10,11 ¢     incluido
+
+An 80× spread that was invisible a moment ago.
+
+**The estimate comes from what actually happened, not from a made-up figure.**
+`/api/ai/status` measures the average size of a chat request over the last 30
+days: this person's own first, the platform's if they have fewer than three (a
+mean over one odd conversation is not how someone writes), and a declared
+assumption only if the table is empty. It always returns *where the number came
+from*, and the picker says so underneath — «Calculado sobre tus 140 últimas
+peticiones (~8.418 de entrada y 339 de salida)». A figure that cannot say what
+it was computed on is indistinguishable from an invented one.
+
+Marked «≈» on purpose: the real cost depends on how much the model answers and
+how well the cache hits. The exact, measured figure is the one under each reply.
+
+## 2026-08-21 — Pending tasks: nine improvements, starting with a date nobody could see
+
+Eugenio: «mejora las tareas pendientes».
+
+**The due date existed and the page never received it.** `roadmap_items.vence_el`
+has been there for a while and the calendar reads it, but `GET /api/tareas`
+never selected it. What the page called `fecha` was `updated_at` — when it was
+last *touched*, not when it is *due*. A task with a deadline looked exactly like
+one without. Two different dates now travel under two different names: `vence`
+and `actualizada`.
+
+**And there was no way to set one, which is why 0 of 128 tasks had a date.** The
+route existed — the calendar uses it — but nothing in the task list reached it.
+Not that nobody wanted deadlines: nobody could add one. The date badge *is* the
+control now; the field sits over it, transparent, so a tap opens the browser's
+own date picker without adding another button to a crowded row.
+
+The other seven:
+
+- **Said in words, not in numbers.** «vencida hace 3 días», «vence hoy», «en 5
+  días». A plazo answers *«am I going to make it?»*, and `2026-08-19` makes you
+  do the subtraction yourself.
+- **Sorted by urgency.** Overdue first, then soonest, then priority, done last.
+  They used to come in creation order, so an overdue task could sit twentieth.
+- **Overdue count at the top**, and per project even when the project is folded
+  — with eight lists closed, a delay did not exist until you opened the one
+  holding it.
+- **Filter by priority** and **«solo las mías»**. Only the state filter existed,
+  and with 128 tasks across eight projects «todas» is not a working view.
+- **The header says what is LEFT**, not «3/10» — which makes you subtract to
+  learn the thing you actually want.
+- **The empty state names the filter that is hiding things.** «Ninguna tarea con
+  esos criterios» does not tell you which of the four to undo.
+
+Verified in the browser: setting a past date showed «vencida hace 3 días», the
+top counter went to «1 vencida», and the row persisted to the database. The test
+date was then removed — it was one of Eugenio's tasks, not mine.
+
+## 2026-08-21 — Six more: a phantom entity, history on three more routes, priority from the list
+
+**A `PUT` on something that does not exist created it.** `/api/data/:entity/:id`
+does an upsert, so `PUT /api/data/challenges/ID_MAL` answered 200 and created a
+challenge titled «Nuevo Reto». A mistyped id — or a screen pointing at something
+already archived — left a phantom entity in the database that nobody asked for,
+while whoever wrote it believed they had edited something else. Now a 404 that
+says which id does not exist and that POST is the way to create. Verified both
+ways: the PUT 404s and creates nothing; the POST still creates.
+
+**Three more routes that changed things without keeping what they replaced.**
+B70 fixed the page editor; the same defect lived on in `PUT /api/graphs/:id` and
+in the shared publication-edit route, which touches windows, graphs and maps.
+The defect was never in the page route — it was that snapshots were only written
+from `/api/data/*`. All of them now go through `historial.ts`, so there is one
+implementation and no second format to drift. Not grouped: these are saved when
+someone presses a button, not every 1,2 s like the editor. Verified end to end on
+a graph of my own — `previous` holds the old title, `snapshot` the new one.
+
+**Priority can be changed from the task list**, the way state already could:
+click cycles alta → media → baja. You could filter by priority and not set it,
+which is half a tool. And «media» was never painted, so on your own task there
+was nothing to click — now there always is, faded until you hover.
+
+## 2026-08-21 — The AI moves to a dock along the bottom
+
+Eugenio: «que crees un menú inferior de lado a lado donde esté el chat de IA con
+capacidad de desplegarse hacia arriba a 1/3 de pantalla, vigilando que en
+versión móvil sea útil, y ahí tener el historial de chats a un lado».
+
+The chat used to be **two different layouts for the same thing**: a resizable
+column on the right on desktop, a full-screen drawer on mobile. Two places to
+fix the same bug. Now it is one dock along the bottom, edge to edge, on both.
+
+- **A third of the screen**, measured: 0,33 on a 1280×800 desktop and 0,33 on a
+  375×812 phone. Drag the top edge to change it, between a quarter and three
+  quarters — under a quarter an answer does not fit, over three quarters you are
+  covering the app, which is what this came to avoid.
+- **The history lives to one side**, as asked. A fixed 208 px column from 768 px
+  up; on a phone it slides over, because taking 200 px of width from a 375 px
+  screen would leave the conversation in a gutter.
+- **It closes by tapping outside**, and has its own «Cerrar el historial». The
+  first version could only be closed with the same button that opened it — and
+  that button sits *underneath* the panel. It opened something that covered its
+  own switch.
+- **The old dropdown is gone.** Two doors to the same room, and one of them
+  pushed the conversation down every time it opened.
+
+**And it reserves its own space.** A fixed element at the bottom covers what is
+under it — the exact bug fixed hours earlier with the AI button (B91). The dock
+publishes its height in `--hueco-muelle` and the layout leaves that much room at
+the end of the page, so the last row of a table stays readable. Measured: 235 px
+of padding on `main` with the dock open, 0 with it closed.
+
+Verified end to end: sending a message from inside the dock got an answer with
+its cost line, at both widths.
+
+## 2026-08-21 — The dock is always there, which is what «menú inferior» meant
+
+Eugenio, minutes after the previous deploy: «no veo el menú de abajo».
+
+The deploy was fine — `--hueco-muelle` was in the production bundle. The bug was
+my reading of the request. He asked for a **menu** along the bottom «con
+capacidad de desplegarse hacia arriba a 1/3 de pantalla»: something that is
+always there and *expands*. I built something that *appears* when you open the
+chat, so unless you clicked the sparkles button there was nothing at the bottom
+to see.
+
+Now the bar is always at the bottom, 52 px, edge to edge, with the writing box
+in it. Tapping it expands to a third of the screen. Measured: 52 px closed, 268
+px open on a 812 px phone (0,33), and the layout reserves both — 52 px of
+padding closed, 268 px open, so nothing is ever hidden underneath.
+
+Two doors were removed in the process, both mine from earlier today: the
+floating button, and the AI button in the top bar (B91). Both existed to open a
+panel that was not visible; with the bar always present they were second doors
+to a room whose door is already open — and the top one was far from the thumb.
+
+## 2026-08-21 — One minimal row at the bottom, and the header gone
+
+Eugenio, with a screenshot of Claude Code's own composer: «con el botón de "+"
+para los archivos, un icono minimalista para el micro, y el modelo, todo abajo
+del todo, las configuraciones que tienes arriba quítalas […] y que entonces se
+quede más espacio para ver las respuestas».
+
+**The writing box goes first and the controls under it**, not the other way
+round. What you do here is write; attaching and picking a model are things from
+before or after. With them on top, every time you looked for where to write you
+had to skip three buttons.
+
+**Icons, not labels.** «Adjuntar», «Dictar» and the model with its badge took
+two lines of a panel that is a third of the screen — two lines less of answer.
+The model name stays, because it is a datum and not a label; the words moved to
+the tooltip, where they cost nothing.
+
+**The header is gone.** It was a 90 px block with the assistant's name, the
+model, a «Viendo: …» pill and four buttons: a third of the dock spent telling
+you where you were. It is now a 41 px strip with «Viendo» as one line and three
+small icons. The «Viendo» itself is kept — knowing the AI can see your page was
+a requested fix and it has to stay checkable — but it is a line, not a card.
+
+**The settings panel is gone too.** The only thing in it was the edit
+permissions, and it pushed the conversation down every time it opened. They are
+now the first item of the bottom row, exactly where the reference puts them —
+visible without opening anything, because whether the AI may touch your data is
+not a detail.
+
+Verified: sending from the new composer answered, with its cost line.
+
+## 2026-08-21 — Three buttons at the bottom, like a phone app
+
+Eugenio, with a screenshot of YouTube's mobile bar: «pon 3 botones, el de
+buscar con la lupa a la derecha, y ahí se abre el CHATBOT. El de "+" en el
+centro y ahí aparecen un visor de las herramientas para crear o subir. Y el
+botón de CASA en la izquierda que te lleva a la página de proyectos».
+
+The bar was a single «Pregunta a la IA…» field. Now it is three: **Proyectos**
+on the left, **+** in the middle, **preguntar** on the right — the three verbs
+of the platform (go back, make, ask), where a thumb reaches without moving the
+hand. The + is the only one with a filled background, because creating is what
+is done most and what is hardest to find today.
+
+**The + opens a viewer of what can be made**, and every button lands where that
+thing is actually created — checked one by one before adding them. An entry
+that leaves you on a page where nothing can be created is worse than no entry.
+
+**There is no loose «upload a file»**, deliberately. A file has to hang from
+something — a project, a task, a page — and one with no owner is exactly the
+problem fixed earlier today. You upload from the thing it belongs to, so the
+viewer takes you to the project.
+
+**The icon is the menu's, not a house.** It started as YouTube's house; Eugenio
+pointed at the sidebar's «Proyectos» section. This button does not lead to a
+home, it leads to projects, and the same thing has to wear the same face in
+both places or it reads as two destinations.
+
+**And an empty dock is now impossible.** Three places open it without saying
+which panel — focusing the box, prefilling from another page, the `ai:abrir`
+event — and a strict check would have opened a blank white gap. Fixed in all
+three places *and* in the render: no panel chosen means the chat.
+
+## 2026-08-21 — Five buttons at the bottom
+
+Eugenio, twice in a row: «vamos a añadir un cuarto botón […] el de publicaciones
+con su mismo icono» and «falta uno más, el de mensajes».
+
+Proyectos · Publicaciones · **+** · Mensajes · Preguntar. Five slots put the +
+exactly in the middle, which is where the most-used thing belongs; with four it
+would sit off-centre, and with six each button would drop under 44 px wide,
+which is the minimum for a thumb.
+
+Every icon is the one that section already uses in the sidebar — `FolderKanban`,
+`Compass`, `MessageSquare`. If the same thing wears two faces it reads as two
+destinations.
+
+The five share **one** `BotonMuelle`: five copies of the same block would be
+five places to fix the same detail. Under 360 px the labels hide and the icons
+stay, with the name still in the tooltip.
+
+### And a leftover of mine, found in the screenshot
+
+A "ZZZ grafo de prueba" was sitting in Eugenio's showcase. It came from a POST I
+had read as failed — the response carried a query error, so I assumed nothing
+was created and moved on. It had been created. Deleted, and every table swept
+for `ZZZ%`: graphs, pages, tasks, projects, maps, publications — all zero.
+
+The lesson is the night's own rule pointed at me: **an error in the response is
+not proof that nothing happened.** Cleanup has to check the table, not the reply.
+
+## 2026-08-21 — The assistant's tables are tables now, and the corner is two things
+
+Eugenio, with a screenshot: «creo que el asistente intenta hacer tabla, pero no
+salen bien, arréglalo». Plus: «el menú de arriba a la izquierda, quítale el
+nombre Menú, y ponlo arriba a la derecha del todo, junto a la foto de perfil; en
+la foto de perfil elimina la flecha lateral y deja solo la foto».
+
+**The replies were painted as plain text.** The AI does write tables, and well —
+they arrived as `| Parámetro | Challenger | Cruiser |` with a row of dashes
+under them. A comparison table is exactly where the format *is* the information:
+three columns show at a glance what a list of pipes does not show at all.
+
+`Markdown.tsx` renders tables, headings, bold, italics, inline code, bullet and
+numbered lists, and rules. **Anything it does not recognise is printed as-is** —
+a renderer that guesses wrong is worse than one that does not interpret, because
+the second at least lets you read the original. Tables scroll sideways inside
+their own box so a four-column table does not push the conversation off a phone.
+
+*Your* messages are still printed verbatim: if you type an asterisk it is an
+asterisk. Interpreting what the user wrote would be changing what they said.
+
+**No library, and not by preference.** `react-markdown` + `remark-gfm` was
+tried; npm refuses it because `react-simple-maps` pins React 18 and the project
+is on 19. That conflict predates this, and forcing it with `--legacy-peer-deps`
+changes how the whole tree resolves while someone else is working in the same
+repo. When it is fixed, this file can be thrown away for the library.
+
+**The corner:** the menu button lost the word «Menú» — three lines is the most
+recognised icon on a screen and the word bought nothing — and moved next to the
+account. The avatar lost its chevron and its pill; the photo *is* the button,
+bigger (36 px) now that it does not share the space. Both names stay in
+`title`/`aria-label`, so a screen reader still says them.
+
+## 2026-08-21 — The 14 objectives across the top of Publicaciones
+
+Eugenio: «pon un submenú superior como el de YouTube donde aparezcan los 14
+objetivos uno al lado del otro y que se pueda hacer scroll lateral para verlos
+todos en móvil».
+
+One strip, one line, scrolling sideways: 1.665 px of chips inside 335 px of
+phone. Fourteen chips wrapping would be four rows of filters above the content
+— more filter than content.
+
+**It is a search by topic, not a category, and it is said that way.** Nothing
+today links a publication to an objective: that table does not exist. So the
+chips look for the objective's words in the title and body — «agua», «hídric»,
+«riego», «acuífer»… When one finds nothing it says «Ninguna publicación habla de
+agua todavía», so it never reads as «there is nothing about water» when what
+happened is that nobody wrote it that way. Calling it a category would be
+claiming a classification nobody made.
+
+Measured: AGUA takes 92 publications down to 4, and they are about water.
+
+The icon map lived inside `Objectives.tsx`. Needed in two places now, so it
+moved to `src/utils/objetivos.ts` and that page imports it — copying it would
+have left two lists that drift the day someone changes one icon.
+
+## 2026-08-21 — The bottom bar, reordered and tighter
+
+Eugenio: «haz más compacto el menú […] cambia la posición de buscar, y ponla en
+el centro, y la de crear donde estaba la de buscar. Cambia el icono de mensajes
+por el de dos personas […] que se vea que es red social. Y el de publicaciones,
+ponlo a la izquierda del todo y cámbialo por el icono de casa».
+
+Inicio · Proyectos · **buscar** · Red · Crear. Search takes the centre — the
+most repeated gesture belongs in the spot the thumb finds without looking — and
+creating moves to the edge, because it happens fewer times a day than asking.
+
+46 px instead of 52, with 18 px icons and smaller labels. Six pixels back to
+every page, on every screen.
+
+## 2026-08-21 — Publicaciones is the home page, with people at the top
+
+Eugenio, with an Instagram screenshot: «la página de publicaciones será a partir
+de ahora la página de inicio, y ahí tienen que aparecer las publicaciones pero
+antes aparecerán círculos modo Instagram de las personas que tienes agregadas, y
+si no tienes agregado a nadie te aparecen canales relevantes a los que siga
+mucha gente».
+
+The root used to be `Entrada`, which sent anyone not logged in straight to
+`/login`: the platform showed nothing before asking for an account. Now the
+first thing anyone sees is what people have published. `Entrada` keeps its own
+address at `/entrada`, so nothing that linked to it breaks.
+
+**The circles say whether they are yours or suggestions.** A circle of someone
+you follow and one of someone you do not look identical, so the difference has
+to be stated: «A quien sigues» or «Gente a la que seguir», plus a coloured ring
+versus a dashed grey one. Without that, the home page would make you believe you
+have a network you do not have.
+
+**«Relevant» is measured, not asserted**: how many people follow them and how
+much they have published. There is no other datum to sort by, and sorting by
+something you do not have would be faking a criterion. Each suggestion shows its
+follower count — the reason it is there — or its publication count when nobody
+follows them yet.
+
+Both branches verified: with nobody followed, 6 suggestions ordered by
+followers; after following one person, «seguidos» with exactly that person. The
+follow used for the test was removed.
+
+Nothing to show means nothing to occupy: on an empty platform the strip does not
+render at all, rather than a row of placeholders.
+
+## 2026-08-21 — The social layer, and a notifications table that had been empty for months
+
+Eugenio: «trabajo en toda la parte de red social, enumera todas las
+funcionalidades […] implementa las que falten, y testéalas todas, gestiona
+también el tema de notificaciones, crea una campanita arriba a la derecha».
+
+**`notifications` had zero rows.** The table existed, the endpoint to read it
+existed, and exactly one place wrote to it — telling followers of a mentioned
+entity. Commenting, replying, reacting, following and saving notified nobody. A
+social network where nobody finds out about anything is a noticeboard.
+
+`src/server/avisos.ts` is the single writer, the same lesson as `historial.ts`:
+if every route writes its own, every route ends up writing them differently and
+one day one forgets. Routes say what happened; this decides who hears about it.
+
+- **Nobody is notified of their own actions.** Commenting on your own
+  publication is not news, and a bell that rings for what you just did teaches
+  people to ignore it. Verified: 0 notifications where sender = recipient.
+- **The sender's name is stored in the notification**, not resolved on read. If
+  they rename tomorrow, today's notice still says what happened today.
+- **`duenoDe` returns null when it does not know**, and then nobody is notified.
+  A notice that reaches the wrong person is worse than one that never arrives.
+
+### What was missing, and now is not
+
+Editing a comment, deleting one (archived, so replies underneath do not become
+orphans), the followers and following lists, seeing what you saved, seeing who
+reacted, the unread count, and marking one notice read instead of all of them.
+
+Marking everything read just by opening the bell would make the ones you had not
+got to read disappear.
+
+### The bell
+
+Polls only the *count*, once a minute; the list is fetched on open. Pulling
+fifty notices every minute to paint a «3» is buying a list to look at a number.
+
+### 31 tests, two people, one real bug
+
+The battery uses two accounts because with one you cannot verify any
+notification at all — you are never notified of your own actions.
+
+Test 09 caught a real bug: `= ANY(${lista}::text[])` looks natural and the
+driver sends the array as a quoted string, so Postgres tries to read `{"a","b"}`
+where there is `a,b` and dies in `array_in`. **The route answered 200 either
+way.** Without that test, @mentions would have shipped notifying nobody, silently.
+
+31/31 pass. Every test row removed afterwards: publications, comments,
+reactions, saves, reports, notifications and the follow, all back to zero.
+
+## 2026-08-21 — Where you are, in black; the corner rearranged
+
+- **The bottom bar marks the page you are on** in black — five destinations with
+  none marked makes you read the content to know where you are. The black sits
+  on the icon only; a pill the width of the button would be a row of squares.
+- **Icons 25% bigger on a phone** (22 px in a 34 px target), unchanged above
+  640 px where a mouse aims for you. The bar itself is 44 px, down from 52.
+- **The menu button is back on the left**, with the logo to its left, and the
+  words «Menú» and «Humanity Wiki» are gone: three lines is the most recognised
+  icon on a screen, and the name was taking the width the open windows need.
+  Both names stay in `title`/`aria-label`.
+
+## 2026-08-22 — Your own work on the home page, and where the panels open
+
+Eugenio: «la página de publicaciones, aparte de los globos de personas y una
+serie de publicaciones, también tiene que aparecer los proyectos de uno mismo y
+tareas pendientes» · «la parte de buscar con IA tiene que abrirte la pantalla
+completa en el móvil y en el ordenador una pantalla lateral derecha; la parte de
+crear también».
+
+**The home page was about other people** — who you follow and what they
+published. The half that is yours was missing, and it is the only half that
+tells you whether there is something to do today. Now: your projects with what
+is left in each, and the five tasks that come first.
+
+**First what is due**, not the first five that turn up: a home page showing five
+random tasks is decoration; one showing the three that slip this week is a tool.
+It reuses `/api/tareas`, which already splits by project and resolves
+permissions — a new endpoint for the home page would be a second way of
+answering the same question.
+
+**Where the panels open, by screen.** Closed it is always the bottom bar. Open:
+on a phone the whole screen (a third of 812 px does not fit an answer with a
+table in it), on a desktop the right-hand column, full height — there is width
+to spare and what is scarce is height, and the page you were reading stays in
+front while you ask about it. Measured: 375×768 with the bar left visible, and
+420×800 pinned right with `main` reserving 420 px.
+
+Both use the *same* box with the same conversation inside. Two JSX branches
+would be two places to fix the same bug.
+
+### A bug I made and then measured
+
+The mobile gap was an inline `bottom: 44` on an element whose classes also
+position it. The attribute was there in the DOM and the computed value came back
+`0px`: the panel ate the bar. Moved to a class (`bottom-11`), and it measures 44
+px of gap. **One mechanism per property** — mixing an inline style with
+positioning classes is how you get a value that is present and not applied.
+
+And a reminder to me: my first check said the circles were gone and they were
+not — I read the page 11 s in, before the fetch resolved. Looking again beat
+"fixing" something that already worked.
+
+## 2026-08-22 — The card panel, the home tab, and two things that said «done» without doing it
+
+### The card that lost what you were writing
+
+Eugenio: «cuando escribo en la tarjeta es muy fácil que se cierre cuando muevo
+el ratón pinchando, y el texto que estaba escribiendo se pierde».
+
+**The dark backdrop had an `onClick` that closed it, and a click counts where
+you RELEASE the mouse.** Select a word inside the field, drag a few pixels too
+far, release outside → click on the backdrop → everything typed is gone. Not a
+rare case: selecting text in a narrow box causes it almost every time.
+
+It is a side panel now — right-hand column on a desktop, full screen on a phone
+— which fixes it at the root because **there is no backdrop to click**. It
+closes with the ✕, with Escape or with «Cancelar»: three deliberate gestures,
+none of which happens by accident on mouse-up. Verified with the exact gesture:
+press inside, release outside, and the text is still there.
+
+Both fields are three lines instead of one. A ten-word title read through a
+one-line slot has to be scrolled with the arrow keys to be re-read.
+
+**And it confirms before closing.** A circle draws itself and a tick strokes
+across it in 900 ms. Drawn, not popped: something that draws itself reads as an
+action completing, something that appears reads as a warning, and warnings get
+dismissed without being read. It animates `stroke-dashoffset`, which runs on the
+GPU without relaying out the page — a confirmation that stutters on a cheap
+phone is worse than none. Respects `prefers-reduced-motion`.
+
+### «Mi Perfil» did work — as a window nobody could see
+
+Eugenio: «pincho en mi imagen en el menú, y le doy a perfil, y no me lleva a mi
+perfil». It *did* take you there: it opened your profile in a **window**, and if
+that window was minimised or behind, nothing visible happened. From the outside
+that is exactly «it does not work». Your profile is a place you GO to, not a
+tool you consult beside something else, so it navigates now.
+
+`/` no longer redirects to your profile either — the home page is Publicaciones.
+`Entrada` stays alive at `/entrada` so saved links do not die in a 404; what
+changed is where it points.
+
+### A home tab that cannot be closed
+
+With every window closed the tab strip was empty and there was no way back to
+the start from up there. A fixed tab costs 24 px and removes that dead end. It
+is not a window: not in the manager, not draggable, not minimisable — a link
+shaped like a tab.
+
+### The icon that would not save, and the menu that could not know
+
+Eugenio: «he cambiado el icono de la página de proyecto y no se ha actualizado
+al instante el icono del menú lateral».
+
+Two bugs stacked, and the second was hiding behind the first.
+
+**The server answered `ok: true` and saved nothing.** The icon validator rejects
+anything containing a colon — correct back when the only thing with a colon was
+a `javascript:` — and since D90 an icon can be `lucide:Truck`. So the value was
+dropped silently. The menu was not failing to notice: **there was nothing to
+notice.** Stroke icons are allowed now, with the name checked against the real
+list, so the door stays shut for everything else.
+
+**And `RamaMenu` copied the icon into local state on mount and never looked
+again.** That state exists so the change shows instantly without waiting for the
+network, so it cannot be removed — it is synchronised instead. Two places
+holding the same truth, again.
+
+Verified end to end: changing the icon on the project page turned the sidebar
+from `lucide-truck` to `lucide-rocket` with no reload. Eugenio's 🚐 was restored
+afterwards.
+
+### And the search button lost its black
+
+Black is reserved for saying *where you are*. With the search button black by
+default there were two black things at once and neither meant anything.
+
+## 2026-08-22 — The tabs, the logo, and a profile that fits on one screen
+
+### Tabs
+
+Closing one now brings **the tab to its left** forward. Before, closing left
+nothing focused: you stared at whatever was behind, which was usually nothing.
+The left one and not the last used — in a row of tabs, what the eye expects when
+one closes is its neighbour moving in.
+
+And a **red ✕ to the left of the strip** closes them all, with a confirmation
+that says how many. Closing eight windows in one click does not undo, and a red
+✕ next to other small ✕s gets pressed by accident. «8» is a number that stops
+you; «close all» is not.
+
+### The logo
+
+Eugenio sent it. One SVG for the sidebar, the top bar and the favicon — one file,
+so they cannot end up different. SVG rather than PNG so it reads the same at
+20 px in the menu and at 180 in a browser tab. The header carries only the mark;
+the sidebar keeps the mark *and* the name, because that is the one place the
+platform says what it is called, and removing it from both would leave it
+nameless everywhere. Both go home.
+
+### The profile, rebuilt
+
+> «quita la portada de fondo. Sube la foto hasta la esquina superior izquierda y pon el nombre al lado de la foto» · «quita lo de siguiendo y seguidores y lo de publicaciones» · «pon en grande una fila de PROYECTOS […] PUBLICACIONES […] PRODUCTOS» · «haz que sea compacto y que se vea todo esto en una sola pantalla»
+
+**Compact means removing, not shrinking.** What makes it fit is not smaller
+type: it is that 160 px of gradient banner went, and the three counters went.
+Measured: everything asked for ends at 487 px on an 800 px screen.
+
+- **The counters are gone.** On a platform that is starting, «0 seguidores» on
+  everybody's profile informs nobody and discourages whoever just arrived. The
+  data is still there — the home page uses it to suggest who to follow — what
+  went is the scoreboard.
+- **Three rows.** Three cards across on a desktop; on a phone 68% of the width,
+  so the next one peeks. That peek is what says *there is more*: a row ending
+  exactly at the edge looks finished, and nobody swipes what looks finished.
+- **Hover lifts and enlarges** the whole card, not just its image.
+- **Up to three locations**, chosen from the real territory catalogue rather than
+  typed, so «Madrid» is *the* Madrid of the platform and not a loose string. The
+  cap is enforced on the server: if only the screen checked it, thirty could be
+  sent from outside. At three the search box disappears and says why — a search
+  box that stops responding looks broken.
+- **The 14 objectives**, pickable, shown between the name and the description.
+  They say what someone is about before a paragraph does, in the platform's own
+  vocabulary — the same fourteen that filter the home page. Ids are filtered
+  against the real catalogue on save: an invented one would paint as a nameless
+  gap.
+
+Verified end to end: added «Comunidad de Madrid» and AGUA, saved, and both
+appear under the name. Eugenio's profile was restored to empty afterwards.
+
+---
+
+## 2026-08-22 — The anthill, and the chat stops eating the screen
+
+Eugenio, in one message: a channel to report what breaks, the bottom bar
+disappearing when the chat opens, the Proyectos page saying its title twice, a
+sidebar drawn two different ways, the chat history taking half the panel, and a
+model list nobody could choose from.
+
+### The anthill (`/hormiguero`)
+
+A shared board for what fails and what is missing, reachable from the bug icon
+next to the bell. Three colours and each one means one thing: **red** waiting,
+**amber** blocked on a person — and it says *on what*, **green** done.
+
+- **Amber cannot be silent.** `PUT` refuses `estado: 'bloqueada'` without
+  `necesita`. A blocked item that does not say what it needs is the reason
+  someone has to ask on another channel, which is what this replaces.
+- **The status belongs to whoever programs** (admin). If the person who opened
+  a note could tick it done, the board would stop describing what is done.
+- **The dot on the button counts only the blocked ones.** If it also counted
+  what is waiting to be built it would be lit permanently and mean nothing.
+- Archive, never delete. Every route checks the session; the state changes check
+  the role.
+
+### The bottom bar and the panel were the same element
+
+Opening the chat made the navigation vanish, so you had to close the chat to
+change section. They were one element changing height. Now they are two
+siblings: the panel opens above, the bar stays below, on the phone and on the
+desktop alike.
+
+### The chat
+
+- **Half the screen**, not 420 px. Fixed pixels are a third of a laptop and a
+  sixth of a big monitor — the same narrow column on a screen with room to
+  spare. Three presets (33/50/66 %), a draggable edge, saved in your settings.
+- **The history is put away**: a narrow rail that peeks on hover and stays on
+  click. It was 208 px of a 420 px panel for a list you open once in a while.
+- **«Viendo: …» is gone.** It was built to check the AI receives the page as
+  context, and it proved it. Checking something once is not a reason to show it
+  forever: it spent a line telling you about the page you already have in front.
+- **Searching no longer spends AI.** «Busca publicaciones sobre el agua» has an
+  exact answer in the database, and running it through a model makes it worse
+  twice: it costs money and returns prose *about* the results instead of the
+  results. Now it answers with the links and says it did not use the AI — with a
+  button to ask the AI anyway. The verb decides, never a word from the topic:
+  «¿por qué se contamina el agua?» still goes to the model. That distinction is
+  the same bug that once turned «create a task» into a document nobody asked for.
+- **Publications open from a link** (`/explorar?abrir=…`). There is no route per
+  publication — they open as a card over the list — and if it is not there any
+  more the page says so instead of doing nothing, which from outside looks like
+  a broken link.
+
+### The model selector: five choices, not nine model names
+
+«Haiku 4.5», «Fable 5», «gemini-pro-latest» only help you choose if you already
+know who makes them and what they cost. What is being decided here is how much
+to spend and on what: **simple / medium / high**, plus **images** and **video**.
+The catalogue is untouched — the automatic router still picks among all nine —
+this is a *view* of it, so the price shown is the price charged.
+
+- **Prices in euros**, one unit everywhere («0,03 € por mensaje»). Two units for
+  the same money on one screen is how you end up wrong by a factor of a hundred.
+  Under a cent it says «menos de 0,01 €», which is true and is not zero.
+- **«Incluido» next to each one**: what it costs and who pays are two questions
+  and both need answering.
+- **Video is shown, switched off, with the reason.** Hiding it would leave the
+  person who asked unable to tell «ignored» from «coming»; showing it as if it
+  worked would be a button that does nothing.
+- «Autónomo» is now **«Permite editar»**: the first describes the AI, the second
+  describes what you are letting it do to your things, which is the actual choice.
+
+### Two pages that said the same thing twice
+
+- **Proyectos**: one title, and «+ Crear nuevo» beside it. It had two headings
+  and a paragraph explaining what a board is, on the page you enter twenty times
+  a day already knowing.
+- **The sidebar**: one style. Project icons came through `Icono` (stroke 1.75,
+  the text's colour); every other section was painted by hand at `text-slate-400`
+  and stroke 2 — thicker and paler, in rows sitting one on top of the other. The
+  colour now lives on the row, so icon and label always match, and the row is
+  what knows whether it is the active one.
+
+Verified locally end to end: the anthill API (create, block without saying what
+is needed → refused, block saying it → accepted, count), the tier list served by
+`/api/ai/status`, the search answering with links and no AI, a publication
+opening from its link, and the bar staying put with the chat open. The test
+session (`claude-dev-verificacion`) and the test note were deleted; no cookie was
+ever written into the shared browser.
+
+---
+
+## 2026-08-22 (II) — The 3D world becomes the Visor 3D, and files can be dropped into a page
+
+### Dropping a file into a page
+
+Eugenio: «permite en el constructor de páginas estilo Notion arrastrar un
+archivo y que se inserte en la página, y que dé la opción, una vez insertado,
+con 3 puntitos, de abrirlo, cerrarlo o embeberlo».
+
+- Dragging a file onto a page inserts it. **It goes through the same pipeline as
+  pasting** — both hand over a `DataTransfer` with files in it, so dragging a
+  PDF and pasting one cannot give different results. A second path with its own
+  list of types is where `.webp` works pasted and not dropped.
+- **An image embeds; a PDF becomes a card** with its name, its size and its
+  first page rendered small. The PDF used to open as a 70vh viewer that split
+  the document in two — you stopped reading your own page to look at an
+  attachment you maybe only wanted to hand.
+- **Three dots** on every file block: open it at the side, embed it, close it to
+  a card, or remove it.
+- If what you drop isn't something we can make a block of, **it says so**.
+  Dropping something and nothing happening is the bug nobody can report.
+
+### «Atrás» from an inserted publication
+
+He described it as a broken back button: insert a project publication in a page,
+open it, press back, and you land on the projects index instead of your page.
+
+It was not the back button. **Viewing the publication took you out of the
+document**, and coming back depended on the history being what you imagine — it
+wasn't, because the card led to `/proyectos/:slug`, whose own screen sends you
+to the index. The cure is not to patch the history: it is not to leave.
+
+Now it opens in a **side window** — the same `<iframe>` mechanism as the desktop
+windows, so it is the real page with its real permissions. Opening it pushes one
+history entry, so back closes the panel and leaves you exactly where you were.
+
+### Expand and close, on every window
+
+One `ControlesVentana` for the three kinds of window there are. Growing is the
+diagonal arrows he sent, and it works in both directions. The desktop windows
+used a square for the same thing and the side panel could not grow at all.
+
+### The header
+
+- **The permanent «Inicio» tab is gone.** It cost 24 px on every screen for a
+  case that lasts a second. The logo already goes home, and **closing the last
+  window now leaves you at Inicio** — that rule lives in one place, not in the
+  four different things that close a window.
+- **The menu button is the mirror of the one that hides the menu**, instead of
+  three lines. Two halves of one gesture that now look like it.
+
+### The Visor 3D (was «Mundo 3D»)
+
+The whole point, in his words: «no será un mundo hiperrealista sino un mundo muy
+simplificado, con un centro y alrededor […] es todo como la sala del arquitecto
+de Matrix, con pantallas alrededor».
+
+What went: 118 hectares of village, houses, an edible forest, a river, paths,
+clouds with a day/night cycle, butterflies by day and fireflies by night, an
+HDRI sky, cascaded shadows, an effects composer, four loading waves and three
+quality levels that dropped by themselves when the FPS fell. All of it existed
+to make it look like a real place — and that was the trap: what you came to look
+at was scattered among the scenery, and finding something meant walking.
+
+What it is now:
+
+- **A centre and a ring.** Nothing is placed by hand: every position comes from
+  `visor/anillo.ts`, which the scene, the collisions and the minimap all share.
+  Ten projects sit 36° apart; add one and all eleven re-space themselves. The
+  ring's radius grows with the count, so twenty things never overlap.
+- **No light at all.** Every material is basic — the only kind that ignores
+  lighting — because with any other one a white surface goes grey the moment it
+  faces away, and the room stops being white. What replaces light is the
+  outline, the way an architect's drawing works.
+- **Rooms, all alike**: Inicio → Proyectos · Personas · Publicaciones ·
+  Herramientas, and from a project into its own room, with its people and its
+  pending cards. The section rooms live inside the scene: entering «Proyectos»
+  is the data already loaded, put in another ring — no request, no navigation.
+- **Portals show what is on the other side**, from above: each thing over there
+  is a dot of its colour in the same ring it will occupy. It is computed from
+  the destination's own data, so it cannot drift. An empty disc means an empty
+  room, and says so.
+- **You are a spirit of light**, blue and green, moving only on the plane. With
+  height gone, so are the jump, gravity, landing, the flight ceiling and the
+  "do I collide with this or pass over it?" question — they don't exist rather
+  than having been deleted. **Other people are beams of other colours** with
+  their name above; each colour comes from their id, so it never changes.
+- **The camera is more overhead** (pitch 0,95 instead of 0,63, and pulled back)
+  — otherwise a ring is just one portal filling the screen.
+- **Kept on purpose**: the editor (create, move, threads), the minimap, fast
+  travel, the products — the DJI and the camper van, which he named — the
+  portals and the YouTube cinema. **Gone**: bike, glider, first person, the
+  appearance editor (it dressed a body that no longer renders) and the world
+  clock (there is no sky left to light).
+
+### The code recycle bin
+
+Ten files, ~2.900 lines, orphaned by the rewrite, moved to `papelera/<date>/`
+keeping their original path inside. A **daily GitHub Action** deletes anything
+older than 30 days and commits the deletion — no one has to remember, and it
+runs whether or not a laptop is on. Nothing is lost even then: every move is a
+commit.
+
+### The audit he asked for
+
+In `memory/12_CODE_AUDIT_2026-08-22.md`, measured rather than estimated. Two
+duplications were unified and tested the same day: the window controls (three
+sets of buttons for one gesture) and `POST /api/uploads` — **the same request
+written by hand in 16 places**, and not identically: some sent the `File`,
+others its `arrayBuffer`; three threw on error, five returned, two said nothing.
+Now `subirArchivo()` returns a result and never throws, so a caller cannot
+forget the failure and leave the screen half-done. `grep` finds exactly one
+upload request in `src/` today.
+
+The rest is listed with numbers and left alone on purpose: 547 bare buttons, 89
+hex colours, 9 copies of «close when you click outside». Doing them all in one
+sweep would produce a diff nobody can review.
+
+---
+
+## 2026-08-22 (III) — Hormiguero #1: two ways a table could lie about a number
+
+Eugenio's first note: «revisar creación de tablas y sus funcionalidades, y
+buscar bugs y resolverlos». Reviewed end to end against the running server —
+creating tables, all the column types, validation, formulas, aggregates across
+relations, views, permissions and deletion. Most of it held: writing text into a
+number is refused, a formula that names a missing column errors instead of
+guessing, an aggregate over nothing is empty and not zero, calculated columns
+cannot be written by hand, cycles are caught on create *and* on edit, and a
+deleted row leaves its link saying «(ya no existe)».
+
+Two things did lie, and both in the same way — producing a believable number
+instead of admitting a problem.
+
+### Renaming a column silently broke every formula that used it
+
+`Precio` = 100, `ConIVA` = `{Precio} * 1.21` = 121. Rename `Precio` to `Coste`
+— a cosmetic gesture — and ConIVA turns into «No hay ninguna columna que se
+llame Precio». In a table with fifteen formulas, one rename breaks all fifteen.
+
+Formulas address columns **by name**, so the stored text was the only reference
+and it stopped pointing anywhere. Now renaming rewrites the formulas of that
+table, in the one place where a column changes name, and answers how many it
+touched — an application that rewrites what a person typed cannot do it
+silently. The discarded alternative (storing ids and translating for display) is
+argued in `src/server/bd/renombrar.ts`.
+
+### Two columns could share a name, and `{Importe}` picked one
+
+Nothing stopped a second column called `Importe`, and the name→id map simply
+kept the last one. The formula then computed with whichever won the ordering and
+returned a perfectly plausible number. It is the `grupos[0]` fallback again:
+choosing for the user when you don't know.
+
+Now duplicates are refused on create and on rename, with a message that says
+why. And for tables that already had one, the formula answers «hay más de una
+columna que se llama así» instead of choosing.
+
+**A third bug appeared while testing the fix**, which is why it was worth
+testing rather than reasoning: when the old name *was* duplicated, the rewrite
+happily rewrote the formulas that meant the *other* column. Renaming one of two
+`Importe` now leaves every formula alone — which is also the right answer,
+because with one `Importe` left they resolve correctly on their own. And the
+check has to be made *before* the update: read afterwards, the old name is gone
+and the count comes back as one.
+
+Test data and the local verification session were deleted afterwards.
+
+---
+
+## 2026-08-22 (IV) — Hormiguero #2 to #6 and #8
+
+Working the board top-down, so as not to collide with the other session, which
+comes up from the bottom.
+
+### #2 · The home page
+
+- **The «Humanidad / Mías» switch is gone.** It split the front page in two and
+  made you choose one before seeing anything — and the «Mías» half is what your
+  own profile already is. The *mode* stays alive in the address (`?mias=1`),
+  because that is what «Mis publicaciones» and the link from your profile use:
+  removing the mode as well would have left those two pointing nowhere.
+- **No heading over the circles.** A row of round faces already says what it is.
+  What the heading actually added — following vs suggestion — is in the ring:
+  coloured if you follow them, dashed grey if it is a suggestion.
+- **The tasks are out.** They went in yesterday so the home page would say
+  whether there was anything to do today. Right idea, wrong place: five tasks
+  with their deadlines above the publications turn a front page into an inbox,
+  and the first thing you see on entering ends up being what you owe. Projects
+  stay — they are somewhere to go, not a debt.
+
+### #3 · The notifications panel on a phone
+
+It hung off the bell with `absolute right-0`, and the bell is pinned to the
+right edge: on a 375 px screen a 304 px panel came out lopsided, its left text
+almost against the frame. On a phone it is now `fixed` and centred on the
+screen, with the same margin on both sides and a height that cannot overflow.
+Fixed rather than absolute on purpose: absolute rides the header's scrolling.
+On a wide screen nothing changed — it still hangs from the bell.
+
+### #4 · The header
+
+The permanent «Inicio» tab was already gone in the previous deploy. The other
+half of the note: **the menu button no longer has a black background.** It was
+the darkest pill in the whole bar and pulled the eye to the corner; and black
+means something else here — «you are here» — which is not what a button that
+opens a menu is.
+
+### #5 and #8 · «The screen isn't fixed, it slides sideways»
+
+Two notes, one cause, and it was not the page: it was Safari. On iOS, tapping a
+field whose text is **under 16 px** makes the browser zoom in so it can be
+read — and once zoomed, the whole page can be dragged sideways. From outside it
+looks exactly as he described it: «se ha hecho como zoom» and «no está fija».
+Nearly every field in the platform is 14 px, so it happened on every form.
+
+The cure is the type size, not the zoom: fields go to 16 px on phone-width
+screens and Safari stops zooming because it no longer needs to. The other way
+out — `maximum-scale=1` — takes pinch-zoom away from everybody, including the
+people who need it to read.
+
+Measured first: the page itself does **not** overflow horizontally (`scrollWidth
+== clientWidth == 375`), which is what ruled out a stray wide element and
+pointed at the zoom.
+
+### #6 · Attaching files when you report something
+
+Half of what fails is easier to show than to describe. The form now takes files,
+holds them until the note exists — an attachment has to hang from something, and
+while you are typing that something has no id yet — and uploads them right
+after. If one fails it says which and why; the note is already saved, so nothing
+is undone, but staying quiet would leave you thinking the screenshot arrived.
+Images show as thumbnails in the note; anything else, as a named link.
+
+Reuses the `archivos` table, adding `incidencia_id` as a fourth container rather
+than a new table: an attachment is the same thing wherever it hangs from.
+Reading the board is open to anyone; **attaching is limited to the note's author
+or an admin** — without that line, anybody with a session could hang files on
+someone else's note.
+
+**And a bug came out of it**: `archivos` has a check constraint demanding
+exactly one container, and it still counted three. The first attempt failed with
+«violates check constraint». Migration `0056` brings it up to four — worth
+knowing, because the same trap waits for the fifth.
+
+---
+
+## 2026-08-22 (V) — Hormiguero #7 and #9
+
+### #7 · Phone contacts, projects and WhatsApp
+
+«Crear un sistema para sincronizar los contactos de mi teléfono y poder
+agregarles a proyectos, y también mandarles mensajes a través de WhatsApp, sea
+como sea.»
+
+**What a web page can and cannot do with an address book**, because it decides
+the shape of this:
+
+- No web page can read the address book on its own. The person picks the
+  contacts and the browser hands over only those.
+- The browser's **contact picker** (`navigator.contacts`) does exactly that with
+  a system screen. It exists in Chrome on Android; on the iPhone it does not.
+- A **.vcf file** is exported by any phone and can be read anywhere.
+
+So there are two ways in: the picker where the browser has it, and .vcf always.
+With only one of them, half the platform is locked out — the picker leaves out
+every iPhone, the file alone gives up the convenience. Which one you are seeing,
+and why, is written under the button: otherwise from an iPhone it looks broken.
+
+**Nothing gets duplicated**: contacts are matched by **number**, never by name.
+«Ana», «Ana Ruiz» and «Ana trabajo» are one person if the number is one; two
+«Juan» with different numbers are two. And a re-import never overwrites a name
+you typed here — «Ana (obras)» stays «Ana (obras)».
+
+The number is normalised in **one** place (`utils/telefono.ts`) for every path —
+typed by hand, imported, or edited — because «600 12 34 56» and «+34600123456»
+would otherwise be two people the next time the agenda is imported. Verified
+with nine cases including `+1 415 555 2671` and rubbish input, which returns
+`null` rather than a plausible-looking number.
+
+**WhatsApp** opens the conversation with `wa.me`. Sending *without* the person
+pressing send needs an approved WhatsApp Business account, Meta-reviewed
+templates and a per-message cost; `wa.me` works today, on the phone and on the
+desktop, without a company account, and the platform never touches anyone's
+messages.
+
+**Adding to projects** existed already, but only from the project's own page —
+you had to know the project before choosing the person. Now it is also in the
+person's menu, the way round he described it.
+
+### #9 · The icon library, from 53 to 988
+
+Fifty-three were the ones the automatic dictionary could return. For picking by
+hand that is very few — there was no sailboat, no guitar, no paw print.
+
+The list is **generated from the package**, not hand-written: lucide's 5.592
+icons minus the families that do not name a *thing* — arrows, chevrons,
+alignments, squares, charts, «Off» and «Check» states — which inflate the
+catalogue without adding anything anyone would choose for their project.
+
+**With a search box**, which is the part that makes it usable: with 53 you chose
+by looking; with 988 you have to be able to ask by name. Without it, widening
+the list would have made the picker worse. It says «in English» in the
+placeholder, because the icons are named in English, and it answers «none is
+called that» rather than showing an empty grid.
+
+**What it costs, with a number**: the app bundle goes from 5,87 MB to 6,24 MB
+(+363 KB raw). Loading all 5.592 would add some 3 MB for icons nobody will ever
+scroll past; loading them on demand would make the sidebar wait for a download
+before drawing an icon that is already chosen.
+
+---
+
+## 2026-08-22 (VI) — The first nine notes turn green
+
+Eugenio: «las tareas del hormiguero que estén ya hechas por ti o por el
+programador 2, ponlas como hechas en la plataforma».
+
+**Done through a migration, not through the API**, and the reason matters: a
+note's state is only moved by an admin with a session, and hand-making a session
+in production is entering as someone else without their password — forbidden
+here, and rightly. The other option was SSH plus psql by hand, which leaves no
+trace anyone can review. A migration goes in the repository, is read before it
+runs, runs once, and stays in the history.
+
+**Each note carries what was done**, not just a green dot. A dot says «done» and
+not what; the written answer means that in a month it can be read without
+digging for the commit — and if something was understood wrong, it shows up
+straight away.
+
+Marked **one by one by id**, never with `WHERE estado = 'esperando'`: that would
+also have turned green any note written in the meantime. Verified locally with
+the nine real ids plus a tenth standing in for a new note — the nine change, the
+tenth does not.
+
+What was verified where, so the green means something: the 16 px rule and the
+board's attachments were checked **on humanity.wiki**; the routes for importing
+contacts and for renaming a column answer 401 there rather than 404, which is
+what says they are deployed; the rest — the notifications panel, the menu
+button, the icon picker — needs a session to see and was verified locally on the
+same commit that is now in production.
+
+---
+
+## 2026-08-22 (VII) — AI programmer accounts, and two kinds of note
+
+### Why this exists
+
+Until today, putting a note in green meant one of two bad things: hand-making a
+session for Eugenio in production — entering as him without his password — or
+writing into the database over SSH, which leaves nothing anyone can review.
+Eugenio asked for the third way: «un usuario de programador IA propia […] y así
+podréis daros permisos de edición del hormiguero».
+
+### Two things, deliberately not one
+
+**A token** (`Authorization: Bearer hw_ia_…`) that opens exactly one door:
+create hormiguero notes, move their state, answer them. It does **not** produce
+a `req.user`, not even a fake one — if an agent could pass for a person, every
+permission check in the platform would be letting it through without anyone
+having decided that. Verified: with the token, creating a project answers 401,
+creating a table answers 401, and `/api/auth/me` says `user: null`.
+
+**A platform account** at level 1 (ordinary user) so an agent can log in and
+*look* — which is what was missing to check the screen fixes (the notifications
+panel, the menu button, the icon picker all need a session to be seen). Level 1
+and not admin: to review how a screen looks you only need to get in.
+
+The reason for keeping them apart is the risk, and it is worth writing down: **an
+agent reads the hormiguero, and anyone can write there.** It is reading
+strangers' text while holding a production key. With this scope the worst a
+hostile note can achieve is a board with a wrong colour — visible, reversible,
+and with the name of whoever did it beside it.
+
+Tokens are stored as a SHA-256 fingerprint, never in the clear, and shown once
+by `scripts/agente-ia.mjs crear "Nombre" correo@…`. Lost means replaced, not
+recovered.
+
+### Notes from the team and notes from outside
+
+Eugenio: «haz una diferenciación entre las notas creadas por un ADMIN […] y haz
+caso directo a las de ADMIN, y las creadas por otros usuarios cada X tiempo las
+revisaremos para que yo las apruebe contigo».
+
+A fourth state, `propuesta`, in **grey** — not a traffic-light colour, because a
+proposal is not late, it is waiting for a decision. Notes from an admin or an
+agent go straight into the work queue; anyone else's land as proposals, and an
+admin approves them into `esperando` with one button.
+
+Kept as two separate fields: `de_admin` (who wrote it) and `estado` (where it
+is). With one field, the origin would be lost the moment it was approved — and
+then there would be no way to measure how many of the ones arriving through the
+letterbox actually get done, which is exactly what will say whether the
+letterbox is worth having. `de_admin` is a snapshot: asking for the author's
+role *today* would rewrite the past for anyone who gets promoted.
+
+Verified end to end: an agent's note enters as team work and is attributed; a
+level-1 user's note enters as a proposal; that user cannot approve their own;
+an agent can, and the note keeps saying it came from outside.
+
+---
+
+## 2026-08-22 (VIII) — The two agents exist, and one gap that only production showed
+
+Eugenio: «dale esa información del usuario al programador 2, créale su usuario
+propio y que no lo olvide, meterlo en MEMORY».
+
+Both agents now exist **in production**: `Claude 1` / `claude1@lighthumanity.org`
+and `Claude 2` / `claude2@lighthumanity.org`. Created by running the script
+inside the app container — the only place with `pg` — with the database
+credentials read from the db container, never typed anywhere.
+
+**The keys never crossed a screen.** The script's output was written to a file
+on the server, the values piped straight into the local `.env` (gitignored), and
+the file deleted. What was printed was the length of each value, which proves it
+is there without showing it. They are not in `memory/` either: house rule 4
+forbids copying secrets there, so the memory says *where* they live and *what
+they open*, not what they are.
+
+Programmer 2 had declined to create its own account, and was right to — it was
+not their decision to make. Once it was Eugenio's instruction to me, it was.
+
+### The gap production found
+
+Testing the token against production revealed something local testing had not:
+an agent could **open** a note and then had no way to **retract** it — the
+`DELETE` route only ever looked at `req.user`. So a note opened by mistake would
+sit on everyone's board forever, and my own test note had to be removed from the
+database by hand.
+
+Undoing what you have just done is not an extra permission: it is the other half
+of the one you already had. Agents can now archive their own notes and only
+their own, recognised by `respondido_por` — an agent has no row in `users`, so
+its authorship lives in the name it opened the note with.
+
+Verified against humanity.wiki: creating a note with the token answers 200 and
+lands as team work attributed to «Claude 1»; creating a project with the same
+token answers 401. The test note was removed and the board is back to its nine.
+
+## 2026-08-22 — A published page finally has a page (Programador 2)
+
+The publishing API was finished and the addresses worked, but **there was no
+screen behind them**. `/@handle/slug` answered HTTP 200 because the server hands
+the whole SPA back for any path, so the test "does the address work?" passed
+while the visitor got the application instead of the page. It is the project's
+own documented trap — a 200 that means nothing was found — and it took opening
+the URL in a browser to see it.
+
+- **New** `src/pages/PaginaPublica.tsx`: the reader's view. Title, author, date,
+  content, and a link home. It renders **outside `Layout`**: whoever arrives has
+  no account and no projects, and the work sidebar is not their life (B3, B41).
+- **New** `src/components/knowledge/BloquesLectura.tsx`: read-only block
+  rendering. `Documento.tsx` knows how to paint blocks but only as an editor,
+  tangled with the active block, autosave and cursor focus across 1.974 lines.
+  `CLASES_TEXTO` now lives in the reader and the editor imports it from there:
+  one definition, so a heading cannot end up a different size on the public page
+  than in the editor.
+- **Routing**: React Router 7 does not allow a fixed prefix glued to a parameter
+  inside one segment (`/@:handle` is not a valid path), so the route is
+  `:arroba/:slug` and the `@` is checked inside. Verified that real two-segment
+  routes still win: `/proyectos/:slug` renders the project page, not this one.
+- **`DataProvider`, `EditProvider` and `DesignProvider` moved inside the
+  `Layout` route.** They wrapped the whole application, so opening a shared page
+  fired the eight workshop loads — territories, objectives, challenges,
+  solutions, projects, organizations, causes, indicators. Measured on the page
+  itself: **10 calls before, 2 after** (the resolver and `auth/me`).
+
+Verified in the browser at 1280 and at 375 px: content renders, the missing-page
+branch says so, `robots` follows the author's choice, no horizontal overflow
+(text lane 335 px of 375). `npx tsc --noEmit` clean, `npm run build` passes.
+
+Still open: the subdomain `nombre.humanity.wiki` answers **525** because the
+Cloudflare origin certificate is not on the server yet. The path address works.
+---
+
+## 2026-08-22 (IX) — The web gets light: 1.137 KB → 324 KB to open it
+
+Eugenio: «haz que la web sea más ligera y que se vaya desplegando al abrir
+herramientas, fundamental».
+
+Measured at every step, because «lighter» without a number is an opinion. What
+someone downloads before seeing anything:
+
+| | Al entrar (comprimido) |
+|---|---|
+| Antes | **1.137 KB** |
+| Cada página por su lado | 428 KB |
+| Y las gráficas aparte | **324 KB** |
+
+**−71 %.** On a phone with poor coverage that is the difference between a few
+seconds of white screen and a page that appears.
+
+### Phase 1 · Measure first
+
+A script that reports exactly what the browser fetches on a first visit — entry
+chunk, CSS, both gzipped. Every later number in this entry comes from it, run
+again after each change.
+
+### Phase 2 · Every tool downloads when you open it
+
+The 53 pages of the platform were in the **same file** you download on arrival.
+Someone coming to read one publication was fetching the page editor, the canvas,
+the market, the financial panel, the user admin and the whole of Mapbox before a
+single letter appeared. Now each page is its own file: 51 deferred, and only the
+front page, the entrance and the login stay eager — deferring the first thing
+anyone sees only swaps one wait for another.
+
+Mapbox fell out on its own as a consequence: **1.823 KB** that now only the map
+pages fetch.
+
+### Phase 3 · Something honest to look at while it arrives
+
+Not a spinner in the middle: the **silhouette** of what is coming — a heading, a
+couple of blocks. The eye understands that something with that shape is on its
+way, and there is no jump when it lands. One single boundary for all 51 routes,
+not 51 copies of the same wrapper: the first one anyone forgot would be a white
+screen nobody could explain.
+
+### Phase 4 · Charts only for whoever sees one
+
+The chart library lived inside the component that draws *any* kind of window —
+used on the front page, in the canvas and in the editor — so everyone downloaded
+a chart engine with no chart on screen. Now it is its own file, requested the
+first time a real chart appears, with a placeholder of the **exact height** so
+the text below does not jump. −104 KB.
+
+While moving it I nearly invented a palette that merely resembled the original:
+every existing chart would have changed colour without anyone asking. The
+comment in `Graficas.tsx` says so, because that is the kind of mistake a move
+makes look like an improvement.
+
+### Phase 5 · The icons: measured, and kept
+
+Removing the 935 non-core icons takes the start from 324 KB to 246 KB — **they
+cost 78 KB**. They stay, and now the decision has that number written beside it:
+the alternative is a chosen icon painted first as the generic one and swapped an
+instant later, a flicker visible in the sidebar on *every* load for anyone with
+custom icons. 78 KB once, cached afterwards, is cheaper than a flicker every
+visit.
+
+### Phase 6 · Nothing broke
+
+Sixteen routes opened one after another in the browser: none blank, no
+chunk-loading errors, no exceptions. 86 chunks now instead of 9, and the total
+grew by 100 KB — which is the point: the total is no longer what anyone waits
+for.
+
+---
+
+## 2026-08-22 (X) — The AI's actions, tested for the first time
+
+The assistant does not only answer: it **creates things**. Nineteen actions — a
+task, a project, a publication, a page, an event, a challenge… — and until today
+whether they still worked was checked by trying a few by hand. The ones nobody
+tried, nobody knew were alive.
+
+`npm run probar:acciones` now runs all of them in about ten seconds.
+
+### What it checks, and what it refuses to check
+
+**It does not read what the AI says. It looks for the row in the database.**
+
+That distinction is the whole reason it exists. The three failures this project
+already paid for were the same kind: «ya te he fijado esa tarea» with no task,
+«he organizado las carpetas» with no evidence, and a task filed under the wrong
+label in silence. A test that read the answer would have passed all three.
+
+It also does **not** call the model: the action is handed to the platform
+already proposed, exactly as when someone presses «aceptar». Going through the
+model would cost money on every run and fail at random depending on what came
+back — and a test that fails on its own stops being read within a week.
+
+### What it found
+
+Two of the four «failures» in the first run were **my own wrong expectations**,
+and that is worth saying: the test sent `fecha`+`hora` for an event when the
+model is told to send `inicio` in ISO; and it demanded that a non-existent label
+be *refused*, when the platform's choice — place the task and **say where** — is
+the better one. Both were fixed in the test, not in the platform.
+
+One was real. `res.json({ status: …, ...result })` had the execution status
+**first**, so it was overwritten: creating a graph returns `status: 'borrador'`
+and a map `status: 'publicado'`, so the response said «borrador» where it should
+have said «ejecutada». The screen paints green only what says «ejecutada» — two
+actions that *had* run were shown in grey, as if nothing had happened. Nobody
+could tell «it happened» from «it didn't» in those two. The entity's own state
+now travels under its own name, `estadoEntidad`, which is what it should have
+had from the start: two different things cannot share one name.
+
+### What is locked in from now on
+
+The twelve create actions each produce a row that is verified to exist by id;
+and four rules that must keep holding: a non-existent label is placed **but
+announced**, a project that is not yours is refused, a task with no title is
+refused, and permission is re-checked **at execution**, not only when proposed.
+
+Cleans up after itself: user, session, proposed actions and every row created —
+verified zero left behind. Refuses to run against anything but the local
+database.
+
+---
+
+## 2026-08-22 (XI) — The open models' cache: it existed, and nobody was reading it
+
+The third item on the list was «add prompt caching for Together». Checking
+their documentation first changed the task: **their cache is automatic.** No
+parameter, no header, no toggle — the provider keeps the *prefixes* of what you
+send and bills at a reduced rate whatever matches something still warm. Only the
+longest common prefix counts: from the first differing byte, full price.
+
+So there was nothing to switch on. What there was:
+
+- **A comment that said the opposite.** «esta API no tiene la caché de prompts
+  de Anthropic» was true of Anthropic's *explicit* mechanism and false about
+  what actually happens. Anyone reading it would have concluded the stable/
+  variable split was pointless here — and moved the date to the top.
+- **The split was already right, by luck of a rule written for another
+  provider.** The stable part goes first and the date, the user and the context
+  after it. That is exactly what a prefix cache needs. Now the file says so, so
+  nobody undoes it.
+- **Nobody was reading what came back.** The provider reports how much it reread
+  from cache and we ignored it. Without that number the cache could be working —
+  or not — and the cost panel would say the same either way.
+
+Now the reread tokens are read, recorded and **billed at their own price**
+(`cacheado` in the catalogue, ≈1/10 of input). If the field is missing, the full
+price is charged: better for the panel to overstate than to promise a saving
+that is not there.
+
+**Honest size of it**: at today's volume this saves céntimos — 44 requests
+through the fast model. It matters when there are a hundred people using the
+chat daily. What it does buy today is that the saving is *visible*: from now on
+the cost table can show whether the cache is hitting at all.
+
+---
+
+## 2026-08-22 (XII) — The context cache, rebuilt for hundreds of thousands of chats
+
+Eugenio: «piensa en cómo hacerlo para mejorar la UX y piensa en cuando tengamos
+cientos de miles de chats al día».
+
+Measured on the local server, three questions in one conversation:
+
+| Petición | Entrada | Releída de caché |
+|---|---|---|
+| 1ª | 5.720 | 0 (escribe la caché) |
+| 2ª | 5.754 | **5.719 — 99 %** |
+| 3ª | 5.785 | **5.753 — 99 %** |
+
+**−89,5 % per request from the second message on.** At 100.000 chats a day that
+is ~403 €/día → ~115 €/día; at 500.000, ~2.014 → ~573.
+
+### What was breaking it
+
+**A timestamp with milliseconds.** The variable block opened with `HOY ES …
+(2026-08-22T10:15:33.123Z)`. Caching compares *prefixes*: one differing byte and
+everything after it is billed in full — including the entire conversation
+history, re-sent and re-charged on every single turn. The date now carries the
+day only. The model never needed the millisecond: it resolves «el jueves» from
+the day.
+
+### Three tiers instead of two
+
+| Capa | Qué lleva | Cambia |
+|---|---|---|
+| 1 · global | las instrucciones de la plataforma | nunca — su caché **se comparte entre todos los usuarios** |
+| 2 · de la persona | sus proyectos, su gente, su nivel, los grafos | cuando crea algo |
+| 3 · variable | la fecha, la pantalla, lo recuperado, la pregunta | cada mensaje |
+
+Ordered least- to most-volatile, which is not a preference: a stable block
+placed after a volatile one is never cached. Anthropic allows four cache
+markers and one was in use; there are now two. Together needs no marker — its
+cache is automatic by prefix, so **the order is the marker**.
+
+### And it can now say whether it is working
+
+`cache_read_tokens` is recorded with every charge. Until today a broken cache
+and a perfect one left an identical record, and at this volume that means
+finding out from the invoice. It is the house rule applied to money.
+
+### For the person using it
+
+Cached prefixes are not only cheaper, they are **faster**: the provider skips
+recomputing them, so the answer starts sooner. The saving and the wait improve
+together.
+## 2026-08-22 · PWA: installable, offline, and honest about it (Programador 3)
+
+The platform can now be added to an iPhone's home screen and opened without a
+network. Three pieces:
+
+**Installable.** `manifest.webmanifest` plus PNG icons. The `apple-touch-icon`
+pointed at `/logo.svg` and iOS does not accept SVG there, so adding to the home
+screen produced a blank icon. Icons are generated from
+`public/iconos/fuente-cuadrado.svg` — square and opaque on purpose, because iOS
+applies its own rounded mask and a source that is already rounded leaves dark
+corners inside the crop. Verified by reading the corner pixel: alpha 255.
+
+**Offline.** `public/sw.js`. Verified with the dev server stopped and again with
+a production build: the app boots from cache, assets included.
+
+**Offline WITH YOUR DATA, and this reverses an earlier decision.** The first
+version refused to cache `/api/*` at all, to avoid showing stale data as if it
+were live. Eugenio asked for his projects to be readable on a plane, so the rule
+changed — but the reason it existed did not:
+
+- The network always wins while it works. A cached answer can never shadow a live
+  one; the copy is only returned when the request actually failed.
+- Every parachute answer is stamped `X-Desde-Cache: 1` and `X-Cacheado-En`.
+- `src/avisoSinConexion.ts` reads those headers and shows a banner saying how old
+  the copy is. It wraps `fetch` rather than living in a component, because the
+  data is read from dozens of screens and none of them should have to remember.
+- GET only. Nothing that writes is ever cached.
+
+Verified with the server stopped: 4 projects returned, stamped, banner visible,
+and an endpoint never requested online still fails instead of inventing a copy.
+
+**Camera.** New "Cámara" type in the create "+": photo or video, uploaded to the
+platform. On a phone `capture` opens the system camera — it records video and
+needs no separate permission; on a desktop, where the attribute is ignored, the
+photo path uses a live `getUserMedia` preview (`src/components/ui/CapturaCamara.tsx`).
+The choice asks the browser what it can do, not how wide the screen is. Server
+side needed nothing: video MIME types and `kind: 'video'` windows already existed.
+
+NOT VERIFIED, and stated as such: the live camera preview (permission denied in
+the automation browser) and "Add to Home Screen" itself, which needs real Safari
+over real HTTPS.
+
+### Follow-up, same session — making the install findable (Programador 3)
+
+`src/avisoInstalar.ts`. On iOS the browser never offers to install a web app:
+there is no `beforeinstallprompt`, and Share → Add to Home Screen is buried in a
+sheet. An app nobody can find how to install is the same as one that cannot be.
+So: a one-time card, on iOS Safari only, never when already running standalone,
+silent for 30 days once dismissed.
+
+Also `CapturaCamara.tsx`: `window.isSecureContext` is now checked first. Without
+https, `navigator.mediaDevices` does not exist at all, and the previous message
+("this browser does not allow the camera") blamed the browser for a missing
+padlock. It now says which one it is.
+
+Still unverified by me, and only verifiable on Eugenio's own devices: the install
+card on a real iPhone, and the live camera preview (permission is denied in the
+automation browser).
+
+**Correction, found by looking at it on a 375px screen:** both overlays were
+anchored to `bottom: 0` and were sitting *behind* the platform's fixed mobile
+navigation bar (`z-index: 9999`). The offline banner was invisible on the exact
+device it exists for, and the install card had its only button covered. Fixed in
+`src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
+instead of hard-coding today's 44px — that bar is mobile-only and belongs to
+another file, so a copied number would rot in silence.
+
+### Tested for real, and three defects it found (Programador 3)
+
+Ran the platform in production mode (`NODE_ENV=production`, `dist/`) on 3002 and
+tried it with the server switched off. That test is the whole reason to trust any
+of the above, and it broke three ways:
+
+1. **Every cache write was fire-and-forget.** `caches.open(...).then(...)` with no
+   `event.waitUntil` lets the browser kill the worker the instant the response
+   reaches the page. The result looked random: `/api/data/*` was saved, the feed
+   (`/api/publicaciones`, `/api/proyectos`) was not, and offline the home screen
+   said **"0 publicaciones"**. All four writes are now inside `waitUntil`.
+
+2. **The first visit cached nothing of the feed.** A service worker does not
+   control the page that installs it, so every request the app fires on that
+   first load goes straight past it. The platform only worked on a plane from the
+   *second* visit — and the first visit is exactly when somebody adds it to their
+   home screen and then tries it. `activate` now warms three endpoints.
+
+3. **`huecoInferior()` swept every element in the DOM** calling `getComputedStyle`
+   and `getBoundingClientRect` on each, wired to `resize`, which fires dozens of
+   times while a phone rotates. Replaced with one `elementsFromPoint` at the
+   bottom edge, plus a 150 ms debounce.
+
+**Result with the server stopped:** the app opens, shows 84 publicaciones and the
+real feed, and the banner reads "estás viendo una copia guardada hace menos de un
+minuto" sitting at `calc(44px + env(safe-area-inset-bottom))` — clear of the
+navigation bar.
+
+**A note on where this was verified.** The in-app automation browser fails *every*
+request a service worker handles — a fifteen-line worker that does nothing but
+`fetch(event.request)` fails there too. Everything above was therefore checked in
+real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
+live camera preview) is still only verifiable by Eugenio on his own device.
+
+---
+
+## 2026-08-22 · Say which figures are measured and which were invented (PR #203, #204, #207)
+
+`CLAUDE.md` opens by saying that mistaking simulated data for measured data is
+the most expensive error made in this project. It was still live, in the most
+literal way possible: **no screen said which was which.**
+
+Counted against the database: of 20.557 indicator observations, **20.499 are
+simulated** — the 179 Madrid municipios («Excel Municipios Madrid (simulado)»)
+and the 32 European countries («IA — número aleatorio»). Every row already
+declared its source. Nothing read it.
+
+Three changes went out, in this order, and each one found the next.
+
+### #203 — the mark exists
+
+`src/utils/origenDelDato.ts` classifies a source into four states, and the
+fourth is the one that matters: `desconocido`. The tempting shortcut is to
+treat "no source written" as measured — most good data arrives without
+decoration — and that is exactly presenting as certain what nobody has checked.
+**If it does not say, we say it does not say.**
+
+Red for `simulado`, and not a discreet grey, because a discreet mark is learned
+away in two days. The damage here is not confusion for a minute: it is somebody
+citing an invented figure in front of people who decide with it.
+
+### #204 — the mark reaches everything, and two worse things surface
+
+Half a platform marked is a promise the other half breaks: once you have seen
+the red warning on one screen, its absence elsewhere reads as "this one is
+real". So it went to the AI assistant, the objectives grid, the indicator list,
+the indicator sheet and the explorer canvas.
+
+Two things came out of that work, both worse than what it set out to fix:
+
+**1. The mark described a different number from the one beside it.** The map
+classified a territory by the sources of its *observations*, then painted its
+fourteen *objective* percentages. For Spain those disagree: its water
+observations are real (INE, MITECO, FAO — 41 of them) but the percentages came
+from a hand-written table in `src/data/seed.ts`. The sheet said **MEDIDO over
+fourteen invented numbers.** A mark that reassures about the wrong figure is
+worse than no mark, because now it vouches for it.
+
+Fixed by deciding the origin **in the same branch that decides the number**,
+and by moving `getObjectivesForTerritory` out of `server.ts` into
+`src/utils/puntuacionesDeObjetivo.ts` so the assistant runs the same
+calculation the screens do instead of forming a second opinion. That is the
+recurring failure of this house — two truths about the same thing — and it had
+appeared here twice in one afternoon.
+
+**2. `|| 0` turned "no data" into a score of zero.** Spain read **0%** in
+Education, Mobility, Energy, Technology, Employment and Governance. Saying a
+country scores zero is a stronger claim than any simulated figure. Now it says
+«Sin datos» — 8 cases on that page alone.
+
+**The mark is rationed on purpose.** The rule is stated once at the top and the
+pill only appears on a figure that does *not* match it. Fourteen identical red
+badges teach people to stop looking, which is the same failure as saying
+nothing, reached from the other side.
+
+### #207 — a real measurement beats the hand-written table
+
+Eugenio's call, and the priority had been backwards. The seed table exists to
+**fill in** where there is no data, and it won every time. Spain's 41 real
+observations were sitting in the database, loaded, reaching no screen.
+
+    AGUA          98 → 74    (medido)
+    ALIMENTACIÓN  86 → 75    (medido)
+    CONVIVENCIA   85 → 65    (medido)
+    ECOSISTEMAS   76 → 67    (medido)
+    VIVIENDA      67 → 67    (medido — same number, different provenance)
+    SALUD         91 → 91    (still simulado: its one indicator has no
+                              observation for Spain, so the fallback is right)
+
+**The drop is the point.** 98% was flattering and made up; 74% is what the
+measurements say.
+
+The rule is deliberately narrow: **a real figure wins over any filler; between
+two fillers, nothing moves.** Simulated observations do not beat the seed
+table — there is no reason to prefer one invention over another, and flipping
+them would have churned the numbers of 179 municipios and 32 countries for
+nothing.
+
+### Where it stands
+
+**3.118 of 3.140 objective scores are still simulated — 99,3%.** The 99,7%
+figure quoted earlier was about observations; the percentages people actually
+look at were 100% simulated until #207 and are now 99,3%.
+
+**Verified in the browser, never by a 200** — the deploy serves the whole
+application for any route, so a status code proves nothing about a screen. Each
+of the three was checked by reading the rendered page and taking a screenshot
+of production.
+
+---
+
+## 2026-08-22 · Count what the open chat costs, and leave it open (PR #208)
+
+`POST /api/ai/chat` answers without a session. That is intentional — the prompt
+itself calls whoever asks «visitante no registrado» — and Eugenio decided today
+that it stays that way, **with no limit on free questions**.
+
+The other half of the hormiguero note (`INCMT4B2B9K1P9`) was not a decision, it
+was a hole: the INSERT into `ai_usage_charges` sat inside `if (req.user)`, so
+every anonymous question was paid for and left no trace. The cost panel showed
+less than the invoice, and the gap grew exactly with usage — the kind of thing
+you find out from the bank statement.
+
+**Not setting a limit is a decision. Not being able to see it is not.**
+
+- `user_id` becomes nullable (migration `0066`). NULL means what it looks like:
+  nobody was signed in. An "anonymous" user row would have been worse — every
+  user count on the platform would then include a person who does not exist.
+- Nobody is billed: `fee_cents` and `total_cents` stay at zero.
+- The admin panel gains one number: what visitors without an account have cost.
+  It is `null`, not zero, when the question was not asked — zero would claim
+  nobody has used it.
+
+Verified end to end locally: one anonymous request wrote a row with
+`user_id = null`, `cost_cents = 0,061`, `total_cents = 0`, and the panel's query
+returns it. The test row was deleted afterwards.
+
+## 2026-08-22 — Three things Eugenio hit with the app installed on his iPhone
+
+He installed it, used it, and sent a screenshot. All three are the same kind of
+bug: the app doing something nobody asked for.
+
+### 1 · The bottom bar sat on the home indicator
+
+Installed full-screen there is no Safari bar underneath, so the platform's own
+navigation ended up on the iPhone's home line. `env(safe-area-inset-bottom)` is
+0 in a browser and ~34px installed, so one rule covers both. It goes on as
+`paddingBottom` with `boxSizing: content-box` — added *below* the buttons, so
+the icons do not shrink when you install it — and `--hueco-muelle` (which
+`Layout.tsx` uses to keep page content clear of the bar) became
+`calc(44px + env(safe-area-inset-bottom))`.
+
+`src/anclajeInferior.ts` needed no change: it measures the bar's real height
+rather than copying a number, so the offline banner followed on its own.
+
+### 2 · The camera opened an image editor nobody asked for
+
+Eugenio: «cuando te lleva a cámara que no te salta el editor por defecto, sino
+que sea tal cual como está y que luego te pregunte dónde guardarla».
+
+You took a photo and got luz/contraste/filtros on top of it. The photo was
+already fine; the only thing missing was where it went. New
+`src/components/knowledge/DestinoCaptura.tsx`: the shot as it is, a title, and a
+destination — a canvas of yours, or a standalone publication. **Editing became a
+button you press.** Video takes the same path.
+
+Canvases and not the "proyectos" board: a project is a board of cards (to
+do / doing / done), so dropping a photo there would invent a card nobody asked
+for. A canvas is where image and video windows already live.
+
+### 3 · Creating a publication threw you onto the publications list
+
+`navigate('/mis-publicaciones')` after every save. Creating a document or a
+canvas *should* take you there — the next thing you do is write inside it. A
+publication is finished the moment you create it, and being sent to a list means
+walking back if you wanted to publish two things. It now confirms in place, with
+"Verlo" and "Crear otra".
+
+### A correction to the entry above this one
+
+**The video path shipped in #205 never worked.** It posts `kind: 'video'` to
+`POST /api/ventanas`, which whitelists `['imagen']` only
+(`src/server/documentos.ts:418`): it returned 400 every time. The earlier entry
+claimed "el servidor ya aceptaba vídeo antes de esto" — that was written without
+checking, and it was false.
+
+What is true, and checked in source this time: `POST /api/graphs/:id/windows`
+does accept `video` (`WINDOW_KINDS`, `src/server/knowledge.ts:28`), so a video
+lands in a canvas today. As a standalone publication the selector says exactly
+that instead of a generic failure. Adding `'video'` to the whitelist is one line
+in Programador 1's area and has been passed to them.
+
+**Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
+create accounts or type passwords. Both endpoints were read in source rather
+than exercised. Phase 1 was checked in the browser.

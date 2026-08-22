@@ -35,7 +35,7 @@ export default function RetoVistas() {
     subtitle: `Vista ${i + 1} · ${g.center?.vista || 'Grafo de conocimiento'}`,
     cover: g.cover_image,
     coverVideoId: g.cover_video_id,
-    to: `/grafos/${g.slug}`,
+    to: `/esquemas/${g.slug}`,
     isReto: true,
     kind: 'grafo' as const,
     creator: g.creator_name,

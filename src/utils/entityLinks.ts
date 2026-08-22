@@ -19,7 +19,7 @@ export interface ResolvedLink {
  * Petición del usuario, 2026-08-05, a raíz del grafo «Incendios en España».
  */
 const CHALLENGE_GRAPH_ROUTE: Record<string, string> = {
-  R017: '/grafos/incendios-espana', // Incendios — una sola vista
+  R017: '/esquemas/incendios-espana', // Incendios — una sola vista
   R021: '/retos-vistas/R021', // Presión sobre la frontera sur — VARIAS vistas (cadena causal + teoría de juegos)
 };
 
@@ -71,7 +71,7 @@ export function resolveEntityLink(type: string, id: string, helpers: any): Resol
     }
     case 'projects': {
       const p = helpers.projects?.find((x: any) => x.id === id);
-      return p ? { label: p.name, to: `/proyectos/${slugify(p.name)}` } : { label: `${typeLabel} ${id}`, to: null };
+      return p ? { label: p.name, to: `/iniciativas/${slugify(p.name)}` } : { label: `${typeLabel} ${id}`, to: null };
     }
     case 'users':
       return { label: 'Persona', to: `/personas/${id}` };

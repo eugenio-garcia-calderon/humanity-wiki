@@ -180,19 +180,27 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col gap-2 text-center">
+        <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
+          {mode === 'login' && (
+            <div className="w-full flex flex-col items-center gap-1.5 px-4 py-3.5 bg-emerald-50 border border-emerald-100 rounded-xl text-center">
+              <p className="text-xs text-slate-600">¿Todavía no tienes cuenta?</p>
+              <button
+                onClick={() => { setMode('register'); setError(''); setInfo(''); }}
+                className="text-sm font-black text-emerald-700 hover:text-emerald-800 transition-colors"
+              >
+                Crear una cuenta →
+              </button>
+            </div>
+          )}
+
           {mode !== 'login' && (
             <button onClick={() => { setMode('login'); setError(''); setInfo(''); }} className="text-xs font-bold text-slate-500 hover:text-emerald-600 uppercase tracking-widest">
               Ya tengo cuenta
             </button>
           )}
-          {mode !== 'register' && (
-            <button onClick={() => { setMode('register'); setError(''); setInfo(''); }} className="text-xs font-bold text-slate-500 hover:text-emerald-600 uppercase tracking-widest">
-              Crear una cuenta
-            </button>
-          )}
+
           {mode !== 'forgot' && (
-            <button onClick={() => { setMode('forgot'); setError(''); setInfo(''); }} className="text-xs font-bold text-slate-400 hover:text-emerald-600 uppercase tracking-widest">
+            <button onClick={() => { setMode('forgot'); setError(''); setInfo(''); }} className="text-[11px] font-medium text-slate-400 hover:text-emerald-600 text-center">
               He olvidado mi contraseña
             </button>
           )}

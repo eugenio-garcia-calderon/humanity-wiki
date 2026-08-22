@@ -87,13 +87,37 @@ data for measured data is the most expensive error made in this project so far.
 ## Forbidden, with the reason
 
 1. **`drizzle-kit push`**: hangs in a non-interactive shell and kills the session. Use `generate` + `psql -f`.
-2. **Deleting knowledge**: archive with `archived_at`. Constitution, rule 6.
+2. **Deleting knowledge by accident**: archive with `archived_at`. Constitution rule 6 (v1.1) does allow the creator to ask for permanent deletion — that path goes through the 15-day recycle bin (`deleted_at`), never a bare DELETE.
 3. **A write route without a role check**: the generic write endpoints shipped with no check at all and had to be closed on 2026-08-06 (PR #25). Every new write route calls `requireAdmin` or `requireLevel`. See `src/server/CLAUDE.md`.
 4. **Real secrets in versioned files**, and never copied into `memory/`. To check whether a key is configured, read `process.env.X` at runtime; never print its value.
 5. **Hex colours and bare `<button>` in pages**: use `src/components/ui/`.
 6. **Creating a new junction table** (`thing_a_thing_b`): there are already 43. See `src/db/CLAUDE.md`.
 7. **`git push --force` on `main`**: Eugenio edits files directly in the GitHub web UI. Always `git fetch` + `merge` before pushing.
 8. **Adding anything new to `server.ts`**: it is frozen. See `src/server/CLAUDE.md`.
+   One authorised exception: the `PORT` line reads the environment (2026-08-22),
+   so two people can run the platform at once. **Programador 1 on 3000,
+   Programador 2 on 3001.**
+
+## Three of you work here at once
+
+Read `equipo/REPARTO.md` before your first commit of the session. The short version:
+
+- Your working copy, your branch, your port. Nobody enters anybody else's folder.
+  Programador 1: the repo root, `prog1/…`, port 3000. Programador 2:
+  `.claude/worktrees/prog2`, `prog2/…`, 3001. Programador 3:
+  `.claude/worktrees/prog3`, `prog3/…`, 3002.
+- Claim a shared file before touching it: `node scripts/equipo.mjs reservar <file>
+  --motivo "…"`, and `soltar` when done. `quien` shows who holds what. A pre-commit
+  hook stops a commit carrying someone else's claimed file.
+- **One PR per programmer, from your own branch, and never a deploy that mixes
+  several people's work.** Say it and wait for your turn before merging to `main`.
+- Before starting anything: `git fetch` and read the last few hours of the log.
+  Somebody may have done it already.
+- **Close every browser tab the moment you stop looking at it**, in that same turn —
+  not at the end of the task — and `preview_stop` any server you are no longer
+  watching. Measured on 2026-08-22: a browser costs ~0.5 GB, three agents held
+  1.68 GB across 42 processes while the machine had 0.30 GB free. The forgotten
+  tab, not the agent, is what closes the app and takes the whole team down.
 
 ## When something can be done fast or done right
 

@@ -1,0 +1,358 @@
+// ============================================================================
+// JUEGO VITAL — la distribución de la aldea, en un solo sitio (2026-08-18)
+// ============================================================================
+// El mundo 3D y el minimapa 2D leen ESTAS mismas constantes. Si cada uno
+// tuviera su copia, moverías una casa en el mundo y el mapa seguiría
+// enseñándola donde estaba: un mapa que miente es peor que no tener mapa.
+import { crearAzar, centroRio } from './paleta';
+import { RADIOS_OBJETO } from './Objetos';
+
+export { centroRio };
+
+/** Media anchura del mundo: 118 ha ≈ 1090 × 1090 m. */
+export const MITAD = 545;
+
+/** Radio de la plaza empedrada. */
+export const PLAZA_R = 13;
+
+/** Caminos: [centro x, centro z, ancho, largo]. */
+export const CAMINOS: Array<[number, number, number, number]> = [
+  [70, 0, 120, 4],    // este: plaza → distrito de proyectos → puente
+  [-53, 0, 86, 4],    // oeste: plaza → naves
+];
+
+// ---------------------------------------------------------------------------
+// LAS SEIS SENDAS (2026-08-19, petición de Eugenio: «en la plaza pon 6 caminos
+// adoquinados... y en cada uno un cartel con el área al que te llevan, y que
+// te lleven a una plaza secundaria de esa temática»).
+//
+// Salen de la plaza central como los radios de una rueda, cada 60°. Cada una
+// tiene su tema, su color, su cartel y su plaza al final. De aquí sale TODO:
+// el empedrado, los carteles, las plazas secundarias, el bosque comestible de
+// los lados, dónde no nace la hierba y lo que dibuja el minimapa.
+// ---------------------------------------------------------------------------
+export interface Senda {
+  id: string;
+  /** Radianes. 0 = este (+x); crece hacia +z (sur en pantalla). */
+  ang: number;
+  /** Hasta dónde llega, desde el centro de la plaza. */
+  largo: number;
+  ancho: number;
+  /** Lo que hay al final: es lo que dice el cartel. */
+  tema: string;
+  /** Una línea de qué encuentras allí. */
+  pie: string;
+  color: string;
+}
+
+const G = Math.PI / 180;
+export const SENDAS: Senda[] = [
+  { id: 'proyectos', ang: 0, largo: 92, ancho: 4.6, tema: 'Distrito de proyectos', pie: 'Tus proyectos, uno por portal', color: '#7dd3fc' },
+  { id: 'huerto', ang: 60 * G, largo: 86, ancho: 4.2, tema: 'Huerto y bosque comestible', pie: 'Frutales, bayas y aromáticas', color: '#86efac' },
+  { id: 'agua', ang: 120 * G, largo: 90, ancho: 4.2, tema: 'Fuente y jardín de agua', pie: 'El agua de la aldea', color: '#93c5fd' },
+  { id: 'talleres', ang: 180 * G, largo: 88, ancho: 4.6, tema: 'Talleres y naves', pie: 'Donde se fabrica y se repara', color: '#fdba74' },
+  { id: 'encuentro', ang: 240 * G, largo: 84, ancho: 4.2, tema: 'Plaza del encuentro', pie: 'Mercado, música y vecinos', color: '#f9a8d4' },
+  { id: 'saber', ang: 300 * G, largo: 84, ancho: 4.2, tema: 'Bosque del saber', pie: 'Lectura, sombra y silencio', color: '#c4b5fd' },
+];
+
+/** Radio de cada plaza secundaria (empedrada, al final de su senda). */
+export const PLAZA_SEC_R = 9.5;
+
+/** Dónde acaba una senda: el centro de su plaza secundaria. */
+export function finDeSenda(s: Senda): { x: number; z: number } {
+  return { x: Math.cos(s.ang) * s.largo, z: Math.sin(s.ang) * s.largo };
+}
+
+/** Dónde va su cartel: a la salida de la plaza central, al borde del camino. */
+export function carteloDeSenda(s: Senda): { x: number; z: number; rot: number } {
+  const r = PLAZA_R + 3.2;
+  const lado = s.ancho / 2 + 1.5;
+  return {
+    x: Math.cos(s.ang) * r + Math.cos(s.ang + Math.PI / 2) * lado,
+    z: Math.sin(s.ang) * r + Math.sin(s.ang + Math.PI / 2) * lado,
+    // El cartel mira a quien sale de la plaza.
+    rot: -s.ang + Math.PI / 2,
+  };
+}
+
+/**
+ * ¿Este punto pisa una senda o una plaza (central o secundaria)? Lo usan el
+ * suelo libre de los árboles y la siembra de hierba: ni bosque ni matas
+ * creciendo en mitad del empedrado.
+ */
+export function enCamino(x: number, z: number, margen = 0): boolean {
+  if (Math.hypot(x, z) < PLAZA_R + margen) return true;
+  for (const s of SENDAS) {
+    const f = finDeSenda(s);
+    if (Math.hypot(x - f.x, z - f.z) < PLAZA_SEC_R + margen) return true;
+    // Distancia del punto al segmento centro → fin de senda.
+    const t = Math.max(0, Math.min(1, (x * f.x + z * f.z) / (s.largo * s.largo)));
+    const px = f.x * t, pz = f.z * t;
+    if (Math.hypot(x - px, z - pz) < s.ancho / 2 + 1.6 + margen) return true;
+  }
+  return false;
+}
+
+/** Las 4 naves industriales, al oeste. */
+export const NAVES = [-36, -12, 12, 36].map(z => ({ x: -70, z, ancho: 16, fondo: 10 }));
+
+/** Los dos lagos. */
+export const LAGOS = [
+  { x: -230, z: 190, rx: 46, rz: 33 },
+  { x: 180, z: -260, rx: 56, rz: 40 },
+];
+
+/** El distrito de proyectos (los edificios de tus proyectos reales). */
+export const DISTRITO = { x0: 34, x1: 90, z0: -44, z1: 26 };
+
+export interface CasaAldea { x: number; z: number; rot: number; modelo: number }
+
+/**
+ * Las 14 casas del anillo. Deterministas: misma semilla, misma aldea siempre.
+ * `modelo` es el índice dentro del catálogo de casas.
+ */
+export function casasAldea(): CasaAldea[] {
+  const azar = crearAzar(20260818);
+  const lista: CasaAldea[] = [];
+  for (let i = 0; i < 14; i++) {
+    const ang = 0.45 + (i / 14) * (Math.PI * 2 - 0.9);
+    const r = (i % 2 === 0 ? 27 : 36) + azar() * 4;
+    // Se consumen los mismos números que consumía la versión con cajas, para
+    // que las posiciones no se muevan al cambiar el aspecto de las casas.
+    azar(); azar(); azar(); azar();
+    lista.push({
+      x: Math.cos(ang) * r,
+      z: Math.sin(ang) * r,
+      rot: -ang - Math.PI / 2,
+      modelo: i,
+    });
+  }
+  return lista;
+}
+
+/** Medio ancho y medio fondo del edificio de un proyecto, para colisiones. */
+export const RADIO_EDIFICIO = 4.6;
+
+/**
+ * Dónde se planta el edificio del proyecto número `i` del distrito.
+ * Lo usan el mundo 3D, los obstáculos y el minimapa: si cada uno lo calculara
+ * por su cuenta, moverías el distrito y el mapa (o las colisiones) se
+ * quedarían apuntando al sitio viejo. Ya pasó con las casas.
+ */
+export function posicionProyecto(i: number): { x: number; z: number } {
+  return { x: 42 + (i % 3) * 19, z: -36 + Math.floor(i / 3) * 21 };
+}
+
+/**
+ * Dónde está el portal de cada proyecto del distrito, con los ARRASTRES del
+ * jugador aplicados (2026-08-18: los portales se mueven como cualquier otro
+ * objeto; la posición se guarda en game_world_overrides con seed_id
+ * `proy:<id>`). La usan el dibujo, los obstáculos, el minimapa y la salida —
+ * si cada uno la calculara, moverías el portal y chocarías con el sitio viejo.
+ */
+export function posicionesProyectos(
+  proyectos: Array<{ id: string }>,
+  overrides: Array<{ seed_id: string; eliminado?: boolean; x: number | null; z: number | null; modelo?: string | null }>,
+  ocultos?: Set<string>,
+): Array<{ x: number; z: number; portada: string | null; eliminado: boolean }> {
+  const ov = new Map(overrides.map(o => [o.seed_id, o]));
+  return proyectos.slice(0, 12).map((p, i) => {
+    const o = ov.get(`proy:${p.id}`);
+    const base = o && o.x != null && o.z != null ? { x: o.x, z: o.z } : posicionProyecto(i);
+    // La PORTADA del portal viaja en `modelo` del mismo retoque: para las
+    // casas es el índice del diseño, para un portal es la URL de su foto.
+    // `eliminado` = el jugador quitó el portal del mapa (el proyecto sigue
+    // existiendo en la plataforma); las posiciones se calculan por índice
+    // ANTES de filtrar para que quitar uno no recoloque a los demás.
+    // `ocultos` = proyectos ya representados por OTRO portal del mundo (un
+    // objeto, una pieza o una persona convertidos): sin esto saldrían dos
+    // puertas al mismo mapa, la suya y la espiral verde del distrito.
+    return {
+      ...base,
+      portada: o?.modelo || null,
+      eliminado: !!o?.eliminado || !!ocultos?.has(p.id),
+    };
+  });
+}
+
+/** El río, como línea quebrada de (x, z) para pintarlo en el mapa. */
+export function trazadoRio(paso = 40): Array<[number, number]> {
+  const puntos: Array<[number, number]> = [];
+  for (let z = -MITAD; z <= MITAD; z += paso) puntos.push([centroRio(z), z]);
+  return puntos;
+}
+
+// ---------------------------------------------------------------------------
+// El mobiliario del pueblo, con IDENTIDAD (2026-08-18). Cada pieza tiene un
+// `seed_id` estable ('farola:3', 'arbol:517'…) por tres razones que comparten
+// código: el rebote al chocar, el clic para editarla y el retoque guardado
+// («eliminada», «movida») tienen que hablar del MISMO objeto.
+// ---------------------------------------------------------------------------
+
+export interface PiezaAldea {
+  seed_id: string;
+  /** casa | nave | fuente | farola | banco | puesto | pozo | carro | arbol */
+  tipo: string;
+  x: number;
+  z: number;
+  rot: number;
+  /** Radio de choque. 0 = no es sólida (no pasa con ninguna de serie). */
+  radio: number;
+  /** Solo carteles: de qué senda son (color del tema) y qué pone en ellos.
+   *  El texto de fábrica sale de `SENDAS`; si el jugador lo ha renombrado,
+   *  Escena mete aquí el suyo. */
+  senda?: Senda;
+  texto?: string;
+  /** Solo árboles: escala y si es pino. Solo casas: índice de modelo. */
+  escala?: number;
+  pino?: boolean;
+  modelo?: number;
+  /** La pieza es un PORTAL sin perder su forma: lleva al mapa de este
+   *  proyecto (viaja en el retoque; lo aplica Escena al ensamblar). */
+  portalProyectoId?: string | null;
+  /** El nombre del mapa, para el rótulo flotante (lo resuelve Escena). */
+  portalTitulo?: string;
+}
+
+/** Bancos, farolas, puestos, pozo y carro de la plaza (antes en Detalles.tsx). */
+export const BANCOS = [
+  { x: -9, z: 7, rot: 0.5 }, { x: 9, z: 7, rot: -0.5 },
+  { x: -9, z: -7, rot: 2.6 }, { x: 9, z: -7, rot: -2.6 },
+];
+export const FAROLAS = [
+  { x: -13, z: 0 }, { x: 13, z: 0 }, { x: 0, z: -13 },
+  { x: 30, z: 3 }, { x: 52, z: 3 }, { x: -30, z: 3 }, { x: -52, z: 3 },
+  { x: 0, z: 30 }, { x: 0, z: 52 },
+];
+export const PUESTOS = [
+  { x: 15, z: 16, rot: -0.5 },
+  { x: 20, z: 10, rot: -1.0 },
+  { x: 11, z: 21, rot: -0.2 },
+];
+export const POZO = { x: -16, z: 13 };
+export const CARRO = { x: 17, z: -14, rot: 0.7 };
+
+/** ¿Se puede plantar aquí un árbol de serie? (misma lógica que la vegetación) */
+export function sueloLibre(x: number, z: number): boolean {
+  if (Math.abs(x) > 540 || Math.abs(z) > 540) return false;
+  if (Math.hypot(x, z) < 52) return false;                          // el pueblo
+  if (x > 28 && x < 96 && z > -62 && z < 18) return false;          // distrito
+  if (Math.abs(x - centroRio(z)) < 16) return false;                // río
+  if (x > -94 && x < -46 && z > -50 && z < 50) return false;        // naves
+  if (Math.abs(z) < 6 && x > -98 && x < 132) return false;          // caminos E-O
+  if (enCamino(x, z, 2)) return false;                              // las 6 sendas y sus plazas
+  for (const l of LAGOS) {
+    if (Math.hypot((x - l.x) / (l.rx + 8), (z - l.z) / (l.rz + 8)) < 1) return false;
+  }
+  return true;
+}
+
+/**
+ * Los ~1.100 árboles del mundo, deterministas (semilla 118, la misma de
+ * siempre: los árboles no se mueven por sacar esta lista de Aldea.tsx).
+ */
+let cacheArboles: PiezaAldea[] | null = null;
+export function arbolesAldea(): PiezaAldea[] {
+  if (cacheArboles) return cacheArboles;
+  const azar = crearAzar(118);
+  const lista: PiezaAldea[] = [];
+  let n = 0;
+  const meter = (x: number, z: number, s: number, pino: boolean) => {
+    lista.push({ seed_id: `arbol:${n++}`, tipo: 'arbol', x, z, rot: 0, radio: 0.9 * s, escala: s, pino });
+  };
+  const nucleos = [
+    [-320, -180], [260, 130], [-150, -380], [320, -320],
+    [-350, 260], [150, 330], [430, 80], [-80, 430],
+  ];
+  // OJO: el orden de consumo del azar es EXACTAMENTE el del código viejo de
+  // Aldea.tsx (s y pino solo se sortean si el sitio está libre) — cambiarlo
+  // replantaría el bosque entero de otra manera.
+  for (const [nx, nz] of nucleos) {
+    for (let i = 0; i < 105; i++) {
+      const x = nx + (azar() + azar() - 1) * 110;
+      const z = nz + (azar() + azar() - 1) * 110;
+      if (sueloLibre(x, z)) meter(x, z, 0.75 + azar() * 0.7, azar() > 0.42);
+    }
+  }
+  for (let i = 0; i < 300; i++) {
+    const x = (azar() - 0.5) * 1060;
+    const z = (azar() - 0.5) * 1060;
+    if (sueloLibre(x, z)) meter(x, z, 0.7 + azar() * 0.7, azar() > 0.5);
+  }
+  cacheArboles = lista;
+  return lista;
+}
+
+/**
+ * TODO el pueblo de serie como piezas con identidad y radio de choque.
+ * Lo consumen: el rebote (obstáculos), el editor (clic → seleccionar) y el
+ * dibujo (Aldea aplica aquí encima los retoques del jugador).
+ */
+let cachePiezas: PiezaAldea[] | null = null;
+export function piezasAldea(): PiezaAldea[] {
+  if (cachePiezas) return cachePiezas;
+  const lista: PiezaAldea[] = [];
+  casasAldea().forEach((c, i) =>
+    // radio 7: la casa a escala 6,4 ocupa ~10×10 m de planta.
+    lista.push({ seed_id: `casa:${i}`, tipo: 'casa', x: c.x, z: c.z, rot: c.rot, radio: 7, modelo: c.modelo }));
+  NAVES.forEach((nv, i) =>
+    lista.push({ seed_id: `nave:${i}`, tipo: 'nave', x: nv.x, z: nv.z, rot: 0, radio: 8.6 }));
+  // El corazón de la aldea (2026-08-19, petición de Eugenio): un FICUS con su
+  // estanque alrededor. Ocupa el centro que antes tenía la fuente; ella se
+  // muda a su plaza secundaria, la del agua.
+  // El ficus encogió a la cuarta parte (2026-08-19): su choque es ahora el
+  // brocal del estanque más el arriate de flores, no los 5,2 m de antes.
+  lista.push({ seed_id: 'ficus:0', tipo: 'ficus', x: 0, z: 0, rot: 0, radio: 2.4 });
+
+  // LOS SEIS CARTELES como piezas del pueblo (2026-08-19, petición de Eugenio:
+  // «que los carteles también se pueda editar su nombre y mover como el resto
+  // de elementos»). Al ser piezas con seed_id heredan GRATIS todo el editor:
+  // arrastrar, girar, quitar y volver a poner. El rótulo propio viaja en el
+  // campo `texto` del retoque.
+  for (const s of SENDAS) {
+    const c = carteloDeSenda(s);
+    lista.push({ seed_id: `cartel:${s.id}`, tipo: 'cartel', x: c.x, z: c.z, rot: c.rot, radio: 1.3, senda: s });
+  }
+  {
+    const agua = SENDAS.find(s => s.id === 'agua')!;
+    const f = finDeSenda(agua);
+    lista.push({ seed_id: 'fuente:0', tipo: 'fuente', x: f.x, z: f.z, rot: 0, radio: 2.9 });
+  }
+  BANCOS.forEach((b, i) =>
+    lista.push({ seed_id: `banco:${i}`, tipo: 'banco', x: b.x, z: b.z, rot: b.rot, radio: 1.2 }));
+  FAROLAS.forEach((f, i) =>
+    lista.push({ seed_id: `farola:${i}`, tipo: 'farola', x: f.x, z: f.z, rot: 0, radio: 0.5 }));
+  PUESTOS.forEach((p, i) =>
+    lista.push({ seed_id: `puesto:${i}`, tipo: 'puesto', x: p.x, z: p.z, rot: p.rot, radio: 1.9 }));
+  lista.push({ seed_id: 'pozo:0', tipo: 'pozo', x: POZO.x, z: POZO.z, rot: 0, radio: 1.4 });
+  lista.push({ seed_id: 'carro:0', tipo: 'carro', x: CARRO.x, z: CARRO.z, rot: CARRO.rot, radio: 1.6 });
+  // El camión camperizado (2026-08-18, petición de Eugenio): aparcado junto
+  // al camino del este, morro hacia la plaza. Pieza con identidad: se pulsa,
+  // se mueve y se puede quitar como el resto del pueblo.
+  // (en 26,9 pisaba la primera casa del anillo con la escala nueva)
+  lista.push({ seed_id: 'camper:0', tipo: 'camper', x: 20, z: 7.5, rot: -0.45, radio: 4 });
+  // La gran pantalla del cine (2026-08-19): pieza con identidad para que se
+  // arrastre y guarde como todo lo demás. Posición de fábrica en Pantalla.tsx.
+  lista.push({ seed_id: 'pantalla:0', tipo: 'pantalla', x: 27, z: -18, rot: -0.98, radio: 4.2 });
+  lista.push(...arbolesAldea());
+  cachePiezas = lista;
+  return lista;
+}
+
+/** Radio de choque de un prop creado por el jugador, según su tipo. */
+export function radioProp(modelo: string | null | undefined): number {
+  // Los objetos de la fase 9 traen el suyo en su propia tabla.
+  const nuevo = modelo ? RADIOS_OBJETO[modelo] : undefined;
+  if (nuevo !== undefined) return nuevo;
+  switch (modelo) {
+    case 'casa': return 7;
+    case 'arbol': case 'pino': return 1.0;
+    case 'farola': return 0.5;
+    case 'banco': return 1.2;
+    case 'puesto': return 1.9;
+    case 'pozo': return 1.4;
+    case 'roca': return 0.9;
+    case 'arbusto': return 0.8;
+    default: return 1.0;
+  }
+}

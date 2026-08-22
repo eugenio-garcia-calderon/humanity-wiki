@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, User as UserIcon, Eye, Sparkles, Map as MapIcon } from 'lucide-react';
+import MapaDePuntos from '../components/mapas/MapaDePuntos';
 import RatingWidget from '../components/knowledge/RatingWidget';
 import EntityComments from '../components/knowledge/EntityComments';
 
@@ -77,8 +78,15 @@ export default function UserMapa() {
         <p className="text-sm text-slate-600 leading-relaxed mt-3">{data.description}</p>
       )}
 
+      {/* DOS CLASES DE MAPA, porque son dos cosas distintas (2026-08-20):
+          uno con TUS SITIOS (dónde ensayas, dónde mides) y otro que es una
+          vista del mapa de la humanidad. Antes solo existía el segundo, así
+          que pedir «los cinco puntos de ensayo» publicaba el mapamundi de
+          Indicadores con los sitios escritos en la descripción. */}
       <div className="mt-5 rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-[70vh]">
-        <iframe src={buildMapSrc(data.config)} title={data.title} className="w-full h-full" />
+        {data.config?.puntos?.length
+          ? <MapaDePuntos puntos={data.config.puntos} unidad={data.config.unidad} />
+          : <iframe src={buildMapSrc(data.config)} title={data.title} className="w-full h-full" />}
       </div>
 
       <div className="mt-6 border-t border-slate-100 pt-4">

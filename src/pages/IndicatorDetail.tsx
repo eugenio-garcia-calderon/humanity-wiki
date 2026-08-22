@@ -4,6 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Card } from '../components/ui/core';
 import { slugify } from '../utils/slugify';
 import { getColorForScore } from '../utils/scoreColor';
+import MarcaOrigen, { AvisoDatoSimulado } from '../components/ui/OrigenDelDato';
+import { origenDe } from '../utils/origenDelDato';
 
 export default function IndicatorDetail() {
   const { objectives, indicators, territories, loading } = useHelpers();
@@ -23,6 +25,11 @@ export default function IndicatorDetail() {
   const objective = objectives.find((o: any) => o.id === indicator.objective_id);
   const territory = territories.find((t: any) => t.id === indicator.territory_id);
   const color = indicator.score != null ? getColorForScore(indicator.score) : '#94a3b8';
+  // De dónde sale ESTA cifra. `source` ya venía en la respuesta de la API y se
+  // pintaba abajo del todo, en gris, en letra pequeña: la información estaba
+  // pero no llegaba. Ahora se clasifica con la misma regla que el mapa.
+  const origen = origenDe(indicator.source);
+  const hayCifra = indicator.score != null || indicator.weighted_score != null;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -44,6 +51,8 @@ export default function IndicatorDetail() {
         </div>
       </div>
 
+      {hayCifra && <AvisoDatoSimulado origen={origen} />}
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 text-center">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Territorio</p>
@@ -56,6 +65,9 @@ export default function IndicatorDetail() {
         <Card className="p-5 text-center">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Puntuación 0-100</p>
           <p className="text-lg font-black" style={{ color }}>{indicator.score != null ? indicator.score : '—'}</p>
+          {indicator.score != null && (
+            <div className="flex justify-center mt-2"><MarcaOrigen origen={origen} tamano="pequeno" /></div>
+          )}
         </Card>
         <Card className="p-5 text-center">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Puntos ponderados</p>

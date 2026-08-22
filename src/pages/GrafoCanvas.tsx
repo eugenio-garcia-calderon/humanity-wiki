@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType,
+  ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType, ConnectionMode,
   useNodesState, useEdgesState, useInternalNode, getStraightPath,
   BaseEdge, EdgeLabelRenderer,
   type Node, type Edge, type NodeProps, type EdgeProps, type InternalNode,
@@ -13,8 +14,11 @@ import {
   Image as ImageIcon, PlayCircle, BookOpen, Link2, Map as MapIcon, MapPin,
   PieChart as PieChartIcon, Info, CalendarClock, Users as UsersIcon,
   FileText, MessageSquare, Plus, GitBranch, Pencil, ShoppingBag, Lightbulb, ChevronDown, Flame,
+  CheckSquare, Table2, Rocket, Lock, Unlock,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import IconoElemento from '../components/ui/Icono';
+import { leerPegado, tamanoLegible, enCampoDeTexto, type Pegado } from '../utils/pegado';
 import { RELATION_STYLE, RELATIONS } from '../utils/relationStyle';
 import { useHelpers } from '../contexts/DataContext';
 import { resolveEntityLink } from '../utils/entityLinks';
@@ -22,6 +26,9 @@ import WindowContent from '../components/knowledge/WindowContent';
 import RatingWidget from '../components/knowledge/RatingWidget';
 import EntityComments from '../components/knowledge/EntityComments';
 import AddWindowPanel from '../components/knowledge/AddWindowPanel';
+import { PuntosConexion, TiradorRotar, TiradoresTamano, MarcoSeleccion } from '../components/knowledge/lienzoChrome';
+import BarraElemento from '../components/knowledge/BarraElemento';
+import RecortarImagen from '../components/knowledge/RecortarImagen';
 
 // ============================================================================
 // Lienzo de un Grafo de Conocimiento (Fase 11, rediseño 11c-11e)
@@ -55,6 +62,11 @@ const KIND_META: Record<string, { label: string; icon: any; chip: string }> = {
   producto:    { label: 'Producto',    icon: ShoppingBag,     chip: 'bg-amber-50 text-amber-700' },
   soluciones:  { label: 'Soluciones',  icon: Lightbulb,       chip: 'bg-emerald-50 text-emerald-700' },
   texto:       { label: 'Texto',       icon: FileText,       chip: 'bg-slate-100 text-slate-600' },
+  tarea:       { label: 'Tarea',       icon: CheckSquare,    chip: 'bg-emerald-50 text-emerald-700' },
+  tabla:       { label: 'Tabla',       icon: Table2,         chip: 'bg-sky-50 text-sky-700' },
+  proyecto:    { label: 'Proyecto',    icon: Rocket,         chip: 'bg-indigo-50 text-indigo-700' },
+  pdf:         { label: 'PDF',         icon: FileText,       chip: 'bg-rose-50 text-rose-700' },
+  audio:       { label: 'Audio',       icon: PlayCircle,     chip: 'bg-violet-50 text-violet-700' },
 };
 
 
@@ -248,18 +260,26 @@ function CenterNode({ data }: NodeProps<any>) {
 // ----------------------------------------------------------------------------
 // Círculo de relación: protagonista clicable — abre los atributos de la unión.
 // ----------------------------------------------------------------------------
-function RelacionNode({ data }: NodeProps<any>) {
+function RelacionNode({ data, selected }: NodeProps<any>) {
   const d = data as any;
   const rel = RELATION_STYLE[d.relation] || RELATION_STYLE.contexto;
+  // Editable como cualquier otro elemento del lienzo (petición del usuario,
+  // 2026-08-08): arrastrar, redimensionar y bloquear, con el mismo cromado
+  // que ya llevan las ventanas — la geometría se guarda en graph_edges.layout.
+  const puedeGestionar = !!d.onGeometria;
+  const puedeDeformar = puedeGestionar && !d.locked;
+  const marcado = !!selected;
+  const aMedida = !!d.size;
   return (
     <div
       onClick={() => (d.active ? d.onOpenEdge?.(d.edgeId) : d.onFocus?.(d.edgeId))}
       className={cn(
-        'group rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer',
-        'transition-all duration-200 ease-out hover:scale-110 active:scale-95',
+        'group rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer relative',
+        'transition-all duration-200 ease-out hover:scale-105 active:scale-95',
+        aMedida && 'w-full h-full',
       )}
       style={{
-        width: CIRCLE_SIZE, height: CIRCLE_SIZE,
+        width: aMedida ? undefined : CIRCLE_SIZE, height: aMedida ? undefined : CIRCLE_SIZE,
         backgroundColor: rel.bg,
         border: '4px solid rgba(255,255,255,0.9)',
         boxShadow: d.active
@@ -269,6 +289,28 @@ function RelacionNode({ data }: NodeProps<any>) {
       title={d.active ? 'Ver los atributos de esta conexión' : 'Hacer zoom a esta rama'}
     >
       <CenterHandles />
+      {puedeDeformar && (
+        <TiradoresTamano
+          visible={marcado}
+          minW={80} minH={80}
+          keepAspectRatio
+          onFin={(w, h) => d.onGeometria(d.edgeId, { size: { w, h } })}
+        />
+      )}
+      {puedeGestionar && <MarcoSeleccion visible={marcado} radio={999} />}
+      {puedeDeformar && <PuntosConexion visible={marcado} />}
+      {puedeGestionar && (
+        <button
+          onClick={e => { e.stopPropagation(); d.onGeometria(d.edgeId, { locked: !d.locked }); }}
+          title={d.locked ? 'Desbloquear' : 'Bloquear'}
+          className={cn(
+            'absolute -top-1.5 -right-1.5 z-10 w-6 h-6 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center transition-opacity',
+            marcado || d.locked ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          )}
+        >
+          {d.locked ? <Lock className="w-3 h-3 text-amber-600" /> : <Unlock className="w-3 h-3 text-slate-400" />}
+        </button>
+      )}
       {d.label ? (
         <>
           <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-0.5 opacity-75" style={{ color: rel.text }}>
@@ -297,20 +339,61 @@ function RelacionNode({ data }: NodeProps<any>) {
  *  imagen/gráfica/mapa como protagonista (petición del usuario, 2026-08-06). */
 const MEDIA_KINDS = new Set(['imagen', 'video', 'mapa', 'grafica']);
 
-function VentanaNode({ data }: NodeProps<any>) {
-  const { win, onOpen } = data as any;
+function VentanaNode({ data, selected }: NodeProps<any>) {
+  const { win, onOpen, onConnectFrom, onGeometria, acciones } = data as any;
   const meta = KIND_META[win.kind] || KIND_META.texto;
   const Icon = meta.icon;
   const isMedia = MEDIA_KINDS.has(win.kind);
+  const puedeGestionar = !!onGeometria;
+  const puedeDeformar = puedeGestionar && !win.locked;
+  const marcado = !!selected;
+  // Si tiene tamaño guardado manda ese; si no, el natural de su tipo.
+  const aMedida = win.w != null || win.h != null;
   return (
     <div
-      onClick={() => onOpen(win.id)}
+      // Un clic SELECCIONA (lo gestiona React Flow); el doble clic abre la
+      // ficha completa — la convención de cualquier lienzo.
+      onDoubleClick={() => onOpen(win.id)}
+      title="Doble clic para abrirla"
       className={cn(
-        'bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer overflow-hidden',
-        isMedia ? 'w-[420px]' : 'w-80',
+        'group relative bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:border-emerald-300 transition-shadow cursor-pointer',
+        aMedida ? 'w-full h-full overflow-hidden flex flex-col' : (isMedia ? 'w-[420px] overflow-hidden' : 'w-80 overflow-hidden'),
       )}
+      style={{ transform: win.rot ? `rotate(${win.rot}deg)` : undefined }}
     >
       <CenterHandles />
+      {puedeDeformar && (
+        <>
+          <TiradoresTamano
+            visible={marcado}
+            minW={isMedia ? 220 : 180}
+            minH={140}
+            onFin={(w, h) => onGeometria(win.id, { w, h })}
+          />
+          <MarcoSeleccion visible={marcado} />
+          <PuntosConexion visible={marcado} />
+          <TiradorRotar
+            visible={marcado}
+            rot={win.rot || 0}
+            onCambio={g => onGeometria(win.id, { rot: g }, true)}
+            onFin={g => onGeometria(win.id, { rot: g })}
+          />
+        </>
+      )}
+      {win.locked && marcado && (
+        <div className="absolute inset-0 rounded-2xl border-2 border-amber-400 pointer-events-none z-[5]" />
+      )}
+      {marcado && acciones && <BarraElemento win={win} acciones={acciones(win)} />}
+      {/* Crecer desde aquí: nace un elemento nuevo YA conectado a este. */}
+      {onConnectFrom && (
+        <button
+          onClick={e => { e.stopPropagation(); onConnectFrom(win); }}
+          title={`Crear algo nuevo conectado a «${win.title}»`}
+          className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-110 transition-all"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      )}
       <div className="px-3.5 pt-3 flex items-center justify-between gap-2">
         <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded', meta.chip)}>
           <Icon className="w-2.5 h-2.5" /> {meta.label}
@@ -324,7 +407,7 @@ function VentanaNode({ data }: NodeProps<any>) {
       <div className="px-3.5 pt-1.5">
         <p className="text-[15px] font-black text-slate-900 leading-tight line-clamp-2">{win.title}</p>
       </div>
-      <div className="px-3.5 py-2">
+      <div className={cn('px-3.5 py-2', aMedida && 'flex-1 min-h-0 overflow-hidden')}>
         <WindowContent kind={win.kind} config={win.config} variant="node" />
       </div>
       <div className="px-3.5 py-1.5 border-t border-slate-50 flex items-center gap-2.5 text-[9px] text-slate-400">
@@ -430,8 +513,21 @@ function ConnectModal({ windows, graphId, onClose, onDone }: {
   );
 }
 
-export default function GrafoCanvas() {
-  const { slug } = useParams();
+/** API que el lienzo ofrece a una barra de herramientas externa
+ *  (Mi Conocimiento monta la suya estilo Miro sobre este mismo lienzo). */
+export interface LienzoApi {
+  graphId: string;
+  windows: any[];
+  reload: () => void;
+  openAdd: (kind?: string) => void;
+  openConnect: () => void;
+}
+
+export function GrafoLienzo({ slug, toolbar }: {
+  slug: string;
+  /** Sustituye los botones Ventana/Conectar por una barra propia. */
+  toolbar?: (api: LienzoApi) => React.ReactNode;
+}) {
   const helpers = useHelpers();
   // Instancia real de React Flow (via onInit): controla el viewport (fitView).
   const rf = useRef<ReactFlowInstance | null>(null);
@@ -442,7 +538,9 @@ export default function GrafoCanvas() {
   const [selectedEdge, setSelectedEdge] = useState<any>(null);
   const [editingEdge, setEditingEdge] = useState(false);
   const [edgeForm, setEdgeForm] = useState({ relation: 'contexto', label: '', description: '' });
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd] = useState<boolean | string>(false);
+  // Ventana de la que nace la siguiente (el «+» de un nodo). null = del centro.
+  const [connectFrom, setConnectFrom] = useState<{ id: string; title: string; pos?: { x: number; y: number }; kind?: string } | null>(null);
   const [showConnect, setShowConnect] = useState(false);
   // Cabecera del grafo: colapsada por defecto (solo título) para no tapar
   // el lienzo; se expande con un clic para ver descripción/etiquetas.
@@ -465,6 +563,144 @@ export default function GrafoCanvas() {
   }, [slug]);
 
   useEffect(() => { load(); }, [load]);
+
+  // ==========================================================================
+  // TRAER COSAS AL LIENZO: PEGAR y ARRASTRAR (2026-08-07, petición del usuario)
+  // ==========================================================================
+  // Ctrl/Cmd+V pega; arrastrar un archivo desde el escritorio lo suelta EN EL
+  // PUNTO donde lo sueltas. En ambos casos se crea la ventana que toque:
+  // una imagen se sube y se ve; un PDF u hoja de cálculo se sube y queda como
+  // enlace descargable; un .txt o .md se lee y se convierte en nota; un enlace
+  // de YouTube en vídeo; cualquier otra URL en enlace; y el texto suelto en
+  // una nota. Todo queda conectado al centro, como cualquier creación.
+  const [pegando, setPegando] = useState<string | null>(null);
+  const [soltando, setSoltando] = useState(false);
+  const arrastres = useRef(0);   // dragenter/dragleave se disparan por cada hijo
+
+  const crearVentana = useCallback(async (
+    win: { title: string; kind: string; config: any },
+    pos?: { x: number; y: number },
+  ) => {
+    if (!data?.graph?.id) return;
+    const ang = Math.random() * 2 * Math.PI;
+    const res = await fetch(`/api/graphs/${data.graph.id}/windows`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({
+        ...win,
+        x: Math.round(pos ? pos.x : Math.cos(ang) * 640 - 128),
+        y: Math.round(pos ? pos.y : Math.sin(ang) * 500 - 110),
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'No se pudo crear la ventana.');
+    // Sin conexión automática al núcleo (petición del usuario, 2026-08-08):
+    // pegar o soltar algo lo deja LIBRE en el punto donde cae. Conectarlo es
+    // una decisión aparte — el botón «+» de un elemento, o arrastrar desde un
+    // punto de conexión.
+  }, [data?.graph?.id]);
+
+  /**
+   * Una pieza ya resuelta por `leerPegado` → la ventana que le toca. Quién
+   * decide QUÉ es cada cosa vive en `utils/pegado.ts`, compartido con el editor
+   * de documentos; aquí solo se decide con qué se pinta.
+   */
+  const ventanaDePegado = useCallback(async (p: Pegado, pos?: { x: number; y: number }) => {
+    switch (p.clase) {
+      case 'imagen':
+        return crearVentana({ title: p.nombre || 'Imagen', kind: 'imagen', config: { image_url: p.url, caption: null } }, pos);
+      case 'video':
+        return crearVentana({ title: p.nombre || 'Vídeo', kind: 'video', config: { video_url: p.url } }, pos);
+      case 'youtube':
+        return crearVentana({ title: 'Vídeo', kind: 'video', config: { youtube_id: p.id } }, pos);
+      case 'vimeo':
+        return crearVentana({ title: 'Vídeo', kind: 'video', config: { vimeo_id: p.id } }, pos);
+      case 'audio':
+        return crearVentana({ title: p.nombre || 'Audio', kind: 'audio', config: { url: p.url } }, pos);
+      case 'pdf':
+        return crearVentana({
+          title: p.nombre || 'Documento',
+          kind: 'pdf',
+          config: { url: p.url, description: p.bytes ? tamanoLegible(p.bytes) : null },
+        }, pos);
+      case 'archivo':
+        return crearVentana({
+          title: p.nombre || 'Archivo',
+          kind: 'enlace',
+          config: { url: p.url, description: `Archivo subido · ${tamanoLegible(p.bytes)}` },
+        }, pos);
+      case 'enlace':
+        return crearVentana({ title: p.nombre, kind: 'enlace', config: { url: p.url } }, pos);
+      case 'texto':
+        return crearVentana({ title: p.titulo, kind: 'texto', config: { body: p.cuerpo } }, pos);
+    }
+  }, [crearVentana]);
+
+  /** El camino común de pegar y soltar. */
+  const traer = useCallback(async (dt: DataTransfer, pos?: { x: number; y: number }) => {
+    // Se mira ANTES de tocar nada: si no hay nada que traer, el ⌘V debe seguir
+    // su camino normal en vez de quedar comido por el lienzo.
+    if (!dt.files?.length && !(dt.getData('text/plain') || '').trim() && !dt.getData('text/html')) return false;
+
+    setPegando('Leyendo…');
+    try {
+      const piezas = await leerPegado(dt, (hecho, total, nombre) => {
+        setPegando(total > 1 ? `Subiendo ${hecho + 1} de ${total}…` : `Subiendo ${nombre.slice(0, 28)}…`);
+      });
+      if (!piezas.length) { setPegando(null); return false; }
+      setPegando(piezas.length > 1 ? `Creando ${piezas.length} elementos…` : 'Creando…');
+      // En cascada, para que varias piezas no caigan una encima de otra.
+      for (let i = 0; i < piezas.length; i++) {
+        await ventanaDePegado(piezas[i], pos ? { x: pos.x + i * 48, y: pos.y + i * 48 } : undefined);
+      }
+      setPegando(null);
+    } catch (e: any) {
+      setPegando(e.message);
+      setTimeout(() => setPegando(null), 5000);
+    }
+    load();
+    return true;
+  }, [ventanaDePegado, load]);
+
+  // Dónde está el ratón AHORA MISMO sobre el lienzo (petición del usuario,
+  // 2026-08-08): Ctrl/Cmd+V no trae coordenadas propias, así que se guarda la
+  // última posición vista para que lo pegado caiga justo ahí, no en un punto
+  // fijo. Va en un ref, no en estado: se actualiza en cada pixel de
+  // movimiento y no debe disparar un re-render.
+  const ratonEnLienzo = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!data?.can_edit) return;
+    const onPaste = async (e: ClipboardEvent) => {
+      // Nunca robar el pegado de un campo de texto (el chat, los formularios).
+      if (enCampoDeTexto(e.target)) return;
+      if (!e.clipboardData) return;
+      const p = ratonEnLienzo.current && rf.current?.screenToFlowPosition(ratonEnLienzo.current);
+      if (await traer(e.clipboardData, p ? { x: p.x - 160, y: p.y - 90 } : undefined)) e.preventDefault();
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [data?.can_edit, traer]);
+
+  /** Soltar sobre el lienzo: la ventana nace justo donde la sueltas. */
+  const onDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    arrastres.current = 0;
+    setSoltando(false);
+    if (!data?.can_edit || !e.dataTransfer) return;
+    const p = rf.current?.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+    await traer(e.dataTransfer, p ? { x: p.x - 160, y: p.y - 90 } : undefined);
+  }, [data?.can_edit, traer]);
+
+  const onDragEnter = useCallback((e: React.DragEvent) => {
+    if (!data?.can_edit || !Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+    arrastres.current++;
+    setSoltando(true);
+  }, [data?.can_edit]);
+
+  const onDragLeave = useCallback(() => {
+    arrastres.current = Math.max(0, arrastres.current - 1);
+    if (arrastres.current === 0) setSoltando(false);
+  }, []);
 
   const openWindow = useCallback((winId: string) => {
     setData((d: any) => {
@@ -586,8 +822,20 @@ export default function GrafoCanvas() {
     const winNodes: Node[] = data.windows.map((w: any) => ({
       id: w.id, type: 'ventana',
       position: { x: posById[w.id]?.x ?? w.x, y: posById[w.id]?.y ?? w.y },
-      draggable: !!data.can_edit,
-      data: { win: w, onOpen: openWindow },
+      draggable: !!data.can_edit && !w.locked,
+      selectable: true,
+      // Si el usuario le dio un tamaño, manda ese: React Flow necesita
+      // conocerlo para que el NodeResizer trabaje sobre el nodo real.
+      width: w.w ?? undefined,
+      height: w.h ?? undefined,
+      data: {
+        win: w, onOpen: openWindow,
+        onGeometria: data.can_edit ? guardarGeometria : undefined,
+        acciones: data.can_edit ? accionesDe : undefined,
+        onConnectFrom: data.can_edit
+          ? (v: any) => setConnectFrom({ id: v.id, title: v.title, pos: posById[v.id] || { x: v.x, y: v.y } })
+          : undefined,
+      },
       // Con una rama activa, lo que no pertenece a ella se atenúa para
       // que sepas visualmente en qué tema estás sin perder el contexto.
       style: branchIds && !branchIds.has(w.id) ? { opacity: 0.25, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
@@ -607,18 +855,26 @@ export default function GrafoCanvas() {
 
     const relNodes: Node[] = sortedCenter.map((e, i) => {
       const ang = startAngle + (2 * Math.PI * i) / N;
+      // Con una posición o un tamaño propios, mandan sobre el anillo
+      // calculado: es lo que persiste el arrastre y el redimensionado.
+      const size = e.layout?.size as { w: number; h: number } | undefined;
+      const propia = e.layout?.pos as { x: number; y: number } | undefined;
+      const half = (size?.w ?? CIRCLE_SIZE) / 2;
       return {
         id: `rel-${e.id}`, type: 'relacion',
-        position: {
-          x: Math.cos(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
-          y: Math.sin(ang) * RING_RADIUS - CIRCLE_SIZE / 2,
+        position: propia || {
+          x: Math.cos(ang) * RING_RADIUS - half,
+          y: Math.sin(ang) * RING_RADIUS - half,
         },
+        width: size?.w, height: size?.h,
         zIndex: 10,
-        draggable: false, selectable: false,
+        draggable: !!data.can_edit && !e.locked, selectable: true,
         data: {
           relation: e.relation, label: e.label, edgeId: e.id,
           onOpenEdge: openEdge, onFocus: focusBranch,
           active: activeBranch?.edgeId === e.id,
+          size, locked: e.locked,
+          onGeometria: data.can_edit ? guardarGeometriaArista : undefined,
         },
         style: activeBranch && activeBranch.edgeId !== e.id ? { opacity: 0.3, transition: 'opacity 0.4s' } : { transition: 'opacity 0.4s' },
       };
@@ -660,7 +916,14 @@ export default function GrafoCanvas() {
       });
     }
 
-    setNodes([centerNode, ...extraNodes, ...relNodes, ...winNodes]);
+    // Se CONSERVA qué estaba seleccionado: cualquier cambio (renombrar,
+    // bloquear, mover) reconstruye los nodos, y sin esto la barra flotante
+    // desaparecía en cuanto hacías una sola acción.
+    setNodes(prev => {
+      const marcados = new Set(prev.filter(n => n.selected).map(n => n.id));
+      return [centerNode, ...extraNodes, ...relNodes, ...winNodes].map(n =>
+        (marcados.has(n.id) ? { ...n, selected: true } : n));
+    });
     setEdges(flowEdges);
   }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges]);
 
@@ -674,8 +937,159 @@ export default function GrafoCanvas() {
     return () => clearTimeout(t);
   }, [nodes, fitView]);
 
+  /**
+   * Guarda tamaño, giro, capa o bloqueo de una ventana en ESTE lienzo.
+   * `soloEnPantalla` sirve para el giro en curso: se pinta al momento y solo
+   * se manda al servidor al soltar, para no bombardearlo con cada grado.
+   */
+  const guardarGeometria = useCallback((
+    winId: string,
+    patch: { w?: number | null; h?: number | null; rot?: number; z?: number; locked?: boolean },
+    soloEnPantalla = false,
+  ) => {
+    setData((d: any) => d && ({
+      ...d,
+      windows: d.windows.map((w: any) => (w.id === winId ? { ...w, ...patch } : w)),
+    }));
+    if (soloEnPantalla || !data?.graph?.id) return;
+    fetch(`/api/graphs/${data.graph.id}/layout`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ positions: [{ window_id: winId, ...patch }] }),
+    }).catch(() => {});
+  }, [data?.graph?.id]);
+
+  /**
+   * Guarda posición, tamaño o bloqueo de un círculo de relación (petición del
+   * usuario, 2026-08-08: «permíteme modificarlos… como si fuesen un elemento
+   * más»). Reutiliza `graph_edges.layout`/`locked`, ya soportados por el
+   * backend desde la migración 0020 — no hace falta tocar el servidor.
+   */
+  const guardarGeometriaArista = useCallback((
+    edgeId: number,
+    patch: { pos?: { x: number; y: number }; size?: { w: number; h: number }; locked?: boolean },
+  ) => {
+    setData((d: any) => d && ({
+      ...d,
+      edges: d.edges.map((e: any) => (e.id === edgeId
+        ? { ...e, layout: { ...e.layout, ...(patch.pos ? { pos: patch.pos } : {}), ...(patch.size ? { size: patch.size } : {}) }, ...(patch.locked !== undefined ? { locked: patch.locked } : {}) }
+        : e)),
+    }));
+    if (!data?.graph?.id) return;
+    const body: any = {};
+    if (patch.pos || patch.size) body.layout = { ...(patch.pos ? { pos: patch.pos } : {}), ...(patch.size ? { size: patch.size } : {}) };
+    if (patch.locked !== undefined) body.locked = patch.locked;
+    fetch(`/api/graphs/${data.graph.id}/edges/${edgeId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify(body),
+    }).catch(() => {});
+  }, [data?.graph?.id]);
+
+  const [recortando, setRecortando] = useState<any>(null);
+
+  /** Guarda campos de la ventana en sí (título, tipo, contenido). */
+  const guardarVentana = useCallback(async (winId: string, patch: any) => {
+    setData((d: any) => d && ({
+      ...d,
+      windows: d.windows.map((w: any) => (w.id === winId ? { ...w, ...patch } : w)),
+    }));
+    await fetch(`/api/windows/${winId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify(patch),
+    }).catch(() => {});
+  }, []);
+
+  /** Todo lo que la barra flotante puede hacer con un elemento. */
+  const accionesDe = useCallback((win: any) => ({
+    abrir: () => openWindow(win.id),
+    renombrar: (titulo: string) => guardarVentana(win.id, { title: titulo }),
+    convertir: (kind: string) => guardarVentana(win.id, { kind }),
+    ponerAlt: (alt: string) => guardarVentana(win.id, { config: { ...win.config, alt } }),
+    recortar: () => setRecortando(win),
+    comentar: () => openWindow(win.id),
+    bloquear: (v: boolean) => guardarGeometria(win.id, { locked: v }),
+    capa: (dir: 1 | -1) => guardarGeometria(win.id, { z: (win.z || 0) + dir }),
+    crearConectado: (kind: string) =>
+      setConnectFrom({ id: win.id, title: win.title, pos: { x: win.x, y: win.y }, kind }),
+
+    descargar: () => {
+      const url = win.config?.image_url || win.config?.url;
+      if (url) window.open(url, '_blank', 'noopener');
+    },
+
+    reemplazarArchivo: async (f: File) => {
+      setPegando('Subiendo…');
+      try {
+        const sub = await subirArchivo(f);
+        if (sub.error) throw new Error(sub.error);
+        const campo = sub.esImagen ? 'image_url' : 'url';
+        await guardarVentana(win.id, { config: { ...win.config, [campo]: sub.url } });
+        setPegando(null);
+      } catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 4000); }
+    },
+
+    preguntarIA: () => {
+      const c = win.config || {};
+      const extracto = (c.body || c.excerpt || c.description || c.caption || c.quote || '').slice(0, 400);
+      window.dispatchEvent(new CustomEvent('ai:prefill', {
+        detail: `Sobre «${win.title}» (${win.kind}${extracto ? `: ${extracto}` : ''}) del grafo «${data?.graph?.title}»: `,
+      }));
+    },
+
+    duplicar: async () => {
+      if (!data?.graph?.id) return;
+      const res = await fetch(`/api/graphs/${data.graph.id}/windows`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({
+          title: `${win.title} (copia)`, kind: win.kind, config: win.config,
+          x: (win.x || 0) + 60, y: (win.y || 0) + 60,
+        }),
+      });
+      if (res.ok) load();
+    },
+
+    quitarDelLienzo: async () => {
+      if (!data?.graph?.id) return;
+      const r = await fetch(`/api/graphs/${data.graph.id}/windows/${win.id}`, {
+        method: 'DELETE', credentials: 'include',
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) {
+        setPegando(j.sigueEnOtrosLienzos
+          ? `Quitada de aquí — sigue en ${j.sigueEnOtrosLienzos} lienzo(s) más`
+          : 'Quitada del lienzo — sigue en la base de datos');
+        setTimeout(() => setPegando(null), 4000);
+        load();
+      }
+    },
+
+    aPapelera: async () => {
+      const r = await fetch(`/api/windows/${win.id}/papelera`, { method: 'POST', credentials: 'include' });
+      if (r.ok) {
+        setPegando('En la papelera — se borra del todo en 15 días');
+        setTimeout(() => setPegando(null), 5000);
+        load();
+      }
+    },
+  }), [data?.graph?.id, data?.graph?.title, openWindow, guardarVentana, guardarGeometria, load]);
+
+  /** Nace una conexión al unir dos puntos (clic-clic o arrastrando). */
+  const onConnect = useCallback(async (c: any) => {
+    if (!data?.can_edit || !c.source || !c.target || c.source === c.target) return;
+    await fetch(`/api/graphs/${data.graph.id}/edges`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ from_window_id: c.source, to_window_id: c.target, relation: 'contexto', label: null }),
+    }).catch(() => {});
+    load();
+  }, [data?.can_edit, data?.graph?.id, load]);
+
   const onNodeDragStop = useCallback((_: any, node: Node) => {
-    if (!data?.can_edit || node.type !== 'ventana') return;
+    if (!data?.can_edit) return;
+    if (node.type === 'relacion') {
+      const edgeId = Number(node.id.replace('rel-', ''));
+      guardarGeometriaArista(edgeId, { pos: node.position });
+      return;
+    }
+    if (node.type !== 'ventana') return;
     setData((d: any) => ({
       ...d,
       windows: d.windows.map((w: any) => w.id === node.id ? { ...w, x: node.position.x, y: node.position.y } : w),
@@ -686,7 +1100,7 @@ export default function GrafoCanvas() {
       credentials: 'include',
       body: JSON.stringify({ positions: [{ window_id: node.id, x: node.position.x, y: node.position.y }] }),
     }).catch(() => {});
-  }, [data]);
+  }, [data, guardarGeometriaArista]);
 
   const patchWindow = (winId: string, patch: any) => {
     setData((d: any) => ({
@@ -745,7 +1159,14 @@ export default function GrafoCanvas() {
     id ? (data.windows.find((w: any) => w.id === id)?.title || id) : 'Centro del grafo';
 
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full"
+      onDrop={onDrop}
+      onDragOver={e => { if (data.can_edit) e.preventDefault(); }}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onMouseMove={e => { ratonEnLienzo.current = { x: e.clientX, y: e.clientY }; }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -756,7 +1177,11 @@ export default function GrafoCanvas() {
         onInit={inst => { rf.current = inst; }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        nodesConnectable={false}
+        nodesConnectable={!!data.can_edit}
+        connectionMode={ConnectionMode.Loose}
+        connectOnClick
+        onConnect={onConnect}
+        elementsSelectable
         elevateNodesOnSelect={false}
         fitView
         fitViewOptions={{ padding: 0.12 }}
@@ -770,7 +1195,14 @@ export default function GrafoCanvas() {
       </ReactFlow>
 
       {/* Herramientas de creación (solo creador o admin) */}
-      {data.can_edit && (
+      {toolbar && data.can_edit && toolbar({
+        graphId: data.graph.id,
+        windows: data.windows || [],
+        reload: load,
+        openAdd: (kind?: string) => setShowAdd(kind || true),
+        openConnect: () => setShowConnect(true),
+      })}
+      {!toolbar && data.can_edit && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           <button onClick={() => setShowAdd(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold shadow-lg transition-colors">
@@ -821,7 +1253,11 @@ export default function GrafoCanvas() {
             className="flex items-center gap-1.5 min-w-0 py-0.5"
             title={infoOpen ? 'Ocultar detalles' : 'Ver detalles del grafo'}
           >
-            <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px]">{data.graph.title}</h1>
+            <h1 className="text-xs font-black text-slate-900 leading-tight truncate max-w-[220px] flex items-center gap-1.5">
+              {/* El icono del esquema, junto a su nombre (Eugenio, 2026-08-20). */}
+              <IconoElemento valor={(data.graph as any).icono} tamano={16} />
+              <span className="truncate">{data.graph.title}</span>
+            </h1>
             <ChevronDown className={cn('w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform', infoOpen && 'rotate-180')} />
           </button>
         </div>
@@ -864,7 +1300,7 @@ export default function GrafoCanvas() {
               <div className="mt-2 pt-2 border-t border-slate-100">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Grafos relacionados</p>
                 {data.related_graphs.map((g: any) => (
-                  <Link key={g.id} to={`/grafos/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
+                  <Link key={g.id} to={`/esquemas/${g.slug}`} className="flex items-center gap-1 text-[11px] text-emerald-700 hover:underline">
                     <Network className="w-3 h-3 shrink-0" /> {g.title}
                   </Link>
                 ))}
@@ -973,9 +1409,20 @@ export default function GrafoCanvas() {
             <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded', meta.chip)}>
               <meta.icon className="w-2.5 h-2.5" /> {meta.label}
             </span>
-            <button onClick={() => setSelected(null)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {data.can_edit && (
+                <button
+                  onClick={() => { setConnectFrom({ id: selected.id, title: selected.title }); setSelected(null); }}
+                  title="Crear algo nuevo conectado a esta ventana"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 border border-emerald-200 hover:border-emerald-400 rounded-full transition-colors"
+                >
+                  <Plus className="w-3 h-3" /> Conectar algo nuevo
+                </button>
+              )}
+              <button onClick={() => setSelected(null)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="px-4 py-4 space-y-4 pb-6">
@@ -992,7 +1439,18 @@ export default function GrafoCanvas() {
               </div>
             </div>
 
-            <WindowContent kind={selected.kind} config={selected.config} variant="full" />
+            <WindowContent
+              kind={selected.kind} config={selected.config} variant="full"
+              onConfigChange={data.can_edit ? (config => {
+                // Optimista: se pinta ya y se guarda detrás.
+                patchWindow(selected.id, { config });
+                setSelected((sel: any) => ({ ...sel, config }));
+                fetch(`/api/windows/${selected.id}`, {
+                  method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include', body: JSON.stringify({ config }),
+                }).catch(() => {});
+              }) : undefined}
+            />
 
             <div className="border-t border-slate-100 pt-3">
               <RatingWidget
@@ -1017,12 +1475,51 @@ export default function GrafoCanvas() {
         </div>
       )}
 
-      {showAdd && (
-        <AddWindowPanel graphId={data.graph.id} onClose={() => setShowAdd(false)} onAdded={load} />
+      {soltando && (
+        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center bg-emerald-50/70 backdrop-blur-[1px] border-4 border-dashed border-emerald-400 rounded-2xl animate-in fade-in duration-150">
+          <div className="text-center">
+            <Plus className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
+            <p className="text-sm font-black text-emerald-800">Suelta aquí</p>
+            <p className="text-[11px] text-emerald-700/80 mt-0.5">
+              Imágenes, PDF, hojas de cálculo o notas de texto
+            </p>
+          </div>
+        </div>
+      )}
+
+      {pegando && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-bold shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+          {pegando}
+        </div>
+      )}
+
+      {recortando && (
+        <RecortarImagen
+          url={recortando.config?.image_url}
+          inicial={recortando.config?.crop || null}
+          onCerrar={() => setRecortando(null)}
+          onGuardar={crop => guardarVentana(recortando.id, { config: { ...recortando.config, crop } })}
+        />
+      )}
+
+      {(showAdd !== false || connectFrom) && (
+        <AddWindowPanel
+          graphId={data.graph.id}
+          initialKind={connectFrom?.kind || (typeof showAdd === 'string' ? showAdd : undefined)}
+          from={connectFrom}
+          onClose={() => { setShowAdd(false); setConnectFrom(null); }}
+          onAdded={load}
+        />
       )}
       {showConnect && (
         <ConnectModal windows={data.windows} graphId={data.graph.id} onClose={() => setShowConnect(false)} onDone={load} />
       )}
     </div>
   );
+}
+
+export default function GrafoCanvas() {
+  const { slug } = useParams();
+  if (!slug) return null;
+  return <GrafoLienzo slug={slug} />;
 }

@@ -1,0 +1,18 @@
+-- ============================================================================
+-- EL RESPONSABLE DE UNA TAREA (2026-08-20, petición de Eugenio: «permite
+-- cambiar el responsable de una tarea», y del tablero de su proyecto:
+-- «permite añadir personas y proyectos a las tareas»).
+-- ============================================================================
+-- Hasta hoy la ficha enseñaba como «Responsable» a quien CREÓ la tarjeta
+-- (autor_user_id, una cuenta de la plataforma), y no se podía cambiar. Pero
+-- las personas con las que Eugenio trabaja —Anita, Javier…— son sus PERSONAS
+-- (game_agents), no cuentas: el responsable tiene que poder ser una de ellas.
+--
+-- `autor_user_id` NO SE TOCA: sigue siendo quien la creó, que es un dato de
+-- historia. El responsable es un encargo y vive en su propia columna; si está
+-- vacía, la ficha enseña al autor, como siempre.
+--
+-- Sin clave ajena a game_agents A PROPÓSITO: las personas se archivan con
+-- archived_at (regla 6), nunca se borran, y una FK impediría además mover
+-- fichas entre entornos. El JOIN con LEFT ya tolera un id que no exista.
+ALTER TABLE roadmap_items ADD COLUMN IF NOT EXISTS responsable_agente_id text;
