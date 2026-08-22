@@ -35,6 +35,7 @@ import type { Express } from 'express';
 
 import { registrarGuardia } from './seguridad/guardia.js';
 import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
+import { registrarTransparencia } from './seguridad/transparencia.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
@@ -88,6 +89,16 @@ export const MODULOS: Modulo[] = [
         + 'Va después de `registerAuthRoutes` como todos —necesita `req.user` para saber el nivel— '
         + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
         + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
+  },
+
+  {
+    nombre: 'seguridad/transparencia',
+    montar: (app, db) => registrarTransparencia(app, db),
+    nota: 'DESPUÉS del guardián y ANTES que todo lo demás, y aquí el orden vuelve a ser '
+        + 'comportamiento: cierra `GET /api/db/tables/:name` para un puñado de tablas que son '
+        + 'de las personas y no nuestras, y para eso tiene que llegar antes que la ruta de '
+        + '`server.ts` que las serviría. Lo que sí se permite, lo anota en el registro sellado. '
+        + 'No decide permisos: eso lo hacen las rutas.',
   },
 
   {
