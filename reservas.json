@@ -83,6 +83,12 @@
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
       "desde": "2026-08-22T20:13:04.214Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/CrearProducto.tsx",
+      "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
+      "desde": "2026-08-22T20:13:07.930Z"
     }
   ]
 }
