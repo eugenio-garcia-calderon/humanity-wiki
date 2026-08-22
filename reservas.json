@@ -107,6 +107,12 @@
       "ruta": ".env.example",
       "motivo": "documentar las dos llaves del TURN de Cloudflare",
       "desde": "2026-08-22T18:34:26.699Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": ".github/workflows/deploy.yml",
+      "motivo": "las dos llaves del TURN de Cloudflare al .env.production",
+      "desde": "2026-08-22T18:35:04.124Z"
     }
   ]
 }
