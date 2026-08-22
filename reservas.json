@@ -65,6 +65,18 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "bloquear a una persona: ultimo requisito de Apple",
       "desde": "2026-08-22T20:46:22.224Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/main.tsx",
+      "motivo": "dominio propio: montar la app del dominio",
+      "desde": "2026-08-22T20:48:23.438Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/AplicacionDeDominio.tsx",
+      "motivo": "dominio propio: montar la app del dominio",
+      "desde": "2026-08-22T20:48:23.438Z"
     }
   ]
 }
