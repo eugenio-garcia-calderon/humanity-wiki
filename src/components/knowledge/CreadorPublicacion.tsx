@@ -1,14 +1,15 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../../utils/subir';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   X, Sparkles, FileText, Network, Map as MapIcon, FolderKanban,
   MessageSquare, Loader2, ArrowRight, MonitorPlay, Image as ImageIcon,
-  Camera, Video,
+  Camera, Video, CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import EditorImagen from './EditorImagen';
 import { CapturaCamara } from '../ui/CapturaCamara';
+import { DestinoCaptura, type Captura } from './DestinoCaptura';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -46,21 +47,49 @@ const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string;
   { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
 
-export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boolean; onCerrar: () => void }) {
+/*
+ * `tipoInicial` (2026-08-22): con qué pestaña se abre. Lo necesita el panel del
+ * «+» de la barra de abajo, que es donde Eugenio pulsa en el móvil: allí
+ * «Cámara» y «Publicación» son dos entradas distintas y cada una tiene que
+ * abrir su parte, no dejarte en la primera y que la busques.
+ */
+export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
+  abierto: boolean; onCerrar: () => void; tipoInicial?: TipoCreable;
+}) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tipo, setTipo] = useState<TipoCreable>('documento');
+  const [tipo, setTipo] = useState<TipoCreable>(tipoInicial ?? 'documento');
   const [prompt, setPrompt] = useState('');
   const [titulo, setTitulo] = useState('');
   const [cuerpo, setCuerpo] = useState('');
   const [ocupado, setOcupado] = useState<'ia' | 'mano' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Editor de imágenes: la foto subida esperando a editarse/guardarse.
+  // Editor de imágenes: solo si LO PIDES desde el selector de destino.
   const [imagenEnEdicion, setImagenEnEdicion] = useState<string | null>(null);
+  // La foto o el vídeo recién subidos, esperando a que digas dónde van.
+  const [capturaPendiente, setCapturaPendiente] = useState<Captura | null>(null);
+  /*
+   * HECHO, SIN ECHARTE DE AQUÍ (2026-08-22, Eugenio: «cuando le doy a crear
+   * publicación, te lleva a la página de publicaciones, y esto hay que
+   * mejorarlo y crear diferentemente desde la ventana de creación»).
+   *
+   * Crear un documento o un lienzo SÍ debe llevarte a él: lo siguiente que vas
+   * a hacer es escribir dentro. Una publicación no: ya está terminada al
+   * crearla, y mandarte a un listado te obliga a volver andando si querías
+   * publicar otra cosa. Así que se queda aquí, te lo confirma, y tú decides si
+   * la abres o si sigues creando.
+   */
+  const [creado, setCreado] = useState<{ texto: string; ruta: string } | null>(null);
   // Cámara en vivo: solo se usa donde `capture` no sirve, o sea en un ordenador.
   const [camaraAbierta, setCamaraAbierta] = useState(false);
   const entradaFoto = useRef<HTMLInputElement | null>(null);
   const entradaVideo = useRef<HTMLInputElement | null>(null);
+
+  // Reabrir con otra herramienta desde el «+» tiene que cambiar la pestaña: el
+  // componente no se desmonta entre una apertura y otra.
+  useEffect(() => {
+    if (abierto && tipoInicial) { setTipo(tipoInicial); setError(null); }
+  }, [abierto, tipoInicial]);
 
   if (!abierto) return null;
 
@@ -170,7 +199,8 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
         onCerrar(); navigate(`/proyectos/${j.slug}`);
       } else {
         await llamar('/api/publications', { title: t || null, body: cuerpo.trim() || null });
-        onCerrar(); navigate('/muro');
+        setTitulo(''); setCuerpo('');
+        setCreado({ texto: 'Publicado en el muro.', ruta: '/muro' });
       }
     } catch (e: any) {
       fallo(e.message);
@@ -180,14 +210,21 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
   };
 
   /** Imagen: se sube el original y se abre el editor encima. */
-  const subirParaEditar = async (archivo: File) => {
+  /*
+   * Sube la foto y PREGUNTA DÓNDE VA (2026-08-22, Eugenio: «que no te salte el
+   * editor por defecto, sino que sea tal cual como está y que luego te
+   * pregunte dónde guardarla»). Antes esto abría el editor de imagen sin que
+   * nadie lo hubiera pedido: la foto ya estaba bien y lo que faltaba era el
+   * destino. Editar sigue estando, un botón dentro del selector.
+   */
+  const subirCaptura = async (archivo: File, tipo: 'imagen' | 'video') => {
     setError(null);
     setOcupado('mano');
     try {
       const sub = await subirArchivo(archivo);
       if (sub.error) throw new Error(sub.error);
       if (!titulo.trim()) setTitulo(archivo.name.replace(/\.[^.]+$/, ''));
-      setImagenEnEdicion(sub.url);
+      setCapturaPendiente({ url: sub.url, tipo, nombre: archivo.name });
     } catch (e: any) {
       fallo(e.message);
     } finally {
@@ -195,40 +232,20 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     }
   };
 
+  /** «Imagen»: subir una del carrete sigue el mismo camino que la cámara. */
+  const subirParaEditar = (archivo: File) => subirCaptura(archivo, 'imagen');
+
   /*
-   * Cámara: una foto sigue el mismo camino que «Imagen» — se sube y se abre el
-   * editor, para no tener dos formas distintas de acabar con una foto dentro.
-   * Un vídeo no se edita: se sube y se crea la ventana directamente.
+   * Un vídeo va por el mismo sitio que una foto: se sube y se pregunta dónde.
    *
-   * El servidor ya aceptaba vídeo antes de esto (mp4, webm, y el .mov que sale
-   * de un iPhone) y la ventana `kind: 'video'` con `config.video_url` ya
-   * existía. Aquí no se ha tocado nada del servidor: sólo faltaba la puerta.
+   * OJO, LÍMITE REAL DEL SERVIDOR: `POST /api/ventanas` solo admite
+   * `kind: 'imagen'` (lista blanca en `src/server/documentos.ts`, área de
+   * Programador 1), así que un vídeo NO puede ser todavía una publicación
+   * suelta — falla con 400. En un lienzo sí entra, porque
+   * `POST /api/graphs/:id/windows` no tiene esa lista. El selector lo dice con
+   * esas palabras en vez de soltar un «no se ha podido».
    */
-  const subirVideo = async (archivo: File) => {
-    setError(null);
-    setOcupado('mano');
-    try {
-      const sub = await subirArchivo(archivo);
-      if (sub.error) throw new Error(sub.error);
-      const r = await fetch('/api/ventanas', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          kind: 'video',
-          titulo: titulo.trim() || archivo.name.replace(/\.[^.]+$/, '') || 'Vídeo sin título',
-          config: { video_url: sub.url },
-        }),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'No se ha podido guardar el vídeo.');
-      onCerrar();
-      navigate('/mis-publicaciones');
-    } catch (e: any) {
-      fallo(e.message);
-    } finally {
-      setOcupado(null);
-    }
-  };
+  const subirVideo = (archivo: File) => subirCaptura(archivo, 'video');
 
   const guardarImagenEditada = async (url: string) => {
     try {
@@ -266,6 +283,27 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
         ) : (
           <div className="px-6 pb-6">
             {/* Qué crear */}
+            {/* HECHO. Se queda a la vista aquí dentro en vez de mandarte a un
+                listado: si querías publicar dos cosas seguidas, ahora puedes. */}
+            {creado && (
+              <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <p className="text-sm font-medium text-emerald-900 flex-1 min-w-0">{creado.texto}</p>
+                <button
+                  onClick={() => { const r = creado.ruta; setCreado(null); onCerrar(); navigate(r); }}
+                  className="text-sm font-semibold text-emerald-700 underline underline-offset-2 min-h-[44px] px-1"
+                >
+                  Verlo
+                </button>
+                <button
+                  onClick={() => setCreado(null)}
+                  className="text-sm font-semibold text-slate-500 min-h-[44px] px-1"
+                >
+                  Crear otra
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
               {TIPOS.map(t => (
                 <button key={t.tipo} onClick={() => { setTipo(t.tipo); setError(null); }}
@@ -399,8 +437,29 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
 
       {camaraAbierta && (
         <CapturaCamara
-          onCaptura={f => { setCamaraAbierta(false); subirParaEditar(f); }}
+          onCaptura={f => { setCamaraAbierta(false); subirCaptura(f, 'imagen'); }}
           onCerrar={() => setCamaraAbierta(false)}
+        />
+      )}
+
+      {capturaPendiente && (
+        <DestinoCaptura
+          captura={capturaPendiente}
+          onEditar={capturaPendiente.tipo === 'imagen'
+            ? () => { setImagenEnEdicion(capturaPendiente.url); setCapturaPendiente(null); }
+            : undefined}
+          onListo={destino => {
+            setCapturaPendiente(null);
+            if (destino.tipo === 'lienzo') {
+              // A un lienzo sí se va: quieres verla colocada.
+              onCerrar();
+              navigate(`/esquemas/${destino.slug}`);
+              return;
+            }
+            setTitulo('');
+            setCreado({ texto: 'Guardado en tus publicaciones.', ruta: '/mis-publicaciones' });
+          }}
+          onCerrar={() => setCapturaPendiente(null)}
         />
       )}
 

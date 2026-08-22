@@ -42,6 +42,10 @@ interface Medicion {
   modelos: ModeloMedido[];
   porDia: Array<{ dia: string; coste_cents: number; llamadas: number }>;
   total: { coste_cents: number; pagado_cents: number; llamadas: number; correctas: number; propuestas: number };
+  /** Lo que ha costado el chat abierto a visitantes sin cuenta. `null` cuando
+   *  no se ha preguntado (no eres administrador o miras solo lo tuyo) — que no
+   *  es lo mismo que un cero. */
+  anonimo?: { llamadas: number; coste_cents: number } | null;
 }
 
 /** Céntimos → euros, con los decimales que hacen falta para que 0,04 € no se
@@ -133,6 +137,24 @@ export default function PanelMedicion({ esAdmin }: { esAdmin?: boolean }) {
               </p>
             </div>
           </div>
+
+          {/* LO QUE CUESTA EL CHAT ABIERTO. No tiene límite —decisión de
+              Eugenio— y por eso hay que poder verlo: dejar algo abierto solo se
+              sostiene si se sabe lo que vale. Hasta hoy este gasto no se
+              apuntaba en ninguna parte y el panel enseñaba menos que la
+              factura. Va dentro del coste real de arriba; aquí solo se separa
+              la parte que no tiene dueño. */}
+          {datos.anonimo && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-700">
+                Visitantes sin cuenta
+              </p>
+              <p className="text-lg font-black text-amber-900 leading-tight">{euros(datos.anonimo.coste_cents)}</p>
+              <p className="text-[10px] text-amber-700/80">
+                {datos.anonimo.llamadas} {datos.anonimo.llamadas === 1 ? 'pregunta' : 'preguntas'} · sin límite, lo paga la plataforma
+              </p>
+            </div>
+          )}
 
           {/* La curva: para ver si un día se disparó algo. */}
           {datos.porDia.length > 1 && (

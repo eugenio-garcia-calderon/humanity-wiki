@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 
 interface Aviso {
   id: number;
@@ -89,12 +90,12 @@ export default function Campana({ compacto }: { compacto?: boolean }) {
       .then(r => r.json())
       .then(j => setAvisos(Array.isArray(j) ? j : []))
       .catch(() => setAvisos([]));
-    const cerrar = (e: MouseEvent) => {
-      if (caja.current && !caja.current.contains(e.target as Node)) setAbierta(false);
-    };
-    window.addEventListener('click', cerrar);
-    return () => window.removeEventListener('click', cerrar);
   }, [abierta]);
+
+  // ESTA ERA LA RARA DE LAS SIETE: escuchaba `click` en `window`, que se
+  // dispara al SOLTAR el botón, así que el mismo clic que abría el panel podía
+  // cerrarlo antes de que se viera. Ahora usa lo mismo que las demás.
+  useCerrarAlPulsarFuera(caja, abierta, () => setAbierta(false));
 
   const abrirAviso = async (a: Aviso) => {
     if (!a.read_at) {

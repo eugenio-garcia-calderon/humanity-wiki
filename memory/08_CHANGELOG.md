@@ -4141,3 +4141,268 @@ request a service worker handles — a fifteen-line worker that does nothing but
 `fetch(event.request)` fails there too. Everything above was therefore checked in
 real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
 live camera preview) is still only verifiable by Eugenio on his own device.
+
+---
+
+## 2026-08-22 · Say which figures are measured and which were invented (PR #203, #204, #207)
+
+`CLAUDE.md` opens by saying that mistaking simulated data for measured data is
+the most expensive error made in this project. It was still live, in the most
+literal way possible: **no screen said which was which.**
+
+Counted against the database: of 20.557 indicator observations, **20.499 are
+simulated** — the 179 Madrid municipios («Excel Municipios Madrid (simulado)»)
+and the 32 European countries («IA — número aleatorio»). Every row already
+declared its source. Nothing read it.
+
+Three changes went out, in this order, and each one found the next.
+
+### #203 — the mark exists
+
+`src/utils/origenDelDato.ts` classifies a source into four states, and the
+fourth is the one that matters: `desconocido`. The tempting shortcut is to
+treat "no source written" as measured — most good data arrives without
+decoration — and that is exactly presenting as certain what nobody has checked.
+**If it does not say, we say it does not say.**
+
+Red for `simulado`, and not a discreet grey, because a discreet mark is learned
+away in two days. The damage here is not confusion for a minute: it is somebody
+citing an invented figure in front of people who decide with it.
+
+### #204 — the mark reaches everything, and two worse things surface
+
+Half a platform marked is a promise the other half breaks: once you have seen
+the red warning on one screen, its absence elsewhere reads as "this one is
+real". So it went to the AI assistant, the objectives grid, the indicator list,
+the indicator sheet and the explorer canvas.
+
+Two things came out of that work, both worse than what it set out to fix:
+
+**1. The mark described a different number from the one beside it.** The map
+classified a territory by the sources of its *observations*, then painted its
+fourteen *objective* percentages. For Spain those disagree: its water
+observations are real (INE, MITECO, FAO — 41 of them) but the percentages came
+from a hand-written table in `src/data/seed.ts`. The sheet said **MEDIDO over
+fourteen invented numbers.** A mark that reassures about the wrong figure is
+worse than no mark, because now it vouches for it.
+
+Fixed by deciding the origin **in the same branch that decides the number**,
+and by moving `getObjectivesForTerritory` out of `server.ts` into
+`src/utils/puntuacionesDeObjetivo.ts` so the assistant runs the same
+calculation the screens do instead of forming a second opinion. That is the
+recurring failure of this house — two truths about the same thing — and it had
+appeared here twice in one afternoon.
+
+**2. `|| 0` turned "no data" into a score of zero.** Spain read **0%** in
+Education, Mobility, Energy, Technology, Employment and Governance. Saying a
+country scores zero is a stronger claim than any simulated figure. Now it says
+«Sin datos» — 8 cases on that page alone.
+
+**The mark is rationed on purpose.** The rule is stated once at the top and the
+pill only appears on a figure that does *not* match it. Fourteen identical red
+badges teach people to stop looking, which is the same failure as saying
+nothing, reached from the other side.
+
+### #207 — a real measurement beats the hand-written table
+
+Eugenio's call, and the priority had been backwards. The seed table exists to
+**fill in** where there is no data, and it won every time. Spain's 41 real
+observations were sitting in the database, loaded, reaching no screen.
+
+    AGUA          98 → 74    (medido)
+    ALIMENTACIÓN  86 → 75    (medido)
+    CONVIVENCIA   85 → 65    (medido)
+    ECOSISTEMAS   76 → 67    (medido)
+    VIVIENDA      67 → 67    (medido — same number, different provenance)
+    SALUD         91 → 91    (still simulado: its one indicator has no
+                              observation for Spain, so the fallback is right)
+
+**The drop is the point.** 98% was flattering and made up; 74% is what the
+measurements say.
+
+The rule is deliberately narrow: **a real figure wins over any filler; between
+two fillers, nothing moves.** Simulated observations do not beat the seed
+table — there is no reason to prefer one invention over another, and flipping
+them would have churned the numbers of 179 municipios and 32 countries for
+nothing.
+
+### Where it stands
+
+**3.118 of 3.140 objective scores are still simulated — 99,3%.** The 99,7%
+figure quoted earlier was about observations; the percentages people actually
+look at were 100% simulated until #207 and are now 99,3%.
+
+**Verified in the browser, never by a 200** — the deploy serves the whole
+application for any route, so a status code proves nothing about a screen. Each
+of the three was checked by reading the rendered page and taking a screenshot
+of production.
+
+---
+
+## 2026-08-22 · Count what the open chat costs, and leave it open (PR #208)
+
+`POST /api/ai/chat` answers without a session. That is intentional — the prompt
+itself calls whoever asks «visitante no registrado» — and Eugenio decided today
+that it stays that way, **with no limit on free questions**.
+
+The other half of the hormiguero note (`INCMT4B2B9K1P9`) was not a decision, it
+was a hole: the INSERT into `ai_usage_charges` sat inside `if (req.user)`, so
+every anonymous question was paid for and left no trace. The cost panel showed
+less than the invoice, and the gap grew exactly with usage — the kind of thing
+you find out from the bank statement.
+
+**Not setting a limit is a decision. Not being able to see it is not.**
+
+- `user_id` becomes nullable (migration `0066`). NULL means what it looks like:
+  nobody was signed in. An "anonymous" user row would have been worse — every
+  user count on the platform would then include a person who does not exist.
+- Nobody is billed: `fee_cents` and `total_cents` stay at zero.
+- The admin panel gains one number: what visitors without an account have cost.
+  It is `null`, not zero, when the question was not asked — zero would claim
+  nobody has used it.
+
+Verified end to end locally: one anonymous request wrote a row with
+`user_id = null`, `cost_cents = 0,061`, `total_cents = 0`, and the panel's query
+returns it. The test row was deleted afterwards.
+
+## 2026-08-22 — Three things Eugenio hit with the app installed on his iPhone
+
+He installed it, used it, and sent a screenshot. All three are the same kind of
+bug: the app doing something nobody asked for.
+
+### 1 · The bottom bar sat on the home indicator
+
+Installed full-screen there is no Safari bar underneath, so the platform's own
+navigation ended up on the iPhone's home line. `env(safe-area-inset-bottom)` is
+0 in a browser and ~34px installed, so one rule covers both. It goes on as
+`paddingBottom` with `boxSizing: content-box` — added *below* the buttons, so
+the icons do not shrink when you install it — and `--hueco-muelle` (which
+`Layout.tsx` uses to keep page content clear of the bar) became
+`calc(44px + env(safe-area-inset-bottom))`.
+
+`src/anclajeInferior.ts` needed no change: it measures the bar's real height
+rather than copying a number, so the offline banner followed on its own.
+
+### 2 · The camera opened an image editor nobody asked for
+
+Eugenio: «cuando te lleva a cámara que no te salta el editor por defecto, sino
+que sea tal cual como está y que luego te pregunte dónde guardarla».
+
+You took a photo and got luz/contraste/filtros on top of it. The photo was
+already fine; the only thing missing was where it went. New
+`src/components/knowledge/DestinoCaptura.tsx`: the shot as it is, a title, and a
+destination — a canvas of yours, or a standalone publication. **Editing became a
+button you press.** Video takes the same path.
+
+Canvases and not the "proyectos" board: a project is a board of cards (to
+do / doing / done), so dropping a photo there would invent a card nobody asked
+for. A canvas is where image and video windows already live.
+
+### 3 · Creating a publication threw you onto the publications list
+
+`navigate('/mis-publicaciones')` after every save. Creating a document or a
+canvas *should* take you there — the next thing you do is write inside it. A
+publication is finished the moment you create it, and being sent to a list means
+walking back if you wanted to publish two things. It now confirms in place, with
+"Verlo" and "Crear otra".
+
+### A correction to the entry above this one
+
+**The video path shipped in #205 never worked.** It posts `kind: 'video'` to
+`POST /api/ventanas`, which whitelists `['imagen']` only
+(`src/server/documentos.ts:418`): it returned 400 every time. The earlier entry
+claimed "el servidor ya aceptaba vídeo antes de esto" — that was written without
+checking, and it was false.
+
+What is true, and checked in source this time: `POST /api/graphs/:id/windows`
+does accept `video` (`WINDOW_KINDS`, `src/server/knowledge.ts:28`), so a video
+lands in a canvas today. As a standalone publication the selector says exactly
+that instead of a generic failure. Adding `'video'` to the whitelist is one line
+in Programador 1's area and has been passed to them.
+
+**Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
+create accounts or type passwords. Both endpoints were read in source rather
+than exercised. Phase 1 was checked in the browser.
+
+## 2026-08-22 — I fixed the camera in the wrong place, twice, and blamed the cache
+
+Eugenio, after two deploys: «no ha cambiado nada en humanity.wiki del tema de
+camara», then «igual te está faltando hacer el deploy amigo», then «humanity.wiki
+en version movil sigue sin mostrar las mejoras».
+
+I checked the served bundle each time, found my code in it, and told him his
+phone was holding a stale copy. **It was not.** I then reproduced the supposed
+staleness and it did not reproduce: a client controlled by the old worker picks
+up a new bundle on an ordinary navigation, because the navigate branch is
+network-first.
+
+**The real cause.** His words were `el boton de camara va en las herramientas de
+crear '+'`. The `+` in the bottom bar opens a panel in `AIAssistant.tsx` that
+renders `HERRAMIENTAS_CREAR` — eight tools, each of which *navigates to a page*.
+I put the camera in `CreadorPublicacion`, the dialog behind the green button on
+the home feed. Different component. He was pressing the one I had not touched.
+
+The same panel is where his third complaint lives, in plain sight:
+`{ label: 'Publicación', destino: '/explorar' }` — a navigation to the
+publications page, which is exactly what he asked me to stop doing. I "fixed" it
+in the other component.
+
+### What changed
+
+`HERRAMIENTAS_CREAR` entries can now either navigate (`destino`) or open the
+creator in place (`crear`), and `CreadorPublicacion` takes a `tipoInicial` so it
+opens on the right tool. **Cámara** is the first entry; **Publicación** opens the
+creator instead of leaving the page. The creator is mounted from the bar itself,
+because the `+` exists on every screen and that is the only way Cámara works
+wherever you are.
+
+Verified in a browser, not by reading: the panel lists Cámara first, clicking it
+opens the creator without changing the route, and Publicación does the same.
+(Logged out it shows «Inicia sesión para crear publicaciones», which is correct.)
+
+### The lesson, which is the expensive part
+
+I was told plainly where the button went, built it somewhere else, and then spent
+two rounds defending the deploy instead of opening the screen he was describing.
+Checking that my code is in the bundle proves the deploy worked. It proves
+nothing about whether the code is where the person is looking. **Open the screen
+they named.**
+
+### Kept anyway: the app can now repair itself
+
+The staleness theory was wrong, but two things found while chasing it are worth
+keeping, and they close the `?sw=off` workaround Eugenio rightly refused («es un
+apaño, yo quiero que funcione sin esa url cutre»):
+
+- `scripts/sellar-sw.mjs` stamps the built entry bundle's name into `dist/sw.js`,
+  so a deploy that changes the app also changes the worker and the browser has a
+  reason to re-install it. The first version listed `dist/assets/` and picked the
+  first `index-*.js`, which was a chunk, not the entry — a stamp that would never
+  change, from a file the page never loads. It reads `dist/index.html` now.
+- `sw.js` v4 reverses the no-`skipWaiting` rule: it takes over at once, drops the
+  stale code caches and reloads its clients. Waiting for every tab to close never
+  happens on a phone.
+
+  **But it never reloads a page somebody is looking at**, and the first draft
+  did. Caught in review: three hours earlier I had refused to auto-reload with
+  the argument «eso tira lo que estés escribiendo», and then wrote exactly that
+  into the worker. This team deployed fifteen times in four hours; a long
+  publication would have been lost by somebody else's deploy. A hidden page is
+  reloaded — nobody types into a page they cannot see, and an installed app in
+  the switcher is precisely the case that matters. A visible page is left alone
+  and gets the "Actualizar" button instead, which is a person deciding rather
+  than a deploy deciding for them.
+
+---
+
+## 2026-08-22 — The info «i» menu, top right (Programador 7)
+
+The pages that explain the platform — `/sobre-red-humana` and its scoring
+subpage — existed and nothing in the interface linked to them. A new `Info`
+button in the top bar of `Layout.tsx` (before the ant, after the window strip)
+opens a small dropdown listing them. Same open/close pattern as the account
+menu: `useCerrarAlPulsarFuera`, same dropdown styling.
+
+Why before the ant: first understand the platform, then ask things of the
+team. Verified in the browser on port 3007 (menu opens, both links navigate,
+button highlights on those routes). `tsc --noEmit` clean.

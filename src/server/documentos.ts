@@ -407,16 +407,34 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
   });
 
   /**
-   * POST /api/ventanas   { kind: 'imagen', title, config }
-   * Una ventana suelta como publicación (el editor de imágenes guarda aquí
-   * su resultado). Lista blanca corta a propósito: solo lo que tiene editor.
+   * POST /api/ventanas   { kind: 'imagen' | 'video', titulo, config }
+   * Una ventana suelta como publicación: el editor de imágenes guarda aquí su
+   * resultado, y la cámara guarda aquí el vídeo. Lista blanca corta a
+   * propósito — solo lo que se crea de una pieza desde el selector de «Crear».
+   *
+   * ── VÍDEO, ROTO EN PRODUCCIÓN UNAS HORAS (2026-08-22) ──────────────────────
+   * La cámara salió esta mañana mandando `kind: 'video'` a esta ruta, y esta
+   * lista decía `['imagen']`: **400 y el vídeo no se guardaba**. Lo que hizo
+   * que pasara desapercibido es que todo lo demás sí estaba listo —el subidor
+   * acepta mp4, webm y el .mov del iPhone; `WINDOW_KINDS` en `knowledge.ts` ya
+   * incluía «video»; `WindowContent` ya pinta `config.video_url` con su
+   * `<video>`—, así que la parte que faltaba era esta línea y solo esta.
+   *
+   * Comprobado antes de tocarla, porque una lista blanca casi nunca está sola:
+   * la ruta no mira el `kind` en ningún otro sitio, el `config` viaja tal cual,
+   * y el listado de publicaciones no filtra por tipo. Lo único que sí daba por
+   * hecho que era una imagen era el título por defecto, y va abajo.
    */
   app.post('/api/ventanas', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const kind = String(req.body?.kind || '');
-      if (!['imagen'].includes(kind)) return res.status(400).json({ error: 'Tipo de ventana no admitido aquí.' });
-      const titulo = String(req.body?.titulo || '').trim() || 'Imagen sin título';
+      if (!['imagen', 'video'].includes(kind)) return res.status(400).json({ error: 'Tipo de ventana no admitido aquí.' });
+      // El título por defecto sigue al tipo. «Imagen sin título» encima de un
+      // vídeo es pequeño, pero es de la misma familia que todo lo de hoy: un
+      // texto que afirma algo que no es.
+      const porDefecto = kind === 'video' ? 'Vídeo sin título' : 'Imagen sin título';
+      const titulo = String(req.body?.titulo || '').trim() || porDefecto;
       const id = newId('KW');
       await db.execute(sql`
         INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by)

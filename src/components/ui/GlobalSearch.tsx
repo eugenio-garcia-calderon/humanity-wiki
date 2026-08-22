@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import {
   Search, X, MapPin, Target, BarChart3, Flag, Activity, AlertTriangle,
   GitBranch, Lightbulb, HelpCircle, Package, Megaphone, Rocket, Award,
@@ -84,18 +85,9 @@ export default function GlobalSearch() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
-  useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', onClickOutside);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onClickOutside);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, []);
+  // Esta era la única de las siete que ya cerraba con Escape. Ahora lo hacen
+  // todas, que era la mitad del motivo para unificarlas.
+  useCerrarAlPulsarFuera(containerRef, open, () => setOpen(false));
 
   const grouped: Record<string, SearchResult[]> = {};
   for (const r of results) (grouped[r.type] ||= []).push(r);

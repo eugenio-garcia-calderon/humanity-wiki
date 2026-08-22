@@ -46,6 +46,71 @@ subdomains went back to error 525 with nobody touching them.
 - So a server fix is not finished until it is merged to `main`. Doing it by
   hand is a way to test it, never a way to ship it.
 
+## Anything you create on the server must belong to `deploy`
+
+The deploy runs as the `deploy` user. **A directory created by hand as `root`
+stops the next deploy dead**, and it fails in the quietest possible way.
+
+Measured on 2026-08-22: `deploy/certs` was created over SSH as root. The next
+deploy died at
+
+```
+error: unable to create file deploy/certs/LEEME.txt: Permission denied
+fatal: Could not reset index file to revision 'origin/main'
+```
+
+`git reset --hard` runs **before** the rebuild, so nothing was rebuilt and
+nothing broke — the site kept serving the old version. That is the trap: the
+site is up, the workflow is red, and the change looks like it simply did not
+work. Fix:
+
+```bash
+chown -R deploy:deploy /opt/humanity-wiki/deploy/certs
+chmod 700 /opt/humanity-wiki/deploy/certs
+chmod 600 /opt/humanity-wiki/deploy/certs/origen.key
+```
+
+Then re-run the failed workflow; no new commit is needed.
+
+## A new Caddyfile never reaches the container by itself
+
+`deploy/Caddyfile` is bind-mounted as a **single file**. `git reset --hard`
+does not edit it, it **replaces** it, and the container keeps looking at the
+old inode. The service definition does not change either, so `up -d` has no
+reason to recreate it.
+
+The result, measured on 2026-08-22: a Caddyfile change deploys, the workflow
+goes green, and nothing happens. The file on the host had the new rule; the
+container did not.
+
+The deploy now ends with `up -d --force-recreate caddy`, so this is handled.
+But if you ever change Caddy config by hand, **recreate the container** — a
+`docker compose restart` is not enough either, for the same inode reason.
+
+It was caught because a cache header did not change. It could just as easily
+have been the subdomain block, and then it would have looked like the
+certificate was failing.
+
+## `header` in Caddy ADDS unless you write `>`
+
+`header @foo Cache-Control "..."` does not replace a header the origin already
+sent — it adds a second one. The response then carries two `Cache-Control`
+lines and Cloudflare keeps the origin's.
+
+The assets rule had been written that way since August and had never done
+anything: measured against the origin, the response carried
+`public, max-age=31536000, immutable` **and** `public, max-age=0`.
+
+Always `header @foo >Cache-Control "..."` when the origin might set the same
+field. And measure against the origin, not through Cloudflare:
+
+```bash
+curl -sI --resolve humanity.wiki:443:<IP> -k https://humanity.wiki/sw.js | grep -i cache-control
+```
+
+Through Cloudflare you see what the edge decided. Against the origin you see
+what Caddy actually sent, and duplicated headers only show up there.
+
 ## The certificate for per-user subdomains
 
 `*.humanity.wiki` needs a certificate **on this origin**, because Cloudflare

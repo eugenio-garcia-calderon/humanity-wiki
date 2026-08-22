@@ -108,21 +108,31 @@ content.
 None of this is the fault of whoever wrote it: **there was no guidance saying where
 things go.** That is what the `CLAUDE.md` files fix.
 
-## One item that is urgent, not debt
+## The one urgent item, and it is already fixed
 
-`/api/data/:entity` accepts `POST`, `PUT` and `DELETE` **with no authentication**.
-Verified on 2026-08-06 against the local server: a `POST` with no cookie returned
-200 and created the entity; a `DELETE` archived it. It covers the 14 tables in
-`ENTITY_TABLES` (`server.ts:637`), including territories, objectives and indicators.
+The generic write endpoints under `/api/data/:entity` shipped with **no
+authorisation check at all**, covering 14 core tables. Found during this audit and
+**closed the same day in PR #25**: they now require a session and level 4, verified
+locally and in production. Details in
+[`02_TECH_DEBT.md`](02_TECH_DEBT.md) under "Resolved".
 
-The newer modules (`knowledge.ts`, `social.ts`) do check roles. The legacy ones were
-left out when authentication was added.
+The operational detail is deliberately not repeated here: this repository is
+**public**, and a public document should not carry a recipe for an attack, even a
+closed one.
 
-**The policy is already written**: the AI action catalogue in
-`src/server/ai/assistant.ts` declares `CREATE_TERRITORY: level 4`,
-`UPDATE_INDICATOR: level 3`, `CREATE_CHALLENGE: level 2`. The AI is more restricted
-than the REST API. Fixing this requires no new decision: extract that table into a
-module and apply it in both places.
+Two lessons worth keeping, because they generalise:
+
+**The policy already existed.** The AI action catalogue in
+`src/server/ai/assistant.ts` declares the level required per operation
+(`CREATE_TERRITORY: 4`, `UPDATE_INDICATOR: 3`, `CREATE_CHALLENGE: 2`). The
+assistant was more restricted than the REST API it sits on top of. When a rule
+exists in one place and not the other, the gap is where the bug lives.
+
+**The gap was generational, not careless.** The modules written after
+authentication landed (`knowledge.ts`, `social.ts`) all check roles. The routes
+written before it never went back. Any codebase with two generations of a pattern
+has this shape of hole somewhere, and it is worth looking for it on purpose rather
+than waiting to find it.
 
 ## What is right and stays
 
