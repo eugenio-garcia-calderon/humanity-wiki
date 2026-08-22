@@ -25,7 +25,7 @@ import BloquesLectura from '../components/knowledge/BloquesLectura';
 // camino. Lo que se pinta es lo mismo, así que cambiar de forma no cambia de
 // pantalla.
 
-export default function PaginaPublica() {
+export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
   // React Router 7 no admite un trozo fijo pegado a un parámetro dentro del
   // mismo tramo (`/@:handle` no vale), así que el arroba viaja DENTRO del
   // parámetro y se comprueba aquí. La ruta declarada es `:arroba/:slug`, la
@@ -33,7 +33,9 @@ export default function PaginaPublica() {
   // variable, así que `/retos/:id` y todas las rutas reales ganan siempre, y
   // aquí solo llega lo que no era de nadie.
   const { arroba, slug } = useParams();
-  const handle = arroba?.startsWith('@') ? arroba.slice(1) : null;
+  // Por subdominio el nombre llega ya resuelto desde el `Host` (`handleFijo`);
+  // por camino viene pegado a un arroba dentro del propio tramo.
+  const handle = handleFijo ?? (arroba?.startsWith('@') ? arroba.slice(1) : null);
 
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'no-existe' | 'fallo'>('cargando');
   const [pagina, setPagina] = useState<any>(null);

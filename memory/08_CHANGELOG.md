@@ -3829,3 +3829,76 @@ branch says so, `robots` follows the author's choice, no horizontal overflow
 
 Still open: the subdomain `nombre.humanity.wiki` answers **525** because the
 Cloudflare origin certificate is not on the server yet. The path address works.
+---
+
+## 2026-08-22 (IX) — The web gets light: 1.137 KB → 324 KB to open it
+
+Eugenio: «haz que la web sea más ligera y que se vaya desplegando al abrir
+herramientas, fundamental».
+
+Measured at every step, because «lighter» without a number is an opinion. What
+someone downloads before seeing anything:
+
+| | Al entrar (comprimido) |
+|---|---|
+| Antes | **1.137 KB** |
+| Cada página por su lado | 428 KB |
+| Y las gráficas aparte | **324 KB** |
+
+**−71 %.** On a phone with poor coverage that is the difference between a few
+seconds of white screen and a page that appears.
+
+### Phase 1 · Measure first
+
+A script that reports exactly what the browser fetches on a first visit — entry
+chunk, CSS, both gzipped. Every later number in this entry comes from it, run
+again after each change.
+
+### Phase 2 · Every tool downloads when you open it
+
+The 53 pages of the platform were in the **same file** you download on arrival.
+Someone coming to read one publication was fetching the page editor, the canvas,
+the market, the financial panel, the user admin and the whole of Mapbox before a
+single letter appeared. Now each page is its own file: 51 deferred, and only the
+front page, the entrance and the login stay eager — deferring the first thing
+anyone sees only swaps one wait for another.
+
+Mapbox fell out on its own as a consequence: **1.823 KB** that now only the map
+pages fetch.
+
+### Phase 3 · Something honest to look at while it arrives
+
+Not a spinner in the middle: the **silhouette** of what is coming — a heading, a
+couple of blocks. The eye understands that something with that shape is on its
+way, and there is no jump when it lands. One single boundary for all 51 routes,
+not 51 copies of the same wrapper: the first one anyone forgot would be a white
+screen nobody could explain.
+
+### Phase 4 · Charts only for whoever sees one
+
+The chart library lived inside the component that draws *any* kind of window —
+used on the front page, in the canvas and in the editor — so everyone downloaded
+a chart engine with no chart on screen. Now it is its own file, requested the
+first time a real chart appears, with a placeholder of the **exact height** so
+the text below does not jump. −104 KB.
+
+While moving it I nearly invented a palette that merely resembled the original:
+every existing chart would have changed colour without anyone asking. The
+comment in `Graficas.tsx` says so, because that is the kind of mistake a move
+makes look like an improvement.
+
+### Phase 5 · The icons: measured, and kept
+
+Removing the 935 non-core icons takes the start from 324 KB to 246 KB — **they
+cost 78 KB**. They stay, and now the decision has that number written beside it:
+the alternative is a chosen icon painted first as the generic one and swapped an
+instant later, a flicker visible in the sidebar on *every* load for anyone with
+custom icons. 78 KB once, cached afterwards, is cheaper than a flicker every
+visit.
+
+### Phase 6 · Nothing broke
+
+Sixteen routes opened one after another in the browser: none blank, no
+chunk-loading errors, no exceptions. 86 chunks now instead of 9, and the total
+grew by 100 KB — which is the point: the total is no longer what anyone waits
+for.

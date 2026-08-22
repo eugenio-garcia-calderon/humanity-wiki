@@ -21,11 +21,21 @@
 // vaya a elegir para su proyecto. Quedan 988, que son objetos, sitios,
 // animales, herramientas, comida, transporte, ciencia y oficios.
 //
-// LO QUE CUESTA, con número: el paquete de la aplicación pasa de 5,87 MB a lo
-// que diga la medición de abajo. Traerlos TODOS (los 5.592) serían unos 3 MB
-// más para que nadie llegue nunca a mirar la mitad; traerlos bajo demanda
-// obligaría a que el menú lateral, las tarjetas y el visor esperasen una
-// descarga para pintar un icono ya elegido, que es peor.
+// ── LO QUE CUESTAN, MEDIDO (2026-08-22) ────────────────────────────────────
+// Al aligerar la web se midió con precisión: quitando los 935 que no son del
+// núcleo, el arranque baja de 324 KB a 246 KB comprimidos. Es decir, esta lista
+// cuesta **78 KB** de lo primero que se descarga.
+//
+// SE QUEDAN, y es una decisión tomada con ese número delante. La alternativa
+// —bajarlos aparte, después— ahorraría esos 78 KB a cambio de que un icono ya
+// elegido se pinte primero con el genérico y cambie al de verdad un instante
+// después. Ese parpadeo se vería en el menú lateral en CADA carga, a quien
+// tenga iconos propios puestos; 78 KB de una vez, que además quedan en la caché
+// del navegador, salen más baratos que un parpadeo en cada visita.
+//
+// (Traerlos todos —los 5.592 de lucide— serían unos 3 MB para que nadie llegue
+// a mirar la mitad. Esa sí es una mala idea, y el programador 2 llegó a la
+// misma conclusión por su cuenta.)
 import {
   Accessibility, Activity, ActivitySquare, AirVent, Airplay, AlarmClock, AlarmSmoke, Album,
   AlertCircle, AlertOctagon, AlertTriangle, Ambulance, Amphora, Anchor, Angry, Annoyed, Antenna,

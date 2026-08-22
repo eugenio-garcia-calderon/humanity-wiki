@@ -1,64 +1,86 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import { subdominioDeUsuario } from './utils/subdominio';
 
 // Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
 const JuegoVital = lazy(() => import('./pages/JuegoVital'));
-import PaginaPublica from './pages/PaginaPublica';
-import TerritoryProfile from './pages/TerritoryProfile';
-import ChallengeProfile from './pages/ChallengeProfile';
-import SolutionProfile from './pages/SolutionProfile';
-import Objectives from './pages/Objectives';
-import ObjectiveDetail from './pages/ObjectiveDetail';
-import Indicators from './pages/Indicators';
-import IndicatorDetail from './pages/IndicatorDetail';
-import Challenges from './pages/Challenges';
-import Solutions from './pages/Solutions';
-import Territories from './pages/Territories';
-import Projects from './pages/Projects';
-import Organizations from './pages/Organizations';
-import ProjectProfile from './pages/ProjectProfile';
-import OrganizationProfile from './pages/OrganizationProfile';
-import MapPage from './pages/Map';
-import Mercado from './pages/Mercado';
-import PanelFinanciero from './pages/PanelFinanciero';
-import Muro from './pages/Muro';
-import PersonaPublica from './pages/PersonaPublica';
-import Grafos from './pages/Grafos';
-import GrafoCanvas from './pages/GrafoCanvas';
-import UserMapa from './pages/UserMapa';
-import Mapas from './pages/Mapas';
-import Esquemas from './pages/Esquemas';
-import Tareas from './pages/Tareas';
-import Hormiguero from './pages/Hormiguero';
-import Tablas from './pages/Tablas';
-import IA from './pages/IA';
-import Paginas from './pages/Paginas';
-import Mensajes from './pages/Mensajes';
-import Persona from './pages/Persona';
-import Calendario from './pages/Calendario';
-import Personas from './pages/Personas';
+
+// ══ CADA HERRAMIENTA SE DESCARGA AL ABRIRLA (2026-08-22) ═════════════════════
+// Eugenio: «haz que la web sea más ligera y que se vaya desplegando al abrir
+// herramientas, fundamental».
+//
+// Antes, las 53 páginas de la plataforma entraban en el MISMO fichero que se
+// descarga al entrar. Alguien que solo venía a leer una publicación se
+// descargaba el editor de páginas, el lienzo, el mercado, el panel financiero,
+// el administrador de usuarios y el mapa entero de Mapbox antes de ver una
+// letra. Medido antes de tocar nada: 1.137 KB comprimidos para pintar la
+// portada.
+//
+// Con `lazy()`, cada página es su propio fichero y solo se baja cuando alguien
+// la abre. La primera vez cuesta un instante de carga —por eso hay una pantalla
+// de espera de verdad, abajo—; a partir de ahí queda en la caché del navegador.
+//
+// QUÉ NO SE DIFIERE, y por qué: la portada (`Explorar`), la entrada y el
+// login. Diferir lo primero que alguien ve solo cambia una espera por otra: la
+// pantalla se pintaría vacía y JUSTO DESPUÉS pediría el trozo que necesita para
+// llenarla. Lo que se difiere es todo lo que hay DETRÁS de un clic.
+const AboutRoot = lazy(() => import('./pages/about/AboutRoot'));
+const AboutScoring = lazy(() => import('./pages/about/AboutScoring'));
+const AdminDesign = lazy(() => import('./pages/AdminDesign'));
+const AdminUsuarios = lazy(() => import('./pages/AdminUsuarios'));
+const Archivos = lazy(() => import('./pages/Archivos'));
+const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
+const Calendario = lazy(() => import('./pages/Calendario'));
+const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
+const Challenges = lazy(() => import('./pages/Challenges'));
+const Configuracion = lazy(() => import('./pages/Configuracion'));
+const Documento = lazy(() => import('./pages/Documento'));
+const Esquemas = lazy(() => import('./pages/Esquemas'));
+const GrafoCanvas = lazy(() => import('./pages/GrafoCanvas'));
+const Grafos = lazy(() => import('./pages/Grafos'));
+const HazteSocio = lazy(() => import('./pages/HazteSocio'));
+const Hormiguero = lazy(() => import('./pages/Hormiguero'));
+const IA = lazy(() => import('./pages/IA'));
+const IncendiosMapa = lazy(() => import('./pages/IncendiosMapa'));
+const IndicatorDetail = lazy(() => import('./pages/IndicatorDetail'));
+const Indicators = lazy(() => import('./pages/Indicators'));
+const MapPage = lazy(() => import('./pages/Map'));
+const Mapas = lazy(() => import('./pages/Mapas'));
+const Mensajes = lazy(() => import('./pages/Mensajes'));
+const Mercado = lazy(() => import('./pages/Mercado'));
+const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
+const Muro = lazy(() => import('./pages/Muro'));
+const ObjectiveDetail = lazy(() => import('./pages/ObjectiveDetail'));
+const Objectives = lazy(() => import('./pages/Objectives'));
+const OrganizationProfile = lazy(() => import('./pages/OrganizationProfile'));
+const Organizations = lazy(() => import('./pages/Organizations'));
+const Paginas = lazy(() => import('./pages/Paginas'));
+const PanelFinanciero = lazy(() => import('./pages/PanelFinanciero'));
+const Persona = lazy(() => import('./pages/Persona'));
+const PersonaPublica = lazy(() => import('./pages/PersonaPublica'));
+const Personas = lazy(() => import('./pages/Personas'));
+const Presentacion = lazy(() => import('./pages/Presentacion'));
+const ProjectProfile = lazy(() => import('./pages/ProjectProfile'));
+const Projects = lazy(() => import('./pages/Projects'));
+const Proyecto = lazy(() => import('./pages/Proyectos').then(m => ({ default: m.Proyecto })));
+const Proyectos = lazy(() => import('./pages/Proyectos').then(m => ({ default: m.Proyectos })));
+const Restablecer = lazy(() => import('./pages/Restablecer'));
+const RetoVistas = lazy(() => import('./pages/RetoVistas'));
+const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
+const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
+const Solutions = lazy(() => import('./pages/Solutions'));
+const Tablas = lazy(() => import('./pages/Tablas'));
+const Tareas = lazy(() => import('./pages/Tareas'));
+const Territories = lazy(() => import('./pages/Territories'));
+const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
+const UserMapa = lazy(() => import('./pages/UserMapa'));
+const Vision = lazy(() => import('./pages/Vision'));
 import Entrada from './pages/Entrada';
-import Configuracion from './pages/Configuracion';
-import BaseDeDatos from './pages/BaseDeDatos';
-import Archivos from './pages/Archivos';
-import MiConocimiento from './pages/MiConocimiento';
-import Vision from './pages/Vision';
 import Explorar from './pages/Explorar';
-import { Proyectos, Proyecto } from './pages/Proyectos';
-import Documento from './pages/Documento';
-import Presentacion from './pages/Presentacion';
-import RetoVistas from './pages/RetoVistas';
-import IncendiosMapa from './pages/IncendiosMapa';
 import Login from './pages/Login';
-import Restablecer from './pages/Restablecer';
-import AdminDesign from './pages/AdminDesign';
-import AdminUsuarios from './pages/AdminUsuarios';
-import AboutRoot from './pages/about/AboutRoot';
-import AboutScoring from './pages/about/AboutScoring';
-import HazteSocio from './pages/HazteSocio';
-import SocioConfirmacion from './pages/SocioConfirmacion';
 import { AuthProvider } from './contexts/AuthContext';
 import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
@@ -78,17 +100,69 @@ function RedirigirEsquema() {
   return <Navigate to={`/esquemas/${slug}`} replace />;
 }
 
+/**
+ * LO QUE SE VE MIENTRAS BAJA UNA PÁGINA (2026-08-22).
+ *
+ * Con las páginas en diferido, entre pulsar y ver hay un instante en el que el
+ * navegador está pidiendo el trozo. Sin nada ahí, la pantalla se queda en
+ * blanco y parece que la aplicación se ha roto — que es exactamente lo que no
+ * puede pasar al hacerla «más ligera».
+ *
+ * NO ES UNA RUEDA GIRANDO EN EL CENTRO: es la silueta de lo que va a aparecer.
+ * Una cabecera, un par de bloques. El ojo entiende que ESTÁ VINIENDO algo con
+ * esa forma, y cuando llega no hay salto.
+ *
+ * Y ES SOBRIA A PROPÓSITO. En una conexión buena esto dura 80 milisegundos:
+ * cualquier animación llamativa se vería como un parpadeo molesto en cada clic.
+ */
+function Esperando() {
+  return (
+    <div className="w-full max-w-5xl mx-auto px-5 py-8 animate-pulse" aria-busy="true" aria-live="polite">
+      <span className="sr-only">Cargando…</span>
+      <div className="h-7 w-52 rounded-lg bg-slate-100" />
+      <div className="mt-3 h-4 w-80 max-w-full rounded bg-slate-50" />
+      <div className="mt-7 grid gap-3 sm:grid-cols-2">
+        <div className="h-28 rounded-2xl bg-slate-50 border border-slate-100" />
+        <div className="h-28 rounded-2xl bg-slate-50 border border-slate-100" />
+        <div className="h-28 rounded-2xl bg-slate-50 border border-slate-100" />
+        <div className="h-28 rounded-2xl bg-slate-50 border border-slate-100" />
+      </div>
+    </div>
+  );
+}
+
+// Se decide UNA VEZ, al cargar, y no cambia: el navegador no se muda de
+// dominio sin recargar. Calcularlo dentro del render sería preguntar lo mismo
+// en cada pintada para obtener siempre la misma respuesta.
+const ESPACIO_DE = subdominioDeUsuario();
+
 export default function App() {
   return (
     <SettingsProvider>
     <AuthProvider>
             <BrowserRouter>
+            {/* UNA SOLA FRONTERA DE ESPERA PARA TODAS LAS RUTAS. Envolver cada
+                una por separado serían 51 copias del mismo envoltorio, y la
+                primera que se olvidara dejaría una pantalla en blanco sin que
+                nadie supiera por qué. */}
+            <Suspense fallback={<Esperando />}>
             <Routes>
               {/* La cara publica de una pagina compartida: `/@nombre/pagina`.
                   Va FUERA del Layout a proposito — quien llega aqui viene de un
                   enlace, no tiene cuenta, y no debe ver la barra de trabajo ni
                   un «todavia no tienes proyectos» que no es su vida. */}
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
+
+              {/* LA MISMA PÁGINA, POR LA PUERTA CORTA. En
+                  `claude-dos.humanity.wiki/mi-pagina` el nombre viaja en el
+                  `Host` y el camino tiene un solo tramo, así que la ruta de
+                  arriba no la coge. Esta solo existe cuando de verdad estamos
+                  en el espacio de alguien: en `humanity.wiki` no se declara, y
+                  por tanto no puede tapar ninguna de las 40 rutas de un tramo
+                  que ya existen. */}
+              {ESPACIO_DE && (
+                <Route path=":slug" element={<PaginaPublica handleFijo={ESPACIO_DE} />} />
+              )}
 
               {/* Los tres proveedores de datos envuelven SOLO el Layout, no la
                   aplicacion entera. Estaban arriba del todo, y eso hacia que
@@ -208,6 +282,7 @@ export default function App() {
                 <Route path="socio-confirmacion" element={<SocioConfirmacion />} />
               </Route>
             </Routes>
+            </Suspense>
           </BrowserRouter>
     </AuthProvider>
     </SettingsProvider>
