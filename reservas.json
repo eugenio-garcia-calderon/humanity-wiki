@@ -41,12 +41,6 @@
       "ruta": "src/components/ventanas/Navegador.tsx",
       "motivo": "unificar cerrar-al-pulsar-fuera en un solo hook",
       "desde": "2026-08-22T13:13:19.916Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/documentos.ts",
-      "motivo": "el selector manda kind video y la ruta lo rechaza (400)",
-      "desde": "2026-08-22T13:14:26.549Z"
     }
   ]
 }
