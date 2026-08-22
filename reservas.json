@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog3",
-      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
-      "motivo": "Programador 3: tipo Camara (foto y video) en el creador",
-      "desde": "2026-08-22T11:30:42.250Z"
-    },
-    {
       "agente": "prog1",
       "ruta": "src/components/ui/OrigenDelDato.tsx",
       "motivo": "marca de origen del dato (fichero nuevo)",
