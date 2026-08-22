@@ -136,7 +136,18 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
           </div>
         )}
         <div className="p-4 min-w-0 flex-1">
-          <h3 className="text-base font-black text-slate-900 leading-snug">{p.nombre}</h3>
+          {/* El nombre lleva a la ficha. Eugenio, 2026-08-22: «ni funciona el
+              botón de Miel de la Sierra cuando pincho en él» — no funcionaba
+              porque no había ficha a la que ir. Fuera de una tienda no se
+              enlaza: no existiría la ruta. */}
+          {tienda ? (
+            <a href={`/producto/${encodeURIComponent(p.id)}`}
+               className="text-base font-black text-slate-900 leading-snug hover:underline">
+              {p.nombre}
+            </a>
+          ) : (
+            <h3 className="text-base font-black text-slate-900 leading-snug">{p.nombre}</h3>
+          )}
 
           {p.descripcion && (
             <p className="mt-1 text-sm text-slate-500 line-clamp-3">{p.descripcion}</p>

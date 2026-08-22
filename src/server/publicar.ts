@@ -705,7 +705,15 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * evitó en la fase 2: un botón que se puede pulsar es una promesa.
    */
   app.get('/api/publicar/cobro', (_req: Request, res: Response) => {
-    res.json({ abierto: COBRO_ENCENDIDO });
+    // `pruebas` NO es un detalle técnico: es lo que hay que decirle a quien va
+    // a pagar. Con una clave de pruebas, Stripe rechaza cualquier tarjeta de
+    // verdad — así que quien lo intente se llevará un error sin entender por
+    // qué, y peor: alguien puede creer que ha comprado algo. Se avisa antes,
+    // en el botón, no después.
+    res.json({
+      abierto: COBRO_ENCENDIDO,
+      pruebas: (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test'),
+    });
   });
 
   /** Lo que tengo a la venta. Con sesión: son mis cosas. */
