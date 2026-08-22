@@ -147,16 +147,21 @@ export default function FichaProducto({ handle }: { handle: string }) {
             <div className="mt-5 space-y-2">
               <button type="button" onClick={comprar} disabled={comprando}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-black disabled:opacity-60">
-                {comprando ? 'Abriendo el pago…' : 'Comprar ahora'}
+                {comprando ? 'Abriendo el pago…'
+                  : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar ahora'}
               </button>
-              <button type="button"
-                onClick={() => {
-                  anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
-                  setAnadido(true); window.setTimeout(() => setAnadido(false), 1600);
-                }}
-                className="w-full h-12 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 flex items-center justify-center gap-2">
-                {anadido ? <><Check className="w-4 h-4 text-emerald-600" /> Añadido</> : 'Añadir a la cesta'}
-              </button>
+              {/* Una suscripción no va a la cesta: se paga sola. Ponerle el
+                  botón sería prometer algo que el cobro rechaza. */}
+              {p.se_puede_encestar !== false && (
+                <button type="button"
+                  onClick={() => {
+                    anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
+                    setAnadido(true); window.setTimeout(() => setAnadido(false), 1600);
+                  }}
+                  className="w-full h-12 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 flex items-center justify-center gap-2">
+                  {anadido ? <><Check className="w-4 h-4 text-emerald-600" /> Añadido</> : 'Añadir a la cesta'}
+                </button>
+              )}
               {error && <p className="text-xs font-bold text-rose-600">{error}</p>}
 
               {/* ── EL AVISO DE MODO DE PRUEBAS ───────────────────────────
