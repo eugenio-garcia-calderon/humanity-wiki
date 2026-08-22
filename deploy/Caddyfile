@@ -23,8 +23,15 @@ humanity.wiki {
 	}
 
 	# Estáticos con hash de Vite: cachear un año en el navegador/Cloudflare.
+	#
+	# EL `>` NO ES DECORACIÓN. Sin él, Caddy AÑADE la cabecera en vez de
+	# sustituirla, y la respuesta sale con DOS `Cache-Control`: la suya y la
+	# que ya venía de `express.static`. Cloudflare se queda con la del origen,
+	# así que esta regla llevaba puesta desde agosto sin hacer nada — medido el
+	# 2026-08-22 contra el origen: `cache-control: public, max-age=31536000,
+	# immutable` y debajo `cache-control: public, max-age=0`.
 	@assets path /assets/*
-	header @assets Cache-Control "public, max-age=31536000, immutable"
+	header @assets >Cache-Control "public, max-age=31536000, immutable"
 
 	# ── EL SERVICE WORKER NO SE CACHEA (2026-08-22) ─────────────────────────
 	# `express.static` mandaba `max-age=14400` para todo, y medido en
@@ -46,8 +53,9 @@ humanity.wiki {
 	# lo que impide que Cloudflare sirva un `sw.js` viejo a quien llega por
 	# primera vez después de un despliegue. Son dos cosas distintas y hacen
 	# falta las dos.
+	# El `>` sustituye en vez de añadir: ver la nota de los estáticos.
 	@sinCache path /sw.js /manifest.webmanifest
-	header @sinCache Cache-Control "no-cache"
+	header @sinCache >Cache-Control "no-cache"
 }
 
 # ============================================================================
@@ -100,7 +108,7 @@ humanity.wiki {
 	# Misma razón que arriba: un subdominio sirve la misma aplicación, así que
 	# sirve el mismo `sw.js` y necesita la misma regla.
 	@sinCacheSub path /sw.js /manifest.webmanifest
-	header @sinCacheSub Cache-Control "no-cache"
+	header @sinCacheSub >Cache-Control "no-cache"
 }
 
 # www.humanity.wiki se redirige en el BORDE de Cloudflare (Redirect Rule
