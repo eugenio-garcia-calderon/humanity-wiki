@@ -83,6 +83,12 @@
       "ruta": "server.ts",
       "motivo": "Veracidad: dos lineas de registro del modulo",
       "desde": "2026-08-22T15:39:31.433Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/textos.ts",
+      "motivo": "textos editables por admin: modulo nuevo",
+      "desde": "2026-08-22T15:41:31.837Z"
     }
   ]
 }
