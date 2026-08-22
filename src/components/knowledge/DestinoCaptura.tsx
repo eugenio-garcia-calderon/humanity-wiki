@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Loader2, Check, Pencil, Network, ImagePlus, X } from 'lucide-react';
+import { Loader2, Check, Pencil, Network, ImagePlus, X, FolderKanban, ChevronLeft, ListChecks } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
 
@@ -20,15 +20,25 @@ import { cn } from '../../utils/cn';
 // LO QUE HACE AHORA. Se ve la foto tal cual, y se elige destino. Editar sigue
 // estando, pero como un botón que pulsas tú.
 //
-// POR QUÉ LOS LIENZOS Y NO LOS «PROYECTOS» DEL TABLERO. Un proyecto es un
-// tablero de tarjetas (por hacer / en curso / hecho): meter una foto ahí sería
-// inventarle una tarjeta que nadie ha pedido. Un lienzo sí es donde viven las
-// ventanas de imagen y vídeo — es literalmente lo que `POST
-// /api/graphs/:id/windows` hace desde que existe el lienzo. Si más adelante
-// hace falta soltar fotos en un tablero, eso es una tarjeta nueva, no este
-// selector.
+// LOS PROYECTOS, CORREGIDO (2026-08-22). La primera versión dejó fuera los
+// proyectos con este razonamiento: «un proyecto es un tablero de tarjetas, meter
+// una foto ahí sería inventarle una tarjeta que nadie ha pedido». Eugenio:
+// «te debe permitir meterla en uno de tus proyectos, y dentro de tus proyectos
+// en alguna tarea».
+//
+// Tenía razón y mi razonamiento estaba mal planteado: la foto no va al tablero,
+// **va dentro de una tarea concreta**, que es donde el trabajo ocurre. La foto
+// del montaje pertenece a «Medidas reales del chasis», no al proyecto entero. Y
+// no hace falta inventar nada: una tarea ya guarda notas en `bloques`, el mismo
+// sitio donde ya caben las imágenes.
 
 type Lienzo = { id: string; slug: string; title: string; window_count?: number };
+type Proyecto = { id: string; slug: string; titulo: string; tarjetas?: number; creador_user_id?: string | null };
+type Tarea = { id: string; titulo: string; estado: string; bloques?: any[] };
+
+const ESTADO_LABEL: Record<string, string> = {
+  por_hacer: 'por hacer', en_curso: 'en curso', hecho: 'hecho',
+};
 
 export type Captura = {
   /** URL ya subida al servidor. */
@@ -49,12 +59,18 @@ export function DestinoCaptura({
   onEditar?: () => void;
   /** Se ha guardado. Devuelve a dónde, por si quien llama quiere navegar. */
   // La ruta del lienzo va por SLUG (`/esquemas/:slug` en App.tsx), no por id.
-  onListo: (destino: { tipo: 'lienzo'; slug: string } | { tipo: 'publicacion'; id: string }) => void;
+  onListo: (destino: { tipo: 'lienzo'; slug: string } | { tipo: 'publicacion'; id: string } | { tipo: 'tarea'; proyecto: string }) => void;
   onCerrar: () => void;
 }) {
   const { user } = useAuth();
   const [titulo, setTitulo] = useState(captura.nombre.replace(/\.[^.]+$/, ''));
   const [lienzos, setLienzos] = useState<Lienzo[] | null>(null);
+  const [proyectos, setProyectos] = useState<Proyecto[] | null>(null);
+  // Dos pasos, no dos listas a la vez: elegir proyecto y luego tarea. En una
+  // pantalla de móvil, cincuenta tareas de cuatro proyectos juntas no son un
+  // selector, son un listado.
+  const [proyectoAbierto, setProyectoAbierto] = useState<Proyecto | null>(null);
+  const [tareas, setTareas] = useState<Tarea[] | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,8 +83,65 @@ export function DestinoCaptura({
       .then(r => r.json())
       .then(j => { if (vivo) setLienzos(Array.isArray(j) ? j : (j.graphs || j.rows || [])); })
       .catch(() => { if (vivo) setLienzos([]); });
+    /*
+     * SOLO LOS PROYECTOS QUE PUEDES EDITAR.
+     *
+     * `/api/proyectos` devuelve también los públicos de otras personas, y
+     * `PUT /api/roadmap/:id` responde 403 con «Solo quien creó el proyecto puede
+     * editar sus tarjetas» (`src/server/roadmap.ts`). Comprobado contra
+     * producción: con una cuenta que no es la del creador, 403.
+     *
+     * Ofrecer un destino que va a rechazarte es peor que no ofrecerlo: has
+     * elegido, has esperado, y el error llega después. Se filtra aquí.
+     */
+    fetch('/api/proyectos', { credentials: 'include' })
+      .then(r => r.json())
+      .then(j => {
+        const todos: Proyecto[] = Array.isArray(j) ? j : (j.rows || []);
+        if (vivo) setProyectos(todos.filter(p => p.creador_user_id && p.creador_user_id === user.id));
+      })
+      .catch(() => { if (vivo) setProyectos([]); });
     return () => { vivo = false; };
   }, [user?.id]);
+
+  const abrirProyecto = async (p: Proyecto) => {
+    setProyectoAbierto(p);
+    setTareas(null);
+    try {
+      const j = await fetch(`/api/roadmap?proyecto=${encodeURIComponent(p.id)}`, { credentials: 'include' }).then(r => r.json());
+      setTareas(Array.isArray(j) ? j : (j.rows || j.items || []));
+    } catch { setTareas([]); }
+  };
+
+  /*
+   * A una tarea: la foto se añade como una nota más de esa tarea. Se leen sus
+   * bloques actuales y se manda la lista entera con el nuevo al final, porque
+   * `PUT /api/roadmap/:id` reemplaza el campo, no añade. Leer-y-reescribir puede
+   * pisar una nota que otra persona haya añadido en estos segundos; con una
+   * tarea que estás mirando tú, con el móvil en la mano, es un riesgo pequeño y
+   * la alternativa —un endpoint que añada— es del área de Programador 1.
+   */
+  const guardarEnTarea = async (t: Tarea) => {
+    setError(null);
+    setGuardando(true);
+    try {
+      const previos = Array.isArray(t.bloques) ? t.bloques : [];
+      const r = await fetch(`/api/roadmap/${t.id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bloques: [...previos, { tipo: captura.tipo, url: captura.url, pie: nombreFinal() }],
+        }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'No se ha podido añadir a la tarea.');
+      onListo({ tipo: 'tarea', proyecto: proyectoAbierto!.slug });
+    } catch (e: any) {
+      setError(e.message);
+      setGuardando(false);
+    }
+  };
 
   const nombreFinal = () =>
     titulo.trim() || (captura.tipo === 'video' ? 'Vídeo sin título' : 'Imagen sin título');
@@ -193,6 +266,60 @@ export function DestinoCaptura({
               onClick={onEditar}
               desactivado={guardando}
             />
+          )}
+        </div>
+
+        <div className="px-5 pt-3 pb-2 space-y-2">
+          {!proyectoAbierto ? (
+            <>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Añadir a una tarea</p>
+              {proyectos === null && (
+                <p className="text-sm text-slate-400 flex items-center gap-2 py-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Buscando tus proyectos…
+                </p>
+              )}
+              {proyectos?.length === 0 && (
+                <p className="text-sm text-slate-400 py-2">No tienes proyectos propios. Solo puedes añadir tareas a los que has creado tú.</p>
+              )}
+              {proyectos?.map(p => (
+                <Opcion
+                  key={p.id}
+                  icono={FolderKanban}
+                  titulo={p.titulo}
+                  pie={typeof p.tarjetas === 'number' ? `${p.tarjetas} tarea${p.tarjetas === 1 ? '' : 's'}` : undefined}
+                  onClick={() => abrirProyecto(p)}
+                  desactivado={guardando}
+                />
+              ))}
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setProyectoAbierto(null); setTareas(null); }}
+                className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-700 min-h-[44px]"
+              >
+                <ChevronLeft className="w-4 h-4" /> {proyectoAbierto.titulo}
+              </button>
+              {tareas === null && (
+                <p className="text-sm text-slate-400 flex items-center gap-2 py-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Buscando sus tareas…
+                </p>
+              )}
+              {tareas?.length === 0 && (
+                <p className="text-sm text-slate-400 py-2">Este proyecto no tiene tareas todavía.</p>
+              )}
+              {tareas?.map(t => (
+                <Opcion
+                  key={t.id}
+                  icono={ListChecks}
+                  titulo={t.titulo}
+                  pie={ESTADO_LABEL[t.estado] || t.estado}
+                  onClick={() => guardarEnTarea(t)}
+                  desactivado={guardando}
+                />
+              ))}
+            </>
           )}
         </div>
 
