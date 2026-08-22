@@ -178,6 +178,16 @@ const comprobar = (ok, t) => { console.log(`   ${ok ? '✅' : '❌'} ${t}`); if 
 paso('Ana y Bruno entran');
 const a = await abrir(ANA);
 const b = await abrir(BRU);
+
+// El identificador de la llamada se pesca al vuelo de la respuesta del
+// servidor: hace falta para comprobar la ruta que apunta por dónde fue, y en
+// la pantalla no aparece por ninguna parte.
+let laLlamada = '';
+b.p.on('response', async r => {
+  if (r.url().endsWith('/api/telecom/llamada') && r.request().method() === 'POST') {
+    try { laLlamada = (await r.json())?.id || laLlamada; } catch { /* respuesta sin cuerpo */ }
+  }
+});
 await a.p.goto(`${BASE}/telefono`, { waitUntil: 'domcontentloaded' });
 await b.p.goto(`${BASE}/mensajes?con=${ANA.id}`, { waitUntil: 'domcontentloaded' });
 await a.p.waitForTimeout(2500);
@@ -187,6 +197,19 @@ comprobar(await a.p.getByText('Conectado', { exact: true }).first().isVisible(),
 comprobar(await a.p.getByRole('heading', { name: 'Teléfono' }).isVisible(), 'La página Teléfono se pinta');
 comprobar(await a.p.getByRole('heading', { name: 'Tu número' }).isVisible(), 'Sale el bloque de «Tu número»');
 comprobar(await a.p.getByRole('button', { name: 'Conocidos' }).isVisible(), 'Se puede elegir quién te puede llamar');
+
+paso('Por dónde se va a intentar conectar');
+// Esta máquina no tiene contratado el TURN, así que la respuesta correcta aquí
+// es «STUN y nada más», dicho con todas las letras. Se comprueba porque el
+// fallo que importa es el silencioso: servir una lista vacía o rota y que las
+// llamadas dejen de conectar sin que nadie sepa por qué.
+const hielo = await a.p.evaluate(() => fetch('/api/telecom/hielo', { credentials: 'include' }).then(r => r.json()));
+const urls = (hielo.servidores || []).flatMap(s => s.urls || []);
+comprobar(urls.some(u => u.startsWith('stun:')), `Siempre hay STUN (${urls.length} direcciones)`);
+comprobar(hielo.hayTurn === false && hielo.porQueNoHayTurn === 'sin contratar',
+  'Sin llaves de Cloudflare se dice que no hay retransmisión, y por qué');
+comprobar(!JSON.stringify(hielo).includes('credential') || hielo.hayTurn === true,
+  'No se reparte ninguna credencial que no venga de Cloudflare');
 
 paso('Ana busca a Bruno por su número');
 await a.p.getByPlaceholder('+34 600 123 456').nth(1).fill('600998877');
@@ -276,6 +299,29 @@ try {
 
 await b.p.screenshot({ path: CAPTURAS + '/3-compartiendo-pantalla.png' });
 
+paso('Por dónde fue la llamada (lo que decide el gasto)');
+// El apretón de manos no se completa en esta máquina, así que la aplicación no
+// llega a medirlo sola; lo que se comprueba aquí es que la ruta que lo apunta
+// existe, guarda y **no deja que un tercero ensucie la cuenta de otro**. La
+// clasificación en sí tiene su propia prueba, sin navegador:
+// `node_modules/.bin/tsx scripts/probar-camino-llamada.ts`.
+const apuntada = await b.p.evaluate(async (id) => {
+  const r = await fetch(`/api/telecom/llamada/${id}/via`, {
+    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ via: 'retransmitida' }),
+  });
+  return { estado: r.status, cuerpo: await r.json() };
+}, laLlamada);
+comprobar(apuntada.estado === 200 && apuntada.cuerpo?.ok === true, 'Se apunta por dónde fue');
+const inventada = await b.p.evaluate(async (id) => {
+  const r = await fetch(`/api/telecom/llamada/${id}/via`, {
+    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ via: 'por-el-espacio' }),
+  });
+  return r.status;
+}, laLlamada);
+comprobar(inventada === 400, 'Un camino inventado se rechaza');
+
 paso('Colgar');
 await a.p.getByRole('button', { name: 'Colgar' }).click();
 await a.p.waitForTimeout(1500);
@@ -288,6 +334,13 @@ await b.p.waitForTimeout(1500);
 comprobar(await b.p.getByText('Últimas llamadas').isVisible(), 'El historial se pinta');
 const hist = await b.p.locator('text=Videollamada').count();
 comprobar(hist > 0, 'La videollamada queda en el historial');
+// A UN MIEMBRO NORMAL NO SE LE CUENTA LA INFRAESTRUCTURA. El aviso de que
+// falta el servidor de retransmisión, y la cuenta de lo que se lleva gastado,
+// son cosas de quien administra: Bruno es nivel 1 y no debe ver ninguna.
+comprobar(!(await b.p.getByText('Sin retransmisión contratada').isVisible().catch(() => false)),
+  'A un miembro normal no se le cuenta que falta el servidor de retransmisión');
+comprobar(!(await b.p.getByText('retransmitidas ·').isVisible().catch(() => false)),
+  'A un miembro normal no se le enseña la cuenta del gasto');
 
 await b.p.screenshot({ path: CAPTURAS + '/4-historial.png', fullPage: true });
 await a.p.goto(`${BASE}/telefono`, { waitUntil: 'domcontentloaded' });

@@ -29,11 +29,16 @@ yet.** They are here so the decision can be explicit.
 
 ## Telecommunications (2026-08-22)
 
-### No TURN server: 10-15% of calls will not connect
-- **What**: calls use STUN only. When both people are behind a symmetric NAT — corporate networks, some mobile carriers — the two browsers see each other, greet each other and never find a path. Measured industry figure is 10-15% of connection attempts.
-- **What it costs to fix**: `coturn` on the existing Hetzner box, 5-10 EUR/month of bandwidth, or a paid service. **The code is already ready**: `GET /api/telecom/hielo` reads `TURN_URL`, `TURN_USUARIO` and `TURN_CLAVE` from the environment and hands them to the browser. Three variables and it works.
-- **Why it was left**: it is the difference between shipping calls today and shipping them next week, and the failure is honest — the person is told "no se ha podido conectar, suele pasar en redes de empresa" instead of watching a spinner forever.
-- **Decided by**: Programador 8, not yet by Eugenio.
+### ~~No TURN server~~ — closed the same day, waiting only on two keys
+- **What it was**: calls used STUN only, so the 10-15% of attempts behind a symmetric NAT never found a path.
+- **How it was closed** (2026-08-22, Eugenio chose Cloudflare): `GET /api/telecom/hielo` mints short-lived Cloudflare credentials server-side — two hours of life, cached one hour, never written into client code. Falls back to STUN-only on any failure, so an outage at Cloudflare costs the hard calls, not all of them.
+- **What is still pending, and it is not code**: `CLOUDFLARE_TURN_KEY_ID` and `CLOUDFLARE_TURN_API_TOKEN`. Both travel to `.env.production` as GitHub secrets, same pattern as `TOGETHER_API_KEY`. Until they exist the platform behaves exactly as before and says so in the Teléfono page — to administrators only.
+- **What it will cost**: Cloudflare gives 1,000 GB/month of egress and charges $0.05/GB after that (checked 2026-08-22). A relayed video call is roughly 1 GB/hour, a voice call 45 MB/hour, and only ~1 call in 10 gets relayed. `GET /api/telecom/gasto` counts the real ones instead of guessing.
+
+### Nobody has ever run a call through a real TURN server
+- **What**: every path in the credential code is tested — including a stubbed Cloudflare, a 401, a 4-second timeout and a dead host — and the classification of the three paths has its own test with nine cases (`scripts/probar-camino-llamada.ts`). But no call has actually been relayed, because that needs the keys and two machines on hostile networks.
+- **How it will be known**: the first relayed call writes `retransmitida` into `llamadas.via` and shows up in `GET /api/telecom/gasto`. If a month passes with keys configured and that counter stays at zero, either nobody is on a hard network or the wiring is wrong — and both are worth knowing.
+- **Decided by**: Programador 8.
 
 ### A phone number is declared, not proven
 - **What**: `PUT /api/telecom/mi-numero` takes your word for it. There is no SMS provider contracted, so nothing stops somebody from claiming a number that is not theirs and receiving the calls meant for its owner.
