@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog5",
-      "ruta": "src/App.tsx",
-      "motivo": "Veracidad fase 4: rutas /debates",
-      "desde": "2026-08-22T18:34:23.256Z"
-    },
-    {
       "agente": "dashboard",
       "ruta": "equipo/DASHBOARD.md",
       "motivo": "para que se me pueda verificar en quien",
@@ -179,6 +173,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "iconos de las ramas nuevas del arbol (archivos, tablas, fechas, guardados)",
       "desde": "2026-08-22T22:31:02.629Z"
+    },
+    {
+      "agente": "prog4",
+      "ruta": "drizzle/0095_cuenta_plataforma_archivada.sql",
+      "motivo": "P4: sacar U_PLATAFORMA de todos los listados, a peticion de prog7",
+      "desde": "2026-08-22T22:37:53.982Z"
     }
   ]
 }
