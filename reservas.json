@@ -35,6 +35,12 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "UI de enviar puntos",
       "desde": "2026-08-22T14:40:04.095Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "servicios y suscripciones en el alta",
+      "desde": "2026-08-22T14:45:43.341Z"
     }
   ]
 }
