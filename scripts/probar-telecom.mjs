@@ -185,13 +185,28 @@ await b.p.waitForTimeout(1500);
 
 comprobar(await a.p.getByText('Conectado', { exact: true }).first().isVisible(), 'Ana ve su aparato conectado');
 comprobar(await a.p.getByRole('heading', { name: 'Teléfono' }).isVisible(), 'La página Teléfono se pinta');
-comprobar(await a.p.getByText('Tu número').isVisible(), 'Sale el bloque de «Tu número»');
+comprobar(await a.p.getByRole('heading', { name: 'Tu número' }).isVisible(), 'Sale el bloque de «Tu número»');
+comprobar(await a.p.getByRole('button', { name: 'Conocidos' }).isVisible(), 'Se puede elegir quién te puede llamar');
 
 paso('Ana busca a Bruno por su número');
 await a.p.getByPlaceholder('+34 600 123 456').nth(1).fill('600998877');
 await a.p.getByPlaceholder('+34 600 123 456').nth(1).press('Enter');
 await a.p.waitForTimeout(1200);
 comprobar(await a.p.getByText(BRU.nombre).first().isVisible(), 'Encuentra a Bruno por el número');
+
+paso('Un desconocido no puede hacer sonar el teléfono de nadie');
+// Todavía no se han escrito, así que para Ana él es un desconocido. Es el valor
+// que viene puesto de fábrica y el que va a tener casi todo el mundo.
+const negada = await b.p.evaluate(async (para) => {
+  const r = await fetch('/api/telecom/llamada', {
+    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ para, tipo: 'audio', dispositivo: 'x' }),
+  });
+  return { estado: r.status, cuerpo: await r.json() };
+}, ANA.id);
+comprobar(negada.estado === 403 && /escríbele/i.test(negada.cuerpo?.error || ''),
+  `Se rechaza y se dice qué hacer: «${negada.cuerpo?.error || negada.estado}»`);
+comprobar((await a.p.locator('[role=dialog]').count()) === 0, 'A Ana no le ha sonado nada');
 
 paso('Bruno escribe a Ana y Ana lo recibe sin recargar');
 await a.p.goto(`${BASE}/mensajes?con=${BRU.id}`, { waitUntil: 'domcontentloaded' });
@@ -204,7 +219,7 @@ comprobar(await a.p.getByText(FRASE).first().isVisible(), 'A Ana le aparece el m
 const marcas = await b.p.locator('[aria-label="Leído"]').count();
 comprobar(marcas > 0, `A Bruno se le ponen las dos marcas de leído (${marcas})`);
 
-paso('Bruno hace una VIDEOLLAMADA a Ana');
+paso('Ya se han escrito: ahora la videollamada sí entra');
 await b.p.getByRole('button', { name: 'Videollamada' }).click();
 await a.p.waitForSelector('text=te está llamando', { timeout: 10000 });
 comprobar(true, 'A Ana le salta la llamada en su aplicación');

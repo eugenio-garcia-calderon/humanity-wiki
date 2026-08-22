@@ -11,6 +11,7 @@ import { useTelecom } from '../telecom/useTelecom';
 import { llamar, pedirPermisoDeAvisos } from '../telecom/motor';
 import { Cara, reloj } from '../components/telecom/piezas';
 import ImportarContactos from '../components/social/ImportarContactos';
+import TextoEditable from '../components/ui/TextoEditable';
 
 // ============================================================================
 // TELÉFONO (2026-08-22)
@@ -60,6 +61,7 @@ export default function Telefono() {
 
   const [miNumero, setMiNumero] = useState('');
   const [buscable, setBuscable] = useState(true);
+  const [llamadasDe, setLlamadasDe] = useState<'todos' | 'conocidos' | 'nadie'>('conocidos');
   const [guardado, setGuardado] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [errorNumero, setErrorNumero] = useState<string | null>(null);
@@ -88,6 +90,7 @@ export default function Telefono() {
       setMiNumero(yo?.telefono ? telefonoLegible(yo.telefono) : '');
       setGuardado(yo?.telefono || null);
       setBuscable(yo?.buscable !== false);
+      setLlamadasDe(yo?.llamadasDe || 'conocidos');
       setContactos(mis?.contactos || []);
       setHistorial(hist?.llamadas || []);
     } catch { /* la pantalla se pinta vacía, que es la verdad */ }
@@ -120,6 +123,15 @@ export default function Telefono() {
       api('/api/telecom/mis-contactos').then(m => setContactos(m.contactos || [])).catch(() => {});
     } catch (e: any) { setErrorNumero(e.message); }
     finally { setGuardando(false); }
+  };
+
+  const cambiarQuienLlama = async (quien: 'todos' | 'conocidos' | 'nadie') => {
+    const antes = llamadasDe;
+    setLlamadasDe(quien);   // se pinta ya; si falla, se vuelve atrás
+    try { await api('/api/telecom/privacidad', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ llamadasDe: quien }),
+    }); } catch (e: any) { setLlamadasDe(antes); setErrorNumero(e.message); }
   };
 
   const buscar = async () => {
@@ -162,11 +174,15 @@ export default function Telefono() {
           {conectado ? 'Conectado' : 'Sin conexión'}
         </span>
       </header>
-      <p className="text-xs text-slate-400 mb-6 max-w-2xl leading-relaxed">
+      {/* Los tres párrafos que explican la pantalla son editables por un
+          administrador sin tocar código (`TextoEditable`, del Programador 1).
+          El texto de siempre se queda aquí; la base de datos solo guarda lo que
+          alguien llegue a cambiar. */}
+      <TextoEditable clave="telefono.intro" className="text-xs text-slate-400 mb-6 max-w-2xl leading-relaxed">
         Llamadas y videollamadas dentro de la plataforma. El audio y el vídeo van
         directos de tu navegador al de la otra persona: no pasan por ningún servidor
         nuestro y nadie más puede oírlos.
-      </p>
+      </TextoEditable>
 
       {errorLlamada && (
         <p className="mb-4 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">{errorLlamada}</p>
@@ -176,10 +192,10 @@ export default function Telefono() {
         {/* ── 1. TU NÚMERO ─────────────────────────────────────────────── */}
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-black text-slate-900 mb-1">Tu número</h2>
-          <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+          <TextoEditable clave="telefono.tu-numero" className="text-[11px] text-slate-400 mb-3 leading-relaxed">
             Con él te encuentran quienes te tengan guardado en su agenda, igual que
             en WhatsApp. Puedes quitarlo cuando quieras.
-          </p>
+          </TextoEditable>
           <div className="flex gap-2">
             <input
               value={miNumero}
@@ -230,6 +246,42 @@ export default function Telefono() {
             </span>
           </p>
 
+          {/* ── QUIÉN PUEDE HACERTE SONAR EL TELÉFONO ────────────────────
+              Va aquí, pegado al número, porque es la otra mitad de la misma
+              decisión: poner tu número es decir «que me encuentren», y esto es
+              decir «y que me llamen quién». Separarlo en una página de ajustes
+              sería esconderlo. */}
+          <div className="mt-4 pt-3 border-t border-slate-100">
+            <p className="text-[11px] font-black text-slate-700 mb-1.5">¿Quién puede llamarte?</p>
+            <div className="grid grid-cols-3 gap-1">
+              {([
+                ['conocidos', 'Conocidos', 'Quien ya se ha escrito contigo, quien tienes en tu agenda o a quien sigues'],
+                ['todos', 'Cualquiera', 'Cualquier persona con cuenta puede hacerte sonar el teléfono'],
+                ['nadie', 'Nadie', 'Solo mensajes. No te sonará el teléfono'],
+              ] as const).map(([valor, etiqueta, explica]) => (
+                <button
+                  key={valor}
+                  type="button"
+                  title={explica}
+                  onClick={() => cambiarQuienLlama(valor)}
+                  className={cn('px-2 py-1.5 rounded-xl text-[11px] font-bold border transition-colors',
+                    llamadasDe === valor
+                      ? 'bg-emerald-600 border-emerald-600 text-white'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-300')}
+                >
+                  {etiqueta}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[10px] text-slate-400 leading-snug">
+              {llamadasDe === 'conocidos'
+                ? 'Quien no te conozca verá que puede escribirte primero. Aquí tu perfil es público, así que sin esto cualquiera podría hacerte sonar el teléfono sin tener tu número — y eso no pasa ni en WhatsApp.'
+                : llamadasDe === 'todos'
+                  ? 'Cualquiera con una cuenta puede llamarte, tenga o no tu número.'
+                  : 'Nadie puede llamarte. Los mensajes te siguen llegando igual.'}
+            </p>
+          </div>
+
           {!avisosOk && (
             <button
               type="button"
@@ -245,10 +297,10 @@ export default function Telefono() {
         {/* ── 2. BUSCAR UN NÚMERO ──────────────────────────────────────── */}
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-black text-slate-900 mb-1">Buscar por número</h2>
-          <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+          <TextoEditable clave="telefono.buscar" className="text-[11px] text-slate-400 mb-3 leading-relaxed">
             Escribe el número entero. Se busca exacto: no hay listas ni búsquedas
             por trozos, a propósito.
-          </p>
+          </TextoEditable>
           <div className="flex gap-2">
             <input
               ref={campo}

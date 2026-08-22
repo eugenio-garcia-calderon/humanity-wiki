@@ -109,13 +109,24 @@ const cerrarViva = (id: string) => {
 // seguidas son justo la señal sospechosa. Es otra pregunta, así que es otro
 // contador, y son ocho líneas.
 const busquedas = new Map<string, { desde: number; cuantas: number }>();
-const puedeBuscar = (userId: string): boolean => {
+
+/** Y el mismo freno para RECLAMAR un número, por un motivo distinto: decir «ese
+ *  número ya está en otra cuenta» es, mirado con mala idea, otra forma de
+ *  preguntar «¿está esta persona aquí?». El mensaje hace falta —quien se
+ *  equivoca al escribir su propio número tiene derecho a saber por qué no
+ *  entra— así que no se quita: se limita a cinco intentos por hora, que
+ *  convierte el listín en imposible y no estorba a nadie de verdad. */
+const reclamos = new Map<string, { desde: number; cuantas: number }>();
+const RECLAMOS_POR_HORA = 5;
+const dentroDelCupo = (mapa: Map<string, { desde: number; cuantas: number }>, clave: string, cupo: number, ventana: number): boolean => {
   const ahora = Date.now();
-  const b = busquedas.get(userId);
-  if (!b || ahora - b.desde > VENTANA_MS) { busquedas.set(userId, { desde: ahora, cuantas: 1 }); return true; }
+  const b = mapa.get(clave);
+  if (!b || ahora - b.desde > ventana) { mapa.set(clave, { desde: ahora, cuantas: 1 }); return true; }
   b.cuantas++;
-  return b.cuantas <= BUSQUEDAS_POR_VENTANA;
+  return b.cuantas <= cupo;
 };
+const puedeBuscar = (userId: string) => dentroDelCupo(busquedas, userId, BUSQUEDAS_POR_VENTANA, VENTANA_MS);
+const puedeReclamar = (userId: string) => dentroDelCupo(reclamos, userId, RECLAMOS_POR_HORA, 60 * 60_000);
 
 export function registerTelecomRoutes(app: Express, db: any) {
   arrancarLatido();
@@ -252,9 +263,14 @@ export function registerTelecomRoutes(app: Express, db: any) {
   app.get('/api/telecom/yo', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-      const r = await db.execute(sql`SELECT telefono, telefono_buscable FROM users WHERE id = ${req.user.id}`);
+      const r = await db.execute(sql`SELECT telefono, telefono_buscable, llamadas_de FROM users WHERE id = ${req.user.id}`);
       const u = r.rows[0] as any;
-      res.json({ telefono: u?.telefono || null, buscable: u?.telefono_buscable !== false, ...recuento() });
+      res.json({
+        telefono: u?.telefono || null,
+        buscable: u?.telefono_buscable !== false,
+        llamadasDe: u?.llamadas_de || 'conocidos',
+        ...recuento(),
+      });
     } catch (e: any) {
       console.error('[telecom] yo:', e);
       res.status(500).json({ error: e.message });
@@ -282,6 +298,9 @@ export function registerTelecomRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
       const bruto = req.body?.telefono;
       const buscable = req.body?.buscable !== false;
+      if (!puedeReclamar(req.user.id)) {
+        return res.status(429).json({ error: 'Has cambiado de número demasiadas veces seguidas. Prueba dentro de un rato.' });
+      }
 
       // Quitarlo es tan legítimo como ponerlo.
       if (bruto === null || bruto === '') {
@@ -296,7 +315,13 @@ export function registerTelecomRoutes(app: Express, db: any) {
         SELECT id FROM users WHERE telefono = ${n} AND id <> ${req.user.id}
       `);
       if (ocupado.rows.length) {
-        return res.status(409).json({ error: 'Ese número ya está en otra cuenta. Si es tuyo, escribe a soporte.' });
+        // NO SE DICE «ese número ya está en otra cuenta». Confirmarlo sería
+        // decirle a quien pregunta que esa persona tiene cuenta aquí, que es
+        // justo lo que la búsqueda por número se cuida de no revelar. Se dice
+        // que no se puede y adónde ir, sin confirmar nada.
+        return res.status(409).json({
+          error: 'No se puede usar ese número en esta cuenta. Si es tuyo y crees que hay un error, escribe a soporte.',
+        });
       }
 
       await db.execute(sql`
@@ -447,6 +472,65 @@ export function registerTelecomRoutes(app: Express, db: any) {
     return fila;
   }
 
+
+  /**
+   * PUT /api/telecom/privacidad — quién puede hacer sonar tu teléfono.
+   *
+   * Va aparte de `mi-numero` a propósito: se cambia por motivos distintos y en
+   * momentos distintos. Cerrar el teléfono un martes por la noche no debería
+   * obligar a volver a tocar tu número.
+   */
+  app.put('/api/telecom/privacidad', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const quien = String(req.body?.llamadasDe || '');
+      if (!['todos', 'conocidos', 'nadie'].includes(quien)) {
+        return res.status(400).json({ error: 'Elige quién puede llamarte.' });
+      }
+      await db.execute(sql`UPDATE users SET llamadas_de = ${quien}, updated_at = now() WHERE id = ${req.user.id}`);
+      res.json({ llamadasDe: quien });
+    } catch (e: any) {
+      console.error('[telecom] privacidad:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * ¿Puede esta persona hacer sonar el teléfono de esta otra?
+   *
+   * «Conocido» es cualquiera de las tres cosas que ya significan que os
+   * conocéis, y se comprueban EN UNA SOLA CONSULTA porque esto está en el
+   * camino de cada llamada:
+   *
+   *   · os habéis escrito, en cualquier dirección
+   *   · le tienes en tu agenda importada (mismo número)
+   *   · le sigues
+   *
+   * No hace falta que sea recíproco: si yo te tengo en mi agenda, tú puedes
+   * llamarme. Al revés sería pedirle a quien recibe que hubiera dado un paso
+   * que nadie le ha pedido dar.
+   */
+  const puedeLlamarme = async (deQuien: string, aQuien: string) => {
+    const r = await db.execute(sql`
+      SELECT
+        (SELECT llamadas_de FROM users WHERE id = ${aQuien}) AS politica,
+        EXISTS (SELECT 1 FROM mensajes
+                 WHERE (de_user_id = ${deQuien} AND para_user_id = ${aQuien})
+                    OR (de_user_id = ${aQuien} AND para_user_id = ${deQuien})) AS hablasteis,
+        EXISTS (SELECT 1 FROM game_agents a
+                 WHERE a.user_id = ${aQuien} AND a.archived_at IS NULL AND a.telefono IS NOT NULL
+                   AND a.telefono = (SELECT telefono FROM users WHERE id = ${deQuien})) AS en_su_agenda,
+        EXISTS (SELECT 1 FROM follows
+                 WHERE follower_user_id = ${aQuien} AND entity_type = 'users' AND entity_id = ${deQuien}) AS te_sigue
+    `);
+    const f = r.rows[0] as any;
+    const politica = f?.politica || 'conocidos';
+    if (politica === 'todos') return { puede: true };
+    if (politica === 'nadie') return { puede: false, porque: 'nadie' };
+    const conocido = f?.hablasteis || f?.en_su_agenda || f?.te_sigue;
+    return conocido ? { puede: true } : { puede: false, porque: 'desconocido' };
+  };
+
   /**
    * POST /api/telecom/llamada — que suene el teléfono de alguien.
    * Cuerpo: `{ para | telefono, tipo: 'audio'|'video', dispositivo }`
@@ -475,6 +559,19 @@ export function registerTelecomRoutes(app: Express, db: any) {
 
       const ficha = await fichaDe(destino);
       if (!ficha) return res.status(404).json({ error: 'Esa persona no existe.' });
+
+      // ¿QUIERE QUE LE LLAMEN, Y QUIERE QUE LE LLAMES TÚ? Se comprueba antes
+      // de escribir la fila: una llamada que no se va a permitir no es una
+      // llamada perdida, y no tiene por qué dejarle un aviso a nadie.
+      const permiso = await puedeLlamarme(yo, destino);
+      if (!permiso.puede) {
+        return res.status(403).json({
+          error: permiso.porque === 'nadie'
+            ? `${ficha.nombre} tiene las llamadas cerradas. Puedes escribirle.`
+            : `${ficha.nombre} solo acepta llamadas de gente con la que ya ha hablado. Escríbele un mensaje primero.`,
+          escribirle: destino,
+        });
+      }
 
       // COMUNICANDO. Con una llamada viva no se abre otra: ni la tuya ni la
       // suya. Sin esto, dos llamadas cruzadas comparten micrófono y las dos

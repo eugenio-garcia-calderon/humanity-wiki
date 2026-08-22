@@ -93,6 +93,7 @@ import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { TextosProvider } from './components/ui/TextoEditable';
 
 /** `/documentos/:id` era donde vivía el editor antes de que documentos y
  *  páginas se fundieran. Se conserva para que ningún enlace guardado se rompa. */
@@ -219,7 +220,18 @@ export default function App() {
                 <DataProvider>
                   <EditProvider>
                     <DesignProvider>
-                      <Layout />
+                      {/* LOS TEXTOS EDITABLES POR UN ADMINISTRADOR (2026-08-22).
+                          El Programador 1 escribió el proveedor, el componente,
+                          la tabla y las rutas, y verificó las rutas — pero el
+                          proveedor no llegó a enchufarse a la aplicación, así
+                          que la pieza estaba publicada y muerta. Se ve al ir a
+                          usarla, no al escribirla, y por eso lo enchufa quien
+                          llegó después. Va DENTRO de `AuthProvider` (mira si
+                          eres administrador para enseñar el lápiz) y FUERA de
+                          `Layout`, que es quien pinta las páginas. */}
+                      <TextosProvider>
+                        <Layout />
+                      </TextosProvider>
                     </DesignProvider>
                   </EditProvider>
                 </DataProvider>
