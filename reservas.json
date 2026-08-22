@@ -53,6 +53,12 @@
       "ruta": "CLAUDE.md",
       "motivo": "la trampa del fallo armado para otro dia",
       "desde": "2026-08-22T16:05:26.213Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/auth.ts",
+      "motivo": "borrado de cuenta: obligatorio para App Store y Google Play",
+      "desde": "2026-08-22T16:15:23.366Z"
     }
   ]
 }
