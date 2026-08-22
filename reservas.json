@@ -161,6 +161,12 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "privacidad: la pagina que exigen las dos tiendas",
       "desde": "2026-08-22T21:45:21.692Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "memory/10_TIENDAS.md",
+      "motivo": "el responsable legal ya se sabe",
+      "desde": "2026-08-22T22:00:56.822Z"
     }
   ]
 }
