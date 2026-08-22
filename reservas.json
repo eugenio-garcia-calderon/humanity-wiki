@@ -77,12 +77,6 @@
       "ruta": "src/pages/Mensajes.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:13.263Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/auth.ts",
-      "motivo": "quien entro con Google no puede borrar su cuenta",
-      "desde": "2026-08-22T16:36:01.329Z"
     }
   ]
 }
