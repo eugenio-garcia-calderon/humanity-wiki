@@ -89,6 +89,12 @@
       "ruta": "src/contexts/DataContext.tsx",
       "motivo": "fase 4: los 8 catalogos solo cuando alguien los pide",
       "desde": "2026-08-22T15:16:33.599Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "fase 4: que el asistente no dispare los 8 catalogos en cada visita",
+      "desde": "2026-08-22T15:21:42.157Z"
     }
   ]
 }
