@@ -1,0 +1,3 @@
+Aqui van `origen.pem` y `origen.key` (el certificado de origen de
+Cloudflare). Estan en .gitignore a proposito: una clave privada no entra
+nunca en el repositorio. Ver deploy/Caddyfile.
