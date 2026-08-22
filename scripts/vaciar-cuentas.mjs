@@ -33,6 +33,40 @@ import pg from 'pg';
 
 const DIAS = 15;
 
+// ── LAS DOS LISTAS, Y POR QUÉ SON DOS ──────────────────────────────────────
+// Esta tarea vacía columnas de `users` **escritas a mano**. Eso significa que
+// cada columna nueva que alguien añada a esa tabla es un agujero silencioso
+// hasta que alguien se acuerda de venir aquí.
+//
+// Ya ha pasado dos veces el mismo día: `telefono` (una cuenta vaciada seguía
+// saliendo al buscar por número) y `llamadas_de` (seguiría recibiendo llamadas
+// perdidas, porque se puede llamar por identificador y no solo por número). La
+// segunda la vio el Programador 8 revisando esta lista, no su propio código.
+//
+// CON UNA SOLA LISTA, «no clasificada» acaba significando «se queda», que es
+// exactamente el silencio de hoy. Con dos, una columna que aparezca sin
+// clasificar es un error con nombre y apellidos, y la tarea **no vacía nada**
+// hasta que alguien decida en cuál va.
+//
+// Añadir una columna a `users` es, a partir de ahora, añadir una línea aquí.
+
+/** Lo que identifica a una persona. Se vacía. */
+const SE_VACIAN = [
+  'email', 'name', 'display_name', 'avatar_url', 'banner_url', 'bio', 'location',
+  'website', 'socials', 'specialties', 'ubicaciones', 'objetivos', 'handle',
+  'google_id', 'password_hash', 'email_verified', 'telefono', 'telefono_buscable',
+  'llamadas_de',
+];
+
+/** Lo que se queda A PROPÓSITO: no identifica a nadie, o hace falta para que la
+ *  fila siga existiendo y sosteniendo lo que esa persona escribió. */
+const SE_QUEDAN = [
+  'id', 'uuid', 'role', 'role_level', 'created_at', 'updated_at', 'created_by',
+  'updated_by', 'version', 'archived_at', 'organization_id', 'reputation',
+  'impact_score', 'last_login_at', 'ui_settings', 'puntos', 'deleted_at',
+  'anonimizado_en',
+];
+
 const cliente = new pg.Client(
   process.env.DATABASE_URL
     ? { connectionString: process.env.DATABASE_URL }
@@ -49,6 +83,30 @@ const seco = process.argv.includes('--en-seco');
 
 await cliente.connect();
 try {
+  // ══ NINGUNA COLUMNA SIN CLASIFICAR ═══════════════════════════════════════
+  // Se pregunta a la base de datos qué columnas tiene `users` HOY y se compara
+  // con las dos listas. Si aparece una que nadie ha clasificado, se para aquí
+  // — antes de vaciar nada — y se dice cómo se llama. Un fallo que no dice
+  // cuál es obliga a buscarlo.
+  const { rows: columnas } = await cliente.query(
+    `SELECT column_name FROM information_schema.columns WHERE table_name = 'users'`,
+  );
+  const reales = columnas.map(c => c.column_name);
+  const sinClasificar = reales.filter(c => !SE_VACIAN.includes(c) && !SE_QUEDAN.includes(c));
+  if (sinClasificar.length) {
+    console.error('\nNo se ha vaciado ninguna cuenta.\n');
+    console.error(`La tabla «users» tiene ${sinClasificar.length} columna(s) que nadie ha clasificado:\n`);
+    for (const c of sinClasificar) console.error(`    ${c}`);
+    console.error('\nAñádela a SE_VACIAN o a SE_QUEDAN en este mismo fichero.');
+    console.error('Si guarda algo de la persona, va en SE_VACIAN — y hay que');
+    console.error('añadirla también a la sentencia UPDATE de abajo.\n');
+    process.exit(1);
+  }
+  // Y al revés: una columna de la lista que ya no existe se dice, pero no
+  // impide vaciar — sobra una línea, no falta protección.
+  const fantasmas = [...SE_VACIAN, ...SE_QUEDAN].filter(c => !reales.includes(c));
+  if (fantasmas.length) console.warn(`Aviso: estas columnas ya no existen en «users»: ${fantasmas.join(', ')}`);
+
   const { rows } = await cliente.query(
     `SELECT id, deleted_at FROM users
      WHERE deleted_at IS NOT NULL
@@ -97,6 +155,22 @@ try {
            ubicaciones    = '[]'::jsonb,
            objetivos      = '[]'::jsonb,
            handle         = NULL,
+           -- EL TELÉFONO TAMBIÉN SE VA (2026-08-22, Programador 8, con la capa
+           -- de telecomunicaciones). Sin estas dos líneas, una cuenta vaciada
+           -- seguiría apareciendo al buscar por su número y seguiría
+           -- recibiendo llamadas; y peor: el número queda pillado para
+           -- siempre por el índice único, así que su dueño no podría usarlo
+           -- en una cuenta nueva.
+           telefono          = NULL,
+           telefono_buscable = false,
+           -- Y EL TELÉFONO SE CIERRA DEL TODO. Se puede llamar a alguien por su
+           -- identificador, no solo por su número, y la página pública de una
+           -- cuenta vaciada sigue existiendo con su «Usuario eliminado». Sin
+           -- esta línea, alguien podría seguir llamando a una cuenta que ya no
+           -- es de nadie: no se conectaría nunca, pero dejaría llamadas
+           -- perdidas y avisos para una persona que se fue. «nadie» y no NULL:
+           -- la columna no admite nulos y además lleva su restricción.
+           llamadas_de       = 'nadie',
            google_id      = NULL,
            password_hash  = NULL,
            email_verified = false,
@@ -110,6 +184,11 @@ try {
       // sirviendo para entrar en una cuenta que ya no es de nadie.
       await cliente.query('UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [r.id]);
       await cliente.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [r.id]);
+      // EL HISTORIAL DE LLAMADAS NO SE TOCA, y es a propósito (2026-08-22): al
+      // otro lado de cada llamada hay otra persona y ese historial es suyo.
+      // Se comporta igual que los mensajes, que tampoco se borran: el nombre
+      // ya ha pasado a «Usuario eliminado» con la anonimización de arriba, que
+      // es lo que hay que quitar de en medio.
       await cliente.query('COMMIT');
       console.log(`  vaciada: ${r.id}`);
     } catch (e) {

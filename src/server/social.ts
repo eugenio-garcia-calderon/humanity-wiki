@@ -690,6 +690,115 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  // ══ Y ALGUIEN TIENE QUE LEERLAS (2026-08-22) ══════════════════════════════
+  // `content_reports` existe desde la migración 0009 y `POST /api/report` la
+  // llena desde entonces. **Ninguna pantalla la consultaba**, así que la
+  // respuesta de arriba —«el contenido queda marcado para revisión»— era una
+  // promesa que no cumplía nadie. Denunciar algo y que no lo lea nunca nadie
+  // es peor que no tener botón de denunciar: el botón hace creer que se ha
+  // hecho algo.
+  //
+  // Lo levantó el Programador 3 al ir a poner el botón, antes de que la primera
+  // denuncia cayera en el pozo: hoy la tabla tiene **cero filas**, así que esto
+  // llega justo a tiempo y no hay ninguna denuncia vieja sin atender.
+  //
+  // Y Apple lo exige: una denuncia que nadie revisa cuenta como no tenerla.
+  //
+  // ── NIVEL 3 Y NO 4 ────────────────────────────────────────────────────────
+  // Revisar contenido denunciado es exactamente lo que `KNOWLEDGE` (nivel 3)
+  // existe para hacer — «revisar contenido», dice su propia definición en
+  // `auth.ts`. Exigir administrador dejaría el trabajo de moderación en manos
+  // de una sola persona, y una cola de moderación que depende de una persona
+  // es una cola que se para cuando esa persona duerme.
+
+  /** Las denuncias, las abiertas primero. Con lo denunciado al lado: una lista
+   *  de identificadores sueltos no se puede revisar sin abrir cada uno. */
+  app.get('/api/reports', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.KNOWLEDGE)) return;
+      const estado = String(req.query.estado || '').trim();
+      // SE TRAE EL TÍTULO DE LO DENUNCIADO, no solo su identificador. Sin esto
+      // la pantalla enseña «knowledge_windows / KWMSIVNH» y hay que abrir cada
+      // cosa en otra pestaña para saber qué se ha denunciado: una revisión de
+      // diez segundos se convierte en una de dos minutos, y una cola que cuesta
+      // dos minutos por elemento es una cola que se deja para mañana. Que es
+      // exactamente lo que esto viene a evitar.
+      //
+      // Un tipo que no esté aquí sale con `titulo` en `null` y la pantalla
+      // enseña el identificador: **no se inventa un título**. Añadir un tipo
+      // nuevo es un `LEFT JOIN` más y una entrada en el `COALESCE`.
+      const r = await db.execute(sql`
+        SELECT c.id, c.entity_type, c.entity_id, c.reason, c.status,
+               c.created_at, c.reviewed_at,
+               quien.display_name AS denunciante,
+               revisor.display_name AS revisado_por,
+               COALESCE(kw.title, ch.title, so.title, pu.title, left(co.body, 140)) AS titulo,
+               -- Si lo denunciado ya no está —archivado o en la papelera— la
+               -- denuncia sigue existiendo y hay que poder cerrarla sabiendo
+               -- que el contenido ya no se ve.
+               COALESCE(kw.archived_at, ch.archived_at, so.archived_at, pu.archived_at, co.archived_at) IS NOT NULL
+                 OR COALESCE(kw.deleted_at, pu.deleted_at) IS NOT NULL AS ya_retirado
+        FROM content_reports c
+        LEFT JOIN users quien   ON quien.id   = c.reporter_user_id
+        LEFT JOIN users revisor ON revisor.id = c.reviewed_by
+        LEFT JOIN knowledge_windows kw ON c.entity_type = 'knowledge_windows' AND kw.id = c.entity_id
+        LEFT JOIN challenges        ch ON c.entity_type = 'challenges'        AND ch.id = c.entity_id
+        LEFT JOIN solutions         so ON c.entity_type = 'solutions'         AND so.id = c.entity_id
+        LEFT JOIN publications      pu ON c.entity_type = 'publications'      AND pu.id = c.entity_id
+        LEFT JOIN comments          co ON c.entity_type = 'comments'          AND co.id = c.entity_id
+        WHERE (${estado || null}::text IS NULL OR c.status = ${estado || null})
+        -- Las abiertas primero, y dentro de cada grupo las más antiguas: una
+        -- denuncia que lleva una semana esperando importa más que la de ahora.
+        ORDER BY (c.status = 'abierto') DESC, c.created_at
+        LIMIT 200
+      `);
+      res.json(r.rows);
+    } catch (e: any) {
+      console.error('reports:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** Cuántas hay sin revisar. Para poner un número en el menú sin traerse la
+   *  lista entera cada vez que se pinta una pantalla. */
+  app.get('/api/reports/cuenta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < ROLE.KNOWLEDGE) return res.json({ abiertas: 0 });
+      const r = await db.execute(sql`SELECT count(*)::int AS n FROM content_reports WHERE status = 'abierto'`);
+      res.json({ abiertas: (r.rows[0] as any)?.n ?? 0 });
+    } catch { res.json({ abiertas: 0 }); }
+  });
+
+  /** Revisarla. `revisado` = se ha mirado y se ha actuado; `descartado` = se ha
+   *  mirado y no había nada. Los dos son «se ha mirado», que es lo que faltaba;
+   *  distinguirlos permite ver después si se está denunciando bien o mal. */
+  app.put('/api/reports/:id', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.KNOWLEDGE)) return;
+      const estado = String(req.body?.status || '');
+      if (!['revisado', 'descartado', 'abierto'].includes(estado)) {
+        return res.status(400).json({ error: 'El estado es «revisado», «descartado» o «abierto».' });
+      }
+      // Quién la revisó y cuándo se guardan SIEMPRE que se cierra, y se borran
+      // si se reabre: si no, una denuncia reabierta seguiría diciendo que ya
+      // la miró alguien.
+      const cerrada = estado !== 'abierto';
+      const r = await db.execute(sql`
+        UPDATE content_reports
+        SET status = ${estado},
+            reviewed_by = ${cerrada ? req.user!.id : null},
+            reviewed_at = ${cerrada ? sql`now()` : sql`NULL`}
+        WHERE id = ${Number(req.params.id)}
+        RETURNING id, status
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Esa denuncia no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('revisar denuncia:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==========================================================================
   // PERFIL PÚBLICO
   // ==========================================================================

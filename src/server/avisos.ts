@@ -27,7 +27,12 @@ export type TipoAviso =
   | 'reaccion'            // alguien reaccionó a algo tuyo
   | 'seguidor'            // alguien te siguió
   | 'guardado'            // alguien guardó algo tuyo
-  | 'nueva_publicacion';  // alguien a quien sigues publicó
+  | 'nueva_publicacion'   // alguien a quien sigues publicó
+  // Telecomunicaciones (2026-08-22). Los dos avisos son para lo que pasa
+  // MIENTRAS NO MIRAS: si tienes la conversación delante, el mensaje aparece
+  // solo y la llamada suena — la campana sobra y sería ruido.
+  | 'mensaje'             // alguien te ha escrito y no lo has visto
+  | 'llamada_perdida';    // te llamó y no lo cogiste (o no estabas)
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos

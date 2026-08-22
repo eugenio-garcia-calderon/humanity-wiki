@@ -61,6 +61,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
+import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
 /**
@@ -128,6 +129,15 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registerTextosRoutes(app, db),
     nota: 'Los textos de las páginas de información, editables por un administrador. '
         + 'Comprueba el nivel, así que necesita `req.user`: después de la autenticación.',
+  },
+
+  {
+    nombre: 'telecom',
+    montar: (app, db) => registerTelecomRoutes(app, db),
+    nota: 'Mensajes en vivo, llamadas y videollamadas. DESPUÉS de la autenticación: '
+        + 'todas sus rutas empiezan por «¿quién eres?». Su conexión abierta (SSE) es una '
+        + 'respuesta que no termina nunca, así que cualquier cosa que capture «/api» '
+        + 'entero tiene que ir después de esta línea, no antes.',
   },
 ];
 
