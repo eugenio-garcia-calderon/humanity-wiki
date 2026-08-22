@@ -3697,3 +3697,61 @@ contacts and for renaming a column answer 401 there rather than 404, which is
 what says they are deployed; the rest — the notifications panel, the menu
 button, the icon picker — needs a session to see and was verified locally on the
 same commit that is now in production.
+
+---
+
+## 2026-08-22 (VII) — AI programmer accounts, and two kinds of note
+
+### Why this exists
+
+Until today, putting a note in green meant one of two bad things: hand-making a
+session for Eugenio in production — entering as him without his password — or
+writing into the database over SSH, which leaves nothing anyone can review.
+Eugenio asked for the third way: «un usuario de programador IA propia […] y así
+podréis daros permisos de edición del hormiguero».
+
+### Two things, deliberately not one
+
+**A token** (`Authorization: Bearer hw_ia_…`) that opens exactly one door:
+create hormiguero notes, move their state, answer them. It does **not** produce
+a `req.user`, not even a fake one — if an agent could pass for a person, every
+permission check in the platform would be letting it through without anyone
+having decided that. Verified: with the token, creating a project answers 401,
+creating a table answers 401, and `/api/auth/me` says `user: null`.
+
+**A platform account** at level 1 (ordinary user) so an agent can log in and
+*look* — which is what was missing to check the screen fixes (the notifications
+panel, the menu button, the icon picker all need a session to be seen). Level 1
+and not admin: to review how a screen looks you only need to get in.
+
+The reason for keeping them apart is the risk, and it is worth writing down: **an
+agent reads the hormiguero, and anyone can write there.** It is reading
+strangers' text while holding a production key. With this scope the worst a
+hostile note can achieve is a board with a wrong colour — visible, reversible,
+and with the name of whoever did it beside it.
+
+Tokens are stored as a SHA-256 fingerprint, never in the clear, and shown once
+by `scripts/agente-ia.mjs crear "Nombre" correo@…`. Lost means replaced, not
+recovered.
+
+### Notes from the team and notes from outside
+
+Eugenio: «haz una diferenciación entre las notas creadas por un ADMIN […] y haz
+caso directo a las de ADMIN, y las creadas por otros usuarios cada X tiempo las
+revisaremos para que yo las apruebe contigo».
+
+A fourth state, `propuesta`, in **grey** — not a traffic-light colour, because a
+proposal is not late, it is waiting for a decision. Notes from an admin or an
+agent go straight into the work queue; anyone else's land as proposals, and an
+admin approves them into `esperando` with one button.
+
+Kept as two separate fields: `de_admin` (who wrote it) and `estado` (where it
+is). With one field, the origin would be lost the moment it was approved — and
+then there would be no way to measure how many of the ones arriving through the
+letterbox actually get done, which is exactly what will say whether the
+letterbox is worth having. `de_admin` is a snapshot: asking for the author's
+role *today* would rewrite the past for anyone who gets promoted.
+
+Verified end to end: an agent's note enters as team work and is attributed; a
+level-1 user's note enters as a proposal; that user cannot approve their own;
+an agent can, and the note keeps saying it came from outside.

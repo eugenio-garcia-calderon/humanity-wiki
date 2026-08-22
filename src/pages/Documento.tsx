@@ -5,12 +5,13 @@ import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip, MoreHorizontal, Maximize2, Minimize2,
+  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
+import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
@@ -165,6 +166,7 @@ export default function Documento() {
   const [resultadosPub, setResultadosPub] = useState<any[]>([]);
   const [iaOcupada, setIaOcupada] = useState<string | null>(null);       // 'continuar' | id del bloque
   const [menuDescargar, setMenuDescargar] = useState(false);
+  const [compartirAbierto, setCompartirAbierto] = useState(false);
   // Editor de imágenes sobre un bloque imagen: id del bloque en edición.
   const [imagenEditando, setImagenEditando] = useState<string | null>(null);
   /** Aviso mientras sube lo pegado (2026-08-19). Un vídeo de 40 MB tarda, y
@@ -912,6 +914,21 @@ export default function Documento() {
     programarGuardado();
   };
 
+  // El diálogo de compartir pide PNG y Markdown por evento en vez de recibir
+  // las funciones como props: las dos viven aquí porque necesitan el DOM del
+  // documento (`docRef`) y el texto de los bloques, y pasarlas hacia abajo
+  // obligaría a mantener dos caminos para lo mismo.
+  useEffect(() => {
+    const png = () => descargarPng();
+    const md = () => descargarMarkdown();
+    window.addEventListener('documento:png', png);
+    window.addEventListener('documento:markdown', md);
+    return () => {
+      window.removeEventListener('documento:png', png);
+      window.removeEventListener('documento:markdown', md);
+    };
+  });
+
   const descargarMarkdown = () => {
     const md = `# ${titulo}\n\n${bloquesAMarkdown(serializar().filter(b => b.tipo !== 'titulo1' || b.texto !== titulo))}`;
     const blob = new Blob([md], { type: 'text/markdown' });
@@ -1546,6 +1563,15 @@ export default function Documento() {
               </button>
             </>
           )}
+          {/* COMPARTIR, y va antes que descargar a propósito: mandarle la página
+              a alguien es lo que se quiere hacer nueve de cada diez veces, y
+              hasta hoy no existía el botón — solo un icono de descarga que
+              nadie asocia con compartir. */}
+          <button onClick={() => setCompartirAbierto(true)}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
+            <Share2 className="w-3.5 h-3.5" /> Compartir
+          </button>
+
           <div className="relative">
             <button onClick={e => { e.stopPropagation(); setMenuDescargar(m => !m); }} title="Descargar"
               className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">
@@ -1660,6 +1686,16 @@ export default function Documento() {
               </label>
             )}
           </div>
+        )}
+
+        {compartirAbierto && (
+          <DialogoCompartir
+            paginaId={docId.current}
+            titulo={titulo}
+            publicoInicial={publico}
+            onCerrar={() => setCompartirAbierto(false)}
+            onCambio={p => setPublico(p)}
+          />
         )}
 
         {/* Título del documento */}

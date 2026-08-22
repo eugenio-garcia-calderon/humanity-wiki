@@ -16,8 +16,15 @@
 // dejaría de decir lo que de verdad está hecho.
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { quienEscribe } from './agentesIA';
 
-const ESTADOS = new Set(['esperando', 'bloqueada', 'hecha']);
+// ══ LOS CUATRO ESTADOS ═══════════════════════════════════════════════════════
+// `propuesta` es de 2026-08-22 (Eugenio: «las creadas por otros usuarios cada X
+// tiempo las revisaremos para que yo las apruebe contigo»). Es donde caen las
+// notas de quien no es del equipo: no están esperando a que alguien las
+// programe, están esperando a que alguien decida si se programan. Mezclarlas
+// con las demás convertía la lista de «qué hay que hacer» en un buzón de ideas.
+const ESTADOS = new Set(['propuesta', 'esperando', 'bloqueada', 'hecha']);
 const CLASES = new Set(['fallo', 'mejora']);
 
 const nuevoId = () => `INC${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
@@ -52,10 +59,17 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
         FROM incidencias i LEFT JOIN users u ON u.id = i.autor_user_id
         WHERE i.archived_at IS NULL
         ORDER BY
-          -- LO QUE NECESITA A UNA PERSONA, ARRIBA DEL TODO. Es lo único de esta
-          -- lista que está parado esperando a alguien, y enterrarlo entre lo
-          -- demás es cómo se quedan las cosas paradas una semana.
-          CASE i.estado WHEN 'bloqueada' THEN 0 WHEN 'esperando' THEN 1 ELSE 2 END,
+          -- EL ORDEN DICE QUÉ MIRAR ANTES:
+          --   0 · bloqueada  — parada esperando a una persona. Enterrarla entre
+          --                    lo demás es cómo algo se queda parado una semana.
+          --   1 · esperando  — la cola de trabajo del equipo.
+          --   2 · propuesta  — lo que ha entrado por el buzón y está por
+          --                    aprobar. No es trabajo todavía, así que no puede
+          --                    estar por encima de lo que sí lo es.
+          --   3 · hecha
+          CASE i.estado
+            WHEN 'bloqueada' THEN 0 WHEN 'esperando' THEN 1
+            WHEN 'propuesta' THEN 2 ELSE 3 END,
           i.created_at DESC
       `);
       res.json(r.rows);
@@ -67,15 +81,36 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
 
   /** POST /api/incidencias — anotar algo que falla o que falta. */
   app.post('/api/incidencias', async (req: Request, res: Response) => {
-    if (!req.user) return res.status(401).json({ error: 'Inicia sesión para anotar algo.' });
+    // Puede anotar una persona con sesión o un PROGRAMADOR IA con su token
+    // (2026-08-22): un agente que encuentra algo mientras trabaja tiene que
+    // poder dejarlo escrito aquí en vez de contarlo en un chat que se pierde.
+    const quien = await quienEscribe(req, db);
+    if (!quien) return res.status(401).json({ error: 'Inicia sesión para anotar algo.' });
     try {
       const titulo = String(req.body?.titulo || '').trim();
       if (!titulo) return res.status(400).json({ error: 'Cuéntame en una línea qué pasa.' });
       const clase = CLASES.has(String(req.body?.clase)) ? String(req.body.clase) : 'fallo';
       const id = nuevoId();
+
+      // ══ DE QUIÉN VIENE DECIDE DÓNDE ENTRA (2026-08-22) ═══════════════════
+      // Del equipo —un administrador, o un programador IA— entra en la cola de
+      // trabajo. De cualquier otra persona entra como PROPUESTA, a la espera de
+      // que Eugenio la apruebe. No es desconfianza: es que «lo que hay que
+      // hacer» y «lo que alguien ha sugerido» son dos listas distintas, y
+      // juntarlas hace que la primera deje de decir nada.
+      //
+      // Se guarda como una FOTO (`de_admin`), no como una consulta al rol de
+      // hoy: si alguien asciende mañana, sus notas de ayer no pueden
+      // reescribirse como si siempre hubiera sido del equipo.
+      const delEquipo = quien.clase === 'agente' || quien.admin;
+      const estadoInicial = delEquipo ? 'esperando' : 'propuesta';
       await db.execute(sql`
-        INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id)
-        VALUES (${id}, ${titulo.slice(0, 300)}, ${req.body?.detalle || null}, ${clase}, ${req.user.id})
+        INSERT INTO incidencias (id, titulo, detalle, clase, autor_user_id, respondido_por,
+                                 de_admin, estado)
+        VALUES (${id}, ${titulo.slice(0, 300)}, ${req.body?.detalle || null}, ${clase},
+                ${quien.clase === 'persona' ? quien.id : null},
+                ${quien.clase === 'agente' ? quien.nombre : null},
+                ${delEquipo}, ${estadoInicial})
       `);
       const r = await db.execute(sql`
         SELECT i.*, u.display_name AS autor_nombre, u.avatar_url AS autor_foto
@@ -97,14 +132,25 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
    * tablero en una lista de deseos con casillas marcadas por ilusión.
    */
   app.put('/api/incidencias/:id', async (req: Request, res: Response) => {
-    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    // ══ QUIÉN PUEDE MOVER ESTO ═══════════════════════════════════════════════
+    // Una persona con sesión, o un PROGRAMADOR IA con su token (2026-08-22,
+    // Eugenio: «así podréis daros permisos de edición del hormiguero y será más
+    // fácil trabajar desde producción»).
+    //
+    // El agente entra por aquí y NO por la puerta de las personas: no tiene
+    // `req.user`, así que ninguna otra ruta de la plataforma lo va a confundir
+    // con alguien. Hasta hoy, poner una nota en verde exigía fabricar a mano
+    // una sesión de Eugenio en producción —entrar como él sin su contraseña— o
+    // escribir por SSH en la base de datos. Las dos cosas eran peores que esto.
+    const quien = await quienEscribe(req, db);
+    if (!quien) return res.status(401).json({ error: 'Inicia sesión.' });
     try {
       const fila = await db.execute(sql`SELECT * FROM incidencias WHERE id = ${req.params.id} AND archived_at IS NULL`);
       const i = fila.rows[0] as any;
       if (!i) return res.status(404).json({ error: 'Esa nota no existe.' });
 
-      const admin = (req.user.roleLevel ?? 0) >= 4;
-      const suya = i.autor_user_id === req.user.id;
+      const admin = quien.admin;
+      const suya = quien.clase === 'persona' && i.autor_user_id === quien.id;
       if (!admin && !suya) return res.status(403).json({ error: 'Esa nota no es tuya.' });
 
       const d = req.body || {};
@@ -125,6 +171,13 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
           estado    = COALESCE(${estado}, estado),
           necesita  = COALESCE(${admin ? (d.necesita ?? null) : null}, necesita),
           respuesta = COALESCE(${admin ? (d.respuesta ?? null) : null}, respuesta),
+          -- QUIÉN LO HA MOVIDO. Con dos agentes trabajando a la vez, «hecha» sin
+          -- decir por quién es justo lo que hay que poder distinguir. Solo se
+          -- escribe cuando de verdad se toca el estado o la respuesta: abrir la
+          -- nota para corregir una falta no cambia quién la contestó.
+          respondido_por = CASE
+            WHEN ${estado !== null || (admin && d.respuesta != null)}::boolean
+            THEN ${quien.nombre} ELSE respondido_por END,
           updated_at = now()
         WHERE id = ${req.params.id}
       `);
@@ -162,7 +215,11 @@ export function registerIncidenciasRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT
           count(*) FILTER (WHERE estado = 'bloqueada')::int AS bloqueadas,
-          count(*) FILTER (WHERE estado = 'esperando')::int AS esperando
+          count(*) FILTER (WHERE estado = 'esperando')::int AS esperando,
+          -- Lo que está por aprobar se cuenta aparte: no es trabajo pendiente,
+          -- es una decisión pendiente, y son dos cosas que se atienden en
+          -- momentos distintos.
+          count(*) FILTER (WHERE estado = 'propuesta')::int AS propuestas
         FROM incidencias WHERE archived_at IS NULL
       `);
       res.json(r.rows[0]);

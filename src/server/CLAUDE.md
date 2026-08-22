@@ -13,13 +13,33 @@ ai/provider.ts   AI provider abstraction (Anthropic today)
 ai/assistant.ts  the assistant, action catalogue, usage accounting
 ```
 
+## Which port each of us runs on
+
+Eugenio's rule, 2026-08-22: **Programador 1 uses 3000, Programador 2 uses 3001.**
+
+`server.ts` reads `PORT` from the environment and falls back to 3000, so the
+second person to start no longer collides with the first — which is what
+happened the night the two of us worked in parallel. Production defines no
+`PORT`, so it stays on 3000 exactly as before.
+
+```bash
+PORT=3001 node --env-file=.env node_modules/.bin/tsx server.ts   # Programador 2
+```
+
+If you are not sure which of the two you are, ask before starting a server:
+taking the other one's port stops their work without telling them.
+
 ## `server.ts` is frozen
 
 The root `server.ts` is 1.891 lines of raw SQL holding the legacy `/api/data/*`,
 `/api/geo/*`, `/api/explorer/*` routes plus the membership Stripe flow and the
 Vite/static wiring.
 
-**Do not add anything to it.** New endpoints go in a module here, or in a new one. If
+One authorised exception exists so far: the `PORT` line (2026-08-22, Eugenio),
+because with it hardcoded two programmers could not run the platform at once.
+It changes no behaviour in production.
+
+**Do not add anything else to it.** New endpoints go in a module here, or in a new one. If
 you have to fix something inside `server.ts`, fix it in place and do not grow the
 file. Moving those routes out is planned work, not something to do mid-task.
 
