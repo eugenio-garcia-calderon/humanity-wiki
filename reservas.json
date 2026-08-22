@@ -161,6 +161,18 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "privacidad: la pagina que exigen las dos tiendas",
       "desde": "2026-08-22T21:45:21.692Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "",
+      "desde": "2026-08-22T22:02:24.745Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "entrada: buscador first",
+      "motivo": "",
+      "desde": "2026-08-22T22:02:24.745Z"
     }
   ]
 }
