@@ -4533,3 +4533,87 @@ Queda pendiente y es decisión de Eugenio, no técnica: **los volcados no van
 cifrados** y ahora además viajan a otro proveedor. Cifrarlos es fácil; lo
 difícil es dónde vive la llave, y una copia que no se puede descifrar es peor
 que ninguna.
+### And then the offline test came back blank (same day, Programador 3)
+
+I changed the service worker twice today, so I re-ran the thing it exists for:
+load once, stop the server, reload. **Blank page.** The title rendered — the
+shell HTML came from the cache — and nothing else did.
+
+**Why.** `PRECACHE` never included the app's own code. The comment above it said,
+with total confidence, that hashed files «se guardan según se usan, en vez de
+adivinarlos aquí». That is wrong for exactly one visit, and it is the visit that
+matters: **a service worker does not control the page that installs it**, so on
+the first load the app's JavaScript goes straight past it and is never copied.
+Somebody who installs the app and gets on the metro that afternoon is precisely
+that case.
+
+It had been passing until now only because my own testing reloaded several
+times. A real person does not.
+
+**Fix, reusing something already there.** `scripts/sellar-sw.mjs` already stamped
+the entry bundle's name into `sw.js` so a deploy would change the worker. It now
+writes the whole boot set — entry module and stylesheet — into a `BUILD` array
+the worker precaches on install. One line doing both jobs: version detection and
+precache. The names cannot be hard-coded because they change every build, which
+is why this has to come from the build and not from the file.
+
+Verified: fresh install, **one** load, server stopped, reload → the app opens
+with 83 publicaciones and the banner «copia guardada hace 1 minuto». That is the
+exact sequence that was blank ten minutes earlier.
+
+**The lesson is the same one as this morning, in a different costume.** A comment
+asserting why something is safe is not evidence that it is. That one had been
+sitting there since the first version, sounding reasonable, describing a
+guarantee the code never made.
+
+## 2026-08-22 — A photo into a task, from both ends
+
+Eugenio: «te debe permitir meterla en uno de tus proyectos, y dentro de tus
+proyectos en alguna tarea», y «desde una tarea directamente tiene que haber la
+posibilidad de subir una foto o video a la tarea».
+
+**Half of it already existed and I checked before building.** A task already
+accepted an image (`TableroKanban.tsx`, block `{tipo:'imagen'}`), and there was
+already an `<Adjuntos>` panel for files. What was missing was video, and — the
+one that matters on a phone — `capture`, so the button opened the camera instead
+of the camera roll. The real case is standing in front of the thing: the
+half-built rig, the fault. Sending you to the roll means leaving, shooting in
+another app, and coming back.
+
+| | |
+|---|---|
+| Ficha de tarea | Tres botones: **Foto · Vídeo · Carrete**. Los dos primeros con `capture="environment"`; el tercero sin él, que es el camino para lo que ya tienes hecho |
+| Bloques | Se pinta `tipo: 'video'`, con `playsInline` — sin eso un iPhone se lleva el vídeo a pantalla completa y te saca de la tarea |
+| Selector de destino | Nueva sección **«Añadir a una tarea»**: proyecto → tarea, en dos pasos |
+
+### Corrijo un razonamiento mío de esta misma tarde
+
+La primera versión del selector dejó fuera los proyectos, con este argumento:
+«un proyecto es un tablero de tarjetas, meter una foto ahí sería inventarle una
+tarjeta que nadie ha pedido». Estaba mal planteado: **la foto no va al tablero,
+va dentro de una tarea concreta**, que es donde ocurre el trabajo. La foto del
+montaje pertenece a «Medidas reales del chasis», no al proyecto entero. Y no hay
+que inventar nada: una tarea ya guarda sus notas en `bloques`.
+
+### Una prueba en producción que encontró un fallo de diseño
+
+Intenté escribir un bloque de prueba en una tarea real con la cuenta de agente,
+para verificar el guardado de verdad en vez de leyéndolo. **403**: `PUT
+/api/roadmap/:id` responde «Solo quien creó el proyecto puede editar sus
+tarjetas». El proyecto quedó intacto —0 bloques antes, 0 después— y el fallo que
+destapó era mío: `/api/proyectos` devuelve también los públicos de otras
+personas, así que el selector iba a ofrecer destinos que rechazarían al usuario
+**después** de elegir y esperar. Ahora solo salen los propios.
+
+### Deuda consciente, con su número
+
+Guardar en una tarea lee sus `bloques` y reescribe la lista entera, porque el
+endpoint reemplaza el campo. Si otra persona añade una nota en esos dos
+segundos, se pierde la suya. Con una tarea que estás mirando tú, con el móvil en
+la mano, el riesgo es pequeño; deja de serlo en cuanto varias personas trabajen
+sobre la misma tarea. Lo correcto es un endpoint que **añada** en vez de
+reemplazar: son unas líneas en `src/server/roadmap.ts`, área de Programador 1.
+
+**No verificado:** ninguna de las dos pantallas, las dos detrás del inicio de
+sesión. Sí verificada, con una petición real, la regla del servidor que explica
+el filtro.

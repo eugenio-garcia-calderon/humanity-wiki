@@ -487,6 +487,13 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
               navigate(`/esquemas/${destino.slug}`);
               return;
             }
+            if (destino.tipo === 'tarea') {
+              // Y al tablero del proyecto, que es donde está la tarea que
+              // acabas de alimentar.
+              onCerrar();
+              navigate(`/proyectos/${destino.proyecto}`);
+              return;
+            }
             setTitulo('');
             setCreado({ texto: 'Guardado en tus publicaciones.', ruta: '/mis-publicaciones' });
           }}
