@@ -790,7 +790,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       const quien = global ? null : req.user.id;
       const dias = Math.min(Math.max(Number(req.query.dias) || 30, 1), 365);
 
-      const [gasto, acciones, porDia] = await Promise.all([
+      const [gasto, acciones, porDia, anonimo] = await Promise.all([
         // Lo que se gastó, por modelo.
         db.execute(sql`
           SELECT model,
@@ -829,6 +829,20 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             AND (${quien}::text IS NULL OR user_id = ${quien})
           GROUP BY 1 ORDER BY 1
         `),
+        // CUÁNTO DE ESTO LO HA PREGUNTADO GENTE SIN CUENTA. El chat abierto no
+        // tiene límite —decisión de Eugenio, 2026-08-22— y por eso hace falta
+        // verlo: una decisión de dejar algo abierto solo se puede sostener si
+        // se sabe lo que cuesta. Sale en el total como todo lo demás; esta
+        // consulta solo separa la parte anónima para poder mirarla.
+        global
+          ? db.execute(sql`
+              SELECT count(*)::int AS llamadas,
+                     coalesce(sum(cost_cents), 0)::float AS coste_cents
+              FROM ai_usage_charges
+              WHERE created_at > now() - (${dias} * interval '1 day')
+                AND user_id IS NULL
+            `)
+          : Promise.resolve({ rows: [] as any[] }),
       ]);
 
       // Se unen por modelo en memoria: son un puñado de filas, y hacerlo en
@@ -878,11 +892,16 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         coste_por_llamada: f.llamadas ? f.coste_cents / f.llamadas : null,
       })).sort((a, b) => b.coste_cents - a.coste_cents);
 
+      const anon = (anonimo.rows as any[])[0];
       res.json({
         dias,
         global,
         modelos,
         porDia: porDia.rows,
+        // Solo para un administrador mirando el total. `null` si no se ha
+        // preguntado: es distinto de un cero, que afirmaría que nadie ha usado
+        // el chat abierto.
+        anonimo: anon ? { llamadas: anon.llamadas, coste_cents: anon.coste_cents } : null,
         total: {
           coste_cents: modelos.reduce((n, m) => n + m.coste_cents, 0),
           pagado_cents: modelos.reduce((n, m) => n + m.pagado_cents, 0),
@@ -1345,12 +1364,20 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // administración y lo que alimenta el tope mensual. Lo que cambia según
       // el router es lo que paga la persona: en los modelos gratis y en el
       // uso premium cubierto, cero.
-      if (req.user) {
-        const dePago = eleccion.cobro === 'de_pago';
+      //
+      // SE APUNTA TAMBIÉN LO QUE PREGUNTA UN VISITANTE (2026-08-22). Este
+      // INSERT vivía dentro de un «if (req.user)», así que el chat abierto
+      // —que Eugenio ha decidido dejar SIN límite— se pagaba sin dejar rastro:
+      // el panel enseñaba menos de lo que dice la factura, y la diferencia
+      // crecía justo con el uso. `user_id` va a NULL, que es lo que pasó de
+      // verdad: no había nadie identificado. Y no se le cobra a nadie: `fee`
+      // y `total` son cero siempre, porque no hay a quién cobrar.
+      {
+        const dePago = eleccion.cobro === 'de_pago' && !!req.user;
         db.execute(sql`
           INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens,
                                         cache_read_tokens, cost_cents, fee_cents, total_cents, conversation_id)
-          VALUES (${req.user.id}, 'chat', ${result.model}, ${result.inputTokens}, ${result.outputTokens},
+          VALUES (${req.user?.id ?? null}, 'chat', ${result.model}, ${result.inputTokens}, ${result.outputTokens},
                   -- CUÁNTA ENTRADA SE RELEYÓ DE CACHÉ. Sin esta cifra, una
                   -- caché rota y una perfecta dejan el mismo registro, y a
                   -- cientos de miles de chats al día eso es enterarse por la
