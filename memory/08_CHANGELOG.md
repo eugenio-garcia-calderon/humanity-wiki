@@ -4323,3 +4323,99 @@ in Programador 1's area and has been passed to them.
 **Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
 create accounts or type passwords. Both endpoints were read in source rather
 than exercised. Phase 1 was checked in the browser.
+
+## 2026-08-22 — I fixed the camera in the wrong place, twice, and blamed the cache
+
+Eugenio, after two deploys: «no ha cambiado nada en humanity.wiki del tema de
+camara», then «igual te está faltando hacer el deploy amigo», then «humanity.wiki
+en version movil sigue sin mostrar las mejoras».
+
+I checked the served bundle each time, found my code in it, and told him his
+phone was holding a stale copy. **It was not.** I then reproduced the supposed
+staleness and it did not reproduce: a client controlled by the old worker picks
+up a new bundle on an ordinary navigation, because the navigate branch is
+network-first.
+
+**The real cause.** His words were `el boton de camara va en las herramientas de
+crear '+'`. The `+` in the bottom bar opens a panel in `AIAssistant.tsx` that
+renders `HERRAMIENTAS_CREAR` — eight tools, each of which *navigates to a page*.
+I put the camera in `CreadorPublicacion`, the dialog behind the green button on
+the home feed. Different component. He was pressing the one I had not touched.
+
+The same panel is where his third complaint lives, in plain sight:
+`{ label: 'Publicación', destino: '/explorar' }` — a navigation to the
+publications page, which is exactly what he asked me to stop doing. I "fixed" it
+in the other component.
+
+### What changed
+
+`HERRAMIENTAS_CREAR` entries can now either navigate (`destino`) or open the
+creator in place (`crear`), and `CreadorPublicacion` takes a `tipoInicial` so it
+opens on the right tool. **Cámara** is the first entry; **Publicación** opens the
+creator instead of leaving the page. The creator is mounted from the bar itself,
+because the `+` exists on every screen and that is the only way Cámara works
+wherever you are.
+
+Verified in a browser, not by reading: the panel lists Cámara first, clicking it
+opens the creator without changing the route, and Publicación does the same.
+(Logged out it shows «Inicia sesión para crear publicaciones», which is correct.)
+
+### The lesson, which is the expensive part
+
+I was told plainly where the button went, built it somewhere else, and then spent
+two rounds defending the deploy instead of opening the screen he was describing.
+Checking that my code is in the bundle proves the deploy worked. It proves
+nothing about whether the code is where the person is looking. **Open the screen
+they named.**
+
+### Kept anyway: the app can now repair itself
+
+The staleness theory was wrong, but two things found while chasing it are worth
+keeping, and they close the `?sw=off` workaround Eugenio rightly refused («es un
+apaño, yo quiero que funcione sin esa url cutre»):
+
+- `scripts/sellar-sw.mjs` stamps the built entry bundle's name into `dist/sw.js`,
+  so a deploy that changes the app also changes the worker and the browser has a
+  reason to re-install it. The first version listed `dist/assets/` and picked the
+  first `index-*.js`, which was a chunk, not the entry — a stamp that would never
+  change, from a file the page never loads. It reads `dist/index.html` now.
+- `sw.js` v4 reverses the no-`skipWaiting` rule: it takes over at once, drops the
+  stale code caches and reloads its clients. Waiting for every tab to close never
+  happens on a phone.
+
+  **But it never reloads a page somebody is looking at**, and the first draft
+  did. Caught in review: three hours earlier I had refused to auto-reload with
+  the argument «eso tira lo que estés escribiendo», and then wrote exactly that
+  into the worker. This team deployed fifteen times in four hours; a long
+  publication would have been lost by somebody else's deploy. A hidden page is
+  reloaded — nobody types into a page they cannot see, and an installed app in
+  the switcher is precisely the case that matters. A visible page is left alone
+  and gets the "Actualizar" button instead, which is a person deciding rather
+  than a deploy deciding for them.
+
+---
+
+## 2026-08-22 — The info «i» menu, top right (Programador 7)
+
+The pages that explain the platform — `/sobre-red-humana` and its scoring
+subpage — existed and nothing in the interface linked to them. A new `Info`
+button in the top bar of `Layout.tsx` (before the ant, after the window strip)
+opens a small dropdown listing them. Same open/close pattern as the account
+menu: `useCerrarAlPulsarFuera`, same dropdown styling.
+
+Why before the ant: first understand the platform, then ask things of the
+team. Verified in the browser on port 3007 (menu opens, both links navigate,
+button highlights on those routes). `tsc --noEmit` clean.
+
+---
+
+## 2026-08-22 — The (i) dropdown fell off a 375px screen (Programador 7)
+
+Found verifying #221 in production on mobile, as the Dashboard asked: the
+panel is `right-0` — right-aligned to the BUTTON — and on a phone the button
+is not at the right edge, so the panel started at x = −33. Local desktop and
+the logged-in local mobile view never showed it (the button sits further
+right there), which is exactly why production had to be checked at 375px.
+Fix: below `sm` the panel pins to the viewport (`fixed inset-x-2`); from `sm`
+up the original button-aligned layout returns. Measured after: 8..367 on a
+375px screen, desktop unchanged.

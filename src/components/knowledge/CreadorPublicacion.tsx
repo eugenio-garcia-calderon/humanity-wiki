@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../../utils/subir';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -47,10 +47,18 @@ const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string;
   { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
 
-export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boolean; onCerrar: () => void }) {
+/*
+ * `tipoInicial` (2026-08-22): con qué pestaña se abre. Lo necesita el panel del
+ * «+» de la barra de abajo, que es donde Eugenio pulsa en el móvil: allí
+ * «Cámara» y «Publicación» son dos entradas distintas y cada una tiene que
+ * abrir su parte, no dejarte en la primera y que la busques.
+ */
+export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
+  abierto: boolean; onCerrar: () => void; tipoInicial?: TipoCreable;
+}) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tipo, setTipo] = useState<TipoCreable>('documento');
+  const [tipo, setTipo] = useState<TipoCreable>(tipoInicial ?? 'documento');
   const [prompt, setPrompt] = useState('');
   const [titulo, setTitulo] = useState('');
   const [cuerpo, setCuerpo] = useState('');
@@ -76,6 +84,12 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
   const [camaraAbierta, setCamaraAbierta] = useState(false);
   const entradaFoto = useRef<HTMLInputElement | null>(null);
   const entradaVideo = useRef<HTMLInputElement | null>(null);
+
+  // Reabrir con otra herramienta desde el «+» tiene que cambiar la pestaña: el
+  // componente no se desmonta entre una apertura y otra.
+  useEffect(() => {
+    if (abierto && tipoInicial) { setTipo(tipoInicial); setError(null); }
+  }, [abierto, tipoInicial]);
 
   if (!abierto) return null;
 
