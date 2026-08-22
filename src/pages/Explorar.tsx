@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState , Fragment, type ReactNode} from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
@@ -12,6 +12,10 @@ import WindowContent from '../components/knowledge/WindowContent';
 import FichaPublicacion, { type Publicacion } from '../components/knowledge/FichaPublicacion';
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
+import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
+import {
+  leerPortada, PORTADA_POR_DEFECTO, type IdBloque, type Portada,
+} from '../components/portada/portadaBloques';
 import { OBJETIVOS, hablaDe } from '../utils/objetivos';
 import CirculosDePersonas from '../components/social/CirculosDePersonas';
 import TuTrabajo from '../components/social/TuTrabajo';
@@ -114,7 +118,7 @@ function formatosDescarga(pub: Publicacion): { id: string; label: string; accion
 }
 
 export default function Explorar() {
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
   const esMovil = useEsMovil();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -143,6 +147,15 @@ export default function Explorar() {
   const [creadorAbierto, setCreadorAbierto] = useState(false);
   const [papelera, setPapelera] = useState<any[]>([]);
   const debounce = useRef<any>(null);
+
+  /*
+   * TU PORTADA. Se lee de `user.uiSettings.portada`, que ya existe y viaja con
+   * la cuenta a cualquier dispositivo. Quien no ha entrado ve la plantilla
+   * completa: sin cuenta no hay dónde guardarlo, y guardarlo solo en este
+   * navegador sería prometer algo que se pierde al cambiar de móvil.
+   */
+  const portada: Portada = user ? leerPortada(user.uiSettings?.portada) : PORTADA_POR_DEFECTO;
+  const [personalizando, setPersonalizando] = useState(false);
 
   // -- Carpetas --
   const [carpetas, setCarpetas] = useState<Carpeta[]>([]);
@@ -379,175 +392,21 @@ export default function Explorar() {
   return (
     <div className="h-full flex overflow-hidden">
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Carpetas: menú lateral izquierdo, solo con sesión.                  */}
-      {/* ------------------------------------------------------------------ */}
-      {/* EN MÓVIL ESTA COLUMNA NO CABE, Y NO ES UN DETALLE (2026-08-21, B37).
-          Son 224 px fijos que, sumados a los 240 de la barra lateral de la
-          app, dan 464 en una pantalla de 390: el panel entero se quedaba fuera
-          y sin forma de alcanzarlo — 89 elementos recortados de verdad, los
-          midió el Tester 1 con sesión. Aunque la barra de la app ya sea un
-          cajón, 224 px fijos al lado del contenido siguen sin caber.
-          Debajo, en móvil, las mismas carpetas como una tira horizontal. */}
-      {user && !esMovil && (
-        <aside className="w-56 shrink-0 border-r border-slate-100 bg-slate-50/60 flex flex-col overflow-hidden">
-          <div className="px-4 pt-5 pb-3 flex items-center justify-between">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Carpetas</p>
-            <button onClick={() => setCreandoCarpeta(v => !v)} title="Nueva carpeta"
-              className="p-1 text-slate-400 hover:text-emerald-600 rounded-md hover:bg-white transition-colors">
-              <FolderPlus className="w-4 h-4" />
-            </button>
-          </div>
+      {/* LA COLUMNA DE CARPETAS SE FUE (2026-08-22, Eugenio: «elimina las
+          carpetas en el lateral izquierdo… y así el inicio es pantalla
+          completa»). Eran 224 px fijos delante del contenido en TODAS las
+          pantallas, para un filtro que casi nadie usa a diario.
 
-          {creandoCarpeta && (
-            <form onSubmit={e => { e.preventDefault(); crearCarpeta(); }} className="px-3 mb-2 flex gap-1">
-              <input
-                autoFocus value={nuevaCarpeta} onChange={e => setNuevaCarpeta(e.target.value)}
-                placeholder="p. ej. Salud" onBlur={() => !nuevaCarpeta && setCreandoCarpeta(false)}
-                className="flex-1 min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300 bg-white"
-              />
-              <button type="submit" className="px-2 bg-slate-900 text-white rounded-lg"><Check className="w-3.5 h-3.5" /></button>
-            </form>
-          )}
-
-          <div className="flex-1 overflow-y-auto px-2 space-y-0.5">
-            <button
-              onClick={() => setCarpetaActiva(null)}
-              className={cn('w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-bold transition-colors text-left',
-                !carpetaActiva ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white')}
-            >
-              <LayoutGrid className="w-3.5 h-3.5 shrink-0" /> Todas
-            </button>
-
-            {carpetas.map(c => (
-              <div
-                key={c.id}
-                onClick={() => setCarpetaActiva(c)}
-                onDragOver={e => { e.preventDefault(); setSobreCarpeta(c.id); }}
-                onDragLeave={() => setSobreCarpeta(s => (s === c.id ? null : s))}
-                onDrop={e => soltarEnCarpeta(c.id, e)}
-                className={cn('group w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer',
-                  carpetaActiva?.id === c.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-white',
-                  sobreCarpeta === c.id && 'ring-2 ring-emerald-400 bg-emerald-50 text-emerald-700')}
-              >
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: c.color || colorDe(c.id) }} />
-                <span className="flex-1 truncate">{c.nombre}</span>
-                <span className={cn('text-[10px] font-black shrink-0', carpetaActiva?.id === c.id ? 'text-white/60' : 'text-slate-400')}>{c.piezas}</span>
-                <button
-                  onClick={e => { e.stopPropagation(); borrarCarpeta(c); }}
-                  className={cn('shrink-0 opacity-0 group-hover:opacity-100 transition-opacity',
-                    carpetaActiva?.id === c.id ? 'text-white/60 hover:text-white' : 'text-slate-300 hover:text-rose-500')}
-                  title="Borrar carpeta"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-
-            {!carpetas.length && !creandoCarpeta && (
-              <p className="px-2.5 py-3 text-[11px] text-slate-400 leading-relaxed">
-                Todavía no tienes carpetas. Crea una o pide que la IA las organice por ti.
-              </p>
-            )}
-          </div>
-
-          <div className="p-2.5 border-t border-slate-100">
-            <button
-              onClick={ordenarConIA} disabled={organizando}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-60 text-indigo-700 rounded-xl text-[11px] font-black transition-colors"
-            >
-              {organizando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-              Ordenar con IA
-            </button>
-            {avisoIA && <p className="mt-2 text-[10px] text-slate-500 leading-relaxed">{avisoIA}</p>}
-          </div>
-        </aside>
-      )}
+          Las carpetas NO desaparecen: la tira horizontal que ya existía para
+          el móvil pasa a ser un bloque más de la portada, apagado por defecto
+          y encendible desde «Tu portada». Quitar el sitio donde vivía una
+          función no es lo mismo que quitar la función. */}
 
       {/* ------------------------------------------------------------------ */}
       {/* Contenido principal                                                */}
       {/* ------------------------------------------------------------------ */}
       <div className="flex-1 overflow-y-auto min-w-0">
 
-        {/* LAS CARPETAS EN MÓVIL: UNA TIRA, NO UNA COLUMNA (B37).
-            Una columna de 224 px se come más de la mitad de un teléfono; una
-            tira se come 48 px de alto y deja la pantalla entera para lo que
-            has venido a leer.
-
-            LLEVA SEÑAL DE QUE SE DESLIZA, y es a propósito: el fallo que el
-            Tester 1 encontró en esta misma página es que aquí ya hay tiras con
-            1.014 px de contenido escondido y NADA que lo indique. Contenido
-            alcanzable sin señal de que existe es tan inútil como el recortado.
-            Por eso el degradado del borde derecho, que solo aparece cuando de
-            verdad queda algo por ver.
-
-            Lo que NO se trae aquí: arrastrar una publicación a una carpeta y
-            el botón de borrar carpeta que sale al pasar el ratón. Las dos son
-            gestos de ratón que en un teléfono no existen; traerlos a medias
-            sería peor que dejarlos en el escritorio. */}
-        {user && esMovil && (
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100">
-            <div className="relative">
-              <div className="flex items-center gap-1.5 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <button
-                  onClick={() => setCarpetaActiva(null)}
-                  className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors',
-                    !carpetaActiva ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5 shrink-0" /> Todas
-                </button>
-
-                {carpetas.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setCarpetaActiva(c)}
-                    className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors max-w-[11rem]',
-                      carpetaActiva?.id === c.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
-                  >
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: c.color || colorDe(c.id) }} />
-                    <span className="truncate">{c.nombre}</span>
-                    <span className={cn('text-[10px] font-black shrink-0', carpetaActiva?.id === c.id ? 'text-white/60' : 'text-slate-400')}>{c.piezas}</span>
-                  </button>
-                ))}
-
-                <button
-                  onClick={() => setCreandoCarpeta(v => !v)}
-                  title="Nueva carpeta" aria-label="Nueva carpeta"
-                  className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-slate-100 text-slate-500 active:bg-slate-200 transition-colors"
-                >
-                  <FolderPlus className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={ordenarConIA} disabled={organizando}
-                  title="Ordenar con IA" aria-label="Ordenar con IA"
-                  className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-indigo-50 disabled:opacity-60 text-indigo-700 transition-colors"
-                >
-                  {organizando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                </button>
-              </div>
-              {/* El degradado que dice «sigue habiendo cosas». No captura
-                  toques: el dedo tiene que poder deslizar a través de él. */}
-              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
-            </div>
-
-            {creandoCarpeta && (
-              <form onSubmit={e => { e.preventDefault(); crearCarpeta(); }} className="px-3 pb-2 flex gap-1.5">
-                <input
-                  autoFocus value={nuevaCarpeta} onChange={e => setNuevaCarpeta(e.target.value)}
-                  placeholder="p. ej. Salud" onBlur={() => !nuevaCarpeta && setCreandoCarpeta(false)}
-                  /* `text-base` = 16 px, y no es una decisión estética: Safari
-                     de iOS hace zoom sobre la página entera al enfocar un
-                     campo con letra por debajo de 16 px, y luego te deja la
-                     página descolocada. La versión de escritorio se queda en
-                     `text-xs` porque allí eso no pasa. */
-                  className="flex-1 min-w-0 h-11 px-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:border-emerald-300 bg-white"
-                />
-                <button type="submit" className="w-11 h-11 grid place-items-center bg-slate-900 text-white rounded-xl shrink-0"><Check className="w-4 h-4" /></button>
-              </form>
-            )}
-            {avisoIA && <p className="px-3 pb-2 text-[11px] text-slate-500 leading-relaxed">{avisoIA}</p>}
-          </div>
-        )}
 
         <div className="max-w-[1500px] mx-auto px-5 sm:px-8 pt-5 pb-24">
 
@@ -561,6 +420,19 @@ export default function Explorar() {
             >
               <Plus className="w-3.5 h-3.5" /> Crear
             </button>
+
+            {/* PERSONALIZAR, AQUÍ Y NO EN CONFIGURACIÓN. Se ajusta mirando el
+                resultado: cambias el orden y lo ves detrás al momento. Metido en
+                una página de ajustes habría que ir, tocar a ciegas y volver. */}
+            {user && (
+              <button
+                onClick={() => setPersonalizando(true)}
+                title="Elegir qué ves en tu portada y en qué orden"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 hover:border-emerald-300 text-slate-500 hover:text-emerald-700 rounded-lg text-xs font-bold transition-colors shrink-0"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" /> Tu portada
+              </button>
+            )}
 
             {/* ══ FUERA EL INTERRUPTOR «HUMANIDAD / MÍAS» ═══════════════════
                 (2026-08-22, hormiguero: «quita el filtro de publicaciones Mías
@@ -657,240 +529,311 @@ export default function Explorar() {
                   en vez de envolver en varias líneas (2026-08-08). */}
               {/* LAS PERSONAS, ANTES QUE NADA (2026-08-21). Van encima de los
                   objetivos porque la portada es de gente: primero a quién
-                  sigues, luego de qué va lo que hay. */}
-              <CirculosDePersonas />
+            <>
+              {/* CADA TROZO DE LA PORTADA, SUELTO, PARA PODER ORDENARLOS
+                  (2026-08-22, Eugenio: «que puedas escoger los elementos que se
+                  muestran y el orden de los mismos»).
 
-              {/* LO TUYO, DESPUÉS DE LA GENTE Y ANTES DE LO DEMÁS (2026-08-22).
-                  La portada tenía a los otros —a quién sigues y qué han
-                  publicado— y le faltaba la mitad que es tuya, que es la única
-                  que te dice si hay algo que hacer hoy. */}
-              <TuTrabajo />
+                  Antes esto era una lista fija de JSX y el orden era el orden en
+                  que estaba escrito. Ahora cada bloque es una entrada de este
+                  objeto y lo que manda es `portada.bloques`. El contenido de
+                  cada uno no ha cambiado ni una línea: solo ha dejado de estar
+                  clavado. */}
+              {(() => {
+                const trozos: Record<IdBloque, ReactNode> = {
+                  /* LAS PERSONAS (2026-08-21): a quién sigues y qué han
+                     publicado. */
+                  personas: <CirculosDePersonas />,
 
-              {/* ══ LOS 14 OBJETIVOS, EN UNA TIRA ═══════════════════════════
-                  (2026-08-21, Eugenio: «pon un submenú superior como el de
-                  YouTube donde aparezcan los 14 objetivos uno al lado del otro
-                  y que se pueda hacer scroll lateral para verlos todos en
-                  móvil»).
+                  /* LO TUYO (2026-08-22): la mitad que te dice si hay algo que
+                     hacer hoy. */
+                  tuyo: <TuTrabajo />,
 
-                  SE DESPLAZA A LO ANCHO Y NO SE PARTE EN LÍNEAS: catorce
-                  pastillas en un teléfono serían cuatro filas, y cuatro filas
-                  de filtros encima del contenido es más filtro que contenido.
-                  Así ocupa una sola línea siempre, en el móvil y en el
-                  ordenador.
-
-                  ES UNA BÚSQUEDA POR TEMA, NO UNA CATEGORÍA. Hoy nada une una
-                  publicación con un objetivo, así que estas pastillas buscan
-                  las palabras del objetivo dentro del título y el texto. Se
-                  dice en la pantalla cuando no encuentra nada, para que no
-                  parezca que «no hay nada de AGUA» cuando lo que pasa es que
-                  nadie lo ha escrito así. */}
-              <div className="sticky top-0 z-30 bg-white/95 backdrop-blur -mx-2 px-2 pt-1 pb-1.5">
-                <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  <button
+                  objetivos: (
+                    <div className="sticky top-0 z-30 bg-white/95 backdrop-blur -mx-2 px-2 pt-1 pb-1.5">
+                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <button
                     onClick={() => setObjetivo(null)}
                     className={cn('shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors',
-                      !objetivo ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                  >
-                    Todos
-                  </button>
-                  {OBJETIVOS.map(o => (
-                    <button
-                      key={o.id}
-                      onClick={() => setObjetivo(v => (v === o.id ? null : o.id))}
-                      title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
-                      className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
-                        objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                    !objetivo ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
                     >
-                      <o.icono className="w-3.5 h-3.5 shrink-0" />
-                      {o.titulo}
+                    Todos
                     </button>
-                  ))}
-                </div>
-              </div>
+                    {OBJETIVOS.map(o => (
+                    <button
+                    key={o.id}
+                    onClick={() => setObjetivo(v => (v === o.id ? null : o.id))}
+                    title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
+                    className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
+                    objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                    >
+                    <o.icono className="w-3.5 h-3.5 shrink-0" />
+                    {o.titulo}
+                    </button>
+                    ))}
+                    </div>
+                    </div>
+                  ),
 
-              <div className="sticky top-10 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
-                <div className="relative flex-1 min-w-[140px] max-w-xs shrink-0">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                  <input
+                  buscador: (
+                    <div className="sticky top-10 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
+                    <div className="relative flex-1 min-w-[140px] max-w-xs shrink-0">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <input
                     value={busqueda} onChange={e => setBusqueda(e.target.value)}
                     placeholder="Buscar…"
                     className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
-                  />
-                </div>
-                <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:thin] pb-0.5">
-                  {TIPOS.map(t => (
+                    />
+                    </div>
+                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:thin] pb-0.5">
+                    {TIPOS.map(t => (
                     <button
-                      key={t.label}
-                      onClick={() => setTipo(t.label)}
-                      className={cn('shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors',
-                        tipo === t.label ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
+                    key={t.label}
+                    onClick={() => setTipo(t.label)}
+                    className={cn('shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors',
+                    tipo === t.label ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
                     >
-                      {t.label}
+                    {t.label}
                     </button>
-                  ))}
-                </div>
-              </div>
+                    ))}
+                    </div>
+                    </div>
+                  ),
 
-              {cargando ? (
-                <p className="text-sm text-slate-400 text-center py-24">Buscando…</p>
-              ) : !visibles.length ? (
-                <div className="text-center py-24">
-                  <LayoutGrid className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                  <p className="text-sm text-slate-400">
-                    {objetivo
+                  /* LAS CARPETAS, ahora un bloque y no una columna. Apagado por
+                     defecto: Eugenio pidió quitarlas de la portada, no perderlas. */
+                  carpetas: user ? (
+                    <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100">
+                    <div className="relative">
+                    <div className="flex items-center gap-1.5 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <button
+                    onClick={() => setCarpetaActiva(null)}
+                    className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors',
+                    !carpetaActiva ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
+                    >
+                    <LayoutGrid className="w-3.5 h-3.5 shrink-0" /> Todas
+                    </button>
+
+                    {carpetas.map(c => (
+                    <button
+                    key={c.id}
+                    onClick={() => setCarpetaActiva(c)}
+                    className={cn('shrink-0 h-11 inline-flex items-center gap-1.5 px-3 rounded-xl text-xs font-bold transition-colors max-w-[11rem]',
+                    carpetaActiva?.id === c.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600')}
+                    >
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: c.color || colorDe(c.id) }} />
+                    <span className="truncate">{c.nombre}</span>
+                    <span className={cn('text-[10px] font-black shrink-0', carpetaActiva?.id === c.id ? 'text-white/60' : 'text-slate-400')}>{c.piezas}</span>
+                    </button>
+                    ))}
+
+                    <button
+                    onClick={() => setCreandoCarpeta(v => !v)}
+                    title="Nueva carpeta" aria-label="Nueva carpeta"
+                    className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-slate-100 text-slate-500 active:bg-slate-200 transition-colors"
+                    >
+                    <FolderPlus className="w-4 h-4" />
+                    </button>
+                    <button
+                    onClick={ordenarConIA} disabled={organizando}
+                    title="Ordenar con IA" aria-label="Ordenar con IA"
+                    className="shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-indigo-50 disabled:opacity-60 text-indigo-700 transition-colors"
+                    >
+                    {organizando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    </button>
+                    </div>
+                    {/* El degradado que dice «sigue habiendo cosas». No captura
+                    toques: el dedo tiene que poder deslizar a través de él. */}
+                    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
+                    </div>
+
+                    {creandoCarpeta && (
+                    <form onSubmit={e => { e.preventDefault(); crearCarpeta(); }} className="px-3 pb-2 flex gap-1.5">
+                    <input
+                    autoFocus value={nuevaCarpeta} onChange={e => setNuevaCarpeta(e.target.value)}
+                    placeholder="p. ej. Salud" onBlur={() => !nuevaCarpeta && setCreandoCarpeta(false)}
+                    /* `text-base` = 16 px, y no es una decisión estética: Safari
+                    de iOS hace zoom sobre la página entera al enfocar un
+                    campo con letra por debajo de 16 px, y luego te deja la
+                    página descolocada. La versión de escritorio se queda en
+                    `text-xs` porque allí eso no pasa. */
+                    className="flex-1 min-w-0 h-11 px-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:border-emerald-300 bg-white"
+                    />
+                    <button type="submit" className="w-11 h-11 grid place-items-center bg-slate-900 text-white rounded-xl shrink-0"><Check className="w-4 h-4" /></button>
+                    </form>
+                    )}
+                    {avisoIA && <p className="px-3 pb-2 text-[11px] text-slate-500 leading-relaxed">{avisoIA}</p>}
+                    </div>
+                  ) : null,
+
+                  contenido: (
+                    <>
+
+                      {cargando ? (
+                      <p className="text-sm text-slate-400 text-center py-24">Buscando…</p>
+                      ) : !visibles.length ? (
+                      <div className="text-center py-24">
+                      <LayoutGrid className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                      <p className="text-sm text-slate-400">
+                      {objetivo
                       ? `Ninguna publicación habla de ${(OBJETIVOS.find(o => o.id === objetivo)?.titulo || '').toLowerCase()} todavía.`
                       : carpetaActiva ? 'Esta carpeta está vacía. Arrastra una tarjeta hasta ella, o usa «Guardar en».'
                       : busqueda ? `Nada sobre «${busqueda}».`
-                        : modo === 'mias' ? 'Todavía no has publicado nada.' : 'Aún no hay publicaciones.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                  {visibles.map(it => {
-                    const clave = `${it.tipo}-${it.id}`;
-                    return (
-                      <div
-                        key={clave}
-                        draggable={!!user}
-                        onDragStart={e => e.dataTransfer.setData('application/json', JSON.stringify({ tipo: it.tipo, id: it.id }))}
-                        onClick={() => it.kind === 'pagina' ? navigate(`/paginas/${it.id}`)
-                          : it.kind === 'presentacion' ? navigate(`/presentaciones/${it.id}`)
-                          : setAbierta({ pub: it, editar: false })}
-                        className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
-                      >
-                        <div className="px-3.5 pt-3 flex items-center gap-1.5">
-                          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">{it.kind}</span>
-                          {it.ia && <Sparkles className="w-2.5 h-2.5 text-amber-500" />}
-                          {!it.publico && (
-                            <span className="text-[8px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
-                              <Lock className="w-2 h-2" />Privada
-                            </span>
-                          )}
-                          {it.estado === 'terminado' && (
-                            <span className="text-[8px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded">Terminada</span>
-                          )}
-                          {it.personal && (
-                            <span className="text-[8px] font-black uppercase tracking-wider text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">Tuyo</span>
-                          )}
-
-                          <div className="ml-auto relative">
-                            <button
-                              onClick={e => {
-                                e.stopPropagation();
-                                setMenuAbierto(menuAbierto === clave ? null : clave);
-                                setGuardarEnAbierto(null); setDescargarAbierto(null);
-                                if (user) carpetasDe(it);
-                              }}
-                              className="p-1 -mr-1 text-slate-300 hover:text-slate-700 rounded-md hover:bg-slate-50 transition-colors"
-                              title="Opciones"
-                            >
-                              <MoreVertical className="w-3.5 h-3.5" />
-                            </button>
-
-                            {menuAbierto === clave && (
-                              <div onClick={e => e.stopPropagation()}
-                                className="absolute right-0 top-6 z-30 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1">
-                                {it.puedo_editar && (
-                                  <button onClick={() => { setMenuAbierto(null); setAbierta({ pub: it, editar: true }); }}
-                                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                    <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar
-                                  </button>
-                                )}
-                                {user && (
-                                  <button onClick={() => { setGuardarEnAbierto(clave); setMenuAbierto(null); }}
-                                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                    <Bookmark className="w-3.5 h-3.5 text-slate-400" /> Guardar en…
-                                  </button>
-                                )}
-                                {carpetaActiva && (
-                                  <button
-                                    onClick={async () => {
-                                      setMenuAbierto(null);
-                                      const actuales = await carpetasDe(it);
-                                      await guardarEnCarpetas(it, actuales.filter(x => x !== carpetaActiva.id));
-                                    }}
-                                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                    <FolderOpen className="w-3.5 h-3.5 text-slate-400" /> Quitar de esta carpeta
-                                  </button>
-                                )}
-                                <button onClick={() => { setDescargarAbierto(clave); setMenuAbierto(null); }}
-                                  className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                  <Download className="w-3.5 h-3.5 text-slate-400" /> Descargar
-                                </button>
-                                {it.soy_autor && (
-                                  <>
-                                    <div className="h-px bg-slate-100 my-1" />
-                                    <button onClick={() => { setMenuAbierto(null); cambiarVisibilidad(it); }}
-                                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                      {it.publico ? <><Lock className="w-3.5 h-3.5 text-slate-400" /> Hacer privada</> : <><Globe className="w-3.5 h-3.5 text-slate-400" /> Hacer pública</>}
-                                    </button>
-                                    <button onClick={() => { setMenuAbierto(null); eliminar(it); }}
-                                      className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 inline-flex items-center gap-2">
-                                      <Trash2 className="w-3.5 h-3.5" /> Eliminar
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            )}
-
-                            {guardarEnAbierto === clave && (
-                              <div onClick={e => e.stopPropagation()}
-                                className="absolute right-0 top-6 z-30 w-60 bg-white border border-slate-200 rounded-xl shadow-xl py-2">
-                                <p className="px-3 pb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Guardar en</p>
-                                {carpetas.length ? carpetas.map(c => {
-                                  const marcada = (carpetasDeItem[clave] || []).includes(c.id);
-                                  return (
-                                    <button key={c.id} onClick={() => alternarCarpeta(it, c.id)}
-                                      className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                      <span className={cn('w-3.5 h-3.5 rounded border shrink-0 flex items-center justify-center',
-                                        marcada ? 'bg-emerald-600 border-emerald-600' : 'border-slate-300')}>
-                                        {marcada && <Check className="w-2.5 h-2.5 text-white" />}
-                                      </span>
-                                      <span className="truncate flex-1">{c.nombre}</span>
-                                    </button>
-                                  );
-                                }) : (
-                                  <p className="px-3 py-1.5 text-[11px] text-slate-400">Crea una carpeta primero, en el menú de la izquierda.</p>
-                                )}
-                              </div>
-                            )}
-
-                            {descargarAbierto === clave && (
-                              <div onClick={e => e.stopPropagation()}
-                                className="absolute right-0 top-6 z-30 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1">
-                                {formatosDescarga(it).map(f => (
-                                  <button key={f.id} onClick={() => { f.accion(); setDescargarAbierto(null); }}
-                                    className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                                    <Download className="w-3.5 h-3.5 text-slate-400" /> {f.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <p className="px-3.5 pt-1 text-[13px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
-                        <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
-                          <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
-                        </div>
-                        <div className="px-3.5 py-2 border-t border-slate-50 flex items-center gap-2 text-[10px] text-slate-400">
-                          <span className="inline-flex items-center gap-1 truncate">
-                            <UserIcon className="w-2.5 h-2.5 shrink-0" />{it.autor_nombre || 'Anónimo'}
-                          </span>
-                          {it.donde && (
-                            <span className="inline-flex items-center gap-1 truncate ml-auto">
-                              <Network className="w-2.5 h-2.5 shrink-0" />{it.donde}
-                            </span>
-                          )}
-                          {it.vistas > 0 && (
-                            <span className="inline-flex items-center gap-0.5 shrink-0"><Eye className="w-2.5 h-2.5" />{it.vistas}</span>
-                          )}
-                        </div>
+                      : modo === 'mias' ? 'Todavía no has publicado nada.' : 'Aún no hay publicaciones.'}
+                      </p>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      ) : (
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+                      {visibles.map(it => {
+                      const clave = `${it.tipo}-${it.id}`;
+                      return (
+                      <div
+                      key={clave}
+                      draggable={!!user}
+                      onDragStart={e => e.dataTransfer.setData('application/json', JSON.stringify({ tipo: it.tipo, id: it.id }))}
+                      onClick={() => it.kind === 'pagina' ? navigate(`/paginas/${it.id}`)
+                      : it.kind === 'presentacion' ? navigate(`/presentaciones/${it.id}`)
+                      : setAbierta({ pub: it, editar: false })}
+                      className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
+                      >
+                      <div className="px-3.5 pt-3 flex items-center gap-1.5">
+                      <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">{it.kind}</span>
+                      {it.ia && <Sparkles className="w-2.5 h-2.5 text-amber-500" />}
+                      {!it.publico && (
+                      <span className="text-[8px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
+                      <Lock className="w-2 h-2" />Privada
+                      </span>
+                      )}
+                      {it.estado === 'terminado' && (
+                      <span className="text-[8px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded">Terminada</span>
+                      )}
+                      {it.personal && (
+                      <span className="text-[8px] font-black uppercase tracking-wider text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">Tuyo</span>
+                      )}
+
+                      <div className="ml-auto relative">
+                      <button
+                      onClick={e => {
+                      e.stopPropagation();
+                      setMenuAbierto(menuAbierto === clave ? null : clave);
+                      setGuardarEnAbierto(null); setDescargarAbierto(null);
+                      if (user) carpetasDe(it);
+                      }}
+                      className="p-1 -mr-1 text-slate-300 hover:text-slate-700 rounded-md hover:bg-slate-50 transition-colors"
+                      title="Opciones"
+                      >
+                      <MoreVertical className="w-3.5 h-3.5" />
+                      </button>
+
+                      {menuAbierto === clave && (
+                      <div onClick={e => e.stopPropagation()}
+                      className="absolute right-0 top-6 z-30 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1">
+                      {it.puedo_editar && (
+                      <button onClick={() => { setMenuAbierto(null); setAbierta({ pub: it, editar: true }); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Pencil className="w-3.5 h-3.5 text-slate-400" /> Editar
+                      </button>
+                      )}
+                      {user && (
+                      <button onClick={() => { setGuardarEnAbierto(clave); setMenuAbierto(null); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Bookmark className="w-3.5 h-3.5 text-slate-400" /> Guardar en…
+                      </button>
+                      )}
+                      {carpetaActiva && (
+                      <button
+                      onClick={async () => {
+                      setMenuAbierto(null);
+                      const actuales = await carpetasDe(it);
+                      await guardarEnCarpetas(it, actuales.filter(x => x !== carpetaActiva.id));
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <FolderOpen className="w-3.5 h-3.5 text-slate-400" /> Quitar de esta carpeta
+                      </button>
+                      )}
+                      <button onClick={() => { setDescargarAbierto(clave); setMenuAbierto(null); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Download className="w-3.5 h-3.5 text-slate-400" /> Descargar
+                      </button>
+                      {it.soy_autor && (
+                      <>
+                      <div className="h-px bg-slate-100 my-1" />
+                      <button onClick={() => { setMenuAbierto(null); cambiarVisibilidad(it); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      {it.publico ? <><Lock className="w-3.5 h-3.5 text-slate-400" /> Hacer privada</> : <><Globe className="w-3.5 h-3.5 text-slate-400" /> Hacer pública</>}
+                      </button>
+                      <button onClick={() => { setMenuAbierto(null); eliminar(it); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 inline-flex items-center gap-2">
+                      <Trash2 className="w-3.5 h-3.5" /> Eliminar
+                      </button>
+                      </>
+                      )}
+                      </div>
+                      )}
+
+                      {guardarEnAbierto === clave && (
+                      <div onClick={e => e.stopPropagation()}
+                      className="absolute right-0 top-6 z-30 w-60 bg-white border border-slate-200 rounded-xl shadow-xl py-2">
+                      <p className="px-3 pb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Guardar en</p>
+                      {carpetas.length ? carpetas.map(c => {
+                      const marcada = (carpetasDeItem[clave] || []).includes(c.id);
+                      return (
+                      <button key={c.id} onClick={() => alternarCarpeta(it, c.id)}
+                      className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <span className={cn('w-3.5 h-3.5 rounded border shrink-0 flex items-center justify-center',
+                      marcada ? 'bg-emerald-600 border-emerald-600' : 'border-slate-300')}>
+                      {marcada && <Check className="w-2.5 h-2.5 text-white" />}
+                      </span>
+                      <span className="truncate flex-1">{c.nombre}</span>
+                      </button>
+                      );
+                      }) : (
+                      <p className="px-3 py-1.5 text-[11px] text-slate-400">Crea una carpeta primero, en el menú de la izquierda.</p>
+                      )}
+                      </div>
+                      )}
+
+                      {descargarAbierto === clave && (
+                      <div onClick={e => e.stopPropagation()}
+                      className="absolute right-0 top-6 z-30 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1">
+                      {formatosDescarga(it).map(f => (
+                      <button key={f.id} onClick={() => { f.accion(); setDescargarAbierto(null); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Download className="w-3.5 h-3.5 text-slate-400" /> {f.label}
+                      </button>
+                      ))}
+                      </div>
+                      )}
+                      </div>
+                      </div>
+
+                      <p className="px-3.5 pt-1 text-[13px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
+                      <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
+                      </div>
+                      <div className="px-3.5 py-2 border-t border-slate-50 flex items-center gap-2 text-[10px] text-slate-400">
+                      <span className="inline-flex items-center gap-1 truncate">
+                      <UserIcon className="w-2.5 h-2.5 shrink-0" />{it.autor_nombre || 'Anónimo'}
+                      </span>
+                      {it.donde && (
+                      <span className="inline-flex items-center gap-1 truncate ml-auto">
+                      <Network className="w-2.5 h-2.5 shrink-0" />{it.donde}
+                      </span>
+                      )}
+                      {it.vistas > 0 && (
+                      <span className="inline-flex items-center gap-0.5 shrink-0"><Eye className="w-2.5 h-2.5" />{it.vistas}</span>
+                      )}
+                      </div>
+                      </div>
+                      );
+                      })}
+                      </div>
+                      )}
+                    </>
+                  ),
+                };
+                return portada.bloques.map(id => <Fragment key={id}>{trozos[id]}</Fragment>);
+              })()}
             </>
           )}
         </div>
@@ -917,6 +860,14 @@ export default function Explorar() {
       )}
 
       <CreadorPublicacion abierto={creadorAbierto} onCerrar={() => setCreadorAbierto(false)} />
+
+      {personalizando && (
+        <PersonalizarPortada
+          portada={portada}
+          onCambiar={p => updateUiSettings({ portada: p })}
+          onCerrar={() => setPersonalizando(false)}
+        />
+      )}
     </div>
   );
 }
