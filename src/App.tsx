@@ -72,6 +72,7 @@ const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
+const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
 const Tareas = lazy(() => import('./pages/Tareas'));
@@ -137,7 +138,39 @@ function Esperando() {
 // en cada pintada para obtener siempre la misma respuesta.
 const ESPACIO_DE = subdominioDeUsuario();
 
+/**
+ * UN SUBDOMINIO NO ES LA PLATAFORMA CON OTRO NOMBRE: ES LA CASA DE ALGUIEN.
+ *
+ * Por eso `nombre.humanity.wiki` no monta el armazón de trabajo ni sus 40
+ * rutas. Monta tres cosas y ninguna más: la portada de esa persona, sus
+ * páginas publicadas, y una salida clara si la dirección no lleva a nada.
+ *
+ * El primer intento fue añadir las dos rutas al árbol de siempre, y no
+ * funcionó: la ruta `/` del `Layout` empata con la portada y gana ella, así
+ * que la raíz del subdominio seguía enseñando la aplicación entera. Empatar
+ * rutas para que gane la que a uno le conviene es frágil; separarlas es
+ * decir lo que de verdad se quiere.
+ */
+function AplicacionDeEspacio({ handle }: { handle: string }) {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<Esperando />}>
+        <Routes>
+          <Route path="/" element={<PortadaEspacio handle={handle} />} />
+          <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
+          <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
 export default function App() {
+  // Se decide antes de montar nada: los proveedores de la plataforma no
+  // llegan a existir en un subdominio, así que un visitante sin cuenta no
+  // paga por cargarlos.
+  if (ESPACIO_DE) return <AplicacionDeEspacio handle={ESPACIO_DE} />;
+
   return (
     <SettingsProvider>
     <AuthProvider>
@@ -161,10 +194,6 @@ export default function App() {
                   en el espacio de alguien: en `humanity.wiki` no se declara, y
                   por tanto no puede tapar ninguna de las 40 rutas de un tramo
                   que ya existen. */}
-              {ESPACIO_DE && (
-                <Route path=":slug" element={<PaginaPublica handleFijo={ESPACIO_DE} />} />
-              )}
-
               {/* Los tres proveedores de datos envuelven SOLO el Layout, no la
                   aplicacion entera. Estaban arriba del todo, y eso hacia que
                   quien abria una pagina compartida —sin cuenta, a leer un

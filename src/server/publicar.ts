@@ -236,6 +236,61 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * página despublicada responde 404 igual que una que no existe, porque decir
    * «existe pero no puedes verla» ya filtra que existe.
    */
+  /**
+   * LA PORTADA DE UN ESPACIO — `/api/publicar/espacio/:handle`
+   *
+   * Quién es esta persona y qué tiene publicado. Es lo que se enseña al entrar
+   * en `nombre.humanity.wiki` a secas, sin pedir página.
+   *
+   * Sin sesión, y a propósito: quien llega viene de fuera. Por eso devuelve
+   * SOLO lo que su autor decidió publicar —`publico = true`— y nada más. Un
+   * borrador, una página archivada o una que dejó de compartirse no salen de
+   * aquí ni para su dueño: si hiciera falta verlas, se entra a la plataforma.
+   *
+   * Devuelve `null` en `espacio` si el nombre no existe, en vez de una lista
+   * vacía. «Esta persona no existe» y «esta persona no ha publicado nada» son
+   * dos respuestas distintas y la portada las enseña distinto.
+   */
+  app.get('/api/publicar/espacio/:handle', async (req: Request, res: Response) => {
+    try {
+      const handle = String(req.params.handle || '').toLowerCase();
+      const u = (await db.execute(sql`
+        SELECT id, handle, display_name, name, avatar_url, bio
+        FROM users WHERE handle = ${handle}
+      `)).rows[0] as any;
+      if (!u) return res.status(404).json({ error: 'Ese espacio no existe.' });
+
+      const paginas = (await db.execute(sql`
+        SELECT id, title, slug, kind, updated_at, config
+        FROM knowledge_windows
+        WHERE creator_user_id = ${u.id}
+          AND publico = true AND slug IS NOT NULL
+          AND archived_at IS NULL AND deleted_at IS NULL
+        ORDER BY updated_at DESC
+        LIMIT 60
+      `)).rows as any[];
+
+      res.json({
+        espacio: {
+          handle: u.handle,
+          nombre: u.display_name || u.name,
+          avatar: u.avatar_url,
+          bio: u.bio || null,
+        },
+        paginas: paginas.map(p => ({
+          titulo: p.title,
+          slug: p.slug,
+          tipo: p.kind,
+          actualizado: p.updated_at,
+          // Un adelanto de una línea, para que la lista no sea sólo títulos.
+          // Se saca del primer bloque con texto; si no hay, va `null` y la
+          // tarjeta enseña sólo el título, que es honesto.
+          adelanto: primerTexto(p.config),
+        })),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
@@ -258,4 +313,15 @@ export function registerPublicarRoutes(app: Express, db: any) {
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
+}
+
+/** El primer texto que tenga la página, para el adelanto. `null` si no hay. */
+function primerTexto(config: any): string | null {
+  const bloques = config?.bloques || config?.blocks;
+  if (!Array.isArray(bloques)) return null;
+  for (const b of bloques) {
+    const t = typeof b?.texto === 'string' ? b.texto.trim() : '';
+    if (t) return t.length > 160 ? t.slice(0, 160) + '…' : t;
+  }
+  return null;
 }
