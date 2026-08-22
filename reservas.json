@@ -85,12 +85,6 @@
       "desde": "2026-08-22T17:04:27.061Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/pages/Hormiguero.tsx",
-      "motivo": "pestana de denuncias, solo nivel 3+",
-      "desde": "2026-08-22T17:05:19.978Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "drizzle/0082_quien_puede_llamarte.sql",
       "motivo": "privacidad: quien puede llamarte",
