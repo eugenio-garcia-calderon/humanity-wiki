@@ -89,12 +89,6 @@
       "ruta": "server.ts",
       "motivo": "descolgar server.ts de la cola: los modulos pasan a una lista",
       "desde": "2026-08-22T16:00:50.667Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "la trampa del fallo armado para otro dia",
-      "desde": "2026-08-22T16:05:26.213Z"
     }
   ]
 }
