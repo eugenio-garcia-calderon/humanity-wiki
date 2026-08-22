@@ -384,6 +384,20 @@ export function registerRoadmapRoutes(app: Express, db: any) {
           `);
           return res.json({ id, abrir: null });
         }
+        case 'publicacion': {
+          // NACE VACÍA Y SE QUEDA AQUÍ (Eugenio, 2026-08-22: «crear
+          // publicaciones dentro del proyecto de manera sencilla»). No devuelve
+          // `abrir`: a diferencia de una página o un mapa, una publicación se
+          // escribe en la misma pantalla del proyecto, sin salir de él. Sacarte
+          // de la página para escribir dos líneas es justo lo que hacía que
+          // nadie publicara nada dentro de su proyecto.
+          const id = nid('PUB');
+          await db.execute(sql`
+            INSERT INTO publications (id, author_user_id, title, body, media, links, visibility, proyecto_id, created_by, updated_by)
+            VALUES (${id}, ${yo}, ${titulo || null}, '', '[]'::jsonb, '[]'::jsonb, 'publica', ${pid}, ${yo}, ${yo})
+          `);
+          return res.json({ id, abrir: null, publicacion: true });
+        }
         default:
           return res.status(400).json({ error: 'Esa herramienta no se puede crear aquí.' });
       }
@@ -528,5 +542,92 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       `);
       res.json({ success: true, valor });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * LAS PUBLICACIONES DE UN PROYECTO (Eugenio, 2026-08-22).
+   *
+   * Viven aquí y no en `social.ts` a propósito: lo que las hace distintas no es
+   * ser publicaciones, es colgar de un proyecto, y el permiso que las gobierna
+   * es el del proyecto —`puedeEditarProyecto`— no el del muro.
+   *
+   * `GET` devuelve, además del texto, **cuántos adjuntos de cada clase lleva**.
+   * Eugenio pidió «que me diga si la publicación tiene imagen o vídeo»: eso se
+   * cuenta aquí, en la consulta, y no en la pantalla — si lo contara cada
+   * pantalla, cada una contaría distinto.
+   */
+  app.get('/api/proyectos/:id/publicaciones', async (req: Request, res: Response) => {
+    try {
+      const filas = await db.execute(sql`
+        SELECT p.id, p.title, p.body, p.media, p.links, p.created_at, p.visibility,
+               p.author_user_id, u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               (SELECT count(*) FROM jsonb_array_elements(p.media) m WHERE m->>'tipo' = 'imagen')    AS n_imagenes,
+               (SELECT count(*) FROM jsonb_array_elements(p.media) m WHERE m->>'tipo' = 'video')     AS n_videos,
+               (SELECT count(*) FROM jsonb_array_elements(p.media) m WHERE m->>'tipo' NOT IN ('imagen','video')) AS n_documentos,
+               jsonb_array_length(coalesce(p.links, '[]'::jsonb)) AS n_referencias
+        FROM publications p
+        LEFT JOIN users u ON u.id = p.author_user_id
+        WHERE p.proyecto_id = ${req.params.id}
+          AND p.archived_at IS NULL AND p.deleted_at IS NULL
+          -- Una publicación privada la ve su autor y nadie más, esté donde esté.
+          AND (coalesce(p.visibility,'publica') <> 'privada' OR p.author_user_id = ${req.user?.id || null}::text)
+        ORDER BY p.created_at DESC
+        LIMIT 200
+      `);
+      res.json(filas.rows);
+    } catch (e: any) {
+      console.error('publicaciones de proyecto error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * Editar una publicación del proyecto: texto, adjuntos y referencias.
+   *
+   * `PUT /api/publications/:id` (el del muro) **no toca `media` ni `links`**, y
+   * por eso hasta hoy no había forma de adjuntar nada después de publicar. Aquí
+   * sí, que es la otra mitad de lo que pidió Eugenio.
+   *
+   * Los adjuntos se suben antes por `/api/uploads`, que ya sabe de tipos y
+   * tamaños; lo que llega aquí son las URL que aquello devolvió.
+   */
+  app.put('/api/proyectos/:pid/publicaciones/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const fila = await db.execute(sql`
+        SELECT author_user_id, proyecto_id FROM publications
+        WHERE id = ${req.params.id} AND archived_at IS NULL AND deleted_at IS NULL
+      `);
+      if (!fila.rows.length) return res.status(404).json({ error: 'Esa publicación no existe.' });
+      const p = fila.rows[0] as any;
+      if (p.proyecto_id !== req.params.pid) {
+        return res.status(404).json({ error: 'Esa publicación no es de este proyecto.' });
+      }
+      // El autor siempre; y quien puede editar el proyecto, porque el proyecto
+      // es suyo y lo que cuelga de él también.
+      const esAutor = p.author_user_id === req.user.id;
+      if (!esAutor && !(await puedeEditarProyecto(req, req.params.pid))) {
+        return res.status(403).json({ error: 'Esta publicación no es tuya.' });
+      }
+      const d = req.body || {};
+      // Cada lista se guarda solo si viene. Mandar `{ body }` no debe borrarte
+      // los adjuntos, que es como se pierde el trabajo sin que nadie lo note.
+      const media = Array.isArray(d.media) ? JSON.stringify(d.media) : null;
+      const links = Array.isArray(d.links) ? JSON.stringify(d.links) : null;
+      await db.execute(sql`
+        UPDATE publications SET
+          title = COALESCE(${d.title ?? null}, title),
+          body  = COALESCE(${d.body ?? null}, body),
+          media = COALESCE(${media}::jsonb, media),
+          links = COALESCE(${links}::jsonb, links),
+          version = version + 1, updated_at = now(), updated_by = ${req.user.id}
+        WHERE id = ${req.params.id}
+      `);
+      const fin = await db.execute(sql`SELECT id, title, body, media, links FROM publications WHERE id = ${req.params.id}`);
+      res.json(fin.rows[0]);
+    } catch (e: any) {
+      console.error('editar publicacion de proyecto error:', e);
+      res.status(500).json({ error: e.message });
+    }
   });
 }

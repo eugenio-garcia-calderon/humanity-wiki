@@ -460,7 +460,7 @@ export function registerMenuRoutes(app: Express, db: any) {
       if (!mio && !fila.publico) return res.status(403).json({ error: 'Ese proyecto es privado.' });
 
       const [tareas, paginas, guardados, esquemas, mapas, productos, personas,
-             archivos, tablas, eventos] = await Promise.all([
+             archivos, tablas, eventos, publicaciones] = await Promise.all([
         db.execute(sql`
           SELECT id, titulo, estado, icono FROM roadmap_items
           WHERE proyecto_id = ${pid} AND archived_at IS NULL
@@ -526,6 +526,20 @@ export function registerMenuRoutes(app: Express, db: any) {
           WHERE proyecto_id = ${pid} AND archived_at IS NULL
           ORDER BY inicio DESC LIMIT 100
         `),
+        // LAS PUBLICACIONES DEL PROYECTO (2026-08-23). Eugenio: «crear
+        // publicaciones dentro del proyecto». `adjuntos` viaja con cada una
+        // para que la lista pueda decir si lleva imagen o vídeo sin abrirla.
+        db.execute(sql`
+          SELECT id, title, body,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' = 'imagen') AS n_imagenes,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' = 'video')  AS n_videos,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' NOT IN ('imagen','video')) AS n_documentos,
+                 jsonb_array_length(coalesce(links, '[]'::jsonb)) AS n_referencias
+          FROM publications
+          WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
+            AND (coalesce(visibility,'publica') <> 'privada' OR author_user_id = ${yo})
+          ORDER BY created_at DESC LIMIT 100
+        `),
       ]);
 
       const ramas: any[] = [];
@@ -569,6 +583,24 @@ export function registerMenuRoutes(app: Express, db: any) {
       // sin ella el enlace no dice nada que no dijera «Calendario».
       rama('eventos', 'Fechas', 'evento', (eventos.rows as any[]).map(e2 => ({
         id: e2.id, label: e2.titulo, icono: e2.icono, destino: '/calendario', inicio: e2.inicio,
+      })));
+
+      // Una publicación no tiene pantalla propia: se abre en una ficha encima
+      // de «Explorar», y esa es la dirección que usa también el buscador del
+      // chat. No invento un parámetro nuevo: uso el que ya existe y funciona.
+      rama('publicaciones', 'Publicaciones', 'publicacion', (publicaciones.rows as any[]).map(pu => ({
+        id: pu.id,
+        label: pu.title || String(pu.body || '').slice(0, 60) || 'Publicación sin título',
+        destino: `/explorar?abrir=${encodeURIComponent(pu.id)}`,
+        // Lo que pidió Eugenio que se vea sin abrir nada. Se cuenta en la
+        // consulta, no en la pantalla: si lo contara cada pantalla, cada una
+        // contaría distinto.
+        adjuntos: {
+          imagenes: Number(pu.n_imagenes) || 0,
+          videos: Number(pu.n_videos) || 0,
+          documentos: Number(pu.n_documentos) || 0,
+          referencias: Number(pu.n_referencias) || 0,
+        },
       })));
 
       res.json({ ramas });

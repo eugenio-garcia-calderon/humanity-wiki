@@ -4,6 +4,7 @@ import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
   Package, Table2, CalendarDays, Bookmark, ExternalLink,
+  Megaphone, ImageIcon, Video, Paperclip, Link2, Send,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
@@ -203,6 +204,9 @@ const HERRAMIENTAS_PROYECTO: Array<{ tipo: string; label: string; icono: any }> 
   { tipo: 'pagina',  label: 'Página',  icono: FileText },
   { tipo: 'esquema', label: 'Esquema', icono: Globe2 },
   { tipo: 'mapa',    label: 'Mapa',    icono: MapIcon },
+  // PUBLICAR DENTRO DEL PROYECTO (Eugenio, 2026-08-23). Es la única de las
+  // cinco que no te saca de la página: se escribe aquí mismo.
+  { tipo: 'publicacion', label: 'Publicación', icono: Megaphone },
 ];
 
 export function Proyecto() {
@@ -218,6 +222,8 @@ export function Proyecto() {
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
   const [renombrando, setRenombrando] = useState(false);
+  // La publicación recién creada, abierta para escribirla sin salir de aquí.
+  const [publicando, setPublicando] = useState<string | null>(null);
 
   /** Solo el dueño (o un administrador) toca el proyecto. */
   const puedoEditar = !!user && !!proyecto
@@ -247,7 +253,10 @@ export function Proyecto() {
       window.dispatchEvent(new Event('humanity:menu-cambiado'));
       // Crear algo es querer usarlo, así que se entra. Una tarea no tiene
       // página propia: se queda en este tablero y basta con recargarlo.
-      if (d.abrir) navegar(d.abrir);
+      // Una publicación no tiene página propia y tampoco es una tarjeta del
+      // tablero: se escribe aquí mismo, debajo, con el foco puesto.
+      if (d.publicacion) setPublicando(d.id);
+      else if (d.abrir) navegar(d.abrir);
       else cargarItems(proyecto.id);
     } catch {
       setError('No se ha podido crear.');
@@ -475,7 +484,21 @@ export function Proyecto() {
 
         <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
 
-        <SeccionContenido proyectoId={proyecto.id} />
+        {publicando && (
+          <ComposerPublicacion
+            proyectoId={proyecto.id}
+            publicacionId={publicando}
+            onCerrar={(cambio) => {
+              setPublicando(null);
+              // El árbol del proyecto y el menú lateral leen lo mismo: que se
+              // enteren los dos, o la publicación recién escrita no aparece
+              // hasta recargar.
+              if (cambio) window.dispatchEvent(new Event('humanity:menu-cambiado'));
+            }}
+          />
+        )}
+
+        <SeccionContenido proyectoId={proyecto.id} recargar={publicando === null} />
 
         {/* LOS ARCHIVOS DEL PROYECTO (2026-08-21). Es el sitio donde más
             falta hacía: un informe, una tabla de ensayos o un modelo 3D
@@ -537,12 +560,13 @@ export function Proyecto() {
 const ICONO_RAMA: Record<string, any> = {
   paginas: FileText, esquemas: Globe2, mapas: MapIcon, productos: Package,
   tablas: Table2, eventos: CalendarDays, guardados: Bookmark, tareas: ListChecks,
+  publicaciones: Megaphone,
 };
 
 /** Las que ya tienen su propio sitio en esta página. */
 const RAMAS_YA_PINTADAS = new Set(['tareas', 'archivos', 'personas']);
 
-function SeccionContenido({ proyectoId }: { proyectoId: string }) {
+function SeccionContenido({ proyectoId, recargar }: { proyectoId: string; recargar?: boolean }) {
   const [ramas, setRamas] = useState<any[] | null>(null);
 
   useEffect(() => {
@@ -552,7 +576,9 @@ function SeccionContenido({ proyectoId }: { proyectoId: string }) {
       .then(d => { if (vivo) setRamas(Array.isArray(d?.ramas) ? d.ramas : []); })
       .catch(() => { if (vivo) setRamas([]); });
     return () => { vivo = false; };
-  }, [proyectoId]);
+    // `recargar` cambia al cerrar el compositor: es lo que hace que la
+    // publicación recién escrita aparezca sin recargar la página entera.
+  }, [proyectoId, recargar]);
 
   // MIENTRAS CARGA NO SE PINTA UN HUECO. Esta sección está entre dos que ya
   // tienen contenido; un esqueleto gris que aparece y desaparece mueve la
@@ -611,6 +637,11 @@ function EnlaceHijo({ hijo, Icono }: { hijo: any; Icono: any }) {
         </span>
       )}
       {hijo.rol && <span className="text-[10px] text-slate-400 shrink-0">{hijo.rol}</span>}
+      {/* QUÉ LLEVA DENTRO SIN ABRIRLA (Eugenio, 2026-08-23: «que me diga si la
+          publicación tiene imagen o vídeo»). Los números los cuenta el
+          servidor; aquí solo se pintan. Una publicación sin nada no enseña
+          ninguna insignia, para que la que sí lleva algo se distinga. */}
+      {hijo.adjuntos && <Insignias adjuntos={hijo.adjuntos} />}
       {esFichero && <ExternalLink className="w-3 h-3 text-slate-300 shrink-0" />}
     </>
   );
@@ -898,5 +929,192 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
           </div>
         )}
       </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// PUBLICAR DENTRO DE UN PROYECTO (Eugenio, 2026-08-23)
+//
+// «Que la página de proyectos me permita crear publicaciones dentro del
+// proyecto de manera sencilla, y que me diga si la publicación tiene imagen o
+// vídeo y me deje adjuntar archivos, referencias.»
+//
+// Dos decisiones que explican por qué esto no es un diálogo:
+//
+// 1. NO TE SACA DE LA PÁGINA. Una página, un mapa o un esquema se crean y se
+//    abren en su pantalla, porque su contenido vive allí. Una publicación son
+//    dos líneas y un archivo: sacarte del proyecto para escribirlas es lo que
+//    hacía que nadie publicara dentro de su proyecto.
+// 2. LA FILA YA EXISTE ANTES DE ESCRIBIR. El botón la crea vacía en el
+//    servidor y esto la rellena. Así, si te vas a media frase, lo que tienes
+//    escrito está guardado con el botón de guardar, y lo que no, se ve vacío en
+//    la lista en vez de haberse perdido en un formulario que nadie envió.
+// ----------------------------------------------------------------------------
+
+/** Cuántas imágenes, vídeos, documentos y referencias lleva. Sin nada, nada. */
+function Insignias({ adjuntos }: { adjuntos: any }) {
+  const a = adjuntos || {};
+  const partes: Array<[any, number, string]> = [
+    [ImageIcon, Number(a.imagenes) || 0, 'imagen'],
+    [Video, Number(a.videos) || 0, 'vídeo'],
+    [Paperclip, Number(a.documentos) || 0, 'archivo'],
+    [Link2, Number(a.referencias) || 0, 'referencia'],
+  ];
+  const vivas = partes.filter(([, n]) => n > 0);
+  if (!vivas.length) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 shrink-0">
+      {vivas.map(([Icono, n, nombre]) => (
+        <span key={nombre} title={`${n} ${nombre}${n > 1 ? 's' : ''}`}
+              className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
+          <Icono className="w-3 h-3" />{n > 1 ? n : ''}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function ComposerPublicacion({ proyectoId, publicacionId, onCerrar }: {
+  proyectoId: string; publicacionId: string; onCerrar: (huboCambio: boolean) => void;
+}) {
+  const [titulo, setTitulo] = useState('');
+  const [texto, setTexto] = useState('');
+  const [media, setMedia] = useState<any[]>([]);
+  const [links, setLinks] = useState<any[]>([]);
+  const [referencia, setReferencia] = useState('');
+  const [subiendo, setSubiendo] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // EL TIPO LO DECIDE EL `mime` DEL ARCHIVO, no su extensión ni el nombre que
+  // le pusiera nadie: es lo que luego cuenta el servidor para decir «tiene
+  // imagen» o «tiene vídeo», y las dos mitades tienen que decir lo mismo.
+  const tipoDe = (mime: string) =>
+    mime.startsWith('image/') ? 'imagen' : mime.startsWith('video/') ? 'video' : 'documento';
+
+  const adjuntar = async (files: FileList | null) => {
+    if (!files?.length || subiendo) return;
+    setSubiendo(true); setError(null);
+    try {
+      for (const f of Array.from(files)) {
+        const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'application/octet-stream')}`, {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/octet-stream' },
+          body: f,
+        });
+        const d = await r.json();
+        // SI UNO FALLA, SE DICE Y SE PARA. Seguir con los demás dejaría una
+        // publicación a la que le falta un archivo sin que nadie lo sepa.
+        if (!r.ok) { setError(d?.error || `No se ha podido subir ${f.name}.`); break; }
+        setMedia(m => [...m, { tipo: tipoDe(f.type || ''), url: d.url, nombre: f.name }]);
+      }
+    } catch {
+      setError('No se ha podido subir el archivo.');
+    } finally { setSubiendo(false); }
+  };
+
+  const anadirReferencia = () => {
+    const url = referencia.trim();
+    if (!url) return;
+    // Una referencia sin `http` no es un enlace: sería un texto que parece uno.
+    const limpia = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    setLinks(l => [...l, { url: limpia }]);
+    setReferencia('');
+  };
+
+  const guardar = async () => {
+    if (guardando) return;
+    setGuardando(true); setError(null);
+    try {
+      const r = await fetch(`/api/proyectos/${proyectoId}/publicaciones/${publicacionId}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: titulo, body: texto, media, links }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setError(d?.error || 'No se ha podido guardar.'); return; }
+      onCerrar(true);
+    } catch {
+      setError('No se ha podido guardar.');
+    } finally { setGuardando(false); }
+  };
+
+  return (
+    <div className="mt-8 max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Megaphone className="w-3.5 h-3.5 text-emerald-600" />
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          Publicación en este proyecto
+        </p>
+        <div className="flex-1" />
+        <button onClick={() => onCerrar(false)} title="Cerrar sin guardar"
+                className="text-slate-400 hover:text-slate-700"><X className="w-4 h-4" /></button>
+      </div>
+
+      <input
+        value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus
+        placeholder="Título (opcional)"
+        className="w-full mb-2 px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-emerald-300"
+      />
+      <textarea
+        value={texto} onChange={e => setTexto(e.target.value)} rows={4}
+        placeholder="Cuenta lo que ha pasado en el proyecto…"
+        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-emerald-300 resize-y"
+      />
+
+      {(media.length > 0 || links.length > 0) && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {media.map((m, i) => (
+            <span key={`m${i}`} className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 bg-white border border-slate-200 rounded-full text-[11px] font-bold text-slate-600">
+              {m.tipo === 'imagen' ? <ImageIcon className="w-3 h-3 text-emerald-600" />
+                : m.tipo === 'video' ? <Video className="w-3 h-3 text-emerald-600" />
+                : <Paperclip className="w-3 h-3 text-emerald-600" />}
+              <span className="truncate max-w-[10rem]">{m.nombre || m.url}</span>
+              <button onClick={() => setMedia(x => x.filter((_, j) => j !== i))}
+                      className="p-0.5 text-slate-300 hover:text-slate-600"><X className="w-3 h-3" /></button>
+            </span>
+          ))}
+          {links.map((l, i) => (
+            <span key={`l${i}`} className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 bg-white border border-slate-200 rounded-full text-[11px] font-bold text-slate-600">
+              <Link2 className="w-3 h-3 text-emerald-600" />
+              <span className="truncate max-w-[12rem]">{l.url}</span>
+              <button onClick={() => setLinks(x => x.filter((_, j) => j !== i))}
+                      className="p-0.5 text-slate-300 hover:text-slate-600"><X className="w-3 h-3" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2 mt-3">
+        <label className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 text-[11px] font-bold cursor-pointer transition-colors">
+          {subiendo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paperclip className="w-3.5 h-3.5" />}
+          Adjuntar
+          <input type="file" multiple className="hidden" disabled={subiendo}
+                 onChange={e => { adjuntar(e.target.files); e.target.value = ''; }} />
+        </label>
+
+        <div className="inline-flex items-center gap-1 px-1 py-0.5 rounded-full bg-white border border-slate-200">
+          <Link2 className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
+          <input
+            value={referencia} onChange={e => setReferencia(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); anadirReferencia(); } }}
+            placeholder="Pega una referencia y pulsa Enter"
+            className="w-56 px-1.5 py-1 text-[11px] text-slate-700 placeholder:text-slate-300 focus:outline-none"
+          />
+          <button onClick={anadirReferencia} disabled={!referencia.trim()}
+                  className="px-2 py-1 text-[11px] font-bold text-emerald-700 disabled:text-slate-300">Añadir</button>
+        </div>
+
+        <div className="flex-1" />
+
+        <button onClick={guardar} disabled={guardando || subiendo}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold hover:bg-emerald-700 disabled:opacity-40 transition-colors">
+          {guardando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+          Publicar
+        </button>
+      </div>
+
+      {error && <p className="mt-2 text-[11px] font-bold text-rose-600">{error}</p>}
+    </div>
   );
 }
