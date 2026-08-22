@@ -125,6 +125,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:05:49.449Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Mensajes.tsx",
+      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
+      "desde": "2026-08-22T16:05:52.997Z"
     }
   ]
 }
