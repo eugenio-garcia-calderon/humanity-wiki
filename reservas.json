@@ -152,12 +152,6 @@
     },
     {
       "agente": "prog8-turn",
-      "ruta": "src/server/juego.ts",
-      "motivo": "sacar la importacion de contactos a una funcion reutilizable",
-      "desde": "2026-08-22T22:13:09.140Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "drizzle/0092_llave_de_agenda.sql",
       "motivo": "importar contactos desde el iPhone con un atajo (0091 lo tiene prog3)",
       "desde": "2026-08-22T22:13:42.049Z"
