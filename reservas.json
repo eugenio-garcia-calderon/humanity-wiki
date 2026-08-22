@@ -89,6 +89,12 @@
       "ruta": "src/server/textos.ts",
       "motivo": "textos editables por admin: modulo nuevo",
       "desde": "2026-08-22T15:41:31.837Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0077_precios_servicio.sql",
+      "motivo": "renumerada desde 0075 (choque con prog6)",
+      "desde": "2026-08-22T15:45:08.623Z"
     }
   ]
 }
