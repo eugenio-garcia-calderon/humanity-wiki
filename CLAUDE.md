@@ -198,6 +198,13 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   was not carelessness: the honest path looked like a failure. **If you are tempted
   to disable a guard in order to verify something, the right move is not to disable
   it and to say so.**
+- **Watch for the bug that waits for someone else to do the right thing.** On
+  2026-08-22 `checkout.session.completed` never looked at `metadata.kind`, so it
+  granted a membership for *every* payment — buying a hundred points would have made
+  you a member. It had never fired because there had never been a payment. It was
+  armed for the day Eugenio put the real Stripe keys in, which is the day nobody
+  would be watching the webhook. Testing does not find these, because nothing
+  happens. Reading does.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
