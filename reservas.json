@@ -55,10 +55,16 @@
       "desde": "2026-08-22T16:05:26.213Z"
     },
     {
-      "agente": "prog1",
-      "ruta": "src/server/auth.ts",
-      "motivo": "borrado de cuenta: obligatorio para App Store y Google Play",
-      "desde": "2026-08-22T16:15:23.366Z"
+      "agente": "prog3",
+      "ruta": "src/App.tsx",
+      "motivo": "ruta y enlace de Mi cuenta (borrar cuenta)",
+      "desde": "2026-08-22T16:15:24.403Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "ruta y enlace de Mi cuenta (borrar cuenta)",
+      "desde": "2026-08-22T16:15:24.403Z"
     }
   ]
 }
