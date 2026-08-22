@@ -33,12 +33,35 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+import { dominioPropio } from "./utils/subdominio";
 import { vigilarSinConexion } from "./avisoSinConexion";
 import { ofrecerInstalacion } from "./avisoInstalar";
 import { vigilarVersion } from "./avisoVersionNueva";
 
 export function registrarPWA() {
   if (!("serviceWorker" in navigator)) return;
+
+  // ── EN EL DOMINIO DE OTRO, NADA DE ESTO (2026-08-22) ───────────────────────
+  // Lo vio prog3 al preguntar por el `scope` del manifiesto, y tenía razón:
+  // `lamieldelasierra.com` sirve esta misma aplicación, así que sin este
+  // freno haría tres cosas que no le tocan.
+  //
+  //   1. Ofrecerle a un cliente de esa tienda instalar «Humanity.wiki». El
+  //      nombre no es el suyo y la intención tampoco: entró a comprar miel.
+  //   2. Registrar un service worker EN EL ORIGEN DE OTRA PERSONA. Es lo único
+  //      que un usuario no puede quitarse recargando, así que un fallo nuestro
+  //      dejaría rota la web de alguien que no nos ha instalado nada.
+  //   3. Guardar en caché el armazón de la aplicación bajo su dominio.
+  //
+  // Un dominio propio es una WEB, no nuestra app. Y el service worker de la
+  // app se registra sólo donde la app vive.
+  if (dominioPropio()) {
+    // Y se quita el enlace al manifiesto, que va en el `index.html` estático y
+    // llega igual. Sin esto el navegador seguiría ofreciendo la instalación
+    // aunque no haya service worker.
+    document.querySelector('link[rel="manifest"]')?.remove();
+    return;
+  }
 
   // El aviso se monta siempre que haya service worker: es lo que impide que una
   // copia guardada se lea como si fuera de ahora.
