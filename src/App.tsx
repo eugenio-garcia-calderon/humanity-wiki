@@ -70,6 +70,7 @@ const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
@@ -280,6 +281,12 @@ export default function App() {
                 <Route path="sobre-red-humana/puntuacion-territorios" element={<AboutScoring />} />
                 <Route path="hazte-socio" element={<HazteSocio />} />
                 <Route path="socio-confirmacion" element={<SocioConfirmacion />} />
+
+                {/* LA ULTIMA, Y A PROPOSITO. Se queda con todo lo que ninguna
+                    otra ha cogido. Sin ella, una direccion mal escrita deja la
+                    pantalla en blanco, y una pantalla en blanco no dice «no
+                    existe»: dice «se ha roto». */}
+                <Route path="*" element={<NoEncontrada />} />
               </Route>
             </Routes>
             </Suspense>
