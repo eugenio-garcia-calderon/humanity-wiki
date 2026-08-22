@@ -134,12 +134,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/components/knowledge/ProductoPublico.tsx",
-      "motivo": "Comprar ahora con puntos (fallo reportado por Eugenio)",
-      "desde": "2026-08-22T21:37:09.287Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/pages/Vision.tsx",
       "motivo": "etiquetas de los motivos nuevos del libro",
       "desde": "2026-08-22T21:37:31.718Z"
