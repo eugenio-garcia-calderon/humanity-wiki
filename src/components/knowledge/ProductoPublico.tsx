@@ -1,0 +1,152 @@
+import { useEffect, useState } from 'react';
+import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff } from 'lucide-react';
+
+// ============================================================================
+// UN PRODUCTO EN UNA PÁGINA PÚBLICA — fase 2 del plan de tiendas (2026-08-22)
+// ============================================================================
+// Antes, un producto puesto en una página se veía así:
+//
+//     📄 DJI Power 1000 V2
+//
+// Un enlace de texto. Ni foto, ni precio, ni saber si queda alguno. Nadie
+// compra eso, y quien lo pulsaba salía de la tienda al mercado global con los
+// productos de todos los demás.
+//
+// ── LO QUE ESTA TARJETA NO HACE TODAVÍA, Y POR QUÉ ──────────────────────────
+// No tiene botón de comprar. No es un olvido: hoy `POST
+// /api/stripe/checkout/product` exige sesión, así que un visitante sin cuenta
+// recibiría un 401 después de pulsar. Un botón que falla al final es peor que
+// no tenerlo, porque desperdicia la decisión de comprar. Llega en la fase 3,
+// que es la que abre la compra sin cuenta.
+//
+// Mientras tanto la tarjeta dice la verdad completa: qué es, cuánto cuesta, si
+// queda, qué garantía tiene y cómo se devuelve.
+
+type Estado = 'cargando' | 'ok' | 'no-existe' | 'fallo';
+
+export default function ProductoPublico({ id, titulo }: { id: string; titulo?: string }) {
+  const [estado, setEstado] = useState<Estado>('cargando');
+  const [p, setP] = useState<any>(null);
+  // Una foto cuya dirección ha dejado de existir. Pasa: las imágenes de un
+  // producto son enlaces a otro sitio, y ese sitio no le debe nada a esta
+  // página. Sin esto, el navegador pinta el icono roto encima de la tarjeta.
+  const [fotoRota, setFotoRota] = useState(false);
+  useEffect(() => { setFotoRota(false); }, [id]);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/publicar/producto/${encodeURIComponent(id)}`)
+      .then(async r => {
+        if (!vivo) return;
+        if (r.status === 404) { setEstado('no-existe'); return; }
+        if (!r.ok) { setEstado('fallo'); return; }
+        setP(await r.json());
+        setEstado('ok');
+      })
+      .catch(() => vivo && setEstado('fallo'));
+    return () => { vivo = false; };
+  }, [id]);
+
+  if (estado === 'cargando') {
+    return (
+      <div className="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white">
+        <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
+        <span className="text-sm text-slate-400">{titulo || 'Cargando el producto…'}</span>
+      </div>
+    );
+  }
+
+  if (estado !== 'ok') {
+    // Un producto retirado no deja un hueco ni un error de programador: deja
+    // dicho que ya no está, con el nombre que tenía cuando se puso en la
+    // página. Quien lee entiende qué pasó.
+    return (
+      <div className="flex items-center gap-3 p-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50">
+        <PackageX className="w-4 h-4 text-slate-300 shrink-0" />
+        <span className="text-sm text-slate-500">
+          {titulo ? <><b className="text-slate-600">{titulo}</b> ya no está disponible.</>
+                  : 'Este producto ya no está disponible.'}
+        </span>
+      </div>
+    );
+  }
+
+  const precio = p.precio_centimos === null ? null
+    : new Intl.NumberFormat('es-ES', { style: 'currency', currency: p.moneda || 'EUR' })
+        .format(p.precio_centimos / 100);
+
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+      <div className="sm:flex">
+        {p.imagen && !fotoRota && (
+          <div className="sm:w-44 sm:shrink-0 bg-slate-50">
+            <img src={p.imagen} alt="" loading="lazy"
+                 onError={() => setFotoRota(true)}
+                 className="w-full h-44 sm:h-full object-cover" />
+          </div>
+        )}
+        {p.imagen && fotoRota && (
+          <div className="sm:w-44 sm:shrink-0 h-20 sm:h-auto bg-slate-50 grid place-items-center">
+            <ImageOff className="w-5 h-5 text-slate-300" />
+          </div>
+        )}
+        <div className="p-4 min-w-0 flex-1">
+          <h3 className="text-base font-black text-slate-900 leading-snug">{p.nombre}</h3>
+
+          {p.descripcion && (
+            <p className="mt-1 text-sm text-slate-500 line-clamp-3">{p.descripcion}</p>
+          )}
+
+          <div className="mt-3 flex items-baseline gap-2 flex-wrap">
+            {precio
+              ? <>
+                  <span className="text-xl font-black text-slate-900">{precio}</span>
+                  {p.modalidad === 'suscripcion' && (
+                    <span className="text-xs text-slate-400">
+                      al {p.periodo === 'anual' ? 'año' : p.periodo === 'trimestral' ? 'trimestre' : 'mes'}
+                    </span>
+                  )}
+                </>
+              // Sin precio no se inventa un cero: se dice que hay que
+              // preguntar. Un cero diría «gratis», que es otra cosa.
+              : <span className="text-sm font-bold text-slate-500">Precio a consultar</span>}
+            <Disponibilidad stock={p.stock} />
+          </div>
+
+          {(p.garantia || p.devoluciones) && (
+            <ul className="mt-3 space-y-1">
+              {p.garantia && (
+                <li className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {p.garantia}
+                </li>
+              )}
+              {p.devoluciones && (
+                <li className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <Undo2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {p.devoluciones}
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/**
+ * `null` no es `0`. «No lleva la cuenta» y «se ha agotado» son respuestas
+ * distintas: la primera no se enseña, la segunda sí y en rojo. Aplastarlas
+ * pondría «agotado» sobre todo lo que nadie inventaría nunca.
+ */
+function Disponibilidad({ stock }: { stock: number | null }) {
+  if (stock === null) return null;
+  if (stock <= 0) {
+    return <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">Agotado</span>;
+  }
+  if (stock <= 5) {
+    return <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+      Quedan {stock}
+    </span>;
+  }
+  return <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Disponible</span>;
+}

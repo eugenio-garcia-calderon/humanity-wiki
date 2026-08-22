@@ -291,6 +291,53 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * UN PRODUCTO PARA UNA PÁGINA PÚBLICA — `/api/publicar/producto/:id`
+   *
+   * Existe `GET /api/products`, pero devuelve el catálogo ENTERO. Una página
+   * con tres productos no puede descargar todo el mercado tres veces.
+   *
+   * Sin sesión: es lo que ve quien llega por un enlace. Y devuelve sólo lo
+   * que se enseña en un escaparate — nombre, precio, foto, disponibilidad,
+   * garantía, devoluciones. Nada de quién lo creó ni a qué proyecto pertenece:
+   * eso es del taller, no del escaparate.
+   *
+   * `stock` merece una nota. La columna admite nulo, y nulo NO es cero: «no
+   * lleva la cuenta» y «se ha agotado» son dos cosas distintas y la tarjeta
+   * las dice distinto. Aplastar una en la otra pondría «agotado» en todo lo
+   * que nadie inventaría.
+   */
+  app.get('/api/publicar/producto/:id', async (req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`
+        SELECT id, name, description, price_cents, currency, images, kind,
+               modality, billing_period, stock, warranty, return_policy, category
+        FROM products
+        WHERE id = ${String(req.params.id)} AND archived_at IS NULL
+      `);
+      const p = r.rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+
+      const imagenes = Array.isArray(p.images) ? p.images.filter((x: any) => typeof x === 'string') : [];
+      res.json({
+        id: p.id,
+        nombre: p.name,
+        descripcion: p.description || null,
+        precio_centimos: p.price_cents ?? null,
+        moneda: p.currency || 'EUR',
+        imagen: imagenes[0] || null,
+        imagenes,
+        tipo: p.kind || null,
+        modalidad: p.modality || null,
+        periodo: p.billing_period || null,
+        stock: p.stock === null || p.stock === undefined ? null : Number(p.stock),
+        garantia: p.warranty || null,
+        devoluciones: p.return_policy || null,
+        categoria: p.category || null,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`

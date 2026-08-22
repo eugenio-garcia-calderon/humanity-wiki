@@ -1,6 +1,7 @@
 import { FileText, Paperclip } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
+import ProductoPublico from './ProductoPublico';
 
 // ============================================================================
 // LEER UNA PÁGINA — el mismo contenido, sin nada con lo que tocarlo
@@ -183,6 +184,12 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       return b.tablaId ? <Rejilla tablaId={b.tablaId} editable={false} alto={520} /> : null;
 
     case 'producto':
+      // Ficha de verdad: foto, precio y disponibilidad. Ver `ProductoPublico`
+      // para por qué todavía no lleva botón de comprar.
+      return b.entityId
+        ? <ProductoPublico id={b.entityId} titulo={b.pubTitulo || b.texto} />
+        : null;
+
     case 'publicacion':
     case 'ventana':
       // Ver la nota de arriba: título y destino, no la ficha entera.
