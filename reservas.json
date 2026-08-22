@@ -95,6 +95,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "rama A: precios publicos, resumen de emision y cobrarServicio",
       "desde": "2026-08-22T15:15:27.206Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "drizzle/0076_intentos_fallidos.sql",
+      "motivo": "limites de peticiones: registro permanente de fallos",
+      "desde": "2026-08-22T15:15:51.793Z"
     }
   ]
 }
