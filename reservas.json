@@ -37,6 +37,12 @@
       "desde": "2026-08-22T15:07:17.510Z"
     },
     {
+      "agente": "prog7",
+      "ruta": "drizzle/0075_precios_servicio.sql",
+      "motivo": "rama A: tabla de precios de la cesta",
+      "desde": "2026-08-22T15:15:21.885Z"
+    },
+    {
       "agente": "prog6",
       "ruta": "drizzle/0076_intentos_fallidos.sql",
       "motivo": "limites de peticiones: registro permanente de fallos",
@@ -85,10 +91,16 @@
       "desde": "2026-08-22T15:41:31.837Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "drizzle/0077_precios_servicio.sql",
-      "motivo": "renumerada desde 0075 (choque con prog6)",
-      "desde": "2026-08-22T15:45:08.623Z"
+      "agente": "prog5",
+      "ruta": "drizzle/0078_veracidad_debates.sql",
+      "motivo": "Veracidad: tablas de debates",
+      "desde": "2026-08-22T15:45:10.389Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "drizzle/0079_veracidad_tablero.sql",
+      "motivo": "Veracidad: tarjetas del tablero",
+      "desde": "2026-08-22T15:45:16.100Z"
     }
   ]
 }
