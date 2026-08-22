@@ -31,12 +31,6 @@
       "desde": "2026-08-22T15:00:17.848Z"
     },
     {
-      "agente": "prog5",
-      "ruta": "src/pages/Vision.tsx",
-      "motivo": "Veracidad: página, menú de información y grupo del tablero",
-      "desde": "2026-08-22T15:00:21.607Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0073_transferencias_puntos.sql",
       "motivo": "piloto de puntos: numero 0073",
