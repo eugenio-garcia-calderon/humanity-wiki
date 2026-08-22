@@ -33,6 +33,16 @@ import {
 // verde no informa: sólo tranquiliza. Y lo que aquí aparece como «falta» es
 // medido, no supuesto — sale de haber usado cada herramienta con una cuenta
 // nueva y haber anotado dónde se atasca.
+//
+// ── LA RAYA: LO QUE FALTA DE FUNCIÓN SÍ; LO QUE FALTA DE DEFENSA NO ─────────
+// «El carrito no guarda entre dispositivos» es una carencia y se cuenta. «Esta
+// ruta no comprueba la sesión» es un mapa de por dónde entrar, y eso no va en
+// una página que lee cualquiera: va al tablero de seguridad, que pide permiso.
+//
+// Las diecinueve de abajo se repasaron con ese filtro el 2026-08-22. Ninguna
+// dice dónde falta una comprobación. Si añades una línea aquí, pásala por la
+// misma pregunta: ¿esto le sirve a alguien para USAR mejor la plataforma, o
+// para ENTRAR donde no debe?
 
 type Estado = 'usable' | 'a-medias' | 'esqueleto';
 
@@ -86,7 +96,7 @@ const HERRAMIENTAS: Herramienta[] = [
       'Ficha propia por producto, con galería',
     ],
     falta: [
-      'Los pagos son de prueba: hace falta poner las claves reales de Stripe',
+      'Todavía no se cobra de verdad: los pagos están en modo de prueba',
       'No hay opiniones ni valoraciones',
       'Un producto digital se cobra y no se entrega nada',
       'Sin variantes (talla, color), sin cupones y sin impuestos',
