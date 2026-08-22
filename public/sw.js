@@ -43,6 +43,10 @@ const MEDIA = `${VERSION}-media`;
 // that nobody wakes up with a full phone.
 const DATOS = `${VERSION}-datos`;
 const MAX_DATOS = 200;
+// Endpoints that serve the same answer to everyone: never kept. See the fetch
+// handler for why — a copy of somebody else's public page must not survive them
+// taking it down.
+const PUBLICO = ["/api/publicar/"];
 // Images, styles and fonts only, and no more than this many. Enough for the
 // icons and the maps you actually opened; not enough to quietly eat a phone.
 const MAX_MEDIA = 60;
@@ -96,6 +100,15 @@ self.addEventListener("fetch", (event) => {
 
   // The API: network always wins; the copy is only a parachute (rule 1).
   if (url.pathname.startsWith("/api/")) {
+    // NOT the public-page endpoints. Those answer the same to everybody, so a
+    // copy would sit in a stranger's browser — and when the author unpublishes a
+    // page, that stranger would still be served it from their own disk. The
+    // point of this cache is your own work on a plane, not other people's pages
+    // outliving the decision to take them down. (Spotted by Programador 2.)
+    if (PUBLICO.some((p) => url.pathname.startsWith(p))) {
+      event.respondWith(fetch(req));
+      return;
+    }
     event.respondWith(
       fetch(req)
         .then((res) => {
