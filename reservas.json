@@ -131,6 +131,24 @@
       "ruta": "src/pages/JuegoVital.tsx",
       "motivo": "techo del mundo 3D: avisar mientras construyes",
       "desde": "2026-08-22T19:39:41.340Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/juego/texturas.ts",
+      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
+      "desde": "2026-08-22T19:48:13.489Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/juego/Producto3D.tsx",
+      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
+      "desde": "2026-08-22T19:48:13.489Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/juego/Interior.tsx",
+      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
+      "desde": "2026-08-22T19:48:13.489Z"
     }
   ]
 }
