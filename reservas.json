@@ -221,6 +221,12 @@
       "ruta": "drizzle/0093_comision_en_puntos.sql",
       "motivo": "comision en puntos (0091 prog3, 0092 prog8)",
       "desde": "2026-08-22T22:24:58.991Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/limites/index.ts",
+      "motivo": "regla de transferencias de puntos (sugerencia de prog6)",
+      "desde": "2026-08-22T22:27:07.451Z"
     }
   ]
 }
