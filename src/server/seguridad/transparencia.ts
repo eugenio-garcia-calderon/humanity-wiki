@@ -215,6 +215,29 @@ export function registrarTransparencia(app: Express, db: any) {
     }
   });
 
+  // ── 3b. LA PRUEBA, PARA CUALQUIERA ───────────────────────────────────────
+  /** GET /api/seguridad/anclajes — los resúmenes diarios publicados fuera.
+   *
+   *  **Sin sesión, a propósito.** El sentido entero de anclar fuera es que
+   *  alguien que no se fía de nosotros pueda comprobarlo, y para eso tiene que
+   *  poder verlo sin pedirnos permiso. Lo que sale son números de 32 bytes y
+   *  sus recibos: ni un dato de nadie. */
+  app.get('/api/seguridad/anclajes', async (_req: Request, res: Response) => {
+    try {
+      const { anclajesPublicos } = await import('./anclaje.js');
+      res.json({
+        que_es: 'El resumen de todo lo anotado cada día, publicado en OpenTimestamps (Bitcoin). '
+              + 'Sirve para demostrar que lo registrado ese día existía ese día, sin tener que fiarse de nosotros.',
+        como_se_comprueba: 'Cada recibo es una prueba de OpenTimestamps sobre la raíz. Con el programa `ots` '
+              + 'y la raíz se verifica contra Bitcoin, sin pedirnos nada.',
+        y_lo_que_no_dice: 'Que lo anotado sea verdad. Dice que no se ha cambiado desde entonces.',
+        dias: await anclajesPublicos(db),
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ── 4. Y que se pueda mirar ──────────────────────────────────────────────
   /** GET /api/seguridad/miradas — quién ha usado sus privilegios para mirar.
    *
