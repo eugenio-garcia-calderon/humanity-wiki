@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins} from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock} from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -89,4 +89,14 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // redirección, nunca un 404.
   { ruta: 'borrar-cuenta', titulo: 'Borrar tu cuenta', icono: UserX,
     componente: lazy(() => import('./pages/BorrarCuentaPublica')) },
+
+  // Qué hacemos con tus datos. LA EXIGEN LAS DOS TIENDAS: App Store Connect no
+  // deja enviar la aplicación sin una dirección de política de privacidad que
+  // responda, y la ficha de Play tampoco. No existía ninguna: ni ruta, ni
+  // fichero, ni texto en el repositorio.
+  //
+  // ESTA RUTA TAMPOCO SE CAMBIA, por lo mismo que `borrar-cuenta`: se pega en
+  // las dos fichas y moverla obliga a volver a pasar revisión.
+  { ruta: 'privacidad', titulo: 'Privacidad', icono: Lock,
+    componente: lazy(() => import('./pages/Privacidad')) },
 ];

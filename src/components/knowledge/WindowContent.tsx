@@ -252,7 +252,14 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
         <div className="space-y-1.5">
           <div className="aspect-video rounded-xl overflow-hidden bg-black">
             <iframe
-              src={`https://www.youtube.com/embed/${id}`}
+            // YOUTUBE SIN COOKIES (2026-08-22). `youtube-nocookie.com` es el mismo
+            // reproductor sin la cookie de seguimiento: existe exactamente para
+            // incrustarse en la web de otro sin dejarle a Google un rastro de quién ha
+            // mirado qué. La decisión ya estaba tomada —el Navegador y el Juego lo usaban
+            // desde antes— y aquí no se había aplicado: cuatro sitios, dos criterios.
+            // Importa además para la ficha de las tiendas, donde hay que DECLARAR con qué
+            // terceros se comparte y para qué.
+              src={`https://www.youtube-nocookie.com/embed/${id}`}
               title="Vídeo"
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
