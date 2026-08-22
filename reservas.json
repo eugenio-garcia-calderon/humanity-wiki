@@ -77,6 +77,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
       "desde": "2026-08-22T16:32:09.623Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/pages/Mensajes.tsx",
+      "motivo": "telecomunicaciones: mensajeria en vivo, llamadas y videollamadas",
+      "desde": "2026-08-22T16:32:13.263Z"
     }
   ]
 }
