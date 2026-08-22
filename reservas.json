@@ -239,6 +239,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
       "desde": "2026-08-22T22:27:51.751Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: transferibles ON, comision en puntos a la mitad",
+      "desde": "2026-08-22T22:29:56.068Z"
     }
   ]
 }
