@@ -227,6 +227,130 @@ export function registerPuntosRoutes(app: Express, db: any) {
   });
 
   /**
+   * GET /api/admin/tokenomics/reparto?mes=YYYY-MM — EL REPARTO MENSUAL, EN
+   * SIMULACIÓN (2026-08-22, decisiones de Eugenio: bote = 50% de la COMISIÓN
+   * del mercado; reparto MIXTO — una parte igual por cabeza, otra proporcional
+   * al éxito de las publicaciones: vistas válidas, interacción, reseñas
+   * positivas). NO PAGA NADA: calcula y enseña. Nace así a propósito — como
+   * el cuadre y el guardián de prog4 — para que Eugenio vea números reales
+   * durante meses antes de que una sola línea mueva saldo. El día que se
+   * active, el pago será recorrer esta misma lista llamando a `otorgarPuntos`
+   * con un motivo nuevo; la lista no cambia.
+   *
+   * Lo que pesa y cuánto (ajustable sin desplegar, y declarado en la
+   * respuesta para que nadie tenga que adivinarlo):
+   *   vistas válidas ×1 · interacciones (reacciones + comentarios) ×1 ·
+   *   reseñas positivas (nota ≥ 7 sobre 10) ×3.
+   * Solo cuentan números que no se pueden inflar desde fuera: vistas VÁLIDAS
+   * (una por persona y día), nunca el contador bruto.
+   *
+   * La conversión euros→puntos del bote usa `PUNTOS_POR_EURO` (1 por defecto,
+   * el precio de venta actual). Es orientativa y lo dice: el punto se
+   * explica por la cesta, no por el euro.
+   */
+  app.get('/api/admin/tokenomics/reparto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const mes = /^\d{4}-\d{2}$/.test(String(req.query.mes || '')) ? String(req.query.mes) : new Date().toISOString().slice(0, 7);
+      const desde = `${mes}-01`;
+      const parteFija = Math.min(Math.max(Number(process.env.PUNTOS_REPARTO_PARTE_FIJA ?? 0.5), 0), 1);
+      const puntosPorEuro = Number(process.env.PUNTOS_POR_EURO || 1);
+      const pesos = {
+        vista_valida: Number(process.env.PUNTOS_PESO_VISTA ?? 1),
+        interaccion: Number(process.env.PUNTOS_PESO_INTERACCION ?? 1),
+        resena_positiva: Number(process.env.PUNTOS_PESO_RESENA ?? 3),
+      };
+
+      // El bote: la mitad de la comisión cobrada en el mes, de operaciones
+      // pagadas. De la comisión, no de la facturación: sale de lo que gana la
+      // plataforma, nunca del dinero de los vendedores.
+      const comision = await db.execute(sql`
+        SELECT coalesce(sum(platform_fee_cents), 0)::int AS fee_cents, count(*)::int AS operaciones
+        FROM transactions
+        WHERE status = 'pagado' AND created_at >= ${desde}::date AND created_at < (${desde}::date + interval '1 month')
+      `);
+      const feeCents = Number((comision.rows[0] as any)?.fee_cents ?? 0);
+      const boteEur = Math.round(feeCents * 0.5) / 100;
+      const botePuntos = Math.round(boteEur * puntosPorEuro * 100) / 100;
+
+      // Quién entra en el reparto: personas verificadas (nivel ≥ 2), vivas.
+      const verificados = await db.execute(sql`
+        SELECT id, coalesce(display_name, name, email) AS nombre FROM users
+        WHERE archived_at IS NULL AND role_level >= ${ROLE.VERIFIED}
+      `);
+      const N = verificados.rows.length;
+
+      // El éxito de cada autor en el mes, por sus ventanas públicas.
+      const exito = await db.execute(sql`
+        WITH ventanas AS (
+          SELECT id, creator_user_id FROM knowledge_windows WHERE publico = true AND creator_user_id IS NOT NULL
+        ),
+        vv AS (
+          SELECT v.creator_user_id AS uid, count(*)::int AS n FROM vistas_validas x JOIN ventanas v ON v.id = x.ventana_id
+          WHERE x.dia >= ${desde}::date AND x.dia < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+        ),
+        inter AS (
+          SELECT v.creator_user_id AS uid, count(*)::int AS n FROM (
+            SELECT entity_id, created_at FROM reactions WHERE entity_type = 'knowledge_windows'
+            UNION ALL
+            SELECT entity_id, created_at FROM comments WHERE entity_type = 'knowledge_windows'
+          ) i JOIN ventanas v ON v.id = i.entity_id
+          WHERE i.created_at >= ${desde}::date AND i.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+        ),
+        res AS (
+          SELECT v.creator_user_id AS uid, count(*)::int AS n FROM ratings r JOIN ventanas v ON v.id = r.entity_id
+          WHERE r.entity_type = 'knowledge_windows' AND r.score >= 7
+            AND r.created_at >= ${desde}::date AND r.created_at < (${desde}::date + interval '1 month') GROUP BY v.creator_user_id
+        )
+        SELECT u.id AS uid,
+               coalesce(vv.n, 0)::int AS vistas_validas,
+               coalesce(inter.n, 0)::int AS interacciones,
+               coalesce(res.n, 0)::int AS resenas_positivas
+        FROM users u
+        LEFT JOIN vv ON vv.uid = u.id LEFT JOIN inter ON inter.uid = u.id LEFT JOIN res ON res.uid = u.id
+        WHERE u.archived_at IS NULL AND u.role_level >= ${ROLE.VERIFIED}
+      `);
+      const porUsuario = new Map<string, { vistas_validas: number; interacciones: number; resenas_positivas: number; peso: number }>();
+      let pesoTotal = 0;
+      for (const f of exito.rows as any[]) {
+        const peso = f.vistas_validas * pesos.vista_valida + f.interacciones * pesos.interaccion + f.resenas_positivas * pesos.resena_positiva;
+        porUsuario.set(f.uid, { vistas_validas: f.vistas_validas, interacciones: f.interacciones, resenas_positivas: f.resenas_positivas, peso });
+        pesoTotal += peso;
+      }
+
+      const fijoTotal = botePuntos * parteFija;
+      const variableTotal = botePuntos - fijoTotal;
+      const fijoPorPersona = N ? Math.floor((fijoTotal / N) * 100) / 100 : 0;
+      const reparto = (verificados.rows as any[]).map(u => {
+        const e = porUsuario.get(u.id) || { vistas_validas: 0, interacciones: 0, resenas_positivas: 0, peso: 0 };
+        const variable = pesoTotal ? Math.floor((variableTotal * e.peso / pesoTotal) * 100) / 100 : 0;
+        return { user_id: u.id, nombre: u.nombre, ...e, fijo: fijoPorPersona, variable, total: Math.round((fijoPorPersona + variable) * 100) / 100 };
+      }).sort((a, b) => b.total - a.total);
+
+      res.json({
+        simulacion: true,
+        nota: 'Nada se paga: este cálculo enseña el reparto que tocaría con los números reales del mes. Activarlo es una decisión del emisor, con los términos de uso y la revisión legal delante.',
+        mes,
+        comision_mes_eur: feeCents / 100,
+        operaciones_pagadas: Number((comision.rows[0] as any)?.operaciones ?? 0),
+        bote_eur: boteEur,
+        puntos_por_euro: puntosPorEuro,
+        bote_puntos: botePuntos,
+        verificados: N,
+        parte_fija: parteFija,
+        pesos,
+        fijo_por_persona: fijoPorPersona,
+        // Si nadie tuvo éxito medible, la parte variable no se reparte y se
+        // dice: repartirla a partes iguales en silencio sería inventar mérito.
+        variable_sin_repartir: pesoTotal ? 0 : Math.round(variableTotal * 100) / 100,
+        reparto: reparto.slice(0, 200),
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * POST /api/admin/tokenomics/precios  { servicio, nombre, unidad, puntos, nota? }
    * Publicar un precio nuevo. NUNCA edita: inserta una fila con
    * `vigente_desde = now()` y quién la publicó — la historia es de

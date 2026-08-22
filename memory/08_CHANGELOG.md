@@ -4962,3 +4962,29 @@ needed». Three pieces, the shapes MiCA will ask for, built now:
 basket as fallback) and shows a live figures section. Verified on 3007: both
 endpoints, 403 without admin on price publishing, price UPDATE rejected by
 trigger, page rendering API prices and the 905,5-point local circulation.
+
+---
+
+## 2026-08-22 — The monthly distribution, as a simulation that pays nobody (Programador 7)
+
+`GET /api/admin/tokenomics/reparto?mes=YYYY-MM` computes Eugenio's
+distribution with the month's real numbers and writes nothing: pot = 50% of
+the platform's commission on paid transactions (the commission, never the
+gross — it comes out of what the platform earns, not sellers' money); a
+fixed half split equally among verified users (level ≥ 2); a variable half
+split by publication success — valid views ×1, interactions (reactions +
+comments) ×1, positive reviews (score ≥ 7) ×3, all weights and the
+euro→point rate (`PUNTOS_POR_EURO`, 1 today) declared in the response. Only
+numbers that cannot be inflated from outside count: `vistas_validas`, never
+the raw counter. If nobody had measurable success, the variable part is
+reported as unallocated rather than silently split: splitting it equally
+would invent merit.
+
+Born as a simulation on purpose, like the reconciliation and prog4's guard:
+months of real figures before a single line moves a balance. The day it is
+switched on, paying is walking this same list with otorgarPuntos and a new
+motive — the list does not change. Verified on the local DB: 453.60 € of
+commission → pot 226.80 → 4 verified → 28.35 fixed each, the variable
+113.40 entirely to the one author with success (3 interactions, 6 positive
+reviews), totals summing back to the pot; 403 without admin. Depends on
+`vistas_validas` (PR #260) being in place.
