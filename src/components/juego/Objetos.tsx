@@ -17,6 +17,7 @@ import { mapasPBR } from './texturas';
 import { MaterialAgua } from './Agua';
 import { PALETA } from './paleta';
 import { Aptera } from './Vehiculos';
+import { Camper } from './Camper';
 
 const MADERA = (r = 1, r2 = 1) => mapasPBR('madera', r, r2);
 const PIEDRA = (r = 1, r2 = 1) => mapasPBR('roca', r, r2);
@@ -964,6 +965,12 @@ function ApteraAparcada() {
 export function ObjetoNuevo({ modelo }: { modelo: string }) {
   switch (modelo) {
     case 'aptera': return <ApteraAparcada />;
+    // EL CAMIÓN CAMPERIZADO SE QUEDA (2026-08-22, Eugenio: «mantén los objetos
+    // que son productos o portales como la DJI y el Camión Camperizado»).
+    // Vivía dentro de la aldea, que se ha ido entera; ahora es un objeto del
+    // catálogo como la Aptera, y por eso sobrevive: es una COSA suya, no
+    // decoración de un pueblo que ya no existe.
+    case 'camper': return <Camper />;
     // Ciudad
     case 'papelera': return <Papelera />;
     case 'semaforo': return <Semaforo />;
@@ -1027,7 +1034,7 @@ export const RADIOS_OBJETO: Record<string, number> = {
   hidrante: 0.3, contenedor: 1, contenedorazul: 1, contenedoramarillo: 1, jardinera: 0.9,
   fuentebeber: 0.4, bolardo: 0.2, muro: 1.7, cerca: 1.7, escalera: 1.4, torreagua: 1.6,
   panelsolar: 1.3, bicicletero: 1, buzon: 0.35, reloj: 0.3, estatua: 0.8, mesa: 1.2,
-  columpio: 1.5,
+  columpio: 1.5, camper: 2.4,
   tronco: 1.7, tocon: 0.6, setas: 0, helecho: 0, canas: 0.5, matorral: 0.9,
   rocagrande: 1.5, charca: 2.2, puentetabla: 1, hoguera: 1.1, tienda: 1.3, colmena: 0.4,
   lena: 0.7, espantapajaros: 0.35, bancal: 1.2, compost: 0.75, gallinero: 1.1,

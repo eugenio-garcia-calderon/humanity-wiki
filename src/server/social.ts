@@ -847,7 +847,7 @@ export function registerSocialRoutes(app: Express, db: any) {
       if (w.n > 0) {
         items.push({
           clave: 'mundo:propio', tipo: 'mundo', id: 'mundo',
-          titulo: 'Mi Mundo 3D', resumen: 'La aldea donde vive lo que voy plantando.',
+          titulo: 'Mi Visor 3D', resumen: 'El espacio donde se ven mis proyectos y quién anda en ellos.',
           url: '/juego', fecha: w.cuando, privado: false,
           dato: `${w.n} cosas`,
           imagen: w.portada || null,

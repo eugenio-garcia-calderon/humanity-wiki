@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../../utils/subir';
 import {
   X, Crop, RotateCw, FlipHorizontal, FlipVertical, Type, Pencil, Undo2,
   Check, Loader2, SunMedium, Contrast, Droplets, Wand2,
@@ -195,14 +196,9 @@ export default function EditorImagen({
       if (brillo !== 100 || contraste !== 100 || saturacion !== 100 || preset !== 'none') aplicarAjustes();
       const blob: Blob = await new Promise((ok, ko) =>
         canvasRef.current!.toBlob(b => (b ? ok(b) : ko(new Error('No se ha podido generar la imagen.'))), 'image/png'));
-      const r = await fetch('/api/uploads?type=image/png', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: await blob.arrayBuffer(),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'No se ha podido guardar.');
-      onGuardar(j.url);
+      const sub = await subirArchivo(blob, 'image/png');
+      if (sub.error) throw new Error(sub.error);
+      onGuardar(sub.url);
     } catch (e: any) {
       setError(e.message);
     } finally {

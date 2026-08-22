@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   User as UserIcon, MapPin, Globe, Heart, UserPlus, UserCheck, Award, Network,
@@ -170,12 +171,8 @@ export default function PersonaPublica() {
     if (!f) return;
     setSubiendoFoto(true);
     try {
-      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-      });
-      const j = await r.json();
-      if (r.ok && j.url) setBorrador(b => ({ ...b, avatar: j.url }));
+      const sub = await subirArchivo(f);
+      if (sub.url) setBorrador(b => ({ ...b, avatar: sub.url }));
     } finally { setSubiendoFoto(false); }
   };
 

@@ -42,6 +42,20 @@ export interface Bloque {
   medioId?: string;
   /** Solo medio: tamaño del archivo subido, para el pie. */
   medioBytes?: number;
+  /** ══ CÓMO SE ENSEÑA UN ARCHIVO (2026-08-22) ═════════════════════════════
+   *  Eugenio: «que dé la opción, una vez insertado, con 3 puntitos, de abrirlo,
+   *  cerrarlo o embeberlo; si es una imagen por defecto la embebes, si es un
+   *  pdf por defecto le haces una tarjetita con el nombre».
+   *
+   *  `embebido` = se ve dentro del documento (una imagen, un vídeo, el PDF
+   *  entero). `tarjeta` = una línea con su nombre y, si es un PDF, la primera
+   *  página en pequeño.
+   *
+   *  SIN VALOR TAMBIÉN ES UNA RESPUESTA: significa «lo que le toque a su
+   *  tipo», que es lo que ya hacían los documentos escritos hasta hoy. Poner
+   *  un valor por defecto al leer habría reescrito en silencio la forma de
+   *  todos los adjuntos que ya existen. */
+  vista?: 'tarjeta' | 'embebido';
   /** Solo tabla: la primera fila es la cabecera. */
   filas?: string[][];
   /** Solo publicacion (Fase 2): una publicación de la plataforma embebida.

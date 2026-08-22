@@ -112,7 +112,7 @@ export default function App() {
                 <Route
                   path="juego"
                   element={
-                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Mundo 3D…</div>}>
+                    <Suspense fallback={<div className="h-full flex items-center justify-center text-sm text-slate-400 animate-pulse">Cargando el Visor 3D…</div>}>
                       <JuegoVital />
                     </Suspense>
                   }

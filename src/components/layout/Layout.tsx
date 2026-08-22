@@ -4,9 +4,10 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
- Bug,} from 'lucide-react';
+ Bug, PanelLeftOpen,} from 'lucide-react';
 import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
+import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
@@ -29,7 +30,7 @@ import AIAssistant from '../ai/AIAssistant';
 const SECCIONES_COMUN = [
   { to: '/esquemas', label: 'Grafos', icon: Globe2 },
   { to: '/mapas', label: 'Mapas', icon: MapIcon },
-  { to: '/juego', label: 'Mundo 3D', icon: Gamepad2 },
+  { to: '/juego', label: 'Visor 3D', icon: Gamepad2 },
   { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
   { to: '/paginas', label: 'Páginas', icon: FileText },
   { to: '/tareas', label: 'Tareas', icon: ListChecks },
@@ -436,7 +437,17 @@ export default function Layout() {
             className={cn('shrink-0 grid place-items-center rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-colors',
               compacto ? 'w-8 h-8' : 'w-10 h-10')}
           >
-            <Menu className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
+            {/* EL MISMO DIBUJO QUE EL DE ESCONDERLO, DEL REVÉS (2026-08-22,
+                Eugenio: «haz que el botón de menú lateral sea parecido al
+                botón que hay de colapsar el menú lateral, en vez de las 3
+                líneas»).
+
+                Tres rayas es «un menú», en abstracto; este panel con la
+                flecha es «el menú que se va por la izquierda» — y es
+                exactamente el mismo dibujo que lo esconde, girado. Los dos
+                botones son las dos mitades de un mismo gesto y ahora se
+                parecen entre sí, que es lo que enseña que lo son. */}
+            <PanelLeftOpen className={cn(compacto ? 'w-5 h-5' : 'w-6 h-6')} />
           </button>
         )}
 
@@ -446,31 +457,18 @@ export default function Layout() {
             petición de Eugenio: «en ese uno es donde deben estar las ventanas
             en forma de iconos para que no ocupen mucho»). Pulsar uno trae la
             ventana; si ya está delante, la minimiza. */}
-        {/* ══ LA PESTAÑA DE INICIO, SIEMPRE ═══════════════════════════════
-            (2026-08-22, Eugenio: «cuando se cierren todas las páginas que
-            aparezca arriba una pestaña de inicio, que te lleve a la página de
-            inicio, y esa pestaña no se puede cerrar, está siempre abierta»).
+        {/* LA PESTAÑA DE INICIO SE HA IDO (2026-08-22, Eugenio: «en el menú
+            de escritorio, quita el botón de inicio, y que cuando pulses en el
+            logo te lleve a Inicio, pero quita ese botón permanente; si hay
+            ventanas abiertas y se cierran todas pues te lleva a inicio
+            directamente»).
 
-            NO SE PUEDE CERRAR A PROPÓSITO: es el suelo. Con todas las ventanas
-            cerradas la barra se quedaba vacía y no había forma de volver al
-            inicio desde arriba — había que buscarla en el menú o en la barra
-            de abajo. Una pestaña fija cuesta 24 px y quita ese callejón.
-
-            No es una ventana: no está en el gestor, no se arrastra y no se
-            minimiza. Es un enlace con forma de pestaña. */}
-        <button
-          onClick={() => navigate('/')}
-          title="Inicio"
-          aria-current={location.pathname === '/' ? 'page' : undefined}
-          className={cn('flex items-center gap-1.5 rounded-lg border shrink-0 ml-1 transition-colors',
-            compacto ? 'w-6 h-6 justify-center' : 'h-7 px-2',
-            location.pathname === '/'
-              ? 'bg-slate-900 border-slate-900 text-white'
-              : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200')}
-        >
-          <Home className={cn('shrink-0', compacto ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
-          {!compacto && <span className="text-[11px] font-black tracking-tight">Inicio</span>}
-        </button>
+            Se puso ayer para que con todo cerrado hubiera una forma de volver
+            arriba. El agujero era real, pero la pestaña lo tapaba ocupando
+            sitio SIEMPRE para un caso que dura un segundo. El logo ya lleva al
+            inicio —está a dos centímetros y es lo primero que se mira—, y
+            cerrar la última ventana ahora te deja allí solo. Dos caminos que
+            no cuestan un píxel de barra. */}
 
         {/* CERRARLAS TODAS (2026-08-22, Eugenio: «añade en la parte izquierda
             una x con fondito rojo que si pinchas te dé la opción de cerrar
@@ -738,6 +736,12 @@ export default function Layout() {
               mirando y parecía que no había pasado nada. */}
           <GestorVentanas compacto={compacto} />
         </div>
+
+        {/* EL PANEL LATERAL, FUERA DE <main> Y FUERA DEL GESTOR. Es una capa
+            propia: no es una ventana del escritorio (no se arrastra, no se
+            minimiza, no se guarda de un día para otro) y no debe heredar el
+            recorte de la página. Lo abre cualquier sitio con `abrirLateral`. */}
+        <VentanaLateral />
 
         {/* UN SOLO ASISTENTE, EL MISMO EN TODAS LAS HERRAMIENTAS. En la
             herramienta «IA» no se monta: esa página YA ES el asistente a

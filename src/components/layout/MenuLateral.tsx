@@ -47,7 +47,7 @@ const HERRAMIENTAS: NodoMenu[] = [
   // El MISMO asistente de la columna derecha, a pantalla completa (2026-08-20).
   { id: 'h-ia',        label: 'IA',        icono: Sparkles,     destino: '/ia',        abrir: 'ventana' },
   { id: 'h-calendario', label: 'Calendario', icono: CalendarDays, destino: '/calendario', abrir: 'ventana' },
-  { id: 'h-mundo',     label: 'Mundo 3D',  icono: Gamepad2,     destino: '/juego',     abrir: 'ventana' },
+  { id: 'h-mundo',     label: 'Visor 3D',  icono: Gamepad2,     destino: '/juego',     abrir: 'ventana' },
   { id: 'h-archivos',  label: 'Archivos',  icono: Database,     destino: '/archivos',  abrir: 'ventana' },
   { id: 'h-navegador', label: 'Navegador', icono: Globe,        destino: 'about:inicio' },
   // «Publicaciones», no «Explorar» (Eugenio, 2026-08-20): es lo que hay dentro.

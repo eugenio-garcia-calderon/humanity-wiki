@@ -1,0 +1,52 @@
+# ============================================================================
+# VACIAR LA PAPELERA, SOLO, TODOS LOS DÍAS (2026-08-22)
+# ============================================================================
+# Eugenio: «que dentro de 30 días se borre de forma definitiva, con un programa
+# ya hecho, que no tengas tú que acordarte».
+#
+# POR QUÉ AQUÍ Y NO EN EL MAC NI EN EL SERVIDOR. En el Mac haría falta que
+# estuviera encendido el día que toca; en el servidor de producción no está el
+# repositorio de trabajo, que es donde vive la papelera. GitHub corre esto
+# aunque no haya nadie delante, y el borrado queda en un commit que se puede
+# leer y deshacer.
+#
+# SI NO HAY NADA QUE BORRAR, NO SE COMMITEA NADA: un commit diario vacío
+# ensucia el historial y esconde los que sí dicen algo.
+name: Vaciar la papelera
+
+on:
+  schedule:
+    # 04:15 UTC. De madrugada, para no cruzarse con un despliegue.
+    - cron: '15 4 * * *'
+  # Y a mano, para poder comprobarlo sin esperar un día.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  vaciar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Borrar lo que ya tiene 30 días
+        run: node scripts/papelera.mjs vaciar
+
+      - name: Guardar el borrado
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "La papelera no tenía nada de más de 30 días."
+            exit 0
+          fi
+          git config user.name  "papelera"
+          git config user.email "noreply@humanity.wiki"
+          git add -A
+          git commit -m "Empty the code recycle bin (items older than 30 days)"
+          git push
