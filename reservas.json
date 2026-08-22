@@ -65,6 +65,12 @@
       "ruta": "equipo/REPARTO.md",
       "motivo": "area del Programador 7: economia y mercado (decision de Eugenio)",
       "desde": "2026-08-22T19:06:45.277Z"
+    },
+    {
+      "agente": "prog4",
+      "ruta": "src/server/ai/assistant.ts",
+      "motivo": "P4: cerrar lectura de conversaciones ajenas por conversation_id (fuga)",
+      "desde": "2026-08-22T19:07:06.273Z"
     }
   ]
 }
