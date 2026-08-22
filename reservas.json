@@ -161,6 +161,12 @@
       "ruta": "src/components/knowledge/DialogoCompartir.tsx",
       "motivo": "dominio y buscadores fuera de la puerta del handle",
       "desde": "2026-08-22T22:08:37.492Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "UI de llamadas",
+      "desde": "2026-08-22T22:10:24.785Z"
     }
   ]
 }
