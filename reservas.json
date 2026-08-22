@@ -7,12 +7,6 @@
       "desde": "2026-08-22T11:30:42.250Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/App.tsx",
-      "motivo": "fase 1 tiendas: portada del subdominio",
-      "desde": "2026-08-22T11:37:08.862Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "prog3: entrada de la PWA",
