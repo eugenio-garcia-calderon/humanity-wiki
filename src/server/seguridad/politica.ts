@@ -122,6 +122,50 @@ const REVISADAS: Entrada[] = [
   { m: 'PUT', ruta: '/api/finanzas/objetivos/:id', guardia: { tipo: 'propietario' } },
   { m: 'DELETE', ruta: '/api/finanzas/objetivos/:id', guardia: { tipo: 'propietario' } },
   { m: 'POST', ruta: '/api/juego/mundo', guardia: { tipo: 'sesion' }, nota: 'juego.ts:497 requiereUsuario' },
+
+  // ══ LO QUE ENTRÓ EL 2026-08-22 POR LA TARDE ═════════════════════════════
+  // Veinticinco rutas nuevas de otros cinco programadores en una tarde. Las
+  // cazó la auditoría al fusionar `main`, que es exactamente para lo que está:
+  // ninguna se declaró sola, y ninguna pudo entrar sin que alguien dijera qué
+  // permiso le toca.
+  { m: 'POST', ruta: '/api/auth/borrar-cuenta', guardia: { tipo: 'sesion' },
+    nota: 'auth.ts:585 — pide además la contraseña actual: borrar tu cuenta no puede depender solo de una cookie robada' },
+  { m: 'POST', ruta: '/api/auth/cancelar-borrado', guardia: { tipo: 'publica', porque: 'la cuenta está en cuenta atrás y su sesión ya no vale: se identifica con correo y contraseña' } },
+  { m: 'POST', ruta: '/api/medicion/reiniciar', guardia: { tipo: 'nivel', minimo: 4 } },
+  { m: 'POST', ruta: '/api/publicar/comprar', guardia: { tipo: 'publica', porque: 'comprar en una tienda pública no exige cuenta, como en cualquier tienda' },
+    nota: 'publicar.ts:425 — los precios salen de la base de datos, nunca del cuerpo, y el pedido lo crea el aviso de Stripe. Detrás de COBRO_ENCENDIDO. Pide límite de peticiones: sin cuenta de por medio, un bucle reserva existencias que nadie va a comprar' },
+  { m: 'POST', ruta: '/api/publicar/mis-productos', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/publicar/mis-productos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/reports/:id', guardia: { tipo: 'nivel', minimo: 3 },
+    nota: 'resolver una denuncia es moderar: nivel 3, y queda quién la cerró' },
+  { m: 'PUT', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 },
+    nota: 'los textos de las páginas públicas son la voz de la plataforma' },
+  { m: 'DELETE', ruta: '/api/textos/:clave', guardia: { tipo: 'nivel', minimo: 4 } },
+
+  // Telecomunicaciones: todo exige sesión, y lo que va sobre una llamada
+  // comprueba además que quien llama es una de las dos puntas.
+  { m: 'PUT', ruta: '/api/telecom/mi-numero', guardia: { tipo: 'sesion' } },
+  { m: 'PUT', ruta: '/api/telecom/privacidad', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/contestar', guardia: { tipo: 'propietario' },
+    nota: 'telecom.ts:616 — solo contesta a quien va dirigida la llamada' },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/colgar', guardia: { tipo: 'propietario' },
+    nota: 'cuelga cualquiera de las dos puntas, y nadie más' },
+  { m: 'POST', ruta: '/api/telecom/senal', guardia: { tipo: 'sesion' } },
+  { m: 'POST', ruta: '/api/telecom/llamada/:id/pantalla', guardia: { tipo: 'propietario' } },
+  { m: 'POST', ruta: '/api/telecom/escribiendo', guardia: { tipo: 'sesion' } },
+
+  // Veracidad: debates, argumentos y fuentes. Escribir pide cuenta; tocar lo
+  // ya escrito, ser su autor.
+  { m: 'POST', ruta: '/api/debates', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/debates/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/debates/:id/argumentos', guardia: { tipo: 'nivel', minimo: 1 } },
+  { m: 'PUT', ruta: '/api/argumentos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/argumentos/:id/archivar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/debates/:id/archivar', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/veracidad/fuentes', guardia: { tipo: 'nivel', minimo: 1 },
+    nota: 'de dónde sale una afirmación: lo puede aportar cualquiera con cuenta, y queda su nombre' },
+  { m: 'DELETE', ruta: '/api/veracidad/fuentes/:id', guardia: { tipo: 'propietario', minimo: 4 } },
 ];
 
 /** Generadas del análisis del código, SIN revisar por una persona.

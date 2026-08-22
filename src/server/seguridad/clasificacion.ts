@@ -86,7 +86,11 @@ export const CLASIFICACION: Clase[] = [
   c('entity_history', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'lo que había antes de cada cambio; quien altera un dato querrá alterar esto'),
   c('registro_sellado', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el registro sellado; su integridad es lo único que hace verificable todo lo demás'),
   c('registro_anclajes', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los resúmenes diarios publicados fuera: la prueba que enseñaríamos a un auditor'),
-  c('registro_pendiente', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el buzón de cambios aún sin sellar; borrar una nota de aquí es esconder un cambio, y por eso los huecos de su secuencia se anotan'),
+  // ── LO QUE NACIÓ EL 2026-08-22 POR LA TARDE ───────────────────────────────
+  c('intentos_fallidos', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'el rastro de quién ha probado a entrar y desde dónde: es la prueba de un ataque y a la vez dice dónde vive la gente'),
+  c('llamadas', 'MEDIA', 'ALTA', 'ALTA', 'MEDIA', 'quién ha llamado a quién y cuándo: cambia poco si se toca, dice muchísimo si se lee'),
+  c('textos_editables', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los textos de las páginas públicas: es lo que la plataforma dice de sí misma'),
+  c('tokenomics_precios', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'a qué precio se venden los puntos; cambiarlo cambia lo que vale el dinero de dentro'),
   c('schema_migrations', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué forma tiene la base de datos; mentir aquí hace que una migración se salte'),
 
   // ── EL BIEN COMÚN MEDIDO ──────────────────────────────────────────────────

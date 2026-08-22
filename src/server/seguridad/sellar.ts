@@ -43,6 +43,14 @@ async function ultimoSellado(db: any): Promise<number> {
  * no se coma la memoria ni bloquee: se llama otra vez hasta que devuelva cero.
  */
 export async function sellarPendientes(db: any, limite = 500): Promise<Resumen> {
+  // El buzón puede no existir todavía: la captura por disparadores va en una
+  // migración aparte, que sale cuando haya algo que lo vacíe cada pocos
+  // minutos. Sin esto, ejecutar el sellador contra una base sin esa migración
+  // reventaba con un error de Postgres en crudo en vez de decir que no hay
+  // nada que sellar — la misma regla que ya se aplicó al verificador.
+  const hayBuzon = await db.execute(sql`SELECT to_regclass('registro_pendiente') IS NOT NULL AS existe`);
+  if (!(hayBuzon.rows[0] as any)?.existe) return { sellados: 0, huecos: 0, hasta: null };
+
   const pendientes = (await db.execute(sql`
     SELECT id, momento, tabla, operacion, clave, huella_nueva, huella_vieja, actor_bd, txid
     FROM registro_pendiente WHERE sellado_at IS NULL

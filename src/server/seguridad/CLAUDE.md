@@ -14,8 +14,11 @@ registro.ts       the sealed record: append-only, hash-chained, signed, verifiab
 sellar.ts         drains the outbox into the sealed record, and answers "is this row still the one we sealed?"
 ```
 
-Migrations: `drizzle/0070_registro_sellado.sql` (the record) and
-`drizzle/0071_registro_captura.sql` (the database-level capture).
+Migration: `drizzle/0070_registro_sellado.sql` (the record). **The
+database-level capture (`0071`) is deliberately not in this branch**: it puts
+triggers on 25 production tables, and every captured change lands in an outbox
+that grows until something drains it. It ships together with the schedule that
+drains it, not before. Branch `prog4/captura-cambios`.
 
 Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
@@ -46,7 +49,7 @@ green is worse than no test.
 | The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
-| Capture from the database | Triggers on 25 tier-3 tables write to an outbox; `sellar.mjs` chains and signs it. **Not applied to production**, and nothing runs it on a schedule yet |
+| Capture from the database | Written and tested, **held back on purpose**: triggers with no drainer make a table that only grows. Ships with its schedule, in `prog4/captura-cambios` |
 | Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
 | Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
 
