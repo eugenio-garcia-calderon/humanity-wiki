@@ -4703,3 +4703,45 @@ que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— 
 **dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
 fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
 la última se lleva borrado su propio rastro.
+### 2026-08-22 — Veracity, phase 1 of 10: a debate is a tree
+
+Eugenio opened a new area and put programmer 5 on it: *«un sistema de veracidad
+dentro de la APP para que lo que la gente publique sea información coherente con
+la otra información que hay, y poder generar un espectro de visiones sobre una
+verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate en
+Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
+it is all data — no screen uses it yet.
+
+- **Three tables** (`drizzle/0065_veracidad_debates.sql`): `debates` (the thesis
+  under discussion), `argumentos` (the tree hanging off it) and
+  `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
+  is a `parent_id`, and a source belongs to what it cites.
+- **Why not the knowledge graph, which already has `apoya`/`contradice`**: a
+  graph edge carries no stance, no weight and no evidence, and a graph node can
+  hang from several parents — the moment it does, the reader no longer knows
+  what is being argued about. A debate is a tree on purpose. Phase 7 will *draw*
+  debates on the existing canvas; the model stays separate.
+- **`src/server/veracidad.ts`**: list and read (the whole tree and all its
+  sources in three queries, never one per node), open a debate, argue, cite,
+  withdraw a citation, archive. Level 1 to open or argue — the same standing as
+  publishing; level 3 to close a debate, because that is a judgement about the
+  commons.
+- **Depth is derived from the parent, never sent by the client**, so no request
+  can flatten or graft a branch; a parent belonging to another debate is
+  rejected, and the thread stops at 12 levels with a message that says to open
+  its own debate instead.
+- **`impacto` is NULL until somebody votes, and 0 only when people voted and it
+  moves nobody.** Initialising it to 0 would make a brand-new argument look like
+  a rejected one — the house rule that every component must be able to say «I
+  don't know» distinguishably.
+- **The only automatic step of the veracity ladder is `sin_fuente` →
+  `con_fuente`**, and it reverses when the last source is withdrawn. Everything
+  above that is a human judgement and belongs to phase 2, not to pasting a link.
+- **Verified against the local server on port 3004: 25 checks, 25 green** —
+  including 401 without a session, an invented `postura` rejected *listing the
+  valid ones*, a cross-debate parent, the tree nested three levels deep, the
+  badge going up and back down with the source, and an archived argument leaving
+  the tree without leaving the database. One bug found and fixed on the way:
+  `= ANY(array)` through the Drizzle template reached Postgres as a record, so
+  every read of a debate answered 500. The test user and both test debates were
+  deleted in the same session.

@@ -432,3 +432,63 @@ export const stripeEvents = pgTable('stripe_events', {
 });
 
 // We can define Drizzle relations below as needed for easy querying
+
+// ============================================================================
+// VERACIDAD: debates, argumentos y fuentes (2026-08-22, drizzle/0065)
+// ============================================================================
+// A debate is a TREE, not a graph: every argument answers exactly one claim,
+// which is what keeps a 300-message disagreement readable. See
+// memory/13_VERACIDAD.md for the ten phases and drizzle/0065 for the reasoning
+// behind each column.
+
+export const debates = pgTable('debates', {
+  id: text('id').primaryKey(),
+  slug: text('slug').notNull().unique(),
+  // An assertion you can be against. Not a question, not a topic.
+  tesis: text('tesis').notNull(),
+  contexto: text('contexto'),
+  estado: text('estado').notNull().default('abierto'),
+  // NULL means global, and means it distinguishably: not a missing territory,
+  // no territory. Diverges from constitution rule 3 on purpose — see 0065.
+  territoryId: text('territory_id'),
+  entidadTipo: text('entidad_tipo'),
+  entidadId: text('entidad_id'),
+  autorUserId: text('autor_user_id'),
+  vistas: integer('vistas').notNull().default(0),
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
+  ...auditColumns,
+});
+
+export const argumentos = pgTable('argumentos', {
+  id: text('id').primaryKey(),
+  debateId: text('debate_id').notNull(),
+  // NULL = hangs from the thesis itself, the root of the tree.
+  parentId: text('parent_id'),
+  // Same three words the knowledge graph already uses: one vocabulary.
+  postura: text('postura').notNull(),
+  texto: text('texto').notNull(),
+  profundidad: integer('profundidad').notNull().default(1),
+  veracidad: text('veracidad').notNull().default('sin_fuente'),
+  // NULL = nobody has voted yet. 0 = people voted and it moves no one.
+  impacto: doublePrecision('impacto'),
+  votos: integer('votos').notNull().default(0),
+  autorUserId: text('autor_user_id'),
+  isAiGenerated: boolean('is_ai_generated').notNull().default(false),
+  ...auditColumns,
+});
+
+export const veracidadFuentes = pgTable('veracidad_fuentes', {
+  id: text('id').primaryKey(),
+  entidadTipo: text('entidad_tipo').notNull(),
+  entidadId: text('entidad_id').notNull(),
+  titulo: text('titulo').notNull(),
+  url: text('url'),
+  autor: text('autor'),
+  publicadoEn: date('publicado_en'),
+  tipo: text('tipo').notNull().default('documento'),
+  // The exact sentence that holds the claim up. A link to a 200-page PDF is
+  // not a source, it is homework for the reader.
+  cita: text('cita'),
+  autorUserId: text('autor_user_id'),
+  ...auditColumns,
+});
