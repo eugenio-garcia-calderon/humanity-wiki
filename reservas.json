@@ -17,6 +17,12 @@
       "ruta": "package.json",
       "motivo": "P4: ordenes npm de clasificacion y pruebas",
       "desde": "2026-08-22T13:54:37.689Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "matiz: la recarga automatica no toca paginas visibles",
+      "desde": "2026-08-22T13:54:57.076Z"
     }
   ]
 }
