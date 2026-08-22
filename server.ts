@@ -14,34 +14,12 @@ import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
-import { registerMedicionRoutes, medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
-import { registerGraphRoutes } from "./src/server/graph.js";
-import { registerSocialRoutes } from "./src/server/social.js";
-import { registerAIRoutes } from "./src/server/ai/assistant.js";
-import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
-import { registerUploadRoutes } from "./src/server/uploads.js";
-import { registerRoadmapRoutes } from "./src/server/roadmap.js";
-import { registerJuegoRoutes } from "./src/server/juego.js";
-import { registerNavegadorRoutes } from "./src/server/navegador.js";
-import { registerArchivosRoutes } from "./src/server/archivos.js";
-import { registerArchivoRoutes } from "./src/server/archivo.js";
-import { registerIncidenciasRoutes } from "./src/server/incidencias.js";
-import { registerBdRoutes } from "./src/server/bd.js";
-import { registerPublicarRoutes } from "./src/server/publicar.js";
-import { registerNavegadorRemotoRoutes } from "./src/server/navegadorRemoto.js";
-import { registerFinanzasRoutes } from "./src/server/finanzas.js";
-import { registerYoutubeRoutes } from "./src/server/youtube.js";
-import { registerSpotifyRoutes } from "./src/server/spotify.js";
+// LOS MÓDULOS VIVEN EN UNA LISTA (2026-08-22). Añadir uno ya no es reservar
+// este fichero: es una línea en `src/server/modulos.ts`, en la PR de quien lo
+// escribe. Ver allí por qué el ORDEN de esa lista es comportamiento y no estilo.
+import { montarModulos } from "./src/server/modulos.js";
+import { medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
-import { registerPuntosRoutes } from "./src/server/puntos.js";
-import { registerGastoRoutes } from "./src/server/gasto.js";
-import { registerDocumentosRoutes } from "./src/server/documentos.js";
-import { registerMenuRoutes } from "./src/server/menu.js";
-import { registerMensajesRoutes } from "./src/server/mensajes.js";
-import { registerCalendarioRoutes } from "./src/server/calendario.js";
-import { registerPersonasRoutes } from "./src/server/personas.js";
-import { registerGuardarRoutes } from "./src/server/guardar.js";
-import { registerVeracidadRoutes } from "./src/server/veracidad.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -284,52 +262,12 @@ async function startServer() {
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
 
-  // Las rutas que ENSEÑAN la medición van aquí, después de la autenticación:
-  // comprueban que quien mira es administrador, y `req.user` lo instala la
-  // línea de arriba. El cronómetro en sí se montó antes (1.45).
-  registerMedicionRoutes(app, db);
-
-  // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
-  // Van después de la autenticación porque dependen de `req.user`
-  // para aplicar los niveles de rol.
-  registerGraphRoutes(app, db);
-  registerSocialRoutes(app, db);
-
-  // 1.65 GRAFOS DE CONOCIMIENTO (Fase 11): lienzos curados de ventanas de
-  // conocimiento con creador, valoración 0-10 y resolución por palabras clave.
-  registerKnowledgeRoutes(app, db);
-  registerUploadRoutes(app, db);
-  registerRoadmapRoutes(app, db);
-  registerJuegoRoutes(app, db);
-  registerNavegadorRoutes(app);
-  registerArchivosRoutes(app, db);
-  registerArchivoRoutes(app, db);
-  registerIncidenciasRoutes(app, db);
-  registerBdRoutes(app, db);
-  registerPublicarRoutes(app, db);
-  registerNavegadorRemotoRoutes(app);
-  registerFinanzasRoutes(app, db);
-  registerYoutubeRoutes(app, db);
-  registerSpotifyRoutes(app, db);
-
-  // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
-  // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de
-  // fallar de forma opaca.
-  registerAIRoutes(app, db);
-
-  // 1.8 ECONOMÍA Y MERCADO (Fase 6): Connect, checkout embebido de
-  // productos, apoyo a creadores y reembolsos. Coexiste con el flujo de
-  // socios/membresía de abajo, que no se modifica.
-  registerStripeRoutes(app, db);
-  registerPuntosRoutes(app, db);
-  registerGastoRoutes(app, db);
-  registerDocumentosRoutes(app, db);
-  registerMenuRoutes(app, db);
-  registerMensajesRoutes(app, db);
-  registerCalendarioRoutes(app, db);
-  registerPersonasRoutes(app, db);
-  registerGuardarRoutes(app, db);
-  registerVeracidadRoutes(app, db);
+  // ── TODOS LOS MÓDULOS DE LA API ──────────────────────────────────────────
+  // Van DESPUÉS de `registerAuthRoutes` porque casi todos dependen de que
+  // `req.user` exista para aplicar los niveles de rol. El orden dentro de la
+  // lista se conserva tal cual estaba aquí: en Express montar antes o después
+  // cambia el comportamiento, y hoy eso costó un 403 con una sesión válida.
+  montarModulos(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
