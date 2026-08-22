@@ -77,12 +77,6 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Veracidad: territorio opcional en debates",
       "desde": "2026-08-22T12:40:21.344Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "fase 7 tiendas: carrito",
-      "desde": "2026-08-22T12:42:42.865Z"
     }
   ]
 }
