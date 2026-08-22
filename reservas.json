@@ -83,6 +83,12 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "denunciar en el menu de la tarjeta, y un texto que quedo mintiendo",
       "desde": "2026-08-22T16:55:05.394Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/BorrarCuentaPublica.tsx",
+      "motivo": "la lista promete menos de lo que borra",
+      "desde": "2026-08-22T16:55:54.253Z"
     }
   ]
 }
