@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import { subdominioDeUsuario } from './utils/subdominio';
 
 // Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
@@ -69,6 +70,8 @@ const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
+const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
 const Tareas = lazy(() => import('./pages/Tareas'));
@@ -129,13 +132,15 @@ function Esperando() {
   );
 }
 
+// Se decide UNA VEZ, al cargar, y no cambia: el navegador no se muda de
+// dominio sin recargar. Calcularlo dentro del render sería preguntar lo mismo
+// en cada pintada para obtener siempre la misma respuesta.
+const ESPACIO_DE = subdominioDeUsuario();
+
 export default function App() {
   return (
     <SettingsProvider>
     <AuthProvider>
-      <DataProvider>
-        <EditProvider>
-          <DesignProvider>
             <BrowserRouter>
             {/* UNA SOLA FRONTERA DE ESPERA PARA TODAS LAS RUTAS. Envolver cada
                 una por separado serían 51 copias del mismo envoltorio, y la
@@ -143,7 +148,40 @@ export default function App() {
                 nadie supiera por qué. */}
             <Suspense fallback={<Esperando />}>
             <Routes>
-              <Route path="/" element={<Layout />}>
+              {/* La cara publica de una pagina compartida: `/@nombre/pagina`.
+                  Va FUERA del Layout a proposito — quien llega aqui viene de un
+                  enlace, no tiene cuenta, y no debe ver la barra de trabajo ni
+                  un «todavia no tienes proyectos» que no es su vida. */}
+              <Route path=":arroba/:slug" element={<PaginaPublica />} />
+
+              {/* LA MISMA PÁGINA, POR LA PUERTA CORTA. En
+                  `claude-dos.humanity.wiki/mi-pagina` el nombre viaja en el
+                  `Host` y el camino tiene un solo tramo, así que la ruta de
+                  arriba no la coge. Esta solo existe cuando de verdad estamos
+                  en el espacio de alguien: en `humanity.wiki` no se declara, y
+                  por tanto no puede tapar ninguna de las 40 rutas de un tramo
+                  que ya existen. */}
+              {ESPACIO_DE && (
+                <Route path=":slug" element={<PaginaPublica handleFijo={ESPACIO_DE} />} />
+              )}
+
+              {/* Los tres proveedores de datos envuelven SOLO el Layout, no la
+                  aplicacion entera. Estaban arriba del todo, y eso hacia que
+                  quien abria una pagina compartida —sin cuenta, a leer un
+                  texto— disparase las OCHO cargas del taller: territorios,
+                  objetivos, retos, soluciones, proyectos, organizaciones,
+                  causas e indicadores. Medido el 2026-08-22 en esta misma
+                  pantalla. Un lector no pide el almacen entero para leer una
+                  pagina. */}
+              <Route path="/" element={
+                <DataProvider>
+                  <EditProvider>
+                    <DesignProvider>
+                      <Layout />
+                    </DesignProvider>
+                  </EditProvider>
+                </DataProvider>
+              }>
                 {/* Fase 11: los Grafos de Conocimiento son el nuevo inicio;
                     el mapa conserva su ruta /mapa (enlazada en el menú). */}
                 {/* La portada presenta las TRES formas de ver (2026-08-06).
@@ -243,13 +281,16 @@ export default function App() {
                 <Route path="sobre-red-humana/puntuacion-territorios" element={<AboutScoring />} />
                 <Route path="hazte-socio" element={<HazteSocio />} />
                 <Route path="socio-confirmacion" element={<SocioConfirmacion />} />
+
+                {/* LA ULTIMA, Y A PROPOSITO. Se queda con todo lo que ninguna
+                    otra ha cogido. Sin ella, una direccion mal escrita deja la
+                    pantalla en blanco, y una pantalla en blanco no dice «no
+                    existe»: dice «se ha roto». */}
+                <Route path="*" element={<NoEncontrada />} />
               </Route>
             </Routes>
             </Suspense>
           </BrowserRouter>
-          </DesignProvider>
-        </EditProvider>
-      </DataProvider>
     </AuthProvider>
     </SettingsProvider>
   );
