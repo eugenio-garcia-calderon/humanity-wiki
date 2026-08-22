@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX} from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins} from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -42,6 +42,14 @@ export const PAGINAS_INFO: PaginaInfo[] = [
     componente: lazy(() => import('./pages/Veracidad')) },
   { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
   { ruta: 'sobre-red-humana/puntuacion-territorios', titulo: 'Puntuación de territorios', icono: BadgeCheck },
+  // Tokenomics: qué es el punto, qué compra, de dónde sale su valor y qué NO
+  // es — y, colgados como vistas (`?vista=libro-blanco`, `?vista=tareas`), el
+  // borrador del libro blanco y la lista de tareas hasta el token (Eugenio,
+  // 2026-08-22: «plasmar de forma pública en una página de información sobre
+  // los tokenomics»). Una sola entrada: los dos documentos no merecen línea
+  // de menú propia.
+  { ruta: 'tokenomics', titulo: 'Tokenomics: el punto', icono: Coins,
+    componente: lazy(() => import('./pages/about/Tokenomics')) },
   // Qué hace cada herramienta y QUÉ LE FALTA, con las cifras leídas de la base
   // de datos al abrirla. Va aquí porque explica la plataforma, no porque sea
   // una herramienta más (Eugenio, 2026-08-22: «que esa página sea el dashboard

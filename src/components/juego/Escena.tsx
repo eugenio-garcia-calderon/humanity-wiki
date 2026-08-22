@@ -55,7 +55,7 @@ function Ambiente({ interior }: { interior: boolean }) {
       scene.environmentIntensity = 0.22;
     } else {
       scene.background = null;
-      scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+      scene.fog = new THREE.Fog(PALETA.cielo, 60, 200);
       scene.environmentIntensity = 0.6;
     }
   }, [interior, scene]);
@@ -338,14 +338,17 @@ export default function Escena({ entrada, camara, proyectos, agentes, jugadorPos
       // Con el composer de efectos el antialias del navegador no pinta nada
       // (lo hace SMAA); en calidad baja no hay composer y sí se necesita.
       gl={{ antialias: !ajustes.efectos, powerPreference: 'high-performance' }}
-      camera={{ fov: 48, near: 0.5, far: 1400, position: [0, 11, 32] }}
+      // `far` 1400 era para un mundo de 545 de medio lado. Con 95, a 320 sobra:
+      // menos precisión desperdiciada en el buffer de profundidad.
+      camera={{ fov: 48, near: 0.5, far: 320, position: [0, 11, 32] }}
       onCreated={(estado) => {
-        // Color «de cine»: curva ACES con algo más de exposición. Con el
-        // composer activo esto lo pisa el efecto ToneMapping (Efectos.tsx);
-        // aquí queda para la calidad baja, que va sin composer.
+        // Color «de cine»: curva ACES con algo más de exposición. Desde
+        // 2026-08-22 la aplica SIEMPRE el renderer, porque el composer que
+        // antes la pisaba ya no se monta: la misma curva, sin guardar media
+        // docena de copias de la pantalla en la tarjeta gráfica.
         estado.gl.toneMapping = THREE.ACESFilmicToneMapping;
         estado.gl.toneMappingExposure = 1.12;
-        estado.scene.fog = new THREE.Fog(PALETA.cielo, 140, 780);
+        estado.scene.fog = new THREE.Fog(PALETA.cielo, 60, 200);
         estado.scene.background = null;
         // Dev-only handle for in-browser scene inspection (used to debug the
         // blank-canvas bug of 2026-08-18; harmless and useful, so it stays).

@@ -26,7 +26,9 @@ const TURBO = 3;
 /** Salto: velocidad inicial y gravedad. Da un brinco de ~1,3 m. */
 const VEL_SALTO = 7.2;
 const GRAVEDAD = 20;
-const LIMITE = 530;          // keep the player inside the 118 ha
+const LIMITE = 92;           // dentro del mundo nuevo (MITAD = 95): el borde
+                             // se ve antes de tocarlo, en vez de andar 500 m
+                             // hasta una pared invisible.
 const TECHO = 130;           // altura máxima de vuelo, en metros
 const VEL_VERTICAL = 11;     // subir y bajar, en m/s
 

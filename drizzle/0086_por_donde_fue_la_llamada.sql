@@ -1,5 +1,5 @@
 -- ============================================================================
--- POR DÓNDE FUE CADA LLAMADA (2026-08-22)
+-- POR DÓNDE FUE CADA LLAMADA (2026-08-22, migración 0086)
 -- ============================================================================
 -- Con el TURN de Cloudflare enchufado, una llamada puede ir por tres caminos y
 -- **solo uno de los tres cuesta dinero**. Esta columna dice cuál fue.

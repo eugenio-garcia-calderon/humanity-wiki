@@ -49,9 +49,28 @@ export const AJUSTES: Record<NivelCalidad, {
   // entera no ahorra ni un fotograma —va instanciada, la tarjeta la dibuja de
   // una vez— pero SÍ cuesta memoria y tiempo de construirla al entrar, que es
   // lo que de verdad se nota. A 15.000 el suelo sigue cubierto.
-  alta: { dpr: [1, 2], sombras: 4096, efectos: true, ao: true, hierba: 15000 },
-  media: { dpr: [1, 1.5], sombras: 2048, efectos: true, ao: false, hierba: 16000 },
-  baja: { dpr: [0.8, 1], sombras: 1024, efectos: false, ao: false, hierba: 3000 },
+  // ══ MEDIDO, Y BAJADO A LO QUE SE NOTA (2026-08-22) ═══════════════════════
+  // Eugenio: «quita sofisticaciones de luces y cosas que quiten mucha RAM».
+  // Los tres números que más pesaban, con su cuenta:
+  //
+  //   SOMBRAS 4096  ->  4096 × 4096 × 4 bytes = **67 MB** de tarjeta gráfica,
+  //                     reservados siempre. A 2048 son 17: **50 MB menos** por
+  //                     una diferencia que hay que buscar a propósito, porque
+  //                     la cámara del juego mira desde arriba y de lejos.
+  //   EFECTOS       ->  el composer guarda varias copias de la pantalla
+  //                     entera. A DPR 2 en un portátil son ~19 MB cada una, y
+  //                     entre bloom, antialiasing y oclusión salían 5-6.
+  //                     ~100 MB para un brillo y una viñeta.
+  //   HIERBA 15.000 ->  poca memoria (1 MB de matrices) pero **15.000 matas
+  //                     que se dibujan dos veces**: una en pantalla y otra en
+  //                     el mapa de sombras.
+  //
+  // El color de cine NO se pierde: la curva ACES la aplica ahora el propio
+  // renderer (`toneMapping` en Escena.tsx), que es gratis. Lo que se va es el
+  // composer, no el aspecto.
+  alta:  { dpr: [1, 1.75], sombras: 2048, efectos: false, ao: false, hierba: 6000 },
+  media: { dpr: [1, 1.5],  sombras: 1024, efectos: false, ao: false, hierba: 3500 },
+  baja:  { dpr: [0.8, 1],  sombras: 1024, efectos: false, ao: false, hierba: 1200 },
 };
 
 /** Un escalón menos, para la degradación automática por FPS. */
