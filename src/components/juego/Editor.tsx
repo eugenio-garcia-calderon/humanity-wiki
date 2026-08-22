@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Billboard, Text, Line } from '@react-three/drei';
 import * as THREE from 'three';
+import { useFoto } from './texturas';
 import { PALETA } from './paleta';
 import { CasaReal } from './CasaReal';
 import { ObjetoNuevo, esObjetoNuevo } from './Objetos';
@@ -182,16 +183,11 @@ function Nota3D({ texto }: { texto: string }) {
  *  puede tumbar el Suspense) y el material se REMONTA con otra key al llegar:
  *  three no recompila el shader de un material que nació sin mapa. */
 function Imagen3D({ url }: { url: string }) {
-  const [tex, setTex] = useState<THREE.Texture | null>(null);
-  useEffect(() => {
-    let vivo = true;
-    new THREE.TextureLoader().load(url, (t) => {
-      if (!vivo) return;
-      t.colorSpace = THREE.SRGBColorSpace;
-      setTex(t);
-    }, undefined, () => { /* la imagen no está: queda el marco */ });
-    return () => { vivo = false; };
-  }, [url]);
+  // La misma foto en dos sitios era antes dos subidas a la tarjeta gráfica:
+  // cada uno tenía su propio `TextureLoader` y no había caché. `useFoto` la
+  // carga una vez por URL. Si no está, devuelve null y queda el marco, que es
+  // lo que hacía este componente antes.
+  const tex = useFoto(url);
   const img = tex?.image as { width?: number; height?: number } | undefined;
   const prop = img?.width && img?.height ? img.height / img.width : 0.68;
   const ancho = 3;

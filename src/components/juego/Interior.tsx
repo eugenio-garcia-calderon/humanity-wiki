@@ -9,7 +9,7 @@
 // Nada de esto es decorado: los grupos son los del proyecto (`proyectos.grupos`),
 // las tarjetas son sus `roadmap_items` y las fotos son las imágenes que hay de
 // verdad en los bloques de cada tarjeta.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
@@ -22,7 +22,7 @@ import {
 import { PortalVerde, LuzDePortal, VERDE_PORTAL } from './PortalVerde';
 import type { Agente, ItemProyecto } from './tipos';
 import { Persona3D, cuerpoDe } from './Modelos';
-import { mapasPBR } from './texturas';
+import { mapasPBR, useFoto } from './texturas';
 import { Halo, Interactivo, Rotulo } from './Senales';
 import { PALETA } from './paleta';
 
@@ -64,16 +64,9 @@ function Flotante({ fase, amplitud = 0.18, children }: {
  * Suspense de la escena; así, simplemente, esa foto no aparece.
  */
 function Foto({ url, ancho = 3 }: { url: string; ancho?: number }) {
-  const [tex, setTex] = useState<THREE.Texture | null>(null);
-  useEffect(() => {
-    let vivo = true;
-    new THREE.TextureLoader().load(url, (t) => {
-      if (!vivo) return;
-      t.colorSpace = THREE.SRGBColorSpace;
-      setTex(t);
-    }, undefined, () => { /* la foto no está: se queda el marco vacío */ });
-    return () => { vivo = false; };
-  }, [url]);
+  // Una foto colgada dentro de una casa y la misma foto fuera, en el mundo,
+  // eran dos copias en la tarjeta. Ahora es una.
+  const tex = useFoto(url);
 
   const img = tex?.image as { width?: number; height?: number } | undefined;
   const prop = img?.width && img?.height ? img.height / img.width : 0.68;
