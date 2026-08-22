@@ -142,6 +142,7 @@ despliega fusionando el código de varios a la vez.**
 | Quién la abre y la fusiona | **tú**, la tuya, y solo la tuya |
 | Antes de fusionar | lo dices y **esperas** a que te den el turno. Avisar no es pedir |
 | Cuántas a la vez | una. Si otro está desplegando, esperas a que termine |
+| **Di cuál de las dos cosas es tu PR** | **aditivo** (quien no toque nada sigue viendo lo de siempre) o **cambia lo que ve todo el mundo mañana**. La segunda necesita que Eugenio lo haya pedido, y al pedir turno se trae **su frase**, no un resumen de ella |
 
 **El turno dice que nadie más está desplegando. No dice que puedas desplegar.**
 Distinción de prog4, el 2026-08-22: si Eugenio ha parado tu rama, el Dashboard no
