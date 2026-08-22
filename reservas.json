@@ -23,6 +23,12 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "fase 2 comercio: crear producto desde una pagina",
       "desde": "2026-08-22T14:25:29.967Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "unificacion de nombres y el barrido de textos viejos",
+      "desde": "2026-08-22T14:25:42.671Z"
     }
   ]
 }
