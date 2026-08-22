@@ -1,10 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, ShieldAlert, Server, Scale, type LucideIcon } from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon } from 'lucide-react';
 
-// ============================================================================
-// LAS PÁGINAS DE LA «i» (2026-08-22)
-// ============================================================================
-// The pages that EXPLAIN the platform, as opposed to being the platform. One
+// =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
+// =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
 // list, read from two places: `App.tsx` mounts the routes and `Layout.tsx`
 // paints the (i) menu in the top bar.
 //
@@ -44,6 +42,12 @@ export const PAGINAS_INFO: PaginaInfo[] = [
     componente: lazy(() => import('./pages/Veracidad')) },
   { ruta: 'sobre-red-humana', titulo: 'Sobre Humanity.wiki', icono: Globe },
   { ruta: 'sobre-red-humana/puntuacion-territorios', titulo: 'Puntuación de territorios', icono: BadgeCheck },
+  // Qué hace cada herramienta y QUÉ LE FALTA, con las cifras leídas de la base
+  // de datos al abrirla. Va aquí porque explica la plataforma, no porque sea
+  // una herramienta más (Eugenio, 2026-08-22: «que esa página sea el dashboard
+  // de información y seguimiento de cómo avanzan las herramientas»).
+  { ruta: 'herramientas', titulo: 'Cómo van las herramientas', icono: Wrench,
+    componente: lazy(() => import('./pages/EstadoHerramientas')) },
 
   // Servidores: dónde vive esto, qué cuesta de verdad y qué queda por hacer.
   // El coste sale de `/api/gasto`, que ya era público — la página no abre nada
