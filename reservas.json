@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
+      "motivo": "Programador 3: botón de cámara (foto y vídeo) en el creador de publicaciones",
+      "desde": "2026-08-22T11:27:21.058Z"
+    }
+  ]
 }
