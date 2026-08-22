@@ -26,7 +26,7 @@ import { cn } from '../../utils/cn';
 //  - A MANO: eliges el tipo, le pones título y se llama al endpoint de
 //    creación de ese tipo (los mismos POST de siempre), abriéndolo al crear.
 
-type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'imagen' | 'camara' | 'proyecto' | 'muro';
+type TipoCreable = 'documento' | 'presentacion' | 'lienzo' | 'mapa' | 'camara' | 'proyecto' | 'muro';
 
 // ¿Sabe este navegador abrir la cámara desde un `<input type=file>`?
 // En un móvil sí, y es el mejor camino: es la cámara del sistema, graba vídeo y
@@ -41,10 +41,13 @@ const TIPOS: { tipo: TipoCreable; label: string; icon: any; descripcion: string;
   { tipo: 'presentacion', label: 'Presentación', icon: MonitorPlay, descripcion: 'Frames horizontales estilo PowerPoint, exportable a .pptx', conIA: true },
   { tipo: 'lienzo', label: 'Lienzo', icon: Network, descripcion: 'Pizarra infinita con ventanas conectadas', conIA: true },
   { tipo: 'mapa', label: 'Mapa', icon: MapIcon, descripcion: 'Mapa con indicadores sobre el territorio', conIA: true },
-  { tipo: 'imagen', label: 'Imagen', icon: ImageIcon, descripcion: 'Sube una foto y edítala: recorte, filtros, texto…', conIA: false },
-  { tipo: 'camara', label: 'Cámara', icon: Camera, descripcion: 'Haz una foto o graba un vídeo aquí mismo y súbelo', conIA: false },
+  // «Imagen» y «Cámara» eran la misma herramienta con dos nombres: las dos
+  // acaban en una foto subida y en el mismo selector de destino, y sólo se
+  // diferenciaban en de dónde sale la foto. Ahora es una, con las tres
+  // procedencias dentro. (2026-08-22, Nielsen 4: un nombre, una cosa.)
+  { tipo: 'camara', label: 'Cámara', icon: Camera, descripcion: 'Haz una foto o un vídeo, o cógelos del carrete', conIA: false },
   { tipo: 'proyecto', label: 'Proyecto', icon: FolderKanban, descripcion: 'Tablero de tarjetas por hacer / en curso / hecho', conIA: false },
-  { tipo: 'muro', label: 'Al muro', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
+  { tipo: 'muro', label: 'Publicación', icon: MessageSquare, descripcion: 'Publicación breve en el muro de la comunidad', conIA: false },
 ];
 
 /*
@@ -222,7 +225,6 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
     }
   };
 
-  /** Imagen: se sube el original y se abre el editor encima. */
   /*
    * Sube la foto y PREGUNTA DÓNDE VA (2026-08-22, Eugenio: «que no te salte el
    * editor por defecto, sino que sea tal cual como está y que luego te
@@ -413,6 +415,15 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
                       Grabar un vídeo
                     </button>
                   </div>
+                  {/* Y el carrete, que antes era una herramienta aparte
+                      llamada «Imagen». Va debajo y en gris porque hacerla ahora
+                      es lo que trae aquí a alguien con el móvil en la mano. */}
+                  <label className="mt-2 min-h-[44px] flex items-center justify-center gap-2 px-4 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 cursor-pointer hover:border-emerald-300 hover:text-emerald-700 transition-colors">
+                    <ImageIcon className="w-4 h-4" />
+                    Elegir del carrete
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirCaptura(f, 'imagen'); }} />
+                  </label>
                   <p className="mt-2 text-[11px] text-slate-400">
                     Después te preguntamos dónde guardarla.
                   </p>
@@ -424,20 +435,6 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
                     ref={entradaVideo} type="file" accept="video/*" capture="environment" className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) subirVideo(f); }}
                   />
-                </>
-              ) : tipo === 'imagen' ? (
-                <>
-                  <input
-                    value={titulo} onChange={e => setTitulo(e.target.value)}
-                    placeholder="Título de la imagen (opcional)"
-                    className="w-full mt-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300"
-                  />
-                  <label className="mt-2 flex items-center justify-center gap-2 px-4 py-5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-colors">
-                    {ocupado === 'mano' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-                    Elegir una foto — se abrirá el editor
-                    <input type="file" accept="image/*" className="hidden"
-                      onChange={e => e.target.files?.[0] && subirParaEditar(e.target.files[0])} />
-                  </label>
                 </>
               ) : (
                 <>
