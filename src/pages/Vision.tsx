@@ -129,6 +129,9 @@ const MOTIVO_LABEL: Record<string, string> = {
   transferencia_enviada: 'Enviado a otra persona',
   transferencia_recibida: 'Recibido de otra persona',
   saldo_inicial: 'Apertura del libro',
+  gasto_servicio: 'Servicio de la plataforma',
+  compra_con_puntos: 'Compra en el mercado pagada con puntos',
+  venta_en_puntos: 'Venta cobrada en puntos',
 };
 
 /**

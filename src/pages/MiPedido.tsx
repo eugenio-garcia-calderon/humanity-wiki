@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download } from 'lucide-react';
 
 // ============================================================================
@@ -24,12 +24,32 @@ export default function MiPedido() {
   const [estado, setEstado] = useState<'quieto' | 'buscando' | 'ok' | 'no-esta'>('quieto');
   const [pedido, setPedido] = useState<any>(null);
 
+  // Llegar con `?codigo=…` desde la confirmación de compra (2026-08-22): se
+  // rellena y se busca solo. Sin correo, el servidor acepta la SESIÓN de quien
+  // compró; si no hay sesión, contestará que falta el correo y se pide.
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('codigo');
+    if (c) { setCodigo(c.toUpperCase()); void buscarCodigo(c.toUpperCase(), ''); }
+  }, []);
+
+  async function buscarCodigo(cod: string, mail: string) {
+    setEstado('buscando');
+    try {
+      const r = await fetch(
+        `/api/publicar/pedido/${encodeURIComponent(cod.trim().toUpperCase())}${mail.trim() ? `?correo=${encodeURIComponent(mail.trim())}` : ''}`
+      );
+      if (!r.ok) { setEstado('no-esta'); return; }
+      setPedido(await r.json());
+      setEstado('ok');
+    } catch { setEstado('no-esta'); }
+  }
+
   async function buscar(e: React.FormEvent) {
     e.preventDefault();
     setEstado('buscando');
     try {
       const r = await fetch(
-        `/api/publicar/pedido/${encodeURIComponent(codigo.trim().toUpperCase())}?correo=${encodeURIComponent(correo.trim())}`
+        `/api/publicar/pedido/${encodeURIComponent(codigo.trim().toUpperCase())}${correo.trim() ? `?correo=${encodeURIComponent(correo.trim())}` : ''}`
       );
       if (!r.ok) { setEstado('no-esta'); return; }
       setPedido(await r.json());
