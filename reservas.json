@@ -55,12 +55,6 @@
       "desde": "2026-08-22T18:22:49.774Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/server/puntos.ts",
-      "motivo": "reparto mensual en modo simulacion (sin pagar)",
-      "desde": "2026-08-22T18:28:11.457Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "drizzle/0085_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: quien movio el sello y cuando (0083 y 0084 ya cogidos)",
