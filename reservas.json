@@ -29,6 +29,12 @@
       "ruta": "src/components/tablero/TableroKanban.tsx",
       "motivo": "Fase A: camara y video en la ficha de tarea",
       "desde": "2026-08-22T14:55:56.852Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/knowledge/DestinoCaptura.tsx",
+      "motivo": "Fase B: destino proyecto -> tarea",
+      "desde": "2026-08-22T14:57:53.433Z"
     }
   ]
 }
