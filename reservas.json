@@ -77,6 +77,12 @@
       "ruta": "drizzle/0075_area_incidencias.sql",
       "motivo": "página de seguridad: columna area en incidencias",
       "desde": "2026-08-22T15:00:42.846Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "foto a una tarea, en los dos sentidos",
+      "desde": "2026-08-22T15:04:43.072Z"
     }
   ]
 }
