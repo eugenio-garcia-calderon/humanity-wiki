@@ -119,6 +119,12 @@
       "ruta": "src/server/social.ts",
       "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
       "desde": "2026-08-22T20:53:54.603Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/mensajes.ts",
+      "motivo": "filtrar contenido de personas bloqueadas (requisito Apple)",
+      "desde": "2026-08-22T20:53:58.607Z"
     }
   ]
 }
