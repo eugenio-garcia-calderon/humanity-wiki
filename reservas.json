@@ -53,12 +53,6 @@
       "ruta": "src/server/knowledge.ts",
       "motivo": "vistas validas en la ruta de vistas",
       "desde": "2026-08-22T18:21:27.176Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/puntos.ts",
-      "motivo": "ref 0077→0083",
-      "desde": "2026-08-22T18:21:47.775Z"
     }
   ]
 }
