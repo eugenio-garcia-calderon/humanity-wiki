@@ -1,0 +1,14 @@
+#!/bin/sh
+# Impide que un programador se lleve por delante un fichero que otro tiene reservado.
+# Falla ABIERTO: si no hay red o node, avisa pero deja trabajar. Solo bloquea ante un
+# choque real. Ver equipo/REPARTO.md
+raiz=$(git rev-parse --show-toplevel)
+
+# Un merge no es trabajo de nadie en concreto: no se comprueba.
+[ -f "$raiz/.git/MERGE_HEAD" ] && exit 0
+[ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ] && exit 0
+
+command -v node >/dev/null 2>&1 || exit 0
+[ -f "$raiz/scripts/equipo.mjs" ] || exit 0
+
+node "$raiz/scripts/equipo.mjs" comprobar --staged
