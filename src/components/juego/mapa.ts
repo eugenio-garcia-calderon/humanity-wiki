@@ -10,7 +10,18 @@ import { RADIOS_OBJETO } from './Objetos';
 export { centroRio };
 
 /** Media anchura del mundo: 118 ha ≈ 1090 × 1090 m. */
-export const MITAD = 545;
+// ══ EL MUNDO SE ENCOGE (2026-08-22) ═══════════════════════════════════════
+// Eugenio: «reduce el tamaño del mapa a solo la plaza central y sus círculos
+// equidistantes».
+//
+// Eran 545 de medio lado: **118 hectáreas** para una plaza de 13 m de radio, un
+// anillo de casas a 36 y un distrito que no pasa de x=80. Todo lo que hay que
+// mirar cabía en el 3 % del mapa; el 97 % restante era suelo que cruzar.
+//
+// Ahora 95: entra la plaza, los dos anillos de casas, el distrito de proyectos
+// y un borde de árboles alrededor. Nada de lo que existe se queda fuera —
+// comprobado pieza a pieza, la más lejana está a 80.
+export const MITAD = 95;
 
 /** Radio de la plaza empedrada. */
 export const PLAZA_R = 13;
@@ -116,7 +127,14 @@ export function casasAldea(): CasaAldea[] {
   const lista: CasaAldea[] = [];
   for (let i = 0; i < 14; i++) {
     const ang = 0.45 + (i / 14) * (Math.PI * 2 - 0.9);
-    const r = (i % 2 === 0 ? 27 : 36) + azar() * 4;
+    // ══ LOS DOS ANILLOS, MÁS JUNTOS (2026-08-22) ═══════════════════════════
+    // Eugenio: «acerca los círculos externos haciendo que el pasillo que los
+    // separa sea muy inferior». Eran 27 y 36: **nueve metros de pasillo** entre
+    // el anillo de dentro y el de fuera, más hasta 4 de azar — se cruzaba andando
+    // y no había nada en medio. Ahora 21 y 26: **cinco metros**, que es un
+    // callejón entre casas y no un descampado. El azar baja de 4 a 2 por lo
+    // mismo: con el pasillo estrecho, 4 metros de ruido lo deshacían.
+    const r = (i % 2 === 0 ? 21 : 26) + azar() * 2;
     // Se consumen los mismos números que consumía la versión con cajas, para
     // que las posiciones no se muevan al cambiar el aspecto de las casas.
     azar(); azar(); azar(); azar();
@@ -140,7 +158,11 @@ export const RADIO_EDIFICIO = 4.6;
  * quedarían apuntando al sitio viejo. Ya pasó con las casas.
  */
 export function posicionProyecto(i: number): { x: number; z: number } {
-  return { x: 42 + (i % 3) * 19, z: -36 + Math.floor(i / 3) * 21 };
+  // Más cerca del centro con el mundo encogido (2026-08-22): empezaba en x=42,
+  // fuera del anillo de casas de 36, y se iba hasta 80. Con los anillos en
+  // 21/26, el distrito arranca en 34 y llega a 62: se ve desde la plaza en vez
+  // de haber que ir a buscarlo.
+  return { x: 34 + (i % 3) * 14, z: -26 + Math.floor(i / 3) * 16 };
 }
 
 /**
@@ -234,9 +256,14 @@ export const CARRO = { x: 17, z: -14, rot: 0.7 };
 
 /** ¿Se puede plantar aquí un árbol de serie? (misma lógica que la vegetación) */
 export function sueloLibre(x: number, z: number): boolean {
-  if (Math.abs(x) > 540 || Math.abs(z) > 540) return false;
-  if (Math.hypot(x, z) < 52) return false;                          // el pueblo
-  if (x > 28 && x < 96 && z > -62 && z < 18) return false;          // distrito
+  if (Math.abs(x) > MITAD - 5 || Math.abs(z) > MITAD - 5) return false;
+  // El veto del pueblo era 52: el radio del anillo viejo (36 + azar) más
+  // margen. Con los anillos en 21/26 sobra sitio entre las casas y el campo, y
+  // ahí es donde Eugenio quiere los árboles que quedan — «algunos principales
+  // cerca de la plaza central». 32 deja libre el corredor de fuera del anillo
+  // sin meter troncos entre las casas.
+  if (Math.hypot(x, z) < 32) return false;                          // el pueblo
+  if (x > 24 && x < 70 && z > -40 && z < 22) return false;          // distrito
   if (Math.abs(x - centroRio(z)) < 16) return false;                // río
   if (x > -94 && x < -46 && z > -50 && z < 50) return false;        // naves
   if (Math.abs(z) < 6 && x > -98 && x < 132) return false;          // caminos E-O
@@ -260,24 +287,44 @@ export function arbolesAldea(): PiezaAldea[] {
   const meter = (x: number, z: number, s: number, pino: boolean) => {
     lista.push({ seed_id: `arbol:${n++}`, tipo: 'arbol', x, z, rot: 0, radio: 0.9 * s, escala: s, pino });
   };
+  // ══ DE 1.092 ÁRBOLES A UNOS 55 (2026-08-22) ════════════════════════════
+  // Eugenio: «elimina toda la paja de árboles, el 95 % quítalos y deja solo
+  // algunos principales cerca de la plaza central».
+  //
+  // Había ocho bosques repartidos por 118 hectáreas más 300 árboles sueltos.
+  // Nadie los miraba: quedaban lejos de todo lo que se hace en el mundo, y lo
+  // único que aportaban era tapar la vista y dar trabajo a la tarjeta gráfica
+  // en cada fotograma y en cada pasada de sombras.
+  //
+  // Quedan cuatro grupitos alrededor de la plaza y unos pocos sueltos. Los
+  // suficientes para que el sitio parezca un pueblo y no una maqueta, y ni uno
+  // más.
+  //
+  // OJO CON EL ORDEN DEL AZAR: la semilla es la misma, así que los árboles que
+  // sobreviven caen donde caían — no es un bosque nuevo más pequeño, es el
+  // mismo bosque podado.
   const nucleos = [
-    [-320, -180], [260, 130], [-150, -380], [320, -320],
-    [-350, 260], [150, 330], [430, 80], [-80, 430],
+    [-38, -22], [-24, 40], [30, 42], [-46, 16],
   ];
   // OJO: el orden de consumo del azar es EXACTAMENTE el del código viejo de
   // Aldea.tsx (s y pino solo se sortean si el sitio está libre) — cambiarlo
   // replantaría el bosque entero de otra manera.
   for (const [nx, nz] of nucleos) {
-    for (let i = 0; i < 105; i++) {
-      const x = nx + (azar() + azar() - 1) * 110;
-      const z = nz + (azar() + azar() - 1) * 110;
+    for (let i = 0; i < 14; i++) {
+      const x = nx + (azar() + azar() - 1) * 16;
+      const z = nz + (azar() + azar() - 1) * 16;
       if (sueloLibre(x, z)) meter(x, z, 0.75 + azar() * 0.7, azar() > 0.42);
     }
   }
-  for (let i = 0; i < 300; i++) {
-    const x = (azar() - 0.5) * 1060;
-    const z = (azar() - 0.5) * 1060;
-    if (sueloLibre(x, z)) meter(x, z, 0.7 + azar() * 0.7, azar() > 0.5);
+  // Los sueltos, en el borde: cierran el horizonte para que el mundo no acabe
+  // en una línea recta, y son pocos.
+  for (let i = 0; i < 44; i++) {
+    const x = (azar() - 0.5) * 150;
+    const z = (azar() - 0.5) * 150;
+    const d = Math.hypot(x, z);
+    // Entre 30 y 78: fuera de la plaza y de los anillos, y DENTRO del mundo
+    // (MITAD = 95). Un árbol al otro lado del borde es un árbol que nadie ve.
+    if (sueloLibre(x, z) && d > 30 && d < 78) meter(x, z, 0.7 + azar() * 0.7, azar() > 0.5);
   }
   cacheArboles = lista;
   return lista;

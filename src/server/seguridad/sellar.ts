@@ -1,7 +1,7 @@
 // ============================================================================
 // PASAR EL BUZÓN AL REGISTRO SELLADO (fase B, 2026-08-22)
 // ============================================================================
-// El disparador de `drizzle/0071_registro_captura.sql` deja una nota por cada
+// El disparador de `drizzle/0085_registro_captura.sql` deja una nota por cada
 // cambio en `registro_pendiente`, rápido y sin firmar. Esto es lo que las coge
 // en orden, las encadena y las firma.
 //

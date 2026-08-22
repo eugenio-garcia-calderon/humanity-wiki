@@ -12,13 +12,16 @@ cifrado.ts        envelope encryption: one key per record, key destruction = del
 firma.ts          Ed25519: proves WE wrote it, which the hash chain cannot
 registro.ts       the sealed record: append-only, hash-chained, signed, verifiable by anyone
 sellar.ts         drains the outbox into the sealed record, and answers "is this row still the one we sealed?"
+selladoAutomatico.ts  runs that drain every two minutes, inside the server
+transparencia.ts  what an administrator may look at, and what looking leaves behind
 ```
 
-Migration: `drizzle/0070_registro_sellado.sql` (the record). **The
-database-level capture (`0071`) is deliberately not in this branch**: it puts
-triggers on 25 production tables, and every captured change lands in an outbox
-that grows until something drains it. It ships together with the schedule that
-drains it, not before. Branch `prog4/captura-cambios`.
+Migrations: `drizzle/0070_registro_sellado.sql` (the record) and
+`drizzle/0085_registro_captura.sql` (the database-level capture).
+
+**The capture and the sealer ship together, never apart.** Triggers with nothing
+draining the outbox is a tap with the drain blocked, and the day somebody notices
+is the day the disk is full.
 
 Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
@@ -49,7 +52,7 @@ green is worse than no test.
 | The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
-| Capture from the database | Written and tested, **held back on purpose**: triggers with no drainer make a table that only grows. Ships with its schedule, in `prog4/captura-cambios` |
+| Capture from the database | Triggers on 25 tier-3 tables write to an outbox, and `selladoAutomatico.ts` drains it every two minutes from inside the server — first pass on boot, so a restart never leaves anything stranded |
 | Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
 | Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
 
@@ -121,6 +124,24 @@ a deploy — that is the point of having the two modes.
 | Trust the `registro_sellado` triggers as security | They stop the accident, not somebody with rights to drop them | The chain, and phase 2's external anchor |
 | Add a table to the capture list without measuring | Every write to it becomes one sealed, signed, serialised entry. On a high-volume table that is a queue that never drains | Measure first; the exclusions in `0071` each carry their reason |
 | Seal inside the trigger | A signing failure would break an ordinary save, and security that breaks people's work gets removed | The outbox, drained by `sellar.mjs` outside the request |
+
+## Protecting people from us
+
+`transparencia.ts` closes the generic database browser on twelve tables whose
+content belongs to a person rather than to the platform — to everyone, including
+an administrator — and records every privileged read that is still allowed in the
+sealed record, where whoever did it cannot erase it. Any account can read that
+log; a surveillance log only its subjects cannot read is not surveillance.
+
+The owner keeps a documented key: one row, by id, with a written reason,
+**recorded before the read** — if the record cannot be written, the read does not
+happen. The record is the permission, not a side effect of it. Without that key
+somebody eventually reaches for `psql`, where nothing is recorded at all.
+
+None of this stops somebody with the database password. Only end-to-end
+encryption does, it costs the person their content if they lose their password,
+and the decision is written up in
+`memory/09_TARGET_ARCHITECTURE/06_PROTECT_FROM_ADMINS.md`.
 
 ## The honest limit of all of this
 

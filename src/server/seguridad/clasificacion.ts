@@ -64,6 +64,7 @@ export const CLASIFICACION: Clase[] = [
   c('sessions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'una fila insertada aquí ES entrar como esa persona, sin su contraseña'),
   c('password_resets', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un testigo válido abre la cuenta de otro'),
   c('agentes_ia', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'las llaves de los programadores IA'),
+  c('dominios_paginas', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'que dominio de internet apunta a la pagina de quien: cambiar una fila manda el trafico de otro a otra parte'),
   c('handles_reservados', 'ALTA', 'BAJA', 'MEDIA', 'ALTA', 'el nombre público con el que se conoce a alguien: cambiarlo es suplantarlo'),
   c('memberships', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'da acceso pagado; cambiarla es regalar o quitar lo que alguien compró'),
 
@@ -85,6 +86,7 @@ export const CLASIFICACION: Clase[] = [
   // Si el rastro se puede editar, no es un rastro: es una redacción.
   c('entity_history', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'lo que había antes de cada cambio; quien altera un dato querrá alterar esto'),
   c('registro_sellado', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el registro sellado; su integridad es lo único que hace verificable todo lo demás'),
+  c('registro_pendiente', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el buzon de cambios aun sin sellar; borrar una nota de aqui es esconder un cambio, y por eso los huecos de su secuencia se anotan'),
   c('registro_anclajes', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'los resúmenes diarios publicados fuera: la prueba que enseñaríamos a un auditor'),
   // ── LO QUE NACIÓ EL 2026-08-22 POR LA TARDE ───────────────────────────────
   c('vistas_validas', 'ALTA', 'MEDIA', 'ALTA', 'MEDIA', 'una vista por persona, ventana y dia: es el contador que ACUNA puntos, asi que meter filas aqui es fabricar dinero'),

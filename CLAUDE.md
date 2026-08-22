@@ -177,6 +177,34 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   with `image/png` and SVG bytes inside. Two green status codes over two different
   failures. Load the thing the way the browser loads it — `Image()` and
   `onload`/`onerror` — and count.
+- **Changing what something does includes changing what it says it does.** On
+  2026-08-22 a screen still promised "the photo opens in the editor before it is
+  saved" hours after that stopped being true — written by the same agent who changed
+  the behaviour. A sentence that describes what the program no longer does teaches
+  people not to read the screen, and after that no warning works either.
+  **And the text is never in one place: `grep` for it.** That same false promise had
+  three copies — two screens and a comment. Fixing the string you happen to remember
+  is exactly how a screen ends up contradicting itself in the corner nobody reopened.
+- **A comment explaining why something is safe is not evidence that it is.** The
+  service worker carried a comment saying hashed files "are cached as they are used
+  rather than guessed here" — a guarantee the code never gave. It read as reasoning,
+  it had been there since the first version, and it hid the fact that the app opened
+  **blank offline** on a real first visit. Repeated reloads in testing never saw it;
+  a person with one load would have.
+- **Saying exactly what you could not check is a complete delivery.** What is not
+  allowed is calling something verified when you did not see it. Approved by Eugenio
+  on 2026-08-22, after an afternoon in which three deliveries were honest about it
+  and one agent bypassed a login check in its own copy just to be able to look. That
+  was not carelessness: the honest path looked like a failure. **If you are tempted
+  to disable a guard in order to verify something, the right move is not to disable
+  it and to say so.**
+- **Watch for the bug that waits for someone else to do the right thing.** On
+  2026-08-22 `checkout.session.completed` never looked at `metadata.kind`, so it
+  granted a membership for *every* payment — buying a hundred points would have made
+  you a member. It had never fired because there had never been a payment. It was
+  armed for the day Eugenio put the real Stripe keys in, which is the day nobody
+  would be watching the webhook. Testing does not find these, because nothing
+  happens. Reading does.
 - **To find out what the browser downloaded, ask the browser.** Searching the
   startup bundle for a chunk's filename returns **zero even when the chunk is
   there** — Vite does not leave those names as string literals. Load the page and
@@ -190,6 +218,34 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   automation browser's `IntersectionObserver` delivers **no events at all**, so
   nothing about lazy loading can be concluded from it. Before quoting a number,
   ask whether the environment you measured in is the one the number is about.
+- **What you keep "just in case" leaves the building every night.** Since backups
+  started on 2026-08-22, anything stored in the database is copied off the server
+  daily. Three times that same day something kept for a good reason turned out to be
+  a copy of something that should not travel: password-reset tokens in the clear, an
+  edit history, and the e-mail address of people asking to be forgotten sitting in a
+  rate-limit log. Before storing a value, ask what it looks like in a backup a month
+  from now — and whether deleting the account can reach it there.
+- **Before you verify a path, count how many there are.** On 2026-08-22 the
+  account-deletion endpoint was checked end to end with eight cases — and all eight
+  were password accounts, on a platform that has had Google sign-in since before the
+  agent arrived. Those users could not delete their account at all, and could not
+  cancel a deletion either. A thorough battery of tests on one case says nothing
+  about the case you did not think of.
+- **Two correct verifications do not verify the seam.** On 2026-08-22 one agent
+  wrote the public account-deletion page by reading the other's code, and the other
+  tested the deletion job without reading the page. Both halves were right. The page
+  promised the tombstone would read "Usuario eliminado" and the job wrote "Cuenta
+  borrada" — the one word anyone would ever see, on a page shown to Apple and Google
+  as a commitment. When your work meets someone else's, one of you has to check the
+  join, out loud, and say which of the two is wrong.
+  **The seam has an owner, and it is whoever arrives second.** Whoever builds against
+  a contract that already exists is the one who can see whether the contract tells
+  the truth. Three of these surfaced on 2026-08-22 — a tombstone that said one thing
+  and wrote another, a page describing a menu that had been removed two hours
+  earlier, and `POST /api/report` answering "kept for review" since migration 0009
+  with no screen ever reading the table. Nobody lied in any of the three. Every rule
+  above says how to check your own half better; not one of them would have caught
+  these.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
