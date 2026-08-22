@@ -83,6 +83,12 @@
       "ruta": "src/pages/Hormiguero.tsx",
       "motivo": "renombrar Hormiguero a Feedback y su icono nuevo",
       "desde": "2026-08-22T15:14:23.663Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0075_precios_servicio.sql",
+      "motivo": "rama A: tabla de precios de la cesta",
+      "desde": "2026-08-22T15:15:21.885Z"
     }
   ]
 }
