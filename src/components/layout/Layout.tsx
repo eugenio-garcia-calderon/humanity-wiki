@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
@@ -136,13 +137,7 @@ export default function Layout() {
     const t = setInterval(pedir, 60000);
     return () => clearInterval(t);
   }, [location.pathname]);
-  useEffect(() => {
-    const fuera = (e: MouseEvent) => {
-      if (cuentaRef.current && !cuentaRef.current.contains(e.target as Node)) setCuentaAbierta(false);
-    };
-    document.addEventListener('mousedown', fuera);
-    return () => document.removeEventListener('mousedown', fuera);
-  }, []);
+  useCerrarAlPulsarFuera(cuentaRef, cuentaAbierta, () => setCuentaAbierta(false));
   useEffect(() => {
     const f = (e: Event) => setVentanasAbiertas([...((e as CustomEvent).detail as VentanaEstado[])]);
     window.addEventListener('humanity:ventanas', f);
