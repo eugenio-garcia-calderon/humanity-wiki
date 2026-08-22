@@ -36,15 +36,29 @@ export const LEGACY_MOCK_OBJECTIVE_KEYS = new Set(['agua', 'alimentacion', 'vivi
 // objective, so adding a new objective there is enough on its own — no
 // changes needed here.
 //
-// Score priority per objective: (1) the legacy mock progress_by_territory
-// entry in src/data/seed.ts, if present — preserved as-is for territories
-// that already rely on it; (2) otherwise a weighted average of that
-// objective's own indicators' real indicator_observations for this
-// territory (using each indicator's `weight`, defaulting to an equal split
-// if unset) — this is what makes territories seeded ONLY with real
-// indicator data (e.g. the Madrid municipios) show a correct roll-up
-// instead of "Sin datos"; (3) a neutral 50 for the 6 original objectives
-// with neither (legacy behavior), or null ("Sin datos") for newer ones.
+// Score priority per objective: (1) a weighted average of that objective's own
+// indicators' indicator_observations for this territory, WHEN THOSE
+// OBSERVATIONS ARE REAL (using each indicator's `weight`, defaulting to an
+// equal split if unset); (2) otherwise the legacy mock progress_by_territory
+// entry in src/data/seed.ts, if present; (3) otherwise that same weighted
+// average even when its sources are simulated — this is what makes territories
+// seeded ONLY with indicator data (e.g. the Madrid municipios) show a roll-up
+// instead of "Sin datos"; (4) a neutral 50 for the 6 original objectives with
+// none of the above (legacy behaviour), or null ("Sin datos") for newer ones.
+//
+// ── POR QUÉ UN DATO REAL GANA A LA TABLA ESCRITA A MANO (2026-08-22) ────────
+// Decisión de Eugenio, y el orden estaba al revés. La tabla de
+// `src/data/seed.ts` existe para RELLENAR donde no hay nada, y sin embargo
+// ganaba siempre: España tiene 41 observaciones reales de agua —INE, MITECO,
+// FAO, ESS— y su porcentaje de AGUA salía de un 98 escrito a mano. Los datos
+// buenos estaban en la base de datos, cargados, y no llegaban a ninguna
+// pantalla.
+//
+// SOLO GANA SI ES REAL. Entre dos rellenos —observaciones simuladas contra
+// tabla escrita a mano— no hay motivo para preferir ninguno, así que se deja
+// lo que ya había: cambiar por cambiar movería los números de los 179
+// municipios y de los 32 países sin que nadie ganara nada. Lo que cambia es
+// exactamente lo que tenía que cambiar.
 //
 // ── Y DE DÓNDE SALE CADA UNA (2026-08-22) ──────────────────────────────────
 // Los tres caminos de arriba NO valen lo mismo, y hasta hoy salían por la
@@ -71,39 +85,46 @@ export const getObjectivesForTerritory = (
   for (const [key, id] of Object.entries(OBJECTIVE_ID_BY_KEY)) {
     const seedEntry = seedObjectives.find(o => o.id === id);
     const raw = seedEntry?.progress_by_territory?.[tid];
+
+    // La media ponderada de las observaciones de este objetivo, se use luego o
+    // no: hay que calcularla ANTES para saber si es real, y si lo es, gana.
+    const objIndicators = indicatorsMeta.filter(i => i.objectiveId === id);
+    let weightedSum = 0;
+    let weightTotal = 0;
+    const fuentesUsadas: Array<string | null> = [];
+    for (const ind of objIndicators) {
+      const score = indicatorScoresForTid[ind.id];
+      if (score != null) {
+        const w = ind.weight != null ? ind.weight : (1 / objIndicators.length);
+        weightedSum += score * w;
+        weightTotal += w;
+        // Solo cuentan las fuentes de los indicadores que DE VERDAD entran en
+        // la media: uno sin observación aquí no ensucia el resultado.
+        fuentesUsadas.push(fuentesForTid[ind.id] ?? null);
+      }
+    }
+    const media = weightTotal > 0 ? Math.round(weightedSum / weightTotal) : null;
+    const origenDeLaMedia = weightTotal > 0 ? origenDeVarios(fuentesUsadas) : null;
+    const mediaEsReal = origenDeLaMedia === 'medido' || origenDeLaMedia === 'estimado';
+
     let value: number | null;
     let origen: OrigenDelDato | null;
-    if (raw != null) {
-      value = raw;
+    if (media != null && (mediaEsReal || raw == null)) {
+      // Medido o estimado: gana a cualquier relleno. Y si no hay relleno, la
+      // media es lo único que hay, valga lo que valga.
+      value = media;
+      origen = origenDeLaMedia;
+    } else if (raw != null) {
       // Escrito a mano en el fichero de semillas para poder enseñar la
       // plataforma. No mide nada.
+      value = raw;
+      origen = 'simulado';
+    } else if (LEGACY_MOCK_OBJECTIVE_KEYS.has(key)) {
+      value = 50;
       origen = 'simulado';
     } else {
-      const objIndicators = indicatorsMeta.filter(i => i.objectiveId === id);
-      let weightedSum = 0;
-      let weightTotal = 0;
-      const fuentesUsadas: Array<string | null> = [];
-      for (const ind of objIndicators) {
-        const score = indicatorScoresForTid[ind.id];
-        if (score != null) {
-          const w = ind.weight != null ? ind.weight : (1 / objIndicators.length);
-          weightedSum += score * w;
-          weightTotal += w;
-          // Solo cuentan las fuentes de los indicadores que DE VERDAD entran
-          // en la media: uno sin observación aquí no ensucia el resultado.
-          fuentesUsadas.push(fuentesForTid[ind.id] ?? null);
-        }
-      }
-      if (weightTotal > 0) {
-        value = Math.round(weightedSum / weightTotal);
-        origen = origenDeVarios(fuentesUsadas);
-      } else if (LEGACY_MOCK_OBJECTIVE_KEYS.has(key)) {
-        value = 50;
-        origen = 'simulado';
-      } else {
-        value = null;
-        origen = null;
-      }
+      value = null;
+      origen = null;
     }
     result[key] = value;
     if (origenesFuera && origen) origenesFuera[key] = origen;
