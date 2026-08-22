@@ -1,10 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, type LucideIcon } from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, type LucideIcon } from 'lucide-react';
 
-// ============================================================================
-// LAS PÁGINAS DE LA «i» (2026-08-22)
-// ============================================================================
-// The pages that EXPLAIN the platform, as opposed to being the platform. One
+// =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
+// =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
 // list, read from two places: `App.tsx` mounts the routes and `Layout.tsx`
 // paints the (i) menu in the top bar.
 //
@@ -48,4 +46,19 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // de información y seguimiento de cómo avanzan las herramientas»).
   { ruta: 'herramientas', titulo: 'Cómo van las herramientas', icono: Wrench,
     componente: lazy(() => import('./pages/EstadoHerramientas')) },
+
+  // Servidores: dónde vive esto, qué cuesta de verdad y qué queda por hacer.
+  // El coste sale de `/api/gasto`, que ya era público — la página no abre nada
+  // nuevo, lo enseña (2026-08-22, Eugenio: «de forma transparente a nivel de
+  // coste»).
+  { ruta: 'sobre-red-humana/servidores', titulo: 'Servidores', icono: Server,
+    componente: lazy(() => import('./pages/about/Servidores')) },
+
+  // Seguridad: EL TABLERO NO SE VE SIN PERMISO, y el candado está en el
+  // servidor, no aquí. Aparecer en este menú solo pone el enlace a la vista;
+  // quien no sea del equipo abre la página y encuentra un aviso, no la lista.
+  // Está en el menú a propósito: que exista un sitio donde se trabaja esto es
+  // parte de lo que se cuenta, aunque el contenido no lo sea.
+  { ruta: 'seguridad', titulo: 'Seguridad', icono: ShieldAlert,
+    componente: lazy(() => import('./pages/Seguridad')) },
 ];
