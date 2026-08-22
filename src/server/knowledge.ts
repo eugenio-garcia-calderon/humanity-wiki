@@ -1727,14 +1727,16 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       //     por ventana (50 por defecto): con cuentas de por medio, inflar
       //     una ventana choca con el techo y deja rastro con nombre.
       //
-      // Pendiente y anotado en /tokenomics/tareas: separar contar y pagar
-      // del todo (vistas válidas por persona + reparto sobre lo contado).
-      // Ese día `views` será solo el número que se enseña, nunca el que
-      // decide dinero.
-      // `views` puede subirlo cualquiera Y NO PAGA A NADIE — cierto el
-      // 2026-08-22, y es una decisión de ese día, no una propiedad del
-      // sistema: el día que el reparto del bote mire vistas, esta frase deja
-      // de ser verdad y harán falta DOS contadores (bruto vs válidas).
+      //  4. UNA VISTA VÁLIDA POR PERSONA, VENTANA Y DÍA (mismo día, más
+      //     tarde — el techo que quedaba, con el número de prog4: 0,50 ×
+      //     ventanas propias al día; con esto baja a ~0,10). La tabla
+      //     `vistas_validas` (0084) es el número que PESA: acuña hoy y lo
+      //     leerá el reparto del bote mañana. Su clave primaria es lo que
+      //     impide subirlo apretando F5.
+      //
+      // DOS CONTADORES, A PROPÓSITO: `views` es el bruto que se enseña y lo
+      // sube cualquiera sin pagar a nadie; `vistas_validas` es el que decide
+      // dinero. La regla de casa de no colapsar dos verdades en un número.
       const fila = w.rows[0] as any;
       if (req.user && fila?.publico && fila.creator_user_id && fila.creator_user_id !== req.user.id) {
         const topeCentimos = Number(process.env.PUNTOS_VISTA_TOPE_DIA || 50);
@@ -1749,6 +1751,16 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         try {
           await db.transaction(async (tx: any) => {
             await tx.execute(sql`SELECT id FROM users WHERE id = ${creadorId} FOR UPDATE`);
+            // La vista válida se anota ANTES de mirar el tope: si esta
+            // persona ya vio esta ventana hoy, no hay nada que pagar y se
+            // sale sin tocar el libro. `ON CONFLICT DO NOTHING` + rowCount es
+            // lo que hace la comprobación atómica: dos pestañas a la vez
+            // insertan una sola fila.
+            const valida = await tx.execute(sql`
+              INSERT INTO vistas_validas (ventana_id, user_id) VALUES (${ventanaId}, ${req.user!.id})
+              ON CONFLICT DO NOTHING
+            `);
+            if (!Number(valida.rowCount ?? 0)) return;
             const hoy = await tx.execute(sql`
               SELECT count(*)::int AS n FROM movimientos_puntos
               WHERE motivo = 'vista_publicacion' AND entidad_tipo = 'knowledge_windows'

@@ -7,7 +7,7 @@ import {
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
  PanelLeftOpen, Info,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
-import { abrirVentana, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
+import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
 import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
@@ -407,10 +407,26 @@ export default function Layout() {
             las ventanas abiertas de al lado.
 
             EL NOMBRE NO SE PIERDE: sigue en el `title` y en el `aria-label`,
-            así que un lector de pantalla lo dice igual que antes. */}
-        {!menuPuesto && (
+            así que un lector de pantalla lo dice igual que antes.
+
+            SE ENSEÑA CUANDO EL MENÚ NO LO ESTÁ ENSEÑANDO, y eso no es lo mismo
+            que «cuando el menú está escondido» (2026-08-22). La condición era
+            `!menuPuesto`, dando por hecho que si el menú está puesto ya hay un
+            logo dentro. Pero el menú lateral **solo se pinta con sesión**
+            (`user && !esMovil && menuPuesto`, arriba): sin sesión no había logo
+            en NINGUNA parte, así que **nadie que no hubiera entrado tenía cómo
+            volver al inicio**. Encontrado reproduciendo lo que contaba Eugenio y
+            mirando la barra: primero el aspa de cerrar ventanas, y ningún logo.
+
+            Ahora la condición dice lo que de verdad importa: enséñalo salvo que
+            el menú lateral lo esté enseñando él. */}
+        {!(user && menuPuesto) && (
           <button
-            onClick={() => navigate('/')}
+            /* IR AL INICIO ES LAS DOS COSAS (2026-08-22). Navegar no basta: las
+               ventanas del escritorio se pintan encima y no se enteran de que la
+               ruta ha cambiado, así que pulsabas el logo y no pasaba nada
+               visible. Se apartan, no se cierran: siguen arriba a un clic. */
+            onClick={() => { minimizarTodas(); navigate('/'); }}
             title="Humanity Wiki — ir al inicio"
             aria-label="Humanity Wiki — ir al inicio"
             className="shrink-0 w-7 h-7 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"

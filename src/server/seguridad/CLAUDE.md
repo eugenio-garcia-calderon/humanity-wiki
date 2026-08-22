@@ -1,93 +1,137 @@
-# The sealed record
+# Security
 
-Written by Programador 4 on 2026-08-22, split out of the security branch so that
-the agent login link (Programador 1) can record itself somewhere that cannot be
-edited. It carries **only** the record: no permission guard, no encryption, no
-classification — those stay in `prog4/seguridad-cadena`.
+Phase 0 of `memory/09_TARGET_ARCHITECTURE/03_SECURITY_AND_CHAIN.md`, written by
+Programador 4 on 2026-08-22. Read that document before changing anything here:
+the order of the phases is the argument, and it is not arbitrary.
 
 ```
-registro.ts   append-only, hash-chained, signed; and the verifier
-firma.ts      Ed25519: proves WE wrote it, which the hash chain cannot
+clasificacion.ts  how much each of the 129 tables matters, and the tier that follows
+politica.ts       the single table: who may write what, and why
+guardia.ts        the table, applied, before any route sees the request
+cifrado.ts        envelope encryption: one key per record, key destruction = deletion
+firma.ts          Ed25519: proves WE wrote it, which the hash chain cannot
+registro.ts       the sealed record: append-only, hash-chained, signed, verifiable by anyone
+sellar.ts         drains the outbox into the sealed record, and answers "is this row still the one we sealed?"
+selladoAutomatico.ts  runs that drain every two minutes, inside the server
 ```
 
-Migration: `drizzle/0070_registro_sellado.sql` — two new tables,
-`registro_sellado` and `registro_anclajes`.
+Migrations: `drizzle/0070_registro_sellado.sql` (the record) and
+`drizzle/0085_registro_captura.sql` (the database-level capture).
 
-## This PR changes no behaviour
+**The capture and the sealer ship together, never apart.** Triggers with nothing
+draining the outbox is a tap with the drain blocked, and the day somebody notices
+is the day the disk is full.
 
-Nothing calls `anotar()` yet. The two tables are created empty and stay empty
-until somebody writes to them on purpose. That is deliberate: it is the smallest
-thing that can be deployed, and it unblocks a feature that must not ship with
-half an audit trail.
+Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
-## Why `entity_history` was not enough
-
-It records what changed, very well, and it can be edited and deleted like any
-other table. Whoever alters a figure can alter its trace, and then the trace is
-worth nothing.
-
-Here each entry carries the hash of the previous one, so removing, editing or
-inserting one breaks every hash after it — and the verifier says **which** entry
-broke and **how**: `huella` is somebody editing a row, `eslabon` is somebody
-deleting one. Different failures, different fixes.
-
-## And why the signature, on top of the chain
-
-The chain proves nothing has changed *since it was written*. It does not prove we
-wrote it: anyone who can write to the table can forge a whole coherent chain from
-scratch. Ed25519 with the key outside the database closes that.
-
-The test shows exactly what it buys: an entry edited **and every following hash
-recomputed** passes all the chain checks, and the signature still catches it.
-
-Each signature carries the id of the key that made it, so rotating a key does not
-turn everything older into "invalid" — which would be indistinguishable from
-"tampered". Without the public key, the answer is `NO SÉ`, never an accusation.
-
-## Using it
-
-```ts
-import { anotar, leerCadena, verificarCadena } from './seguridad/registro.js';
-
-await anotar(db, { clase: 'sesion_agente', actor: agenteId, asunto: userId, datos: { ip } });
-
-const v = verificarCadena(await leerCadena(db), { [claveId]: publicaBase64 });
-// v.estado: VERIFICADA | ALTERADA | NO_SE      ← three answers, never two
-// v.firmas.estado: VALIDAS | ALGUNA_INVALIDA | SIN_FIRMAR | NO_SE
-```
-
-**Never put a token, a hash of a token, or anything identifying in `datos`.** The
-daily root of this table is meant to be published outside (phase 2), and the
-EDPB's final guidelines are explicit that the hash of personal data is still
-personal data.
-
-## The key
-
-`CLAVE_FIRMA_REGISTRO`, base64 of a PKCS8 Ed25519 private key. **It is not set
-anywhere yet**, so entries are written unsigned — and they say so (`firma NULL`,
-`firmas.estado = 'SIN_FIRMAR'`) rather than pretending. Generate one with
-`generarPareja()` in `firma.ts`.
-
-Until that key exists in production, this table proves *nothing was changed*. It
-does not yet prove *we wrote it*.
-
-## Checking it
+## The commands
 
 ```bash
-npx tsx scripts/probar-registro.ts
+npm run seguridad:permisos       # is every write route declared? fails the build if not
+npm run seguridad:clasificacion  # is every table classified? fails the build if not
+npm run seguridad:probar         # the five test scripts
+node --env-file=.env scripts/sellar.mjs              # seal what is pending
+node --env-file=.env scripts/sellar.mjs users U_X    # is that row still the one we sealed?
+node --env-file=.env scripts/verificar.mjs           # whole chain + a random sample
+node --env-file=.env scripts/verificar.mjs --muestra 50   # sample only, for the hourly run
+npx tsx scripts/probar-registro.ts   # creates a throwaway database, and drops it
 ```
 
-Creates its own throwaway database, applies the migration, writes, tampers —
-including disabling the trigger and editing a row the way somebody with rights
-would — and drops the database at the end. **If no Postgres is reachable it says
-NO SÉ and exits non-zero**: a skipped test that reports green is worse than no
-test.
+`seguridad:probar` needs Postgres reachable for the sealed-record part. **If it
+cannot reach one it says NO SÉ and exits non-zero** — a skipped test that reports
+green is worse than no test.
+
+## What is real today, and what is still paper
+
+| Piece | State |
+|---|---|
+| The classification | **129 of 129 tables**: 40 tier 3, 68 tier 2, 18 tier 1, 3 recomputable |
+| Signatures | Ed25519 with key rotation built in. **`CLAVE_FIRMA_REGISTRO` is not set anywhere**, so entries are written unsigned and say so |
+| The policy table | **150 of 150 reviewed by hand**, each with the reason for its level. Zero left as `revisar` |
+| The guard | Wired in `server.ts`, running in `avisar` mode: it logs, it blocks nothing |
+| Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
+| The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
+| Capture from the database | Triggers on 25 tier-3 tables write to an outbox, and `selladoAutomatico.ts` drains it every two minutes from inside the server — first pass on boot, so a restart never leaves anything stranded |
+| Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
+| Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
+
+Saying it plainly costs nothing and prevents the expensive mistake: believing
+these are protecting something they are not yet wired to.
+
+## `revisar` is the third answer, not a pass — and it is at zero
+
+A route marked `revisar` means *the scan saw a guard and no person has confirmed
+it is the right one*. The guard deliberately enforces nothing on those routes.
+
+**That number reached zero on 2026-08-22.** All 150 were read by hand, one at a
+time, and each carries the level it should have plus, where the reason is not
+obvious, why.
+
+Keep it at zero the same way: a new write route fails the build until it is
+declared, and declaring it means reading the handler rather than copying the one
+above. **Never batch-convert:** a policy deduced from the code being audited
+certifies whatever that code already does.
+
+### What the reading found that no scan could
+
+Three routes were declared as what they **should** be rather than what they are,
+because reading them showed the difference:
+
+| Route | What reading it showed |
+|---|---|
+| `POST /api/windows/:id/view` | Minted 0,01 points per call **with no session**. Points are bought at 100 for 100 €. Fixed by prog7 in PR #242 |
+| `POST /api/stripe/create-checkout-session` | Takes `userId` and `email` **from the request body**, and the webhook grants the membership to that id. Whoever pays chooses which account gets it |
+| `POST /api/ai/chat` | Open without a session **by Eugenio's decision**, with no limit on free questions. What is missing is not a session: it is a daily ceiling on what the platform will spend |
+
+For an automated scan all three looked identical to the fifteen harmless routes
+around them: "no visible check". The difference is what the handler *does with
+the money*, and that only shows by reading it.
+
+## Turning the guard on
+
+```bash
+SEGURIDAD_MODO=exigir      # enforce
+SEGURIDAD_MODO=avisar      # default: log only
+```
+
+Verified locally on 2026-08-22, port 3003:
+
+| Mode | `POST /api/data/territories`, no session | Log |
+|---|---|---|
+| `avisar` | 401 with the route's own message — the guard did not intervene | `habría devuelto 401 … exige nivel 4` |
+| `exigir` | 401 with the guard's message, before the route ran | — |
+
+Public routes (`/api/auth/login`) reach their handler in both modes, and `GET`
+is never touched.
+
+**Read the `avisar` log for a few days before flipping it.** One wrong line in
+the table and somebody cannot do their job, in production, and the cause looks
+like anything but a policy table. Flipping back is an environment variable, not
+a deploy — that is the point of having the two modes.
 
 ## Before you change this, decide
 
 | If you are about to… | Why it matters | What to do instead |
 |---|---|---|
-| Change `SEPARADOR`, `textoDe()` or the Merkle rule | **Every hash ever written changes**, and the whole record reads as tampered | Never. Add a new version tag and keep reading the old one |
-| Trust the `UPDATE`/`DELETE` triggers as security | They stop the accident and the 3am shortcut, not somebody with rights to drop them | The chain, the signature, and the external anchor |
-| Take a lock to avoid two writers | A lock has to be remembered; one place that forgets it removes the guarantee | The unique index on `huella_previa`: the database decides who continues the chain |
-| Publish anything from here | A hash of personal data is still personal data | Only the salted daily root |
+| Add a write route | The audit fails the build until it is declared | Add it to `politica.ts` with its reason |
+| Mark many routes as reviewed at once | A policy deduced from the audited code always passes | Review one at a time, and write the `nota` |
+| Change `SEPARADOR`, `textoDe` or the Merkle rule | **Every hash ever written changes**, and the whole record reads as tampered | Never. Add a new version tag and keep reading the old one |
+| Store the wrapped key in the same row as the data | A backup carries both, and destroying the key never reaches that copy | Its own table, which is what gets purged |
+| Write a tier by hand in `clasificacion.ts` | The tier is computed; a hand-written one hides the argument about why it matters | Change the grades, and say why in `porque` |
+| Let confidentiality raise the tier | You end up signing and anchoring private chats while public indicators stay unsigned | Confidentiality decides encryption, integrity and authenticity decide the tier |
+| Put personal data on a chain, even hashed | EDPB Guidelines 02/2025 v2.0 (7 July 2026): a hash of personal data is still personal data | Only the salted daily root leaves |
+| Trust the `registro_sellado` triggers as security | They stop the accident, not somebody with rights to drop them | The chain, and phase 2's external anchor |
+| Add a table to the capture list without measuring | Every write to it becomes one sealed, signed, serialised entry. On a high-volume table that is a queue that never drains | Measure first; the exclusions in `0071` each carry their reason |
+| Seal inside the trigger | A signing failure would break an ordinary save, and security that breaks people's work gets removed | The outbox, drained by `sellar.mjs` outside the request |
+
+## The honest limit of all of this
+
+Everything here is verifiable **by us**, on our own machine, against our own
+database. That is worth a great deal against accident and against an insider in
+a hurry — and it is worth nothing against someone who can rewrite the database
+and recompute every hash at leisure.
+
+Only phase 2 closes that, and it closes it by publishing a number where we
+cannot reach it. Until that runs daily, the correct answer to "can this be
+corrupted?" is **not yet fully** — and saying so is the difference between
+security and the appearance of it.
