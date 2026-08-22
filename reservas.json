@@ -1,76 +1,10 @@
 {
   "reservas": [
     {
-      "agente": "prog1",
-      "ruta": "src/components/ui/OrigenDelDato.tsx",
-      "motivo": "marca de origen del dato (fichero nuevo)",
-      "desde": "2026-08-22T11:54:08.627Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/Map.tsx",
-      "motivo": "marca de origen del dato en la ficha del territorio",
-      "desde": "2026-08-22T11:55:23.181Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/ai/assistant.ts",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:14.686Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/Objectives.tsx",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:18.658Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/Indicators.tsx",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:26.181Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/IndicatorDetail.tsx",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:29.902Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/utils/origenDelDato.ts",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:33.709Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/origenDelDato.ts",
-      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
-      "desde": "2026-08-22T12:10:37.437Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/explorer/EntityExplorerPanel.tsx",
-      "motivo": "marca de origen del dato en el explorador",
-      "desde": "2026-08-22T12:20:40.887Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/utils/puntuacionesDeObjetivo.ts",
-      "motivo": "que los datos reales ganen a la tabla escrita a mano",
-      "desde": "2026-08-22T12:56:42.596Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "PWA: margen de seguridad abajo (barra pegada al borde en iPhone instalado)",
       "desde": "2026-08-22T13:03:28.134Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/ai/PanelMedicion.tsx",
-      "motivo": "enseñar lo que cuesta el chat abierto",
-      "desde": "2026-08-22T13:03:43.033Z"
     },
     {
       "agente": "prog3",
