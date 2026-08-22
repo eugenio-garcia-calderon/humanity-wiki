@@ -94,7 +94,7 @@ application records what the application does — and the likeliest way to corru
 data here does not go through the application at all: it is somebody with the
 database password writing an `UPDATE` by hand. Middleware cannot see that.
 
-So the capture happens in the database itself (`drizzle/0071_registro_captura.sql`):
+So the capture happens in the database itself (`drizzle/0085_registro_captura.sql`):
 `AFTER` triggers on 25 tier-3 tables drop a note in an outbox, and `sellar.mjs`
 drains it into the sealed record, chained and signed, outside the request. Two
 processes rather than one because they fail for different reasons — a signing
