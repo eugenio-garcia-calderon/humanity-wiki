@@ -70,6 +70,7 @@ const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
@@ -261,6 +262,7 @@ export default function App() {
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="hormiguero" element={<Hormiguero />} />
+                <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
