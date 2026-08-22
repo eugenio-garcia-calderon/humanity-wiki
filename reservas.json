@@ -29,6 +29,12 @@
       "ruta": "src/pages/Map.tsx",
       "motivo": "marca de origen del dato en la ficha del territorio",
       "desde": "2026-08-22T11:55:23.181Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/stripe.ts",
+      "motivo": "fase 3 tiendas: compra sin cuenta",
+      "desde": "2026-08-22T12:02:55.454Z"
     }
   ]
 }
