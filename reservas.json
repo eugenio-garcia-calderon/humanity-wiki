@@ -91,10 +91,10 @@
       "desde": "2026-08-22T15:41:31.837Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "drizzle/0077_precios_servicio.sql",
-      "motivo": "renumerada desde 0075 (choque con prog6)",
-      "desde": "2026-08-22T15:45:08.623Z"
+      "agente": "prog5",
+      "ruta": "drizzle/0078_veracidad_debates.sql",
+      "motivo": "Veracidad: tablas de debates",
+      "desde": "2026-08-22T15:45:10.389Z"
     }
   ]
 }
