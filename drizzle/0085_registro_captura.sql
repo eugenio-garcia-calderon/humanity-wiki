@@ -118,6 +118,28 @@ $$ LANGUAGE plpgsql;
 --   content_reports, ai_proposed_actions, initiative_results, reservas_stock
 --       son de capa 3 por autoría o trazabilidad, no porque corromperlas mueva
 --       dinero o permisos. Segunda tanda, por el mismo motivo de volumen.
+--   sessions
+--       ES LA EXCLUSIÓN QUE MÁS DUELE, y va con su motivo entero porque alguien
+--       la va a querer añadir. Una fila insertada ahí a mano ES entrar como esa
+--       persona: es justo lo que interesa ver.
+--
+--       Pero `auth.ts:223` hace `UPDATE sessions SET last_seen_at = now()` **en
+--       cada petición autenticada**, sin freno. Con el disparador puesto, cada
+--       vez que alguien carga una página se capturaría una nota, y cada nota se
+--       encadena y se firma en serie: el registro quedaría lleno de «fulano
+--       cargó una página» y el sellador no alcanzaría nunca. Un registro donde
+--       el 99 % es rutina no lo lee nadie — la misma razón por la que el tablero
+--       de seguridad solo anota las lecturas de los agentes.
+--
+--       Ignorar solo esa columna tampoco vale de forma barata: la huella se
+--       calcula sobre la fila entera, así que habría que calcularla sin esa
+--       columna en el disparador Y sin ella al comprobar, o `comprobarFila`
+--       daría DISTINTA en cuanto alguien recargara. Se hace bien o no se hace.
+--
+--       Lo que se pierde mientras tanto, dicho claro: **una sesión fabricada a
+--       mano no queda anotada**. Se recupera anotando el alta de sesión desde
+--       `auth.ts`, que es un hecho de la aplicación y no una fila que cambia
+--       sola. Está en la fase B2.
 --
 -- Se aplica solo a las tablas que existan: hay ramas donde alguna todavía no.
 DO $$
@@ -125,7 +147,7 @@ DECLARE
   t TEXT;
   vigiladas TEXT[] := ARRAY[
     -- quién es quién, y quién manda
-    'users', 'sessions', 'password_resets', 'agentes_ia', 'handles_reservados', 'memberships',
+    'users', 'password_resets', 'agentes_ia', 'handles_reservados', 'memberships',
     -- dinero
     'transactions', 'transaction_links', 'refunds', 'stripe_accounts', 'movimientos_puntos',
     'supports', 'pedidos', 'pedido_lineas', 'presupuestos_proyecto',

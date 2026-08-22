@@ -67,6 +67,14 @@ try {
     `SELECT tgname FROM pg_trigger WHERE tgrelid = 'users'::regclass AND NOT tgisinternal`);
   comprobar('el disparador queda puesto sobre `users`', disparador.rows.length === 1);
 
+  // `sessions` NO está vigilada, y no es un descuido: `auth.ts` la escribe en
+  // cada petición autenticada. Si alguien la añade sin leer el porqué, esta
+  // comprobación se lo recuerda antes de que el registro se llene de ruido.
+  const migracionCaptura = migracion('0085_registro_captura.sql');
+  comprobar('`sessions` sigue fuera de la lista de tablas vigiladas',
+    !/'sessions'/.test(migracionCaptura.split('vigiladas TEXT[] :=')[1]?.split('];')[0] ?? "'sessions'"),
+    'se escribe en cada petición: vigilarla llenaría el registro de «fulano cargó una página»');
+
   console.log('\nCAMBIOS HECHOS POR FUERA, SIN PASAR POR LA APLICACIÓN');
   await pool.query(`SET application_name = 'psql-de-madrugada'`);
   await pool.query(`INSERT INTO users (id, email, role_level) VALUES ('U_PRUEBA', 'ai-prueba@ejemplo.invalid', 1)`);

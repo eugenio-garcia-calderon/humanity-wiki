@@ -119,8 +119,14 @@ it decides what an alarm is.
 > trigger, change the row underneath, and the row's hash no longer matches what was
 > sealed.
 >
-> **Still missing:** applying it to production, a schedule that runs it, and
-> `CLAVE_FIRMA_REGISTRO` existing so the entries are signed.
+> **What the capture does not cover, and it is the one that hurts:** `sessions`
+> is deliberately out. A row inserted there by hand *is* logging in as that
+> person, which is exactly what one wants to see — but `auth.ts:223` updates
+> `last_seen_at` on every authenticated request, so watching it would fill the
+> record with "somebody loaded a page" and the sealer would never catch up. A
+> record that is 99 % routine is a record nobody reads. Recovering it means
+> recording the session's creation from `auth.ts`, which is an application event
+> rather than a row that changes on its own. That is phase B2.
 
 ### Phase C — Take the power away from the application
 
