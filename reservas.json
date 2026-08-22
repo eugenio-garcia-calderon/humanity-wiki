@@ -59,6 +59,12 @@
       "ruta": "src/utils/origenDelDato.ts",
       "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
       "desde": "2026-08-22T12:10:33.709Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/origenDelDato.ts",
+      "motivo": "extender la marca de origen del dato a la IA, objetivos e indicadores",
+      "desde": "2026-08-22T12:10:37.437Z"
     }
   ]
 }
