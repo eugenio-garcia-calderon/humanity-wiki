@@ -82,6 +82,13 @@ export default function BorrarCuentaPublica() {
             'Tu foto de perfil',
             'Tu contraseña y tu vínculo con Google, si lo usabas',
             'Tus sesiones abiertas, en todos tus dispositivos',
+            // «Y todo lo demás» y no la lista de diez, comprobada por prog1
+            // ejecutando la tarea: banner, biografía, ubicación, web, redes,
+            // especialidades, ubicaciones guardadas, objetivos, nombre de
+            // usuario y la marca de correo verificado. Enumerarlos haría una
+            // lista más larga que el resto de la página, y la palabra que hace
+            // el trabajo es «todo».
+            'Y todo lo demás de tu perfil: biografía, ubicación, web, redes, especialidades y tu nombre de usuario',
           ].map(t => (
             <li key={t} className="flex gap-2.5">
               <Trash2 className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
