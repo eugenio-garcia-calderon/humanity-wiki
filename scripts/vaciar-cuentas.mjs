@@ -105,6 +105,14 @@ try {
            -- en una cuenta nueva.
            telefono          = NULL,
            telefono_buscable = false,
+           -- Y EL TELÉFONO SE CIERRA DEL TODO. Se puede llamar a alguien por su
+           -- identificador, no solo por su número, y la página pública de una
+           -- cuenta vaciada sigue existiendo con su «Usuario eliminado». Sin
+           -- esta línea, alguien podría seguir llamando a una cuenta que ya no
+           -- es de nadie: no se conectaría nunca, pero dejaría llamadas
+           -- perdidas y avisos para una persona que se fue. «nadie» y no NULL:
+           -- la columna no admite nulos y además lleva su restricción.
+           llamadas_de       = 'nadie',
            google_id      = NULL,
            password_hash  = NULL,
            email_verified = false,
