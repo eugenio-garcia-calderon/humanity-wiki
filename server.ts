@@ -78,7 +78,20 @@ const ES_REGION_NAME_BY_ISO_CODE: Record<string, string> = {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // LA PUERTA SE PUEDE ELEGIR (2026-08-22, autorizado por Eugenio como
+  // excepción al congelado de este fichero).
+  //
+  // Estaba escrita a fuego en 3000, y por una puerta solo cabe un servidor: el
+  // primero de los dos programadores que arrancaba ocupaba la 3000 y el
+  // segundo no podía levantar la plataforma para probar nada. Pasó de verdad
+  // esta noche.
+  //
+  // EN PRODUCCIÓN NO CAMBIA NADA: allí nadie define `PORT`, así que sigue
+  // siendo 3000 exactamente igual que antes. Es una comodidad para quien
+  // programa, no un cambio de comportamiento.
+  //
+  // El reparto acordado: Programador 1 en la 3000, Programador 2 en la 3001.
+  const PORT = Number(process.env.PORT) || 3000;
   app.set("trust proxy", true);
 
   // getStripe() vive ahora en src/server/stripe.ts (Fase 6), compartido por
