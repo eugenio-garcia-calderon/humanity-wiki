@@ -95,6 +95,12 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "el gasto en modelos abiertos se contaba como Anthropic, y desaparecia del total",
       "desde": "2026-08-22T20:52:37.294Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "vite.config.ts",
+      "motivo": "poder probar dominios propios en local",
+      "desde": "2026-08-22T20:52:47.989Z"
     }
   ]
 }
