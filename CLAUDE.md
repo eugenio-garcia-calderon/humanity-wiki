@@ -214,10 +214,17 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   how the home page turned out to call `es.wikipedia.org` and `img.youtube.com`
   on every first visit.
 - **Measure in the place the answer lives.** A count of 96 requests on a first
-  visit was 85 dev-server modules that do not exist in production; and the
-  automation browser's `IntersectionObserver` delivers **no events at all**, so
-  nothing about lazy loading can be concluded from it. Before quoting a number,
-  ask whether the environment you measured in is the one the number is about.
+  visit was 85 dev-server modules that do not exist in production. Before quoting
+  a number, ask whether the environment you measured in is the one the number is
+  about.
+- **A hidden tab is not a broken API.** This file used to say the automation
+  browser's `IntersectionObserver` "delivers no events at all". **That was wrong,
+  and it was mine.** Retested in real Chrome: also zero events — and then
+  `document.hidden === true`. A hidden tab stops `requestAnimationFrame` and
+  never intersects anything, so the observer was correct and the measurement was
+  not. Before declaring a browser API broken, print `document.hidden`. The same
+  trap eats WebGL: with the tab hidden R3F never creates the renderer and
+  `window.__JV` never exists, which looks exactly like a broken 3D scene.
 - **What you keep "just in case" leaves the building every night.** Since backups
   started on 2026-08-22, anything stored in the database is copied off the server
   daily. Three times that same day something kept for a good reason turned out to be

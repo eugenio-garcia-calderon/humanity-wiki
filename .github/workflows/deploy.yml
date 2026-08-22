@@ -76,10 +76,18 @@ jobs:
             for v in COPIAS_REMOTO_CUBO COPIAS_REMOTO_ENDPOINT COPIAS_REMOTO_CLAVE_ID COPIAS_REMOTO_CLAVE_SECRETA; do
               sed -i "/^$v=/d" .env.production
             done
-            if [ -n "${{ secrets.COPIAS_REMOTO_CLAVE_ID }}" ]; then
+            # DOS NOMBRES PARA LA MISMA LLAVE, y no es despiste: al guardarla en
+            # GitHub quedó como `COPIAS_REMOTO_CUBO_ID` en vez de
+            # `COPIAS_REMOTO_CLAVE_ID`, y GitHub no deja renombrar un secreto.
+            # Se acepta el que haya. Cuesta una línea y ahorra tener que crear
+            # otra llave en Cloudflare solo por el nombre — que es exactamente
+            # el momento en el que se pierde una llave buena.
+            CLAVE_ID="${{ secrets.COPIAS_REMOTO_CLAVE_ID }}"
+            [ -z "$CLAVE_ID" ] && CLAVE_ID="${{ secrets.COPIAS_REMOTO_CUBO_ID }}"
+            if [ -n "$CLAVE_ID" ]; then
               echo "COPIAS_REMOTO_CUBO=${{ secrets.COPIAS_REMOTO_CUBO }}"                   >> .env.production
               echo "COPIAS_REMOTO_ENDPOINT=${{ secrets.COPIAS_REMOTO_ENDPOINT }}"           >> .env.production
-              echo "COPIAS_REMOTO_CLAVE_ID=${{ secrets.COPIAS_REMOTO_CLAVE_ID }}"           >> .env.production
+              echo "COPIAS_REMOTO_CLAVE_ID=$CLAVE_ID"                                       >> .env.production
               echo "COPIAS_REMOTO_CLAVE_SECRETA=${{ secrets.COPIAS_REMOTO_CLAVE_SECRETA }}" >> .env.production
             fi
             # Las dos llaves del TURN de Cloudflare, por el mismo camino y por

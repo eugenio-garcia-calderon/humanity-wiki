@@ -1245,18 +1245,39 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * Devuelve las líneas, y en cada línea digital con archivo, la URL de
    * descarga (que vuelve a pedir el correo: la llave viaja con el enlace).
    */
+  /**
+   * ¿YA EXISTE MI PEDIDO? — `GET /api/publicar/pedido-por-sesion/:sesion`
+   * Al volver de Stripe la página solo sabe el id de la sesión de pago; el
+   * pedido lo crea el webhook un instante después. La confirmación pregunta
+   * aquí hasta que aparece. Solo devuelve el código: con él y el correo (o la
+   * sesión de quien compró) se consulta el resto.
+   */
+  app.get('/api/publicar/pedido-por-sesion/:sesion', async (req: Request, res: Response) => {
+    try {
+      const sid = String(req.params.sesion || '').trim();
+      if (!sid.startsWith('cs_')) return res.status(400).json({ error: 'Esa sesión de pago no se entiende.' });
+      const r = await db.execute(sql`SELECT codigo FROM pedidos WHERE stripe_session_id = ${sid}`);
+      if (!r.rows[0]) return res.status(404).json({ pendiente: true, error: 'Todavía estamos confirmando el pago.' });
+      res.json({ codigo: (r.rows[0] as any).codigo });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) {
+      // Dos llaves: el correo, o la sesión de quien compró con cuenta.
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) {
         return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
       }
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
+               moneda, estado, seguimiento, created_at, updated_at, direccion_envio,
+               puntos_usados, cupon_codigo, descuento_centimos, comprador_email
         FROM pedidos
-        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
+        WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
       `);
       const p = r.rows[0] as any;
       if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
@@ -1283,6 +1304,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         ciudad: p.direccion_envio?.city || null,
         hecho_el: p.created_at,
         cambiado_el: p.updated_at,
+        // Lo que se pagó con puntos y con cupón, para que la confirmación y
+        // «¿dónde está lo mío?» lo digan sin consultar el libro.
+        puntos_usados: Number(p.puntos_usados || 0),
+        cupon: p.cupon_codigo || null,
+        descuento_centimos: Number(p.descuento_centimos || 0),
         // Un pedido sin nada físico no se envía: la pantalla no debe pintar
         // «enviado» como un paso pendiente que nunca llegará.
         solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital'),
@@ -1296,7 +1322,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // no es digital (nada que descargar), es digital pero el vendedor
           // no subió el archivo (se dice), o el pedido no está vivo.
           descarga: l.kind === 'digital' && l.con_archivo && vivo
-            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}?correo=${encodeURIComponent(correo)}`
+            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}${correo ? `?correo=${encodeURIComponent(correo)}` : ''}`
             : null,
           sin_archivo: l.kind === 'digital' && !l.con_archivo,
         })),
@@ -1317,13 +1343,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
+      // Dos llaves válidas: el correo del pedido, o la SESIÓN de quien lo
+      // compró con cuenta (2026-08-22: la confirmación de compra enseña las
+      // descargas sin pedir el correo a quien acaba de pagar con su sesión).
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
       const r = await db.execute(sql`
         SELECT pr.archivo_digital, l.producto_nombre, p.estado
         FROM pedidos p
         JOIN pedido_lineas l ON l.pedido_id = p.id AND l.id = ${String(req.params.lineaId)}
         JOIN products pr ON pr.id = l.producto_id
-        WHERE p.codigo = ${codigo} AND lower(p.comprador_email) = ${correo}
+        WHERE p.codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(p.comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND p.comprador_user_id = ${quien}))
           AND coalesce(pr.kind, 'fisico') = 'digital'
       `);
       const fila = r.rows[0] as any;
