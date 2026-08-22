@@ -83,12 +83,6 @@
       "ruta": "src/server/social.ts",
       "motivo": "las denuncias no las lee nadie: hacen falta rutas para revisarlas",
       "desde": "2026-08-22T16:57:06.578Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "la costura tiene dueno: el que llega segundo",
-      "desde": "2026-08-22T17:00:40.187Z"
     }
   ]
 }
