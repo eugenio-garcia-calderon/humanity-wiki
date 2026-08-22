@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
+  Package, Table2, CalendarDays, Bookmark, ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
@@ -360,11 +361,23 @@ export function Proyecto() {
       )}
 
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-8 pb-24">
-        <div className="flex items-center gap-2">
-          <Link to="/proyectos" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
+        {/* EN UN MÓVIL ESTA FILA NO CABÍA, Y NO SE PODÍA DESLIZAR (2026-08-23).
+            Medido a 375 px: la fila pide 474 px y se le dan 319, con
+            `overflow-x: visible` — o sea que «Mapa» y la papelera se salían de
+            la pantalla y **no había forma de llegar a ellos**. Justamente los
+            botones para añadirle un mapa a un proyecto, en el aparato donde
+            más se usa.
+            No se apilan en dos líneas a propósito: son cinco acciones cortas y
+            una tira que se desliza es lo que la gente ya espera de una barra de
+            herramientas en el móvil. `min-w-0` en el padre es lo que permite
+            que el hijo encoja; sin él el `flex` se niega a bajar del contenido
+            y el desbordamiento vuelve. */}
+        <div className="flex items-center gap-2 min-w-0 overflow-x-auto sm:overflow-x-visible -mx-1 px-1 pb-1
+                        [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Link to="/proyectos" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors shrink-0">
             <ArrowLeft className="w-3.5 h-3.5" /> Proyectos
           </Link>
-          <div className="flex-1" />
+          <div className="flex-1 min-w-2" />
 
           {/* LAS HERRAMIENTAS DE LA PLATAFORMA, AQUÍ DENTRO (Eugenio,
               2026-08-20: «permite añadir todas las herramientas de la
@@ -377,7 +390,7 @@ export function Proyecto() {
               onClick={() => crearHerramienta(h.tipo)}
               disabled={creando !== null}
               title={`Añadir ${h.label.toLowerCase()} a este proyecto`}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 text-[11px] font-bold disabled:opacity-40 transition-colors"
+              className="inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 text-[11px] font-bold disabled:opacity-40 transition-colors"
             >
               {creando === h.tipo
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -390,7 +403,7 @@ export function Proyecto() {
             <button
               onClick={() => setBorrando(true)}
               title="Quitar este proyecto"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -462,6 +475,8 @@ export function Proyecto() {
 
         <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
 
+        <SeccionContenido proyectoId={proyecto.id} />
+
         {/* LOS ARCHIVOS DEL PROYECTO (2026-08-21). Es el sitio donde más
             falta hacía: un informe, una tabla de ensayos o un modelo 3D
             colgados aquí los encuentra mañana cualquiera del proyecto, que
@@ -494,6 +509,117 @@ export function Proyecto() {
       )}
     </div>
   );
+}
+
+// ----------------------------------------------------------------------------
+// LO QUE HAY EN EL PROYECTO (2026-08-23, Eugenio: «no aparecen por ejemplo las
+// páginas ligadas a ese proyecto, y seguro que tampoco otros elementos como
+// mapas»). Tenía razón, y por más de lo que dijo: **doce tablas tienen
+// `proyecto_id`** y esta página enseñaba una, el tablero de tareas. Páginas,
+// esquemas, mapas, productos, tablas de datos, fechas y lo guardado del
+// navegador existían en la base de datos, colgaban de este proyecto, y no
+// aparecían en ninguna pantalla salvo desplegando el proyecto en el menú
+// lateral.
+//
+// SE PIDE AL MISMO SITIO QUE EL MENÚ: `/api/proyectos/:id/arbol`. Escribir aquí
+// una segunda consulta habría sido más rápido y habría creado el problema de
+// siempre — dos listas de «lo que hay en un proyecto» que se separan en cuanto
+// alguien añade una tabla a una y no a la otra. Con una sola fuente, arreglar
+// el árbol arregla las dos pantallas a la vez, que es justo lo que ha pasado al
+// añadirle Archivos, Tablas y Fechas.
+//
+// DOS RAMAS SE OMITEN AQUÍ Y ES A PROPÓSITO: `tareas`, porque el tablero está
+// justo debajo y repetirlas sería enseñar lo mismo dos veces con dos aspectos
+// distintos; y `archivos`, porque «Adjuntos» ya los pinta con su previsualización
+// unos centímetros más abajo. En el menú sí salen las dos, porque allí no hay
+// tablero ni adjuntos.
+// ----------------------------------------------------------------------------
+const ICONO_RAMA: Record<string, any> = {
+  paginas: FileText, esquemas: Globe2, mapas: MapIcon, productos: Package,
+  tablas: Table2, eventos: CalendarDays, guardados: Bookmark, tareas: ListChecks,
+};
+
+/** Las que ya tienen su propio sitio en esta página. */
+const RAMAS_YA_PINTADAS = new Set(['tareas', 'archivos', 'personas']);
+
+function SeccionContenido({ proyectoId }: { proyectoId: string }) {
+  const [ramas, setRamas] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/proyectos/${proyectoId}/arbol`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : { ramas: [] })
+      .then(d => { if (vivo) setRamas(Array.isArray(d?.ramas) ? d.ramas : []); })
+      .catch(() => { if (vivo) setRamas([]); });
+    return () => { vivo = false; };
+  }, [proyectoId]);
+
+  // MIENTRAS CARGA NO SE PINTA UN HUECO. Esta sección está entre dos que ya
+  // tienen contenido; un esqueleto gris que aparece y desaparece mueve la
+  // página bajo el dedo de quien ya estaba leyendo.
+  if (!ramas) return null;
+  const visibles = ramas.filter(r => !RAMAS_YA_PINTADAS.has(r.clave) && r.hijos?.length);
+  // Un proyecto recién creado no tiene nada de esto, y un título encima de la
+  // nada solo dice que falta algo. Los botones de crear ya están arriba.
+  if (!visibles.length) return null;
+
+  return (
+    <div className="mt-8 max-w-3xl space-y-5">
+      {visibles.map(rama => {
+        const Icono = ICONO_RAMA[rama.clave] || FolderKanban;
+        return (
+          <div key={rama.clave}>
+            <div className="flex items-center gap-2 mb-2.5">
+              <Icono className="w-3.5 h-3.5 text-emerald-600" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                {rama.label}
+              </p>
+              <span className="text-[10px] font-bold text-slate-300">{rama.hijos.length}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {rama.hijos.map((h: any) => (
+                <EnlaceHijo key={h.id} hijo={h} Icono={Icono} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Una cosa del proyecto. `destino` puede ser una ruta de la aplicación
+ * (`/mapas/algo`) o un fichero servido tal cual (`/uploads/…`): lo primero se
+ * navega sin recargar, lo segundo NO — un `<Link>` a un fichero deja la
+ * aplicación intentando pintar un PDF como si fuera una pantalla.
+ */
+function EnlaceHijo({ hijo, Icono }: { hijo: any; Icono: any }) {
+  const esFichero = typeof hijo.destino === 'string' && hijo.destino.startsWith('/uploads/');
+  const dentro = (
+    <>
+      {hijo.icono
+        ? <IconoElemento valor={hijo.icono} tamano={14} />
+        : <Icono className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
+      <span className="text-xs font-bold text-slate-700 truncate max-w-[16rem]">{hijo.label || 'Sin título'}</span>
+      {/* La fecha es lo que hace que una fila de «Fechas» diga algo: todas
+          llevan al mismo calendario, así que sin ella el enlace no distingue
+          una reunión de mañana de una del año pasado. */}
+      {hijo.inicio && (
+        <span className="text-[10px] text-slate-400 shrink-0">
+          {new Date(hijo.inicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+        </span>
+      )}
+      {hijo.rol && <span className="text-[10px] text-slate-400 shrink-0">{hijo.rol}</span>}
+      {esFichero && <ExternalLink className="w-3 h-3 text-slate-300 shrink-0" />}
+    </>
+  );
+  const clase = 'inline-flex items-center gap-2 pl-2 pr-3 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm hover:border-emerald-300 hover:shadow transition-all';
+
+  if (esFichero) {
+    return <a href={hijo.destino} target="_blank" rel="noreferrer" className={clase}>{dentro}</a>;
+  }
+  return <Link to={hijo.destino} className={clase}>{dentro}</Link>;
 }
 
 // ----------------------------------------------------------------------------
