@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import DominioPropio from './DominioPropio';
 import {
   X, Globe, Lock, Copy, Check, Loader2, AlertTriangle, ExternalLink,
   Download, FileText, Image as ImageIcon, FileType, Search,
@@ -205,17 +206,28 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
                 </div>
               </div>
 
-              {/* La dirección corta que llegará con el subdominio. Se enseña
-                  apagada y dicho lo que falta, en vez de esconderla: así se ve
-                  hacia dónde va esto y por qué el nombre del espacio importa. */}
-              <div className="p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/60">
-                <p className="text-[11px] font-black uppercase tracking-wide text-slate-300">Tu dirección corta</p>
-                <p className="mt-0.5 font-mono text-xs text-slate-400 break-all">{urlSubdominio}</p>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                  Todavía no funciona: falta configurar el dominio. El nombre ya es tuyo,
-                  así que cuando se active, este enlace apunta a esta misma página.
-                </p>
+              {/* LA DIRECCIÓN CORTA YA FUNCIONA (2026-08-22). Este bloque
+                  decía «todavía no funciona» desde que se escribió por la
+                  mañana, y el subdominio se activó esa misma tarde. Un texto
+                  que envejece mal es peor que ninguno: quien lo lee deja de
+                  usar algo que sí puede usar. */}
+              <div className="p-2.5 rounded-xl border border-slate-200 bg-white">
+                <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Tu dirección corta</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <a href={urlSubdominio} target="_blank" rel="noreferrer"
+                     className="font-mono text-xs text-slate-700 break-all hover:underline flex-1 min-w-0">
+                    {urlSubdominio}
+                  </a>
+                  <button onClick={() => navigator.clipboard?.writeText(urlSubdominio)}
+                    aria-label="Copiar la dirección corta"
+                    className="w-11 h-11 shrink-0 grid place-items-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50">
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+
+              {/* Y si además tiene un dominio comprado, puede vivir ahí. */}
+              <DominioPropio paginaId={paginaId} />
 
               <label className="flex items-start gap-2 pt-1">
                 <input type="checkbox" checked={indexable} className="mt-0.5"
