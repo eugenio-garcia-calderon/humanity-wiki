@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "ref 0077→0083",
-      "desde": "2026-08-22T18:21:44.045Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/puntos.ts",
       "motivo": "ref 0077→0083",
       "desde": "2026-08-22T18:21:47.775Z"
