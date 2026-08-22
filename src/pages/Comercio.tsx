@@ -38,6 +38,8 @@ type Producto = {
   con_archivo?: boolean;
   /** Opiniones: media en estrellas (1-5) y cuántas; null/0 = nadie ha opinado. */
   media_estrellas?: number | null; n_resenas?: number;
+  /** El vendedor acepta cobrar este producto en puntos (total o en parte). */
+  acepta_puntos?: boolean;
 };
 
 export default function Comercio() {
@@ -78,6 +80,14 @@ export default function Comercio() {
     await fetch(`/api/publicar/mis-productos/${id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ archivo_digital: j.url }),
+    });
+    cargar();
+  }
+
+  async function aceptarPuntos(id: string, valor: boolean) {
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acepta_puntos: valor }),
     });
     cargar();
   }
@@ -187,6 +197,15 @@ export default function Comercio() {
                       {p.status === 'tienda' && <span className="text-slate-400">· solo en tu tienda</span>}
                       {Number(p.n_resenas) > 0 && (
                         <span className="text-amber-600 font-bold">· ★ {Number(p.media_estrellas).toLocaleString('es-ES')} ({p.n_resenas})</span>
+                      )}
+                      {/* Cobrar en puntos: lo decide cada vendedor, producto a
+                          producto. Es el «abanico limitado» del piloto. */}
+                      {p.modality !== 'suscripcion' && (
+                        <button type="button" onClick={() => aceptarPuntos(p.id, !p.acepta_puntos)}
+                          className={`px-2 h-6 rounded-full text-[10px] font-black uppercase tracking-wide ${p.acepta_puntos ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'}`}
+                          title={p.acepta_puntos ? 'Acepta puntos: pulsa para dejar de aceptarlos' : 'No acepta puntos: pulsa para aceptarlos'}>
+                          {p.acepta_puntos ? '● acepta puntos' : '○ sin puntos'}
+                        </button>
                       )}
                       {p.kind === 'digital' && (
                         p.con_archivo

@@ -24,6 +24,7 @@
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
+import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos } from './puntos';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 // `server.ts` está congelado (prohibición 8), así que una ruta nueva no puede
@@ -323,7 +324,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, description, price_cents, currency, images, kind,
                modality, billing_period, stock, warranty, return_policy, category,
-               envio_centimos, envio_gratis_desde_centimos, envio_plazo,
+               envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
                (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
                (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas
         FROM products
@@ -362,6 +363,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // Las opiniones, resumidas: media en estrellas (1-5) y cuántas. `null`
         // = nadie ha opinado, que no es lo mismo que cero estrellas.
         valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
+        // Si el vendedor acepta cobrar en puntos (y el interruptor está
+        // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
+        acepta_puntos: !!p.acepta_puntos,
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
@@ -377,6 +381,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
           hace_falta: (p.kind || '') === 'fisico',
         },
       });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿SE PUEDE PAGAR CON PUNTOS AQUÍ, Y CON CUÁNTOS? — `GET /api/publicar/puntos-en-caja`
+   * Lo pregunta la cesta antes de pintar el control. `activo` lo decide el
+   * servidor (interruptor PUNTOS_DESCUENTO); `saldo` solo con sesión.
+   */
+  app.get('/api/publicar/puntos-en-caja', async (req: Request, res: Response) => {
+    try {
+      const activo = puntosDescuentoActivo();
+      let saldo: number | null = null;
+      if (activo && req.user) {
+        saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
+      }
+      res.json({ activo, con_sesion: !!req.user, saldo, puntos_por_euro: puntosPorEuro() });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -567,7 +587,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
-               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo
+               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
         FROM products
         WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
           AND archived_at IS NULL
@@ -641,9 +661,82 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const reparte = !!vendedor?.charges_enabled;
       const comision = Math.round((subtotal * COMISION_BPS) / 10000);
 
+      // ══ PUNTOS EN EL CARRITO (2026-08-22, interruptor PUNTOS_DESCUENTO) ══
+      // El comprador con sesión puede pagar con puntos la parte de la cesta
+      // cuyos productos ACEPTAN puntos (lo marca cada vendedor), hasta el
+      // 100 % de esa parte. El envío siempre va en euros. El vendedor cobra
+      // esos puntos por el libro (pagarConPuntos). Si el total en euros se
+      // queda en cero, no se abre Stripe: el pedido nace aquí mismo.
+      let puntosUsados = 0;
+      let descuentoCentimos = 0;
+      const pidePuntos = Number(cuerpo.usar_puntos) || 0;
+      if (pidePuntos > 0) {
+        if (!puntosDescuentoActivo()) {
+          return res.status(403).json({ error: 'Pagar con puntos todavía no está activado en esta tienda.' });
+        }
+        if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para pagar con puntos.' });
+        if (suscripcion) return res.status(400).json({ error: 'Una suscripción no se paga con puntos.' });
+        if (req.user.id === vendedorId) return res.status(400).json({ error: 'No puedes comprarte a ti con puntos.' });
+        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+        if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
+        const saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
+        const tasa = puntosPorEuro();
+        const topePuntos = Math.floor(Math.min(saldo, (aceptan / 100) * tasa) * 100) / 100;
+        puntosUsados = Math.min(Math.round(pidePuntos * 100) / 100, topePuntos);
+        if (puntosUsados <= 0) return res.status(400).json({ error: 'No tienes puntos suficientes para usar aquí.' });
+        descuentoCentimos = Math.min(aceptan, Math.round((puntosUsados / tasa) * 100));
+      }
+      const totalEuros = subtotal - descuentoCentimos + (envioCobrado || 0);
+
+      if (puntosUsados > 0 && totalEuros <= 0) {
+        // TODO EN PUNTOS: sin pasarela. El pedido se crea aquí, y el cobro
+        // en puntos se hace en la misma llamada; si el libro dice que no
+        // (saldo cambió), no hay pedido.
+        const pedidoId = 'PED' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+        const codigo = Math.random().toString(36).replace(/[^a-hj-np-z2-9]/g, '').slice(0, 8).toUpperCase().padEnd(8, '7');
+        const resumen = lineas.length === 1 ? lineas[0].p.name : `${lineas[0].p.name} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
+        const todoDigital = lineas.every(l => (l.p.kind || '') === 'digital');
+        await db.execute(sql`
+          INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades, importe_centimos, envio_centimos, moneda,
+                               comprador_user_id, comprador_email, comprador_nombre, vendedor_user_id, estado)
+          VALUES (${pedidoId}, ${codigo}, ${lineas.length === 1 ? lineas[0].p.id : null}, ${resumen},
+                  ${lineas.length === 1 ? lineas[0].unidades : null}, 0, 0, ${moneda.toUpperCase()},
+                  ${req.user!.id}, ${req.user!.email || null}, ${req.user!.displayName || null},
+                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'})
+        `);
+        const ok = await pagarConPuntos(db, req.user!.id, vendedorId, puntosUsados, pedidoId);
+        if (!ok) {
+          await db.execute(sql`DELETE FROM pedidos WHERE id = ${pedidoId} AND puntos_usados = 0`);
+          return res.status(409).json({ error: 'Tu saldo de puntos ha cambiado y ya no alcanza. Vuelve a intentarlo.' });
+        }
+        for (const l of lineas) {
+          await db.execute(sql`
+            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos)
+            VALUES (${'PLN' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
+                    ${pedidoId}, ${l.p.id}, ${l.p.name}, ${l.unidades}, ${l.p.price_cents})
+          `);
+          if (l.llevaCuenta) {
+            await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
+          }
+        }
+        return res.json({
+          pagado_con_puntos: true, codigo, puntos_usados: puntosUsados,
+          subtotal_centimos: subtotal, descuento_centimos: descuentoCentimos, envio_centimos: envioCobrado,
+          url: `${destino}${destino.includes('?') ? '&' : '?'}compra=hecha&pedido=${codigo}`,
+        });
+      }
+
+      // PARTE EN PUNTOS + RESTO EN EUROS: un cupón de Stripe por el importe
+      // exacto del descuento, y los puntos viajan en los metadatos para que el
+      // webhook los cobre al confirmar el pago (nunca antes: una sesión
+      // abandonada no mueve puntos).
       const stripe = getStripe();
+      const cupon = descuentoCentimos > 0
+        ? await stripe.coupons.create({ amount_off: descuentoCentimos, currency: moneda, duration: 'once', name: `${puntosUsados} puntos` })
+        : null;
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
+        ...(cupon ? { discounts: [{ coupon: cupon.id }] } : {}),
         ui_mode: 'hosted',
         line_items: lineas.map(l => ({
           price_data: {
@@ -676,6 +769,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         metadata: {
           kind: 'compra_publica',
           vendedor_id: vendedorId || '',
+          puntos: puntosUsados > 0 ? String(puntosUsados) : '',
+          buyer_id: puntosUsados > 0 && req.user ? req.user.id : '',
           envio_centimos: envioCobrado === null ? '' : String(envioCobrado),
           // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
           // pedido sin volver a preguntarle al navegador — que para entonces
@@ -710,6 +805,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         envio_centimos: envioCobrado,
         pide_direccion: esFisico,
         lineas: lineas.length,
+        puntos_usados: puntosUsados, descuento_centimos: descuentoCentimos,
       });
     } catch (e: any) {
       console.error('comprar publico:', e);
@@ -751,7 +847,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos,
       } = req.body || {};
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
@@ -813,7 +909,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
                               modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
-                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital)
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
@@ -825,7 +921,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
                 ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
                 ${String(envio_plazo || '').trim() || null},
-                ${clase === 'digital' ? archivo : null})
+                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true})
       `);
 
       res.json({
@@ -866,7 +962,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, name, price_cents, currency, kind, stock, status, images,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, created_at,
-               (archivo_digital IS NOT NULL) AS con_archivo,
+               (archivo_digital IS NOT NULL) AS con_archivo, acepta_puntos,
                (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
                (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas,
                (archivo_digital IS NOT NULL) AS con_archivo
@@ -911,6 +1007,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           archivo_digital = CASE
             WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
             ELSE archivo_digital END,
+          acepta_puntos = CASE WHEN ${b.acepta_puntos !== undefined} THEN ${!!b.acepta_puntos} ELSE acepta_puntos END,
           updated_by = ${req.user.id},
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
