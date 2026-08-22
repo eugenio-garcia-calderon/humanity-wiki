@@ -47,6 +47,12 @@
       "ruta": "drizzle/0088_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
       "desde": "2026-08-22T19:10:40.908Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0089_puntos_en_el_carrito.sql",
+      "motivo": "fase 3 economia: puntos como descuento en el carrito (interruptor apagado)",
+      "desde": "2026-08-22T20:12:45.563Z"
     }
   ]
 }
