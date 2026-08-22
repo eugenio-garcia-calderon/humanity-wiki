@@ -160,6 +160,13 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
 
 ## Before calling something done
 
+- **Check from the client the user actually uses.** A 200 does not prove a screen
+  exists — and reading the rendered page does not prove it either, if you read it
+  from a different client than theirs. On 2026-08-22 four PRs were verified by
+  screenshot in the automation browser and Eugenio still saw none of them: he has
+  the app installed, and the service worker was serving him the old build. If the
+  change ships to phones, verify with the app installed, or say plainly that you
+  did not. `humanity.wiki/?sw=off` drops a stale copy.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
