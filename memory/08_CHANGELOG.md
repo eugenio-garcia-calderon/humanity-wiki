@@ -4703,3 +4703,77 @@ que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— 
 **dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
 fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
 la última se lleva borrado su propio rastro.
+### 2026-08-22 — Veracity, phase 1 of 10: a debate is a tree
+
+Eugenio opened a new area and put programmer 5 on it: *«un sistema de veracidad
+dentro de la APP para que lo que la gente publique sea información coherente con
+la otra información que hay, y poder generar un espectro de visiones sobre una
+verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate en
+Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
+it is all data — no screen uses it yet.
+
+- **Three tables** (`drizzle/0078_veracidad_debates.sql`): `debates` (the thesis
+  under discussion), `argumentos` (the tree hanging off it) and
+  `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
+  is a `parent_id`, and a source belongs to what it cites.
+- **Why not the knowledge graph, which already has `apoya`/`contradice`**: a
+  graph edge carries no stance, no weight and no evidence, and a graph node can
+  hang from several parents — the moment it does, the reader no longer knows
+  what is being argued about. A debate is a tree on purpose. Phase 7 will *draw*
+  debates on the existing canvas; the model stays separate.
+- **`src/server/veracidad.ts`**: list and read (the whole tree and all its
+  sources in three queries, never one per node), open a debate, argue, cite,
+  withdraw a citation, archive. Level 1 to open or argue — the same standing as
+  publishing; level 3 to close a debate, because that is a judgement about the
+  commons.
+- **Depth is derived from the parent, never sent by the client**, so no request
+  can flatten or graft a branch; a parent belonging to another debate is
+  rejected, and the thread stops at 12 levels with a message that says to open
+  its own debate instead.
+- **`impacto` is NULL until somebody votes, and 0 only when people voted and it
+  moves nobody.** Initialising it to 0 would make a brand-new argument look like
+  a rejected one — the house rule that every component must be able to say «I
+  don't know» distinguishably.
+- **The only automatic step of the veracity ladder is `sin_fuente` →
+  `con_fuente`**, and it reverses when the last source is withdrawn. Everything
+  above that is a human judgement and belongs to phase 2, not to pasting a link.
+- **Verified against the local server on port 3004: 25 checks, 25 green** —
+  including 401 without a session, an invented `postura` rejected *listing the
+  valid ones*, a cross-debate parent, the tree nested three levels deep, the
+  badge going up and back down with the source, and an archived argument leaving
+  the tree without leaving the database. One bug found and fixed on the way:
+  `= ANY(array)` through the Drizzle template reached Postgres as a record, so
+  every read of a debate answered 500. The test user and both test debates were
+  deleted in the same session.
+
+### 2026-08-22 — Veracidad: su página en la «i», con sus principios y su tablero
+
+Eugenio: *«genera una página en el menú superior derecho, donde pone "i"
+información, y ahí añade el Veracidad, como página donde pongamos los principios
+y tecnologías que usamos para esto; haz un kanban con todas las tareas que
+tenemos hacia adelante, copia el modelo de Hormiguero»*.
+
+- **`/veracidad`**: qué es esto en dos párrafos, **seis principios** (no hay una
+  verdad publicada sino un espectro de visiones; un debate es un árbol; lo que no
+  tiene fuente lo dice; lo que pesa lo decide la gente; cerrar no borra al que
+  perdió; todo puede decir «no lo sé») y **seis piezas** de con qué está hecho —
+  y casi ninguna es nueva: el vocabulario del grafo, el lienzo del grafo, la
+  tabla de puntuaciones que ya existía.
+- **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
+  que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
+  tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
+  (migración 0079, décimo grupo), así que las mismas tarjetas salen también en
+  «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
+  varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
+  que saber en cuál está.
+- **La entrada del menú es una línea** en `src/paginasInfo.ts`, la lista que
+  salió antes en la PR #241.
+- Verificado en el navegador: el menú (i) abre con Veracidad, la página carga,
+  el tablero pinta 30 tarjetas repartidas en 2 hechas / 1 en curso / 27 por
+  hacer, y las 25 comprobaciones de la API de la fase 1 siguen en verde con el
+  módulo ya registrado en el servidor.
+
+**Lo que no está**: `server.ts` lleva las dos líneas que registran el módulo,
+pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
+suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
+de ruta), pero las rutas de debates no existen.
