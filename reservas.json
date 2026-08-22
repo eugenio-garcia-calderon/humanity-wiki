@@ -107,6 +107,12 @@
       "ruta": "src/components/ui/TextoEditable.tsx",
       "motivo": "componente de texto editable por admin",
       "desde": "2026-08-22T15:45:26.451Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "referencia 0075→0077",
+      "desde": "2026-08-22T15:45:33.296Z"
     }
   ]
 }
