@@ -61,12 +61,6 @@
       "desde": "2026-08-22T18:29:50.175Z"
     },
     {
-      "agente": "prog1",
-      "ruta": "src/components/juego/Efectos.tsx",
-      "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
-      "desde": "2026-08-22T18:32:40.459Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "src/App.tsx",
       "motivo": "Veracidad fase 4: rutas /debates",
