@@ -1,0 +1,99 @@
+# Comercio — una herramienta para vender, al nivel de Shopify
+
+Eugenio, 2026-08-22: «pon una herramienta nueva que sea Comercio, donde el
+usuario pueda añadir ahí sus productos y servicios, al estilo shopify, estudia
+todas las funcionalidades de shopify y wix store, y haz una lista y hazla una
+por una». Y antes: «tiene que ser un ecommerce real y funcional».
+
+Se reutiliza lo que ya hay: la tabla `products`, el Mercado, el cobro con
+Stripe Connect, las reservas de stock, los pedidos y el carrito.
+
+## Qué tiene Shopify / Wix Store, y qué tenemos
+
+| | Shopify / Wix | Aquí, hoy |
+|---|---|---|
+| Ficha con galería de fotos | Sí | **Una sola foto**, y la mayoría sin ninguna |
+| Descripción con formato | Sí | Un párrafo de texto plano |
+| Variantes (talla, color, sabor) | Sí | **No existe** |
+| Referencia / SKU | Sí | **No existe** |
+| Stock por variante | Sí | Stock único por producto |
+| Opiniones y valoraciones | Sí | **No existe** |
+| Colecciones o categorías propias | Sí | Una categoría de una lista cerrada de la plataforma |
+| Productos relacionados | Sí | **No existe** |
+| Buscador y filtros dentro de la tienda | Sí | **No existe** |
+| Carrito | Sí | Sí |
+| Cupones y descuentos | Sí | **No existe** |
+| Zonas de envío con precios distintos | Sí | Un precio único de envío |
+| Impuestos | Sí | **No existe** |
+| Pedidos con estado y seguimiento | Sí | Sí |
+| Devoluciones y reembolsos | Sí | **No existe** |
+| Ficha de cliente e historial | Sí | Sólo correo en el pedido |
+| Entrega de producto digital | Sí | **Se cobra y no se entrega nada** |
+| Borrador / publicado | Sí | Todo nace publicado |
+| Aviso de stock bajo | Sí | **No existe** |
+| Diseño de la tienda | Sí | Portada, rejilla y columnas (fase 9 de tiendas) |
+| Dominio propio | Sí | Subdominio por persona |
+| Analítica de visitas y ventas | Sí | **No existe** |
+| Carrito abandonado | Sí | **No existe** |
+
+## Lo que hay que arreglar antes de añadir nada
+
+Probado el 2026-08-22 en `claude-dos.humanity.wiki/tienda-2`, y Eugenio tiene
+razón en las tres:
+
+1. **Ni una foto.** El producto de prueba se creó sin imágenes y la ficha
+   enseña un hueco.
+2. **Ni una descripción de verdad.** Una línea.
+3. **El título del producto no lleva a ninguna parte.** No hay ficha propia: el
+   producto sólo existe como tarjeta dentro de una página.
+
+Y el botón de comprar no salía porque el cobro estaba apagado a la espera de su
+decisión. Ya está encendido; Stripe sigue en modo pruebas.
+
+## Las 10 fases
+
+### Fase 1 — La ficha de producto, de verdad
+Página propia por producto (`/tienda/:producto` dentro del subdominio):
+galería de fotos, descripción con formato, precio, variantes cuando las haya,
+añadir a la cesta y volver a la tienda. Hoy un producto no tiene dónde vivir.
+
+### Fase 2 — El creador de comercio dentro de Páginas
+Eugenio lo pidió primero: «céntrate primero en mejorar el creador de comercio
+dentro de páginas». Poner un producto en una página tiene que ser elegirlo de
+una lista o crearlo ahí mismo, con sus fotos, sin salir a otra pantalla.
+
+### Fase 3 — Opiniones y valoraciones
+Estrellas y comentario, sólo de quien compró —el pedido lo demuestra— para que
+una opinión signifique algo. Media visible en la ficha y en la rejilla.
+
+### Fase 4 — La herramienta Comercio
+Su sitio en el menú. Lista de productos, alta y edición con fotos, stock,
+envío, borrador o publicado, y un panel de pedidos. Reutiliza `products` y las
+rutas de `publicar.ts`.
+
+### Fase 5 — Variantes y referencia
+Talla, color, sabor, con su propio precio y su propio stock. Es lo que separa
+vender miel de vender camisetas.
+
+### Fase 6 — Colecciones, buscador y relacionados
+Que quien entra encuentre. Una tienda de treinta productos sin buscador no se
+puede usar.
+
+### Fase 7 — Descuentos y cupones
+Códigos, porcentaje o importe, caducidad y límite de usos.
+
+### Fase 8 — Entrega de lo digital
+Hoy un PDF se cobra y no se entrega. Enlace de descarga tras el pago, con
+caducidad.
+
+### Fase 9 — Impuestos, zonas de envío y devoluciones
+El IVA y los reembolsos por Stripe. Zonas con precios distintos.
+
+### Fase 10 — Analítica y carrito abandonado
+Cuánta gente entró, cuánta compró, qué se quedó en la cesta.
+
+## La regla de las pruebas
+
+Todo lo que se cree para probar lleva **PRUEBA** delante en el título, y se
+borra al terminar. Eugenio, 2026-08-22: «puedes añadir toda esta info con la
+etiqueta de PRUEBA delante de todo».
