@@ -65,12 +65,6 @@
       "ruta": "drizzle/0085_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: quien movio el sello y cuando (0083 y 0084 ya cogidos)",
       "desde": "2026-08-22T18:29:50.175Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: reparto mensual en simulacion",
-      "desde": "2026-08-22T18:30:24.885Z"
     }
   ]
 }
