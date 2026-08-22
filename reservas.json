@@ -44,12 +44,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/pages/Vision.tsx",
-      "motivo": "rehacer #235 sobre main: enviar puntos",
-      "desde": "2026-08-22T18:18:33.924Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/puntos.ts",
       "motivo": "rehacer #235 sobre main",
       "desde": "2026-08-22T18:18:37.668Z"
