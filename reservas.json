@@ -29,6 +29,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "libro solo-anadir y cuadre nocturno (acuerdo con prog4)",
       "desde": "2026-08-22T14:52:49.934Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/tablero/TableroKanban.tsx",
+      "motivo": "Fase A: camara y video en la ficha de tarea",
+      "desde": "2026-08-22T14:55:56.852Z"
     }
   ]
 }
