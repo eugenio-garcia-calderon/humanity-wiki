@@ -4460,6 +4460,38 @@ de vuelta, cero apariciones de `{false ?`, `tsc` limpio). Nunca salió de este
 ordenador y no entró en ningún commit. Se deja escrito porque un atajo así, sin
 contarlo, es exactamente cómo un candado desaparece sin que nadie lo decida.
 
+## 2026-08-22 — One name per thing, and a sweep that found two more lies
+
+The last item of the UX list. «Imagen» and «Cámara» were the same tool under two
+names — both end in an uploaded photo and the same destination step, and they
+differed only in where the photo came from. «Al muro» here was «Publicación» in
+the `+`.
+
+| | Antes | Ahora |
+|---|---|---|
+| Publicar en el muro | «Al muro» aquí, «Publicación» en el `+` | **Publicación** en los dos |
+| Foto | Dos herramientas casi idénticas | **Cámara**, una, con tres procedencias: hacer foto · grabar vídeo · elegir del carrete |
+
+The name is **Cámara** and not something tidier like «Foto o vídeo» because that
+is the word Eugenio used and the one already in the `+`. Renaming it to my own
+coinage would have created the very inconsistency this change removes.
+
+### The sweep, and why it mattered
+
+Merging the two tools deleted a screen — and with it a second copy of this
+afternoon's lie: **«Elegir una foto — se abrirá el editor»**. I had changed the
+behaviour, fixed the one string I remembered, and missed this one. A third turned
+up in a doc comment: «Imagen: se sube el original y se abre el editor encima».
+
+Three copies of the same false claim, from one behaviour change. So the rule
+written this morning needs its second half: changing what something does includes
+changing what it *says* it does — **and the text is never in one place. Grep for
+it.** Fixing the string you happen to remember is how a screen ends up
+contradicting itself in the corner nobody reopened.
+
+Swept `src/components/knowledge/` and `CapturaCamara.tsx` for anything still
+describing the automatic editor: clean.
+
 ## 2026-08-22 · La base de datos pasa de cero copias a dos capas (prog6)
 
 **Antes de hoy no había ninguna copia de seguridad.** La casilla

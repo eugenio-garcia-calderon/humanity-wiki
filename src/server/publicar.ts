@@ -632,7 +632,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes,
+        garantia, devoluciones, imagenes, periodo,
       } = req.body || {};
 
       const nom = String(nombre || '').trim();
@@ -663,6 +663,25 @@ export function registerPublicarRoutes(app: Express, db: any) {
         }
       }
 
+      // ── QUÉ CLASE DE COSA SE VENDE ────────────────────────────────────
+      // Cuatro, y no dos. Un servicio no se envía ni se descarga —una hora de
+      // asesoría, un taller, una visita— y una suscripción se cobra otra vez
+      // cada mes, que en Stripe es un modo de pago distinto, no un detalle.
+      //
+      // Sin esto no se podía dar de alta ni un servicio ni una SaaS, que son
+      // dos de las tres formas de vender que tiene la gente. Sólo se podía
+      // vender lo que cabe en una caja.
+      const TIPOS = new Set(['fisico', 'digital', 'servicio']);
+      const esSuscripcion = tipo === 'suscripcion';
+      const clase = esSuscripcion ? 'digital' : (TIPOS.has(String(tipo)) ? String(tipo) : 'fisico');
+      // Mensual salvo que se diga otra cosa. `anual` y `trimestral` son lo que
+      // entiende el cobro; cualquier otra cosa se trata como mensual en vez de
+      // rechazar el alta por una palabra.
+      const PERIODOS = new Set(['mensual', 'trimestral', 'anual']);
+      const cadaCuanto = esSuscripcion
+        ? (PERIODOS.has(String(periodo)) ? String(periodo) : 'mensual')
+        : null;
+
       const id = 'PRD' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
       // `tienda` para quien no está verificado; `activo` para quien sí, que es
       // lo que ya podía hacer por la otra puerta.
@@ -671,12 +690,14 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       await db.execute(sql`
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
+                              modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
                               envio_centimos, envio_gratis_desde_centimos, envio_plazo)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
-                ${tipo === 'digital' ? 'digital' : 'fisico'},
+                ${clase},
+                ${esSuscripcion ? 'suscripcion' : 'unico'}, ${cadaCuanto},
                 ${stock === null || stock === undefined || stock === '' ? null : Math.max(0, Math.round(Number(stock) || 0))},
                 ${String(garantia || '').trim() || null}, ${String(devoluciones || '').trim() || null},
                 ${JSON.stringify(fotos)}::jsonb, ${estado}, ${req.user.id}, ${req.user.id},
@@ -686,7 +707,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       `);
 
       res.json({
-        id, estado,
+        id, estado, tipo: clase, suscripcion: esSuscripcion, periodo: cadaCuanto,
         // Se dice en la respuesta, no se deja que lo descubra al no verlo en
         // el mercado: quien vende tiene derecho a saber dónde sale su cosa.
         en_el_mercado_comun: estado === 'activo',
@@ -705,7 +726,15 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * evitó en la fase 2: un botón que se puede pulsar es una promesa.
    */
   app.get('/api/publicar/cobro', (_req: Request, res: Response) => {
-    res.json({ abierto: COBRO_ENCENDIDO });
+    // `pruebas` NO es un detalle técnico: es lo que hay que decirle a quien va
+    // a pagar. Con una clave de pruebas, Stripe rechaza cualquier tarjeta de
+    // verdad — así que quien lo intente se llevará un error sin entender por
+    // qué, y peor: alguien puede creer que ha comprado algo. Se avisa antes,
+    // en el botón, no después.
+    res.json({
+      abierto: COBRO_ENCENDIDO,
+      pruebas: (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test'),
+    });
   });
 
   /** Lo que tengo a la venta. Con sesión: son mis cosas. */
