@@ -131,6 +131,12 @@
       "ruta": "src/pages/Configuracion.tsx",
       "motivo": "bloquear a una persona: interfaz",
       "desde": "2026-08-22T21:03:09.023Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "bloquear a una persona: interfaz",
+      "desde": "2026-08-22T21:03:12.729Z"
     }
   ]
 }
