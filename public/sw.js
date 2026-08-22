@@ -65,6 +65,24 @@ const MAX_MEDIA = 60;
 
 // Only the things that are useless to miss. The app's own code lives under
 // /assets/ with a hash, and gets cached as it is used instead of guessed here.
+/*
+ * EL CÓDIGO DE LA APLICACIÓN, RELLENADO EN CADA COMPILACIÓN por
+ * `scripts/sellar-sw.mjs`. Vacío aquí, con contenido en `dist/sw.js`.
+ *
+ * POR QUÉ EXISTE. La versión anterior decía, con toda la seguridad del mundo,
+ * que los ficheros con hash «se guardan según se usan, en vez de adivinarlos
+ * aquí». Suena bien y está mal: **un service worker no controla la página que
+ * lo instala**, así que en la primera visita el JavaScript de la aplicación
+ * pasa de largo y no se guarda. Probado el 2026-08-22: cargar una vez, apagar
+ * el servidor y recargar daba una **pantalla en blanco** — el HTML venía de la
+ * caché y el código que tenía que pintarlo no estaba.
+ *
+ * Alguien que instala la aplicación y se mete en el metro esa misma tarde es
+ * exactamente ese caso. Y no se pueden escribir los nombres a mano porque
+ * cambian en cada compilación: por eso los pone el build.
+ */
+const BUILD = [];
+
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
@@ -72,21 +90,24 @@ const PRECACHE = [
   "/iconos/icono-180.png",
   "/iconos/icono-192.png",
   "/iconos/icono-512.png",
+  ...BUILD,
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(SHELL).then((c) =>
+    (async () => {
+      const shell = await caches.open(SHELL);
+      const assets = await caches.open(ASSETS);
       // addAll fails the whole install if one file 404s. Individual puts mean a
       // missing icon degrades the cache instead of leaving the app with none.
-      Promise.all(
+      await Promise.all(
         PRECACHE.map((url) =>
           fetch(url, { cache: "no-store" })
-            .then((r) => (r.ok ? c.put(url, r) : null))
+            .then((r) => (r.ok ? (url.startsWith("/assets/") ? assets : shell).put(url, r) : null))
             .catch(() => null),
         ),
-      ),
-    ),
+      );
+    })(),
   );
 });
 
