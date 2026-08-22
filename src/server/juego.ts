@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { iconoDeNombre } from '../utils/iconoDeNombre';
 import { normalizarTelefono } from '../utils/telefono';
+import { TIPOS_CON_FOTO, TECHO_COSAS, TECHO_FOTOS } from '../utils/limitesDelMundo';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 
@@ -497,6 +498,31 @@ export function registerJuegoRoutes(app: Express, db: any) {
       if (!requiereUsuario(req, res)) return;
       const d = req.body || {};
       if (!TIPOS_MUNDO.has(d.tipo)) return res.status(400).json({ error: 'Tipo de objeto no válido.' });
+
+      // EL TECHO DEL MUNDO. La pantalla ya avisa mientras construyes, mucho
+      // antes de llegar aquí; esto es la última puerta, para lo que entra por
+      // la IA o por ⌘V sin pasar por el menú. El porqué de los dos números
+      // está en `src/utils/limitesDelMundo.ts`, no aquí: una sola regla.
+      // `IN ${array}` y no `= ANY(array)`: drizzle no manda el array como un
+      // parámetro de tipo array, lo despliega en `($1, $2, $3)`. Con `ANY` eso
+      // revienta («requires array on right side»), y con `::text[]` también
+      // («cannot cast type record to text[]»). Las dos las vi fallar contra la
+      // base antes de subir esto; ninguna se deduce leyendo el código.
+      const cuenta = await db.execute(sql`
+        SELECT count(*)::int AS cosas,
+               count(*) FILTER (WHERE tipo IN ${Array.from(TIPOS_CON_FOTO)})::int AS fotos
+        FROM game_world_items
+        WHERE user_id = ${req.user!.id} AND archived_at IS NULL
+      `);
+      const { cosas, fotos } = cuenta.rows[0] as { cosas: number; fotos: number };
+      if (cosas >= TECHO_COSAS) return res.status(409).json({
+        error: `Tu mundo está lleno: ${cosas} cosas. Guarda algo en el almacén para hacer sitio.`,
+        techo: 'cosas', cosas, fotos,
+      });
+      if (TIPOS_CON_FOTO.has(d.tipo) && fotos >= TECHO_FOTOS) return res.status(409).json({
+        error: `Ya tienes ${fotos} cosas con foto, que es el máximo. Las fotos son lo que más pesa: guarda alguna para poner otra.`,
+        techo: 'fotos', cosas, fotos,
+      });
       // Un vídeo de YouTube llega con la URL pelada: se le pregunta a YouTube
       // el TÍTULO y el CANAL por oEmbed (público, sin clave) y se guardan en
       // `nombre` y `texto` — la tarjeta 3D enseña eso y su miniatura, nunca la
