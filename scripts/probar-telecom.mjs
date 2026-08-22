@@ -206,10 +206,25 @@ paso('Por dónde se va a intentar conectar');
 const hielo = await a.p.evaluate(() => fetch('/api/telecom/hielo', { credentials: 'include' }).then(r => r.json()));
 const urls = (hielo.servidores || []).flatMap(s => s.urls || []);
 comprobar(urls.some(u => u.startsWith('stun:')), `Siempre hay STUN (${urls.length} direcciones)`);
-comprobar(hielo.hayTurn === false && hielo.porQueNoHayTurn === 'sin contratar',
-  'Sin llaves de Cloudflare se dice que no hay retransmisión, y por qué');
-comprobar(!JSON.stringify(hielo).includes('credential') || hielo.hayTurn === true,
-  'No se reparte ninguna credencial que no venga de Cloudflare');
+// ESTA PRUEBA VALE EN LOS DOS MUNDOS, y tiene que valer: se ejecuta en la
+// máquina de quien la corre, y unos tendrán las llaves de Cloudflare en su
+// `.env` y otros no. Una prueba que solo pase con la configuración de uno no
+// es una prueba, es una foto de su ordenador.
+if (hielo.hayTurn) {
+  const conCredencial = (hielo.servidores || []).filter(s => s.username && s.credential);
+  comprobar(conCredencial.length > 0, 'Con llaves, Cloudflare devuelve credencial de un solo uso');
+  comprobar(urls.some(u => u.startsWith('turn:') || u.startsWith('turns:')), 'Hay direcciones de retransmisión');
+  // La de 443 sobre TLS es la que atraviesa un cortafuegos de empresa, que es
+  // justo el caso para el que se contrata todo esto. Si faltara, tendríamos
+  // TURN para todo menos para lo que hacía falta.
+  comprobar(urls.some(u => u.startsWith('turns:') && u.includes(':443')),
+    'Está la puerta de 443 sobre TLS, la que pasa los cortafuegos');
+} else {
+  comprobar(hielo.porQueNoHayTurn === 'sin contratar',
+    'Sin llaves de Cloudflare se dice que no hay retransmisión, y por qué');
+  comprobar(!JSON.stringify(hielo).includes('credential'),
+    'No se reparte ninguna credencial inventada');
+}
 
 paso('Ana busca a Bruno por su número');
 await a.p.getByPlaceholder('+34 600 123 456').nth(1).fill('600998877');
