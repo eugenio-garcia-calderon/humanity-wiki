@@ -29,6 +29,12 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "menu (i) se sale de pantalla a 375px",
       "desde": "2026-08-22T14:09:05.604Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "deploy/CLAUDE.md",
+      "motivo": "nota del inodo del montaje, junto a la del Caddyfile",
+      "desde": "2026-08-22T14:11:13.203Z"
     }
   ]
 }
