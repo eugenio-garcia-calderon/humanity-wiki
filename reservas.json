@@ -215,6 +215,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
       "desde": "2026-08-22T22:27:51.751Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "agenda del iPhone",
+      "desde": "2026-08-22T22:30:18.160Z"
     }
   ]
 }
