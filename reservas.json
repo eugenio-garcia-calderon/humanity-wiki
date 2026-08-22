@@ -176,12 +176,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "drizzle/0091_comision_en_puntos.sql",
-      "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
-      "desde": "2026-08-22T22:23:29.017Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/puntos.ts",
       "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
       "desde": "2026-08-22T22:23:33.070Z"
