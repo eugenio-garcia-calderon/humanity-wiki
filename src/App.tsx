@@ -70,10 +70,12 @@ const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
 const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
+const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
 const MiPedido = lazy(() => import('./pages/MiPedido'));
+const FichaProducto = lazy(() => import('./pages/FichaProducto'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
 const Tareas = lazy(() => import('./pages/Tareas'));
@@ -162,6 +164,10 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               llamada «pedido» se comería esta pantalla. Lo fijo gana a lo
               variable, pero sólo si existe: mejor declararlo. */}
           <Route path="pedido" element={<MiPedido />} />
+          {/* La ficha de un producto. Va antes que `:slug` porque `producto`
+              es fijo y `:slug` variable: si no se declarara, una tienda con
+              una página llamada «producto» se comería todas las fichas. */}
+          <Route path="producto/:producto" element={<FichaProducto handle={handle} />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -256,6 +262,7 @@ export default function App() {
                 <Route path="proyectos" element={<Proyectos />} />
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="hormiguero" element={<Hormiguero />} />
+                <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />

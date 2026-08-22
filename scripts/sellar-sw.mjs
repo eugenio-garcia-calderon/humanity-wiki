@@ -42,17 +42,38 @@ const sw = join(dist, "sw.js");
  * place that says which file the browser actually runs.
  */
 const html = readFileSync(join(dist, "index.html"), "utf8");
-const m = html.match(/\/assets\/(index-[A-Za-z0-9_-]+\.js)/);
+// Todo lo que la página carga de arranque: el módulo de entrada, sus
+// precargas, y la hoja de estilos. Sin la hoja, sin conexión la aplicación
+// abriría desnuda; sin el módulo, en blanco.
+const arranque = [...new Set(
+  [...html.matchAll(/["'](\/assets\/[A-Za-z0-9._-]+\.(?:js|css))["']/g)].map((m) => m[1]),
+)];
+const entrada = arranque.find((f) => /\/assets\/index-.*\.js$/.test(f));
 
-if (!m) {
+if (!entrada) {
   console.error("sellar-sw: dist/index.html no referencia ningún /assets/index-*.js — ¿ha corrido vite build?");
   process.exit(1);
 }
-const entrada = m[1];
 
 const original = readFileSync(sw, "utf8");
+
+/*
+ * Dos cosas de una: `BUILD` le dice al worker QUÉ guardar en la instalación
+ * —sin esto la primera visita se queda sin el código de la aplicación y sin
+ * conexión abre en blanco— y, como su contenido cambia en cada compilación,
+ * también hace que `sw.js` cambie, que es lo único que hace al navegador
+ * reinstalarlo. Detección de versión y precarga con la misma línea.
+ */
+const lista = JSON.stringify(arranque);
+const conBuild = original.replace(/^const BUILD = \[.*?\];$/m, `const BUILD = ${lista};`);
+
+if (conBuild === original) {
+  console.error("sellar-sw: no encuentro la línea `const BUILD = [];` en sw.js. ¿La han quitado?");
+  process.exit(1);
+}
+
 // Idempotent: re-running the stamp replaces the line instead of stacking them.
-const limpio = original.replace(/\n\/\/ BUILD: .*\n?$/, "\n");
+const limpio = conBuild.replace(/\n\/\/ BUILD: .*\n?$/, "\n");
 writeFileSync(sw, `${limpio}\n// BUILD: ${entrada}\n`);
 
-console.log(`sellar-sw: sw.js sellado con ${entrada}`);
+console.log(`sellar-sw: ${arranque.length} ficheros de arranque sellados (entrada: ${entrada})`);
