@@ -28,6 +28,10 @@ export const TIPOS = [
   // viven en `/data/uploads` y su ficha en `archivos`, igual que los del chat y
   // los del editor. Ver `bd/ficheros.ts`.
   'imagen', 'video', 'documento',
+  // Fases 5-8: las que se CALCULAN. No guardan nada — su valor sale de
+  // `bd/calculo.ts` al leer. Guardar el resultado daría dos verdades: lo
+  // guardado y lo que sale de recalcular.
+  'formula', 'agregado', 'condicional',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -216,6 +220,9 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
       unicos.sort((a, b) => (orden.get(a) ?? 1e9) - (orden.get(b) ?? 1e9));
       return ok(unicos);
     }
+
+    case 'formula': case 'agregado': case 'condicional':
+      return mal('Esta columna se calcula sola: no se puede escribir en ella.');
 
     case 'imagen': case 'video': case 'documento':
       return mal('Esta columna guarda archivos: no se escribe como un valor.');
