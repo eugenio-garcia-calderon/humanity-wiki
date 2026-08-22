@@ -27,7 +27,7 @@ import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
-  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag,
+  Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
@@ -340,6 +340,10 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       id: 'todas', label: 'Todas las personas', icono: Users2, destino: '/personas', abrir: 'ventana',
     } as NodoMenu, {
       id: 'mensajes', label: 'Mensajes', icono: MessageSquare, destino: '/mensajes',
+    } as NodoMenu, {
+      // EL TELÉFONO VA JUNTO A MENSAJES porque es lo mismo visto de otra
+      // manera: a la misma persona se le escribe o se le llama (2026-08-22).
+      id: 'telefono', label: 'Teléfono', icono: Phone, destino: '/telefono',
     } as NodoMenu] : []),
     // LOS GRUPOS FAVORITOS, aquí arriba (Eugenio: «ponerlo como favoritos,
     // entonces los grupos favoritos se añadirán»). Cada uno abre la lista ya

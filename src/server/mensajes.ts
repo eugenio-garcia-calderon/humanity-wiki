@@ -1,5 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { enviarA, enviarAlResto, estaConectado } from './telecomHub.js';
+import { avisar } from './avisos.js';
 
 // ============================================================================
 // MENSAJES ENTRE PERSONAS (2026-08-20, petición de Eugenio: «haz mensajería
@@ -19,6 +21,20 @@ import { sql } from 'drizzle-orm';
 // Anita dentro del mundo de Eugenio, y en el que representa a Eugenio dentro
 // del de Anita. El puente entre un agente y una cuenta real es la columna
 // `persona_user_id`, que ya existía.
+//
+// ── 2026-08-22: EL MENSAJE YA NO ESPERA A QUE RECARGUES ────────────────────
+// Esto nació pidiendo la conversación al abrirla y nada más. Para sustituir a
+// WhatsApp eso no vale: un mensaje tiene que APARECER. Ahora, al guardar uno,
+// se empuja por la conexión abierta de la otra persona (`telecomHub`), que es
+// el mismo cable por el que suena una llamada.
+//
+// Y CON ÉL LLEGAN LAS DOS MARCAS DE VERIFICACIÓN, que no son un adorno:
+//   ✓   guardado en el servidor
+//   ✓✓  entregado en el aparato de la otra persona
+//   ✓✓  en verde: leído
+// «Entregado» se apunta cuando el empujón llega de verdad a un aparato suyo,
+// no cuando el servidor termina el INSERT. Si no hay nadie conectado, se queda
+// sin entregar y se marca en cuanto vuelva a abrir la aplicación.
 //
 // EL «RESUMEN» NO LLAMA A LA IA. Se recorta el mensaje y se apunta quién lo
 // dijo y cuándo. Resumir de verdad costaría una llamada al modelo por cada
@@ -66,8 +82,26 @@ export function registerMensajesRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Inicia sesión para escribir.' });
       const para = String(req.body?.para || '').trim();
       const texto = String(req.body?.texto || '').trim();
+
+      // EL ADJUNTO YA ESTÁ SUBIDO cuando llega aquí: el navegador lo manda
+      // antes a `/api/uploads`, que es quien decide el tipo de verdad y dónde
+      // vive el fichero. Aquí solo se apunta a qué mensaje pertenece — así
+      // este endpoint sigue siendo JSON pequeño y no hay dos sitios que
+      // decidan qué formatos se aceptan.
+      const a = req.body?.adjunto;
+      const adjuntoUrl = a?.url ? String(a.url).trim() : null;
+      // Solo lo que sirve ESTE servidor. Una URL de fuera metida aquí sería un
+      // rastreador —o algo peor— empotrado en la conversación de otro.
+      if (adjuntoUrl && !adjuntoUrl.startsWith('/uploads/')) {
+        return res.status(400).json({ error: 'Ese adjunto no es de aquí.' });
+      }
+      const adjuntoTipo = adjuntoUrl ? String(a?.tipo || 'archivo').slice(0, 40) : null;
+      const adjuntoNombre = adjuntoUrl ? String(a?.nombre || '').slice(0, 200) || null : null;
+      const adjuntoSegundos = adjuntoUrl && Number.isFinite(Number(a?.segundos))
+        ? Math.max(0, Math.min(3600, Math.round(Number(a.segundos)))) : null;
+
       if (!para) return res.status(400).json({ error: '¿A quién se lo escribes?' });
-      if (!texto) return res.status(400).json({ error: 'El mensaje está vacío.' });
+      if (!texto && !adjuntoUrl) return res.status(400).json({ error: 'El mensaje está vacío.' });
       if (texto.length > 5000) return res.status(400).json({ error: 'El mensaje es demasiado largo.' });
       if (para === req.user.id) return res.status(400).json({ error: 'No puedes escribirte a ti.' });
 
@@ -77,27 +111,60 @@ export function registerMensajesRoutes(app: Express, db: any) {
       if (!destino.rows.length) return res.status(404).json({ error: 'Esa persona no existe.' });
 
       const id = nuevoId();
+      const fecha = new Date().toISOString();
       await db.execute(sql`
-        INSERT INTO mensajes (id, de_user_id, para_user_id, texto)
-        VALUES (${id}, ${req.user.id}, ${para}, ${texto})
+        INSERT INTO mensajes (id, de_user_id, para_user_id, texto,
+                              adjunto_url, adjunto_tipo, adjunto_nombre, adjunto_segundos)
+        VALUES (${id}, ${req.user.id}, ${para}, ${texto || null},
+                ${adjuntoUrl}, ${adjuntoTipo}, ${adjuntoNombre}, ${adjuntoSegundos})
       `);
+
+      // ── QUE APAREZCA SOLO ──────────────────────────────────────────────
+      const sobre = {
+        id, texto: texto || null, fecha,
+        adjunto: adjuntoUrl ? { url: adjuntoUrl, tipo: adjuntoTipo, nombre: adjuntoNombre, segundos: adjuntoSegundos } : null,
+      };
+      const llegaron = enviarA(para, { tipo: 'mensaje', de: req.user.id, mensaje: { ...sobre, mio: false } });
+
+      // TUS OTROS APARATOS TAMBIÉN. Si escribes desde el portátil, el móvil
+      // tiene que enseñar lo que acabas de mandar: si no, cada aparato guarda
+      // media conversación.
+      const miAparato = String(req.body?.dispositivo || '');
+      enviarAlResto(req.user.id, miAparato, { tipo: 'mensaje', de: req.user.id, con: para, mensaje: { ...sobre, mio: true } });
+
+      let entregado = false;
+      if (llegaron > 0) {
+        entregado = true;
+        await db.execute(sql`UPDATE mensajes SET entregado_at = now() WHERE id = ${id}`);
+        enviarA(req.user.id, { tipo: 'entregados', ids: [id], con: para });
+      } else {
+        // NO ESTÁ. Entonces sí va a la campana: es lo único que le avisará.
+        // Con la persona conectada, la campana sería ruido encima del mensaje
+        // que ya ha visto aparecer.
+        await avisar(db, {
+          paraQuien: para, dePartede: req.user.id, tipo: 'mensaje',
+          entidadTipo: 'mensajes', entidadId: id,
+          datos: { texto: (texto || '📎 Un archivo').slice(0, 120) },
+        });
+      }
 
       // LA MEMORIA DE LOS DOS AGENTES. Va después de guardar y sin bloquear la
       // respuesta si falla: que la representación no se entere es un problema
       // menor; perder el mensaje, no.
       try {
-        const [yo, otro] = await Promise.all([nombreDe(req.user.id), nombreDe(para)]);
+        const [yo] = await Promise.all([nombreDe(req.user.id)]);
+        const paraElResumen = texto || `un ${adjuntoTipo === 'audio' ? 'audio' : 'archivo'}`;
         await Promise.all([
           // En MI mundo, la representación de la otra persona recuerda lo que le dije.
-          recordar(req.user.id, para, resumir(texto, yo)),
+          recordar(req.user.id, para, resumir(paraElResumen, yo)),
           // Y en SU mundo, la representación mía recuerda lo que recibió.
-          recordar(para, req.user.id, resumir(texto, yo)),
+          recordar(para, req.user.id, resumir(paraElResumen, yo)),
         ]);
       } catch (e) {
         console.error('memoria de agentes tras mensaje:', e);
       }
 
-      res.json({ id, ok: true });
+      res.json({ id, ok: true, entregado, fecha });
     } catch (e: any) {
       console.error('enviar mensaje error:', e);
       res.status(500).json({ error: e.message });
@@ -124,11 +191,21 @@ export function registerMensajesRoutes(app: Express, db: any) {
           FROM mensajes m
           WHERE (m.de_user_id = ${yo} OR m.para_user_id = ${yo}) AND m.archived_at IS NULL
           GROUP BY 1
+        ),
+        ultimos AS (
+          SELECT DISTINCT ON (LEAST(m.de_user_id, m.para_user_id), GREATEST(m.de_user_id, m.para_user_id))
+                 CASE WHEN m.de_user_id = ${yo} THEN m.para_user_id ELSE m.de_user_id END AS con,
+                 m.texto, m.adjunto_tipo, m.de_user_id
+          FROM mensajes m
+          WHERE (m.de_user_id = ${yo} OR m.para_user_id = ${yo}) AND m.archived_at IS NULL
+          ORDER BY LEAST(m.de_user_id, m.para_user_id), GREATEST(m.de_user_id, m.para_user_id), m.created_at DESC
         )
         SELECT h.con, h.ultima, h.sin_leer, h.total,
-               u.display_name, u.name, u.avatar_url
+               u.display_name, u.name, u.avatar_url,
+               x.texto AS ultimo_texto, x.adjunto_tipo AS ultimo_adjunto, x.de_user_id AS ultimo_de
         FROM hilos h
         JOIN users u ON u.id = h.con AND u.archived_at IS NULL
+        LEFT JOIN ultimos x ON x.con = h.con
         ORDER BY h.ultima DESC
         LIMIT 100
       `);
@@ -139,6 +216,15 @@ export function registerMensajesRoutes(app: Express, db: any) {
           nombre: r.display_name || r.name || 'Persona',
           avatar: r.avatar_url || null,
           ultima: r.ultima, sinLeer: r.sin_leer, total: r.total,
+          // LA ÚLTIMA LÍNEA DE CADA CONVERSACIÓN. Sin ella, la lista es una
+          // columna de nombres y hay que entrar en cada uno para saber de qué
+          // iba. Es lo primero que se mira en cualquier mensajería.
+          vistazo: r.ultimo_texto
+            || (r.ultimo_adjunto === 'audio' ? '🎤 Nota de voz'
+              : r.ultimo_adjunto === 'imagen' ? '📷 Foto'
+              : r.ultimo_adjunto ? '📎 Archivo' : ''),
+          ultimoMio: r.ultimo_de === yo,
+          conectado: estaConectado(r.con),
         })),
       });
     } catch (e: any) {
@@ -155,7 +241,8 @@ export function registerMensajesRoutes(app: Express, db: any) {
       const yo = req.user.id;
       const otro = req.params.id;
       const rows = await db.execute(sql`
-        SELECT id, de_user_id, para_user_id, texto, created_at, leido_at
+        SELECT id, de_user_id, para_user_id, texto, created_at, leido_at, entregado_at,
+               adjunto_url, adjunto_tipo, adjunto_nombre, adjunto_segundos
         FROM mensajes
         WHERE archived_at IS NULL
           AND ((de_user_id = ${yo} AND para_user_id = ${otro})
@@ -163,13 +250,26 @@ export function registerMensajesRoutes(app: Express, db: any) {
         ORDER BY created_at
         LIMIT 500
       `);
-      await db.execute(sql`
+      const leidos = await db.execute(sql`
         UPDATE mensajes SET leido_at = now()
         WHERE para_user_id = ${yo} AND de_user_id = ${otro} AND leido_at IS NULL
+        RETURNING id
       `);
+
+      // QUE LA OTRA PERSONA VEA LAS DOS MARCAS PONERSE AZULES AHORA, no la
+      // próxima vez que recargue. Es el mismo cable de las llamadas.
+      const ids = (leidos.rows as any[]).map(r => r.id);
+      if (ids.length) enviarA(otro, { tipo: 'leidos', ids, con: yo });
+
       res.json({
+        conectado: estaConectado(otro),
         mensajes: (rows.rows as any[]).map(m => ({
           id: m.id, mio: m.de_user_id === yo, texto: m.texto, fecha: m.created_at,
+          entregado: Boolean(m.entregado_at),
+          leido: Boolean(m.leido_at),
+          adjunto: m.adjunto_url
+            ? { url: m.adjunto_url, tipo: m.adjunto_tipo, nombre: m.adjunto_nombre, segundos: m.adjunto_segundos }
+            : null,
         })),
       });
     } catch (e: any) {

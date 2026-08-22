@@ -4777,3 +4777,22 @@ tenemos hacia adelante, copia el modelo de Hormiguero»*.
 pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
 suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
 de ruta), pero las rutas de debates no existen.
+
+### 2026-08-22 — Telecomunicaciones: mensajes en vivo, llamadas y videollamadas (Programador 8)
+Petición de Eugenio: «quiero que esta plataforma sustituya a WhatsApp, que se pueda enviar mensajes y hacer llamadas y videollamadas compartiendo pantalla etc. Y que con un número de la persona le puedas encontrar en la base de datos y enviarle un mensaje o llamarle, y le saltará en su aplicación».
+
+**El cable** (`src/server/telecomHub.ts`). Una conexión abierta por aparato (SSE, `GET /api/telecom/conexion`), que es lo que permite al servidor hablarle a alguien sin que lo pida: por ahí llegan los mensajes, la presencia y el timbre. Se eligió SSE y no WebSockets por tres motivos, en orden de peso: un WebSocket se engancha al servidor HTTP y eso obliga a tocar `server.ts`, que está congelado; no añade dependencia (`ws` son 40 KB); y atraviesa Cloudflare y cualquier proxy porque es un GET que no termina. Cuesta que es de una sola dirección — el cliente contesta por POST, que para señalización son cuatro mensajes. **Una persona son varios aparatos**: cada conexión tiene su identificador y la señalización va a uno concreto, o la pestaña olvidada en el trabajo contesta a una negociación que no es suya.
+
+**Las llamadas** (`src/server/telecom.ts`, `src/telecom/motor.ts`). WebRTC: el audio y el vídeo van de un navegador al otro, cifrados de extremo a extremo y **sin pasar por Hetzner**. El servidor solo presenta a los dos navegadores y comprueba que quien manda una señal es de verdad parte de esa llamada. Coste de una llamada en servidor: cero.
+
+**Lo que se añadió a los mensajes**: aparecen solos, dos marcas de verificación (entregado / leído), «está escribiendo…», punto verde de presencia, fotos, archivos y notas de voz. Y botones de llamar y videollamar en la propia conversación.
+
+**Buscar por número** (`GET /api/telecom/buscar`). Exacto y de uno en uno, nunca una lista, con freno de 40 búsquedas cada diez minutos: una búsqueda parcial sería un listín telefónico de toda la plataforma servido por la puerta de atrás. Y el cruce de la agenda importada con la gente registrada (`GET /api/telecom/mis-contactos`), que es la función que hizo grande a WhatsApp: no buscas a nadie, abres y tu gente ya está.
+
+**Base de datos** (`drizzle/0080_telecomunicaciones.sql`): `users.telefono` (normalizado, único) y `telefono_buscable`; `mensajes` gana `entregado_at` y los cuatro campos del adjunto; tabla `llamadas` con las siete formas de acabar una llamada. El contenido de una llamada no se guarda en ninguna parte.
+
+**Dos fallos que encontró la prueba automática y que no se habrían visto a ojo**:
+1. *Cuatro carriles en vez de dos.* Quien contesta no debe crear sus transceptores: los crea la oferta al aplicarla. Cuando los creaban los dos, quien contestaba acababa con cuatro y los suyos no transmitían — una llamada que conecta y enseña la cara de uno solo.
+2. *El acuse de lectura llegaba antes que el propio mensaje.* El servidor empuja el mensaje a la otra persona antes de contestar a quien lo envía; si ella lo lee en ese instante, el «leído» llega cuando el mensaje todavía tiene su identificador provisional. Ahora las marcas huérfanas se guardan y se aplican al bautizarlo.
+
+**Verificación** (`scripts/probar-telecom.mjs`): dos navegadores de verdad con dos sesiones distintas, que se crean y se archivan solos. Pasa: presencia, búsqueda por número, mensaje en vivo, las dos marcas, timbre en la otra aplicación, negociación completa (los dos envían y reciben audio y vídeo, dos carriles y ni uno más), silenciar, compartir pantalla, colgar y el historial. **Lo que no se ha podido comprobar**: el apretón de manos final (ICE) no se completa en este Mac — se probó con dos conexiones dentro de una misma página, sin nada de esta aplicación por medio, y también falla. Que el audio suene entre dos personas hay que verlo entre dos aparatos de verdad.

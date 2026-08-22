@@ -49,6 +49,7 @@ const Indicators = lazy(() => import('./pages/Indicators'));
 const MapPage = lazy(() => import('./pages/Map'));
 const Mapas = lazy(() => import('./pages/Mapas'));
 const Mensajes = lazy(() => import('./pages/Mensajes'));
+const Telefono = lazy(() => import('./pages/Telefono'));
 const Mercado = lazy(() => import('./pages/Mercado'));
 const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
 const Muro = lazy(() => import('./pages/Muro'));
@@ -281,6 +282,7 @@ export default function App() {
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />
                 <Route path="mensajes" element={<Mensajes />} />
+                <Route path="telefono" element={<Telefono />} />
                 {/* Una persona de TU mundo: su ficha y vuestra conversación, sin
                     cargar el Mundo 3D entero (Eugenio, 2026-08-20). */}
                 <Route path="persona/:id" element={<Persona />} />
