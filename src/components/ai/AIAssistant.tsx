@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import CreadorPublicacion from '../knowledge/CreadorPublicacion';
 import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight, Camera } from 'lucide-react';
-import { useData } from '../../contexts/DataContext';
+import { useDataSinPedir } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePanelWidth } from '../../hooks/usePanelWidth';
@@ -456,7 +456,11 @@ export default function AIAssistant({ modo = 'panel' }: {
   // Los territorios que la app ya tiene cargados, para comprobar que un
   // destino existe antes de navegar (B63). Si aún no han llegado, no se
   // bloquea nada: mejor dejar pasar que impedir algo que sí existe.
-  const { territories: territorios } = useData();
+  // SIN PEDIRLOS: si ya están, se usan; si no, el `if` de abajo deja pasar.
+  // Con `useData()` normal, el asistente —que se monta en TODAS las páginas—
+  // hacía que los ocho catálogos se descargaran en cada visita, incluida la
+  // portada, que no usa ninguno.
+  const { territories: territorios } = useDataSinPedir();
 
   // HISTORIAL (Eugenio, 2026-08-20: «con historial de conversaciones»). La
   // ruta ya existía y no la usaba nadie: lo que faltaba era el sitio donde
