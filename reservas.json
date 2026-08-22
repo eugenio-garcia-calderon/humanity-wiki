@@ -101,12 +101,6 @@
       "ruta": "vite.config.ts",
       "motivo": "poder probar dominios propios en local",
       "desde": "2026-08-22T20:52:47.989Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: sesion en los subdominios",
-      "desde": "2026-08-22T20:53:32.921Z"
     }
   ]
 }
