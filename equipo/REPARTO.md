@@ -68,6 +68,13 @@ El gancho `pre-commit` comprueba lo que vas a commitear y **para el commit** si
 lleva un fichero reservado por otro. Si no hay red, avisa pero te deja seguir:
 prefiero un choque ocasional a tres agentes bloqueados.
 
+**Un fichero que solo crece por el final se reserva treinta segundos, no diez
+minutos.** `src/paginasInfo.ts` es el ejemplo: cinco agentes añadiendo una línea al
+final de una lista. Ahí se coge la reserva **justo antes de escribir la línea** y se
+suelta al commitear, no al empezar la tarea — el 2026-08-22 uno lo tuvo once
+minutos con la línea sin escribir y encadenó a tres detrás. En un fichero que se
+edita de verdad, al contrario: resérvalo mientras trabajas en él.
+
 **Ficheros que siempre hay que reservar** (los tocan todos):
 `src/App.tsx` · `src/main.tsx` · `CHANGELOG.md` · `src/components/ui/**` ·
 `src/index.css` · `index.html` · `package.json` · `server.ts` · `docker-compose.prod.yml`
