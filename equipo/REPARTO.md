@@ -26,6 +26,14 @@ así que ya no hay forma de borrárselo.
 **Nadie entra en la carpeta de otro.** Ni para mirar: para ver el código de otro
 está `git show`, `git diff` y las ramas.
 
+**Una sola excepción, y con nombre: la llave que solo se imprime una vez.** Quien
+crea el usuario de producción de otro agente escribe su clave y su token
+directamente en el `.env` de esa copia — entra solo a eso, no lee nada más y sale.
+La alternativa es mandar un secreto por un chat, que es peor. Fuera de este caso no
+hay más excepciones (planteada por prog1 el 2026-08-22, y hace bien en decirla en
+voz alta en vez de darla por hecha). A futuro, que `scripts/agente-ia.mjs` acepte la
+ruta donde dejar la llave y la excepción desaparece.
+
 **Quién eres lo dice dónde estás**, no un fichero: la raíz es `prog1`, y
 `.claude/worktrees/progN` es `progN`. **No hay fichero `.agente` en las tres
 carpetas de siempre y no debe haberlo**: en la primera hora de vida de este sistema
