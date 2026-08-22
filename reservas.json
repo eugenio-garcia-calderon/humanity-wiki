@@ -215,6 +215,12 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
       "desde": "2026-08-22T22:23:56.659Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0093_comision_en_puntos.sql",
+      "motivo": "comision en puntos (0091 prog3, 0092 prog8)",
+      "desde": "2026-08-22T22:24:58.991Z"
     }
   ]
 }
