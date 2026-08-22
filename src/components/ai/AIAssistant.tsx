@@ -1361,7 +1361,13 @@ export default function AIAssistant({ modo = 'panel' }: {
     const raiz = document.documentElement;
     // ABAJO SIEMPRE LA BARRA, que existe esté abierto o no: ponerlo a 0 al
     // cerrar taparía el final de cada página.
-    raiz.style.setProperty('--hueco-muelle', `${ALTO_BARRA}px`);
+    // MÁS EL BORDE DEL TELÉFONO (2026-08-22, Eugenio, con la aplicación ya
+    // instalada en su iPhone: «el menú inferior en PWA está demasiado pegado a
+    // la parte inferior»). Instalada a pantalla completa no hay barra de Safari
+    // debajo, así que la de la aplicación queda encima de la rayita del iPhone.
+    // `env(safe-area-inset-bottom)` vale 0 en el navegador y ~34px instalada:
+    // una sola regla para los dos casos.
+    raiz.style.setProperty('--hueco-muelle', `calc(${ALTO_BARRA}px + env(safe-area-inset-bottom))`);
     // Y A LA DERECHA, el lateral cuando lo hay. En el teléfono no se reserva
     // nada: allí el panel ocupa la pantalla entera y no hay página detrás que
     // proteger.
@@ -1808,7 +1814,9 @@ export default function AIAssistant({ modo = 'panel' }: {
           navegación. */}
       <nav
         className="fixed inset-x-0 bottom-0 z-[9999] bg-white border-t border-slate-200 shadow-lg grid grid-cols-5 items-center"
-        style={{ height: ALTO_BARRA }}
+        // El alto es el de los botones; el hueco del iPhone se añade DEBAJO con
+        // padding, para que los iconos no se encojan al instalarla.
+        style={{ height: ALTO_BARRA, boxSizing: 'content-box', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* EL ORDEN LO PIDIÓ EUGENIO Y TIENE SENTIDO DE LECTURA
             (2026-08-21): casa · proyectos · BUSCAR · mensajes · crear.
