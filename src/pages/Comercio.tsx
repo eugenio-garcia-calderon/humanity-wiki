@@ -248,6 +248,7 @@ export default function Comercio() {
                 {productos.length} de {limite}. Para tener más, verifica tu cuenta.
               </p>
             )}
+            <Cupones />
           </>
         )
       ) : (
@@ -343,6 +344,88 @@ export default function Comercio() {
         />
       )}
     </Marco>
+  );
+}
+
+/**
+ * CUPONES (2026-08-22, fase 7 del plan): el vendedor crea códigos de
+ * descuento — porcentaje o importe fijo, mínimo, caducidad, número de usos —
+ * y los apaga cuando quiere. Nunca se borran: los pedidos los citan.
+ */
+function Cupones() {
+  const [lista, setLista] = useState<any[] | null>(null);
+  const [abierto, setAbierto] = useState(false);
+  const [codigo, setCodigo] = useState('');
+  const [tipo, setTipo] = useState<'porcentaje' | 'fijo'>('porcentaje');
+  const [valor, setValor] = useState('');
+  const [usosMax, setUsosMax] = useState('');
+  const [caduca, setCaduca] = useState('');
+  const [aviso, setAviso] = useState<string | null>(null);
+  const cargar = () => fetch('/api/publicar/mis-cupones').then(r => r.json()).then(j => Array.isArray(j) && setLista(j)).catch(() => {});
+  useEffect(() => { cargar(); }, []);
+  const crear = async () => {
+    setAviso(null);
+    const v = tipo === 'fijo' ? Math.round(Number(valor.replace(',', '.')) * 100) : Number(valor);
+    const r = await fetch('/api/publicar/mis-cupones', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo, tipo, valor: v, usos_max: usosMax || null, caduca: caduca || null }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setAviso(j.error || 'No se ha podido crear.'); return; }
+    setCodigo(''); setValor(''); setUsosMax(''); setCaduca(''); setAbierto(false); cargar();
+  };
+  const alternar = async (id: string, activo: boolean) => {
+    await fetch(`/api/publicar/mis-cupones/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activo }) });
+    cargar();
+  };
+  return (
+    <section className="mt-6 pt-4 border-t border-slate-100">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-black text-slate-800">Cupones de descuento</h3>
+        <button type="button" onClick={() => setAbierto(o => !o)}
+          className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+          {abierto ? 'Cerrar' : 'Nuevo cupón'}
+        </button>
+      </div>
+      {abierto && (
+        <div className="mt-3 p-3 rounded-2xl border border-slate-200 space-y-2">
+          <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="CÓDIGO (p. ej. VERANO10)"
+            className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm uppercase" />
+          <div className="flex gap-2 flex-wrap">
+            <select value={tipo} onChange={e => setTipo(e.target.value as any)} className="h-10 px-2 rounded-lg border border-slate-200 text-sm">
+              <option value="porcentaje">% de descuento</option>
+              <option value="fijo">€ de descuento</option>
+            </select>
+            <input value={valor} onChange={e => setValor(e.target.value)} inputMode="decimal" placeholder={tipo === 'fijo' ? '5,00' : '10'}
+              className="w-24 h-10 px-3 rounded-lg border border-slate-200 text-sm" />
+            <input value={usosMax} onChange={e => setUsosMax(e.target.value)} inputMode="numeric" placeholder="Usos máx."
+              className="w-24 h-10 px-3 rounded-lg border border-slate-200 text-sm" />
+            <input type="date" value={caduca} onChange={e => setCaduca(e.target.value)} aria-label="Caduca el"
+              className="h-10 px-2 rounded-lg border border-slate-200 text-sm" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={crear} disabled={!codigo.trim() || !valor.trim()}
+              className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-bold disabled:opacity-40">Crear</button>
+            {aviso && <p className="text-xs font-bold text-rose-600">{aviso}</p>}
+          </div>
+        </div>
+      )}
+      {lista && lista.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {lista.map(c => (
+            <li key={c.id} className="flex items-center gap-3 text-xs">
+              <span className={`font-mono font-black ${c.activo ? 'text-slate-800' : 'text-slate-400 line-through'}`}>{c.codigo}</span>
+              <span className="text-slate-500">{c.tipo === 'porcentaje' ? `${c.valor} %` : `${(Number(c.valor) / 100).toFixed(2)} €`}</span>
+              <span className="text-slate-400">· {c.usos}{c.usos_max ? `/${c.usos_max}` : ''} usos{c.caduca_at ? ` · hasta ${new Date(c.caduca_at).toLocaleDateString('es-ES')}` : ''}</span>
+              <button type="button" onClick={() => alternar(c.id, !c.activo)} className="ml-auto text-[11px] font-bold text-slate-500 underline">
+                {c.activo ? 'desactivar' : 'activar'}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {lista && lista.length === 0 && !abierto && <p className="mt-2 text-xs text-slate-400">Sin cupones todavía.</p>}
+    </section>
   );
 }
 

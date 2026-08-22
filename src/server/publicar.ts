@@ -439,6 +439,112 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  // ==========================================================================
+  // CUPONES DEL VENDEDOR (2026-08-22, fase 7 del plan de comercio)
+  // ==========================================================================
+  /** Mis cupones. */
+  app.get('/api/publicar/mis-cupones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo, created_at
+        FROM cupones WHERE vendedor_user_id = ${req.user.id} ORDER BY created_at DESC
+      `);
+      res.json(r.rows);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Crear un cupón: { codigo, tipo 'porcentaje'|'fijo', valor, minimo_centimos?, caduca?, usos_max? } */
+  app.post('/api/publicar/mis-cupones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const b = req.body || {};
+      const codigo = String(b.codigo || '').trim().toUpperCase().replace(/\s+/g, '');
+      if (!/^[A-Z0-9\-_]{3,24}$/.test(codigo)) return res.status(400).json({ error: 'El código: de 3 a 24 letras o números, sin espacios.' });
+      const tipo = b.tipo === 'fijo' ? 'fijo' : 'porcentaje';
+      const valor = Math.round(Number(b.valor));
+      if (!Number.isFinite(valor) || valor <= 0 || (tipo === 'porcentaje' && valor > 100)) {
+        return res.status(400).json({ error: tipo === 'porcentaje' ? 'El porcentaje va de 1 a 100.' : 'El importe tiene que ser mayor que cero.' });
+      }
+      const minimo = Math.max(0, Math.round(Number(b.minimo_centimos) || 0));
+      const caduca = b.caduca ? new Date(String(b.caduca)) : null;
+      if (caduca && Number.isNaN(caduca.getTime())) return res.status(400).json({ error: 'La fecha de caducidad no se entiende.' });
+      const usosMax = b.usos_max === null || b.usos_max === undefined || b.usos_max === '' ? null : Math.max(1, Math.round(Number(b.usos_max) || 1));
+      const id = 'CUP' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+      try {
+        await db.execute(sql`
+          INSERT INTO cupones (id, vendedor_user_id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max)
+          VALUES (${id}, ${req.user.id}, ${codigo}, ${tipo}, ${valor}, ${minimo}, ${caduca ? caduca.toISOString() : null}, ${usosMax})
+        `);
+      } catch (e: any) {
+        // pg dice 23505 en el error o en su `cause` según quién lo envuelva;
+        // se mira en los dos y también en el texto, que es lo que no cambia.
+        const texto = `${e?.message || ''} ${e?.cause?.message || ''}`;
+        if (String(e?.code) === '23505' || String(e?.cause?.code) === '23505' || /duplicate key|unique/i.test(texto)) {
+          return res.status(409).json({ error: 'Ya tienes un cupón con ese código.' });
+        }
+        throw e;
+      }
+      res.json({ id, codigo, tipo, valor, minimo_centimos: minimo, caduca_at: caduca, usos_max: usosMax, usos: 0, activo: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** Activar / desactivar un cupón mío. Nunca se borra: los pedidos lo citan. */
+  app.put('/api/publicar/mis-cupones/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        UPDATE cupones SET activo = ${!!req.body?.activo}, updated_at = now()
+        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        RETURNING id, activo
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese cupón no es tuyo o no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿VALE ESTE CÓDIGO PARA ESTA CESTA? — `POST /api/publicar/cupon/comprobar`
+   * { codigo, lineas: [{ producto_id, cantidad }] } → { valido, descuento_centimos, motivo }
+   * Lo mismo que comprueba el cobro, pero sin cobrar: para que la cesta diga
+   * el descuento ANTES de pulsar pagar. Sin sesión: quien compra sin cuenta
+   * también tiene cupones.
+   */
+  app.post('/api/publicar/cupon/comprobar', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.body?.codigo || '').trim().toUpperCase();
+      const lineas: any[] = Array.isArray(req.body?.lineas) ? req.body.lineas : [];
+      if (!codigo || !lineas.length) return res.json({ valido: false, descuento_centimos: 0, motivo: 'Escribe un código.' });
+      const ids = lineas.map(l => String(l?.producto_id || '')).filter(Boolean);
+      const productos = (await db.execute(sql`
+        SELECT id, price_cents, created_by FROM products
+        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+      `)).rows as any[];
+      const vendedores = new Set(productos.map(p => p.created_by));
+      if (vendedores.size !== 1) return res.json({ valido: false, descuento_centimos: 0, motivo: 'El cupón es de una sola tienda.' });
+      const vendedorId = productos[0].created_by;
+      const subtotal = lineas.reduce((n, l) => {
+        const p = productos.find(x => x.id === String(l.producto_id));
+        return n + (p?.price_cents || 0) * Math.max(1, Math.min(99, Number(l.cantidad) || 1));
+      }, 0);
+      const c = (await db.execute(sql`
+        SELECT codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo
+        FROM cupones WHERE vendedor_user_id = ${vendedorId} AND codigo = ${codigo}
+      `)).rows[0] as any;
+      const motivo = !c ? 'Ese código no existe en esta tienda.'
+        : !c.activo ? 'Ese código ya no está activo.'
+        : c.caduca_at && new Date(c.caduca_at).getTime() < Date.now() ? 'Ese código ha caducado.'
+        : c.usos_max !== null && Number(c.usos) >= Number(c.usos_max) ? 'Ese código ya se ha usado todas las veces posibles.'
+        : subtotal < Number(c.minimo_centimos || 0) ? `Pide una compra mínima de ${(Number(c.minimo_centimos) / 100).toFixed(2)} €.`
+        : null;
+      if (motivo) return res.json({ valido: false, descuento_centimos: 0, motivo });
+      const descuento = c.tipo === 'porcentaje'
+        ? Math.min(subtotal, Math.round((subtotal * Math.min(100, Number(c.valor))) / 100))
+        : Math.min(subtotal, Number(c.valor));
+      res.json({ valido: true, descuento_centimos: descuento, codigo: c.codigo, motivo: null });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /**
    * ¿SE PUEDE PAGAR CON PUNTOS AQUÍ, Y CON CUÁNTOS? — `GET /api/publicar/puntos-en-caja`
    * Lo pregunta la cesta antes de pintar el control. `activo` lo decide el
@@ -716,6 +822,32 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const reparte = !!vendedor?.charges_enabled;
       const comision = Math.round((subtotal * COMISION_BPS) / 10000);
 
+      // ══ CUPÓN DEL VENDEDOR (2026-08-22, fase 7 del plan) ═══════════════
+      // Un código del vendedor de TODA la cesta (ya se ha exigido un solo
+      // vendedor). Se valida aquí mismo — activo, no caducado, con usos, con
+      // el mínimo — y se rebaja del subtotal antes que los puntos. Si no vale,
+      // no se cobra a ciegas con otro precio: se dice y se para.
+      let cuponCent = 0;
+      let cuponRow: any = null;
+      const codigoCupon = String(cuerpo.cupon || '').trim().toUpperCase();
+      if (codigoCupon) {
+        if (suscripcion) return res.status(400).json({ error: 'Una suscripción no admite cupón.' });
+        cuponRow = (await db.execute(sql`
+          SELECT id, codigo, tipo, valor, minimo_centimos, caduca_at, usos_max, usos, activo
+          FROM cupones WHERE vendedor_user_id = ${vendedorId} AND codigo = ${codigoCupon}
+        `)).rows[0] as any;
+        const motivo = !cuponRow ? 'Ese código no existe en esta tienda.'
+          : !cuponRow.activo ? 'Ese código ya no está activo.'
+          : cuponRow.caduca_at && new Date(cuponRow.caduca_at).getTime() < Date.now() ? 'Ese código ha caducado.'
+          : cuponRow.usos_max !== null && Number(cuponRow.usos) >= Number(cuponRow.usos_max) ? 'Ese código ya se ha usado todas las veces posibles.'
+          : subtotal < Number(cuponRow.minimo_centimos || 0) ? `Ese código pide una compra mínima de ${(Number(cuponRow.minimo_centimos) / 100).toFixed(2)} €.`
+          : null;
+        if (motivo) return res.status(400).json({ error: motivo, cupon: false });
+        cuponCent = cuponRow.tipo === 'porcentaje'
+          ? Math.min(subtotal, Math.round((subtotal * Math.min(100, Number(cuponRow.valor))) / 100))
+          : Math.min(subtotal, Number(cuponRow.valor));
+      }
+
       // ══ PUNTOS EN EL CARRITO (2026-08-22, interruptor PUNTOS_DESCUENTO) ══
       // El comprador con sesión puede pagar con puntos la parte de la cesta
       // cuyos productos ACEPTAN puntos (lo marca cada vendedor), hasta el
@@ -736,12 +868,17 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
         const saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
         const tasa = puntosPorEuro();
-        const topePuntos = Math.floor(Math.min(saldo, (aceptan / 100) * tasa) * 100) / 100;
+        // Los puntos cubren como mucho lo que acepta puntos y queda por
+        // pagar después del cupón: un descuento no se paga dos veces.
+        const topePuntos = Math.floor(Math.min(saldo, (Math.min(aceptan, subtotal - cuponCent) / 100) * tasa) * 100) / 100;
         puntosUsados = Math.min(Math.round(pidePuntos * 100) / 100, topePuntos);
         if (puntosUsados <= 0) return res.status(400).json({ error: 'No tienes puntos suficientes para usar aquí.' });
         descuentoCentimos = Math.min(aceptan, Math.round((puntosUsados / tasa) * 100));
       }
-      const totalEuros = subtotal - descuentoCentimos + (envioCobrado || 0);
+      const totalEuros = subtotal - cuponCent - descuentoCentimos + (envioCobrado || 0);
+      // La comisión va sobre lo que de verdad se cobra en euros por los
+      // productos (sin envío), no sobre el precio de etiqueta.
+      const comisionReal = Math.round((Math.max(0, subtotal - cuponCent - descuentoCentimos) * COMISION_BPS) / 10000);
 
       if (puntosUsados > 0 && totalEuros <= 0) {
         // TODO EN PUNTOS: sin pasarela. El pedido se crea aquí, y el cobro
@@ -763,6 +900,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (!ok) {
           await db.execute(sql`DELETE FROM pedidos WHERE id = ${pedidoId} AND puntos_usados = 0`);
           return res.status(409).json({ error: 'Tu saldo de puntos ha cambiado y ya no alcanza. Vuelve a intentarlo.' });
+        }
+        if (cuponRow) {
+          await db.execute(sql`UPDATE cupones SET usos = usos + 1, updated_at = now() WHERE id = ${cuponRow.id}`);
+          await db.execute(sql`UPDATE pedidos SET cupon_codigo = ${cuponRow.codigo}, descuento_centimos = ${cuponCent} WHERE id = ${pedidoId}`);
         }
         for (const l of lineas) {
           await db.execute(sql`
@@ -786,8 +927,14 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // webhook los cobre al confirmar el pago (nunca antes: una sesión
       // abandonada no mueve puntos).
       const stripe = getStripe();
-      const cupon = descuentoCentimos > 0
-        ? await stripe.coupons.create({ amount_off: descuentoCentimos, currency: moneda, duration: 'once', name: `${puntosUsados} puntos` })
+      // Un solo cupón de Stripe con la suma de las dos rebajas (la del
+      // vendedor y la de los puntos), con el nombre que se verá en el recibo.
+      const rebajaTotal = descuentoCentimos + cuponCent;
+      const cupon = rebajaTotal > 0
+        ? await stripe.coupons.create({
+            amount_off: rebajaTotal, currency: moneda, duration: 'once',
+            name: [cuponRow ? `Cupón ${cuponRow.codigo}` : '', puntosUsados > 0 ? `${puntosUsados} puntos` : ''].filter(Boolean).join(' + '),
+          })
         : null;
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
@@ -817,7 +964,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         } : {}),
         ...(reparte && !suscripcion ? {
           payment_intent_data: {
-            application_fee_amount: comision,
+            application_fee_amount: comisionReal,
             transfer_data: { destination: vendedor.stripe_account_id },
           },
         } : {}),
@@ -826,6 +973,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
           vendedor_id: vendedorId || '',
           puntos: puntosUsados > 0 ? String(puntosUsados) : '',
           buyer_id: puntosUsados > 0 && req.user ? req.user.id : '',
+          cupon_id: cuponRow ? String(cuponRow.id) : '',
+          cupon_codigo: cuponRow ? String(cuponRow.codigo) : '',
+          cupon_centimos: cuponCent > 0 ? String(cuponCent) : '',
           envio_centimos: envioCobrado === null ? '' : String(envioCobrado),
           // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
           // pedido sin volver a preguntarle al navegador — que para entonces
@@ -861,6 +1011,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         pide_direccion: esFisico,
         lineas: lineas.length,
         puntos_usados: puntosUsados, descuento_centimos: descuentoCentimos,
+        cupon: cuponRow ? cuponRow.codigo : null, cupon_centimos: cuponCent,
       });
     } catch (e: any) {
       console.error('comprar publico:', e);
