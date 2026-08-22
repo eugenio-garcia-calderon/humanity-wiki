@@ -62,12 +62,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/juego/calidad.ts",
-      "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
-      "desde": "2026-08-22T18:32:36.751Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/juego/Efectos.tsx",
       "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
       "desde": "2026-08-22T18:32:40.459Z"
