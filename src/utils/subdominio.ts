@@ -40,3 +40,29 @@ export function subdominioDeUsuario(host?: string): string | null {
 
   return primero;
 }
+
+/**
+ * ¿ESTAMOS EN UN DOMINIO PROPIO? — `lamieldelasierra.com` (2026-08-22)
+ *
+ * Ni `humanity.wiki`, ni un subdominio suyo, ni `localhost`: cualquier otra
+ * cosa por la que alguien haya llegado hasta aquí sólo puede ser un dominio
+ * que su dueño apuntó a esta máquina.
+ *
+ * Devuelve el anfitrión tal cual, para preguntarle al servidor a qué apunta.
+ * `null` cuando estamos en casa.
+ *
+ * ── POR QUÉ NO SE COMPRUEBA AQUÍ SI ES VÁLIDO ───────────────────────────────
+ * Porque esta pantalla no puede saberlo. Quién ha reclamado qué dominio vive
+ * en la base de datos, y preguntarlo es una llamada. Aquí sólo se decide si
+ * hay que preguntar.
+ */
+export function dominioPropio(host?: string): string | null {
+  const h = (host ?? (typeof location !== 'undefined' ? location.hostname : '')).toLowerCase();
+  if (!h) return null;
+  if (h === DOMINIO || h.endsWith('.' + DOMINIO)) return null;
+  // En desarrollo todo es `localhost` o una IP, y ninguna de las dos es el
+  // dominio propio de nadie.
+  if (h === 'localhost' || h.endsWith('.localhost')) return null;
+  if (/^[0-9.]+$/.test(h) || h.includes(':')) return null;
+  return h;
+}

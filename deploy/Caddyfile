@@ -1,6 +1,32 @@
 # humanity.wiki — HTTPS automático (Let's Encrypt) + proxy al app.
 # Cloudflare va delante (proxy naranja): SSL "Full (strict)" contra este Caddy.
 
+# ============================================================================
+# CERTIFICADOS BAJO DEMANDA — para los dominios propios (2026-08-22)
+# ============================================================================
+# Eugenio: «permitir que el usuario ponga su dominio propio en una de sus
+# páginas como hace notion».
+#
+# Un dominio propio no se puede saber de antemano: alguien compra
+# `lamieldelasierra.com` a las tres de la tarde y quiere que funcione a las
+# tres y cinco. Así que el certificado se pide EN LA PRIMERA VISITA.
+#
+# ── EL `ask` NO ES OPCIONAL ─────────────────────────────────────────────────
+# Sin él, cualquiera que apunte CUALQUIER dominio del mundo a esta IP haría
+# que pidiéramos un certificado para él. Let's Encrypt corta a los pocos
+# fallos, y entonces se quedan sin certificado también los dominios buenos:
+# un desconocido puede dejar sin servicio a los clientes de otro.
+#
+# Con `ask`, Caddy pregunta primero a la plataforma si ese dominio está
+# reclamado por alguien de aquí. Y la prueba de que el dominio es SUYO la hace
+# después el propio Let's Encrypt: si el DNS no apunta a esta máquina, la
+# validación falla. Dos puertas, y ninguna se fía de la otra.
+{
+	on_demand_tls {
+		ask http://app:3000/api/dominios/permitido
+	}
+}
+
 humanity.wiki {
 	encode zstd gzip
 
@@ -119,3 +145,52 @@ humanity.wiki {
 #
 # El bloque temporal 167-233-245-191.sslip.io se retiró el 2026-08-07: el
 # dominio humanity.wiki quedó activo en Cloudflare ese día.
+
+# ============================================================================
+# LOS DOMINIOS PROPIOS DE CADA PERSONA (2026-08-22)
+# ============================================================================
+# Este bloque no nombra ningún dominio: los recoge TODOS los que no hayan
+# encajado en los bloques de arriba. Es a propósito y por eso va el último —
+# `humanity.wiki` y `*.humanity.wiki` se declaran antes y ganan siempre.
+#
+# `on_demand` es lo que hace que un dominio comprado hoy funcione hoy. Y lo
+# que impide que sea una puerta abierta es el `ask` de la cabecera del fichero.
+#
+# La aplicación distingue por la cabecera `Host`, igual que con los
+# subdominios: para ella, un dominio propio es una forma más de llegar a la
+# misma página.
+:443 {
+	encode zstd gzip
+
+	tls {
+		on_demand
+	}
+
+	reverse_proxy app:3000 {
+		lb_try_duration 20s
+		lb_try_interval 500ms
+		fail_duration 0
+	}
+
+	header {
+		# ── UN DÍA, NO UN AÑO, Y ES IMPORTANTE (2026-08-22) ──────────────────
+		# Aquí abajo el dominio NO ES NUESTRO. `Strict-Transport-Security` dice
+		# al navegador «a este dominio, sólo por HTTPS, durante este tiempo», y
+		# eso NO SE PUEDE DESHACER desde fuera.
+		#
+		# Con un año: alguien retira su dominio de la plataforma, se lo lleva a
+		# otro sitio sin HTTPS, y los navegadores que pasaron por aquí se niegan
+		# a abrirlo durante meses. Nosotros ya no lo servimos, así que el
+		# problema sería suyo y no podríamos arreglarlo.
+		#
+		# Un día protege igual mientras está aquí y caduca solo si se va. Lo vio
+		# prog6 revisando esto antes de que saliera.
+		Strict-Transport-Security "max-age=86400"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# El service worker, sin caché: misma razón que en los otros bloques.
+	@sinCacheDom path /sw.js /manifest.webmanifest
+	header @sinCacheDom >Cache-Control "no-cache"
+}
