@@ -62,6 +62,10 @@ export const CLASIFICACION: Clase[] = [
   // persona que puede corromper todos los demás.
   c('users', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un nivel de rol cambiado a mano convierte a cualquiera en administrador'),
   c('sessions', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'una fila insertada aquí ES entrar como esa persona, sin su contraseña'),
+  // La tabla vive ya en la base local; su migración es de prog3 y aún no está en
+  // main. Se clasifica ahora y no cuando llegue: el día que llegue, nadie se
+  // acordará de que faltaba, y esta es de las que no admiten un despiste.
+  c('bloqueos', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'quién no quiere saber nada de quién: alterarlo devuelve el contacto a alguien a quien se le cerró la puerta, y en silencio'),
   c('password_resets', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un testigo válido abre la cuenta de otro'),
   c('agentes_ia', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'las llaves de los programadores IA'),
   c('dominios_paginas', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'que dominio de internet apunta a la pagina de quien: cambiar una fila manda el trafico de otro a otra parte'),
@@ -78,6 +82,7 @@ export const CLASIFICACION: Clase[] = [
   c('supports', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'aportaciones económicas a un contenido o persona'),
   c('pedidos', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'lo que alguien ha comprado y a quién'),
   c('pedido_lineas', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'el detalle y el precio de cada compra'),
+  c('cupones', 'ALTA', 'MEDIA', 'ALTA', 'ALTA', 'cambiar el valor o los usos de un cupón mueve dinero real: el descuento lo paga el vendedor'),
   c('reservas_stock', 'ALTA', 'BAJA', 'ALTA', 'MEDIA', 'compromete existencias que otro no podrá comprar'),
   c('presupuestos_proyecto', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'las cifras económicas de un proyecto real'),
   c('ai_usage_charges', 'ALTA', 'MEDIA', 'ALTA', 'MEDIA', 'el coste facturable del asistente; es una cuenta que alguien paga'),

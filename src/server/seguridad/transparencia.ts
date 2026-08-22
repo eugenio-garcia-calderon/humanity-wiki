@@ -60,6 +60,7 @@ export const NO_SE_ASOMAN = new Map<string, string>([
   ['spotify_accounts', 'llaves de una cuenta de otro servicio'],
   ['youtube_accounts', 'llaves de una cuenta de otro servicio'],
   ['content_reports', 'quién ha denunciado a quién'],
+  ['bloqueos', 'quién ha bloqueado a quién: se bloquea a alguien precisamente para que no lo sepa'],
 ]);
 
 /** Las rutas de lectura que solo puede usar quien manda, y qué enseñan.
