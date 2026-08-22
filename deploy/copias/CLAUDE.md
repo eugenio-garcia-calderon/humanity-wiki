@@ -95,6 +95,48 @@ Any S3-compatible provider works — change `COPIAS_REMOTO_PROVEEDOR` and the
 endpoint. R2 was picked because he already has the Cloudflare account, and
 because a backup on Hetzner does not protect against losing Hetzner.
 
+### Is it actually uploading? (healthy-and-idle looks like healthy-and-working)
+
+The healthcheck deliberately shows green in both states, so **green is not
+evidence that anything is leaving the server.** Green means "nothing is broken",
+and "not configured" is not broken. To know, ask what is in the bucket:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production \
+  exec -T copias-remoto cat /copias/estado-remoto.json
+```
+
+| `resultado` | What it means |
+|---|---|
+| `sin_configurar` | **Nothing is leaving the server.** The four `COPIAS_REMOTO_*` lines are missing |
+| `ok` with `ficheros_en_destino` > 0 | That many dumps are in the bucket, counted there, not assumed |
+| `ok` with a stale `momento` | Cannot happen — stale turns the healthcheck red at 36 h |
+| `error` | `detalle` carries the first 300 characters of what rclone said |
+
+And the one that settles it, listing the remote itself rather than trusting our
+own status file:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production \
+  exec -T copias-remoto rclone lsl fuera:$COPIAS_REMOTO_CUBO
+```
+
+**Until that command lists a dump, there is a service waiting, not an off-site
+backup.** And listing it still only proves the bytes arrived. The full proof is
+bringing one back:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production \
+  exec -T copias-remoto rclone copy fuera:$COPIAS_REMOTO_CUBO/humanity-2026-08-22.dump /copias/desde-fuera/
+
+# `probar` takes a path relative to /copias, so this restores THE DOWNLOADED
+# copy, not the local one it came from — which is the whole point.
+bash deploy/copias/restaurar.sh probar desde-fuera/humanity-2026-08-22.dump
+```
+
+Do that **once**, the day the bucket is configured. A round trip that has never
+been made is a plan, not a backup.
+
 ## Restoring
 
 ```bash
