@@ -185,6 +185,12 @@
       "ruta": "src/components/knowledge/ProductoPublico.tsx",
       "motivo": "envio pagado con puntos + direccion sin Stripe (Eugenio)",
       "desde": "2026-08-22T22:12:12.466Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0091_llave_de_agenda.sql",
+      "motivo": "importar contactos desde el iPhone con un atajo",
+      "desde": "2026-08-22T22:13:05.087Z"
     }
   ]
 }
