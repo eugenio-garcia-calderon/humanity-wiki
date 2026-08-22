@@ -11,12 +11,6 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "menu de informacion (i) arriba a la derecha",
       "desde": "2026-08-22T13:50:24.279Z"
-    },
-    {
-      "agente": "prog4",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "P4: entrada de capas por relevancia",
-      "desde": "2026-08-22T13:55:25.925Z"
     }
   ]
 }
