@@ -25,6 +25,7 @@ import {
   GENESIS, huellaDe, verificarCadena, raizMerkle, anotar, leerCadena, calcularAnclajeDelDia,
   type Anotacion,
 } from '../src/server/seguridad/registro.js';
+import { generarPareja, firmante } from '../src/server/seguridad/firma.js';
 
 let fallos = 0;
 const comprobar = (que: string, bien: boolean, detalle = '') => {
@@ -86,6 +87,51 @@ comprobar('alguien borra una fila: ALTERADA por eslabón, no por huella',
 const desordenada = [cadena[0], cadena[2], cadena[1]];
 comprobar('alguien reordena: ALTERADA', verificarCadena(desordenada).estado === 'ALTERADA');
 
+console.log('\nLA FIRMA');
+// La cadena demuestra que nada cambió. La firma demuestra que lo escribimos
+// nosotros: sin ella, quien pueda escribir en la tabla fabrica una cadena
+// entera, coherente y falsa.
+const pareja = generarPareja();
+const publicas = { [pareja.claveId]: pareja.publicaBase64 };
+process.env.CLAVE_FIRMA_REGISTRO = pareja.privadaBase64;
+const f4 = firmante()!;
+
+comprobar('el firmante sale de la llave del entorno', f4?.claveId === pareja.claveId);
+
+const firmada = cadena.map((a) => ({ ...a, firma: f4.firmar(a.huella), clave_id: f4.claveId }));
+const vf = verificarCadena(firmada, publicas);
+comprobar('cadena firmada y comprobable: VERIFICADA y firmas VÁLIDAS',
+  vf.estado === 'VERIFICADA' && vf.firmas.estado === 'VALIDAS' && vf.firmas.validas === 3, JSON.stringify(vf.firmas));
+
+comprobar('sin la llave pública dice NO SÉ, no «inválida»',
+  verificarCadena(firmada, {}).firmas.estado === 'NO_SE',
+  'acusar de manipulación a algo firmado con una llave anterior es el error caro de la rotación');
+
+comprobar('una cadena sin firmar se distingue de una firmada',
+  verificarCadena(cadena, publicas).firmas.estado === 'SIN_FIRMAR');
+
+const otraPareja = generarPareja();
+const suplantada = firmada.map((a, i) => (i === 1
+  ? { ...a, firma: Buffer.from(otraPareja.privadaBase64, 'base64').toString('base64url').slice(0, 86) }
+  : a));
+const vs = verificarCadena(suplantada, publicas);
+comprobar('una firma que no cuadra: ALTERADA por firma, señalando la anotación',
+  vs.estado === 'ALTERADA' && vs.rota?.motivo === 'firma' && vs.rota?.n === 2, JSON.stringify(vs));
+
+// Y el caso que de verdad importa: alguien con acceso a la base de datos
+// reescribe una anotación Y recalcula su huella, dejando la cadena coherente.
+const rehecha = structuredClone(firmada);
+(rehecha[1].datos as any).cantidad = 999_999;
+rehecha[1].huella = huellaDe(rehecha[1]);
+rehecha[2].huella_previa = rehecha[1].huella;
+rehecha[2].huella = huellaDe(rehecha[2]);
+const vr = verificarCadena(rehecha, publicas);
+comprobar('cadena rehecha entera por dentro: las huellas cuadran y la FIRMA la delata',
+  vr.estado === 'ALTERADA' && vr.rota?.motivo === 'firma',
+  'esto es lo que la firma añade sobre la cadena: ' + JSON.stringify(vr));
+
+delete process.env.CLAVE_FIRMA_REGISTRO;
+
 console.log('\nEL RESUMEN DEL DÍA');
 comprobar('sin hojas no hay raíz (y se dice, no se inventa)', raizMerkle([]) === null);
 const h = (s: string) => crypto.createHash('sha256').update(s).digest('hex');
@@ -133,21 +179,31 @@ if (admin) {
     await pool.query(migracion);
     comprobar('la migración se aplica sobre una base de datos vacía', true);
 
-    await anotar(db, { clase: 'puntos', actor: 'U_ADMIN_EUGENIO', asunto: 'MP1', datos: { cantidad: 100 } });
+    process.env.CLAVE_FIRMA_REGISTRO = pareja.privadaBase64;
+    const primera = await anotar(db, { clase: 'puntos', actor: 'U_ADMIN_EUGENIO', asunto: 'MP1', datos: { cantidad: 100 } });
+    comprobar('con llave configurada, la anotación sale firmada', primera.firmada === true);
     await anotar(db, { clase: 'puntos', actor: 'U_ADMIN_EUGENIO', asunto: 'MP2', datos: { cantidad: -5 } });
     await anotar(db, { clase: 'permiso', actor: 'sistema', asunto: 'U_X', datos: { nivel: 4 } });
 
     const filas = await leerCadena(db);
     comprobar('se han anotado las tres', filas.length === 3);
     comprobar('la primera dice venir del génesis', filas[0].huella_previa === GENESIS);
-    comprobar('recién anotadas: VERIFICADA', verificarCadena(filas).estado === 'VERIFICADA');
+    const vBd = verificarCadena(filas, publicas);
+    comprobar('recién anotadas: VERIFICADA y con las tres firmas válidas',
+      vBd.estado === 'VERIFICADA' && vBd.firmas.estado === 'VALIDAS' && vBd.firmas.validas === 3,
+      JSON.stringify(vBd.firmas));
 
     // Anotar a la vez desde varios sitios no puede partir la cadena.
-    await Promise.all([1, 2, 3, 4, 5].map((i) =>
+    // Diez a la vez, no cinco: con cinco y sin espera entre reintentos esto
+    // fallaba una de cada tantas, y una prueba de concurrencia que sólo falla
+    // a veces es una prueba que se acaba ignorando.
+    const alaVez = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    await Promise.all(alaVez.map((i) =>
       anotar(db, { clase: 'concurrencia', actor: 'prueba', asunto: `C${i}`, datos: { i } })));
     const tras = await leerCadena(db);
-    comprobar('cinco anotaciones a la vez: la cadena sigue entera',
-      tras.length === 8 && verificarCadena(tras).estado === 'VERIFICADA');
+    comprobar('diez anotaciones a la vez: la cadena sigue entera',
+      tras.length === 13 && verificarCadena(tras, publicas).estado === 'VERIFICADA',
+      `${tras.length} anotaciones`);
 
     // El disparador para el accidente.
     let paro = false;
@@ -164,7 +220,7 @@ if (admin) {
     await pool.query(`ALTER TABLE registro_sellado DISABLE TRIGGER registro_sellado_sin_update`);
     await pool.query(`UPDATE registro_sellado SET datos = '{"cantidad": 999999}'::jsonb WHERE n = 2`);
     const manipuladas = await leerCadena(db);
-    const v = verificarCadena(manipuladas);
+    const v = verificarCadena(manipuladas, publicas);
     comprobar('quien puede quitar el disparador y edita: se le ve, y se dice en cuál',
       v.estado === 'ALTERADA' && v.rota?.n === 2 && v.rota?.motivo === 'huella',
       JSON.stringify(v));

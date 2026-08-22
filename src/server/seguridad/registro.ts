@@ -13,6 +13,7 @@
 // el sentido de todo esto.
 import crypto from 'node:crypto';
 import { sql } from 'drizzle-orm';
+import { firmante, comprobarFirma } from './firma.js';
 
 /** El eslabón cero. No existe ninguna anotación con esta huella: es de dónde
  *  dice venir la primera. */
@@ -77,14 +78,21 @@ export const huellaDe = (a: Anotacion): string =>
 
 export type EstadoCadena = 'VERIFICADA' | 'ALTERADA' | 'NO_SE';
 
+/** Lo que se sabe de las firmas, que es una pregunta DISTINTA de si la cadena
+ *  está entera. Una cadena intacta y sin firmar está intacta y no demuestra
+ *  quién la escribió; juntar las dos respuestas en una perdería justo eso. */
+export type EstadoFirmas = 'VALIDAS' | 'ALGUNA_INVALIDA' | 'SIN_FIRMAR' | 'NO_SE';
+
 export interface Veredicto {
   estado: EstadoCadena;
   /** Cuántas anotaciones se han comprobado de verdad. */
   comprobadas: number;
   /** La primera que no cuadra, si la hay. */
-  rota?: { n: number; motivo: 'huella' | 'eslabon' | 'orden'; momento: string };
+  rota?: { n: number; motivo: 'huella' | 'eslabon' | 'orden' | 'firma'; momento: string };
   /** Por qué no se sabe, cuando no se sabe. */
   porque?: string;
+  /** Las firmas, contadas aparte. */
+  firmas: { estado: EstadoFirmas; validas: number; invalidas: number; sinComprobar: number; sinFirmar: number };
 }
 
 /**
@@ -100,8 +108,14 @@ export interface Veredicto {
  * no hay nada que comprobar, y decir «VERIFICADA» ahí sería dar por bueno un
  * silencio.
  */
-export function verificarCadena(filas: (Anotacion & { huella: string })[]): Veredicto {
-  if (!filas.length) return { estado: 'NO_SE', comprobadas: 0, porque: 'No hay ninguna anotación que comprobar.' };
+export function verificarCadena(
+  filas: (Anotacion & { huella: string; firma?: string | null; clave_id?: string | null })[],
+  publicas: Record<string, string> = {},
+): Veredicto {
+  const nada = { estado: 'NO_SE' as const, validas: 0, invalidas: 0, sinComprobar: 0, sinFirmar: 0 };
+  if (!filas.length) {
+    return { estado: 'NO_SE', comprobadas: 0, porque: 'No hay ninguna anotación que comprobar.', firmas: nada };
+  }
 
   let previa = filas[0].huella_previa === GENESIS ? GENESIS : filas[0].huella_previa;
   // Si el primer eslabón no es el génesis, se está verificando un trozo de en
@@ -109,24 +123,51 @@ export function verificarCadena(filas: (Anotacion & { huella: string })[]): Vere
   // todo), pero entonces lo que se comprueba es ese trozo, no el principio.
   const desdeElPrincipio = filas[0].huella_previa === GENESIS;
 
+  const firmas = { validas: 0, invalidas: 0, sinComprobar: 0, sinFirmar: 0 };
+
   for (let i = 0; i < filas.length; i++) {
     const f = filas[i];
     if (i > 0 && f.n <= filas[i - 1].n) {
-      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'orden', momento: f.momento } };
+      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'orden', momento: f.momento }, firmas: { ...firmas, estado: 'NO_SE' } };
     }
     if (f.huella_previa !== previa) {
-      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'eslabon', momento: f.momento } };
+      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'eslabon', momento: f.momento }, firmas: { ...firmas, estado: 'NO_SE' } };
     }
     if (huellaDe(f) !== f.huella) {
-      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'huella', momento: f.momento } };
+      return { estado: 'ALTERADA', comprobadas: i, rota: { n: f.n, motivo: 'huella', momento: f.momento }, firmas: { ...firmas, estado: 'NO_SE' } };
+    }
+
+    // La firma se comprueba sobre la huella, que ya resume el contenido entero.
+    if (!f.firma) firmas.sinFirmar++;
+    else {
+      const r = comprobarFirma(f.huella, f.firma, f.clave_id ?? null, publicas);
+      if (r === 'VALIDA') firmas.validas++;
+      else if (r === 'NO_SE') firmas.sinComprobar++;
+      else {
+        // Una firma que no cuadra sobre una huella que sí cuadra significa algo
+        // muy concreto: el contenido es coherente pero NO lo escribimos nosotros.
+        // Es una cadena fabricada, y es peor que una fila editada.
+        firmas.invalidas++;
+        return {
+          estado: 'ALTERADA', comprobadas: i,
+          rota: { n: f.n, motivo: 'firma', momento: f.momento },
+          firmas: { ...firmas, estado: 'ALGUNA_INVALIDA' },
+        };
+      }
     }
     previa = f.huella;
   }
+
+  const estadoFirmas: EstadoFirmas =
+    firmas.sinFirmar === filas.length ? 'SIN_FIRMAR'
+      : firmas.sinComprobar > 0 || firmas.sinFirmar > 0 ? 'NO_SE'
+        : 'VALIDAS';
 
   return {
     estado: 'VERIFICADA',
     comprobadas: filas.length,
     porque: desdeElPrincipio ? undefined : 'Comprobado un tramo, no desde el principio.',
+    firmas: { ...firmas, estado: estadoFirmas },
   };
 }
 
@@ -171,11 +212,19 @@ export interface Hecho {
  * Si dos peticiones lo hacen a la vez, las dos leen la misma última huella y la
  * segunda choca contra el índice único de `huella_previa` — que es justo lo que
  * se quiere: en vez de partir la cadena, reintenta leyendo la nueva última.
- * Tres intentos son de sobra; si a la tercera sigue chocando, lo que hay no es
- * concurrencia, es un problema, y entonces hay que enterarse.
+ *
+ * CUÁNTOS INTENTOS, Y POR QUÉ CON ESPERA. Con tres y sin espera, cinco
+ * escrituras a la vez se quedaban fuera: los que chocan vuelven todos en el
+ * mismo instante y vuelven a chocar entre ellos. Lo cazó la prueba de
+ * concurrencia, no producción. Ocho intentos con una espera corta y desigual
+ * (0-12 ms, creciendo) los separa; y ocho fallos seguidos ya no son
+ * concurrencia normal, son algo que hay que mirar.
  */
-export async function anotar(db: any, hecho: Hecho, intentos = 3): Promise<{ n: number; huella: string }> {
+export async function anotar(db: any, hecho: Hecho, intentos = 8): Promise<{ n: number; huella: string; firmada: boolean }> {
   for (let intento = 1; intento <= intentos; intento++) {
+    if (intento > 1) {
+      await new Promise((r) => setTimeout(r, Math.floor(Math.random() * 4 * intento)));
+    }
     const ultima = await db.execute(sql`SELECT huella FROM registro_sellado ORDER BY n DESC LIMIT 1`);
     const previa = (ultima.rows[0] as any)?.huella ?? GENESIS;
     const siguiente = await db.execute(sql`SELECT nextval(pg_get_serial_sequence('registro_sellado', 'n')) AS n`);
@@ -193,13 +242,21 @@ export async function anotar(db: any, hecho: Hecho, intentos = 3): Promise<{ n: 
     };
     const huella = huellaDe(a);
 
+    // Si hay llave, se firma; si no, se anota sin firma y se ve que no la lleva.
+    // Nunca una firma vacía o de mentira: «no firmado» y «firmado mal» tienen
+    // que poder distinguirse desde fuera.
+    const f = firmante();
+    const firma = f ? f.firmar(huella) : null;
+    const claveId = f ? f.claveId : null;
+
     try {
       await db.execute(sql`
-        INSERT INTO registro_sellado (n, momento, clase, actor, asunto, datos, sal, huella, huella_previa)
+        INSERT INTO registro_sellado (n, momento, clase, actor, asunto, datos, sal, huella, huella_previa, firma, clave_id)
         VALUES (${a.n}, ${a.momento}, ${a.clase}, ${a.actor}, ${a.asunto},
-                ${JSON.stringify(a.datos)}::jsonb, ${a.sal}, ${huella}, ${a.huella_previa})
+                ${JSON.stringify(a.datos)}::jsonb, ${a.sal}, ${huella}, ${a.huella_previa},
+                ${firma}, ${claveId})
       `);
-      return { n, huella };
+      return { n, huella, firmada: !!firma };
     } catch (e: any) {
       const choque = String(e?.cause?.message || e?.message || '').includes('registro_sellado_previa_idx');
       if (!choque || intento === intentos) throw e;
@@ -213,7 +270,7 @@ export async function anotar(db: any, hecho: Hecho, intentos = 3): Promise<{ n: 
  *  miente. Quien quiera un tramo, que lo pida. */
 export async function leerCadena(db: any, desde = 1, hasta?: number) {
   const r = await db.execute(sql`
-    SELECT n, momento, clase, actor, asunto, datos, sal, huella, huella_previa
+    SELECT n, momento, clase, actor, asunto, datos, sal, huella, huella_previa, firma, clave_id
     FROM registro_sellado
     WHERE n >= ${desde} ${hasta ? sql`AND n <= ${hasta}` : sql``}
     ORDER BY n ASC
@@ -222,7 +279,7 @@ export async function leerCadena(db: any, desde = 1, hasta?: number) {
     ...f,
     n: Number(f.n),
     momento: new Date(f.momento).toISOString(),
-  })) as (Anotacion & { huella: string })[];
+  })) as (Anotacion & { huella: string; firma: string | null; clave_id: string | null })[];
 }
 
 /** Calcula el resumen de un día. Calcular no es publicar: esto deja

@@ -43,7 +43,23 @@ CREATE TABLE IF NOT EXISTS registro_sellado (
   datos          JSONB        NOT NULL DEFAULT '{}'::jsonb,
   sal            TEXT         NOT NULL,
   huella         TEXT         NOT NULL,
-  huella_previa  TEXT         NOT NULL
+  huella_previa  TEXT         NOT NULL,
+  -- ── LA FIRMA (capa 3) ─────────────────────────────────────────────────────
+  -- La cadena de huellas demuestra que nada ha cambiado. No demuestra quién lo
+  -- escribió: quien pueda escribir en esta tabla puede fabricar una cadena
+  -- entera, coherente y falsa. La firma cierra eso, porque la llave no está en
+  -- la base de datos.
+  --
+  -- Admiten NULL porque firmar se puede tener apagado (sin `CLAVE_FIRMA_REGISTRO`
+  -- no hay con qué firmar), y porque una anotación sin firma tiene que poder
+  -- distinguirse de una con firma que no cuadra. Son cosas distintas: la primera
+  -- es «no lo sé», la segunda es «alguien la ha tocado».
+  --
+  -- `clave_id` es la huella corta de la llave pública que firmó. Va desde el
+  -- primer día para que cambiar de llave no convierta todo lo anterior en
+  -- inválido — que sería indistinguible de manipulado.
+  firma          TEXT,
+  clave_id       TEXT
 );
 
 CREATE INDEX IF NOT EXISTS registro_sellado_momento_idx ON registro_sellado (momento);
