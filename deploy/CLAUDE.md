@@ -46,6 +46,32 @@ subdomains went back to error 525 with nobody touching them.
 - So a server fix is not finished until it is merged to `main`. Doing it by
   hand is a way to test it, never a way to ship it.
 
+## Anything you create on the server must belong to `deploy`
+
+The deploy runs as the `deploy` user. **A directory created by hand as `root`
+stops the next deploy dead**, and it fails in the quietest possible way.
+
+Measured on 2026-08-22: `deploy/certs` was created over SSH as root. The next
+deploy died at
+
+```
+error: unable to create file deploy/certs/LEEME.txt: Permission denied
+fatal: Could not reset index file to revision 'origin/main'
+```
+
+`git reset --hard` runs **before** the rebuild, so nothing was rebuilt and
+nothing broke — the site kept serving the old version. That is the trap: the
+site is up, the workflow is red, and the change looks like it simply did not
+work. Fix:
+
+```bash
+chown -R deploy:deploy /opt/humanity-wiki/deploy/certs
+chmod 700 /opt/humanity-wiki/deploy/certs
+chmod 600 /opt/humanity-wiki/deploy/certs/origen.key
+```
+
+Then re-run the failed workflow; no new commit is needed.
+
 ## The certificate for per-user subdomains
 
 `*.humanity.wiki` needs a certificate **on this origin**, because Cloudflare
