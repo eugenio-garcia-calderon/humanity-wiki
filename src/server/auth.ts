@@ -87,6 +87,9 @@ function parseCookies(header: string | undefined): Record<string, string> {
   return out;
 }
 
+/** La huella de un token de un solo uso. Se guarda esto, nunca el token. */
+const huellaDeToken = (t: string) => crypto.createHash('sha256').update(t, 'utf8').digest('hex');
+
 function setSessionCookie(res: Response, token: string, maxAgeSeconds: number) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader('Set-Cookie',
@@ -511,9 +514,19 @@ export function registerAuthRoutes(app: Express, db: any) {
       if (!row) return res.json(genericResponse);
 
       const token = crypto.randomBytes(32).toString('hex');
+      // SE GUARDA LA HUELLA, NUNCA EL TOKEN. Hasta hoy esta tabla guardaba el
+      // token tal cual: quien leyera la base de datos —una copia de seguridad,
+      // una réplica, un `pg_dump` pegado en un chat— se llevaba todos los
+      // enlaces de restablecer vivos, y con cada uno se cambia la contraseña de
+      // esa persona sin saber la anterior. Es el mismo patrón que
+      // `agentes_ia.token_hash` usa desde el primer día. Lo encontró el
+      // Programador 4 revisando otra cosa.
+      //
+      // La columna `token` se sigue rellenando con un valor inservible mientras
+      // exista: es la clave primaria de la tabla y no se puede dejar vacía.
       await db.execute(sql`
-        INSERT INTO password_resets (token, user_id, expires_at)
-        VALUES (${token}, ${row.id}, now() + interval '1 hour')
+        INSERT INTO password_resets (token, token_hash, user_id, expires_at)
+        VALUES (${'gastado-' + crypto.randomUUID()}, ${huellaDeToken(token)}, ${row.id}, now() + interval '1 hour')
       `);
 
       // TODO(correo): enviar el enlace por email cuando haya proveedor.
@@ -533,18 +546,25 @@ export function registerAuthRoutes(app: Express, db: any) {
       if (!token || !new_password || String(new_password).length < 8) {
         return res.status(400).json({ error: 'Token y contraseña (mínimo 8 caracteres) obligatorios.' });
       }
+      // GASTAR Y LEER EN UNA SOLA SENTENCIA. Antes eran dos —`SELECT` y luego
+      // `UPDATE`— y entre las dos hay una rendija: dos peticiones que llegan a
+      // la vez pasan las dos el `SELECT` y las dos cambian la contraseña. Con
+      // `RETURNING` decide la base de datos y solo gana una.
       const result = await db.execute(sql`
-        SELECT user_id FROM password_resets
-        WHERE token = ${token} AND used_at IS NULL AND expires_at > now()
+        UPDATE password_resets SET used_at = now()
+        WHERE token_hash = ${huellaDeToken(String(token))}
+          AND used_at IS NULL AND expires_at > now()
+        RETURNING user_id
       `);
       const row = result.rows[0];
+      // Inválido, caducado y ya usado dan la MISMA respuesta: distinguirlos le
+      // regala a quien prueba tokens la información de si acertó alguno.
       if (!row) return res.status(400).json({ error: 'Token inválido o caducado.' });
 
       await db.execute(sql`
         UPDATE users SET password_hash = ${hashPassword(String(new_password))},
           version = version + 1, updated_at = now() WHERE id = ${row.user_id}
       `);
-      await db.execute(sql`UPDATE password_resets SET used_at = now() WHERE token = ${token}`);
       // Restablecer la contraseña cierra todas las sesiones abiertas.
       await db.execute(sql`UPDATE sessions SET revoked_at = now() WHERE user_id = ${row.user_id} AND revoked_at IS NULL`);
       res.json({ success: true });
@@ -610,8 +630,8 @@ export function registerAuthRoutes(app: Express, db: any) {
 
       const token = crypto.randomBytes(32).toString('hex');
       await db.execute(sql`
-        INSERT INTO password_resets (token, user_id, expires_at)
-        VALUES (${token}, ${id}, now() + interval '24 hours')
+        INSERT INTO password_resets (token, token_hash, user_id, expires_at)
+        VALUES (${'gastado-' + crypto.randomUUID()}, ${huellaDeToken(token)}, ${id}, now() + interval '24 hours')
       `);
       res.json({ id, email, url: `/restablecer?token=${token}`, caduca_horas: 24 });
     } catch (e: any) {
