@@ -34,11 +34,26 @@ const gitSilencioso = (args, opts) => {
 
 const raiz = git(['rev-parse', '--show-toplevel']);
 
+// Quién eres lo dice DÓNDE estás, no un fichero: el 2026-08-22, a la hora de nacer
+// este sistema, un agente escribió su `.agente` en las tres copias de trabajo y las
+// tres decían lo mismo. La carpeta no se puede falsificar por descuido.
+function porLaCarpeta() {
+  const m = raiz.match(/\/\.claude\/worktrees\/(prog\d)$/);
+  if (m) return m[1];
+  const principal = gitSilencioso(['rev-parse', '--path-format=absolute', '--git-common-dir']);
+  if (principal && path.dirname(principal) === raiz) return 'prog1'; // la raíz es de prog1
+  return null;
+}
+
 function quienSoy() {
+  const porCarpeta = porLaCarpeta();
   const f = path.join(raiz, '.agente');
-  if (!existsSync(f)) return null;
-  const v = readFileSync(f, 'utf8').trim().toLowerCase();
-  return v || null;
+  const porFichero = existsSync(f) ? readFileSync(f, 'utf8').trim().toLowerCase() : null;
+  if (porCarpeta && porFichero && porCarpeta !== porFichero) {
+    console.error(`Aviso: el fichero .agente dice "${porFichero}" y esta carpeta es de ${porCarpeta}.`);
+    console.error(`Mando la carpeta. Corrígelo:  echo ${porCarpeta} > ${f}`);
+  }
+  return porCarpeta || porFichero || null;
 }
 
 function leer() {

@@ -26,8 +26,14 @@ así que ya no hay forma de borrárselo.
 **Nadie entra en la carpeta de otro.** Ni para mirar: para ver el código de otro
 está `git show`, `git diff` y las ramas.
 
-Cada carpeta tiene un fichero `.agente` (sin versionar) con `prog1`, `prog2` o
-`prog3` dentro. Es la identidad: si falta, el gancho de commit no sabe quién eres.
+**Quién eres lo dice dónde estás**, no un fichero: la raíz es `prog1`, y
+`.claude/worktrees/progN` es `progN`. El fichero `.agente` solo vale de respaldo, y
+si contradice a la carpeta, manda la carpeta y el script te avisa. (La primera hora
+de vida de este sistema, un agente escribió su nombre en las tres copias.)
+
+El gancho vive en `.githooks/`, no en `.git/hooks/`: está enganchado con
+`core.hooksPath`, que es la única forma de que valga para las tres copias a la vez.
+Para comprobarlo: `git config core.hooksPath`.
 
 ## 2 · Reservar antes de tocar lo compartido
 
