@@ -69,20 +69,20 @@
     {
       "agente": "prog8",
       "ruta": "src/pages/GrafoCanvas.tsx",
-      "motivo": "",
-      "desde": "2026-08-22T19:07:48.671Z"
+      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
+      "desde": "2026-08-22T19:08:17.988Z"
     },
     {
       "agente": "prog8",
       "ruta": "src/components/knowledge/lienzoChrome.tsx",
-      "motivo": "",
-      "desde": "2026-08-22T19:07:48.671Z"
+      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
+      "desde": "2026-08-22T19:08:17.988Z"
     },
     {
       "agente": "prog8",
       "ruta": "src/components/knowledge/BarraElemento.tsx",
-      "motivo": "",
-      "desde": "2026-08-22T19:07:48.671Z"
+      "motivo": "Lienzos nivel Miro: deshacer, atajos, multiseleccion, alinear",
+      "desde": "2026-08-22T19:08:17.988Z"
     }
   ]
 }
