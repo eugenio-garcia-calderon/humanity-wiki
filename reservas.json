@@ -50,30 +50,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/juego/Editor.tsx",
-      "motivo": "techo del mundo 3D: avisar mientras construyes, no al guardar",
-      "desde": "2026-08-22T19:37:00.191Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/juego/texturas.ts",
-      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
-      "desde": "2026-08-22T19:48:13.489Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/juego/Producto3D.tsx",
-      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
-      "desde": "2026-08-22T19:48:13.489Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/juego/Interior.tsx",
-      "motivo": "la misma foto de usuario se subia a la GPU una vez por sitio donde aparece",
-      "desde": "2026-08-22T19:48:13.489Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/contexts/AuthContext.tsx",
       "motivo": "un refresh de sesion dispara 4 peticiones: user cambia de identidad sin cambiar de contenido",
       "desde": "2026-08-22T20:01:33.398Z"
