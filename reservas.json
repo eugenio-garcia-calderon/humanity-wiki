@@ -59,6 +59,12 @@
       "ruta": "drizzle/0085_veracidad_revision.sql",
       "motivo": "Veracidad fase 2: quien movio el sello y cuando (0083 y 0084 ya cogidos)",
       "desde": "2026-08-22T18:29:50.175Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/juego/mapa.ts",
+      "motivo": "aligerar el mundo 3D: menos arboles, mapa mas pequeno, menos RAM",
+      "desde": "2026-08-22T18:32:21.544Z"
     }
   ]
 }
