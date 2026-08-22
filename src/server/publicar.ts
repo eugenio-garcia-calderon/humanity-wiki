@@ -23,11 +23,6 @@
 // uno.
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
-// `server.ts` está congelado (prohibición 8), así que una ruta nueva no puede
-// registrarse allí. Se cuelga de este módulo, que ya está registrado. El
-// fichero se mantiene aparte porque el asunto es otro: esto publica páginas,
-// aquello cuenta cómo van las herramientas.
-import { registerHerramientasRoutes } from './herramientas';
 import { sql } from 'drizzle-orm';
 
 /** El alfabeto de un subdominio: minúsculas, números y guiones interiores. */
@@ -67,7 +62,6 @@ export function motivoInvalido(handle: string): string | null {
 }
 
 export function registerPublicarRoutes(app: Express, db: any) {
-  registerHerramientasRoutes(app, db);
 
   const exigeSesion = (req: Request, res: Response): boolean => {
     if (!req.user) { res.status(401).json({ error: 'Debes iniciar sesión.' }); return false; }
