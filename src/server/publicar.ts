@@ -379,6 +379,67 @@ export function registerPublicarRoutes(app: Express, db: any) {
   });
 
   /**
+   * CÓMO VAN MIS VENTAS — `GET /api/publicar/mis-ventas/resumen` (2026-08-22,
+   * fase 10 del plan de comercio, la parte que no necesita nada nuevo: leer
+   * los pedidos que ya existen y contarlos bien).
+   *
+   * Este mes (pedidos, euros cobrados, puntos cobrados, sin enviar), la serie
+   * de los últimos 6 meses y lo más vendido. Los euros son `importe_centimos`
+   * del pedido (lo que pagó el comprador por tarjeta, envío incluido) y los
+   * puntos `puntos_usados`: dos columnas, dos números, nunca sumados entre sí.
+   * Pedidos devueltos y cancelados no cuentan como venta.
+   */
+  app.get('/api/publicar/mis-ventas/resumen', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const uid = req.user.id;
+      const [mes, serie, top, sinEnviar] = await Promise.all([
+        db.execute(sql`
+          SELECT count(*)::int AS pedidos,
+                 coalesce(sum(importe_centimos), 0)::int AS euros_centimos,
+                 coalesce(sum(puntos_usados), 0)::float AS puntos
+          FROM pedidos
+          WHERE vendedor_user_id = ${uid} AND estado NOT IN ('cancelado', 'devuelto')
+            AND created_at >= date_trunc('month', now())
+        `),
+        db.execute(sql`
+          SELECT to_char(date_trunc('month', created_at), 'YYYY-MM') AS mes,
+                 count(*)::int AS pedidos,
+                 coalesce(sum(importe_centimos), 0)::int AS euros_centimos,
+                 coalesce(sum(puntos_usados), 0)::float AS puntos
+          FROM pedidos
+          WHERE vendedor_user_id = ${uid} AND estado NOT IN ('cancelado', 'devuelto')
+            AND created_at >= date_trunc('month', now()) - interval '5 months'
+          GROUP BY 1 ORDER BY 1
+        `),
+        db.execute(sql`
+          SELECT x.producto_id, max(x.nombre) AS nombre, sum(x.unidades)::int AS unidades
+          FROM (
+            SELECT pl.producto_id, pl.producto_nombre AS nombre, pl.unidades
+            FROM pedido_lineas pl JOIN pedidos pd ON pd.id = pl.pedido_id
+            WHERE pd.vendedor_user_id = ${uid} AND pd.estado NOT IN ('cancelado', 'devuelto')
+            UNION ALL
+            -- Pedidos de antes del carrito: una sola cosa, sin líneas.
+            SELECT pd.producto_id, pd.producto_nombre, coalesce(pd.unidades, 1)
+            FROM pedidos pd
+            WHERE pd.vendedor_user_id = ${uid} AND pd.estado NOT IN ('cancelado', 'devuelto')
+              AND NOT EXISTS (SELECT 1 FROM pedido_lineas pl WHERE pl.pedido_id = pd.id)
+          ) x
+          WHERE x.producto_id IS NOT NULL
+          GROUP BY x.producto_id ORDER BY unidades DESC LIMIT 5
+        `),
+        db.execute(sql`SELECT count(*)::int AS n FROM pedidos WHERE vendedor_user_id = ${uid} AND estado = 'pagado'`),
+      ]);
+      res.json({
+        mes: mes.rows[0],
+        serie: serie.rows,
+        mas_vendido: top.rows,
+        sin_enviar: Number((sinEnviar.rows[0] as any)?.n ?? 0),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * ¿SE PUEDE PAGAR CON PUNTOS AQUÍ, Y CON CUÁNTOS? — `GET /api/publicar/puntos-en-caja`
    * Lo pregunta la cesta antes de pintar el control. `activo` lo decide el
    * servidor (interruptor PUNTOS_DESCUENTO); `saldo` solo con sesión.

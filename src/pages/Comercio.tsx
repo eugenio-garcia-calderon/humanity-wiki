@@ -46,6 +46,7 @@ export default function Comercio() {
   const [productos, setProductos] = useState<Producto[] | null>(null);
   const [limite, setLimite] = useState<number | null>(null);
   const [pedidos, setPedidos] = useState<any[]>([]);
+  const [resumen, setResumen] = useState<any>(null);
   const [creando, setCreando] = useState(false);
   const [handle, setHandle] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,11 +54,14 @@ export default function Comercio() {
 
   async function cargar() {
     try {
-      const [rp, rv, rm] = await Promise.all([
+      const [rp, rv, rm, rr] = await Promise.all([
         fetch('/api/publicar/mis-productos'),
         fetch('/api/publicar/mis-ventas'),
         fetch('/api/auth/me'),
+        fetch('/api/publicar/mis-ventas/resumen'),
       ]);
+      // El resumen de ventas es opcional: si falla, la lista sigue saliendo.
+      rr.json().then(j => { if (j && !j.error) setResumen(j); }).catch(() => {});
       if (rp.status === 401) { setError('sesion'); setProductos([]); return; }
       const jp = await rp.json();
       setProductos(jp.productos || []);
@@ -252,6 +256,39 @@ export default function Comercio() {
             Todavía no te ha comprado nadie.
           </p>
         ) : (
+          <>
+          {/* CÓMO VAN LAS VENTAS (2026-08-22): lo que un vendedor mira antes
+              que la lista — este mes, los últimos meses y lo más vendido.
+              Euros y puntos son dos números y se enseñan como dos. */}
+          {resumen && (
+            <div className="mb-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Este mes</p>
+                  <p className="text-xl font-black text-slate-900">{resumen.mes?.pedidos ?? 0} <span className="text-xs font-bold text-slate-400">pedidos</span></p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Cobrado</p>
+                  <p className="text-xl font-black text-slate-900">{dinero(resumen.mes?.euros_centimos ?? 0, 'EUR')}</p>
+                  {Number(resumen.mes?.puntos) > 0 && <p className="text-[11px] font-bold text-amber-700">+ {Number(resumen.mes.puntos).toLocaleString('es-ES')} puntos</p>}
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Sin enviar</p>
+                  <p className={`text-xl font-black ${resumen.sin_enviar > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{resumen.sin_enviar}</p>
+                </div>
+              </div>
+              {resumen.serie?.length > 1 && (
+                <p className="mt-3 text-[11px] text-slate-500">
+                  Últimos meses: {resumen.serie.map((s: any) => `${s.mes.slice(5)}/${s.mes.slice(2, 4)} · ${s.pedidos} (${dinero(s.euros_centimos, 'EUR')})`).join(' — ')}
+                </p>
+              )}
+              {resumen.mas_vendido?.length > 0 && (
+                <p className="mt-1.5 text-[11px] text-slate-500">
+                  Lo más vendido: {resumen.mas_vendido.map((m: any) => `${m.nombre} ×${m.unidades}`).join(' · ')}
+                </p>
+              )}
+            </div>
+          )}
           <ul className="space-y-2">
             {pedidos.map(p => (
               <li key={p.id} className="p-3 rounded-2xl border border-slate-200 bg-white">
@@ -295,6 +332,7 @@ export default function Comercio() {
               </li>
             ))}
           </ul>
+          </>
         )
       )}
 

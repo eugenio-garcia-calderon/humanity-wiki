@@ -5319,3 +5319,29 @@ accepting line), Stripe test session created with the 5,00 € coupon. `tsc`
 clean. Not tested: the webhook leg for the mixed cart (needs a completed
 Stripe payment) — its code path is the same pagarConPuntos() the all-points
 path exercised.
+
+---
+
+## 2026-08-22 — Upload the photo, and see how sales are going (Programador 7, economy & market)
+
+Two small things sellers feel every day.
+
+**Photos from the phone.** CrearProducto only accepted a pasted image URL — asking
+a seller to have a website before having a shop. Now a "Subir una foto" control
+sends the file to the public upload zone (`POST /api/uploads`) and adds the
+returned URL to the gallery (max 8). The URL field stays for who prefers it.
+
+**How are my sales going.** `GET /api/publicar/mis-ventas/resumen` (session):
+this month's orders, euros charged and points charged (two numbers, never
+added together), pending-to-ship count, the last six months and the five
+best-selling products (from `pedido_lineas`, plus pre-cart single-product
+orders). Cancelled and returned orders are not sales. Comercio shows it at the
+top of the Pedidos tab.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, rows and
+the uploaded test PNG removed): 401 without session; 2 paid/delivered orders of
+a seeded trio (the cancelled one excluded) → 2 orders, 31,00 €, 5 points, 1 to
+ship, best seller ×3 (2 from lines + 1 pre-cart); PNG upload → public URL
+served as image/png. `tsc` clean. The Comercio panel itself was not opened in a
+browser (the shared automation browser would have needed a seller session);
+its data contract is what was tested.
