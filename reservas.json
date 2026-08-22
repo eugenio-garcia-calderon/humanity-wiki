@@ -71,6 +71,18 @@
       "ruta": "src/server/publicar.ts",
       "motivo": "registrar la ruta de herramientas",
       "desde": "2026-08-22T15:07:17.510Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/ui/IconoFeedback.tsx",
+      "motivo": "renombrar Hormiguero a Feedback y su icono nuevo",
+      "desde": "2026-08-22T15:14:23.663Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Hormiguero.tsx",
+      "motivo": "renombrar Hormiguero a Feedback y su icono nuevo",
+      "desde": "2026-08-22T15:14:23.663Z"
     }
   ]
 }
