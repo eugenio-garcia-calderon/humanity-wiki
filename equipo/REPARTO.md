@@ -136,6 +136,12 @@ despliega fusionando el código de varios a la vez.**
 | Antes de fusionar | lo dices y **esperas** a que te den el turno. Avisar no es pedir |
 | Cuántas a la vez | una. Si otro está desplegando, esperas a que termine |
 
+**El turno dice que nadie más está desplegando. No dice que puedas desplegar.**
+Distinción de prog4, el 2026-08-22: si Eugenio ha parado tu rama, el Dashboard no
+te la levanta dándote turno — coordinar que no os piséis y autorizar que algo salga
+a producción son dos cosas distintas, y la segunda es solo suya. Devolver un turno
+concedido porque el freno sigue puesto es la respuesta correcta.
+
 Por qué: el 2026-08-22 la PR #200 salió a producción con trabajo de los tres
 mezclado. Cuando algo se rompe así, no se sabe de quién es ni se puede volver
 atrás sin llevarse por delante el trabajo de los otros dos.
