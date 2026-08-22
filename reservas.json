@@ -83,6 +83,18 @@
       "ruta": "src/server/auth.ts",
       "motivo": "cookie de sesion valida en los subdominios (Eugenio: probar puntos en el carrito)",
       "desde": "2026-08-22T20:51:15.124Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/gasto.ts",
+      "motivo": "el gasto en modelos abiertos se contaba como Anthropic, y desaparecia del total",
+      "desde": "2026-08-22T20:52:37.294Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Vision.tsx",
+      "motivo": "el gasto en modelos abiertos se contaba como Anthropic, y desaparecia del total",
+      "desde": "2026-08-22T20:52:37.294Z"
     }
   ]
 }
