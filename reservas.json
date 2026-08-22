@@ -104,12 +104,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "",
-      "desde": "2026-08-22T21:36:25.815Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "buscador first: el chat busca antes de gastar IA",
       "motivo": "",
       "desde": "2026-08-22T21:36:25.815Z"
@@ -146,12 +140,6 @@
     },
     {
       "agente": "prog8",
-      "ruta": "src/server/graph.ts",
-      "motivo": "",
-      "desde": "2026-08-22T21:45:01.084Z"
-    },
-    {
-      "agente": "prog8",
       "ruta": "buscador first: ordenar los resultados de /api/search",
       "motivo": "",
       "desde": "2026-08-22T21:45:01.084Z"
@@ -161,12 +149,6 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "privacidad: la pagina que exigen las dos tiendas",
       "desde": "2026-08-22T21:45:21.692Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "",
-      "desde": "2026-08-22T22:02:24.745Z"
     },
     {
       "agente": "prog8",
