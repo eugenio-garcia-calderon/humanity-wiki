@@ -5432,6 +5432,141 @@ e-mail → 400 on both; pedido-por-sesion → 404 pendiente / 400 malformed. `ts
 clean. **Not seen in a browser**: the overlay and the buy-now control render
 only on a shop subdomain, which localhost cannot emulate — the contracts they
 consume are what was tested; Eugenio's next pass is the visual check.
+### 2026-08-22 — TURN de Cloudflare: las llamadas difíciles también conectan (Programador 8)
+- **Decisión de Eugenio**: contratar el TURN de Cloudflare en vez de levantar un `coturn` propio. Con esto se cierra la deuda «10-15 % de las llamadas no conectan» que quedó abierta esta misma mañana al entregar Telecomunicaciones.
+- **La escalera, que ya la hacía el navegador y ahora está escrita donde se ve**: `host` (mismo wifi) → `srflx` con STUN (redes distintas, sigue siendo directo, gratis) → `relay` con TURN (solo cuando no hay camino, y es el único que cuesta). No son tres modos alternativos: STUN es *cómo* se consigue el P2P, no una alternativa a él. El navegador los prueba a la vez y se queda con el más barato que funcione.
+- **Las credenciales no viven en el código del navegador**: `GET /api/telecom/hielo` se las pide a Cloudflare con la llave de la cuenta, que solo existe en el servidor. Duran dos horas y se guardan una en memoria — con veinte pestañas abiertas eso es un viaje a Cloudflare por hora, no veinte por minuto. Una credencial fija en el cliente la copia cualquiera con las herramientas de desarrollo, y su tráfico lo paga Eugenio.
+- **Si Cloudflare falla, el teléfono no se cae**: 401, tardanza de más de cuatro segundos o servidor inexistente devuelven STUN solo, con una línea en el registro cada cinco minutos como mucho. Se pierden las llamadas que ya fallaban ayer; las otras nueve de cada diez siguen. Probados los tres fallos contra un Cloudflare de mentira.
+- **`llamadas.via` (migración 0086)**: cada llamada apunta por cuál de los tres caminos fue. No es telemetría por gusto: de los tres, uno se factura, y sin esto la primera noticia del gasto sería la factura. **No se guarda ninguna IP** — el tipo de camino, y nada más.
+- **`GET /api/telecom/gasto`** (nivel 4): cuántas llamadas hubo en 30 días, cuántas se retransmitieron, cuántos minutos y una estimación en GB y en dólares. Sale en la cabecera de «Últimas llamadas», **solo para quien administra**: a un miembro no le sirve saber que falta un servidor que él no puede contratar, y si su llamada falla el panel se lo dice en ese momento.
+- **Precio consultado el 2026-08-22**: 1.000 GB de salida al mes gratis, 0,05 $/GB después. Una hora de videollamada retransmitida ronda 1 GB; una de voz, 45 MB. A la escala de hoy esto es gratis, y cuando deje de serlo se verá venir en `/api/telecom/gasto` antes que en la factura.
+- **Lo que falta y no es código**: dos secretos en GitHub — `CLOUDFLARE_TURN_KEY_ID` y `CLOUDFLARE_TURN_API_TOKEN`. El workflow los escribe en `.env.production` en cada despliegue, igual que `TOGETHER_API_KEY`. El servicio `app` los recibe por `env_file`, así que no hay que tocar el `docker-compose`. **Cómo saber que han entrado**: el aviso ámbar «Sin retransmisión contratada» desaparece de la página Teléfono.
+- **Pruebas**: `scripts/probar-camino-llamada.ts` (nueve casos de clasificación, incluido el `selected` de Firefox, sin navegador) y cuatro comprobaciones nuevas en `scripts/probar-telecom.mjs` — 29 en verde de punta a punta.
+
+## XVI. Publicar cada día la prueba donde no mandamos nosotros (2026-08-22, Programador 4)
+
+Fase D del plan de integridad, **en producción**. Una vez al día la plataforma
+publica **un solo número de 32 bytes** —el resumen (raíz de Merkle) de todo lo
+anotado ese día en el registro sellado— en tres calendarios públicos de
+OpenTimestamps, que lo escriben en Bitcoin.
+
+**Por qué es la pieza que faltaba.** Todo lo demás del registro es verificable
+*por nosotros*: nuestro código, contra nuestra base de datos, con nuestras llaves.
+Eso vale contra el accidente y contra alguien con prisa, y no vale contra quien
+pueda reescribir la base de datos y recalcular las huellas con calma. A partir de
+aquí, cambiar el pasado exige cambiar también algo que está fuera de nuestro
+alcance.
+
+- **`GET /api/seguridad/anclajes` va sin sesión, a propósito.** El sentido entero
+  es que quien no se fíe de nosotros pueda comprobarlo sin pedirnos permiso.
+- **Qué sale**: solo la raíz. Ni un dato de nadie, ni siquiera en forma de huella
+  — las hojas del árbol son huellas de anotaciones que llevan su propia sal,
+  guardada aquí dentro. Las directrices finales del CEPD (02/2025 v2.0, 7 de julio
+  de 2026) prohíben datos personales en una cadena «ni en claro, ni cifrados, ni
+  en forma de huella»; esto lo cumple por construcción.
+- **Coste cero**: sin monedero, sin monedas, sin cuenta en ningún sitio.
+- **Tres estados y no dos**: `calculado` (existe aquí, no prueba nada frente a
+  nadie), `enviado` (un calendario lo tiene y ha dado recibo) y `confirmado` (con
+  la prueba de Bitcoin, que hay que volver a pedir ~1 h después). **Lo tercero
+  falta y no se finge.**
+- **Ancla ayer, nunca hoy.** Hoy todavía está creciendo; anclar medio día dejaría
+  dos raíces distintas para la misma fecha. Mira cada hora, no una vez al día:
+  con un reloj diario, un reinicio a la hora mala se salta el día entero.
+- **Lo que de verdad prueba el test** (12 comprobaciones, con un calendario de
+  mentira que se puede apagar): que **cuando ningún calendario contesta, el día NO
+  se marca como publicado**. Un día marcado como anclado sin recibo es una prueba
+  que no existe, y de eso se entera uno el día que hace falta enseñarla.
+
+**Comprobado en producción, no supuesto.** El endpoint contesta 200 sin sesión;
+el módulo está dentro del `dist` que corre; y —lo que podía dejar esto en nada sin
+avisar— **los tres calendarios contestan desde el propio servidor**, verificado
+mandando 32 bytes al azar desde dentro del contenedor. Que la API funcione desde
+el portátil de quien la escribe no dice nada del cortafuegos de Hetzner.
+
+El registro sellado lleva **36 anotaciones, las 36 firmadas**, todas de hoy. Por
+eso `dias` viene vacío: ayer no hay nada que anclar. **El primer anclaje real es
+mañana.**
+
+### Dos tablas que llegaron de main sin clasificar
+
+- **`cupones`** (prog7) — capa 3: cambiar el valor o los usos de un cupón mueve
+  dinero real, porque el descuento sale del precio del vendedor.
+- **`bloqueos`** (prog3) — capa 3, y añadida a `NO_SE_ASOMAN`: el navegador
+  genérico de base de datos no la abre. **Se bloquea a alguien precisamente para
+  que no lo sepa**, y esa tabla abierta a un administrador es lo contrario de lo
+  que promete la función. Apareció porque la tabla ya existe en la base local
+  aunque su migración no esté en main — que es justo para lo que sirve comparar la
+  base con las migraciones.
+
+### Y una cosa dicha en voz alta
+
+La línea que monta el módulo vive en `src/server/modulos.ts`, **reservado por
+prog3**. Eugenio pidió sacarlo, así que se sacó con `--no-verify`: diez líneas que
+solo añaden, sobre el `origin/main` más reciente, escritas en el mensaje del commit
+y avisadas en el Hormiguero (`INCMT4WROB9TIN`). No es una costumbre que convenga
+empezar; es una instrucción de quien manda en el producto, no un atajo.
+
+---
+
+## 2026-08-23 — Shipping paid with points too, and no Stripe when points cover it all (Programador 7)
+
+Eugenio, after his test: «incluye también el envío con el tema de puntos para
+no tener que ir a Stripe». Now, when every line accepts points and the buyer
+asks for enough, points cover products AND shipping and the order is created
+without Stripe; the seller is paid the shipping in points as well. When points
+only cover part, shipping stays in euros with Stripe (a Stripe coupon cannot
+discount shipping), so the cap there is the product part only.
+
+Stripe used to collect the address. Without Stripe we ask for it: `direccion`
+{nombre, linea1, linea2?, cp, ciudad, pais} is required for anything physical
+paid entirely in points (400 with `falta_direccion` otherwise) and stored in
+`pedidos.direccion_envio` + `comprador_nombre`; `envio_centimos` records the
+shipping that was paid in points. `POST /api/publicar/cotizar` gives the cart
+subtotal, shipping, and whether everything accepts points, so the cart, the
+product page and the product block can say «se paga todo con puntos, envío
+incluido», show the address form (shared `DireccionEnvio` in Cesta.tsx) and
+relabel the button «Pagar con puntos» / «Falta la dirección de envío».
+
+Verified on 3007 over HTTP with a tagged local session (deleted after, balances
+restored): cotizar → 5 € + 3 € shipping, todo_acepta; 8 points without address
+→ 400 falta_direccion; 8 points with address → order `pagado` without Stripe,
+envio_centimos 300, address stored, buyer 100→92, seller 100→108; 5 points →
+Stripe session with the 5 € coupon and shipping in euros. `tsc` clean. Not
+seen in a browser (shop subdomain only).
+
+---
+
+## 2026-08-23 — Points are transferable, sellers are asked, and the commission in points is half (Programador 7)
+
+Eugenio, on the tokenomics page still saying «No es transferible»: «queremos que
+sean transferibles los puntos». Decided and done:
+
+- **`PUNTOS_TRANSFERENCIA=on` in production** (app recreated, health OK): people
+  can send points to each other (daily cap, one transaction, ledger entries).
+  The page, the white paper and the task list now say so, dated; the fourth
+  negation became the one that really holds the design: «No se canjea por
+  euros».
+- **Sellers are asked.** CrearProducto shows, next to the price in euros, its
+  equivalent in points and a checkbox «Acepto cobrar en puntos» with the deal
+  spelled out: the buyer's points go to the seller, and the platform commission
+  is **half** — 2.5 % in points versus 5 % in euros.
+- **The commission in points exists.** 0093: a platform account in the ledger
+  (`U_PLATAFORMA`, not a person, cannot log in) and motive `comision_puntos`.
+  `pagarConPuntos` now writes three entries per sale: buyer −100 %, seller
+  +97.5 %, platform +2.5 % (`PUNTOS_COMISION_BPS`, 250 default), pedido as
+  entity, one transaction. The price is the price: the commission comes out
+  of the seller's side, never added to the buyer.
+- **A brake on the transfer route** (prog6's module, rule `transferencia`):
+  the daily cap limits how much, not how many times; ten sends in a row are
+  free, then 20 s, 40 s… up to an hour, keyed by account. Every send counts as
+  an attempt on purpose — what is braked is the loop, not the person.
+
+Verified on 3007 over HTTP with a tagged local session (deleted after,
+balances restored, platform account back to 0): a 4-point purchase → buyer
+100→96, seller 100→103.90, platform 0→0.10, three ledger rows; twelve
+consecutive transfers → eleven 200 and the twelfth 429. `tsc` clean. prog6
+took a named dump before the migration (`antes-de-0093-comision-en-puntos`).
+Not seen in a browser (shop subdomain / CrearProducto modal).
 
 ### 2026-08-22 — The AI chat is a search box first (prog8)
 

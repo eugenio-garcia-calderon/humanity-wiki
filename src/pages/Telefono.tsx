@@ -34,6 +34,12 @@ interface Persona { id: string; nombre: string; avatar?: string | null; handle?:
 interface Registro {
   id: string; mia: boolean; con: Persona; tipo: 'audio' | 'video';
   estado: string; segundos: number; pantalla: boolean; fecha: string;
+  /** Por dónde fue: 'local' | 'directo' | 'retransmitida' | 'desconocido'. */
+  via: string | null;
+}
+interface Gasto {
+  dias: number; llamadas: number; retransmitidas: number;
+  minutosRetransmitidos: number; gigasEstimados: number; eurosEstimados: number;
 }
 
 const api = async (url: string, opciones?: RequestInit) => {
@@ -76,17 +82,24 @@ export default function Telefono() {
 
   const [contactos, setContactos] = useState<Persona[]>([]);
   const [historial, setHistorial] = useState<Registro[]>([]);
+  const [gasto, setGasto] = useState<Gasto | null>(null);
+  const [hayTurn, setHayTurn] = useState<boolean | null>(null);
   const [cargando, setCargando] = useState(true);
   const [errorLlamada, setErrorLlamada] = useState<string | null>(null);
   const campo = useRef<HTMLInputElement>(null);
 
   const cargar = useCallback(async () => {
     try {
-      const [yo, mis, hist] = await Promise.all([
+      const [yo, mis, hist, hielo] = await Promise.all([
         api('/api/telecom/yo'),
         api('/api/telecom/mis-contactos').catch(() => ({ contactos: [] })),
         api('/api/telecom/llamadas').catch(() => ({ llamadas: [] })),
+        api('/api/telecom/hielo').catch(() => null),
       ]);
+      setHayTurn(hielo ? Boolean(hielo.hayTurn) : null);
+      // El resumen del gasto es solo para quien administra: es una cifra de la
+      // factura de Eugenio, no información de la persona que está llamando.
+      api('/api/telecom/gasto').then(setGasto).catch(() => setGasto(null));
       setMiNumero(yo?.telefono ? telefonoLegible(yo.telefono) : '');
       setGuardado(yo?.telefono || null);
       setBuscable(yo?.buscable !== false);
@@ -386,7 +399,35 @@ export default function Telefono() {
 
       {/* ── 4. LO QUE HA PASADO ────────────────────────────────────────── */}
       <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 className="text-sm font-black text-slate-900 mb-3">Últimas llamadas</h2>
+        <div className="flex items-baseline gap-2 flex-wrap mb-3">
+          <h2 className="text-sm font-black text-slate-900">Últimas llamadas</h2>
+          {/* LA CUENTA DEL MES, PARA QUIEN PAGA. De los tres caminos que puede
+              tomar una llamada solo uno cuesta dinero, así que aquí se dice
+              cuántas lo tomaron — antes de que llegue la factura, no después. */}
+          {gasto && (
+            <span
+              className="text-[10px] text-slate-400"
+              title={`De ${gasto.llamadas} llamadas en ${gasto.dias} días, ${gasto.retransmitidas} no encontraron camino directo y pasaron por Cloudflare: ${gasto.minutosRetransmitidos} minutos, unos ${gasto.gigasEstimados} GB. Los primeros 1.000 GB al mes son gratis.`}
+            >
+              {gasto.retransmitidas === 0
+                ? `${gasto.llamadas} en 30 días · ninguna ha necesitado retransmisión`
+                : `${gasto.retransmitidas} de ${gasto.llamadas} retransmitidas · ~${gasto.gigasEstimados} GB · ${gasto.eurosEstimados === 0 ? 'dentro de lo gratuito' : `~${gasto.eurosEstimados} $`}`}
+            </span>
+          )}
+          {/* ESTE AVISO ES PARA QUIEN ADMINISTRA, NO PARA QUIEN LLAMA. A un
+              miembro no le sirve de nada saber que falta un servidor que él no
+              puede contratar; y si su llamada llega a fallar, el propio panel
+              de la llamada se lo dice en ese momento, que es cuando importa.
+              `gasto` solo llega con nivel 4 o más, así que sirve de portero. */}
+          {gasto && hayTurn === false && (
+            <span
+              className="ml-auto text-[10px] font-bold text-amber-700"
+              title="Sin servidor de retransmisión, las llamadas que no encuentran camino directo no conectan: entre un 10 % y un 15 %. Se contrata en Cloudflare y son dos líneas en el .env."
+            >
+              Sin retransmisión contratada
+            </span>
+          )}
+        </div>
         {historial.length === 0 ? (
           <p className="py-6 text-center text-xs text-slate-400">Todavía no has llamado a nadie.</p>
         ) : (
@@ -403,6 +444,11 @@ export default function Telefono() {
                     <span className="block text-[10px] text-slate-400">
                       {l.tipo === 'video' ? 'Videollamada' : 'Llamada'} · {comoFue(l)}
                       {l.pantalla && <> · <ScreenShare className="w-2.5 h-2.5 inline -mt-px" /> pantalla</>}
+                      {/* Solo se marca la que costó dinero. Poner «directa» en
+                          las otras nueve sería ruido para decir «lo normal». */}
+                      {l.via === 'retransmitida' && (
+                        <span title="No hubo camino directo entre los dos aparatos y el audio pasó por Cloudflare. Es la única clase de llamada que cuesta dinero."> · retransmitida</span>
+                      )}
                     </span>
                   </span>
                   <span className="text-[10px] text-slate-400 shrink-0">

@@ -6,6 +6,7 @@ import { Card, Button } from '../components/ui/core';
 import { AdminMenu } from '../components/ui/AdminMenu';
 import { useEdit } from '../contexts/EditContext';
 import { slugify } from '../utils/slugify';
+import { TEXTURA_CUBOS } from '../utils/texturaCubos';
 
 export default function ChallengeProfile() {
   const { getChallengeCauses, getChallengeSolutions, getChallengeProjects, territories, challenges, loading } = useHelpers();
@@ -49,7 +50,11 @@ export default function ChallengeProfile() {
       
       {/* Hero Section for Challenge */}
       <div className="bg-gradient-to-r from-red-500 to-rose-600 rounded-3xl p-8 md:p-12 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+        {/* La textura se dibuja en el propio código, no se le pide a
+            transparenttextures.com: un fondo decorativo no justifica
+            mandarle la IP de cada visitante a un servidor ajeno — y las
+            tiendas obligan a declarar con quién se comparten datos. */}
+        <div className="absolute inset-0 opacity-10 mix-blend-overlay" style={TEXTURA_CUBOS}></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md p-4 shrink-0 shadow-[0_0_40px_rgba(255,255,255,0.2)]">
             <span className="text-5xl md:text-6xl">🔥</span>

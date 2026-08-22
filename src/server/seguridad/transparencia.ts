@@ -60,6 +60,13 @@ export const NO_SE_ASOMAN = new Map<string, string>([
   ['spotify_accounts', 'llaves de una cuenta de otro servicio'],
   ['youtube_accounts', 'llaves de una cuenta de otro servicio'],
   ['content_reports', 'quién ha denunciado a quién'],
+  ['bloqueos', 'quién ha bloqueado a quién: se bloquea a alguien precisamente para que no lo sepa'],
+  // Un pedido lleva `direccion_envio`: dónde vive alguien. Cerrar esto NO toca
+  // el panel del vendedor ni ninguna ruta del producto — solo el navegador
+  // genérico de base de datos, que enseña la tabla entera de una vez. Quien
+  // necesite un pedido concreto tiene la llave documentada: una fila, por su id,
+  // con el motivo escrito y anotado ANTES de leerla.
+  ['pedidos', 'la dirección de casa de quien compra, y toda de golpe'],
 ]);
 
 /** Las rutas de lectura que solo puede usar quien manda, y qué enseñan.
@@ -209,6 +216,33 @@ export function registrarTransparencia(app: Express, db: any) {
         aviso: 'Esta consulta ha quedado anotada con tu nombre y tu motivo en el registro sellado, '
              + 'donde no se puede borrar, y cualquiera con cuenta puede verla.',
         fila: fila.rows[0] ?? null,
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── 3b. LA PRUEBA, PARA CUALQUIERA ───────────────────────────────────────
+  /** GET /api/seguridad/anclajes — los resúmenes diarios publicados fuera.
+   *
+   *  **Sin sesión, a propósito.** El sentido entero de anclar fuera es que
+   *  alguien que no se fía de nosotros pueda comprobarlo, y para eso tiene que
+   *  poder verlo sin pedirnos permiso. Lo que sale son números de 32 bytes y
+   *  sus recibos: ni un dato de nadie. */
+  app.get('/api/seguridad/anclajes', async (_req: Request, res: Response) => {
+    try {
+      const { anclajesPublicos } = await import('./anclaje.js');
+      res.json({
+        que_es: 'El resumen de todo lo anotado cada día, publicado en OpenTimestamps (Bitcoin). '
+              + 'Sirve para demostrar que lo registrado ese día existía ese día, sin tener que fiarse de nosotros.',
+        como_se_comprueba: 'Cada recibo es una prueba de OpenTimestamps sobre la raíz. Con el programa `ots` '
+              + 'y la raíz se verifica contra Bitcoin, sin pedirnos nada.',
+        y_lo_que_no_dice: 'Que lo anotado sea verdad. Dice que no se ha cambiado desde entonces.',
+        // Un «día» sin zona horaria es una fecha con dos respuestas, y quien
+        // venga a comprobar esto no tiene por qué adivinar cuál usábamos.
+        que_es_un_dia: 'De 00:00 a 24:00 en UTC. No en hora de Madrid: con el cambio de hora habría '
+              + 'un día de 23 horas y otro de 25, y una hora que aparece en dos resúmenes o en ninguno.',
+        dias: await anclajesPublicos(db),
       });
     } catch (e: any) {
       res.status(500).json({ error: e.message });

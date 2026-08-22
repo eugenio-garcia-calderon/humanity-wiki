@@ -6,6 +6,7 @@ import { useDesign } from '../contexts/DesignContext';
 import { cn } from '../utils/cn';
 import { slugify } from '../utils/slugify';
 import { challengeLinkTo } from '../utils/entityLinks';
+import { TEXTURA_CUBOS } from '../utils/texturaCubos';
 
 // Colors for each objective
 const objectiveColors: Record<string, { from: string; to: string; bg: string; text: string; border: string }> = {
@@ -66,7 +67,11 @@ export default function ObjectiveDetail() {
 
       {/* Hero Section */}
       <div className={`bg-gradient-to-r ${colors.from} ${colors.to} rounded-3xl p-8 md:p-12 text-white shadow-lg relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+        {/* La textura se dibuja en el propio código, no se le pide a
+            transparenttextures.com: un fondo decorativo no justifica
+            mandarle la IP de cada visitante a un servidor ajeno — y las
+            tiendas obligan a declarar con quién se comparten datos. */}
+        <div className="absolute inset-0 opacity-10 mix-blend-overlay" style={TEXTURA_CUBOS}></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="w-32 h-32 md:w-48 md:h-48 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md p-4 shrink-0 shadow-[0_0_40px_rgba(255,255,255,0.2)]">
             {image ? (
