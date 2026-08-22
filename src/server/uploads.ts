@@ -127,14 +127,38 @@ export const uploadsDir = () =>
  * devuelve la misma forma que `POST /api/uploads`. Mismo almacén, mismas
  * carpetas por mes, mismo nombre UUID: un origen único de verdad.
  */
-export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; bytes: number; type: string; esImagen: boolean; clase: ClaseArchivo } {
+/**
+ * LA ZONA PRIVADA (2026-08-22, entrega de lo digital). Todo lo que se sube
+ * vive bajo `/uploads/...` y se sirve como estático: perfecto para una foto,
+ * fatal para el PDF que alguien paga. Los archivos de productos digitales se
+ * guardan bajo `privado/` — misma raíz, mismo volumen, mismo nombre UUID — y
+ * esa carpeta NO la sirve el estático (abajo contesta 404 antes de llegar a
+ * él). Solo salen por la ruta de descarga del pedido, que comprueba quién
+ * pagó. El nombre UUID por sí solo sería «seguridad por oscuridad»: con la
+ * carpeta cerrada, adivinar la URL no sirve de nada.
+ */
+export const PRIVADO = 'privado';
+
+/** Ruta en disco de una URL de subida, o `null` si no es una URL nuestra.
+ *  Resuelve y comprueba que el resultado sigue DENTRO de la raíz: una URL con
+ *  `..` no puede salir a leer otro fichero del servidor. */
+export function rutaLocalDeUpload(url: string): string | null {
+  if (typeof url !== 'string' || !url.startsWith('/uploads/')) return null;
+  const raiz = path.resolve(uploadsDir());
+  const destino = path.resolve(raiz, url.slice('/uploads/'.length));
+  if (!destino.startsWith(raiz + path.sep)) return null;
+  return destino;
+}
+
+export function guardarArchivo(tipo: string, bytes: Buffer, opciones?: { privado?: boolean }): { url: string; bytes: number; type: string; esImagen: boolean; clase: ClaseArchivo } {
   const ext = TIPOS[tipo.toLowerCase()];
   if (!ext) throw new Error(`Formato no admitido: ${tipo}`);
   const tope = topeDe(tipo.toLowerCase());
   if (bytes.length > tope) throw new Error(`El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.`);
   const raiz = uploadsDir();
   const ahora = new Date();
-  const rel = path.join(String(ahora.getFullYear()), String(ahora.getMonth() + 1).padStart(2, '0'));
+  const mes = path.join(String(ahora.getFullYear()), String(ahora.getMonth() + 1).padStart(2, '0'));
+  const rel = opciones?.privado ? path.join(PRIVADO, mes) : mes;
   mkdirSync(path.join(raiz, rel), { recursive: true });
   const nombre = `${randomUUID()}.${ext}`;
   writeFileSync(path.join(raiz, rel, nombre), bytes);
@@ -150,6 +174,13 @@ export function guardarArchivo(tipo: string, bytes: Buffer): { url: string; byte
 export function registerUploadRoutes(app: Express, _db: any) {
   const raiz = uploadsDir();
   mkdirSync(raiz, { recursive: true });
+
+  // La zona privada se cierra ANTES de montar el estático: lo que hay debajo
+  // de /uploads/privado solo sale por la ruta de descarga de un pedido
+  // (publicar.ts), que comprueba quién pagó.
+  app.use(`/uploads/${PRIVADO}`, (_req: Request, res: Response) => {
+    res.status(404).json({ error: 'Ese archivo no es público. Si lo compraste, descárgalo desde tu pedido.' });
+  });
 
   // Servir lo subido. Los nombres son UUID generados aquí, así que no hay
   // nombre de usuario en la ruta; express.static ya bloquea el path traversal.
@@ -200,7 +231,9 @@ export function registerUploadRoutes(app: Express, _db: any) {
         if (bytes.length > tope) {
           return res.status(413).json({ error: `El archivo supera los ${Math.round(tope / 1024 / 1024)} MB.` });
         }
-        res.json(guardarArchivo(tipo, bytes));
+        // `?privado=1`: el archivo de un producto digital. Nadie lo verá por
+        // su URL; solo quien pague el producto, desde su pedido.
+        res.json(guardarArchivo(tipo, bytes, { privado: String(req.query.privado || '') === '1' }));
       } catch (e: any) {
         console.error('upload error:', e);
         res.status(500).json({ error: e.message });
