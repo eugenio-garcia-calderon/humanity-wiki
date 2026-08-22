@@ -60,6 +60,28 @@ interface AuthContextType {
   refresh: () => Promise<void>;
 }
 
+/**
+ * ¿Es el MISMO usuario, con los mismos datos?
+ *
+ * Volver a preguntar «¿quién soy?» devuelve un objeto nuevo aunque la
+ * respuesta sea idéntica, y en React un objeto nuevo es un usuario nuevo:
+ * todo lo que dependa de `[user]` se vuelve a lanzar. Medido en local, con
+ * sesión abierta, **un solo refresco de sesión disparaba cuatro peticiones**:
+ * la suya y las tres de los efectos que dependen del usuario —los avisos sin
+ * leer, las tareas y las carpetas—, ninguna de las cuales tenía nada nuevo
+ * que traer.
+ *
+ * Comparar el JSON entero y no solo el `id` es a propósito: si cambia el
+ * nombre, el nivel o los ajustes, eso SÍ es un usuario distinto para la
+ * pantalla y tiene que volver a pintarse. Lo que no puede pasar es que dos
+ * respuestas idénticas cuenten como un cambio.
+ */
+function mismoUsuario(a: AuthUser | null, b: AuthUser | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -72,7 +94,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' });
       const json = await res.json();
-      setUser(json.user || null);
+      // Si la respuesta es la misma, se conserva el objeto de antes: así nadie
+      // que dependa de `user` se entera de un cambio que no ha habido.
+      setUser(antes => (mismoUsuario(antes, json.user || null) ? antes : (json.user || null)));
     } catch {
       setUser(null);
     } finally {
