@@ -80,12 +80,6 @@
     },
     {
       "agente": "prog5",
-      "ruta": "drizzle/0078_veracidad_debates.sql",
-      "motivo": "Veracidad: tablas de debates",
-      "desde": "2026-08-22T15:45:10.389Z"
-    },
-    {
-      "agente": "prog5",
       "ruta": "drizzle/0079_veracidad_tablero.sql",
       "motivo": "Veracidad: tarjetas del tablero",
       "desde": "2026-08-22T15:45:16.100Z"
