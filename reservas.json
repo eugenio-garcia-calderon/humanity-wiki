@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog5",
-      "ruta": "drizzle/0088_veracidad_revision.sql",
-      "motivo": "Veracidad fase 2: firma del sello (0085 ya en main, 0086 y 0087 cogidos)",
-      "desde": "2026-08-22T19:10:40.908Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "drizzle/0091_bloqueos.sql",
       "motivo": "bloquear a una persona: ultimo requisito de Apple",
@@ -137,6 +131,18 @@
       "ruta": "src/server/roadmap.ts",
       "motivo": "publicaciones dentro de un proyecto",
       "desde": "2026-08-22T23:08:33.198Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "src/server/menu.ts",
+      "motivo": "dashboard: publicaciones dentro del proyecto",
+      "desde": "2026-08-22T23:17:55.753Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "src/pages/Proyectos.tsx",
+      "motivo": "dashboard: publicaciones dentro del proyecto",
+      "desde": "2026-08-22T23:17:55.753Z"
     }
   ]
 }
