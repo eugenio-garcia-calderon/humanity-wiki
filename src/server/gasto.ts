@@ -174,13 +174,63 @@ async function gastoInterno(db: any): Promise<{ mes_actual: FilaMes; historial: 
   return { mes_actual, historial };
 }
 
+/**
+ * Lo que ve quien NO es del equipo (2026-08-22, prog6).
+ *
+ * ══ POR QUÉ APARECE ESTO AHORA ═══════════════════════════════════════════════
+ * Esta ruta lleva abierta desde el 8 de agosto y nunca fue un problema porque
+ * solo la miraba la pestaña de Visión, que es del panel. Desde hoy hay una
+ * página pública de Servidores que la enseña (Eugenio: «de forma transparente a
+ * nivel de coste»), y una cosa que estaba bien solo porque nadie la miraba deja
+ * de estar bien en cuanto alguien la mira. El aviso es de prog2, que se comió
+ * exactamente este patrón con la caché.
+ *
+ * LO QUE SE QUEDA PÚBLICO: los euros. Es lo que Eugenio quiere transparente y
+ * no le sirve a nadie para atacar nada.
+ *
+ * LO QUE NO:
+ *  · `nombre` — el nombre de la máquina (`humanity-wiki-prod`).
+ *  · `tipo` — el modelo exacto de Hetzner. `CPX42` dice 8 núcleos y 16 GB, o
+ *    sea, cuánto hace falta para tumbarla. Es reconocimiento gratis.
+ *  · `mensaje` — los avisos de «falta tal variable en el .env» llevan dentro
+ *    los nombres de las claves y cómo se sacan. Son instrucciones de montaje
+ *    de la casa, y no tienen por qué estar en la calle.
+ *
+ * Se filtra AL SALIR y no al guardar: la caché guarda la respuesta entera una
+ * sola vez y cada quien recibe la suya. Guardar dos versiones sería tener dos
+ * verdades que se pueden desincronizar.
+ */
+function soloLoPublico(g: Gasto): Gasto {
+  return {
+    ...g,
+    servidores: {
+      estado: g.servidores.estado,
+      total_mes_eur: g.servidores.total_mes_eur,
+      consumo_mes_eur: g.servidores.consumo_mes_eur,
+      servidores: (g.servidores.servidores || []).map(m => ({
+        // Un nombre genérico y numerado: sigue siendo una lista de máquinas
+        // con su precio —que es lo que se enseña— sin decir cómo se llama
+        // ninguna.
+        nombre: 'Servidor',
+        tipo: '',
+        eur_mes: m.eur_mes,
+        consumo_eur: m.consumo_eur,
+      })),
+    },
+    ia: {
+      ...g.ia,
+      oficial_anthropic: { estado: g.ia.oficial_anthropic.estado, mes_actual_eur: g.ia.oficial_anthropic.mes_actual_eur },
+    },
+  };
+}
+
 export function registerGastoRoutes(app: Express, db: any) {
   app.get('/api/gasto', async (req: Request, res: Response) => {
     try {
       const esAdmin = (req.user?.roleLevel ?? 0) >= 4;
       const forzar = esAdmin && req.query.refrescar === '1';
       if (cache && cache.expira > Date.now() && !forzar) {
-        return res.json(cache.datos);
+        return res.json(esAdmin ? cache.datos : soloLoPublico(cache.datos));
       }
       const [servidores, oficial, interno] = await Promise.all([
         gastoHetzner(),
@@ -194,7 +244,7 @@ export function registerGastoRoutes(app: Express, db: any) {
         ia: { oficial_anthropic: oficial, interno },
       };
       cache = { datos, expira: Date.now() + CACHE_HORAS() * 3600_000 };
-      res.json(datos);
+      res.json(esAdmin ? datos : soloLoPublico(datos));
     } catch (e: any) {
       console.error('gasto error:', e);
       res.status(500).json({ error: e.message });

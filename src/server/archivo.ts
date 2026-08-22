@@ -87,10 +87,28 @@ export function registerArchivoRoutes(app: Express, db: any) {
       // quien escribió la nota, o quien programa. Sin esa línea, cualquiera con
       // sesión podría colgar ficheros en la nota de otro.
       const r = await db.execute(sql`
-        SELECT autor_user_id FROM incidencias WHERE id = ${c.id} AND archived_at IS NULL
+        SELECT autor_user_id, area FROM incidencias WHERE id = ${c.id} AND archived_at IS NULL
       `);
       const n = r.rows[0] as any;
       if (!n) return 'Esa nota no existe.';
+
+      // ══ EL TABLERO DE SEGURIDAD NO ADMITE ADJUNTOS (2026-08-22) ══════════
+      // Medido por prog4 contra producción, no deducido: los ficheros los
+      // sirve `express.static` en `/uploads` SIN comprobar sesión, así que un
+      // adjunto responde 200 sin cookie ninguna. La nota quedaría escondida y
+      // su fichero no — y el adjunto de una nota de seguridad es justo la
+      // captura del agujero. El enlace lleva un UUID que no se adivina, pero
+      // viaja: en la respuesta de la API, en el historial, en cualquier sitio
+      // donde se pegue.
+      //
+      // Se cierra por el lado barato: aquí no se cuelga nada. Lo correcto es
+      // que `/uploads` deje de ser una carpeta pública y pase por permisos,
+      // y eso es un cambio que toca a toda la plataforma — está anotado como
+      // nota propia en el tablero de seguridad, y es de prog4, no de aquí.
+      if (n.area === 'seguridad') {
+        return 'El tablero de seguridad no admite adjuntos: los ficheros subidos se sirven sin comprobar sesión, así que una captura ahí sería pública aunque la nota no lo sea.';
+      }
+
       if (!escribir) return null;
       if (n.autor_user_id === yo || admin) return null;
       return 'Esa nota no es tuya.';
