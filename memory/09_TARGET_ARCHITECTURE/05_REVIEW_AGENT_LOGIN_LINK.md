@@ -78,16 +78,35 @@ mild. For a login link it means a link that leaked can be used by the attacker
 > `agentes_ia.token_hash` already does. It costs one line and it is the
 > difference between a leaked backup being embarrassing and being an entry.
 
-### 4. The token must not travel in the URL
+### 4. The token must not travel in the URL — measured, and smaller than I first wrote
 
-`/restablecer?token=…` is the existing pattern. A query string leaks into the
-`Referer` header sent to third parties, into browser history, into the proxy and
-Cloudflare access logs, and into every screenshot.
+**Corrected after checking production in a browser, 2026-08-22.** I claimed the
+query string leaks to third parties through `Referer`. It does not, and the
+reason is a header that is already set:
 
-> **Condition:** the link opens a page that redeems by `POST`, or the token
-> travels in the fragment (`#`), which is never sent to the server or to
-> referrers. Set `Referrer-Policy: no-referrer` on that route, and redirect to a
-> clean URL as the first thing after redeeming.
+| Measured on `https://humanity.wiki/restablecer?token=…` | |
+|---|---|
+| `referrer-policy: strict-origin-when-cross-origin` | **present.** Cross-origin requests carry only the origin, never the token |
+| Third-party requests from that page | **none.** 17 requests, all to `humanity.wiki` |
+| `strict-transport-security: max-age=31536000; includeSubDomains` | present |
+| `x-content-type-options: nosniff` · `x-frame-options: SAMEORIGIN` | present |
+
+So the third-party leak is already covered. What stays true:
+
+- **Same-origin** subresources *do* get the full URL as `Referer` under that
+  policy — so the token lands in **our own access logs**, and in Cloudflare's.
+- Browser history keeps it (`history.length` grew, the URL is intact).
+- Every screenshot and every pasted URL keeps it.
+- The page is served `cache-control: public, max-age=0`; `public` on a URL that
+  carries a credential invites an intermediary to store it.
+- And the third-party leak is one `<script>` tag away from coming back — the day
+  somebody adds a font or an analytics tag to that page, every live link leaks
+  retroactively.
+
+> **Condition (unchanged, for weaker reasons):** redeem by `POST`, or carry the
+> token in the fragment (`#`), which is never sent to any server. Add
+> `Referrer-Policy: no-referrer` and `Cache-Control: no-store` **on that route**,
+> and replace the URL as the first thing after redeeming.
 >
 > And a rule for us, not for the code: **a live one-use link pasted into a chat
 > transcript is a credential sitting in a log.** With a two-minute life that is
@@ -135,7 +154,7 @@ delete afterwards.
 | | |
 |---|---|
 | **Turning off an agent must close its doors** | `agente-ia.mjs apagar` sets `activo = false` and nothing else. It must also revoke that agent's live sessions and unused links, or "revoked" is a word |
-| **Rate limit** | There is no rate limiting anywhere in `auth.ts` (grep: nothing). Cap link creation per agent (say 5/hour) and per IP. 32 bytes of entropy makes guessing hopeless, but a stolen token minting links forever should be noisy |
+| **Rate limit** | Confirmed against production, not just by reading: **ten wrong passwords in a row on `/api/auth/login` answered `401` ten times.** No `429`, no delay, no lockout. Cap link creation per agent (say 5/hour) and per IP. 32 bytes of entropy makes guessing hopeless, but a stolen token minting links forever should be noisy |
 | **One live link per agent** | Creating a new one invalidates the previous. Two live links is one more than anybody needs |
 | **Mark the session** | `sessions.user_agent = 'agente:AIA…'` so anybody looking at the table can tell a machine's session from a person's at a glance |
 | **Answer identically** | Invalid, expired and already-used must be indistinguishable to the caller. Different messages are a free oracle |
@@ -156,6 +175,22 @@ minted from a token that reads the hormiguero — where anybody can write — sh
 never be able to touch the commons. That is the reasoning already written in
 `src/server/CLAUDE.md`, and this change does not weaken it as long as the level
 stays where it is.
+
+## Two things found while checking, that have nothing to do with this door
+
+Both measured against production on 2026-08-22, and both older than this change:
+
+1. **The login has no brute-force protection at all.** Ten consecutive failures
+   from one address, ten `401`s, no throttling. That is credential stuffing with
+   the door held open, and it is worth more than this review: it applies to every
+   human account, including Eugenio's.
+2. **No `Content-Security-Policy`, no `Permissions-Policy`.** On a platform that
+   renders content written by its users, CSP is the control that keeps an
+   injected script from acting as whoever is logged in. The session cookie is
+   `HttpOnly`, which stops it being *read* — it does not stop it being *used*
+   from the page.
+
+Neither blocks this PR. Both should become notes on the board.
 
 ## What I could not check
 
