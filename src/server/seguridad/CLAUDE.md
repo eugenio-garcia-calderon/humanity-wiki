@@ -55,7 +55,7 @@ green is worse than no test.
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
 | Capture from the database | Triggers on 25 tier-3 tables write to an outbox, and `selladoAutomatico.ts` drains it every two minutes from inside the server — first pass on boot, so a restart never leaves anything stranded |
 | Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
-| Anchoring | **Built**: the daily root goes to three OpenTimestamps calendars and their receipts are stored. `GET /api/seguridad/anclajes`, no session needed. The first real anchor happens the day after this ships, because it anchors *yesterday* |
+| Anchoring | **Running in production** since 2026-08-22. The daily root goes to three OpenTimestamps calendars and their receipts are stored whole. `GET /api/seguridad/anclajes`, no session needed. **The first real anchor is 2026-08-23**: it anchors *yesterday*, and the record only started today, so `dias` is legitimately empty until then |
 
 Saying it plainly costs nothing and prevents the expensive mistake: believing
 these are protecting something they are not yet wired to.
@@ -151,7 +151,16 @@ database. That is worth a great deal against accident and against an insider in
 a hurry — and it is worth nothing against someone who can rewrite the database
 and recompute every hash at leisure.
 
-Only phase 2 closes that, and it closes it by publishing a number where we
-cannot reach it. Until that runs daily, the correct answer to "can this be
-corrupted?" is **not yet fully** — and saying so is the difference between
-security and the appearance of it.
+Phase D closes that, and it closes it by publishing a number where we cannot
+reach it. **It is deployed and its network path is proven** — 32 random bytes sent
+from inside the production container reached all three calendars and came back
+with receipts. Verifying the API from the laptop of whoever wrote it says nothing
+about the firewall on the server, and that was the one failure that would have
+been silent: a feature that quietly anchors nothing, discovered the day somebody
+asks for the proof.
+
+**It has not anchored a real day yet.** It anchors yesterday, the sealed record
+started today, so the first one is tomorrow. Until a day appears in
+`/api/seguridad/anclajes` with a receipt, the correct answer to "can this be
+corrupted?" is still **not yet fully** — and saying that, rather than "phase D is
+done", is the difference between security and the appearance of it.

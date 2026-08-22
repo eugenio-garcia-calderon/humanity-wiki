@@ -5442,3 +5442,66 @@ consume are what was tested; Eugenio's next pass is the visual check.
 - **Precio consultado el 2026-08-22**: 1.000 GB de salida al mes gratis, 0,05 $/GB después. Una hora de videollamada retransmitida ronda 1 GB; una de voz, 45 MB. A la escala de hoy esto es gratis, y cuando deje de serlo se verá venir en `/api/telecom/gasto` antes que en la factura.
 - **Lo que falta y no es código**: dos secretos en GitHub — `CLOUDFLARE_TURN_KEY_ID` y `CLOUDFLARE_TURN_API_TOKEN`. El workflow los escribe en `.env.production` en cada despliegue, igual que `TOGETHER_API_KEY`. El servicio `app` los recibe por `env_file`, así que no hay que tocar el `docker-compose`. **Cómo saber que han entrado**: el aviso ámbar «Sin retransmisión contratada» desaparece de la página Teléfono.
 - **Pruebas**: `scripts/probar-camino-llamada.ts` (nueve casos de clasificación, incluido el `selected` de Firefox, sin navegador) y cuatro comprobaciones nuevas en `scripts/probar-telecom.mjs` — 29 en verde de punta a punta.
+
+## XVI. Publicar cada día la prueba donde no mandamos nosotros (2026-08-22, Programador 4)
+
+Fase D del plan de integridad, **en producción**. Una vez al día la plataforma
+publica **un solo número de 32 bytes** —el resumen (raíz de Merkle) de todo lo
+anotado ese día en el registro sellado— en tres calendarios públicos de
+OpenTimestamps, que lo escriben en Bitcoin.
+
+**Por qué es la pieza que faltaba.** Todo lo demás del registro es verificable
+*por nosotros*: nuestro código, contra nuestra base de datos, con nuestras llaves.
+Eso vale contra el accidente y contra alguien con prisa, y no vale contra quien
+pueda reescribir la base de datos y recalcular las huellas con calma. A partir de
+aquí, cambiar el pasado exige cambiar también algo que está fuera de nuestro
+alcance.
+
+- **`GET /api/seguridad/anclajes` va sin sesión, a propósito.** El sentido entero
+  es que quien no se fíe de nosotros pueda comprobarlo sin pedirnos permiso.
+- **Qué sale**: solo la raíz. Ni un dato de nadie, ni siquiera en forma de huella
+  — las hojas del árbol son huellas de anotaciones que llevan su propia sal,
+  guardada aquí dentro. Las directrices finales del CEPD (02/2025 v2.0, 7 de julio
+  de 2026) prohíben datos personales en una cadena «ni en claro, ni cifrados, ni
+  en forma de huella»; esto lo cumple por construcción.
+- **Coste cero**: sin monedero, sin monedas, sin cuenta en ningún sitio.
+- **Tres estados y no dos**: `calculado` (existe aquí, no prueba nada frente a
+  nadie), `enviado` (un calendario lo tiene y ha dado recibo) y `confirmado` (con
+  la prueba de Bitcoin, que hay que volver a pedir ~1 h después). **Lo tercero
+  falta y no se finge.**
+- **Ancla ayer, nunca hoy.** Hoy todavía está creciendo; anclar medio día dejaría
+  dos raíces distintas para la misma fecha. Mira cada hora, no una vez al día:
+  con un reloj diario, un reinicio a la hora mala se salta el día entero.
+- **Lo que de verdad prueba el test** (12 comprobaciones, con un calendario de
+  mentira que se puede apagar): que **cuando ningún calendario contesta, el día NO
+  se marca como publicado**. Un día marcado como anclado sin recibo es una prueba
+  que no existe, y de eso se entera uno el día que hace falta enseñarla.
+
+**Comprobado en producción, no supuesto.** El endpoint contesta 200 sin sesión;
+el módulo está dentro del `dist` que corre; y —lo que podía dejar esto en nada sin
+avisar— **los tres calendarios contestan desde el propio servidor**, verificado
+mandando 32 bytes al azar desde dentro del contenedor. Que la API funcione desde
+el portátil de quien la escribe no dice nada del cortafuegos de Hetzner.
+
+El registro sellado lleva **36 anotaciones, las 36 firmadas**, todas de hoy. Por
+eso `dias` viene vacío: ayer no hay nada que anclar. **El primer anclaje real es
+mañana.**
+
+### Dos tablas que llegaron de main sin clasificar
+
+- **`cupones`** (prog7) — capa 3: cambiar el valor o los usos de un cupón mueve
+  dinero real, porque el descuento sale del precio del vendedor.
+- **`bloqueos`** (prog3) — capa 3, y añadida a `NO_SE_ASOMAN`: el navegador
+  genérico de base de datos no la abre. **Se bloquea a alguien precisamente para
+  que no lo sepa**, y esa tabla abierta a un administrador es lo contrario de lo
+  que promete la función. Apareció porque la tabla ya existe en la base local
+  aunque su migración no esté en main — que es justo para lo que sirve comparar la
+  base con las migraciones.
+
+### Y una cosa dicha en voz alta
+
+La línea que monta el módulo vive en `src/server/modulos.ts`, **reservado por
+prog3**. Eugenio pidió sacarlo, así que se sacó con `--no-verify`: diez líneas que
+solo añaden, sobre el `origin/main` más reciente, escritas en el mensaje del commit
+y avisadas en el Hormiguero (`INCMT4WROB9TIN`). No es una costumbre que convenga
+empezar; es una instrucción de quien manda en el producto, no un atajo.

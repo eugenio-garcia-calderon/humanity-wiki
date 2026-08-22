@@ -159,7 +159,7 @@ the phase that protects against our own code being wrong:
 > **Verifiable by:** the application, with its own credentials, failing to
 > `UPDATE registro_sellado` and failing to `DROP TABLE`.
 
-### Phase D — Publish the proof where we cannot reach it · **built 2026-08-22**
+### Phase D — Publish the proof where we cannot reach it · **in production 2026-08-22**
 
 > `src/server/seguridad/anclaje.ts`. Once a day the Merkle root of everything
 > recorded that day — 32 bytes, nothing else — goes to three OpenTimestamps
@@ -192,6 +192,16 @@ machine, against our own database — which is worth a lot against accident and 
 insider in a hurry, and nothing against someone who can rewrite the database and
 recompute every hash at leisure.
 
+> **Verified in production, 2026-08-22:** the route answers 200 with no session,
+> the module is inside the `dist` that runs, and **all three calendars answer from
+> the server itself** — checked by sending 32 random bytes from inside the
+> container. That last one is the check worth having: the API working from the
+> laptop of whoever wrote it says nothing about Hetzner's firewall, and a feature
+> that anchors nothing fails silently until the day the proof is asked for.
+>
+> **No real day is anchored yet.** It anchors yesterday and the record started
+> today. First one: 2026-08-23.
+>
 > **Verifiable by:** a stranger, with a public script and no access to our
 > systems, confirming yesterday's root.
 
@@ -273,5 +283,6 @@ control is attached to something it is not:
 | Nothing here stops a lie | being written correctly by an authorised person. That is [`05_VERACIDAD`](.) territory — a different problem, owned by somebody else |
 
 The honest answer to "can this be corrupted?" stays **not yet fully** until phase
-D runs daily. Saying that, rather than the other thing, is the difference between
-security and the appearance of it.
+D has actually anchored a day — deployed is not the same as anchored, and the
+difference is one night. Saying that, rather than the other thing, is the
+difference between security and the appearance of it.
