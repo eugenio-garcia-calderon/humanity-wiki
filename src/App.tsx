@@ -82,6 +82,7 @@ const Tareas = lazy(() => import('./pages/Tareas'));
 const Territories = lazy(() => import('./pages/Territories'));
 const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
 const UserMapa = lazy(() => import('./pages/UserMapa'));
+import { PAGINAS_INFO } from './paginasInfo';
 const Vision = lazy(() => import('./pages/Vision'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
@@ -254,6 +255,17 @@ export default function App() {
                   }
                 />
                 <Route path="vision" element={<Vision />} />
+
+                {/* LAS PÁGINAS DE LA «i», DESDE SU LISTA (2026-08-22). Añadir
+                    una es una línea en `src/paginasInfo.ts` y ningún cambio
+                    aquí — que es lo que evita cuatro PRs sobre este fichero la
+                    misma tarde. Las que ya tenían ruta propia (vision,
+                    sobre-red-humana) no traen componente y no se montan dos
+                    veces. */}
+                {PAGINAS_INFO.filter(p => p.componente).map(p => {
+                  const Pagina = p.componente!;
+                  return <Route key={p.ruta} path={p.ruta} element={<Pagina />} />;
+                })}
                 <Route path="explorar" element={<Explorar />} />
                 {/* Atajo, no una página aparte: si fuera <Explorar mias /> el cambio
                     de ruta desmontaría el componente y perdería la carpeta abierta
