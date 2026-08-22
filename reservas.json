@@ -176,12 +176,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
-      "desde": "2026-08-22T22:23:41.094Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/pages/about/Tokenomics.tsx",
       "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
       "desde": "2026-08-22T22:23:44.806Z"
@@ -215,12 +209,6 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "la pagina de un proyecto no ensena nada de lo que cuelga de el (Eugenio)",
       "desde": "2026-08-22T22:27:51.751Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "agenda del iPhone",
-      "desde": "2026-08-22T22:30:18.160Z"
     }
   ]
 }
