@@ -191,6 +191,13 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   it had been there since the first version, and it hid the fact that the app opened
   **blank offline** on a real first visit. Repeated reloads in testing never saw it;
   a person with one load would have.
+- **Saying exactly what you could not check is a complete delivery.** What is not
+  allowed is calling something verified when you did not see it. Approved by Eugenio
+  on 2026-08-22, after an afternoon in which three deliveries were honest about it
+  and one agent bypassed a login check in its own copy just to be able to look. That
+  was not carelessness: the honest path looked like a failure. **If you are tempted
+  to disable a guard in order to verify something, the right move is not to disable
+  it and to say so.**
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
