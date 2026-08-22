@@ -91,6 +91,23 @@ It was caught because a cache header did not change. It could just as easily
 have been the subdomain block, and then it would have looked like the
 certificate was failing.
 
+### The same trap, second instance: `deploy/copias/*.sh`
+
+The backup scripts (2026-08-22, prog6) come in through a bind mount too, and
+`up -d` has no reason to recreate a service whose definition did not change. So
+a deploy that only edits `copias.sh` goes green and changes nothing running.
+
+Unlike Caddy, the deploy does **not** force-recreate `copias`. After a deploy
+that touches those scripts:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production restart copias
+```
+
+Two instances of this in one day is the pattern, not the coincidence: **any
+bind-mounted config or script is invisible to `up -d`.** Before assuming your
+change did not work, check whether the container ever saw it.
+
 ## `header` in Caddy ADDS unless you write `>`
 
 `header @foo Cache-Control "..."` does not replace a header the origin already
