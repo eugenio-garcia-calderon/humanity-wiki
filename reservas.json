@@ -125,6 +125,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "una linea: registrar los textos editables en la lista",
       "desde": "2026-08-22T16:08:01.282Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/avisos.ts",
+      "motivo": "telecomunicaciones: aviso de llamada perdida",
+      "desde": "2026-08-22T16:09:39.435Z"
     }
   ]
 }
