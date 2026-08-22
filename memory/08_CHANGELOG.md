@@ -3989,3 +3989,155 @@ that is not there.
 through the fast model. It matters when there are a hundred people using the
 chat daily. What it does buy today is that the saving is *visible*: from now on
 the cost table can show whether the cache is hitting at all.
+
+---
+
+## 2026-08-22 (XII) — The context cache, rebuilt for hundreds of thousands of chats
+
+Eugenio: «piensa en cómo hacerlo para mejorar la UX y piensa en cuando tengamos
+cientos de miles de chats al día».
+
+Measured on the local server, three questions in one conversation:
+
+| Petición | Entrada | Releída de caché |
+|---|---|---|
+| 1ª | 5.720 | 0 (escribe la caché) |
+| 2ª | 5.754 | **5.719 — 99 %** |
+| 3ª | 5.785 | **5.753 — 99 %** |
+
+**−89,5 % per request from the second message on.** At 100.000 chats a day that
+is ~403 €/día → ~115 €/día; at 500.000, ~2.014 → ~573.
+
+### What was breaking it
+
+**A timestamp with milliseconds.** The variable block opened with `HOY ES …
+(2026-08-22T10:15:33.123Z)`. Caching compares *prefixes*: one differing byte and
+everything after it is billed in full — including the entire conversation
+history, re-sent and re-charged on every single turn. The date now carries the
+day only. The model never needed the millisecond: it resolves «el jueves» from
+the day.
+
+### Three tiers instead of two
+
+| Capa | Qué lleva | Cambia |
+|---|---|---|
+| 1 · global | las instrucciones de la plataforma | nunca — su caché **se comparte entre todos los usuarios** |
+| 2 · de la persona | sus proyectos, su gente, su nivel, los grafos | cuando crea algo |
+| 3 · variable | la fecha, la pantalla, lo recuperado, la pregunta | cada mensaje |
+
+Ordered least- to most-volatile, which is not a preference: a stable block
+placed after a volatile one is never cached. Anthropic allows four cache
+markers and one was in use; there are now two. Together needs no marker — its
+cache is automatic by prefix, so **the order is the marker**.
+
+### And it can now say whether it is working
+
+`cache_read_tokens` is recorded with every charge. Until today a broken cache
+and a perfect one left an identical record, and at this volume that means
+finding out from the invoice. It is the house rule applied to money.
+
+### For the person using it
+
+Cached prefixes are not only cheaper, they are **faster**: the provider skips
+recomputing them, so the answer starts sooner. The saving and the wait improve
+together.
+## 2026-08-22 · PWA: installable, offline, and honest about it (Programador 3)
+
+The platform can now be added to an iPhone's home screen and opened without a
+network. Three pieces:
+
+**Installable.** `manifest.webmanifest` plus PNG icons. The `apple-touch-icon`
+pointed at `/logo.svg` and iOS does not accept SVG there, so adding to the home
+screen produced a blank icon. Icons are generated from
+`public/iconos/fuente-cuadrado.svg` — square and opaque on purpose, because iOS
+applies its own rounded mask and a source that is already rounded leaves dark
+corners inside the crop. Verified by reading the corner pixel: alpha 255.
+
+**Offline.** `public/sw.js`. Verified with the dev server stopped and again with
+a production build: the app boots from cache, assets included.
+
+**Offline WITH YOUR DATA, and this reverses an earlier decision.** The first
+version refused to cache `/api/*` at all, to avoid showing stale data as if it
+were live. Eugenio asked for his projects to be readable on a plane, so the rule
+changed — but the reason it existed did not:
+
+- The network always wins while it works. A cached answer can never shadow a live
+  one; the copy is only returned when the request actually failed.
+- Every parachute answer is stamped `X-Desde-Cache: 1` and `X-Cacheado-En`.
+- `src/avisoSinConexion.ts` reads those headers and shows a banner saying how old
+  the copy is. It wraps `fetch` rather than living in a component, because the
+  data is read from dozens of screens and none of them should have to remember.
+- GET only. Nothing that writes is ever cached.
+
+Verified with the server stopped: 4 projects returned, stamped, banner visible,
+and an endpoint never requested online still fails instead of inventing a copy.
+
+**Camera.** New "Cámara" type in the create "+": photo or video, uploaded to the
+platform. On a phone `capture` opens the system camera — it records video and
+needs no separate permission; on a desktop, where the attribute is ignored, the
+photo path uses a live `getUserMedia` preview (`src/components/ui/CapturaCamara.tsx`).
+The choice asks the browser what it can do, not how wide the screen is. Server
+side needed nothing: video MIME types and `kind: 'video'` windows already existed.
+
+NOT VERIFIED, and stated as such: the live camera preview (permission denied in
+the automation browser) and "Add to Home Screen" itself, which needs real Safari
+over real HTTPS.
+
+### Follow-up, same session — making the install findable (Programador 3)
+
+`src/avisoInstalar.ts`. On iOS the browser never offers to install a web app:
+there is no `beforeinstallprompt`, and Share → Add to Home Screen is buried in a
+sheet. An app nobody can find how to install is the same as one that cannot be.
+So: a one-time card, on iOS Safari only, never when already running standalone,
+silent for 30 days once dismissed.
+
+Also `CapturaCamara.tsx`: `window.isSecureContext` is now checked first. Without
+https, `navigator.mediaDevices` does not exist at all, and the previous message
+("this browser does not allow the camera") blamed the browser for a missing
+padlock. It now says which one it is.
+
+Still unverified by me, and only verifiable on Eugenio's own devices: the install
+card on a real iPhone, and the live camera preview (permission is denied in the
+automation browser).
+
+**Correction, found by looking at it on a 375px screen:** both overlays were
+anchored to `bottom: 0` and were sitting *behind* the platform's fixed mobile
+navigation bar (`z-index: 9999`). The offline banner was invisible on the exact
+device it exists for, and the install card had its only button covered. Fixed in
+`src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
+instead of hard-coding today's 44px — that bar is mobile-only and belongs to
+another file, so a copied number would rot in silence.
+
+### Tested for real, and three defects it found (Programador 3)
+
+Ran the platform in production mode (`NODE_ENV=production`, `dist/`) on 3002 and
+tried it with the server switched off. That test is the whole reason to trust any
+of the above, and it broke three ways:
+
+1. **Every cache write was fire-and-forget.** `caches.open(...).then(...)` with no
+   `event.waitUntil` lets the browser kill the worker the instant the response
+   reaches the page. The result looked random: `/api/data/*` was saved, the feed
+   (`/api/publicaciones`, `/api/proyectos`) was not, and offline the home screen
+   said **"0 publicaciones"**. All four writes are now inside `waitUntil`.
+
+2. **The first visit cached nothing of the feed.** A service worker does not
+   control the page that installs it, so every request the app fires on that
+   first load goes straight past it. The platform only worked on a plane from the
+   *second* visit — and the first visit is exactly when somebody adds it to their
+   home screen and then tries it. `activate` now warms three endpoints.
+
+3. **`huecoInferior()` swept every element in the DOM** calling `getComputedStyle`
+   and `getBoundingClientRect` on each, wired to `resize`, which fires dozens of
+   times while a phone rotates. Replaced with one `elementsFromPoint` at the
+   bottom edge, plus a 150 ms debounce.
+
+**Result with the server stopped:** the app opens, shows 84 publicaciones and the
+real feed, and the banner reads "estás viendo una copia guardada hace menos de un
+minuto" sitting at `calc(44px + env(safe-area-inset-bottom))` — clear of the
+navigation bar.
+
+**A note on where this was verified.** The in-app automation browser fails *every*
+request a service worker handles — a fifteen-line worker that does nothing but
+`fetch(event.request)` fails there too. Everything above was therefore checked in
+real Chrome. The iPhone itself (the install card, "Add to Home Screen", and the
+live camera preview) is still only verifiable by Eugenio on his own device.

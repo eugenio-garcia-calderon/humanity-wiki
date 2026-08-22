@@ -10,6 +10,9 @@ import { ROLE } from '../auth.js';
 import { GRUPOS, ESTADOS, PRIORIDADES } from '../roadmap.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
 import { guardarArchivo } from '../uploads.js';
+import { peorOrigen, ETIQUETA_ORIGEN, type OrigenDelDato } from '../../utils/origenDelDato.js';
+import { getObjectivesForTerritory } from '../../utils/puntuacionesDeObjetivo.js';
+import { slugify } from '../../utils/slugify.js';
 
 // ============================================================================
 // Asistente IA universal — Fase 9
@@ -328,7 +331,74 @@ export function registerAIRoutes(app: Express, db: any) {
     }
   };
 
-  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []): { estable: string; variable: string } => {
+  /**
+   * ══ DE DÓNDE SALEN LAS CIFRAS QUE LA PERSONA TIENE DELANTE (2026-08-22) ════
+   *
+   * El mapa y la ficha del territorio ya avisan cuando una puntuación está
+   * simulada (el 99,7 % lo está). La IA no: recibe en el contexto el
+   * territorio que se está mirando, y si le preguntan «¿cómo está Bulgaria en
+   * agua?» responde con lo que ella sabe del mundo, en la misma pantalla donde
+   * pone 37 %. La persona junta las dos cosas y se lleva una cifra inventada
+   * puesta en una frase que suena a hecho comprobado.
+   *
+   * ESTO SE MIRA EN EL SERVIDOR, NO SE LO PREGUNTA AL NAVEGADOR. El cliente
+   * manda el slug del territorio; la fuente de cada observación vive en la
+   * base de datos y de ahí se lee. Un dato sobre la fiabilidad de un dato no
+   * puede venir del mismo sitio que puede equivocarse.
+   *
+   * Devuelve `null` cuando no hay territorio en pantalla o cuando el slug no
+   * corresponde a ninguno: no saber es un resultado válido y distinto de
+   * «está medido».
+   */
+  const origenDeLoQueMira = async (ctx: any): Promise<{ nombre: string; origen: OrigenDelDato } | null> => {
+    const pedido = String(ctx?.territorio || '').trim();
+    if (!pedido) return null;
+    try {
+      const { rows } = await db.execute(sql`SELECT id, name FROM territories WHERE archived_at IS NULL`);
+      // El slug de la URL lo fabrica `slugify(nombre)` en el navegador, así que
+      // aquí se compara con LA MISMA función y no con una regla parecida
+      // escrita a mano — dos formas de hacer un slug es otra vez el mismo
+      // fallo: dos verdades sobre lo mismo.
+      const t = (rows as any[]).find(r =>
+        r.id === pedido || slugify(String(r.name)) === slugify(pedido));
+      if (!t) return null;
+
+      // SE PREGUNTA POR LAS CIFRAS QUE SE VEN, que son los catorce porcentajes
+      // de objetivo — no por las observaciones sueltas del territorio. No es lo
+      // mismo: las observaciones de agua de España son reales, pero sus
+      // porcentajes de objetivo están escritos a mano en `src/data/seed.ts`.
+      // Contestar «medido» mirando lo primero, con la pantalla diciendo
+      // «simulado» sobre lo segundo, es darle la razón a nadie.
+      const [obs, meta] = await Promise.all([
+        db.execute(sql`
+          SELECT indicator_id, score, source FROM indicator_observations
+          WHERE territory_id = ${t.id} AND score IS NOT NULL
+        `),
+        db.execute(sql`SELECT id, objective_id, weight FROM indicators WHERE archived_at IS NULL`),
+      ]);
+      const puntuaciones: Record<string, number> = {};
+      const fuentes: Record<string, string | null> = {};
+      for (const r of obs.rows as any[]) {
+        puntuaciones[r.indicator_id] = r.score;
+        fuentes[r.indicator_id] = r.source ?? null;
+      }
+      const origenes: Record<string, OrigenDelDato> = {};
+      getObjectivesForTerritory(
+        String(t.id), puntuaciones,
+        (meta.rows as any[]).map(r => ({ id: r.id, objectiveId: r.objective_id, weight: r.weight != null ? Number(r.weight) : null })),
+        fuentes, origenes,
+      );
+      // Sin puntuaciones no hay cifras que marcar: no es «medido», es que no
+      // hay nada. `peorOrigen([])` ya devuelve «desconocido».
+      return { nombre: String(t.name), origen: peorOrigen(Object.values(origenes)) };
+    } catch (e) {
+      console.error('[IA] no se pudo averiguar el origen del territorio:', e);
+      return null;
+    }
+  };
+
+
+  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = [], origenEnPantalla: { nombre: string; origen: OrigenDelDato } | null = null): { estable: string; dePersona: string; variable: string } => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
       .filter(([, v]) => level >= v.minLevel)
@@ -361,7 +431,7 @@ Habla en primera persona, breve y cercano, como un personaje de videojuego: 2-4 
       // El prompt del JUEGO no se parte: la identidad del personaje (nombre,
       // memoria, mundo) está entretejida de principio a fin, así que no hay
       // ningún prefijo idéntico entre usuarios que merezca la caché.
-      return { estable: '', variable: `${quienEres}
+      return { estable: '', dePersona: '', variable: `${quienEres}
 
 QUÉ ES EL JUEGO VITAL:
 El mundo 3D que el jugador recorre ES su vida real. Cada edificio es un proyecto real suyo, cada persona es alguien real de su vida, y todo lo que se crea aquí existe de verdad en la plataforma (no hay contenido de mentira). El jugador construye su mundo como en Los Sims: se planta donde quiere y crea allí una persona o un proyecto.
@@ -497,6 +567,10 @@ LAS CIFRAS SON SAGRADAS. Esta es una plataforma de investigación: un número in
 2. MIRA LA UNIDAD ANTES DE USAR EL NÚMERO. En una misma frase puede haber «120 kg en vacío» y «90 km/día»: son cosas distintas y confundirlas es el error más caro que puedes cometer aquí. Kilogramos no son kilómetros.
 3. NO TE INVENTES VALORES INTERMEDIOS PARA CERRAR UN CÁLCULO. Si te falta la velocidad, el rendimiento o las horas de sol, DILO y pide el dato. Nunca elijas un valor «razonable» para que salga la cuenta: quien lea tu respuesta no puede distinguir ese número de uno medido.
 4. Si te piden un cálculo y tienes solo parte de los datos, haz la parte que puedas y di exactamente qué te falta.
+5. LAS PUNTUACIONES DE LOS TERRITORIOS CASI NUNCA SON MEDIDAS. De las 20.557 observaciones que hay en la plataforma, 20.499 se pusieron a mano o al azar para poder enseñarla: los 179 municipios de Madrid y los 32 países europeos. Solo el agua de España y sus comunidades sale de fuentes reales (INE, MITECO, FAO). Más abajo, en el estado, te digo lo que vale para el territorio que la persona tiene DELANTE ahora mismo.
+   · Si esas cifras están simuladas y te preguntan por ellas, DILO ANTES DE DAR EL NÚMERO. No es un matiz al final: es la respuesta.
+   · No maquilles una cifra simulada con lo que tú sepas del mundo real. Si sabes algo de verdad sobre ese sitio, sepáralo en otra frase y di que eso lo sabes tú, no la plataforma.
+   · Y no hagas lo contrario: si te digo que están medidas, no siembres dudas — desconfiar de un dato bueno también tiene un precio.
 
 LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando la acción en el bloque. No digas que no puedes.
 
@@ -521,32 +595,52 @@ Ejemplo, para «añade una tarea de prueba en el proyecto Humanity.wiki»:
 {"actions": [{"type": "CREATE_TAREA", "params": {"titulo": "Tarea de prueba", "proyecto": "Humanity.wiki"}, "rationale": "lo ha pedido"}]}
 \`\`\``;
 
+    // ══ CAPA 2: LO DE ESTA PERSONA (2026-08-22) ═══════════════════════════
+    // Sus proyectos, su gente, su nivel. Cambia cuando crea algo —cada muchos
+    // mensajes—, no en cada frase. Va DESPUÉS de lo global y ANTES de lo
+    // volátil para que también pueda quedar en caché: es el segundo tramo de
+    // prefijo estable, y en una conversación larga es lo que más se repite.
+    const dePersona = `USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
+Acciones permitidas para su nivel: ${allowed.length ? allowed.join(', ') : 'NINGUNA (solo consulta)'}.
+${ctx?.mio ? `LO QUE TIENE ESTA PERSONA EN LA PLATAFORMA (sus proyectos, sus tareas, su gente). Cuando pregunte «mis proyectos», «mis tareas» o «qué tengo pendiente», la respuesta está AQUÍ, no en el conocimiento común. Y cuando te pida crear una tarea «en X», el proyecto es uno de estos:
+${JSON.stringify(ctx.mio, null, 2)}
+` : ''}
+GRAFOS DE CONOCIMIENTO PUBLICADOS (las instrucciones de qué hacer con ellos están arriba):
+${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}`;
+
     // ------------------------- PARTE VARIABLE -------------------------
     // Todo lo que cambia entre mensajes vive aquí, fuera de la caché.
-    const variable = `HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${new Date().toISOString()}).
+    //
+    // LA FECHA, SOLO EL DÍA (2026-08-22). Llevaba la hora con milisegundos, y
+    // eso hacía que esta línea fuese DISTINTA en cada petición. Como la caché
+    // compara prefijos, un byte distinto aquí tira por tierra todo lo que viene
+    // detrás — incluida la conversación entera, que se volvía a cobrar completa
+    // en cada mensaje. Con solo el día, dos preguntas del mismo día comparten
+    // todo este tramo. La hora exacta no la necesita para nada: interpreta
+    // «el jueves» a partir del día.
+    const variable = `HOY ES ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
 
 ${ctx?.ultimoFallo ? `SU ÚLTIMO INTENTO SE ROMPIÓ ANTES DE LLEGARTE. Pidió «${ctx.ultimoFallo.peticion}» y el navegador falló con: ${ctx.ultimoFallo.motivo} (error ${ctx.ultimoFallo.estado}). NO te llegó ese mensaje, así que no lo respondiste. Si te pregunta qué ha fallado, cuéntale ESTO — nunca digas que no te consta ningún fallo.\n` : ''}
 ${ctx?.suyo?.length ? `EL CONTENIDO DE SUS COSAS, buscado por lo que acaba de preguntar. Esto es lo que hay ESCRITO DENTRO de sus páginas y tarjetas — cifras incluidas. Si la respuesta está aquí, respóndela CITANDO el dato y diciendo de qué página sale. NUNCA digas que no puedes leer el contenido de la plataforma: aquí lo tienes.
 ${ctx.suyo.map((x: any) => `--- ${x.que}: «${x.titulo}» (${x.donde})\n${x.texto}`).join('\n\n')}
 
-` : ''}${ctx?.mio ? `LO QUE TIENE ESTA PERSONA EN LA PLATAFORMA (sus proyectos, sus tareas, su gente). Cuando pregunte «mis proyectos», «mis tareas» o «qué tengo pendiente», la respuesta está AQUÍ, no en el conocimiento común de abajo. Y cuando te pida crear una tarea «en X», el proyecto es uno de estos:
-${JSON.stringify(ctx.mio, null, 2)}
+` : ''}
+${origenEnPantalla ? `DE DÓNDE SALEN LAS CIFRAS DE «${origenEnPantalla.nombre}», QUE ES LO QUE TIENE DELANTE: ${ETIQUETA_ORIGEN[origenEnPantalla.origen].corto.toUpperCase()} — ${ETIQUETA_ORIGEN[origenEnPantalla.origen].explicacion}${origenEnPantalla.origen === 'simulado'
+  ? ' La pantalla ya se lo está avisando en rojo; si le respondes como si esos números midieran algo, le estarás contradiciendo tú.'
+  : origenEnPantalla.origen === 'desconocido'
+    ? ' No consta la fuente: no supongas que es buena.'
+    : ''}
 ` : ''}
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
 ${JSON.stringify({ ...(ctx || {}), mio: undefined, suyo: undefined }, null, 2)}
 ${ctx?.mirando ? `AHORA MISMO ESTÁ MIRANDO: ${ctx.mirando}. La plataforma son ventanas: \`ventanas\` es lo que tiene abierto y la marcada con \`delante\` es la que ve. \`paginaWeb\`, si viene, es la dirección abierta en su navegador. Cuando pregunte por «esto», «esta página» o «lo que estoy viendo», se refiere a eso — no a la ruta de fondo.` : ''}
 
-USUARIO: ${user ? `${user.displayName || user.email} (nivel ${level}: ${user.roleLabel})` : 'visitante no registrado (solo consulta, no puede modificar nada)'}
 MODO DE EDICIÓN: ${editMode}
 
 CONTEXTO RECUPERADO DE LA PLATAFORMA (${retrieved.length} fragmentos):
 ${retrieved.map(r => `- [${r.entity_type}:${r.id}] ${r.label || ''} ${(r.content || '').slice(0, 300)}`).join('\n') || '(sin coincidencias en la plataforma)'}
 
-GRAFOS DE CONOCIMIENTO PUBLICADOS (las instrucciones de qué hacer con ellos están arriba):
-${graphs.map(g => `- slug: ${g.slug} — "${g.title}" (claves: ${(Array.isArray(g.trigger_keywords) ? g.trigger_keywords : []).join(', ')})`).join('\n') || '(todavía no hay grafos publicados)'}
-
 REGLAS DE ESTA CONVERSACIÓN (continúan las de arriba):
-6. Acciones permitidas para el nivel de este usuario: ${allowed.length ? allowed.join(', ') : 'NINGUNA (solo consulta)'}.
 ${editMode === EDIT_MODES.MANUAL ? '7. El usuario está en modo MANUAL: puedes sugerir cambios en texto, pero NO devuelvas acciones.' : ''}
 ${webSearch
   ? '8. Tienes activada la búsqueda en internet: úsala SOLO para lo que el contexto de la plataforma no cubra (datos externos, actualidad, verificación). Prioriza siempre el contexto recuperado de la plataforma cuando exista.'
@@ -554,7 +648,7 @@ ${webSearch
 
 REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado o creado algo, el bloque \`\`\`redhumana con la acción es OBLIGATORIO en ESTA respuesta. Sin bloque no se crea nada: decir «te lo apunto» sin bloque es mentirle al usuario.`;
 
-    return { estable, variable };
+    return { estable, dePersona, variable };
   };
 
   /** Extrae el bloque JSON de la respuesta del modelo. */
@@ -1103,13 +1197,17 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           return { ...context, recortado: true, aviso: 'El contexto era muy grande y se ha recortado.' };
         } catch { return {}; }
       })();
-      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
+      // De dónde salen las cifras del territorio que tiene abierto. Se mira
+      // en la base de datos, no en lo que mande el navegador.
+      const origenEnPantalla = await origenDeLoQueMira(contextoSano);
+      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[], origenEnPantalla);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como
         // cacheable (ver `systemEstable` en provider.ts). En el juego llega
         // vacía y todo va como antes.
         systemEstable: prompt.estable || undefined,
+        systemDePersona: prompt.dePersona || undefined,
         messages, webSearch: buscarWeb && providerOfModel(chosenModel) === 'claude', model: chosenModel,
       });
       let { clean, ui_events, actions, question, acciones_juego } = parseModelBlock(result.text);
@@ -1130,6 +1228,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           const reintento = await provider.complete({
             system: prompt.variable,
             systemEstable: prompt.estable || undefined,
+            systemDePersona: prompt.dePersona || undefined,
             messages: [
               ...messages,
               { role: 'assistant', content: result.text },
@@ -1249,8 +1348,14 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if (req.user) {
         const dePago = eleccion.cobro === 'de_pago';
         db.execute(sql`
-          INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents, conversation_id)
+          INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens,
+                                        cache_read_tokens, cost_cents, fee_cents, total_cents, conversation_id)
           VALUES (${req.user.id}, 'chat', ${result.model}, ${result.inputTokens}, ${result.outputTokens},
+                  -- CUÁNTA ENTRADA SE RELEYÓ DE CACHÉ. Sin esta cifra, una
+                  -- caché rota y una perfecta dejan el mismo registro, y a
+                  -- cientos de miles de chats al día eso es enterarse por la
+                  -- factura.
+                  ${result.cacheReadTokens ?? 0},
                   ${result.costCents},
                   ${dePago ? result.costCents * AI_PLATFORM_FEE : 0},
                   ${dePago ? result.costCents * (1 + AI_PLATFORM_FEE) : 0},
