@@ -17,6 +17,12 @@
       "ruta": "server.ts",
       "motivo": "la ficha de territorio hace 53 consultas: agruparlas",
       "desde": "2026-08-22T14:31:54.297Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/App.tsx",
+      "motivo": "rutas libro blanco y tareas de tokenomics",
+      "desde": "2026-08-22T14:39:55.869Z"
     }
   ]
 }
