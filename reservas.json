@@ -56,12 +56,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/components/knowledge/ProductoPublico.tsx",
-      "motivo": "fase 2 economia: resenas de productos",
-      "desde": "2026-08-22T20:03:19.214Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/puntos.ts",
       "motivo": "fase 2 economia: resenas de productos",
       "desde": "2026-08-22T20:03:22.994Z"
