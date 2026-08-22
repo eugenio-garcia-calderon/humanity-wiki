@@ -89,12 +89,6 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "la lista de modulos: descolgar server.ts de la cola de los siete",
       "desde": "2026-08-22T15:57:05.073Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "server.ts",
-      "motivo": "el webhook regala membresia en cualquier compra",
-      "desde": "2026-08-22T15:58:38.360Z"
     }
   ]
 }
