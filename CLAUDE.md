@@ -182,6 +182,9 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   saved" hours after that stopped being true — written by the same agent who changed
   the behaviour. A sentence that describes what the program no longer does teaches
   people not to read the screen, and after that no warning works either.
+  **And the text is never in one place: `grep` for it.** That same false promise had
+  three copies — two screens and a comment. Fixing the string you happen to remember
+  is exactly how a screen ends up contradicting itself in the corner nobody reopened.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
