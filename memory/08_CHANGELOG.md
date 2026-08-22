@@ -5376,3 +5376,24 @@ descuento 100, uses 1/2, buyer 100→91, seller 100→109; deactivate →
 comprobar says "ya no está activo". `tsc` clean. Comercio's panel and the
 cesta field were not opened in a browser (subdomain + seller session); their
 data contracts are what was tested.
+
+---
+
+## 2026-08-22 — The session now travels to the shops (Programador 7)
+
+Found while preparing Eugenio's first real test of points in the cart: the
+session cookie was host-only (`humanity.wiki`), and the cart only lives on the
+shop subdomains (`nombre.humanity.wiki`). Anyone logged in was an anonymous
+visitor there — no «pagar con puntos», no «compra verificada», no buyer id on
+orders. With `COOKIE_DOMAIN=.humanity.wiki` in the environment (set in
+production), `setSessionCookie` emits the cookie for the whole domain and
+expires the legacy host-only one; `clearSessionCookie` expires both variants,
+so "cerrar sesión" does not leave a second session stuck on the main domain.
+Without the variable nothing changes (local, other deployments).
+
+Verified on 3007 over HTTP with the variable set: logout emits two Set-Cookie
+headers (plain + Domain), register emits the Domain cookie plus the expired
+plain one; test user removed. `tsc` clean. Also today, at Eugenio's request:
+`PUNTOS_DESCUENTO=on` in production (app recreated, health OK), +500 points to
+his admin account via an `ajuste_admin` entry, and two PRUEBA products of the
+`claude-dos` shop opted into points so there is something to buy with them.
