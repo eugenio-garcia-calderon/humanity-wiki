@@ -191,24 +191,6 @@
       "ruta": "drizzle/0092_llave_de_agenda.sql",
       "motivo": "importar contactos desde el iPhone con un atajo (0091 lo tiene prog3)",
       "desde": "2026-08-22T22:13:42.049Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: envio pagado con puntos",
-      "desde": "2026-08-22T22:16:25.519Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "envio con puntos (paso de prog2)",
-      "desde": "2026-08-22T22:18:16.402Z"
-    },
-    {
-      "agente": "prog6",
-      "ruta": "docker-compose.prod.yml",
-      "motivo": "montar el volumen de copias en app, solo lectura",
-      "desde": "2026-08-22T22:18:26.724Z"
     }
   ]
 }
