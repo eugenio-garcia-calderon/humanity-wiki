@@ -82,6 +82,7 @@ esté hecha.
 | `pkill -f node` o matar procesos por nombre | tumbas los servidores de los otros dos |
 | Tocar ficheros del área de otro sin reservarlos | dos soluciones al mismo problema, y una se tira |
 | Fusionar a `main` sin avisar | `main` despliega, y el despliegue hace `git reset --hard origin/main` en el servidor |
+| `git add -A` o `git add .` sin mirar antes qué entra | Así se versionó `.agente` el 2026-08-22: un fichero de identidad local acabó en el repositorio y **git lo reponía en la copia de todos** en cada checkout. Dos agentes decían llamarse igual y nadie lo había escrito. `git status` primero, y añadir por nombre |
 
 ## 5 · Una PR por programador, y el despliegue por turnos
 
