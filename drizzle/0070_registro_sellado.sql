@@ -99,6 +99,20 @@ CREATE TRIGGER registro_sellado_sin_delete
   BEFORE DELETE ON registro_sellado
   FOR EACH ROW EXECUTE FUNCTION registro_sellado_solo_crece();
 
+-- Y TRUNCATE, que es el agujero que se cuela en casi todas las tablas «de solo
+-- añadir». Un disparador `FOR EACH ROW` no se dispara nunca con TRUNCATE: no
+-- hay filas que recorrer, se tira la tabla entera de golpe. Sin esta línea,
+-- `TRUNCATE registro_sellado` borraba el registro completo sin que saltara
+-- nada. Hace falta uno de sentencia, y además quitarle el permiso a todo el
+-- mundo (encontrado el 2026-08-22 revisando el libro de puntos de prog7, que
+-- tenía el mismo hueco; el mío también).
+DROP TRIGGER IF EXISTS registro_sellado_sin_truncate ON registro_sellado;
+CREATE TRIGGER registro_sellado_sin_truncate
+  BEFORE TRUNCATE ON registro_sellado
+  FOR EACH STATEMENT EXECUTE FUNCTION registro_sellado_solo_crece();
+
+REVOKE TRUNCATE ON registro_sellado FROM PUBLIC;
+
 -- ============================================================================
 -- LOS ANCLAJES: el resumen de cada día, y dónde se publicó (fase 2)
 -- ============================================================================
