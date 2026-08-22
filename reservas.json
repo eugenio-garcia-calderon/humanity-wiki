@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog7",
-      "ruta": "drizzle/0084_vistas_validas.sql",
-      "motivo": "vistas validas: una por persona y ventana y dia",
-      "desde": "2026-08-22T18:21:23.530Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "src/App.tsx",
       "motivo": "Veracidad fase 4: rutas /debates",
