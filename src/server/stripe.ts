@@ -486,6 +486,31 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         `);
         const yaContada = cerrada.rows.length === 0;
 
+        // ── EL PEDIDO (fase 6) ────────────────────────────────────────
+        // Sólo si esta compra es nueva. Con `yaContada` se evita que un aviso
+        // repetido de Stripe cree dos pedidos del mismo tarro, que es peor que
+        // descontar dos veces el stock: son dos cajas saliendo por la puerta.
+        if (!yaContada) {
+          const envioCent = Number(session.metadata!.envio_centimos || 0) || 0;
+          const d = session.customer_details;
+          const envio = (session as any).shipping_details || (session as any).shipping || null;
+          await db.execute(sql`
+            INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades,
+                                 importe_centimos, envio_centimos, moneda,
+                                 comprador_user_id, comprador_email, comprador_nombre,
+                                 direccion_envio, vendedor_user_id, estado,
+                                 stripe_session_id, transaction_id)
+            VALUES (${newId2('PED')}, ${codigoDePedido()}, ${productId}, ${product.name}, ${unidades},
+                    ${session.amount_total || product.price_cents}, ${envioCent},
+                    ${(session.currency || 'eur').toUpperCase()},
+                    NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
+                    ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
+                    ${product.created_by || null}, 'pagado',
+                    ${session.id}, ${txId})
+            ON CONFLICT (stripe_session_id) DO NOTHING
+          `);
+        }
+
         if (!yaContada) {
           // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva, y
           // `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
@@ -562,4 +587,22 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
     default:
       break;
   }
+}
+
+/**
+ * El código que se le da a quien compra: `MIEL-7K3Q2`.
+ *
+ * Sin `I`, `O`, `0` ni `1`. Un código de pedido se lee en voz alta por
+ * teléfono y se copia a mano de un correo, y esas cuatro son las que se
+ * confunden entre sí. Perder un pedido por un cero leído como una o es un
+ * fallo evitable con una línea.
+ */
+function codigoDePedido(): string {
+  const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) out += '-';
+    out += LETRAS[Math.floor(Math.random() * LETRAS.length)];
+  }
+  return out;
 }

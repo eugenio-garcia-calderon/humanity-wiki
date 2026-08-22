@@ -73,6 +73,7 @@ const SolutionProfile = lazy(() => import('./pages/SolutionProfile'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
+const MiPedido = lazy(() => import('./pages/MiPedido'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
 const Tareas = lazy(() => import('./pages/Tareas'));
@@ -157,6 +158,10 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
       <Suspense fallback={<Esperando />}>
         <Routes>
           <Route path="/" element={<PortadaEspacio handle={handle} />} />
+          {/* Antes que `:slug`, porque si no una tienda con una página
+              llamada «pedido» se comería esta pantalla. Lo fijo gana a lo
+              variable, pero sólo si existe: mejor declararlo. */}
+          <Route path="pedido" element={<MiPedido />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>

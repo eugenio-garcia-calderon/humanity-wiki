@@ -521,6 +521,113 @@ export function registerPublicarRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * ¿DÓNDE ESTÁ LO MÍO? — `GET /api/publicar/pedido/:codigo`
+   *
+   * Fase 6. Quien compró sin cuenta no tiene un «mis pedidos» donde mirar, así
+   * que el código es su llave. Se le da al pagar y le llega en el recibo.
+   *
+   * ── POR QUÉ TAMBIÉN PIDE EL CORREO ────────────────────────────────────────
+   * El código sólo tiene 8 caracteres. Sin una segunda cosa que sepa quien
+   * compró, alguien podría probar códigos hasta dar con uno y leer el nombre y
+   * la dirección de casa de un desconocido. Con el correo, acertar los dos a
+   * la vez deja de ser cuestión de insistir.
+   *
+   * Y la respuesta es la misma —404— tanto si el código no existe como si el
+   * correo no cuadra. Decir «ese código existe pero el correo no es» ya
+   * confirmaría que el código existe, que es justo lo que no se quiere
+   * confirmar.
+   */
+  app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.query.correo || '').toLowerCase().trim();
+      if (!codigo || !correo) {
+        return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
+      }
+
+      const r = await db.execute(sql`
+        SELECT codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
+               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
+        FROM pedidos
+        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
+      `);
+      const p = r.rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
+
+      res.json({
+        codigo: p.codigo,
+        producto: p.producto_nombre,
+        unidades: Number(p.unidades),
+        importe_centimos: Number(p.importe_centimos),
+        envio_centimos: Number(p.envio_centimos),
+        moneda: p.moneda,
+        estado: p.estado,
+        // `null` y no una cadena vacía: «todavía no hay número de seguimiento»
+        // no es «el número de seguimiento es ''».
+        seguimiento: p.seguimiento || null,
+        // La ciudad, no la calle. Basta para que quien mira reconozca que es
+        // su pedido, y una dirección completa en una página que se abre con un
+        // código de ocho letras es más de lo que hace falta enseñar.
+        ciudad: p.direccion_envio?.city || null,
+        hecho_el: p.created_at,
+        cambiado_el: p.updated_at,
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * ¿QUÉ TENGO QUE ENVIAR? — `GET /api/publicar/mis-ventas`
+   *
+   * La otra mitad de la fase 6. Con sesión, porque aquí sí hay una cuenta: la
+   * de quien vende. Devuelve SUS pedidos y sólo los suyos, y aquí sí va la
+   * dirección entera, que es lo que hay que escribir en la caja.
+   */
+  app.get('/api/publicar/mis-ventas', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
+               moneda, comprador_email, comprador_nombre, direccion_envio,
+               estado, seguimiento, created_at
+        FROM pedidos
+        WHERE vendedor_user_id = ${req.user.id}
+        ORDER BY created_at DESC
+        LIMIT 200
+      `);
+      res.json({ pedidos: r.rows });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * MARCAR UN PEDIDO COMO ENVIADO — `PUT /api/publicar/mis-ventas/:id`
+   *
+   * Sólo quien lo vendió, y sólo hacia adelante en los estados que tienen
+   * sentido. El `WHERE vendedor_user_id` no es un adorno: sin él, cualquiera
+   * con sesión podría marcar como entregado el pedido de otro.
+   */
+  app.put('/api/publicar/mis-ventas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const { estado, seguimiento, nota } = req.body || {};
+      const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
+      if (estado && !VALIDOS.includes(estado)) {
+        return res.status(400).json({ error: 'Ese estado no existe.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE pedidos SET
+          estado = COALESCE(${estado || null}, estado),
+          seguimiento = COALESCE(${seguimiento ?? null}, seguimiento),
+          nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
+          updated_at = now()
+        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        RETURNING codigo, estado, seguimiento
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/resolver/:handle/:slug', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
