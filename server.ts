@@ -14,6 +14,7 @@ import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
+import { registerMedicionRoutes, medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { registerGraphRoutes } from "./src/server/graph.js";
 import { registerSocialRoutes } from "./src/server/social.js";
 import { registerAIRoutes } from "./src/server/ai/assistant.js";
@@ -268,11 +269,24 @@ async function startServer() {
   app.use('/api/ai/chat', express.json({ limit: '20mb' }));
   app.use(express.json());
 
+  // 1.45 MEDICIÓN (2026-08-22). Va ANTES que todo lo demás porque mide el
+  // tiempo que espera quien pide, no el del trozo del medio. Y envuelve `db`
+  // para saber cuánto de ese tiempo se fue esperando a la base de datos y en
+  // cuántas consultas — que es lo que convierte «tarda 400 ms» en una
+  // decisión. Ver `src/server/medicion.ts`.
+  medirBaseDeDatos(db);
+  medirPeticiones(app);
+
   // 1.5 AUTENTICACIÓN (Fase 2). Se monta justo después de express.json() y
   // antes que el resto de la API, porque instala el middleware que resuelve
   // `req.user` a partir de la cookie de sesión — todos los endpoints
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
+
+  // Las rutas que ENSEÑAN la medición van aquí, después de la autenticación:
+  // comprueban que quien mira es administrador, y `req.user` lo instala la
+  // línea de arriba. El cronómetro en sí se montó antes (1.45).
+  registerMedicionRoutes(app, db);
 
   // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
   // Van después de la autenticación porque dependen de `req.user`
