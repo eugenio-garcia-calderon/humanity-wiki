@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
+import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -45,7 +46,11 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
-  { tipo: 'tabla', label: 'Tabla', icon: Table2 },
+  // La primera es la buena: columnas con tipo, fórmulas y relaciones. La de
+  // texto se queda debajo y dice lo que es, para quien solo quiera una rejilla
+  // de texto en un documento.
+  { tipo: 'basedatos', label: 'Base de datos', icon: Boxes },
+  { tipo: 'tabla', label: 'Tabla de texto', icon: Table2 },
   { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
   { tipo: 'producto', label: 'Producto', icon: Store },
 ];
@@ -321,7 +326,7 @@ export default function Documento() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
@@ -979,6 +984,47 @@ export default function Documento() {
             <span className="text-sm font-bold text-slate-700 truncate">{b.pie || 'Archivo'}</span>
           </a>
         );
+      }
+
+      // ── UNA BASE DE DATOS DENTRO DE LA PÁGINA (fase 10) ──────────────────
+      // El bloque `tabla` de siempre es texto plano: nada dentro sabe que 620
+      // es un número. Éste es el que lo sustituye — es la MISMA rejilla de la
+      // herramienta «Tablas», no una copia, así que lo que se edite aquí es la
+      // tabla de verdad y lo que se edite allí se ve aquí.
+      //
+      // LAS TABLAS DE TEXTO ANTIGUAS SIGUEN FUNCIONANDO. No se migran solas:
+      // convertir texto a columnas tipadas exige adivinar el tipo de cada una,
+      // y adivinar mal destruiría datos de alguien. Se ofrece convertir, y
+      // decide quien escribió la tabla.
+      if (b.tipo === 'basedatos') {
+        const tablaId = (b as any).tabla_id || bloquesRef.current?.[b.id]?.tabla_id;
+        if (!tablaId) {
+          return (
+            <div className="border border-dashed border-slate-200 rounded-xl p-4 text-center">
+              <p className="text-xs font-bold text-slate-500">Este bloque todavía no apunta a ninguna tabla.</p>
+              {editable && (
+                <button
+                  onClick={async () => {
+                    const r = await fetch('/api/bd/tablas', {
+                      method: 'POST', credentials: 'include',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ titulo: titulo || 'Tabla de la página' }),
+                    });
+                    const j = await r.json();
+                    if (j.id) {
+                      (b as any).tabla_id = j.id;
+                      setBloques(bs => [...bs]);
+                      programarGuardado();
+                    }
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 h-11 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
+                  Crear una tabla aquí
+                </button>
+              )}
+            </div>
+          );
+        }
+        return <Rejilla tablaId={tablaId} editable={editable} alto={520} />;
       }
 
       if (b.tipo === 'tabla') {

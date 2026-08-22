@@ -53,8 +53,24 @@ function aNumero(bruto: any): number | null {
   if (typeof bruto === 'number') return Number.isFinite(bruto) ? bruto : null;
   const t = String(bruto).trim().replace(/\s/g, '');
   if (!t) return null;
-  // «1.500,50» → «1500.50».  «1500.50» se deja como está.
-  const normal = /,\d{1,8}$/.test(t) ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+
+  // EL PUNTO DE MILLAR ESPAÑOL. Esto costó un fallo grave y silencioso: sin la
+  // segunda regla, «120.000» se convertía en 120 —JavaScript lee el punto como
+  // decimal— y se guardaba un importe mil veces menor sin avisar de nada. Un
+  // dato incorrecto con toda la pinta de correcto, que es lo peor que puede
+  // pasar aquí.
+  let normal: string;
+  if (/,/.test(t)) {
+    // Hay coma: la coma es el decimal y los puntos son millares. «1.500,50».
+    normal = t.replace(/\./g, '').replace(',', '.');
+  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(t)) {
+    // Solo puntos, y en grupos de tres exactos: son millares. «120.000»,
+    // «1.234.567». Es la convención de aquí y la que escribe la gente.
+    normal = t.replace(/\./g, '');
+  } else {
+    // Un punto suelto que no forma grupos de tres es decimal: «120.5», «0.15».
+    normal = t;
+  }
   const n = Number(normal);
   return Number.isFinite(n) ? n : null;
 }

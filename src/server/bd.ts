@@ -41,6 +41,7 @@ import { CLASE_FICHERO, ficherosDe, guardarFicheros, comprobarFicheros, celdaDeF
 import { calcularTabla, esCalculada, detectaCiclo, reglasAFormula } from './bd/calculo';
 import { compilar } from './bd/formulas';
 import { OPERACIONES } from './bd/agregados';
+import { filtrar, ordenarFilas, agrupar, OPERADORES, type Filtro, type Orden } from './bd/vistas';
 
 const nid = (p: string) => `${p}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -244,17 +245,43 @@ export function registerBdRoutes(app: Express, db: any) {
       });
       for (const f of preparadas) Object.assign(f.celdas, porFila[f.id] || {});
 
+      // ORDENAR Y FILTRAR VA DESPUÉS DE CALCULAR. Tiene que ser así: la mitad
+      // de las columnas —fórmulas y agregados— no existen en la base de datos,
+      // así que «ordena por dinero comprometido» es imposible en SQL. Ver la
+      // nota de coste en `bd/vistas.ts`.
+      let visibles = preparadas;
+      let vista: any = null;
+      if (req.query.vista) {
+        const v = await db.execute(sql`
+          SELECT * FROM bd_vistas WHERE id = ${String(req.query.vista)} AND tabla_id = ${req.params.id} AND archived_at IS NULL
+        `);
+        vista = v.rows[0] || null;
+      }
+      const filtros: Filtro[] = vista?.filtros || (req.query.filtros ? JSON.parse(String(req.query.filtros)) : []);
+      const ordenPor: Orden[] = vista?.orden_por || (req.query.orden ? JSON.parse(String(req.query.orden)) : []);
+      visibles = ordenarFilas(filtrar(visibles, filtros), ordenPor);
+
+      const agrupadoPor = vista?.agrupar_por || (req.query.agrupar ? String(req.query.agrupar) : null);
+      const grupos = agrupadoPor ? agrupar(visibles, agrupadoPor) : null;
+
       res.json({
         tabla: {
           id: permiso.tabla.id, titulo: permiso.tabla.titulo, icono: permiso.tabla.icono,
           descripcion: permiso.tabla.descripcion, proyecto_id: permiso.tabla.proyecto_id,
         },
         columnas,
+        ...(vista ? { vista: { id: vista.id, nombre: vista.nombre, ocultas: vista.ocultas } } : {}),
+        // Se dice CUÁNTAS había antes de filtrar. Sin ese número, una vista con
+        // un filtro puesto y otra sin él se ven igual de completas y nadie sabe
+        // que está mirando un trozo.
+        total: preparadas.length,
+        mostradas: visibles.length,
+        ...(grupos ? { grupos } : {}),
         // Si hay un cálculo circular se dice en la respuesta, además de en cada
         // celda afectada: la pantalla tiene que poder avisar arriba, no solo
         // enseñar celdas rojas sin explicación.
         ...(ciclo ? { ciclo } : {}),
-        filas: preparadas,
+        filas: visibles,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -398,6 +425,55 @@ export function registerBdRoutes(app: Express, db: any) {
 
       await db.execute(sql`UPDATE bd_columnas SET archived_at = now() WHERE id = ${req.params.id}`);
       res.json({ ok: true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // ── LAS VISTAS ────────────────────────────────────────────────────────────
+
+  app.get('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
+    try {
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      // Las de la tabla (`usuario_id` nulo) y las MÍAS. Las de otros no: una
+      // vista personal es de quien la hizo.
+      const r = await db.execute(sql`
+        SELECT id, nombre, forma, orden_por, filtros, ocultas, agrupar_por, usuario_id, orden
+        FROM bd_vistas
+        WHERE tabla_id = ${req.params.id} AND archived_at IS NULL
+          AND (usuario_id IS NULL OR usuario_id = ${req.user?.id || null})
+        ORDER BY orden, created_at
+      `);
+      res.json(r.rows);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  app.post('/api/bd/tablas/:id/vistas', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, req.params.id, false);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const d = req.body || {};
+      if (!d.nombre || !String(d.nombre).trim()) return res.status(400).json({ error: 'La vista necesita un nombre.' });
+
+      // Los filtros se validan al guardarlos. Un operador inventado guardado
+      // aquí no fallaría al escribir, fallaría al mirar la tabla — y entonces
+      // nadie sabría de dónde vino.
+      const filtros = Array.isArray(d.filtros) ? d.filtros : [];
+      for (const f of filtros) {
+        if (!OPERADORES.includes(f?.operador)) {
+          return res.status(400).json({ error: `Filtro no válido: «${f?.operador}». Los que hay: ${OPERADORES.join(', ')}.` });
+        }
+      }
+
+      const id = nid('BDV');
+      await db.execute(sql`
+        INSERT INTO bd_vistas (id, tabla_id, nombre, usuario_id, forma, orden_por, filtros, ocultas, agrupar_por)
+        VALUES (${id}, ${req.params.id}, ${String(d.nombre).trim().slice(0, 120)},
+                ${d.compartida ? null : req.user!.id}, ${String(d.forma || 'tabla')},
+                ${JSON.stringify(d.orden_por || [])}::jsonb, ${JSON.stringify(filtros)}::jsonb,
+                ${JSON.stringify(d.ocultas || [])}::jsonb, ${d.agrupar_por || null})
+      `);
+      res.json({ id });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
