@@ -4264,3 +4264,62 @@ you find out from the bank statement.
 Verified end to end locally: one anonymous request wrote a row with
 `user_id = null`, `cost_cents = 0,061`, `total_cents = 0`, and the panel's query
 returns it. The test row was deleted afterwards.
+
+## 2026-08-22 — Three things Eugenio hit with the app installed on his iPhone
+
+He installed it, used it, and sent a screenshot. All three are the same kind of
+bug: the app doing something nobody asked for.
+
+### 1 · The bottom bar sat on the home indicator
+
+Installed full-screen there is no Safari bar underneath, so the platform's own
+navigation ended up on the iPhone's home line. `env(safe-area-inset-bottom)` is
+0 in a browser and ~34px installed, so one rule covers both. It goes on as
+`paddingBottom` with `boxSizing: content-box` — added *below* the buttons, so
+the icons do not shrink when you install it — and `--hueco-muelle` (which
+`Layout.tsx` uses to keep page content clear of the bar) became
+`calc(44px + env(safe-area-inset-bottom))`.
+
+`src/anclajeInferior.ts` needed no change: it measures the bar's real height
+rather than copying a number, so the offline banner followed on its own.
+
+### 2 · The camera opened an image editor nobody asked for
+
+Eugenio: «cuando te lleva a cámara que no te salta el editor por defecto, sino
+que sea tal cual como está y que luego te pregunte dónde guardarla».
+
+You took a photo and got luz/contraste/filtros on top of it. The photo was
+already fine; the only thing missing was where it went. New
+`src/components/knowledge/DestinoCaptura.tsx`: the shot as it is, a title, and a
+destination — a canvas of yours, or a standalone publication. **Editing became a
+button you press.** Video takes the same path.
+
+Canvases and not the "proyectos" board: a project is a board of cards (to
+do / doing / done), so dropping a photo there would invent a card nobody asked
+for. A canvas is where image and video windows already live.
+
+### 3 · Creating a publication threw you onto the publications list
+
+`navigate('/mis-publicaciones')` after every save. Creating a document or a
+canvas *should* take you there — the next thing you do is write inside it. A
+publication is finished the moment you create it, and being sent to a list means
+walking back if you wanted to publish two things. It now confirms in place, with
+"Verlo" and "Crear otra".
+
+### A correction to the entry above this one
+
+**The video path shipped in #205 never worked.** It posts `kind: 'video'` to
+`POST /api/ventanas`, which whitelists `['imagen']` only
+(`src/server/documentos.ts:418`): it returned 400 every time. The earlier entry
+claimed "el servidor ya aceptaba vídeo antes de esto" — that was written without
+checking, and it was false.
+
+What is true, and checked in source this time: `POST /api/graphs/:id/windows`
+does accept `video` (`WINDOW_KINDS`, `src/server/knowledge.ts:28`), so a video
+lands in a canvas today. As a standalone publication the selector says exactly
+that instead of a generic failure. Adding `'video'` to the whitelist is one line
+in Programador 1's area and has been passed to them.
+
+**Not verified by me:** phases 2 and 3 need a logged-in session, and I do not
+create accounts or type passwords. Both endpoints were read in source rather
+than exercised. Phase 1 was checked in the browser.
