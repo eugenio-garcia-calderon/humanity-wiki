@@ -990,8 +990,11 @@ export default function Documento() {
                 {filas.map((fila, fi) => (
                   <tr key={fi}>
                     {fila.map((celda, ci) => (
-                      <td key={ci}
-                        className={cn('border border-slate-200 px-2.5 py-1.5',
+                      // `inicial` en vez de pintar el texto como hijo: es lo que
+                      // impide que React reescriba la celda mientras escribes y
+                      // te mande el cursor al principio. Ver `CeldaEditable`.
+                      <CeldaEditable key={ci} inicial={celda}
+                        className={cn('border border-slate-200 px-2.5 py-1.5 align-top',
                           fi === 0 ? 'bg-slate-50 font-bold text-slate-800' : 'text-slate-600')}
                         contentEditable={editable} suppressContentEditableWarning
                         onInput={e => {
@@ -1000,7 +1003,7 @@ export default function Documento() {
                           filasRef.current[b.id] = f;
                           programarGuardado();
                         }}
-                      >{celda}</td>
+                      />
                     ))}
                   </tr>
                 ))}
@@ -1607,6 +1610,37 @@ function BloqueEditable({ inicial, ...props }: { inicial: string } & React.HTMLA
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <div ref={ref} {...props} />;
+}
+
+/**
+ * LA MISMA CURA, PARA UNA CELDA DE TABLA (2026-08-21, Eugenio: «la tabla del
+ * creador de páginas, cuando escribes dentro funciona mal, y escribe al
+ * revés»).
+ *
+ * Es EXACTAMENTE el fallo de arriba, en el único sitio donde se quedó vivo. La
+ * celda era `<td contentEditable ...>{celda}</td>`: React pintaba el texto como
+ * hijo, así que en cada re-render lo reescribía y el cursor se iba al
+ * principio. La letra siguiente entraba delante de la anterior.
+ *
+ * Y aquí re-renders hay de sobra: el autoguardado toca estado en cada tecla, y
+ * «+ fila» y «+ columna» llaman a `setBloques` a propósito.
+ *
+ * MISMA REGLA: mientras se escribe, el dueño del texto es el DOM. El texto se
+ * pone una vez al montar y React no vuelve a tocar el contenido de la celda.
+ *
+ * (Se separa de `BloqueEditable` en vez de generalizarlo con una prop de
+ * etiqueta porque un `<td>` solo es válido dentro de un `<tr>`: un componente
+ * que sirva para los dos casos invita a usarlo donde no toca. Son diez líneas
+ * duplicadas a cambio de que el tipo de elemento sea imposible de equivocar.)
+ */
+function CeldaEditable({ inicial, ...props }: { inicial: string } & React.TdHTMLAttributes<HTMLTableCellElement>) {
+  const ref = useRef<HTMLTableCellElement>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.textContent = inicial;
+    // Sin `inicial` en las dependencias, por lo mismo que arriba.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <td ref={ref} {...props} />;
 }
 
 
