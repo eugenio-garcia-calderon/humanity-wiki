@@ -14,35 +14,12 @@ import { territories as seedTerritories } from "./src/data/seed.js";
 import { OBJECTIVE_ID_BY_KEY } from "./src/utils/objectiveIds.js";
 import { sql } from "drizzle-orm";
 import { registerAuthRoutes, ROLE } from "./src/server/auth.js";
-import { registerMedicionRoutes, medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
-import { registerTextosRoutes } from "./src/server/textos.js";
-import { registerGraphRoutes } from "./src/server/graph.js";
-import { registerSocialRoutes } from "./src/server/social.js";
-import { registerAIRoutes } from "./src/server/ai/assistant.js";
-import { registerKnowledgeRoutes } from "./src/server/knowledge.js";
-import { registerUploadRoutes } from "./src/server/uploads.js";
-import { registerRoadmapRoutes } from "./src/server/roadmap.js";
-import { registerJuegoRoutes } from "./src/server/juego.js";
-import { registerNavegadorRoutes } from "./src/server/navegador.js";
-import { registerArchivosRoutes } from "./src/server/archivos.js";
-import { registerArchivoRoutes } from "./src/server/archivo.js";
-import { registerIncidenciasRoutes } from "./src/server/incidencias.js";
-import { registerBdRoutes } from "./src/server/bd.js";
-import { registerPublicarRoutes } from "./src/server/publicar.js";
-import { registerNavegadorRemotoRoutes } from "./src/server/navegadorRemoto.js";
-import { registerFinanzasRoutes } from "./src/server/finanzas.js";
-import { registerYoutubeRoutes } from "./src/server/youtube.js";
-import { registerSpotifyRoutes } from "./src/server/spotify.js";
+// LOS MÓDULOS VIVEN EN UNA LISTA (2026-08-22). Añadir uno ya no es reservar
+// este fichero: es una línea en `src/server/modulos.ts`, en la PR de quien lo
+// escribe. Ver allí por qué el ORDEN de esa lista es comportamiento y no estilo.
+import { montarModulos } from "./src/server/modulos.js";
+import { medirPeticiones, medirBaseDeDatos } from "./src/server/medicion.js";
 import { getStripe, registerStripeRoutes, handleMarketplaceWebhookEvent } from "./src/server/stripe.js";
-import { registerPuntosRoutes } from "./src/server/puntos.js";
-import { registerGastoRoutes } from "./src/server/gasto.js";
-import { registerDocumentosRoutes } from "./src/server/documentos.js";
-import { registerMenuRoutes } from "./src/server/menu.js";
-import { registerMensajesRoutes } from "./src/server/mensajes.js";
-import { registerCalendarioRoutes } from "./src/server/calendario.js";
-import { registerPersonasRoutes } from "./src/server/personas.js";
-import { registerGuardarRoutes } from "./src/server/guardar.js";
-import { registerVeracidadRoutes } from "./src/server/veracidad.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -145,7 +122,39 @@ async function startServer() {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id || session.client_reference_id || "anonymous";
+
+        // ── ESTE CASO ES SOLO PARA LAS MEMBRESÍAS (2026-08-22) ────────────
+        // Encontrado por prog4 revisando otro arreglo. Este `case` creaba una
+        // membresía de socio para CUALQUIER `checkout.session.completed`, y al
+        // final del mismo manejador corre `handleMarketplaceWebhookEvent`, que
+        // es quien distingue por `metadata.kind`. Los dos para el mismo evento.
+        //
+        // O sea: comprar cien puntos te hacía además socio. Y comprar un
+        // producto. Y apoyar a un creador. No había pasado nunca porque no ha
+        // habido eventos de pago —la única fila de membresías es una prueba
+        // del 4 de agosto—, pero se dispararía solo el día que se pusieran las
+        // claves de Stripe de verdad, que es justo el día en que nadie estaría
+        // mirando esto.
+        //
+        // `source: 'red_humana'` sin `kind` es como se marcan las sesiones de
+        // membresía creadas hasta hoy. Se acepta para que una sesión abierta
+        // ANTES de este despliegue termine bien; lo nuevo lleva además
+        // `kind: 'membresia'`.
+        const clase = session.metadata?.kind;
+        const esMembresia = clase === 'membresia'
+          || (!clase && session.metadata?.source === 'red_humana');
+        if (!esMembresia) break;
+
+        // Y sin una cuenta a la que abonarla, NO se crea. Antes ponía
+        // `"anonymous"`, que fabricaba una fila de membresía activa a nombre de
+        // un usuario que no existe y se leía como resultado válido. «No sé de
+        // quién es esto» tiene que poder decirse distinto de «es de fulano»:
+        // es la regla de esta casa y esa línea la rompía.
+        const userId = session.metadata?.user_id || session.client_reference_id;
+        if (!userId) {
+          console.error('[Stripe Webhook] Membresía sin cuenta a la que abonarla; no se crea. Sesión:', session.id);
+          break;
+        }
         const customerId = (session.customer as string) || null;
         const subscriptionId = (session.subscription as string) || null;
         const membershipType = session.metadata?.membership_type || "socio_regular";
@@ -285,61 +294,47 @@ async function startServer() {
   // posteriores dependen de él para conocer el usuario y su nivel de rol.
   registerAuthRoutes(app, db);
 
-  // Las rutas que ENSEÑAN la medición van aquí, después de la autenticación:
-  // comprueban que quien mira es administrador, y `req.user` lo instala la
-  // línea de arriba. El cronómetro en sí se montó antes (1.45).
-  registerMedicionRoutes(app, db);
-
-  // Los textos de las páginas de información, editables por un administrador
-  // (2026-08-22). Va después de la autenticación porque comprueba el nivel.
-  registerTextosRoutes(app, db);
-
-  // 1.6 GRAFO DE CONOCIMIENTO, RED SOCIAL Y MERCADO (Fases 3-5).
-  // Van después de la autenticación porque dependen de `req.user`
-  // para aplicar los niveles de rol.
-  registerGraphRoutes(app, db);
-  registerSocialRoutes(app, db);
-
-  // 1.65 GRAFOS DE CONOCIMIENTO (Fase 11): lienzos curados de ventanas de
-  // conocimiento con creador, valoración 0-10 y resolución por palabras clave.
-  registerKnowledgeRoutes(app, db);
-  registerUploadRoutes(app, db);
-  registerRoadmapRoutes(app, db);
-  registerJuegoRoutes(app, db);
-  registerNavegadorRoutes(app);
-  registerArchivosRoutes(app, db);
-  registerArchivoRoutes(app, db);
-  registerIncidenciasRoutes(app, db);
-  registerBdRoutes(app, db);
-  registerPublicarRoutes(app, db);
-  registerNavegadorRemotoRoutes(app);
-  registerFinanzasRoutes(app, db);
-  registerYoutubeRoutes(app, db);
-  registerSpotifyRoutes(app, db);
-
-  // 1.7 ASISTENTE IA (Fase 9). Construido y enrutado siempre; responde
-  // 503 con un mensaje claro mientras falte ANTHROPIC_API_KEY, en vez de
-  // fallar de forma opaca.
-  registerAIRoutes(app, db);
-
-  // 1.8 ECONOMÍA Y MERCADO (Fase 6): Connect, checkout embebido de
-  // productos, apoyo a creadores y reembolsos. Coexiste con el flujo de
-  // socios/membresía de abajo, que no se modifica.
-  registerStripeRoutes(app, db);
-  registerPuntosRoutes(app, db);
-  registerGastoRoutes(app, db);
-  registerDocumentosRoutes(app, db);
-  registerMenuRoutes(app, db);
-  registerMensajesRoutes(app, db);
-  registerCalendarioRoutes(app, db);
-  registerPersonasRoutes(app, db);
-  registerGuardarRoutes(app, db);
-  registerVeracidadRoutes(app, db);
+  // ── TODOS LOS MÓDULOS DE LA API ──────────────────────────────────────────
+  // Van DESPUÉS de `registerAuthRoutes` porque casi todos dependen de que
+  // `req.user` exista para aplicar los niveles de rol. El orden dentro de la
+  // lista se conserva tal cual estaba aquí: en Express montar antes o después
+  // cambia el comportamiento, y hoy eso costó un 403 con una sesión válida.
+  montarModulos(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
     try {
-      const { userId, email, membershipType = "socio_regular" } = req.body;
+      // ── A QUIÉN SE LE ABONA LA MEMBRESÍA (2026-08-22) ─────────────────
+      // Antes salía de `req.body.userId`: quien llamaba decía a qué cuenta
+      // apuntar la membresía. Cualquiera podía pagar y ponérsela a otro, o
+      // apuntar a otro un cobro recurrente que no había pedido. Es dinero de
+      // verdad, no puntos internos.
+      //
+      // Ahora la cuenta la decide EL SERVIDOR desde la sesión. Lo que venga en
+      // el cuerpo se ignora. Sin sesión no hay cuenta a la que abonar, y se
+      // dice: pagar primero y no saber de quién es la membresía después es
+      // peor que pedir que entre antes.
+      //
+      // El correo se toma también de la sesión por el mismo motivo: con un
+      // correo ajeno se puede enganchar el pago al cliente de Stripe de otra
+      // persona.
+      const { membershipType = "socio_regular" } = req.body;
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Entra en tu cuenta antes de hacerte socio: si no, no sabríamos a quién abonarle la membresía.",
+        });
+      }
+      // Si un cliente viejo sigue mandando un id, y no es el suyo, se le dice.
+      // Ignorarlo en silencio dejaría a alguien creyendo que ha comprado la
+      // membresía para otra persona y descubriéndolo por un cobro raro tres
+      // semanas después. Silencio es peor que error (prog4, revisando esto).
+      if (req.body?.userId && req.body.userId !== req.user.id) {
+        return res.status(400).json({
+          error: "La membresía se abona a la cuenta con la que has entrado. Si querías regalarla, todavía no se puede.",
+        });
+      }
+      const userId = req.user.id;
+      const email = req.user.email;
       const stripe = getStripe();
 
       let customerId: string | undefined;
@@ -392,7 +387,11 @@ async function startServer() {
         mode: "subscription",
         return_url: returnUrl,
         metadata: {
-          user_id: userId || "anonymous",
+          // `kind` para que el manejador del webhook sepa que este pago es una
+          // membresía y no un producto, unos puntos o un apoyo: los cuatro
+          // llegan por el mismo evento.
+          kind: "membresia",
+          user_id: userId,
           membership_type: membershipType,
           source: "red_humana",
         },
