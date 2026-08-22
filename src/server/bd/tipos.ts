@@ -24,6 +24,10 @@ export const TIPOS = [
   // jsonb de la fila sino en `bd_enlaces`, y la ruta los desvía antes. Están en
   // esta lista porque es la que dice qué tipos de columna existen.
   'persona', 'proyecto', 'publicacion', 'relacion',
+  // Fase 3: los que llevan FICHEROS. Tampoco pasan por `tipar()`: sus bytes
+  // viven en `/data/uploads` y su ficha en `archivos`, igual que los del chat y
+  // los del editor. Ver `bd/ficheros.ts`.
+  'imagen', 'video', 'documento',
 ] as const;
 
 export type Tipo = typeof TIPOS[number];
@@ -212,6 +216,9 @@ export function tipar(tipo: Tipo, bruto: any, opciones: Opcion[] = [], config: a
       unicos.sort((a, b) => (orden.get(a) ?? 1e9) - (orden.get(b) ?? 1e9));
       return ok(unicos);
     }
+
+    case 'imagen': case 'video': case 'documento':
+      return mal('Esta columna guarda archivos: no se escribe como un valor.');
 
     case 'persona': case 'proyecto': case 'publicacion': case 'relacion':
       // No debería llegar aquí nunca: la ruta desvía las columnas que apuntan a
