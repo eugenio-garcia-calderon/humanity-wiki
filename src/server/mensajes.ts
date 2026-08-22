@@ -110,6 +110,24 @@ export function registerMensajesRoutes(app: Express, db: any) {
       `);
       if (!destino.rows.length) return res.status(404).json({ error: 'Esa persona no existe.' });
 
+      // BLOQUEO (2026-08-22). Es el sitio donde más importa: un bloqueo que
+      // esconde publicaciones pero deja pasar mensajes directos no protege de
+      // nada a quien está siendo molestado, que es justo para lo que existe.
+      //
+      // `bloqueado_entre` mira los dos sentidos, así que esta única
+      // comprobación cubre las dos: ni escribo a quien bloqueé ni me escribe
+      // quien me bloqueó a mí.
+      //
+      // EL MENSAJE NO DICE QUIÉN BLOQUEÓ A QUIÉN, a propósito. «No has podido
+      // bloquear» delataría la decisión del otro, y quien bloquea lo hace para
+      // dejar de aparecer, no para anunciarlo.
+      const bloq = await db.execute(sql`
+        SELECT bloqueado_entre(${req.user.id}, ${para}) AS hay
+      `);
+      if ((bloq.rows[0] as any)?.hay) {
+        return res.status(403).json({ error: 'No puedes escribir a esta persona.' });
+      }
+
       const id = nuevoId();
       const fecha = new Date().toISOString();
       await db.execute(sql`

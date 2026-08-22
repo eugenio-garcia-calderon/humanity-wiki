@@ -4,7 +4,7 @@ import {
   Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2, Plus, Flag,
+  ArrowLeft, Users2, Globe2, Plus, Flag, Ban,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -14,6 +14,7 @@ import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
 import { Denunciar } from '../components/moderacion/Denunciar';
+import { Bloquear } from '../components/moderacion/Bloquear';
 import {
   leerPortada, PORTADA_POR_DEFECTO, type IdBloque, type Portada,
 } from '../components/portada/portadaBloques';
@@ -157,7 +158,8 @@ export default function Explorar() {
    */
   const portada: Portada = user ? leerPortada(user.uiSettings?.portada) : PORTADA_POR_DEFECTO;
   const [personalizando, setPersonalizando] = useState(false);
-  const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string } | null>(null);
+  const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string; autor_id?: string; autor_nombre?: string } | null>(null);
+  const [bloqueando, setBloqueando] = useState<{ id: string; nombre?: string } | null>(null);
 
   // -- Carpetas --
   const [carpetas, setCarpetas] = useState<Carpeta[]>([]);
@@ -763,10 +765,20 @@ export default function Explorar() {
                       {user && !it.soy_autor && (
                       <>
                       <div className="h-px bg-slate-100 my-1" />
-                      <button onClick={() => { setMenuAbierto(null); setDenunciando({ tipo: it.tipo, id: it.id, titulo: it.titulo }); }}
+                      <button onClick={() => { setMenuAbierto(null); setDenunciando({ tipo: it.tipo, id: it.id, titulo: it.titulo, autor_id: it.autor_id, autor_nombre: it.autor_nombre }); }}
                       className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-700 inline-flex items-center gap-2">
                       <Flag className="w-3.5 h-3.5 text-slate-400" /> Denunciar
                       </button>
+                      {/* BLOQUEAR va junto a denunciar y NO en su lugar: una
+                          es sobre esta publicación y la revisa alguien; la
+                          otra es sobre la persona y surte efecto ya. Quien
+                          está siendo molestado necesita la segunda. */}
+                      {it.autor_id && (
+                      <button onClick={() => { setMenuAbierto(null); setBloqueando({ id: it.autor_id!, nombre: it.autor_nombre }); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-700 inline-flex items-center gap-2">
+                      <Ban className="w-3.5 h-3.5 text-slate-400" /> Bloquear a {it.autor_nombre || 'esta persona'}
+                      </button>
+                      )}
                       </>
                       )}
                       {it.soy_autor && (
@@ -880,7 +892,23 @@ export default function Explorar() {
           tipo={denunciando.tipo}
           id={denunciando.id}
           titulo={denunciando.titulo}
+          autorNombre={denunciando.autor_nombre}
+          onBloquear={denunciando.autor_id
+            ? () => { setBloqueando({ id: denunciando.autor_id!, nombre: denunciando.autor_nombre }); setDenunciando(null); }
+            : undefined}
           onCerrar={() => setDenunciando(null)}
+        />
+      )}
+
+      {bloqueando && (
+        <Bloquear
+          usuarioId={bloqueando.id}
+          nombre={bloqueando.nombre}
+          // Recargar no es cosmético: lo suyo acaba de dejar de existir para
+          // ti, y una lista que sigue enseñándolo dice que el bloqueo no ha
+          // funcionado.
+          onBloqueado={() => cargar()}
+          onCerrar={() => setBloqueando(null)}
         />
       )}
 
