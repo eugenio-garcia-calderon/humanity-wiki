@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import { origenDeVarios } from "./src/server/origenDelDato.js";
 import { registrarHistorial } from './src/server/historial';
 import path from "path";
 import fs from "fs";
@@ -1328,6 +1329,34 @@ async function startServer() {
     return map;
   };
 
+  /**
+   * ══ DE DÓNDE SALE CADA PUNTUACIÓN (2026-08-22) ═════════════════════════════
+   * Medido contra la base de datos: de 20.557 observaciones, 20.499 están
+   * SIMULADAS — «Excel Municipios Madrid (simulado)» y «IA — número aleatorio».
+   * El 99,7 %. Todas declaran su fuente y ninguna pantalla lo decía.
+   *
+   * El origen viaja junto a la puntuación, no como un adorno que cada pantalla
+   * tenga que acordarse de pintar: así lo reciben ya dicho el mapa, la ficha
+   * del territorio y cualquier cosa que se construya después.
+   *
+   * MANDA EL PEOR de los que componen un territorio (`origenDeVarios`): una
+   * puntuación media con un solo indicador inventado dentro no es una
+   * puntuación medida.
+   */
+  const getOrigenByTerritory = async (): Promise<Record<string, string>> => {
+    const result = await db.execute(sql`
+      SELECT territory_id, array_agg(DISTINCT coalesce(source, '')) AS fuentes
+      FROM indicator_observations
+      WHERE score IS NOT NULL
+      GROUP BY territory_id
+    `);
+    const map: Record<string, string> = {};
+    for (const row of result.rows as any[]) {
+      map[row.territory_id] = origenDeVarios(row.fuentes || []);
+    }
+    return map;
+  };
+
   // Helper to retrieve real marker scores (from marker_observations) grouped by territory
   const getMarkerScoresByTerritory = async (): Promise<Record<string, Record<string, number>>> => {
     const result = await db.execute(sql`
@@ -1430,6 +1459,7 @@ async function startServer() {
       // Populate objective scores directly onto polygon properties
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
+      const origenByTerritory = await getOrigenByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
       rawFeatures = rawFeatures.map((f: any) => {
         const tid = f.properties.territoryId || f.properties.id;
@@ -1440,7 +1470,10 @@ async function startServer() {
             ...f.properties,
             objectives: objs,
             indicatorScores: indicatorScoresByTerritory[tid] || {},
-            markerScores: markerScoresByTerritory[tid] || {}
+            markerScores: markerScoresByTerritory[tid] || {},
+            // Sin observaciones no hay origen que dar: «desconocido» y no un
+            // silencio que el mapa interprete como bueno.
+            origenDato: origenByTerritory[tid] || 'desconocido'
           }
         };
       });
@@ -1489,6 +1522,7 @@ async function startServer() {
 
       const indicatorScoresByTerritory = await getIndicatorScoresByTerritory();
       const markerScoresByTerritory = await getMarkerScoresByTerritory();
+      const origenByTerritory = await getOrigenByTerritory();
       const indicatorsMeta = await getIndicatorsMeta();
 
       const features = filtered.map(t => {
@@ -1513,6 +1547,7 @@ async function startServer() {
             objectives: objectivesForTerritory,
             indicatorScores: indicatorScoresByTerritory[t.id] || {},
             markerScores: markerScoresByTerritory[t.id] || {},
+            origenDato: origenByTerritory[t.id] || 'desconocido',
             challenges: t.active_challenges || []
           }
         };
@@ -2009,8 +2044,19 @@ async function startServer() {
         };
       }));
       
+      // DE DÓNDE SALEN SUS CIFRAS (2026-08-22). La ficha de un territorio es
+      // donde alguien se queda mirando los números un rato — y donde puede
+      // apuntarlos. Si son inventados, aquí es donde tiene que decirlo.
+      const fuentes = await db.execute(sql`
+        SELECT DISTINCT coalesce(source, '') AS fuente
+        FROM indicator_observations
+        WHERE territory_id = ${id} AND score IS NOT NULL
+      `);
+      const origenDato = origenDeVarios((fuentes.rows as any[]).map(r => r.fuente));
+
       res.json({
         ...territory,
+        origenDato,
         challenges: populatedChallenges
       });
       
