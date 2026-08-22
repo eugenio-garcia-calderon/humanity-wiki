@@ -34,6 +34,7 @@
 import type { Express } from 'express';
 
 import { registrarGuardia } from './seguridad/guardia.js';
+import { registrarSelladoAutomatico } from './seguridad/selladoAutomatico.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
@@ -87,6 +88,15 @@ export const MODULOS: Modulo[] = [
         + 'Va después de `registerAuthRoutes` como todos —necesita `req.user` para saber el nivel— '
         + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
         + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
+  },
+
+  {
+    nombre: 'seguridad/sellado',
+    montar: (app, db) => registrarSelladoAutomatico(app, db),
+    nota: 'No registra ninguna ruta: vacía cada dos minutos el buzón de cambios que llenan los '
+        + 'disparadores de la base de datos, encadenando y firmando. Sale JUNTO con esos disparadores '
+        + 'a propósito: ponerlos sin nada que vacíe el buzón es un grifo con el desagüe tapado. '
+        + 'El sitio en la lista da igual; está aquí para que se vea que existe.',
   },
 
   {
