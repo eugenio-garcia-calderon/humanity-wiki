@@ -4644,3 +4644,136 @@ Agreed with prog4 and written in /tokenomics/tareas: the day the monthly pot
 pays out over counted views, `views` (raw, displayed) and valid views (one
 per person, session required) must be TWO numbers, and the pot only reads
 the second. PUNTOS_TRANSFERENCIA stays off until this fix is deployed.
+
+## 2026-08-22 · Dos tableros nuevos, y el candado que hace que uno sirva (prog6)
+
+**Seis notas del Feedback decían en texto llano, a la vista de cualquiera, por
+dónde entrar en la plataforma**: que el login no tenía límite de intentos, que
+la aplicación se conecta a la base de datos como superusuario, que falta
+`Content-Security-Policy`, que los ficheros subidos se sirven sin comprobar
+sesión y que había una ruta fabricando puntos sin pedir sesión.
+
+Eugenio: «hay cuatro cosas de seguridad en el hormiguero, traslada ahí esas
+cuestiones para limpiar el hormiguero, que es un tema para el público». Y
+aparte: «vas a crear una página en (i) donde pondrás tu visión y estrategia de
+los servidores […] de forma transparente a nivel de coste […] y un kanban como
+el del hormiguero con las tareas que tienes pendientes».
+
+**Una columna `area` en `incidencias`, no un tablero nuevo** (migración `0075`).
+La maquinaria del Feedback ya resuelve estados, adjuntos, permisos, el token de
+los agentes y el archivado; un tablero paralelo habría sido una segunda lista
+que nadie mira, y las notas de seguridad son justo las que no pueden acabar
+ahí. Tres tableros: `general`, `seguridad` y `servidores`.
+
+**El candado está en el servidor, en cinco puertas.** Ver el tablero, crear,
+mover una nota de tablero, el contador del botón de la hormiga —un número
+también filtra: diría cuántos agujeros hay a quien no puede ver ninguno— y los
+adjuntos. Esa quinta la encontró prog4 revisando, y es la que convierte un
+candado en un candado: **la nota quedaba escondida y su adjunto no**, porque
+`express.static` sirve `/uploads` sin comprobar sesión. Comprobado contra
+producción, no deducido. El tablero de seguridad no admite adjuntos y dice por
+qué.
+
+Y una decisión escrita en vez de tapada: **un programador IA con su token lee
+el tablero de seguridad**, porque somos quienes trabajamos esas notas. Eso
+amplía lo que vale un token robado —antes, un color equivocado; ahora, la lista
+de por dónde entrar—, así que cada lectura con token **deja rastro con nombre y
+hora** (idea de prog4: no le quita el acceso a nadie y convierte «no lo podemos
+impedir» en «lo veríamos»).
+
+**El candado nombra `seguridad` explícitamente y no «todo lo que no sea
+general»**, porque el tercer tablero, `servidores`, es público a propósito. Lo
+que se esconde se decide uno por uno, nunca por descarte.
+
+**`/api/gasto` dejaba caer reconocimiento.** Llevaba abierto desde el 8 de
+agosto y estaba bien porque solo lo leía la pestaña de Visión; la página nueva
+lo pone en una pantalla pública. Aviso de prog2, y medido: no daba IP ni
+nombres de contenedor, pero sí el nombre de la máquina, el modelo exacto
+(`CPX42`, o sea 8 núcleos y 16 GB — cuánta máquina hay que tumbar) y los avisos
+de «falta tal variable», que llevan dentro los nombres de nuestras claves. Los
+euros siguen públicos: es la transparencia que pidió Eugenio y no sirve para
+atacar nada. Filtrado **al salir** y no al guardar, para no tener dos cachés
+que se desincronicen.
+
+**Y los límites de peticiones** (`src/server/limites/`, migración `0076`), que
+**entran pero no están conectados a ninguna ruta todavía**: `auth.ts` es de
+prog1. Cinco reglas acordadas con prog4, y las dos que importan son las que
+salieron de discutirlas: quien acierta la contraseña no paga el retraso de los
+que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— y
+**dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
+fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
+la última se lleva borrado su propio rastro.
+### 2026-08-22 — Veracity, phase 1 of 10: a debate is a tree
+
+Eugenio opened a new area and put programmer 5 on it: *«un sistema de veracidad
+dentro de la APP para que lo que la gente publique sea información coherente con
+la otra información que hay, y poder generar un espectro de visiones sobre una
+verdad, y que haya debates visuales sobre los temas más relevantes. Inspírate en
+Kialo»*. The ten phases are in `memory/13_VERACIDAD.md`; this is the first, and
+it is all data — no screen uses it yet.
+
+- **Three tables** (`drizzle/0078_veracidad_debates.sql`): `debates` (the thesis
+  under discussion), `argumentos` (the tree hanging off it) and
+  `veracidad_fuentes` (what any of it cites). No 44th junction table: the tree
+  is a `parent_id`, and a source belongs to what it cites.
+- **Why not the knowledge graph, which already has `apoya`/`contradice`**: a
+  graph edge carries no stance, no weight and no evidence, and a graph node can
+  hang from several parents — the moment it does, the reader no longer knows
+  what is being argued about. A debate is a tree on purpose. Phase 7 will *draw*
+  debates on the existing canvas; the model stays separate.
+- **`src/server/veracidad.ts`**: list and read (the whole tree and all its
+  sources in three queries, never one per node), open a debate, argue, cite,
+  withdraw a citation, archive. Level 1 to open or argue — the same standing as
+  publishing; level 3 to close a debate, because that is a judgement about the
+  commons.
+- **Depth is derived from the parent, never sent by the client**, so no request
+  can flatten or graft a branch; a parent belonging to another debate is
+  rejected, and the thread stops at 12 levels with a message that says to open
+  its own debate instead.
+- **`impacto` is NULL until somebody votes, and 0 only when people voted and it
+  moves nobody.** Initialising it to 0 would make a brand-new argument look like
+  a rejected one — the house rule that every component must be able to say «I
+  don't know» distinguishably.
+- **The only automatic step of the veracity ladder is `sin_fuente` →
+  `con_fuente`**, and it reverses when the last source is withdrawn. Everything
+  above that is a human judgement and belongs to phase 2, not to pasting a link.
+- **Verified against the local server on port 3004: 25 checks, 25 green** —
+  including 401 without a session, an invented `postura` rejected *listing the
+  valid ones*, a cross-debate parent, the tree nested three levels deep, the
+  badge going up and back down with the source, and an archived argument leaving
+  the tree without leaving the database. One bug found and fixed on the way:
+  `= ANY(array)` through the Drizzle template reached Postgres as a record, so
+  every read of a debate answered 500. The test user and both test debates were
+  deleted in the same session.
+
+### 2026-08-22 — Veracidad: su página en la «i», con sus principios y su tablero
+
+Eugenio: *«genera una página en el menú superior derecho, donde pone "i"
+información, y ahí añade el Veracidad, como página donde pongamos los principios
+y tecnologías que usamos para esto; haz un kanban con todas las tareas que
+tenemos hacia adelante, copia el modelo de Hormiguero»*.
+
+- **`/veracidad`**: qué es esto en dos párrafos, **seis principios** (no hay una
+  verdad publicada sino un espectro de visiones; un debate es un árbol; lo que no
+  tiene fuente lo dice; lo que pesa lo decide la gente; cerrar no borra al que
+  perdió; todo puede decir «no lo sé») y **seis piezas** de con qué está hecho —
+  y casi ninguna es nueva: el vocabulario del grafo, el lienzo del grafo, la
+  tabla de puntuaciones que ya existía.
+- **El tablero, con las 30 tarjetas de las diez fases**, en el `TableroKanban`
+  que la hoja de ruta y los proyectos ya usan desde el 8 de agosto. **No estrena
+  tabla ni componente**: son filas de `roadmap_items` con `grupo = 'veracidad'`
+  (migración 0079, décimo grupo), así que las mismas tarjetas salen también en
+  «Visión y hoja de ruta» sin sincronizar nada. Su título lo dice — hay ya
+  varias listas de tareas en la casa con la misma pinta, y quien mire una tiene
+  que saber en cuál está.
+- **La entrada del menú es una línea** en `src/paginasInfo.ts`, la lista que
+  salió antes en la PR #241.
+- Verificado en el navegador: el menú (i) abre con Veracidad, la página carga,
+  el tablero pinta 30 tarjetas repartidas en 2 hechas / 1 en curso / 27 por
+  hacer, y las 25 comprobaciones de la API de la fase 1 siguen en verde con el
+  módulo ya registrado en el servidor.
+
+**Lo que no está**: `server.ts` lleva las dos líneas que registran el módulo,
+pero ese fichero lo tiene reservado el programador 1 — va aparte, en cuanto lo
+suelte. Sin ellas la página se ve y el tablero funciona (el tablero lee la hoja
+de ruta), pero las rutas de debates no existen.

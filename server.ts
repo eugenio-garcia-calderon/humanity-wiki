@@ -41,6 +41,7 @@ import { registerMensajesRoutes } from "./src/server/mensajes.js";
 import { registerCalendarioRoutes } from "./src/server/calendario.js";
 import { registerPersonasRoutes } from "./src/server/personas.js";
 import { registerGuardarRoutes } from "./src/server/guardar.js";
+import { registerVeracidadRoutes } from "./src/server/veracidad.js";
 
 // Reverse lookup (O001 -> 'agua') used to read mock objective scores by id.
 const OBJECTIVE_KEY_BY_ID: Record<string, string> = Object.fromEntries(
@@ -143,7 +144,39 @@ async function startServer() {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id || session.client_reference_id || "anonymous";
+
+        // ── ESTE CASO ES SOLO PARA LAS MEMBRESÍAS (2026-08-22) ────────────
+        // Encontrado por prog4 revisando otro arreglo. Este `case` creaba una
+        // membresía de socio para CUALQUIER `checkout.session.completed`, y al
+        // final del mismo manejador corre `handleMarketplaceWebhookEvent`, que
+        // es quien distingue por `metadata.kind`. Los dos para el mismo evento.
+        //
+        // O sea: comprar cien puntos te hacía además socio. Y comprar un
+        // producto. Y apoyar a un creador. No había pasado nunca porque no ha
+        // habido eventos de pago —la única fila de membresías es una prueba
+        // del 4 de agosto—, pero se dispararía solo el día que se pusieran las
+        // claves de Stripe de verdad, que es justo el día en que nadie estaría
+        // mirando esto.
+        //
+        // `source: 'red_humana'` sin `kind` es como se marcan las sesiones de
+        // membresía creadas hasta hoy. Se acepta para que una sesión abierta
+        // ANTES de este despliegue termine bien; lo nuevo lleva además
+        // `kind: 'membresia'`.
+        const clase = session.metadata?.kind;
+        const esMembresia = clase === 'membresia'
+          || (!clase && session.metadata?.source === 'red_humana');
+        if (!esMembresia) break;
+
+        // Y sin una cuenta a la que abonarla, NO se crea. Antes ponía
+        // `"anonymous"`, que fabricaba una fila de membresía activa a nombre de
+        // un usuario que no existe y se leía como resultado válido. «No sé de
+        // quién es esto» tiene que poder decirse distinto de «es de fulano»:
+        // es la regla de esta casa y esa línea la rompía.
+        const userId = session.metadata?.user_id || session.client_reference_id;
+        if (!userId) {
+          console.error('[Stripe Webhook] Membresía sin cuenta a la que abonarla; no se crea. Sesión:', session.id);
+          break;
+        }
         const customerId = (session.customer as string) || null;
         const subscriptionId = (session.subscription as string) || null;
         const membershipType = session.metadata?.membership_type || "socio_regular";
@@ -328,11 +361,42 @@ async function startServer() {
   registerCalendarioRoutes(app, db);
   registerPersonasRoutes(app, db);
   registerGuardarRoutes(app, db);
+  registerVeracidadRoutes(app, db);
 
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
     try {
-      const { userId, email, membershipType = "socio_regular" } = req.body;
+      // ── A QUIÉN SE LE ABONA LA MEMBRESÍA (2026-08-22) ─────────────────
+      // Antes salía de `req.body.userId`: quien llamaba decía a qué cuenta
+      // apuntar la membresía. Cualquiera podía pagar y ponérsela a otro, o
+      // apuntar a otro un cobro recurrente que no había pedido. Es dinero de
+      // verdad, no puntos internos.
+      //
+      // Ahora la cuenta la decide EL SERVIDOR desde la sesión. Lo que venga en
+      // el cuerpo se ignora. Sin sesión no hay cuenta a la que abonar, y se
+      // dice: pagar primero y no saber de quién es la membresía después es
+      // peor que pedir que entre antes.
+      //
+      // El correo se toma también de la sesión por el mismo motivo: con un
+      // correo ajeno se puede enganchar el pago al cliente de Stripe de otra
+      // persona.
+      const { membershipType = "socio_regular" } = req.body;
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Entra en tu cuenta antes de hacerte socio: si no, no sabríamos a quién abonarle la membresía.",
+        });
+      }
+      // Si un cliente viejo sigue mandando un id, y no es el suyo, se le dice.
+      // Ignorarlo en silencio dejaría a alguien creyendo que ha comprado la
+      // membresía para otra persona y descubriéndolo por un cobro raro tres
+      // semanas después. Silencio es peor que error (prog4, revisando esto).
+      if (req.body?.userId && req.body.userId !== req.user.id) {
+        return res.status(400).json({
+          error: "La membresía se abona a la cuenta con la que has entrado. Si querías regalarla, todavía no se puede.",
+        });
+      }
+      const userId = req.user.id;
+      const email = req.user.email;
       const stripe = getStripe();
 
       let customerId: string | undefined;
@@ -385,7 +449,11 @@ async function startServer() {
         mode: "subscription",
         return_url: returnUrl,
         metadata: {
-          user_id: userId || "anonymous",
+          // `kind` para que el manejador del webhook sepa que este pago es una
+          // membresía y no un producto, unos puntos o un apoyo: los cuatro
+          // llegan por el mismo evento.
+          kind: "membresia",
+          user_id: userId,
           membership_type: membershipType,
           source: "red_humana",
         },
