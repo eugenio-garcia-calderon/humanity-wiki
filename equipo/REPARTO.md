@@ -27,9 +27,11 @@ así que ya no hay forma de borrárselo.
 está `git show`, `git diff` y las ramas.
 
 **Quién eres lo dice dónde estás**, no un fichero: la raíz es `prog1`, y
-`.claude/worktrees/progN` es `progN`. El fichero `.agente` solo vale de respaldo, y
-si contradice a la carpeta, manda la carpeta y el script te avisa. (La primera hora
-de vida de este sistema, un agente escribió su nombre en las tres copias.)
+`.claude/worktrees/progN` es `progN`. **No hay fichero `.agente` en las tres
+carpetas de siempre y no debe haberlo**: en la primera hora de vida de este sistema
+un agente lo escribió con su nombre en las tres, dos veces, y dos copias decían
+llamarse igual. Solo hace falta en una carpeta que no sea una de las tres, y ahí
+manda la carpeta si contradicen.
 
 El gancho vive en `.githooks/`, no en `.git/hooks/`: está enganchado con
 `core.hooksPath`, que es la única forma de que valga para las tres copias a la vez.
