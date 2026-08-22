@@ -4406,3 +4406,16 @@ menu: `useCerrarAlPulsarFuera`, same dropdown styling.
 Why before the ant: first understand the platform, then ask things of the
 team. Verified in the browser on port 3007 (menu opens, both links navigate,
 button highlights on those routes). `tsc --noEmit` clean.
+
+---
+
+## 2026-08-22 — The (i) dropdown fell off a 375px screen (Programador 7)
+
+Found verifying #221 in production on mobile, as the Dashboard asked: the
+panel is `right-0` — right-aligned to the BUTTON — and on a phone the button
+is not at the right edge, so the panel started at x = −33. Local desktop and
+the logged-in local mobile view never showed it (the button sits further
+right there), which is exactly why production had to be checked at 375px.
+Fix: below `sm` the panel pins to the viewport (`fixed inset-x-2`); from `sm`
+up the original button-aligned layout returns. Measured after: 8..367 on a
+375px screen, desktop unchanged.

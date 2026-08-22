@@ -640,7 +640,12 @@ export default function Layout() {
             <Info className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
           </button>
           {infoAbierta && (
-            <div className="absolute top-11 right-0 w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+            /* ON A PHONE THE BUTTON IS NOT AT THE RIGHT EDGE, so `right-0`
+               (right-aligned to the button) pushed the panel 33px off the
+               left of a 375px screen — measured in production the day this
+               shipped. Below `sm` the panel pins to the viewport instead of
+               the button; from `sm` up the original alignment returns. */
+            <div className="fixed inset-x-2 top-14 sm:absolute sm:inset-x-auto sm:top-11 sm:right-0 sm:w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <p className="px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Información</p>
               <button onClick={() => { setInfoAbierta(false); navigate('/sobre-red-humana'); }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
