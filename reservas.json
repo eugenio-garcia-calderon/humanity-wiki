@@ -23,6 +23,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "tipos de bloque de tienda",
       "desde": "2026-08-22T14:28:03.654Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "copias de seguridad: entrada de las dos PRs",
+      "desde": "2026-08-22T14:30:32.980Z"
     }
   ]
 }
