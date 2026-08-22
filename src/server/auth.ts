@@ -44,6 +44,11 @@ export const ROLE_LABELS: Record<number, string> = {
 
 const SESSION_COOKIE = 'rh_session';
 
+/** La papelera de una cuenta borrada. Mismo plazo que la de la Constitución
+ *  para el conocimiento: si el contenido se puede recuperar 15 días, la cuenta
+ *  que lo escribió también. */
+export const DIAS_PAPELERA_CUENTA = 15;
+
 // CUÁNTO DURA UNA SESIÓN. En producción, 30 días: una sesión eterna en un
 // ordenador ajeno o robado es un agujero, y 30 días ya es generoso.
 //
@@ -204,6 +209,12 @@ export function registerAuthRoutes(app: Express, db: any) {
           AND s.revoked_at IS NULL
           AND s.expires_at > now()
           AND u.archived_at IS NULL
+          -- UNA CUENTA EN LA PAPELERA NO TIENE SESIÓN. Al pedir el borrado se
+          -- revocan todas, pero esto es el cinturón: si alguna sobreviviera
+          -- —otro dispositivo, una carrera— seguiría dando acceso a una cuenta
+          -- que su dueño ha pedido borrar. Volver se hace por la puerta, con
+          -- contraseña, que es lo que cancela el borrado a propósito.
+          AND u.deleted_at IS NULL
       `);
       const row = result.rows[0];
       if (row) {
@@ -382,8 +393,26 @@ export function registerAuthRoutes(app: Express, db: any) {
       // se llevaría borrado su propio rastro — que es justo el caso que hay que
       // poder ver después.
       levantarFreno(REGLAS.login, ipDe(req), normalizedEmail);
+
+      // ══ VOLVER CANCELA EL BORRADO ══════════════════════════════════════
+      // La papelera de 15 días no es un plazo administrativo: es que alguien
+      // borre su cuenta un mal día y vuelva el jueves. Que entrar la recupere,
+      // **sin un paso más y sin tener que pedirlo a nadie**, es lo que la hace
+      // de verdad reversible.
+      //
+      // Solo llega aquí quien ha puesto su contraseña bien, así que cancelarlo
+      // no lo puede hacer otro. Y pasados los 15 días la cuenta ya está vacía:
+      // no hay contraseña con la que entrar, así que este camino ya no existe.
+      let recuperada = false;
+      if (row.deleted_at && !row.anonimizado_en) {
+        await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${row.id}`);
+        row.deleted_at = null;
+        recuperada = true;
+        console.warn('[cuenta] borrado cancelado al volver a entrar:', row.id);
+      }
+
       await createSession(req, res, row.id);
-      res.json({ user: rowToUser(row) });
+      res.json({ user: rowToUser(row), ...(recuperada ? { borrado_cancelado: true } : {}) });
     } catch (e: any) {
       console.error('login error:', e);
       res.status(500).json({ error: e.message });
@@ -518,6 +547,95 @@ export function registerAuthRoutes(app: Express, db: any) {
         WHERE user_id = ${req.user.id} AND token <> ${req.sessionToken} AND revoked_at IS NULL
       `);
       res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // BORRAR LA CUENTA — obligatorio en App Store y Google Play (2026-08-22)
+  // --------------------------------------------------------------------------
+  // Una aplicación que deja crear cuenta y no deja borrarla se rechaza. Esto
+  // bloqueaba el lanzamiento en las dos tiendas.
+  //
+  // Lo decidió Eugenio así: el contenido se anonimiza y **se queda** —nadie
+  // pierde lo que construyó encima de lo que escribió otro— y hay papelera de
+  // 15 días. La fila no se borra: **49 tablas apuntan a `users`**, y borrarla
+  // se llevaría por delante proyectos, mensajes y los comentarios que otras
+  // personas dejaron debajo. Se vacía, que es lo que la ley pide.
+  //
+  // ── POR QUÉ PIDE LA CONTRASEÑA OTRA VEZ ─────────────────────────────────
+  // Un `POST` sin fricción es un borrado por accidente y, peor, un borrado
+  // ajeno: bastaría con que alguien te hiciera cargar una página con un
+  // formulario apuntando aquí. Volver a escribir la contraseña demuestra que
+  // quien lo pide está delante del teclado. Es la misma razón por la que
+  // cambiar una contraseña pide la anterior.
+  app.post('/api/auth/borrar-cuenta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const { password } = req.body || {};
+      if (!password) {
+        return res.status(400).json({ error: 'Escribe tu contraseña para confirmar que eres tú.' });
+      }
+      const r = await db.execute(sql`SELECT id, password_hash, deleted_at FROM users WHERE id = ${req.user.id}`);
+      const row = r.rows[0] as any;
+      if (!row) return res.status(404).json({ error: 'Esa cuenta ya no existe.' });
+      if (!verifyPassword(String(password), row.password_hash)) {
+        return res.status(401).json({ error: 'La contraseña no es correcta.' });
+      }
+      // Pedirlo dos veces no hace nada nuevo, y sobre todo NO reinicia la
+      // cuenta atrás: si no, quien insistiera se alejaría del vaciado en vez
+      // de acercarse.
+      if (row.deleted_at) {
+        return res.json({ ok: true, ya_estaba: true, dias: DIAS_PAPELERA_CUENTA });
+      }
+
+      await db.execute(sql`
+        UPDATE users SET deleted_at = now(), updated_at = now() WHERE id = ${row.id}
+      `);
+      // Todas las sesiones fuera, en todos sus dispositivos. Una cuenta que se
+      // está borrando no puede quedarse abierta en el móvil de nadie.
+      await db.execute(sql`
+        UPDATE sessions SET revoked_at = now() WHERE user_id = ${row.id} AND revoked_at IS NULL
+      `);
+      clearSessionCookie(res);
+      console.warn('[cuenta] borrado pedido:', row.id);
+      res.json({
+        ok: true,
+        dias: DIAS_PAPELERA_CUENTA,
+        mensaje: `Tu cuenta se borrará en ${DIAS_PAPELERA_CUENTA} días. Si vuelves a entrar antes, se cancela.`,
+      });
+    } catch (e: any) {
+      console.error('borrar cuenta:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Cancelar sin llegar a entrar del todo. `POST /api/auth/login` ya lo cancela
+  // por su cuenta; esto existe para una pantalla que diga «has pedido borrar tu
+  // cuenta, ¿seguro?» sin obligar a navegar a otro sitio. Pide la contraseña
+  // por lo mismo que el borrado.
+  app.post('/api/auth/cancelar-borrado', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body || {};
+      if (!email || !password) return res.status(400).json({ error: 'Email y contraseña son obligatorios.' });
+      const r = await db.execute(sql`
+        SELECT * FROM users WHERE lower(email) = ${String(email).trim().toLowerCase()} AND archived_at IS NULL
+      `);
+      const row = r.rows[0] as any;
+      if (!row || !verifyPassword(String(password), row.password_hash)) {
+        return res.status(401).json({ error: 'Email o contraseña incorrectos.' });
+      }
+      // Ya vaciada: no hay nada que cancelar y no se puede deshacer. Se dice
+      // claro en vez de fingir que ha funcionado.
+      if (row.anonimizado_en) {
+        return res.status(410).json({ error: 'Esa cuenta ya se borró y no se puede recuperar.' });
+      }
+      if (!row.deleted_at) return res.json({ ok: true, ya_estaba: true });
+
+      await db.execute(sql`UPDATE users SET deleted_at = NULL, updated_at = now() WHERE id = ${row.id}`);
+      console.warn('[cuenta] borrado cancelado:', row.id);
+      res.json({ ok: true });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
