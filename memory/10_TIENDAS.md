@@ -198,9 +198,14 @@ for app functionality".
 
 | What | Blocked on |
 |---|---|
-| The controller's identity, address and contact | **Eugenio** — the company details. Said in amber *on the page* rather than invented |
+| ~~The controller's identity, address and contact~~ | **Answered 2026-08-23.** Light for Humanity, CIF G88040563, Madrid. Now on the page and in `memory/14_SOCIEDAD.md` |
 | The exact country of the servers | Not written down anywhere in the repo. Hetzner is German; the datacentre region is a config value |
 | Which provider holds the off-site backups | `COPIAS_REMOTO_CUBO`, set at deploy time, not in the repo |
+| An e-mail for exercising data rights | The postal address is legally sufficient; an address people actually write to is better |
+
+**The CIF starts with G**, the Spanish range for non-profits. That decides the
+Apple commission question — but the exemption needs enrolment in Apple's
+non-profit programme, which **nobody has confirmed**. See `memory/14_SOCIEDAD.md`.
 
 None of these were guessed. A privacy policy that states something false about
 who answers for your data is exactly the thing that should not exist.

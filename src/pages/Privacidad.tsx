@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Cookie, Database, EyeOff, Server, Share2, ShieldCheck, UserX } from 'lucide-react';
+import { Building2, Cookie, Database, EyeOff, Server, Share2, ShieldCheck, UserX } from 'lucide-react';
 
 // ============================================================================
 // PRIVACIDAD · PÁGINA PÚBLICA (2026-08-22, agente de APP/UX)
@@ -176,24 +176,34 @@ export default function Privacidad() {
       </section>
 
       {/*
-        LO QUE FALTA, DICHO EN LA PÁGINA Y NO ESCONDIDO EN UN COMENTARIO.
-        Un aviso visible es feo y es correcto: lo que no se puede afirmar todavía
-        no se afirma. Se quita cuando Eugenio dé los datos de la sociedad.
+        QUIÉN RESPONDE. Estaba en blanco y en ámbar hasta que Eugenio dio los
+        datos (2026-08-23). No es un trámite: el RGPD exige que el responsable
+        del tratamiento sea identificable y localizable, y las dos tiendas
+        enseñan esta identidad en la ficha del producto.
+
+        El dato vive además en `memory/14_SOCIEDAD.md`, porque hasta ese día no
+        estaba escrito en ningún sitio del proyecto — ni en la memoria, ni en la
+        documentación, ni en el código — y hacen falta en cuatro sitios más.
       */}
-      <section className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-5">
-        <h2 className="text-sm font-black text-amber-900 mb-2">Falta por completar</h2>
-        <p className="text-sm text-amber-900/80 leading-relaxed">
-          Faltan los datos de la sociedad responsable —nombre, domicilio y una
-          dirección de contacto para ejercer tus derechos—, el <strong>país
-          exacto</strong> donde están los servidores y el <strong>nombre del
-          proveedor</strong> que guarda las copias de seguridad. Preferimos
-          decirlo a poner algo que no sea exacto. Mientras tanto, escríbenos desde{' '}
-          <Link to="/hormiguero" className="font-bold underline">Feedback</Link>{' '}
-          y llega a una persona.
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 mb-5">
+        <h2 className="text-sm font-black text-slate-900 mb-3 inline-flex items-center gap-2">
+          <Building2 className="w-4 h-4 text-slate-400" /> Quién responde de tus datos
+        </h2>
+        <address className="not-italic text-sm text-slate-600 leading-relaxed">
+          <strong className="text-slate-800">Light for Humanity</strong><br />
+          CIF G88040563<br />
+          Calle Bahía de Almería 30, Bajo C<br />
+          28042 Madrid, España
+        </address>
+        <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+          Para ver, corregir, llevarte o borrar tus datos puedes escribir a esa
+          dirección, o decírnoslo desde{' '}
+          <Link to="/hormiguero" className="font-bold text-emerald-700 hover:underline">Feedback</Link>,
+          que llega a una persona y es bastante más rápido.
         </p>
       </section>
 
-      <p className="mt-6 text-xs text-slate-400">Última revisión: 22 de agosto de 2026.</p>
+      <p className="mt-6 text-xs text-slate-400">Última revisión: 23 de agosto de 2026.</p>
     </div>
   );
 }
