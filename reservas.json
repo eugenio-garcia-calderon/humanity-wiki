@@ -38,12 +38,6 @@
     },
     {
       "agente": "prog5",
-      "ruta": "drizzle/0085_veracidad_revision.sql",
-      "motivo": "Veracidad fase 2: quien movio el sello y cuando (0083 y 0084 ya cogidos)",
-      "desde": "2026-08-22T18:29:50.175Z"
-    },
-    {
-      "agente": "prog5",
       "ruta": "src/App.tsx",
       "motivo": "Veracidad fase 4: rutas /debates",
       "desde": "2026-08-22T18:34:23.256Z"
