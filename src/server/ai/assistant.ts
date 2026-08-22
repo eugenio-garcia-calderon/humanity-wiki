@@ -10,6 +10,9 @@ import { ROLE } from '../auth.js';
 import { GRUPOS, ESTADOS, PRIORIDADES } from '../roadmap.js';
 import { autoOrganizarCarpetas } from '../knowledge.js';
 import { guardarArchivo } from '../uploads.js';
+import { peorOrigen, ETIQUETA_ORIGEN, type OrigenDelDato } from '../../utils/origenDelDato.js';
+import { getObjectivesForTerritory } from '../../utils/puntuacionesDeObjetivo.js';
+import { slugify } from '../../utils/slugify.js';
 
 // ============================================================================
 // Asistente IA universal — Fase 9
@@ -328,7 +331,74 @@ export function registerAIRoutes(app: Express, db: any) {
     }
   };
 
-  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = []): { estable: string; dePersona: string; variable: string } => {
+  /**
+   * ══ DE DÓNDE SALEN LAS CIFRAS QUE LA PERSONA TIENE DELANTE (2026-08-22) ════
+   *
+   * El mapa y la ficha del territorio ya avisan cuando una puntuación está
+   * simulada (el 99,7 % lo está). La IA no: recibe en el contexto el
+   * territorio que se está mirando, y si le preguntan «¿cómo está Bulgaria en
+   * agua?» responde con lo que ella sabe del mundo, en la misma pantalla donde
+   * pone 37 %. La persona junta las dos cosas y se lleva una cifra inventada
+   * puesta en una frase que suena a hecho comprobado.
+   *
+   * ESTO SE MIRA EN EL SERVIDOR, NO SE LO PREGUNTA AL NAVEGADOR. El cliente
+   * manda el slug del territorio; la fuente de cada observación vive en la
+   * base de datos y de ahí se lee. Un dato sobre la fiabilidad de un dato no
+   * puede venir del mismo sitio que puede equivocarse.
+   *
+   * Devuelve `null` cuando no hay territorio en pantalla o cuando el slug no
+   * corresponde a ninguno: no saber es un resultado válido y distinto de
+   * «está medido».
+   */
+  const origenDeLoQueMira = async (ctx: any): Promise<{ nombre: string; origen: OrigenDelDato } | null> => {
+    const pedido = String(ctx?.territorio || '').trim();
+    if (!pedido) return null;
+    try {
+      const { rows } = await db.execute(sql`SELECT id, name FROM territories WHERE archived_at IS NULL`);
+      // El slug de la URL lo fabrica `slugify(nombre)` en el navegador, así que
+      // aquí se compara con LA MISMA función y no con una regla parecida
+      // escrita a mano — dos formas de hacer un slug es otra vez el mismo
+      // fallo: dos verdades sobre lo mismo.
+      const t = (rows as any[]).find(r =>
+        r.id === pedido || slugify(String(r.name)) === slugify(pedido));
+      if (!t) return null;
+
+      // SE PREGUNTA POR LAS CIFRAS QUE SE VEN, que son los catorce porcentajes
+      // de objetivo — no por las observaciones sueltas del territorio. No es lo
+      // mismo: las observaciones de agua de España son reales, pero sus
+      // porcentajes de objetivo están escritos a mano en `src/data/seed.ts`.
+      // Contestar «medido» mirando lo primero, con la pantalla diciendo
+      // «simulado» sobre lo segundo, es darle la razón a nadie.
+      const [obs, meta] = await Promise.all([
+        db.execute(sql`
+          SELECT indicator_id, score, source FROM indicator_observations
+          WHERE territory_id = ${t.id} AND score IS NOT NULL
+        `),
+        db.execute(sql`SELECT id, objective_id, weight FROM indicators WHERE archived_at IS NULL`),
+      ]);
+      const puntuaciones: Record<string, number> = {};
+      const fuentes: Record<string, string | null> = {};
+      for (const r of obs.rows as any[]) {
+        puntuaciones[r.indicator_id] = r.score;
+        fuentes[r.indicator_id] = r.source ?? null;
+      }
+      const origenes: Record<string, OrigenDelDato> = {};
+      getObjectivesForTerritory(
+        String(t.id), puntuaciones,
+        (meta.rows as any[]).map(r => ({ id: r.id, objectiveId: r.objective_id, weight: r.weight != null ? Number(r.weight) : null })),
+        fuentes, origenes,
+      );
+      // Sin puntuaciones no hay cifras que marcar: no es «medido», es que no
+      // hay nada. `peorOrigen([])` ya devuelve «desconocido».
+      return { nombre: String(t.name), origen: peorOrigen(Object.values(origenes)) };
+    } catch (e) {
+      console.error('[IA] no se pudo averiguar el origen del territorio:', e);
+      return null;
+    }
+  };
+
+
+  const buildSystemPrompt = (ctx: any, retrieved: any[], user: any, editMode: string, webSearch: boolean, graphs: any[] = [], origenEnPantalla: { nombre: string; origen: OrigenDelDato } | null = null): { estable: string; dePersona: string; variable: string } => {
     const level = user?.roleLevel ?? 0;
     const allowed = Object.entries(ACTION_CATALOG)
       .filter(([, v]) => level >= v.minLevel)
@@ -497,6 +567,10 @@ LAS CIFRAS SON SAGRADAS. Esta es una plataforma de investigación: un número in
 2. MIRA LA UNIDAD ANTES DE USAR EL NÚMERO. En una misma frase puede haber «120 kg en vacío» y «90 km/día»: son cosas distintas y confundirlas es el error más caro que puedes cometer aquí. Kilogramos no son kilómetros.
 3. NO TE INVENTES VALORES INTERMEDIOS PARA CERRAR UN CÁLCULO. Si te falta la velocidad, el rendimiento o las horas de sol, DILO y pide el dato. Nunca elijas un valor «razonable» para que salga la cuenta: quien lea tu respuesta no puede distinguir ese número de uno medido.
 4. Si te piden un cálculo y tienes solo parte de los datos, haz la parte que puedas y di exactamente qué te falta.
+5. LAS PUNTUACIONES DE LOS TERRITORIOS CASI NUNCA SON MEDIDAS. De las 20.557 observaciones que hay en la plataforma, 20.499 se pusieron a mano o al azar para poder enseñarla: los 179 municipios de Madrid y los 32 países europeos. Solo el agua de España y sus comunidades sale de fuentes reales (INE, MITECO, FAO). Más abajo, en el estado, te digo lo que vale para el territorio que la persona tiene DELANTE ahora mismo.
+   · Si esas cifras están simuladas y te preguntan por ellas, DILO ANTES DE DAR EL NÚMERO. No es un matiz al final: es la respuesta.
+   · No maquilles una cifra simulada con lo que tú sepas del mundo real. Si sabes algo de verdad sobre ese sitio, sepáralo en otra frase y di que eso lo sabes tú, no la plataforma.
+   · Y no hagas lo contrario: si te digo que están medidas, no siembres dudas — desconfiar de un dato bueno también tiene un precio.
 
 LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando la acción en el bloque. No digas que no puedes.
 
@@ -550,6 +624,12 @@ ${ctx?.ultimoFallo ? `SU ÚLTIMO INTENTO SE ROMPIÓ ANTES DE LLEGARTE. Pidió «
 ${ctx?.suyo?.length ? `EL CONTENIDO DE SUS COSAS, buscado por lo que acaba de preguntar. Esto es lo que hay ESCRITO DENTRO de sus páginas y tarjetas — cifras incluidas. Si la respuesta está aquí, respóndela CITANDO el dato y diciendo de qué página sale. NUNCA digas que no puedes leer el contenido de la plataforma: aquí lo tienes.
 ${ctx.suyo.map((x: any) => `--- ${x.que}: «${x.titulo}» (${x.donde})\n${x.texto}`).join('\n\n')}
 
+` : ''}
+${origenEnPantalla ? `DE DÓNDE SALEN LAS CIFRAS DE «${origenEnPantalla.nombre}», QUE ES LO QUE TIENE DELANTE: ${ETIQUETA_ORIGEN[origenEnPantalla.origen].corto.toUpperCase()} — ${ETIQUETA_ORIGEN[origenEnPantalla.origen].explicacion}${origenEnPantalla.origen === 'simulado'
+  ? ' La pantalla ya se lo está avisando en rojo; si le respondes como si esos números midieran algo, le estarás contradiciendo tú.'
+  : origenEnPantalla.origen === 'desconocido'
+    ? ' No consta la fuente: no supongas que es buena.'
+    : ''}
 ` : ''}
 ESTADO ACTUAL DE LA PANTALLA DEL USUARIO:
 ${JSON.stringify({ ...(ctx || {}), mio: undefined, suyo: undefined }, null, 2)}
@@ -1117,7 +1197,10 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           return { ...context, recortado: true, aviso: 'El contexto era muy grande y se ha recortado.' };
         } catch { return {}; }
       })();
-      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[]);
+      // De dónde salen las cifras del territorio que tiene abierto. Se mira
+      // en la base de datos, no en lo que mande el navegador.
+      const origenEnPantalla = await origenDeLoQueMira(contextoSano);
+      const prompt = buildSystemPrompt({ ...contextoSano, mio, suyo }, retrieved, req.user, editMode, buscarWeb, publishedGraphs.rows as any[], origenEnPantalla);
       const result = await provider.complete({
         system: prompt.variable,
         // La parte estable viaja aparte para que el proveedor la marque como

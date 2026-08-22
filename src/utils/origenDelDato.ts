@@ -21,6 +21,17 @@
 // quien la pinte —hoy tres pantallas, mañana las que sean— recibe ya dicho de
 // qué se trata.
 //
+// ── POR QUÉ ESTÁ EN `utils/` Y NO EN `server/` (2026-08-22) ─────────────────
+// Nació en `src/server/`, y duró un día: `/api/data/indicators` ya manda la
+// `source` de cada observación al navegador, así que la pantalla de
+// indicadores tenía que clasificarla ella. La opción cómoda era copiar las
+// tres listas de palabras al cliente — y entonces habría DOS reglas sobre qué
+// es un dato inventado, que se separan el día que alguien añada «mock» a una
+// sola de ellas. Justo el fallo que este fichero existe para evitar.
+//
+// Aquí lo importan los dos lados: el servidor (`server.ts`, la IA) y las
+// pantallas. Una regla, un sitio.
+//
 // ── LOS CUATRO ESTADOS, Y POR QUÉ CUATRO ───────────────────────────────────
 // `medido`      sale de una fuente citada: INE, MITECO, FAO, una estación.
 // `estimado`    real pero derivado: una estimación, un reparto por comunidad.
@@ -97,7 +108,20 @@ export const ETIQUETA_ORIGEN: Record<OrigenDelDato, { corto: string; explicacion
  */
 export function origenDeVarios(fuentes: Array<string | null | undefined>): OrigenDelDato {
   if (!fuentes.length) return 'desconocido';
+  return peorOrigen(fuentes.map(origenDe));
+}
+
+/**
+ * Lo mismo, pero cuando ya están clasificados.
+ *
+ * Hace falta para las cifras que no tienen una `source` detrás: la puntuación
+ * de un objetivo sale de varios indicadores y la global sale de varios
+ * objetivos. Sin esto habría que reconstruir la lista de fuentes hacia atrás
+ * —o, peor, escribir el orden de gravedad por segunda vez—.
+ */
+export function peorOrigen(origenes: OrigenDelDato[]): OrigenDelDato {
+  if (!origenes.length) return 'desconocido';
   const orden: OrigenDelDato[] = ['simulado', 'desconocido', 'estimado', 'medido'];
-  const encontrados = new Set(fuentes.map(origenDe));
+  const encontrados = new Set(origenes);
   return orden.find(o => encontrados.has(o)) || 'desconocido';
 }
