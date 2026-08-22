@@ -5,6 +5,7 @@ import Layout from './components/layout/Layout';
 // Mundo 3D: la escena pesa ~1 MB (three.js), así que la página entera
 // se carga en diferido — el resto de la app no paga por el motor del juego.
 const JuegoVital = lazy(() => import('./pages/JuegoVital'));
+import PaginaPublica from './pages/PaginaPublica';
 import TerritoryProfile from './pages/TerritoryProfile';
 import ChallengeProfile from './pages/ChallengeProfile';
 import SolutionProfile from './pages/SolutionProfile';
@@ -81,12 +82,31 @@ export default function App() {
   return (
     <SettingsProvider>
     <AuthProvider>
-      <DataProvider>
-        <EditProvider>
-          <DesignProvider>
             <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Layout />}>
+              {/* La cara publica de una pagina compartida: `/@nombre/pagina`.
+                  Va FUERA del Layout a proposito — quien llega aqui viene de un
+                  enlace, no tiene cuenta, y no debe ver la barra de trabajo ni
+                  un «todavia no tienes proyectos» que no es su vida. */}
+              <Route path=":arroba/:slug" element={<PaginaPublica />} />
+
+              {/* Los tres proveedores de datos envuelven SOLO el Layout, no la
+                  aplicacion entera. Estaban arriba del todo, y eso hacia que
+                  quien abria una pagina compartida —sin cuenta, a leer un
+                  texto— disparase las OCHO cargas del taller: territorios,
+                  objetivos, retos, soluciones, proyectos, organizaciones,
+                  causas e indicadores. Medido el 2026-08-22 en esta misma
+                  pantalla. Un lector no pide el almacen entero para leer una
+                  pagina. */}
+              <Route path="/" element={
+                <DataProvider>
+                  <EditProvider>
+                    <DesignProvider>
+                      <Layout />
+                    </DesignProvider>
+                  </EditProvider>
+                </DataProvider>
+              }>
                 {/* Fase 11: los Grafos de Conocimiento son el nuevo inicio;
                     el mapa conserva su ruta /mapa (enlazada en el menú). */}
                 {/* La portada presenta las TRES formas de ver (2026-08-06).
@@ -189,9 +209,6 @@ export default function App() {
               </Route>
             </Routes>
           </BrowserRouter>
-          </DesignProvider>
-        </EditProvider>
-      </DataProvider>
     </AuthProvider>
     </SettingsProvider>
   );
