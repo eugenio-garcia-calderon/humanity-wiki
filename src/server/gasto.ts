@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { providerOfModel } from './ai/provider.js';
 
 // ============================================================================
 // Cuadro de mando de GASTO (2026-08-08, petición del usuario)
@@ -44,7 +45,16 @@ interface GastoOficialAnthropic {
   mes_actual_eur?: number;
 }
 
-interface FilaMes { mes: string; anthropic_eur: number; google_eur: number; total_eur: number }
+interface FilaMes {
+  mes: string;
+  anthropic_eur: number;
+  google_eur: number;
+  /** Los modelos abiertos (Together). Son gratis PARA EL USUARIO, no para la
+   *  casa: su coste lo absorbe la plataforma y hasta hoy no salía en ningún
+   *  sitio. Ver `gastoInterno`. */
+  abiertos_eur: number;
+  total_eur: number;
+}
 
 interface Gasto {
   actualizado: string;
@@ -156,21 +166,40 @@ async function gastoOficialAnthropic(): Promise<GastoOficialAnthropic> {
 }
 
 async function gastoInterno(db: any): Promise<{ mes_actual: FilaMes; historial: FilaMes[] }> {
+  // SE AGRUPA POR MODELO Y SE CLASIFICA AQUÍ, no con un `LIKE` en la SQL
+  // (2026-08-22). El `LIKE 'gemini%'` de antes partía el mundo en dos —Google
+  // y «todo lo demás»— y por eso los modelos abiertos, que los sirve Together,
+  // aparecían como gasto de Anthropic. Medido en producción: 1,69 céntimos
+  // atribuidos al proveedor equivocado sobre 74,38 en total.
+  //
+  // Quién sirve cada modelo ya lo sabe `providerOfModel`, que es la misma
+  // función que usa el enrutador para decidir a quién llamar. Preguntárselo a
+  // ella en vez de reescribir la regla con otro `LIKE` es lo que evita que las
+  // dos versiones de la misma verdad se separen otra vez.
   const filas = await db.execute(sql`
     SELECT to_char(date_trunc('month', created_at), 'YYYY-MM') AS mes,
-           SUM(CASE WHEN model LIKE 'gemini%' THEN cost_cents ELSE 0 END) AS google_cents,
-           SUM(CASE WHEN model LIKE 'gemini%' THEN 0 ELSE cost_cents END) AS anthropic_cents
+           model, SUM(cost_cents) AS cents
     FROM ai_usage_charges
-    GROUP BY 1 ORDER BY 1 DESC LIMIT 12
+    GROUP BY 1, 2 ORDER BY 1 DESC
   `);
-  const historial: FilaMes[] = (filas.rows as any[]).map(f => {
-    const anthropic = Number(f.anthropic_cents || 0) / 100;
-    const google = Number(f.google_cents || 0) / 100;
-    return { mes: f.mes, anthropic_eur: anthropic, google_eur: google, total_eur: anthropic + google };
-  });
+  const porMes = new Map<string, FilaMes>();
+  for (const f of filas.rows as any[]) {
+    const mes = f.mes as string;
+    const fila = porMes.get(mes)
+      || { mes, anthropic_eur: 0, google_eur: 0, abiertos_eur: 0, total_eur: 0 };
+    const eur = Number(f.cents || 0) / 100;
+    const quien = providerOfModel(f.model || undefined);
+    if (quien === 'gemini') fila.google_eur += eur;
+    else if (quien === 'claude') fila.anthropic_eur += eur;
+    else fila.abiertos_eur += eur;   // together, y cualquiera que venga después
+    fila.total_eur += eur;
+    porMes.set(mes, fila);
+  }
+  const historial: FilaMes[] = [...porMes.values()]
+    .sort((a, b) => b.mes.localeCompare(a.mes)).slice(0, 12);
   const mesActual = new Date().toISOString().slice(0, 7);
   const mes_actual = historial.find(h => h.mes === mesActual)
-    || { mes: mesActual, anthropic_eur: 0, google_eur: 0, total_eur: 0 };
+    || { mes: mesActual, anthropic_eur: 0, google_eur: 0, abiertos_eur: 0, total_eur: 0 };
   return { mes_actual, historial };
 }
 
