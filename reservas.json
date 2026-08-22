@@ -151,12 +151,6 @@
       "desde": "2026-08-22T22:02:24.745Z"
     },
     {
-      "agente": "prog6",
-      "ruta": "src/server/gasto.ts",
-      "motivo": "estado de las copias en la pagina de Servidores",
-      "desde": "2026-08-22T22:19:14.077Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/pages/about/TokenomicsTareas.tsx",
       "motivo": "puntos transferibles + comision a la mitad en puntos (Eugenio)",
