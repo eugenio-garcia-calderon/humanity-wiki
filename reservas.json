@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "server.ts",
-      "motivo": "marcar el origen del dato en las puntuaciones que sirve",
-      "desde": "2026-08-22T11:49:17.623Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/ui/OrigenDelDato.tsx",
       "motivo": "marca de origen del dato (fichero nuevo)",
       "desde": "2026-08-22T11:54:08.627Z"
