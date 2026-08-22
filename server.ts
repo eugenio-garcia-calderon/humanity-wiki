@@ -334,7 +334,28 @@ async function startServer() {
   // 2. STRIPE CHECKOUT ENDPOINTS (flujo de socios/membresía, sin cambios)
   app.post("/api/stripe/create-checkout-session", async (req: Request, res: Response) => {
     try {
-      const { userId, email, membershipType = "socio_regular" } = req.body;
+      // ── A QUIÉN SE LE ABONA LA MEMBRESÍA (2026-08-22) ─────────────────
+      // Antes salía de `req.body.userId`: quien llamaba decía a qué cuenta
+      // apuntar la membresía. Cualquiera podía pagar y ponérsela a otro, o
+      // apuntar a otro un cobro recurrente que no había pedido. Es dinero de
+      // verdad, no puntos internos.
+      //
+      // Ahora la cuenta la decide EL SERVIDOR desde la sesión. Lo que venga en
+      // el cuerpo se ignora. Sin sesión no hay cuenta a la que abonar, y se
+      // dice: pagar primero y no saber de quién es la membresía después es
+      // peor que pedir que entre antes.
+      //
+      // El correo se toma también de la sesión por el mismo motivo: con un
+      // correo ajeno se puede enganchar el pago al cliente de Stripe de otra
+      // persona.
+      const { membershipType = "socio_regular" } = req.body;
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Entra en tu cuenta antes de hacerte socio: si no, no sabríamos a quién abonarle la membresía.",
+        });
+      }
+      const userId = req.user.id;
+      const email = req.user.email;
       const stripe = getStripe();
 
       let customerId: string | undefined;
