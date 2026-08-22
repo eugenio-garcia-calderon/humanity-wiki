@@ -4807,3 +4807,25 @@ El coordinador paró la fusión con dos preguntas que no tenían respuesta técn
 **¿Es opcional dar el número?** Lo era desde el principio: nada lo pide, ni al entrar ni al registrarse, y quitarlo es dejar el campo vacío y guardar.
 
 También en este commit, y no es mío: `TextosProvider` no estaba montado en `App.tsx`. El Programador 1 escribió el proveedor, el componente, la tabla y las rutas del servidor, verificó las rutas… y la pieza estaba publicada y muerta porque nadie la había enchufado a la aplicación. Se ve al ir a usarla, no al escribirla. Enchufado, y los tres párrafos de la página de Teléfono son ya los primeros que lo usan.
+
+---
+
+## 2026-08-22 — /tokenomics, rebuilt on the pages registry (Programador 7, PR #220)
+
+The public tokenomics page, now as ONE line in `src/paginasInfo.ts` instead
+of edits in `App.tsx` and `Layout.tsx` — the Dashboard's request once five
+programmers needed the same menu. The white paper draft and the task list
+hang off it as views (`?vista=libro-blanco`, `?vista=tareas`): the house
+pattern for "a different way of looking at the same place", and it keeps the
+(i) menu at one Tokenomics entry without touching any contested file.
+
+What the page says (all verified in the browser on 3007, menu entry and both
+views included): what exists today (internal balance + ledger), the service
+basket as declared intention (read from the public prices API when the #235
+server lands, static fallback otherwise), the capacity-not-ownership design
+principle, the four negations, the three-phase roadmap where only phase A
+exists, the distribution model Eugenio decided (50% of the platform's
+commission, success-weighted, 10-year expiry, 24-month dormancy, no euro
+redemption, market discounts up to 100%), the white paper draft with its
+[PENDIENTE] gaps, and the task list with rama A decided and the remaining
+mint ceiling stated with prog4's number.
