@@ -1,7 +1,7 @@
 // ============================================================================
 // EL REGISTRO SELLADO (fase 0, 2026-08-22)
 // ============================================================================
-// La tabla y el porqué están en `drizzle/0064_registro_sellado.sql`. Aquí está
+// La tabla y el porqué están en `drizzle/0070_registro_sellado.sql`. Aquí está
 // lo que la escribe y, sobre todo, **lo que la verifica**.
 //
 // ── EL NÚCLEO NO TOCA LA BASE DE DATOS, Y ESO ES A PROPÓSITO ────────────────

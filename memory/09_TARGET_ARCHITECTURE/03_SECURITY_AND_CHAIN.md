@@ -97,7 +97,7 @@ finished by narration, which the house rules forbid.
 
 > **State on 2026-08-22, the same day this was written.** Items 1, 3 and 4 of
 > phase 0 are built, tested and pushed on `prog4/seguridad-cadena`
-> (`src/server/seguridad/`, `drizzle/0064_registro_sellado.sql`). None of it is
+> (`src/server/seguridad/`, `drizzle/0070_registro_sellado.sql`). None of it is
 > attached to production data yet: the guard only warns, no route encrypts
 > anything, and nothing writes to the sealed record. What is left in phase 0 is
 > **110 routes still to review by hand**, the key vault (item 2), signed releases

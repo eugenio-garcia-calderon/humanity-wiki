@@ -15,7 +15,7 @@ registro.ts       the sealed record: append-only, hash-chained, signed, verifiab
 
 Tiers and the phased plan: `memory/09_TARGET_ARCHITECTURE/04_DATA_INTEGRITY_TIERS.md`.
 
-Migration: `drizzle/0064_registro_sellado.sql`.
+Migration: `drizzle/0070_registro_sellado.sql`.
 
 ## The commands
 
