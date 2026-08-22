@@ -53,6 +53,12 @@
       "ruta": "drizzle/0083_por_donde_fue_la_llamada.sql",
       "motivo": "TURN de Cloudflare: medir por donde va cada llamada",
       "desde": "2026-08-22T18:22:49.774Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "reparto mensual en modo simulacion (sin pagar)",
+      "desde": "2026-08-22T18:28:11.457Z"
     }
   ]
 }
