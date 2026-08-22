@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2 } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download } from 'lucide-react';
 
 // ============================================================================
 // ¿DÓNDE ESTÁ LO MÍO? — fase 6 del plan de tiendas (2026-08-22)
@@ -96,7 +96,9 @@ export default function MiPedido() {
               </p>
             ) : (
               <ol className="mt-5 space-y-3">
-                {PASOS.map(paso => {
+                {/* Un pedido solo de descargas no se envía: se pinta pagado →
+                    entregado, sin un «enviado» que nunca llegaría. */}
+                {PASOS.filter(paso => !(pedido.solo_digital && paso.estado === 'enviado')).map(paso => {
                   const indice = PASOS.findIndex(x => x.estado === pedido.estado);
                   const yo = PASOS.findIndex(x => x.estado === paso.estado);
                   const hecho = yo <= indice;
@@ -118,6 +120,33 @@ export default function MiPedido() {
               <p className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500">
                 Seguimiento: <span className="font-mono text-slate-700">{pedido.seguimiento}</span>
               </p>
+            )}
+
+            {/* LO QUE SE COMPRÓ, LÍNEA A LÍNEA — y la descarga de lo digital
+                (2026-08-22). Antes un PDF se cobraba y no se entregaba: la
+                descarga vive AQUÍ, en el pedido, con las mismas dos llaves
+                (código + correo) que abrieron esta pantalla. Si quien vende no
+                subió el archivo, se dice tal cual: el pedido está pagado y la
+                culpa no es de quien compró. */}
+            {Array.isArray(pedido.lineas) && pedido.lineas.length > 0 && (
+              <ul className="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                {pedido.lineas.map((l: any) => (
+                  <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-slate-700 min-w-0 truncate">
+                      {l.producto}{l.unidades > 1 && <span className="text-slate-400"> × {l.unidades}</span>}
+                    </span>
+                    {l.descarga ? (
+                      <a href={l.descarga} className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                        <Download className="w-3.5 h-3.5" /> Descargar
+                      </a>
+                    ) : l.sin_archivo ? (
+                      <span className="shrink-0 text-xs text-amber-700 font-bold">
+                        Quien vende aún no ha subido el archivo
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
             )}
           </article>
         )}

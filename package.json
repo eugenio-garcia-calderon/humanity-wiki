@@ -13,7 +13,8 @@
     "probar:acciones": "node --env-file=.env scripts/probar-acciones-ia.mjs",
     "seguridad:permisos": "node scripts/auditar-permisos.mjs",
     "seguridad:probar": "tsx scripts/probar-politica.ts && tsx scripts/probar-clasificacion.ts && tsx scripts/probar-cifrado.ts && tsx scripts/probar-registro.ts",
-    "seguridad:clasificacion": "node scripts/auditar-clasificacion.mjs"
+    "seguridad:clasificacion": "node scripts/auditar-clasificacion.mjs",
+    "probar:fotos": "node --env-file=.env node_modules/.bin/tsx scripts/probar-fotos.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

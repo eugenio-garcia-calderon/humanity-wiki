@@ -171,6 +171,11 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
               // Sin precio no se inventa un cero: se dice que hay que
               // preguntar. Un cero diría «gratis», que es otra cosa.
               : <span className="text-sm font-bold text-slate-500">Precio a consultar</span>}
+            {p.valoracion?.n > 0 && (
+              <span className="text-xs font-bold text-amber-600" title={`${p.valoracion.n} opiniones`}>
+                ★ {Number(p.valoracion.media).toLocaleString('es-ES')} ({p.valoracion.n})
+              </span>
+            )}
             <Disponibilidad stock={p.stock} />
           </div>
 
