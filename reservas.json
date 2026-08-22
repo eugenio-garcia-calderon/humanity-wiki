@@ -11,12 +11,6 @@
       "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
       "motivo": "Fase 2: la camara pregunta donde guardar en vez de abrir el editor",
       "desde": "2026-08-22T13:05:59.642Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entradas del origen del dato y del chat abierto",
-      "desde": "2026-08-22T13:08:47.652Z"
     }
   ]
 }
