@@ -100,6 +100,11 @@ export const NANO_BANANA_CATALOG_MODEL = 'gemini-2.5-flash-image';
 
 export const AI_MODELS: Record<string, {
   label: string; hint: string; input: number; output: number; image?: boolean;
+  /** Precio de la entrada RELEÍDA de la caché del proveedor, en céntimos por
+   *  millón. Solo lo tienen los modelos abiertos: su proveedor guarda los
+   *  prefijos automáticamente y los cobra mucho más baratos. Sin este campo se
+   *  cobra la entrada entera, que es lo prudente. */
+  cacheado?: number;
   /** La plataforma cubre su coste: el usuario paga 0 por usarlo. */
   gratis?: boolean;
   /** Nivel mínimo para elegirlo. Los de pago son para verificados (2+),
@@ -115,8 +120,10 @@ export const AI_MODELS: Record<string, {
   // plataforma. Los ids son NUESTROS alias, no los del proveedor: así el día
   // que se cambie Together por otro (DeepSeek directo, Fireworks…) los
   // registros de consumo y las preferencias guardadas siguen valiendo.
-  'abierto-rapido': { label: 'Rápido',      hint: 'Gratis · para preguntas sencillas', input: 14, output: 28,  gratis: true, proveedor: 'together' },
-  'abierto-medio':  { label: 'Equilibrado', hint: 'Gratis · el de cada día',           input: 32, output: 128, gratis: true, proveedor: 'together' },
+  // `cacheado`: lo que cuesta el trozo que el proveedor ya tenía caliente. La
+  // proporción sale de su tabla pública (≈1/10 de la entrada, 2026-08-22).
+  'abierto-rapido': { label: 'Rápido',      hint: 'Gratis · para preguntas sencillas', input: 14, output: 28,  cacheado: 1.4, gratis: true, proveedor: 'together' },
+  'abierto-medio':  { label: 'Equilibrado', hint: 'Gratis · el de cada día',           input: 32, output: 128, cacheado: 3.2, gratis: true, proveedor: 'together' },
   'claude-haiku-4-5': { label: 'Haiku 4.5',  hint: 'Rápido y económico',        input: 100,  output: 500,  nivelMinimo: 2 },
   'claude-sonnet-5':  { label: 'Sonnet 5',   hint: 'Premium (recomendado)',     input: 300,  output: 1500, nivelMinimo: 2 },
   'claude-opus-5':    { label: 'Opus 5',     hint: 'Máxima capacidad',          input: 500,  output: 2500, nivelMinimo: 2 },
@@ -697,8 +704,21 @@ export class TogetherProvider implements AIProvider {
     const alias = req.model && MODELOS_ABIERTOS[req.model] ? req.model : 'abierto-medio';
     const modeloReal = MODELOS_ABIERTOS[alias]();
 
-    // El system va entero como primer mensaje `system`: esta API no tiene la
-    // caché de prompts de Anthropic, así que estable y variable viajan juntos.
+    // ══ LA CACHÉ DE ESTE PROVEEDOR ES AUTOMÁTICA (comprobado 2026-08-22) ═══
+    // No se activa con ningún parámetro ni cabecera: el proveedor guarda los
+    // PREFIJOS de lo que se le manda y cobra a precio reducido la parte que
+    // coincide con algo que ya tenía caliente. Solo cuenta el prefijo común
+    // más largo: a partir del primer byte distinto, se paga entero.
+    //
+    // Por eso la parte ESTABLE va delante y la variable detrás. Ya iba así, y
+    // ahora se sabe por qué importa: si la fecha o el nombre del usuario
+    // estuvieran arriba, el prefijo cambiaría en cada mensaje y no habría
+    // acierto nunca. La regla está escrita en `buildSystemPrompt`, y esta es la
+    // otra mitad que la hace valer.
+    //
+    // (El comentario anterior decía que esta API no tenía caché de prompts. Era
+    // cierto para el mecanismo EXPLÍCITO de Anthropic —marcar un bloque— y
+    // falso para lo que hay: una caché de prefijos que no hay que pedir.)
     const system = req.systemEstable ? `${req.systemEstable}
 
 ${req.system}` : req.system;
@@ -735,6 +755,7 @@ ${req.system}` : req.system;
     let text = '';
     let inputTokens = 0;
     let outputTokens = 0;
+    let cacheRead = 0;
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -755,6 +776,13 @@ ${req.system}` : req.system;
         if (ev.usage) {
           inputTokens = ev.usage.prompt_tokens ?? inputTokens;
           outputTokens = ev.usage.completion_tokens ?? outputTokens;
+          // CUÁNTO SE HA RELEÍDO DE LA CACHÉ. El proveedor lo informa aquí
+          // cuando hay acierto. Sin leerlo, la caché podría estar funcionando
+          // —o no— y el panel de costes diría lo mismo en los dos casos: no
+          // habría forma de saber si sirve de algo.
+          cacheRead = ev.usage.prompt_tokens_details?.cached_tokens
+            ?? ev.usage.cached_tokens
+            ?? cacheRead;
         }
       }
     }
@@ -762,13 +790,25 @@ ${req.system}` : req.system;
     // El precio se calcula con NUESTRO alias de catálogo: es la cifra que ve
     // el panel de costes, y es coste de la plataforma (el usuario paga 0).
     const price = AI_MODELS[alias] || PRICE_PER_MTOK;
+    // LO RELEÍDO DE LA CACHÉ SE COBRA A SU PRECIO, no al de entrada. El
+    // proveedor lo descuenta de verdad; si aquí se cobrara entero, el panel de
+    // costes diría que gastamos más de lo que la factura dice, y una cifra que
+    // no cuadra con la factura no sirve para decidir nada.
+    //
+    // El descuento se declara en el catálogo (`cacheado`). Sin él se cobra
+    // entero, que es lo prudente: preferimos que el panel se pase de caro a
+    // que prometa un ahorro que no existe.
+    const sinCache = Math.max(0, inputTokens - cacheRead);
+    const precioCache = (price as any).cacheado ?? price.input;
     return {
       text,
       model: alias,
       inputTokens,
       outputTokens,
+      cacheReadTokens: cacheRead,
       costCents:
-        (inputTokens / 1_000_000) * price.input +
+        (sinCache / 1_000_000) * price.input +
+        (cacheRead / 1_000_000) * precioCache +
         (outputTokens / 1_000_000) * price.output,
       durationMs: Date.now() - started,
       webSources: [],

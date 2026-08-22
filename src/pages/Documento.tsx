@@ -21,6 +21,11 @@ import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '.
 import PortadaPdf from '../components/ui/PortadaPdf';
 import { abrirLateral } from '../components/ventanas/bus';
 import { cn } from '../utils/cn';
+// La tabla de estilos de los bloques vive en el LECTOR, y el editor la
+// importa de allí. Una sola definición: lo que se escribe y lo que se
+// publica tienen que verse igual, y con dos copias el fallo sale siempre en
+// la pantalla pública, que es la que nadie mira.
+import { CLASES_TEXTO } from '../components/knowledge/BloquesLectura';
 import Adjuntos from '../components/archivo/Adjuntos';
 
 // ============================================================================
@@ -86,17 +91,6 @@ function Inline({ texto }: { texto: string }) {
   return <>{partes}</>;
 }
 
-const CLASES_TEXTO: Partial<Record<TipoBloque, string>> = {
-  parrafo: 'text-[15px] leading-relaxed text-slate-700',
-  titulo1: 'text-3xl font-black tracking-tight text-slate-900 mt-4',
-  titulo2: 'text-xl font-black text-slate-900 mt-3',
-  titulo3: 'text-base font-black text-slate-800 mt-2',
-  lista: 'text-[15px] leading-relaxed text-slate-700',
-  numerada: 'text-[15px] leading-relaxed text-slate-700',
-  tarea: 'text-[15px] leading-relaxed text-slate-700',
-  cita: 'text-[15px] leading-relaxed text-slate-600 italic',
-  codigo: 'font-mono text-[13px] leading-relaxed text-slate-100 whitespace-pre-wrap',
-};
 
 export default function Documento() {
   const { id } = useParams<{ id: string }>();

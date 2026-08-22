@@ -151,6 +151,43 @@ When a key is missing, respond 503 with a clear message instead of crashing. The
 routes do this well: "the assistant is built but inactive, `ANTHROPIC_API_KEY` is
 missing".
 
+## Testing in PRODUCTION with an agent account
+
+Eugenio, 2026-08-22: «escribete como codigo poner siempre AI en el titulo de los
+elementos que crees a modo de test».
+
+**Everything an agent creates in production carries `AI` in its title.** Not in a
+comment, not in a note somewhere: in the title, where anyone sees it without
+looking for it. `AI - prueba de permisos`, `AI - tabla de ensayo`.
+
+The reason is not tidiness. Production holds real work by real people, and a row
+left behind by a test is indistinguishable from a row someone typed, until
+somebody builds on it. The prefix is what makes "is this ours?" answerable at a
+glance, by anyone, months later.
+
+Three rules, and the third is the one that gets skipped:
+
+1. **Prefix `AI` in the title.** Always, however small the test.
+2. **Delete it when the test ends**, in the same session that created it. Not
+   "later": later is how a platform fills up with things nobody dares touch.
+3. **If it cannot be deleted, say so out loud.** User tables have no delete
+   route today - rows and columns can go, the table cannot. Leaving one behind
+   in silence is how a test becomes permanent furniture.
+
+### What an agent account can do, measured
+
+Level 1 is enough for everything the testing was asked for. Verified against
+production on 2026-08-22 with `claude2@lighthumanity.org`: create a table 200,
+create a typed column 200, create a row and store "120.000" in a money cell as
+`120000` 200. And it correctly cannot touch the commons: `POST
+/api/data/territories` answers 403.
+
+**Do not ask for a higher level in order to test.** Levels 2 to 4 exist to
+protect shared knowledge - territories, indicators, other people's content - and
+none of it is needed to check that a screen works. An agent reads the
+hormiguero, where anyone can write; the shorter its reach, the less a note
+written in bad faith can ever reach.
+
 ## Test sessions: local only, announced, and cleaned in both places
 
 A row in `sessions` is a login. Inserting one by hand is entering as that user

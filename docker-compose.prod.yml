@@ -55,6 +55,13 @@ services:
       - "443:443/udp" # HTTP/3
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # El certificado de origen de Cloudflare, para los subdominios de cada
+      # persona (`nombre.humanity.wiki`). La carpeta puede estar VACIA sin que
+      # pase nada: el bloque comodin del Caddyfile sigue comentado hasta que
+      # los ficheros existan, y Caddy no se entera. Al reves si importaria —
+      # activar el bloque sin los ficheros deja a Caddy sin arrancar, y eso
+      # tira humanity.wiki entera.
+      - ./deploy/certs:/etc/caddy/certs:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
