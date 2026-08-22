@@ -4644,3 +4644,62 @@ Agreed with prog4 and written in /tokenomics/tareas: the day the monthly pot
 pays out over counted views, `views` (raw, displayed) and valid views (one
 per person, session required) must be TWO numbers, and the pot only reads
 the second. PUNTOS_TRANSFERENCIA stays off until this fix is deployed.
+
+## 2026-08-22 · Dos tableros nuevos, y el candado que hace que uno sirva (prog6)
+
+**Seis notas del Feedback decían en texto llano, a la vista de cualquiera, por
+dónde entrar en la plataforma**: que el login no tenía límite de intentos, que
+la aplicación se conecta a la base de datos como superusuario, que falta
+`Content-Security-Policy`, que los ficheros subidos se sirven sin comprobar
+sesión y que había una ruta fabricando puntos sin pedir sesión.
+
+Eugenio: «hay cuatro cosas de seguridad en el hormiguero, traslada ahí esas
+cuestiones para limpiar el hormiguero, que es un tema para el público». Y
+aparte: «vas a crear una página en (i) donde pondrás tu visión y estrategia de
+los servidores […] de forma transparente a nivel de coste […] y un kanban como
+el del hormiguero con las tareas que tienes pendientes».
+
+**Una columna `area` en `incidencias`, no un tablero nuevo** (migración `0075`).
+La maquinaria del Feedback ya resuelve estados, adjuntos, permisos, el token de
+los agentes y el archivado; un tablero paralelo habría sido una segunda lista
+que nadie mira, y las notas de seguridad son justo las que no pueden acabar
+ahí. Tres tableros: `general`, `seguridad` y `servidores`.
+
+**El candado está en el servidor, en cinco puertas.** Ver el tablero, crear,
+mover una nota de tablero, el contador del botón de la hormiga —un número
+también filtra: diría cuántos agujeros hay a quien no puede ver ninguno— y los
+adjuntos. Esa quinta la encontró prog4 revisando, y es la que convierte un
+candado en un candado: **la nota quedaba escondida y su adjunto no**, porque
+`express.static` sirve `/uploads` sin comprobar sesión. Comprobado contra
+producción, no deducido. El tablero de seguridad no admite adjuntos y dice por
+qué.
+
+Y una decisión escrita en vez de tapada: **un programador IA con su token lee
+el tablero de seguridad**, porque somos quienes trabajamos esas notas. Eso
+amplía lo que vale un token robado —antes, un color equivocado; ahora, la lista
+de por dónde entrar—, así que cada lectura con token **deja rastro con nombre y
+hora** (idea de prog4: no le quita el acceso a nadie y convierte «no lo podemos
+impedir» en «lo veríamos»).
+
+**El candado nombra `seguridad` explícitamente y no «todo lo que no sea
+general»**, porque el tercer tablero, `servidores`, es público a propósito. Lo
+que se esconde se decide uno por uno, nunca por descarte.
+
+**`/api/gasto` dejaba caer reconocimiento.** Llevaba abierto desde el 8 de
+agosto y estaba bien porque solo lo leía la pestaña de Visión; la página nueva
+lo pone en una pantalla pública. Aviso de prog2, y medido: no daba IP ni
+nombres de contenedor, pero sí el nombre de la máquina, el modelo exacto
+(`CPX42`, o sea 8 núcleos y 16 GB — cuánta máquina hay que tumbar) y los avisos
+de «falta tal variable», que llevan dentro los nombres de nuestras claves. Los
+euros siguen públicos: es la transparencia que pidió Eugenio y no sirve para
+atacar nada. Filtrado **al salir** y no al guardar, para no tener dos cachés
+que se desincronicen.
+
+**Y los límites de peticiones** (`src/server/limites/`, migración `0076`), que
+**entran pero no están conectados a ninguna ruta todavía**: `auth.ts` es de
+prog1. Cinco reglas acordadas con prog4, y las dos que importan son las que
+salieron de discutirlas: quien acierta la contraseña no paga el retraso de los
+que fallaron —si no, cualquiera te deja fuera de tu cuenta fallando adrede— y
+**dos contadores, nunca uno**: el freno se limpia al acertar, el registro de
+fallos no se limpia nunca. Con uno solo, quien prueba mil contraseñas y acierta
+la última se lleva borrado su propio rastro.
