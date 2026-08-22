@@ -23,6 +23,14 @@ import { Clock, Mail, Trash2, UserX } from 'lucide-react';
 // es una máquina de borrar cuentas ajenas: cualquiera escribe el correo de otro.
 // El borrado real se pide desde dentro, ya identificado. Aquí se explica cómo, y
 // se da una vía humana para quien no pueda entrar.
+//
+// CORREGIDO EL MISMO DÍA (2026-08-22). El paso 3 decía «te pedirá tu
+// contraseña», y para quien entra con Google es falso: se le pide el correo. Es
+// **exactamente el fallo que yo le encontré a Programador 1 en su endpoint**,
+// sobrevivido en mi propia página — porque escribí el texto contra la primera
+// versión del contrato y no volví a leerlo cuando el contrato cambió. Lo
+// encontró él revisándola. Dos personas, la misma suposición, en dos sitios
+// distintos: la señal de que el problema nunca fue el endpoint.
 
 export default function BorrarCuentaPublica() {
   return (
@@ -50,7 +58,7 @@ export default function BorrarCuentaPublica() {
           </li>
           <li className="flex gap-3">
             <span className="shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-black grid place-items-center">3</span>
-            <span>Abajo del todo, <strong>«Borrar mi cuenta»</strong>. Te pedirá tu contraseña para confirmar que eres tú.</span>
+            <span>Abajo del todo, <strong>«Borrar mi cuenta»</strong>. Te pedirá tu contraseña —o tu correo, si entras con Google— para confirmar que eres tú.</span>
           </li>
         </ol>
         <p className="mt-4 text-xs text-slate-500 leading-relaxed flex gap-2">
