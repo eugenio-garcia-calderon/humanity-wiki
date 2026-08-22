@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState , lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ExternalLink, PlayCircle, BookOpen, Link2, Map as MapIcon, Quote,
   Users as UsersIcon, Network, FileText, CalendarClock, Lightbulb,
   CheckSquare, Square, Plus, Trash2, Rocket,
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 
 // ============================================================================
 // Ventana de Conocimiento — renderizado por tipo (Fase 11)
@@ -114,30 +113,24 @@ function SourceCredit({ name, url }: { name?: string; url?: string }) {
   );
 }
 
+// ══ LAS GRÁFICAS SE DESCARGAN AL VER UNA (2026-08-22) ════════════════════════
+// La librería de gráficas pesa lo suyo y hasta hoy entraba en el fichero que se
+// descarga al ENTRAR, porque este componente pinta cualquier tipo de ventana y
+// se usa en la portada, en el lienzo y en el editor. O sea: todo el mundo se
+// bajaba el motor de gráficas aunque no hubiera una sola gráfica en pantalla.
+//
+// Ahora vive en su propio trozo y se pide la primera vez que aparece una. Lo
+// que se ve mientras llega es un hueco de la ALTURA EXACTA que va a ocupar: sin
+// eso, al llegar la gráfica el texto de debajo daría un salto.
+const Graficas = lazy(() => import('./Graficas'));
+
 function ChartBlock({ chart, height }: { chart: any; height: number }) {
   const data = Array.isArray(chart?.data) ? chart.data : [];
   if (!data.length) return null;
-  if (chart.type === 'line') {
-    return (
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: -18 }}>
-          <XAxis dataKey="name" tick={{ fontSize: 9 }} />
-          <YAxis tick={{ fontSize: 9 }} />
-          <Tooltip contentStyle={{ fontSize: 11 }} />
-          <Line type="monotone" dataKey="value" stroke="#059669" strokeWidth={2} dot={{ r: 2 }} />
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  }
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" innerRadius="55%" outerRadius="85%" paddingAngle={2}>
-          {data.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-        </Pie>
-        <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: any, n: any) => [`${v}${chart.unit || '%'}`, n]} />
-      </PieChart>
-    </ResponsiveContainer>
+    <Suspense fallback={<div style={{ height }} className="rounded-lg bg-slate-50 animate-pulse" />}>
+      <Graficas chart={chart} height={height} />
+    </Suspense>
   );
 }
 
