@@ -27,6 +27,8 @@ npm run seguridad:clasificacion  # is every table classified? fails the build if
 npm run seguridad:probar         # the five test scripts
 node --env-file=.env scripts/sellar.mjs              # seal what is pending
 node --env-file=.env scripts/sellar.mjs users U_X    # is that row still the one we sealed?
+node --env-file=.env scripts/verificar.mjs           # whole chain + a random sample
+node --env-file=.env scripts/verificar.mjs --muestra 50   # sample only, for the hourly run
 npx tsx scripts/probar-registro.ts   # creates a throwaway database, and drops it
 ```
 
@@ -45,6 +47,7 @@ green is worse than no test.
 | Encryption | Module and tests done. **Nothing in the product uses it yet**, and there is no key table |
 | The sealed record | Table, writer and verifier done and tested. **Nothing writes to it in production yet** |
 | Capture from the database | Triggers on 25 tier-3 tables write to an outbox; `sellar.mjs` chains and signs it. **Not applied to production**, and nothing runs it on a schedule yet |
+| Verification | `verificar.mjs` checks the chain and a random sample of rows. Exit 0 / 1 (altered) / 2 (cannot tell). **It notifies nobody by itself** — whoever schedules it turns the exit code into an alarm |
 | Anchoring (phase 2) | The `registro_anclajes` table exists and the daily root can be computed. **Nothing publishes it** |
 
 Saying it plainly costs nothing and prevents the expensive mistake: believing

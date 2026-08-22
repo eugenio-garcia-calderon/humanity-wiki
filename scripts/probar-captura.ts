@@ -16,7 +16,7 @@ import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import { leerCadena, verificarCadena } from '../src/server/seguridad/registro.js';
-import { sellarPendientes, comprobarFila } from '../src/server/seguridad/sellar.js';
+import { sellarPendientes, comprobarFila, verificarMuestra } from '../src/server/seguridad/sellar.js';
 import { generarPareja } from '../src/server/seguridad/firma.js';
 
 let fallos = 0;
@@ -124,6 +124,21 @@ try {
     JSON.stringify(hueco?.datos));
   const v2 = verificarCadena(await leerCadena(db), publicas);
   comprobar('con todo eso, la cadena sigue entera', v2.estado === 'VERIFICADA');
+
+  console.log('\nLA COMPROBACIÓN AL AZAR');
+  const m1 = await verificarMuestra(db, 10);
+  comprobar('mira filas de verdad y las encuentra iguales',
+    m1.miradas >= 1 && m1.distintas.length === 0, JSON.stringify(m1));
+  // Se manipula otra vez por debajo, y la muestra tiene que cazarlo.
+  await pool.query(`ALTER TABLE users DISABLE TRIGGER registro_captura`);
+  await pool.query(`UPDATE users SET email = 'otra-vez@ejemplo.invalid' WHERE id = 'U_PRUEBA'`);
+  await pool.query(`ALTER TABLE users ENABLE TRIGGER registro_captura`);
+  const m2 = await verificarMuestra(db, 10);
+  comprobar('con una fila manipulada, la muestra la señala con nombre y clave',
+    m2.distintas.some((d) => d.tabla === 'users' && d.clave === 'U_PRUEBA'), JSON.stringify(m2));
+  // Se deja como estaba antes de seguir, para que el resto de la prueba valga.
+  await pool.query(`UPDATE users SET email = 'suplantado@ejemplo.invalid' WHERE id = 'U_PRUEBA'`);
+  await sellarPendientes(db);
 
   console.log('\nEL BORRADO DE UNA FILA');
   await pool.query(`DELETE FROM users WHERE id = 'U_PRUEBA'`);

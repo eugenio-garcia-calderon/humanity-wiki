@@ -146,3 +146,52 @@ export async function comprobarFila(db: any, tabla: string, clave: string): Prom
     ? { estado: 'IGUAL', sellada_en: new Date(sellada.momento).toISOString() }
     : { estado: 'DISTINTA', porque: 'El contenido de ahora no da la huella que se selló.', sellada_en: new Date(sellada.momento).toISOString() };
 }
+
+// ── LA COMPROBACIÓN PERIÓDICA ───────────────────────────────────────────────
+
+export interface Muestra {
+  miradas: number;
+  iguales: number;
+  distintas: { tabla: string; clave: string; sellada_en?: string }[];
+  sinSaber: number;
+}
+
+/**
+ * Coge unas cuantas filas al azar de las que hay selladas y comprueba que
+ * siguen siendo las mismas.
+ *
+ * **Al azar y no las últimas**, que es la diferencia entre una comprobación y
+ * un teatro: quien manipula algo lo hace en un sitio viejo y tranquilo, no en
+ * la fila que se acaba de escribir. Con una muestra pequeña cada hora, una
+ * manipulación tiene que sobrevivir a muchas tiradas de dados para no salir.
+ *
+ * No sustituye a verificar la cadena entera: son dos preguntas distintas. La
+ * cadena dice si el REGISTRO está intacto; esto dice si los DATOS siguen
+ * pareciéndose a lo que el registro afirma.
+ */
+export async function verificarMuestra(db: any, cuantas = 25): Promise<Muestra> {
+  const filas = (await db.execute(sql`
+    SELECT DISTINCT ON (datos ->> 'tabla', datos ->> 'clave')
+           datos ->> 'tabla' AS tabla, datos ->> 'clave' AS clave
+    FROM registro_sellado
+    WHERE clase = 'dato' AND datos ->> 'clave' <> ''
+    ORDER BY datos ->> 'tabla', datos ->> 'clave', n DESC
+  `)).rows as any[];
+
+  // Se barajan aquí y no en SQL: `ORDER BY random()` sobre una tabla que solo
+  // crece acaba costando una lectura entera cada vez que se ejecuta.
+  for (let i = filas.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filas[i], filas[j]] = [filas[j], filas[i]];
+  }
+
+  const m: Muestra = { miradas: 0, iguales: 0, distintas: [], sinSaber: 0 };
+  for (const f of filas.slice(0, cuantas)) {
+    const v = await comprobarFila(db, f.tabla, f.clave);
+    m.miradas++;
+    if (v.estado === 'IGUAL') m.iguales++;
+    else if (v.estado === 'DISTINTA') m.distintas.push({ tabla: f.tabla, clave: f.clave, sellada_en: v.sellada_en });
+    else m.sinSaber++;
+  }
+  return m;
+}
