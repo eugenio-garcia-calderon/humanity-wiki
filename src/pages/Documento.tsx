@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip,
+  Search, X, Wand2, PenLine, Smile, Paperclip, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
+import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -15,6 +17,8 @@ import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
+import PortadaPdf from '../components/ui/PortadaPdf';
+import { abrirLateral } from '../components/ventanas/bus';
 import { cn } from '../utils/cn';
 import Adjuntos from '../components/archivo/Adjuntos';
 
@@ -45,7 +49,11 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
-  { tipo: 'tabla', label: 'Tabla', icon: Table2 },
+  // La primera es la buena: columnas con tipo, fórmulas y relaciones. La de
+  // texto se queda debajo y dice lo que es, para quien solo quiera una rejilla
+  // de texto en un documento.
+  { tipo: 'basedatos', label: 'Base de datos', icon: Boxes },
+  { tipo: 'tabla', label: 'Tabla de texto', icon: Table2 },
   { tipo: 'publicacion', label: 'Publicación', icon: Boxes },
   { tipo: 'producto', label: 'Producto', icon: Store },
 ];
@@ -146,6 +154,12 @@ export default function Documento() {
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
   const [arrastrando, setArrastrando] = useState<string | null>(null);   // id del bloque en vuelo
   const [sobreBloque, setSobreBloque] = useState<string | null>(null);   // id del bloque bajo el cursor
+  /** Hay un archivo del escritorio volando sobre el documento (2026-08-22).
+   *  Se pinta un borde para decir «suéltalo aquí»: sin señal, arrastrar algo
+   *  encima de una página es probar a ver si pasa algo. */
+  const [archivoEncima, setArchivoEncima] = useState(false);
+  /** Qué bloque tiene abierto su menú de tres puntos. */
+  const [menuMedio, setMenuMedio] = useState<string | null>(null);
   const [buscadorPub, setBuscadorPub] = useState<string | null>(null);   // id del bloque tras el que insertar ('' = al final)
   const [busquedaPub, setBusquedaPub] = useState('');
   const [resultadosPub, setResultadosPub] = useState<any[]>([]);
@@ -321,7 +335,7 @@ export default function Documento() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
@@ -513,15 +527,9 @@ export default function Documento() {
   };
 
   const subirPortada = async (archivo: File) => {
-    const bytes = await archivo.arrayBuffer();
-    const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: bytes,
-    });
-    const j = await r.json();
-    if (!r.ok) { setError(j.error || 'No se ha podido subir la portada.'); return; }
-    setPortada(j.url);
+    const sub = await subirArchivo(archivo);
+    if (sub.error) { setError(sub.error); return; }
+    setPortada(sub.url);
     programarGuardado();
   };
 
@@ -698,6 +706,39 @@ export default function Documento() {
     programarGuardado();
   }, [programarGuardado]);
 
+  /** ══ SOLTAR UN ARCHIVO EN EL DOCUMENTO (2026-08-22) ═══════════════════
+   *  Eugenio: «permite en el constructor de páginas estilo Notion arrastrar un
+   *  archivo y que se inserte en la página».
+   *
+   *  PASA POR EL MISMO SITIO QUE PEGAR. Arrastrar y pegar traen exactamente lo
+   *  mismo —un `DataTransfer` con ficheros dentro—, así que arrastrar un PDF y
+   *  pegarlo no pueden dar resultados distintos. Un segundo camino con su
+   *  propia lista de tipos habría sido el sitio donde el .webp funciona pegado
+   *  y no arrastrado.
+   *
+   *  NO SE QUEDA CON LOS ARRASTRES DE DENTRO. Los bloques se recolocan
+   *  arrastrándolos, y ese arrastre no lleva ficheros; si esto se los quedara,
+   *  reordenar dejaría de funcionar el día que se implementó subir archivos. */
+  const traeArchivos = (dt: DataTransfer | null) =>
+    !!dt && (Array.from(dt.types || []).includes('Files') || (dt.files?.length ?? 0) > 0);
+
+  const alSoltarArchivos = async (e: React.DragEvent) => {
+    if (arrastrando || !traeArchivos(e.dataTransfer)) return;
+    e.preventDefault();
+    setArchivoEncima(false);
+    if (!editable) { setError('Esta página es de solo lectura: no se pueden añadir archivos.'); return; }
+    try {
+      const nuevos = await bloquesDelPortapapeles(e.dataTransfer);
+      // `null` = no traía nada que sepamos incrustar. Se dice, en vez de
+      // tragárselo en silencio: soltar algo y que no pase nada es el fallo que
+      // nadie sabe reportar.
+      if (!nuevos?.length) { setError('De eso que has soltado no sé hacer un bloque.'); return; }
+      insertarBloques(null, nuevos, false);
+    } finally {
+      setSubiendo(null);
+    }
+  };
+
   /** Pegar varias líneas crea varios bloques, pasando por el mismo parser
    *  markdown de siempre — pegar una lista pega una lista de verdad. Y desde
    *  2026-08-19, pegar una imagen, un vídeo o un PDF crea su bloque. */
@@ -844,6 +885,16 @@ export default function Documento() {
     }
   });
 
+  // El menú de los tres puntitos se cierra al pinchar en cualquier otro
+  // sitio, como el resto de los menús de la plataforma. Sin esto se quedan dos
+  // abiertos a la vez y ninguno parece el que manda.
+  useEffect(() => {
+    if (!menuMedio) return;
+    const fuera = () => setMenuMedio(null);
+    window.addEventListener('click', fuera);
+    return () => window.removeEventListener('click', fuera);
+  }, [menuMedio]);
+
   /** Dónde está el cursor dentro de un contentEditable, en caracteres. */
   const offsetCaret = (el: HTMLElement): number => {
     const sel = window.getSelection();
@@ -855,15 +906,9 @@ export default function Documento() {
   };
 
   const subirImagen = async (b: Bloque, archivo: File) => {
-    const bytes = await archivo.arrayBuffer();
-    const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: bytes,
-    });
-    const j = await r.json();
-    if (!r.ok) { setError(j.error || 'No se ha podido subir la imagen.'); return; }
-    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: j.url } : x));
+    const sub = await subirArchivo(archivo);
+    if (sub.error) { setError(sub.error); return; }
+    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: sub.url } : x));
     programarGuardado();
   };
 
@@ -899,6 +944,26 @@ export default function Documento() {
       if (b.tipo === 'separador') return <hr className="border-slate-200 my-2" />;
 
       if (b.tipo === 'imagen') {
+        // UNA IMAGEN SE EMBEBE, SALVO QUE LA HAYAS CERRADO (2026-08-22,
+        // Eugenio: «si es una imagen por defecto la embebes»). Es lo que ya
+        // pasaba; lo nuevo es poder cerrarla a una línea desde los tres
+        // puntitos, para una página con veinte capturas donde lo que se lee es
+        // el texto.
+        if (b.url && b.vista === 'tarjeta') {
+          return (
+            <button
+              type="button"
+              onClick={() => abrirLateral({ titulo: b.pie || 'Imagen', destino: b.url || '', crudo: true })}
+              className="w-full flex items-center gap-3 p-2.5 border border-slate-200 rounded-xl bg-white hover:border-emerald-300 transition-colors text-left"
+            >
+              <img src={b.url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-100" />
+              <span className="min-w-0">
+                <span className="block text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Imagen</span>
+                <span className="block text-sm font-bold text-slate-700 truncate">{b.pie || 'Imagen de la página'}</span>
+              </span>
+            </button>
+          );
+        }
         return b.url ? (
           <figure className="group/img relative">
             <img src={b.url} alt={b.pie || ''} className="rounded-xl max-w-full border border-slate-100" />
@@ -921,9 +986,8 @@ export default function Documento() {
         ) : null;
       }
 
-      // Vídeo, audio, PDF y archivos sueltos pegados con ⌘V (2026-08-19).
-      // Cada uno se abre DENTRO del documento; el archivo genérico es el único
-      // que se queda en enlace, porque no hay nada que reproducir.
+      // Vídeo, audio, PDF y archivos sueltos pegados con ⌘V (2026-08-19) o
+      // soltados encima (2026-08-22).
       if (b.tipo === 'medio') {
         const pie = b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>;
         if (b.medio === 'video') {
@@ -958,18 +1022,41 @@ export default function Documento() {
             </figure>
           );
         }
+        // ══ EL PDF: TARJETA POR DEFECTO ═══════════════════════════════════
+        // (2026-08-22, Eugenio: «si es un pdf por defecto le haces una
+        // tarjetita con el nombre y quizás una preview de la primera
+        // página»).
+        //
+        // Antes se metía un visor de 70 vh, que parte el documento en dos: uno
+        // deja de leer lo suyo para mirar un adjunto que quizá solo quería
+        // tener a mano. La tarjeta dice CUÁL es el archivo —nombre y primera
+        // página— y quien quiera leerlo lo abre. Los tres puntitos lo embeben
+        // si es eso lo que se quiere.
         if (b.medio === 'pdf') {
+          if (b.vista === 'embebido') {
+            return (
+              <figure>
+                <iframe src={b.url} title={b.pie || 'PDF'}
+                        className="w-full h-[70vh] rounded-xl border border-slate-200 bg-slate-50" />
+                {pie}
+              </figure>
+            );
+          }
           return (
-            <figure>
-              <iframe src={b.url} title={b.pie || 'PDF'}
-                      className="w-full h-[70vh] rounded-xl border border-slate-200 bg-slate-50" />
-              <figcaption className="text-xs text-slate-400 mt-1">
-                <a href={b.url} target="_blank" rel="noreferrer" className="font-bold text-sky-700 hover:underline">
-                  Abrir el PDF en una pestaña
-                </a>
-                {b.pie && <> · {b.pie}</>}
-              </figcaption>
-            </figure>
+            <button
+              type="button"
+              onClick={() => abrirLateral({ titulo: b.pie || 'PDF', destino: b.url || '', crudo: true })}
+              className="w-full flex items-center gap-3 p-3 border border-slate-200 rounded-xl bg-white hover:border-emerald-300 hover:-translate-y-0.5 transition-all text-left"
+            >
+              {b.url && <PortadaPdf url={b.url} className="shrink-0" />}
+              <span className="min-w-0">
+                <span className="block text-[9px] font-black uppercase tracking-[0.2em] text-rose-500">PDF</span>
+                <span className="block text-sm font-bold text-slate-800 truncate">{b.pie || 'Documento'}</span>
+                {typeof b.medioBytes === 'number' && (
+                  <span className="block text-[10px] text-slate-400">{tamanoLegible(b.medioBytes)}</span>
+                )}
+              </span>
+            </button>
           );
         }
         return (
@@ -979,6 +1066,47 @@ export default function Documento() {
             <span className="text-sm font-bold text-slate-700 truncate">{b.pie || 'Archivo'}</span>
           </a>
         );
+      }
+
+      // ── UNA BASE DE DATOS DENTRO DE LA PÁGINA (fase 10) ──────────────────
+      // El bloque `tabla` de siempre es texto plano: nada dentro sabe que 620
+      // es un número. Éste es el que lo sustituye — es la MISMA rejilla de la
+      // herramienta «Tablas», no una copia, así que lo que se edite aquí es la
+      // tabla de verdad y lo que se edite allí se ve aquí.
+      //
+      // LAS TABLAS DE TEXTO ANTIGUAS SIGUEN FUNCIONANDO. No se migran solas:
+      // convertir texto a columnas tipadas exige adivinar el tipo de cada una,
+      // y adivinar mal destruiría datos de alguien. Se ofrece convertir, y
+      // decide quien escribió la tabla.
+      if (b.tipo === 'basedatos') {
+        const tablaId = (b as any).tabla_id || bloquesRef.current?.[b.id]?.tabla_id;
+        if (!tablaId) {
+          return (
+            <div className="border border-dashed border-slate-200 rounded-xl p-4 text-center">
+              <p className="text-xs font-bold text-slate-500">Este bloque todavía no apunta a ninguna tabla.</p>
+              {editable && (
+                <button
+                  onClick={async () => {
+                    const r = await fetch('/api/bd/tablas', {
+                      method: 'POST', credentials: 'include',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ titulo: titulo || 'Tabla de la página' }),
+                    });
+                    const j = await r.json();
+                    if (j.id) {
+                      (b as any).tabla_id = j.id;
+                      setBloques(bs => [...bs]);
+                      programarGuardado();
+                    }
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 h-11 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">
+                  Crear una tabla aquí
+                </button>
+              )}
+            </div>
+          );
+        }
+        return <Rejilla tablaId={tablaId} editable={editable} alto={520} />;
       }
 
       if (b.tipo === 'tabla') {
@@ -1032,8 +1160,10 @@ export default function Documento() {
       // proyecto se enseña como tarjeta que lleva a su página.
       if (b.tipo === 'producto') {
         return (
-          <a href={b.pubUrl || '#'}
-            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 hover:border-emerald-300 hover:-translate-y-0.5 transition-all">
+          <button
+            type="button"
+            onClick={() => b.pubUrl && abrirLateral({ titulo: b.pubTitulo || 'Producto', destino: b.pubUrl })}
+            className="w-full text-left flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 hover:border-emerald-300 hover:-translate-y-0.5 transition-all">
             <span className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 grid place-items-center shrink-0">
               <Store className="w-4 h-4" />
             </span>
@@ -1041,7 +1171,7 @@ export default function Documento() {
               <span className="block text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Producto</span>
               <span className="block text-sm font-bold text-slate-800 truncate">{b.pubTitulo || 'Producto'}</span>
             </span>
-          </a>
+          </button>
         );
       }
       if (b.tipo === 'publicacion') {
@@ -1068,8 +1198,28 @@ export default function Documento() {
             )}
           </div>
         );
+        // ══ SE ABRE AL LADO, NO TE SACA DE LA PÁGINA ══════════════════════
+        // (2026-08-22, Eugenio: «cuando estoy en una página y he insertado por
+        // ejemplo una publicación de proyecto, y luego le doy a verla, y luego
+        // le doy atrás, me tiene que devolver a la página, no atrás de la
+        // página de todos los proyectos. Arréglalo, y además haz que se abra en
+        // una ventana lateral»).
+        //
+        // Era un enlace: pulsarlo te llevaba a `/proyectos/:slug`, y desde ahí
+        // «atrás» hacía lo que hace esa pantalla —volver al índice de
+        // proyectos—, no lo que esperaba quien venía de un documento. La cura
+        // no es apañar el historial: es no salir. El panel lateral abre la
+        // publicación al lado y «atrás» lo cierra, que es lo que se pidió.
         return b.pubUrl
-          ? <Link to={b.pubUrl} className="block hover:-translate-y-0.5 transition-transform">{interior}</Link>
+          ? (
+            <button
+              type="button"
+              onClick={() => abrirLateral({ titulo: b.pubTitulo || 'Publicación', destino: b.pubUrl! })}
+              className="block w-full text-left hover:-translate-y-0.5 transition-transform"
+            >
+              {interior}
+            </button>
+          )
           : interior;
       }
 
@@ -1208,6 +1358,79 @@ export default function Documento() {
             )}
           </div>
         )}
+        {/* ══ LOS TRES PUNTITOS DE UN ARCHIVO (2026-08-22) ══════════════════
+            Eugenio: «que dé la opción, una vez insertado, con 3 puntitos,
+            abrirlo, cerrarlo o embeberlo».
+
+            SOLO EN LOS BLOQUES QUE SON UN ARCHIVO. En un párrafo no hay nada
+            que abrir ni que embeber, y un botón que en la mayoría de las filas
+            no lleva a ningún sitio enseña a no mirarlos.
+
+            A LA DERECHA, no con el «+» y el asa: aquéllos hablan del sitio del
+            bloque en la página (añadir debajo, moverlo); éste habla del
+            archivo. Juntarlos sería un solo montón de botones que hacen cosas
+            de dos naturalezas. */}
+        {editable && (b.tipo === 'medio' || b.tipo === 'imagen') && (
+          <div className="absolute right-1 top-1 z-10 opacity-0 group-hover/bloque:opacity-100 focus-within:opacity-100 transition-opacity">
+            <button
+              onClick={e => { e.stopPropagation(); setMenuMedio(m => (m === b.id ? null : b.id)); }}
+              title="Qué hacer con este archivo"
+              aria-label="Qué hacer con este archivo"
+              className="w-7 h-7 grid place-items-center rounded-lg bg-white/90 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-white shadow-sm transition-colors"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+            {menuMedio === b.id && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-2xl p-1 z-30">
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    setMenuMedio(null);
+                    // Abrir es ver el archivo entero SIN salir de la página:
+                    // el mismo panel lateral que todo lo demás.
+                    abrirLateral({ titulo: b.pie || 'Archivo', destino: b.url || '', crudo: true });
+                  }}
+                  disabled={!b.url}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors disabled:opacity-40"
+                >
+                  <Maximize2 className="w-3.5 h-3.5 text-slate-400" /> Abrirlo al lado
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation(); setMenuMedio(null);
+                    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, vista: 'embebido' } : x));
+                    programarGuardado();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors"
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-slate-400" /> Embeberlo
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation(); setMenuMedio(null);
+                    setBloques(bs => bs.map(x => x.id === b.id ? { ...x, vista: 'tarjeta' } : x));
+                    programarGuardado();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-left transition-colors"
+                >
+                  <Minimize2 className="w-3.5 h-3.5 text-slate-400" /> Cerrarlo a tarjeta
+                </button>
+                <div className="border-t border-slate-100 my-1" />
+                <button
+                  onClick={e => {
+                    e.stopPropagation(); setMenuMedio(null);
+                    setBloques(bs => bs.filter(x => x.id !== b.id));
+                    programarGuardado();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-rose-50 hover:text-rose-600 text-left transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Quitarlo de la página
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {iaOcupada === b.id && (
           <div className="absolute inset-0 z-20 bg-white/70 rounded flex items-center justify-center">
             <span className="inline-flex items-center gap-1.5 text-xs font-black text-indigo-600">
@@ -1347,7 +1570,20 @@ export default function Documento() {
           </div>
         </div>
 
-        <div ref={docRef} className="bg-white">
+        <div
+          ref={docRef}
+          onDragOver={e => { if (!arrastrando && traeArchivos(e.dataTransfer)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setArchivoEncima(true); } }}
+          onDragLeave={e => { if (e.currentTarget === e.target) setArchivoEncima(false); }}
+          onDrop={alSoltarArchivos}
+          className={cn('bg-white rounded-2xl transition-colors',
+            archivoEncima && 'ring-2 ring-emerald-400 ring-offset-4')}
+        >
+        {/* SUÉLTALO AQUÍ. Solo mientras hay algo volando encima. */}
+        {archivoEncima && (
+          <p className="mb-3 px-3 py-2 rounded-xl bg-emerald-50 border border-dashed border-emerald-300 text-xs font-bold text-emerald-700">
+            Suelta el archivo y lo añado al final de la página.
+          </p>
+        )}
         {/* Portada e icono, estilo Notion (Fase 2) */}
         {portada && (
           <div className="group/portada relative -mx-6 sm:-mx-12 mb-6">
@@ -1401,12 +1637,8 @@ export default function Documento() {
                         if (!f) return;
                         setSubiendoIcono(true);
                         try {
-                          const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-                            method: 'POST', credentials: 'include',
-                            headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-                          });
-                          const j = await r.json();
-                          if (r.ok && j.url) { setIcono(j.url); setEligiendoIcono(false); programarGuardado(); }
+                          const sub = await subirArchivo(f);
+                          if (sub.url) { setIcono(sub.url); setEligiendoIcono(false); programarGuardado(); }
                         } finally { setSubiendoIcono(false); }
                       }} />
                     <button onClick={() => iconoFileRef.current?.click()} disabled={subiendoIcono}

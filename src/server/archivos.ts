@@ -134,7 +134,7 @@ export function registerArchivosRoutes(app: Express, db: any) {
           privado: true,
           // Se abre EN el mundo, centrado en la pieza: es donde vive.
           abrir: `/juego?item=${i.id}`,
-          contexto: i.proyecto_titulo || 'Mundo 3D',
+          contexto: i.proyecto_titulo || 'Visor 3D',
         })),
       ].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 

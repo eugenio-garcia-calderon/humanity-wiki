@@ -12,6 +12,7 @@
 // `DataTransfer`, y de ahí sale siempre la misma lista de piezas.
 // ============================================================================
 
+import { subirArchivo } from './subir';
 /** Una pieza ya resuelta: se sabe qué es y dónde vive. */
 export type Pegado =
   | { clase: 'imagen'; url: string; nombre: string }
@@ -75,14 +76,8 @@ function porExtension(url: string): Pegado {
 // ---------------------------------------------------------------------------
 /** Sube un archivo y devuelve la pieza que le corresponde. */
 async function subir(f: File): Promise<Pegado> {
-  const res = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/octet-stream' },
-    body: f,
-  });
-  const j = await res.json();
-  if (!res.ok) throw new Error(j.error || 'No se pudo subir el archivo.');
+  const j = await subirArchivo(f);
+  if (j.error) throw new Error(j.error);
 
   const nombre = sinExtension(f.name).slice(0, 60) || 'Archivo';
   // El SERVIDOR dice de qué clase es: él decide la extensión y él sabe qué se

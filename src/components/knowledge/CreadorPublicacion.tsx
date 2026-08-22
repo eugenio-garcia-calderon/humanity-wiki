@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { subirArchivo } from '../../utils/subir';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   X, Sparkles, FileText, Network, Map as MapIcon, FolderKanban,
@@ -168,15 +169,10 @@ export default function CreadorPublicacion({ abierto, onCerrar }: { abierto: boo
     setError(null);
     setOcupado('mano');
     try {
-      const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: await archivo.arrayBuffer(),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'No se ha podido subir la imagen.');
+      const sub = await subirArchivo(archivo);
+      if (sub.error) throw new Error(sub.error);
       if (!titulo.trim()) setTitulo(archivo.name.replace(/\.[^.]+$/, ''));
-      setImagenEnEdicion(j.url);
+      setImagenEnEdicion(sub.url);
     } catch (e: any) {
       fallo(e.message);
     } finally {

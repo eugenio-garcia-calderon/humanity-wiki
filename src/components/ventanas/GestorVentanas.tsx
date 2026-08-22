@@ -25,7 +25,8 @@
 // memoria). Con tres o cuatro ventanas no se nota; con veinte sí.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Minus, Square, Copy, Globe, AppWindow } from 'lucide-react';
+import { Globe, AppWindow } from 'lucide-react';
+import { ControlesVentana } from './controles';
 import { cn } from '../../utils/cn';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useEsMovil } from '../../hooks/useEsMovil';
@@ -282,22 +283,51 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
 
   /** Minimizar, maximizar y cerrar. Es lo único que sobrevive de la barra de
    *  título: el nombre estaba duplicado con la pestaña de arriba. */
+  /** LOS MISMOS BOTONES QUE EL PANEL LATERAL (2026-08-22, Eugenio: «haz esto
+   *  de la expansión para todas las ventanas que veas programadas»). Eran un
+   *  cuadrado y un cuadrado doble dibujados aquí a mano; ahora son las flechas
+   *  diagonales de `controles.tsx`, iguales en las tres clases de ventana que
+   *  tiene la plataforma. */
   const controlesDe = (v: Ventana) => (
-    <>
-      <button onClick={() => cambiar(v.id, { minimizada: true })} title="Minimizar"
-        className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500 shrink-0">
-        <Minus className="w-3.5 h-3.5" />
-      </button>
-      <button onClick={() => cambiar(v.id, { maximizada: !v.maximizada })} title={v.maximizada ? 'Restaurar' : 'Maximizar'}
-        className="w-6 h-6 grid place-items-center rounded hover:bg-slate-200 text-slate-500 shrink-0">
-        {v.maximizada ? <Copy className="w-3 h-3" /> : <Square className="w-3 h-3" />}
-      </button>
-      <button onClick={() => cerrar(v.id)} title="Cerrar"
-        className="w-6 h-6 grid place-items-center rounded hover:bg-rose-100 hover:text-rose-600 text-slate-500 shrink-0">
-        <X className="w-3.5 h-3.5" />
-      </button>
-    </>
+    <ControlesVentana
+      expandida={!!v.maximizada}
+      onMinimizar={() => cambiar(v.id, { minimizada: true })}
+      onExpandir={() => cambiar(v.id, { maximizada: !v.maximizada })}
+      onCerrar={() => cerrar(v.id)}
+    />
   );
+
+  /** ══ CERRAR LA ÚLTIMA TE DEJA EN INICIO ═══════════════════════════════
+   *  (2026-08-22, Eugenio: «si hay ventanas abiertas y se cierran todas pues
+   *  te lleva a inicio directamente»).
+   *
+   *  Va aquí y no en quien pulsa la ✕ porque hay cuatro sitios que cierran
+   *  ventanas —la ✕ de la pestaña, la de la barra, «cerrar todas» y el teclado—
+   *  y esto tiene que pasar en los cuatro. Puesto en cada uno, sería la cuarta
+   *  copia de la misma regla y el día que se añada un quinto se olvidará.
+   *
+   *  SOLO SI SE QUEDA VACÍO Y HABÍA ALGO. Navegar cuando aún quedan ventanas
+   *  te sacaría de lo que estás mirando. */
+  /** ══ CERRAR LA ÚLTIMA TE DEJA EN INICIO ═══════════════════════════════
+   *  (2026-08-22, Eugenio: «si hay ventanas abiertas y se cierran todas pues
+   *  te lleva a inicio directamente»).
+   *
+   *  Mirando el RESULTADO, no metido en cada sitio que cierra. Hay cuatro que
+   *  cierran ventanas —la ✕ de la pestaña, la de la barra, «cerrar todas» y el
+   *  atajo de teclado—; escrito en los cuatro serían cuatro copias de la misma
+   *  regla y el quinto que se añada se olvidaría. Y navegar dentro de un
+   *  `setVentanas` sería un efecto escondido en un cálculo.
+   *
+   *  SOLO CUANDO SE QUEDA VACÍO HABIENDO TENIDO ALGO: al arrancar sin ventanas
+   *  no pasa nada, y con ventanas aún abiertas tampoco — sacarte de lo que
+   *  estás mirando no es cerrar una ventana. */
+  const habiaVentanas = useRef(false);
+  useEffect(() => {
+    if (habiaVentanas.current && ventanas.length === 0 && window.location.pathname !== '/') {
+      navigate('/');
+    }
+    habiaVentanas.current = ventanas.length > 0;
+  }, [ventanas.length, navigate]);
 
   const cerrar = useCallback((id: string) => {
     setVentanas(vs => {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Plus, Copy, Trash2, Type, Square, Circle as CircleIcon,
@@ -143,14 +144,9 @@ export default function Presentacion() {
   };
 
   const subirImagen = async (archivo: File) => {
-    const r = await fetch(`/api/uploads?type=${encodeURIComponent(archivo.type)}`, {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: await archivo.arrayBuffer(),
-    });
-    const j = await r.json();
-    if (!r.ok) { setError(j.error); return; }
-    anadirElemento({ id: nuevoId('E'), tipo: 'imagen', x: 280, y: 120, w: 400, h: 300, url: j.url });
+    const sub = await subirArchivo(archivo);
+    if (sub.error) { setError(sub.error); return; }
+    anadirElemento({ id: nuevoId('E'), tipo: 'imagen', x: 280, y: 120, w: 400, h: 300, url: sub.url });
   };
 
   // ---- Arrastrar y redimensionar dentro de su frame -------------------------

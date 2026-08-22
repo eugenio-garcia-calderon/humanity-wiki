@@ -11,6 +11,7 @@
 // qué cuelgan. Separarlos es lo que permite que el chat y el editor sigan
 // subiendo como siempre sin saber nada de contenedores.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../../utils/subir';
 import {
   Paperclip, Loader2, Trash2, FileText, Image as ImageIcon, Video, Music, File as FileIcon, Download,
 } from 'lucide-react';
@@ -69,12 +70,8 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
     setSubiendo(true);
     setError(null);
     try {
-      const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type || 'application/octet-stream')}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-      });
-      const u = await up.json();
-      if (!up.ok) throw new Error(u?.error || 'No se ha podido subir.');
+      const u = await subirArchivo(f);
+      if (u.error) throw new Error(u.error);
 
       const r = await fetch('/api/archivo', {
         method: 'POST', credentials: 'include',

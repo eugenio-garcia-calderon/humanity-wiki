@@ -14,6 +14,7 @@
 // Quien no es el dueño la ve en SOLO LECTURA: sin asas, sin botones, sin poder
 // mover nada. Es una página, no un editor compartido.
 import { useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../../utils/subir';
 import {
   X, StickyNote, ImagePlus, Link2, Film, Globe, Play, GripHorizontal,
   ShoppingBag, ShoppingCart, Package, ExternalLink, Pencil, Eye,
@@ -111,13 +112,9 @@ export default function FichaProducto({ producto, puedeEditar, onCerrar, onGuard
     if (!f) return;
     setSubiendo(true);
     try {
-      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-      });
-      const j = await r.json();
-      if (!r.ok || !j.url) { setAviso(j.error || 'No se ha podido subir la foto.'); return; }
-      anadir({ tipo: 'imagen', url: j.url });
+      const sub = await subirArchivo(f);
+      if (sub.error) { setAviso(sub.error); return; }
+      anadir({ tipo: 'imagen', url: sub.url });
     } finally { setSubiendo(false); }
   };
 

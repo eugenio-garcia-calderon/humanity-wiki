@@ -79,3 +79,25 @@ export const publicarPaginaWeb = (url: string | null) =>
  *  tamaño, que es lo que hace la barra de título de cualquier ventana. */
 export const maximizarVentana = (id: string) =>
   window.dispatchEvent(new CustomEvent('humanity:maximizar-ventana', { detail: id }));
+
+/** ══ ABRIR ALGO AL LADO (2026-08-22) ═════════════════════════════════════
+ *  Eugenio: «haz que se abra en una ventana lateral, y que permita luego
+ *  expandirse a ventana superior […] también que permita cerrarlo con una X».
+ *
+ *  Va por el mismo hilo de eventos que las ventanas del escritorio, y no por
+ *  un contexto nuevo, por la misma razón que aquéllas: el estado vive en un
+ *  solo sitio —el panel— y por aquí solo viajan avisos. Cualquier página puede
+ *  pedirlo sin saber quién lo pinta. */
+export interface AbrirLateral {
+  titulo: string;
+  /** Una ruta de la propia aplicación. Se carga con `embed=1`. */
+  destino: string;
+  /** `true` cuando `destino` NO es una ruta de la app sino un archivo suelto
+   *  (un PDF subido, una imagen). Entonces no se le añade `embed=1`: ese
+   *  parámetro solo lo entiende la aplicación, y colgárselo a un fichero es
+   *  ensuciar una dirección que alguien puede copiar. */
+  crudo?: boolean;
+}
+
+export const abrirLateral = (a: AbrirLateral) =>
+  window.dispatchEvent(new CustomEvent('humanity:abrir-lateral', { detail: a }));

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../utils/subir';
 import { Link, useParams } from 'react-router-dom';
 import {
   ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType, ConnectionMode,
@@ -1018,14 +1019,10 @@ export function GrafoLienzo({ slug, toolbar }: {
     reemplazarArchivo: async (f: File) => {
       setPegando('Subiendo…');
       try {
-        const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-          method: 'POST', credentials: 'include',
-          headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-        });
-        const j = await up.json();
-        if (!up.ok) throw new Error(j.error || 'No se pudo subir.');
-        const campo = j.esImagen ? 'image_url' : 'url';
-        await guardarVentana(win.id, { config: { ...win.config, [campo]: j.url } });
+        const sub = await subirArchivo(f);
+        if (sub.error) throw new Error(sub.error);
+        const campo = sub.esImagen ? 'image_url' : 'url';
+        await guardarVentana(win.id, { config: { ...win.config, [campo]: sub.url } });
         setPegando(null);
       } catch (e: any) { setPegando(e.message); setTimeout(() => setPegando(null), 4000); }
     },

@@ -179,6 +179,8 @@ export const CATALOGO_PROPS: Array<{ modelo: string; nombre: string; icono: stri
   // Tu Aptera, aparcada (2026-08-19). Es el mismo componente que pilotas, con
   // las alas plegadas y los rotores quietos.
   { modelo: 'aptera', nombre: 'Aptera', icono: '🛸' },
+  // El camión camperizado, que antes estaba aparcado en la aldea (2026-08-22).
+  { modelo: 'camper', nombre: 'Camión camperizado', icono: '🚐' },
   // --- CIUDAD (fase 9, 2026-08-19)
   { modelo: 'papelera', nombre: 'Papelera', icono: '🗑️', grupo: 'ciudad' },
   { modelo: 'semaforo', nombre: 'Semáforo', icono: '🚦', grupo: 'ciudad' },

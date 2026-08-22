@@ -3354,3 +3354,122 @@ is needed → refused, block saying it → accepted, count), the tier list serve
 opening from its link, and the bar staying put with the chat open. The test
 session (`claude-dev-verificacion`) and the test note were deleted; no cookie was
 ever written into the shared browser.
+
+---
+
+## 2026-08-22 (II) — The 3D world becomes the Visor 3D, and files can be dropped into a page
+
+### Dropping a file into a page
+
+Eugenio: «permite en el constructor de páginas estilo Notion arrastrar un
+archivo y que se inserte en la página, y que dé la opción, una vez insertado,
+con 3 puntitos, de abrirlo, cerrarlo o embeberlo».
+
+- Dragging a file onto a page inserts it. **It goes through the same pipeline as
+  pasting** — both hand over a `DataTransfer` with files in it, so dragging a
+  PDF and pasting one cannot give different results. A second path with its own
+  list of types is where `.webp` works pasted and not dropped.
+- **An image embeds; a PDF becomes a card** with its name, its size and its
+  first page rendered small. The PDF used to open as a 70vh viewer that split
+  the document in two — you stopped reading your own page to look at an
+  attachment you maybe only wanted to hand.
+- **Three dots** on every file block: open it at the side, embed it, close it to
+  a card, or remove it.
+- If what you drop isn't something we can make a block of, **it says so**.
+  Dropping something and nothing happening is the bug nobody can report.
+
+### «Atrás» from an inserted publication
+
+He described it as a broken back button: insert a project publication in a page,
+open it, press back, and you land on the projects index instead of your page.
+
+It was not the back button. **Viewing the publication took you out of the
+document**, and coming back depended on the history being what you imagine — it
+wasn't, because the card led to `/proyectos/:slug`, whose own screen sends you
+to the index. The cure is not to patch the history: it is not to leave.
+
+Now it opens in a **side window** — the same `<iframe>` mechanism as the desktop
+windows, so it is the real page with its real permissions. Opening it pushes one
+history entry, so back closes the panel and leaves you exactly where you were.
+
+### Expand and close, on every window
+
+One `ControlesVentana` for the three kinds of window there are. Growing is the
+diagonal arrows he sent, and it works in both directions. The desktop windows
+used a square for the same thing and the side panel could not grow at all.
+
+### The header
+
+- **The permanent «Inicio» tab is gone.** It cost 24 px on every screen for a
+  case that lasts a second. The logo already goes home, and **closing the last
+  window now leaves you at Inicio** — that rule lives in one place, not in the
+  four different things that close a window.
+- **The menu button is the mirror of the one that hides the menu**, instead of
+  three lines. Two halves of one gesture that now look like it.
+
+### The Visor 3D (was «Mundo 3D»)
+
+The whole point, in his words: «no será un mundo hiperrealista sino un mundo muy
+simplificado, con un centro y alrededor […] es todo como la sala del arquitecto
+de Matrix, con pantallas alrededor».
+
+What went: 118 hectares of village, houses, an edible forest, a river, paths,
+clouds with a day/night cycle, butterflies by day and fireflies by night, an
+HDRI sky, cascaded shadows, an effects composer, four loading waves and three
+quality levels that dropped by themselves when the FPS fell. All of it existed
+to make it look like a real place — and that was the trap: what you came to look
+at was scattered among the scenery, and finding something meant walking.
+
+What it is now:
+
+- **A centre and a ring.** Nothing is placed by hand: every position comes from
+  `visor/anillo.ts`, which the scene, the collisions and the minimap all share.
+  Ten projects sit 36° apart; add one and all eleven re-space themselves. The
+  ring's radius grows with the count, so twenty things never overlap.
+- **No light at all.** Every material is basic — the only kind that ignores
+  lighting — because with any other one a white surface goes grey the moment it
+  faces away, and the room stops being white. What replaces light is the
+  outline, the way an architect's drawing works.
+- **Rooms, all alike**: Inicio → Proyectos · Personas · Publicaciones ·
+  Herramientas, and from a project into its own room, with its people and its
+  pending cards. The section rooms live inside the scene: entering «Proyectos»
+  is the data already loaded, put in another ring — no request, no navigation.
+- **Portals show what is on the other side**, from above: each thing over there
+  is a dot of its colour in the same ring it will occupy. It is computed from
+  the destination's own data, so it cannot drift. An empty disc means an empty
+  room, and says so.
+- **You are a spirit of light**, blue and green, moving only on the plane. With
+  height gone, so are the jump, gravity, landing, the flight ceiling and the
+  "do I collide with this or pass over it?" question — they don't exist rather
+  than having been deleted. **Other people are beams of other colours** with
+  their name above; each colour comes from their id, so it never changes.
+- **The camera is more overhead** (pitch 0,95 instead of 0,63, and pulled back)
+  — otherwise a ring is just one portal filling the screen.
+- **Kept on purpose**: the editor (create, move, threads), the minimap, fast
+  travel, the products — the DJI and the camper van, which he named — the
+  portals and the YouTube cinema. **Gone**: bike, glider, first person, the
+  appearance editor (it dressed a body that no longer renders) and the world
+  clock (there is no sky left to light).
+
+### The code recycle bin
+
+Ten files, ~2.900 lines, orphaned by the rewrite, moved to `papelera/<date>/`
+keeping their original path inside. A **daily GitHub Action** deletes anything
+older than 30 days and commits the deletion — no one has to remember, and it
+runs whether or not a laptop is on. Nothing is lost even then: every move is a
+commit.
+
+### The audit he asked for
+
+In `memory/12_CODE_AUDIT_2026-08-22.md`, measured rather than estimated. Two
+duplications were unified and tested the same day: the window controls (three
+sets of buttons for one gesture) and `POST /api/uploads` — **the same request
+written by hand in 16 places**, and not identically: some sent the `File`,
+others its `arrayBuffer`; three threw on error, five returned, two said nothing.
+Now `subirArchivo()` returns a result and never throws, so a caller cannot
+forget the failure and leave the screen half-done. `grep` finds exactly one
+upload request in `src/` today.
+
+The rest is listed with numbers and left alone on purpose: 547 bare buttons, 89
+hex colours, 9 copies of «close when you click outside». Doing them all in one
+sweep would produce a diff nobody can review.

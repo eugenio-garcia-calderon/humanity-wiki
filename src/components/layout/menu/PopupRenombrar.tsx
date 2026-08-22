@@ -16,6 +16,7 @@
 // pantalla no enseñe nunca uno: si se pudieran elegir y luego no se pintaran,
 // la interfaz estaría mintiendo sobre lo que acabas de guardar.
 import { useEffect, useRef, useState } from 'react';
+import { subirArchivo } from '../../../utils/subir';
 import { X, Loader2, Check, ImagePlus } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import Icono, { esImagen } from '../../ui/Icono';
@@ -57,13 +58,9 @@ export default function PopupRenombrar({ tipo, id, nombre, icono, onHecho, onCer
     setSubiendo(true);
     setError(null);
     try {
-      const r = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-      });
-      const j = await r.json();
-      if (!r.ok || !j.url) { setError(j?.error || 'No se ha podido subir la imagen.'); return; }
-      setElegido(j.url);
+      const sub = await subirArchivo(f);
+      if (sub.error) { setError(sub.error); return; }
+      setElegido(sub.url);
     } catch {
       setError('No se ha podido subir la imagen.');
     } finally { setSubiendo(false); }

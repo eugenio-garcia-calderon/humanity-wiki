@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { subirArchivo } from '../../utils/subir';
 import {
   X, Plus, Image as ImageIcon, Trash2, User as UserIcon,
   CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check, ChevronDown,
@@ -450,13 +451,9 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
   const subirImagen = async (f: File) => {
     setGuardando(true); setError(null);
     try {
-      const up = await fetch(`/api/uploads?type=${encodeURIComponent(f.type)}`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/octet-stream' }, body: f,
-      });
-      const j = await up.json();
-      if (!up.ok) throw new Error(j.error || 'No se pudo subir la imagen.');
-      await guardar({ bloques: [...bloques, { tipo: 'imagen', url: j.url, pie: f.name }] });
+      const sub = await subirArchivo(f);
+      if (sub.error) throw new Error(sub.error);
+      await guardar({ bloques: [...bloques, { tipo: 'imagen', url: sub.url, pie: f.name }] });
     } catch (e: any) { setError(e.message); setGuardando(false); }
   };
 

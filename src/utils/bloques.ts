@@ -13,6 +13,11 @@ export type TipoBloque =
   | 'parrafo' | 'titulo1' | 'titulo2' | 'titulo3'
   | 'lista' | 'numerada' | 'tarea'
   | 'cita' | 'separador' | 'codigo' | 'imagen' | 'tabla'
+  // `basedatos` SUSTITUYE a `tabla` para lo nuevo. `tabla` se queda porque hay
+  // páginas que la usan: convertir texto plano a columnas tipadas obliga a
+  // adivinar el tipo de cada columna, y adivinar mal destruiría datos de
+  // alguien. Las viejas siguen viéndose; las nuevas nacen ya como base de datos.
+  | 'basedatos'
   | 'publicacion' | 'medio'
   // 2026-08-20 (Eugenio: «en el creador de páginas añade la opción de agregar
   // un producto»). Es primo de `publicacion`: se reutilizan sus campos
@@ -42,6 +47,20 @@ export interface Bloque {
   medioId?: string;
   /** Solo medio: tamaño del archivo subido, para el pie. */
   medioBytes?: number;
+  /** ══ CÓMO SE ENSEÑA UN ARCHIVO (2026-08-22) ═════════════════════════════
+   *  Eugenio: «que dé la opción, una vez insertado, con 3 puntitos, de abrirlo,
+   *  cerrarlo o embeberlo; si es una imagen por defecto la embebes, si es un
+   *  pdf por defecto le haces una tarjetita con el nombre».
+   *
+   *  `embebido` = se ve dentro del documento (una imagen, un vídeo, el PDF
+   *  entero). `tarjeta` = una línea con su nombre y, si es un PDF, la primera
+   *  página en pequeño.
+   *
+   *  SIN VALOR TAMBIÉN ES UNA RESPUESTA: significa «lo que le toque a su
+   *  tipo», que es lo que ya hacían los documentos escritos hasta hoy. Poner
+   *  un valor por defecto al leer habría reescrito en silencio la forma de
+   *  todos los adjuntos que ya existen. */
+  vista?: 'tarjeta' | 'embebido';
   /** Solo tabla: la primera fila es la cabecera. */
   filas?: string[][];
   /** Solo publicacion (Fase 2): una publicación de la plataforma embebida.
