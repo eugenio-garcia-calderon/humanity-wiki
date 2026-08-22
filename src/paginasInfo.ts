@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon } from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand} from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -63,4 +63,12 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // parte de lo que se cuenta, aunque el contenido no lo sea.
   { ruta: 'seguridad', titulo: 'Seguridad', icono: ShieldAlert,
     componente: lazy(() => import('./pages/Seguridad')) },
+
+  // Usabilidad: los principios que sigue la interfaz y el plan para mejorarla,
+  // cada uno con el fallo real que lo puso ahí (2026-08-22, Eugenio: «mete
+  // todos los principios y planes para mejorar la usabilidad de la
+  // plataforma»). Va en este menú porque explica cómo se decide lo que ves, que
+  // es tan parte de la plataforma como lo que hace.
+  { ruta: 'usabilidad', titulo: 'Usabilidad', icono: Hand,
+    componente: lazy(() => import('./pages/Usabilidad')) },
 ];
