@@ -4099,3 +4099,11 @@ padlock. It now says which one it is.
 Still unverified by me, and only verifiable on Eugenio's own devices: the install
 card on a real iPhone, and the live camera preview (permission is denied in the
 automation browser).
+
+**Correction, found by looking at it on a 375px screen:** both overlays were
+anchored to `bottom: 0` and were sitting *behind* the platform's fixed mobile
+navigation bar (`z-index: 9999`). The offline banner was invisible on the exact
+device it exists for, and the install card had its only button covered. Fixed in
+`src/anclajeInferior.ts`, which measures whatever is pinned to the bottom edge
+instead of hard-coding today's 44px — that bar is mobile-only and belongs to
+another file, so a copied number would rot in silence.

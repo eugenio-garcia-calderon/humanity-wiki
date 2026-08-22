@@ -15,6 +15,8 @@
  *   being a hint.
  */
 
+import { mantenerSobreLaBarra, POR_ENCIMA_DE_LA_BARRA } from "./anclajeInferior";
+
 const CLAVE = "hw:aviso-instalar-visto";
 const DIAS = 30;
 
@@ -66,8 +68,8 @@ export function ofrecerInstalacion() {
     "position:fixed",
     "left:0.75rem",
     "right:0.75rem",
-    "bottom:calc(0.75rem + env(safe-area-inset-bottom))",
-    "z-index:9998",
+    // bottom and z-index are set below: the mobile nav bar owns the bottom edge
+    `z-index:${POR_ENCIMA_DE_LA_BARRA}`,
     "padding:1rem",
     "border-radius:1rem",
     "background:#2b2258",
@@ -95,4 +97,5 @@ export function ofrecerInstalacion() {
 
   caja.append(texto, cerrar);
   document.body.appendChild(caja);
+  mantenerSobreLaBarra(caja, 12);
 }

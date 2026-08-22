@@ -16,6 +16,8 @@
  * headers and passes everything else through untouched.
  */
 
+import { mantenerSobreLaBarra, POR_ENCIMA_DE_LA_BARRA } from "./anclajeInferior";
+
 const ID = "aviso-sin-conexion";
 
 function hace(desde: string | null): string {
@@ -40,8 +42,9 @@ function pintar(texto: string) {
       "position:fixed",
       "left:0",
       "right:0",
-      "bottom:0",
-      "z-index:9999",
+      // bottom is set below: on a phone the nav bar owns the bottom edge, and
+      // this banner spent its first version hidden behind it.
+      `z-index:${POR_ENCIMA_DE_LA_BARRA}`,
       "padding:0.6rem 1rem",
       // The notch and the home bar: without this it sits under them on an iPhone.
       "padding-bottom:max(0.6rem,env(safe-area-inset-bottom))",
@@ -51,6 +54,7 @@ function pintar(texto: string) {
       "text-align:center",
     ].join(";");
     document.body.appendChild(el);
+    mantenerSobreLaBarra(el);
   }
   el.textContent = texto;
 }
