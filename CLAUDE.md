@@ -185,6 +185,12 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   **And the text is never in one place: `grep` for it.** That same false promise had
   three copies — two screens and a comment. Fixing the string you happen to remember
   is exactly how a screen ends up contradicting itself in the corner nobody reopened.
+- **A comment explaining why something is safe is not evidence that it is.** The
+  service worker carried a comment saying hashed files "are cached as they are used
+  rather than guessed here" — a guarantee the code never gave. It read as reasoning,
+  it had been there since the first version, and it hid the fact that the app opened
+  **blank offline** on a real first visit. Repeated reloads in testing never saw it;
+  a person with one load would have.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
