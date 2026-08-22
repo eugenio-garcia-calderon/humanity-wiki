@@ -171,10 +171,24 @@ scripts change rarely; if they start changing often, switch.
 
 **The `.dump` files are not encrypted.** They hold every user's data. They are
 readable by anyone with root on the server — and now by anyone holding the R2
-token, which widens the blast radius rather than narrowing it. Adding
-`age`/GPG is one line in `copias.sh` and one more secret to not lose — and a
-backup you cannot decrypt is worse than no backup, so it needs a real key
-custody decision first. Not made. Raised with Eugenio 2026-08-22.
+token, which widens the blast radius rather than narrowing it.
+
+The design is agreed with prog4 (security). It is **not built**, and it is not
+blocked on code:
+
+| | |
+|---|---|
+| Tool | `age`, not the platform's own `cifrado.ts`. `age` is built for encrypting a large file in a pipe, and it stays one line in `copias.sh` |
+| **Asymmetric, not a shared passphrase** | The server carries only the **public** key: it can encrypt every dump and **cannot decrypt any of them**. Steal the server, get the backups, open none |
+| Where the private key lives | **Not on the server and not in any `.env`.** Eugenio's password manager, plus an offline copy kept somewhere else |
+| Split, rather than in one place | Three shares, any two reconstruct it (Shamir). Then it survives one person losing theirs, and no single person can open the backups alone |
+| The step that decides whether any of this is worth anything | A **test restore with the real key, before we start trusting it**. An encrypted backup nobody has restored is two beliefs stacked on one |
+
+**The decision is Eugenio's, and it is not technical: if that private key is
+lost, the backups can never be opened again.** Good code does not fix that, so
+nothing gets encrypted until he has decided where the key lives. Raised with him
+2026-08-22; to be asked alongside `CLAVE_FIRMA_REGISTRO`, which is waiting on
+him too — two keys in one conversation rather than one a day.
 
 **36 hours is the healthcheck threshold**, not 24, so a slow dump or an
 off-hours restart does not cry wolf. If the daily cadence ever tightens, tighten
