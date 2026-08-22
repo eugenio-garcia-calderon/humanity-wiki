@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Loader2, Plus, Trash2 } from 'lucide-react';
 
 // ============================================================================
@@ -29,6 +29,16 @@ type Props = {
 export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
+  // COBRAR EN PUNTOS (2026-08-23, Eugenio: «preguntemos a los vendedores si
+  // quieren recibir el valor en puntos, y darles el equivalente cuando pongan
+  // el valor en euros, con un 50 % de descuento en la comisión»). El
+  // equivalente sale de la tasa que publica el servidor (1 punto = 1 € hoy).
+  const [aceptaPuntos, setAceptaPuntos] = useState(false);
+  const [tasaPuntos, setTasaPuntos] = useState<number | null>(null);
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json())
+      .then(j => { if (typeof j?.puntos_por_euro === 'number') setTasaPuntos(j.puntos_por_euro); }).catch(() => {});
+  }, []);
   const [descripcion, setDescripcion] = useState('');
   // Cuatro formas de vender, no dos. Un servicio no se envía ni se descarga, y
   // una suscripción se cobra otra vez cada mes — que en el cobro es un modo
@@ -123,6 +133,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           envio_centimos: tipo === 'fisico' && envio.trim() !== '' ? aCentimos(envio) : null,
           imagenes: fotos,
           archivo_digital: tipo === 'digital' && archivo ? archivo.url : undefined,
+          acepta_puntos: tipo !== 'suscripcion' && aceptaPuntos,
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -180,6 +191,20 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                   className="w-full h-12 pl-3 pr-8 rounded-xl border border-slate-200 text-base focus:border-emerald-400 focus:outline-none" />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">€</span>
               </div>
+              {tipo !== 'suscripcion' && (() => {
+                const cent = aCentimos(precio);
+                const puntosEq = cent && !Number.isNaN(cent) && tasaPuntos ? Math.round((cent / 100) * tasaPuntos * 100) / 100 : null;
+                return (
+                  <label className={`mt-2 flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer ${aceptaPuntos ? 'border-amber-300 bg-amber-50/70' : 'border-slate-200'}`}>
+                    <input type="checkbox" checked={aceptaPuntos} onChange={e => setAceptaPuntos(e.target.checked)} className="mt-1" />
+                    <span className="text-xs leading-relaxed text-slate-700">
+                      <b>Acepto cobrar en puntos</b>
+                      {puntosEq !== null && <> — este precio son <b>{puntosEq.toLocaleString('es-ES')} puntos</b></>}.
+                      {' '}Quien compre con puntos te los paga a ti, y la comisión de la plataforma es <b>la mitad</b> (2,5 % en puntos, frente al 5 % en euros).
+                    </span>
+                  </label>
+                );
+              })()}
             </Campo>
             {/* El stock sólo tiene sentido en lo que se envía: «quedan 3» en un
                 servicio querría decir tres plazas, que es otra cosa, y en una

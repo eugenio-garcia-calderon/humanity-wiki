@@ -76,6 +76,13 @@ export const REGLAS: Record<string, Regla> = {
   // castigo: lo que se frena es el bucle, no a la persona.
   registro:    { puerta: 'registro',    gracia: 2, baseSegundos: 10, topeSegundos: 600, alFallar: 'cerrar' },
   restablecer: { puerta: 'restablecer', gracia: 2, baseSegundos: 10, topeSegundos: 600, alFallar: 'cerrar' },
+  // Enviar puntos a otra persona (2026-08-23, Programador 7, a sugerencia de
+  // prog6): el tope diario de puntos limita CUÁNTO, no CUÁNTAS VECES — cien
+  // envíos de un punto caben en el tope y son cien apuntes en un libro que no
+  // se limpia. Aquí «fallo» es «has enviado otra vez»: diez envíos seguidos
+  // gratis (nadie envía más a mano), y después 20 s, 40, 80… hasta una hora.
+  // La clave es la CUENTA, que es lo que de verdad envía.
+  transferencia: { puerta: 'transferencia', gracia: 10, baseSegundos: 20, topeSegundos: 3600, alFallar: 'cerrar' },
 };
 
 /** La IP de quien pide, con Cloudflare y Caddy delante.

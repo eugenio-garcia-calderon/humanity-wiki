@@ -39,7 +39,8 @@ const BLOQUES: { titulo: string; nota?: string; tareas: { texto: string; estado:
     nota: 'Probar la experiencia de tener, gastar y enviar puntos con el sistema interno, antes de cualquier token.',
     tareas: [
       { texto: 'Saldo interno con libro de movimientos y motivo en cada apunte', estado: 'hecha' },
-      { texto: 'Transferencias entre cuentas: envío por correo o nombre, tope diario, saldo y libro en una sola transacción, interruptor apagado en producción', estado: 'en_revision' },
+      { texto: 'Transferencias entre cuentas: envío por correo o nombre, tope diario, saldo y libro en una sola transacción. Encendidas en producción el 2026-08-23 (piloto), por decisión del emisor', estado: 'hecha' },
+      { texto: 'Puntos en el carrito encendidos el 2026-08-23: el vendedor cobra en puntos con comisión de la plataforma a la mitad (2,5 % en puntos frente al 5 % en euros), anotada en la cuenta de la plataforma del libro', estado: 'hecha' },
       { texto: 'Salvaguarda en base de datos: ningún saldo puede quedar negativo', estado: 'en_revision' },
       { texto: 'Libro de movimientos de solo-añadir: ni editar ni borrar apuntes — una corrección es un apunte contrario (lo hace cumplir la propia base de datos)', estado: 'en_revision' },
       { texto: 'El libro manda: el saldo se deriva de los movimientos y se cuadra cada noche contra ellos', estado: 'en_revision' },

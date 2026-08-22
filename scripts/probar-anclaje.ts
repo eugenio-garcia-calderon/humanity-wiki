@@ -110,6 +110,40 @@ try {
   comprobar('un día ya publicado no se vuelve a mandar', otraVez.estado === 'ANCLADO' && recibidas.length === 0,
     `${recibidas.length} envíos`);
   comprobar('y devuelve la raíz de la primera vez', otraVez.raiz === ok.raiz);
+  console.log('\nLA FRONTERA DEL DÍA');
+  // Esto solo se puede decidir una vez: en cuanto haya un día anclado, mover la
+  // frontera cambia qué filas entran en las raíces siguientes. La prueba que
+  // importa no es que salga bien con el reloj en UTC —eso sale bien solo—, sino
+  // que **salga LO MISMO con la sesión en hora de Madrid**, porque comparar un
+  // timestamptz contra un date a secas usa la zona de la sesión, y esa es la
+  // que alguien puede cambiar mañana sin saber lo que toca.
+  const ayer = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  // Se encadenan a partir de la última anotación real: `huella_previa` no admite
+  // nulos salvo en la primera, y saltarse esa regla en una prueba es fabricarse
+  // una cadena que la de verdad no permitiría.
+  const ultima = await pool.query(`SELECT huella FROM registro_sellado ORDER BY n DESC LIMIT 1`);
+  await pool.query(
+    `INSERT INTO registro_sellado (momento, clase, actor, asunto, datos, sal, huella, huella_previa)
+     VALUES ($1::timestamptz, 'prueba', 'prog4', 'ULTIMO', '{}', 'sal1', repeat('a',64), $3),
+            ($2::timestamptz, 'prueba', 'prog4', 'PRIMERO', '{}', 'sal2', repeat('b',64), repeat('a',64))`,
+    [`${ayer}T23:59:59Z`, `${new Date().toISOString().slice(0, 10)}T00:00:01Z`, ultima.rows[0].huella]);
+  const { calcularAnclajeDelDia } = await import('../src/server/seguridad/registro.js');
+  await pool.query(`DELETE FROM registro_anclajes WHERE dia = $1`, [ayer]);
+  const enUtc = await calcularAnclajeDelDia(db, ayer);
+  comprobar('las 23:59:59 de un día entran en ese día, y las 00:00:01 del siguiente no',
+    enUtc?.anotaciones === 1, JSON.stringify(enUtc));
+
+  await pool.query(`SET TIME ZONE 'Europe/Madrid'`);
+  await pool.query(`DELETE FROM registro_anclajes WHERE dia = $1`, [ayer]);
+  const enMadrid = await calcularAnclajeDelDia(db, ayer);
+  comprobar('y con la sesión en hora de Madrid sale EXACTAMENTE la misma raíz',
+    enMadrid?.raiz === enUtc?.raiz, `${enMadrid?.raiz} vs ${enUtc?.raiz}`);
+  await pool.query(`SET TIME ZONE 'UTC'`);
+  // No se borran las dos filas de atrezo, y no es descuido: `registro_sellado`
+  // es de solo crecer y su disparador RECHAZA el DELETE — lo comprobé sin
+  // querer, intentando limpiar. La base entera se tira al acabar, así que la
+  // limpieza sobra; y que una prueba no pueda borrar del registro es
+  // exactamente lo que se le pide al registro.
 } finally {
   calendario.close();
   await pool.end();
