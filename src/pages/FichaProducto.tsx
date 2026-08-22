@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star } from 'lucide-react';
 import { useCarrito } from '../hooks/useCarrito';
-import Cesta from '../components/knowledge/Cesta';
+import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from '../components/knowledge/Cesta';
 
 // ============================================================================
 // LA FICHA DE UN PRODUCTO — fase 1 del plan de Comercio (2026-08-22)
@@ -79,15 +79,41 @@ export default function FichaProducto({ handle }: { handle: string }) {
   const fotos: string[] = Array.isArray(p.imagenes) && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
   const sePuede = p.precio_centimos && !(p.stock !== null && p.stock <= 0);
 
+  // PAGAR CON PUNTOS TAMBIÉN DESDE «COMPRAR AHORA» (2026-08-22, Eugenio: «el
+  // botón de comprar ahora te lleva directamente a Stripe, MAL»). El mismo
+  // control que la cesta: el servidor dice si está activo y cuánto saldo hay,
+  // y solo se enseña si este producto acepta puntos.
+  const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
+  const [usarPuntos, setUsarPuntos] = useState('');
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
+  }, []);
+  const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  // Con envío incluido (2026-08-23): si los puntos llegan a precio + porte, no
+  // hay Stripe y la dirección se pide aquí.
+  const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
+  const envioFicha = p?.envio?.hace_falta ? Number(p.envio.centimos || 0) : 0;
+  const todoEnPuntos = caja && p?.precio_centimos
+    ? Math.floor((((p.precio_centimos || 0) + envioFicha) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
+  const maxPuntos = caja?.saldo != null && p?.precio_centimos ? Math.min(caja.saldo, todoEnPuntos) : 0;
+  const cubreTodo = !!caja && todoEnPuntos > 0 && puntosPedidos >= todoEnPuntos && maxPuntos >= todoEnPuntos;
+  const faltaDireccion = cubreTodo && !!p?.envio?.hace_falta && !direccionCompleta(direccion);
+
   async function comprar() {
     setComprando(true); setError(null);
     try {
       const r = await fetch('/api/publicar/comprar', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ producto_id: p.id, cantidad: 1, volver_a: window.location.href }),
+        body: JSON.stringify({
+          producto_id: p.id, cantidad: 1, volver_a: window.location.href,
+          ...(caja?.activo && p.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
+          ...(cubreTodo && p.envio?.hace_falta ? { direccion } : {}),
+        }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.url) { setError(j.error || 'No se ha podido abrir el pago.'); setComprando(false); return; }
+      // Pagado entero con puntos: no hay Stripe, vuelve aquí con el código y
+      // la confirmación la pinta la cesta (que también vive en esta página).
       window.location.href = j.url;
     } catch { setError('No hay conexión con el servidor.'); setComprando(false); }
   }
@@ -145,9 +171,30 @@ export default function FichaProducto({ handle }: { handle: string }) {
 
           {cobro?.abierto && sePuede && (
             <div className="mt-5 space-y-2">
-              <button type="button" onClick={comprar} disabled={comprando}
+              {caja?.activo && caja.con_sesion && caja.saldo != null && p.acepta_puntos && p.modalidad !== 'suscripcion' && (
+                <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/60">
+                  <div className="flex items-center justify-between gap-3">
+                    <label htmlFor="ficha-puntos" className="text-xs font-bold text-amber-900">
+                      Pagar con puntos <span className="font-normal text-amber-700">(tienes {caja.saldo.toLocaleString('es-ES', { maximumFractionDigits: 2 })})</span>
+                    </label>
+                    <button type="button" onClick={() => setUsarPuntos(String(maxPuntos))} className="text-[11px] font-bold text-amber-800 underline">usar el máximo</button>
+                  </div>
+                  <input id="ficha-puntos" inputMode="decimal" value={usarPuntos} onChange={e => setUsarPuntos(e.target.value)} placeholder="0"
+                    className="mt-1.5 w-32 h-10 px-3 rounded-lg border border-amber-200 bg-white text-sm" />
+                  {puntosPedidos > 0 && (
+                    <p className="mt-1 text-[11px] text-amber-800">
+                      −{dinero(Math.min((p.precio_centimos || 0) + (cubreTodo ? envioFicha : 0), Math.round((Math.min(puntosPedidos, maxPuntos) / caja.puntos_por_euro) * 100)))} de descuento
+                      {cubreTodo ? ` — se paga todo con puntos${envioFicha > 0 ? `, envío (${dinero(envioFicha)}) incluido` : ''}, sin tarjeta` : ` — con ${todoEnPuntos.toLocaleString('es-ES')} puntos se pagaría todo${envioFicha > 0 ? ', envío incluido,' : ''} sin tarjeta`}.
+                    </p>
+                  )}
+                  {cubreTodo && p.envio?.hace_falta && <DireccionEnvio valor={direccion} onCambio={setDireccion} />}
+                </div>
+              )}
+              <button type="button" onClick={comprar} disabled={comprando || faltaDireccion}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-black disabled:opacity-60">
-                {comprando ? 'Abriendo el pago…'
+                {comprando ? (cubreTodo ? 'Pagando con puntos…' : 'Abriendo el pago…')
+                  : faltaDireccion ? 'Falta la dirección de envío'
+                  : cubreTodo ? 'Pagar con puntos'
                   : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar ahora'}
               </button>
               {/* Una suscripción no va a la cesta: se paga sola. Ponerle el

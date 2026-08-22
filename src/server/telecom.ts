@@ -33,20 +33,36 @@ import { normalizarTelefono } from '../utils/telefono.js';
 // Se dice porque cambia la conversación sobre el coste: el mensaje cuesta una
 // fila; la llamada, cero.
 //
-// ── EL AGUJERO QUE QUEDA ABIERTO Y HAY QUE SABER ───────────────────────────
-// Sin un servidor TURN, entre el 10 % y el 15 % de las llamadas NO conectarán:
-// las que salen de una red de empresa con NAT simétrico o de algunas redes
-// móviles. Los dos navegadores se ven, se saludan, y no encuentran camino. Hoy
-// solo hay STUN (que es gratis y solo sirve para preguntar «¿cuál es mi
-// dirección pública?»). TURN reenvía el audio cuando no hay camino directo, y
-// eso ya son bytes y ya cuesta dinero — unos 5-10 €/mes en el propio Hetzner
-// con `coturn`, o un servicio contratado.
+// ── LA ESCALERA DE TRES PELDAÑOS, Y CUÁL DE ELLOS CUESTA DINERO ────────────
+// Dos navegadores que quieren hablarse prueban tres caminos, en este orden, y
+// se quedan con el primero que funciona. Lo hace el propio navegador: no hay
+// que programarlo, hay que no estropearlo.
 //
-// LA DECISIÓN ESTÁ TOMADA A MEDIAS A PROPÓSITO: el código ya lee un TURN de
-// las variables de entorno (`TURN_URL`, `TURN_USUARIO`, `TURN_CLAVE`). El día
-// que se levante uno, se rellenan tres variables y funciona. Sin ellas, la
-// llamada que no puede conectar lo DICE con esas palabras en vez de quedarse
-// girando para siempre.
+//   1. LOCAL (`host`). Estáis en el mismo wifi. Se hablan directamente.
+//      Coste: cero. No interviene nadie.
+//   2. DIRECTO (`srflx`, con STUN). Redes distintas. STUN es un servidor al
+//      que cada navegador le pregunta «¿cuál es mi dirección pública?», y con
+//      esa respuesta se encuentran. SIGUE SIENDO DIRECTO: por el servidor de
+//      STUN no pasa ni un byte de la conversación. Coste: cero.
+//   3. RETRANSMITIDO (`relay`, con TURN). No hay camino directo —NAT simétrico
+//      de una red de empresa, algunas redes móviles— y el audio y el vídeo
+//      tienen que pasar por un servidor intermedio. **Este es el único que
+//      cuesta dinero**, y por eso se usa solo cuando los otros dos fallan.
+//
+// Conviene decirlo porque es un malentendido caro: STUN no es «un TURN más
+// barato», y TURN no es «un STUN mejor». Son dos cosas distintas para dos
+// momentos distintos, y la que se paga es la que casi nunca hace falta.
+//
+// ── EL TURN ES DE CLOUDFLARE (2026-08-22, decisión de Eugenio) ──────────────
+// Sus credenciales NO son fijas y NO están en el código del navegador: se piden
+// a Cloudflare cuando hacen falta, valen dos horas y se sirven desde aquí. Una
+// credencial fija en el cliente la copia cualquiera con las herramientas de
+// desarrollo, y a partir de ese momento su tráfico lo paga Eugenio.
+//
+// Y si Cloudflare no contesta, ESTO NO SE CAE: se sirve STUN solo. Se pierde
+// el peldaño 3, o sea que fallan las llamadas que ya fallaban antes de tener
+// TURN, y las otras nueve de cada diez siguen funcionando. Que el servicio de
+// las llamadas difíciles se caiga no puede llevarse por delante las fáciles.
 
 /** Cuánto suena antes de darse por perdida. WhatsApp corta cerca de los 45 s. */
 const SONANDO_MS = 45_000;
@@ -127,6 +143,91 @@ const dentroDelCupo = (mapa: Map<string, { desde: number; cuantas: number }>, cl
 };
 const puedeBuscar = (userId: string) => dentroDelCupo(busquedas, userId, BUSQUEDAS_POR_VENTANA, VENTANA_MS);
 const puedeReclamar = (userId: string) => dentroDelCupo(reclamos, userId, RECLAMOS_POR_HORA, 60 * 60_000);
+
+// ── LAS CREDENCIALES DE TURN ────────────────────────────────────────────────
+// Cloudflare las fabrica a petición y con caducidad. El trato es:
+//
+//   · se piden con la llave de la cuenta, que vive SOLO en el servidor
+//   · valen dos horas
+//   · se guardan aquí una hora y se vuelven a pedir
+//
+// POR QUÉ SE GUARDAN Y NO SE PIDEN CADA VEZ: esta ruta la llama cada pestaña al
+// abrirse, no solo al llamar por teléfono. Con veinte personas conectadas serían
+// veinte viajes a Cloudflare por nada, y un servicio ajeno metido en el camino
+// de arrancar la aplicación. Una hora de caché sobre dos de vida deja margen de
+// sobra: la credencial más vieja que se puede repartir todavía tiene una hora
+// por delante, y una llamada ya conectada no se corta cuando caduca.
+const VIDA_CREDENCIAL_S = 2 * 60 * 60;
+const CACHE_CREDENCIAL_MS = 60 * 60 * 1000;
+/** Cloudflare tiene cuatro segundos. Pasados esos, se sale con STUN y ya. */
+const ESPERA_CLOUDFLARE_MS = 4000;
+
+/** El peldaño 2, que es gratis y siempre está. */
+const STUN_DE_SIEMPRE = { urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] };
+
+let hieloEnCache: { servidores: any[]; hayTurn: boolean; caduca: number } | null = null;
+let ultimoFalloTurn = 0;
+
+/**
+ * Los servidores por los que intentar la conexión, con TURN si está contratado.
+ *
+ * NUNCA LANZA. Devolver STUN solo es una respuesta correcta y peor: es la que
+ * había antes de contratar nada. Que Cloudflare tenga un mal día no puede
+ * apagar el teléfono de toda la plataforma.
+ */
+async function servidoresDeHielo(): Promise<{ servidores: any[]; hayTurn: boolean; porQueNoHayTurn?: string }> {
+  if (hieloEnCache && Date.now() < hieloEnCache.caduca) {
+    return { servidores: hieloEnCache.servidores, hayTurn: hieloEnCache.hayTurn };
+  }
+
+  const llave = process.env.CLOUDFLARE_TURN_KEY_ID;
+  const ficha = process.env.CLOUDFLARE_TURN_API_TOKEN;
+
+  if (llave && ficha) {
+    const base = process.env.CLOUDFLARE_TURN_API || 'https://rtc.live.cloudflare.com/v1';
+    try {
+      const r = await fetch(`${base}/turn/keys/${llave}/credentials/generate-ice-servers`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${ficha}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ttl: VIDA_CREDENCIAL_S }),
+        signal: AbortSignal.timeout(ESPERA_CLOUDFLARE_MS),
+      });
+      const j: any = await r.json().catch(() => null);
+      if (!r.ok || !Array.isArray(j?.iceServers) || !j.iceServers.length) {
+        throw new Error(`Cloudflare contestó ${r.status}`);
+      }
+      hieloEnCache = { servidores: j.iceServers, hayTurn: true, caduca: Date.now() + CACHE_CREDENCIAL_MS };
+      return { servidores: j.iceServers, hayTurn: true };
+    } catch (e: any) {
+      // UNA LÍNEA CADA CINCO MINUTOS, NO UNA POR PETICIÓN. Si Cloudflare se
+      // cae, esto se llama una vez por pestaña que se abre, y el registro se
+      // llenaría de la misma línea hasta tapar cualquier otra cosa.
+      if (Date.now() - ultimoFalloTurn > 5 * 60_000) {
+        ultimoFalloTurn = Date.now();
+        console.error('[telecom] TURN de Cloudflare no disponible, se sigue con STUN:', e?.message || e);
+      }
+      // Se cachea el fallo un minuto: sin esto, con Cloudflare caído cada
+      // pestaña que se abra se come cuatro segundos de espera.
+      hieloEnCache = { servidores: [STUN_DE_SIEMPRE], hayTurn: false, caduca: Date.now() + 60_000 };
+      return { servidores: [STUN_DE_SIEMPRE], hayTurn: false, porQueNoHayTurn: 'no responde' };
+    }
+  }
+
+  // TURN propio (`coturn`), por si algún día se levanta uno en el mismo
+  // servidor. Se queda por dos líneas y evita tener que rehacer esto entero.
+  if (process.env.TURN_URL) {
+    const propio = {
+      urls: process.env.TURN_URL.split(',').map(s => s.trim()).filter(Boolean),
+      username: process.env.TURN_USUARIO || undefined,
+      credential: process.env.TURN_CLAVE || undefined,
+    };
+    const servidores = [STUN_DE_SIEMPRE, propio];
+    hieloEnCache = { servidores, hayTurn: true, caduca: Date.now() + CACHE_CREDENCIAL_MS };
+    return { servidores, hayTurn: true };
+  }
+
+  return { servidores: [STUN_DE_SIEMPRE], hayTurn: false, porQueNoHayTurn: 'sin contratar' };
+}
 
 export function registerTelecomRoutes(app: Express, db: any) {
   arrancarLatido();
@@ -235,27 +336,18 @@ export function registerTelecomRoutes(app: Express, db: any) {
     res.json({ conectados: conectadosDe(ids) });
   });
 
-  /** GET /api/telecom/hielo — por dónde intentar la conexión directa.
+  /**
+   * GET /api/telecom/hielo — por dónde intentar la conexión.
    *
-   *  Se sirve desde el servidor y no se escribe en el cliente porque el día que
-   *  haya TURN, sus credenciales NO pueden estar en el código del navegador:
-   *  cualquiera se las copiaría y usaría el servidor de reenvío de Eugenio para
-   *  su propio tráfico. */
-  app.get('/api/telecom/hielo', (req: Request, res: Response) => {
+   * Se sirve desde el servidor y no se escribe en el cliente por una razón de
+   * dinero: las credenciales de TURN son la llave de un servicio que se paga
+   * por gigabyte. En el código del navegador las copia cualquiera que abra las
+   * herramientas de desarrollo, y a partir de ahí su tráfico lo pagamos
+   * nosotros. Aquí duran dos horas y se piden de nuevo solas.
+   */
+  app.get('/api/telecom/hielo', async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
-    const servidores: any[] = [
-      // STUN público de Google. Solo contesta «tu dirección pública es esta»:
-      // no ve tráfico, no transporta nada y no hay nada que filtrar.
-      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
-    ];
-    if (process.env.TURN_URL) {
-      servidores.push({
-        urls: process.env.TURN_URL.split(',').map(s => s.trim()).filter(Boolean),
-        username: process.env.TURN_USUARIO || undefined,
-        credential: process.env.TURN_CLAVE || undefined,
-      });
-    }
-    res.json({ servidores, hayTurn: Boolean(process.env.TURN_URL) });
+    res.json(await servidoresDeHielo());
   });
 
   // ══ EL NÚMERO ═════════════════════════════════════════════════════════════
@@ -720,6 +812,88 @@ export function registerTelecomRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * POST /api/telecom/llamada/:id/via — por dónde acabó yendo.
+   *
+   * Lo dice el navegador, que es el único que lo sabe: mira cuál de todos los
+   * caminos que probó es el que ganó. Se apunta porque **de los tres, solo uno
+   * cuesta dinero**, y sin esto la primera noticia de cuánto se está gastando
+   * en retransmisión sería la factura.
+   *
+   * LO MANDAN LOS DOS LADOS Y NO PASA NADA: es el mismo dato desde las dos
+   * puntas del mismo cable. El segundo escribe lo mismo que el primero. Se
+   * prefiere eso a decidir cuál de los dos «manda», que se rompe justo cuando
+   * el que mandaba es el que se desconectó.
+   */
+  app.post('/api/telecom/llamada/:id/via', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      const via = String(req.body?.via || '');
+      if (!['local', 'directo', 'retransmitida', 'desconocido'].includes(via)) {
+        return res.status(400).json({ error: 'Camino no reconocido.' });
+      }
+      // Que sea de verdad una llamada suya. Sin esto, cualquiera podría
+      // ensuciar la cuenta del mes de otro.
+      const r = await db.execute(sql`
+        UPDATE llamadas SET via = ${via}
+        WHERE id = ${req.params.id}
+          AND (de_user_id = ${req.user.id} OR para_user_id = ${req.user.id})
+        RETURNING id
+      `);
+      res.json({ ok: r.rows.length > 0 });
+    } catch (e: any) {
+      console.error('[telecom] via:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * GET /api/telecom/gasto — cuántas llamadas han tenido que retransmitirse.
+   *
+   * La pregunta que contesta es «¿cuánto va a costar esto?», y se contesta con
+   * números medidos y no con una estimación: cuántas llamadas hubo, cuántas
+   * necesitaron pasar por Cloudflare y cuántos minutos fueron. Los gigabytes
+   * salen de multiplicar los minutos por el caudal de una llamada, que es lo
+   * único que hay que estimar y se dice que se estima.
+   */
+  app.get('/api/telecom/gasto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+      if ((req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel 4 o superior.' });
+      const r = await db.execute(sql`
+        SELECT via, tipo, count(*)::int AS cuantas, coalesce(sum(segundos), 0)::int AS segundos
+        FROM llamadas
+        WHERE creada_at > now() - interval '30 days' AND estado = 'terminada'
+        GROUP BY via, tipo
+      `);
+      const filas = r.rows as any[];
+      const total = filas.reduce((a, f) => a + f.cuantas, 0);
+      const relay = filas.filter(f => f.via === 'retransmitida');
+      const minutosRelay = relay.reduce((a, f) => a + f.segundos, 0) / 60;
+      // Caudal aproximado: una llamada de voz ronda los 50 kbps y una de vídeo
+      // el mega. Se cuenta el tráfico de SALIDA, que es lo que factura
+      // Cloudflare, y en una llamada retransmitida sale hacia las dos personas.
+      const gb = relay.reduce((a, f) => {
+        const kbps = f.tipo === 'video' ? 1000 : 50;
+        return a + (f.segundos * kbps * 2) / 8 / 1_000_000;
+      }, 0);
+      res.json({
+        dias: 30,
+        llamadas: total,
+        retransmitidas: relay.reduce((a, f) => a + f.cuantas, 0),
+        minutosRetransmitidos: Math.round(minutosRelay),
+        gigasEstimados: Math.round(gb * 100) / 100,
+        // Cloudflare regala los primeros 1.000 GB al mes y cobra 0,05 $ por GB
+        // a partir de ahí (consultado el 2026-08-22).
+        eurosEstimados: Math.max(0, Math.round((gb - 1000) * 0.05 * 100) / 100),
+        detalle: filas,
+      });
+    } catch (e: any) {
+      console.error('[telecom] gasto:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** GET /api/telecom/llamadas — el historial. */
   app.get('/api/telecom/llamadas', async (req: Request, res: Response) => {
     try {
@@ -728,7 +902,7 @@ export function registerTelecomRoutes(app: Express, db: any) {
       const con = String(req.query.con || '').trim();
       const r = await db.execute(sql`
         SELECT l.id, l.de_user_id, l.para_user_id, l.tipo, l.estado, l.segundos,
-               l.compartio_pantalla, l.creada_at,
+               l.compartio_pantalla, l.creada_at, l.via,
                u.id AS otro_id, u.display_name, u.name, u.avatar_url
         FROM llamadas l
         JOIN users u ON u.id = CASE WHEN l.de_user_id = ${yo} THEN l.para_user_id ELSE l.de_user_id END
@@ -756,6 +930,7 @@ export function registerTelecomRoutes(app: Express, db: any) {
               : l.estado,
             segundos: l.segundos ?? 0,
             pantalla: l.compartio_pantalla,
+            via: l.via || null,
             fecha: l.creada_at,
           };
         }),

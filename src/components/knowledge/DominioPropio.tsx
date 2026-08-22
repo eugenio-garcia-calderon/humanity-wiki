@@ -153,8 +153,18 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
           </div>
           <p className="mt-2 text-[11px] text-amber-900/80 leading-relaxed">
             Luego abre tu dominio en el navegador. El certificado de seguridad se
-            crea solo en esa primera visita. Si tarda, no está roto: el cambio de
-            DNS puede tardar desde minutos hasta unas horas.
+            crea solo en esa primera visita, y tarda unos segundos.
+          </p>
+          {/* EL MINUTO DE ESPERA, DICHO ANTES DE QUE OCURRA (2026-08-22).
+              Lo señaló prog6 revisando: comprobamos el DNS y guardamos el
+              resultado un minuto, también cuando sale que no. Eso protege de
+              que golpear con dominios ajenos salga gratis, y a cambio quien
+              ACABA de arreglar su DNS puede ver un error durante ese minuto.
+              Decirlo antes cuesta una línea; no decirlo cuesta un «no me
+              funciona» treinta segundos después. */}
+          <p className="mt-1.5 text-[11px] text-amber-900/80 leading-relaxed">
+            Si acabas de cambiar el DNS y todavía falla, espera un minuto y
+            vuelve a probar: comprobamos el DNS una vez por minuto.
           </p>
         </div>
       )}

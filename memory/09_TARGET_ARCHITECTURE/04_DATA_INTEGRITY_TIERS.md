@@ -159,7 +159,29 @@ the phase that protects against our own code being wrong:
 > **Verifiable by:** the application, with its own credentials, failing to
 > `UPDATE registro_sellado` and failing to `DROP TABLE`.
 
-### Phase D — Publish the proof where we cannot reach it
+### Phase D — Publish the proof where we cannot reach it · **in production 2026-08-22**
+
+> `src/server/seguridad/anclaje.ts`. Once a day the Merkle root of everything
+> recorded that day — 32 bytes, nothing else — goes to three OpenTimestamps
+> calendars, and their receipts are stored whole: without the receipt, the date
+> is just another claim of ours. `GET /api/seguridad/anclajes` serves them
+> **without a session**, because the entire point is that somebody who does not
+> trust us can check without asking us for anything.
+>
+> **Three states, because they are three different things:** *calculado* (the
+> root exists here and proves nothing to anyone), *enviado* (a calendar has it
+> and returned a receipt) and *confirmado* (the receipt completed with the
+> Bitcoin attestation, which needs asking again about an hour later — not built,
+> and not pretended).
+>
+> The test's point is not that it works when everything is up: it is that **when
+> no calendar answers, the day is NOT marked as published**. A day marked
+> anchored without a receipt is a proof that does not exist, and you find that
+> out the day you need to show it.
+>
+> It anchors **yesterday**, never today: today is still growing, and anchoring
+> half a day would leave two different roots for one date with no way to say
+> which is the day's root.
 
 The daily Merkle root to OpenTimestamps (Bitcoin) — free, no wallet, verifiable by
 anyone. Only the salted root travels: EDPB Guidelines 02/2025 v2.0 (final,
@@ -170,6 +192,16 @@ machine, against our own database — which is worth a lot against accident and 
 insider in a hurry, and nothing against someone who can rewrite the database and
 recompute every hash at leisure.
 
+> **Verified in production, 2026-08-22:** the route answers 200 with no session,
+> the module is inside the `dist` that runs, and **all three calendars answer from
+> the server itself** — checked by sending 32 random bytes from inside the
+> container. That last one is the check worth having: the API working from the
+> laptop of whoever wrote it says nothing about Hetzner's firewall, and a feature
+> that anchors nothing fails silently until the day the proof is asked for.
+>
+> **No real day is anchored yet.** It anchors yesterday and the record started
+> today. First one: 2026-08-23.
+>
 > **Verifiable by:** a stranger, with a public script and no access to our
 > systems, confirming yesterday's root.
 
@@ -251,5 +283,6 @@ control is attached to something it is not:
 | Nothing here stops a lie | being written correctly by an authorised person. That is [`05_VERACIDAD`](.) territory — a different problem, owned by somebody else |
 
 The honest answer to "can this be corrupted?" stays **not yet fully** until phase
-D runs daily. Saying that, rather than the other thing, is the difference between
-security and the appearance of it.
+D has actually anchored a day — deployed is not the same as anchored, and the
+difference is one night. Saying that, rather than the other thing, is the
+difference between security and the appearance of it.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2, PackageX, ShieldCheck, Undo2, ImageOff, Truck, Check } from 'lucide-react';
 import { useCarrito } from '../../hooks/useCarrito';
+import { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from './Cesta';
 import { subdominioDeUsuario } from '../../utils/subdominio';
 
 // ============================================================================
@@ -59,6 +60,24 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
   const { anadir } = useCarrito(tienda || 'general');
   useEffect(() => { setFotoRota(false); setCompra({ fase: 'quieto' }); setAnadido(false); }, [id]);
 
+  // PAGAR CON PUNTOS DESDE «COMPRAR» (2026-08-22, Eugenio). El servidor dice
+  // si está activo; solo se enseña si el producto acepta puntos y hay sesión.
+  const [caja, setCaja] = useState<{ activo: boolean; con_sesion: boolean; saldo: number | null; puntos_por_euro: number } | null>(null);
+  const [usarPuntos, setUsarPuntos] = useState('');
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
+  }, []);
+  const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
+  // Con envío incluido (2026-08-23): si los puntos llegan a precio + porte, no
+  // hay Stripe y la dirección se pide aquí.
+  const precioCentPP = Number(p?.precio_centimos || 0);
+  const envioPP = p?.envio?.hace_falta ? Number(p.envio.centimos || 0) : 0;
+  const todoEnPuntosPP = caja && precioCentPP ? Math.floor(((precioCentPP + envioPP) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
+  const maxPuntosPP = caja?.saldo != null && precioCentPP ? Math.min(caja.saldo, todoEnPuntosPP) : 0;
+  const cubreTodoPP = !!caja && todoEnPuntosPP > 0 && puntosPedidos >= todoEnPuntosPP && maxPuntosPP >= todoEnPuntosPP;
+  const faltaDireccionPP = cubreTodoPP && !!p?.envio?.hace_falta && !direccionCompleta(direccion);
+
   async function comprar() {
     setCompra({ fase: 'abriendo' });
     try {
@@ -67,7 +86,11 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
         headers: { 'Content-Type': 'application/json' },
         // De dónde sale y a dónde vuelve: a esta misma tienda. El servidor no
         // se fía de esto y comprueba que sea una dirección suya.
-        body: JSON.stringify({ producto_id: id, cantidad: 1, volver_a: window.location.href }),
+        body: JSON.stringify({
+          producto_id: id, cantidad: 1, volver_a: window.location.href,
+          ...(caja?.activo && p?.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntosPP) } : {}),
+          ...(cubreTodoPP && p?.envio?.hace_falta ? { direccion } : {}),
+        }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.url) {
@@ -183,11 +206,26 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
 
           {cobro === true && puedeComprarse(p) && (
             <div className="mt-3">
+              {caja?.activo && caja.con_sesion && caja.saldo != null && p.acepta_puntos && p.modalidad !== 'suscripcion' && (
+                <div className="mb-2 p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-amber-900">Pagar con puntos <span className="font-normal text-amber-700">(tienes {caja.saldo.toLocaleString('es-ES', { maximumFractionDigits: 2 })})</span></span>
+                  <input inputMode="decimal" value={usarPuntos} onChange={e => setUsarPuntos(e.target.value)} placeholder="0" aria-label="Puntos a usar"
+                    className="w-24 h-9 px-2 rounded-lg border border-amber-200 bg-white text-sm" />
+                  <button type="button" className="text-[11px] font-bold text-amber-800 underline"
+                    onClick={() => setUsarPuntos(String(maxPuntosPP))}>
+                    usar el máximo
+                  </button>
+                  {cubreTodoPP && <span className="text-[11px] text-amber-800">Se paga todo con puntos{envioPP > 0 ? ', envío incluido' : ''}: sin tarjeta.</span>}
+                  {cubreTodoPP && p.envio?.hace_falta && <div className="w-full"><DireccionEnvio valor={direccion} onCambio={setDireccion} /></div>}
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo'}
+                <button type="button" onClick={comprar} disabled={compra.fase === 'abriendo' || faltaDireccionPP}
                   className="h-11 px-5 rounded-xl bg-slate-900 text-white text-sm font-bold
                              disabled:opacity-60 disabled:cursor-wait">
-                  {compra.fase === 'abriendo' ? 'Abriendo el pago…'
+                  {compra.fase === 'abriendo' ? (cubreTodoPP ? 'Pagando con puntos…' : 'Abriendo el pago…')
+                  : faltaDireccionPP ? 'Falta la dirección'
+                  : cubreTodoPP ? 'Pagar con puntos'
                   : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar'}
                 </button>
                 {/* «Añadir» sólo dentro de una tienda: fuera de un subdominio

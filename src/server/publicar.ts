@@ -504,6 +504,40 @@ export function registerPublicarRoutes(app: Express, db: any) {
   });
 
   /**
+   * ¿CUÁNTO ES ESTA CESTA, CON ENVÍO? — `POST /api/publicar/cotizar` { lineas, cupon? }
+   * La cesta lo necesita para saber si los puntos pueden cubrirlo TODO (y
+   * entonces no hay Stripe, y hace falta dirección si hay algo físico). Misma
+   * aritmética que el cobro — de hecho es la misma, sin cobrar. Sin sesión.
+   */
+  app.post('/api/publicar/cotizar', async (req: Request, res: Response) => {
+    try {
+      const crudas: any[] = Array.isArray(req.body?.lineas) ? req.body.lineas : [];
+      const ids = crudas.map(l => String(l?.producto_id || '')).filter(Boolean);
+      if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
+      const productos = (await db.execute(sql`
+        SELECT id, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos
+        FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+      `)).rows as any[];
+      const lineas = crudas.map(l => ({ p: productos.find(x => x.id === String(l.producto_id)), unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) })).filter(l => l.p && l.p.price_cents);
+      if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
+      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
+      const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
+      const gratis = fisicas.some(l => l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined && subtotal >= Number(l.p.envio_gratis_desde_centimos));
+      const envio = fisicas.length === 0 ? null : conPorte.length === 0 ? null : gratis ? 0 : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
+      const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      res.json({
+        subtotal_centimos: subtotal,
+        envio_centimos: envio,
+        es_fisico: fisicas.length > 0,
+        acepta_puntos_centimos: aceptan,
+        todo_acepta_puntos: aceptan >= subtotal,
+        puntos_por_euro: puntosPorEuro(),
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
    * ¿VALE ESTE CÓDIGO PARA ESTA CESTA? — `POST /api/publicar/cupon/comprobar`
    * { codigo, lineas: [{ producto_id, cantidad }] } → { valido, descuento_centimos, motivo }
    * Lo mismo que comprueba el cobro, pero sin cobrar: para que la cesta diga
@@ -870,10 +904,23 @@ export function registerPublicarRoutes(app: Express, db: any) {
         const tasa = puntosPorEuro();
         // Los puntos cubren como mucho lo que acepta puntos y queda por
         // pagar después del cupón: un descuento no se paga dos veces.
-        const topePuntos = Math.floor(Math.min(saldo, (Math.min(aceptan, subtotal - cuponCent) / 100) * tasa) * 100) / 100;
-        puntosUsados = Math.min(Math.round(pidePuntos * 100) / 100, topePuntos);
+        const parteProductos = Math.min(aceptan, subtotal - cuponCent);
+        // Y EL ENVÍO TAMBIÉN (2026-08-23, Eugenio: «incluye también el envío
+        // con el tema de puntos para no tener que ir a Stripe»): si los
+        // puntos alcanzan para TODO — productos y porte — no hay pasarela y
+        // el envío se cobra en puntos al vendedor. Si solo alcanzan para una
+        // parte, el porte sigue en euros con Stripe (un cupón de Stripe no
+        // rebaja el envío), así que ahí el tope es solo la parte de productos.
+        const envioCent = envioCobrado || 0;
+        const todoEnPuntos = Math.floor(((parteProductos + envioCent) / 100) * tasa * 100) / 100;
+        const quiere = Math.round(pidePuntos * 100) / 100;
+        const cubreTodo = aceptan >= subtotal && quiere >= todoEnPuntos && saldo >= todoEnPuntos;
+        const topePuntos = cubreTodo
+          ? todoEnPuntos
+          : Math.floor(Math.min(saldo, (parteProductos / 100) * tasa) * 100) / 100;
+        puntosUsados = Math.min(quiere, topePuntos);
         if (puntosUsados <= 0) return res.status(400).json({ error: 'No tienes puntos suficientes para usar aquí.' });
-        descuentoCentimos = Math.min(aceptan, Math.round((puntosUsados / tasa) * 100));
+        descuentoCentimos = Math.min(parteProductos + (cubreTodo ? envioCent : 0), Math.round((puntosUsados / tasa) * 100));
       }
       const totalEuros = subtotal - cuponCent - descuentoCentimos + (envioCobrado || 0);
       // La comisión va sobre lo que de verdad se cobra en euros por los
@@ -888,12 +935,29 @@ export function registerPublicarRoutes(app: Express, db: any) {
         const codigo = Math.random().toString(36).replace(/[^a-hj-np-z2-9]/g, '').slice(0, 8).toUpperCase().padEnd(8, '7');
         const resumen = lineas.length === 1 ? lineas[0].p.name : `${lineas[0].p.name} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
         const todoDigital = lineas.every(l => (l.p.kind || '') === 'digital');
+        // Algo físico pagado entero con puntos: Stripe no pide la dirección
+        // porque Stripe no interviene, así que la pedimos nosotros. Sin ella
+        // no hay pedido: un paquete sin destino es un problema del vendedor.
+        let direccion: any = null;
+        if (esFisico) {
+          const d = cuerpo.direccion || {};
+          const nombre = String(d.nombre || '').trim();
+          const line1 = String(d.linea1 || d.line1 || '').trim();
+          const cp = String(d.cp || d.postal_code || '').trim();
+          const ciudad = String(d.ciudad || d.city || '').trim();
+          const pais = String(d.pais || d.country || 'ES').trim().toUpperCase().slice(0, 2);
+          if (!nombre || !line1 || !cp || !ciudad) {
+            return res.status(400).json({ error: 'Para enviártelo hacen falta nombre, dirección, código postal y ciudad.', falta_direccion: true });
+          }
+          direccion = { name: nombre, line1, line2: String(d.linea2 || d.line2 || '').trim() || null, postal_code: cp, city: ciudad, country: pais };
+        }
         await db.execute(sql`
           INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades, importe_centimos, envio_centimos, moneda,
-                               comprador_user_id, comprador_email, comprador_nombre, vendedor_user_id, estado)
+                               comprador_user_id, comprador_email, comprador_nombre, direccion_envio, vendedor_user_id, estado)
           VALUES (${pedidoId}, ${codigo}, ${lineas.length === 1 ? lineas[0].p.id : null}, ${resumen},
-                  ${lineas.length === 1 ? lineas[0].unidades : null}, 0, 0, ${moneda.toUpperCase()},
-                  ${req.user!.id}, ${req.user!.email || null}, ${req.user!.displayName || null},
+                  ${lineas.length === 1 ? lineas[0].unidades : null}, 0, ${envioCobrado || 0}, ${moneda.toUpperCase()},
+                  ${req.user!.id}, ${req.user!.email || null}, ${direccion?.name || req.user!.displayName || null},
+                  ${direccion ? JSON.stringify(direccion) : null}::jsonb,
                   ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'})
         `);
         const ok = await pagarConPuntos(db, req.user!.id, vendedorId, puntosUsados, pedidoId);
@@ -1245,18 +1309,39 @@ export function registerPublicarRoutes(app: Express, db: any) {
    * Devuelve las líneas, y en cada línea digital con archivo, la URL de
    * descarga (que vuelve a pedir el correo: la llave viaja con el enlace).
    */
+  /**
+   * ¿YA EXISTE MI PEDIDO? — `GET /api/publicar/pedido-por-sesion/:sesion`
+   * Al volver de Stripe la página solo sabe el id de la sesión de pago; el
+   * pedido lo crea el webhook un instante después. La confirmación pregunta
+   * aquí hasta que aparece. Solo devuelve el código: con él y el correo (o la
+   * sesión de quien compró) se consulta el resto.
+   */
+  app.get('/api/publicar/pedido-por-sesion/:sesion', async (req: Request, res: Response) => {
+    try {
+      const sid = String(req.params.sesion || '').trim();
+      if (!sid.startsWith('cs_')) return res.status(400).json({ error: 'Esa sesión de pago no se entiende.' });
+      const r = await db.execute(sql`SELECT codigo FROM pedidos WHERE stripe_session_id = ${sid}`);
+      if (!r.rows[0]) return res.status(404).json({ pendiente: true, error: 'Todavía estamos confirmando el pago.' });
+      res.json({ codigo: (r.rows[0] as any).codigo });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/publicar/pedido/:codigo', async (req: Request, res: Response) => {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) {
+      // Dos llaves: el correo, o la sesión de quien compró con cuenta.
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) {
         return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
       }
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, estado, seguimiento, created_at, updated_at, direccion_envio
+               moneda, estado, seguimiento, created_at, updated_at, direccion_envio,
+               puntos_usados, cupon_codigo, descuento_centimos, comprador_email
         FROM pedidos
-        WHERE codigo = ${codigo} AND lower(comprador_email) = ${correo}
+        WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
       `);
       const p = r.rows[0] as any;
       if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
@@ -1283,6 +1368,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         ciudad: p.direccion_envio?.city || null,
         hecho_el: p.created_at,
         cambiado_el: p.updated_at,
+        // Lo que se pagó con puntos y con cupón, para que la confirmación y
+        // «¿dónde está lo mío?» lo digan sin consultar el libro.
+        puntos_usados: Number(p.puntos_usados || 0),
+        cupon: p.cupon_codigo || null,
+        descuento_centimos: Number(p.descuento_centimos || 0),
         // Un pedido sin nada físico no se envía: la pantalla no debe pintar
         // «enviado» como un paso pendiente que nunca llegará.
         solo_digital: lineas.length > 0 && lineas.every(l => l.kind === 'digital'),
@@ -1296,7 +1386,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // no es digital (nada que descargar), es digital pero el vendedor
           // no subió el archivo (se dice), o el pedido no está vivo.
           descarga: l.kind === 'digital' && l.con_archivo && vivo
-            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}?correo=${encodeURIComponent(correo)}`
+            ? `/api/publicar/pedido/${encodeURIComponent(p.codigo)}/descarga/${encodeURIComponent(l.id)}${correo ? `?correo=${encodeURIComponent(correo)}` : ''}`
             : null,
           sin_archivo: l.kind === 'digital' && !l.con_archivo,
         })),
@@ -1317,13 +1407,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
     try {
       const codigo = String(req.params.codigo || '').toUpperCase().trim();
       const correo = String(req.query.correo || '').toLowerCase().trim();
-      if (!codigo || !correo) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
+      // Dos llaves válidas: el correo del pedido, o la SESIÓN de quien lo
+      // compró con cuenta (2026-08-22: la confirmación de compra enseña las
+      // descargas sin pedir el correo a quien acaba de pagar con su sesión).
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo.' });
       const r = await db.execute(sql`
         SELECT pr.archivo_digital, l.producto_nombre, p.estado
         FROM pedidos p
         JOIN pedido_lineas l ON l.pedido_id = p.id AND l.id = ${String(req.params.lineaId)}
         JOIN products pr ON pr.id = l.producto_id
-        WHERE p.codigo = ${codigo} AND lower(p.comprador_email) = ${correo}
+        WHERE p.codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(p.comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND p.comprador_user_id = ${quien}))
           AND coalesce(pr.kind, 'fisico') = 'digital'
       `);
       const fila = r.rows[0] as any;
@@ -1392,6 +1487,39 @@ export function registerPublicarRoutes(app: Express, db: any) {
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
       res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * CÓMO ESTÁ COMPARTIDA ESTA PÁGINA — `GET /api/publicar/estado/:id`
+   *
+   * Lo que la pantalla de compartir necesita saber al ABRIRSE: si está
+   * publicada, con qué dirección, y si se dijo que sí o que no a los
+   * buscadores.
+   *
+   * Sin esto la pantalla suponía. Y suponía que sí: quien había elegido «no
+   * aparecer en Google» reabría el diálogo y veía «Sí» marcado, con lo que un
+   * clic descuidado en cualquier otra cosa podía volver a indexarla. Una
+   * pantalla que no lee el estado real acaba escribiéndolo mal.
+   */
+  app.get('/api/publicar/estado/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT w.publico, w.indexable, w.slug, u.handle
+        FROM knowledge_windows w
+        JOIN users u ON u.id = w.creator_user_id
+        WHERE w.id = ${String(req.params.id)} AND w.creator_user_id = ${req.user.id}
+      `);
+      const w = r.rows[0] as any;
+      if (!w) return res.status(404).json({ error: 'Esa página no es tuya o no existe.' });
+      res.json({
+        publico: !!w.publico,
+        // `null` cuando nunca se ha publicado: «no se ha decidido» no es lo
+        // mismo que «se dijo que no», y la pantalla los enseña distinto.
+        indexable: w.publico ? !!w.indexable : null,
+        slug: w.slug, handle: w.handle,
+      });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

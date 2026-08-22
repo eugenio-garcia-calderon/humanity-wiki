@@ -383,13 +383,20 @@ function crearConexion(llamadaId: string, montarCarriles: boolean) {
 
   conexion.onconnectionstatechange = () => {
     const s = conexion.connectionState;
-    if (s === 'connected') cambiarLlamada({ fase: 'hablando', aviso: null, desde: estado.llamada?.desde || Date.now() });
+    if (s === 'connected') {
+      cambiarLlamada({ fase: 'hablando', aviso: null, desde: estado.llamada?.desde || Date.now() });
+      // POR DÓNDE HA IDO. Se mira una vez, al conectar, y se apunta: de los
+      // tres caminos posibles solo uno cuesta dinero, y sin medirlo la primera
+      // noticia del gasto sería la factura.
+      apuntarPorDondeFue(conexion, llamadaId);
+    }
     if (s === 'failed') {
-      // AQUÍ ES DONDE SE NOTA NO TENER TURN, y se dice con esas palabras en
-      // vez de dejar a alguien mirando «conectando…» para siempre.
+      // Con TURN contratado esto ya casi no debería pasar, así que el mensaje
+      // cambia: si hay TURN y aun así falla, no es «tu red es rara», es que
+      // algo va mal y hay que mirarlo.
       cambiarLlamada({
         aviso: hayTurn
-          ? 'No se ha podido establecer la conexión.'
+          ? 'No se ha podido establecer la conexión. Vuelve a intentarlo.'
           : 'No se ha podido conectar. Suele pasar en redes de empresa o móviles muy cerradas.',
       });
       colgar().catch(() => {});
@@ -398,6 +405,64 @@ function crearConexion(llamadaId: string, montarCarriles: boolean) {
 
   pc = conexion;
   return conexion;
+}
+
+/**
+ * ¿Por dónde ha acabado yendo la llamada?
+ *
+ * El navegador prueba todos los caminos a la vez y se queda con el primero que
+ * funciona; en `getStats()` queda escrito cuál ganó. Se traduce a las tres
+ * palabras que entiende una persona:
+ *
+ *   los dos «host»        → local          (mismo wifi)
+ *   alguno «relay»        → retransmitida  (por el TURN de Cloudflare: cuesta)
+ *   el resto              → directo        (de navegador a navegador, gratis)
+ *
+ * BASTA CON QUE UNO DE LOS DOS EXTREMOS SEA «relay» para que la llamada esté
+ * pasando por Cloudflare: el tráfico entra por ahí aunque el otro lado tenga
+ * una dirección directa.
+ *
+ * No lanza y no se espera a que termine: si esto falla, la llamada sigue.
+ */
+/**
+ * ¿Por dónde ha acabado yendo la llamada?
+ *
+ * El navegador prueba todos los caminos a la vez y se queda con el primero que
+ * funciona; en `getStats()` queda escrito cuál ganó. Se traduce a las tres
+ * palabras que entiende una persona:
+ *
+ *   los dos «host»   → local          (mismo wifi, nadie en medio)
+ *   alguno «relay»   → retransmitida  (por el TURN de Cloudflare: esta cuesta)
+ *   el resto         → directo        (de navegador a navegador, gratis)
+ *
+ * BASTA CON QUE UNO DE LOS DOS EXTREMOS SEA «relay»: el tráfico ya está
+ * pasando por Cloudflare aunque el otro lado tenga una dirección directa.
+ *
+ * Está separada y exportada para poder probarla con un informe de mentira, sin
+ * necesidad de dos navegadores y una llamada de verdad.
+ */
+export function clasificarCamino(informe: Map<string, any> | RTCStatsReport): string {
+  let pareja: any = null;
+  informe.forEach((d: any) => {
+    // «succeeded» y elegida: en una llamada se prueban muchas parejas y solo
+    // una gana. `selected` no lo pone Firefox, así que vale también la
+    // nominada — con las dos se cubren todos los navegadores.
+    if (d.type === 'candidate-pair' && d.state === 'succeeded' && (d.selected || d.nominated)) pareja = d;
+  });
+  if (!pareja) return 'desconocido';
+  const local = (informe as any).get(pareja.localCandidateId)?.candidateType;
+  const remoto = (informe as any).get(pareja.remoteCandidateId)?.candidateType;
+  if (local === 'relay' || remoto === 'relay') return 'retransmitida';
+  if (local === 'host' && remoto === 'host') return 'local';
+  if (local || remoto) return 'directo';
+  return 'desconocido';
+}
+
+async function apuntarPorDondeFue(conexion: RTCPeerConnection, llamadaId: string) {
+  let via = 'desconocido';
+  try { via = clasificarCamino(await conexion.getStats()); }
+  catch { /* si el navegador no lo cuenta, se queda en «desconocido» */ }
+  api(`/api/telecom/llamada/${llamadaId}/via`, { via }).catch(() => {});
 }
 
 /** El micrófono y, si toca, la cámara. */
