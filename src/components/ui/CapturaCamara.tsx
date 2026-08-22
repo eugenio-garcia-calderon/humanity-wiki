@@ -48,6 +48,13 @@ export function CapturaCamara({ onCaptura, onCerrar, camaraInicial = "environmen
       setListo(false);
       parar();
 
+      // Sin HTTPS no hay cámara, y el navegador no lo dice: `mediaDevices` ni
+      // siquiera existe. Sin este aviso, en un servidor de pruebas por http
+      // parecería que la cámara está rota cuando lo que falta es el candado.
+      if (!window.isSecureContext) {
+        setError("La cámara solo funciona con conexión segura (https).");
+        return;
+      }
       if (!navigator.mediaDevices?.getUserMedia) {
         setError("Este navegador no permite abrir la cámara.");
         return;

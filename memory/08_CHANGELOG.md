@@ -4082,3 +4082,20 @@ side needed nothing: video MIME types and `kind: 'video'` windows already existe
 NOT VERIFIED, and stated as such: the live camera preview (permission denied in
 the automation browser) and "Add to Home Screen" itself, which needs real Safari
 over real HTTPS.
+
+### Follow-up, same session — making the install findable (Programador 3)
+
+`src/avisoInstalar.ts`. On iOS the browser never offers to install a web app:
+there is no `beforeinstallprompt`, and Share → Add to Home Screen is buried in a
+sheet. An app nobody can find how to install is the same as one that cannot be.
+So: a one-time card, on iOS Safari only, never when already running standalone,
+silent for 30 days once dismissed.
+
+Also `CapturaCamara.tsx`: `window.isSecureContext` is now checked first. Without
+https, `navigator.mediaDevices` does not exist at all, and the previous message
+("this browser does not allow the camera") blamed the browser for a missing
+padlock. It now says which one it is.
+
+Still unverified by me, and only verifiable on Eugenio's own devices: the install
+card on a real iPhone, and the live camera preview (permission is denied in the
+automation browser).

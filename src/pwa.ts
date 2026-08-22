@@ -13,6 +13,7 @@
  */
 
 import { vigilarSinConexion } from "./avisoSinConexion";
+import { ofrecerInstalacion } from "./avisoInstalar";
 
 export function registrarPWA() {
   if (!("serviceWorker" in navigator)) return;
@@ -20,6 +21,10 @@ export function registrarPWA() {
   // El aviso se monta siempre que haya service worker: es lo que impide que una
   // copia guardada se lea como si fuera de ahora.
   vigilarSinConexion();
+
+  // Y el empujón para instalarla en un iPhone, que es el único sitio donde el
+  // navegador no lo ofrece por su cuenta.
+  window.addEventListener("load", ofrecerInstalacion);
 
   const params = new URLSearchParams(location.search);
   const pedido = params.get("sw");
