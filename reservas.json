@@ -1,3 +1,16 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "el rail y los paneles tambien en movil",
+      "desde": "2026-08-23T15:05:30.449Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "el rail y los paneles tambien en movil",
+      "desde": "2026-08-23T15:05:30.449Z"
+    }
+  ]
 }
