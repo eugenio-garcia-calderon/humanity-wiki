@@ -65,12 +65,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: tope de gasto de IA",
       "desde": "2026-08-23T14:04:06.566Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "equipo/DASHBOARD.md",
-      "motivo": "el fichero manda esperar un turno de un coordinador que ya no existe",
-      "desde": "2026-08-23T14:04:16.126Z"
     }
   ]
 }
