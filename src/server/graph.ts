@@ -323,6 +323,16 @@ export function registerGraphRoutes(app: Express, db: any) {
       const pattern = `%${q}%`;
       const results: any[] = [];
 
+      // ══ ESTO NO USA NINGÚN ÍNDICE, Y HAY UN NÚMERO ESCRITO PARA CUÁNDO
+      // EMPIEZA A IMPORTAR ═══════════════════════════════════════════════════
+      // Un `ILIKE '%algo%'` recorre la tabla entera: ningún B-tree sirve. Con
+      // las 83 publicaciones y las 78 filas del grafo de hoy sobra de lejos, y
+      // por eso se deja así. **A partir de ~4.000 publicaciones** (el cuerpo es
+      // texto largo y es lo primero que se rompe) o **~100.000 filas** sumando
+      // las demás tablas, esto necesita `pg_trgm` + GIN. Medido, con la tabla
+      // de tiempos y la consulta para saber en qué punto estamos, en
+      // `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+      //
       // ══ BUSCAR POR PALABRAS, NO SOLO POR LA FRASE ENTERA ═════════════════
       // (2026-08-22, «buscador first»: el chat busca antes de gastar IA.)
       //
