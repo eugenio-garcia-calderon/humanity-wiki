@@ -173,6 +173,12 @@
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/social/ImportarContactos.tsx",
+      "motivo": "fase 4: boton de traer de Google",
+      "desde": "2026-08-23T13:17:04.051Z"
     }
   ]
 }
