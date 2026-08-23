@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Table2, Plus, Loader2, ArrowLeft } from 'lucide-react';
+import { Table2, Pencil, Archive, Plus, Loader2, ArrowLeft } from 'lucide-react';
 import Rejilla from '../components/tablas/Rejilla';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
@@ -24,6 +24,59 @@ export default function Tablas() {
     setTablas(r.ok ? await r.json() : []);
   };
   useEffect(() => { if (user) cargar(); }, [user?.id]);
+
+  /**
+   * Cambiar el nombre. No se podía: una tabla nacía con su nombre y ese nombre
+   * era para siempre, así que corregirlo obligaba a crear otra y copiar los
+   * datos a mano. Un nombre es lo que más se equivoca uno al empezar algo.
+   */
+  async function renombrar(t: any) {
+    const nuevo = window.prompt('¿Cómo se llama esta tabla?', t.titulo);
+    if (nuevo === null || nuevo.trim() === '' || nuevo.trim() === t.titulo) return;
+    const r = await fetch(`/api/bd/tablas/${t.id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo: nuevo.trim() }),
+    });
+    if (r.ok) cargar();
+  }
+
+  /**
+   * Retirarla. Se archiva, no se borra: puede estar metida en páginas de otras
+   * personas.
+   *
+   * SE PREGUNTA ANTES DE TOCAR NADA. La primera versión de esto llamaba al
+   * servidor y preguntaba después, con la idea de deshacerlo si decías que no.
+   * Eso es archivar primero y pedir perdón luego, y encima dependía de una
+   * ruta de restaurar que no existe. Preguntar cuesta lo mismo y no deja a
+   * nadie con la tabla retirada por un clic.
+   *
+   * El servidor añade lo que esta pantalla no sabe: en cuántas páginas está
+   * metida. Por eso hay dos preguntas y no una — la segunda sólo aparece
+   * cuando hay alguien más a quien le va a cambiar la pantalla.
+   */
+  async function retirar(t: any) {
+    if (!window.confirm(`¿Retirar «${t.titulo}»?\n\nDeja de verse en la lista y en las páginas donde esté. No se borra nada.`)) return;
+
+    const quitar = (confirmado: boolean) => fetch(`/api/bd/tablas/${t.id}`, {
+      method: 'DELETE', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmado }),
+    });
+
+    let r = await quitar(false);
+    if (r.status === 409) {
+      const j = await r.json().catch(() => ({}));
+      if (!window.confirm(`${j.error}\n\n¿Retirarla de todas formas?`)) return;
+      r = await quitar(true);
+    }
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      window.alert(j.error || 'No se ha podido retirar.');
+      return;
+    }
+    cargar();
+  }
 
   const crear = async () => {
     setCreando(true);
@@ -78,16 +131,31 @@ export default function Tablas() {
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {(tablas || []).map(t => (
-          <button key={t.id} onClick={() => setParams({ tabla: t.id })}
-            className="flex items-center gap-2.5 p-3 border border-slate-200 rounded-xl text-left hover:border-emerald-300 hover:bg-emerald-50/30 transition-colors">
-            <span className="w-9 h-9 shrink-0 rounded-lg bg-slate-100 grid place-items-center">
-              <Table2 className="w-4 h-4 text-slate-500" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-bold text-slate-800 truncate">{t.titulo}</span>
-              <span className="block text-[11px] text-slate-400">{t.filas} {Number(t.filas) === 1 ? 'fila' : 'filas'}</span>
-            </span>
-          </button>
+          // Una fila, dos acciones: abrir es el gesto principal y ocupa todo;
+          // renombrar y retirar van al lado, a 44 px, sin menús escondidos.
+          <div key={t.id}
+            className="flex items-center gap-1 p-1 pl-3 border border-slate-200 rounded-xl hover:border-emerald-300 hover:bg-emerald-50/30 transition-colors">
+            <button onClick={() => setParams({ tabla: t.id })}
+              className="flex items-center gap-2.5 min-w-0 flex-1 text-left py-2">
+              <span className="w-9 h-9 shrink-0 rounded-lg bg-slate-100 grid place-items-center">
+                <Table2 className="w-4 h-4 text-slate-500" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-bold text-slate-800 truncate">{t.titulo}</span>
+                <span className="block text-[11px] text-slate-400">{t.filas} {Number(t.filas) === 1 ? 'fila' : 'filas'}</span>
+              </span>
+            </button>
+            <button onClick={() => renombrar(t)} aria-label={`Cambiar el nombre de ${t.titulo}`}
+              title="Cambiar el nombre"
+              className="w-11 h-11 shrink-0 grid place-items-center rounded-lg hover:bg-white">
+              <Pencil className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+            <button onClick={() => retirar(t)} aria-label={`Retirar ${t.titulo}`}
+              title="Retirar de la lista"
+              className="w-11 h-11 shrink-0 grid place-items-center rounded-lg hover:bg-white">
+              <Archive className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+          </div>
         ))}
       </div>
     </div>
