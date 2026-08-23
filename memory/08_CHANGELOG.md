@@ -6017,3 +6017,12 @@ opened in a browser (admin session in the shared browser).
 - **Sus citas se pintan junto a las de aquí**, no en otra pestaña, y las dos agendas se piden en paralelo: si Google falla, el calendario de la plataforma se pinta igual.
 - **Dos costuras cerradas**: arrastrar una cita de Google la habría pintado movida sin cambiar nada en Google, y pulsarla habría abierto nuestro editor para guardar en el vacío. Ahora no se arrastra y se abre en Google.
 - **Lo que no se escribe en tu calendario**: ni invitados, ni videollamada, ni recordatorios que nadie pidió. 13 comprobaciones.
+
+### 2026-08-23 — Un clic, una carga: la espera del navegador era una carga de más (Programador 8)
+- **Eugenio**: «tarda en responder y ponerle a cargar esa URL, es como si por 1 o 2 segundos estuviese haciendo un proceso que no es cargar esa web».
+- **Medido antes de tocar nada**: al pulsar un enlace, apple.com se cargaba **dos veces** — una al seguir el enlace y otra 700 ms después. La segunda era el marco remontándose: llevaba `key={url}`, la página avisa por `postMessage` de a dónde ha ido, eso cambiaba la clave, y React tiraba el `<iframe>` para montar otro que volvía a cargar lo ya cargado.
+- **El arreglo separa dos cosas que no son la misma**: dónde estás (barra, historia, título) y qué hay que **mandar** cargar. Lo segundo solo cambia cuando la orden es nuestra: barra, atrás/adelante, recargar, o subir a instantánea.
+- **Y la otra mitad**: cada navegación llamaba a `/api/navegador/leer` para el título, y esa ruta **vuelve a descargar la página entera en el servidor**. Dos descargas completas por clic. Ahora el título y el «viene vacía» los manda la propia página por `postMessage`, donde ya está cargada y no cuesta nada.
+- **Dos cosas que rompí arreglándolo, y por eso la prueba cubre los caminos que SÍ tienen que cargar**: el primer freno dejó «atrás» sin efecto —volvía a una dirección que el marco ya tenía apuntada, así que la clave no cambiaba— y se arregla con un contador de órdenes en vez de la dirección; y la subida a instantánea, que es la misma dirección por otro camino, necesitaba saltarse el freno a propósito.
+- **La prueba cuenta las cargas** (`scripts/probar-clic-sin-espera.mjs`, 10 comprobaciones). El síntoma era «va lento», que no falla ninguna prueba: si no se cuenta, vuelve.
+- **Tercera vez en el día** que una comilla invertida dentro de una plantilla de JavaScript cierra el literal y lo de después se evalúa como código. Queda avisado dentro de la propia inyección.
