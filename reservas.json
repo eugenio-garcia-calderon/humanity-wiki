@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog7",
-      "ruta": "src/pages/about/Tokenomics.tsx",
-      "motivo": "caducidad 10 años e inactividad 24 meses de puntos",
-      "desde": "2026-08-23T12:22:07.040Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/pages/about/TokenomicsTareas.tsx",
       "motivo": "caducidad 10 años e inactividad 24 meses de puntos",
       "desde": "2026-08-23T12:22:07.040Z"
