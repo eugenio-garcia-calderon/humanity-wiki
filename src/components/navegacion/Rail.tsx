@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
@@ -103,7 +103,7 @@ export const PERSONALES: Herramienta[] = [
 
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
-  items, titulo = 'Red de Conocimiento', claro = false,
+  items, titulo = 'Red de Conocimiento', claro = false, onPasarPorEncima,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -156,6 +156,24 @@ export default function Rail({
    * distintos en la primera corrección que entra sólo en uno.
    */
   claro?: boolean;
+  /**
+   * ABRIR AL PASAR EL RATÓN (2026-08-24).
+   *
+   * Eugenio: «si hago hover en alguno de los catorce objetivos, que se
+   * despliegue automáticamente el submenú con el contenido de ese objetivo,
+   * para no tener que hacer clic».
+   *
+   * NO ES LO MISMO QUE `onElegir`, y por eso son dos. Pasar el ratón **abre el
+   * panel** y nada más; hacer clic abre el panel **y cambia la pantalla de
+   * detrás** al contenido de ese tema. Si el hover navegara, cruzar la lista de
+   * camino a otro sitio te dejaría en una pantalla que no pediste, catorce
+   * veces seguidas. Mirar y elegir son dos gestos y tienen dos consecuencias.
+   *
+   * Sólo lo usa el menú de los temas. En el de la derecha no: allí los paneles
+   * piden datos al abrirse, y rozar la lista dispararía diez peticiones que
+   * nadie ha pedido.
+   */
+  onPasarPorEncima?: (h: Herramienta) => void;
 }) {
   const navigate = useNavigate();
 
@@ -200,12 +218,32 @@ export default function Rail({
     });
   };
 
+  /*
+   * UNA ESPERA CORTA ANTES DE ABRIR. Sin ella, cruzar la columna de arriba
+   * abajo dispara los catorce paneles en el camino y la pantalla parpadea. 140
+   * ms es el tiempo por debajo del cual un gesto es «voy de paso» y por encima
+   * del cual es «me he parado aquí» — y se cancela si el ratón se va antes, así
+   * que nunca se abre uno que ya has dejado atrás.
+   */
+  const reloj = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelar = () => { if (reloj.current) { clearTimeout(reloj.current); reloj.current = null; } };
+  useEffect(() => cancelar, []);
+
   const boton = (h: Herramienta) => {
     const Icono = h.icono;
     const activa = abierta === h.clave;
     return (
       <button
         key={h.clave}
+        onMouseEnter={onPasarPorEncima ? () => {
+          cancelar();
+          reloj.current = setTimeout(() => onPasarPorEncima(h), 140);
+        } : undefined}
+        onMouseLeave={onPasarPorEncima ? cancelar : undefined}
+        // Y con el teclado también: quien navega con el tabulador llega aquí y
+        // merece ver lo mismo que quien pasa el ratón. Sin espera, porque el
+        // tabulador ya es un gesto deliberado.
+        onFocus={onPasarPorEncima ? () => onPasarPorEncima(h) : undefined}
         onClick={() => (h.conPanel ? onElegir(h) : h.ruta.startsWith('/') ? navigate(h.ruta) : onElegir(h))}
         title={desplegado ? undefined : h.nombre}
         aria-label={h.nombre}
