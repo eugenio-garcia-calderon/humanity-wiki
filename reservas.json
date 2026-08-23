@@ -59,6 +59,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "quitar la lista que ahora duplica el panel lateral",
       "desde": "2026-08-23T14:25:38.562Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": ".github/workflows/deploy.yml",
+      "motivo": "arreglar mi bloque: el for/case rompe el script del ssh-action",
+      "desde": "2026-08-23T14:27:47.902Z"
     }
   ]
 }
