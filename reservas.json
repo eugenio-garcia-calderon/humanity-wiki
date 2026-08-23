@@ -155,6 +155,12 @@
       "ruta": "drizzle/0109_como_se_contesto.sql",
       "motivo": "medir cuantas preguntas del chat las contesta la plataforma",
       "desde": "2026-08-23T13:31:32.076Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/graph.ts",
+      "motivo": "ruta para marcar como se contesto cada pregunta",
+      "desde": "2026-08-23T13:31:36.079Z"
     }
   ]
 }
