@@ -113,6 +113,12 @@
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "devolver una compra pagada con puntos (apuntes contrarios)",
       "desde": "2026-08-23T00:23:09.184Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "src/server/agenda.ts",
+      "motivo": "el freno pasa a la base de datos: esperaPendiente ahora es async",
+      "desde": "2026-08-23T00:23:46.990Z"
     }
   ]
 }
