@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import CrearProducto from '../components/knowledge/CrearProducto';
 import EditorVariantes, { type VarianteForm, variantesAFormulario, variantesAlServidor } from '../components/knowledge/EditorVariantes';
+import Recibo from '../components/knowledge/Recibo';
+import DatosFiscales from '../components/knowledge/DatosFiscales';
 
 // ============================================================================
 // COMERCIO — lo que vendes, en un sitio (2026-08-22)
@@ -56,6 +58,13 @@ export default function Comercio() {
   // aviso «te han comprado algo» de la campana.
   // Editor de variantes por producto (2026-08-23): abierto en uno a la vez.
   const [variantesDe, setVariantesDe] = useState<string | null>(null);
+  // Recibo de una venta (F4): abierto en uno a la vez.
+  const [reciboDe, setReciboDe] = useState<{ id: string; datos: any } | null>(null);
+  async function verRecibo(id: string) {
+    if (reciboDe?.id === id) { setReciboDe(null); return; }
+    const r = await fetch(`/api/publicar/mis-ventas/${id}/recibo`).catch(() => null);
+    if (r && r.ok) setReciboDe({ id, datos: await r.json() });
+  }
   const [variantesForm, setVariantesForm] = useState<VarianteForm[]>([]);
   const [guardandoVariantes, setGuardandoVariantes] = useState(false);
   async function guardarVariantes(id: string) {
@@ -316,6 +325,7 @@ export default function Comercio() {
           {/* CÓMO VAN LAS VENTAS (2026-08-22): lo que un vendedor mira antes
               que la lista — este mes, los últimos meses y lo más vendido.
               Euros y puntos son dos números y se enseñan como dos. */}
+          <DatosFiscales />
           {resumen && (
             <div className="mb-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
               <div className="grid grid-cols-3 gap-3">
@@ -392,6 +402,10 @@ export default function Comercio() {
                     </button>
                   </div>
                 )}
+                <button type="button" onClick={() => verRecibo(p.id)} className="mt-2 mr-2 h-8 px-2 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-100">
+                  {reciboDe?.id === p.id ? 'Ocultar recibo' : 'Recibo'}
+                </button>
+                {reciboDe?.id === p.id && <Recibo datos={reciboDe.datos} onCerrar={() => setReciboDe(null)} />}
                 {['pagado', 'enviado', 'entregado'].includes(p.estado) && (
                   <button onClick={() => marcarPedido(p.id, 'devuelto')}
                     className="mt-2 h-8 px-2 rounded-lg text-[11px] font-bold text-rose-700 hover:bg-rose-50">

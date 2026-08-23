@@ -68,6 +68,141 @@ export function motivoInvalido(handle: string): string | null {
 
 export function registerPublicarRoutes(app: Express, db: any) {
   // ==========================================================================
+  // DATOS FISCALES DEL VENDEDOR Y RECIBO (2026-08-23, comercio F4)
+  // ==========================================================================
+  // Regla (Dashboard, 23-08): nada inventado ni vacío en un documento fiscal.
+  // Sin datos fiscales completos, el comprador recibe un RECIBO (no fiscal,
+  // sin número). Con ellos, y SOLO cuando Eugenio y su asesor digan cómo se
+  // factura en nombre del vendedor, habrá factura numerada: correlativa, con
+  // el número sacado en la misma transacción que la crea, y con los datos
+  // fiscales copiados dentro. Hoy no se emite nada numerado.
+  const IVAS_VALIDOS = [21, 10, 4, 0];
+  const limpiaTexto = (v: any, max: number) => { const t = String(v ?? '').trim(); return t ? t.slice(0, max) : null; };
+  const fiscalCompleto = (f: any) => !!(f && f.nombre_fiscal && f.nif && f.direccion && f.cp && f.ciudad);
+
+  /** GET /api/publicar/mis-datos-fiscales — lo que declaré de mí. */
+  app.get('/api/publicar/mis-datos-fiscales', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const f = (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${req.user.id}`)).rows[0] as any;
+      res.json({ datos: f || null, completos: fiscalCompleto(f), nota: 'Sin estos datos, tus compradores reciben un recibo (no fiscal). Con ellos, cuando la plataforma pueda emitir facturas en tu nombre, una factura numerada.' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** PUT /api/publicar/mis-datos-fiscales — guardar. Valida lo básico; no inventa nada. */
+  app.put('/api/publicar/mis-datos-fiscales', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const b = req.body || {};
+      const iva = b.iva_defecto === undefined || b.iva_defecto === null || b.iva_defecto === '' ? 21 : Number(b.iva_defecto);
+      if (!IVAS_VALIDOS.includes(iva)) return res.status(400).json({ error: 'El IVA por defecto tiene que ser 21, 10, 4 o 0.' });
+      const nif = limpiaTexto(b.nif, 20)?.toUpperCase().replace(/[\s-]/g, '') || null;
+      if (nif && !/^[A-Z0-9]{8,15}$/.test(nif)) return res.status(400).json({ error: 'El NIF no tiene buena pinta: letras y números, sin espacios.' });
+      await db.execute(sql`
+        INSERT INTO datos_fiscales (user_id, nombre_fiscal, nif, direccion, cp, ciudad, pais, iva_defecto, serie_factura, updated_at)
+        VALUES (${req.user.id}, ${limpiaTexto(b.nombre_fiscal, 200)}, ${nif}, ${limpiaTexto(b.direccion, 300)}, ${limpiaTexto(b.cp, 12)}, ${limpiaTexto(b.ciudad, 120)},
+                ${(limpiaTexto(b.pais, 2) || 'ES').toUpperCase()}, ${iva}, ${limpiaTexto(b.serie_factura, 20)}, now())
+        ON CONFLICT (user_id) DO UPDATE SET nombre_fiscal = EXCLUDED.nombre_fiscal, nif = EXCLUDED.nif, direccion = EXCLUDED.direccion, cp = EXCLUDED.cp,
+          ciudad = EXCLUDED.ciudad, pais = EXCLUDED.pais, iva_defecto = EXCLUDED.iva_defecto, serie_factura = EXCLUDED.serie_factura, updated_at = now()
+      `);
+      const f = (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${req.user.id}`)).rows[0] as any;
+      res.json({ datos: f, completos: fiscalCompleto(f) });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * El RECIBO de un pedido: qué se compró, qué se pagó y con qué. NO es una
+   * factura: no lleva número, y lo dice. Si el vendedor tiene datos fiscales
+   * completos, se enseñan y se añade un desglose de IVA INFORMATIVO
+   * (precios con IVA incluido: base = total / (1 + tipo)). Lo usan comprador
+   * (por código + correo o sesión) y vendedor (sus ventas): el mismo papel.
+   */
+  const construirRecibo = async (pedidoId: string) => {
+    const p = (await db.execute(sql`
+      SELECT pd.*, u.display_name AS vendedor_nombre, u.handle AS vendedor_handle, u.email AS vendedor_email
+      FROM pedidos pd LEFT JOIN users u ON u.id = pd.vendedor_user_id WHERE pd.id = ${pedidoId}
+    `)).rows[0] as any;
+    if (!p) return null;
+    const fiscal = p.vendedor_user_id ? (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${p.vendedor_user_id}`)).rows[0] as any : null;
+    const ivaDefecto = Number(fiscal?.iva_defecto ?? 21);
+    let lineas = (await db.execute(sql`
+      SELECT l.producto_nombre, l.unidades, l.precio_unitario_centimos, l.variante_nombre, pr.iva_pct
+      FROM pedido_lineas l LEFT JOIN products pr ON pr.id = l.producto_id WHERE l.pedido_id = ${p.id} ORDER BY l.created_at
+    `)).rows as any[];
+    if (!lineas.length) {
+      // Pedidos de antes del carrito: una sola cosa, sin líneas.
+      const pr = p.producto_id ? (await db.execute(sql`SELECT iva_pct FROM products WHERE id = ${p.producto_id}`)).rows[0] as any : null;
+      const unidades = Number(p.unidades || 1);
+      const totalLinea = Number(p.importe_centimos || 0) - Number(p.envio_centimos || 0) + Number(p.descuento_centimos || 0);
+      lineas = [{ producto_nombre: p.producto_nombre, unidades, precio_unitario_centimos: Math.round(totalLinea / Math.max(1, unidades)), variante_nombre: null, iva_pct: pr?.iva_pct ?? null }];
+    }
+    const subtotal = lineas.reduce((n, l) => n + Number(l.precio_unitario_centimos) * Number(l.unidades), 0);
+    const descuento = Number(p.descuento_centimos || 0);
+    const envio = Number(p.envio_centimos || 0);
+    const puntos = Number(p.puntos_usados || 0);
+    const totalEuros = Number(p.importe_centimos || 0);
+    const completos = fiscalCompleto(fiscal);
+    // Desglose informativo por tipo, sobre lo cobrado en euros: el descuento y
+    // los puntos se reparten en proporción entre las líneas.
+    let desglose: { tipo: number; base_centimos: number; cuota_centimos: number; total_centimos: number }[] | null = null;
+    // Solo sobre lo COBRADO EN EUROS: lo pagado con puntos no lleva IVA en
+    // euros (una compra entera en puntos no tiene desglose). El envío se
+    // considera cobrado en euros hasta donde lleguen los euros; el resto de
+    // euros se reparte entre las líneas en proporción.
+    if (completos && totalEuros > 0) {
+      const porTipo = new Map<number, number>();
+      const envioEuros = Math.min(envio, totalEuros);
+      const factor = subtotal > 0 ? Math.max(0, totalEuros - envioEuros) / subtotal : 0;
+      for (const l of lineas) {
+        const tipo = l.iva_pct === null || l.iva_pct === undefined ? ivaDefecto : Number(l.iva_pct);
+        porTipo.set(tipo, (porTipo.get(tipo) || 0) + Math.round(Number(l.precio_unitario_centimos) * Number(l.unidades) * factor));
+      }
+      if (envioEuros > 0) porTipo.set(ivaDefecto, (porTipo.get(ivaDefecto) || 0) + envioEuros);
+      desglose = [...porTipo.entries()].sort((a, b) => b[0] - a[0]).map(([tipo, total]) => {
+        const base = Math.round(total / (1 + tipo / 100));
+        return { tipo, base_centimos: base, cuota_centimos: total - base, total_centimos: total };
+      });
+    }
+    return {
+      tipo: 'recibo',
+      aviso: 'Recibo de compra. No es una factura: no lleva número y no sustituye a una. Precios con IVA incluido.',
+      codigo: p.codigo, fecha: p.created_at, estado: p.estado, moneda: p.moneda || 'EUR',
+      comprador: { nombre: p.comprador_nombre || null, email: p.comprador_email || null, direccion: p.direccion_envio || null },
+      vendedor: {
+        nombre: p.vendedor_nombre || null, tienda: p.vendedor_handle || null,
+        fiscal: completos ? { nombre_fiscal: fiscal.nombre_fiscal, nif: fiscal.nif, direccion: fiscal.direccion, cp: fiscal.cp, ciudad: fiscal.ciudad, pais: fiscal.pais } : null,
+      },
+      lineas: lineas.map(l => ({ nombre: l.producto_nombre, variante: l.variante_nombre || null, unidades: Number(l.unidades), precio_unitario_centimos: Number(l.precio_unitario_centimos), total_centimos: Number(l.precio_unitario_centimos) * Number(l.unidades), iva_pct: completos ? (l.iva_pct === null || l.iva_pct === undefined ? ivaDefecto : Number(l.iva_pct)) : null })),
+      subtotal_centimos: subtotal, descuento_centimos: descuento, cupon: p.cupon_codigo || null, envio_centimos: envio,
+      puntos_usados: puntos, total_euros_centimos: totalEuros,
+      desglose_iva: desglose,
+    };
+  };
+  /** GET /api/publicar/pedido/:codigo/recibo?correo= — el recibo, para quien compró (correo o sesión). */
+  app.get('/api/publicar/pedido/:codigo/recibo', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.query.correo || '').toLowerCase().trim();
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
+      const r = await db.execute(sql`
+        SELECT id FROM pedidos WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
+      res.json(await construirRecibo((r.rows[0] as any).id));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** GET /api/publicar/mis-ventas/:id/recibo — el mismo recibo, para quien vendió. */
+  app.get('/api/publicar/mis-ventas/:id/recibo', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`SELECT id FROM pedidos WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}`);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+      res.json(await construirRecibo((r.rows[0] as any).id));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
   // CARRITO ABANDONADO Y FAVORITOS (2026-08-23, comercio F3)
   // ==========================================================================
   const dominioPublico = () => process.env.DOMINIO_PUBLICO || 'humanity.wiki';
@@ -1331,8 +1466,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador, variantes,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador, variantes, iva_pct,
       } = req.body || {};
+      // IVA del producto (F4): 21/10/4/0 o nulo = el tipo por defecto del vendedor.
+      const iva = iva_pct === null || iva_pct === undefined || iva_pct === '' ? null : Number(iva_pct);
+      if (iva !== null && ![21, 10, 4, 0].includes(iva)) return res.status(400).json({ error: 'El IVA tiene que ser 21, 10, 4 o 0.' });
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
 
@@ -1396,7 +1534,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
                               modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
-                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos)
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos, iva_pct)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
@@ -1408,7 +1546,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
                 ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
                 ${String(envio_plazo || '').trim() || null},
-                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true})
+                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true}, ${iva})
       `);
       // Las variantes, si las trae (2026-08-23).
       if (Array.isArray(variantes) && variantes.length) await guardarVariantes(db, id, variantes);
@@ -1500,6 +1638,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
             WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
             ELSE archivo_digital END,
           acepta_puntos = CASE WHEN ${b.acepta_puntos !== undefined} THEN ${!!b.acepta_puntos} ELSE acepta_puntos END,
+          iva_pct = CASE WHEN ${b.iva_pct !== undefined} THEN ${b.iva_pct === null || b.iva_pct === '' ? null : Number(b.iva_pct)} ELSE iva_pct END,
           -- Publicar un borrador o volver a borrador. Al publicar, el estado
           -- es el que le toca por nivel: mercado común (activo) o solo su
           -- tienda (tienda) — la misma regla que al crearlo.
