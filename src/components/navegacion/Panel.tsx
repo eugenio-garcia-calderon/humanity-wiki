@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronRight, Plus, Search, X, FolderKanban, FileText, Globe2,
   Map as MapIcon, ListChecks, Table2, Store, Users2, Paperclip, CalendarDays,
-  Bookmark, Megaphone, Loader2, CircleDot, Receipt,
+  Bookmark, Megaphone, Loader2, CircleDot, Receipt, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
@@ -577,6 +577,344 @@ function PanelComercio({ onCerrar }: { onCerrar: () => void }) {
   );
 }
 
+
+// ---------------------------------------------------------------------------
+// ESQUEMAS — igual que Mapas, y a propósito: son la misma clase de cosa (un
+// lienzo que alguien construyó) y lo que las distingue es de quién son. Dos
+// herramientas parecidas con dos formas distintas de panel obligarían a
+// aprender dos veces lo mismo.
+// ---------------------------------------------------------------------------
+function PanelEsquemas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/graphs');
+  const [busca, setBusca] = useState('');
+  const { user } = useAuth();
+  const q = busca.trim().toLowerCase();
+  const filtra = (l: any[]) => l.filter(g => !q || (g.title || '').toLowerCase().includes(q));
+  const mios = filtra(datos.filter(g => user && g.creator_user_id === user.id));
+  const otros = filtra(datos.filter(g => !user || g.creator_user_id !== user.id));
+
+  return (
+    <>
+      <Cabecera titulo="Esquemas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un esquema…" />
+      <BotonCrear a="/esquemas?nuevo=1">Nuevo esquema</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="los esquemas" onReintentar={recargar} />
+        {Array.isArray(estado) && !mios.length && !otros.length && (
+          <Vacio>{q ? 'Ningún esquema con ese nombre.' : 'Todavía no hay esquemas.'}</Vacio>
+        )}
+        {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
+          <div>
+            <Grupo icono={Globe2} titulo="Tuyos" cuantos={mios.length} />
+            {!mios.length && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin esquemas todavía</p>}
+            {mios.map(g => (
+              <HojaPanel key={g.id} a={`/esquemas/${g.slug}`} icono={Globe2} insignia={g.window_count || undefined}>
+                {g.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+        {Array.isArray(estado) && otros.length > 0 && (
+          <div>
+            <Grupo icono={Globe2} titulo="De la plataforma" cuantos={otros.length} />
+            {otros.map(g => (
+              <HojaPanel key={g.id} a={`/esquemas/${g.slug}`} icono={Globe2} insignia={g.window_count || undefined}>
+                {g.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TABLAS — por el proyecto del que cuelgan, como las Páginas. Hacen falta DOS
+// peticiones porque `/api/bd/tablas` devuelve `proyecto_id` y no el nombre del
+// proyecto, y agrupar por un identificador que nadie reconoce no es agrupar.
+// Si falla la de proyectos, las tablas se siguen viendo: caen todas al grupo
+// «Sueltas», que es peor que lo ideal y mejor que una pantalla vacía.
+// ---------------------------------------------------------------------------
+function PanelTablas({ onCerrar }: { onCerrar: () => void }) {
+  const tablas = useLista<any>('/api/bd/tablas', j => (Array.isArray(j) ? j : j?.tablas));
+  const proyectos = useLista<any>('/api/proyectos');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const nombreDe = new Map(proyectos.datos.map((p: any) => [p.id, p]));
+
+  const visibles = tablas.datos.filter(t => !q || (t.titulo || '').toLowerCase().includes(q));
+  const grupos = new Map<string, { titulo: string; url: string | null; items: any[] }>();
+  for (const t of visibles) {
+    const p = t.proyecto_id ? nombreDe.get(t.proyecto_id) : null;
+    const clave = p ? String(t.proyecto_id) : '__sueltas__';
+    if (!grupos.has(clave)) {
+      grupos.set(clave, p
+        ? { titulo: (p as any).titulo, url: `/proyectos/${(p as any).slug}`, items: [] }
+        : { titulo: 'Sueltas', url: null, items: [] });
+    }
+    grupos.get(clave)!.items.push(t);
+  }
+
+  return (
+    <>
+      <Cabecera titulo="Tablas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tabla…" />
+      <BotonCrear a="/tablas?nueva=1">Nueva tabla</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={tablas.estado} que="las tablas" onReintentar={tablas.recargar} />
+        {Array.isArray(tablas.estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna tabla con ese nombre.' : 'Todavía no tienes tablas.'}</Vacio>
+        )}
+        {[...grupos.values()].map(g => (
+          <div key={g.titulo}>
+            <Grupo icono={g.url ? FolderKanban : Table2} titulo={g.titulo} cuantos={g.items.length} a={g.url ?? undefined} />
+            {g.items.map(t => (
+              <HojaPanel key={t.id} a={`/tablas?tabla=${encodeURIComponent(t.id)}`} icono={Table2} insignia={t.filas || undefined}>
+                {t.titulo || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PUBLICACIONES — el muro es de todos, así que el panel no lo repite: enseña
+// LO TUYO, que es lo único de esa herramienta sobre lo que puedes actuar.
+// Meter aquí las publicaciones de los demás sería una segunda copia del muro
+// en una columna de 288 px, donde se lee peor que en la página.
+// ---------------------------------------------------------------------------
+function PanelPublicaciones({ onCerrar }: { onCerrar: () => void }) {
+  const { user } = useAuth();
+  const url = user ? `/api/publicaciones?autor=${encodeURIComponent(user.id)}&limit=120` : '/api/publicaciones?limit=40';
+  const { estado, datos, recargar } = useLista<any>(url);
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(p => !q || (p.titulo || '').toLowerCase().includes(q));
+
+  return (
+    <>
+      <Cabecera titulo="Publicaciones" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo tuyo…" />
+      <BotonCrear a="/explorar?crear=1">Publicar algo</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus publicaciones" onReintentar={recargar} />
+        {Array.isArray(estado) && (
+          <>
+            <Grupo icono={Megaphone} titulo={user ? 'Lo que has publicado' : 'Lo último'} cuantos={visibles.length} a="/explorar" />
+            {visibles.length === 0 && (
+              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">
+                {q ? 'Nada con ese texto' : 'Todavía no has publicado nada'}
+              </p>
+            )}
+            {visibles.slice(0, 40).map(p => (
+              <HojaPanel key={`${p.tipo}-${p.id}`} a={p.ruta || `/explorar?abrir=${encodeURIComponent(p.id)}`} icono={Megaphone}>
+                {p.titulo || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ASISTENTE — tus conversaciones, de la más reciente a la más vieja. Es la
+// herramienta cuyo contenido envejece más rápido, así que se agrupa por CUÁNDO,
+// que es como se busca una conversación: «la de esta mañana».
+// ---------------------------------------------------------------------------
+function PanelIA({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/ai/conversations');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(c => !q || (c.title || '').toLowerCase().includes(q));
+
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const semana = new Date(hoy.getTime() - 6 * 864e5);
+  const cuando = (c: any) => {
+    const f = new Date(c.updated_at || c.created_at || 0);
+    return f >= hoy ? 'Hoy' : f >= semana ? 'Esta semana' : 'Antes';
+  };
+  const bloques = ['Hoy', 'Esta semana', 'Antes'];
+
+  return (
+    <>
+      <Cabecera titulo="Asistente" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una conversación…" />
+      <BotonCrear a="/ia">Nueva conversación</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus conversaciones" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna conversación con ese texto.' : 'Todavía no has hablado con el asistente.'}</Vacio>
+        )}
+        {Array.isArray(estado) && bloques.map(b => {
+          const suyas = visibles.filter(c => cuando(c) === b);
+          if (!suyas.length) return null;
+          return (
+            <div key={b}>
+              <Grupo icono={Sparkles} titulo={b} cuantos={suyas.length} />
+              {suyas.slice(0, 25).map(c => (
+                <HojaPanel key={c.id} a={`/ia?conversacion=${encodeURIComponent(c.id)}`} icono={Sparkles} insignia={c.message_count || undefined}>
+                  {c.title || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CALENDARIO — el único que agrupa por TIEMPO, y es el que más lo pide: a una
+// fecha se le pregunta «¿qué tengo hoy?». Lo pasado va al final y plegado en la
+// cuenta, porque estorba sin llegar a sobrar del todo.
+// ---------------------------------------------------------------------------
+function PanelCalendario({ onCerrar }: { onCerrar: () => void }) {
+  /*
+   * `/api/calendario` PIDE UN TRAMO y devuelve `{ items }`, no un array pelado.
+   * Lo escribí sin mirar y contestó **400 «Faltan las fechas del tramo»** — que
+   * el panel enseñó como «no hemos podido cargar el calendario», que es
+   * exactamente lo que tenía que hacer. La señal funcionó: fue el único de los
+   * once que se quejó, y por eso se encontró en un minuto en vez de quedarse
+   * vacío y en silencio como habría pasado con la versión de ayer.
+   *
+   * El tramo va de tres meses atrás a un año adelante: lo pasado se enseña
+   * plegado en su grupo, y un año por delante cubre cualquier cosa que alguien
+   * apunte de verdad sin traerse el calendario entero.
+   */
+  const tramo = useMemo(() => {
+    const d = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);
+    const h = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
+    return `/api/calendario?desde=${d}&hasta=${h}`;
+  }, []);
+  const { estado, datos, recargar } = useLista<any>(tramo, j => (Array.isArray(j) ? j : j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(e => !q || (e.titulo || '').toLowerCase().includes(q));
+
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const manana = new Date(hoy.getTime() + 864e5);
+  const semana = new Date(hoy.getTime() + 7 * 864e5);
+  const grupo = (e: any) => {
+    const f = new Date(e.inicio || 0);
+    if (f < hoy) return 'Pasadas';
+    if (f < manana) return 'Hoy';
+    if (f < semana) return 'Esta semana';
+    return 'Más adelante';
+  };
+  const orden = ['Hoy', 'Esta semana', 'Más adelante', 'Pasadas'];
+  const dia = (e: any) => new Date(e.inicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+  return (
+    <>
+      <Cabecera titulo="Calendario" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una fecha…" />
+      <BotonCrear a="/calendario?nuevo=1">Nueva fecha</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="el calendario" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna fecha con ese texto.' : 'No tienes nada en el calendario.'}</Vacio>
+        )}
+        {Array.isArray(estado) && orden.map(g => {
+          const suyas = visibles.filter(e => grupo(e) === g)
+            .sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime());
+          if (!suyas.length) return null;
+          return (
+            <div key={g}>
+              <Grupo icono={CalendarDays} titulo={g} cuantos={suyas.length} />
+              {suyas.slice(0, 20).map(e => (
+                <HojaPanel key={e.id} a="/calendario" icono={CalendarDays} insignia={dia(e)}>
+                  {e.titulo || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ARCHIVOS — por TIPO, no por proyecto. Es lo que distingue este panel del de
+// Proyectos: cuando buscas un archivo suelto sabes qué era —una foto, un
+// vídeo, un PDF— antes de acordarte de dónde estaba.
+// ---------------------------------------------------------------------------
+const TIPOS_ARCHIVO: Array<{ kind: string[]; label: string; icono: any }> = [
+  { kind: ['imagen'], label: 'Imágenes', icono: Paperclip },
+  { kind: ['video'], label: 'Vídeos', icono: Paperclip },
+  { kind: ['enlace'], label: 'Enlaces', icono: Bookmark },
+  { kind: ['pagina', 'documento'], label: 'Documentos', icono: FileText },
+];
+
+function PanelArchivos({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/archivos', j => (Array.isArray(j) ? j : j?.archivos ?? j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(a => !q || (a.title || '').toLowerCase().includes(q));
+  const conocidos = TIPOS_ARCHIVO.flatMap(t => t.kind);
+  const otros = visibles.filter(a => !conocidos.includes(a.kind));
+
+  return (
+    <>
+      <Cabecera titulo="Archivos" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un archivo…" />
+      <BotonCrear a="/archivos">Subir un archivo</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus archivos" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Nada con ese nombre.' : 'Todavía no has subido nada.'}</Vacio>
+        )}
+        {Array.isArray(estado) && TIPOS_ARCHIVO.map(t => {
+          const suyos = visibles.filter(a => t.kind.includes(a.kind));
+          if (!suyos.length) return null;
+          return (
+            <div key={t.label}>
+              <Grupo icono={t.icono} titulo={t.label} cuantos={suyos.length} />
+              {suyos.slice(0, 20).map(a => (
+                <HojaPanel key={a.id} a={`/archivos?abrir=${encodeURIComponent(a.id)}`} icono={t.icono}>
+                  {a.title || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+        {/* «Otros» existe para que nada desaparezca por no encajar en la lista
+            de tipos de arriba. Un archivo que no se ve en ninguna parte porque
+            su `kind` es nuevo es peor que un grupo con nombre feo. */}
+        {Array.isArray(estado) && otros.length > 0 && (
+          <div>
+            <Grupo icono={Paperclip} titulo="Otros" cuantos={otros.length} />
+            {otros.slice(0, 20).map(a => (
+              <HojaPanel key={a.id} a={`/archivos?abrir=${encodeURIComponent(a.id)}`} icono={Paperclip}>
+                {a.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+/*
+ * Y DOS QUE NO TIENEN PANEL, A PROPÓSITO (2026-08-23)
+ * ---------------------------------------------------------------------------
+ * **Visor 3D** y **Navegador** no llevan panel y no es que falten: es que no
+ * tienen nada que listar. El Visor es UN sitio por el que se camina, no una
+ * colección; el Navegador es una ventana que se abre en una dirección.
+ *
+ * Un panel para ellos sería una columna vacía o, peor, un «próximamente» — que
+ * enseña que los paneles a veces no sirven, y a partir de ahí nadie los abre.
+ * Pulsar su icono navega, que es exactamente lo que se espera de ellos.
+ */
+
 export default function Panel({ herramienta, onCerrar }: { herramienta: Herramienta; onCerrar: () => void }) {
   return (
     <aside
@@ -588,6 +926,12 @@ export default function Panel({ herramienta, onCerrar }: { herramienta: Herramie
       {herramienta.clave === 'mapas' && <PanelMapas onCerrar={onCerrar} />}
       {herramienta.clave === 'tareas' && <PanelTareas onCerrar={onCerrar} />}
       {herramienta.clave === 'comercio' && <PanelComercio onCerrar={onCerrar} />}
+      {herramienta.clave === 'esquemas' && <PanelEsquemas onCerrar={onCerrar} />}
+      {herramienta.clave === 'tablas' && <PanelTablas onCerrar={onCerrar} />}
+      {herramienta.clave === 'publicaciones' && <PanelPublicaciones onCerrar={onCerrar} />}
+      {herramienta.clave === 'ia' && <PanelIA onCerrar={onCerrar} />}
+      {herramienta.clave === 'calendario' && <PanelCalendario onCerrar={onCerrar} />}
+      {herramienta.clave === 'archivos' && <PanelArchivos onCerrar={onCerrar} />}
     </aside>
   );
 }
