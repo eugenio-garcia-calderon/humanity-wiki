@@ -145,12 +145,6 @@
       "desde": "2026-08-23T13:25:59.595Z"
     },
     {
-      "agente": "prog8-turn",
-      "ruta": "src/components/ventanas/Navegador.tsx",
-      "motivo": "el clic tarda: doble carga del marco",
-      "desde": "2026-08-23T13:27:41.996Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "drizzle/0109_como_se_contesto.sql",
       "motivo": "medir cuantas preguntas del chat las contesta la plataforma",
