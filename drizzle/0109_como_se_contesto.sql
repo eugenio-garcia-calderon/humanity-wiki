@@ -1,12 +1,29 @@
 -- ============================================================================
 -- CÓMO SE CONTESTÓ CADA PREGUNTA DEL CHAT (2026-08-23, Programador 8)
 -- ============================================================================
+-- ══ PARA QUÉ ES ESTE NÚMERO, Y PARA QUÉ NO ES ══════════════════════════════
+-- **NO es para medir un ahorro de dinero.** Quien encuentre esta tabla dentro
+-- de un año pensará que sí, y sacaría la conclusión contraria a la que hay que
+-- sacar, así que queda escrito aquí con su cifra:
+--
+--   Gasto interno de IA de la plataforma en **todo** agosto de 2026: **0,74 €**
+--   (0,727 € Anthropic + 0,018 € modelos abiertos, leídos de `/api/gasto`).
+--   Con 16 usuarios, ahorrar la mitad son 0,37 € al mes. En euros no hay
+--   ninguna historia que contar, y contarla sería que la historia fuese más
+--   grande que el número.
+--
+-- **Es para saber si la plataforma sabe responder sobre lo suyo.** Si la mayor
+-- parte de lo que se pregunta acaba en el modelo, no es que el buscador vaya
+-- mal: es que **el contenido no se encuentra** —o no está—, y eso sí es un
+-- problema de producto y no de factura. La proporción es una señal sobre el
+-- contenido, leída desde la puerta por la que entra la gente a preguntar.
+--
+-- ── POR QUÉ HACE FALTA UNA TABLA PARA ALGO TAN SIMPLE ──────────────────────
 -- Desde el «buscador primero» (#290), una parte de lo que se escribe en el chat
--- se contesta con lo que hay publicado y NO llega a ningún modelo. Eso está muy
--- bien y no se puede demostrar: una pregunta resuelta en la plataforma **no
--- deja ni una fila** en ninguna tabla — no pasa por `/api/ai/chat`, así que no
--- hay `ai_messages` ni `ai_usage_charges`. Solo se sabe lo que SÍ costó, que es
--- justo la mitad que no hacía falta contar.
+-- se contesta con lo que hay publicado y NO llega a ningún modelo. Y eso **no
+-- deja ni una fila** en ninguna tabla: no pasa por `/api/ai/chat`, así que no
+-- hay `ai_messages` ni `ai_usage_charges`. Solo queda registrado lo que SÍ
+-- costó, que es justo la mitad que no hacía falta contar.
 --
 -- Esta tabla cuenta la otra mitad: una fila por pregunta, diciendo quién la
 -- contestó. Con las dos mitades en la MISMA tabla, la proporción sale de una

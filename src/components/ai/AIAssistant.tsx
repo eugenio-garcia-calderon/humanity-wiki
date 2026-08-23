@@ -312,7 +312,10 @@ const terminoDeBusqueda = (texto: string): string => {
   return t.length >= 2 ? t : original;
 };
 
-/** ══ QUIÉN CONTESTÓ, PARA PODER DECIRLO CON UN NÚMERO ═══════════════════════
+/** ══ QUIÉN CONTESTÓ, Y PARA QUÉ SIRVE SABERLO ══════════════════════════════
+ *  No para contar dinero —el gasto de IA de agosto entero fueron 0,74 €— sino
+ *  para saber si la plataforma sabe responder sobre lo suyo: si casi todo acaba
+ *  en el modelo, lo que falla es que el contenido no se encuentra.
  *  Una pregunta que resuelve el buscador **no deja rastro en ninguna parte**:
  *  no pasa por `/api/ai/chat`, así que no hay `ai_messages` ni cargo. Se sabe
  *  al céntimo lo que costó la IA y no se sabe cuántas veces no hizo falta, que

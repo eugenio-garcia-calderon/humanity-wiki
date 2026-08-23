@@ -303,6 +303,14 @@ export function registerGraphRoutes(app: Express, db: any) {
   /**
    * POST /api/search/marca — cómo se contestó una pregunta del chat.
    *
+   * ══ QUÉ MIDE ESTO, Y QUÉ NO ══════════════════════════════════════════════
+   * NO mide un ahorro de dinero: el gasto de IA de la plataforma en TODO agosto
+   * de 2026 fueron 0,74 €, así que ahorrar la mitad son 0,37 € al mes. Mide si
+   * **la plataforma sabe responder sobre lo suyo**: que la mayoría de las
+   * preguntas acaben en el modelo no diría que el buscador va mal, diría que el
+   * contenido no se encuentra. Es una señal sobre el contenido, no sobre la
+   * factura. El razonamiento entero, en `drizzle/0109_como_se_contesto.sql`.
+   *
    * ══ POR QUÉ HACE FALTA ESCRIBIR ESTO EN ALGUNA PARTE ═══════════════════════
    * Desde el «buscador primero» (#290), una pregunta que se contesta con lo que
    * hay publicado **no deja rastro**: no pasa por `/api/ai/chat`, así que no hay
