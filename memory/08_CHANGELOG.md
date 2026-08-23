@@ -6187,3 +6187,42 @@ sello sin pantalla no lo ve nadie. Separadas, ninguna de las dos sirve todavía.
 plegado por tramos de un hilo largo (fase 3) y la votación (fase 5) — por eso un
 argumento dice todavía «Sin votos» y no un número. Y no se ha comprobado en un
 móvil.
+
+### 2026-08-22 — Veracidad, fase 5: el voto de impacto
+
+Eugenio: *«termina de hacer la herramienta de DEBATES y votaciones»*.
+
+- **«¿Cuánto te mueve?», del 1 al 5**, en cada argumento. No es un «me gusta»:
+  un argumento del bando contrario puede moverte mucho, y ese es justo el que
+  tiene que subir. Pulsar otra vez el número que ya tenías **retira el voto** —
+  cambiar de opinión al leer incluye dejar de tener opinión.
+- **No estrena tabla**: los votos van a `ratings`, la que la plataforma ya usa
+  para puntuar, con `entity_type = 'argumento'`. Una segunda forma de puntuar
+  acaba dando dos números distintos para lo mismo.
+- **Cada rama se ordena por impacto**, no por hora de llegada. Y **lo que nadie
+  ha votado no se hunde al fondo**: iría al fondo el día que se escribe, donde
+  nadie lo lee, y de ahí no saldría nunca — el voto que le faltaba se lo negaría
+  el propio orden. Va justo detrás de lo más votado y por delante de lo que ya
+  se juzgó flojo.
+- **Ves tu voto y solo el tuyo.** Sin sesión, `mi_voto` es `null` — que no es lo
+  mismo que votar bajo.
+- **Sin votos sigue siendo NULL y no cero**, y la pantalla lo dice con palabras
+  («Sin votos todavía»), no con un número. Al retirar el último voto vuelve a
+  NULL: un argumento que se queda sin votos no es un argumento rechazado.
+- **Un debate cerrado tampoco se vota** (409). Si no, el resultado seguiría
+  moviéndose después de darlo por cerrado.
+- **Se puede votar lo propio**, y es deliberado: un voto entre cientos no mueve
+  nada, y prohibirlo obligaría a explicar por qué el autor es el único que no
+  puede decir cuánto le importa su argumento. Revisar sí está prohibido —
+  revisar afirma sobre el común, votar solo dice lo que te pasa a ti.
+- **Verificado**: 15 comprobaciones nuevas en verde (401 sin sesión, fuera de
+  rango, decimales, argumento inexistente, la media con dos votantes, cambiar el
+  voto sin sumar otro, el orden con uno sin votar en medio, retirar y recontar),
+  **y además pulsando los botones en el navegador**: 3,5 → 4,0 al votar, el
+  número marcado en morado, y 4,0 · 1 voto al retirarlo. Todo lo de prueba,
+  borrado.
+- **Tablero**: 11 de 30 tarjetas en verde.
+
+**Lo que sigue sin estar**: el espectro de visiones (fase 6, la que junta los
+votos en posturas), el enlace permanente a un argumento, la carga por tramos de
+un hilo largo, y el móvil sin comprobar.

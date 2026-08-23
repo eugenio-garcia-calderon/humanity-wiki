@@ -42,3 +42,20 @@ WHERE id IN (
 -- hilo largo no.
 UPDATE roadmap_items SET estado = 'en_curso', updated_at = now()
 WHERE id = 'RM_VER_F3_CONTADORES';
+
+-- ── FASE 5: EL VOTO DE IMPACTO ──────────────────────────────────────────────
+-- No estrena tabla: los votos van a `ratings`, la que la plataforma ya usa para
+-- puntuar cosas, con `entity_type = 'argumento'`. Una segunda forma de puntuar
+-- habría acabado dando dos números distintos para lo mismo.
+--
+-- Lo único que hace falta es poder preguntar «los votos de estos argumentos»
+-- sin recorrer la tabla entera de puntuaciones de la plataforma.
+CREATE INDEX IF NOT EXISTS ratings_argumento_idx
+  ON ratings (entity_id) WHERE entity_type = 'argumento';
+
+UPDATE roadmap_items SET estado = 'hecho', updated_at = now()
+WHERE id IN (
+  'RM_VER_F5_VOTO',   -- votar de 1 a 5 cuánto te mueve
+  'RM_VER_F5_ORDEN',  -- cada rama ordenada por impacto
+  'RM_VER_F5_TUYO'    -- ves tu voto y lo puedes cambiar o retirar
+);

@@ -36,7 +36,7 @@ interface Argumento {
   id: string; parent_id: string | null; postura: 'a_favor' | 'en_contra' | 'matiza';
   texto: string; profundidad: number;
   veracidad: string; veracidad_por: string | null; veracidad_motivo: string | null;
-  impacto: number | null; votos: number;
+  impacto: number | null; votos: number; mi_voto: number | null;
   autor_user_id: string | null; autor_nombre: string | null;
   created_at: string;
   fuentes: Fuente[]; hijos: Argumento[];
@@ -229,13 +229,10 @@ function Nodo({ a, debateId, cerrado, revisor, user, onHecho }: {
           estado={a.veracidad} por={a.veracidad_por} motivo={a.veracidad_motivo}
           fuentes={a.fuentes.length} compacto
         />
-        {/* NULL NO ES CERO. Un argumento sin votos no dice «0», dice que aún
-            nadie lo ha valorado — la votación llega en la fase 5. */}
-        <span className="text-[10px] text-slate-400">
-          {a.impacto === null ? 'Sin votos' : `Impacto ${a.impacto.toFixed(1)} · ${a.votos}`}
-        </span>
         <span className="text-[10px] text-slate-400">· {a.autor_nombre || 'Alguien'}</span>
       </div>
+
+      <Votar a={a} puedeVotar={!!user && !cerrado} onHecho={onHecho} />
 
       <Fuentes lista={a.fuentes} />
 
@@ -483,6 +480,65 @@ function Revisar({ argumentoId, actual, onHecho }: {
           <Trash2 className="w-3.5 h-3.5 mr-1 inline" /> Refutada
         </Button>
       </div>
+    </div>
+  );
+}
+
+function Votar({ a, puedeVotar, onHecho }: {
+  a: Argumento; puedeVotar: boolean; onHecho: () => void;
+}) {
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const votar = async (valor: number) => {
+    setEnviando(true); setError(null);
+    try {
+      // Volver a pulsar el que ya tenías retira el voto: cambiar de opinión al
+      // leer incluye dejar de tener opinión.
+      const quitar = a.mi_voto === valor;
+      const r = await fetch(`/api/argumentos/${a.id}/voto`, {
+        method: quitar ? 'DELETE' : 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: quitar ? undefined : JSON.stringify({ valor }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j?.error || 'No se ha podido votar.');
+      onHecho();
+    } catch (e: any) { setError(e.message); } finally { setEnviando(false); }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-2">
+      {/* LA PREGUNTA NO ES SI TE GUSTA. Un argumento del bando contrario puede
+          moverte mucho, y ese es justo el que tiene que subir. */}
+      <span className="text-[10px] font-bold text-slate-400">¿Cuánto te mueve?</span>
+      <div className="inline-flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map(n => (
+          <button key={n}
+            onClick={() => puedeVotar && votar(n)}
+            disabled={!puedeVotar || enviando}
+            title={puedeVotar
+              ? (a.mi_voto === n ? 'Pulsa otra vez para retirar tu voto' : `Votar ${n} de 5`)
+              : 'Inicia sesión para votar'}
+            className={cn('w-5 h-5 rounded-md text-[10px] font-black transition-colors',
+              a.mi_voto === n
+                ? 'bg-purple-700 text-white'
+                : puedeVotar
+                  ? 'bg-slate-100 text-slate-500 hover:bg-purple-100 hover:text-purple-700'
+                  : 'bg-slate-100 text-slate-300 cursor-default')}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      {/* SIN VOTOS NO ES CERO. Un argumento recién escrito no vale cero: no ha
+          sido valorado, y la pantalla lo dice con palabras y no con un número. */}
+      <span className="text-[10px] text-slate-400">
+        {a.impacto === null
+          ? 'Sin votos todavía'
+          : `${a.impacto.toFixed(1)} de 5 · ${a.votos} ${a.votos === 1 ? 'voto' : 'votos'}`}
+      </span>
+      {error && <span className="text-[10px] text-rose-700">{error}</span>}
     </div>
   );
 }
