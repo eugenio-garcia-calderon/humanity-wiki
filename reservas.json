@@ -37,40 +37,10 @@
       "desde": "2026-08-23T11:59:36.486Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/App.tsx",
-      "motivo": "portada para quien no tiene cuenta + el menu no desaparece al cerrar sesion",
-      "desde": "2026-08-23T12:00:18.314Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "portada para quien no tiene cuenta + el menu no desaparece al cerrar sesion",
-      "desde": "2026-08-23T12:00:18.314Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/layout/MenuLateral.tsx",
-      "motivo": "portada para quien no tiene cuenta + el menu no desaparece al cerrar sesion",
-      "desde": "2026-08-23T12:00:18.314Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/auth.ts",
       "motivo": "",
       "desde": "2026-08-23T12:00:46.206Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/Login.tsx",
-      "motivo": "que ?crear=1 abra la pestana de crear cuenta",
-      "desde": "2026-08-23T12:03:32.428Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "la barra de abajo ofrece a un visitante cosas que no puede usar",
-      "desde": "2026-08-23T12:10:00.132Z"
     },
     {
       "agente": "prog8-turn",
