@@ -19,12 +19,6 @@
       "desde": "2026-08-23T12:00:46.206Z"
     },
     {
-      "agente": "prog8-turn",
-      "ruta": "src/server/navegador.ts",
-      "motivo": "fase 1: exportar la reescritura y decir si hace falta render",
-      "desde": "2026-08-23T12:16:10.952Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0104_caducidad_e_inactividad.sql",
       "motivo": "caducidad 10 años e inactividad 24 meses de puntos",
