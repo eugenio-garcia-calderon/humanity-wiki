@@ -82,11 +82,26 @@ export const PERSONALES: Herramienta[] = [
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
 ];
 
-export default function Rail({ abierta, onElegir, onInicio }: {
+export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = false }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
   onElegir: (h: Herramienta) => void;
   onInicio: () => void;
+  /**
+   * EN MÓVIL EL RAÍL VA SIEMPRE DESPLEGADO (2026-08-23).
+   *
+   * Eugenio: «¿por qué en versión móvil no está?». No estaba porque lo monté
+   * sólo en escritorio: implementé la mitad de lo que él había decidido —el
+   * panel a pantalla completa— y me dejé la otra mitad, que es cómo se llega
+   * a ese panel.
+   *
+   * Y va desplegado, no en iconos, porque **en un móvil no hay ratón**: el raíl
+   * de iconos funciona en escritorio precisamente porque puedes pasar por
+   * encima y leer los nombres sin comprometerte. Sin esa posibilidad, trece
+   * iconos sin texto son trece adivinanzas. Aquí ocupa el cajón entero, que es
+   * el sitio donde ya estaba el menú de siempre.
+   */
+  siempreAbierto?: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -121,7 +136,7 @@ export default function Rail({ abierta, onElegir, onInicio }: {
     try { return localStorage.getItem('hw_rail_fijado') === '1'; } catch { return false; }
   });
   const [encima, setEncima] = useState(false);
-  const desplegado = fijado || encima;
+  const desplegado = siempreAbierto || fijado || encima;
 
   const fijar = () => {
     setFijado(v => {
@@ -170,7 +185,8 @@ export default function Rail({ abierta, onElegir, onInicio }: {
   return (
     // El HUECO. Mide 56 px salvo que esté fijado: es lo que decide si el raíl
     // empuja el contenido o se le pone encima.
-    <div className={cn('relative h-full shrink-0 transition-[width] duration-200', fijado ? 'w-56' : 'w-14')}>
+    <div className={cn('relative h-full shrink-0 transition-[width] duration-200',
+      siempreAbierto ? 'w-64' : fijado ? 'w-56' : 'w-14')}>
       <nav
         aria-label="Herramientas"
         onMouseEnter={() => setEncima(true)}
@@ -185,7 +201,7 @@ export default function Rail({ abierta, onElegir, onInicio }: {
           'absolute left-0 top-0 z-50 flex h-full flex-col gap-0.5 overflow-y-auto overflow-x-hidden',
           'border-r border-slate-800 bg-slate-950 px-2 py-2 transition-[width] duration-200',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-          desplegado ? 'w-56' : 'w-14',
+          siempreAbierto ? 'w-64' : desplegado ? 'w-56' : 'w-14',
           // La sombra sólo cuando está flotando por encima: fijado forma parte
           // de la página y una sombra ahí lo despegaría de ella sin motivo.
           !fijado && encima && 'shadow-2xl shadow-black/40',
@@ -213,7 +229,9 @@ export default function Rail({ abierta, onElegir, onInicio }: {
           {/* EL BOTÓN DE FIJAR. Sólo existe desplegado, y es a propósito: es la
               acción de «quédate así», y plegado no hay ningún «así» que
               mantener. Aparece con el hover, que es cuando la mano ya está ahí. */}
-          {desplegado && (
+          {/* La chincheta no existe en móvil: no hay nada que fijar cuando ya
+              está siempre abierto. */}
+          {desplegado && !siempreAbierto && (
             <button
               onClick={fijar}
               title={fijado ? 'Soltar el menú' : 'Dejar el menú abierto'}
