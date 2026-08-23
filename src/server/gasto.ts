@@ -115,7 +115,38 @@ interface Gasto {
   };
 }
 
-let cache: { datos: Gasto; expira: number } | null = null;
+// ══ LA CACHÉ VIVE EN LA BASE DE DATOS, NO EN EL PROCESO ═════════════════════
+// Con un proceso daba igual. Con los ocho que va a haber al repartir el
+// trabajo, serían ocho cachés tomadas en momentos distintos: hasta 8 veces las
+// llamadas a las APIs de fuera y, sobre todo, LA CIFRA BAILARÍA al recargar.
+//
+// Esta página existe para ser transparente con el dinero de Eugenio, y un
+// número que cambia al recargar hace dudar de todos los demás números de la
+// página. Un dato viejo se explica con su fecha al lado; uno que baila, no.
+//
+// Nada de esto puede tumbar la página: si la caché no se puede leer o escribir,
+// se pregunta a las APIs y se sigue.
+async function leerCache(db: any): Promise<Gasto | null> {
+  try {
+    const r = await db.execute(sql`SELECT datos FROM gasto_cache WHERE id = 1 AND expira > now()`);
+    return (r.rows[0] as any)?.datos ?? null;
+  } catch (e: any) {
+    console.error('[gasto] no se pudo leer la caché:', e?.message || e);
+    return null;
+  }
+}
+
+async function guardarCache(db: any, datos: Gasto): Promise<void> {
+  try {
+    await db.execute(sql`
+      INSERT INTO gasto_cache (id, datos, expira, guardado)
+      VALUES (1, ${JSON.stringify(datos)}::jsonb, now() + (${CACHE_HORAS()}::int || ' hours')::interval, now())
+      ON CONFLICT (id) DO UPDATE SET datos = EXCLUDED.datos, expira = EXCLUDED.expira, guardado = now()
+    `);
+  } catch (e: any) {
+    console.error('[gasto] no se pudo guardar la caché:', e?.message || e);
+  }
+}
 
 async function gastoHetzner(): Promise<GastoServidores> {
   const token = process.env.HETZNER_API_TOKEN;
@@ -309,10 +340,11 @@ export function registerGastoRoutes(app: Express, db: any) {
     try {
       const esAdmin = (req.user?.roleLevel ?? 0) >= 4;
       const forzar = esAdmin && req.query.refrescar === '1';
-      if (cache && cache.expira > Date.now() && !forzar) {
+      const guardado = forzar ? null : await leerCache(db);
+      if (guardado) {
         // Las copias se releen aunque el gasto venga de la caché: es el dato
         // que tiene que estar al día.
-        const conCopias = { ...cache.datos, copias: estadoCopias() };
+        const conCopias = { ...guardado, copias: estadoCopias() };
         return res.json(esAdmin ? conCopias : soloLoPublico(conCopias));
       }
       const [servidores, oficial, interno] = await Promise.all([
@@ -327,7 +359,7 @@ export function registerGastoRoutes(app: Express, db: any) {
         copias: estadoCopias(),
         ia: { oficial_anthropic: oficial, interno },
       };
-      cache = { datos, expira: Date.now() + CACHE_HORAS() * 3600_000 };
+      await guardarCache(db, datos);
       res.json(esAdmin ? datos : soloLoPublico(datos));
     } catch (e: any) {
       console.error('gasto error:', e);
