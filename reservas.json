@@ -7,12 +7,6 @@
       "desde": "2026-08-23T13:03:04.503Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "src/pages/Mercado.tsx",
-      "motivo": "comercio F3: carrito abandonado y favoritos",
-      "desde": "2026-08-23T13:25:59.595Z"
-    },
-    {
       "agente": "prog8-turn",
       "ruta": "src/components/ventanas/Navegador.tsx",
       "motivo": "el clic tarda: doble carga del marco",
