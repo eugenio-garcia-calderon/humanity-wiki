@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog3",
-      "ruta": "drizzle/0091_bloqueos.sql",
-      "motivo": "bloquear a una persona: ultimo requisito de Apple",
-      "desde": "2026-08-22T20:46:22.224Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "bloquear a una persona: interfaz",
       "desde": "2026-08-22T21:03:12.729Z"
@@ -77,6 +71,12 @@
       "ruta": "drizzle/0099_cable_entre_procesos.sql",
       "motivo": "el cable cruza procesos: presencia y entrega",
       "desde": "2026-08-23T00:40:47.993Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "cable entre procesos",
+      "desde": "2026-08-23T00:53:32.100Z"
     }
   ]
 }
