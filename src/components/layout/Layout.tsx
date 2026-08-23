@@ -14,7 +14,7 @@ import MenuLateral from './MenuLateral';
 import Rail, { type Herramienta } from '../navegacion/Rail';
 import Panel, { EstilosPanel } from '../navegacion/Panel';
 import TresCirculos, { type Circulo } from '../navegacion/TresCirculos';
-import PanelExplorar from '../navegacion/PanelExplorar';
+import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
@@ -106,6 +106,8 @@ export default function Layout() {
    * cualquiera cuando se ha equivocado de botón.
    */
   const [circulo, setCirculo] = useState<Circulo | null>(null);
+  /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
+  const [objetivoAbierto, setObjetivoAbierto] = useState<string | null>(null);
   const pulsarCirculo = (c: Circulo) => {
     setCirculo(a => (a === c ? null : c));
     // Elegir un círculo cierra lo del anterior: el panel de la derecha es de
@@ -388,8 +390,26 @@ export default function Layout() {
           Los catorce objetivos en cascada, igual que en el mapa. Ocupa la
           mitad de la pantalla en un móvil y un tercio en un ordenador, que es
           lo que pidió Eugenio: es un menú para leer, no una tira de iconos. */}
+      {/* ══ EXPLORAR: EL ESPEJO DE ORGANIZAR (2026-08-23) ════════════════
+          El MISMO `Rail`, con los catorce objetivos en vez de las
+          herramientas, y su panel claro al lado. Eugenio: «que sea un menú que
+          se abre de lado en vez de en cascada hacia abajo, y así tenemos como
+          en un espejo ambos menús igual de diseñados».
+          A la izquierda el raíl va primero y el panel después; a la derecha, al
+          revés. Es la única diferencia entre los dos lados. */}
       {!esMovil && circulo === 'explorar' && (
-        <PanelExplorar onCerrar={() => setCirculo(null)} />
+        <>
+          <Rail
+            titulo="Explorar"
+            items={OBJETIVOS_RAIL}
+            abierta={objetivoAbierto}
+            onElegir={h => setObjetivoAbierto(a => (a === h.clave ? null : h.clave))}
+            onInicio={() => { navigate('/'); setObjetivoAbierto(null); setCirculo(null); }}
+          />
+          {objetivoAbierto && (
+            <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
+          )}
+        </>
       )}
 
       {/* ══ EL RAÍL Y SU PANEL (2026-08-23) ═══════════════════════════════
@@ -1085,9 +1105,18 @@ export default function Layout() {
           contenido, no al lado: a 375 px una columna del 50 % dejaría al
           contenido 187 px, que no es una pantalla, es una rendija. */}
       {esMovil && circulo === 'explorar' && (
-        <div className="fixed inset-0 z-[9997] flex">
-          <PanelExplorar onCerrar={() => setCirculo(null)} />
-          <div onClick={() => setCirculo(null)} aria-hidden className="flex-1 bg-slate-900/30" />
+        <div className="fixed inset-0 z-[9997] flex bg-white">
+          {objetivoAbierto
+            ? <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
+            : <Rail
+                siempreAbierto
+                titulo="Explorar"
+                items={OBJETIVOS_RAIL}
+                abierta={null}
+                onElegir={h => setObjetivoAbierto(h.clave)}
+                onInicio={() => { navigate('/'); setCirculo(null); }}
+              />}
+          <div onClick={() => { setObjetivoAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
         </div>
       )}
     </div>
