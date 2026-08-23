@@ -23,6 +23,12 @@
       "ruta": "drizzle/0102_gasto_compartido.sql",
       "motivo": "la cifra de gasto no puede bailar entre procesos",
       "desde": "2026-08-23T11:45:22.057Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "src/server/gasto.ts",
+      "motivo": "la cache del gasto pasa a la base de datos",
+      "desde": "2026-08-23T11:45:45.159Z"
     }
   ]
 }
