@@ -101,6 +101,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "devolver una compra pagada con puntos (apuntes contrarios)",
       "desde": "2026-08-23T00:23:00.157Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "devolver una compra pagada con puntos (apuntes contrarios)",
+      "desde": "2026-08-23T00:23:04.695Z"
     }
   ]
 }
