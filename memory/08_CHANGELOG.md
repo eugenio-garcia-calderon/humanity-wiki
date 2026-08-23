@@ -5632,3 +5632,165 @@ nothing, says so and escalates to the model (answered in 8,5 s, «menos de
 0,01 €»); the IA switch silences the typeahead and forces the model; ↓ + Enter
 on a suggestion opens `/retos/R001`. 17-case table for `queHacer` run in node,
 all green. `tsc` clean.
+## Blocking a person, end to end (2026-08-22, Programador 3 / app)
+
+The last App Store requirement that depended on us. Apple rejects an app with
+user-generated content that lets you report a *thing* but not block a *person*:
+reporting opens a case somebody else judges later, blocking takes effect now and
+is decided by whoever presses it. Someone being harassed needs the second one.
+
+**The rule lives in one place.** `bloqueado_entre(a, b)` (migration `0091`) is a
+`STABLE` SQL function that looks in both directions, and every query that filters
+adds one line saying the same thing. The alternative was repeating a `NOT IN
+(SELECT …)` in the wall, the publications, the comments, the canvases, the
+projects and the maps — **six copies of a rule are six places to forget it**, and
+that is exactly how a block ends up filtering the wall but not the comments,
+which from the outside reads as the block not working.
+
+**Both directions, from one row.** A single `bloqueos` row describes the whole
+relationship: I stop seeing them *and* they stop seeing me. That is what Apple
+checks, and it is why the predicate tests both orders instead of one.
+
+**Nobody is told.** No notification on blocking, on purpose — telling someone
+turns the block into a provocation, which is the thing the person pressing it is
+running from. `GET /api/bloqueos` returns only who *I* have blocked; who has
+blocked me cannot be queried anywhere.
+
+What it covers, all of it verified over HTTP with two accounts:
+
+| Surface | Before | After |
+|---|---|---|
+| The wall (`/api/feed`) | 4 posts visible | 0, in both directions |
+| Publications, canvases, projects, maps, windows (`/api/publicaciones`) | 4 | 0, in both directions |
+| Comments under a publication | visible | hidden |
+| Direct messages | 200 | 403, either way |
+| Following | allowed | 403, and existing follows deleted by a trigger |
+
+**25 checks in green, 0 in red** — 9 in SQL against real data inside a rolled-back
+transaction, 16 over HTTP against a local server. The list deliberately includes
+what must *not* change: a third party still sees everything, a logged-out visitor
+sees everything (`bloqueado_entre(NULL, x)` is false, so nothing is filtered),
+blocking twice is not an error, blocking yourself is refused by a `CHECK`, and one
+person cannot delete another's block.
+
+**Two things found while testing, worth writing down.** `U_DEMO_MARC` is archived,
+so its session never resolved and the first run's "reverse direction" result was
+measuring an anonymous request, not a blocked one — the test looked like it passed
+the forward case and failed the reverse, and it was neither. And an archived
+user's publications still appear in the feed; that is pre-existing and not part of
+this change.
+
+**Where it is in the app.** "Bloquear a <name>" in the card menu, right under
+"Denunciar"; the same option offered *after* a report is sent, because reporting
+takes time and the person who just reported harassment still sees it meanwhile;
+and the undo list in **Configuración → Personas bloqueadas**, which hides itself
+when it is empty — most people never block anyone, and an empty section titled
+"Personas bloqueadas" in their settings suggests a problem they do not have.
+
+**What unblocking does not do**: it does not restore the follows the block
+deleted. That is said on the screen, before the button.
+
+---
+
+## 2026-08-23 — A privacy policy, and two third parties nobody had decided on (app/UX agent)
+
+**There was none.** No route, no file, no text anywhere in the repo. App Store
+Connect will not accept a submission without a privacy policy URL that answers,
+and neither will the Play listing. Now at `humanity.wiki/privacidad`; like
+`/borrar-cuenta`, **that path never moves** — it is pasted into both listings and
+changing it means going through review again.
+
+Play's **Data safety** form and Apple's **privacy labels** are declarations: a
+mismatch with what the app does is grounds for removal. So the text was written
+by measuring — the columns of `users`, `sessions` and `intentos_fallidos`; a grep
+for known trackers across all of `src/` and `index.html` (**zero**: no Analytics,
+no pixel, no Sentry); the cookies the server sets (**one**, `rh_session`, which is
+why there is no cookie banner); and the third-party hosts the app calls.
+
+**That last one changed the code before it changed the text.** Two things nobody
+had decided:
+
+- **Four videos embedded from `youtube.com`**, which sets a tracking cookie,
+  while four other places already used `youtube-nocookie.com`. One decision,
+  applied in half the places. All four switched.
+- **`transparenttextures.com`**, fetched on every visit to an objective or a
+  challenge for a decorative background at 10% opacity — handing that visitor's
+  IP to a third party for a texture you can barely see. Now drawn in code
+  (`src/utils/texturaCubos.ts`). Measured after: that page makes **zero**
+  third-party requests where it made one before.
+
+A privacy policy does not describe the app you wish you had. If writing one turns
+up something you would rather not declare, the app is what changes.
+
+**And two errors of mine, found by checking a claim I could not verify.**
+Cloudflare was missing from the list of who receives data — it sits in front of
+the whole site, so every visitor's IP passes through it. So was the off-site
+backup store, which takes a full dump out of the building nightly. And the page
+asserted the servers were "in Germany"; Hetzner is a German company, but where
+the machine runs was written nowhere in the repo. Eugenio confirmed **Germany**
+the next morning, and the entity with it: **Light for Humanity, CIF G88040563,
+Madrid** — now in `memory/14_SOCIEDAD.md`, because it was recorded nowhere and
+five things need it.
+
+The page states the origin and the CDN separately instead of collapsing them into
+"we are in Europe": the origin is in the EU, and a CDN terminates the connection
+at the edge nearest the visitor, which may not be. Both are true and only one of
+them is the reassuring one.
+
+---
+
+## 2026-08-23 — A project page that shows what is in the project (app/UX agent)
+
+Eugenio: *«no aparecen por ejemplo las páginas ligadas a ese proyecto, y seguro
+que tampoco otros elementos como mapas»*. Right, and by more than he said:
+**twelve tables carry `proyecto_id` and the page rendered one of them**, the task
+board. Pages, canvases, maps, products, data tables, dates and things saved from
+the browser all existed, all hung off the project, and appeared on no screen
+except by expanding the project in the side menu.
+
+It asks **the same endpoint the menu does**, `/api/proyectos/:id/arbol`. A second
+query here would have been quicker and would have created the usual problem: two
+lists of "what is in a project" that drift the moment someone adds a table to one
+and not the other. With one source, fixing the tree fixed both screens — which is
+what happened when it gained Archivos, Tablas and Fechas, three of the twelve it
+was missing.
+
+Found while checking it on a phone: at 375px that toolbar asked for 474px, got
+319, and had `overflow-x: visible`. **The "Mapa" button and the delete button
+were off-screen with no way to reach them** — the buttons for adding a map to a
+project, on the device where that matters most.
+
+---
+
+## 2026-08-23 — The service worker was cloning a stream that never ends (app/UX agent)
+
+**An outage, and mine.** Eugenio: *«la aplicación se queda constantemente, a
+veces recargando, durante minutos, sin parar»*. Shipped hours earlier in `hw-v4`.
+
+Every `/api/` response went through a branch that does `res.clone()` and then
+`await copia.blob()` inside `event.waitUntil`. **`/api/telecom/conexion` is
+Server-Sent Events and by design never ends.** So `blob()` could never resolve —
+one pending `waitUntil` per connection, per tab — and cloning a streaming
+response makes the browser buffer the *whole* stream so both branches can read
+it. A stream that never ends is memory that never stops growing. With several
+tabs on a machine with 8 GB, that is exactly what it looks like from outside.
+
+Reproduced before fixing, by running the worker's own two lines in the page
+against the real endpoint: **still hanging after 8 seconds**.
+
+The filter is on the **request**, not the response, on purpose: by the time the
+response arrives it has already been intercepted and the clone is paid for.
+`EventSource` always sends `Accept: text/event-stream`, so it covers the chat
+today and any stream added later by someone who does not read the comment.
+
+**`scripts/probar-sw.mjs` ships with it**, because this cannot be caught the
+usual way: it needs a live session and patience, and **the automation browser
+cannot run a service worker at all** (`src/pwa.ts` has said so for a day). It
+loads `sw.js` with a fake `self` and asserts which requests get `respondWith`.
+Against the `sw.js` that was live in production: **4 green, 1 red**. Against the
+fix: 5 green.
+
+**What this cost, written down so it is not repeated.** The bug was invisible in
+every way the work had been verified: one tab, two minutes, logged out, on
+localhost. It needed a session, several tabs and time — which is the shape of
+every service-worker bug so far. `VERSION` bumped to `hw-v5`.
