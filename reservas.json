@@ -17,12 +17,6 @@
       "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
       "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
       "desde": "2026-08-23T13:50:52.975Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "prog7: corregir mi inserción en TipoAviso (30 s)",
-      "desde": "2026-08-23T14:34:11.759Z"
     }
   ]
 }
