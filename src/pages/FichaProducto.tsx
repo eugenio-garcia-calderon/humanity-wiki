@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star, MessageCircle } from 'lucide-react';
 import Markdown from '../components/ai/Markdown';
+import BotonFavorito from '../components/knowledge/BotonFavorito';
 import { useCarrito } from '../hooks/useCarrito';
 import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from '../components/knowledge/Cesta';
 
@@ -277,12 +278,17 @@ export default function FichaProducto({ handle }: { handle: string }) {
           {/* PREGUNTAR AL VENDEDOR (2026-08-23): un mensaje directo, que ya
               existe (Telecomunicaciones). La duda que no se puede preguntar
               es una venta que no se hace. */}
-          {p.vendedor?.id && (
-            <a href={`${dominioPrincipal()}/mensajes?con=${encodeURIComponent(p.vendedor.id)}`}
-              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
-              <MessageCircle className="w-4 h-4" /> Preguntar al vendedor
-            </a>
-          )}
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
+            {/* Favoritos (2026-08-23): con sesión en la tienda (la cookie llega
+                al subdominio). Sin ella, el botón lo dice. */}
+            <BotonFavorito productoId={p.id} conSesion={!!caja?.con_sesion} />
+            {p.vendedor?.id && (
+              <a href={`${dominioPrincipal()}/mensajes?con=${encodeURIComponent(p.vendedor.id)}`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+                <MessageCircle className="w-4 h-4" /> Preguntar al vendedor
+              </a>
+            )}
+          </div>
 
           {(p.garantia || p.devoluciones) && (
             <ul className="mt-5 space-y-1.5 pt-4 border-t border-slate-100">

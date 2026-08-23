@@ -4,6 +4,8 @@ import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
 import { Search, Package, Megaphone, MapPin, Filter, X, Plus, ShoppingCart, FolderKanban } from 'lucide-react';
 import { cn } from '../utils/cn';
+import BotonFavorito from '../components/knowledge/BotonFavorito';
+import { Heart } from 'lucide-react';
 import EmbeddedCheckoutModal from '../components/stripe/EmbeddedCheckoutModal';
 import FichaProducto, { type ProductoFicha } from '../components/juego/FichaProducto';
 
@@ -42,6 +44,10 @@ export default function Mercado() {
   const [tab, setTab] = useState<'ofertas' | 'demandas'>('ofertas');
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [products, setProducts] = useState<any[]>([]);
+  // Favoritos (2026-08-23): los ids de quien mira, para pintar el corazón y
+  // para el chip «Solo favoritos».
+  const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
+  const [soloFavoritos, setSoloFavoritos] = useState(false);
   const [demands, setDemands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
@@ -55,6 +61,11 @@ export default function Mercado() {
   const [proyectoDeFicha, setProyectoDeFicha] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const { user, can } = useAuth();
+  useEffect(() => {
+    if (!user) { setFavoritos(new Set()); setSoloFavoritos(false); return; }
+    fetch('/api/publicar/favoritos', { credentials: 'include' }).then(r => r.json())
+      .then(j => { if (Array.isArray(j?.ids)) setFavoritos(new Set(j.ids)); }).catch(() => {});
+  }, [user]);
   const { territories, objectives } = useHelpers();
 
   useEffect(() => {
@@ -166,6 +177,14 @@ export default function Mercado() {
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 transition-colors"
           />
         </div>
+        {user && tab === 'ofertas' && (
+          <button type="button" onClick={() => setSoloFavoritos(v => !v)}
+            className={cn('inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-bold border transition-colors',
+              soloFavoritos ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}
+            title="Ver solo tus favoritos">
+            <Heart className={cn('w-4 h-4', soloFavoritos && 'fill-current')} /> Favoritos{favoritos.size ? ` (${favoritos.size})` : ''}
+          </button>
+        )}
         <button
           onClick={() => setShowFilters(v => !v)}
           className={cn(
@@ -258,7 +277,7 @@ export default function Mercado() {
 
       {!loading && tab === 'ofertas' && products.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map(p => (
+          {(soloFavoritos ? products.filter(p => favoritos.has(p.id)) : products).map(p => (
             // La tarjeta ENTERA abre la página del producto. El botón de
             // comprar vive dentro y para su propio clic: comprar sin haber
             // visto la ficha sigue estando a un solo toque.
@@ -281,8 +300,12 @@ export default function Mercado() {
                 <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                   {p.category || 'producto'}
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                  {p.kind === 'digital' ? 'Digital' : 'Físico'}
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                    {p.kind === 'digital' ? 'Digital' : 'Físico'}
+                  </span>
+                  <BotonFavorito productoId={p.id} conSesion={!!user} inicial={favoritos.has(p.id)} className="w-8 h-8"
+                    onCambio={activo => setFavoritos(prev => { const n = new Set(prev); if (activo) n.add(p.id); else n.delete(p.id); return n; })} />
                 </span>
               </div>
               <h3 className="text-base font-black text-slate-900 leading-tight mb-1.5">{p.name}</h3>

@@ -332,6 +332,13 @@ export default function Comercio() {
                   <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Sin enviar</p>
                   <p className={`text-xl font-black ${resumen.sin_enviar > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{resumen.sin_enviar}</p>
                 </div>
+                {Number(resumen.cestas_a_medias) > 0 && (
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400">Cestas a medias (30 días)</p>
+                    <p className="text-xl font-black text-slate-900">{resumen.cestas_a_medias}</p>
+                    <p className="text-[11px] text-slate-400">Con sesión y sin comprar; se les avisa a las 24 h.</p>
+                  </div>
+                )}
               </div>
               {resumen.serie?.length > 1 && (
                 <p className="mt-3 text-[11px] text-slate-500">

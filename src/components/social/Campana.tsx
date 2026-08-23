@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -52,6 +52,8 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   // Comercio (prog7, 2026-08-23).
   pedido_nuevo:       { icono: ShoppingBag,    frase: n => `${n} te ha comprado algo` },
   pedido_estado:      { icono: Package,        frase: () => 'Tu pedido se ha movido' },
+  cesta_olvidada:     { icono: ShoppingCart,   frase: () => 'Tu cesta sigue ahí' },
+  precio_bajado:      { icono: Tag,            frase: () => 'Un favorito tuyo ha bajado de precio' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -81,6 +83,7 @@ const destinoDe = (a: Aviso): string | null => {
   // Un pedido lleva a quien lo mira: al vendedor a su panel, al comprador a
   // su pedido. El aviso trae su propio destino porque lo sabe quien lo escribe.
   if (a.entity_type === 'pedidos') return a.payload?.destino || '/comercio?pestana=pedidos';
+  if (a.entity_type === 'cestas' || a.entity_type === 'favoritos') return a.payload?.destino || '/mercado';
   return null;
 };
 
