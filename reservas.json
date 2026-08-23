@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog7",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "apartado Avisos legales: terminos + privacidad (Eugenio)",
-      "desde": "2026-08-23T10:59:33.890Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "menu (i): 1 linea para ocultar entradas con enMenu:false (Avisos legales)",
       "desde": "2026-08-23T11:01:23.908Z"
