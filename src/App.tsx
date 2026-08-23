@@ -87,6 +87,8 @@ const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
 const UserMapa = lazy(() => import('./pages/UserMapa'));
 import { PAGINAS_INFO } from './paginasInfo';
 const Vision = lazy(() => import('./pages/Vision'));
+const Debates = lazy(() => import('./pages/Debates'));
+const Debate = lazy(() => import('./pages/Debate'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
 import Bienvenida from './pages/Bienvenida';
@@ -293,6 +295,11 @@ export default function App() {
                   }
                 />
                 <Route path="vision" element={<Vision />} />
+                {/* Los debates NO son páginas de información: son la
+                    plataforma. Por eso van aquí y no en `paginasInfo.ts`, que
+                    es la lista de lo que EXPLICA la plataforma. */}
+                <Route path="debates" element={<Debates />} />
+                <Route path="debates/:slug" element={<Debate />} />
 
                 {/* LAS PÁGINAS DE LA «i», DESDE SU LISTA (2026-08-22). Añadir
                     una es una línea en `src/paginasInfo.ts` y ningún cambio
