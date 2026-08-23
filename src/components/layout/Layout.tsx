@@ -413,6 +413,7 @@ export default function Layout() {
               nadie. Dos arreglos con un cambio porque eran el mismo problema. */}
           <Rail
             siempreAbierto
+            claro
             titulo="Explorar"
             items={OBJETIVOS_RAIL}
             abierta={objetivoAbierto}
@@ -1119,8 +1120,15 @@ export default function Layout() {
           {panelAbierto && (
             <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
           )}
+          {/* FONDO BLANCO EN LOS DOS (2026-08-24, Eugenio: «ponle el fondo
+              blanco»). El negro venía de cuando el raíl estaba SIEMPRE puesto y
+              tenía que leerse como armazón de la aplicación. Ahora sólo aparece
+              cuando lo pides, y entonces es contenido: una lista de tus cosas o
+              de los catorce temas. En blanco además los colores del mapa se
+              ven — un `text-yellow-500` sobre negro casi no existe. */}
           <Rail
             siempreAbierto
+            claro
             ladoDerecho
             abierta={panelAbierto?.clave ?? null}
             onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
@@ -1137,6 +1145,7 @@ export default function Layout() {
             ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
             : <Rail
                 siempreAbierto
+                claro
                 abierta={null}
                 onElegir={h => { if (h.conPanel) setPanelAbierto(h); else if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } }}
                 onInicio={() => { navigate('/'); setCirculo(null); }}
@@ -1213,6 +1222,7 @@ export default function Layout() {
             ? <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
             : <Rail
                 siempreAbierto
+                claro
                 titulo="Explorar"
                 items={OBJETIVOS_RAIL}
                 abierta={null}

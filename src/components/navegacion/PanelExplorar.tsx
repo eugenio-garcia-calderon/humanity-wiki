@@ -35,6 +35,7 @@ export const OBJETIVOS_RAIL: Herramienta[] = OBJETIVOS.map(o => ({
   clave: o.id,
   nombre: o.titulo,
   icono: o.icono,
+  color: o.color,
   ruta: `/objetivos/${o.id}`,
   conPanel: true,
 }));

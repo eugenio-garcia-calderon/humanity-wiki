@@ -4,6 +4,7 @@ import {
   EstilosPrevias,
   PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
   PreviaTelecom, PreviaIA, PreviaCalendario, PreviaArchivos, PreviaPublicaciones,
+  PreviaMundo, PreviaNavegador,
 } from '../bienvenida/previas';
 
 /*
@@ -60,6 +61,14 @@ const COSAS: Cosa[] = [
   { nombre: 'Persona',      Previa: PreviaTelecom,       a: '/personas?nueva=1' },
   { nombre: 'Archivo',      Previa: PreviaArchivos,      a: '/archivos' },
   { nombre: 'Pedírselo a la IA', Previa: PreviaIA,       a: '/ia',                nota: 'Que lo haga ella' },
+  // LAS TRES QUE FALTABAN (2026-08-24, Eugenio: «cuidado que hay herramientas
+  // que aún no están en ese menú central, como el visor 3D o el navegador o
+  // CONTACTOS»). Se habían quedado fuera al montar la hoja, y ahora que el menú
+  // de la derecha ya no lleva herramientas, **éste es su único sitio**: si no
+  // estuvieran aquí, no habría forma de llegar a ellas.
+  { nombre: 'Visor 3D',     Previa: PreviaMundo,         a: '/juego',             nota: 'Camina por tus proyectos' },
+  { nombre: 'Navegador',    Previa: PreviaNavegador,     a: '/archivos',          nota: 'Guarda lo de internet' },
+  { nombre: 'Contactos',    Previa: PreviaTelecom,       a: '/telefono',          nota: 'Tu gente y sus llamadas' },
 ];
 
 export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
@@ -145,7 +154,13 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
               no caber. Que entonces se pueda bajar es mejor que quedarse sin
               ver las últimas. */}
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+            {/* SEIS COLUMNAS EN PANTALLA GRANDE (2026-08-24). Con las tres
+                herramientas nuevas son dieciséis, y a cinco columnas pedían una
+                cuarta fila que ya no cabía — medido, no supuesto. A seis
+                vuelven a caber en tres filas. Cada vez que entra una
+                herramienta hay que volver a mirar esto: la rejilla no avisa,
+                simplemente empieza a hacer falta bajar. */}
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
               {COSAS.map(c => (
                 <button
                   key={c.nombre}
@@ -155,8 +170,20 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
                   // dibujo: cada previsualización se mueve con `group-hover`.
                   className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
                 >
-                  <span className="block aspect-[16/9] w-full border-b border-slate-100">
-                    <c.Previa />
+                  {/* LA FOTO SE AMPLÍA AL PASAR EL RATÓN (2026-08-24, Eugenio:
+                      «que cuando hagas hover por encima se amplíe la foto de la
+                      herramienta»). Un 8 %, no más: el dibujo tiene que crecer
+                      lo justo para responder al gesto, no saltar. Y crece
+                      DENTRO de su marco —`overflow-hidden` en el padre—, así
+                      que la rejilla no se mueve: si la tarjeta empujara a sus
+                      vecinas, pasar el ratón por encima descolocaría la lista
+                      que estás intentando leer.
+                      El zoom convive con la animación de dentro del dibujo: una
+                      escala el contenedor, la otra mueve las piezas. */}
+                  <span className="block aspect-[16/9] w-full overflow-hidden border-b border-slate-100">
+                    <span className="block h-full w-full transition-transform duration-300 ease-out group-hover:scale-[1.08]">
+                      <c.Previa />
+                    </span>
                   </span>
                   <span className="px-2 py-1.5 text-[12px] font-black leading-tight text-slate-900">
                     {c.nombre}
