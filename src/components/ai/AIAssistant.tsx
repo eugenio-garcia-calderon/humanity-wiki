@@ -312,6 +312,28 @@ const terminoDeBusqueda = (texto: string): string => {
   return t.length >= 2 ? t : original;
 };
 
+/** ══ QUIÉN CONTESTÓ, PARA PODER DECIRLO CON UN NÚMERO ═══════════════════════
+ *  Una pregunta que resuelve el buscador **no deja rastro en ninguna parte**:
+ *  no pasa por `/api/ai/chat`, así que no hay `ai_messages` ni cargo. Se sabe
+ *  al céntimo lo que costó la IA y no se sabe cuántas veces no hizo falta, que
+ *  es justo lo que se quería demostrar. Esta línea es la que lo cuenta.
+ *
+ *  NO VIAJA NI EL TEXTO NI QUIÉN PREGUNTA: para una proporción no hacen falta,
+ *  y una tabla con las preguntas de la gente es una tabla que hay que
+ *  proteger. Ver `drizzle/0109_como_se_contesto.sql`.
+ *
+ *  Y NO SE ESPERA A QUE TERMINE, ni se avisa si falla: es una estadística. Si
+ *  se pierde una fila, se pierde una fila; romper una respuesta por no poder
+ *  contarla sería el peor cambio posible. */
+const marcarQuienContesto = (resuelta: 'plataforma' | 'modelo', resultados?: number) => {
+  fetch('/api/search/marca', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resuelta, resultados }),
+    keepalive: true,
+  }).catch(() => { /* una estadística nunca interrumpe una conversación */ });
+};
+
 type Intencion =
   /** `exigente`: es una pregunta de explicación, así que solo vale un
    *  resultado que se llame como lo preguntado. Si no lo hay, contesta la IA. */
@@ -1127,6 +1149,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           encontrados = [];
         }
         if (encontrados.length) {
+          marcarQuienContesto('plataforma', encontrados.length);
           setMessages(m => [...m, {
             role: 'assistant',
             content: `Esto es lo que hay en la plataforma sobre «${termino}».`,
@@ -1139,6 +1162,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           return;
         }
         if (!ES_PREGUNTA.test(text)) {
+          marcarQuienContesto('plataforma', 0);
           setMessages(m => [...m, {
             role: 'assistant',
             content: `No hay nada en la plataforma sobre «${termino}». Puedes preguntárselo a la IA si quieres que te lo explique ella.`,
@@ -1188,6 +1212,9 @@ export default function AIAssistant({ modo = 'panel' }: {
         /\b(documento|informe|acta|art[ií]culo|memoria|dossier|redacci[oó]n)\b/i.test(text) &&
         (wantsToCreate || /\b(dame|d[áa]melo|en forma de|como (un )?documento|convi[eé]rte\w*|p[áa]salo|redacta)\b/i.test(text));
       if (pideDocumento && user && !pendingAttachment) {
+        // El documento se escribe en otra página, pero lo escribe un modelo:
+        // para esta cuenta, esta pregunta la contesta la IA.
+        marcarQuienContesto('modelo');
         setMessages(m => [...m, {
           role: 'assistant',
           content: 'Abriendo el documento — lo verás escribirse en directo. Quedará guardado en tus publicaciones como borrador privado.',
@@ -1209,6 +1236,7 @@ export default function AIAssistant({ modo = 'panel' }: {
       // la plataforma antes que desde el modelo— es lo que hace ahora el
       // buscador primero, unas líneas más arriba, y ése sí se ejecuta.
 
+      marcarQuienContesto('modelo');
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
