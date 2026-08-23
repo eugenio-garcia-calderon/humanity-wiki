@@ -13,36 +13,6 @@
       "desde": "2026-08-23T13:45:28.078Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "src/server/ai/assistant.ts",
-      "motivo": "tope mensual de gasto de IA de la plataforma",
-      "desde": "2026-08-23T13:49:06.237Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/documentos.ts",
-      "motivo": "tope mensual de gasto de IA de la plataforma",
-      "desde": "2026-08-23T13:49:10.226Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/gasto.ts",
-      "motivo": "tope mensual de gasto de IA de la plataforma",
-      "desde": "2026-08-23T13:49:13.930Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/pages/about/Servidores.tsx",
-      "motivo": "tope mensual de gasto de IA de la plataforma",
-      "desde": "2026-08-23T13:49:18.036Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "tope mensual de gasto de IA de la plataforma",
-      "desde": "2026-08-23T13:49:21.893Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
       "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
@@ -59,12 +29,6 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "pintar el aviso del 80% del tope de IA",
       "desde": "2026-08-23T13:54:15.339Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: tope de gasto de IA",
-      "desde": "2026-08-23T14:04:06.566Z"
     }
   ]
 }
