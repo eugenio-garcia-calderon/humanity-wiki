@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -44,6 +44,11 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   // Telecomunicaciones (2026-08-22).
   mensaje:           { icono: Send,            frase: n => `${n} te ha escrito` },
   llamada_perdida:   { icono: PhoneMissed,     frase: n => `Llamada perdida de ${n}` },
+  // Puntos (prog7, 2026-08-23): lo dice el sistema, no una persona; la cifra
+  // y la fecha van en el texto del aviso (payload.texto).
+  puntos_inactividad: { icono: Hourglass,      frase: () => 'Tu saldo de puntos se perderá si no vuelves' },
+  puntos_caducan:     { icono: Hourglass,      frase: () => 'Parte de tus puntos va a caducar' },
+  puntos_perdidos:    { icono: Coins,          frase: () => 'Puntos perdidos' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -68,6 +73,8 @@ const destinoDe = (a: Aviso): string | null => {
   // concreta — no a la bandeja, que te obligaría a buscar de quién era.
   if (a.entity_type === 'llamadas') return `/telefono`;
   if (a.entity_type === 'mensajes') return a.payload?.de ? `/mensajes?con=${a.payload.de}` : `/mensajes`;
+  // Un aviso de puntos lleva a tu saldo, donde está la fecha y lo que hacer.
+  if (a.entity_type === 'puntos') return `/vision?pestana=economia`;
   return null;
 };
 

@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { guardian, REGLAS, ritmo, ipDe } from './limites/index.js';
+import { avisar } from './avisos.js';
 
 // ============================================================================
 // PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
@@ -316,6 +317,188 @@ export async function cuadrarPuntos(db: any): Promise<{ revisadas: number; repar
   return { revisadas: Number((total.rows[0] as any)?.n ?? 0), repara, descuadres };
 }
 
+
+// ============================================================================
+// CADUCIDAD (10 AÑOS) E INACTIVIDAD (24 MESES) — 2026-08-23
+// ============================================================================
+// Decisión de Eugenio (22-08): «caducidad de 10 años; si usuario no activo en
+// 24 meses, entonces pierde saldo». Los términos (Avisos legales) lo recogen.
+//  · INACTIVIDAD: la última señal de vida de una cuenta es la mayor de: día
+//    de uso (`actividad_diaria`), última sesión vista, último inicio de
+//    sesión, último movimiento HECHO por la persona (no lo que recibe sin
+//    hacer nada: reparto, vistas, transferencias recibidas) y la fecha de
+//    alta. Con más de 24 meses y saldo, el saldo se pierde ENTERO con un
+//    apunte contrario `perdida_inactividad`.
+//  · CADUCIDAD: los puntos se gastan por orden de llegada (los más antiguos
+//    primero), así que lo que queda en el saldo es siempre lo último ganado.
+//    Caduca max(0, saldo − ingresos de los últimos 10 años): la parte del
+//    saldo que ya no se explica con nada ganado en la década. Apunte
+//    `caducidad`.
+//  · AVISOS antes, nunca sorpresa: inactividad a 30 y 7 días; caducidad a 90
+//    días (cuánto y cuándo). Por la campana (`avisar`), y cada aviso lleva
+//    una clave: antes de escribirlo se mira si ya está.
+//  · El barrido corre cada 6 h (y a los 2 min de arrancar) detrás de
+//    `PUNTOS_CADUCIDAD`: `off` (por defecto) solo calcula y canta en el
+//    registro; `avisar` escribe avisos y nada más; `on` avisa y ejecuta las
+//    pérdidas. Como todo lo que mueve saldo: nace apagado y lo enciende
+//    Eugenio. La cuenta de la plataforma (`U_PLATAFORMA`) queda fuera.
+export const modoCaducidad = (): 'off' | 'avisar' | 'on' => {
+  const v = String(process.env.PUNTOS_CADUCIDAD || 'off').toLowerCase();
+  return v === 'on' ? 'on' : v === 'avisar' ? 'avisar' : 'off';
+};
+const mesesInactividad = () => Math.max(1, Math.floor(Number(process.env.PUNTOS_INACTIVIDAD_MESES ?? 24)));
+const aniosCaducidad = () => Math.max(1, Math.floor(Number(process.env.PUNTOS_CADUCIDAD_ANIOS ?? 10)));
+const DIA_MS = 24 * 60 * 60 * 1000;
+// Fechas en partes LOCALES, no en ISO/UTC: `dia` (date) llega como la
+// medianoche local, y pasarla por toISOString la movería un día atrás en
+// cualquier servidor al este de Greenwich.
+const fechaISO = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const sumarMeses = (d: Date, meses: number) => { const x = new Date(d); x.setMonth(x.getMonth() + meses); return x; };
+const sumarAnios = (d: Date, anios: number) => { const x = new Date(d); x.setFullYear(x.getFullYear() + anios); return x; };
+
+export type EstadoConservacion = {
+  user_id: string; nombre: string; saldo: number;
+  ultima_actividad: string; se_pierde_el: string; dias_restantes: number;
+  caduca_ahora: number; caducan_pronto: { puntos: number; fecha: string } | null;
+};
+
+/** El estado de conservación de cada saldo (o de uno solo): nada se escribe. */
+export async function estadoConservacion(db: any, userId?: string): Promise<EstadoConservacion[]> {
+  const meses = mesesInactividad(), anios = aniosCaducidad();
+  const filas = await db.execute(sql`
+    WITH act AS (SELECT user_id, max(dia)::timestamp AS t FROM actividad_diaria GROUP BY user_id),
+    ses AS (SELECT user_id, max(last_seen_at) AS t FROM sessions GROUP BY user_id),
+    mov AS (
+      SELECT user_id, max(created_at) AS t FROM movimientos_puntos
+      WHERE motivo NOT IN ('reparto_mensual', 'vista_publicacion', 'transferencia_recibida', 'venta_en_puntos',
+                           'devolucion_puntos', 'comision_puntos', 'caducidad', 'perdida_inactividad', 'regalo_bienvenida', 'saldo_inicial')
+      GROUP BY user_id
+    ),
+    -- El saldo que caduca es el del LIBRO (suma de apuntes), no la columna:
+    -- si columna y libro no casan, eso es asunto del cuadre, y caducar por la
+    -- columna haría desaparecer puntos que el libro no conoce.
+    libro AS (
+      SELECT user_id,
+             coalesce(sum(cantidad), 0)::float AS saldo_libro,
+             coalesce(sum(cantidad) FILTER (WHERE cantidad > 0 AND created_at >= now() - make_interval(years => ${anios})), 0)::float AS ing_decada,
+             coalesce(sum(cantidad) FILTER (WHERE cantidad > 0 AND created_at >= now() - make_interval(years => ${anios}) + interval '90 days'), 0)::float AS ing_decada_menos_90,
+             min(created_at) FILTER (WHERE cantidad > 0 AND created_at >= now() - make_interval(years => ${anios})) AS primer_ingreso_vigente
+      FROM movimientos_puntos GROUP BY user_id
+    )
+    SELECT u.id, coalesce(u.display_name, u.name, u.email) AS nombre, u.puntos::float AS saldo,
+           coalesce(libro.saldo_libro, 0)::float AS saldo_libro,
+           GREATEST(u.created_at, u.last_login_at, act.t, ses.t, mov.t) AS ultima_actividad,
+           coalesce(libro.ing_decada, 0)::float AS ing_decada, coalesce(libro.ing_decada_menos_90, 0)::float AS ing_decada_menos_90,
+           libro.primer_ingreso_vigente
+    FROM users u
+    LEFT JOIN act ON act.user_id = u.id LEFT JOIN ses ON ses.user_id = u.id
+    LEFT JOIN mov ON mov.user_id = u.id LEFT JOIN libro ON libro.user_id = u.id
+    WHERE u.id <> 'U_PLATAFORMA' AND (${userId ?? null}::text IS NULL OR u.id = ${userId ?? null}::text)
+      AND (${userId ?? null}::text IS NOT NULL OR u.puntos > 0 OR coalesce(libro.saldo_libro, 0) > 0)
+  `);
+  const hoy = new Date();
+  return (filas.rows as any[]).map(f => {
+    const ultima = new Date(f.ultima_actividad);
+    const pierde = sumarMeses(ultima, meses);
+    const saldo = Math.round(Number(f.saldo) * 100) / 100;
+    const saldoLibro = Math.round(Number(f.saldo_libro) * 100) / 100;
+    // Lo caducado se mide en el libro y nunca supera la columna: lo que se
+    // pueda restar de verdad.
+    const caducaAhora = Math.min(saldo, Math.max(0, Math.round((saldoLibro - Number(f.ing_decada)) * 100) / 100));
+    const caducaEn90 = Math.min(saldo, Math.max(0, Math.round((saldoLibro - Number(f.ing_decada_menos_90)) * 100) / 100));
+    const primer = f.primer_ingreso_vigente ? new Date(f.primer_ingreso_vigente) : null;
+    return {
+      user_id: f.id, nombre: f.nombre, saldo,
+      ultima_actividad: fechaISO(ultima), se_pierde_el: fechaISO(pierde),
+      dias_restantes: Math.ceil((pierde.getTime() - hoy.getTime()) / DIA_MS),
+      caduca_ahora: caducaAhora,
+      // Lo que caducará en 90 días POR ENCIMA de lo que ya caduca hoy, y la
+      // fecha del ingreso vigente más antiguo + los años: la próxima caducidad.
+      caducan_pronto: caducaEn90 - caducaAhora > 0 && primer ? { puntos: Math.round((caducaEn90 - caducaAhora) * 100) / 100, fecha: fechaISO(sumarAnios(primer, anios)) } : null,
+    };
+  });
+}
+
+/** ¿Ya está escrito este aviso? (clave en entity_id, entity_type 'puntos'). */
+async function avisoYaDado(db: any, userId: string, tipo: string, clave: string) {
+  const r = await db.execute(sql`SELECT 1 FROM notifications WHERE user_id = ${userId} AND type = ${tipo} AND entity_type = 'puntos' AND entity_id = ${clave} LIMIT 1`);
+  return r.rows.length > 0;
+}
+async function avisarUnaVez(db: any, userId: string, tipo: 'puntos_inactividad' | 'puntos_caducan' | 'puntos_perdidos', clave: string, texto: string, datos: Record<string, any>) {
+  if (await avisoYaDado(db, userId, tipo, clave)) return false;
+  return avisar(db, { paraQuien: userId, dePartede: null, tipo, entidadTipo: 'puntos', entidadId: clave, datos: { texto, ...datos } });
+}
+
+/** Una pérdida: apunte contrario + saldo, en una transacción, releyendo el saldo con candado. */
+async function ejecutarPerdida(db: any, userId: string, motivo: 'caducidad' | 'perdida_inactividad', tope: number | null, hoy: string) {
+  return db.transaction(async (tx: any) => {
+    const r = await tx.execute(sql`SELECT puntos::float AS saldo FROM users WHERE id = ${userId} FOR UPDATE`);
+    const saldo = Number((r.rows[0] as any)?.saldo ?? 0);
+    const cantidad = Math.round(Math.min(saldo, tope ?? saldo) * 100) / 100;
+    if (cantidad <= 0) return 0;
+    await tx.execute(sql`UPDATE users SET puntos = puntos - ${cantidad} WHERE id = ${userId}`);
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+      VALUES (${newId()}, ${userId}, ${-cantidad}, ${motivo}, 'caducidad', ${hoy})
+    `);
+    return cantidad;
+  });
+}
+
+/**
+ * El barrido. Calcula para todos, avisa a quien toca (si el modo lo permite)
+ * y ejecuta las pérdidas (solo con `on`). Devuelve lo que hizo y lo que haría.
+ */
+export async function barrerCaducidades(db: any): Promise<{
+  modo: 'off' | 'avisar' | 'on'; revisadas: number;
+  avisos_escritos: number; perdidas_ejecutadas: { user_id: string; motivo: string; puntos: number }[];
+  pendientes: { pierden_inactividad: EstadoConservacion[]; caducan: EstadoConservacion[]; por_avisar: { user_id: string; nombre: string; tipo: string; fecha: string; puntos?: number }[] };
+}> {
+  const modo = modoCaducidad();
+  const estados = await estadoConservacion(db);
+  const hoy = fechaISO(new Date());
+  const fmt = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 2 });
+  let avisos = 0;
+  const perdidas: { user_id: string; motivo: string; puntos: number }[] = [];
+  const pierden: EstadoConservacion[] = [], caducan: EstadoConservacion[] = [], porAvisar: any[] = [];
+  for (const e of estados) {
+    // Inactividad: pérdida, o aviso a 30 y a 7 días.
+    if (e.saldo > 0 && e.dias_restantes <= 0) {
+      pierden.push(e);
+      if (modo === 'on') {
+        const q = await ejecutarPerdida(db, e.user_id, 'perdida_inactividad', null, hoy);
+        if (q > 0) {
+          perdidas.push({ user_id: e.user_id, motivo: 'perdida_inactividad', puntos: q });
+          if (await avisarUnaVez(db, e.user_id, 'puntos_perdidos', `inactividad:${hoy}`, `Tu saldo de ${fmt(q)} puntos se ha perdido tras ${mesesInactividad()} meses sin actividad, como dicen los términos.`, { puntos: q, motivo: 'perdida_inactividad' })) avisos++;
+        }
+        continue;
+      }
+    } else if (e.saldo > 0 && e.dias_restantes <= 30) {
+      const clave = `${e.dias_restantes <= 7 ? 'inactividad-7d' : 'inactividad-30d'}:${e.se_pierde_el}`;
+      porAvisar.push({ user_id: e.user_id, nombre: e.nombre, tipo: 'puntos_inactividad', fecha: e.se_pierde_el, puntos: e.saldo });
+      if (modo !== 'off' && await avisarUnaVez(db, e.user_id, 'puntos_inactividad', clave, `Llevas casi ${mesesInactividad()} meses sin usar la plataforma: tu saldo de ${fmt(e.saldo)} puntos se perderá el ${e.se_pierde_el} si no vuelves antes. Entrar una vez basta.`, { fecha: e.se_pierde_el, puntos: e.saldo })) avisos++;
+    }
+    // Caducidad: pérdida de la parte antigua, o aviso a 90 días.
+    if (e.caduca_ahora > 0) {
+      caducan.push(e);
+      if (modo === 'on') {
+        const q = await ejecutarPerdida(db, e.user_id, 'caducidad', e.caduca_ahora, hoy);
+        if (q > 0) {
+          perdidas.push({ user_id: e.user_id, motivo: 'caducidad', puntos: q });
+          if (await avisarUnaVez(db, e.user_id, 'puntos_perdidos', `caducidad:${hoy}`, `${fmt(q)} puntos han caducado: tenían más de ${aniosCaducidad()} años.`, { puntos: q, motivo: 'caducidad' })) avisos++;
+        }
+      }
+    } else if (e.caducan_pronto) {
+      porAvisar.push({ user_id: e.user_id, nombre: e.nombre, tipo: 'puntos_caducan', fecha: e.caducan_pronto.fecha, puntos: e.caducan_pronto.puntos });
+      if (modo !== 'off' && await avisarUnaVez(db, e.user_id, 'puntos_caducan', `caducidad-90d:${e.caducan_pronto.fecha}`, `${fmt(e.caducan_pronto.puntos)} de tus puntos caducan el ${e.caducan_pronto.fecha} (${aniosCaducidad()} años): úsalos antes en la cesta o en el mercado.`, e.caducan_pronto)) avisos++;
+    }
+  }
+  if (pierden.length || caducan.length || porAvisar.length || perdidas.length) {
+    console.log(`[puntos] barrido de caducidad (${modo}): ${estados.length} saldos; pierden por inactividad ${pierden.length}, caducan ${caducan.length}, avisos que tocan ${porAvisar.length}; escritos ${avisos} avisos y ${perdidas.length} pérdidas.`);
+  }
+  return { modo, revisadas: estados.length, avisos_escritos: avisos, perdidas_ejecutadas: perdidas, pendientes: { pierden_inactividad: pierden, caducan, por_avisar: porAvisar } };
+}
+
 export function registerPuntosRoutes(app: Express, db: any) {
   // El cuadre corre al arrancar (al minuto, para no competir con el arranque)
   // y cada 6 horas. No a las 24: con el ritmo de despliegues de este equipo
@@ -325,6 +508,38 @@ export function registerPuntosRoutes(app: Express, db: any) {
   const pasada = () => cuadrarPuntos(db).catch(e => console.error('[puntos] cuadre fallido:', e.message));
   setTimeout(pasada, 60 * 1000);
   setInterval(pasada, 6 * 60 * 60 * 1000);
+
+  // El barrido de caducidad e inactividad, con el mismo ritmo que el cuadre
+  // (a los 2 min y cada 6 h): apagado solo calcula y canta.
+  const barrido = () => barrerCaducidades(db).catch(e => console.error('[puntos] barrido de caducidad fallido:', e.message));
+  setTimeout(barrido, 2 * 60 * 1000);
+  setInterval(barrido, 6 * 60 * 60 * 1000);
+
+  /** GET /api/admin/puntos/caducidades — la simulación: quién pierde, quién caduca, a quién tocaría avisar. Nada se escribe. */
+  app.get('/api/admin/puntos/caducidades', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      const estados = await estadoConservacion(db);
+      res.json({
+        modo: modoCaducidad(), meses_inactividad: mesesInactividad(), anios_caducidad: aniosCaducidad(),
+        revisadas: estados.length,
+        pierden_inactividad: estados.filter(e => e.saldo > 0 && e.dias_restantes <= 0),
+        avisar_inactividad: estados.filter(e => e.saldo > 0 && e.dias_restantes > 0 && e.dias_restantes <= 30),
+        caducan: estados.filter(e => e.caduca_ahora > 0),
+        avisar_caducidad: estados.filter(e => e.caduca_ahora <= 0 && e.caducan_pronto),
+        proximos: [...estados].sort((a, b) => a.dias_restantes - b.dias_restantes).slice(0, 20),
+        nota: 'Simulación. El barrido corre solo cada 6 h: con PUNTOS_CADUCIDAD=off solo calcula; =avisar escribe avisos; =on avisa y ejecuta las pérdidas (apuntes contrarios).',
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** POST /api/admin/puntos/caducidades/barrer — pasar el barrido ahora (respeta el modo). */
+  app.post('/api/admin/puntos/caducidades/barrer', guardian(db, REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
+      res.json(await barrerCaducidades(db));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
 
   /** GET /api/admin/puntos/cuadre — ejecutar el cuadre a mano y ver el resultado. */
   app.get('/api/admin/puntos/cuadre', async (req: Request, res: Response) => {
@@ -834,7 +1049,14 @@ export function registerPuntosRoutes(app: Express, db: any) {
         FROM movimientos_puntos WHERE user_id = ${req.user.id}
         ORDER BY created_at DESC LIMIT 20
       `);
-      res.json({ puntos: Number((saldo.rows[0] as any)?.puntos ?? 0), movimientos: movimientos.rows });
+      // Y cómo se conserva ese saldo: última actividad, cuándo se perdería
+      // si no vuelves, y si algo caduca pronto. La fecha a la vista es el
+      // primer aviso; la campana, los otros dos.
+      const [conservacion] = await estadoConservacion(db, req.user.id).catch(() => [] as EstadoConservacion[]);
+      res.json({
+        puntos: Number((saldo.rows[0] as any)?.puntos ?? 0), movimientos: movimientos.rows,
+        conservacion: conservacion ? { ...conservacion, meses_inactividad: mesesInactividad(), anios_caducidad: aniosCaducidad() } : null,
+      });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
