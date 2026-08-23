@@ -71,6 +71,12 @@
       "ruta": "drizzle/0105_cuenta_de_google.sql",
       "motivo": "fase 2: conectar tu cuenta de Google (0104 lo tiene prog7)",
       "desde": "2026-08-23T12:32:22.299Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/App.tsx",
+      "motivo": "fase 3: mis videos de YouTube",
+      "desde": "2026-08-23T12:55:39.432Z"
     }
   ]
 }
