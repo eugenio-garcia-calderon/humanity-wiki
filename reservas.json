@@ -29,6 +29,12 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "prog2: el resumen enseñaba el JSON crudo cuando venia cortado",
       "desde": "2026-08-23T23:35:04.995Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "equipo/DASHBOARD.md",
+      "motivo": "el papel queda vacante",
+      "desde": "2026-08-23T23:37:50.189Z"
     }
   ]
 }
