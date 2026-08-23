@@ -65,6 +65,12 @@
       "ruta": "src/pages/Login.tsx",
       "motivo": "que ?crear=1 abra la pestana de crear cuenta",
       "desde": "2026-08-23T12:03:32.428Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "la barra de abajo ofrece a un visitante cosas que no puede usar",
+      "desde": "2026-08-23T12:10:00.132Z"
     }
   ]
 }
