@@ -107,7 +107,7 @@ recibo/factura con IVA, «avísame cuando vuelva», valoración del vendedor.
 |---|---|---|
 | **F1** | **Avisos de comercio** por la campana: `pedido_nuevo` al vendedor (puntos y Stripe) y `pedido_estado` al comprador (enviado con seguimiento, entregado, devuelto, cancelado) · **Preguntar al vendedor** desde la ficha (mensaje directo) · **Descripción con formato** (Markdown del asistente) · `/comercio?pestana=pedidos` | hecha 23-08 (PR fase 1) |
 | **F2** | **Variantes/SKU**: talla, color… con precio y stock por variante; la variante elegida viaja en cesta, pedido y línea; «agotado» por variante | hecha 23-08 (PR fase 2, 0107) |
-| **F3** | **Carrito abandonado**: la cesta se guarda en el servidor con sesión; a las 24 h sin comprar, aviso por la campana con enlace a la cesta; panel del vendedor ve cuántas cestas se quedan a medias · **Favoritos / lista de deseos** con aviso si baja el precio | pendiente |
+| **F3** | **Carrito abandonado**: la cesta se guarda en el servidor con sesión; a las 24 h sin comprar, aviso por la campana con enlace a la cesta; panel del vendedor ve cuántas cestas se quedan a medias · **Favoritos / lista de deseos** con aviso si baja el precio | hecha 23-08 (PR fase 3, 0108) |
 | **F4** | **Recibo/factura imprimible** por pedido (comprador y vendedor), con **IVA desglosado** y datos fiscales del vendedor (NIF, dirección) en su panel; tipo de IVA por producto | pendiente |
 | **F5** | **«Avísame cuando vuelva»** (stock) · **productos relacionados** en la ficha (misma categoría/vendedor) · **valoración del vendedor** (media de sus reseñas verificadas en la tienda y la ficha) | pendiente |
 
