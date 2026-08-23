@@ -35,6 +35,12 @@
       "ruta": "src/components/navegacion/Rail.tsx",
       "motivo": "prog2: abrir el panel al pasar el raton por los 3 botones",
       "desde": "2026-08-23T23:43:01.000Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "equipo/REPARTO.md",
+      "motivo": "norma: comprobar con quien despues de soltar",
+      "desde": "2026-08-23T23:43:10.099Z"
     }
   ]
 }
