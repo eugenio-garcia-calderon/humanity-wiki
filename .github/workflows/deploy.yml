@@ -96,6 +96,27 @@ jobs:
             # las de redes de empresa y algunas móviles—. Si no están, la
             # aplicación arranca igual y sirve solo STUN: no se cae nada, esas
             # llamadas concretas no conectan y se dice en pantalla.
+            # La clave maestra del cifrado y las llaves de Google (2026-08-23,
+            # prog8). Mismo camino que las demás.
+            #
+            # LA CLAVE MAESTRA NO SE ROTA A LA LIGERA: al cambiarla, todo lo
+            # cifrado con la anterior deja de leerse, y hoy eso es el permiso de
+            # Google de cada persona — tendrían que volver a conectarlo todas.
+            # Por eso el borrado va DENTRO del `if` y no fuera: si el secreto
+            # desapareciera de GitHub por un descuido, borrar la línea del
+            # servidor convertiría el descuido en pérdida de datos.
+            if [ -n "${{ secrets.CLAVE_MAESTRA }}" ]; then
+              sed -i '/^CLAVE_MAESTRA=/d' .env.production
+              echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
+            fi
+            for v in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI; do
+              sed -i "/^$v=/d" .env.production
+            done
+            if [ -n "${{ secrets.GOOGLE_CLIENT_SECRET }}" ]; then
+              echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}"         >> .env.production
+              echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env.production
+              echo "GOOGLE_REDIRECT_URI=https://humanity.wiki/api/google/vuelta" >> .env.production
+            fi
             if [ -n "${{ secrets.CLOUDFLARE_TURN_KEY_ID }}" ]; then
               sed -i '/^CLOUDFLARE_TURN_KEY_ID=/d' .env.production
               echo "CLOUDFLARE_TURN_KEY_ID=${{ secrets.CLOUDFLARE_TURN_KEY_ID }}" >> .env.production

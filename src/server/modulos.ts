@@ -69,6 +69,7 @@ import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
 import { registerAgendaRoutes } from './agenda.js';
+import { registerGoogleRoutes } from './google.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
@@ -214,6 +215,13 @@ export const MODULOS: Modulo[] = [
         + 'todas sus rutas empiezan por «¿quién eres?». Su conexión abierta (SSE) es una '
         + 'respuesta que no termina nunca, así que cualquier cosa que capture «/api» '
         + 'entero tiene que ir después de esta línea, no antes.',
+  },
+  {
+    nombre: 'google',
+    montar: (app, db) => registerGoogleRoutes(app, db),
+    nota: 'Una de sus rutas, `/api/google/vuelta`, la abre Google en el navegador de la '
+        + 'persona y NO lleva sesión: se identifica con un pase firmado que viaja en el '
+        + '`state`. Es a propósito y está explicado en el módulo.',
   },
 ];
 
