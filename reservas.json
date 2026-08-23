@@ -155,6 +155,12 @@
       "ruta": "src/server/ai/assistant.ts",
       "motivo": "tope mensual de gasto de IA de la plataforma",
       "desde": "2026-08-23T13:49:06.237Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/documentos.ts",
+      "motivo": "tope mensual de gasto de IA de la plataforma",
+      "desde": "2026-08-23T13:49:10.226Z"
     }
   ]
 }
