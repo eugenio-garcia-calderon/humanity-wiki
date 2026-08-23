@@ -113,6 +113,12 @@
       "ruta": "src/server/agenda.ts",
       "motivo": "el freno pasa a la base de datos: esperaPendiente ahora es async",
       "desde": "2026-08-23T00:23:46.990Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: devolver compras pagadas con puntos",
+      "desde": "2026-08-23T00:25:53.698Z"
     }
   ]
 }
