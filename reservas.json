@@ -101,6 +101,12 @@
       "ruta": "src/server/bd.ts",
       "motivo": "renombrar y retirar una tabla",
       "desde": "2026-08-23T00:18:37.998Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "public/sw.js",
+      "motivo": "la cache de datos se traga docx y pdf enteros",
+      "desde": "2026-08-23T00:19:59.767Z"
     }
   ]
 }
