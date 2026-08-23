@@ -68,6 +68,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
+import { registerAgendaRoutes } from './agenda.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
@@ -190,6 +191,15 @@ export const MODULOS: Modulo[] = [
   { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
   { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
   { nombre: 'veracidad', montar: (app, db) => registerVeracidadRoutes(app, db) },
+  {
+    nombre: 'agenda',
+    montar: (app, db) => registerAgendaRoutes(app, db),
+    nota: 'Rutas concretas bajo `/api/agenda/…`, nunca un comodín: un catch-all por '
+        + 'delante de `telecom` apagaría los teléfonos de toda la plataforma, porque '
+        + '`/api/telecom/conexion` es una respuesta que no termina nunca. '
+        + 'Una de sus rutas NO mira la sesión a propósito: por ahí entra el Atajo del '
+        + 'iPhone, que no tiene navegador y se identifica con su propia llave.',
+  },
   {
     nombre: 'textos',
     montar: (app, db) => registerTextosRoutes(app, db),
