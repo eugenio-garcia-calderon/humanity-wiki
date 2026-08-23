@@ -46,11 +46,11 @@ export type TipoAviso =
   | 'cesta_olvidada'      // dejaste cosas en una cesta hace 24 h
   | 'precio_bajado'       // un favorito tuyo ha bajado de precio
   // Gasto de IA (prog8, 2026-08-23): solo para quien administra, y solo una
-  // vez por mes. Enterarse al llegar al tope es enterarse tarde
-  // Comercio F5 (prog7, 2026-08-23): algo agotado que pediste que te avisáramos vuelve a estar disponible.
-  | 'vuelve_stock'; enterarse
+  // vez por mes. Enterarse al llegar al tope es enterarse tarde; enterarse
   // cada día de que se va acercando es enseñar a ignorar la campana.
-  | 'gasto_ia_80';        // la plataforma lleva el 80 % del tope de IA del mes
+  | 'gasto_ia_80'         // la plataforma lleva el 80 % del tope de IA del mes
+  // Comercio F5 (prog7, 2026-08-23): algo agotado que pediste que te avisáramos vuelve a estar disponible.
+  | 'vuelve_stock';
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos
