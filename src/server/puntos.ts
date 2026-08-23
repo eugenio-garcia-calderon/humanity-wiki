@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
-import { guardian, REGLAS, anotarFallo, ipDe } from './limites/index.js';
+import { guardian, REGLAS, ritmo, ipDe } from './limites/index.js';
 
 // ============================================================================
 // PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
@@ -471,11 +471,14 @@ export function registerPuntosRoutes(app: Express, db: any) {
    */
   // Con freno por cuenta (regla `transferencia` de src/server/limites): diez
   // envíos seguidos gratis, luego espera creciente. Cada envío, salga bien o
-  // mal, cuenta como intento — lo que se frena es el bucle, no a la persona.
+  // mal, cuenta para el RITMO — lo que se frena es el bucle, no a la persona —
+  // y `ritmo()` solo frena: no escribe en `intentos_fallidos`, que es el
+  // rastro de los ataques y no el de las transferencias legítimas (prog6,
+  // 2026-08-23, tras ver que `anotarFallo` lo habría enterrado).
   app.post('/api/puntos/transferir', guardian(REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
-      void anotarFallo(db, REGLAS.transferencia, ipDe(req), req.user.id, true);
+      ritmo(REGLAS.transferencia, ipDe(req), req.user.id);
       if (!transferenciasActivas()) {
         return res.status(403).json({ error: 'Las transferencias de puntos todavía no están activadas. Se anunciará en /tokenomics antes de encenderlas.' });
       }
