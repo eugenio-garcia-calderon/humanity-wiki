@@ -46,6 +46,17 @@
  * reloading, so there has to be a way out that does not need a developer.
  */
 
+// SIGUE SIENDO v5 A PROPÓSITO (2026-08-23). Cambiar este número tira TODAS las
+// cachés al activarse, incluida la de tus datos — o sea que todo el mundo se
+// queda sin copia para trabajar sin conexión hasta que vuelva a navegar. Eso se
+// paga cuando el contenido guardado ya no vale; aquí lo que ha cambiado es la
+// REGLA de qué se guarda, no lo guardado.
+//
+// Lo único que puede haber colado la versión anterior es algún Word o PDF que
+// alguien se descargara en la media hora que estuvo viva, y eso lo echa solo
+// `recortar()`. El fichero cambia igual, así que el navegador instala este
+// worker de todas formas: `VERSION` sólo da nombre a las cachés, no decide si
+// hay actualización.
 const VERSION = "hw-v5";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
@@ -232,12 +243,27 @@ self.addEventListener("fetch", (event) => {
         .then((res) => {
           // Only keep what is safe to show later. An error page cached as if it
           // were data would be the same lie in another costume.
-          // EL SEGUNDO CINTURÓN. Lo de arriba mira la petición; esto mira la
-          // respuesta, por si algún día algo devuelve un flujo sin pedirlo con
-          // la cabecera `Accept`. Clonar es lo que cuesta caro, así que la
-          // decisión se toma ANTES de clonar, nunca después.
+          // EL SEGUNDO CINTURÓN: SOLO SE GUARDA JSON.
+          //
+          // Lo de arriba mira la petición; esto mira la respuesta, por si algo
+          // devuelve un flujo sin pedirlo con la cabecera `Accept`. Clonar es lo
+          // que cuesta caro, así que la decisión se toma ANTES de clonar.
+          //
+          // Y la regla es una lista blanca, no una negra. Empezó siendo «todo
+          // menos `text/event-stream`», que arreglaba el fallo del día pero
+          // dejaba pasar lo siguiente: bajo `/api/` hay TRES flujos
+          // (`telecom.ts`, `navegadorRemoto.ts`, `documentos.ts`) y además
+          // descargas binarias — `/api/documentos/:id/docx` y `/pdf` devuelven
+          // un Word y un PDF de verdad. Con la lista negra, cada documento que
+          // alguien se descargara se copiaba entero en la caché de DATOS y
+          // ocupaba una de las 200 plazas, echando de ahí lo que sí sirve para
+          // trabajar sin conexión.
+          //
+          // Esta caché existe para los DATOS de la aplicación, y los datos de
+          // esta aplicación son JSON. Todo lo demás que viva bajo `/api/` pasa
+          // de largo: se sirve, no se guarda.
           const tipo = res.headers.get("content-type") || "";
-          if (res.ok && !tipo.includes("text/event-stream")) {
+          if (res.ok && tipo.includes("application/json")) {
             const copia = res.clone();
             // waitUntil, NOT fire-and-forget. Without it the browser is free to
             // kill the worker the moment the response reaches the page, and the
