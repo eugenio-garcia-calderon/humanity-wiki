@@ -270,6 +270,15 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   the door open and did not look for the turnstile behind it.» Before reporting a
   hole, read to the end of the handler — and if you already told someone, correct it
   yourself, out loud, the same way.
+- **Before touching anything in production, ask the data whose it is. A prefix is a
+  hint, never an answer.** On 2026-08-23 five test posts were visible to the public.
+  The Dashboard said two of them belonged to a departed agent; another agent said
+  the other three looked like Eugenio's. Both were guesses and both were wrong — all
+  five belonged to one agent account. The instruction to remove them rested on both
+  guesses at once. What kept it from doing harm was not care: it was that two people
+  had written it down separately and the two sentences did not match. And the guess
+  that lasted longer was the one written into a document merged to `main`, where the
+  next person would read it without knowing it was a hunch.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
