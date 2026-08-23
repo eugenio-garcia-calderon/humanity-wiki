@@ -77,6 +77,12 @@
       "ruta": "memory/10_TIENDAS.md",
       "motivo": "corregir de quien son las publicaciones de prueba: lo supuse y era falso",
       "desde": "2026-08-23T12:34:56.607Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "CLAUDE.md",
+      "motivo": "un prefijo es una pista, nunca una respuesta",
+      "desde": "2026-08-23T12:36:19.760Z"
     }
   ]
 }
