@@ -23,6 +23,12 @@
       "ruta": "scripts/probar-portada.ts",
       "motivo": "los tres bloques retirados",
       "desde": "2026-08-23T23:32:55.817Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog2: buscador arriba, calendario, logo verde y abrir menus al acercar el raton",
+      "desde": "2026-08-23T23:42:50.581Z"
     }
   ]
 }
