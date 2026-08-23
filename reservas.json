@@ -83,12 +83,6 @@
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "borrador/publicado en productos (fase del plan de comercio)",
       "desde": "2026-08-23T00:29:51.520Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: borrador/publicado en productos",
-      "desde": "2026-08-23T00:32:11.124Z"
     }
   ]
 }
