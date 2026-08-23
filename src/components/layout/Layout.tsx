@@ -417,6 +417,10 @@ export default function Layout() {
             titulo="Explorar"
             items={OBJETIVOS_RAIL}
             abierta={objetivoAbierto}
+            // Pasar el ratón ABRE el panel del tema y nada más. Cambiar la
+            // pantalla de detrás es una decisión, y una decisión se toma
+            // pulsando — no rozando algo de camino a otro sitio.
+            onPasarPorEncima={h => setObjetivoAbierto(h.clave)}
             onElegir={h => {
               // DOS COSAS A LA VEZ, y las dos hacen falta: se abre su panel
               // —indicadores y marcadores— y **la pantalla de detrás pasa a
