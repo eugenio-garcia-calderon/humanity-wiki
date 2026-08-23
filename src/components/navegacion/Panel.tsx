@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronRight, Plus, Search, X, FolderKanban, FileText, Globe2,
   Map as MapIcon, ListChecks, Table2, Store, Users2, Paperclip, CalendarDays,
-  Bookmark, Megaphone, Loader2,
+  Bookmark, Megaphone, Loader2, CircleDot, Receipt, Sparkles,
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
 import { HojaPanel, type Herramienta } from './Rail';
 
@@ -86,6 +87,83 @@ function Vacio({ children }: { children: any }) {
   return <p className="px-3 py-6 text-center text-xs leading-relaxed text-slate-400">{children}</p>;
 }
 
+/** El botón de crear. Uno por panel, siempre el mismo sitio y el mismo aspecto:
+ *  si cada herramienta lo pone donde le parece, hay que buscarlo cada vez. */
+function BotonCrear({ a, children }: { a: string; children: any }) {
+  const navegar = useNavigate();
+  return (
+    <button
+      onClick={() => navegar(a)}
+      className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-2 text-[13px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
+    >
+      <Plus className="h-3.5 w-3.5" /> {children}
+    </button>
+  );
+}
+
+/** El título de un grupo dentro de la lista. */
+function Grupo({ icono: Icono, titulo, cuantos, a }: { icono?: any; titulo: string; cuantos?: number; a?: string }) {
+  const clase = 'truncate text-[9px] font-black uppercase tracking-[0.15em] text-slate-400';
+  return (
+    <div className="flex items-center gap-1.5 px-2 pb-0.5 pt-2">
+      {Icono && <Icono className="h-3 w-3 shrink-0 text-slate-300" />}
+      {a ? <Link to={a} className={cn(clase, 'hover:text-emerald-700')}>{titulo}</Link> : <span className={clase}>{titulo}</span>}
+      {cuantos !== undefined && <span className="text-[10px] text-slate-300">{cuantos}</span>}
+    </div>
+  );
+}
+
+/*
+ * PEDIR UNA LISTA, CON LOS TRES ESTADOS QUE TIENE DE VERDAD.
+ *
+ * Existe para que ningún panel pueda saltarse la regla raíz de la casa: **todo
+ * tiene que poder decir «no lo sé» de forma distinguible de un resultado
+ * válido**. Ya la incumplí una vez —el panel de Proyectos pintaba «todavía no
+ * tienes proyectos» cuando lo que fallaba era la petición, y Eugenio lo vio en
+ * producción con cinco proyectos en la pantalla de al lado—, así que aquí la
+ * regla no se cumple por disciplina: se cumple porque no hay otra forma de
+ * pedir datos en este fichero.
+ *
+ * `extrae` es para las respuestas que no son un array pelado. Se le pasa la
+ * respuesta entera y devuelve la lista; si no puede, que lance — y entonces
+ * sale «no lo sé», que es la verdad.
+ */
+function useLista<T = any>(url: string, extrae?: (j: any) => T[]) {
+  const [estado, setEstado] = useState<T[] | 'fallo' | null>(null);
+  const pedir = () => {
+    setEstado(null);
+    fetch(url, { credentials: 'include' })
+      .then(async r => {
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        const l = extrae ? extrae(j) : j;
+        if (!Array.isArray(l)) throw new Error('respuesta inesperada');
+        return l as T[];
+      })
+      .then(setEstado)
+      .catch(() => setEstado('fallo'));
+  };
+  useEffect(pedir, [url]);
+  return { estado, datos: Array.isArray(estado) ? estado : [], recargar: pedir };
+}
+
+/** Lo que se pinta mientras la lista no es una lista. */
+function Estado({ estado, que, onReintentar }: { estado: any; que: string; onReintentar: () => void }) {
+  if (estado === null) return <Vacio>Cargando…</Vacio>;
+  if (estado !== 'fallo') return null;
+  return (
+    <div className="px-3 py-4">
+      <p className="text-xs leading-relaxed text-amber-700">
+        No hemos podido cargar {que}. No es que no tengas: es que no hemos podido preguntarlo.
+      </p>
+      <button onClick={onReintentar}
+        className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
+        Volver a intentarlo
+      </button>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // PROYECTOS — el que describió Eugenio: «cuando haces click en uno de ellos
 // tiene que aparecerte cierta información relativa a poder ver las tareas,
@@ -97,17 +175,39 @@ function Vacio({ children }: { children: any }) {
 // las otras dos en cuanto alguien añada una tabla a una y no a las demás.
 // ---------------------------------------------------------------------------
 function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
-  const [proyectos, setProyectos] = useState<any[] | null>(null);
+  /*
+   * TRES ESTADOS, NO DOS: cargando (`null`), una lista, o un FALLO.
+   *
+   * La primera versión hacía `.catch(() => setProyectos([]))`, y eso pinta
+   * «Todavía no tienes proyectos» cuando lo que ha pasado es que la petición
+   * se ha caído. Eugenio lo vio en producción: el panel decía que no tenía
+   * ninguno mientras la página de al lado enseñaba cinco.
+   *
+   * Es la regla raíz de esta plataforma incumplida por mí, y está escrita en
+   * `src/server/CLAUDE.md`: **todo tiene que poder decir «no lo sé» de una
+   * forma distinguible de un resultado válido**. Un fallo convertido en cero
+   * no es un cero: es una mentira que además parece un dato.
+   */
+  const [proyectos, setProyectos] = useState<any[] | 'fallo' | null>(null);
   const [busca, setBusca] = useState('');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [arboles, setArboles] = useState<Record<string, any[] | 'cargando'>>({});
   const navegar = useNavigate();
 
-  useEffect(() => {
+  const recargar = () => {
     fetch('/api/proyectos', { credentials: 'include' })
-      .then(r => r.json()).then(j => setProyectos(Array.isArray(j) ? j : []))
-      .catch(() => setProyectos([]));
-  }, []);
+      .then(async r => {
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        // Si un día deja de ser un array, quiero enterarme, no enseñar cero.
+        if (!Array.isArray(j)) throw new Error('respuesta inesperada');
+        return j;
+      })
+      .then(setProyectos)
+      .catch(() => setProyectos('fallo'));
+  };
+
+  useEffect(recargar, []);
 
   const desplegar = (p: any) => {
     if (abierto === p.id) { setAbierto(null); return; }
@@ -120,7 +220,8 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
       .catch(() => setArboles(a => ({ ...a, [p.id]: [] })));
   };
 
-  const visibles = (proyectos || []).filter(p =>
+  const lista = Array.isArray(proyectos) ? proyectos : [];
+  const visibles = lista.filter(p =>
     !busca.trim() || (p.titulo || '').toLowerCase().includes(busca.trim().toLowerCase()));
 
   return (
@@ -137,7 +238,19 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         {proyectos === null && <Vacio>Cargando…</Vacio>}
-        {proyectos !== null && visibles.length === 0 && (
+        {proyectos === 'fallo' && (
+          <div className="px-3 py-4">
+            <p className="text-xs leading-relaxed text-amber-700">
+              No hemos podido cargar tus proyectos. No es que no tengas: es que
+              no hemos podido preguntarlo.
+            </p>
+            <button onClick={() => { setProyectos(null); recargar(); }}
+              className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
+              Volver a intentarlo
+            </button>
+          </div>
+        )}
+        {Array.isArray(proyectos) && visibles.length === 0 && (
           <Vacio>{busca ? 'Ningún proyecto con ese nombre.' : 'Todavía no tienes proyectos. Empieza por el botón de arriba.'}</Vacio>
         )}
         {visibles.map(p => {
@@ -274,6 +387,534 @@ function PanelPaginas({ onCerrar }: { onCerrar: () => void }) {
   );
 }
 
+
+// ---------------------------------------------------------------------------
+// MAPAS — se agrupan por DE QUIÉN SON, no por proyecto: `/api/maps` no
+// devuelve `proyecto_id`, y además lo que distingue un mapa aquí es si es tuyo
+// o es de la plataforma. El Mapa de Indicadores de la Humanidad no es «uno de
+// tus mapas»: es el mapa común, y mezclarlo con los tuyos haría pensar que lo
+// puedes editar.
+// ---------------------------------------------------------------------------
+function PanelMapas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/maps');
+  const [busca, setBusca] = useState('');
+  const { user } = useAuth();
+  const q = busca.trim().toLowerCase();
+
+  const filtra = (l: any[]) => l.filter(m => !q || (m.title || '').toLowerCase().includes(q));
+  const mios = filtra(datos.filter(m => user && m.creator_user_id === user.id));
+  const comunes = filtra(datos.filter(m => !user || m.creator_user_id !== user.id));
+
+  return (
+    <>
+      <Cabecera titulo="Mapas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un mapa…" />
+      <BotonCrear a="/mapas?nuevo=1">Nuevo mapa</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="los mapas" onReintentar={recargar} />
+        {Array.isArray(estado) && mios.length === 0 && comunes.length === 0 && (
+          <Vacio>{q ? 'Ningún mapa con ese nombre.' : 'Todavía no hay mapas.'}</Vacio>
+        )}
+        {/* «Tuyos» se enseña aunque esté vacío cuando no hay búsqueda: es el
+            cajón donde va a caer el primero, y un cajón vacío tiene que verse
+            para poder usarlo. */}
+        {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
+          <div>
+            <Grupo icono={MapIcon} titulo="Tuyos" cuantos={mios.length} />
+            {mios.length === 0 && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin mapas todavía</p>}
+            {mios.map(m => <HojaPanel key={m.id} a={`/mapas/${m.slug}`} icono={MapIcon}>{m.title || 'Sin título'}</HojaPanel>)}
+          </div>
+        )}
+        {Array.isArray(estado) && comunes.length > 0 && (
+          <div>
+            <Grupo icono={Globe2} titulo="De la plataforma" cuantos={comunes.length} />
+            {comunes.map(m => <HojaPanel key={m.id} a={`/mapas/${m.slug}`} icono={MapIcon}>{m.title || 'Sin título'}</HojaPanel>)}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TAREAS — la única de las cinco que NO agrupa por dónde vive la cosa, sino por
+// EN QUÉ ESTADO ESTÁ. Y es a propósito: a las tareas se les pregunta «¿qué me
+// queda?», no «¿dónde está esto?». Agruparlas por proyecto sería repetir el
+// panel de Proyectos con otro nombre.
+//
+// «Por hacer» va primero y «Hecho» al final, porque el orden de una lista es una
+// afirmación sobre qué mirar antes.
+// ---------------------------------------------------------------------------
+const ESTADOS_TAREA = [
+  { clave: 'por_hacer', label: 'Por hacer', color: 'text-slate-400' },
+  { clave: 'en_curso',  label: 'En curso',  color: 'text-amber-500' },
+  { clave: 'hecho',     label: 'Hecho',     color: 'text-emerald-500' },
+];
+
+function PanelTareas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/roadmap');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(t => !q || (t.titulo || '').toLowerCase().includes(q));
+
+  return (
+    <>
+      <Cabecera titulo="Tareas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tarea…" />
+      <BotonCrear a="/tareas?nueva=1">Nueva tarea</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="las tareas" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna tarea con ese texto.' : 'No tienes tareas. Se crean dentro de un proyecto.'}</Vacio>
+        )}
+        {Array.isArray(estado) && ESTADOS_TAREA.map(e => {
+          const suyas = visibles.filter(t => (t.estado || 'por_hacer') === e.clave);
+          // Aquí un grupo vacío SÍ se esconde: «Hecho 0» no es un cajón donde
+          // soltar nada, es una línea que ocupa sitio para decir que no hay nada.
+          if (!suyas.length) return null;
+          return (
+            <div key={e.clave}>
+              <Grupo icono={CircleDot} titulo={e.label} cuantos={suyas.length} />
+              {suyas.slice(0, 30).map(t => (
+                <HojaPanel key={t.id} a={`/tareas?tarea=${encodeURIComponent(t.id)}`} icono={ListChecks}>
+                  {t.titulo || 'Sin título'}
+                </HojaPanel>
+              ))}
+              {suyas.length > 30 && (
+                <Link to="/tareas" className="block px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:underline">
+                  y {suyas.length - 30} más →
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// COMERCIO — el panel de GESTIÓN, y por eso es el que más se sale del molde.
+// Los otros cuatro contestan «¿qué tengo?»; éste contesta «¿qué me falta por
+// atender?», y la respuesta de arriba del todo es un número: los pedidos que
+// esperan. Un panel de comercio que enseñe tus productos y esconda los pedidos
+// sin enviar está ordenado y es inútil.
+//
+// LAS DOS LISTAS SE PIDEN POR SEPARADO y cada una puede fallar sola. Si caen las
+// ventas, tus productos se siguen viendo — y se dice cuál de las dos falta, en
+// vez de dejar el panel a medias sin explicación.
+// ---------------------------------------------------------------------------
+function PanelComercio({ onCerrar }: { onCerrar: () => void }) {
+  const productos = useLista<any>('/api/publicar/mis-productos', j => (Array.isArray(j) ? j : j?.productos ?? j?.items));
+  const ventas = useLista<any>('/api/publicar/mis-ventas', j => (Array.isArray(j) ? j : j?.ventas ?? j?.pedidos ?? j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+
+  const mis = productos.datos.filter(p => !q || (p.nombre || p.name || '').toLowerCase().includes(q));
+  // «Pendiente» es todo lo que no está entregado ni cancelado: prefiero contar de
+  // más y que mires, a contar de menos y que se te pase un pedido.
+  const pendientes = ventas.datos.filter(v => !['entregado', 'cancelado', 'reembolsado'].includes(String(v.estado || '')));
+
+  return (
+    <>
+      <Cabecera titulo="Comercio" onCerrar={onCerrar} />
+
+      {/* LO QUE HAY QUE ATENDER, ANTES QUE LO QUE TIENES. */}
+      {Array.isArray(ventas.estado) && (
+        <Link
+          to="/comercio"
+          className={cn(
+            'mx-3 mb-2 flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors',
+            pendientes.length > 0
+              ? 'bg-amber-50 text-amber-900 hover:bg-amber-100'
+              : 'bg-slate-50 text-slate-500 hover:bg-slate-100',
+          )}
+        >
+          <span className="text-[13px] font-bold">
+            {pendientes.length > 0 ? 'Pedidos por atender' : 'Nada pendiente'}
+          </span>
+          <span className={cn('text-lg font-black', pendientes.length > 0 ? 'text-amber-700' : 'text-slate-300')}>
+            {pendientes.length}
+          </span>
+        </Link>
+      )}
+      <Estado estado={ventas.estado} que="tus ventas" onReintentar={ventas.recargar} />
+
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo que vendes…" />
+      <BotonCrear a="/comercio?nuevo=1">Nuevo producto</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={productos.estado} que="tus productos" onReintentar={productos.recargar} />
+        {Array.isArray(productos.estado) && (
+          <div>
+            <Grupo icono={Store} titulo="Lo que vendes" cuantos={mis.length} a="/comercio" />
+            {mis.length === 0 && (
+              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">
+                {q ? 'Nada con ese nombre' : 'Todavía no vendes nada'}
+              </p>
+            )}
+            {mis.map(p => (
+              <HojaPanel key={p.id} a={`/comercio?producto=${encodeURIComponent(p.id)}`} icono={Store}>
+                {p.nombre || p.name || 'Sin nombre'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+        {Array.isArray(ventas.estado) && ventas.datos.length > 0 && (
+          <div>
+            <Grupo icono={Receipt} titulo="Últimas ventas" cuantos={ventas.datos.length} a="/comercio" />
+            {ventas.datos.slice(0, 8).map((v: any) => (
+              <HojaPanel key={v.id} a="/comercio" icono={Receipt}>
+                {v.producto_nombre || v.titulo || `Pedido ${String(v.codigo || v.id).slice(0, 8)}`}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// ESQUEMAS — igual que Mapas, y a propósito: son la misma clase de cosa (un
+// lienzo que alguien construyó) y lo que las distingue es de quién son. Dos
+// herramientas parecidas con dos formas distintas de panel obligarían a
+// aprender dos veces lo mismo.
+// ---------------------------------------------------------------------------
+function PanelEsquemas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/graphs');
+  const [busca, setBusca] = useState('');
+  const { user } = useAuth();
+  const q = busca.trim().toLowerCase();
+  const filtra = (l: any[]) => l.filter(g => !q || (g.title || '').toLowerCase().includes(q));
+  const mios = filtra(datos.filter(g => user && g.creator_user_id === user.id));
+  const otros = filtra(datos.filter(g => !user || g.creator_user_id !== user.id));
+
+  return (
+    <>
+      <Cabecera titulo="Esquemas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un esquema…" />
+      <BotonCrear a="/esquemas?nuevo=1">Nuevo esquema</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="los esquemas" onReintentar={recargar} />
+        {Array.isArray(estado) && !mios.length && !otros.length && (
+          <Vacio>{q ? 'Ningún esquema con ese nombre.' : 'Todavía no hay esquemas.'}</Vacio>
+        )}
+        {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
+          <div>
+            <Grupo icono={Globe2} titulo="Tuyos" cuantos={mios.length} />
+            {!mios.length && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin esquemas todavía</p>}
+            {mios.map(g => (
+              <HojaPanel key={g.id} a={`/esquemas/${g.slug}`} icono={Globe2} insignia={g.window_count || undefined}>
+                {g.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+        {Array.isArray(estado) && otros.length > 0 && (
+          <div>
+            <Grupo icono={Globe2} titulo="De la plataforma" cuantos={otros.length} />
+            {otros.map(g => (
+              <HojaPanel key={g.id} a={`/esquemas/${g.slug}`} icono={Globe2} insignia={g.window_count || undefined}>
+                {g.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TABLAS — por el proyecto del que cuelgan, como las Páginas. Hacen falta DOS
+// peticiones porque `/api/bd/tablas` devuelve `proyecto_id` y no el nombre del
+// proyecto, y agrupar por un identificador que nadie reconoce no es agrupar.
+// Si falla la de proyectos, las tablas se siguen viendo: caen todas al grupo
+// «Sueltas», que es peor que lo ideal y mejor que una pantalla vacía.
+// ---------------------------------------------------------------------------
+function PanelTablas({ onCerrar }: { onCerrar: () => void }) {
+  const tablas = useLista<any>('/api/bd/tablas', j => (Array.isArray(j) ? j : j?.tablas));
+  const proyectos = useLista<any>('/api/proyectos');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const nombreDe = new Map(proyectos.datos.map((p: any) => [p.id, p]));
+
+  const visibles = tablas.datos.filter(t => !q || (t.titulo || '').toLowerCase().includes(q));
+  const grupos = new Map<string, { titulo: string; url: string | null; items: any[] }>();
+  for (const t of visibles) {
+    const p = t.proyecto_id ? nombreDe.get(t.proyecto_id) : null;
+    const clave = p ? String(t.proyecto_id) : '__sueltas__';
+    if (!grupos.has(clave)) {
+      grupos.set(clave, p
+        ? { titulo: (p as any).titulo, url: `/proyectos/${(p as any).slug}`, items: [] }
+        : { titulo: 'Sueltas', url: null, items: [] });
+    }
+    grupos.get(clave)!.items.push(t);
+  }
+
+  return (
+    <>
+      <Cabecera titulo="Tablas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tabla…" />
+      <BotonCrear a="/tablas?nueva=1">Nueva tabla</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={tablas.estado} que="las tablas" onReintentar={tablas.recargar} />
+        {Array.isArray(tablas.estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna tabla con ese nombre.' : 'Todavía no tienes tablas.'}</Vacio>
+        )}
+        {[...grupos.values()].map(g => (
+          <div key={g.titulo}>
+            <Grupo icono={g.url ? FolderKanban : Table2} titulo={g.titulo} cuantos={g.items.length} a={g.url ?? undefined} />
+            {g.items.map(t => (
+              <HojaPanel key={t.id} a={`/tablas?tabla=${encodeURIComponent(t.id)}`} icono={Table2} insignia={t.filas || undefined}>
+                {t.titulo || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PUBLICACIONES — el muro es de todos, así que el panel no lo repite: enseña
+// LO TUYO, que es lo único de esa herramienta sobre lo que puedes actuar.
+// Meter aquí las publicaciones de los demás sería una segunda copia del muro
+// en una columna de 288 px, donde se lee peor que en la página.
+// ---------------------------------------------------------------------------
+function PanelPublicaciones({ onCerrar }: { onCerrar: () => void }) {
+  const { user } = useAuth();
+  const url = user ? `/api/publicaciones?autor=${encodeURIComponent(user.id)}&limit=120` : '/api/publicaciones?limit=40';
+  const { estado, datos, recargar } = useLista<any>(url);
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(p => !q || (p.titulo || '').toLowerCase().includes(q));
+
+  return (
+    <>
+      <Cabecera titulo="Publicaciones" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo tuyo…" />
+      <BotonCrear a="/explorar?crear=1">Publicar algo</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus publicaciones" onReintentar={recargar} />
+        {Array.isArray(estado) && (
+          <>
+            <Grupo icono={Megaphone} titulo={user ? 'Lo que has publicado' : 'Lo último'} cuantos={visibles.length} a="/explorar" />
+            {visibles.length === 0 && (
+              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">
+                {q ? 'Nada con ese texto' : 'Todavía no has publicado nada'}
+              </p>
+            )}
+            {visibles.slice(0, 40).map(p => (
+              <HojaPanel key={`${p.tipo}-${p.id}`} a={p.ruta || `/explorar?abrir=${encodeURIComponent(p.id)}`} icono={Megaphone}>
+                {p.titulo || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ASISTENTE — tus conversaciones, de la más reciente a la más vieja. Es la
+// herramienta cuyo contenido envejece más rápido, así que se agrupa por CUÁNDO,
+// que es como se busca una conversación: «la de esta mañana».
+// ---------------------------------------------------------------------------
+function PanelIA({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/ai/conversations');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(c => !q || (c.title || '').toLowerCase().includes(q));
+
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const semana = new Date(hoy.getTime() - 6 * 864e5);
+  const cuando = (c: any) => {
+    const f = new Date(c.updated_at || c.created_at || 0);
+    return f >= hoy ? 'Hoy' : f >= semana ? 'Esta semana' : 'Antes';
+  };
+  const bloques = ['Hoy', 'Esta semana', 'Antes'];
+
+  return (
+    <>
+      <Cabecera titulo="Asistente" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una conversación…" />
+      <BotonCrear a="/ia">Nueva conversación</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus conversaciones" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna conversación con ese texto.' : 'Todavía no has hablado con el asistente.'}</Vacio>
+        )}
+        {Array.isArray(estado) && bloques.map(b => {
+          const suyas = visibles.filter(c => cuando(c) === b);
+          if (!suyas.length) return null;
+          return (
+            <div key={b}>
+              <Grupo icono={Sparkles} titulo={b} cuantos={suyas.length} />
+              {suyas.slice(0, 25).map(c => (
+                <HojaPanel key={c.id} a={`/ia?conversacion=${encodeURIComponent(c.id)}`} icono={Sparkles} insignia={c.message_count || undefined}>
+                  {c.title || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CALENDARIO — el único que agrupa por TIEMPO, y es el que más lo pide: a una
+// fecha se le pregunta «¿qué tengo hoy?». Lo pasado va al final y plegado en la
+// cuenta, porque estorba sin llegar a sobrar del todo.
+// ---------------------------------------------------------------------------
+function PanelCalendario({ onCerrar }: { onCerrar: () => void }) {
+  /*
+   * `/api/calendario` PIDE UN TRAMO y devuelve `{ items }`, no un array pelado.
+   * Lo escribí sin mirar y contestó **400 «Faltan las fechas del tramo»** — que
+   * el panel enseñó como «no hemos podido cargar el calendario», que es
+   * exactamente lo que tenía que hacer. La señal funcionó: fue el único de los
+   * once que se quejó, y por eso se encontró en un minuto en vez de quedarse
+   * vacío y en silencio como habría pasado con la versión de ayer.
+   *
+   * El tramo va de tres meses atrás a un año adelante: lo pasado se enseña
+   * plegado en su grupo, y un año por delante cubre cualquier cosa que alguien
+   * apunte de verdad sin traerse el calendario entero.
+   */
+  const tramo = useMemo(() => {
+    const d = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);
+    const h = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
+    return `/api/calendario?desde=${d}&hasta=${h}`;
+  }, []);
+  const { estado, datos, recargar } = useLista<any>(tramo, j => (Array.isArray(j) ? j : j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(e => !q || (e.titulo || '').toLowerCase().includes(q));
+
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const manana = new Date(hoy.getTime() + 864e5);
+  const semana = new Date(hoy.getTime() + 7 * 864e5);
+  const grupo = (e: any) => {
+    const f = new Date(e.inicio || 0);
+    if (f < hoy) return 'Pasadas';
+    if (f < manana) return 'Hoy';
+    if (f < semana) return 'Esta semana';
+    return 'Más adelante';
+  };
+  const orden = ['Hoy', 'Esta semana', 'Más adelante', 'Pasadas'];
+  const dia = (e: any) => new Date(e.inicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+  return (
+    <>
+      <Cabecera titulo="Calendario" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una fecha…" />
+      <BotonCrear a="/calendario?nuevo=1">Nueva fecha</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="el calendario" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna fecha con ese texto.' : 'No tienes nada en el calendario.'}</Vacio>
+        )}
+        {Array.isArray(estado) && orden.map(g => {
+          const suyas = visibles.filter(e => grupo(e) === g)
+            .sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime());
+          if (!suyas.length) return null;
+          return (
+            <div key={g}>
+              <Grupo icono={CalendarDays} titulo={g} cuantos={suyas.length} />
+              {suyas.slice(0, 20).map(e => (
+                <HojaPanel key={e.id} a="/calendario" icono={CalendarDays} insignia={dia(e)}>
+                  {e.titulo || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ARCHIVOS — por TIPO, no por proyecto. Es lo que distingue este panel del de
+// Proyectos: cuando buscas un archivo suelto sabes qué era —una foto, un
+// vídeo, un PDF— antes de acordarte de dónde estaba.
+// ---------------------------------------------------------------------------
+const TIPOS_ARCHIVO: Array<{ kind: string[]; label: string; icono: any }> = [
+  { kind: ['imagen'], label: 'Imágenes', icono: Paperclip },
+  { kind: ['video'], label: 'Vídeos', icono: Paperclip },
+  { kind: ['enlace'], label: 'Enlaces', icono: Bookmark },
+  { kind: ['pagina', 'documento'], label: 'Documentos', icono: FileText },
+];
+
+function PanelArchivos({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/archivos', j => (Array.isArray(j) ? j : j?.archivos ?? j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(a => !q || (a.title || '').toLowerCase().includes(q));
+  const conocidos = TIPOS_ARCHIVO.flatMap(t => t.kind);
+  const otros = visibles.filter(a => !conocidos.includes(a.kind));
+
+  return (
+    <>
+      <Cabecera titulo="Archivos" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un archivo…" />
+      <BotonCrear a="/archivos">Subir un archivo</BotonCrear>
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="tus archivos" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Nada con ese nombre.' : 'Todavía no has subido nada.'}</Vacio>
+        )}
+        {Array.isArray(estado) && TIPOS_ARCHIVO.map(t => {
+          const suyos = visibles.filter(a => t.kind.includes(a.kind));
+          if (!suyos.length) return null;
+          return (
+            <div key={t.label}>
+              <Grupo icono={t.icono} titulo={t.label} cuantos={suyos.length} />
+              {suyos.slice(0, 20).map(a => (
+                <HojaPanel key={a.id} a={`/archivos?abrir=${encodeURIComponent(a.id)}`} icono={t.icono}>
+                  {a.title || 'Sin título'}
+                </HojaPanel>
+              ))}
+            </div>
+          );
+        })}
+        {/* «Otros» existe para que nada desaparezca por no encajar en la lista
+            de tipos de arriba. Un archivo que no se ve en ninguna parte porque
+            su `kind` es nuevo es peor que un grupo con nombre feo. */}
+        {Array.isArray(estado) && otros.length > 0 && (
+          <div>
+            <Grupo icono={Paperclip} titulo="Otros" cuantos={otros.length} />
+            {otros.slice(0, 20).map(a => (
+              <HojaPanel key={a.id} a={`/archivos?abrir=${encodeURIComponent(a.id)}`} icono={Paperclip}>
+                {a.title || 'Sin título'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+/*
+ * Y DOS QUE NO TIENEN PANEL, A PROPÓSITO (2026-08-23)
+ * ---------------------------------------------------------------------------
+ * **Visor 3D** y **Navegador** no llevan panel y no es que falten: es que no
+ * tienen nada que listar. El Visor es UN sitio por el que se camina, no una
+ * colección; el Navegador es una ventana que se abre en una dirección.
+ *
+ * Un panel para ellos sería una columna vacía o, peor, un «próximamente» — que
+ * enseña que los paneles a veces no sirven, y a partir de ahí nadie los abre.
+ * Pulsar su icono navega, que es exactamente lo que se espera de ellos.
+ */
+
 export default function Panel({ herramienta, onCerrar }: { herramienta: Herramienta; onCerrar: () => void }) {
   return (
     <aside
@@ -282,6 +923,15 @@ export default function Panel({ herramienta, onCerrar }: { herramienta: Herramie
     >
       {herramienta.clave === 'proyectos' && <PanelProyectos onCerrar={onCerrar} />}
       {herramienta.clave === 'paginas' && <PanelPaginas onCerrar={onCerrar} />}
+      {herramienta.clave === 'mapas' && <PanelMapas onCerrar={onCerrar} />}
+      {herramienta.clave === 'tareas' && <PanelTareas onCerrar={onCerrar} />}
+      {herramienta.clave === 'comercio' && <PanelComercio onCerrar={onCerrar} />}
+      {herramienta.clave === 'esquemas' && <PanelEsquemas onCerrar={onCerrar} />}
+      {herramienta.clave === 'tablas' && <PanelTablas onCerrar={onCerrar} />}
+      {herramienta.clave === 'publicaciones' && <PanelPublicaciones onCerrar={onCerrar} />}
+      {herramienta.clave === 'ia' && <PanelIA onCerrar={onCerrar} />}
+      {herramienta.clave === 'calendario' && <PanelCalendario onCerrar={onCerrar} />}
+      {herramienta.clave === 'archivos' && <PanelArchivos onCerrar={onCerrar} />}
     </aside>
   );
 }

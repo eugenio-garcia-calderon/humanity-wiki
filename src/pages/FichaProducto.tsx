@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star, MessageCircle } from 'lucide-react';
+import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star, MessageCircle, BellRing } from 'lucide-react';
 import Markdown from '../components/ai/Markdown';
 import BotonFavorito from '../components/knowledge/BotonFavorito';
 import { useCarrito } from '../hooks/useCarrito';
@@ -42,6 +42,10 @@ export default function FichaProducto({ handle }: { handle: string }) {
   // La variante elegida (2026-08-23): si el producto tiene, hay que elegir
   // una antes de comprar o encestar; precio y stock pasan a ser los suyos.
   const [varianteId, setVarianteId] = useState<string | null>(null);
+  // «Avísame cuando vuelva» (F5): qué tengo pedido para este producto
+  // (por variante), y si acabo de pedirlo.
+  const [avisamePedidos, setAvisamePedidos] = useState<{ variante_id: string | null; avisado: boolean }[]>([]);
+  const [avisameOcupado, setAvisameOcupado] = useState(false);
   const [anadido, setAnadido] = useState(false);
   const [comprando, setComprando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +108,27 @@ export default function FichaProducto({ handle }: { handle: string }) {
     fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
   }, []);
   const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  useEffect(() => {
+    if (!p?.id || !caja?.con_sesion) return;
+    fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
+      .then(j => { if (Array.isArray(j?.pedidos)) setAvisamePedidos(j.pedidos); }).catch(() => {});
+  }, [p?.id, caja?.con_sesion]);
+  const avisameActivo = avisamePedidos.some(x => (x.variante_id || null) === (varianteId || null) && !x.avisado);
+  async function alternarAvisame() {
+    if (!p?.id || avisameOcupado) return;
+    if (!caja?.con_sesion) { window.alert('Entra para que te avisemos cuando vuelva.'); return; }
+    setAvisameOcupado(true);
+    try {
+      if (avisameActivo) {
+        await fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}${varianteId ? `?variante_id=${encodeURIComponent(varianteId)}` : ''}`, { method: 'DELETE', credentials: 'include' });
+        setAvisamePedidos(xs => xs.filter(x => (x.variante_id || null) !== (varianteId || null)));
+      } else {
+        await fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(varianteId ? { variante_id: varianteId } : {}) });
+        setAvisamePedidos(xs => [...xs.filter(x => (x.variante_id || null) !== (varianteId || null)), { variante_id: varianteId || null, avisado: false }]);
+      }
+    } catch { /* sin conexión */ }
+    finally { setAvisameOcupado(false); }
+  }
   // Con envío incluido (2026-08-23): si los puntos llegan a precio + porte, no
   // hay Stripe y la dirección se pide aquí.
   const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
@@ -212,6 +237,14 @@ export default function FichaProducto({ handle }: { handle: string }) {
             </div>
           )}
 
+          {/* AGOTADO: «Avísame cuando vuelva» (F5). Con variante, por variante. */}
+          {stockEfectivo !== null && stockEfectivo <= 0 && !faltaVariante && (
+            <button type="button" onClick={alternarAvisame} disabled={avisameOcupado}
+              className={`mt-4 inline-flex items-center gap-1.5 h-10 px-3 rounded-xl border text-xs font-bold ${avisameActivo ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-300 text-slate-700 hover:border-slate-500'}`}>
+              <BellRing className="w-4 h-4" /> {avisameActivo ? 'Te avisaremos cuando vuelva · cancelar' : 'Avísame cuando vuelva'}
+            </button>
+          )}
+
           {cobro?.abierto && sePuede && (
             <div className="mt-5 space-y-2">
               {caja?.activo && caja.con_sesion && caja.saldo != null && p.acepta_puntos && p.modalidad !== 'suscripcion' && (
@@ -288,6 +321,13 @@ export default function FichaProducto({ handle }: { handle: string }) {
                 <MessageCircle className="w-4 h-4" /> Preguntar al vendedor
               </a>
             )}
+            {/* Valoración del vendedor (F5): agregado de reseñas verificadas de
+                sus productos; con pocas no se enseña nada (lo decide el servidor). */}
+            {p.vendedor?.valoracion && (
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700" title="Media de las opiniones con compra verificada de esta tienda">
+                <Star className="w-3.5 h-3.5 fill-current" /> {Number(p.vendedor.valoracion.media).toLocaleString('es-ES')} · {p.vendedor.valoracion.n} opiniones verificadas en esta tienda
+              </span>
+            )}
           </div>
 
           {(p.garantia || p.devoluciones) && (
@@ -309,6 +349,23 @@ export default function FichaProducto({ handle }: { handle: string }) {
               marcas se ve igual que antes, párrafo a párrafo. */}
           <div className="text-[15px] leading-relaxed text-slate-700">
             <Markdown texto={p.descripcion} />
+          </div>
+        </section>
+      )}
+
+      {Array.isArray(p.relacionados) && p.relacionados.length > 0 && (
+        <section className="mt-10 pt-6 border-t border-slate-100">
+          <h2 className="text-lg font-black text-slate-900 mb-3">También en esta tienda</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {p.relacionados.map((r: any) => (
+              <a key={r.id} href={`/producto/${encodeURIComponent(r.id)}`} className="rounded-2xl border border-slate-200 overflow-hidden hover:border-slate-400 transition-colors">
+                {r.imagen ? <img src={r.imagen} alt="" loading="lazy" className="w-full h-28 object-cover" /> : <div className="w-full h-28 bg-slate-50" />}
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-slate-800 line-clamp-2">{r.nombre}</p>
+                  <p className="text-xs text-slate-500">{r.precio_centimos != null ? dinero(r.precio_centimos) : 'Precio a consultar'}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
       )}

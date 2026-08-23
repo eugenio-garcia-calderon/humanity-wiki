@@ -106,8 +106,13 @@ export default function Bienvenida() {
           herramientas — que es lo que hay que ver. Sigue entero en «i → Visión»,
           que es su casa. */}
       <header className="flex min-h-[33vh] flex-col items-center justify-center py-3 text-center">
+        {/* EL NOMBRE NUEVO (2026-08-23, Eugenio: «vamos a llamarla Red de
+            Conocimiento»). Aquí importa más que en ningún otro sitio: es lo
+            primero que lee alguien que no sabe qué es esto, y si la portada
+            dice un nombre y la barra de arriba dice otro, ninguno de los dos
+            se cree. */}
         <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
-          humanity<span className="text-emerald-600">.wiki</span>
+          Red de <span className="text-emerald-600">Conocimiento</span>
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
           Agregar el conocimiento de la humanidad y repartir lo que genere entre

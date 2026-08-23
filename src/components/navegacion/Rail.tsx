@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
-  Layers, Users2, MessageSquare, Phone, User,
+  Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -47,15 +48,15 @@ export interface Herramienta {
 export const HERRAMIENTAS: Herramienta[] = [
   { clave: 'proyectos',    nombre: 'Proyectos',     icono: FolderKanban, ruta: '/proyectos',    conPanel: true },
   { clave: 'paginas',      nombre: 'Páginas',       icono: FileText,     ruta: '/paginas',      conPanel: true },
-  { clave: 'esquemas',     nombre: 'Esquemas',      icono: Globe2,       ruta: '/esquemas' },
-  { clave: 'mapas',        nombre: 'Mapas',         icono: MapIcon,      ruta: '/mapas' },
-  { clave: 'tareas',       nombre: 'Tareas',        icono: ListChecks,   ruta: '/tareas' },
-  { clave: 'tablas',       nombre: 'Tablas',        icono: Table2,       ruta: '/tablas' },
-  { clave: 'publicaciones', nombre: 'Publicaciones', icono: Compass,     ruta: '/explorar' },
-  { clave: 'comercio',     nombre: 'Comercio',      icono: Store,        ruta: '/comercio' },
-  { clave: 'ia',           nombre: 'Asistente',     icono: Sparkles,     ruta: '/ia' },
-  { clave: 'calendario',   nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario' },
-  { clave: 'archivos',     nombre: 'Archivos',      icono: Database,     ruta: '/archivos' },
+  { clave: 'esquemas',     nombre: 'Esquemas',      icono: Globe2,       ruta: '/esquemas' , conPanel: true },
+  { clave: 'mapas',        nombre: 'Mapas',         icono: MapIcon,      ruta: '/mapas' , conPanel: true },
+  { clave: 'tareas',       nombre: 'Tareas',        icono: ListChecks,   ruta: '/tareas' , conPanel: true },
+  { clave: 'tablas',       nombre: 'Tablas',        icono: Table2,       ruta: '/tablas' , conPanel: true },
+  { clave: 'publicaciones', nombre: 'Publicaciones', icono: Compass,     ruta: '/explorar' , conPanel: true },
+  { clave: 'comercio',     nombre: 'Comercio',      icono: Store,        ruta: '/comercio' , conPanel: true },
+  { clave: 'ia',           nombre: 'Asistente',     icono: Sparkles,     ruta: '/ia' , conPanel: true },
+  { clave: 'calendario',   nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario' , conPanel: true },
+  { clave: 'archivos',     nombre: 'Archivos',      icono: Database,     ruta: '/archivos' , conPanel: true },
   { clave: 'mundo',        nombre: 'Visor 3D',      icono: Gamepad2,     ruta: '/juego' },
   { clave: 'navegador',    nombre: 'Navegador',     icono: Globe,        ruta: 'about:inicio' },
 ];
@@ -81,62 +82,217 @@ export const PERSONALES: Herramienta[] = [
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
 ];
 
-export default function Rail({ abierta, onElegir, onInicio }: {
+export default function Rail({
+  abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
+  items, titulo = 'Red de Conocimiento',
+}: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
   onElegir: (h: Herramienta) => void;
   onInicio: () => void;
+  /**
+   * EN MÓVIL EL RAÍL VA SIEMPRE DESPLEGADO (2026-08-23).
+   *
+   * Eugenio: «¿por qué en versión móvil no está?». No estaba porque lo monté
+   * sólo en escritorio: implementé la mitad de lo que él había decidido —el
+   * panel a pantalla completa— y me dejé la otra mitad, que es cómo se llega
+   * a ese panel.
+   *
+   * Y va desplegado, no en iconos, porque **en un móvil no hay ratón**: el raíl
+   * de iconos funciona en escritorio precisamente porque puedes pasar por
+   * encima y leer los nombres sin comprometerte. Sin esa posibilidad, trece
+   * iconos sin texto son trece adivinanzas. Aquí ocupa el cajón entero, que es
+   * el sitio donde ya estaba el menú de siempre.
+   */
+  siempreAbierto?: boolean;
+  /**
+   * EL RAÍL, PEGADO AL BORDE DERECHO (2026-08-23).
+   *
+   * Eugenio movió «lo tuyo» a la derecha: «coger exactamente ese mismo menú que
+   * ahora mismo está a la izquierda y ponerlo a la derecha, con la misma
+   * lógica». Es este mismo componente con tres cosas del revés —el borde, el
+   * lado por el que se despliega y la barra de «aquí estás»—, no una copia
+   * espejada. Dos raíles serían dos sitios donde arreglar el mismo fallo.
+   */
+  ladoDerecho?: boolean;
+  /**
+   * QUÉ LISTA PINTA (2026-08-23). Por defecto las herramientas —el raíl de la
+   * derecha—. «Explorar» le pasa los catorce objetivos.
+   *
+   * Eugenio: «haz que el menú de la izquierda tenga también ese fondo negro…
+   * y así tenemos como en un espejo ambos menús igual de diseñados, solo que
+   * uno está a la izquierda y otro a la derecha».
+   *
+   * ES EL MISMO COMPONENTE, no dos parecidos. Un segundo raíl «igual pero para
+   * objetivos» sería igual el día que se escribe y distinto al mes siguiente:
+   * la primera corrección de sombra, de ancho o de accesibilidad entraría en
+   * uno solo, y ahí el espejo deja de serlo.
+   */
+  items?: Herramienta[];
+  titulo?: string;
 }) {
   const navigate = useNavigate();
 
-  return (
-    <nav
-      aria-label="Herramientas"
-      className="flex h-full w-14 shrink-0 flex-col items-center gap-0.5 overflow-y-auto border-r border-slate-800 bg-slate-950 py-2
-                 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
-      {/* La marca es también el botón de inicio: es lo que la gente ya espera
-          de un logo arriba a la izquierda, y aquí además es la única salida
-          hacia la portada desde una herramienta abierta. */}
+  /*
+   * ABRIRSE AL PASAR EL RATÓN, Y QUEDARSE ABIERTO SI SE FIJA (2026-08-23).
+   *
+   * Eugenio: «si haces hover el menú lateral con fondo negro se tiene que
+   * abrir, también si pulsas el botón de expansión se debe quedar abierto y
+   * desplegado sin hover».
+   *
+   * LA PRIMERA VERSIÓN NO LO HACÍA, y fue decisión mía escrita en un comentario:
+   * un raíl que se ensancha empuja la página entera cada vez que el ratón lo
+   * roza de camino a otro sitio. **El problema era real y la solución era
+   * equivocada.** Quitarle el hover resolvía el empujón cargándose lo que hace
+   * útil un raíl de iconos: que puedas leer los nombres sin comprometerte.
+   *
+   * LO QUE SÍ LO RESUELVE: separar el ANCHO QUE OCUPA del ANCHO QUE SE VE.
+   *
+   *   · Con el ratón encima → el raíl se despliega **por encima** del contenido.
+   *     El hueco que ocupa sigue siendo de 56 px, así que la página no se mueve.
+   *   · Fijado con el botón → ocupa de verdad los 224 px y **empuja** el
+   *     contenido, que es lo que quieres cuando has decidido tenerlo abierto.
+   *
+   * Un caso es mirar y el otro es quedarse, y por eso no se comportan igual.
+   *
+   * SE RECUERDA ENTRE VISITAS. Fijar el menú es una preferencia sobre cómo
+   * trabajas, no algo que se decida cada mañana. En `localStorage` y no en el
+   * servidor a propósito: depende de la pantalla que tengas delante, y la del
+   * portátil y la del monitor grande no piden lo mismo.
+   */
+  const [fijado, setFijado] = useState(() => {
+    try { return localStorage.getItem('hw_rail_fijado') === '1'; } catch { return false; }
+  });
+  const [encima, setEncima] = useState(false);
+  const desplegado = siempreAbierto || fijado || encima;
+
+  const fijar = () => {
+    setFijado(v => {
+      const n = !v;
+      try { localStorage.setItem('hw_rail_fijado', n ? '1' : '0'); } catch { /* modo privado */ }
+      return n;
+    });
+  };
+
+  const boton = (h: Herramienta) => {
+    const Icono = h.icono;
+    const activa = abierta === h.clave;
+    return (
       <button
-        onClick={onInicio}
-        title="Inicio"
-        aria-label="Inicio"
-        className="mb-1 grid h-10 w-10 shrink-0 place-items-center rounded-xl text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+        key={h.clave}
+        onClick={() => (h.conPanel ? onElegir(h) : h.ruta.startsWith('/') ? navigate(h.ruta) : onElegir(h))}
+        title={desplegado ? undefined : h.nombre}
+        aria-label={h.nombre}
+        aria-current={activa ? 'true' : undefined}
+        className={cn(
+          // 40 px de alto: por debajo de eso este proyecto ya tiene catalogado
+          // que los botones dejan de acertarse con el dedo.
+          'relative flex h-10 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+          desplegado ? 'w-full' : 'w-10 justify-center',
+          activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white',
+        )}
       >
-        <Home className="h-5 w-5" />
+        {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
+            distinto: el fondo ya lo usa el ratón al pasar por encima, y dos
+            cosas que se pintan igual dejan de significar. */}
+        {activa && (
+          <span className={cn('absolute top-2 h-6 w-0.5 bg-emerald-400',
+            ladoDerecho ? 'right-0 rounded-l' : 'left-0 rounded-r')} />
+        )}
+        <Icono className="h-5 w-5 shrink-0" />
+        {/* El nombre NO se desmonta al plegar: se hace transparente y se le
+            quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
+            final de la animación en vez de acompañarla. */}
+        <span className={cn(
+          'overflow-hidden whitespace-nowrap text-left text-[13px] font-bold transition-all duration-200',
+          desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
+        )}>
+          {h.nombre}
+        </span>
       </button>
+    );
+  };
 
-      <div className="mb-1 h-px w-7 shrink-0 bg-slate-800" />
-
-      {[...HERRAMIENTAS, null, ...PERSONALES].map((h, i) => {
-        if (h === null) return <div key="sep" className="my-1 h-px w-7 shrink-0 bg-slate-800" />;
-        void i;
-        const Icono = h.icono;
-        const activa = abierta === h.clave;
-        return (
+  return (
+    // El HUECO. Mide 56 px salvo que esté fijado: es lo que decide si el raíl
+    // empuja el contenido o se le pone encima.
+    <div className={cn('relative h-full shrink-0 transition-[width] duration-200',
+      siempreAbierto ? 'w-64' : fijado ? 'w-56' : 'w-14')}>
+      <nav
+        aria-label="Herramientas"
+        onMouseEnter={() => setEncima(true)}
+        onMouseLeave={() => setEncima(false)}
+        className={cn(
+          // z-50, POR ENCIMA DE LA BARRA SUPERIOR (2026-08-23). La barra
+          // también es z-40 y va después en el documento, así que al
+          // desplegarse el raíl por encima del contenido, la barra le tapaba
+          // los primeros 40 px: el nombre salía cortado y **el botón de fijar
+          // no se veía**, o sea que la mitad de lo que Eugenio pidió existía y
+          // no se podía usar. Se ve mirando, no compilando.
+          // Anclado al borde que le toca: a la izquierda crece hacia la
+          // derecha y al revés. Si se quedara en `left-0` estando a la derecha,
+          // al desplegarse se metería en el contenido en vez de salir de él.
+          ladoDerecho ? 'absolute right-0 top-0' : 'absolute left-0 top-0',
+          'z-50 flex h-full flex-col gap-0.5 overflow-y-auto overflow-x-hidden',
+          ladoDerecho ? 'border-l border-slate-800' : 'border-r border-slate-800',
+          'bg-slate-950 px-2 py-2 transition-[width] duration-200',
+          '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          siempreAbierto ? 'w-64' : desplegado ? 'w-56' : 'w-14',
+          // La sombra sólo cuando está flotando por encima: fijado forma parte
+          // de la página y una sombra ahí lo despegaría de ella sin motivo.
+          !fijado && encima && 'shadow-2xl shadow-black/40',
+        )}
+      >
+        <div className="flex shrink-0 items-center gap-1">
           <button
-            key={h.clave}
-            onClick={() => (h.conPanel ? onElegir(h) : h.ruta.startsWith('/') ? navigate(h.ruta) : onElegir(h))}
-            title={h.nombre}
-            aria-label={h.nombre}
-            aria-current={activa ? 'true' : undefined}
+            onClick={onInicio}
+            title="Inicio"
+            aria-label="Inicio"
             className={cn(
-              // 40 px: por debajo de eso este proyecto ya tiene catalogado que
-              // los botones dejan de acertarse con el dedo.
-              'relative grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors',
-              activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white',
+              'flex h-10 items-center gap-3 rounded-xl px-[10px] text-slate-300 transition-colors hover:bg-slate-800 hover:text-white',
+              desplegado ? 'flex-1' : 'w-10 justify-center',
             )}
           >
-            {/* La marca de «aquí estás» es una barra a la izquierda, no un
-                fondo distinto: el fondo ya lo usa el ratón al pasar por encima,
-                y dos cosas que se pintan igual dejan de significar. */}
-            {activa && <span className="absolute left-0 top-2 h-6 w-0.5 rounded-r bg-emerald-400" />}
-            <Icono className="h-5 w-5" />
+            <Home className="h-5 w-5 shrink-0" />
+            <span className={cn(
+              'overflow-hidden whitespace-nowrap text-[13px] font-black transition-all duration-200',
+              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
+            )}>
+              {titulo}
+            </span>
           </button>
-        );
-      })}
-    </nav>
+
+          {/* EL BOTÓN DE FIJAR. Sólo existe desplegado, y es a propósito: es la
+              acción de «quédate así», y plegado no hay ningún «así» que
+              mantener. Aparece con el hover, que es cuando la mano ya está ahí. */}
+          {/* La chincheta no existe en móvil: no hay nada que fijar cuando ya
+              está siempre abierto. */}
+          {desplegado && !siempreAbierto && (
+            <button
+              onClick={fijar}
+              title={fijado ? 'Soltar el menú' : 'Dejar el menú abierto'}
+              aria-label={fijado ? 'Soltar el menú' : 'Dejar el menú abierto'}
+              aria-pressed={fijado}
+              className={cn(
+                'grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors',
+                fijado ? 'bg-slate-800 text-emerald-400' : 'text-slate-500 hover:bg-slate-800 hover:text-white',
+              )}
+            >
+              {fijado ? <PanelLeftClose className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+            </button>
+          )}
+        </div>
+
+        <div className="my-1 h-px shrink-0 bg-slate-800" />
+
+        {(items ?? HERRAMIENTAS).map(boton)}
+        {/* El separador y lo personal sólo en el raíl de las herramientas: el
+            de Explorar es una sola lista de catorce y una raya ahí no separa
+            nada. */}
+        {!items && <div className="my-1 h-px shrink-0 bg-slate-800" />}
+        {!items && PERSONALES.map(boton)}
+      </nav>
+    </div>
   );
 }
 
