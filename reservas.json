@@ -131,6 +131,18 @@
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0108_cestas_y_favoritos.sql",
+      "motivo": "comercio F3: carrito abandonado y favoritos",
+      "desde": "2026-08-23T13:25:59.595Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Mercado.tsx",
+      "motivo": "comercio F3: carrito abandonado y favoritos",
+      "desde": "2026-08-23T13:25:59.595Z"
     }
   ]
 }
