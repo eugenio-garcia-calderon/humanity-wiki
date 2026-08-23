@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/Vision.tsx",
-      "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
-      "desde": "2026-08-23T11:36:09.015Z"
-    }
-  ]
+  "reservas": []
 }
