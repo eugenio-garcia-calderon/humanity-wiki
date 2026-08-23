@@ -155,12 +155,6 @@
       "ruta": "scripts/equipo.mjs",
       "motivo": "reservar trataba el motivo como un fichero",
       "desde": "2026-08-23T13:19:27.293Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "drizzle/0999_prueba.sql",
-      "motivo": "prueba de que lo normal sigue",
-      "desde": "2026-08-23T13:19:40.466Z"
     }
   ]
 }
