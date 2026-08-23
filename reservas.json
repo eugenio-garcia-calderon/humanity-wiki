@@ -95,6 +95,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "anotarFallo -> ritmo en transferir (modulo de prog6)",
       "desde": "2026-08-23T00:17:30.579Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "drizzle/0097_frenos_compartidos.sql",
+      "motivo": "el freno de los limites, compartido entre procesos",
+      "desde": "2026-08-23T00:17:34.713Z"
     }
   ]
 }
