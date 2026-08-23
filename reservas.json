@@ -56,18 +56,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/components/social/Campana.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/pages/FichaProducto.tsx",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
       "desde": "2026-08-23T13:03:04.503Z"
