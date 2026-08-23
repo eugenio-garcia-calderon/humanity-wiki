@@ -205,7 +205,21 @@ if (!yo) {
 if (orden === 'reservar') {
   const i = resto.indexOf('--motivo');
   const motivo = i === -1 ? '' : resto.slice(i + 1).join(' ');
-  const rutas = relativos(i === -1 ? resto : resto.slice(0, i));
+  const crudas = i === -1 ? resto : resto.slice(0, i);
+  // UN MOTIVO NO ES UN FICHERO. El 2026-08-23 alguien escribió
+  // `reservar fichero "el motivo"` sin `--motivo` y quedó una reserva fantasma
+  // llamada como la frase: el tablero se ensucia con ficheros que no existen y
+  // el motivo real se pierde. Aquí no hay rutas con espacios, así que un
+  // argumento con espacios es siempre esto.
+  const conEspacios = crudas.filter((x) => /\s/.test(x));
+  if (conEspacios.length) {
+    console.error('Eso parece un motivo, no un fichero:');
+    for (const x of conEspacios) console.error(`  «${x}»`);
+    console.error('\nEl motivo va detrás de --motivo:');
+    console.error(`  node scripts/equipo.mjs reservar ${crudas.filter((x) => !/\s/.test(x)).join(' ') || '<fichero>'} --motivo "${conEspacios[0]}"`);
+    process.exit(1);
+  }
+  const rutas = relativos(crudas);
   if (!rutas.length) { console.error('Dime qué ficheros.'); process.exit(1); }
   const malos = conflictos(rutas, yo);
   if (malos.length) {
