@@ -435,3 +435,48 @@ looks correct is exactly the failure this project has paid for most (see the
 `docs/` is not touched — the specification is his. If he prefers the rule kept,
 the fix is one migration (`SET NOT NULL` plus a global territory row) and no
 application code.
+
+---
+
+## 2026-08-23 — Las dos rutas `resolve` se quedan, aunque no las llame nadie
+
+**Contexto**: `GET /api/graphs/resolve` y `GET /api/publications/resolve`
+(`src/server/knowledge.ts`) eran el camino rápido del chat para abrir un grafo o
+una publicación sin gastar IA. Su único cliente dejó de poder llamarlas el
+**2026-08-20** (`99446b3`, «One assistant everywhere»): la llamada quedó detrás
+de `mode !== 'dock'` y `mode` pasó a ser la constante `'dock'`. El código muerto
+del cliente se retiró en la #330; las rutas siguen ahí, sin nadie que las use.
+
+**Opciones consideradas**:
+1. Borrarlas ahora. Ahorro real: cero — son dos manejadores registrados.
+2. Registrar cada llamada y esperar dos o tres semanas antes de decidir.
+3. Dejarlas, con el criterio de borrado escrito.
+
+**Decisión**: la 3.
+
+**Motivo**: el motivo para no borrarlas **no es técnico**.
+`docs/12_KNOWLEDGE_GRAPHS.md` («Resolución desde el chat/buscador») nombra
+`GET /api/graphs/resolve` como el **«Fast-path sin IA»**, y `docs/` es la
+especificación de Eugenio. Borrar la ruta sin más sería incumplir la
+especificación por la puerta de atrás.
+
+**Y el matiz que lo resuelve: la promesa del documento se sigue cumpliendo.** El
+camino rápido sin IA existe hoy — lo hace `/api/search` desde la #290, y con más
+alcance: busca en las 20 tablas del grafo, no solo en grafos y publicaciones. Lo
+que sobra es **la implementación vieja, no la función**. Esto es lo que hace que
+la divergencia sea de forma y no de fondo, y por eso queda aquí anotado en vez
+de tocar `docs/`.
+
+La opción 2 se descartó por lo que cuesta de verdad: no escribir el registro,
+sino leerlo. Un pendiente que depende de que alguien lea un fichero de registro
+dentro de tres semanas es un pendiente que no se hace.
+
+**Consecuencias**: las dos rutas siguen respondiendo, **públicas y sin sesión**,
+como han estado siempre. Se borran cuando alguien toque `knowledge.ts` por otro
+motivo, y ese día esta entrada dice por qué se pueden borrar sin incumplir nada.
+Ver la deuda con su criterio en `09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+
+**Lo que NO demuestra la medición por ruta**, por si alguien la usa para esto:
+`src/server/medicion.ts` vive en memoria y se pierde en cada reinicio, y cada
+despliegue reinicia. Sirve para «qué se está pidiendo ahora», nunca para «desde
+cuándo no lo pide nadie».

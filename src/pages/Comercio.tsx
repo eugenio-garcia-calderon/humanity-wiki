@@ -5,6 +5,9 @@ import {
   Download, Wrench, Truck, FileText, ShoppingBag, AlertCircle,
 } from 'lucide-react';
 import CrearProducto from '../components/knowledge/CrearProducto';
+import EditorVariantes, { type VarianteForm, variantesAFormulario, variantesAlServidor } from '../components/knowledge/EditorVariantes';
+import Recibo from '../components/knowledge/Recibo';
+import DatosFiscales from '../components/knowledge/DatosFiscales';
 
 // ============================================================================
 // COMERCIO — lo que vendes, en un sitio (2026-08-22)
@@ -40,6 +43,7 @@ type Producto = {
   media_estrellas?: number | null; n_resenas?: number;
   /** El vendedor acepta cobrar este producto en puntos (total o en parte). */
   acepta_puntos?: boolean;
+  variantes?: { id: string; nombre: string; sku: string | null; precio_centimos: number | null; stock: number | null }[];
 };
 
 export default function Comercio() {
@@ -50,7 +54,29 @@ export default function Comercio() {
   const [creando, setCreando] = useState(false);
   const [handle, setHandle] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pestana, setPestana] = useState<'productos' | 'pedidos'>('productos');
+  // `?pestana=pedidos` abre directamente los pedidos: es adonde lleva el
+  // aviso «te han comprado algo» de la campana.
+  // Editor de variantes por producto (2026-08-23): abierto en uno a la vez.
+  const [variantesDe, setVariantesDe] = useState<string | null>(null);
+  // Recibo de una venta (F4): abierto en uno a la vez.
+  const [reciboDe, setReciboDe] = useState<{ id: string; datos: any } | null>(null);
+  async function verRecibo(id: string) {
+    if (reciboDe?.id === id) { setReciboDe(null); return; }
+    const r = await fetch(`/api/publicar/mis-ventas/${id}/recibo`).catch(() => null);
+    if (r && r.ok) setReciboDe({ id, datos: await r.json() });
+  }
+  const [variantesForm, setVariantesForm] = useState<VarianteForm[]>([]);
+  const [guardandoVariantes, setGuardandoVariantes] = useState(false);
+  async function guardarVariantes(id: string) {
+    setGuardandoVariantes(true);
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ variantes: variantesAlServidor(variantesForm) }),
+    }).catch(() => {});
+    setGuardandoVariantes(false); setVariantesDe(null); cargar();
+  }
+  const [pestana, setPestana] = useState<'productos' | 'pedidos'>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pestana') === 'pedidos' ? 'pedidos' : 'productos');
 
   async function cargar() {
     try {
@@ -238,7 +264,23 @@ export default function Comercio() {
                           ? <span className="text-emerald-700">· archivo listo</span>
                           : <span className="text-amber-700 font-bold">· SIN ARCHIVO: se cobra y no se entrega</span>
                       )}
+                      {p.modality !== 'suscripcion' && (
+                        <button type="button" onClick={() => { if (variantesDe === p.id) { setVariantesDe(null); return; } setVariantesDe(p.id); setVariantesForm(variantesAFormulario(p.variantes)); }}
+                          className="text-[11px] font-bold text-slate-500 underline">
+                          {Array.isArray(p.variantes) && p.variantes.length ? `${p.variantes.length} variante${p.variantes.length === 1 ? '' : 's'}` : 'variantes'}
+                        </button>
+                      )}
                     </p>
+                    {variantesDe === p.id && (
+                      <div className="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <EditorVariantes valor={variantesForm} onCambio={setVariantesForm} precioBase={p.price_cents ? (p.price_cents / 100).toFixed(2).replace('.', ',') : undefined} />
+                        <div className="mt-2 flex items-center gap-2">
+                          <button type="button" onClick={() => guardarVariantes(p.id)} disabled={guardandoVariantes}
+                            className="h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-black disabled:opacity-50">{guardandoVariantes ? 'Guardando…' : 'Guardar variantes'}</button>
+                          <button type="button" onClick={() => setVariantesDe(null)} className="h-9 px-3 rounded-lg text-xs font-bold text-slate-500">Cancelar</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {p.kind === 'digital' && (
@@ -283,6 +325,7 @@ export default function Comercio() {
           {/* CÓMO VAN LAS VENTAS (2026-08-22): lo que un vendedor mira antes
               que la lista — este mes, los últimos meses y lo más vendido.
               Euros y puntos son dos números y se enseñan como dos. */}
+          <DatosFiscales />
           {resumen && (
             <div className="mb-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
               <div className="grid grid-cols-3 gap-3">
@@ -299,6 +342,13 @@ export default function Comercio() {
                   <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Sin enviar</p>
                   <p className={`text-xl font-black ${resumen.sin_enviar > 0 ? 'text-amber-700' : 'text-slate-900'}`}>{resumen.sin_enviar}</p>
                 </div>
+                {Number(resumen.cestas_a_medias) > 0 && (
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400">Cestas a medias (30 días)</p>
+                    <p className="text-xl font-black text-slate-900">{resumen.cestas_a_medias}</p>
+                    <p className="text-[11px] text-slate-400">Con sesión y sin comprar; se les avisa a las 24 h.</p>
+                  </div>
+                )}
               </div>
               {resumen.serie?.length > 1 && (
                 <p className="mt-3 text-[11px] text-slate-500">
@@ -352,6 +402,10 @@ export default function Comercio() {
                     </button>
                   </div>
                 )}
+                <button type="button" onClick={() => verRecibo(p.id)} className="mt-2 mr-2 h-8 px-2 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-100">
+                  {reciboDe?.id === p.id ? 'Ocultar recibo' : 'Recibo'}
+                </button>
+                {reciboDe?.id === p.id && <Recibo datos={reciboDe.datos} onCerrar={() => setReciboDe(null)} />}
                 {['pagado', 'enviado', 'entregado'].includes(p.estado) && (
                   <button onClick={() => marcarPedido(p.id, 'devuelto')}
                     className="mt-2 h-8 px-2 rounded-lg text-[11px] font-bold text-rose-700 hover:bg-rose-50">

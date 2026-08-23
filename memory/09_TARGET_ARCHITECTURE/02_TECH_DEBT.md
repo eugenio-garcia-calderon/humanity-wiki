@@ -237,3 +237,80 @@ uno y ordena en memoria. Con las 61 filas de hoy sobra; a partir de ~1.000 por
 usuario habrá que paginar de verdad (cursor por fecha sobre una vista UNION). Se
 hizo así para no crear una vista ni una tabla nueva antes de saber cómo se usa la
 página. Coste de cambiarlo: ~1 hora, y no antes de que alguien note la espera.
+
+## Buscador: `ILIKE '%…%'` sin índices, y a partir de cuántas filas deja de valer — 2026-08-23
+`GET /api/search` recorre las **20 tablas del grafo** con `ILIKE '%…%'` y, desde el
+«buscador primero» (#290), también busca **mientras se teclea**: una tanda de
+consultas por cada pausa al escribir, no una por pulsar enviar. Ningún índice sirve
+para eso — un `%algo%` no puede usar un B-tree — y `pg_trgm` **no está instalado**.
+
+Con los datos de hoy sobra de lejos: 83 publicaciones en producción y 78 filas
+sumando las otras 19 tablas. Por eso no se hace ahora: instalar una extensión en la
+base de datos para eso sería pagar hoy una complejidad que no se cobra hasta dentro
+de mucho.
+
+**El disparador, medido y no estimado** (Postgres local, caché caliente, tablas
+temporales; en el servidor será del mismo orden, no el mismo número):
+
+| Forma de la consulta | Filas | Tiempo |
+|---|---|---|
+| Un título corto, una palabra | 200.000 | 135 ms |
+| Un título corto, **tres palabras** (`ILIKE ANY`, que es como busca hoy) | 200.000 | 421 ms |
+| Un cuerpo de publicación de ~2 KB, una palabra | 50.000 | 679 ms |
+| Un cuerpo de ~2 KB, **tres palabras** | 50.000 | **2,6 s** |
+
+Un desplegable que se pinta mientras escribes deja de parecer instantáneo por encima
+de **~200 ms**. Con eso:
+
+- **Las publicaciones son las que se rompen primero, y con mucha diferencia**, porque
+  `body ILIKE` recorre texto largo: ~50 µs por fila y palabra. **A partir de unas
+  4.000 publicaciones** una búsqueda de tres palabras se sale del presupuesto. Ése es
+  el número que hay que vigilar; es alcanzable en un año normal.
+- Las otras 19 tablas, que buscan sobre títulos cortos, aguantan hasta **~100.000
+  filas sumadas** con la misma cuenta.
+
+**Cuando se cruce cualquiera de los dos**: `CREATE EXTENSION pg_trgm` + un índice GIN
+`gin_trgm_ops` por cada columna que se busca. Eso convierte el recorrido completo en
+una búsqueda por índice y aguanta dos órdenes de magnitud más. Es trabajo de quien
+lleve escalabilidad, no del buscador: mete una extensión en la base.
+
+**Cómo saber en qué punto estamos**, sin adivinarlo:
+
+```sql
+SELECT (SELECT count(*) FROM publications WHERE archived_at IS NULL) AS publicaciones,
+       (SELECT sum(n_live_tup) FROM pg_stat_user_tables
+         WHERE relname IN ('challenges','solutions','products','users','territories',
+           'organizations','initiatives','knowledge_graphs','knowledge_windows','user_maps',
+           'indicators','objectives','markers','metrics','causes','needs','demands',
+           'success_cases','projects')) AS filas_del_grafo;
+```
+
+## Dos rutas públicas que no llama nadie: `/api/graphs/resolve` y `/api/publications/resolve` — 2026-08-23
+En `src/server/knowledge.ts`. Eran el camino rápido del chat para abrir un grafo o
+una publicación sin gastar IA. **Nadie las llama desde el 2026-08-20**: su único
+cliente quedó inalcanzable con `99446b3` («One assistant everywhere»), que puso la
+llamada detrás de `mode !== 'dock'` con `mode` ya fijado a `'dock'`. El código
+muerto del cliente se retiró en la #330. No se buscó más: en todo `main` no queda
+ni una llamada, y no hay app nativa que empaquete una versión vieja del JavaScript
+—lo que llamamos «la app instalada» es la PWA, cuyo service worker toma el control
+al instante desde el 22-08 y recarga las pestañas ocultas—.
+
+**Son públicas y sin sesión**, como han estado siempre: no comprueban `req.user`.
+Queda dicho aquí para que salgan en la lista el día que alguien revise qué hay
+abierto sin autenticar, en vez de descubrirlas desde cero.
+
+**Por qué no se borran ya**: `docs/12_KNOWLEDGE_GRAPHS.md` nombra
+`GET /api/graphs/resolve` como el «Fast-path sin IA», y `docs/` es la
+especificación. Que la promesa se siga cumpliendo por otro camino —`/api/search`,
+desde la #290— es lo que convierte el borrado en algo seguro, y está razonado en
+`03_DECISIONS.md` (2026-08-23).
+
+**Criterio de borrado, para no volver a discutirlo**: se van **el día que alguien
+toque `knowledge.ts` por otro motivo**. Coste de dejarlas mientras tanto: cero —
+son dos manejadores registrados que nadie invoca. Coste de borrarlas hoy: el
+riesgo pequeño de romperle la pantalla a un cliente rezagado a cambio de ningún
+ahorro.
+
+**Y lo que no sirve para decidir esto**: la medición por ruta (`medicion.ts`) vive
+en memoria y se pierde en cada reinicio; cada despliegue reinicia. Responde «qué
+se está pidiendo ahora», nunca «desde cuándo no lo pide nadie».
