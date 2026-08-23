@@ -162,6 +162,18 @@ export default function Cesta({ tienda }: { tienda: string }) {
   const { lineas, unidades, subtotal, cambiar, quitar, vaciar } = useCarrito(tienda);
   // `?cesta=abrir` la abre al cargar: es adonde lleva el aviso «tu cesta sigue ahí».
   const [abierta, setAbierta] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('cesta') === 'abrir');
+  // El aviso de cesta olvidada se apaga AQUÍ, en la propia cesta (revisión
+  // del Dashboard, 23-08): `null` = sin sesión o sin cargar, no se enseña.
+  const [avisoCesta, setAvisoCesta] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!abierta) return;
+    fetch('/api/publicar/preferencias', { credentials: 'include' }).then(r => r.ok ? r.json() : null)
+      .then(j => { if (j && typeof j.aviso_cesta === 'boolean') setAvisoCesta(j.aviso_cesta); }).catch(() => {});
+  }, [abierta]);
+  const cambiarAvisoCesta = async (valor: boolean) => {
+    setAvisoCesta(valor);
+    fetch('/api/publicar/preferencias', { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aviso_cesta: valor }) }).catch(() => {});
+  };
   const [pagando, setPagando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // PUNTOS EN LA CESTA (2026-08-22). El servidor dice si está activo y cuánto
@@ -330,6 +342,14 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 <span className="text-sm text-slate-500">Subtotal</span>
                 <span className="text-xl font-black text-slate-900">{dinero(subtotal)}</span>
               </div>
+              {avisoCesta !== null && (
+                <p className="mt-1 text-[11px] text-slate-400">
+                  {avisoCesta ? 'Si la dejas a medias, te lo recordamos una vez a las 24 h. ' : 'No te recordaremos esta cesta. '}
+                  <button type="button" onClick={() => cambiarAvisoCesta(!avisoCesta)} className="underline font-bold text-slate-500">
+                    {avisoCesta ? 'No avisarme' : 'Volver a avisarme'}
+                  </button>
+                </p>
+              )}
               {/* Se dice ANTES, no en la última pantalla: un total que sube al
                   final es la primera causa de cesta abandonada. */}
               <p className="mt-1 text-[11px] text-slate-400">

@@ -164,6 +164,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
       SELECT c.user_id, c.tienda, c.lineas FROM cestas_guardadas c JOIN users u ON u.id = c.user_id
       WHERE jsonb_array_length(c.lineas) > 0 AND c.avisada_at IS NULL AND c.updated_at < now() - interval '24 hours'
         AND u.archived_at IS NULL
+        -- Quien lo apagó (revisión del Dashboard: la mitad de las cestas a
+        -- medias son gente que miró y decidió que no) no recibe el aviso.
+        AND coalesce(u.ui_settings->>'aviso_cesta', 'on') <> 'off'
       LIMIT 200
     `);
     for (const c of olvidadas.rows as any[]) {
@@ -171,7 +174,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const primera = (c.lineas as any[])[0]?.nombre || 'algo';
       await avisar(db, {
         paraQuien: c.user_id, dePartede: null, tipo: 'cesta_olvidada', entidadTipo: 'cestas', entidadId: `${c.tienda}:${Date.now()}`,
-        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en la cesta de ${c.tienda}. Sigue ahí.`, tienda: c.tienda, destino: `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
+        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en la cesta de ${c.tienda}. Sigue ahí. (Este aviso se apaga desde la propia cesta.)`, tienda: c.tienda, destino: `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
       });
       await db.execute(sql`UPDATE cestas_guardadas SET avisada_at = now() WHERE user_id = ${c.user_id} AND tienda = ${c.tienda}`);
     }
@@ -180,6 +183,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       FROM favoritos_productos f JOIN products p ON p.id = f.producto_id LEFT JOIN users u ON u.id = p.created_by
       WHERE f.precio_centimos IS NOT NULL AND p.price_cents IS NOT NULL AND p.price_cents < f.precio_centimos
         AND p.archived_at IS NULL AND p.status <> 'borrador'
+        -- Al propio vendedor no: bajó él el precio.
+        AND p.created_by IS DISTINCT FROM f.user_id
       LIMIT 500
     `);
     for (const b of bajadas.rows as any[]) {
@@ -193,6 +198,25 @@ export function registerPublicarRoutes(app: Express, db: any) {
     if (olvidadas.rows.length || bajadas.rows.length) console.log(`[comercio] barrido: ${olvidadas.rows.length} cestas olvidadas avisadas, ${bajadas.rows.length} bajadas de precio avisadas.`);
     return { cestas_olvidadas_avisadas: olvidadas.rows.length, bajadas_de_precio_avisadas: bajadas.rows.length };
   };
+  /** GET/PUT /api/publicar/preferencias — de momento, solo si quieres el aviso de cesta olvidada. */
+  app.get('/api/publicar/preferencias', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const r = (await db.execute(sql`SELECT ui_settings FROM users WHERE id = ${req.user.id}`)).rows[0] as any;
+      res.json({ aviso_cesta: (r?.ui_settings?.aviso_cesta ?? 'on') !== 'off' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.put('/api/publicar/preferencias', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      if (typeof req.body?.aviso_cesta === 'boolean') {
+        await db.execute(sql`UPDATE users SET ui_settings = coalesce(ui_settings, '{}'::jsonb) || ${JSON.stringify({ aviso_cesta: req.body.aviso_cesta ? 'on' : 'off' })}::jsonb WHERE id = ${req.user.id}`);
+      }
+      const r = (await db.execute(sql`SELECT ui_settings FROM users WHERE id = ${req.user.id}`)).rows[0] as any;
+      res.json({ aviso_cesta: (r?.ui_settings?.aviso_cesta ?? 'on') !== 'off' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   /** POST /api/admin/comercio/barrido — pasar el barrido ahora (administrador). */
   app.post('/api/admin/comercio/barrido', async (req: Request, res: Response) => {
     try {
