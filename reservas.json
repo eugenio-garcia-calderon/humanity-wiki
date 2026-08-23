@@ -53,6 +53,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "prog2: bloques que faltan (desplegable, aviso, indice)",
       "desde": "2026-08-23T14:23:34.298Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": ".github/workflows/deploy.yml",
+      "motivo": "tuberia para las llaves que hoy solo viven en el servidor",
+      "desde": "2026-08-23T14:24:14.026Z"
     }
   ]
 }
