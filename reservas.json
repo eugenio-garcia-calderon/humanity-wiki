@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog7",
+      "ruta": "src/paginasInfo.ts",
+      "motivo": "apartado Avisos legales: terminos + privacidad (Eugenio)",
+      "desde": "2026-08-23T10:59:33.890Z"
+    }
+  ]
 }
