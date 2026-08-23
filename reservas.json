@@ -17,6 +17,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "guardian delante de ejecutar reparto + 23505 -> 409",
       "desde": "2026-08-23T11:44:40.637Z"
+    },
+    {
+      "agente": "prog6",
+      "ruta": "drizzle/0102_gasto_compartido.sql",
+      "motivo": "la cifra de gasto no puede bailar entre procesos",
+      "desde": "2026-08-23T11:45:22.057Z"
     }
   ]
 }
