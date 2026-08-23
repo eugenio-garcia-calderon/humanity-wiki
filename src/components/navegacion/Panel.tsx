@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronRight, Plus, Search, X, FolderKanban, FileText, Globe2,
   Map as MapIcon, ListChecks, Table2, Store, Users2, Paperclip, CalendarDays,
-  Bookmark, Megaphone, Loader2,
+  Bookmark, Megaphone, Loader2, CircleDot, Receipt,
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
 import { HojaPanel, type Herramienta } from './Rail';
 
@@ -84,6 +85,83 @@ function Buscador({ valor, onCambiar, placeholder }: { valor: string; onCambiar:
 
 function Vacio({ children }: { children: any }) {
   return <p className="px-3 py-6 text-center text-xs leading-relaxed text-slate-400">{children}</p>;
+}
+
+/** El botón de crear. Uno por panel, siempre el mismo sitio y el mismo aspecto:
+ *  si cada herramienta lo pone donde le parece, hay que buscarlo cada vez. */
+function BotonCrear({ a, children }: { a: string; children: any }) {
+  const navegar = useNavigate();
+  return (
+    <button
+      onClick={() => navegar(a)}
+      className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-2 text-[13px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
+    >
+      <Plus className="h-3.5 w-3.5" /> {children}
+    </button>
+  );
+}
+
+/** El título de un grupo dentro de la lista. */
+function Grupo({ icono: Icono, titulo, cuantos, a }: { icono?: any; titulo: string; cuantos?: number; a?: string }) {
+  const clase = 'truncate text-[9px] font-black uppercase tracking-[0.15em] text-slate-400';
+  return (
+    <div className="flex items-center gap-1.5 px-2 pb-0.5 pt-2">
+      {Icono && <Icono className="h-3 w-3 shrink-0 text-slate-300" />}
+      {a ? <Link to={a} className={cn(clase, 'hover:text-emerald-700')}>{titulo}</Link> : <span className={clase}>{titulo}</span>}
+      {cuantos !== undefined && <span className="text-[10px] text-slate-300">{cuantos}</span>}
+    </div>
+  );
+}
+
+/*
+ * PEDIR UNA LISTA, CON LOS TRES ESTADOS QUE TIENE DE VERDAD.
+ *
+ * Existe para que ningún panel pueda saltarse la regla raíz de la casa: **todo
+ * tiene que poder decir «no lo sé» de forma distinguible de un resultado
+ * válido**. Ya la incumplí una vez —el panel de Proyectos pintaba «todavía no
+ * tienes proyectos» cuando lo que fallaba era la petición, y Eugenio lo vio en
+ * producción con cinco proyectos en la pantalla de al lado—, así que aquí la
+ * regla no se cumple por disciplina: se cumple porque no hay otra forma de
+ * pedir datos en este fichero.
+ *
+ * `extrae` es para las respuestas que no son un array pelado. Se le pasa la
+ * respuesta entera y devuelve la lista; si no puede, que lance — y entonces
+ * sale «no lo sé», que es la verdad.
+ */
+function useLista<T = any>(url: string, extrae?: (j: any) => T[]) {
+  const [estado, setEstado] = useState<T[] | 'fallo' | null>(null);
+  const pedir = () => {
+    setEstado(null);
+    fetch(url, { credentials: 'include' })
+      .then(async r => {
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        const l = extrae ? extrae(j) : j;
+        if (!Array.isArray(l)) throw new Error('respuesta inesperada');
+        return l as T[];
+      })
+      .then(setEstado)
+      .catch(() => setEstado('fallo'));
+  };
+  useEffect(pedir, [url]);
+  return { estado, datos: Array.isArray(estado) ? estado : [], recargar: pedir };
+}
+
+/** Lo que se pinta mientras la lista no es una lista. */
+function Estado({ estado, que, onReintentar }: { estado: any; que: string; onReintentar: () => void }) {
+  if (estado === null) return <Vacio>Cargando…</Vacio>;
+  if (estado !== 'fallo') return null;
+  return (
+    <div className="px-3 py-4">
+      <p className="text-xs leading-relaxed text-amber-700">
+        No hemos podido cargar {que}. No es que no tengas: es que no hemos podido preguntarlo.
+      </p>
+      <button onClick={onReintentar}
+        className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
+        Volver a intentarlo
+      </button>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -309,6 +387,196 @@ function PanelPaginas({ onCerrar }: { onCerrar: () => void }) {
   );
 }
 
+
+// ---------------------------------------------------------------------------
+// MAPAS — se agrupan por DE QUIÉN SON, no por proyecto: `/api/maps` no
+// devuelve `proyecto_id`, y además lo que distingue un mapa aquí es si es tuyo
+// o es de la plataforma. El Mapa de Indicadores de la Humanidad no es «uno de
+// tus mapas»: es el mapa común, y mezclarlo con los tuyos haría pensar que lo
+// puedes editar.
+// ---------------------------------------------------------------------------
+function PanelMapas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/maps');
+  const [busca, setBusca] = useState('');
+  const { user } = useAuth();
+  const q = busca.trim().toLowerCase();
+
+  const filtra = (l: any[]) => l.filter(m => !q || (m.title || '').toLowerCase().includes(q));
+  const mios = filtra(datos.filter(m => user && m.creator_user_id === user.id));
+  const comunes = filtra(datos.filter(m => !user || m.creator_user_id !== user.id));
+
+  return (
+    <>
+      <Cabecera titulo="Mapas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un mapa…" />
+      <BotonCrear a="/mapas?nuevo=1">Nuevo mapa</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="los mapas" onReintentar={recargar} />
+        {Array.isArray(estado) && mios.length === 0 && comunes.length === 0 && (
+          <Vacio>{q ? 'Ningún mapa con ese nombre.' : 'Todavía no hay mapas.'}</Vacio>
+        )}
+        {/* «Tuyos» se enseña aunque esté vacío cuando no hay búsqueda: es el
+            cajón donde va a caer el primero, y un cajón vacío tiene que verse
+            para poder usarlo. */}
+        {Array.isArray(estado) && user && (mios.length > 0 || !q) && (
+          <div>
+            <Grupo icono={MapIcon} titulo="Tuyos" cuantos={mios.length} />
+            {mios.length === 0 && <p className="px-2.5 py-1 text-[11px] italic text-slate-300">Sin mapas todavía</p>}
+            {mios.map(m => <HojaPanel key={m.id} a={`/mapas/${m.slug}`} icono={MapIcon}>{m.title || 'Sin título'}</HojaPanel>)}
+          </div>
+        )}
+        {Array.isArray(estado) && comunes.length > 0 && (
+          <div>
+            <Grupo icono={Globe2} titulo="De la plataforma" cuantos={comunes.length} />
+            {comunes.map(m => <HojaPanel key={m.id} a={`/mapas/${m.slug}`} icono={MapIcon}>{m.title || 'Sin título'}</HojaPanel>)}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TAREAS — la única de las cinco que NO agrupa por dónde vive la cosa, sino por
+// EN QUÉ ESTADO ESTÁ. Y es a propósito: a las tareas se les pregunta «¿qué me
+// queda?», no «¿dónde está esto?». Agruparlas por proyecto sería repetir el
+// panel de Proyectos con otro nombre.
+//
+// «Por hacer» va primero y «Hecho» al final, porque el orden de una lista es una
+// afirmación sobre qué mirar antes.
+// ---------------------------------------------------------------------------
+const ESTADOS_TAREA = [
+  { clave: 'por_hacer', label: 'Por hacer', color: 'text-slate-400' },
+  { clave: 'en_curso',  label: 'En curso',  color: 'text-amber-500' },
+  { clave: 'hecho',     label: 'Hecho',     color: 'text-emerald-500' },
+];
+
+function PanelTareas({ onCerrar }: { onCerrar: () => void }) {
+  const { estado, datos, recargar } = useLista<any>('/api/roadmap');
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+  const visibles = datos.filter(t => !q || (t.titulo || '').toLowerCase().includes(q));
+
+  return (
+    <>
+      <Cabecera titulo="Tareas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una tarea…" />
+      <BotonCrear a="/tareas?nueva=1">Nueva tarea</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={estado} que="las tareas" onReintentar={recargar} />
+        {Array.isArray(estado) && visibles.length === 0 && (
+          <Vacio>{q ? 'Ninguna tarea con ese texto.' : 'No tienes tareas. Se crean dentro de un proyecto.'}</Vacio>
+        )}
+        {Array.isArray(estado) && ESTADOS_TAREA.map(e => {
+          const suyas = visibles.filter(t => (t.estado || 'por_hacer') === e.clave);
+          // Aquí un grupo vacío SÍ se esconde: «Hecho 0» no es un cajón donde
+          // soltar nada, es una línea que ocupa sitio para decir que no hay nada.
+          if (!suyas.length) return null;
+          return (
+            <div key={e.clave}>
+              <Grupo icono={CircleDot} titulo={e.label} cuantos={suyas.length} />
+              {suyas.slice(0, 30).map(t => (
+                <HojaPanel key={t.id} a={`/tareas?tarea=${encodeURIComponent(t.id)}`} icono={ListChecks}>
+                  {t.titulo || 'Sin título'}
+                </HojaPanel>
+              ))}
+              {suyas.length > 30 && (
+                <Link to="/tareas" className="block px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:underline">
+                  y {suyas.length - 30} más →
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// COMERCIO — el panel de GESTIÓN, y por eso es el que más se sale del molde.
+// Los otros cuatro contestan «¿qué tengo?»; éste contesta «¿qué me falta por
+// atender?», y la respuesta de arriba del todo es un número: los pedidos que
+// esperan. Un panel de comercio que enseñe tus productos y esconda los pedidos
+// sin enviar está ordenado y es inútil.
+//
+// LAS DOS LISTAS SE PIDEN POR SEPARADO y cada una puede fallar sola. Si caen las
+// ventas, tus productos se siguen viendo — y se dice cuál de las dos falta, en
+// vez de dejar el panel a medias sin explicación.
+// ---------------------------------------------------------------------------
+function PanelComercio({ onCerrar }: { onCerrar: () => void }) {
+  const productos = useLista<any>('/api/publicar/mis-productos', j => (Array.isArray(j) ? j : j?.productos ?? j?.items));
+  const ventas = useLista<any>('/api/publicar/mis-ventas', j => (Array.isArray(j) ? j : j?.ventas ?? j?.pedidos ?? j?.items));
+  const [busca, setBusca] = useState('');
+  const q = busca.trim().toLowerCase();
+
+  const mis = productos.datos.filter(p => !q || (p.nombre || p.name || '').toLowerCase().includes(q));
+  // «Pendiente» es todo lo que no está entregado ni cancelado: prefiero contar de
+  // más y que mires, a contar de menos y que se te pase un pedido.
+  const pendientes = ventas.datos.filter(v => !['entregado', 'cancelado', 'reembolsado'].includes(String(v.estado || '')));
+
+  return (
+    <>
+      <Cabecera titulo="Comercio" onCerrar={onCerrar} />
+
+      {/* LO QUE HAY QUE ATENDER, ANTES QUE LO QUE TIENES. */}
+      {Array.isArray(ventas.estado) && (
+        <Link
+          to="/comercio"
+          className={cn(
+            'mx-3 mb-2 flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors',
+            pendientes.length > 0
+              ? 'bg-amber-50 text-amber-900 hover:bg-amber-100'
+              : 'bg-slate-50 text-slate-500 hover:bg-slate-100',
+          )}
+        >
+          <span className="text-[13px] font-bold">
+            {pendientes.length > 0 ? 'Pedidos por atender' : 'Nada pendiente'}
+          </span>
+          <span className={cn('text-lg font-black', pendientes.length > 0 ? 'text-amber-700' : 'text-slate-300')}>
+            {pendientes.length}
+          </span>
+        </Link>
+      )}
+      <Estado estado={ventas.estado} que="tus ventas" onReintentar={ventas.recargar} />
+
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar en lo que vendes…" />
+      <BotonCrear a="/comercio?nuevo=1">Nuevo producto</BotonCrear>
+
+      <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Estado estado={productos.estado} que="tus productos" onReintentar={productos.recargar} />
+        {Array.isArray(productos.estado) && (
+          <div>
+            <Grupo icono={Store} titulo="Lo que vendes" cuantos={mis.length} a="/comercio" />
+            {mis.length === 0 && (
+              <p className="px-2.5 py-1 text-[11px] italic text-slate-300">
+                {q ? 'Nada con ese nombre' : 'Todavía no vendes nada'}
+              </p>
+            )}
+            {mis.map(p => (
+              <HojaPanel key={p.id} a={`/comercio?producto=${encodeURIComponent(p.id)}`} icono={Store}>
+                {p.nombre || p.name || 'Sin nombre'}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+        {Array.isArray(ventas.estado) && ventas.datos.length > 0 && (
+          <div>
+            <Grupo icono={Receipt} titulo="Últimas ventas" cuantos={ventas.datos.length} a="/comercio" />
+            {ventas.datos.slice(0, 8).map((v: any) => (
+              <HojaPanel key={v.id} a="/comercio" icono={Receipt}>
+                {v.producto_nombre || v.titulo || `Pedido ${String(v.codigo || v.id).slice(0, 8)}`}
+              </HojaPanel>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function Panel({ herramienta, onCerrar }: { herramienta: Herramienta; onCerrar: () => void }) {
   return (
     <aside
@@ -317,6 +585,9 @@ export default function Panel({ herramienta, onCerrar }: { herramienta: Herramie
     >
       {herramienta.clave === 'proyectos' && <PanelProyectos onCerrar={onCerrar} />}
       {herramienta.clave === 'paginas' && <PanelPaginas onCerrar={onCerrar} />}
+      {herramienta.clave === 'mapas' && <PanelMapas onCerrar={onCerrar} />}
+      {herramienta.clave === 'tareas' && <PanelTareas onCerrar={onCerrar} />}
+      {herramienta.clave === 'comercio' && <PanelComercio onCerrar={onCerrar} />}
     </aside>
   );
 }
