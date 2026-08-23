@@ -12,10 +12,14 @@ identificar a nadie. Lo que no cambia:
 
 | Señal | |
 |---|---|
-| Su dirección ahora mismo | `uds:/tmp/cc-socks/91908.sock` — actualizada el 2026-08-22 a las 20:53 |
+| Su dirección ahora mismo | `uds:/tmp/cc-socks/94086.sock` — actualizada el 2026-08-23 a las 13:48 |
 | Su copia de trabajo | `.claude/worktrees/dashboard`, rama `equipo/infra` |
 | Sus reservas | Salen a nombre de **`dashboard`** en `node scripts/equipo.mjs quien` |
 | Sus commits | Los de `equipo/REPARTO.md`, `CLAUDE.md` y `scripts/equipo.mjs` |
+
+**Un socket muerto no avisa: falla.** Si te contesta «no reachable», el Dashboard
+se ha reiniciado y esta línea está vieja. Responde entonces al `from=` del último
+mensaje que te llegó de él, que siempre es el bueno.
 
 **La forma más simple: responde al mensaje que te llegó de él.** El Dashboard
 escribe a todos al empezar y cada vez que cambia de nombre; su `from=` de ese
