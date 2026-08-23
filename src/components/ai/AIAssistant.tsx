@@ -497,6 +497,10 @@ export default function AIAssistant({ modo = 'panel' }: {
      *  peticiones, de las de la plataforma, o de un supuesto declarado. */
     tamanoTipico?: { entrada: number; salida: number; origen: 'tuyo' | 'plataforma' | 'supuesto'; n: number };
     niveles?: NivelModelo[];
+    /** El techo de gasto de IA de la plataforma (2026-08-23). `alcanzado` es lo
+     *  único que mira esta pantalla: si hoy no hay respuestas del modelo, se
+     *  sabe **antes** de escribir y no después de enviar. */
+    tope?: { alcanzado: boolean; motivo: 'mes' | 'dia' | null; porcentaje_mes: number; tope_mes_eur: number };
   } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
@@ -780,6 +784,15 @@ export default function AIAssistant({ modo = 'panel' }: {
   useEffect(() => {
     fetch('/api/ai/status').then(r => r.json()).then(setStatus).catch(() => setStatus(null));
   }, []);
+
+  // ══ SI HOY NO HAY IA, SE SABE ANTES DE ESCRIBIR ═══════════════════════════
+  // (2026-08-23, tope de gasto de la plataforma.) El estado viene en
+  // `/api/ai/status`. Cuando está alcanzado, el chat se queda en **Buscar**:
+  // el interruptor de IA se apaga y se dice por qué. Dejarlo encendido sería
+  // ofrecer un botón que no funciona, y descubrirlo después de escribir una
+  // pregunta es descubrirlo tarde.
+  const sinIA = !!status?.tope?.alcanzado;
+  useEffect(() => { if (sinIA) setModoEntrada('buscar'); }, [sinIA]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -1973,10 +1986,14 @@ export default function AIAssistant({ modo = 'panel' }: {
                   <button
                     key={m}
                     onClick={() => setModoEntrada(m)}
-                    title={ayuda}
+                    disabled={m === 'ia' && sinIA}
+                    title={m === 'ia' && sinIA
+                      ? 'Hoy no hay respuestas del modelo: la plataforma ha llegado a su tope de gasto. El buscador sigue funcionando.'
+                      : ayuda}
                     aria-pressed={modoEntrada === m}
                     className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold transition-colors',
-                      modoEntrada === m ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+                      m === 'ia' && sinIA ? 'text-slate-300 cursor-not-allowed line-through'
+                        : modoEntrada === m ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
                   >
                     {m === 'buscar' ? <Search className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
                     {etiqueta}
@@ -1984,9 +2001,11 @@ export default function AIAssistant({ modo = 'panel' }: {
                 ))}
               </div>
               <span className="text-[10px] text-slate-400 truncate hidden sm:inline">
-                {modoEntrada === 'buscar'
-                  ? 'Primero busco aquí dentro; solo pregunto a la IA si no hay nada.'
-                  : 'Va directo al modelo, aunque la respuesta estuviera publicada.'}
+                {sinIA
+                  ? 'Hoy sin respuestas del modelo (tope de gasto). El buscador sigue entero.'
+                  : modoEntrada === 'buscar'
+                    ? 'Primero busco aquí dentro; solo pregunto a la IA si no hay nada.'
+                    : 'Va directo al modelo, aunque la respuesta estuviera publicada.'}
               </span>
             </div>
 

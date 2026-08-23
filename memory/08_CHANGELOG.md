@@ -6070,3 +6070,68 @@ returns 204 and never surfaces in the chat. Test rows deleted, table back to 0.
 **What it will answer, in a month**: `X de Y preguntas` with its window, from
 one query. Not before: with 16 users the sample will be small, and a small
 sample said out loud is honest — presented as if it were big, it is not.
+
+### 2026-08-23 — A ceiling on what the platform can spend on AI (prog8)
+
+From the security board: **the AI chat has no spending ceiling**. It answers
+**without a session**, so a loop from outside does not show up as usage — it
+shows up on the bill, a month later.
+
+**It is a ceiling for the platform, not for anyone.** Eugenio decided free
+questions have no per-person limit and that is untouched: this does not look at
+who is asking.
+
+**The numbers are measured, not picked** (`src/server/ai/tope.ts` carries the
+reasoning): the platform's entire AI spend for August 2026 was 0,74 €, and an
+answer from the fast model costs 0,003–0,006 €. So **20 €/month** — about 27×
+the real peak, which a normal month does not touch even at twenty times today's
+use, and which a one-per-second loop exhausts in an hour or two. Not less,
+because a cap that trips on normal use teaches people to raise it and by the
+third time it is gone; not more, because past that the margin stops protecting
+and only makes the worst case dearer.
+
+**And 2 €/day, which is what keeps the degradation a mode instead of a month.**
+With a monthly cap alone, that one-hour loop takes the month and leaves the chat
+without a model for the other 29 days. A normal day is 0,025 €, so 2 € is eighty
+normal days.
+
+- **Three doors, not one**: the chat, `POST /api/ai/generar-imagen`, and the
+  three AI routes in `documentos.ts` (document, presentation, improve a block).
+  A cap on one of three doors is a sign, not a cap.
+- **Checked before the call, never during**: cutting mid-answer would spend the
+  money and still not answer. In the chat it is checked before the conversation
+  row is even created — otherwise there would be conversations with a question
+  and no answer.
+- **It degrades, it does not fall**: the chat replies **200 with a normal
+  message**, not an error, saying the search still works and costs nothing.
+  `/api/ai/status` carries the state, so the panel starts in *Buscar* with the
+  IA switch off and the reason written — knowing after you typed is knowing
+  late.
+- **If the database cannot be read, nothing is cut.** A failed read is not
+  evidence of spending, and turning it into "no AI today" would make a small
+  fault into an outage.
+- **Counted without a query per message**: the sum is read once a minute and
+  charges are added in memory in between (`apuntarGasto`), so the cut is
+  accurate to the cent. A restart re-reads everything from the database.
+- **Notice at 80 %**, once a month, to administrators only, checked **in the
+  database** and not in a variable: here the server restarts several times a
+  day and a bell that repeats teaches people to ignore it.
+- **Visible**: `/vision` → Gasto shows «1,89 € de 20,00 €» with a bar that goes
+  amber at 80 % and red when reached, and `?pestana=gasto` now opens that tab
+  (it only understood `economia`, so the notice would have landed on the wrong
+  one).
+
+**A hole named and not hidden**: image charges are written with `cost_cents` =
+0, so generating images costs real money at Gemini and **does not move the
+counter**. The cap stops further images once it has been reached by another
+route, but images cannot make it trip. Pricing the image belongs to whoever owns
+the model catalogue; it is written next to the check, not in a document nobody
+opens. **The cap protects the chat and the documents; images do not add up yet.**
+
+Verified on 3008 with `TOPE_IA_EUR_MES=1` against 1,89 € already spent:
+`/api/ai/status` reports 189 % and `alcanzado`; the chat answers with the
+message and **no charge and no conversation row is created**; the search keeps
+working in the same panel; the IA switch is disabled with its explanation. With
+`2,30 €` (82 %) the notice is written **once** for two consecutive calls, keyed
+by month, and reads «1,89 € de 2,30 € este mes». Test rows deleted, `.env`
+restored, `tsc` clean.
