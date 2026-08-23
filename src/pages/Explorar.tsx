@@ -142,7 +142,27 @@ export default function Explorar() {
   const [busqueda, setBusqueda] = useState(() => searchParams.get('q') || '');
   const [tipo, setTipo] = useState<string>('Todo');
   /** El objetivo elegido en la tira de arriba, o null para «Todos». */
-  const [objetivo, setObjetivo] = useState<string | null>(null);
+  /*
+   * EL TEMA VIENE DE LA DIRECCIÓN (2026-08-24). Eugenio: «la funcionalidad del
+   * menú izquierdo es que el contenido que se muestra en pantalla esté
+   * relacionado con la temática… por ejemplo de "Energía" te muestra todo lo
+   * relacionado con energía en un grid».
+   *
+   * El filtro por objetivo ya existía aquí —son las pastillas de arriba— pero
+   * vivía sólo en la memoria de esta pantalla, así que **nadie de fuera podía
+   * pedirlo**. Bastaba con leerlo de `?objetivo=` para que el menú de Explorar,
+   * un enlace compartido o el buscador puedan dejar esta rejilla ya filtrada.
+   *
+   * Y se sincroniza en los dos sentidos: pulsar una pastilla cambia la
+   * dirección, así que lo que estás viendo se puede copiar y mandar. Un filtro
+   * que no cabe en una URL es un filtro que no se puede enseñar a nadie.
+   */
+  const objetivo = searchParams.get('objetivo');
+  const setObjetivo = (id: string | null) => {
+    const q = new URLSearchParams(searchParams);
+    if (id) q.set('objetivo', id); else q.delete('objetivo');
+    setSearchParams(q, { replace: true });
+  };
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   const [verPapelera, setVerPapelera] = useState(false);
@@ -267,6 +287,28 @@ export default function Explorar() {
     if (objetivo) {
       const o = OBJETIVOS.find(x => x.id === objetivo);
       if (o) lista = lista.filter(i => hablaDe(`${i.titulo} ${(i as any).resumen || ''} ${(i as any).descripcion || ''}`, o));
+    }
+    /*
+     * CON UN TEMA ELEGIDO, MANDA LA POPULARIDAD (2026-08-24).
+     *
+     * Eugenio: «que cuando hagas click en uno de esos temas te abra
+     * publicaciones y contenido ordenado de mayor a menor visualizaciones y
+     * likes relacionado con ese tema».
+     *
+     * Y sólo entonces. Sin tema elegido esta lista es «lo último», que es lo
+     * que quieres al entrar: enterarte de lo que ha pasado. Con un tema
+     * elegido la pregunta cambia a «¿qué hay de bueno sobre energía?», y ahí lo
+     * nuevo importa menos que lo que le ha servido a alguien.
+     *
+     * Un apoyo pesa 3 y una vista 1. No es una fórmula fina, es una decisión:
+     * dar «me gusta» cuesta un gesto y ver algo no cuesta nada, así que
+     * contarlos igual dejaría que un enlace muy visitado y que no le gustó a
+     * nadie ganara a algo que ayudó a diez personas. El número está aquí, en
+     * una línea, para que se pueda discutir.
+     */
+    if (objetivo) {
+      const peso = (i: any) => (Number(i.apoyos) || 0) * 3 + (Number(i.vistas) || 0);
+      lista = [...lista].sort((a, b) => peso(b) - peso(a));
     }
     return lista;
   }, [items, tipo, carpetaActiva, busqueda, objetivo]);
@@ -566,7 +608,7 @@ export default function Explorar() {
                     {OBJETIVOS.map(o => (
                     <button
                     key={o.id}
-                    onClick={() => setObjetivo(v => (v === o.id ? null : o.id))}
+                    onClick={() => setObjetivo(objetivo === o.id ? null : o.id)}
                     title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
                     className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
                     objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
