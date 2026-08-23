@@ -77,6 +77,12 @@
       "ruta": "src/components/ventanas/Navegador.tsx",
       "motivo": "fase 1: ligero por defecto y render de una vez, sin lag",
       "desde": "2026-08-23T12:14:49.408Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/navegadorRemoto.ts",
+      "motivo": "fase 1: render de una vez en vez de retransmitir",
+      "desde": "2026-08-23T12:14:53.192Z"
     }
   ]
 }
