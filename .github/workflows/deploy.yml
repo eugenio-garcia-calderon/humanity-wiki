@@ -55,6 +55,25 @@ jobs:
               sed -i '/^TOGETHER_API_KEY=/d' .env.production
               echo "TOGETHER_API_KEY=${{ secrets.TOGETHER_API_KEY }}" >> .env.production
             fi
+            # LA LLAVE MAESTRA de los permisos de Google de cada persona
+            # (2026-08-23). Estaba puesta como secreto en GitHub y NO LLEGABA AL
+            # SERVIDOR: comprobado en las dos puntas — el secreto existía, el
+            # workflow no lo nombraba, y `grep -c "^CLAVE_MAESTRA=" ` en el
+            # `.env.production` de producción daba 0. La función de conectar
+            # cuentas se desplegó sin su llave.
+            #
+            # PONER UN SECRETO EN GITHUB NO HACE NADA POR SÍ SOLO: este fichero
+            # solo escribe las variables que nombra. Quien añada un secreto
+            # nuevo tiene que añadir también su línea aquí, y comprobarlo EN EL
+            # SERVIDOR, no en la pantalla de GitHub.
+            #
+            # Y ojo con rotarla: es la llave con la que se cifran los permisos
+            # de Google. Si cambia, todo el mundo tiene que volver a conectar su
+            # cuenta. No es una clave de API cualquiera.
+            if [ -n "${{ secrets.CLAVE_MAESTRA }}" ]; then
+              sed -i '/^CLAVE_MAESTRA=/d' .env.production
+              echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
+            fi
             # Las llaves de Cloudflare R2, donde viven las copias de seguridad
             # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
             # camino que la de Together: el secreto vive en GitHub, nunca en el
