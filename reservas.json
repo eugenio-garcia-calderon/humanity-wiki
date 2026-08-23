@@ -17,24 +17,6 @@
       "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
       "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
       "desde": "2026-08-23T13:50:52.975Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "prog7: F5 tipo vuelve_stock + changelog (1 min)",
-      "desde": "2026-08-23T14:33:02.647Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/components/social/Campana.tsx",
-      "motivo": "prog7: F5 tipo vuelve_stock + changelog (1 min)",
-      "desde": "2026-08-23T14:33:02.647Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog7: F5 tipo vuelve_stock + changelog (1 min)",
-      "desde": "2026-08-23T14:33:02.647Z"
     }
   ]
 }
