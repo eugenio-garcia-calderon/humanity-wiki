@@ -9,7 +9,6 @@ import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
-import PublicationPopup from '../knowledge/PublicationPopup';
 import { cn } from '../../utils/cn';
 import Markdown from './Markdown';
 
@@ -455,7 +454,6 @@ export default function AIAssistant({ modo = 'panel' }: {
   // comportaba distinto. Ahora es siempre el panel lateral, con su botón
   // flotante abajo a la derecha. La barra de abajo desaparece: su micro y su
   // «+» viven dentro del panel.
-  const mode = 'dock' as const;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -586,8 +584,6 @@ export default function AIAssistant({ modo = 'panel' }: {
   const [modoEntrada, setModoEntrada] = useState<'buscar' | 'ia'>(
     () => (localStorage.getItem('chat:modo') === 'ia' ? 'ia' : 'buscar'));
   useEffect(() => { localStorage.setItem('chat:modo', modoEntrada); }, [modoEntrada]);
-  // Pop-up central: la publicación real que responde a la pregunta.
-  const [popupPub, setPopupPub] = useState<{ publication: any; graphs: any[] } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1200,27 +1196,19 @@ export default function AIAssistant({ modo = 'panel' }: {
         return;
       }
 
-      if (mode !== 'dock' && !pendingAttachment && !wantsToCreate) {
-        try {
-          const [gr, pr] = await Promise.all([
-            fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
-            fetch(`/api/publications/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
-          ]);
-          const g = gr.confident && gr.matches?.[0]?.slug ? gr.matches[0] : null;
-          const p = pr.confident && pr.matches?.[0]?.publication ? pr.matches[0] : null;
-          const isQuestion = text.includes('?') || /\bes cierto\b/i.test(text);
-          if (p && (isQuestion || !g || p.score > g.score)) {
-            setMessages(m => [...m, { role: 'assistant', content: `Esto es lo más relevante que hay publicado sobre tu pregunta: «${p.publication.title || 'publicación'}» de ${p.publication.author_name || 'la comunidad'}.` }]);
-            setPopupPub(p);
-            return;
-          }
-          if (g) {
-            setMessages(m => [...m, { role: 'assistant', content: `Abriendo el grafo de conocimiento «${g.title}».` }]);
-            navigate(`/esquemas/${g.slug}`);
-            return;
-          }
-        } catch { /* si falla la resolución, se sigue con la IA */ }
-      }
+      // ══ AQUÍ HABÍA UN ATAJO QUE NO SE EJECUTABA NUNCA (retirado 2026-08-23)
+      // Resolvía la frase contra `/api/graphs/resolve` y
+      // `/api/publications/resolve` para abrir un grafo o una publicación sin
+      // gastar IA. Buena idea; sólo que estaba tras `if (mode !== 'dock')` y
+      // `mode` es la constante `'dock'` desde que hay un único asistente: la
+      // condición era `false` en todos los casos. Y su publicación se guardaba
+      // en un estado que **no se pintaba en ninguna parte**, así que ni
+      // ejecutándose habría enseñado nada.
+      //
+      // No se revive porque ya no hace falta: lo que buscaba —contestar desde
+      // la plataforma antes que desde el modelo— es lo que hace ahora el
+      // buscador primero, unas líneas más arriba, y ése sí se ejecuta.
+
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
