@@ -161,12 +161,6 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "marcar como se contesto cada pregunta",
       "desde": "2026-08-23T13:31:39.836Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog8: changelog de las cinco fases",
-      "desde": "2026-08-23T13:38:19.563Z"
     }
   ]
 }
