@@ -77,6 +77,12 @@
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "borrador/publicado en productos (fase del plan de comercio)",
       "desde": "2026-08-23T00:29:47.823Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/CrearProducto.tsx",
+      "motivo": "borrador/publicado en productos (fase del plan de comercio)",
+      "desde": "2026-08-23T00:29:51.520Z"
     }
   ]
 }
