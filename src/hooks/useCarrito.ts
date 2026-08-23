@@ -61,6 +61,24 @@ function leer(tienda: string): LineaCarrito[] {
  *  entera de lo que acaba de pulsar quien está mirando. */
 const EVENTO = 'humanity:carrito-cambiado';
 
+// SINCRONIZAR CON EL SERVIDOR (2026-08-23, carrito abandonado): si hay sesión,
+// cada cambio se guarda también en el servidor (con un pequeño retraso para
+// no mandar uno por pulsación) — así la cesta se recupera en otro dispositivo
+// y el servidor puede avisar a las 24 h. Sin sesión el servidor contesta 401
+// y se deja de intentar en esta página: a nadie anónimo se le persigue.
+let sinSesion = false;
+const temporizadores = new Map<string, number>();
+function sincronizar(tienda: string, lineas: LineaCarrito[]) {
+  if (sinSesion || typeof fetch === 'undefined') return;
+  window.clearTimeout(temporizadores.get(tienda));
+  temporizadores.set(tienda, window.setTimeout(() => {
+    fetch('/api/publicar/cesta', {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tienda, lineas }),
+    }).then(r => { if (r.status === 401) sinSesion = true; }).catch(() => {});
+  }, 800));
+}
+
 export function useCarrito(tienda: string) {
   const [lineas, setLineas] = useState<LineaCarrito[]>(() => leer(tienda));
 
@@ -78,6 +96,22 @@ export function useCarrito(tienda: string) {
   const guardar = useCallback((nuevas: LineaCarrito[]) => {
     try { localStorage.setItem(clave(tienda), JSON.stringify(nuevas)); } catch { /* modo privado */ }
     window.dispatchEvent(new Event(EVENTO));
+    sincronizar(tienda, nuevas);
+  }, [tienda]);
+
+  // Recuperar la cesta guardada si la local está vacía (otro dispositivo, o
+  // un navegador limpio). Una vez por tienda y carga de página.
+  useEffect(() => {
+    if (sinSesion || leer(tienda).length > 0) return;
+    fetch(`/api/publicar/cesta?tienda=${encodeURIComponent(tienda)}`, { credentials: 'include' })
+      .then(async r => {
+        if (r.status === 401) { sinSesion = true; return; }
+        const j = await r.json().catch(() => null);
+        if (Array.isArray(j?.lineas) && j.lineas.length && leer(tienda).length === 0) {
+          try { localStorage.setItem(clave(tienda), JSON.stringify(j.lineas)); } catch { /* modo privado */ }
+          window.dispatchEvent(new Event(EVENTO));
+        }
+      }).catch(() => {});
   }, [tienda]);
 
   const anadir = useCallback((linea: LineaCarrito) => {

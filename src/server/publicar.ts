@@ -67,6 +67,143 @@ export function motivoInvalido(handle: string): string | null {
 }
 
 export function registerPublicarRoutes(app: Express, db: any) {
+  // ==========================================================================
+  // CARRITO ABANDONADO Y FAVORITOS (2026-08-23, comercio F3)
+  // ==========================================================================
+  const dominioPublico = () => process.env.DOMINIO_PUBLICO || 'humanity.wiki';
+
+  /** PUT /api/publicar/cesta { tienda, lineas } — guardar la cesta de quien tiene sesión (vacía = borrarla). */
+  app.put('/api/publicar/cesta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión no se guarda la cesta.' });
+      const tienda = String(req.body?.tienda || '').trim().toLowerCase().slice(0, 80);
+      if (!tienda) return res.status(400).json({ error: 'Falta la tienda.' });
+      const lineas = Array.isArray(req.body?.lineas) ? req.body.lineas.slice(0, 20).map((l: any) => ({
+        producto_id: String(l?.producto_id || ''), cantidad: Math.max(1, Math.min(99, Number(l?.cantidad) || 1)),
+        nombre: String(l?.nombre || '').slice(0, 200), precio_centimos: Number(l?.precio_centimos) || 0,
+        ...(l?.variante_id ? { variante_id: String(l.variante_id), variante_nombre: String(l.variante_nombre || '').slice(0, 120) } : {}),
+      })).filter((l: any) => l.producto_id) : [];
+      if (!lineas.length) {
+        await db.execute(sql`DELETE FROM cestas_guardadas WHERE user_id = ${req.user.id} AND tienda = ${tienda}`);
+        return res.json({ guardada: false, vacia: true });
+      }
+      // Cambiar la cesta reinicia el aviso: si vuelve a tocarla, el reloj de
+      // las 24 h empieza de nuevo y el aviso puede repetirse más adelante.
+      await db.execute(sql`
+        INSERT INTO cestas_guardadas (user_id, tienda, lineas, updated_at, avisada_at)
+        VALUES (${req.user.id}, ${tienda}, ${JSON.stringify(lineas)}::jsonb, now(), NULL)
+        ON CONFLICT (user_id, tienda) DO UPDATE SET lineas = EXCLUDED.lineas, updated_at = now(), avisada_at = NULL
+      `);
+      res.json({ guardada: true, lineas: lineas.length });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicar/cesta?tienda= — la cesta guardada, para recuperarla en otro dispositivo. */
+  app.get('/api/publicar/cesta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const tienda = String(req.query.tienda || '').trim().toLowerCase();
+      const r = await db.execute(sql`SELECT lineas, updated_at FROM cestas_guardadas WHERE user_id = ${req.user.id} AND tienda = ${tienda}`);
+      const f = r.rows[0] as any;
+      res.json({ lineas: f?.lineas || [], updated_at: f?.updated_at || null });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicar/favoritos — mis favoritos (ids y ficha breve). */
+  app.get('/api/publicar/favoritos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const r = await db.execute(sql`
+        SELECT f.producto_id, f.precio_centimos AS precio_guardado, f.created_at,
+               p.name, p.price_cents, p.currency, p.images, p.status, p.archived_at, p.created_by,
+               u.handle AS tienda
+        FROM favoritos_productos f
+        LEFT JOIN products p ON p.id = f.producto_id
+        LEFT JOIN users u ON u.id = p.created_by
+        WHERE f.user_id = ${req.user.id}
+        ORDER BY f.created_at DESC
+      `);
+      res.json({
+        ids: (r.rows as any[]).map(x => x.producto_id),
+        favoritos: (r.rows as any[]).map(x => ({
+          producto_id: x.producto_id, nombre: x.name, precio_centimos: x.price_cents, precio_guardado: x.precio_guardado,
+          moneda: x.currency || 'EUR', imagen: Array.isArray(x.images) ? x.images[0] || null : null,
+          disponible: !!x.name && !x.archived_at && x.status !== 'borrador',
+          tienda: x.tienda || null, url: x.tienda ? `https://${x.tienda}.${dominioPublico()}/producto/${encodeURIComponent(x.producto_id)}` : null,
+          guardado_en: x.created_at,
+        })),
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** PUT /api/publicar/favoritos/:id — guardar; DELETE — quitar. */
+  app.put('/api/publicar/favoritos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra para guardar favoritos.' });
+      const p = (await db.execute(sql`SELECT id, price_cents FROM products WHERE id = ${String(req.params.id)} AND archived_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+      await db.execute(sql`
+        INSERT INTO favoritos_productos (user_id, producto_id, precio_centimos) VALUES (${req.user.id}, ${p.id}, ${p.price_cents ?? null})
+        ON CONFLICT (user_id, producto_id) DO NOTHING
+      `);
+      res.json({ favorito: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.delete('/api/publicar/favoritos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      await db.execute(sql`DELETE FROM favoritos_productos WHERE user_id = ${req.user.id} AND producto_id = ${String(req.params.id)}`);
+      res.json({ favorito: false });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // Los dos barridos, cada hora (y a los 3 min de arrancar): cestas olvidadas
+  // (24 h sin tocar, una vez por cesta) y bajadas de precio de favoritos (una
+  // vez por precio). No escriben nada salvo el aviso.
+  const barridoComercio = async () => {
+    const olvidadas = await db.execute(sql`
+      SELECT c.user_id, c.tienda, c.lineas FROM cestas_guardadas c JOIN users u ON u.id = c.user_id
+      WHERE jsonb_array_length(c.lineas) > 0 AND c.avisada_at IS NULL AND c.updated_at < now() - interval '24 hours'
+        AND u.archived_at IS NULL
+      LIMIT 200
+    `);
+    for (const c of olvidadas.rows as any[]) {
+      const n = (c.lineas as any[]).reduce((k, l) => k + (Number(l.cantidad) || 1), 0);
+      const primera = (c.lineas as any[])[0]?.nombre || 'algo';
+      await avisar(db, {
+        paraQuien: c.user_id, dePartede: null, tipo: 'cesta_olvidada', entidadTipo: 'cestas', entidadId: `${c.tienda}:${Date.now()}`,
+        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en la cesta de ${c.tienda}. Sigue ahí.`, tienda: c.tienda, destino: `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
+      });
+      await db.execute(sql`UPDATE cestas_guardadas SET avisada_at = now() WHERE user_id = ${c.user_id} AND tienda = ${c.tienda}`);
+    }
+    const bajadas = await db.execute(sql`
+      SELECT f.user_id, f.producto_id, f.precio_centimos AS guardado, p.price_cents AS actual, p.name, u.handle AS tienda
+      FROM favoritos_productos f JOIN products p ON p.id = f.producto_id LEFT JOIN users u ON u.id = p.created_by
+      WHERE f.precio_centimos IS NOT NULL AND p.price_cents IS NOT NULL AND p.price_cents < f.precio_centimos
+        AND p.archived_at IS NULL AND p.status <> 'borrador'
+      LIMIT 500
+    `);
+    for (const b of bajadas.rows as any[]) {
+      const fmt = (c: number) => (c / 100).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+      await avisar(db, {
+        paraQuien: b.user_id, dePartede: null, tipo: 'precio_bajado', entidadTipo: 'favoritos', entidadId: `${b.producto_id}:${b.actual}`,
+        datos: { texto: `${b.name} ha bajado de ${fmt(Number(b.guardado))} a ${fmt(Number(b.actual))}.`, producto_id: b.producto_id, destino: b.tienda ? `https://${b.tienda}.${dominioPublico()}/producto/${encodeURIComponent(b.producto_id)}` : '/mercado' },
+      });
+      await db.execute(sql`UPDATE favoritos_productos SET precio_centimos = ${Number(b.actual)} WHERE user_id = ${b.user_id} AND producto_id = ${b.producto_id}`);
+    }
+    if (olvidadas.rows.length || bajadas.rows.length) console.log(`[comercio] barrido: ${olvidadas.rows.length} cestas olvidadas avisadas, ${bajadas.rows.length} bajadas de precio avisadas.`);
+    return { cestas_olvidadas_avisadas: olvidadas.rows.length, bajadas_de_precio_avisadas: bajadas.rows.length };
+  };
+  /** POST /api/admin/comercio/barrido — pasar el barrido ahora (administrador). */
+  app.post('/api/admin/comercio/barrido', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      res.json(await barridoComercio());
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  const ticComercio = () => barridoComercio().catch(e => console.error('[comercio] barrido fallido:', e.message));
+  setTimeout(ticComercio, 3 * 60 * 1000);
+  setInterval(ticComercio, 60 * 60 * 1000);
+
 
   const exigeSesion = (req: Request, res: Response): boolean => {
     if (!req.user) { res.status(401).json({ error: 'Debes iniciar sesión.' }); return false; }
@@ -445,7 +582,15 @@ export function registerPublicarRoutes(app: Express, db: any) {
         `),
         db.execute(sql`SELECT count(*)::int AS n FROM pedidos WHERE vendedor_user_id = ${uid} AND estado = 'pagado'`),
       ]);
+      // Cestas a medias (2026-08-23): cuántas personas con sesión dejaron algo
+      // en la cesta de esta tienda en los últimos 30 días sin comprarlo.
+      const handleRow = (await db.execute(sql`SELECT handle FROM users WHERE id = ${uid}`)).rows[0] as any;
+      const cestas = handleRow?.handle ? (await db.execute(sql`
+        SELECT count(*)::int AS n FROM cestas_guardadas WHERE tienda = ${handleRow.handle} AND jsonb_array_length(lineas) > 0 AND updated_at > now() - interval '30 days'
+      `)).rows[0] as any : null;
+      const cestasAMedias = Number(cestas?.n || 0);
       res.json({
+        cestas_a_medias: cestasAMedias,
         mes: mes.rows[0],
         serie: serie.rows,
         mas_vendido: top.rows,

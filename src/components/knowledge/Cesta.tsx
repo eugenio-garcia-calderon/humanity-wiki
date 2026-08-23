@@ -160,7 +160,8 @@ function CompraHecha({ tienda }: { tienda: string }) {
 
 export default function Cesta({ tienda }: { tienda: string }) {
   const { lineas, unidades, subtotal, cambiar, quitar, vaciar } = useCarrito(tienda);
-  const [abierta, setAbierta] = useState(false);
+  // `?cesta=abrir` la abre al cargar: es adonde lleva el aviso «tu cesta sigue ahí».
+  const [abierta, setAbierta] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('cesta') === 'abrir');
   const [pagando, setPagando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // PUNTOS EN LA CESTA (2026-08-22). El servidor dice si está activo y cuánto

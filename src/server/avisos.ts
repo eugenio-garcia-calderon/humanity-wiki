@@ -42,7 +42,9 @@ export type TipoAviso =
   // Comercio (prog7, 2026-08-23): el vendedor se entera de que ha vendido y
   // el comprador de que su pedido se mueve. Hasta hoy, ninguno de los dos.
   | 'pedido_nuevo'        // te han comprado algo
-  | 'pedido_estado';      // tu pedido ha cambiado de estado (enviado, entregado…)
+  | 'pedido_estado'       // tu pedido ha cambiado de estado (enviado, entregado…)
+  | 'cesta_olvidada'      // dejaste cosas en una cesta hace 24 h
+  | 'precio_bajado';      // un favorito tuyo ha bajado de precio
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos
