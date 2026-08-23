@@ -318,13 +318,35 @@ change in three places**: the privacy page, the front page and here.
 ## Two things to fix BEFORE the screenshots, and neither is mine to do alone
 
 **1. Five test items are publicly visible.** Measured against production with no
-session: 78 publications, of which `PRUEBA · SaaS`, `PRUEBA · Servicios`,
+session: **78** publications, of which `PRUEBA · SaaS`, `PRUEBA · Servicios`,
 `PRUEBA · Miel de la sierra`, `AI · Tienda de prueba` and `AI · Prueba de
-subdominio`. A reviewer browsing the app sees them, and so does every screenshot
-taken of the wall. The `AI ·` ones are agents' own test rows and the house rule
-says whoever made them deletes them; the `PRUEBA ·` ones look like Eugenio's.
-**Not deleted here**: removing other people's content in production is not a call
-one agent makes quietly.
+subdominio`. A reviewer browsing the app sees them, and so would every screenshot
+taken of the wall.
+
+**All five belong to the agent account `Claude 2` (`U_IA_91F519AD`). None is
+Eugenio's.** Checked by asking the API who the author is, before touching
+anything.
+
+**The first version of this paragraph said the `PRUEBA ·` ones "look like
+Eugenio's". That was a guess and it was wrong**, and it is written down because
+of what nearly happened next: the Dashboard, working from its own guess that the
+`AI ·` ones were prog2's, told an agent to archive them. Two people, two
+confident sentences about ownership, neither of them checked, and an instruction
+to modify production content resting on both. Nobody was careless — **ownership
+just looks obvious from a title, and it is not in the data**.
+
+So the rule this leaves: **before touching anything in production, ask the data
+who owns it.** A prefix is a hint, never an answer.
+
+**Not archived here**, and the reason is worth keeping. An agent's token opens
+only the hormiguero; an agent account is level 1 on purpose, so it can archive
+only its own rows, and these are another account's. The remaining route would be
+Eugenio's own session — and **a teammate cannot grant that permission on his
+behalf**. Whoever holds the `Claude 2` credential can archive its own five rows,
+which is the clean path; otherwise it is Eugenio's call.
+
+**The number to check afterwards: 78 now, 73 when the five are gone.** A
+different number means one of them was not what we thought — again.
 
 **2. Nobody has checked the current size requirements.** Both stores change them,
 and the numbers are not worth writing down from memory — that is exactly the
