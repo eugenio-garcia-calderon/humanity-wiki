@@ -161,6 +161,62 @@ export async function pagarConPuntos(db: any, compradorId: string, vendedorId: s
 }
 
 /**
+ * DEVOLVER LO PAGADO CON PUNTOS (2026-08-23). Deshace `pagarConPuntos` con
+ * apuntes contrarios sobre el MISMO pedido: el vendedor devuelve su neto, la
+ * plataforma su comisión y el comprador recupera el total. Todo o nada, en
+ * una transacción con las filas cerradas en orden de id. Si el vendedor (o la
+ * plataforma) ya no tiene saldo, no se devuelve a medias: se devuelve `false`
+ * con el motivo y no se toca nada. Repetirla es inocuo: si el pedido ya tiene
+ * apuntes de devolución, no hace nada y dice que ya estaba.
+ */
+export async function devolverPuntos(db: any, pedidoId: string): Promise<{ ok: boolean; motivo?: string; puntos?: number }> {
+  const ped = (await db.execute(sql`
+    SELECT id, comprador_user_id, vendedor_user_id, puntos_usados::float AS puntos FROM pedidos WHERE id = ${pedidoId}
+  `)).rows[0] as any;
+  if (!ped) return { ok: false, motivo: 'Ese pedido no existe.' };
+  const total = Math.round(Number(ped.puntos || 0) * 100) / 100;
+  if (total <= 0) return { ok: true, puntos: 0 };
+  if (!ped.comprador_user_id || !ped.vendedor_user_id) return { ok: false, motivo: 'El pedido no tiene comprador o vendedor con cuenta: no se puede devolver en puntos.' };
+  // Lo que cada parte recibió, leído del libro (la verdad), no recalculado.
+  const apuntes = (await db.execute(sql`
+    SELECT user_id, motivo, cantidad::float AS cantidad FROM movimientos_puntos
+    WHERE entidad_tipo = 'pedidos' AND entidad_id = ${pedidoId}
+  `)).rows as any[];
+  if (apuntes.some(a => a.motivo === 'devolucion_puntos')) return { ok: true, puntos: total, motivo: 'Ya estaba devuelto.' };
+  const neto = apuntes.filter(a => a.motivo === 'venta_en_puntos').reduce((n, a) => n + a.cantidad, 0);
+  const comision = apuntes.filter(a => a.motivo === 'comision_puntos').reduce((n, a) => n + a.cantidad, 0);
+  const netoR = Math.round(neto * 100) / 100;
+  const comR = Math.round(comision * 100) / 100;
+  let resultado: { ok: boolean; motivo?: string; puntos?: number } = { ok: false, motivo: 'No se ha podido devolver.' };
+  await db.transaction(async (tx: any) => {
+    await tx.execute(sql`SELECT id FROM users WHERE id IN (${ped.comprador_user_id}, ${ped.vendedor_user_id}, ${CUENTA_PLATAFORMA}) ORDER BY id FOR UPDATE`);
+    const v = await tx.execute(sql`UPDATE users SET puntos = puntos - ${netoR} WHERE id = ${ped.vendedor_user_id} AND puntos >= ${netoR} RETURNING id`);
+    if (!v.rows.length) { resultado = { ok: false, motivo: `No tienes saldo suficiente para devolver los ${netoR.toLocaleString('es-ES')} puntos que cobraste.` }; throw new Error('SIN_SALDO_VENDEDOR'); }
+    if (comR > 0) {
+      const p = await tx.execute(sql`UPDATE users SET puntos = puntos - ${comR} WHERE id = ${CUENTA_PLATAFORMA} AND puntos >= ${comR} RETURNING id`);
+      if (!p.rows.length) { resultado = { ok: false, motivo: 'La cuenta de la plataforma no puede devolver su comisión ahora mismo; avisa al equipo.' }; throw new Error('SIN_SALDO_PLATAFORMA'); }
+    }
+    await tx.execute(sql`UPDATE users SET puntos = puntos + ${total} WHERE id = ${ped.comprador_user_id}`);
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+      VALUES (${newId()}, ${ped.vendedor_user_id}, ${-netoR}, 'devolucion_puntos', 'pedidos', ${pedidoId})
+    `);
+    if (comR > 0) {
+      await tx.execute(sql`
+        INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+        VALUES (${newId()}, ${CUENTA_PLATAFORMA}, ${-comR}, 'devolucion_puntos', 'pedidos', ${pedidoId})
+      `);
+    }
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+      VALUES (${newId()}, ${ped.comprador_user_id}, ${total}, 'devolucion_puntos', 'pedidos', ${pedidoId})
+    `);
+    resultado = { ok: true, puntos: total };
+  }).catch((e: any) => { if (!String(e?.message || '').startsWith('SIN_SALDO')) throw e; });
+  return resultado;
+}
+
+/**
  * Solo el justificante del regalo de bienvenida — el saldo de 100 ya lo puso
  * el DEFAULT de `users.puntos` al crear la fila (migración 0026), así que
  * esto NO toca el saldo: si lo hiciera, lo duplicaría. Se llama una vez,
