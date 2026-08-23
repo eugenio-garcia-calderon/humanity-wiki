@@ -11,6 +11,12 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "reparto: UNIQUE por mes y persona + boton de admin en Vision (sugerencia prog6)",
       "desde": "2026-08-23T11:44:07.550Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "guardian delante de ejecutar reparto + 23505 -> 409",
+      "desde": "2026-08-23T11:44:40.637Z"
     }
   ]
 }
