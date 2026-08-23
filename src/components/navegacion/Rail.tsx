@@ -82,7 +82,10 @@ export const PERSONALES: Herramienta[] = [
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
 ];
 
-export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false }: {
+export default function Rail({
+  abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
+  items, titulo = 'Red de Conocimiento',
+}: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
   onElegir: (h: Herramienta) => void;
@@ -112,6 +115,21 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
    * espejada. Dos raíles serían dos sitios donde arreglar el mismo fallo.
    */
   ladoDerecho?: boolean;
+  /**
+   * QUÉ LISTA PINTA (2026-08-23). Por defecto las herramientas —el raíl de la
+   * derecha—. «Explorar» le pasa los catorce objetivos.
+   *
+   * Eugenio: «haz que el menú de la izquierda tenga también ese fondo negro…
+   * y así tenemos como en un espejo ambos menús igual de diseñados, solo que
+   * uno está a la izquierda y otro a la derecha».
+   *
+   * ES EL MISMO COMPONENTE, no dos parecidos. Un segundo raíl «igual pero para
+   * objetivos» sería igual el día que se escribe y distinto al mes siguiente:
+   * la primera corrección de sombra, de ancho o de accesibilidad entraría en
+   * uno solo, y ahí el espejo deja de serlo.
+   */
+  items?: Herramienta[];
+  titulo?: string;
 }) {
   const navigate = useNavigate();
 
@@ -240,7 +258,7 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
               'overflow-hidden whitespace-nowrap text-[13px] font-black transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
             )}>
-              Red de Conocimiento
+              {titulo}
             </span>
           </button>
 
@@ -267,9 +285,12 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
 
         <div className="my-1 h-px shrink-0 bg-slate-800" />
 
-        {HERRAMIENTAS.map(boton)}
-        <div className="my-1 h-px shrink-0 bg-slate-800" />
-        {PERSONALES.map(boton)}
+        {(items ?? HERRAMIENTAS).map(boton)}
+        {/* El separador y lo personal sólo en el raíl de las herramientas: el
+            de Explorar es una sola lista de catorce y una raya ahí no separa
+            nada. */}
+        {!items && <div className="my-1 h-px shrink-0 bg-slate-800" />}
+        {!items && PERSONALES.map(boton)}
       </nav>
     </div>
   );
