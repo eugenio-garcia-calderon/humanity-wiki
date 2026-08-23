@@ -10,7 +10,22 @@ type Mode = 'login' | 'register' | 'forgot';
 // escritas en el propio código del cliente; ahora cualquiera puede registrarse
 // (nivel 1) y la verificación la hace el servidor.
 export default function Login() {
-  const [mode, setMode] = useState<Mode>('login');
+  /*
+   * `?crear=1` ABRE DIRECTAMENTE «CREAR CUENTA» (2026-08-23).
+   *
+   * La portada de quien no tiene cuenta tiene UN botón y dice «Crear cuenta».
+   * Sin esto lo llevaba al formulario de ENTRAR, con su correo y su contraseña
+   * pidiéndole algo que todavía no tiene, y un enlace pequeño abajo para
+   * corregir el error de la pantalla anterior. Un botón que promete una cosa y
+   * abre otra es lo que enseña a no leer los botones.
+   *
+   * Se lee una sola vez, al montar: si se leyera en cada render, cambiar a
+   * «Entrar» con el enlace de abajo volvería a saltar a «Crear cuenta» y la
+   * pantalla se quedaría atascada en lo que dice la dirección.
+   */
+  const [mode, setMode] = useState<Mode>(
+    () => (new URLSearchParams(window.location.search).get('crear') === '1' ? 'register' : 'login'),
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');

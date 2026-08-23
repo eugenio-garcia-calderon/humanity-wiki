@@ -87,8 +87,9 @@ import { PAGINAS_INFO } from './paginasInfo';
 const Vision = lazy(() => import('./pages/Vision'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
+import Bienvenida from './pages/Bienvenida';
 import Login from './pages/Login';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { EditProvider } from './contexts/EditContext';
 import { DesignProvider } from './contexts/DesignContext';
 import { DataProvider } from './contexts/DataContext';
@@ -179,6 +180,21 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
   );
 }
 
+/**
+ * QUÉ SE VE EN «/».
+ *
+ * Mientras se resuelve la sesión no se pinta ninguna de las dos: enseñar la
+ * portada de bienvenida a alguien que sí tiene cuenta —aunque sea medio
+ * segundo— le dice que ha perdido su trabajo. Es el mismo error que el botón
+ * de «Iniciar sesión» de la barra de arriba tuvo que arreglar (B21), y aquí
+ * costaría más caro porque ocupa la pantalla entera.
+ */
+function Inicio() {
+  const { user, loading: cargandoSesion } = useAuth();
+  if (cargandoSesion) return null;
+  return user ? <Explorar /> : <Bienvenida />;
+}
+
 export default function App() {
   // Se decide antes de montar nada: los proveedores de la plataforma no
   // llegan a existir en un subdominio, así que un visitante sin cuenta no
@@ -246,7 +262,14 @@ export default function App() {
                     entrado le mandaba directo a /login: la plataforma no
                     enseñaba nada antes de pedir la cuenta. Ahora lo primero
                     que se ve es lo que la gente ha publicado. */}
-                <Route index element={<Explorar />} />
+                {/* LA PORTADA DEPENDE DE SI TIENES CUENTA (2026-08-23).
+                    Sin sesión, el muro no significa nada: publicaciones sueltas
+                    de gente que no conoces y un botón «Crear» que no puedes
+                    pulsar. Con sesión, ese muro ES la aplicación. Así que la
+                    misma dirección enseña dos cosas distintas — y es lo
+                    correcto: «/» significa «lo primero que te interesa», y eso
+                    cambia según quién seas. */}
+                <Route index element={<Inicio />} />
                 <Route path="entrada" element={<Entrada />} />
                 {/* ESQUEMAS (2026-08-20, Eugenio: «llámalo Esquemas, y unifica
                     todo para ese mismo nombre»). Un lienzo, un grafo y la red
