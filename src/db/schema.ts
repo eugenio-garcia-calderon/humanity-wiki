@@ -469,6 +469,12 @@ export const argumentos = pgTable('argumentos', {
   texto: text('texto').notNull(),
   profundidad: integer('profundidad').notNull().default(1),
   veracidad: text('veracidad').notNull().default('sin_fuente'),
+  // Who moved the badge above `con_fuente`, when, and why. Text and not a
+  // foreign key on purpose: a review has to keep saying who signed it even if
+  // that account is gone (same reason as `incidencias.respondido_por`).
+  veracidadPor: text('veracidad_por'),
+  veracidadEn: timestamp('veracidad_en'),
+  veracidadMotivo: text('veracidad_motivo'),
   // NULL = nobody has voted yet. 0 = people voted and it moves no one.
   impacto: doublePrecision('impacto'),
   votos: integer('votos').notNull().default(0),
