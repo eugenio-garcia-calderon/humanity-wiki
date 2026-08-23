@@ -675,7 +675,7 @@ export default function Layout() {
                   fichero que nadie más está editando, y no un cambio en estas
                   veinte. El marco, el tamaño y el ajuste al móvil de abajo se
                   quedan como estaban. */}
-              {PAGINAS_INFO.map(op => (
+              {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
                 <button key={op.ruta}
                   onClick={() => { setInfoAbierta(false); navigate(`/${op.ruta}`); }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">

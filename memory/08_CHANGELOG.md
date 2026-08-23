@@ -5876,3 +5876,32 @@ draft → `borrador`. `tsc` clean. Not seen in a browser (Comercio / modal).
 - **La prueba levanta dos procesos de sistema de verdad** (`scripts/probar-cable-entre-procesos.ts`). Dos servidores dentro del mismo `node` comparten el mapa y todo saldría verde con el fallo intacto. **Comprobado que la prueba puede fallar**: con el cable desenchufado da 6 rojos, incluido «0 eventos recibidos», que es el fallo silencioso original.
 - **Lo que NO se ha compartido, y es una decisión**: `hieloEnCache` y `ultimoFalloTurn` de `telecom.ts` se multiplican por ocho — 8 peticiones a Cloudflare por hora en vez de 1, y 8 líneas de registro cada 5 minutos con Cloudflare caído. No compensa una tabla. Escrito al lado del código para que no parezca un descuido.
 - Sin regresiones: 43 comprobaciones de punta a punta en verde con un solo proceso, que es como corre hoy.
+
+---
+
+## 2026-08-23 — Avisos legales: terms and conditions, with the privacy policy beside them (Programador 7)
+
+Eugenio: «haz tú mismo los términos y condiciones, y colócalo donde tenga sentido
+en el menú, quizás en un apartado que sea avisos legales, y le pones ahí la
+política de privacidad también».
+
+`/avisos-legales` (one registry line, icon Gavel) is a hub with two views:
+`?vista=terminos` — new, v1.0 dated 2026-08-23, eight sections in plain
+Spanish (who provides the service, your account, what you publish,
+coexistence, the market, the points, reviews, the platform and its changes) —
+and `?vista=privacidad`, which embeds the existing `Privacidad` page unchanged.
+The terms describe what the platform does today and the decisions already
+taken (transferable points, 10-year expiry, 24-month dormancy, 5 % / 2.5 %
+commission, draft products, returns in points); the legal entity and the
+contact are `[PENDIENTE]` and a banner says plainly they were written by the
+team, not a lawyer, pending legal review.
+
+The registry gains `enMenu?: boolean`; `/privacidad` stays mounted (the app
+stores cite that address) but leaves the (i) menu, which now shows a single
+«Avisos legales». Layout.tsx: one-line filter.
+
+Verified on 3007 in the browser: hub with both cards, the (i) menu lists
+«Avisos legales» and no longer «Privacidad», the terms view renders the
+banner, 8 sections and 3 [PENDIENTE] marks, the privacy view renders the old
+page with a back link; `/privacidad` and `/avisos-legales?vista=terminos`
+answer 200. `tsc` clean.
