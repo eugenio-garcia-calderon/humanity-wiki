@@ -155,12 +155,6 @@
       "ruta": "retirar el atajo que no se ejecutaba nunca",
       "motivo": "",
       "desde": "2026-08-23T13:05:42.142Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "fase 4: contactos de Google",
-      "desde": "2026-08-23T13:16:19.577Z"
     }
   ]
 }
