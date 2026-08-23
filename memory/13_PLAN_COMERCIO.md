@@ -115,6 +115,19 @@ Las cinco cosas nuevas que no teníamos: avisos de pedido (F1), preguntar al
 vendedor (F1), favoritos (F3), recibo/factura con IVA (F4), avísame cuando
 vuelva + valoración del vendedor (F5).
 
+### Tercera vuelta (24-08-2026, Eugenio: «mejora el ecommerce, qué funcionalidades te faltan»)
+
+Respuestas suyas: avisos por **WhatsApp** en vez de correo · la **devolución la pide el comprador** · **zonas de envío + recogida en persona** · y las cuatro prioridades a la vez (analítica de tienda, estado «preparando» y fechas, buscador y orden, cesta de varias tiendas).
+
+| Fase | Qué | Estado |
+|---|---|---|
+| **F6** | **WhatsApp**: enlaces `wa.me` que funcionan hoy + envío automático por la Cloud API de Meta, apagado hasta que haya cuenta, número y plantillas aprobadas; teléfono en el pedido; libro de lo enviado | hecha 24-08 (0112) |
+| **F7** | **Devolución pedida por el comprador** (con motivo; el vendedor acepta o rechaza) · estado **«preparando»** y **fecha estimada de entrega** | siguiente |
+| **F8** | **Zonas de envío** (península, Baleares/Canarias, Europa, resto) con precio por zona · **recogida en persona** | pendiente |
+| **F9** | **Analítica de tienda**: vistas → añadidos a la cesta → comprados, por producto | pendiente |
+| **F10** | **Buscador, orden y paginación** en el mercado | pendiente |
+| **F11** | **Cesta de varias tiendas**: partir el pedido y el cobro por vendedor | pendiente |
+
 ## La regla de las pruebas
 
 Todo lo que se cree para probar lleva **PRUEBA** delante en el título, y se
