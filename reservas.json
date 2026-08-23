@@ -53,6 +53,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "portada para quien no tiene cuenta + el menu no desaparece al cerrar sesion",
       "desde": "2026-08-23T12:00:18.314Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/auth.ts",
+      "motivo": "",
+      "desde": "2026-08-23T12:00:46.206Z"
     }
   ]
 }
