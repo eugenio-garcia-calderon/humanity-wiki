@@ -83,6 +83,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "dos tipos de aviso de puntos (caducidad/inactividad)",
       "desde": "2026-08-23T12:22:56.026Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "CLAUDE.md",
+      "motivo": "el texto y el dato que promete viven en sitios distintos",
+      "desde": "2026-08-23T12:25:52.505Z"
     }
   ]
 }
