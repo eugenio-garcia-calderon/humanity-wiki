@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog8-turn",
-      "ruta": "src/server/navegadorRemoto.ts",
-      "motivo": "fase 1: render de una vez en vez de retransmitir",
-      "desde": "2026-08-23T12:14:53.192Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "src/server/navegador.ts",
       "motivo": "fase 1: exportar la reescritura y decir si hace falta render",
       "desde": "2026-08-23T12:16:10.952Z"
