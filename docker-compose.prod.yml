@@ -1,4 +1,38 @@
 # ============================================================================
+# TECHOS DE MEMORIA (2026-08-23, prog6)
+# ============================================================================
+# Hasta hoy NINGÚN servicio tenía techo (`mem_limit=0` en los cinco, medido con
+# `docker inspect`). Con la memoria libre eso no se nota — hasta que algo se
+# desboca. Y entonces no elige el que se desbocó: elige el kernel, que mata al
+# proceso que más memoria ocupa, y en esta máquina ese suele ser **Postgres**.
+#
+# O sea: un fallo en la aplicación podía llevarse por delante la base de datos
+# y el servicio de copias, que son las dos cosas que no se pueden perder.
+#
+# Hay un caso concreto esperando a que eso pase: `navegadorRemoto.ts` abre un
+# Chromium DENTRO del contenedor `app` (ver `Dockerfile:25`), con un temporizador
+# de apagado que solo conoce el suyo. El día que se reparta el trabajo entre los
+# ocho núcleos serían ocho Chromium. Con estos techos, eso mata a `app` —que se
+# reinicia solo— en vez de a la base de datos.
+#
+# ── LOS NÚMEROS SALEN DE MEDIR, NO DE ESTIMAR ──────────────────────────────
+# En reposo, medido con `docker stats` el 2026-08-23 sobre 15,2 GB de máquina:
+#
+#     app 144 MB · db 109 MB · caddy 13 MB · copias 1,9 MB · copias-remoto 1,7 MB
+#
+# Unos 270 MB de 15,2 GB. Los techos son entre 10 y 30 veces eso a propósito:
+# NO son un presupuesto, son un tope de daño. Un techo ajustado mata un
+# contenedor sano un martes por la tarde, y eso es peor que no tener techo.
+#
+# ── QUÉ PASA AL TOCAR EL TECHO, PORQUE CONVIENE SABERLO ────────────────────
+# El kernel mata el proceso dentro del contenedor y `restart: unless-stopped` lo
+# levanta otra vez. Quien se entera: el `healthcheck` de cada servicio, y para
+# las copias además el aviso de las 36 horas.
+#
+# LO QUE ESTO NO PROTEGE: la compilación del despliegue (`up -d --build`) corre
+# FUERA de estos contenedores, en el propio dockerd. Quedan ~7,7 GB libres para
+# ella, que es de sobra hoy.
+# ============================================================================
 # humanity.wiki — producción (Hetzner). Tres servicios:
 #   db    → PostgreSQL 17 + PostGIS (datos en volumen persistente)
 #   app   → la plataforma (API + frontend estático), detrás de Caddy
@@ -14,6 +48,10 @@ services:
       POSTGRES_DB: ${SQL_DB_NAME:-humanity}
       POSTGRES_USER: ${SQL_ADMIN_USER:-humanity}
       POSTGRES_PASSWORD: ${SQL_ADMIN_PASSWORD:?falta SQL_ADMIN_PASSWORD}
+    # 2 GB. Postgres reserva 128 MB fijos (`shared_buffers`) y hasta 4 MB por
+    # operación de ordenación, con 100 conexiones posibles: el peor caso teórico
+    # no llega a esto ni de lejos. Es la primera que no puede morir.
+    mem_limit: 2g
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -29,6 +67,10 @@ services:
         VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
     restart: unless-stopped
     env_file: .env.production
+    # 4 GB, el más alto de los cinco, y es donde vive Chromium. Hoy usa 144 MB;
+    # un Chromium con varias pestañas se pone en cientos de megas. Este techo
+    # existe para que un Chromium desbocado mate a `app` y no a la base de datos.
+    mem_limit: 4g
     environment:
       NODE_ENV: production
       SQL_HOST: db
@@ -65,6 +107,10 @@ services:
     restart: unless-stopped
     # Sin esto, la imagen intentaría arrancar un Postgres suyo. Aquí solo
     # queremos sus herramientas de cliente.
+    # 1 GB. Hoy usa 1,9 MB: solo canaliza lo que `pg_dump` va escribiendo. El
+    # margen es para el día que la base de datos sea mucho mayor, y porque este
+    # servicio es lo segundo que no puede morir.
+    mem_limit: 1g
     entrypoint: ["/bin/bash", "/opt/copias/copias.sh"]
     environment:
       PGHOST: db
@@ -100,6 +146,8 @@ services:
   copias-remoto:
     image: rclone/rclone:1
     restart: unless-stopped
+    # 256 MB. Hoy usa 1,7 MB: sube ficheros de 1,3 MB de uno en uno.
+    mem_limit: 256m
     entrypoint: ["/bin/sh", "/opt/copias/remoto.sh"]
     environment:
       COPIAS_DIR: /copias
@@ -130,6 +178,9 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    # 256 MB. Hoy usa 13 MB. Va aquí y no más bajo porque si Caddy muere no se
+    # cae una función: se cae humanity.wiki entera.
+    mem_limit: 256m
     ports:
       - "80:80"
       - "443:443"
