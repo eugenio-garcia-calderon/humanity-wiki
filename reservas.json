@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog7",
-      "ruta": "src/pages/Vision.tsx",
-      "motivo": "reparto: UNIQUE por mes y persona + boton de admin en Vision (sugerencia prog6)",
-      "desde": "2026-08-23T11:44:07.550Z"
-    },
-    {
       "agente": "prog6",
       "ruta": "drizzle/0102_gasto_compartido.sql",
       "motivo": "la cifra de gasto no puede bailar entre procesos",
