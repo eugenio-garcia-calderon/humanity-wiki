@@ -5905,3 +5905,40 @@ Verified on 3007 in the browser: hub with both cards, the (i) menu lists
 banner, 8 sections and 3 [PENDIENTE] marks, the privacy view renders the old
 page with a back link; `/privacidad` and `/avisos-legales?vista=terminos`
 answer 200. `tsc` clean.
+
+---
+
+## 2026-08-23 — The monthly pot is fixed at 1,000 points, the reference price is one simple AI task, and the entity is named (Programador 7)
+
+Eugenio: «el reparto mensual, al principio de manera fija, repartiendo X
+puntos por mes: que esos puntos sean 1000, y que la relación sea que correr
+el modelo más barato con una tarea simple valga 1 punto, y eso ponga el valor
+de referencia para el resto». And: «la entidad ya está en memoria: Light for
+Humanity».
+
+- **Pot**: `PUNTOS_BOTE_MENSUAL` (1000 by default; 0 = back to half the
+  commission). The split stays mixed: half equal per verified person, half by
+  success. The calculation is one function used by the simulation (GET) and
+  by the new **execution** (`POST /api/admin/tokenomics/reparto/ejecutar`
+  {mes}): one `reparto_mensual` entry per person with the month as entity, one
+  transaction, and 409 if the month is already in the book — the month is
+  re-checked inside the transaction so two admins cannot double-pay. The pot
+  EMITS points (no account is debited); that is why only an admin triggers it
+  by hand. Migration 0100.
+- **Reference price** (0100, append-only rows): `ia_tarea_simple` = 1 point is
+  the unit; `ia_tarea_avanzada` 20, `almacenamiento_gb_mes` 5, `computo_hora`
+  25 as orientative multiples of it; the old `ia_accion_estandar` is RETIRED
+  (a last row named RETIRADO…; the prices API hides retired services from
+  `vigentes`, keeps them in `historia`).
+- **Entity**: the white paper's issuer and the terms' provider/contact now say
+  Light for Humanity (CIF G88040563, Calle Bahía de Almería 30, Bajo C, 28042
+  Madrid) — from `memory/14_SOCIEDAD.md`; the [PENDIENTE] marks are gone.
+- Page texts updated: tokenomics (fixed pot first, reference unit), white paper
+  (obtaining points via the pot), task list, Vision motive labels.
+
+Verified on 3007 over HTTP with a tagged admin test user (deleted after,
+balances restored, reparto rows removed): simulation modo `fijo`, bote 1000,
+5 verified → 100 fixed each, variable 500 to the only person with success;
+execute → 1000 points to 5 people, ledger sums 1000; repeat → 409; simulation
+then reports `ya_ejecutado`; prices API shows the new unit and hides the
+retired service. `tsc` clean.

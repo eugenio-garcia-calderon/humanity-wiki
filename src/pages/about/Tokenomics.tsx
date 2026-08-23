@@ -155,7 +155,9 @@ export default function Tokenomics() {
           <span className="px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 text-[10px] font-black uppercase tracking-wide">Intención declarada</span>
         </div>
         <p className="text-sm text-slate-500 leading-relaxed max-w-2xl mb-6">
-          Esta es la <strong>cesta de servicio</strong> hacia la que va el punto. Los precios se
+          Esta es la <strong>cesta de servicio</strong> hacia la que va el punto. La unidad de
+          referencia es sencilla: <strong>1 punto = una tarea simple con el modelo de IA más
+          barato</strong>; el resto de la cesta se expresa como múltiplo de esa unidad. Los precios se
           publican en una API abierta (<code className="text-xs bg-slate-100 px-1 py-0.5 rounded">/api/tokenomics/precios</code>,
           con su historia entera) y son orientativos hasta que cada servicio empiece a cobrar.
         </p>
@@ -247,11 +249,13 @@ export default function Tokenomics() {
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
             <h3 className="text-sm font-bold text-slate-900 mb-1.5">El bote mensual</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              La mitad de la <strong>comisión</strong> que la plataforma ingrese por su mercado
-              cada mes va a un <strong>bote de reparto</strong> — la comisión, no la facturación
-              bruta: el bote sale de lo que la plataforma gana, nunca del dinero de los
-              vendedores. Cada usuario verificado recibe su parte en puntos, para usar en
-              almacenamiento, procesamiento y el resto de la cesta.
+              Cada mes hay un <strong>bote de reparto</strong> para las personas verificadas.
+              <strong> Al principio es fijo: 1.000 puntos al mes</strong> (decisión del 23 de agosto
+              de 2026), para que el reparto arranque y se pueda medir. Más adelante el bote será
+              la mitad de la <strong>comisión</strong> que la plataforma ingrese por su mercado — la
+              comisión, no la facturación bruta: lo que la plataforma gana, nunca el dinero de los
+              vendedores. Cada persona recibe su parte en puntos, para usar en almacenamiento,
+              procesamiento y el resto de la cesta.
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">

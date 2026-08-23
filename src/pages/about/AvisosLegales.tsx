@@ -30,7 +30,7 @@ const TERMINOS: { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '1 · Quién presta el servicio y qué aceptas',
     parrafos: [
-      'Humanity.wiki es una plataforma para reunir, organizar y compartir conocimiento, con una red de personas, un mercado y un sistema de puntos. La presta [PENDIENTE: la persona jurídica titular — la fundación u otra entidad —, con su domicilio y su identificación; lo decide el emisor].',
+      'Humanity.wiki es una plataforma para reunir, organizar y compartir conocimiento, con una red de personas, un mercado y un sistema de puntos. La presta Light for Humanity (CIF G88040563), con domicilio en Calle Bahía de Almería 30, Bajo C, 28042 Madrid, España — una entidad sin ánimo de lucro.',
       'Al crear una cuenta o usar la plataforma aceptas estos términos y la política de privacidad. Si no estás de acuerdo, no uses el servicio. Para tener cuenta debes tener al menos 14 años; para vender en el mercado o cobrar, la mayoría de edad.',
     ],
   },
@@ -87,7 +87,7 @@ const TERMINOS: { titulo: string; parrafos: string[] }[] = [
     parrafos: [
       'El software, la marca y el diseño de Humanity.wiki son de su titular; el conocimiento que la gente publica, de quien lo publica, con las licencias dichas arriba. La plataforma se ofrece tal cual, con el esfuerzo razonable por mantenerla disponible y segura, pero sin garantía de disponibilidad ininterrumpida ni de ausencia de errores. Nuestra responsabilidad se limita a lo que la ley no permita limitar; en ningún caso respondemos de lo que un vendedor venda o una persona publique.',
       'Podemos cambiar estos términos. Cuando el cambio importe, lo anunciaremos dentro de la plataforma con antelación y aquí aparecerá la nueva versión con su fecha; seguir usando la plataforma después es aceptarla. Las versiones anteriores quedan archivadas.',
-      'Estos términos se rigen por la ley española y la europea que corresponda. Si eres consumidor conservas todos los derechos que esa ley te da, incluidos los tribunales de tu domicilio. Contacto para cualquier cuestión sobre estos términos: [PENDIENTE: correo de contacto del titular].',
+      'Estos términos se rigen por la ley española y la europea que corresponda. Si eres consumidor conservas todos los derechos que esa ley te da, incluidos los tribunales de tu domicilio. Para cualquier cuestión sobre estos términos puedes escribir a Light for Humanity en la dirección postal de arriba, o decírnoslo desde Feedback dentro de la plataforma.',
     ],
   },
 ];
@@ -104,9 +104,8 @@ function Terminos() {
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-900 leading-relaxed">
             <strong>Redactados por el equipo de la plataforma, no por un abogado.</strong> Describen lo que
-            la plataforma hace hoy y las decisiones ya tomadas; los huecos marcados [PENDIENTE]
-            esperan al titular del servicio. Están pendientes de revisión legal y se actualizarán
-            aquí, con fecha, cuando cambien.
+            la plataforma hace hoy y las decisiones ya tomadas. Están pendientes de revisión legal y
+            se actualizarán aquí, con fecha, cuando cambien.
           </p>
         </div>
       </div>
