@@ -83,6 +83,12 @@
       "ruta": "CLAUDE.md",
       "motivo": "un prefijo es una pista, nunca una respuesta",
       "desde": "2026-08-23T12:36:19.760Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Configuracion.tsx",
+      "motivo": "fase 2: la tarjeta de conectar Google",
+      "desde": "2026-08-23T12:36:23.695Z"
     }
   ]
 }
