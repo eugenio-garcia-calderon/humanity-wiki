@@ -28,6 +28,7 @@ import {
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
+  Paperclip, Bookmark, Megaphone,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
@@ -224,9 +225,20 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       const r = await fetch(`/api/proyectos/${p.id}/arbol`, { credentials: 'include' });
       const d = await r.json();
       if (!Array.isArray(d?.ramas)) return [];
+      // Las cuatro últimas se añadieron el 2026-08-23 con las ramas nuevas del
+      // árbol. `guardados` ya existía y caía en el icono por defecto, o sea que
+      // «Guardados» se pintaba con la carpeta de proyecto: parecía otro
+      // proyecto dentro del proyecto.
       const ICONO: Record<string, any> = {
         tareas: ListChecks, paginas: FileText, esquemas: Globe2,
         mapas: MapIcon, productos: Package, personas: Users2,
+        archivos: Paperclip, tablas: Table2, eventos: CalendarDays, guardados: Bookmark,
+        // `publicaciones` la trae el Dashboard en su PR #300. El icono va aquí
+        // y no en su rama porque este fichero es mío y así no chocan las dos.
+        // Sin esta línea la rama sale con la carpeta de proyecto por defecto y
+        // parece un proyecto dentro del proyecto — el mismo despiste que tuvo
+        // «Guardados» hasta hoy.
+        publicaciones: Megaphone,
       };
       return d.ramas.map((rama: any) => ({
         // La rama («Tareas») NO se renombra: es una categoría, no una cosa.

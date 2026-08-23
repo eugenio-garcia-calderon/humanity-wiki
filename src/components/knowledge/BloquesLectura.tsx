@@ -123,7 +123,14 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       }
       if (b.medio === 'youtube' || b.medio === 'vimeo') {
         const src = b.medio === 'youtube'
-          ? `https://www.youtube.com/embed/${b.medioId}`
+        // YOUTUBE SIN COOKIES (2026-08-22). `youtube-nocookie.com` es el mismo
+        // reproductor sin la cookie de seguimiento: existe exactamente para
+        // incrustarse en la web de otro sin dejarle a Google un rastro de quién ha
+        // mirado qué. La decisión ya estaba tomada —el Navegador y el Juego lo usaban
+        // desde antes— y aquí no se había aplicado: cuatro sitios, dos criterios.
+        // Importa además para la ficha de las tiendas, donde hay que DECLARAR con qué
+        // terceros se comparte y para qué.
+          ? `https://www.youtube-nocookie.com/embed/${b.medioId}`
           : `https://player.vimeo.com/video/${b.medioId}`;
         return (
           <figure>

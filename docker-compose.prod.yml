@@ -37,6 +37,13 @@ services:
       # Los archivos subidos (imágenes pegadas en el lienzo) viven fuera del
       # contenedor: si estuvieran dentro, cada despliegue los borraría.
       - uploads:/data/uploads
+      # SOLO LECTURA, y el `:ro` es la parte importante: la aplicación enseña el
+      # estado de las copias en la página pública de Servidores (2026-08-22,
+      # Eugenio: «mete esta info de las copias de seguridad en la parte de
+      # información»). Leer el estado no puede convertirse nunca en poder
+      # borrarlo — quien entre por un agujero de la aplicación no puede tocar
+      # aquí. Los dos ficheros que lee son `estado.json` y `estado-remoto.json`.
+      - copias:/copias:ro
     depends_on:
       db:
         condition: service_healthy

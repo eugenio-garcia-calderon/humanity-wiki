@@ -1,4 +1,4 @@
-import { REGLAS, esperaPendiente, anotarFallo, levantarFreno, ipDe } from '../src/server/limites/index.js';
+import { REGLAS, esperaPendiente, anotarFallo, levantarFreno, ritmo, ipDe } from '../src/server/limites/index.js';
 
 async function main() {
 
@@ -52,6 +52,15 @@ es('espera <= tope de 900 s', e <= 900 && e > 800, true);
 console.log('\n== 7 · La IP se lee de Cloudflare primero ==');
 es('cf-connecting-ip gana', ipDe({ headers: { 'cf-connecting-ip': '5.5.5.5', 'x-forwarded-for': '6.6.6.6' } } as any), '5.5.5.5');
 es('sin cf, el primero de xff', ipDe({ headers: { 'x-forwarded-for': '6.6.6.6, 10.0.0.1' } } as any), '6.6.6.6');
+
+console.log('\n== 8 · `ritmo` frena igual pero NO ensucia el rastro ==');
+// Corrección de prog7: enviar puntos once veces seguidas no es un fallo.
+const antesDeRitmo = filas.length;
+const T = { puerta: 'transferencia', gracia: 3, baseSegundos: 5, topeSegundos: 900, alFallar: 'cerrar' as const };
+for (let i = 0; i < 5; i++) ritmo(T, '4.4.4.4', 'rapido@x.com');
+es('frena igual que un fallo', esperaPendiente(T, '4.4.4.4', 'rapido@x.com') > 0, true);
+es('y no escribe NI UNA fila en el rastro', filas.length - antesDeRitmo, 0);
+es('no se mezcla con la puerta del login', esperaPendiente(R, '4.4.4.4', 'rapido@x.com'), 0);
 
 console.log(`\n${mal === 0 ? 'TODO BIEN' : 'HAY FALLOS'} — ${ok} bien, ${mal} mal\n`);
 process.exit(mal === 0 ? 0 : 1);
