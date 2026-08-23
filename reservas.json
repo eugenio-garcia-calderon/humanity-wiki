@@ -85,10 +85,10 @@
       "desde": "2026-08-22T22:23:56.659Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "las entradas de hoy: bloqueos, privacidad, proyecto y el fallo del service worker",
-      "desde": "2026-08-23T00:17:15.187Z"
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "anotarFallo -> ritmo en transferir (modulo de prog6)",
+      "desde": "2026-08-23T00:17:30.579Z"
     },
     {
       "agente": "prog6",
