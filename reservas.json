@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/components/knowledge/ProductoPublico.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "drizzle/0107_variantes.sql",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
