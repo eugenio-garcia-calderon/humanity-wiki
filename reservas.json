@@ -1,22 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/FichaProducto.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
-      "desde": "2026-08-23T13:45:28.078Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
-      "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
-      "desde": "2026-08-23T13:50:52.975Z"
-    }
-  ]
+  "reservas": []
 }
