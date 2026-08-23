@@ -253,6 +253,14 @@ deploy/, Dockerfile, docker-compose.prod.yml    production: Hetzner + Caddy
   with no screen ever reading the table. Nobody lied in any of the three. Every rule
   above says how to check your own half better; not one of them would have caught
   these.
+- **A conclusion drawn from half a reading is worse than a number misremembered.**
+  On 2026-08-23 an agent read that `POST /api/navegador/remoto` asks for a session
+  and not for an admin, concluded that ten people could open ten browsers on the
+  server, and told Eugenio. Twelve lines further down there is a global cap of two
+  and a single shared Chromium: the third person gets a 503. Its own words: «I found
+  the door open and did not look for the turnstile behind it.» Before reporting a
+  hole, read to the end of the handler — and if you already told someone, correct it
+  yourself, out loud, the same way.
 - `npx tsc --noEmit` clean. It is at zero errors today; keep it there.
 - `npm run build` passes.
 - Functional change → new entry **at the end** of `memory/08_CHANGELOG.md`.
