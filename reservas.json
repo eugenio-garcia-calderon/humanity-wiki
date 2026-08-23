@@ -50,12 +50,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/stripe.ts",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
       "desde": "2026-08-23T13:03:04.503Z"
@@ -81,24 +75,6 @@
     {
       "agente": "prog7",
       "ruta": "src/components/knowledge/ProductoPublico.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/components/knowledge/CrearProducto.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/MiPedido.tsx",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
       "desde": "2026-08-23T13:03:04.503Z"
     },
@@ -149,6 +125,36 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: contador de quien contesta",
       "desde": "2026-08-23T13:41:55.139Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0110_datos_fiscales_y_recibo.sql",
+      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
+      "desde": "2026-08-23T13:45:28.078Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
+      "desde": "2026-08-23T13:45:28.078Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/MiPedido.tsx",
+      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
+      "desde": "2026-08-23T13:45:28.078Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Comercio.tsx",
+      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
+      "desde": "2026-08-23T13:45:28.078Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/CrearProducto.tsx",
+      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
+      "desde": "2026-08-23T13:45:28.078Z"
     }
   ]
 }
