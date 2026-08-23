@@ -107,6 +107,12 @@
       "ruta": "public/sw.js",
       "motivo": "la cache de datos se traga docx y pdf enteros",
       "desde": "2026-08-23T00:19:59.767Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Tablas.tsx",
+      "motivo": "renombrar y retirar desde la pantalla",
+      "desde": "2026-08-23T00:21:36.460Z"
     }
   ]
 }
