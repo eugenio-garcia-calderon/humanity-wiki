@@ -219,7 +219,7 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
   textos: Record<string, string>; esAdmin: boolean; guardadoTexto: (c: string, v: string) => void;
 }) {
   const { user } = useAuth();
-  const [saldo, setSaldo] = useState<{ puntos: number; movimientos: any[] } | null>(null);
+  const [saldo, setSaldo] = useState<{ puntos: number; movimientos: any[]; conservacion?: any } | null>(null);
   const [comprando, setComprando] = useState(false);
 
   const cargarSaldo = () => {
@@ -250,6 +250,16 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
             {saldo ? saldo.puntos.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
             <span className="text-base font-bold text-slate-400 ml-1.5">puntos</span>
           </p>
+          {saldo?.conservacion && (
+            <p className="mt-2 text-[11px] text-slate-500 leading-relaxed">
+              {saldo.conservacion.dias_restantes <= 30 && <span className="font-black text-amber-700">Aviso: </span>}
+              Tu saldo se conserva mientras uses la plataforma (última actividad: {fechaCorta(saldo.conservacion.ultima_actividad)}).
+              {' '}Se perdería el <strong>{fechaCorta(saldo.conservacion.se_pierde_el)}</strong> si pasas {saldo.conservacion.meses_inactividad} meses sin entrar.
+              {saldo.conservacion.caducan_pronto && (
+                <> <strong>{Number(saldo.conservacion.caducan_pronto.puntos).toLocaleString('es-ES', { maximumFractionDigits: 2 })} puntos caducan el {fechaCorta(saldo.conservacion.caducan_pronto.fecha)}</strong> ({saldo.conservacion.anios_caducidad} años): úsalos antes.</>
+              )}
+            </p>
+          )}
           <button
             onClick={() => setComprando(true)}
             className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black transition-colors"
@@ -381,6 +391,12 @@ function RepartoMensual() {
     </div>
   );
 }
+
+/** «23 ago 2028»: una fecha que se lee de un vistazo bajo el saldo. */
+const fechaCorta = (iso: string) => {
+  const d = new Date(iso); if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
 const eur = (n: number) =>
   n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
@@ -538,7 +554,10 @@ export default function Vision() {
   const [items, setItems] = useState<ItemTablero[]>([]);
   const [cargando, setCargando] = useState(true);
   const [textos, setTextos] = useState<Record<string, string>>({});
-  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>('hoja_de_ruta');
+  // `?pestana=economia` abre directamente Economía: es adonde llevan los
+  // avisos de puntos de la campana (caducidad, inactividad).
+  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pestana') === 'economia' ? 'economia' : 'hoja_de_ruta');
 
   const cargar = () => fetch('/api/roadmap')
     .then(r => r.json())

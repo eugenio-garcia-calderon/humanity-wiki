@@ -289,10 +289,14 @@ export default function Tokenomics() {
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
             <h3 className="text-sm font-bold text-slate-900 mb-1.5">Caducidad y cuentas dormidas</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Los puntos <strong>caducan a los 10 años</strong>, y una cuenta
-              <strong> inactiva durante 24 meses pierde su saldo</strong> — con avisos antes de
-              que ocurra. Es lo que impide que el pasivo de puntos crezca sin límite mientras la
-              plataforma sigue prestando los servicios que los respaldan.
+              Los puntos <strong>caducan a los 10 años</strong> (se gastan por orden de llegada,
+              así que caduca solo la parte del saldo más antigua que una década), y una cuenta
+              <strong> sin actividad durante 24 meses pierde su saldo</strong>. Siempre con aviso
+              antes: por la campana, 30 y 7 días antes de perder el saldo y 90 días antes de una
+              caducidad, con la cifra y la fecha; y bajo tu saldo en <em>Visión · Economía</em> ves
+              en todo momento tu última actividad y la fecha en que se perdería. Entrar una vez
+              basta para conservarlo. Es lo que impide que el pasivo de puntos crezca sin límite
+              mientras la plataforma sigue prestando los servicios que los respaldan.
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">

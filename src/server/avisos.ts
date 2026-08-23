@@ -32,7 +32,13 @@ export type TipoAviso =
   // MIENTRAS NO MIRAS: si tienes la conversación delante, el mensaje aparece
   // solo y la llamada suena — la campana sobra y sería ruido.
   | 'mensaje'             // alguien te ha escrito y no lo has visto
-  | 'llamada_perdida';    // te llamó y no lo cogiste (o no estabas)
+  | 'llamada_perdida'     // te llamó y no lo cogiste (o no estabas)
+  // Puntos (prog7, 2026-08-23): los tres avisos de la caducidad. Sin
+  // `dePartede` (los escribe el sistema), y con una clave en `entidadId`
+  // para no repetir el mismo aviso dos días seguidos.
+  | 'puntos_inactividad'  // tu saldo se perderá el día X si no vuelves
+  | 'puntos_caducan'      // N puntos caducan el día X (10 años)
+  | 'puntos_perdidos';    // ya se ha perdido / ha caducado N
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos
