@@ -1,4 +1,4 @@
-import { Phone, PhoneOff, Video } from 'lucide-react';
+import { Phone, PhoneOff, Video, VideoOff } from 'lucide-react';
 import { useTelecom } from '../../telecom/useTelecom';
 import { contestar, colgar } from '../../telecom/motor';
 import { BotonRedondo, Cara } from './piezas';
@@ -49,11 +49,27 @@ export default function LlamadaEntrante() {
         <p className="mt-4 text-lg font-black text-slate-900">{llamada.con.nombre}</p>
         <p className="text-xs text-slate-400">te está llamando</p>
 
+        {/* DESCOLGAR SIN CÁMARA, y solo cuando la llamada es de vídeo. Es lo
+            que hace falta cuando te llaman por la calle o recién levantado: la
+            alternativa era descolgar enseñándote y apagar corriendo, y para
+            entonces la imagen ya ha salido. Se puede encender después. */}
         <div className="mt-6 flex items-center justify-center gap-8">
           <div className="flex flex-col items-center gap-1.5">
             <BotonRedondo icono={PhoneOff} etiqueta="Rechazar la llamada" tono="colgar" grande onClick={() => { colgar(); }} />
             <span className="text-[10px] font-bold text-slate-400">Rechazar</span>
           </div>
+          {esVideo && (
+            <div className="flex flex-col items-center gap-1.5">
+              <BotonRedondo
+                icono={VideoOff}
+                etiqueta="Descolgar solo con voz, sin cámara"
+                tono="claro"
+                grande
+                onClick={() => { contestar(false); }}
+              />
+              <span className="text-[10px] font-bold text-slate-400">Solo voz</span>
+            </div>
+          )}
           <div className="flex flex-col items-center gap-1.5">
             <BotonRedondo
               icono={esVideo ? Video : Phone}

@@ -261,8 +261,13 @@ paso('Ya se han escrito: ahora la videollamada sí entra');
 await b.p.getByRole('button', { name: 'Videollamada' }).click();
 await a.p.waitForSelector('text=te está llamando', { timeout: 10000 });
 comprobar(true, 'A Ana le salta la llamada en su aplicación');
+// Descolgar una videollamada sin enseñarse. Solo sale en las de vídeo:
+// ofrecerlo en una de voz sería un botón que no hace nada distinto del de al
+// lado, y dos botones que hacen lo mismo obligan a pensar cuál es cuál.
+comprobar(await a.p.getByRole('button', { name: 'Descolgar solo con voz, sin cámara' }).isVisible().catch(() => false),
+  'Se puede descolgar una videollamada sin cámara');
 await a.p.screenshot({ path: CAPTURAS + '/1-llamada-entrante.png' });
-await a.p.getByRole('button', { name: 'Descolgar' }).click();
+await a.p.getByRole('button', { name: 'Descolgar', exact: true }).click();
 
 // Esperar a que el reloj de la llamada corra: eso solo pasa cuando la conexión
 // directa entre los dos navegadores está establecida de verdad.
@@ -294,6 +299,44 @@ comprobar((await a.p.locator('[role=dialog]').count()) > 0 && (await b.p.locator
   'Los dos ven la pantalla de la llamada');
 
 await b.p.screenshot({ path: CAPTURAS + '/2-panel-de-llamada.png' });
+
+paso('La llamada cuenta cómo va (2026-08-23)');
+// LAS BARRITAS TARDAN, y es correcto que tarden: la calidad se mide comparando
+// dos lecturas separadas dos segundos, así que antes de eso lo honrado es no
+// pintar nada en vez de inventarse un verde.
+await a.p.waitForTimeout(5000);
+const cobertura = a.p.locator('[role=dialog] [role=img][aria-label*="conexión" i]').first();
+comprobar(await cobertura.isVisible().catch(() => false),
+  `Salen las barritas de cobertura (${await cobertura.getAttribute('aria-label').catch(() => '—')})`);
+
+// El navegador de pruebas emite un pitido continuo por el micrófono falso, así
+// que el detector de voz da «hablando» siempre. Eso, que suena a limitación,
+// es justo lo que hace comprobable el aviso más útil de todos.
+comprobar(await a.p.locator('[role=dialog] video').first().evaluate(() => true).catch(() => false),
+  'El panel sigue en pie mientras se mide');
+
+paso('El aviso de hablar con el micrófono cerrado');
+await a.p.getByRole('button', { name: 'Silenciar el micrófono' }).click();
+await a.p.waitForTimeout(1200);
+comprobar(await a.p.getByText('Estás hablando con el micrófono cerrado').isVisible().catch(() => false),
+  'Se avisa de que hablas con el micrófono cerrado');
+await a.p.screenshot({ path: CAPTURAS + '/6-avisos-en-la-llamada.png' });
+await a.p.getByRole('button', { name: 'Volver a hablar' }).click();
+await a.p.waitForTimeout(800);
+comprobar(!(await a.p.getByText('Estás hablando con el micrófono cerrado').isVisible().catch(() => false)),
+  'El aviso desaparece al volver a abrir el micrófono');
+
+paso('Elegir por dónde entra y por dónde sale');
+await a.p.getByRole('button', { name: 'Elegir micrófono, cámara y altavoz' }).click();
+await a.p.waitForTimeout(700);
+const menu = a.p.locator('[role=menu]');
+comprobar(await menu.isVisible().catch(() => false), 'Se abre el menú de aparatos');
+comprobar(await menu.getByText('Micrófono', { exact: false }).first().isVisible().catch(() => false),
+  'El menú lista micrófonos');
+await a.p.keyboard.press('Escape');
+await a.p.waitForTimeout(400);
+comprobar(!(await menu.isVisible().catch(() => false)), 'Se cierra con Escape sin colgar la llamada');
+comprobar(await a.p.locator('[role=dialog]').isVisible(), 'Y la llamada sigue en pie');
 
 paso('Silenciar el micrófono');
 await a.p.getByRole('button', { name: 'Silenciar el micrófono' }).click();
@@ -346,6 +389,46 @@ comprobar(sueltas === 0, 'No queda ningún vídeo (ni la cámara encendida)');
 
 await b.p.goto(`${BASE}/telefono`, { waitUntil: 'domcontentloaded' });
 await b.p.waitForTimeout(1500);
+paso('Traer la agenda desde el iPhone, sin exportar nada');
+// El navegador de pruebas SÍ tiene selector de contactos (es Chromium), así que
+// el bloque del iPhone sale plegado — que es lo correcto en un ordenador. Se
+// abre y se comprueba que están los dos caminos y que la llave se puede hacer.
+// EN UN ORDENADOR EL BLOQUE VA PLEGADO Y EN UN IPHONE ABIERTO, y este navegador
+// puede ser cualquiera de los dos: Chromium sin interfaz no trae el selector de
+// contactos, así que se comporta como el iPhone y el bloque ya está abierto.
+// La prueba tiene que valer en los dos casos o solo prueba la máquina de quien
+// la corre.
+const plegado = b.p.getByRole('button', { name: /iPhone/ });
+if (await plegado.isVisible().catch(() => false)) await plegado.click();
+await b.p.waitForTimeout(600);
+comprobar(await b.p.getByText('Contact Picker API').isVisible().catch(() => false),
+  'Se explica cómo encender el selector de Safari, con la ruta exacta');
+comprobar(await b.p.getByText('Obtener contenido de la URL').isVisible().catch(() => false),
+  'Y están los pasos del Atajo');
+await b.p.getByRole('button', { name: 'Hacerme una llave' }).click();
+await b.p.waitForTimeout(900);
+const laLlave = await b.p.locator('code').filter({ hasText: 'hw_agenda_' }).first().textContent().catch(() => '');
+comprobar(/^hw_agenda_[0-9a-f]{64}$/.test((laLlave || '').trim()), 'Se hace una llave con su prefijo reconocible');
+comprobar(await b.p.getByText('no se puede volver a ver').isVisible().catch(() => false),
+  'Y se avisa de que solo se enseña una vez');
+
+// La prueba de verdad: la llave recién hecha mete un contacto por la puerta del
+// Atajo, sin sesión ni cookie, que es exactamente lo que hará el iPhone.
+const traido = await b.p.evaluate(async (llave) => {
+  const r = await fetch('/api/agenda/contactos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${llave}` },
+    // `credentials: 'omit'` a propósito: si esto funcionara solo por llevar la
+    // cookie del navegador, en el iPhone no funcionaría nada.
+    credentials: 'omit',
+    body: JSON.stringify({ contactos: [{ nombre: 'Contacto de prueba', telefono: '+34600424242' }] }),
+  });
+  return { estado: r.status, cuerpo: await r.json() };
+}, (laLlave || '').trim());
+comprobar(traido.estado === 200 && traido.cuerpo?.nuevos === 1,
+  `Entra un contacto solo con la llave, sin sesión: ${traido.cuerpo?.resumen || traido.estado}`);
+await b.p.screenshot({ path: CAPTURAS + '/7-desde-el-iphone.png', fullPage: true });
+
 comprobar(await b.p.getByText('Últimas llamadas').isVisible(), 'El historial se pinta');
 const hist = await b.p.locator('text=Videollamada').count();
 comprobar(hist > 0, 'La videollamada queda en el historial');

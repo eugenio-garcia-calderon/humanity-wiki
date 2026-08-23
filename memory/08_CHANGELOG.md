@@ -5632,3 +5632,187 @@ nothing, says so and escalates to the model (answered in 8,5 s, «menos de
 0,01 €»); the IA switch silences the typeahead and forces the model; ↓ + Enter
 on a suggestion opens `/retos/R001`. 17-case table for `queHacer` run in node,
 all green. `tsc` clean.
+## Blocking a person, end to end (2026-08-22, Programador 3 / app)
+
+The last App Store requirement that depended on us. Apple rejects an app with
+user-generated content that lets you report a *thing* but not block a *person*:
+reporting opens a case somebody else judges later, blocking takes effect now and
+is decided by whoever presses it. Someone being harassed needs the second one.
+
+**The rule lives in one place.** `bloqueado_entre(a, b)` (migration `0091`) is a
+`STABLE` SQL function that looks in both directions, and every query that filters
+adds one line saying the same thing. The alternative was repeating a `NOT IN
+(SELECT …)` in the wall, the publications, the comments, the canvases, the
+projects and the maps — **six copies of a rule are six places to forget it**, and
+that is exactly how a block ends up filtering the wall but not the comments,
+which from the outside reads as the block not working.
+
+**Both directions, from one row.** A single `bloqueos` row describes the whole
+relationship: I stop seeing them *and* they stop seeing me. That is what Apple
+checks, and it is why the predicate tests both orders instead of one.
+
+**Nobody is told.** No notification on blocking, on purpose — telling someone
+turns the block into a provocation, which is the thing the person pressing it is
+running from. `GET /api/bloqueos` returns only who *I* have blocked; who has
+blocked me cannot be queried anywhere.
+
+What it covers, all of it verified over HTTP with two accounts:
+
+| Surface | Before | After |
+|---|---|---|
+| The wall (`/api/feed`) | 4 posts visible | 0, in both directions |
+| Publications, canvases, projects, maps, windows (`/api/publicaciones`) | 4 | 0, in both directions |
+| Comments under a publication | visible | hidden |
+| Direct messages | 200 | 403, either way |
+| Following | allowed | 403, and existing follows deleted by a trigger |
+
+**25 checks in green, 0 in red** — 9 in SQL against real data inside a rolled-back
+transaction, 16 over HTTP against a local server. The list deliberately includes
+what must *not* change: a third party still sees everything, a logged-out visitor
+sees everything (`bloqueado_entre(NULL, x)` is false, so nothing is filtered),
+blocking twice is not an error, blocking yourself is refused by a `CHECK`, and one
+person cannot delete another's block.
+
+**Two things found while testing, worth writing down.** `U_DEMO_MARC` is archived,
+so its session never resolved and the first run's "reverse direction" result was
+measuring an anonymous request, not a blocked one — the test looked like it passed
+the forward case and failed the reverse, and it was neither. And an archived
+user's publications still appear in the feed; that is pre-existing and not part of
+this change.
+
+**Where it is in the app.** "Bloquear a <name>" in the card menu, right under
+"Denunciar"; the same option offered *after* a report is sent, because reporting
+takes time and the person who just reported harassment still sees it meanwhile;
+and the undo list in **Configuración → Personas bloqueadas**, which hides itself
+when it is empty — most people never block anyone, and an empty section titled
+"Personas bloqueadas" in their settings suggests a problem they do not have.
+
+**What unblocking does not do**: it does not restore the follows the block
+deleted. That is said on the screen, before the button.
+
+---
+
+## 2026-08-23 — A privacy policy, and two third parties nobody had decided on (app/UX agent)
+
+**There was none.** No route, no file, no text anywhere in the repo. App Store
+Connect will not accept a submission without a privacy policy URL that answers,
+and neither will the Play listing. Now at `humanity.wiki/privacidad`; like
+`/borrar-cuenta`, **that path never moves** — it is pasted into both listings and
+changing it means going through review again.
+
+Play's **Data safety** form and Apple's **privacy labels** are declarations: a
+mismatch with what the app does is grounds for removal. So the text was written
+by measuring — the columns of `users`, `sessions` and `intentos_fallidos`; a grep
+for known trackers across all of `src/` and `index.html` (**zero**: no Analytics,
+no pixel, no Sentry); the cookies the server sets (**one**, `rh_session`, which is
+why there is no cookie banner); and the third-party hosts the app calls.
+
+**That last one changed the code before it changed the text.** Two things nobody
+had decided:
+
+- **Four videos embedded from `youtube.com`**, which sets a tracking cookie,
+  while four other places already used `youtube-nocookie.com`. One decision,
+  applied in half the places. All four switched.
+- **`transparenttextures.com`**, fetched on every visit to an objective or a
+  challenge for a decorative background at 10% opacity — handing that visitor's
+  IP to a third party for a texture you can barely see. Now drawn in code
+  (`src/utils/texturaCubos.ts`). Measured after: that page makes **zero**
+  third-party requests where it made one before.
+
+A privacy policy does not describe the app you wish you had. If writing one turns
+up something you would rather not declare, the app is what changes.
+
+**And two errors of mine, found by checking a claim I could not verify.**
+Cloudflare was missing from the list of who receives data — it sits in front of
+the whole site, so every visitor's IP passes through it. So was the off-site
+backup store, which takes a full dump out of the building nightly. And the page
+asserted the servers were "in Germany"; Hetzner is a German company, but where
+the machine runs was written nowhere in the repo. Eugenio confirmed **Germany**
+the next morning, and the entity with it: **Light for Humanity, CIF G88040563,
+Madrid** — now in `memory/14_SOCIEDAD.md`, because it was recorded nowhere and
+five things need it.
+
+The page states the origin and the CDN separately instead of collapsing them into
+"we are in Europe": the origin is in the EU, and a CDN terminates the connection
+at the edge nearest the visitor, which may not be. Both are true and only one of
+them is the reassuring one.
+
+---
+
+## 2026-08-23 — A project page that shows what is in the project (app/UX agent)
+
+Eugenio: *«no aparecen por ejemplo las páginas ligadas a ese proyecto, y seguro
+que tampoco otros elementos como mapas»*. Right, and by more than he said:
+**twelve tables carry `proyecto_id` and the page rendered one of them**, the task
+board. Pages, canvases, maps, products, data tables, dates and things saved from
+the browser all existed, all hung off the project, and appeared on no screen
+except by expanding the project in the side menu.
+
+It asks **the same endpoint the menu does**, `/api/proyectos/:id/arbol`. A second
+query here would have been quicker and would have created the usual problem: two
+lists of "what is in a project" that drift the moment someone adds a table to one
+and not the other. With one source, fixing the tree fixed both screens — which is
+what happened when it gained Archivos, Tablas and Fechas, three of the twelve it
+was missing.
+
+Found while checking it on a phone: at 375px that toolbar asked for 474px, got
+319, and had `overflow-x: visible`. **The "Mapa" button and the delete button
+were off-screen with no way to reach them** — the buttons for adding a map to a
+project, on the device where that matters most.
+
+---
+
+## 2026-08-23 — The service worker was cloning a stream that never ends (app/UX agent)
+
+**An outage, and mine.** Eugenio: *«la aplicación se queda constantemente, a
+veces recargando, durante minutos, sin parar»*. Shipped hours earlier in `hw-v4`.
+
+Every `/api/` response went through a branch that does `res.clone()` and then
+`await copia.blob()` inside `event.waitUntil`. **`/api/telecom/conexion` is
+Server-Sent Events and by design never ends.** So `blob()` could never resolve —
+one pending `waitUntil` per connection, per tab — and cloning a streaming
+response makes the browser buffer the *whole* stream so both branches can read
+it. A stream that never ends is memory that never stops growing. With several
+tabs on a machine with 8 GB, that is exactly what it looks like from outside.
+
+Reproduced before fixing, by running the worker's own two lines in the page
+against the real endpoint: **still hanging after 8 seconds**.
+
+The filter is on the **request**, not the response, on purpose: by the time the
+response arrives it has already been intercepted and the clone is paid for.
+`EventSource` always sends `Accept: text/event-stream`, so it covers the chat
+today and any stream added later by someone who does not read the comment.
+
+**`scripts/probar-sw.mjs` ships with it**, because this cannot be caught the
+usual way: it needs a live session and patience, and **the automation browser
+cannot run a service worker at all** (`src/pwa.ts` has said so for a day). It
+loads `sw.js` with a fake `self` and asserts which requests get `respondWith`.
+Against the `sw.js` that was live in production: **4 green, 1 red**. Against the
+fix: 5 green.
+
+**What this cost, written down so it is not repeated.** The bug was invisible in
+every way the work had been verified: one tab, two minutes, logged out, on
+localhost. It needed a session, several tabs and time — which is the shape of
+every service-worker bug so far. `VERSION` bumped to `hw-v5`.
+### 2026-08-23 — La llamada por fin cuenta lo que está pasando (Programador 8)
+- **El problema que se cierra**: una llamada perfecta y otra que perdía uno de cada cinco paquetes se veían exactamente iguales. La aplicación lo sabía y no lo decía, y eso convierte un problema de red en una discusión entre dos personas: «¿me oyes?» «sí, ¿y tú?».
+- **Barritas de cobertura** (`src/telecom/calidad.ts`): tres barras como las del móvil, porque es el único dibujo que todo el mundo sabe leer sin explicación. Se miden pérdida de paquetes, ida y vuelta y nerviosismo, **por tramos y no en total** — con acumulados, una llamada que empezó mal seguiría en rojo veinte minutos después de haberse arreglado. Solo audio: el vídeo pierde paquetes constantemente sin que se note.
+- **«Estás hablando con el micrófono cerrado»**, que es el fallo universal de las videollamadas. Tuvo truco: silenciar es `enabled = false`, y eso deja la pista muda **también para el medidor**, así que medir sobre ella daba cero siempre. Se mide sobre un `clone()` de la pista, que comparte fuente y tiene su propio `enabled`. No abre una segunda captura ni enciende otro punto naranja.
+- **Quién habla**: un halo verde alrededor de la cara. En una llamada de voz la pantalla es una inicial quieta, y sin esto no se distingue que el otro se ha callado de que la llamada se ha caído.
+- **«Recuperando la conexión…»**: `disconnected` no es `failed`. El navegador se recompone solo la mayoría de las veces —es lo que pasa al salir de casa y cambiar el wifi por los datos—, así que ni se cuelga ni se calla.
+- **Un solo aviso a la vez, por orden de urgencia**: los cuatro pueden ser ciertos al mismo tiempo y cuatro carteles apilados taparían la cara de la persona. Gana lo que puedes arreglar tú.
+- **Elegir micrófono, cámara y altavoz** (`src/telecom/aparatos.ts`, `MenuAparatos.tsx`), en caliente y sin colgar: `replaceTrack` sobre el carril ya negociado, así que el otro lado no nota nada. Se recuerda entre llamadas — quien se pone los cascos para hablar se los pone siempre. El altavoz solo donde `setSinkId` existe; donde no, se dice en vez de ofrecer un desplegable muerto.
+- **Pantalla completa de verdad**, la del navegador, además de «grande». «Grande» deja márgenes y barras: en un portátil de 13 pulgadas eso se come un tercio del alto, y compartir pantalla ahí es enseñar código ilegible. El botón lee `fullscreenElement` en vez de creerse su propia variable: se sale con Escape y con F11, y de ninguna de las dos se entera un `useState`.
+- **Descolgar sin cámara** en las videollamadas. La alternativa era descolgar enseñándote y apagar corriendo, y para entonces la imagen ya salió. Hizo falta un tono `claro` para el botón: `neutro` es blanco translúcido y sobre la tarjeta blanca del timbre era invisible.
+- **Pruebas**: 38 comprobaciones de punta a punta, ocho nuevas — barritas, el aviso del micro cerrado y que desaparece al abrirlo, el menú de aparatos, que se cierre con Escape sin colgar, y el botón de solo voz.
+
+### 2026-08-23 — La agenda del iPhone, sin exportar ningún fichero (Programador 8)
+- **Eugenio**: «haz que el importador de contactos funcione con el PWA de mi iPhone sin tener que exportarlo a un archivo y subirlos».
+- **Lo que se comprobó antes de construir nada**: el selector de contactos del navegador (`navigator.contacts.select`) **sí existe en Safari**, pero detrás de una casilla experimental apagada de fábrica. El comentario que había en `ImportarContactos.tsx` decía que el iPhone «no lo permite», y eso ya no era cierto — se ha corregido, porque un texto que describe lo que el programa ya no hace enseña a no leer la pantalla.
+- **Dos caminos sin fichero, y los dos están**: (1) encender la casilla — Ajustes → Safari → Avanzado → Funciones experimentales → Contact Picker API — y el botón «De mi agenda» de siempre funciona igual que en Android; (2) un **Atajo de Apple** que manda toda la agenda de golpe, sin tocar ningún ajuste, y que se puede volver a ejecutar para traer lo nuevo.
+- **Por qué el Atajo necesita una llave**: no es el navegador, no tiene sesión ni cookie. `llaves_agenda` (migración 0092) guarda **la huella, no la llave**; la llave se enseña una vez y punto. Crear una nueva revoca la anterior, que es lo que hace que «hazme otra» signifique también «invalida la que se me escapó».
+- **Esa llave solo abre una puerta**: añadir contactos a tu propia agenda. No entra en la cuenta, no lee, no publica. Si se filtra, lo peor es que te metan gente en tu lista.
+- **`POST /api/agenda/contactos` es la primera ruta de escritura que no mira la sesión**, y está escrito en la nota del módulo para que no parezca un descuido: se identifica con su llave. Lleva freno propio por IP (5 de gracia, luego 2 s doblando hasta 300) — adivinar 256 bits no es la amenaza, un bucle que convierte cada intento en una consulta sí. La regla vive en `agenda.ts` y no en `limites/index.ts`, que es de prog6.
+- **Acepta tres formas de lista** porque el Atajo lo monta una persona a mano: el JSON de la documentación, la lista pelada, y texto con una línea `Nombre, +34600111222`. Rechazar por la forma sería mandar a alguien a depurar un Atajo sin herramientas.
+- **La lógica de importar se sacó a `importarContactosDe()`**: ahora hay dos puertas y las dos tienen que casar por número, deduplicar y no pisar nombres exactamente igual. Dos copias se separan a la primera corrección, y ese día una de las dos empieza a duplicar gente en silencio.
+- **Pruebas**: `scripts/probar-agenda-iphone.ts`, 13 comprobaciones contra la base de datos de verdad (que en la base solo vive la huella, que sin llave no entra nadie, las tres formas de lista, que repetir el Atajo no duplica ni pisa nombres, que al retirar la llave deja de entrar, y el freno). Y 5 más en `probar-telecom.mjs`, incluida una que mete un contacto con `credentials: 'omit'` — si funcionara por llevar la cookie, en el iPhone no funcionaría nada. **43 en verde en total.**

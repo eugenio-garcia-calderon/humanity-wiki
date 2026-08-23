@@ -11,6 +11,7 @@ import { useTelecom } from '../telecom/useTelecom';
 import { llamar, pedirPermisoDeAvisos } from '../telecom/motor';
 import { Cara, reloj } from '../components/telecom/piezas';
 import ImportarContactos from '../components/social/ImportarContactos';
+import DesdeElIphone from '../components/social/DesdeElIphone';
 import TextoEditable from '../components/ui/TextoEditable';
 
 // ============================================================================
@@ -83,6 +84,9 @@ export default function Telefono() {
   const [contactos, setContactos] = useState<Persona[]>([]);
   const [historial, setHistorial] = useState<Registro[]>([]);
   const [gasto, setGasto] = useState<Gasto | null>(null);
+  const [verIphone, setVerIphone] = useState(
+    typeof navigator !== 'undefined' && !(('contacts' in navigator) && typeof (navigator as any).contacts?.select === 'function'),
+  );
   const [hayTurn, setHayTurn] = useState<boolean | null>(null);
   const [cargando, setCargando] = useState(true);
   const [errorLlamada, setErrorLlamada] = useState<string | null>(null);
@@ -372,6 +376,23 @@ export default function Telefono() {
           Se cruzan los números que importaste con los de la gente registrada. Ni tu
           agenda sale de aquí ni se le dice a nadie que le tienes guardado.
         </p>
+
+        {/* LAS INSTRUCCIONES DEL IPHONE SE ABREN SOLAS DONDE HACEN FALTA. Si el
+            navegador no tiene selector de contactos, es justo el aparato que las
+            necesita y esconderlas detrás de un enlace sería esconder la única
+            salida. En un ordenador van plegadas: ahí no estorban, pero tienen
+            que poder abrirse — la agenda está en el teléfono y la llave se
+            copia mejor con teclado. */}
+        {!verIphone ? (
+          <button
+            onClick={() => setVerIphone(true)}
+            className="mb-3 text-[11px] font-bold text-emerald-700 hover:underline"
+          >
+            ¿Vas a traerlos desde el iPhone? Se puede sin exportar ningún archivo →
+          </button>
+        ) : (
+          <div className="mb-3"><DesdeElIphone /></div>
+        )}
 
         {cargando ? (
           <div className="py-8 grid place-items-center"><Loader2 className="w-5 h-5 animate-spin text-slate-300" /></div>

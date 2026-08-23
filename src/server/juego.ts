@@ -188,61 +188,13 @@ export function registerJuegoRoutes(app: Express, db: any) {
       const brutos = Array.isArray(req.body?.contactos) ? req.body.contactos : null;
       if (!brutos) return res.status(400).json({ error: 'Mándame una lista de contactos.' });
       if (brutos.length > 500) return res.status(400).json({ error: 'Máximo 500 contactos de una vez.' });
-
-      // Se limpian y se quitan los repetidos DENTRO de la propia lista: una
-      // agenda trae el mismo número con dos etiquetas más veces de lo que
-      // parece.
-      const vistos = new Set<string>();
-      const contactos: Array<{ nombre: string; telefono: string }> = [];
-      for (const c of brutos) {
-        const nombre = String(c?.nombre || '').trim().slice(0, 120);
-        const telefono = normalizarTelefono(c?.telefono);
-        if (!nombre || !telefono || vistos.has(telefono)) continue;
-        vistos.add(telefono);
-        contactos.push({ nombre, telefono });
-      }
-      if (!contactos.length) {
-        // SE DICE QUE NO ENTRÓ NINGUNO. Un «listo» con cero importados es la
-        // clase de respuesta que deja a alguien buscando a su gente por el
-        // mundo sin saber que nunca llegó.
-        return res.json({ nuevos: 0, actualizados: 0, ignorados: brutos.length, error: 'Ninguno traía nombre y número a la vez.' });
-      }
-
-      const yaEstan = await db.execute(sql`
-        SELECT id, telefono FROM game_agents
-        WHERE user_id = ${req.user!.id} AND archived_at IS NULL AND telefono IS NOT NULL
-      `);
-      const porTelefono = new Map((yaEstan.rows as any[]).map(r => [String(r.telefono), r.id]));
-
-      let nuevos = 0, actualizados = 0;
-      for (const c of contactos) {
-        const id = porTelefono.get(c.telefono);
-        if (id) {
-          // Ya lo tienes: solo se marca de dónde vino. El nombre no se toca.
-          await db.execute(sql`
-            UPDATE game_agents SET telefono_origen = 'agenda', updated_at = now(), updated_by = ${req.user!.id}
-            WHERE id = ${id}
-          `);
-          actualizados++;
-          continue;
-        }
-        const nuevo = `GA${Date.now()}${Math.floor(Math.random() * 1000)}`;
-        await db.execute(sql`
-          INSERT INTO game_agents (id, user_id, tipo, nombre, telefono, telefono_origen,
-                                   apariencia, x, z, created_by, updated_by)
-          VALUES (${nuevo}, ${req.user!.id}, 'persona', ${c.nombre}, ${c.telefono}, 'agenda',
-                  '{}'::jsonb, 0, 0, ${req.user!.id}, ${req.user!.id})
-        `);
-        nuevos++;
-      }
-      res.json({ nuevos, actualizados, ignorados: brutos.length - contactos.length });
+      res.json(await importarContactosDe(db, req.user!.id, brutos));
     } catch (e: any) {
       console.error('importar contactos:', e);
       res.status(500).json({ error: e.message });
     }
   });
 
-  /** PUT /api/juego/agentes/:id — mover, renombrar, cambiar aspecto. */
   app.put('/api/juego/agentes/:id', async (req: Request, res: Response) => {
     try {
       if (!requiereUsuario(req, res)) return;
@@ -777,4 +729,76 @@ export function registerJuegoRoutes(app: Express, db: any) {
   });
 
 
+}
+
+/**
+ * Traerse una lista de contactos a la agenda de alguien.
+ *
+ * ESTÁ FUERA DE LA RUTA A PROPÓSITO (2026-08-23). Ahora hay dos puertas por las
+ * que puede entrar una agenda —el navegador con sesión, y un Atajo del iPhone
+ * con una llave— y las dos tienen que casar, deduplicar e ignorar exactamente
+ * igual. Dos copias de estas reglas se separan a la primera corrección, y el
+ * día que se separen una de las dos puertas empezará a duplicar gente en
+ * silencio.
+ *
+ * NO DUPLICA. Se casa por NÚMERO, no por nombre: «Ana», «Ana Ruiz» y «Ana
+ * trabajo» son la misma persona si el número es el mismo, y dos «Juan» con
+ * números distintos son dos. Casar por nombre es cómo una agenda acaba con la
+ * misma persona cuatro veces.
+ *
+ * A QUIEN YA ESTÁ, NO SE LE PISA EL NOMBRE. Si tú le pusiste «Ana (obras)» y en
+ * tu agenda es «Ana Ruiz», se queda el tuyo: lo que escribiste aquí es una
+ * decisión, y una importación no puede deshacerla sin avisar.
+ */
+export async function importarContactosDe(
+  db: any,
+  userId: string,
+  brutos: any[],
+): Promise<{ nuevos: number; actualizados: number; ignorados: number; error?: string }> {
+  // Se limpian y se quitan los repetidos DENTRO de la propia lista: una agenda
+  // trae el mismo número con dos etiquetas más veces de lo que parece.
+  const vistos = new Set<string>();
+  const contactos: Array<{ nombre: string; telefono: string }> = [];
+  for (const c of brutos) {
+    const nombre = String(c?.nombre || '').trim().slice(0, 120);
+    const telefono = normalizarTelefono(c?.telefono);
+    if (!nombre || !telefono || vistos.has(telefono)) continue;
+    vistos.add(telefono);
+    contactos.push({ nombre, telefono });
+  }
+  if (!contactos.length) {
+    // SE DICE QUE NO ENTRÓ NINGUNO. Un «listo» con cero importados es la clase
+    // de respuesta que deja a alguien buscando a su gente por el mundo sin
+    // saber que nunca llegó.
+    return { nuevos: 0, actualizados: 0, ignorados: brutos.length, error: 'Ninguno traía nombre y número a la vez.' };
+  }
+
+  const yaEstan = await db.execute(sql`
+    SELECT id, telefono FROM game_agents
+    WHERE user_id = ${userId} AND archived_at IS NULL AND telefono IS NOT NULL
+  `);
+  const porTelefono = new Map((yaEstan.rows as any[]).map(r => [String(r.telefono), r.id]));
+
+  let nuevos = 0, actualizados = 0;
+  for (const c of contactos) {
+    const id = porTelefono.get(c.telefono);
+    if (id) {
+      // Ya lo tienes: solo se marca de dónde vino. El nombre no se toca.
+      await db.execute(sql`
+        UPDATE game_agents SET telefono_origen = 'agenda', updated_at = now(), updated_by = ${userId}
+        WHERE id = ${id}
+      `);
+      actualizados++;
+      continue;
+    }
+    const nuevo = `GA${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    await db.execute(sql`
+      INSERT INTO game_agents (id, user_id, tipo, nombre, telefono, telefono_origen,
+                               apariencia, x, z, created_by, updated_by)
+      VALUES (${nuevo}, ${userId}, 'persona', ${c.nombre}, ${c.telefono}, 'agenda',
+              '{}'::jsonb, 0, 0, ${userId}, ${userId})
+    `);
+    nuevos++;
+  }
+  return { nuevos, actualizados, ignorados: brutos.length - contactos.length };
 }
