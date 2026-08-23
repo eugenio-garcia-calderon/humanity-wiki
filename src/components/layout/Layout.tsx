@@ -562,7 +562,24 @@ export default function Layout() {
             al inicio está el logo, que es donde todo el mundo lo busca. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[13px] font-black tracking-tight text-slate-800 sm:text-sm"
+          /*
+           * NO SE PINTA EN EL MÓVIL, Y ES UNA RENUNCIA, NO UN OLVIDO.
+           *
+           * Eugenio lo quería centrado arriba, y en un ordenador lo está. A
+           * 375 px no cabe: la barra ya lleva el logo, el menú, buscar,
+           * información, feedback, la campana y tu foto — quedan ~117 px libres
+           * y el nombre pide ~140. Probado en dos pasos: primero recortándolo, y
+           * seguía montándose encima de los iconos.
+           *
+           * **Texto superpuesto es peor que texto ausente**: uno no se lee y el
+           * otro tampoco, pero además ensucia lo que sí se leía. Y el nombre no
+           * se pierde en un teléfono: está en la portada, en la cabecera de los
+           * dos raíles y en la pestaña del navegador.
+           *
+           * Si algún día tiene que estar sí o sí, la salida es quitar un icono
+           * de la barra, no encoger el nombre hasta que no se lea.
+           */
+          className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 select-none text-sm font-black tracking-tight text-slate-800 sm:block"
         >
           Red de Conocimiento
         </span>
@@ -860,7 +877,14 @@ export default function Layout() {
               : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
         >
           <IconoFeedback className={cn('shrink-0', compacto ? 'w-4 h-4' : 'w-5 h-5')} />
-          {!compacto && <span className="text-xs font-bold">Feedback</span>}
+          {/* LA PALABRA SE VA EN EL MÓVIL (2026-08-23). Al centrar «Red de
+              Conocimiento» en la barra, a 375 px el nombre se montaba encima de
+              esta palabra: dos textos superpuestos y ninguno legible. Se ve en
+              una captura, no compilando.
+              Se quita la de aquí y no el nombre porque el nombre es la marca de
+              la aplicación y esto es un botón que ya se entiende por su icono —
+              y que además conserva la palabra en su `aria-label`. */}
+          {!compacto && <span className="hidden text-xs font-bold sm:inline">Feedback</span>}
           {incidencias.bloqueadas > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
               {incidencias.bloqueadas > 9 ? '9+' : incidencias.bloqueadas}
