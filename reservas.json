@@ -179,6 +179,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "tope mensual de gasto de IA de la plataforma",
       "desde": "2026-08-23T13:49:21.893Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "F4 comercio: entrada del changelog (30 s)",
+      "desde": "2026-08-23T13:50:09.705Z"
     }
   ]
 }
