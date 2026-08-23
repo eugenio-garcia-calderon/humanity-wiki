@@ -2,17 +2,35 @@
 // EL NAVEGADOR DE LA APP (2026-08-19; Chromium remoto 2026-08-20, petición de
 // Eugenio: «dale a Chromium»).
 // ============================================================================
-// Tres formas de enseñar una web, de mejor a peor, y se usa la mejor posible:
+// ── SE EMPIEZA POR LO LIGERO (2026-08-23) ───────────────────────────────────
+// Hasta hoy el modo normal era retransmitir la pantalla de un Chromium del
+// servidor. Eugenio: «esa solución nunca será viable porque va con LAG, y el
+// usuario se queja de que va lento, y tiene razón».
 //
-//   1. CHROMIUM REMOTO (el modo normal): un navegador de verdad corre en el
-//      servidor y aquí solo se pinta su pantalla (fotogramas por SSE) y se le
-//      mandan los clics y el teclado. Todo funciona: YouTube, Google, webs con
-//      JavaScript. La pantalla viaja SIN sonido — por eso los vídeos no van
-//      por aquí, sino por (2).
-//   2. REPRODUCTOR OFICIAL para direcciones de vídeo (YouTube/Vimeo): el
-//      embed trae imagen Y SONIDO directos del CDN del vídeo.
-//   3. PROXY DE LECTURA (`/api/navegador/ver`): si el servidor no tiene
-//      Chromium, se cae a la versión de solo-documentos de antes.
+// La tiene, y no era optimizable: entre mover el ratón y ver el efecto hay una
+// ida y vuelta por internet. No es un problema de velocidad del servidor, es de
+// dónde está el ordenador que dibuja.
+//
+// Ahora, de más barato a más caro, y se para en el primero que sirva:
+//
+//   1. LECTURA (`/api/navegador/ver`): el servidor solo baja el HTML y le quita
+//      las cabeceras que impiden meterlo en un marco. **Lo dibuja tu máquina.**
+//      Cero retardo, cero memoria del servidor, y el texto es texto: se
+//      selecciona, se copia, se le hace zoom. Medido el 2026-08-23: 8 de 12
+//      sitios comunes se leen así.
+//   2. REPRODUCTOR OFICIAL para vídeo (YouTube/Vimeo): imagen Y SONIDO desde el
+//      CDN del vídeo, que por una pantalla retransmitida no viajaría.
+//   3. INSTANTÁNEA (`/api/navegador/instantanea`): para las webs que se pintan
+//      solas con JavaScript y por (1) saldrían en blanco. Chromium las dibuja
+//      UNA VEZ en el servidor y manda el HTML resultante. Se espera al cambiar
+//      de página, como una web lenta — no en cada movimiento del ratón.
+//   4. CHROMIUM RETRANSMITIDO: sigue existiendo, ya no es el modo normal. Es lo
+//      único que permite pulsar botones de una aplicación de JavaScript, y se
+//      entra a mano sabiendo que va con retardo.
+//
+// LO QUE NINGUNO DE LOS CUATRO HACE, Y NO DEBE HACER: entrar en tu correo o en
+// tu banco. Eso necesita tu sesión, y tu sesión no tiene por qué pasar por
+// nuestro servidor. Para eso está el botón de abrir fuera.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Search, Loader2, Bot, AlertTriangle, ExternalLink, Star, Home, X, MoreVertical, Minus, Plus as PlusIcon, Sparkles, Check, ChevronDown, Inbox } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -37,6 +55,9 @@ export function comoUrl(texto: string, buscadorReal = false): string {
 }
 
 const proxy = (url: string) => `/api/navegador/ver?url=${encodeURIComponent(url)}`;
+/** La misma página, pero dibujada antes por un Chromium del servidor. Para las
+ *  webs que son una aplicación de JavaScript y por el proxy salen en blanco. */
+const instantanea = (url: string) => `/api/navegador/instantanea?url=${encodeURIComponent(url)}`;
 
 /** La pantalla de inicio del navegador. Es una dirección propia y no una
  *  cadena vacía para que quepa en la historia como cualquier otra página. */
@@ -102,7 +123,13 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
   const { user, updateUiSettings } = useAuth();
   const favoritos: Favorito[] = Array.isArray(user?.uiSettings?.favoritosWeb)
     ? user!.uiSettings!.favoritosWeb : [];
-  const [modo, setModo] = useState<'remoto' | 'proxy'>('remoto');
+  // LIGERO POR DEFECTO. Antes era `'remoto'` y por eso toda visita arrancaba un
+  // Chromium en el servidor, con su retardo y su tope de dos personas en toda
+  // la plataforma. Ahora se sube de escalón solo cuando la página lo pide.
+  const [modo, setModo] = useState<'remoto' | 'proxy'>('proxy');
+  /** Direcciones que ya se sabe que no se pintan solas: se les da instantánea
+   *  directamente en vez de enseñar una página en blanco y luego corregir. */
+  const [conRender, setConRender] = useState<Set<string>>(() => new Set());
   const [sesion, setSesion] = useState<string | null>(null);
   const [reinicios, setReinicios] = useState(0);
   const [url, setUrl] = useState(inicial);
@@ -580,6 +607,15 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
         if (!vivo) return;
         if (j.error) { setAviso(j.error); return; }
         if (j.titulo) onTitulo?.(j.titulo.slice(0, 60));
+        // ── SUBIR DE ESCALÓN SOLO SI HACE FALTA ──────────────────────────
+        // El servidor ya ha bajado esta página para sacarle el título, así que
+        // sabe si trae texto o viene vacía. Si viene vacía es una aplicación
+        // de JavaScript: por el proxy se vería en blanco, y se pide la
+        // instantánea. No cuesta una petición extra — la respuesta ya estaba.
+        if (j.necesitaRender && !conRender.has(url)) {
+          setConRender(s => new Set(s).add(url));
+          setCargando(true);
+        }
       })
       .catch(() => { /* el marco enseñará su propio error */ });
     return () => { vivo = false; };
@@ -705,10 +741,25 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
           className="w-7 h-7 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-200 shrink-0">
           <ExternalLink className="w-3.5 h-3.5" />
         </button>
-        {modo === 'proxy' && (
-          <span title="El Chromium del servidor no está disponible: versión de solo lectura"
+        {/* ── LO QUE DICE LA ETIQUETA TIENE QUE SER VERDAD (2026-08-23) ──────
+            Antes ponía «lectura» con el texto «el Chromium del servidor no
+            está disponible». Eso era cierto cuando este modo era el respaldo;
+            ahora es el modo normal, y esa frase saldría en TODAS las páginas
+            diciendo que algo va mal cuando va bien. Una etiqueta que miente
+            enseña a no leer las etiquetas.
+
+            El modo ligero no lleva distintivo: es lo normal y lo bueno. Solo
+            se avisa cuando hay algo que la persona notaría. */}
+        {modo === 'proxy' && url && conRender.has(url) && (
+          <span title="Esta web se dibuja sola con JavaScript, así que el servidor la ha dibujado una vez y te ha mandado el resultado. Se lee perfectamente; los botones de la propia web pueden no responder."
+            className="hidden sm:flex items-center px-2 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600 shrink-0">
+            instantánea
+          </span>
+        )}
+        {modo === 'remoto' && (
+          <span title="Estás viendo la pantalla de un navegador que corre en el servidor. Todo funciona, incluidos los botones, pero va con retardo."
             className="hidden sm:flex items-center px-2 py-1 rounded-lg bg-amber-50 border border-amber-200 text-[10px] font-bold text-amber-700 shrink-0">
-            lectura
+            en directo · con retardo
           </span>
         )}
         <span title="La IA del chat ve esta página"
@@ -721,7 +772,11 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
         {/* LOS TRES PUNTITOS DEL NAVEGADOR: los ajustes de la ventana. De
             momento el zoom, que es lo que hacía falta — un aviso de cookies que
             no cabe en la pantalla no se puede aceptar, y alejando sí. */}
-        {modo === 'remoto' && !esPantallaInicio(url) && (
+        {/* EL MENÚ YA NO ES DEL MODO RETRANSMITIDO (2026-08-23). Colgaba de
+            `modo === 'remoto'`, que era el normal; al invertir el defecto, dejarlo
+            así habría escondido el menú entero —y con él la única forma de subir
+            al modo con retardo— justo en el modo que ahora usa todo el mundo. */}
+        {!esPantallaInicio(url) && (
           <div className="relative shrink-0" ref={menuRef}>
             <button onClick={() => setMenuAbierto(o => !o)} title="Ajustes del navegador"
               className={cn('w-7 h-7 grid place-items-center rounded-lg transition-colors',
@@ -731,6 +786,40 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
 
             {menuAbierto && (
               <div className="absolute top-9 right-0 w-56 bg-white border border-slate-200 shadow-2xl rounded-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                {/* ── SUBIR AL MODO CON RETARDO, A MANO ─────────────────
+                    La instantánea es una foto en HTML: se lee perfectamente y
+                    los botones de la propia web no responden. Cuando alguien
+                    necesita pulsarlos de verdad, este es el camino — y se dice
+                    lo que cuesta ANTES de entrar, no después de que se note. */}
+                <p className="px-1 pb-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Cómo se ve</p>
+                {modo === 'proxy' ? (
+                  <button
+                    onClick={() => { setMenuAbierto(false); autoReinicios.current = 0; setModo('remoto'); }}
+                    className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-100"
+                  >
+                    Usarla como aplicación
+                    <span className="block text-[10px] text-slate-400 leading-snug">
+                      Para pulsar botones que ahora no responden. Va con retardo: la pantalla
+                      viaja desde el servidor.
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setMenuAbierto(false); setModo('proxy'); }}
+                    className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-100"
+                  >
+                    Volver al modo rápido
+                    <span className="block text-[10px] text-slate-400 leading-snug">
+                      Sin retardo, y el texto se puede seleccionar y copiar.
+                    </span>
+                  </button>
+                )}
+                {/* EL ZOOM ES SOLO DEL MODO RETRANSMITIDO, y no es un olvido: en
+                    el modo ligero la página es un documento de verdad en tu
+                    máquina, así que el zoom del propio navegador ya funciona y
+                    hace mejor trabajo que el nuestro. */}
+                {modo === 'remoto' && <>
+                <div className="my-1.5 border-t border-slate-100" />
                 <p className="px-1 pb-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">Zoom</p>
                 <div className="flex items-center gap-1">
                   <button onClick={() => cambiarZoom(-1)} disabled={zoom <= PASOS[0]}
@@ -750,6 +839,7 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
                   Alejar hace que quepa más página — útil cuando un aviso de cookies
                   no cabe entero y no deja aceptarlo.
                 </p>
+                </>}
               </div>
             )}
           </div>
@@ -859,7 +949,7 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
         <iframe
           ref={marcoProxy}
           key={`${url}|${recarga}`}
-          src={url ? proxy(url) : 'about:blank'}
+          src={url ? (conRender.has(url) ? instantanea(url) : proxy(url)) : 'about:blank'}
           title="Navegador"
           onLoad={() => setCargando(false)}
           className="flex-1 w-full border-0 bg-white"
