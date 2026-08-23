@@ -5842,3 +5842,25 @@ return again → no new rows; second purchase then seller set to 1 point →
 409 «No tienes saldo suficiente para devolver los 3,9 puntos…» and the order
 stays `entregado`. `tsc` clean. Not seen in a browser (Comercio needs a
 seller session in the shared browser).
+
+---
+
+## 2026-08-23 — Products can be drafts (Programador 7)
+
+Plan fase 1's «borrador / publicado»: until today every product was born for
+sale, so a provisional price was a price. `status = 'borrador'` now exists:
+CrearProducto has «Guardar como borrador»; Comercio shows the badge and a
+«publicar» / «pasar a borrador» link (`PUT mis-productos/:id` with `publicar`
+or `borrador`; publishing gives the status the level deserves — `activo` for
+verified, `tienda` otherwise — the same rule as creation).
+
+A draft does not exist for anyone but its owner: the public product route
+answers 404 unless the session is the owner's; `comprar`, `cotizar` and
+`cupon/comprobar` skip it; the common market and the side menu already listed
+only `activo`. The AI's global search (`ai/assistant.ts`) still matches on
+`archived_at` only — prog1's file, not touched; noted for them.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after): create
+as draft → `borrador`; public 404, owner 200; buy → "ya no está a la venta";
+cotizar 404; seller list shows it; publish → `activo` and public 200; back to
+draft → `borrador`. `tsc` clean. Not seen in a browser (Comercio / modal).

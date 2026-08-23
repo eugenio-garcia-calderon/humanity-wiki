@@ -88,6 +88,14 @@ export default function Comercio() {
     cargar();
   }
 
+  async function publicarProducto(id: string, aBorrador: boolean) {
+    await fetch(`/api/publicar/mis-productos/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(aBorrador ? { borrador: true } : { publicar: true }),
+    });
+    cargar();
+  }
+
   async function aceptarPuntos(id: string, valor: boolean) {
     await fetch(`/api/publicar/mis-productos/${id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -205,6 +213,14 @@ export default function Comercio() {
                         · {p.stock <= 0 ? 'agotado' : `${p.stock} en stock`}
                       </span>}
                       {p.status === 'tienda' && <span className="text-slate-400">· solo en tu tienda</span>}
+                      {p.status === 'borrador' && (
+                        <span className="px-1.5 h-5 inline-flex items-center rounded bg-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-wide">borrador</span>
+                      )}
+                      {/* Publicar un borrador, o esconder algo publicado mientras se arregla. */}
+                      <button type="button" onClick={() => publicarProducto(p.id, p.status !== 'borrador')}
+                        className="text-[11px] font-bold text-slate-500 underline">
+                        {p.status === 'borrador' ? 'publicar' : 'pasar a borrador'}
+                      </button>
                       {Number(p.n_resenas) > 0 && (
                         <span className="text-amber-600 font-bold">· ★ {Number(p.media_estrellas).toLocaleString('es-ES')} ({p.n_resenas})</span>
                       )}
