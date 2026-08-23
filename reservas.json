@@ -77,12 +77,6 @@
       "ruta": "memory/10_TIENDAS.md",
       "motivo": "corregir de quien son las publicaciones de prueba: lo supuse y era falso",
       "desde": "2026-08-23T12:34:56.607Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": ".env.example",
-      "motivo": "fase 2: llaves de Google y clave maestra",
-      "desde": "2026-08-23T12:40:42.510Z"
     }
   ]
 }
