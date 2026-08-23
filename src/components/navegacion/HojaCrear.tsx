@@ -59,9 +59,25 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-label="Crear"
-        className="fixed inset-x-0 bottom-0 z-[9998] h-1/2 animate-in slide-in-from-bottom duration-200"
+        /*
+         * 72 vh Y NO LA MITAD (2026-08-23). Eugenio: «haz más grande la ventana
+         * central de crear y un poco más pequeñas las tarjetas de herramientas
+         * para que quepa todo sin tener que hacer el scroll down».
+         *
+         * Media pantalla estaba bien elegida por lo que dura el gesto —creas y
+         * te vas— y mal por lo que hay que enseñar: son TRECE cosas, y a la
+         * mitad quedaban cinco fuera. Una lista donde hay que buscar lo que no
+         * se ve pierde justo lo que la hacía rápida.
+         *
+         * El sitio sale de los dos lados a la vez: la hoja crece y la tarjeta
+         * encoge. Sólo agrandando habría hecho falta el 95 % de la pantalla,
+         * que ya no es una hoja sino otra página; sólo encogiendo, las tarjetas
+         * dejarían de leerse. Con 72 vh y cinco columnas caben las trece en
+         * tres filas en un ordenador y en cinco en un móvil.
+         */
+        className="fixed inset-x-0 bottom-0 z-[9998] h-[72vh] animate-in slide-in-from-bottom duration-200"
       >
-        <div className="mx-auto flex h-full max-w-2xl flex-col rounded-t-3xl border border-slate-200 bg-white shadow-2xl">
+        <div className="mx-auto flex h-full max-w-3xl flex-col rounded-t-3xl border border-slate-200 bg-white shadow-2xl">
           {/* El tirador de arriba: dice «esto se arrastra o se cierra» sin
               escribirlo, y es lo que la gente ya conoce de su teléfono. */}
           <div className="flex items-center justify-between px-5 pb-2 pt-3">
@@ -73,20 +89,30 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
           </div>
           <p className="px-5 pb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Crear</p>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {/* `overflow-y-auto` se queda aunque ya no haga falta: en una pantalla
+              muy baja —un portátil de 13 pulgadas con la barra del navegador— o
+              con la letra del sistema muy grande, trece tarjetas pueden volver a
+              no caber. Que entonces se pueda bajar es mejor que quedarse sin
+              ver las últimas. */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
               {COSAS.map(c => (
                 <button
                   key={c.nombre}
                   onClick={() => { navegar(c.a); onCerrar(); }}
-                  className="flex flex-col items-start gap-1 rounded-2xl border border-slate-200 px-3 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
+                  title={c.nota}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-slate-200 px-2 py-3 text-center transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
                 >
-                  <c.icono className="h-5 w-5 text-emerald-600" />
-                  <span className="text-[13px] font-black text-slate-900">{c.nombre}</span>
-                  {/* La nota explica lo que el nombre no dice. Las que no la
-                      necesitan no la llevan: rellenar todas con una frase
-                      obligaría a inventar texto para «Mapa». */}
-                  {c.nota && <span className="text-[11px] leading-snug text-slate-500">{c.nota}</span>}
+                  <c.icono className="h-5 w-5 shrink-0 text-emerald-600" />
+                  <span className="text-[12px] font-black leading-tight text-slate-900">{c.nombre}</span>
+                  {/* La nota se esconde en pantallas pequeñas y sigue viva en el
+                      `title`: en un móvil el sitio se lo tienen que llevar los
+                      nombres, que son lo que hay que leer. Las que no la
+                      necesitan no la llevan — rellenarlas todas obligaría a
+                      inventar una frase para «Mapa». */}
+                  {c.nota && (
+                    <span className="hidden text-[10px] leading-tight text-slate-500 sm:line-clamp-2">{c.nota}</span>
+                  )}
                 </button>
               ))}
             </div>
