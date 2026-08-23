@@ -123,6 +123,25 @@ jobs:
               sed -i '/^CLOUDFLARE_TURN_API_TOKEN=/d' .env.production
               echo "CLOUDFLARE_TURN_API_TOKEN=${{ secrets.CLOUDFLARE_TURN_API_TOKEN }}" >> .env.production
             fi
+            # LAS LLAVES DE GOOGLE (2026-08-23, prog8). Mismo camino que las
+            # demás. La clave maestra con la que se cifra el permiso de cada
+            # persona ya la escribe el bloque de arriba: **no se repite aquí**.
+            # Dos sitios escribiendo la misma variable es cómo se acaba
+            # cambiándola en uno y no en el otro.
+            #
+            # `GOOGLE_REDIRECT_URI` no es un secreto —es una dirección pública—
+            # pero se escribe aquí igualmente: tiene que coincidir LETRA POR
+            # LETRA con la que esté dada de alta en la consola de Google, y
+            # dejarla suelta en un `.env` a mano es dejarla a merced del
+            # siguiente `git reset --hard` del despliegue.
+            for v in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI; do
+              sed -i "/^$v=/d" .env.production
+            done
+            if [ -n "${{ secrets.GOOGLE_CLIENT_SECRET }}" ]; then
+              echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}"         >> .env.production
+              echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env.production
+              echo "GOOGLE_REDIRECT_URI=https://humanity.wiki/api/google/vuelta" >> .env.production
+            fi
             # Migraciones ANTES de reconstruir: si una falla, el código nuevo
             # no llega a arrancar y la app vieja sigue en pie con su esquema.
             bash deploy/migrate.sh

@@ -10,6 +10,7 @@ import { cn } from '../utils/cn';
 import { useSettings, FontScaleKey, FONT_SCALE_LABELS } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { BorrarCuenta } from '../components/cuenta/BorrarCuenta';
+import CuentaDeGoogle from '../components/social/CuentaDeGoogle';
 import { Bloqueados } from '../components/cuenta/Bloqueados';
 
 export default function Configuracion() {
@@ -48,7 +49,12 @@ export default function Configuracion() {
 
       {/* Y lo de la cuenta, al final y separado: lo de arriba se toca a menudo,
           esto se toca una vez en la vida. */}
+      {/* CONECTAR GOOGLE VA ANTES QUE BORRAR LA CUENTA y después de lo de uso
+          diario: es una decisión que se toma una vez, como bloquear a alguien,
+          pero no es irreversible ni destructiva. El orden de esta columna es
+          por cuánto duele equivocarse, de menos a más. */}
       <div className="mt-6 space-y-6">
+        <CuentaDeGoogle />
         <Bloqueados />
         <BorrarCuenta />
       </div>
