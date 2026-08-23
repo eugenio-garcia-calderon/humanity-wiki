@@ -69,7 +69,28 @@ const MAX_DATOS = 200;
 // Endpoints that serve the same answer to everyone: never kept. See the fetch
 // handler for why — a copy of somebody else's public page must not survive them
 // taking it down.
-const PUBLICO = ["/api/publicar/"];
+// Rutas de `/api/` que NUNCA se guardan.
+//
+// `/api/publicar/` porque contesta lo mismo a todo el mundo: una copia acabaría
+// en el navegador de un desconocido y, al despublicar el autor su página, ese
+// desconocido se la seguiría sirviendo desde su propio disco.
+//
+// `/api/auth/` POR UNA RAZÓN DISTINTA Y MÁS GRAVE (2026-08-23): es QUIÉN ERES.
+// `/api/auth/me` devuelve `application/json`, así que caía de lleno en la caché
+// de datos, y eso tiene dos consecuencias que ninguna caché debería tener:
+//
+//   1. **Cerrar sesión no bastaba.** La respuesta guardada es un `{user: …}` de
+//      antes. Si la petición de después falla por cualquier motivo, la rama de
+//      respaldo la sirve con estado 200 y sin que nadie lo distinga de una
+//      respuesta viva. Al revés también: un `{user: null}` guardado deja la
+//      pantalla diciendo que no has entrado cuando el servidor sabe que sí.
+//   2. **En un aparato compartido**, la identidad de una persona se queda en el
+//      disco después de que se vaya.
+//
+// La identidad se pregunta siempre, o no se pregunta. Sin conexión no hace
+// falta respuesta guardada: `AuthContext` ya trata el fallo como «todavía no lo
+// sé», que es la verdad.
+const PUBLICO = ["/api/publicar/", "/api/auth/"];
 // Images, styles and fonts only, and no more than this many. Enough for the
 // icons and the maps you actually opened; not enough to quietly eat a phone.
 const MAX_MEDIA = 60;

@@ -77,6 +77,12 @@ const casos = [
   ['documento en Word',         '/api/documentos/7/docx', {}, true, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', false],
   ['documento en PDF',          '/api/documentos/7/pdf',  {}, true, 'application/pdf', false],
 
+  // QUIÉN ERES NO SE GUARDA (2026-08-23). Una respuesta guardada de
+  // `/api/auth/me` deja «no has entrado» pegado después de entrar, y en un
+  // aparato compartido deja la identidad de alguien en el disco.
+  ['quién soy',                 '/api/auth/me',       { accept: J }, true, J, false],
+  ['salir',                     '/api/auth/logout',   { accept: J }, true, J, false],
+
   // LO QUE SÍ TIENE QUE SEGUIR GUARDÁNDOSE, o el avión vuelve a ser un muro.
   ['tus proyectos',             '/api/proyectos',     { accept: J }, true, J, true],
   ['el muro',                   '/api/publicaciones', {},            true, J, true],
