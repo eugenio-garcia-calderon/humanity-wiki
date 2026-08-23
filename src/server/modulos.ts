@@ -70,6 +70,7 @@ import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
 import { registerAgendaRoutes } from './agenda.js';
 import { registerGoogleRoutes } from './google.js';
+import { registerMisVideosRoutes } from './misVideos.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
@@ -222,6 +223,14 @@ export const MODULOS: Modulo[] = [
     nota: 'Una de sus rutas, `/api/google/vuelta`, la abre Google en el navegador de la '
         + 'persona y NO lleva sesión: se identifica con un pase firmado que viaja en el '
         + '`state`. Es a propósito y está explicado en el módulo.',
+  },
+  {
+    nombre: 'misVideos',
+    montar: (app, db) => registerMisVideosRoutes(app, db),
+    nota: 'NO es `youtube`, que ya está en esta lista y es la pantalla de cine de la '
+        + 'aldea. Aquella recomienda lo que no has visto; esta enseña lo que ya has '
+        + 'guardado. Depende de `google` para la llave, pero no del orden: se la pide '
+        + 'en cada petición, no al montarse.',
   },
 ];
 

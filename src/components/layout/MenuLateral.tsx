@@ -28,8 +28,7 @@ import {
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
-  Paperclip, Bookmark, Megaphone,
-} from 'lucide-react';
+  Paperclip, Bookmark, Megaphone, Youtube } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { iconoDeProyecto } from '../../utils/iconoDeNombre';
 import { useAuth } from '../../contexts/AuthContext';
@@ -377,6 +376,10 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       // EL TELÉFONO VA JUNTO A MENSAJES porque es lo mismo visto de otra
       // manera: a la misma persona se le escribe o se le llama (2026-08-22).
       id: 'telefono', label: 'Teléfono', icono: Phone, destino: '/telefono',
+    } as NodoMenu, {
+      // MIS VÍDEOS va aquí, con lo demás que es tuyo y no de la plataforma:
+      // tus mensajes, tus llamadas, tus vídeos (2026-08-23).
+      id: 'mis-videos', label: 'Mis vídeos', icono: Youtube, destino: '/mis-videos',
     } as NodoMenu] : []),
     // LOS GRUPOS FAVORITOS, aquí arriba (Eugenio: «ponerlo como favoritos,
     // entonces los grupos favoritos se añadirán»). Cada uno abre la lista ya
