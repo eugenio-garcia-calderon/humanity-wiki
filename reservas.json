@@ -71,6 +71,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "la barra de abajo ofrece a un visitante cosas que no puede usar",
       "desde": "2026-08-23T12:10:00.132Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/ventanas/Navegador.tsx",
+      "motivo": "fase 1: ligero por defecto y render de una vez, sin lag",
+      "desde": "2026-08-23T12:14:49.408Z"
     }
   ]
 }
