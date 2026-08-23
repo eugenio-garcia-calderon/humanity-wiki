@@ -25,6 +25,7 @@ import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
 import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
+import { avisar } from './avisos';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -316,7 +317,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
   app.get('/api/publicar/producto/:id', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT id, name, description, price_cents, currency, images, kind,
+        SELECT id, name, description, price_cents, currency, images, kind, created_by,
                modality, billing_period, stock, warranty, return_policy, category,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
                (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
@@ -360,6 +361,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // Las opiniones, resumidas: media en estrellas (1-5) y cuántas. `null`
         // = nadie ha opinado, que no es lo mismo que cero estrellas.
         valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
+        // Quién vende, para «preguntar al vendedor» (un mensaje directo).
+        vendedor: p.created_by ? { id: p.created_by } : null,
         // Si el vendedor acepta cobrar en puntos (y el interruptor está
         // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
         acepta_puntos: !!p.acepta_puntos,
@@ -982,6 +985,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
             await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
           }
         }
+        // EL VENDEDOR SE ENTERA (2026-08-23): hasta hoy vendía y no lo sabía
+        // salvo que entrara en Comercio. Un aviso por la campana, con el
+        // código, que lleva a su panel de pedidos.
+        await avisar(db, {
+          paraQuien: vendedorId, dePartede: req.user!.id, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
+          datos: { texto: `${resumen} · pedido ${codigo} · pagado con ${puntosUsados.toLocaleString('es-ES')} puntos`, codigo, destino: '/comercio?pestana=pedidos' },
+        });
         return res.json({
           pagado_con_puntos: true, codigo, puntos_usados: puntosUsados,
           subtotal_centimos: subtotal, descuento_centimos: descuentoCentimos, envio_centimos: envioCobrado,
@@ -1513,10 +1523,28 @@ export function registerPublicarRoutes(app: Express, db: any) {
           nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
-        RETURNING codigo, estado, seguimiento
+        RETURNING id, codigo, estado, seguimiento, comprador_user_id, producto_nombre
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
-      res.json({ ...(r.rows[0] as any), puntos_devueltos: puntosDevueltos });
+      const fila = r.rows[0] as any;
+      // EL COMPRADOR SE ENTERA (2026-08-23): si el estado ha cambiado y el
+      // pedido tiene cuenta detrás, un aviso con lo que ha pasado y el
+      // número de seguimiento si lo hay. Quien compró sin cuenta sigue
+      // teniendo su código y la página del pedido.
+      if (estado && fila.comprador_user_id) {
+        const TEXTO: Record<string, string> = {
+          pagado: 'está pagado y en preparación', enviado: 'ha salido', entregado: 'consta como entregado',
+          devuelto: 'se ha devuelto', cancelado: 'se ha cancelado',
+        };
+        await avisar(db, {
+          paraQuien: fila.comprador_user_id, dePartede: req.user.id, tipo: 'pedido_estado', entidadTipo: 'pedidos', entidadId: fila.id,
+          datos: {
+            texto: `Tu pedido ${fila.codigo} (${fila.producto_nombre}) ${TEXTO[estado] || estado}${fila.seguimiento && estado === 'enviado' ? ` · seguimiento ${fila.seguimiento}` : ''}${puntosDevueltos > 0 ? ` · ${puntosDevueltos.toLocaleString('es-ES')} puntos devueltos` : ''}.`,
+            codigo: fila.codigo, estado, destino: `/pedido?codigo=${fila.codigo}`,
+          },
+        });
+      }
+      res.json({ codigo: fila.codigo, estado: fila.estado, seguimiento: fila.seguimiento, puntos_devueltos: puntosDevueltos });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 

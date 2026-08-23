@@ -256,6 +256,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
             <textarea value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={4}
               placeholder="De dónde sale, cómo es, qué tamaño tiene…"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 text-base leading-relaxed focus:border-emerald-400 focus:outline-none resize-y" />
+            <p className="mt-1 text-[11px] text-slate-400">Puedes dar formato: <b>**negrita**</b>, <i>*cursiva*</i>, listas con «- » y tablas. Se ve en la ficha tal cual lo escribes.</p>
           </Campo>
 
           {tipo === 'digital' && (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star } from 'lucide-react';
+import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star, MessageCircle } from 'lucide-react';
+import Markdown from '../components/ai/Markdown';
 import { useCarrito } from '../hooks/useCarrito';
 import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from '../components/knowledge/Cesta';
 
@@ -21,6 +22,16 @@ import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direcci
 // devoluciones y opiniones. Es lo que alguien quiere saber antes de dar su
 // tarjeta a un desconocido, y cada dato que falta es una razón para no
 // hacerlo.
+
+/** La tienda vive en `nombre.humanity.wiki`; los mensajes, en el dominio
+ *  principal. Se quita el primer subdominio; en local (sin subdominio) es el
+ *  mismo origen. */
+const dominioPrincipal = () => {
+  if (typeof window === 'undefined') return '';
+  const partes = window.location.hostname.split('.');
+  if (partes.length > 2 && !window.location.hostname.endsWith('localhost')) return `${window.location.protocol}//${partes.slice(1).join('.')}${window.location.port ? ':' + window.location.port : ''}`;
+  return '';
+};
 
 export default function FichaProducto({ handle }: { handle: string }) {
   const { producto } = useParams();
@@ -230,6 +241,16 @@ export default function FichaProducto({ handle }: { handle: string }) {
             </div>
           )}
 
+          {/* PREGUNTAR AL VENDEDOR (2026-08-23): un mensaje directo, que ya
+              existe (Telecomunicaciones). La duda que no se puede preguntar
+              es una venta que no se hace. */}
+          {p.vendedor?.id && (
+            <a href={`${dominioPrincipal()}/mensajes?con=${encodeURIComponent(p.vendedor.id)}`}
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+              <MessageCircle className="w-4 h-4" /> Preguntar al vendedor
+            </a>
+          )}
+
           {(p.garantia || p.devoluciones) && (
             <ul className="mt-5 space-y-1.5 pt-4 border-t border-slate-100">
               {p.garantia && <li className="flex items-center gap-2 text-xs text-slate-500">
@@ -244,9 +265,12 @@ export default function FichaProducto({ handle }: { handle: string }) {
       {p.descripcion && (
         <section className="mt-10 pt-6 border-t border-slate-100 max-w-2xl">
           <h2 className="text-lg font-black text-slate-900 mb-2">Sobre esto</h2>
-          <p className="text-[15px] leading-relaxed text-slate-700" style={{ whiteSpace: 'pre-wrap' }}>
-            {p.descripcion}
-          </p>
+          {/* Con formato (2026-08-23): negrita, cursiva, listas, tablas — el
+              mismo Markdown del asistente. Lo que el vendedor escribe sin
+              marcas se ve igual que antes, párrafo a párrafo. */}
+          <div className="text-[15px] leading-relaxed text-slate-700">
+            <Markdown texto={p.descripcion} />
+          </div>
         </section>
       )}
 

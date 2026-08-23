@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -49,6 +49,9 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   puntos_inactividad: { icono: Hourglass,      frase: () => 'Tu saldo de puntos se perderá si no vuelves' },
   puntos_caducan:     { icono: Hourglass,      frase: () => 'Parte de tus puntos va a caducar' },
   puntos_perdidos:    { icono: Coins,          frase: () => 'Puntos perdidos' },
+  // Comercio (prog7, 2026-08-23).
+  pedido_nuevo:       { icono: ShoppingBag,    frase: n => `${n} te ha comprado algo` },
+  pedido_estado:      { icono: Package,        frase: () => 'Tu pedido se ha movido' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -75,6 +78,9 @@ const destinoDe = (a: Aviso): string | null => {
   if (a.entity_type === 'mensajes') return a.payload?.de ? `/mensajes?con=${a.payload.de}` : `/mensajes`;
   // Un aviso de puntos lleva a tu saldo, donde está la fecha y lo que hacer.
   if (a.entity_type === 'puntos') return `/vision?pestana=economia`;
+  // Un pedido lleva a quien lo mira: al vendedor a su panel, al comprador a
+  // su pedido. El aviso trae su propio destino porque lo sabe quien lo escribe.
+  if (a.entity_type === 'pedidos') return a.payload?.destino || '/comercio?pestana=pedidos';
   return null;
 };
 
