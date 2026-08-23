@@ -63,6 +63,34 @@ function trozo(texto: string | null, palabras: string[], largo = 180): string | 
   return (desde > 0 ? '…' : '') + limpio.slice(desde, hasta) + (hasta < limpio.length ? '…' : '');
 }
 
+/**
+ * Saca `enPlataforma` y `general` de un texto que quería ser JSON y no llegó.
+ *
+ * No intenta reparar el JSON: busca cada rótulo y lee la cadena que va detrás,
+ * aceptando que la última se acabe sin cerrar. Devuelve `null` si no reconoce
+ * ninguno de los dos rótulos — y ese `null` significa «no sé qué es esto»,
+ * que es distinto de «no hay nada» y se trata distinto más abajo.
+ */
+function rescatarPartes(texto: string): { enPlataforma: string; general: string } | null {
+  const campo = (nombre: string): string => {
+    // La comilla de cierre es opcional a propósito: si el modelo se quedó sin
+    // tokens a mitad de frase, esa frase sigue siendo útil.
+    const re = new RegExp(`"${nombre}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)("|$)`);
+    const m = texto.match(re);
+    if (!m) return '';
+    return m[1]
+      .replace(/\\n/g, ' ')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+  const enPlataforma = campo('enPlataforma');
+  const general = campo('general');
+  if (!enPlataforma && !general) return null;
+  return { enPlataforma, general };
+}
+
 export function registerBuscadorRoutes(app: Express, db: any) {
   /**
    * LO QUE SE VE MIENTRAS SE ESCRIBE — `GET /api/buscar/sugerencias?q=`
@@ -302,7 +330,11 @@ export function registerBuscadorRoutes(app: Express, db: any) {
         const r = await proveedor.complete({
           system: sistema,
           messages: [{ role: 'user', content: mensaje }],
-          maxTokens: 500,
+          // 800 y no 500: se pide un JSON con dos cadenas dentro, y a 500 el
+          // modelo barato se quedaba sin sitio a mitad de la segunda. Cortar
+          // el JSON es peor que cortar un párrafo, porque se pierde el rótulo
+          // de qué parte es cuál.
+          maxTokens: 800,
           temperature: 0.3,
           model: modelo,
         });
@@ -317,6 +349,21 @@ export function registerBuscadorRoutes(app: Express, db: any) {
         if (m) partes = JSON.parse(m[0]);
       } catch { partes = null; }
 
+      // ── SEGUNDO INTENTO SIN `JSON.parse` ─────────────────────────────────
+      // Medido contra producción el 2026-08-24, misma búsqueda cinco veces con
+      // el modelo barato: dos de cinco devolvieron el JSON **cortado a la
+      // mitad** —se acaban los tokens en medio de la segunda cadena—. Eso hace
+      // fallar a `JSON.parse`, y entonces caía en el camino de abajo, que da
+      // por prosa lo que en realidad era JSON: al usuario le salían las llaves
+      // y las comillas escritas en el bloque gris. Feo, y encima mandaba a la
+      // parte «no comprobado» un texto que venía rotulado como comprobado.
+      //
+      // Un JSON cortado no es un JSON perdido: los rótulos siguen estando. Se
+      // sacan los dos campos a mano, y así se recupera la atribución, que es
+      // justo lo que no se puede perder. Lo que quede a medias se queda a
+      // medias; lo que no se puede leer, no se enseña.
+      if (!partes) partes = rescatarPartes(texto);
+
       // ── CUANDO EL MODELO NO DEVUELVE EL JSON QUE SE LE PIDIÓ ──────────────
       // Pasa, y con el modelo barato pasa a menudo: la misma pregunta dos
       // veces, una sale bien y otra devuelve prosa suelta. Medido el
@@ -328,7 +375,12 @@ export function registerBuscadorRoutes(app: Express, db: any) {
       // entero va a la parte de la IA. Nunca al revés.
       if (!partes || (!partes.enPlataforma && !partes.general)) {
         const suelto = texto.replace(/```[a-z]*|```/g, '').trim();
-        if (suelto.length > 20) {
+        // Y SI TODAVÍA PARECE JSON, NO SE ENSEÑA. Aquí ya han fallado el
+        // parseo y el rescate, así que lo único que se puede hacer con unas
+        // llaves es pintárselas a alguien. Antes salía sin resumen; sigue
+        // saliendo sin resumen, pero ahora a propósito.
+        const pareceJson = suelto.startsWith('{') || suelto.includes('"enPlataforma"');
+        if (suelto.length > 20 && !pareceJson) {
           return res.json({
             hay: true, enPlataforma: null, general: suelto.slice(0, 900),
             modelo: String(req.body?.modelo || 'sencillo'), sinSeparar: true,
