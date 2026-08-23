@@ -65,6 +65,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "dos tipos de aviso de puntos (caducidad/inactividad)",
       "desde": "2026-08-23T12:22:56.026Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "memory/10_TIENDAS.md",
+      "motivo": "textos de las fichas de App Store y Play",
+      "desde": "2026-08-23T12:28:46.724Z"
     }
   ]
 }
