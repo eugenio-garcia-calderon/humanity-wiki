@@ -34,6 +34,9 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   // el valor en euros, con un 50 % de descuento en la comisión»). El
   // equivalente sale de la tasa que publica el servidor (1 punto = 1 € hoy).
   const [aceptaPuntos, setAceptaPuntos] = useState(false);
+  // BORRADOR (2026-08-23): guardar sin publicar. No se ve ni se puede comprar
+  // hasta que se publique desde Comercio.
+  const [borrador, setBorrador] = useState(false);
   const [tasaPuntos, setTasaPuntos] = useState<number | null>(null);
   useEffect(() => {
     fetch('/api/publicar/puntos-en-caja').then(r => r.json())
@@ -134,6 +137,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           imagenes: fotos,
           archivo_digital: tipo === 'digital' && archivo ? archivo.url : undefined,
           acepta_puntos: tipo !== 'suscripcion' && aceptaPuntos,
+          borrador,
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -205,6 +209,12 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                   </label>
                 );
               })()}
+              <label className="mt-2 flex items-start gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                <input type="checkbox" checked={borrador} onChange={e => setBorrador(e.target.checked)} className="mt-1" />
+                <span className="text-xs leading-relaxed text-slate-700">
+                  <b>Guardar como borrador</b> — no se verá ni se podrá comprar hasta que lo publiques desde Comercio.
+                </span>
+              </label>
             </Campo>
             {/* El stock sólo tiene sentido en lo que se envía: «quedan 3» en un
                 servicio querría decir tres plazas, que es otra cosa, y en una

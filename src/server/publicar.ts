@@ -323,6 +323,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
                (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas
         FROM products
         WHERE id = ${String(req.params.id)} AND archived_at IS NULL
+          -- Un BORRADOR solo lo ve quien lo está escribiendo (2026-08-23):
+          -- para el resto no existe, que es lo que «borrador» promete.
+          AND (status <> 'borrador' OR created_by = ${req.user?.id || ''})
       `);
       const p = r.rows[0] as any;
       if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
@@ -516,7 +519,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
         SELECT id, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos
-        FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+        FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       const lineas = crudas.map(l => ({ p: productos.find(x => x.id === String(l.producto_id)), unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) })).filter(l => l.p && l.p.price_cents);
       if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
@@ -552,7 +555,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const ids = lineas.map(l => String(l?.producto_id || '')).filter(Boolean);
       const productos = (await db.execute(sql`
         SELECT id, price_cents, created_by FROM products
-        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       const vendedores = new Set(productos.map(p => p.created_by));
       if (vendedores.size !== 1) return res.json({ valido: false, descuento_centimos: 0, motivo: 'El cupón es de una sola tienda.' });
@@ -785,7 +788,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
                billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
         FROM products
         WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
-          AND archived_at IS NULL
+          AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
 
       // Se comprueba TODO antes de cobrar NADA. Cobrar la mitad de un carrito
@@ -1117,7 +1120,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador,
       } = req.body || {};
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
@@ -1172,7 +1175,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const id = 'PRD' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
       // `tienda` para quien no está verificado; `activo` para quien sí, que es
       // lo que ya podía hacer por la otra puerta.
-      const estado = nivel >= 2 ? 'activo' : 'tienda';
+      // BORRADOR (2026-08-23, plan de comercio): un producto a medias no se ve
+      // ni se puede comprar hasta que su dueño lo publique. Hasta hoy todo
+      // nacía publicado, y un precio provisional era un precio a la venta.
+      const estado = borrador === true ? 'borrador' : (nivel >= 2 ? 'activo' : 'tienda');
       const fotos = Array.isArray(imagenes) ? imagenes.filter((x: any) => typeof x === 'string').slice(0, 8) : [];
 
       await db.execute(sql`
@@ -1278,6 +1284,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
             WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
             ELSE archivo_digital END,
           acepta_puntos = CASE WHEN ${b.acepta_puntos !== undefined} THEN ${!!b.acepta_puntos} ELSE acepta_puntos END,
+          -- Publicar un borrador o volver a borrador. Al publicar, el estado
+          -- es el que le toca por nivel: mercado común (activo) o solo su
+          -- tienda (tienda) — la misma regla que al crearlo.
+          status = CASE
+            WHEN ${b.borrador === true} THEN 'borrador'
+            WHEN ${b.publicar === true} THEN ${(req.user.roleLevel ?? 0) >= 2 ? 'activo' : 'tienda'}
+            ELSE status END,
           updated_by = ${req.user.id},
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
