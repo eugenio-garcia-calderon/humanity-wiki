@@ -149,6 +149,12 @@
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
       "desde": "2026-08-23T13:45:28.078Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/ai/assistant.ts",
+      "motivo": "tope mensual de gasto de IA de la plataforma",
+      "desde": "2026-08-23T13:49:06.237Z"
     }
   ]
 }
