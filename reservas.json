@@ -107,18 +107,6 @@
       "ruta": "src/components/navegacion/TresCirculos.tsx",
       "motivo": "prog2: desplegar el menu al pasar el raton por el circulo",
       "desde": "2026-08-23T23:51:00.086Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog7: F6 changelog (1 min)",
-      "desde": "2026-08-23T23:53:24.631Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/13_PLAN_COMERCIO.md",
-      "motivo": "prog7: F6 changelog (1 min)",
-      "desde": "2026-08-23T23:53:24.631Z"
     }
   ]
 }
