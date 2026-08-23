@@ -47,6 +47,12 @@
       "ruta": "src/server/knowledge.ts",
       "motivo": "contar apoyos para ordenar por popularidad",
       "desde": "2026-08-23T23:07:37.421Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/buscador.ts",
+      "motivo": "prog2: buscador con sugerencias y resumen de IA",
+      "desde": "2026-08-23T23:09:33.100Z"
     }
   ]
 }
