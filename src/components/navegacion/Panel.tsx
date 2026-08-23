@@ -97,17 +97,39 @@ function Vacio({ children }: { children: any }) {
 // las otras dos en cuanto alguien añada una tabla a una y no a las demás.
 // ---------------------------------------------------------------------------
 function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
-  const [proyectos, setProyectos] = useState<any[] | null>(null);
+  /*
+   * TRES ESTADOS, NO DOS: cargando (`null`), una lista, o un FALLO.
+   *
+   * La primera versión hacía `.catch(() => setProyectos([]))`, y eso pinta
+   * «Todavía no tienes proyectos» cuando lo que ha pasado es que la petición
+   * se ha caído. Eugenio lo vio en producción: el panel decía que no tenía
+   * ninguno mientras la página de al lado enseñaba cinco.
+   *
+   * Es la regla raíz de esta plataforma incumplida por mí, y está escrita en
+   * `src/server/CLAUDE.md`: **todo tiene que poder decir «no lo sé» de una
+   * forma distinguible de un resultado válido**. Un fallo convertido en cero
+   * no es un cero: es una mentira que además parece un dato.
+   */
+  const [proyectos, setProyectos] = useState<any[] | 'fallo' | null>(null);
   const [busca, setBusca] = useState('');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [arboles, setArboles] = useState<Record<string, any[] | 'cargando'>>({});
   const navegar = useNavigate();
 
-  useEffect(() => {
+  const recargar = () => {
     fetch('/api/proyectos', { credentials: 'include' })
-      .then(r => r.json()).then(j => setProyectos(Array.isArray(j) ? j : []))
-      .catch(() => setProyectos([]));
-  }, []);
+      .then(async r => {
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        // Si un día deja de ser un array, quiero enterarme, no enseñar cero.
+        if (!Array.isArray(j)) throw new Error('respuesta inesperada');
+        return j;
+      })
+      .then(setProyectos)
+      .catch(() => setProyectos('fallo'));
+  };
+
+  useEffect(recargar, []);
 
   const desplegar = (p: any) => {
     if (abierto === p.id) { setAbierto(null); return; }
@@ -120,7 +142,8 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
       .catch(() => setArboles(a => ({ ...a, [p.id]: [] })));
   };
 
-  const visibles = (proyectos || []).filter(p =>
+  const lista = Array.isArray(proyectos) ? proyectos : [];
+  const visibles = lista.filter(p =>
     !busca.trim() || (p.titulo || '').toLowerCase().includes(busca.trim().toLowerCase()));
 
   return (
@@ -137,7 +160,19 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         {proyectos === null && <Vacio>Cargando…</Vacio>}
-        {proyectos !== null && visibles.length === 0 && (
+        {proyectos === 'fallo' && (
+          <div className="px-3 py-4">
+            <p className="text-xs leading-relaxed text-amber-700">
+              No hemos podido cargar tus proyectos. No es que no tengas: es que
+              no hemos podido preguntarlo.
+            </p>
+            <button onClick={() => { setProyectos(null); recargar(); }}
+              className="mt-2 rounded-lg border border-amber-300 px-2.5 py-1.5 text-[12px] font-bold text-amber-800 hover:bg-amber-50">
+              Volver a intentarlo
+            </button>
+          </div>
+        )}
+        {Array.isArray(proyectos) && visibles.length === 0 && (
           <Vacio>{busca ? 'Ningún proyecto con ese nombre.' : 'Todavía no tienes proyectos. Empieza por el botón de arriba.'}</Vacio>
         )}
         {visibles.map(p => {
