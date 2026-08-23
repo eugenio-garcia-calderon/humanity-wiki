@@ -86,12 +86,6 @@
     },
     {
       "agente": "prog8-turn",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "fase 3: mis videos de YouTube",
-      "desde": "2026-08-23T12:55:47.291Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "drizzle/0106_mis_videos.sql",
       "motivo": "fase 3: los videos de YouTube, pintados aqui",
       "desde": "2026-08-23T12:56:14.853Z"
