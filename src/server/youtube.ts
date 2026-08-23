@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
+import { tokenDe as tokenDeGoogle } from './google.js';
 
 // ============================================================================
 // GRAN PANTALLA DE YOUTUBE (2026-08-18, petición de Eugenio)
@@ -79,7 +80,17 @@ export function registerYoutubeRoutes(app: Express, db: any) {
   /** Token vigente para llamar a la API; refresca si está caducado o al caer. */
   const tokenVigente = async (userId: string): Promise<string | null> => {
     const c = await cuentaDe(userId);
-    if (!c) return null;
+    // ── SI YA CONECTÓ SU CUENTA POR LA VÍA GENERAL, VALE (2026-08-23) ────────
+    // Desde la fase 2 existe `/api/google/conectar`, que pide el permiso de
+    // YouTube entre otros y guarda la llave cifrada. Quien haya pasado por ahí
+    // NO tiene por qué pasar otra vez por la pantalla de permisos solo para
+    // que funcione el cine de la aldea.
+    //
+    // Es un añadido, no un cambio: quien tenga su fila de siempre en
+    // `youtube_accounts` sigue exactamente igual. Unificar del todo —migrar
+    // esas filas y retirar este flujo— es una decisión de Eugenio, no un
+    // arreglo de paso, y está apuntada en la deuda técnica.
+    if (!c) return await tokenDeGoogle(db, userId);
     const caducado = c.token_expiry && new Date(c.token_expiry).getTime() < Date.now() + 60_000;
     if (!caducado) return c.access_token;
     if (!c.refresh_token) return null;

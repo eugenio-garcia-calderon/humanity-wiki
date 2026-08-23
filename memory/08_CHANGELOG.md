@@ -6343,6 +6343,7 @@ shell roto**.
 - **La prueba cuenta las cargas** (`scripts/probar-clic-sin-espera.mjs`, 10 comprobaciones). El síntoma era «va lento», que no falla ninguna prueba: si no se cuenta, vuelve.
 - **Tercera vez en el día** que una comilla invertida dentro de una plantilla de JavaScript cierra el literal y lo de después se evalúa como código. Queda avisado dentro de la propia inyección.
 
+
 ### 2026-08-24 — Comercio F6: avisos de pedido por WhatsApp (Programador 7)
 - Eugenio (24-08): «les mandamos un whatsapp, no un email, que es más moderno, montémoslo». Antes de esto **nadie recibía nada al comprar**: quien compraba sin cuenta solo tenía su código en la pantalla; si cerraba la pestaña, lo perdía. Era el agujero más grande del comercio.
 - **Dos capas a propósito.** (1) **Funciona hoy, sin cuenta ni clave**: enlaces `wa.me` con el texto ya escrito — el comprador ve «Escribir al vendedor por WhatsApp» en su pedido y el vendedor «WhatsApp al comprador» en cada venta; lo manda la persona desde su número, coste cero. (2) **Automático, apagado**: cliente de la Cloud API de Meta (`src/server/whatsapp.ts`), `WHATSAPP_ENVIO=off` por defecto: calcula el mensaje, lo anota como `simulado` y no sale nada. Para enviar de verdad hacen falta cosas que no son programación y solo puede hacer Eugenio: cuenta de Meta Business verificada, número dedicado y **plantillas aprobadas** por Meta (categoría «utility»); los nombres de plantilla se configuran por variable.
