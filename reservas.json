@@ -17,6 +17,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "quitar la barra de cinco: la sustituyen los tres circulos",
       "desde": "2026-08-23T17:26:38.625Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Bienvenida.tsx",
+      "motivo": "el nombre nuevo en la portada",
+      "desde": "2026-08-23T17:30:15.943Z"
     }
   ]
 }
