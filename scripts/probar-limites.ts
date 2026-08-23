@@ -105,6 +105,17 @@ async function main() {
   const quedan = Number((await db.execute(sql`SELECT count(*)::int AS n FROM frenos WHERE clave LIKE '%AI-prueba-%'`)).rows[0].n);
   es('no queda ni una fila de prueba', quedan, 0);
 
+  console.log('\n== 10 · El buscador: escribir NO puede tocar el freno ==');
+  // 40 llamadas seguidas es una búsqueda larga escrita del tirón. Si esto
+  // frenara, el buscador se sentiría roto y nadie sabría por qué.
+  const B = REGLAS.buscar;
+  const IPB = 'AI-prueba-teclea';
+  for (let i = 0; i < B.gracia; i++) await ritmo(db, B, IPB);
+  es(`${B.gracia} seguidas escribiendo -> sin freno`, await esperaPendiente(db, B, IPB), 0);
+  await ritmo(db, B, IPB);
+  es('y la siguiente ya frena, poco', await esperaPendiente(db, B, IPB), B.baseSegundos);
+  es('sin ensuciar el rastro', Number((await db.execute(sql`SELECT count(*)::int AS n FROM intentos_fallidos WHERE ip = ${IPB}`)).rows[0].n), 0);
+
   console.log(`\n${mal === 0 ? 'TODO BIEN' : 'HAY FALLOS'} — ${ok} bien, ${mal} mal\n`);
   await pool.end();
   process.exit(mal === 0 ? 0 : 1);

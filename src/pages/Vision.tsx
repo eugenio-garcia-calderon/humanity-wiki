@@ -418,6 +418,12 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
   if (!gasto) return <p className="text-sm text-slate-400 py-16 text-center">No se ha podido cargar el gasto.</p>;
 
   const srv = gasto.servidores;
+  /** El techo de gasto de IA. Viaja en la misma respuesta y siempre fresco:
+   *  el gasto se cachea seis horas, el tope no (ver `gasto.ts`). */
+  const tope = gasto.tope_ia as {
+    tope_mes_eur: number; tope_dia_eur: number; gastado_mes_eur: number; gastado_dia_eur: number;
+    porcentaje_mes: number; alcanzado: boolean; motivo: 'mes' | 'dia' | null;
+  } | undefined;
   const oficial = gasto.ia.oficial_anthropic;
   const interno = gasto.ia.interno;
   // LOS MODELOS ABIERTOS TAMBIÉN CUESTAN (2026-08-22). Con la facturación
@@ -518,6 +524,39 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
               <span className="text-slate-900 font-black ml-auto">{eur(interno.mes_actual.abiertos_eur)}</span>
             </div>
           </div>
+          {/* ══ EL TECHO DE GASTO, DEBAJO DE LO QUE SE LLEVA GASTADO ═══════
+              (2026-08-23.) Una cifra de gasto sin su tope no dice si va bien o
+              mal: 15 € es tranquilizador con un techo de 100 y una urgencia
+              con uno de 20. Van juntos o no dicen nada.
+
+              SE ENSEÑA A TODO EL MUNDO, como el resto de esta página: el coste
+              de las máquinas ya está aquí a propósito, y el de la IA también.
+              Lo que no aparece es cómo cambiarlo. */}
+          {tope && (
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center text-xs">
+                <span className="text-slate-600 font-bold">Tope del mes</span>
+                <span className="text-slate-900 font-black ml-auto">
+                  {eur(tope.gastado_mes_eur)} <span className="text-slate-400 font-bold">de {eur(tope.tope_mes_eur)}</span>
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all',
+                    tope.alcanzado ? 'bg-red-500' : tope.porcentaje_mes >= 80 ? 'bg-amber-500' : 'bg-emerald-500')}
+                  style={{ width: `${Math.min(100, Math.max(1, tope.porcentaje_mes))}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+                {tope.alcanzado
+                  ? (tope.motivo === 'dia'
+                    ? `Alcanzado el tope de hoy (${eur(tope.tope_dia_eur)}): las respuestas del modelo vuelven mañana. El buscador sigue funcionando.`
+                    : 'Alcanzado el tope del mes: no hay respuestas del modelo hasta el mes que viene. El buscador sigue funcionando.')
+                  : `${tope.porcentaje_mes} % del tope del mes · hoy ${eur(tope.gastado_dia_eur)} de ${eur(tope.tope_dia_eur)}. Al llegar al tope, el chat sigue buscando y deja de preguntar al modelo.`}
+              </p>
+            </div>
+          )}
+
           <p className="text-[10px] text-slate-400 mt-3 leading-relaxed">
             {oficial.estado === 'ok'
               ? 'Anthropic: dato oficial de facturación. Google: estimación por el registro interno de llamadas.'
@@ -556,8 +595,13 @@ export default function Vision() {
   const [textos, setTextos] = useState<Record<string, string>>({});
   // `?pestana=economia` abre directamente Economía: es adonde llevan los
   // avisos de puntos de la campana (caducidad, inactividad).
-  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>(() =>
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pestana') === 'economia' ? 'economia' : 'hoja_de_ruta');
+  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>(() => {
+    // `?pestana=gasto` lo usa el aviso del 80 % del tope de IA (2026-08-23):
+    // un aviso que abre la pestaña equivocada obliga a buscar a mano justo lo
+    // que venía a enseñarte.
+    const p = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('pestana') : null;
+    return p === 'economia' ? 'economia' : p === 'gasto' ? 'gasto' : 'hoja_de_ruta';
+  });
 
   const cargar = () => fetch('/api/roadmap')
     .then(r => r.json())
