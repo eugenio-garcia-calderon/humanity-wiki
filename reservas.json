@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "drizzle/0110_datos_fiscales_y_recibo.sql",
-      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
-      "desde": "2026-08-23T13:45:28.078Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/publicar.ts",
       "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
       "desde": "2026-08-23T13:45:28.078Z"
