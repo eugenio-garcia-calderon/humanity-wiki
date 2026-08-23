@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8b",
+      "ruta": "src/pages/Tablas.tsx",
+      "motivo": "Graficas nivel OWID: vista Grafica dentro de la tabla",
+      "desde": "2026-08-23T15:15:23.054Z"
+    }
+  ]
 }
