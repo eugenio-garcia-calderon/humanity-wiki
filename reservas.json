@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "public/sw.js",
+      "motivo": "quien eres no se guarda en cache",
+      "desde": "2026-08-23T11:49:50.982Z"
+    }
+  ]
 }
