@@ -5,6 +5,18 @@
       "ruta": "src/hooks/useAbrirAlAcercarse.ts",
       "motivo": "prog2: un solo gesto de hover para toda la barra",
       "desde": "2026-08-23T23:26:40.324Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "muro limpio: solo publicaciones, con portada y video al pasar el raton",
+      "desde": "2026-08-23T23:30:41.345Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "muro limpio: solo publicaciones, con portada y video al pasar el raton",
+      "desde": "2026-08-23T23:30:41.345Z"
     }
   ]
 }
