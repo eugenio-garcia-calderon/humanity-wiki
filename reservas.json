@@ -49,18 +49,6 @@
       "desde": "2026-08-23T12:22:07.040Z"
     },
     {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0105_cuenta_de_google.sql",
-      "motivo": "fase 2: conectar tu cuenta de Google (0104 lo tiene prog7)",
-      "desde": "2026-08-23T12:32:22.299Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0106_mis_videos.sql",
-      "motivo": "fase 3: los videos de YouTube, pintados aqui",
-      "desde": "2026-08-23T12:56:14.853Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
