@@ -29,12 +29,6 @@
       "ruta": "src/pages/Vision.tsx",
       "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
       "desde": "2026-08-23T11:36:09.015Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "drizzle/0100_reparto_fijo_y_referencia.sql",
-      "motivo": "reparto fijo + referencia (0099 ya en main)",
-      "desde": "2026-08-23T11:36:29.428Z"
     }
   ]
 }
