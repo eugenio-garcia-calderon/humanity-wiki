@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
-      "desde": "2026-08-23T13:45:28.078Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
       "desde": "2026-08-23T13:45:28.078Z"
