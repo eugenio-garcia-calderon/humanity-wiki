@@ -52,6 +52,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [periodo, setPeriodo] = useState<'mensual' | 'trimestral' | 'anual'>('mensual');
   const [stock, setStock] = useState('');
   const [variantes, setVariantes] = useState<VarianteForm[]>([]);
+  const [iva, setIva] = useState<string>('');
   const [envio, setEnvio] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotoNueva, setFotoNueva] = useState('');
@@ -142,6 +143,8 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           borrador,
           // Variantes (2026-08-23): solo en lo que no es suscripción.
           variantes: tipo !== 'suscripcion' ? variantesAlServidor(variantes) : [],
+          // IVA del producto (F4): vacío = el tipo por defecto de tus datos fiscales.
+          iva_pct: iva === '' ? null : Number(iva),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -220,6 +223,16 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                 </span>
               </label>
             </Campo>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">IVA incluido en el precio</p>
+              <select value={iva} onChange={e => setIva(e.target.value)} className="h-10 px-2.5 rounded-lg border border-slate-200 text-sm bg-white" aria-label="Tipo de IVA">
+                <option value="">El de mis datos fiscales (por defecto 21 %)</option>
+                <option value="21">21 % general</option>
+                <option value="10">10 % reducido</option>
+                <option value="4">4 % superreducido</option>
+                <option value="0">0 % (exento)</option>
+              </select>
+            </div>
             {tipo !== 'suscripcion' && (
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Variantes (tallas, colores…)</p>

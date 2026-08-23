@@ -6071,6 +6071,13 @@ returns 204 and never surfaces in the chat. Test rows deleted, table back to 0.
 one query. Not before: with 16 users the sample will be small, and a small
 sample said out loud is honest — presented as if it were big, it is not.
 
+### 2026-08-23 — Comercio, segunda vuelta · Fase 4 (acotada): datos fiscales del vendedor, IVA por producto y RECIBO no fiscal (Programador 7)
+- Acotada con el Dashboard hasta que Eugenio/asesor digan cómo se factura **en nombre del vendedor** (facturación por cuenta ajena; quién vende sin ser empresa): **nada numerado como factura**. Condiciones escritas para cuando toque: número correlativo sacado en la misma transacción que crea la factura (sin huecos ni repetidos; una anulada explicada antes que un hueco), y datos fiscales **copiados dentro de la factura** (una factura emitida no se edita).
+- 0110: `datos_fiscales (user_id, nombre_fiscal, nif, direccion, cp, ciudad, pais, iva_defecto, serie_factura)` y `products.iva_pct` (21/10/4/0; nulo = el del vendedor). Hoy no existía ningún dato fiscal en la plataforma.
+- Rutas: `GET/PUT /api/publicar/mis-datos-fiscales` (NIF validado en forma; `completos` solo con nombre, NIF, dirección, CP y ciudad); `iva_pct` en POST/PUT `mis-productos`; `construirRecibo` + `GET /api/publicar/pedido/:codigo/recibo?correo=` (comprador: correo o sesión) y `GET /api/publicar/mis-ventas/:id/recibo` (vendedor). El recibo dice arriba que **no es una factura**; con datos fiscales completos enseña quién vende y un **desglose de IVA informativo sobre los euros cobrados** (precios con IVA incluido; lo pagado en puntos no lleva IVA en euros; 0 € → sin desglose). Fallo cazado en la prueba: repartía IVA sobre un envío pagado en puntos → corregido.
+- UI: `Recibo.tsx` (imprimir / guardar en PDF con `@media print` que deja solo el recibo), botón «Ver el recibo» en MiPedido y «Recibo» por venta en Comercio; panel plegable **Datos fiscales** en Comercio (`DatosFiscales.tsx`, con la nota de que sin datos hay recibo y no factura); select de IVA en CrearProducto.
+- Probado en local por HTTP: datos vacíos → `completos=false`; sin NIF → false; NIF «12 3» → 400; completo → true; producto con IVA 10 comprado en puntos (2 uds + envío) → recibo del comprador con NIF del vendedor, línea con 10 %, puntos 22, euros 0; recibo del vendedor con comprador y dirección; otro usuario → 404; sin llaves → 400; sin datos fiscales → sin desglose y «no es factura». Todo retirado.
+
 ### 2026-08-23 — A ceiling on what the platform can spend on AI (prog8)
 
 From the security board: **the AI chat has no spending ceiling**. It answers
