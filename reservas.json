@@ -74,12 +74,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/server/bd.ts",
-      "motivo": "renombrar y retirar una tabla",
-      "desde": "2026-08-23T00:18:37.998Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/pages/Tablas.tsx",
       "motivo": "renombrar y retirar desde la pantalla",
       "desde": "2026-08-23T00:21:36.460Z"
