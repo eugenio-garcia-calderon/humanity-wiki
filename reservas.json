@@ -179,6 +179,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "tope mensual de gasto de IA de la plataforma",
       "desde": "2026-08-23T13:49:21.893Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
+      "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
+      "desde": "2026-08-23T13:50:52.975Z"
     }
   ]
 }
