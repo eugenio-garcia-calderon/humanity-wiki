@@ -6012,6 +6012,7 @@ opened in a browser (admin session in the shared browser).
 - **Carrito abandonado**: `useCarrito` sincroniza cada cambio con `PUT /api/publicar/cesta` si hay sesión (retraso de 800 ms; un 401 apaga el intento en esa página: a nadie anónimo se le persigue) y recupera la cesta guardada si la local está vacía (otro dispositivo). Barrido horario (`barridoComercio`, y `POST /api/admin/comercio/barrido` a mano): cestas con líneas, 24 h sin tocar y sin aviso → aviso `cesta_olvidada` por la campana con destino `https://{tienda}.humanity.wiki/?cesta=abrir` (la cesta se abre sola), una vez por cesta (tocarla reinicia el reloj). El resumen del vendedor dice `cestas_a_medias` (30 días).
 - **Favoritos**: corazón en las tarjetas del mercado y en la ficha de la tienda (`BotonFavorito`), chip «Favoritos (n)» en /mercado que filtra; `GET/PUT/DELETE /api/publicar/favoritos[/:id]`. El mismo barrido avisa `precio_bajado` cuando un favorito baja de precio (una vez por precio; el precio guardado se pone al día).
 - Probado en local por HTTP: guardar/leer/vaciar cesta; sin sesión 401; resumen del vendedor con 1 cesta a medias; cesta retrasada 25 h → 1 aviso con destino a la tienda, segundo barrido 0; favorito guardado a 45 € → precio a 40 € → aviso «ha bajado de 45,00 € a 40,00 €», precio guardado 4000, segundo barrido 0; DELETE → 0. Todo retirado (precio demo repuesto, handle temporal quitado).
+
 ### 2026-08-23 — A counter for whether the platform can answer about its own content (prog8)
 
 The Dashboard asked how much search-first has saved since #290, in euros. Two
