@@ -53,6 +53,12 @@
       "ruta": "src/utils/bloques.ts",
       "motivo": "prog2: bloques que faltan (desplegable, aviso, indice)",
       "desde": "2026-08-23T14:23:34.298Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Proyectos.tsx",
+      "motivo": "quitar la lista que ahora duplica el panel lateral",
+      "desde": "2026-08-23T14:25:38.562Z"
     }
   ]
 }
