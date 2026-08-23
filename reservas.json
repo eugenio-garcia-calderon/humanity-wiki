@@ -1,3 +1,40 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0103_reparto_automatico_y_bienvenida.sql",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Vision.tsx",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/about/Tokenomics.tsx",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/about/TokenomicsLibroBlanco.tsx",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/about/TokenomicsTareas.tsx",
+      "motivo": "",
+      "desde": "2026-08-23T11:59:36.486Z"
+    }
+  ]
 }
