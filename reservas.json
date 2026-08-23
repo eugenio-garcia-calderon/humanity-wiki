@@ -95,6 +95,24 @@
       "ruta": "drizzle/0106_mis_videos.sql",
       "motivo": "fase 3: los videos de YouTube, pintados aqui",
       "desde": "2026-08-23T12:56:14.853Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
+      "desde": "2026-08-23T13:01:14.835Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Bienvenida.tsx",
+      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
+      "desde": "2026-08-23T13:01:14.835Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/bienvenida/previas.tsx",
+      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
+      "desde": "2026-08-23T13:01:14.835Z"
     }
   ]
 }
