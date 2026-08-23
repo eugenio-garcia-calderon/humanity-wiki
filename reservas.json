@@ -121,12 +121,6 @@
       "desde": "2026-08-23T13:27:41.996Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: contador de quien contesta",
-      "desde": "2026-08-23T13:41:55.139Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0110_datos_fiscales_y_recibo.sql",
       "motivo": "comercio F4: datos fiscales del vendedor + recibo (no fiscal)",
