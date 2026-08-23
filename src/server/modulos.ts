@@ -71,6 +71,8 @@ import { registerVeracidadRoutes } from './veracidad.js';
 import { registerAgendaRoutes } from './agenda.js';
 import { registerGoogleRoutes } from './google.js';
 import { registerMisVideosRoutes } from './misVideos.js';
+import { registerContactosGoogleRoutes } from './contactosGoogle.js';
+import { registerCalendarioGoogleRoutes } from './calendarioGoogle.js';
 import { registerTelecomRoutes } from './telecom.js';
 import { registerTextosRoutes } from './textos.js';
 
@@ -231,6 +233,20 @@ export const MODULOS: Modulo[] = [
         + 'aldea. Aquella recomienda lo que no has visto; esta enseña lo que ya has '
         + 'guardado. Depende de `google` para la llave, pero no del orden: se la pide '
         + 'en cada petición, no al montarse.',
+  },
+  {
+    nombre: 'contactosGoogle',
+    montar: (app, db) => registerContactosGoogleRoutes(app, db),
+    nota: 'La cuarta puerta de la agenda, con el .vcf, el Atajo del iPhone y el selector '
+        + 'del navegador. Las cuatro pasan por `importarContactosDe()`: son las reglas de '
+        + 'no duplicar y no pisar nombres, y no puede haber dos copias.',
+  },
+  {
+    nombre: 'calendarioGoogle',
+    montar: (app, db) => registerCalendarioGoogleRoutes(app, db),
+    nota: 'El único de los tres de Google que NO guarda copia: un calendario cambia '
+        + 'mientras lo miras, y una cita vieja te presenta a la hora que no es. El '
+        + 'porqué está escrito en la cabecera del módulo.',
   },
 ];
 
