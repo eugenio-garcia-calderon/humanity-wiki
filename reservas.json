@@ -29,12 +29,6 @@
       "ruta": "src/server/gasto.ts",
       "motivo": "la cache del gasto pasa a la base de datos",
       "desde": "2026-08-23T11:45:45.159Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: un reparto por mes garantizado + boton de admin",
-      "desde": "2026-08-23T11:46:49.126Z"
     }
   ]
 }
