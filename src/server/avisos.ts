@@ -48,12 +48,14 @@ export type TipoAviso =
   // Gasto de IA (prog8, 2026-08-23): solo para quien administra, y solo una
   // vez por mes. Enterarse al llegar al tope es enterarse tarde. Enterarse
   // cada día de que se va acercando es enseñar a ignorar la campana.
-  // (El punto va donde había un punto y coma: esta lista la amplían otros a
-  //  máquina buscando el primer «;», y un «;» dentro de un comentario parte
-  //  el tipo por la mitad. Le pasó a prog7 el 2026-08-23 con este mismo
+  // (El punto de arriba va donde había un punto y coma: esta lista la amplían
+  //  otros a máquina buscando el primer «;», y un «;» dentro de un comentario
+  //  parte el tipo por la mitad. Le pasó a prog7 el 2026-08-23 con este mismo
   //  comentario. En una lista que amplía todo el mundo, la puntuación de un
   //  comentario deja de ser cosa del que lo escribe.)
-  | 'gasto_ia_80';        // la plataforma lleva el 80 % del tope de IA del mes
+  | 'gasto_ia_80'        // la plataforma lleva el 80 % del tope de IA del mes
+  // Comercio F5 (prog7, 2026-08-23): algo agotado que pediste que te avisáramos vuelve a estar disponible.
+  | 'vuelve_stock';
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos

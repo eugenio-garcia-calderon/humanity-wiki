@@ -109,7 +109,7 @@ recibo/factura con IVA, «avísame cuando vuelva», valoración del vendedor.
 | **F2** | **Variantes/SKU**: talla, color… con precio y stock por variante; la variante elegida viaja en cesta, pedido y línea; «agotado» por variante | hecha 23-08 (PR fase 2, 0107) |
 | **F3** | **Carrito abandonado**: la cesta se guarda en el servidor con sesión; a las 24 h sin comprar, aviso por la campana con enlace a la cesta; panel del vendedor ve cuántas cestas se quedan a medias · **Favoritos / lista de deseos** con aviso si baja el precio | hecha 23-08 (PR fase 3, 0108) |
 | **F4** | **Recibo/factura imprimible** por pedido (comprador y vendedor), con **IVA desglosado** y datos fiscales del vendedor (NIF, dirección) en su panel; tipo de IVA por producto | hecha 23-08 la parte que no depende del asesor (PR fase 4, 0110): datos fiscales + IVA por producto + RECIBO no fiscal. **Factura numerada: esperando a Eugenio/asesor** (facturación en nombre del vendedor) |
-| **F5** | **«Avísame cuando vuelva»** (stock) · **productos relacionados** en la ficha (misma categoría/vendedor) · **valoración del vendedor** (media de sus reseñas verificadas en la tienda y la ficha) | pendiente |
+| **F5** | **«Avísame cuando vuelva»** (stock, por producto o variante; aviso por la campana una vez) · **productos relacionados** en la ficha («También en esta tienda») · **valoración del vendedor** (solo agregado de reseñas verificadas de sus productos; con menos de `MIN_RESENAS_VALORACION_VENDEDOR`=3 no se enseña nada) | hecha 23-08 (PR fase 5, 0111) |
 
 Las cinco cosas nuevas que no teníamos: avisos de pedido (F1), preguntar al
 vendedor (F1), favoritos (F3), recibo/factura con IVA (F4), avísame cuando

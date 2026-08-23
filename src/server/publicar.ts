@@ -77,6 +77,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
   // el número sacado en la misma transacción que la crea, y con los datos
   // fiscales copiados dentro. Hoy no se emite nada numerado.
   const IVAS_VALIDOS = [21, 10, 4, 0];
+  // Con menos de estas reseñas verificadas no se enseña la valoración del
+  // vendedor (acordado con el Dashboard, 23-08: con 16 usuarios, 3; el día
+  // que haya 500 opiniones, subirlo es cambiar este número).
+  const MIN_RESENAS_VALORACION_VENDEDOR = 3;
   const limpiaTexto = (v: any, max: number) => { const t = String(v ?? '').trim(); return t ? t.slice(0, max) : null; };
   const fiscalCompleto = (f: any) => !!(f && f.nombre_fiscal && f.nif && f.direccion && f.cp && f.ciudad);
 
@@ -330,8 +334,31 @@ export function registerPublicarRoutes(app: Express, db: any) {
       });
       await db.execute(sql`UPDATE favoritos_productos SET precio_centimos = ${Number(b.actual)} WHERE user_id = ${b.user_id} AND producto_id = ${b.producto_id}`);
     }
-    if (olvidadas.rows.length || bajadas.rows.length) console.log(`[comercio] barrido: ${olvidadas.rows.length} cestas olvidadas avisadas, ${bajadas.rows.length} bajadas de precio avisadas.`);
-    return { cestas_olvidadas_avisadas: olvidadas.rows.length, bajadas_de_precio_avisadas: bajadas.rows.length };
+    // «Avísame cuando vuelva» (F5): pendientes cuyo producto (o variante) ya
+    // tiene stock disponible (descontando reservas). Stock nulo = no se lleva
+    // la cuenta = disponible.
+    const pendientes = await db.execute(sql`
+      SELECT a.user_id, a.producto_id, a.variante_id, p.name, p.stock AS stock_producto, v.stock AS stock_variante, v.nombre AS variante_nombre, v.activo AS variante_activa, u.handle AS tienda
+      FROM avisos_stock a JOIN products p ON p.id = a.producto_id LEFT JOIN producto_variantes v ON v.id = a.variante_id LEFT JOIN users u ON u.id = p.created_by
+      WHERE a.avisado_at IS NULL AND p.archived_at IS NULL AND p.status <> 'borrador'
+      LIMIT 500
+    `);
+    let vueltas = 0;
+    for (const a of pendientes.rows as any[]) {
+      if (a.variante_id && a.variante_activa === false) continue;
+      const bruto = a.variante_id ? a.stock_variante : a.stock_producto;
+      const disponible = bruto === null || bruto === undefined ? Infinity : Number(bruto) - await reservado(db, a.producto_id, a.variante_id || null);
+      if (disponible <= 0) continue;
+      const nombre = `${a.name}${a.variante_nombre ? ` — ${a.variante_nombre}` : ''}`;
+      await avisar(db, {
+        paraQuien: a.user_id, dePartede: null, tipo: 'vuelve_stock', entidadTipo: 'stock', entidadId: `${a.producto_id}:${a.variante_id || ''}:${Date.now()}`,
+        datos: { texto: `${nombre} vuelve a estar disponible.`, producto_id: a.producto_id, destino: a.tienda ? `https://${a.tienda}.${dominioPublico()}/producto/${encodeURIComponent(a.producto_id)}` : '/mercado' },
+      });
+      await db.execute(sql`UPDATE avisos_stock SET avisado_at = now() WHERE user_id = ${a.user_id} AND producto_id = ${a.producto_id} AND coalesce(variante_id, '') = coalesce(${a.variante_id}::text, '')`);
+      vueltas++;
+    }
+    if (olvidadas.rows.length || bajadas.rows.length || vueltas) console.log(`[comercio] barrido: ${olvidadas.rows.length} cestas olvidadas avisadas, ${bajadas.rows.length} bajadas de precio avisadas, ${vueltas} vueltas de stock avisadas.`);
+    return { cestas_olvidadas_avisadas: olvidadas.rows.length, bajadas_de_precio_avisadas: bajadas.rows.length, vueltas_de_stock_avisadas: vueltas };
   };
   /** GET/PUT /api/publicar/preferencias — de momento, solo si quieres el aviso de cesta olvidada. */
   app.get('/api/publicar/preferencias', async (req: Request, res: Response) => {
@@ -349,6 +376,37 @@ export function registerPublicarRoutes(app: Express, db: any) {
       }
       const r = (await db.execute(sql`SELECT ui_settings FROM users WHERE id = ${req.user.id}`)).rows[0] as any;
       res.json({ aviso_cesta: (r?.ui_settings?.aviso_cesta ?? 'on') !== 'off' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** PUT /api/publicar/avisame/:productoId { variante_id? } — avísame cuando vuelva; DELETE — ya no. */
+  app.put('/api/publicar/avisame/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra para que te avisemos.' });
+      const p = (await db.execute(sql`SELECT id FROM products WHERE id = ${String(req.params.id)} AND archived_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+      const vid = String(req.body?.variante_id || '').trim() || null;
+      await db.execute(sql`
+        INSERT INTO avisos_stock (user_id, producto_id, variante_id) VALUES (${req.user.id}, ${p.id}, ${vid})
+        ON CONFLICT (user_id, producto_id, coalesce(variante_id, '')) DO UPDATE SET avisado_at = NULL, created_at = now()
+      `);
+      res.json({ avisame: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.delete('/api/publicar/avisame/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const vid = String(req.query.variante_id || '').trim() || null;
+      await db.execute(sql`DELETE FROM avisos_stock WHERE user_id = ${req.user.id} AND producto_id = ${String(req.params.id)} AND coalesce(variante_id, '') = coalesce(${vid}::text, '')`);
+      res.json({ avisame: false });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** GET /api/publicar/avisame/:id — ¿tengo pedido aviso para este producto (y variante)? */
+  app.get('/api/publicar/avisame/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const r = await db.execute(sql`SELECT variante_id, avisado_at FROM avisos_stock WHERE user_id = ${req.user.id} AND producto_id = ${String(req.params.id)}`);
+      res.json({ pedidos: (r.rows as any[]).map(x => ({ variante_id: x.variante_id, avisado: !!x.avisado_at })) });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -629,6 +687,28 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       const imagenes = Array.isArray(p.images) ? p.images.filter((x: any) => typeof x === 'string') : [];
       const variantes = (await variantesDe(db, [p.id])).get(p.id) || [];
+      // RELACIONADOS (F5): otras cosas de la misma tienda, la misma categoría
+      // primero. Solo de la misma tienda: la ficha vive en su subdominio.
+      const relacionados = p.created_by ? (await db.execute(sql`
+        SELECT id, name, price_cents, currency, images, category
+        FROM products WHERE created_by = ${p.created_by} AND id <> ${p.id} AND archived_at IS NULL AND status IN ('activo', 'tienda')
+        ORDER BY (category = ${p.category || ''}) DESC, created_at DESC LIMIT 6
+      `)).rows as any[] : [];
+      // VALORACIÓN DEL VENDEDOR (F5, acordado con el Dashboard): NADIE valora a
+      // la persona; es el agregado de las reseñas de sus PRODUCTOS con compra
+      // verificada, y con menos de 3 no se enseña nada (una sola «1,0» no es
+      // una nota, es un enfado con aspecto de estadística).
+      const valVendedor = p.created_by ? (await db.execute(sql`
+        SELECT round(avg(r.score) / 2.0, 1)::float AS media, count(*)::int AS n
+        FROM ratings r JOIN products pr ON pr.id = r.entity_id AND r.entity_type = 'products'
+        WHERE pr.created_by = ${p.created_by} AND r.user_id <> pr.created_by
+          AND EXISTS (
+            SELECT 1 FROM pedidos pd LEFT JOIN pedido_lineas pl ON pl.pedido_id = pd.id LEFT JOIN users cu ON cu.id = r.user_id
+            WHERE pd.estado NOT IN ('cancelado', 'devuelto') AND (pd.producto_id = pr.id OR pl.producto_id = pr.id)
+              AND (pd.comprador_user_id = r.user_id OR (cu.email IS NOT NULL AND lower(pd.comprador_email) = lower(cu.email)))
+          )
+      `)).rows[0] as any : null;
+      const nVal = Number(valVendedor?.n || 0);
       res.json({
         id: p.id,
         nombre: p.name,
@@ -661,7 +741,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // = nadie ha opinado, que no es lo mismo que cero estrellas.
         valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
         // Quién vende, para «preguntar al vendedor» (un mensaje directo).
-        vendedor: p.created_by ? { id: p.created_by } : null,
+        vendedor: p.created_by ? { id: p.created_by, valoracion: nVal >= MIN_RESENAS_VALORACION_VENDEDOR ? { media: Number(valVendedor.media), n: nVal } : null } : null,
+        relacionados: relacionados.map((x: any) => ({ id: x.id, nombre: x.name, precio_centimos: x.price_cents ?? null, moneda: x.currency || 'EUR', imagen: Array.isArray(x.images) ? x.images[0] || null : null })),
         // Si el vendedor acepta cobrar en puntos (y el interruptor está
         // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
         acepta_puntos: !!p.acepta_puntos,
