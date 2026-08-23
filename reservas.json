@@ -161,12 +161,6 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "marcar como se contesto cada pregunta",
       "desde": "2026-08-23T13:31:39.836Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "F3 comercio: entrada del changelog (30 s)",
-      "desde": "2026-08-23T13:38:58.575Z"
     }
   ]
 }
