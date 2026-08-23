@@ -53,6 +53,12 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "prog2: buscador con sugerencias y resumen de IA",
       "desde": "2026-08-23T23:09:33.100Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "prog2: registrar el buscador",
+      "desde": "2026-08-23T23:12:28.053Z"
     }
   ]
 }
