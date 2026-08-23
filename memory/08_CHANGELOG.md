@@ -6012,3 +6012,61 @@ opened in a browser (admin session in the shared browser).
 - **Carrito abandonado**: `useCarrito` sincroniza cada cambio con `PUT /api/publicar/cesta` si hay sesión (retraso de 800 ms; un 401 apaga el intento en esa página: a nadie anónimo se le persigue) y recupera la cesta guardada si la local está vacía (otro dispositivo). Barrido horario (`barridoComercio`, y `POST /api/admin/comercio/barrido` a mano): cestas con líneas, 24 h sin tocar y sin aviso → aviso `cesta_olvidada` por la campana con destino `https://{tienda}.humanity.wiki/?cesta=abrir` (la cesta se abre sola), una vez por cesta (tocarla reinicia el reloj). El resumen del vendedor dice `cestas_a_medias` (30 días).
 - **Favoritos**: corazón en las tarjetas del mercado y en la ficha de la tienda (`BotonFavorito`), chip «Favoritos (n)» en /mercado que filtra; `GET/PUT/DELETE /api/publicar/favoritos[/:id]`. El mismo barrido avisa `precio_bajado` cuando un favorito baja de precio (una vez por precio; el precio guardado se pone al día).
 - Probado en local por HTTP: guardar/leer/vaciar cesta; sin sesión 401; resumen del vendedor con 1 cesta a medias; cesta retrasada 25 h → 1 aviso con destino a la tienda, segundo barrido 0; favorito guardado a 45 € → precio a 40 € → aviso «ha bajado de 45,00 € a 40,00 €», precio guardado 4000, segundo barrido 0; DELETE → 0. Todo retirado (precio demo repuesto, handle temporal quitado).
+
+### 2026-08-23 — A counter for whether the platform can answer about its own content (prog8)
+
+The Dashboard asked how much search-first has saved since #290, in euros. Two
+answers came out of looking, and the second one matters more.
+
+**It cannot be measured today**: a question the search answers leaves **no row
+anywhere** — it never reaches `/api/ai/chat`, so there is no `ai_messages` and
+no `ai_usage_charges`. What the AI cost is known to the cent; how often it was
+not needed is not recorded at all. Counting `/api/search` does not fix it
+either: the top search bar calls the same route, and the chat's typeahead calls
+it once per typing pause.
+
+**And there is no story in euros.** Public `GET /api/gasto` in production: the
+platform's whole internal AI spend for August 2026 is **0,74 €** (0,727 €
+Anthropic + 0,018 € open models). With 16 users, saving even half is ~0,37 € a
+month. Search-first is worth having for speed and for answering with links
+instead of prose — not as a cost saving, and it must not be sold as one.
+
+**So the counter that went in is not measuring money.** It measures whether the
+platform can answer about its own content: if most of what people ask ends up
+at the model, the search is not failing — the content is not being found, or is
+not there, and that is a product problem. A signal about the content, read at
+the door people ask through. That reason is written in the migration header,
+the route and the client **next to the 0,74 €**, because whoever finds this
+table in a year would otherwise assume it was built to save costs and draw the
+opposite conclusion (the Dashboard's point, and the right one).
+
+What it is made of:
+
+- `drizzle/0109_como_se_contesto.sql` — one row per question in
+  `chat_como_se_contesto`: `resuelta` ('plataforma' | 'modelo') and, when the
+  platform answered, how many results were shown. **Neither the question text
+  nor who asked is stored**: a proportion needs neither, and a table holding
+  people's questions is a table that has to be protected, anonymised and purged.
+  Both halves live in the same table so the ratio is one query rather than a
+  join between `ai_usage_charges` (which only exists when there was a charge)
+  and something else.
+- `POST /api/search/marca` in `src/server/graph.ts`, session-less on purpose —
+  the chat works for visitors, and demanding a session would measure only
+  registered users and bias the number upwards exactly where it should be
+  honest. It is forgeable, and that is written down: the worst anyone achieves
+  is spoiling our own statistic.
+- The chat marks both outcomes, fire-and-forget, `keepalive`. An escalation
+  (searched, nothing found, question) counts as **one** row, `modelo`: what is
+  counted is who ended up answering.
+
+Verified on 3008: «retos del agua» → one `plataforma / 8` row and **no**
+`/api/ai/chat`; an escalated question → one `modelo` row (the model call itself
+was cut in the browser for the test, so no tokens were spent); «zzqxvon
+praderas» → `plataforma / 0`, because "there is nothing published" is also an
+answer. Bad `resuelta` → 400; out-of-range `resultados` clamped; a failed insert
+returns 204 and never surfaces in the chat. Test rows deleted, table back to 0.
+`tsc` clean.
+
+**What it will answer, in a month**: `X de Y preguntas` with its window, from
+one query. Not before: with 16 users the sample will be small, and a small
+sample said out loud is honest — presented as if it were big, it is not.
