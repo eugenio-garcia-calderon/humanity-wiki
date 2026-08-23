@@ -77,12 +77,6 @@
       "ruta": "memory/10_TIENDAS.md",
       "motivo": "corregir de quien son las publicaciones de prueba: lo supuse y era falso",
       "desde": "2026-08-23T12:34:56.607Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": ".github/workflows/deploy.yml",
-      "motivo": "fase 2: clave maestra y llaves de Google al .env.production",
-      "desde": "2026-08-23T12:40:57.840Z"
     }
   ]
 }
