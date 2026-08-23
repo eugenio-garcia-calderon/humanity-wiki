@@ -74,6 +74,83 @@ jobs:
               sed -i '/^CLAVE_MAESTRA=/d' .env.production
               echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
             fi
+            # ══ LAS LLAVES QUE HOY SOLO VIVEN EN EL SERVIDOR ═══════════════════
+            # De las 27 variables del `.env.production`, este fichero solo sabía
+            # reponer 7. Las otras 20 existen ÚNICAMENTE en ese fichero, en esa
+            # máquina — la misma de la que las copias de seguridad protegen.
+            #
+            # O sea: los datos a salvo en Cloudflare y las llaves para leerlos
+            # solo en el servidor que puede desaparecer. Es la diferencia entre
+            # «tengo copias» y «puedo volver».
+            #
+            # Estas líneas son la TUBERÍA, y están puestas aunque los secretos
+            # todavía no existan: si no están en GitHub, el `if` no hace nada y
+            # el despliegue sigue igual. El día que Eugenio pegue uno, llega
+            # solo. Mismo patrón que el servicio de copias esperando su cubo.
+            #
+            # QUÉ SE PIERDE HOY SI SE PIERDE LA MÁQUINA, por orden de gravedad:
+            #  · CLAVE_FIRMA_REGISTRO / CLAVES_PUBLICAS_REGISTRO — el libro
+            #    sellado no se puede verificar ni continuar. Su valor entero era
+            #    ser comprobable.
+            #  · STRIPE_* — los cobros no vuelven hasta sacarlas otra vez.
+            #  · ANTHROPIC / GEMINI / MAPBOX — molestia, no pérdida.
+            #
+            # LO QUE NO SE REPONE DESDE AQUÍ, Y ES A PROPÓSITO:
+            #  · SQL_ADMIN_PASSWORD. Es la contraseña que la BASE DE DATOS ya
+            #    tiene guardada en su volumen. Escribirla desde un secreto que
+            #    no coincida dejaría a la aplicación sin poder abrir su propia
+            #    base — un despliegue en verde y la plataforma muerta. Se
+            #    documenta en `deploy/copias/CLAUDE.md` y no se automatiza.
+            # UN `if` POR VARIABLE, Y NO UN BUCLE, Y ESTO NO ES ESTILO.
+            # El primer intento usó un `for` con CONTINUACIONES DE LÍNEA (`\`)
+            # y un `case … esac` dentro, y el despliegue murió con
+            # `syntax error near unexpected token ';'` (2026-08-23, run 32645433959).
+            #
+            # Con `script_stop: true`, la acción de SSH inserta
+            # `DRONE_SSH_PREV_COMMAND_EXIT_CODE=$? ; if …` DESPUÉS DE CADA LÍNEA
+            # del script. Una línea que continúa en la siguiente deja de
+            # continuar, y el bloque queda partido.
+            #
+            # OJO: un `for … ; do` de UNA sola línea con cuerpo simple SÍ
+            # funciona — el de arriba lleva horas desplegando. Lo que no
+            # sobrevive es la continuación con `\` y el `case` de varias ramas.
+            # Lo digo así de preciso porque «no uses bucles» sería falso y
+            # alguien lo creería.
+            #
+            # Es feo y se repite ocho veces. Es lo que funciona aquí, y el
+            # despliegue no es sitio para ser elegante.
+            if [ -n "${{ secrets.CLAVE_FIRMA_REGISTRO }}" ]; then
+              sed -i '/^CLAVE_FIRMA_REGISTRO=/d' .env.production
+              echo "CLAVE_FIRMA_REGISTRO=${{ secrets.CLAVE_FIRMA_REGISTRO }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" ]; then
+              sed -i '/^CLAVES_PUBLICAS_REGISTRO=/d' .env.production
+              echo "CLAVES_PUBLICAS_REGISTRO=${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_SECRET_KEY }}" ]; then
+              sed -i '/^STRIPE_SECRET_KEY=/d' .env.production
+              echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_PUBLISHABLE_KEY }}" ]; then
+              sed -i '/^STRIPE_PUBLISHABLE_KEY=/d' .env.production
+              echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_WEBHOOK_SECRET }}" ]; then
+              sed -i '/^STRIPE_WEBHOOK_SECRET=/d' .env.production
+              echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+              sed -i '/^ANTHROPIC_API_KEY=/d' .env.production
+              echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.GEMINI_API_KEY }}" ]; then
+              sed -i '/^GEMINI_API_KEY=/d' .env.production
+              echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.VITE_MAPBOX_TOKEN }}" ]; then
+              sed -i '/^VITE_MAPBOX_TOKEN=/d' .env.production
+              echo "VITE_MAPBOX_TOKEN=${{ secrets.VITE_MAPBOX_TOKEN }}" >> .env.production
+            fi
             # Las llaves de Cloudflare R2, donde viven las copias de seguridad
             # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
             # camino que la de Together: el secreto vive en GitHub, nunca en el

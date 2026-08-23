@@ -498,7 +498,17 @@ export function Proyecto() {
           />
         )}
 
-        <SeccionContenido proyectoId={proyecto.id} recargar={publicando === null} />
+        {/* LA LISTA DE LO QUE CUELGA SE HA IDO AL PANEL LATERAL (2026-08-23).
+            Decisión de Eugenio al diseñar el raíl estilo Kpler: «el panel
+            navega, la página muestra». Ayer esta sección listaba las páginas,
+            esquemas, mapas, tablas y fechas del proyecto; hoy eso mismo está en
+            el panel de Proyectos, en cascada y alcanzable desde cualquier
+            pantalla. Enseñarlo en los dos sitios no es el doble de ayuda: son
+            dos sitios donde buscar y dos listas que se separan en cuanto una
+            cambie.
+            `SeccionContenido` NO se borra: volver es descomentar esta línea, y
+            el panel todavía cubre solo dos herramientas. */}
+        {/* <SeccionContenido proyectoId={proyecto.id} recargar={publicando === null} /> */}
 
         {/* LOS ARCHIVOS DEL PROYECTO (2026-08-21). Es el sitio donde más
             falta hacía: un informe, una tabla de ensayos o un modelo 3D
@@ -566,6 +576,7 @@ const ICONO_RAMA: Record<string, any> = {
 /** Las que ya tienen su propio sitio en esta página. */
 const RAMAS_YA_PINTADAS = new Set(['tareas', 'archivos', 'personas']);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SeccionContenido({ proyectoId, recargar }: { proyectoId: string; recargar?: boolean }) {
   const [ramas, setRamas] = useState<any[] | null>(null);
 

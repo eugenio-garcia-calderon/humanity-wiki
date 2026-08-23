@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { REGLAS, guardian, ritmo, ipDe } from './limites/index.js';
 
 // ============================================================================
 // Motor del Grafo de Conocimiento — Fase 3
@@ -369,7 +370,15 @@ export function registerGraphRoutes(app: Express, db: any) {
    * (06_SOCIAL_NETWORK.md: buscar personas, organizaciones, publicaciones,
    * retos, soluciones, productos, demandas, iniciativas).
    */
-  app.get('/api/search', async (req: Request, res: Response) => {
+  // ══ CON FRENO DESDE 2026-08-23 ═══════════════════════════════════════════
+  // Esta ruta pasó de llamarse al pulsar a llamarse al teclear, y por dentro
+  // recorre 20 tablas con `ILIKE` sin pedir sesión. El freno está calibrado
+  // para que escribir no lo toque nunca y para que un bucle deje de salir
+  // gratis. Se avisa con `ritmo` y NO con `anotarFallo`: buscar no es fallar, y
+  // meter búsquedas legítimas en el rastro de intentos fallidos enterraría lo
+  // que ese rastro existe para enseñar.
+  app.get('/api/search', guardian(db, REGLAS.buscar, () => null), async (req: Request, res: Response) => {
+    void ritmo(db, REGLAS.buscar, ipDe(req));
     try {
       const q = String(req.query.q || '').trim();
       if (q.length < 2) return res.json({ query: q, results: [] });
