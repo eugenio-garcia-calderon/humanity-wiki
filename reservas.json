@@ -143,6 +143,12 @@
       "ruta": "src/components/ventanas/Navegador.tsx",
       "motivo": "el clic tarda: doble carga del marco",
       "desde": "2026-08-23T13:27:41.996Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: contador de quien contesta",
+      "desde": "2026-08-23T13:41:55.139Z"
     }
   ]
 }
