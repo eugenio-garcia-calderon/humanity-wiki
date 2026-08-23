@@ -41,6 +41,12 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "menu derecho de lo tuyo, colores del mapa, herramientas en Crear",
       "desde": "2026-08-23T23:03:06.723Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "contar apoyos para ordenar por popularidad",
+      "desde": "2026-08-23T23:07:37.421Z"
     }
   ]
 }
