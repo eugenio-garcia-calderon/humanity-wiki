@@ -11,6 +11,12 @@
       "ruta": "src/server/puntos.ts",
       "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
       "desde": "2026-08-23T11:35:53.186Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/about/Tokenomics.tsx",
+      "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
+      "desde": "2026-08-23T11:35:56.999Z"
     }
   ]
 }
