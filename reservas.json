@@ -1,3 +1,22 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "Explorar en espejo del de la derecha, y el panel empieza donde acaba el rail",
+      "desde": "2026-08-23T18:08:27.065Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/PanelExplorar.tsx",
+      "motivo": "Explorar en espejo del de la derecha, y el panel empieza donde acaba el rail",
+      "desde": "2026-08-23T18:08:27.065Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "Explorar en espejo del de la derecha, y el panel empieza donde acaba el rail",
+      "desde": "2026-08-23T18:08:27.065Z"
+    }
+  ]
 }
