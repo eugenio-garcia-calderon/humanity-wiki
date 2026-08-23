@@ -29,7 +29,18 @@ export type TipoBloque =
   // el JSON a mano: no estaban en el menú ni en este tipo. Un bloque que sólo
   // sabe poner quien conoce la base de datos no existe para quien usa la
   // aplicación.
-  | 'portada' | 'rejilla' | 'columnas' | 'franja';
+  | 'portada' | 'rejilla' | 'columnas' | 'franja'
+  // 2026-08-23. Los tres que más se usan en Notion y que aquí no existían.
+  // Salieron de comparar herramienta contra herramienta, no de suponerlo:
+  //
+  //   `desplegable` un título que esconde lo de dentro. Es lo que permite que
+  //                 una página larga se lea: sin él, todo está siempre abierto
+  //                 y hay que leerlo entero para saber si te interesa.
+  //   `aviso`       el recuadro con icono. Lo que se quiere destacar sin
+  //                 gritar en mayúsculas ni poner tres signos de admiración.
+  //   `indice`      la lista de títulos de la propia página. No guarda nada:
+  //                 se calcula al pintar, así que nunca se queda vieja.
+  | 'desplegable' | 'aviso' | 'indice';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -78,6 +89,14 @@ export interface Bloque {
   pubTitulo?: string;
   pubAutor?: string;
   pubUrl?: string;    // /esquemas/:slug, /mapas/:slug, /proyectos/:slug…
+  // ── LOS BLOQUES NUEVOS (2026-08-23) ──────────────────────────────────────
+  /** `aviso`: cuál de los cuatro colores. Cerrado a propósito — un color libre
+   *  acaba en texto ilegible sobre su propio fondo. */
+  tono?: 'info' | 'ojo' | 'idea' | 'hecho';
+  /** `desplegable`: si al llegar se ve abierto. Lo decide quien escribe, no
+   *  quien lee: guardar la preferencia de cada lector obligaría a saber quién
+   *  es, y quien abre una página pública no tiene por qué serlo. */
+  abierto?: boolean;
 }
 
 /** Un tramo de texto con su formato resuelto — para las exportaciones (Word,

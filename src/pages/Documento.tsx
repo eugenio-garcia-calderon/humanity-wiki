@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   Quote, Minus, Code2, Image as ImageIcon, Table2, Trash2, Globe, Lock,
+  ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, MoreHorizontal, Maximize2, Minimize2,
@@ -54,6 +55,12 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'numerada', label: 'Lista numerada', icon: ListOrdered },
   { tipo: 'tarea', label: 'Casilla', icon: CheckSquare },
   { tipo: 'cita', label: 'Cita', icon: Quote },
+  // Los tres de Notion que faltaban (2026-08-23). Van aquí arriba, entre los
+  // de texto, porque es lo que son: formas de escribir, no cosas que se
+  // embeben.
+  { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight },
+  { tipo: 'aviso', label: 'Aviso', icon: Info },
+  { tipo: 'indice', label: 'Índice', icon: List },
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
@@ -1287,6 +1294,84 @@ export default function Documento() {
 
       if (b.tipo === 'cita') {
         return <blockquote className="border-l-[3px] border-emerald-300 pl-3">{cuerpo()}</blockquote>;
+      }
+
+      // ── LOS TRES BLOQUES NUEVOS, EN EL EDITOR (2026-08-23) ─────────────────
+      // Se escriben igual que un párrafo: el texto vive en el mismo sitio, así
+      // que `cuerpo()` sirve tal cual y no hace falta tocar el guardado ni el
+      // manejo del cursor. Lo único que cambia es la caja de alrededor.
+      if (b.tipo === 'aviso') {
+        const TONOS: Record<string, string> = {
+          info: 'bg-sky-50 border-sky-200 text-sky-900',
+          ojo: 'bg-amber-50 border-amber-200 text-amber-900',
+          idea: 'bg-violet-50 border-violet-200 text-violet-900',
+          hecho: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+        };
+        const tono = TONOS[b.tono || 'info'] || TONOS.info;
+        return (
+          <div className={cn('rounded-xl border p-3', tono)}>
+            {/* El color se elige aquí y no en un menú aparte: son cuatro, y
+                verlos puestos es más rápido que leer sus nombres. */}
+            {editable && (
+              <div className="flex gap-1 mb-2">
+                {(['info', 'ojo', 'idea', 'hecho'] as const).map(t => (
+                  <button key={t} type="button" title={t}
+                    onClick={() => { setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tono: t } : x)); programarGuardado(); }}
+                    className={cn('w-6 h-6 rounded-md border-2',
+                      TONOS[t].split(' ')[0], TONOS[t].split(' ')[1],
+                      (b.tono || 'info') === t ? 'ring-2 ring-slate-400 ring-offset-1' : '')} />
+                ))}
+              </div>
+            )}
+            {cuerpo()}
+          </div>
+        );
+      }
+
+      if (b.tipo === 'desplegable') {
+        return (
+          <div className="border-l-2 border-slate-200 pl-3">
+            <div className="flex items-start gap-1.5">
+              <ChevronRight className="w-4 h-4 mt-1 shrink-0 text-slate-400" />
+              {cuerpo('flex-1 min-w-0 font-bold')}
+            </div>
+            {/* SE DICE LO QUE VA A PASAR AL PUBLICAR, porque aquí no se puede
+                enseñar: en el editor todo está abierto para poder escribirlo.
+                Sin esta línea, quien lo pone no entiende para qué sirve. */}
+            {editable && (
+              <p className="mt-1 text-[11px] text-slate-400">
+                Al publicarla, esto se verá cerrado y se abre al pulsarlo.
+              </p>
+            )}
+          </div>
+        );
+      }
+
+      if (b.tipo === 'indice') {
+        // El índice no se escribe: se calcula. Aquí se enseña ya calculado,
+        // para que quien lo pone vea lo que va a salir en vez de un hueco.
+        const titulos = bloques.filter(x =>
+          x.tipo === 'titulo1' || x.tipo === 'titulo2' || x.tipo === 'titulo3');
+        return (
+          <div className="my-1 py-2 pl-3 border-l-2 border-slate-200">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 mb-1">Índice</p>
+            {titulos.length === 0 ? (
+              <p className="text-xs text-slate-400">
+                Aparecerá aquí en cuanto la página tenga títulos.
+              </p>
+            ) : (
+              <ul className="space-y-0.5">
+                {titulos.map((t, i) => (
+                  <li key={t.id || i}
+                      className={cn('text-sm text-slate-600',
+                        t.tipo === 'titulo3' ? 'ml-6' : t.tipo === 'titulo2' ? 'ml-3' : '')}>
+                    {(textosRef.current[t.id] ?? t.texto ?? '').trim() || 'Sin título'}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
       }
       if (b.tipo === 'codigo') {
         return <pre className="bg-slate-900 rounded-xl px-4 py-3 overflow-x-auto">{cuerpo()}</pre>;
