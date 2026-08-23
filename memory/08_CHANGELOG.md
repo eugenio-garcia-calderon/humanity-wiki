@@ -6150,6 +6150,83 @@ restored, `tsc` clean.
 - **Valoración del vendedor** (acordada con el Dashboard antes de que desapareciera): nadie valora a la persona; es el agregado de reseñas de sus productos con compra verificada (una por persona y producto; el vendedor no reseña lo suyo; #277). Con menos de `MIN_RESENAS_VALORACION_VENDEDOR = 3` no se enseña nada (ni «sin valoraciones»); con 3+, «★ 4,5 · 3 opiniones verificadas en esta tienda». El umbral vive en una constante con nombre.
 - Probado en local por HTTP: 2 reseñas → null; 3 → 4,5·3; relacionados; avísame → barrido con stock 0 → 0, con stock 5 → 1 aviso, segundo barrido 0, DELETE → 0. Todo retirado.
 - Nota de equipo: el Dashboard dejó de existir esta noche; el turno de despliegue pasa a ser «mirar `gh run list` y que nadie esté desplegando antes de fusionar»; el motivo de cada reserva lleva delante el número del programador; y tras `soltar`, comprobar con `quien` (prog8 vio reservas «resucitadas» por una carrera).
+### 2026-08-22 — Veracidad, fases 2 y 4: ya se puede debatir
+
+Eugenio dio el sí a las dos decisiones abiertas y pidió seguir por donde
+recomendara. Recomendé juntar la fase 4 con la 2 en una sola entrega, y por qué:
+la pantalla sin el sello enseña afirmaciones sin decir qué se sabe de ellas, y el
+sello sin pantalla no lo ve nadie. Separadas, ninguna de las dos sirve todavía.
+
+- **`/debates` y `/debates/:slug`**: la lista de lo que se discute y la pantalla
+  del debate — la tesis arriba, y debajo **a favor** y **en contra** en dos
+  columnas (y **matiza** cuando lo hay), cada argumento con sus fuentes, sus
+  respuestas anidadas y su sello. Se argumenta y se cita **sin salir de la
+  pantalla**: si hay que ir a otro sitio a escribir, no se escribe.
+- **`<SelloVeracidad>`**: sin fuente · con fuente · verificada · disputada ·
+  refutada, con las mismas palabras en cualquier pantalla de la plataforma.
+  **«Sin fuente» es gris y no rojo**: no está mal, está sin comprobar — si todo
+  lo que falta llevara rojo, el rojo dejaría de significar nada. Y un estado que
+  el componente no reconoce **no se pinta como el primero de la lista**: eso
+  sería inventarse un dato.
+- **La escalera ya tiene firma** (`drizzle/0088`): quién movió el sello, cuándo y
+  por qué. `verificada` sin decir por quién es exactamente el tipo de afirmación
+  que esta área existe para no aceptar. Texto y no clave foránea, como
+  `incidencias.respondido_por`: la firma sobrevive al borrado de la cuenta.
+- **Tres reglas del servidor, no de la pantalla**: revisar es nivel 3; **nadie
+  revisa su propio argumento** (ni un administrador — la regla es sobre quién lo
+  escribió, no sobre el rango); y `refutada`/`disputada` **exigen motivo**, porque
+  marcar algo como falso sin decir por qué deja al autor sin nada que responder.
+  `sin_fuente` y `con_fuente` no se pueden poner a mano: las deciden las citas.
+- **Verificado**: 12 comprobaciones nuevas en verde con dos usuarios de prueba
+  (uno de nivel 3), más las 25 de la fase 1. En el navegador: el debate de
+  muestra con sus cuatro argumentos, la respuesta anidada, el sello verificado
+  con su fuente y el disputado con su motivo. Todo lo de prueba, borrado.
+- **Tablero**: 8 tarjetas en verde de 30 (eran 2).
+
+**Lo que NO está**: el enlace permanente a un argumento concreto (fase 4), el
+plegado por tramos de un hilo largo (fase 3) y la votación (fase 5) — por eso un
+argumento dice todavía «Sin votos» y no un número. Y no se ha comprobado en un
+móvil.
+
+### 2026-08-22 — Veracidad, fase 5: el voto de impacto
+
+Eugenio: *«termina de hacer la herramienta de DEBATES y votaciones»*.
+
+- **«¿Cuánto te mueve?», del 1 al 5**, en cada argumento. No es un «me gusta»:
+  un argumento del bando contrario puede moverte mucho, y ese es justo el que
+  tiene que subir. Pulsar otra vez el número que ya tenías **retira el voto** —
+  cambiar de opinión al leer incluye dejar de tener opinión.
+- **No estrena tabla**: los votos van a `ratings`, la que la plataforma ya usa
+  para puntuar, con `entity_type = 'argumento'`. Una segunda forma de puntuar
+  acaba dando dos números distintos para lo mismo.
+- **Cada rama se ordena por impacto**, no por hora de llegada. Y **lo que nadie
+  ha votado no se hunde al fondo**: iría al fondo el día que se escribe, donde
+  nadie lo lee, y de ahí no saldría nunca — el voto que le faltaba se lo negaría
+  el propio orden. Va justo detrás de lo más votado y por delante de lo que ya
+  se juzgó flojo.
+- **Ves tu voto y solo el tuyo.** Sin sesión, `mi_voto` es `null` — que no es lo
+  mismo que votar bajo.
+- **Sin votos sigue siendo NULL y no cero**, y la pantalla lo dice con palabras
+  («Sin votos todavía»), no con un número. Al retirar el último voto vuelve a
+  NULL: un argumento que se queda sin votos no es un argumento rechazado.
+- **Un debate cerrado tampoco se vota** (409). Si no, el resultado seguiría
+  moviéndose después de darlo por cerrado.
+- **Se puede votar lo propio**, y es deliberado: un voto entre cientos no mueve
+  nada, y prohibirlo obligaría a explicar por qué el autor es el único que no
+  puede decir cuánto le importa su argumento. Revisar sí está prohibido —
+  revisar afirma sobre el común, votar solo dice lo que te pasa a ti.
+- **Verificado**: 15 comprobaciones nuevas en verde (401 sin sesión, fuera de
+  rango, decimales, argumento inexistente, la media con dos votantes, cambiar el
+  voto sin sumar otro, el orden con uno sin votar en medio, retirar y recontar),
+  **y además pulsando los botones en el navegador**: 3,5 → 4,0 al votar, el
+  número marcado en morado, y 4,0 · 1 voto al retirarlo. Todo lo de prueba,
+  borrado.
+- **Tablero**: 11 de 30 tarjetas en verde.
+
+**Lo que sigue sin estar**: el espectro de visiones (fase 6, la que junta los
+votos en posturas), el enlace permanente a un argumento, la carga por tramos de
+un hilo largo, y el móvil sin comprobar.
+
 
 ## 2026-08-23 · Servidores: de «tengo copias» a «puedo volver» (prog6)
 
