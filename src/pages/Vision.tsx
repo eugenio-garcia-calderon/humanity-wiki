@@ -50,7 +50,7 @@ const DEFECTOS: Record<string, string> = {
   titular: 'Agregar el conocimiento de la humanidad\ny repartir lo que genere entre quienes lo crean',
   parrafo_1: 'Hoy el saber está partido: los datos en un sitio, los mapas en otro, las conversaciones en un tercero, y lo que cada persona sabe encerrado en su cabeza o en su Notion. humanity.wiki junta las tres formas de mirar — el dato en crudo, el conocimiento conectado y el conocimiento situado en el territorio — sobre una sola base.',
   economia_titular: 'Puntos de Humanity.wiki',
-  economia_parrafo_1: 'Todo el mundo empieza con 100 puntos al registrarse. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
+  economia_parrafo_1: 'Todo el mundo empieza con 5.000 puntos al registrarse, y cada persona verificada que use la plataforma al menos 3 días al mes recibe 1.000 puntos fijos cada mes, más una parte variable según su reputación social. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
   economia_parrafo_2: 'Hoy son un saldo interno, sin nada por detrás salvo la base de datos de la plataforma. El plan es que, más adelante, se conviertan en un token real sobre blockchain — pero eso es el destino, no el punto de partida: primero funcionan aquí dentro, con las mismas reglas que tendrán después.',
 };
 
@@ -277,7 +277,7 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
       ) : (
         <div className="mt-7 bg-slate-50 border border-slate-200 rounded-3xl p-6 text-center">
           <Sparkle className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">Entra para ver tu saldo — todo el mundo empieza con 100 puntos.</p>
+          <p className="text-sm text-slate-500">Entra para ver tu saldo — todo el mundo empieza con 5.000 puntos.</p>
         </div>
       )}
 
@@ -311,6 +311,7 @@ function RepartoMensual() {
   const [datos, setDatos] = useState<any>(null);
   const [ejecutando, setEjecutando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const num = (n: any) => Number(n || 0).toLocaleString('es-ES', { maximumFractionDigits: 2 });
   const cargar = () => {
     fetch(`/api/admin/tokenomics/reparto?mes=${encodeURIComponent(mes)}`, { credentials: 'include' })
       .then(r => r.json()).then(j => { if (j && !j.error) setDatos(j); else setAviso(j?.error || 'No se ha podido calcular.'); }).catch(() => {});
@@ -318,33 +319,34 @@ function RepartoMensual() {
   useEffect(() => { setAviso(null); cargar(); }, [mes]);
   const ejecutar = async () => {
     if (!datos) return;
-    if (!window.confirm(`Vas a EMITIR ${Number(datos.bote_puntos).toLocaleString('es-ES')} puntos nuevos y repartirlos entre ${datos.verificados} personas verificadas para ${mes}. Solo se puede hacer una vez por mes y no se deshace solo. ¿Seguro?`)) return;
+    const variable = datos.variable_sin_repartir ? ' (nadie con reputación medible: el bote variable no se emite)' : ` más un bote variable de ${num(datos.bote_variable)} por reputación social`;
+    if (!window.confirm(`Vas a EMITIR ${num(datos.total_a_emitir)} puntos nuevos para ${mes}: ${num(datos.fijo_por_persona)} fijos a cada una de las ${datos.activos} personas activas (al menos ${datos.min_dias_activo} días de uso en el mes)${variable}. Solo se puede hacer una vez por mes y no se deshace solo. ¿Seguro?`)) return;
     setEjecutando(true); setAviso(null);
     try {
       const r = await fetch('/api/admin/tokenomics/reparto/ejecutar', {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mes }),
       });
       const j = await r.json().catch(() => ({}));
-      setAviso(r.ok ? `Hecho: ${Number(j.puntos_repartidos).toLocaleString('es-ES')} puntos repartidos entre ${j.personas} personas.` : (j.error || 'No se ha podido ejecutar.'));
+      setAviso(r.ok ? `Hecho: ${num(j.puntos_repartidos)} puntos repartidos entre ${j.personas} personas.` : (j.error || 'No se ha podido ejecutar.'));
       cargar();
     } catch { setAviso('No hay conexión con el servidor.'); }
     finally { setEjecutando(false); }
   };
-  const num = (n: any) => Number(n || 0).toLocaleString('es-ES', { maximumFractionDigits: 2 });
   return (
     <div className="mt-7 bg-white border border-slate-200 rounded-3xl p-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 inline-flex items-center gap-1.5">
-          <Coins className="w-3.5 h-3.5" /> Reparto mensual del bote · solo administradores
+          <Coins className="w-3.5 h-3.5" /> Reparto mensual · solo administradores
         </p>
         <input type="month" value={mes} onChange={e => setMes(e.target.value)} className="h-9 px-2 rounded-lg border border-slate-200 text-sm" aria-label="Mes del reparto" />
       </div>
       {datos ? (
         <>
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <div><p className="text-[10px] font-black uppercase text-slate-400">Bote ({datos.modo_bote})</p><p className="text-xl font-black text-slate-900">{num(datos.bote_puntos)} <span className="text-xs text-slate-400">puntos</span></p></div>
-            <div><p className="text-[10px] font-black uppercase text-slate-400">Verificados</p><p className="text-xl font-black text-slate-900">{datos.verificados}</p></div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Activas / verificadas</p><p className="text-xl font-black text-slate-900">{datos.activos} <span className="text-xs text-slate-400">/ {datos.verificados}</span></p></div>
             <div><p className="text-[10px] font-black uppercase text-slate-400">Fijo por persona</p><p className="text-xl font-black text-slate-900">{num(datos.fijo_por_persona)}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Bote variable</p><p className="text-xl font-black text-slate-900">{num(datos.bote_variable)}{datos.variable_sin_repartir ? <span className="block text-[10px] text-amber-700 font-bold">sin reputación medible: no se emite</span> : null}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Total a emitir</p><p className="text-xl font-black text-slate-900">{num(datos.total_a_emitir)} <span className="text-xs text-slate-400">puntos</span></p></div>
             <div><p className="text-[10px] font-black uppercase text-slate-400">Estado</p><p className={`text-sm font-black ${datos.ya_ejecutado ? 'text-emerald-700' : 'text-amber-700'}`}>{datos.ya_ejecutado ? `Repartido (${num(datos.ya_repartido_puntos)})` : 'Sin repartir'}</p></div>
           </div>
           {Array.isArray(datos.reparto) && datos.reparto.length > 0 && (
@@ -352,20 +354,28 @@ function RepartoMensual() {
               {datos.reparto.slice(0, 50).map((p: any) => (
                 <div key={p.user_id} className="flex items-center justify-between gap-3 text-xs">
                   <span className="text-slate-700 truncate">{p.nombre}</span>
-                  <span className="text-slate-400 shrink-0">{p.vistas_validas}v · {p.interacciones}i · {p.resenas_positivas}r</span>
+                  <span className="text-slate-400 shrink-0">{p.dias_activos}d · {p.vistas_validas}v · {p.interacciones}i · {p.resenas_positivas}r</span>
                   <span className="font-black text-slate-900 shrink-0 w-20 text-right">{num(p.total)}</span>
                 </div>
               ))}
             </div>
           )}
+          {Array.isArray(datos.inactivos) && datos.inactivos.length > 0 && (
+            <p className="mt-2 text-[11px] text-slate-400">
+              Sin llegar a {datos.min_dias_activo} días de uso ({datos.inactivos.length}): {datos.inactivos.slice(0, 12).map((p: any) => `${p.nombre} (${p.dias_activos}d)`).join(', ')}{datos.inactivos.length > 12 ? '…' : ''}
+            </p>
+          )}
           <div className="mt-4 flex items-center gap-3 flex-wrap">
-            <button onClick={ejecutar} disabled={ejecutando || datos.ya_ejecutado || !datos.verificados}
+            <button onClick={ejecutar} disabled={ejecutando || datos.ya_ejecutado || !datos.activos}
               className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-black disabled:opacity-40">
-              {ejecutando ? 'Repartiendo…' : datos.ya_ejecutado ? 'Ya repartido este mes' : `Ejecutar el reparto de ${mes}`}
+              {ejecutando ? 'Repartiendo…' : datos.ya_ejecutado ? 'Ya repartido este mes' : `Ejecutar ahora el reparto de ${mes}`}
             </button>
             {aviso && <p className="text-xs font-bold text-slate-700">{aviso}</p>}
           </div>
-          <p className="mt-2 text-[11px] text-slate-400">Mitad igual por cabeza, mitad por éxito (vistas válidas, interacciones, reseñas positivas). Emite puntos nuevos: una vez por mes, y la base de datos no deja repetirlo.</p>
+          <p className="mt-2 text-[11px] text-slate-400">
+            {datos.automatico ? 'Se ejecuta solo: el día 1 de cada mes, para el mes que acaba de cerrar. ' : 'El reparto automático está apagado. '}
+            Este botón es para adelantar un mes o pagar uno que el reloj no haya podido. {num(datos.fijo_por_persona)} fijos a cada persona verificada con al menos {datos.min_dias_activo} días de uso en el mes, más el bote variable por reputación social (vistas válidas, interacciones, reseñas positivas). Emite puntos nuevos: una vez por mes, y la base de datos no deja repetirlo.
+          </p>
         </>
       ) : <p className="mt-3 text-sm text-slate-400">{aviso || 'Calculando…'}</p>}
     </div>
