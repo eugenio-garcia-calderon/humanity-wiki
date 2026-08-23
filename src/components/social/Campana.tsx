@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro, PackageCheck } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -44,6 +44,22 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   // Telecomunicaciones (2026-08-22).
   mensaje:           { icono: Send,            frase: n => `${n} te ha escrito` },
   llamada_perdida:   { icono: PhoneMissed,     frase: n => `Llamada perdida de ${n}` },
+  // Puntos (prog7, 2026-08-23): lo dice el sistema, no una persona; la cifra
+  // y la fecha van en el texto del aviso (payload.texto).
+  puntos_inactividad: { icono: Hourglass,      frase: () => 'Tu saldo de puntos se perderá si no vuelves' },
+  puntos_caducan:     { icono: Hourglass,      frase: () => 'Parte de tus puntos va a caducar' },
+  puntos_perdidos:    { icono: Coins,          frase: () => 'Puntos perdidos' },
+  // Comercio (prog7, 2026-08-23).
+  pedido_nuevo:       { icono: ShoppingBag,    frase: n => `${n} te ha comprado algo` },
+  pedido_estado:      { icono: Package,        frase: () => 'Tu pedido se ha movido' },
+  cesta_olvidada:     { icono: ShoppingCart,   frase: () => 'Tu cesta sigue ahí' },
+  precio_bajado:      { icono: Tag,            frase: () => 'Un favorito tuyo ha bajado de precio' },
+  // Gasto de IA (prog8, 2026-08-23). Solo lo recibe quien administra: a quien
+  // no puede cambiar el tope, saberlo no le sirve de nada. La cifra concreta
+  // va en `payload.texto`.
+  gasto_ia_80:        { icono: Euro,           frase: () => 'La IA lleva el 80 % del tope de gasto del mes' },
+  // Comercio F5 (prog7).
+  vuelve_stock:       { icono: PackageCheck,   frase: () => 'Ya vuelve a haber' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -68,6 +84,16 @@ const destinoDe = (a: Aviso): string | null => {
   // concreta — no a la bandeja, que te obligaría a buscar de quién era.
   if (a.entity_type === 'llamadas') return `/telefono`;
   if (a.entity_type === 'mensajes') return a.payload?.de ? `/mensajes?con=${a.payload.de}` : `/mensajes`;
+  // Un aviso de puntos lleva a tu saldo, donde está la fecha y lo que hacer.
+  if (a.entity_type === 'puntos') return `/vision?pestana=economia`;
+  // Un pedido lleva a quien lo mira: al vendedor a su panel, al comprador a
+  // su pedido. El aviso trae su propio destino porque lo sabe quien lo escribe.
+  if (a.entity_type === 'pedidos') return a.payload?.destino || '/comercio?pestana=pedidos';
+  if (a.entity_type === 'cestas' || a.entity_type === 'favoritos') return a.payload?.destino || '/mercado';
+  // El aviso del gasto lleva a la página donde se ve cuánto va y cuál es el
+  // tope: enterarse sin poder mirar el detalle obliga a buscarlo a mano.
+  if (a.entity_type === 'gasto_ia') return '/vision?pestana=gasto';
+  if (a.entity_type === 'stock') return a.payload?.destino || '/mercado';
   return null;
 };
 

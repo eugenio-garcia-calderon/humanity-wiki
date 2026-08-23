@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { OBJETIVOS } from '../utils/objetivos';
 import {
+  EstilosPrevias,
   PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
   PreviaTelecom, PreviaIA, PreviaMundo, PreviaCalendario, PreviaArchivos,
   PreviaNavegador, PreviaPublicaciones,
@@ -72,7 +73,7 @@ function BotonCrearCuenta({ grande = false }: { grande?: boolean }) {
       to="/login?crear=1"
       className={
         grande
-          ? 'inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-10 py-5 text-lg font-black text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700'
+          ? 'inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-10 py-4 text-lg font-black text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700'
           : 'inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-8 py-4 text-base font-black text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700'
       }
     >
@@ -83,27 +84,41 @@ function BotonCrearCuenta({ grande = false }: { grande?: boolean }) {
 
 export default function Bienvenida() {
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:px-8 sm:pt-16">
+    <div className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
+      {/* Las trece animaciones, en un solo bloque y una sola vez. */}
+      <EstilosPrevias />
 
-      {/* ── EL TITULAR ─────────────────────────────────────────────────────
-          El subtítulo es la visión, literal, la misma que está publicada en
-          «i → Visión». No se reescribe aquí: si se reescribe, en un mes hay
-          dos visiones distintas y nadie sabe cuál es la buena. */}
-      <header className="text-center">
-        <h1 className="text-5xl font-black tracking-tight text-slate-900 sm:text-7xl">
-          humanity<span className="text-emerald-600">.wiki</span>
+      {/* ── EL TITULAR, EN UN TERCIO DE PANTALLA ───────────────────────────
+          Eugenio, 2026-08-23: «haz más compacta la parte del titular y
+          subtitular y el botón, que ocupe solo un tercio de la pantalla y los
+          otros dos tercios muestre las herramientas».
+
+          `min-h-[34vh]` y no una altura fija: el tercio es del ALTO DE LA
+          PANTALLA, y una pantalla de portátil y un iPhone no miden lo mismo.
+          Con `vh` el reparto se cumple en las dos.
+
+          Es `min-h` y no `h`: si alguien tiene la letra muy grande, el texto
+          empuja en vez de salirse de la caja. Un tercio es el objetivo, no una
+          promesa que romper a costa de que no se lea.
+
+          Y el párrafo largo se ha ido. Decía lo mismo que el subtítulo con más
+          palabras, y aquí sobrar palabras es ocupar el sitio de las
+          herramientas — que es lo que hay que ver. Sigue entero en «i → Visión»,
+          que es su casa. */}
+      <header className="flex min-h-[33vh] flex-col items-center justify-center py-3 text-center">
+        {/* EL NOMBRE NUEVO (2026-08-23, Eugenio: «vamos a llamarla Red de
+            Conocimiento»). Aquí importa más que en ningún otro sitio: es lo
+            primero que lee alguien que no sabe qué es esto, y si la portada
+            dice un nombre y la barra de arriba dice otro, ninguno de los dos
+            se cree. */}
+        <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+          Red de <span className="text-emerald-600">Conocimiento</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
           Agregar el conocimiento de la humanidad y repartir lo que genere entre
           quienes lo crean.
         </p>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-500">
-          Hoy el saber está partido: los datos en un sitio, los mapas en otro, las
-          conversaciones en un tercero, y lo que cada persona sabe encerrado en su
-          cabeza. Aquí se junta el dato en crudo, el conocimiento conectado y el
-          conocimiento situado en el territorio, sobre una sola base.
-        </p>
-        <div className="mt-9">
+        <div className="mt-5">
           <BotonCrearCuenta grande />
         </div>
         {/*
@@ -128,7 +143,7 @@ export default function Bienvenida() {
           `/api/auth/me` ya se pide en cada carga, así que llevarlo ahí no
           costaría ni una petición más.
         */}
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-400">
           Gratis. Empiezas con puntos para usar la IA y el Mercado.
         </p>
       </header>
@@ -137,24 +152,40 @@ export default function Bienvenida() {
           Rejilla de tarjetas, cada una con su dibujo arriba. En un móvil van a
           una columna: dos columnas de 160 px dejan el dibujo tan pequeño que
           deja de reconocerse, y entonces no cumple su único trabajo. */}
-      <section className="mt-20">
+      {/* ── LAS HERRAMIENTAS, EN LOS DOS TERCIOS ───────────────────────────
+          Galería más pequeña y de cuatro columnas: el objetivo es que quepan
+          MUCHAS a la vez, porque lo que impresiona no es una tarjeta bonita
+          sino ver de un golpe todo lo que puedes hacer.
+
+          En móvil van a DOS columnas, no a una. A una columna esto son trece
+          pantallazos de scroll y nadie llega al final; a dos, el dibujo sigue
+          siendo reconocible —que es su único trabajo— y se ven seis de golpe.
+
+          `group` en la tarjeta es lo que enciende la animación de dentro: cada
+          previsualización tiene la suya y se dispara con `group-hover`. Está
+          explicado en `components/bienvenida/previas.tsx`. */}
+      <section className="mt-6">
         <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">
           Todo esto es tuyo desde el primer día
         </h2>
-        <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {HERRAMIENTAS.map(({ nombre, que, icono: Icono, Previa }) => (
             <article
               key={nombre}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-md"
+              title={que}
+              className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg"
             >
               <div className="aspect-[16/9] w-full border-b border-slate-100">
                 <Previa />
               </div>
-              <div className="p-4">
-                <h3 className="inline-flex items-center gap-2 text-sm font-black text-slate-900">
-                  <Icono className="h-4 w-4 text-emerald-600" /> {nombre}
+              <div className="px-3 py-2.5">
+                <h3 className="inline-flex items-center gap-1.5 text-[13px] font-black text-slate-900">
+                  <Icono className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> {nombre}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{que}</p>
+                {/* La frase larga se queda, pero recortada a dos líneas: la
+                    tarjeta tiene que caber en una rejilla de cuatro sin que
+                    unas midan el doble que otras. Entera en el `title`. */}
+                <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500">{que}</p>
               </div>
             </article>
           ))}
@@ -167,7 +198,7 @@ export default function Bienvenida() {
           tarjetitas». La frase de arriba es la que hace el enlace: sin ella
           esto sería una lista de temas suelta debajo de una lista de
           herramientas suelta. */}
-      <section className="mt-20">
+      <section className="mt-16">
         <h2 className="text-center text-2xl font-black tracking-tight text-slate-900">
           Y todo apunta a los mismos catorce sitios
         </h2>

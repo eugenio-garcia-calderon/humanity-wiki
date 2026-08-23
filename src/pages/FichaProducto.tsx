@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star } from 'lucide-react';
+import { Loader2, PackageX, ShieldCheck, Undo2, Truck, ChevronLeft, Check, Star, MessageCircle, BellRing } from 'lucide-react';
+import Markdown from '../components/ai/Markdown';
+import BotonFavorito from '../components/knowledge/BotonFavorito';
 import { useCarrito } from '../hooks/useCarrito';
 import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direccion } from '../components/knowledge/Cesta';
 
@@ -22,11 +24,28 @@ import Cesta, { DireccionEnvio, DIRECCION_VACIA, direccionCompleta, type Direcci
 // tarjeta a un desconocido, y cada dato que falta es una razón para no
 // hacerlo.
 
+/** La tienda vive en `nombre.humanity.wiki`; los mensajes, en el dominio
+ *  principal. Se quita el primer subdominio; en local (sin subdominio) es el
+ *  mismo origen. */
+const dominioPrincipal = () => {
+  if (typeof window === 'undefined') return '';
+  const partes = window.location.hostname.split('.');
+  if (partes.length > 2 && !window.location.hostname.endsWith('localhost')) return `${window.location.protocol}//${partes.slice(1).join('.')}${window.location.port ? ':' + window.location.port : ''}`;
+  return '';
+};
+
 export default function FichaProducto({ handle }: { handle: string }) {
   const { producto } = useParams();
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'no-existe' | 'fallo'>('cargando');
   const [p, setP] = useState<any>(null);
   const [foto, setFoto] = useState(0);
+  // La variante elegida (2026-08-23): si el producto tiene, hay que elegir
+  // una antes de comprar o encestar; precio y stock pasan a ser los suyos.
+  const [varianteId, setVarianteId] = useState<string | null>(null);
+  // «Avísame cuando vuelva» (F5): qué tengo pedido para este producto
+  // (por variante), y si acabo de pedirlo.
+  const [avisamePedidos, setAvisamePedidos] = useState<{ variante_id: string | null; avisado: boolean }[]>([]);
+  const [avisameOcupado, setAvisameOcupado] = useState(false);
   const [anadido, setAnadido] = useState(false);
   const [comprando, setComprando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,13 +108,40 @@ export default function FichaProducto({ handle }: { handle: string }) {
     fetch('/api/publicar/puntos-en-caja').then(r => r.json()).then(j => { if (typeof j?.activo === 'boolean') setCaja(j); }).catch(() => {});
   }, []);
   const puntosPedidos = Number(String(usarPuntos).replace(',', '.')) || 0;
+  useEffect(() => {
+    if (!p?.id || !caja?.con_sesion) return;
+    fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
+      .then(j => { if (Array.isArray(j?.pedidos)) setAvisamePedidos(j.pedidos); }).catch(() => {});
+  }, [p?.id, caja?.con_sesion]);
+  const avisameActivo = avisamePedidos.some(x => (x.variante_id || null) === (varianteId || null) && !x.avisado);
+  async function alternarAvisame() {
+    if (!p?.id || avisameOcupado) return;
+    if (!caja?.con_sesion) { window.alert('Entra para que te avisemos cuando vuelva.'); return; }
+    setAvisameOcupado(true);
+    try {
+      if (avisameActivo) {
+        await fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}${varianteId ? `?variante_id=${encodeURIComponent(varianteId)}` : ''}`, { method: 'DELETE', credentials: 'include' });
+        setAvisamePedidos(xs => xs.filter(x => (x.variante_id || null) !== (varianteId || null)));
+      } else {
+        await fetch(`/api/publicar/avisame/${encodeURIComponent(p.id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(varianteId ? { variante_id: varianteId } : {}) });
+        setAvisamePedidos(xs => [...xs.filter(x => (x.variante_id || null) !== (varianteId || null)), { variante_id: varianteId || null, avisado: false }]);
+      }
+    } catch { /* sin conexión */ }
+    finally { setAvisameOcupado(false); }
+  }
   // Con envío incluido (2026-08-23): si los puntos llegan a precio + porte, no
   // hay Stripe y la dirección se pide aquí.
   const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
   const envioFicha = p?.envio?.hace_falta ? Number(p.envio.centimos || 0) : 0;
-  const todoEnPuntos = caja && p?.precio_centimos
-    ? Math.floor((((p.precio_centimos || 0) + envioFicha) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
-  const maxPuntos = caja?.saldo != null && p?.precio_centimos ? Math.min(caja.saldo, todoEnPuntos) : 0;
+  const variantes: any[] = Array.isArray(p?.variantes) ? p.variantes : [];
+  const variante = variantes.find(v => v.id === varianteId) || null;
+  const faltaVariante = variantes.length > 0 && !variante;
+  // Precio y stock efectivos: los de la variante si hay una elegida.
+  const precioEfectivo: number | null = variante ? (variante.precio_centimos ?? p?.precio_centimos ?? null) : (p?.precio_centimos ?? null);
+  const stockEfectivo: number | null = variante ? (variante.stock ?? null) : (p?.stock ?? null);
+  const todoEnPuntos = caja && precioEfectivo
+    ? Math.floor((((precioEfectivo || 0) + envioFicha) / 100) * caja.puntos_por_euro * 100) / 100 : 0;
+  const maxPuntos = caja?.saldo != null && precioEfectivo ? Math.min(caja.saldo, todoEnPuntos) : 0;
   const cubreTodo = !!caja && todoEnPuntos > 0 && puntosPedidos >= todoEnPuntos && maxPuntos >= todoEnPuntos;
   const faltaDireccion = cubreTodo && !!p?.envio?.hace_falta && !direccionCompleta(direccion);
 
@@ -106,6 +152,7 @@ export default function FichaProducto({ handle }: { handle: string }) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           producto_id: p.id, cantidad: 1, volver_a: window.location.href,
+          ...(variante ? { variante_id: variante.id } : {}),
           ...(caja?.activo && p.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cubreTodo && p.envio?.hace_falta ? { direccion } : {}),
         }),
@@ -156,18 +203,47 @@ export default function FichaProducto({ handle }: { handle: string }) {
 
           <div className="mt-3 flex items-baseline gap-3 flex-wrap">
             {p.precio_centimos
-              ? <span className="text-3xl font-black text-slate-900">{dinero(p.precio_centimos)}</span>
+              ? <span className="text-3xl font-black text-slate-900">{dinero(precioEfectivo)}</span>
               : <span className="text-base font-bold text-slate-500">Precio a consultar</span>}
-            {p.stock !== null && (
-              p.stock <= 0
+            {stockEfectivo !== null && (
+              stockEfectivo <= 0
                 ? <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">Agotado</span>
-                : p.stock <= 5
-                  ? <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Quedan {p.stock}</span>
+                : stockEfectivo <= 5
+                  ? <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Quedan {stockEfectivo}</span>
                   : <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Disponible</span>
             )}
           </div>
 
           {p.envio?.hace_falta && <Envio envio={p.envio} dinero={dinero} precio={p.precio_centimos} />}
+
+          {/* VARIANTES (2026-08-23): talla, color… Botones, no desplegable:
+              se ven todas de un vistazo y las agotadas se ven agotadas. */}
+          {variantes.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Elige una opción</p>
+              <div className="flex flex-wrap gap-1.5">
+                {variantes.map(v => {
+                  const agotada = v.stock !== null && v.stock <= 0;
+                  const precioV = v.precio_centimos ?? p.precio_centimos;
+                  return (
+                    <button key={v.id} type="button" disabled={agotada} onClick={() => setVarianteId(v.id)}
+                      className={`h-10 px-3 rounded-xl border text-sm font-bold transition-colors ${varianteId === v.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 text-slate-700 hover:border-slate-500'} disabled:opacity-40 disabled:line-through`}>
+                      {v.nombre}{precioV && precioV !== p.precio_centimos ? <span className="ml-1 text-[11px] font-semibold opacity-80">{dinero(precioV)}</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+              {faltaVariante && <p className="mt-1.5 text-[11px] text-slate-500">Elige una para ver el precio final y comprar.</p>}
+            </div>
+          )}
+
+          {/* AGOTADO: «Avísame cuando vuelva» (F5). Con variante, por variante. */}
+          {stockEfectivo !== null && stockEfectivo <= 0 && !faltaVariante && (
+            <button type="button" onClick={alternarAvisame} disabled={avisameOcupado}
+              className={`mt-4 inline-flex items-center gap-1.5 h-10 px-3 rounded-xl border text-xs font-bold ${avisameActivo ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-300 text-slate-700 hover:border-slate-500'}`}>
+              <BellRing className="w-4 h-4" /> {avisameActivo ? 'Te avisaremos cuando vuelva · cancelar' : 'Avísame cuando vuelva'}
+            </button>
+          )}
 
           {cobro?.abierto && sePuede && (
             <div className="mt-5 space-y-2">
@@ -190,9 +266,10 @@ export default function FichaProducto({ handle }: { handle: string }) {
                   {cubreTodo && p.envio?.hace_falta && <DireccionEnvio valor={direccion} onCambio={setDireccion} />}
                 </div>
               )}
-              <button type="button" onClick={comprar} disabled={comprando || faltaDireccion}
+              <button type="button" onClick={comprar} disabled={comprando || faltaDireccion || faltaVariante}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white text-sm font-black disabled:opacity-60">
                 {comprando ? (cubreTodo ? 'Pagando con puntos…' : 'Abriendo el pago…')
+                  : faltaVariante ? 'Elige una opción'
                   : faltaDireccion ? 'Falta la dirección de envío'
                   : cubreTodo ? 'Pagar con puntos'
                   : p.modalidad === 'suscripcion' ? 'Suscribirme' : 'Comprar ahora'}
@@ -200,12 +277,13 @@ export default function FichaProducto({ handle }: { handle: string }) {
               {/* Una suscripción no va a la cesta: se paga sola. Ponerle el
                   botón sería prometer algo que el cobro rechaza. */}
               {p.se_puede_encestar !== false && (
-                <button type="button"
+                <button type="button" disabled={faltaVariante}
                   onClick={() => {
-                    anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
+                    anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: precioEfectivo || 0,
+                      ...(variante ? { variante_id: variante.id, variante_nombre: variante.nombre } : {}) });
                     setAnadido(true); window.setTimeout(() => setAnadido(false), 1600);
                   }}
-                  className="w-full h-12 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 flex items-center justify-center gap-2">
+                  className="w-full h-12 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 flex items-center justify-center gap-2 disabled:opacity-50">
                   {anadido ? <><Check className="w-4 h-4 text-emerald-600" /> Añadido</> : 'Añadir a la cesta'}
                 </button>
               )}
@@ -230,6 +308,28 @@ export default function FichaProducto({ handle }: { handle: string }) {
             </div>
           )}
 
+          {/* PREGUNTAR AL VENDEDOR (2026-08-23): un mensaje directo, que ya
+              existe (Telecomunicaciones). La duda que no se puede preguntar
+              es una venta que no se hace. */}
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
+            {/* Favoritos (2026-08-23): con sesión en la tienda (la cookie llega
+                al subdominio). Sin ella, el botón lo dice. */}
+            <BotonFavorito productoId={p.id} conSesion={!!caja?.con_sesion} />
+            {p.vendedor?.id && (
+              <a href={`${dominioPrincipal()}/mensajes?con=${encodeURIComponent(p.vendedor.id)}`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+                <MessageCircle className="w-4 h-4" /> Preguntar al vendedor
+              </a>
+            )}
+            {/* Valoración del vendedor (F5): agregado de reseñas verificadas de
+                sus productos; con pocas no se enseña nada (lo decide el servidor). */}
+            {p.vendedor?.valoracion && (
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700" title="Media de las opiniones con compra verificada de esta tienda">
+                <Star className="w-3.5 h-3.5 fill-current" /> {Number(p.vendedor.valoracion.media).toLocaleString('es-ES')} · {p.vendedor.valoracion.n} opiniones verificadas en esta tienda
+              </span>
+            )}
+          </div>
+
           {(p.garantia || p.devoluciones) && (
             <ul className="mt-5 space-y-1.5 pt-4 border-t border-slate-100">
               {p.garantia && <li className="flex items-center gap-2 text-xs text-slate-500">
@@ -244,9 +344,29 @@ export default function FichaProducto({ handle }: { handle: string }) {
       {p.descripcion && (
         <section className="mt-10 pt-6 border-t border-slate-100 max-w-2xl">
           <h2 className="text-lg font-black text-slate-900 mb-2">Sobre esto</h2>
-          <p className="text-[15px] leading-relaxed text-slate-700" style={{ whiteSpace: 'pre-wrap' }}>
-            {p.descripcion}
-          </p>
+          {/* Con formato (2026-08-23): negrita, cursiva, listas, tablas — el
+              mismo Markdown del asistente. Lo que el vendedor escribe sin
+              marcas se ve igual que antes, párrafo a párrafo. */}
+          <div className="text-[15px] leading-relaxed text-slate-700">
+            <Markdown texto={p.descripcion} />
+          </div>
+        </section>
+      )}
+
+      {Array.isArray(p.relacionados) && p.relacionados.length > 0 && (
+        <section className="mt-10 pt-6 border-t border-slate-100">
+          <h2 className="text-lg font-black text-slate-900 mb-3">También en esta tienda</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {p.relacionados.map((r: any) => (
+              <a key={r.id} href={`/producto/${encodeURIComponent(r.id)}`} className="rounded-2xl border border-slate-200 overflow-hidden hover:border-slate-400 transition-colors">
+                {r.imagen ? <img src={r.imagen} alt="" loading="lazy" className="w-full h-28 object-cover" /> : <div className="w-full h-28 bg-slate-50" />}
+                <div className="p-2.5">
+                  <p className="text-sm font-bold text-slate-800 line-clamp-2">{r.nombre}</p>
+                  <p className="text-xs text-slate-500">{r.precio_centimos != null ? dinero(r.precio_centimos) : 'Precio a consultar'}</p>
+                </div>
+              </a>
+            ))}
+          </div>
         </section>
       )}
 

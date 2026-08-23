@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import EditorVariantes, { type VarianteForm, variantesAlServidor } from './EditorVariantes';
 import { X, Loader2, Plus, Trash2 } from 'lucide-react';
 
 // ============================================================================
@@ -50,6 +51,8 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   const [tipo, setTipo] = useState<'fisico' | 'digital' | 'servicio' | 'suscripcion'>('fisico');
   const [periodo, setPeriodo] = useState<'mensual' | 'trimestral' | 'anual'>('mensual');
   const [stock, setStock] = useState('');
+  const [variantes, setVariantes] = useState<VarianteForm[]>([]);
+  const [iva, setIva] = useState<string>('');
   const [envio, setEnvio] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotoNueva, setFotoNueva] = useState('');
@@ -138,6 +141,10 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
           archivo_digital: tipo === 'digital' && archivo ? archivo.url : undefined,
           acepta_puntos: tipo !== 'suscripcion' && aceptaPuntos,
           borrador,
+          // Variantes (2026-08-23): solo en lo que no es suscripción.
+          variantes: tipo !== 'suscripcion' ? variantesAlServidor(variantes) : [],
+          // IVA del producto (F4): vacío = el tipo por defecto de tus datos fiscales.
+          iva_pct: iva === '' ? null : Number(iva),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -216,6 +223,22 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                 </span>
               </label>
             </Campo>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">IVA incluido en el precio</p>
+              <select value={iva} onChange={e => setIva(e.target.value)} className="h-10 px-2.5 rounded-lg border border-slate-200 text-sm bg-white" aria-label="Tipo de IVA">
+                <option value="">El de mis datos fiscales (por defecto 21 %)</option>
+                <option value="21">21 % general</option>
+                <option value="10">10 % reducido</option>
+                <option value="4">4 % superreducido</option>
+                <option value="0">0 % (exento)</option>
+              </select>
+            </div>
+            {tipo !== 'suscripcion' && (
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Variantes (tallas, colores…)</p>
+                <EditorVariantes valor={variantes} onCambio={setVariantes} precioBase={precio || undefined} />
+              </div>
+            )}
             {/* El stock sólo tiene sentido en lo que se envía: «quedan 3» en un
                 servicio querría decir tres plazas, que es otra cosa, y en una
                 suscripción no quiere decir nada. */}
@@ -256,6 +279,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
             <textarea value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={4}
               placeholder="De dónde sale, cómo es, qué tamaño tiene…"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 text-base leading-relaxed focus:border-emerald-400 focus:outline-none resize-y" />
+            <p className="mt-1 text-[11px] text-slate-400">Puedes dar formato: <b>**negrita**</b>, <i>*cursiva*</i>, listas con «- » y tablas. Se ve en la ficha tal cual lo escribes.</p>
           </Campo>
 
           {tipo === 'digital' && (

@@ -5,8 +5,9 @@ Before this existed, **humanity.wiki had no backups at all**. The
 August and there was not one `pg_dump` anywhere in the repo. Production data
 lived in a single volume on a single server.
 
-Owned by **prog6** (escalabilidad). Caddy, certificates and the deploy itself
-stay with prog2 — see `equipo/REPARTO.md`.
+Owned by **prog6** (servidores). Since 2026-08-23 that also covers the deploy
+and the infrastructure — Caddy, the certificates and `deploy.yml` — after prog2
+left. See `equipo/REPARTO.md`.
 
 ## What runs
 
@@ -136,6 +137,57 @@ bash deploy/copias/restaurar.sh probar desde-fuera/humanity-2026-08-22.dump
 
 Do that **once**, the day the bucket is configured. A round trip that has never
 been made is a plan, not a backup.
+
+## Coming back is not the same as restoring
+
+A dump you can restore but not decrypt is a large file, not a backup. **This is
+the difference between "we have backups" and "we can come back."**
+
+Of the 27 variables in `.env.production`, the deploy can replace only the ones
+it names. The rest exist **solely in that file, on that machine** — the machine
+the backups protect against losing. Found on 2026-08-23 while measuring
+somebody else's claim about one of them.
+
+### What a real recovery needs, in order
+
+1. **A server.** New Hetzner box, Docker, the repo cloned into `/opt/humanity-wiki`.
+2. **`.env.production`.** The deploy writes every secret that exists in GitHub;
+   the rest have to be pasted by hand. **This is the step that is not automatic
+   and the one that decides whether the rest works.**
+3. **`SQL_ADMIN_PASSWORD`** — see below. On a *new* database, choose any value;
+   on a *restored volume*, it must be the old one.
+4. **`deploy compose up -d db`**, then `bash deploy/copias/restaurar.sh probar`
+   against a dump brought down from R2, before touching the real one.
+5. The rest of the stack, and `deploy/certs/` for the wildcard certificate —
+   **it has no copy anywhere**; a new one is requested from Cloudflare.
+
+### Which keys travel and which do not
+
+| | |
+|---|---|
+| Travel from GitHub | Everything the workflow names. The pipe is in place even for secrets that do not exist yet: absent, the `if` does nothing; the day one is pasted it arrives on its own |
+| **Do not travel** | Whatever is not a GitHub secret. Today that includes the signing keys of the sealed ledger and the Stripe keys |
+| Never travels, by design | Nothing goes into R2 next to the data. That would be storing the safe and its key in the same room |
+
+**`SQL_ADMIN_PASSWORD` is deliberately not automated.** It is the password the
+database already holds inside its volume. Writing it from a secret that does not
+match would leave the application unable to open its own database — a green
+deploy and a dead platform.
+
+### What each one costs if it is lost
+
+| Lost | Consequence |
+|---|---|
+| `CLAVE_FIRMA_REGISTRO`, `CLAVES_PUBLICAS_REGISTRO` | The sealed ledger cannot be verified or continued. Being verifiable was its entire value |
+| `CLAVE_MAESTRA` | Everyone has to reconnect their Google account |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | No payments until they are fetched again from Stripe |
+| `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `VITE_MAPBOX_TOKEN` | Annoyance, not loss |
+| The origin certificate in `deploy/certs/` | Subdomains stop until a new one is issued |
+
+**And putting a secret in GitHub does nothing on its own**: the workflow writes
+only the variables it names. A new secret needs its line there too — and the
+check is on the server, not on the GitHub page. That is how `CLAVE_MAESTRA`
+shipped to production without ever arriving.
 
 ## Restoring
 

@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { otorgarPuntos, pagarConPuntos } from './puntos.js';
+import { avisar } from './avisos.js';
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -450,7 +451,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         // porque para cuando llega este aviso el navegador ya no está, y
         // volver a calcularlo desde `products` daría los precios de HOY, no
         // los del momento de comprar.
-        let carrito: [string, number, number][] = [];
+        let carrito: [string, number, number, string?][] = [];
         try { carrito = JSON.parse(session.metadata!.lineas || '[]'); } catch { carrito = []; }
         if (carrito.length === 0 && session.metadata!.product_id) {
           // Compras de una sola cosa hechas antes de que existiera el carrito.
@@ -464,6 +465,15 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           WHERE id = ANY(string_to_array(${ids.join(',')}, ','))
         `)).rows as any[];
         if (productos.length === 0) break;
+        // Las variantes elegidas (2026-08-23): cuarto campo de cada línea.
+        const vids = carrito.map(l => String(l[3] || '')).filter(Boolean);
+        const variantes = vids.length ? (await db.execute(sql`
+          SELECT id, nombre FROM producto_variantes WHERE id = ANY(string_to_array(${vids.join(',')}, ','))
+        `)).rows as any[] : [];
+        const nombreLinea = (pid: string, vid: string) => {
+          const prod = productos.find(x => x.id === pid); const v = vid ? variantes.find(x => x.id === vid) : null;
+          return `${prod?.name || 'Producto retirado'}${v ? ` — ${v.nombre}` : ''}`;
+        };
         // UN PEDIDO SOLO DE DESCARGAS NACE ENTREGADO (2026-08-22, entrega de lo
         // digital): no hay caja que mandar ni «enviado» que marcar — lo que se
         // compró está disponible en el pedido desde el segundo uno. Si hay
@@ -513,7 +523,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
         const cerradas = await db.execute(sql`
           UPDATE reservas_stock SET estado = 'confirmada', updated_at = now()
           WHERE stripe_session_id = ${session.id} AND estado = 'abierta'
-          RETURNING producto_id, unidades
+          RETURNING producto_id, unidades, variante_id
         `);
         const habiaReservas = (await db.execute(sql`
           SELECT 1 FROM reservas_stock WHERE stripe_session_id = ${session.id} LIMIT 1
@@ -529,10 +539,17 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             // `GREATEST(0, ...)` por si dos pagos se cruzan pese a la reserva,
             // y `stock IS NOT NULL` para no empezar a llevar la cuenta a quien
             // decidió no llevarla.
-            await db.execute(sql`
-              UPDATE products SET stock = GREATEST(0, stock - ${Number(fila.unidades)})
-              WHERE id = ${fila.producto_id} AND stock IS NOT NULL
-            `);
+            if (fila.variante_id) {
+              await db.execute(sql`
+                UPDATE producto_variantes SET stock = GREATEST(0, stock - ${Number(fila.unidades)}), updated_at = now()
+                WHERE id = ${fila.variante_id} AND stock IS NOT NULL
+              `);
+            } else {
+              await db.execute(sql`
+                UPDATE products SET stock = GREATEST(0, stock - ${Number(fila.unidades)})
+                WHERE id = ${fila.producto_id} AND stock IS NOT NULL
+              `);
+            }
           }
 
           // ── EL PEDIDO Y SUS LÍNEAS (fases 6 y 7) ───────────────────────
@@ -562,14 +579,15 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           // no devuelve nada cuando ya existía, y sin esta comprobación las
           // líneas se duplicarían aunque el pedido no.
           if (creado.rows[0]) {
-            for (const [pid, unid, precio] of carrito) {
+            for (const [pid, unid, precio, vid] of carrito) {
               const prod = productos.find(x => x.id === pid);
+              const v = vid ? variantes.find(x => x.id === String(vid)) : null;
               await db.execute(sql`
                 INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre,
-                                           unidades, precio_unitario_centimos)
+                                           unidades, precio_unitario_centimos, variante_id, variante_nombre)
                 VALUES (${newId2('PLN')}, ${pedidoId}, ${pid},
-                        ${prod?.name || 'Producto retirado'}, ${unid},
-                        ${precio || prod?.price_cents || 0})
+                        ${nombreLinea(pid, String(vid || ''))}, ${unid},
+                        ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
               `);
             }
             // LA PARTE PAGADA CON PUNTOS (2026-08-22): el comprador ya pagó en
@@ -592,6 +610,13 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             }
             const puntosPagados = Number(session.metadata!.puntos || 0) || 0;
             const compradorId = session.metadata!.buyer_id || null;
+            // EL VENDEDOR SE ENTERA (2026-08-23): aviso por la campana con el
+            // código del pedido. Sin `dePartede` si compró alguien sin cuenta.
+            const codigoNuevo = (await db.execute(sql`SELECT codigo FROM pedidos WHERE id = ${pedidoId}`)).rows[0] as any;
+            await avisar(db, {
+              paraQuien: vendedorId, dePartede: compradorId, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
+              datos: { texto: `${resumen} · pedido ${codigoNuevo?.codigo || ''} · ${((session.amount_total || 0) / 100).toLocaleString('es-ES', { style: 'currency', currency: (session.currency || 'eur').toUpperCase() })}`, codigo: codigoNuevo?.codigo || null, destino: '/comercio?pestana=pedidos' },
+            }).catch(() => {});
             if (puntosPagados > 0 && compradorId && vendedorId) {
               const ok = await pagarConPuntos(db, compradorId, vendedorId, puntosPagados, pedidoId).catch((e: any) => { console.error('[puntos] pago con puntos fallido:', e?.message); return false; });
               if (!ok) console.error(`[puntos] el pedido ${pedidoId} esperaba ${puntosPagados} puntos de ${compradorId} y no se pudieron cobrar: revisar a mano.`);

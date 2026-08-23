@@ -54,6 +54,7 @@ import { registerBdRoutes } from './bd.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
+import { registerBuscadorRoutes } from './buscador.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
 import { registerYoutubeRoutes } from './youtube.js';
@@ -167,6 +168,7 @@ export const MODULOS: Modulo[] = [
   // certificado, así que si este módulo no monta, nadie puede estrenar un
   // dominio nuevo — pero los que ya tienen certificado siguen funcionando.
   { nombre: 'dominios', montar: (app, db) => registerDominiosRoutes(app, db) },
+  { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },

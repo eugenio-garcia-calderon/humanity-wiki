@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { REGLAS, guardian, ritmo, ipDe } from './limites/index.js';
 
 // ============================================================================
 // Motor del Grafo de Conocimiento — Fase 3
@@ -300,6 +301,60 @@ export function registerGraphRoutes(app: Express, db: any) {
     }
   });
 
+  /**
+   * POST /api/search/marca — cómo se contestó una pregunta del chat.
+   *
+   * ══ QUÉ MIDE ESTO, Y QUÉ NO ══════════════════════════════════════════════
+   * NO mide un ahorro de dinero: el gasto de IA de la plataforma en TODO agosto
+   * de 2026 fueron 0,74 €, así que ahorrar la mitad son 0,37 € al mes. Mide si
+   * **la plataforma sabe responder sobre lo suyo**: que la mayoría de las
+   * preguntas acaben en el modelo no diría que el buscador va mal, diría que el
+   * contenido no se encuentra. Es una señal sobre el contenido, no sobre la
+   * factura. El razonamiento entero, en `drizzle/0109_como_se_contesto.sql`.
+   *
+   * ══ POR QUÉ HACE FALTA ESCRIBIR ESTO EN ALGUNA PARTE ═══════════════════════
+   * Desde el «buscador primero» (#290), una pregunta que se contesta con lo que
+   * hay publicado **no deja rastro**: no pasa por `/api/ai/chat`, así que no hay
+   * `ai_messages` ni `ai_usage_charges`. Se puede saber al céntimo lo que costó
+   * la IA y es imposible saber cuántas veces no hizo falta — o sea, justo lo
+   * que se quería demostrar.
+   *
+   * Una fila por pregunta, en las dos direcciones, y la proporción sale de una
+   * consulta. Ver `drizzle/0109_como_se_contesto.sql` para lo que NO se guarda:
+   * ni el texto, ni quién preguntó.
+   *
+   * ══ SIN SESIÓN, Y SIN NADA QUE PROTEGER ═══════════════════════════════════
+   * El chat funciona para visitantes, así que exigir sesión aquí mediría solo a
+   * los registrados y sesgaría el número hacia arriba justo donde interesa que
+   * sea honesto. Lo peor que consigue quien decida llamar a esto en bucle es
+   * ensuciar nuestra propia estadística: no hay dinero, ni permisos, ni datos
+   * de nadie detrás. Se responde 204 y no se devuelve nada.
+   */
+  app.post('/api/search/marca', async (req: Request, res: Response) => {
+    try {
+      const resuelta = String(req.body?.resuelta || '');
+      if (resuelta !== 'plataforma' && resuelta !== 'modelo') {
+        return res.status(400).json({ error: 'resuelta: «plataforma» o «modelo».' });
+      }
+      // Un número que llega de fuera se acota antes de guardarlo, aunque hoy
+      // solo pueda ser 0..8: el día que el cliente cambie, esta tabla no tiene
+      // por qué enterarse.
+      const n = Number(req.body?.resultados);
+      const resultados = Number.isFinite(n) ? Math.max(0, Math.min(999, Math.trunc(n))) : null;
+      await db.execute(sql`
+        INSERT INTO chat_como_se_contesto (resuelta, resultados)
+        VALUES (${resuelta}, ${resultados})
+      `);
+      res.status(204).end();
+    } catch (e: any) {
+      // NO SE LE CUENTA AL USUARIO QUE ESTO HA FALLADO. Es una estadística: si
+      // se cae, se pierde una fila, no una respuesta. Convertir eso en un error
+      // visible sería romper el chat por no poder contar.
+      console.error('[buscador] marca:', e.message);
+      res.status(204).end();
+    }
+  });
+
   /** Mapa del grafo: qué tipos existen y cómo se conectan. Útil para la IA. */
   app.get('/api/graph/schema', (_req: Request, res: Response) => {
     res.json({
@@ -315,7 +370,15 @@ export function registerGraphRoutes(app: Express, db: any) {
    * (06_SOCIAL_NETWORK.md: buscar personas, organizaciones, publicaciones,
    * retos, soluciones, productos, demandas, iniciativas).
    */
-  app.get('/api/search', async (req: Request, res: Response) => {
+  // ══ CON FRENO DESDE 2026-08-23 ═══════════════════════════════════════════
+  // Esta ruta pasó de llamarse al pulsar a llamarse al teclear, y por dentro
+  // recorre 20 tablas con `ILIKE` sin pedir sesión. El freno está calibrado
+  // para que escribir no lo toque nunca y para que un bucle deje de salir
+  // gratis. Se avisa con `ritmo` y NO con `anotarFallo`: buscar no es fallar, y
+  // meter búsquedas legítimas en el rastro de intentos fallidos enterraría lo
+  // que ese rastro existe para enseñar.
+  app.get('/api/search', guardian(db, REGLAS.buscar, () => null), async (req: Request, res: Response) => {
+    void ritmo(db, REGLAS.buscar, ipDe(req));
     try {
       const q = String(req.query.q || '').trim();
       if (q.length < 2) return res.json({ query: q, results: [] });
@@ -323,6 +386,16 @@ export function registerGraphRoutes(app: Express, db: any) {
       const pattern = `%${q}%`;
       const results: any[] = [];
 
+      // ══ ESTO NO USA NINGÚN ÍNDICE, Y HAY UN NÚMERO ESCRITO PARA CUÁNDO
+      // EMPIEZA A IMPORTAR ═══════════════════════════════════════════════════
+      // Un `ILIKE '%algo%'` recorre la tabla entera: ningún B-tree sirve. Con
+      // las 83 publicaciones y las 78 filas del grafo de hoy sobra de lejos, y
+      // por eso se deja así. **A partir de ~4.000 publicaciones** (el cuerpo es
+      // texto largo y es lo primero que se rompe) o **~100.000 filas** sumando
+      // las demás tablas, esto necesita `pg_trgm` + GIN. Medido, con la tabla
+      // de tiempos y la consulta para saber en qué punto estamos, en
+      // `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+      //
       // ══ BUSCAR POR PALABRAS, NO SOLO POR LA FRASE ENTERA ═════════════════
       // (2026-08-22, «buscador first»: el chat busca antes de gastar IA.)
       //

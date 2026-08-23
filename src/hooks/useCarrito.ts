@@ -18,7 +18,17 @@ import { useCallback, useEffect, useState } from 'react';
 // `localStorage` desaparece si alguien limpia sus datos. Un carrito no es una
 // promesa: lo que sí sobrevive es el pedido, en cuanto se paga.
 
-export type LineaCarrito = { producto_id: string; cantidad: number; nombre: string; precio_centimos: number };
+export type LineaCarrito = {
+  producto_id: string; cantidad: number; nombre: string; precio_centimos: number;
+  // La variante elegida (2026-08-23): talla, color… Dos variantes del mismo
+  // producto son dos líneas distintas.
+  variante_id?: string; variante_nombre?: string;
+};
+/** La clave de una línea: producto + variante. */
+export const claveLinea = (l: { producto_id: string; variante_id?: string | null }) => `${l.producto_id}|${l.variante_id || ''}`;
+/** Las líneas tal como las espera el servidor (comprar, cotizar, cupón). */
+export const aLineasServidor = (ls: LineaCarrito[]) =>
+  ls.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}) }));
 
 const MAX_LINEAS = 20;
 
@@ -39,6 +49,7 @@ function leer(tienda: string): LineaCarrito[] {
            cantidad: Math.max(1, Math.min(99, Number(x.cantidad) || 1)),
            nombre: typeof x.nombre === 'string' ? x.nombre : 'Producto',
            precio_centimos: Number(x.precio_centimos) || 0,
+           ...(typeof x.variante_id === 'string' && x.variante_id ? { variante_id: x.variante_id, variante_nombre: typeof x.variante_nombre === 'string' ? x.variante_nombre : '' } : {}),
          }))
          .slice(0, MAX_LINEAS)
       : [];
@@ -49,6 +60,24 @@ function leer(tienda: string): LineaCarrito[] {
  *  pestañas, así que en esta hace falta uno propio o la cesta de arriba no se
  *  entera de lo que acaba de pulsar quien está mirando. */
 const EVENTO = 'humanity:carrito-cambiado';
+
+// SINCRONIZAR CON EL SERVIDOR (2026-08-23, carrito abandonado): si hay sesión,
+// cada cambio se guarda también en el servidor (con un pequeño retraso para
+// no mandar uno por pulsación) — así la cesta se recupera en otro dispositivo
+// y el servidor puede avisar a las 24 h. Sin sesión el servidor contesta 401
+// y se deja de intentar en esta página: a nadie anónimo se le persigue.
+let sinSesion = false;
+const temporizadores = new Map<string, number>();
+function sincronizar(tienda: string, lineas: LineaCarrito[]) {
+  if (sinSesion || typeof fetch === 'undefined') return;
+  window.clearTimeout(temporizadores.get(tienda));
+  temporizadores.set(tienda, window.setTimeout(() => {
+    fetch('/api/publicar/cesta', {
+      method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tienda, lineas }),
+    }).then(r => { if (r.status === 401) sinSesion = true; }).catch(() => {});
+  }, 800));
+}
 
 export function useCarrito(tienda: string) {
   const [lineas, setLineas] = useState<LineaCarrito[]>(() => leer(tienda));
@@ -67,11 +96,27 @@ export function useCarrito(tienda: string) {
   const guardar = useCallback((nuevas: LineaCarrito[]) => {
     try { localStorage.setItem(clave(tienda), JSON.stringify(nuevas)); } catch { /* modo privado */ }
     window.dispatchEvent(new Event(EVENTO));
+    sincronizar(tienda, nuevas);
+  }, [tienda]);
+
+  // Recuperar la cesta guardada si la local está vacía (otro dispositivo, o
+  // un navegador limpio). Una vez por tienda y carga de página.
+  useEffect(() => {
+    if (sinSesion || leer(tienda).length > 0) return;
+    fetch(`/api/publicar/cesta?tienda=${encodeURIComponent(tienda)}`, { credentials: 'include' })
+      .then(async r => {
+        if (r.status === 401) { sinSesion = true; return; }
+        const j = await r.json().catch(() => null);
+        if (Array.isArray(j?.lineas) && j.lineas.length && leer(tienda).length === 0) {
+          try { localStorage.setItem(clave(tienda), JSON.stringify(j.lineas)); } catch { /* modo privado */ }
+          window.dispatchEvent(new Event(EVENTO));
+        }
+      }).catch(() => {});
   }, [tienda]);
 
   const anadir = useCallback((linea: LineaCarrito) => {
     const actuales = leer(tienda);
-    const ya = actuales.find(l => l.producto_id === linea.producto_id);
+    const ya = actuales.find(l => claveLinea(l) === claveLinea(linea));
     if (ya) {
       // Pulsar «añadir» dos veces suma, no duplica la línea: si no, el
       // servidor recibiría el mismo producto dos veces y reservaría de más.
@@ -84,17 +129,19 @@ export function useCarrito(tienda: string) {
     return true;
   }, [tienda, guardar]);
 
-  const cambiar = useCallback((productoId: string, cantidad: number) => {
+  const cambiar = useCallback((productoId: string, cantidad: number, varianteId?: string | null) => {
     const n = Math.max(0, Math.min(99, Math.floor(cantidad)));
+    const k = claveLinea({ producto_id: productoId, variante_id: varianteId });
     // Bajar a cero es quitarlo. Es lo que espera quien pulsa «menos» en el
     // último, y evita una línea de cero unidades que no significa nada.
     guardar(n === 0
-      ? leer(tienda).filter(l => l.producto_id !== productoId)
-      : leer(tienda).map(l => l.producto_id === productoId ? { ...l, cantidad: n } : l));
+      ? leer(tienda).filter(l => claveLinea(l) !== k)
+      : leer(tienda).map(l => claveLinea(l) === k ? { ...l, cantidad: n } : l));
   }, [tienda, guardar]);
 
-  const quitar = useCallback((productoId: string) => {
-    guardar(leer(tienda).filter(l => l.producto_id !== productoId));
+  const quitar = useCallback((productoId: string, varianteId?: string | null) => {
+    const k = claveLinea({ producto_id: productoId, variante_id: varianteId });
+    guardar(leer(tienda).filter(l => claveLinea(l) !== k));
   }, [tienda, guardar]);
 
   const vaciar = useCallback(() => guardar([]), [guardar]);
