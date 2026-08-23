@@ -1,3 +1,28 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/TresCirculos.tsx",
+      "motivo": "buscador arriba, nombre desplegable, hoja conectada, circulos mas pequenos, filtro por tema",
+      "desde": "2026-08-23T22:42:35.938Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/HojaCrear.tsx",
+      "motivo": "buscador arriba, nombre desplegable, hoja conectada, circulos mas pequenos, filtro por tema",
+      "desde": "2026-08-23T22:42:35.938Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "buscador arriba, nombre desplegable, hoja conectada, circulos mas pequenos, filtro por tema",
+      "desde": "2026-08-23T22:42:35.938Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "buscador arriba, nombre desplegable, hoja conectada, circulos mas pequenos, filtro por tema",
+      "desde": "2026-08-23T22:42:35.938Z"
+    }
+  ]
 }
