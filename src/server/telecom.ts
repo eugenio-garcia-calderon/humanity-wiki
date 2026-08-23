@@ -2,7 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import {
   apuntar, enviarA, enviarAlDispositivo, enviarAlResto,
-  estaConectado, conectadosDe, arrancarLatido, recuento,
+  estaConectado, conectadosDe, arrancarLatido, arrancarCable, recuento,
 } from './telecomHub.js';
 import { avisar } from './avisos.js';
 import { normalizarTelefono } from '../utils/telefono.js';
@@ -157,6 +157,13 @@ const puedeReclamar = (userId: string) => dentroDelCupo(reclamos, userId, RECLAM
 // de arrancar la aplicación. Una hora de caché sobre dos de vida deja margen de
 // sobra: la credencial más vieja que se puede repartir todavía tiene una hora
 // por delante, y una llamada ya conectada no se corta cuando caduca.
+// CON OCHO PROCESOS ESTA CACHÉ SE MULTIPLICA POR OCHO, y se deja así a
+// propósito (2026-08-23, hablado con prog6). Cada proceso pediría sus propias
+// credenciales: 8 peticiones a Cloudflare por hora en vez de 1. Compartirlas
+// exigiría una tabla y su invalidación para ahorrar siete peticiones diarias de
+// las 1.000 GB de cupo. Lo mismo vale para `ultimoFalloTurn`: con Cloudflare
+// caído habría 8 líneas de registro cada 5 minutos en vez de 1. Escrito aquí
+// para que se lea como una decisión y no como algo que nadie miró.
 const VIDA_CREDENCIAL_S = 2 * 60 * 60;
 const CACHE_CREDENCIAL_MS = 60 * 60 * 1000;
 /** Cloudflare tiene cuatro segundos. Pasados esos, se sale con STUN y ya. */
@@ -231,6 +238,10 @@ async function servidoresDeHielo(): Promise<{ servidores: any[]; hayTurn: boolea
 
 export function registerTelecomRoutes(app: Express, db: any) {
   arrancarLatido();
+  // EL CABLE ENTRE PROCESOS. Hoy no hace nada visible —hay un solo proceso— y
+  // es justo por eso por lo que se enchufa ahora: el día que la plataforma se
+  // reparta entre los ocho núcleos, lo que falla sin esto no da error, se calla.
+  arrancarCable(db);
 
   /** Los datos públicos de una persona, que es lo único que sale de aquí. */
   const fichaDe = async (id: string) => {
