@@ -22,7 +22,7 @@
 // dos tamaños. Quien decide si se pinta es `Layout`, y es también quien pone
 // el botón grande de traerlo de vuelta.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   FolderKanban, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
@@ -89,6 +89,27 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
 }) {
   const navigate = useNavigate();
   const { user, updateUiSettings } = useAuth();
+
+  /*
+   * LO QUE CUELGA DE TU CUENTA, CUANDO NO HAY CUENTA (2026-08-23).
+   *
+   * El menú ya no desaparece al cerrar sesión: la lista de herramientas es
+   * justo lo que quiere ver quien está decidiendo si se registra. Pero sus
+   * proyectos, sus productos y su gente sí dependen de tener cuenta, y ahí
+   * «Todavía no tienes proyectos» es una frase falsa: no es que no tengas, es
+   * que no has entrado.
+   *
+   * Así que en su sitio va la invitación. Enlace y no botón: lleva a otra
+   * pantalla, y las tres llevan al mismo sitio — la portada dice que hay UN
+   * botón de crear cuenta, y esto no compite con él, lo repite donde la
+   * ausencia se nota.
+   */
+  const invitar = (que: string) => (
+    <Link to="/login?crear=1"
+      className="mx-2 my-1 block rounded-lg border border-dashed border-slate-200 px-2.5 py-2 text-[11px] font-bold leading-snug text-slate-400 transition-colors hover:border-emerald-300 hover:text-emerald-700">
+      {que}
+    </Link>
+  );
   const [datos, setDatos] = useState<DatosMenu>(VACIO);
   const [plegadas, setPlegadas] = useState<Record<string, boolean>>({});
   // LAS ÁREAS (2026-08-20): los 14 objetivos con sus indicadores. Son el mapa
@@ -406,7 +427,9 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       hijos: (
         <>
           {nodosProyectos.length === 0 && (
-            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
+            user
+              ? <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
+              : invitar('Crea tu cuenta y empieza tu primer proyecto →')
           )}
           {filas('proyectos', nodosProyectos)}
         </>
@@ -426,7 +449,9 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       hijos: (
         <>
           {nodosProductos.length === 0 && (
-            <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
+            user
+              ? <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no ofreces nada.</p>
+              : invitar('Con una cuenta puedes vender lo que haces →')
           )}
           {filas('productos', nodosProductos)}
         </>

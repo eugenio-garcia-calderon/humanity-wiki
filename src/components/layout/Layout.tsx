@@ -359,7 +359,16 @@ export default function Layout() {
           En una pantalla de 390 px esta columna se comía 240 y al contenido le
           quedaban 118 px útiles: el texto salía a una palabra por línea y en
           /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
-      {user && !esMovil && menuPuesto && (
+      {/* EL MENÚ TAMBIÉN SIN CUENTA (2026-08-23). Eugenio: «cuando se cierra
+          la sesión desaparece, y creo que es un menú muy guay donde están
+          todas las herramientas».
+          Tenía razón y era un error de diseño, no una decisión: la lista de
+          herramientas es EXACTAMENTE lo que quieres enseñarle a quien está
+          decidiendo si se registra. Esconderla dejaba la pantalla más pobre
+          justo para quien menos sabe qué hay aquí. Lo que cuelga de tu cuenta
+          —tus proyectos, tus productos, tus personas— sale vacío y con su
+          invitación, que lo resuelve `MenuLateral`. */}
+      {!esMovil && menuPuesto && (
         <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
       )}
 
@@ -369,9 +378,8 @@ export default function Layout() {
           dice nada y no se mueve nada.
           Solo cuando el menú va a estar puesto: si lo tenías escondido, no hay
           columna que reservar y el hueco sería el salto que evitamos. */}
-      {!user && cargandoSesion && !esMovil && menuPuesto && (
-        <div aria-hidden className="shrink-0 h-full w-60 border-r border-slate-200 bg-white" />
-      )}
+      {/* Ya no hace falta el hueco: la columna está puesta desde el principio,
+          haya sesión o no, así que no hay nada que aparezca de golpe. */}
 
       <div className="flex-1 flex flex-col min-w-0">
       {/* Barra superior: SOLO las ventanas abiertas. La marca y las secciones

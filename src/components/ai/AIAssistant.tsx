@@ -2288,7 +2288,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           onClick={() => navigate('/')} />
         <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
           activo={ruta.startsWith('/proyectos')}
-          onClick={() => navigate('/proyectos')} />
+          onClick={() => navigate(user ? '/proyectos' : '/login?crear=1')} />
 
         <button
           onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
@@ -2306,12 +2306,25 @@ export default function AIAssistant({ modo = 'panel' }: {
           <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
         </button>
 
-        <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
+        {/* SIN CUENTA, ESTOS DOS NO LLEVABAN A NINGUNA PARTE (2026-08-23).
+            «Crear» abría un panel de herramientas que ninguna funciona sin
+            sesión —medido: pulsarlo se quedaba en la misma pantalla sin hacer
+            NADA— y «Red» llevaba a una bandeja de mensajes vacía. Es la queja
+            exacta de Eugenio sobre la portada: «no puede ser, que aparezca un
+            botón de crear».
+            No se esconden: una barra a la que le faltan botones parece rota, y
+            además son justo las dos cosas que interesa enseñar. Lo que cambia
+            es a dónde llevan — a crear la cuenta que hace falta para usarlas,
+            que es la respuesta honesta a lo que la persona acaba de pedir. */}
+        <BotonMuelle icono={UsersRound} label="Red" titulo={user ? 'Tus mensajes con personas' : 'Crea tu cuenta para hablar con la gente de la plataforma'}
           activo={ruta.startsWith('/mensajes') || ruta.startsWith('/personas')}
-          onClick={() => navigate('/mensajes')} />
-        <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
+          onClick={() => navigate(user ? '/mensajes' : '/login?crear=1')} />
+        <BotonMuelle icono={Plus} label="Crear" titulo={user ? 'Crear algo nuevo' : 'Crea tu cuenta para empezar'}
           activo={open && panelMuelle === 'crear'}
-          onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
+          onClick={() => {
+            if (!user) { navigate('/login?crear=1'); return; }
+            setOpen(true); setPanelMuelle('crear');
+          }} />
       
       </nav>
 
