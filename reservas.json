@@ -17,6 +17,12 @@
       "ruta": "src/components/portada/portadaBloques.ts",
       "motivo": "quitar circulos, buscador y tematicas de la portada",
       "desde": "2026-08-23T23:31:33.381Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "scripts/probar-portada.ts",
+      "motivo": "los tres bloques retirados",
+      "desde": "2026-08-23T23:32:55.817Z"
     }
   ]
 }
