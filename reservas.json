@@ -155,6 +155,24 @@
       "ruta": "retirar el atajo que no se ejecutaba nunca",
       "motivo": "",
       "desde": "2026-08-23T13:05:42.142Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0107_variantes.sql",
+      "motivo": "comercio F2: variantes/SKU con stock por variante",
+      "desde": "2026-08-23T13:16:52.780Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/hooks/useCarrito.ts",
+      "motivo": "comercio F2: variantes/SKU con stock por variante",
+      "desde": "2026-08-23T13:16:52.780Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/Cesta.tsx",
+      "motivo": "comercio F2: variantes/SKU con stock por variante",
+      "desde": "2026-08-23T13:16:52.780Z"
     }
   ]
 }
