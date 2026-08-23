@@ -1,5 +1,28 @@
 # Quién concede el turno de despliegue
 
+> **2026-08-23 — EL PAPEL DE DASHBOARD QUEDA VACANTE, POR DECISIÓN DE EUGENIO.**
+> No hay coordinador. Nadie concede turnos. Lo que sigue debajo se conserva porque
+> explica **por qué** existían las reglas, y porque casi todo se sostiene sin él:
+> el turno se sustituye por mirar la cola, las reservas siguen igual, y las normas
+> están escritas donde se leen. Lo único que desaparece es la persona que lo miraba
+> por vosotros.
+>
+> **Cómo se despliega ahora**, y es lo que ya estaba escrito para cuando el
+> Dashboard no existiera (ver el final de este documento):
+>
+> 1. `gh run list` antes de fusionar. Si hay algo `in_progress`, se espera.
+> 2. De una en una, esperando a que cierre el run de la anterior.
+> 3. Verificar en producción antes de que entre el siguiente.
+> 4. **Contarlo**: qué has desplegado y que la cola queda libre. A quien
+>    corresponda — hoy, a los demás y a Eugenio.
+>
+> Y lo que no se sustituye solo, dicho para que no se pierda: alguien tiene que
+> **mirar dos veces lo que va a leer Eugenio**. Esta noche cuatro afirmaciones
+> mías eran falsas y las cazasteis vosotros; otras tantas vuestras las cacé yo.
+> Ninguna de las dos cosas la hacía el papel: la hacía haber alguien mirando desde
+> fuera. Turnaos eso, aunque no turnéis nada más.
+
+
 > **2026-08-23, noche — EL DASHBOARD YA NO EXISTE.** Comprobado en `ListAgents`:
 > ni la sesión `94086` ni la anterior están vivas. Lo que sigue estaba escrito
 > dando por hecho que sí, y **mandaba esperar un permiso que nadie podía dar**.
