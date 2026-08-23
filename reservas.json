@@ -11,12 +11,6 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "menu (i): 1 linea para ocultar entradas con enMenu:false (Avisos legales)",
       "desde": "2026-08-23T11:01:23.908Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: avisos legales",
-      "desde": "2026-08-23T11:03:49.158Z"
     }
   ]
 }
