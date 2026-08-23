@@ -395,7 +395,7 @@ export default function Layout() {
           carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
           ve; tapar contenido es un precio que se paga a escondidas. */}
       <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
-        user && !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
+        !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
@@ -428,7 +428,7 @@ export default function Layout() {
 
             Ahora la condición dice lo que de verdad importa: enséñalo salvo que
             el menú lateral lo esté enseñando él. */}
-        {!(user && menuPuesto) && (
+        {!menuPuesto && (
           <button
             /* IR AL INICIO ES LAS DOS COSAS (2026-08-22). Navegar no basta: las
                ventanas del escritorio se pintan encima y no se enteran de que la
@@ -455,7 +455,17 @@ export default function Layout() {
             SIGUE SIENDO GRANDE. Desde que no hay estado intermedio del menú,
             éste es el ÚNICO camino de vuelta, y este proyecto ya tiene
             catalogado que 83 de cada 100 de sus botones bajan de 24 px. */}
-        {user && !menuPuesto && (
+        {/* SIN `user` (2026-08-23). Eugenio: «el menú lateral izquierdo, cuando
+            se pliega, no se vuelve a desplegar… todo esto con la sesión
+            cerrada».
+            Desde ayer el menú se pinta también sin sesión, pero esta condición
+            se quedó como estaba: **se podía plegar y no había forma de volver a
+            abrirlo**. Un callejón sin salida, y del peor tipo — el que se abre
+            con un gesto normal y no tiene deshacer.
+            Es la segunda vez hoy que quitar `user &&` de un sitio deja el fallo
+            en otro que asumía lo mismo. Los otros dos de esta misma barra están
+            justo debajo. */}
+        {!menuPuesto && (
           <button
             onClick={ponerMenu}
             title="Ver el menú"
