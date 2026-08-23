@@ -142,7 +142,27 @@ export default function Explorar() {
   const [busqueda, setBusqueda] = useState(() => searchParams.get('q') || '');
   const [tipo, setTipo] = useState<string>('Todo');
   /** El objetivo elegido en la tira de arriba, o null para «Todos». */
-  const [objetivo, setObjetivo] = useState<string | null>(null);
+  /*
+   * EL TEMA VIENE DE LA DIRECCIÓN (2026-08-24). Eugenio: «la funcionalidad del
+   * menú izquierdo es que el contenido que se muestra en pantalla esté
+   * relacionado con la temática… por ejemplo de "Energía" te muestra todo lo
+   * relacionado con energía en un grid».
+   *
+   * El filtro por objetivo ya existía aquí —son las pastillas de arriba— pero
+   * vivía sólo en la memoria de esta pantalla, así que **nadie de fuera podía
+   * pedirlo**. Bastaba con leerlo de `?objetivo=` para que el menú de Explorar,
+   * un enlace compartido o el buscador puedan dejar esta rejilla ya filtrada.
+   *
+   * Y se sincroniza en los dos sentidos: pulsar una pastilla cambia la
+   * dirección, así que lo que estás viendo se puede copiar y mandar. Un filtro
+   * que no cabe en una URL es un filtro que no se puede enseñar a nadie.
+   */
+  const objetivo = searchParams.get('objetivo');
+  const setObjetivo = (id: string | null) => {
+    const q = new URLSearchParams(searchParams);
+    if (id) q.set('objetivo', id); else q.delete('objetivo');
+    setSearchParams(q, { replace: true });
+  };
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   const [verPapelera, setVerPapelera] = useState(false);
@@ -566,7 +586,7 @@ export default function Explorar() {
                     {OBJETIVOS.map(o => (
                     <button
                     key={o.id}
-                    onClick={() => setObjetivo(v => (v === o.id ? null : o.id))}
+                    onClick={() => setObjetivo(objetivo === o.id ? null : o.id)}
                     title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
                     className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
                     objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}

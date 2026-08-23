@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import {
-  X, Camera, Megaphone, FolderKanban, ListChecks, FileText, Globe2,
-  Map as MapIcon, Table2, CalendarDays, Store, Users2, Sparkles, Paperclip,
-} from 'lucide-react';
+  EstilosPrevias,
+  PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
+  PreviaTelecom, PreviaIA, PreviaCalendario, PreviaArchivos, PreviaPublicaciones,
+} from '../bienvenida/previas';
 
 /*
  * CREAR — LA HOJA QUE SUBE DESDE EL BOTÓN (2026-08-23, agente de APP/UX)
@@ -26,22 +28,38 @@ import {
  * después. Es la misma lista de cosas y dos preguntas distintas.
  */
 
-interface Cosa { nombre: string; icono: any; a: string; nota?: string }
+/*
+ * CADA COSA CON SU DIBUJO (2026-08-24). Eugenio: «en el cajetín central de
+ * herramientas utiliza las imágenes y animaciones que hiciste para esta
+ * página, son preciosas y chulas con esa función de HOVER animada».
+ *
+ * Son LAS MISMAS de la portada, importadas de `bienvenida/previas.tsx`, no
+ * copiadas. Y eso importa más aquí que en ninguna otra parte: el dibujo que ve
+ * un desconocido al decidir si se registra tiene que ser exactamente el que
+ * verá al ir a crear esa cosa. Si se separan, la promesa de la portada deja de
+ * cumplirse en la primera pantalla de dentro.
+ *
+ * TRECE COSAS Y ONCE DIBUJOS: «Proyecto» y «Tarea» comparten el tablero, y
+ * «Foto o vídeo» comparte con «Archivo» las miniaturas. Repetir un dibujo
+ * cuando dos cosas se parecen de verdad es honesto; inventar dos distintos para
+ * que no se repitan sería decorar una diferencia que no existe.
+ */
+interface Cosa { nombre: string; Previa: () => any; a: string; nota?: string }
 
 const COSAS: Cosa[] = [
-  { nombre: 'Foto o vídeo', icono: Camera,       a: '/?atajo=crear',        nota: 'Con la cámara' },
-  { nombre: 'Publicación',  icono: Megaphone,    a: '/explorar?crear=1',    nota: 'En el muro' },
-  { nombre: 'Proyecto',     icono: FolderKanban, a: '/proyectos?nuevo=1',   nota: 'Con su tablero' },
-  { nombre: 'Tarea',        icono: ListChecks,   a: '/tareas?nueva=1' },
-  { nombre: 'Página',       icono: FileText,     a: '/paginas?nueva=1',     nota: 'Texto, fotos y vídeo' },
-  { nombre: 'Esquema',      icono: Globe2,       a: '/esquemas?nuevo=1',    nota: 'Ideas conectadas' },
-  { nombre: 'Mapa',         icono: MapIcon,      a: '/mapas?nuevo=1' },
-  { nombre: 'Tabla',        icono: Table2,       a: '/tablas?nueva=1',      nota: 'Datos con columnas' },
-  { nombre: 'Fecha',        icono: CalendarDays, a: '/calendario?nuevo=1' },
-  { nombre: 'Producto',     icono: Store,        a: '/comercio?nuevo=1',    nota: 'Para vender' },
-  { nombre: 'Persona',      icono: Users2,       a: '/personas?nueva=1' },
-  { nombre: 'Archivo',      icono: Paperclip,    a: '/archivos' },
-  { nombre: 'Pedírselo a la IA', icono: Sparkles, a: '/ia',                 nota: 'Que lo haga ella' },
+  { nombre: 'Foto o vídeo', Previa: PreviaArchivos,      a: '/?atajo=crear',      nota: 'Con la cámara' },
+  { nombre: 'Publicación',  Previa: PreviaPublicaciones, a: '/explorar?crear=1',  nota: 'En el muro' },
+  { nombre: 'Proyecto',     Previa: PreviaTareas,        a: '/proyectos?nuevo=1', nota: 'Con su tablero' },
+  { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
+  { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },
+  { nombre: 'Esquema',      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  nota: 'Ideas conectadas' },
+  { nombre: 'Mapa',         Previa: PreviaMapa,          a: '/mapas?nuevo=1' },
+  { nombre: 'Tabla',        Previa: PreviaTabla,         a: '/tablas?nueva=1',    nota: 'Datos con columnas' },
+  { nombre: 'Fecha',        Previa: PreviaCalendario,    a: '/calendario?nuevo=1' },
+  { nombre: 'Producto',     Previa: PreviaComercio,      a: '/comercio?nuevo=1',  nota: 'Para vender' },
+  { nombre: 'Persona',      Previa: PreviaTelecom,       a: '/personas?nueva=1' },
+  { nombre: 'Archivo',      Previa: PreviaArchivos,      a: '/archivos' },
+  { nombre: 'Pedírselo a la IA', Previa: PreviaIA,       a: '/ia',                nota: 'Que lo haga ella' },
 ];
 
 export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
@@ -75,9 +93,39 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
          * dejarían de leerse. Con 72 vh y cinco columnas caben las trece en
          * tres filas en un ordenador y en cinco en un móvil.
          */
-        className="fixed inset-x-0 bottom-0 z-[9998] h-[72vh] animate-in slide-in-from-bottom duration-200"
+        /*
+         * ARRANCA JUSTO ENCIMA DE LOS CÍRCULOS (2026-08-23). Eugenio: «que
+         * cuando le dé a crear se sigan viendo los 3 botones de abajo, y como
+         * que esté conectado mediante un diseño bonito esa ventana emergente
+         * con el botón central».
+         *
+         * Antes empezaba en `bottom-0` y se comía los tres botones, incluido el
+         * que acababas de pulsar. Una ventana que tapa el botón que la abrió
+         * deja sin ancla al que la mira: no queda ni rastro de por qué está ahí.
+         *
+         * `--alto-circulos` lo publica `TresCirculos`, que es quien sabe cuánto
+         * mide —92 px en un ordenador, 70 en un móvil—. Preguntárselo evita el
+         * número mágico que se queda viejo el día que cambien de tamaño.
+         */
+        style={{ bottom: 'calc(var(--alto-circulos, 92px) + env(safe-area-inset-bottom) + 10px)' }}
+        // MÁS ALTA EN EL MÓVIL, no menos (2026-08-24). Con los dibujos puestos, las
+        // trece tarjetas piden cinco filas a tres columnas y a 64 vh la última
+        // se quedaba fuera — medido, no supuesto. En un ordenador caben en tres
+        // filas de cinco y 64 vh sobra. La misma rejilla en dos formas distintas
+        // no pide la misma altura.
+        className="fixed inset-x-0 z-[9998] h-[74vh] animate-in slide-in-from-bottom duration-200 sm:h-[64vh]"
       >
-        <div className="mx-auto flex h-full max-w-3xl flex-col rounded-t-3xl border border-slate-200 bg-white shadow-2xl">
+        <div className="relative mx-auto flex h-full max-w-3xl flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          {/* EL PICO QUE LA CONECTA CON EL BOTÓN. Un triángulo del mismo blanco
+              y el mismo borde, centrado sobre el círculo de Crear: la hoja deja
+              de ser una ventana que ha aparecido y pasa a ser lo que ha salido
+              de ese botón. Es el mismo recurso de un bocadillo de cómic, y
+              funciona por lo mismo — dice quién habla.
+              El borde se dibuja con dos triángulos superpuestos: el de atrás en
+              gris y el de delante en blanco, 1 px más arriba. Un `border` en un
+              triángulo de CSS no existe. */}
+          <span aria-hidden className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[10px] border-t-[10px] border-x-transparent border-t-slate-200" />
+          <span aria-hidden className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 -translate-y-px border-x-[10px] border-t-[10px] border-x-transparent border-t-white" />
           {/* El tirador de arriba: dice «esto se arrastra o se cierra» sin
               escribirlo, y es lo que la gente ya conoce de su teléfono. */}
           <div className="flex items-center justify-between px-5 pb-2 pt-3">
@@ -88,6 +136,8 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
             </button>
           </div>
           <p className="px-5 pb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Crear</p>
+          {/* Las trece animaciones, una sola vez. */}
+          <EstilosPrevias />
 
           {/* `overflow-y-auto` se queda aunque ya no haga falta: en una pantalla
               muy baja —un portátil de 13 pulgadas con la barra del navegador— o
@@ -101,18 +151,16 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
                   key={c.nombre}
                   onClick={() => { navegar(c.a); onCerrar(); }}
                   title={c.nota}
-                  className="flex flex-col items-center gap-1 rounded-xl border border-slate-200 px-2 py-3 text-center transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
+                  // `group` es lo que enciende la animación de dentro del
+                  // dibujo: cada previsualización se mueve con `group-hover`.
+                  className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
                 >
-                  <c.icono className="h-5 w-5 shrink-0 text-emerald-600" />
-                  <span className="text-[12px] font-black leading-tight text-slate-900">{c.nombre}</span>
-                  {/* La nota se esconde en pantallas pequeñas y sigue viva en el
-                      `title`: en un móvil el sitio se lo tienen que llevar los
-                      nombres, que son lo que hay que leer. Las que no la
-                      necesitan no la llevan — rellenarlas todas obligaría a
-                      inventar una frase para «Mapa». */}
-                  {c.nota && (
-                    <span className="hidden text-[10px] leading-tight text-slate-500 sm:line-clamp-2">{c.nota}</span>
-                  )}
+                  <span className="block aspect-[16/9] w-full border-b border-slate-100">
+                    <c.Previa />
+                  </span>
+                  <span className="px-2 py-1.5 text-[12px] font-black leading-tight text-slate-900">
+                    {c.nombre}
+                  </span>
                 </button>
               ))}
             </div>
