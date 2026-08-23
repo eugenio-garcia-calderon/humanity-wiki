@@ -68,12 +68,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "memory/13_PLAN_COMERCIO.md",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "drizzle/0107_variantes.sql",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
@@ -185,6 +179,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "pintar el aviso del 80% del tope de IA",
       "desde": "2026-08-23T13:54:15.339Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/13_PLAN_COMERCIO.md",
+      "motivo": "F5: marcar hecha",
+      "desde": "2026-08-23T13:57:21.613Z"
     }
   ]
 }
