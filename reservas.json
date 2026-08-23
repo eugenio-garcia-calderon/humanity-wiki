@@ -91,12 +91,6 @@
       "desde": "2026-08-23T13:01:14.835Z"
     },
     {
-      "agente": "prog6",
-      "ruta": "src/server/graph.ts",
-      "motivo": "freno al buscador, que ahora se llama al teclear",
-      "desde": "2026-08-23T13:02:39.846Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/publicar.ts",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
