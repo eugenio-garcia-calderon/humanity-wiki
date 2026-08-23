@@ -73,10 +73,10 @@
       "desde": "2026-08-23T12:32:22.299Z"
     },
     {
-      "agente": "prog8-turn",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "fase 2: registrar el modulo google",
-      "desde": "2026-08-23T12:34:34.050Z"
+      "agente": "prog3",
+      "ruta": "memory/10_TIENDAS.md",
+      "motivo": "corregir de quien son las publicaciones de prueba: lo supuse y era falso",
+      "desde": "2026-08-23T12:34:56.607Z"
     }
   ]
 }
