@@ -71,6 +71,12 @@
       "ruta": "drizzle/0105_cuenta_de_google.sql",
       "motivo": "fase 2: conectar tu cuenta de Google (0104 lo tiene prog7)",
       "desde": "2026-08-23T12:32:22.299Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "fase 2: registrar el modulo google",
+      "desde": "2026-08-23T12:34:34.050Z"
     }
   ]
 }
