@@ -161,6 +161,18 @@
       "ruta": "memory/13_PLAN_COMERCIO.md",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
       "desde": "2026-08-23T13:03:04.503Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "",
+      "desde": "2026-08-23T13:05:42.142Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "retirar el atajo que no se ejecutaba nunca",
+      "motivo": "",
+      "desde": "2026-08-23T13:05:42.142Z"
     }
   ]
 }
