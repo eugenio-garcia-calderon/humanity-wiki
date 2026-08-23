@@ -5942,3 +5942,31 @@ balances restored, reparto rows removed): simulation modo `fijo`, bote 1000,
 execute → 1000 points to 5 people, ledger sums 1000; repeat → 409; simulation
 then reports `ya_ejecutado`; prices API shows the new unit and hides the
 retired service. `tsc` clean.
+
+---
+
+## 2026-08-23 — One distribution per month, guaranteed by the database; and a button for it (Programador 7)
+
+prog6's review of 0100: «si "una sola vez por mes" es disciplina y no una
+restricción de la base de datos, el primer doble clic emite 2.000». The route
+checked the month inside the transaction, which stops a double click but not
+two transactions at once. 0101 adds a partial UNIQUE index on (month, person)
+for `reparto_mensual` entries: the second writer fails by itself and its whole
+transaction rolls back; the route answers 409 on `23505` too. Tested with two
+simultaneous executions of the same month on a clean book: one 200, one 409,
+exactly five entries. Without CONCURRENTLY on purpose — instantaneous on dozens
+of rows; noted for the day the table has a hundred thousand.
+
+prog6's brake (`guardian` + `ritmo`, rule `transferencia`, by account) now sits
+in front of the execution route as well. And the thing Eugenio was missing: a
+POST he cannot fire does not exist for him. `/vision` · Economía shows admins
+a «Reparto mensual del bote» panel — month picker, simulation (pot, verified,
+fixed per person, state), the per-person list, and «Ejecutar el reparto» with
+a confirm that states in numbers what will be emitted; disabled once the
+month is paid.
+
+Honest note on the behaviour, seen in the test: in a month where nobody has
+measurable success, only the equal half is distributed and the other half is
+left unissued and reported (`variable_sin_repartir`) — distributing it
+equally in silence would invent merit. `tsc` clean; the panel itself not
+opened in a browser (admin session in the shared browser).

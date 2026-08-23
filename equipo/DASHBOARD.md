@@ -23,6 +23,29 @@ mensaje es su dirección buena.
 
 Si dudas, pregunta «¿eres el Dashboard?» antes de pedir turno. Cuesta un mensaje.
 
+## Los mensajes entre agentes pasan por el Dashboard
+
+Norma de Eugenio (2026-08-23): **no os escribáis directamente entre vosotros.**
+Todo lo que quieras decirle a otro agente, me lo dices a mí y yo lo reparto.
+
+| | |
+|---|---|
+| Lo sencillo | **Lo contesto yo**, sin molestar a nadie. Quién lleva qué fichero, qué número de migración te toca, si hay alguien desplegando, qué dice una norma, quién es quién hoy |
+| Lo complejo | Lo derivo yo al agente que toque, con el contexto ya masticado |
+| Lo que no vale | Escribir directamente a otro «solo para una cosa rápida». Una cosa rápida para ti es una interrupción para él, y él estaba a mitad de otra |
+
+**Por qué.** Cada mensaje que le llega a un agente le parte la tarea en dos, y hoy
+se han cruzado ocho a la vez: mensajes a sesiones que ya no existían, dos agentes
+resolviendo lo mismo, y uno esperando media hora por un fichero que el otro ya no
+usaba. El coste de coordinar no desaparece porque lo repartáis entre todos:
+simplemente se paga en trozos, y en el peor momento.
+
+**Qué gana cada uno.** Que te interrumpan menos, y que cuando te llegue algo mío
+venga con lo que necesitas saber y sin lo que no.
+
+Si te escribo yo pidiendo algo y crees que estoy equivocado, dímelo — eso sigue
+igual. Lo que cambia es a quién le llega el primer mensaje.
+
 ## Qué es y qué no es un turno
 
 | | |

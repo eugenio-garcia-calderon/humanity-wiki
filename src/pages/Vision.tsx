@@ -281,6 +281,8 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
         </div>
       )}
 
+      {esAdmin && <RepartoMensual />}
+
       {comprando && (
         <EmbeddedCheckoutModal
           title="Comprar 100 Puntos de Humanity.wiki"
@@ -293,6 +295,79 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
           }}
         />
       )}
+    </div>
+  );
+}
+
+/**
+ * EL REPARTO MENSUAL, PARA EL ADMINISTRADOR (2026-08-23). Eugenio no puede
+ * lanzar un POST a mano: aquí ve la simulación del mes (bote, cuántos entran,
+ * qué le tocaría a cada persona) y un botón que lo ejecuta, con confirmación
+ * y diciendo en números lo que va a emitir. El servidor es quien decide: una
+ * vez por mes, y la base de datos lo garantiza (índice único de la 0101).
+ */
+function RepartoMensual() {
+  const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+  const [datos, setDatos] = useState<any>(null);
+  const [ejecutando, setEjecutando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const cargar = () => {
+    fetch(`/api/admin/tokenomics/reparto?mes=${encodeURIComponent(mes)}`, { credentials: 'include' })
+      .then(r => r.json()).then(j => { if (j && !j.error) setDatos(j); else setAviso(j?.error || 'No se ha podido calcular.'); }).catch(() => {});
+  };
+  useEffect(() => { setAviso(null); cargar(); }, [mes]);
+  const ejecutar = async () => {
+    if (!datos) return;
+    if (!window.confirm(`Vas a EMITIR ${Number(datos.bote_puntos).toLocaleString('es-ES')} puntos nuevos y repartirlos entre ${datos.verificados} personas verificadas para ${mes}. Solo se puede hacer una vez por mes y no se deshace solo. ¿Seguro?`)) return;
+    setEjecutando(true); setAviso(null);
+    try {
+      const r = await fetch('/api/admin/tokenomics/reparto/ejecutar', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mes }),
+      });
+      const j = await r.json().catch(() => ({}));
+      setAviso(r.ok ? `Hecho: ${Number(j.puntos_repartidos).toLocaleString('es-ES')} puntos repartidos entre ${j.personas} personas.` : (j.error || 'No se ha podido ejecutar.'));
+      cargar();
+    } catch { setAviso('No hay conexión con el servidor.'); }
+    finally { setEjecutando(false); }
+  };
+  const num = (n: any) => Number(n || 0).toLocaleString('es-ES', { maximumFractionDigits: 2 });
+  return (
+    <div className="mt-7 bg-white border border-slate-200 rounded-3xl p-6">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 inline-flex items-center gap-1.5">
+          <Coins className="w-3.5 h-3.5" /> Reparto mensual del bote · solo administradores
+        </p>
+        <input type="month" value={mes} onChange={e => setMes(e.target.value)} className="h-9 px-2 rounded-lg border border-slate-200 text-sm" aria-label="Mes del reparto" />
+      </div>
+      {datos ? (
+        <>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Bote ({datos.modo_bote})</p><p className="text-xl font-black text-slate-900">{num(datos.bote_puntos)} <span className="text-xs text-slate-400">puntos</span></p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Verificados</p><p className="text-xl font-black text-slate-900">{datos.verificados}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Fijo por persona</p><p className="text-xl font-black text-slate-900">{num(datos.fijo_por_persona)}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Estado</p><p className={`text-sm font-black ${datos.ya_ejecutado ? 'text-emerald-700' : 'text-amber-700'}`}>{datos.ya_ejecutado ? `Repartido (${num(datos.ya_repartido_puntos)})` : 'Sin repartir'}</p></div>
+          </div>
+          {Array.isArray(datos.reparto) && datos.reparto.length > 0 && (
+            <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
+              {datos.reparto.slice(0, 50).map((p: any) => (
+                <div key={p.user_id} className="flex items-center justify-between gap-3 text-xs">
+                  <span className="text-slate-700 truncate">{p.nombre}</span>
+                  <span className="text-slate-400 shrink-0">{p.vistas_validas}v · {p.interacciones}i · {p.resenas_positivas}r</span>
+                  <span className="font-black text-slate-900 shrink-0 w-20 text-right">{num(p.total)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
+            <button onClick={ejecutar} disabled={ejecutando || datos.ya_ejecutado || !datos.verificados}
+              className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-black disabled:opacity-40">
+              {ejecutando ? 'Repartiendo…' : datos.ya_ejecutado ? 'Ya repartido este mes' : `Ejecutar el reparto de ${mes}`}
+            </button>
+            {aviso && <p className="text-xs font-bold text-slate-700">{aviso}</p>}
+          </div>
+          <p className="mt-2 text-[11px] text-slate-400">Mitad igual por cabeza, mitad por éxito (vistas válidas, interacciones, reseñas positivas). Emite puntos nuevos: una vez por mes, y la base de datos no deja repetirlo.</p>
+        </>
+      ) : <p className="mt-3 text-sm text-slate-400">{aviso || 'Calculando…'}</p>}
     </div>
   );
 }
