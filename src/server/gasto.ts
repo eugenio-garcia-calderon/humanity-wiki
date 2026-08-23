@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { estadoDelTope } from './ai/tope.js';
 import { sql } from 'drizzle-orm';
 import { readFileSync } from 'fs';
 import { providerOfModel } from './ai/provider.js';
@@ -344,7 +345,11 @@ export function registerGastoRoutes(app: Express, db: any) {
       if (guardado) {
         // Las copias se releen aunque el gasto venga de la caché: es el dato
         // que tiene que estar al día.
-        const conCopias = { ...guardado, copias: estadoCopias() };
+        // ══ EL TOPE VA SIEMPRE FRESCO, AUNQUE EL GASTO VENGA DE LA CACHÉ ══
+        // La caché del gasto dura seis horas: enseñar «llevas el 12 % del
+        // tope» con seis horas de retraso es enseñar otra cosa. El tope se
+        // lee aparte, y es barato — una suma cacheada un minuto.
+        const conCopias = { ...guardado, copias: estadoCopias(), tope_ia: await estadoDelTope(db) };
         return res.json(esAdmin ? conCopias : soloLoPublico(conCopias));
       }
       const [servidores, oficial, interno] = await Promise.all([
@@ -360,7 +365,9 @@ export function registerGastoRoutes(app: Express, db: any) {
         ia: { oficial_anthropic: oficial, interno },
       };
       await guardarCache(db, datos);
-      res.json(esAdmin ? datos : soloLoPublico(datos));
+      // El tope NO se guarda en la caché: se calcula ahora, por lo de arriba.
+      const conTope = { ...datos, tope_ia: await estadoDelTope(db) };
+      res.json(esAdmin ? conTope : soloLoPublico(conTope));
     } catch (e: any) {
       console.error('gasto error:', e);
       res.status(500).json({ error: e.message });
