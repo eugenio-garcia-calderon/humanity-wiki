@@ -35,6 +35,12 @@
       "ruta": "drizzle/0100_reparto_fijo_y_referencia.sql",
       "motivo": "reparto fijo + referencia (0099 ya en main)",
       "desde": "2026-08-23T11:36:29.428Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: reparto fijo + referencia + entidad",
+      "desde": "2026-08-23T11:41:22.142Z"
     }
   ]
 }
