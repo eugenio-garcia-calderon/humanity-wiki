@@ -49,8 +49,29 @@ export default function TresCirculos({ abierto, onPulsar }: {
    */
   useEffect(() => {
     const raiz = document.documentElement;
-    raiz.style.setProperty('--hueco-muelle', 'calc(92px + env(safe-area-inset-bottom))');
-    return () => raiz.style.setProperty('--hueco-muelle', '0px');
+    const movil = window.matchMedia('(max-width: 767px)');
+    /*
+     * SE VUELVE A CALCULAR AL CAMBIAR DE TAMAÑO (2026-08-24).
+     *
+     * La primera versión lo leía UNA vez, al montarse, y se quedaba con ese
+     * número para siempre. Consecuencia medida: montado en una ventana
+     * estrecha reservaba 70 px —el del móvil— y al ensanchar la ventana los
+     * círculos crecían a 92 px pero el hueco seguía en 70, así que **la hoja de
+     * Crear acababa 23 px por debajo del botón que la abre** y se le metía
+     * detrás. Un valor que depende del tamaño y sólo se lee al arrancar es un
+     * valor que miente en cuanto alguien gira el teléfono.
+     */
+    const publicar = () => {
+      const alto = movil.matches ? 70 : 92;
+      raiz.style.setProperty('--hueco-muelle', `calc(${alto}px + env(safe-area-inset-bottom))`);
+      raiz.style.setProperty('--alto-circulos', `${alto}px`);
+    };
+    publicar();
+    movil.addEventListener('change', publicar);
+    return () => {
+      movil.removeEventListener('change', publicar);
+      raiz.style.setProperty('--hueco-muelle', '0px');
+    };
   }, []);
 
   const boton = (c: Circulo, Icono: any, etiqueta: string, grande = false) => {
@@ -69,7 +90,11 @@ export default function TresCirculos({ abierto, onPulsar }: {
         <span
           className={cn(
             'grid place-items-center rounded-full shadow-xl transition-all duration-200',
-            grande ? 'h-16 w-16' : 'h-14 w-14',
+            // UN 25 % MÁS PEQUEÑOS EN EL MÓVIL (2026-08-23, Eugenio). Allí la
+            // pantalla es lo escaso y tres círculos de 64 px se comen una
+            // franja que hace falta para leer; en un ordenador sobra sitio y
+            // grandes se aciertan mejor con el ratón.
+            grande ? 'h-12 w-12 sm:h-16 sm:w-16' : 'h-[42px] w-[42px] sm:h-14 sm:w-14',
             activo
               ? 'bg-slate-900 text-white shadow-slate-900/40'
               : grande
@@ -77,11 +102,11 @@ export default function TresCirculos({ abierto, onPulsar }: {
                 : 'bg-white text-slate-700 shadow-slate-400/30 hover:bg-slate-50',
           )}
         >
-          <Icono className={grande ? 'h-7 w-7' : 'h-6 w-6'} />
+          <Icono className={grande ? 'h-5 w-5 sm:h-7 sm:w-7' : 'h-[18px] w-[18px] sm:h-6 sm:w-6'} />
         </span>
         {/* La palabra debajo y siempre visible: tres iconos sin texto son tres
             adivinanzas, y ésta es la barra de la que cuelga todo. */}
-        <span className={cn('text-[10px] font-black uppercase tracking-wider',
+        <span className={cn('text-[9px] font-black uppercase tracking-wider sm:text-[10px]',
           activo ? 'text-slate-900' : 'text-slate-500')}>
           {etiqueta}
         </span>
@@ -91,7 +116,11 @@ export default function TresCirculos({ abierto, onPulsar }: {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[9998] flex items-end justify-center gap-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:gap-12"
+      // z-[9999]: POR ENCIMA DE LA HOJA DE CREAR (2026-08-23). Eugenio: «que
+      // cuando le dé a crear se sigan viendo los 3 botones de abajo». La hoja
+      // se levanta hasta justo encima de ellos y además éstos quedan delante,
+      // así que el botón que la ha abierto no desaparece bajo lo que abre.
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] flex items-end justify-center gap-6 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:gap-12 sm:pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       {boton('explorar', Compass, 'Explorar')}
       {boton('crear', Plus, 'Crear', true)}
