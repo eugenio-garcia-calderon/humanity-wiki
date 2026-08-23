@@ -4,6 +4,11 @@ import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { otorgarPuntos, pagarConPuntos } from './puntos.js';
 import { avisar } from './avisos.js';
+import { avisarPorWhatsApp } from './whatsapp.js';
+import { normalizarTelefono } from '../utils/telefono.js';
+
+/** El teléfono que recoge Stripe, en la forma del resto de la casa (o nulo). */
+const normalizarTelefonoSeguro = (t: any) => normalizarTelefono(typeof t === 'string' ? t : null);
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -562,7 +567,7 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                                  importe_centimos, envio_centimos, moneda,
                                  comprador_user_id, comprador_email, comprador_nombre,
                                  direccion_envio, vendedor_user_id, estado,
-                                 stripe_session_id, transaction_id)
+                                 stripe_session_id, transaction_id, telefono_contacto)
             VALUES (${pedidoId}, ${codigoDePedido()},
                     ${carrito.length === 1 ? carrito[0][0] : null}, ${resumen},
                     ${carrito.length === 1 ? carrito[0][1] : null},
@@ -570,7 +575,8 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
                     ${(session.currency || 'eur').toUpperCase()},
                     NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
                     ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
-                    ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${session.id}, ${txId})
+                    ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${session.id}, ${txId},
+                    ${normalizarTelefonoSeguro(d?.phone || (session.metadata as any)?.telefono)})
             ON CONFLICT (stripe_session_id) DO NOTHING
             RETURNING id
           `);
@@ -612,7 +618,21 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             const compradorId = session.metadata!.buyer_id || null;
             // EL VENDEDOR SE ENTERA (2026-08-23): aviso por la campana con el
             // código del pedido. Sin `dePartede` si compró alguien sin cuenta.
-            const codigoNuevo = (await db.execute(sql`SELECT codigo FROM pedidos WHERE id = ${pedidoId}`)).rows[0] as any;
+            const codigoNuevo = (await db.execute(sql`SELECT codigo, telefono_contacto FROM pedidos WHERE id = ${pedidoId}`)).rows[0] as any;
+            // WhatsApp (F6, 2026-08-24): el código al comprador —que puede no
+            // tener cuenta y solo tenerlo en la pantalla— y la venta al vendedor.
+            const vendedorTel = vendedorId ? (await db.execute(sql`SELECT telefono FROM users WHERE id = ${vendedorId}`)).rows[0] as any : null;
+            const dominio = process.env.DOMINIO_PUBLICO || 'humanity.wiki';
+            await avisarPorWhatsApp(db, {
+              telefono: codigoNuevo?.telefono_contacto, userId: compradorId, motivo: 'compra_hecha', entidadTipo: 'pedidos', entidadId: pedidoId,
+              texto: `Compra hecha en ${dominio}: ${resumen}. Tu código de pedido es ${codigoNuevo?.codigo}. Puedes seguirlo en ${dominio}/pedido?codigo=${codigoNuevo?.codigo}`,
+              parametros: [resumen, codigoNuevo?.codigo || ''],
+            });
+            await avisarPorWhatsApp(db, {
+              telefono: vendedorTel?.telefono, userId: vendedorId, motivo: 'venta_nueva', entidadTipo: 'pedidos', entidadId: pedidoId,
+              texto: `Has vendido: ${resumen} (pedido ${codigoNuevo?.codigo}). Míralo en ${dominio}/comercio`,
+              parametros: [resumen, codigoNuevo?.codigo || ''],
+            });
             await avisar(db, {
               paraQuien: vendedorId, dePartede: compradorId, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
               datos: { texto: `${resumen} · pedido ${codigoNuevo?.codigo || ''} · ${((session.amount_total || 0) / 100).toLocaleString('es-ES', { style: 'currency', currency: (session.currency || 'eur').toUpperCase() })}`, codigo: codigoNuevo?.codigo || null, destino: '/comercio?pestana=pedidos' },

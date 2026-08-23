@@ -402,6 +402,12 @@ export default function Comercio() {
                     </button>
                   </div>
                 )}
+                {p.whatsapp_comprador && (
+                  <a href={p.whatsapp_comprador} target="_blank" rel="noreferrer"
+                    className="mt-2 mr-2 inline-flex items-center h-8 px-2 rounded-lg text-[11px] font-bold text-emerald-700 hover:bg-emerald-50">
+                    WhatsApp al comprador
+                  </a>
+                )}
                 <button type="button" onClick={() => verRecibo(p.id)} className="mt-2 mr-2 h-8 px-2 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-100">
                   {reciboDe?.id === p.id ? 'Ocultar recibo' : 'Recibo'}
                 </button>
