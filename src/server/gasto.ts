@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
+import { readFileSync } from 'fs';
 import { providerOfModel } from './ai/provider.js';
 
 // ============================================================================
@@ -56,10 +57,58 @@ interface FilaMes {
   total_eur: number;
 }
 
+// ══ EL ESTADO DE LAS COPIAS DE SEGURIDAD ════════════════════════════════════
+// Eugenio, 2026-08-22: «mete esta info de las copias de seguridad en la parte
+// de información».
+//
+// VA AQUÍ Y NO EN UN MÓDULO NUEVO por una razón práctica: registrar un módulo
+// es una línea en `modulos.ts`, que ahora mismo lo tiene otro con siete commits
+// detrás. Esta ruta ya es la de «cómo va el servidor» y ya la lee la página de
+// Servidores, así que añadirlo aquí es una llamada menos desde el navegador y
+// cero ficheros compartidos de por medio.
+//
+// SE LEE EN CADA PETICIÓN, sin caché, a diferencia del gasto. Son dos ficheros
+// diminutos, y el sentido de esto es decir si las copias están saliendo AHORA:
+// un estado de hace seis horas contestaría a otra pregunta.
+//
+// LO QUE SE ENSEÑA Y LO QUE NO: si hay copia, de cuándo es, cuántas se guardan
+// y si salen del servidor. Ni el nombre del cubo, ni el proveedor exacto, ni
+// rutas, ni tamaños de fichero. Cuánto se protege es transparencia; dónde está
+// guardado es reconocimiento.
+interface EstadoCopias {
+  hay: boolean;
+  ultima?: string;
+  objetos?: number;
+  fuera: 'ok' | 'sin_configurar' | 'error' | 'desconocido';
+  fuera_ultima?: string;
+  copias_fuera?: number;
+}
+
+function leerJson(ruta: string): any | null {
+  try { return JSON.parse(readFileSync(ruta, 'utf8')); } catch { return null; }
+}
+
+function estadoCopias(): EstadoCopias {
+  const local = leerJson('/copias/estado.json');
+  const remoto = leerJson('/copias/estado-remoto.json');
+  return {
+    hay: local?.resultado === 'ok',
+    ultima: local?.momento,
+    objetos: local?.objetos,
+    // `desconocido` no es lo mismo que `error`: significa que no hemos podido
+    // ni preguntar —el fichero no está—, y decirlo así evita que la pantalla
+    // afirme que algo falla cuando lo que pasa es que no lo sabe.
+    fuera: remoto?.resultado ?? 'desconocido',
+    fuera_ultima: remoto?.momento,
+    copias_fuera: remoto?.ficheros_en_destino,
+  };
+}
+
 interface Gasto {
   actualizado: string;
   cache_horas: number;
   servidores: GastoServidores;
+  copias: EstadoCopias;
   ia: {
     oficial_anthropic: GastoOficialAnthropic;
     interno: { mes_actual: FilaMes; historial: FilaMes[] };
@@ -232,6 +281,8 @@ async function gastoInterno(db: any): Promise<{ mes_actual: FilaMes; historial: 
 function soloLoPublico(g: Gasto): Gasto {
   return {
     ...g,
+    // `copias` se queda entero: no lleva nada que sirva para atacar nada, y es
+    // justo lo que Eugenio quiere enseñar.
     servidores: {
       estado: g.servidores.estado,
       total_mes_eur: g.servidores.total_mes_eur,
@@ -259,7 +310,10 @@ export function registerGastoRoutes(app: Express, db: any) {
       const esAdmin = (req.user?.roleLevel ?? 0) >= 4;
       const forzar = esAdmin && req.query.refrescar === '1';
       if (cache && cache.expira > Date.now() && !forzar) {
-        return res.json(esAdmin ? cache.datos : soloLoPublico(cache.datos));
+        // Las copias se releen aunque el gasto venga de la caché: es el dato
+        // que tiene que estar al día.
+        const conCopias = { ...cache.datos, copias: estadoCopias() };
+        return res.json(esAdmin ? conCopias : soloLoPublico(conCopias));
       }
       const [servidores, oficial, interno] = await Promise.all([
         gastoHetzner(),
@@ -270,6 +324,7 @@ export function registerGastoRoutes(app: Express, db: any) {
         actualizado: new Date().toISOString(),
         cache_horas: CACHE_HORAS(),
         servidores,
+        copias: estadoCopias(),
         ia: { oficial_anthropic: oficial, interno },
       };
       cache = { datos, expira: Date.now() + CACHE_HORAS() * 3600_000 };

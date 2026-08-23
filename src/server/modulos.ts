@@ -40,6 +40,7 @@ import { registrarAnclajeAutomatico } from './seguridad/anclaje.js';
 import { registerMedicionRoutes } from './medicion.js';
 import { registerGraphRoutes } from './graph.js';
 import { registerSocialRoutes } from './social.js';
+import { registerBloqueosRoutes } from './bloqueos.js';
 import { registerAIRoutes } from './ai/assistant.js';
 import { registerKnowledgeRoutes } from './knowledge.js';
 import { registerUploadRoutes } from './uploads.js';
@@ -134,6 +135,17 @@ export const MODULOS: Modulo[] = [
   // autenticación porque dependen de `req.user` para los niveles de rol.
   { nombre: 'graph', montar: (app, db) => registerGraphRoutes(app, db) },
   { nombre: 'social', montar: (app, db) => registerSocialRoutes(app, db) },
+
+  {
+    nombre: 'bloqueos',
+    montar: app => registerBloqueosRoutes(app),
+    nota: 'Bloquear a una persona: último requisito de la App Store que dependía de nosotros. '
+        + 'Va DESPUÉS de `social`, que es donde vive seguir a alguien — bloquear rompe el '
+        + 'seguimiento, y eso lo hace un disparador de la base de datos (migración 0091), no este '
+        + 'módulo. La regla de quién ve a quién tampoco está aquí: es la función SQL '
+        + '`bloqueado_entre(a, b)`, para que las consultas que filtran digan todas lo mismo en vez '
+        + 'de repetir cinco veces un NOT IN que se olvida en el sexto sitio.',
+  },
 
   // Grafos de conocimiento (fase 11) y todo lo que se apoya en ellos.
   { nombre: 'knowledge', montar: (app, db) => registerKnowledgeRoutes(app, db) },

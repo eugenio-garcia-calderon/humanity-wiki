@@ -459,7 +459,8 @@ export function registerMenuRoutes(app: Express, db: any) {
       const mio = fila.creador_user_id === yo || (req.user.roleLevel ?? 0) >= 4;
       if (!mio && !fila.publico) return res.status(403).json({ error: 'Ese proyecto es privado.' });
 
-      const [tareas, paginas, guardados, esquemas, mapas, productos, personas] = await Promise.all([
+      const [tareas, paginas, guardados, esquemas, mapas, productos, personas,
+             archivos, tablas, eventos, publicaciones] = await Promise.all([
         db.execute(sql`
           SELECT id, titulo, estado, icono FROM roadmap_items
           WHERE proyecto_id = ${pid} AND archived_at IS NULL
@@ -499,6 +500,50 @@ export function registerMenuRoutes(app: Express, db: any) {
           WHERE proyecto_id = ${pid} AND tipo = 'persona' AND archived_at IS NULL
           ORDER BY nombre LIMIT 100
         `),
+        // ── LAS TRES QUE FALTABAN (2026-08-23) ───────────────────────────
+        // Doce tablas tienen `proyecto_id`; el árbol miraba siete. Las fotos
+        // que alguien sube desde la cámara a un proyecto, sus tablas de datos
+        // y sus fechas existían en la base y no salían en ninguna pantalla.
+        // Eugenio lo vio por las páginas: «no aparecen las páginas ligadas a
+        // ese proyecto, y seguro que tampoco otros elementos».
+        //
+        // Las que quedan fuera, y por qué: `presupuestos_proyecto` y
+        // `objetivos_financieros` son cifras, no cosas que se abren —van en el
+        // panel financiero—, y `game_world_items` son los objetos de la aldea
+        // en 3D, que no es un material del proyecto.
+        db.execute(sql`
+          SELECT id, nombre, url, clase, mime FROM archivos
+          WHERE proyecto_id = ${pid} AND archived_at IS NULL
+          ORDER BY created_at DESC LIMIT 100
+        `),
+        db.execute(sql`
+          SELECT id, titulo, icono FROM bd_tablas
+          WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
+          ORDER BY updated_at DESC NULLS LAST LIMIT 100
+        `),
+        db.execute(sql`
+          SELECT id, titulo, icono, inicio FROM eventos
+          WHERE proyecto_id = ${pid} AND archived_at IS NULL
+          ORDER BY inicio DESC LIMIT 100
+        `),
+        // LAS PUBLICACIONES DEL PROYECTO (2026-08-23). Eugenio: «crear
+        // publicaciones dentro del proyecto». `adjuntos` viaja con cada una
+        // para que la lista pueda decir si lleva imagen o vídeo sin abrirla.
+        db.execute(sql`
+          SELECT id, title, body,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' = 'imagen') AS n_imagenes,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' = 'video')  AS n_videos,
+                 (SELECT count(*) FROM jsonb_array_elements(media) m WHERE m->>'tipo' NOT IN ('imagen','video')) AS n_documentos,
+                 jsonb_array_length(coalesce(links, '[]'::jsonb)) AS n_referencias
+          FROM publications
+          WHERE proyecto_id = ${pid} AND archived_at IS NULL AND deleted_at IS NULL
+            AND (coalesce(visibility,'publica') <> 'privada' OR author_user_id = ${yo})
+            -- BLOQUEO (0091): en un proyecto compartido, lo que publique alguien
+            -- a quien he bloqueado no me sale. Sin esta línea el bloqueo se lee
+            -- como que no funciona, y es lo último que le quedaba a Apple.
+            AND NOT bloqueado_entre(${yo}::text, author_user_id)
+          ORDER BY created_at DESC LIMIT 100
+        `),
       ]);
 
       const ramas: any[] = [];
@@ -527,6 +572,39 @@ export function registerMenuRoutes(app: Express, db: any) {
       })));
       rama('personas', 'Personas', 'persona', (personas.rows as any[]).map(a2 => ({
         id: a2.id, label: a2.nombre, icono: a2.icono, destino: `/persona/${a2.id}`, rol: a2.rol,
+      })));
+      // El destino de un archivo es el archivo. No hay pantalla que enseñe uno
+      // solo, y mandar a `/archivos` a quien acaba de pulsar una foto concreta
+      // es hacerle buscarla otra vez en una lista.
+      rama('archivos', 'Archivos', '', (archivos.rows as any[]).map(a3 => ({
+        id: a3.id, label: a3.nombre, destino: a3.url, clase: a3.clase, mime: a3.mime,
+      })));
+      rama('tablas', 'Tablas', 'tabla', (tablas.rows as any[]).map(t2 => ({
+        id: t2.id, label: t2.titulo, icono: t2.icono, destino: `/tablas?tabla=${encodeURIComponent(t2.id)}`,
+      })));
+      // El calendario no sabe abrirse por un evento, así que lleva al
+      // calendario. Enseñar la fecha aquí es lo que hace que valga la pena:
+      // sin ella el enlace no dice nada que no dijera «Calendario».
+      rama('eventos', 'Fechas', 'evento', (eventos.rows as any[]).map(e2 => ({
+        id: e2.id, label: e2.titulo, icono: e2.icono, destino: '/calendario', inicio: e2.inicio,
+      })));
+
+      // Una publicación no tiene pantalla propia: se abre en una ficha encima
+      // de «Explorar», y esa es la dirección que usa también el buscador del
+      // chat. No invento un parámetro nuevo: uso el que ya existe y funciona.
+      rama('publicaciones', 'Publicaciones', 'publicacion', (publicaciones.rows as any[]).map(pu => ({
+        id: pu.id,
+        label: pu.title || String(pu.body || '').slice(0, 60) || 'Publicación sin título',
+        destino: `/explorar?abrir=${encodeURIComponent(pu.id)}`,
+        // Lo que pidió Eugenio que se vea sin abrir nada. Se cuenta en la
+        // consulta, no en la pantalla: si lo contara cada pantalla, cada una
+        // contaría distinto.
+        adjuntos: {
+          imagenes: Number(pu.n_imagenes) || 0,
+          videos: Number(pu.n_videos) || 0,
+          documentos: Number(pu.n_documentos) || 0,
+          referencias: Number(pu.n_referencias) || 0,
+        },
       })));
 
       res.json({ ramas });

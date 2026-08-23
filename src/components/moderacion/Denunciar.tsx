@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flag, Loader2, X } from 'lucide-react';
+import { Ban, Flag, Loader2, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 /*
@@ -39,12 +39,26 @@ export function Denunciar({
   tipo,
   id,
   titulo,
+  autorNombre,
+  onBloquear,
   onCerrar,
 }: {
   /** `entity_type` que espera el servidor: publicacion, grafo, proyecto… */
   tipo: string;
   id: string;
   titulo?: string;
+  autorNombre?: string | null;
+  /**
+   * BLOQUEAR SE OFRECE DESPUÉS DE DENUNCIAR, no antes y no en su lugar.
+   * Denunciar tarda —lo lee una persona— y quien acaba de denunciar acoso
+   * sigue viendo a quien le acosa mientras tanto. Este es el único momento en
+   * que sabemos que le vendría bien, y ofrecerlo aquí evita que tenga que
+   * buscar el mismo menú otra vez.
+   *
+   * Lo abre el padre en vez de anidarse aquí: dos ventanas superpuestas en un
+   * móvil no dejan ver de qué va ninguna de las dos.
+   */
+  onBloquear?: () => void;
   onCerrar: () => void;
 }) {
   const [motivo, setMotivo] = useState<string | null>(null);
@@ -112,11 +126,26 @@ export function Denunciar({
               se revisa primero, porque quitar algo por una sola denuncia sería
               regalarle a cualquiera el poder de borrar lo de otro.
             </p>
+            {onBloquear && (
+              <button
+                onClick={onBloquear}
+                className="mt-4 w-full min-h-[44px] rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-sm font-bold inline-flex items-center justify-center gap-2"
+              >
+                <Ban className="w-4 h-4" />
+                Bloquear también a {autorNombre?.trim() || 'esta persona'}
+              </button>
+            )}
+            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              Bloquear es inmediato y lo decides tú: dejáis de veros el uno al
+              otro sin esperar a que nadie revise nada.
+            </p>
             <button
               onClick={onCerrar}
-              className="mt-4 w-full min-h-[44px] rounded-xl bg-slate-900 text-white text-sm font-bold"
+              className={onBloquear
+                ? 'mt-3 w-full min-h-[44px] rounded-xl bg-slate-100 text-slate-700 text-sm font-bold'
+                : 'mt-4 w-full min-h-[44px] rounded-xl bg-slate-900 text-white text-sm font-bold'}
             >
-              Cerrar
+              {onBloquear ? 'No, gracias' : 'Cerrar'}
             </button>
           </div>
         ) : (
