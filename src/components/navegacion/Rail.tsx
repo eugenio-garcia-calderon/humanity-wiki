@@ -39,12 +39,31 @@ export interface Herramienta {
   clave: string;
   nombre: string;
   icono: any;
+  /** Su color, cuando lo tiene. Los catorce temas lo traen del mapa. */
+  color?: string;
   /** A dónde va si la herramienta no tiene panel propio todavía. */
   ruta: string;
   /** Si tiene panel, al pulsarla se abre en vez de navegar. */
   conPanel?: boolean;
 }
 
+/*
+ * LO TUYO — EL MENÚ DE LA DERECHA (2026-08-24)
+ * ---------------------------------------------------------------------------
+ * Eugenio: «el menú lateral derecho tiene que ser de los proyectos y
+ * publicaciones propias, no de las herramientas. Elimina el link a las
+ * herramientas desde ese menú, y haz que se acceda a las herramientas desde el
+ * botón crear».
+ *
+ * La separación es la que hacía falta: **una herramienta es algo que se USA y
+ * un proyecto es algo que se TIENE**. Este menú contesta «¿qué tengo?»; el
+ * botón de Crear contesta «¿qué quiero hacer?». Mezclarlos obligaba a leer
+ * trece nombres para encontrar tus dos proyectos.
+ *
+ * Se han ido de aquí el **Asistente**, el **Visor 3D** y el **Navegador**: son
+ * herramientas puras, no producen nada que sea tuyo y esté en una lista. Se
+ * abren desde el botón del centro.
+ */
 export const HERRAMIENTAS: Herramienta[] = [
   { clave: 'proyectos',    nombre: 'Proyectos',     icono: FolderKanban, ruta: '/proyectos',    conPanel: true },
   { clave: 'paginas',      nombre: 'Páginas',       icono: FileText,     ruta: '/paginas',      conPanel: true },
@@ -54,11 +73,8 @@ export const HERRAMIENTAS: Herramienta[] = [
   { clave: 'tablas',       nombre: 'Tablas',        icono: Table2,       ruta: '/tablas' , conPanel: true },
   { clave: 'publicaciones', nombre: 'Publicaciones', icono: Compass,     ruta: '/explorar' , conPanel: true },
   { clave: 'comercio',     nombre: 'Comercio',      icono: Store,        ruta: '/comercio' , conPanel: true },
-  { clave: 'ia',           nombre: 'Asistente',     icono: Sparkles,     ruta: '/ia' , conPanel: true },
   { clave: 'calendario',   nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario' , conPanel: true },
   { clave: 'archivos',     nombre: 'Archivos',      icono: Database,     ruta: '/archivos' , conPanel: true },
-  { clave: 'mundo',        nombre: 'Visor 3D',      icono: Gamepad2,     ruta: '/juego' },
-  { clave: 'navegador',    nombre: 'Navegador',     icono: Globe,        ruta: 'about:inicio' },
 ];
 
 /*
@@ -78,13 +94,16 @@ export const PERSONALES: Herramienta[] = [
   { clave: 'areas',     nombre: 'Áreas',            icono: Layers,         ruta: '/objetivos' },
   { clave: 'personas',  nombre: 'Todas las personas', icono: Users2,       ruta: '/personas' },
   { clave: 'mensajes',  nombre: 'Mensajes',         icono: MessageSquare,  ruta: '/mensajes' },
-  { clave: 'telefono',  nombre: 'Teléfono',         icono: Phone,          ruta: '/telefono' },
+  // CONTACTOS, NO «TELÉFONO» (2026-08-24, Eugenio: «antes era Teléfono,
+  // llámalo contactos a partir de ahora»). Es mejor nombre: un teléfono es el
+  // aparato y lo que hay dentro son personas.
+  { clave: 'contactos', nombre: 'Contactos',        icono: Phone,          ruta: '/telefono' },
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
 ];
 
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
-  items, titulo = 'Red de Conocimiento',
+  items, titulo = 'Red de Conocimiento', claro = false,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -130,6 +149,13 @@ export default function Rail({
    */
   items?: Herramienta[];
   titulo?: string;
+  /**
+   * FONDO BLANCO (2026-08-24). Eugenio, para el menú de la derecha: «ponle el
+   * fondo blanco». Es el mismo componente con otra piel — no un segundo raíl —
+   * por lo mismo de siempre: dos que se parecen empiezan iguales y acaban
+   * distintos en la primera corrección que entra sólo en uno.
+   */
+  claro?: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -189,7 +215,9 @@ export default function Rail({
           // que los botones dejan de acertarse con el dedo.
           'relative flex h-10 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
           desplegado ? 'w-full' : 'w-10 justify-center',
-          activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white',
+          claro
+            ? (activa ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900')
+            : (activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'),
         )}
       >
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
@@ -199,7 +227,10 @@ export default function Rail({
           <span className={cn('absolute top-2 h-6 w-0.5 bg-emerald-400',
             ladoDerecho ? 'right-0 rounded-l' : 'left-0 rounded-r')} />
         )}
-        <Icono className="h-5 w-5 shrink-0" />
+        {/* EL COLOR DEL TEMA, cuando lo tiene: el mismo azul del agua que en el
+            mapa. Sobre fondo oscuro no se usa —un `text-yellow-500` sobre negro
+            casi no se ve— y ahí manda el estado del botón. */}
+        <Icono className={cn('h-5 w-5 shrink-0', claro && h.color && !activa && h.color)} />
         {/* El nombre NO se desmonta al plegar: se hace transparente y se le
             quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
             final de la animación en vez de acompañarla. */}
@@ -234,8 +265,10 @@ export default function Rail({
           // al desplegarse se metería en el contenido en vez de salir de él.
           ladoDerecho ? 'absolute right-0 top-0' : 'absolute left-0 top-0',
           'z-50 flex h-full flex-col gap-0.5 overflow-y-auto overflow-x-hidden',
-          ladoDerecho ? 'border-l border-slate-800' : 'border-r border-slate-800',
-          'bg-slate-950 px-2 py-2 transition-[width] duration-200',
+          claro
+            ? (ladoDerecho ? 'border-l border-slate-200 bg-white' : 'border-r border-slate-200 bg-white')
+            : (ladoDerecho ? 'border-l border-slate-800 bg-slate-950' : 'border-r border-slate-800 bg-slate-950'),
+          'px-2 py-2 transition-[width] duration-200',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           siempreAbierto ? 'w-64' : desplegado ? 'w-56' : 'w-14',
           // La sombra sólo cuando está flotando por encima: fijado forma parte
@@ -249,7 +282,8 @@ export default function Rail({
             title="Inicio"
             aria-label="Inicio"
             className={cn(
-              'flex h-10 items-center gap-3 rounded-xl px-[10px] text-slate-300 transition-colors hover:bg-slate-800 hover:text-white',
+              'flex h-10 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              claro ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
               desplegado ? 'flex-1' : 'w-10 justify-center',
             )}
           >
@@ -283,13 +317,13 @@ export default function Rail({
           )}
         </div>
 
-        <div className="my-1 h-px shrink-0 bg-slate-800" />
+        <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />
 
         {(items ?? HERRAMIENTAS).map(boton)}
         {/* El separador y lo personal sólo en el raíl de las herramientas: el
             de Explorar es una sola lista de catorce y una raya ahí no separa
             nada. */}
-        {!items && <div className="my-1 h-px shrink-0 bg-slate-800" />}
+        {!items && <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />}
         {!items && PERSONALES.map(boton)}
       </nav>
     </div>

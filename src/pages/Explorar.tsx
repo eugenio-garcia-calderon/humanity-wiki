@@ -288,6 +288,28 @@ export default function Explorar() {
       const o = OBJETIVOS.find(x => x.id === objetivo);
       if (o) lista = lista.filter(i => hablaDe(`${i.titulo} ${(i as any).resumen || ''} ${(i as any).descripcion || ''}`, o));
     }
+    /*
+     * CON UN TEMA ELEGIDO, MANDA LA POPULARIDAD (2026-08-24).
+     *
+     * Eugenio: «que cuando hagas click en uno de esos temas te abra
+     * publicaciones y contenido ordenado de mayor a menor visualizaciones y
+     * likes relacionado con ese tema».
+     *
+     * Y sólo entonces. Sin tema elegido esta lista es «lo último», que es lo
+     * que quieres al entrar: enterarte de lo que ha pasado. Con un tema
+     * elegido la pregunta cambia a «¿qué hay de bueno sobre energía?», y ahí lo
+     * nuevo importa menos que lo que le ha servido a alguien.
+     *
+     * Un apoyo pesa 3 y una vista 1. No es una fórmula fina, es una decisión:
+     * dar «me gusta» cuesta un gesto y ver algo no cuesta nada, así que
+     * contarlos igual dejaría que un enlace muy visitado y que no le gustó a
+     * nadie ganara a algo que ayudó a diez personas. El número está aquí, en
+     * una línea, para que se pueda discutir.
+     */
+    if (objetivo) {
+      const peso = (i: any) => (Number(i.apoyos) || 0) * 3 + (Number(i.vistas) || 0);
+      lista = [...lista].sort((a, b) => peso(b) - peso(a));
+    }
     return lista;
   }, [items, tipo, carpetaActiva, busqueda, objetivo]);
 

@@ -864,6 +864,16 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
 
       const muro = await db.execute(sql`
         SELECT p.id, p.title, p.body, p.created_at, p.visibility, p.author_user_id AS creator_user_id,
+               -- LOS APOYOS, PARA PODER ORDENAR POR POPULARIDAD (2026-08-24).
+               -- Eugenio: «que cuando hagas click en uno de esos temas te abra
+               -- publicaciones y contenido ordenado de mayor a menor
+               -- visualizaciones y likes». Las vistas ya viajaban; los apoyos
+               -- no, y sin ellos «lo más querido» no se puede calcular.
+               -- Solo el muro los tiene: la tabla reactions guarda hoy unicamente
+               -- entity_type = publications. Lo demas sale con 0, que es la
+               -- verdad, en vez de con un número inventado.
+               (SELECT count(*)::int FROM reactions r
+                 WHERE r.entity_type = 'publications' AND r.entity_id = p.id) AS apoyos,
                u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
                coalesce(pm.estado, 'en_desarrollo') AS estado,
                coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
@@ -973,7 +983,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         ...(muro.rows as any[]).map(p => ({
           tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
           kind: 'publicacion', config: { body: p.body },
-          vistas: 0, ia: false, fecha: p.created_at,
+          vistas: 0, apoyos: Number(p.apoyos) || 0, ia: false, fecha: p.created_at,
           autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
           donde: 'El muro', donde_slug: null, personal: false,
           ruta: '/muro',
