@@ -23,6 +23,12 @@
       "ruta": "src/pages/Buscar.tsx",
       "motivo": "prog2: buscador tipo Google",
       "desde": "2026-08-23T23:19:47.288Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/App.tsx",
+      "motivo": "prog2: ruta /buscar",
+      "desde": "2026-08-23T23:21:34.502Z"
     }
   ]
 }
