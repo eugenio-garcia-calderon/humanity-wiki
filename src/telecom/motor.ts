@@ -44,6 +44,10 @@
 // crea `setRemoteDescription` al aplicar la oferta, y él solo les pone su cinta
 // y les abre los dos sentidos.
 
+import { vigilarCalidad, type Calidad } from './calidad';
+import { escucharVoz } from './voz';
+import { leerPreferencias, guardarPreferencia } from './aparatos';
+
 export interface Ficha { id: string; nombre: string; avatar?: string | null; handle?: string | null }
 
 export type FaseLlamada = 'sonando' | 'llamando' | 'conectando' | 'hablando';
@@ -65,6 +69,18 @@ export interface Llamada {
   hayVideoRemoto: boolean;
   /** El aviso que se pinta encima de la llamada («no se ha podido conectar»). */
   aviso: string | null;
+  /** Cómo va la conexión ahora mismo. Ver `calidad.ts`. */
+  calidad: Calidad;
+  /** ¿Se le oye la voz al otro en este momento? */
+  hablaElOtro: boolean;
+  /** ¿Estás hablando tú? Solo importa de verdad si tienes el micro cerrado. */
+  hablasTu: boolean;
+  /**
+   * La conexión se ha caído y el navegador está intentando recomponerla sola.
+   * No es lo mismo que `failed`: de esto se vuelve, y volver es lo normal
+   * cuando alguien pasa del wifi a los datos por la calle.
+   */
+  reconectando: boolean;
 }
 
 export interface EstadoTelecom {
@@ -108,6 +124,21 @@ export const leerEstado = () => estado;
 // ── LO QUE NO ES ESTADO DE PINTAR ───────────────────────────────────────────
 let fuente: EventSource | null = null;
 let pc: RTCPeerConnection | null = null;
+// Las tres vigilancias vivas de la llamada: calidad, mi voz y la suya. Se
+// guardan aquí porque **hay que apagarlas al colgar**, y olvidarse de una no da
+// error: deja un cronómetro o una tarjeta de sonido despiertos para siempre.
+let pararVigilancias: Array<() => void> = [];
+// UN DUPLICADO DE MI MICRÓFONO, SOLO PARA MEDIR. Silenciar es poner
+// `enabled = false` en la pista, y eso la deja muda **también para nosotros**:
+// el medidor de voz sobre la pista silenciada siempre lee cero, así que era
+// imposible avisar de lo único que de verdad hace falta avisar —que estás
+// hablando con el micro cerrado—.
+//
+// `clone()` crea otra pista sobre la MISMA fuente, con su `enabled` propio. No
+// enciende el micrófono otra vez (ya está encendido, no aparece un segundo
+// punto naranja) y no se manda a ningún sitio: solo se escucha aquí. La
+// alternativa era pedir un segundo `getUserMedia`, que sí abre otra captura.
+let pistaMedidor: MediaStreamTrack | null = null;
 let carrilAudio: RTCRtpSender | null = null;
 let carrilVideo: RTCRtpSender | null = null;
 let pistaCamara: MediaStreamTrack | null = null;
@@ -306,6 +337,7 @@ async function manejar(d: any) {
           entrante: true, fase: 'sonando', desde: null,
           micro: true, camara: d.llamada === 'video', pantalla: false,
           hayVideoRemoto: false, aviso: null,
+          calidad: 'sin-datos', hablaElOtro: false, hablasTu: false, reconectando: false,
         },
       });
       timbrar(true);
@@ -384,12 +416,19 @@ function crearConexion(llamadaId: string, montarCarriles: boolean) {
   conexion.onconnectionstatechange = () => {
     const s = conexion.connectionState;
     if (s === 'connected') {
-      cambiarLlamada({ fase: 'hablando', aviso: null, desde: estado.llamada?.desde || Date.now() });
+      cambiarLlamada({ fase: 'hablando', aviso: null, reconectando: false, desde: estado.llamada?.desde || Date.now() });
+      arrancarVigilancias(conexion);
       // POR DÓNDE HA IDO. Se mira una vez, al conectar, y se apunta: de los
       // tres caminos posibles solo uno cuesta dinero, y sin medirlo la primera
       // noticia del gasto sería la factura.
       apuntarPorDondeFue(conexion, llamadaId);
     }
+    // «Desconectado» NO es «fallido». El navegador sigue intentándolo solo, y
+    // la mayoría de las veces vuelve en unos segundos —es lo que pasa al salir
+    // de casa y cambiar el wifi por los datos—. Colgar aquí sería cortar una
+    // llamada que iba a recuperarse sola; callarse sería dejar a dos personas
+    // hablándole al silencio sin saber por qué.
+    if (s === 'disconnected') cambiarLlamada({ reconectando: true });
     if (s === 'failed') {
       // Con TURN contratado esto ya casi no debería pasar, así que el mensaje
       // cambia: si hay TURN y aun así falla, no es «tu red es rara», es que
@@ -467,10 +506,22 @@ async function apuntarPorDondeFue(conexion: RTCPeerConnection, llamadaId: string
 
 /** El micrófono y, si toca, la cámara. */
 async function pedirMedios(conVideo: boolean): Promise<MediaStream> {
+  // EL APARATO QUE SE ELIGIÓ LA ÚLTIMA VEZ, si sigue enchufado. `ideal` y no
+  // `exact` a propósito: con `exact`, unos auriculares desconectados harían
+  // fallar la llamada entera en vez de salir por donde se pueda.
+  const guardado = leerPreferencias();
   const medios = await navigator.mediaDevices.getUserMedia({
     // Lo que hace que una llamada por internet suene a llamada y no a lata.
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    video: conVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false,
+    audio: {
+      echoCancellation: true, noiseSuppression: true, autoGainControl: true,
+      ...(guardado.micro ? { deviceId: { ideal: guardado.micro } } : {}),
+    },
+    video: conVideo
+      ? {
+          width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user',
+          ...(guardado.camara ? { deviceId: { ideal: guardado.camara } } : {}),
+        }
+      : false,
   });
   publicar({ streamLocal: medios });
   pistaCamara = medios.getVideoTracks()[0] || null;
@@ -543,7 +594,43 @@ async function soltarCandidatasEnEspera() {
 
 /** Se recoge TODO: si algo se queda encendido, la luz de la cámara del portátil
  *  se queda encendida, y eso —con razón— asusta. */
+/**
+ * Poner a mirar las tres cosas que una persona nota y la aplicación no contaba:
+ * si la conexión va bien, si habla el otro, y si hablas tú con el micro cerrado.
+ *
+ * Es idempotente: si ya estaban en marcha, se paran y se vuelven a montar. La
+ * conexión puede pasar por `connected` más de una vez —una reconexión es
+ * exactamente eso— y sin esto cada recuperación dejaría un vigilante de más.
+ */
+function arrancarVigilancias(conexion: RTCPeerConnection) {
+  pararVigilanciasYa();
+  pararVigilancias.push(
+    vigilarCalidad(conexion, m => cambiarLlamada({ calidad: m.calidad })),
+  );
+  if (estado.streamRemoto) {
+    pararVigilancias.push(escucharVoz(estado.streamRemoto, hablando => cambiarLlamada({ hablaElOtro: hablando })));
+  }
+  const miAudio = estado.streamLocal?.getAudioTracks()[0];
+  if (miAudio) {
+    pistaMedidor = miAudio.clone();
+    pistaMedidor.enabled = true;
+    const soloParaMedir = new MediaStream([pistaMedidor]);
+    pararVigilancias.push(escucharVoz(soloParaMedir, hablando => cambiarLlamada({ hablasTu: hablando })));
+  }
+}
+
+function pararVigilanciasYa() {
+  for (const parar of pararVigilancias) { try { parar(); } catch { /* ya parado */ } }
+  pararVigilancias = [];
+  // El duplicado también se para. Una pista clonada viva mantiene la captura
+  // abierta aunque la original se haya cerrado: sería el punto naranja de «te
+  // están escuchando» encendido con la llamada colgada.
+  pistaMedidor?.stop();
+  pistaMedidor = null;
+}
+
 function cerrarTodo(aviso: string | null) {
+  pararVigilanciasYa();
   pararTimbre();
   candidatasEnEspera = [];
   try { pc?.close(); } catch { /* ya estaba */ }
@@ -598,6 +685,7 @@ export async function llamar(destino: Ficha | { telefono: string }, tipo: 'audio
         id: r.id, con, tipo, entrante: false, fase: 'llamando', desde: null,
         micro: true, camara: tipo === 'video', pantalla: false,
         hayVideoRemoto: false, aviso: null,
+        calidad: 'sin-datos', hablaElOtro: false, hablasTu: false, reconectando: false,
       },
     });
     timbrar(false);
@@ -609,13 +697,25 @@ export async function llamar(destino: Ficha | { telefono: string }, tipo: 'audio
   }
 }
 
-export async function contestar() {
+/**
+ * Descolgar.
+ *
+ * `conCamara` deja contestar una videollamada **sin encender la cámara**, que
+ * es lo que hace falta cuando te llaman y no estás presentable o vas por la
+ * calle. Sin esto la única alternativa era descolgar enseñándote y apagar
+ * corriendo, que es tarde: la imagen ya salió.
+ *
+ * Se puede encender después con el botón de la cámara, sin renegociar nada: el
+ * carril de vídeo se monta igualmente al contestar, solo que vacío.
+ */
+export async function contestar(conCamara?: boolean) {
   const l = estado.llamada;
   if (!l || !l.entrante || !estado.dispositivo) return;
   pararTimbre();
-  cambiarLlamada({ fase: 'conectando', desde: Date.now() });
+  const conVideo = conCamara ?? l.tipo === 'video';
+  cambiarLlamada({ fase: 'conectando', desde: Date.now(), camara: conVideo });
   try {
-    const medios = await pedirMedios(l.tipo === 'video');
+    const medios = await pedirMedios(conVideo);
     // La conexión sí, los carriles no: llegan con la oferta y se enganchan
     // allí. Los medios se piden ya para que el permiso del micrófono se
     // resuelva mientras el otro lado prepara su oferta.
@@ -716,6 +816,69 @@ export async function alternarPantalla() {
     api(`/api/telecom/llamada/${l.id}/pantalla`).catch(() => {});
   } catch {
     // Cancelar el selector no es un fallo.
+  }
+}
+
+// ── CAMBIAR DE APARATO SIN COLGAR ───────────────────────────────────────────
+// `replaceTrack` cambia lo que va por un carril **ya negociado**. Eso es lo que
+// permite ponerse los cascos a mitad de conversación sin que el otro note nada:
+// no hay oferta nueva, no hay renegociación, no hay medio segundo de silencio.
+//
+// Lo que sí hay que hacer a mano es lo de siempre que se olvida: **parar la
+// pista vieja**. Una pista de micrófono que no se para deja el punto naranja de
+// «te están escuchando» encendido en el sistema, con la llamada ya colgada.
+
+/** Pasar el micrófono a otro aparato, en caliente. */
+export async function cambiarMicro(idAparato: string) {
+  const l = estado.llamada;
+  if (!l || !estado.streamLocal) return;
+  try {
+    const nuevos = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        deviceId: { exact: idAparato },
+        echoCancellation: true, noiseSuppression: true, autoGainControl: true,
+      },
+    });
+    const nueva = nuevos.getAudioTracks()[0];
+    if (!nueva) return;
+    // El silencio viaja con la persona: si estabas silenciado antes de
+    // cambiarte de micrófono, sigues silenciado después. Lo contrario es
+    // abrirle el micro a alguien sin que lo haya pedido.
+    nueva.enabled = l.micro;
+    const vieja = estado.streamLocal.getAudioTracks()[0];
+    await carrilAudio?.replaceTrack(nueva);
+    if (vieja) { estado.streamLocal.removeTrack(vieja); vieja.stop(); }
+    estado.streamLocal.addTrack(nueva);
+    guardarPreferencia('micro', idAparato);
+    // El medidor de voz escuchaba la pista vieja, que ya no existe.
+    if (pc) arrancarVigilancias(pc);
+    publicar({ streamLocal: estado.streamLocal });
+  } catch {
+    cambiarLlamada({ aviso: 'No he podido cambiar de micrófono.' });
+  }
+}
+
+/** Pasar la cámara a otra (la de delante y la de atrás, en el móvil). */
+export async function cambiarCamara(idAparato: string) {
+  const l = estado.llamada;
+  if (!l || !estado.streamLocal) return;
+  try {
+    const nuevos = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: idAparato }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    });
+    const nueva = nuevos.getVideoTracks()[0];
+    if (!nueva) return;
+    const vieja = pistaCamara;
+    pistaCamara = nueva;
+    // Si estás compartiendo pantalla, el carril lo ocupa la pantalla: se
+    // cambia la cámara de debajo y se verá cuando dejes de compartir.
+    if (l.camara && !l.pantalla) await carrilVideo?.replaceTrack(nueva);
+    if (vieja) { estado.streamLocal.removeTrack(vieja); vieja.stop(); }
+    if (l.camara) estado.streamLocal.addTrack(nueva); else nueva.stop();
+    guardarPreferencia('camara', idAparato);
+    publicar({ streamLocal: estado.streamLocal });
+  } catch {
+    cambiarLlamada({ aviso: 'No he podido cambiar de cámara.' });
   }
 }
 
