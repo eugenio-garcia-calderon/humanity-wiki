@@ -18,7 +18,17 @@ import { useCallback, useEffect, useState } from 'react';
 // `localStorage` desaparece si alguien limpia sus datos. Un carrito no es una
 // promesa: lo que sí sobrevive es el pedido, en cuanto se paga.
 
-export type LineaCarrito = { producto_id: string; cantidad: number; nombre: string; precio_centimos: number };
+export type LineaCarrito = {
+  producto_id: string; cantidad: number; nombre: string; precio_centimos: number;
+  // La variante elegida (2026-08-23): talla, color… Dos variantes del mismo
+  // producto son dos líneas distintas.
+  variante_id?: string; variante_nombre?: string;
+};
+/** La clave de una línea: producto + variante. */
+export const claveLinea = (l: { producto_id: string; variante_id?: string | null }) => `${l.producto_id}|${l.variante_id || ''}`;
+/** Las líneas tal como las espera el servidor (comprar, cotizar, cupón). */
+export const aLineasServidor = (ls: LineaCarrito[]) =>
+  ls.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}) }));
 
 const MAX_LINEAS = 20;
 
@@ -39,6 +49,7 @@ function leer(tienda: string): LineaCarrito[] {
            cantidad: Math.max(1, Math.min(99, Number(x.cantidad) || 1)),
            nombre: typeof x.nombre === 'string' ? x.nombre : 'Producto',
            precio_centimos: Number(x.precio_centimos) || 0,
+           ...(typeof x.variante_id === 'string' && x.variante_id ? { variante_id: x.variante_id, variante_nombre: typeof x.variante_nombre === 'string' ? x.variante_nombre : '' } : {}),
          }))
          .slice(0, MAX_LINEAS)
       : [];
@@ -71,7 +82,7 @@ export function useCarrito(tienda: string) {
 
   const anadir = useCallback((linea: LineaCarrito) => {
     const actuales = leer(tienda);
-    const ya = actuales.find(l => l.producto_id === linea.producto_id);
+    const ya = actuales.find(l => claveLinea(l) === claveLinea(linea));
     if (ya) {
       // Pulsar «añadir» dos veces suma, no duplica la línea: si no, el
       // servidor recibiría el mismo producto dos veces y reservaría de más.
@@ -84,17 +95,19 @@ export function useCarrito(tienda: string) {
     return true;
   }, [tienda, guardar]);
 
-  const cambiar = useCallback((productoId: string, cantidad: number) => {
+  const cambiar = useCallback((productoId: string, cantidad: number, varianteId?: string | null) => {
     const n = Math.max(0, Math.min(99, Math.floor(cantidad)));
+    const k = claveLinea({ producto_id: productoId, variante_id: varianteId });
     // Bajar a cero es quitarlo. Es lo que espera quien pulsa «menos» en el
     // último, y evita una línea de cero unidades que no significa nada.
     guardar(n === 0
-      ? leer(tienda).filter(l => l.producto_id !== productoId)
-      : leer(tienda).map(l => l.producto_id === productoId ? { ...l, cantidad: n } : l));
+      ? leer(tienda).filter(l => claveLinea(l) !== k)
+      : leer(tienda).map(l => claveLinea(l) === k ? { ...l, cantidad: n } : l));
   }, [tienda, guardar]);
 
-  const quitar = useCallback((productoId: string) => {
-    guardar(leer(tienda).filter(l => l.producto_id !== productoId));
+  const quitar = useCallback((productoId: string, varianteId?: string | null) => {
+    const k = claveLinea({ producto_id: productoId, variante_id: varianteId });
+    guardar(leer(tienda).filter(l => claveLinea(l) !== k));
   }, [tienda, guardar]);
 
   const vaciar = useCallback(() => guardar([]), [guardar]);

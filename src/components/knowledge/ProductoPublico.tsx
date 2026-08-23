@@ -184,7 +184,7 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
           <div className="mt-3 flex items-baseline gap-2 flex-wrap">
             {precio
               ? <>
-                  <span className="text-xl font-black text-slate-900">{precio}</span>
+                  <span className="text-xl font-black text-slate-900">{Array.isArray(p.variantes) && p.variantes.length && p.precio_desde_centimos != null && p.precio_desde_centimos !== p.precio_centimos ? <span className="text-xs font-bold text-slate-400 mr-1">desde</span> : null}{precio}</span>
                   {p.modalidad === 'suscripcion' && (
                     <span className="text-xs text-slate-400">
                       al {p.periodo === 'anual' ? 'año' : p.periodo === 'trimestral' ? 'trimestre' : 'mes'}
@@ -234,6 +234,7 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
                 {tienda && p.se_puede_encestar !== false && (
                   <button type="button"
                     onClick={() => {
+                      if (Array.isArray(p.variantes) && p.variantes.length) { window.location.href = `/producto/${encodeURIComponent(p.id)}`; return; }
                       anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
                       setAnadido(true);
                       window.setTimeout(() => setAnadido(false), 1600);

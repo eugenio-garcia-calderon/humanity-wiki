@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
-import { useCarrito } from '../../hooks/useCarrito';
+import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito';
 
 // ============================================================================
 // LA CESTA — fase 7 del plan de tiendas (2026-08-22)
@@ -176,9 +176,9 @@ export default function Cesta({ tienda }: { tienda: string }) {
     if (!abierta || lineas.length === 0) return;
     fetch('/api/publicar/cotizar', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })) }),
+      body: JSON.stringify({ lineas: aLineasServidor(lineas) }),
     }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
-  }, [abierta, lineas.map(l => `${l.producto_id}:${l.cantidad}`).join('|')]);
+  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}`).join('|')]);
   // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
   // pagar, para que la cesta diga el descuento y no lo adivine.
   const [cupon, setCupon] = useState('');
@@ -191,7 +191,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
     try {
       const r = await fetch('/api/publicar/cupon/comprobar', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo, lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })) }),
+        body: JSON.stringify({ codigo, lineas: aLineasServidor(lineas) }),
       });
       const j = await r.json().catch(() => ({}));
       if (j.valido) setCuponOk({ codigo: j.codigo, descuento_centimos: j.descuento_centimos });
@@ -231,7 +231,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          lineas: lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad })),
+          lineas: aLineasServidor(lineas),
           volver_a: window.location.href,
           ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
@@ -296,19 +296,19 @@ export default function Cesta({ tienda }: { tienda: string }) {
 
             <ul className="space-y-3">
               {lineas.map(l => (
-                <li key={l.producto_id} className="flex items-center gap-3">
+                <li key={claveLinea(l)} className="flex items-center gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-800 truncate">{l.nombre}</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{l.nombre}{l.variante_nombre ? <span className="text-slate-500 font-semibold"> · {l.variante_nombre}</span> : null}</p>
                     <p className="text-xs text-slate-400">{dinero(l.precio_centimos)} cada uno</p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1)}
+                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad - 1, l.variante_id)}
                             aria-label="Uno menos"
                             className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
                       <Minus className="w-3.5 h-3.5 text-slate-600" />
                     </button>
                     <span className="w-7 text-center text-sm font-bold tabular-nums">{l.cantidad}</span>
-                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad + 1)}
+                    <button type="button" onClick={() => cambiar(l.producto_id, l.cantidad + 1, l.variante_id)}
                             aria-label="Uno más"
                             className="w-11 h-11 grid place-items-center rounded-lg border border-slate-200">
                       <Plus className="w-3.5 h-3.5 text-slate-600" />
@@ -316,7 +316,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
                   </div>
                   {/* Separado del «uno menos» con `ml-1`: pegados, un dedo que
                       falla el menos borra la línea entera. */}
-                  <button type="button" onClick={() => quitar(l.producto_id)} aria-label="Quitar"
+                  <button type="button" onClick={() => quitar(l.producto_id, l.variante_id)} aria-label="Quitar"
                           className="w-11 h-11 ml-1 grid place-items-center rounded-lg hover:bg-slate-100 shrink-0">
                     <X className="w-3.5 h-3.5 text-slate-400" />
                   </button>

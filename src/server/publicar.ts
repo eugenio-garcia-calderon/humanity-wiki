@@ -332,6 +332,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
 
       const imagenes = Array.isArray(p.images) ? p.images.filter((x: any) => typeof x === 'string') : [];
+      const variantes = (await variantesDe(db, [p.id])).get(p.id) || [];
       res.json({
         id: p.id,
         nombre: p.name,
@@ -352,9 +353,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // menos lo que otra persona está pagando ahora mismo. Enseñar el
         // bruto pondría «queda 1» a alguien que va a recibir un «se ha
         // agotado» treinta segundos después.
-        stock: p.stock === null || p.stock === undefined
-          ? null
-          : Math.max(0, Number(p.stock) - await reservado(db, p.id)),
+        stock: variantes.length
+          ? (variantes.every((v: any) => v.stock === null) ? null : variantes.reduce((n: number, v: any) => n + (v.stock ?? 0), 0))
+          : p.stock === null || p.stock === undefined
+            ? null
+            : Math.max(0, Number(p.stock) - await reservado(db, p.id)),
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
@@ -366,6 +369,12 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // Si el vendedor acepta cobrar en puntos (y el interruptor está
         // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
         acepta_puntos: !!p.acepta_puntos,
+        // VARIANTES (2026-08-23): talla, color… con precio y stock propios. Si
+        // hay, la ficha pide elegir una antes de comprar; el precio de
+        // portada es «desde» el más bajo y el stock es la suma de las que
+        // llevan cuenta (nulo si ninguna la lleva).
+        variantes,
+        precio_desde_centimos: variantes.length ? Math.min(...variantes.map((v: any) => v.precio_centimos ?? p.price_cents ?? 0)) : null,
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
@@ -524,14 +533,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
         SELECT id, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos
         FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
-      const lineas = crudas.map(l => ({ p: productos.find(x => x.id === String(l.producto_id)), unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) })).filter(l => l.p && l.p.price_cents);
+      // Con variante, el precio es el de la variante (2026-08-23).
+      const mapaV = await variantesDe(db, [...new Set(ids)]);
+      const lineas = crudas.map(l => {
+        const p = productos.find(x => x.id === String(l.producto_id));
+        const v = p ? (mapaV.get(p.id) || []).find((x: any) => x.id === String(l.variante_id || '')) : null;
+        return { p, v, precio: v && v.precio_centimos !== null ? v.precio_centimos : p?.price_cents, unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) };
+      }).filter(l => l.p && l.precio);
       if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
-      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const subtotal = lineas.reduce((n, l) => n + l.precio * l.unidades, 0);
       const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
       const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
       const gratis = fisicas.some(l => l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined && subtotal >= Number(l.p.envio_gratis_desde_centimos));
       const envio = fisicas.length === 0 ? null : conPorte.length === 0 ? null : gratis ? 0 : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
-      const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
       res.json({
         subtotal_centimos: subtotal,
         envio_centimos: envio,
@@ -777,43 +792,59 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       // Un mismo producto repetido en el carrito se suma en una sola línea: si
       // no, se reservaría dos veces y el stock se comprobaría contra sí mismo.
-      const pedidas = new Map<string, number>();
+      // La clave de una línea es producto + variante (2026-08-23): dos
+      // tallas del mismo producto son dos líneas.
+      const pedidas = new Map<string, { id: string; vid: string | null; n: number }>();
       for (const l of crudas) {
         const id = String(l?.producto_id || '').trim();
         if (!id) continue;
+        const vid = String(l?.variante_id || '').trim() || null;
         const n = Math.max(1, Math.min(99, Number(l?.cantidad) || 1));
-        pedidas.set(id, Math.min(99, (pedidas.get(id) || 0) + n));
+        const k = `${id}|${vid || ''}`;
+        pedidas.set(k, { id, vid, n: Math.min(99, (pedidas.get(k)?.n || 0) + n) });
       }
       if (pedidas.size === 0) return res.status(400).json({ error: 'No has elegido nada.' });
 
+      const idsProductos = [...new Set([...pedidas.values()].map(x => x.id))];
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
                billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
         FROM products
-        WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
+        WHERE id = ANY(string_to_array(${idsProductos.join(',')}, ','))
           AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
+      const mapaVariantes = await variantesDe(db, idsProductos);
 
       // Se comprueba TODO antes de cobrar NADA. Cobrar la mitad de un carrito
       // y descubrir en la segunda línea que no había es peor que no cobrar.
+      // Cada línea lleva `precio` y `nombre` efectivos (los de la variante si
+      // la hay): es lo que se cobra, se reserva y se escribe en el pedido.
       const lineas: any[] = [];
-      for (const [id, unidades] of pedidas) {
+      for (const { id, vid, n: unidades } of pedidas.values()) {
         const p = productos.find(x => x.id === id);
         if (!p) return res.status(404).json({ error: 'Una de las cosas que llevas ya no está a la venta.', producto_id: id });
-        if (!p.price_cents) {
+        const variantes = mapaVariantes.get(id) || [];
+        const v = vid ? variantes.find((x: any) => x.id === vid) : null;
+        if (variantes.length && !v) {
+          return res.status(400).json({ error: `Elige una opción de «${p.name}» (${variantes.slice(0, 3).map((x: any) => x.nombre).join(', ')}${variantes.length > 3 ? '…' : ''}).`, producto_id: id, falta_variante: true });
+        }
+        const precio = v && v.precio_centimos !== null ? v.precio_centimos : p.price_cents;
+        if (!precio) {
           return res.status(400).json({ error: `«${p.name}» no tiene precio: hay que preguntar antes de comprarlo.`, producto_id: id });
         }
-        const llevaCuenta = p.stock !== null && p.stock !== undefined;
-        const disponible = llevaCuenta ? Number(p.stock) - await reservado(db, p.id) : null;
+        const nombre = v ? `${p.name} — ${v.nombre}` : p.name;
+        const llevaCuenta = v ? v.stock !== null : (p.stock !== null && p.stock !== undefined);
+        // `variantesDe` ya descuenta lo reservado de cada variante.
+        const disponible = !llevaCuenta ? null : v ? Number(v.stock) : Number(p.stock) - await reservado(db, p.id);
         if (disponible !== null && disponible < unidades) {
           return res.status(409).json({
             error: disponible <= 0
-              ? `«${p.name}» se ha agotado.`
-              : `De «${p.name}» solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
-            producto_id: id, stock: Math.max(0, disponible),
+              ? `«${nombre}» se ha agotado.`
+              : `De «${nombre}» solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
+            producto_id: id, variante_id: vid, stock: Math.max(0, disponible),
           });
         }
-        lineas.push({ p, unidades, llevaCuenta });
+        lineas.push({ p, v, precio, nombre, unidades, llevaCuenta });
       }
 
       const vendedores = new Set(lineas.map(l => l.p.created_by || ''));
@@ -837,7 +868,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         return res.status(400).json({ error: 'No se pueden pagar juntas cosas en monedas distintas.' });
       }
 
-      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const subtotal = lineas.reduce((n, l) => n + l.precio * l.unidades, 0);
       const destino = destinoSeguro(cuerpo.volver_a);
       const esFisico = lineas.some(l => (l.p.kind || '') === 'fisico');
 
@@ -904,7 +935,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para pagar con puntos.' });
         if (suscripcion) return res.status(400).json({ error: 'Una suscripción no se paga con puntos.' });
         if (req.user.id === vendedorId) return res.status(400).json({ error: 'No puedes comprarte a ti con puntos.' });
-        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
         if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
         const saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
         const tasa = puntosPorEuro();
@@ -939,7 +970,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // (saldo cambió), no hay pedido.
         const pedidoId = 'PED' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
         const codigo = Math.random().toString(36).replace(/[^a-hj-np-z2-9]/g, '').slice(0, 8).toUpperCase().padEnd(8, '7');
-        const resumen = lineas.length === 1 ? lineas[0].p.name : `${lineas[0].p.name} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
+        const resumen = lineas.length === 1 ? lineas[0].nombre : `${lineas[0].nombre} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
         const todoDigital = lineas.every(l => (l.p.kind || '') === 'digital');
         // Algo físico pagado entero con puntos: Stripe no pide la dirección
         // porque Stripe no interviene, así que la pedimos nosotros. Sin ella
@@ -977,12 +1008,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
         }
         for (const l of lineas) {
           await db.execute(sql`
-            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos)
+            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos, variante_id, variante_nombre)
             VALUES (${'PLN' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
-                    ${pedidoId}, ${l.p.id}, ${l.p.name}, ${l.unidades}, ${l.p.price_cents})
+                    ${pedidoId}, ${l.p.id}, ${l.nombre}, ${l.unidades}, ${l.precio}, ${l.v?.id || null}, ${l.v?.nombre || null})
           `);
           if (l.llevaCuenta) {
-            await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
+            if (l.v) await db.execute(sql`UPDATE producto_variantes SET stock = GREATEST(0, stock - ${l.unidades}), updated_at = now() WHERE id = ${l.v.id} AND stock IS NOT NULL`);
+            else await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
           }
         }
         // EL VENDEDOR SE ENTERA (2026-08-23): hasta hoy vendía y no lo sabía
@@ -1020,8 +1052,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         line_items: lineas.map(l => ({
           price_data: {
             currency: moneda,
-            product_data: { name: l.p.name, description: l.p.description || undefined },
-            unit_amount: l.p.price_cents,
+            product_data: { name: l.nombre, description: l.p.description || undefined },
+            unit_amount: l.precio,
             ...(suscripcion ? { recurring: { interval: l.p.billing_period === 'anual' ? 'year' as const : 'month' as const } } : {}),
           },
           quantity: l.unidades,
@@ -1057,7 +1089,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
           // pedido sin volver a preguntarle al navegador — que para entonces
           // ya no está.
-          lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.p.price_cents])),
+          lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.precio, l.v?.id || ''])),
           // Se conservan para los pedidos de una sola cosa, que es lo que ya
           // existía y sigue funcionando igual.
           product_id: lineas.length === 1 ? lineas[0].p.id : '',
@@ -1073,11 +1105,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
       for (const l of lineas) {
         if (!l.llevaCuenta) continue;
         await db.execute(sql`
-          INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at)
+          INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at, variante_id)
           VALUES (${'RSV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
                   ${l.p.id}, ${l.unidades}, ${sesion.id}, 'abierta',
-                  now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval)
-          ON CONFLICT (stripe_session_id, producto_id) DO NOTHING
+                  now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval, ${l.v?.id || null})
+          ON CONFLICT (stripe_session_id, producto_id, coalesce(variante_id, '')) DO NOTHING
         `);
       }
 
@@ -1130,7 +1162,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador, variantes,
       } = req.body || {};
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
@@ -1209,6 +1241,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${String(envio_plazo || '').trim() || null},
                 ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true})
       `);
+      // Las variantes, si las trae (2026-08-23).
+      if (Array.isArray(variantes) && variantes.length) await guardarVariantes(db, id, variantes);
 
       res.json({
         id, estado, tipo: clase, suscripcion: esSuscripcion, periodo: cadaCuanto,
@@ -1256,6 +1290,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         WHERE created_by = ${req.user.id} AND archived_at IS NULL
         ORDER BY created_at DESC
       `);
+      // Variantes de cada producto (2026-08-23), para el editor del panel.
+      const mapaVariantes = await variantesDe(db, (r.rows as any[]).map((x: any) => x.id));
+      for (const x of r.rows as any[]) x.variantes = mapaVariantes.get(x.id) || [];
       res.json({
         productos: r.rows,
         limite: (req.user.roleLevel ?? 0) >= 2 ? null : MAX_PRODUCTOS_SIN_VERIFICAR,
@@ -1307,6 +1344,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         RETURNING id, name, price_cents, stock, status, archived_at, (archivo_digital IS NOT NULL) AS con_archivo
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      // Las variantes, si vienen (2026-08-23): la lista entera manda — lo que
+      // no está, se desactiva.
+      if (Array.isArray(b.variantes)) await guardarVariantes(db, String(req.params.id), b.variantes);
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -1693,11 +1733,71 @@ const COBRO_ENCENDIDO = process.env.TIENDAS_COBRO === '1';
  * retener en cuanto pasa su hora, sin que nadie tenga que limpiarlas: la
  * condición está en la propia consulta.
  */
-async function reservado(db: any, productoId: string): Promise<number> {
+async function reservado(db: any, productoId: string, varianteId?: string | null): Promise<number> {
+  // Con variante: solo lo reservado de ESA variante. Sin ella: todo lo del
+  // producto (el stock de un producto sin variantes vive en products.stock).
   const r = await db.execute(sql`
     SELECT COALESCE(SUM(unidades), 0) AS n
     FROM reservas_stock
     WHERE producto_id = ${productoId} AND estado = 'abierta' AND expira_at > now()
+      AND (${varianteId ?? null}::text IS NULL OR variante_id = ${varianteId ?? null}::text)
   `);
   return Number(r.rows[0]?.n || 0);
+}
+
+/** Las variantes activas de uno o varios productos, con el stock que se puede comprar. */
+async function variantesDe(db: any, productoIds: string[]): Promise<Map<string, any[]>> {
+  const m = new Map<string, any[]>();
+  if (!productoIds.length) return m;
+  const r = await db.execute(sql`
+    SELECT id, producto_id, nombre, sku, precio_centimos, stock
+    FROM producto_variantes
+    WHERE activo = true AND producto_id = ANY(string_to_array(${productoIds.join(',')}, ','))
+    ORDER BY orden, created_at
+  `);
+  for (const v of r.rows as any[]) {
+    const disponible = v.stock === null || v.stock === undefined ? null : Math.max(0, Number(v.stock) - await reservado(db, v.producto_id, v.id));
+    const lista = m.get(v.producto_id) || [];
+    lista.push({ id: v.id, nombre: v.nombre, sku: v.sku || null, precio_centimos: v.precio_centimos === null || v.precio_centimos === undefined ? null : Number(v.precio_centimos), stock: disponible });
+    m.set(v.producto_id, lista);
+  }
+  return m;
+}
+
+/**
+ * Guardar las variantes de un producto tal como llegan del formulario: las
+ * que traen id se actualizan, las nuevas se insertan, y las que ya no vienen
+ * se DESACTIVAN (nunca se borran: alguna línea de pedido puede nombrarlas).
+ */
+async function guardarVariantes(db: any, productoId: string, crudas: any) {
+  if (!Array.isArray(crudas)) return;
+  const limpias = crudas.slice(0, 60).map((v: any, i: number) => ({
+    id: typeof v?.id === 'string' && v.id.startsWith('VAR') ? v.id : null,
+    nombre: String(v?.nombre || '').trim().slice(0, 120),
+    sku: String(v?.sku || '').trim().slice(0, 60) || null,
+    precio: v?.precio_centimos === null || v?.precio_centimos === undefined || v?.precio_centimos === '' ? null : Math.max(0, Math.round(Number(v.precio_centimos) || 0)),
+    stock: v?.stock === null || v?.stock === undefined || v?.stock === '' ? null : Math.max(0, Math.round(Number(v.stock) || 0)),
+    orden: i,
+  })).filter((v: any) => v.nombre);
+  const vivas: string[] = [];
+  for (const v of limpias) {
+    if (v.id) {
+      const r = await db.execute(sql`
+        UPDATE producto_variantes SET nombre = ${v.nombre}, sku = ${v.sku}, precio_centimos = ${v.precio}, stock = ${v.stock}, orden = ${v.orden}, activo = true, updated_at = now()
+        WHERE id = ${v.id} AND producto_id = ${productoId} RETURNING id
+      `);
+      if (r.rows[0]) { vivas.push(v.id); continue; }
+    }
+    const id = 'VAR' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+    await db.execute(sql`
+      INSERT INTO producto_variantes (id, producto_id, nombre, sku, precio_centimos, stock, orden)
+      VALUES (${id}, ${productoId}, ${v.nombre}, ${v.sku}, ${v.precio}, ${v.stock}, ${v.orden})
+    `);
+    vivas.push(id);
+  }
+  await db.execute(sql`
+    UPDATE producto_variantes SET activo = false, updated_at = now()
+    WHERE producto_id = ${productoId} AND activo = true
+      AND NOT (id = ANY(string_to_array(${vivas.join(',') || '-'}, ',')))
+  `);
 }
