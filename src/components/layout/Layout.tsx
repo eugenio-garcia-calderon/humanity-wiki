@@ -415,9 +415,12 @@ export default function Layout() {
           forma de llegar a las herramientas.
           NO SE BORRA el componente. Lleva cosas que el panel todavía no hace
           —ventanas del escritorio, renombrar, favoritos— y volver es esta línea. */}
-      {esMovil && menuPuesto && (
-        <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
-      )}
+      {/* AQUÍ YA NO VA NADA (2026-08-23). Al retirar el menú de escritorio
+          cambié `!esMovil` por `esMovil` y dejé este render en pie: en un móvil
+          el menú se pintaba DOS VECES, una aquí dentro de la fila y otra en el
+          cajón de abajo. No se veía porque el cajón tapaba al otro — dos menús
+          vivos, los dos pidiendo sus datos, en el aparato con menos memoria.
+          En escritorio manda el raíl; en móvil, el cajón. */}
 
       {/* MIENTRAS NO SE SABE SI HAY SESIÓN, UN HUECO (B21, parte 1). Sin esto
           la columna aparece de golpe cuando contesta el servidor y toda la
@@ -921,7 +924,9 @@ export default function Layout() {
 
           NO SE TOCA EL ESCRITORIO: por encima de 768 px `esMovil` es false y
           nada de este bloque llega a existir. */}
-      {user && esMovil && menuPuesto && (
+      {/* SIN `user` (2026-08-23): el raíl y sus paneles son también para quien
+          no ha entrado, igual que en escritorio. */}
+      {esMovil && menuPuesto && (
         <>
           {/* El fondo oscuro. Tocar fuera cierra, que es lo que todo el mundo
               intenta primero. */}
@@ -936,10 +941,22 @@ export default function Layout() {
             aria-label="Menú"
             className="fixed inset-y-0 left-0 z-50 flex animate-in slide-in-from-left duration-200"
           >
-            <MenuLateral
-              activo={location.pathname}
-              movil
-              onCerrar={esconderMenu}
+            {/* EL MISMO RAÍL QUE EN ESCRITORIO, desplegado. Antes aquí iba
+                `MenuLateral`, y entonces en un móvil no había forma de llegar a
+                los paneles: existían y no tenían puerta.
+                Al elegir una herramienta el cajón se cierra y, si tiene panel,
+                se abre a pantalla completa — que es lo que decidió Eugenio para
+                móvil. Dejar el cajón abierto detrás sería dos capas de
+                navegación en una pantalla de 375 px. */}
+            <Rail
+              siempreAbierto
+              abierta={panelAbierto?.clave ?? null}
+              onElegir={h => {
+                setCajonAbierto(false);
+                if (h.conPanel) setPanelAbierto(h);
+                else if (h.ruta.startsWith('/')) navigate(h.ruta);
+              }}
+              onInicio={() => { navigate('/'); setPanelAbierto(null); setCajonAbierto(false); }}
             />
           </div>
         </>
