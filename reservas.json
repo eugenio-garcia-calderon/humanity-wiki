@@ -59,6 +59,42 @@
       "ruta": "src/components/navegacion/TresCirculos.tsx",
       "motivo": "prog2: desplegar el menu al pasar el raton por el circulo",
       "desde": "2026-08-23T23:51:00.086Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0113_devoluciones_y_preparando.sql",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/MiPedido.tsx",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Comercio.tsx",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/avisos.ts",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
+      "desde": "2026-08-23T23:57:04.558Z"
     }
   ]
 }
