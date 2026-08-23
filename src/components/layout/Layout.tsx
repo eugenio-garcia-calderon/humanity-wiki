@@ -11,6 +11,8 @@ import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodas
 import GestorVentanas from '../ventanas/GestorVentanas';
 import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
+import Rail, { type Herramienta } from '../navegacion/Rail';
+import Panel, { EstilosPanel } from '../navegacion/Panel';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
@@ -87,6 +89,11 @@ export default function Layout() {
   // porque en un teléfono el menú abierto tapa la pantalla entera y nadie
   // quiere empezar cada visita mirando un menú.
   const [cajonAbierto, setCajonAbierto] = useState(false);
+  /* Qué herramienta del raíl tiene el panel abierto. `null` = ninguno, y
+     entonces el contenido ocupa todo lo que deja el raíl. No se guarda entre
+     visitas a propósito: un panel que aparece solo al abrir la aplicación es
+     una columna que nadie pidió esta vez. */
+  const [panelAbierto, setPanelAbierto] = useState<Herramienta | null>(null);
 
   // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
   // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
@@ -359,6 +366,33 @@ export default function Layout() {
           En una pantalla de 390 px esta columna se comía 240 y al contenido le
           quedaban 118 px útiles: el texto salía a una palabra por línea y en
           /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
+      {/* ══ EL RAÍL Y SU PANEL (2026-08-23) ═══════════════════════════════
+          Encargo de Eugenio: el patrón de Kpler — raíl oscuro de iconos, y al
+          pulsar uno se abre a su lado un panel claro con lo que hay dentro.
+
+          CONVIVE CON EL MENÚ DE SIEMPRE Y NO LO SUSTITUYE TODAVÍA. El menú
+          lateral lleva cosas que el panel aún no hace —ventanas del escritorio,
+          renombrar, favoritos, áreas— y cambiarlo entero de golpe sería
+          apagarlas sin aviso. Hoy hay panel para dos herramientas, que es lo
+          que él pidió probar; el raíl las abre y las demás navegan.
+
+          EN MÓVIL EL PANEL VA A PANTALLA COMPLETA (decisión suya). A 375 px el
+          raíl y el panel no caben juntos: el panel se pone encima y se cierra
+          con su aspa, que es el gesto que ya conoce cualquiera. */}
+      {!esMovil && (
+        <Rail
+          abierta={panelAbierto?.clave ?? null}
+          onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+          onInicio={() => { navigate('/'); setPanelAbierto(null); }}
+        />
+      )}
+      {panelAbierto && (
+        <div className={cn(esMovil && 'fixed inset-0 z-50 bg-white')}>
+          <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+        </div>
+      )}
+      <EstilosPanel />
+
       {/* EL MENÚ TAMBIÉN SIN CUENTA (2026-08-23). Eugenio: «cuando se cierra
           la sesión desaparece, y creo que es un menú muy guay donde están
           todas las herramientas».
@@ -368,7 +402,20 @@ export default function Layout() {
           justo para quien menos sabe qué hay aquí. Lo que cuelga de tu cuenta
           —tus proyectos, tus productos, tus personas— sale vacío y con su
           invitación, que lo resuelve `MenuLateral`. */}
-      {!esMovil && menuPuesto && (
+      {/* EL MENÚ DE SIEMPRE SE APAGA EN ESCRITORIO (2026-08-23).
+          Al montarlo se vio en pantalla lo que no se veía en el código: **tres
+          columnas de navegación a la vez** —raíl, panel y menú— y el contenido
+          aplastado en lo que sobraba. Tres formas de ir al mismo sitio no son
+          tres ayudas: son tres sitios donde buscar.
+          Por eso el raíl lleva también Áreas, Personas, Mensajes, Teléfono y Mi
+          perfil, que sólo vivían en este menú: rediseñar la navegación sin
+          llevarse lo que colgaba de ella no rompe nada visiblemente, sólo deja
+          de haber camino.
+          En MÓVIL se queda: allí no hay raíl, y el cajón sigue siendo la única
+          forma de llegar a las herramientas.
+          NO SE BORRA el componente. Lleva cosas que el panel todavía no hace
+          —ventanas del escritorio, renombrar, favoritos— y volver es esta línea. */}
+      {esMovil && menuPuesto && (
         <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
       )}
 
