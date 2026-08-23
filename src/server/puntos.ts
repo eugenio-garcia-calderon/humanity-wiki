@@ -532,11 +532,16 @@ export function registerPuntosRoutes(app: Express, db: any) {
    * administrador a mano (Eugenio, 2026-08-23: «el reparto mensual… al
    * principio de manera fija, 1000 puntos»).
    */
-  app.post('/api/admin/tokenomics/reparto/ejecutar', async (req: Request, res: Response) => {
+  // Con el freno de prog6 delante (por cuenta): no por abuso, por el doble
+  // clic de alguien con prisa. Y la garantía de fondo es la base de datos: el
+  // índice único de la 0101 hace imposible pagar dos veces el mismo mes a la
+  // misma persona aunque dos transacciones entren a la vez.
+  app.post('/api/admin/tokenomics/reparto/ejecutar', guardian(db, REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
     try {
       if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
         return res.status(403).json({ error: 'Requiere nivel de administrador.' });
       }
+      ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
       const mes = mesDe(req.body?.mes);
       const r = await calcularReparto(mes);
       if (r.ya_ejecutado) return res.status(409).json({ error: `El reparto de ${mes} ya se ejecutó (${r.ya_repartido_puntos} puntos). No se repite.`, ...r, reparto: undefined });
@@ -561,7 +566,12 @@ export function registerPuntosRoutes(app: Express, db: any) {
       console.log(`[puntos] reparto ${mes} ejecutado por ${req.user.id}: ${total} puntos a ${filas.length} personas (bote ${r.modo_bote} ${r.bote_puntos}).`);
       res.json({ ejecutado: true, mes, personas: filas.length, puntos_repartidos: total, bote_puntos: r.bote_puntos, modo_bote: r.modo_bote, reparto: filas });
     } catch (e: any) {
-      if (e?.ya) return res.status(409).json({ error: 'Ese mes ya estaba repartido.' });
+      // `ya`: lo vio la comprobación; 23505: lo paró el índice único de la
+      // 0101 (dos transacciones a la vez). Las dos son la misma respuesta.
+      const texto = `${e?.message || ''} ${e?.cause?.message || ''}`;
+      if (e?.ya || String(e?.code) === '23505' || String(e?.cause?.code) === '23505' || /un_reparto_por_mes|duplicate key/i.test(texto)) {
+        return res.status(409).json({ error: 'Ese mes ya estaba repartido (o se estaba repartiendo en ese mismo instante). No se repite.' });
+      }
       res.status(500).json({ error: e.message });
     }
   });
