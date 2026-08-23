@@ -29,18 +29,6 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "pintar el aviso del 80% del tope de IA",
       "desde": "2026-08-23T13:54:15.339Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "raíl oscuro + panel blanco estilo Kpler (encargo de Eugenio)",
-      "desde": "2026-08-23T14:14:38.765Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/Proyectos.tsx",
-      "motivo": "quitar la lista que ahora duplica el panel lateral",
-      "desde": "2026-08-23T14:25:38.562Z"
     }
   ]
 }
