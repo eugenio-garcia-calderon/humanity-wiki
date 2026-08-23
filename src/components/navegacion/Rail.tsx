@@ -82,7 +82,7 @@ export const PERSONALES: Herramienta[] = [
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
 ];
 
-export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = false }: {
+export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
   onElegir: (h: Herramienta) => void;
@@ -102,6 +102,16 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
    * el sitio donde ya estaba el menú de siempre.
    */
   siempreAbierto?: boolean;
+  /**
+   * EL RAÍL, PEGADO AL BORDE DERECHO (2026-08-23).
+   *
+   * Eugenio movió «lo tuyo» a la derecha: «coger exactamente ese mismo menú que
+   * ahora mismo está a la izquierda y ponerlo a la derecha, con la misma
+   * lógica». Es este mismo componente con tres cosas del revés —el borde, el
+   * lado por el que se despliega y la barra de «aquí estás»—, no una copia
+   * espejada. Dos raíles serían dos sitios donde arreglar el mismo fallo.
+   */
+  ladoDerecho?: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -167,7 +177,10 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
             distinto: el fondo ya lo usa el ratón al pasar por encima, y dos
             cosas que se pintan igual dejan de significar. */}
-        {activa && <span className="absolute left-0 top-2 h-6 w-0.5 rounded-r bg-emerald-400" />}
+        {activa && (
+          <span className={cn('absolute top-2 h-6 w-0.5 bg-emerald-400',
+            ladoDerecho ? 'right-0 rounded-l' : 'left-0 rounded-r')} />
+        )}
         <Icono className="h-5 w-5 shrink-0" />
         {/* El nombre NO se desmonta al plegar: se hace transparente y se le
             quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
@@ -198,8 +211,13 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
           // los primeros 40 px: el nombre salía cortado y **el botón de fijar
           // no se veía**, o sea que la mitad de lo que Eugenio pidió existía y
           // no se podía usar. Se ve mirando, no compilando.
-          'absolute left-0 top-0 z-50 flex h-full flex-col gap-0.5 overflow-y-auto overflow-x-hidden',
-          'border-r border-slate-800 bg-slate-950 px-2 py-2 transition-[width] duration-200',
+          // Anclado al borde que le toca: a la izquierda crece hacia la
+          // derecha y al revés. Si se quedara en `left-0` estando a la derecha,
+          // al desplegarse se metería en el contenido en vez de salir de él.
+          ladoDerecho ? 'absolute right-0 top-0' : 'absolute left-0 top-0',
+          'z-50 flex h-full flex-col gap-0.5 overflow-y-auto overflow-x-hidden',
+          ladoDerecho ? 'border-l border-slate-800' : 'border-r border-slate-800',
+          'bg-slate-950 px-2 py-2 transition-[width] duration-200',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           siempreAbierto ? 'w-64' : desplegado ? 'w-56' : 'w-14',
           // La sombra sólo cuando está flotando por encima: fijado forma parte
@@ -222,7 +240,7 @@ export default function Rail({ abierta, onElegir, onInicio, siempreAbierto = fal
               'overflow-hidden whitespace-nowrap text-[13px] font-black transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
             )}>
-              humanity.wiki
+              Red de Conocimiento
             </span>
           </button>
 

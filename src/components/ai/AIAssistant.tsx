@@ -1749,7 +1749,12 @@ export default function AIAssistant({ modo = 'panel' }: {
     // debajo, así que la de la aplicación queda encima de la rayita del iPhone.
     // `env(safe-area-inset-bottom)` vale 0 en el navegador y ~34px instalada:
     // una sola regla para los dos casos.
-    raiz.style.setProperty('--hueco-muelle', `calc(${ALTO_BARRA}px + env(safe-area-inset-bottom))`);
+    // YA NO LO PUBLICA ESTE COMPONENTE (2026-08-23). Su barra está escondida
+    // desde que la sustituyeron los tres círculos, así que reservar su altura
+    // dejaría una franja en blanco al final de todas las páginas. El hueco lo
+    // publica ahora `navegacion/TresCirculos.tsx`, que es lo que de verdad está
+    // ahí abajo: **quien tapa, reserva.**
+    raiz.style.setProperty('--hueco-muelle', '0px');
     // Y A LA DERECHA, el lateral cuando lo hay. En el teléfono no se reserva
     // nada: allí el panel ocupa la pantalla entera y no hay página detrás que
     // proteger.
@@ -2309,8 +2314,22 @@ export default function AIAssistant({ modo = 'panel' }: {
         onCerrar={() => setCreador(null)}
       />
 
+      {/* LA BARRA DE CINCO SE HA IDO (2026-08-23). Eugenio: «vamos a
+          simplificar el diseño poniendo abajo del todo tres grandes círculos
+          flotantes». Los tres círculos están en `navegacion/TresCirculos.tsx` y
+          hacen lo mismo con jerarquía: cinco destinos del mismo tamaño no son
+          una barra de navegación, son cinco cosas sin orden.
+
+          NO SE BORRA ESTE `nav`, se esconde: dentro vive el panel del muelle
+          —el chat y el creador— que los círculos todavía usan, y arrancarlo se
+          llevaría por delante «Pedírselo a la IA» y el creador de publicaciones.
+          Volver es quitar el `hidden`.
+
+          LO QUE SE PIERDE Y HAY QUE DECIRLO: el botón de BUSCAR vivía aquí. Se
+          ha puesto en la barra de arriba, que es el otro sitio donde la gente
+          lo busca. */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-[9999] bg-white border-t border-slate-200 shadow-lg grid grid-cols-5 items-center"
+        className="hidden fixed inset-x-0 bottom-0 z-[9999] bg-white border-t border-slate-200 shadow-lg grid-cols-5 items-center"
         // El alto es el de los botones; el hueco del iPhone se añade DEBAJO con
         // padding, para que los iconos no se encojan al instalarla.
         style={{ height: ALTO_BARRA, boxSizing: 'content-box', paddingBottom: 'env(safe-area-inset-bottom)' }}

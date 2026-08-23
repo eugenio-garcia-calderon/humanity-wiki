@@ -5,7 +5,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home,
- PanelLeftOpen, Info,} from 'lucide-react';
+ PanelLeftOpen, Info, Search,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -13,6 +13,9 @@ import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
 import Rail, { type Herramienta } from '../navegacion/Rail';
 import Panel, { EstilosPanel } from '../navegacion/Panel';
+import TresCirculos, { type Circulo } from '../navegacion/TresCirculos';
+import PanelExplorar from '../navegacion/PanelExplorar';
+import HojaCrear from '../navegacion/HojaCrear';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
@@ -94,6 +97,21 @@ export default function Layout() {
      visitas a propósito: un panel que aparece solo al abrir la aplicación es
      una columna que nadie pidió esta vez. */
   const [panelAbierto, setPanelAbierto] = useState<Herramienta | null>(null);
+  /*
+   * CUÁL DE LOS TRES CÍRCULOS ESTÁ ABIERTO (2026-08-23).
+   *
+   * Uno o ninguno, nunca dos: los tres ocupan la pantalla y abrir el segundo
+   * sin cerrar el primero dejaría dos menús discutiendo por el mismo sitio.
+   * Volver a pulsar el que ya está abierto lo cierra, que es lo que hace
+   * cualquiera cuando se ha equivocado de botón.
+   */
+  const [circulo, setCirculo] = useState<Circulo | null>(null);
+  const pulsarCirculo = (c: Circulo) => {
+    setCirculo(a => (a === c ? null : c));
+    // Elegir un círculo cierra lo del anterior: el panel de la derecha es de
+    // «Organizar», así que abrir «Explorar» tiene que llevárselo.
+    if (c !== 'organizar') setPanelAbierto(null);
+  };
 
   // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
   // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
@@ -366,6 +384,14 @@ export default function Layout() {
           En una pantalla de 390 px esta columna se comía 240 y al contenido le
           quedaban 118 px útiles: el texto salía a una palabra por línea y en
           /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
+      {/* ══ EXPLORAR: EL MUNDO, POR LA IZQUIERDA (2026-08-23) ════════════
+          Los catorce objetivos en cascada, igual que en el mapa. Ocupa la
+          mitad de la pantalla en un móvil y un tercio en un ordenador, que es
+          lo que pidió Eugenio: es un menú para leer, no una tira de iconos. */}
+      {!esMovil && circulo === 'explorar' && (
+        <PanelExplorar onCerrar={() => setCirculo(null)} />
+      )}
+
       {/* ══ EL RAÍL Y SU PANEL (2026-08-23) ═══════════════════════════════
           Encargo de Eugenio: el patrón de Kpler — raíl oscuro de iconos, y al
           pulsar uno se abre a su lado un panel claro con lo que hay dentro.
@@ -379,18 +405,24 @@ export default function Layout() {
           EN MÓVIL EL PANEL VA A PANTALLA COMPLETA (decisión suya). A 375 px el
           raíl y el panel no caben juntos: el panel se pone encima y se cierra
           con su aspa, que es el gesto que ya conoce cualquiera. */}
-      {!esMovil && (
-        <Rail
-          abierta={panelAbierto?.clave ?? null}
-          onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
-          onInicio={() => { navigate('/'); setPanelAbierto(null); }}
-        />
-      )}
-      {panelAbierto && (
-        <div className={cn(esMovil && 'fixed inset-0 z-50 bg-white')}>
-          <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
-        </div>
-      )}
+      {/* ══ ORGANIZAR: LO TUYO, POR LA DERECHA ═══════════════════════════
+          Eugenio: «el botón de la derecha sería el botón de organizar… coger
+          exactamente ese mismo menú que ahora mismo está a la izquierda y
+          ponerlo a la derecha, con la misma lógica».
+
+          Es EL MISMO componente, no una copia: `Rail` y `Panel` sin tocar, con
+          el orden invertido —panel primero y raíl después— para que el raíl
+          quede pegado al borde derecho, que es de donde sale. Duplicarlos para
+          espejarlos habría creado dos menús que se separan a la primera.
+
+          Y ya no está siempre: aparece cuando pulsas su círculo. Ésa es la
+          simplificación que pidió — la pantalla empieza vacía y tú decides qué
+          traer. */}
+      {/* (El bloque de «Organizar» está más abajo, DESPUÉS de la columna de
+          contenido: en una fila flex el orden del documento es el orden en
+          pantalla, y aquí arriba salía pegado al borde IZQUIERDO por mucho que
+          su CSS dijera `right-0`. Se ve mirando la pantalla, no leyendo el
+          `className`.) */}
       <EstilosPanel />
 
       {/* EL MENÚ TAMBIÉN SIN CUENTA (2026-08-23). Eugenio: «cuando se cierra
@@ -444,7 +476,7 @@ export default function Layout() {
           se vio el daño en una captura: en /explorar tapaba las tres primeras
           carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
           ve; tapar contenido es un precio que se paga a escondidas. */}
-      <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
+      <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
@@ -485,8 +517,8 @@ export default function Layout() {
                ruta ha cambiado, así que pulsabas el logo y no pasaba nada
                visible. Se apartan, no se cierran: siguen arriba a un clic. */
             onClick={() => { minimizarTodas(); navigate('/'); }}
-            title="Humanity Wiki — ir al inicio"
-            aria-label="Humanity Wiki — ir al inicio"
+            title="Red de Conocimiento — ir al inicio"
+            aria-label="Red de Conocimiento — ir al inicio"
             className="shrink-0 w-7 h-7 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
           >
             {/* EL LOGO DE VERDAD (2026-08-22, Eugenio lo mandó). Antes era un
@@ -495,6 +527,25 @@ export default function Layout() {
             <img src="/logo.svg" alt="" className="w-full h-full" />
           </button>
         )}
+
+        {/* ══ EL NOMBRE, CENTRADO (2026-08-23) ════════════════════════════
+            Eugenio: «vamos a llamarla Red de Conocimiento. Eso tiene que estar
+            arriba en el menú superior centrado».
+
+            `absolute` y `pointer-events-none`: está centrado respecto a la
+            BARRA, no respecto a lo que quede libre entre los botones. Si fuera
+            un hijo más del flex, se movería cada vez que aparece o desaparece
+            algo a los lados —una ventana abierta, la campana de avisos— y un
+            título que baila no parece un título.
+            Y no intercepta el ratón, porque está por encima de botones que sí
+            tienen que poder pulsarse. El texto en sí no es un enlace: para ir
+            al inicio está el logo, que es donde todo el mundo lo busca. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[13px] font-black tracking-tight text-slate-800 sm:text-sm"
+        >
+          Red de Conocimiento
+        </span>
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
             Eugenio, 2026-08-21: «vuelve a poner el menú colapsable superior a
@@ -713,6 +764,21 @@ export default function Layout() {
             scores territories — which until today had no visible door:
             /sobre-red-humana existed and nothing linked to it. It goes
             BEFORE the ant: first understand, then ask. */}
+        {/* BUSCAR, QUE VIVÍA EN LA BARRA DE ABAJO (2026-08-23). Al sustituir
+            esa barra por los tres círculos se quedaba sin sitio, y una
+            aplicación de conocimiento sin buscador es una biblioteca sin
+            fichero. Va aquí, que es el otro lugar donde se busca un buscador, y
+            lleva a la pantalla que ya tiene la caja de verdad. */}
+        <button
+          onClick={() => navigate('/explorar')}
+          title="Buscar"
+          aria-label="Buscar"
+          className={cn('grid shrink-0 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800',
+            compacto ? 'w-7 h-7' : 'w-9 h-9')}
+        >
+          <Search className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+        </button>
+
         <div className="relative shrink-0" ref={infoRef}>
           <button
             onClick={() => setInfoAbierta(o => !o)}
@@ -911,6 +977,51 @@ export default function Layout() {
           abajo»). Solo hay UNA barra, la de arriba, y lleva las ventanas. */}
       </div>
 
+      {/* ══ ORGANIZAR: LO TUYO, POR LA DERECHA (2026-08-23) ═══════════════
+          Eugenio: «el botón de la derecha sería el de organizar… coger
+          exactamente ese mismo menú que ahora está a la izquierda y ponerlo a
+          la derecha, con la misma lógica».
+
+          Es EL MISMO componente, no una copia espejada: `Rail` con
+          `ladoDerecho` y `Panel` sin tocar. Dos raíles serían dos sitios donde
+          arreglar el mismo fallo.
+
+          Y va DESPUÉS de la columna de contenido a propósito: en una fila flex
+          el orden del documento es el orden en pantalla. Ponerlo antes lo
+          dejaba a la izquierda por mucho `right-0` que llevara dentro.
+
+          Ya no está siempre: aparece al pulsar su círculo. Ésa es la
+          simplificación — la pantalla empieza limpia y tú decides qué traer. */}
+      {circulo === 'organizar' && !esMovil && (
+        <>
+          {panelAbierto && (
+            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          )}
+          <Rail
+            ladoDerecho
+            abierta={panelAbierto?.clave ?? null}
+            onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+            onInicio={() => { navigate('/'); setPanelAbierto(null); setCirculo(null); }}
+          />
+        </>
+      )}
+
+      {/* En móvil «Organizar» ocupa la pantalla: a 375 px un raíl y un panel
+          uno al lado del otro no dejan nada para el contenido. */}
+      {circulo === 'organizar' && esMovil && (
+        <div className="fixed inset-0 z-[9997] flex bg-white">
+          {panelAbierto
+            ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+            : <Rail
+                siempreAbierto
+                abierta={null}
+                onElegir={h => { if (h.conPanel) setPanelAbierto(h); else if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } }}
+                onInicio={() => { navigate('/'); setCirculo(null); }}
+              />}
+          <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
+        </div>
+      )}
+
       {/* ══ EL CAJÓN DEL MENÚ EN MÓVIL (B41) ══════════════════════════════
           Va aquí, el último y fuera de la columna de contenido, para que se
           pinte POR ENCIMA de todo: de la página, de las ventanas y del panel
@@ -960,6 +1071,24 @@ export default function Layout() {
             />
           </div>
         </>
+      )}
+
+      {/* ══ LOS TRES CÍRCULOS, LO ÚLTIMO Y ENCIMA DE TODO ════════════════
+          Van al final del documento a propósito: flotan sobre la página, sobre
+          las ventanas y sobre los paneles, y en un navegador el que va después
+          gana sin tener que subir el `z-index` de nadie. */}
+      <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} />
+
+      {circulo === 'crear' && <HojaCrear onCerrar={() => setCirculo(null)} />}
+
+      {/* Y en móvil, «Explorar» también ocupa media pantalla — pero encima del
+          contenido, no al lado: a 375 px una columna del 50 % dejaría al
+          contenido 187 px, que no es una pantalla, es una rendija. */}
+      {esMovil && circulo === 'explorar' && (
+        <div className="fixed inset-0 z-[9997] flex">
+          <PanelExplorar onCerrar={() => setCirculo(null)} />
+          <div onClick={() => setCirculo(null)} aria-hidden className="flex-1 bg-slate-900/30" />
+        </div>
       )}
     </div>
   );
