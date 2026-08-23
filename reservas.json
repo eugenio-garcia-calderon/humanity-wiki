@@ -71,12 +71,6 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "la barra de abajo ofrece a un visitante cosas que no puede usar",
       "desde": "2026-08-23T12:10:00.132Z"
-    },
-    {
-      "agente": "dashboard",
-      "ruta": "CLAUDE.md",
-      "motivo": "una conclusion de media lectura",
-      "desde": "2026-08-23T12:12:36.726Z"
     }
   ]
 }
