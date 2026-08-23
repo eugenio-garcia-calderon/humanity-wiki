@@ -50,7 +50,10 @@ export default function Comercio() {
   const [creando, setCreando] = useState(false);
   const [handle, setHandle] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pestana, setPestana] = useState<'productos' | 'pedidos'>('productos');
+  // `?pestana=pedidos` abre directamente los pedidos: es adonde lleva el
+  // aviso «te han comprado algo» de la campana.
+  const [pestana, setPestana] = useState<'productos' | 'pedidos'>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pestana') === 'pedidos' ? 'pedidos' : 'productos');
 
   async function cargar() {
     try {

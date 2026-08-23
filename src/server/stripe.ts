@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { otorgarPuntos, pagarConPuntos } from './puntos.js';
+import { avisar } from './avisos.js';
 
 // ============================================================================
 // Economía y Stripe — Fase 6
@@ -592,6 +593,13 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
             }
             const puntosPagados = Number(session.metadata!.puntos || 0) || 0;
             const compradorId = session.metadata!.buyer_id || null;
+            // EL VENDEDOR SE ENTERA (2026-08-23): aviso por la campana con el
+            // código del pedido. Sin `dePartede` si compró alguien sin cuenta.
+            const codigoNuevo = (await db.execute(sql`SELECT codigo FROM pedidos WHERE id = ${pedidoId}`)).rows[0] as any;
+            await avisar(db, {
+              paraQuien: vendedorId, dePartede: compradorId, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
+              datos: { texto: `${resumen} · pedido ${codigoNuevo?.codigo || ''} · ${((session.amount_total || 0) / 100).toLocaleString('es-ES', { style: 'currency', currency: (session.currency || 'eur').toUpperCase() })}`, codigo: codigoNuevo?.codigo || null, destino: '/comercio?pestana=pedidos' },
+            }).catch(() => {});
             if (puntosPagados > 0 && compradorId && vendedorId) {
               const ok = await pagarConPuntos(db, compradorId, vendedorId, puntosPagados, pedidoId).catch((e: any) => { console.error('[puntos] pago con puntos fallido:', e?.message); return false; });
               if (!ok) console.error(`[puntos] el pedido ${pedidoId} esperaba ${puntosPagados} puntos de ${compradorId} y no se pudieron cobrar: revisar a mano.`);

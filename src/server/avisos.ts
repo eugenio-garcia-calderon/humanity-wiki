@@ -38,7 +38,11 @@ export type TipoAviso =
   // para no repetir el mismo aviso dos días seguidos.
   | 'puntos_inactividad'  // tu saldo se perderá el día X si no vuelves
   | 'puntos_caducan'      // N puntos caducan el día X (10 años)
-  | 'puntos_perdidos';    // ya se ha perdido / ha caducado N
+  | 'puntos_perdidos'     // ya se ha perdido / ha caducado N
+  // Comercio (prog7, 2026-08-23): el vendedor se entera de que ha vendido y
+  // el comprador de que su pedido se mueve. Hasta hoy, ninguno de los dos.
+  | 'pedido_nuevo'        // te han comprado algo
+  | 'pedido_estado';      // tu pedido ha cambiado de estado (enviado, entregado…)
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos
