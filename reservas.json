@@ -11,6 +11,12 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "abrir el submenu al pasar el raton por un objetivo",
       "desde": "2026-08-23T23:22:47.480Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/hooks/useAbrirAlAcercarse.ts",
+      "motivo": "prog2: un solo gesto de hover para toda la barra",
+      "desde": "2026-08-23T23:26:40.324Z"
     }
   ]
 }
