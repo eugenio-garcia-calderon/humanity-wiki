@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/HojaCrear.tsx",
+      "motivo": "que quepan las 13 herramientas sin scroll",
+      "desde": "2026-08-23T18:18:16.221Z"
+    }
+  ]
 }
