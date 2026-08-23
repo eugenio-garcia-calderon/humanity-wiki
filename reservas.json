@@ -145,12 +145,6 @@
       "desde": "2026-08-23T13:03:04.503Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "retirar el atajo que no se ejecutaba nunca",
-      "motivo": "",
-      "desde": "2026-08-23T13:05:42.142Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0107_variantes.sql",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
