@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -54,6 +54,10 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   pedido_estado:      { icono: Package,        frase: () => 'Tu pedido se ha movido' },
   cesta_olvidada:     { icono: ShoppingCart,   frase: () => 'Tu cesta sigue ahí' },
   precio_bajado:      { icono: Tag,            frase: () => 'Un favorito tuyo ha bajado de precio' },
+  // Gasto de IA (prog8, 2026-08-23). Solo lo recibe quien administra: a quien
+  // no puede cambiar el tope, saberlo no le sirve de nada. La cifra concreta
+  // va en `payload.texto`.
+  gasto_ia_80:        { icono: Euro,           frase: () => 'La IA lleva el 80 % del tope de gasto del mes' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a
@@ -84,6 +88,9 @@ const destinoDe = (a: Aviso): string | null => {
   // su pedido. El aviso trae su propio destino porque lo sabe quien lo escribe.
   if (a.entity_type === 'pedidos') return a.payload?.destino || '/comercio?pestana=pedidos';
   if (a.entity_type === 'cestas' || a.entity_type === 'favoritos') return a.payload?.destino || '/mercado';
+  // El aviso del gasto lleva a la página donde se ve cuánto va y cuál es el
+  // tope: enterarse sin poder mirar el detalle obliga a buscarlo a mano.
+  if (a.entity_type === 'gasto_ia') return '/vision?pestana=gasto';
   return null;
 };
 
