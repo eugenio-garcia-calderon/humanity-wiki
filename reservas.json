@@ -59,6 +59,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "pintar el aviso del 80% del tope de IA",
       "desde": "2026-08-23T13:54:15.339Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: tope de gasto de IA",
+      "desde": "2026-08-23T14:04:06.566Z"
     }
   ]
 }
