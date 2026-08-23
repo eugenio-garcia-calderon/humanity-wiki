@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog7",
-      "ruta": "drizzle/0099_reparto_fijo_y_referencia.sql",
-      "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
-      "desde": "2026-08-23T11:35:48.784Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/puntos.ts",
       "motivo": "reparto mensual fijo de 1000 puntos + precio de referencia (Eugenio)",
       "desde": "2026-08-23T11:35:53.186Z"
