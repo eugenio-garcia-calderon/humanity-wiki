@@ -99,11 +99,17 @@ export default function Comercio() {
   // MARCAR UN PEDIDO (2026-08-22): la ruta existía desde la fase 6 y la
   // pantalla no la usaba — «sin enviar» se quedaba así para siempre.
   async function marcarPedido(id: string, estado: string) {
+    if (estado === 'devuelto' && !window.confirm('¿Devolver este pedido? Si se pagó con puntos, los puntos vuelven al comprador ahora mismo (tú devuelves lo que cobraste y la plataforma su comisión).')) return;
     const seguimiento = estado === 'enviado' ? (window.prompt('Número de seguimiento (opcional):') || null) : null;
-    await fetch(`/api/publicar/mis-ventas/${id}`, {
+    const r = await fetch(`/api/publicar/mis-ventas/${id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado, seguimiento }),
     });
+    const j = await r.json().catch(() => ({}));
+    // El motivo se enseña tal cual: «no tienes saldo para devolver los 9
+    // puntos» es lo que hace falta saber para arreglarlo.
+    if (!r.ok) window.alert(j.error || 'No se ha podido cambiar el pedido.');
+    else if (Number(j.puntos_devueltos) > 0) window.alert(`Devueltos ${Number(j.puntos_devueltos).toLocaleString('es-ES')} puntos al comprador.`);
     cargar();
   }
 
@@ -329,6 +335,12 @@ export default function Comercio() {
                       Marcar entregado
                     </button>
                   </div>
+                )}
+                {['pagado', 'enviado', 'entregado'].includes(p.estado) && (
+                  <button onClick={() => marcarPedido(p.id, 'devuelto')}
+                    className="mt-2 h-8 px-2 rounded-lg text-[11px] font-bold text-rose-700 hover:bg-rose-50">
+                    Devolver{Number(p.puntos_usados) > 0 ? ` (${Number(p.puntos_usados).toLocaleString('es-ES')} puntos al comprador)` : ''}
+                  </button>
                 )}
               </li>
             ))}

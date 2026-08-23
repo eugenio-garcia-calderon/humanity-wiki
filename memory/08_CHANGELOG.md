@@ -5654,3 +5654,29 @@ all green. `tsc` clean.
 - **Acepta tres formas de lista** porque el Atajo lo monta una persona a mano: el JSON de la documentación, la lista pelada, y texto con una línea `Nombre, +34600111222`. Rechazar por la forma sería mandar a alguien a depurar un Atajo sin herramientas.
 - **La lógica de importar se sacó a `importarContactosDe()`**: ahora hay dos puertas y las dos tienen que casar por número, deduplicar y no pisar nombres exactamente igual. Dos copias se separan a la primera corrección, y ese día una de las dos empieza a duplicar gente en silencio.
 - **Pruebas**: `scripts/probar-agenda-iphone.ts`, 13 comprobaciones contra la base de datos de verdad (que en la base solo vive la huella, que sin llave no entra nadie, las tres formas de lista, que repetir el Atajo no duplica ni pisa nombres, que al retirar la llave deja de entrar, y el freno). Y 5 más en `probar-telecom.mjs`, incluida una que mete un contacto con `credentials: 'omit'` — si funcionara por llevar la cookie, en el iPhone no funcionaría nada. **43 en verde en total.**
+
+---
+
+## 2026-08-23 — Returning a purchase paid with points (Programador 7)
+
+Plan fase 9, the half that matters now that points purchases are live. A seller
+could mark an order «devuelto» but the points stayed where they were. Now
+`devolverPuntos(pedidoId)` undoes `pagarConPuntos` with contrary entries on
+the same order (0098, motive `devolucion_puntos`): seller −net, platform
+−commission, buyer +total, one transaction, rows locked in id order. All or
+nothing: if the seller (or the platform) no longer has the balance, nothing
+moves and the seller is told how much they would need — a half refund is
+worse than none. Repeating it is harmless (already returned → no rows).
+
+`PUT /api/publicar/mis-ventas/:id` with `devuelto` or `cancelado` returns the
+points BEFORE changing the state (409 if it cannot), and answers
+`puntos_devueltos`. Comercio shows a «Devolver (N puntos al comprador)» link
+on live orders, with a confirm, and shows the server's reason when it refuses.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after, balances
+restored, platform back to 0): 4-point purchase → 96/103,90/0,10; return →
+100/100/0 with three `devolucion_puntos` rows next to the three sale rows;
+return again → no new rows; second purchase then seller set to 1 point →
+409 «No tienes saldo suficiente para devolver los 3,9 puntos…» and the order
+stays `entregado`. `tsc` clean. Not seen in a browser (Comercio needs a
+seller session in the shared browser).
