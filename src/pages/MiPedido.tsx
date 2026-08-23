@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download, Receipt } from 'lucide-react';
+import Recibo from '../components/knowledge/Recibo';
 
 // ============================================================================
 // ¿DÓNDE ESTÁ LO MÍO? — fase 6 del plan de tiendas (2026-08-22)
@@ -23,6 +24,15 @@ export default function MiPedido() {
   const [correo, setCorreo] = useState('');
   const [estado, setEstado] = useState<'quieto' | 'buscando' | 'ok' | 'no-esta'>('quieto');
   const [pedido, setPedido] = useState<any>(null);
+  // El recibo (F4, 2026-08-23): se pide aparte, con las mismas llaves.
+  const [recibo, setRecibo] = useState<any>(null);
+  async function verRecibo() {
+    if (recibo) { setRecibo(null); return; }
+    try {
+      const r = await fetch(`/api/publicar/pedido/${encodeURIComponent(codigo.trim().toUpperCase())}/recibo${correo.trim() ? `?correo=${encodeURIComponent(correo.trim())}` : ''}`);
+      if (r.ok) setRecibo(await r.json());
+    } catch { /* sin conexión: no se enseña nada */ }
+  }
 
   // Llegar con `?codigo=…` desde la confirmación de compra (2026-08-22): se
   // rellena y se busca solo. Sin correo, el servidor acepta la SESIÓN de quien
@@ -108,6 +118,10 @@ export default function MiPedido() {
               {pedido.envio_centimos > 0 && ` · envío ${dinero(pedido.envio_centimos, pedido.moneda)}`}
               {pedido.ciudad && ` · a ${pedido.ciudad}`}
             </p>
+            <button type="button" onClick={verRecibo} className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
+              <Receipt className="w-3.5 h-3.5" /> {recibo ? 'Ocultar el recibo' : 'Ver el recibo'}
+            </button>
+            {recibo && <Recibo datos={recibo} onCerrar={() => setRecibo(null)} />}
 
             {pedido.estado === 'devuelto' || pedido.estado === 'cancelado' ? (
               <p className="mt-5 flex items-center gap-2 text-sm font-bold text-slate-600">
