@@ -77,6 +77,18 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "caducidad 10 años e inactividad 24 meses de puntos",
       "desde": "2026-08-23T12:22:07.040Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/avisos.ts",
+      "motivo": "dos tipos de aviso de puntos (caducidad/inactividad)",
+      "desde": "2026-08-23T12:22:56.026Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "dos tipos de aviso de puntos (caducidad/inactividad)",
+      "desde": "2026-08-23T12:22:56.026Z"
     }
   ]
 }
