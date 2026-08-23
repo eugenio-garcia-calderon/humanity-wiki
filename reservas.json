@@ -68,12 +68,6 @@
     },
     {
       "agente": "prog6",
-      "ruta": "drizzle/0097_frenos_compartidos.sql",
-      "motivo": "el freno de los limites, compartido entre procesos",
-      "desde": "2026-08-23T00:17:34.713Z"
-    },
-    {
-      "agente": "prog6",
       "ruta": "src/server/agenda.ts",
       "motivo": "el freno pasa a la base de datos: esperaPendiente ahora es async",
       "desde": "2026-08-23T00:23:46.990Z"
