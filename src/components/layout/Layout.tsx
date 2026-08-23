@@ -399,7 +399,19 @@ export default function Layout() {
           revés. Es la única diferencia entre los dos lados. */}
       {!esMovil && circulo === 'explorar' && (
         <>
+          {/* FIJO Y DESPLEGADO (2026-08-23). Eugenio: «cuando pinchas en el
+              botón inferior, el menú con fondo negro tanto el derecho como el
+              izquierdo se quieren fijos y desplegados para ver todas las
+              opciones».
+              Y arregla de raíz lo otro que señaló —«se superpone el menú al
+              submenú»—: el solapamiento venía de que el raíl se DESPLEGABA POR
+              ENCIMA al pasar el ratón. Eso tenía sentido cuando el raíl estaba
+              siempre puesto y rozarlo de camino a otro sitio no debía empujar
+              la página. Ahora sólo aparece porque has pulsado su círculo: ya
+              has dicho que lo quieres, así que ocupa su sitio y nadie tapa a
+              nadie. Dos arreglos con un cambio porque eran el mismo problema. */}
           <Rail
+            siempreAbierto
             titulo="Explorar"
             items={OBJETIVOS_RAIL}
             abierta={objetivoAbierto}
@@ -1042,6 +1054,7 @@ export default function Layout() {
             <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
           )}
           <Rail
+            siempreAbierto
             ladoDerecho
             abierta={panelAbierto?.clave ?? null}
             onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
