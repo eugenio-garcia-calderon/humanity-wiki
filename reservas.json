@@ -149,6 +149,12 @@
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
+    },
+    {
+      "agente": "dashboard",
+      "ruta": "scripts/equipo.mjs",
+      "motivo": "reservar trataba el motivo como un fichero",
+      "desde": "2026-08-23T13:19:27.293Z"
     }
   ]
 }
