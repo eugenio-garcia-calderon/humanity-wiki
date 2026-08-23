@@ -11,6 +11,12 @@
       "ruta": "src/server/knowledge.ts",
       "motivo": "muro limpio: solo publicaciones, con portada y video al pasar el raton",
       "desde": "2026-08-23T23:30:41.345Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/portada/portadaBloques.ts",
+      "motivo": "quitar circulos, buscador y tematicas de la portada",
+      "desde": "2026-08-23T23:31:33.381Z"
     }
   ]
 }
