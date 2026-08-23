@@ -23,12 +23,6 @@
       "ruta": "scripts/probar-portada.ts",
       "motivo": "los tres bloques retirados",
       "desde": "2026-08-23T23:32:55.817Z"
-    },
-    {
-      "agente": "prog6",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada de la noche de servidores",
-      "desde": "2026-08-23T23:42:49.299Z"
     }
   ]
 }
