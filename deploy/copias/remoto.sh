@@ -68,8 +68,14 @@ while true; do
   # minutos aquí dentro no arregla nada. Se vuelve a intentar en un cuarto de
   # hora, y mientras tanto el estado dice la verdad en vez de quedarse en
   # blanco — que es lo que veríamos si esto se quedara colgado reintentando.
+  # DOS PATRONES, NO UNO (2026-08-23). Los volcados diarios se llaman
+  # `humanity-*`; los que se hacen a mano justo antes de una migración se llaman
+  # `antes-de-*`. Al principio solo subían los primeros — y eso dejaba fuera
+  # precisamente los que existen porque algo puede salir mal, viviendo solo en
+  # la máquina que podría ser lo que salga mal. Lo destapó prog7 pidiendo uno.
   salida="$(rclone copy "$ORIGEN" "$DESTINO" \
       --include 'humanity-*.dump' \
+      --include 'antes-de-*.dump' \
       --ignore-existing \
       --transfers 2 \
       --retries 2 --low-level-retries 3 --contimeout 20s --timeout 120s \
@@ -84,7 +90,7 @@ while true; do
   else
     # LA COMPROBACIÓN QUE IMPORTA: no «he subido», sino «cuántas hay allí».
     # Un `rclone copy` que no encuentra nada que subir también sale con 0.
-    n="$(rclone lsf "$DESTINO" --include 'humanity-*.dump' 2>/dev/null | wc -l | tr -d ' ')"
+    n="$(rclone lsf "$DESTINO" --include '*.dump' 2>/dev/null | wc -l | tr -d ' ')"
     if [ "${n:-0}" -eq 0 ]; then
       log "ERROR: el destino responde pero no hay ni un volcado en él"
       escribir_estado "error" 0 "el destino esta vacio despues de copiar"

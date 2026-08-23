@@ -475,10 +475,10 @@ export function registerPuntosRoutes(app: Express, db: any) {
   // y `ritmo()` solo frena: no escribe en `intentos_fallidos`, que es el
   // rastro de los ataques y no el de las transferencias legítimas (prog6,
   // 2026-08-23, tras ver que `anotarFallo` lo habría enterrado).
-  app.post('/api/puntos/transferir', guardian(REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
+  app.post('/api/puntos/transferir', guardian(db, REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
-      ritmo(REGLAS.transferencia, ipDe(req), req.user.id);
+      ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
       if (!transferenciasActivas()) {
         return res.status(403).json({ error: 'Las transferencias de puntos todavía no están activadas. Se anunciará en /tokenomics antes de encenderlas.' });
       }

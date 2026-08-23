@@ -50,17 +50,30 @@ success, a transfer does not. That is the route's decision, not the module's.
 
 | | Where | Why |
 |---|---|---|
-| The brake | In memory | Checked on every attempt, has to cost nothing. Losing it on restart gives away one restart's worth of attempts |
+| The brake | `frenos` (migration `0097`) | It must be ONE brake, not one per process |
 | The failure record | `intentos_fallidos` (migration `0076`) | It is the audit trail. It has to survive restarts and it is never cleared |
 
 ## Before you change this, decide
 
-**⚠️ `cluster` breaks the brake, and this is the thing to remember.** The brake
-is a `Map` in one process. The day the work is spread across the eight cores,
-it becomes **eight independent brakes** and the real limit is eight times the
-configured one — silently. Two ways out when that day comes: move the brake to
-somewhere shared (Postgres or Redis), or divide the numbers by eight
-deliberately. Do not discover this in production.
+**The brake used to be a `Map` in one process, and that was wrong.** With
+`cluster` it would have become eight independent brakes and the real limit eight
+times the configured one — with no error and no log line. A limit that loosens
+in silence is worse than none, because you also believe it is there. Fixed
+before `cluster` arrived, because afterwards nobody would have noticed.
+
+It costs one query per attempt on the entry routes, which are the quietest in
+the platform. In exchange the brake **survives a restart**: until 2026-08-23 a
+deploy handed whoever was trying passwords a fresh start.
+
+**Two things that only a real database tells you**, both found by moving the
+test off a fake `db`:
+
+- `= ANY($1)` does not work: node-postgres sends a JS array as text and Postgres
+  answers *"requires array on right side"*. Use `IN` with one placeholder per key.
+- **`::int` on the parameters is not decoration.** Without it they arrive as
+  text and `LEAST('5','900')` compares *strings* — `'5'` sorts after `'900'`, so
+  it always returned the cap and the very first failure braked for 15 minutes.
+  It passed every test against the fake database.
 
 **The trail deliberately does not record what was typed.** Not the password,
 nothing derived from it, not even its length. An attempt log that records the
