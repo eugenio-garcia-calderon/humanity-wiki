@@ -49,24 +49,6 @@
       "desde": "2026-08-23T12:22:07.040Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
-      "desde": "2026-08-23T13:01:14.835Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/Bienvenida.tsx",
-      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
-      "desde": "2026-08-23T13:01:14.835Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/bienvenida/previas.tsx",
-      "motivo": "portada: el menu plegado no volvia, y galeria compacta con animacion",
-      "desde": "2026-08-23T13:01:14.835Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/publicar.ts",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
