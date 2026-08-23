@@ -68,14 +68,22 @@ export function registerBdRoutes(app: Express, db: any) {
    * la tabla si puede, o el mensaje de por qué no.
    */
   async function puedeConTabla(req: Request, tablaId: string, escribir: boolean): Promise<{ tabla: any } | { error: string; codigo: number }> {
+    // Se busca SIN filtrar las retiradas, y se decide después. «No existe» y
+    // «su dueño la retiró» son dos respuestas distintas, y aquí importa: una
+    // tabla puede estar metida en la página de otra persona, y ahí «esa tabla
+    // no existe» se lee como un fallo del programa en vez de como una decisión
+    // de alguien.
     const r = await db.execute(sql`
       SELECT t.*, p.creador_user_id AS proyecto_creador, p.publico AS proyecto_publico
       FROM bd_tablas t
       LEFT JOIN proyectos p ON p.id = t.proyecto_id
-      WHERE t.id = ${tablaId} AND t.archived_at IS NULL AND t.deleted_at IS NULL
+      WHERE t.id = ${tablaId} AND t.deleted_at IS NULL
     `);
     const t = r.rows[0] as any;
     if (!t) return { error: 'Esa tabla no existe.', codigo: 404 };
+    if (t.archived_at) {
+      return { error: 'Esta tabla se retiró. Quien la creó puede recuperarla.', codigo: 404 };
+    }
 
     const yo = req.user?.id || null;
     const admin = (req.user?.roleLevel ?? 0) >= 4;
@@ -349,6 +357,88 @@ export function registerBdRoutes(app: Express, db: any) {
   // ── LAS COLUMNAS ──────────────────────────────────────────────────────────
 
   /** Añadir una columna. */
+  /**
+   * RENOMBRAR UNA TABLA — `PUT /api/bd/tablas/:id`
+   *
+   * No existía. Una tabla nacía con el nombre que se le pusiera y ese nombre
+   * era para siempre: la única salida era crear otra y copiar los datos a
+   * mano. Un nombre es lo que más se equivoca uno al empezar algo.
+   */
+  app.put('/api/bd/tablas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+
+      const titulo = typeof req.body?.titulo === 'string' ? req.body.titulo.trim() : null;
+      if (titulo !== null && !titulo) {
+        return res.status(400).json({ error: 'La tabla necesita un título.' });
+      }
+      const r = await db.execute(sql`
+        UPDATE bd_tablas SET
+          titulo = COALESCE(${titulo}, titulo),
+          descripcion = COALESCE(${req.body?.descripcion ?? null}, descripcion),
+          icono = COALESCE(${req.body?.icono ?? null}, icono),
+          updated_by = ${req.user.id}, updated_at = now()
+        WHERE id = ${String(req.params.id)}
+        RETURNING id, titulo, descripcion, icono
+      `);
+      res.json(r.rows[0]);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * RETIRAR UNA TABLA — `DELETE /api/bd/tablas/:id`
+   *
+   * Tampoco existía, y era el hueco más incómodo de la herramienta: se podían
+   * crear tablas y no quitarlas, así que probar algo dejaba basura para
+   * siempre.
+   *
+   * ── SE ARCHIVA, NO SE BORRA ────────────────────────────────────────────────
+   * Regla 2 de la casa. Y aquí importa más que en otros sitios: **una tabla
+   * puede estar embebida en páginas de otras personas**. Borrarla de verdad
+   * dejaría un agujero en el documento de alguien sin avisarle y sin vuelta
+   * atrás. Archivada, la página dice que ya no está y quien la puso puede
+   * recuperarla.
+   *
+   * Se avisa de en cuántas páginas está antes de nada: quien retira una tabla
+   * tiene derecho a saber a quién le va a cambiar la pantalla.
+   */
+  app.delete('/api/bd/tablas/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const permiso = await puedeConTabla(req, req.params.id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+
+      const id = String(req.params.id);
+      // En cuántas páginas está metida. Se busca dentro de los bloques, que es
+      // donde vive la referencia.
+      const usos = await db.execute(sql`
+        SELECT COUNT(*) AS n FROM knowledge_windows
+        WHERE archived_at IS NULL AND deleted_at IS NULL
+          AND config::text LIKE ${'%' + id + '%'}
+      `);
+      const enPaginas = Number((usos.rows[0] as any)?.n || 0);
+
+      // `confirmado` es obligatorio cuando está en uso. Sin esto, un clic
+      // distraído cambia la página de otra persona; con esto, hay que haber
+      // leído cuántas.
+      if (enPaginas > 0 && req.body?.confirmado !== true) {
+        return res.status(409).json({
+          error: `Esta tabla está metida en ${enPaginas} ${enPaginas === 1 ? 'página' : 'páginas'}. Si la retiras, ahí dejará de verse.`,
+          en_paginas: enPaginas,
+          necesita_confirmacion: true,
+        });
+      }
+
+      await db.execute(sql`
+        UPDATE bd_tablas SET archived_at = now(), updated_by = ${req.user.id}, updated_at = now()
+        WHERE id = ${id}
+      `);
+      res.json({ retirada: true, en_paginas: enPaginas });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.post('/api/bd/tablas/:id/columnas', async (req: Request, res: Response) => {
     try {
       if (!exigeSesion(req, res)) return;
