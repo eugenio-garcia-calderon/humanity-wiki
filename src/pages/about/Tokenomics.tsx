@@ -137,9 +137,10 @@ export default function Tokenomics() {
         </h2>
         <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
           Un sistema de puntos <strong>interno</strong>, sin blockchain. Al crear tu cuenta recibes
-          un regalo de bienvenida; ganas céntimos de punto cuando otras personas ven tus
+          5.000 puntos de bienvenida; cada mes recibes 1.000 fijos si estás verificada y usas la
+          plataforma al menos 3 días, más una parte variable por tu reputación social; ganas céntimos de punto cuando otras personas ven tus
           publicaciones públicas; puedes comprar más; desde el 23 de agosto de 2026 puedes
-          <strong> enviarlos a otras personas</strong> de la plataforma (piloto, con tope diario) y
+          <strong> enviarlos a otras personas</strong> de la plataforma (piloto, con tope diario y cuenta verificada) y
           <strong> pagar con ellos en el mercado</strong> cuando el vendedor los acepta — el vendedor
           cobra en puntos con la comisión de la plataforma a la mitad; y cada movimiento queda anotado con su
           motivo en tu libro de movimientos. Los usos del punto — almacenamiento, cómputo,
@@ -155,7 +156,9 @@ export default function Tokenomics() {
           <span className="px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 text-[10px] font-black uppercase tracking-wide">Intención declarada</span>
         </div>
         <p className="text-sm text-slate-500 leading-relaxed max-w-2xl mb-6">
-          Esta es la <strong>cesta de servicio</strong> hacia la que va el punto. Los precios se
+          Esta es la <strong>cesta de servicio</strong> hacia la que va el punto. La unidad de
+          referencia es sencilla: <strong>1 punto = una tarea simple con el modelo de IA más
+          barato</strong>; el resto de la cesta se expresa como múltiplo de esa unidad. Los precios se
           publican en una API abierta (<code className="text-xs bg-slate-100 px-1 py-0.5 rounded">/api/tokenomics/precios</code>,
           con su historia entera) y son orientativos hasta que cada servicio empiece a cobrar.
         </p>
@@ -240,46 +243,70 @@ export default function Tokenomics() {
           desharía la rama A recién decidida.) */}
       <section>
         <div className="flex items-center gap-3 mb-2">
-          <h2 className="text-2xl font-bold text-slate-900 font-display">Cómo se repartirán los puntos</h2>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wide">Decidido · en construcción</span>
+          <h2 className="text-2xl font-bold text-slate-900 font-display">Cómo se reparten los puntos</h2>
+          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wide">En marcha · automático</span>
         </div>
         <div className="space-y-3">
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5">El bote mensual</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-1.5">Al empezar: 5.000 puntos</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              La mitad de la <strong>comisión</strong> que la plataforma ingrese por su mercado
-              cada mes va a un <strong>bote de reparto</strong> — la comisión, no la facturación
-              bruta: el bote sale de lo que la plataforma gana, nunca del dinero de los
-              vendedores. Cada usuario verificado recibe su parte en puntos, para usar en
-              almacenamiento, procesamiento y el resto de la cesta.
+              Cada cuenta nueva recibe <strong>5.000 puntos de bienvenida</strong> (decisión del 23 de
+              agosto de 2026), para usar desde el primer día en la cesta de servicios y como
+              descuento en el mercado. Enviar puntos a otra persona exige cuenta verificada: así
+              crear cuentas no sirve para fabricar puntos y juntarlos en una.
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5">Reparto mixto: el éxito pesa</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-1.5">Cada mes: 1.000 fijos si estás</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              El bote no se reparte a partes iguales: quien más aporta recibe más,
-              <strong> proporcional al éxito de sus publicaciones</strong> — vistas válidas (una
-              por persona, con sesión), interacción y reseñas positivas. Los números que pesan
-              en el reparto son siempre los que no se pueden inflar desde fuera.
+              Cada persona <strong>verificada y activa</strong> recibe <strong>1.000 puntos fijos al
+              mes</strong>. Activa quiere decir haber usado la plataforma <strong>al menos 3 días
+              distintos</strong> en ese mes — se cuenta que estuviste, no qué hiciste. Quien no
+              llega, ese mes no cobra; vuelve a cobrar el mes que vuelva.
+            </p>
+          </div>
+          <div className="p-5 bg-white border border-slate-200 rounded-2xl">
+            <h3 className="text-sm font-bold text-slate-900 mb-1.5">Y una parte variable: la reputación social</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Además, un <strong>bote variable de 1.000 puntos al mes</strong> se reparte entre las
+              personas activas <strong>en proporción a su reputación social</strong> del mes: lo que
+              otras personas hacen con lo que publicas — vistas válidas (una por persona y día, con
+              sesión), interacción y reseñas positivas (las de productos, solo con compra
+              verificada). Los números que pesan son siempre los que no se pueden inflar desde
+              fuera. Si un mes nadie tiene reputación medible, ese bote no se emite.
+            </p>
+          </div>
+          <div className="p-5 bg-white border border-slate-200 rounded-2xl">
+            <h3 className="text-sm font-bold text-slate-900 mb-1.5">Automático, el día 1</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              El reparto lo hace el servidor solo, <strong>el día 1 de cada mes para el mes que
+              acaba de cerrar</strong>; nadie tiene que pulsar nada y nadie puede pagarlo dos veces:
+              cada pago queda en el libro de movimientos con su mes, y la base de datos no admite
+              otro. Las cifras (5.000 · 1.000 · 1.000 · 3 días) son decisión publicada del emisor y
+              pueden cambiar; cuando cambien, se anunciará aquí antes.
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
             <h3 className="text-sm font-bold text-slate-900 mb-1.5">Caducidad y cuentas dormidas</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Los puntos <strong>caducan a los 10 años</strong>, y una cuenta
-              <strong> inactiva durante 24 meses pierde su saldo</strong> — con avisos antes de
-              que ocurra. Es lo que impide que el pasivo de puntos crezca sin límite mientras la
-              plataforma sigue prestando los servicios que los respaldan.
+              Los puntos <strong>caducan a los 10 años</strong> (se gastan por orden de llegada,
+              así que caduca solo la parte del saldo más antigua que una década), y una cuenta
+              <strong> sin actividad durante 24 meses pierde su saldo</strong>. Siempre con aviso
+              antes: por la campana, 30 y 7 días antes de perder el saldo y 90 días antes de una
+              caducidad, con la cifra y la fecha; y bajo tu saldo en <em>Visión · Economía</em> ves
+              en todo momento tu última actividad y la fecha en que se perdería. Entrar una vez
+              basta para conservarlo. Es lo que impide que el pasivo de puntos crezca sin límite
+              mientras la plataforma sigue prestando los servicios que los respaldan.
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">
             <h3 className="text-sm font-bold text-slate-900 mb-1.5">La regla que sujeta el diseño</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              El bote decide <strong>cuántos puntos se emiten</strong> cada mes — nunca cuánto
+              El reparto decide <strong>cuántos puntos se emiten</strong> cada mes — nunca cuánto
               vale cada punto. El valor del punto sigue siendo la cesta de servicios a los
-              precios publicados. Así el reparto sube y baja con los ingresos reales, nunca se
-              emite más de lo que el mercado respalda, y el punto no se convierte en una
-              participación en los ingresos (que lo sacaría del terreno de la utilidad).
+              precios publicados, y la emisión es una cifra publicada que el emisor revisa con
+              lo que el mercado respalda; el punto no se convierte en una participación en los
+              ingresos (que lo sacaría del terreno de la utilidad).
             </p>
           </div>
           <div className="p-5 bg-white border border-slate-200 rounded-2xl">

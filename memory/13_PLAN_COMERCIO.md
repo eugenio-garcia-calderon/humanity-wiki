@@ -92,6 +92,29 @@ El IVA y los reembolsos por Stripe. Zonas con precios distintos.
 ### Fase 10 — Analítica y carrito abandonado
 Cuánta gente entró, cuánta compró, qué se quedó en la cesta.
 
+## Segunda vuelta (23-08-2026, Eugenio: «dale a variantes, carrito, etc. y cinco cosas importantes que aún no tenemos, en 5 fases»)
+
+Inventario antes de planear (lo que YA hay y no se repite): 8 fotos con galería en
+la ficha, stock con reservas y «agotado», categorías, buscador y filtros en
+/mercado, nº de seguimiento al marcar enviado, tarifas de envío y envío gratis
+desde X, cupones, puntos, devoluciones, entrega de lo digital, reseñas, resumen
+de ventas, borradores. Lo que NO había: variantes, carrito abandonado,
+descripción con formato, aviso de pedido nuevo al vendedor (¡vendía y no lo
+sabía!), aviso de estado al comprador, preguntar al vendedor, favoritos,
+recibo/factura con IVA, «avísame cuando vuelva», valoración del vendedor.
+
+| Fase | Qué | Estado |
+|---|---|---|
+| **F1** | **Avisos de comercio** por la campana: `pedido_nuevo` al vendedor (puntos y Stripe) y `pedido_estado` al comprador (enviado con seguimiento, entregado, devuelto, cancelado) · **Preguntar al vendedor** desde la ficha (mensaje directo) · **Descripción con formato** (Markdown del asistente) · `/comercio?pestana=pedidos` | hecha 23-08 (PR fase 1) |
+| **F2** | **Variantes/SKU**: talla, color… con precio y stock por variante; la variante elegida viaja en cesta, pedido y línea; «agotado» por variante | hecha 23-08 (PR fase 2, 0107) |
+| **F3** | **Carrito abandonado**: la cesta se guarda en el servidor con sesión; a las 24 h sin comprar, aviso por la campana con enlace a la cesta; panel del vendedor ve cuántas cestas se quedan a medias · **Favoritos / lista de deseos** con aviso si baja el precio | hecha 23-08 (PR fase 3, 0108) |
+| **F4** | **Recibo/factura imprimible** por pedido (comprador y vendedor), con **IVA desglosado** y datos fiscales del vendedor (NIF, dirección) en su panel; tipo de IVA por producto | hecha 23-08 la parte que no depende del asesor (PR fase 4, 0110): datos fiscales + IVA por producto + RECIBO no fiscal. **Factura numerada: esperando a Eugenio/asesor** (facturación en nombre del vendedor) |
+| **F5** | **«Avísame cuando vuelva»** (stock) · **productos relacionados** en la ficha (misma categoría/vendedor) · **valoración del vendedor** (media de sus reseñas verificadas en la tienda y la ficha) | pendiente |
+
+Las cinco cosas nuevas que no teníamos: avisos de pedido (F1), preguntar al
+vendedor (F1), favoritos (F3), recibo/factura con IVA (F4), avísame cuando
+vuelva + valoración del vendedor (F5).
+
 ## La regla de las pruebas
 
 Todo lo que se cree para probar lleva **PRUEBA** delante en el título, y se

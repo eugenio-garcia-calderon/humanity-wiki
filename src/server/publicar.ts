@@ -24,7 +24,8 @@
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
-import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos } from './puntos';
+import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
+import { avisar } from './avisos';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -66,6 +67,302 @@ export function motivoInvalido(handle: string): string | null {
 }
 
 export function registerPublicarRoutes(app: Express, db: any) {
+  // ==========================================================================
+  // DATOS FISCALES DEL VENDEDOR Y RECIBO (2026-08-23, comercio F4)
+  // ==========================================================================
+  // Regla (Dashboard, 23-08): nada inventado ni vacío en un documento fiscal.
+  // Sin datos fiscales completos, el comprador recibe un RECIBO (no fiscal,
+  // sin número). Con ellos, y SOLO cuando Eugenio y su asesor digan cómo se
+  // factura en nombre del vendedor, habrá factura numerada: correlativa, con
+  // el número sacado en la misma transacción que la crea, y con los datos
+  // fiscales copiados dentro. Hoy no se emite nada numerado.
+  const IVAS_VALIDOS = [21, 10, 4, 0];
+  const limpiaTexto = (v: any, max: number) => { const t = String(v ?? '').trim(); return t ? t.slice(0, max) : null; };
+  const fiscalCompleto = (f: any) => !!(f && f.nombre_fiscal && f.nif && f.direccion && f.cp && f.ciudad);
+
+  /** GET /api/publicar/mis-datos-fiscales — lo que declaré de mí. */
+  app.get('/api/publicar/mis-datos-fiscales', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const f = (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${req.user.id}`)).rows[0] as any;
+      res.json({ datos: f || null, completos: fiscalCompleto(f), nota: 'Sin estos datos, tus compradores reciben un recibo (no fiscal). Con ellos, cuando la plataforma pueda emitir facturas en tu nombre, una factura numerada.' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** PUT /api/publicar/mis-datos-fiscales — guardar. Valida lo básico; no inventa nada. */
+  app.put('/api/publicar/mis-datos-fiscales', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const b = req.body || {};
+      const iva = b.iva_defecto === undefined || b.iva_defecto === null || b.iva_defecto === '' ? 21 : Number(b.iva_defecto);
+      if (!IVAS_VALIDOS.includes(iva)) return res.status(400).json({ error: 'El IVA por defecto tiene que ser 21, 10, 4 o 0.' });
+      const nif = limpiaTexto(b.nif, 20)?.toUpperCase().replace(/[\s-]/g, '') || null;
+      if (nif && !/^[A-Z0-9]{8,15}$/.test(nif)) return res.status(400).json({ error: 'El NIF no tiene buena pinta: letras y números, sin espacios.' });
+      await db.execute(sql`
+        INSERT INTO datos_fiscales (user_id, nombre_fiscal, nif, direccion, cp, ciudad, pais, iva_defecto, serie_factura, updated_at)
+        VALUES (${req.user.id}, ${limpiaTexto(b.nombre_fiscal, 200)}, ${nif}, ${limpiaTexto(b.direccion, 300)}, ${limpiaTexto(b.cp, 12)}, ${limpiaTexto(b.ciudad, 120)},
+                ${(limpiaTexto(b.pais, 2) || 'ES').toUpperCase()}, ${iva}, ${limpiaTexto(b.serie_factura, 20)}, now())
+        ON CONFLICT (user_id) DO UPDATE SET nombre_fiscal = EXCLUDED.nombre_fiscal, nif = EXCLUDED.nif, direccion = EXCLUDED.direccion, cp = EXCLUDED.cp,
+          ciudad = EXCLUDED.ciudad, pais = EXCLUDED.pais, iva_defecto = EXCLUDED.iva_defecto, serie_factura = EXCLUDED.serie_factura, updated_at = now()
+      `);
+      const f = (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${req.user.id}`)).rows[0] as any;
+      res.json({ datos: f, completos: fiscalCompleto(f) });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * El RECIBO de un pedido: qué se compró, qué se pagó y con qué. NO es una
+   * factura: no lleva número, y lo dice. Si el vendedor tiene datos fiscales
+   * completos, se enseñan y se añade un desglose de IVA INFORMATIVO
+   * (precios con IVA incluido: base = total / (1 + tipo)). Lo usan comprador
+   * (por código + correo o sesión) y vendedor (sus ventas): el mismo papel.
+   */
+  const construirRecibo = async (pedidoId: string) => {
+    const p = (await db.execute(sql`
+      SELECT pd.*, u.display_name AS vendedor_nombre, u.handle AS vendedor_handle, u.email AS vendedor_email
+      FROM pedidos pd LEFT JOIN users u ON u.id = pd.vendedor_user_id WHERE pd.id = ${pedidoId}
+    `)).rows[0] as any;
+    if (!p) return null;
+    const fiscal = p.vendedor_user_id ? (await db.execute(sql`SELECT * FROM datos_fiscales WHERE user_id = ${p.vendedor_user_id}`)).rows[0] as any : null;
+    const ivaDefecto = Number(fiscal?.iva_defecto ?? 21);
+    let lineas = (await db.execute(sql`
+      SELECT l.producto_nombre, l.unidades, l.precio_unitario_centimos, l.variante_nombre, pr.iva_pct
+      FROM pedido_lineas l LEFT JOIN products pr ON pr.id = l.producto_id WHERE l.pedido_id = ${p.id} ORDER BY l.created_at
+    `)).rows as any[];
+    if (!lineas.length) {
+      // Pedidos de antes del carrito: una sola cosa, sin líneas.
+      const pr = p.producto_id ? (await db.execute(sql`SELECT iva_pct FROM products WHERE id = ${p.producto_id}`)).rows[0] as any : null;
+      const unidades = Number(p.unidades || 1);
+      const totalLinea = Number(p.importe_centimos || 0) - Number(p.envio_centimos || 0) + Number(p.descuento_centimos || 0);
+      lineas = [{ producto_nombre: p.producto_nombre, unidades, precio_unitario_centimos: Math.round(totalLinea / Math.max(1, unidades)), variante_nombre: null, iva_pct: pr?.iva_pct ?? null }];
+    }
+    const subtotal = lineas.reduce((n, l) => n + Number(l.precio_unitario_centimos) * Number(l.unidades), 0);
+    const descuento = Number(p.descuento_centimos || 0);
+    const envio = Number(p.envio_centimos || 0);
+    const puntos = Number(p.puntos_usados || 0);
+    const totalEuros = Number(p.importe_centimos || 0);
+    const completos = fiscalCompleto(fiscal);
+    // Desglose informativo por tipo, sobre lo cobrado en euros: el descuento y
+    // los puntos se reparten en proporción entre las líneas.
+    let desglose: { tipo: number; base_centimos: number; cuota_centimos: number; total_centimos: number }[] | null = null;
+    // Solo sobre lo COBRADO EN EUROS: lo pagado con puntos no lleva IVA en
+    // euros (una compra entera en puntos no tiene desglose). El envío se
+    // considera cobrado en euros hasta donde lleguen los euros; el resto de
+    // euros se reparte entre las líneas en proporción.
+    if (completos && totalEuros > 0) {
+      const porTipo = new Map<number, number>();
+      const envioEuros = Math.min(envio, totalEuros);
+      const factor = subtotal > 0 ? Math.max(0, totalEuros - envioEuros) / subtotal : 0;
+      for (const l of lineas) {
+        const tipo = l.iva_pct === null || l.iva_pct === undefined ? ivaDefecto : Number(l.iva_pct);
+        porTipo.set(tipo, (porTipo.get(tipo) || 0) + Math.round(Number(l.precio_unitario_centimos) * Number(l.unidades) * factor));
+      }
+      if (envioEuros > 0) porTipo.set(ivaDefecto, (porTipo.get(ivaDefecto) || 0) + envioEuros);
+      desglose = [...porTipo.entries()].sort((a, b) => b[0] - a[0]).map(([tipo, total]) => {
+        const base = Math.round(total / (1 + tipo / 100));
+        return { tipo, base_centimos: base, cuota_centimos: total - base, total_centimos: total };
+      });
+    }
+    return {
+      tipo: 'recibo',
+      aviso: 'Recibo de compra. No es una factura: no lleva número y no sustituye a una. Precios con IVA incluido.',
+      codigo: p.codigo, fecha: p.created_at, estado: p.estado, moneda: p.moneda || 'EUR',
+      comprador: { nombre: p.comprador_nombre || null, email: p.comprador_email || null, direccion: p.direccion_envio || null },
+      vendedor: {
+        nombre: p.vendedor_nombre || null, tienda: p.vendedor_handle || null,
+        fiscal: completos ? { nombre_fiscal: fiscal.nombre_fiscal, nif: fiscal.nif, direccion: fiscal.direccion, cp: fiscal.cp, ciudad: fiscal.ciudad, pais: fiscal.pais } : null,
+      },
+      lineas: lineas.map(l => ({ nombre: l.producto_nombre, variante: l.variante_nombre || null, unidades: Number(l.unidades), precio_unitario_centimos: Number(l.precio_unitario_centimos), total_centimos: Number(l.precio_unitario_centimos) * Number(l.unidades), iva_pct: completos ? (l.iva_pct === null || l.iva_pct === undefined ? ivaDefecto : Number(l.iva_pct)) : null })),
+      subtotal_centimos: subtotal, descuento_centimos: descuento, cupon: p.cupon_codigo || null, envio_centimos: envio,
+      puntos_usados: puntos, total_euros_centimos: totalEuros,
+      desglose_iva: desglose,
+    };
+  };
+  /** GET /api/publicar/pedido/:codigo/recibo?correo= — el recibo, para quien compró (correo o sesión). */
+  app.get('/api/publicar/pedido/:codigo/recibo', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.query.correo || '').toLowerCase().trim();
+      const quien = req.user?.id || null;
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
+      const r = await db.execute(sql`
+        SELECT id FROM pedidos WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
+      `);
+      if (!r.rows[0]) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
+      res.json(await construirRecibo((r.rows[0] as any).id));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** GET /api/publicar/mis-ventas/:id/recibo — el mismo recibo, para quien vendió. */
+  app.get('/api/publicar/mis-ventas/:id/recibo', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`SELECT id FROM pedidos WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}`);
+      if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+      res.json(await construirRecibo((r.rows[0] as any).id));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==========================================================================
+  // CARRITO ABANDONADO Y FAVORITOS (2026-08-23, comercio F3)
+  // ==========================================================================
+  const dominioPublico = () => process.env.DOMINIO_PUBLICO || 'humanity.wiki';
+
+  /** PUT /api/publicar/cesta { tienda, lineas } — guardar la cesta de quien tiene sesión (vacía = borrarla). */
+  app.put('/api/publicar/cesta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión no se guarda la cesta.' });
+      const tienda = String(req.body?.tienda || '').trim().toLowerCase().slice(0, 80);
+      if (!tienda) return res.status(400).json({ error: 'Falta la tienda.' });
+      const lineas = Array.isArray(req.body?.lineas) ? req.body.lineas.slice(0, 20).map((l: any) => ({
+        producto_id: String(l?.producto_id || ''), cantidad: Math.max(1, Math.min(99, Number(l?.cantidad) || 1)),
+        nombre: String(l?.nombre || '').slice(0, 200), precio_centimos: Number(l?.precio_centimos) || 0,
+        ...(l?.variante_id ? { variante_id: String(l.variante_id), variante_nombre: String(l.variante_nombre || '').slice(0, 120) } : {}),
+      })).filter((l: any) => l.producto_id) : [];
+      if (!lineas.length) {
+        await db.execute(sql`DELETE FROM cestas_guardadas WHERE user_id = ${req.user.id} AND tienda = ${tienda}`);
+        return res.json({ guardada: false, vacia: true });
+      }
+      // Cambiar la cesta reinicia el aviso: si vuelve a tocarla, el reloj de
+      // las 24 h empieza de nuevo y el aviso puede repetirse más adelante.
+      await db.execute(sql`
+        INSERT INTO cestas_guardadas (user_id, tienda, lineas, updated_at, avisada_at)
+        VALUES (${req.user.id}, ${tienda}, ${JSON.stringify(lineas)}::jsonb, now(), NULL)
+        ON CONFLICT (user_id, tienda) DO UPDATE SET lineas = EXCLUDED.lineas, updated_at = now(), avisada_at = NULL
+      `);
+      res.json({ guardada: true, lineas: lineas.length });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicar/cesta?tienda= — la cesta guardada, para recuperarla en otro dispositivo. */
+  app.get('/api/publicar/cesta', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const tienda = String(req.query.tienda || '').trim().toLowerCase();
+      const r = await db.execute(sql`SELECT lineas, updated_at FROM cestas_guardadas WHERE user_id = ${req.user.id} AND tienda = ${tienda}`);
+      const f = r.rows[0] as any;
+      res.json({ lineas: f?.lineas || [], updated_at: f?.updated_at || null });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/publicar/favoritos — mis favoritos (ids y ficha breve). */
+  app.get('/api/publicar/favoritos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const r = await db.execute(sql`
+        SELECT f.producto_id, f.precio_centimos AS precio_guardado, f.created_at,
+               p.name, p.price_cents, p.currency, p.images, p.status, p.archived_at, p.created_by,
+               u.handle AS tienda
+        FROM favoritos_productos f
+        LEFT JOIN products p ON p.id = f.producto_id
+        LEFT JOIN users u ON u.id = p.created_by
+        WHERE f.user_id = ${req.user.id}
+        ORDER BY f.created_at DESC
+      `);
+      res.json({
+        ids: (r.rows as any[]).map(x => x.producto_id),
+        favoritos: (r.rows as any[]).map(x => ({
+          producto_id: x.producto_id, nombre: x.name, precio_centimos: x.price_cents, precio_guardado: x.precio_guardado,
+          moneda: x.currency || 'EUR', imagen: Array.isArray(x.images) ? x.images[0] || null : null,
+          disponible: !!x.name && !x.archived_at && x.status !== 'borrador',
+          tienda: x.tienda || null, url: x.tienda ? `https://${x.tienda}.${dominioPublico()}/producto/${encodeURIComponent(x.producto_id)}` : null,
+          guardado_en: x.created_at,
+        })),
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** PUT /api/publicar/favoritos/:id — guardar; DELETE — quitar. */
+  app.put('/api/publicar/favoritos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Entra para guardar favoritos.' });
+      const p = (await db.execute(sql`SELECT id, price_cents FROM products WHERE id = ${String(req.params.id)} AND archived_at IS NULL`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
+      await db.execute(sql`
+        INSERT INTO favoritos_productos (user_id, producto_id, precio_centimos) VALUES (${req.user.id}, ${p.id}, ${p.price_cents ?? null})
+        ON CONFLICT (user_id, producto_id) DO NOTHING
+      `);
+      res.json({ favorito: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.delete('/api/publicar/favoritos/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      await db.execute(sql`DELETE FROM favoritos_productos WHERE user_id = ${req.user.id} AND producto_id = ${String(req.params.id)}`);
+      res.json({ favorito: false });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // Los dos barridos, cada hora (y a los 3 min de arrancar): cestas olvidadas
+  // (24 h sin tocar, una vez por cesta) y bajadas de precio de favoritos (una
+  // vez por precio). No escriben nada salvo el aviso.
+  const barridoComercio = async () => {
+    const olvidadas = await db.execute(sql`
+      SELECT c.user_id, c.tienda, c.lineas FROM cestas_guardadas c JOIN users u ON u.id = c.user_id
+      WHERE jsonb_array_length(c.lineas) > 0 AND c.avisada_at IS NULL AND c.updated_at < now() - interval '24 hours'
+        AND u.archived_at IS NULL
+        -- Quien lo apagó (revisión del Dashboard: la mitad de las cestas a
+        -- medias son gente que miró y decidió que no) no recibe el aviso.
+        AND coalesce(u.ui_settings->>'aviso_cesta', 'on') <> 'off'
+      LIMIT 200
+    `);
+    for (const c of olvidadas.rows as any[]) {
+      const n = (c.lineas as any[]).reduce((k, l) => k + (Number(l.cantidad) || 1), 0);
+      const primera = (c.lineas as any[])[0]?.nombre || 'algo';
+      await avisar(db, {
+        paraQuien: c.user_id, dePartede: null, tipo: 'cesta_olvidada', entidadTipo: 'cestas', entidadId: `${c.tienda}:${Date.now()}`,
+        datos: { texto: `Dejaste ${n === 1 ? primera : `${n} cosas (${primera}…)`} en la cesta de ${c.tienda}. Sigue ahí. (Este aviso se apaga desde la propia cesta.)`, tienda: c.tienda, destino: `https://${c.tienda}.${dominioPublico()}/?cesta=abrir` },
+      });
+      await db.execute(sql`UPDATE cestas_guardadas SET avisada_at = now() WHERE user_id = ${c.user_id} AND tienda = ${c.tienda}`);
+    }
+    const bajadas = await db.execute(sql`
+      SELECT f.user_id, f.producto_id, f.precio_centimos AS guardado, p.price_cents AS actual, p.name, u.handle AS tienda
+      FROM favoritos_productos f JOIN products p ON p.id = f.producto_id LEFT JOIN users u ON u.id = p.created_by
+      WHERE f.precio_centimos IS NOT NULL AND p.price_cents IS NOT NULL AND p.price_cents < f.precio_centimos
+        AND p.archived_at IS NULL AND p.status <> 'borrador'
+        -- Al propio vendedor no: bajó él el precio.
+        AND p.created_by IS DISTINCT FROM f.user_id
+      LIMIT 500
+    `);
+    for (const b of bajadas.rows as any[]) {
+      const fmt = (c: number) => (c / 100).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+      await avisar(db, {
+        paraQuien: b.user_id, dePartede: null, tipo: 'precio_bajado', entidadTipo: 'favoritos', entidadId: `${b.producto_id}:${b.actual}`,
+        datos: { texto: `${b.name} ha bajado de ${fmt(Number(b.guardado))} a ${fmt(Number(b.actual))}.`, producto_id: b.producto_id, destino: b.tienda ? `https://${b.tienda}.${dominioPublico()}/producto/${encodeURIComponent(b.producto_id)}` : '/mercado' },
+      });
+      await db.execute(sql`UPDATE favoritos_productos SET precio_centimos = ${Number(b.actual)} WHERE user_id = ${b.user_id} AND producto_id = ${b.producto_id}`);
+    }
+    if (olvidadas.rows.length || bajadas.rows.length) console.log(`[comercio] barrido: ${olvidadas.rows.length} cestas olvidadas avisadas, ${bajadas.rows.length} bajadas de precio avisadas.`);
+    return { cestas_olvidadas_avisadas: olvidadas.rows.length, bajadas_de_precio_avisadas: bajadas.rows.length };
+  };
+  /** GET/PUT /api/publicar/preferencias — de momento, solo si quieres el aviso de cesta olvidada. */
+  app.get('/api/publicar/preferencias', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      const r = (await db.execute(sql`SELECT ui_settings FROM users WHERE id = ${req.user.id}`)).rows[0] as any;
+      res.json({ aviso_cesta: (r?.ui_settings?.aviso_cesta ?? 'on') !== 'off' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.put('/api/publicar/preferencias', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
+      if (typeof req.body?.aviso_cesta === 'boolean') {
+        await db.execute(sql`UPDATE users SET ui_settings = coalesce(ui_settings, '{}'::jsonb) || ${JSON.stringify({ aviso_cesta: req.body.aviso_cesta ? 'on' : 'off' })}::jsonb WHERE id = ${req.user.id}`);
+      }
+      const r = (await db.execute(sql`SELECT ui_settings FROM users WHERE id = ${req.user.id}`)).rows[0] as any;
+      res.json({ aviso_cesta: (r?.ui_settings?.aviso_cesta ?? 'on') !== 'off' });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/admin/comercio/barrido — pasar el barrido ahora (administrador). */
+  app.post('/api/admin/comercio/barrido', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      res.json(await barridoComercio());
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  const ticComercio = () => barridoComercio().catch(e => console.error('[comercio] barrido fallido:', e.message));
+  setTimeout(ticComercio, 3 * 60 * 1000);
+  setInterval(ticComercio, 60 * 60 * 1000);
+
 
   const exigeSesion = (req: Request, res: Response): boolean => {
     if (!req.user) { res.status(401).json({ error: 'Debes iniciar sesión.' }); return false; }
@@ -316,18 +613,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
   app.get('/api/publicar/producto/:id', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT id, name, description, price_cents, currency, images, kind,
+        SELECT id, name, description, price_cents, currency, images, kind, created_by,
                modality, billing_period, stock, warranty, return_policy, category,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
                (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
                (SELECT count(*)::int FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS n_resenas
         FROM products
         WHERE id = ${String(req.params.id)} AND archived_at IS NULL
+          -- Un BORRADOR solo lo ve quien lo está escribiendo (2026-08-23):
+          -- para el resto no existe, que es lo que «borrador» promete.
+          AND (status <> 'borrador' OR created_by = ${req.user?.id || ''})
       `);
       const p = r.rows[0] as any;
       if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
 
       const imagenes = Array.isArray(p.images) ? p.images.filter((x: any) => typeof x === 'string') : [];
+      const variantes = (await variantesDe(db, [p.id])).get(p.id) || [];
       res.json({
         id: p.id,
         nombre: p.name,
@@ -348,18 +649,28 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // menos lo que otra persona está pagando ahora mismo. Enseñar el
         // bruto pondría «queda 1» a alguien que va a recibir un «se ha
         // agotado» treinta segundos después.
-        stock: p.stock === null || p.stock === undefined
-          ? null
-          : Math.max(0, Number(p.stock) - await reservado(db, p.id)),
+        stock: variantes.length
+          ? (variantes.every((v: any) => v.stock === null) ? null : variantes.reduce((n: number, v: any) => n + (v.stock ?? 0), 0))
+          : p.stock === null || p.stock === undefined
+            ? null
+            : Math.max(0, Number(p.stock) - await reservado(db, p.id)),
         garantia: p.warranty || null,
         devoluciones: p.return_policy || null,
         categoria: p.category || null,
         // Las opiniones, resumidas: media en estrellas (1-5) y cuántas. `null`
         // = nadie ha opinado, que no es lo mismo que cero estrellas.
         valoracion: { media: p.media_estrellas ?? null, n: Number(p.n_resenas || 0) },
+        // Quién vende, para «preguntar al vendedor» (un mensaje directo).
+        vendedor: p.created_by ? { id: p.created_by } : null,
         // Si el vendedor acepta cobrar en puntos (y el interruptor está
         // encendido, que lo decide el servidor en /api/publicar/puntos-en-caja).
         acepta_puntos: !!p.acepta_puntos,
+        // VARIANTES (2026-08-23): talla, color… con precio y stock propios. Si
+        // hay, la ficha pide elegir una antes de comprar; el precio de
+        // portada es «desde» el más bajo y el stock es la suma de las que
+        // llevan cuenta (nulo si ninguna la lleva).
+        variantes,
+        precio_desde_centimos: variantes.length ? Math.min(...variantes.map((v: any) => v.precio_centimos ?? p.price_cents ?? 0)) : null,
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
@@ -430,7 +741,15 @@ export function registerPublicarRoutes(app: Express, db: any) {
         `),
         db.execute(sql`SELECT count(*)::int AS n FROM pedidos WHERE vendedor_user_id = ${uid} AND estado = 'pagado'`),
       ]);
+      // Cestas a medias (2026-08-23): cuántas personas con sesión dejaron algo
+      // en la cesta de esta tienda en los últimos 30 días sin comprarlo.
+      const handleRow = (await db.execute(sql`SELECT handle FROM users WHERE id = ${uid}`)).rows[0] as any;
+      const cestas = handleRow?.handle ? (await db.execute(sql`
+        SELECT count(*)::int AS n FROM cestas_guardadas WHERE tienda = ${handleRow.handle} AND jsonb_array_length(lineas) > 0 AND updated_at > now() - interval '30 days'
+      `)).rows[0] as any : null;
+      const cestasAMedias = Number(cestas?.n || 0);
       res.json({
+        cestas_a_medias: cestasAMedias,
         mes: mes.rows[0],
         serie: serie.rows,
         mas_vendido: top.rows,
@@ -516,16 +835,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
         SELECT id, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos
-        FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+        FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
-      const lineas = crudas.map(l => ({ p: productos.find(x => x.id === String(l.producto_id)), unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) })).filter(l => l.p && l.p.price_cents);
+      // Con variante, el precio es el de la variante (2026-08-23).
+      const mapaV = await variantesDe(db, [...new Set(ids)]);
+      const lineas = crudas.map(l => {
+        const p = productos.find(x => x.id === String(l.producto_id));
+        const v = p ? (mapaV.get(p.id) || []).find((x: any) => x.id === String(l.variante_id || '')) : null;
+        return { p, v, precio: v && v.precio_centimos !== null ? v.precio_centimos : p?.price_cents, unidades: Math.max(1, Math.min(99, Number(l.cantidad) || 1)) };
+      }).filter(l => l.p && l.precio);
       if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
-      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const subtotal = lineas.reduce((n, l) => n + l.precio * l.unidades, 0);
       const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
       const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
       const gratis = fisicas.some(l => l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined && subtotal >= Number(l.p.envio_gratis_desde_centimos));
       const envio = fisicas.length === 0 ? null : conPorte.length === 0 ? null : gratis ? 0 : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
-      const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
       res.json({
         subtotal_centimos: subtotal,
         envio_centimos: envio,
@@ -552,7 +877,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const ids = lineas.map(l => String(l?.producto_id || '')).filter(Boolean);
       const productos = (await db.execute(sql`
         SELECT id, price_cents, created_by FROM products
-        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL
+        WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       const vendedores = new Set(productos.map(p => p.created_by));
       if (vendedores.size !== 1) return res.json({ valido: false, descuento_centimos: 0, motivo: 'El cupón es de una sola tienda.' });
@@ -771,43 +1096,59 @@ export function registerPublicarRoutes(app: Express, db: any) {
 
       // Un mismo producto repetido en el carrito se suma en una sola línea: si
       // no, se reservaría dos veces y el stock se comprobaría contra sí mismo.
-      const pedidas = new Map<string, number>();
+      // La clave de una línea es producto + variante (2026-08-23): dos
+      // tallas del mismo producto son dos líneas.
+      const pedidas = new Map<string, { id: string; vid: string | null; n: number }>();
       for (const l of crudas) {
         const id = String(l?.producto_id || '').trim();
         if (!id) continue;
+        const vid = String(l?.variante_id || '').trim() || null;
         const n = Math.max(1, Math.min(99, Number(l?.cantidad) || 1));
-        pedidas.set(id, Math.min(99, (pedidas.get(id) || 0) + n));
+        const k = `${id}|${vid || ''}`;
+        pedidas.set(k, { id, vid, n: Math.min(99, (pedidas.get(k)?.n || 0) + n) });
       }
       if (pedidas.size === 0) return res.status(400).json({ error: 'No has elegido nada.' });
 
+      const idsProductos = [...new Set([...pedidas.values()].map(x => x.id))];
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
                billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
         FROM products
-        WHERE id = ANY(string_to_array(${[...pedidas.keys()].join(',')}, ','))
-          AND archived_at IS NULL
+        WHERE id = ANY(string_to_array(${idsProductos.join(',')}, ','))
+          AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
+      const mapaVariantes = await variantesDe(db, idsProductos);
 
       // Se comprueba TODO antes de cobrar NADA. Cobrar la mitad de un carrito
       // y descubrir en la segunda línea que no había es peor que no cobrar.
+      // Cada línea lleva `precio` y `nombre` efectivos (los de la variante si
+      // la hay): es lo que se cobra, se reserva y se escribe en el pedido.
       const lineas: any[] = [];
-      for (const [id, unidades] of pedidas) {
+      for (const { id, vid, n: unidades } of pedidas.values()) {
         const p = productos.find(x => x.id === id);
         if (!p) return res.status(404).json({ error: 'Una de las cosas que llevas ya no está a la venta.', producto_id: id });
-        if (!p.price_cents) {
+        const variantes = mapaVariantes.get(id) || [];
+        const v = vid ? variantes.find((x: any) => x.id === vid) : null;
+        if (variantes.length && !v) {
+          return res.status(400).json({ error: `Elige una opción de «${p.name}» (${variantes.slice(0, 3).map((x: any) => x.nombre).join(', ')}${variantes.length > 3 ? '…' : ''}).`, producto_id: id, falta_variante: true });
+        }
+        const precio = v && v.precio_centimos !== null ? v.precio_centimos : p.price_cents;
+        if (!precio) {
           return res.status(400).json({ error: `«${p.name}» no tiene precio: hay que preguntar antes de comprarlo.`, producto_id: id });
         }
-        const llevaCuenta = p.stock !== null && p.stock !== undefined;
-        const disponible = llevaCuenta ? Number(p.stock) - await reservado(db, p.id) : null;
+        const nombre = v ? `${p.name} — ${v.nombre}` : p.name;
+        const llevaCuenta = v ? v.stock !== null : (p.stock !== null && p.stock !== undefined);
+        // `variantesDe` ya descuenta lo reservado de cada variante.
+        const disponible = !llevaCuenta ? null : v ? Number(v.stock) : Number(p.stock) - await reservado(db, p.id);
         if (disponible !== null && disponible < unidades) {
           return res.status(409).json({
             error: disponible <= 0
-              ? `«${p.name}» se ha agotado.`
-              : `De «${p.name}» solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
-            producto_id: id, stock: Math.max(0, disponible),
+              ? `«${nombre}» se ha agotado.`
+              : `De «${nombre}» solo ${disponible === 1 ? 'queda 1' : `quedan ${disponible}`}.`,
+            producto_id: id, variante_id: vid, stock: Math.max(0, disponible),
           });
         }
-        lineas.push({ p, unidades, llevaCuenta });
+        lineas.push({ p, v, precio, nombre, unidades, llevaCuenta });
       }
 
       const vendedores = new Set(lineas.map(l => l.p.created_by || ''));
@@ -831,7 +1172,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         return res.status(400).json({ error: 'No se pueden pagar juntas cosas en monedas distintas.' });
       }
 
-      const subtotal = lineas.reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+      const subtotal = lineas.reduce((n, l) => n + l.precio * l.unidades, 0);
       const destino = destinoSeguro(cuerpo.volver_a);
       const esFisico = lineas.some(l => (l.p.kind || '') === 'fisico');
 
@@ -898,7 +1239,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para pagar con puntos.' });
         if (suscripcion) return res.status(400).json({ error: 'Una suscripción no se paga con puntos.' });
         if (req.user.id === vendedorId) return res.status(400).json({ error: 'No puedes comprarte a ti con puntos.' });
-        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.p.price_cents * l.unidades, 0);
+        const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
         if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
         const saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
         const tasa = puntosPorEuro();
@@ -933,7 +1274,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // (saldo cambió), no hay pedido.
         const pedidoId = 'PED' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
         const codigo = Math.random().toString(36).replace(/[^a-hj-np-z2-9]/g, '').slice(0, 8).toUpperCase().padEnd(8, '7');
-        const resumen = lineas.length === 1 ? lineas[0].p.name : `${lineas[0].p.name} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
+        const resumen = lineas.length === 1 ? lineas[0].nombre : `${lineas[0].nombre} y ${lineas.length - 1} ${lineas.length === 2 ? 'cosa más' : 'cosas más'}`;
         const todoDigital = lineas.every(l => (l.p.kind || '') === 'digital');
         // Algo físico pagado entero con puntos: Stripe no pide la dirección
         // porque Stripe no interviene, así que la pedimos nosotros. Sin ella
@@ -971,14 +1312,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
         }
         for (const l of lineas) {
           await db.execute(sql`
-            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos)
+            INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre, unidades, precio_unitario_centimos, variante_id, variante_nombre)
             VALUES (${'PLN' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
-                    ${pedidoId}, ${l.p.id}, ${l.p.name}, ${l.unidades}, ${l.p.price_cents})
+                    ${pedidoId}, ${l.p.id}, ${l.nombre}, ${l.unidades}, ${l.precio}, ${l.v?.id || null}, ${l.v?.nombre || null})
           `);
           if (l.llevaCuenta) {
-            await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
+            if (l.v) await db.execute(sql`UPDATE producto_variantes SET stock = GREATEST(0, stock - ${l.unidades}), updated_at = now() WHERE id = ${l.v.id} AND stock IS NOT NULL`);
+            else await db.execute(sql`UPDATE products SET stock = GREATEST(0, stock - ${l.unidades}) WHERE id = ${l.p.id} AND stock IS NOT NULL`);
           }
         }
+        // EL VENDEDOR SE ENTERA (2026-08-23): hasta hoy vendía y no lo sabía
+        // salvo que entrara en Comercio. Un aviso por la campana, con el
+        // código, que lleva a su panel de pedidos.
+        await avisar(db, {
+          paraQuien: vendedorId, dePartede: req.user!.id, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
+          datos: { texto: `${resumen} · pedido ${codigo} · pagado con ${puntosUsados.toLocaleString('es-ES')} puntos`, codigo, destino: '/comercio?pestana=pedidos' },
+        });
         return res.json({
           pagado_con_puntos: true, codigo, puntos_usados: puntosUsados,
           subtotal_centimos: subtotal, descuento_centimos: descuentoCentimos, envio_centimos: envioCobrado,
@@ -1007,8 +1356,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
         line_items: lineas.map(l => ({
           price_data: {
             currency: moneda,
-            product_data: { name: l.p.name, description: l.p.description || undefined },
-            unit_amount: l.p.price_cents,
+            product_data: { name: l.nombre, description: l.p.description || undefined },
+            unit_amount: l.precio,
             ...(suscripcion ? { recurring: { interval: l.p.billing_period === 'anual' ? 'year' as const : 'month' as const } } : {}),
           },
           quantity: l.unidades,
@@ -1044,7 +1393,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // Qué llevaba el carrito, para que el aviso de Stripe pueda crear el
           // pedido sin volver a preguntarle al navegador — que para entonces
           // ya no está.
-          lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.p.price_cents])),
+          lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.precio, l.v?.id || ''])),
           // Se conservan para los pedidos de una sola cosa, que es lo que ya
           // existía y sigue funcionando igual.
           product_id: lineas.length === 1 ? lineas[0].p.id : '',
@@ -1060,11 +1409,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
       for (const l of lineas) {
         if (!l.llevaCuenta) continue;
         await db.execute(sql`
-          INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at)
+          INSERT INTO reservas_stock (id, producto_id, unidades, stripe_session_id, estado, expira_at, variante_id)
           VALUES (${'RSV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
                   ${l.p.id}, ${l.unidades}, ${sesion.id}, 'abierta',
-                  now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval)
-          ON CONFLICT (stripe_session_id, producto_id) DO NOTHING
+                  now() + (${MINUTOS_DE_RESERVA} || ' minutes')::interval, ${l.v?.id || null})
+          ON CONFLICT (stripe_session_id, producto_id, coalesce(variante_id, '')) DO NOTHING
         `);
       }
 
@@ -1117,8 +1466,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const {
         nombre, descripcion, precio_centimos, moneda, tipo, categoria,
         stock, envio_centimos, envio_gratis_desde_centimos, envio_plazo,
-        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos,
+        garantia, devoluciones, imagenes, periodo, archivo_digital, acepta_puntos, borrador, variantes, iva_pct,
       } = req.body || {};
+      // IVA del producto (F4): 21/10/4/0 o nulo = el tipo por defecto del vendedor.
+      const iva = iva_pct === null || iva_pct === undefined || iva_pct === '' ? null : Number(iva_pct);
+      if (iva !== null && ![21, 10, 4, 0].includes(iva)) return res.status(400).json({ error: 'El IVA tiene que ser 21, 10, 4 o 0.' });
       // El archivo de una descarga: solo de nuestra zona privada (ver PUT).
       const archivo = typeof archivo_digital === 'string' && archivo_digital.startsWith('/uploads/privado/') ? archivo_digital : null;
 
@@ -1172,14 +1524,17 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const id = 'PRD' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
       // `tienda` para quien no está verificado; `activo` para quien sí, que es
       // lo que ya podía hacer por la otra puerta.
-      const estado = nivel >= 2 ? 'activo' : 'tienda';
+      // BORRADOR (2026-08-23, plan de comercio): un producto a medias no se ve
+      // ni se puede comprar hasta que su dueño lo publique. Hasta hoy todo
+      // nacía publicado, y un precio provisional era un precio a la venta.
+      const estado = borrador === true ? 'borrador' : (nivel >= 2 ? 'activo' : 'tienda');
       const fotos = Array.isArray(imagenes) ? imagenes.filter((x: any) => typeof x === 'string').slice(0, 8) : [];
 
       await db.execute(sql`
         INSERT INTO products (id, name, description, category, price_cents, currency, kind,
                               modality, billing_period,
                               stock, warranty, return_policy, images, status, created_by, updated_by,
-                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos)
+                              envio_centimos, envio_gratis_desde_centimos, envio_plazo, archivo_digital, acepta_puntos, iva_pct)
         VALUES (${id}, ${nom}, ${String(descripcion || '').trim() || null},
                 ${String(categoria || 'OTROS').toUpperCase()}, ${precio},
                 ${String(moneda || 'EUR').toUpperCase()},
@@ -1191,8 +1546,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
                 ${envio_centimos === null || envio_centimos === undefined || envio_centimos === '' ? null : Math.max(0, Math.round(Number(envio_centimos) || 0))},
                 ${envio_gratis_desde_centimos === null || envio_gratis_desde_centimos === undefined || envio_gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(envio_gratis_desde_centimos) || 0))},
                 ${String(envio_plazo || '').trim() || null},
-                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true})
+                ${clase === 'digital' ? archivo : null}, ${acepta_puntos === true}, ${iva})
       `);
+      // Las variantes, si las trae (2026-08-23).
+      if (Array.isArray(variantes) && variantes.length) await guardarVariantes(db, id, variantes);
 
       res.json({
         id, estado, tipo: clase, suscripcion: esSuscripcion, periodo: cadaCuanto,
@@ -1240,6 +1597,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         WHERE created_by = ${req.user.id} AND archived_at IS NULL
         ORDER BY created_at DESC
       `);
+      // Variantes de cada producto (2026-08-23), para el editor del panel.
+      const mapaVariantes = await variantesDe(db, (r.rows as any[]).map((x: any) => x.id));
+      for (const x of r.rows as any[]) x.variantes = mapaVariantes.get(x.id) || [];
       res.json({
         productos: r.rows,
         limite: (req.user.roleLevel ?? 0) >= 2 ? null : MAX_PRODUCTOS_SIN_VERIFICAR,
@@ -1278,12 +1638,23 @@ export function registerPublicarRoutes(app: Express, db: any) {
             WHEN ${typeof b.archivo_digital === 'string' && b.archivo_digital.startsWith('/uploads/privado/')} THEN ${typeof b.archivo_digital === 'string' ? b.archivo_digital : null}
             ELSE archivo_digital END,
           acepta_puntos = CASE WHEN ${b.acepta_puntos !== undefined} THEN ${!!b.acepta_puntos} ELSE acepta_puntos END,
+          iva_pct = CASE WHEN ${b.iva_pct !== undefined} THEN ${b.iva_pct === null || b.iva_pct === '' ? null : Number(b.iva_pct)} ELSE iva_pct END,
+          -- Publicar un borrador o volver a borrador. Al publicar, el estado
+          -- es el que le toca por nivel: mercado común (activo) o solo su
+          -- tienda (tienda) — la misma regla que al crearlo.
+          status = CASE
+            WHEN ${b.borrador === true} THEN 'borrador'
+            WHEN ${b.publicar === true} THEN ${(req.user.roleLevel ?? 0) >= 2 ? 'activo' : 'tienda'}
+            ELSE status END,
           updated_by = ${req.user.id},
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}
         RETURNING id, name, price_cents, stock, status, archived_at, (archivo_digital IS NOT NULL) AS con_archivo
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      // Las variantes, si vienen (2026-08-23): la lista entera manda — lo que
+      // no está, se desactiva.
+      if (Array.isArray(b.variantes)) await guardarVariantes(db, String(req.params.id), b.variantes);
       res.json(r.rows[0]);
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -1476,6 +1847,23 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const { estado, seguimiento, nota } = req.body || {};
       const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
       if (estado && !VALIDOS.includes(estado)) return res.status(400).json({ error: 'Ese estado no existe.' });
+      // DEVOLVER O CANCELAR UNA COMPRA PAGADA CON PUNTOS (2026-08-23): antes de
+      // cambiar el estado, los puntos vuelven al comprador con apuntes
+      // contrarios (vendedor y plataforma devuelven lo suyo). Si el vendedor
+      // ya no tiene saldo, no se marca devuelto: una devolución a medias es
+      // peor que ninguna, y el mensaje dice por qué.
+      let puntosDevueltos = 0;
+      if (estado === 'devuelto' || estado === 'cancelado') {
+        const mio = (await db.execute(sql`
+          SELECT id, estado FROM pedidos WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        `)).rows[0] as any;
+        if (!mio) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+        if (!['devuelto', 'cancelado'].includes(mio.estado)) {
+          const dev = await devolverPuntos(db, mio.id);
+          if (!dev.ok) return res.status(409).json({ error: dev.motivo || 'No se han podido devolver los puntos.' });
+          puntosDevueltos = dev.puntos || 0;
+        }
+      }
       const r = await db.execute(sql`
         UPDATE pedidos SET
           estado = COALESCE(${estado || null}, estado),
@@ -1483,10 +1871,28 @@ export function registerPublicarRoutes(app: Express, db: any) {
           nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
-        RETURNING codigo, estado, seguimiento
+        RETURNING id, codigo, estado, seguimiento, comprador_user_id, producto_nombre
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
-      res.json(r.rows[0]);
+      const fila = r.rows[0] as any;
+      // EL COMPRADOR SE ENTERA (2026-08-23): si el estado ha cambiado y el
+      // pedido tiene cuenta detrás, un aviso con lo que ha pasado y el
+      // número de seguimiento si lo hay. Quien compró sin cuenta sigue
+      // teniendo su código y la página del pedido.
+      if (estado && fila.comprador_user_id) {
+        const TEXTO: Record<string, string> = {
+          pagado: 'está pagado y en preparación', enviado: 'ha salido', entregado: 'consta como entregado',
+          devuelto: 'se ha devuelto', cancelado: 'se ha cancelado',
+        };
+        await avisar(db, {
+          paraQuien: fila.comprador_user_id, dePartede: req.user.id, tipo: 'pedido_estado', entidadTipo: 'pedidos', entidadId: fila.id,
+          datos: {
+            texto: `Tu pedido ${fila.codigo} (${fila.producto_nombre}) ${TEXTO[estado] || estado}${fila.seguimiento && estado === 'enviado' ? ` · seguimiento ${fila.seguimiento}` : ''}${puntosDevueltos > 0 ? ` · ${puntosDevueltos.toLocaleString('es-ES')} puntos devueltos` : ''}.`,
+            codigo: fila.codigo, estado, destino: `/pedido?codigo=${fila.codigo}`,
+          },
+        });
+      }
+      res.json({ codigo: fila.codigo, estado: fila.estado, seguimiento: fila.seguimiento, puntos_devueltos: puntosDevueltos });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -1635,11 +2041,71 @@ const COBRO_ENCENDIDO = process.env.TIENDAS_COBRO === '1';
  * retener en cuanto pasa su hora, sin que nadie tenga que limpiarlas: la
  * condición está en la propia consulta.
  */
-async function reservado(db: any, productoId: string): Promise<number> {
+async function reservado(db: any, productoId: string, varianteId?: string | null): Promise<number> {
+  // Con variante: solo lo reservado de ESA variante. Sin ella: todo lo del
+  // producto (el stock de un producto sin variantes vive en products.stock).
   const r = await db.execute(sql`
     SELECT COALESCE(SUM(unidades), 0) AS n
     FROM reservas_stock
     WHERE producto_id = ${productoId} AND estado = 'abierta' AND expira_at > now()
+      AND (${varianteId ?? null}::text IS NULL OR variante_id = ${varianteId ?? null}::text)
   `);
   return Number(r.rows[0]?.n || 0);
+}
+
+/** Las variantes activas de uno o varios productos, con el stock que se puede comprar. */
+async function variantesDe(db: any, productoIds: string[]): Promise<Map<string, any[]>> {
+  const m = new Map<string, any[]>();
+  if (!productoIds.length) return m;
+  const r = await db.execute(sql`
+    SELECT id, producto_id, nombre, sku, precio_centimos, stock
+    FROM producto_variantes
+    WHERE activo = true AND producto_id = ANY(string_to_array(${productoIds.join(',')}, ','))
+    ORDER BY orden, created_at
+  `);
+  for (const v of r.rows as any[]) {
+    const disponible = v.stock === null || v.stock === undefined ? null : Math.max(0, Number(v.stock) - await reservado(db, v.producto_id, v.id));
+    const lista = m.get(v.producto_id) || [];
+    lista.push({ id: v.id, nombre: v.nombre, sku: v.sku || null, precio_centimos: v.precio_centimos === null || v.precio_centimos === undefined ? null : Number(v.precio_centimos), stock: disponible });
+    m.set(v.producto_id, lista);
+  }
+  return m;
+}
+
+/**
+ * Guardar las variantes de un producto tal como llegan del formulario: las
+ * que traen id se actualizan, las nuevas se insertan, y las que ya no vienen
+ * se DESACTIVAN (nunca se borran: alguna línea de pedido puede nombrarlas).
+ */
+async function guardarVariantes(db: any, productoId: string, crudas: any) {
+  if (!Array.isArray(crudas)) return;
+  const limpias = crudas.slice(0, 60).map((v: any, i: number) => ({
+    id: typeof v?.id === 'string' && v.id.startsWith('VAR') ? v.id : null,
+    nombre: String(v?.nombre || '').trim().slice(0, 120),
+    sku: String(v?.sku || '').trim().slice(0, 60) || null,
+    precio: v?.precio_centimos === null || v?.precio_centimos === undefined || v?.precio_centimos === '' ? null : Math.max(0, Math.round(Number(v.precio_centimos) || 0)),
+    stock: v?.stock === null || v?.stock === undefined || v?.stock === '' ? null : Math.max(0, Math.round(Number(v.stock) || 0)),
+    orden: i,
+  })).filter((v: any) => v.nombre);
+  const vivas: string[] = [];
+  for (const v of limpias) {
+    if (v.id) {
+      const r = await db.execute(sql`
+        UPDATE producto_variantes SET nombre = ${v.nombre}, sku = ${v.sku}, precio_centimos = ${v.precio}, stock = ${v.stock}, orden = ${v.orden}, activo = true, updated_at = now()
+        WHERE id = ${v.id} AND producto_id = ${productoId} RETURNING id
+      `);
+      if (r.rows[0]) { vivas.push(v.id); continue; }
+    }
+    const id = 'VAR' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+    await db.execute(sql`
+      INSERT INTO producto_variantes (id, producto_id, nombre, sku, precio_centimos, stock, orden)
+      VALUES (${id}, ${productoId}, ${v.nombre}, ${v.sku}, ${v.precio}, ${v.stock}, ${v.orden})
+    `);
+    vivas.push(id);
+  }
+  await db.execute(sql`
+    UPDATE producto_variantes SET activo = false, updated_at = now()
+    WHERE producto_id = ${productoId} AND activo = true
+      AND NOT (id = ANY(string_to_array(${vivas.join(',') || '-'}, ',')))
+  `);
 }

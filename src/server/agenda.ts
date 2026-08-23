@@ -165,7 +165,9 @@ export function registerAgendaRoutes(app: Express, db: any) {
   app.post('/api/agenda/contactos', async (req: Request, res: Response) => {
     try {
       const ip = ipDe(req);
-      const espera = esperaPendiente(FRENO, ip);
+      // `await` y `db`: el freno vive en Postgres desde la migración 0097, para
+      // que con `cluster` no se convierta en ocho frenos independientes.
+      const espera = await esperaPendiente(db, FRENO, ip);
       if (espera > 0) {
         res.setHeader('Retry-After', String(espera));
         return res.status(429).json({ error: `Demasiados intentos. Prueba en ${espera} segundos.` });

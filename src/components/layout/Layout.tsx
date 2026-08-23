@@ -359,7 +359,16 @@ export default function Layout() {
           En una pantalla de 390 px esta columna se comía 240 y al contenido le
           quedaban 118 px útiles: el texto salía a una palabra por línea y en
           /login ni «CONTRASEÑA» ni el botón de entrar cabían enteros. */}
-      {user && !esMovil && menuPuesto && (
+      {/* EL MENÚ TAMBIÉN SIN CUENTA (2026-08-23). Eugenio: «cuando se cierra
+          la sesión desaparece, y creo que es un menú muy guay donde están
+          todas las herramientas».
+          Tenía razón y era un error de diseño, no una decisión: la lista de
+          herramientas es EXACTAMENTE lo que quieres enseñarle a quien está
+          decidiendo si se registra. Esconderla dejaba la pantalla más pobre
+          justo para quien menos sabe qué hay aquí. Lo que cuelga de tu cuenta
+          —tus proyectos, tus productos, tus personas— sale vacío y con su
+          invitación, que lo resuelve `MenuLateral`. */}
+      {!esMovil && menuPuesto && (
         <MenuLateral activo={location.pathname} onCerrar={esconderMenu} />
       )}
 
@@ -369,9 +378,8 @@ export default function Layout() {
           dice nada y no se mueve nada.
           Solo cuando el menú va a estar puesto: si lo tenías escondido, no hay
           columna que reservar y el hueco sería el salto que evitamos. */}
-      {!user && cargandoSesion && !esMovil && menuPuesto && (
-        <div aria-hidden className="shrink-0 h-full w-60 border-r border-slate-200 bg-white" />
-      )}
+      {/* Ya no hace falta el hueco: la columna está puesta desde el principio,
+          haya sesión o no, así que no hay nada que aparezca de golpe. */}
 
       <div className="flex-1 flex flex-col min-w-0">
       {/* Barra superior: SOLO las ventanas abiertas. La marca y las secciones
@@ -387,7 +395,7 @@ export default function Layout() {
           carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
           ve; tapar contenido es un precio que se paga a escondidas. */}
       <header className={cn('border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
-        user && !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
+        !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
@@ -420,7 +428,7 @@ export default function Layout() {
 
             Ahora la condición dice lo que de verdad importa: enséñalo salvo que
             el menú lateral lo esté enseñando él. */}
-        {!(user && menuPuesto) && (
+        {!menuPuesto && (
           <button
             /* IR AL INICIO ES LAS DOS COSAS (2026-08-22). Navegar no basta: las
                ventanas del escritorio se pintan encima y no se enteran de que la
@@ -447,7 +455,17 @@ export default function Layout() {
             SIGUE SIENDO GRANDE. Desde que no hay estado intermedio del menú,
             éste es el ÚNICO camino de vuelta, y este proyecto ya tiene
             catalogado que 83 de cada 100 de sus botones bajan de 24 px. */}
-        {user && !menuPuesto && (
+        {/* SIN `user` (2026-08-23). Eugenio: «el menú lateral izquierdo, cuando
+            se pliega, no se vuelve a desplegar… todo esto con la sesión
+            cerrada».
+            Desde ayer el menú se pinta también sin sesión, pero esta condición
+            se quedó como estaba: **se podía plegar y no había forma de volver a
+            abrirlo**. Un callejón sin salida, y del peor tipo — el que se abre
+            con un gesto normal y no tiene deshacer.
+            Es la segunda vez hoy que quitar `user &&` de un sitio deja el fallo
+            en otro que asumía lo mismo. Los otros dos de esta misma barra están
+            justo debajo. */}
+        {!menuPuesto && (
           <button
             onClick={ponerMenu}
             title="Ver el menú"
@@ -675,7 +693,7 @@ export default function Layout() {
                   fichero que nadie más está editando, y no un cambio en estas
                   veinte. El marco, el tamaño y el ajuste al móvil de abajo se
                   quedan como estaban. */}
-              {PAGINAS_INFO.map(op => (
+              {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
                 <button key={op.ruta}
                   onClick={() => { setInfoAbierta(false); navigate(`/${op.ruta}`); }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">

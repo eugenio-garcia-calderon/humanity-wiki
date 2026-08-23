@@ -5816,3 +5816,329 @@ every service-worker bug so far. `VERSION` bumped to `hw-v5`.
 - **Acepta tres formas de lista** porque el Atajo lo monta una persona a mano: el JSON de la documentación, la lista pelada, y texto con una línea `Nombre, +34600111222`. Rechazar por la forma sería mandar a alguien a depurar un Atajo sin herramientas.
 - **La lógica de importar se sacó a `importarContactosDe()`**: ahora hay dos puertas y las dos tienen que casar por número, deduplicar y no pisar nombres exactamente igual. Dos copias se separan a la primera corrección, y ese día una de las dos empieza a duplicar gente en silencio.
 - **Pruebas**: `scripts/probar-agenda-iphone.ts`, 13 comprobaciones contra la base de datos de verdad (que en la base solo vive la huella, que sin llave no entra nadie, las tres formas de lista, que repetir el Atajo no duplica ni pisa nombres, que al retirar la llave deja de entrar, y el freno). Y 5 más en `probar-telecom.mjs`, incluida una que mete un contacto con `credentials: 'omit'` — si funcionara por llevar la cookie, en el iPhone no funcionaría nada. **43 en verde en total.**
+
+---
+
+## 2026-08-23 — Returning a purchase paid with points (Programador 7)
+
+Plan fase 9, the half that matters now that points purchases are live. A seller
+could mark an order «devuelto» but the points stayed where they were. Now
+`devolverPuntos(pedidoId)` undoes `pagarConPuntos` with contrary entries on
+the same order (0098, motive `devolucion_puntos`): seller −net, platform
+−commission, buyer +total, one transaction, rows locked in id order. All or
+nothing: if the seller (or the platform) no longer has the balance, nothing
+moves and the seller is told how much they would need — a half refund is
+worse than none. Repeating it is harmless (already returned → no rows).
+
+`PUT /api/publicar/mis-ventas/:id` with `devuelto` or `cancelado` returns the
+points BEFORE changing the state (409 if it cannot), and answers
+`puntos_devueltos`. Comercio shows a «Devolver (N puntos al comprador)» link
+on live orders, with a confirm, and shows the server's reason when it refuses.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after, balances
+restored, platform back to 0): 4-point purchase → 96/103,90/0,10; return →
+100/100/0 with three `devolucion_puntos` rows next to the three sale rows;
+return again → no new rows; second purchase then seller set to 1 point →
+409 «No tienes saldo suficiente para devolver los 3,9 puntos…» and the order
+stays `entregado`. `tsc` clean. Not seen in a browser (Comercio needs a
+seller session in the shared browser).
+
+---
+
+## 2026-08-23 — Products can be drafts (Programador 7)
+
+Plan fase 1's «borrador / publicado»: until today every product was born for
+sale, so a provisional price was a price. `status = 'borrador'` now exists:
+CrearProducto has «Guardar como borrador»; Comercio shows the badge and a
+«publicar» / «pasar a borrador» link (`PUT mis-productos/:id` with `publicar`
+or `borrador`; publishing gives the status the level deserves — `activo` for
+verified, `tienda` otherwise — the same rule as creation).
+
+A draft does not exist for anyone but its owner: the public product route
+answers 404 unless the session is the owner's; `comprar`, `cotizar` and
+`cupon/comprobar` skip it; the common market and the side menu already listed
+only `activo`. The AI's global search (`ai/assistant.ts`) still matches on
+`archived_at` only — prog1's file, not touched; noted for them.
+
+Verified on 3007 over HTTP with tagged local sessions (deleted after): create
+as draft → `borrador`; public 404, owner 200; buy → "ya no está a la venta";
+cotizar 404; seller list shows it; publish → `activo` and public 200; back to
+draft → `borrador`. `tsc` clean. Not seen in a browser (Comercio / modal).
+
+### 2026-08-23 — El cable cruza procesos, antes de que haya varios (Programador 8)
+- **Lo encontró prog6** preparando el reparto de la plataforma entre los ocho núcleos de la máquina, y **paró su trabajo** en vez de tocar un fichero ajeno. El registro de cables (`porUsuario` en `telecomHub.ts`) vive en la memoria del proceso: con ocho, cada uno conoce solo los suyos. Ana tiene el cable en el proceso 3, Bea le escribe y su petición cae en el 6 — **siete de cada ocho veces el mensaje no llega, el teléfono no suena, y no hay error ni línea en el registro**.
+- **Al verificarlo apareció más de lo que traía el aviso**: `estaConectado`, `conectadosDe` y `recuento` leen el mismo mapa. El puntito verde diría gris siete de cada ocho veces, y el recuento de `GET /api/telecom/yo` enseñaría un octavo de la gente con toda la cara de ser el número bueno.
+- **Son dos problemas, no uno.** «Llévale esto a Ana» se resuelve con `LISTEN`/`NOTIFY`. «¿Está Ana?» no: se pregunta antes, de forma síncrona, y de ella depende que una llamada llegue a sonar. Un aviso se manda y no contesta. Por eso además hay tabla de presencia (`conexiones_vivas`, migración 0099), que es la pieza que faltaba en la propuesta original y que prog6 aceptó como tal.
+- **Por qué tabla y no que los procesos se cuenten entre ellos**: un proceso recién arrancado no sabría nada del mundo hasta que los demás hablaran, y durante esos segundos diría «Ana no está» de alguien que sí está. Con una tabla, hace una consulta y ya sabe.
+- **El tope de 8000 bytes de `NOTIFY` no trunca: revienta.** Casi todo cabe, pero una oferta de WebRTC con candidatas de TURN se acerca — y perder justo esa es quedarse sin llamada. Los eventos grandes van por `eventos_grandes` y por el aviso viaja solo el número de fila. El camino rápido sigue siendo el aviso directo.
+- **La escucha es una conexión suya, no del pool**: un `LISTEN` sobre una conexión reciclada se pierde sin avisar, y el cable dejaría de cruzar exactamente igual que si no existiera. Se reconecta sola con espera creciente y lo dice en el registro.
+- **La fila huérfana era el fallo obvio del diseño** y se ataja por dos sitios: el mismo latido de 25 s que mantiene vivos los cables refresca `visto_at`, y **ninguna lectura mira la tabla entera** — siempre filtrando por las vistas hace menos de 70 s. Además, al recibir `SIGTERM` el proceso borra sus filas: sin eso, tras cada despliegue habría hasta 70 segundos en los que un mensaje se marcaría como entregado sin haberlo sido.
+- **La prueba levanta dos procesos de sistema de verdad** (`scripts/probar-cable-entre-procesos.ts`). Dos servidores dentro del mismo `node` comparten el mapa y todo saldría verde con el fallo intacto. **Comprobado que la prueba puede fallar**: con el cable desenchufado da 6 rojos, incluido «0 eventos recibidos», que es el fallo silencioso original.
+- **Lo que NO se ha compartido, y es una decisión**: `hieloEnCache` y `ultimoFalloTurn` de `telecom.ts` se multiplican por ocho — 8 peticiones a Cloudflare por hora en vez de 1, y 8 líneas de registro cada 5 minutos con Cloudflare caído. No compensa una tabla. Escrito al lado del código para que no parezca un descuido.
+- Sin regresiones: 43 comprobaciones de punta a punta en verde con un solo proceso, que es como corre hoy.
+
+---
+
+## 2026-08-23 — Avisos legales: terms and conditions, with the privacy policy beside them (Programador 7)
+
+Eugenio: «haz tú mismo los términos y condiciones, y colócalo donde tenga sentido
+en el menú, quizás en un apartado que sea avisos legales, y le pones ahí la
+política de privacidad también».
+
+`/avisos-legales` (one registry line, icon Gavel) is a hub with two views:
+`?vista=terminos` — new, v1.0 dated 2026-08-23, eight sections in plain
+Spanish (who provides the service, your account, what you publish,
+coexistence, the market, the points, reviews, the platform and its changes) —
+and `?vista=privacidad`, which embeds the existing `Privacidad` page unchanged.
+The terms describe what the platform does today and the decisions already
+taken (transferable points, 10-year expiry, 24-month dormancy, 5 % / 2.5 %
+commission, draft products, returns in points); the legal entity and the
+contact are `[PENDIENTE]` and a banner says plainly they were written by the
+team, not a lawyer, pending legal review.
+
+The registry gains `enMenu?: boolean`; `/privacidad` stays mounted (the app
+stores cite that address) but leaves the (i) menu, which now shows a single
+«Avisos legales». Layout.tsx: one-line filter.
+
+Verified on 3007 in the browser: hub with both cards, the (i) menu lists
+«Avisos legales» and no longer «Privacidad», the terms view renders the
+banner, 8 sections and 3 [PENDIENTE] marks, the privacy view renders the old
+page with a back link; `/privacidad` and `/avisos-legales?vista=terminos`
+answer 200. `tsc` clean.
+
+---
+
+## 2026-08-23 — The monthly pot is fixed at 1,000 points, the reference price is one simple AI task, and the entity is named (Programador 7)
+
+Eugenio: «el reparto mensual, al principio de manera fija, repartiendo X
+puntos por mes: que esos puntos sean 1000, y que la relación sea que correr
+el modelo más barato con una tarea simple valga 1 punto, y eso ponga el valor
+de referencia para el resto». And: «la entidad ya está en memoria: Light for
+Humanity».
+
+- **Pot**: `PUNTOS_BOTE_MENSUAL` (1000 by default; 0 = back to half the
+  commission). The split stays mixed: half equal per verified person, half by
+  success. The calculation is one function used by the simulation (GET) and
+  by the new **execution** (`POST /api/admin/tokenomics/reparto/ejecutar`
+  {mes}): one `reparto_mensual` entry per person with the month as entity, one
+  transaction, and 409 if the month is already in the book — the month is
+  re-checked inside the transaction so two admins cannot double-pay. The pot
+  EMITS points (no account is debited); that is why only an admin triggers it
+  by hand. Migration 0100.
+- **Reference price** (0100, append-only rows): `ia_tarea_simple` = 1 point is
+  the unit; `ia_tarea_avanzada` 20, `almacenamiento_gb_mes` 5, `computo_hora`
+  25 as orientative multiples of it; the old `ia_accion_estandar` is RETIRED
+  (a last row named RETIRADO…; the prices API hides retired services from
+  `vigentes`, keeps them in `historia`).
+- **Entity**: the white paper's issuer and the terms' provider/contact now say
+  Light for Humanity (CIF G88040563, Calle Bahía de Almería 30, Bajo C, 28042
+  Madrid) — from `memory/14_SOCIEDAD.md`; the [PENDIENTE] marks are gone.
+- Page texts updated: tokenomics (fixed pot first, reference unit), white paper
+  (obtaining points via the pot), task list, Vision motive labels.
+
+Verified on 3007 over HTTP with a tagged admin test user (deleted after,
+balances restored, reparto rows removed): simulation modo `fijo`, bote 1000,
+5 verified → 100 fixed each, variable 500 to the only person with success;
+execute → 1000 points to 5 people, ledger sums 1000; repeat → 409; simulation
+then reports `ya_ejecutado`; prices API shows the new unit and hides the
+retired service. `tsc` clean.
+
+---
+
+## 2026-08-23 — One distribution per month, guaranteed by the database; and a button for it (Programador 7)
+
+prog6's review of 0100: «si "una sola vez por mes" es disciplina y no una
+restricción de la base de datos, el primer doble clic emite 2.000». The route
+checked the month inside the transaction, which stops a double click but not
+two transactions at once. 0101 adds a partial UNIQUE index on (month, person)
+for `reparto_mensual` entries: the second writer fails by itself and its whole
+transaction rolls back; the route answers 409 on `23505` too. Tested with two
+simultaneous executions of the same month on a clean book: one 200, one 409,
+exactly five entries. Without CONCURRENTLY on purpose — instantaneous on dozens
+of rows; noted for the day the table has a hundred thousand.
+
+prog6's brake (`guardian` + `ritmo`, rule `transferencia`, by account) now sits
+in front of the execution route as well. And the thing Eugenio was missing: a
+POST he cannot fire does not exist for him. `/vision` · Economía shows admins
+a «Reparto mensual del bote» panel — month picker, simulation (pot, verified,
+fixed per person, state), the per-person list, and «Ejecutar el reparto» with
+a confirm that states in numbers what will be emitted; disabled once the
+month is paid.
+
+Honest note on the behaviour, seen in the test: in a month where nobody has
+measurable success, only the equal half is distributed and the other half is
+left unissued and reported (`variable_sin_repartir`) — distributing it
+equally in silence would invent merit. `tsc` clean; the panel itself not
+opened in a browser (admin session in the shared browser).
+
+### 2026-08-23 — Reparto de puntos automático, bienvenida de 5.000 y «activo = 3 días de uso» (Programador 7)
+- **Encargo de Eugenio**: «haz que sea automático el reparto de puntos, y también que el usuario nuevo tenga 5000 puntos iniciales, y que reciba 1000 puntos al mes fijo si está activo y usando la plataforma al menos 3 veces al mes, y luego variables en función de su reputación social».
+- **Bienvenida de 5.000** (`PUNTOS_BIENVENIDA`): `registrarRegaloBienvenida` pone saldo y apunte del libro en UNA transacción; `users.puntos` ya no nace por DEFAULT de columna (0103: DEFAULT 0). Cuentas existentes no se tocan.
+- **Candado** (revisión del Dashboard): hoy circulaban ~1.400 puntos (14 × 100); con 5.000 una cuenta nueva valdría más que toda la plataforma junta y, con puntos transferibles, crear cuentas sería fabricar valor. Por eso **ENVIAR puntos exige cuenta verificada (nivel ≥ 2)**; recibir, gastar en la cesta y en el mercado, sí puede cualquiera. Queda dicho el riesgo residual: cuentas nuevas comprando con sus 5.000 a vendedores que aceptan puntos (cada cuenta tope 5.000, sin consolidación; el freno de registro de prog6 delante).
+- **Días de uso**: tabla `actividad_diaria (user_id, dia)` (0103) anotada desde el middleware de sesión (una escritura por persona y día, en memoria se evita repetir); relleno del mes en curso desde sesiones, vistas válidas, reacciones y comentarios. No guarda qué hizo nadie, solo que estuvo.
+- **Modelo vigente del reparto**: `PUNTOS_FIJO_MENSUAL` (1.000) a CADA persona verificada y activa (≥ `PUNTOS_ACTIVIDAD_MIN_DIAS` = 3 días de uso en el mes) + bote `PUNTOS_BOTE_VARIABLE` (1.000) repartido entre las activas en proporción a su reputación social del mes (vistas válidas, interacciones, reseñas positivas verificadas; `users.reputation` no lo calcula nadie aún — cuando exista entra aquí como peso). Sin reputación medible, el bote variable no se emite y se dice. Sustituye al «bote de 1.000 mitad/mitad» de la mañana.
+- **Automático**: `repartoAutomatico` cada hora (y a los 90 s del arranque) paga el MES ANTERIOR (hora de Madrid) si está sin repartir; nunca el actual; desde `PUNTOS_REPARTO_DESDE` (2026-08). `PUNTOS_REPARTO_AUTO=off` lo apaga. Reloj y botón de admin comparten `ejecutarReparto` (una transacción, `ya`/`nada`/`hecho`; índice único de la 0101 de fondo). El botón de `/vision` · Economía sigue, para adelantar un mes o pagar uno que el reloj no pudiera.
+- Textos públicos al día: `/tokenomics` (sección «Cómo se reparten los puntos»: 5.000 · 1.000 · 1.000 · 3 días · automático el día 1), libro blanco, lista de tareas, `/vision` (5.000 al empezar).
+- Probado en local por HTTP: registro → 5.000 y apunte; día de uso anotado en la primera petición; transferir sin verificar → 403; simulación de agosto (1 activa de 4 verificadas); ejecutar julio → 400 «nadie activo»; ejecutar agosto → 200; repetir → 409; cuadre sin descuadres nuevos. Datos de prueba retirados.
+
+### 2026-08-23 — Caducidad (10 años) e inactividad (24 meses) de los puntos (Programador 7)
+- Decisión de Eugenio (22-08) ya en los términos; ahora construida. 0104: motivos `caducidad` y `perdida_inactividad` (apuntes contrarios, el libro sigue siendo de solo añadir) e índice para «¿ya avisé?».
+- `estadoConservacion`: última actividad = mayor de día de uso, última sesión, último login, último movimiento HECHO por la persona y alta; se pierde a los 24 meses. Caducidad FIFO: caduca max(0, saldo − ingresos de los últimos 10 años). `U_PLATAFORMA` fuera.
+- `barrerCaducidades` cada 6 h (y a los 2 min): `PUNTOS_CADUCIDAD=off` (por defecto) solo calcula y canta; `avisar` escribe avisos por la campana (30 y 7 días antes; 90 días antes de una caducidad; tipos `puntos_inactividad`/`puntos_caducan`/`puntos_perdidos`, una vez por clave); `on` además ejecuta las pérdidas. Lo enciende Eugenio. Rutas admin: `GET /api/admin/puntos/caducidades` (simulación) y `POST …/barrer`.
+- `/api/puntos/saldo` devuelve `conservacion` y `/vision` · Economía la enseña bajo el saldo (última actividad, fecha en que se perdería, qué caduca pronto); `?pestana=economia` abre esa pestaña (destino de los avisos).
+- **Nota que pidió el Dashboard (23-08):** con la bienvenida de 5.000 y `PUNTOS_TRANSFERENCIA=on` en producción, el 403 «para enviar puntos hace falta una cuenta verificada» es hoy la **única barrera** entre «cuenta nueva» y «5.000 puntos que se pueden mover». Está probada en local por HTTP y en el `server.cjs` desplegado; en vivo la prueba Eugenio con una cuenta sin verificar (no se crean cuentas en producción).
+
+### 2026-08-23 — Comercio, segunda vuelta · Fase 1: avisos de pedido, preguntar al vendedor, descripción con formato (Programador 7)
+- Eugenio: «dale a la parte de ecommerce (variantes, carrito, etc.) y haz una lista de otras 5 cosas importantes que aún no tenemos; divídelo en 5 fases». Plan e inventario en `memory/13_PLAN_COMERCIO.md` (Segunda vuelta).
+- **El vendedor se entera de que ha vendido**: aviso `pedido_nuevo` por la campana al crear el pedido (pago todo-en-puntos en `publicar.ts` y pago con Stripe en el webhook), con el código y destino `/comercio?pestana=pedidos`. **El comprador se entera de que su pedido se mueve**: aviso `pedido_estado` al cambiar el estado desde Comercio (enviado con nº de seguimiento, entregado, devuelto con puntos devueltos, cancelado), destino `/pedido?codigo=`.
+- **Preguntar al vendedor** desde la ficha del producto: enlace a mensaje directo (`/mensajes?con=`) en el dominio principal (la tienda vive en subdominio; ayudante `dominioPrincipal`). La ruta pública del producto expone `vendedor.id`.
+- **Descripción con formato**: la ficha pinta la descripción con el `Markdown` del asistente (negrita, cursiva, listas, tablas); pista en CrearProducto. Sin marcas se ve igual que antes.
+- Campana: tipos `pedido_nuevo` / `pedido_estado` con frase, icono y destino (el aviso trae el suyo). `avisos.ts`: `TipoAviso` ampliado.
+- Probado en local por HTTP con producto «AI» y sesiones de prueba: compra en puntos → aviso al vendedor con código y nombre del comprador; marcar enviado con seguimiento → aviso al comprador con el seguimiento; `/api/notifications` del vendedor lo lista. Todo retirado.
+
+### 2026-08-23 — Comercio, segunda vuelta · Fase 2: variantes/SKU con precio y stock por variante (Programador 7)
+- 0107: tabla `producto_variantes` (nombre, SKU, precio propio nulo = el del producto, stock propio nulo = sin cuenta, `activo`; nunca se borra una variante comprada, se desactiva); `pedido_lineas.variante_id/variante_nombre`; `reservas_stock.variante_id` y unicidad (sesión, producto, variante).
+- Servidor (`publicar.ts`): `variantesDe()` (con stock disponible descontando reservas por variante), `guardarVariantes()` (upsert: lo que no viene se desactiva), `reservado(db, producto, variante?)`. Ficha pública: `variantes`, `precio_desde_centimos`, `stock` = suma de variantes con cuenta. POST/PUT `mis-productos` aceptan `variantes`; GET `mis-productos` las adjunta. `comprar`: clave de línea = producto|variante, precio y nombre efectivos («Camiseta — Talla M»), stock por variante, 400 «Elige una opción» si el producto tiene variantes y no viene, 409 por variante, descuento de stock por variante en el pago en puntos, reserva con variante, metadatos de Stripe con 4.º campo. `cotizar` con variante. Webhook (`stripe.ts`): líneas con variante, descuento de stock por variante.
+- Frontend: `useCarrito` (clave producto|variante, `aLineasServidor`, `claveLinea`), Cesta (variante en la línea y en las llamadas), FichaProducto (botones de variantes, precio/stock efectivos, «Elige una opción», añadir con variante), ProductoPublico («desde» y «Elegir opción» → ficha), `EditorVariantes.tsx` nuevo (CrearProducto y panel de Comercio por producto: «N variantes» → editor → Guardar).
+- Probado en local por HTTP: crear con 2 variantes (M 2 uds, L 7 € sin cuenta) → ficha stock 2 / desde 5 €; comprar sin variante → 400; cotizar L → 7 €; comprar L en puntos → línea «— Talla L» a 700; 3 de M → 409 «solo quedan 2»; 1 de M → stock M 1; PUT quitando L → L desactivada; mis-productos con variantes. Camino Stripe no probado en local (sin claves): metadatos y webhook cambian de forma simétrica. Todo retirado.
+
+### 2026-08-23 — Despliegues #325, #332, #335 verificados en producción (Programador 7)
+- **#325 (caducidad/inactividad)**: en `off`; 0 apuntes de pérdida. **El número antes del `on`**: de 16 cuentas con saldo, 0 perderían por inactividad, 0 recibirían aviso y 0 caducarían; actividad más antigua 2026-08-03 → la primera pérdida posible sería en agosto de 2028. Condición pactada: antes de pasar a `on`, el `off` debe haber cantado con datos reales y ese número quedar escrito (hecho aquí).
+- **#335 (variantes)**: índice `reservas_stock_sesion_producto_variante_idx` sustituye al viejo; reservas abiertas antes/después 0; el INSERT duplicado (misma sesión, producto y variante) falla y otra variante de la misma sesión entra (probado en producción en una transacción con ROLLBACK, sin rastro).
+- **Qué mirar en la primera compra real con variante por Stripe** (no probada en local, sin claves): (1) `pedido_lineas`: `producto_nombre` con «— variante», `variante_id` y `variante_nombre` rellenos; (2) `producto_variantes.stock` de esa variante baja y `products.stock` no; (3) `reservas_stock` de esa sesión con `variante_id` y `confirmada`; (4) aviso `pedido_nuevo` al vendedor con el nombre de la variante. Avisar al Dashboard, salga como salga.
+
+### 2026-08-23 — Comercio, segunda vuelta · Fase 3: carrito abandonado y favoritos (Programador 7)
+- 0108: `cestas_guardadas (user_id, tienda, lineas, updated_at, avisada_at)` y `favoritos_productos (user_id, producto_id, precio_centimos)`.
+- **Carrito abandonado**: `useCarrito` sincroniza cada cambio con `PUT /api/publicar/cesta` si hay sesión (retraso de 800 ms; un 401 apaga el intento en esa página: a nadie anónimo se le persigue) y recupera la cesta guardada si la local está vacía (otro dispositivo). Barrido horario (`barridoComercio`, y `POST /api/admin/comercio/barrido` a mano): cestas con líneas, 24 h sin tocar y sin aviso → aviso `cesta_olvidada` por la campana con destino `https://{tienda}.humanity.wiki/?cesta=abrir` (la cesta se abre sola), una vez por cesta (tocarla reinicia el reloj). El resumen del vendedor dice `cestas_a_medias` (30 días).
+- **Favoritos**: corazón en las tarjetas del mercado y en la ficha de la tienda (`BotonFavorito`), chip «Favoritos (n)» en /mercado que filtra; `GET/PUT/DELETE /api/publicar/favoritos[/:id]`. El mismo barrido avisa `precio_bajado` cuando un favorito baja de precio (una vez por precio; el precio guardado se pone al día).
+- Probado en local por HTTP: guardar/leer/vaciar cesta; sin sesión 401; resumen del vendedor con 1 cesta a medias; cesta retrasada 25 h → 1 aviso con destino a la tienda, segundo barrido 0; favorito guardado a 45 € → precio a 40 € → aviso «ha bajado de 45,00 € a 40,00 €», precio guardado 4000, segundo barrido 0; DELETE → 0. Todo retirado (precio demo repuesto, handle temporal quitado).
+
+### 2026-08-23 — A counter for whether the platform can answer about its own content (prog8)
+
+The Dashboard asked how much search-first has saved since #290, in euros. Two
+answers came out of looking, and the second one matters more.
+
+**It cannot be measured today**: a question the search answers leaves **no row
+anywhere** — it never reaches `/api/ai/chat`, so there is no `ai_messages` and
+no `ai_usage_charges`. What the AI cost is known to the cent; how often it was
+not needed is not recorded at all. Counting `/api/search` does not fix it
+either: the top search bar calls the same route, and the chat's typeahead calls
+it once per typing pause.
+
+**And there is no story in euros.** Public `GET /api/gasto` in production: the
+platform's whole internal AI spend for August 2026 is **0,74 €** (0,727 €
+Anthropic + 0,018 € open models). With 16 users, saving even half is ~0,37 € a
+month. Search-first is worth having for speed and for answering with links
+instead of prose — not as a cost saving, and it must not be sold as one.
+
+**So the counter that went in is not measuring money.** It measures whether the
+platform can answer about its own content: if most of what people ask ends up
+at the model, the search is not failing — the content is not being found, or is
+not there, and that is a product problem. A signal about the content, read at
+the door people ask through. That reason is written in the migration header,
+the route and the client **next to the 0,74 €**, because whoever finds this
+table in a year would otherwise assume it was built to save costs and draw the
+opposite conclusion (the Dashboard's point, and the right one).
+
+What it is made of:
+
+- `drizzle/0109_como_se_contesto.sql` — one row per question in
+  `chat_como_se_contesto`: `resuelta` ('plataforma' | 'modelo') and, when the
+  platform answered, how many results were shown. **Neither the question text
+  nor who asked is stored**: a proportion needs neither, and a table holding
+  people's questions is a table that has to be protected, anonymised and purged.
+  Both halves live in the same table so the ratio is one query rather than a
+  join between `ai_usage_charges` (which only exists when there was a charge)
+  and something else.
+- `POST /api/search/marca` in `src/server/graph.ts`, session-less on purpose —
+  the chat works for visitors, and demanding a session would measure only
+  registered users and bias the number upwards exactly where it should be
+  honest. It is forgeable, and that is written down: the worst anyone achieves
+  is spoiling our own statistic.
+- The chat marks both outcomes, fire-and-forget, `keepalive`. An escalation
+  (searched, nothing found, question) counts as **one** row, `modelo`: what is
+  counted is who ended up answering.
+
+Verified on 3008: «retos del agua» → one `plataforma / 8` row and **no**
+`/api/ai/chat`; an escalated question → one `modelo` row (the model call itself
+was cut in the browser for the test, so no tokens were spent); «zzqxvon
+praderas» → `plataforma / 0`, because "there is nothing published" is also an
+answer. Bad `resuelta` → 400; out-of-range `resultados` clamped; a failed insert
+returns 204 and never surfaces in the chat. Test rows deleted, table back to 0.
+`tsc` clean.
+
+**What it will answer, in a month**: `X de Y preguntas` with its window, from
+one query. Not before: with 16 users the sample will be small, and a small
+sample said out loud is honest — presented as if it were big, it is not.
+
+### 2026-08-23 — Comercio, segunda vuelta · Fase 4 (acotada): datos fiscales del vendedor, IVA por producto y RECIBO no fiscal (Programador 7)
+- Acotada con el Dashboard hasta que Eugenio/asesor digan cómo se factura **en nombre del vendedor** (facturación por cuenta ajena; quién vende sin ser empresa): **nada numerado como factura**. Condiciones escritas para cuando toque: número correlativo sacado en la misma transacción que crea la factura (sin huecos ni repetidos; una anulada explicada antes que un hueco), y datos fiscales **copiados dentro de la factura** (una factura emitida no se edita).
+- 0110: `datos_fiscales (user_id, nombre_fiscal, nif, direccion, cp, ciudad, pais, iva_defecto, serie_factura)` y `products.iva_pct` (21/10/4/0; nulo = el del vendedor). Hoy no existía ningún dato fiscal en la plataforma.
+- Rutas: `GET/PUT /api/publicar/mis-datos-fiscales` (NIF validado en forma; `completos` solo con nombre, NIF, dirección, CP y ciudad); `iva_pct` en POST/PUT `mis-productos`; `construirRecibo` + `GET /api/publicar/pedido/:codigo/recibo?correo=` (comprador: correo o sesión) y `GET /api/publicar/mis-ventas/:id/recibo` (vendedor). El recibo dice arriba que **no es una factura**; con datos fiscales completos enseña quién vende y un **desglose de IVA informativo sobre los euros cobrados** (precios con IVA incluido; lo pagado en puntos no lleva IVA en euros; 0 € → sin desglose). Fallo cazado en la prueba: repartía IVA sobre un envío pagado en puntos → corregido.
+- UI: `Recibo.tsx` (imprimir / guardar en PDF con `@media print` que deja solo el recibo), botón «Ver el recibo» en MiPedido y «Recibo» por venta en Comercio; panel plegable **Datos fiscales** en Comercio (`DatosFiscales.tsx`, con la nota de que sin datos hay recibo y no factura); select de IVA en CrearProducto.
+- Probado en local por HTTP: datos vacíos → `completos=false`; sin NIF → false; NIF «12 3» → 400; completo → true; producto con IVA 10 comprado en puntos (2 uds + envío) → recibo del comprador con NIF del vendedor, línea con 10 %, puntos 22, euros 0; recibo del vendedor con comprador y dirección; otro usuario → 404; sin llaves → 400; sin datos fiscales → sin desglose y «no es factura». Todo retirado.
+
+### 2026-08-23 — A ceiling on what the platform can spend on AI (prog8)
+
+From the security board: **the AI chat has no spending ceiling**. It answers
+**without a session**, so a loop from outside does not show up as usage — it
+shows up on the bill, a month later.
+
+**It is a ceiling for the platform, not for anyone.** Eugenio decided free
+questions have no per-person limit and that is untouched: this does not look at
+who is asking.
+
+**The numbers are measured, not picked** (`src/server/ai/tope.ts` carries the
+reasoning): the platform's entire AI spend for August 2026 was 0,74 €, and an
+answer from the fast model costs 0,003–0,006 €. So **20 €/month** — about 27×
+the real peak, which a normal month does not touch even at twenty times today's
+use, and which a one-per-second loop exhausts in an hour or two. Not less,
+because a cap that trips on normal use teaches people to raise it and by the
+third time it is gone; not more, because past that the margin stops protecting
+and only makes the worst case dearer.
+
+**And 2 €/day, which is what keeps the degradation a mode instead of a month.**
+With a monthly cap alone, that one-hour loop takes the month and leaves the chat
+without a model for the other 29 days. A normal day is 0,025 €, so 2 € is eighty
+normal days.
+
+- **Three doors, not one**: the chat, `POST /api/ai/generar-imagen`, and the
+  three AI routes in `documentos.ts` (document, presentation, improve a block).
+  A cap on one of three doors is a sign, not a cap.
+- **Checked before the call, never during**: cutting mid-answer would spend the
+  money and still not answer. In the chat it is checked before the conversation
+  row is even created — otherwise there would be conversations with a question
+  and no answer.
+- **It degrades, it does not fall**: the chat replies **200 with a normal
+  message**, not an error, saying the search still works and costs nothing.
+  `/api/ai/status` carries the state, so the panel starts in *Buscar* with the
+  IA switch off and the reason written — knowing after you typed is knowing
+  late.
+- **If the database cannot be read, nothing is cut.** A failed read is not
+  evidence of spending, and turning it into "no AI today" would make a small
+  fault into an outage.
+- **Counted without a query per message**: the sum is read once a minute and
+  charges are added in memory in between (`apuntarGasto`), so the cut is
+  accurate to the cent. A restart re-reads everything from the database.
+- **Notice at 80 %**, once a month, to administrators only, checked **in the
+  database** and not in a variable: here the server restarts several times a
+  day and a bell that repeats teaches people to ignore it.
+- **Visible**: `/vision` → Gasto shows «1,89 € de 20,00 €» with a bar that goes
+  amber at 80 % and red when reached, and `?pestana=gasto` now opens that tab
+  (it only understood `economia`, so the notice would have landed on the wrong
+  one).
+
+**A hole named and not hidden**: image charges are written with `cost_cents` =
+0, so generating images costs real money at Gemini and **does not move the
+counter**. The cap stops further images once it has been reached by another
+route, but images cannot make it trip. Pricing the image belongs to whoever owns
+the model catalogue; it is written next to the check, not in a document nobody
+opens. **The cap protects the chat and the documents; images do not add up yet.**
+
+Verified on 3008 with `TOPE_IA_EUR_MES=1` against 1,89 € already spent:
+`/api/ai/status` reports 189 % and `alcanzado`; the chat answers with the
+message and **no charge and no conversation row is created**; the search keeps
+working in the same panel; the IA switch is disabled with its explanation. With
+`2,30 €` (82 %) the notice is written **once** for two consecutive calls, keyed
+by month, and reads «1,89 € de 2,30 € este mes». Test rows deleted, `.env`
+restored, `tsc` clean.

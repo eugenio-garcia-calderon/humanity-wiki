@@ -14,6 +14,7 @@ import { guardarArchivo } from '../uploads.js';
 import { peorOrigen, ETIQUETA_ORIGEN, type OrigenDelDato } from '../../utils/origenDelDato.js';
 import { getObjectivesForTerritory } from '../../utils/puntuacionesDeObjetivo.js';
 import { slugify } from '../../utils/slugify.js';
+import { hayPresupuesto, apuntarGasto, estadoDelTope } from './tope.js';
 
 // ============================================================================
 // Asistente IA universal — Fase 9
@@ -750,6 +751,11 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // La vista por niveles del mismo catálogo: es lo que enseña el selector.
       niveles: NIVELES_MODELO,
       platformFee: AI_PLATFORM_FEE,
+      // ══ SI HOY NO HAY IA, SE SABE ANTES DE ESCRIBIR ═════════════════════
+      // El chat lo lee al abrirse y se queda en modo Buscar, con el
+      // interruptor de IA apagado y el motivo escrito. Enterarse después de
+      // haber escrito una pregunta es enterarse tarde.
+      tope: await estadoDelTope(db),
     });
   });
 
@@ -996,6 +1002,31 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if (!message) return res.status(400).json({ error: 'Falta el mensaje.' });
 
       // Modelo pedido a mano por el usuario (validado contra el catálogo).
+      // ══ EL TECHO DE GASTO DE LA PLATAFORMA, ANTES DE TOCAR NADA ══════════
+      // (2026-08-23, nota del tablero de seguridad: «el chat de IA no tiene
+      // techo de gasto»). No mira quién pregunta —las preguntas gratis no
+      // tienen límite por persona, decisión de Eugenio— sino cuánto lleva
+      // gastado la plataforma entera. Ver `tope.ts` para los números y el
+      // porqué.
+      //
+      // AQUÍ ARRIBA Y NO MÁS ABAJO: si se cortara después de crear la
+      // conversación y guardar el mensaje, quedarían conversaciones con una
+      // pregunta y ninguna respuesta, que es basura con aspecto de fallo. Y
+      // nunca durante la llamada: cortar a mitad es gastar el dinero y encima
+      // no dar la respuesta.
+      const presupuesto = await hayPresupuesto(db);
+      if (!presupuesto.ok) {
+        // 200 y no un error: para quien pregunta esto no es un fallo, es una
+        // respuesta —«hoy no, y esto otro sí»—. El chat la enseña como un
+        // mensaje normal y el buscador sigue funcionando entero.
+        return res.json({
+          reply: presupuesto.mensaje,
+          topeAlcanzado: true,
+          conversation_id: req.body?.conversation_id || null,
+          actions: [], ui_events: [], sources: [],
+        });
+      }
+
       const pedido = typeof req.body?.model === 'string' && AI_MODELS[req.body.model] ? req.body.model : undefined;
 
       // SI PIDES UN MODELO QUE NO EXISTE, SE DICE (2026-08-21). Antes se
@@ -1420,6 +1451,10 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       // y `total` son cero siempre, porque no hay a quién cobrar.
       {
         const dePago = eleccion.cobro === 'de_pago' && !!req.user;
+        // El techo de la plataforma se entera de esta llamada AHORA, no en la
+        // próxima lectura de la base de datos: si no, un pico de mensajes en el
+        // mismo minuto se saltaría el tope por no haberse contado todavía.
+        apuntarGasto(result.costCents);
         db.execute(sql`
           INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens,
                                         cache_read_tokens, cost_cents, fee_cents, total_cents, conversation_id)
@@ -1453,6 +1488,19 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const prompt = String(req.body?.prompt || '').trim();
       if (!prompt) return res.status(400).json({ error: 'Falta describir la imagen que quieres.' });
+
+      // La segunda puerta que gasta. Un tope que solo cubre el chat no es un
+      // tope: es un cartel en una de las tres puertas.
+      //
+      // AVISO HONESTO: el cargo de una imagen se apunta hoy con `cost_cents`
+      // = 0 (aquí abajo), así que generarlas **no sube el contador** aunque
+      // cuesten dinero de verdad en Gemini. Esta comprobación impide seguir
+      // generando cuando el tope ya se ha alcanzado por otra vía, pero no
+      // impide que se alcance por ésta. Ponerle precio a la imagen es de quien
+      // lleve el catálogo de modelos, y hasta entonces queda dicho aquí y no
+      // en un sitio donde no se lea.
+      const presupuestoImagen = await hayPresupuesto(db);
+      if (!presupuestoImagen.ok) return res.status(429).json({ error: presupuestoImagen.mensaje });
       const started = Date.now();
       const imagen = await generarImagenNanoBanana(prompt);
       const guardada = guardarArchivo(imagen.mimeType, Buffer.from(imagen.base64, 'base64'));

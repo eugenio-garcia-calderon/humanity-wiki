@@ -50,7 +50,7 @@ const DEFECTOS: Record<string, string> = {
   titular: 'Agregar el conocimiento de la humanidad\ny repartir lo que genere entre quienes lo crean',
   parrafo_1: 'Hoy el saber está partido: los datos en un sitio, los mapas en otro, las conversaciones en un tercero, y lo que cada persona sabe encerrado en su cabeza o en su Notion. humanity.wiki junta las tres formas de mirar — el dato en crudo, el conocimiento conectado y el conocimiento situado en el territorio — sobre una sola base.',
   economia_titular: 'Puntos de Humanity.wiki',
-  economia_parrafo_1: 'Todo el mundo empieza con 100 puntos al registrarse. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
+  economia_parrafo_1: 'Todo el mundo empieza con 5.000 puntos al registrarse, y cada persona verificada que use la plataforma al menos 3 días al mes recibe 1.000 puntos fijos cada mes, más una parte variable según su reputación social. Los puntos se gastan dentro de la app — usar la IA, comprar en el Mercado — y tienen decimales: puedes tener 54,23 puntos, y ganas céntimos de punto cuando una publicación pública tuya recibe una visita de otra persona. Cuanto más útil sea lo que compartes, más puntos genera por sí solo.',
   economia_parrafo_2: 'Hoy son un saldo interno, sin nada por detrás salvo la base de datos de la plataforma. El plan es que, más adelante, se conviertan en un token real sobre blockchain — pero eso es el destino, no el punto de partida: primero funcionan aquí dentro, con las mismas reglas que tendrán después.',
 };
 
@@ -133,6 +133,8 @@ const MOTIVO_LABEL: Record<string, string> = {
   compra_con_puntos: 'Compra en el mercado pagada con puntos',
   venta_en_puntos: 'Venta cobrada en puntos',
   comision_puntos: 'Comisión de la plataforma (en puntos)',
+  devolucion_puntos: 'Devolución de una compra con puntos',
+  reparto_mensual: 'Reparto mensual del bote',
 };
 
 /**
@@ -217,7 +219,7 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
   textos: Record<string, string>; esAdmin: boolean; guardadoTexto: (c: string, v: string) => void;
 }) {
   const { user } = useAuth();
-  const [saldo, setSaldo] = useState<{ puntos: number; movimientos: any[] } | null>(null);
+  const [saldo, setSaldo] = useState<{ puntos: number; movimientos: any[]; conservacion?: any } | null>(null);
   const [comprando, setComprando] = useState(false);
 
   const cargarSaldo = () => {
@@ -248,6 +250,16 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
             {saldo ? saldo.puntos.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
             <span className="text-base font-bold text-slate-400 ml-1.5">puntos</span>
           </p>
+          {saldo?.conservacion && (
+            <p className="mt-2 text-[11px] text-slate-500 leading-relaxed">
+              {saldo.conservacion.dias_restantes <= 30 && <span className="font-black text-amber-700">Aviso: </span>}
+              Tu saldo se conserva mientras uses la plataforma (última actividad: {fechaCorta(saldo.conservacion.ultima_actividad)}).
+              {' '}Se perdería el <strong>{fechaCorta(saldo.conservacion.se_pierde_el)}</strong> si pasas {saldo.conservacion.meses_inactividad} meses sin entrar.
+              {saldo.conservacion.caducan_pronto && (
+                <> <strong>{Number(saldo.conservacion.caducan_pronto.puntos).toLocaleString('es-ES', { maximumFractionDigits: 2 })} puntos caducan el {fechaCorta(saldo.conservacion.caducan_pronto.fecha)}</strong> ({saldo.conservacion.anios_caducidad} años): úsalos antes.</>
+              )}
+            </p>
+          )}
           <button
             onClick={() => setComprando(true)}
             className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black transition-colors"
@@ -275,9 +287,11 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
       ) : (
         <div className="mt-7 bg-slate-50 border border-slate-200 rounded-3xl p-6 text-center">
           <Sparkle className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">Entra para ver tu saldo — todo el mundo empieza con 100 puntos.</p>
+          <p className="text-sm text-slate-500">Entra para ver tu saldo — todo el mundo empieza con 5.000 puntos.</p>
         </div>
       )}
+
+      {esAdmin && <RepartoMensual />}
 
       {comprando && (
         <EmbeddedCheckoutModal
@@ -294,6 +308,95 @@ function PestanaEconomia({ textos, esAdmin, guardadoTexto }: {
     </div>
   );
 }
+
+/**
+ * EL REPARTO MENSUAL, PARA EL ADMINISTRADOR (2026-08-23). Eugenio no puede
+ * lanzar un POST a mano: aquí ve la simulación del mes (bote, cuántos entran,
+ * qué le tocaría a cada persona) y un botón que lo ejecuta, con confirmación
+ * y diciendo en números lo que va a emitir. El servidor es quien decide: una
+ * vez por mes, y la base de datos lo garantiza (índice único de la 0101).
+ */
+function RepartoMensual() {
+  const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+  const [datos, setDatos] = useState<any>(null);
+  const [ejecutando, setEjecutando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const num = (n: any) => Number(n || 0).toLocaleString('es-ES', { maximumFractionDigits: 2 });
+  const cargar = () => {
+    fetch(`/api/admin/tokenomics/reparto?mes=${encodeURIComponent(mes)}`, { credentials: 'include' })
+      .then(r => r.json()).then(j => { if (j && !j.error) setDatos(j); else setAviso(j?.error || 'No se ha podido calcular.'); }).catch(() => {});
+  };
+  useEffect(() => { setAviso(null); cargar(); }, [mes]);
+  const ejecutar = async () => {
+    if (!datos) return;
+    const variable = datos.variable_sin_repartir ? ' (nadie con reputación medible: el bote variable no se emite)' : ` más un bote variable de ${num(datos.bote_variable)} por reputación social`;
+    if (!window.confirm(`Vas a EMITIR ${num(datos.total_a_emitir)} puntos nuevos para ${mes}: ${num(datos.fijo_por_persona)} fijos a cada una de las ${datos.activos} personas activas (al menos ${datos.min_dias_activo} días de uso en el mes)${variable}. Solo se puede hacer una vez por mes y no se deshace solo. ¿Seguro?`)) return;
+    setEjecutando(true); setAviso(null);
+    try {
+      const r = await fetch('/api/admin/tokenomics/reparto/ejecutar', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mes }),
+      });
+      const j = await r.json().catch(() => ({}));
+      setAviso(r.ok ? `Hecho: ${num(j.puntos_repartidos)} puntos repartidos entre ${j.personas} personas.` : (j.error || 'No se ha podido ejecutar.'));
+      cargar();
+    } catch { setAviso('No hay conexión con el servidor.'); }
+    finally { setEjecutando(false); }
+  };
+  return (
+    <div className="mt-7 bg-white border border-slate-200 rounded-3xl p-6">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 inline-flex items-center gap-1.5">
+          <Coins className="w-3.5 h-3.5" /> Reparto mensual · solo administradores
+        </p>
+        <input type="month" value={mes} onChange={e => setMes(e.target.value)} className="h-9 px-2 rounded-lg border border-slate-200 text-sm" aria-label="Mes del reparto" />
+      </div>
+      {datos ? (
+        <>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Activas / verificadas</p><p className="text-xl font-black text-slate-900">{datos.activos} <span className="text-xs text-slate-400">/ {datos.verificados}</span></p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Fijo por persona</p><p className="text-xl font-black text-slate-900">{num(datos.fijo_por_persona)}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Bote variable</p><p className="text-xl font-black text-slate-900">{num(datos.bote_variable)}{datos.variable_sin_repartir ? <span className="block text-[10px] text-amber-700 font-bold">sin reputación medible: no se emite</span> : null}</p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Total a emitir</p><p className="text-xl font-black text-slate-900">{num(datos.total_a_emitir)} <span className="text-xs text-slate-400">puntos</span></p></div>
+            <div><p className="text-[10px] font-black uppercase text-slate-400">Estado</p><p className={`text-sm font-black ${datos.ya_ejecutado ? 'text-emerald-700' : 'text-amber-700'}`}>{datos.ya_ejecutado ? `Repartido (${num(datos.ya_repartido_puntos)})` : 'Sin repartir'}</p></div>
+          </div>
+          {Array.isArray(datos.reparto) && datos.reparto.length > 0 && (
+            <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
+              {datos.reparto.slice(0, 50).map((p: any) => (
+                <div key={p.user_id} className="flex items-center justify-between gap-3 text-xs">
+                  <span className="text-slate-700 truncate">{p.nombre}</span>
+                  <span className="text-slate-400 shrink-0">{p.dias_activos}d · {p.vistas_validas}v · {p.interacciones}i · {p.resenas_positivas}r</span>
+                  <span className="font-black text-slate-900 shrink-0 w-20 text-right">{num(p.total)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {Array.isArray(datos.inactivos) && datos.inactivos.length > 0 && (
+            <p className="mt-2 text-[11px] text-slate-400">
+              Sin llegar a {datos.min_dias_activo} días de uso ({datos.inactivos.length}): {datos.inactivos.slice(0, 12).map((p: any) => `${p.nombre} (${p.dias_activos}d)`).join(', ')}{datos.inactivos.length > 12 ? '…' : ''}
+            </p>
+          )}
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
+            <button onClick={ejecutar} disabled={ejecutando || datos.ya_ejecutado || !datos.activos}
+              className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-black disabled:opacity-40">
+              {ejecutando ? 'Repartiendo…' : datos.ya_ejecutado ? 'Ya repartido este mes' : `Ejecutar ahora el reparto de ${mes}`}
+            </button>
+            {aviso && <p className="text-xs font-bold text-slate-700">{aviso}</p>}
+          </div>
+          <p className="mt-2 text-[11px] text-slate-400">
+            {datos.automatico ? 'Se ejecuta solo: el día 1 de cada mes, para el mes que acaba de cerrar. ' : 'El reparto automático está apagado. '}
+            Este botón es para adelantar un mes o pagar uno que el reloj no haya podido. {num(datos.fijo_por_persona)} fijos a cada persona verificada con al menos {datos.min_dias_activo} días de uso en el mes, más el bote variable por reputación social (vistas válidas, interacciones, reseñas positivas). Emite puntos nuevos: una vez por mes, y la base de datos no deja repetirlo.
+          </p>
+        </>
+      ) : <p className="mt-3 text-sm text-slate-400">{aviso || 'Calculando…'}</p>}
+    </div>
+  );
+}
+
+/** «23 ago 2028»: una fecha que se lee de un vistazo bajo el saldo. */
+const fechaCorta = (iso: string) => {
+  const d = new Date(iso); if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
 const eur = (n: number) =>
   n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
@@ -315,6 +418,12 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
   if (!gasto) return <p className="text-sm text-slate-400 py-16 text-center">No se ha podido cargar el gasto.</p>;
 
   const srv = gasto.servidores;
+  /** El techo de gasto de IA. Viaja en la misma respuesta y siempre fresco:
+   *  el gasto se cachea seis horas, el tope no (ver `gasto.ts`). */
+  const tope = gasto.tope_ia as {
+    tope_mes_eur: number; tope_dia_eur: number; gastado_mes_eur: number; gastado_dia_eur: number;
+    porcentaje_mes: number; alcanzado: boolean; motivo: 'mes' | 'dia' | null;
+  } | undefined;
   const oficial = gasto.ia.oficial_anthropic;
   const interno = gasto.ia.interno;
   // LOS MODELOS ABIERTOS TAMBIÉN CUESTAN (2026-08-22). Con la facturación
@@ -415,6 +524,39 @@ function PestanaGasto({ esAdmin }: { esAdmin: boolean }) {
               <span className="text-slate-900 font-black ml-auto">{eur(interno.mes_actual.abiertos_eur)}</span>
             </div>
           </div>
+          {/* ══ EL TECHO DE GASTO, DEBAJO DE LO QUE SE LLEVA GASTADO ═══════
+              (2026-08-23.) Una cifra de gasto sin su tope no dice si va bien o
+              mal: 15 € es tranquilizador con un techo de 100 y una urgencia
+              con uno de 20. Van juntos o no dicen nada.
+
+              SE ENSEÑA A TODO EL MUNDO, como el resto de esta página: el coste
+              de las máquinas ya está aquí a propósito, y el de la IA también.
+              Lo que no aparece es cómo cambiarlo. */}
+          {tope && (
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center text-xs">
+                <span className="text-slate-600 font-bold">Tope del mes</span>
+                <span className="text-slate-900 font-black ml-auto">
+                  {eur(tope.gastado_mes_eur)} <span className="text-slate-400 font-bold">de {eur(tope.tope_mes_eur)}</span>
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all',
+                    tope.alcanzado ? 'bg-red-500' : tope.porcentaje_mes >= 80 ? 'bg-amber-500' : 'bg-emerald-500')}
+                  style={{ width: `${Math.min(100, Math.max(1, tope.porcentaje_mes))}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+                {tope.alcanzado
+                  ? (tope.motivo === 'dia'
+                    ? `Alcanzado el tope de hoy (${eur(tope.tope_dia_eur)}): las respuestas del modelo vuelven mañana. El buscador sigue funcionando.`
+                    : 'Alcanzado el tope del mes: no hay respuestas del modelo hasta el mes que viene. El buscador sigue funcionando.')
+                  : `${tope.porcentaje_mes} % del tope del mes · hoy ${eur(tope.gastado_dia_eur)} de ${eur(tope.tope_dia_eur)}. Al llegar al tope, el chat sigue buscando y deja de preguntar al modelo.`}
+              </p>
+            </div>
+          )}
+
           <p className="text-[10px] text-slate-400 mt-3 leading-relaxed">
             {oficial.estado === 'ok'
               ? 'Anthropic: dato oficial de facturación. Google: estimación por el registro interno de llamadas.'
@@ -451,7 +593,15 @@ export default function Vision() {
   const [items, setItems] = useState<ItemTablero[]>([]);
   const [cargando, setCargando] = useState(true);
   const [textos, setTextos] = useState<Record<string, string>>({});
-  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>('hoja_de_ruta');
+  // `?pestana=economia` abre directamente Economía: es adonde llevan los
+  // avisos de puntos de la campana (caducidad, inactividad).
+  const [tab, setTab] = useState<'hoja_de_ruta' | 'economia' | 'gasto'>(() => {
+    // `?pestana=gasto` lo usa el aviso del 80 % del tope de IA (2026-08-23):
+    // un aviso que abre la pestaña equivocada obliga a buscar a mano justo lo
+    // que venía a enseñarte.
+    const p = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('pestana') : null;
+    return p === 'economia' ? 'economia' : p === 'gasto' ? 'gasto' : 'hoja_de_ruta';
+  });
 
   const cargar = () => fetch('/api/roadmap')
     .then(r => r.json())

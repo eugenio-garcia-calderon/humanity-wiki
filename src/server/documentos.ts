@@ -6,6 +6,7 @@ import {
   type Bloque, markdownABloques, bloquesAMarkdown, tituloDeBloques, tokenizarInline,
 } from '../utils/bloques.js';
 import { ROLE } from './auth.js';
+import { hayPresupuesto, apuntarGasto } from './ai/tope.js';
 
 // ============================================================================
 // DOCUMENTOS estilo Notion (2026-08-08, petición del usuario) — Fase 1
@@ -101,6 +102,13 @@ export function registerDocumentosRoutes(app: Express, db: any) {
     if (!prompt) return res.status(400).json({ error: 'Falta describir el documento que quieres.' });
 
     try {
+      // El techo de gasto de la plataforma, antes de llamar (ver
+      // `ai/tope.ts`). Escribir un documento es de lo más caro que se le pide
+      // a un modelo aquí: dejarlo fuera del tope sería dejar abierta la puerta
+      // más grande.
+      const presupuesto = await hayPresupuesto(db);
+      if (!presupuesto.ok) return res.status(429).json({ error: presupuesto.mensaje });
+
       let contexto = '';
       const conversationId = req.body?.conversation_id;
       if (conversationId) {
@@ -151,6 +159,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         WHERE id = ${id}
       `);
 
+      apuntarGasto(resultado.costCents);
       db.execute(sql`
         INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
         VALUES (${req.user.id}, 'documento', ${resultado.model}, ${resultado.inputTokens}, ${resultado.outputTokens},
@@ -358,6 +367,13 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       const prompt = String(req.body?.prompt || '').trim();
       if (!prompt) return res.status(400).json({ error: 'Describe la presentación que quieres.' });
 
+      // El techo de gasto de la plataforma, antes de llamar (ver
+      // `ai/tope.ts`). Escribir un documento es de lo más caro que se le pide
+      // a un modelo aquí: dejarlo fuera del tope sería dejar abierta la puerta
+      // más grande.
+      const presupuesto = await hayPresupuesto(db);
+      if (!presupuesto.ok) return res.status(429).json({ error: presupuesto.mensaje });
+
       const provider = getProvider('claude');
       const r = await provider.complete({
         system: `Eres quien redacta presentaciones en humanity.wiki. Devuelve SOLO un JSON válido, sin comentarios ni vallas de código, con esta forma exacta:
@@ -394,6 +410,7 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
         VALUES (${id}, ${titulo}, 'presentacion', ${JSON.stringify({ diapositivas })}::jsonb,
                 false, ${req.user.id}, true, ${req.user.id}, ${req.user.id})
       `);
+      apuntarGasto(r.costCents);
       db.execute(sql`
         INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
         VALUES (${req.user.id}, 'documento', ${r.model}, ${r.inputTokens}, ${r.outputTokens},
@@ -461,6 +478,14 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
       const w = await cargarDocumento(db, req, res, String(window_id || ''), true);
       if (!w) return;
 
+      // El techo de gasto de la plataforma, antes de llamar (ver
+      // `ai/tope.ts`). Escribir un documento es de lo más caro que se le pide
+      // a un modelo aquí: dejarlo fuera del tope sería dejar abierta la puerta
+      // más grande.
+      const presupuesto = await hayPresupuesto(db);
+      if (!presupuesto.ok) return res.status(429).json({ error: presupuesto.mensaje });
+
+
       const md = bloquesAMarkdown((w.config?.bloques || []) as Bloque[]);
       const provider = getProvider('claude');
       const encargo = accion === 'mejorar'
@@ -473,6 +498,7 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
         maxTokens: 2048,
       });
 
+      apuntarGasto(r.costCents);
       db.execute(sql`
         INSERT INTO ai_usage_charges (user_id, kind, model, input_tokens, output_tokens, cost_cents, fee_cents, total_cents)
         VALUES (${req.user.id}, 'documento', ${r.model}, ${r.inputTokens}, ${r.outputTokens},

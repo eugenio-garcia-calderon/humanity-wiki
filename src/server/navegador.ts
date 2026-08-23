@@ -163,7 +163,7 @@ document.getElementById('f').addEventListener('submit',function(e){
  * parser completo son megas de dependencia y aquí no hace falta entender el
  * documento, solo tocar los atributos de dirección.
  */
-function reescribir(html: string, base: URL): string {
+export function reescribir(html: string, base: URL): string {
   // `&amp;` dentro de un atributo HTML es un `&`. Sin deshacer eso, una URL
   // como `load.php?lang=es&amp;modules=…` se pide con un parámetro llamado
   // «amp;modules» y el servidor de enfrente devuelve otra cosa: es lo que hacía
@@ -428,6 +428,17 @@ export function registerNavegadorRoutes(app: Express) {
       const html = buf.toString('utf8');
       const texto = soloTexto(html);
       res.json({
+        // ── ¿HACE FALTA UN NAVEGADOR DE VERDAD PARA ESTA PÁGINA? ────────────
+        // Se decide AQUÍ y no en el cliente porque aquí está el texto entero:
+        // lo que viaja al navegador va recortado, y medir sobre un recorte
+        // diría «vacía» de cualquier página larga.
+        //
+        // El criterio es tonto y funciona: si el HTML no trae texto, es que la
+        // página se dibuja sola con JavaScript y por el proxy se vería en
+        // blanco. Medido el 2026-08-23 con doce sitios comunes — Wikipedia,
+        // BBC, el BOE y GitHub traen entre 2.000 y 124.000 caracteres; El País,
+        // X y Amazon traen menos de 500. No hay zona gris entre medias.
+        necesitaRender: texto.trim().length < 2000,
         url: final.href,
         titulo: tituloDe(html),
         // 40 000 caracteres: suficiente para un artículo largo y lejos de

@@ -55,6 +55,25 @@ jobs:
               sed -i '/^TOGETHER_API_KEY=/d' .env.production
               echo "TOGETHER_API_KEY=${{ secrets.TOGETHER_API_KEY }}" >> .env.production
             fi
+            # LA LLAVE MAESTRA de los permisos de Google de cada persona
+            # (2026-08-23). Estaba puesta como secreto en GitHub y NO LLEGABA AL
+            # SERVIDOR: comprobado en las dos puntas — el secreto existía, el
+            # workflow no lo nombraba, y `grep -c "^CLAVE_MAESTRA=" ` en el
+            # `.env.production` de producción daba 0. La función de conectar
+            # cuentas se desplegó sin su llave.
+            #
+            # PONER UN SECRETO EN GITHUB NO HACE NADA POR SÍ SOLO: este fichero
+            # solo escribe las variables que nombra. Quien añada un secreto
+            # nuevo tiene que añadir también su línea aquí, y comprobarlo EN EL
+            # SERVIDOR, no en la pantalla de GitHub.
+            #
+            # Y ojo con rotarla: es la llave con la que se cifran los permisos
+            # de Google. Si cambia, todo el mundo tiene que volver a conectar su
+            # cuenta. No es una clave de API cualquiera.
+            if [ -n "${{ secrets.CLAVE_MAESTRA }}" ]; then
+              sed -i '/^CLAVE_MAESTRA=/d' .env.production
+              echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
+            fi
             # Las llaves de Cloudflare R2, donde viven las copias de seguridad
             # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
             # camino que la de Together: el secreto vive en GitHub, nunca en el
@@ -103,6 +122,25 @@ jobs:
             if [ -n "${{ secrets.CLOUDFLARE_TURN_API_TOKEN }}" ]; then
               sed -i '/^CLOUDFLARE_TURN_API_TOKEN=/d' .env.production
               echo "CLOUDFLARE_TURN_API_TOKEN=${{ secrets.CLOUDFLARE_TURN_API_TOKEN }}" >> .env.production
+            fi
+            # LAS LLAVES DE GOOGLE (2026-08-23, prog8). Mismo camino que las
+            # demás. La clave maestra con la que se cifra el permiso de cada
+            # persona ya la escribe el bloque de arriba: **no se repite aquí**.
+            # Dos sitios escribiendo la misma variable es cómo se acaba
+            # cambiándola en uno y no en el otro.
+            #
+            # `GOOGLE_REDIRECT_URI` no es un secreto —es una dirección pública—
+            # pero se escribe aquí igualmente: tiene que coincidir LETRA POR
+            # LETRA con la que esté dada de alta en la consola de Google, y
+            # dejarla suelta en un `.env` a mano es dejarla a merced del
+            # siguiente `git reset --hard` del despliegue.
+            for v in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI; do
+              sed -i "/^$v=/d" .env.production
+            done
+            if [ -n "${{ secrets.GOOGLE_CLIENT_SECRET }}" ]; then
+              echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}"         >> .env.production
+              echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env.production
+              echo "GOOGLE_REDIRECT_URI=https://humanity.wiki/api/google/vuelta" >> .env.production
             fi
             # Migraciones ANTES de reconstruir: si una falla, el código nuevo
             # no llega a arrancar y la app vieja sigue en pie con su esquema.

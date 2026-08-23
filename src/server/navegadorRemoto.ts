@@ -2,7 +2,7 @@ import type { Express, Request, Response } from 'express';
 import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import type { Browser, BrowserContext, Page } from 'playwright';
-import { esPublica } from './navegador';
+import { esPublica, reescribir } from './navegador';
 
 // ============================================================================
 // EL NAVEGADOR REMOTO (2026-08-20, petición de Eugenio: «dale a Chromium»).
@@ -25,6 +25,55 @@ import { esPublica } from './navegador';
 // imágenes; para el audio harían falta WebRTC y otra fase. Los vídeos de
 // YouTube siguen abriéndose con su reproductor oficial (Navegador.tsx), que
 // sí trae sonido.
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// LA INSTANTÁNEA: CHROMIUM QUE RENDERIZA UNA VEZ Y SE APARTA (2026-08-23)
+// ════════════════════════════════════════════════════════════════════════════
+// Eugenio: «esa solución nunca será viable porque va con LAG, y el usuario se
+// queja de que va lento, y tiene razón».
+//
+// La tiene. Retransmitir fotogramas tiene un retardo que no se optimiza: por
+// muy rápido que vaya el servidor, entre que mueves el ratón y ves el efecto
+// hay una ida y vuelta por internet, y eso se nota siempre. No es un problema
+// de eficiencia, es de dónde está el ordenador.
+//
+// ── LO QUE CAMBIA AQUÍ ──────────────────────────────────────────────────────
+// Chromium deja de ser una CÁMARA y pasa a ser una IMPRENTA. Abre la página,
+// espera a que el JavaScript termine de dibujarla, se queda con el HTML ya
+// montado y lo suelta. A partir de ahí es una página normal en la máquina de
+// quien mira: se selecciona el texto, se hace zoom, y no hay retardo porque no
+// hay nada viajando.
+//
+//   Retransmitir  →  retardo en CADA movimiento del ratón
+//   Imprimir      →  una espera al CAMBIAR de página, como una web lenta
+//
+// Medido el 2026-08-23: Amazon buscando «teclado» tarda 3,7 s y devuelve 51.536
+// caracteres de página real. Nadie se queja de una web que tarda tres segundos;
+// todo el mundo se queja de un ratón que va con retardo.
+//
+// ── Y EL SERVIDOR RESPIRA ───────────────────────────────────────────────────
+// El Chromium está ocupado tres segundos en vez de toda la sesión. La página se
+// cierra en cuanto se tiene el HTML, y el navegador se apaga solo cuando no
+// queda nadie, como ya hacía.
+//
+// ── LO QUE ESTO NO ES ───────────────────────────────────────────────────────
+// No es un navegador: es una foto en HTML. Los botones que dependan del
+// JavaScript de la página no responderán, porque ese JavaScript no viaja. Para
+// leer una ficha de producto o un artículo es perfecto; **para entrar en tu
+// correo no sirve, y no debe servir** — eso necesita tu sesión, y tu sesión no
+// tiene por qué pasar por nuestro servidor.
+
+/** Tres a la vez como mucho. Una instantánea dura segundos, pero si llegan
+ *  veinte peticiones juntas —una página con veinte enlaces que alguien abre en
+ *  ráfaga— serían veinte Chromium a la vez. */
+const MAX_INSTANTANEAS = 3;
+let instantaneasEnCurso = 0;
+
+/** Lo que se espera a que la página termine de dibujarse. Pasado esto, se
+ *  entrega lo que haya: media página es mucho mejor que una pantalla en
+ *  blanco con un mensaje de tiempo agotado. */
+const ESPERA_RENDER_MS = 9000;
 
 const MAX_SESIONES = 2;
 const RATO_SIN_USO = 3 * 60_000;
@@ -89,10 +138,14 @@ async function arrancarChromium(): Promise<Browser> {
 
 /** Si no queda nadie navegando, Chromium se apaga solo al minuto. */
 function quizasApagar() {
-  if (sesiones.size || !chromium) return;
+  // LAS INSTANTÁNEAS TAMBIÉN CUENTAN. Sin mirarlas, una sesión que se cierra
+  // programaría el apagado y Chromium podría cerrarse con una página a medio
+  // dibujar — que se vería como «no se ha podido dibujar esta página» sin que
+  // nada estuviera roto.
+  if (sesiones.size || instantaneasEnCurso > 0 || !chromium) return;
   if (apagado) clearTimeout(apagado);
   apagado = setTimeout(() => {
-    if (!sesiones.size) { chromium?.close().catch(() => {}); chromium = null; }
+    if (!sesiones.size && instantaneasEnCurso === 0) { chromium?.close().catch(() => {}); chromium = null; }
   }, RATO_APAGAR_CHROMIUM);
 }
 
@@ -311,6 +364,69 @@ function sesionDe(req: Request, res: Response): Sesion | null {
 
 export function registerNavegadorRemotoRoutes(app: Express) {
   /** POST /api/navegador/remoto — abre una pestaña real en el servidor. */
+  /**
+   * GET /api/navegador/instantanea?url=… — la página ya dibujada, en HTML.
+   *
+   * Es el camino para las webs que se pintan solas con JavaScript y que por el
+   * proxy de lectura saldrían en blanco. Chromium las abre, espera a que
+   * terminen, y aquí sale el HTML resultante **pasado por la misma reescritura
+   * que usa el proxy**, para que las imágenes y los estilos sigan viniendo por
+   * nosotros y no se rompan.
+   *
+   * Devuelve HTML y no JSON a propósito: el marco que lo enseña es el mismo
+   * `<iframe>` del modo de lectura, y así no hay dos caminos de pintado que
+   * mantener sincronizados.
+   */
+  app.get('/api/navegador/instantanea', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).send('Inicia sesión para navegar.');
+    if (instantaneasEnCurso >= MAX_INSTANTANEAS) {
+      return res.status(503).send('<!doctype html><meta charset="utf-8"><body style="font:14px system-ui;padding:2rem;color:#475569">'
+        + 'Hay varias páginas dibujándose ahora mismo. Prueba en unos segundos.</body>');
+    }
+
+    let destino: URL;
+    try {
+      destino = new URL(String(req.query.url || ''));
+      if (!/^https?:$/.test(destino.protocol)) throw new Error('protocolo');
+    } catch {
+      return res.status(400).send('Dirección no válida.');
+    }
+    // LA MISMA PUERTA QUE EL RESTO. `esPublica` es lo que impide que alguien
+    // use nuestro servidor para asomarse a la red interna del propio servidor
+    // — la dirección la escribe quien mira, y sin esto esto sería un agujero.
+    if (!(await esPublica(destino.hostname))) {
+      return res.status(400).send('Esa dirección no se puede abrir desde aquí.');
+    }
+
+    instantaneasEnCurso++;
+    let pagina: Page | null = null;
+    try {
+      const navegador = await arrancarChromium();
+      pagina = await navegador.newPage({ viewport: { width: 1280, height: 900 } });
+      await pagina.goto(destino.href, { waitUntil: 'domcontentloaded', timeout: ESPERA_RENDER_MS });
+      // `networkidle` es lo que separa «el HTML ha llegado» de «la página está
+      // dibujada». Si no llega a calmarse, se sigue con lo que haya: una web
+      // con un anuncio que nunca termina de cargar no puede dejar a nadie
+      // mirando una pantalla en blanco.
+      await pagina.waitForLoadState('networkidle', { timeout: 4000 }).catch(() => {});
+      const html = await pagina.content();
+      const final = new URL(pagina.url());
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      res.send(reescribir(html, final));
+    } catch (e: any) {
+      console.error('[instantanea]', e?.message || e);
+      res.status(502).send('<!doctype html><meta charset="utf-8"><body style="font:14px system-ui;padding:2rem;color:#475569">'
+        + 'No se ha podido dibujar esta página.</body>');
+    } finally {
+      instantaneasEnCurso--;
+      // La página se cierra SIEMPRE y en cuanto se tiene el HTML. Es lo que
+      // hace que esto ocupe segundos y no una sesión entera.
+      await pagina?.close().catch(() => {});
+      quizasApagar();
+    }
+  });
+
   app.post('/api/navegador/remoto', async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Inicia sesión para navegar.' });
     // El tope es global y pequeño a propósito: cada sesión es un Chromium.

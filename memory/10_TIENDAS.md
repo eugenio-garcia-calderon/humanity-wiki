@@ -209,3 +209,162 @@ non-profit programme, which **nobody has confirmed**. See `memory/14_SOCIEDAD.md
 
 None of these were guessed. A privacy policy that states something false about
 who answers for your data is exactly the thing that should not exist.
+
+---
+
+# The listing copy (2026-08-23, app/UX agent)
+
+Written after the logged-out front page, and **deliberately the same words**.
+The store listing and the first screen of the app are read minutes apart by the
+same person; if they describe two different products, the second one is the lie.
+When one changes, change the other — `src/pages/Bienvenida.tsx`.
+
+Everything below is Spanish, because the platform is. English versions are a
+separate decision nobody has made.
+
+## Apple App Store
+
+**Name** (30 characters max, and it is the one thing that cannot be edited
+without a new review):
+
+```
+humanity.wiki
+```
+
+**Subtitle** (30):
+
+```
+Conocimiento que se reparte
+```
+
+**Promotional text** (170 — editable *without* a review, so it is the only place
+to put anything time-sensitive):
+
+```
+Proyectos, mapas, esquemas y datos sobre los retos de la humanidad. Lo que
+publicas sigue siendo tuyo y genera puntos cada vez que le sirve a alguien.
+```
+
+**Keywords** (100, comma-separated, no spaces after commas — the space counts):
+
+```
+conocimiento,proyectos,mapas,notas,tareas,colaborar,territorio,datos,wiki,sostenibilidad
+```
+
+**Description**: the block below, shared with Play.
+
+## Google Play
+
+**Título** (30): `humanity.wiki`
+
+**Descripción corta** (80):
+
+```
+Proyectos, mapas y conocimiento sobre los retos de la humanidad.
+```
+
+**Descripción completa** (4000): the block below.
+
+## The description, one text for both stores
+
+```
+Agregar el conocimiento de la humanidad y repartir lo que genere entre quienes
+lo crean.
+
+Hoy el saber está partido: los datos en un sitio, los mapas en otro, las
+conversaciones en un tercero, y lo que cada persona sabe encerrado en su cabeza.
+humanity.wiki junta el dato en crudo, el conocimiento conectado y el
+conocimiento situado en el territorio, sobre una sola base.
+
+QUÉ PUEDES HACER
+
+· Páginas — escribe documentos con texto, imágenes y vídeo, solos o dentro de un
+  proyecto.
+· Esquemas — conecta ideas, causas y soluciones en un lienzo.
+· Mapas — sitúa lo que ocurre donde ocurre: territorios, indicadores y tus
+  propios sitios.
+· Tareas — un tablero por proyecto: por hacer, en curso y hecho.
+· Tablas — tus datos con columnas de verdad: números, fechas, dinero, enlaces.
+· Publicaciones — un muro donde se comparte lo que cada cual va aprendiendo.
+· Mensajes y llamadas — habla con cualquiera de la plataforma, por escrito, voz
+  o vídeo, sin salir de aquí.
+· Comercio — vende lo que haces: tu tienda, tus pedidos y tus envíos.
+· Asistente — una IA que conoce tus proyectos y crea contigo dentro de ellos.
+· Calendario, Archivos, Visor 3D y Navegador.
+
+CATORCE RETOS
+
+Cada página, cada mapa y cada proyecto habla de alguno de estos: agua,
+alimentación, vivienda, salud, convivencia, ecosistemas, educación, movilidad,
+energía, tecnología, empleo, gobernanza, economía y cultura.
+
+TUYO Y SIN SEGUIMIENTO
+
+No hay publicidad. No vendemos ni cedemos tus datos. No hay analítica ni
+rastreadores: ni Google Analytics, ni píxeles, ni herramientas que midan lo que
+haces. Una sola cookie, la que te mantiene dentro.
+
+Puedes borrar tu cuenta cuando quieras desde la propia aplicación, y bloquear a
+quien no quieras volver a ver.
+
+Privacidad: https://humanity.wiki/privacidad
+Borrar tu cuenta: https://humanity.wiki/borrar-cuenta
+```
+
+Every claim in the "sin seguimiento" block is the measured one behind
+`humanity.wiki/privacidad`, not marketing. **If it stops being true, it has to
+change in three places**: the privacy page, the front page and here.
+
+## Two things to fix BEFORE the screenshots, and neither is mine to do alone
+
+**1. Five test items are publicly visible.** Measured against production with no
+session: **78** publications, of which `PRUEBA · SaaS`, `PRUEBA · Servicios`,
+`PRUEBA · Miel de la sierra`, `AI · Tienda de prueba` and `AI · Prueba de
+subdominio`. A reviewer browsing the app sees them, and so would every screenshot
+taken of the wall.
+
+**All five belong to the agent account `Claude 2` (`U_IA_91F519AD`). None is
+Eugenio's.** Checked by asking the API who the author is, before touching
+anything.
+
+**The first version of this paragraph said the `PRUEBA ·` ones "look like
+Eugenio's". That was a guess and it was wrong**, and it is written down because
+of what nearly happened next: the Dashboard, working from its own guess that the
+`AI ·` ones were prog2's, told an agent to archive them. Two people, two
+confident sentences about ownership, neither of them checked, and an instruction
+to modify production content resting on both. Nobody was careless — **ownership
+just looks obvious from a title, and it is not in the data**.
+
+So the rule this leaves: **before touching anything in production, ask the data
+who owns it.** A prefix is a hint, never an answer.
+
+**Not archived here**, and the reason is worth keeping. An agent's token opens
+only the hormiguero; an agent account is level 1 on purpose, so it can archive
+only its own rows, and these are another account's. The remaining route would be
+Eugenio's own session — and **a teammate cannot grant that permission on his
+behalf**. Whoever holds the `Claude 2` credential can archive its own five rows,
+which is the clean path; otherwise it is Eugenio's call.
+
+**The number to check afterwards: 78 now, 73 when the five are gone.** A
+different number means one of them was not what we thought — again.
+
+**2. Nobody has checked the current size requirements.** Both stores change them,
+and the numbers are not worth writing down from memory — that is exactly the
+mistake this file exists to prevent. Check them in App Store Connect and the Play
+Console when the accounts are verified, then capture.
+
+## How to capture, when the time comes
+
+Not from the in-app automation browser against production: **it cannot run a
+service worker**, so production hangs there (this is written in `src/pwa.ts` and
+was confirmed again today). Run the production build locally and capture from
+there — same code, and `?sw=off` keeps the worker out of the way:
+
+```
+npm run build
+PORT=3002 NODE_ENV=production node --env-file=.env node_modules/.bin/tsx server.ts
+```
+
+The first screenshot should be the logged-out front page: it is the only screen
+with no real person's data on it, so it needs no cleaning and cannot go stale
+with somebody else's content.

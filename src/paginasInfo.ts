@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock} from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock, Gavel } from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -35,6 +35,13 @@ export interface PaginaInfo {
    * most people read once.
    */
   componente?: LazyExoticComponent<ComponentType<any>>;
+  /**
+   * `false` = se monta la ruta pero NO sale en el menú (i). Para direcciones
+   * que tienen que seguir vivas porque alguien de fuera las cita — las tiendas
+   * de aplicaciones citan `/privacidad` — pero que ahora se llega a ellas desde
+   * otra entrada del menú (Avisos legales, 2026-08-23). Por defecto, sale.
+   */
+  enMenu?: boolean;
 }
 
 export const PAGINAS_INFO: PaginaInfo[] = [
@@ -97,6 +104,14 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   //
   // ESTA RUTA TAMPOCO SE CAMBIA, por lo mismo que `borrar-cuenta`: se pega en
   // las dos fichas y moverla obliga a volver a pasar revisión.
-  { ruta: 'privacidad', titulo: 'Privacidad', icono: Lock,
+  // AVISOS LEGALES (2026-08-23, Eugenio: «un apartado que sea avisos legales,
+  // y le pones ahí la política de privacidad también»): términos y condiciones
+  // (nuevos, escritos por el equipo y marcados como pendientes de revisión
+  // legal) + la política de privacidad (la misma página de siempre, embebida).
+  // Una sola entrada en el menú; `/privacidad` sigue montada pero oculta del
+  // menú, porque las tiendas la citan por esa dirección.
+  { ruta: 'avisos-legales', titulo: 'Avisos legales', icono: Gavel,
+    componente: lazy(() => import('./pages/about/AvisosLegales')) },
+  { ruta: 'privacidad', titulo: 'Privacidad', icono: Lock, enMenu: false,
     componente: lazy(() => import('./pages/Privacidad')) },
 ];

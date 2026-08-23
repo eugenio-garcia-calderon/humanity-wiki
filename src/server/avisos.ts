@@ -32,7 +32,23 @@ export type TipoAviso =
   // MIENTRAS NO MIRAS: si tienes la conversación delante, el mensaje aparece
   // solo y la llamada suena — la campana sobra y sería ruido.
   | 'mensaje'             // alguien te ha escrito y no lo has visto
-  | 'llamada_perdida';    // te llamó y no lo cogiste (o no estabas)
+  | 'llamada_perdida'     // te llamó y no lo cogiste (o no estabas)
+  // Puntos (prog7, 2026-08-23): los tres avisos de la caducidad. Sin
+  // `dePartede` (los escribe el sistema), y con una clave en `entidadId`
+  // para no repetir el mismo aviso dos días seguidos.
+  | 'puntos_inactividad'  // tu saldo se perderá el día X si no vuelves
+  | 'puntos_caducan'      // N puntos caducan el día X (10 años)
+  | 'puntos_perdidos'     // ya se ha perdido / ha caducado N
+  // Comercio (prog7, 2026-08-23): el vendedor se entera de que ha vendido y
+  // el comprador de que su pedido se mueve. Hasta hoy, ninguno de los dos.
+  | 'pedido_nuevo'        // te han comprado algo
+  | 'pedido_estado'       // tu pedido ha cambiado de estado (enviado, entregado…)
+  | 'cesta_olvidada'      // dejaste cosas en una cesta hace 24 h
+  | 'precio_bajado'       // un favorito tuyo ha bajado de precio
+  // Gasto de IA (prog8, 2026-08-23): solo para quien administra, y solo una
+  // vez por mes. Enterarse al llegar al tope es enterarse tarde; enterarse
+  // cada día de que se va acercando es enseñar a ignorar la campana.
+  | 'gasto_ia_80';        // la plataforma lleva el 80 % del tope de IA del mes
 
 /**
  * Deja un aviso. `paraQuien` puede ser null o el propio autor: en los dos

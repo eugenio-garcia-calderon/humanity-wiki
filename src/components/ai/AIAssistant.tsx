@@ -9,7 +9,6 @@ import { usePanelWidth } from '../../hooks/usePanelWidth';
 import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
-import PublicationPopup from '../knowledge/PublicationPopup';
 import { cn } from '../../utils/cn';
 import Markdown from './Markdown';
 
@@ -313,6 +312,31 @@ const terminoDeBusqueda = (texto: string): string => {
   return t.length >= 2 ? t : original;
 };
 
+/** ══ QUIÉN CONTESTÓ, Y PARA QUÉ SIRVE SABERLO ══════════════════════════════
+ *  No para contar dinero —el gasto de IA de agosto entero fueron 0,74 €— sino
+ *  para saber si la plataforma sabe responder sobre lo suyo: si casi todo acaba
+ *  en el modelo, lo que falla es que el contenido no se encuentra.
+ *  Una pregunta que resuelve el buscador **no deja rastro en ninguna parte**:
+ *  no pasa por `/api/ai/chat`, así que no hay `ai_messages` ni cargo. Se sabe
+ *  al céntimo lo que costó la IA y no se sabe cuántas veces no hizo falta, que
+ *  es justo lo que se quería demostrar. Esta línea es la que lo cuenta.
+ *
+ *  NO VIAJA NI EL TEXTO NI QUIÉN PREGUNTA: para una proporción no hacen falta,
+ *  y una tabla con las preguntas de la gente es una tabla que hay que
+ *  proteger. Ver `drizzle/0109_como_se_contesto.sql`.
+ *
+ *  Y NO SE ESPERA A QUE TERMINE, ni se avisa si falla: es una estadística. Si
+ *  se pierde una fila, se pierde una fila; romper una respuesta por no poder
+ *  contarla sería el peor cambio posible. */
+const marcarQuienContesto = (resuelta: 'plataforma' | 'modelo', resultados?: number) => {
+  fetch('/api/search/marca', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resuelta, resultados }),
+    keepalive: true,
+  }).catch(() => { /* una estadística nunca interrumpe una conversación */ });
+};
+
 type Intencion =
   /** `exigente`: es una pregunta de explicación, así que solo vale un
    *  resultado que se llame como lo preguntado. Si no lo hay, contesta la IA. */
@@ -455,7 +479,6 @@ export default function AIAssistant({ modo = 'panel' }: {
   // comportaba distinto. Ahora es siempre el panel lateral, con su botón
   // flotante abajo a la derecha. La barra de abajo desaparece: su micro y su
   // «+» viven dentro del panel.
-  const mode = 'dock' as const;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -474,6 +497,10 @@ export default function AIAssistant({ modo = 'panel' }: {
      *  peticiones, de las de la plataforma, o de un supuesto declarado. */
     tamanoTipico?: { entrada: number; salida: number; origen: 'tuyo' | 'plataforma' | 'supuesto'; n: number };
     niveles?: NivelModelo[];
+    /** El techo de gasto de IA de la plataforma (2026-08-23). `alcanzado` es lo
+     *  único que mira esta pantalla: si hoy no hay respuestas del modelo, se
+     *  sabe **antes** de escribir y no después de enviar. */
+    tope?: { alcanzado: boolean; motivo: 'mes' | 'dia' | null; porcentaje_mes: number; tope_mes_eur: number };
   } | null>(null);
   // Modelo elegido por el usuario para sus creaciones (Fase 12) — vacío = el de la plataforma.
   const [selectedModel, setSelectedModel] = useState<string>('');
@@ -586,8 +613,6 @@ export default function AIAssistant({ modo = 'panel' }: {
   const [modoEntrada, setModoEntrada] = useState<'buscar' | 'ia'>(
     () => (localStorage.getItem('chat:modo') === 'ia' ? 'ia' : 'buscar'));
   useEffect(() => { localStorage.setItem('chat:modo', modoEntrada); }, [modoEntrada]);
-  // Pop-up central: la publicación real que responde a la pregunta.
-  const [popupPub, setPopupPub] = useState<{ publication: any; graphs: any[] } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -759,6 +784,15 @@ export default function AIAssistant({ modo = 'panel' }: {
   useEffect(() => {
     fetch('/api/ai/status').then(r => r.json()).then(setStatus).catch(() => setStatus(null));
   }, []);
+
+  // ══ SI HOY NO HAY IA, SE SABE ANTES DE ESCRIBIR ═══════════════════════════
+  // (2026-08-23, tope de gasto de la plataforma.) El estado viene en
+  // `/api/ai/status`. Cuando está alcanzado, el chat se queda en **Buscar**:
+  // el interruptor de IA se apaga y se dice por qué. Dejarlo encendido sería
+  // ofrecer un botón que no funciona, y descubrirlo después de escribir una
+  // pregunta es descubrirlo tarde.
+  const sinIA = !!status?.tope?.alcanzado;
+  useEffect(() => { if (sinIA) setModoEntrada('buscar'); }, [sinIA]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -1131,6 +1165,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           encontrados = [];
         }
         if (encontrados.length) {
+          marcarQuienContesto('plataforma', encontrados.length);
           setMessages(m => [...m, {
             role: 'assistant',
             content: `Esto es lo que hay en la plataforma sobre «${termino}».`,
@@ -1143,6 +1178,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           return;
         }
         if (!ES_PREGUNTA.test(text)) {
+          marcarQuienContesto('plataforma', 0);
           setMessages(m => [...m, {
             role: 'assistant',
             content: `No hay nada en la plataforma sobre «${termino}». Puedes preguntárselo a la IA si quieres que te lo explique ella.`,
@@ -1192,6 +1228,9 @@ export default function AIAssistant({ modo = 'panel' }: {
         /\b(documento|informe|acta|art[ií]culo|memoria|dossier|redacci[oó]n)\b/i.test(text) &&
         (wantsToCreate || /\b(dame|d[áa]melo|en forma de|como (un )?documento|convi[eé]rte\w*|p[áa]salo|redacta)\b/i.test(text));
       if (pideDocumento && user && !pendingAttachment) {
+        // El documento se escribe en otra página, pero lo escribe un modelo:
+        // para esta cuenta, esta pregunta la contesta la IA.
+        marcarQuienContesto('modelo');
         setMessages(m => [...m, {
           role: 'assistant',
           content: 'Abriendo el documento — lo verás escribirse en directo. Quedará guardado en tus publicaciones como borrador privado.',
@@ -1200,27 +1239,20 @@ export default function AIAssistant({ modo = 'panel' }: {
         return;
       }
 
-      if (mode !== 'dock' && !pendingAttachment && !wantsToCreate) {
-        try {
-          const [gr, pr] = await Promise.all([
-            fetch(`/api/graphs/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
-            fetch(`/api/publications/resolve?q=${encodeURIComponent(text)}`).then(r => r.json()),
-          ]);
-          const g = gr.confident && gr.matches?.[0]?.slug ? gr.matches[0] : null;
-          const p = pr.confident && pr.matches?.[0]?.publication ? pr.matches[0] : null;
-          const isQuestion = text.includes('?') || /\bes cierto\b/i.test(text);
-          if (p && (isQuestion || !g || p.score > g.score)) {
-            setMessages(m => [...m, { role: 'assistant', content: `Esto es lo más relevante que hay publicado sobre tu pregunta: «${p.publication.title || 'publicación'}» de ${p.publication.author_name || 'la comunidad'}.` }]);
-            setPopupPub(p);
-            return;
-          }
-          if (g) {
-            setMessages(m => [...m, { role: 'assistant', content: `Abriendo el grafo de conocimiento «${g.title}».` }]);
-            navigate(`/esquemas/${g.slug}`);
-            return;
-          }
-        } catch { /* si falla la resolución, se sigue con la IA */ }
-      }
+      // ══ AQUÍ HABÍA UN ATAJO QUE NO SE EJECUTABA NUNCA (retirado 2026-08-23)
+      // Resolvía la frase contra `/api/graphs/resolve` y
+      // `/api/publications/resolve` para abrir un grafo o una publicación sin
+      // gastar IA. Buena idea; sólo que estaba tras `if (mode !== 'dock')` y
+      // `mode` es la constante `'dock'` desde que hay un único asistente: la
+      // condición era `false` en todos los casos. Y su publicación se guardaba
+      // en un estado que **no se pintaba en ninguna parte**, así que ni
+      // ejecutándose habría enseñado nada.
+      //
+      // No se revive porque ya no hace falta: lo que buscaba —contestar desde
+      // la plataforma antes que desde el modelo— es lo que hace ahora el
+      // buscador primero, unas líneas más arriba, y ése sí se ejecuta.
+
+      marcarQuienContesto('modelo');
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1954,10 +1986,14 @@ export default function AIAssistant({ modo = 'panel' }: {
                   <button
                     key={m}
                     onClick={() => setModoEntrada(m)}
-                    title={ayuda}
+                    disabled={m === 'ia' && sinIA}
+                    title={m === 'ia' && sinIA
+                      ? 'Hoy no hay respuestas del modelo: la plataforma ha llegado a su tope de gasto. El buscador sigue funcionando.'
+                      : ayuda}
                     aria-pressed={modoEntrada === m}
                     className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold transition-colors',
-                      modoEntrada === m ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+                      m === 'ia' && sinIA ? 'text-slate-300 cursor-not-allowed line-through'
+                        : modoEntrada === m ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
                   >
                     {m === 'buscar' ? <Search className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
                     {etiqueta}
@@ -1965,9 +2001,11 @@ export default function AIAssistant({ modo = 'panel' }: {
                 ))}
               </div>
               <span className="text-[10px] text-slate-400 truncate hidden sm:inline">
-                {modoEntrada === 'buscar'
-                  ? 'Primero busco aquí dentro; solo pregunto a la IA si no hay nada.'
-                  : 'Va directo al modelo, aunque la respuesta estuviera publicada.'}
+                {sinIA
+                  ? 'Hoy sin respuestas del modelo (tope de gasto). El buscador sigue entero.'
+                  : modoEntrada === 'buscar'
+                    ? 'Primero busco aquí dentro; solo pregunto a la IA si no hay nada.'
+                    : 'Va directo al modelo, aunque la respuesta estuviera publicada.'}
               </span>
             </div>
 
@@ -2288,7 +2326,7 @@ export default function AIAssistant({ modo = 'panel' }: {
           onClick={() => navigate('/')} />
         <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
           activo={ruta.startsWith('/proyectos')}
-          onClick={() => navigate('/proyectos')} />
+          onClick={() => navigate(user ? '/proyectos' : '/login?crear=1')} />
 
         <button
           onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
@@ -2306,12 +2344,25 @@ export default function AIAssistant({ modo = 'panel' }: {
           <Search className="w-[22px] h-[22px] sm:w-5 sm:h-5" />
         </button>
 
-        <BotonMuelle icono={UsersRound} label="Red" titulo="Tus mensajes con personas"
+        {/* SIN CUENTA, ESTOS DOS NO LLEVABAN A NINGUNA PARTE (2026-08-23).
+            «Crear» abría un panel de herramientas que ninguna funciona sin
+            sesión —medido: pulsarlo se quedaba en la misma pantalla sin hacer
+            NADA— y «Red» llevaba a una bandeja de mensajes vacía. Es la queja
+            exacta de Eugenio sobre la portada: «no puede ser, que aparezca un
+            botón de crear».
+            No se esconden: una barra a la que le faltan botones parece rota, y
+            además son justo las dos cosas que interesa enseñar. Lo que cambia
+            es a dónde llevan — a crear la cuenta que hace falta para usarlas,
+            que es la respuesta honesta a lo que la persona acaba de pedir. */}
+        <BotonMuelle icono={UsersRound} label="Red" titulo={user ? 'Tus mensajes con personas' : 'Crea tu cuenta para hablar con la gente de la plataforma'}
           activo={ruta.startsWith('/mensajes') || ruta.startsWith('/personas')}
-          onClick={() => navigate('/mensajes')} />
-        <BotonMuelle icono={Plus} label="Crear" titulo="Crear algo nuevo"
+          onClick={() => navigate(user ? '/mensajes' : '/login?crear=1')} />
+        <BotonMuelle icono={Plus} label="Crear" titulo={user ? 'Crear algo nuevo' : 'Crea tu cuenta para empezar'}
           activo={open && panelMuelle === 'crear'}
-          onClick={() => { setOpen(true); setPanelMuelle('crear'); }} />
+          onClick={() => {
+            if (!user) { navigate('/login?crear=1'); return; }
+            setOpen(true); setPanelMuelle('crear');
+          }} />
       
       </nav>
 
