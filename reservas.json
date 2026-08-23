@@ -89,6 +89,12 @@
       "ruta": "src/pages/Tablas.tsx",
       "motivo": "renombrar y retirar desde la pantalla",
       "desde": "2026-08-23T00:21:36.460Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0098_devolucion_en_puntos.sql",
+      "motivo": "devolver una compra pagada con puntos (apuntes contrarios)",
+      "desde": "2026-08-23T00:22:55.070Z"
     }
   ]
 }
