@@ -101,27 +101,56 @@ jobs:
             #    no coincida dejaría a la aplicación sin poder abrir su propia
             #    base — un despliegue en verde y la plataforma muerta. Se
             #    documenta en `deploy/copias/CLAUDE.md` y no se automatiza.
-            for v in CLAVE_FIRMA_REGISTRO CLAVES_PUBLICAS_REGISTRO STRIPE_SECRET_KEY \
-                     STRIPE_PUBLISHABLE_KEY STRIPE_WEBHOOK_SECRET ANTHROPIC_API_KEY \
-                     GEMINI_API_KEY VITE_MAPBOX_TOKEN; do
-              case "$v" in
-                CLAVE_FIRMA_REGISTRO)     nuevo="${{ secrets.CLAVE_FIRMA_REGISTRO }}" ;;
-                CLAVES_PUBLICAS_REGISTRO) nuevo="${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" ;;
-                STRIPE_SECRET_KEY)        nuevo="${{ secrets.STRIPE_SECRET_KEY }}" ;;
-                STRIPE_PUBLISHABLE_KEY)   nuevo="${{ secrets.STRIPE_PUBLISHABLE_KEY }}" ;;
-                STRIPE_WEBHOOK_SECRET)    nuevo="${{ secrets.STRIPE_WEBHOOK_SECRET }}" ;;
-                ANTHROPIC_API_KEY)        nuevo="${{ secrets.ANTHROPIC_API_KEY }}" ;;
-                GEMINI_API_KEY)           nuevo="${{ secrets.GEMINI_API_KEY }}" ;;
-                VITE_MAPBOX_TOKEN)        nuevo="${{ secrets.VITE_MAPBOX_TOKEN }}" ;;
-              esac
-              # Solo si el secreto existe. Un secreto ausente NO borra la línea
-              # que ya hay en el servidor: eso convertiría este arreglo en la
-              # forma más rápida de dejar la plataforma sin sus llaves.
-              if [ -n "$nuevo" ]; then
-                sed -i "/^$v=/d" .env.production
-                echo "$v=$nuevo" >> .env.production
-              fi
-            done
+            # UN `if` POR VARIABLE, Y NO UN BUCLE, Y ESTO NO ES ESTILO.
+            # El primer intento usó un `for` con CONTINUACIONES DE LÍNEA (`\`)
+            # y un `case … esac` dentro, y el despliegue murió con
+            # `syntax error near unexpected token ';'` (2026-08-23, run 32645433959).
+            #
+            # Con `script_stop: true`, la acción de SSH inserta
+            # `DRONE_SSH_PREV_COMMAND_EXIT_CODE=$? ; if …` DESPUÉS DE CADA LÍNEA
+            # del script. Una línea que continúa en la siguiente deja de
+            # continuar, y el bloque queda partido.
+            #
+            # OJO: un `for … ; do` de UNA sola línea con cuerpo simple SÍ
+            # funciona — el de arriba lleva horas desplegando. Lo que no
+            # sobrevive es la continuación con `\` y el `case` de varias ramas.
+            # Lo digo así de preciso porque «no uses bucles» sería falso y
+            # alguien lo creería.
+            #
+            # Es feo y se repite ocho veces. Es lo que funciona aquí, y el
+            # despliegue no es sitio para ser elegante.
+            if [ -n "${{ secrets.CLAVE_FIRMA_REGISTRO }}" ]; then
+              sed -i '/^CLAVE_FIRMA_REGISTRO=/d' .env.production
+              echo "CLAVE_FIRMA_REGISTRO=${{ secrets.CLAVE_FIRMA_REGISTRO }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" ]; then
+              sed -i '/^CLAVES_PUBLICAS_REGISTRO=/d' .env.production
+              echo "CLAVES_PUBLICAS_REGISTRO=${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_SECRET_KEY }}" ]; then
+              sed -i '/^STRIPE_SECRET_KEY=/d' .env.production
+              echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_PUBLISHABLE_KEY }}" ]; then
+              sed -i '/^STRIPE_PUBLISHABLE_KEY=/d' .env.production
+              echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.STRIPE_WEBHOOK_SECRET }}" ]; then
+              sed -i '/^STRIPE_WEBHOOK_SECRET=/d' .env.production
+              echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+              sed -i '/^ANTHROPIC_API_KEY=/d' .env.production
+              echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.GEMINI_API_KEY }}" ]; then
+              sed -i '/^GEMINI_API_KEY=/d' .env.production
+              echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.production
+            fi
+            if [ -n "${{ secrets.VITE_MAPBOX_TOKEN }}" ]; then
+              sed -i '/^VITE_MAPBOX_TOKEN=/d' .env.production
+              echo "VITE_MAPBOX_TOKEN=${{ secrets.VITE_MAPBOX_TOKEN }}" >> .env.production
+            fi
             # Las llaves de Cloudflare R2, donde viven las copias de seguridad
             # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
             # camino que la de Together: el secreto vive en GitHub, nunca en el
