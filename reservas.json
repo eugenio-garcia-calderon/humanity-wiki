@@ -35,6 +35,24 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "raíl oscuro + panel blanco estilo Kpler (encargo de Eugenio)",
       "desde": "2026-08-23T14:14:38.765Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "prog2: bloques que faltan (desplegable, aviso, indice)",
+      "desde": "2026-08-23T14:23:34.298Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/BloquesLectura.tsx",
+      "motivo": "prog2: bloques que faltan (desplegable, aviso, indice)",
+      "desde": "2026-08-23T14:23:34.298Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/utils/bloques.ts",
+      "motivo": "prog2: bloques que faltan (desplegable, aviso, indice)",
+      "desde": "2026-08-23T14:23:34.298Z"
     }
   ]
 }
