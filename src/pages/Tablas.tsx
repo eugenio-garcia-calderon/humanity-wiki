@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Table2, Pencil, Archive, Plus, Loader2, ArrowLeft } from 'lucide-react';
+import { Table2, Pencil, Archive, Plus, Loader2, ArrowLeft, LayoutGrid, LineChart } from 'lucide-react';
 import Rejilla from '../components/tablas/Rejilla';
+import GraficaDeTabla from '../components/graficas/GraficaDeTabla';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 
@@ -16,6 +17,9 @@ export default function Tablas() {
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const abierta = params.get('tabla');
+  // CÓMO SE MIRA LA TABLA VA EN LA DIRECCIÓN, igual que cuál está abierta: así
+  // «mírate esta gráfica» es un enlace, y no «abre la tabla y dale a Gráfica».
+  const forma = params.get('ver') === 'grafica' ? 'grafica' : 'rejilla';
   const [tablas, setTablas] = useState<any[] | null>(null);
   const [creando, setCreando] = useState(false);
 
@@ -95,13 +99,32 @@ export default function Tablas() {
   }
 
   if (abierta) {
+    const ver = (v: 'rejilla' | 'grafica') =>
+      setParams(v === 'grafica' ? { tabla: abierta, ver: 'grafica' } : { tabla: abierta });
+    const pestaña = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors';
     return (
       <div className="space-y-3">
-        <button onClick={() => setParams({})}
-          className="inline-flex items-center gap-1.5 h-11 px-2 -ml-2 text-xs font-bold text-slate-400 hover:text-slate-700">
-          <ArrowLeft className="w-4 h-4" /> Todas las tablas
-        </button>
-        <Rejilla tablaId={abierta} />
+        <div className="flex items-center gap-2">
+          <button onClick={() => setParams({})}
+            className="inline-flex items-center gap-1.5 h-11 px-2 -ml-2 text-xs font-bold text-slate-400 hover:text-slate-700">
+            <ArrowLeft className="w-4 h-4" /> Todas las tablas
+          </button>
+          <div className="flex-1" />
+          {/* LOS MISMOS DATOS, DOS MANERAS DE MIRARLOS. La rejilla es para
+              escribir; la gráfica, para entender. Antes había que sacar los
+              datos a otro sitio para poder verlos dibujados. */}
+          <div className="flex items-center gap-0.5 bg-slate-50 rounded-lg p-0.5">
+            <button onClick={() => ver('rejilla')}
+              className={cn(pestaña, forma === 'rejilla' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900')}>
+              <LayoutGrid className="w-3.5 h-3.5" /> Rejilla
+            </button>
+            <button onClick={() => ver('grafica')}
+              className={cn(pestaña, forma === 'grafica' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900')}>
+              <LineChart className="w-3.5 h-3.5" /> Gráfica
+            </button>
+          </div>
+        </div>
+        {forma === 'grafica' ? <GraficaDeTabla tablaId={abierta} /> : <Rejilla tablaId={abierta} />}
       </div>
     );
   }
