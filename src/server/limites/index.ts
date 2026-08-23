@@ -30,28 +30,35 @@
 //       en el login se cierra y en una lectura se abre. No hay un valor por
 //       defecto que sirva para las dos.
 import type { Request, Response, NextFunction } from 'express';
+import { sql } from 'drizzle-orm';
 
 // ══ EL FRENO ════════════════════════════════════════════════════════════════
-// En memoria a propósito: se consulta en cada intento y tiene que costar nada.
-// Perderlo en un reinicio regala, como mucho, un reinicio de intentos.
+// Vive en Postgres (tabla `frenos`, migración 0097) y NO en memoria, y eso es
+// una corrección de algo que este módulo tuvo mal desde el primer día.
 //
-// ⚠️ CUANDO LLEGUE EL `cluster` ESTO SE PARTE EN OCHO FRENOS INDEPENDIENTES,
-// uno por proceso, y el límite real pasa a ser ocho veces el configurado. Hoy
-// hay un solo proceso y no es un problema; el día que se reparta el trabajo
-// entre los ocho núcleos, este mapa tiene que mudarse a un sitio compartido
-// —Postgres o Redis— O el límite hay que dividirlo entre ocho a sabiendas.
-// Está escrito también en `CLAUDE.md`, porque es la clase de detalle que se
-// descubre en producción.
-interface Freno { fallos: number; hasta: number }
-const freno = new Map<string, Freno>();
+// Con un `Map` de un proceso funcionaba — mientras hubiera un proceso. El día
+// que el trabajo se reparta entre los ocho núcleos serían ocho frenos
+// independientes y el límite real ocho veces el configurado, **sin un error y
+// sin una línea en el registro**. Un límite que se afloja en silencio es peor
+// que no tenerlo, porque además se cree que está.
+//
+// Se arregla ahora y no cuando llegue el `cluster`, porque después no se nota.
+//
+// EL COSTE: una consulta por intento, en el login, el registro, el restablecer
+// y las transferencias. Son las rutas menos transitadas de la plataforma, y a
+// cambio el freno sobrevive a un reinicio — hasta hoy, un despliegue le
+// regalaba a quien estuviera probando contraseñas empezar de cero.
+//
+// NO CONFUNDIR CON `intentos_fallidos`: aquello es el rastro de lo que pasó y
+// no se limpia nunca; esto es cuánto hay que esperar AHORA y se borra solo.
 
-/** Se barre de vez en cuando para que un mapa no crezca sin fin con las IP de
- *  todo el que se equivocó una vez hace tres días. */
-function barrer() {
-  const ahora = Date.now();
-  for (const [k, v] of freno) if (v.hasta < ahora && v.fallos === 0) freno.delete(k);
+/** Barre los frenos que ya no frenan a nadie. Sin esto, la tabla crecería con
+ *  la IP de todo el que se equivocó una vez hace tres meses. */
+async function barrer(db: any): Promise<void> {
+  try {
+    await db.execute(sql`DELETE FROM frenos WHERE actualizado < now() - interval '2 days'`);
+  } catch { /* que no se barra hoy no rompe nada */ }
 }
-setInterval(barrer, 10 * 60_000).unref();
 
 export interface Regla {
   /** Para qué puerta es: 'login' | 'registro' | 'restablecer'. Se guarda tal cual. */
@@ -103,15 +110,24 @@ export function ipDe(req: Request): string {
 const clave = (puerta: string, tipo: 'ip' | 'cuenta', valor: string) => `${puerta}:${tipo}:${valor.toLowerCase()}`;
 
 /** ¿Puede intentarlo, o tiene que esperar? Devuelve los segundos que faltan, o
- *  0 si puede pasar. Mira las DOS claves y manda la más restrictiva. */
-export function esperaPendiente(regla: Regla, ip: string, cuenta?: string | null): number {
-  const ahora = Date.now();
-  let falta = 0;
-  for (const k of [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])]) {
-    const f = freno.get(k);
-    if (f && f.hasta > ahora) falta = Math.max(falta, Math.ceil((f.hasta - ahora) / 1000));
-  }
-  return falta;
+ *  0 si puede pasar. Mira las DOS claves y manda la más restrictiva.
+ *
+ *  Si la consulta falla, LANZA. No devuelve 0: «no he podido comprobarlo» y
+ *  «puede pasar» son dos cosas distintas, y quien decide qué hacer con la duda
+ *  es la regla de la ruta (`alFallar`), no esta función. */
+export async function esperaPendiente(db: any, regla: Regla, ip: string, cuenta?: string | null): Promise<number> {
+  const claves = [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])];
+  // `IN` con un hueco por clave y no `= ANY($1)`: node-postgres manda un array
+  // de JavaScript como texto y Postgres contesta «requires array on right
+  // side». Se descubrió probándolo contra una base de verdad — con la base de
+  // mentira que tenía antes, esto habría pasado la prueba y fallado en
+  // producción.
+  const r = await db.execute(sql`
+    SELECT COALESCE(MAX(CEIL(EXTRACT(EPOCH FROM (hasta - now()))))::int, 0) AS falta
+    FROM frenos
+    WHERE clave IN (${sql.join(claves.map((c) => sql`${c}`), sql`, `)}) AND hasta > now()
+  `);
+  return Math.max(0, Number(r.rows[0]?.falta ?? 0));
 }
 
 /** Un intento que salió mal: sube el freno de las dos claves y deja constancia.
@@ -120,22 +136,54 @@ export function esperaPendiente(regla: Regla, ip: string, cuenta?: string | null
  *  si falla: perder una línea del rastro es malo, pero dejar de poder entrar en
  *  la plataforma porque no se pudo escribir una fila de auditoría es peor. Lo
  *  que sí decide `alFallar` es si el intento pasa cuando esto no puede decidir. */
+/** Sube el freno de las dos claves. Común a `anotarFallo` y a `ritmo`.
+ *
+ *  El cálculo de la espera se hace EN LA BASE DE DATOS, en el mismo `UPDATE`
+ *  que incrementa el contador. Leer, calcular y escribir por separado sería una
+ *  carrera: dos procesos leyendo «llevas 3» a la vez escribirían los dos «4», y
+ *  el atacante se llevaría un intento gratis por cada proceso. */
+async function subirFreno(db: any, regla: Regla, ip: string, cuenta?: string | null): Promise<void> {
+  const claves = [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])];
+  for (const k of claves) {
+    await db.execute(sql`
+      INSERT INTO frenos (clave, fallos, hasta, actualizado)
+      VALUES (${k}, 1, NULL, now())
+      ON CONFLICT (clave) DO UPDATE SET
+        fallos = frenos.fallos + 1,
+        -- LOS ::int NO SON DECORACIÓN. Sin ellos los parámetros llegan como
+        -- texto y LEAST('5','900') compara CADENAS: '5' es mayor que '900'
+        -- letra a letra, así que devolvía siempre el tope y el primer fallo ya
+        -- frenaba 15 minutos. Salió al probar contra una base de verdad; con
+        -- una de mentira habría pasado la prueba y roto el login en producción.
+        hasta = CASE
+          WHEN frenos.fallos + 1 > ${regla.gracia}::int
+          THEN now() + (LEAST(
+                 ${regla.baseSegundos}::int * POWER(2, frenos.fallos + 1 - ${regla.gracia}::int - 1),
+                 ${regla.topeSegundos}::int
+               ) || ' seconds')::interval
+          ELSE frenos.hasta END,
+        actualizado = now()
+    `);
+  }
+}
+
+/** Un intento que salió mal: sube el freno de las dos claves y deja constancia.
+ *
+ *  El registro en `intentos_fallidos` va en su propio `try` y NO tumba la
+ *  petición si falla: perder una línea del rastro es malo, pero dejar de poder
+ *  entrar en la plataforma porque no se pudo escribir una fila de auditoría es
+ *  peor. Lo que sí decide `alFallar` es si el intento pasa cuando el guardián
+ *  no puede decidir. */
 export async function anotarFallo(
   db: any, regla: Regla, ip: string,
   cuenta?: string | null, cuentaExiste?: boolean | null,
 ): Promise<void> {
-  const ahora = Date.now();
-  for (const k of [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])]) {
-    const f = freno.get(k) || { fallos: 0, hasta: 0 };
-    f.fallos += 1;
-    if (f.fallos > regla.gracia) {
-      const segundos = Math.min(regla.baseSegundos * 2 ** (f.fallos - regla.gracia - 1), regla.topeSegundos);
-      f.hasta = ahora + segundos * 1000;
-    }
-    freno.set(k, f);
+  try {
+    await subirFreno(db, regla, ip, cuenta);
+  } catch (e: any) {
+    console.error('[limites] no se pudo subir el freno:', e?.message || e);
   }
   try {
-    const { sql } = await import('drizzle-orm');
     await db.execute(sql`
       INSERT INTO intentos_fallidos (puerta, cuenta, cuenta_existe, ip)
       VALUES (${regla.puerta}, ${cuenta || null}, ${cuentaExiste ?? null}, ${ip})
@@ -145,6 +193,8 @@ export async function anotarFallo(
     // en silencio es lo mismo que no tenerlo.
     console.error('[limites] no se pudo anotar el intento fallido:', e?.message || e);
   }
+  // De vez en cuando, y sin esperar a que termine: barrer no es urgente.
+  if (Math.random() < 0.02) void barrer(db);
 }
 
 /** Un intento que salió BIEN pero cuenta para el ritmo: sube el freno y NO
@@ -161,32 +211,28 @@ export async function anotarFallo(
  *  transferencias correctas es exactamente cómo se entierra la línea que
  *  importa. Anotar lo normal es cómo lo raro pasa desapercibido.
  *
- *  Así que se separan las dos verdades, que es la regla de la casa:
- *    · `anotarFallo` — algo salió mal. Frena Y deja rastro.
- *    · `ritmo`       — algo salió bien pero va demasiado rápido. Solo frena.
- *
- *  El freno no distingue: para él son lo mismo. Lo que cambia es qué queda
- *  escrito, y eso es lo que alguien va a leer dentro de seis meses. */
-export function ritmo(regla: Regla, ip: string, cuenta?: string | null): void {
-  const ahora = Date.now();
-  for (const k of [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])]) {
-    const f = freno.get(k) || { fallos: 0, hasta: 0 };
-    f.fallos += 1;
-    if (f.fallos > regla.gracia) {
-      const segundos = Math.min(regla.baseSegundos * 2 ** (f.fallos - regla.gracia - 1), regla.topeSegundos);
-      f.hasta = ahora + segundos * 1000;
-    }
-    freno.set(k, f);
+ *  Se puede llamar sin `await`: no lanza nunca. */
+export async function ritmo(db: any, regla: Regla, ip: string, cuenta?: string | null): Promise<void> {
+  try {
+    await subirFreno(db, regla, ip, cuenta);
+  } catch (e: any) {
+    console.error('[limites] no se pudo subir el freno de ritmo:', e?.message || e);
   }
 }
 
 /** Salió bien: se levanta EL FRENO, y solo el freno.
  *
  *  `intentos_fallidos` NO SE TOCA. Es la regla 4, y es la que hace que el
- *  ataque que tuvo éxito siga viéndose después. */
-export function levantarFreno(regla: Regla, ip: string, cuenta?: string | null): void {
-  freno.delete(clave(regla.puerta, 'ip', ip));
-  if (cuenta) freno.delete(clave(regla.puerta, 'cuenta', cuenta));
+ *  ataque que tuvo éxito siga viéndose después.
+ *
+ *  Se puede llamar sin `await`: no lanza nunca. */
+export async function levantarFreno(db: any, regla: Regla, ip: string, cuenta?: string | null): Promise<void> {
+  try {
+    const claves = [clave(regla.puerta, 'ip', ip), ...(cuenta ? [clave(regla.puerta, 'cuenta', cuenta)] : [])];
+    await db.execute(sql`DELETE FROM frenos WHERE clave IN (${sql.join(claves.map((c) => sql`${c}`), sql`, `)})`);
+  } catch (e: any) {
+    console.error('[limites] no se pudo levantar el freno:', e?.message || e);
+  }
 }
 
 /** El guardián para poner delante de una ruta.
@@ -195,10 +241,10 @@ export function levantarFreno(regla: Regla, ip: string, cuenta?: string | null):
  *  cualquier cliente entienden, y un mensaje en castellano para la persona.
  *  Quien llama tiene que avisar después con `anotarFallo` o `levantarFreno`:
  *  esto no sabe si la contraseña era buena. */
-export function guardian(regla: Regla, cuentaDe: (req: Request) => string | null | undefined) {
-  return (req: Request, res: Response, next: NextFunction) => {
+export function guardian(db: any, regla: Regla, cuentaDe: (req: Request) => string | null | undefined) {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const espera = esperaPendiente(regla, ipDe(req), cuentaDe(req));
+      const espera = await esperaPendiente(db, regla, ipDe(req), cuentaDe(req));
       if (espera > 0) {
         res.setHeader('Retry-After', String(espera));
         return res.status(429).json({
@@ -220,32 +266,4 @@ export function guardian(regla: Regla, cuentaDe: (req: Request) => string | null
       next();
     }
   };
-}
-
-/**
- * Alguien pidió que le borraran la cuenta: se le quita el nombre del rastro.
- *
- * ══ POR QUÉ EXISTE ESTO (2026-08-22, aviso de prog1) ═════════════════════════
- * `intentos_fallidos` guarda el correo en claro, porque sin él no se puede
- * responder «¿atacaron esta cuenta?», que es para lo que existe la tabla. Pero
- * el borrado de cuenta vacía la fila de `users` a los 15 días, y **el correo
- * seguiría aquí para siempre**: una persona que pidió ser olvidada, y no lo fue
- * del todo. Desde que hay copias diarias, además, eso sale del servidor todas
- * las noches.
- *
- * SE BORRA EL NOMBRE, NO LA FILA. La IP, la fecha y el recuento se quedan:
- * «cuántos intentos vinieron de esa IP» sigue siendo la señal de un ataque y no
- * es de nadie en particular. Lo que se pierde es poder decir a qué cuenta
- * apuntaban — de una cuenta que ya no existe.
- *
- * Se llama desde el borrado DEFINITIVO, no al pedirlo: durante los 15 días la
- * persona puede volver, y entonces su rastro tiene que seguir entero.
- */
-export async function olvidarCuenta(db: any, correo: string): Promise<number> {
-  const { sql } = await import('drizzle-orm');
-  const r = await db.execute(sql`
-    UPDATE intentos_fallidos SET cuenta = NULL
-    WHERE lower(cuenta) = ${String(correo).trim().toLowerCase()}
-  `);
-  return r.rowCount ?? 0;
 }

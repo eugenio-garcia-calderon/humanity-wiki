@@ -271,7 +271,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // --------------------------------------------------------------------------
   // POST /api/auth/register
   // --------------------------------------------------------------------------
-  app.post('/api/auth/register', guardian(REGLAS.registro, r => r.body?.email), async (req: Request, res: Response) => {
+  app.post('/api/auth/register', guardian(db, REGLAS.registro, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password, name } = req.body || {};
       if (!email || !password) {
@@ -401,7 +401,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // El guardián primero: si toca esperar, la ruta ni se ejecuta. La cuenta que
   // se mira es la que viene en el cuerpo, para que el freno sea por cuenta Y
   // por IP y no solo por una de las dos.
-  app.post('/api/auth/login', guardian(REGLAS.login, r => r.body?.email), async (req: Request, res: Response) => {
+  app.post('/api/auth/login', guardian(db, REGLAS.login, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body || {};
       if (!email || !password) {
@@ -429,7 +429,7 @@ export function registerAuthRoutes(app: Express, db: any) {
       // toca. Si se limpiara, quien prueba mil contraseñas y acierta la última
       // se llevaría borrado su propio rastro — que es justo el caso que hay que
       // poder ver después.
-      levantarFreno(REGLAS.login, ipDe(req), normalizedEmail);
+      await levantarFreno(db, REGLAS.login, ipDe(req), normalizedEmail);
 
       // ══ VOLVER CANCELA EL BORRADO ══════════════════════════════════════
       // La papelera de 15 días no es un plazo administrativo: es que alguien
@@ -725,7 +725,7 @@ export function registerAuthRoutes(app: Express, db: any) {
   // pendiente de configurar un proveedor. En desarrollo, el token se devuelve
   // en la respuesta para poder probar el flujo de extremo a extremo; en
   // producción NUNCA debe devolverse (ver comprobación de NODE_ENV).
-  app.post('/api/auth/password/forgot', guardian(REGLAS.restablecer, r => r.body?.email), async (req: Request, res: Response) => {
+  app.post('/api/auth/password/forgot', guardian(db, REGLAS.restablecer, r => r.body?.email), async (req: Request, res: Response) => {
     try {
       const email = String((req.body || {}).email || '').trim().toLowerCase();
       const result = await db.execute(sql`SELECT id FROM users WHERE lower(email) = ${email} AND archived_at IS NULL`);
