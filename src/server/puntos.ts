@@ -317,7 +317,12 @@ export function registerPuntosRoutes(app: Express, db: any) {
         SELECT servicio, unidad, puntos::float, vigente_desde
         FROM tokenomics_precios ORDER BY servicio, vigente_desde DESC
       `);
-      res.json({ vigentes: vigentes.rows, historia: historia.rows });
+      // Un servicio cuya última fila empieza por RETIRADO ya no está en la
+      // cesta: sigue en la historia (solo-añadir) pero no entre los vigentes.
+      res.json({
+        vigentes: (vigentes.rows as any[]).filter(v => !String(v.nombre || '').startsWith('RETIRADO')),
+        historia: historia.rows,
+      });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -369,12 +374,10 @@ export function registerPuntosRoutes(app: Express, db: any) {
    * el precio de venta actual). Es orientativa y lo dice: el punto se
    * explica por la cesta, no por el euro.
    */
-  app.get('/api/admin/tokenomics/reparto', async (req: Request, res: Response) => {
-    try {
-      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
-        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
-      }
-      const mes = /^\d{4}-\d{2}$/.test(String(req.query.mes || '')) ? String(req.query.mes) : new Date().toISOString().slice(0, 7);
+  // El cálculo vive en una función porque lo usan dos rutas: la SIMULACIÓN (GET,
+  // no escribe nada) y la EJECUCIÓN (POST, escribe los apuntes). Si fueran dos
+  // cálculos, algún día darían números distintos.
+  const calcularReparto = async (mes: string) => {
       const desde = `${mes}-01`;
       const parteFija = Math.min(Math.max(Number(process.env.PUNTOS_REPARTO_PARTE_FIJA ?? 0.5), 0), 1);
       const puntosPorEuro = Number(process.env.PUNTOS_POR_EURO || 1);
@@ -394,7 +397,13 @@ export function registerPuntosRoutes(app: Express, db: any) {
       `);
       const feeCents = Number((comision.rows[0] as any)?.fee_cents ?? 0);
       const boteEur = Math.round(feeCents * 0.5) / 100;
-      const botePuntos = Math.round(boteEur * puntosPorEuro * 100) / 100;
+      // AL PRINCIPIO, UN BOTE FIJO (2026-08-23, Eugenio: «de manera fija,
+      // repartiendo X puntos por mes… que esos puntos sean 1000»): mientras la
+      // comisión no dé para nada, el reparto arranca con una cantidad fija que
+      // se puede medir; `PUNTOS_BOTE_MENSUAL=0` vuelve al 50 % de la comisión.
+      const boteFijo = Number(process.env.PUNTOS_BOTE_MENSUAL ?? 1000);
+      const modoBote: 'fijo' | 'comision' = boteFijo > 0 ? 'fijo' : 'comision';
+      const botePuntos = modoBote === 'fijo' ? Math.round(boteFijo * 100) / 100 : Math.round(boteEur * puntosPorEuro * 100) / 100;
 
       // Quién entra en el reparto: personas verificadas (nivel ≥ 2), vivas.
       const verificados = await db.execute(sql`
@@ -468,10 +477,15 @@ export function registerPuntosRoutes(app: Express, db: any) {
         return { user_id: u.id, nombre: u.nombre, ...e, fijo: fijoPorPersona, variable, total: Math.round((fijoPorPersona + variable) * 100) / 100 };
       }).sort((a, b) => b.total - a.total);
 
-      res.json({
-        simulacion: true,
-        nota: 'Nada se paga: este cálculo enseña el reparto que tocaría con los números reales del mes. Activarlo es una decisión del emisor, con los términos de uso y la revisión legal delante.',
+      // ¿Ya se ejecutó este mes? Se pregunta al libro, no a una tabla aparte:
+      // cada apunte del reparto lleva el mes como entidad.
+      const ejecutado = await db.execute(sql`
+        SELECT count(*)::int AS n, coalesce(sum(cantidad), 0)::float AS total
+        FROM movimientos_puntos WHERE motivo = 'reparto_mensual' AND entidad_tipo = 'reparto' AND entidad_id = ${mes}
+      `);
+      return {
         mes,
+        modo_bote: modoBote,
         comision_mes_eur: feeCents / 100,
         operaciones_pagadas: Number((comision.rows[0] as any)?.operaciones ?? 0),
         bote_eur: boteEur,
@@ -484,9 +498,72 @@ export function registerPuntosRoutes(app: Express, db: any) {
         // Si nadie tuvo éxito medible, la parte variable no se reparte y se
         // dice: repartirla a partes iguales en silencio sería inventar mérito.
         variable_sin_repartir: pesoTotal ? 0 : Math.round(variableTotal * 100) / 100,
-        reparto: reparto.slice(0, 200),
+        ya_ejecutado: Number((ejecutado.rows[0] as any)?.n ?? 0) > 0,
+        ya_repartido_puntos: Number((ejecutado.rows[0] as any)?.total ?? 0),
+        reparto,
+      };
+  };
+
+  const mesDe = (v: unknown) => /^\d{4}-\d{2}$/.test(String(v || '')) ? String(v) : new Date().toISOString().slice(0, 7);
+
+  /** GET — la simulación: calcula y enseña, no escribe nada. */
+  app.get('/api/admin/tokenomics/reparto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const r = await calcularReparto(mesDe(req.query.mes));
+      res.json({
+        simulacion: true,
+        nota: 'Nada se paga con esta llamada: enseña el reparto que tocaría con los números reales del mes. Ejecutarlo es POST /api/admin/tokenomics/reparto/ejecutar, una vez por mes.',
+        ...r,
+        reparto: r.reparto.slice(0, 200),
       });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * POST /api/admin/tokenomics/reparto/ejecutar  { mes: 'YYYY-MM' }
+   * EJECUTA el reparto: un apunte `reparto_mensual` por persona, con el mes
+   * como entidad, en UNA transacción — o todos o ninguno. Una vez por mes: si
+   * el libro ya tiene apuntes de ese mes, 409 y no se toca nada. El reparto
+   * EMITE puntos (no salen de ninguna cuenta): es la única emisión que no
+   * nace de un regalo, una vista o una compra, y por eso solo la dispara un
+   * administrador a mano (Eugenio, 2026-08-23: «el reparto mensual… al
+   * principio de manera fija, 1000 puntos»).
+   */
+  app.post('/api/admin/tokenomics/reparto/ejecutar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const mes = mesDe(req.body?.mes);
+      const r = await calcularReparto(mes);
+      if (r.ya_ejecutado) return res.status(409).json({ error: `El reparto de ${mes} ya se ejecutó (${r.ya_repartido_puntos} puntos). No se repite.`, ...r, reparto: undefined });
+      const filas = r.reparto.filter(p => p.total > 0);
+      if (!filas.length) return res.status(400).json({ error: 'No hay nada que repartir: ningún verificado o bote a cero.' });
+      await db.transaction(async (tx: any) => {
+        // Se cierra el libro del mes ANTES de escribir: dos administradores
+        // pulsando a la vez no pueden repartir dos veces.
+        const otra = await tx.execute(sql`
+          SELECT 1 FROM movimientos_puntos WHERE motivo = 'reparto_mensual' AND entidad_tipo = 'reparto' AND entidad_id = ${mes} LIMIT 1
+        `);
+        if (otra.rows.length) throw Object.assign(new Error('YA'), { ya: true });
+        for (const p of filas) {
+          await tx.execute(sql`UPDATE users SET puntos = puntos + ${p.total} WHERE id = ${p.user_id}`);
+          await tx.execute(sql`
+            INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo, entidad_tipo, entidad_id)
+            VALUES (${newId()}, ${p.user_id}, ${p.total}, 'reparto_mensual', 'reparto', ${mes})
+          `);
+        }
+      });
+      const total = Math.round(filas.reduce((n, p) => n + p.total, 0) * 100) / 100;
+      console.log(`[puntos] reparto ${mes} ejecutado por ${req.user.id}: ${total} puntos a ${filas.length} personas (bote ${r.modo_bote} ${r.bote_puntos}).`);
+      res.json({ ejecutado: true, mes, personas: filas.length, puntos_repartidos: total, bote_puntos: r.bote_puntos, modo_bote: r.modo_bote, reparto: filas });
+    } catch (e: any) {
+      if (e?.ya) return res.status(409).json({ error: 'Ese mes ya estaba repartido.' });
+      res.status(500).json({ error: e.message });
+    }
   });
 
   /**
