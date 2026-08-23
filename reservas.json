@@ -143,12 +143,6 @@
       "ruta": "src/pages/Mercado.tsx",
       "motivo": "comercio F3: carrito abandonado y favoritos",
       "desde": "2026-08-23T13:25:59.595Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/navegador.ts",
-      "motivo": "el clic tarda: la pagina se cargaba dos veces",
-      "desde": "2026-08-23T13:27:01.909Z"
     }
   ]
 }
