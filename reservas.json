@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0101_un_reparto_por_mes.sql",
+      "motivo": "reparto: UNIQUE por mes y persona + boton de admin en Vision (sugerencia prog6)",
+      "desde": "2026-08-23T11:44:03.500Z"
+    }
+  ]
 }
