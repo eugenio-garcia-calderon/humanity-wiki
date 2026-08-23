@@ -216,18 +216,57 @@ export async function devolverPuntos(db: any, pedidoId: string): Promise<{ ok: b
   return resultado;
 }
 
+/** Hoy (YYYY-MM-DD) en hora de Madrid: el calendario del equipo, no el del contenedor (UTC). */
+export const hoyMadrid = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
+
+/** El regalo de bienvenida vigente: `PUNTOS_BIENVENIDA`, 5.000 desde el 2026-08-23 (decisión de Eugenio). */
+export const puntosBienvenida = () => Math.max(0, Math.round(Number(process.env.PUNTOS_BIENVENIDA ?? 5000) * 100) / 100);
+
 /**
- * Solo el justificante del regalo de bienvenida — el saldo de 100 ya lo puso
- * el DEFAULT de `users.puntos` al crear la fila (migración 0026), así que
- * esto NO toca el saldo: si lo hiciera, lo duplicaría. Se llama una vez,
- * justo después de dar de alta a cada usuario nuevo.
+ * El regalo de bienvenida, ENTERO y en un solo sitio (2026-08-23). Hasta la
+ * 0103 el saldo nacía por el DEFAULT 100 de `users.puntos` y aquí solo se
+ * dejaba el justificante; con el DEFAULT en 0, esta función pone columna y
+ * apunte en la MISMA transacción — la cifra vive en `PUNTOS_BIENVENIDA` y
+ * libro y columna no pueden discrepar por cambiarla. Si por lo que sea se
+ * llamara dos veces para la misma cuenta, la segunda no hace nada: el libro
+ * ya tiene su regalo. Se llama una vez, justo después de cada alta.
+ *
+ * OJO con la cifra (revisión del Dashboard, 23-08): 5.000 por cuenta nueva
+ * es más que todo lo que circulaba hasta hoy (14 cuentas × 100). Con puntos
+ * transferibles, crear cuentas sería fabricar valor — por eso ENVIAR puntos
+ * exige cuenta verificada (nivel ≥ 2): una cuenta recién creada gasta sus
+ * 5.000 en la cesta y el mercado, pero no los consolida en otra.
  */
 export async function registrarRegaloBienvenida(db: any, userId: string) {
-  await db.execute(sql`
-    INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo)
-    VALUES (${newId()}, ${userId}, 100, 'regalo_bienvenida')
-    ON CONFLICT DO NOTHING
-  `);
+  const cantidad = puntosBienvenida();
+  if (cantidad <= 0) return;
+  await db.transaction(async (tx: any) => {
+    const ya = await tx.execute(sql`SELECT 1 FROM movimientos_puntos WHERE user_id = ${userId} AND motivo = 'regalo_bienvenida' LIMIT 1`);
+    if (ya.rows.length) return;
+    await tx.execute(sql`UPDATE users SET puntos = puntos + ${cantidad} WHERE id = ${userId}`);
+    await tx.execute(sql`
+      INSERT INTO movimientos_puntos (id, user_id, cantidad, motivo)
+      VALUES (${newId()}, ${userId}, ${cantidad}, 'regalo_bienvenida')
+    `);
+  });
+}
+
+// ============================================================================
+// DÍAS DE USO (2026-08-23): «activo» = al menos N días con sesión en el mes
+// ============================================================================
+// Una fila por persona y día en `actividad_diaria` (0103), puesta desde el
+// middleware de sesión. No guarda qué hizo nadie, solo que estuvo. En memoria
+// se recuerda el último día anotado por persona para no escribir en cada
+// petición: una por persona y día; si la escritura falla se olvida, para
+// reintentar en la siguiente. Best-effort: nunca bloquea una petición.
+const ultimoDiaAnotado = new Map<string, string>();
+export function anotarActividad(db: any, userId: string) {
+  const hoy = hoyMadrid();
+  if (ultimoDiaAnotado.get(userId) === hoy) return;
+  if (ultimoDiaAnotado.size > 100000) ultimoDiaAnotado.clear();
+  ultimoDiaAnotado.set(userId, hoy);
+  Promise.resolve(db.execute(sql`INSERT INTO actividad_diaria (user_id, dia) VALUES (${userId}, ${hoy}::date) ON CONFLICT DO NOTHING`))
+    .catch(() => { ultimoDiaAnotado.delete(userId); });
 }
 
 // ============================================================================
@@ -374,43 +413,65 @@ export function registerPuntosRoutes(app: Express, db: any) {
    * el precio de venta actual). Es orientativa y lo dice: el punto se
    * explica por la cesta, no por el euro.
    */
-  // El cálculo vive en una función porque lo usan dos rutas: la SIMULACIÓN (GET,
-  // no escribe nada) y la EJECUCIÓN (POST, escribe los apuntes). Si fueran dos
-  // cálculos, algún día darían números distintos.
+  // El cálculo vive en una función porque lo usan dos rutas y el reloj: la
+  // SIMULACIÓN (GET, no escribe nada), la EJECUCIÓN a mano (POST) y el reparto
+  // AUTOMÁTICO del día 1. Si fueran cálculos distintos, algún día darían
+  // números distintos.
+  //
+  // EL MODELO (2026-08-23, Eugenio: «que reciba 1000 puntos al mes fijo si
+  // está activo y usando la plataforma al menos 3 veces al mes, y luego
+  // variables en función de su reputación social»):
+  //   · FIJO: `PUNTOS_FIJO_MENSUAL` (1.000) a CADA persona verificada y ACTIVA
+  //     en el mes — activa = al menos `PUNTOS_ACTIVIDAD_MIN_DIAS` (3) días
+  //     distintos con sesión (`actividad_diaria`). No es un bote que se
+  //     divide: es por cabeza, la emisión crece con las personas activas.
+  //     Verificada (nivel ≥ 2) sigue siendo la puerta: con puntos
+  //     transferibles, pagar 1.000 al mes a cualquier cuenta recién creada
+  //     sería invitar a crear cuentas.
+  //   · VARIABLE: un bote `PUNTOS_BOTE_VARIABLE` (1.000) al mes repartido entre
+  //     las activas en proporción a su REPUTACIÓN SOCIAL del mes: lo que otras
+  //     personas hicieron con lo suyo — vistas válidas (una por persona y día,
+  //     con sesión), interacciones (reacciones y comentarios) y reseñas
+  //     positivas (≥ 7/10; las de productos solo con compra verificada). Son
+  //     las señales que no se inflan desde fuera. Si nadie tiene reputación
+  //     medible, el bote variable NO se emite y se dice. (`users.reputation`
+  //     existe pero nadie lo calcula todavía: cuando haya una puntuación
+  //     social de verdad, entra aquí como peso, no en otro sitio.)
   const calcularReparto = async (mes: string) => {
       const desde = `${mes}-01`;
-      const parteFija = Math.min(Math.max(Number(process.env.PUNTOS_REPARTO_PARTE_FIJA ?? 0.5), 0), 1);
-      const puntosPorEuro = Number(process.env.PUNTOS_POR_EURO || 1);
+      const fijoPorPersona = Math.max(0, Math.round(Number(process.env.PUNTOS_FIJO_MENSUAL ?? 1000) * 100) / 100);
+      const boteVariable = Math.max(0, Math.round(Number(process.env.PUNTOS_BOTE_VARIABLE ?? 1000) * 100) / 100);
+      const minDias = Math.max(1, Math.floor(Number(process.env.PUNTOS_ACTIVIDAD_MIN_DIAS ?? 3)));
       const pesos = {
         vista_valida: Number(process.env.PUNTOS_PESO_VISTA ?? 1),
         interaccion: Number(process.env.PUNTOS_PESO_INTERACCION ?? 1),
         resena_positiva: Number(process.env.PUNTOS_PESO_RESENA ?? 3),
       };
 
-      // El bote: la mitad de la comisión cobrada en el mes, de operaciones
-      // pagadas. De la comisión, no de la facturación: sale de lo que gana la
-      // plataforma, nunca del dinero de los vendedores.
+      // La comisión del mes se sigue enseñando: es el dato con el que algún
+      // día la emisión volverá a atarse a los ingresos reales del mercado.
       const comision = await db.execute(sql`
         SELECT coalesce(sum(platform_fee_cents), 0)::int AS fee_cents, count(*)::int AS operaciones
         FROM transactions
         WHERE status = 'pagado' AND created_at >= ${desde}::date AND created_at < (${desde}::date + interval '1 month')
       `);
       const feeCents = Number((comision.rows[0] as any)?.fee_cents ?? 0);
-      const boteEur = Math.round(feeCents * 0.5) / 100;
-      // AL PRINCIPIO, UN BOTE FIJO (2026-08-23, Eugenio: «de manera fija,
-      // repartiendo X puntos por mes… que esos puntos sean 1000»): mientras la
-      // comisión no dé para nada, el reparto arranca con una cantidad fija que
-      // se puede medir; `PUNTOS_BOTE_MENSUAL=0` vuelve al 50 % de la comisión.
-      const boteFijo = Number(process.env.PUNTOS_BOTE_MENSUAL ?? 1000);
-      const modoBote: 'fijo' | 'comision' = boteFijo > 0 ? 'fijo' : 'comision';
-      const botePuntos = modoBote === 'fijo' ? Math.round(boteFijo * 100) / 100 : Math.round(boteEur * puntosPorEuro * 100) / 100;
 
-      // Quién entra en el reparto: personas verificadas (nivel ≥ 2), vivas.
-      const verificados = await db.execute(sql`
-        SELECT id, coalesce(display_name, name, email) AS nombre FROM users
-        WHERE archived_at IS NULL AND role_level >= ${ROLE.VERIFIED}
+      // Quién entra: personas verificadas (nivel ≥ 2), vivas, con sus días de
+      // uso del mes. Activas = días ≥ minDias; las demás se enseñan aparte.
+      const personas = await db.execute(sql`
+        SELECT u.id, coalesce(u.display_name, u.name, u.email) AS nombre, coalesce(a.dias, 0)::int AS dias_activos
+        FROM users u
+        LEFT JOIN (
+          SELECT user_id, count(*)::int AS dias FROM actividad_diaria
+          WHERE dia >= ${desde}::date AND dia < (${desde}::date + interval '1 month') GROUP BY user_id
+        ) a ON a.user_id = u.id
+        WHERE u.archived_at IS NULL AND u.role_level >= ${ROLE.VERIFIED}
+        ORDER BY a.dias DESC NULLS LAST, u.created_at
       `);
-      const N = verificados.rows.length;
+      const verificados = personas.rows as any[];
+      const activos = verificados.filter(p => p.dias_activos >= minDias);
+      const inactivos = verificados.filter(p => p.dias_activos < minDias);
 
       // El éxito de cada autor en el mes, por sus ventanas públicas.
       const exito = await db.execute(sql`
@@ -461,21 +522,21 @@ export function registerPuntosRoutes(app: Express, db: any) {
         WHERE u.archived_at IS NULL AND u.role_level >= ${ROLE.VERIFIED}
       `);
       const porUsuario = new Map<string, { vistas_validas: number; interacciones: number; resenas_positivas: number; peso: number }>();
-      let pesoTotal = 0;
       for (const f of exito.rows as any[]) {
         const peso = f.vistas_validas * pesos.vista_valida + f.interacciones * pesos.interaccion + f.resenas_positivas * pesos.resena_positiva;
         porUsuario.set(f.uid, { vistas_validas: f.vistas_validas, interacciones: f.interacciones, resenas_positivas: f.resenas_positivas, peso });
-        pesoTotal += peso;
       }
+      // El bote variable se reparte entre quien ESTÁ: solo pesa la reputación
+      // de las personas activas.
+      let pesoTotal = 0;
+      for (const p of activos) pesoTotal += porUsuario.get(p.id)?.peso ?? 0;
 
-      const fijoTotal = botePuntos * parteFija;
-      const variableTotal = botePuntos - fijoTotal;
-      const fijoPorPersona = N ? Math.floor((fijoTotal / N) * 100) / 100 : 0;
-      const reparto = (verificados.rows as any[]).map(u => {
+      const reparto = activos.map(u => {
         const e = porUsuario.get(u.id) || { vistas_validas: 0, interacciones: 0, resenas_positivas: 0, peso: 0 };
-        const variable = pesoTotal ? Math.floor((variableTotal * e.peso / pesoTotal) * 100) / 100 : 0;
-        return { user_id: u.id, nombre: u.nombre, ...e, fijo: fijoPorPersona, variable, total: Math.round((fijoPorPersona + variable) * 100) / 100 };
-      }).sort((a, b) => b.total - a.total);
+        const variable = pesoTotal ? Math.floor((boteVariable * e.peso / pesoTotal) * 100) / 100 : 0;
+        return { user_id: u.id, nombre: u.nombre, dias_activos: Number(u.dias_activos), ...e, fijo: fijoPorPersona, variable, total: Math.round((fijoPorPersona + variable) * 100) / 100 };
+      }).sort((a, b) => b.total - a.total || b.dias_activos - a.dias_activos);
+      const totalAEmitir = Math.round(reparto.reduce((n, p) => n + p.total, 0) * 100) / 100;
 
       // ¿Ya se ejecutó este mes? Se pregunta al libro, no a una tabla aparte:
       // cada apunte del reparto lleva el mes como entidad.
@@ -485,71 +546,54 @@ export function registerPuntosRoutes(app: Express, db: any) {
       `);
       return {
         mes,
-        modo_bote: modoBote,
+        modelo: 'fijo_por_persona_activa_mas_bote_variable_por_reputacion',
+        fijo_por_persona: fijoPorPersona,
+        bote_variable: boteVariable,
+        min_dias_activo: minDias,
+        pesos,
         comision_mes_eur: feeCents / 100,
         operaciones_pagadas: Number((comision.rows[0] as any)?.operaciones ?? 0),
-        bote_eur: boteEur,
-        puntos_por_euro: puntosPorEuro,
-        bote_puntos: botePuntos,
-        verificados: N,
-        parte_fija: parteFija,
-        pesos,
-        fijo_por_persona: fijoPorPersona,
-        // Si nadie tuvo éxito medible, la parte variable no se reparte y se
-        // dice: repartirla a partes iguales en silencio sería inventar mérito.
-        variable_sin_repartir: pesoTotal ? 0 : Math.round(variableTotal * 100) / 100,
+        verificados: verificados.length,
+        activos: activos.length,
+        inactivos: inactivos.slice(0, 200).map(p => ({ user_id: p.id, nombre: p.nombre, dias_activos: Number(p.dias_activos) })),
+        // `bote_puntos` se conserva para quien lo leía: ahora es el total a emitir.
+        bote_puntos: totalAEmitir,
+        total_a_emitir: totalAEmitir,
+        // Si nadie activo tiene reputación medible, el bote variable no se
+        // emite y se dice: repartirlo a partes iguales en silencio sería
+        // inventar mérito.
+        variable_sin_repartir: pesoTotal ? 0 : boteVariable,
         ya_ejecutado: Number((ejecutado.rows[0] as any)?.n ?? 0) > 0,
         ya_repartido_puntos: Number((ejecutado.rows[0] as any)?.total ?? 0),
         reparto,
       };
   };
 
-  const mesDe = (v: unknown) => /^\d{4}-\d{2}$/.test(String(v || '')) ? String(v) : new Date().toISOString().slice(0, 7);
-
-  /** GET — la simulación: calcula y enseña, no escribe nada. */
-  app.get('/api/admin/tokenomics/reparto', async (req: Request, res: Response) => {
-    try {
-      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
-        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
-      }
-      const r = await calcularReparto(mesDe(req.query.mes));
-      res.json({
-        simulacion: true,
-        nota: 'Nada se paga con esta llamada: enseña el reparto que tocaría con los números reales del mes. Ejecutarlo es POST /api/admin/tokenomics/reparto/ejecutar, una vez por mes.',
-        ...r,
-        reparto: r.reparto.slice(0, 200),
-      });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
-  });
+  const mesDe = (v: unknown) => /^\d{4}-\d{2}$/.test(String(v || '')) ? String(v) : hoyMadrid().slice(0, 7);
+  const mesRepartido = async (mes: string) => {
+    const r = await db.execute(sql`SELECT 1 FROM movimientos_puntos WHERE motivo = 'reparto_mensual' AND entidad_tipo = 'reparto' AND entidad_id = ${mes} LIMIT 1`);
+    return r.rows.length > 0;
+  };
 
   /**
-   * POST /api/admin/tokenomics/reparto/ejecutar  { mes: 'YYYY-MM' }
-   * EJECUTA el reparto: un apunte `reparto_mensual` por persona, con el mes
-   * como entidad, en UNA transacción — o todos o ninguno. Una vez por mes: si
-   * el libro ya tiene apuntes de ese mes, 409 y no se toca nada. El reparto
-   * EMITE puntos (no salen de ninguna cuenta): es la única emisión que no
-   * nace de un regalo, una vista o una compra, y por eso solo la dispara un
-   * administrador a mano (Eugenio, 2026-08-23: «el reparto mensual… al
-   * principio de manera fija, 1000 puntos»).
+   * EJECUTA el reparto de un mes: un apunte `reparto_mensual` por persona con
+   * el mes como entidad, en UNA transacción — o todos o ninguno. Una vez por
+   * mes: si el libro ya tiene apuntes de ese mes, `ya` y no se toca nada; y
+   * la garantía de fondo es la base de datos (índice único de la 0101): dos
+   * ejecuciones a la vez no pueden pagar dos veces a la misma persona. El
+   * reparto EMITE puntos (no salen de ninguna cuenta). Lo llaman el reloj
+   * (día 1, mes cerrado) y el botón del administrador: el mismo código.
    */
-  // Con el freno de prog6 delante (por cuenta): no por abuso, por el doble
-  // clic de alguien con prisa. Y la garantía de fondo es la base de datos: el
-  // índice único de la 0101 hace imposible pagar dos veces el mismo mes a la
-  // misma persona aunque dos transacciones entren a la vez.
-  app.post('/api/admin/tokenomics/reparto/ejecutar', guardian(db, REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
+  type ResultadoReparto = { estado: 'hecho' | 'ya' | 'nada'; calculo: Awaited<ReturnType<typeof calcularReparto>>; filas: any[]; total: number };
+  const ejecutarReparto = async (mes: string, actor: string): Promise<ResultadoReparto> => {
+    const calculo = await calcularReparto(mes);
+    const filas = calculo.reparto.filter(p => p.total > 0);
+    if (calculo.ya_ejecutado) return { estado: 'ya', calculo, filas: [], total: 0 };
+    if (!filas.length) return { estado: 'nada', calculo, filas: [], total: 0 };
     try {
-      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
-        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
-      }
-      ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
-      const mes = mesDe(req.body?.mes);
-      const r = await calcularReparto(mes);
-      if (r.ya_ejecutado) return res.status(409).json({ error: `El reparto de ${mes} ya se ejecutó (${r.ya_repartido_puntos} puntos). No se repite.`, ...r, reparto: undefined });
-      const filas = r.reparto.filter(p => p.total > 0);
-      if (!filas.length) return res.status(400).json({ error: 'No hay nada que repartir: ningún verificado o bote a cero.' });
       await db.transaction(async (tx: any) => {
-        // Se cierra el libro del mes ANTES de escribir: dos administradores
-        // pulsando a la vez no pueden repartir dos veces.
+        // Se cierra el libro del mes ANTES de escribir: dos ejecuciones a la
+        // vez (el reloj y un administrador) no pueden repartir dos veces.
         const otra = await tx.execute(sql`
           SELECT 1 FROM movimientos_puntos WHERE motivo = 'reparto_mensual' AND entidad_tipo = 'reparto' AND entidad_id = ${mes} LIMIT 1
         `);
@@ -562,18 +606,89 @@ export function registerPuntosRoutes(app: Express, db: any) {
           `);
         }
       });
-      const total = Math.round(filas.reduce((n, p) => n + p.total, 0) * 100) / 100;
-      console.log(`[puntos] reparto ${mes} ejecutado por ${req.user.id}: ${total} puntos a ${filas.length} personas (bote ${r.modo_bote} ${r.bote_puntos}).`);
-      res.json({ ejecutado: true, mes, personas: filas.length, puntos_repartidos: total, bote_puntos: r.bote_puntos, modo_bote: r.modo_bote, reparto: filas });
     } catch (e: any) {
       // `ya`: lo vio la comprobación; 23505: lo paró el índice único de la
       // 0101 (dos transacciones a la vez). Las dos son la misma respuesta.
       const texto = `${e?.message || ''} ${e?.cause?.message || ''}`;
       if (e?.ya || String(e?.code) === '23505' || String(e?.cause?.code) === '23505' || /un_reparto_por_mes|duplicate key/i.test(texto)) {
-        return res.status(409).json({ error: 'Ese mes ya estaba repartido (o se estaba repartiendo en ese mismo instante). No se repite.' });
+        return { estado: 'ya', calculo, filas: [], total: 0 };
       }
-      res.status(500).json({ error: e.message });
+      throw e;
     }
+    const total = Math.round(filas.reduce((n, p) => n + p.total, 0) * 100) / 100;
+    console.log(`[puntos] reparto ${mes} ejecutado por ${actor}: ${total} puntos a ${filas.length} personas activas (fijo ${calculo.fijo_por_persona} por persona + bote variable ${calculo.bote_variable}${calculo.variable_sin_repartir ? ', variable sin repartir' : ''}).`);
+    return { estado: 'hecho', calculo, filas, total };
+  };
+
+  // ==========================================================================
+  // REPARTO AUTOMÁTICO (2026-08-23, Eugenio: «haz que sea automático»)
+  // ==========================================================================
+  // Cada hora (y al minuto y medio de arrancar) el servidor mira si el MES
+  // ANTERIOR — el último cerrado, en hora de Madrid — está sin repartir, y si
+  // lo está, lo reparte. Cada hora y no «a las 00:05 del día 1» porque el
+  // contenedor se reinicia con cada despliegue y un temporizador largo no
+  // llega a sonar (lección del cuadre, revisión de prog4); repasar de más es
+  // inocuo: un mes repartido se detecta con una consulta y no se toca. Solo
+  // el mes anterior — nunca el actual (se paga con el mes cerrado, cuando los
+  // días de uso son definitivos) y nunca meses de antes de que el sistema
+  // existiera (`PUNTOS_REPARTO_DESDE`). `PUNTOS_REPARTO_AUTO=off` lo apaga y
+  // deja solo el botón.
+  const mesAnteriorMadrid = () => {
+    const [y, m] = hoyMadrid().split('-').map(Number);
+    return new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7);
+  };
+  const avisadoSinNadie = new Set<string>();
+  const repartoAutomatico = async () => {
+    if ((process.env.PUNTOS_REPARTO_AUTO || 'on').toLowerCase() === 'off') return;
+    const mes = mesAnteriorMadrid();
+    if (mes < (process.env.PUNTOS_REPARTO_DESDE || '2026-08')) return;
+    if (await mesRepartido(mes)) return;
+    const r = await ejecutarReparto(mes, 'reloj');
+    if (r.estado === 'nada' && !avisadoSinNadie.has(mes)) {
+      avisadoSinNadie.add(mes);
+      console.log(`[puntos] reparto automático de ${mes}: ninguna persona verificada con ≥ ${r.calculo.min_dias_activo} días de uso — no se emite nada.`);
+    }
+  };
+  const tic = () => repartoAutomatico().catch(e => console.error('[puntos] reparto automático fallido:', e.message));
+  setTimeout(tic, 90 * 1000);
+  setInterval(tic, 60 * 60 * 1000);
+
+  /** GET — la simulación: calcula y enseña, no escribe nada. */
+  app.get('/api/admin/tokenomics/reparto', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      const r = await calcularReparto(mesDe(req.query.mes));
+      res.json({
+        simulacion: true,
+        nota: 'Nada se paga con esta llamada: enseña el reparto que tocaría con los números reales del mes. El reloj lo ejecuta solo el día 1 para el mes cerrado; a mano es POST /api/admin/tokenomics/reparto/ejecutar, una vez por mes.',
+        automatico: (process.env.PUNTOS_REPARTO_AUTO || 'on').toLowerCase() !== 'off',
+        ...r,
+        reparto: r.reparto.slice(0, 200),
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * POST /api/admin/tokenomics/reparto/ejecutar  { mes: 'YYYY-MM' }
+   * El botón del administrador: adelantar un mes o pagar uno que el reloj no
+   * haya podido. Mismo código que el reloj (`ejecutarReparto`), misma
+   * garantía. Con el freno de prog6 delante (por cuenta): no por abuso, por
+   * el doble clic de alguien con prisa.
+   */
+  app.post('/api/admin/tokenomics/reparto/ejecutar', guardian(db, REGLAS.transferencia, r => r.user?.id), async (req: Request, res: Response) => {
+    try {
+      if (!req.user || req.user.roleLevel < ROLE.ADMIN) {
+        return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      }
+      ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
+      const mes = mesDe(req.body?.mes);
+      const r = await ejecutarReparto(mes, req.user.id);
+      if (r.estado === 'ya') return res.status(409).json({ error: `El reparto de ${mes} ya se ejecutó (${r.calculo.ya_repartido_puntos} puntos) o se estaba ejecutando en ese mismo instante. No se repite.` });
+      if (r.estado === 'nada') return res.status(400).json({ error: `No hay nada que repartir en ${mes}: ninguna persona verificada con al menos ${r.calculo.min_dias_activo} días de uso.` });
+      res.json({ ejecutado: true, mes, personas: r.filas.length, puntos_repartidos: r.total, fijo_por_persona: r.calculo.fijo_por_persona, bote_variable: r.calculo.bote_variable, variable_sin_repartir: r.calculo.variable_sin_repartir, reparto: r.filas });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   /**
@@ -624,6 +739,13 @@ export function registerPuntosRoutes(app: Express, db: any) {
       ritmo(db, REGLAS.transferencia, ipDe(req), req.user.id);
       if (!transferenciasActivas()) {
         return res.status(403).json({ error: 'Las transferencias de puntos todavía no están activadas. Se anunciará en /tokenomics antes de encenderlas.' });
+      }
+      // ENVIAR exige cuenta verificada (nivel ≥ 2) desde que la bienvenida es
+      // de 5.000 (2026-08-23): si no, crear cuentas sería fabricar puntos y
+      // juntarlos en una. Recibir, gastar en la cesta y en el mercado, sí
+      // puede cualquiera.
+      if (req.user.roleLevel < ROLE.VERIFIED) {
+        return res.status(403).json({ error: 'Para enviar puntos hace falta una cuenta verificada. Mientras tanto puedes usarlos en la cesta de servicios y como descuento en el mercado.' });
       }
       const para = String(req.body?.para || '').trim();
       // Céntimos de punto como máximo: la misma precisión que el resto del

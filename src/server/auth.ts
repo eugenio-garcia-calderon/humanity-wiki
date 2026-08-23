@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { sql } from 'drizzle-orm';
-import { registrarRegaloBienvenida } from './puntos.js';
+import { registrarRegaloBienvenida, anotarActividad } from './puntos.js';
 // ══ LOS LÍMITES DE INTENTOS (2026-08-22, prog6) ══════════════════════════════
 // Van aquí y no en la lista de módulos por dos razones que no son de estilo:
 //
@@ -246,6 +246,9 @@ export function registerAuthRoutes(app: Express, db: any) {
         req.user = rowToUser(row);
         // Best-effort: no bloquea la petición si falla.
         db.execute(sql`UPDATE sessions SET last_seen_at = now() WHERE token = ${token}`).catch(() => {});
+        // Y el «día de uso» para el reparto de puntos (0103): una fila por
+        // persona y día, en memoria se evita repetirla. También best-effort.
+        anotarActividad(db, req.user.id);
       }
     } catch (e) {
       console.error('attachUser error:', e);
@@ -300,9 +303,8 @@ export function registerAuthRoutes(app: Express, db: any) {
         VALUES (${id}, ${normalizedEmail}, ${name || null}, ${name || null},
                 ${hashPassword(String(password))}, ${ROLE.USER}, true, ${id})
       `);
-      // El regalo de bienvenida: `users.puntos` ya nace en 100 por el valor
-      // por defecto de la columna (migración 0026) — no se vuelve a sumar
-      // aquí, solo se deja su justificante en el libro de movimientos.
+      // El regalo de bienvenida (5.000 desde la 0103, `PUNTOS_BIENVENIDA`):
+      // la función pone saldo y apunte del libro a la vez; la columna nace en 0.
       await registrarRegaloBienvenida(db, id);
 
       await createSession(req, res, id);

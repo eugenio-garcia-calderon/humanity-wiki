@@ -106,8 +106,30 @@ export default function Bienvenida() {
         <div className="mt-9">
           <BotonCrearCuenta grande />
         </div>
+        {/*
+          SIN CIFRA, Y POR DOS RAZONES (2026-08-23).
+
+          LA PRIMERA es que aquí decía «Empiezas con 100 puntos» y esa misma
+          tarde el regalo de bienvenida pasó a 5.000. La cifra no vive en el
+          código: vive en `PUNTOS_BIENVENIDA`, una variable de entorno que se
+          cambia sin tocar un solo fichero. **Cualquier número escrito a mano
+          aquí es una promesa que otra persona puede romper sin enterarse**, y
+          esta pantalla es lo primero que lee alguien que aún no confía en
+          nosotros. Lo pilló el Dashboard mirando la portada diez minutos antes
+          de que saliera el cambio.
+
+          LA SEGUNDA importa más: **un número en una unidad que el lector no
+          conoce no es un beneficio**. Quien no ha entrado nunca no sabe si
+          5.000 puntos es mucho o poco, ni para qué sirven. Decirle para qué son
+          y que no cuestan nada informa más que la cifra.
+
+          Si algún día se quiere enseñar el número, que salga del servidor:
+          `puntosBienvenida()` en `src/server/puntos.ts` es la única fuente, y
+          `/api/auth/me` ya se pide en cada carga, así que llevarlo ahí no
+          costaría ni una petición más.
+        */}
         <p className="mt-3 text-xs text-slate-400">
-          Empiezas con 100 puntos. Gratis.
+          Gratis. Empiezas con puntos para usar la IA y el Mercado.
         </p>
       </header>
 
