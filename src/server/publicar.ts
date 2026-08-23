@@ -24,7 +24,7 @@
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
-import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos } from './puntos';
+import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -1476,6 +1476,23 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const { estado, seguimiento, nota } = req.body || {};
       const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
       if (estado && !VALIDOS.includes(estado)) return res.status(400).json({ error: 'Ese estado no existe.' });
+      // DEVOLVER O CANCELAR UNA COMPRA PAGADA CON PUNTOS (2026-08-23): antes de
+      // cambiar el estado, los puntos vuelven al comprador con apuntes
+      // contrarios (vendedor y plataforma devuelven lo suyo). Si el vendedor
+      // ya no tiene saldo, no se marca devuelto: una devolución a medias es
+      // peor que ninguna, y el mensaje dice por qué.
+      let puntosDevueltos = 0;
+      if (estado === 'devuelto' || estado === 'cancelado') {
+        const mio = (await db.execute(sql`
+          SELECT id, estado FROM pedidos WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+        `)).rows[0] as any;
+        if (!mio) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+        if (!['devuelto', 'cancelado'].includes(mio.estado)) {
+          const dev = await devolverPuntos(db, mio.id);
+          if (!dev.ok) return res.status(409).json({ error: dev.motivo || 'No se han podido devolver los puntos.' });
+          puntosDevueltos = dev.puntos || 0;
+        }
+      }
       const r = await db.execute(sql`
         UPDATE pedidos SET
           estado = COALESCE(${estado || null}, estado),
@@ -1486,7 +1503,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         RETURNING codigo, estado, seguimiento
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
-      res.json(r.rows[0]);
+      res.json({ ...(r.rows[0] as any), puntos_devueltos: puntosDevueltos });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
