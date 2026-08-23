@@ -17,18 +17,6 @@
       "ruta": "drizzle/0111_avisame_cuando_vuelva.sql",
       "motivo": "comercio F5: avísame cuando vuelva, relacionados, valoración del vendedor",
       "desde": "2026-08-23T13:50:52.975Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/server/avisos.ts",
-      "motivo": "aviso del 80% del tope de gasto de IA",
-      "desde": "2026-08-23T13:53:39.460Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/social/Campana.tsx",
-      "motivo": "pintar el aviso del 80% del tope de IA",
-      "desde": "2026-08-23T13:54:15.339Z"
     }
   ]
 }
