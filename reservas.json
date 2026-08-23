@@ -173,12 +173,6 @@
       "ruta": "src/components/knowledge/Cesta.tsx",
       "motivo": "comercio F2: variantes/SKU con stock por variante",
       "desde": "2026-08-23T13:16:52.780Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "fase 5: calendario de Google",
-      "desde": "2026-08-23T13:18:17.803Z"
     }
   ]
 }
