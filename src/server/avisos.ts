@@ -46,8 +46,13 @@ export type TipoAviso =
   | 'cesta_olvidada'      // dejaste cosas en una cesta hace 24 h
   | 'precio_bajado'       // un favorito tuyo ha bajado de precio
   // Gasto de IA (prog8, 2026-08-23): solo para quien administra, y solo una
-  // vez por mes. Enterarse al llegar al tope es enterarse tarde; enterarse
+  // vez por mes. Enterarse al llegar al tope es enterarse tarde. Enterarse
   // cada día de que se va acercando es enseñar a ignorar la campana.
+  // (El punto va donde había un punto y coma: esta lista la amplían otros a
+  //  máquina buscando el primer «;», y un «;» dentro de un comentario parte
+  //  el tipo por la mitad. Le pasó a prog7 el 2026-08-23 con este mismo
+  //  comentario. En una lista que amplía todo el mundo, la puntuación de un
+  //  comentario deja de ser cosa del que lo escribe.)
   | 'gasto_ia_80';        // la plataforma lleva el 80 % del tope de IA del mes
 
 /**
