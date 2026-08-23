@@ -59,12 +59,6 @@
       "ruta": "entrada: buscador first",
       "motivo": "",
       "desde": "2026-08-22T22:02:24.745Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0099_cable_entre_procesos.sql",
-      "motivo": "el cable cruza procesos: presencia y entrega",
-      "desde": "2026-08-23T00:40:47.993Z"
     }
   ]
 }
