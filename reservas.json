@@ -95,6 +95,12 @@
       "ruta": "src/pages/FichaProducto.tsx",
       "motivo": "prog7: F6 avisos por WhatsApp de pedidos",
       "desde": "2026-08-23T23:45:01.127Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/navegacion/BotonCalendario.tsx",
+      "motivo": "prog2: calendario arriba a la derecha con vista previa de hoy",
+      "desde": "2026-08-23T23:49:54.293Z"
     }
   ]
 }
