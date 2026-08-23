@@ -65,6 +65,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "dos tipos de aviso de puntos (caducidad/inactividad)",
       "desde": "2026-08-23T12:22:56.026Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0105_cuenta_de_google.sql",
+      "motivo": "fase 2: conectar tu cuenta de Google (0104 lo tiene prog7)",
+      "desde": "2026-08-23T12:32:22.299Z"
     }
   ]
 }
