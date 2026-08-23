@@ -90,6 +90,29 @@ export const REGLAS: Record<string, Regla> = {
   // gratis (nadie envía más a mano), y después 20 s, 40, 80… hasta una hora.
   // La clave es la CUENTA, que es lo que de verdad envía.
   transferencia: { puerta: 'transferencia', gracia: 10, baseSegundos: 20, topeSegundos: 3600, alFallar: 'cerrar' },
+
+  // ══ EL BUSCADOR ES DISTINTO A TODOS LOS DEMÁS ═════════════════════════════
+  // Desde 2026-08-23 `/api/search` no se llama al pulsar: se llama MIENTRAS SE
+  // TECLEA. Y por dentro recorre 20 tablas con `ILIKE '%…%'` en cada llamada,
+  // sin pedir sesión.
+  //
+  // Eso cambia el número, no la idea. Un límite pensado para intentos de
+  // contraseña y uno pensado para pulsaciones no se parecen: escribiendo se
+  // producen varias llamadas por segundo, y ESO TIENE QUE PASAR. Si el freno
+  // muerde a quien escribe, el buscador se siente roto y nadie sabrá por qué.
+  //
+  // 40 seguidas gratis: una búsqueda larga escrita del tirón no llega ahí. Y a
+  // partir de ahí un segundo, lo justo para que un bucle deje de ser gratis sin
+  // que una persona real note nada. El tope de 60 s es bajo a propósito: aquí
+  // no estamos parando a nadie, estamos quitándole el interés a machacar.
+  //
+  // POR IP Y NO POR CUENTA: es pública, y la mayoría de quien busca no ha
+  // iniciado sesión.
+  //
+  // Y `abrir` si el limitador no puede decidir: es una lectura. Cerrar el
+  // buscador de toda la plataforma porque no se pudo consultar el freno sería
+  // cambiar un problema que no existe por uno que sí.
+  buscar: { puerta: 'buscar', gracia: 40, baseSegundos: 1, topeSegundos: 60, alFallar: 'abrir' },
 };
 
 /** La IP de quien pide, con Cloudflare y Caddy delante.

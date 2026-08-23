@@ -74,6 +74,54 @@ jobs:
               sed -i '/^CLAVE_MAESTRA=/d' .env.production
               echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
             fi
+            # ══ LAS LLAVES QUE HOY SOLO VIVEN EN EL SERVIDOR ═══════════════════
+            # De las 27 variables del `.env.production`, este fichero solo sabía
+            # reponer 7. Las otras 20 existen ÚNICAMENTE en ese fichero, en esa
+            # máquina — la misma de la que las copias de seguridad protegen.
+            #
+            # O sea: los datos a salvo en Cloudflare y las llaves para leerlos
+            # solo en el servidor que puede desaparecer. Es la diferencia entre
+            # «tengo copias» y «puedo volver».
+            #
+            # Estas líneas son la TUBERÍA, y están puestas aunque los secretos
+            # todavía no existan: si no están en GitHub, el `if` no hace nada y
+            # el despliegue sigue igual. El día que Eugenio pegue uno, llega
+            # solo. Mismo patrón que el servicio de copias esperando su cubo.
+            #
+            # QUÉ SE PIERDE HOY SI SE PIERDE LA MÁQUINA, por orden de gravedad:
+            #  · CLAVE_FIRMA_REGISTRO / CLAVES_PUBLICAS_REGISTRO — el libro
+            #    sellado no se puede verificar ni continuar. Su valor entero era
+            #    ser comprobable.
+            #  · STRIPE_* — los cobros no vuelven hasta sacarlas otra vez.
+            #  · ANTHROPIC / GEMINI / MAPBOX — molestia, no pérdida.
+            #
+            # LO QUE NO SE REPONE DESDE AQUÍ, Y ES A PROPÓSITO:
+            #  · SQL_ADMIN_PASSWORD. Es la contraseña que la BASE DE DATOS ya
+            #    tiene guardada en su volumen. Escribirla desde un secreto que
+            #    no coincida dejaría a la aplicación sin poder abrir su propia
+            #    base — un despliegue en verde y la plataforma muerta. Se
+            #    documenta en `deploy/copias/CLAUDE.md` y no se automatiza.
+            for v in CLAVE_FIRMA_REGISTRO CLAVES_PUBLICAS_REGISTRO STRIPE_SECRET_KEY \
+                     STRIPE_PUBLISHABLE_KEY STRIPE_WEBHOOK_SECRET ANTHROPIC_API_KEY \
+                     GEMINI_API_KEY VITE_MAPBOX_TOKEN; do
+              case "$v" in
+                CLAVE_FIRMA_REGISTRO)     nuevo="${{ secrets.CLAVE_FIRMA_REGISTRO }}" ;;
+                CLAVES_PUBLICAS_REGISTRO) nuevo="${{ secrets.CLAVES_PUBLICAS_REGISTRO }}" ;;
+                STRIPE_SECRET_KEY)        nuevo="${{ secrets.STRIPE_SECRET_KEY }}" ;;
+                STRIPE_PUBLISHABLE_KEY)   nuevo="${{ secrets.STRIPE_PUBLISHABLE_KEY }}" ;;
+                STRIPE_WEBHOOK_SECRET)    nuevo="${{ secrets.STRIPE_WEBHOOK_SECRET }}" ;;
+                ANTHROPIC_API_KEY)        nuevo="${{ secrets.ANTHROPIC_API_KEY }}" ;;
+                GEMINI_API_KEY)           nuevo="${{ secrets.GEMINI_API_KEY }}" ;;
+                VITE_MAPBOX_TOKEN)        nuevo="${{ secrets.VITE_MAPBOX_TOKEN }}" ;;
+              esac
+              # Solo si el secreto existe. Un secreto ausente NO borra la línea
+              # que ya hay en el servidor: eso convertiría este arreglo en la
+              # forma más rápida de dejar la plataforma sin sus llaves.
+              if [ -n "$nuevo" ]; then
+                sed -i "/^$v=/d" .env.production
+                echo "$v=$nuevo" >> .env.production
+              fi
+            done
             # Las llaves de Cloudflare R2, donde viven las copias de seguridad
             # de la base de datos fuera de Hetzner (2026-08-22, prog6). Mismo
             # camino que la de Together: el secreto vive en GitHub, nunca en el
