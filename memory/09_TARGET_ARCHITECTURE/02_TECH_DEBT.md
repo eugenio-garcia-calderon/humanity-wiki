@@ -284,3 +284,33 @@ SELECT (SELECT count(*) FROM publications WHERE archived_at IS NULL) AS publicac
            'indicators','objectives','markers','metrics','causes','needs','demands',
            'success_cases','projects')) AS filas_del_grafo;
 ```
+
+## Dos rutas públicas que no llama nadie: `/api/graphs/resolve` y `/api/publications/resolve` — 2026-08-23
+En `src/server/knowledge.ts`. Eran el camino rápido del chat para abrir un grafo o
+una publicación sin gastar IA. **Nadie las llama desde el 2026-08-20**: su único
+cliente quedó inalcanzable con `99446b3` («One assistant everywhere»), que puso la
+llamada detrás de `mode !== 'dock'` con `mode` ya fijado a `'dock'`. El código
+muerto del cliente se retiró en la #330. No se buscó más: en todo `main` no queda
+ni una llamada, y no hay app nativa que empaquete una versión vieja del JavaScript
+—lo que llamamos «la app instalada» es la PWA, cuyo service worker toma el control
+al instante desde el 22-08 y recarga las pestañas ocultas—.
+
+**Son públicas y sin sesión**, como han estado siempre: no comprueban `req.user`.
+Queda dicho aquí para que salgan en la lista el día que alguien revise qué hay
+abierto sin autenticar, en vez de descubrirlas desde cero.
+
+**Por qué no se borran ya**: `docs/12_KNOWLEDGE_GRAPHS.md` nombra
+`GET /api/graphs/resolve` como el «Fast-path sin IA», y `docs/` es la
+especificación. Que la promesa se siga cumpliendo por otro camino —`/api/search`,
+desde la #290— es lo que convierte el borrado en algo seguro, y está razonado en
+`03_DECISIONS.md` (2026-08-23).
+
+**Criterio de borrado, para no volver a discutirlo**: se van **el día que alguien
+toque `knowledge.ts` por otro motivo**. Coste de dejarlas mientras tanto: cero —
+son dos manejadores registrados que nadie invoca. Coste de borrarlas hoy: el
+riesgo pequeño de romperle la pantalla a un cliente rezagado a cambio de ningún
+ahorro.
+
+**Y lo que no sirve para decidir esto**: la medición por ruta (`medicion.ts`) vive
+en memoria y se pierde en cada reinicio; cada despliegue reinicia. Responde «qué
+se está pidiendo ahora», nunca «desde cuándo no lo pide nadie».
