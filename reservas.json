@@ -23,12 +23,6 @@
       "ruta": "scripts/probar-portada.ts",
       "motivo": "los tres bloques retirados",
       "desde": "2026-08-23T23:32:55.817Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/buscador.ts",
-      "motivo": "prog2: el resumen enseñaba el JSON crudo cuando venia cortado",
-      "desde": "2026-08-23T23:35:04.995Z"
     }
   ]
 }
