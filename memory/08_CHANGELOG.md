@@ -6077,3 +6077,76 @@ sample said out loud is honest — presented as if it were big, it is not.
 - Rutas: `GET/PUT /api/publicar/mis-datos-fiscales` (NIF validado en forma; `completos` solo con nombre, NIF, dirección, CP y ciudad); `iva_pct` en POST/PUT `mis-productos`; `construirRecibo` + `GET /api/publicar/pedido/:codigo/recibo?correo=` (comprador: correo o sesión) y `GET /api/publicar/mis-ventas/:id/recibo` (vendedor). El recibo dice arriba que **no es una factura**; con datos fiscales completos enseña quién vende y un **desglose de IVA informativo sobre los euros cobrados** (precios con IVA incluido; lo pagado en puntos no lleva IVA en euros; 0 € → sin desglose). Fallo cazado en la prueba: repartía IVA sobre un envío pagado en puntos → corregido.
 - UI: `Recibo.tsx` (imprimir / guardar en PDF con `@media print` que deja solo el recibo), botón «Ver el recibo» en MiPedido y «Recibo» por venta en Comercio; panel plegable **Datos fiscales** en Comercio (`DatosFiscales.tsx`, con la nota de que sin datos hay recibo y no factura); select de IVA en CrearProducto.
 - Probado en local por HTTP: datos vacíos → `completos=false`; sin NIF → false; NIF «12 3» → 400; completo → true; producto con IVA 10 comprado en puntos (2 uds + envío) → recibo del comprador con NIF del vendedor, línea con 10 %, puntos 22, euros 0; recibo del vendedor con comprador y dirección; otro usuario → 404; sin llaves → 400; sin datos fiscales → sin desglose y «no es factura». Todo retirado.
+
+### 2026-08-23 — A ceiling on what the platform can spend on AI (prog8)
+
+From the security board: **the AI chat has no spending ceiling**. It answers
+**without a session**, so a loop from outside does not show up as usage — it
+shows up on the bill, a month later.
+
+**It is a ceiling for the platform, not for anyone.** Eugenio decided free
+questions have no per-person limit and that is untouched: this does not look at
+who is asking.
+
+**The numbers are measured, not picked** (`src/server/ai/tope.ts` carries the
+reasoning): the platform's entire AI spend for August 2026 was 0,74 €, and an
+answer from the fast model costs 0,003–0,006 €. So **20 €/month** — about 27×
+the real peak, which a normal month does not touch even at twenty times today's
+use, and which a one-per-second loop exhausts in an hour or two. Not less,
+because a cap that trips on normal use teaches people to raise it and by the
+third time it is gone; not more, because past that the margin stops protecting
+and only makes the worst case dearer.
+
+**And 2 €/day, which is what keeps the degradation a mode instead of a month.**
+With a monthly cap alone, that one-hour loop takes the month and leaves the chat
+without a model for the other 29 days. A normal day is 0,025 €, so 2 € is eighty
+normal days.
+
+- **Three doors, not one**: the chat, `POST /api/ai/generar-imagen`, and the
+  three AI routes in `documentos.ts` (document, presentation, improve a block).
+  A cap on one of three doors is a sign, not a cap.
+- **Checked before the call, never during**: cutting mid-answer would spend the
+  money and still not answer. In the chat it is checked before the conversation
+  row is even created — otherwise there would be conversations with a question
+  and no answer.
+- **It degrades, it does not fall**: the chat replies **200 with a normal
+  message**, not an error, saying the search still works and costs nothing.
+  `/api/ai/status` carries the state, so the panel starts in *Buscar* with the
+  IA switch off and the reason written — knowing after you typed is knowing
+  late.
+- **If the database cannot be read, nothing is cut.** A failed read is not
+  evidence of spending, and turning it into "no AI today" would make a small
+  fault into an outage.
+- **Counted without a query per message**: the sum is read once a minute and
+  charges are added in memory in between (`apuntarGasto`), so the cut is
+  accurate to the cent. A restart re-reads everything from the database.
+- **Notice at 80 %**, once a month, to administrators only, checked **in the
+  database** and not in a variable: here the server restarts several times a
+  day and a bell that repeats teaches people to ignore it.
+- **Visible**: `/vision` → Gasto shows «1,89 € de 20,00 €» with a bar that goes
+  amber at 80 % and red when reached, and `?pestana=gasto` now opens that tab
+  (it only understood `economia`, so the notice would have landed on the wrong
+  one).
+
+**A hole named and not hidden**: image charges are written with `cost_cents` =
+0, so generating images costs real money at Gemini and **does not move the
+counter**. The cap stops further images once it has been reached by another
+route, but images cannot make it trip. Pricing the image belongs to whoever owns
+the model catalogue; it is written next to the check, not in a document nobody
+opens. **The cap protects the chat and the documents; images do not add up yet.**
+
+Verified on 3008 with `TOPE_IA_EUR_MES=1` against 1,89 € already spent:
+`/api/ai/status` reports 189 % and `alcanzado`; the chat answers with the
+message and **no charge and no conversation row is created**; the search keeps
+working in the same panel; the IA switch is disabled with its explanation. With
+`2,30 €` (82 %) the notice is written **once** for two consecutive calls, keyed
+by month, and reads «1,89 € de 2,30 € este mes». Test rows deleted, `.env`
+restored, `tsc` clean.
+
+### 2026-08-23 — Comercio, segunda vuelta · Fase 5: «avísame cuando vuelva», relacionados y valoración del vendedor (Programador 7)
+- 0111: `avisos_stock (user_id, producto_id, variante_id, avisado_at)` con unicidad por persona, producto y variante.
+- **Avísame cuando vuelva**: botón en la ficha con stock efectivo 0 (por variante); `PUT/DELETE/GET /api/publicar/avisame/:id`; el barrido horario del comercio avisa `vuelve_stock` cuando vuelve a haber disponible (descontando reservas), una vez por petición; destino a la ficha de la tienda. Tipo `vuelve_stock` en `avisos.ts` y frase/icono/destino en `Campana.tsx` (sin `as any`; reservados un minuto).
+- **Relacionados**: «También en esta tienda» — otras cosas del mismo vendedor, misma categoría primero (6).
+- **Valoración del vendedor** (acordada con el Dashboard antes de que desapareciera): nadie valora a la persona; es el agregado de reseñas de sus productos con compra verificada (una por persona y producto; el vendedor no reseña lo suyo; #277). Con menos de `MIN_RESENAS_VALORACION_VENDEDOR = 3` no se enseña nada (ni «sin valoraciones»); con 3+, «★ 4,5 · 3 opiniones verificadas en esta tienda». El umbral vive en una constante con nombre.
+- Probado en local por HTTP: 2 reseñas → null; 3 → 4,5·3; relacionados; avísame → barrido con stock 0 → 0, con stock 5 → 1 aviso, segundo barrido 0, DELETE → 0. Todo retirado.
+- Nota de equipo: el Dashboard dejó de existir esta noche; el turno de despliegue pasa a ser «mirar `gh run list` y que nadie esté desplegando antes de fusionar»; y el motivo de cada reserva lleva delante el número del programador.
