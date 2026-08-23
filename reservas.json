@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog7",
-      "ruta": "src/pages/about/TokenomicsLibroBlanco.tsx",
-      "motivo": "",
-      "desde": "2026-08-23T11:59:36.486Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/server/auth.ts",
       "motivo": "",
       "desde": "2026-08-23T12:00:46.206Z"
