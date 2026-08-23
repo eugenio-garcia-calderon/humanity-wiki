@@ -104,12 +104,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
-      "desde": "2026-08-23T13:03:04.503Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "memory/13_PLAN_COMERCIO.md",
       "motivo": "ecommerce fase 1: avisos de pedidos, preguntar al vendedor, descripción con formato",
       "desde": "2026-08-23T13:03:04.503Z"
@@ -143,6 +137,12 @@
       "ruta": "src/pages/Mercado.tsx",
       "motivo": "comercio F3: carrito abandonado y favoritos",
       "desde": "2026-08-23T13:25:59.595Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/ventanas/Navegador.tsx",
+      "motivo": "el clic tarda: doble carga del marco",
+      "desde": "2026-08-23T13:27:41.996Z"
     },
     {
       "agente": "prog8",
