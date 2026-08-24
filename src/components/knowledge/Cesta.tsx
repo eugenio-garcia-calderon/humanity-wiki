@@ -26,8 +26,8 @@ import { useCarrito, aLineasServidor, claveLinea } from '../../hooks/useCarrito'
  * cubren todo y hay algo físico, Stripe no interviene y la dirección la
  * pedimos nosotros. Compartido por la cesta, la ficha y el bloque de producto.
  */
-export type Direccion = { nombre: string; linea1: string; linea2: string; cp: string; ciudad: string; pais: string };
-export const DIRECCION_VACIA: Direccion = { nombre: '', linea1: '', linea2: '', cp: '', ciudad: '', pais: 'ES' };
+export type Direccion = { nombre: string; linea1: string; linea2: string; cp: string; ciudad: string; pais: string; telefono: string };
+export const DIRECCION_VACIA: Direccion = { nombre: '', linea1: '', linea2: '', cp: '', ciudad: '', pais: 'ES', telefono: '' };
 export const direccionCompleta = (d: Direccion) => !!(d.nombre.trim() && d.linea1.trim() && d.cp.trim() && d.ciudad.trim());
 export function DireccionEnvio({ valor, onCambio }: { valor: Direccion; onCambio: (d: Direccion) => void }) {
   const campo = (k: keyof Direccion, placeholder: string, ancho = 'w-full', label?: string) => (
@@ -45,6 +45,12 @@ export function DireccionEnvio({ valor, onCambio }: { valor: Direccion; onCambio
         {campo('ciudad', 'Ciudad', 'flex-1')}
         {campo('pais', 'País', 'w-16', 'País (código de dos letras)')}
       </div>
+      {/* EL TELÉFONO, PARA AVISARTE POR WHATSAPP (F6, 2026-08-24). Opcional:
+          quien no lo deje compra igual y sigue teniendo su código en pantalla
+          y en la campana. Se dice para qué es — un teléfono pedido sin decir
+          para qué es un teléfono que nadie da. */}
+      {campo('telefono', 'Teléfono (opcional)', 'w-full', 'Teléfono para avisarte por WhatsApp')}
+      <p className="text-[11px] text-slate-400">Si dejas tu móvil te avisamos por WhatsApp cuando el pedido salga y cuando llegue. Solo para este pedido.</p>
     </div>
   );
 }
@@ -249,6 +255,7 @@ export default function Cesta({ tienda }: { tienda: string }) {
           ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
           ...(cubreTodo && cotiza?.es_fisico ? { direccion } : {}),
+          ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));

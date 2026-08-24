@@ -863,7 +863,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       `);
 
       const muro = await db.execute(sql`
-        SELECT p.id, p.title, p.body, p.created_at, p.visibility, p.author_user_id AS creator_user_id,
+        SELECT p.id, p.title, p.body, p.media, p.created_at, p.visibility, p.author_user_id AS creator_user_id,
                -- LOS APOYOS, PARA PODER ORDENAR POR POPULARIDAD (2026-08-24).
                -- Eugenio: «que cuando hagas click en uno de esos temas te abra
                -- publicaciones y contenido ordenado de mayor a menor
@@ -982,7 +982,12 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         })),
         ...(muro.rows as any[]).map(p => ({
           tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
-          kind: 'publicacion', config: { body: p.body },
+          // LA MEDIA VIAJA (2026-08-24). `publications.media` guarda las fotos y
+          // vídeos que alguien sube a una publicación, y hasta hoy se quedaba
+          // en el servidor: la tarjeta recibía solo el texto, así que una
+          // publicación con foto se pintaba igual que una sin ella. Hoy la
+          // portada de la tarjeta se elige con esto.
+          kind: 'publicacion', config: { body: p.body, media: p.media || [] },
           vistas: 0, apoyos: Number(p.apoyos) || 0, ia: false, fecha: p.created_at,
           autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
           donde: 'El muro', donde_slug: null, personal: false,

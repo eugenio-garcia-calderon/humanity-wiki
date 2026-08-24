@@ -25,7 +25,7 @@
 // pantalla del sistema y en otro pide un fichero, sin explicar nada, parece
 // roto en el segundo.
 import { useRef, useState } from 'react';
-import { UserPlus, Loader2, Upload, Check } from 'lucide-react';
+import { UserPlus, Loader2, Upload, Check, Cloud } from 'lucide-react';
 import { leerVcf, normalizarTelefono } from '../../utils/telefono';
 import { cn } from '../../utils/cn';
 
@@ -92,6 +92,32 @@ export default function ImportarContactos({ onImportado }: { onImportado?: () =>
     }
   };
 
+  /** La agenda de Google, si la cuenta está conectada (fase 4, 2026-08-23).
+   *
+   *  No pasa por `enviar()` como los otros dos: aquí los contactos no salen del
+   *  navegador, los trae el servidor de Google directamente. Mandarlos de aquí
+   *  para allá sería hacer viajar la agenda entera por el navegador para nada. */
+  const deGoogle = async () => {
+    setTrabajando(true); setError(null); setResultado(null);
+    try {
+      const r = await fetch('/api/agenda/google/traer', { method: 'POST', credentials: 'include' });
+      const j = await r.json();
+      if (r.status === 409) {
+        // No es un error: falta conectar la cuenta, y eso se hace en otro
+        // sitio. Se dice dónde en vez de dejar un mensaje sin salida.
+        setError('Conecta tu cuenta de Google primero, en Configuración.');
+        return;
+      }
+      if (!r.ok) throw new Error(j?.error || 'No se ha podido traer tu agenda.');
+      setResultado(j.resumen || 'Listo.');
+      onImportado?.();
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setTrabajando(false);
+    }
+  };
+
   const conFichero = async (f?: File) => {
     if (!f) return;
     const texto = await f.text();
@@ -112,6 +138,18 @@ export default function ImportarContactos({ onImportado }: { onImportado?: () =>
             De mi agenda
           </button>
         )}
+        {/* DE GOOGLE, y va primero de los tres: es el único que no le pide
+            nada a la persona — ni exportar, ni encender ajustes, ni montar un
+            Atajo. Si su agenda está en Google, entra sola. */}
+        <button
+          onClick={deGoogle}
+          disabled={trabajando}
+          title="Traer los contactos de tu cuenta de Google"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors disabled:opacity-50"
+        >
+          {trabajando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Cloud className="w-3.5 h-3.5" />}
+          De Google
+        </button>
         <input
           ref={fichero} type="file" accept=".vcf,text/vcard,text/x-vcard" className="hidden"
           onChange={e => { conFichero(e.target.files?.[0]); e.target.value = ''; }}

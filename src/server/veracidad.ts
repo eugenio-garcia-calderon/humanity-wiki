@@ -36,6 +36,13 @@ export const TIPOS_FUENTE = [
   'estudio', 'informe', 'noticia', 'dato', 'documento', 'observacion', 'otra',
 ] as const;
 
+/**
+ * The rungs a person decides. `sin_fuente` and `con_fuente` are missing on
+ * purpose: those two follow the citations, and a hand that could set them would
+ * make the badge say something the sources do not.
+ */
+export const VERACIDADES_REVISABLES = ['verificada', 'disputada', 'refutada'] as const;
+
 /** What a source may be attached to today. */
 export const ENTIDADES_CITABLES = ['debate', 'argumento'] as const;
 
@@ -103,6 +110,32 @@ export function registerVeracidadRoutes(app: Express, db: any) {
     const porEntidad: Record<string, any[]> = {};
     for (const f of rows.rows as any[]) (porEntidad[f.entidad_id] ||= []).push(f);
     return porEntidad;
+  };
+
+  /**
+   * Recalcula el promedio guardado en `argumentos` a partir de los votos.
+   *
+   * ES UNA COPIA A PROPÓSITO: el promedio vive también en `ratings` y se podría
+   * calcular al leer, pero entonces ordenar un debate por impacto obligaría a
+   * agregar toda la tabla de puntuaciones de la plataforma en cada apertura de
+   * pantalla. Se guarda aquí, y se refresca en el mismo momento en que cambia
+   * — que es la única forma en que una copia no miente.
+   *
+   * SIN VOTOS VUELVE A `NULL`, NO A CERO. Cero es «la gente votó y no mueve a
+   * nadie»; NULL es «nadie ha votado». Son dos cosas distintas y la pantalla
+   * las dice distinto.
+   */
+  const refrescarImpacto = async (argumentoId: string) => {
+    const agg = (await db.execute(sql`
+      SELECT round(avg(score)::numeric, 2)::float AS media, count(*)::int AS votos
+      FROM ratings WHERE entity_type = 'argumento' AND entity_id = ${argumentoId}
+    `)).rows[0] as any;
+    const media = agg?.votos ? agg.media : null;
+    await db.execute(sql`
+      UPDATE argumentos SET impacto = ${media}, votos = ${agg?.votos || 0}, updated_at = now()
+      WHERE id = ${argumentoId}
+    `);
+    return { impacto: media, votos: agg?.votos || 0 };
   };
 
   // ==========================================================================
@@ -176,12 +209,20 @@ export function registerVeracidadRoutes(app: Express, db: any) {
       // cargado» — src/server/CLAUDE.md, the rule of «I don't know».
       if (!d) return res.status(404).json({ error: 'Ese debate no existe.' });
 
+      // `mi_voto` sale de la misma tabla `ratings` que guarda el resto de
+      // puntuaciones de la plataforma. Sin sesión es NULL — y NULL aquí
+      // significa «no has votado», que no es lo mismo que votar bajo.
+      const yo = req.user?.id || null;
       const args = await db.execute(sql`
         SELECT a.id, a.debate_id, a.parent_id, a.postura, a.texto, a.profundidad, a.veracidad,
+               a.veracidad_por, a.veracidad_en, a.veracidad_motivo,
                a.impacto, a.votos, a.autor_user_id, a.is_ai_generated, a.created_at, a.updated_at,
-               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar
+               u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               v.score AS mi_voto
         FROM argumentos a
         LEFT JOIN users u ON u.id = a.autor_user_id
+        LEFT JOIN ratings v ON v.entity_type = 'argumento' AND v.entity_id = a.id
+                           AND v.user_id = ${yo}
         WHERE a.debate_id = ${d.id} AND a.archived_at IS NULL
         ORDER BY a.profundidad, a.created_at
       `);
@@ -201,6 +242,25 @@ export function registerVeracidadRoutes(app: Express, db: any) {
         if (padre) padre.hijos.push(nodo);
         else raiz.push(nodo);
       }
+
+      // ── LO QUE MÁS MUEVE, PRIMERO ──────────────────────────────────────
+      // Y lo que nadie ha votado NO se hunde al fondo: iría al fondo el día
+      // que se escribe, donde nadie lo lee, y de ahí no sale nunca — el voto
+      // que le faltaba se lo negaría el propio orden. Va justo detrás de lo
+      // más votado y por delante de lo que ya se juzgó flojo, que es lo más
+      // cerca de «todavía no lo sé» que puede estar una lista.
+      const porImpacto = (a: any, b: any) => {
+        const ia = a.impacto, ib = b.impacto;
+        if (ia === null && ib === null) return +new Date(b.created_at) - +new Date(a.created_at);
+        if (ia === null) return ib >= 3 ? 1 : -1;
+        if (ib === null) return ia >= 3 ? -1 : 1;
+        return ib - ia;
+      };
+      const ordenar = (lista: any[]) => {
+        lista.sort(porImpacto);
+        for (const n of lista) ordenar(n.hijos);
+      };
+      ordenar(raiz);
 
       res.json({
         ...d,
@@ -469,6 +529,225 @@ export function registerVeracidadRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // THE SPECTRUM OF VIEWS (phase 6)
+  // ==========================================================================
+
+  /**
+   * Which side of the thesis an argument ends up supporting.
+   *
+   * A stance is relative to what it answers, not to the thesis: «a favor» hung
+   * under an «en contra» argument reinforces the AGAINST side. So the side is
+   * the product of the signs down the path — the reason a debate is a tree and
+   * not a list of opinions.
+   *
+   * `matiza` scores 0 for itself (it takes no side, that is the point) but its
+   * children keep the side of what it qualifies. Otherwise a whole branch would
+   * fall silent because somebody added a nuance halfway.
+   */
+  const ladosDelArbol = (filas: any[]): Map<string, number> => {
+    const hijosDe = new Map<string, any[]>();
+    for (const a of filas) {
+      const k = a.parent_id || '';
+      (hijosDe.get(k) || hijosDe.set(k, []).get(k)!).push(a);
+    }
+    const lados = new Map<string, number>();
+    const bajar = (padreId: string, ladoDelPadre: number) => {
+      for (const a of hijosDe.get(padreId) || []) {
+        const propio = a.postura === 'matiza' ? 0 : ladoDelPadre * (a.postura === 'a_favor' ? 1 : -1);
+        lados.set(a.id, propio);
+        bajar(a.id, propio !== 0 ? propio : ladoDelPadre);
+      }
+    };
+    bajar('', 1);
+    return lados;
+  };
+
+  /** Las cinco bandas, de un extremo al otro. El orden es el del dibujo. */
+  const BANDAS = [
+    { clave: 'muy_en_contra', label: 'Muy en contra', hasta: -0.6 },
+    { clave: 'en_contra', label: 'En contra', hasta: -0.2 },
+    { clave: 'en_medio', label: 'En medio', hasta: 0.2 },
+    { clave: 'a_favor', label: 'A favor', hasta: 0.6 },
+    { clave: 'muy_a_favor', label: 'Muy a favor', hasta: 1.01 },
+  ] as const;
+
+  /**
+   * GET /api/debates/:slug/espectro — el reparto de posturas, no un veredicto.
+   *
+   * Lo que Eugenio pidió por su nombre: «poder generar un espectro de visiones
+   * sobre una verdad». La postura de cada persona NO se le pregunta: **sale de
+   * lo que ha votado**, porque lo que alguien dice que piensa y lo que le mueve
+   * de verdad no siempre coinciden — y porque dos personas pueden estar a favor
+   * por razones opuestas, y eso solo se ve mirando QUÉ argumento sostiene cada
+   * una.
+   *
+   * Se puede leer sin sesión: el reparto es del debate, no tuyo.
+   */
+  app.get('/api/debates/:slug/espectro', async (req: Request, res: Response) => {
+    try {
+      const d = (await db.execute(sql`
+        SELECT id, tesis FROM debates WHERE slug = ${req.params.slug} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (!d) return res.status(404).json({ error: 'Ese debate no existe.' });
+
+      const filas = (await db.execute(sql`
+        SELECT id, parent_id, postura, texto, impacto, votos
+        FROM argumentos WHERE debate_id = ${d.id} AND archived_at IS NULL
+        ORDER BY profundidad, created_at
+      `)).rows as any[];
+
+      const votos = (await db.execute(sql`
+        SELECT v.user_id, v.entity_id, v.score, u.display_name AS nombre, u.avatar_url AS avatar
+        FROM ratings v
+        LEFT JOIN users u ON u.id = v.user_id
+        WHERE v.entity_type = 'argumento'
+          AND v.entity_id IN (SELECT id FROM argumentos WHERE debate_id = ${d.id} AND archived_at IS NULL)
+      `)).rows as any[];
+
+      const lados = ladosDelArbol(filas);
+      const porArgumento = new Map(filas.map((a) => [a.id, a]));
+
+      // Cada persona: cuánto peso ha puesto de cada lado.
+      const gente = new Map<string, { nombre: string; avatar: string | null; favor: number; contra: number; matices: number; votos: number }>();
+      for (const v of votos) {
+        const lado = lados.get(v.entity_id);
+        if (lado === undefined) continue;
+        const p = gente.get(v.user_id) || { nombre: v.nombre || 'Alguien', avatar: v.avatar, favor: 0, contra: 0, matices: 0, votos: 0 };
+        p.votos++;
+        if (lado > 0) p.favor += v.score;
+        else if (lado < 0) p.contra += v.score;
+        else p.matices += v.score;
+        gente.set(v.user_id, p);
+      }
+
+      const bandas = BANDAS.map((b) => ({ ...b, personas: 0, sumaPorArgumento: new Map<string, { suma: number; n: number }>() }));
+      let sinPostura = 0;
+
+      for (const [userId, p] of gente) {
+        const peso = p.favor + p.contra;
+        // SOLO HA VOTADO MATICES: no tiene postura, y eso NO es estar en medio.
+        // Meterlo en la banda central inventaría un centrista que no existe.
+        if (peso === 0) { sinPostura++; continue; }
+        const posicion = (p.favor - p.contra) / peso;   // −1 … +1
+        const banda = bandas.find((b) => posicion < b.hasta) || bandas[bandas.length - 1];
+        banda.personas++;
+        for (const v of votos) {
+          if (v.user_id !== userId) continue;
+          const acc = banda.sumaPorArgumento.get(v.entity_id) || { suma: 0, n: 0 };
+          acc.suma += v.score; acc.n++;
+          banda.sumaPorArgumento.set(v.entity_id, acc);
+        }
+      }
+
+      const conPostura = bandas.reduce((n, b) => n + b.personas, 0);
+
+      res.json({
+        tesis: d.tesis,
+        personas: conPostura,
+        sin_postura: sinPostura,
+        // POCA GENTE NO ES UN REPARTO. Se dice aquí, y no se deja que la
+        // pantalla lo deduzca de un número que también podría no mirar.
+        suficiente: conPostura >= 3,
+        bandas: bandas.map((b) => {
+          // El argumento que más mueve a ESTA banda: su mejor razón, la que
+          // habría que rebatir para moverla de sitio.
+          let mejor: any = null;
+          for (const [argId, acc] of b.sumaPorArgumento) {
+            const media = acc.suma / acc.n;
+            if (!mejor || media > mejor.media) {
+              const a = porArgumento.get(argId);
+              if (a) mejor = { id: a.id, texto: a.texto, media: Math.round(media * 100) / 100, personas: acc.n };
+            }
+          }
+          return { clave: b.clave, label: b.label, personas: b.personas, mejor_argumento: mejor };
+        }),
+      });
+    } catch (e: any) {
+      console.error('espectro GET:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
+  // THE IMPACT VOTE (phase 5)
+  // ==========================================================================
+
+  /**
+   * PUT /api/argumentos/:id/voto — «¿cuánto te mueve esto?», de 1 a 5.
+   *
+   * NO ES UN «ME GUSTA». Un argumento puede caerte fatal y moverte mucho, y ese
+   * es exactamente el que tiene que subir. La pregunta de la pantalla no es si
+   * te gusta, es cuánto te cambia la postura.
+   *
+   * PUEDES VOTAR LO TUYO. Kialo tampoco lo impide, y el motivo no es pereza:
+   * un voto propio entre cientos no mueve nada, y prohibirlo obligaría a
+   * explicar por qué el autor es el único que no puede decir cuánto le importa
+   * su propio argumento. Distinto de revisar, que sí está prohibido: revisar
+   * afirma sobre el común, votar solo dice lo que te pasa a ti.
+   *
+   * Se guarda en `ratings`, la tabla que la plataforma ya usa para puntuar
+   * cosas — la misma que escribe `POST /api/rate` en `knowledge.ts`. Esta ruta
+   * existe aparte porque además refresca el promedio guardado en `argumentos`,
+   * que es lo que ordena las ramas; `/api/rate` no sabe nada de eso.
+   */
+  app.put('/api/argumentos/:id/voto', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const valor = Number(req.body?.valor);
+      if (!Number.isInteger(valor) || valor < 1 || valor > 5) {
+        return res.status(400).json({ error: 'El voto va de 1 a 5: cuánto te mueve este argumento.' });
+      }
+
+      const argumento = (await db.execute(sql`
+        SELECT id, debate_id FROM argumentos WHERE id = ${req.params.id} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (!argumento) return res.status(404).json({ error: 'Ese argumento no existe.' });
+
+      // Un debate cerrado se lee: ni se argumenta ni se vota. Si no, el
+      // resultado seguiría moviéndose después de darlo por cerrado.
+      const debate = (await db.execute(sql`
+        SELECT estado FROM debates WHERE id = ${argumento.debate_id} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (debate?.estado === 'cerrado') {
+        return res.status(409).json({ error: 'Ese debate está cerrado: ya no se vota.' });
+      }
+
+      await db.execute(sql`
+        INSERT INTO ratings (user_id, entity_type, entity_id, score)
+        VALUES (${req.user!.id}, 'argumento', ${argumento.id}, ${valor})
+        ON CONFLICT (user_id, entity_type, entity_id)
+        DO UPDATE SET score = EXCLUDED.score, updated_at = now()
+      `);
+      const agg = await refrescarImpacto(argumento.id);
+      res.json({ ok: true, ...agg, mi_voto: valor });
+    } catch (e: any) {
+      console.error('voto PUT:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * DELETE /api/argumentos/:id/voto — retirar el voto.
+   *
+   * Cambiar de opinión al leer es lo que se quiere que pase, y eso incluye
+   * dejar de tener opinión. Sin esta ruta, un voto sería para siempre.
+   */
+  app.delete('/api/argumentos/:id/voto', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      await db.execute(sql`
+        DELETE FROM ratings
+        WHERE user_id = ${req.user!.id} AND entity_type = 'argumento' AND entity_id = ${req.params.id}
+      `);
+      const agg = await refrescarImpacto(req.params.id);
+      res.json({ ok: true, ...agg, mi_voto: null });
+    } catch (e: any) {
+      console.error('voto DELETE:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // SOURCES
   // ==========================================================================
 
@@ -519,6 +798,60 @@ export function registerVeracidadRoutes(app: Express, db: any) {
       res.status(201).json({ id });
     } catch (e: any) {
       console.error('fuente POST:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PUT /api/argumentos/:id/veracidad — a reviewer moves the badge.
+   *
+   * Level 3 (KNOWLEDGE), and never the author of the claim: signing off your
+   * own argument as verified is not a review, it is an assertion with extra
+   * steps. `sin_fuente` and `con_fuente` are not on offer here — those two the
+   * sources decide by themselves, and letting a person set them by hand would
+   * make the badge say something the citations do not.
+   */
+  app.put('/api/argumentos/:id/veracidad', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.KNOWLEDGE)) return;
+      const { veracidad, motivo } = req.body || {};
+      if (!valorValido(res, 'veracidad', veracidad, VERACIDADES_REVISABLES)) return;
+
+      const previo = (await db.execute(sql`
+        SELECT * FROM argumentos WHERE id = ${req.params.id} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (!previo) return res.status(404).json({ error: 'Ese argumento no existe.' });
+
+      // An admin is not exempt: the rule is about who wrote it, not about rank.
+      if (previo.autor_user_id === req.user!.id) {
+        return res.status(403).json({
+          error: 'No puedes revisar tu propio argumento. Pídeselo a otra persona de nivel Conocimiento.',
+        });
+      }
+      // Saying something is false without saying why leaves the author nothing
+      // to answer and the reader nothing to check.
+      if ((veracidad === 'refutada' || veracidad === 'disputada') && !motivo?.trim()) {
+        return res.status(400).json({
+          error: 'Di por qué. Marcar algo como refutado o disputado sin motivo no se puede responder ni comprobar.',
+        });
+      }
+
+      await db.execute(sql`
+        UPDATE argumentos SET
+          veracidad = ${veracidad},
+          veracidad_por = ${req.user!.displayName || req.user!.email || req.user!.id},
+          veracidad_en = now(),
+          veracidad_motivo = ${motivo?.trim() || null},
+          version = version + 1, updated_by = ${req.user!.id}, updated_at = now()
+        WHERE id = ${req.params.id}
+      `);
+      await registrarHistorial(db, {
+        entidad: 'argumento', tabla: 'argumentos', id: req.params.id, operacion: 'update',
+        previo, actor: req.user!.id,
+      });
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('veracidad PUT:', e?.cause?.message || e);
       res.status(500).json({ error: e.message });
     }
   });

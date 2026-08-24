@@ -130,6 +130,41 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
   /** Direcciones que ya se sabe que no se pintan solas: se les da instantánea
    *  directamente en vez de enseñar una página en blanco y luego corregir. */
   const [conRender, setConRender] = useState<Set<string>>(() => new Set());
+  // ── LO QUE EL MARCO TIENE QUE CARGAR, QUE NO ES LO MISMO QUE «LA DIRECCIÓN
+  //    ACTUAL» (2026-08-23) ─────────────────────────────────────────────────
+  // Medido: al pulsar un enlace, apple.com se cargaba DOS VECES —una al seguir
+  // el enlace y otra 700 ms después—, y eso era el «tarda uno o dos segundos
+  // haciendo algo que no es cargar la web» que se veía.
+  //
+  // El motivo: el marco llevaba `key={url}`. La página avisa por
+  // `postMessage` de a dónde ha ido, eso actualizaba `url`, cambiaba la `key`,
+  // y React tiraba el `<iframe>` y montaba uno nuevo — que volvía a cargar
+  // desde cero la página que ya estaba cargada.
+  //
+  // Ahora hay dos cosas separadas: `url` es dónde estás (barra, historia,
+  // título) y `urlMarco` es lo que hay que MANDAR cargar. Solo cambia cuando
+  // la navegación la ordenamos nosotros: la barra, atrás/adelante, recargar o
+  // subir a instantánea. Cuando navega la propia página, no se toca.
+  const [urlMarco, setUrlMarco] = useState('');
+  /** Cuántas veces se ha ORDENADO cargar. La clave del marco sale de aquí y no
+   *  de la dirección, y eso importa: al volver atrás se ordena cargar una
+   *  dirección que el marco ya tenía apuntada, y con la clave hecha de la
+   *  dirección no cambiaba nada — «atrás» se quedaba sin efecto. Con un
+   *  contador, cada orden es distinta de la anterior aunque la dirección
+   *  repita. (Encontrado probándolo, 2026-08-23.) */
+  const [orden, setOrden] = useState(0);
+  const ordenarCarga = useCallback((u: string) => {
+    yaPuesta.current = '';
+    setUrlMarco(u);
+    setOrden(n => n + 1);
+  }, []);
+  /** La dirección que el marco YA está enseñando porque navegó él solo.
+   *
+   *  Sin esto no basta con separar `url` de `urlMarco`: la página avisa, eso
+   *  mete la dirección en la historia, y la historia vuelve a ordenar cargar —
+   *  la doble carga entra por la puerta de atrás. Aquí se anota «esta ya la
+   *  tienes puesta» para que la historia no la mande cargar otra vez. */
+  const yaPuesta = useRef<string>('');
   const [sesion, setSesion] = useState<string | null>(null);
   const [reinicios, setReinicios] = useState(0);
   const [url, setUrl] = useState(inicial);
@@ -595,31 +630,17 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
   useEffect(() => {
     if (modo !== 'proxy') return;
     setUrl(urlProxy);
-  }, [modo, urlProxy]);
+    // La historia la mueven DOS cosas: la barra y atrás/adelante, que sí son
+    // una orden de cargar; y la propia página avisando de a dónde ha ido, que
+    // no lo es — ya está cargada. Se distinguen por `yaPuesta`.
+    if (urlProxy && urlProxy !== yaPuesta.current) ordenarCarga(urlProxy);
+  }, [modo, urlProxy, ordenarCarga]);
 
-  // El proxy no avisa del título por SSE: se le pregunta al servidor.
-  useEffect(() => {
-    if (modo !== 'proxy' || !url) return;
-    let vivo = true;
-    fetch(`/api/navegador/leer?url=${encodeURIComponent(url)}`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(j => {
-        if (!vivo) return;
-        if (j.error) { setAviso(j.error); return; }
-        if (j.titulo) onTitulo?.(j.titulo.slice(0, 60));
-        // ── SUBIR DE ESCALÓN SOLO SI HACE FALTA ──────────────────────────
-        // El servidor ya ha bajado esta página para sacarle el título, así que
-        // sabe si trae texto o viene vacía. Si viene vacía es una aplicación
-        // de JavaScript: por el proxy se vería en blanco, y se pide la
-        // instantánea. No cuesta una petición extra — la respuesta ya estaba.
-        if (j.necesitaRender && !conRender.has(url)) {
-          setConRender(s => new Set(s).add(url));
-          setCargando(true);
-        }
-      })
-      .catch(() => { /* el marco enseñará su propio error */ });
-    return () => { vivo = false; };
-  }, [modo, url]);
+  // EL TÍTULO YA NO SE PIDE APARTE (2026-08-23). Antes se llamaba a
+  // `/api/navegador/leer`, que **vuelve a descargar la página entera en el
+  // servidor**: cada clic costaba dos descargas completas de la misma web.
+  // Ahora lo manda la propia página por `postMessage`, donde ya está cargada y
+  // no cuesta nada. Ver la inyección en `src/server/navegador.ts`.
 
   // La página avisa por postMessage de dónde está (solo en modo proxy).
   useEffect(() => {
@@ -628,6 +649,20 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
       const d = e.data;
       if (!d || d.navegadorHumanity !== 'aqui' || typeof d.url !== 'string') return;
       setCargando(false);
+      // La página ya está pintada: que nadie la mande cargar otra vez.
+      yaPuesta.current = d.url;
+      if (d.titulo) onTitulo?.(String(d.titulo).slice(0, 60));
+      // SUBIR A INSTANTÁNEA SI LA PÁGINA HA VENIDO VACÍA. Lo dice la propia
+      // página, que es quien lo sabe sin que nadie la vuelva a descargar.
+      if (d.vacia && !conRender.has(d.url)) {
+        setConRender(s2 => new Set(s2).add(d.url));
+        // ESTO SÍ es una orden nuestra: la misma dirección, pero por el otro
+        // camino. Se borra la marca para que no la frene.
+        ordenarCarga(d.url);
+        setCargando(true);
+      }
+      // La página avisando de dónde ha ido NO recarga el marco: solo mueve la
+      // historia y la barra. Es el arreglo del clic que tardaba.
       setHistoria(h => (h[donde] === d.url ? h : [...h.slice(0, donde + 1), d.url]));
       setDonde(dd => (historia[dd] === d.url ? dd : dd + 1));
     };
@@ -912,7 +947,7 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
         </div>
       ) : video ? (
         <iframe
-          key={`${url}|${recarga}`}
+          key={`${orden}|${recarga}`}
           src={video}
           title="Reproductor de vídeo"
           onLoad={() => setCargando(false)}
@@ -948,8 +983,8 @@ export default function Navegador({ inicial, onTitulo, onUrl, controles, onMover
            este par es el correcto. */
         <iframe
           ref={marcoProxy}
-          key={`${url}|${recarga}`}
-          src={url ? (conRender.has(url) ? instantanea(url) : proxy(url)) : 'about:blank'}
+          key={`${orden}|${recarga}`}
+          src={urlMarco ? (conRender.has(urlMarco) ? instantanea(urlMarco) : proxy(urlMarco)) : 'about:blank'}
           title="Navegador"
           onLoad={() => setCargando(false)}
           className="flex-1 w-full border-0 bg-white"

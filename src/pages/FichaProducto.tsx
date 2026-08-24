@@ -155,6 +155,7 @@ export default function FichaProducto({ handle }: { handle: string }) {
           ...(variante ? { variante_id: variante.id } : {}),
           ...(caja?.activo && p.acepta_puntos && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cubreTodo && p.envio?.hace_falta ? { direccion } : {}),
+          ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
