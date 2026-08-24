@@ -6813,3 +6813,22 @@ alimenta esta caja) **sí distingue tildes**, así que «energia» encuentra la
 temática pero ninguna publicación. El arreglo es el mismo `translate()` que ya
 lleva `/api/search`, y va en su propia PR porque toca `src/server/buscador.ts`,
 que otro agente está editando hoy.
+
+## 2026-08-24 — El tercer desbordamiento del pie de la tarjeta
+Con la tarjeta ya dentro de la pantalla (PR #400 del Programador 2), el renglón
+«PARTE DE · nombre del lienzo · 11 piezas» seguía saliéndose: medía 395 px
+dentro de una tarjeta de 320, y el nombre no salía con puntos suspensivos sino
+cortado por el canto.
+
+**`min-w-0` permite encoger; no obliga a nada.** En una columna con
+`items-start`, un hijo se dimensiona por su contenido, así que el `truncate` no
+llegaba a actuar nunca. Hacían falta las dos cosas:
+
+- `max-w-full` en el botón, que es `inline-flex` y por tanto se dimensiona por
+  su contenido. En una fila con `flex-wrap`, un hijo más ancho que la línea no
+  encoge: se queda ancho y se sale.
+- `w-full` en los dos `span` de dentro, para que el renglón herede el ancho del
+  botón en vez del de su texto.
+
+Comprobado a 360, 414 y en la portada: **nada se sale**. A 320 px se sale
+todavía la cabecera —el botón de la cuenta, 38 px— y eso es de `Layout.tsx`.
