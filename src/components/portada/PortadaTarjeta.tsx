@@ -66,19 +66,77 @@ export function temasDe(item: any): typeof OBJETIVOS {
  * tarjetas vecinas. Una rejilla que se reordena cuando pasas el ratón por
  * encima es una rejilla que no se puede leer.
  */
+/** ¿Ha tocado ya algo la persona en esta página?
+ *
+ *  De esto depende que se pueda quitar el silencio. Sin un clic previo, Chrome
+ *  no ignora el intento: **pausa el vídeo**. Preguntar primero es la diferencia
+ *  entre «se ve y no se oye» y «no se ve». */
+const puedeSonar = () => {
+  const a = (navigator as any).userActivation;
+  return a ? Boolean(a.hasBeenActive) : true;
+};
+
 export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo: string }) {
   const [encima, setEncima] = useState(false);
   const [rota, setRota] = useState(false);
   const reproductor = useRef<HTMLVideoElement>(null);
+  const marco = useRef<HTMLIFrameElement>(null);
 
-  // Se reproduce al pasar el ratón y se rebobina al salir, para que la
-  // siguiente vez vuelva a empezar por el principio y no por donde se quedó.
+  // ── SE REPRODUCE CON SONIDO, Y ESO TIENE UNA PELEA DETRÁS ─────────────────
+  // Eugenio: «se empieza a reproducir, pero no se escucha… ponle el sonido
+  // activado por defecto».
+  //
+  // Ningún navegador deja empezar un vídeo con sonido por su cuenta: es la
+  // norma que impide que una página que abres te grite. Así que la única forma
+  // de que suene es **empezar callado y quitar el silencio en cuanto arranca**,
+  // que sí está permitido si la persona ya ha tocado algo de la página.
+  //
+  // Si el navegador se niega, se queda callado y no pasa nada más: no hay
+  // mensaje de error ni vídeo parado. Merece la pena intentarlo porque en la
+  // práctica, para cuando alguien pasa el ratón por una tarjeta, ya ha hecho
+  // clic en algo — y entonces suena.
+  //
+  // ── Y POR ESO SE PREGUNTA ANTES DE INTENTARLO ────────────────────────────
+  // Si NADIE ha tocado nada de la página todavía, quitar el silencio no es que
+  // no funcione: **Chrome pausa el vídeo**. O sea que el intento a ciegas
+  // cambia «se ve pero no se oye» por «no se ve», que es peor.
+  //
+  // `navigator.userActivation` dice si ya ha habido un clic. Donde no exista
+  // esa propiedad se intenta igual, que es como estaba.
   useEffect(() => {
     const v = reproductor.current;
     if (!v) return;
-    if (encima) { v.play().catch(() => {}); }
-    else { v.pause(); v.currentTime = 0; }
+    if (encima) {
+      v.muted = !puedeSonar();
+      v.play().catch(() => {
+        // El navegador lo ha bloqueado. Se reproduce callado, que es mejor que
+        // no reproducir: la portada en movimiento sigue diciendo que hay vídeo.
+        v.muted = true;
+        v.play().catch(() => {});
+      });
+    } else {
+      v.pause();
+      v.currentTime = 0;
+    }
   }, [encima]);
+
+  // Lo mismo para YouTube, que no es un `<video>` sino un reproductor dentro de
+  // un marco: se le habla por mensajes. Se insiste tres veces porque el
+  // reproductor tarda en estar listo y un mensaje que llega antes se pierde.
+  useEffect(() => {
+    if (!encima || !portada.youtube) return;
+    if (!puedeSonar()) return;
+    const quitarSilencio = () => {
+      const w = marco.current?.contentWindow;
+      if (!w) return;
+      for (const orden of ['unMute', 'playVideo']) {
+        try { w.postMessage(JSON.stringify({ event: 'command', func: orden, args: [] }), '*'); } catch { /* aún no escucha */ }
+      }
+      try { w.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*'); } catch { /* ídem */ }
+    };
+    const tiempos = [600, 1400, 2600].map(t => setTimeout(quitarSilencio, t));
+    return () => tiempos.forEach(clearTimeout);
+  }, [encima, portada.youtube]);
 
   return (
     <div
@@ -88,7 +146,15 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     >
       <div className={cn(
         'absolute inset-0 overflow-hidden rounded-xl transition-transform duration-300 ease-out',
-        encima && portada.clase === 'video' ? 'z-20 scale-[1.12] shadow-2xl' : '',
+        // MÁS GRANDE MIENTRAS SUENA. Eugenio: «haz que incluso se amplíe el
+        // vídeo de tamaño solo con el hover cuando se reproduce». Del 1,12 al
+        // 1,25: se sale del marco lo bastante para que se note que esa tarjeta
+        // es la que está viva, y no tanto como para tapar a las vecinas.
+        //
+        // Sigue siendo `scale` y no un cambio de tamaño de la caja: así la
+        // rejilla no se recoloca al pasar el ratón. Una rejilla que se mueve
+        // mientras la lees no se puede leer.
+        encima && portada.clase === 'video' ? 'z-20 scale-[1.25] shadow-2xl' : '',
       )}>
         {/* Quieta: la miniatura. Siempre, aunque haya vídeo — así la rejilla se
             pinta entera sin esperar a ningún reproductor. */}
@@ -111,12 +177,31 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
 
         {encima && portada.youtube && (
           <iframe
+            ref={marco}
             // `youtube-nocookie`, como en el resto de la aplicación: el mismo
             // reproductor sin la cookie de seguimiento.
-            src={`https://www.youtube-nocookie.com/embed/${portada.youtube}?autoplay=1&mute=1&controls=0&loop=1&playlist=${portada.youtube}`}
+            //
+            // `enablejsapi=1` es lo que permite hablarle para quitarle el
+            // silencio. `mute=1` de salida no es una preferencia: sin él el
+            // navegador no deja arrancar el vídeo solo, y entonces no hay nada
+            // que desmutear.
+            src={`https://www.youtube-nocookie.com/embed/${portada.youtube}?autoplay=1&mute=1&controls=0&loop=1&playlist=${portada.youtube}&enablejsapi=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1`}
             title={titulo}
             allow="autoplay; encrypted-media"
-            className="absolute inset-0 h-full w-full"
+            // ── LA LÍNEA QUE QUITA LOS BOTONES Y EL TÍTULO ──────────────────
+            // Eugenio: «aparecen los botones de pausa, adelante y atrás y el
+            // título que tapan la imagen». `controls=0` ya estaba puesto y no
+            // bastaba: **YouTube enseña su barra en cuanto el ratón se mueve
+            // por encima del reproductor**, controles o no.
+            //
+            // Con `pointer-events: none` el ratón le atraviesa y el reproductor
+            // no se entera de que hay nadie: no saca la barra, ni el título, ni
+            // el logo. El hover de la tarjeta sigue funcionando porque vive en
+            // el div de fuera, no aquí.
+            //
+            // Y de regalo arregla otra cosa: un clic ya no se lo come YouTube
+            // —que abriría su página—, sino que llega a la tarjeta.
+            className="pointer-events-none absolute inset-0 h-full w-full"
           />
         )}
         {portada.fichero && (
@@ -130,8 +215,12 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
             ref={reproductor}
             src={`${portada.fichero}#t=0.1`}
             preload="metadata"
-            muted loop playsInline
-            className="absolute inset-0 h-full w-full object-cover"
+            // Sin `muted` fijo: lo decide el efecto de arriba, que intenta
+            // sonar y se calla solo si el navegador se niega.
+            loop playsInline
+            // Igual que el marco de YouTube: el ratón lo atraviesa, así que
+            // ningún control del navegador aparece encima de la portada.
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
           />
         )}
 
