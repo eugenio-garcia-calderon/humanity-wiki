@@ -26,18 +26,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "src/paginasInfo.ts",
       "motivo": "prog7: panel de variables económicas y comisiones 12/10",
       "desde": "2026-08-24T11:54:01.050Z"
@@ -83,6 +71,42 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "fase 1 del buscador: areas y mas profundidad",
       "desde": "2026-08-24T12:05:44.673Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0118_liquidaciones.sql",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/liquidaciones.ts",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/stripe.ts",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/Cesta.tsx",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Comercio.tsx",
+      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
+      "desde": "2026-08-24T12:06:42.011Z"
     }
   ]
 }
