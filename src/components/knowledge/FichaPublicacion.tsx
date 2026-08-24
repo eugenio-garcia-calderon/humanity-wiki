@@ -35,6 +35,9 @@ export interface Publicacion {
   fecha: string;
   autor_id: string | null;
   autor_nombre: string | null;
+  /** La foto del autor. El servidor la manda desde que la tarjeta la enseña
+   *  arriba; puede faltar, y entonces se pinta la inicial. */
+  autor_avatar?: string | null;
   donde: string | null;
   donde_slug: string | null;
   personal: boolean;
