@@ -1,22 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/portada/PortadaTarjeta.tsx",
-      "motivo": "hover: sonido, sin controles encima y mas grande",
-      "desde": "2026-08-24T11:13:45.376Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog8: portada al pasar el raton",
-      "desde": "2026-08-24T11:21:02.353Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/navegacion/Rail.tsx",
-      "motivo": "prog2: railes siempre puestos",
-      "desde": "2026-08-24T11:21:07.715Z"
-    }
-  ]
+  "reservas": []
 }
