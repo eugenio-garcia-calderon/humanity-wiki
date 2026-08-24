@@ -1085,12 +1085,31 @@ export default function Explorar() {
                       <button
                       onClick={e => { e.stopPropagation(); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
                       title={`Ver «${it.donde}»`}
-                      className="group/red inline-flex min-w-0 items-center gap-2 rounded-lg -mx-1.5 px-1.5 py-1 hover:bg-slate-50 transition-colors"
+                      /* `max-w-full` ADEMÁS DE `min-w-0` (2026-08-24). Los dos
+                         hacen falta y hacen cosas distintas: `min-w-0` deja que
+                         el `truncate` de dentro pueda recortar, y `max-w-full`
+                         impide que este botón —que es `inline-flex`, o sea que
+                         se dimensiona por su contenido— crezca más que la
+                         tarjeta. En una fila con `flex-wrap`, un hijo más ancho
+                         que la línea no encoge: se queda ancho y se sale.
+                         Medido a 360 px: el renglón del nombre medía 395 y
+                         acababa en 451, con el nombre del lienzo cortado por el
+                         canto en vez de con sus puntos suspensivos. */
+                      className="group/red inline-flex min-w-0 max-w-full items-center gap-2 rounded-lg -mx-1.5 px-1.5 py-1 hover:bg-slate-50 transition-colors"
                       >
                       <Network className="w-3.5 h-3.5 shrink-0 text-slate-300 group-hover/red:text-emerald-600 transition-colors" />
-                      <span className="min-w-0 flex flex-col items-start leading-tight">
+                      {/* `w-full` EN LOS DOS, Y NO SÓLO `min-w-0` (2026-08-24).
+                          `min-w-0` permite encoger; no obliga a nada. En una
+                          columna con `items-start`, un hijo se dimensiona por su
+                          contenido, así que el renglón del nombre se iba a 395 px
+                          dentro de una tarjeta de 320 y el `truncate` no llegaba a
+                          actuar: el nombre no salía con puntos suspensivos, salía
+                          cortado por el canto. Con `w-full` el renglón hereda el
+                          ancho del botón, que ya está limitado por `max-w-full`, y
+                          entonces sí recorta. */}
+                      <span className="w-full min-w-0 flex flex-col items-start leading-tight">
                       <span className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">Parte de</span>
-                      <span className="flex min-w-0 items-baseline gap-1.5">
+                      <span className="flex w-full min-w-0 items-baseline gap-1.5">
                       <span className="truncate text-[12px] font-black text-slate-800 group-hover/red:text-emerald-700 transition-colors">{it.donde}</span>
                       {/* `> 0` y no `!= null`: un lienzo del que no consta
                           ninguna pieza no se anuncia con un «0 piezas», que

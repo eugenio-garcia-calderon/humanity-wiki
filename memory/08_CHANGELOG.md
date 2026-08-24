@@ -6750,6 +6750,29 @@ o modificadas—.
 - **Nace apagado** (`COBRO_AGREGADO=off`): calcula, marca vencimientos y canta, pero no mueve dinero.
 - Probado en local por HTTP: sin contrato → 400 diciendo quién falta (y con la concordancia arreglada: «no cobra» / «no cobran»); con las dos firmas → la sesión de pago se crea de verdad (claves de prueba); puntos + dos tiendas → 400 con motivo; liquidación vencida → pasa a «lista» y el barrido dice `sin_cuenta_de_cobro` porque la tienda no tiene Stripe conectado; devolución pedida → **retenida** con motivo; rechazada → vuelve a **pendiente**; aceptada → **cancelada** y el pedido devuelto; la tienda ve por cobrar / retenido / cobrado. Todo retirado.
 
+## 2026-08-24 — Capturas para Google Play, y dos fallos de móvil que encontraron
+Eugenio: «ya tengo la cuenta de Google Play verificada, ¿qué podemos hacer
+ahora?».
+
+- `scripts/capturas-tienda.mjs`: cinco capturas a 1080×1920 contra la
+  compilación de producción en local, con `?sw=off` (el trabajador de servicio
+  cuelga un navegador automatizado) y una sesión de prueba marcada que se borra
+  **pase lo que pase**, también si el guion falla.
+- **360 px de ancho en CSS, no 1080.** Los dos números son distintos y los dos
+  importan: el fichero lo pide la tienda a 1080, pero el ancho en CSS decide qué
+  diseño se dibuja. La primera tanda salió con la vista de ORDENADOR dentro de
+  un fichero con forma de móvil.
+- Y con el ancho de verdad aparecieron **dos fallos que llevaban días en
+  producción sin que nadie los viera**:
+  - Los tres caminos: «Proyectar» se salía de la pantalla. Arreglado aquí —
+    `min-w-0` en la tarjeta, y en el móvil sin icono y un punto más pequeño.
+  - La tarjeta de publicación de `/explorar` medía 445 px en una pantalla de
+    360. **No es mío**: `Explorar.tsx` lo tiene reservado el Programador 2 y se
+    le ha pasado el diagnóstico y la línea.
+- El informe de pwabuilder.com sobre `humanity.wiki`: **0 errores**, 2 avisos
+  (el trabajador de servicio, que su rastreador no ve porque se registra desde
+  JavaScript, y las capturas del manifiesto). El paquete de Android se puede
+  generar.
 ### 2026-08-24 — Las temáticas, en el buscador que se usa de verdad (prog8)
 
 Eugenio, después de la fase 1: «he probado a escribir *eco* y no aparece
@@ -6790,3 +6813,22 @@ alimenta esta caja) **sí distingue tildes**, así que «energia» encuentra la
 temática pero ninguna publicación. El arreglo es el mismo `translate()` que ya
 lleva `/api/search`, y va en su propia PR porque toca `src/server/buscador.ts`,
 que otro agente está editando hoy.
+
+## 2026-08-24 — El tercer desbordamiento del pie de la tarjeta
+Con la tarjeta ya dentro de la pantalla (PR #400 del Programador 2), el renglón
+«PARTE DE · nombre del lienzo · 11 piezas» seguía saliéndose: medía 395 px
+dentro de una tarjeta de 320, y el nombre no salía con puntos suspensivos sino
+cortado por el canto.
+
+**`min-w-0` permite encoger; no obliga a nada.** En una columna con
+`items-start`, un hijo se dimensiona por su contenido, así que el `truncate` no
+llegaba a actuar nunca. Hacían falta las dos cosas:
+
+- `max-w-full` en el botón, que es `inline-flex` y por tanto se dimensiona por
+  su contenido. En una fila con `flex-wrap`, un hijo más ancho que la línea no
+  encoge: se queda ancho y se sale.
+- `w-full` en los dos `span` de dentro, para que el renglón herede el ancho del
+  botón en vez del de su texto.
+
+Comprobado a 360, 414 y en la portada: **nada se sale**. A 320 px se sale
+todavía la cabecera —el botón de la cuenta, 38 px— y eso es de `Layout.tsx`.
