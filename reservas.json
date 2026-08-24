@@ -65,6 +65,12 @@
       "ruta": "src/components/knowledge/CrearProducto.tsx",
       "motivo": "prog7: comisión 12/10 en los textos",
       "desde": "2026-08-24T12:00:59.191Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/bienvenida/previas.tsx",
+      "motivo": "prog3: previa de Explorar con vídeo, fotos y muro social animado",
+      "desde": "2026-08-24T12:04:15.720Z"
     }
   ]
 }
