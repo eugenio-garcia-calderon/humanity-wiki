@@ -7,30 +7,6 @@
       "desde": "2026-08-24T11:13:45.376Z"
     },
     {
-      "agente": "prog7",
-      "ruta": "drizzle/0118_liquidaciones.sql",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/liquidaciones.ts",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/stripe.ts",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "prog2: autor pinchable, visualizaciones claras y la etiqueta de donde esta integrada",
