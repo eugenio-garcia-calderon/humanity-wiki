@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { abrirVentana } from '../ventanas/bus';
 import {
   EstilosPrevias,
   PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
@@ -45,7 +46,28 @@ import {
  * cuando dos cosas se parecen de verdad es honesto; inventar dos distintos para
  * que no se repitan sería decorar una diferencia que no existe.
  */
-interface Cosa { nombre: string; Previa: () => any; a: string; nota?: string }
+/*
+ * ALGUNAS COSAS NO SON UNA PÁGINA (2026-08-24). Eugenio: «la herramienta de
+ * navegador, donde podía navegar en internet, cuando hago clic no me lleva
+ * ahí».
+ *
+ * Y no llevaba a ningún sitio porque no lo hay: el navegador no es una ruta,
+ * es una VENTANA que `GestorVentanas` abre encima de lo que estés haciendo
+ * (vive en el Layout, así que está montado en todas las páginas). La tarjeta
+ * apuntaba a `/archivos` —lo más parecido que había— y por eso al pulsarla
+ * aparecían tus archivos en vez de internet.
+ *
+ * Por eso una cosa lleva `a` (una ruta) **o** `abrir` (una orden). Nunca las
+ * dos: si tuviera las dos, la tarjeta haría dos cosas y habría que leer el
+ * código para saber cuál gana.
+ */
+interface Cosa {
+  nombre: string;
+  Previa: () => any;
+  a?: string;
+  abrir?: () => void;
+  nota?: string;
+}
 
 const COSAS: Cosa[] = [
   { nombre: 'Foto o vídeo', Previa: PreviaArchivos,      a: '/?atajo=crear',      nota: 'Con la cámara' },
@@ -67,7 +89,12 @@ const COSAS: Cosa[] = [
   // de la derecha ya no lleva herramientas, **éste es su único sitio**: si no
   // estuvieran aquí, no habría forma de llegar a ellas.
   { nombre: 'Visor 3D',     Previa: PreviaMundo,         a: '/juego',             nota: 'Camina por tus proyectos' },
-  { nombre: 'Navegador',    Previa: PreviaNavegador,     a: '/archivos',          nota: 'Guarda lo de internet' },
+  // `about:inicio` es la página de arranque del propio navegador, la misma con
+  // la que lo abría el menú ☰ de antes. No se le pasa una web de verdad: quien
+  // lo abre desde aquí todavía no ha dicho a dónde quiere ir.
+  { nombre: 'Navegador',    Previa: PreviaNavegador,
+    abrir: () => abrirVentana({ titulo: 'Navegador', clase: 'navegador', destino: 'about:inicio' }),
+    nota: 'Navega por internet' },
   { nombre: 'Contactos',    Previa: PreviaTelecom,       a: '/telefono',          nota: 'Tu gente y sus llamadas' },
 ];
 
@@ -164,7 +191,7 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
               {COSAS.map(c => (
                 <button
                   key={c.nombre}
-                  onClick={() => { navegar(c.a); onCerrar(); }}
+                  onClick={() => { if (c.abrir) c.abrir(); else if (c.a) navegar(c.a); onCerrar(); }}
                   title={c.nota}
                   // `group` es lo que enciende la animación de dentro del
                   // dibujo: cada previsualización se mueve con `group-hover`.

@@ -6370,3 +6370,18 @@ shell roto**.
 - Enganches: compra pagada con puntos y compra por Stripe → `compra_hecha` al comprador y `venta_nueva` al vendedor; marcar enviado/entregado/devuelto → aviso al comprador con el seguimiento. El teléfono se pide en la cesta (opcional, diciendo para qué) y Stripe lo recoge en el pago (`phone_number_collection`).
 - `GET /api/admin/whatsapp`: estado del canal, qué falta para enviar de verdad, y los últimos avisos.
 - Probado en local por HTTP: canal apagado dice qué falta; compra con teléfono → dos avisos `simulado` (comprador y vendedor) con el texto real; enlaces `wa.me` correctos en las dos direcciones y el teléfono no se filtra al cliente; marcar enviado → aviso con seguimiento; repetir el estado → sigue habiendo **un** aviso. Todo retirado.
+
+## 2026-08-24 — El «Navegador» del cajetín de crear abre el navegador
+Eugenio: «la herramienta de navegador, donde podía navegar en internet, cuando
+hago clic no me lleva ahí».
+
+No llevaba a ningún sitio porque no lo hay: el navegador no es una ruta, es una
+ventana que abre `GestorVentanas` (montado en el Layout, o sea en todas las
+páginas). La tarjeta apuntaba a `/archivos` —lo más parecido que había— y por
+eso salían tus archivos en vez de internet.
+
+- `Cosa` acepta ahora `a` (una ruta) **o** `abrir` (una orden). Nunca las dos.
+- «Navegador» llama a `abrirVentana({ clase: 'navegador', destino: 'about:inicio' })`,
+  igual que hacía el menú ☰ que se retiró.
+- Comprobado en el navegador: se abre la ventana con su barra de direcciones,
+  se escribe una dirección y la ventana va a esa página.
