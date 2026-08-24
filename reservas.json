@@ -25,12 +25,6 @@
       "desde": "2026-08-23T23:32:55.817Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "equipo/REPARTO.md",
-      "motivo": "norma: comprobar con quien despues de soltar",
-      "desde": "2026-08-23T23:43:10.099Z"
-    },
-    {
       "agente": "prog5",
       "ruta": "drizzle/0116_veracidad_coherencia.sql",
       "motivo": "Veracidad fase 8: busqueda de contradicciones (indice de texto)",
