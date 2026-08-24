@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { Scale, FileText, Lock, AlertTriangle, ArrowLeft } from 'lucide-react';
 import Privacidad from '../Privacidad';
+import ContratoCobro from './ContratoCobro';
 
 // ============================================================================
 // AVISOS LEGALES (2026-08-23, Eugenio: «haz tú mismo los términos y
@@ -144,6 +145,10 @@ export default function AvisosLegales() {
       </div>
     );
   }
+  // El contrato de servicio de cobro (2026-08-24): el que firma cada tienda
+  // para que la plataforma pueda cobrar por ella.
+  if (vista === 'cobro') return <ContratoCobro />;
+
   if (vista === 'terminos') {
     return (
       <div className="max-w-3xl mx-auto px-5 py-8 pb-16">
@@ -172,6 +177,16 @@ export default function AvisosLegales() {
         <Link to="/avisos-legales?vista=privacidad" className="group block p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-500 hover:shadow-lg transition-all duration-300">
           <h3 className="text-sm font-bold text-slate-900 mb-1 inline-flex items-center gap-2 group-hover:text-emerald-600 transition-colors"><Lock className="w-4 h-4" /> Política de privacidad</h3>
           <p className="text-xs text-slate-500 leading-relaxed">Qué guardamos, con quién se comparte, cuánto tiempo y cómo borrarlo. Medido sobre el código, no recordado.</p>
+        </Link>
+        <Link to="/avisos-legales?vista=cobro" className="group block p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-500 hover:shadow-lg transition-all duration-300">
+          <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 inline-flex items-center gap-1.5">
+            <Scale className="w-3.5 h-3.5" /> Para quien vende
+          </p>
+          <h2 className="mt-1 text-lg font-black text-slate-900 group-hover:text-emerald-700">Contrato de servicio de cobro</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Lo que firma cada tienda para que la plataforma pueda cobrar en su nombre: comisión, cuándo se
+            liquida, qué pasa con devoluciones y contracargos.
+          </p>
         </Link>
       </div>
     </div>
