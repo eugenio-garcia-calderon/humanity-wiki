@@ -6430,3 +6430,32 @@ lienzo (7), revisión y moderación (9), y sacarlo a la portada y al buscador (1
 - `cotizar` acepta país y CP y devuelve zona, si se envía, qué no llega y si cabe recogida; la cesta recotiza mientras se escribe el destino. `comprar` calcula el porte con la zona real y admite `entrega: 'recogida'` (sin porte y sin pedir dirección). La ficha enseña la tabla de zonas y «a otras zonas no envía», más el sitio de recogida.
 - El vendedor las gestiona en Comercio → «envíos» (`EditorEnvio`): una fila por zona, **zona en blanco = no envía ahí**, dicho con esas palabras porque «vacío» suele leerse como «gratis».
 - Probado en local por HTTP: tarifas 3,50 / 9 / 15 y resto cerrado → cotizar Madrid 350, Tenerife 900, París 1500, Nueva York `se_envia=false` con el nombre de lo que no llega; 5 unidades (50 €) → envío 0 por umbral; comprar a Canarias → pedido con porte 900 y `entrega_tipo=envio`; comprar a EE. UU. → 409 sin tocar dinero; recogida → porte 0, `entrega_tipo=recogida` y sin dirección. Todo retirado.
+### 2026-08-24 — El debate, donde se crean las cosas
+
+Eugenio: *«mete el debate como herramienta de creación en el menú desplegable
+central y en la página principal cuando la sesión no está iniciada, junto con el
+resto de herramientas»*.
+
+- **En el botón central de crear** (`HojaCrear`), entre «Esquema» y «Mapa»:
+  «Debate · Con argumentos y votos». Lleva a `/debates?nuevo=1`, que **abre el
+  formulario ya desplegado** — llegar a una lista después de haber dicho que
+  quieres crear algo es hacerle repetir el gesto a quien ya lo hizo.
+- **En la portada de quien no ha entrado** (`Bienvenida`), como la 7ª de las 14
+  herramientas: «Una afirmación, sus razones a favor y en contra, y las fuentes
+  de cada una. Al final no hay un veredicto: hay un mapa de quién piensa qué y
+  por qué».
+- **Un dibujo propio, `PreviaDebate`**, con la misma animación al pasar el ratón
+  que las otras trece: la tesis arriba, las dos ramas colgando y las barras del
+  voto debajo. **Verde y rojo**, los mismos dos colores con los que el grafo
+  dice «apoya» y «contradice» en toda la plataforma — un dibujo que estrenara
+  colores enseñaría un vocabulario que después no se ve en ninguna parte.
+  Y es **el mismo dibujo en los dos sitios**, importado y no copiado: lo que ve
+  un desconocido al decidir si se registra es exactamente lo que verá al ir a
+  crear un debate.
+- **Por qué hacía falta**: el debate estaba solo en el menú de información, que
+  es donde se EXPLICA lo que es. Ahí no lo encuentra quien tiene algo que
+  discutir, que es justo la persona que hace falta.
+- **Verificado en el navegador, con clics reales**: la portada enseña las 14
+  herramientas con Debates entre ellas y su dibujo; el botón central abre la
+  hoja con «Debate» en su sitio; y pulsarlo cae en `/debates` con el formulario
+  abierto. El usuario de prueba se borró y la sesión se cerró.

@@ -183,6 +183,50 @@ export function PreviaEsquema() {
   );
 }
 
+/**
+ * Un debate: la tesis arriba y, colgando, lo que la sostiene y lo que la tumba
+ * — con las barras del voto debajo, que es lo que decide cuál sube.
+ *
+ * VERDE A UN LADO Y ROJO AL OTRO, los mismos dos colores con los que el grafo
+ * dice «apoya» y «contradice» en toda la plataforma. Un dibujo que estrenara
+ * colores enseñaría un vocabulario que después nadie vuelve a ver.
+ */
+export function PreviaDebate() {
+  return (
+    <svg viewBox="0 0 160 90" className={marco} aria-hidden preserveAspectRatio="xMidYMid slice">
+      <rect width="160" height="90" fill="#faf5ff" />
+      {/* La tesis */}
+      <rect x="40" y="8" width="80" height="16" rx="4" fill="#fff" stroke="#c4b5fd" strokeWidth="1.4" />
+      <rect x="46" y="13" width="52" height="3.5" rx="1.75" fill="#7c3aed" />
+      <rect x="46" y="19" width="34" height="2.5" rx="1.25" fill="#ddd6fe" />
+      {/* Las dos ramas */}
+      <path className="pv-arista" d="M70 24 L44 38" stroke="#a7f3d0" strokeWidth="1.6" fill="none" />
+      <path className="pv-arista" d="M90 24 L116 38" stroke="#fecaca" strokeWidth="1.6" fill="none" />
+      <g className="pv-sube">
+        <rect x="14" y="38" width="60" height="18" rx="4" fill="#fff" stroke="#34d399" strokeWidth="1.3" />
+        <rect x="20" y="43" width="40" height="3" rx="1.5" fill="#059669" />
+        <rect x="20" y="49" width="28" height="2.5" rx="1.25" fill="#d1fae5" />
+      </g>
+      <g className="pv-sube pv-sube-2">
+        <rect x="86" y="38" width="60" height="18" rx="4" fill="#fff" stroke="#f87171" strokeWidth="1.3" />
+        <rect x="92" y="43" width="40" height="3" rx="1.5" fill="#dc2626" />
+        <rect x="92" y="49" width="24" height="2.5" rx="1.25" fill="#fee2e2" />
+      </g>
+      {/* El voto: cinco barras que crecen, que es lo que ordena las ramas */}
+      <g className="pv-cae">
+        <rect x="20" y="72" width="7" height="10" rx="1.5" fill="#34d399" />
+        <rect x="30" y="66" width="7" height="16" rx="1.5" fill="#10b981" />
+        <rect x="40" y="70" width="7" height="12" rx="1.5" fill="#6ee7b7" />
+      </g>
+      <g className="pv-cae pv-cae-2">
+        <rect x="106" y="76" width="7" height="6" rx="1.5" fill="#fca5a5" />
+        <rect x="116" y="68" width="7" height="14" rx="1.5" fill="#ef4444" />
+        <rect x="126" y="74" width="7" height="8" rx="1.5" fill="#fca5a5" />
+      </g>
+    </svg>
+  );
+}
+
 /** Una página: un título y renglones de texto. */
 export function PreviaPagina() {
   return (

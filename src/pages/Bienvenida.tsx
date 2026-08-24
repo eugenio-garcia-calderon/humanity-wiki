@@ -2,14 +2,14 @@ import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Store, Sparkles,
-  CalendarDays, Gamepad2, Database, Globe, Compass, MessageSquare,
+  CalendarDays, Gamepad2, Database, Globe, Compass, MessageSquare, Scale,
 } from 'lucide-react';
 import { OBJETIVOS } from '../utils/objetivos';
 import {
   EstilosPrevias,
   PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
   PreviaTelecom, PreviaIA, PreviaMundo, PreviaCalendario, PreviaArchivos,
-  PreviaNavegador, PreviaPublicaciones,
+  PreviaNavegador, PreviaPublicaciones, PreviaDebate,
 } from '../components/bienvenida/previas';
 
 // ============================================================================
@@ -57,6 +57,7 @@ const HERRAMIENTAS: Herramienta[] = [
   { nombre: 'Tareas', que: 'Un tablero por proyecto: por hacer, en curso y hecho.', icono: ListChecks, Previa: PreviaTareas },
   { nombre: 'Tablas', que: 'Tus datos con columnas de verdad: números, fechas, dinero, enlaces.', icono: Table2, Previa: PreviaTabla },
   { nombre: 'Publicaciones', que: 'Un muro donde se comparte lo que cada cual va aprendiendo.', icono: Compass, Previa: PreviaPublicaciones },
+  { nombre: 'Debates', que: 'Una afirmación, sus razones a favor y en contra, y las fuentes de cada una. Al final no hay un veredicto: hay un mapa de quién piensa qué y por qué.', icono: Scale, Previa: PreviaDebate },
   { nombre: 'Mensajes y llamadas', que: 'Habla con cualquiera de la plataforma: mensajes, voz y vídeo, sin salir de aquí.', icono: MessageSquare, Previa: PreviaTelecom },
   { nombre: 'Comercio', que: 'Vende lo que haces. Tu tienda, tus pedidos y tus envíos.', icono: Store, Previa: PreviaComercio },
   { nombre: 'Asistente', que: 'Una IA que conoce tus proyectos y crea contigo dentro de ellos.', icono: Sparkles, Previa: PreviaIA },
