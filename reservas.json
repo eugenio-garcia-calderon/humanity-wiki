@@ -5,12 +5,6 @@
       "ruta": "drizzle/0119_republicaciones.sql",
       "motivo": "prog2: republicar, de la plataforma y de otras redes",
       "desde": "2026-08-24T18:30:40.560Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/pages/Explorar.tsx",
-      "motivo": "prog2: republicar desde la tarjeta",
-      "desde": "2026-08-24T18:37:13.886Z"
     }
   ]
 }
