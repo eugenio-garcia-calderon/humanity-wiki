@@ -5,6 +5,54 @@
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "hover: sonido, sin controles encima y mas grande",
       "desde": "2026-08-24T11:13:45.376Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0117_ajustes_economicos.sql",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/ajustes.ts",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/puntos.ts",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/stripe.ts",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/paginasInfo.ts",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Administracion.tsx",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/about/ContratoCobro.tsx",
+      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
+      "desde": "2026-08-24T11:54:01.050Z"
     }
   ]
 }
