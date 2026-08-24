@@ -71,6 +71,42 @@
       "ruta": "src/hooks/useAbrirAlAcercarse.ts",
       "motivo": "prog2: cerrar mirando donde esta el raton, no esperando un mouseleave",
       "desde": "2026-08-24T00:03:45.654Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0114_zonas_de_envio.sql",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/Cesta.tsx",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/FichaProducto.tsx",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/CrearProducto.tsx",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Comercio.tsx",
+      "motivo": "prog7: F8 zonas de envío y recogida en persona",
+      "desde": "2026-08-24T00:10:00.433Z"
     }
   ]
 }
