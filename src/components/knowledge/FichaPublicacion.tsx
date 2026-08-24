@@ -67,6 +67,28 @@ const campoTexto = (p: Publicacion): 'cuerpo' | 'descripcion' | null =>
   : p.tipo === 'lienzo' || p.tipo === 'proyecto' || p.tipo === 'mapa' ? 'descripcion'
   : null;
 
+/*
+ * ── LO QUE PUEDE LLEVAR DESCRIPCIÓN ─────────────────────────────────────────
+ * Eugenio: «permite que al publicar un vídeo se permita añadir una
+ * descripción, no sólo el título».
+ *
+ * Faltaba, y faltaba por una razón concreta: `campoTexto()` devuelve `null`
+ * para las ventanas, así que en su ficha no salía ningún campo de texto. Un
+ * vídeo publicado sólo podía llevar su titular, y todo lo que hubiera que
+ * contar sobre él —de qué trata, por qué está aquí, qué minuto mirar— no tenía
+ * dónde ir.
+ *
+ * Va en `config.caption`, que es donde una imagen y un vídeo subido YA
+ * guardaban su pie. No se inventa un campo nuevo: dos claves para lo mismo se
+ * separan al mes siguiente, y entonces una publicación tiene dos descripciones
+ * y ninguna es la buena.
+ *
+ * Sólo los tipos donde el contenido es una pieza de media. En una tabla o un
+ * grafo el «contenido» ya es la propia cosa y el sitio para explicarla es
+ * otro.
+ */
+const LLEVAN_DESCRIPCION = new Set(['video', 'imagen', 'pdf', 'audio', 'enlace']);
+
 /** El texto largo vive bajo una clave distinta según el tipo dentro de `config`. */
 const campoConfig = (p: Publicacion): 'body' | 'description' | 'goal' | null =>
   p.tipo === 'muro' ? 'body'
@@ -279,6 +301,20 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
               <span className="inline-flex items-center gap-0.5"><Users className="w-3 h-3" />{nColaboradores}</span>
             )}
           </div>
+
+          {/* LA DESCRIPCIÓN DE UNA PIEZA DE MEDIA. Va DEBAJO del título y
+              ENCIMA del vídeo, que es donde se lee: primero cómo se llama,
+              luego de qué va, luego la cosa. Puesta debajo del reproductor
+              habría que bajar para saber si hay algo escrito. */}
+          {editando && pub.tipo === 'ventana' && LLEVAN_DESCRIPCION.has(pub.kind) && (
+            <textarea
+              value={config.caption || ''}
+              onChange={e => setConfig({ ...config, caption: e.target.value })}
+              rows={3}
+              placeholder="Añade una descripción, si quieres. De qué va, por qué lo publicas, qué mirar."
+              className="w-full mb-3 px-3 py-2.5 border border-slate-200 rounded-xl text-sm leading-relaxed focus:outline-none focus:border-emerald-400 resize-y"
+            />
+          )}
 
           {/* Contenido */}
           {editando && campoTexto(pub) ? (

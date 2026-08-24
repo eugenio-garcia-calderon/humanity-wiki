@@ -216,7 +216,7 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
               onClick={isNode ? undefined : e => e.stopPropagation()}
               className={isNode ? 'w-full h-56 object-cover rounded-lg bg-black' : 'w-full rounded-xl bg-black max-h-[70vh]'}
             />
-            {!isNode && config.caption && <p className="text-xs text-slate-500 leading-relaxed">{config.caption}</p>}
+            {!isNode && config.caption && <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-line">{config.caption}</p>}
           </div>
         );
       }
@@ -241,6 +241,9 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
                 allowFullScreen
               />
             </div>
+            {!isNode && config.caption && (
+              <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-line">{config.caption}</p>
+            )}
             <SourceCredit name="Vimeo" url={`https://vimeo.com/${vimeo}`} />
           </div>
         );
@@ -273,6 +276,16 @@ export default function WindowContent({ kind, config, variant, onConfigChange }:
               allowFullScreen
             />
           </div>
+          {/* LA DESCRIPCIÓN, TAMBIÉN AQUÍ (2026-08-24). Eugenio: «permite que
+              al publicar un vídeo se permita añadir una descripción, no sólo
+              el título».
+              Un vídeo subido ya la enseñaba y uno de YouTube no, así que la
+              misma publicación perdía su texto según de dónde viniera el
+              vídeo. Se lee del mismo sitio, `caption`, para que no haya dos
+              campos que signifiquen lo mismo. */}
+          {!isNode && config.caption && (
+            <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-line">{config.caption}</p>
+          )}
           <SourceCredit name={config.channel ? `${config.channel} (YouTube)` : 'YouTube'} url={`https://youtu.be/${id}`} />
         </div>
       );

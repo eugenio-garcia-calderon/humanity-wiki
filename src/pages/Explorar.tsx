@@ -13,6 +13,7 @@ import FichaPublicacion, { type Publicacion } from '../components/knowledge/Fich
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import VentanaCentral from '../components/ventanas/VentanaCentral';
+import { hayRaton, useCerrarAlAlejarse } from '../hooks/useAbrirAlAcercarse';
 import Republicacion, { SelloRepublicado } from '../components/knowledge/Republicacion';
 import DialogoRepublicar from '../components/knowledge/DialogoRepublicar';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
@@ -205,6 +206,41 @@ export default function Explorar() {
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   /** El lienzo o el mapa que se está mirando en el pop-up central, si hay uno. */
   const [dentroDe, setDentroDe] = useState<{ titulo: string; ruta: string } | null>(null);
+
+  /*
+   * ══ ABRIRLO AL ACERCAR EL RATÓN A LA ETIQUETA ═════════════════════════════
+   * Eugenio: «haz que cuando se haga hover en esa sección de "Parte de: grafo
+   * X" se abra en pop-up ventana ese grafo».
+   *
+   * ── ESTO NO ES UN MENÚ: ES UNA VENTANA QUE TAPA LA PANTALLA ───────────────
+   * Y por eso se hace con la misma regla que ya rige los menús laterales, no
+   * con un `onMouseEnter` a secas:
+   *
+   *   · un retardo antes de abrir, para no dispararlo al cruzar la etiqueta de
+   *     camino a otra cosa. Aquí es de 350 ms y no de 150: lo que se abre
+   *     ocupa la pantalla entera, y equivocarse cuesta mucho más que con un
+   *     menú lateral;
+   *   · **lo que se abre rozando se cierra solo** al alejarse, y lo que se
+   *     abre pulsando se queda. Sin eso, rozar la etiqueta te deja una ventana
+   *     encima que tienes que ir a cerrar — y eso, en una lista por la que se
+   *     baja leyendo, pasaría una vez por tarjeta.
+   *
+   * Se guarda cuál es la etiqueta que lo abrió porque el ratón puede quedarse
+   * en ella: si sólo contara el pop-up, se cerraría teniendo el ratón encima
+   * del sitio que acaba de abrirlo.
+   */
+  const [porRoce, setPorRoce] = useState(false);
+  const cajaPopup = useRef<HTMLDivElement>(null);
+  const etiquetaViva = useRef<HTMLElement | null>(null);
+  const relojRoce = useRef<number | null>(null);
+  const pararRoce = () => {
+    if (relojRoce.current !== null) { window.clearTimeout(relojRoce.current); relojRoce.current = null; }
+  };
+  useEffect(() => pararRoce, []);
+  useCerrarAlAlejarse(porRoce && !!dentroDe, [cajaPopup, etiquetaViva], () => {
+    setDentroDe(null);
+    setPorRoce(false);
+  });
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   /*
    * LA PAPELERA Y EL PERSONALIZADOR SE ABREN POR DIRECCIÓN (2026-08-24). Sus
@@ -1142,7 +1178,21 @@ export default function Explorar() {
                          La flecha aparece sólo al acercarse: mientras no la
                          necesitas, no ocupa. */
                       <button
-                      onClick={e => { e.stopPropagation(); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
+                      onClick={e => { e.stopPropagation(); pararRoce(); setPorRoce(false); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
+                      // Sólo donde hay un puntero de verdad: con el dedo no
+                      // existe «acercarse», y el primer toque sería a la vez
+                      // abrir y pulsar.
+                      onMouseEnter={hayRaton() ? e => {
+                      const el = e.currentTarget;
+                      pararRoce();
+                      if (dentroDe) return;   // ya hay una ventana: no se cambia sola
+                      relojRoce.current = window.setTimeout(() => {
+                      etiquetaViva.current = el;
+                      setPorRoce(true);
+                      setDentroDe({ titulo: it.donde!, ruta: it.ruta! });
+                      }, 350);
+                      } : undefined}
+                      onMouseLeave={hayRaton() ? () => pararRoce() : undefined}
                       title={`Ver «${it.donde}»`}
                       /* `max-w-full` ADEMÁS DE `min-w-0` (2026-08-24). Los dos
                          hacen falta y hacen cosas distintas: `min-w-0` deja que
@@ -1245,12 +1295,18 @@ export default function Explorar() {
       )}
 
       {dentroDe && (
-        <VentanaCentral
-          titulo={dentroDe.titulo}
-          destino={dentroDe.ruta}
-          onCerrar={() => setDentroDe(null)}
-          onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); navigate(r); }}
-        />
+        /* `onClickCapture`: tocar algo de dentro lo asciende a «lo quiero», y
+           deja de cerrarse al apartar el ratón. Si ya has empezado a usar la
+           ventana, no es un accidente. */
+        <div onClickCapture={() => setPorRoce(false)} className="contents">
+          <VentanaCentral
+            caja={cajaPopup}
+            titulo={dentroDe.titulo}
+            destino={dentroDe.ruta}
+            onCerrar={() => { setDentroDe(null); setPorRoce(false); }}
+            onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); setPorRoce(false); navigate(r); }}
+          />
+        </div>
       )}
 
       {republicando !== undefined && (
