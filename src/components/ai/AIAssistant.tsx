@@ -10,7 +10,7 @@ import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
 import { cn } from '../../utils/cn';
-import { OBJETIVOS, sinTildes } from '../../utils/objetivos';
+import { areasQueEncajan as areasDe, AREA_POR_ID } from '../../utils/objetivos';
 import Markdown from './Markdown';
 
 // ============================================================================
@@ -142,44 +142,26 @@ const costeEstimado = (
  *  por una palabra suelta hacen falta tres, porque «co» encaja con «coche»,
  *  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
  *  siempre no son una predicción, son ruido. */
-const AREA_POR_ID: Record<string, typeof OBJETIVOS[number]> =
-  Object.fromEntries(OBJETIVOS.map(o => [o.id, o]));
-
 /** El área y su ficha de objetivo son **la misma cosa por dos puertas**, y el
- *  buscador enseñaba las dos, una debajo de la otra y con el mismo nombre:
- *  «ECOSISTEMAS · área» y «ECOSISTEMAS · objetivo». Dos filas idénticas a la
- *  vista obligan a adivinar en qué se diferencian, y la respuesta —una lleva a
- *  todo lo publicado y la otra a la ficha de indicadores— no cabe en la fila.
+ *  buscador enseñaba las dos, una debajo de la otra y con el mismo nombre.
+ *  Dos filas idénticas a la vista obligan a adivinar en qué se diferencian, y
+ *  la respuesta —una lleva a todo lo publicado y la otra a la ficha de
+ *  indicadores— no cabe en la fila. Se queda la que contesta lo que se estaba
+ *  preguntando; la ficha sigue donde siempre, en Objetivos.
  *
- *  Se queda la que contesta lo que se estaba preguntando: **todo lo publicado
- *  sobre el tema**. La ficha del objetivo sigue donde siempre, en Objetivos.
- *
- *  Solo se quita el objetivo que ES un área (los catorce de `OBJETIVOS`). Si
- *  algún día hay objetivos que no son áreas, esos siguen apareciendo. */
+ *  Solo se quita el objetivo que ES un área. Si algún día hay objetivos que no
+ *  lo son, ésos siguen apareciendo. */
 const quitarObjetivosDuplicados = (rs: ResultadoBusqueda[], areas: ResultadoBusqueda[]) => {
   if (!areas.length) return rs;
   const ids = new Set(areas.map(a => a.id));
   return rs.filter(r => !(r.type === 'objectives' && ids.has(r.id)));
 };
 
-const areasQueEncajan = (texto: string): ResultadoBusqueda[] => {
-  const t = sinTildes(texto.trim());
-  if (t.length < 2) return [];
-  const punto = (o: typeof OBJETIVOS[number]) => {
-    const titulo = sinTildes(o.titulo);
-    if (titulo === t) return 0;
-    if (titulo.startsWith(t)) return 1;
-    if (titulo.includes(t)) return 2;
-    if (t.length >= 3 && o.palabras.some(p => p.startsWith(t) || t.startsWith(p))) return 3;
-    return 99;
-  };
-  return OBJETIVOS
-    .map(o => ({ o, p: punto(o) }))
-    .filter(x => x.p < 99)
-    .sort((a, b) => a.p - b.p || a.o.titulo.length - b.o.titulo.length)
-    .slice(0, 3)
-    .map(x => ({ id: x.o.id, label: x.o.titulo, type: 'areas' }));
-};
+/** Las áreas que encajan, con la forma que usa esta lista. La decisión de
+ *  CUÁLES encajan vive en `utils/objetivos.ts`, compartida con la barra de
+ *  buscar de arriba: dos copias divergen en la primera corrección. */
+const areasQueEncajan = (texto: string): ResultadoBusqueda[] =>
+  areasDe(texto).map(o => ({ id: o.id, label: o.titulo, type: 'areas' }));
 
 /** Una fila de /api/search. `slug` solo viene en grafos y mapas. */
 interface ResultadoBusqueda {

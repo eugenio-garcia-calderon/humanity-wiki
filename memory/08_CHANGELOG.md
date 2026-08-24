@@ -6728,3 +6728,44 @@ o modificadas—.
 - Rutas: `GET /api/publicar/mis-liquidaciones` (lo que me deben, retenido y cobrado), `GET/POST /api/admin/liquidaciones[/pagar]`, y barrido horario que marca vencidas y —solo encendido— transfiere.
 - **Nace apagado** (`COBRO_AGREGADO=off`): calcula, marca vencimientos y canta, pero no mueve dinero.
 - Probado en local por HTTP: sin contrato → 400 diciendo quién falta (y con la concordancia arreglada: «no cobra» / «no cobran»); con las dos firmas → la sesión de pago se crea de verdad (claves de prueba); puntos + dos tiendas → 400 con motivo; liquidación vencida → pasa a «lista» y el barrido dice `sin_cuenta_de_cobro` porque la tienda no tiene Stripe conectado; devolución pedida → **retenida** con motivo; rechazada → vuelve a **pendiente**; aceptada → **cancelada** y el pedido devuelto; la tienda ve por cobrar / retenido / cobrado. Todo retirado.
+
+### 2026-08-24 — Las temáticas, en el buscador que se usa de verdad (prog8)
+
+Eugenio, después de la fase 1: «he probado a escribir *eco* y no aparece
+ecosistemas». Y tenía razón: **la fase 1 se quedó en el chat**, y él escribe en
+la barra de arriba. Dos buscadores, y el arreglo estaba en el que no usa.
+
+Su encargo, con sus palabras: «cuando se escriban letras y palabras en el
+buscador se recomienda también temáticas, y con un icono poder separarlo, que
+es una temática de una publicación».
+
+- **`CajaBusqueda` gana una tercera clase de sugerencia: `tematica`.** Va la
+  primera, con «· todo lo publicado» al lado, y lleva a
+  `/explorar?objetivo=O006`, que es donde están todas las publicaciones de ese
+  tema.
+- **El icono que las separa es el SUYO**, con su color: la misma hoja verde de
+  ECOSISTEMAS que hay en las pastillas de Explorar y en el mapa. Un icono
+  genérico habría cumplido lo pedido —separar temática de publicación— pero
+  desaprovecha que quien ya ha visto ese icono sabe qué es sin leer la
+  etiqueta.
+- **Se calculan en el navegador, sin red**, así que aparecen con la segunda
+  letra y **antes** de que conteste el servidor: si esperaran, la lista saldría
+  primero sin ellas y saltarían al llegar la respuesta, moviendo lo que estabas
+  a punto de pulsar.
+- **Y la decisión de qué área encaja se mudó a `src/utils/objetivos.ts`**
+  (`areasQueEncajan`), compartida por la barra de arriba y el chat. Estaba
+  escrita dentro del chat; con dos cajas que la necesitan, dos copias divergen
+  en la primera corrección y entonces «bosque» encuentra ECOSISTEMAS en un
+  sitio y no en el otro sin que nadie sepa por qué.
+
+Comprobado en 3008, en la barra de arriba: «eco» → **ECONOMÍA** y
+**ECOSISTEMAS** como temáticas, con sus iconos, encima de las publicaciones y
+del reto; pulsar ECOSISTEMAS abre `/explorar?objetivo=O006`. «bosque» →
+ECOSISTEMAS (por palabra, no por nombre). «energia» → ENERGÍA. «vivienda» →
+VIVIENDA. `tsc` limpio.
+
+**Un hueco que queda, medido aquí:** `GET /api/buscar/sugerencias` (el que
+alimenta esta caja) **sí distingue tildes**, así que «energia» encuentra la
+temática pero ninguna publicación. El arreglo es el mismo `translate()` que ya
+lleva `/api/search`, y va en su propia PR porque toca `src/server/buscador.ts`,
+que otro agente está editando hoy.
