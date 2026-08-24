@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/components/ventanas/VentanaCentral.tsx",
-      "motivo": "prog2: el grafo se abre al pasar el raton por la etiqueta",
-      "desde": "2026-08-24T19:00:58.052Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: descripcion al publicar, no solo titulo",
       "desde": "2026-08-24T19:03:43.793Z"
