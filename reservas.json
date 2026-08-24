@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/components/navegacion/Rail.tsx",
-      "motivo": "prog2: railes siempre visibles, plegar, y submenu con flechita en vez de hover",
-      "desde": "2026-08-24T11:06:28.237Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "prog2: railes siempre visibles, plegar, y submenu con flechita en vez de hover",
       "desde": "2026-08-24T11:06:32.376Z"
