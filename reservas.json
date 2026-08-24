@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog2",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "prog2: railes siempre visibles, plegar, y submenu con flechita en vez de hover",
-      "desde": "2026-08-24T11:06:32.376Z"
-    },
-    {
       "agente": "prog8-turn",
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "hover: sonido, sin controles encima y mas grande",
