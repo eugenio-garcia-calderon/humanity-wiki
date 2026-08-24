@@ -61,12 +61,6 @@
       "desde": "2026-08-23T23:51:00.086Z"
     },
     {
-      "agente": "prog5",
-      "ruta": "drizzle/0114_veracidad_espectro.sql",
-      "motivo": "Veracidad fase 6: espectro de visiones (tarjetas del tablero)",
-      "desde": "2026-08-24T00:00:03.549Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/hooks/useAbrirAlAcercarse.ts",
       "motivo": "prog2: cerrar mirando donde esta el raton, no esperando un mouseleave",
