@@ -17,6 +17,12 @@
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: el tipo lleva ahora el tamano del lienzo",
       "desde": "2026-08-24T15:40:29.165Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog2: la cabecera se sale a 320 px",
+      "desde": "2026-08-24T16:26:50.484Z"
     }
   ]
 }
