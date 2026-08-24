@@ -24,10 +24,11 @@
 import type { Express, Request, Response } from 'express';
 import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
-import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
+import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos, comisionPuntosBps } from './puntos';
 import { avisar } from './avisos';
 import { avisarPorWhatsApp, enlaceWa, estadoWhatsApp } from './whatsapp.js';
 import { ZONAS, zonaDe, tarifasDe, calcularEnvio, type Zona } from './zonasEnvio.js';
+import { AJUSTES, ajuste, guardarAjuste, numeroSincrono, olvidarAjustes } from './ajustes.js';
 import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -421,7 +422,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
   // Ahora: la pide con un motivo, el vendedor acepta o rechaza diciendo por
   // qué, y LOS PUNTOS VUELVEN SOLO AL ACEPTAR — nunca al pedirla, que sería
   // devolver por decisión de una sola parte.
-  const diasParaDevolver = () => Math.max(1, Number(process.env.DIAS_PARA_DEVOLVER ?? 30));
+  const diasParaDevolver = () => Math.max(1, numeroSincrono('DIAS_PARA_DEVOLVER'));
 
   /** POST /api/publicar/pedido/:codigo/devolucion { motivo, correo? } — la pide quien compró. */
   app.post('/api/publicar/pedido/:codigo/devolucion', async (req: Request, res: Response) => {
@@ -684,6 +685,53 @@ export function registerPublicarRoutes(app: Express, db: any) {
     const r = await db.execute(sql`SELECT 1 FROM acuerdos_aceptados WHERE user_id = ${userId} AND acuerdo = 'cobro' AND version = ${VERSION_COBRO} LIMIT 1`);
     return r.rows.length > 0;
   };
+
+  // ==========================================================================
+  // EL PANEL ECONÓMICO (2026-08-24) — «que se cambie en todos los lugares»
+  // ==========================================================================
+  /** GET /api/admin/economia — todas las cifras, su valor vigente y de dónde sale. */
+  app.get('/api/admin/economia', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      const guardados = (await db.execute(sql`SELECT clave, valor, updated_at, actualizado_por FROM ajustes_economicos`)).rows as any[];
+      const historial = (await db.execute(sql`
+        SELECT h.clave, h.valor_antes, h.valor_nuevo, h.motivo, h.created_at, coalesce(u.display_name, u.name, u.email) AS quien
+        FROM ajustes_economicos_historial h LEFT JOIN users u ON u.id = h.actor
+        ORDER BY h.created_at DESC LIMIT 40
+      `)).rows;
+      const cifras = await Promise.all(AJUSTES.map(async a => {
+        const fila = guardados.find(g => g.clave === a.clave);
+        return {
+          ...a,
+          valor: await ajuste(db, a.clave),
+          // De dónde sale el valor que rige ahora mismo: es la pregunta que
+          // se hace cualquiera al ver un número raro.
+          origen: fila ? 'panel' : process.env[a.clave] !== undefined ? 'servidor' : 'por defecto',
+          cambiado_en: fila?.updated_at || null,
+        };
+      }));
+      res.json({
+        grupos: [...new Set(AJUSTES.map(a => a.grupo))],
+        cifras, historial,
+        nota: 'Lo que cambies aquí rige en toda la plataforma en menos de un minuto. Cada cambio queda con tu nombre, la fecha y el motivo.',
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** PUT /api/admin/economia { clave, valor, motivo? } — cambiar una cifra. */
+  app.put('/api/admin/economia', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      const clave = String(req.body?.clave || '');
+      const valor = String(req.body?.valor ?? '');
+      await guardarAjuste(db, clave, valor, req.user.id, String(req.body?.motivo || '').trim().slice(0, 500) || undefined);
+      olvidarAjustes();
+      res.json({ guardado: true, clave, valor: await ajuste(db, clave) });
+    } catch (e: any) {
+      if (e?.publico) return res.status(400).json({ error: e.message });
+      console.error(e); res.status(500).json({ error: e.message });
+    }
+  });
 
   /** GET /api/admin/whatsapp — cómo está el canal y los últimos avisos (administrador). */
   app.get('/api/admin/whatsapp', async (req: Request, res: Response) => {
@@ -1360,7 +1408,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (activo && req.user) {
         saldo = Number(((await db.execute(sql`SELECT puntos FROM users WHERE id = ${req.user.id}`)).rows[0] as any)?.puntos ?? 0);
       }
-      res.json({ activo, con_sesion: !!req.user, saldo, puntos_por_euro: puntosPorEuro() });
+      res.json({
+        activo, con_sesion: !!req.user, saldo, puntos_por_euro: puntosPorEuro(),
+        // Las comisiones vigentes (2026-08-24): las pantallas dejan de tener
+        // cifras escritas a mano que un día dicen una cosa y el cobro hace otra.
+        comision_euros_pct: Math.round(comisionBps() / 100 * 100) / 100,
+        comision_puntos_pct: Math.round(comisionPuntosBps() / 100 * 100) / 100,
+      });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -1661,7 +1715,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${vendedorId}`)).rows[0] as any
         : null;
       const reparte = !!vendedor?.charges_enabled;
-      const comision = Math.round((subtotal * COMISION_BPS) / 10000);
+      const comision = Math.round((subtotal * comisionBps()) / 10000);
 
       // ══ CUPÓN DEL VENDEDOR (2026-08-22, fase 7 del plan) ═══════════════
       // Un código del vendedor de TODA la cesta (ya se ha exigido un solo
@@ -1732,7 +1786,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const totalEuros = subtotal - cuponCent - descuentoCentimos + (envioCobrado || 0);
       // La comisión va sobre lo que de verdad se cobra en euros por los
       // productos (sin envío), no sobre el precio de etiqueta.
-      const comisionReal = Math.round((Math.max(0, subtotal - cuponCent - descuentoCentimos) * COMISION_BPS) / 10000);
+      const comisionReal = Math.round((Math.max(0, subtotal - cuponCent - descuentoCentimos) * comisionBps()) / 10000);
 
       if (puntosUsados > 0 && totalEuros <= 0) {
         // TODO EN PUNTOS: sin pasarela. El pedido se crea aquí, y el cobro
@@ -2240,7 +2294,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // ¿Se puede pedir la devolución? Se dice aquí para que la pantalla no
         // tenga que adivinar la regla ni repetirla.
         se_puede_devolver: !['devuelto', 'cancelado'].includes(p.estado)
-          && (Date.now() - new Date(p.created_at).getTime()) / 86400000 <= Number(process.env.DIAS_PARA_DEVOLVER ?? 30),
+          && (Date.now() - new Date(p.created_at).getTime()) / 86400000 <= numeroSincrono('DIAS_PARA_DEVOLVER'),
         // Escribirle al vendedor por WhatsApp (F6): lo abre quien pulsa, con
         // el texto escrito. Solo si el vendedor dio su número.
         whatsapp_vendedor: await (async () => {
@@ -2501,7 +2555,13 @@ function primerTexto(config: any): string | null {
 }
 
 /** La misma comisión que cobra el mercado de dentro. Una sola cifra. */
-const COMISION_BPS = Number(process.env.PLATFORM_FEE_BPS || 500);
+/**
+ * La comisión, del panel de Administración (0117). Era una constante leída al
+ * arrancar: cambiarla exigía desplegar, y nadie podía ver qué comisión regía
+ * en una fecha. Ahora es una función porque el valor puede cambiar mientras
+ * el servidor corre.
+ */
+const comisionBps = () => Math.max(0, Math.min(10000, numeroSincrono('COMISION_BPS')));
 
 /**
  * A dónde puede volver el comprador después de pagar.

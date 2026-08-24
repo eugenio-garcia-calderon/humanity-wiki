@@ -5,6 +5,7 @@ import { ROLE } from './auth.js';
 import { otorgarPuntos, pagarConPuntos } from './puntos.js';
 import { avisar } from './avisos.js';
 import { avisarPorWhatsApp } from './whatsapp.js';
+import { numeroSincrono } from './ajustes.js';
 import { normalizarTelefono } from '../utils/telefono.js';
 
 /** El teléfono que recoge Stripe, en la forma del resto de la casa (o nulo). */
@@ -40,7 +41,9 @@ const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 // plataforma puede configurar comisión fija/porcentual/por categoría).
 // De momento un único porcentaje global, configurable por variable de
 // entorno — el panel de configuración por categoría queda para más adelante.
-const PLATFORM_FEE_BPS = Number(process.env.PLATFORM_FEE_BPS || 500); // 500 = 5.00%
+// La comisión viene del panel de Administración (0117, 2026-08-24): función y
+// no constante, porque puede cambiar sin reiniciar el servidor.
+const platformFeeBps = () => Math.max(0, Math.min(10000, numeroSincrono('COMISION_BPS')));
 
 export function registerStripeRoutes(app: Express, db: any) {
 
@@ -166,7 +169,7 @@ export function registerStripeRoutes(app: Express, db: any) {
         ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${sellerUserId}`)).rows[0]
         : null;
       const canSplit = sellerAccount?.charges_enabled;
-      const feeCents = Math.round((product.price_cents * quantity * PLATFORM_FEE_BPS) / 10000);
+      const feeCents = Math.round((product.price_cents * quantity * platformFeeBps()) / 10000);
 
       const session = await stripe.checkout.sessions.create({
         mode: isSubscription ? 'subscription' : 'payment',
@@ -221,7 +224,7 @@ export function registerStripeRoutes(app: Express, db: any) {
         ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${beneficiary_user_id}`)).rows[0]
         : null;
       const canSplit = beneficiaryAccount?.charges_enabled;
-      const feeCents = Math.round((amount_cents * PLATFORM_FEE_BPS) / 10000);
+      const feeCents = Math.round((amount_cents * platformFeeBps()) / 10000);
 
       const session = await stripe.checkout.sessions.create({
         mode: recurring ? 'subscription' : 'payment',

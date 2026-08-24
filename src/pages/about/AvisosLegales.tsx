@@ -19,7 +19,8 @@ import ContratoCobro from './ContratoCobro';
 // todo. Cada regla de abajo describe lo que la plataforma HACE HOY — lo que el
 // código impone, medido — más las decisiones de producto que Eugenio ya tomó
 // (puntos transferibles, caducidad a 10 años, inactividad de 24 meses,
-// comisión 5 % / 2,5 %). Lo que solo él o un abogado pueden rellenar va
+// comisión 12 % / 10 % desde el 24-08-2026, ajustable desde Administración).
+// Lo que solo él o un abogado pueden rellenar va
 // marcado [PENDIENTE]: la entidad que presta el servicio y el contacto. Es la
 // misma regla que en la política de privacidad: mejor un hueco visible que
 // una afirmación falsa sobre quién responde.
@@ -71,7 +72,7 @@ const TERMINOS: { titulo: string; parrafos: string[] }[] = [
     titulo: '6 · Los puntos',
     parrafos: [
       'Los puntos son un crédito de uso dentro de la plataforma: sirven para pagar servicios de la plataforma y para comprar en el mercado a los vendedores que los aceptan. No son dinero, no son una inversión, no dan intereses ni rendimiento y no se cambian de vuelta a euros. Todo lo que describe la página de Tokenomics forma parte de estos términos.',
-      'Cómo se obtienen: un regalo al crear la cuenta, céntimos de punto cuando otras personas ven tus publicaciones públicas, comprándolos a la plataforma, y, cuando esté activo, el reparto mensual del bote de comisiones. Cómo circulan: puedes enviarlos a otras personas de la plataforma, con un tope diario, y pagar con ellos en el mercado; al vendedor le llegan sus puntos menos una comisión de la plataforma del 2,5 % (la mitad que en euros). Cada movimiento queda anotado en un libro que no se edita: una corrección es siempre un apunte contrario.',
+      'Cómo se obtienen: un regalo al crear la cuenta, céntimos de punto cuando otras personas ven tus publicaciones públicas, comprándolos a la plataforma, y, cuando esté activo, el reparto mensual del bote de comisiones. Cómo circulan: puedes enviarlos a otras personas de la plataforma, con un tope diario, y pagar con ellos en el mercado; al vendedor le llegan sus puntos menos la comisión de la plataforma, que pagando con puntos es menor que en euros (las cifras vigentes están publicadas y pueden cambiar). Cada movimiento queda anotado en un libro que no se edita: una corrección es siempre un apunte contrario.',
       'Caducidad y cuentas dormidas: los puntos caducan a los diez años de obtenerse, y una cuenta sin actividad durante veinticuatro meses pierde su saldo. Antes de que cualquiera de las dos cosas ocurra te avisaremos por los medios de la plataforma, con tiempo para usarlos.',
       'Devoluciones en puntos: si un vendedor devuelve una compra pagada con puntos, los puntos vuelven a tu cuenta íntegros. Si un movimiento fuera erróneo, se corrige con el apunte contrario y se te explica.',
       'Los precios en puntos de los servicios de la plataforma se publican y pueden cambiar; lo que un punto compra no está garantizado. Los puntos no se transfieren fuera de la plataforma ni se negocian en ningún mercado externo.',

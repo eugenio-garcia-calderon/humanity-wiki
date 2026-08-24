@@ -64,7 +64,7 @@ export default function ContratoDeCobro() {
         <b> La venta sigue siendo tuya</b>: tú facturas, tú entregas y tú atiendes las devoluciones.
       </p>
       <ul className="mt-2 space-y-0.5 text-[11px] text-slate-500">
-        <li>· Comisión 5 % en euros y 2,5 % en puntos, descontada de la liquidación.</li>
+        <li>· Comisión 12 % en euros y 10 % en puntos, descontada de la liquidación.</li>
         <li>· Se te liquida a los 14 días de que el pedido conste entregado.</li>
         <li>· Las devoluciones y los contracargos se descuentan de lo que tengas pendiente.</li>
         <li>· Puedes dejarlo cuando quieras avisando con 15 días.</li>

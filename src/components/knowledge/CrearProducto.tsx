@@ -35,6 +35,15 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
   // el valor en euros, con un 50 % de descuento en la comisión»). El
   // equivalente sale de la tasa que publica el servidor (1 punto = 1 € hoy).
   const [aceptaPuntos, setAceptaPuntos] = useState(false);
+  // Las comisiones vigentes las dice el servidor (panel de Administración,
+  // 2026-08-24): escribirlas a mano aquí garantizaba que un día dijeran una
+  // cifra y el cobro hiciera otra.
+  const [tasaComision, setTasaComision] = useState<{ euros: number; puntos: number } | null>(null);
+  useEffect(() => {
+    fetch('/api/publicar/puntos-en-caja').then(r => r.json())
+      .then(j => { if (j && typeof j.comision_euros_pct === 'number') setTasaComision({ euros: j.comision_euros_pct, puntos: j.comision_puntos_pct }); })
+      .catch(() => {});
+  }, []);
   // BORRADOR (2026-08-23): guardar sin publicar. No se ve ni se puede comprar
   // hasta que se publique desde Comercio.
   const [borrador, setBorrador] = useState(false);
@@ -211,7 +220,7 @@ export default function CrearProducto({ onCancelar, onCreado }: Props) {
                     <span className="text-xs leading-relaxed text-slate-700">
                       <b>Acepto cobrar en puntos</b>
                       {puntosEq !== null && <> — este precio son <b>{puntosEq.toLocaleString('es-ES')} puntos</b></>}.
-                      {' '}Quien compre con puntos te los paga a ti, y la comisión de la plataforma es <b>la mitad</b> (2,5 % en puntos, frente al 5 % en euros).
+                      {' '}Quien compre con puntos te los paga a ti, y la comisión de la plataforma es <b>menor que en euros</b>{tasaComision ? <> ({tasaComision.puntos} % en puntos, frente al {tasaComision.euros} % en euros)</> : null}.
                     </span>
                   </label>
                 );
