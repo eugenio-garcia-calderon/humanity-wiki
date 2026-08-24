@@ -47,6 +47,12 @@
       "ruta": "src/components/buscador/CajaBusqueda.tsx",
       "motivo": "tematicas en el recomendador del buscador",
       "desde": "2026-08-24T15:43:24.404Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "tematicas en el recomendador del buscador",
+      "desde": "2026-08-24T15:43:28.246Z"
     }
   ]
 }
