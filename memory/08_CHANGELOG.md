@@ -6606,6 +6606,11 @@ arriba el nombre en grande de "Red de Conocimiento"».
 - `/explorar` no cambia: el muro sigue en su dirección de siempre, así que
   ningún enlace guardado se rompe. Y sin sesión sigue mandando la portada de
   bienvenida.
+
+## 2026-08-24 — Fuera «¿A qué vienes hoy?»
+Eugenio: «quita la frase de ¿a qué vienes hoy?, debajo del titular de la página
+de inicio». El hueco que dejaba lo asume la rejilla (de 8 a 10, y de 12 a 14 en
+escritorio): sin eso, el nombre y las tarjetas quedaban pegados.
 ### 2026-08-24 — La portada que suena, sin botones encima y más grande (Programador 8)
 - **Eugenio**: «se empieza a reproducir, pero no se escucha… aparecen los botones de pausa, adelante y atrás y el título que tapan la imagen… ponle el sonido activado por defecto, y haz que se amplíe».
 - **Los botones no salían por tener `controls=1`** —ya estaba en `0`— sino porque **YouTube saca su barra en cuanto el ratón se mueve por encima del reproductor**, controles o no. Se arregla con `pointer-events: none` en el marco: el ratón lo atraviesa, el reproductor no se entera de que hay nadie, y no saca ni barra, ni título, ni logo. El hover de la tarjeta sigue funcionando porque vive en el div de fuera. De regalo, un clic ya no se lo come YouTube.
@@ -6636,3 +6641,10 @@ arriba el nombre en grande de "Red de Conocimiento"».
 - **0116 `acuerdos_aceptados`**: qué versión, cuándo, IP y navegador; solo-añadir con índice único (persona, acuerdo, versión). Un contrato que no se puede probar no vale, y si cambia, las firmas viejas siguen diciendo lo que se firmó entonces. Rutas `GET/POST /api/publicar/acuerdos`, panel en Comercio, y `cotizar` informa por tienda con `acepta_cobro_agregado`. No firmar no penaliza: se sigue vendiendo y cobrando en la cuenta propia, solo se queda fuera de los carritos compartidos.
 - Probado en local y **verificado en producción**: tabla creada, ruta 401 sin sesión, la página del contrato responde 200 y el texto está en los bundles de AvisosLegales y Comercio.
 - Nota de equipo: esta entrada salió en PR aparte porque el changelog estaba reservado. Lección compartida con prog8: **soltar sin silenciar la salida y comprobar con `quien` después**; y redactar la entrada fuera del fichero para volcarla de golpe.
+
+## 2026-08-24 — El nombre, pegado a la barra de arriba
+Eugenio: «sube el nombre de Red de Conocimiento más hacia el menú de arriba».
+Arrancaba a `8vh`, que en una pantalla alta son 80 px de nada antes de empezar:
+el nombre flotaba en medio y las tarjetas se iban hacia abajo. Ahora empieza a
+24 px de la barra (36 en escritorio), la misma distancia a la que empieza el
+contenido en el resto de las páginas.
