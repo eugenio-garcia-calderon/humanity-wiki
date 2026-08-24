@@ -35,6 +35,24 @@
       "ruta": "drizzle/0116_veracidad_coherencia.sql",
       "motivo": "Veracidad fase 8: busqueda de contradicciones (indice de texto)",
       "desde": "2026-08-24T00:29:34.444Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: F11 cesta de varias tiendas",
+      "desde": "2026-08-24T00:39:25.439Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/Cesta.tsx",
+      "motivo": "prog7: F11 cesta de varias tiendas",
+      "desde": "2026-08-24T00:39:25.439Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/hooks/useCarrito.ts",
+      "motivo": "prog7: F11 cesta de varias tiendas",
+      "desde": "2026-08-24T00:39:25.439Z"
     }
   ]
 }
