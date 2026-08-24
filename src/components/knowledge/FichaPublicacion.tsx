@@ -43,6 +43,10 @@ export interface Publicacion {
   /** Cuántas piezas tiene el lienzo donde vive. `null` cuando no vive en
    *  ninguno — que no es lo mismo que 0, y la etiqueta lo pinta distinto. */
   donde_piezas?: number | null;
+  /** Lo republicado, ya armado por el servidor. `null` cuando esto no es una
+   *  republicación. Se pregunta por este campo entero y no por sus trozos: así
+   *  no se puede pintar media republicación si alguno viene vacío. */
+  republica?: import('./Republicacion').Republicado | null;
   personal: boolean;
   ruta: string | null;
   publico: boolean;
