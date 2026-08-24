@@ -23,36 +23,6 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "prog2: railes siempre puestos",
       "desde": "2026-08-24T11:21:11.491Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "drizzle/0116_acuerdos_aceptados.sql",
-      "motivo": "prog7: contrato de servicio de cobro + aceptación registrada",
-      "desde": "2026-08-24T11:27:08.700Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/about/AvisosLegales.tsx",
-      "motivo": "prog7: contrato de servicio de cobro + aceptación registrada",
-      "desde": "2026-08-24T11:27:08.700Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/publicar.ts",
-      "motivo": "prog7: contrato de servicio de cobro + aceptación registrada",
-      "desde": "2026-08-24T11:27:08.700Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
-      "motivo": "prog7: contrato de servicio de cobro + aceptación registrada",
-      "desde": "2026-08-24T11:27:08.700Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "prog7: contrato de servicio de cobro + aceptación registrada",
-      "desde": "2026-08-24T11:27:08.700Z"
     }
   ]
 }
