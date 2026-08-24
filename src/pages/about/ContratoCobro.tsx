@@ -25,7 +25,7 @@
 import { Link } from 'react-router-dom';
 import { Scale, ArrowLeft, AlertTriangle } from 'lucide-react';
 
-export const VERSION_COBRO = 'v1.0 · 24 de agosto de 2026';
+export const VERSION_COBRO = 'v1.1 · 24 de agosto de 2026';
 
 export const CLAUSULAS: { titulo: string; parrafos: string[] }[] = [
   {
@@ -56,7 +56,7 @@ export const CLAUSULAS: { titulo: string; parrafos: string[] }[] = [
   {
     titulo: '4 · Comisión y factura del servicio',
     parrafos: [
-      'La plataforma cobra por este servicio una comisión del **5 % del importe de los productos** (sin contar los gastos de envío) cuando el pago es en euros, y del **2,5 %** cuando el pago se hace con puntos de la plataforma. La comisión se descuenta de la liquidación.',
+      'La plataforma cobra por este servicio una comisión del **12 % del importe de los productos** (sin contar los gastos de envío) cuando el pago es en euros, y del **10 %** cuando el pago se hace con puntos de la plataforma. La comisión se descuenta de la liquidación. Las comisiones vigentes están publicadas en la plataforma en todo momento.',
       'Las comisiones bancarias o de la pasarela de pago no van incluidas en esa comisión y se descuentan también de la liquidación cuando el proveedor de pago las repercuta.',
       'Por este servicio la plataforma **emite a la tienda una factura** con su IVA correspondiente. Esa factura es del servicio de cobro, distinta y separada de la factura de la venta, que sigue siendo cosa de la tienda.',
       'La plataforma puede cambiar la comisión avisando con **treinta días** de antelación. Si la tienda no está de acuerdo, puede terminar este contrato antes de que el cambio entre en vigor, sin penalización.',
