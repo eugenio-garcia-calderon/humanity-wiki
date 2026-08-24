@@ -87,6 +87,29 @@ suelta al commitear, no al empezar la tarea — el 2026-08-22 uno lo tuvo once
 minutos con la línea sin escribir y encadenó a tres detrás. En un fichero que se
 edita de verdad, al contrario: resérvalo mientras trabajas en él.
 
+**Soltar no siempre suelta: compruébalo cuando sepas que alguien espera.**
+Encontrado el 2026-08-23 por prog8 y prog7. `soltar` dijo «Soltadas 2 reserva(s)»
+y cuarenta minutos después los dos ficheros seguían reservados a nombre de quien
+ya los había soltado — con otro agente parado esperándolos y sin forma de saber
+que la reserva era un fantasma.
+
+La causa está en cómo funciona esto: las reservas son un `push` a
+`equipo/reservas`, y con varios agentes empujando a la vez una carrera puede
+reponer el estado anterior y **resucitar una reserva ya soltada**. El mismo rato
+en que pasó, un `reservar` falló con «No he podido guardar la reserva (¿sin red,
+o alguien empujando a la vez?)», que es la misma carrera vista desde el otro
+lado.
+
+```
+node scripts/equipo.mjs soltar src/server/avisos.ts
+node scripts/equipo.mjs quien | grep avisos.ts     # ← esta línea es la norma
+```
+
+Diez segundos, y solo hace falta cuando alguien te está esperando. El que suelta
+se queda tranquilo con el «Soltadas 2» y el que espera sigue bloqueado sin que
+nadie lo sepa: por eso lo comprueba quien suelta, que es el único de los dos que
+sabe que acaba de hacerlo.
+
 **Ficheros que siempre hay que reservar** (los tocan todos):
 `src/App.tsx` · `src/main.tsx` · `CHANGELOG.md` · `src/components/ui/**` ·
 `src/index.css` · `index.html` · `package.json` · `server.ts` · `docker-compose.prod.yml`
