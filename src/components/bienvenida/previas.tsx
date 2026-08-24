@@ -161,6 +161,68 @@ const ESTILOS = `
   .group:hover .pv-late { animation: pv-late 1.8s ease-in-out infinite; transform-origin: center; }
   @keyframes pv-late { 0%,62%,100% { transform: scale(1) } 72% { transform: scale(1.45) } 82% { transform: scale(1.1) } }
 
+  /* ══ CREAR: LA PÁGINA SE ESCRIBE SOLA ════════════════════════════════════
+     Eugenio: «mejóralas para que realmente se vea el poder de esta plataforma,
+     no escatimes en animaciones».
+
+     El poder de esto no es que tenga un editor: es que en la MISMA página caben
+     un texto, una foto, un mapa, una tabla y un esquema. Así que aquí no entra
+     una cosa — entran cinco, una detrás de otra, encima de un texto que se está
+     escribiendo mientras tanto. */
+
+  /* El texto se escribe: cada renglón crece de izquierda a derecha. */
+  .group:hover .pv-teclea { animation: pv-teclea .5s steps(14) both; transform-origin: left; }
+  .group:hover .pv-teclea-2 { animation-delay: .18s }
+  .group:hover .pv-teclea-3 { animation-delay: .36s }
+  .group:hover .pv-teclea-4 { animation-delay: .54s }
+  @keyframes pv-teclea { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+  /* Y el cursor parpadea al final, como en cualquier editor. */
+  .group:hover .pv-cursor { animation: pv-cursor .9s steps(1) infinite; }
+  @keyframes pv-cursor { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
+
+  /* Las herramientas brotan alrededor, una a una, con rebote. */
+  .group:hover .pv-brota { animation: pv-brota .5s cubic-bezier(.2,1.7,.4,1) both; transform-box: fill-box; transform-origin: center; }
+  .group:hover .pv-brota-2 { animation-delay: .5s }
+  .group:hover .pv-brota-3 { animation-delay: .68s }
+  .group:hover .pv-brota-4 { animation-delay: .86s }
+  .group:hover .pv-brota-5 { animation-delay: 1.04s }
+  @keyframes pv-brota { from { transform: scale(0) rotate(-25deg); opacity: 0 } to { transform: none; opacity: 1 } }
+
+  /* La chispa de la IA destella sin parar: siempre está ahí para ayudar. */
+  .group:hover .pv-destella { animation: pv-destella 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes pv-destella { 0%,100% { transform: scale(1); opacity: .85 } 50% { transform: scale(1.25); opacity: 1 } }
+
+  /* ══ PROYECTAR: EL TABLERO AVANZA ════════════════════════════════════════
+     Un tablero quieto es una foto de tres columnas. Lo que hace que se entienda
+     para qué sirve es ver una tarjeta CRUZAR de «por hacer» a «hecho»: eso es
+     el trabajo pasando, y es lo único que un dibujo estático no puede contar. */
+
+  /* La tarjeta viaja de la primera columna a la tercera, y se queda. */
+  .group:hover .pv-cruza { animation: pv-cruza 2.6s cubic-bezier(.5,0,.2,1) infinite; }
+  @keyframes pv-cruza {
+    0%,12%   { transform: translate(0,0) rotate(0); opacity: 1 }
+    38%      { transform: translate(23px,-7px) rotate(4deg) }
+    64%,100% { transform: translate(46px,17px) rotate(0); opacity: 1 }
+  }
+
+  /* Las que quedan detrás suben a ocupar el hueco. */
+  .group:hover .pv-recoloca { animation: pv-recoloca 2.6s cubic-bezier(.5,0,.2,1) infinite; }
+  @keyframes pv-recoloca { 0%,20% { transform: translateY(0) } 50%,100% { transform: translateY(-15px) } }
+
+  /* La barra de avance se llena. */
+  .group:hover .pv-avanza { animation: pv-avanza 2.6s ease-out infinite; transform-origin: left; }
+  @keyframes pv-avanza { 0%,12% { transform: scaleX(.18) } 70%,100% { transform: scaleX(1) } }
+
+  /* Y el visto se dibuja de un trazo cuando la tarjeta llega. */
+  .group:hover .pv-visto { stroke-dasharray: 14; animation: pv-visto 2.6s ease-out infinite; }
+  @keyframes pv-visto { 0%,58% { stroke-dashoffset: 14 } 76%,100% { stroke-dashoffset: 0 } }
+
+  /* Las caras del equipo asoman por turnos: un proyecto es gente. */
+  .group:hover .pv-equipo { animation: pv-marca .5s cubic-bezier(.2,1.6,.4,1) both; transform-box: fill-box; transform-origin: center; }
+  .group:hover .pv-equipo-2 { animation-delay: .12s }
+  .group:hover .pv-equipo-3 { animation-delay: .24s }
+
   /* Y para quien pide que la pantalla se esté quieta, se está quieta. */
   @media (prefers-reduced-motion: reduce) {
     .group:hover .pv-lienzo *, .pv-lienzo * { animation: none !important; }
@@ -522,6 +584,129 @@ export function PreviaPublicaciones() {
           <rect x="90" y="26" width="56" height="18" rx="3" />
         </clipPath>
       </defs>
+    </svg>
+  );
+}
+
+/**
+ * CREAR (2026-08-24). No es «un editor»: es que en una misma página quepan un
+ * texto, una foto, un mapa, una tabla y un esquema, y que la IA esté al lado.
+ * Por eso el texto se está escribiendo mientras las cinco herramientas brotan
+ * alrededor: si sólo hubiera una hoja con renglones, esta tarjeta prometería un
+ * bloc de notas.
+ */
+export function PreviaCrear() {
+  return (
+    <svg viewBox="0 0 160 90" className={marco} aria-hidden preserveAspectRatio="xMidYMid slice">
+      <rect width="160" height="90" fill="#f8fafc" />
+
+      {/* La hoja, escribiéndose. */}
+      <rect x="37" y="14" width="86" height="62" rx="6" fill="#fff" stroke="#e2e8f0" />
+      <rect className="pv-teclea" x="46" y="24" width="44" height="6" rx="3" fill="#0f172a" />
+      <rect className="pv-teclea pv-teclea-2" x="46" y="37" width="66" height="4" rx="2" fill="#cbd5e1" />
+      <rect className="pv-teclea pv-teclea-3" x="46" y="46" width="58" height="4" rx="2" fill="#cbd5e1" />
+      <rect className="pv-teclea pv-teclea-4" x="46" y="55" width="38" height="4" rx="2" fill="#cbd5e1" />
+      <rect className="pv-cursor" x="86" y="53" width="1.8" height="8" fill="#059669" />
+
+      {/* Y dentro de la hoja, un bloque que no es texto: una foto. */}
+      <g className="pv-brota pv-brota-5">
+        <rect x="94" y="44" width="23" height="18" rx="3" fill="#bae6fd" />
+        <path d="M94 62 L102 54 L108 59 L113 51 L117 62 Z" fill="#38bdf8" />
+        <circle cx="112" cy="49" r="2.4" fill="#fde68a" />
+      </g>
+
+      {/* LAS HERRAMIENTAS, BROTANDO ALREDEDOR DE LA HOJA. Van a 13 y a 129 y no
+          pegadas al borde: la tarjeta se acerca un 6 % al pasar el ratón, y a
+          menos de ~5 px del canto se quedaban cortadas justo cuando la estás
+          mirando — que es el único momento en que se ven. */}
+      {/* Mapa */}
+      <g className="pv-brota">
+        <rect x="13" y="16" width="18" height="18" rx="5" fill="#fff" stroke="#e2e8f0" />
+        <path d="M16 30 L21 19 L28 23 L28 31 Z" fill="#6ee7b7" />
+        <circle cx="22" cy="24" r="2" fill="#059669" />
+      </g>
+      {/* Tabla */}
+      <g className="pv-brota pv-brota-2">
+        <rect x="13" y="42" width="18" height="18" rx="5" fill="#fff" stroke="#e2e8f0" />
+        <rect x="17" y="46" width="10" height="3" rx="1.5" fill="#0f172a" />
+        <rect x="17" y="51" width="10" height="2.5" rx="1.25" fill="#cbd5e1" />
+        <rect x="17" y="55.5" width="7" height="2.5" rx="1.25" fill="#cbd5e1" />
+      </g>
+      {/* Esquema */}
+      <g className="pv-brota pv-brota-3">
+        <rect x="129" y="16" width="18" height="18" rx="5" fill="#fff" stroke="#e2e8f0" />
+        <path d="M133 30 L138 21 L143 27" stroke="#c4b5fd" strokeWidth="1.4" fill="none" />
+        <circle cx="133" cy="30" r="2.2" fill="#8b5cf6" />
+        <circle cx="138" cy="21" r="2.2" fill="#8b5cf6" />
+        <circle cx="143" cy="27" r="2.2" fill="#a78bfa" />
+      </g>
+      {/* Vídeo */}
+      <g className="pv-brota pv-brota-4">
+        <rect x="129" y="42" width="18" height="18" rx="5" fill="#fff" stroke="#e2e8f0" />
+        <rect x="132.5" y="46.5" width="11" height="9" rx="2" fill="#1e293b" />
+        <path d="M136.5 48.8 L140.6 51 L136.5 53.2 Z" fill="#fff" />
+      </g>
+
+      {/* La IA, siempre encendida al lado de lo que escribes. */}
+      <g className="pv-destella" transform="translate(118 21)">
+        <path d="M0 -7 L1.9 -1.9 L7 0 L1.9 1.9 L0 7 L-1.9 1.9 L-7 0 L-1.9 -1.9 Z" fill="#f59e0b" />
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * PROYECTAR (2026-08-24). Un tablero quieto es una foto de tres columnas. Lo que
+ * explica para qué sirve es ver una tarjeta CRUZAR de «por hacer» a «hecho»,
+ * las de detrás subir a ocupar el hueco, la barra de avance llenarse y el visto
+ * dibujarse. Eso es trabajo pasando, y es justo lo que un dibujo quieto no puede
+ * contar.
+ */
+export function PreviaProyectar() {
+  return (
+    <svg viewBox="0 0 160 90" className={marco} aria-hidden preserveAspectRatio="xMidYMid slice">
+      <rect width="160" height="90" fill="#f8fafc" />
+
+      {/* El proyecto: su nombre, su equipo y su barra de avance. */}
+      <rect x="8" y="6" width="40" height="4" rx="2" fill="#0f172a" />
+      <g>
+        <circle className="pv-equipo" cx="118" cy="8" r="4.5" fill="#6ee7b7" />
+        <circle className="pv-equipo pv-equipo-2" cx="128" cy="8" r="4.5" fill="#93c5fd" />
+        <circle className="pv-equipo pv-equipo-3" cx="138" cy="8" r="4.5" fill="#fcd34d" />
+      </g>
+      <rect x="8" y="14" width="144" height="3" rx="1.5" fill="#e2e8f0" />
+      <rect className="pv-avanza" x="8" y="14" width="144" height="3" rx="1.5" fill="#10b981" />
+
+      {/* Las tres columnas. */}
+      <rect x="8" y="23" width="44" height="60" rx="5" fill="#eef2ff" />
+      <rect x="58" y="23" width="44" height="60" rx="5" fill="#fffbeb" />
+      <rect x="108" y="23" width="44" height="60" rx="5" fill="#ecfdf5" />
+      <rect x="13" y="27" width="18" height="3" rx="1.5" fill="#a5b4fc" />
+      <rect x="63" y="27" width="18" height="3" rx="1.5" fill="#fcd34d" />
+      <rect x="113" y="27" width="18" height="3" rx="1.5" fill="#6ee7b7" />
+
+      {/* Por hacer: dos tarjetas, y la de arriba es la que se va. */}
+      <g className="pv-cruza">
+        <rect x="13" y="34" width="34" height="14" rx="3" fill="#fff" stroke="#e0e7ff" />
+        <rect x="17" y="38" width="20" height="3" rx="1.5" fill="#0f172a" />
+        <rect x="17" y="43" width="14" height="2.5" rx="1.25" fill="#cbd5e1" />
+      </g>
+      <g className="pv-recoloca">
+        <rect x="13" y="52" width="34" height="14" rx="3" fill="#fff" stroke="#e0e7ff" />
+        <rect x="17" y="56" width="16" height="3" rx="1.5" fill="#0f172a" />
+        <rect x="17" y="61" width="22" height="2.5" rx="1.25" fill="#cbd5e1" />
+      </g>
+
+      {/* En curso. */}
+      <rect x="63" y="34" width="34" height="14" rx="3" fill="#fff" stroke="#fde68a" />
+      <rect x="67" y="38" width="22" height="3" rx="1.5" fill="#0f172a" />
+      <rect x="67" y="43" width="12" height="2.5" rx="1.25" fill="#cbd5e1" />
+
+      {/* Hecho: la que ya estaba, con su visto dibujándose. */}
+      <rect x="113" y="34" width="34" height="14" rx="3" fill="#fff" stroke="#a7f3d0" />
+      <circle cx="120" cy="41" r="4.5" fill="#10b981" />
+      <path className="pv-visto" d="M117.8 41 L119.6 42.8 L122.6 39.2" stroke="#fff" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="128" y="39.5" width="15" height="3" rx="1.5" fill="#0f172a" />
     </svg>
   );
 }

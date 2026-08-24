@@ -6672,6 +6672,27 @@ que se decidió al montarlo.
 - **Contrato de cobro a v1.1** con 12 % / 10 % (no podía decir 5 % si se cobra 12 %), y los textos de Avisos legales y CrearProducto dejan de tener la cifra escrita a mano: la piden a `puntos-en-caja`, que devuelve las comisiones vigentes.
 - Probado en local por HTTP: el panel lista 17 cifras con su origen; cambiar la comisión a 15 % se ve en el resto de la plataforma en menos de un segundo; 200 % rechazado por el límite; clave inventada 400; sin ser administrador 403; el historial guarda los tres cambios con su motivo. Y **una compra real**: 10 € pagados con 10 puntos → comprador −10, vendedora +9,00, plataforma +1,00 (10 % exacto). Todo retirado.
 
+## 2026-08-24 — «Crear» y «Proyectar» también se mueven
+Eugenio: «haz lo mismo para las otras dos tarjetas, mejóralas para que realmente
+se vea el poder de esta plataforma, no escatimes en animaciones».
+
+Dos dibujos NUEVOS, `PreviaCrear` y `PreviaProyectar`, en vez de seguir tomando
+prestados los de «Página» y «Tarea». La razón: en el cajetín de herramientas el
+dibujo de «Página» tiene que parecer una página, y aquí «Crear» no es una
+página — son las dieciséis herramientas a la vez. Reutilizarlo prometía un
+editor de texto donde hay un taller.
+
+- **Crear**: el texto se teclea renglón a renglón con su cursor parpadeando, y
+  alrededor brotan cinco herramientas (mapa, tabla, esquema, vídeo y una foto
+  metida dentro de la propia hoja), con la chispa de la IA destellando al lado.
+- **Proyectar**: una tarjeta CRUZA de «por hacer» a «hecho» en bucle, las de
+  detrás suben a ocupar el hueco, la barra de avance se llena, el visto se
+  dibuja de un trazo y las caras del equipo asoman por turnos.
+- Las herramientas van a 13 y 129 px y no pegadas al canto: la tarjeta se acerca
+  un 6 % al pasar el ratón y a menos de ~5 px del borde quedaban cortadas justo
+  en el único momento en que se ven.
+- Todo sigue apagándose con «reducir movimiento» del sistema, que ya cubría
+  cualquier animación dentro de `.pv-lienzo`.
 ### 2026-08-24 — Buscador, fase 1: las áreas, y buscar sin tildes (prog8)
 
 Eugenio, sobre el desplegable del chat: «si pongo las tres letras *eco*, todavía
