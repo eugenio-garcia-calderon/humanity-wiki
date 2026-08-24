@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState , Fragment, type ReactNode} from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Search, User as UserIcon, Eye, Sparkles, Network, LayoutGrid,
+  Search, User as UserIcon, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
   ArrowLeft, Users2, Globe2, Plus, Flag, Ban,
@@ -12,6 +12,7 @@ import WindowContent from '../components/knowledge/WindowContent';
 import FichaPublicacion, { type Publicacion } from '../components/knowledge/FichaPublicacion';
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
+import VentanaCentral from '../components/ventanas/VentanaCentral';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
 import { Denunciar } from '../components/moderacion/Denunciar';
 import { Bloquear } from '../components/moderacion/Bloquear';
@@ -120,6 +121,41 @@ function formatosDescarga(pub: Publicacion): { id: string; label: string; accion
   return salida;
 }
 
+/**
+ * ¿El rótulo de abajo es un SITIO al que se puede ir, o una cuenta?
+ *
+ * Sólo una ventana metida dentro de un lienzo tiene un contenedor de verdad:
+ * ahí `donde` es el nombre del lienzo y `ruta` lleva a él. En un lienzo, un
+ * mapa o un proyecto, ese mismo campo trae «12 piezas», «Mapas» o «3/8 hechas»
+ * — información sobre la propia tarjeta, no sobre dónde vive.
+ *
+ * Se pregunta por el tipo y no por si hay `ruta`, porque `ruta` la traen todos:
+ * la de un lienzo apunta a sí mismo, y pulsando «12 piezas» se abriría el mismo
+ * lienzo dentro de un pop-up encima del lienzo.
+ */
+function dondeEsUnSitio(it: any): boolean {
+  return it?.tipo === 'ventana' && !!it?.donde && !!it?.ruta;
+}
+
+/**
+ * «1,2 mil visualizaciones», como YouTube.
+ *
+ * Abrevia a partir del millar porque a partir de ahí el número exacto no dice
+ * nada que importe: entre 1.203 y 1.240 no hay ninguna decisión distinta. Por
+ * debajo se escribe entero, que ahí sí se distingue 8 de 80.
+ */
+function contarVistas(n: number): string {
+  const uno = n === 1;
+  if (n < 1000) return `${n} ${uno ? 'visualización' : 'visualizaciones'}`;
+  if (n < 1000000) {
+    const miles = n / 1000;
+    // Una decimal por debajo de 10 mil («1,2 mil»); a partir de ahí sobra.
+    const txt = miles < 10 ? miles.toFixed(1).replace('.', ',') : String(Math.round(miles));
+    return `${txt} mil visualizaciones`;
+  }
+  return `${(n / 1000000).toFixed(1).replace('.', ',')} M de visualizaciones`;
+}
+
 export default function Explorar() {
   const { user, updateUiSettings } = useAuth();
   const esMovil = useEsMovil();
@@ -165,6 +201,8 @@ export default function Explorar() {
     setSearchParams(q, { replace: true });
   };
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
+  /** El lienzo o el mapa que se está mirando en el pop-up central, si hay uno. */
+  const [dentroDe, setDentroDe] = useState<{ titulo: string; ruta: string } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   /*
    * LA PAPELERA Y EL PERSONALIZADOR SE ABREN POR DIRECCIÓN (2026-08-24). Sus
@@ -756,8 +794,37 @@ export default function Explorar() {
                           La foto es de 26 px y con inicial de respaldo: sin foto
                           guardada, un círculo vacío es peor que una letra. */}
                       <div className="px-3.5 pt-3 flex items-center gap-1.5">
+                      {/* ── QUIEN PUBLICA ES UN ENLACE, NO PARTE DEL CARTEL ────
+                          Eugenio: «si se pincha en ese nombre, te lleve al perfil
+                          de esa persona. Ahora mismo es todo como una gran
+                          ventana que solo puedes pinchar en la publicación en
+                          general, pero se debe de poder pinchar en el autor».
+
+                          La tarjeta entera era un solo objetivo, así que el
+                          nombre y la foto **parecían** pulsables y llevaban al
+                          mismo sitio que el resto. Eso no es que faltara un
+                          enlace: es que había uno falso, y un nombre que no
+                          lleva a su persona enseña a no pulsar nombres.
+
+                          `stopPropagation` es lo que impide que el clic siga
+                          hacia la tarjeta y abra las dos cosas a la vez. Y sin
+                          `autor_id` no se pinta enlace ninguno: enlazar a un
+                          perfil que no existe es peor que no enlazar. */}
+                      {it.autor_id ? (
+                      <Link
+                      to={`/personas/${it.autor_id}`}
+                      onClick={e => e.stopPropagation()}
+                      className="flex min-w-0 items-center gap-1.5 rounded-lg -mx-1 px-1 py-0.5 hover:bg-slate-100 transition-colors"
+                      >
+                      <AvatarAutor url={it.autor_avatar} nombre={it.autor_nombre} />
+                      <span className="truncate text-[12px] font-black text-slate-800 hover:underline">{it.autor_nombre || 'Anónimo'}</span>
+                      </Link>
+                      ) : (
+                      <>
                       <AvatarAutor url={it.autor_avatar} nombre={it.autor_nombre} />
                       <span className="truncate text-[12px] font-black text-slate-800">{it.autor_nombre || 'Anónimo'}</span>
+                      </>
+                      )}
                       {it.ia && <Sparkles className="w-2.5 h-2.5 shrink-0 text-amber-500" />}
                       {!it.publico && (
                       <span className="text-[8px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
@@ -939,14 +1006,62 @@ export default function Explorar() {
                       </div>
                       )}
                       {/* EL PIE YA NO REPITE AL AUTOR: está arriba, con su foto. */}
-                      <div className="px-3.5 py-2 flex items-center gap-2 text-[10px] text-slate-400">
+                      <div className="px-3.5 py-2 flex items-center gap-2.5 text-[11px] text-slate-500">
+                      {/* ── DÓNDE ESTÁ METIDA ESTO, Y CUÁNDO SE PUEDE PULSAR ───
+                          Eugenio: «hay una información abajo que es dónde está
+                          integrada esa publicación, puede estar integrada dentro
+                          de un grafo o un mapa. También se debe de poder pinchar
+                          en esa etiqueta y que se abra ese grafo o ese mapa de
+                          forma central como un pop-up».
+
+                          **Y sólo cuando de verdad es un sitio.** `donde` viene
+                          del servidor con dos significados distintos según qué
+                          sea la tarjeta:
+
+                            · una ventana dentro de un lienzo → el NOMBRE de ese
+                              lienzo, con su `donde_slug`. Eso es un sitio.
+                            · un lienzo → «12 piezas». Un mapa → «Mapas». Un
+                              proyecto → «3/8 hechas». Eso son CUENTAS y
+                              categorías, no sitios.
+
+                          Hacer pulsable lo segundo abriría «12 piezas» como si
+                          fuera un lugar, o el propio lienzo dentro de sí mismo.
+                          Un campo que significa dos cosas no se puede tratar
+                          como si significara una, y aquí la diferencia se nota
+                          en cuanto alguien pulsa. */}
                       {it.donde && (
-                      <span className="inline-flex items-center gap-1 truncate">
-                      <Network className="w-2.5 h-2.5 shrink-0" />{it.donde}
+                      dondeEsUnSitio(it) ? (
+                      <button
+                      onClick={e => { e.stopPropagation(); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
+                      title={`Ver «${it.donde}»`}
+                      className="inline-flex min-w-0 items-center gap-1 rounded-md -mx-1 px-1 py-0.5 font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                      >
+                      <Network className="w-3 h-3 shrink-0" /><span className="truncate">{it.donde}</span>
+                      </button>
+                      ) : (
+                      <span className="inline-flex items-center gap-1 truncate text-slate-400">
+                      <Network className="w-3 h-3 shrink-0" />{it.donde}
                       </span>
+                      )
                       )}
+                      {/* ── LAS VISUALIZACIONES, LEGIBLES ──────────────────────
+                          Eugenio: «tiene que estar más claro el número de
+                          visualizaciones que tiene esa publicación al estilo
+                          YouTube».
+
+                          Iban en gris de 10 px junto a un ojo diminuto, del
+                          mismo tamaño y color que todo lo demás del pie. En
+                          YouTube ese dato **se lee**: dice la palabra entera y
+                          abrevia el número, porque «1,2 mil visualizaciones» se
+                          entiende de un vistazo y «1203» hay que leerlo.
+
+                          El ojo se va: con la palabra delante no aporta nada, y
+                          dos señales para el mismo dato ocupan el sitio de la
+                          siguiente. */}
                       {it.vistas > 0 && (
-                      <span className="inline-flex items-center gap-0.5 shrink-0"><Eye className="w-2.5 h-2.5" />{it.vistas}</span>
+                      <span className="shrink-0 font-bold text-slate-600">
+                      {contarVistas(it.vistas)}
+                      </span>
                       )}
                       </div>
                       </div>
@@ -981,6 +1096,15 @@ export default function Explorar() {
           onIr={ruta => navigate(ruta)}
           onCambiada={() => { cargar(); if (modo === 'mias') cargarPapelera(); }}
           onCerrar={() => setAbierta(null)}
+        />
+      )}
+
+      {dentroDe && (
+        <VentanaCentral
+          titulo={dentroDe.titulo}
+          destino={dentroDe.ruta}
+          onCerrar={() => setDentroDe(null)}
+          onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); navigate(r); }}
         />
       )}
 
