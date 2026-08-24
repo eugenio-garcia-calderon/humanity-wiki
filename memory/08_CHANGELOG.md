@@ -6606,3 +6606,11 @@ arriba el nombre en grande de "Red de Conocimiento"».
 - `/explorar` no cambia: el muro sigue en su dirección de siempre, así que
   ningún enlace guardado se rompe. Y sin sesión sigue mandando la portada de
   bienvenida.
+### 2026-08-24 — La portada que suena, sin botones encima y más grande (Programador 8)
+- **Eugenio**: «se empieza a reproducir, pero no se escucha… aparecen los botones de pausa, adelante y atrás y el título que tapan la imagen… ponle el sonido activado por defecto, y haz que se amplíe».
+- **Los botones no salían por tener `controls=1`** —ya estaba en `0`— sino porque **YouTube saca su barra en cuanto el ratón se mueve por encima del reproductor**, controles o no. Se arregla con `pointer-events: none` en el marco: el ratón lo atraviesa, el reproductor no se entera de que hay nadie, y no saca ni barra, ni título, ni logo. El hover de la tarjeta sigue funcionando porque vive en el div de fuera. De regalo, un clic ya no se lo come YouTube.
+- **El sonido tiene una pelea detrás**: ningún navegador deja arrancar un vídeo con sonido por su cuenta. La única vía es empezar callado y quitar el silencio en cuanto arranca — con `enablejsapi=1` y un mensaje al reproductor.
+- **Y por eso se pregunta antes de intentarlo.** Si nadie ha tocado nada de la página, quitar el silencio no es que no funcione: **Chrome pausa el vídeo**. El intento a ciegas cambiaría «se ve pero no se oye» por «no se ve», que es peor. Se comprueba con `navigator.userActivation.hasBeenActive`.
+- **Se amplía de ×1,12 a ×1,25** al reproducirse. Sigue siendo `scale` y no un cambio de caja: una rejilla que se recoloca al pasar el ratón no se puede leer.
+- **Dos veces midió mal la prueba antes de acertar**, y las dos son la misma lección: un `hover` quieto **no** provoca la barra de YouTube —hay que mover el ratón, y por eso la prueba lo mueve—; y `getComputedStyle().transform` decía «×1.00» con la ampliación funcionando, porque en esta versión de Tailwind `scale` es su propia propiedad de CSS. Ahora se miden **los píxeles de la caja**, que no dependen de con qué propiedad se haya escrito.
+- **7 comprobaciones** en `scripts/probar-portada-al-pasar.mjs`, incluida una que hace clic antes de pasar el ratón —parte de la prueba, no preparación— y le pregunta al propio reproductor de YouTube si está silenciado.
