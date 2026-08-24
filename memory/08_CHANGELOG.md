@@ -6490,3 +6490,39 @@ resto de herramientas»*.
 - **Fallo cazado en la prueba**: con `SELECT DISTINCT`, Postgres exige que lo que se ordena esté en la lista de columnas — ordenar por «lo más vendido» devolvía error de consulta. Ahora «vendidos» y «valoración» se calculan como columnas con nombre (y de paso viajan al cliente).
 - `/mercado`: selector de orden, paginador (solo si hay más de una página: un paginador de una página es ruido) y vuelta a la página 1 al cambiar búsqueda u orden.
 - Probado en local por HTTP: los cinco órdenes; página 1 y 2 traen productos distintos; precio_asc ordena 120→450000; buscar una palabra que solo está en la descripción encuentra 3; sin `pagina` sigue siendo array.
+### 2026-08-24 — Veracidad, fase 8: te enseña lo que ya se ha dicho ANTES de escribirlo
+
+La otra mitad del encargo del primer día, la que faltaba: *«que lo que la gente
+publique sea información coherente con la otra información que hay»*.
+
+- **Mientras escribes un argumento**, con 700 ms de calma, aparece «Esto ya se
+  ha tocado» con las frases que ya existen y se parecen a la tuya — cada una con
+  su **postura** (el punto verde, rojo o naranja), su **sello de veracidad** y
+  el debate del que viene. Y si ya hay **otro debate abierto** sobre lo mismo,
+  lo enlaza.
+- **No bloquea nada, y eso es el diseño.** No impide publicar, no puntúa, no
+  dice «esto es falso». Un aviso que se equivoca mientras escribes se aprende a
+  ignorar en dos días, y a partir de ahí ya no avisa de nada. Este solo enseña
+  lo que puede demostrar: frases que existen, con su enlace, para que decidas
+  seguir, citarlas o responderles.
+- **Avisar antes y no después**: después es una discusión; antes es la
+  oportunidad de traer la fuente.
+- **Búsqueda de texto en español, no la IA** (`drizzle/0116`, índices GIN sobre
+  `argumentos.texto` y `debates.tesis`). Un modelo afirmaría el parecido con una
+  seguridad que no tiene. La IA entra en la fase 10, y entrará proponiendo.
+- **Se busca con «o» y se ordena con «y»**, que es el hallazgo de la tarde:
+  `plainto_tsquery` exige TODAS las palabras y por eso no encontraba nada — dos
+  frases que dicen lo mismo casi nunca comparten todas sus palabras. Buscar con
+  «o» trae de más y ordenar con «y» las coloca. **El corte en 0,05 está medido**:
+  la frase que dice lo mismo con otras palabras puntúa 0,63, la casi idéntica
+  0,93, y una que solo comparte el tema, 0,00.
+- **Verificado**: 10 comprobaciones en verde — el 401 sin sesión, «con dos
+  palabras todavía no puedo decirte» (que no es «no hay nada»), encontrar la
+  frase equivalente, distinguir si viene de este debate o de otro, no proponerse
+  a sí mismo, no sacar lo que no tiene que ver, y que **lo archivado deja de
+  avisar**. Y en el navegador, escribiendo de verdad en el formulario.
+- **Tablero**: 16 de 30 tarjetas en verde.
+
+**Lo que falta de esta fase**: dejar la contradicción registrada como relación
+del grafo (`RM_VER_F8_REGISTRAR`), que es lo que la haría visible desde fuera del
+debate.
