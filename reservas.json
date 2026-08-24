@@ -23,6 +23,12 @@
       "ruta": "src/pages/TresCaminos.tsx",
       "motivo": "prog3: los tres caminos se salen del ancho en movil",
       "desde": "2026-08-24T16:05:54.192Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "prog3: el pie PARTE DE aun se sale a 360px",
+      "desde": "2026-08-24T16:15:37.164Z"
     }
   ]
 }
