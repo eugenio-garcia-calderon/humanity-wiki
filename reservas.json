@@ -32,12 +32,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/components/navegacion/TresCirculos.tsx",
-      "motivo": "prog2: desplegar el menu al pasar el raton por el circulo",
-      "desde": "2026-08-23T23:51:00.086Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/hooks/useAbrirAlAcercarse.ts",
       "motivo": "prog2: cerrar mirando donde esta el raton, no esperando un mouseleave",
       "desde": "2026-08-24T00:03:45.654Z"
