@@ -107,6 +107,18 @@
       "ruta": "src/hooks/useAbrirAlAcercarse.ts",
       "motivo": "prog2: cerrar mirando donde esta el raton, no esperando un mouseleave",
       "desde": "2026-08-24T00:03:45.654Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog7: F7 changelog (1 min)",
+      "desde": "2026-08-24T00:06:26.501Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/13_PLAN_COMERCIO.md",
+      "motivo": "prog7: F7 changelog (1 min)",
+      "desde": "2026-08-24T00:06:26.501Z"
     }
   ]
 }
