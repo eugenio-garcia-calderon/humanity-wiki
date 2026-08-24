@@ -23,6 +23,12 @@
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: el tipo lleva ahora el tamano del lienzo",
       "desde": "2026-08-24T15:40:29.165Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/TresCaminos.tsx",
+      "motivo": "prog3: los tres caminos se salen del ancho en movil",
+      "desde": "2026-08-24T16:05:54.192Z"
     }
   ]
 }
