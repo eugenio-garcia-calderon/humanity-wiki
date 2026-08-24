@@ -834,6 +834,23 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
                w.publico, w.creator_user_id,
                u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
                g.slug AS grafo_slug, g.title AS grafo_titulo,
+               -- ── EL TAMAÑO DE LO QUE HAY DETRÁS (2026-08-24) ─────────────
+               -- Eugenio: «dale más relevancia a esa etiqueta para que se
+               -- entienda que eso viene de un tema complejo mucho mayor de lo
+               -- que la gente se pueda imaginar».
+               --
+               -- El nombre del lienzo solo no dice eso: «Incendios en España»
+               -- puede ser una nota suelta o veinticuatro piezas conectadas
+               -- entre sí. El número es lo que convierte un rótulo en una
+               -- promesa comprobable, y sale de contar, no de adjetivos.
+               --
+               -- Subconsulta y no un JOIN con GROUP BY: la consulta de fuera
+               -- ya lleva DISTINCT ON y cuatro LEFT JOIN, y agrupar aquí
+               -- obligaría a meter todas sus columnas en el GROUP BY.
+               (SELECT count(*) FROM graph_windows gw2
+                 JOIN knowledge_windows w2 ON w2.id = gw2.window_id
+                 WHERE gw2.graph_id = g.id
+                   AND w2.archived_at IS NULL AND w2.deleted_at IS NULL) AS grafo_piezas,
                coalesce(g.center->>'personal','') = '1' AS es_personal,
                coalesce(pm.estado, 'en_desarrollo') AS estado,
                coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
@@ -977,6 +994,11 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           vistas: w.views, ia: w.is_ai_generated, fecha: w.created_at,
           autor_id: w.creator_user_id, autor_nombre: w.autor_nombre, autor_avatar: w.autor_avatar,
           donde: w.grafo_titulo, donde_slug: w.grafo_slug, personal: w.es_personal,
+          // Cuántas piezas tiene el lienzo donde vive esto. `null` cuando no
+          // vive en ninguno, que **no es lo mismo que cero**: un lienzo vacío y
+          // «esto no está en ningún lienzo» son dos cosas distintas y la
+          // etiqueta las pinta distinto.
+          donde_piezas: w.grafo_slug ? Number(w.grafo_piezas) || 0 : null,
           ruta: w.grafo_slug ? `/esquemas/${w.grafo_slug}` : null,
           publico: w.publico, ...comun(w),
         })),
