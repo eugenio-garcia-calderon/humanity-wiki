@@ -29,14 +29,14 @@ comprobar('null', leerPortada(null), PORTADA_POR_DEFECTO);
 comprobar('basura', leerPortada('vete a saber'), PORTADA_POR_DEFECTO);
 comprobar('objeto sin bloques', leerPortada({ plantilla: 'lectura' }), PORTADA_POR_DEFECTO);
 comprobar('bloque inventado se ignora',
-  leerPortada({ plantilla: 'propia', bloques: ['personas', 'inventado', 'contenido'] }).bloques,
-  ['personas', 'contenido']);
+  leerPortada({ plantilla: 'propia', bloques: ['tuyo', 'inventado', 'contenido'] }).bloques,
+  ['tuyo', 'contenido']);
 comprobar('duplicados fuera',
-  leerPortada({ plantilla: 'propia', bloques: ['personas', 'personas', 'contenido'] }).bloques,
-  ['personas', 'contenido']);
+  leerPortada({ plantilla: 'propia', bloques: ['tuyo', 'tuyo', 'contenido'] }).bloques,
+  ['tuyo', 'contenido']);
 comprobar('SIN CONTENIDO se le añade (portada en blanco imposible)',
-  leerPortada({ plantilla: 'propia', bloques: ['personas'] }).bloques,
-  ['personas', 'contenido']);
+  leerPortada({ plantilla: 'propia', bloques: ['tuyo'] }).bloques,
+  ['tuyo', 'contenido']);
 comprobar('lista vacía acaba con contenido',
   leerPortada({ plantilla: 'propia', bloques: [] }).bloques,
   ['contenido']);
@@ -46,9 +46,22 @@ comprobar('todo inválido acaba con contenido',
 
 // Las tres plantillas se reconocen a sí mismas
 for (const p of PLANTILLAS) comprobar(`plantilla «${p.titulo}» se reconoce`, plantillaDe(p.bloques), p.id);
-comprobar('un orden propio se llama propia', plantillaDe(['contenido', 'personas']), 'propia');
+comprobar('un orden propio se llama propia', plantillaDe(['contenido', 'tuyo']), 'propia');
 comprobar('mismo contenido distinto orden NO es la plantilla',
-  plantillaDe(['tuyo', 'personas', 'objetivos', 'buscador', 'contenido']), 'propia');
+  plantillaDe(['carpetas', 'tuyo', 'contenido']), 'propia');
+
+// LOS TRES BLOQUES RETIRADOS (2026-08-24): personas, objetivos y buscador se
+// quitaron del registro, así que una portada guardada con ellos tiene que
+// ignorarlos en vez de romperse. Es el caso que de verdad va a ocurrir: hay
+// gente con esa portada guardada de ayer.
+// (`leerPortada` recibe `unknown` a propósito, así que aquí se pueden escribir
+//  los identificadores viejos: es exactamente lo que va a llegar de la base.)
+comprobar('una portada guardada con bloques retirados los ignora',
+  leerPortada({ plantilla: 'completa', bloques: ['personas', 'tuyo', 'objetivos', 'buscador', 'contenido'] }).bloques,
+  ['tuyo', 'contenido']);
+comprobar('y si solo tenía bloques retirados, queda el contenido',
+  leerPortada({ plantilla: 'completa', bloques: ['personas', 'objetivos', 'buscador'] }).bloques,
+  ['contenido']);
 
 // Y que ninguna plantilla se quede sin contenido
 for (const p of PLANTILLAS) comprobar(`«${p.titulo}» incluye el contenido`, p.bloques.includes('contenido'), true);

@@ -6150,6 +6150,25 @@ restored, `tsc` clean.
 - **Valoración del vendedor** (acordada con el Dashboard antes de que desapareciera): nadie valora a la persona; es el agregado de reseñas de sus productos con compra verificada (una por persona y producto; el vendedor no reseña lo suyo; #277). Con menos de `MIN_RESENAS_VALORACION_VENDEDOR = 3` no se enseña nada (ni «sin valoraciones»); con 3+, «★ 4,5 · 3 opiniones verificadas en esta tienda». El umbral vive en una constante con nombre.
 - Probado en local por HTTP: 2 reseñas → null; 3 → 4,5·3; relacionados; avísame → barrido con stock 0 → 0, con stock 5 → 1 aviso, segundo barrido 0, DELETE → 0. Todo retirado.
 - Nota de equipo: el Dashboard dejó de existir esta noche; el turno de despliegue pasa a ser «mirar `gh run list` y que nadie esté desplegando antes de fusionar»; el motivo de cada reserva lleva delante el número del programador; y tras `soltar`, comprobar con `quien` (prog8 vio reservas «resucitadas» por una carrera).
+
+## 2026-08-24 — El muro, limpio: solo publicaciones
+Eugenio: «elimina los círculos de estados de personas, el buscador secundario
+y la ristra de temáticas, y deja solo las publicaciones».
+
+- Fuera tres bloques de la portada (`personas`, `objetivos`, `buscador`).
+  `leerPortada` los ignora si estaban guardados, así que a nadie se le queda
+  una portada rota de ayer.
+- Arriba, solo lo que tiene portada; con vídeo, primero. Dentro de cada
+  tramo manda la popularidad (`apoyos * 3 + vistas`), y para eso `knowledge.ts`
+  ahora devuelve `apoyos` y `media`.
+- Tres tarjetas por fila en vez de cuatro.
+- Al pasar el ratón, el vídeo se reproduce y la portada crece un 12% por
+  encima de sus vecinas, sin mover la rejilla.
+- Etiquetas de tema dentro de la tarjeta, con el color del mapa y el mismo
+  criterio (`hablaDe`) que usa el filtro de la izquierda: la etiqueta y el
+  filtro no se pueden contradecir.
+- Una foto que ya no existe se retira; antes dejaba el icono roto del
+  navegador dentro de la tarjeta.
 ### 2026-08-22 — Veracidad, fases 2 y 4: ya se puede debatir
 
 Eugenio dio el sí a las dos decisiones abiertas y pidió seguir por donde
