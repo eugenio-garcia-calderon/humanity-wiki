@@ -101,7 +101,16 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind,
       case 'video': {
         const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
         if (!m) { setError('Pega un enlace de YouTube válido.'); return null; }
-        return { title: title.trim() || 'Vídeo', config: { youtube_id: m[1], channel: sourceName.trim() || undefined } };
+        // LA DESCRIPCIÓN VIAJA (2026-08-24). Eugenio: «permite que al publicar
+        // un vídeo se permita añadir una descripción, no sólo el título».
+        // La imagen de aquí abajo ya guardaba su pie en `caption` y el vídeo
+        // se dejaba el texto por el camino: el campo se escribía y no llegaba a
+        // ninguna parte. Misma clave que la imagen, que es donde el resto de la
+        // aplicación ya busca el pie de una pieza de media.
+        return {
+          title: title.trim() || 'Vídeo',
+          config: { youtube_id: m[1], channel: sourceName.trim() || undefined, caption: body.trim() || undefined },
+        };
       }
       case 'imagen':
         if (!url.trim()) { setError('Falta la URL de la imagen.'); return null; }
@@ -292,8 +301,9 @@ export default function AddWindowPanel({ graphId, onClose, onAdded, initialKind,
             <input value={url} onChange={e => setUrl(e.target.value)}
               placeholder={kind === 'video' ? 'https://youtu.be/…' : kind === 'imagen' ? 'https://…/imagen.png' : 'https://…'} className={input} />
           )}
-          {(kind === 'enlace' || kind === 'imagen') && (
-            <input value={body} onChange={e => setBody(e.target.value)} placeholder={kind === 'imagen' ? 'Pie de imagen (opcional)' : 'Descripción (opcional)'} className={input} />
+          {(kind === 'enlace' || kind === 'imagen' || kind === 'video') && (
+            <input value={body} onChange={e => setBody(e.target.value)}
+              placeholder={kind === 'imagen' ? 'Pie de imagen (opcional)' : 'Descripción (opcional)'} className={input} />
           )}
           {(kind === 'video' || kind === 'imagen') && (
             <input value={sourceName} onChange={e => setSourceName(e.target.value)} placeholder={kind === 'video' ? 'Canal (crédito)' : 'Fuente (crédito)'} className={input} />
