@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog2",
-      "ruta": "src/components/knowledge/AddWindowPanel.tsx",
-      "motivo": "prog2: descripcion al anadir un video",
-      "desde": "2026-08-24T19:06:53.420Z"
-    }
-  ]
+  "reservas": []
 }
