@@ -383,7 +383,31 @@ export function registerGraphRoutes(app: Express, db: any) {
       const q = String(req.query.q || '').trim();
       if (q.length < 2) return res.json({ query: q, results: [] });
       const limitPerType = Math.min(Number(req.query.limit) || 5, 20);
-      const pattern = `%${q}%`;
+
+      // ══ LAS TILDES NO SEPARAN DOS FORMAS DE ESCRIBIR LA MISMA PALABRA ════
+      // (2026-08-24, Eugenio, sobre el buscador del chat: «todavía hay que
+      // darle mucha más profundidad».) Buscar «energia» no encontraba
+      // «ENERGÍA», ni «ecologia» a «ecológico»: quien busca escribe deprisa y
+      // sin tildes, y el título las lleva. Es de los fallos de predicción que
+      // más se notan y menos se entienden desde fuera.
+      //
+      // SE HACE CON `translate` Y NO CON `unaccent`: la extensión `unaccent`
+      // no está instalada, y meter una extensión en la base de datos es una
+      // decisión de quien lleva escalabilidad, no un detalle de esta ruta.
+      // `translate` es SQL de siempre y no necesita permiso de nadie.
+      //
+      // El precio está medido y escrito en `02_TECH_DEBT.md`: esto ya recorría
+      // la tabla entera, y seguir recorriéndola aplicando `translate` es el
+      // mismo orden de magnitud, no uno nuevo.
+      const CON = 'áàäâãéèëêíìïîóòöôõúùüûñçÁÀÄÂÃÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑÇ';
+      const SIN = 'aaaaaeeeeiiiiooooouuuuncAAAAAEEEEIIIIOOOOOUUUUNC';
+      /** La columna en minúsculas y sin tildes, para comparar como se escribe. */
+      const llano = (col: any) => sql`translate(lower(${col}), ${CON}, ${SIN})`;
+      /** Lo mismo, pero para el texto que llega de fuera. Se normaliza en
+       *  JavaScript para no hacer el trabajo por fila. */
+      const aLlano = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const qLlano = aLlano(q);
+      const pattern = `%${qLlano}%`;
       const results: any[] = [];
 
       // ══ ESTO NO USA NINGÚN ÍNDICE, Y HAY UN NÚMERO ESCRITO PARA CUÁNDO
@@ -419,8 +443,8 @@ export function registerGraphRoutes(app: Express, db: any) {
         'que', 'qué', 'cual', 'cuál', 'cuales', 'cuáles', 'como', 'cómo',
         'cuando', 'cuándo', 'donde', 'dónde', 'quien', 'quién', 'quienes',
         'son', 'ser', 'está', 'esta', 'están', 'hay', 'tiene', 'tienen', 'hacer']);
-      const palabras = q.toLowerCase()
-        .replace(/[^\wáéíóúñü\s]/g, ' ')
+      const palabras = qLlano
+        .replace(/[^\w\s]/g, ' ')
         .split(/\s+/)
         .filter(w => w.length >= 3 && !VACIAS.has(w))
         .slice(0, 8);
@@ -433,7 +457,7 @@ export function registerGraphRoutes(app: Express, db: any) {
       /** Cuántas de las palabras buscadas aparecen en este título. Es lo que
        *  convierte «alguna de ellas» en un orden con sentido. */
       const cuantasCoinciden = (col: any) =>
-        sql.join(palabras.map(w => sql`(CASE WHEN ${col} ILIKE ${'%' + w + '%'} THEN 1 ELSE 0 END)`), sql.raw(' + '));
+        sql.join(palabras.map(w => sql`(CASE WHEN ${llano(col)} LIKE ${'%' + w + '%'} THEN 1 ELSE 0 END)`), sql.raw(' + '));
 
       // ══ Y EL MEJOR PRIMERO, DENTRO DEL LÍMITE ════════════════════════════
       // Sin `ORDER BY` esto devolvía las cinco filas que la base de datos
@@ -457,10 +481,13 @@ export function registerGraphRoutes(app: Express, db: any) {
         const col = sql.raw(`n.${label}`);
         return sql`
           CASE
-            WHEN lower(${col}) = lower(${q}) THEN 0
-            WHEN lower(${col}) LIKE lower(${q}) || '%' THEN 1
-            WHEN ${col} ILIKE ${pattern} THEN 2
-            ELSE 3
+            WHEN ${llano(col)} = ${qLlano} THEN 0
+            WHEN ${llano(col)} LIKE ${qLlano} || '%' THEN 1
+            -- «Empieza una palabra por esto» antes que «lo lleva dentro»:
+            -- buscando «eco», ECOSISTEMAS va delante de El Berru**eco**.
+            WHEN ${llano(col)} LIKE ${'% ' + qLlano} || '%' THEN 2
+            WHEN ${llano(col)} LIKE ${pattern} THEN 3
+            ELSE 4
           END,
           ${porPalabras ? sql`(${cuantasCoinciden(col)}) DESC,` : sql``}
           length(${col})
@@ -473,7 +500,7 @@ export function registerGraphRoutes(app: Express, db: any) {
           SELECT ${sql.raw(nodeSelect(type))}
           FROM ${sql.raw(def.table)} n
           WHERE n.archived_at IS NULL
-            AND (${col} ILIKE ${pattern}${porPalabras ? sql` OR ${col} ILIKE ANY(${patrones})` : sql``})
+            AND (${llano(col)} LIKE ${pattern}${porPalabras ? sql` OR ${llano(col)} LIKE ANY(${patrones})` : sql``})
           ORDER BY ${orden(def.label)}
           LIMIT ${limitPerType}
         `);
@@ -485,14 +512,14 @@ export function registerGraphRoutes(app: Express, db: any) {
         SELECT id, uuid, COALESCE(title, left(body, 80)) AS label, 'publications' AS type
         FROM publications
         WHERE archived_at IS NULL AND status = 'publicada'
-          AND (title ILIKE ${pattern} OR body ILIKE ${pattern}${porPalabras
-            ? sql` OR title ILIKE ANY(${patrones}) OR body ILIKE ANY(${patrones})`
+          AND (${llano(sql.raw('title'))} LIKE ${pattern} OR ${llano(sql.raw('body'))} LIKE ${pattern}${porPalabras
+            ? sql` OR ${llano(sql.raw('title'))} LIKE ANY(${patrones}) OR ${llano(sql.raw('body'))} LIKE ANY(${patrones})`
             : sql``})
         -- Lo que lo lleva en el TÍTULO antes que lo que solo lo menciona en el
         -- cuerpo: una publicación que se llama como lo que buscas es casi
         -- siempre la que buscabas.
         ORDER BY
-          (CASE WHEN title ILIKE ${pattern} THEN 0 ELSE 1 END),
+          (CASE WHEN ${llano(sql.raw('title'))} LIKE ${pattern} THEN 0 ELSE 1 END),
           ${porPalabras ? sql`(${cuantasCoinciden(sql.raw('title'))}) DESC,` : sql``}
           length(COALESCE(title, body))
         LIMIT ${limitPerType}

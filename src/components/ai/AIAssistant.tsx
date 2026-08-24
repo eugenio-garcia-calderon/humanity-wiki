@@ -10,6 +10,7 @@ import { pedirVentanas } from '../ventanas/bus';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
 import ResizeHandle from '../ui/ResizeHandle';
 import { cn } from '../../utils/cn';
+import { OBJETIVOS, sinTildes } from '../../utils/objetivos';
 import Markdown from './Markdown';
 
 // ============================================================================
@@ -117,6 +118,69 @@ const costeEstimado = (
   return '≈ ' + euros(c);
 };
 
+/** ══ LAS ÁREAS SON LA PUERTA A «TODO LO QUE HAY SOBRE ESTO» ═══════════════
+ *  (2026-08-24, Eugenio: «si pongo las tres letras eco, todavía no aparece
+ *  debajo ecosistema, que es un tema relevante dentro de la plataforma, ya que
+ *  si pulsas en ecosistemas, te aparecen todas las publicaciones que llevan a
+ *  ello».)
+ *
+ *  Las catorce áreas (`utils/objetivos.ts`) no son una tabla: son la tira de
+ *  pastillas de Explorar, y llevan a **todo lo publicado** sobre un tema. El
+ *  buscador no las conocía —solo encontraba la ficha del objetivo, que es otra
+ *  página y enseña otra cosa— así que lo más útil que se podía contestar a
+ *  «eco» era justo lo que no salía.
+ *
+ *  SE RESUELVEN AQUÍ, SIN IR AL SERVIDOR: son catorce y ya están cargadas.
+ *  Aparecen mientras escribes la segunda letra, sin esperar a la red.
+ *
+ *  Y SE BUSCAN TAMBIÉN POR SUS PALABRAS: «bosque» o «biodiversidad» llevan a
+ *  ECOSISTEMAS aunque no se parezcan a su nombre. Eso es lo que convierte el
+ *  buscador en una predicción de lo que quieres encontrar y no en una
+ *  comparación de letras.
+ *
+ *  El listón sube con lo poco que has escrito: por el nombre valen dos letras;
+ *  por una palabra suelta hacen falta tres, porque «co» encaja con «coche»,
+ *  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
+ *  siempre no son una predicción, son ruido. */
+const AREA_POR_ID: Record<string, typeof OBJETIVOS[number]> =
+  Object.fromEntries(OBJETIVOS.map(o => [o.id, o]));
+
+/** El área y su ficha de objetivo son **la misma cosa por dos puertas**, y el
+ *  buscador enseñaba las dos, una debajo de la otra y con el mismo nombre:
+ *  «ECOSISTEMAS · área» y «ECOSISTEMAS · objetivo». Dos filas idénticas a la
+ *  vista obligan a adivinar en qué se diferencian, y la respuesta —una lleva a
+ *  todo lo publicado y la otra a la ficha de indicadores— no cabe en la fila.
+ *
+ *  Se queda la que contesta lo que se estaba preguntando: **todo lo publicado
+ *  sobre el tema**. La ficha del objetivo sigue donde siempre, en Objetivos.
+ *
+ *  Solo se quita el objetivo que ES un área (los catorce de `OBJETIVOS`). Si
+ *  algún día hay objetivos que no son áreas, esos siguen apareciendo. */
+const quitarObjetivosDuplicados = (rs: ResultadoBusqueda[], areas: ResultadoBusqueda[]) => {
+  if (!areas.length) return rs;
+  const ids = new Set(areas.map(a => a.id));
+  return rs.filter(r => !(r.type === 'objectives' && ids.has(r.id)));
+};
+
+const areasQueEncajan = (texto: string): ResultadoBusqueda[] => {
+  const t = sinTildes(texto.trim());
+  if (t.length < 2) return [];
+  const punto = (o: typeof OBJETIVOS[number]) => {
+    const titulo = sinTildes(o.titulo);
+    if (titulo === t) return 0;
+    if (titulo.startsWith(t)) return 1;
+    if (titulo.includes(t)) return 2;
+    if (t.length >= 3 && o.palabras.some(p => p.startsWith(t) || t.startsWith(p))) return 3;
+    return 99;
+  };
+  return OBJETIVOS
+    .map(o => ({ o, p: punto(o) }))
+    .filter(x => x.p < 99)
+    .sort((a, b) => a.p - b.p || a.o.titulo.length - b.o.titulo.length)
+    .slice(0, 3)
+    .map(x => ({ id: x.o.id, label: x.o.titulo, type: 'areas' }));
+};
+
 /** Una fila de /api/search. `slug` solo viene en grafos y mapas. */
 interface ResultadoBusqueda {
   id: string; uuid?: string; label: string; type: string; slug?: string;
@@ -186,6 +250,10 @@ const NOMBRE_DE_TIPO: Record<string, string> = {
   // Los tipos que ya devuelve /api/search y aquí no tenían nombre: salían con
   // su nombre de tabla en inglés («knowledge_graphs») encima del resultado.
   knowledge_graphs: 'grafo', knowledge_windows: 'ventana', user_maps: 'mapa',
+  // No es una tabla: es una de las catorce áreas, y lleva a todo lo publicado
+  // sobre ella. Se llama «área» y no «objetivo» porque es lo que dice la tira
+  // de Explorar, que es de donde viene quien la reconoce.
+  areas: 'área',
   initiatives: 'iniciativa', needs: 'necesidad', demands: 'demanda',
   markers: 'marcador', metrics: 'métrica', success_cases: 'caso de éxito',
 };
@@ -203,6 +271,9 @@ const RUTA_DE_TIPO: Record<string, (r: any) => string | null> = {
   objectives: r => `/objetivos/${r.id}`,
   indicators: r => `/indicadores/${r.id}`,
   users: r => `/personas/${r.id}`,
+  // A Explorar filtrado por esa área: «todas las publicaciones que llevan a
+  // ello», que es lo que se busca al escribir el nombre de un tema.
+  areas: r => `/explorar?objetivo=${encodeURIComponent(r.id)}`,
   // Grafos y mapas se abren por su `slug`, que /api/search ya devuelve entre
   // los campos extra. Sin slug no hay dirección posible: mejor sin enlace.
   knowledge_graphs: r => (r.slug ? `/esquemas/${r.slug}` : null),
@@ -831,15 +902,23 @@ export default function AIAssistant({ modo = 'panel' }: {
         // fila «sin ficha» ocupa el sitio de una a la que sí se puede ir. En
         // los resultados del mensaje enviado sí salen, apagadas, porque allí
         // el que existan es parte de la respuesta.
-        .then(json => setSugerencias(
-          ordenarResultados(Array.isArray(json.results) ? json.results : [], q)
+        .then(json => {
+          // Las áreas primero y siempre: son el único resultado que contesta
+          // «enséñame TODO lo que hay sobre esto» en vez de una ficha suelta.
+          const areas = areasQueEncajan(q);
+          setSugerencias([
+          ...areas,
+          ...quitarObjetivosDuplicados(
+            ordenarResultados(Array.isArray(json.results) ? json.results : [], q), areas)
             .filter(r => rutaDeResultado(r))
             // Mismo listón que al enviar: si la frase pide una explicación,
             // aquí solo aparece lo que se llama como lo preguntado. Colgar
             // siete resultados de parecido lejano encima de una pregunta es
             // sugerir que la plataforma tiene la respuesta cuando no la tiene.
             .filter(r => !exigente || coincidenciaFuerte(r.label, q))
-            .slice(0, 6)))
+            .slice(0, 7),
+          ]);
+        })
         .catch(() => { if (!ctrl.signal.aborted) setSugerencias([]); })
         .finally(() => { if (!ctrl.signal.aborted) setBuscandoSugerencias(false); });
     }, 220);
@@ -1152,11 +1231,17 @@ export default function AIAssistant({ modo = 'panel' }: {
         try {
           const r = await fetch(`/api/search?q=${encodeURIComponent(termino)}&limit=6`, { credentials: 'include' });
           const j = await r.json();
-          encontrados = ordenarResultados(Array.isArray(j?.results) ? j.results : [], termino).slice(0, 8);
+          const areas = areasQueEncajan(termino);
+          encontrados = [
+            ...areas,
+            ...quitarObjetivosDuplicados(
+              ordenarResultados(Array.isArray(j?.results) ? j.results : [], termino), areas).slice(0, 8),
+          ];
         } catch {
-          // Si el buscador se cae, no se deja al usuario sin respuesta: sigue
-          // hacia la IA, que es exactamente lo que hacía antes de todo esto.
-          encontrados = [];
+          // Si el buscador se cae, quedan las áreas —que no dependen de la
+          // red— y si tampoco encajan, sigue hacia la IA, que es exactamente
+          // lo que hacía antes de todo esto.
+          encontrados = areasQueEncajan(termino);
         }
         // EL LISTÓN DE LAS PREGUNTAS DE EXPLICACIÓN. Con `exigente`, parecerse
         // en una palabra no basta: o hay algo que se llama como lo preguntado,
@@ -1594,8 +1679,17 @@ export default function AIAssistant({ modo = 'panel' }: {
                             rel="noopener"
                             className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
                           >
-                            <Search className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                            <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                            {(() => {
+                              const area = r.type === 'areas' ? AREA_POR_ID[r.id] : null;
+                              const Icono = area?.icono;
+                              return Icono
+                                ? <Icono className={cn('w-3.5 h-3.5 shrink-0', area!.color)} />
+                                : <Search className="w-3.5 h-3.5 shrink-0 text-slate-400" />;
+                            })()}
+                            <span className="min-w-0 flex-1 truncate">
+                              {r.label}
+                              {r.type === 'areas' && <span className="font-medium text-slate-400"> · todo lo publicado</span>}
+                            </span>
                             <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
                               {NOMBRE_DE_TIPO[r.type] || r.type}
                             </span>
@@ -1953,6 +2047,8 @@ export default function AIAssistant({ modo = 'panel' }: {
                 </p>
                 {sugerencias.map((r, i) => {
                   const destino = rutaDeResultado(r);
+                  const area = r.type === 'areas' ? AREA_POR_ID[r.id] : null;
+                  const Icono = area?.icono;
                   return (
                     <button
                       key={`${r.type}-${r.id}-${i}`}
@@ -1963,7 +2059,14 @@ export default function AIAssistant({ modo = 'panel' }: {
                         !destino ? 'text-slate-400 cursor-default'
                           : i === sugerenciaActiva ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50')}
                     >
-                      <span className="min-w-0 flex-1 truncate">{r.label}</span>
+                      {/* El área se enseña con SU icono y SU color, los mismos
+                          de la tira de Explorar y del mapa: así se reconoce como
+                          la misma cosa y no como otra parecida. */}
+                      {Icono && <Icono className={cn('w-3.5 h-3.5 shrink-0', area!.color)} />}
+                      <span className="min-w-0 flex-1 truncate">
+                        {r.label}
+                        {area && <span className="font-medium text-slate-400"> · todo lo publicado</span>}
+                      </span>
                       <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-slate-400">
                         {destino ? (NOMBRE_DE_TIPO[r.type] || r.type) : 'sin ficha'}
                       </span>
