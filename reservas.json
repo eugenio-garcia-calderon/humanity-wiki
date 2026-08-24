@@ -1,30 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog2",
-      "ruta": "src/components/portada/PortadaTarjeta.tsx",
-      "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
-      "desde": "2026-08-24T15:30:52.943Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/pages/Explorar.tsx",
-      "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
-      "desde": "2026-08-24T15:30:58.347Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
-      "desde": "2026-08-24T15:31:03.141Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/knowledge/FichaPublicacion.tsx",
-      "motivo": "prog2: el tipo lleva ahora el tamano del lienzo",
-      "desde": "2026-08-24T15:40:29.165Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "src/utils/objetivos.ts",
       "motivo": "tematicas en el recomendador del buscador",
