@@ -17,6 +17,18 @@
       "ruta": "src/server/knowledge.ts",
       "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
       "desde": "2026-08-24T15:31:03.141Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/bienvenida/previas.tsx",
+      "motivo": "prog3: previas de Crear y Proyectar con animaciones",
+      "desde": "2026-08-24T15:31:32.633Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/TresCaminos.tsx",
+      "motivo": "prog3: previas de Crear y Proyectar con animaciones",
+      "desde": "2026-08-24T15:31:32.633Z"
     }
   ]
 }
