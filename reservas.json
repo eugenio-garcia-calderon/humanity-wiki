@@ -17,6 +17,12 @@
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "hover: sonido, sin controles encima y mas grande",
       "desde": "2026-08-24T11:13:45.376Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog2: entrada de los railes siempre puestos",
+      "desde": "2026-08-24T11:20:12.092Z"
     }
   ]
 }
