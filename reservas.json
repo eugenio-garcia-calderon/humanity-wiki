@@ -32,12 +32,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
-      "motivo": "prog2: sugerencias al escribir y llevar a la pagina de resultados",
-      "desde": "2026-08-23T23:44:03.743Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/navegacion/BotonCalendario.tsx",
       "motivo": "prog2: calendario arriba a la derecha con vista previa de hoy",
       "desde": "2026-08-23T23:49:54.293Z"
