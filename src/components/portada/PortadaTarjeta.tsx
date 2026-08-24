@@ -79,6 +79,31 @@ const puedeSonar = () => {
 export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo: string }) {
   const [encima, setEncima] = useState(false);
   const [rota, setRota] = useState(false);
+  /*
+   * ── EL RÓTULO DE YOUTUBE NO SE TAPA: SE HACE QUE NO LLEGUE A VERSE ────────
+   * Eugenio: «la información que pone YouTube cuando se empieza a reproducir el
+   * vídeo en el hover, que te pone el nombre del canal y te da la dirección de
+   * pausa, esos botones molestan, intenta ocultarlos y que simplemente se
+   * reproduzca el vídeo».
+   *
+   * Aquí ya había un arreglo —`pointer-events: none` en el marco— y **funciona
+   * para lo que arregla**: impide que YouTube saque su barra al mover el ratón
+   * por encima. Lo que Eugenio está viendo es otro caso distinto, y por eso el
+   * arreglo anterior no lo tocaba: el rótulo que YouTube pinta **mientras
+   * carga**, antes de reproducir, con el título, el canal, el aviso del canal y
+   * «Más vídeos». Eso sale solo, sin que nadie mueva nada. Reproducido en el
+   * navegador antes de tocar nada, porque desde el código las dos cosas se
+   * describen igual.
+   *
+   * Contra eso no hay CSS: es contenido dentro de un marco de otro dominio.
+   * `controls=0`, `modestbranding` y `rel=0` no lo quitan —`modestbranding`
+   * además ya no hace nada desde que YouTube lo retiró—.
+   *
+   * LO QUE SÍ FUNCIONA: no enseñar el marco hasta que el reproductor confirme
+   * que está reproduciendo. Mientras tanto se ve la miniatura, que es lo que ya
+   * había ahí. El rótulo no se oculta — es que ocurre debajo de la foto.
+   */
+  const [reproduciendo, setReproduciendo] = useState(false);
   const reproductor = useRef<HTMLVideoElement>(null);
   const marco = useRef<HTMLIFrameElement>(null);
 
@@ -138,24 +163,76 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     return () => tiempos.forEach(clearTimeout);
   }, [encima, portada.youtube]);
 
+  /*
+   * ── CUÁNDO ESTÁ REPRODUCIENDO DE VERDAD ───────────────────────────────────
+   * El reproductor no lo dice por su cuenta: hay que suscribirse mandándole
+   * `{event:'listening'}`, y entonces contesta con `onStateChange` (1 =
+   * reproduciendo) y con `infoDelivery`, que trae lo mismo dentro. Se aceptan
+   * los dos porque el segundo llega antes en la práctica.
+   *
+   * Se insiste tres veces por lo mismo que con el sonido: un mensaje enviado
+   * antes de que el marco escuche se pierde sin avisar.
+   *
+   * ── LA RED DE SEGURIDAD ENSEÑA, NO ESCONDE ────────────────────────────────
+   * Si a los 3 s no ha contestado nadie, se enseña igual. Es la decisión
+   * importante de todo esto: el fallo tiene que ser «se ve el rótulo un
+   * momento», nunca «no se ve nada». Lo segundo es peor y además es
+   * indistinguible de una tarjeta rota, así que nadie lo reportaría como fallo.
+   *
+   * Y hace falta de verdad: en una pestaña que el navegador no está pintando
+   * —otra pestaña delante, la ventana detrás— el reproductor puede no llegar
+   * nunca a «reproduciendo», y entonces este temporizador es el único camino.
+   */
+  useEffect(() => {
+    if (!encima || !portada.youtube) { setReproduciendo(false); return; }
+    const oir = (e: MessageEvent) => {
+      if (e.source !== marco.current?.contentWindow) return;
+      let d: any = e.data;
+      if (typeof d === 'string') { try { d = JSON.parse(d); } catch { return; } }
+      const estado = d?.event === 'onStateChange' ? d.info : d?.info?.playerState;
+      if (estado === 1) setReproduciendo(true);
+    };
+    window.addEventListener('message', oir);
+    // `id` y `channel` no son adorno: son los campos que el reproductor
+    // devuelve en su respuesta, o sea los que espera. Comprobado en Chrome — a
+    // un `listening` con los tres campos contesta
+    // `{"event":"alreadyInitialized","channel":"widget","id":1}`, así que el
+    // canal existe y escucha.
+    const suscribir = () => {
+      try {
+        marco.current?.contentWindow?.postMessage(
+          JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*');
+      } catch { /* aún no escucha */ }
+    };
+    // El primero va pronto a propósito: el reproductor sólo empieza a mandar
+    // estados al que se suscribe antes de que se dé por iniciado. Al que llega
+    // tarde le contesta «ya estaba iniciado» y no le manda nada más.
+    const tiempos = [0, 200, 700, 1500].map(t => setTimeout(suscribir, t));
+    const red = setTimeout(() => setReproduciendo(true), 3000);
+    return () => {
+      window.removeEventListener('message', oir);
+      tiempos.forEach(clearTimeout);
+      clearTimeout(red);
+    };
+  }, [encima, portada.youtube]);
+
   return (
     <div
       onMouseEnter={() => setEncima(true)}
       onMouseLeave={() => setEncima(false)}
       className="relative aspect-video w-full overflow-visible rounded-xl bg-slate-100"
     >
-      <div className={cn(
-        'absolute inset-0 overflow-hidden rounded-xl transition-transform duration-300 ease-out',
-        // MÁS GRANDE MIENTRAS SUENA. Eugenio: «haz que incluso se amplíe el
-        // vídeo de tamaño solo con el hover cuando se reproduce». Del 1,12 al
-        // 1,25: se sale del marco lo bastante para que se note que esa tarjeta
-        // es la que está viva, y no tanto como para tapar a las vecinas.
-        //
-        // Sigue siendo `scale` y no un cambio de tamaño de la caja: así la
-        // rejilla no se recoloca al pasar el ratón. Una rejilla que se mueve
-        // mientras la lees no se puede leer.
-        encima && portada.clase === 'video' ? 'z-20 scale-[1.25] shadow-2xl' : '',
-      )}>
+      {/* AQUÍ CRECÍA EL VÍDEO AL PASAR EL RATÓN (`scale-[1.25]`), y se retira
+          el 2026-08-24 a petición de Eugenio: «esto no queda bien».
+          Se probó primero a 1,12 y luego a 1,25 buscando que se notara cuál
+          está viva. El problema no era cuánto crecía: la tarjeta de Explorar ya
+          no lleva `overflow-hidden` —se le quitó justo para que el vídeo pudiera
+          salirse—, así que crecer significaba **taparle la portada a la vecina**
+          cada vez que el ratón pasaba de largo. Que se oiga ya dice cuál está
+          viva, y eso no le quita sitio a nadie.
+          Lo que sí se queda: el sonido. Eugenio: «eso sí que ha sido una
+          mejora». */}
+      <div className="absolute inset-0 overflow-hidden rounded-xl">
         {/* Quieta: la miniatura. Siempre, aunque haya vídeo — así la rejilla se
             pinta entera sin esperar a ningún reproductor. */}
         {portada.imagen && !rota && (
@@ -201,7 +278,16 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
             //
             // Y de regalo arregla otra cosa: un clic ya no se lo come YouTube
             // —que abriría su página—, sino que llega a la tarjeta.
-            className="pointer-events-none absolute inset-0 h-full w-full"
+            //
+            // Y NO SE VE HASTA QUE REPRODUCE. Ver la nota de `reproduciendo`:
+            // debajo está la miniatura, así que mientras carga se sigue viendo
+            // la tarjeta de siempre y no el rótulo de YouTube. Se desvanece en
+            // vez de aparecer de golpe porque el corte entre foto y vídeo, si
+            // es seco, parece un parpadeo de la página.
+            className={cn(
+              'pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-200',
+              reproduciendo ? 'opacity-100' : 'opacity-0',
+            )}
           />
         )}
         {portada.fichero && (
