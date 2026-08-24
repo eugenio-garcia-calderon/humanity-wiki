@@ -26,6 +26,12 @@
     },
     {
       "agente": "prog2",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog2: buscador arriba, calendario, logo verde y abrir menus al acercar el raton",
+      "desde": "2026-08-23T23:42:50.581Z"
+    },
+    {
+      "agente": "prog2",
       "ruta": "src/components/navegacion/Rail.tsx",
       "motivo": "prog2: abrir el panel al pasar el raton por los 3 botones",
       "desde": "2026-08-23T23:43:01.000Z"
@@ -101,6 +107,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "prog2: entrada del buscador y los gestos de raton",
       "desde": "2026-08-24T00:13:19.108Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "src/components/bienvenida/previas.tsx",
+      "motivo": "Veracidad: el debate como herramienta en Crear y en la portada",
+      "desde": "2026-08-24T00:14:15.404Z"
     }
   ]
 }
