@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
+import { useAbrirDesdeElBorde, useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
@@ -17,6 +18,7 @@ import TresCirculos, { type Circulo } from '../navegacion/TresCirculos';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
+import BotonCalendario from '../navegacion/BotonCalendario';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
@@ -111,10 +113,88 @@ export default function Layout() {
   const [objetivoAbierto, setObjetivoAbierto] = useState<string | null>(null);
   const pulsarCirculo = (c: Circulo) => {
     setCirculo(a => (a === c ? null : c));
+    // Pulsar es una decisión: lo que se abre así se queda hasta que lo cierres
+    // tú. Ver `abrirPorRoce`.
+    setPorRoce(false);
     // Elegir un círculo cierra lo del anterior: el panel de la derecha es de
     // «Organizar», así que abrir «Explorar» tiene que llevárselo.
     if (c !== 'organizar') setPanelAbierto(null);
   };
+
+  /*
+   * ══ ABRIR LOS MENÚS SIN PULSAR (2026-08-24) ═══════════════════════════════
+   *
+   * Eugenio, en un solo mensaje, pidió tres cosas que son la misma: «haz que
+   * cuando el ratón esté muy cercano al borde izquierdo se abra el menú lateral
+   * izquierdo, y lo mismo con el derecho. Y lo mismo si pongo el ratón encima de
+   * uno de los 3 botones, modo hover, sin hacer click se despliegan los menús
+   * correspondientes según el botón que esté haciendo hover».
+   *
+   * Las tres acaban en la misma línea —`setCirculo(...)`—, porque en esta
+   * pantalla los dos menús laterales SON los círculos: «Explorar» es el de la
+   * izquierda y «Organizar» el de la derecha. Por eso no hay tres mecanismos:
+   * hay uno con tres disparadores.
+   *
+   * ── LO QUE SE ABRE ROZANDO, SE CIERRA SOLO ────────────────────────────────
+   * Y aquí está la única decisión de verdad. Un menú que aparece porque has
+   * pasado cerca del borde y **se queda** es peor que no tenerlo: has ganado un
+   * panel que no pediste y ahora tienes que ir a cerrarlo. Uno que se cierra al
+   * alejarte y que ADEMÁS se cerrara aunque lo hubieras abierto pulsando sería
+   * igual de malo por el otro lado: el que sí lo quería lo pierde en cuanto
+   * mueve el ratón para trabajar.
+   *
+   * Así que se recuerda CÓMO se abrió. Rozando → se va solo al alejarse.
+   * Pulsando → se queda. Y pulsar cualquier cosa dentro del menú lo asciende a
+   * «lo quiero»: si ya has empezado a usarlo, deja de ser un accidente.
+   */
+  const [porRoce, setPorRoce] = useState(false);
+
+  const abrirPorRoce = (c: Circulo) => {
+    // SI YA HAY ALGO ABIERTO, NO SE CAMBIA. Rozar el círculo de al lado
+    // mientras lees un panel te lo cambiaría por otro sin haber pedido nada.
+    setCirculo(a => {
+      if (a !== null) return a;
+      setPorRoce(true);
+      if (c !== 'organizar') setPanelAbierto(null);
+      return c;
+    });
+  };
+
+  /*
+   * ── DÓNDE CUENTA QUE ESTÉ EL RATÓN ────────────────────────────────────────
+   * Dos sitios: el menú que se ha abierto y la tira de los tres círculos. Fuera
+   * de esos dos, si el menú apareció rozando, se cierra solo.
+   *
+   * Los círculos entran en la cuenta porque son lo que lo abrió: sin ellos, el
+   * menú se cerraría mientras tienes el ratón encima del botón que acaba de
+   * abrirlo — que es de las pocas cosas que consiguen que una función parezca
+   * estropeada estando bien.
+   */
+  const cajaMenu = useRef<HTMLDivElement>(null);
+  const cajaCirculos = useRef<HTMLDivElement>(null);
+  useCerrarAlAlejarse(porRoce, [cajaMenu, cajaCirculos], () => {
+    setCirculo(null);
+    setPorRoce(false);
+    setObjetivoAbierto(null);
+    setPanelAbierto(null);
+  });
+
+  /** Lo que se cuelga del menú abierto por roce. Tocar algo de dentro lo
+   *  convierte en abierto a propósito: si ya has empezado a usarlo, deja de ser
+   *  un accidente y se queda hasta que lo cierres tú. */
+  const gestoDelMenu = { ref: cajaMenu, onClickCapture: () => setPorRoce(false) };
+
+  /*
+   * LOS DOS BORDES. Ocho píxeles de franja, y sólo en escritorio: en un móvil
+   * no existe «acercarse», y además el borde derecho es por donde se arrastra
+   * la página. El hook se apaga solo cuando no hay puntero fino.
+   *
+   * `abierto: circulo !== null` es lo que evita el bucle más molesto posible:
+   * sin él, cerrar el menú con el ratón todavía en el borde lo volvería a abrir
+   * al instante, y la única forma de deshacerse de él sería apartar el ratón.
+   */
+  useAbrirDesdeElBorde('izquierda', () => abrirPorRoce('explorar'), { abierto: circulo !== null, activo: !esMovil });
+  useAbrirDesdeElBorde('derecha', () => abrirPorRoce('organizar'), { abierto: circulo !== null, activo: !esMovil });
 
   // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
   // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
@@ -159,6 +239,10 @@ export default function Layout() {
   /** El menú de información (i): las páginas que explican la plataforma.
    *  Sus entradas salen de `src/paginasInfo.ts`, no de aquí. */
   const [infoAbierta, setInfoAbierta] = useState(false);
+  /** El botón del nombre se pinta en negro cuando su menú está abierto o estás
+   *  en una de sus páginas. Lo miran dos sitios —el fondo y el tono del verde
+   *  de «Conocimiento»—, así que se decide aquí una vez. */
+  const nombreEnNegro = infoAbierta || PAGINAS_INFO.some(p => location.pathname.startsWith(`/${p.ruta}`));
   const infoRef = useRef<HTMLDivElement>(null);
   const [confirmarCerrarTodas, setConfirmarCerrarTodas] = useState(false);
   /** Cuántas notas del hormiguero necesitan algo de una persona. Solo el
@@ -399,7 +483,11 @@ export default function Layout() {
           A la izquierda el raíl va primero y el panel después; a la derecha, al
           revés. Es la única diferencia entre los dos lados. */}
       {!esMovil && circulo === 'explorar' && (
-        <>
+        /* El envoltorio existe SÓLO para saber cuándo el ratón se va del menú
+           entero —raíl y panel juntos—, y así cerrarlo si apareció por rozar el
+           borde. `flex` para no cambiar nada de cómo se coloca: en una fila
+           flex, una caja flex de dos hijos ocupa lo mismo que los dos hijos. */
+        <div className="flex h-full shrink-0" {...gestoDelMenu}>
           {/* FIJO Y DESPLEGADO (2026-08-23). Eugenio: «cuando pinchas en el
               botón inferior, el menú con fondo negro tanto el derecho como el
               izquierdo se quieren fijos y desplegados para ver todas las
@@ -436,7 +524,7 @@ export default function Layout() {
           {objetivoAbierto && (
             <PanelExplorar objetivoId={objetivoAbierto} onCerrar={() => setObjetivoAbierto(null)} />
           )}
-        </>
+        </div>
       )}
 
       {/* ══ EL RAÍL Y SU PANEL (2026-08-23) ═══════════════════════════════
@@ -602,6 +690,9 @@ export default function Layout() {
             nombre volvería a chocar. El desplegable sigue abriéndose desde el
             logo, así que no se pierde ninguna página. */}
         <div className="relative shrink-0" ref={infoRef}>
+          {/* Se calcula una vez porque lo miran dos sitios: el fondo del botón
+              y el tono del verde. Dos copias de la misma condición son dos
+              sitios donde se olvida una página nueva. */}
           {/* EL DISPARADOR YA NO ES UNA «i» (2026-08-24). Eugenio: «el botón
               de "i" ponlo como si fuese un desplegable del nombre de la
               plataforma, que se vea como una pestaña, y el "i" ya desaparece».
@@ -621,12 +712,26 @@ export default function Layout() {
             aria-expanded={infoAbierta}
             className={cn('flex shrink-0 items-center gap-1 rounded-lg transition-colors',
               compacto ? 'h-7 px-1.5' : 'h-9 px-2',
-              infoAbierta || PAGINAS_INFO.some(p => location.pathname.startsWith(`/${p.ruta}`))
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-800 hover:bg-slate-100')}
+              nombreEnNegro ? 'bg-slate-900 text-white' : 'text-slate-800 hover:bg-slate-100')}
           >
+            {/* «CONOCIMIENTO» EN VERDE (2026-08-24). Eugenio: «el logo de Red
+                de Conocimiento, pon Conocimiento en el verde que has utilizado
+                en la página principal de sesión no iniciada».
+
+                Es el `emerald-600` de la portada, que es donde ese verde ya
+                significa algo —lo lleva el botón de entrar y los datos que sí
+                están medidos—. Poner un verde parecido pero distinto sería
+                empezar el segundo verde de la marca.
+
+                Y va sólo en la segunda palabra: «Red de» es lo genérico y
+                «Conocimiento» es el nombre. Cuando el botón está abierto o
+                estás en una de sus páginas el fondo es negro, y ahí el verde
+                oscuro no se leería: se sube a `emerald-400`. */}
             <span className="hidden whitespace-nowrap text-sm font-black tracking-tight sm:inline">
-              Red de Conocimiento
+              Red de{' '}
+              <span className={cn(nombreEnNegro ? 'text-emerald-400' : 'text-emerald-600')}>
+                Conocimiento
+              </span>
             </span>
             <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', infoAbierta && 'rotate-180')} />
           </button>
@@ -975,6 +1080,23 @@ export default function Layout() {
           <MessageSquare className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
         </button>
 
+        {/* ══ EL CALENDARIO, ARRIBA A LA DERECHA (2026-08-24) ═══════════
+            Eugenio: «pon el acceso al calendario arriba a la derecha, y que
+            cuando se haga hover te dé una preview del día de hoy y si tienes
+            algún evento, y si se pincha ya te lleva a la página de calendario».
+
+            SÓLO CON LA SESIÓN ABIERTA, y no por prudencia: `/api/calendario`
+            contesta 401 sin sesión, así que a un visitante este botón le
+            enseñaría un panel vacío cada vez que pasara por encima. Un
+            calendario que dice «hoy no tienes nada» a quien ni siquiera ha
+            entrado no está informando de nada.
+
+            Va junto a la campana y los mensajes porque las tres contestan la
+            misma clase de pregunta —qué me espera— y se miran de un vistazo. */}
+        {user && (
+          <BotonCalendario compacto={compacto} activo={location.pathname.startsWith('/calendario')} />
+        )}
+
         <Campana compacto={compacto} />
 
         <div className="relative shrink-0" ref={cuentaRef}>
@@ -1120,7 +1242,9 @@ export default function Layout() {
           Ya no está siempre: aparece al pulsar su círculo. Ésa es la
           simplificación — la pantalla empieza limpia y tú decides qué traer. */}
       {circulo === 'organizar' && !esMovil && (
-        <>
+        // El mismo envoltorio que en «Explorar», por lo mismo: saber cuándo el
+        // ratón abandona el conjunto. Ver la nota de allí.
+        <div className="flex h-full shrink-0" {...gestoDelMenu}>
           {panelAbierto && (
             <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
           )}
@@ -1138,7 +1262,7 @@ export default function Layout() {
             onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
             onInicio={() => { navigate('/'); setPanelAbierto(null); setCirculo(null); }}
           />
-        </>
+        </div>
       )}
 
       {/* En móvil «Organizar» ocupa la pantalla: a 375 px un raíl y un panel
@@ -1213,7 +1337,11 @@ export default function Layout() {
           Van al final del documento a propósito: flotan sobre la página, sobre
           las ventanas y sobre los paneles, y en un navegador el que va después
           gana sin tener que subir el `z-index` de nadie. */}
-      <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} />
+      {/* El envoltorio no pinta nada: sólo sirve para poder preguntar «¿está el
+          ratón todavía en los círculos?». Ver `useCerrarAlAlejarse`. */}
+      <div ref={cajaCirculos}>
+        <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
+      </div>
 
       {circulo === 'crear' && <HojaCrear onCerrar={() => setCirculo(null)} />}
 
