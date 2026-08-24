@@ -41,6 +41,12 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "prog2: republicar desde la tarjeta",
       "desde": "2026-08-24T18:37:13.886Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/FichaPublicacion.tsx",
+      "motivo": "prog2: el tipo lleva la republicacion",
+      "desde": "2026-08-24T18:38:03.250Z"
     }
   ]
 }
