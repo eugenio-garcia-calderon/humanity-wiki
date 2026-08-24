@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { abrirVentana } from '../ventanas/bus';
@@ -102,7 +103,26 @@ const COSAS: Cosa[] = [
   { nombre: 'Contactos',    Previa: PreviaTelecom,       a: '/telefono',          nota: 'Tu gente y sus llamadas' },
 ];
 
-export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
+/*
+ * LA HOJA ES PARTE DEL MENÚ, NO ALGO QUE HAY «FUERA» (2026-08-24). Eugenio:
+ * «el hover de crear no se queda fijo cuando lo muevo a la ventana central
+ * para explorar las herramientas».
+ *
+ * Cuando la hoja se abre acercando el ratón al botón, el Layout la cierra sola
+ * en cuanto el puntero sale de las zonas que cuentan como «aquí». La hoja no
+ * estaba en esa lista: mover el ratón hacia las herramientas era, para el
+ * contador, alejarse — así que se cerraba justo al ir a usarla.
+ *
+ * `gesto` es lo que el Layout cuelga de cualquier menú abierto por roce: el
+ * `ref` que lo mete en la lista de zonas, y el `onClickCapture` que asciende
+ * «me he acercado sin querer» a «lo quiero abierto» en cuanto tocas algo de
+ * dentro. Es opcional porque la hoja también se abre pulsando, y entonces no
+ * hay nada que vigilar.
+ */
+export default function HojaCrear({ onCerrar, gesto }: {
+  onCerrar: () => void;
+  gesto?: { ref: RefObject<HTMLDivElement | null>; onClickCapture: () => void };
+}) {
   const navegar = useNavigate();
 
   return (
@@ -114,6 +134,7 @@ export default function HojaCrear({ onCerrar }: { onCerrar: () => void }) {
         className="fixed inset-0 z-[9998] bg-slate-900/30 animate-in fade-in duration-150"
       />
       <div
+        {...gesto}
         role="dialog"
         aria-modal="true"
         aria-label="Crear"

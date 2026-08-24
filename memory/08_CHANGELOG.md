@@ -6444,6 +6444,22 @@ lienzo (7), revisión y moderación (9), y sacarlo a la portada y al buscador (1
 - `cotizar` acepta país y CP y devuelve zona, si se envía, qué no llega y si cabe recogida; la cesta recotiza mientras se escribe el destino. `comprar` calcula el porte con la zona real y admite `entrega: 'recogida'` (sin porte y sin pedir dirección). La ficha enseña la tabla de zonas y «a otras zonas no envía», más el sitio de recogida.
 - El vendedor las gestiona en Comercio → «envíos» (`EditorEnvio`): una fila por zona, **zona en blanco = no envía ahí**, dicho con esas palabras porque «vacío» suele leerse como «gratis».
 - Probado en local por HTTP: tarifas 3,50 / 9 / 15 y resto cerrado → cotizar Madrid 350, Tenerife 900, París 1500, Nueva York `se_envia=false` con el nombre de lo que no llega; 5 unidades (50 €) → envío 0 por umbral; comprar a Canarias → pedido con porte 900 y `entrega_tipo=envio`; comprar a EE. UU. → 409 sin tocar dinero; recogida → porte 0, `entrega_tipo=recogida` y sin dirección. Todo retirado.
+
+## 2026-08-24 — Dos arreglos de la cabecera y del cajetín de crear
+Eugenio: «arregla este desplegable, no se ve bien el contenido» y «el hover de
+crear no se queda fijo cuando lo muevo a la ventana central para explorar las
+herramientas».
+
+- **El desplegable del nombre** colgaba de `right-0`, con su borde derecho
+  pegado al del botón. El botón se mudó a la izquierda de la barra y nadie
+  volvió a mirar esa línea: de ahí para la izquierda hay 224 px de panel y 16
+  de pantalla, así que media palabra de cada título quedaba fuera. Ahora es
+  `sm:left-0` y se abre hacia dentro. En móvil sigue anclado a la pantalla.
+- **La hoja de Crear** no estaba en la lista de zonas que cuentan como «aquí»
+  para el contador que cierra los menús abiertos por roce, así que mover el
+  ratón hacia las herramientas contaba como alejarse. Recibe `gestoDelMenu`
+  como cualquier otro menú: el `ref` la mete en la lista y el `onClickCapture`
+  asciende el roce a decisión en cuanto tocas una herramienta.
 ### 2026-08-24 — El debate, donde se crean las cosas
 
 Eugenio: *«mete el debate como herramienta de creación en el menú desplegable
