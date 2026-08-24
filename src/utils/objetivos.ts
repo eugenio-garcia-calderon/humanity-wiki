@@ -74,3 +74,51 @@ export const hablaDe = (texto: string, o: Objetivo) => {
   const t = sinTildes(texto);
   return o.palabras.some(p => t.includes(p));
 };
+
+/**
+ * ══ QUÉ ÁREAS ENCAJAN CON LO QUE SE ESTÁ ESCRIBIENDO ═══════════════════════
+ * (2026-08-24, Eugenio: «cuando se escriban letras y palabras en el buscador
+ * se recomienda también temáticas, y con un icono poder separarlo, que es una
+ * temática de una publicación».)
+ *
+ * Un área no es una ficha: es la puerta a **todo lo publicado** sobre un tema.
+ * Por eso vale la pena recomendarla antes que cualquier resultado suelto —
+ * escribiendo «eco», lo más útil que hay en la plataforma es ECOSISTEMAS, y
+ * hasta hoy era justo lo que no salía.
+ *
+ * VIVE AQUÍ Y NO EN CADA BUSCADOR. Hay dos cajas que la necesitan (la barra de
+ * arriba y el chat) y va a haber más. Dos copias de esta función empiezan
+ * iguales y divergen en la primera corrección, y entonces escribir «bosque»
+ * encuentra ECOSISTEMAS en un sitio y no en el otro sin que nadie sepa por qué.
+ *
+ * ── EL LISTÓN SUBE CUANTO MENOS HAS ESCRITO ────────────────────────────────
+ * Por el NOMBRE bastan dos letras. Por una PALABRA suelta hacen falta tres,
+ * porque «co» encaja a la vez con «coche», «coste», «comunidad» y
+ * «conservación»: cuatro áreas que salen siempre no son una predicción, son
+ * ruido. Y nunca más de tres, por lo mismo.
+ *
+ * Se compara sin tildes por los dos lados: quien busca escribe deprisa y
+ * «energia» tiene que encontrar ENERGÍA.
+ */
+export const areasQueEncajan = (texto: string, cuantas = 3): Objetivo[] => {
+  const t = sinTildes(String(texto || '').trim());
+  if (t.length < 2) return [];
+  const punto = (o: Objetivo) => {
+    const titulo = sinTildes(o.titulo);
+    if (titulo === t) return 0;
+    if (titulo.startsWith(t)) return 1;
+    if (titulo.includes(t)) return 2;
+    if (t.length >= 3 && o.palabras.some(p => p.startsWith(t) || t.startsWith(p))) return 3;
+    return 99;
+  };
+  return OBJETIVOS
+    .map(o => ({ o, p: punto(o) }))
+    .filter(x => x.p < 99)
+    .sort((a, b) => a.p - b.p || a.o.titulo.length - b.o.titulo.length)
+    .slice(0, cuantas)
+    .map(x => x.o);
+};
+
+/** El área por su id, para pintar su icono y su color donde haga falta. */
+export const AREA_POR_ID: Record<string, Objetivo> =
+  Object.fromEntries(OBJETIVOS.map(o => [o.id, o]));

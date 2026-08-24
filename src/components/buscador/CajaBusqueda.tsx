@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Loader2, ArrowUpRight, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { areasQueEncajan, AREA_POR_ID } from '../../utils/objetivos';
 
 // ============================================================================
 // LA CAJA DE BUSCAR — sugerencias mientras escribes (2026-08-24)
@@ -36,7 +37,28 @@ import { cn } from '../../utils/cn';
 // sugerencias, la espera, el teclado y el descarte de respuestas tardías se
 // escriben una vez.
 
-type Sugerencia = { clase: 'contenido' | 'frase'; tipo?: string; texto: string; url: string };
+// ── TRES CLASES, NO DOS (2026-08-24) ───────────────────────────────────────
+// Eugenio: «cuando se escriban letras y palabras en el buscador se recomienda
+// también temáticas, y con un icono poder separarlo, que es una temática de
+// una publicación».
+//
+// `tematica` es una de las catorce áreas de la plataforma. No es una ficha: es
+// la puerta a **todo lo publicado** sobre un tema, así que va la primera —
+// escribiendo «eco», lo más útil que hay es ECOSISTEMAS, y hasta hoy era justo
+// lo que no salía—.
+//
+// Y se distingue por SU icono y SU color, los mismos del mapa y de las
+// pastillas de Explorar. Un icono genérico separaría una temática de una
+// publicación, que es lo que se pidió, pero desaprovecha que quien ha visto
+// esa hoja verde en Explorar ya sabe qué es sin leer la etiqueta.
+type Sugerencia = {
+  clase: 'contenido' | 'frase' | 'tematica';
+  tipo?: string;
+  texto: string;
+  url: string;
+  /** Solo en `tematica`: para pintar su icono y su color. */
+  areaId?: string;
+};
 
 export default function CajaBusqueda({
   compacto = false, onCerrar, pastilla = false, derecha, placeholder, alBuscar, className,
@@ -66,7 +88,26 @@ export default function CajaBusqueda({
   // coincide, se tira: es de una tecla anterior.
   const ultima = useRef('');
 
+  /** Las temáticas que encajan con lo escrito. Se calculan aquí, sin red: son
+   *  catorce y ya están cargadas, así que aparecen con la segunda letra y no
+   *  esperan a la respuesta del servidor. */
+  const tematicas = (v: string): Sugerencia[] => areasQueEncajan(v).map(o => ({
+    clase: 'tematica',
+    tipo: 'temática',
+    texto: o.titulo,
+    url: `/explorar?objetivo=${encodeURIComponent(o.id)}`,
+    areaId: o.id,
+  }));
+
   useEffect(() => {
+    const v0 = q.trim();
+    // Las temáticas se enseñan YA, antes de que conteste el servidor: si
+    // esperaran, la lista aparecería primero sin ellas y saltarían al llegar
+    // la red, moviendo lo que ya estabas a punto de pulsar.
+    if (v0.length >= 2) {
+      const t0 = tematicas(v0);
+      if (t0.length) { setSugerencias(t0); setAbierto(true); }
+    }
     const t = window.setTimeout(async () => {
       const v = q.trim();
       ultima.current = v;
@@ -76,9 +117,12 @@ export default function CajaBusqueda({
         const r = await fetch(`/api/buscar/sugerencias?q=${encodeURIComponent(v)}`);
         const j = await r.json();
         if (ultima.current !== v) return;  // llegó tarde
-        setSugerencias(j.sugerencias || []);
+        setSugerencias([...tematicas(v), ...(j.sugerencias || [])]);
         setAbierto(true);
-      } catch { /* sin sugerencias, se busca igual */ }
+      } catch {
+        // Sin red quedan las temáticas, que no dependen de ella.
+        if (ultima.current === v) setSugerencias(tematicas(v));
+      }
       if (ultima.current === v) setCargando(false);
     }, 180);
     return () => window.clearTimeout(t);
@@ -161,10 +205,24 @@ export default function CajaBusqueda({
                 onClick={() => { setAbierto(false); onCerrar?.(); navigate(s.url); }}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 text-left ${i === marcada ? 'bg-slate-50' : ''}`}
               >
-                {s.clase === 'frase'
-                  ? <Search className="w-3.5 h-3.5 shrink-0 text-slate-300" />
-                  : <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-emerald-500" />}
-                <span className="min-w-0 flex-1 text-sm text-slate-700 truncate">{s.texto}</span>
+                {(() => {
+                  if (s.clase === 'tematica') {
+                    const a = s.areaId ? AREA_POR_ID[s.areaId] : null;
+                    const Icono = a?.icono;
+                    return Icono
+                      ? <Icono className={cn('w-4 h-4 shrink-0', a!.color)} />
+                      : <Search className="w-3.5 h-3.5 shrink-0 text-slate-300" />;
+                  }
+                  return s.clase === 'frase'
+                    ? <Search className="w-3.5 h-3.5 shrink-0 text-slate-300" />
+                    : <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-emerald-500" />;
+                })()}
+                <span className="min-w-0 flex-1 text-sm text-slate-700 truncate">
+                  {s.texto}
+                  {s.clase === 'tematica' && (
+                    <span className="text-slate-400"> · todo lo publicado</span>
+                  )}
+                </span>
                 {s.tipo && <span className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">{s.tipo}</span>}
               </button>
             </li>
