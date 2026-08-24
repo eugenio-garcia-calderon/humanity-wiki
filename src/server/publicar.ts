@@ -624,6 +624,67 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  // ==========================================================================
+  // ACUERDOS: QUIÉN FIRMÓ QUÉ Y CUÁNDO (2026-08-24)
+  // ==========================================================================
+  // El contrato de servicio de cobro es el que permite cobrar un carrito de
+  // varias tiendas y liquidar después a cada una. Un contrato que no se puede
+  // probar no vale: aquí se guarda la VERSIÓN aceptada, cuándo y desde dónde.
+  // Si el contrato cambia, las aceptaciones viejas siguen diciendo lo que se
+  // aceptó entonces.
+  const VERSION_COBRO = process.env.VERSION_CONTRATO_COBRO || 'v1.0 · 24 de agosto de 2026';
+
+  /** GET /api/publicar/acuerdos — qué he aceptado y qué me falta. */
+  app.get('/api/publicar/acuerdos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT acuerdo, version, created_at FROM acuerdos_aceptados WHERE user_id = ${req.user.id} ORDER BY created_at DESC
+      `);
+      const filas = r.rows as any[];
+      const cobro = filas.find(f => f.acuerdo === 'cobro' && f.version === VERSION_COBRO);
+      res.json({
+        aceptados: filas,
+        cobro: {
+          version_vigente: VERSION_COBRO,
+          aceptado: !!cobro,
+          aceptado_en: cobro?.created_at || null,
+          // Si firmó una versión anterior, se dice: hay que volver a aceptar.
+          version_anterior: !cobro && filas.some(f => f.acuerdo === 'cobro') ? filas.find(f => f.acuerdo === 'cobro')?.version : null,
+        },
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** POST /api/publicar/acuerdos { acuerdo: 'cobro' } — aceptar la versión vigente. */
+  app.post('/api/publicar/acuerdos', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const acuerdo = String(req.body?.acuerdo || '').trim();
+      if (acuerdo !== 'cobro') return res.status(400).json({ error: 'Ese acuerdo no existe.' });
+      try {
+        await db.execute(sql`
+          INSERT INTO acuerdos_aceptados (id, user_id, acuerdo, version, ip, user_agent)
+          VALUES (${'ACU' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
+                  ${req.user.id}, ${acuerdo}, ${VERSION_COBRO}, ${String((req.headers['x-forwarded-for'] as string || '').split(',')[0].trim() || req.ip || '').slice(0, 60) || null}, ${String(req.headers['user-agent'] || '').slice(0, 300)})
+        `);
+      } catch (e: any) {
+        const t = `${e?.message || ''} ${e?.cause?.message || ''}`;
+        if (/acuerdos_aceptados_una_vez_idx|duplicate key/i.test(t)) return res.json({ aceptado: true, ya_estaba: true, version: VERSION_COBRO });
+        throw e;
+      }
+      console.log(`[acuerdos] ${req.user.id} acepta «${acuerdo}» ${VERSION_COBRO}`);
+      res.json({ aceptado: true, version: VERSION_COBRO });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** ¿Puede esta tienda entrar en el cobro agregado? Solo si firmó la versión vigente. */
+  const aceptoElCobro = async (userId: string | null | undefined) => {
+    if (!userId) return false;
+    const r = await db.execute(sql`SELECT 1 FROM acuerdos_aceptados WHERE user_id = ${userId} AND acuerdo = 'cobro' AND version = ${VERSION_COBRO} LIMIT 1`);
+    return r.rows.length > 0;
+  };
+
   /** GET /api/admin/whatsapp — cómo está el canal y los últimos avisos (administrador). */
   app.get('/api/admin/whatsapp', async (req: Request, res: Response) => {
     try {
@@ -1207,6 +1268,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
         const c = calcularEnvio(fis as any, sub, zona, tarifas);
         const u = nombresTienda.find(x => x.id === vid);
         return {
+          // Para el cobro de un carrito de varias tiendas (cuando se encienda):
+          // solo entran las tiendas que han firmado el contrato de cobro.
+          acepta_cobro_agregado: await aceptoElCobro(vid),
           vendedor_id: vid || null,
           tienda: u?.handle || null,
           nombre: u?.nombre || null,

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
-import { useAbrirDesdeElBorde, useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
+import { useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
@@ -112,9 +112,21 @@ export default function Layout() {
   /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
   const [objetivoAbierto, setObjetivoAbierto] = useState<string | null>(null);
   const pulsarCirculo = (c: Circulo) => {
+    /*
+     * PULSAR LO QUE YA ABRIÓ EL RATÓN LO CONFIRMA; NO LO CIERRA.
+     *
+     * Encontrado probándolo, y sólo se ve probándolo: para pulsar un círculo
+     * hay que pasar el ratón por encima, y pasar el ratón por encima ya lo
+     * abre. Así que al llegar el clic el menú **ya estaba abierto**, el
+     * interruptor lo leía como «vuelve a pulsarlo para cerrar» y lo cerraba.
+     * Resultado: pulsar el botón no hacía nada visible, nunca.
+     *
+     * Un clic sobre algo que se abrió rozando significa «esto lo quiero de
+     * verdad»: deja de ser provisional y ya no se cierra al apartar el ratón.
+     * Cerrar sigue siendo el segundo clic, o el botón de plegar.
+     */
+    if (circulo === c && porRoce) { setPorRoce(false); return; }
     setCirculo(a => (a === c ? null : c));
-    // Pulsar es una decisión: lo que se abre así se queda hasta que lo cierres
-    // tú. Ver `abrirPorRoce`.
     setPorRoce(false);
     // Elegir un círculo cierra lo del anterior: el panel de la derecha es de
     // «Organizar», así que abrir «Explorar» tiene que llevárselo.
@@ -185,16 +197,22 @@ export default function Layout() {
   const gestoDelMenu = { ref: cajaMenu, onClickCapture: () => setPorRoce(false) };
 
   /*
-   * LOS DOS BORDES. Ocho píxeles de franja, y sólo en escritorio: en un móvil
-   * no existe «acercarse», y además el borde derecho es por donde se arrastra
-   * la página. El hook se apaga solo cuando no hay puntero fino.
+   * AQUÍ VIVÍAN LOS DOS DETECTORES DE BORDE (2026-08-24, retirados el mismo
+   * día). Escuchaban el ratón para abrir el menú al acercarse a 8 px del canto
+   * de la pantalla.
    *
-   * `abierto: circulo !== null` es lo que evita el bucle más molesto posible:
-   * sin él, cerrar el menú con el ratón todavía en el borde lo volvería a abrir
-   * al instante, y la única forma de deshacerse de él sería apartar el ratón.
+   * Ya no hacen falta, y no porque la idea fuera mala: porque **desde que los
+   * raíles están siempre puestos, el menú ES el borde**. Acercarse a él es
+   * ponerle el ratón encima, y de eso se encarga el propio raíl, que además lo
+   * hace mejor —sabe si el ratón sigue dentro—.
+   *
+   * Dejarlos habría sido tener dos cosas escuchando el mismo gesto para hacer
+   * cosas parecidas pero no iguales: una desplegaría el raíl flotando y la otra
+   * lo fijaría empujando la página, según cuál llegara antes.
+   *
+   * El hook sigue existiendo en `src/hooks/useAbrirAlAcercarse.ts` por si otra
+   * pantalla lo necesita.
    */
-  useAbrirDesdeElBorde('izquierda', () => abrirPorRoce('explorar'), { abierto: circulo !== null, activo: !esMovil });
-  useAbrirDesdeElBorde('derecha', () => abrirPorRoce('organizar'), { abierto: circulo !== null, activo: !esMovil });
 
   // El menú lateral: puesto o escondido. YA NO HAY ESTADO INTERMEDIO
   // (2026-08-21, Eugenio: «vamos a hacer que se colapse del todo, tanto en
@@ -482,43 +500,45 @@ export default function Layout() {
           en un espejo ambos menús igual de diseñados».
           A la izquierda el raíl va primero y el panel después; a la derecha, al
           revés. Es la única diferencia entre los dos lados. */}
-      {!esMovil && circulo === 'explorar' && (
-        /* El envoltorio existe SÓLO para saber cuándo el ratón se va del menú
-           entero —raíl y panel juntos—, y así cerrarlo si apareció por rozar el
-           borde. `flex` para no cambiar nada de cómo se coloca: en una fila
-           flex, una caja flex de dos hijos ocupa lo mismo que los dos hijos. */
+      {/* ══ SIEMPRE PUESTO, EN ICONOS ═════════════════════════════════════
+          Eugenio: «haz que además los menús laterales estén siempre visibles
+          enseñando solo los iconos, y cuando se haga hover ahí, se despliegue.
+          Y también se despliegan cuando se toquen los botones de abajo».
+
+          ── LO QUE CAMBIA DE VERDAD ──────────────────────────────────────────
+          Hasta ahora estos dos menús **no existían** hasta que pulsabas su
+          círculo. Eso deja la pantalla limpia, y a cambio esconde el mapa: para
+          saber qué hay en la aplicación había que probar un botón. Un raíl de
+          56 px pegado al borde cuesta muy poco sitio y contesta esa pregunta
+          sin que nadie la haga.
+
+          Y de paso desaparece un mecanismo entero: ya no hace falta detectar
+          que el ratón se acerca al borde para abrir el menú, porque **el menú
+          es el borde**. Acercarse a él es pasarle el ratón por encima, y de eso
+          ya se encarga el propio raíl.
+
+          Tres formas de tenerlo abierto, y no significan lo mismo:
+            · con el ratón encima → se despliega FLOTANDO, sin mover la página;
+            · pulsando su círculo de abajo → se queda abierto y EMPUJA;
+            · con la chincheta → igual, y además se recuerda entre visitas.
+          El botón de plegar deshace las dos últimas. */}
+      {!esMovil && (
         <div className="flex h-full shrink-0" {...gestoDelMenu}>
-          {/* FIJO Y DESPLEGADO (2026-08-23). Eugenio: «cuando pinchas en el
-              botón inferior, el menú con fondo negro tanto el derecho como el
-              izquierdo se quieren fijos y desplegados para ver todas las
-              opciones».
-              Y arregla de raíz lo otro que señaló —«se superpone el menú al
-              submenú»—: el solapamiento venía de que el raíl se DESPLEGABA POR
-              ENCIMA al pasar el ratón. Eso tenía sentido cuando el raíl estaba
-              siempre puesto y rozarlo de camino a otro sitio no debía empujar
-              la página. Ahora sólo aparece porque has pulsado su círculo: ya
-              has dicho que lo quieres, así que ocupa su sitio y nadie tapa a
-              nadie. Dos arreglos con un cambio porque eran el mismo problema. */}
           <Rail
-            siempreAbierto
+            siempreAbierto={circulo === 'explorar'}
             claro
             titulo="Explorar"
             items={OBJETIVOS_RAIL}
             abierta={objetivoAbierto}
-            // Pasar el ratón ABRE el panel del tema y nada más. Cambiar la
-            // pantalla de detrás es una decisión, y una decisión se toma
-            // pulsando — no rozando algo de camino a otro sitio.
-            onPasarPorEncima={h => setObjetivoAbierto(h.clave)}
-            onElegir={h => {
-              // DOS COSAS A LA VEZ, y las dos hacen falta: se abre su panel
-              // —indicadores y marcadores— y **la pantalla de detrás pasa a
-              // enseñar todo lo que habla de ese tema**, en rejilla. Eugenio:
-              // «de Energía te muestra todo lo relacionado con energía».
-              // Sólo abrir el panel dejaba el menú contando cosas mientras el
-              // contenido seguía siendo el de antes.
-              setObjetivoAbierto(a => (a === h.clave ? null : h.clave));
-              navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`);
-            }}
+            // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
+            // relacionado con energía».
+            onElegir={h => navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`)}
+            // LA FLECHA ABRE SU PANEL — indicadores y marcadores— y no toca la
+            // pantalla de detrás. Mirar lo que hay dentro de un tema y decidir
+            // pasarte a él son dos cosas, y ahora tienen dos sitios donde
+            // pulsar.
+            onAbrirSubmenu={h => setObjetivoAbierto(a => (a === h.clave ? null : h.clave))}
+            onPlegar={() => { setCirculo(null); setPorRoce(false); setObjetivoAbierto(null); }}
             onInicio={() => { navigate('/'); setObjetivoAbierto(null); setCirculo(null); }}
           />
           {objetivoAbierto && (
@@ -1278,25 +1298,28 @@ export default function Layout() {
 
           Ya no está siempre: aparece al pulsar su círculo. Ésa es la
           simplificación — la pantalla empieza limpia y tú decides qué traer. */}
-      {circulo === 'organizar' && !esMovil && (
-        // El mismo envoltorio que en «Explorar», por lo mismo: saber cuándo el
-        // ratón abandona el conjunto. Ver la nota de allí.
+      {/* El espejo del de la izquierda, y siempre puesto por lo mismo. Ver la
+          nota de allí. Aquí el panel va ANTES que el raíl: en una fila flex el
+          orden del documento es el orden en pantalla, y el raíl tiene que
+          quedar pegado al borde derecho. */}
+      {!esMovil && (
         <div className="flex h-full shrink-0" {...gestoDelMenu}>
           {panelAbierto && (
             <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
           )}
           {/* FONDO BLANCO EN LOS DOS (2026-08-24, Eugenio: «ponle el fondo
-              blanco»). El negro venía de cuando el raíl estaba SIEMPRE puesto y
-              tenía que leerse como armazón de la aplicación. Ahora sólo aparece
-              cuando lo pides, y entonces es contenido: una lista de tus cosas o
-              de los catorce temas. En blanco además los colores del mapa se
-              ven — un `text-yellow-500` sobre negro casi no existe. */}
+              blanco»). En blanco los colores del mapa se ven — un
+              `text-yellow-500` sobre negro casi no existe. */}
           <Rail
-            siempreAbierto
+            siempreAbierto={circulo === 'organizar'}
             claro
             ladoDerecho
             abierta={panelAbierto?.clave ?? null}
-            onElegir={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+            // El nombre lleva a la herramienta; la flecha enseña lo que hay
+            // dentro sin sacarte de donde estás.
+            onElegir={h => navigate(h.ruta)}
+            onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+            onPlegar={() => { setCirculo(null); setPorRoce(false); setPanelAbierto(null); }}
             onInicio={() => { navigate('/'); setPanelAbierto(null); setCirculo(null); }}
           />
         </div>
@@ -1312,7 +1335,12 @@ export default function Layout() {
                 siempreAbierto
                 claro
                 abierta={null}
-                onElegir={h => { if (h.conPanel) setPanelAbierto(h); else if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } }}
+                // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
+                // que no hay ningún gesto intermedio entre mirar y abrir. El
+                // nombre lleva a la herramienta y la flecha enseña lo que tiene
+                // dentro; sin ella, una de las dos cosas no tendría puerta.
+                onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
+                onAbrirSubmenu={h => setPanelAbierto(h)}
                 onInicio={() => { navigate('/'); setCirculo(null); }}
               />}
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
@@ -1361,9 +1389,10 @@ export default function Layout() {
               abierta={panelAbierto?.clave ?? null}
               onElegir={h => {
                 setCajonAbierto(false);
-                if (h.conPanel) setPanelAbierto(h);
-                else if (h.ruta.startsWith('/')) navigate(h.ruta);
+                if (h.ruta.startsWith('/')) navigate(h.ruta);
+                else setPanelAbierto(h);
               }}
+              onAbrirSubmenu={h => { setCajonAbierto(false); setPanelAbierto(h); }}
               onInicio={() => { navigate('/'); setPanelAbierto(null); setCajonAbierto(false); }}
             />
           </div>
@@ -1398,7 +1427,8 @@ export default function Layout() {
                 titulo="Explorar"
                 items={OBJETIVOS_RAIL}
                 abierta={null}
-                onElegir={h => setObjetivoAbierto(h.clave)}
+                onElegir={h => { navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`); setCirculo(null); }}
+                onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}
                 onInicio={() => { navigate('/'); setCirculo(null); }}
               />}
           <div onClick={() => { setObjetivoAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
