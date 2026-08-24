@@ -32,9 +32,26 @@ import { cn } from '../../utils/cn';
 
 export type Circulo = 'explorar' | 'crear' | 'organizar';
 
-export default function TresCirculos({ abierto, onPulsar }: {
+export default function TresCirculos({ abierto, onPulsar, onPasarPorEncima }: {
   abierto: Circulo | null;
   onPulsar: (c: Circulo) => void;
+  /*
+   * ABRIR SIN PULSAR (2026-08-24).
+   *
+   * Eugenio: «si pongo el ratón encima de uno de los 3 botones, modo hover, sin
+   * hacer click se despliegan los menús correspondientes según el botón que
+   * esté haciendo hover».
+   *
+   * NO ES `onPulsar` CON OTRO NOMBRE, y por eso son dos. Pulsar **alterna**: si
+   * ya estaba abierto, lo cierra. Acercarse sólo **abre** — que el menú
+   * desaparezca porque el ratón ha vuelto a rozar el botón por el que acabas de
+   * entrar es la forma más rápida de hacer inservible un menú.
+   *
+   * Y lo que se abre así se cierra solo al alejarse; lo que se abre pulsando se
+   * queda. Esa diferencia la lleva el Layout, que es quien sabe cuál de las dos
+   * cosas pasó.
+   */
+  onPasarPorEncima?: (c: Circulo) => void;
 }) {
   /*
    * QUIEN TAPA, RESERVA. Los círculos flotan sobre el contenido, así que sin
@@ -79,6 +96,7 @@ export default function TresCirculos({ abierto, onPulsar }: {
     return (
       <button
         onClick={() => onPulsar(c)}
+        onMouseEnter={onPasarPorEncima ? () => onPasarPorEncima(c) : undefined}
         title={etiqueta}
         aria-label={etiqueta}
         aria-pressed={activo}

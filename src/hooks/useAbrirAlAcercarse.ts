@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 
 // ============================================================================
 // ABRIR ALGO AL ACERCAR EL RATÓN — un solo sitio para todos (2026-08-24)
@@ -166,6 +166,59 @@ export function useAbrirDesdeElBorde(
       if (reloj.current !== null) window.clearTimeout(reloj.current);
     };
   }, [lado, o.anchoPx, o.ms, o.activo]);
+}
+
+/**
+ * CERRAR AL ALEJARSE — cuando lo que se abrió no está pegado a lo que lo abrió.
+ *
+ * ── POR QUÉ NO VALE UN `onMouseLeave` ──────────────────────────────────────
+ * Probado en el navegador el 2026-08-24, y por eso existe esto: se pasa el
+ * ratón por el círculo de «Explorar», que está abajo en el centro, y el menú
+ * aparece pegado al borde izquierdo. Si desde el círculo el ratón se va a
+ * cualquier otro sitio de la pantalla **nunca entra en el menú**, así que el
+ * `onMouseLeave` del menú no se dispara jamás y el menú se queda abierto para
+ * siempre. Un menú que sólo sabe cerrarse si primero lo visitas es un menú que
+ * no se cierra.
+ *
+ * Lo que hay que preguntar no es «¿ha salido de esta caja?» sino «¿sigue el
+ * ratón en alguno de los sitios que cuentan?» — el menú o el botón que lo abre.
+ * Eso se contesta mirando dónde está el ratón, que es lo que hace esto.
+ *
+ * ── Y SE PREGUNTA POR PERTENENCIA, NO POR COORDENADAS ──────────────────────
+ * `contains` en vez de comparar rectángulos: los tres círculos viven dentro de
+ * una tira que ocupa TODO el ancho de la pantalla y no deja pasar el ratón
+ * salvo en los botones. Con rectángulos, recorrer la parte de abajo de la
+ * pantalla mantendría el menú abierto sin tocar nada.
+ */
+export function useCerrarAlAlejarse(
+  activo: boolean,
+  zonas: Array<RefObject<HTMLElement | null>>,
+  cerrar: () => void,
+  ms = 400,
+) {
+  const reloj = useRef<number | null>(null);
+  const cerrarRef = useRef(cerrar);
+  cerrarRef.current = cerrar;
+  const zonasRef = useRef(zonas);
+  zonasRef.current = zonas;
+
+  useEffect(() => {
+    if (!activo || !hayRaton()) return;
+    const parar = () => {
+      if (reloj.current !== null) { window.clearTimeout(reloj.current); reloj.current = null; }
+    };
+    const mover = (e: MouseEvent) => {
+      const donde = e.target as Node | null;
+      const dentro = !!donde && zonasRef.current.some(z => z.current?.contains(donde));
+      if (dentro) { parar(); return; }
+      // Ya hay una cuenta atrás en marcha: no se reinicia con cada píxel, o
+      // moverse despacio por fuera la aplazaría indefinidamente.
+      if (reloj.current !== null) return;
+      reloj.current = window.setTimeout(() => { reloj.current = null; cerrarRef.current(); }, ms);
+    };
+    window.addEventListener('mousemove', mover, { passive: true });
+    return () => { window.removeEventListener('mousemove', mover); parar(); };
+  }, [activo, ms]);
 }
 
 export default useAbrirAlAcercarse;
