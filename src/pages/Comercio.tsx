@@ -9,6 +9,7 @@ import EditorVariantes, { type VarianteForm, variantesAFormulario, variantesAlSe
 import Recibo from '../components/knowledge/Recibo';
 import EditorEnvio from '../components/knowledge/EditorEnvio';
 import DatosFiscales from '../components/knowledge/DatosFiscales';
+import ContratoDeCobro from '../components/knowledge/ContratoDeCobro';
 
 // ============================================================================
 // COMERCIO — lo que vendes, en un sitio (2026-08-22)
@@ -405,6 +406,7 @@ export default function Comercio() {
           {/* CÓMO VAN LAS VENTAS (2026-08-22): lo que un vendedor mira antes
               que la lista — este mes, los últimos meses y lo más vendido.
               Euros y puntos son dos números y se enseñan como dos. */}
+          <ContratoDeCobro />
           <DatosFiscales />
           {resumen && (
             <div className="mb-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
