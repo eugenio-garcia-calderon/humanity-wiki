@@ -6473,3 +6473,12 @@ resto de herramientas»*.
   herramientas con Debates entre ellas y su dibujo; el botón central abre la
   hoja con «Debate» en su sitio; y pulsarlo cae en `/debates` con el formulario
   abierto. El usuario de prueba se borró y la sesión se cerró.
+
+
+### 2026-08-24 — Comercio F9: ¿se ve, se enceta, se compra? (Programador 7)
+- Eugenio lo puso el primero de los cuatro pendientes. Hasta hoy quien vende no sabía si no vende **porque nadie entra** o **porque entran y no compran**, que son problemas opuestos: el primero se arregla enseñando el producto, el segundo cambiándolo.
+- 0115: `producto_metricas (producto_id, dia, visitas, encestados)` — agregado por día, **sin `user_id` a propósito**: para contestar la pregunta basta el recuento y el rastro de nadie hace falta.
+- La visita se apunta al servir la ficha (sin esperar: la ficha no depende de una métrica); `POST /api/publicar/producto/:id/encestado` cuenta los añadidos a la cesta. Las **compras salen de los pedidos**, no de un contador aparte que podría desviarse.
+- `GET /api/publicar/mis-productos/analitica?dias=30` y panel plegable en Comercio: visitas, a la cesta, pedidos y «compran %» por producto, más la frase que interpreta el número («muchas visitas y pocos pedidos: mira precio, fotos o descripción; pocas visitas: no lo ve nadie»).
+- **Los porcentajes solo a partir de 10 visitas**: con 3 visitas, «33 % compra» es una anécdota con aspecto de dato. Y se dice «visitas, no personas» para no dar por gente lo que son visitas.
+- Probado en local por HTTP: 12 visitas y 3 encestados → 25 % a la cesta; producto con 4 visitas → porcentajes en `null`; la analítica de otra vendedora no ve nada mío. Todo retirado.

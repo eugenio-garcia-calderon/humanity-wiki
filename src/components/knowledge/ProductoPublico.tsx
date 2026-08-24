@@ -236,6 +236,7 @@ export default function ProductoPublico({ id, titulo }: { id: string; titulo?: s
                     onClick={() => {
                       if (Array.isArray(p.variantes) && p.variantes.length) { window.location.href = `/producto/${encodeURIComponent(p.id)}`; return; }
                       anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: p.precio_centimos });
+                      fetch(`/api/publicar/producto/${encodeURIComponent(p.id)}/encestado`, { method: 'POST' }).catch(() => {});
                       setAnadido(true);
                       window.setTimeout(() => setAnadido(false), 1600);
                     }}
