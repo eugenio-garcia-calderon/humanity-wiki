@@ -529,6 +529,95 @@ export function registerVeracidadRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // COHERENCE WITH WHAT IS ALREADY THERE (phase 8)
+  // ==========================================================================
+
+  /**
+   * POST /api/veracidad/coherencia — «¿esto que voy a escribir choca con algo?»
+   *
+   * La otra mitad del encargo del primer día: que lo que se publique sea
+   * coherente con lo que ya hay. Se llama MIENTRAS se escribe, y contesta con
+   * lo que ya está dicho y se parece — con su postura y su sello, para que
+   * quien escribe decida: seguir, citarlo, o responderle.
+   *
+   * NO DECIDE NADA, Y ESO ES EL DISEÑO. No bloquea, no puntúa, no dice «esto es
+   * falso». Un aviso que se equivoca mientras escribes se aprende a ignorar en
+   * dos días, y a partir de ahí ya no avisa de nada. Este solo enseña lo que
+   * puede demostrar: frases que existen, escritas por alguien, con su enlace.
+   *
+   * Se busca con el índice de texto en español (`drizzle/0116`), no con la IA:
+   * un modelo afirmaría el parecido con una seguridad que no tiene.
+   */
+  app.post('/api/veracidad/coherencia', async (req: Request, res: Response) => {
+    try {
+      if (!requireLevel(req, res, ROLE.USER)) return;
+      const texto = String(req.body?.texto || '').trim();
+      const debateId = req.body?.debateId || null;
+
+      // Con dos palabras cualquier cosa se parece a cualquier cosa. Se dice que
+      // no hay respuesta todavía, que no es lo mismo que decir que no hay nada.
+      if (texto.split(/\s+/).filter(Boolean).length < 4) {
+        return res.json({ suficiente: false, parecidos: [] });
+      }
+
+      // ── POR QUÉ «O» PARA BUSCAR Y «Y» PARA ORDENAR ─────────────────────
+      // `plainto_tsquery` une las palabras con Y: pide que estén TODAS, y así
+      // no encuentra nada — dos frases que dicen lo mismo casi nunca comparten
+      // todas sus palabras. Buscar con O (alguna palabra) trae de más, y
+      // ordenar con Y las coloca: el rango con Y mide cuánto de lo que has
+      // escrito aparece en la otra frase.
+      //
+      // El corte en 0,05 está MEDIDO, no elegido: la frase que dice lo mismo
+      // con otras palabras puntúa 0,63; la casi idéntica, 0,93; y una que solo
+      // comparte el tema, 0,00. Entre 0,63 y 0,00 cabe cualquier número; se
+      // deja bajo a propósito, porque un aviso de más se ignora y uno de menos
+      // no existe.
+      const consultaO = sql`replace(plainto_tsquery('spanish', ${texto})::text, ' & ', ' | ')::tsquery`;
+      const filas = (await db.execute(sql`
+        SELECT a.id, a.texto, a.postura, a.veracidad, a.debate_id, a.parent_id,
+               d.slug AS debate_slug, d.tesis,
+               ts_rank(to_tsvector('spanish', a.texto), plainto_tsquery('spanish', ${texto})) AS parecido
+        FROM argumentos a
+        JOIN debates d ON d.id = a.debate_id AND d.archived_at IS NULL
+        WHERE a.archived_at IS NULL
+          AND to_tsvector('spanish', a.texto) @@ ${consultaO}
+          AND ts_rank(to_tsvector('spanish', a.texto), plainto_tsquery('spanish', ${texto})) >= 0.05
+        ORDER BY parecido DESC
+        LIMIT 5
+      `)).rows as any[];
+
+      // También si ya hay un debate abierto sobre lo mismo: abrir el segundo
+      // parte la discusión en dos y ninguna de las dos mitades sirve.
+      const debatesParecidos = (await db.execute(sql`
+        SELECT id, slug, tesis,
+               ts_rank(to_tsvector('spanish', tesis), plainto_tsquery('spanish', ${texto})) AS parecido
+        FROM debates
+        WHERE archived_at IS NULL
+          AND (${debateId}::text IS NULL OR id <> ${debateId})
+          AND to_tsvector('spanish', tesis) @@ ${consultaO}
+          AND ts_rank(to_tsvector('spanish', tesis), plainto_tsquery('spanish', ${texto})) >= 0.05
+        ORDER BY parecido DESC
+        LIMIT 3
+      `)).rows as any[];
+
+      res.json({
+        suficiente: true,
+        parecidos: filas.map((f) => ({
+          id: f.id, texto: f.texto, postura: f.postura, veracidad: f.veracidad,
+          debate_slug: f.debate_slug, tesis: f.tesis,
+          // MISMO DEBATE O NO: en el mismo, lo que sale es con qué estás
+          // hablando sin saberlo; en otro, es una conversación que ya existe.
+          mismo_debate: !!debateId && f.debate_id === debateId,
+        })),
+        debates: debatesParecidos.map((d) => ({ slug: d.slug, tesis: d.tesis })),
+      });
+    } catch (e: any) {
+      console.error('coherencia POST:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // THE SPECTRUM OF VIEWS (phase 6)
   // ==========================================================================
 
