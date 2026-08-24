@@ -6371,6 +6371,20 @@ shell roto**.
 - `GET /api/admin/whatsapp`: estado del canal, qué falta para enviar de verdad, y los últimos avisos.
 - Probado en local por HTTP: canal apagado dice qué falta; compra con teléfono → dos avisos `simulado` (comprador y vendedor) con el texto real; enlaces `wa.me` correctos en las dos direcciones y el teléfono no se filtra al cliente; marcar enviado → aviso con seguimiento; repetir el estado → sigue habiendo **un** aviso. Todo retirado.
 
+## 2026-08-24 — El «Navegador» del cajetín de crear abre el navegador
+Eugenio: «la herramienta de navegador, donde podía navegar en internet, cuando
+hago clic no me lleva ahí».
+
+No llevaba a ningún sitio porque no lo hay: el navegador no es una ruta, es una
+ventana que abre `GestorVentanas` (montado en el Layout, o sea en todas las
+páginas). La tarjeta apuntaba a `/archivos` —lo más parecido que había— y por
+eso salían tus archivos en vez de internet.
+
+- `Cosa` acepta ahora `a` (una ruta) **o** `abrir` (una orden). Nunca las dos.
+- «Navegador» llama a `abrirVentana({ clase: 'navegador', destino: 'about:inicio' })`,
+  igual que hacía el menú ☰ que se retiró.
+- Comprobado en el navegador: se abre la ventana con su barra de direcciones,
+  se escribe una dirección y la ventana va a esa página.
 ### 2026-08-24 — Comercio F7: la devolución la pide el comprador · «preparando» · fecha estimada (Programador 7)
 - Eugenio (24-08): «sí, que la pida el comprador». Antes solo el vendedor podía marcar devuelto; quien había comprado tenía que escribirle y confiar.
 - 0113: tabla `devoluciones` (motivo, estado pedida/aceptada/rechazada, respuesta, quién y cuándo) — tabla y no columnas porque una rechazada y otra pedida después son dos hechos y el libro es de solo añadir; índice único «una viva por pedido». `pedidos.entrega_estimada`. **Y se amplía `pedidos_estado_check`** para admitir `preparando`.
@@ -6430,3 +6444,40 @@ lienzo (7), revisión y moderación (9), y sacarlo a la portada y al buscador (1
 - `cotizar` acepta país y CP y devuelve zona, si se envía, qué no llega y si cabe recogida; la cesta recotiza mientras se escribe el destino. `comprar` calcula el porte con la zona real y admite `entrega: 'recogida'` (sin porte y sin pedir dirección). La ficha enseña la tabla de zonas y «a otras zonas no envía», más el sitio de recogida.
 - El vendedor las gestiona en Comercio → «envíos» (`EditorEnvio`): una fila por zona, **zona en blanco = no envía ahí**, dicho con esas palabras porque «vacío» suele leerse como «gratis».
 - Probado en local por HTTP: tarifas 3,50 / 9 / 15 y resto cerrado → cotizar Madrid 350, Tenerife 900, París 1500, Nueva York `se_envia=false` con el nombre de lo que no llega; 5 unidades (50 €) → envío 0 por umbral; comprar a Canarias → pedido con porte 900 y `entrega_tipo=envio`; comprar a EE. UU. → 409 sin tocar dinero; recogida → porte 0, `entrega_tipo=recogida` y sin dirección. Todo retirado.
+### 2026-08-24 — El debate, donde se crean las cosas
+
+Eugenio: *«mete el debate como herramienta de creación en el menú desplegable
+central y en la página principal cuando la sesión no está iniciada, junto con el
+resto de herramientas»*.
+
+- **En el botón central de crear** (`HojaCrear`), entre «Esquema» y «Mapa»:
+  «Debate · Con argumentos y votos». Lleva a `/debates?nuevo=1`, que **abre el
+  formulario ya desplegado** — llegar a una lista después de haber dicho que
+  quieres crear algo es hacerle repetir el gesto a quien ya lo hizo.
+- **En la portada de quien no ha entrado** (`Bienvenida`), como la 7ª de las 14
+  herramientas: «Una afirmación, sus razones a favor y en contra, y las fuentes
+  de cada una. Al final no hay un veredicto: hay un mapa de quién piensa qué y
+  por qué».
+- **Un dibujo propio, `PreviaDebate`**, con la misma animación al pasar el ratón
+  que las otras trece: la tesis arriba, las dos ramas colgando y las barras del
+  voto debajo. **Verde y rojo**, los mismos dos colores con los que el grafo
+  dice «apoya» y «contradice» en toda la plataforma — un dibujo que estrenara
+  colores enseñaría un vocabulario que después no se ve en ninguna parte.
+  Y es **el mismo dibujo en los dos sitios**, importado y no copiado: lo que ve
+  un desconocido al decidir si se registra es exactamente lo que verá al ir a
+  crear un debate.
+- **Por qué hacía falta**: el debate estaba solo en el menú de información, que
+  es donde se EXPLICA lo que es. Ahí no lo encuentra quien tiene algo que
+  discutir, que es justo la persona que hace falta.
+- **Verificado en el navegador, con clics reales**: la portada enseña las 14
+  herramientas con Debates entre ellas y su dibujo; el botón central abre la
+  hoja con «Debate» en su sitio; y pulsarlo cae en `/debates` con el formulario
+  abierto. El usuario de prueba se borró y la sesión se cerró.
+
+### 2026-08-24 — Comercio F9: ¿se ve, se enceta, se compra? (Programador 7)
+- Eugenio lo puso el primero de los cuatro pendientes. Hasta hoy quien vende no sabía si no vende **porque nadie entra** o **porque entran y no compran**, que son problemas opuestos: el primero se arregla enseñando el producto, el segundo cambiándolo.
+- 0115: `producto_metricas (producto_id, dia, visitas, encestados)` — agregado por día, **sin `user_id` a propósito**: para contestar la pregunta basta el recuento y el rastro de nadie hace falta.
+- La visita se apunta al servir la ficha (sin esperar: la ficha no depende de una métrica); `POST /api/publicar/producto/:id/encestado` cuenta los añadidos a la cesta. Las **compras salen de los pedidos**, no de un contador aparte que podría desviarse.
+- `GET /api/publicar/mis-productos/analitica?dias=30` y panel plegable en Comercio: visitas, a la cesta, pedidos y «compran %» por producto, más la frase que interpreta el número («muchas visitas y pocos pedidos: mira precio, fotos o descripción; pocas visitas: no lo ve nadie»).
+- **Los porcentajes solo a partir de 10 visitas**: con 3 visitas, «33 % compra» es una anécdota con aspecto de dato. Y se dice «visitas, no personas» para no dar por gente lo que son visitas.
+- Probado en local por HTTP: 12 visitas y 3 encestados → 25 % a la cesta; producto con 4 visitas → porcentajes en `null`; la analítica de otra vendedora no ve nada mío. Todo retirado.

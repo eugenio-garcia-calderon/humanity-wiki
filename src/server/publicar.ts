@@ -505,6 +505,68 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * POST /api/publicar/producto/:id/encestado — «alguien lo ha echado a la
+   * cesta». Sin sesión y sin cuerpo: es un recuento, no un registro de quién.
+   * La cesta lo llama al añadir; si falla, no pasa nada.
+   */
+  app.post('/api/publicar/producto/:id/encestado', async (req: Request, res: Response) => {
+    try {
+      await db.execute(sql`
+        INSERT INTO producto_metricas (producto_id, dia, encestados) VALUES (${String(req.params.id)}, current_date, 1)
+        ON CONFLICT (producto_id, dia) DO UPDATE SET encestados = producto_metricas.encestados + 1
+      `);
+      res.json({ ok: true });
+    } catch { res.json({ ok: false }); }
+  });
+
+  /**
+   * GET /api/publicar/mis-productos/analitica?dias=30 — ¿se ve?, ¿se enceta?,
+   * ¿se compra? Por producto, de mis productos. Las compras salen de los
+   * pedidos (la verdad), no de un contador aparte que podría desviarse.
+   */
+  app.get('/api/publicar/mis-productos/analitica', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const dias = Math.min(365, Math.max(1, Math.floor(Number(req.query.dias) || 30)));
+      const r = await db.execute(sql`
+        WITH mios AS (SELECT id, name, price_cents, currency, status FROM products WHERE created_by = ${req.user.id} AND archived_at IS NULL),
+        m AS (
+          SELECT producto_id, sum(visitas)::int AS visitas, sum(encestados)::int AS encestados
+          FROM producto_metricas WHERE dia >= current_date - ${dias}::int GROUP BY producto_id
+        ),
+        v AS (
+          SELECT l.producto_id, sum(l.unidades)::int AS unidades, count(DISTINCT l.pedido_id)::int AS pedidos
+          FROM pedido_lineas l JOIN pedidos pd ON pd.id = l.pedido_id
+          WHERE pd.estado NOT IN ('cancelado', 'devuelto') AND pd.created_at >= now() - make_interval(days => ${dias})
+          GROUP BY l.producto_id
+        )
+        SELECT mios.id, mios.name, mios.price_cents, mios.currency, mios.status,
+               coalesce(m.visitas, 0) AS visitas, coalesce(m.encestados, 0) AS encestados,
+               coalesce(v.unidades, 0) AS unidades, coalesce(v.pedidos, 0) AS pedidos
+        FROM mios LEFT JOIN m ON m.producto_id = mios.id LEFT JOIN v ON v.producto_id = mios.id
+        ORDER BY coalesce(v.pedidos, 0) DESC, coalesce(m.visitas, 0) DESC
+      `);
+      const filas = (r.rows as any[]).map(f => ({
+        id: f.id, nombre: f.name, precio_centimos: f.price_cents, moneda: f.currency || 'EUR', status: f.status,
+        visitas: Number(f.visitas), encestados: Number(f.encestados), pedidos: Number(f.pedidos), unidades: Number(f.unidades),
+        // Los porcentajes solo cuando hay suelo suficiente para que signifiquen
+        // algo: con 3 visitas, «33 % compra» es una anécdota con aspecto de dato.
+        de_visita_a_cesta: Number(f.visitas) >= 10 ? Math.round((Number(f.encestados) / Number(f.visitas)) * 1000) / 10 : null,
+        de_visita_a_compra: Number(f.visitas) >= 10 ? Math.round((Number(f.pedidos) / Number(f.visitas)) * 1000) / 10 : null,
+      }));
+      res.json({
+        dias, productos: filas,
+        totales: {
+          visitas: filas.reduce((n, f) => n + f.visitas, 0),
+          encestados: filas.reduce((n, f) => n + f.encestados, 0),
+          pedidos: filas.reduce((n, f) => n + f.pedidos, 0),
+        },
+        nota: 'Visitas, no personas: quien entra tres veces cuenta tres. Los porcentajes aparecen a partir de 10 visitas; con menos no dicen nada.',
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   // ==========================================================================
   // TARIFAS DE ENVÍO POR ZONA Y RECOGIDA (2026-08-24, comercio F8)
   // ==========================================================================
@@ -855,6 +917,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!p) return res.status(404).json({ error: 'Ese producto no existe.' });
 
       const imagenes = Array.isArray(p.images) ? p.images.filter((x: any) => typeof x === 'string') : [];
+      // ¿SE VE ESTO? (F9, 2026-08-24): una visita más, hoy. No se guarda quién:
+      // el recuento contesta la pregunta y el rastro no hace falta. Y no se
+      // espera: que la ficha no dependa de una métrica.
+      db.execute(sql`
+        INSERT INTO producto_metricas (producto_id, dia, visitas) VALUES (${p.id}, current_date, 1)
+        ON CONFLICT (producto_id, dia) DO UPDATE SET visitas = producto_metricas.visitas + 1
+      `).catch(() => {});
       const variantes = (await variantesDe(db, [p.id])).get(p.id) || [];
       // RELACIONADOS (F5): otras cosas de la misma tienda, la misma categoría
       // primero. Solo de la misma tienda: la ficha vive en su subdominio.
