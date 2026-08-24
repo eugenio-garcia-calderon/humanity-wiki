@@ -1,3 +1,22 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "drizzle/0119_republicaciones.sql",
+      "motivo": "prog2: republicar, de la plataforma y de otras redes",
+      "desde": "2026-08-24T18:30:40.560Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/republicar.ts",
+      "motivo": "prog2: republicar, de la plataforma y de otras redes",
+      "desde": "2026-08-24T18:30:40.560Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "prog2: republicar, de la plataforma y de otras redes",
+      "desde": "2026-08-24T18:30:40.560Z"
+    }
+  ]
 }
