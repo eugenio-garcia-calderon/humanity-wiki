@@ -19,6 +19,7 @@ import {
   leerPortada, PORTADA_POR_DEFECTO, type IdBloque, type Portada,
 } from '../components/portada/portadaBloques';
 import { OBJETIVOS, hablaDe } from '../utils/objetivos';
+import { portadaDe, ImagenDePortada, EtiquetasDeTema } from '../components/portada/PortadaTarjeta';
 import CirculosDePersonas from '../components/social/CirculosDePersonas';
 import TuTrabajo from '../components/social/TuTrabajo';
 
@@ -306,10 +307,33 @@ export default function Explorar() {
      * nadie ganara a algo que ayudó a diez personas. El número está aquí, en
      * una línea, para que se pueda discutir.
      */
-    if (objetivo) {
-      const peso = (i: any) => (Number(i.apoyos) || 0) * 3 + (Number(i.vistas) || 0);
-      lista = [...lista].sort((a, b) => peso(b) - peso(a));
-    }
+    /*
+     * ARRIBA LO QUE TIENE PORTADA, Y EL VÍDEO ANTES QUE LA FOTO (2026-08-24).
+     *
+     * Eugenio: «pon publicaciones que sean más relevantes y muestra arriba solo
+     * las que tengan alguna imagen o vídeo de portada, las que tengan vídeo
+     * dales prioridad».
+     *
+     * No es una preferencia estética: una rejilla donde la mitad de las
+     * tarjetas son un rectángulo de texto y la otra mitad una foto se lee mal
+     * en cualquier orden. Juntando primero las que tienen imagen, la parte de
+     * arriba es una rejilla de verdad y la de abajo una lista de títulos, y
+     * cada una se lee como lo que es.
+     *
+     * Y DENTRO DE CADA GRUPO, LA POPULARIDAD. Un apoyo pesa 3 y una vista 1:
+     * dar «me gusta» cuesta un gesto y ver algo no cuesta nada. El número está
+     * en una línea para que se pueda discutir.
+     *
+     * `sort` es estable en JavaScript desde hace años, así que dentro del mismo
+     * rango se conserva el orden que traía —lo más nuevo primero—, que es el
+     * desempate correcto cuando dos cosas gustan lo mismo.
+     */
+    const peso = (i: any) => (Number(i.apoyos) || 0) * 3 + (Number(i.vistas) || 0);
+    const rango = (i: any) => {
+      const p = portadaDe(i);
+      return p?.clase === 'video' ? 0 : p ? 1 : 2;
+    };
+    lista = [...lista].sort((a, b) => rango(a) - rango(b) || peso(b) - peso(a));
     return lista;
   }, [items, tipo, carpetaActiva, busqueda, objetivo]);
 
@@ -589,65 +613,8 @@ export default function Explorar() {
                 const trozos: Record<IdBloque, ReactNode> = {
                   /* LAS PERSONAS (2026-08-21): a quién sigues y qué han
                      publicado. */
-                  personas: <CirculosDePersonas />,
-
-                  /* LO TUYO (2026-08-22): la mitad que te dice si hay algo que
-                     hacer hoy. */
                   tuyo: <TuTrabajo />,
 
-                  objetivos: (
-                    <div className="sticky top-0 z-30 bg-white/95 backdrop-blur -mx-2 px-2 pt-1 pb-1.5">
-                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <button
-                    onClick={() => setObjetivo(null)}
-                    className={cn('shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors',
-                    !objetivo ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                    >
-                    Todos
-                    </button>
-                    {OBJETIVOS.map(o => (
-                    <button
-                    key={o.id}
-                    onClick={() => setObjetivo(objetivo === o.id ? null : o.id)}
-                    title={`Publicaciones que hablan de ${o.titulo.toLowerCase()}`}
-                    className={cn('shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors whitespace-nowrap',
-                    objetivo === o.id ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                    >
-                    <o.icono className="w-3.5 h-3.5 shrink-0" />
-                    {o.titulo}
-                    </button>
-                    ))}
-                    </div>
-                    </div>
-                  ),
-
-                  buscador: (
-                    <div className="sticky top-10 bg-white/95 backdrop-blur z-20 -mx-2 px-2 py-2 rounded-2xl flex items-center gap-2">
-                    <div className="relative flex-1 min-w-[140px] max-w-xs shrink-0">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                    <input
-                    value={busqueda} onChange={e => setBusqueda(e.target.value)}
-                    placeholder="Buscar…"
-                    className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-300"
-                    />
-                    </div>
-                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:thin] pb-0.5">
-                    {TIPOS.map(t => (
-                    <button
-                    key={t.label}
-                    onClick={() => setTipo(t.label)}
-                    className={cn('shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors',
-                    tipo === t.label ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-                    >
-                    {t.label}
-                    </button>
-                    ))}
-                    </div>
-                    </div>
-                  ),
-
-                  /* LAS CARPETAS, ahora un bloque y no una columna. Apagado por
-                     defecto: Eugenio pidió quitarlas de la portada, no perderlas. */
                   carpetas: user ? (
                     <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100">
                     <div className="relative">
@@ -729,7 +696,12 @@ export default function Explorar() {
                       </p>
                       </div>
                       ) : (
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+                      // TRES POR FILA, NO CUATRO (2026-08-24, Eugenio: «haz las
+                      // tarjetas más grandes mostrando 3 en vez de 4 por fila»).
+                      // Con portada dentro, a cuatro columnas la imagen bajaba de
+                      // 200 px de ancho y dejaba de contar nada; a tres respira y
+                      // se ve lo que hay en la foto.
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                       {visibles.map(it => {
                       const clave = `${it.tipo}-${it.id}`;
                       return (
@@ -875,10 +847,43 @@ export default function Explorar() {
                       </div>
                       </div>
 
-                      <p className="px-3.5 pt-1 text-[13px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      {/* LA PORTADA, CUANDO LA HAY. Y sólo cuando la hay: una
+                          tarjeta sin foto no recibe un relleno, porque si todas
+                          tuvieran imagen «tener imagen» dejaría de ser el
+                          criterio con el que está ordenada esta página. */}
+                      {(() => { const p = portadaDe(it); return p ? (
+                      <div className="px-2.5 pt-2.5">
+                      <ImagenDePortada portada={p} titulo={it.titulo} />
+                      </div>
+                      ) : null; })()}
+
+                      <p className="px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+
+                      {/* DE QUÉ HABLA. Sale de las mismas palabras con las que
+                          filtra el menú de la izquierda, así que la etiqueta y
+                          el filtro nunca se contradicen: si una tarjeta dice
+                          «Energía», está en «Energía». */}
+                      <div className="px-3.5 pt-1.5">
+                      <EtiquetasDeTema item={it} />
+                      </div>
+
+                      {/* CUANDO YA HAY PORTADA NO SE PINTA EL CUERPO. `WindowContent`
+                          vuelve a dibujar la misma foto o el mismo vídeo, así que la
+                          tarjeta enseñaba la imagen dos veces, una encima de otra. Con
+                          portada se resume en dos líneas de texto; sin portada manda el
+                          contenido, que es lo único que esa tarjeta tiene que enseñar. */}
+                      {portadaDe(it) ? (
+                      (() => {
+                      const texto = String(it.config?.body || (it as any).resumen || '').replace(/[#*`>\-]/g, ' ').trim();
+                      return texto ? (
+                      <p className="px-3.5 pt-1.5 pb-2 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
+                      ) : null;
+                      })()
+                      ) : (
                       <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
                       <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
                       </div>
+                      )}
                       <div className="px-3.5 py-2 border-t border-slate-50 flex items-center gap-2 text-[10px] text-slate-400">
                       <span className="inline-flex items-center gap-1 truncate">
                       <UserIcon className="w-2.5 h-2.5 shrink-0" />{it.autor_nombre || 'Anónimo'}

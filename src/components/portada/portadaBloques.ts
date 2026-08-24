@@ -19,7 +19,23 @@
  */
 
 /** Cada trozo de la portada que se puede encender, apagar y mover. */
-export type IdBloque = 'personas' | 'tuyo' | 'objetivos' | 'buscador' | 'carpetas' | 'contenido';
+/*
+ * TRES BLOQUES SE HAN IDO (2026-08-24). Eugenio, mirando la portada: «elimina
+ * todo esto de los círculos de estados de personas, el buscador secundario
+ * metido en la página, la ristra de temáticas… y deja solo las publicaciones».
+ *
+ * No se apagan por defecto: **se quitan del registro**. `leerPortada` filtra lo
+ * que no reconoce, así que borrarlos de aquí los hace desaparecer también para
+ * quien los tuviera guardados en su portada de antes. Apagarlos sólo por
+ * defecto habría dejado a Eugenio viéndolos igual, que es exactamente lo que ha
+ * pedido que no pase.
+ *
+ * Y no se pierde nada de lo que hacían: **buscar** está ahora en la barra de
+ * arriba, y **los catorce temas** son el menú de la izquierda, donde además
+ * filtran de verdad. Estaban repetidos, y la copia de dentro de la página era
+ * la peor de las dos.
+ */
+export type IdBloque = 'tuyo' | 'carpetas' | 'contenido';
 
 export interface DefinicionBloque {
   id: IdBloque;
@@ -30,10 +46,7 @@ export interface DefinicionBloque {
 }
 
 export const BLOQUES: DefinicionBloque[] = [
-  { id: 'personas', titulo: 'Personas', descripcion: 'A quién sigues y qué ha publicado' },
   { id: 'tuyo', titulo: 'Lo tuyo', descripcion: 'Tus tareas y lo que tienes a medias' },
-  { id: 'objetivos', titulo: 'Los 14 objetivos', descripcion: 'La tira de temas para filtrar' },
-  { id: 'buscador', titulo: 'Buscador y tipos', descripcion: 'Buscar por título y filtrar por tipo' },
   {
     id: 'carpetas',
     titulo: 'Tus carpetas',
@@ -65,14 +78,20 @@ export const PLANTILLAS: Plantilla[] = [
   {
     id: 'completa',
     titulo: 'Completa',
-    descripcion: 'Todo: la gente, lo tuyo, los temas y el buscador. La de siempre.',
-    bloques: ['personas', 'tuyo', 'objetivos', 'buscador', 'contenido'],
+    descripcion: 'Lo tuyo y tus carpetas encima de las publicaciones.',
+    bloques: ['tuyo', 'carpetas', 'contenido'],
   },
   {
     id: 'trabajo',
     titulo: 'A trabajar',
-    descripcion: 'Lo tuyo primero y tus carpetas a mano. Para venir a hacer, no a mirar.',
-    bloques: ['tuyo', 'carpetas', 'buscador', 'contenido'],
+    /* AL RETIRAR TRES BLOQUES, ÉSTA Y «COMPLETA» SE QUEDARON IGUALES
+       (2026-08-24). Con las mismas piezas, elegir entre las dos no significaba
+       nada — y `plantillaDe` devolvía siempre la primera, así que la de trabajo
+       era imposible de reconocer. Lo cazó la prueba, no la vista.
+       Ahora se distinguen por lo que de verdad las separa: aquí lo tuyo y nada
+       más, para venir a hacer; en «Completa» además tus carpetas. */
+    descripcion: 'Lo tuyo primero y nada más. Para venir a hacer, no a mirar.',
+    bloques: ['tuyo', 'contenido'],
   },
   {
     id: 'lectura',
@@ -82,9 +101,12 @@ export const PLANTILLAS: Plantilla[] = [
   },
 ];
 
+/* POR DEFECTO, SOLO LAS PUBLICACIONES. Es lo que pidió Eugenio y además es la
+ * portada que tiene sentido para quien llega: lo primero que se ve es lo que
+ * hay, no los mandos para filtrarlo. */
 export const PORTADA_POR_DEFECTO: Portada = {
-  plantilla: 'completa',
-  bloques: PLANTILLAS[0].bloques,
+  plantilla: 'lectura',
+  bloques: ['contenido'],
 };
 
 /**
