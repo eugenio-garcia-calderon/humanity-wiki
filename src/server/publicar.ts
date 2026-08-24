@@ -27,6 +27,7 @@ import { rutaLocalDeUpload } from './uploads';
 import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
 import { avisar } from './avisos';
 import { avisarPorWhatsApp, enlaceWa, estadoWhatsApp } from './whatsapp.js';
+import { ZONAS, zonaDe, tarifasDe, calcularEnvio, type Zona } from './zonasEnvio.js';
 import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -504,6 +505,63 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  // ==========================================================================
+  // TARIFAS DE ENVÍO POR ZONA Y RECOGIDA (2026-08-24, comercio F8)
+  // ==========================================================================
+  /** GET /api/publicar/mis-productos/:id/envio — las tarifas de un producto mío. */
+  app.get('/api/publicar/mis-productos/:id/envio', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const p = (await db.execute(sql`SELECT id, recogida_en_persona, recogida_donde FROM products WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      res.json({
+        zonas: ZONAS,
+        tarifas: (await tarifasDe(db, [p.id])).get(p.id) || [],
+        recogida_en_persona: !!p.recogida_en_persona,
+        recogida_donde: p.recogida_donde || null,
+        nota: 'Una zona sin tarifa es una zona a la que no envías: quien viva ahí lo sabrá antes de pagar, no después.',
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  /** PUT /api/publicar/mis-productos/:id/envio { tarifas: [{zona, centimos, gratis_desde_centimos}], recogida_en_persona, recogida_donde } */
+  app.put('/api/publicar/mis-productos/:id/envio', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const p = (await db.execute(sql`SELECT id FROM products WHERE id = ${String(req.params.id)} AND created_by = ${req.user.id}`)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese producto no es tuyo o no existe.' });
+      const validas = new Set<string>(ZONAS.map(z => z.id));
+      const filas = (Array.isArray(req.body?.tarifas) ? req.body.tarifas : [])
+        .filter((t: any) => validas.has(String(t?.zona)) && t?.centimos !== null && t?.centimos !== undefined && t?.centimos !== '')
+        .map((t: any) => ({
+          zona: String(t.zona) as Zona, centimos: Math.max(0, Math.round(Number(t.centimos) || 0)),
+          gratis: t.gratis_desde_centimos === null || t.gratis_desde_centimos === undefined || t.gratis_desde_centimos === '' ? null : Math.max(0, Math.round(Number(t.gratis_desde_centimos) || 0)),
+        }));
+      // La lista manda: una zona que no viene deja de tener tarifa, o sea,
+      // deja de estar servida. Es la forma de dejar de enviar a un sitio.
+      await db.execute(sql`DELETE FROM producto_envio_zonas WHERE producto_id = ${p.id}`);
+      for (const f of filas) {
+        await db.execute(sql`
+          INSERT INTO producto_envio_zonas (producto_id, zona, centimos, gratis_desde_centimos, updated_at)
+          VALUES (${p.id}, ${f.zona}, ${f.centimos}, ${f.gratis}, now())
+          ON CONFLICT (producto_id, zona) DO UPDATE SET centimos = EXCLUDED.centimos, gratis_desde_centimos = EXCLUDED.gratis_desde_centimos, updated_at = now()
+        `);
+      }
+      // La tarifa de península se refleja también en la columna vieja: hay
+      // pantallas que la leen y no tienen por qué enterarse de las zonas.
+      const peninsula = filas.find((f: any) => f.zona === 'peninsula');
+      await db.execute(sql`
+        UPDATE products SET
+          envio_centimos = ${peninsula ? peninsula.centimos : null},
+          envio_gratis_desde_centimos = ${peninsula ? peninsula.gratis : null},
+          recogida_en_persona = ${req.body?.recogida_en_persona === true},
+          recogida_donde = ${String(req.body?.recogida_donde || '').trim().slice(0, 300) || null},
+          updated_at = now()
+        WHERE id = ${p.id}
+      `);
+      res.json({ guardado: true, zonas_servidas: filas.length, recogida_en_persona: req.body?.recogida_en_persona === true });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** GET /api/admin/whatsapp — cómo está el canal y los últimos avisos (administrador). */
   app.get('/api/admin/whatsapp', async (req: Request, res: Response) => {
     try {
@@ -782,7 +840,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
   app.get('/api/publicar/producto/:id', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT id, name, description, price_cents, currency, images, kind, created_by,
+        SELECT id, name, description, price_cents, currency, images, kind, created_by, recogida_en_persona, recogida_donde,
                modality, billing_period, stock, warranty, return_policy, category,
                envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
                (SELECT round(avg(score) / 2.0, 1)::float FROM ratings WHERE entity_type = 'products' AND entity_id = products.id) AS media_estrellas,
@@ -866,6 +924,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // El envío se cuenta ANTES de comprar, no en la última pantalla. Un
         // coste que aparece al final es la primera causa de carrito
         // abandonado, y en una tienda de una persona es peor: parece un truco.
+        // Adónde llega y por cuánto (F8, 2026-08-24): las zonas con tarifa.
+        // Una zona que no está en la lista es una zona a la que no se envía.
+        envio_zonas: ((await tarifasDe(db, [p.id])).get(p.id) || []).map(t => ({
+          zona: t.zona, nombre: ZONAS.find(z => z.id === t.zona)?.nombre || t.zona,
+          centimos: t.centimos, gratis_desde_centimos: t.gratis_desde_centimos,
+        })),
+        recogida: p.recogida_en_persona ? { donde: p.recogida_donde || null } : null,
         envio: {
           // `null` = no lo ha configurado, y entonces no se ofrece envío.
           // `0` = gratis dicho a propósito. No son lo mismo.
@@ -1026,7 +1091,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const ids = crudas.map(l => String(l?.producto_id || '')).filter(Boolean);
       if (!ids.length) return res.status(400).json({ error: 'No hay nada que cotizar.' });
       const productos = (await db.execute(sql`
-        SELECT id, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos
+        SELECT id, name, price_cents, kind, created_by, acepta_puntos, envio_centimos, envio_gratis_desde_centimos, recogida_en_persona
         FROM products WHERE id = ANY(string_to_array(${ids.join(',')}, ',')) AND archived_at IS NULL AND status <> 'borrador'
       `)).rows as any[];
       // Con variante, el precio es el de la variante (2026-08-23).
@@ -1039,13 +1104,26 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!lineas.length) return res.status(404).json({ error: 'Esos productos no están a la venta.' });
       const subtotal = lineas.reduce((n, l) => n + l.precio * l.unidades, 0);
       const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
-      const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
-      const gratis = fisicas.some(l => l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined && subtotal >= Number(l.p.envio_gratis_desde_centimos));
-      const envio = fisicas.length === 0 ? null : conPorte.length === 0 ? null : gratis ? 0 : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
+      // ZONAS DE ENVÍO (F8, 2026-08-24): el porte depende de a dónde va. Si la
+      // cesta aún no sabe el destino, se cotiza la península — y se dice que
+      // es «desde», para que nadie descubra el porte de verdad al final.
+      const zona: Zona = req.body?.pais || req.body?.cp ? zonaDe(req.body.pais, req.body.cp) : 'peninsula';
+      const tarifas = await tarifasDe(db, fisicas.map(l => l.p.id));
+      const calc = calcularEnvio(fisicas as any, subtotal, zona, tarifas);
+      const recogidaPosible = fisicas.length > 0 && fisicas.every(l => !!l.p.recogida_en_persona);
+      const envio = calc.centimos;
       const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
       res.json({
         subtotal_centimos: subtotal,
         envio_centimos: envio,
+        zona: calc.zona,
+        zona_nombre: ZONAS.find(z => z.id === calc.zona)?.nombre || null,
+        // `false` = alguna cosa de la cesta no llega a esa zona; `no_llega`
+        // dice cuál, para poder nombrarla.
+        se_envia: calc.se_envia,
+        no_llega: calc.no_llega,
+        envio_estimado: !(req.body?.pais || req.body?.cp),
+        recogida_posible: recogidaPosible,
         es_fisico: fisicas.length > 0,
         acepta_puntos_centimos: aceptan,
         todo_acepta_puntos: aceptan >= subtotal,
@@ -1304,7 +1382,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const idsProductos = [...new Set([...pedidas.values()].map(x => x.id))];
       const productos = (await db.execute(sql`
         SELECT id, name, description, price_cents, currency, stock, created_by, modality,
-               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos
+               billing_period, kind, envio_centimos, envio_gratis_desde_centimos, envio_plazo, acepta_puntos,
+               recogida_en_persona, recogida_donde
         FROM products
         WHERE id = ANY(string_to_array(${idsProductos.join(',')}, ','))
           AND archived_at IS NULL AND status <> 'borrador'
@@ -1368,19 +1447,32 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const destino = destinoSeguro(cuerpo.volver_a);
       const esFisico = lineas.some(l => (l.p.kind || '') === 'fisico');
 
-      // El porte más caro de lo que se lleva, no la suma: va todo en una caja.
-      // Y si CUALQUIERA de las líneas tiene umbral de envío gratis y el
-      // subtotal lo pasa, sale gratis: quien puso el umbral está diciendo «a
-      // partir de aquí lo pago yo».
+      // EL PORTE (F8, 2026-08-24): depende de la ZONA del destino. Mismas
+      // reglas de siempre —el porte más caro, no la suma, porque va todo en
+      // una caja; y gratis si alguna línea tiene umbral y el subtotal lo
+      // pasa— pero con una tarifa por zona. Si algo no llega a esa zona, no
+      // se cobra: se dice cuál antes de tocar el dinero.
       const fisicas = lineas.filter(l => (l.p.kind || '') === 'fisico');
-      const conPorte = fisicas.filter(l => l.p.envio_centimos !== null && l.p.envio_centimos !== undefined);
-      const gratisPorUmbral = fisicas.some(l =>
-        l.p.envio_gratis_desde_centimos !== null && l.p.envio_gratis_desde_centimos !== undefined &&
-        subtotal >= Number(l.p.envio_gratis_desde_centimos));
-      const envioCobrado = !esFisico ? null
-        : conPorte.length === 0 ? null
-        : gratisPorUmbral ? 0
-        : Math.max(...conPorte.map(l => Number(l.p.envio_centimos)));
+      // RECOGIDA EN PERSONA: si se pide y todo lo físico la admite, no hay
+      // porte ni dirección que pedir.
+      const quiereRecogida = cuerpo.entrega === 'recogida';
+      const recogidaPosible = fisicas.length > 0 && fisicas.every(l => !!l.p.recogida_en_persona);
+      if (quiereRecogida && !recogidaPosible) {
+        return res.status(400).json({ error: 'Alguna de las cosas que llevas no se puede recoger en persona.' });
+      }
+      const zonaDestino: Zona = quiereRecogida ? 'peninsula' : zonaDe(cuerpo.direccion?.pais || cuerpo.direccion?.country, cuerpo.direccion?.cp || cuerpo.direccion?.postal_code);
+      const tarifasEnvio = await tarifasDe(db, fisicas.map(l => l.p.id));
+      const calculo = quiereRecogida
+        ? { centimos: 0, se_envia: true, no_llega: null, zona: zonaDestino, gratis_por_umbral: false }
+        : calcularEnvio(fisicas as any, subtotal, zonaDestino, tarifasEnvio);
+      if (!calculo.se_envia) {
+        return res.status(409).json({
+          error: `«${calculo.no_llega}» no se envía a ese destino. Escribe a quien lo vende: puede que pueda hacer una excepción.`,
+          no_se_envia: true, zona: zonaDestino,
+        });
+      }
+      const gratisPorUmbral = calculo.gratis_por_umbral;
+      const envioCobrado = !esFisico ? null : calculo.centimos;
 
       const vendedorId = lineas[0].p.created_by;
       const vendedor = vendedorId
@@ -1472,7 +1564,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         // porque Stripe no interviene, así que la pedimos nosotros. Sin ella
         // no hay pedido: un paquete sin destino es un problema del vendedor.
         let direccion: any = null;
-        if (esFisico) {
+        if (esFisico && !quiereRecogida) {
           const d = cuerpo.direccion || {};
           const nombre = String(d.nombre || '').trim();
           const line1 = String(d.linea1 || d.line1 || '').trim();
@@ -1492,12 +1584,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
         const telefonoPedido = normalizarTelefono(cuerpo.telefono) || telefonoPerfil?.telefono || null;
         await db.execute(sql`
           INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades, importe_centimos, envio_centimos, moneda,
-                               comprador_user_id, comprador_email, comprador_nombre, direccion_envio, vendedor_user_id, estado, telefono_contacto)
+                               comprador_user_id, comprador_email, comprador_nombre, direccion_envio, vendedor_user_id, estado, telefono_contacto, entrega_tipo)
           VALUES (${pedidoId}, ${codigo}, ${lineas.length === 1 ? lineas[0].p.id : null}, ${resumen},
                   ${lineas.length === 1 ? lineas[0].unidades : null}, 0, ${envioCobrado || 0}, ${moneda.toUpperCase()},
                   ${req.user!.id}, ${req.user!.email || null}, ${direccion?.name || req.user!.displayName || null},
                   ${direccion ? JSON.stringify(direccion) : null}::jsonb,
-                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${telefonoPedido})
+                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${telefonoPedido},
+                  ${todoDigital ? 'digital' : quiereRecogida ? 'recogida' : 'envio'})
         `);
         const ok = await pagarConPuntos(db, req.user!.id, vendedorId, puntosUsados, pedidoId);
         if (!ok) {

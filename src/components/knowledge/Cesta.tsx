@@ -189,15 +189,21 @@ export default function Cesta({ tienda }: { tienda: string }) {
   const [usarPuntos, setUsarPuntos] = useState('');
   // La cotización (envío incluido) para saber si los puntos pueden cubrirlo
   // todo (2026-08-23); y la dirección, por si entonces hay que enviar algo.
-  const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean } | null>(null);
+  const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean;
+    zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean } | null>(null);
+  // Recogida en persona (F8, 2026-08-24): si todo lo de la cesta la admite, se
+  // puede elegir en vez de envío — sin porte y sin pedir dirección.
+  const [recogida, setRecogida] = useState(false);
   const [direccion, setDireccion] = useState<Direccion>(DIRECCION_VACIA);
   useEffect(() => {
     if (!abierta || lineas.length === 0) return;
     fetch('/api/publicar/cotizar', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lineas: aLineasServidor(lineas) }),
+      // Con el destino que se va escribiendo: el porte depende de la zona, y
+      // enseñarlo al final es la primera causa de carrito abandonado.
+      body: JSON.stringify({ lineas: aLineasServidor(lineas), pais: direccion.pais || undefined, cp: direccion.cp || undefined }),
     }).then(r => r.json()).then(j => { if (typeof j?.subtotal_centimos === 'number') setCotiza(j); }).catch(() => {});
-  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}`).join('|')]);
+  }, [abierta, lineas.map(l => `${claveLinea(l)}:${l.cantidad}`).join('|'), direccion.pais, direccion.cp]);
   // CUPÓN DEL VENDEDOR (2026-08-22): se comprueba contra el servidor antes de
   // pagar, para que la cesta diga el descuento y no lo adivine.
   const [cupon, setCupon] = useState('');
@@ -254,8 +260,9 @@ export default function Cesta({ tienda }: { tienda: string }) {
           volver_a: window.location.href,
           ...(caja?.activo && puntosPedidos > 0 ? { usar_puntos: Math.min(puntosPedidos, maxPuntos) } : {}),
           ...(cuponOk ? { cupon: cuponOk.codigo } : {}),
-          ...(cubreTodo && cotiza?.es_fisico ? { direccion } : {}),
+          ...(cubreTodo && cotiza?.es_fisico && !recogida ? { direccion } : {}),
           ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
+          ...(recogida ? { entrega: 'recogida' } : {}),
         }),
       });
       const j = await r.json().catch(() => ({}));
@@ -349,6 +356,23 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 <span className="text-sm text-slate-500">Subtotal</span>
                 <span className="text-xl font-black text-slate-900">{dinero(subtotal)}</span>
               </div>
+              {cotiza?.recogida_posible && (
+                <label className="mt-2 flex items-start gap-2 cursor-pointer p-2 rounded-lg border border-slate-200">
+                  <input type="checkbox" checked={recogida} onChange={e => setRecogida(e.target.checked)} className="mt-0.5" />
+                  <span className="text-xs text-slate-700"><b>Lo recojo en persona</b> — sin gastos de envío y sin dar dirección.</span>
+                </label>
+              )}
+              {!recogida && cotiza && cotiza.es_fisico && cotiza.se_envia === false && (
+                <p className="mt-2 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2 py-1.5">
+                  «{cotiza.no_llega}» no se envía a {cotiza.zona_nombre || 'ese destino'}. Quita eso de la cesta o escribe a quien lo vende.
+                </p>
+              )}
+              {!recogida && cotiza && cotiza.es_fisico && cotiza.se_envia !== false && cotiza.envio_centimos !== null && (
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Envío {cotiza.envio_centimos === 0 ? 'gratis' : dinero(cotiza.envio_centimos)} a {cotiza.zona_nombre || 'tu zona'}
+                  {cotiza.envio_estimado ? ' (escribe el código postal y el país para el precio exacto)' : ''}.
+                </p>
+              )}
               {avisoCesta !== null && (
                 <p className="mt-1 text-[11px] text-slate-400">
                   {avisoCesta ? 'Si la dejas a medias, te lo recordamos una vez a las 24 h. ' : 'No te recordaremos esta cesta. '}

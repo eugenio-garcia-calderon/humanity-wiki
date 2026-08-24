@@ -217,6 +217,26 @@ export default function FichaProducto({ handle }: { handle: string }) {
 
           {p.envio?.hace_falta && <Envio envio={p.envio} dinero={dinero} precio={p.precio_centimos} />}
 
+          {/* A DÓNDE LLEGA Y POR CUÁNTO (F8, 2026-08-24). Una zona que no está
+              en la lista es una zona a la que no se envía, y se dice aquí en
+              vez de descubrirlo al pagar. */}
+          {p.envio?.hace_falta && Array.isArray(p.envio_zonas) && p.envio_zonas.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {p.envio_zonas.map((z: any) => (
+                <li key={z.zona} className="text-[11px] text-slate-500">
+                  {z.nombre}: <b>{z.centimos === 0 ? 'gratis' : dinero(z.centimos)}</b>
+                  {z.gratis_desde_centimos != null && <> · gratis desde {dinero(z.gratis_desde_centimos)}</>}
+                </li>
+              ))}
+              {p.envio_zonas.length < 4 && <li className="text-[11px] text-slate-400">A otras zonas, este vendedor no envía.</li>}
+            </ul>
+          )}
+          {p.recogida && (
+            <p className="mt-2 text-[11px] text-emerald-700 font-bold">
+              También se puede recoger en persona{p.recogida.donde ? `: ${p.recogida.donde}` : ''}.
+            </p>
+          )}
+
           {/* VARIANTES (2026-08-23): talla, color… Botones, no desplegable:
               se ven todas de un vistazo y las agotadas se ven agotadas. */}
           {variantes.length > 0 && (
