@@ -6749,3 +6749,27 @@ o modificadas—.
 - Rutas: `GET /api/publicar/mis-liquidaciones` (lo que me deben, retenido y cobrado), `GET/POST /api/admin/liquidaciones[/pagar]`, y barrido horario que marca vencidas y —solo encendido— transfiere.
 - **Nace apagado** (`COBRO_AGREGADO=off`): calcula, marca vencimientos y canta, pero no mueve dinero.
 - Probado en local por HTTP: sin contrato → 400 diciendo quién falta (y con la concordancia arreglada: «no cobra» / «no cobran»); con las dos firmas → la sesión de pago se crea de verdad (claves de prueba); puntos + dos tiendas → 400 con motivo; liquidación vencida → pasa a «lista» y el barrido dice `sin_cuenta_de_cobro` porque la tienda no tiene Stripe conectado; devolución pedida → **retenida** con motivo; rechazada → vuelve a **pendiente**; aceptada → **cancelada** y el pedido devuelto; la tienda ve por cobrar / retenido / cobrado. Todo retirado.
+
+## 2026-08-24 — Capturas para Google Play, y dos fallos de móvil que encontraron
+Eugenio: «ya tengo la cuenta de Google Play verificada, ¿qué podemos hacer
+ahora?».
+
+- `scripts/capturas-tienda.mjs`: cinco capturas a 1080×1920 contra la
+  compilación de producción en local, con `?sw=off` (el trabajador de servicio
+  cuelga un navegador automatizado) y una sesión de prueba marcada que se borra
+  **pase lo que pase**, también si el guion falla.
+- **360 px de ancho en CSS, no 1080.** Los dos números son distintos y los dos
+  importan: el fichero lo pide la tienda a 1080, pero el ancho en CSS decide qué
+  diseño se dibuja. La primera tanda salió con la vista de ORDENADOR dentro de
+  un fichero con forma de móvil.
+- Y con el ancho de verdad aparecieron **dos fallos que llevaban días en
+  producción sin que nadie los viera**:
+  - Los tres caminos: «Proyectar» se salía de la pantalla. Arreglado aquí —
+    `min-w-0` en la tarjeta, y en el móvil sin icono y un punto más pequeño.
+  - La tarjeta de publicación de `/explorar` medía 445 px en una pantalla de
+    360. **No es mío**: `Explorar.tsx` lo tiene reservado el Programador 2 y se
+    le ha pasado el diagnóstico y la línea.
+- El informe de pwabuilder.com sobre `humanity.wiki`: **0 errores**, 2 avisos
+  (el trabajador de servicio, que su rastreador no ve porque se registra desde
+  JavaScript, y las capturas del manifiesto). El paquete de Android se puede
+  generar.

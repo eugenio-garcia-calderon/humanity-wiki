@@ -119,16 +119,26 @@ export default function TresCaminos() {
               onClick={() => { if (c.ruta) navegar(c.ruta); else setCreando(true); }}
               /* `group` enciende la animación de dentro del dibujo: cada
                  previsualización se mueve con `group-hover`. */
-              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition-all hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl"
+              /* `min-w-0`: una celda de rejilla nace con `min-width: auto`, así
+                 que lo más ancho de dentro empuja la celda entera. Sin esto, a
+                 360 px la tercera tarjeta se salía de la pantalla y «Proyectar»
+                 quedaba cortado a media palabra. */
+              className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition-all hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl"
             >
               <span className="block aspect-[16/10] w-full overflow-hidden border-b border-slate-100">
                 <span className="block h-full w-full transition-transform duration-300 ease-out group-hover:scale-[1.06]">
                   <c.Previa />
                 </span>
               </span>
-              <span className="flex items-center gap-1.5 px-2.5 pt-2.5 sm:px-4 sm:pt-4">
-                <c.Icono className="h-4 w-4 shrink-0 text-emerald-600" />
-                <span className="text-[13px] font-black text-slate-900 sm:text-lg">{c.titulo}</span>
+              {/* EN EL MÓVIL, SIN ICONO Y UN PUNTO MÁS PEQUEÑO. A 360 px cada
+                  tarjeta tiene 105 px: «Proyectar» a 13 px con su icono delante
+                  pide 112 y se salía. El icono es lo que sobra —el dibujo de
+                  arriba ya dice de qué va— y la palabra es lo que no puede
+                  faltar. Lo dijo una captura hecha con el ancho de un teléfono
+                  de verdad; a 1080 px de ancho en CSS no se veía. */}
+              <span className="flex items-center justify-center gap-1.5 px-1.5 pt-2.5 sm:justify-start sm:px-4 sm:pt-4">
+                <c.Icono className="hidden h-4 w-4 shrink-0 text-emerald-600 sm:block" />
+                <span className="text-[12px] font-black leading-tight text-slate-900 sm:text-lg">{c.titulo}</span>
               </span>
               <span className="hidden px-4 pb-4 pt-1 text-[12px] font-bold leading-snug text-slate-400 sm:block">
                 {c.frase}

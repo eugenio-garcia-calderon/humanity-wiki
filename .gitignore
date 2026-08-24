@@ -41,3 +41,7 @@ deploy/certs/*
 
 # Quién eres en esta copia de trabajo (prog1/prog2/prog3)
 .agente
+
+# Las capturas de la ficha de las tiendas: se regeneran con
+# `node --env-file=.env scripts/capturas-tienda.mjs` y pesan medio mega cada una.
+capturas-tienda/
