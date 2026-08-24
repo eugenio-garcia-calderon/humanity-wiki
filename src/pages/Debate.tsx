@@ -363,6 +363,7 @@ function Responder({ debateId, parentId, onHecho }: {
         placeholder={parentId ? 'Responde a este argumento…' : 'Un argumento, uno solo. Si tienes dos, escríbelos por separado: así se puede responder a cada uno.'}
         className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-y focus:outline-none focus:border-purple-300"
       />
+      <Coherencia texto={texto} debateId={debateId} />
       {error && <p className="text-xs text-rose-700 mt-1.5">{error}</p>}
       <div className="flex justify-end mt-2">
         <Button onClick={enviar} disabled={guardando || texto.trim().length < 3}>
@@ -665,5 +666,90 @@ function Espectro({ slug, recarga }: { slug: string; recarga: number }) {
         ))}
       </div>
     </Card>
+  );
+}
+
+interface Parecido {
+  id: string; texto: string; postura: string; veracidad: string;
+  debate_slug: string; tesis: string; mismo_debate: boolean;
+}
+
+/**
+ * LO QUE YA SE HA DICHO, ANTES DE ESCRIBIRLO OTRA VEZ (fase 8).
+ *
+ * Eugenio, el primer día: «que lo que la gente publique sea información
+ * coherente con la otra información que hay». Esta es esa mitad.
+ *
+ * NO BLOQUEA NADA. Enseña lo que existe y se parece, con su postura y su sello,
+ * y quien escribe decide: seguir, citarlo o responderle. Un aviso que impide
+ * publicar convierte cada parecido en una pelea con la máquina; uno que solo
+ * informa convierte el mismo parecido en una cita.
+ *
+ * SE PREGUNTA MIENTRAS SE ESCRIBE, con 700 ms de calma. Después de publicar ya
+ * no sirve: entonces es una discusión, y antes era una oportunidad de traer la
+ * fuente.
+ */
+function Coherencia({ texto, debateId }: { texto: string; debateId: string }) {
+  const [parecidos, setParecidos] = useState<Parecido[]>([]);
+  const [debates, setDebates] = useState<{ slug: string; tesis: string }[]>([]);
+
+  useEffect(() => {
+    if (texto.trim().split(/\s+/).filter(Boolean).length < 4) {
+      setParecidos([]); setDebates([]);
+      return;
+    }
+    // Un reloj por cada tecla sería una petición por letra. Se espera a que
+    // pares de escribir.
+    const reloj = setTimeout(() => {
+      fetch('/api/veracidad/coherencia', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto: texto.trim(), debateId }),
+      })
+        .then(r => r.json())
+        .then(j => { setParecidos(j?.parecidos || []); setDebates(j?.debates || []); })
+        .catch(() => {});
+    }, 700);
+    return () => clearTimeout(reloj);
+  }, [texto, debateId]);
+
+  if (!parecidos.length && !debates.length) return null;
+
+  return (
+    <div className="mt-2 rounded-xl border border-sky-200 bg-sky-50/60 p-2.5">
+      <p className="text-[11px] font-black text-sky-900 inline-flex items-center gap-1.5">
+        <Quote className="w-3 h-3" /> Esto ya se ha tocado
+      </p>
+      <p className="text-[10px] text-sky-800/70 mb-1.5">
+        No te lo impide nadie. Míralo antes: puede que quieras citarlo, responderle,
+        o escribir otra cosa.
+      </p>
+      <ul className="space-y-1.5">
+        {parecidos.map(p => (
+          <li key={p.id} className="text-[11px] leading-snug">
+            <span className={cn('inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle',
+              p.postura === 'a_favor' ? 'bg-emerald-500' : p.postura === 'en_contra' ? 'bg-rose-500' : 'bg-amber-500')} />
+            <span className="text-slate-700">{p.texto}</span>
+            {/* DE DÓNDE SALE. En este mismo debate es «estás discutiendo con
+                alguien sin saberlo»; en otro es una conversación que ya existe
+                y a la que puedes ir. */}
+            {p.mismo_debate ? (
+              <span className="text-slate-400"> · en este debate</span>
+            ) : (
+              <Link to={`/debates/${p.debate_slug}`} className="text-sky-700 font-bold hover:underline">
+                {' '}· en «{p.tesis}»
+              </Link>
+            )}
+          </li>
+        ))}
+        {debates.map(d => (
+          <li key={d.slug} className="text-[11px] leading-snug">
+            <Link to={`/debates/${d.slug}`} className="text-sky-700 font-bold hover:underline">
+              Ya hay un debate abierto sobre esto: «{d.tesis}»
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
