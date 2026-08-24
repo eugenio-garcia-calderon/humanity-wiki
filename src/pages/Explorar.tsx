@@ -777,7 +777,23 @@ export default function Explorar() {
                          una sombra sin caja es una mancha. Queda el empujón de
                          medio píxel al pasar por encima, que es lo único que
                          hacía falta para saber cuál estás señalando. */
-                      className="relative text-left rounded-2xl hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
+                      /* `min-w-0` NO ES UN AJUSTE FINO: sin él la tarjeta se
+                         sale de la pantalla en un móvil (encontrado por prog3 y
+                         medido aquí contra producción a 360 px: la tarjeta medía
+                         **550** y su borde derecho caía en 570, o sea 210 px
+                         fuera).
+
+                         Una celda de rejilla nace con `min-width: auto`, que
+                         significa «no te encojas por debajo de tu contenido». Lo
+                         más ancho de dentro —el nombre de quien publica, que no
+                         parte— empujaba la celda, y la rejilla obedecía.
+
+                         Y lo peor es cómo se ve: `scrollWidth` sigue valiendo
+                         360, así que **no hay barra de desplazamiento**. No
+                         parece «la página se mueve», parece «la aplicación está
+                         mal cortada», que es lo que nadie sabe cómo reportar.
+                         En escritorio no se nota: ahí sobra sitio. */
+                      className="relative min-w-0 text-left rounded-2xl hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
                       >
                       {/* ARRIBA VA QUIÉN LO PUBLICA (2026-08-24). Eugenio: «haz
                           que el nombre de usuario y su foto de perfil estén arriba
@@ -1006,7 +1022,17 @@ export default function Explorar() {
                       </div>
                       )}
                       {/* EL PIE YA NO REPITE AL AUTOR: está arriba, con su foto. */}
-                      <div className="px-3.5 py-2 flex items-center gap-3 text-[11px] text-slate-500">
+                      {/* SE PARTE EN DOS LÍNEAS CUANDO NO CABE (2026-08-24). Con la
+                          tarjeta ya dentro de la pantalla en un móvil aparece lo
+                          siguiente: en 320 px no caben en un renglón «PARTE DE ·
+                          nombre del lienzo · 11 piezas» y «3 visualizaciones», y
+                          sin `flex-wrap` no se apartan — **se pintan encima**.
+                          Medido: el segundo hijo acababa en 326 dentro de una
+                          caja de 320.
+                          `items-start` porque la etiqueta ocupa dos líneas y las
+                          visualizaciones una: centradas, la de una línea flotaba
+                          a media altura de la otra. */}
+                      <div className="px-3.5 py-2 flex flex-wrap items-start gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
                       {/* ── DÓNDE ESTÁ METIDA ESTO, Y CUÁNDO SE PUEDE PULSAR ───
                           Eugenio: «hay una información abajo que es dónde está
                           integrada esa publicación, puede estar integrada dentro
@@ -1100,7 +1126,7 @@ export default function Explorar() {
                           dos señales para el mismo dato ocupan el sitio de la
                           siguiente. */}
                       {it.vistas > 0 && (
-                      <span className="shrink-0 font-bold text-slate-600">
+                      <span className="shrink-0 self-center font-bold text-slate-600">
                       {contarVistas(it.vistas)}
                       </span>
                       )}
