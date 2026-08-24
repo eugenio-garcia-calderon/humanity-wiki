@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock, Gavel } from 'lucide-react';
+import { Globe, BadgeCheck, Wrench, ShieldAlert, Server, Scale, type LucideIcon , Hand, UserX, Coins, Lock, Gavel, SlidersHorizontal } from 'lucide-react';
 
 // =====================================================================// LAS PÁGINAS DE LA «i» (2026-08-22)
 // =====================================================================// The pages that EXPLAIN the platform, as opposed to being the platform. One
@@ -110,6 +110,10 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // legal) + la política de privacidad (la misma página de siempre, embebida).
   // Una sola entrada en el menú; `/privacidad` sigue montada pero oculta del
   // menú, porque las tiendas la citan por esa dirección.
+  // Solo para administradores: las cifras del dinero (2026-08-24). Fuera del
+  // menú de todos — la pantalla comprueba el nivel y lo dice si no lo tienes.
+  { ruta: 'administracion', titulo: 'Administración', icono: SlidersHorizontal, enMenu: false,
+    componente: lazy(() => import('./pages/Administracion')) },
   { ruta: 'avisos-legales', titulo: 'Avisos legales', icono: Gavel,
     componente: lazy(() => import('./pages/about/AvisosLegales')) },
   { ruta: 'privacidad', titulo: 'Privacidad', icono: Lock, enMenu: false,
