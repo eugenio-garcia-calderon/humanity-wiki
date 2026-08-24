@@ -122,8 +122,8 @@ Respuestas suyas: avisos por **WhatsApp** en vez de correo · la **devolución l
 | Fase | Qué | Estado |
 |---|---|---|
 | **F6** | **WhatsApp**: enlaces `wa.me` que funcionan hoy + envío automático por la Cloud API de Meta, apagado hasta que haya cuenta, número y plantillas aprobadas; teléfono en el pedido; libro de lo enviado | hecha 24-08 (0112) |
-| **F7** | **Devolución pedida por el comprador** (con motivo; el vendedor acepta o rechaza) · estado **«preparando»** y **fecha estimada de entrega** | siguiente |
-| **F8** | **Zonas de envío** (península, Baleares/Canarias, Europa, resto) con precio por zona · **recogida en persona** | pendiente |
+| **F7** | **Devolución pedida por el comprador** (con motivo; el vendedor acepta o rechaza) · estado **«preparando»** y **fecha estimada de entrega** | hecha 24-08 (0113) |
+| **F8** | **Zonas de envío** (península, Baleares/Canarias, Europa, resto) con precio por zona · **recogida en persona** | hecha 24-08 (0114) |
 | **F9** | **Analítica de tienda**: vistas → añadidos a la cesta → comprados, por producto | pendiente |
 | **F10** | **Buscador, orden y paginación** en el mercado | pendiente |
 | **F11** | **Cesta de varias tiendas**: partir el pedido y el cobro por vendedor | pendiente |

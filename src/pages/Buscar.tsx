@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Loader2, Sparkles, Search, ChevronDown, Info } from 'lucide-react';
-import CajaBusqueda from '../components/buscador/CajaBusqueda';
 
 // ============================================================================
 // LA PÁGINA DE RESULTADOS (2026-08-24)
@@ -75,8 +74,13 @@ export default function Buscar() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5">
-      <div className="mb-5"><CajaBusqueda /></div>
-
+      {/* AQUÍ YA NO VA OTRA CAJA DE BUSCAR (2026-08-24). La llevaba, y estaba
+          bien mientras la barra de arriba no buscaba de verdad. Desde que
+          `BuscadorSuperior` es esta misma caja, la página salía con DOS: una
+          con lo que habías escrito y otra vacía, tres centímetros más abajo.
+          Dos campos para lo mismo en la misma pantalla no dan a elegir, hacen
+          dudar de cuál es el bueno. Se queda el de arriba, que además está en
+          todas las demás pantallas. */}
       {!q ? (
         <p className="text-sm text-slate-500 py-8 text-center">Escribe algo arriba para buscar.</p>
       ) : (

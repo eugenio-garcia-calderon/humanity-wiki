@@ -6385,3 +6385,62 @@ eso salían tus archivos en vez de internet.
   igual que hacía el menú ☰ que se retiró.
 - Comprobado en el navegador: se abre la ventana con su barra de direcciones,
   se escribe una dirección y la ventana va a esa página.
+### 2026-08-24 — Comercio F7: la devolución la pide el comprador · «preparando» · fecha estimada (Programador 7)
+- Eugenio (24-08): «sí, que la pida el comprador». Antes solo el vendedor podía marcar devuelto; quien había comprado tenía que escribirle y confiar.
+- 0113: tabla `devoluciones` (motivo, estado pedida/aceptada/rechazada, respuesta, quién y cuándo) — tabla y no columnas porque una rechazada y otra pedida después son dos hechos y el libro es de solo añadir; índice único «una viva por pedido». `pedidos.entrega_estimada`. **Y se amplía `pedidos_estado_check`** para admitir `preparando`.
+- **Fallo cazado en la prueba**: la primera versión de la migración decía que el estado no tenía restricción en la base. Sí la tenía: marcar «preparando» fallaba con un error de Postgres. Corregido en la propia migración antes de desplegar.
+- Rutas: `POST /api/publicar/pedido/:codigo/devolucion` (la pide quien compró, con correo o sesión, motivo obligatorio, plazo `DIAS_PARA_DEVOLVER`=30) y `PUT /api/publicar/mis-ventas/:id/devolucion` (el vendedor acepta o rechaza; rechazar exige motivo). **Los puntos vuelven solo al aceptar**, nunca al pedirla. Avisos `devolucion_pedida` (vendedor) y `devolucion_resuelta` (comprador, también por WhatsApp).
+- `preparando` entre pagado y enviado (paso propio en el pedido y botón en Comercio) y **fecha estimada de entrega** que pone el vendedor y ve el comprador (nula = no se enseña ninguna: inventar una fecha es prometer en nombre de otro).
+- Probado en local por HTTP: sin motivo → 400; pedida → aviso al vendedor; repetir → 409; rechazar sin motivo → 400; rechazada → saldo intacto y aviso con el porqué; volver a pedirla y aceptar → 2 puntos devueltos, pedido `devuelto`, saldos cuadrados (100/100/0) e historial «rechazada → aceptada»; preparando + fecha → el comprador los ve; quitar la fecha funciona. Todo retirado.
+### 2026-08-22 — Veracidad, fase 6: el espectro de visiones
+
+Lo que Eugenio pidió por su nombre el primer día: *«poder generar un espectro de
+visiones sobre una verdad»*. Está en la pantalla del debate, debajo de la tesis.
+
+- **No dice quién gana. Dice cómo está repartida la gente**, en cinco bandas de
+  «muy en contra» a «muy a favor», y **la mejor razón de cada banda** — que es
+  lo que habría que rebatir para moverla de sitio. Eso es lo que convierte esto
+  en un mapa del desacuerdo y no en una encuesta.
+- **La postura no se pregunta: sale de lo que cada uno vota.** Lo que alguien
+  dice que piensa y lo que de verdad le mueve no siempre coinciden, y **dos
+  personas pueden estar a favor por razones opuestas** — eso solo se ve mirando
+  qué argumento sostiene cada una.
+- **El signo se hereda por el árbol.** Un «a favor» colgado de un argumento «en
+  contra» refuerza el lado contrario a la tesis, y quien lo vota queda en contra.
+  Un grafo plano no sabría decir eso; el árbol sí, y es la razón de que el
+  modelo sea un árbol.
+- **Quien solo vota matices no es un centrista**: sale aparte, como «sin postura
+  clara». Meterlo en la banda del medio inventaría una postura que nadie tiene.
+- **Con menos de tres personas lo dice**: «esto no es un reparto de posturas, son
+  dos opiniones». El dibujo con dos votos tiene forma, y la forma engaña.
+- **No estrena tabla**: la postura se calcula al leer, a partir de los votos que
+  ya están en `ratings`. Guardarla habría sido congelar algo que cambia cada vez
+  que alguien mueve un voto.
+- **Verificado**: 11 comprobaciones nuevas en verde — las tres bandas extremas,
+  el matiz que no cuenta, la herencia del signo por el árbol, la mejor razón de
+  cada banda, y que se lee sin sesión. **Y un fallo encontrado midiendo, no
+  mirando**: las barras salían con altura 0 (un `height` en % sobre una columna
+  de alto automático) y en la captura parecían un detalle de diseño. El alto
+  real las delató. Arreglado y vuelto a medir: 45 px, 32 px, 32 px.
+- **Tablero**: 14 de 30 tarjetas en verde.
+
+**Lo que queda**: coherencia con lo ya publicado (fase 8), el debate sobre el
+lienzo (7), revisión y moderación (9), y sacarlo a la portada y al buscador (10).
+### 2026-08-24 — Un buscador de verdad, y los menús que se abren sin pulsar (Programador 2)
+- **Buscador** (`src/server/buscador.ts`, desplegado en #360): `GET /api/buscar/sugerencias` (dos clases: lo que existe y frases para completar, compuestas con títulos reales porque no hay historial), `GET /api/buscar` (puntuación: +3 por palabra en el título, +1 en el cuerpo, +4 si el título lleva la frase entera; devuelve el trozo con la palabra dentro) y `POST /api/buscar/resumen`. Sólo lo público: busca cualquiera sin cuenta, decisión de Eugenio.
+- El resumen llega **en dos partes rotuladas y con distinto color**: «SEGÚN LO QUE HAY AQUÍ» y «LO AÑADE LA IA · NO ESTÁ COMPROBADO AQUÍ». Si no se pueden separar, todo va a la gris; nunca al revés. Selector de tres modelos (Sencillo / Medio / El mejor). Los resultados se piden y se pintan antes que el resumen, así que un fallo de la IA no tumba la página.
+- **Fallo encontrado en producción y arreglado en #361**: con el modelo barato, 2 de cada 5 respuestas venían con el JSON **cortado a mitad** (500 tokens no daban). `JSON.parse` fallaba, el código lo daba por prosa y (a) pintaba las llaves y las comillas en pantalla y (b) mandaba a «no comprobado» un párrafo que venía rotulado como comprobado. Ahora los dos campos se leen por su rótulo aceptando la última cadena sin cerrar, `maxTokens` sube a 800, y si aún parece JSON no se enseña resumen. Verificado 5/5 en producción con los dos bloques llenos.
+- **Una sola caja de buscar.** Ya existía `BuscadorSuperior` (barra de arriba, sin sugerencias, llevaba a `/explorar?q=`). No se ha dejado en dos: el cuerpo es `CajaBusqueda` —la misma que usa la página de resultados— con la piel de pastilla y el interruptor de IA dentro. Y se ha quitado la segunda caja que la página de resultados llevaba encima, que salía vacía tres centímetros debajo de la que sí tenía lo escrito.
+- **«Conocimiento» en verde** en la barra superior: `emerald-600`, el mismo de la portada; `emerald-400` cuando el botón está en negro, que si no no se lee.
+- **Calendario arriba a la derecha** (`BotonCalendario.tsx`) con vista previa del día al acercar el ratón: no pide nada hasta que alguien se acerca (está en todas las pantallas), distingue «todavía no lo sé» de «hoy no hay nada», y el punto verde sólo aparece cuando consta que hay algo. Sólo con sesión: `/api/calendario` contesta 401 sin ella.
+- **Abrir los menús sin pulsar** (`src/hooks/useAbrirAlAcercarse.ts`): borde izquierdo → «Explorar», borde derecho → «Organizar», y pasar el ratón por cualquiera de los tres círculos abre el suyo. Un solo sitio decide el retardo (150 ms para abrir, 400 para cerrar), la franja (8 px, estrecha para no dispararse al ir a por la barra de desplazamiento) y que nada de esto exista sin puntero fino.
+- **Lo que se abre rozando se cierra solo; lo que se abre pulsando se queda**, y tocar algo dentro del menú lo asciende a «lo quiero». Segundo intento: el cierre por `onMouseLeave` **no valía** —probado en el navegador: del círculo de abajo al menú del borde el ratón nunca entra en el menú, así que el evento no llega nunca y el menú se quedaba abierto para siempre—. Ahora se mira dónde está el ratón y se pregunta por pertenencia (`contains`), no por rectángulos: los círculos viven en una tira que ocupa todo el ancho.
+- Verificado en el navegador: sugerencias sobre «agua», Intro y lupa a `/buscar?q=`, los dos bloques del resumen, hover en los dos círculos y en los dos bordes (abre y cierra), y la vista previa del calendario con dos eventos de hoy. Para esto último se creó un usuario `PRUEBA_PROG2_CAL` con dos eventos en la base local; borrado después y comprobado a 0.
+
+### 2026-08-24 — Comercio F8: zonas de envío y recogida en persona (Programador 7)
+- Eugenio (24-08), a «¿se vende fuera de España?»: zonas con precios distintos **y** recogida en persona. Antes había una sola tarifa por producto, igual para el pueblo de al lado que para Alemania.
+- 0114: `producto_envio_zonas (producto_id, zona, centimos, gratis_desde_centimos)` con cuatro zonas — `peninsula`, `no_peninsular` (Baleares, Canarias, Ceuta y Melilla: para un transportista son el mismo problema), `europa`, `resto` —; `products.recogida_en_persona` y `recogida_donde`; `pedidos.entrega_tipo` (envio/recogida/digital). **Herencia sin sorpresas**: quien tenía `envio_centimos` lo conserva como tarifa de PENÍNSULA y las demás zonas quedan cerradas — nadie amanece vendiendo a Alemania sin saberlo.
+- `src/server/zonasEnvio.ts`: la zona se **deduce** del país y el CP del destino (07/35/38/51/52 = no peninsular; lista de la UE en un solo sitio), nunca se elige a mano — elegirla sería invitar a pagar el porte barato y pedir el envío caro. `calcularEnvio` mantiene las reglas de siempre (el porte más caro, no la suma; gratis si alguna línea tiene umbral y el subtotal lo pasa) y añade una: **si algo no llega a esa zona, no se cobra y se dice cuál**.
+- `cotizar` acepta país y CP y devuelve zona, si se envía, qué no llega y si cabe recogida; la cesta recotiza mientras se escribe el destino. `comprar` calcula el porte con la zona real y admite `entrega: 'recogida'` (sin porte y sin pedir dirección). La ficha enseña la tabla de zonas y «a otras zonas no envía», más el sitio de recogida.
+- El vendedor las gestiona en Comercio → «envíos» (`EditorEnvio`): una fila por zona, **zona en blanco = no envía ahí**, dicho con esas palabras porque «vacío» suele leerse como «gratis».
+- Probado en local por HTTP: tarifas 3,50 / 9 / 15 y resto cerrado → cotizar Madrid 350, Tenerife 900, París 1500, Nueva York `se_envia=false` con el nombre de lo que no llega; 5 unidades (50 €) → envío 0 por umbral; comprar a Canarias → pedido con porte 900 y `entrega_tipo=envio`; comprar a EE. UU. → 409 sin tocar dinero; recogida → porte 0, `entrega_tipo=recogida` y sin dirección. Todo retirado.
