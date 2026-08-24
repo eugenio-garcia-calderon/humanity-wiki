@@ -736,12 +736,21 @@ export default function Layout() {
             <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', infoAbierta && 'rotate-180')} />
           </button>
           {infoAbierta && (
-            /* ON A PHONE THE BUTTON IS NOT AT THE RIGHT EDGE, so `right-0`
-               (right-aligned to the button) pushed the panel 33px off the
-               left of a 375px screen — measured in production the day this
-               shipped. Below `sm` the panel pins to the viewport instead of
-               the button; from `sm` up the original alignment returns. */
-            <div className="fixed inset-x-2 top-14 sm:absolute sm:inset-x-auto sm:top-11 sm:right-0 sm:w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+            /* SE ABRE HACIA LA DERECHA, PORQUE EL BOTÓN ESTÁ A LA IZQUIERDA
+               (2026-08-24). Eugenio: «arregla este desplegable, no se ve bien
+               el contenido».
+
+               Colgaba de `right-0`, o sea con su borde derecho pegado al del
+               botón: de ahí para la izquierda hay 224 px de panel y sólo 16 px
+               de pantalla, así que la mitad de cada título quedaba cortada
+               fuera del navegador. Esa alineación era correcta cuando el
+               nombre vivía en la derecha de la barra; al mudarse a la
+               izquierda dejó de serlo, y nada la avisó porque el panel seguía
+               abriéndose.
+
+               Abajo de `sm` sigue anclado a la pantalla y no al botón: a 375 px
+               ni a un lado ni al otro cabe un panel de 224 px sin salirse. */
+            <div className="fixed inset-x-2 top-14 sm:absolute sm:inset-x-auto sm:top-11 sm:left-0 sm:w-56 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <p className="px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">Información</p>
               {/* LAS ENTRADAS SALEN DE LA LISTA (2026-08-22): la misma
                   `src/paginasInfo.ts` que monta las rutas en App.tsx. Cinco
@@ -1343,7 +1352,10 @@ export default function Layout() {
         <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
       </div>
 
-      {circulo === 'crear' && <HojaCrear onCerrar={() => setCirculo(null)} />}
+      {/* La hoja recibe `gestoDelMenu` como cualquier otro menú abierto por
+          roce: sin él, llevar el ratón desde el botón hasta las herramientas
+          contaba como alejarse y la hoja se cerraba justo al ir a usarla. */}
+      {circulo === 'crear' && <HojaCrear onCerrar={() => setCirculo(null)} gesto={gestoDelMenu} />}
 
       {/* Y en móvil, «Explorar» también ocupa media pantalla — pero encima del
           contenido, no al lado: a 375 px una columna del 50 % dejaría al
