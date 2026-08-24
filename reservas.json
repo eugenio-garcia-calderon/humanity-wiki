@@ -71,6 +71,18 @@
       "ruta": "src/pages/Bienvenida.tsx",
       "motivo": "Veracidad: el debate en la portada",
       "desde": "2026-08-24T00:14:48.210Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog7: F8 changelog (1 min)",
+      "desde": "2026-08-24T00:18:48.380Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/13_PLAN_COMERCIO.md",
+      "motivo": "prog7: F8 changelog (1 min)",
+      "desde": "2026-08-24T00:18:48.380Z"
     }
   ]
 }
