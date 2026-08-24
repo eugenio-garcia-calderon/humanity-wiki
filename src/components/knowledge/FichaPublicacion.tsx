@@ -40,6 +40,9 @@ export interface Publicacion {
   autor_avatar?: string | null;
   donde: string | null;
   donde_slug: string | null;
+  /** Cuántas piezas tiene el lienzo donde vive. `null` cuando no vive en
+   *  ninguno — que no es lo mismo que 0, y la etiqueta lo pinta distinto. */
+  donde_piezas?: number | null;
   personal: boolean;
   ruta: string | null;
   publico: boolean;
