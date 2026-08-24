@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "prog2: el muro trae la republicacion y su original",
-      "desde": "2026-08-24T18:33:31.814Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/knowledge/Republicacion.tsx",
       "motivo": "prog2: pintar y crear republicaciones",
       "desde": "2026-08-24T18:35:30.958Z"
