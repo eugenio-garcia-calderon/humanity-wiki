@@ -1,28 +1,10 @@
 {
   "reservas": [
     {
-      "agente": "prog3",
-      "ruta": "src/pages/Explorar.tsx",
-      "motivo": "muro limpio: solo publicaciones, con portada y video al pasar el raton",
-      "desde": "2026-08-23T23:30:41.345Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/server/knowledge.ts",
-      "motivo": "muro limpio: solo publicaciones, con portada y video al pasar el raton",
-      "desde": "2026-08-23T23:30:41.345Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/portada/portadaBloques.ts",
-      "motivo": "quitar circulos, buscador y tematicas de la portada",
-      "desde": "2026-08-23T23:31:33.381Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "scripts/probar-portada.ts",
-      "motivo": "los tres bloques retirados",
-      "desde": "2026-08-23T23:32:55.817Z"
+      "agente": "prog2",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "prog2: railes siempre visibles, plegar, y submenu con flechita en vez de hover",
+      "desde": "2026-08-24T11:06:28.237Z"
     }
   ]
 }
