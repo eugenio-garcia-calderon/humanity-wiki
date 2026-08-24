@@ -6693,3 +6693,59 @@ editor de texto donde hay un taller.
   en el único momento en que se ven.
 - Todo sigue apagándose con «reducir movimiento» del sistema, que ya cubría
   cualquier animación dentro de `.pv-lienzo`.
+### 2026-08-24 — Buscador, fase 1: las áreas, y buscar sin tildes (prog8)
+
+Eugenio, sobre el desplegable del chat: «si pongo las tres letras *eco*, todavía
+no aparece debajo *ecosistema*, que es un tema relevante dentro de la
+plataforma, ya que si pulsas en ecosistemas te aparecen todas las publicaciones
+que llevan a ello […] todavía hay que darle mucha más profundidad».
+
+**Lo que fallaba no era el orden: era que las áreas no existían para el
+buscador.** Las catorce áreas (`src/utils/objetivos.ts`) no son una tabla — son
+la tira de pastillas de Explorar, y llevan a *todo lo publicado* sobre un tema.
+El buscador solo conocía tablas, así que de «eco» sacaba la ficha del objetivo
+ECOSISTEMAS (otra página, que enseña indicadores) y la enterraba bajo *Meco* y
+*El Berrueco*, que llevan «eco» dentro.
+
+- **Las áreas son ahora un resultado más, y van primero.** Con su icono y su
+  color —los mismos del mapa y de Explorar, para que se reconozcan como la
+  misma cosa— y con «· todo lo publicado» al lado, que es lo que las distingue
+  de una ficha. Llevan a `/explorar?objetivo=O006`.
+- **Se resuelven en el navegador, sin ir al servidor**: son catorce y ya están
+  cargadas, así que aparecen con la segunda letra y sin esperar a la red.
+- **Y se encuentran por sus palabras, no solo por su nombre**: «bosque» y
+  «biodiversidad» llevan a ECOSISTEMAS. Eso es predecir lo que se busca en vez
+  de comparar letras. El listón sube según lo poco escrito: por nombre bastan
+  dos letras, por palabra suelta hacen falta tres — «co» encaja con «coche»,
+  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
+  siempre son ruido, no predicción.
+- **El área y la ficha del objetivo ya no salen las dos.** Eran dos filas con
+  el mismo nombre, una encima de otra, y la diferencia no cabía en la fila. Se
+  queda la que contesta lo que se preguntaba; la ficha sigue en Objetivos.
+- **Buscar sin tildes** (`GET /api/search`): «energia» no encontraba «ENERGÍA»
+  y «ecologia» no encontraba nada. Ahora los dos lados se comparan llanos, con
+  `translate()` —SQL de siempre— y no con la extensión `unaccent`, que no está
+  instalada y cuya instalación es decisión de quien lleva escalabilidad.
+- **Y «empieza una palabra por esto» pasa a ir por delante de «lo lleva
+  dentro»**, así que buscando «eco» ECOSISTEMAS va antes que El Berru*eco*.
+
+Comprobado en 3008: «eco» → ECONOMÍA y ECOSISTEMAS como áreas, y detrás reto,
+organización, territorios, publicaciones y grafo — nueve filas que enseñan la
+variedad de lo que hay; pulsar ECOSISTEMAS abre `/explorar?objetivo=O006` con
+sus publicaciones. «bosque» y «biodiversidad» → ECOSISTEMAS. «energia» →
+ENERGÍA. «vivienda» → VIVIENDA + soluciones + grafo. `tsc` limpio.
+
+**Esto es la fase 1 de lo que pidió**, y solo cubre el chat. Quedan: el
+historial de búsquedas (que lo buscado antes vuelva arriba), y los tres
+historiales del perfil —búsquedas, publicaciones vistas, publicaciones creadas
+o modificadas—.
+
+### 2026-08-24 — Cobro agregado: un pago, varias tiendas, y las liquidaciones (Programador 7)
+- Eugenio (24-08): «lo demás queda validado y se puede subir, genera la lógica de cobro con estas variables». Es la segunda mitad de su idea del gestor de cobro: la plataforma cobra el carrito entero y luego le entrega a cada tienda lo suyo.
+- **0118 `liquidaciones`**: una fila por pedido y tienda con bruto, envío, comisión (y **los bps del día de la venta**, guardados: si mañana sube la comisión, lo vendido ayer se liquida con la de ayer), neto, estado y **cuándo vence**. Índice único (pedido, tienda): un aviso repetido de Stripe no puede crear dos deudas. `pedidos.cobro_tipo` recuerda si cobró la tienda («directo») o la plataforma («agregado»).
+- **`src/server/liquidaciones.ts`** con las tres reglas escritas: es dinero ajeno (la deuda se apunta al cobrar, no «luego»); «pagada» solo cuando el proveedor confirma la transferencia y guarda su identificador (`idempotencyKey` por liquidación: la misma nunca paga dos veces); y **nada se borra** — una devolución retiene o cancela, con motivo.
+- **`comprar` con varias tiendas** solo pasa si: el interruptor `COBRO_AGREGADO` está encendido, **todas** las tiendas han firmado el contrato de cobro (y si no, se dice **quién** falta por su nombre) y se paga en euros (los puntos siguen yendo tienda por tienda). Con cobro agregado el dinero **no** va a la cuenta de la tienda: `reparte` pasa a false y entra entero en la plataforma.
+- **Webhook**: si `cobro_agregado`, parte el carrito por tienda y crea un pedido y una liquidación por cada una, repartiendo el envío en proporción; la clave de idempotencia pasa a ser `sesión#tienda`, así un aviso repetido sigue sin duplicar y caben las demás tiendas.
+- Rutas: `GET /api/publicar/mis-liquidaciones` (lo que me deben, retenido y cobrado), `GET/POST /api/admin/liquidaciones[/pagar]`, y barrido horario que marca vencidas y —solo encendido— transfiere.
+- **Nace apagado** (`COBRO_AGREGADO=off`): calcula, marca vencimientos y canta, pero no mueve dinero.
+- Probado en local por HTTP: sin contrato → 400 diciendo quién falta (y con la concordancia arreglada: «no cobra» / «no cobran»); con las dos firmas → la sesión de pago se crea de verdad (claves de prueba); puntos + dos tiendas → 400 con motivo; liquidación vencida → pasa a «lista» y el barrido dice `sin_cuenta_de_cobro` porque la tienda no tiene Stripe conectado; devolución pedida → **retenida** con motivo; rechazada → vuelve a **pendiente**; aceptada → **cancelada** y el pedido devuelto; la tienda ve por cobrar / retenido / cobrado. Todo retirado.

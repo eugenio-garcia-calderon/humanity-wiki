@@ -29,6 +29,7 @@ import { avisar } from './avisos';
 import { avisarPorWhatsApp, enlaceWa, estadoWhatsApp } from './whatsapp.js';
 import { ZONAS, zonaDe, tarifasDe, calcularEnvio, type Zona } from './zonasEnvio.js';
 import { AJUSTES, ajuste, guardarAjuste, numeroSincrono, olvidarAjustes } from './ajustes.js';
+import { anotarLiquidacion, retenerLiquidacion, cancelarLiquidacion, pagarLiquidaciones, cobroAgregadoActivo } from './liquidaciones.js';
 import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -453,6 +454,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
         if (/devoluciones_una_viva_idx|duplicate key/i.test(t)) return res.status(409).json({ error: 'Ya has pedido la devolución de este pedido y el vendedor todavía no ha contestado.' });
         throw e;
       }
+      // Si el dinero lo cobró la plataforma, lo que se le debe a la tienda
+      // queda RETENIDO mientras se decide: pagarle y luego pedírselo de vuelta
+      // es la forma segura de no recuperarlo nunca.
+      await retenerLiquidacion(db, p.id, `Devolución pedida: ${motivo.slice(0, 120)}`);
       await avisar(db, {
         paraQuien: p.vendedor_user_id, dePartede: quien, tipo: 'devolucion_pedida', entidadTipo: 'pedidos', entidadId: p.id,
         datos: { texto: `Piden devolver el pedido ${p.codigo} (${p.producto_nombre}): «${motivo.slice(0, 120)}»`, codigo: p.codigo, destino: '/comercio?pestana=pedidos' },
@@ -486,11 +491,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
           puntosDevueltos = dev.puntos || 0;
         }
         await db.execute(sql`UPDATE pedidos SET estado = 'devuelto', updated_at = now() WHERE id = ${p.id}`);
+        // Aceptada: la tienda ya no cobra ese pedido.
+        await cancelarLiquidacion(db, p.id, 'Devolución aceptada por la tienda.');
       }
       await db.execute(sql`
         UPDATE devoluciones SET estado = ${acepta ? 'aceptada' : 'rechazada'}, respuesta = ${respuesta}, resuelta_por = ${req.user.id}, resuelta_en = now()
         WHERE id = ${d.id}
       `);
+      if (!acepta) {
+        // Rechazada: se levanta la retención y la tienda vuelve a la cola de cobro.
+        await db.execute(sql`
+          UPDATE liquidaciones SET estado = 'pendiente', motivo_retencion = NULL, updated_at = now()
+          WHERE pedido_id = ${p.id} AND estado = 'retenida'
+        `);
+      }
       const texto = acepta
         ? `Tu devolución del pedido ${p.codigo} (${p.producto_nombre}) ha sido aceptada${puntosDevueltos > 0 ? `: te vuelven ${puntosDevueltos} puntos` : ''}.${respuesta ? ` «${respuesta.slice(0, 120)}»` : ''}`
         : `Tu devolución del pedido ${p.codigo} (${p.producto_nombre}) ha sido rechazada: «${(respuesta || '').slice(0, 160)}»`;
@@ -689,6 +703,64 @@ export function registerPublicarRoutes(app: Express, db: any) {
   // ==========================================================================
   // EL PANEL ECONÓMICO (2026-08-24) — «que se cambie en todos los lugares»
   // ==========================================================================
+  /** GET /api/publicar/mis-liquidaciones — lo que la plataforma me debe y cuándo me lo paga. */
+  app.get('/api/publicar/mis-liquidaciones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const r = await db.execute(sql`
+        SELECT l.id, l.pedido_id, p.codigo, p.producto_nombre, l.bruto_centimos, l.envio_centimos,
+               l.comision_centimos, l.comision_bps, l.neto_centimos, l.moneda, l.estado, l.vence_el,
+               l.pagada_en, l.transferencia_ref, l.motivo_retencion
+        FROM liquidaciones l JOIN pedidos p ON p.id = l.pedido_id
+        WHERE l.vendedor_user_id = ${req.user.id}
+        ORDER BY l.created_at DESC LIMIT 100
+      `);
+      const filas = r.rows as any[];
+      const suma = (e: string[]) => filas.filter(f => e.includes(f.estado)).reduce((n, f) => n + Number(f.neto_centimos), 0);
+      res.json({
+        liquidaciones: filas,
+        por_cobrar_centimos: suma(['pendiente', 'lista']),
+        retenido_centimos: suma(['retenida']),
+        cobrado_centimos: suma(['pagada']),
+        nota: 'Esto es solo lo que ha cobrado la plataforma por ti (carritos con varias tiendas). Lo que cobras tú en tu cuenta no aparece aquí.',
+      });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET/POST /api/admin/liquidaciones — ver la cola y pasar el barrido (administrador). */
+  app.get('/api/admin/liquidaciones', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      const porEstado = await db.execute(sql`
+        SELECT estado, count(*)::int AS n, coalesce(sum(neto_centimos), 0)::int AS neto FROM liquidaciones GROUP BY estado
+      `);
+      const proximas = await db.execute(sql`
+        SELECT l.id, l.vendedor_user_id, coalesce(u.display_name, u.name) AS tienda, l.neto_centimos, l.estado, l.vence_el
+        FROM liquidaciones l LEFT JOIN users u ON u.id = l.vendedor_user_id
+        WHERE l.estado IN ('pendiente', 'lista', 'retenida') ORDER BY l.vence_el LIMIT 30
+      `);
+      res.json({
+        cobro_agregado_activo: cobroAgregadoActivo(),
+        por_estado: porEstado.rows, proximas: proximas.rows,
+        nota: cobroAgregadoActivo()
+          ? 'El cobro agregado está encendido: las liquidaciones vencidas se transfieren solas.'
+          : 'El cobro agregado está APAGADO (COBRO_AGREGADO=off): se calcula todo pero no se mueve dinero.',
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+  app.post('/api/admin/liquidaciones/pagar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      res.json(await pagarLiquidaciones(db, () => getStripe()));
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  // El barrido de liquidaciones, cada hora: marca vencidas y —solo con el
+  // interruptor encendido— transfiere. Apagado, calcula y canta.
+  const ticLiquidaciones = () => pagarLiquidaciones(db, () => getStripe()).catch(e => console.error('[liquidaciones] barrido fallido:', e.message));
+  setTimeout(ticLiquidaciones, 4 * 60 * 1000);
+  setInterval(ticLiquidaciones, 60 * 60 * 1000);
+
   /** GET /api/admin/economia — todas las cifras, su valor vigente y de dónde sale. */
   app.get('/api/admin/economia', async (req: Request, res: Response) => {
     try {
@@ -1657,12 +1729,34 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // Eugenio y su asesor, como la factura). Lo que cambia es que ahora la
       // cesta SÍ admite varias tiendas: llama aquí una vez por tienda. Y si
       // alguien llama con dos, se le dice cuántas hay y cuáles.
+      // VARIAS TIENDAS EN UN SOLO PAGO (2026-08-24, «gestor de cobro»). Se
+      // permite solo si: el interruptor está encendido, TODAS las tiendas han
+      // firmado el contrato de servicio de cobro, y se paga en euros (con
+      // puntos ya funcionaba tienda por tienda). Si falta cualquiera de las
+      // tres, se dice cuál — nunca se cobra «a ver si cuela».
       const vendedores = new Set(lineas.map(l => l.p.created_by || ''));
+      let cobroAgregado = false;
       if (vendedores.size > 1) {
-        return res.status(400).json({
-          error: `Llevas cosas de ${vendedores.size} tiendas. Cada tienda cobra por separado: se paga una y luego la siguiente.`,
-          varias_tiendas: true, tiendas: vendedores.size,
-        });
+        if (!cobroAgregadoActivo()) {
+          return res.status(400).json({
+            error: `Llevas cosas de ${vendedores.size} tiendas. Cada tienda cobra por separado: se paga una y luego la siguiente.`,
+            varias_tiendas: true, tiendas: vendedores.size,
+          });
+        }
+        const sinFirmar: string[] = [];
+        for (const vid of vendedores) if (!(await aceptoElCobro(vid))) sinFirmar.push(vid);
+        if (sinFirmar.length) {
+          const nombres = (await db.execute(sql`
+            SELECT coalesce(display_name, name, email) AS nombre FROM users WHERE id = ANY(string_to_array(${sinFirmar.join(',')}, ','))
+          `)).rows as any[];
+          return res.status(400).json({
+            error: nombres.length === 1
+              ? `${nombres[0].nombre} todavía no cobra a través de la plataforma. Paga esa tienda por separado.`
+              : `${nombres.map(n => n.nombre).join(', ')} todavía no cobran a través de la plataforma. Págalas por separado.`,
+            varias_tiendas: true, tiendas: vendedores.size, sin_contrato: nombres.map(n => n.nombre),
+          });
+        }
+        cobroAgregado = true;
       }
 
       // Una suscripción no se mezcla con nada: se cobra sola y con su
@@ -1714,7 +1808,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const vendedor = vendedorId
         ? (await db.execute(sql`SELECT stripe_account_id, charges_enabled FROM stripe_accounts WHERE user_id = ${vendedorId}`)).rows[0] as any
         : null;
-      const reparte = !!vendedor?.charges_enabled;
+      // Con cobro agregado, el dinero NO va a la cuenta de la tienda: entra
+      // entero en la de la plataforma y se le devuelve después por
+      // liquidación. Es la diferencia entre «cada uno cobra lo suyo» y
+      // «cobro yo y luego reparto», que es lo que pidió Eugenio.
+      const reparte = !!vendedor?.charges_enabled && !cobroAgregado;
       const comision = Math.round((subtotal * comisionBps()) / 10000);
 
       // ══ CUPÓN DEL VENDEDOR (2026-08-22, fase 7 del plan) ═══════════════
@@ -1758,6 +1856,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
         }
         if (!req.user) return res.status(401).json({ error: 'Entra en tu cuenta para pagar con puntos.' });
         if (suscripcion) return res.status(400).json({ error: 'Una suscripción no se paga con puntos.' });
+        if (cobroAgregado) return res.status(400).json({ error: 'Los puntos se pagan tienda por tienda: quita una de las dos de la cesta o paga con tarjeta.' });
         if (req.user.id === vendedorId) return res.status(400).json({ error: 'No puedes comprarte a ti con puntos.' });
         const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
         if (aceptan <= 0) return res.status(400).json({ error: 'Nada de lo que llevas acepta puntos.' });
@@ -1940,6 +2039,9 @@ export function registerPublicarRoutes(app: Express, db: any) {
           // pedido sin volver a preguntarle al navegador — que para entonces
           // ya no está.
           lineas: JSON.stringify(lineas.map(l => [l.p.id, l.unidades, l.precio, l.v?.id || ''])),
+          // El cobro agregado (2026-08-24): el webhook creará un pedido y una
+          // liquidación por tienda en vez de uno solo.
+          cobro_agregado: cobroAgregado ? '1' : '',
           // Se conservan para los pedidos de una sola cosa, que es lo que ya
           // existía y sigue funcionando igual.
           product_id: lineas.length === 1 ? lineas[0].p.id : '',
