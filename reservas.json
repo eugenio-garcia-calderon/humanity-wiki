@@ -35,6 +35,36 @@
       "ruta": "src/pages/Bienvenida.tsx",
       "motivo": "Veracidad: el debate en la portada",
       "desde": "2026-08-24T00:14:48.210Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "drizzle/0115_analitica_tienda.sql",
+      "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
+      "desde": "2026-08-24T00:24:00.503Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
+      "desde": "2026-08-24T00:24:00.503Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Comercio.tsx",
+      "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
+      "desde": "2026-08-24T00:24:00.503Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/FichaProducto.tsx",
+      "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
+      "desde": "2026-08-24T00:24:00.503Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/components/knowledge/ProductoPublico.tsx",
+      "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
+      "desde": "2026-08-24T00:24:00.503Z"
     }
   ]
 }
