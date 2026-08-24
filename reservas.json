@@ -5,18 +5,6 @@
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "hover: sonido, sin controles encima y mas grande",
       "desde": "2026-08-24T11:13:45.376Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/pages/Explorar.tsx",
-      "motivo": "prog2: autor pinchable, visualizaciones claras y la etiqueta de donde esta integrada",
-      "desde": "2026-08-24T12:09:14.385Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/ventanas/VentanaCentral.tsx",
-      "motivo": "prog2: abrir un grafo o mapa como pop-up central",
-      "desde": "2026-08-24T12:11:13.707Z"
     }
   ]
 }
