@@ -190,7 +190,13 @@ export default function Cesta({ tienda }: { tienda: string }) {
   // La cotización (envío incluido) para saber si los puntos pueden cubrirlo
   // todo (2026-08-23); y la dirección, por si entonces hay que enviar algo.
   const [cotiza, setCotiza] = useState<{ subtotal_centimos: number; envio_centimos: number | null; es_fisico: boolean; acepta_puntos_centimos: number; todo_acepta_puntos: boolean;
-    zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean } | null>(null);
+    zona?: string; zona_nombre?: string; se_envia?: boolean; no_llega?: string | null; envio_estimado?: boolean; recogida_posible?: boolean;
+    varias_tiendas?: boolean;
+    tiendas?: { vendedor_id: string | null; tienda: string | null; nombre: string | null; lineas: { producto_id: string; variante_id: string | null; cantidad: number }[];
+      subtotal_centimos: number; envio_centimos: number | null; se_envia: boolean; no_llega: string | null; todo_acepta_puntos: boolean }[] } | null>(null);
+  // Varias tiendas (F11): cuando se paga con puntos se liquidan todas
+  // seguidas; con tarjeta, una cada vez. Aquí se cuenta por dónde va.
+  const [progresoTiendas, setProgresoTiendas] = useState<string | null>(null);
   // Recogida en persona (F8, 2026-08-24): si todo lo de la cesta la admite, se
   // puede elegir en vez de envío — sin porte y sin pedir dirección.
   const [recogida, setRecogida] = useState(false);
@@ -249,7 +255,59 @@ export default function Cesta({ tienda }: { tienda: string }) {
   const dinero = (c: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(c / 100);
 
+  /** Una tienda: el cobro de siempre, con las líneas que le tocan. */
+  async function pagarTienda(lineasTienda: any[], usarPuntos: number | null) {
+    return fetch('/api/publicar/comprar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lineas: lineasTienda,
+        volver_a: window.location.href,
+        ...(usarPuntos && usarPuntos > 0 ? { usar_puntos: usarPuntos } : {}),
+        ...(cubreTodo && cotiza?.es_fisico && !recogida ? { direccion } : {}),
+        ...(direccion.telefono.trim() ? { telefono: direccion.telefono.trim() } : {}),
+        ...(recogida ? { entrega: 'recogida' } : {}),
+      }),
+    });
+  }
+
+  /**
+   * VARIAS TIENDAS (F11, 2026-08-24). Un cobro sigue siendo de una tienda
+   * —cada vendedor cobra en su cuenta—, así que aquí se paga una detrás de
+   * otra. Si todo va con puntos, se liquidan todas seguidas y quien compra
+   * solo ve «3 pedidos hechos». Si hace falta tarjeta, se paga la primera y
+   * al volver queda la siguiente en la cesta, que lo dice.
+   */
+  async function pagarVariasTiendas() {
+    const tiendas = cotiza?.tiendas || [];
+    setPagando(true); setError(null);
+    const hechos: string[] = [];
+    for (let i = 0; i < tiendas.length; i++) {
+      const t = tiendas[i];
+      setProgresoTiendas(`Pagando ${t.nombre || t.tienda || 'una tienda'} (${i + 1} de ${tiendas.length})…`);
+      // Con puntos solo se puede liquidar la tienda entera; si no, va a Stripe
+      // y allí se para: lo demás se queda en la cesta esperando.
+      const puntosTienda = caja?.activo && t.todo_acepta_puntos && caja.puntos_por_euro
+        ? Math.floor((((t.subtotal_centimos + (t.envio_centimos || 0)) / 100) * caja.puntos_por_euro) * 100) / 100
+        : 0;
+      const r = await pagarTienda(t.lineas.map(l => ({ producto_id: l.producto_id, cantidad: l.cantidad, ...(l.variante_id ? { variante_id: l.variante_id } : {}) })), puntosTienda || null);
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.pagado_con_puntos) {
+        hechos.push(j.codigo);
+        // Lo pagado sale de la cesta; lo que quede sigue esperando.
+        for (const l of t.lineas) quitar(l.producto_id, l.variante_id || undefined);
+        continue;
+      }
+      if (r.ok && j.url) { window.location.href = j.url; return; }  // tarjeta: se para aquí
+      setError(`${t.nombre || 'Una tienda'}: ${j.error || 'no se ha podido pagar.'}${hechos.length ? ` (${hechos.length} ya pagadas: ${hechos.join(', ')})` : ''}`);
+      setPagando(false); setProgresoTiendas(null);
+      return;
+    }
+    setProgresoTiendas(null); setPagando(false);
+    if (hechos.length) window.location.href = `${window.location.pathname}?compra=hecha&pedido=${encodeURIComponent(hechos[0])}`;
+  }
+
   async function pagar() {
+    if (cotiza?.varias_tiendas && (cotiza.tiendas?.length || 0) > 1) return pagarVariasTiendas();
     setPagando(true); setError(null);
     try {
       const r = await fetch('/api/publicar/comprar', {
@@ -356,6 +414,21 @@ export default function Cesta({ tienda }: { tienda: string }) {
                 <span className="text-sm text-slate-500">Subtotal</span>
                 <span className="text-xl font-black text-slate-900">{dinero(subtotal)}</span>
               </div>
+              {cotiza?.varias_tiendas && (cotiza.tiendas?.length || 0) > 1 && (
+                <div className="mt-2 p-2.5 rounded-xl border border-sky-200 bg-sky-50">
+                  <p className="text-xs font-black text-sky-900">Llevas cosas de {cotiza.tiendas!.length} tiendas</p>
+                  <ul className="mt-1 space-y-0.5">
+                    {cotiza.tiendas!.map(t => (
+                      <li key={t.vendedor_id || t.tienda || Math.random()} className="text-[11px] text-slate-600 flex justify-between gap-2">
+                        <span className="truncate">{t.nombre || t.tienda || 'Tienda'}{t.todo_acepta_puntos ? ' · acepta puntos' : ''}</span>
+                        <span className="tabular-nums shrink-0">{dinero(t.subtotal_centimos)}{t.envio_centimos ? ` + ${dinero(t.envio_centimos)} envío` : ''}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-1 text-[11px] text-sky-800">Cada tienda cobra por separado: se pagan una detrás de otra. Lo que ya esté pagado sale de la cesta.</p>
+                </div>
+              )}
+              {progresoTiendas && <p className="mt-2 text-xs font-bold text-slate-700">{progresoTiendas}</p>}
               {cotiza?.recogida_posible && (
                 <label className="mt-2 flex items-start gap-2 cursor-pointer p-2 rounded-lg border border-slate-200">
                   <input type="checkbox" checked={recogida} onChange={e => setRecogida(e.target.checked)} className="mt-0.5" />

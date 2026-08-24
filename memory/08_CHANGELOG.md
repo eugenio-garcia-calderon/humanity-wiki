@@ -6542,3 +6542,11 @@ publique sea información coherente con la otra información que hay»*.
 **Lo que falta de esta fase**: dejar la contradicción registrada como relación
 del grafo (`RM_VER_F8_REGISTRAR`), que es lo que la haría visible desde fuera del
 debate.
+
+
+### 2026-08-24 — Comercio F11: la cesta admite varias tiendas (Programador 7)
+- Hasta hoy la cesta obligaba a elegir: cosas de dos tiendas → «haz un pago por cada tienda» y a apañarse.
+- **La regla del dinero no cambia y es a propósito**: un cobro sigue siendo de UNA tienda, porque cada vendedor cobra en SU cuenta de Stripe. Un pago único repartido entre varias cuentas exigiría que la plataforma pasara a ser la vendedora de todo — decisión de Eugenio y su asesor, como la factura numerada. Queda escrito, no hecho.
+- Lo que sí cambia: `cotizar` devuelve `tiendas[]` (vendedor, nombre, handle, sus líneas, subtotal, envío por zona, si acepta puntos y si llega) y `varias_tiendas`. La cesta agrupa por tienda, lo enseña con sus importes, y al pagar **las liquida una detrás de otra**: si todas se pagan con puntos, quien compra solo ve los pedidos hechos; si hace falta tarjeta, se paga la primera y el resto **se queda en la cesta** esperando. Lo pagado sale de la cesta; lo demás no se pierde.
+- `comprar` con varias tiendas ya no dice una regla abstracta: dice cuántas tiendas llevas y que se paga una y luego la siguiente.
+- Probado en local por HTTP: cotizar con dos tiendas → desglose correcto (200 + 100 de envío / 600 + 150); comprar las dos juntas → 400 con el número de tiendas; pagar tienda por tienda → 2 pedidos, 2 vendedores, cada uno ve solo el suyo, y los saldos cuadran al céntimo (92,50 + 2,92 + 4,39 + 0,19 = 100). Todo retirado.

@@ -1182,9 +1182,50 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const recogidaPosible = fisicas.length > 0 && fisicas.every(l => !!l.p.recogida_en_persona);
       const envio = calc.centimos;
       const aceptan = lineas.filter(l => !!l.p.acepta_puntos).reduce((n, l) => n + l.precio * l.unidades, 0);
+
+      // LA CESTA DE VARIAS TIENDAS (F11, 2026-08-24). Un cobro sigue siendo de
+      // UNA tienda —cada vendedor cobra en su cuenta, y esa regla es la que
+      // protege el dinero— pero la cesta ya no obliga a elegir: se agrupa por
+      // tienda y se dice qué toca pagar en cada una. Si todo se paga con
+      // puntos, la cesta las liquida una detrás de otra sin que nadie note la
+      // diferencia; si hace falta tarjeta, se paga una tienda cada vez y se
+      // dice cuántas quedan.
+      const porVendedor = new Map<string, any[]>();
+      for (const l of lineas) {
+        const vid = l.p.created_by || '';
+        porVendedor.set(vid, [...(porVendedor.get(vid) || []), l]);
+      }
+      const nombresTienda = porVendedor.size > 1
+        ? (await db.execute(sql`
+            SELECT id, handle, coalesce(display_name, name, email) AS nombre FROM users
+            WHERE id = ANY(string_to_array(${[...porVendedor.keys()].filter(Boolean).join(',') || '-'}, ','))
+          `)).rows as any[]
+        : [];
+      const tiendas = await Promise.all([...porVendedor.entries()].map(async ([vid, ls]) => {
+        const sub = ls.reduce((n: number, l: any) => n + l.precio * l.unidades, 0);
+        const fis = ls.filter((l: any) => (l.p.kind || '') === 'fisico');
+        const c = calcularEnvio(fis as any, sub, zona, tarifas);
+        const u = nombresTienda.find(x => x.id === vid);
+        return {
+          vendedor_id: vid || null,
+          tienda: u?.handle || null,
+          nombre: u?.nombre || null,
+          lineas: ls.map((l: any) => ({ producto_id: l.p.id, variante_id: l.v?.id || null, cantidad: l.unidades })),
+          subtotal_centimos: sub,
+          envio_centimos: c.centimos,
+          se_envia: c.se_envia,
+          no_llega: c.no_llega,
+          todo_acepta_puntos: ls.every((l: any) => !!l.p.acepta_puntos),
+          recogida_posible: fis.length > 0 && fis.every((l: any) => !!l.p.recogida_en_persona),
+        };
+      }));
+
       res.json({
         subtotal_centimos: subtotal,
         envio_centimos: envio,
+        // Cuántas tiendas hay en la cesta y qué toca en cada una.
+        tiendas,
+        varias_tiendas: tiendas.length > 1,
         zona: calc.zona,
         zona_nombre: ZONAS.find(z => z.id === calc.zona)?.nombre || null,
         // `false` = alguna cosa de la cesta no llega a esa zona; `no_llega`
@@ -1491,10 +1532,18 @@ export function registerPublicarRoutes(app: Express, db: any) {
         lineas.push({ p, v, precio, nombre, unidades, llevaCuenta });
       }
 
+      // UN COBRO, UNA TIENDA — y esa regla se queda (F11, 2026-08-24). No es
+      // una limitación de la cesta: es que cada vendedor cobra en SU cuenta de
+      // Stripe, y un solo pago no puede repartirse entre varias cuentas sin
+      // que la plataforma pase a ser la vendedora de todo (decisión de
+      // Eugenio y su asesor, como la factura). Lo que cambia es que ahora la
+      // cesta SÍ admite varias tiendas: llama aquí una vez por tienda. Y si
+      // alguien llama con dos, se le dice cuántas hay y cuáles.
       const vendedores = new Set(lineas.map(l => l.p.created_by || ''));
       if (vendedores.size > 1) {
         return res.status(400).json({
-          error: 'Todo lo que se paga junto tiene que ser de la misma persona. Haz un pago por cada tienda.',
+          error: `Llevas cosas de ${vendedores.size} tiendas. Cada tienda cobra por separado: se paga una y luego la siguiente.`,
+          varias_tiendas: true, tiendas: vendedores.size,
         });
       }
 
