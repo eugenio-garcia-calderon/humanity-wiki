@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/components/knowledge/FichaPublicacion.tsx",
-      "motivo": "prog2: descripcion al publicar, no solo titulo",
-      "desde": "2026-08-24T19:03:43.793Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/knowledge/WindowContent.tsx",
       "motivo": "prog2: la descripcion se ve tambien bajo YouTube, Vimeo, PDF y audio",
       "desde": "2026-08-24T19:05:02.873Z"
