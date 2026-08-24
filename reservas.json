@@ -25,12 +25,6 @@
       "desde": "2026-08-23T23:32:55.817Z"
     },
     {
-      "agente": "prog5",
-      "ruta": "drizzle/0116_veracidad_coherencia.sql",
-      "motivo": "Veracidad fase 8: busqueda de contradicciones (indice de texto)",
-      "desde": "2026-08-24T00:29:34.444Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "src/server/publicar.ts",
       "motivo": "prog7: F11 cesta de varias tiendas",
