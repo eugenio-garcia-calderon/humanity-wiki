@@ -174,3 +174,61 @@ export function EtiquetasDeTema({ item }: { item: any }) {
     </div>
   );
 }
+
+/**
+ * LA FOTO DE QUIEN PUBLICA (2026-08-24). Eugenio: «haz que el nombre de usuario
+ * y su foto de perfil estén arriba y se vea mejor, como en Twitter».
+ *
+ * Tiene su propio componente por una sola razón: **una foto de perfil que ya no
+ * existe**. Sin esto, el navegador pinta su icono de imagen rota dentro del
+ * círculo, que es peor que no tener foto. Con el fallo controlado, se cae a la
+ * inicial del nombre, que siempre existe.
+ */
+export function AvatarAutor({ url, nombre }: { url?: string | null; nombre?: string | null }) {
+  const [rota, setRota] = useState(false);
+  const inicial = (nombre || '?').trim().charAt(0).toUpperCase() || '?';
+  if (!url || rota) {
+    return (
+      <span className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full bg-slate-200 text-[11px] font-black text-slate-500">
+        {inicial}
+      </span>
+    );
+  }
+  return (
+    <img
+      src={url}
+      alt=""
+      onError={() => setRota(true)}
+      className="h-[26px] w-[26px] shrink-0 rounded-full object-cover"
+    />
+  );
+}
+
+/**
+ * EL TEXTO QUE DESCRIBE UNA PUBLICACIÓN (2026-08-24). Eugenio: «haz que el
+ * texto descriptivo también se lea debajo del título».
+ *
+ * NO ESTÁ SIEMPRE EN EL MISMO CAMPO, y ésa es toda la razón de que esto exista.
+ * Medido contra lo que devuelve `/api/publicaciones`:
+ *   · una publicación → `config.body`   (en Markdown)
+ *   · un grafo        → `config.description`
+ *   · un mapa         → `config.description`, y a veces `config.nota`
+ *   · un proyecto     → `config.goal`   (para qué es el proyecto)
+ *
+ * La primera versión leía sólo `body` y el resultado fue que **ninguna tarjeta
+ * enseñaba texto salvo las publicaciones sueltas**: proyectos, grafos y mapas
+ * salían con el título a secas teniendo una descripción escrita.
+ *
+ * Se le quitan las marcas de Markdown y los espacios de más porque el cuerpo se
+ * guarda en Markdown y aquí se lee como texto corrido: sin esto salían
+ * almohadillas, asteriscos y emojis de encabezado sueltos a media frase.
+ */
+export function textoDe(item: any): string {
+  const c = item?.config || {};
+  const bruto = c.body || c.description || c.descripcion || item?.resumen || c.goal || c.nota || '';
+  return String(bruto)
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')   // enlaces e imágenes: se queda el texto
+    .replace(/[#*`>_~|-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}

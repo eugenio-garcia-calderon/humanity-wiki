@@ -19,7 +19,7 @@ import {
   leerPortada, PORTADA_POR_DEFECTO, type IdBloque, type Portada,
 } from '../components/portada/portadaBloques';
 import { OBJETIVOS, hablaDe } from '../utils/objetivos';
-import { portadaDe, ImagenDePortada, EtiquetasDeTema } from '../components/portada/PortadaTarjeta';
+import { portadaDe, ImagenDePortada, EtiquetasDeTema, AvatarAutor, textoDe } from '../components/portada/PortadaTarjeta';
 import CirculosDePersonas from '../components/social/CirculosDePersonas';
 import TuTrabajo from '../components/social/TuTrabajo';
 
@@ -166,7 +166,15 @@ export default function Explorar() {
   };
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
-  const [verPapelera, setVerPapelera] = useState(false);
+  /*
+   * LA PAPELERA Y EL PERSONALIZADOR SE ABREN POR DIRECCIÓN (2026-08-24). Sus
+   * botones se fueron con la barra de arriba y ahora los abre el menú de la
+   * derecha, que está fuera de esta página: por eso el estado arranca leyendo
+   * `?papelera=1` y `?portada=1`. Se limpian del enlace en cuanto se abren, así
+   * que cerrar la papelera no te deja con una dirección que la vuelve a abrir
+   * al recargar.
+   */
+  const [verPapelera, setVerPapelera] = useState(() => new URLSearchParams(window.location.search).get('papelera') === '1');
   const [creadorAbierto, setCreadorAbierto] = useState(false);
   const [papelera, setPapelera] = useState<any[]>([]);
   const debounce = useRef<any>(null);
@@ -178,7 +186,25 @@ export default function Explorar() {
    * navegador sería prometer algo que se pierde al cambiar de móvil.
    */
   const portada: Portada = user ? leerPortada(user.uiSettings?.portada) : PORTADA_POR_DEFECTO;
-  const [personalizando, setPersonalizando] = useState(false);
+  const [personalizando, setPersonalizando] = useState(() => new URLSearchParams(window.location.search).get('portada') === '1');
+
+  /*
+   * Y VUELVEN A ABRIRSE SI YA ESTABAS AQUÍ. El valor inicial de arriba sólo
+   * sirve la primera vez: pulsando «Papelera» en el menú de la derecha estando
+   * ya en `/explorar`, React Router cambia el enlace pero no vuelve a montar
+   * esta página, así que sin este efecto el botón no haría nada la segunda vez.
+   * Se borra el parámetro al abrirlo para que recargar no lo reabra.
+   */
+  useEffect(() => {
+    const papelera = searchParams.get('papelera') === '1';
+    const portada = searchParams.get('portada') === '1';
+    if (!papelera && !portada) return;
+    if (papelera) setVerPapelera(true);
+    if (portada) setPersonalizando(true);
+    const q = new URLSearchParams(searchParams);
+    q.delete('papelera'); q.delete('portada');
+    setSearchParams(q, { replace: true });
+  }, [searchParams]);
   const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string; autor_id?: string; autor_nombre?: string } | null>(null);
   const [bloqueando, setBloqueando] = useState<{ id: string; nombre?: string } | null>(null);
 
@@ -480,81 +506,59 @@ export default function Explorar() {
 
         <div className="max-w-[1500px] mx-auto px-5 sm:px-8 pt-5 pb-24">
 
-          {/* Barra compacta: modo, carpeta, papelera y contador en una sola línea
-              (2026-08-08 — antes eran tres bloques apilados que empujaban las
-              publicaciones muy abajo en la pantalla). */}
-          <div className="flex items-center gap-2 flex-wrap mb-2">
-            <button
-              onClick={() => setCreadorAbierto(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black shadow-sm transition-colors shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" /> Crear
-            </button>
+          {/* ══ LA BARRA DE ARRIBA SE HA IDO (2026-08-24) ═══════════════════
+              Eugenio: «elimina también la parte de arriba de esa página donde se
+              ven los proyectos, y donde sale el botón de crear, y debajo todo
+              limpio, sólo con las publicaciones».
 
-            {/* PERSONALIZAR, AQUÍ Y NO EN CONFIGURACIÓN. Se ajusta mirando el
-                resultado: cambias el orden y lo ves detrás al momento. Metido en
-                una página de ajustes habría que ir, tocar a ciegas y volver. */}
-            {user && (
-              <button
-                onClick={() => setPersonalizando(true)}
-                title="Elegir qué ves en tu portada y en qué orden"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 hover:border-emerald-300 text-slate-500 hover:text-emerald-700 rounded-lg text-xs font-bold transition-colors shrink-0"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" /> Tu portada
-              </button>
-            )}
+              Llevaba «Crear», «Tu portada», «Papelera» y el contador. Las cuatro
+              siguen existiendo, en un sitio donde no le quitan la primera
+              pantalla a lo que has venido a leer:
+                · Crear      → el círculo verde de abajo, que está en TODAS las
+                               páginas y lleva las dieciséis herramientas.
+                · Papelera   → el menú de la derecha (`/explorar?papelera=1`).
+                · Tu portada → el menú de la derecha (`/explorar?portada=1`).
+                · el contador → no estaba contando nada que hiciera falta.
 
-            {/* ══ FUERA EL INTERRUPTOR «HUMANIDAD / MÍAS» ═══════════════════
-                (2026-08-22, hormiguero: «quita el filtro de publicaciones Mías
-                y de Otros»).
+              QUEDAN LAS DOS QUE NO SON ADORNO: «Solo mías» y la carpeta abierta.
+              Las dos aparecen sólo porque tú has entrado en ese estado, y son la
+              única forma de salir de él. Un filtro puesto sin manera visible de
+              quitarlo es una aplicación rota, no una aplicación limpia. */}
+          {(modo === 'mias' || carpetaActiva) && (
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              {modo === 'mias' && (
+                <button
+                  onClick={() => cambiarModo('humanidad')}
+                  title="Ver todo lo que hay publicado"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-black shrink-0"
+                >
+                  <Users2 className="w-3.5 h-3.5" /> Solo mías
+                  <X className="w-3 h-3 opacity-70" />
+                </button>
+              )}
 
-                Partía la portada en dos mitades y obligaba a elegir una antes
-                de ver nada — y la mitad «Mías» es la que uno ya tiene en su
-                perfil. Sin él, el inicio enseña todo lo que hay, que es lo que
-                se espera de una portada.
+              {carpetaActiva && (
+                <button onClick={() => setCarpetaActiva(null)}
+                  className="inline-flex items-center gap-1.5 shrink-0 pl-1.5 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors">
+                  <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: carpetaActiva.color || colorDe(carpetaActiva.id) }} />
+                  {carpetaActiva.nombre}
+                </button>
+              )}
+            </div>
+          )}
 
-                EL MODO SIGUE EXISTIENDO, en la dirección (`?mias=1`): es lo
-                que usan «Mis publicaciones» del menú y el enlace desde tu
-                perfil. Lo que se ha ido es el botón, no el sitio. Si además se
-                hubiera quitado el modo, esos dos enlaces habrían dejado de
-                llevar a ninguna parte. */}
-            {modo === 'mias' && (
-              <button
-                onClick={() => cambiarModo('humanidad')}
-                title="Ver todo lo que hay publicado"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-black shrink-0"
-              >
-                <Users2 className="w-3.5 h-3.5" /> Solo mías
+          {/* LA PAPELERA SÍ SE ANUNCIA CUANDO ESTÁS DENTRO: es una lista de cosas
+              borradas y confundirla con la portada sería grave. */}
+          {verPapelera && !carpetaActiva && (
+            <div className="flex items-center gap-2 mb-2">
+              <button onClick={() => setVerPapelera(false)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-black shrink-0">
+                <Trash className="w-3.5 h-3.5" /> Papelera · {papelera.length}
                 <X className="w-3 h-3 opacity-70" />
               </button>
-            )}
-
-            {carpetaActiva && (
-              <button onClick={() => setCarpetaActiva(null)}
-                className="inline-flex items-center gap-1.5 shrink-0 pl-1.5 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors">
-                <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: carpetaActiva.color || colorDe(carpetaActiva.id) }} />
-                {carpetaActiva.nombre}
-              </button>
-            )}
-
-            {user && !carpetaActiva && (
-              <button
-                onClick={() => setVerPapelera(v => !v)}
-                className={cn('inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors shrink-0',
-                  verPapelera ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400')}
-              >
-                <Trash className="w-3.5 h-3.5" />
-                {papelera.length ? `Papelera · ${papelera.length}` : 'Papelera'}
-              </button>
-            )}
-
-            <p className="text-[11px] font-bold text-slate-400 shrink-0 ml-auto">
-              {verPapelera && !carpetaActiva ? `${papelera.length} en la papelera`
-                : carpetaActiva ? `${visibles.length} dentro`
-                : `${visibles.length} publicaciones`}
-            </p>
-          </div>
+            </div>
+          )}
 
           {verPapelera && !carpetaActiva ? (
             <div className="mt-5">
@@ -613,8 +617,6 @@ export default function Explorar() {
                 const trozos: Record<IdBloque, ReactNode> = {
                   /* LAS PERSONAS (2026-08-21): a quién sigues y qué han
                      publicado. */
-                  tuyo: <TuTrabajo />,
-
                   carpetas: user ? (
                     <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-100">
                     <div className="relative">
@@ -696,12 +698,19 @@ export default function Explorar() {
                       </p>
                       </div>
                       ) : (
-                      // TRES POR FILA, NO CUATRO (2026-08-24, Eugenio: «haz las
-                      // tarjetas más grandes mostrando 3 en vez de 4 por fila»).
-                      // Con portada dentro, a cuatro columnas la imagen bajaba de
-                      // 200 px de ancho y dejaba de contar nada; a tres respira y
-                      // se ve lo que hay en la foto.
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                      // DOS POR FILA, Y UNA EN EL MÓVIL (2026-08-24). Eugenio:
+                      // «haz que se muestren 2 publicaciones por línea, así se
+                      // puede ver más grande, y 1 publicación por línea en móvil».
+                      //
+                      // El corte es `md` (768 px) y no `sm` (640): entre 640 y 768
+                      // están las tabletas de pie y los móviles apaisados, y ahí
+                      // dos columnas dejan cada portada en 300 px de ancho, que es
+                      // justo lo que se acaba de decidir que era pequeño.
+                      //
+                      // (Aquí va un comentario de `//` y no uno de JSX: esto es la
+                      //  rama de un `? :`, o sea una expresión, y unas llaves en
+                      //  este sitio empiezan un objeto, no un comentario.)
+                      <div className="grid gap-4 mt-4 md:grid-cols-2">
                       {visibles.map(it => {
                       const clave = `${it.tipo}-${it.id}`;
                       return (
@@ -712,11 +721,44 @@ export default function Explorar() {
                       onClick={() => it.kind === 'pagina' ? navigate(`/paginas/${it.id}`)
                       : it.kind === 'presentacion' ? navigate(`/presentaciones/${it.id}`)
                       : setAbierta({ pub: it, editar: false })}
-                      className="relative text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
+                      /* SIN MARCO Y SIN FONDO (2026-08-24). Eugenio: «quita el
+                         borde externo que envuelve a la publicación, hazlo
+                         transparente, que no se vea».
+
+                         Lo que separa una publicación de la siguiente ya no es
+                         una raya: es el hueco entre ellas y la portada, que
+                         tiene su propio recorte. La caja blanca sólo repetía ese
+                         límite una segunda vez, y con tres tarjetas por fila la
+                         página era una rejilla de marcos antes que una lista de
+                         cosas.
+
+                         Se va también `overflow-hidden`, que era del marco: con
+                         él, el vídeo que crece al pasar el ratón se recortaba
+                         justo en el borde de la tarjeta, o sea que no podía
+                         salirse — que es lo que se le pidió. Y con la sombra:
+                         una sombra sin caja es una mancha. Queda el empujón de
+                         medio píxel al pasar por encima, que es lo único que
+                         hacía falta para saber cuál estás señalando. */
+                      className="relative text-left rounded-2xl hover:-translate-y-0.5 transition-all flex flex-col cursor-pointer"
                       >
+                      {/* ARRIBA VA QUIÉN LO PUBLICA (2026-08-24). Eugenio: «haz
+                          que el nombre de usuario y su foto de perfil estén arriba
+                          y se vea mejor, como en Twitter», y «elimina la etiqueta
+                          que describe si es un vídeo, una foto o un grafo».
+
+                          Las dos cosas son la misma decisión: en ese renglón sólo
+                          cabe un dato, y el que importa es de quién es esto. Que
+                          sea un vídeo ya lo dice la portada —con su triángulo—, y
+                          que sea un grafo lo dice el dibujo; el rótulo repetía en
+                          letras lo que la imagen ya había dicho. De quién es no lo
+                          decía nadie hasta el pie, en gris de 10 px.
+
+                          La foto es de 26 px y con inicial de respaldo: sin foto
+                          guardada, un círculo vacío es peor que una letra. */}
                       <div className="px-3.5 pt-3 flex items-center gap-1.5">
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">{it.kind}</span>
-                      {it.ia && <Sparkles className="w-2.5 h-2.5 text-amber-500" />}
+                      <AvatarAutor url={it.autor_avatar} nombre={it.autor_nombre} />
+                      <span className="truncate text-[12px] font-black text-slate-800">{it.autor_nombre || 'Anónimo'}</span>
+                      {it.ia && <Sparkles className="w-2.5 h-2.5 shrink-0 text-amber-500" />}
                       {!it.publico && (
                       <span className="text-[8px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
                       <Lock className="w-2 h-2" />Privada
@@ -859,37 +901,47 @@ export default function Explorar() {
 
                       <p className="px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
 
+                      {/* EL TEXTO, DEBAJO DEL TÍTULO (2026-08-24). Eugenio: «haz
+                          que el texto descriptivo también se lea debajo del
+                          título».
+
+                          Va antes que las etiquetas y antes que `WindowContent`,
+                          y ya no depende de que haya portada: un título de seis
+                          palabras no dice de qué va nada, y estas dos líneas sí.
+                          Se le quitan las marcas de Markdown porque el cuerpo se
+                          guarda en Markdown y aquí se lee como texto: sin esto
+                          salían almohadillas y asteriscos sueltos. */}
+                      {(() => {
+                      const texto = textoDe(it);
+                      return texto ? (
+                      <p className="px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
+                      ) : null;
+                      })()}
+
                       {/* DE QUÉ HABLA. Sale de las mismas palabras con las que
                           filtra el menú de la izquierda, así que la etiqueta y
                           el filtro nunca se contradicen: si una tarjeta dice
                           «Energía», está en «Energía». */}
-                      <div className="px-3.5 pt-1.5">
+                      <div className="px-3.5 pt-1.5 pb-1">
                       <EtiquetasDeTema item={it} />
                       </div>
 
-                      {/* CUANDO YA HAY PORTADA NO SE PINTA EL CUERPO. `WindowContent`
-                          vuelve a dibujar la misma foto o el mismo vídeo, así que la
-                          tarjeta enseñaba la imagen dos veces, una encima de otra. Con
-                          portada se resume en dos líneas de texto; sin portada manda el
-                          contenido, que es lo único que esa tarjeta tiene que enseñar. */}
-                      {portadaDe(it) ? (
-                      (() => {
-                      const texto = String(it.config?.body || (it as any).resumen || '').replace(/[#*`>\-]/g, ' ').trim();
-                      return texto ? (
-                      <p className="px-3.5 pt-1.5 pb-2 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
-                      ) : null;
-                      })()
-                      ) : (
+                      {/* EL CONTENIDO SÓLO CUANDO NO HAY NADA MÁS QUE ENSEÑAR.
+                          `WindowContent` vuelve a dibujar la misma foto o el mismo
+                          vídeo que ya está de portada —la tarjeta enseñaba la imagen
+                          dos veces— y, si ya hay dos líneas de texto, repite también
+                          el texto. Así que se pinta cuando la tarjeta no tiene ni
+                          portada ni cuerpo: un grafo o una tabla, donde el dibujo ES
+                          la publicación. */}
+                      {!portadaDe(it) && !textoDe(it) && (
                       <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
                       <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
                       </div>
                       )}
-                      <div className="px-3.5 py-2 border-t border-slate-50 flex items-center gap-2 text-[10px] text-slate-400">
-                      <span className="inline-flex items-center gap-1 truncate">
-                      <UserIcon className="w-2.5 h-2.5 shrink-0" />{it.autor_nombre || 'Anónimo'}
-                      </span>
+                      {/* EL PIE YA NO REPITE AL AUTOR: está arriba, con su foto. */}
+                      <div className="px-3.5 py-2 flex items-center gap-2 text-[10px] text-slate-400">
                       {it.donde && (
-                      <span className="inline-flex items-center gap-1 truncate ml-auto">
+                      <span className="inline-flex items-center gap-1 truncate">
                       <Network className="w-2.5 h-2.5 shrink-0" />{it.donde}
                       </span>
                       )}
