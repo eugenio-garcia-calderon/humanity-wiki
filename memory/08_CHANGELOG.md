@@ -6648,3 +6648,18 @@ Arrancaba a `8vh`, que en una pantalla alta son 80 px de nada antes de empezar:
 el nombre flotaba en medio y las tarjetas se iban hacia abajo. Ahora empieza a
 24 px de la barra (36 en escritorio), la misma distancia a la que empieza el
 contenido en el resto de las páginas.
+
+## 2026-08-24 — La previa de «Explorar» ya parece una red social
+Eugenio: «mejora la imagen de inicio de la tarjeta de Explorar animada, que
+aparezcan iconos de vídeos e imágenes en movimiento, y que se vea que es como
+una red social con publicaciones».
+
+Eran dos tarjetas de texto gris, y por eso podían ser cualquier cosa: una bandeja
+de correo, una lista de tareas, un chat. Ahora se ve qué hay dentro — un vídeo
+con su botón latiendo y soltando un aro, una foto que se cambia por otra, caras
+de quien publica, y un corazón que alguien acaba de pulsar. Cuatro movimientos
+distintos: si los cuatro fueran «entrar», sería una animación larga, no un muro.
+
+Se toca `PreviaPublicaciones`, que la usan la portada de sin sesión, el cajetín
+de crear y la tarjeta de Explorar: el mismo dibujo en los tres sitios, que es lo
+que se decidió al montarlo.

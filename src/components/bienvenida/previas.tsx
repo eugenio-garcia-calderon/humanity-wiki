@@ -132,7 +132,34 @@ const ESTILOS = `
   /* Las publicaciones entran desde abajo, como un muro que se rellena. */
   .group:hover .pv-muro { animation: pv-muro .55s cubic-bezier(.2,1.2,.4,1) both; }
   .group:hover .pv-muro-2 { animation-delay: .13s }
+  .group:hover .pv-muro-3 { animation-delay: .26s }
   @keyframes pv-muro { from { transform: translateY(10px); opacity: 0 } to { transform: none; opacity: 1 } }
+
+  /* ══ EL MURO SE MUEVE COMO UNA RED SOCIAL (2026-08-24) ═══════════════════
+     Eugenio: «mejora la imagen de inicio de la tarjeta de Explorar animada, que
+     aparezcan iconos de vídeos e imágenes en movimiento, y que se vea que es
+     como una red social con publicaciones».
+
+     Cuatro movimientos, y cada uno cuenta una cosa distinta. Si los cuatro
+     hicieran lo mismo —entrar— sería una animación larga en vez de un muro. */
+
+  /* 1. El botón de reproducir late: eso es un vídeo, no una foto. */
+  .group:hover .pv-play { animation: pv-play 1.4s ease-in-out infinite; transform-origin: center; }
+  @keyframes pv-play { 0%,100% { transform: scale(1) } 50% { transform: scale(1.14) } }
+
+  /* 2. Y suelta un aro, como el pulso de un reproductor. */
+  .group:hover .pv-aro { animation: pv-aro 1.4s ease-out infinite; transform-origin: center; }
+  @keyframes pv-aro { 0% { transform: scale(.7); opacity: .55 } 70%,100% { transform: scale(1.9); opacity: 0 } }
+
+  /* 3. La foto de la derecha cambia: son varias, no una. */
+  .group:hover .pv-foto-a { animation: pv-foto-a 3s ease-in-out infinite; }
+  .group:hover .pv-foto-b { animation: pv-foto-b 3s ease-in-out infinite; }
+  @keyframes pv-foto-a { 0%,42% { opacity: 1 } 50%,92% { opacity: 0 } 100% { opacity: 1 } }
+  @keyframes pv-foto-b { 0%,42% { opacity: 0 } 50%,92% { opacity: 1 } 100% { opacity: 0 } }
+
+  /* 4. Y alguien da un «me gusta». Es lo único que dice que hay gente detrás. */
+  .group:hover .pv-late { animation: pv-late 1.8s ease-in-out infinite; transform-origin: center; }
+  @keyframes pv-late { 0%,62%,100% { transform: scale(1) } 72% { transform: scale(1.45) } 82% { transform: scale(1.1) } }
 
   /* Y para quien pide que la pantalla se esté quieta, se está quieta. */
   @media (prefers-reduced-motion: reduce) {
@@ -419,20 +446,82 @@ export function PreviaNavegador() {
 }
 
 /** Publicaciones: el muro, con autor y texto. */
+/**
+ * EL MURO (2026-08-24). Antes eran dos tarjetas de texto gris, y por eso podía
+ * ser cualquier cosa: una bandeja de correo, una lista de tareas, un chat.
+ *
+ * Ahora se ve QUÉ hay dentro: un vídeo con su botón latiendo, una foto que
+ * cambia por otra, caras, y un corazón que alguien acaba de pulsar. Son las
+ * cuatro señales que hacen que una pantalla se lea como una red social sin
+ * necesidad de una sola palabra.
+ */
 export function PreviaPublicaciones() {
   return (
     <svg viewBox="0 0 160 90" className={marco} aria-hidden preserveAspectRatio="xMidYMid slice">
       <rect width="160" height="90" fill="#f8fafc" />
-      <rect className="pv-muro" x="16" y="12" width="128" height="32" rx="5" fill="#fff" stroke="#e2e8f0" />
-      <circle cx="30" cy="24" r="6" fill="#a7f3d0" />
-      <rect x="42" y="20" width="34" height="4" rx="2" fill="#0f172a" />
-      <rect x="42" y="29" width="86" height="4" rx="2" fill="#cbd5e1" />
-      <rect x="42" y="36" width="58" height="4" rx="2" fill="#cbd5e1" />
-      <rect className="pv-muro pv-muro-2" x="16" y="50" width="128" height="32" rx="5" fill="#fff" stroke="#e2e8f0" />
-      <circle cx="30" cy="62" r="6" fill="#bfdbfe" />
-      <rect x="42" y="58" width="28" height="4" rx="2" fill="#0f172a" />
-      <rect x="42" y="67" width="76" height="4" rx="2" fill="#cbd5e1" />
-      <rect x="42" y="74" width="44" height="4" rx="2" fill="#cbd5e1" />
+
+      {/* ── LA PUBLICACIÓN CON VÍDEO ─────────────────────────────────────── */}
+      <g className="pv-muro">
+        <rect x="8" y="8" width="70" height="74" rx="6" fill="#fff" stroke="#e2e8f0" />
+        {/* Quién publica: cara y nombre, arriba, como en la tarjeta de verdad. */}
+        <circle cx="18" cy="18" r="5" fill="#34d399" />
+        <rect x="26" y="16" width="26" height="4" rx="2" fill="#0f172a" />
+        {/* El fotograma del vídeo: cielo, monte y noche, para que se lea como
+            una imagen y no como un rectángulo. */}
+        <rect x="14" y="27" width="58" height="33" rx="4" fill="#1e293b" />
+        <path d="M14 52 L28 40 L38 49 L48 38 L72 56 L72 56 L14 60 Z" fill="#334155" />
+        <circle cx="62" cy="35" r="4" fill="#64748b" />
+        {/* El botón de reproducir, latiendo y soltando su aro. */}
+        <g transform="translate(43 43.5)">
+          <circle className="pv-aro" r="9" fill="none" stroke="#fff" strokeWidth="1.6" />
+          <g className="pv-play">
+            <circle r="8" fill="#000" fillOpacity=".55" />
+            <path d="M-2.6 -4 L5 0 L-2.6 4 Z" fill="#fff" />
+          </g>
+        </g>
+        <rect x="14" y="65" width="46" height="4" rx="2" fill="#0f172a" />
+        {/* Y el corazón, que es lo que dice que hay gente al otro lado. */}
+        <g transform="translate(17 76)">
+          <path className="pv-late" d="M0 -1.6 C0 -4.2 -4 -4.2 -4 -1.2 C-4 1.2 0 3.4 0 3.4 C0 3.4 4 1.2 4 -1.2 C4 -4.2 0 -4.2 0 -1.6 Z" fill="#f43f5e" />
+        </g>
+        <rect x="24" y="74" width="10" height="3.5" rx="1.75" fill="#cbd5e1" />
+        <rect x="40" y="74" width="18" height="3.5" rx="1.75" fill="#cbd5e1" />
+      </g>
+
+      {/* ── LA PUBLICACIÓN CON FOTO, QUE VA CAMBIANDO ────────────────────── */}
+      <g className="pv-muro pv-muro-2">
+        <rect x="84" y="8" width="68" height="42" rx="6" fill="#fff" stroke="#e2e8f0" />
+        <circle cx="94" cy="18" r="5" fill="#93c5fd" />
+        <rect x="102" y="16" width="22" height="4" rx="2" fill="#0f172a" />
+        {/* Dos fotos en el mismo hueco: una se apaga y la otra se enciende. */}
+        <g clipPath="url(#pv-recorte-foto)">
+          <g className="pv-foto-a">
+            <rect x="90" y="26" width="56" height="18" fill="#bae6fd" />
+            <path d="M90 44 L104 33 L114 40 L124 31 L146 44 Z" fill="#38bdf8" />
+            <circle cx="136" cy="31" r="3.4" fill="#fde68a" />
+          </g>
+          <g className="pv-foto-b">
+            <rect x="90" y="26" width="56" height="18" fill="#fed7aa" />
+            <path d="M90 44 L100 35 L112 44 Z" fill="#fb923c" />
+            <path d="M112 44 L126 32 L146 44 Z" fill="#f97316" />
+          </g>
+        </g>
+      </g>
+
+      {/* ── Y UNA TERCERA, SÓLO TEXTO: no todo lleva foto ─────────────────── */}
+      <g className="pv-muro pv-muro-3">
+        <rect x="84" y="56" width="68" height="26" rx="6" fill="#fff" stroke="#e2e8f0" />
+        <circle cx="94" cy="66" r="5" fill="#ddd6fe" />
+        <rect x="102" y="64" width="20" height="4" rx="2" fill="#0f172a" />
+        <rect x="90" y="73" width="56" height="3.5" rx="1.75" fill="#cbd5e1" />
+        <rect x="90" y="78" width="36" height="3.5" rx="1.75" fill="#cbd5e1" />
+      </g>
+
+      <defs>
+        <clipPath id="pv-recorte-foto">
+          <rect x="90" y="26" width="56" height="18" rx="3" />
+        </clipPath>
+      </defs>
     </svg>
   );
 }
