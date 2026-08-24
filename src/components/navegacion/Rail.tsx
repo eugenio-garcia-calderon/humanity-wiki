@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
-  Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, Trash2, LayoutGrid,
+  Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
+  ChevronLeft, ChevronRight, Trash2, LayoutGrid,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -113,7 +114,7 @@ export const PERSONALES: Herramienta[] = [
 
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
-  items, titulo = 'Red de Conocimiento', claro = false, onPasarPorEncima,
+  items, titulo = 'Red de Conocimiento', claro = false, onAbrirSubmenu, onPlegar,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -167,25 +168,42 @@ export default function Rail({
    */
   claro?: boolean;
   /**
-   * ABRIR AL PASAR EL RATÓN (2026-08-24).
+   * EL SUBMENÚ SE ABRE CON LA FLECHITA, NO PASANDO EL RATÓN (2026-08-24).
    *
-   * Eugenio: «si hago hover en alguno de los catorce objetivos, que se
-   * despliegue automáticamente el submenú con el contenido de ese objetivo,
-   * para no tener que hacer clic».
+   * Eugenio: «que el submenú no se despliegue con HOVER, sino que haya que
+   * hacer click en una flechita lateral que estará al lado de cada elemento del
+   * menú para que se abra el submenú lateral».
    *
-   * NO ES LO MISMO QUE `onElegir`, y por eso son dos. Pasar el ratón **abre el
-   * panel** y nada más; hacer clic abre el panel **y cambia la pantalla de
-   * detrás** al contenido de ese tema. Si el hover navegara, cruzar la lista de
-   * camino a otro sitio te dejaría en una pantalla que no pediste, catorce
-   * veces seguidas. Mirar y elegir son dos gestos y tienen dos consecuencias.
+   * ── POR QUÉ ESTO ES MEJOR, Y NO SÓLO DISTINTO ─────────────────────────────
+   * Antes el submenú salía al pasar el ratón por encima de un elemento. Con
+   * catorce elementos en columna, bajar la lista para llegar al último es pasar
+   * por trece: trece paneles abriéndose y cerrándose por el camino, cada uno
+   * pidiendo sus datos. La espera de 140 ms tapaba lo peor, pero el gesto
+   * seguía estando mal repartido: **mirar la lista** disparaba **abrir cosas**.
    *
-   * Sólo lo usa el menú de los temas. En el de la derecha no: allí los paneles
-   * piden datos al abrirse, y rozar la lista dispararía diez peticiones que
-   * nadie ha pedido.
+   * Ahora hay dos gestos con dos destinos, y se ven los dos:
+   *
+   *   · el NOMBRE te lleva a esa herramienta o a ese tema;
+   *   · la FLECHITA de al lado abre su submenú al lado, sin moverte.
+   *
+   * Y ninguno de los dos ocurre por accidente.
+   *
+   * La flecha apunta hacia donde va a salir el panel —a la derecha en el raíl
+   * izquierdo, a la izquierda en el derecho— y se gira cuando ya está abierto,
+   * porque entonces lo que hace es cerrarlo.
    */
-  onPasarPorEncima?: (h: Herramienta) => void;
+  onAbrirSubmenu?: (h: Herramienta) => void;
+  /**
+   * PLEGARSE (2026-08-24). Eugenio: «permite que ambos menús, el de la derecha
+   * y la izquierda, tengan el botón de volverse a plegar cuando se despliegan».
+   *
+   * El raíl sabe deshacer lo suyo —quitar la chincheta— pero no sabe deshacer
+   * lo de fuera: cuando está abierto porque se ha pulsado un círculo de abajo,
+   * el que tiene que enterarse es quien guarda ese estado. Por eso el botón
+   * está aquí y la consecuencia la decide el Layout.
+   */
+  onPlegar?: () => void;
 }) {
-  const navigate = useNavigate();
 
   /*
    * ABRIRSE AL PASAR EL RATÓN, Y QUEDARSE ABIERTO SI SE FIJA (2026-08-23).
@@ -218,7 +236,25 @@ export default function Rail({
     try { return localStorage.getItem('hw_rail_fijado') === '1'; } catch { return false; }
   });
   const [encima, setEncima] = useState(false);
-  const desplegado = siempreAbierto || fijado || encima;
+
+  /*
+   * ── FLOTAR O QUEDARSE ─────────────────────────────────────────────────────
+   * Y hay una tercera razón para quedarse, además de la chincheta y el círculo:
+   * **que haya un submenú abierto**.
+   *
+   * Sin eso, el raíl desplegado por el ratón se pinta POR ENCIMA del contenido
+   * y el submenú sale justo detrás, tapado. Es literalmente lo que Eugenio
+   * describió en su día —«se superpone el menú al submenú»— y volvía a pasar
+   * ahora que el raíl está siempre puesto: se arregló para el caso de pulsar el
+   * círculo y reaparecía por el camino nuevo.
+   *
+   * Abrir un submenú es haber decidido: has pulsado una flecha. A partir de ahí
+   * el raíl forma parte de la página, empuja como cualquier columna y nadie
+   * tapa a nadie. Y se queda desplegado aunque apartes el ratón, porque si no,
+   * el submenú quedaría abierto sin que se vea de cuál de los catorce es.
+   */
+  const anclado = siempreAbierto || fijado || abierta !== null;
+  const desplegado = anclado || encima;
 
   const fijar = () => {
     setFijado(v => {
@@ -229,66 +265,91 @@ export default function Rail({
   };
 
   /*
-   * UNA ESPERA CORTA ANTES DE ABRIR. Sin ella, cruzar la columna de arriba
-   * abajo dispara los catorce paneles en el camino y la pantalla parpadea. 140
-   * ms es el tiempo por debajo del cual un gesto es «voy de paso» y por encima
-   * del cual es «me he parado aquí» — y se cancela si el ratón se va antes, así
-   * que nunca se abre uno que ya has dejado atrás.
+   * AQUÍ VIVÍA UNA ESPERA DE 140 ms antes de abrir el submenú al pasar el
+   * ratón. Ya no hace falta: el submenú se abre con la flecha, y una flecha no
+   * se pulsa sin querer al cruzar la lista. La espera existía para tapar un
+   * gesto mal repartido; quitado el gesto, sobra la tirita.
    */
-  const reloj = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cancelar = () => { if (reloj.current) { clearTimeout(reloj.current); reloj.current = null; } };
-  useEffect(() => cancelar, []);
 
   const boton = (h: Herramienta) => {
     const Icono = h.icono;
     const activa = abierta === h.clave;
+    // La flecha sólo existe desplegado, y no es una renuncia: plegado no caben
+    // dos objetivos de 40 px en 56 de ancho sin que uno se falle. Y no hace
+    // falta, porque acercar el ratón despliega el raíl — la flecha está siempre
+    // a un gesto de distancia.
+    const conFlecha = !!onAbrirSubmenu && h.conPanel && desplegado;
+    const Flecha = ladoDerecho
+      ? (activa ? ChevronRight : ChevronLeft)
+      : (activa ? ChevronLeft : ChevronRight);
     return (
-      <button
-        key={h.clave}
-        onMouseEnter={onPasarPorEncima ? () => {
-          cancelar();
-          reloj.current = setTimeout(() => onPasarPorEncima(h), 140);
-        } : undefined}
-        onMouseLeave={onPasarPorEncima ? cancelar : undefined}
-        // Y con el teclado también: quien navega con el tabulador llega aquí y
-        // merece ver lo mismo que quien pasa el ratón. Sin espera, porque el
-        // tabulador ya es un gesto deliberado.
-        onFocus={onPasarPorEncima ? () => onPasarPorEncima(h) : undefined}
-        onClick={() => (h.conPanel ? onElegir(h) : h.ruta.startsWith('/') ? navigate(h.ruta) : onElegir(h))}
-        title={desplegado ? undefined : h.nombre}
-        aria-label={h.nombre}
-        aria-current={activa ? 'true' : undefined}
-        className={cn(
-          // 40 px de alto: por debajo de eso este proyecto ya tiene catalogado
-          // que los botones dejan de acertarse con el dedo.
-          'relative flex h-10 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
-          desplegado ? 'w-full' : 'w-10 justify-center',
-          claro
-            ? (activa ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900')
-            : (activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'),
-        )}
-      >
+      <div key={h.clave} className={cn('relative flex shrink-0 items-center',
+        desplegado ? 'w-full' : 'w-10')}>
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
             distinto: el fondo ya lo usa el ratón al pasar por encima, y dos
             cosas que se pintan igual dejan de significar. */}
         {activa && (
-          <span className={cn('absolute top-2 h-6 w-0.5 bg-emerald-400',
+          <span className={cn('absolute top-2 z-10 h-6 w-0.5 bg-emerald-400',
             ladoDerecho ? 'right-0 rounded-l' : 'left-0 rounded-r')} />
         )}
-        {/* EL COLOR DEL TEMA, cuando lo tiene: el mismo azul del agua que en el
-            mapa. Sobre fondo oscuro no se usa —un `text-yellow-500` sobre negro
-            casi no se ve— y ahí manda el estado del botón. */}
-        <Icono className={cn('h-5 w-5 shrink-0', claro && h.color && !activa && h.color)} />
-        {/* El nombre NO se desmonta al plegar: se hace transparente y se le
-            quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
-            final de la animación en vez de acompañarla. */}
-        <span className={cn(
-          'overflow-hidden whitespace-nowrap text-left text-[13px] font-bold transition-all duration-200',
-          desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
-        )}>
-          {h.nombre}
-        </span>
-      </button>
+        <button
+          // EL NOMBRE LLEVA AL SITIO. Antes, en las herramientas con panel, no
+          // llevaba a ninguna parte: sólo abría el panel, y la herramienta
+          // entera sólo se alcanzaba desde dentro de él. Con la flecha haciendo
+          // ya ese trabajo, el nombre puede volver a hacer el suyo.
+          //
+          // Y A DÓNDE LLEVA LO DECIDE QUIEN LO PINTA, no el raíl. Aquí ponía
+          // `h.ruta.startsWith('/') ? navigate(h.ruta) : onElegir(h)`, y con eso
+          // los catorce temas se iban a `/objetivos/<id>` —su `ruta`— cuando lo
+          // que Eugenio pidió para ellos es `/explorar?objetivo=<id>`, la
+          // rejilla con todo lo que habla del tema. El raíl adivinaba, y
+          // adivinaba mal en catorce de veinticuatro casos.
+          onClick={() => onElegir(h)}
+          title={desplegado ? undefined : h.nombre}
+          aria-label={h.nombre}
+          aria-current={activa ? 'true' : undefined}
+          className={cn(
+            // 40 px de alto: por debajo de eso este proyecto ya tiene catalogado
+            // que los botones dejan de acertarse con el dedo.
+            'flex h-10 min-w-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+            desplegado ? 'flex-1' : 'w-10 justify-center',
+            claro
+              ? (activa ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900')
+              : (activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'),
+          )}
+        >
+          {/* EL COLOR DEL TEMA, cuando lo tiene: el mismo azul del agua que en
+              el mapa. Sobre fondo oscuro no se usa —un `text-yellow-500` sobre
+              negro casi no se ve— y ahí manda el estado del botón. */}
+          <Icono className={cn('h-5 w-5 shrink-0', claro && h.color && !activa && h.color)} />
+          {/* El nombre NO se desmonta al plegar: se hace transparente y se le
+              quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
+              final de la animación en vez de acompañarla. */}
+          <span className={cn(
+            'overflow-hidden whitespace-nowrap text-left text-[13px] font-bold transition-all duration-200',
+            desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
+          )}>
+            {h.nombre}
+          </span>
+        </button>
+
+        {conFlecha && (
+          <button
+            onClick={() => onAbrirSubmenu!(h)}
+            title={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
+            aria-label={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
+            aria-expanded={activa}
+            className={cn(
+              'grid h-8 w-7 shrink-0 place-items-center rounded-lg transition-colors',
+              claro
+                ? (activa ? 'text-emerald-600' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')
+                : (activa ? 'text-emerald-400' : 'text-slate-500 hover:bg-slate-800 hover:text-white'),
+            )}
+          >
+            <Flecha className="h-4 w-4" />
+          </button>
+        )}
+      </div>
     );
   };
 
@@ -296,7 +357,7 @@ export default function Rail({
     // El HUECO. Mide 56 px salvo que esté fijado: es lo que decide si el raíl
     // empuja el contenido o se le pone encima.
     <div className={cn('relative h-full shrink-0 transition-[width] duration-200',
-      siempreAbierto ? 'w-64' : fijado ? 'w-56' : 'w-14')}>
+      siempreAbierto ? 'w-64' : anclado ? 'w-56' : 'w-14')}>
       <nav
         aria-label="Herramientas"
         onMouseEnter={() => setEncima(true)}
@@ -321,7 +382,7 @@ export default function Rail({
           siempreAbierto ? 'w-64' : desplegado ? 'w-56' : 'w-14',
           // La sombra sólo cuando está flotando por encima: fijado forma parte
           // de la página y una sombra ahí lo despegaría de ella sin motivo.
-          !fijado && encima && 'shadow-2xl shadow-black/40',
+          !anclado && encima && 'shadow-2xl shadow-black/40',
         )}
       >
         <div className="flex shrink-0 items-center gap-1">
@@ -329,26 +390,51 @@ export default function Rail({
             onClick={onInicio}
             title="Inicio"
             aria-label="Inicio"
+            // `min-w-0` NO ES DECORACIÓN. Sin él este botón no baja de lo que
+            // mide su texto —«Red de Conocimiento» son ~190 px con el icono— y
+            // en un raíl de 224 px eso deja 34 para lo que venga detrás. Con un
+            // solo botón al lado cabía por los pelos; al añadir el de plegar,
+            // la fila se desbordó y, como el raíl recorta lo que se sale, **el
+            // botón nuevo acabó fuera de la pantalla**: existía, respondía al
+            // teclado y no se veía. Medido en el navegador: `x = 1299` en una
+            // ventana de 1280.
             className={cn(
-              'flex h-10 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              'flex h-10 min-w-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
               claro ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
               desplegado ? 'flex-1' : 'w-10 justify-center',
             )}
           >
             <Home className="h-5 w-5 shrink-0" />
             <span className={cn(
-              'overflow-hidden whitespace-nowrap text-[13px] font-black transition-all duration-200',
+              'truncate whitespace-nowrap text-[13px] font-black transition-all duration-200',
               desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
             )}>
               {titulo}
             </span>
           </button>
 
-          {/* EL BOTÓN DE FIJAR. Sólo existe desplegado, y es a propósito: es la
-              acción de «quédate así», y plegado no hay ningún «así» que
-              mantener. Aparece con el hover, que es cuando la mano ya está ahí. */}
-          {/* La chincheta no existe en móvil: no hay nada que fijar cuando ya
-              está siempre abierto. */}
+          {/* ══ PLEGAR, Y FIJAR ═══════════════════════════════════════════
+              Eugenio: «permite que ambos menús, el de la derecha y la
+              izquierda, tengan el botón de volverse a plegar cuando se
+              despliegan».
+
+              SON DOS BOTONES PORQUE SON DOS COSAS, aunque se parezcan:
+
+                · la CHINCHETA dice «quédate abierto aunque quite el ratón»;
+                · el de PLEGAR dice «ciérrate ahora».
+
+              Y el de plegar hace falta precisamente porque el otro existe: un
+              menú fijado ya no se cierra solo al alejarse, así que sin este
+              botón la única salida sería volver a buscar la chincheta. Lo mismo
+              cuando el menú está abierto porque se ha pulsado un círculo de
+              abajo: ahí quien lo tiene que cerrar es el Layout, y por eso la
+              consecuencia viaja hacia fuera (`onPlegar`).
+
+              La flecha apunta hacia donde se va a ir el menú, que en el raíl de
+              la derecha es al contrario.
+
+              En móvil no sale ninguno de los dos: allí el menú es un cajón que
+              ocupa la pantalla y se cierra tocando fuera o con su aspa. */}
           {desplegado && !siempreAbierto && (
             <button
               onClick={fijar}
@@ -357,10 +443,27 @@ export default function Rail({
               aria-pressed={fijado}
               className={cn(
                 'grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors',
-                fijado ? 'bg-slate-800 text-emerald-400' : 'text-slate-500 hover:bg-slate-800 hover:text-white',
+                fijado
+                  ? (claro ? 'bg-slate-100 text-emerald-600' : 'bg-slate-800 text-emerald-400')
+                  : (claro ? 'text-slate-400 hover:bg-slate-100 hover:text-slate-700' : 'text-slate-500 hover:bg-slate-800 hover:text-white'),
               )}
             >
-              {fijado ? <PanelLeftClose className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+              <Pin className="h-4 w-4" />
+            </button>
+          )}
+          {desplegado && anclado && (onPlegar || fijado) && (
+            <button
+              onClick={() => { if (fijado) fijar(); onPlegar?.(); }}
+              title="Plegar el menú"
+              aria-label="Plegar el menú"
+              className={cn(
+                'grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors',
+                claro
+                  ? 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                  : 'text-slate-500 hover:bg-slate-800 hover:text-white',
+              )}
+            >
+              {ladoDerecho ? <PanelRightClose className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
           )}
         </div>
