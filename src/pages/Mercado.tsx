@@ -48,6 +48,12 @@ export default function Mercado() {
   // para el chip «Solo favoritos».
   const [favoritos, setFavoritos] = useState<Set<string>>(new Set());
   const [soloFavoritos, setSoloFavoritos] = useState(false);
+  // Orden y páginas (F10, 2026-08-24). Con catálogo pequeño no se nota; con
+  // trescientas cosas, «no encuentro lo que vi ayer» es una venta perdida.
+  const [orden, setOrden] = useState('nuevo');
+  const [pagina, setPagina] = useState(1);
+  const [paginas, setPaginas] = useState(1);
+  const [totalProductos, setTotalProductos] = useState(0);
   const [demands, setDemands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
@@ -77,19 +83,24 @@ export default function Mercado() {
     if (filters.objective_id) params.set('objective_id', filters.objective_id);
     if (tab === 'ofertas' && filters.kind) params.set('kind', filters.kind);
     if (tab === 'demandas' && filters.status) params.set('status', filters.status);
+    if (tab === 'ofertas') { params.set('pagina', String(pagina)); params.set('por_pagina', '24'); params.set('orden', orden); }
 
     const url = tab === 'ofertas' ? `/api/products?${params}` : `/api/demands?${params}`;
     fetch(url)
       .then(r => r.json())
       .then(json => {
         if (cancelled) return;
-        if (tab === 'ofertas') setProducts(Array.isArray(json) ? json : []);
+        if (tab === 'ofertas') {
+          setProducts(Array.isArray(json?.productos) ? json.productos : Array.isArray(json) ? json : []);
+          setPaginas(Number(json?.paginas) || 1);
+          setTotalProductos(Number(json?.total) || 0);
+        }
         else setDemands(Array.isArray(json) ? json : []);
       })
       .catch(() => { if (!cancelled) { setProducts([]); setDemands([]); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [tab, filters]);
+  }, [tab, filters, orden, pagina]);
 
   useEffect(() => {
     if (!user) { setMisProyectos([]); return; }
@@ -172,11 +183,21 @@ export default function Mercado() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             value={filters.q}
-            onChange={e => setFilters(f => ({ ...f, q: e.target.value }))}
+            onChange={e => { setPagina(1); setFilters(f => ({ ...f, q: e.target.value })); }}
             placeholder={tab === 'ofertas' ? 'Buscar productos…' : 'Buscar demandas…'}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 transition-colors"
           />
         </div>
+        {tab === 'ofertas' && (
+          <select value={orden} onChange={e => { setPagina(1); setOrden(e.target.value); }}
+            className="h-[42px] px-3 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600" aria-label="Ordenar por">
+            <option value="nuevo">Lo más nuevo</option>
+            <option value="precio_asc">Precio: de menor a mayor</option>
+            <option value="precio_desc">Precio: de mayor a menor</option>
+            <option value="vendidos">Lo más vendido</option>
+            <option value="valorados">Mejor valorado</option>
+          </select>
+        )}
         {user && tab === 'ofertas' && (
           <button type="button" onClick={() => setSoloFavoritos(v => !v)}
             className={cn('inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-bold border transition-colors',
@@ -335,6 +356,19 @@ export default function Mercado() {
               )}
             </div>
           ))}
+        </div>
+
+      )}
+
+      {/* Páginas (F10). Solo aparece cuando hay más de una: un paginador con
+          una sola página es ruido. */}
+      {!loading && tab === 'ofertas' && paginas > 1 && !soloFavoritos && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button type="button" disabled={pagina <= 1} onClick={() => setPagina(p => Math.max(1, p - 1))}
+            className="h-10 px-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 disabled:opacity-40">Anterior</button>
+          <span className="text-xs font-bold text-slate-500">Página {pagina} de {paginas} · {totalProductos} productos</span>
+          <button type="button" disabled={pagina >= paginas} onClick={() => setPagina(p => Math.min(paginas, p + 1))}
+            className="h-10 px-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 disabled:opacity-40">Siguiente</button>
         </div>
       )}
 

@@ -6482,3 +6482,11 @@ resto de herramientas»*.
 - `GET /api/publicar/mis-productos/analitica?dias=30` y panel plegable en Comercio: visitas, a la cesta, pedidos y «compran %» por producto, más la frase que interpreta el número («muchas visitas y pocos pedidos: mira precio, fotos o descripción; pocas visitas: no lo ve nadie»).
 - **Los porcentajes solo a partir de 10 visitas**: con 3 visitas, «33 % compra» es una anécdota con aspecto de dato. Y se dice «visitas, no personas» para no dar por gente lo que son visitas.
 - Probado en local por HTTP: 12 visitas y 3 encestados → 25 % a la cesta; producto con 4 visitas → porcentajes en `null`; la analítica de otra vendedora no ve nada mío. Todo retirado.
+
+### 2026-08-24 — Comercio F10: buscar, ordenar y pasar página en el mercado (Programador 7)
+- Antes se buscaba solo por el **nombre**, se ordenaba solo por fecha y se devolvían 50 sin más. Con seis productos no se nota; con trescientos, «no encuentro lo que vi ayer» es una venta perdida.
+- `GET /api/products` ahora: busca en **nombre y descripción** (quien busca «miel» no tiene por qué acertar con el título que le puso otra persona), ordena por `nuevo` / `precio_asc` / `precio_desc` / `vendidos` / `valorados`, y **pagina**. Precio de menor a mayor deja «precio a consultar» al final: un nulo no es barato, es que no lo han dicho.
+- **Compatibilidad**: la ruta la usan otras pantallas que esperan un array. Sigue devolviendo array salvo que se pida `pagina`, y entonces devuelve `{productos, total, pagina, paginas}`. Comprobado que sin `pagina` responde array.
+- **Fallo cazado en la prueba**: con `SELECT DISTINCT`, Postgres exige que lo que se ordena esté en la lista de columnas — ordenar por «lo más vendido» devolvía error de consulta. Ahora «vendidos» y «valoración» se calculan como columnas con nombre (y de paso viajan al cliente).
+- `/mercado`: selector de orden, paginador (solo si hay más de una página: un paginador de una página es ruido) y vuelta a la página 1 al cambiar búsqueda u orden.
+- Probado en local por HTTP: los cinco órdenes; página 1 y 2 traen productos distintos; precio_asc ordena 120→450000; buscar una palabra que solo está en la descripción encuentra 3; sin `pagina` sigue siendo array.
