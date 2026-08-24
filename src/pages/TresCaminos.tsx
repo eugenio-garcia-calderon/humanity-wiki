@@ -91,16 +91,15 @@ export default function TresCaminos() {
         <h1 className="text-center text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">
           Red de <span className="text-emerald-600">Conocimiento</span>
         </h1>
-        <p className="mt-3 text-center text-sm font-bold text-slate-400 sm:text-base">
-          ¿A qué vienes hoy?
-        </p>
-
         {/* EN UNA SOLA LÍNEA, TAMBIÉN EN EL MÓVIL, que es lo que se pidió. A
             375 px cada tarjeta mide unos 105 px: el dibujo se sigue leyendo
             —son formas grandes, no texto— y la frase de debajo se esconde,
             porque tres frases de dos palabras por línea no se leen, se
             adivinan. El nombre de cada camino no se esconde nunca. */}
-        <div className="mt-8 grid grid-cols-3 gap-3 sm:mt-12 sm:gap-5">
+        {/* Sin subtítulo (2026-08-24, Eugenio: «quita la frase de ¿a qué vienes
+            hoy?»). El hueco que dejaba lo asume la rejilla, que sube de 8 a 10 y
+            de 12 a 14: si no, el nombre y las tarjetas se quedaban pegados. */}
+        <div className="mt-10 grid grid-cols-3 gap-3 sm:mt-14 sm:gap-5">
           {CAMINOS.map(c => (
             <button
               key={c.clave}

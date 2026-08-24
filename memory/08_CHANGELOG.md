@@ -6606,3 +6606,8 @@ arriba el nombre en grande de "Red de Conocimiento"».
 - `/explorar` no cambia: el muro sigue en su dirección de siempre, así que
   ningún enlace guardado se rompe. Y sin sesión sigue mandando la portada de
   bienvenida.
+
+## 2026-08-24 — Fuera «¿A qué vienes hoy?»
+Eugenio: «quita la frase de ¿a qué vienes hoy?, debajo del titular de la página
+de inicio». El hueco que dejaba lo asume la rejilla (de 8 a 10, y de 12 a 14 en
+escritorio): sin eso, el nombre y las tarjetas quedaban pegados.
