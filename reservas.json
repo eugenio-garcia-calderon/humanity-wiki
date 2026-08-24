@@ -35,6 +35,12 @@
       "ruta": "src/server/buscador.ts",
       "motivo": "prog2: reintentar cuando la respuesta no sirve, no cuando es corta",
       "desde": "2026-08-24T00:27:37.486Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "drizzle/0116_veracidad_coherencia.sql",
+      "motivo": "Veracidad fase 8: busqueda de contradicciones (indice de texto)",
+      "desde": "2026-08-24T00:29:34.444Z"
     }
   ]
 }
