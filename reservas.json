@@ -31,16 +31,16 @@
       "desde": "2026-08-24T15:31:32.633Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "src/utils/objetivos.ts",
-      "motivo": "tematicas en el recomendador del buscador",
-      "desde": "2026-08-24T15:33:54.657Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: el tipo lleva ahora el tamano del lienzo",
       "desde": "2026-08-24T15:40:29.165Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/utils/objetivos.ts",
+      "motivo": "tematicas en el recomendador del buscador",
+      "desde": "2026-08-24T15:43:19.338Z"
     }
   ]
 }
