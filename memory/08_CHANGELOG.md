@@ -6671,3 +6671,50 @@ que se decidió al montarlo.
 - **Página `/administracion`** (solo administradores, fuera del menú): cada cifra con su valor legible (12 % y no 1200), su explicación, **de dónde sale** (panel / servidor / por defecto) y un campo de motivo que va al historial. La página no sabe qué cifras existen: las pide al servidor, así que añadir una es tocar solo `ajustes.ts`.
 - **Contrato de cobro a v1.1** con 12 % / 10 % (no podía decir 5 % si se cobra 12 %), y los textos de Avisos legales y CrearProducto dejan de tener la cifra escrita a mano: la piden a `puntos-en-caja`, que devuelve las comisiones vigentes.
 - Probado en local por HTTP: el panel lista 17 cifras con su origen; cambiar la comisión a 15 % se ve en el resto de la plataforma en menos de un segundo; 200 % rechazado por el límite; clave inventada 400; sin ser administrador 403; el historial guarda los tres cambios con su motivo. Y **una compra real**: 10 € pagados con 10 puntos → comprador −10, vendedora +9,00, plataforma +1,00 (10 % exacto). Todo retirado.
+
+### 2026-08-24 — Buscador, fase 1: las áreas, y buscar sin tildes (prog8)
+
+Eugenio, sobre el desplegable del chat: «si pongo las tres letras *eco*, todavía
+no aparece debajo *ecosistema*, que es un tema relevante dentro de la
+plataforma, ya que si pulsas en ecosistemas te aparecen todas las publicaciones
+que llevan a ello […] todavía hay que darle mucha más profundidad».
+
+**Lo que fallaba no era el orden: era que las áreas no existían para el
+buscador.** Las catorce áreas (`src/utils/objetivos.ts`) no son una tabla — son
+la tira de pastillas de Explorar, y llevan a *todo lo publicado* sobre un tema.
+El buscador solo conocía tablas, así que de «eco» sacaba la ficha del objetivo
+ECOSISTEMAS (otra página, que enseña indicadores) y la enterraba bajo *Meco* y
+*El Berrueco*, que llevan «eco» dentro.
+
+- **Las áreas son ahora un resultado más, y van primero.** Con su icono y su
+  color —los mismos del mapa y de Explorar, para que se reconozcan como la
+  misma cosa— y con «· todo lo publicado» al lado, que es lo que las distingue
+  de una ficha. Llevan a `/explorar?objetivo=O006`.
+- **Se resuelven en el navegador, sin ir al servidor**: son catorce y ya están
+  cargadas, así que aparecen con la segunda letra y sin esperar a la red.
+- **Y se encuentran por sus palabras, no solo por su nombre**: «bosque» y
+  «biodiversidad» llevan a ECOSISTEMAS. Eso es predecir lo que se busca en vez
+  de comparar letras. El listón sube según lo poco escrito: por nombre bastan
+  dos letras, por palabra suelta hacen falta tres — «co» encaja con «coche»,
+  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
+  siempre son ruido, no predicción.
+- **El área y la ficha del objetivo ya no salen las dos.** Eran dos filas con
+  el mismo nombre, una encima de otra, y la diferencia no cabía en la fila. Se
+  queda la que contesta lo que se preguntaba; la ficha sigue en Objetivos.
+- **Buscar sin tildes** (`GET /api/search`): «energia» no encontraba «ENERGÍA»
+  y «ecologia» no encontraba nada. Ahora los dos lados se comparan llanos, con
+  `translate()` —SQL de siempre— y no con la extensión `unaccent`, que no está
+  instalada y cuya instalación es decisión de quien lleva escalabilidad.
+- **Y «empieza una palabra por esto» pasa a ir por delante de «lo lleva
+  dentro»**, así que buscando «eco» ECOSISTEMAS va antes que El Berru*eco*.
+
+Comprobado en 3008: «eco» → ECONOMÍA y ECOSISTEMAS como áreas, y detrás reto,
+organización, territorios, publicaciones y grafo — nueve filas que enseñan la
+variedad de lo que hay; pulsar ECOSISTEMAS abre `/explorar?objetivo=O006` con
+sus publicaciones. «bosque» y «biodiversidad» → ECOSISTEMAS. «energia» →
+ENERGÍA. «vivienda» → VIVIENDA + soluciones + grafo. `tsc` limpio.
+
+**Esto es la fase 1 de lo que pidió**, y solo cubre el chat. Quedan: el
+historial de búsquedas (que lo buscado antes vuelva arriba), y los tres
+historiales del perfil —búsquedas, publicaciones vistas, publicaciones creadas
+o modificadas—.
