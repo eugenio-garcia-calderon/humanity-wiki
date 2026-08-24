@@ -71,6 +71,12 @@
       "ruta": "src/components/bienvenida/previas.tsx",
       "motivo": "prog3: previa de Explorar con vídeo, fotos y muro social animado",
       "desde": "2026-08-24T12:04:15.720Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/graph.ts",
+      "motivo": "fase 1 del buscador: buscar sin tildes",
+      "desde": "2026-08-24T12:05:39.742Z"
     }
   ]
 }
