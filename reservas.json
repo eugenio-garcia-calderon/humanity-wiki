@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/components/portada/PortadaTarjeta.tsx",
+      "motivo": "prog2: barra de progreso del video, arrastrable",
+      "desde": "2026-08-24T18:25:37.981Z"
+    }
+  ]
 }
