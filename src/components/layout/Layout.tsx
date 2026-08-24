@@ -631,7 +631,39 @@ export default function Layout() {
           se vio el daño en una captura: en /explorar tapaba las tres primeras
           carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
           ve; tapar contenido es un precio que se paga a escondidas. */}
-      <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
+      {/* ══ A 320 px LA FILA NO CABÍA (2026-08-24) ════════════════════════
+          Encontrado por prog3 preparando las capturas de Google Play y medido
+          aquí: la cabecera pedía **358 px dentro de una ventana de 320** — 38
+          fuera. Con la sesión cerrada lo que se salía era el botón de entrar;
+          con ella abierta, la foto de la cuenta. Es el mismo sitio: el último
+          de la fila es el que se cae por el borde.
+
+          Y 320 no es un capricho: es el ancho mínimo que acepta Google Play,
+          o sea el que se mira antes de publicar la aplicación.
+
+          ── LO QUE SE HA DADO, Y LO QUE NO ────────────────────────────────
+          No se quita ningún botón. Lo que se aprieta por debajo de `sm` es el
+          **aire** entre ellos, de 8 px a 4. Ocho separan; cuatro también
+          separan, y a 320 px el aire es lo único que sobra cuando lo demás son
+          objetivos que hay que poder acertar con el dedo.
+
+          El otro ahorro está en el botón de entrar: ahí abajo dice «Entrar» en
+          vez de «Iniciar sesión». **Sigue siendo una palabra**, que es lo que
+          no se podía perder — un icono de persona sin texto se lee como «tu
+          cuenta», justo lo contrario de lo que ese botón hace.
+
+          ── Y HACÍA FALTA UN TERCER RECORTE, MEDIDO ───────────────────────
+          Con el aire a 4 px, **con la sesión abierta** la fila seguía pidiendo
+          322 px: dos de más. Ahí hay tres botones que no existen sin sesión —
+          calendario, avisos y tu cuenta— y ninguno sobra.
+
+          Así que lo que se recorta es el margen de la propia barra, de 8 px a 4
+          por lado. Ocho píxeles que no eran de nadie, en vez de encoger un
+          botón por debajo de lo que se acierta con el dedo o quitar un control
+          de la única barra que hay.
+
+          Comprobado con las dos sesiones a 320 px, no calculado. */}
+      <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-1 sm:px-2 flex items-center gap-1 sm:gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
@@ -1217,8 +1249,15 @@ export default function Layout() {
             />
           ) : (
             <Link to="/login"
-              className="h-9 px-3 inline-flex items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
-              <User className="w-3.5 h-3.5" /> Iniciar sesión
+              aria-label="Iniciar sesión"
+              className="h-9 px-2.5 sm:px-3 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
+              <User className="w-3.5 h-3.5 shrink-0" />
+              {/* Dos palabras distintas para lo mismo, y no un texto recortado:
+                  «Iniciar ses…» no es más corto, es peor. El `aria-label` de
+                  arriba dice la frase entera pase lo que pase, así que quien no
+                  ve la pantalla oye siempre lo mismo. */}
+              <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">Iniciar sesión</span>
             </Link>
           )}
         </div>
