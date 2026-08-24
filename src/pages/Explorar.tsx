@@ -4,7 +4,7 @@ import {
   Search, User as UserIcon, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2, Plus, Flag, Ban,
+  ArrowLeft, Users2, Globe2, Plus, Flag, Ban, ArrowUpRight,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -1006,7 +1006,7 @@ export default function Explorar() {
                       </div>
                       )}
                       {/* EL PIE YA NO REPITE AL AUTOR: está arriba, con su foto. */}
-                      <div className="px-3.5 py-2 flex items-center gap-2.5 text-[11px] text-slate-500">
+                      <div className="px-3.5 py-2 flex items-center gap-3 text-[11px] text-slate-500">
                       {/* ── DÓNDE ESTÁ METIDA ESTO, Y CUÁNDO SE PUEDE PULSAR ───
                           Eugenio: «hay una información abajo que es dónde está
                           integrada esa publicación, puede estar integrada dentro
@@ -1031,12 +1031,53 @@ export default function Explorar() {
                           en cuanto alguien pulsa. */}
                       {it.donde && (
                       dondeEsUnSitio(it) ? (
+                      /* ══ NO ES UNA ETIQUETA: ES UNA PUERTA ═══════════════
+                         Eugenio: «dale más relevancia a esa etiqueta para que
+                         sea todavía algo más sofisticado a nivel de red de
+                         conocimiento, que se entienda que eso viene de un tema
+                         complejo mucho mayor de lo que la gente se pueda
+                         imaginar. Hazlo de forma elegante, minimalista, pero
+                         poderosa».
+
+                         Lo que hace esto poderoso no es el tamaño de la letra:
+                         es **el número**. «Incendios en España» puede ser una
+                         nota suelta; «Incendios en España · 24 piezas» ya no
+                         puede serlo. Un rótulo se lee y se olvida; una cuenta
+                         se comprueba, y por eso pesa. Sale de contar las
+                         ventanas de ese lienzo, no de una palabra elegida.
+
+                         Y por eso lo poco que se añade se añade ahí: dos
+                         palabras en versal pequeña —«PARTE DE»— que dicen que
+                         hay un dentro, el nombre en negro, y el recuento. Sin
+                         color de marca, sin sombra y sin fondo salvo al pasar
+                         el ratón, porque esto convive con la portada y el
+                         título, y competir con ellos sería quitarle sitio a lo
+                         que la tarjeta viene a decir.
+
+                         La flecha aparece sólo al acercarse: mientras no la
+                         necesitas, no ocupa. */
                       <button
                       onClick={e => { e.stopPropagation(); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
                       title={`Ver «${it.donde}»`}
-                      className="inline-flex min-w-0 items-center gap-1 rounded-md -mx-1 px-1 py-0.5 font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                      className="group/red inline-flex min-w-0 items-center gap-2 rounded-lg -mx-1.5 px-1.5 py-1 hover:bg-slate-50 transition-colors"
                       >
-                      <Network className="w-3 h-3 shrink-0" /><span className="truncate">{it.donde}</span>
+                      <Network className="w-3.5 h-3.5 shrink-0 text-slate-300 group-hover/red:text-emerald-600 transition-colors" />
+                      <span className="min-w-0 flex flex-col items-start leading-tight">
+                      <span className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">Parte de</span>
+                      <span className="flex min-w-0 items-baseline gap-1.5">
+                      <span className="truncate text-[12px] font-black text-slate-800 group-hover/red:text-emerald-700 transition-colors">{it.donde}</span>
+                      {/* `> 0` y no `!= null`: un lienzo del que no consta
+                          ninguna pieza no se anuncia con un «0 piezas», que
+                          suena a vacío cuando lo que pasa es que no lo sabemos
+                          contar. Sin número, la etiqueta sigue funcionando. */}
+                      {(it.donde_piezas ?? 0) > 0 && (
+                      <span className="shrink-0 text-[10px] font-bold text-slate-400">
+                      {it.donde_piezas} {it.donde_piezas === 1 ? 'pieza' : 'piezas'}
+                      </span>
+                      )}
+                      </span>
+                      </span>
+                      <ArrowUpRight className="w-3 h-3 shrink-0 text-slate-300 opacity-0 group-hover/red:opacity-100 transition-opacity" />
                       </button>
                       ) : (
                       <span className="inline-flex items-center gap-1 truncate text-slate-400">

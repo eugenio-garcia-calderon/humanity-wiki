@@ -66,15 +66,28 @@ export function temasDe(item: any): typeof OBJETIVOS {
  * tarjetas vecinas. Una rejilla que se reordena cuando pasas el ratón por
  * encima es una rejilla que no se puede leer.
  */
-/** ¿Ha tocado ya algo la persona en esta página?
+/*
+ * AQUÍ VIVÍA `puedeSonar()`, que preguntaba si la persona ya había pulsado algo
+ * antes de intentar quitar el silencio. Retirado el 2026-08-24.
  *
- *  De esto depende que se pueda quitar el silencio. Sin un clic previo, Chrome
- *  no ignora el intento: **pausa el vídeo**. Preguntar primero es la diferencia
- *  entre «se ve y no se oye» y «no se ve». */
-const puedeSonar = () => {
-  const a = (navigator as any).userActivation;
-  return a ? Boolean(a.hasBeenActive) : true;
-};
+ * La razón por la que se escribió era buena y sigue siendo cierta: en un
+ * `<video>` del navegador, quitar el silencio sin ese permiso hace que Chrome
+ * **pause** el vídeo, y eso cambia «se ve y no se oye» por «no se ve».
+ *
+ * Lo que fallaba es que se usaba como si eso valiera para los dos casos, y no:
+ *
+ *   · el `<video>` subido → el riesgo ya lo cubre su `catch`, que lo vuelve a
+ *     poner callado y lo arranca otra vez. Preguntar antes sólo garantizaba que
+ *     no sonara nunca.
+ *   · YouTube → ni siquiera es un `<video>`: es un reproductor de otro dominio
+ *     al que se le manda un mensaje. Comprobado en producción con
+ *     `hasBeenActive === false`: contesta `muted: false`.
+ *
+ * O sea que el candado no protegía de nada y silenciaba a todo el que pasara el
+ * ratón por un vídeo antes de haber hecho clic en algo — que es exactamente lo
+ * que hace cualquiera al llegar a una lista de publicaciones.
+ */
+
 
 export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo: string }) {
   const [encima, setEncima] = useState(false);
@@ -132,7 +145,14 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     const v = reproductor.current;
     if (!v) return;
     if (encima) {
-      v.muted = !puedeSonar();
+      // SE INTENTA CON SONIDO SIEMPRE. Antes esto era `v.muted = !puedeSonar()`,
+      // o sea: si la persona no había pulsado nada todavía, se empezaba callado
+      // **sin ni siquiera intentarlo**. En un `<video>` de verdad el riesgo es
+      // real —Chrome pausa el vídeo si le quitas el silencio sin permiso—, pero
+      // ese riesgo ya lo cubre el `catch` de aquí abajo, que vuelve a ponerlo
+      // callado y lo arranca otra vez. Entre «nunca suena» y «suena, y si el
+      // navegador se queja se queda callado», la segunda.
+      v.muted = false;
       v.play().catch(() => {
         // El navegador lo ha bloqueado. Se reproduce callado, que es mejor que
         // no reproducir: la portada en movimiento sigue diciendo que hay vídeo.
@@ -145,75 +165,94 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     }
   }, [encima]);
 
-  // Lo mismo para YouTube, que no es un `<video>` sino un reproductor dentro de
-  // un marco: se le habla por mensajes. Se insiste tres veces porque el
-  // reproductor tarda en estar listo y un mensaje que llega antes se pierde.
-  useEffect(() => {
-    if (!encima || !portada.youtube) return;
-    if (!puedeSonar()) return;
-    const quitarSilencio = () => {
-      const w = marco.current?.contentWindow;
-      if (!w) return;
-      for (const orden of ['unMute', 'playVideo']) {
-        try { w.postMessage(JSON.stringify({ event: 'command', func: orden, args: [] }), '*'); } catch { /* aún no escucha */ }
-      }
-      try { w.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*'); } catch { /* ídem */ }
-    };
-    const tiempos = [600, 1400, 2600].map(t => setTimeout(quitarSilencio, t));
-    return () => tiempos.forEach(clearTimeout);
-  }, [encima, portada.youtube]);
-
   /*
-   * ── CUÁNDO ESTÁ REPRODUCIENDO DE VERDAD ───────────────────────────────────
-   * El reproductor no lo dice por su cuenta: hay que suscribirse mandándole
-   * `{event:'listening'}`, y entonces contesta con `onStateChange` (1 =
-   * reproduciendo) y con `infoDelivery`, que trae lo mismo dentro. Se aceptan
-   * los dos porque el segundo llega antes en la práctica.
+   * ══ YOUTUBE: EL SONIDO Y EL «YA ESTOY REPRODUCIENDO», EN UNA SOLA CONVERSACIÓN
+   * ══════════════════════════════════════════════════════════════════════════
+   * Aquí había dos efectos que le hablaban al reproductor **a ciegas**: uno le
+   * mandaba `unMute` a los 600, 1400 y 2600 ms, y otro le pedía los estados a
+   * los 0, 200, 700 y 1500 ms. Los dos disparaban contra el reloj esperando
+   * acertar cuando el marco ya estuviera listo.
    *
-   * Se insiste tres veces por lo mismo que con el sonido: un mensaje enviado
-   * antes de que el marco escuche se pierde sin avisar.
+   * Eugenio: «el vídeo se reproduce, pero no se escucha el audio». Medido
+   * contra producción en Chrome: el reproductor **no contestaba absolutamente
+   * nada** —cero mensajes— y seguía en `muted: true`.
    *
-   * ── LA RED DE SEGURIDAD ENSEÑA, NO ESCONDE ────────────────────────────────
-   * Si a los 3 s no ha contestado nadie, se enseña igual. Es la decisión
-   * importante de todo esto: el fallo tiene que ser «se ve el rótulo un
-   * momento», nunca «no se ve nada». Lo segundo es peor y además es
-   * indistinguible de una tarjeta rota, así que nadie lo reportaría como fallo.
+   * ── LO QUE FALLABA, Y ERAN DOS COSAS A LA VEZ ─────────────────────────────
    *
-   * Y hace falta de verdad: en una pestaña que el navegador no está pintando
-   * —otra pestaña delante, la ventana detrás— el reproductor puede no llegar
-   * nunca a «reproduciendo», y entonces este temporizador es el único camino.
+   * 1. NADIE ESCUCHABA EN EL MOMENTO BUENO. El reproductor sólo manda estados
+   *    a quien se suscribe **cuando él está listo**; al que llega tarde le
+   *    contesta «ya estaba iniciado» y no le manda nada más. Un temporizador no
+   *    puede acertar ese instante: lo sabe el propio marco cuando carga.
+   *
+   * 2. EL SONIDO NI SE INTENTABA. Había un candado, `puedeSonar()`, que sólo
+   *    dejaba pedir sonido si la persona ya había pulsado algo en la página.
+   *    Venía de una razón buena —en un `<video>` de verdad, quitar el silencio
+   *    sin ese permiso hace que Chrome **pause** el vídeo— pero **aquí no
+   *    aplica**: esto no es un `<video>`, es un reproductor de otro dominio al
+   *    que se le manda un mensaje, y quien decide qué hacer con él es YouTube.
+   *
+   *    Comprobado a propósito antes de quitarlo, en producción y con
+   *    `navigator.userActivation.hasBeenActive === false`: se manda `unMute` al
+   *    recibir `onReady` y el reproductor contesta `muted: false`. O sea que el
+   *    candado no protegía de nada — sólo garantizaba el silencio para
+   *    cualquiera que pasara el ratón por un vídeo antes de haber hecho clic en
+   *    algo, que es justo lo que hace todo el mundo al llegar a una lista.
+   *
+   * ── ASÍ QUE SE ESPERA A QUE ÉL HABLE ──────────────────────────────────────
+   * El marco avisa al cargar (`onLoad`), ahí se le dice «te escucho», y él
+   * contesta `onReady`. En ESE momento —y no antes— se le pide sonido. Después
+   * cuenta lo que va pasando, y de ahí sale también el «ya está reproduciendo»
+   * que destapa el vídeo.
    */
+  const alCargarElMarco = () => {
+    try {
+      marco.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*');
+    } catch { /* el marco se ha ido entre medias */ }
+  };
+
   useEffect(() => {
     if (!encima || !portada.youtube) { setReproduciendo(false); return; }
+
+    const mandar = (func: string, args: any[] = []) => {
+      try {
+        marco.current?.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func, args, id: 1, channel: 'widget' }), '*');
+      } catch { /* ídem */ }
+    };
+
     const oir = (e: MessageEvent) => {
       if (e.source !== marco.current?.contentWindow) return;
       let d: any = e.data;
       if (typeof d === 'string') { try { d = JSON.parse(d); } catch { return; } }
+
+      // LISTO: es el único instante en que se sabe que escucha de verdad.
+      if (d?.event === 'onReady') {
+        mandar('unMute');
+        mandar('setVolume', [100]);
+        mandar('playVideo');
+      }
       const estado = d?.event === 'onStateChange' ? d.info : d?.info?.playerState;
       if (estado === 1) setReproduciendo(true);
     };
+
     window.addEventListener('message', oir);
-    // `id` y `channel` no son adorno: son los campos que el reproductor
-    // devuelve en su respuesta, o sea los que espera. Comprobado en Chrome — a
-    // un `listening` con los tres campos contesta
-    // `{"event":"alreadyInitialized","channel":"widget","id":1}`, así que el
-    // canal existe y escucha.
-    const suscribir = () => {
-      try {
-        marco.current?.contentWindow?.postMessage(
-          JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*');
-      } catch { /* aún no escucha */ }
-    };
-    // El primero va pronto a propósito: el reproductor sólo empieza a mandar
-    // estados al que se suscribe antes de que se dé por iniciado. Al que llega
-    // tarde le contesta «ya estaba iniciado» y no le manda nada más.
-    const tiempos = [0, 200, 700, 1500].map(t => setTimeout(suscribir, t));
+    // Y una suscripción de repuesto: si el marco ya estaba cargado cuando este
+    // efecto arranca, su `onLoad` ya pasó y nadie habría dicho «te escucho».
+    alCargarElMarco();
+
+    /*
+     * ── LA RED DE SEGURIDAD ENSEÑA, NO ESCONDE ──────────────────────────────
+     * Si a los 3 s no ha contestado nadie, se enseña igual. Es la decisión
+     * importante: el fallo tiene que ser «se ve el rótulo un momento», nunca
+     * «no se ve nada» — lo segundo es peor y además es indistinguible de una
+     * tarjeta rota, así que nadie lo reportaría.
+     *
+     * Y hace falta de verdad: en una pestaña que el navegador no está pintando
+     * el reproductor puede no llegar nunca a «reproduciendo».
+     */
     const red = setTimeout(() => setReproduciendo(true), 3000);
-    return () => {
-      window.removeEventListener('message', oir);
-      tiempos.forEach(clearTimeout);
-      clearTimeout(red);
-    };
+    return () => { window.removeEventListener('message', oir); clearTimeout(red); };
   }, [encima, portada.youtube]);
 
   return (
@@ -262,8 +301,11 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
             // silencio. `mute=1` de salida no es una preferencia: sin él el
             // navegador no deja arrancar el vídeo solo, y entonces no hay nada
             // que desmutear.
-            src={`https://www.youtube-nocookie.com/embed/${portada.youtube}?autoplay=1&mute=1&controls=0&loop=1&playlist=${portada.youtube}&enablejsapi=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1`}
+            src={`https://www.youtube-nocookie.com/embed/${portada.youtube}?autoplay=1&mute=1&controls=0&loop=1&playlist=${portada.youtube}&enablejsapi=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&origin=${encodeURIComponent(window.location.origin)}`}
+            onLoad={alCargarElMarco}
             title={titulo}
+            // `origin` lo pide la documentación de YouTube para el canal de
+            // mensajes, y con él el marco contesta `readyToListen` antes de nada.
             allow="autoplay; encrypted-media"
             // ── LA LÍNEA QUE QUITA LOS BOTONES Y EL TÍTULO ──────────────────
             // Eugenio: «aparecen los botones de pausa, adelante y atrás y el
