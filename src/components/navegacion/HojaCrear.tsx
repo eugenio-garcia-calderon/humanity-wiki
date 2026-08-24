@@ -73,6 +73,12 @@ interface Cosa {
 const COSAS: Cosa[] = [
   { nombre: 'Foto o vídeo', Previa: PreviaArchivos,      a: '/?atajo=crear',      nota: 'Con la cámara' },
   { nombre: 'Publicación',  Previa: PreviaPublicaciones, a: '/explorar?crear=1',  nota: 'En el muro' },
+  // REPUBLICAR VA AQUÍ Y NO SÓLO EN EL MENÚ DE UNA TARJETA (2026-08-24).
+  // Desde una tarjeta se republica lo que ya estás viendo; desde aquí se
+  // republica algo de FUERA —un tuit, un vídeo, un artículo—, que es un
+  // «quiero hacer esto» y no un «esto que estoy leyendo». Sin esta entrada, lo
+  // de fuera no tendría puerta: no hay ninguna tarjeta de la que colgarlo.
+  { nombre: 'Republicar',   Previa: PreviaPublicaciones, a: '/explorar?republicar=1', nota: 'De aquí o de otra red' },
   { nombre: 'Proyecto',     Previa: PreviaTareas,        a: '/proyectos?nuevo=1', nota: 'Con su tablero' },
   { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
   { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },

@@ -4,7 +4,7 @@ import {
   Search, User as UserIcon, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2, Plus, Flag, Ban, ArrowUpRight,
+  ArrowLeft, Users2, Globe2, Plus, Flag, Ban, ArrowUpRight, Repeat2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -13,6 +13,8 @@ import FichaPublicacion, { type Publicacion } from '../components/knowledge/Fich
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import VentanaCentral from '../components/ventanas/VentanaCentral';
+import Republicacion, { SelloRepublicado } from '../components/knowledge/Republicacion';
+import DialogoRepublicar from '../components/knowledge/DialogoRepublicar';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
 import { Denunciar } from '../components/moderacion/Denunciar';
 import { Bloquear } from '../components/moderacion/Bloquear';
@@ -214,6 +216,10 @@ export default function Explorar() {
    */
   const [verPapelera, setVerPapelera] = useState(() => new URLSearchParams(window.location.search).get('papelera') === '1');
   const [creadorAbierto, setCreadorAbierto] = useState(false);
+  /** Lo que se está republicando ahora mismo, si hay algo. `null` con el
+   *  diálogo cerrado; un objeto vacío cuando se abre para pegar un enlace de
+   *  fuera, sin nada elegido todavía. */
+  const [republicando, setRepublicando] = useState<{ id: string; titulo?: string | null; autor?: string | null } | null | undefined>(undefined);
   const [papelera, setPapelera] = useState<any[]>([]);
   const debounce = useRef<any>(null);
 
@@ -236,11 +242,16 @@ export default function Explorar() {
   useEffect(() => {
     const papelera = searchParams.get('papelera') === '1';
     const portada = searchParams.get('portada') === '1';
-    if (!papelera && !portada) return;
+    // `republicar=1` llega desde el botón de Crear, para republicar algo de
+    // FUERA: no hay ninguna publicación de aquí elegida, así que el diálogo se
+    // abre con `null` y pide una dirección.
+    const republicar = searchParams.get('republicar') === '1';
+    if (!papelera && !portada && !republicar) return;
     if (papelera) setVerPapelera(true);
     if (portada) setPersonalizando(true);
+    if (republicar) setRepublicando(null);
     const q = new URLSearchParams(searchParams);
-    q.delete('papelera'); q.delete('portada');
+    q.delete('papelera'); q.delete('portada'); q.delete('republicar');
     setSearchParams(q, { replace: true });
   }, [searchParams]);
   const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string; autor_id?: string; autor_nombre?: string } | null>(null);
@@ -809,7 +820,21 @@ export default function Explorar() {
 
                           La foto es de 26 px y con inicial de respaldo: sin foto
                           guardada, un círculo vacío es peor que una letra. */}
-                      <div className="px-3.5 pt-3 flex items-center gap-1.5">
+                      {/* ── EL SELLO, ENCIMA DE TODO ────────────────────────
+                          Eugenio: «que aparezca arriba el que republica».
+
+                          Va **antes** del nombre y no dentro del pie porque
+                          cambia cómo se lee todo lo de abajo: sin este renglón,
+                          el texto de otro que hay dentro parece de quien
+                          aparece arriba. Es la línea que evita la única forma
+                          de romper esto de verdad — que republicar acabe
+                          pareciendo firmar. */}
+                      {it.republica && (
+                      <div className="px-3.5 pt-2.5">
+                      <SelloRepublicado nombre={it.autor_nombre} />
+                      </div>
+                      )}
+                      <div className={cn('px-3.5 flex items-center gap-1.5', it.republica ? 'pt-1' : 'pt-3')}>
                       {/* ── QUIEN PUBLICA ES UN ENLACE, NO PARTE DEL CARTEL ────
                           Eugenio: «si se pincha en ese nombre, te lleve al perfil
                           de esa persona. Ahora mismo es todo como una gran
@@ -898,6 +923,21 @@ export default function Explorar() {
                       className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
                       <Download className="w-3.5 h-3.5 text-slate-400" /> Descargar
                       </button>
+                      {/* ══ REPUBLICAR ══════════════════════════════════
+                          Eugenio: «poder hacer una republicación de otro autor».
+
+                          Sólo sobre lo de OTROS y sólo sobre publicaciones del
+                          muro: republicar lo tuyo es duplicarlo, y para tenerlo
+                          arriba está fijarlo. Y una republicación no se vuelve
+                          a republicar en cadena — el servidor manda al original,
+                          porque tres capas de «fulano republicó a mengano»
+                          esconden el contenido detrás de la genealogía. */}
+                      {user && !it.soy_autor && it.tipo === 'muro' && !it.republica && (
+                      <button onClick={() => { setMenuAbierto(null); setRepublicando({ id: it.id, titulo: it.titulo, autor: it.autor_nombre }); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Repeat2 className="w-3.5 h-3.5 text-slate-400" /> Republicar
+                      </button>
+                      )}
                       {/* DENUNCIAR: solo sobre lo de otros. Denunciarte a ti
                           mismo no es una acción, es una confusión — y quien
                           quiera quitar lo suyo tiene «Eliminar» ahí debajo. */}
@@ -982,7 +1022,13 @@ export default function Explorar() {
                       </div>
                       ) : null; })()}
 
+                      {/* Sin título no se pinta el hueco. Pasa en las
+                          republicaciones sin comentario, que no tienen ninguno
+                          — y un párrafo vacío deja un salto que parece un
+                          fallo de maquetación. */}
+                      {it.titulo && (
                       <p className="px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      )}
 
                       {/* EL TEXTO, DEBAJO DEL TÍTULO (2026-08-24). Eugenio: «haz
                           que el texto descriptivo también se lea debajo del
@@ -1000,6 +1046,19 @@ export default function Explorar() {
                       <p className="px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
                       ) : null;
                       })()}
+
+                      {/* ── Y DEBAJO, LO DE OTRO, EN SU PROPIA CAJA ─────────
+                          Eugenio: «abajo el autor original y el contenido».
+
+                          Después del comentario, porque ése es el orden en que
+                          se lee: primero lo que dice quien reparte, luego lo
+                          que reparte. Y dentro de un marco, que es lo que
+                          impide que los dos textos se lean como uno. */}
+                      {it.republica && (
+                      <div className="px-3.5 pt-2">
+                      <Republicacion r={it.republica} compacto />
+                      </div>
+                      )}
 
                       {/* DE QUÉ HABLA. Sale de las mismas palabras con las que
                           filtra el menú de la izquierda, así que la etiqueta y
@@ -1191,6 +1250,14 @@ export default function Explorar() {
           destino={dentroDe.ruta}
           onCerrar={() => setDentroDe(null)}
           onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); navigate(r); }}
+        />
+      )}
+
+      {republicando !== undefined && (
+        <DialogoRepublicar
+          original={republicando}
+          onCerrar={() => setRepublicando(undefined)}
+          onHecho={() => cargar()}
         />
       )}
 

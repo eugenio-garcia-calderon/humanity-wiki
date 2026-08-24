@@ -892,11 +892,30 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
                (SELECT count(*)::int FROM reactions r
                  WHERE r.entity_type = 'publications' AND r.entity_id = p.id) AS apoyos,
                u.display_name AS autor_nombre, u.avatar_url AS autor_avatar,
+               -- ── LO REPUBLICADO (2026-08-24) ────────────────────────────
+               -- Lo de fuera va copiado en la propia fila (republica_fuente)
+               -- porque de un tuit no se puede saber si sigue ahí.
+               -- Lo de aquí se lee VIVO del original: si su autor lo edita, la
+               -- republicación enseña lo editado, y si lo retira, deja de
+               -- enseñarse. Guardar una copia de lo de dentro sería quedarse
+               -- con una versión que su autor ya no sostiene.
+               p.republica_url, p.republica_fuente, p.republica_pub_id,
+               op.title AS orig_titulo, op.body AS orig_texto, op.media AS orig_media,
+               op.created_at AS orig_fecha, op.author_user_id AS orig_autor_id,
+               ou.display_name AS orig_autor_nombre, ou.avatar_url AS orig_autor_avatar,
+               -- Que el original ya no esté NO es que no exista: puede estar
+               -- retirado. Se distingue, para poder decirlo en vez de dejar un
+               -- hueco mudo.
+               (p.republica_pub_id IS NOT NULL AND op.id IS NULL) AS orig_retirado,
                coalesce(pm.estado, 'en_desarrollo') AS estado,
                coalesce(jsonb_array_length(pm.colaboradores), 0) AS n_colaboradores,
                coalesce(jsonb_exists(pm.colaboradores, ${usuarioId}), false) AS soy_colaborador
         FROM publications p
         LEFT JOIN users u ON u.id = p.author_user_id
+        LEFT JOIN publications op ON op.id = p.republica_pub_id
+             AND op.archived_at IS NULL AND op.deleted_at IS NULL
+             AND coalesce(op.visibility,'publica') <> 'privada'
+        LEFT JOIN users ou ON ou.id = op.author_user_id
         LEFT JOIN publicacion_meta pm ON pm.tipo = 'muro' AND pm.entity_id = p.id
         WHERE p.archived_at IS NULL AND p.deleted_at IS NULL
           -- Las filas que ya había usan 'publica'; se considera privado solo
@@ -1003,13 +1022,45 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           publico: w.publico, ...comun(w),
         })),
         ...(muro.rows as any[]).map(p => ({
-          tipo: 'muro', id: p.id, titulo: p.title || (p.body || '').slice(0, 70),
+          tipo: 'muro', id: p.id,
+          // ── EL TÍTULO DE UNA REPUBLICACIÓN NO SE INVENTA ─────────────────
+          // Para una publicación normal, si no hay título se usa el principio
+          // del texto: mejor un titular recortado que una tarjeta sin nada
+          // arriba.
+          //
+          // En una republicación eso salía MAL: el cuerpo es el comentario, así
+          // que el comentario se pintaba dos veces seguidas — una como título y
+          // otra como texto. Visto en pantalla, no leyendo.
+          //
+          // Aquí no hace falta rellenar: encima ya está el sello de quién
+          // republica y debajo el bloque con lo de otro. Sin comentario, la
+          // tarjeta se entiende igual.
+          titulo: (p.republica_pub_id || p.republica_url)
+            ? (p.title || '')
+            : (p.title || (p.body || '').slice(0, 70)),
           // LA MEDIA VIAJA (2026-08-24). `publications.media` guarda las fotos y
           // vídeos que alguien sube a una publicación, y hasta hoy se quedaba
           // en el servidor: la tarjeta recibía solo el texto, así que una
           // publicación con foto se pintaba igual que una sin ella. Hoy la
           // portada de la tarjeta se elige con esto.
           kind: 'publicacion', config: { body: p.body, media: p.media || [] },
+          // ── LA REPUBLICACIÓN, YA ARMADA PARA LA TARJETA ──────────────────
+          // `null` cuando esto no es una republicación. La tarjeta pregunta por
+          // este campo y no por tres columnas sueltas: así no puede pintar
+          // media republicación si alguna viene vacía.
+          republica: p.republica_pub_id
+            ? {
+                de: 'aqui' as const,
+                id: p.republica_pub_id,
+                retirado: !!p.orig_retirado,
+                titulo: p.orig_titulo, texto: p.orig_texto, media: p.orig_media || [],
+                fecha: p.orig_fecha,
+                autor_id: p.orig_autor_id, autor_nombre: p.orig_autor_nombre,
+                autor_avatar: p.orig_autor_avatar,
+              }
+            : p.republica_url
+              ? { de: 'fuera' as const, ...(p.republica_fuente || {}), url: p.republica_url }
+              : null,
           vistas: 0, apoyos: Number(p.apoyos) || 0, ia: false, fecha: p.created_at,
           autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
           donde: 'El muro', donde_slug: null, personal: false,
