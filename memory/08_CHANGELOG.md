@@ -6542,3 +6542,15 @@ publique sea información coherente con la otra información que hay»*.
 **Lo que falta de esta fase**: dejar la contradicción registrada como relación
 del grafo (`RM_VER_F8_REGISTRAR`), que es lo que la haría visible desde fuera del
 debate.
+
+## 2026-08-24 — El nombre lleva al inicio; la flecha abre el menú
+Eugenio: «el logo de Red de Conocimiento debe actuar como botón de regresar a
+INICIO "/", y sólo cuando se pinche en la flecha desplegable de su derecha se
+abrirá el menú».
+
+Eran un solo botón que hacía las dos cosas, y por eso ninguna: pedir el inicio
+por el nombre te dejaba en la misma página con un panel abierto encima. Ahora
+son dos botones dentro de una pastilla —el fondo y el redondeo los pone la caja,
+así que siguen viéndose como una sola pieza—: el nombre navega a `/` y la flecha
+alterna el menú. En móvil el nombre no se pinta (no cabe) y sólo está la flecha;
+al inicio se va por el logo de al lado.
