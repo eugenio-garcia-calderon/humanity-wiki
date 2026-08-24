@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Compass, Plus, LayoutGrid } from 'lucide-react';
-import { EstilosPrevias, PreviaPublicaciones, PreviaPagina, PreviaTareas } from '../components/bienvenida/previas';
+import { EstilosPrevias, PreviaPublicaciones, PreviaCrear, PreviaProyectar } from '../components/bienvenida/previas';
 import HojaCrear from '../components/navegacion/HojaCrear';
 
 /*
@@ -24,9 +24,16 @@ import HojaCrear from '../components/navegacion/HojaCrear';
  * plataforma, no un menú de secciones: si esto creciera a seis tarjetas volvería
  * a ser un menú, y un menú ya hay dos (los dos raíles).
  *
- * LOS DIBUJOS SON LOS DE LA PORTADA DE SIN SESIÓN, importados y no copiados. El
- * dibujo que ve un desconocido antes de registrarse tiene que ser el mismo que
- * ve al entrar; si se separan, la promesa de fuera deja de cumplirse dentro.
+ * LOS DIBUJOS VIVEN EN `bienvenida/previas.tsx`, con los de la portada de sin
+ * sesión y los del cajetín de crear: un solo fichero de dibujos para toda la
+ * aplicación, importados y nunca copiados.
+ *
+ * PERO ESTOS TRES SON SUYOS (2026-08-24). «Explorar» usa el muro, y «Crear» y
+ * «Proyectar» tienen dibujo propio —`PreviaCrear` y `PreviaProyectar`— en vez de
+ * tomar prestados los de «Página» y «Tarea». La razón: en el cajetín, el dibujo
+ * de «Página» tiene que parecer una página, y aquí «Crear» no es una página, son
+ * las dieciséis herramientas a la vez. Reutilizarlo habría prometido un editor
+ * de texto donde hay un taller.
  *
  * «CREAR» NO ES UNA DIRECCIÓN. Las otras dos llevan a una página; ésta abre el
  * cajetín de las dieciséis herramientas, que es el mismo del círculo verde. No
@@ -63,7 +70,7 @@ const CAMINOS: Camino[] = [
     clave: 'crear',
     titulo: 'Crear',
     frase: 'Escribe, dibuja, graba o publica. Dieciséis herramientas.',
-    Previa: PreviaPagina,
+    Previa: PreviaCrear,
     Icono: Plus,
     // Sin `ruta` ni `accion`: lo abre el propio componente, ver más abajo.
   },
@@ -71,7 +78,7 @@ const CAMINOS: Camino[] = [
     clave: 'proyectar',
     titulo: 'Proyectar',
     frase: 'Tus proyectos y sus tableros: lo que está por hacer y lo hecho.',
-    Previa: PreviaTareas,
+    Previa: PreviaProyectar,
     Icono: LayoutGrid,
     ruta: '/proyectos',
   },
