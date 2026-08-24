@@ -5,6 +5,12 @@
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
       "desde": "2026-08-24T15:30:52.943Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
+      "desde": "2026-08-24T15:30:58.347Z"
     }
   ]
 }
