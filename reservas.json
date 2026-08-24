@@ -19,18 +19,6 @@
       "desde": "2026-08-24T15:31:03.141Z"
     },
     {
-      "agente": "prog3",
-      "ruta": "src/components/bienvenida/previas.tsx",
-      "motivo": "prog3: previas de Crear y Proyectar con animaciones",
-      "desde": "2026-08-24T15:31:32.633Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/pages/TresCaminos.tsx",
-      "motivo": "prog3: previas de Crear y Proyectar con animaciones",
-      "desde": "2026-08-24T15:31:32.633Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: el tipo lleva ahora el tamano del lienzo",
