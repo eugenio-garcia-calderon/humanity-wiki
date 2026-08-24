@@ -1117,18 +1117,38 @@ export function registerSocialRoutes(app: Express, db: any) {
     }
   });
 
+  // EL MERCADO: BUSCAR, ORDENAR Y PASAR PÁGINA (2026-08-24, prog7, comercio F10)
+  // Antes: se buscaba solo por el NOMBRE, se ordenaba solo por fecha y se
+  // devolvían 50 sin más. Con catálogo pequeño no se nota; el día que haya
+  // trescientas cosas, «no encuentro lo que vi ayer» es una venta perdida.
+  //
+  // COMPATIBILIDAD: esta ruta la usan otras pantallas que esperan un ARRAY.
+  // Sigue devolviendo un array salvo que se pida `pagina`, y entonces
+  // devuelve `{ productos, total, pagina, paginas }`. Así se añade sin
+  // romper lo que ya funcionaba.
   app.get('/api/products', async (req: Request, res: Response) => {
     try {
       const { territory_id, objective_id, indicator_id, challenge_id, category, kind, q } = req.query as any;
       const limit = Math.min(Number(req.query.limit) || 50, 200);
-      const rows = await db.execute(sql`
-        SELECT DISTINCT p.*, o.name AS organization_name
-        FROM products p
-        LEFT JOIN organizations o ON o.id = p.organization_id
-        LEFT JOIN product_territories pt ON pt.product_id = p.id
-        LEFT JOIN product_objectives po ON po.product_id = p.id
-        LEFT JOIN product_indicators pi ON pi.product_id = p.id
-        LEFT JOIN product_challenges pc ON pc.product_id = p.id
+      const paginado = req.query.pagina !== undefined;
+      const porPagina = Math.min(Math.max(Number(req.query.por_pagina) || 24, 1), 100);
+      const pagina = Math.max(1, Math.floor(Number(req.query.pagina) || 1));
+      const desplazamiento = (pagina - 1) * porPagina;
+      const orden = String(req.query.orden || 'nuevo');
+      const texto = String(q ?? '').trim();
+      const patron = texto ? `%${texto}%` : null;
+      // Precio de menor a mayor con «precio a consultar» SIEMPRE al final: un
+      // nulo no es barato, es que no lo han dicho.
+      // Con `SELECT DISTINCT`, Postgres exige que lo que se ordena esté en la
+      // lista de columnas: por eso «vendidos» y «valoración» se calculan como
+      // columnas con nombre y se ordena por ellas. (Lo cazó la prueba: sin
+      // esto, ordenar por «lo más vendido» devolvía un error de consulta.)
+      const ordenSql = orden === 'precio_asc' ? sql`p.price_cents ASC NULLS LAST, p.created_at DESC`
+        : orden === 'precio_desc' ? sql`p.price_cents DESC NULLS LAST, p.created_at DESC`
+        : orden === 'vendidos' ? sql`vendidos DESC, p.created_at DESC`
+        : orden === 'valorados' ? sql`valoracion DESC, p.created_at DESC`
+        : sql`p.created_at DESC`;
+      const filtros = sql`
         WHERE p.archived_at IS NULL AND p.status = 'activo'
           AND (${territory_id ?? null}::text IS NULL OR pt.territory_id = ${territory_id ?? null})
           AND (${objective_id ?? null}::text IS NULL OR po.objective_id = ${objective_id ?? null})
@@ -1136,11 +1156,30 @@ export function registerSocialRoutes(app: Express, db: any) {
           AND (${challenge_id ?? null}::text IS NULL OR pc.challenge_id = ${challenge_id ?? null})
           AND (${category ?? null}::text IS NULL OR p.category = ${category ?? null})
           AND (${kind ?? null}::text IS NULL OR p.kind = ${kind ?? null})
-          AND (${q ?? null}::text IS NULL OR p.name ILIKE ${'%' + (q || '') + '%'})
-        ORDER BY p.created_at DESC
-        LIMIT ${limit}
+          -- Se busca en el nombre Y en la descripción: quien busca «miel» no
+          -- tiene por qué acertar con el título que le puso otra persona.
+          AND (${patron}::text IS NULL OR p.name ILIKE ${patron} OR p.description ILIKE ${patron})`;
+      const uniones = sql`
+        FROM products p
+        LEFT JOIN organizations o ON o.id = p.organization_id
+        LEFT JOIN product_territories pt ON pt.product_id = p.id
+        LEFT JOIN product_objectives po ON po.product_id = p.id
+        LEFT JOIN product_indicators pi ON pi.product_id = p.id
+        LEFT JOIN product_challenges pc ON pc.product_id = p.id`;
+      const rows = await db.execute(sql`
+        SELECT DISTINCT p.*, o.name AS organization_name,
+               (SELECT count(*)::int FROM pedido_lineas pl JOIN pedidos pd ON pd.id = pl.pedido_id
+                 WHERE pl.producto_id = p.id AND pd.estado NOT IN ('cancelado','devuelto')) AS vendidos,
+               (SELECT coalesce(avg(r.score), 0)::float FROM ratings r
+                 WHERE r.entity_type = 'products' AND r.entity_id = p.id) AS valoracion
+        ${uniones}
+        ${filtros}
+        ORDER BY ${ordenSql}
+        LIMIT ${paginado ? porPagina : limit} OFFSET ${paginado ? desplazamiento : 0}
       `);
-      res.json(rows.rows);
+      if (!paginado) return res.json(rows.rows);
+      const total = Number(((await db.execute(sql`SELECT count(DISTINCT p.id)::int AS n ${uniones} ${filtros}`)).rows[0] as any)?.n ?? 0);
+      res.json({ productos: rows.rows, total, pagina, por_pagina: porPagina, paginas: Math.max(1, Math.ceil(total / porPagina)), orden });
     } catch (e: any) {
       console.error('list products error:', e);
       res.status(500).json({ error: e.message });

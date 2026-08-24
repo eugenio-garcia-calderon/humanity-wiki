@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Scale, Plus, Loader2, MessagesSquare, Lock, Search, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui/core';
@@ -25,9 +25,13 @@ interface Debate {
 
 export default function Debates() {
   const { user } = useAuth();
+  // `?nuevo=1` abre el formulario nada más entrar: es como llega quien pulsa
+  // «Debate» en el botón de crear, y llegar a una lista después de haber dicho
+  // que quieres crear algo es hacerle repetir el gesto.
+  const [params] = useSearchParams();
   const [lista, setLista] = useState<Debate[] | null>(null);
   const [busqueda, setBusqueda] = useState('');
-  const [abriendo, setAbriendo] = useState(false);
+  const [abriendo, setAbriendo] = useState(params.get('nuevo') === '1');
   const [tesis, setTesis] = useState('');
   const [contexto, setContexto] = useState('');
   const [guardando, setGuardando] = useState(false);

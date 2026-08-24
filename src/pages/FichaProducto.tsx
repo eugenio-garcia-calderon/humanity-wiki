@@ -302,6 +302,9 @@ export default function FichaProducto({ handle }: { handle: string }) {
                   onClick={() => {
                     anadir({ producto_id: p.id, cantidad: 1, nombre: p.nombre, precio_centimos: precioEfectivo || 0,
                       ...(variante ? { variante_id: variante.id, variante_nombre: variante.nombre } : {}) });
+                    // Para que el vendedor sepa si le encestan (F9): un
+                    // recuento, sin quién. Si falla, da igual.
+                    fetch(`/api/publicar/producto/${encodeURIComponent(p.id)}/encestado`, { method: 'POST' }).catch(() => {});
                     setAnadido(true); window.setTimeout(() => setAnadido(false), 1600);
                   }}
                   className="w-full h-12 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 flex items-center justify-center gap-2 disabled:opacity-50">

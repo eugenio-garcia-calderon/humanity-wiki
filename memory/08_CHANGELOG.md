@@ -6460,3 +6460,85 @@ herramientas».
   ratón hacia las herramientas contaba como alejarse. Recibe `gestoDelMenu`
   como cualquier otro menú: el `ref` la mete en la lista y el `onClickCapture`
   asciende el roce a decisión en cuanto tocas una herramienta.
+### 2026-08-24 — El debate, donde se crean las cosas
+
+Eugenio: *«mete el debate como herramienta de creación en el menú desplegable
+central y en la página principal cuando la sesión no está iniciada, junto con el
+resto de herramientas»*.
+
+- **En el botón central de crear** (`HojaCrear`), entre «Esquema» y «Mapa»:
+  «Debate · Con argumentos y votos». Lleva a `/debates?nuevo=1`, que **abre el
+  formulario ya desplegado** — llegar a una lista después de haber dicho que
+  quieres crear algo es hacerle repetir el gesto a quien ya lo hizo.
+- **En la portada de quien no ha entrado** (`Bienvenida`), como la 7ª de las 14
+  herramientas: «Una afirmación, sus razones a favor y en contra, y las fuentes
+  de cada una. Al final no hay un veredicto: hay un mapa de quién piensa qué y
+  por qué».
+- **Un dibujo propio, `PreviaDebate`**, con la misma animación al pasar el ratón
+  que las otras trece: la tesis arriba, las dos ramas colgando y las barras del
+  voto debajo. **Verde y rojo**, los mismos dos colores con los que el grafo
+  dice «apoya» y «contradice» en toda la plataforma — un dibujo que estrenara
+  colores enseñaría un vocabulario que después no se ve en ninguna parte.
+  Y es **el mismo dibujo en los dos sitios**, importado y no copiado: lo que ve
+  un desconocido al decidir si se registra es exactamente lo que verá al ir a
+  crear un debate.
+- **Por qué hacía falta**: el debate estaba solo en el menú de información, que
+  es donde se EXPLICA lo que es. Ahí no lo encuentra quien tiene algo que
+  discutir, que es justo la persona que hace falta.
+- **Verificado en el navegador, con clics reales**: la portada enseña las 14
+  herramientas con Debates entre ellas y su dibujo; el botón central abre la
+  hoja con «Debate» en su sitio; y pulsarlo cae en `/debates` con el formulario
+  abierto. El usuario de prueba se borró y la sesión se cerró.
+
+
+### 2026-08-24 — Comercio F9: ¿se ve, se enceta, se compra? (Programador 7)
+- Eugenio lo puso el primero de los cuatro pendientes. Hasta hoy quien vende no sabía si no vende **porque nadie entra** o **porque entran y no compran**, que son problemas opuestos: el primero se arregla enseñando el producto, el segundo cambiándolo.
+- 0115: `producto_metricas (producto_id, dia, visitas, encestados)` — agregado por día, **sin `user_id` a propósito**: para contestar la pregunta basta el recuento y el rastro de nadie hace falta.
+- La visita se apunta al servir la ficha (sin esperar: la ficha no depende de una métrica); `POST /api/publicar/producto/:id/encestado` cuenta los añadidos a la cesta. Las **compras salen de los pedidos**, no de un contador aparte que podría desviarse.
+- `GET /api/publicar/mis-productos/analitica?dias=30` y panel plegable en Comercio: visitas, a la cesta, pedidos y «compran %» por producto, más la frase que interpreta el número («muchas visitas y pocos pedidos: mira precio, fotos o descripción; pocas visitas: no lo ve nadie»).
+- **Los porcentajes solo a partir de 10 visitas**: con 3 visitas, «33 % compra» es una anécdota con aspecto de dato. Y se dice «visitas, no personas» para no dar por gente lo que son visitas.
+- Probado en local por HTTP: 12 visitas y 3 encestados → 25 % a la cesta; producto con 4 visitas → porcentajes en `null`; la analítica de otra vendedora no ve nada mío. Todo retirado.
+
+### 2026-08-24 — Comercio F10: buscar, ordenar y pasar página en el mercado (Programador 7)
+- Antes se buscaba solo por el **nombre**, se ordenaba solo por fecha y se devolvían 50 sin más. Con seis productos no se nota; con trescientos, «no encuentro lo que vi ayer» es una venta perdida.
+- `GET /api/products` ahora: busca en **nombre y descripción** (quien busca «miel» no tiene por qué acertar con el título que le puso otra persona), ordena por `nuevo` / `precio_asc` / `precio_desc` / `vendidos` / `valorados`, y **pagina**. Precio de menor a mayor deja «precio a consultar» al final: un nulo no es barato, es que no lo han dicho.
+- **Compatibilidad**: la ruta la usan otras pantallas que esperan un array. Sigue devolviendo array salvo que se pida `pagina`, y entonces devuelve `{productos, total, pagina, paginas}`. Comprobado que sin `pagina` responde array.
+- **Fallo cazado en la prueba**: con `SELECT DISTINCT`, Postgres exige que lo que se ordena esté en la lista de columnas — ordenar por «lo más vendido» devolvía error de consulta. Ahora «vendidos» y «valoración» se calculan como columnas con nombre (y de paso viajan al cliente).
+- `/mercado`: selector de orden, paginador (solo si hay más de una página: un paginador de una página es ruido) y vuelta a la página 1 al cambiar búsqueda u orden.
+- Probado en local por HTTP: los cinco órdenes; página 1 y 2 traen productos distintos; precio_asc ordena 120→450000; buscar una palabra que solo está en la descripción encuentra 3; sin `pagina` sigue siendo array.
+### 2026-08-24 — Veracidad, fase 8: te enseña lo que ya se ha dicho ANTES de escribirlo
+
+La otra mitad del encargo del primer día, la que faltaba: *«que lo que la gente
+publique sea información coherente con la otra información que hay»*.
+
+- **Mientras escribes un argumento**, con 700 ms de calma, aparece «Esto ya se
+  ha tocado» con las frases que ya existen y se parecen a la tuya — cada una con
+  su **postura** (el punto verde, rojo o naranja), su **sello de veracidad** y
+  el debate del que viene. Y si ya hay **otro debate abierto** sobre lo mismo,
+  lo enlaza.
+- **No bloquea nada, y eso es el diseño.** No impide publicar, no puntúa, no
+  dice «esto es falso». Un aviso que se equivoca mientras escribes se aprende a
+  ignorar en dos días, y a partir de ahí ya no avisa de nada. Este solo enseña
+  lo que puede demostrar: frases que existen, con su enlace, para que decidas
+  seguir, citarlas o responderles.
+- **Avisar antes y no después**: después es una discusión; antes es la
+  oportunidad de traer la fuente.
+- **Búsqueda de texto en español, no la IA** (`drizzle/0116`, índices GIN sobre
+  `argumentos.texto` y `debates.tesis`). Un modelo afirmaría el parecido con una
+  seguridad que no tiene. La IA entra en la fase 10, y entrará proponiendo.
+- **Se busca con «o» y se ordena con «y»**, que es el hallazgo de la tarde:
+  `plainto_tsquery` exige TODAS las palabras y por eso no encontraba nada — dos
+  frases que dicen lo mismo casi nunca comparten todas sus palabras. Buscar con
+  «o» trae de más y ordenar con «y» las coloca. **El corte en 0,05 está medido**:
+  la frase que dice lo mismo con otras palabras puntúa 0,63, la casi idéntica
+  0,93, y una que solo comparte el tema, 0,00.
+- **Verificado**: 10 comprobaciones en verde — el 401 sin sesión, «con dos
+  palabras todavía no puedo decirte» (que no es «no hay nada»), encontrar la
+  frase equivalente, distinguir si viene de este debate o de otro, no proponerse
+  a sí mismo, no sacar lo que no tiene que ver, y que **lo archivado deja de
+  avisar**. Y en el navegador, escribiendo de verdad en el formulario.
+- **Tablero**: 16 de 30 tarjetas en verde.
+
+**Lo que falta de esta fase**: dejar la contradicción registrada como relación
+del grafo (`RM_VER_F8_REGISTRAR`), que es lo que la haría visible desde fuera del
+debate.

@@ -60,6 +60,14 @@ export default function Comercio() {
   // Editor de variantes por producto (2026-08-23): abierto en uno a la vez.
   const [variantesDe, setVariantesDe] = useState<string | null>(null);
   const [envioDe, setEnvioDe] = useState<string | null>(null);
+  // ¿Se ve, se enceta, se compra? (F9, 2026-08-24)
+  const [analitica, setAnalitica] = useState<any>(null);
+  const [verAnalitica, setVerAnalitica] = useState(false);
+  useEffect(() => {
+    if (!verAnalitica || analitica) return;
+    fetch('/api/publicar/mis-productos/analitica?dias=30', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null).then(j => { if (j) setAnalitica(j); }).catch(() => {});
+  }, [verAnalitica, analitica]);
   // Recibo de una venta (F4): abierto en uno a la vez.
   const [reciboDe, setReciboDe] = useState<{ id: string; datos: any } | null>(null);
   // Resolver una devolución pedida por el comprador (F7, 2026-08-24).
@@ -239,6 +247,46 @@ export default function Comercio() {
       </div>
 
       {pestana === 'productos' ? (
+        <>
+        {/* ¿VENDE O NO VENDE? (F9): la pregunta que no se podía contestar. */}
+        <div className="mb-3">
+          <button type="button" onClick={() => setVerAnalitica(v => !v)} className="text-xs font-bold text-slate-600 underline">
+            {verAnalitica ? 'Ocultar «cómo va cada producto»' : 'Ver cómo va cada producto (30 días)'}
+          </button>
+          {verAnalitica && (
+            analitica ? (
+              <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div><p className="text-[10px] font-black uppercase text-slate-400">Visitas</p><p className="text-xl font-black text-slate-900">{analitica.totales.visitas}</p></div>
+                  <div><p className="text-[10px] font-black uppercase text-slate-400">A la cesta</p><p className="text-xl font-black text-slate-900">{analitica.totales.encestados}</p></div>
+                  <div><p className="text-[10px] font-black uppercase text-slate-400">Pedidos</p><p className="text-xl font-black text-slate-900">{analitica.totales.pedidos}</p></div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead><tr className="text-left text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-200">
+                      <th className="py-1.5 font-black">Producto</th><th className="py-1.5 font-black text-right">Visitas</th><th className="py-1.5 font-black text-right">Cesta</th><th className="py-1.5 font-black text-right">Pedidos</th><th className="py-1.5 font-black text-right">Compran</th>
+                    </tr></thead>
+                    <tbody>
+                      {analitica.productos.map((f: any) => (
+                        <tr key={f.id} className="border-b border-slate-100">
+                          <td className="py-1.5 pr-2 text-slate-700">{f.nombre}</td>
+                          <td className="py-1.5 text-right tabular-nums">{f.visitas}</td>
+                          <td className="py-1.5 text-right tabular-nums">{f.encestados}</td>
+                          <td className="py-1.5 text-right tabular-nums font-bold">{f.pedidos}</td>
+                          <td className="py-1.5 text-right tabular-nums text-slate-500">{f.de_visita_a_compra === null ? '—' : `${f.de_visita_a_compra} %`}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="mt-2 text-[11px] text-slate-400">{analitica.nota}</p>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Muchas visitas y pocos pedidos: mira el precio, las fotos o la descripción. Pocas visitas: el problema no es el producto, es que no lo ve nadie.
+                </p>
+              </div>
+            ) : <p className="mt-2 text-xs text-slate-400">Cargando…</p>
+          )}
+        </div>
         productos.length === 0 ? (
           <Vacio onCrear={() => setCreando(true)} />
         ) : (
@@ -346,6 +394,7 @@ export default function Comercio() {
             <Cupones />
           </>
         )
+        </>
       ) : (
         pedidos.length === 0 ? (
           <p className="text-sm text-slate-500 py-8 text-center">

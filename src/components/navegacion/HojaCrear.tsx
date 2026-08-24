@@ -6,7 +6,7 @@ import {
   EstilosPrevias,
   PreviaMapa, PreviaEsquema, PreviaPagina, PreviaTabla, PreviaTareas, PreviaComercio,
   PreviaTelecom, PreviaIA, PreviaCalendario, PreviaArchivos, PreviaPublicaciones,
-  PreviaMundo, PreviaNavegador,
+  PreviaMundo, PreviaNavegador, PreviaDebate,
 } from '../bienvenida/previas';
 
 /*
@@ -77,6 +77,10 @@ const COSAS: Cosa[] = [
   { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
   { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },
   { nombre: 'Esquema',      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  nota: 'Ideas conectadas' },
+  // Un debate se CREA como cualquier otra cosa (2026-08-24, Eugenio). Estaba
+  // solo en el menú de información, que es donde se EXPLICA lo que es — y ahí
+  // no lo encuentra quien tiene algo que discutir, que es el que hace falta.
+  { nombre: 'Debate',       Previa: PreviaDebate,        a: '/debates?nuevo=1',   nota: 'Con argumentos y votos' },
   { nombre: 'Mapa',         Previa: PreviaMapa,          a: '/mapas?nuevo=1' },
   { nombre: 'Tabla',        Previa: PreviaTabla,         a: '/tablas?nueva=1',    nota: 'Datos con columnas' },
   { nombre: 'Fecha',        Previa: PreviaCalendario,    a: '/calendario?nuevo=1' },
