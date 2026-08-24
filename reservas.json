@@ -11,12 +11,6 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "prog2: republicar desde la tarjeta",
       "desde": "2026-08-24T18:37:13.886Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/navegacion/HojaCrear.tsx",
-      "motivo": "prog2: entrada de Republicar en Crear",
-      "desde": "2026-08-24T18:39:55.604Z"
     }
   ]
 }
