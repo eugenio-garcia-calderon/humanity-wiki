@@ -65,6 +65,18 @@
       "ruta": "src/components/knowledge/ProductoPublico.tsx",
       "motivo": "prog7: F9 analítica de tienda (visitas, cestas, compras)",
       "desde": "2026-08-24T00:24:00.503Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog7: F9 changelog (1 min)",
+      "desde": "2026-08-24T00:27:11.651Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/13_PLAN_COMERCIO.md",
+      "motivo": "prog7: F9 changelog (1 min)",
+      "desde": "2026-08-24T00:27:11.651Z"
     }
   ]
 }
