@@ -6169,3 +6169,204 @@ y la ristra de temáticas, y deja solo las publicaciones».
   filtro no se pueden contradecir.
 - Una foto que ya no existe se retira; antes dejaba el icono roto del
   navegador dentro de la tarjeta.
+### 2026-08-22 — Veracidad, fases 2 y 4: ya se puede debatir
+
+Eugenio dio el sí a las dos decisiones abiertas y pidió seguir por donde
+recomendara. Recomendé juntar la fase 4 con la 2 en una sola entrega, y por qué:
+la pantalla sin el sello enseña afirmaciones sin decir qué se sabe de ellas, y el
+sello sin pantalla no lo ve nadie. Separadas, ninguna de las dos sirve todavía.
+
+- **`/debates` y `/debates/:slug`**: la lista de lo que se discute y la pantalla
+  del debate — la tesis arriba, y debajo **a favor** y **en contra** en dos
+  columnas (y **matiza** cuando lo hay), cada argumento con sus fuentes, sus
+  respuestas anidadas y su sello. Se argumenta y se cita **sin salir de la
+  pantalla**: si hay que ir a otro sitio a escribir, no se escribe.
+- **`<SelloVeracidad>`**: sin fuente · con fuente · verificada · disputada ·
+  refutada, con las mismas palabras en cualquier pantalla de la plataforma.
+  **«Sin fuente» es gris y no rojo**: no está mal, está sin comprobar — si todo
+  lo que falta llevara rojo, el rojo dejaría de significar nada. Y un estado que
+  el componente no reconoce **no se pinta como el primero de la lista**: eso
+  sería inventarse un dato.
+- **La escalera ya tiene firma** (`drizzle/0088`): quién movió el sello, cuándo y
+  por qué. `verificada` sin decir por quién es exactamente el tipo de afirmación
+  que esta área existe para no aceptar. Texto y no clave foránea, como
+  `incidencias.respondido_por`: la firma sobrevive al borrado de la cuenta.
+- **Tres reglas del servidor, no de la pantalla**: revisar es nivel 3; **nadie
+  revisa su propio argumento** (ni un administrador — la regla es sobre quién lo
+  escribió, no sobre el rango); y `refutada`/`disputada` **exigen motivo**, porque
+  marcar algo como falso sin decir por qué deja al autor sin nada que responder.
+  `sin_fuente` y `con_fuente` no se pueden poner a mano: las deciden las citas.
+- **Verificado**: 12 comprobaciones nuevas en verde con dos usuarios de prueba
+  (uno de nivel 3), más las 25 de la fase 1. En el navegador: el debate de
+  muestra con sus cuatro argumentos, la respuesta anidada, el sello verificado
+  con su fuente y el disputado con su motivo. Todo lo de prueba, borrado.
+- **Tablero**: 8 tarjetas en verde de 30 (eran 2).
+
+**Lo que NO está**: el enlace permanente a un argumento concreto (fase 4), el
+plegado por tramos de un hilo largo (fase 3) y la votación (fase 5) — por eso un
+argumento dice todavía «Sin votos» y no un número. Y no se ha comprobado en un
+móvil.
+
+### 2026-08-22 — Veracidad, fase 5: el voto de impacto
+
+Eugenio: *«termina de hacer la herramienta de DEBATES y votaciones»*.
+
+- **«¿Cuánto te mueve?», del 1 al 5**, en cada argumento. No es un «me gusta»:
+  un argumento del bando contrario puede moverte mucho, y ese es justo el que
+  tiene que subir. Pulsar otra vez el número que ya tenías **retira el voto** —
+  cambiar de opinión al leer incluye dejar de tener opinión.
+- **No estrena tabla**: los votos van a `ratings`, la que la plataforma ya usa
+  para puntuar, con `entity_type = 'argumento'`. Una segunda forma de puntuar
+  acaba dando dos números distintos para lo mismo.
+- **Cada rama se ordena por impacto**, no por hora de llegada. Y **lo que nadie
+  ha votado no se hunde al fondo**: iría al fondo el día que se escribe, donde
+  nadie lo lee, y de ahí no saldría nunca — el voto que le faltaba se lo negaría
+  el propio orden. Va justo detrás de lo más votado y por delante de lo que ya
+  se juzgó flojo.
+- **Ves tu voto y solo el tuyo.** Sin sesión, `mi_voto` es `null` — que no es lo
+  mismo que votar bajo.
+- **Sin votos sigue siendo NULL y no cero**, y la pantalla lo dice con palabras
+  («Sin votos todavía»), no con un número. Al retirar el último voto vuelve a
+  NULL: un argumento que se queda sin votos no es un argumento rechazado.
+- **Un debate cerrado tampoco se vota** (409). Si no, el resultado seguiría
+  moviéndose después de darlo por cerrado.
+- **Se puede votar lo propio**, y es deliberado: un voto entre cientos no mueve
+  nada, y prohibirlo obligaría a explicar por qué el autor es el único que no
+  puede decir cuánto le importa su argumento. Revisar sí está prohibido —
+  revisar afirma sobre el común, votar solo dice lo que te pasa a ti.
+- **Verificado**: 15 comprobaciones nuevas en verde (401 sin sesión, fuera de
+  rango, decimales, argumento inexistente, la media con dos votantes, cambiar el
+  voto sin sumar otro, el orden con uno sin votar en medio, retirar y recontar),
+  **y además pulsando los botones en el navegador**: 3,5 → 4,0 al votar, el
+  número marcado en morado, y 4,0 · 1 voto al retirarlo. Todo lo de prueba,
+  borrado.
+- **Tablero**: 11 de 30 tarjetas en verde.
+
+**Lo que sigue sin estar**: el espectro de visiones (fase 6, la que junta los
+votos en posturas), el enlace permanente a un argumento, la carga por tramos de
+un hilo largo, y el móvil sin comprobar.
+
+
+## 2026-08-23 · Servidores: de «tengo copias» a «puedo volver» (prog6)
+
+Segunda mitad de la noche del área de servidores. La primera dejó las copias
+diarias funcionando; ésta las convierte en algo con lo que de verdad se puede
+volver, y prepara la máquina para repartirse entre sus ocho núcleos.
+
+**Todo lo que vivía en la memoria de un proceso y `cluster` habría roto en
+silencio.** Es la familia de fallos de la noche: con un proceso funciona, con
+ocho se multiplica sin un error y sin una línea en el registro.
+
+- **El freno de los límites** (migración `0097`, tabla `frenos`). Era un `Map`
+  de un proceso: con ocho, ocho frenos y el límite real ocho veces el puesto.
+  De regalo, ahora sobrevive a un reinicio — hasta hoy un despliegue le
+  regalaba empezar de cero a quien probara contraseñas.
+- **La caché del gasto** (migración `0102`). Con ocho procesos, ocho cachés
+  tomadas en momentos distintos: **la cifra de coste habría cambiado al
+  recargar** la página que existe para ser transparente con el dinero. Un dato
+  viejo se explica con su fecha; uno que baila hace dudar de todos los demás.
+- **El cable del chat y el Chromium del navegador remoto** eran los otros dos.
+  Los cogió prog8; el segundo lo resolvió Eugenio rechazando la premisa
+  entera: dejar de encender Chromium en vez de repartirlo mejor.
+
+**Dos fallos que solo encontró una base de datos de verdad.** Al pasar
+`scripts/probar-limites.ts` de una base falsa a un PostgreSQL real:
+`= ANY($1)` no funciona con un array de JavaScript, y —el grave— sin `::int`
+los parámetros llegan como texto y `LEAST('5','900')` compara **cadenas**:
+devolvía siempre el tope, o sea que **el primer fallo al iniciar sesión habría
+dejado a cualquiera 15 minutos fuera**. Los dos pasaban la prueba anterior.
+
+**`ritmo()`, porque un límite de ritmo no es un contador de fallos**
+(corrección de prog7). `anotarFallo` frena y deja rastro; `ritmo` solo frena.
+Meter actividad legítima en `intentos_fallidos` entierra lo que esa tabla
+existe para enseñar. Ya lo usan las transferencias de puntos y el buscador.
+
+**Freno al buscador**, que pasó a llamarse al teclear y recorre 20 tablas con
+`ILIKE` sin sesión. Lo delicado es el número: **40 seguidas gratis**, porque
+escribir tiene que pasar. Si el freno muerde a quien escribe, el buscador se
+siente roto y nadie sabe por qué.
+
+**Techo de memoria a los cinco servicios.** No tenía ninguno: si algo se
+desbocaba no elegía el que fallaba, elegía el kernel — y aquí mata al que más
+memoria ocupa, que suele ser Postgres. **No son un presupuesto, son un tope de
+daño**: de 10 a 30 veces el uso medido, porque un techo ajustado mata un
+contenedor sano un martes. Medido con `docker stats`, y la máquina también:
+**15 GB y 8 núcleos**, no los 8 que dije yo ni los 32 que sigue diciendo
+`docs/13_DEPLOY.md` — ese fichero es de Eugenio y no se ha tocado.
+
+**Y lo que da título a la entrada.** De las 27 variables del `.env.production`,
+el despliegue sabía reponer 7; las otras 20 vivían **solo en la máquina de la
+que las copias protegen**. Los datos a salvo en Cloudflare y las llaves para
+leerlos en el servidor que puede desaparecer. Ahora la tubería está puesta para
+todas —aunque el secreto aún no exista: ausente, el `if` no hace nada— y
+`deploy/copias/CLAUDE.md` dice qué hace falta para volver, en orden, y qué
+cuesta perder cada llave. `SQL_ADMIN_PASSWORD` se deja fuera a propósito:
+escribirla desde un secreto que no coincida daría un despliegue en verde y la
+plataforma muerta.
+
+Salió de medir la afirmación de otro: prog8 avisó de que `CLAVE_MAESTRA` no
+estaba en las copias. Al comprobarlo apareció algo peor — **la llave nunca
+llegaba al servidor**, porque poner un secreto en GitHub no hace nada por sí
+solo: el workflow escribe únicamente las variables que nombra.
+
+**Y un despliegue roto por mí**, contado aquí porque el arreglo enseña más que
+el fallo: con `script_stop: true` la acción de SSH inserta su comprobación
+después de cada línea, así que **una continuación con `\` deja de continuar**.
+Un `for … ; do` de una línea sí funciona. La plataforma no se cayó —el fallo
+ocurre antes de reconstruir— pero el despliegue quedó a medias. Lo que faltaba
+era pasarle `bash -n` al `script:` del YAML: **un YAML válido puede contener un
+shell roto**.
+### 2026-08-23 — El navegador deja de retransmitir: se acabó el lag (Programador 8, fase 1 de 5)
+- **Eugenio**: «esa solución nunca será viable porque va con LAG, y el usuario se queja de que va lento, y tiene razón». La tiene, y no era optimizable: entre mover el ratón y ver el efecto hay una ida y vuelta por internet. No es velocidad del servidor, es dónde está el ordenador que dibuja.
+- **El defecto se invierte**: `useState<'remoto'|'proxy'>` pasa de `'remoto'` a `'proxy'`. Antes, **toda** visita encendía un Chromium en el servidor con su retardo y su tope de dos personas en toda la plataforma.
+- **Chromium deja de ser una cámara y pasa a ser una imprenta** (`GET /api/navegador/instantanea`): abre la página, espera a que el JavaScript termine, se queda con el HTML y lo suelta pasado por la misma reescritura del proxy. El navegador queda ocupado segundos, no toda la sesión. Retransmitir da retardo en cada movimiento; imprimir da una espera al cambiar de página, como una web lenta.
+- **La escalada no cuesta una petición extra**: `/api/navegador/leer` ya bajaba la página para sacar el título, así que ahora devuelve también `necesitaRender`. Se decide en el servidor porque el texto que viaja al cliente va recortado, y medir sobre un recorte diría «vacía» de cualquier página larga.
+- **Medido a través del proxy real, no con `fetch` a pelo**: **9 de 12** sitios comunes se leen sin encender Chromium. Solo x.com, Gmail y Amazon lo piden — y dos de esos tres necesitan tu sesión, así que su sitio es el botón de abrir fuera.
+- **Una corrección propia**: la primera medición, hecha con `fetch` sin identificación de navegador, decía 8 de 12 y ponía a El País entre los que necesitan render. Por el proxy —que sí manda una identificación de navegador— El País se lee entero. La prueba llegó a fallar por eso: **la expectativa estaba mal, no el código**.
+- **La etiqueta «lectura» decía una mentira nueva.** Su texto era «el Chromium del servidor no está disponible», cierto cuando este modo era el respaldo. Al pasar a ser el normal habría salido en todas las páginas diciendo que algo va mal cuando va bien. Ahora el modo ligero no lleva distintivo —es lo normal— y solo se avisa de la instantánea y del modo con retardo.
+- **El menú de tres puntos colgaba de `modo === 'remoto'`**: al invertir el defecto habría desaparecido justo en el modo que ahora usa todo el mundo, y con él la única forma de subir a directo. Ahora se enseña siempre; el zoom sigue siendo solo del modo retransmitido, porque en el ligero el zoom del propio navegador ya funciona y lo hace mejor.
+- **Lo que la instantánea NO hace, dicho en el propio código y en la interfaz**: no responde a los botones de la web, porque su JavaScript no viaja. Para eso está «Usarla como aplicación», que avisa del retardo **antes** de entrar. Y para lo que necesita tu sesión —tu correo, tu banco— está abrir fuera: eso no debe pasar por nuestro servidor.
+- **Desbloquea el reparto entre los ocho núcleos** de prog6: sin Chromium por defecto, ocho procesos ya no son ocho navegadores.
+- **Pruebas**: `scripts/probar-navegador-sin-lag.mjs`, 10 comprobaciones, incluida una que cuenta los procesos de Chromium del sistema para demostrar que leer Wikipedia **no enciende ninguno**. Verificado además en la aplicación de verdad: Wikipedia se pinta entera en modo ligero y Amazon entera por instantánea, con su etiqueta.
+
+### 2026-08-23 — Conectar tu cuenta de Google (Programador 8, fase 2 de 5)
+- **No es «entrar con Google»**, que ya existía y solo dice quién eres. Esto es un permiso que dura y deja pedirle cosas a Google en tu nombre; usa el flujo de código de autorización y necesita un secreto de cliente. **No se mezclan nunca**: unirlos convertiría un botón de «entrar» en uno de «dame tu correo».
+- **El permiso duradero va cifrado** con el sobre de prog4. Es el dato más peligroso que la plataforma va a guardar de nadie, y desde el 2026-08-22 la base entera sale del servidor cada noche en la copia de seguridad.
+- **Gmail queda fuera a propósito**: es el único permiso «restringido» de Google, con auditoría de seguridad anual de pago (500–4.500 $/año). YouTube, Contactos y Calendario son «sensibles»: solo verificación. Decisión de Eugenio, «para todos, pero solo con lo barato». Enchufar Gmail es añadir una línea a una lista.
+- **Nadie usaba todavía el cifrado de prog4 y `CLAVE_MAESTRA` no estaba configurada en ninguna parte.** Sin ella el fallo habría llegado en el peor momento: la persona ya habría dado el permiso en Google y al volver no se habría podido guardar. Ahora se comprueba antes y el botón no aparece.
+- **Una comilla invertida dentro de un comentario en una plantilla SQL cierra el literal** y lo de después se evalúa como JavaScript (`$6 is not defined`). Queda avisado en el código.
+- **Una prueba que empezó verde por el motivo equivocado**: «la cuenta no se cuelga de quien no debe» pasaba porque el canje iba al Google real, fallaba, y no se guardaba nada. Rehecha con un Google de mentira; ahora la comprobación es positiva.
+- **18 comprobaciones**, incluida que al retirar el permiso **se le avisa a Google** y no solo se borra la fila.
+
+### 2026-08-23 — Mis vídeos de YouTube, pintados a nuestra manera (Programador 8, fase 3 de 5)
+- **«A nuestra manera» acabó siendo concreto**: los «me gusta» y las listas **juntos y buscables** —en YouTube son pantallas distintas y no se pueden buscar— y sin recomendaciones al lado. El vídeo lo pone el reproductor oficial: descargarlo o retransmitirlo le quitaría la visita al canal, además de ser ilegal.
+- **Estuve a punto de sobrescribir `src/server/youtube.ts`**, que existe desde el 2026-08-18 y es la pantalla de cine de la aldea. Lo recuperé al ver que el editor decía «actualizado» y no «creado». Que dos cosas usen YouTube no las hace la misma cosa: aquella recomienda lo que no has visto, esta enseña lo que ya guardaste. Vive en `misVideos.ts`.
+- **Y de paso, el cine deja de pedir un segundo permiso**: si ya conectaste por la vía general, la usa. Añadido de tres líneas, no cambio.
+- **Tres decisiones con número**: no se traen las suscripciones enteras (200 canales son miles de vídeos al mes); **no se busca nunca** en la API (buscar cuesta 100 unidades de cuota, listar 1, sobre 10.000 al día); y no hay sincronización automática, que gastaría la cuota en gente que no ha abierto la pantalla.
+- **Lo más probado es lo que no puede pasar**: con YouTube caído o la cuota agotada, **la lista no se vacía**. Es el fallo que se lee como «he perdido mis vídeos». 13 comprobaciones.
+
+### 2026-08-23 — Tu agenda y tu calendario de Google (Programador 8, fases 4 y 5 de 5)
+- **La agenda entra por la misma puerta** que el .vcf, el Atajo del iPhone y el selector del navegador: las cuatro pasan por `importarContactosDe()`. Una sola copia de las reglas de no duplicar y no pisar el nombre que tú pusiste.
+- **Solo nombre y teléfono.** Ni correos, ni direcciones, ni cumpleaños: una agenda dice con quién se trata alguien, quién es su médico y quién su abogado. Se cuentan aparte los contactos que Google tiene sin número — sin ese dato, quien tiene 400 contactos y ve 250 importados busca a los otros 150.
+- **El calendario es la excepción del plan y se explica como decisión**: no guarda copia aunque Eugenio eligiera guardar. Un calendario cambia mientras lo miras y una cita vieja te presenta a la hora que no es; son decenas de filas; y «miércoles 17:00, oncología» dice más de alguien que toda su lista de reproducción.
+- **Sus citas se pintan junto a las de aquí**, no en otra pestaña, y las dos agendas se piden en paralelo: si Google falla, el calendario de la plataforma se pinta igual.
+- **Dos costuras cerradas**: arrastrar una cita de Google la habría pintado movida sin cambiar nada en Google, y pulsarla habría abierto nuestro editor para guardar en el vacío. Ahora no se arrastra y se abre en Google.
+- **Lo que no se escribe en tu calendario**: ni invitados, ni videollamada, ni recordatorios que nadie pidió. 13 comprobaciones.
+
+### 2026-08-23 — Un clic, una carga: la espera del navegador era una carga de más (Programador 8)
+- **Eugenio**: «tarda en responder y ponerle a cargar esa URL, es como si por 1 o 2 segundos estuviese haciendo un proceso que no es cargar esa web».
+- **Medido antes de tocar nada**: al pulsar un enlace, apple.com se cargaba **dos veces** — una al seguir el enlace y otra 700 ms después. La segunda era el marco remontándose: llevaba `key={url}`, la página avisa por `postMessage` de a dónde ha ido, eso cambiaba la clave, y React tiraba el `<iframe>` para montar otro que volvía a cargar lo ya cargado.
+- **El arreglo separa dos cosas que no son la misma**: dónde estás (barra, historia, título) y qué hay que **mandar** cargar. Lo segundo solo cambia cuando la orden es nuestra: barra, atrás/adelante, recargar, o subir a instantánea.
+- **Y la otra mitad**: cada navegación llamaba a `/api/navegador/leer` para el título, y esa ruta **vuelve a descargar la página entera en el servidor**. Dos descargas completas por clic. Ahora el título y el «viene vacía» los manda la propia página por `postMessage`, donde ya está cargada y no cuesta nada.
+- **Dos cosas que rompí arreglándolo, y por eso la prueba cubre los caminos que SÍ tienen que cargar**: el primer freno dejó «atrás» sin efecto —volvía a una dirección que el marco ya tenía apuntada, así que la clave no cambiaba— y se arregla con un contador de órdenes en vez de la dirección; y la subida a instantánea, que es la misma dirección por otro camino, necesitaba saltarse el freno a propósito.
+- **La prueba cuenta las cargas** (`scripts/probar-clic-sin-espera.mjs`, 10 comprobaciones). El síntoma era «va lento», que no falla ninguna prueba: si no se cuenta, vuelve.
+- **Tercera vez en el día** que una comilla invertida dentro de una plantilla de JavaScript cierra el literal y lo de después se evalúa como código. Queda avisado dentro de la propia inyección.
+
+
+### 2026-08-24 — Comercio F6: avisos de pedido por WhatsApp (Programador 7)
+- Eugenio (24-08): «les mandamos un whatsapp, no un email, que es más moderno, montémoslo». Antes de esto **nadie recibía nada al comprar**: quien compraba sin cuenta solo tenía su código en la pantalla; si cerraba la pestaña, lo perdía. Era el agujero más grande del comercio.
+- **Dos capas a propósito.** (1) **Funciona hoy, sin cuenta ni clave**: enlaces `wa.me` con el texto ya escrito — el comprador ve «Escribir al vendedor por WhatsApp» en su pedido y el vendedor «WhatsApp al comprador» en cada venta; lo manda la persona desde su número, coste cero. (2) **Automático, apagado**: cliente de la Cloud API de Meta (`src/server/whatsapp.ts`), `WHATSAPP_ENVIO=off` por defecto: calcula el mensaje, lo anota como `simulado` y no sale nada. Para enviar de verdad hacen falta cosas que no son programación y solo puede hacer Eugenio: cuenta de Meta Business verificada, número dedicado y **plantillas aprobadas** por Meta (categoría «utility»); los nombres de plantilla se configuran por variable.
+- 0112: `pedidos.telefono_contacto` (copiado al comprar, no leído del perfil al enviar) y `whatsapp_enviados` (qué se mandó, a quién, con qué estado y qué contestó Meta) con índice único (motivo, entidad, teléfono): un aviso, una vez.
+- Enganches: compra pagada con puntos y compra por Stripe → `compra_hecha` al comprador y `venta_nueva` al vendedor; marcar enviado/entregado/devuelto → aviso al comprador con el seguimiento. El teléfono se pide en la cesta (opcional, diciendo para qué) y Stripe lo recoge en el pago (`phone_number_collection`).
+- `GET /api/admin/whatsapp`: estado del canal, qué falta para enviar de verdad, y los últimos avisos.
+- Probado en local por HTTP: canal apagado dice qué falta; compra con teléfono → dos avisos `simulado` (comprador y vendedor) con el texto real; enlaces `wa.me` correctos en las dos direcciones y el teléfono no se filtra al cliente; marcar enviado → aviso con seguimiento; repetir el estado → sigue habiendo **un** aviso. Todo retirado.

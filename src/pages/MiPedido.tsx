@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download, Receipt } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Undo2, XCircle, Loader2, Download, Receipt, MessageCircle } from 'lucide-react';
 import Recibo from '../components/knowledge/Recibo';
 
 // ============================================================================
@@ -118,6 +118,12 @@ export default function MiPedido() {
               {pedido.envio_centimos > 0 && ` · envío ${dinero(pedido.envio_centimos, pedido.moneda)}`}
               {pedido.ciudad && ` · a ${pedido.ciudad}`}
             </p>
+            {pedido.whatsapp_vendedor && (
+              <a href={pedido.whatsapp_vendedor} target="_blank" rel="noreferrer"
+                className="mt-2 mr-3 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900">
+                <MessageCircle className="w-3.5 h-3.5" /> Escribir al vendedor por WhatsApp
+              </a>
+            )}
             <button type="button" onClick={verRecibo} className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900">
               <Receipt className="w-3.5 h-3.5" /> {recibo ? 'Ocultar el recibo' : 'Ver el recibo'}
             </button>

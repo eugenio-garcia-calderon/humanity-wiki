@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Scale, GitBranch, Quote, Users, Sparkles, ShieldCheck, Layers, ArrowUpRight,
+  Scale, GitBranch, Quote, Users, Sparkles, ShieldCheck, Layers, ArrowUpRight, MessagesSquare,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo } from '../components/tablero/TableroKanban';
@@ -136,7 +136,14 @@ export default function Veracidad() {
           contenido: una afirmación, los argumentos a favor y en contra colgando de
           ella, las fuentes de cada uno, y cuánto mueve cada rama a quien la lee.
         </p>
-        <p className="mt-3 text-base text-slate-600 leading-relaxed max-w-3xl">
+        {/* LA PUERTA, ARRIBA. Esta página explica; los debates son la cosa.
+            Un enlace a lo que se explica, junto a la explicación. */}
+        <Link to="/debates"
+          className="inline-flex items-center gap-1.5 mt-4 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-sm font-bold px-3.5 py-2 transition-colors">
+          <MessagesSquare className="w-4 h-4" /> Ver los debates
+        </Link>
+
+        <p className="mt-4 text-base text-slate-600 leading-relaxed max-w-3xl">
           Lo que sale de ahí no es un veredicto: es un <strong>espectro de visiones</strong>,
           con las razones de cada una a la vista. Y lo que se publique en la
           plataforma se contrasta con lo que ya hay, para avisar de una

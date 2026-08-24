@@ -26,6 +26,8 @@ import { getStripe } from './stripe';
 import { rutaLocalDeUpload } from './uploads';
 import { puntosDescuentoActivo, puntosPorEuro, pagarConPuntos, devolverPuntos } from './puntos';
 import { avisar } from './avisos';
+import { avisarPorWhatsApp, enlaceWa, estadoWhatsApp } from './whatsapp.js';
+import { normalizarTelefono } from '../utils/telefono.js';
 import { createReadStream, existsSync } from 'node:fs';
 import path from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -407,6 +409,23 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Sin sesión.' });
       const r = await db.execute(sql`SELECT variante_id, avisado_at FROM avisos_stock WHERE user_id = ${req.user.id} AND producto_id = ${String(req.params.id)}`);
       res.json({ pedidos: (r.rows as any[]).map(x => ({ variante_id: x.variante_id, avisado: !!x.avisado_at })) });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /** GET /api/admin/whatsapp — cómo está el canal y los últimos avisos (administrador). */
+  app.get('/api/admin/whatsapp', async (req: Request, res: Response) => {
+    try {
+      if (!req.user || (req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel de administrador.' });
+      const ultimos = await db.execute(sql`
+        SELECT motivo, telefono, estado, texto, created_at FROM whatsapp_enviados ORDER BY created_at DESC LIMIT 30
+      `);
+      const cuenta = await db.execute(sql`SELECT estado, count(*)::int AS n FROM whatsapp_enviados GROUP BY estado`);
+      res.json({
+        ...estadoWhatsApp(),
+        nota: 'Con el canal apagado, los avisos se calculan y se anotan como «simulado» pero NO salen de aquí. Para enviar de verdad hacen falta una cuenta de Meta Business verificada, un número dedicado y plantillas aprobadas por Meta.',
+        por_estado: cuenta.rows,
+        ultimos: ultimos.rows,
+      });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
@@ -1373,14 +1392,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
           }
           direccion = { name: nombre, line1, line2: String(d.linea2 || d.line2 || '').trim() || null, postal_code: cp, city: ciudad, country: pais };
         }
+        // El teléfono para avisar por WhatsApp (F6, 2026-08-24): el que se
+        // escriba en la compra, y si no, el del perfil de quien compra. Se
+        // COPIA en el pedido: si cambia de número mañana, este pedido sigue
+        // diciendo a qué número se avisó.
+        const telefonoPerfil = (await db.execute(sql`SELECT telefono FROM users WHERE id = ${req.user!.id}`)).rows[0] as any;
+        const telefonoPedido = normalizarTelefono(cuerpo.telefono) || telefonoPerfil?.telefono || null;
         await db.execute(sql`
           INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades, importe_centimos, envio_centimos, moneda,
-                               comprador_user_id, comprador_email, comprador_nombre, direccion_envio, vendedor_user_id, estado)
+                               comprador_user_id, comprador_email, comprador_nombre, direccion_envio, vendedor_user_id, estado, telefono_contacto)
           VALUES (${pedidoId}, ${codigo}, ${lineas.length === 1 ? lineas[0].p.id : null}, ${resumen},
                   ${lineas.length === 1 ? lineas[0].unidades : null}, 0, ${envioCobrado || 0}, ${moneda.toUpperCase()},
                   ${req.user!.id}, ${req.user!.email || null}, ${direccion?.name || req.user!.displayName || null},
                   ${direccion ? JSON.stringify(direccion) : null}::jsonb,
-                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'})
+                  ${vendedorId}, ${todoDigital ? 'entregado' : 'pagado'}, ${telefonoPedido})
         `);
         const ok = await pagarConPuntos(db, req.user!.id, vendedorId, puntosUsados, pedidoId);
         if (!ok) {
@@ -1409,6 +1434,20 @@ export function registerPublicarRoutes(app: Express, db: any) {
           paraQuien: vendedorId, dePartede: req.user!.id, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: pedidoId,
           datos: { texto: `${resumen} · pedido ${codigo} · pagado con ${puntosUsados.toLocaleString('es-ES')} puntos`, codigo, destino: '/comercio?pestana=pedidos' },
         });
+        // WhatsApp (F6): al comprador su código, al vendedor que ha vendido.
+        // Apagado hasta que Eugenio tenga cuenta y plantillas: entonces solo
+        // se anota lo que se habría enviado.
+        const vendedorTel = vendedorId ? (await db.execute(sql`SELECT telefono FROM users WHERE id = ${vendedorId}`)).rows[0] as any : null;
+        await avisarPorWhatsApp(db, {
+          telefono: telefonoPedido, userId: req.user!.id, motivo: 'compra_hecha', entidadTipo: 'pedidos', entidadId: pedidoId,
+          texto: `Compra hecha en ${dominioPublico()}: ${resumen}. Tu código de pedido es ${codigo}. Puedes seguirlo en ${dominioPublico()}/pedido?codigo=${codigo}`,
+          parametros: [resumen, codigo],
+        });
+        await avisarPorWhatsApp(db, {
+          telefono: vendedorTel?.telefono, userId: vendedorId, motivo: 'venta_nueva', entidadTipo: 'pedidos', entidadId: pedidoId,
+          texto: `Has vendido: ${resumen} (pedido ${codigo}), pagado con ${puntosUsados} puntos. Míralo en ${dominioPublico()}/comercio`,
+          parametros: [resumen, codigo],
+        });
         return res.json({
           pagado_con_puntos: true, codigo, puntos_usados: puntosUsados,
           subtotal_centimos: subtotal, descuento_centimos: descuentoCentimos, envio_centimos: envioCobrado,
@@ -1432,6 +1471,11 @@ export function registerPublicarRoutes(app: Express, db: any) {
         : null;
       const sesion = await stripe.checkout.sessions.create({
         mode: suscripcion ? 'subscription' : 'payment',
+        // EL TELÉFONO, PARA AVISAR POR WHATSAPP (F6, 2026-08-24). Se pide en
+        // el pago porque quien compra sin cuenta no tiene dónde dejarlo, y sin
+        // él su código de pedido solo vive en una pestaña que puede cerrar.
+        // Es opcional para Stripe: quien no quiera, sigue comprando igual.
+        phone_number_collection: { enabled: true },
         ...(cupon ? { discounts: [{ coupon: cupon.id }] } : {}),
         ui_mode: 'hosted',
         line_items: lineas.map(l => ({
@@ -1790,7 +1834,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
                moneda, estado, seguimiento, created_at, updated_at, direccion_envio,
-               puntos_usados, cupon_codigo, descuento_centimos, comprador_email
+               puntos_usados, cupon_codigo, descuento_centimos, comprador_email, vendedor_user_id, telefono_contacto
         FROM pedidos
         WHERE codigo = ${codigo}
           AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
@@ -1819,6 +1863,13 @@ export function registerPublicarRoutes(app: Express, db: any) {
         seguimiento: p.seguimiento || null,
         ciudad: p.direccion_envio?.city || null,
         hecho_el: p.created_at,
+        // Escribirle al vendedor por WhatsApp (F6): lo abre quien pulsa, con
+        // el texto escrito. Solo si el vendedor dio su número.
+        whatsapp_vendedor: await (async () => {
+          if (!p.vendedor_user_id) return null;
+          const v = (await db.execute(sql`SELECT telefono, coalesce(display_name, name) AS nombre FROM users WHERE id = ${p.vendedor_user_id}`)).rows[0] as any;
+          return enlaceWa(v?.telefono, `Hola${v?.nombre ? ` ${v.nombre}` : ''}, te escribo por el pedido ${p.codigo} (${p.producto_nombre}).`);
+        })(),
         cambiado_el: p.updated_at,
         // Lo que se pagó con puntos y con cupón, para que la confirmación y
         // «¿dónde está lo mío?» lo digan sin consultar el libro.
@@ -1906,13 +1957,19 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, comprador_email, comprador_nombre, direccion_envio,
+               moneda, comprador_email, comprador_nombre, direccion_envio, telefono_contacto,
                estado, seguimiento, created_at
         FROM pedidos
         WHERE vendedor_user_id = ${req.user.id}
         ORDER BY created_at DESC
         LIMIT 200
       `);
+      // El enlace para escribirle a quien compró (F6): se calcula aquí, no en
+      // la pantalla, para no repartir teléfonos por el cliente sin motivo.
+      for (const p of r.rows as any[]) {
+        p.whatsapp_comprador = enlaceWa(p.telefono_contacto, `Hola${p.comprador_nombre ? ` ${String(p.comprador_nombre).split(' ')[0]}` : ''}, te escribo por tu pedido ${p.codigo} (${p.producto_nombre}).`);
+        delete p.telefono_contacto;
+      }
       res.json({ pedidos: r.rows });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -1971,6 +2028,22 @@ export function registerPublicarRoutes(app: Express, db: any) {
             texto: `Tu pedido ${fila.codigo} (${fila.producto_nombre}) ${TEXTO[estado] || estado}${fila.seguimiento && estado === 'enviado' ? ` · seguimiento ${fila.seguimiento}` : ''}${puntosDevueltos > 0 ? ` · ${puntosDevueltos.toLocaleString('es-ES')} puntos devueltos` : ''}.`,
             codigo: fila.codigo, estado, destino: `/pedido?codigo=${fila.codigo}`,
           },
+        });
+      }
+      // Y por WhatsApp, si dejó número (F6): salir, llegar y devolver son las
+      // tres cosas que alguien quiere saber sin tener que entrar a mirar.
+      if (estado && ['enviado', 'entregado', 'devuelto'].includes(estado)) {
+        const p2 = (await db.execute(sql`SELECT telefono_contacto, comprador_user_id, producto_nombre FROM pedidos WHERE id = ${fila.id}`)).rows[0] as any;
+        const motivo = estado === 'enviado' ? 'pedido_enviado' : estado === 'entregado' ? 'pedido_entregado' : 'devolucion';
+        const texto = estado === 'enviado'
+          ? `Tu pedido ${fila.codigo} (${p2?.producto_nombre}) ha salido${fila.seguimiento ? `. Seguimiento: ${fila.seguimiento}` : ''}.`
+          : estado === 'entregado'
+            ? `Tu pedido ${fila.codigo} (${p2?.producto_nombre}) consta como entregado.`
+            : `Tu pedido ${fila.codigo} (${p2?.producto_nombre}) se ha devuelto${puntosDevueltos > 0 ? `. Te han vuelto ${puntosDevueltos} puntos` : ''}.`;
+        await avisarPorWhatsApp(db, {
+          telefono: p2?.telefono_contacto, userId: p2?.comprador_user_id, motivo: motivo as any,
+          entidadTipo: 'pedidos', entidadId: fila.id, texto,
+          parametros: [fila.codigo, p2?.producto_nombre || '', fila.seguimiento || ''],
         });
       }
       res.json({ codigo: fila.codigo, estado: fila.estado, seguimiento: fila.seguimiento, puntos_devueltos: puntosDevueltos });

@@ -25,7 +25,10 @@ import { useAuth } from '../contexts/AuthContext';
 type Vista = 'dia' | 'semana' | 'mes' | 'anio';
 
 interface Cosa {
-  clase: 'evento' | 'tarea';
+  // 'google' se añadió en la fase 5 (2026-08-23): las citas de tu calendario de
+  // Google, pintadas JUNTO a lo de aquí y no en otra pestaña. Ver dos agendas
+  // por separado es exactamente el problema que tiene la gente hoy.
+  clase: 'evento' | 'tarea' | 'google';
   id: string;
   titulo: string;
   descripcion: string | null;
@@ -207,12 +210,39 @@ export default function Calendario() {
   const cargar = useCallback(() => {
     if (!user) { setCargando(false); return; }
     setCargando(true);
-    fetch(`/api/calendario?desde=${desde}&hasta=${hasta}`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(d => {
+    // ── LAS DOS AGENDAS, EN PARALELO Y SIN QUE UNA TUMBE A LA OTRA ──────────
+    // Lo de aquí y lo de Google se piden a la vez. Si Google falla —o no hay
+    // cuenta conectada, que es lo normal— el calendario de la plataforma se
+    // pinta igual: encadenarlas dejaría la pantalla vacía por algo opcional.
+    Promise.allSettled([
+      fetch(`/api/calendario?desde=${desde}&hasta=${hasta}`, { credentials: 'include' }).then(r => r.json()),
+      fetch(`/api/calendario/google?desde=${new Date(desde).toISOString()}&hasta=${new Date(hasta).toISOString()}`,
+        { credentials: 'include' }).then(r => (r.ok ? r.json() : null)),
+    ])
+      .then(([mio, google]) => {
+        const d: any = mio.status === 'fulfilled' ? mio.value : null;
         if (d?.error) { setError(d.error); setItems([]); return; }
         setError(null);
-        setItems(Array.isArray(d.items) ? d.items : []);
+        const propios: Cosa[] = Array.isArray(d?.items) ? d.items : [];
+
+        const g: any = google.status === 'fulfilled' ? google.value : null;
+        const deGoogle: Cosa[] = (g?.citas || []).map((c: any) => ({
+          clase: 'google' as const,
+          id: `g-${c.id}`,
+          titulo: c.titulo,
+          descripcion: null,
+          inicio: c.empieza,
+          fin: c.acaba,
+          todoElDia: Boolean(c.todoElDia),
+          lugar: c.donde,
+          // Un color propio para que se distinga de un vistazo de qué agenda
+          // viene cada cosa, sin tener que abrirla.
+          color: '#4285F4',
+          icono: null,
+          proyectoId: null, proyecto: null, proyectoSlug: null,
+          url: c.enlace,
+        }));
+        setItems([...propios, ...deGoogle]);
       })
       .catch(() => setError('No se ha podido cargar el calendario.'))
       .finally(() => setCargando(false));
@@ -269,6 +299,11 @@ export default function Calendario() {
     if (!it) return;
     const destino = claveDia(dia);
     if (claveDia(new Date(it.inicio)) === destino) return;
+    // UNA CITA DE GOOGLE NO SE ARRASTRA DESDE AQUÍ. Sin esto caería en la rama
+    // de «evento nuestro» y se pintaría movida mientras el servidor no cambia
+    // nada: la pantalla diría una cosa y tu Google otra, que es peor que no
+    // dejar moverla. Se mueve en Google, y al recargar se ve.
+    if (it.clase === 'google') return;
 
     // Se pinta ya y se confirma después: arrastrar tiene que ir a la velocidad
     // de la mano.
@@ -384,13 +419,23 @@ export default function Calendario() {
     return (
       <button
         data-ficha
-        draggable
+        // Y NO SE DEJA NI EMPEZAR A ARRASTRARLA. Bloquearlo solo al soltar
+        // funciona, pero la cita se ve moverse con el ratón y volver de golpe:
+        // parece que la aplicación se ha equivocado, cuando está acertando.
+        draggable={it.clase !== 'google'}
         onDragStart={e => { arrastrando.current = it; e.dataTransfer.effectAllowed = 'move'; }}
         onDragEnd={() => { arrastrando.current = null; setEncima(null); }}
         onClick={e => {
           e.stopPropagation();
           // Una tarea se abre donde vive; un evento se edita aquí.
           if (it.clase === 'tarea') { if (it.url) navegar(it.url); return; }
+          // Y una cita de Google se abre EN GOOGLE. Abrirla en nuestro editor
+          // dejaría «guardar» un cambio que no llegaría a ninguna parte —o
+          // peor, crearía un evento nuestro duplicado al lado del suyo.
+          if (it.clase === 'google') {
+            if (it.url) window.open(it.url, '_blank', 'noopener');
+            return;
+          }
           // Si es una repetición, se edita EL EVENTO, no esa vez suelta: su id
           // lleva la fecha detrás y no existe como fila.
           setEditando({ ...it, id: (it as any).idBase || it.id });

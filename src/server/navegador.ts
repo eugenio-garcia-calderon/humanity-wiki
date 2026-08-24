@@ -219,7 +219,36 @@ export function reescribir(html: string, base: URL): string {
   var BASE = ${JSON.stringify(base.href)};
   var TOK = ${JSON.stringify(tokenDia())};
   var proxi = function(u){ return '/api/navegador/ver?url=' + encodeURIComponent(u) + '&t=' + TOK; };
-  try { parent.postMessage({ navegadorHumanity: 'aqui', url: BASE }, '*'); } catch(e){}
+  // ── SE MANDA EL TÍTULO Y CUÁNTO TEXTO HAY, NO SOLO LA DIRECCIÓN ──────────
+  // (2026-08-23) Antes solo iba la dirección, y el cliente pedía aparte
+  // /api/navegador/leer para saber el título y si la página venía vacía. Esa
+  // llamada **vuelve a descargar la página entera en el servidor**: cada clic
+  // costaba dos descargas completas de la misma web.
+  //
+  // Aquí la página ya está cargada y estas dos cosas se saben sin pedir nada.
+  // Se avisa DOS VECES a propósito: al principio para que la barra reaccione
+  // ya, y al terminar de cargar porque el título de muchas webs lo pone su
+  // JavaScript después.
+  //
+  // OJO AL EDITAR ESTO: es una plantilla de JavaScript. Una comilla invertida
+  // aquí dentro —aunque sea en un comentario— cierra el literal y lo de después
+  // se evalúa como código. Ha pasado tres veces hoy.
+  var avisar = function(){
+    var texto = '';
+    try { texto = (document.body && document.body.innerText || '').trim(); } catch(e){}
+    try {
+      parent.postMessage({
+        navegadorHumanity: 'aqui', url: BASE,
+        titulo: document.title || null,
+        // El mismo criterio que usaba el servidor: por debajo de esto, la
+        // página se dibuja sola con JavaScript y por aquí se ve en blanco.
+        vacia: texto.length < 2000,
+      }, '*');
+    } catch(e){}
+  };
+  avisar();
+  if (document.readyState === 'complete') setTimeout(avisar, 300);
+  else window.addEventListener('load', function(){ setTimeout(avisar, 300); });
   // Los enlaces con target=_blank sacarían la web de la ventana: se quedan.
   document.addEventListener('click', function(e){
     var a = e.target && e.target.closest && e.target.closest('a');
