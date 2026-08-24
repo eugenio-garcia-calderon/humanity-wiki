@@ -95,6 +95,12 @@
       "ruta": "src/components/social/Campana.tsx",
       "motivo": "prog7: F7 devolución pedida por el comprador, estado preparando y fecha estimada",
       "desde": "2026-08-23T23:57:04.558Z"
+    },
+    {
+      "agente": "prog5",
+      "ruta": "drizzle/0114_veracidad_espectro.sql",
+      "motivo": "Veracidad fase 6: espectro de visiones (tarjetas del tablero)",
+      "desde": "2026-08-24T00:00:03.549Z"
     }
   ]
 }
