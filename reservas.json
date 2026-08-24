@@ -31,12 +31,6 @@
       "desde": "2026-08-23T23:43:10.099Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/hooks/useAbrirAlAcercarse.ts",
-      "motivo": "prog2: cerrar mirando donde esta el raton, no esperando un mouseleave",
-      "desde": "2026-08-24T00:03:45.654Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0114_zonas_de_envio.sql",
       "motivo": "prog7: F8 zonas de envío y recogida en persona",
