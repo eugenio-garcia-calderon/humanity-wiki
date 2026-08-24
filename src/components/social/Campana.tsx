@@ -16,7 +16,7 @@
 // haría desaparecer los que no has llegado a leer.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro, PackageCheck } from 'lucide-react';
+import { Bell, MessageSquare, Heart, UserPlus, Bookmark, AtSign, CornerDownRight, FileText, PhoneMissed, Send, Coins, Hourglass, ShoppingBag, Package, ShoppingCart, Tag, Euro, PackageCheck, Undo2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
@@ -60,6 +60,9 @@ const COMO: Record<string, { icono: any; frase: (n: string) => string }> = {
   gasto_ia_80:        { icono: Euro,           frase: () => 'La IA lleva el 80 % del tope de gasto del mes' },
   // Comercio F5 (prog7).
   vuelve_stock:       { icono: PackageCheck,   frase: () => 'Ya vuelve a haber' },
+  // Comercio F7 (prog7).
+  devolucion_pedida:  { icono: Undo2,          frase: n => `${n} pide devolver un pedido` },
+  devolucion_resuelta:{ icono: Undo2,          frase: () => 'Tu petición de devolución tiene respuesta' },
 };
 
 /** «hace 3 min», «ayer». Una fecha completa en una lista de avisos obliga a

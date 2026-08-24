@@ -412,6 +412,98 @@ export function registerPublicarRoutes(app: Express, db: any) {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  // ==========================================================================
+  // DEVOLUCIONES A PETICIÓN DE QUIEN COMPRÓ (2026-08-24, comercio F7)
+  // ==========================================================================
+  // Eugenio: «sí, que la pida el comprador». Antes solo el vendedor podía
+  // marcar devuelto; quien había comprado tenía que escribirle y confiar.
+  // Ahora: la pide con un motivo, el vendedor acepta o rechaza diciendo por
+  // qué, y LOS PUNTOS VUELVEN SOLO AL ACEPTAR — nunca al pedirla, que sería
+  // devolver por decisión de una sola parte.
+  const diasParaDevolver = () => Math.max(1, Number(process.env.DIAS_PARA_DEVOLVER ?? 30));
+
+  /** POST /api/publicar/pedido/:codigo/devolucion { motivo, correo? } — la pide quien compró. */
+  app.post('/api/publicar/pedido/:codigo/devolucion', async (req: Request, res: Response) => {
+    try {
+      const codigo = String(req.params.codigo || '').toUpperCase().trim();
+      const correo = String(req.body?.correo || '').toLowerCase().trim();
+      const quien = req.user?.id || null;
+      const motivo = String(req.body?.motivo || '').trim().slice(0, 1000);
+      if (!motivo) return res.status(400).json({ error: 'Cuenta qué ha pasado: el vendedor necesita saberlo para decidir.' });
+      if (!codigo || (!correo && !quien)) return res.status(400).json({ error: 'Hacen falta el código y el correo con el que se compró.' });
+      const p = (await db.execute(sql`
+        SELECT id, codigo, estado, created_at, vendedor_user_id, producto_nombre, comprador_user_id, comprador_email, telefono_contacto
+        FROM pedidos WHERE codigo = ${codigo}
+          AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
+      `)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'No hay ningún pedido con ese código y ese correo.' });
+      if (['devuelto', 'cancelado'].includes(p.estado)) return res.status(409).json({ error: `Ese pedido ya está ${p.estado}.` });
+      const dias = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
+      if (dias > diasParaDevolver()) return res.status(409).json({ error: `El plazo para pedir la devolución es de ${diasParaDevolver()} días y este pedido es de hace ${Math.floor(dias)}. Escribe al vendedor: puede aceptarla igual.` });
+      try {
+        await db.execute(sql`
+          INSERT INTO devoluciones (id, pedido_id, pedida_por, pedida_email, motivo)
+          VALUES (${'DEV' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase()},
+                  ${p.id}, ${quien}, ${correo || p.comprador_email || null}, ${motivo})
+        `);
+      } catch (e: any) {
+        const t = `${e?.message || ''} ${e?.cause?.message || ''}`;
+        if (/devoluciones_una_viva_idx|duplicate key/i.test(t)) return res.status(409).json({ error: 'Ya has pedido la devolución de este pedido y el vendedor todavía no ha contestado.' });
+        throw e;
+      }
+      await avisar(db, {
+        paraQuien: p.vendedor_user_id, dePartede: quien, tipo: 'devolucion_pedida', entidadTipo: 'pedidos', entidadId: p.id,
+        datos: { texto: `Piden devolver el pedido ${p.codigo} (${p.producto_nombre}): «${motivo.slice(0, 120)}»`, codigo: p.codigo, destino: '/comercio?pestana=pedidos' },
+      });
+      res.json({ pedida: true, codigo: p.codigo, nota: 'El vendedor tiene que aceptarla. Si la acepta y pagaste con puntos, te vuelven en ese momento.' });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** PUT /api/publicar/mis-ventas/:id/devolucion { acepta, respuesta? } — la resuelve quien vendió. */
+  app.put('/api/publicar/mis-ventas/:id/devolucion', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const acepta = req.body?.acepta === true;
+      const respuesta = String(req.body?.respuesta || '').trim().slice(0, 1000) || null;
+      if (!acepta && !respuesta) return res.status(400).json({ error: 'Si la rechazas, di por qué: quien compró tiene derecho a saberlo.' });
+      const p = (await db.execute(sql`
+        SELECT id, codigo, estado, producto_nombre, comprador_user_id, telefono_contacto FROM pedidos
+        WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
+      `)).rows[0] as any;
+      if (!p) return res.status(404).json({ error: 'Ese pedido no es tuyo o no existe.' });
+      const d = (await db.execute(sql`SELECT id FROM devoluciones WHERE pedido_id = ${p.id} AND estado = 'pedida' ORDER BY created_at DESC LIMIT 1`)).rows[0] as any;
+      if (!d) return res.status(404).json({ error: 'No hay ninguna devolución pendiente de este pedido.' });
+
+      // ACEPTAR mueve dinero: primero vuelven los puntos, y solo si vuelven
+      // enteros se marca. Una devolución a medias es peor que ninguna.
+      let puntosDevueltos = 0;
+      if (acepta) {
+        if (!['devuelto', 'cancelado'].includes(p.estado)) {
+          const dev = await devolverPuntos(db, p.id);
+          if (!dev.ok) return res.status(409).json({ error: dev.motivo || 'No se han podido devolver los puntos.' });
+          puntosDevueltos = dev.puntos || 0;
+        }
+        await db.execute(sql`UPDATE pedidos SET estado = 'devuelto', updated_at = now() WHERE id = ${p.id}`);
+      }
+      await db.execute(sql`
+        UPDATE devoluciones SET estado = ${acepta ? 'aceptada' : 'rechazada'}, respuesta = ${respuesta}, resuelta_por = ${req.user.id}, resuelta_en = now()
+        WHERE id = ${d.id}
+      `);
+      const texto = acepta
+        ? `Tu devolución del pedido ${p.codigo} (${p.producto_nombre}) ha sido aceptada${puntosDevueltos > 0 ? `: te vuelven ${puntosDevueltos} puntos` : ''}.${respuesta ? ` «${respuesta.slice(0, 120)}»` : ''}`
+        : `Tu devolución del pedido ${p.codigo} (${p.producto_nombre}) ha sido rechazada: «${(respuesta || '').slice(0, 160)}»`;
+      await avisar(db, {
+        paraQuien: p.comprador_user_id, dePartede: req.user.id, tipo: 'devolucion_resuelta', entidadTipo: 'pedidos', entidadId: p.id,
+        datos: { texto, codigo: p.codigo, destino: `/pedido?codigo=${p.codigo}` },
+      });
+      await avisarPorWhatsApp(db, {
+        telefono: p.telefono_contacto, userId: p.comprador_user_id, motivo: 'devolucion', entidadTipo: 'devoluciones', entidadId: d.id,
+        texto, parametros: [p.codigo, p.producto_nombre || ''],
+      });
+      res.json({ resuelta: acepta ? 'aceptada' : 'rechazada', puntos_devueltos: puntosDevueltos });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** GET /api/admin/whatsapp — cómo está el canal y los últimos avisos (administrador). */
   app.get('/api/admin/whatsapp', async (req: Request, res: Response) => {
     try {
@@ -1834,7 +1926,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
                moneda, estado, seguimiento, created_at, updated_at, direccion_envio,
-               puntos_usados, cupon_codigo, descuento_centimos, comprador_email, vendedor_user_id, telefono_contacto
+               puntos_usados, cupon_codigo, descuento_centimos, comprador_email, vendedor_user_id, telefono_contacto,
+               entrega_estimada, comprador_user_id
         FROM pedidos
         WHERE codigo = ${codigo}
           AND ((${correo} <> '' AND lower(comprador_email) = ${correo}) OR (${quien}::text IS NOT NULL AND comprador_user_id = ${quien}))
@@ -1863,6 +1956,16 @@ export function registerPublicarRoutes(app: Express, db: any) {
         seguimiento: p.seguimiento || null,
         ciudad: p.direccion_envio?.city || null,
         hecho_el: p.created_at,
+        entrega_estimada: p.entrega_estimada || null,
+        // La última devolución de este pedido (F7): qué pidió, en qué estado
+        // está y qué contestó el vendedor.
+        devolucion: (await db.execute(sql`
+          SELECT motivo, estado, respuesta, created_at, resuelta_en FROM devoluciones WHERE pedido_id = ${p.id} ORDER BY created_at DESC LIMIT 1
+        `)).rows[0] || null,
+        // ¿Se puede pedir la devolución? Se dice aquí para que la pantalla no
+        // tenga que adivinar la regla ni repetirla.
+        se_puede_devolver: !['devuelto', 'cancelado'].includes(p.estado)
+          && (Date.now() - new Date(p.created_at).getTime()) / 86400000 <= Number(process.env.DIAS_PARA_DEVOLVER ?? 30),
         // Escribirle al vendedor por WhatsApp (F6): lo abre quien pulsa, con
         // el texto escrito. Solo si el vendedor dio su número.
         whatsapp_vendedor: await (async () => {
@@ -1957,7 +2060,8 @@ export function registerPublicarRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const r = await db.execute(sql`
         SELECT id, codigo, producto_nombre, unidades, importe_centimos, envio_centimos,
-               moneda, comprador_email, comprador_nombre, direccion_envio, telefono_contacto,
+               moneda, comprador_email, comprador_nombre, direccion_envio, telefono_contacto, entrega_estimada,
+               (SELECT row_to_json(x) FROM (SELECT id, motivo, estado, created_at FROM devoluciones WHERE pedido_id = pedidos.id ORDER BY created_at DESC LIMIT 1) x) AS devolucion,
                estado, seguimiento, created_at
         FROM pedidos
         WHERE vendedor_user_id = ${req.user.id}
@@ -1982,8 +2086,10 @@ export function registerPublicarRoutes(app: Express, db: any) {
   app.put('/api/publicar/mis-ventas/:id', async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
-      const { estado, seguimiento, nota } = req.body || {};
-      const VALIDOS = ['pagado', 'enviado', 'entregado', 'devuelto', 'cancelado'];
+      const { estado, seguimiento, nota, entrega_estimada } = req.body || {};
+      // «preparando» (F7, 2026-08-24): el hueco entre pagado y enviado. Sin él,
+      // un pedido que alguien está empaquetando parece un pedido olvidado.
+      const VALIDOS = ['pagado', 'preparando', 'enviado', 'entregado', 'devuelto', 'cancelado'];
       if (estado && !VALIDOS.includes(estado)) return res.status(400).json({ error: 'Ese estado no existe.' });
       // DEVOLVER O CANCELAR UNA COMPRA PAGADA CON PUNTOS (2026-08-23): antes de
       // cambiar el estado, los puntos vuelven al comprador con apuntes
@@ -2007,6 +2113,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
           estado = COALESCE(${estado || null}, estado),
           seguimiento = COALESCE(${seguimiento ?? null}, seguimiento),
           nota_vendedor = COALESCE(${nota ?? null}, nota_vendedor),
+          entrega_estimada = CASE WHEN ${entrega_estimada !== undefined} THEN ${entrega_estimada || null}::date ELSE entrega_estimada END,
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND vendedor_user_id = ${req.user.id}
         RETURNING id, codigo, estado, seguimiento, comprador_user_id, producto_nombre
@@ -2019,7 +2126,7 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // teniendo su código y la página del pedido.
       if (estado && fila.comprador_user_id) {
         const TEXTO: Record<string, string> = {
-          pagado: 'está pagado y en preparación', enviado: 'ha salido', entregado: 'consta como entregado',
+          pagado: 'está pagado', preparando: 'se está preparando', enviado: 'ha salido', entregado: 'consta como entregado',
           devuelto: 'se ha devuelto', cancelado: 'se ha cancelado',
         };
         await avisar(db, {
