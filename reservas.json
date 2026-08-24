@@ -5,6 +5,12 @@
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
       "motivo": "hover: sonido, sin controles encima y mas grande",
       "desde": "2026-08-24T11:13:45.376Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog7: entrada de los contratos (1 min)",
+      "desde": "2026-08-24T11:38:24.737Z"
     }
   ]
 }
