@@ -65,12 +65,6 @@
       "ruta": "src/pages/Comercio.tsx",
       "motivo": "prog7: F8 zonas de envío y recogida en persona",
       "desde": "2026-08-24T00:10:00.433Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog2: entrada del buscador y los gestos de raton",
-      "desde": "2026-08-24T00:13:19.108Z"
     }
   ]
 }
