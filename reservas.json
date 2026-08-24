@@ -47,6 +47,18 @@
       "ruta": "src/pages/Mercado.tsx",
       "motivo": "prog7: F10 buscador, orden y paginación del mercado",
       "desde": "2026-08-24T00:32:16.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "prog7: F10 changelog (1 min)",
+      "desde": "2026-08-24T00:36:54.504Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "memory/13_PLAN_COMERCIO.md",
+      "motivo": "prog7: F10 changelog (1 min)",
+      "desde": "2026-08-24T00:36:54.504Z"
     }
   ]
 }
