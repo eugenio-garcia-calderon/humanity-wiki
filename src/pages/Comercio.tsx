@@ -7,6 +7,7 @@ import {
 import CrearProducto from '../components/knowledge/CrearProducto';
 import EditorVariantes, { type VarianteForm, variantesAFormulario, variantesAlServidor } from '../components/knowledge/EditorVariantes';
 import Recibo from '../components/knowledge/Recibo';
+import EditorEnvio from '../components/knowledge/EditorEnvio';
 import DatosFiscales from '../components/knowledge/DatosFiscales';
 
 // ============================================================================
@@ -58,6 +59,7 @@ export default function Comercio() {
   // aviso «te han comprado algo» de la campana.
   // Editor de variantes por producto (2026-08-23): abierto en uno a la vez.
   const [variantesDe, setVariantesDe] = useState<string | null>(null);
+  const [envioDe, setEnvioDe] = useState<string | null>(null);
   // Recibo de una venta (F4): abierto en uno a la vez.
   const [reciboDe, setReciboDe] = useState<{ id: string; datos: any } | null>(null);
   // Resolver una devolución pedida por el comprador (F7, 2026-08-24).
@@ -288,6 +290,10 @@ export default function Comercio() {
                           ? <span className="text-emerald-700">· archivo listo</span>
                           : <span className="text-amber-700 font-bold">· SIN ARCHIVO: se cobra y no se entrega</span>
                       )}
+                      {p.kind === 'fisico' && (
+                        <button type="button" onClick={() => setEnvioDe(envioDe === p.id ? null : p.id)}
+                          className="text-[11px] font-bold text-slate-500 underline">envíos</button>
+                      )}
                       {p.modality !== 'suscripcion' && (
                         <button type="button" onClick={() => { if (variantesDe === p.id) { setVariantesDe(null); return; } setVariantesDe(p.id); setVariantesForm(variantesAFormulario(p.variantes)); }}
                           className="text-[11px] font-bold text-slate-500 underline">
@@ -295,6 +301,7 @@ export default function Comercio() {
                         </button>
                       )}
                     </p>
+                    {envioDe === p.id && <EditorEnvio productoId={p.id} onGuardado={cargar} />}
                     {variantesDe === p.id && (
                       <div className="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <EditorVariantes valor={variantesForm} onCambio={setVariantesForm} precioBase={p.price_cents ? (p.price_cents / 100).toFixed(2).replace('.', ',') : undefined} />
