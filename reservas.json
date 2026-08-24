@@ -8,54 +8,6 @@
     },
     {
       "agente": "prog7",
-      "ruta": "drizzle/0117_ajustes_economicos.sql",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/ajustes.ts",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/server/puntos.ts",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/paginasInfo.ts",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/Administracion.tsx",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/about/ContratoCobro.tsx",
-      "motivo": "prog7: panel de variables económicas y comisiones 12/10",
-      "desde": "2026-08-24T11:54:01.050Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/about/AvisosLegales.tsx",
-      "motivo": "prog7: comisión 12/10 en los textos",
-      "desde": "2026-08-24T12:00:59.191Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/components/knowledge/CrearProducto.tsx",
-      "motivo": "prog7: comisión 12/10 en los textos",
-      "desde": "2026-08-24T12:00:59.191Z"
-    },
-    {
-      "agente": "prog7",
       "ruta": "drizzle/0118_liquidaciones.sql",
       "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
       "desde": "2026-08-24T12:06:42.011Z"
@@ -75,18 +27,6 @@
     {
       "agente": "prog7",
       "ruta": "src/server/stripe.ts",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/components/knowledge/Cesta.tsx",
-      "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
-      "desde": "2026-08-24T12:06:42.011Z"
-    },
-    {
-      "agente": "prog7",
-      "ruta": "src/pages/Comercio.tsx",
       "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
       "desde": "2026-08-24T12:06:42.011Z"
     },
