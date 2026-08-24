@@ -60,6 +60,30 @@ export default function Comercio() {
   const [variantesDe, setVariantesDe] = useState<string | null>(null);
   // Recibo de una venta (F4): abierto en uno a la vez.
   const [reciboDe, setReciboDe] = useState<{ id: string; datos: any } | null>(null);
+  // Resolver una devolución pedida por el comprador (F7, 2026-08-24).
+  async function resolverDevolucion(id: string, acepta: boolean) {
+    const respuesta = window.prompt(acepta
+      ? 'Vas a ACEPTAR la devolución. Si se pagó con puntos, vuelven al comprador ahora mismo. Puedes añadir un mensaje (opcional):'
+      : 'Vas a RECHAZAR la devolución. Di por qué (quien compró tiene derecho a saberlo):');
+    if (!acepta && !String(respuesta || '').trim()) return;
+    const r = await fetch(`/api/publicar/mis-ventas/${id}/devolucion`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acepta, respuesta: respuesta || null }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) window.alert(j.error || 'No se ha podido.');
+    cargar();
+  }
+  async function ponerFecha(id: string) {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const f = window.prompt(`¿Para qué día calculas que llega? (AAAA-MM-DD, hoy es ${hoy}). Déjalo vacío para quitarla.`, hoy);
+    if (f === null) return;
+    await fetch(`/api/publicar/mis-ventas/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entrega_estimada: f.trim() || null }),
+    }).catch(() => {});
+    cargar();
+  }
+
   async function verRecibo(id: string) {
     if (reciboDe?.id === id) { setReciboDe(null); return; }
     const r = await fetch(`/api/publicar/mis-ventas/${id}/recibo`).catch(() => null);
@@ -382,20 +406,42 @@ export default function Comercio() {
                   </div>
                   <span className={`text-[11px] font-black px-2 py-1 rounded-full shrink-0 ${
                     p.estado === 'pagado' ? 'bg-amber-50 text-amber-700'
+                    : p.estado === 'preparando' ? 'bg-orange-50 text-orange-700'
                     : p.estado === 'enviado' ? 'bg-sky-50 text-sky-700'
                     : p.estado === 'entregado' ? 'bg-emerald-50 text-emerald-700'
                     : 'bg-slate-100 text-slate-500'}`}>
                     {p.estado}
                   </span>
                 </div>
-                {(p.estado === 'pagado' || p.estado === 'enviado') && (
-                  <div className="mt-2 flex gap-2">
+                {p.devolucion?.estado === 'pedida' && (
+                  <div className="mt-2 p-3 rounded-xl border border-amber-200 bg-amber-50">
+                    <p className="text-xs font-black text-amber-900">Piden devolver este pedido</p>
+                    <p className="text-xs text-slate-700 mt-0.5">«{p.devolucion.motivo}»</p>
+                    <div className="mt-2 flex gap-2">
+                      <button onClick={() => resolverDevolucion(p.id, true)} className="h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-black">Aceptar la devolución</button>
+                      <button onClick={() => resolverDevolucion(p.id, false)} className="h-9 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-700">Rechazarla</button>
+                    </div>
+                  </div>
+                )}
+                {p.entrega_estimada && <p className="mt-1 text-[11px] text-slate-500">Entrega estimada: {new Date(p.entrega_estimada).toLocaleDateString('es-ES')}</p>}
+                {(p.estado === 'pagado' || p.estado === 'preparando' || p.estado === 'enviado') && (
+                  <div className="mt-2 flex gap-2 flex-wrap">
                     {p.estado === 'pagado' && (
+                      <button onClick={() => marcarPedido(p.id, 'preparando')}
+                        className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                        Marcar preparando
+                      </button>
+                    )}
+                    {(p.estado === 'pagado' || p.estado === 'preparando') && (
                       <button onClick={() => marcarPedido(p.id, 'enviado')}
                         className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50">
                         Marcar enviado
                       </button>
                     )}
+                    <button onClick={() => ponerFecha(p.id)}
+                      className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">
+                      {p.entrega_estimada ? 'Cambiar fecha' : 'Poner fecha de entrega'}
+                    </button>
                     <button onClick={() => marcarPedido(p.id, 'entregado')}
                       className="h-9 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
                       Marcar entregado
