@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
 import { guardian, REGLAS, ritmo, ipDe } from './limites/index.js';
 import { avisar } from './avisos.js';
+import { numeroSincrono, iniciarAjustes } from './ajustes.js';
 
 // ============================================================================
 // PUNTOS DE HUMANITY.WIKI (2026-08-08, petición del usuario)
@@ -106,7 +107,7 @@ export async function cobrarServicio(
 export const puntosDescuentoActivo = () => process.env.PUNTOS_DESCUENTO === 'on';
 /** Cuántos puntos vale un euro de precio al pagar en el carrito (1 hoy: el
  *  precio de venta publicado). Se lee al usar, no al arrancar. */
-export const puntosPorEuro = () => Math.max(0.0001, Number(process.env.PUNTOS_POR_EURO || 1));
+export const puntosPorEuro = () => Math.max(0.0001, numeroSincrono('PUNTOS_POR_EURO'));
 
 /**
  * Mueve `puntos` del comprador al vendedor por un pedido, EN UNA TRANSACCIÓN
@@ -119,7 +120,7 @@ export const puntosPorEuro = () => Math.max(0.0001, Number(process.env.PUNTOS_PO
  *  (Eugenio, 2026-08-23: «un 50 % de descuento en la comisión cuando utilizan
  *  un sistema de intercambio de puntos en vez de moneda fiat»). */
 export const CUENTA_PLATAFORMA = 'U_PLATAFORMA';
-export const comisionPuntosBps = () => Math.max(0, Math.min(10000, Number(process.env.PUNTOS_COMISION_BPS ?? 250)));
+export const comisionPuntosBps = () => Math.max(0, Math.min(10000, numeroSincrono('PUNTOS_COMISION_BPS')));
 
 export async function pagarConPuntos(db: any, compradorId: string, vendedorId: string, puntos: number, pedidoId: string): Promise<boolean> {
   const importe = Math.round(puntos * 100) / 100;
@@ -221,7 +222,7 @@ export async function devolverPuntos(db: any, pedidoId: string): Promise<{ ok: b
 export const hoyMadrid = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
 
 /** El regalo de bienvenida vigente: `PUNTOS_BIENVENIDA`, 5.000 desde el 2026-08-23 (decisión de Eugenio). */
-export const puntosBienvenida = () => Math.max(0, Math.round(Number(process.env.PUNTOS_BIENVENIDA ?? 5000) * 100) / 100);
+export const puntosBienvenida = () => Math.max(0, Math.round(numeroSincrono('PUNTOS_BIENVENIDA') * 100) / 100);
 
 /**
  * El regalo de bienvenida, ENTERO y en un solo sitio (2026-08-23). Hasta la
@@ -346,8 +347,8 @@ export const modoCaducidad = (): 'off' | 'avisar' | 'on' => {
   const v = String(process.env.PUNTOS_CADUCIDAD || 'off').toLowerCase();
   return v === 'on' ? 'on' : v === 'avisar' ? 'avisar' : 'off';
 };
-const mesesInactividad = () => Math.max(1, Math.floor(Number(process.env.PUNTOS_INACTIVIDAD_MESES ?? 24)));
-const aniosCaducidad = () => Math.max(1, Math.floor(Number(process.env.PUNTOS_CADUCIDAD_ANIOS ?? 10)));
+const mesesInactividad = () => Math.max(1, Math.floor(numeroSincrono('PUNTOS_INACTIVIDAD_MESES')));
+const aniosCaducidad = () => Math.max(1, Math.floor(numeroSincrono('PUNTOS_CADUCIDAD_ANIOS')));
 const DIA_MS = 24 * 60 * 60 * 1000;
 // Fechas en partes LOCALES, no en ISO/UTC: `dia` (date) llega como la
 // medianoche local, y pasarla por toISOString la movería un día atrás en
@@ -500,6 +501,9 @@ export async function barrerCaducidades(db: any): Promise<{
 }
 
 export function registerPuntosRoutes(app: Express, db: any) {
+  // Las cifras del dinero se leen del panel de Administración (0117): se
+  // cargan al arrancar y se refrescan solas.
+  iniciarAjustes(db);
   // El cuadre corre al arrancar (al minuto, para no competir con el arranque)
   // y cada 6 horas. No a las 24: con el ritmo de despliegues de este equipo
   // el contenedor se reinicia a diario y un temporizador de 24 h no llegaría
@@ -654,13 +658,13 @@ export function registerPuntosRoutes(app: Express, db: any) {
   //     social de verdad, entra aquí como peso, no en otro sitio.)
   const calcularReparto = async (mes: string) => {
       const desde = `${mes}-01`;
-      const fijoPorPersona = Math.max(0, Math.round(Number(process.env.PUNTOS_FIJO_MENSUAL ?? 1000) * 100) / 100);
-      const boteVariable = Math.max(0, Math.round(Number(process.env.PUNTOS_BOTE_VARIABLE ?? 1000) * 100) / 100);
-      const minDias = Math.max(1, Math.floor(Number(process.env.PUNTOS_ACTIVIDAD_MIN_DIAS ?? 3)));
+      const fijoPorPersona = Math.max(0, Math.round(numeroSincrono('PUNTOS_FIJO_MENSUAL') * 100) / 100);
+      const boteVariable = Math.max(0, Math.round(numeroSincrono('PUNTOS_BOTE_VARIABLE') * 100) / 100);
+      const minDias = Math.max(1, Math.floor(numeroSincrono('PUNTOS_ACTIVIDAD_MIN_DIAS')));
       const pesos = {
-        vista_valida: Number(process.env.PUNTOS_PESO_VISTA ?? 1),
-        interaccion: Number(process.env.PUNTOS_PESO_INTERACCION ?? 1),
-        resena_positiva: Number(process.env.PUNTOS_PESO_RESENA ?? 3),
+        vista_valida: numeroSincrono('PUNTOS_PESO_VISTA'),
+        interaccion: numeroSincrono('PUNTOS_PESO_INTERACCION'),
+        resena_positiva: numeroSincrono('PUNTOS_PESO_RESENA'),
       };
 
       // La comisión del mes se sigue enseñando: es el dato con el que algún
