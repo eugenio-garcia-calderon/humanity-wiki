@@ -35,6 +35,18 @@
       "ruta": "drizzle/0116_veracidad_coherencia.sql",
       "motivo": "Veracidad fase 8: busqueda de contradicciones (indice de texto)",
       "desde": "2026-08-24T00:29:34.444Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/server/social.ts",
+      "motivo": "prog7: F10 buscador, orden y paginación del mercado",
+      "desde": "2026-08-24T00:32:16.433Z"
+    },
+    {
+      "agente": "prog7",
+      "ruta": "src/pages/Mercado.tsx",
+      "motivo": "prog7: F10 buscador, orden y paginación del mercado",
+      "desde": "2026-08-24T00:32:16.433Z"
     }
   ]
 }
