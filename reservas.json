@@ -41,6 +41,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "tematicas en el recomendador del buscador",
       "desde": "2026-08-24T15:43:28.246Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/server/buscador.ts",
+      "motivo": "buscar sin tildes tambien en el recomendador",
+      "desde": "2026-08-24T15:47:14.173Z"
     }
   ]
 }
