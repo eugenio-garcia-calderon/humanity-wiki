@@ -17,12 +17,6 @@
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "prog2: railes siempre puestos",
       "desde": "2026-08-24T11:21:11.491Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "prog2: entrada de los railes siempre puestos",
-      "desde": "2026-08-24T11:36:20.501Z"
     }
   ]
 }
