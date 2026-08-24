@@ -126,7 +126,7 @@ Respuestas suyas: avisos por **WhatsApp** en vez de correo · la **devolución l
 | **F8** | **Zonas de envío** (península, Baleares/Canarias, Europa, resto) con precio por zona · **recogida en persona** | hecha 24-08 (0114) |
 | **F9** | **Analítica de tienda**: vistas → añadidos a la cesta → comprados, por producto | hecha 24-08 (0115) |
 | **F10** | **Buscador, orden y paginación** en el mercado | hecha 24-08 |
-| **F11** | **Cesta de varias tiendas**: partir el pedido y el cobro por vendedor | pendiente |
+| **F11** | **Cesta de varias tiendas**: agrupada por tienda, se pagan una detrás de otra (un cobro = una tienda, porque cada vendedor cobra en su cuenta). Pago único repartido entre varias cuentas: pendiente de Eugenio/asesor | hecha 24-08 |
 
 ## La regla de las pruebas
 
