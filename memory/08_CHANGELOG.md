@@ -6585,3 +6585,24 @@ Cinco peticiones de Eugenio seguidas, todas sobre la misma pantalla.
   (`/explorar?papelera=1`, `?portada=1`) para no quedarse sin puerta. El bloque
   «lo tuyo» sale del registro y la plantilla «A trabajar» con él, porque sin ese
   bloque era idéntica a «Solo leer».
+
+## 2026-08-24 — El inicio pregunta a qué vienes
+Eugenio: «esta página debe estar dentro de "/explorar", no en la página de
+inicio; en la página de inicio, una galería con 3 opciones en una sola línea:
+Explorar, Crear, Proyectar, con una previsualización animada en cada tarjeta, y
+arriba el nombre en grande de "Red de Conocimiento"».
+
+- `src/pages/TresCaminos.tsx`: el nombre en grande y tres tarjetas en una línea,
+  también en el móvil (a 375 px la frase de debajo se esconde; el nombre de cada
+  camino no se esconde nunca).
+- Los dibujos son los de la portada de sin sesión, **importados y no copiados**:
+  lo que ve un desconocido antes de registrarse tiene que ser lo mismo que ve al
+  entrar.
+- «Crear» no es una dirección: monta el mismo `HojaCrear` que el círculo verde,
+  con su propio interruptor. La lista de herramientas sigue en un solo fichero
+  —es el mismo componente—, así que lo único que se duplica es un booleano.
+  (La primera versión lo pedía al Layout con un aviso global; se descartó porque
+  `Layout.tsx` lo tiene reservado el Programador 2 y esta forma no lo necesita.)
+- `/explorar` no cambia: el muro sigue en su dirección de siempre, así que
+  ningún enlace guardado se rompe. Y sin sesión sigue mandando la portada de
+  bienvenida.
