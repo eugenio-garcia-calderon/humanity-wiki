@@ -1,10 +1,10 @@
 {
   "reservas": [
     {
-      "agente": "prog8-turn",
+      "agente": "prog2",
       "ruta": "src/components/portada/PortadaTarjeta.tsx",
-      "motivo": "hover: sonido, sin controles encima y mas grande",
-      "desde": "2026-08-24T11:13:45.376Z"
+      "motivo": "prog2: audio del video y la etiqueta del grafo con peso",
+      "desde": "2026-08-24T15:30:52.943Z"
     }
   ]
 }
