@@ -128,6 +128,8 @@ export default function Debate() {
           )}
         </Card>
 
+        <Espectro slug={d.slug} recarga={d.total_argumentos} />
+
         {cerrado && (
           <p className="text-xs text-slate-500 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 mt-3">
             Este debate está cerrado: se puede leer, no argumentar. Lo que se argumentó
@@ -540,5 +542,128 @@ function Votar({ a, puedeVotar, onHecho }: {
       </span>
       {error && <span className="text-[10px] text-rose-700">{error}</span>}
     </div>
+  );
+}
+
+interface Banda {
+  clave: string; label: string; personas: number;
+  mejor_argumento: { id: string; texto: string; media: number; personas: number } | null;
+}
+interface EspectroDatos {
+  personas: number; sin_postura: number; suficiente: boolean; bandas: Banda[];
+}
+
+/** Los cinco colores del espectro, de un extremo al otro. */
+const COLOR_BANDA: Record<string, string> = {
+  muy_en_contra: 'bg-rose-500',
+  en_contra: 'bg-rose-300',
+  en_medio: 'bg-slate-300',
+  a_favor: 'bg-emerald-300',
+  muy_a_favor: 'bg-emerald-500',
+};
+
+/**
+ * EL ESPECTRO DE VISIONES (fase 6) — lo que Eugenio pidió por su nombre.
+ *
+ * No dice quién gana. Dice cómo está repartida la gente y **cuál es la mejor
+ * razón de cada grupo**, que es lo que hay que rebatir para moverlo de sitio.
+ *
+ * La postura de cada persona no se le pregunta: sale de lo que ha votado. Dos
+ * personas pueden estar a favor por razones opuestas, y eso solo se ve mirando
+ * qué argumento sostiene cada una.
+ */
+function Espectro({ slug, recarga }: { slug: string; recarga: number }) {
+  const [d, setD] = useState<EspectroDatos | null>(null);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch(`/api/debates/${slug}/espectro`, { credentials: 'include' })
+      .then(r => r.json())
+      .then(j => { if (vivo && !j?.error) setD(j); })
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, [slug, recarga]);
+
+  if (!d) return null;
+
+  // SIN VOTOS NO HAY ESPECTRO, y se dice en vez de dibujar cinco barras vacías
+  // que parecerían un empate.
+  if (d.personas === 0) {
+    return (
+      <Card className="p-3 mt-3">
+        <p className="text-xs font-black text-slate-700">El espectro de visiones</p>
+        <p className="text-[11px] text-slate-500 mt-0.5">
+          Todavía no ha votado nadie. El reparto de posturas sale de los votos, así que
+          aparecerá en cuanto alguien diga cuánto le mueve algún argumento.
+          {d.sin_postura > 0 && ` (${d.sin_postura} ${d.sin_postura === 1 ? 'persona ha votado' : 'personas han votado'} solo matices, que no toman lado.)`}
+        </p>
+      </Card>
+    );
+  }
+
+  const maximo = Math.max(...d.bandas.map(b => b.personas), 1);
+
+  return (
+    <Card className="p-3 sm:p-4 mt-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-xs font-black text-slate-700">El espectro de visiones</p>
+        <p className="text-[10px] text-slate-400">
+          {d.personas} {d.personas === 1 ? 'persona' : 'personas'} con postura
+          {d.sin_postura > 0 && ` · ${d.sin_postura} sin postura clara`}
+        </p>
+      </div>
+
+      {/* POCA GENTE NO ES UN REPARTO. Se dice con todas las letras: la forma
+          del dibujo con dos personas es una coincidencia, no una tendencia. */}
+      {!d.suficiente && (
+        <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 mt-2">
+          Con {d.personas} {d.personas === 1 ? 'persona' : 'personas'} esto no es un reparto de
+          posturas: son {d.personas === 1 ? 'una opinión' : `${d.personas} opiniones`}. El dibujo
+          empieza a decir algo a partir de tres.
+        </p>
+      )}
+
+      {/* `h-full` EN LA COLUMNA no es decorativo: sin él mide lo que mide su
+          contenido, y una altura en % sobre un alto automático vale 0 — las
+          barras salían invisibles y los números encima parecían flotar. No se
+          veía en la captura: se vio midiendo el alto en el navegador. */}
+      <div className="flex items-end gap-1 mt-3 h-16">
+        {d.bandas.map(b => (
+          <div key={b.clave} className="flex-1 h-full flex flex-col items-center justify-end gap-1" title={`${b.label}: ${b.personas}`}>
+            <span className="text-[10px] font-black text-slate-500">{b.personas || ''}</span>
+            <div
+              className={cn('w-full rounded-t', b.personas ? COLOR_BANDA[b.clave] : 'bg-slate-100')}
+              style={{ height: `${Math.max((b.personas / maximo) * 100, b.personas ? 8 : 3)}%` }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-1">
+        {d.bandas.map(b => (
+          <span key={b.clave} className="flex-1 text-center text-[9px] font-bold text-slate-400 leading-tight">
+            {b.label}
+          </span>
+        ))}
+      </div>
+
+      {/* LA MEJOR RAZÓN DE CADA GRUPO. Es lo que hay que rebatir para moverlo
+          de sitio, y lo que hace que esto sea un mapa y no una encuesta. */}
+      <div className="grid sm:grid-cols-2 gap-2 mt-3">
+        {d.bandas.filter(b => b.personas > 0 && b.mejor_argumento).map(b => (
+          <div key={b.clave} className="rounded-xl border border-slate-200 p-2.5">
+            <p className="text-[10px] font-black text-slate-500 inline-flex items-center gap-1.5">
+              <span className={cn('w-2 h-2 rounded-full', COLOR_BANDA[b.clave])} />
+              {b.label} · {b.personas} {b.personas === 1 ? 'persona' : 'personas'}
+            </p>
+            <p className="text-[11px] text-slate-700 leading-snug mt-1">
+              «{b.mejor_argumento!.texto}»
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">
+              Su razón más fuerte: {b.mejor_argumento!.media.toFixed(1)} de 5
+            </p>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }

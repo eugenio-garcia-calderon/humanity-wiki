@@ -529,6 +529,146 @@ export function registerVeracidadRoutes(app: Express, db: any) {
   });
 
   // ==========================================================================
+  // THE SPECTRUM OF VIEWS (phase 6)
+  // ==========================================================================
+
+  /**
+   * Which side of the thesis an argument ends up supporting.
+   *
+   * A stance is relative to what it answers, not to the thesis: «a favor» hung
+   * under an «en contra» argument reinforces the AGAINST side. So the side is
+   * the product of the signs down the path — the reason a debate is a tree and
+   * not a list of opinions.
+   *
+   * `matiza` scores 0 for itself (it takes no side, that is the point) but its
+   * children keep the side of what it qualifies. Otherwise a whole branch would
+   * fall silent because somebody added a nuance halfway.
+   */
+  const ladosDelArbol = (filas: any[]): Map<string, number> => {
+    const hijosDe = new Map<string, any[]>();
+    for (const a of filas) {
+      const k = a.parent_id || '';
+      (hijosDe.get(k) || hijosDe.set(k, []).get(k)!).push(a);
+    }
+    const lados = new Map<string, number>();
+    const bajar = (padreId: string, ladoDelPadre: number) => {
+      for (const a of hijosDe.get(padreId) || []) {
+        const propio = a.postura === 'matiza' ? 0 : ladoDelPadre * (a.postura === 'a_favor' ? 1 : -1);
+        lados.set(a.id, propio);
+        bajar(a.id, propio !== 0 ? propio : ladoDelPadre);
+      }
+    };
+    bajar('', 1);
+    return lados;
+  };
+
+  /** Las cinco bandas, de un extremo al otro. El orden es el del dibujo. */
+  const BANDAS = [
+    { clave: 'muy_en_contra', label: 'Muy en contra', hasta: -0.6 },
+    { clave: 'en_contra', label: 'En contra', hasta: -0.2 },
+    { clave: 'en_medio', label: 'En medio', hasta: 0.2 },
+    { clave: 'a_favor', label: 'A favor', hasta: 0.6 },
+    { clave: 'muy_a_favor', label: 'Muy a favor', hasta: 1.01 },
+  ] as const;
+
+  /**
+   * GET /api/debates/:slug/espectro — el reparto de posturas, no un veredicto.
+   *
+   * Lo que Eugenio pidió por su nombre: «poder generar un espectro de visiones
+   * sobre una verdad». La postura de cada persona NO se le pregunta: **sale de
+   * lo que ha votado**, porque lo que alguien dice que piensa y lo que le mueve
+   * de verdad no siempre coinciden — y porque dos personas pueden estar a favor
+   * por razones opuestas, y eso solo se ve mirando QUÉ argumento sostiene cada
+   * una.
+   *
+   * Se puede leer sin sesión: el reparto es del debate, no tuyo.
+   */
+  app.get('/api/debates/:slug/espectro', async (req: Request, res: Response) => {
+    try {
+      const d = (await db.execute(sql`
+        SELECT id, tesis FROM debates WHERE slug = ${req.params.slug} AND archived_at IS NULL
+      `)).rows[0] as any;
+      if (!d) return res.status(404).json({ error: 'Ese debate no existe.' });
+
+      const filas = (await db.execute(sql`
+        SELECT id, parent_id, postura, texto, impacto, votos
+        FROM argumentos WHERE debate_id = ${d.id} AND archived_at IS NULL
+        ORDER BY profundidad, created_at
+      `)).rows as any[];
+
+      const votos = (await db.execute(sql`
+        SELECT v.user_id, v.entity_id, v.score, u.display_name AS nombre, u.avatar_url AS avatar
+        FROM ratings v
+        LEFT JOIN users u ON u.id = v.user_id
+        WHERE v.entity_type = 'argumento'
+          AND v.entity_id IN (SELECT id FROM argumentos WHERE debate_id = ${d.id} AND archived_at IS NULL)
+      `)).rows as any[];
+
+      const lados = ladosDelArbol(filas);
+      const porArgumento = new Map(filas.map((a) => [a.id, a]));
+
+      // Cada persona: cuánto peso ha puesto de cada lado.
+      const gente = new Map<string, { nombre: string; avatar: string | null; favor: number; contra: number; matices: number; votos: number }>();
+      for (const v of votos) {
+        const lado = lados.get(v.entity_id);
+        if (lado === undefined) continue;
+        const p = gente.get(v.user_id) || { nombre: v.nombre || 'Alguien', avatar: v.avatar, favor: 0, contra: 0, matices: 0, votos: 0 };
+        p.votos++;
+        if (lado > 0) p.favor += v.score;
+        else if (lado < 0) p.contra += v.score;
+        else p.matices += v.score;
+        gente.set(v.user_id, p);
+      }
+
+      const bandas = BANDAS.map((b) => ({ ...b, personas: 0, sumaPorArgumento: new Map<string, { suma: number; n: number }>() }));
+      let sinPostura = 0;
+
+      for (const [userId, p] of gente) {
+        const peso = p.favor + p.contra;
+        // SOLO HA VOTADO MATICES: no tiene postura, y eso NO es estar en medio.
+        // Meterlo en la banda central inventaría un centrista que no existe.
+        if (peso === 0) { sinPostura++; continue; }
+        const posicion = (p.favor - p.contra) / peso;   // −1 … +1
+        const banda = bandas.find((b) => posicion < b.hasta) || bandas[bandas.length - 1];
+        banda.personas++;
+        for (const v of votos) {
+          if (v.user_id !== userId) continue;
+          const acc = banda.sumaPorArgumento.get(v.entity_id) || { suma: 0, n: 0 };
+          acc.suma += v.score; acc.n++;
+          banda.sumaPorArgumento.set(v.entity_id, acc);
+        }
+      }
+
+      const conPostura = bandas.reduce((n, b) => n + b.personas, 0);
+
+      res.json({
+        tesis: d.tesis,
+        personas: conPostura,
+        sin_postura: sinPostura,
+        // POCA GENTE NO ES UN REPARTO. Se dice aquí, y no se deja que la
+        // pantalla lo deduzca de un número que también podría no mirar.
+        suficiente: conPostura >= 3,
+        bandas: bandas.map((b) => {
+          // El argumento que más mueve a ESTA banda: su mejor razón, la que
+          // habría que rebatir para moverla de sitio.
+          let mejor: any = null;
+          for (const [argId, acc] of b.sumaPorArgumento) {
+            const media = acc.suma / acc.n;
+            if (!mejor || media > mejor.media) {
+              const a = porArgumento.get(argId);
+              if (a) mejor = { id: a.id, texto: a.texto, media: Math.round(media * 100) / 100, personas: acc.n };
+            }
+          }
+          return { clave: b.clave, label: b.label, personas: b.personas, mejor_argumento: mejor };
+        }),
+      });
+    } catch (e: any) {
+      console.error('espectro GET:', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==========================================================================
   // THE IMPACT VOTE (phase 5)
   // ==========================================================================
 

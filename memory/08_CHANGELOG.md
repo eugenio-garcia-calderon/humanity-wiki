@@ -6378,3 +6378,37 @@ shell roto**.
 - Rutas: `POST /api/publicar/pedido/:codigo/devolucion` (la pide quien compró, con correo o sesión, motivo obligatorio, plazo `DIAS_PARA_DEVOLVER`=30) y `PUT /api/publicar/mis-ventas/:id/devolucion` (el vendedor acepta o rechaza; rechazar exige motivo). **Los puntos vuelven solo al aceptar**, nunca al pedirla. Avisos `devolucion_pedida` (vendedor) y `devolucion_resuelta` (comprador, también por WhatsApp).
 - `preparando` entre pagado y enviado (paso propio en el pedido y botón en Comercio) y **fecha estimada de entrega** que pone el vendedor y ve el comprador (nula = no se enseña ninguna: inventar una fecha es prometer en nombre de otro).
 - Probado en local por HTTP: sin motivo → 400; pedida → aviso al vendedor; repetir → 409; rechazar sin motivo → 400; rechazada → saldo intacto y aviso con el porqué; volver a pedirla y aceptar → 2 puntos devueltos, pedido `devuelto`, saldos cuadrados (100/100/0) e historial «rechazada → aceptada»; preparando + fecha → el comprador los ve; quitar la fecha funciona. Todo retirado.
+### 2026-08-22 — Veracidad, fase 6: el espectro de visiones
+
+Lo que Eugenio pidió por su nombre el primer día: *«poder generar un espectro de
+visiones sobre una verdad»*. Está en la pantalla del debate, debajo de la tesis.
+
+- **No dice quién gana. Dice cómo está repartida la gente**, en cinco bandas de
+  «muy en contra» a «muy a favor», y **la mejor razón de cada banda** — que es
+  lo que habría que rebatir para moverla de sitio. Eso es lo que convierte esto
+  en un mapa del desacuerdo y no en una encuesta.
+- **La postura no se pregunta: sale de lo que cada uno vota.** Lo que alguien
+  dice que piensa y lo que de verdad le mueve no siempre coinciden, y **dos
+  personas pueden estar a favor por razones opuestas** — eso solo se ve mirando
+  qué argumento sostiene cada una.
+- **El signo se hereda por el árbol.** Un «a favor» colgado de un argumento «en
+  contra» refuerza el lado contrario a la tesis, y quien lo vota queda en contra.
+  Un grafo plano no sabría decir eso; el árbol sí, y es la razón de que el
+  modelo sea un árbol.
+- **Quien solo vota matices no es un centrista**: sale aparte, como «sin postura
+  clara». Meterlo en la banda del medio inventaría una postura que nadie tiene.
+- **Con menos de tres personas lo dice**: «esto no es un reparto de posturas, son
+  dos opiniones». El dibujo con dos votos tiene forma, y la forma engaña.
+- **No estrena tabla**: la postura se calcula al leer, a partir de los votos que
+  ya están en `ratings`. Guardarla habría sido congelar algo que cambia cada vez
+  que alguien mueve un voto.
+- **Verificado**: 11 comprobaciones nuevas en verde — las tres bandas extremas,
+  el matiz que no cuenta, la herencia del signo por el árbol, la mejor razón de
+  cada banda, y que se lee sin sesión. **Y un fallo encontrado midiendo, no
+  mirando**: las barras salían con altura 0 (un `height` en % sobre una columna
+  de alto automático) y en la captura parecían un detalle de diseño. El alto
+  real las delató. Arreglado y vuelto a medir: 45 px, 32 px, 32 px.
+- **Tablero**: 14 de 30 tarjetas en verde.
+
+**Lo que queda**: coherencia con lo ya publicado (fase 8), el debate sobre el
+lienzo (7), revisión y moderación (9), y sacarlo a la portada y al buscador (10).
