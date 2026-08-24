@@ -6,6 +6,7 @@ import { otorgarPuntos, pagarConPuntos } from './puntos.js';
 import { avisar } from './avisos.js';
 import { avisarPorWhatsApp } from './whatsapp.js';
 import { numeroSincrono } from './ajustes.js';
+import { anotarLiquidacion } from './liquidaciones.js';
 import { normalizarTelefono } from '../utils/telefono.js';
 
 /** El teléfono que recoge Stripe, en la forma del resto de la casa (o nulo). */
@@ -564,6 +565,81 @@ export async function handleMarketplaceWebhookEvent(event: Stripe.Event, db: any
           const envioCent = Number(session.metadata!.envio_centimos || 0) || 0;
           const d = session.customer_details;
           const envio = (session as any).shipping_details || (session as any).shipping || null;
+
+          // ══ COBRO AGREGADO: UN PAGO, VARIAS TIENDAS (2026-08-24) ═══════
+          // El dinero ha entrado ENTERO en la cuenta de la plataforma. Aquí se
+          // parte en un pedido por tienda y se apunta lo que se le debe a cada
+          // una. La clave de idempotencia deja de ser la sesión a secas y pasa
+          // a ser sesión#tienda: así un aviso repetido de Stripe —y llegan—
+          // sigue sin poder crear dos pedidos de la misma tienda, pero caben
+          // los de las demás.
+          if (session.metadata!.cobro_agregado === '1') {
+            const porTienda = new Map<string, typeof carrito>();
+            for (const l of carrito) {
+              const prod = productos.find(x => x.id === l[0]);
+              const vid = prod?.created_by || '';
+              porTienda.set(vid, [...(porTienda.get(vid) || []), l]);
+            }
+            // El envío cobrado se reparte entre las tiendas que mandan algo,
+            // en proporción a lo suyo: cobrárselo entero a una sería regalarle
+            // el porte a las otras.
+            const subtotalTotal = carrito.reduce((n, l) => n + (Number(l[2]) || 0) * Number(l[1]), 0) || 1;
+            for (const [vid, lineasT] of porTienda) {
+              const subT = lineasT.reduce((n, l) => n + (Number(l[2]) || 0) * Number(l[1]), 0);
+              const envioT = Math.round(envioCent * (subT / subtotalTotal));
+              const brutoT = subT + envioT;
+              const idT = newId2('PED');
+              const primeroT = productos.find(x => x.id === lineasT[0][0]);
+              const resumenT = lineasT.length === 1
+                ? nombreLinea(lineasT[0][0], String(lineasT[0][3] || ''))
+                : `${nombreLinea(lineasT[0][0], String(lineasT[0][3] || ''))} y ${lineasT.length - 1} más`;
+              const digitalT = lineasT.every(l => (productos.find(x => x.id === l[0])?.kind || 'fisico') === 'digital');
+              const creadoT = await db.execute(sql`
+                INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades,
+                                     importe_centimos, envio_centimos, moneda,
+                                     comprador_user_id, comprador_email, comprador_nombre,
+                                     direccion_envio, vendedor_user_id, estado,
+                                     stripe_session_id, transaction_id, telefono_contacto, cobro_tipo)
+                VALUES (${idT}, ${codigoDePedido()},
+                        ${lineasT.length === 1 ? lineasT[0][0] : null}, ${resumenT},
+                        ${lineasT.length === 1 ? lineasT[0][1] : null},
+                        ${brutoT}, ${envioT}, ${(session.currency || 'eur').toUpperCase()},
+                        NULL, ${d?.email || null}, ${envio?.name || d?.name || null},
+                        ${envio?.address ? JSON.stringify(envio.address) : null}::jsonb,
+                        ${vid || null}, ${digitalT ? 'entregado' : 'pagado'},
+                        ${`${session.id}#${vid}`}, ${txId},
+                        ${normalizarTelefonoSeguro(d?.phone || (session.metadata as any)?.telefono)}, 'agregado')
+                ON CONFLICT (stripe_session_id) DO NOTHING
+                RETURNING id
+              `);
+              if (!creadoT.rows[0]) continue;   // ya existía: aviso repetido
+              for (const [pid, unid, precio, vv] of lineasT) {
+                const prod = productos.find(x => x.id === pid);
+                const v = vv ? variantes.find(x => x.id === String(vv)) : null;
+                await db.execute(sql`
+                  INSERT INTO pedido_lineas (id, pedido_id, producto_id, producto_nombre,
+                                             unidades, precio_unitario_centimos, variante_id, variante_nombre)
+                  VALUES (${newId2('PLN')}, ${idT}, ${pid}, ${nombreLinea(pid, String(vv || ''))}, ${unid},
+                          ${precio || prod?.price_cents || 0}, ${v?.id || null}, ${v?.nombre || null})
+                `);
+              }
+              // Lo que la plataforma le debe a esta tienda, con su fecha de pago.
+              const liq = await anotarLiquidacion(db, {
+                pedidoId: idT, vendedorId: vid, brutoCentimos: brutoT, envioCentimos: envioT,
+                moneda: (session.currency || 'eur').toUpperCase(), entregado: digitalT,
+              });
+              await avisar(db, {
+                paraQuien: vid, dePartede: null, tipo: 'pedido_nuevo', entidadTipo: 'pedidos', entidadId: idT,
+                datos: {
+                  texto: `${resumenT} · pedido pagado a través de la plataforma${liq ? ` · te corresponden ${(liq.neto / 100).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}` : ''}`,
+                  destino: '/comercio?pestana=pedidos',
+                },
+              }).catch(() => {});
+              console.log(`[cobro agregado] pedido ${idT} de ${vid}: bruto ${brutoT}, neto ${liq?.neto ?? '(ya existía)'}`);
+            }
+            break;   // el camino de un solo pedido no aplica aquí
+          }
+
           const pedidoId = newId2('PED');
           const creado = await db.execute(sql`
             INSERT INTO pedidos (id, codigo, producto_id, producto_nombre, unidades,
