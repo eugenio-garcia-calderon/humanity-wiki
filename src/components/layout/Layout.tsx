@@ -705,14 +705,26 @@ export default function Layout() {
               En un móvil sólo se ve la flecha, pegada al logo: a 375 px la
               barra ya lleva el buscador y el nombre entero no cabe. Ninguna
               página se pierde — se abre igual. */}
-          <button
-            onClick={() => setInfoAbierta(o => !o)}
-            title="Sobre la Red de Conocimiento"
-            aria-label="Sobre la Red de Conocimiento"
-            aria-expanded={infoAbierta}
-            className={cn('flex shrink-0 items-center gap-1 rounded-lg transition-colors',
-              compacto ? 'h-7 px-1.5' : 'h-9 px-2',
-              nombreEnNegro ? 'bg-slate-900 text-white' : 'text-slate-800 hover:bg-slate-100')}
+          {/* DOS BOTONES DENTRO DE UNA PASTILLA (2026-08-24). Eugenio: «el
+              logo de Red de Conocimiento debe actuar como botón de regresar a
+              INICIO "/", y sólo cuando se pinche en la flecha desplegable de su
+              derecha se abrirá el menú».
+
+              Se ven como una sola pieza —el fondo y el redondeo los pone esta
+              caja, no cada botón— y hacen dos cosas distintas. Que el nombre de
+              un sitio lleve a su inicio es lo que hace todo el mundo desde hace
+              treinta años; que además abriera un menú era lo raro, y se notaba:
+              ir al inicio pidiendo el nombre te dejaba en la misma página con
+              un panel abierto encima.
+
+              La flecha se queda con el menú, que es lo que una flecha hacia
+              abajo anuncia. En móvil el nombre no se pinta —no cabe— y sólo
+              está la flecha: al inicio se va por el logo de al lado, que es
+              donde se busca en un teléfono. */}
+          <div
+            className={cn('flex shrink-0 items-center rounded-lg transition-colors',
+              compacto ? 'h-7' : 'h-9',
+              nombreEnNegro ? 'bg-slate-900 text-white' : 'text-slate-800')}
           >
             {/* «CONOCIMIENTO» EN VERDE (2026-08-24). Eugenio: «el logo de Red
                 de Conocimiento, pon Conocimiento en el verde que has utilizado
@@ -727,14 +739,30 @@ export default function Layout() {
                 «Conocimiento» es el nombre. Cuando el botón está abierto o
                 estás en una de sus páginas el fondo es negro, y ahí el verde
                 oscuro no se leería: se sube a `emerald-400`. */}
-            <span className="hidden whitespace-nowrap text-sm font-black tracking-tight sm:inline">
-              Red de{' '}
-              <span className={cn(nombreEnNegro ? 'text-emerald-400' : 'text-emerald-600')}>
-                Conocimiento
+            <button
+              onClick={() => { setInfoAbierta(false); navigate('/'); }}
+              title="Ir al inicio"
+              className={cn('hidden h-full items-center rounded-l-lg pl-2 pr-1 transition-colors sm:flex',
+                nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
+            >
+              <span className="whitespace-nowrap text-sm font-black tracking-tight">
+                Red de{' '}
+                <span className={cn(nombreEnNegro ? 'text-emerald-400' : 'text-emerald-600')}>
+                  Conocimiento
+                </span>
               </span>
-            </span>
-            <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', infoAbierta && 'rotate-180')} />
-          </button>
+            </button>
+            <button
+              onClick={() => setInfoAbierta(o => !o)}
+              title="Sobre la Red de Conocimiento"
+              aria-label="Sobre la Red de Conocimiento"
+              aria-expanded={infoAbierta}
+              className={cn('flex h-full items-center rounded-lg px-1.5 transition-colors sm:rounded-l-none',
+                nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
+            >
+              <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', infoAbierta && 'rotate-180')} />
+            </button>
+          </div>
           {infoAbierta && (
             /* SE ABRE HACIA LA DERECHA, PORQUE EL BOTÓN ESTÁ A LA IZQUIERDA
                (2026-08-24). Eugenio: «arregla este desplegable, no se ve bien
