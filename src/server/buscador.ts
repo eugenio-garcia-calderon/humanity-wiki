@@ -319,13 +319,31 @@ export function registerBuscadorRoutes(app: Express, db: any) {
         : `Búsqueda: "${q}"\n\nLa plataforma no ha encontrado nada sobre esto. Deja "enPlataforma" vacío.`;
 
       // ── UN REINTENTO, Y SOLO UNO ──────────────────────────────────────
-      // Medido el 2026-08-24: el modelo barato devuelve la respuesta VACÍA
-      // aproximadamente una de cada tres veces con la misma pregunta. No es un
-      // error que se pueda detectar —contesta 200 sin texto—, así que la única
-      // señal es que no hay nada.
+      // El modelo barato falla, y falla de varias formas distintas. Pedidas
+      // seis respuestas seguidas a la misma pregunta el 2026-08-24, una salió
+      // así, entera:
+      //
+      //     {"
+      //
+      // Dos caracteres. Ni error, ni excepción, ni aviso: un 200 con la
+      // respuesta cortada en el primer carácter. Las otras cinco salieron
+      // bien.
+      //
+      // La primera versión reintentaba cuando el texto medía menos de 20
+      // caracteres, y con eso este caso concreto sí se cubría. Pero en
+      // producción seguían saliendo búsquedas sin resumen 2 de cada 6, o sea
+      // que la respuesta inútil no siempre es corta.
+      //
+      // ── ASÍ QUE LA PREGUNTA CAMBIA ────────────────────────────────────────
+      // De «¿vino poco texto?» a **«¿me sirve esto?»**. Se intenta leer la
+      // respuesta y sólo se reintenta si de leerla no sale nada aprovechable.
+      // Es la única condición que cubre todas las formas de fallar a la vez,
+      // incluidas las que todavía no hemos visto: no describe el síntoma,
+      // describe lo que hacía falta.
       //
       // Uno solo: si a la segunda tampoco, no se insiste. Sale la página sin
-      // resumen, que es exactamente lo que ya sabe hacer.
+      // resumen, que es exactamente lo que ya sabe hacer, y queda escrito en el
+      // registro del servidor para poder contarlo.
       const pedir = async () => {
         const r = await proveedor.complete({
           system: sistema,
@@ -341,28 +359,28 @@ export function registerBuscadorRoutes(app: Express, db: any) {
         return String((r as any).text || '').trim();
       };
 
-      let texto = await pedir();
-      if (texto.length < 20) texto = await pedir();
-      let partes: any = null;
-      try {
-        const m = texto.match(/\{[\s\S]*\}/);
-        if (m) partes = JSON.parse(m[0]);
-      } catch { partes = null; }
+      /** Lee una respuesta. Devuelve `null` si de ella no sale nada. */
+      const leer = (t: string) => {
+        let p: any = null;
+        try {
+          const m = t.match(/\{[\s\S]*\}/);
+          if (m) p = JSON.parse(m[0]);
+        } catch { p = null; }
+        if (!p) p = rescatarPartes(t);
+        if (!p) return null;
+        const a = String(p.enPlataforma || '').trim();
+        const b = String(p.general || '').trim();
+        return a || b ? { enPlataforma: a, general: b } : null;
+      };
 
-      // ── SEGUNDO INTENTO SIN `JSON.parse` ─────────────────────────────────
-      // Medido contra producción el 2026-08-24, misma búsqueda cinco veces con
-      // el modelo barato: dos de cinco devolvieron el JSON **cortado a la
-      // mitad** —se acaban los tokens en medio de la segunda cadena—. Eso hace
-      // fallar a `JSON.parse`, y entonces caía en el camino de abajo, que da
-      // por prosa lo que en realidad era JSON: al usuario le salían las llaves
-      // y las comillas escritas en el bloque gris. Feo, y encima mandaba a la
-      // parte «no comprobado» un texto que venía rotulado como comprobado.
-      //
-      // Un JSON cortado no es un JSON perdido: los rótulos siguen estando. Se
-      // sacan los dos campos a mano, y así se recupera la atribución, que es
-      // justo lo que no se puede perder. Lo que quede a medias se queda a
-      // medias; lo que no se puede leer, no se enseña.
-      if (!partes) partes = rescatarPartes(texto);
+      let texto = await pedir();
+      let partes = leer(texto);
+      if (!partes) {
+        texto = await pedir();
+        partes = leer(texto);
+      }
+
+      // (El rescate del JSON cortado vive dentro de `leer`, arriba.)
 
       // ── CUANDO EL MODELO NO DEVUELVE EL JSON QUE SE LE PIDIÓ ──────────────
       // Pasa, y con el modelo barato pasa a menudo: la misma pregunta dos
@@ -373,7 +391,8 @@ export function registerBuscadorRoutes(app: Express, db: any) {
       // no se puede separar qué viene de los resultados y qué se lo sabe la
       // IA, entonces **no se puede atribuir nada a la plataforma**: el texto
       // entero va a la parte de la IA. Nunca al revés.
-      if (!partes || (!partes.enPlataforma && !partes.general)) {
+      if (!partes) {
+        console.warn('[buscador] dos respuestas seguidas sin resumen aprovechable para', JSON.stringify(q));
         const suelto = texto.replace(/```[a-z]*|```/g, '').trim();
         // Y SI TODAVÍA PARECE JSON, NO SE ENSEÑA. Aquí ya han fallado el
         // parseo y el rescate, así que lo único que se puede hacer con unas
