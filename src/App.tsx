@@ -91,6 +91,7 @@ const Debates = lazy(() => import('./pages/Debates'));
 const Debate = lazy(() => import('./pages/Debate'));
 import Entrada from './pages/Entrada';
 import Explorar from './pages/Explorar';
+import TresCaminos from './pages/TresCaminos';
 import Bienvenida from './pages/Bienvenida';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -193,10 +194,23 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
  * de «Iniciar sesión» de la barra de arriba tuvo que arreglar (B21), y aquí
  * costaría más caro porque ocupa la pantalla entera.
  */
+/*
+ * EL INICIO YA NO ES EL MURO (2026-08-24). Eugenio: «esta página debe estar
+ * dentro de "/explorar", no en la página de inicio; en la página de inicio, una
+ * galería con 3 opciones en una sola línea».
+ *
+ * `/explorar` no cambia: el muro sigue exactamente donde estaba, con su
+ * dirección de siempre, así que ningún enlace guardado se rompe. Lo que cambia
+ * es lo que ve alguien con sesión al abrir la aplicación: antes empezaba
+ * leyendo, ahora elige.
+ *
+ * SIN SESIÓN NO CAMBIA NADA: sigue la portada de bienvenida, que es la que
+ * explica qué es esto y tiene el único botón de crear cuenta.
+ */
 function Inicio() {
   const { user, loading: cargandoSesion } = useAuth();
   if (cargandoSesion) return null;
-  return user ? <Explorar /> : <Bienvenida />;
+  return user ? <TresCaminos /> : <Bienvenida />;
 }
 
 export default function App() {
