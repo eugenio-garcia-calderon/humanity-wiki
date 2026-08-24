@@ -6474,6 +6474,7 @@ resto de herramientas»*.
   hoja con «Debate» en su sitio; y pulsarlo cae en `/debates` con el formulario
   abierto. El usuario de prueba se borró y la sesión se cerró.
 
+
 ### 2026-08-24 — Comercio F9: ¿se ve, se enceta, se compra? (Programador 7)
 - Eugenio lo puso el primero de los cuatro pendientes. Hasta hoy quien vende no sabía si no vende **porque nadie entra** o **porque entran y no compran**, que son problemas opuestos: el primero se arregla enseñando el producto, el segundo cambiándolo.
 - 0115: `producto_metricas (producto_id, dia, visitas, encestados)` — agregado por día, **sin `user_id` a propósito**: para contestar la pregunta basta el recuento y el rastro de nadie hace falta.
