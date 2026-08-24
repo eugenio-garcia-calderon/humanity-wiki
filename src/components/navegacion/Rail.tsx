@@ -4,7 +4,7 @@ import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Trash2, LayoutGrid,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -100,6 +100,16 @@ export const PERSONALES: Herramienta[] = [
   // aparato y lo que hay dentro son personas.
   { clave: 'contactos', nombre: 'Contactos',        icono: Phone,          ruta: '/telefono' },
   { clave: 'perfil',    nombre: 'Mi perfil',        icono: User,           ruta: '/persona/yo' },
+  /*
+   * LAS DOS QUE BAJARON DE LA BARRA DE LA PORTADA (2026-08-24). Al vaciar la
+   * parte de arriba de «Explorar» —petición de Eugenio— la papelera y el
+   * personalizador se quedaban sin ningún botón que los abriera. Aquí es su
+   * sitio natural: las dos son sobre lo tuyo, que es de lo que va este menú.
+   * Van por dirección (`?papelera=1`, `?portada=1`) y no por un evento, para
+   * que además se puedan guardar en favoritos y compartir.
+   */
+  { clave: 'papelera',  nombre: 'Papelera',         icono: Trash2,         ruta: '/explorar?papelera=1' },
+  { clave: 'portada',   nombre: 'Tu portada',       icono: LayoutGrid,     ruta: '/explorar?portada=1' },
 ];
 
 export default function Rail({

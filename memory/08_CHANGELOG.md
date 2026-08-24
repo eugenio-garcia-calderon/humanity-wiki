@@ -6561,3 +6561,48 @@ al inicio se va por el logo de al lado.
 - Lo que sí cambia: `cotizar` devuelve `tiendas[]` (vendedor, nombre, handle, sus líneas, subtotal, envío por zona, si acepta puntos y si llega) y `varias_tiendas`. La cesta agrupa por tienda, lo enseña con sus importes, y al pagar **las liquida una detrás de otra**: si todas se pagan con puntos, quien compra solo ve los pedidos hechos; si hace falta tarjeta, se paga la primera y el resto **se queda en la cesta** esperando. Lo pagado sale de la cesta; lo demás no se pierde.
 - `comprar` con varias tiendas ya no dice una regla abstracta: dice cuántas tiendas llevas y que se paga una y luego la siguiente.
 - Probado en local por HTTP: cotizar con dos tiendas → desglose correcto (200 + 100 de envío / 600 + 150); comprar las dos juntas → 400 con el número de tiendas; pagar tienda por tienda → 2 pedidos, 2 vendedores, cada uno ve solo el suyo, y los saldos cuadran al céntimo (92,50 + 2,92 + 4,39 + 0,19 = 100). Todo retirado.
+
+## 2026-08-24 — La tarjeta, como en Twitter, y la portada sin barra
+Cinco peticiones de Eugenio seguidas, todas sobre la misma pantalla.
+
+- **Sin marco.** «Quita el borde externo que envuelve a la publicación, hazlo
+  transparente.» Se va el fondo blanco, el borde y la sombra — y con ellos el
+  `overflow-hidden`, que era del marco y recortaba el vídeo justo cuando crecía
+  al pasar el ratón, o sea que impedía lo que se había pedido dos días antes.
+- **Arriba, quién publica.** Foto de 26 px y nombre, como en Twitter. Con
+  inicial de respaldo y con el fallo de carga controlado: una foto borrada
+  dejaba el icono roto del navegador dentro del círculo.
+- **Fuera la etiqueta VÍDEO / IMAGEN / GRAFO.** Repetía en letras lo que la
+  portada ya decía con su triángulo o con su dibujo.
+- **El texto descriptivo, debajo del título.** Y leyéndolo de donde está de
+  verdad: `body` en una publicación, `description` en un grafo o un mapa, `goal`
+  en un proyecto. La primera versión leía sólo `body` y dejaba sin texto a todo
+  lo que no fuera una publicación suelta.
+- **Dos por fila, una en el móvil.** El corte en `md` (768 px), no en `sm`.
+- **Sin la barra de arriba ni la tira de proyectos.** «Todo limpio, sólo con las
+  publicaciones.» Crear ya está en el círculo verde; **Papelera** y **Tu
+  portada** bajan al menú de la derecha con dirección propia
+  (`/explorar?papelera=1`, `?portada=1`) para no quedarse sin puerta. El bloque
+  «lo tuyo» sale del registro y la plantilla «A trabajar» con él, porque sin ese
+  bloque era idéntica a «Solo leer».
+
+## 2026-08-24 — El inicio pregunta a qué vienes
+Eugenio: «esta página debe estar dentro de "/explorar", no en la página de
+inicio; en la página de inicio, una galería con 3 opciones en una sola línea:
+Explorar, Crear, Proyectar, con una previsualización animada en cada tarjeta, y
+arriba el nombre en grande de "Red de Conocimiento"».
+
+- `src/pages/TresCaminos.tsx`: el nombre en grande y tres tarjetas en una línea,
+  también en el móvil (a 375 px la frase de debajo se esconde; el nombre de cada
+  camino no se esconde nunca).
+- Los dibujos son los de la portada de sin sesión, **importados y no copiados**:
+  lo que ve un desconocido antes de registrarse tiene que ser lo mismo que ve al
+  entrar.
+- «Crear» no es una dirección: monta el mismo `HojaCrear` que el círculo verde,
+  con su propio interruptor. La lista de herramientas sigue en un solo fichero
+  —es el mismo componente—, así que lo único que se duplica es un booleano.
+  (La primera versión lo pedía al Layout con un aviso global; se descartó porque
+  `Layout.tsx` lo tiene reservado el Programador 2 y esta forma no lo necesita.)
+- `/explorar` no cambia: el muro sigue en su dirección de siempre, así que
+  ningún enlace guardado se rompe. Y sin sesión sigue mandando la portada de
+  bienvenida.

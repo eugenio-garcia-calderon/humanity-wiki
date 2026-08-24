@@ -35,7 +35,16 @@
  * filtran de verdad. Estaban repetidos, y la copia de dentro de la página era
  * la peor de las dos.
  */
-export type IdBloque = 'tuyo' | 'carpetas' | 'contenido';
+/*
+ * Y EL CUARTO, «LO TUYO», SE FUE DETRÁS (2026-08-24). Eugenio: «elimina también
+ * la parte de arriba de esa página donde se ven los proyectos, y donde sale el
+ * botón de crear, y debajo todo limpio, sólo con las publicaciones».
+ *
+ * Era la tira de proyectos con «10 por hacer». Se quita por lo mismo que las
+ * otras tres: tus proyectos están enteros en el menú de la derecha, y una
+ * portada que empieza por tus pendientes no es una portada, es un tablero.
+ */
+export type IdBloque = 'carpetas' | 'contenido';
 
 export interface DefinicionBloque {
   id: IdBloque;
@@ -46,7 +55,6 @@ export interface DefinicionBloque {
 }
 
 export const BLOQUES: DefinicionBloque[] = [
-  { id: 'tuyo', titulo: 'Lo tuyo', descripcion: 'Tus tareas y lo que tienes a medias' },
   {
     id: 'carpetas',
     titulo: 'Tus carpetas',
@@ -78,21 +86,14 @@ export const PLANTILLAS: Plantilla[] = [
   {
     id: 'completa',
     titulo: 'Completa',
-    descripcion: 'Lo tuyo y tus carpetas encima de las publicaciones.',
-    bloques: ['tuyo', 'carpetas', 'contenido'],
+    descripcion: 'Tus carpetas encima de las publicaciones.',
+    bloques: ['carpetas', 'contenido'],
   },
-  {
-    id: 'trabajo',
-    titulo: 'A trabajar',
-    /* AL RETIRAR TRES BLOQUES, ÉSTA Y «COMPLETA» SE QUEDARON IGUALES
-       (2026-08-24). Con las mismas piezas, elegir entre las dos no significaba
-       nada — y `plantillaDe` devolvía siempre la primera, así que la de trabajo
-       era imposible de reconocer. Lo cazó la prueba, no la vista.
-       Ahora se distinguen por lo que de verdad las separa: aquí lo tuyo y nada
-       más, para venir a hacer; en «Completa» además tus carpetas. */
-    descripcion: 'Lo tuyo primero y nada más. Para venir a hacer, no a mirar.',
-    bloques: ['tuyo', 'contenido'],
-  },
+  /* «A TRABAJAR» YA NO EXISTE (2026-08-24). Era «lo tuyo y las publicaciones»;
+     sin «lo tuyo» quedaba idéntica a «Solo leer», y dos plantillas que hacen lo
+     mismo obligan a elegir entre nada y nada. `leerPortada` no la reconoce y
+     quien la tuviera guardada cae en la de defecto, que enseña lo mismo que
+     enseñaba ella. */
   {
     id: 'lectura',
     titulo: 'Solo leer',
