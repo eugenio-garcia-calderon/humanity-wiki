@@ -84,33 +84,28 @@ export default function TresCaminos() {
   return (
     <div className="h-full overflow-y-auto">
       <EstilosPrevias />
-      <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-[8vh] sm:px-8">
+      {/* PEGADO A LA BARRA DE ARRIBA (2026-08-24, Eugenio: «sube el nombre de
+          Red de Conocimiento más hacia el menú de arriba»). Estaba a `8vh`, que
+          en una pantalla alta son 80 px de nada antes de empezar: el nombre
+          flotaba en medio y las tarjetas se iban hacia abajo. Ahora arranca a
+          24 px de la barra —36 en escritorio—, que es la misma distancia a la
+          que empieza el contenido en el resto de las páginas. */}
+      <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-6 sm:px-8 sm:pt-9">
         {/* EL NOMBRE, EN GRANDE. «Conocimiento» en el mismo `emerald-600` que
             lleva en la barra de arriba y en la portada de sin sesión: es el
             verde de la marca, y un segundo verde parecido lo estropearía. */}
         <h1 className="text-center text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">
           Red de <span className="text-emerald-600">Conocimiento</span>
         </h1>
-<<<<<<< HEAD
-=======
-        <p className="mt-3 text-center text-sm font-bold text-slate-400 sm:text-base">
-          ¿A qué vienes hoy?
-        </p>
-
->>>>>>> origin/main
         {/* EN UNA SOLA LÍNEA, TAMBIÉN EN EL MÓVIL, que es lo que se pidió. A
             375 px cada tarjeta mide unos 105 px: el dibujo se sigue leyendo
             —son formas grandes, no texto— y la frase de debajo se esconde,
             porque tres frases de dos palabras por línea no se leen, se
             adivinan. El nombre de cada camino no se esconde nunca. */}
-<<<<<<< HEAD
         {/* Sin subtítulo (2026-08-24, Eugenio: «quita la frase de ¿a qué vienes
             hoy?»). El hueco que dejaba lo asume la rejilla, que sube de 8 a 10 y
             de 12 a 14: si no, el nombre y las tarjetas se quedaban pegados. */}
         <div className="mt-10 grid grid-cols-3 gap-3 sm:mt-14 sm:gap-5">
-=======
-        <div className="mt-8 grid grid-cols-3 gap-3 sm:mt-12 sm:gap-5">
->>>>>>> origin/main
           {CAMINOS.map(c => (
             <button
               key={c.clave}

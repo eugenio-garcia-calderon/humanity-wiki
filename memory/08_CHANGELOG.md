@@ -6641,3 +6641,10 @@ escritorio): sin eso, el nombre y las tarjetas quedaban pegados.
 - **0116 `acuerdos_aceptados`**: qué versión, cuándo, IP y navegador; solo-añadir con índice único (persona, acuerdo, versión). Un contrato que no se puede probar no vale, y si cambia, las firmas viejas siguen diciendo lo que se firmó entonces. Rutas `GET/POST /api/publicar/acuerdos`, panel en Comercio, y `cotizar` informa por tienda con `acepta_cobro_agregado`. No firmar no penaliza: se sigue vendiendo y cobrando en la cuenta propia, solo se queda fuera de los carritos compartidos.
 - Probado en local y **verificado en producción**: tabla creada, ruta 401 sin sesión, la página del contrato responde 200 y el texto está en los bundles de AvisosLegales y Comercio.
 - Nota de equipo: esta entrada salió en PR aparte porque el changelog estaba reservado. Lección compartida con prog8: **soltar sin silenciar la salida y comprobar con `quien` después**; y redactar la entrada fuera del fichero para volcarla de golpe.
+
+## 2026-08-24 — El nombre, pegado a la barra de arriba
+Eugenio: «sube el nombre de Red de Conocimiento más hacia el menú de arriba».
+Arrancaba a `8vh`, que en una pantalla alta son 80 px de nada antes de empezar:
+el nombre flotaba en medio y las tarjetas se iban hacia abajo. Ahora empieza a
+24 px de la barra (36 en escritorio), la misma distancia a la que empieza el
+contenido en el resto de las páginas.
