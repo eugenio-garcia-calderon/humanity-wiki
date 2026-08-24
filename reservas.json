@@ -55,18 +55,6 @@
       "desde": "2026-08-24T12:00:59.191Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "src/server/graph.ts",
-      "motivo": "fase 1 del buscador: buscar sin tildes",
-      "desde": "2026-08-24T12:05:39.742Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "fase 1 del buscador: areas y mas profundidad",
-      "desde": "2026-08-24T12:05:44.673Z"
-    },
-    {
       "agente": "prog7",
       "ruta": "drizzle/0118_liquidaciones.sql",
       "motivo": "prog7: cobro agregado de varias tiendas y liquidaciones",
@@ -113,12 +101,6 @@
       "ruta": "src/components/ventanas/VentanaCentral.tsx",
       "motivo": "prog2: abrir un grafo o mapa como pop-up central",
       "desde": "2026-08-24T12:11:13.707Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: buscador fase 1",
-      "desde": "2026-08-24T12:21:54.578Z"
     }
   ]
 }
