@@ -13,12 +13,6 @@
       "desde": "2026-08-25T17:53:03.252Z"
     },
     {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0125_agregador_imagenes.sql",
-      "motivo": "imagenes de Commons para movilidad electrica ligera",
-      "desde": "2026-08-25T18:02:25.117Z"
-    },
-    {
       "agente": "prog8",
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "previsualizar la imagen pegada en el chat",
