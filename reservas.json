@@ -47,6 +47,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "tres puntitos para editar la tarjeta de proyecto (prog8)",
       "desde": "2026-08-25T23:17:11.773Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/roadmap.ts",
+      "motivo": "tres puntitos para editar la tarjeta de proyecto (prog8)",
+      "desde": "2026-08-25T23:17:14.972Z"
     }
   ]
 }
