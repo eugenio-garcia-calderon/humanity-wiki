@@ -4,7 +4,7 @@ import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight, Trash2, LayoutGrid,
+  ChevronLeft, ChevronRight, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -115,6 +115,7 @@ export const PERSONALES: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'Red de Conocimiento', claro = false, onAbrirSubmenu, onPlegar,
+  personal,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -203,6 +204,38 @@ export default function Rail({
    * está aquí y la consecuencia la decide el Layout.
    */
   onPlegar?: () => void;
+  /*
+   * ══ EL MENÚ DE CADA UNO (2026-08-25) ══════════════════════════════════════
+   * Eugenio: «haz que el menú izquierdo, donde están todas las temáticas, el
+   * usuario lo pueda reordenar y pueda darle a un botón de favorito… no se le
+   * puede dar a favorito en los tres puntos que tienes que añadir para poder
+   * modificar cada uno de estos temas, porque igual hay algún tema que el
+   * usuario quiere ocultar».
+   *
+   * Son dos gestos y por eso son dos sitios, exactamente como los pidió:
+   *
+   *   · la ESTRELLA sale al pasar el ratón y hace una sola cosa. Marcar
+   *     favorito es lo que se hace a menudo y de un vistazo; esconderlo detrás
+   *     de un menú costaría dos pulsaciones para algo de una;
+   *   · los TRES PUNTOS abren lo demás — ocultar, y lo que venga después.
+   *     Ahí va lo que se hace una vez y se piensa antes.
+   *
+   * Sólo lo lleva el menú de los temas. En el de las herramientas no tendría
+   * sentido: sus trece entradas no son gustos de nadie, son lo que hay.
+   */
+  personal?: {
+    esFavorito: (clave: string) => boolean;
+    estaOculto: (clave: string) => boolean;
+    marcarFavorito: (clave: string, valor: boolean) => void;
+    ocultar: (clave: string) => void;
+    /** Al soltar un elemento sobre otro. La lista nueva la calcula el Layout. */
+    reordenar?: (desde: string, hasta: string) => void;
+    /** Los que están escondidos, para poder traerlos de vuelta. Sin esto,
+     *  ocultar sería una puerta de un solo sentido: el tema desaparece del
+     *  único sitio desde el que se podría recuperar. */
+    ocultos?: Array<{ clave: string; nombre: string }>;
+    mostrar?: (clave: string) => void;
+  };
 }) {
 
   /*
@@ -271,6 +304,12 @@ export default function Rail({
    * gesto mal repartido; quitado el gesto, sobra la tirita.
    */
 
+  /** Qué elemento tiene abierto su menú de tres puntos, si hay alguno. */
+  const [menuDe, setMenuDe] = useState<string | null>(null);
+  /** Cuál se está arrastrando. Se guarda aquí y no en el evento porque en un
+   *  arrastre de HTML el dato viaja como texto y hay que volver a leerlo. */
+  const arrastrado = useRef<string | null>(null);
+
   const boton = (h: Herramienta) => {
     const Icono = h.icono;
     const activa = abierta === h.clave;
@@ -282,9 +321,32 @@ export default function Rail({
     const Flecha = ladoDerecho
       ? (activa ? ChevronRight : ChevronLeft)
       : (activa ? ChevronLeft : ChevronRight);
+    const conPersonal = !!personal && desplegado;
     return (
-      <div key={h.clave} className={cn('relative flex shrink-0 items-center',
-        desplegado ? 'w-full' : 'w-10')}>
+      <div
+        key={h.clave}
+        // ── ARRASTRAR PARA REORDENAR ────────────────────────────────────
+        // Con el arrastre del propio navegador y no con una librería: son
+        // catorce elementos en una columna, no una tabla con miles. Lo que
+        // hace falta —cógelo, suéltalo encima de otro— ya lo trae el
+        // navegador, y una dependencia más para esto sería pagar un peso de
+        // carga por algo que ya está.
+        draggable={!!personal?.reordenar && desplegado}
+        onDragStart={personal?.reordenar ? e => {
+          arrastrado.current = h.clave;
+          e.dataTransfer.effectAllowed = 'move';
+          // Firefox no empieza el arrastre si no se escribe algo.
+          try { e.dataTransfer.setData('text/plain', h.clave); } catch { /* da igual */ }
+        } : undefined}
+        onDragOver={personal?.reordenar ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
+        onDrop={personal?.reordenar ? e => {
+          e.preventDefault();
+          const desde = arrastrado.current || e.dataTransfer.getData('text/plain');
+          if (desde && desde !== h.clave) personal.reordenar!(desde, h.clave);
+          arrastrado.current = null;
+        } : undefined}
+        className={cn('group/fila relative flex shrink-0 items-center',
+          desplegado ? 'w-full' : 'w-10')}>
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
             distinto: el fondo ya lo usa el ratón al pasar por encima, y dos
             cosas que se pintan igual dejan de significar. */}
@@ -332,6 +394,78 @@ export default function Rail({
             {h.nombre}
           </span>
         </button>
+
+        {/* ══ LA ESTRELLA Y LOS TRES PUNTOS ══════════════════════════════
+            Aparecen al pasar el ratón por la fila. En reposo el menú es una
+            lista de temas, no una lista de controles: catorce estrellas
+            siempre visibles convierten un índice en un panel de mandos.
+            La estrella SÍ se queda cuando ya es favorito — ahí ya no es un
+            control, es el estado. */}
+        {conPersonal && (
+          <>
+            <button
+              onClick={e => { e.stopPropagation(); personal!.marcarFavorito(h.clave, !personal!.esFavorito(h.clave)); }}
+              title={personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Marcar como favorito'}
+              aria-label={personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Marcar como favorito'}
+              aria-pressed={personal!.esFavorito(h.clave)}
+              className={cn('grid h-7 w-6 shrink-0 place-items-center rounded-lg transition-all',
+                personal!.esFavorito(h.clave)
+                  ? 'text-amber-400'
+                  : 'text-slate-300 opacity-0 hover:text-amber-400 group-hover/fila:opacity-100')}
+            >
+              <Star className="h-3.5 w-3.5" fill={personal!.esFavorito(h.clave) ? 'currentColor' : 'none'} />
+            </button>
+
+            <div className="relative shrink-0">
+              <button
+                onClick={e => { e.stopPropagation(); setMenuDe(v => (v === h.clave ? null : h.clave)); }}
+                title="Más"
+                aria-label={`Más sobre ${h.nombre}`}
+                aria-expanded={menuDe === h.clave}
+                className={cn('grid h-7 w-5 place-items-center rounded-lg text-slate-300 transition-all hover:text-slate-600',
+                  menuDe === h.clave ? 'opacity-100 text-slate-600' : 'opacity-0 group-hover/fila:opacity-100')}
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+              {menuDe === h.clave && (
+                <div className={cn('absolute top-7 z-50 w-44 rounded-xl border border-slate-200 bg-white py-1 shadow-xl',
+                  ladoDerecho ? 'right-0' : 'left-0')}>
+                  <button
+                    onClick={e => { e.stopPropagation(); setMenuDe(null); personal!.marcarFavorito(h.clave, !personal!.esFavorito(h.clave)); }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50">
+                    <Star className="h-3.5 w-3.5 text-slate-400" />
+                    {personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Favorito'}
+                  </button>
+                  {/* OCULTAR ES SÓLO DEL MENÚ, y se dice aquí mismo. Decisión de
+                      Eugenio: sus publicaciones siguen saliendo en el muro y en
+                      el buscador. Sin esta línea, «ocultar» se lee como «no
+                      quiero ver nada de esto» y luego sorprende. */}
+                  <button
+                    onClick={e => { e.stopPropagation(); setMenuDe(null); personal!.ocultar(h.clave); }}
+                    className="flex w-full items-start gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50">
+                    <EyeOff className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span>
+                      Quitar del menú
+                      <span className="mt-0.5 block text-[10px] font-normal text-slate-400">
+                        Sigue saliendo en el muro
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {personal!.reordenar && (
+              <span
+                aria-hidden
+                title="Arrastra para ordenar"
+                className="grid h-7 w-4 shrink-0 cursor-grab place-items-center text-slate-200 opacity-0 transition-opacity group-hover/fila:opacity-100"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </>
+        )}
 
         {conFlecha && (
           <button
@@ -476,6 +610,31 @@ export default function Rail({
             nada. */}
         {!items && <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />}
         {!items && PERSONALES.map(boton)}
+
+        {/* ── LO QUE HAS QUITADO, AL FINAL ─────────────────────────────────
+            Un renglón pequeño y en gris, no una sección: no es contenido, es
+            la forma de deshacer. Y tiene que estar, porque un tema oculto
+            desaparece del único sitio desde el que se podría recuperar. */}
+        {desplegado && personal?.ocultos && personal.ocultos.length > 0 && (
+          <div className={cn('mt-1 shrink-0 border-t pt-1.5', claro ? 'border-slate-200' : 'border-slate-800')}>
+            <p className="px-2.5 pb-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
+              Quitados del menú
+            </p>
+            {personal.ocultos.map(o => (
+              <button
+                key={o.clave}
+                onClick={() => personal.mostrar?.(o.clave)}
+                title={`Devolver ${o.nombre} al menú`}
+                className={cn('flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[11px] font-bold transition-colors',
+                  claro ? 'text-slate-400 hover:bg-slate-100 hover:text-slate-700' : 'text-slate-500 hover:bg-slate-800 hover:text-white')}
+              >
+                <EyeOff className="h-3 w-3 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{o.nombre}</span>
+                <span className="shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">Devolver</span>
+              </button>
+            ))}
+          </div>
+        )}
       </nav>
     </div>
   );

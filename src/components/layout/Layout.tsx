@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import { useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
@@ -159,6 +159,95 @@ export default function Layout() {
    * Pulsando → se queda. Y pulsar cualquier cosa dentro del menú lo asciende a
    * «lo quiero»: si ya has empezado a usarlo, deja de ser un accidente.
    */
+  /*
+   * ══ EL MENÚ DE TEMAS DE CADA UNO (2026-08-25) ═════════════════════════════
+   * Eugenio: favoritos arriba, poder ocultar temas y poder reordenarlos.
+   *
+   * ── SE GUARDA FUERA Y SE PINTA YA ─────────────────────────────────────────
+   * Al marcar un favorito, la lista se recoloca **antes** de que el servidor
+   * conteste. Es lo correcto aquí: el orden de tu propio menú no es un dato que
+   * haya que confirmar con nadie, y esperar medio segundo a que una estrella se
+   * encienda hace que parezca que no ha funcionado y se pulse otra vez.
+   * Si la grabación falla, lo que se pierde es una preferencia — y se recupera
+   * volviéndola a pulsar.
+   *
+   * ── SIN SESIÓN NO SE GUARDA, PERO SE PUEDE MIRAR ──────────────────────────
+   * Quien no ha entrado ve los catorce en su orden de siempre y no tiene
+   * estrellas: no hay dónde guardar lo suyo. No se le enseñan controles que no
+   * van a hacer nada.
+   */
+  const [prefsTemas, setPrefsTemas] = useState<Record<string, { favorito?: boolean; oculto?: boolean; orden?: number }>>({});
+
+  useEffect(() => {
+    if (!user) { setPrefsTemas({}); return; }
+    let vivo = true;
+    fetch('/api/temas/mio/objetivos', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (!vivo || !j?.preferencias) return;
+        const m: Record<string, any> = {};
+        for (const p of j.preferencias) m[p.clave] = { favorito: p.favorito, oculto: p.oculto, orden: p.orden };
+        setPrefsTemas(m);
+      })
+      .catch(() => { /* sin preferencias, el menú es el de siempre */ });
+    return () => { vivo = false; };
+  }, [user]);
+
+  const guardarPref = (clave: string, cambio: { favorito?: boolean; oculto?: boolean }) => {
+    setPrefsTemas(p => ({ ...p, [clave]: { ...p[clave], ...cambio } }));
+    fetch('/api/temas/preferencia', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ clave, ...cambio }),
+    }).catch(() => { /* ver la nota de arriba */ });
+  };
+
+  /*
+   * LA LISTA QUE SE PINTA. Tres reglas, en este orden:
+   *   1. lo oculto no está;
+   *   2. los favoritos arriba — que es lo que pidió Eugenio;
+   *   3. dentro de cada grupo, el orden que haya puesto la persona, y si no,
+   *      el de siempre.
+   *
+   * Favoritos arriba **por encima del orden manual** a propósito: marcar algo
+   * favorito es decir «esto lo quiero a mano», y si se quedara donde estaba,
+   * la estrella no habría hecho nada visible.
+   */
+  const temasDelMenu = useMemo(() => {
+    const pos = (clave: string, i: number) => prefsTemas[clave]?.orden ?? i;
+    return OBJETIVOS_RAIL
+      .filter(o => !prefsTemas[o.clave]?.oculto)
+      .map((o, i) => ({ o, i }))
+      .sort((a, b) => {
+        const fa = prefsTemas[a.o.clave]?.favorito ? 0 : 1;
+        const fb = prefsTemas[b.o.clave]?.favorito ? 0 : 1;
+        if (fa !== fb) return fa - fb;
+        return pos(a.o.clave, a.i) - pos(b.o.clave, b.i);
+      })
+      .map(x => x.o);
+  }, [prefsTemas]);
+
+  /** Cuántos hay escondidos, para poder decirlo y poder recuperarlos. */
+  const temasOcultos = OBJETIVOS_RAIL.filter(o => prefsTemas[o.clave]?.oculto);
+
+  const reordenarTemas = (desde: string, hasta: string) => {
+    const claves = temasDelMenu.map(o => o.clave);
+    const i = claves.indexOf(desde);
+    const j = claves.indexOf(hasta);
+    if (i < 0 || j < 0) return;
+    claves.splice(j, 0, ...claves.splice(i, 1));
+    // Se escribe el orden de TODOS, no sólo del que se ha movido: así lo
+    // guardado no depende de cómo estaba antes en el servidor.
+    setPrefsTemas(p => {
+      const m = { ...p };
+      claves.forEach((c, k) => { m[c] = { ...m[c], orden: k }; });
+      return m;
+    });
+    fetch('/api/temas/orden', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ claves }),
+    }).catch(() => {});
+  };
+
   const [porRoce, setPorRoce] = useState(false);
 
   const abrirPorRoce = (c: Circulo) => {
@@ -528,7 +617,16 @@ export default function Layout() {
             siempreAbierto={circulo === 'explorar'}
             claro
             titulo="Explorar"
-            items={OBJETIVOS_RAIL}
+            items={temasDelMenu}
+            personal={user ? {
+              esFavorito: c => !!prefsTemas[c]?.favorito,
+              estaOculto: c => !!prefsTemas[c]?.oculto,
+              marcarFavorito: (c, v) => guardarPref(c, { favorito: v }),
+              ocultar: c => guardarPref(c, { oculto: true }),
+              reordenar: reordenarTemas,
+              ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
+              mostrar: c => guardarPref(c, { oculto: false }),
+            } : undefined}
             abierta={objetivoAbierto}
             // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
             // relacionado con energía».
