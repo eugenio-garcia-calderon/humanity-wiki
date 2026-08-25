@@ -41,6 +41,12 @@
       "ruta": "src/utils/objectiveIds.ts",
       "motivo": "prog2: enchufar Nuevo tema y el quince que falta en objectiveIds",
       "desde": "2026-08-25T17:03:57.362Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0124_agregador_movilidad_ligera.sql",
+      "motivo": "la semilla de las 50 como migracion, para que llegue a produccion",
+      "desde": "2026-08-25T17:05:52.250Z"
     }
   ]
 }
