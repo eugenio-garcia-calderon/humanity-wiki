@@ -58,6 +58,7 @@ import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
 import { registrarTemas } from './temas.js';
+import { registrarAgregador } from './agregador.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
 import { registerYoutubeRoutes } from './youtube.js';
@@ -175,6 +176,10 @@ export const MODULOS: Modulo[] = [
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },
   { nombre: 'temas', montar: (app, db) => registrarTemas(app, db) },
+  // Va DESPUÉS de `temas`: lee el árbol que aquel crea. Sus rutas cuelgan de
+  // `/api/agregador/…` y no de `/api/temas/…` a propósito — `/api/temas/:objetivo`
+  // es un comodín de un segmento y cualquier ruta nueva ahí se le puede colar.
+  { nombre: 'agregador', montar: (app, db) => registrarAgregador(app, db) },
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
