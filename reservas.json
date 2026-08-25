@@ -41,6 +41,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "pegar imagenes en el chat de IA",
       "desde": "2026-08-25T16:21:04.406Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/buscador/CajaBusqueda.tsx",
+      "motivo": "pegar una imagen en la barra con la IA encendida",
+      "desde": "2026-08-25T16:25:00.182Z"
     }
   ]
 }
