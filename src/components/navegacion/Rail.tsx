@@ -558,10 +558,22 @@ export default function Rail({
               : (activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'),
           )}
         >
-          {/* EL COLOR DEL TEMA, cuando lo tiene: el mismo azul del agua que en
-              el mapa. Sobre fondo oscuro no se usa —un `text-yellow-500` sobre
-              negro casi no se ve— y ahí manda el estado del botón. */}
-          <Icono className={cn('h-5 w-5 shrink-0', claro && h.color && !activa && h.color)} />
+          {/* ══ SIN COLORINES (2026-08-25) ═══════════════════════════════
+              Eugenio: «haz que los iconos del menú izquierdo no sean de
+              colorines, sino que tengan el mismo aspecto sobrio y negro del
+              menú lateral derecho».
+
+              Llevaban el color de cada tema en el mapa —el azul del agua, el
+              ámbar de la alimentación—. La idea era buena y el resultado no:
+              catorce colores en columna compiten entre sí y con lo que hay en
+              el centro de la pantalla, que es lo que hay que mirar. En el mapa
+              el color distingue territorios que están unos al lado de otros;
+              en una lista, el nombre ya los distingue.
+
+              El color no se pierde: sigue en el mapa y en las etiquetas de las
+              tarjetas, que es donde separa cosas de verdad. Aquí manda el
+              estado del botón, igual que en el raíl de la derecha. */}
+          <Icono className="h-5 w-5 shrink-0" />
           {/* El nombre NO se desmonta al plegar: se hace transparente y se le
               quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
               final de la animación en vez de acompañarla. */}

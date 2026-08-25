@@ -166,8 +166,10 @@ export default function RailInferior({
 
         {/* ══ FEEDBACK, AQUÍ Y EN ROJO (2026-08-25) ═══════════════════════
             Eugenio: «el feedback, mételo en la barra de herramientas inferior
-            con un color distinto, que sea en rojo, que destaque. Y así también
-            la liberamos de arriba».
+            con un color distinto, que destaque». Empezó en rojo y lo cambió a
+            **amarillo** el 2026-08-25, y es mejor: en esta aplicación el rojo
+            ya significa error o borrar, así que un botón rojo permanente decía
+            «algo va mal» todo el rato. El amarillo llama igual y no alarma.
 
             El rojo no es decoración: es el único botón de esta barra que no
             crea nada — sirve para decir que algo está roto. Que se distinga de
@@ -178,7 +180,7 @@ export default function RailInferior({
             onClick={onFeedback}
             title="Lo que falla y lo que falta"
             aria-label="Feedback: lo que falla y lo que falta"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-rose-400 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-amber-400 transition-colors hover:bg-amber-500/15 hover:text-amber-300"
           >
             <MessageCircleWarning className="h-5 w-5 shrink-0" />
             <span className={cn(

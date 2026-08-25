@@ -7343,3 +7343,43 @@ agente, y el borrado exacto del otro script ya no las alcanza.
 los cuatro campos se guardan, la tarjeta se repinta en el sitio sin recargar la
 lista, y vaciar descripción y portada funciona. El proyecto de prueba quedó
 como estaba y la sesión, borrada.
+
+## 2026-08-25 — Las dos esquinas son el remate de sus menús
+Eugenio, en el mismo mensaje: «el botón de explorar tiene que estar fusionado
+con el menú izquierdo, y el logo de humanity.wiki a la derecha de explorar; con
+una brújula, no una casa. Lo mismo con proyectos y el menú de la derecha. Piensa
+cómo hacer esta fusión de forma elegante para que, cuando el usuario pinche, se
+fije el menú que le corresponde y le lleve a su página». Y después: los iconos
+del menú izquierdo sobrios en vez de de colorines, el feedback amarillo, y el
+chat de IA en un círculo flotante abajo a la derecha.
+
+- **La fusión no es cercanía, es remate.** Cada rótulo va pegado al borde del
+  que nace su columna y, cuando está activo, se pinta como ella y **sin línea
+  abajo** (`-mb-px` se come el borde de la cabecera): el color corre sin corte
+  desde el rótulo hasta el último elemento. Eso es lo que hace que se lean como
+  una pieza y no como dos cosas alineadas.
+- **Dos cosas al pulsar, y en este orden**: fija el menú y navega. Fijar sin
+  navegar deja el menú abierto sobre la misma página; navegar sin fijar cierra
+  el menú justo al llegar a la página que va de eso.
+- Brújula y no casa: una casa es «inicio», que es otro sitio y ya lo lleva el
+  logo de al lado. Explorar es buscar sin saber todavía qué.
+- **Iconos sobrios.** Catorce colores en columna compiten entre sí y con el
+  centro de la pantalla. El color sigue en el mapa y en las etiquetas de las
+  tarjetas, que es donde separa cosas de verdad.
+- **Feedback amarillo.** Empezó rojo esta misma tarde; en esta aplicación el
+  rojo ya significa error o borrar, así que un botón rojo permanente decía «algo
+  va mal» todo el rato.
+
+**Y el conflicto que él notaba entre el chat y el menú de abajo era invisible y
+real:** `AIAssistant` escribía `--hueco-muelle` a `0px` cada vez que se abría o
+se cerraba, y el raíl inferior escribe ahí sus 64 px. El último en escribir
+gana, así que **abrir el chat borraba la reserva del menú** y la última fila de
+todas las páginas se metía debajo de la barra. No daba error. La regla que
+queda: **una variable, un dueño** — `--hueco-muelle` es de quien tapa abajo,
+`--hueco-lateral` es del chat.
+
+El círculo flotante no es un chat nuevo: manda `ai:abrir`, el aviso que
+`AIAssistant` ya escuchaba, así que abre el mismo con su historial y su modelo.
+Y se aparta solo de los dos menús porque lee sus variables (`--hueco-lateral` a
+la derecha, `--hueco-muelle` abajo): si mañana cambian de tamaño, se mueve con
+ellos.

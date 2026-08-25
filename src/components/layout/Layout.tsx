@@ -871,6 +871,44 @@ export default function Layout() {
       <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-1 sm:px-2 flex items-center gap-1 sm:gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
+        {/* ══ «EXPLORAR», FUSIONADO CON LA COLUMNA DE LA IZQUIERDA ═══════════
+            (2026-08-25) Eugenio: «el botón de explorar tiene que estar
+            fusionado con el menú izquierdo, y el logo de humanity.wiki a la
+            derecha de explorar. Y tiene que tener el logo de la exploración, no
+            el de una casa: utiliza una brújula. Piensa cómo hacer esta fusión
+            de forma elegante y eficiente para que, cuando el usuario pinche, se
+            fije el menú que le corresponde y le lleve a su página».
+
+            ── CÓMO SE HACE LA FUSIÓN, Y POR QUÉ ASÍ ────────────────────────
+            No es un botón que esté «cerca» del raíl: es **su remate**. Va el
+            primero de la barra, pegado al mismo borde del que nace la columna,
+            y cuando está activo se pinta como ella y **sin línea abajo**
+            (`-mb-px` se come el borde de la cabecera), de modo que el color
+            corre sin corte desde el rótulo hasta el último tema. Eso es lo que
+            hace que se lean como una sola pieza y no como dos cosas alineadas.
+
+            Y hace las DOS cosas que pidió, en este orden: **fija** el menú —que
+            deja de depender del ratón— y **navega**. Fijar sin navegar dejaría
+            el menú abierto sobre la misma página; navegar sin fijar cerraría el
+            menú justo al llegar a la página que va de eso.
+
+            La brújula y no la casa: una casa es «inicio», que es otro sitio
+            —el logo de al lado ya lleva ahí—. Explorar es buscar sin saber
+            todavía qué. */}
+        {user && (
+          <button
+            onClick={() => { setCirculo('explorar'); setPorRoce(false); navigate('/preferencias'); }}
+            title="Explorar los catorce temas"
+            className={cn('hidden shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2.5 transition-colors sm:flex -mb-px border-b',
+              circulo === 'explorar' || location.pathname === '/preferencias'
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          >
+            <Compass className="h-4 w-4 shrink-0" />
+            <span className="whitespace-nowrap text-[13px] font-black">Explorar</span>
+          </button>
+        )}
+
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
             llamativo y grande».
@@ -1101,20 +1139,6 @@ export default function Layout() {
             palabra es el rótulo de esa columna. Y lleva a `/preferencias`, que
             es donde vive la rueda: él se corrigió a sí mismo en la frase y
             **manda la corrección**, no la primera versión. */}
-        {user && (
-          <Link
-            to="/preferencias"
-            className={cn('hidden shrink-0 items-center gap-1.5 rounded-lg px-2.5 transition-colors sm:flex',
-              compacto ? 'h-7' : 'h-9',
-              location.pathname === '/preferencias'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-          >
-            <Home className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap text-[13px] font-black">Explorar</span>
-          </Link>
-        )}
-
         <BuscadorSuperior compacto={compacto} />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
@@ -1390,18 +1414,21 @@ export default function Layout() {
 
             Tu foto ya no está aquí: se ha mudado a lo alto de esa misma columna
             (ver `AvatarRail`), con mensajes, contactos y calendario debajo. */}
+        {/* EL MISMO REMATE, POR EL OTRO LADO. Fija el raíl de la derecha y
+            lleva a tus proyectos, con el mismo par de gestos que «Explorar»:
+            las dos esquinas se comportan igual porque son la misma idea. */}
         {user && (
-          <Link
-            to="/proyectos"
-            className={cn('hidden shrink-0 items-center gap-1.5 rounded-lg px-2.5 transition-colors sm:flex',
-              compacto ? 'h-7' : 'h-9',
-              location.pathname.startsWith('/proyectos')
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          <button
+            onClick={() => { setCirculo('organizar'); setPorRoce(false); navigate('/proyectos'); }}
+            title="Tus proyectos"
+            className={cn('hidden shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2.5 transition-colors sm:flex -mb-px border-b',
+              circulo === 'organizar' || location.pathname.startsWith('/proyectos')
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <FolderKanban className="h-4 w-4 shrink-0" />
             <span className="whitespace-nowrap text-[13px] font-black">Mis proyectos</span>
-          </Link>
+          </button>
         )}
 
         {!user && !cargandoSesion && (
@@ -1460,6 +1487,47 @@ export default function Layout() {
             pantalla completa, y tener además su botón flotante daría dos
             chats a la vez — el error que este proyecto ya pagó caro. */}
         {!isIAPage && <AIAssistant />}
+
+        {/* ══ EL CHAT, EN UN CÍRCULO ABAJO A LA DERECHA (2026-08-25) ═══════
+            Eugenio: «haz que el chat de IA esté flotando con un círculo abajo a
+            la derecha, que abra la ventana del chat con todo el historial y el
+            modelo que ya hemos fabricado antes. Entonces el menú de abajo no
+            tiene que entrar en conflicto con el chat, ni tampoco el de la
+            derecha».
+
+            ── NO ES UN CHAT NUEVO ──────────────────────────────────────────
+            Es una puerta al que ya hay. Manda el aviso `ai:abrir`, que
+            `AIAssistant` ya escuchaba desde el botón del teléfono. Escribir
+            aquí un segundo chat sería tener dos historiales y dos modelos que
+            se separan en la primera corrección.
+
+            ── Y NO CHOCA CON NADIE, POR CONSTRUCCIÓN ───────────────────────
+            · Con el raíl de la DERECHA: se aparta `--hueco-lateral`, que ese
+              raíl ya publica. Puesto en `right-4` a secas quedaría debajo de la
+              columna de proyectos.
+            · Con el menú de ABAJO: ése va centrado con un ancho máximo, y el
+              círculo se sube por encima de su altura reservada
+              (`--hueco-muelle`). Los dos leen la misma variable, así que si un
+              día la barra cambia de alto, el círculo se mueve con ella.
+
+            El conflicto de verdad que él notaba estaba en otro sitio y era
+            invisible: el chat escribía `--hueco-muelle` a cero cada vez que se
+            abría, y **borraba la reserva del menú de abajo**. Arreglado en
+            `AIAssistant.tsx`; esto es sólo la puerta. */}
+        {!isIAPage && user && (
+          <button
+            onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
+            title="Preguntar a la IA"
+            aria-label="Preguntar a la IA"
+            className="fixed z-[9992] grid h-14 w-14 place-items-center rounded-full bg-slate-900 text-white shadow-2xl ring-1 ring-white/10 transition-transform hover:scale-105 active:scale-95"
+            style={{
+              right: 'calc(var(--hueco-lateral, 0px) + 16px)',
+              bottom: 'calc(var(--hueco-muelle, 64px) + 16px)',
+            }}
+          >
+            <Sparkles className="h-6 w-6" />
+          </button>
+        )}
 
         {/* EL TELÉFONO, EN TODA LA APLICACIÓN (2026-08-22). Va aquí y no en la
             pantalla de Mensajes porque una llamada tiene que sonar estés donde
