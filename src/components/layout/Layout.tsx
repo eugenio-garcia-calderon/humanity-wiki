@@ -626,6 +626,7 @@ export default function Layout() {
               reordenar: reordenarTemas,
               ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
               mostrar: c => guardarPref(c, { oculto: false }),
+              onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
             } : undefined}
             abierta={objetivoAbierto}
             // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
