@@ -19,6 +19,7 @@ import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
 import BotonCalendario from '../navegacion/BotonCalendario';
+import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
@@ -289,6 +290,9 @@ export default function Layout() {
       body: JSON.stringify({ claves }),
     }).catch(() => {});
   };
+
+  /** El diálogo de crear un tema, abierto desde el menú de la izquierda. */
+  const [nuevoTema, setNuevoTema] = useState(false);
 
   const [porRoce, setPorRoce] = useState(false);
 
@@ -669,6 +673,7 @@ export default function Layout() {
               ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
               mostrar: c => guardarPref(c, { oculto: false }),
               onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
+              onNuevoTema: () => setNuevoTema(true),
             } : undefined}
             ramas={{
               de: c => ramas[c] ?? [],
@@ -1613,6 +1618,8 @@ export default function Layout() {
           gana sin tener que subir el `z-index` de nadie. */}
       {/* El envoltorio no pinta nada: sólo sirve para poder preguntar «¿está el
           ratón todavía en los círculos?». Ver `useCerrarAlAlejarse`. */}
+      {nuevoTema && <DialogoNuevoTema onCerrar={() => setNuevoTema(false)} />}
+
       <div ref={cajaCirculos}>
         <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
       </div>
