@@ -17,18 +17,6 @@
       "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
       "motivo": "pegar una imagen en la barra con la IA encendida",
       "desde": "2026-08-25T16:25:04.655Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/temas.ts",
-      "motivo": "prog2: la cuenta de la rama entera, no la del nodo",
-      "desde": "2026-08-25T17:43:49.302Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/pages/Preferencias.tsx",
-      "motivo": "prog2: la cuenta de la rama entera, no la del nodo",
-      "desde": "2026-08-25T17:43:49.302Z"
     }
   ]
 }
