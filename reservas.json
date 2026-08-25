@@ -23,6 +23,12 @@
       "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
       "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
       "desde": "2026-08-25T23:14:42.188Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/layout/menu/PopupRenombrar.tsx",
+      "motivo": "tres puntitos para editar la tarjeta de proyecto (prog8)",
+      "desde": "2026-08-25T23:17:02.036Z"
     }
   ]
 }
