@@ -56,6 +56,7 @@ const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
 const Muro = lazy(() => import('./pages/Muro'));
 const ObjectiveDetail = lazy(() => import('./pages/ObjectiveDetail'));
 const Objectives = lazy(() => import('./pages/Objectives'));
+const Tema = lazy(() => import('./pages/Tema'));
 const OrganizationProfile = lazy(() => import('./pages/OrganizationProfile'));
 const Organizations = lazy(() => import('./pages/Organizations'));
 const Paginas = lazy(() => import('./pages/Paginas'));
@@ -373,6 +374,8 @@ export default function App() {
                 <Route path="soluciones/:id" element={<SolutionProfile />} />
                                 <Route path="objetivos/:id" element={<ObjectiveDetail />} />
                 <Route path="objetivos" element={<Objectives />} />
+                {/* La página de un subtema del menú (prog8, 2026-08-25). */}
+                <Route path="temas/:id" element={<Tema />} />
                 <Route path="mercado" element={<Mercado />} />
                 <Route path="panel-financiero" element={<PanelFinanciero />} />
                 <Route path="muro" element={<Muro />} />

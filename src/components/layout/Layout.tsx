@@ -193,6 +193,48 @@ export default function Layout() {
     return () => { vivo = false; };
   }, [user]);
 
+  /*
+   * ══ LOS SUBTEMAS DEL MENÚ (2026-08-25, prog8) ═════════════════════════════
+   * `0120_subtemas.sql` dejó el árbol y `GET /api/temas/:objetivo` que lo
+   * sirve, y no había pantalla que lo pidiera: el árbol estaba en la base de
+   * datos y no se veía por ningún sitio.
+   *
+   * ── SE PIDE AL ABRIR, NO AL CARGAR ────────────────────────────────────────
+   * Catorce peticiones al pintar el menú, para catorce árboles que casi nadie
+   * va a desplegar, es pagar la portada entera por adelantado. Se pide el de
+   * un tema la primera vez que alguien pulsa su flecha, y se queda guardado.
+   *
+   * `null` mientras viaja y `[]` cuando ya se sabe que está vacío: sin esa
+   * diferencia, un tema sin subtemas se volvería a pedir cada vez que se abre.
+   */
+  const [ramas, setRamas] = useState<Record<string, Array<{ id: string; padre_id: string | null; nombre: string; cosas: number }> | null>>({});
+  const [ramasAbiertas, setRamasAbiertas] = useState<Record<string, boolean>>({});
+  /** Cuántos subtemas tiene cada objetivo. Una sola consulta al arrancar, y es
+   *  lo único que decide en qué filas se dibuja la flecha. */
+  const [cuantasRamas, setCuantasRamas] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/agregador/temas/cuantos', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (vivo && j?.cuantos) setCuantasRamas(j.cuantos); })
+      .catch(() => { /* sin flechas; el menú es el de siempre */ });
+    return () => { vivo = false; };
+  }, []);
+
+  const alternarRama = (clave: string) => {
+    setRamasAbiertas(a => ({ ...a, [clave]: !a[clave] }));
+    if (ramas[clave] !== undefined) return;
+    setRamas(r => ({ ...r, [clave]: null }));
+    fetch(`/api/temas/${encodeURIComponent(clave)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setRamas(r => ({ ...r, [clave]: j?.subtemas ?? j?.temas ?? [] })))
+      // Si falla, se queda en lista vacía: la flecha se apaga y el menú sigue
+      // funcionando. Un menú que se rompe entero porque un árbol no cargó es
+      // peor que un tema que hoy no despliega.
+      .catch(() => setRamas(r => ({ ...r, [clave]: [] })));
+  };
+
   const guardarPref = (clave: string, cambio: { favorito?: boolean; oculto?: boolean }) => {
     setPrefsTemas(p => ({ ...p, [clave]: { ...p[clave], ...cambio } }));
     fetch('/api/temas/preferencia', {
@@ -628,6 +670,12 @@ export default function Layout() {
               mostrar: c => guardarPref(c, { oculto: false }),
               onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
             } : undefined}
+            ramas={{
+              de: c => ramas[c] ?? [],
+              hay: c => (cuantasRamas[c] ?? 0) > 0,
+              abierto: c => !!ramasAbiertas[c],
+              alternar: alternarRama,
+            }}
             abierta={objetivoAbierto}
             // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
             // relacionado con energía».
@@ -1586,6 +1634,17 @@ export default function Layout() {
                 claro
                 titulo="Explorar"
                 items={OBJETIVOS_RAIL}
+                // EL ÁRBOL TAMBIÉN EN EL MÓVIL (prog8, 2026-08-25). Aquí no va
+                // `personal` —favoritos y reordenar son de escritorio— pero los
+                // subtemas sí: no son un gusto de nadie, son a dónde se va. Sin
+                // esto, en un teléfono el menú se queda en los catorce y las
+                // 1.100 ramas no existen.
+                ramas={{
+                  de: c => ramas[c] ?? [],
+                  hay: c => (cuantasRamas[c] ?? 0) > 0,
+                  abierto: c => !!ramasAbiertas[c],
+                  alternar: alternarRama,
+                }}
                 abierta={null}
                 onElegir={h => { navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`); setCirculo(null); }}
                 onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}

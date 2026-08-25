@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal,
+  ChevronLeft, ChevronRight, ChevronDown, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -115,7 +115,7 @@ export const PERSONALES: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'Red de Conocimiento', claro = false, onAbrirSubmenu, onPlegar,
-  personal,
+  personal, ramas,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -238,6 +238,32 @@ export default function Rail({
     /** Ir a la página donde se ordenan los temas a lo grande. */
     onPersonalizar?: () => void;
   };
+  /*
+   * ══ LOS SUBTEMAS, DENTRO DEL MENÚ (2026-08-25, prog8) ═════════════════════
+   * `0120_subtemas.sql` creó el árbol y la API que lo sirve, y el menú seguía
+   * enseñando sólo los catorce objetivos: el árbol existía y no se veía por
+   * ninguna parte. Esto es la mitad que faltaba.
+   *
+   * ── SE ABRE CON UNA FLECHA, NO AL PASAR EL RATÓN ──────────────────────────
+   * Un objetivo con treinta subtemas que se desplegara solo al rozarlo
+   * empujaría los trece de abajo fuera de la pantalla cada vez que el ratón
+   * cruza la lista. Con flecha, desplegar es una decisión.
+   *
+   * ── EL RAÍL NO SABE DE SUBTEMAS, LOS RECIBE ──────────────────────────────
+   * Igual que con `personal`: quien los carga y los guarda es el Layout. El
+   * raíl los pinta y avisa de que se ha pulsado una flecha. Si esto pidiera
+   * los datos por su cuenta, el menú de las herramientas —que usa el mismo
+   * componente— cargaría subtemas que nunca va a enseñar.
+   */
+  ramas?: {
+    /** El árbol de un tema, plano y con `padre_id`: quien lo pinta lo monta. */
+    de: (clave: string) => Array<{ id: string; padre_id: string | null; nombre: string; cosas: number }>;
+    /** Si ese tema tiene ramas, **antes** de haberlas pedido. Sin esto la
+     *  flecha no se podría dibujar hasta después de pulsarla. */
+    hay: (clave: string) => boolean;
+    abierto: (clave: string) => boolean;
+    alternar: (clave: string) => void;
+  };
 }) {
 
   /*
@@ -312,6 +338,60 @@ export default function Rail({
    *  arrastre de HTML el dato viaja como texto y hay que volver a leerlo. */
   const arrastrado = useRef<string | null>(null);
 
+  /**
+   * EL ÁRBOL DE UN TEMA, DEBAJO DE SU FILA.
+   *
+   * Se monta aquí a partir de la lista plana con `padre_id`, que es como lo
+   * sirve la API: traer el árbol entero de una vez cuesta una consulta, y
+   * pedirlo nivel a nivel costaría una por cada rama que alguien abra.
+   *
+   * La sangría es un padding que crece con la hondura y se para a los cuatro
+   * niveles: el árbol no tiene límite de profundidad, pero un menú de 224 px
+   * sí, y a partir de ahí sangrar más sólo estrecha el nombre.
+   */
+  const ramaDe = (clave: string) => {
+    if (!ramas || !desplegado || !ramas.abierto(clave)) return null;
+    const todos = ramas.de(clave);
+    if (!todos.length) return null;
+
+    const hijosDe = (padre: string | null) => todos.filter(t => t.padre_id === padre);
+
+    const pintar = (padre: string | null, nivel: number): any => hijosDe(padre).map(t => {
+      const suyos = hijosDe(t.id);
+      return (
+        <div key={t.id}>
+          <NavLink
+            to={`/temas/${t.id}`}
+            title={`${t.nombre} — ${t.cosas} ${t.cosas === 1 ? 'cosa' : 'cosas'}`}
+            style={{ paddingLeft: 12 + Math.min(nivel, 3) * 11 }}
+            className={({ isActive }) => cn(
+              'flex items-center gap-2 rounded-lg py-1.5 pr-2 text-[12px] transition-colors',
+              isActive
+                ? (claro ? 'bg-emerald-50 font-bold text-emerald-800' : 'bg-slate-800 font-bold text-emerald-300')
+                : (claro ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' : 'text-slate-500 hover:bg-slate-800/70 hover:text-white'),
+            )}
+          >
+            <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
+            {/* Cuántas cosas hay dentro. Un cero no se pinta: un número gris
+                al lado de un nombre se lee como «esto está vacío» y de los 31
+                subtemas de Movilidad hay varios que sólo tienen cosas en sus
+                hijos. */}
+            {t.cosas > 0 && (
+              <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
+            )}
+          </NavLink>
+          {suyos.length > 0 && pintar(t.id, nivel + 1)}
+        </div>
+      );
+    });
+
+    return (
+      <div className={cn('mb-1 ml-3 shrink-0 border-l pl-1', claro ? 'border-slate-200' : 'border-slate-800')}>
+        {pintar(null, 0)}
+      </div>
+    );
+  };
+
   const boton = (h: Herramienta) => {
     const Icono = h.icono;
     const activa = abierta === h.clave;
@@ -324,6 +404,7 @@ export default function Rail({
       ? (activa ? ChevronRight : ChevronLeft)
       : (activa ? ChevronLeft : ChevronRight);
     const conPersonal = !!personal && desplegado;
+    const conRamas = !!ramas && desplegado && ramas.hay(h.clave);
     return (
       <div
         key={h.clave}
@@ -403,6 +484,26 @@ export default function Rail({
             siempre visibles convierten un índice en un panel de mandos.
             La estrella SÍ se queda cuando ya es favorito — ahí ya no es un
             control, es el estado. */}
+        {/* ── LA FLECHA DE LOS SUBTEMAS ─────────────────────────────────
+            Sólo cuando ese tema tiene ramas de verdad. Una flecha que abre
+            una lista vacía es peor que no tener flecha: enseña que no hay
+            nada en el sitio donde el usuario esperaba encontrarlo, y la
+            siguiente vez ya no la pulsa. */}
+        {conRamas && (
+          <button
+            onClick={e => { e.stopPropagation(); ramas!.alternar(h.clave); }}
+            title={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
+            aria-label={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
+            aria-expanded={ramas!.abierto(h.clave)}
+            className={cn('grid h-7 w-5 shrink-0 place-items-center rounded-lg transition-colors',
+              claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-500 hover:text-white')}
+          >
+            {ramas!.abierto(h.clave)
+              ? <ChevronDown className="h-3.5 w-3.5" />
+              : <ChevronRight className="h-3.5 w-3.5" />}
+          </button>
+        )}
+
         {conPersonal && (
           <>
             <button
@@ -632,7 +733,12 @@ export default function Rail({
           </button>
         )}
 
-        {(items ?? HERRAMIENTAS).map(boton)}
+        {(items ?? HERRAMIENTAS).map(h => (
+          <Fragment key={h.clave}>
+            {boton(h)}
+            {ramaDe(h.clave)}
+          </Fragment>
+        ))}
         {/* El separador y lo personal sólo en el raíl de las herramientas: el
             de Explorar es una sola lista de catorce y una raya ahí no separa
             nada. */}
