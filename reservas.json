@@ -29,6 +29,12 @@
       "ruta": "scripts/auditar-subtemas.mjs",
       "motivo": "prog2: buscar sinonimos en la siembra",
       "desde": "2026-08-25T17:18:42.940Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "drizzle/0124_cicloturismo.sql",
+      "motivo": "prog2: la rama con errata que duplica la de prog8",
+      "desde": "2026-08-25T17:24:13.701Z"
     }
   ]
 }
