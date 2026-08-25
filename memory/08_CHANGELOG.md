@@ -7258,6 +7258,42 @@ su ancho.
 «Explorar» lleva a `/preferencias` y no a `/explorar` porque él se corrigió en la
 misma frase —«se lleva a la página de personalizar realmente»— y **manda la
 corrección, no la primera versión**. Ahí está la rueda de los catorce temas.
+
+## 2026-08-25 — Paso 1 de la navegación contextual: dónde estás
+Eugenio: «si estoy en la página de un proyecto y le doy a crear una tarea, que
+se asigne a ese proyecto… y si estoy explorando movilidad y le doy a páginas,
+que me aparezcan las páginas de movilidad. Crea esta sofisticación en cuanto a
+la navegación, donde todos los menús están funcionales en cuanto a lo que se ve
+en el centro de la pantalla». Pidió hacerlo **entero, aunque tarde varios pasos**.
+
+**Paso 1, el que sostiene todo lo demás:**
+
+- `src/utils/contextoNavegacion.ts` — de dónde estás sale de **la dirección**, no
+  de un estado global: es lo único que sigue siendo cierto al recargar, al
+  compartir un enlace y al volver atrás. Un «proyecto actual» guardado aparte
+  sería una segunda verdad, y esas dos discrepan siempre después de un «atrás».
+- Con proyecto **y** tema a la vez, manda el proyecto: es lo concreto. El tema
+  dice de qué habla; el proyecto dice dónde vive.
+- `scripts/probar-contexto.ts`, 13 casos. Esto decide en qué proyecto acaba una
+  tarea: equivocarse no da ningún error, mete el trabajo de alguien en el
+  proyecto de al lado y no se entera nadie hasta que lo busca donde lo dejó.
+  La primera versión de la prueba usaba `movilidad` como identificador y los
+  catorce se llaman `O001`…`O014` — **lo dijo la prueba, no la pantalla**.
+- El raíl inferior pega el contexto a cada destino y **lo enseña escrito**
+  («EN APTERA»). Una barra que se comporta distinto según dónde estés y no lo
+  dice es una barra que sorprende.
+- El panel de Páginas ya filtra: por proyecto con el dato (`proyecto_slug`, que
+  ya viajaba) y por tema con `hablaDe`, el mismo criterio que el muro. **Y por
+  tema no puede ser de otra forma: no existe ninguna tabla que una una página
+  con un objetivo**, está escrito en `utils/objetivos.ts` desde que se creó.
+- Si el dato no viaja en una lista, **no se filtra**: se enseña entera. Devolver
+  vacío porque el dato falta sería decir «no tienes nada» cuando lo cierto es
+  «no lo sé».
+
+**Lo que falta, y es lo que viene:** que los paneles de Mapas, Tareas, Esquemas
+y Comercio filtren igual (a dos de ellos hay que añadirles el proyecto en el
+servidor, hoy no lo devuelven), que las páginas completas honren `?proyecto=` y
+`?objetivo=`, y el «crear dentro de este proyecto».
 ---
 
 ## 2026-08-26 — Los tres puntitos de una tarjeta de proyecto

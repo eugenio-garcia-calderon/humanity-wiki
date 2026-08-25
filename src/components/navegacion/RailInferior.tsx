@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { Herramienta } from './Rail';
+import { useContextoNavegacion, conContexto } from '../../utils/contextoNavegacion';
 
 /*
  * EL MENÚ DE ABAJO — LAS HERRAMIENTAS, A MANO (2026-08-25, agente de APP/UX)
@@ -87,6 +88,19 @@ export default function RailInferior({
 }) {
   const [encima, setEncima] = useState(false);
   const desplegado = fijo || encima;
+
+  /*
+   * ══ LAS HERRAMIENTAS SE APLICAN A DONDE ESTÁS (2026-08-25) ═══════════════
+   * Eugenio: «si estoy en la página de un proyecto y le doy a crear una tarea,
+   * que se asigne a ese proyecto… y si estoy explorando movilidad y le doy a
+   * páginas, que me aparezcan las páginas de movilidad».
+   *
+   * El contexto sale de la dirección, así que esta barra no tiene que saber
+   * nada: pregunta dónde está y se lo pega a cada destino. Si no hay contexto,
+   * `conContexto` devuelve la ruta tal cual y todo se comporta como antes.
+   */
+  const contexto = useContextoNavegacion();
+  const dondeEstoy = contexto.proyecto?.slug || contexto.tema?.titulo || null;
   const reloj = useRef<number | null>(null);
 
   /*
@@ -138,6 +152,18 @@ export default function RailInferior({
           desplegado ? 'py-2' : 'py-1.5',
         )}
       >
+        {/* ══ EN QUÉ ESTÁS, ESCRITO ══════════════════════════════════════
+            Una barra que se comporta distinto según dónde estés y no lo dice es
+            una barra que sorprende. Con el rótulo, «Páginas» deja de significar
+            «todas las páginas» y pasa a significar «las páginas de esto», que
+            es lo que hace. Sólo cuando está desplegada: en reposo son iconos, y
+            un rótulo suelto entre iconos no se lee, se estorba. */}
+        {desplegado && dondeEstoy && (
+          <span className="mr-1 max-w-[9rem] shrink-0 self-center truncate rounded-lg bg-slate-800 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300">
+            en {dondeEstoy}
+          </span>
+        )}
+
         {/* ══ FEEDBACK, AQUÍ Y EN ROJO (2026-08-25) ═══════════════════════
             Eugenio: «el feedback, mételo en la barra de herramientas inferior
             con un color distinto, que sea en rojo, que destaque. Y así también
@@ -170,7 +196,7 @@ export default function RailInferior({
           return (
             <div key={h.clave} className="relative flex shrink-0 flex-col items-center">
               <button
-                onClick={() => onElegir(h)}
+                onClick={() => onElegir({ ...h, ruta: conContexto(h.ruta, contexto) })}
                 title={h.nombre}
                 aria-label={h.nombre}
                 className={cn(
