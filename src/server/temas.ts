@@ -242,7 +242,28 @@ export function registrarTemas(app: Express, db: any) {
       const yo = req.user?.id || null;
       const filas = await db.execute(sql`
         SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, s.orden,
-               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas,
+               -- ── LA CUENTA ES DE LA RAMA ENTERA, NO DEL NODO (2026-08-25)
+               -- Contaba sólo lo colgado de este subtema. Lo cazó prog8
+               -- midiendo el árbol: cuatro de sus ramas salían con CERO y
+               -- tenían dos o tres hijas llenas cada una. Un padre cuyo
+               -- contenido vive en sus hijos aparecía vacío.
+               --
+               -- Y eso no es un número feo: es un número que MIENTE. Con él,
+               -- cualquier criterio de poda —«borra lo que no tiene nada»—
+               -- empieza matando a los padres, que es justo lo contrario de lo
+               -- que se quería.
+               --
+               -- Recursivo, y no una cuenta simple, porque el árbol no tiene límite de
+               -- profundidad: lo que cuelga de una rama puede estar cuatro
+               -- niveles más abajo.
+               (SELECT count(*)::int FROM subtema_contenido c
+                 WHERE c.subtema_id IN (
+                   WITH RECURSIVE rama AS (
+                     SELECT s.id
+                     UNION ALL
+                     SELECT h.id FROM subtemas h JOIN rama r ON h.padre_id = r.id
+                      WHERE h.archived_at IS NULL
+                   ) SELECT id FROM rama)) AS cosas,
                coalesce(p.favorito, false) AS favorito,
                coalesce(p.oculto, false) AS oculto
         FROM subtemas s
@@ -352,7 +373,28 @@ export function registrarTemas(app: Express, db: any) {
       const yo = req.user?.id || null;
       const filas = await db.execute(sql`
         SELECT s.id, s.padre_id, s.nombre, s.orden, s.creador_user_id,
-               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas,
+               -- ── LA CUENTA ES DE LA RAMA ENTERA, NO DEL NODO (2026-08-25)
+               -- Contaba sólo lo colgado de este subtema. Lo cazó prog8
+               -- midiendo el árbol: cuatro de sus ramas salían con CERO y
+               -- tenían dos o tres hijas llenas cada una. Un padre cuyo
+               -- contenido vive en sus hijos aparecía vacío.
+               --
+               -- Y eso no es un número feo: es un número que MIENTE. Con él,
+               -- cualquier criterio de poda —«borra lo que no tiene nada»—
+               -- empieza matando a los padres, que es justo lo contrario de lo
+               -- que se quería.
+               --
+               -- Recursivo, y no una cuenta simple, porque el árbol no tiene límite de
+               -- profundidad: lo que cuelga de una rama puede estar cuatro
+               -- niveles más abajo.
+               (SELECT count(*)::int FROM subtema_contenido c
+                 WHERE c.subtema_id IN (
+                   WITH RECURSIVE rama AS (
+                     SELECT s.id
+                     UNION ALL
+                     SELECT h.id FROM subtemas h JOIN rama r ON h.padre_id = r.id
+                      WHERE h.archived_at IS NULL
+                   ) SELECT id FROM rama)) AS cosas,
                coalesce(p.favorito, false) AS favorito,
                coalesce(p.oculto, false) AS oculto,
                p.orden AS mi_orden
