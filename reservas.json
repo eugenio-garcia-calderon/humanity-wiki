@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-turn",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "volver a humanity.wiki como nombre (prog8)",
-      "desde": "2026-08-25T22:43:13.380Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "src/components/navegacion/Rail.tsx",
       "motivo": "volver a humanity.wiki como nombre (prog8)",
       "desde": "2026-08-25T22:43:17.283Z"
