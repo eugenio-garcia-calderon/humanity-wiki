@@ -1,3 +1,28 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
+      "desde": "2026-08-25T23:14:42.188Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
+      "desde": "2026-08-25T23:14:42.188Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/RailInferior.tsx",
+      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
+      "desde": "2026-08-25T23:14:42.188Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
+      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
+      "desde": "2026-08-25T23:14:42.188Z"
+    }
+  ]
 }
