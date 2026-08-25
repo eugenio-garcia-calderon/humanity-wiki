@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { promises as dns } from 'node:dns';
+import { COMPARTIBLES, compartiblePorTipo } from './compartir.js';
 
 // ============================================================================
 // DOMINIO PROPIO PARA UNA PÁGINA — como en Notion (2026-08-22)
@@ -129,7 +130,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
       if (!d) return res.status(404).json({ error: 'Dominio no válido.' });
 
       const dom = (await db.execute(sql`
-        SELECT dp.pagina_id, dp.estado, u.handle
+        SELECT dp.entidad_tipo, dp.entidad_id, dp.estado, u.handle
         FROM dominios_paginas dp
         JOIN users u ON u.id = dp.propietario_user_id
         WHERE dp.dominio = ${d} AND dp.estado IN ('pendiente', 'activo')
@@ -148,37 +149,51 @@ export function registerDominiosRoutes(app: Express, db: any) {
         `);
       }
 
-      if (!dom.pagina_id) {
+      if (!dom.entidad_id) {
         return res.json({ tipo: 'espacio', handle: dom.handle });
       }
 
+      // ── UN DOMINIO PUEDE APUNTAR A CUALQUIER COSA COMPARTIBLE (2026-08-25) ─
+      // Aquí había una consulta a `knowledge_windows` escrita a mano, y por eso
+      // un dominio sólo podía servir una página. Ahora se mira el tipo que
+      // guarda la fila y se pregunta a la tabla que le toque, según el registro
+      // de `compartir.ts`. Añadir mapas a lo compartible no vuelve a tocar esto.
+      const c = compartiblePorTipo(dom.entidad_tipo);
+      if (!c) {
+        return res.status(404).json({ error: 'Este dominio apunta a algo que ya no se puede compartir.' });
+      }
+
       const p = (await db.execute(sql`
-        SELECT w.id, w.title, w.kind, w.config, w.indexable, w.slug,
-               w.created_at, w.updated_at,
+        SELECT e.${sql.raw(c.col.id)}::text AS id,
+               e.${sql.raw(c.col.titulo)}::text AS titulo,
+               e.${sql.raw(c.col.slug)}::text AS slug,
                u.handle, u.display_name, u.name, u.avatar_url
-        FROM knowledge_windows w
-        JOIN users u ON u.id = w.creator_user_id
-        WHERE w.id = ${dom.pagina_id}
-          AND w.publico = true
-          AND w.archived_at IS NULL AND w.deleted_at IS NULL
+        FROM ${sql.raw(c.tabla)} e
+        JOIN users u ON u.id = e.${sql.raw(c.col.duenyo)}
+        WHERE e.${sql.raw(c.col.id)} = ${dom.entidad_id}
+          AND e.${sql.raw(c.col.publico)} = true
+          ${c.col.archivado ? sql.raw(`AND e.${c.col.archivado} IS NULL`) : sql``}
+          ${c.col.borrado ? sql.raw(`AND e.${c.col.borrado} IS NULL`) : sql``}
       `)).rows[0] as any;
 
-      // El dominio existe pero la página se despublicó. No es lo mismo que un
-      // dominio que no apunta a nada, y quien lo abre merece saber cuál de las
-      // dos cosas pasa.
+      // El dominio existe pero lo que servía se despublicó. No es lo mismo que
+      // un dominio que no apunta a nada, y quien lo abre merece saber cuál de
+      // las dos cosas pasa.
       if (!p) {
         return res.status(404).json({
-          error: 'Este dominio apunta a una página que ya no está publicada.',
+          error: `Este dominio apunta a ${c.nombre === 'página' ? 'una página' : 'un ' + c.nombre} que ya no está ${c.nombre === 'página' ? 'publicada' : 'publicado'}.`,
           tipo: 'despublicada',
         });
       }
 
       res.json({
-        tipo: 'pagina',
-        id: p.id, titulo: p.title, kind: p.kind, config: p.config,
-        indexable: p.indexable, slug: p.slug,
+        tipo: c.tipo,
+        id: p.id, titulo: p.titulo, slug: p.slug,
+        // La dirección larga viaja con la respuesta: quien llega por un dominio
+        // propio puede así ir a la misma cosa dentro de la plataforma sin que
+        // la pantalla tenga que saber cómo se arma cada URL.
+        ruta: `/@${p.handle}/${p.slug}`,
         autor: { handle: p.handle, nombre: p.display_name || p.name, avatar: p.avatar_url },
-        created_at: p.created_at, updated_at: p.updated_at,
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -234,17 +249,38 @@ export function registerDominiosRoutes(app: Express, db: any) {
       // `null` significa «apúntalo al espacio entero». Al probarlo, volver a
       // reclamar un dominio sin nombrar la página lo desconectaba de la suya
       // en silencio, que es la peor forma de perder algo.
-      const traePagina = req.body && 'pagina_id' in req.body;
-      const paginaId = traePagina && req.body.pagina_id ? String(req.body.pagina_id) : null;
-      if (paginaId) {
+      // ── A QUÉ APUNTA: PÁGINA (como siempre) O CUALQUIER COSA COMPARTIBLE ─
+      // `pagina_id` se sigue aceptando tal cual: hay dominios funcionando con
+      // esa forma y una pantalla que la usa. Es exactamente lo mismo que
+      // mandar `{tipo:'pagina', entidad_id:…}`, y se traduce aquí para que
+      // debajo haya una sola forma y no dos.
+      const traeEntidad = !!req.body && ('entidad_id' in req.body || 'pagina_id' in req.body);
+      const tipoPedido = req.body?.entidad_id !== undefined
+        ? String(req.body?.tipo || 'pagina')
+        : 'pagina';
+      const entidadId = !traeEntidad ? null
+        : (req.body?.entidad_id ?? req.body?.pagina_id)
+          ? String(req.body.entidad_id ?? req.body.pagina_id)
+          : null;
+
+      let cTipo = 'pagina';
+      if (entidadId) {
+        const c = compartiblePorTipo(tipoPedido);
+        if (!c) return res.status(400).json({ error: 'Eso no se puede compartir todavía.' });
+        cTipo = c.tipo;
         const p = (await db.execute(sql`
-          SELECT publico FROM knowledge_windows
-          WHERE id = ${paginaId} AND creator_user_id = ${req.user.id}
-            AND archived_at IS NULL AND deleted_at IS NULL
+          SELECT e.${sql.raw(c.col.publico)} AS publico
+          FROM ${sql.raw(c.tabla)} e
+          WHERE e.${sql.raw(c.col.id)} = ${entidadId}
+            AND e.${sql.raw(c.col.duenyo)} = ${req.user.id}
+            ${c.col.archivado ? sql.raw(`AND e.${c.col.archivado} IS NULL`) : sql``}
+            ${c.col.borrado ? sql.raw(`AND e.${c.col.borrado} IS NULL`) : sql``}
         `)).rows[0] as any;
-        if (!p) return res.status(404).json({ error: 'Esa página no es tuya o no existe.' });
+        if (!p) return res.status(404).json({ error: `Ese ${c.nombre} no es tuyo o no existe.` });
         if (!p.publico) {
-          return res.status(400).json({ error: 'Publica la página antes de ponerle un dominio: si no, el dominio no enseñaría nada.' });
+          return res.status(400).json({
+            error: `Publica ${c.nombre === 'página' ? 'la página' : 'el ' + c.nombre} antes de ponerle un dominio: si no, el dominio no enseñaría nada.`,
+          });
         }
       }
 
@@ -258,12 +294,18 @@ export function registerDominiosRoutes(app: Express, db: any) {
       }
 
       const id = 'DOM' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+      // `pagina_id` se sigue rellenando **sólo** cuando lo que se comparte es
+      // una página, para no dejar tirado lo que aún la lee. La pareja
+      // `(entidad_tipo, entidad_id)` es la que manda.
       await db.execute(sql`
-        INSERT INTO dominios_paginas (id, dominio, propietario_user_id, pagina_id, estado)
-        VALUES (${id}, ${d}, ${req.user.id}, ${paginaId}, 'pendiente')
+        INSERT INTO dominios_paginas (id, dominio, propietario_user_id, pagina_id, entidad_tipo, entidad_id, estado)
+        VALUES (${id}, ${d}, ${req.user.id},
+                ${cTipo === 'pagina' ? entidadId : null},
+                ${entidadId ? cTipo : null}, ${entidadId}, 'pendiente')
         ON CONFLICT (dominio) DO UPDATE
-          SET pagina_id = CASE WHEN ${traePagina} THEN ${paginaId}
-                               ELSE dominios_paginas.pagina_id END,
+          SET pagina_id    = CASE WHEN ${traeEntidad} THEN ${cTipo === 'pagina' ? entidadId : null} ELSE dominios_paginas.pagina_id END,
+              entidad_tipo = CASE WHEN ${traeEntidad} THEN ${entidadId ? cTipo : null} ELSE dominios_paginas.entidad_tipo END,
+              entidad_id   = CASE WHEN ${traeEntidad} THEN ${entidadId} ELSE dominios_paginas.entidad_id END,
               estado = 'pendiente', ultimo_error = NULL, updated_at = now()
           WHERE dominios_paginas.propietario_user_id = ${req.user.id}
       `);
@@ -287,16 +329,27 @@ export function registerDominiosRoutes(app: Express, db: any) {
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const retirar = req.body?.retirar === true;
-      const paginaId = req.body?.pagina_id === null ? null
-        : req.body?.pagina_id ? String(req.body.pagina_id) : undefined;
+      // Igual que al reclamarlo: `pagina_id` sigue valiendo y significa
+      // `{tipo:'pagina'}`. `undefined` es «no lo toques» y `null` es
+      // «apúntalo al espacio entero» — confundirlos desconectaba un dominio
+      // de su página en silencio, y eso ya costó una vez.
+      const traeEntidad = !!req.body && ('entidad_id' in req.body || 'pagina_id' in req.body);
+      const entidadId = !traeEntidad ? undefined
+        : ((req.body?.entidad_id ?? req.body?.pagina_id) ? String(req.body.entidad_id ?? req.body.pagina_id) : null);
+      const tipo = entidadId ? String(req.body?.tipo || 'pagina') : null;
+      if (tipo && !compartiblePorTipo(tipo)) {
+        return res.status(400).json({ error: 'Eso no se puede compartir todavía.' });
+      }
 
       const r = await db.execute(sql`
         UPDATE dominios_paginas SET
           estado = CASE WHEN ${retirar} THEN 'retirado' ELSE estado END,
-          pagina_id = CASE WHEN ${paginaId !== undefined} THEN ${paginaId ?? null} ELSE pagina_id END,
+          pagina_id    = CASE WHEN ${entidadId !== undefined} THEN ${tipo === 'pagina' ? entidadId : null} ELSE pagina_id END,
+          entidad_tipo = CASE WHEN ${entidadId !== undefined} THEN ${tipo} ELSE entidad_tipo END,
+          entidad_id   = CASE WHEN ${entidadId !== undefined} THEN ${entidadId ?? null} ELSE entidad_id END,
           updated_at = now()
         WHERE id = ${String(req.params.id)} AND propietario_user_id = ${req.user.id}
-        RETURNING dominio, estado, pagina_id
+        RETURNING dominio, estado, entidad_tipo, entidad_id
       `);
       if (!r.rows[0]) return res.status(404).json({ error: 'Ese dominio no es tuyo o no existe.' });
       res.json(r.rows[0]);

@@ -4,12 +4,13 @@ import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
   Package, Table2, CalendarDays, Bookmark, ExternalLink,
-  Megaphone, ImageIcon, Video, Paperclip, Link2, Send,
+  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
 import ArbolDeRamas from '../components/proyecto/ArbolDeRamas';
+import CajaCompartir from '../components/compartir/CajaCompartir';
 import { useEsMovil } from '../hooks/useEsMovil';
 import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
@@ -300,6 +301,8 @@ export function Proyecto() {
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
   const [renombrando, setRenombrando] = useState(false);
+  /** La cajita de compartir, la misma que usan las páginas. */
+  const [compartiendo, setCompartiendo] = useState(false);
   /*
    * ── LA DESCRIPCIÓN TAMBIÉN SE EDITA (2026-08-25) ─────────────────────────
    * Eugenio: «cuando le des a editar, también se puede editar la descripción
@@ -476,6 +479,18 @@ export function Proyecto() {
         />
       )}
 
+      {compartiendo && (
+        <CajaCompartir
+          tipo="proyecto"
+          id={proyecto.id}
+          onCerrar={() => setCompartiendo(false)}
+          // Publicar desde la cajita cambia el proyecto: se recarga para que el
+          // candado de la cabecera no siga diciendo «privado».
+          onCambiado={() => fetch(`/api/proyectos/${proyecto.id}`, { credentials: 'include' })
+            .then(r => r.json()).then(p => setProyecto(p)).catch(() => {})}
+        />
+      )}
+
       {borrando && (
         <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
           onClick={() => !quitando && setBorrando(false)}>
@@ -518,6 +533,20 @@ export function Proyecto() {
             <ArrowLeft className="w-3.5 h-3.5" /> Proyectos
           </Link>
           <div className="flex-1 min-w-2" />
+
+          {/* COMPARTIR, con la misma cajita que las páginas (2026-08-25).
+              Eugenio: «permite compartir los proyectos como si fuesen
+              páginas». No es una pantalla nueva: es el mismo componente al que
+              se le dice qué se comparte. */}
+          {puedoEditar && (
+            <button
+              onClick={() => setCompartiendo(true)}
+              title="Compartir este proyecto"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors shrink-0"
+            >
+              <Share2 className="w-3.5 h-3.5" /> Compartir
+            </button>
+          )}
 
           {/* LAS HERRAMIENTAS DE LA PLATAFORMA, AQUÍ DENTRO (Eugenio,
               2026-08-20: «permite añadir todas las herramientas de la
