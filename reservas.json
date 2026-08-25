@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/App.tsx",
-      "motivo": "en un subdominio no existia la ruta de proyecto: pagina en blanco (prog8)",
-      "desde": "2026-08-25T22:26:21.318Z"
-    }
-  ]
+  "reservas": []
 }
