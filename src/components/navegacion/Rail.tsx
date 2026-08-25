@@ -114,7 +114,7 @@ export const PERSONALES: Herramienta[] = [
 
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
-  items, titulo = 'Red de Conocimiento', claro = false, onAbrirSubmenu, onPlegar,
+  items, titulo = 'humanity.wiki', claro = false, onAbrirSubmenu, onPlegar,
   personal, ramas,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
@@ -688,7 +688,7 @@ export default function Rail({
             title="Inicio"
             aria-label="Inicio"
             // `min-w-0` NO ES DECORACIÓN. Sin él este botón no baja de lo que
-            // mide su texto —«Red de Conocimiento» son ~190 px con el icono— y
+            // mide su texto —«humanity.wiki» son ~140 px con el icono— y
             // en un raíl de 224 px eso deja 34 para lo que venga detrás. Con un
             // solo botón al lado cabía por los pelos; al añadir el de plegar,
             // la fila se desbordó y, como el raíl recorta lo que se sale, **el
