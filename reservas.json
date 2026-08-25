@@ -35,6 +35,12 @@
       "ruta": "drizzle/0124_cicloturismo.sql",
       "motivo": "prog2: la rama con errata que duplica la de prog8",
       "desde": "2026-08-25T17:24:13.701Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "scripts/sembrar-subtemas.mjs",
+      "motivo": "prog2: la siembra tiene que pasar por el desempatador",
+      "desde": "2026-08-25T17:24:50.152Z"
     }
   ]
 }
