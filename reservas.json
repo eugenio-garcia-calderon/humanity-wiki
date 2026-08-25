@@ -35,6 +35,12 @@
       "ruta": "pruebas/carrera-3.txt",
       "motivo": "prueba 3",
       "desde": "2026-08-25T17:58:06.146Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "pruebas/carrera-4.txt",
+      "motivo": "prueba 4",
+      "desde": "2026-08-25T17:58:06.147Z"
     }
   ]
 }
