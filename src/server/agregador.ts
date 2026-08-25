@@ -273,7 +273,11 @@ export function registrarAgregador(app: Express, db: any) {
                -- tiene con qué cumplirlo. (Sin acentos graves dentro de esta
                -- plantilla: uno solo la corta en seco y el fallo sale como un
                -- error de coma en la línea siguiente.)
-               a.medio_url, a.licencia, a.autor
+               a.medio_url, a.licencia, a.autor,
+               -- Los tres ejes de la constelación: con quién habla de lo mismo,
+               -- qué TIPO de pieza es, y dónde cae en el mapa. Los calcula
+               -- scripts/agregador/constelacion.py y aquí sólo se leen.
+               a.cluster_id, a.genero, a.mapa_x, a.mapa_y
         FROM contenido_agregado a
         JOIN subtema_contenido c ON c.entity_id = a.id AND c.tipo = 'agregado'
         WHERE c.subtema_id = ANY(${ramaIds}) AND a.archived_at IS NULL
@@ -402,6 +406,26 @@ export function registrarAgregador(app: Express, db: any) {
       const tuyo = yo ? dentro.filter(d => d.duenyo === yo) : [];
       const humanidad = dentro.filter(d => !yo || d.duenyo !== yo);
 
+      // ── LOS GRUPOS Y LAS ARISTAS ────────────────────────────────────────
+      // Los grupos son del OBJETIVO: agrupar las piezas de MOVILIDAD junto a
+      // las de AGUA daría grupos ciertos y completamente inútiles.
+      const clusters = await db.execute(sql`
+        SELECT id, nombre, frase, x, y, cuantas, modelo, calculado_el
+        FROM contenido_cluster WHERE tema_id = ${tema.objetivo_id}
+        ORDER BY cuantas DESC
+      `);
+
+      // Las tres piezas más parecidas a cada una de las que se devuelven. Es la
+      // parte de «red» del asunto: el árbol de temas no puede decir «esto se
+      // parece a aquello» porque no es una jerarquía.
+      const idsFuera = arreglo((fuera.rows as any[]).map(r => r.id));
+      const vecinos = await db.execute(sql`
+        SELECT v.id, v.vecino_id, v.parecido, a.titulo, a.formato, a.fuente
+        FROM contenido_vecino v JOIN contenido_agregado a ON a.id = v.vecino_id
+        WHERE v.id = ANY(${idsFuera}) AND a.archived_at IS NULL
+        ORDER BY v.parecido DESC
+      `);
+
       // ── LOS RETOS DE LA HUMANIDAD EN ESTE TEMA ──────────────────────────
       // Eugenio: «y retos de la humanidad». Van por objetivo, no por subtema:
       // `challenge_objectives` une un reto con un objetivo y no existe ninguna
@@ -422,6 +446,8 @@ export function registrarAgregador(app: Express, db: any) {
 
       res.json({
         tema,
+        clusters: clusters.rows,
+        vecinos: vecinos.rows,
         retos: retos.rows,
         camino: camino.rows,
         hijos: hijos.rows,
