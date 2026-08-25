@@ -77,6 +77,12 @@
       "ruta": "src/components/navegacion/DialogoNuevoTema.tsx",
       "motivo": "prog2: crear tema desde el menu",
       "desde": "2026-08-25T16:47:51.409Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "drizzle/0123_temas_espiritualidad.sql",
+      "motivo": "prog2: los 72 subtemas del objetivo 15",
+      "desde": "2026-08-25T16:57:32.318Z"
     }
   ]
 }
