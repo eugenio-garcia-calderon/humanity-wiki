@@ -71,6 +71,12 @@
       "ruta": "scripts/sembrar-subtemas.mjs",
       "motivo": "prog2: el sembrador tiene que conocer al 15",
       "desde": "2026-08-25T16:45:10.061Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/navegacion/DialogoNuevoTema.tsx",
+      "motivo": "prog2: crear tema desde el menu",
+      "desde": "2026-08-25T16:47:51.409Z"
     }
   ]
 }
