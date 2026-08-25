@@ -85,11 +85,50 @@ function caducada(r) {
   return (Date.now() - new Date(r.desde).getTime()) / 60000 > CADUCIDAD_MIN;
 }
 
-function escribir(reservas, mensaje) {
+/**
+ * Guarda un cambio en la lista de reservas.
+ *
+ * ══ RECIBE UN CAMBIO, NO UNA LISTA ══════════════════════════════════════════
+ * (2026-08-25.) Antes recibía la lista ya calculada, y ahí estaba el fallo que
+ * se comió dos horas de dos agentes en dos días:
+ *
+ *   1. El agente A lee la lista y quita su reserva de un fichero.
+ *   2. Mientras la calcula, el agente B —que había leído ANTES— empuja la suya.
+ *   3. El push de A se rechaza. Se reintentaba releyendo **solo la base** y
+ *      empujando **la misma lista de A**, calculada sobre una foto vieja.
+ *   4. Resultado: lo que B acababa de guardar desaparecía. Y al revés, la
+ *      reserva que A había soltado **resucitaba** — con su hora original, así
+ *      que parecía que A no la había soltado nunca.
+ *
+ * Eso es una escritura perdida de manual, y no lo arreglaba reintentar más
+ * veces: reintentar empujando lo viejo es repetir el error con más fuerza.
+ *
+ * Ahora recibe una FUNCIÓN que aplica el cambio, y se aplica **sobre la lista
+ * recién leída en cada intento**. Si entre medias otro añadió o quitó algo, su
+ * cambio sigue ahí y el nuestro se pone encima.
+ *
+ * Coste real medido: dos agentes bloqueados una hora cada uno creyendo que un
+ * fichero estaba cogido cuando ya se había soltado — y uno de ellos estuvo a
+ * punto de commitear una copia vieja del changelog encima del trabajo ajeno,
+ * porque la espera envejeció su `stash`.
+ */
+function escribir(aplicarCambio, mensaje) {
   // Escritura atómica: si otro ha empujado mientras tanto, el push se rechaza,
-  // releemos y lo volvemos a intentar. Tres intentos y avisamos.
-  for (let intento = 1; intento <= 3; intento++) {
-    const { base } = leer();
+  // releemos, **volvemos a aplicar el cambio sobre lo nuevo** y reintentamos.
+  // Tres intentos y avisamos.
+  // ══ SEIS INTENTOS Y UNA ESPERA DESIGUAL ═══════════════════════════════════
+  // Con tres no llegaba: probado el 2026-08-25 con cuatro reservas a la vez,
+  // una se quedaba fuera y avisaba de que no había podido. Avisar es correcto
+  // —mejor eso que pisar a otro— pero el trabajo se queda sin guardar y somos
+  // nueve empujando a la misma rama.
+  //
+  // La espera es al azar a propósito: si todos reintentaran a la vez y con el
+  // mismo ritmo, volverían a chocar exactamente igual en cada vuelta.
+  const esperar = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  for (let intento = 1; intento <= 6; intento++) {
+    if (intento > 1) esperar(80 * intento + Math.floor(Math.random() * 250));
+    const { reservas: frescas, base } = leer();
+    const reservas = aplicarCambio(frescas);
     const cuerpo = JSON.stringify({ reservas }, null, 2) + '\n';
     const blob = git(['hash-object', '-w', '--stdin'], { input: cuerpo });
     const arbol = git(['mktree'], { input: `100644 blob ${blob}\t${FICHERO}\n` });
@@ -103,7 +142,7 @@ function escribir(reservas, mensaje) {
     const { reservas: ahora } = leer();
     const igual = JSON.stringify(ahora) === JSON.stringify(reservas);
     if (igual) return true;
-    if (intento === 3) {
+    if (intento === 6) {
       console.error('No he podido guardar la reserva (¿sin red, o alguien empujando a la vez?).');
       return false;
     }
@@ -227,11 +266,16 @@ if (orden === 'reservar') {
     for (const c of malos) console.error(`  ${c.ruta} → ${c.agente} (${c.motivo || 'sin motivo'}, hace ${haceCuanto(c.desde)})`);
     process.exit(1);
   }
-  const { reservas } = leer();
-  const vivas = reservas.filter((r) => !caducada(r) && !(r.agente === yo && rutas.some((x) => x === r.ruta)));
   const ahora = new Date().toISOString();
-  for (const ruta of rutas) vivas.push({ agente: yo, ruta, motivo, desde: ahora });
-  if (!escribir(vivas, `${yo} reserva ${rutas.join(', ')}`)) process.exit(1);
+  // El cambio, no la lista: quitar mis reservas viejas de esas rutas y las
+  // caducadas de cualquiera, y poner las mías nuevas. Se aplica sobre lo que
+  // haya en cada intento, así que lo que otro guarde mientras tanto se queda.
+  const anadirLasMias = (actuales) => {
+    const vivas = actuales.filter((r) => !caducada(r) && !(r.agente === yo && rutas.some((x) => x === r.ruta)));
+    for (const ruta of rutas) vivas.push({ agente: yo, ruta, motivo, desde: ahora });
+    return vivas;
+  };
+  if (!escribir(anadirLasMias, `${yo} reserva ${rutas.join(', ')}`)) process.exit(1);
   console.log(`Reservado por ${yo}: ${rutas.join(', ')}`);
   process.exit(0);
 }
@@ -245,7 +289,8 @@ if (orden === 'liberar') {
   const quedan = reservas.filter((r) => r.agente !== quien);
   const soltadas = reservas.length - quedan.length;
   if (!soltadas) { console.log(`${quien} no tenía nada reservado.`); process.exit(0); }
-  if (!escribir(quedan, `${yo} libera las reservas de ${quien} (agente parado)`)) process.exit(1);
+  if (!escribir((actuales) => actuales.filter((r) => r.agente !== quien),
+    `${yo} libera las reservas de ${quien} (agente parado)`)) process.exit(1);
   console.log(`Liberadas ${soltadas} reserva(s) de ${quien}.`);
   process.exit(0);
 }
@@ -270,7 +315,10 @@ if (orden === 'soltar') {
     const quedan2 = reservas.filter((r) => r.agente !== yo || vivas2.includes(r));
     const soltadas2 = reservas.length - quedan2.length;
     if (!soltadas2) { console.log('No había ninguna muerta que soltar.'); process.exit(0); }
-    if (!escribir(quedan2, `${yo} suelta ${soltadas2} reserva(s) muerta(s)`)) process.exit(1);
+    const rutasMuertas = quedan2.length === reservas.length ? [] :
+      reservas.filter((r) => !quedan2.includes(r)).map((r) => r.ruta);
+    if (!escribir((actuales) => actuales.filter((r) => r.agente !== yo || !rutasMuertas.includes(r.ruta)),
+      `${yo} suelta ${soltadas2} reserva(s) muerta(s)`)) process.exit(1);
     console.log(`Soltadas ${soltadas2} reserva(s) muerta(s).`);
     process.exit(0);
   }
@@ -282,7 +330,12 @@ if (orden === 'soltar') {
   });
   const soltadas = reservas.length - quedan.length;
   if (!soltadas) { console.log('No tenías nada de eso reservado.'); process.exit(0); }
-  if (!escribir(quedan, `${yo} suelta ${todo ? 'todo' : rutas.join(', ')}`)) process.exit(1);
+  const soltarLasMias = (actuales) => actuales.filter((r) => {
+    if (r.agente !== yo) return true;   // lo de los demás no se toca nunca
+    if (todo) return false;
+    return !rutas.some((x) => x === r.ruta);
+  });
+  if (!escribir(soltarLasMias, `${yo} suelta ${todo ? 'todo' : rutas.join(', ')}`)) process.exit(1);
   console.log(`Soltadas ${soltadas} reserva(s).`);
   process.exit(0);
 }
