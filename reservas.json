@@ -26,33 +26,15 @@
     },
     {
       "agente": "prog2",
-      "ruta": "scripts/sembrar-subtemas.mjs",
+      "ruta": "src/pages/Preferencias.tsx",
       "motivo": "prog2: rueda grande e integrada, y sembrar 8+8 subtemas",
       "desde": "2026-08-25T16:19:51.283Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "src/components/ai/AIAssistant.tsx",
-      "motivo": "pegar imagenes en el chat de IA",
-      "desde": "2026-08-25T16:21:04.406Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/buscador/CajaBusqueda.tsx",
-      "motivo": "pegar una imagen en la barra con la IA encendida",
-      "desde": "2026-08-25T16:25:00.182Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
-      "motivo": "pegar una imagen en la barra con la IA encendida",
-      "desde": "2026-08-25T16:25:04.655Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: pegar imagenes en la IA",
-      "desde": "2026-08-25T16:29:23.390Z"
+      "agente": "prog2",
+      "ruta": "scripts/sembrar-subtemas.mjs",
+      "motivo": "prog2: rueda grande e integrada, y sembrar 8+8 subtemas",
+      "desde": "2026-08-25T16:19:51.283Z"
     },
     {
       "agente": "prog2",
