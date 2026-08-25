@@ -7125,6 +7125,41 @@ El verde sigue siendo el `emerald-600` de siempre y ahora lo lleva `.wiki`
 `Humanity.wiki`: no había que tocarlo, y por eso la barra del navegador era lo
 único que llevaba semanas diciendo la verdad.
 
+## 2026-08-25 — Tres barras, tres preguntas
+Eugenio: «traslada todas las herramientas de visualización y creación de
+contenido fuera del menú lateral derecho, a un nuevo menú inferior. El anterior
+menú inferior deja de tener sentido y se elimina. El lateral derecho pasa a ser
+un visor de todos los proyectos del usuario, cada uno con su icono, y con
+submenú para ver lo que hay dentro sin pinchar».
+
+La regla que queda, y que hace que no haya que aprenderse dónde está cada cosa:
+
+| Barra | Contesta |
+|---|---|
+| Izquierda | **de qué habla** — los catorce temas |
+| Abajo | **con qué se hace** — las doce herramientas |
+| Derecha | **qué tienes** — tus proyectos |
+
+- **Fuera los tres círculos.** No eran destinos: eran mandos para abrir otros
+  menús, y se quedaban con la franja que alcanza el pulgar sin enseñar nada.
+- **El raíl inferior** reserva 64 px donde los círculos reservaban 92, así que
+  el contenido de todas las páginas gana 28. Iconos en reposo, nombres al
+  acercarse, y la flechita abre el panel de esa herramienta.
+- **El raíl derecho** pinta un proyecto por icono, con el icono que cada uno
+  tiene guardado. La flecha abre su árbol —`/api/proyectos/:id/arbol`, el mismo
+  que usa la ficha— con tres estados: cargando, contenido y **fallo**, que no es
+  lo mismo que «vacío».
+- **Lo personal sube a tu foto**: Mensajes y Contactos como iconos al lado;
+  Mi perfil, Todas las personas, Papelera y Tu portada dentro del menú. **Áreas
+  se retira**, que es lo que pidió.
+- **En el móvil, tus proyectos tienen puerta nueva** en la barra de arriba. Sin
+  ella habrían quedado existiendo y sin forma de llegar: el círculo que los
+  abría acaba de desaparecer y en un teléfono no hay ratón.
+- `HojaCrear` dejaba de colocarse bien: se apoyaba en `--alto-circulos`, que ya
+  no lo publica nadie, y habría caído al valor de reserva —92 px— sin dar ningún
+  error. Ahora lee `--hueco-muelle`. **Lo cazó otro programador leyendo el plan.**
+- Comprobado en el navegador: «Personalizar» sigue siendo alcanzable en el raíl
+  izquierdo, que es la única puerta a `/preferencias`.
 ---
 
 ## 2026-08-26 — Portadas de rama, galería del proyecto y tarjetas que dicen algo

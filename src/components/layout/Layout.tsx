@@ -6,7 +6,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, Info, Search,} from 'lucide-react';
+ PanelLeftOpen, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -14,7 +14,18 @@ import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
 import Rail, { type Herramienta } from '../navegacion/Rail';
 import Panel, { EstilosPanel } from '../navegacion/Panel';
-import TresCirculos, { type Circulo } from '../navegacion/TresCirculos';
+/*
+ * LOS TRES CÍRCULOS SE HAN IDO (2026-08-25). Eugenio: «el anterior menú
+ * inferior deja de tener sentido y se elimina, pasando a ser sustituido por
+ * este nuevo menú» — el raíl de herramientas.
+ *
+ * `Circulo` sobrevive como tipo porque el estado sigue mandando en UNA cosa: en
+ * el móvil, qué cajón está abierto. Lo que se ha ido son los tres botones, no
+ * la idea de «hay un menú abierto».
+ */
+import { type Circulo } from '../navegacion/TresCirculos';
+import RailInferior from '../navegacion/RailInferior';
+import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
@@ -110,6 +121,18 @@ export default function Layout() {
    * cualquiera cuando se ha equivocado de botón.
    */
   const [circulo, setCirculo] = useState<Circulo | null>(null);
+
+  /*
+   * TUS PROYECTOS, QUE AHORA SON EL MENÚ DE LA DERECHA (2026-08-25).
+   * Se piden una vez desde aquí y no desde el raíl, porque el mismo dato lo
+   * necesitan el raíl (para los iconos) y el panel (para saber cuál abrir).
+   * Dos peticiones para lo mismo son dos listas que se pueden contradecir.
+   */
+  const { estado: proyectos, recargar: recargarProyectos } = useProyectos(!!user);
+  const listaProyectos = Array.isArray(proyectos) ? proyectos : [];
+  const itemsProyectos = comoItems(listaProyectos);
+  const proyectosDe = (clave: string) => listaProyectos.find(p => `proyecto-${p.id}` === clave);
+  const [proyectoAbierto, setProyectoAbierto] = useState<ReturnType<typeof proyectosDe>>(undefined);
   /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
   const [objetivoAbierto, setObjetivoAbierto] = useState<string | null>(null);
   const pulsarCirculo = (c: Circulo) => {
@@ -1369,6 +1392,46 @@ export default function Layout() {
           <MessageSquare className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
         </button>
 
+        {/* CONTACTOS, AL LADO DE MENSAJES Y DE TU FOTO (2026-08-25). Eugenio:
+            «toda la parte de mensajes y contactos se coloca al lado de la cara
+            de la imagen de perfil». Bajó del raíl de la derecha, que ha pasado
+            a ser sólo tus proyectos; aquí queda junto a lo otro que también es
+            gente, y a un clic en vez de a dos. */}
+        {user && (
+          <button
+            onClick={() => navigate('/telefono')}
+            title="Contactos"
+            aria-label="Contactos"
+            className={cn('hidden shrink-0 place-items-center rounded-lg transition-colors sm:grid',
+              compacto ? 'w-7 h-7' : 'w-9 h-9',
+              location.pathname.startsWith('/telefono')
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
+          >
+            <Phone className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          </button>
+        )}
+
+        {/* ══ LA PUERTA A TUS PROYECTOS EN EL MÓVIL (2026-08-25) ═══════════
+            En un ordenador el raíl de la derecha está siempre puesto y se
+            despliega al acercarse. En un móvil **no hay ratón**, y hasta hoy ese
+            menú lo abría el círculo de «Organizar», que acaba de desaparecer.
+            Sin este botón, tus proyectos existirían y no habría forma de
+            llegar a ellos desde un teléfono — que es exactamente el fallo que
+            este proyecto lleva documentado dos veces. */}
+        {user && esMovil && (
+          <button
+            onClick={() => setCirculo(c => (c === 'organizar' ? null : 'organizar'))}
+            title="Tus proyectos"
+            aria-label="Tus proyectos"
+            className={cn('grid shrink-0 place-items-center rounded-lg transition-colors',
+              compacto ? 'w-7 h-7' : 'w-9 h-9',
+              circulo === 'organizar' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
+          >
+            <FolderKanban className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
+          </button>
+        )}
+
         {/* ══ EL CALENDARIO, ARRIBA A LA DERECHA (2026-08-24) ═══════════
             Eugenio: «pon el acceso al calendario arriba a la derecha, y que
             cuando se haga hover te dé una preview del día de hoy y si tienes
@@ -1416,9 +1479,33 @@ export default function Layout() {
                     {user.displayName || user.email}
                   </p>
                   <p className="px-3 pb-2 text-[10px] text-slate-400 truncate border-b border-slate-100">{user.roleLabel}</p>
+                  {/* ══ LO PERSONAL, DENTRO DE TU FOTO (2026-08-25) ═══════
+                      Eugenio: «toda la parte de mensajes y contactos se coloca
+                      al lado de la imagen de perfil; la parte de mi perfil ya
+                      está dentro de esa imagen, y la papelera se puede meter
+                      también dentro de ese menú de usuario. La parte de áreas
+                      no es necesaria, se puede quitar del menú».
+
+                      Bajan aquí porque el raíl de la derecha ha dejado de ser
+                      «lo tuyo» para ser «tus proyectos», y estas cuatro se
+                      quedaban sin puerta. Y es mejor sitio del que tenían: son
+                      cosas TUYAS, y tu cara es el sitio donde todo el mundo
+                      busca lo suyo desde hace veinte años. */}
                   <button onClick={() => { setCuentaAbierta(false); navigate(`/personas/${user.id}`); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
                     <User className="w-3.5 h-3.5 text-slate-400" /> Mi Perfil
+                  </button>
+                  <button onClick={() => { setCuentaAbierta(false); navigate('/personas'); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <Users2 className="w-3.5 h-3.5 text-slate-400" /> Todas las personas
+                  </button>
+                  <button onClick={() => { setCuentaAbierta(false); navigate('/explorar?papelera=1'); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <Trash2 className="w-3.5 h-3.5 text-slate-400" /> Papelera
+                  </button>
+                  <button onClick={() => { setCuentaAbierta(false); navigate('/explorar?portada=1'); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
+                    <LayoutGrid className="w-3.5 h-3.5 text-slate-400" /> Tu portada
                   </button>
                   <button onClick={() => { setCuentaAbierta(false); navigate('/configuracion'); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
@@ -1541,25 +1628,37 @@ export default function Layout() {
           nota de allí. Aquí el panel va ANTES que el raíl: en una fila flex el
           orden del documento es el orden en pantalla, y el raíl tiene que
           quedar pegado al borde derecho. */}
+      {/* ══ EL RAÍL DE LA DERECHA SON TUS PROYECTOS (2026-08-25) ═══════════
+          Eugenio: «el menú lateral derecho pasa a ser un visor de todos los
+          proyectos del usuario, cada uno con su icono, y si se hace hover se
+          ven los nombres; y sigue teniendo el submenú para ver dentro de cada
+          proyecto lo que hay, sin necesidad de pinchar en él».
+
+          Las herramientas que vivían aquí se han bajado al raíl inferior. La
+          regla que ordena ahora las tres barras: izquierda **de qué habla**,
+          abajo **con qué se hace**, derecha **qué tienes**. */}
       {!esMovil && (
         <div className="flex h-full shrink-0" {...gestoDelMenu}>
-          {panelAbierto && (
-            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          {proyectoAbierto && (
+            <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
           )}
-          {/* FONDO BLANCO EN LOS DOS (2026-08-24, Eugenio: «ponle el fondo
-              blanco»). En blanco los colores del mapa se ven — un
-              `text-yellow-500` sobre negro casi no existe. */}
           <Rail
             siempreAbierto={circulo === 'organizar'}
             claro
             ladoDerecho
-            abierta={panelAbierto?.clave ?? null}
-            // El nombre lleva a la herramienta; la flecha enseña lo que hay
-            // dentro sin sacarte de donde estás.
+            titulo="Tus proyectos"
+            items={itemsProyectos}
+            abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
+            // El icono lleva al proyecto; la flecha enseña lo que hay dentro
+            // sin sacarte de donde estás.
             onElegir={h => navigate(h.ruta)}
-            onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
-            onPlegar={() => { setCirculo(null); setPorRoce(false); setPanelAbierto(null); }}
-            onInicio={() => { navigate('/'); setPanelAbierto(null); setCirculo(null); }}
+            onAbrirSubmenu={h => {
+              const p = proyectosDe(h.clave);
+              setProyectoAbierto(a => (a?.id === p?.id ? null : p ?? null));
+            }}
+            onPlegar={() => { setCirculo(null); setPorRoce(false); setProyectoAbierto(null); }}
+            onInicio={() => { navigate('/'); setProyectoAbierto(null); setCirculo(null); }}
+            pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
           />
         </div>
       )}
@@ -1589,20 +1688,23 @@ export default function Layout() {
         <div className="fixed inset-0 z-[9997] flex bg-white">
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
           <div className="flex animate-in slide-in-from-right duration-200">
-            {panelAbierto
-              ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+            {proyectoAbierto
+              ? <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
               : <Rail
                   siempreAbierto
                   claro
                   ladoDerecho
+                  titulo="Tus proyectos"
+                  items={itemsProyectos}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
                   // que no hay ningún gesto intermedio entre mirar y abrir. El
-                  // nombre lleva a la herramienta y la flecha enseña lo que tiene
+                  // nombre abre el proyecto y la flecha enseña lo que tiene
                   // dentro; sin ella, una de las dos cosas no tendría puerta.
-                  onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
-                  onAbrirSubmenu={h => setPanelAbierto(h)}
+                  onElegir={h => { navigate(h.ruta); setCirculo(null); }}
+                  onAbrirSubmenu={h => setProyectoAbierto(proyectosDe(h.clave) ?? null)}
                   onInicio={() => { navigate('/'); setCirculo(null); }}
+                  pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
                 />}
           </div>
         </div>
@@ -1686,9 +1788,28 @@ export default function Layout() {
         />
       )}
 
+      {/* ══ EL MENÚ DE ABAJO: LAS HERRAMIENTAS ═════════════════════════════
+          Sustituye a los tres círculos. Aquéllos no eran destinos: eran mandos
+          para abrir otros menús, y ocupaban la franja que alcanza el pulgar
+          para no enseñar nada. Ahora esa franja lleva las once herramientas,
+          que sí son destinos. Reserva 64 px abajo en vez de 92, así que el
+          contenido de todas las páginas gana 28. */}
       <div ref={cajaCirculos}>
-        <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
+        <RailInferior
+          abierta={panelAbierto?.clave ?? null}
+          onElegir={h => { navigate(h.ruta); setPanelAbierto(null); }}
+          onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+          onPasarPorEncima={() => setPorRoce(false)}
+        />
       </div>
+
+      {/* El panel de una herramienta del raíl de abajo sale por la izquierda,
+          como el de siempre: es el mismo `Panel`, no una copia. */}
+      {!esMovil && panelAbierto && (
+        <div className="fixed bottom-[84px] left-3 top-16 z-[9991] flex" {...gestoDelMenu}>
+          <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+        </div>
+      )}
 
       {/* La hoja recibe `gestoDelMenu` como cualquier otro menú abierto por
           roce: sin él, llevar el ratón desde el botón hasta las herramientas

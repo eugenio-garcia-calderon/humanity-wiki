@@ -170,11 +170,19 @@ export default function HojaCrear({ onCerrar, gesto }: {
          * que acababas de pulsar. Una ventana que tapa el botón que la abrió
          * deja sin ancla al que la mira: no queda ni rastro de por qué está ahí.
          *
-         * `--alto-circulos` lo publica `TresCirculos`, que es quien sabe cuánto
-         * mide —92 px en un ordenador, 70 en un móvil—. Preguntárselo evita el
-         * número mágico que se queda viejo el día que cambien de tamaño.
+         * AHORA SE APOYA EN `--hueco-muelle` Y NO EN `--alto-circulos`
+         * (2026-08-25). Los tres círculos se han ido, y con ellos la única
+         * línea que escribía `--alto-circulos`. Esta hoja no habría dado ningún
+         * error: se habría quedado con el valor de reserva —92 px, la altura
+         * que ya no existe— y flotando casi 40 px por encima de su sitio, un
+         * fallo que sólo se ve mirándolo. Lo cazó otro programador leyendo el
+         * plan, no la aplicación.
+         *
+         * `--hueco-muelle` es la variable que de verdad significa «lo que hay
+         * ocupado abajo», la publican los menús inferiores desde siempre y ya la
+         * leen todas las páginas. Una sola variable para una sola idea.
          */
-        style={{ bottom: 'calc(var(--alto-circulos, 92px) + env(safe-area-inset-bottom) + 10px)' }}
+        style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 10px)' }}
         // MÁS ALTA EN EL MÓVIL, no menos (2026-08-24). Con los dibujos puestos, las
         // trece tarjetas piden cinco filas a tres columnas y a 64 vh la última
         // se quedaba fuera — medido, no supuesto. En un ordenador caben en tres
