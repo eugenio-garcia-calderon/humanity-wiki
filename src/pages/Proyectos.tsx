@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
+import ArbolDeRamas from '../components/proyecto/ArbolDeRamas';
 import { useEsMovil } from '../hooks/useEsMovil';
 import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
@@ -558,6 +559,10 @@ export function Proyecto() {
             </div>
           )}
         </div>
+
+        {/* Las ramas van ANTES que las personas: primero en qué se abre el
+            proyecto, después quién está en él. */}
+        <ArbolDeRamas proyectoId={proyecto.id} titulo={proyecto.titulo} />
 
         <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
 
