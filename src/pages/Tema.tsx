@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   Loader2, ChevronRight, PlayCircle, FileText, BarChart3, Map as MapIcon,
   Image as ImageIcon, ExternalLink, Sparkles, FolderKanban, LayoutGrid,
   Search, ShieldAlert, Gauge, Play, User as UserIcon, CircleDashed, Flag,
-  Orbit, X as Cerrar, Minimize2,
+  Orbit, X as Cerrar, Minimize2, Plus, Minus, Pencil, Check, Move,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAuth, ROLE } from '../contexts/AuthContext';
 import { OBJETIVOS } from '../utils/objetivos';
 
 // ============================================================================
@@ -47,12 +48,12 @@ type Pieza = {
   publicado_el: string | null; nota_ia: string | null; calidad: number; estado: string;
   medio_url?: string | null; licencia?: string | null; autor?: string | null;
   cluster_id?: string | null; genero?: string | null;
-  mapa_x?: number | null; mapa_y?: number | null;
+  mapa_x?: number | null; mapa_y?: number | null; a_mano?: boolean;
 };
 
 type Cluster = {
   id: string; nombre: string; frase: string | null;
-  x: number; y: number; cuantas: number; modelo: string | null;
+  x: number; y: number; cuantas: number; modelo: string | null; a_mano?: boolean;
 };
 
 type Vecino = {
@@ -109,6 +110,9 @@ export default function Tema() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formato, setFormato] = useState<string>('todo');
+  /** Sube cuando alguien corrige el mapa: es lo que vuelve a pedir el tema. */
+  const [vuelta, setVuelta] = useState(0);
+  const recargar = () => setVuelta(v => v + 1);
 
   useEffect(() => {
     let vivo = true;
@@ -122,7 +126,7 @@ export default function Tema() {
       .then(j => { if (vivo) { setDatos(j); setCargando(false); } })
       .catch(e => { if (vivo) { setError(e.message); setCargando(false); } });
     return () => { vivo = false; };
-  }, [id]);
+  }, [id, vuelta]);
 
   // Los indicadores son del OBJETIVO, no del subtema: hoy no hay ninguna tabla
   // que los una a un subtema, y decir que estos siete son de «Bicicleta de
@@ -324,7 +328,12 @@ export default function Tema() {
 
         {/* ── EL MAPA ──────────────────────────────────────────────────── */}
         {pestanya === 'mapa' && (
-          <Constelacion piezas={datos.fuera} clusters={datos.clusters} vecinos={datos.vecinos} />
+          <Constelacion
+            piezas={datos.fuera}
+            clusters={datos.clusters}
+            vecinos={datos.vecinos}
+            onCambiado={() => recargar()}
+          />
         )}
 
         {/* ── EXPLORAR: LA REJILLA DE SUBTEMAS ─────────────────────────── */}
@@ -530,19 +539,28 @@ export default function Tema() {
  * forma o por posición.
  */
 const COLORES = [
-  { punto: 'bg-emerald-500', suave: 'bg-emerald-500/10', texto: 'text-emerald-700' },
-  { punto: 'bg-sky-500',     suave: 'bg-sky-500/10',     texto: 'text-sky-700' },
-  { punto: 'bg-amber-400',   suave: 'bg-amber-400/10',   texto: 'text-amber-700' },
-  { punto: 'bg-violet-500',  suave: 'bg-violet-500/10',  texto: 'text-violet-700' },
-  { punto: 'bg-fuchsia-500', suave: 'bg-fuchsia-500/10', texto: 'text-fuchsia-700' },
-  { punto: 'bg-red-500',     suave: 'bg-red-500/10',     texto: 'text-red-700' },
+  { punto: 'bg-emerald-500', suave: 'bg-emerald-500/[0.07]', anillo: 'border-emerald-300', texto: 'text-emerald-700' },
+  { punto: 'bg-sky-500',     suave: 'bg-sky-500/[0.07]',     anillo: 'border-sky-300',     texto: 'text-sky-700' },
+  { punto: 'bg-amber-400',   suave: 'bg-amber-400/[0.07]',   anillo: 'border-amber-300',   texto: 'text-amber-700' },
+  { punto: 'bg-violet-500',  suave: 'bg-violet-500/[0.07]',  anillo: 'border-violet-300',  texto: 'text-violet-700' },
+  { punto: 'bg-fuchsia-500', suave: 'bg-fuchsia-500/[0.07]', anillo: 'border-fuchsia-300', texto: 'text-fuchsia-700' },
+  { punto: 'bg-red-500',     suave: 'bg-red-500/[0.07]',     anillo: 'border-red-300',     texto: 'text-red-700' },
 ];
 
-function Constelacion({ piezas, clusters, vecinos }: {
-  piezas: Pieza[]; clusters: Cluster[]; vecinos: Vecino[];
+function Constelacion({ piezas, clusters, vecinos, onCambiado }: {
+  piezas: Pieza[]; clusters: Cluster[]; vecinos: Vecino[]; onCambiado?: () => void;
 }) {
+  const { user } = useAuth();
+  const puedeCorregir = (user?.roleLevel ?? 0) >= ROLE.ADMIN;
+
   const [dentro, setDentro] = useState<string | null>(null);
   const [encima, setEncima] = useState<Pieza | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [editando, setEditando] = useState<string | null>(null);
+  const [nombreNuevo, setNombreNuevo] = useState('');
+  const [moviendo, setMoviendo] = useState(false);
+  const arrastre = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
 
   const enElMapa = useMemo(
     () => piezas.filter(p => p.mapa_x != null && p.mapa_y != null),
@@ -555,6 +573,123 @@ function Constelacion({ piezas, clusters, vecinos }: {
     return m;
   }, [clusters]);
 
+  /*
+   * ══ LA COLOCACIÓN: GRUPOS SEPARADOS, PIEZAS JUNTAS ═══════════════════════
+   * Eugenio: «haz que los clusters estén visualmente más separados, quizá con
+   * un círculo de ese color que los envuelva a todos, y no estén tan
+   * dispersos».
+   *
+   * Tenía razón y el problema estaba en usar la proyección en crudo. PCA
+   * reparte las 64 piezas por todo el cuadro **maximizando la varianza**, que
+   * es justo lo contrario de agrupar: los grupos existen en las 768 dimensiones
+   * pero al aplastarlos a dos se solapan, y el mapa se veía como una nube de
+   * colores mezclados con unos nombres flotando encima.
+   *
+   * Aquí se separan en dos pasos, y ninguno inventa nada:
+   *
+   *   1. **Los centros se alejan** del centro del mapa multiplicando su
+   *      distancia. Los grupos que la proyección puso cerca siguen cerca y los
+   *      que puso lejos, lejos — se conserva quién es vecino de quién, sólo se
+   *      estira el espacio entre ellos.
+   *   2. **Las piezas se encogen hacia su centro.** Cada una mantiene su
+   *      posición relativa dentro del grupo —dos que se parecen mucho siguen
+   *      pegadas— pero el grupo entero ocupa un disco pequeño en vez de medio
+   *      cuadro.
+   *
+   * El círculo que se dibuja es exactamente ese disco: no es un adorno alrededor
+   * de las piezas, es **dónde caben todas las suyas**. Por eso se calcula del
+   * radio máximo y no de un número escrito a mano.
+   */
+  const LEJOS = 1.55;   // cuánto se apartan los grupos entre sí
+  const APRETADO = 0.42; // cuánto se juntan las piezas dentro del suyo
+
+  const trazado = useMemo(() => {
+    const centroMapa = { x: 50, y: 50 };
+    const sitio: Record<string, { x: number; y: number }> = {};
+    const discos: Array<{ id: string; x: number; y: number; r: number }> = [];
+
+    for (const c of clusters) {
+      const suyas = enElMapa.filter(p => p.cluster_id === c.id);
+      if (!suyas.length) continue;
+
+      // El centro real de sus piezas, no el guardado: si alguien ha movido una
+      // pieza de grupo, el centro guardado ya no es el de lo que hay dentro.
+      const cx = suyas.reduce((a, p) => a + (p.mapa_x as number), 0) / suyas.length;
+      const cy = suyas.reduce((a, p) => a + (p.mapa_y as number), 0) / suyas.length;
+
+      const nx = centroMapa.x + (cx - centroMapa.x) * LEJOS;
+      const ny = centroMapa.y + (cy - centroMapa.y) * LEJOS;
+
+      let r = 0;
+      for (const p of suyas) {
+        const x = nx + ((p.mapa_x as number) - cx) * APRETADO;
+        const y = ny + ((p.mapa_y as number) - cy) * APRETADO;
+        sitio[p.id] = { x, y };
+        r = Math.max(r, Math.hypot(x - nx, y - ny));
+      }
+      // Un grupo de una sola pieza tendría radio cero y no se vería: mínimo 7.
+      discos.push({ id: c.id, x: nx, y: ny, r: Math.max(6, r * 1.3) });
+    }
+
+    // ── QUE NO SE PISEN ───────────────────────────────────────────────────
+    // Tres grupos caían montados unos sobre otros y sus nombres eran
+    // ilegibles. Se separan empujándolos por su eje **sólo cuando se solapan**,
+    // y moviendo también sus piezas con ellos.
+    //
+    // Esto SÍ falsea un poco la distancia, y conviene tenerlo claro: dos grupos
+    // que estaban muy juntos acaban un poco más lejos de lo que dice la
+    // medida. Se hace igual porque un círculo es una forma de dibujar un
+    // conjunto, no una coordenada — y dos nombres superpuestos no informan de
+    // nada. Lo que no se toca es el ORDEN: quien estaba a la izquierda sigue a
+    // la izquierda, y las piezas de dentro conservan su sitio relativo.
+    for (let vuelta = 0; vuelta < 60; vuelta++) {
+      let quieto = true;
+      for (let i = 0; i < discos.length; i++) {
+        for (let j = i + 1; j < discos.length; j++) {
+          const a = discos[i], b = discos[j];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy) || 0.01;
+          const falta = a.r + b.r + 2 - dist;
+          if (falta <= 0) continue;
+          quieto = false;
+          const ux = dx / dist, uy = dy / dist, m = falta / 2;
+          a.x -= ux * m; a.y -= uy * m;
+          b.x += ux * m; b.y += uy * m;
+          for (const p of enElMapa) {
+            const s2 = sitio[p.id];
+            if (!s2) continue;
+            if (p.cluster_id === a.id) { s2.x -= ux * m; s2.y -= uy * m; }
+            if (p.cluster_id === b.id) { s2.x += ux * m; s2.y += uy * m; }
+          }
+        }
+      }
+      if (quieto) break;
+    }
+
+    // ── Y AHORA TODO CABE ─────────────────────────────────────────────────
+    // Separar los grupos los saca del cuadro: en la primera versión dos
+    // círculos se salían por los lados y uno quedaba cortado por abajo. Se
+    // mide lo que ocupa el conjunto **contando el radio de cada círculo**, no
+    // sólo los centros —un centro dentro con un radio grande sigue saliéndose—
+    // y se encoge todo hasta que entra con margen.
+    if (discos.length) {
+      const x0 = Math.min(...discos.map(d => d.x - d.r));
+      const x1 = Math.max(...discos.map(d => d.x + d.r));
+      const y0 = Math.min(...discos.map(d => d.y - d.r));
+      const y1 = Math.max(...discos.map(d => d.y + d.r));
+      const MARGEN = 4;
+      const k = Math.min((100 - MARGEN * 2) / (x1 - x0 || 1), (100 - MARGEN * 2) / (y1 - y0 || 1));
+      // Se centra lo que sobra, para que el mapa no quede pegado a una esquina.
+      const dx = MARGEN + (100 - MARGEN * 2 - (x1 - x0) * k) / 2 - x0 * k;
+      const dy = MARGEN + (100 - MARGEN * 2 - (y1 - y0) * k) / 2 - y0 * k;
+      for (const d of discos) { d.x = d.x * k + dx; d.y = d.y * k + dy; d.r *= k; }
+      for (const id of Object.keys(sitio)) {
+        sitio[id] = { x: sitio[id].x * k + dx, y: sitio[id].y * k + dy };
+      }
+    }
+    return { sitio, discos };
+  }, [clusters, enElMapa]);
+
   const vecinasDe = useMemo(() => {
     const m: Record<string, Vecino[]> = {};
     for (const v of vecinos) (m[v.id] ||= []).push(v);
@@ -562,14 +697,47 @@ function Constelacion({ piezas, clusters, vecinos }: {
   }, [vecinos]);
 
   const grupo = clusters.find(c => c.id === dentro) ?? null;
+  const disco = trazado.discos.find(d => d.id === dentro) ?? null;
 
-  /* El zoom: se lleva el centro del grupo al centro del cuadro y se agranda.
-     Con `transform` y no recalculando posiciones, así la transición la hace el
-     navegador y las piezas se mueven a la vez en vez de saltar. */
-  const zoom = grupo ? 2.1 : 1;
-  const transform = grupo
-    ? `scale(${zoom}) translate(${50 - grupo.x}%, ${50 - grupo.y}%)`
-    : 'scale(1) translate(0,0)';
+  /* El zoom tiene dos mandos y no se estorban: los botones y la rueda cambian
+     `zoom`; entrar en un grupo pone `zoom` y `pan` para encuadrarlo. Salirse
+     del grupo devuelve la vista entera. */
+  const encuadrar = (c: Cluster | null) => {
+    const d = c ? trazado.discos.find(x => x.id === c.id) : null;
+    if (!c || !d) { setDentro(null); setZoom(1); setPan({ x: 0, y: 0 }); return; }
+    setDentro(c.id);
+    const z = Math.min(3.2, 46 / d.r);
+    setZoom(z);
+    setPan({ x: 50 - d.x, y: 50 - d.y });
+  };
+
+  const cambiarZoom = (paso: number) => {
+    setZoom(z => Math.min(4, Math.max(0.6, +(z + paso).toFixed(2))));
+  };
+
+  const guardarNombre = async (c: Cluster) => {
+    const nombre = nombreNuevo.trim();
+    setEditando(null);
+    if (!nombre || nombre === c.nombre) return;
+    await fetch(`/api/agregador/cluster/${encodeURIComponent(c.id)}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre }),
+    }).catch(() => {});
+    onCambiado?.();
+  };
+
+  const moverPieza = async (p: Pieza, clusterId: string) => {
+    setMoviendo(true);
+    await fetch(`/api/agregador/pieza/${encodeURIComponent(p.id)}/cluster`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cluster_id: clusterId }),
+    }).catch(() => {});
+    setMoviendo(false);
+    setEncima(null);
+    onCambiado?.();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -578,10 +746,12 @@ function Constelacion({ piezas, clusters, vecinos }: {
           Cada punto es una publicación y <b className="font-bold text-slate-700">dos puntos están
           cerca porque hablan de lo mismo</b> — medido, no colocado a ojo. Pasa por encima de uno
           para verlo; entra en un grupo para acercarte.
+          {puedeCorregir && <> Como administrador puedes <b className="font-bold text-slate-700">renombrar
+          un grupo y mover una publicación</b> de uno a otro.</>}
         </p>
         {grupo && (
           <button
-            onClick={() => { setDentro(null); setEncima(null); }}
+            onClick={() => { encuadrar(null); setEncima(null); }}
             className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-slate-700"
           >
             <Minimize2 className="h-3.5 w-3.5" />
@@ -590,79 +760,103 @@ function Constelacion({ piezas, clusters, vecinos }: {
         )}
       </div>
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white sm:aspect-[16/10]">
+      <div
+        className="relative aspect-[4/3] w-full touch-none select-none overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white sm:aspect-[16/10]"
+        onWheel={e => { e.preventDefault(); cambiarZoom(e.deltaY > 0 ? -0.15 : 0.15); }}
+        onPointerDown={e => {
+          arrastre.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={e => {
+          const a = arrastre.current;
+          if (!a) return;
+          const caja = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          // El arrastre se mide en porcentaje del cuadro y dividido por el zoom:
+          // acercado, el mismo gesto del dedo tiene que mover menos mapa o se
+          // sale de la pantalla al primer tirón.
+          setPan({
+            x: a.px + ((e.clientX - a.x) / caja.width) * 100 / zoom,
+            y: a.py + ((e.clientY - a.y) / caja.height) * 100 / zoom,
+          });
+        }}
+        onPointerUp={() => { arrastre.current = null; }}
+        onPointerCancel={() => { arrastre.current = null; }}
+      >
         <div
           className="absolute inset-0 origin-center transition-transform duration-500 ease-out"
-          style={{ transform }}
+          style={{ transform: `scale(${zoom}) translate(${pan.x}%, ${pan.y}%)` }}
         >
-          {/* Las nubes de cada grupo, detrás de todo: dan la forma sin pedir
-              atención. */}
-          {clusters.map(c => (
+          {/* EL CÍRCULO DE CADA GRUPO. Es el disco donde caben sus piezas, con
+              el borde en su color: es lo que hace que un grupo se lea como un
+              grupo y no como puntos del mismo color repartidos. */}
+          {trazado.discos.map(d => (
             <span
-              key={`nube-${c.id}`}
+              key={`disco-${d.id}`}
               aria-hidden
-              className={cn('absolute -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl transition-opacity duration-500',
-                colorDe[c.id]?.suave,
-                dentro && dentro !== c.id ? 'opacity-20' : 'opacity-100')}
-              style={{
-                left: `${c.x}%`, top: `${c.y}%`,
-                width: `${18 + c.cuantas * 1.6}%`, height: `${18 + c.cuantas * 1.6}%`,
-              }}
+              className={cn('absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-opacity duration-500',
+                colorDe[d.id]?.suave, colorDe[d.id]?.anillo,
+                dentro && dentro !== d.id ? 'opacity-25' : 'opacity-100')}
+              style={{ left: `${d.x}%`, top: `${d.y}%`, width: `${d.r * 2}%`, height: `${d.r * 2}%` }}
             />
           ))}
 
-          {/* Las aristas de la pieza sobre la que está el ratón. Sólo las suyas:
-              192 líneas a la vez serían una maraña, y una maraña no dice nada. */}
-          {encima && encima.mapa_x != null && (
+          {encima && trazado.sitio[encima.id] && (
             <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
               {(vecinasDe[encima.id] ?? []).map(v => {
-                const o = enElMapa.find(p => p.id === v.vecino_id);
-                if (!o) return null;
+                const a = trazado.sitio[encima.id];
+                const b = trazado.sitio[v.vecino_id];
+                if (!b) return null;
                 return (
                   <line
                     key={v.vecino_id}
-                    x1={`${encima.mapa_x}%`} y1={`${encima.mapa_y}%`}
-                    x2={`${o.mapa_x}%`} y2={`${o.mapa_y}%`}
-                    className="stroke-slate-400"
-                    strokeWidth={1} strokeDasharray="3 3"
+                    x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`}
+                    className="stroke-slate-400" strokeWidth={1} strokeDasharray="3 3"
                   />
                 );
               })}
             </svg>
           )}
 
-          {/* Los puntos. El tamaño es la calidad: lo mejor pesa más en el mapa
-              sin que haya que leer un número. */}
           {enElMapa.map(p => {
+            const s = trazado.sitio[p.id];
+            if (!s) return null;
             const c = colorDe[p.cluster_id ?? ''] ?? COLORES[0];
             const apagado = !!dentro && p.cluster_id !== dentro;
             const d = 8 + Math.round((p.calidad / 100) * 12);
-            // Dentro de un grupo, cada pieza dice cómo se llama. Ése es el
-            // premio de acercarse: si al entrar sólo salieran los mismos puntos
-            // más grandes, no habría motivo para entrar.
             const conNombre = dentro != null && p.cluster_id === dentro;
             return (
               <button
                 key={p.id}
                 onMouseEnter={() => setEncima(p)}
                 onFocus={() => setEncima(p)}
-                onClick={() => setEncima(p)}
+                onClick={e => { e.stopPropagation(); setEncima(p); }}
                 title={p.titulo}
                 aria-label={p.titulo}
-                className={cn('group/punto absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:z-20',
+                className={cn('group/punto absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-500 hover:z-20',
                   apagado ? 'opacity-20' : 'opacity-95',
                   encima?.id === p.id && 'z-20')}
-                style={{ left: `${p.mapa_x}%`, top: `${p.mapa_y}%` }}
+                style={{ left: `${s.x}%`, top: `${s.y}%` }}
               >
                 <span
                   className={cn('block rounded-full ring-2 ring-white transition-transform duration-300 group-hover/punto:scale-150',
-                    c.punto, encima?.id === p.id && 'scale-150 ring-slate-900')}
+                    c.punto, encima?.id === p.id && 'scale-150 ring-slate-900',
+                    // Una pieza colocada a mano lleva su marca: quien mire el
+                    // mapa tiene derecho a saber qué puso una persona y qué una
+                    // máquina.
+                    p.a_mano && 'ring-slate-900')}
                   style={{ width: d, height: d }}
                 />
+                {/* EL TÍTULO, SÓLO EN EL QUE SE SEÑALA.
+                    Estaban todos a la vez y dentro de un grupo de trece se
+                    tapaban unos a otros hasta no poder leer ninguno: el momento
+                    de acercarse era justo el momento en que dejaba de
+                    entenderse. Los trece están abajo, en lista, que es donde
+                    trece títulos se leen. */}
                 {conNombre && (
                   <span
-                    className="pointer-events-none absolute left-1/2 top-full mt-0.5 block w-24 -translate-x-1/2 text-center font-bold leading-tight text-slate-600"
-                    style={{ fontSize: '0.28rem' }}
+                    className={cn('pointer-events-none absolute left-1/2 top-full z-30 mt-0.5 block w-28 -translate-x-1/2 rounded bg-white/90 px-1 text-center font-bold leading-tight text-slate-700 opacity-0 transition-opacity group-hover/punto:opacity-100',
+                      encima?.id === p.id && 'opacity-100')}
+                    style={{ fontSize: `${Math.max(0.16, 0.6 / zoom)}rem` }}
                   >
                     {p.titulo.length > 46 ? p.titulo.slice(0, 46) + '…' : p.titulo}
                   </span>
@@ -671,31 +865,56 @@ function Constelacion({ piezas, clusters, vecinos }: {
             );
           })}
 
-          {/* Los títulos de los grupos: lo más grande del mapa, porque son lo
-              que se lee desde lejos y lo que decide a dónde entrar. */}
-          {clusters.map(c => (
-            <button
-              key={`nom-${c.id}`}
-              onClick={() => { setDentro(dentro === c.id ? null : c.id); setEncima(null); }}
-              className={cn('absolute z-10 max-w-[30%] -translate-x-1/2 -translate-y-1/2 rounded-xl px-2 py-1 text-center transition-all duration-500 hover:bg-white/80',
-                dentro && dentro !== c.id ? 'opacity-30' : 'opacity-100')}
-              style={{ left: `${c.x}%`, top: `${c.y}%`, fontSize: grupo ? '0.5rem' : '0.8rem' }}
-            >
-              <span className={cn('block font-black leading-tight tracking-tight', colorDe[c.id]?.texto)}>
-                {c.nombre}
-              </span>
-              <span className="block text-[0.6em] font-bold text-slate-400">{c.cuantas}</span>
-            </button>
-          ))}
+          {/* Los nombres, encima del círculo de su grupo. El tamaño se divide
+              por el zoom para que al acercarse no crezcan hasta taparlo todo. */}
+          {trazado.discos.map(d => {
+            const c = clusters.find(x => x.id === d.id);
+            if (!c) return null;
+            return (
+              <button
+                key={`nom-${d.id}`}
+                onClick={e => { e.stopPropagation(); encuadrar(dentro === d.id ? null : c); setEncima(null); }}
+                className={cn('absolute z-10 max-w-[26%] -translate-x-1/2 rounded-xl px-2 py-0.5 text-center transition-opacity duration-500 hover:bg-white/80',
+                  dentro && dentro !== d.id ? 'opacity-30' : 'opacity-100')}
+                style={{
+                  left: `${d.x}%`, top: `${d.y - d.r - 1}%`,
+                  fontSize: `${Math.max(0.3, 0.85 / zoom)}rem`,
+                }}
+              >
+                <span className={cn('block font-black leading-tight tracking-tight', colorDe[d.id]?.texto)}>
+                  {c.nombre}
+                </span>
+                <span className="block text-[0.62em] font-bold text-slate-400">{c.cuantas}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* La ficha de la pieza señalada, encima del mapa y sin moverse con él:
-            si se moviera con el zoom saldría del cuadro justo al acercarse. */}
+        {/* ── LOS MANDOS DEL ZOOM ─────────────────────────────────────────
+            Botones además de la rueda: en un portátil sin ratón la rueda es un
+            gesto de dos dedos que la página se traga, y en un móvil no existe. */}
+        <div className="absolute right-3 top-3 z-30 flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur">
+          <button onClick={() => cambiarZoom(0.3)} title="Acercar" aria-label="Acercar"
+            className="grid h-8 w-8 place-items-center text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <Plus className="h-4 w-4" />
+          </button>
+          <span className="border-y border-slate-200 px-1 py-0.5 text-center text-[9px] font-black tabular-nums text-slate-400">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button onClick={() => cambiarZoom(-0.3)} title="Alejar" aria-label="Alejar"
+            className="grid h-8 w-8 place-items-center text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <Minus className="h-4 w-4" />
+          </button>
+          <button onClick={() => { encuadrar(null); setEncima(null); }} title="Volver al mapa entero" aria-label="Volver al mapa entero"
+            className="grid h-8 w-8 place-items-center border-t border-slate-200 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <Minimize2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
         {encima && (
           <div className="absolute bottom-3 left-3 right-3 z-30 rounded-2xl border border-slate-200 bg-white/95 p-3.5 shadow-xl backdrop-blur sm:right-auto sm:max-w-md">
             <button
-              onClick={() => setEncima(null)}
-              aria-label="Cerrar"
+              onClick={() => setEncima(null)} aria-label="Cerrar"
               className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-lg text-slate-300 hover:text-slate-600"
             >
               <Cerrar className="h-3.5 w-3.5" />
@@ -706,18 +925,17 @@ function Constelacion({ piezas, clusters, vecinos }: {
               {encima.genero && (
                 <>
                   <span className="text-slate-200">·</span>
-                  <span className="rounded bg-slate-100 px-1 py-px normal-case tracking-normal text-slate-500">
-                    {encima.genero}
-                  </span>
+                  <span className="rounded bg-slate-100 px-1 py-px normal-case tracking-normal text-slate-500">{encima.genero}</span>
                 </>
               )}
               {encima.fuente && <><span className="text-slate-200">·</span><span>{encima.fuente}</span></>}
+              {encima.a_mano && (
+                <span className="rounded bg-slate-900 px-1 py-px normal-case tracking-normal text-white">colocada a mano</span>
+              )}
             </p>
 
-            <a
-              href={encima.url} target="_blank" rel="noopener noreferrer"
-              className="mt-1 block text-[14.5px] font-bold leading-snug text-slate-800 hover:text-emerald-700 hover:underline"
-            >
+            <a href={encima.url} target="_blank" rel="noopener noreferrer"
+              className="mt-1 block text-[14.5px] font-bold leading-snug text-slate-800 hover:text-emerald-700 hover:underline">
               {encima.titulo}
             </a>
 
@@ -727,11 +945,26 @@ function Constelacion({ piezas, clusters, vecinos }: {
               </p>
             )}
 
+            {/* MOVERLA DE GRUPO. Un desplegable y no arrastrar: arrastrar sobre
+                un mapa que además se arrastra entero es un gesto encima de otro,
+                y en un móvil no hay forma de distinguirlos. */}
+            {puedeCorregir && (
+              <div className="mt-2.5 flex items-center gap-2 border-t border-slate-100 pt-2">
+                <Move className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <select
+                  value={encima.cluster_id ?? ''}
+                  disabled={moviendo}
+                  onChange={e => moverPieza(encima, e.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11.5px] font-bold text-slate-700"
+                >
+                  {clusters.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                </select>
+              </div>
+            )}
+
             {(vecinasDe[encima.id] ?? []).length > 0 && (
               <div className="mt-2.5 border-t border-slate-100 pt-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-                  Habla de lo mismo que
-                </p>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Habla de lo mismo que</p>
                 <ul className="mt-1 flex flex-col gap-1">
                   {(vecinasDe[encima.id] ?? []).map(v => (
                     <li key={v.vecino_id}>
@@ -740,9 +973,7 @@ function Constelacion({ piezas, clusters, vecinos }: {
                         className="flex w-full items-baseline gap-2 text-left text-[11.5px] text-slate-600 hover:text-emerald-700"
                       >
                         <span className="min-w-0 flex-1 truncate">{v.titulo}</span>
-                        <span className="shrink-0 tabular-nums text-slate-300">
-                          {Math.round(v.parecido * 100)}%
-                        </span>
+                        <span className="shrink-0 tabular-nums text-slate-300">{Math.round(v.parecido * 100)}%</span>
                       </button>
                     </li>
                   ))}
@@ -753,22 +984,50 @@ function Constelacion({ piezas, clusters, vecinos }: {
         )}
       </div>
 
-      {/* La leyenda es también el mando: entrar en un grupo desde aquí es lo
-          mismo que pulsar su nombre en el mapa, y en un móvil es más fácil. */}
       <div className="flex flex-wrap gap-2">
         {clusters.map(c => (
-          <button
+          <div
             key={`ley-${c.id}`}
-            onClick={() => { setDentro(dentro === c.id ? null : c.id); setEncima(null); }}
-            className={cn('flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all',
-              dentro === c.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:border-slate-300')}
+            className={cn('flex items-center gap-2 rounded-xl border px-3 py-2 transition-all',
+              dentro === c.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white')}
           >
             <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', colorDe[c.id]?.punto)} />
-            <span className="text-[12.5px] font-bold">{c.nombre}</span>
-            <span className={cn('text-[11px] font-black tabular-nums', dentro === c.id ? 'text-white/60' : 'text-slate-300')}>
-              {c.cuantas}
-            </span>
-          </button>
+
+            {editando === c.id ? (
+              <>
+                <input
+                  autoFocus
+                  value={nombreNuevo}
+                  onChange={e => setNombreNuevo(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') guardarNombre(c); if (e.key === 'Escape') setEditando(null); }}
+                  className="w-44 rounded border border-slate-300 px-1.5 py-0.5 text-[12.5px] font-bold text-slate-800"
+                />
+                <button onClick={() => guardarNombre(c)} aria-label="Guardar el nombre"
+                  className="grid h-6 w-6 place-items-center rounded text-emerald-600 hover:bg-emerald-50">
+                  <Check className="h-3.5 w-3.5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => { encuadrar(dentro === c.id ? null : c); setEncima(null); }}
+                  className="text-[12.5px] font-bold">
+                  {c.nombre}
+                </button>
+                <span className={cn('text-[11px] font-black tabular-nums', dentro === c.id ? 'text-white/60' : 'text-slate-300')}>
+                  {c.cuantas}
+                </span>
+                {puedeCorregir && (
+                  <button
+                    onClick={() => { setEditando(c.id); setNombreNuevo(c.nombre); }}
+                    title={`Cambiar el nombre de ${c.nombre}`} aria-label={`Cambiar el nombre de ${c.nombre}`}
+                    className={cn('grid h-6 w-5 place-items-center rounded', dentro === c.id ? 'text-white/50 hover:text-white' : 'text-slate-300 hover:text-slate-700')}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         ))}
       </div>
 
@@ -778,13 +1037,43 @@ function Constelacion({ piezas, clusters, vecinos }: {
         </p>
       )}
 
-      {/* Quién agrupó esto y cuándo. Un mapa hecho por una máquina que no dice
-          que lo hizo una máquina se lee como un hecho. */}
+      {/* LO QUE HAY DENTRO DEL GRUPO, EN LISTA.
+          Trece títulos no caben alrededor de trece puntos, y ése era el fallo
+          de la primera versión. El mapa enseña la forma; la lista enseña los
+          nombres. Las dos cosas a la vez, no una escondiendo a la otra. */}
+      {grupo && (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {enElMapa
+            .filter(p => p.cluster_id === grupo.id)
+            .sort((a, b) => b.calidad - a.calidad)
+            .map(p => (
+              <button
+                key={`lista-${p.id}`}
+                onMouseEnter={() => setEncima(p)}
+                onClick={() => setEncima(p)}
+                className={cn('flex items-start gap-2 rounded-xl border p-2.5 text-left transition-colors',
+                  encima?.id === p.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50')}
+              >
+                <span className={cn('mt-1 h-2 w-2 shrink-0 rounded-full', colorDe[grupo.id]?.punto)} />
+                <span className="min-w-0">
+                  <span className="block text-[12.5px] font-bold leading-snug text-slate-800">{p.titulo}</span>
+                  <span className="mt-0.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-400">
+                    {p.genero ?? NOMBRE_FORMATO[p.formato]}
+                    {p.fuente && <> · {p.fuente}</>}
+                    {p.a_mano && <> · a mano</>}
+                  </span>
+                </span>
+              </button>
+            ))}
+        </div>
+      )}
+
       {clusters[0]?.modelo && (
         <p className="text-[11px] leading-relaxed text-slate-400">
           Grupos y posiciones calculados con {clusters[0].modelo}. La cercanía mide de qué habla
           cada pieza, no su calidad ni su fecha — y se equivoca: si dos que no pegan salen juntas,
           es que se parecen en las palabras y no en el fondo.
+          {puedeCorregir && ' Por eso puedes corregirlo: lo que muevas queda marcado y no se pierde al recalcular.'}
         </p>
       )}
     </div>
