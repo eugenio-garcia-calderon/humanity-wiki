@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/components/knowledge/FuenteDeLaPublicacion.tsx",
-      "motivo": "prog2: la fuente con sus piezas en la ficha",
-      "desde": "2026-08-25T15:27:18.057Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/components/knowledge/FichaPublicacion.tsx",
       "motivo": "prog2: la fuente con sus piezas dentro de la ficha",
       "desde": "2026-08-25T15:27:47.418Z"
