@@ -98,37 +98,6 @@ async function yaExisteConOtroNombre(nombre: string, hermanos: Array<{ id: strin
 }
 
 export function registrarTemas(app: Express, db: any) {
-  /**
-   * EL ÁRBOL DE UN OBJETIVO — `GET /api/temas/:objetivo`
-   *
-   * Todo el árbol de una vez, plano, con `padre_id`: quien lo pinta lo monta.
-   * Un objetivo no tiene cientos de subtemas, así que traerlo entero cuesta
-   * menos que una petición por nivel cada vez que alguien despliega una rama.
-   *
-   * Y con lo de cada uno pegado: si es tuyo favorito, si lo tienes escondido y
-   * en qué orden lo pusiste. Sin sesión, todo eso viene vacío.
-   */
-  app.get('/api/temas/:objetivo', async (req: Request, res: Response) => {
-    try {
-      const objetivo = String(req.params.objetivo || '');
-      const yo = req.user?.id || null;
-      const filas = await db.execute(sql`
-        SELECT s.id, s.padre_id, s.nombre, s.orden, s.creador_user_id,
-               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas,
-               coalesce(p.favorito, false) AS favorito,
-               coalesce(p.oculto, false) AS oculto,
-               p.orden AS mi_orden
-        FROM subtemas s
-        LEFT JOIN preferencias_menu p ON p.clave = s.id AND p.user_id = ${yo}::text
-        WHERE s.objetivo_id = ${objetivo} AND s.archived_at IS NULL
-        ORDER BY coalesce(p.orden, s.orden), s.created_at
-      `);
-      res.json({ objetivo, subtemas: filas.rows });
-    } catch (e: any) {
-      console.error('[temas]', e);
-      res.status(500).json({ error: e.message });
-    }
-  });
 
   /**
    * CREAR UN SUBTEMA — `POST /api/temas`
@@ -293,6 +262,57 @@ export function registrarTemas(app: Express, db: any) {
     }
   });
 
+  /**
+   * BUSCAR UN TEMA MIENTRAS SE ESCRIBE — `GET /api/temas/buscar?q=`
+   *
+   * Eugenio: «que según vayas escribiendo te diga los temas que ya hay creados,
+   * y no te permita duplicarlos».
+   *
+   * ── ENSEÑAR LO QUE HAY ES LA FORMA DE NO DUPLICAR ─────────────────────────
+   * El servidor ya se niega a crear un hermano repetido, y la IA además caza
+   * los sinónimos. Pero eso ocurre DESPUÉS de escribir el nombre y pulsar, y
+   * llegar hasta ahí para que te digan que no es perder el tiempo de alguien
+   * que quería colaborar.
+   *
+   * Esto lo evita antes: mientras escribes «desal» ya ves «Desalación» y
+   * dónde vive. La mayoría de las veces lo que buscabas era eso.
+   *
+   * Cada resultado viene con SU CAMINO —«AGUA › Desalación › Coste
+   * energético»— porque un nombre suelto no dice si es el que buscas: puede
+   * haber «Prevención» dentro de Salud y dentro de Ecosistemas, y son dos
+   * cosas distintas que se llaman igual.
+   */
+  app.get('/api/temas/buscar', async (req: Request, res: Response) => {
+    try {
+      const q = String(req.query.q || '').trim();
+      if (q.length < 2) return res.json({ q, temas: [] });
+      // Se busca por el nombre reducido: así «desalacion» encuentra
+      // «Desalación» sin que nadie tenga que poner la tilde.
+      const patron = `%${claveDe(q)}%`;
+      const r = await db.execute(sql`
+        WITH RECURSIVE camino AS (
+          SELECT id, objetivo_id, padre_id, nombre, nombre_clave, nombre AS ruta, 1 AS nivel
+            FROM subtemas WHERE padre_id IS NULL AND archived_at IS NULL
+          UNION ALL
+          SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, s.nombre_clave,
+                 c.ruta || ' › ' || s.nombre, c.nivel + 1
+            FROM subtemas s JOIN camino c ON c.id = s.padre_id
+           WHERE s.archived_at IS NULL AND c.nivel < 8
+        )
+        SELECT id, objetivo_id, padre_id, nombre, ruta, nivel FROM camino
+         WHERE nombre_clave LIKE ${patron}
+         -- Lo que empieza por lo escrito primero, y lo menos hondo antes: quien
+         -- escribe «riego» busca «Riego» y no «Riego por goteo en invernadero».
+         ORDER BY (nombre_clave LIKE ${claveDe(q) + '%'}) DESC, nivel, nombre
+         LIMIT 12
+      `);
+      res.json({ q, temas: r.rows });
+    } catch (e: any) {
+      console.error('[temas buscar]', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** LO MÍO DE LOS 14 OBJETIVOS — `GET /api/temas/mio/objetivos` */
   app.get('/api/temas/mio/objetivos', async (req: Request, res: Response) => {
     if (!req.user) return res.json({ preferencias: [] });
@@ -304,4 +324,48 @@ export function registrarTemas(app: Express, db: any) {
       res.json({ preferencias: r.rows });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
+  /*
+   * ── ESTE VA EL ÚLTIMO, Y NO ES ORDEN ALFABÉTICO ──────────────────────────
+   * `/api/temas/:objetivo` se traga CUALQUIER cosa que venga detrás de
+   * `/api/temas/`. Registrado antes que `/api/temas/buscar`, una búsqueda se
+   * habría atendido como «dame el árbol del objetivo llamado buscar»: cero
+   * resultados, 200, y ningún error en ninguna parte. El buscador habría
+   * parecido roto y el servidor habría dicho que todo iba bien.
+   *
+   * En Express gana el primero que encaja, así que lo que lleva comodín se
+   * pone SIEMPRE detrás de lo que lleva nombre fijo. Es la misma norma que ya
+   * está escrita en `modulos.ts` para el orden de los módulos.
+   */
+  /**
+   * EL ÁRBOL DE UN OBJETIVO — `GET /api/temas/:objetivo`
+   *
+   * Todo el árbol de una vez, plano, con `padre_id`: quien lo pinta lo monta.
+   * Un objetivo no tiene cientos de subtemas, así que traerlo entero cuesta
+   * menos que una petición por nivel cada vez que alguien despliega una rama.
+   *
+   * Y con lo de cada uno pegado: si es tuyo favorito, si lo tienes escondido y
+   * en qué orden lo pusiste. Sin sesión, todo eso viene vacío.
+   */
+  app.get('/api/temas/:objetivo', async (req: Request, res: Response) => {
+    try {
+      const objetivo = String(req.params.objetivo || '');
+      const yo = req.user?.id || null;
+      const filas = await db.execute(sql`
+        SELECT s.id, s.padre_id, s.nombre, s.orden, s.creador_user_id,
+               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas,
+               coalesce(p.favorito, false) AS favorito,
+               coalesce(p.oculto, false) AS oculto,
+               p.orden AS mi_orden
+        FROM subtemas s
+        LEFT JOIN preferencias_menu p ON p.clave = s.id AND p.user_id = ${yo}::text
+        WHERE s.objetivo_id = ${objetivo} AND s.archived_at IS NULL
+        ORDER BY coalesce(p.orden, s.orden), s.created_at
+      `);
+      res.json({ objetivo, subtemas: filas.rows });
+    } catch (e: any) {
+      console.error('[temas]', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
 }

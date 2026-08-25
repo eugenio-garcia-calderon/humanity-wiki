@@ -39,8 +39,13 @@ const OBJETIVOS = [
   ['O001', 'AGUA'], ['O002', 'ALIMENTACIÓN'], ['O003', 'VIVIENDA'], ['O004', 'SALUD'],
   ['O005', 'CONVIVENCIA'], ['O006', 'ECOSISTEMAS'], ['O007', 'EDUCACIÓN'], ['O008', 'MOVILIDAD'],
   ['O009', 'ENERGÍA'], ['O010', 'TECNOLOGÍA'], ['O011', 'EMPLEO'], ['O012', 'GOBERNANZA'],
-  ['O013', 'ECONOMÍA'], ['O014', 'CULTURA'],
+  ['O013', 'ECONOMÍA'], ['O014', 'CULTURA'], ['O015', 'ESPIRITUALIDAD'],
 ];
+// OJO: esta lista está copiada de `src/utils/objetivos.ts`, y son dos sitios
+// que dicen lo mismo. Al añadir ESPIRITUALIDAD se notó: el script contestó «0
+// temas nuevos» sin explicar por qué, simplemente porque no la conocía. Si
+// algún día hay un decimosexto, hay que tocar los dos — está dicho aquí para
+// que se encuentre buscando el nombre del objetivo nuevo.
 
 const clave = n => n.normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();

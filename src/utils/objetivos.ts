@@ -15,7 +15,7 @@
 // respaldo para lo que aún no esté clasificado.
 import {
   Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, GraduationCap,
-  Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette,
+  Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles,
 } from 'lucide-react';
 
 export interface Objetivo {
@@ -68,6 +68,7 @@ const HEX: Record<string, string> = {
   'text-violet-500': '#8b5cf6',
   'text-pink-500': '#ec4899',
   'text-fuchsia-500': '#d946ef',
+  'text-teal-500': '#14b8a6',
 };
 
 /** El color de un objetivo, listo para un `fill` de SVG. El gris es para lo que
@@ -90,6 +91,22 @@ export const OBJETIVOS: Objetivo[] = [
   { id: 'O012', titulo: 'GOBERNANZA',   icono: Landmark, color: 'text-fuchsia-500',       palabras: ['gobernanza', 'gobierno', 'politic', 'ley', 'norma', 'participacion', 'democra', 'institucion'] },
   { id: 'O013', titulo: 'ECONOMÍA',     icono: Coins, color: 'text-violet-500',          palabras: ['economia', 'dinero', 'inversion', 'financ', 'coste', 'precio', 'mercado', 'presupuesto'] },
   { id: 'O014', titulo: 'CULTURA',      icono: Palette, color: 'text-pink-500',        palabras: ['cultura', 'arte', 'musica', 'patrimonio', 'literatura', 'cine', 'tradicion'] },
+  /*
+   * EL QUINCE (2026-08-25). Eugenio: «de paso añade espiritualidad como tema
+   * principal dentro de los 14 objetivos, es el número 15».
+   *
+   * Se le da un color que no tenía nadie —`teal`— y no uno repetido: en la
+   * rueda de temas cada objetivo se distingue por su color antes que por su
+   * nombre, y dos iguales harían que dos ramas se leyeran como una.
+   *
+   * Las `palabras` son las que hacen que una publicación caiga sola en este
+   * tema. Se eligen anchas a propósito: aquí caben tradiciones religiosas,
+   * prácticas contemplativas y la pregunta por el sentido, que es de lo que
+   * habla la gente cuando habla de esto, y no de una sola de las tres.
+   */
+  { id: 'O015', titulo: 'ESPIRITUALIDAD', icono: Sparkles, color: 'text-teal-500',
+    palabras: ['espiritual', 'meditacion', 'contemplat', 'religion', 'religios', 'fe ', 'sentido de la vida',
+               'conciencia', 'mindfulness', 'sagrado', 'ritual', 'oracion', 'yoga', 'duelo', 'proposito'] },
 ];
 
 /** Sin tildes y en minúsculas. Mismo criterio que en `iconoDeNombre`: dos
