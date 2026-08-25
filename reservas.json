@@ -23,6 +23,12 @@
       "ruta": "scripts/equipo.mjs",
       "motivo": "la carrera del push resucita reservas soltadas",
       "desde": "2026-08-25T17:48:57.591Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "pruebas/carrera-1.txt",
+      "motivo": "prueba 1",
+      "desde": "2026-08-25T17:50:34.460Z"
     }
   ]
 }
