@@ -697,7 +697,16 @@ function Constelacion({ piezas, clusters, vecinos, onCambiado }: {
   }, [vecinos]);
 
   const grupo = clusters.find(c => c.id === dentro) ?? null;
-  const disco = trazado.discos.find(d => d.id === dentro) ?? null;
+
+  // Escape cierra la ficha. Es lo que hace todo el mundo cuando algo se queda
+  // abierto, y aquí lo hará más gente de lo normal: la versión anterior no se
+  // dejaba cerrar y enseñó a desconfiar de esa ventana.
+  useEffect(() => {
+    if (!encima) return;
+    const alPulsar = (e: KeyboardEvent) => { if (e.key === 'Escape') setEncima(null); };
+    window.addEventListener('keydown', alPulsar);
+    return () => window.removeEventListener('keydown', alPulsar);
+  }, [encima]);
 
   /* El zoom tiene dos mandos y no se estorban: los botones y la rueda cambian
      `zoom`; entrar en un grupo pone `zoom` y `pan` para encuadrarlo. Salirse
@@ -781,6 +790,10 @@ function Constelacion({ piezas, clusters, vecinos, onCambiado }: {
         }}
         onPointerUp={() => { arrastre.current = null; }}
         onPointerCancel={() => { arrastre.current = null; }}
+        // Pulsar el fondo cierra la ficha. Los puntos y los nombres paran el
+        // clic con `stopPropagation`, así que sólo llega hasta aquí lo que de
+        // verdad es «he pulsado fuera».
+        onClick={() => setEncima(null)}
       >
         <div
           className="absolute inset-0 origin-center transition-transform duration-500 ease-out"
@@ -823,44 +836,55 @@ function Constelacion({ piezas, clusters, vecinos, onCambiado }: {
             const c = colorDe[p.cluster_id ?? ''] ?? COLORES[0];
             const apagado = !!dentro && p.cluster_id !== dentro;
             const d = 8 + Math.round((p.calidad / 100) * 12);
-            const conNombre = dentro != null && p.cluster_id === dentro;
             return (
+              /*
+               * ── EL RATÓN ENCIMA NO ABRE NADA. SÓLO EL CLIC. ─────────────
+               * Estaba en `onMouseEnter` y la ficha **no había forma de
+               * cerrarla**: para llegar a su aspa el ratón cruzaba otros
+               * puntos, y cada uno la volvía a abrir con otra publicación. El
+               * aspa funcionaba; lo que fallaba es que algo la reabría medio
+               * píxel después.
+               *
+               * Eugenio: «elimina esa funcionalidad, y que sólo cuando se haga
+               * clic se abra esa ventana. Mientras se hace hover, que la pelota
+               * se haga un poquito más grande y se ensanche el título, e invite
+               * a hacer clic».
+               *
+               * Lo que queda al pasar por encima es **puro CSS**: ni un estado
+               * de React, ni un `re-render` por cada punto que cruza el ratón.
+               * Mover el ratón por el mapa vuelve a ser gratis.
+               */
               <button
                 key={p.id}
-                onMouseEnter={() => setEncima(p)}
-                onFocus={() => setEncima(p)}
                 onClick={e => { e.stopPropagation(); setEncima(p); }}
                 title={p.titulo}
-                aria-label={p.titulo}
-                className={cn('group/punto absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-500 hover:z-20',
+                aria-label={`Ver ${p.titulo}`}
+                className={cn('group/punto absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-500 hover:z-30 focus-visible:z-30',
                   apagado ? 'opacity-20' : 'opacity-95',
-                  encima?.id === p.id && 'z-20')}
+                  encima?.id === p.id && 'z-30')}
                 style={{ left: `${s.x}%`, top: `${s.y}%` }}
               >
                 <span
-                  className={cn('block rounded-full ring-2 ring-white transition-transform duration-300 group-hover/punto:scale-150',
-                    c.punto, encima?.id === p.id && 'scale-150 ring-slate-900',
+                  className={cn('block rounded-full ring-2 ring-white transition-transform duration-200 ease-out group-hover/punto:scale-[1.45] group-focus-visible/punto:scale-[1.45]',
+                    c.punto, encima?.id === p.id && 'scale-[1.6] ring-slate-900',
                     // Una pieza colocada a mano lleva su marca: quien mire el
                     // mapa tiene derecho a saber qué puso una persona y qué una
                     // máquina.
                     p.a_mano && 'ring-slate-900')}
                   style={{ width: d, height: d }}
                 />
-                {/* EL TÍTULO, SÓLO EN EL QUE SE SEÑALA.
-                    Estaban todos a la vez y dentro de un grupo de trece se
-                    tapaban unos a otros hasta no poder leer ninguno: el momento
-                    de acercarse era justo el momento en que dejaba de
-                    entenderse. Los trece están abajo, en lista, que es donde
-                    trece títulos se leen. */}
-                {conNombre && (
-                  <span
-                    className={cn('pointer-events-none absolute left-1/2 top-full z-30 mt-0.5 block w-28 -translate-x-1/2 rounded bg-white/90 px-1 text-center font-bold leading-tight text-slate-700 opacity-0 transition-opacity group-hover/punto:opacity-100',
-                      encima?.id === p.id && 'opacity-100')}
-                    style={{ fontSize: `${Math.max(0.16, 0.6 / zoom)}rem` }}
+                {/* EL TÍTULO, AL PASAR POR ENCIMA DE CUALQUIERA.
+                    Antes sólo salía dentro de un grupo abierto, y con el ratón
+                    ya no abriendo la ficha hacía falta que el mapa dijera qué
+                    hay en cada punto **antes** de pulsarlo. Es lo que invita a
+                    pulsar: si un punto no dice nada, nadie lo pulsa. */}
+                <span
+                    className={cn('pointer-events-none absolute left-1/2 top-full z-30 mt-1 block w-32 -translate-x-1/2 scale-95 rounded-md bg-white/95 px-1.5 py-0.5 text-center font-bold leading-tight text-slate-700 opacity-0 shadow-sm ring-1 ring-slate-200 transition-all duration-200 ease-out group-hover/punto:scale-100 group-hover/punto:opacity-100 group-focus-visible/punto:scale-100 group-focus-visible/punto:opacity-100',
+                      encima?.id === p.id && 'scale-100 opacity-100')}
+                    style={{ fontSize: `${Math.max(0.17, 0.58 / zoom)}rem` }}
                   >
                     {p.titulo.length > 46 ? p.titulo.slice(0, 46) + '…' : p.titulo}
-                  </span>
-                )}
+                </span>
               </button>
             );
           })}
@@ -1049,7 +1073,6 @@ function Constelacion({ piezas, clusters, vecinos, onCambiado }: {
             .map(p => (
               <button
                 key={`lista-${p.id}`}
-                onMouseEnter={() => setEncima(p)}
                 onClick={() => setEncima(p)}
                 className={cn('flex items-start gap-2 rounded-xl border p-2.5 text-left transition-colors',
                   encima?.id === p.id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50')}
