@@ -4,7 +4,7 @@ import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical,
+  ChevronLeft, ChevronRight, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -235,6 +235,8 @@ export default function Rail({
      *  único sitio desde el que se podría recuperar. */
     ocultos?: Array<{ clave: string; nombre: string }>;
     mostrar?: (clave: string) => void;
+    /** Ir a la página donde se ordenan los temas a lo grande. */
+    onPersonalizar?: () => void;
   };
 }) {
 
@@ -603,6 +605,32 @@ export default function Rail({
         </div>
 
         <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />
+
+        {/* ── PERSONALIZAR, ARRIBA DEL TODO (2026-08-25) ───────────────────
+            Eugenio: «en el menú de la izquierda tiene que haber un botón arriba
+            del todo que sea personalizar, preferencias».
+
+            Arriba y no al final porque es la puerta a ordenar todo lo que
+            viene debajo: puesto al pie, sólo lo encontraría quien ya hubiera
+            bajado la lista entera — o sea, quien ya no lo necesita.
+            Se pinta distinto del resto —más pequeño y en gris— porque no es un
+            tema más: es lo que se hace CON los temas. */}
+        {personal?.onPersonalizar && (
+          <button
+            onClick={personal.onPersonalizar}
+            title="Personalizar tus temas"
+            aria-label="Personalizar tus temas"
+            className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              desplegado ? 'w-full' : 'w-10 justify-center',
+              claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
+          >
+            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+            <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
+              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
+              Personalizar
+            </span>
+          </button>
+        )}
 
         {(items ?? HERRAMIENTAS).map(boton)}
         {/* El separador y lo personal sólo en el raíl de las herramientas: el

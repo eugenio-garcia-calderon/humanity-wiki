@@ -81,6 +81,9 @@ const MiPedido = lazy(() => import('./pages/MiPedido'));
 const FichaProducto = lazy(() => import('./pages/FichaProducto'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
+// La rueda de temas y los favoritos. `lazy` como el resto: dibuja un SVG
+// grande que no hace falta hasta que alguien entra a ordenar sus temas.
+const Preferencias = lazy(() => import('./pages/Preferencias'));
 const Tareas = lazy(() => import('./pages/Tareas'));
 const Territories = lazy(() => import('./pages/Territories'));
 const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
@@ -336,6 +339,7 @@ export default function App() {
                 <Route path="buscar" element={<Buscar />} />
                 <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
+                <Route path="preferencias" element={<Preferencias />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
                 <Route path="mis-videos" element={<MisVideos />} />
