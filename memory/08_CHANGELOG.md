@@ -7233,3 +7233,28 @@ reordenado que persiste, portada de proyecto en la tarjeta y las caras en lugar
 del creador. **Lo que NO he podido ver**: la tarjeta de un proyecto de OTRA
 persona —en esta base no hay ninguno— así que el caso «sí se enseña el creador
 porque no eres tú» está leído en el código, no visto en pantalla.
+
+## 2026-08-25 — La barra de arriba, para el buscador
+Eugenio: «la imagen de perfil se introduce en el menú derecho, y mensajería,
+teléfono y calendario justo debajo cuando se hace clic, y a continuación los
+proyectos. Así despejamos la parte de arriba, que la dejamos principalmente para
+la barra de buscar, que, por cierto, ha empeorado su aspecto».
+
+**Tenía razón sobre el buscador y la causa era el resto de la barra.** Arriba
+había siete cosas y la caja se quedaba con lo que sobraba: medido antes de tocar
+nada, **por debajo de 1024 px el campo de escribir llegaba a medir cero**. No es
+que el buscador fuera feo: es que no cabía. Vaciando la barra, la caja recupera
+su ancho.
+
+| Qué | Dónde estaba | Dónde está |
+|---|---|---|
+| Tu foto y su menú | arriba a la derecha | arriba del raíl derecho |
+| Mensajes, Contactos, Calendario | barra de arriba | debajo de tu foto, al pulsarla |
+| Feedback | barra de arriba | raíl inferior, **en rojo** |
+| «Explorar» + casa | no existía | fijo arriba a la izquierda → `/preferencias` |
+| «Mis proyectos» | no existía | fijo arriba a la derecha → `/proyectos` |
+| La campana | barra de arriba | **se queda**: es lo único que avisa, y esconder un aviso es dejar de avisar |
+
+«Explorar» lleva a `/preferencias` y no a `/explorar` porque él se corrigió en la
+misma frase —«se lleva a la página de personalizar realmente»— y **manda la
+corrección, no la primera versión**. Ahí está la rueda de los catorce temas.

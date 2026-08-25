@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp, MessageCircleWarning } from 'lucide-react';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Compass, Store,
   CalendarDays, Database, Sparkles, Gamepad2, Globe,
@@ -72,7 +72,7 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
 export const ALTO_RESERVADO = 64;
 
 export default function RailInferior({
-  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima,
+  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima, onFeedback,
 }: {
   /** Qué herramienta tiene su panel abierto, si hay alguno. */
   abierta: string | null;
@@ -82,6 +82,8 @@ export default function RailInferior({
   /** Desplegado y quieto, sin depender del ratón. */
   fijo?: boolean;
   onPasarPorEncima?: () => void;
+  /** El botón rojo. Bajó de la barra de arriba para despejarla. */
+  onFeedback: () => void;
 }) {
   const [encima, setEncima] = useState(false);
   const desplegado = fijo || encima;
@@ -136,6 +138,33 @@ export default function RailInferior({
           desplegado ? 'py-2' : 'py-1.5',
         )}
       >
+        {/* ══ FEEDBACK, AQUÍ Y EN ROJO (2026-08-25) ═══════════════════════
+            Eugenio: «el feedback, mételo en la barra de herramientas inferior
+            con un color distinto, que sea en rojo, que destaque. Y así también
+            la liberamos de arriba».
+
+            El rojo no es decoración: es el único botón de esta barra que no
+            crea nada — sirve para decir que algo está roto. Que se distinga de
+            las once herramientas es exactamente lo que hace que se encuentre el
+            día que hace falta, que es un día malo. */}
+        <div className="relative flex shrink-0 flex-col items-center">
+          <button
+            onClick={onFeedback}
+            title="Lo que falla y lo que falta"
+            aria-label="Feedback: lo que falla y lo que falta"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-rose-400 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
+          >
+            <MessageCircleWarning className="h-5 w-5 shrink-0" />
+            <span className={cn(
+              'overflow-hidden whitespace-nowrap text-[10px] font-bold leading-none transition-all duration-200',
+              desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+            )}>
+              Feedback
+            </span>
+          </button>
+        </div>
+        <div className="mx-1 h-8 w-px shrink-0 self-center bg-slate-700" />
+
         {HERRAMIENTAS_ABAJO.map(h => {
           const activa = abierta === h.clave;
           return (
