@@ -17,12 +17,6 @@
       "ruta": "src/components/navegacion/RailInferior.tsx",
       "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
       "desde": "2026-08-25T23:14:42.188Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/roadmap.ts",
-      "motivo": "tres puntitos para editar la tarjeta de proyecto (prog8)",
-      "desde": "2026-08-25T23:17:14.972Z"
     }
   ]
 }
