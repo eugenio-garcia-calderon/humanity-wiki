@@ -47,6 +47,12 @@
       "ruta": "src/components/buscador/CajaBusqueda.tsx",
       "motivo": "pegar una imagen en la barra con la IA encendida",
       "desde": "2026-08-25T16:25:00.182Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
+      "motivo": "pegar una imagen en la barra con la IA encendida",
+      "desde": "2026-08-25T16:25:04.655Z"
     }
   ]
 }
