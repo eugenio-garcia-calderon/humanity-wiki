@@ -47,42 +47,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/utils/objetivos.ts",
-      "motivo": "prog2: ESPIRITUALIDAD como objetivo 15 y buscador de temas",
-      "desde": "2026-08-25T16:43:52.277Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "drizzle/0122_espiritualidad.sql",
-      "motivo": "prog2: ESPIRITUALIDAD como objetivo 15 y buscador de temas",
-      "desde": "2026-08-25T16:43:52.277Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/server/temas.ts",
-      "motivo": "prog2: ESPIRITUALIDAD como objetivo 15 y buscador de temas",
-      "desde": "2026-08-25T16:43:52.277Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "scripts/sembrar-subtemas.mjs",
-      "motivo": "prog2: el sembrador tiene que conocer al 15",
-      "desde": "2026-08-25T16:45:10.061Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "src/components/navegacion/DialogoNuevoTema.tsx",
-      "motivo": "prog2: crear tema desde el menu",
-      "desde": "2026-08-25T16:47:51.409Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "drizzle/0123_temas_espiritualidad.sql",
-      "motivo": "prog2: los 72 subtemas del objetivo 15",
-      "desde": "2026-08-25T16:57:32.318Z"
     }
   ]
 }
