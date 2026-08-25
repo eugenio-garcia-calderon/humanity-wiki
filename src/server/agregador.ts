@@ -277,7 +277,13 @@ export function registrarAgregador(app: Express, db: any) {
                -- Los tres ejes de la constelación: con quién habla de lo mismo,
                -- qué TIPO de pieza es, y dónde cae en el mapa. Los calcula
                -- scripts/agregador/constelacion.py y aquí sólo se leen.
-               a.cluster_id, a.genero, a.mapa_x, a.mapa_y
+               a.cluster_id, a.genero, a.mapa_x, a.mapa_y,
+               -- a_mano marca lo que ha colocado una persona. Sin traerlo, la
+               -- pantalla no puede distinguir el trabajo de alguien del de la
+               -- máquina — y esa distinción es la única razón de que la columna
+               -- exista. Se me olvidó, y el resultado fue una marca escrita en
+               -- la pantalla que nunca se encendía.
+               coalesce(a.a_mano, false) AS a_mano
         FROM contenido_agregado a
         JOIN subtema_contenido c ON c.entity_id = a.id AND c.tipo = 'agregado'
         WHERE c.subtema_id = ANY(${ramaIds}) AND a.archived_at IS NULL
@@ -410,7 +416,8 @@ export function registrarAgregador(app: Express, db: any) {
       // Los grupos son del OBJETIVO: agrupar las piezas de MOVILIDAD junto a
       // las de AGUA daría grupos ciertos y completamente inútiles.
       const clusters = await db.execute(sql`
-        SELECT id, nombre, frase, x, y, cuantas, modelo, calculado_el
+        SELECT id, nombre, frase, x, y, cuantas, modelo, calculado_el,
+               coalesce(a_mano, false) AS a_mano
         FROM contenido_cluster WHERE tema_id = ${tema.objetivo_id}
         ORDER BY cuantas DESC
       `);
