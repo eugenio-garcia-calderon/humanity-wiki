@@ -87,18 +87,27 @@ suelta al commitear, no al empezar la tarea — el 2026-08-22 uno lo tuvo once
 minutos con la línea sin escribir y encadenó a tres detrás. En un fichero que se
 edita de verdad, al contrario: resérvalo mientras trabajas en él.
 
+**Soltar no siempre soltaba: arreglado el 2026-08-25** (ver abajo). La
+comprobación sigue siendo buena costumbre cuando sabes que alguien espera, pero
+ya no es un parche imprescindible.
+
 **Soltar no siempre suelta: compruébalo cuando sepas que alguien espera.**
 Encontrado el 2026-08-23 por prog8 y prog7. `soltar` dijo «Soltadas 2 reserva(s)»
 y cuarenta minutos después los dos ficheros seguían reservados a nombre de quien
 ya los había soltado — con otro agente parado esperándolos y sin forma de saber
 que la reserva era un fantasma.
 
-La causa está en cómo funciona esto: las reservas son un `push` a
-`equipo/reservas`, y con varios agentes empujando a la vez una carrera puede
-reponer el estado anterior y **resucitar una reserva ya soltada**. El mismo rato
-en que pasó, un `reservar` falló con «No he podido guardar la reserva (¿sin red,
-o alguien empujando a la vez?)», que es la misma carrera vista desde el otro
-lado.
+La causa, encontrada el 2026-08-25 leyendo `escribir()`: era una **escritura
+perdida** de manual. El script calculaba la lista nueva sobre una foto, y si el
+`push` se rechazaba por haber empujado otro, reintentaba **empujando esa misma
+lista vieja** sobre la base nueva. Resultado: el cambio del otro desaparecía y
+la reserva que uno acababa de soltar **volvía, con su hora original** — por eso
+parecía que no la había soltado nunca.
+
+Ya no: `escribir()` recibe **el cambio** y no la lista, y lo aplica sobre lo
+recién leído en cada intento (seis, con espera desigual). Probado con cinco
+reservas a la vez —sobreviven las cinco— y con un `soltar` y un `reservar`
+simultáneos: lo soltado se queda soltado y lo reservado no se pierde.
 
 ```
 node scripts/equipo.mjs soltar src/server/avisos.ts
@@ -109,6 +118,35 @@ Diez segundos, y solo hace falta cuando alguien te está esperando. El que suelt
 se queda tranquilo con el «Soltadas 2» y el que espera sigue bloqueado sin que
 nadie lo sepa: por eso lo comprueba quien suelta, que es el único de los dos que
 sabe que acaba de hacerlo.
+
+**Y no aparques en `stash` un fichero compartido de solo-añadir.** Encontrado
+el 2026-08-25 por el agente del agregador, y estuvo a un `commit` de costar una
+hora de trabajo ajeno. Su entrada del changelog no cabía —el fichero estaba
+reservado— así que la guardó en un `git stash`. Una hora después, al hacer
+`pop`:
+
+```
+memory/08_CHANGELOG.md | 59 insertions(+), 37 deletions(-)
+```
+
+**Treinta y siete líneas borradas.** El `stash` no guarda tu párrafo: guarda
+**el fichero entero tal y como estaba**, así que al volver traía una copia
+anterior a tres fusiones de otros. Commitearlo habría sustituido el trabajo de
+los demás por una foto vieja, y el commit habría dicho «añade la entrada del
+agregador». No se coló porque el `pop` dio conflicto en otro sitio y fue a
+mirar los números; si llega a aplicar limpio, no los mira.
+
+Un changelog **se añade por el final**, y un `stash` no sabe eso. Guarda **el
+texto** —en el borrador, en un fichero aparte, donde sea— y cuando el fichero
+se libere, escríbelo encima de lo que haya entonces:
+
+```
+git checkout HEAD -- memory/08_CHANGELOG.md   # vuelve a lo de ahora
+…pega tu texto al final…                       # debe salir «N insertadas, 0 borradas»
+```
+
+**Si tu diff en un fichero de solo-añadir borra líneas, párate.** Ese número es
+la alarma.
 
 **Ficheros que siempre hay que reservar** (los tocan todos):
 `src/App.tsx` · `src/main.tsx` · `CHANGELOG.md` · `src/components/ui/**` ·

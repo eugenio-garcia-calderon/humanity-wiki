@@ -55,6 +55,11 @@ interface Message {
   pending?: boolean;
   error?: boolean;
   attachmentName?: string;
+  /** Una MINIATURA de la imagen enviada, no la imagen. Ver `miniatura()`: una
+   *  captura de 4 MB dentro de cada mensaje se queda en memoria mientras dure
+   *  la conversación, y con cinco capturas eso es una pestaña que va a tirones
+   *  por enseñar cinco cuadraditos de 120 píxeles. */
+  attachmentPreview?: string;
   /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
   /** LO QUE COSTÓ. `totalCents` es lo que paga la persona (0 casi siempre);
    *  `costCents` es lo que le cuesta a la plataforma, que no es lo mismo y es
@@ -142,6 +147,56 @@ const costeEstimado = (
  *  por una palabra suelta hacen falta tres, porque «co» encaja con «coche»,
  *  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
  *  siempre no son una predicción, son ruido. */
+/** ══ UNA MINIATURA, NO LA IMAGEN ═══════════════════════════════════════════
+ *  (2026-08-25, Eugenio: «haz que al pegar una imagen en el chat se vea con
+ *  una preview como hace claude code».)
+ *
+ *  Para la pastilla de «lo que vas a enviar» se usa la imagen entera: es una
+ *  sola, está viva un momento y se ve exactamente lo que se va a mandar.
+ *
+ *  Para el MENSAJE YA ENVIADO no: ahí la imagen se quedaría en memoria toda la
+ *  conversación, y cinco capturas de cuatro megas son veinte megas retenidos
+ *  para enseñar cinco cuadraditos de 120 píxeles. Se guarda una miniatura.
+ *
+ *  SI EL NAVEGADOR NO PUEDE HACERLA, NO SE INVENTA NADA: se devuelve `null` y
+ *  el mensaje enseña la pastilla con el nombre, como hasta hoy. Una vista
+ *  previa rota sería peor que ninguna. */
+const miniatura = (dataUrl: string, lado = 240): Promise<string | null> =>
+  new Promise(resolver => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const escala = Math.min(1, lado / Math.max(img.width, img.height));
+        const lienzo = document.createElement('canvas');
+        lienzo.width = Math.max(1, Math.round(img.width * escala));
+        lienzo.height = Math.max(1, Math.round(img.height * escala));
+        const ctx = lienzo.getContext('2d');
+        if (!ctx) return resolver(null);
+        ctx.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+        // JPEG y no PNG: una captura de pantalla en PNG pesa varias veces más
+        // y aquí solo hace falta que se reconozca de un vistazo.
+        resolver(lienzo.toDataURL('image/jpeg', 0.7));
+      } catch { resolver(null); }
+    };
+    img.onerror = () => resolver(null);
+    img.src = dataUrl;
+  });
+
+/** UNA CAPTURA LLEGA SIN NOMBRE PROPIO: el navegador la llama «image.png»
+ *  SIEMPRE, así que tres capturas pegadas seguidas se llaman las tres igual y
+ *  no hay manera de saber cuál es cuál en la conversación. Se le pone la hora,
+ *  que es el único dato que las distingue de verdad.
+ *
+ *  Vale para las dos puertas —pegar en el chat y pegar en la barra de arriba
+ *  con la IA encendida— porque si no, la misma captura se llamaría distinto
+ *  según dónde la pegaste. */
+const conNombreDeCaptura = (f: File): File => {
+  if (f.name && f.name !== 'image.png') return f;
+  const ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+  const hora = new Date().toTimeString().slice(0, 8).replace(/:/g, '.');
+  return new File([f], `captura ${hora}.${ext}`, { type: f.type });
+};
+
 /** El área y su ficha de objetivo son **la misma cosa por dos puertas**, y el
  *  buscador enseñaba las dos, una debajo de la otra y con el mismo nombre.
  *  Dos filas idénticas a la vista obligan a adivinar en qué se diferencian, y
@@ -834,6 +889,25 @@ export default function AIAssistant({ modo = 'panel' }: {
     return () => window.removeEventListener('ai:abrir', abrir);
   }, []);
 
+  // ══ UNA IMAGEN PEGADA EN LA BARRA DE ARRIBA ENTRA POR AQUÍ ════════════════
+  // (2026-08-25.) Con el interruptor de IA encendido, esa barra es «hablarle a
+  // la IA», y pegarle una captura tiene que hacer lo que uno espera. Pero la
+  // barra no sabe adjuntar —ni debe: los límites, los formatos y el aviso de
+  // error viven aquí, en un solo sitio— así que lo único que hace es pasar el
+  // fichero, y el chat lo abre y lo adjunta.
+  useEffect(() => {
+    const alAdjuntar = (e: Event) => {
+      const f = (e as CustomEvent).detail as File | undefined;
+      if (!f) return;
+      setOpen(true);
+      setPanelMuelle('chat');
+      handleFileSelectRef.current?.(conNombreDeCaptura(f));
+      setTimeout(() => barInputRef.current?.focus(), 60);
+    };
+    window.addEventListener('ai:adjuntar', alAdjuntar);
+    return () => window.removeEventListener('ai:adjuntar', alAdjuntar);
+  }, []);
+
   useEffect(() => {
     fetch('/api/ai/status').then(r => r.json()).then(setStatus).catch(() => setStatus(null));
   }, []);
@@ -1088,6 +1162,11 @@ export default function AIAssistant({ modo = 'panel' }: {
     }
   };
 
+  /** La misma función, alcanzable desde un efecto que se declara antes que
+   *  ella. Mover `handleFileSelect` cien líneas más arriba para esto sería
+   *  cambiar de sitio algo que lleva meses donde está, por una flecha. */
+  const handleFileSelectRef = useRef<((f: File | undefined) => void) | null>(null);
+
   const handleFileSelect = (file: File | undefined) => {
     setAttachError(null);
     if (!file) return;
@@ -1108,6 +1187,48 @@ export default function AIAssistant({ modo = 'panel' }: {
     };
     reader.onerror = () => setAttachError('No se pudo leer el archivo.');
     reader.readAsDataURL(file);
+  };
+  handleFileSelectRef.current = handleFileSelect;
+
+  // ══ PEGAR UNA IMAGEN (2026-08-25, Eugenio: «el buscador de IA no me permite
+  // pegarle imágenes, arréglalo») ═══════════════════════════════════════════
+  //
+  // Adjuntar ya funcionaba de dos maneras —el «+» y arrastrar— pero **no con
+  // el gesto que se usa de verdad para una captura**: copiarla y pegarla. En
+  // un chat donde se enseña lo que se está viendo, ése es el camino corto, y
+  // no estaba.
+  //
+  // NO VALIDA NADA POR SU CUENTA: le entrega el fichero a `handleFileSelect`,
+  // igual que el clip y que arrastrar. Tres formas de adjuntar con tres reglas
+  // distintas es cómo se acaba admitiendo por una puerta lo que se rechaza por
+  // otra.
+  //
+  // SOLO SE QUEDA EL PEGADO CUANDO TRAE UN FICHERO QUE ADMITIMOS. Pegar texto
+  // —que es lo que más se pega en un chat— sigue funcionando como siempre:
+  // sin fichero no se llama a `preventDefault`, así que lo pega el navegador.
+  const alPegar = (e: React.ClipboardEvent) => {
+    const dt = e.clipboardData;
+    if (!dt) return;
+    const admitido = (t: string) => !!ATTACHMENT_MAX_BYTES[t];
+    const desdeItems = Array.from(dt.items || [])
+      .filter(i => i.kind === 'file' && admitido(i.type))
+      .map(i => i.getAsFile())
+      .find(Boolean) as File | null | undefined;
+    const fichero = desdeItems || Array.from(dt.files || []).find(f => admitido(f.type)) || null;
+
+    // ── UN FICHERO QUE NO ADMITIMOS TAMBIÉN SE CONTESTA ──────────────────────
+    // Si el portapapeles trae un fichero pero no de los que valen (un .zip,
+    // un .docx), ignorarlo en silencio deja al usuario pegando otra vez sin
+    // entender nada: pegar un fichero no escribe texto, así que no pasaría
+    // NADA en la pantalla. Se le pasa a `handleFileSelect`, que es quien sabe
+    // decir «solo se admiten imágenes o PDF» — la misma frase que ya sale por
+    // el clip y por arrastrar.
+    const otro = !fichero && Array.from(dt.files || [])[0];
+    if (otro) { e.preventDefault(); handleFileSelect(otro); return; }
+    if (!fichero) return;
+    e.preventDefault();
+
+    handleFileSelect(conNombreDeCaptura(fichero));
   };
 
   // ══ ARRASTRAR UN FICHERO AL CHAT (2026-08-21, petición de Eugenio: «haz que
@@ -1174,6 +1295,7 @@ export default function AIAssistant({ modo = 'panel' }: {
         <Paperclip className="w-7 h-7" />
         <p className="text-sm font-black">Suelta para adjuntarlo</p>
         <p className="text-[11px] font-bold text-emerald-600">PDF hasta 15 MB · imágenes hasta 5 MB</p>
+        <p className="text-[10px] font-bold text-emerald-500">o pega una captura con {navigator.platform.includes('Mac') ? '⌘V' : 'Ctrl+V'}</p>
       </div>
     </div>
   ) : null;
@@ -1186,7 +1308,24 @@ export default function AIAssistant({ modo = 'panel' }: {
     setAttachment(null);
     setSugerencias([]);
     setSugerenciaActiva(-1);
-    setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
+    // ══ TU MENSAJE APARECE YA; LA MINIATURA, EN CUANTO ESTÉ ═══════════════
+    // Fabricar la miniatura antes de pintar el mensaje retrasaría tu propia
+    // frase — descodificar una captura de cuatro megas no es gratis— y en un
+    // chat eso se nota como lentitud del chat, no del adjunto. Se pinta
+    // primero y se rellena después.
+    //
+    // Se localiza POR IDENTIDAD del objeto y no por su posición: entre que se
+    // añade y que la miniatura está lista pueden haber entrado más mensajes, y
+    // un índice guardado sería el de otro.
+    const mensajeUsuario: Message = { role: 'user', content: text, attachmentName: pendingAttachment?.name };
+    setMessages(m => [...m, mensajeUsuario]);
+    if (pendingAttachment && pendingAttachment.mediaType !== 'application/pdf') {
+      miniatura(`data:${pendingAttachment.mediaType};base64,${pendingAttachment.data}`)
+        .then(mini => {
+          if (!mini) return;   // sin miniatura, el mensaje se queda con su nombre
+          setMessages(m => m.map(x => (x === mensajeUsuario ? { ...x, attachmentPreview: mini } : x)));
+        });
+    }
     setBusy(true);
     try {
       // ══ BUSCAR PRIMERO, Y BUSCAR CASI SIEMPRE ════════════════════════════
@@ -1495,6 +1634,16 @@ export default function AIAssistant({ modo = 'panel' }: {
                   m.role === 'user' ? 'bg-emerald-600 text-white whitespace-pre-wrap'
                     : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200 whitespace-pre-wrap'
                     : 'bg-slate-100 text-slate-800')}>
+                  {/* La miniatura de lo que enviaste, dentro de tu propio
+                      mensaje: al desplazar hacia arriba se ve qué imagen era
+                      esa pregunta sin tener que acordarse del nombre. */}
+                  {m.attachmentPreview && (
+                    <img
+                      src={m.attachmentPreview}
+                      alt={m.attachmentName || 'imagen enviada'}
+                      className="block mb-1.5 max-h-40 w-auto max-w-full rounded-lg border border-white/30"
+                    />
+                  )}
                   {m.attachmentName && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/20 px-1.5 py-0.5 rounded mb-1">
                       <Paperclip className="w-2.5 h-2.5" /> {m.attachmentName}
@@ -2002,11 +2151,38 @@ export default function AIAssistant({ modo = 'panel' }: {
               del modelo se queda —es un dato, no una etiqueta— y las palabras
               se van al `title`, donde no roban sitio. */}
           <div className="border-t border-slate-100 px-3 pt-2.5 pb-2 space-y-2 bg-white">
+            {/* ══ SE VE LO QUE VAS A ENVIAR, NO SU NOMBRE ══════════════════
+                (2026-08-25, Eugenio: «que al pegar una imagen en el chat se
+                vea con una preview como hace claude code».)
+
+                Un nombre de fichero no dice si has pegado la captura buena, y
+                con «captura 18.23.18.png» menos todavía. La miniatura sí, y de
+                un vistazo: es la única forma de darse cuenta ANTES de enviar
+                de que has pegado la ventana equivocada.
+
+                El PDF se queda con su icono: una primera página en miniatura
+                haría falta abrir el PDF para pintarla, y no aclara gran cosa. */}
             {attachment && (
-              <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
-                {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
-                <span className="truncate flex-1">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
+              <div className="flex items-center gap-2.5 p-1.5 pr-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
+                {attachment.mediaType === 'application/pdf' ? (
+                  <span className="w-10 h-10 shrink-0 grid place-items-center rounded-md bg-white border border-emerald-200">
+                    <FileText className="w-4 h-4" />
+                  </span>
+                ) : (
+                  <img
+                    src={`data:${attachment.mediaType};base64,${attachment.data}`}
+                    alt={attachment.name}
+                    className="w-10 h-10 shrink-0 rounded-md object-cover border border-emerald-200 bg-white"
+                  />
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold">{attachment.name}</span>
+                  <span className="block text-[10px] text-emerald-600">
+                    {attachment.mediaType === 'application/pdf' ? 'PDF' : 'Imagen'} · se enviará con tu mensaje
+                  </span>
+                </span>
+                <button onClick={() => setAttachment(null)} title="Quitar el adjunto"
+                  className="text-emerald-600 hover:text-emerald-900 shrink-0">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -2104,6 +2280,7 @@ export default function AIAssistant({ modo = 'panel' }: {
                 ref={barInputRef}
                 value={input}
                 onChange={e => { setInput(e.target.value); dictationBase.current = e.target.value; }}
+                onPaste={alPegar}
                 onKeyDown={e => {
                   // El desplegable manda mientras está abierto: las flechas lo
                   // recorren e Intro abre lo marcado. Si no hay nada marcado,
@@ -2186,7 +2363,9 @@ export default function AIAssistant({ modo = 'panel' }: {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                title="Adjuntar una imagen o un PDF"
+                // Se nombran las TRES formas: el gesto que falta es el que
+                // no se descubre solo, y pegar una captura es el más rápido.
+                title="Adjuntar una imagen o un PDF — también puedes pegar una captura o arrastrarla"
                 aria-label="Adjuntar una imagen o un PDF"
                 className={cn('w-8 h-8 grid place-items-center rounded-lg transition-colors',
                   attachment ? 'bg-emerald-50 text-emerald-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700')}

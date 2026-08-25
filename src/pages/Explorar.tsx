@@ -4,7 +4,7 @@ import {
   Search, User as UserIcon, Sparkles, Network, LayoutGrid,
   MoreVertical, Pencil, Globe, Lock, Trash2, Trash, RotateCcw, CircleDot,
   Folder, FolderPlus, FolderOpen, Download, Bookmark, X, Check, Loader2,
-  ArrowLeft, Users2, Globe2, Plus, Flag, Ban, ArrowUpRight,
+  ArrowLeft, Users2, Globe2, Plus, Flag, Ban, ArrowUpRight, Repeat2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -13,6 +13,9 @@ import FichaPublicacion, { type Publicacion } from '../components/knowledge/Fich
 import CreadorPublicacion from '../components/knowledge/CreadorPublicacion';
 import { cn } from '../utils/cn';
 import VentanaCentral from '../components/ventanas/VentanaCentral';
+import { hayRaton, useCerrarAlAlejarse } from '../hooks/useAbrirAlAcercarse';
+import Republicacion, { SelloRepublicado } from '../components/knowledge/Republicacion';
+import DialogoRepublicar from '../components/knowledge/DialogoRepublicar';
 import { PersonalizarPortada } from '../components/portada/PersonalizarPortada';
 import { Denunciar } from '../components/moderacion/Denunciar';
 import { Bloquear } from '../components/moderacion/Bloquear';
@@ -203,6 +206,41 @@ export default function Explorar() {
   const [abierta, setAbierta] = useState<{ pub: Publicacion; editar: boolean } | null>(null);
   /** El lienzo o el mapa que se está mirando en el pop-up central, si hay uno. */
   const [dentroDe, setDentroDe] = useState<{ titulo: string; ruta: string } | null>(null);
+
+  /*
+   * ══ ABRIRLO AL ACERCAR EL RATÓN A LA ETIQUETA ═════════════════════════════
+   * Eugenio: «haz que cuando se haga hover en esa sección de "Parte de: grafo
+   * X" se abra en pop-up ventana ese grafo».
+   *
+   * ── ESTO NO ES UN MENÚ: ES UNA VENTANA QUE TAPA LA PANTALLA ───────────────
+   * Y por eso se hace con la misma regla que ya rige los menús laterales, no
+   * con un `onMouseEnter` a secas:
+   *
+   *   · un retardo antes de abrir, para no dispararlo al cruzar la etiqueta de
+   *     camino a otra cosa. Aquí es de 350 ms y no de 150: lo que se abre
+   *     ocupa la pantalla entera, y equivocarse cuesta mucho más que con un
+   *     menú lateral;
+   *   · **lo que se abre rozando se cierra solo** al alejarse, y lo que se
+   *     abre pulsando se queda. Sin eso, rozar la etiqueta te deja una ventana
+   *     encima que tienes que ir a cerrar — y eso, en una lista por la que se
+   *     baja leyendo, pasaría una vez por tarjeta.
+   *
+   * Se guarda cuál es la etiqueta que lo abrió porque el ratón puede quedarse
+   * en ella: si sólo contara el pop-up, se cerraría teniendo el ratón encima
+   * del sitio que acaba de abrirlo.
+   */
+  const [porRoce, setPorRoce] = useState(false);
+  const cajaPopup = useRef<HTMLDivElement>(null);
+  const etiquetaViva = useRef<HTMLElement | null>(null);
+  const relojRoce = useRef<number | null>(null);
+  const pararRoce = () => {
+    if (relojRoce.current !== null) { window.clearTimeout(relojRoce.current); relojRoce.current = null; }
+  };
+  useEffect(() => pararRoce, []);
+  useCerrarAlAlejarse(porRoce && !!dentroDe, [cajaPopup, etiquetaViva], () => {
+    setDentroDe(null);
+    setPorRoce(false);
+  });
   const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
   /*
    * LA PAPELERA Y EL PERSONALIZADOR SE ABREN POR DIRECCIÓN (2026-08-24). Sus
@@ -214,6 +252,10 @@ export default function Explorar() {
    */
   const [verPapelera, setVerPapelera] = useState(() => new URLSearchParams(window.location.search).get('papelera') === '1');
   const [creadorAbierto, setCreadorAbierto] = useState(false);
+  /** Lo que se está republicando ahora mismo, si hay algo. `null` con el
+   *  diálogo cerrado; un objeto vacío cuando se abre para pegar un enlace de
+   *  fuera, sin nada elegido todavía. */
+  const [republicando, setRepublicando] = useState<{ id: string; titulo?: string | null; autor?: string | null } | null | undefined>(undefined);
   const [papelera, setPapelera] = useState<any[]>([]);
   const debounce = useRef<any>(null);
 
@@ -236,11 +278,16 @@ export default function Explorar() {
   useEffect(() => {
     const papelera = searchParams.get('papelera') === '1';
     const portada = searchParams.get('portada') === '1';
-    if (!papelera && !portada) return;
+    // `republicar=1` llega desde el botón de Crear, para republicar algo de
+    // FUERA: no hay ninguna publicación de aquí elegida, así que el diálogo se
+    // abre con `null` y pide una dirección.
+    const republicar = searchParams.get('republicar') === '1';
+    if (!papelera && !portada && !republicar) return;
     if (papelera) setVerPapelera(true);
     if (portada) setPersonalizando(true);
+    if (republicar) setRepublicando(null);
     const q = new URLSearchParams(searchParams);
-    q.delete('papelera'); q.delete('portada');
+    q.delete('papelera'); q.delete('portada'); q.delete('republicar');
     setSearchParams(q, { replace: true });
   }, [searchParams]);
   const [denunciando, setDenunciando] = useState<{ tipo: string; id: string; titulo?: string; autor_id?: string; autor_nombre?: string } | null>(null);
@@ -809,7 +856,40 @@ export default function Explorar() {
 
                           La foto es de 26 px y con inicial de respaldo: sin foto
                           guardada, un círculo vacío es peor que una letra. */}
-                      <div className="px-3.5 pt-3 flex items-center gap-1.5">
+                      {/* ── PEGADO AL BORDE EN UN TELÉFONO (2026-08-25) ─────
+                          Eugenio: «haz que el título, la persona que lo publica
+                          y las etiquetas estén más alineadas hacia la izquierda,
+                          pegándose más al borde de la pantalla izquierda».
+
+                          Se sumaban DOS sangrías: los 20 px del contenedor de la
+                          página y los 14 de la propia tarjeta, o sea **34 px de
+                          los 375** antes de que empiece una letra. En un
+                          ordenador ese doble margen separa una tarjeta de la de
+                          al lado; en un teléfono no hay tarjeta de al lado —hay
+                          una sola columna— así que la segunda sangría no separa
+                          de nada y sólo estrecha el texto.
+
+                          Se quita **la de dentro**, no la de fuera: así todo lo
+                          escrito queda alineado en la misma vertical que el
+                          resto de la página, y la portada sigue siendo lo único
+                          que llega al borde de verdad. Desde `sm` vuelve, porque
+                          allí sí hay columnas.
+
+                          ── EL SELLO, ENCIMA DE TODO ────────────────────────
+                          Eugenio: «que aparezca arriba el que republica».
+
+                          Va **antes** del nombre y no dentro del pie porque
+                          cambia cómo se lee todo lo de abajo: sin este renglón,
+                          el texto de otro que hay dentro parece de quien
+                          aparece arriba. Es la línea que evita la única forma
+                          de romper esto de verdad — que republicar acabe
+                          pareciendo firmar. */}
+                      {it.republica && (
+                      <div className="px-0 sm:px-3.5 pt-2.5">
+                      <SelloRepublicado nombre={it.autor_nombre} />
+                      </div>
+                      )}
+                      <div className={cn('px-0 sm:px-3.5 flex items-center gap-1.5', it.republica ? 'pt-1' : 'pt-3')}>
                       {/* ── QUIEN PUBLICA ES UN ENLACE, NO PARTE DEL CARTEL ────
                           Eugenio: «si se pincha en ese nombre, te lleve al perfil
                           de esa persona. Ahora mismo es todo como una gran
@@ -898,6 +978,21 @@ export default function Explorar() {
                       className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
                       <Download className="w-3.5 h-3.5 text-slate-400" /> Descargar
                       </button>
+                      {/* ══ REPUBLICAR ══════════════════════════════════
+                          Eugenio: «poder hacer una republicación de otro autor».
+
+                          Sólo sobre lo de OTROS y sólo sobre publicaciones del
+                          muro: republicar lo tuyo es duplicarlo, y para tenerlo
+                          arriba está fijarlo. Y una republicación no se vuelve
+                          a republicar en cadena — el servidor manda al original,
+                          porque tres capas de «fulano republicó a mengano»
+                          esconden el contenido detrás de la genealogía. */}
+                      {user && !it.soy_autor && it.tipo === 'muro' && !it.republica && (
+                      <button onClick={() => { setMenuAbierto(null); setRepublicando({ id: it.id, titulo: it.titulo, autor: it.autor_nombre }); }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
+                      <Repeat2 className="w-3.5 h-3.5 text-slate-400" /> Republicar
+                      </button>
+                      )}
                       {/* DENUNCIAR: solo sobre lo de otros. Denunciarte a ti
                           mismo no es una acción, es una confusión — y quien
                           quiera quitar lo suyo tiene «Eliminar» ahí debajo. */}
@@ -976,13 +1071,43 @@ export default function Explorar() {
                           tarjeta sin foto no recibe un relleno, porque si todas
                           tuvieran imagen «tener imagen» dejaría de ser el
                           criterio con el que está ordenada esta página. */}
+                      {/* ── A TODO EL ANCHO EN UN TELÉFONO (2026-08-25) ─────
+                          Eugenio: «haz que la imagen y vídeo de las
+                          publicaciones ocupen todo el ancho de la pantalla,
+                          como en YouTube móvil».
+
+                          En una pantalla de 390 px, 10 px de margen a cada lado
+                          son 20 de los 390 — un 5 % del ancho gastado en aire
+                          alrededor de lo único que se mira de lejos. YouTube no
+                          los pone, y no es minimalismo: es que en un teléfono la
+                          foto **es** la publicación, y lo que la enmarca compite
+                          con ella.
+                          Desde `sm` vuelve el margen, porque ahí hay columnas y
+                          una foto pegada al borde de su columna se confunde con
+                          la de al lado.
+
+                          ── EL `-mx-5` VA EMPAREJADO CON EL `px-5` DE FUERA ──
+                          Los 20 px no eran de la tarjeta: los pone el contenedor
+                          de la página (`max-w-[1500px] mx-auto px-5`), que los
+                          necesita para el nombre, el título y las etiquetas. Así
+                          que no se quitan — **se cancelan sólo para la foto**,
+                          con un margen negativo del mismo tamaño. Si algún día
+                          cambia ese `px-5`, este `-mx-5` tiene que cambiar con
+                          él: son el mismo número escrito dos veces, y por eso
+                          queda dicho aquí. */}
                       {(() => { const p = portadaDe(it); return p ? (
-                      <div className="px-2.5 pt-2.5">
+                      <div className="-mx-5 pt-2.5 sm:mx-0 sm:px-2.5">
                       <ImagenDePortada portada={p} titulo={it.titulo} />
                       </div>
                       ) : null; })()}
 
-                      <p className="px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      {/* Sin título no se pinta el hueco. Pasa en las
+                          republicaciones sin comentario, que no tienen ninguno
+                          — y un párrafo vacío deja un salto que parece un
+                          fallo de maquetación. */}
+                      {it.titulo && (
+                      <p className="px-0 sm:px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      )}
 
                       {/* EL TEXTO, DEBAJO DEL TÍTULO (2026-08-24). Eugenio: «haz
                           que el texto descriptivo también se lea debajo del
@@ -997,15 +1122,28 @@ export default function Explorar() {
                       {(() => {
                       const texto = textoDe(it);
                       return texto ? (
-                      <p className="px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
+                      <p className="px-0 sm:px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
                       ) : null;
                       })()}
+
+                      {/* ── Y DEBAJO, LO DE OTRO, EN SU PROPIA CAJA ─────────
+                          Eugenio: «abajo el autor original y el contenido».
+
+                          Después del comentario, porque ése es el orden en que
+                          se lee: primero lo que dice quien reparte, luego lo
+                          que reparte. Y dentro de un marco, que es lo que
+                          impide que los dos textos se lean como uno. */}
+                      {it.republica && (
+                      <div className="px-0 sm:px-3.5 pt-2">
+                      <Republicacion r={it.republica} compacto />
+                      </div>
+                      )}
 
                       {/* DE QUÉ HABLA. Sale de las mismas palabras con las que
                           filtra el menú de la izquierda, así que la etiqueta y
                           el filtro nunca se contradicen: si una tarjeta dice
                           «Energía», está en «Energía». */}
-                      <div className="px-3.5 pt-1.5 pb-1">
+                      <div className="px-0 sm:px-3.5 pt-1.5 pb-1">
                       <EtiquetasDeTema item={it} />
                       </div>
 
@@ -1017,7 +1155,7 @@ export default function Explorar() {
                           portada ni cuerpo: un grafo o una tabla, donde el dibujo ES
                           la publicación. */}
                       {!portadaDe(it) && !textoDe(it) && (
-                      <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
+                      <div className="px-0 sm:px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
                       <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
                       </div>
                       )}
@@ -1032,7 +1170,7 @@ export default function Explorar() {
                           `items-start` porque la etiqueta ocupa dos líneas y las
                           visualizaciones una: centradas, la de una línea flotaba
                           a media altura de la otra. */}
-                      <div className="px-3.5 py-2 flex flex-wrap items-start gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                      <div className="px-0 sm:px-3.5 py-2 flex flex-wrap items-start gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
                       {/* ── DÓNDE ESTÁ METIDA ESTO, Y CUÁNDO SE PUEDE PULSAR ───
                           Eugenio: «hay una información abajo que es dónde está
                           integrada esa publicación, puede estar integrada dentro
@@ -1083,7 +1221,21 @@ export default function Explorar() {
                          La flecha aparece sólo al acercarse: mientras no la
                          necesitas, no ocupa. */
                       <button
-                      onClick={e => { e.stopPropagation(); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
+                      onClick={e => { e.stopPropagation(); pararRoce(); setPorRoce(false); setDentroDe({ titulo: it.donde!, ruta: it.ruta! }); }}
+                      // Sólo donde hay un puntero de verdad: con el dedo no
+                      // existe «acercarse», y el primer toque sería a la vez
+                      // abrir y pulsar.
+                      onMouseEnter={hayRaton() ? e => {
+                      const el = e.currentTarget;
+                      pararRoce();
+                      if (dentroDe) return;   // ya hay una ventana: no se cambia sola
+                      relojRoce.current = window.setTimeout(() => {
+                      etiquetaViva.current = el;
+                      setPorRoce(true);
+                      setDentroDe({ titulo: it.donde!, ruta: it.ruta! });
+                      }, 350);
+                      } : undefined}
+                      onMouseLeave={hayRaton() ? () => pararRoce() : undefined}
                       title={`Ver «${it.donde}»`}
                       /* `max-w-full` ADEMÁS DE `min-w-0` (2026-08-24). Los dos
                          hacen falta y hacen cosas distintas: `min-w-0` deja que
@@ -1186,11 +1338,25 @@ export default function Explorar() {
       )}
 
       {dentroDe && (
-        <VentanaCentral
-          titulo={dentroDe.titulo}
-          destino={dentroDe.ruta}
-          onCerrar={() => setDentroDe(null)}
-          onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); navigate(r); }}
+        /* `onClickCapture`: tocar algo de dentro lo asciende a «lo quiero», y
+           deja de cerrarse al apartar el ratón. Si ya has empezado a usar la
+           ventana, no es un accidente. */
+        <div onClickCapture={() => setPorRoce(false)} className="contents">
+          <VentanaCentral
+            caja={cajaPopup}
+            titulo={dentroDe.titulo}
+            destino={dentroDe.ruta}
+            onCerrar={() => { setDentroDe(null); setPorRoce(false); }}
+            onAbrirEntero={() => { const r = dentroDe.ruta; setDentroDe(null); setPorRoce(false); navigate(r); }}
+          />
+        </div>
+      )}
+
+      {republicando !== undefined && (
+        <DialogoRepublicar
+          original={republicando}
+          onCerrar={() => setRepublicando(undefined)}
+          onHecho={() => cargar()}
         />
       )}
 

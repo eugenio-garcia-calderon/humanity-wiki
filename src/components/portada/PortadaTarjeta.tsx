@@ -117,6 +117,31 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
    * había ahí. El rótulo no se oculta — es que ocurre debajo de la foto.
    */
   const [reproduciendo, setReproduciendo] = useState(false);
+
+  /*
+   * ══ LA BARRA DEL VÍDEO ════════════════════════════════════════════════════
+   * Eugenio: «que haya una barra indicadora del vídeo como en YouTube que
+   * puedas con el dedo o con el ratón pinchar y arrastrar».
+   *
+   * ── POR QUÉ HAY QUE PINTARLA Y NO PEDÍRSELA A YOUTUBE ─────────────────────
+   * Su barra existe, y está apagada a propósito: `controls=0` y el marco sin
+   * eventos de ratón son lo que impide que salga su rótulo con el canal encima
+   * de la portada. Volver a encenderla traería de vuelta lo que Eugenio pidió
+   * quitar hace dos horas. Así que la barra es nuestra: se le pregunta al
+   * reproductor por dónde va y se le dice a dónde ir.
+   *
+   * ── DOS REPRODUCTORES, UNA BARRA ──────────────────────────────────────────
+   * Un vídeo subido es un `<video>` y se lee directamente; uno de YouTube es un
+   * marco al que se le habla por mensajes. Lo que la barra necesita es lo mismo
+   * en los dos casos —por dónde va, cuánto dura y llévame ahí—, así que eso es
+   * lo único que se guarda aquí y cada reproductor pone su forma de contestarlo.
+   */
+  const [segundo, setSegundo] = useState(0);
+  const [duracion, setDuracion] = useState(0);
+  /** Mientras se arrastra, manda el dedo y no el reproductor: si no, cada aviso
+   *  del vídeo devolvería la bolita al sitio del que la estás sacando. */
+  const [arrastrando, setArrastrando] = useState(false);
+  const barra = useRef<HTMLDivElement>(null);
   const reproductor = useRef<HTMLVideoElement>(null);
   const marco = useRef<HTMLIFrameElement>(null);
 
@@ -166,6 +191,25 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
   }, [encima]);
 
   /*
+   * EL TIEMPO DE UN `<video>` SUBIDO. `timeupdate` llega unas cuatro veces por
+   * segundo, que es justo lo que hace falta para una barra: más sería repintar
+   * de más y menos se vería a saltos.
+   */
+  useEffect(() => {
+    const v = reproductor.current;
+    if (!v || !encima) return;
+    const alAvanzar = () => { if (!arrastrando) setSegundo(v.currentTime); };
+    const alSaberDuracion = () => setDuracion(v.duration || 0);
+    v.addEventListener('timeupdate', alAvanzar);
+    v.addEventListener('loadedmetadata', alSaberDuracion);
+    alSaberDuracion();
+    return () => {
+      v.removeEventListener('timeupdate', alAvanzar);
+      v.removeEventListener('loadedmetadata', alSaberDuracion);
+    };
+  }, [encima, arrastrando]);
+
+  /*
    * ══ YOUTUBE: EL SONIDO Y EL «YA ESTOY REPRODUCIENDO», EN UNA SOLA CONVERSACIÓN
    * ══════════════════════════════════════════════════════════════════════════
    * Aquí había dos efectos que le hablaban al reproductor **a ciegas**: uno le
@@ -211,6 +255,12 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     } catch { /* el marco se ha ido entre medias */ }
   };
 
+  // Se lee dentro del oyente de mensajes, que se engancha una sola vez. Con el
+  // valor normal, cada arrastre volvería a enganchar y desenganchar el oyente —
+  // y en ese hueco se pierden avisos del reproductor.
+  const arrastrandoRef = useRef(false);
+  arrastrandoRef.current = arrastrando;
+
   useEffect(() => {
     if (!encima || !portada.youtube) { setReproduciendo(false); return; }
 
@@ -234,6 +284,13 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
       }
       const estado = d?.event === 'onStateChange' ? d.info : d?.info?.playerState;
       if (estado === 1) setReproduciendo(true);
+
+      // POR DÓNDE VA. El reproductor lo cuenta solo, dentro de `infoDelivery`,
+      // varias veces por segundo. No hay que pedírselo.
+      if (d?.info?.duration) setDuracion(d.info.duration);
+      if (typeof d?.info?.currentTime === 'number' && !arrastrandoRef.current) {
+        setSegundo(d.info.currentTime);
+      }
     };
 
     window.addEventListener('message', oir);
@@ -255,11 +312,64 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     return () => { window.removeEventListener('message', oir); clearTimeout(red); };
   }, [encima, portada.youtube]);
 
+  /** Llevar el vídeo a un punto. Cada reproductor a su manera; quien llama no
+   *  tiene que saber cuál hay debajo. */
+  const irA = (seg: number) => {
+    const v = reproductor.current;
+    if (v) { v.currentTime = seg; return; }
+    try {
+      marco.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func: 'seekTo', args: [seg, true], id: 1, channel: 'widget' }), '*');
+    } catch { /* el marco ya no está */ }
+  };
+
+  /** De dónde está el dedo a qué segundo es. Se recorta a los extremos porque
+   *  al arrastrar es normal salirse de la barra por los lados, y ahí lo que se
+   *  quiere es el principio o el final, no que deje de responder. */
+  const segundoEn = (clientX: number) => {
+    const caja = barra.current?.getBoundingClientRect();
+    if (!caja || !caja.width || !duracion) return 0;
+    const parte = Math.min(1, Math.max(0, (clientX - caja.left) / caja.width));
+    return parte * duracion;
+  };
+
+  const empezarArrastre = (e: React.PointerEvent) => {
+    if (!duracion) return;
+    // NO DEJAR QUE EL GESTO SIGA HACIA LA TARJETA: si no, mover la barra abre
+    // la publicación. Y `setPointerCapture` es lo que hace que el dedo siga
+    // mandando aunque se salga de la barra a medio arrastre.
+    e.stopPropagation();
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    setArrastrando(true);
+    const seg = segundoEn(e.clientX);
+    setSegundo(seg);
+    irA(seg);
+  };
+
+  const seguirArrastre = (e: React.PointerEvent) => {
+    if (!arrastrando) return;
+    e.stopPropagation();
+    const seg = segundoEn(e.clientX);
+    setSegundo(seg);
+    irA(seg);
+  };
+
+  const soltarArrastre = (e: React.PointerEvent) => {
+    if (!arrastrando) return;
+    e.stopPropagation();
+    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+    setArrastrando(false);
+  };
+
   return (
     <div
       onMouseEnter={() => setEncima(true)}
       onMouseLeave={() => setEncima(false)}
-      className="relative aspect-video w-full overflow-visible rounded-xl bg-slate-100"
+      // Sin esquinas redondeadas cuando va a todo el ancho: una foto pegada a
+      // los dos bordes con las puntas recortadas deja cuatro triángulos de
+      // fondo que se leen como un fallo. Desde `sm`, con su margen, vuelven.
+      className="relative aspect-video w-full overflow-visible bg-slate-100 sm:rounded-xl"
     >
       {/* AQUÍ CRECÍA EL VÍDEO AL PASAR EL RATÓN (`scale-[1.25]`), y se retira
           el 2026-08-24 a petición de Eugenio: «esto no queda bien».
@@ -271,7 +381,7 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
           viva, y eso no le quita sitio a nadie.
           Lo que sí se queda: el sonido. Eugenio: «eso sí que ha sido una
           mejora». */}
-      <div className="absolute inset-0 overflow-hidden rounded-xl">
+      <div className="absolute inset-0 overflow-hidden sm:rounded-xl">
         {/* Quieta: la miniatura. Siempre, aunque haya vídeo — así la rejilla se
             pinta entera sin esperar a ningún reproductor. */}
         {portada.imagen && !rota && (
@@ -350,6 +460,54 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
             // ningún control del navegador aparece encima de la portada.
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
           />
+        )}
+
+        {/* ══ LA BARRA, ABAJO DEL TODO ═══════════════════════════════════
+            Sólo mientras se está encima y sólo cuando se sabe cuánto dura: una
+            barra sin duración no puede decir por dónde va, y una que aparece
+            vacía parece que el vídeo no ha empezado.
+
+            ── EL ÁREA QUE SE PUEDE PULSAR ES MÁS ALTA QUE LA RAYA ───────────
+            La raya mide 3 px porque tiene que estorbar poco encima de la
+            portada; el objetivo mide 16, con el resto transparente. Sin eso,
+            acertar 3 px con el dedo es imposible y con el ratón es una prueba
+            de puntería. Es la misma idea que las barras de YouTube: la línea es
+            fina, la zona sensible no.
+
+            `touch-none` para que arrastrar el dedo por la barra mueva el vídeo
+            y no desplace la página, que es lo que haría por defecto. */}
+        {encima && duracion > 0 && (
+          <div
+            ref={barra}
+            onPointerDown={empezarArrastre}
+            onPointerMove={seguirArrastre}
+            onPointerUp={soltarArrastre}
+            onPointerCancel={soltarArrastre}
+            onClick={e => { e.stopPropagation(); e.preventDefault(); }}
+            role="slider"
+            aria-label="Punto del vídeo"
+            aria-valuemin={0}
+            aria-valuemax={Math.round(duracion)}
+            aria-valuenow={Math.round(segundo)}
+            tabIndex={-1}
+            className="absolute inset-x-0 bottom-0 z-10 flex h-4 cursor-pointer touch-none items-end px-1 pb-1"
+          >
+            <div className="relative h-[3px] w-full rounded-full bg-white/30">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-emerald-400"
+                style={{ width: `${Math.min(100, (segundo / duracion) * 100)}%` }}
+              />
+              {/* La bolita sólo mientras se arrastra: en reposo la raya sola
+                  ensucia menos la portada, y al arrastrar hace falta saber
+                  exactamente dónde se está soltando. */}
+              {arrastrando && (
+                <span
+                  className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow"
+                  style={{ left: `${Math.min(100, (segundo / duracion) * 100)}%` }}
+                />
+              )}
+            </div>
+          </div>
         )}
 
         {/* El triángulo dice que hay vídeo antes de acercar el ratón. Sin él,

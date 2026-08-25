@@ -27,13 +27,20 @@ import { X, Maximize2 } from 'lucide-react';
  * lienzo se ve sin una segunda barra de menús dentro del pop-up.
  */
 
-export default function VentanaCentral({ titulo, destino, onCerrar, onAbrirEntero }: {
+export default function VentanaCentral({ titulo, destino, onCerrar, onAbrirEntero, caja }: {
   titulo: string;
   /** Una ruta de la propia aplicación, sin `embed=1`: se añade aquí. */
   destino: string;
   onCerrar: () => void;
   /** Irse de verdad a esa página. Si no se pasa, no sale el botón. */
   onAbrirEntero?: () => void;
+  /**
+   * Quien lo abre puede pedir una referencia a la caja para saber si el ratón
+   * sigue dentro. Lo usa la etiqueta de «parte de», que abre esto al acercarse
+   * y necesita cerrarlo al alejarse: sin poder preguntar dónde está el ratón,
+   * un pop-up abierto por roce no sabría nunca que ya no lo miran.
+   */
+  caja?: React.RefObject<HTMLDivElement | null>;
 }) {
   // Escape cierra, como en el resto de la plataforma. Y el fondo de detrás no
   // se desplaza mientras esto está abierto: un pop-up que deja rodar la página
@@ -57,7 +64,7 @@ export default function VentanaCentral({ titulo, destino, onCerrar, onAbrirEnter
     // esto es un diálogo modal: mientras está abierto, es la aplicación. Visto
     // en la pantalla antes de arreglarlo, el botón verde de Crear se plantaba
     // encima de la barra de herramientas del lienzo.
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-8">
+    <div ref={caja} className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-8">
       <div onClick={onCerrar} aria-hidden className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]" />
       <div
         role="dialog"

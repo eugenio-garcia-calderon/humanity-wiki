@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import { useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
@@ -19,6 +19,7 @@ import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
 import BotonCalendario from '../navegacion/BotonCalendario';
+import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
@@ -159,6 +160,147 @@ export default function Layout() {
    * Pulsando → se queda. Y pulsar cualquier cosa dentro del menú lo asciende a
    * «lo quiero»: si ya has empezado a usarlo, deja de ser un accidente.
    */
+  /*
+   * ══ EL MENÚ DE TEMAS DE CADA UNO (2026-08-25) ═════════════════════════════
+   * Eugenio: favoritos arriba, poder ocultar temas y poder reordenarlos.
+   *
+   * ── SE GUARDA FUERA Y SE PINTA YA ─────────────────────────────────────────
+   * Al marcar un favorito, la lista se recoloca **antes** de que el servidor
+   * conteste. Es lo correcto aquí: el orden de tu propio menú no es un dato que
+   * haya que confirmar con nadie, y esperar medio segundo a que una estrella se
+   * encienda hace que parezca que no ha funcionado y se pulse otra vez.
+   * Si la grabación falla, lo que se pierde es una preferencia — y se recupera
+   * volviéndola a pulsar.
+   *
+   * ── SIN SESIÓN NO SE GUARDA, PERO SE PUEDE MIRAR ──────────────────────────
+   * Quien no ha entrado ve los catorce en su orden de siempre y no tiene
+   * estrellas: no hay dónde guardar lo suyo. No se le enseñan controles que no
+   * van a hacer nada.
+   */
+  const [prefsTemas, setPrefsTemas] = useState<Record<string, { favorito?: boolean; oculto?: boolean; orden?: number }>>({});
+
+  useEffect(() => {
+    if (!user) { setPrefsTemas({}); return; }
+    let vivo = true;
+    fetch('/api/temas/mio/objetivos', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (!vivo || !j?.preferencias) return;
+        const m: Record<string, any> = {};
+        for (const p of j.preferencias) m[p.clave] = { favorito: p.favorito, oculto: p.oculto, orden: p.orden };
+        setPrefsTemas(m);
+      })
+      .catch(() => { /* sin preferencias, el menú es el de siempre */ });
+    return () => { vivo = false; };
+  }, [user]);
+
+  /*
+   * ══ LOS SUBTEMAS DEL MENÚ (2026-08-25, prog8) ═════════════════════════════
+   * `0120_subtemas.sql` dejó el árbol y `GET /api/temas/:objetivo` que lo
+   * sirve, y no había pantalla que lo pidiera: el árbol estaba en la base de
+   * datos y no se veía por ningún sitio.
+   *
+   * ── SE PIDE AL ABRIR, NO AL CARGAR ────────────────────────────────────────
+   * Catorce peticiones al pintar el menú, para catorce árboles que casi nadie
+   * va a desplegar, es pagar la portada entera por adelantado. Se pide el de
+   * un tema la primera vez que alguien pulsa su flecha, y se queda guardado.
+   *
+   * `null` mientras viaja y `[]` cuando ya se sabe que está vacío: sin esa
+   * diferencia, un tema sin subtemas se volvería a pedir cada vez que se abre.
+   */
+  const [ramas, setRamas] = useState<Record<string, Array<{ id: string; padre_id: string | null; nombre: string; cosas: number }> | null>>({});
+  const [ramasAbiertas, setRamasAbiertas] = useState<Record<string, boolean>>({});
+  /** Cuántos subtemas tiene cada objetivo. Una sola consulta al arrancar, y es
+   *  lo único que decide en qué filas se dibuja la flecha. */
+  const [cuantasRamas, setCuantasRamas] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/agregador/temas/cuantos', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (vivo && j?.cuantos) setCuantasRamas(j.cuantos); })
+      .catch(() => { /* sin flechas; el menú es el de siempre */ });
+    return () => { vivo = false; };
+  }, []);
+
+  const alternarRama = (clave: string) => {
+    setRamasAbiertas(a => ({ ...a, [clave]: !a[clave] }));
+    // Sólo se pide el árbol de un OBJETIVO. Al abrir una rama de dentro no hay
+    // nada que pedir: el árbol entero del objetivo ya llegó en esa primera
+    // petición, y volver a pedirlo por cada rama que alguien abra sería una
+    // llamada por clic para datos que ya están en memoria.
+    if (!/^O\d{3}$/.test(clave)) return;
+    if (ramas[clave] !== undefined) return;
+    setRamas(r => ({ ...r, [clave]: null }));
+    fetch(`/api/temas/${encodeURIComponent(clave)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setRamas(r => ({ ...r, [clave]: j?.subtemas ?? j?.temas ?? [] })))
+      // Si falla, se queda en lista vacía: la flecha se apaga y el menú sigue
+      // funcionando. Un menú que se rompe entero porque un árbol no cargó es
+      // peor que un tema que hoy no despliega.
+      .catch(() => setRamas(r => ({ ...r, [clave]: [] })));
+  };
+
+  const guardarPref = (clave: string, cambio: { favorito?: boolean; oculto?: boolean }) => {
+    setPrefsTemas(p => ({ ...p, [clave]: { ...p[clave], ...cambio } }));
+    fetch('/api/temas/preferencia', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ clave, ...cambio }),
+    }).catch(() => { /* ver la nota de arriba */ });
+  };
+
+  /*
+   * LA LISTA QUE SE PINTA. Tres reglas, en este orden:
+   *   1. lo oculto no está;
+   *   2. los favoritos arriba — que es lo que pidió Eugenio;
+   *   3. dentro de cada grupo, el orden que haya puesto la persona, y si no,
+   *      el de siempre.
+   *
+   * Favoritos arriba **por encima del orden manual** a propósito: marcar algo
+   * favorito es decir «esto lo quiero a mano», y si se quedara donde estaba,
+   * la estrella no habría hecho nada visible.
+   */
+  const temasDelMenu = useMemo(() => {
+    const pos = (clave: string, i: number) => prefsTemas[clave]?.orden ?? i;
+    return OBJETIVOS_RAIL
+      .filter(o => !prefsTemas[o.clave]?.oculto)
+      .map((o, i) => ({ o, i }))
+      .sort((a, b) => {
+        const fa = prefsTemas[a.o.clave]?.favorito ? 0 : 1;
+        const fb = prefsTemas[b.o.clave]?.favorito ? 0 : 1;
+        if (fa !== fb) return fa - fb;
+        return pos(a.o.clave, a.i) - pos(b.o.clave, b.i);
+      })
+      .map(x => x.o);
+  }, [prefsTemas]);
+
+  /** Cuántos hay escondidos, para poder decirlo y poder recuperarlos. */
+  const temasOcultos = OBJETIVOS_RAIL.filter(o => prefsTemas[o.clave]?.oculto);
+
+  const reordenarTemas = (desde: string, hasta: string) => {
+    const claves = temasDelMenu.map(o => o.clave);
+    const i = claves.indexOf(desde);
+    const j = claves.indexOf(hasta);
+    if (i < 0 || j < 0) return;
+    claves.splice(j, 0, ...claves.splice(i, 1));
+    // Se escribe el orden de TODOS, no sólo del que se ha movido: así lo
+    // guardado no depende de cómo estaba antes en el servidor.
+    setPrefsTemas(p => {
+      const m = { ...p };
+      claves.forEach((c, k) => { m[c] = { ...m[c], orden: k }; });
+      return m;
+    });
+    fetch('/api/temas/orden', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ claves }),
+    }).catch(() => {});
+  };
+
+  /** El diálogo de crear un tema, abierto desde el menú de la izquierda. */
+  const [nuevoTema, setNuevoTema] = useState(false);
+  /** Cuando el «+» sale de una rama concreta, el diálogo abre colgado de ella. */
+  const [nuevoTemaEn, setNuevoTemaEn] = useState<string | null>(null);
+
   const [porRoce, setPorRoce] = useState(false);
 
   const abrirPorRoce = (c: Circulo) => {
@@ -528,11 +670,50 @@ export default function Layout() {
             siempreAbierto={circulo === 'explorar'}
             claro
             titulo="Explorar"
-            items={OBJETIVOS_RAIL}
+            items={temasDelMenu}
+            personal={user ? {
+              esFavorito: c => !!prefsTemas[c]?.favorito,
+              estaOculto: c => !!prefsTemas[c]?.oculto,
+              marcarFavorito: (c, v) => guardarPref(c, { favorito: v }),
+              ocultar: c => guardarPref(c, { oculto: true }),
+              reordenar: reordenarTemas,
+              ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
+              mostrar: c => guardarPref(c, { oculto: false }),
+              onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
+              onNuevoTema: () => setNuevoTema(true),
+            } : undefined}
+            ramas={{
+              de: c => ramas[c] ?? [],
+              hay: c => (cuantasRamas[c] ?? 0) > 0,
+              abierto: c => !!ramasAbiertas[c],
+              alternar: alternarRama,
+              // El «+» sólo para administración. Crear un subtema lo permite
+              // `POST /api/temas` a cualquiera con sesión (decisión de Eugenio
+              // en 0120), pero **crearlo desde el menú de todos** es otra cosa:
+              // ahí lo que se toca es la navegación común, y eso es de nivel 4.
+              onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
+            }}
             abierta={objetivoAbierto}
-            // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
-            // relacionado con energía».
-            onElegir={h => navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`)}
+            /*
+             * EL NOMBRE LLEVA A LA PÁGINA DEL TEMA (2026-08-25, prog8).
+             *
+             * Llevaba a `/explorar?objetivo=O008`, y esa página contestaba
+             * «Ninguna publicación habla de movilidad todavía» **teniendo 64
+             * publicaciones y 31 subtemas** colgando de ese mismo objetivo. El
+             * gesto natural —pulsar el tema— decía que no había nada, y lo que
+             * sí funcionaba pedía acertarle a una flecha gris de catorce
+             * píxeles que además compartía fila con otra flecha distinta.
+             *
+             * Eugenio lo dijo así: «haz que al pulsar Movilidad te lleve a la
+             * página de movilidad con todos los subtemas y con los mejores
+             * contenidos de Internet, estadísticas, y retos de la humanidad».
+             *
+             * `/temas/O008` es la misma pantalla que `/temas/ST_MEL`: un
+             * objetivo y un subtema contestan a la misma pregunta —«¿qué hay
+             * de esto?»— y tener dos pantallas para eso sería mantener dos
+             * cosas que enseñan lo mismo.
+             */
+            onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}`)}
             // LA FLECHA ABRE SU PANEL — indicadores y marcadores— y no toca la
             // pantalla de detrás. Mirar lo que hay dentro de un tema y decidir
             // pasarte a él son dos cosas, y ahora tienen dos sitios donde
@@ -631,7 +812,39 @@ export default function Layout() {
           se vio el daño en una captura: en /explorar tapaba las tres primeras
           carpetas. Crecer 16 px una sola vez es un precio que se paga donde se
           ve; tapar contenido es un precio que se paga a escondidas. */}
-      <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-2 flex items-center gap-2 z-40 shrink-0 shadow-sm',
+      {/* ══ A 320 px LA FILA NO CABÍA (2026-08-24) ════════════════════════
+          Encontrado por prog3 preparando las capturas de Google Play y medido
+          aquí: la cabecera pedía **358 px dentro de una ventana de 320** — 38
+          fuera. Con la sesión cerrada lo que se salía era el botón de entrar;
+          con ella abierta, la foto de la cuenta. Es el mismo sitio: el último
+          de la fila es el que se cae por el borde.
+
+          Y 320 no es un capricho: es el ancho mínimo que acepta Google Play,
+          o sea el que se mira antes de publicar la aplicación.
+
+          ── LO QUE SE HA DADO, Y LO QUE NO ────────────────────────────────
+          No se quita ningún botón. Lo que se aprieta por debajo de `sm` es el
+          **aire** entre ellos, de 8 px a 4. Ocho separan; cuatro también
+          separan, y a 320 px el aire es lo único que sobra cuando lo demás son
+          objetivos que hay que poder acertar con el dedo.
+
+          El otro ahorro está en el botón de entrar: ahí abajo dice «Entrar» en
+          vez de «Iniciar sesión». **Sigue siendo una palabra**, que es lo que
+          no se podía perder — un icono de persona sin texto se lee como «tu
+          cuenta», justo lo contrario de lo que ese botón hace.
+
+          ── Y HACÍA FALTA UN TERCER RECORTE, MEDIDO ───────────────────────
+          Con el aire a 4 px, **con la sesión abierta** la fila seguía pidiendo
+          322 px: dos de más. Ahí hay tres botones que no existen sin sesión —
+          calendario, avisos y tu cuenta— y ninguno sobra.
+
+          Así que lo que se recorta es el margen de la propia barra, de 8 px a 4
+          por lado. Ocho píxeles que no eran de nadie, en vez de encoger un
+          botón por debajo de lo que se acierta con el dedo o quitar un control
+          de la única barra que hay.
+
+          Comprobado con las dos sesiones a 320 px, no calculado. */}
+      <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-1 sm:px-2 flex items-center gap-1 sm:gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
@@ -1018,7 +1231,21 @@ export default function Layout() {
           </div>
         )}
 
-        <div className="flex-1" />
+        {/* ══ ESTE HUECO YA NO CRECE, PARA QUE EL BUSCADOR QUEDE CENTRADO ══
+            (2026-08-25, Eugenio: «haz que el chat de búsqueda sea un 30 % más
+            largo, y que esté centrado».)
+
+            Aquí había un `flex-1` vacío cuyo único trabajo era empujar los
+            iconos a la derecha. Pero el contenedor del buscador **también** es
+            `flex-1`, así que los dos se repartían el hueco a partes iguales: el
+            buscador se quedaba con la mitad izquierda de ese espacio y su
+            centro caía a 448 px en una ventana de 1440 — a 272 px del centro
+            de la pantalla. Se veía torcido porque lo estaba.
+
+            Sin crecer, el buscador se lleva todo el hueco libre y su caja queda
+            centrada dentro. Los iconos siguen a la derecha exactamente igual:
+            los empuja el buscador, que ahora es el único que crece. */}
+        <div className="shrink-0 xl:flex-1" />
 
         {/* EL BOTÓN DE COLAPSAR. Solo aparece si hay ventanas: sin ellas no hay
             nada que encoger. */}
@@ -1217,8 +1444,15 @@ export default function Layout() {
             />
           ) : (
             <Link to="/login"
-              className="h-9 px-3 inline-flex items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
-              <User className="w-3.5 h-3.5" /> Iniciar sesión
+              aria-label="Iniciar sesión"
+              className="h-9 px-2.5 sm:px-3 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
+              <User className="w-3.5 h-3.5 shrink-0" />
+              {/* Dos palabras distintas para lo mismo, y no un texto recortado:
+                  «Iniciar ses…» no es más corto, es peor. El `aria-label` de
+                  arriba dice la frase entera pase lo que pase, así que quien no
+                  ve la pantalla oye siempre lo mismo. */}
+              <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">Iniciar sesión</span>
             </Link>
           )}
         </div>
@@ -1327,23 +1561,45 @@ export default function Layout() {
 
       {/* En móvil «Organizar» ocupa la pantalla: a 375 px un raíl y un panel
           uno al lado del otro no dejan nada para el contenido. */}
+      {/* ══ Y SALE POR LA DERECHA, COMO EN EL ORDENADOR (2026-08-25) ══════
+          Eugenio: «en versión móvil, cuando pulsas el botón de organizar, se
+          abre el menú de izquierda a derecha. Cuando ese menú en realidad tiene
+          que estar a la derecha».
+
+          Tenía razón y era un despiste con consecuencias: en el ordenador
+          «Explorar» vive a la izquierda y «Organizar» a la derecha, y esa
+          posición es la mitad de lo que distingue a los dos menús — se aprende
+          con la mano antes que con la cabeza. En el móvil los dos salían por la
+          izquierda, así que el mismo botón abría el mismo sitio en dos lados
+          distintos según el aparato.
+
+          En una fila flex el orden del documento es el orden en pantalla, así
+          que basta con invertirlo: primero el velo y después el menú. Es
+          exactamente lo que ya hace la versión de escritorio, donde el panel va
+          antes que el raíl por la misma razón.
+
+          Y entra deslizándose desde su lado: un cajón que aparece por un borde
+          y se va por el otro cuenta mal de dónde ha salido. */}
       {circulo === 'organizar' && esMovil && (
         <div className="fixed inset-0 z-[9997] flex bg-white">
-          {panelAbierto
-            ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
-            : <Rail
-                siempreAbierto
-                claro
-                abierta={null}
-                // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
-                // que no hay ningún gesto intermedio entre mirar y abrir. El
-                // nombre lleva a la herramienta y la flecha enseña lo que tiene
-                // dentro; sin ella, una de las dos cosas no tendría puerta.
-                onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
-                onAbrirSubmenu={h => setPanelAbierto(h)}
-                onInicio={() => { navigate('/'); setCirculo(null); }}
-              />}
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
+          <div className="flex animate-in slide-in-from-right duration-200">
+            {panelAbierto
+              ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+              : <Rail
+                  siempreAbierto
+                  claro
+                  ladoDerecho
+                  abierta={null}
+                  // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
+                  // que no hay ningún gesto intermedio entre mirar y abrir. El
+                  // nombre lleva a la herramienta y la flecha enseña lo que tiene
+                  // dentro; sin ella, una de las dos cosas no tendría puerta.
+                  onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
+                  onAbrirSubmenu={h => setPanelAbierto(h)}
+                  onInicio={() => { navigate('/'); setCirculo(null); }}
+                />}
+          </div>
         </div>
       )}
 
@@ -1405,6 +1661,26 @@ export default function Layout() {
           gana sin tener que subir el `z-index` de nadie. */}
       {/* El envoltorio no pinta nada: sólo sirve para poder preguntar «¿está el
           ratón todavía en los círculos?». Ver `useCerrarAlAlejarse`. */}
+      {nuevoTema && <DialogoNuevoTema onCerrar={() => setNuevoTema(false)} />}
+      {nuevoTemaEn && (
+        <DialogoNuevoTema
+          padreInicial={nuevoTemaEn}
+          onCerrar={() => setNuevoTemaEn(null)}
+          // Al crearlo, se recarga el árbol de ese objetivo: si no, el tema
+          // nuevo existe en la base y no está en el menú desde el que se acaba
+          // de crear, que es el único sitio donde su autor lo va a buscar.
+          onCreado={() => {
+            const obj = Object.keys(ramas).find(o => (ramas[o] ?? []).some(t => t.id === nuevoTemaEn));
+            setNuevoTemaEn(null);
+            if (!obj) return;
+            fetch(`/api/temas/${encodeURIComponent(obj)}`, { credentials: 'include' })
+              .then(r => (r.ok ? r.json() : null))
+              .then(j => { if (j?.subtemas) setRamas(r => ({ ...r, [obj]: j.subtemas })); })
+              .catch(() => {});
+          }}
+        />
+      )}
+
       <div ref={cajaCirculos}>
         <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
       </div>
@@ -1426,8 +1702,27 @@ export default function Layout() {
                 claro
                 titulo="Explorar"
                 items={OBJETIVOS_RAIL}
+                // EL ÁRBOL TAMBIÉN EN EL MÓVIL (prog8, 2026-08-25). Aquí no va
+                // `personal` —favoritos y reordenar son de escritorio— pero los
+                // subtemas sí: no son un gusto de nadie, son a dónde se va. Sin
+                // esto, en un teléfono el menú se queda en los catorce y las
+                // 1.100 ramas no existen.
+                ramas={{
+                  de: c => ramas[c] ?? [],
+                  hay: c => (cuantasRamas[c] ?? 0) > 0,
+                  abierto: c => !!ramasAbiertas[c],
+                  alternar: alternarRama,
+                  onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
+                }}
                 abierta={null}
-                onElegir={h => { navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`); setCirculo(null); }}
+                // EL MISMO DESTINO QUE EN ESCRITORIO, y aquí falló por segunda
+                // vez lo mismo: `Layout.tsx` monta CINCO raíles y arreglé uno.
+                // Ya me pasó esta misma tarde con el árbol de subtemas, lo
+                // escribí en el commit —contar los caminos antes de dar algo
+                // por comprobado— y volví a contarlos mal. Lo que lo destapó no
+                // fue leer: fue abrir producción y ver que seguía yendo a
+                // `/explorar`.
+                onElegir={h => { navigate(`/temas/${encodeURIComponent(h.clave)}`); setCirculo(null); }}
                 onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}
                 onInicio={() => { navigate('/'); setCirculo(null); }}
               />}

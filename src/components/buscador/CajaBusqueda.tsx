@@ -61,7 +61,7 @@ type Sugerencia = {
 };
 
 export default function CajaBusqueda({
-  compacto = false, onCerrar, pastilla = false, derecha, placeholder, alBuscar, className,
+  compacto = false, onCerrar, pastilla = false, derecha, placeholder, alBuscar, alPegarFichero, className,
 }: {
   compacto?: boolean;
   onCerrar?: () => void;
@@ -75,6 +75,13 @@ export default function CajaBusqueda({
   /** Qué hacer al buscar de verdad. Por defecto, la página de resultados. La
    *  barra de arriba lo cambia cuando el interruptor de IA está encendido. */
   alBuscar?: (q: string) => void;
+  /** Qué hacer si pegan un FICHERO aquí dentro. Solo lo pone la barra de
+   *  arriba cuando el interruptor de IA está encendido: entonces esta caja es
+   *  «hablarle a la IA» y pegarle una captura tiene que hacer algo. Con el
+   *  interruptor apagado esto no se pasa, y pegar un fichero en una caja de
+   *  buscar palabras sigue sin hacer nada — que es lo correcto: mandar una
+   *  imagen a la IA porque la pegaste en el buscador sería una sorpresa cara. */
+  alPegarFichero?: (f: File) => void;
   className?: string;
 }) {
   const navigate = useNavigate();
@@ -162,7 +169,12 @@ export default function CajaBusqueda({
   }
 
   return (
-    <div ref={caja} className={cn('relative w-full', pastilla && 'max-w-xl', className)}>
+    // ══ 30 % MÁS LARGA (2026-08-25) ═══════════════════════════════════════
+    // Medido antes de tocar nada: en una ventana de 1440 la caja se pintaba a
+    // 426 px, no a los 576 del tope de antes (`max-w-xl`) — la estrechaba el
+    // reparto del hueco de la cabecera, no este número. 426 × 1,3 = 554, así
+    // que el tope nuevo son 34,5 rem = 552 px y ahora sí es el que manda.
+    <div ref={caja} className={cn('relative w-full', pastilla && 'max-w-[34.5rem]', className)}>
       {/* En la barra de arriba la caja es un `form`: así el Intro del teclado
           y la lupa hacen lo mismo sin escribirlo dos veces, y el navegador la
           reconoce como lo que es. */}
@@ -180,6 +192,15 @@ export default function CajaBusqueda({
           value={q}
           onChange={e => { setQ(e.target.value); setMarcada(-1); }}
           onFocus={() => sugerencias.length && setAbierto(true)}
+          // Pegar texto sigue siendo pegar texto: solo se intercepta cuando el
+          // portapapeles trae un fichero Y hay quien sepa qué hacer con él.
+          onPaste={e => {
+            if (!alPegarFichero) return;
+            const f = Array.from(e.clipboardData?.files || [])[0];
+            if (!f) return;
+            e.preventDefault();
+            alPegarFichero(f);
+          }}
           onKeyDown={teclas}
           placeholder={placeholder ?? 'Busca en toda la plataforma'}
           aria-label="Buscar"

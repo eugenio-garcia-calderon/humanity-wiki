@@ -4,11 +4,13 @@ import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
   Package, Table2, CalendarDays, Bookmark, ExternalLink,
-  Megaphone, ImageIcon, Video, Paperclip, Link2, Send,
+  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
 import { cn } from '../utils/cn';
+import ArbolDeRamas from '../components/proyecto/ArbolDeRamas';
+import CajaCompartir from '../components/compartir/CajaCompartir';
 import { useEsMovil } from '../hooks/useEsMovil';
 import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
@@ -26,7 +28,7 @@ import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 // El listado
 // ----------------------------------------------------------------------------
 export function Proyectos() {
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
   const [proyectos, setProyectos] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -42,6 +44,43 @@ export function Proyectos() {
 
   useEffect(() => { cargar(); }, []);
 
+  /*
+   * ── EL NOMBRE DE ESTA PÁGINA ES SUYO (2026-08-25) ────────────────────────
+   * Eugenio: «permite ponerle un nombre característico y propio a la página de
+   * proyectos, para que arriba no aparezca sólo Proyectos, sino Proyectos: y
+   * el nombre del usuario o lo que el usuario decida».
+   *
+   * ── DÓNDE SE GUARDA, Y POR QUÉ AHÍ ────────────────────────────────────────
+   * En `ui_settings`, el jsonb que ya lleva las preferencias de interfaz de
+   * cada persona, con `PUT /api/auth/ui-settings`, que hace una fusión
+   * superficial. No hace falta ni tabla ni columna ni ruta nuevas: esto es una
+   * preferencia de alguien sobre su propia pantalla, exactamente lo que esa
+   * columna guarda.
+   *
+   * ── EL VALOR POR DEFECTO ES SU NOMBRE, Y NO SE GUARDA ────────────────────
+   * Quien no toque nada lee «Proyectos: Eugenio» sin haber hecho nada, que es
+   * lo que pidió. Pero ese nombre **no se copia** a `ui_settings`: si se
+   * guardara, el día que alguien cambie cómo se llama, su página de proyectos
+   * se quedaría con el nombre viejo y no habría forma de saber por qué. Se
+   * guarda sólo lo que la persona escribe **a propósito**.
+   *
+   * Y se puede dejar en blanco: entonces vuelve a poner «Proyectos» a secas,
+   * que es lo que había. Poner un nombre es una decisión, y toda decisión debe
+   * poder deshacerse.
+   */
+  const suyo = (user?.uiSettings?.titulo_proyectos ?? '') as string;
+  const porDefecto = user ? (user.displayName || user.name || '') : '';
+  const sufijo = suyo || porDefecto;
+  const [editandoTitulo, setEditandoTitulo] = useState(false);
+  const [tituloBorrador, setTituloBorrador] = useState('');
+
+  const guardarTitulo = async () => {
+    const v = tituloBorrador.trim().slice(0, 40);
+    setEditandoTitulo(false);
+    if (v === suyo) return;
+    await updateUiSettings({ titulo_proyectos: v });
+  };
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-8 pb-24">
@@ -56,10 +95,50 @@ export function Proyectos() {
             entra veinte veces al día ya sabiéndolo. El botón se sube al lado
             del nombre porque es lo único que se hace desde aquí aparte de
             entrar en uno. */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 group/titulo">
           <h1 className="text-3xl font-black tracking-tight text-slate-900 inline-flex items-center gap-2">
             <FolderKanban className="w-6 h-6 text-slate-400" /> Proyectos
+            {editandoTitulo ? (
+              <>
+                <span className="text-slate-300">:</span>
+                <input
+                  autoFocus
+                  value={tituloBorrador}
+                  onChange={e => setTituloBorrador(e.target.value)}
+                  onBlur={guardarTitulo}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') guardarTitulo();
+                    if (e.key === 'Escape') setEditandoTitulo(false);
+                  }}
+                  maxLength={40}
+                  placeholder="ponle un nombre"
+                  aria-label="Nombre de tu página de proyectos"
+                  className="w-56 max-w-full border-b-2 border-emerald-400 bg-transparent text-3xl font-black tracking-tight text-slate-900 outline-none placeholder:font-bold placeholder:text-slate-300"
+                />
+              </>
+            ) : sufijo ? (
+              <>
+                <span className="text-slate-300">:</span>
+                <span className="text-emerald-700">{sufijo}</span>
+              </>
+            ) : null}
           </h1>
+
+          {/* El lápiz sale al pasar por la fila, y se queda si no hay nada
+              escrito todavía: quien aún no le ha puesto nombre es justo quien
+              necesita ver que se le puede poner. */}
+          {user && !editandoTitulo && (
+            <button
+              onClick={() => { setTituloBorrador(suyo || porDefecto); setEditandoTitulo(true); }}
+              title="Ponle un nombre a tu página de proyectos"
+              aria-label="Ponle un nombre a tu página de proyectos"
+              className={cn('grid h-7 w-7 place-items-center rounded-lg text-slate-300 transition-all hover:bg-slate-100 hover:text-slate-700',
+                suyo ? 'opacity-0 group-hover/titulo:opacity-100' : 'opacity-100')}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {user && (
             <button onClick={() => setCreando(true)}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow transition-colors">
@@ -222,6 +301,61 @@ export function Proyecto() {
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
   const [renombrando, setRenombrando] = useState(false);
+  /** La cajita de compartir, la misma que usan las páginas. */
+  const [compartiendo, setCompartiendo] = useState(false);
+  /*
+   * ── LA DESCRIPCIÓN TAMBIÉN SE EDITA (2026-08-25) ─────────────────────────
+   * Eugenio: «cuando le des a editar, también se puede editar la descripción
+   * del proyecto, no sólo el título y el icono».
+   *
+   * ── POR QUÉ AQUÍ Y NO DENTRO DEL POPUP DE RENOMBRAR ──────────────────────
+   * Ese popup es COMÚN: lo usan el menú, las personas y todo lo que tiene
+   * nombre e icono. Meterle una descripción le añadiría un campo a páginas,
+   * mapas y esquemas, que no la tienen — arreglar una pantalla estropeando
+   * cinco.
+   *
+   * Se edita donde se lee, que además es donde uno se da cuenta de que hay que
+   * cambiarla.
+   *
+   * ── Y SIN DESCRIPCIÓN NO HABÍA NI SITIO DONDE PULSAR ─────────────────────
+   * `{proyecto.descripcion && …}`: si estaba vacía no se pintaba nada, así que
+   * un proyecto sin descripción no tenía forma de ganar una. El hueco vacío
+   * ahora invita, y sólo a quien puede editar.
+   */
+  const [editandoDesc, setEditandoDesc] = useState(false);
+  const [descBorrador, setDescBorrador] = useState('');
+  const [guardandoDesc, setGuardandoDesc] = useState(false);
+
+  /**
+   * Guardar la descripción.
+   *
+   * Se manda cadena vacía y no `null` cuando se borra: el `UPDATE` de
+   * `roadmap.ts` usa `COALESCE(${d.descripcion}, descripcion)`, así que un
+   * `null` **conserva la que había** y borrarla sería imposible. La cadena
+   * vacía sí pasa por el COALESCE y la deja limpia.
+   */
+  const guardarDescripcion = async () => {
+    if (guardandoDesc) return;
+    const v = descBorrador.trim().slice(0, 400);
+    setGuardandoDesc(true);
+    try {
+      const r = await fetch(`/api/proyectos/${proyecto.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descripcion: v }),
+      });
+      if (r.ok) {
+        const j = await r.json().catch(() => null);
+        // Se repinta con lo que devolvió el servidor, no con lo que se escribió:
+        // si algún día ese PUT recorta o limpia el texto, la pantalla tiene que
+        // enseñar lo que quedó guardado y no lo que uno tecleó.
+        setProyecto((p: any) => (p ? { ...p, descripcion: j?.descripcion ?? v } : p));
+        setEditandoDesc(false);
+      }
+    } catch { /* se queda abierto con lo escrito dentro */ } finally {
+      setGuardandoDesc(false);
+    }
+  };
   // La publicación recién creada, abierta para escribirla sin salir de aquí.
   const [publicando, setPublicando] = useState<string | null>(null);
 
@@ -345,6 +479,18 @@ export function Proyecto() {
         />
       )}
 
+      {compartiendo && (
+        <CajaCompartir
+          tipo="proyecto"
+          id={proyecto.id}
+          onCerrar={() => setCompartiendo(false)}
+          // Publicar desde la cajita cambia el proyecto: se recarga para que el
+          // candado de la cabecera no siga diciendo «privado».
+          onCambiado={() => fetch(`/api/proyectos/${proyecto.id}`, { credentials: 'include' })
+            .then(r => r.json()).then(p => setProyecto(p)).catch(() => {})}
+        />
+      )}
+
       {borrando && (
         <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-sm grid place-items-center p-4"
           onClick={() => !quitando && setBorrando(false)}>
@@ -387,6 +533,20 @@ export function Proyecto() {
             <ArrowLeft className="w-3.5 h-3.5" /> Proyectos
           </Link>
           <div className="flex-1 min-w-2" />
+
+          {/* COMPARTIR, con la misma cajita que las páginas (2026-08-25).
+              Eugenio: «permite compartir los proyectos como si fuesen
+              páginas». No es una pantalla nueva: es el mismo componente al que
+              se le dice qué se comparte. */}
+          {puedoEditar && (
+            <button
+              onClick={() => setCompartiendo(true)}
+              title="Compartir este proyecto"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors shrink-0"
+            >
+              <Share2 className="w-3.5 h-3.5" /> Compartir
+            </button>
+          )}
 
           {/* LAS HERRAMIENTAS DE LA PLATAFORMA, AQUÍ DENTRO (Eugenio,
               2026-08-20: «permite añadir todas las herramientas de la
@@ -467,7 +627,74 @@ export function Proyecto() {
               </button>
             )}
           </h1>
-          {proyecto.descripcion && <p className="text-sm text-slate-500 mt-1.5">{proyecto.descripcion}</p>}
+          {editandoDesc ? (
+            <div className="mt-1.5">
+              <textarea
+                autoFocus
+                value={descBorrador}
+                onChange={e => setDescBorrador(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') { setEditandoDesc(false); return; }
+                  // Enter guarda y Mayús+Enter salta de línea: una descripción
+                  // es casi siempre una frase, y obligar a buscar un botón para
+                  // una frase es un paso de más.
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); guardarDescripcion(); }
+                }}
+                rows={2}
+                maxLength={400}
+                placeholder="Una línea que diga de qué va este proyecto"
+                className="w-full max-w-2xl px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-emerald-300 resize-y"
+              />
+              <div className="flex items-center gap-2 mt-1.5">
+                <button onClick={guardarDescripcion} disabled={guardandoDesc}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black disabled:opacity-40 transition-colors">
+                  {guardandoDesc ? 'Guardando…' : 'Guardar'}
+                </button>
+                <button onClick={() => setEditandoDesc(false)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[11px] font-bold hover:bg-slate-50 transition-colors">
+                  Cancelar
+                </button>
+                <span className="text-[10.5px] text-slate-400">Enter guarda · Mayús+Enter salta de línea</span>
+              </div>
+            </div>
+          ) : proyecto.descripcion ? (
+            /*
+             * ── EL LÁPIZ ESTABA INVISIBLE, Y ESO ES NO PODER EDITARLA ────────
+             * Lo puse con `opacity-0` hasta pasar el ratón, y Eugenio volvió a
+             * decir que no se podía cambiar la descripción. Tenía razón: el
+             * botón existía en la página con opacidad **cero**, así que no
+             * había forma de saber que estaba ahí — y en una pantalla táctil no
+             * hay ratón que pasar, así que no aparecía nunca.
+             *
+             * Es el mismo fallo que me hizo llegar aquí con los subtemas del
+             * menú: poner la puerta donde nadie va a mirar. Lo escribí en aquel
+             * commit y lo repetí tres pantallas después.
+             *
+             * Ahora: **la descripción entera se pulsa** —es el sitio grande y
+             * evidente— y el lápiz se ve siempre, en gris flojo. Que un botón
+             * sea discreto está bien; que sea invisible es no tenerlo.
+             */
+            <button
+              type="button"
+              onClick={() => { setDescBorrador(proyecto.descripcion || ''); setEditandoDesc(true); }}
+              disabled={!puedoEditar}
+              title={puedoEditar ? 'Cambiar la descripción' : undefined}
+              className={cn('group/desc mt-1.5 flex items-start gap-1.5 text-left text-sm text-slate-500 rounded-lg',
+                puedoEditar && '-mx-1.5 px-1.5 py-0.5 hover:bg-slate-50 hover:text-slate-700 transition-colors')}
+            >
+              <span>{proyecto.descripcion}</span>
+              {puedoEditar && (
+                <Pencil className="w-3 h-3 mt-1 shrink-0 text-slate-300 group-hover/desc:text-emerald-600 transition-colors" />
+              )}
+            </button>
+          ) : puedoEditar ? (
+            <button
+              onClick={() => { setDescBorrador(''); setEditandoDesc(true); }}
+              className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-emerald-700 transition-colors"
+            >
+              <Pencil className="w-3 h-3" /> Añade una descripción
+            </button>
+          ) : null}
           {proyecto.vision && (
             <p className="text-sm text-slate-600 leading-relaxed mt-4 border-l-2 border-emerald-300 pl-4">{proyecto.vision}</p>
           )}
@@ -481,6 +708,10 @@ export function Proyecto() {
             </div>
           )}
         </div>
+
+        {/* Las ramas van ANTES que las personas: primero en qué se abre el
+            proyecto, después quién está en él. */}
+        <ArbolDeRamas proyectoId={proyecto.id} titulo={proyecto.titulo} />
 
         <SeccionPersonas proyectoId={proyecto.id} puedeEditar={puedeEditar} />
 
@@ -674,6 +905,24 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
   const [personas, setPersonas] = useState<any[]>([]);
   const [todas, setTodas] = useState<any[]>([]);
   const [anadiendo, setAnadiendo] = useState(false);
+  /*
+   * ── CREAR UNA PERSONA SIN SALIR DE AQUÍ (2026-08-25) ─────────────────────
+   * Eugenio: «cuando añades a personas, que te permita crear una nueva persona
+   * directamente desde ahí».
+   *
+   * Antes, si no tenías a nadie creado en el Juego Vital, este panel decía
+   * «aún no has creado ninguna» y ahí se acababa: un callejón sin salida en el
+   * único sitio donde alguien está buscando exactamente eso. Había que irse al
+   * Juego Vital, crearla, volver al proyecto y volver a abrir el panel — cuatro
+   * pasos para escribir un nombre.
+   *
+   * La API ya sabía hacerlo (`POST /api/juego/agentes`); lo que faltaba era la
+   * puerta.
+   */
+  const [nombreNuevo, setNombreNuevo] = useState('');
+  const [rolNuevo, setRolNuevo] = useState('');
+  const [creando, setCreando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
 
   const cargar = () =>
     fetch(`/api/juego/proyectos/${proyectoId}/personas`, { credentials: 'include' })
@@ -695,6 +944,41 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
     }).catch(() => {});
     setAnadiendo(false);
     cargar();
+  };
+
+  /**
+   * Crear la persona y meterla en el proyecto, en ese orden y sin preguntar en
+   * medio. Quien escribe un nombre aquí quiere las dos cosas: crearla y que
+   * esté. Crearla y dejarla fuera sería obligarle a un segundo clic para
+   * terminar algo que ya había pedido entero.
+   */
+  const crearYPoner = async () => {
+    const nombre = nombreNuevo.trim();
+    if (!nombre || creando) return;
+    setCreando(true);
+    setFallo(null);
+    try {
+      const r = await fetch('/api/juego/agentes', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'persona', nombre, rol: rolNuevo.trim() || null }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.id) throw new Error(j?.error || 'No se ha podido crear.');
+      await fetch(`/api/juego/agentes/${j.id}/proyectos`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proyecto_id: proyectoId }),
+      });
+      setNombreNuevo(''); setRolNuevo(''); setAnadiendo(false);
+      cargar();
+    } catch (e: any) {
+      // El fallo se dice donde se escribió. Cerrar el panel y perder el nombre
+      // es la forma más rápida de que nadie lo vuelva a intentar.
+      setFallo(e.message || 'No se ha podido crear.');
+    } finally {
+      setCreando(false);
+    }
   };
 
   // Sin personas y sin permiso de edición no hay nada que enseñar.
@@ -724,7 +1008,9 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
           </span>
         ))}
         {personas.length === 0 && (
-          <p className="text-xs text-slate-400">Nadie todavía. Las personas de tu mundo pueden formar parte de este proyecto.</p>
+          <p className="text-xs text-slate-400">
+            Nadie todavía.{puedeEditar && ' Añade a alguien de tu mundo o crea una persona nueva.'}
+          </p>
         )}
         {puedeEditar && !anadiendo && (
           <button onClick={abrirAnadir}
@@ -747,8 +1033,53 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
               </button>
             ))}
             {candidatas.length === 0 && (
-              <p className="text-xs text-slate-400">Todas las personas de tu mundo están ya en el proyecto (o aún no has creado ninguna en el Juego Vital).</p>
+              <p className="text-xs text-slate-400">
+                {todas.length === 0
+                  ? 'Todavía no tienes a nadie en tu mundo. Escribe un nombre aquí abajo y lo creas.'
+                  : 'Todas las personas de tu mundo están ya en este proyecto.'}
+              </p>
             )}
+          </div>
+
+          {/* ── O CREAR UNA NUEVA ────────────────────────────────────────
+              Debajo de la lista y no encima: quien ya tiene a esa persona
+              creada debe encontrarla antes que el formulario de crearla otra
+              vez. Es la misma regla que en los temas — que encontrar lo que hay
+              sea más cómodo que crear un duplicado. */}
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              O crea a alguien nuevo
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <input
+                value={nombreNuevo}
+                onChange={e => { setNombreNuevo(e.target.value); setFallo(null); }}
+                onKeyDown={e => { if (e.key === 'Enter') crearYPoner(); }}
+                placeholder="Nombre"
+                aria-label="Nombre de la persona nueva"
+                className="min-w-0 flex-1 px-2.5 py-1.5 border border-slate-200 rounded-full text-xs font-bold text-slate-700 placeholder:font-normal placeholder:text-slate-300 focus:border-emerald-300 focus:outline-none"
+              />
+              <input
+                value={rolNuevo}
+                onChange={e => setRolNuevo(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') crearYPoner(); }}
+                placeholder="Su papel (opcional)"
+                aria-label="Papel de la persona nueva"
+                className="min-w-0 flex-1 px-2.5 py-1.5 border border-slate-200 rounded-full text-xs text-slate-600 placeholder:text-slate-300 focus:border-emerald-300 focus:outline-none"
+              />
+              <button
+                onClick={crearYPoner}
+                disabled={!nombreNuevo.trim() || creando}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                {creando ? 'Creando…' : 'Crear y añadir'}
+              </button>
+            </div>
+            {fallo && <p className="mt-1.5 text-[11px] font-bold text-red-600">{fallo}</p>}
+            <p className="mt-1.5 text-[10.5px] text-slate-400">
+              Se crea en tu mundo del Juego Vital y entra en este proyecto a la vez.
+            </p>
           </div>
         </div>
       )}

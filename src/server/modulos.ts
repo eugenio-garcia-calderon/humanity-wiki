@@ -55,6 +55,12 @@ import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
 import { registerBuscadorRoutes } from './buscador.js';
+import { registrarRepublicar } from './republicar.js';
+import { registrarFuente } from './fuente.js';
+import { registrarTemas } from './temas.js';
+import { registrarAgregador } from './agregador.js';
+import { registrarRamas } from './ramas.js';
+import { registrarCompartir } from './compartir.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
 import { registerYoutubeRoutes } from './youtube.js';
@@ -169,6 +175,22 @@ export const MODULOS: Modulo[] = [
   // dominio nuevo — pero los que ya tienen certificado siguen funcionando.
   { nombre: 'dominios', montar: (app, db) => registerDominiosRoutes(app, db) },
   { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
+  { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
+  { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },
+  { nombre: 'temas', montar: (app, db) => registrarTemas(app, db) },
+  // Va DESPUÉS de `temas`: lee el árbol que aquel crea. Sus rutas cuelgan de
+  // `/api/agregador/…` y no de `/api/temas/…` a propósito — `/api/temas/:objetivo`
+  // es un comodín de un segmento y cualquier ruta nueva ahí se le puede colar.
+  { nombre: 'agregador', montar: (app, db) => registrarAgregador(app, db) },
+  // Las ramas de un proyecto. Cuelgan de `/api/proyectos/:id/ramas`, que es
+  // una ruta más específica que cualquiera de las de `proyectos`, así que el
+  // orden entre las dos da igual — pero se monta después por costumbre: lo
+  // que depende de otra cosa, detrás.
+  { nombre: 'ramas', montar: (app, db) => registrarRamas(app, db) },
+  // La cajita de compartir, común a páginas y proyectos. Va DESPUÉS de
+  // `dominios`, que sigue sirviendo lo suyo: las dos leen la misma tabla y
+  // ninguna se pisa las rutas — `/api/compartir/…` contra `/api/dominios/…`.
+  { nombre: 'compartir', montar: (app, db) => registrarCompartir(app, db) },
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },

@@ -1,0 +1,613 @@
+import type { Express, Request, Response } from 'express';
+import { sql } from 'drizzle-orm';
+
+/**
+ * Una lista de textos como UN parámetro de Postgres, para `= ANY(...)`.
+ *
+ * ── POR QUÉ HACE FALTA ESTA FUNCIÓN ────────────────────────────────────────
+ * Metiendo un array de JavaScript directamente en la plantilla `sql`, drizzle
+ * lo despliega en `($1, $2, …, $31)` — una lista de parámetros sueltos, no un
+ * array — y `ANY()` de un array vacío ni siquiera es SQL válido. Las dos cosas
+ * fallan en el momento de la consulta y no antes, así que `tsc` las da por
+ * buenas. Aquí se construye el `ARRAY[…]::text[]` explícito, y el caso vacío
+ * tiene su propia forma en vez de romper.
+ */
+/**
+ * El mismo texto sin tildes, dentro de Postgres.
+ *
+ * ── POR QUÉ NO BASTA CON QUITARLE LAS TILDES A LA BÚSQUEDA ─────────────────
+ * Buscar «baterias» contra un texto que dice «batería» no encuentra nada, y es
+ * el caso normal y no el raro: el tema se llama en plural y el texto habla en
+ * singular, y las dos palabras llevan la tilde donde el patrón ya no la tiene.
+ * Comprobado aquí mismo: los cinco subtemas de Movilidad devolvían cero de
+ * dentro, y no era que no hubiera nada.
+ *
+ * `unaccent` resolvería esto mejor, pero es una extensión y habría que
+ * instalarla en la base de producción; `translate` es SQL de siempre y hace lo
+ * mismo para el castellano. Si algún día entra `unaccent`, esto se sustituye
+ * por una llamada y las consultas no cambian.
+ */
+function sinTildes(col: any) {
+  return sql`translate(lower(${col}), 'áéíóúàèìòùäëïöüâêîôûñç', 'aeiouaeiouaeiouaeiounc')`;
+}
+
+function arreglo(ids: string[]) {
+  if (!ids.length) return sql`ARRAY[]::text[]`;
+  return sql`ARRAY[${sql.join(ids.map(i => sql`${i}`), sql`, `)}]::text[]`;
+}
+
+// ============================================================================
+// EL AGREGADOR: QUÉ SE VE AL PULSAR UN TEMA (2026-08-25)
+// ============================================================================
+// Eugenio, en tres encargos que son una sola pantalla:
+//
+//   «recopilar las mejores publicaciones de cada tema y subtema […] enseñar
+//    contenido relevante en forma de mapas, imágenes, vídeos, textos y
+//    gráficas cada vez que alguien pulse en un tema concreto»;
+//
+//   «puedes añadir un breve comentario como "IA" de por qué es relevante»;
+//
+//   «también tienes que tener en cuenta si el usuario tiene alguna publicación,
+//    proyecto, mapa o página relacionada con ese tema, que le tengas que
+//    refrescar y mostrar como contenido propio».
+//
+// ── TRES CARRILES, Y EL ORDEN IMPORTA ──────────────────────────────────────
+// 1. LO TUYO      — tus publicaciones, proyectos y ventanas de este tema.
+// 2. LA HUMANIDAD — lo que ha puesto el resto de la plataforma.
+// 3. DE FUERA     — las piezas agregadas de YouTube y la web.
+//
+// Lo tuyo va primero por lo que pidió Eugenio: al entrar en un tema en el que
+// tienes cosas, lo primero que quieres saber es si lo tuyo sigue al día. Si lo
+// tuyo saliera mezclado por relevancia con un informe de la OCDE, perdería
+// siempre — y entonces la plataforma te estaría escondiendo tu propio trabajo
+// dentro de tu propio tema.
+//
+// ── CLASIFICADO Y ENCONTRADO NO SON LO MISMO, Y SE DICE ────────────────────
+// Hoy casi nada está clasificado: `subtema_contenido` acaba de nacer. Así que
+// además de lo clasificado se BUSCA por palabras, igual que hace hoy el filtro
+// por objetivo de `utils/objetivos.ts`.
+//
+// Lo encontrado así viene marcado `por_busqueda: true` y la pantalla lo dice.
+// Es la misma decisión que ya está escrita en `objetivos.ts`: «las palabras son
+// para buscar, no para clasificar», y llamar categoría a una búsqueda sería
+// afirmar una clasificación que nadie ha hecho.
+
+/** Palabras vacías: aparecen en cualquier texto y no distinguen ningún tema. */
+const VACIAS = new Set([
+  'de', 'del', 'la', 'el', 'los', 'las', 'y', 'e', 'o', 'u', 'en', 'con', 'por',
+  'para', 'un', 'una', 'unos', 'unas', 'al', 'a', 'que', 'se', 'su', 'sus',
+]);
+
+/** Sin tildes y en minúsculas: mismo criterio que `claveDe` en `temas.ts`. */
+function normalizar(t: string): string {
+  return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+/**
+ * Las palabras con las que se busca un tema.
+ *
+ * Se usan el nombre del subtema Y el de sus padres, porque un subtema hondo
+ * suele llamarse con una palabra sola —«GBFS», «Reparto urbano»— y sin la rama
+ * de arriba no se entiende de qué habla. Buscar «Reparto urbano» a secas trae
+ * paquetería de furgoneta; con «Bicicleta de carga» delante, no.
+ *
+ * Fuera van las palabras de menos de cuatro letras: «VMP» sí sirve, pero se
+ * añade aparte porque es una sigla, y «con» o «por» sólo traen ruido.
+ */
+function palabrasDe(nombres: string[]): string[] {
+  const fuera = new Set<string>();
+  for (const n of nombres) {
+    for (const p of normalizar(n).replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').split(/\s+/)) {
+      if (!p || VACIAS.has(p)) continue;
+      // Las siglas cortas en mayúsculas del nombre original sí valen.
+      if (p.length < 4 && !/^[A-ZÁÉÍÓÚÑ]{2,}$/.test(n.match(new RegExp(p, 'i'))?.[0] || '')) continue;
+      fuera.add(p);
+    }
+  }
+  return [...fuera].slice(0, 8);
+}
+
+export function registrarAgregador(app: Express, db: any) {
+  /**
+   * QUÉ TEMAS TIENEN RAMAS — `GET /api/agregador/temas/cuantos`
+   *
+   * Devuelve `{ O001: 0, …, O008: 31 }`.
+   *
+   * ── POR QUÉ HACE FALTA, SI YA ESTÁ `GET /api/temas/:objetivo` ────────────
+   * El menú pide el árbol de un tema **al abrirlo**, no al cargar: catorce
+   * árboles por adelantado, para catorce flechas que casi nadie pulsa, es
+   * pagar la portada entera de golpe.
+   *
+   * Pero entonces el menú no sabe **en cuál dibujar la flecha**, y ahí no hay
+   * salida buena: pintarla en los catorce hace que trece se abran vacías, y no
+   * pintarla ninguna esconde la única que tiene algo. Esta ruta es una sola
+   * consulta agregada que contesta exactamente esa pregunta y ninguna otra.
+   */
+  app.get('/api/agregador/temas/cuantos', async (_req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`
+        SELECT objetivo_id, count(*)::int AS cuantos
+        FROM subtemas WHERE archived_at IS NULL
+        GROUP BY objetivo_id
+      `);
+      const m: Record<string, number> = {};
+      for (const f of r.rows as any[]) m[f.objetivo_id] = f.cuantos;
+      res.json({ cuantos: m });
+    } catch (e: any) {
+      console.error('[agregador cuantos]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * LO QUE SE VE AL PULSAR UN TEMA — `GET /api/agregador/tema/:id`
+   *
+   * Devuelve el tema, sus ramas y los tres carriles. Sin sesión, `tuyo` viene
+   * vacío y no se pide: no hay nadie de quien sea nada.
+   */
+  app.get('/api/agregador/tema/:id', async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params.id || '');
+      const yo = req.user?.id || null;
+
+      // EL NOMBRE DEL OBJETIVO SE LEE DE LA BASE, no de una lista en el
+      // código. Aquí había un mapa hecho al revés de `objectiveIds.ts`, y el
+      // mismo día que se escribió ya estaba viejo: prog2 añadió ESPIRITUALIDAD
+      // (`O015`) a `objetivos.ts` y a la tabla `objectives`, y `objectiveIds.ts`
+      // se quedó en catorce. Con dos listas de lo mismo la que se queda vieja
+      // es siempre la copia; `objectives` es donde el dato vive de verdad y no
+      // se puede desincronizar de sí mismo.
+      // ── UN OBJETIVO TAMBIÉN ES UN TEMA ──────────────────────────────────
+      // Eugenio: «haz que al pulsar Movilidad te lleve a la página de movilidad
+      // con todos los subtemas y con los mejores contenidos de Internet».
+      //
+      // Antes, pulsar MOVILIDAD llevaba a `/explorar?objetivo=O008`, que
+      // contestaba «Ninguna publicación habla de movilidad todavía» **teniendo
+      // 64 publicaciones y 31 subtemas** un nivel más abajo. El camino natural
+      // decía que no había nada; el que funcionaba pedía acertarle a una flecha
+      // gris de catorce píxeles.
+      //
+      // Se resuelve aquí y no con una página nueva: un objetivo y un subtema
+      // contestan a la misma pregunta —«¿qué hay de esto?»— y separarlos sería
+      // mantener dos pantallas que enseñan lo mismo. La raíz de un árbol es un
+      // nodo del árbol.
+      const esObjetivo = /^O\d{3}$/.test(id);
+
+      const suyo = esObjetivo
+        ? await db.execute(sql`
+            SELECT o.id, o.id AS objetivo_id, NULL::text AS padre_id,
+                   o.title AS nombre, o.title AS objetivo_nombre, true AS es_objetivo
+            FROM objectives o WHERE o.id = ${id} AND o.archived_at IS NULL
+          `)
+        : await db.execute(sql`
+            SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, o.title AS objetivo_nombre,
+                   false AS es_objetivo
+            FROM subtemas s LEFT JOIN objectives o ON o.id = s.objetivo_id
+            WHERE s.id = ${id} AND s.archived_at IS NULL
+          `);
+      if (!suyo.rows.length) return res.status(404).json({ error: 'Ese tema no existe.' });
+      const tema = suyo.rows[0] as any;
+
+      // ── EL CAMINO HASTA AQUÍ ────────────────────────────────────────────
+      // Para las migas de pan y para las palabras de búsqueda. Recursivo hacia
+      // ARRIBA: son como mucho unos pocos niveles, y el árbol no tiene límite
+      // de profundidad, así que un número fijo de consultas no valdría.
+      const camino = esObjetivo ? { rows: [] as any[] } : await db.execute(sql`
+        WITH RECURSIVE subida AS (
+          SELECT id, padre_id, nombre, 0 AS altura FROM subtemas WHERE id = ${id}
+          UNION ALL
+          SELECT s.id, s.padre_id, s.nombre, subida.altura + 1
+          FROM subtemas s JOIN subida ON s.id = subida.padre_id
+        )
+        SELECT id, nombre FROM subida ORDER BY altura DESC
+      `);
+
+      // ── TODA LA RAMA, PARA CONTAR ───────────────────────────────────────
+      // Pulsar «Baterías» tiene que enseñar también lo que hay en «Fuga
+      // térmica»: si no, el padre sale vacío y parece que no hay nada, cuando
+      // lo que pasa es que está un nivel más abajo.
+      const rama = esObjetivo
+        ? await db.execute(sql`SELECT id FROM subtemas WHERE objetivo_id = ${id} AND archived_at IS NULL`)
+        : await db.execute(sql`
+        WITH RECURSIVE bajada AS (
+          SELECT id FROM subtemas WHERE id = ${id}
+          UNION ALL
+          SELECT s.id FROM subtemas s JOIN bajada ON s.padre_id = bajada.id
+          WHERE s.archived_at IS NULL
+        )
+        SELECT id FROM bajada
+      `);
+      const ramaIds = arreglo((rama.rows as any[]).map(r => r.id));
+
+      // ── LA CUENTA DE CADA HIJA ES LA DE SU RAMA ENTERA ──────────────────
+      // Aquí había un `count` plano y **mentía**: «Baterías y seguridad
+      // eléctrica» salía con 0 publicaciones en la rejilla teniendo cinco
+      // repartidas entre sus tres hijas. Un cero al lado de un tema que sí
+      // tiene cosas es peor que no poner número: dice que ahí no hay nada, y
+      // quien lo lea no vuelve a entrar.
+      //
+      // El mismo fallo estaba en `GET /api/temas/:objetivo` y prog2 lo arregló
+      // allí; éste es el mío, en mi fichero, y no se vio hasta mirar la página
+      // en producción después de que él arreglara el suyo. Dos consultas
+      // correctas por separado no verifican la costura entre ellas.
+      //
+      // `WITH RECURSIVE` y no un número fijo de niveles porque el árbol no
+      // tiene fondo (decisión de Eugenio en `0120`). `DISTINCT` porque una
+      // misma pieza puede estar colgada de dos ramas de la misma rama y no
+      // debe contarse dos veces.
+      //
+      // La condición de «quién es hija» se decide en JavaScript y no dentro del
+      // SQL: Postgres no tiene el `? :` de JavaScript, y meterlo en un CASE
+      // dentro del WHERE hace que el índice de `padre_id` deje de usarse.
+      const sonHijas = esObjetivo
+        ? sql`s.objetivo_id = ${id} AND s.padre_id IS NULL`
+        : sql`s.padre_id = ${id}`;
+      const cuelganDe = esObjetivo
+        ? sql`objetivo_id = ${id} AND padre_id IS NULL`
+        : sql`padre_id = ${id}`;
+
+      const hijos = await db.execute(sql`
+        WITH RECURSIVE bajo AS (
+          SELECT id AS raiz, id FROM subtemas
+          WHERE ${cuelganDe} AND archived_at IS NULL
+          UNION ALL
+          SELECT b.raiz, s.id FROM subtemas s JOIN bajo b ON s.padre_id = b.id
+          WHERE s.archived_at IS NULL
+        )
+        SELECT s.id, s.nombre, s.orden,
+               (SELECT count(DISTINCT (c.tipo, c.entity_id))::int
+                  FROM subtema_contenido c
+                 WHERE c.subtema_id IN (SELECT id FROM bajo WHERE raiz = s.id)) AS cosas
+        FROM subtemas s
+        WHERE s.archived_at IS NULL AND ${sonHijas}
+        ORDER BY s.orden, s.nombre
+      `);
+
+      // ── CARRIL 3: LO DE FUERA ───────────────────────────────────────────
+      const fuera = await db.execute(sql`
+        SELECT DISTINCT a.id, a.origen, a.formato, a.url, a.origen_id, a.titulo,
+               a.fuente, a.idioma, a.publicado_el, a.nota_ia, a.calidad, a.estado,
+               -- medio_url es lo que se pinta y url a dónde se va. Y la
+               -- atribución viaja con la imagen porque CC BY-SA obliga a
+               -- nombrar autor y licencia: si no sale de aquí, la pantalla no
+               -- tiene con qué cumplirlo. (Sin acentos graves dentro de esta
+               -- plantilla: uno solo la corta en seco y el fallo sale como un
+               -- error de coma en la línea siguiente.)
+               a.medio_url, a.licencia, a.autor,
+               -- Los tres ejes de la constelación: con quién habla de lo mismo,
+               -- qué TIPO de pieza es, y dónde cae en el mapa. Los calcula
+               -- scripts/agregador/constelacion.py y aquí sólo se leen.
+               a.cluster_id, a.genero, a.mapa_x, a.mapa_y,
+               -- a_mano marca lo que ha colocado una persona. Sin traerlo, la
+               -- pantalla no puede distinguir el trabajo de alguien del de la
+               -- máquina — y esa distinción es la única razón de que la columna
+               -- exista. Se me olvidó, y el resultado fue una marca escrita en
+               -- la pantalla que nunca se encendía.
+               coalesce(a.a_mano, false) AS a_mano
+        FROM contenido_agregado a
+        JOIN subtema_contenido c ON c.entity_id = a.id AND c.tipo = 'agregado'
+        WHERE c.subtema_id = ANY(${ramaIds}) AND a.archived_at IS NULL
+        ORDER BY a.calidad DESC, a.titulo
+      `);
+
+      // ── CARRILES 1 Y 2: LO DE DENTRO ────────────────────────────────────
+      // Primero lo clasificado de verdad; luego, lo que se parece.
+      const clasificado = await db.execute(sql`
+        SELECT DISTINCT c.tipo, c.entity_id FROM subtema_contenido c
+        WHERE c.subtema_id = ANY(${ramaIds}) AND c.tipo <> 'agregado'
+      `);
+      const idsPub = arreglo((clasificado.rows as any[]).filter(r => r.tipo === 'publicacion').map(r => r.entity_id));
+      const idsProy = arreglo((clasificado.rows as any[]).filter(r => r.tipo === 'proyecto').map(r => r.entity_id));
+      const idsVent = arreglo((clasificado.rows as any[]).filter(r => r.tipo === 'ventana').map(r => r.entity_id));
+
+      // ── LAS PALABRAS: LAS DE ESTE TEMA **Y** LAS DE SU RAMA ──────────────
+      // Con todas juntas en un solo «o» esto se llenaba de ruido: «España: VMP
+      // y DGT» traía «Evolución precio vivienda España» e «Incendios
+      // forestales de España», porque bastaba con acertar UNA palabra y la
+      // palabra que acertaban era «españa».
+      //
+      // Así que la rama de arriba no ensancha, ESTRECHA: hay que decir algo de
+      // este tema **y además** algo de la rama en la que está. «España» y
+      // «movilidad» a la vez ya no lo cumple una noticia de vivienda.
+      const propias = palabrasDe([tema.nombre]);
+      // El OBJETIVO entra en la rama, y no es un adorno: el padre de un subtema
+      // hondo no siempre lleva la palabra del tema. «Tratamiento y purificación
+      // del agua» cuelga de «Infraestructura y distribución urbana», donde la
+      // palabra «agua» ya no está — y sin ella la única ventana de agua de la
+      // plataforma se quedaba fuera de su propio subtema.
+      const heredadas = palabrasDe([
+        ...(camino.rows as any[]).slice(0, -1).map(r => r.nombre),
+        tema.objetivo_nombre ?? '',
+      ]);
+      const palabras = [...new Set([...propias, ...heredadas])];
+      // `%palabra%` sobre título y cuerpo. `unaccent` no está instalado, así
+      // que se compara en minúsculas y se acepta que «batería» y «bateria» no
+      // sean la misma búsqueda; por eso las palabras salen ya sin tildes y se
+      // busca también la forma con tilde tal cual está escrita.
+      const patron = propias.length ? '(' + propias.join('|') + ')' : null;
+      // Sin rama por encima —el tema de primer nivel— no hay nada que
+      // estrechar, y entonces la segunda condición sobra en vez de vaciarlo.
+      const patronRama = heredadas.length ? '(' + heredadas.join('|') + ')' : null;
+
+      const dentro: any[] = [];
+
+      const pubs = await db.execute(sql`
+        SELECT p.id, p.title, p.body, p.created_at, p.updated_at, p.author_user_id,
+               u.name AS autor,
+               (p.id = ANY(${idsPub})) AS clasificado
+        FROM publications p LEFT JOIN users u ON u.id = p.author_user_id
+        WHERE p.archived_at IS NULL AND p.deleted_at IS NULL
+          AND p.visibility = 'public'
+          AND (
+            p.id = ANY(${idsPub})
+            OR (${patron}::text IS NOT NULL
+                AND (${sinTildes(sql`coalesce(p.title, '')`)} ~ ${patron}
+                  OR ${sinTildes(sql`coalesce(p.body, '')`)}  ~ ${patron})
+                AND (${patronRama}::text IS NULL
+                  OR ${sinTildes(sql`coalesce(p.title, '') || ' ' || coalesce(p.body, '')`)} ~ ${patronRama}))
+          )
+        ORDER BY p.updated_at DESC NULLS LAST, p.created_at DESC
+        LIMIT 40
+      `);
+      for (const r of pubs.rows as any[]) {
+        dentro.push({
+          tipo: 'publicacion', id: r.id, titulo: r.title || '(sin título)',
+          extracto: (r.body || '').slice(0, 220), autor: r.autor,
+          duenyo: r.author_user_id, fecha: r.updated_at || r.created_at,
+          ruta: `/muro?p=${r.id}`, por_busqueda: !r.clasificado,
+        });
+      }
+
+      const proys = await db.execute(sql`
+        SELECT p.id, p.titulo, p.descripcion, p.slug, p.updated_at, p.created_at,
+               p.creador_user_id, (p.id = ANY(${idsProy})) AS clasificado
+        FROM proyectos p
+        WHERE p.archived_at IS NULL AND p.deleted_at IS NULL AND p.publico = true
+          AND (
+            p.id = ANY(${idsProy})
+            OR (${patron}::text IS NOT NULL
+                AND (${sinTildes(sql`coalesce(p.titulo, '')`)} ~ ${patron}
+                  OR ${sinTildes(sql`coalesce(p.descripcion, '')`)} ~ ${patron})
+                AND (${patronRama}::text IS NULL
+                  OR ${sinTildes(sql`coalesce(p.titulo, '') || ' ' || coalesce(p.descripcion, '')`)} ~ ${patronRama}))
+          )
+        ORDER BY p.updated_at DESC NULLS LAST
+        LIMIT 20
+      `);
+      for (const r of proys.rows as any[]) {
+        dentro.push({
+          tipo: 'proyecto', id: r.id, titulo: r.titulo,
+          extracto: (r.descripcion || '').slice(0, 220),
+          duenyo: r.creador_user_id, fecha: r.updated_at || r.created_at,
+          ruta: `/proyectos/${r.slug || r.id}`, por_busqueda: !r.clasificado,
+        });
+      }
+
+      const vents = await db.execute(sql`
+        SELECT v.id, v.title, v.kind, v.slug, v.updated_at, v.created_at,
+               v.creator_user_id, (v.id = ANY(${idsVent})) AS clasificado
+        FROM knowledge_windows v
+        WHERE v.archived_at IS NULL AND v.deleted_at IS NULL AND v.publico = true
+          AND (
+            v.id = ANY(${idsVent})
+            OR (${patron}::text IS NOT NULL
+                AND ${sinTildes(sql`coalesce(v.title, '')`)} ~ ${patron}
+                AND (${patronRama}::text IS NULL
+                  OR ${sinTildes(sql`coalesce(v.title, '')`)} ~ ${patronRama}))
+          )
+        ORDER BY v.updated_at DESC NULLS LAST
+        LIMIT 20
+      `);
+      for (const r of vents.rows as any[]) {
+        dentro.push({
+          tipo: r.kind === 'map' ? 'mapa' : r.kind === 'chart' ? 'grafica' : 'ventana',
+          id: r.id, titulo: r.title, extracto: '',
+          duenyo: r.creator_user_id, fecha: r.updated_at || r.created_at,
+          ruta: `/w/${r.slug || r.id}`, por_busqueda: !r.clasificado,
+        });
+      }
+
+      // El reparto entre los dos carriles se hace aquí y no en SQL para no
+      // repetir tres consultas casi idénticas con y sin el filtro de dueño.
+      const tuyo = yo ? dentro.filter(d => d.duenyo === yo) : [];
+      const humanidad = dentro.filter(d => !yo || d.duenyo !== yo);
+
+      // ── LOS GRUPOS Y LAS ARISTAS ────────────────────────────────────────
+      // Los grupos son del OBJETIVO: agrupar las piezas de MOVILIDAD junto a
+      // las de AGUA daría grupos ciertos y completamente inútiles.
+      const clusters = await db.execute(sql`
+        SELECT id, nombre, frase, x, y, cuantas, modelo, calculado_el,
+               coalesce(a_mano, false) AS a_mano
+        FROM contenido_cluster WHERE tema_id = ${tema.objetivo_id}
+        ORDER BY cuantas DESC
+      `);
+
+      // Las tres piezas más parecidas a cada una de las que se devuelven. Es la
+      // parte de «red» del asunto: el árbol de temas no puede decir «esto se
+      // parece a aquello» porque no es una jerarquía.
+      const idsFuera = arreglo((fuera.rows as any[]).map(r => r.id));
+      const vecinos = await db.execute(sql`
+        SELECT v.id, v.vecino_id, v.parecido, a.titulo, a.formato, a.fuente
+        FROM contenido_vecino v JOIN contenido_agregado a ON a.id = v.vecino_id
+        WHERE v.id = ANY(${idsFuera}) AND a.archived_at IS NULL
+        ORDER BY v.parecido DESC
+      `);
+
+      // ── LOS RETOS DE LA HUMANIDAD EN ESTE TEMA ──────────────────────────
+      // Eugenio: «y retos de la humanidad». Van por objetivo, no por subtema:
+      // `challenge_objectives` une un reto con un objetivo y no existe ninguna
+      // tabla que lo una con un subtema. Se dice de quién son en la pantalla,
+      // igual que con los indicadores — decir que son de «Bicicleta de carga»
+      // sería afirmar una relación que nadie ha hecho.
+      //
+      // Y hoy MOVILIDAD tiene CERO. Eso se enseña, no se esconde: un hueco que
+      // se ve es un hueco que alguien puede llenar.
+      const retos = await db.execute(sql`
+        SELECT c.id, c.title, c.description, c.scope, c.priority
+        FROM challenges c
+        JOIN challenge_objectives co ON co.challenge_id = c.id
+        WHERE co.objective_id = ${tema.objetivo_id} AND c.archived_at IS NULL
+        ORDER BY c.priority DESC NULLS LAST, c.title
+        LIMIT 30
+      `);
+
+      res.json({
+        tema,
+        clusters: clusters.rows,
+        vecinos: vecinos.rows,
+        retos: retos.rows,
+        camino: camino.rows,
+        hijos: hijos.rows,
+        palabras,
+        tuyo,
+        humanidad: humanidad.slice(0, 30),
+        fuera: fuera.rows,
+      });
+    } catch (e: any) {
+      console.error('[agregador tema]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * CORREGIR EL MAPA — `PUT /api/agregador/cluster/:id` y
+   * `PUT /api/agregador/pieza/:id/cluster`
+   *
+   * Eugenio: «permite al admin modificar el mapa de cluster de las
+   * publicaciones».
+   *
+   * ── POR QUÉ HACE FALTA, Y NO ES UN CAPRICHO ────────────────────────────
+   * Los grupos los calcula una máquina midiendo de qué habla cada pieza, y **se
+   * equivoca**: dos textos pueden parecerse en las palabras y no en el fondo.
+   * Hasta ahora la única forma de arreglar un grupo mal puesto era volver a
+   * ejecutar el script entero y rezar para que esta vez saliera distinto — o
+   * sea, ninguna.
+   *
+   * ── LO QUE SE CORRIGE A MANO NO SE PIERDE AL RECALCULAR ────────────────
+   * `a_mano` marca la pieza que ha movido una persona. El día que la
+   * constelación se vuelva a calcular, esas se respetan: si el trabajo de
+   * corregir se borrara en el siguiente cálculo, nadie corregiría dos veces.
+   */
+  app.put('/api/agregador/cluster/:id', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    if ((req.user.roleLevel ?? 0) < 4) {
+      return res.status(403).json({ error: 'Cambiar el mapa común es cosa de administración.' });
+    }
+    try {
+      const nombre = String(req.body?.nombre ?? '').trim().slice(0, 60);
+      const frase = req.body?.frase === undefined ? null : String(req.body.frase).trim().slice(0, 200);
+      if (nombre.length < 2) return res.status(400).json({ error: 'El grupo necesita un nombre.' });
+      const r = await db.execute(sql`
+        UPDATE contenido_cluster
+           SET nombre = ${nombre},
+               frase = coalesce(${frase}::text, frase),
+               a_mano = true
+         WHERE id = ${req.params.id}
+        RETURNING id, nombre, frase
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Ese grupo no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('[agregador cluster]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/agregador/pieza/:id/cluster', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    if ((req.user.roleLevel ?? 0) < 4) {
+      return res.status(403).json({ error: 'Cambiar el mapa común es cosa de administración.' });
+    }
+    try {
+      const destino = String(req.body?.cluster_id ?? '').trim();
+      const cl = await db.execute(sql`SELECT id, tema_id FROM contenido_cluster WHERE id = ${destino}`);
+      if (!cl.rows.length) return res.status(404).json({ error: 'Ese grupo no existe.' });
+
+      const antes = await db.execute(sql`SELECT cluster_id FROM contenido_agregado WHERE id = ${req.params.id}`);
+      if (!antes.rows.length) return res.status(404).json({ error: 'Esa publicación no existe.' });
+
+      await db.execute(sql`
+        UPDATE contenido_agregado SET cluster_id = ${destino}, a_mano = true WHERE id = ${req.params.id}
+      `);
+      // Las cuentas de los dos grupos, el que pierde y el que gana. Si sólo se
+      // actualizara el de destino, el de origen seguiría diciendo que tiene una
+      // pieza que ya no tiene — y el número de la leyenda es lo único que dice
+      // si un grupo vale la pena.
+      await db.execute(sql`
+        UPDATE contenido_cluster c
+           SET cuantas = (SELECT count(*) FROM contenido_agregado a
+                           WHERE a.cluster_id = c.id AND a.archived_at IS NULL)
+         WHERE c.id IN (${destino}, coalesce(${(antes.rows[0] as any).cluster_id}::text, ''))
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('[agregador mover]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
+   * PONER ALGO EN UN TEMA — `POST /api/agregador/tema/:id/contenido`
+   * `{ tipo, entity_id }`
+   *
+   * La pieza que faltaba: 0120 creó la tabla `subtema_contenido` y no dejó
+   * ninguna ruta que escribiera en ella, así que el árbol no se podía llenar
+   * ni por una persona ni por el agregador.
+   *
+   * ── QUIÉN PUEDE ────────────────────────────────────────────────────────
+   * Cualquiera con sesión puede clasificar **lo suyo**. Para meter lo de otro
+   * hace falta nivel 4, porque poner el proyecto de otra persona en un tema es
+   * hablar por ella. Es más estricto que crear un subtema —que 0120 dejó
+   * abierto a todos a propósito— y la diferencia tiene motivo: crear una rama
+   * vacía no afecta a nadie; colgar el trabajo de alguien de una rama, sí.
+   */
+  app.post('/api/agregador/tema/:id/contenido', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión para poner algo en un tema.' });
+    try {
+      const subtema = String(req.params.id || '');
+      const tipo = String(req.body?.tipo || '').trim();
+      const entity = String(req.body?.entity_id || '').trim();
+      if (!tipo || !entity) return res.status(400).json({ error: 'Falta qué se pone y de qué tipo.' });
+
+      const hay = await db.execute(sql`SELECT id FROM subtemas WHERE id = ${subtema} AND archived_at IS NULL`);
+      if (!hay.rows.length) return res.status(404).json({ error: 'Ese tema no existe.' });
+
+      // ¿Es suyo? Cada tipo guarda al dueño en una columna distinta.
+      let duenyo: string | null = null;
+      if (tipo === 'publicacion') {
+        const r = await db.execute(sql`SELECT author_user_id AS d FROM publications WHERE id = ${entity}`);
+        duenyo = (r.rows[0] as any)?.d ?? null;
+      } else if (tipo === 'proyecto') {
+        const r = await db.execute(sql`SELECT creador_user_id AS d FROM proyectos WHERE id = ${entity}`);
+        duenyo = (r.rows[0] as any)?.d ?? null;
+      } else if (tipo === 'ventana') {
+        const r = await db.execute(sql`SELECT creator_user_id AS d FROM knowledge_windows WHERE id = ${entity}`);
+        duenyo = (r.rows[0] as any)?.d ?? null;
+      } else if (tipo === 'agregado') {
+        const r = await db.execute(sql`SELECT id FROM contenido_agregado WHERE id = ${entity}`);
+        if (!r.rows.length) return res.status(404).json({ error: 'Esa pieza no existe.' });
+      } else {
+        return res.status(400).json({ error: 'Ese tipo de contenido no se puede clasificar todavía.' });
+      }
+
+      // `roleLevel` es el nombre real del campo (`auth.ts`), y 4 es ADMIN.
+      const nivel = req.user.roleLevel ?? 0;
+      if (tipo !== 'agregado' && duenyo !== req.user.id && nivel < 4) {
+        return res.status(403).json({ error: 'Sólo puedes poner en un tema lo que es tuyo.' });
+      }
+      if (tipo === 'agregado' && nivel < 4) {
+        return res.status(403).json({ error: 'Clasificar contenido agregado es cosa de administración.' });
+      }
+
+      await db.execute(sql`
+        INSERT INTO subtema_contenido (subtema_id, tipo, entity_id, puesto_por)
+        VALUES (${subtema}, ${tipo}, ${entity}, ${req.user.id})
+        ON CONFLICT DO NOTHING
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('[agregador poner]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+}

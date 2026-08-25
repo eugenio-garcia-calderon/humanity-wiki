@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight, Trash2, LayoutGrid,
+  ChevronLeft, ChevronRight, ChevronDown, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal, Plus,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -115,6 +115,7 @@ export const PERSONALES: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'Red de Conocimiento', claro = false, onAbrirSubmenu, onPlegar,
+  personal, ramas,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -203,6 +204,70 @@ export default function Rail({
    * está aquí y la consecuencia la decide el Layout.
    */
   onPlegar?: () => void;
+  /*
+   * ══ EL MENÚ DE CADA UNO (2026-08-25) ══════════════════════════════════════
+   * Eugenio: «haz que el menú izquierdo, donde están todas las temáticas, el
+   * usuario lo pueda reordenar y pueda darle a un botón de favorito… no se le
+   * puede dar a favorito en los tres puntos que tienes que añadir para poder
+   * modificar cada uno de estos temas, porque igual hay algún tema que el
+   * usuario quiere ocultar».
+   *
+   * Son dos gestos y por eso son dos sitios, exactamente como los pidió:
+   *
+   *   · la ESTRELLA sale al pasar el ratón y hace una sola cosa. Marcar
+   *     favorito es lo que se hace a menudo y de un vistazo; esconderlo detrás
+   *     de un menú costaría dos pulsaciones para algo de una;
+   *   · los TRES PUNTOS abren lo demás — ocultar, y lo que venga después.
+   *     Ahí va lo que se hace una vez y se piensa antes.
+   *
+   * Sólo lo lleva el menú de los temas. En el de las herramientas no tendría
+   * sentido: sus trece entradas no son gustos de nadie, son lo que hay.
+   */
+  personal?: {
+    esFavorito: (clave: string) => boolean;
+    estaOculto: (clave: string) => boolean;
+    marcarFavorito: (clave: string, valor: boolean) => void;
+    ocultar: (clave: string) => void;
+    /** Al soltar un elemento sobre otro. La lista nueva la calcula el Layout. */
+    reordenar?: (desde: string, hasta: string) => void;
+    /** Los que están escondidos, para poder traerlos de vuelta. Sin esto,
+     *  ocultar sería una puerta de un solo sentido: el tema desaparece del
+     *  único sitio desde el que se podría recuperar. */
+    ocultos?: Array<{ clave: string; nombre: string }>;
+    mostrar?: (clave: string) => void;
+    /** Ir a la página donde se ordenan los temas a lo grande. */
+    onPersonalizar?: () => void;
+    /** Abrir el diálogo de crear un tema. */
+    onNuevoTema?: () => void;
+  };
+  /*
+   * ══ LOS SUBTEMAS, DENTRO DEL MENÚ (2026-08-25, prog8) ═════════════════════
+   * `0120_subtemas.sql` creó el árbol y la API que lo sirve, y el menú seguía
+   * enseñando sólo los catorce objetivos: el árbol existía y no se veía por
+   * ninguna parte. Esto es la mitad que faltaba.
+   *
+   * ── SE ABRE CON UNA FLECHA, NO AL PASAR EL RATÓN ──────────────────────────
+   * Un objetivo con treinta subtemas que se desplegara solo al rozarlo
+   * empujaría los trece de abajo fuera de la pantalla cada vez que el ratón
+   * cruza la lista. Con flecha, desplegar es una decisión.
+   *
+   * ── EL RAÍL NO SABE DE SUBTEMAS, LOS RECIBE ──────────────────────────────
+   * Igual que con `personal`: quien los carga y los guarda es el Layout. El
+   * raíl los pinta y avisa de que se ha pulsado una flecha. Si esto pidiera
+   * los datos por su cuenta, el menú de las herramientas —que usa el mismo
+   * componente— cargaría subtemas que nunca va a enseñar.
+   */
+  ramas?: {
+    /** El árbol de un tema, plano y con `padre_id`: quien lo pinta lo monta. */
+    de: (clave: string) => Array<{ id: string; padre_id: string | null; nombre: string; cosas: number }>;
+    /** Si ese tema tiene ramas, **antes** de haberlas pedido. Sin esto la
+     *  flecha no se podría dibujar hasta después de pulsarla. */
+    hay: (clave: string) => boolean;
+    abierto: (clave: string) => boolean;
+    alternar: (clave: string) => void;
+    /** Sólo para quien pueda crear temas. Si no viene, el «+» no existe. */
+    onAnadir?: (padreId: string) => void;
+  };
 }) {
 
   /*
@@ -271,6 +336,122 @@ export default function Rail({
    * gesto mal repartido; quitado el gesto, sobra la tirita.
    */
 
+  /** Qué elemento tiene abierto su menú de tres puntos, si hay alguno. */
+  const [menuDe, setMenuDe] = useState<string | null>(null);
+  /** Cuál se está arrastrando. Se guarda aquí y no en el evento porque en un
+   *  arrastre de HTML el dato viaja como texto y hay que volver a leerlo. */
+  const arrastrado = useRef<string | null>(null);
+
+  /**
+   * EL ÁRBOL DE UN TEMA, DEBAJO DE SU FILA.
+   *
+   * Se monta aquí a partir de la lista plana con `padre_id`, que es como lo
+   * sirve la API: traer el árbol entero de una vez cuesta una consulta, y
+   * pedirlo nivel a nivel costaría una por cada rama que alguien abra.
+   *
+   * La sangría es un padding que crece con la hondura y se para a los cuatro
+   * niveles: el árbol no tiene límite de profundidad, pero un menú de 224 px
+   * sí, y a partir de ahí sangrar más sólo estrecha el nombre.
+   */
+  const ramaDe = (clave: string) => {
+    if (!ramas || !desplegado || !ramas.abierto(clave)) return null;
+    const todos = ramas.de(clave);
+    if (!todos.length) return null;
+
+    const hijosDe = (padre: string | null) => todos.filter(t => t.padre_id === padre);
+
+    /*
+     * ── CASCADA, RAMA A RAMA (2026-08-25) ─────────────────────────────────
+     * Eugenio: «que en el menú lateral izquierdo aparezcan esos subtemas en
+     * formato cascada».
+     *
+     * Aquí hubo un tope de un solo nivel, y con motivo: la siembra puso 8+8 por
+     * objetivo, así que abrir un objetivo soltaba 72 renglones de golpe en una
+     * tira de 224 px. El tope lo arreglaba a lo bruto — quitando la hondura
+     * entera para que no cupiera lo de más abajo.
+     *
+     * La cascada lo arregla sin quitar nada: **cada rama con hijas trae su
+     * propia flecha y nace cerrada**. Abrir MOVILIDAD son nueve renglones, no
+     * setenta y dos, y quien quiera bajar baja — sin límite, que es lo que
+     * decidió Eugenio en `0120` para el árbol.
+     *
+     * La sangría sí se para a los cuatro niveles: el árbol no tiene fondo pero
+     * la tira mide 224 px, y a partir de ahí sangrar más sólo estrecha el
+     * nombre sin decir nada nuevo.
+     */
+    const pintar = (padre: string | null, nivel: number): any => hijosDe(padre).map(t => {
+      const suyos = hijosDe(t.id);
+      const abierta = ramas.abierto(t.id);
+      return (
+        <div key={t.id}>
+          <div className="group/rama flex items-center">
+            {/* La flecha va ANTES del nombre y ocupa sitio aunque no haya nada
+                que abrir: si apareciera sólo en las que tienen hijas, los
+                nombres bailarían de izquierda a derecha por la lista. */}
+            {suyos.length > 0 ? (
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); ramas.alternar(t.id); }}
+                title={abierta ? `Cerrar ${t.nombre}` : `Ver lo que hay dentro de ${t.nombre}`}
+                aria-label={abierta ? `Cerrar ${t.nombre}` : `Ver lo que hay dentro de ${t.nombre}`}
+                aria-expanded={abierta}
+                style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }}
+                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded transition-colors',
+                  claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-600 hover:text-white')}
+              >
+                {abierta ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              </button>
+            ) : (
+              <span aria-hidden style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }} className="h-6 w-5 shrink-0" />
+            )}
+
+            <NavLink
+              to={`/temas/${t.id}`}
+              title={`${t.nombre} — ${t.cosas} ${t.cosas === 1 ? 'cosa' : 'cosas'}`}
+              className={({ isActive }) => cn(
+                'flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1.5 pl-1 pr-2 text-[12px] transition-colors',
+                isActive
+                  ? (claro ? 'bg-emerald-50 font-bold text-emerald-800' : 'bg-slate-800 font-bold text-emerald-300')
+                  : (claro ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' : 'text-slate-500 hover:bg-slate-800/70 hover:text-white'),
+              )}
+            >
+              <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
+              {/* Un cero no se pinta: un número gris al lado de un nombre se
+                  lee como «esto está vacío», y hay ramas que sólo tienen cosas
+                  en sus hijas. */}
+              {t.cosas > 0 && (
+                <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
+              )}
+            </NavLink>
+
+            {/* ── AÑADIR UN TEMA AQUÍ DENTRO ─────────────────────────────
+                Eugenio: «haz que un administrador pueda añadir temas a ese
+                submenú, directamente desde el menú lateral». Sale al pasar el
+                ratón por la fila y sólo si quien mira puede: en reposo esto es
+                un índice, no un panel de mandos. */}
+            {ramas.onAnadir && (
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); ramas.onAnadir!(t.id); }}
+                title={`Añadir un tema dentro de ${t.nombre}`}
+                aria-label={`Añadir un tema dentro de ${t.nombre}`}
+                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded opacity-0 transition-all group-hover/rama:opacity-100',
+                  claro ? 'text-slate-300 hover:text-emerald-600' : 'text-slate-600 hover:text-emerald-400')}
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          {suyos.length > 0 && abierta && pintar(t.id, nivel + 1)}
+        </div>
+      );
+    });
+
+    return (
+      <div className={cn('mb-1 ml-3 shrink-0 border-l pl-1', claro ? 'border-slate-200' : 'border-slate-800')}>
+        {pintar(null, 0)}
+      </div>
+    );
+  };
+
   const boton = (h: Herramienta) => {
     const Icono = h.icono;
     const activa = abierta === h.clave;
@@ -282,9 +463,33 @@ export default function Rail({
     const Flecha = ladoDerecho
       ? (activa ? ChevronRight : ChevronLeft)
       : (activa ? ChevronLeft : ChevronRight);
+    const conPersonal = !!personal && desplegado;
+    const conRamas = !!ramas && desplegado && ramas.hay(h.clave);
     return (
-      <div key={h.clave} className={cn('relative flex shrink-0 items-center',
-        desplegado ? 'w-full' : 'w-10')}>
+      <div
+        key={h.clave}
+        // ── ARRASTRAR PARA REORDENAR ────────────────────────────────────
+        // Con el arrastre del propio navegador y no con una librería: son
+        // catorce elementos en una columna, no una tabla con miles. Lo que
+        // hace falta —cógelo, suéltalo encima de otro— ya lo trae el
+        // navegador, y una dependencia más para esto sería pagar un peso de
+        // carga por algo que ya está.
+        draggable={!!personal?.reordenar && desplegado}
+        onDragStart={personal?.reordenar ? e => {
+          arrastrado.current = h.clave;
+          e.dataTransfer.effectAllowed = 'move';
+          // Firefox no empieza el arrastre si no se escribe algo.
+          try { e.dataTransfer.setData('text/plain', h.clave); } catch { /* da igual */ }
+        } : undefined}
+        onDragOver={personal?.reordenar ? e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
+        onDrop={personal?.reordenar ? e => {
+          e.preventDefault();
+          const desde = arrastrado.current || e.dataTransfer.getData('text/plain');
+          if (desde && desde !== h.clave) personal.reordenar!(desde, h.clave);
+          arrastrado.current = null;
+        } : undefined}
+        className={cn('group/fila relative flex shrink-0 items-center',
+          desplegado ? 'w-full' : 'w-10')}>
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
             distinto: el fondo ya lo usa el ratón al pasar por encima, y dos
             cosas que se pintan igual dejan de significar. */}
@@ -332,6 +537,98 @@ export default function Rail({
             {h.nombre}
           </span>
         </button>
+
+        {/* ══ LA ESTRELLA Y LOS TRES PUNTOS ══════════════════════════════
+            Aparecen al pasar el ratón por la fila. En reposo el menú es una
+            lista de temas, no una lista de controles: catorce estrellas
+            siempre visibles convierten un índice en un panel de mandos.
+            La estrella SÍ se queda cuando ya es favorito — ahí ya no es un
+            control, es el estado. */}
+        {/* ── LA FLECHA DE LOS SUBTEMAS ─────────────────────────────────
+            Sólo cuando ese tema tiene ramas de verdad. Una flecha que abre
+            una lista vacía es peor que no tener flecha: enseña que no hay
+            nada en el sitio donde el usuario esperaba encontrarlo, y la
+            siguiente vez ya no la pulsa. */}
+        {conRamas && (
+          <button
+            onClick={e => { e.stopPropagation(); ramas!.alternar(h.clave); }}
+            title={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
+            aria-label={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
+            aria-expanded={ramas!.abierto(h.clave)}
+            className={cn('grid h-7 w-5 shrink-0 place-items-center rounded-lg transition-colors',
+              claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-500 hover:text-white')}
+          >
+            {ramas!.abierto(h.clave)
+              ? <ChevronDown className="h-3.5 w-3.5" />
+              : <ChevronRight className="h-3.5 w-3.5" />}
+          </button>
+        )}
+
+        {conPersonal && (
+          <>
+            <button
+              onClick={e => { e.stopPropagation(); personal!.marcarFavorito(h.clave, !personal!.esFavorito(h.clave)); }}
+              title={personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Marcar como favorito'}
+              aria-label={personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Marcar como favorito'}
+              aria-pressed={personal!.esFavorito(h.clave)}
+              className={cn('grid h-7 w-6 shrink-0 place-items-center rounded-lg transition-all',
+                personal!.esFavorito(h.clave)
+                  ? 'text-amber-400'
+                  : 'text-slate-300 opacity-0 hover:text-amber-400 group-hover/fila:opacity-100')}
+            >
+              <Star className="h-3.5 w-3.5" fill={personal!.esFavorito(h.clave) ? 'currentColor' : 'none'} />
+            </button>
+
+            <div className="relative shrink-0">
+              <button
+                onClick={e => { e.stopPropagation(); setMenuDe(v => (v === h.clave ? null : h.clave)); }}
+                title="Más"
+                aria-label={`Más sobre ${h.nombre}`}
+                aria-expanded={menuDe === h.clave}
+                className={cn('grid h-7 w-5 place-items-center rounded-lg text-slate-300 transition-all hover:text-slate-600',
+                  menuDe === h.clave ? 'opacity-100 text-slate-600' : 'opacity-0 group-hover/fila:opacity-100')}
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+              {menuDe === h.clave && (
+                <div className={cn('absolute top-7 z-50 w-44 rounded-xl border border-slate-200 bg-white py-1 shadow-xl',
+                  ladoDerecho ? 'right-0' : 'left-0')}>
+                  <button
+                    onClick={e => { e.stopPropagation(); setMenuDe(null); personal!.marcarFavorito(h.clave, !personal!.esFavorito(h.clave)); }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50">
+                    <Star className="h-3.5 w-3.5 text-slate-400" />
+                    {personal!.esFavorito(h.clave) ? 'Quitar de favoritos' : 'Favorito'}
+                  </button>
+                  {/* OCULTAR ES SÓLO DEL MENÚ, y se dice aquí mismo. Decisión de
+                      Eugenio: sus publicaciones siguen saliendo en el muro y en
+                      el buscador. Sin esta línea, «ocultar» se lee como «no
+                      quiero ver nada de esto» y luego sorprende. */}
+                  <button
+                    onClick={e => { e.stopPropagation(); setMenuDe(null); personal!.ocultar(h.clave); }}
+                    className="flex w-full items-start gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50">
+                    <EyeOff className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span>
+                      Quitar del menú
+                      <span className="mt-0.5 block text-[10px] font-normal text-slate-400">
+                        Sigue saliendo en el muro
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {personal!.reordenar && (
+              <span
+                aria-hidden
+                title="Arrastra para ordenar"
+                className="grid h-7 w-4 shrink-0 cursor-grab place-items-center text-slate-200 opacity-0 transition-opacity group-hover/fila:opacity-100"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </>
+        )}
 
         {conFlecha && (
           <button
@@ -470,12 +767,94 @@ export default function Rail({
 
         <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />
 
-        {(items ?? HERRAMIENTAS).map(boton)}
+        {/* ── PERSONALIZAR, ARRIBA DEL TODO (2026-08-25) ───────────────────
+            Eugenio: «en el menú de la izquierda tiene que haber un botón arriba
+            del todo que sea personalizar, preferencias».
+
+            Arriba y no al final porque es la puerta a ordenar todo lo que
+            viene debajo: puesto al pie, sólo lo encontraría quien ya hubiera
+            bajado la lista entera — o sea, quien ya no lo necesita.
+            Se pinta distinto del resto —más pequeño y en gris— porque no es un
+            tema más: es lo que se hace CON los temas. */}
+        {personal?.onPersonalizar && (
+          <button
+            onClick={personal.onPersonalizar}
+            title="Personalizar tus temas"
+            aria-label="Personalizar tus temas"
+            className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              desplegado ? 'w-full' : 'w-10 justify-center',
+              claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
+          >
+            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+            <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
+              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
+              Personalizar
+            </span>
+          </button>
+        )}
+
+        {/* CREAR UN TEMA, JUNTO A PERSONALIZAR (2026-08-25). Eugenio: «añade la
+            opción en el menú izquierdo de crear un nuevo tema».
+            Va con el otro y no al final de los quince: los dos son cosas que se
+            hacen CON la lista, no elementos de la lista. Juntos arriba se leen
+            como lo que son —las herramientas del menú— y no como dos temas más
+            perdidos entre los demás. */}
+        {personal?.onNuevoTema && (
+          <button
+            onClick={personal.onNuevoTema}
+            title="Crear un tema"
+            aria-label="Crear un tema"
+            className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              desplegado ? 'w-full' : 'w-10 justify-center',
+              claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
+              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
+              Nuevo tema
+            </span>
+          </button>
+        )}
+
+        {/* Cada entrada y, debajo, su rama de subtemas (prog8). Las dos cosas
+            conviven: mi botón es una herramienta del menú y su árbol es el
+            contenido — el choque al fusionar era de sitio, no de idea. */}
+        {(items ?? HERRAMIENTAS).map(h => (
+          <Fragment key={h.clave}>
+            {boton(h)}
+            {ramaDe(h.clave)}
+          </Fragment>
+        ))}
         {/* El separador y lo personal sólo en el raíl de las herramientas: el
             de Explorar es una sola lista de catorce y una raya ahí no separa
             nada. */}
         {!items && <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />}
         {!items && PERSONALES.map(boton)}
+
+        {/* ── LO QUE HAS QUITADO, AL FINAL ─────────────────────────────────
+            Un renglón pequeño y en gris, no una sección: no es contenido, es
+            la forma de deshacer. Y tiene que estar, porque un tema oculto
+            desaparece del único sitio desde el que se podría recuperar. */}
+        {desplegado && personal?.ocultos && personal.ocultos.length > 0 && (
+          <div className={cn('mt-1 shrink-0 border-t pt-1.5', claro ? 'border-slate-200' : 'border-slate-800')}>
+            <p className="px-2.5 pb-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
+              Quitados del menú
+            </p>
+            {personal.ocultos.map(o => (
+              <button
+                key={o.clave}
+                onClick={() => personal.mostrar?.(o.clave)}
+                title={`Devolver ${o.nombre} al menú`}
+                className={cn('flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[11px] font-bold transition-colors',
+                  claro ? 'text-slate-400 hover:bg-slate-100 hover:text-slate-700' : 'text-slate-500 hover:bg-slate-800 hover:text-white')}
+              >
+                <EyeOff className="h-3 w-3 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{o.nombre}</span>
+                <span className="shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">Devolver</span>
+              </button>
+            ))}
+          </div>
+        )}
       </nav>
     </div>
   );

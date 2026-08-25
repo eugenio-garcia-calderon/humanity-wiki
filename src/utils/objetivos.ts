@@ -15,8 +15,9 @@
 // respaldo para lo que aún no esté clasificado.
 import {
   Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, GraduationCap,
-  Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette,
+  Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles,
 } from 'lucide-react';
+import { OBJECTIVE_ID_BY_KEY } from './objectiveIds';
 
 export interface Objetivo {
   id: string;
@@ -39,6 +40,43 @@ export interface Objetivo {
   palabras: string[];
 }
 
+/**
+ * EL MISMO COLOR, EN HEXADECIMAL (2026-08-25)
+ *
+ * Los catorce colores viven arriba como clases de Tailwind (`text-blue-500`),
+ * que es lo correcto para pintar texto e iconos. Pero un dibujo en SVG —la
+ * rueda de temas de la página de preferencias— necesita el color de verdad:
+ * una clase de CSS no vale como relleno de un sector.
+ *
+ * ── POR QUÉ LA TABLA ESTÁ AQUÍ Y NO EN LA PÁGINA QUE LA USA ────────────────
+ * Por lo mismo que el color se mudó junto al nombre y al icono, y está contado
+ * ahí arriba: cuando el agua deja de ser azul, tiene que dejar de serlo en un
+ * sitio. Si esta tabla viviera en la rueda, mañana habría dos verdades sobre
+ * de qué color es AGUA y sólo se notaría al mirarlas juntas.
+ */
+const HEX: Record<string, string> = {
+  'text-blue-500': '#3b82f6',
+  'text-amber-500': '#f59e0b',
+  'text-indigo-500': '#6366f1',
+  'text-rose-500': '#f43f5e',
+  'text-purple-500': '#a855f7',
+  'text-emerald-500': '#10b981',
+  'text-sky-500': '#0ea5e9',
+  'text-orange-500': '#f97316',
+  'text-yellow-500': '#eab308',
+  'text-cyan-500': '#06b6d4',
+  'text-lime-500': '#84cc16',
+  'text-violet-500': '#8b5cf6',
+  'text-pink-500': '#ec4899',
+  'text-fuchsia-500': '#d946ef',
+  'text-teal-500': '#14b8a6',
+};
+
+/** El color de un objetivo, listo para un `fill` de SVG. El gris es para lo que
+ *  no tiene color propio: un subtema hereda el de su objetivo, así que aquí no
+ *  debería caer nada — y si cae, se ve gris en vez de desaparecer. */
+export const hexDelColor = (clase?: string): string => (clase && HEX[clase]) || '#94a3b8';
+
 export const OBJETIVOS: Objetivo[] = [
   { id: 'O001', titulo: 'AGUA',         icono: Droplets, color: 'text-blue-500',       palabras: ['agua', 'hidric', 'riego', 'acuifer', 'potable', 'saneamiento', 'sequia', 'rio', 'embalse'] },
   { id: 'O002', titulo: 'ALIMENTACIÓN', icono: Wheat, color: 'text-amber-500',          palabras: ['aliment', 'comida', 'nutricion', 'cultivo', 'agricultura', 'huerto', 'cosecha', 'hambre'] },
@@ -54,6 +92,22 @@ export const OBJETIVOS: Objetivo[] = [
   { id: 'O012', titulo: 'GOBERNANZA',   icono: Landmark, color: 'text-fuchsia-500',       palabras: ['gobernanza', 'gobierno', 'politic', 'ley', 'norma', 'participacion', 'democra', 'institucion'] },
   { id: 'O013', titulo: 'ECONOMÍA',     icono: Coins, color: 'text-violet-500',          palabras: ['economia', 'dinero', 'inversion', 'financ', 'coste', 'precio', 'mercado', 'presupuesto'] },
   { id: 'O014', titulo: 'CULTURA',      icono: Palette, color: 'text-pink-500',        palabras: ['cultura', 'arte', 'musica', 'patrimonio', 'literatura', 'cine', 'tradicion'] },
+  /*
+   * EL QUINCE (2026-08-25). Eugenio: «de paso añade espiritualidad como tema
+   * principal dentro de los 14 objetivos, es el número 15».
+   *
+   * Se le da un color que no tenía nadie —`teal`— y no uno repetido: en la
+   * rueda de temas cada objetivo se distingue por su color antes que por su
+   * nombre, y dos iguales harían que dos ramas se leyeran como una.
+   *
+   * Las `palabras` son las que hacen que una publicación caiga sola en este
+   * tema. Se eligen anchas a propósito: aquí caben tradiciones religiosas,
+   * prácticas contemplativas y la pregunta por el sentido, que es de lo que
+   * habla la gente cuando habla de esto, y no de una sola de las tres.
+   */
+  { id: 'O015', titulo: 'ESPIRITUALIDAD', icono: Sparkles, color: 'text-teal-500',
+    palabras: ['espiritual', 'meditacion', 'contemplat', 'religion', 'religios', 'fe ', 'sentido de la vida',
+               'conciencia', 'mindfulness', 'sagrado', 'ritual', 'oracion', 'yoga', 'duelo', 'proposito'] },
 ];
 
 /** Sin tildes y en minúsculas. Mismo criterio que en `iconoDeNombre`: dos
@@ -122,3 +176,26 @@ export const areasQueEncajan = (texto: string, cuantas = 3): Objetivo[] => {
 /** El área por su id, para pintar su icono y su color donde haga falta. */
 export const AREA_POR_ID: Record<string, Objetivo> =
   Object.fromEntries(OBJETIVOS.map(o => [o.id, o]));
+
+/*
+ * ── QUE LAS DOS LISTAS NO SE SEPAREN ──────────────────────────────────────
+ * `src/utils/objectiveIds.ts` repite estos mismos ids sin iconos ni colores,
+ * porque de ahí tira también el servidor y aquí dentro hay `lucide-react`.
+ *
+ * Dos listas de lo mismo se separan: al añadir ESPIRITUALIDAD, aquélla se
+ * quedó en catorce y los 72 subtemas del quince buscaban sin su palabra. No
+ * falló nada ni se quejó nadie — se encontró leyendo.
+ *
+ * Esto no las une; **avisa cuando dejan de coincidir**, y sólo en desarrollo:
+ * en producción un aviso en la consola no lo lee nadie y el arreglo hay que
+ * hacerlo antes de desplegar, no después.
+ */
+if (import.meta.env?.DEV) {
+  const faltan = OBJETIVOS.filter(o => !Object.values(OBJECTIVE_ID_BY_KEY).includes(o.id));
+  if (faltan.length) {
+    console.warn(
+      '[objetivos] estos están aquí y no en objectiveIds.ts:',
+      faltan.map(o => `${o.id} ${o.titulo}`).join(', '),
+      '— añádelos allí o lo que lea esa lista se los saltará sin avisar.');
+  }
+}

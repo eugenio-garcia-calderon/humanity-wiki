@@ -45,16 +45,80 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
   const [conIA, setConIA] = useState(false);
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
+    // ══ CENTRADA EN LA PANTALLA, NO EN EL HUECO QUE SOBRA ═══════════════════
+    // (2026-08-25, Eugenio: «y que esté centrado».)
+    //
+    // Centrar en el hueco no basta: el raíl de la derecha (Feedback, iconos,
+    // tu foto) es 97 px más ancho que el de la izquierda, así que el centro
+    // del hueco cae 53 px a la izquierda del centro de la pantalla. Medido,
+    // no estimado.
+    //
+    // Desde 1280 px la caja se saca del flujo y se clava en el centro de la
+    // ventana. **Solo desde ahí**: por debajo no cabe y se montaría encima de
+    // los iconos — a 1280 el borde derecho de la caja queda a 916 px y los
+    // iconos empiezan en 936, veinte de margen. Por debajo se queda centrada
+    // en el hueco, que es lo que se puede.
+    //
+    // Y AL SACARLA DEL FLUJO HAY QUE DEVOLVERLE EL EMPUJE A OTRO: quien manda
+    // los iconos a la derecha era esta caja al crecer. Desde 1280 lo hace el
+    // hueco vacío de `Layout.tsx`, que recupera su `flex-1` justo a esa
+    // anchura. Si no, los iconos se vendrían al centro con la caja encima.
+    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5
+      xl:absolute xl:left-1/2 xl:w-[34.5rem] xl:-translate-x-1/2 xl:flex-none">
+      {/* ══ EN UNA PANTALLA MUY ESTRECHA, UN BOTÓN Y NO UNA CAJA ══════════
+          Medido a 320 px: la caja quedaba en 18 px de ancho **con 116 px de
+          botones dentro**, y el campo de escribir medía **0**. O sea que el
+          buscador estaba ahí, se veía, y no se podía usar: los iconos se
+          pintaban unos encima de otros y no había dónde teclear.
+
+          Un buscador que no acepta una letra es peor que no tener buscador en
+          la barra, porque el sitio ya parece ocupado. Así que por debajo de
+          `lg` esto es una lupa que lleva a la página de búsqueda —donde la caja
+          tiene la pantalla entera— y de `lg` para arriba sigue siendo la caja
+          de siempre, con sus sugerencias y su interruptor.
+
+          ── EL CORTE SE ELIGIÓ MIDIENDO, NO A OJO ──────────────────────────
+          Primero se puso en `sm` (640) y el campo **seguía midiendo 0**: se
+          cambiaba un buscador inservible por otro inservible 320 px más allá.
+          En `md` (768) tampoco: a 800 px el campo era 0. El motivo está en el
+          resto de la fila — a esos anchos el nombre de la plataforma ya se
+          pinta entero y ocupa 183 px, y a la caja le quedan 106.
+
+          A `lg` (1024) el campo mide 78 px con el interruptor compacto: poco,
+          pero se escribe y se ve lo escrito. Por debajo, la lupa.
+
+          Es lo mismo que hace YouTube en un teléfono, y por el mismo motivo:
+          ahí arriba no caben a la vez un campo de texto útil y la cuenta. */}
+      <button
+        type="button"
+        onClick={() => navegar('/buscar')}
+        title="Buscar"
+        aria-label="Buscar"
+        className={cn(
+          'grid shrink-0 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 lg:hidden',
+          compacto ? 'h-7 w-7' : 'h-9 w-9',
+        )}
+      >
+        <Search className="h-5 w-5" />
+      </button>
+
       <CajaBusqueda
         pastilla
         compacto={compacto}
         placeholder={conIA ? 'Pregúntale a la IA…' : 'Buscar en la Red…'}
-        className={cn(conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
+        className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
         // gratis y no dependen de la IA. Lo que cambia es a dónde va el Intro.
         alBuscar={q => navegar(conIA ? `/ia?q=${encodeURIComponent(q)}` : `/buscar?q=${encodeURIComponent(q)}`)}
+        // CON LA IA ENCENDIDA, PEGAR UNA CAPTURA AQUÍ LA MANDA A LA IA
+        // (2026-08-25, Eugenio: «el buscador de IA no me permite pegarle
+        // imágenes»). Esta caja no sabe adjuntar y no debe aprender: los
+        // formatos, el tamaño máximo y el aviso de error viven en el chat, en
+        // un solo sitio. Aquí solo se le pasa el fichero y él lo abre y lo
+        // adjunta. Con el interruptor apagado no se pasa nada, y pegar un
+        // fichero en una caja de buscar palabras sigue sin hacer nada.
+        alPegarFichero={conIA ? (f => window.dispatchEvent(new CustomEvent('ai:adjuntar', { detail: f }))) : undefined}
         derecha={
           <>
             {/* EL INTERRUPTOR, DENTRO DE LA CAJA. Fuera sería un ajuste de la
@@ -72,10 +136,16 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
               )}
             >
               <Sparkles className="h-3.5 w-3.5 shrink-0" />
-              <span className="hidden text-[11px] font-black lg:inline">IA</span>
+              <span className="hidden text-[11px] font-black xl:inline">IA</span>
               {/* La pastilla del interruptor: dice si está encendido sin tener
-                  que interpretar un color. */}
-              <span className={cn('relative h-3.5 w-6 shrink-0 rounded-full transition-colors',
+                  que interpretar un color.
+
+                  SÓLO DESDE `xl`. Medido: la pastilla y su palabra cuestan 34 px
+                  de los 218 que tiene la caja en un portátil de 1024, y ahí esos
+                  34 son la mitad del sitio donde se escribe. Por debajo queda la
+                  estrella sola, que ya cambia de color al encenderse — se pierde
+                  el matiz de «esto es un interruptor», no el de si está puesto. */}
+              <span className={cn('relative hidden h-3.5 w-6 shrink-0 rounded-full transition-colors xl:block',
                 conIA ? 'bg-violet-600' : 'bg-slate-300')}>
                 <span className={cn('absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-all',
                   conIA ? 'left-3' : 'left-0.5')} />

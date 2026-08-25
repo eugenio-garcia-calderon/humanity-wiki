@@ -56,6 +56,7 @@ const MiConocimiento = lazy(() => import('./pages/MiConocimiento'));
 const Muro = lazy(() => import('./pages/Muro'));
 const ObjectiveDetail = lazy(() => import('./pages/ObjectiveDetail'));
 const Objectives = lazy(() => import('./pages/Objectives'));
+const Tema = lazy(() => import('./pages/Tema'));
 const OrganizationProfile = lazy(() => import('./pages/OrganizationProfile'));
 const Organizations = lazy(() => import('./pages/Organizations'));
 const Paginas = lazy(() => import('./pages/Paginas'));
@@ -81,6 +82,9 @@ const MiPedido = lazy(() => import('./pages/MiPedido'));
 const FichaProducto = lazy(() => import('./pages/FichaProducto'));
 const Solutions = lazy(() => import('./pages/Solutions'));
 const Tablas = lazy(() => import('./pages/Tablas'));
+// La rueda de temas y los favoritos. `lazy` como el resto: dibuja un SVG
+// grande que no hace falta hasta que alguien entra a ordenar sus temas.
+const Preferencias = lazy(() => import('./pages/Preferencias'));
 const Tareas = lazy(() => import('./pages/Tareas'));
 const Territories = lazy(() => import('./pages/Territories'));
 const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
@@ -165,6 +169,24 @@ const ESPACIO_DE = subdominioDeUsuario();
  */
 function AplicacionDeEspacio({ handle }: { handle: string }) {
   return (
+    /*
+     * ── EL ESPACIO TAMBIÉN NECESITA SESIÓN Y DATOS (2026-08-26) ─────────────
+     * Aquí no había proveedores, y con lo que se servía antes —páginas, la
+     * portada, una ficha de producto— no hacían falta: ninguna preguntaba quién
+     * eres.
+     *
+     * Un proyecto sí. Al añadir su ruta, la pantalla se quedó **en blanco** con
+     * `useAuth must be used within AuthProvider` en la consola. No es un fallo
+     * de esa pantalla: es que este árbol no le daba lo que cualquier otra parte
+     * de la aplicación da por hecho.
+     *
+     * Envolverlo aquí es además lo correcto para lo que viene: quien entre en el
+     * espacio de alguien **con su propia sesión** debe poder ver el botón de
+     * editar si resulta que el proyecto es suyo, en vez de tener que salir al
+     * dominio principal para tocar lo suyo.
+     */
+    <AuthProvider>
+    <DataProvider>
     <BrowserRouter>
       <Suspense fallback={<Esperando />}>
         <Routes>
@@ -177,11 +199,31 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               es fijo y `:slug` variable: si no se declarara, una tienda con
               una página llamada «producto» se comería todas las fichas. */}
           <Route path="producto/:producto" element={<FichaProducto handle={handle} />} />
+          {/* ── UN PROYECTO TAMBIÉN SE VE EN EL ESPACIO DE ALGUIEN (2026-08-26) ─
+              Sin esta línea, `quien.humanity.wiki/mi-proyecto` acababa en una
+              PÁGINA EN BLANCO. Y no era un fallo de datos: `PaginaPublica`
+              resuelve la dirección, ve que es un proyecto y manda a
+              `/proyectos/:slug` — una ruta que en el subdominio **no existía**.
+              Así que caía en el comodín de abajo, volvía a `PaginaPublica` con
+              el tramo «proyectos» como si fuera el nombre de una página, y ahí
+              no hay nada.
+
+              Lo peor es dónde caía: la dirección corta es justo la que la
+              cajita de compartir enseña como «la que se enseña». La larga
+              funcionaba desde el primer día, así que probando por ahí no se veía
+              nada raro — que es exactamente lo que me pasó.
+
+              Va ANTES que `:slug` porque «proyectos» es fijo y `:slug` variable:
+              si no, una página llamada «proyectos» se comería todos los
+              proyectos. Misma razón que `pedido` y `producto` aquí arriba. */}
+          <Route path="proyectos/:slug" element={<Proyecto />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </DataProvider>
+    </AuthProvider>
   );
 }
 
@@ -336,6 +378,7 @@ export default function App() {
                 <Route path="buscar" element={<Buscar />} />
                 <Route path="comercio" element={<Comercio />} />
                 <Route path="tablas" element={<Tablas />} />
+                <Route path="preferencias" element={<Preferencias />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
                 <Route path="mis-videos" element={<MisVideos />} />
@@ -369,6 +412,8 @@ export default function App() {
                 <Route path="soluciones/:id" element={<SolutionProfile />} />
                                 <Route path="objetivos/:id" element={<ObjectiveDetail />} />
                 <Route path="objetivos" element={<Objectives />} />
+                {/* La página de un subtema del menú (prog8, 2026-08-25). */}
+                <Route path="temas/:id" element={<Tema />} />
                 <Route path="mercado" element={<Mercado />} />
                 <Route path="panel-financiero" element={<PanelFinanciero />} />
                 <Route path="muro" element={<Muro />} />

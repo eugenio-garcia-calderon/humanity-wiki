@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   X, ExternalLink, Globe, Lock, Trash2, Users, Check, Loader2, Pencil,
-  CircleDot, CheckCircle2, AlertCircle, User as UserIcon, Eye, Sparkles,
+  CircleDot, CheckCircle2, AlertCircle, User as UserIcon, Eye, Sparkles, MoreHorizontal,
 } from 'lucide-react';
 import WindowContent from './WindowContent';
 import { KIND_TINT } from './esferaKit';
 import { cn } from '../../utils/cn';
+import { useEsMovil } from '../../hooks/useEsMovil';
+import FuenteDeLaPublicacion from './FuenteDeLaPublicacion';
 
 // ============================================================================
 // FICHA DE UNA PUBLICACIÓN (2026-08-08, petición del usuario)
@@ -43,6 +45,10 @@ export interface Publicacion {
   /** Cuántas piezas tiene el lienzo donde vive. `null` cuando no vive en
    *  ninguno — que no es lo mismo que 0, y la etiqueta lo pinta distinto. */
   donde_piezas?: number | null;
+  /** Lo republicado, ya armado por el servidor. `null` cuando esto no es una
+   *  republicación. Se pregunta por este campo entero y no por sus trozos: así
+   *  no se puede pintar media republicación si alguno viene vacío. */
+  republica?: import('./Republicacion').Republicado | null;
   personal: boolean;
   ruta: string | null;
   publico: boolean;
@@ -62,6 +68,28 @@ const campoTexto = (p: Publicacion): 'cuerpo' | 'descripcion' | null =>
   p.tipo === 'muro' ? 'cuerpo'
   : p.tipo === 'lienzo' || p.tipo === 'proyecto' || p.tipo === 'mapa' ? 'descripcion'
   : null;
+
+/*
+ * ── LO QUE PUEDE LLEVAR DESCRIPCIÓN ─────────────────────────────────────────
+ * Eugenio: «permite que al publicar un vídeo se permita añadir una
+ * descripción, no sólo el título».
+ *
+ * Faltaba, y faltaba por una razón concreta: `campoTexto()` devuelve `null`
+ * para las ventanas, así que en su ficha no salía ningún campo de texto. Un
+ * vídeo publicado sólo podía llevar su titular, y todo lo que hubiera que
+ * contar sobre él —de qué trata, por qué está aquí, qué minuto mirar— no tenía
+ * dónde ir.
+ *
+ * Va en `config.caption`, que es donde una imagen y un vídeo subido YA
+ * guardaban su pie. No se inventa un campo nuevo: dos claves para lo mismo se
+ * separan al mes siguiente, y entonces una publicación tiene dos descripciones
+ * y ninguna es la buena.
+ *
+ * Sólo los tipos donde el contenido es una pieza de media. En una tabla o un
+ * grafo el «contenido» ya es la propia cosa y el sitio para explicarla es
+ * otro.
+ */
+const LLEVAN_DESCRIPCION = new Set(['video', 'imagen', 'pdf', 'audio', 'enlace']);
 
 /** El texto largo vive bajo una clave distinta según el tipo dentro de `config`. */
 const campoConfig = (p: Publicacion): 'body' | 'description' | 'goal' | null =>
@@ -104,6 +132,25 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
   const [aviso, setAviso] = useState<string | null>(null);
   const [confirmandoBorrado, setConfirmandoBorrado] = useState(false);
   const [panelColab, setPanelColab] = useState(false);
+  const esMovil = useEsMovil();
+  /*
+   * ── EN UN TELÉFONO, LO DE SIEMPRE DETRÁS DE UN BOTÓN (2026-08-25) ─────────
+   * Eugenio, con una captura: «arregla la versión móvil de la ventana de
+   * publicaciones, mira el problema de los botones, y simplifica y que sea
+   * minimalista».
+   *
+   * La barra de abajo lleva cinco acciones en una fila que se parte. En un
+   * ordenador caben todas; en un teléfono de 390 px se convierten en **cinco
+   * renglones apilados** que ocupan media pantalla, tapan el contenido y
+   * chocan con los tres círculos que flotan encima.
+   *
+   * Lo que se hace no es encoger los botones —serían cinco objetivos pequeños
+   * en vez de cinco grandes— sino separar lo que se usa de lo que se consulta:
+   * **Editar** se queda a la vista, porque es lo que se viene a hacer, y lo
+   * demás se recoge detrás de un botón. Nada desaparece; deja de estar todo a
+   * la vez.
+   */
+  const [masAbierto, setMasAbierto] = useState(false);
   const [colaboradores, setColaboradores] = useState<any[]>([]);
   const [invitado, setInvitado] = useState('');
   const cajaTitulo = useRef<HTMLInputElement>(null);
@@ -215,24 +262,42 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
     : campoCfg ? { ...guardado.config, [campoCfg]: guardado.texto } : guardado.config;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-3 sm:p-4"
       onClick={() => !editando && onCerrar()}>
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto"
+      {/* ── SITIO PARA LOS TRES CÍRCULOS ─────────────────────────────────
+          Flotan encima de todo y en la captura de Eugenio se plantan sobre la
+          última fila de botones. `--hueco-muelle` es la altura que ellos mismos
+          publican y que ya respetan todas las páginas; la ficha no la usaba.
+          En un ordenador vale 92 px y no molesta; en un móvil es lo que separa
+          «se puede pulsar» de «lo tapa el botón verde». */}
+      <div
+        style={{ marginBottom: 'var(--hueco-muelle, 0px)' }}
+        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
 
         {/* Cabecera */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-5 py-3 flex items-center justify-between gap-3 z-10">
-          <div className="flex items-center gap-2 min-w-0">
+        {/* ── LA CABECERA, CON SITIO PARA CERRAR ───────────────────────────
+            Las tres chapas llevan `shrink-0`, así que en un teléfono no caben y
+            se salían **por debajo del aspa y del botón de abrir**: en la
+            captura de Eugenio la de «EN DESARROLLO» sale cortada con la ✕
+            encima. `min-w-0` en la fila y `overflow-hidden` es lo que permite
+            que lo que sobra se recorte en vez de invadir los botones. */}
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-4 sm:px-5 py-3 flex items-center justify-between gap-2 z-10">
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded shrink-0"
               style={{ color: tint, backgroundColor: `${tint}18` }}>
               {TIPO_LABEL[pub.tipo] || pub.kind}
             </span>
-            <span className={cn('text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1 shrink-0',
+            {/* De `sm` para arriba. En un móvil sobran, y no se pierde nada:
+                si es pública lo dice el botón de abajo («Hacer privada»), y el
+                estado igual. Dos sitios para el mismo dato es lo primero que
+                se puede quitar cuando falta ancho. */}
+            <span className={cn('hidden sm:inline-flex text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full items-center gap-1 shrink-0',
               publico ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500')}>
               {publico ? <Globe className="w-2.5 h-2.5" /> : <Lock className="w-2.5 h-2.5" />}
               {publico ? 'Pública' : 'Privada'}
             </span>
-            <span className={cn('text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1 shrink-0',
+            <span className={cn('hidden sm:inline-flex text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full items-center gap-1 shrink-0',
               estado === 'terminado' ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700')}>
               {estado === 'terminado' ? <CheckCircle2 className="w-2.5 h-2.5" /> : <CircleDot className="w-2.5 h-2.5" />}
               {estado === 'terminado' ? 'Terminada' : 'En desarrollo'}
@@ -268,13 +333,31 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
             <span className="inline-flex items-center gap-1">
               <UserIcon className="w-3 h-3" />{pub.autor_nombre || 'Anónimo'}
             </span>
-            {pub.donde && <span>· {pub.donde}</span>}
+            {/* Cuando el bloque de la fuente sale abajo —con su nombre, su
+                recuento y sus piezas— este renglón repetiría el mismo dato en
+                gris de 11 px. Se queda sólo cuando no hay bloque: para un
+                proyecto o un mapa, donde `donde` es una cuenta y no un sitio. */}
+            {pub.donde && !(pub.tipo === 'ventana' && pub.donde_slug) && <span>· {pub.donde}</span>}
             {pub.vistas > 0 && <span className="inline-flex items-center gap-0.5"><Eye className="w-3 h-3" />{pub.vistas}</span>}
             {pub.ia && <span className="inline-flex items-center gap-0.5 text-amber-600"><Sparkles className="w-3 h-3" />Escrito por la IA</span>}
             {nColaboradores > 0 && (
               <span className="inline-flex items-center gap-0.5"><Users className="w-3 h-3" />{nColaboradores}</span>
             )}
           </div>
+
+          {/* LA DESCRIPCIÓN DE UNA PIEZA DE MEDIA. Va DEBAJO del título y
+              ENCIMA del vídeo, que es donde se lee: primero cómo se llama,
+              luego de qué va, luego la cosa. Puesta debajo del reproductor
+              habría que bajar para saber si hay algo escrito. */}
+          {editando && pub.tipo === 'ventana' && LLEVAN_DESCRIPCION.has(pub.kind) && (
+            <textarea
+              value={config.caption || ''}
+              onChange={e => setConfig({ ...config, caption: e.target.value })}
+              rows={3}
+              placeholder="Añade una descripción, si quieres. De qué va, por qué lo publicas, qué mirar."
+              className="w-full mb-3 px-3 py-2.5 border border-slate-200 rounded-xl text-sm leading-relaxed focus:outline-none focus:border-emerald-400 resize-y"
+            />
+          )}
 
           {/* Contenido */}
           {editando && campoTexto(pub) ? (
@@ -341,6 +424,27 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
               </form>
             </div>
           )}
+
+          {/* ══ DE DÓNDE VIENE ESTO, CON SUS PIEZAS ══════════════════════════
+              Eugenio: «dale más relevancia al grafo o proyecto al que
+              pertenezca esta publicación… podemos meter una preview de esa
+              fuente y dará a entender que hay más piezas».
+
+              VA AL FINAL, y es a propósito: primero se lee lo que has venido a
+              leer, y cuando se acaba, aparece de dónde salía y qué más hay
+              dentro. Puesto arriba, competiría con el propio contenido — y esto
+              no es un encabezado, es lo que viene después.
+
+              Sólo para una ventana que viva en un lienzo. En un proyecto o un
+              mapa, `donde` trae una cuenta —«3/8 hechas»— y no un sitio; ya
+              está catalogado que ese campo significa dos cosas. */}
+          {pub.tipo === 'ventana' && pub.donde_slug && (
+            <FuenteDeLaPublicacion
+              slug={pub.donde_slug}
+              excepto={pub.id}
+              onIr={pub.ruta && onIr ? () => onIr(pub.ruta!) : undefined}
+            />
+          )}
         </div>
 
         {/* Barra de acciones: solo si puedes hacer algo con ella */}
@@ -369,7 +473,21 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
                     <Pencil className="w-3.5 h-3.5" /> Editar
                   </button>
                 )}
-                {pub.soy_autor && (
+                {/* EN MÓVIL, EL RESTO DETRÁS DE ESTE BOTÓN. Ver la nota de
+                    `masAbierto`: cinco acciones en una fila que se parte son
+                    cinco renglones apilados en un teléfono. */}
+                {esMovil && pub.soy_autor && (
+                  <button
+                    onClick={() => setMasAbierto(v => !v)}
+                    aria-expanded={masAbierto}
+                    aria-label="Más acciones"
+                    className={cn('inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-colors',
+                      masAbierto ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-600')}
+                  >
+                    <MoreHorizontal className="h-4 w-4" /> Más
+                  </button>
+                )}
+                {pub.soy_autor && (!esMovil || masAbierto) && (
                   <>
                     <button onClick={cambiarVisibilidad} disabled={guardando}
                       className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-600 transition-colors disabled:opacity-50">
