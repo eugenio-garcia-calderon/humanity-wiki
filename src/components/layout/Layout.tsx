@@ -1634,6 +1634,17 @@ export default function Layout() {
                 claro
                 titulo="Explorar"
                 items={OBJETIVOS_RAIL}
+                // EL ÁRBOL TAMBIÉN EN EL MÓVIL (prog8, 2026-08-25). Aquí no va
+                // `personal` —favoritos y reordenar son de escritorio— pero los
+                // subtemas sí: no son un gusto de nadie, son a dónde se va. Sin
+                // esto, en un teléfono el menú se queda en los catorce y las
+                // 1.100 ramas no existen.
+                ramas={{
+                  de: c => ramas[c] ?? [],
+                  hay: c => (cuantasRamas[c] ?? 0) > 0,
+                  abierto: c => !!ramasAbiertas[c],
+                  alternar: alternarRama,
+                }}
                 abierta={null}
                 onElegir={h => { navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`); setCirculo(null); }}
                 onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}
