@@ -7160,3 +7160,76 @@ La regla que queda, y que hace que no haya que aprenderse dónde está cada cosa
   error. Ahora lee `--hueco-muelle`. **Lo cazó otro programador leyendo el plan.**
 - Comprobado en el navegador: «Personalizar» sigue siendo alcanzable en el raíl
   izquierdo, que es la única puerta a `/preferencias`.
+---
+
+## 2026-08-26 — Portadas de rama, galería del proyecto y tarjetas que dicen algo
+
+Eugenio, tres cosas en un mensaje: portada en cada rama, galería general del
+proyecto debajo del título con pie de foto opcional, y tarjetas del listado con
+portada y **sin repetir doce veces el nombre del creador**.
+
+### La portada de cada rama
+
+`portada_url` en `proyecto_ramas` (0130). Se pone y se quita desde el propio
+árbol, pasando el ratón por la rama.
+
+**Si una rama tiene portada, crecen TODAS las tarjetas.** No es comodidad: la
+simetría es el algoritmo de ese dibujo. Las hijas se colocan a
+`nivel * altoNivel`, así que con tarjetas de alturas distintas en un mismo nivel
+unas líneas entran por la cabeza de la tarjeta y otras por su mitad, y el árbol
+se ve torcido sin que nada esté mal colocado. La rama sin foto enseña una banda
+lisa de su color con el icono de añadir: se ve el hueco, y ver el hueco es la
+mejor invitación a llenarlo.
+
+### La galería, debajo del título
+
+Tabla `proyecto_imagenes` (0130) y módulo `src/server/galeria.ts`. Tira
+horizontal, pie de foto opcional, visor a pantalla completa con flechas y
+Escape, reordenar con ‹ ›, y **pegar con ⌘V** con la misma regla que los
+archivos: sólo actúa si el bloque está señalado y nunca dentro de un campo de
+texto.
+
+En la migración queda escrito **por qué no se reutiliza `archivos`**: son dos
+cosas distintas para quien las usa. Los archivos son el material del proyecto;
+la galería es lo que el proyecto enseña de sí mismo. Mezclarlas significaría que
+adjuntar una factura la publica en la portada.
+
+### Las tarjetas del listado
+
+Eugenio: «no pongas en todos el creador del proyecto, porque en realidad sí va a
+ser el del perfil». La regla que ha quedado: **el creador sólo se enseña cuando
+no eres tú**; en tus propios proyectos salen las personas asociadas —hasta tres
+caras y «+N»—, y si no hay ninguna no se pinta nada. Rellenar el hueco con
+«Anónimo» era inventarse un dato donde lo que hay es una ausencia.
+
+Las personas son `game_agents` del Juego Vital y viajan filtradas por
+`user_id`: en el proyecto público de otra persona esa línea sale vacía, que es
+la misma regla que ya protege esos datos en su herramienta. Van en **una
+consulta aparte y con su fallo tragado**: esto adorna la tarjeta, no la
+sostiene, y una subconsulta habría tumbado la lista entera el día que
+`game_agents` no esté.
+
+Y `portada_url` en `proyectos`, que sale en la tarjeta **sólo si la hay**: un
+hueco gris reservado en las doce tarjetas para que dos tengan foto convierte el
+listado en una rejilla de marcos vacíos.
+
+### Dos fallos míos, por escrito
+
+- **La columna no estaba en el SELECT.** `portada_url` creada, endpoint que la
+  escribe, pantalla que la pinta — y la lista de columnas de
+  `GET /api/proyectos/:id/ramas` escrita a mano, donde nadie la añadió. No falla
+  nada: la portada simplemente no existe para quien mira. Es la tercera vez.
+- **Comillas invertidas dentro de una plantilla `sql`.** Las puse en un
+  comentario SQL y cortaron la plantilla; el error salió como «se esperaba `)`»
+  en la línea siguiente. Y `tsc` no lo cazó porque **no lo volví a ejecutar
+  después de esa edición**: lo cazó el servidor al arrancar.
+
+Las seis rutas nuevas están declaradas en `seguridad/politica.ts`
+(`auditar-permisos` baja de 58 a 52 pendientes; las 52 son de otros).
+
+**Comprobado en local**, con datos creados por la ruta del producto y borrados
+después: portada de rama con las alturas iguales, galería con visor, pegado,
+reordenado que persiste, portada de proyecto en la tarjeta y las caras en lugar
+del creador. **Lo que NO he podido ver**: la tarjeta de un proyecto de OTRA
+persona —en esta base no hay ninguno— así que el caso «sí se enseña el creador
+porque no eres tú» está leído en el código, no visto en pantalla.

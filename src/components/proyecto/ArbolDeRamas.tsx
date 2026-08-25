@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, X, Pencil, Check, GitBranch, Trash2, Loader2 } from 'lucide-react';
+import { Plus, X, Pencil, Check, GitBranch, Trash2, Loader2, ImagePlus } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { elegirYSubirImagenes } from '../../utils/elegirImagen';
 
 // ============================================================================
 // EL ÁRBOL DE RAMAS DE UN PROYECTO (2026-08-25)
@@ -37,23 +38,40 @@ import { cn } from '../../utils/cn';
 type Rama = {
   id: string; padre_id: string | null; nombre: string;
   nota: string | null; color: string | null; orden: number;
+  portada_url: string | null;
 };
 
 /* Medidas del dibujo, en un solo sitio. Cambiar el aire entre ramas es cambiar
    un número y no perseguirlo por seis fórmulas. */
 const ANCHO = 168;   // lo que ocupa una rama
 const HUECO = 22;    // aire entre dos hermanas
-const ALTO = 104;    // lo que baja de un nivel al siguiente
-const TARJETA = 52;  // alto de la tarjeta
+const TARJETA = 52;  // alto de la tarjeta sin portada
+const PORTADA = 66;  // lo que añade la banda de la imagen
+const AIRE = 52;     // lo que se deja entre el pie de una tarjeta y la de abajo
+
+/*
+ * ── SI UNA RAMA TIENE PORTADA, CRECEN TODAS (2026-08-26) ───────────────────
+ * Eugenio: «permite a las ramas del proyecto añadir imágenes de portada a cada
+ * rama».
+ *
+ * La tentación es que sólo crezca la que tiene imagen. No se hace, y no es por
+ * comodidad: **la simetría es el algoritmo de este dibujo**, no un adorno. Las
+ * hijas se colocan a `nivel * altoNivel`, así que si las tarjetas de un mismo nivel
+ * miden distinto, unas líneas entran por la cabeza de la tarjeta y otras por su
+ * mitad, y el árbol se ve torcido sin que nada esté mal colocado.
+ *
+ * Con una altura única, la rama sin foto enseña una banda lisa de su color: se
+ * ve el hueco, y ver el hueco es la mejor invitación a llenarlo.
+ */
 
 /** Los colores que puede tener una rama. Se hereda de la madre si no elige. */
-const COLORES: Record<string, { linea: string; borde: string; punto: string; texto: string }> = {
-  esmeralda: { linea: '#10b981', borde: 'border-emerald-200', punto: 'bg-emerald-500', texto: 'text-emerald-700' },
-  cielo:     { linea: '#0ea5e9', borde: 'border-sky-200',     punto: 'bg-sky-500',     texto: 'text-sky-700' },
-  ambar:     { linea: '#f59e0b', borde: 'border-amber-200',   punto: 'bg-amber-500',   texto: 'text-amber-700' },
-  violeta:   { linea: '#8b5cf6', borde: 'border-violet-200',  punto: 'bg-violet-500',  texto: 'text-violet-700' },
-  rosa:      { linea: '#ec4899', borde: 'border-pink-200',    punto: 'bg-pink-500',    texto: 'text-pink-700' },
-  pizarra:   { linea: '#64748b', borde: 'border-slate-200',   punto: 'bg-slate-400',   texto: 'text-slate-600' },
+const COLORES: Record<string, { linea: string; borde: string; punto: string; texto: string; banda: string }> = {
+  esmeralda: { linea: '#10b981', borde: 'border-emerald-200', punto: 'bg-emerald-500', texto: 'text-emerald-700', banda: 'bg-emerald-50' },
+  cielo:     { linea: '#0ea5e9', borde: 'border-sky-200',     punto: 'bg-sky-500',     texto: 'text-sky-700',     banda: 'bg-sky-50' },
+  ambar:     { linea: '#f59e0b', borde: 'border-amber-200',   punto: 'bg-amber-500',   texto: 'text-amber-700',   banda: 'bg-amber-50' },
+  violeta:   { linea: '#8b5cf6', borde: 'border-violet-200',  punto: 'bg-violet-500',  texto: 'text-violet-700',  banda: 'bg-violet-50' },
+  rosa:      { linea: '#ec4899', borde: 'border-pink-200',    punto: 'bg-pink-500',    texto: 'text-pink-700',    banda: 'bg-pink-50' },
+  pizarra:   { linea: '#64748b', borde: 'border-slate-200',   punto: 'bg-slate-400',   texto: 'text-slate-600',   banda: 'bg-slate-50' },
 };
 const ORDEN_COLORES = Object.keys(COLORES);
 
@@ -67,6 +85,7 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
   const [editando, setEditando] = useState<string | null>(null);
   const [borrador, setBorrador] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  const [subiendoEn, setSubiendoEn] = useState<string | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
   const caja = useRef<HTMLDivElement>(null);
 
@@ -77,6 +96,13 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
       .catch(() => setRamas([]));
 
   useEffect(() => { cargar(); }, [proyectoId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* La altura de una tarjeta y la caída entre niveles, decididas por si HAY
+     portadas en este árbol. Se calculan aquí porque el dibujo entero depende de
+     ellas y hay que pasarlas a las dos pasadas. */
+  const hayPortadas = !!ramas?.some(r => !!r.portada_url);
+  const altoTarjeta = hayPortadas ? TARJETA + PORTADA : TARJETA;
+  const altoNivel = altoTarjeta + AIRE;
 
   /* ── LAS DOS PASADAS ──────────────────────────────────────────────────── */
   const arbol = useMemo(() => {
@@ -102,7 +128,7 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
         return p;
       });
       const mio = ancho(r);
-      return { rama: r, x: izq + mio / 2, y: nivel * ALTO, nivel, color, hijas };
+      return { rama: r, x: izq + mio / 2, y: nivel * altoNivel, nivel, color, hijas };
     };
 
     const raices = hijasDe(null);
@@ -116,10 +142,10 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
     });
     const total = Math.max(cursor - HUECO * 2, ANCHO);
     const hondo = (function fondo(ps: Puesta[]): number {
-      return ps.reduce((m, p) => Math.max(m, p.y + TARJETA, fondo(p.hijas)), 0);
+      return ps.reduce((m, p) => Math.max(m, p.y + altoTarjeta, fondo(p.hijas)), 0);
     })(puestas);
     return { puestas, total, hondo };
-  }, [ramas]);
+  }, [ramas, altoNivel, altoTarjeta]);
 
   const planas = useMemo(() => {
     const fuera: Puesta[] = [];
@@ -153,6 +179,39 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
       method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre }),
+    }).catch(() => {});
+    cargar();
+  };
+
+  /*
+   * LA PORTADA DE UNA RAMA. Se sube la imagen y se guarda su dirección en la
+   * rama; `null` la quita. Se recarga el árbol entero y no sólo esa rama a
+   * propósito: **poner la primera portada cambia la altura de todas las
+   * tarjetas**, así que la respuesta correcta a este cambio nunca es local.
+   */
+  const ponerPortada = async (r: Rama) => {
+    if (subiendoEn) return;
+    setFallo(null);
+    const sub = await elegirYSubirImagenes(false);
+    if (sub.error) { setFallo(sub.error); return; }
+    if (!sub.urls.length) return;
+    setSubiendoEn(r.id);
+    try {
+      const res = await fetch(`/api/proyectos/${proyectoId}/ramas/${r.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portada_url: sub.urls[0] }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error || 'No he podido guardarla.');
+      await cargar();
+    } catch (e: any) { setFallo(e.message); } finally { setSubiendoEn(null); }
+  };
+
+  const quitarPortada = async (r: Rama) => {
+    await fetch(`/api/proyectos/${proyectoId}/ramas/${r.id}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portada_url: null }),
     }).catch(() => {});
     cargar();
   };
@@ -225,6 +284,10 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
         </div>
       )}
 
+      {fallo && creandoEn === undefined && (
+        <p className="mb-2 text-[11px] font-bold text-red-600">{fallo}</p>
+      )}
+
       {vacio ? (
         <div className="rounded-3xl border-2 border-dashed border-slate-200 py-14 text-center">
           <GitBranch className="mx-auto mb-3 h-8 w-8 text-slate-300" />
@@ -242,7 +305,7 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
                 entran por la cabeza de la hija. */}
             <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
               {planas.flatMap(p => p.hijas.map(h => {
-                const x1 = p.x, y1 = p.y + TARJETA;
+                const x1 = p.x, y1 = p.y + altoTarjeta;
                 const x2 = h.x, y2 = h.y;
                 const m = (y1 + y2) / 2;
                 return (
@@ -265,9 +328,35 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
                 <div
                   key={p.rama.id}
                   className="group/rama absolute"
-                  style={{ left: p.x - ANCHO / 2, top: p.y, width: ANCHO, height: TARJETA }}
+                  style={{ left: p.x - ANCHO / 2, top: p.y, width: ANCHO, height: altoTarjeta }}
                 >
-                  <div className={cn('flex h-full flex-col justify-center rounded-2xl border bg-white px-3 shadow-sm transition-shadow hover:shadow-md', c.borde)}>
+                  <div className={cn('flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md', c.borde)}>
+                    {/* LA PORTADA. Sólo se pinta la banda si en este árbol hay
+                        alguna: en un proyecto donde nadie ha puesto fotos, una
+                        franja gris sobre cada rama es ruido en quince sitios. */}
+                    {hayPortadas && (
+                      <div className={cn('relative shrink-0 overflow-hidden', c.banda)} style={{ height: PORTADA }}>
+                        {p.rama.portada_url ? (
+                          <img
+                            src={p.rama.portada_url}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : puedeEditar ? (
+                          <button
+                            onClick={() => ponerPortada(p.rama)}
+                            title={`Poner una portada a ${p.rama.nombre}`}
+                            className="grid h-full w-full place-items-center text-slate-300 transition-colors hover:text-emerald-600"
+                          >
+                            {subiendoEn === p.rama.id
+                              ? <Loader2 className="h-4 w-4 animate-spin" />
+                              : <ImagePlus className="h-4 w-4" />}
+                          </button>
+                        ) : null}
+                      </div>
+                    )}
+                    <div className="flex flex-1 flex-col justify-center px-3">
                     {editando === p.rama.id ? (
                       <div className="flex items-center gap-1">
                         <input
@@ -293,6 +382,7 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
                         )}
                       </>
                     )}
+                    </div>
                   </div>
 
                   {/* Los mandos salen al pasar por encima. En reposo esto es un
@@ -308,6 +398,16 @@ export default function ArbolDeRamas({ proyectoId, titulo }: { proyectoId: strin
                         className="grid h-6 w-6 place-items-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm hover:text-emerald-700"
                       >
                         <Plus className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => (p.rama.portada_url ? quitarPortada(p.rama) : ponerPortada(p.rama))}
+                        title={p.rama.portada_url ? `Quitar la portada de ${p.rama.nombre}` : `Poner una portada a ${p.rama.nombre}`}
+                        aria-label={p.rama.portada_url ? `Quitar la portada de ${p.rama.nombre}` : `Poner una portada a ${p.rama.nombre}`}
+                        className="grid h-6 w-6 place-items-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm hover:text-emerald-700"
+                      >
+                        {subiendoEn === p.rama.id
+                          ? <Loader2 className="h-3 w-3 animate-spin" />
+                          : p.rama.portada_url ? <X className="h-3 w-3" /> : <ImagePlus className="h-3 w-3" />}
                       </button>
                       <button
                         onClick={() => { setEditando(p.rama.id); setBorrador(p.rama.nombre); }}
