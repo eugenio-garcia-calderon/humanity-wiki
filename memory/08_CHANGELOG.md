@@ -6960,3 +6960,41 @@ contenido. Y un aviso para quien quiera podar por ahí: contar sólo el
 contenido propio **mata a los padres** (cuatro ramas de éstas salen a cero y
 tienen dos o tres hijas llenas). Hay que contar la rama, y sin límite de
 profundidad eso es un `WITH RECURSIVE`.
+
+### 2026-08-25 — Se ve la imagen que vas a enviar, y la que enviaste (prog8)
+
+Eugenio: «haz que al pegar una imagen en el chat se vea con una preview como
+hace claude code».
+
+Pegar ya funcionaba desde esta misma mañana, pero lo único que se veía era el
+nombre del fichero — y con «captura 20.07.53.png» eso no dice **cuál** de las
+tres capturas has pegado. La vista previa es la única forma de darse cuenta
+**antes** de enviar de que has pegado la ventana equivocada.
+
+- **En la caja**: miniatura de 40×40 de la imagen de verdad, con el nombre y
+  «Imagen · se enviará con tu mensaje», y la X para quitarla. Un PDF se queda
+  con su icono: pintar su primera página exigiría abrir el PDF y no aclara gran
+  cosa.
+- **En el mensaje ya enviado**: la imagen dentro de tu propia burbuja, para que
+  al subir por la conversación se vea de qué iba esa pregunta sin acordarse del
+  nombre.
+- **Pero en el mensaje va una MINIATURA, no la imagen.** Una captura de cuatro
+  megas dentro de cada mensaje se queda en memoria mientras dure la
+  conversación: cinco capturas son veinte megas retenidos para enseñar cinco
+  cuadraditos. Se reescala a 240 px de lado y se guarda en JPEG al 70 % — la
+  del ejemplo pasó de PNG entero a **3 KB**.
+- **Tu mensaje aparece antes que su miniatura.** Fabricarla primero retrasaría
+  tu propia frase —descodificar una captura grande no es gratis— y eso se nota
+  como lentitud del chat, no del adjunto. Se pinta el mensaje y se rellena
+  después, localizándolo **por identidad del objeto y no por su posición**:
+  entre medias pueden haber entrado más mensajes y un índice guardado sería el
+  de otro.
+- **Si el navegador no puede hacer la miniatura, no se inventa nada**: el
+  mensaje se queda con la pastilla del nombre, como hasta hoy. Una vista previa
+  rota es peor que ninguna.
+
+Comprobado en 3008: pegada una imagen de 320×180 → miniatura en la caja
+(«captura 20.07.53.png · Imagen · se enviará con tu mensaje»); enviada →
+aparece dentro de la burbuja verde, en JPEG de **3 KB**, con el nombre y el
+texto debajo; pegado un PDF → icono, «PDF · se enviará con tu mensaje», y
+**ninguna imagen rota** en la página. `tsc` limpio.
