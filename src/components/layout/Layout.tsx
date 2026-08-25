@@ -1698,9 +1698,17 @@ export default function Layout() {
                   hay: c => (cuantasRamas[c] ?? 0) > 0,
                   abierto: c => !!ramasAbiertas[c],
                   alternar: alternarRama,
+                  onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
                 }}
                 abierta={null}
-                onElegir={h => { navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`); setCirculo(null); }}
+                // EL MISMO DESTINO QUE EN ESCRITORIO, y aquí falló por segunda
+                // vez lo mismo: `Layout.tsx` monta CINCO raíles y arreglé uno.
+                // Ya me pasó esta misma tarde con el árbol de subtemas, lo
+                // escribí en el commit —contar los caminos antes de dar algo
+                // por comprobado— y volví a contarlos mal. Lo que lo destapó no
+                // fue leer: fue abrir producción y ver que seguía yendo a
+                // `/explorar`.
+                onElegir={h => { navigate(`/temas/${encodeURIComponent(h.clave)}`); setCirculo(null); }}
                 onAbrirSubmenu={h => setObjetivoAbierto(h.clave)}
                 onInicio={() => { navigate('/'); setCirculo(null); }}
               />}
