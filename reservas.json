@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/archivo/Adjuntos.tsx",
+      "motivo": "pegar imagenes en los archivos (prog8)",
+      "desde": "2026-08-25T22:37:18.856Z"
+    }
+  ]
 }
