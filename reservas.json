@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0127_mapa_a_mano.sql",
+      "motivo": "marcar lo que corrige una persona (prog8)",
+      "desde": "2026-08-25T20:31:50.167Z"
+    }
+  ]
 }
