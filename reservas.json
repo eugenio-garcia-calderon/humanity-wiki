@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0126_constelacion.sql",
-      "motivo": "clusters, generos y mapa de las piezas (prog8)",
-      "desde": "2026-08-25T18:59:06.793Z"
-    }
-  ]
+  "reservas": []
 }
