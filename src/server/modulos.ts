@@ -60,6 +60,7 @@ import { registrarFuente } from './fuente.js';
 import { registrarTemas } from './temas.js';
 import { registrarAgregador } from './agregador.js';
 import { registrarRamas } from './ramas.js';
+import { registrarGaleria } from './galeria.js';
 import { registrarCompartir } from './compartir.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
@@ -187,6 +188,7 @@ export const MODULOS: Modulo[] = [
   // orden entre las dos da igual — pero se monta después por costumbre: lo
   // que depende de otra cosa, detrás.
   { nombre: 'ramas', montar: (app, db) => registrarRamas(app, db) },
+  { nombre: 'galeria', montar: (app, db) => registrarGaleria(app, db) },
   // La cajita de compartir, común a páginas y proyectos. Va DESPUÉS de
   // `dominios`, que sigue sirviendo lo suyo: las dos leen la misma tabla y
   // ninguna se pisa las rutas — `/api/compartir/…` contra `/api/dominios/…`.
