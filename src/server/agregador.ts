@@ -230,7 +230,14 @@ export function registrarAgregador(app: Express, db: any) {
       // ── CARRIL 3: LO DE FUERA ───────────────────────────────────────────
       const fuera = await db.execute(sql`
         SELECT DISTINCT a.id, a.origen, a.formato, a.url, a.origen_id, a.titulo,
-               a.fuente, a.idioma, a.publicado_el, a.nota_ia, a.calidad, a.estado
+               a.fuente, a.idioma, a.publicado_el, a.nota_ia, a.calidad, a.estado,
+               -- medio_url es lo que se pinta y url a dónde se va. Y la
+               -- atribución viaja con la imagen porque CC BY-SA obliga a
+               -- nombrar autor y licencia: si no sale de aquí, la pantalla no
+               -- tiene con qué cumplirlo. (Sin acentos graves dentro de esta
+               -- plantilla: uno solo la corta en seco y el fallo sale como un
+               -- error de coma en la línea siguiente.)
+               a.medio_url, a.licencia, a.autor
         FROM contenido_agregado a
         JOIN subtema_contenido c ON c.entity_id = a.id AND c.tipo = 'agregado'
         WHERE c.subtema_id = ANY(${ramaIds}) AND a.archived_at IS NULL

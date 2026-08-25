@@ -44,6 +44,7 @@ type Pieza = {
   id: string; origen: string; formato: string; url: string; origen_id: string | null;
   titulo: string; fuente: string | null; idioma: string | null;
   publicado_el: string | null; nota_ia: string | null; calidad: number; estado: string;
+  medio_url?: string | null; licencia?: string | null; autor?: string | null;
 };
 
 type Cosa = {
@@ -77,7 +78,7 @@ const ICONO_TIPO: Record<string, any> = {
   mapa: MapIcon, grafica: BarChart3,
 };
 
-type Pestanya = 'explorar' | 'videos' | 'arte' | 'indicadores' | 'tuyo';
+type Pestanya = 'explorar' | 'videos' | 'imagenes' | 'arte' | 'indicadores' | 'tuyo';
 
 export default function Tema() {
   const { id = '' } = useParams();
@@ -127,6 +128,11 @@ export default function Tema() {
     [datos?.fuera],
   );
 
+  const imagenes = useMemo(
+    () => (datos?.fuera ?? []).filter(p => p.formato === 'imagen' && p.medio_url),
+    [datos?.fuera],
+  );
+
   const cuentas = useMemo(() => {
     const m: Record<string, number> = {};
     for (const p of datos?.fuera ?? []) m[p.formato] = (m[p.formato] ?? 0) + 1;
@@ -139,13 +145,14 @@ export default function Tema() {
     const l: Array<{ id: Pestanya; nombre: string; icono: any; cuantos?: number }> = [];
     if (datos.hijos.length) l.push({ id: 'explorar', nombre: 'Explorar', icono: LayoutGrid, cuantos: datos.hijos.length });
     if (videos.length) l.push({ id: 'videos', nombre: 'Vídeos', icono: PlayCircle, cuantos: videos.length });
+    if (imagenes.length) l.push({ id: 'imagenes', nombre: 'Imágenes', icono: ImageIcon, cuantos: imagenes.length });
     if (datos.fuera.length) l.push({ id: 'arte', nombre: 'Estado del arte', icono: Sparkles, cuantos: datos.fuera.length });
     if (datos.tuyo.length || datos.humanidad.length) {
       l.push({ id: 'tuyo', nombre: 'En la plataforma', icono: UserIcon, cuantos: datos.tuyo.length + datos.humanidad.length });
     }
     l.push({ id: 'indicadores', nombre: 'Indicadores', icono: Gauge, cuantos: indicadores?.length });
     return l;
-  }, [datos, videos.length, indicadores?.length]);
+  }, [datos, videos.length, imagenes.length, indicadores?.length]);
 
   const pedida = params.get('ver') as Pestanya | null;
   const pestanya: Pestanya = useMemo(() => {
@@ -275,6 +282,17 @@ export default function Tema() {
         {pestanya === 'videos' && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {videos.map(v => <FichaVideo key={v.id} pieza={v} />)}
+          </div>
+        )}
+
+        {/* ── IMÁGENES ─────────────────────────────────────────────────────
+            Columnas de mampostería (`columns-*`) y no una rejilla: estas fotos
+            vienen de Commons con la proporción que tenía la cámara, y una
+            rejilla de celdas iguales sólo puede recortarlas o dejar huecos. En
+            columnas cada una entra con su forma. */}
+        {pestanya === 'imagenes' && (
+          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
+            {imagenes.map(p => <FichaImagen key={p.id} pieza={p} />)}
           </div>
         )}
 
@@ -440,6 +458,55 @@ function FichaVideo({ pieza }: { pieza: Pieza }) {
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * UNA FICHA DE IMAGEN.
+ *
+ * ── LA ATRIBUCIÓN SE PINTA SIEMPRE, NO AL PASAR EL RATÓN ───────────────────
+ * Casi todas estas fotos son CC BY-SA, que **obliga** a nombrar al autor y a
+ * decir la licencia. Esconder eso detrás de un `hover` no cumple —en un móvil
+ * no hay ratón— y ponerlo en una página de créditos aparte tampoco: el
+ * requisito es que acompañe a la obra. Ocupa un renglón de once píxeles y
+ * resuelve el asunto entero.
+ *
+ * Y el enlace lleva a la página de Commons, no al fichero: ahí es donde están
+ * la licencia completa y el historial, que es lo que hay que poder comprobar.
+ */
+function FichaImagen({ pieza }: { pieza: Pieza }) {
+  return (
+    <figure className="break-inside-avoid overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <a href={pieza.url} target="_blank" rel="noopener noreferrer" className="block">
+        <img
+          src={pieza.medio_url ?? ''}
+          alt={pieza.titulo}
+          loading="lazy"
+          className="w-full bg-slate-100 transition-opacity hover:opacity-90"
+        />
+      </a>
+      <figcaption className="flex flex-col gap-2 p-3.5">
+        <p className="text-[14px] font-bold leading-snug text-slate-800">{pieza.titulo}</p>
+        {pieza.nota_ia && (
+          <p className="flex gap-1.5 text-[12px] leading-relaxed text-slate-500">
+            <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+            <span>{pieza.nota_ia}</span>
+          </p>
+        )}
+        <p className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-2 text-[10.5px] text-slate-400">
+          <a href={pieza.url} target="_blank" rel="noopener noreferrer" className="font-bold hover:text-slate-600 hover:underline">
+            Wikimedia Commons
+          </a>
+          {pieza.autor && <><span className="text-slate-200">·</span><span className="truncate">{pieza.autor}</span></>}
+          {pieza.licencia && (
+            <>
+              <span className="text-slate-200">·</span>
+              <span className="rounded bg-slate-100 px-1 py-px font-bold text-slate-500">{pieza.licencia}</span>
+            </>
+          )}
+        </p>
+      </figcaption>
+    </figure>
   );
 }
 
