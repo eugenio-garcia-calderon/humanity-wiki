@@ -65,6 +65,12 @@
       "ruta": "src/server/temas.ts",
       "motivo": "prog2: ESPIRITUALIDAD como objetivo 15 y buscador de temas",
       "desde": "2026-08-25T16:43:52.277Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "scripts/sembrar-subtemas.mjs",
+      "motivo": "prog2: el sembrador tiene que conocer al 15",
+      "desde": "2026-08-25T16:45:10.061Z"
     }
   ]
 }
