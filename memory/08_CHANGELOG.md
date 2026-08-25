@@ -7383,3 +7383,19 @@ El círculo flotante no es un chat nuevo: manda `ai:abrir`, el aviso que
 Y se aparta solo de los dos menús porque lee sus variables (`--hueco-lateral` a
 la derecha, `--hueco-muelle` abajo): si mañana cambian de tamaño, se mueve con
 ellos.
+
+## 2026-08-25 — El proyecto nuevo sale solo, y el panel sube desde su botón
+- **Un proyecto recién creado aparece en el menú de la derecha sin recargar.**
+  El aviso ya existía —`humanity:menu-cambiado`, que dispara el diálogo de crear
+  desde el 2026-08-20— y el menú simplemente no lo escuchaba. No hizo falta ni
+  endpoint nuevo ni tocar a quien crea: hacía falta escuchar.
+  Y se vuelve a preguntar en vez de añadir el proyecto a la lista a mano: meterlo
+  a mano deja fuera el `slug` que calcula el servidor y el icono por defecto, y
+  el menú enseñaría algo que todavía no existe tal cual.
+- **El panel de una herramienta sube desde abajo**, hasta media pantalla, en vez
+  de aparecer arriba a la izquierda. Eugenio: «esa ventana emergente… haz que
+  aparezca de abajo arriba hasta la mitad de la pantalla». Salía del menú de
+  abajo y aparecía en la otra punta, sin nada que la uniera al botón que
+  acababas de pulsar; ahora el gesto y lo que ocurre pasan en el mismo sitio.
+  Media pantalla y no más: lo que estabas mirando sigue detrás y se ve.
+  Arranca en `--hueco-muelle`, así que si la barra cambia de alto, sube con ella.

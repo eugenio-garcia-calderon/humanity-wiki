@@ -1739,12 +1739,38 @@ export default function Layout() {
         />
       </div>
 
-      {/* El panel de una herramienta del raíl de abajo sale por la izquierda,
-          como el de siempre: es el mismo `Panel`, no una copia. */}
+      {/* ══ EL PANEL SUBE DESDE ABAJO (2026-08-25) ═════════════════════════
+          Eugenio: «esa ventana emergente que aparece cuando se le da a ampliar
+          una de las herramientas del menú inferior, en vez de que aparezca en
+          el lateral izquierdo, haz que aparezca de abajo arriba hasta la mitad
+          de la pantalla».
+
+          Y tiene razón de sobra: **sale del menú de abajo y aparecía arriba a
+          la izquierda**, o sea en la otra punta de la pantalla, sin nada que lo
+          uniera al botón que acababas de pulsar. Ahora nace justo encima de su
+          barra, del mismo ancho máximo, y sube. El gesto y lo que ocurre pasan
+          en el mismo sitio.
+
+          MEDIA PANTALLA Y NO MÁS: lo que estabas mirando sigue detrás y se ve.
+          A pantalla completa habría que cerrarlo para recordar de dónde venías.
+
+          Arranca en `--hueco-muelle`, que es lo que mide la barra: si un día
+          cambia de alto, este panel sube con ella y no hay que acordarse. */}
       {!esMovil && panelAbierto && (
-        <div className="fixed bottom-[84px] left-3 top-16 z-[9991] flex" {...gestoDelMenu}>
-          <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
-        </div>
+        <>
+          <div
+            onClick={() => setPanelAbierto(null)}
+            aria-hidden
+            className="fixed inset-0 z-[9990] bg-slate-900/20 animate-in fade-in duration-150"
+          />
+          <div
+            {...gestoDelMenu}
+            className="fixed inset-x-0 z-[9991] mx-auto flex h-[50vh] max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl ring-1 ring-slate-200 animate-in slide-in-from-bottom duration-200 [&>*]:w-full [&>*]:border-0"
+            style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 8px)' }}
+          >
+            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          </div>
+        </>
       )}
 
       {/* La hoja recibe `gestoDelMenu` como cualquier otro menú abierto por
