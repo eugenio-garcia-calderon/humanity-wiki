@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   Loader2, ChevronRight, PlayCircle, FileText, BarChart3, Map as MapIcon,
   Image as ImageIcon, ExternalLink, Sparkles, FolderKanban, LayoutGrid,
-  Search, ShieldAlert, Gauge, Play, User as UserIcon, CircleDashed,
+  Search, ShieldAlert, Gauge, Play, User as UserIcon, CircleDashed, Flag,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { OBJETIVOS } from '../utils/objetivos';
@@ -52,8 +52,14 @@ type Cosa = {
   fecha: string | null; ruta: string; por_busqueda: boolean;
 };
 
+type Reto = { id: string; title: string; description: string | null; scope: string | null; priority: number | null };
+
 type Respuesta = {
-  tema: { id: string; objetivo_id: string; padre_id: string | null; nombre: string; objetivo_nombre?: string };
+  tema: {
+    id: string; objetivo_id: string; padre_id: string | null; nombre: string;
+    objetivo_nombre?: string; es_objetivo?: boolean;
+  };
+  retos: Reto[];
   camino: Array<{ id: string; nombre: string }>;
   hijos: Array<{ id: string; nombre: string; cosas: number }>;
   palabras: string[];
@@ -78,7 +84,7 @@ const ICONO_TIPO: Record<string, any> = {
   mapa: MapIcon, grafica: BarChart3,
 };
 
-type Pestanya = 'explorar' | 'videos' | 'imagenes' | 'arte' | 'indicadores' | 'tuyo';
+type Pestanya = 'explorar' | 'videos' | 'imagenes' | 'arte' | 'tuyo' | 'retos' | 'indicadores';
 
 export default function Tema() {
   const { id = '' } = useParams();
@@ -150,6 +156,11 @@ export default function Tema() {
     if (datos.tuyo.length || datos.humanidad.length) {
       l.push({ id: 'tuyo', nombre: 'En la plataforma', icono: UserIcon, cuantos: datos.tuyo.length + datos.humanidad.length });
     }
+    // Retos e Indicadores van SIEMPRE, tengan o no. Son las dos pestañas que
+    // pueden estar vacías con sentido: enseñar que MOVILIDAD no tiene ni un
+    // reto escrito es información, y esconder la pestaña la convertiría en un
+    // hueco que nadie ve y que por tanto nadie llena.
+    l.push({ id: 'retos', nombre: 'Retos', icono: Flag, cuantos: datos.retos?.length ?? 0 });
     l.push({ id: 'indicadores', nombre: 'Indicadores', icono: Gauge, cuantos: indicadores?.length });
     return l;
   }, [datos, videos.length, imagenes.length, indicadores?.length]);
@@ -352,6 +363,53 @@ export default function Tema() {
                   tema: sale de buscar {datos.palabras.map(p => `«${p}»`).join(', ')} en títulos y textos.
                 </span>
               </p>
+            )}
+          </div>
+        )}
+
+        {/* ── RETOS ────────────────────────────────────────────────────── */}
+        {pestanya === 'retos' && (
+          <div className="flex flex-col gap-4">
+            <p className="text-[12.5px] leading-relaxed text-slate-500">
+              Los retos van por objetivo y no por subtema: no existe ninguna tabla que una un reto
+              con un subtema, y decir que éstos son de aquí sería afirmar una relación que nadie ha hecho.
+            </p>
+            {(datos.retos ?? []).length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-6 text-center">
+                <Flag className="mx-auto h-6 w-6 text-slate-300" />
+                <p className="mt-2 text-[15px] font-bold text-slate-700">
+                  Ningún reto escrito todavía en {objetivo?.titulo ?? datos.tema.objetivo_nombre}
+                </p>
+                <p className="mx-auto mt-1 max-w-md text-[12.5px] leading-relaxed text-slate-500">
+                  Se enseña el hueco en vez de esconder la pestaña. Hay 26 retos en la plataforma y
+                  ninguno cuelga de este objetivo: eso no es un fallo de la pantalla, es trabajo
+                  que falta.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {datos.retos.map(r => (
+                  <Link
+                    key={r.id}
+                    to={`/retos/${r.id}`}
+                    className="flex flex-col gap-1.5 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <span className="text-[15px] font-bold leading-snug text-slate-800">{r.title}</span>
+                    {r.description && (
+                      <span className="line-clamp-3 text-[12.5px] leading-relaxed text-slate-500">{r.description}</span>
+                    )}
+                    <span className="mt-1 flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-400">
+                      {r.scope && <span>{r.scope}</span>}
+                      {r.priority != null && (
+                        <>
+                          <span className="text-slate-200">·</span>
+                          <span className="tabular-nums">prioridad {r.priority}</span>
+                        </>
+                      )}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
         )}

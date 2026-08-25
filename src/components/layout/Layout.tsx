@@ -225,6 +225,11 @@ export default function Layout() {
 
   const alternarRama = (clave: string) => {
     setRamasAbiertas(a => ({ ...a, [clave]: !a[clave] }));
+    // Sólo se pide el árbol de un OBJETIVO. Al abrir una rama de dentro no hay
+    // nada que pedir: el árbol entero del objetivo ya llegó en esa primera
+    // petición, y volver a pedirlo por cada rama que alguien abra sería una
+    // llamada por clic para datos que ya están en memoria.
+    if (!/^O\d{3}$/.test(clave)) return;
     if (ramas[clave] !== undefined) return;
     setRamas(r => ({ ...r, [clave]: null }));
     fetch(`/api/temas/${encodeURIComponent(clave)}`, { credentials: 'include' })
@@ -293,6 +298,8 @@ export default function Layout() {
 
   /** El diálogo de crear un tema, abierto desde el menú de la izquierda. */
   const [nuevoTema, setNuevoTema] = useState(false);
+  /** Cuando el «+» sale de una rama concreta, el diálogo abre colgado de ella. */
+  const [nuevoTemaEn, setNuevoTemaEn] = useState<string | null>(null);
 
   const [porRoce, setPorRoce] = useState(false);
 
@@ -680,11 +687,33 @@ export default function Layout() {
               hay: c => (cuantasRamas[c] ?? 0) > 0,
               abierto: c => !!ramasAbiertas[c],
               alternar: alternarRama,
+              // El «+» sólo para administración. Crear un subtema lo permite
+              // `POST /api/temas` a cualquiera con sesión (decisión de Eugenio
+              // en 0120), pero **crearlo desde el menú de todos** es otra cosa:
+              // ahí lo que se toca es la navegación común, y eso es de nivel 4.
+              onAnadir: (user?.roleLevel ?? 0) >= 4 ? (padreId => setNuevoTemaEn(padreId)) : undefined,
             }}
             abierta={objetivoAbierto}
-            // EL NOMBRE LLEVA AL TEMA. Eugenio: «de Energía te muestra todo lo
-            // relacionado con energía».
-            onElegir={h => navigate(`/explorar?objetivo=${encodeURIComponent(h.clave)}`)}
+            /*
+             * EL NOMBRE LLEVA A LA PÁGINA DEL TEMA (2026-08-25, prog8).
+             *
+             * Llevaba a `/explorar?objetivo=O008`, y esa página contestaba
+             * «Ninguna publicación habla de movilidad todavía» **teniendo 64
+             * publicaciones y 31 subtemas** colgando de ese mismo objetivo. El
+             * gesto natural —pulsar el tema— decía que no había nada, y lo que
+             * sí funcionaba pedía acertarle a una flecha gris de catorce
+             * píxeles que además compartía fila con otra flecha distinta.
+             *
+             * Eugenio lo dijo así: «haz que al pulsar Movilidad te lleve a la
+             * página de movilidad con todos los subtemas y con los mejores
+             * contenidos de Internet, estadísticas, y retos de la humanidad».
+             *
+             * `/temas/O008` es la misma pantalla que `/temas/ST_MEL`: un
+             * objetivo y un subtema contestan a la misma pregunta —«¿qué hay
+             * de esto?»— y tener dos pantallas para eso sería mantener dos
+             * cosas que enseñan lo mismo.
+             */
+            onElegir={h => navigate(`/temas/${encodeURIComponent(h.clave)}`)}
             // LA FLECHA ABRE SU PANEL — indicadores y marcadores— y no toca la
             // pantalla de detrás. Mirar lo que hay dentro de un tema y decidir
             // pasarte a él son dos cosas, y ahora tienen dos sitios donde
@@ -1619,6 +1648,24 @@ export default function Layout() {
       {/* El envoltorio no pinta nada: sólo sirve para poder preguntar «¿está el
           ratón todavía en los círculos?». Ver `useCerrarAlAlejarse`. */}
       {nuevoTema && <DialogoNuevoTema onCerrar={() => setNuevoTema(false)} />}
+      {nuevoTemaEn && (
+        <DialogoNuevoTema
+          padreInicial={nuevoTemaEn}
+          onCerrar={() => setNuevoTemaEn(null)}
+          // Al crearlo, se recarga el árbol de ese objetivo: si no, el tema
+          // nuevo existe en la base y no está en el menú desde el que se acaba
+          // de crear, que es el único sitio donde su autor lo va a buscar.
+          onCreado={() => {
+            const obj = Object.keys(ramas).find(o => (ramas[o] ?? []).some(t => t.id === nuevoTemaEn));
+            setNuevoTemaEn(null);
+            if (!obj) return;
+            fetch(`/api/temas/${encodeURIComponent(obj)}`, { credentials: 'include' })
+              .then(r => (r.ok ? r.json() : null))
+              .then(j => { if (j?.subtemas) setRamas(r => ({ ...r, [obj]: j.subtemas })); })
+              .catch(() => {});
+          }}
+        />
+      )}
 
       <div ref={cajaCirculos}>
         <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />

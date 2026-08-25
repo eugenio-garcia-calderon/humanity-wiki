@@ -157,11 +157,34 @@ export function registrarAgregador(app: Express, db: any) {
       // se quedó en catorce. Con dos listas de lo mismo la que se queda vieja
       // es siempre la copia; `objectives` es donde el dato vive de verdad y no
       // se puede desincronizar de sí mismo.
-      const suyo = await db.execute(sql`
-        SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, o.title AS objetivo_nombre
-        FROM subtemas s LEFT JOIN objectives o ON o.id = s.objetivo_id
-        WHERE s.id = ${id} AND s.archived_at IS NULL
-      `);
+      // ── UN OBJETIVO TAMBIÉN ES UN TEMA ──────────────────────────────────
+      // Eugenio: «haz que al pulsar Movilidad te lleve a la página de movilidad
+      // con todos los subtemas y con los mejores contenidos de Internet».
+      //
+      // Antes, pulsar MOVILIDAD llevaba a `/explorar?objetivo=O008`, que
+      // contestaba «Ninguna publicación habla de movilidad todavía» **teniendo
+      // 64 publicaciones y 31 subtemas** un nivel más abajo. El camino natural
+      // decía que no había nada; el que funcionaba pedía acertarle a una flecha
+      // gris de catorce píxeles.
+      //
+      // Se resuelve aquí y no con una página nueva: un objetivo y un subtema
+      // contestan a la misma pregunta —«¿qué hay de esto?»— y separarlos sería
+      // mantener dos pantallas que enseñan lo mismo. La raíz de un árbol es un
+      // nodo del árbol.
+      const esObjetivo = /^O\d{3}$/.test(id);
+
+      const suyo = esObjetivo
+        ? await db.execute(sql`
+            SELECT o.id, o.id AS objetivo_id, NULL::text AS padre_id,
+                   o.title AS nombre, o.title AS objetivo_nombre, true AS es_objetivo
+            FROM objectives o WHERE o.id = ${id} AND o.archived_at IS NULL
+          `)
+        : await db.execute(sql`
+            SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, o.title AS objetivo_nombre,
+                   false AS es_objetivo
+            FROM subtemas s LEFT JOIN objectives o ON o.id = s.objetivo_id
+            WHERE s.id = ${id} AND s.archived_at IS NULL
+          `);
       if (!suyo.rows.length) return res.status(404).json({ error: 'Ese tema no existe.' });
       const tema = suyo.rows[0] as any;
 
@@ -169,7 +192,7 @@ export function registrarAgregador(app: Express, db: any) {
       // Para las migas de pan y para las palabras de búsqueda. Recursivo hacia
       // ARRIBA: son como mucho unos pocos niveles, y el árbol no tiene límite
       // de profundidad, así que un número fijo de consultas no valdría.
-      const camino = await db.execute(sql`
+      const camino = esObjetivo ? { rows: [] as any[] } : await db.execute(sql`
         WITH RECURSIVE subida AS (
           SELECT id, padre_id, nombre, 0 AS altura FROM subtemas WHERE id = ${id}
           UNION ALL
@@ -183,7 +206,9 @@ export function registrarAgregador(app: Express, db: any) {
       // Pulsar «Baterías» tiene que enseñar también lo que hay en «Fuga
       // térmica»: si no, el padre sale vacío y parece que no hay nada, cuando
       // lo que pasa es que está un nivel más abajo.
-      const rama = await db.execute(sql`
+      const rama = esObjetivo
+        ? await db.execute(sql`SELECT id FROM subtemas WHERE objetivo_id = ${id} AND archived_at IS NULL`)
+        : await db.execute(sql`
         WITH RECURSIVE bajada AS (
           SELECT id FROM subtemas WHERE id = ${id}
           UNION ALL
@@ -210,10 +235,21 @@ export function registrarAgregador(app: Express, db: any) {
       // tiene fondo (decisión de Eugenio en `0120`). `DISTINCT` porque una
       // misma pieza puede estar colgada de dos ramas de la misma rama y no
       // debe contarse dos veces.
+      //
+      // La condición de «quién es hija» se decide en JavaScript y no dentro del
+      // SQL: Postgres no tiene el `? :` de JavaScript, y meterlo en un CASE
+      // dentro del WHERE hace que el índice de `padre_id` deje de usarse.
+      const sonHijas = esObjetivo
+        ? sql`s.objetivo_id = ${id} AND s.padre_id IS NULL`
+        : sql`s.padre_id = ${id}`;
+      const cuelganDe = esObjetivo
+        ? sql`objetivo_id = ${id} AND padre_id IS NULL`
+        : sql`padre_id = ${id}`;
+
       const hijos = await db.execute(sql`
         WITH RECURSIVE bajo AS (
           SELECT id AS raiz, id FROM subtemas
-          WHERE padre_id = ${id} AND archived_at IS NULL
+          WHERE ${cuelganDe} AND archived_at IS NULL
           UNION ALL
           SELECT b.raiz, s.id FROM subtemas s JOIN bajo b ON s.padre_id = b.id
           WHERE s.archived_at IS NULL
@@ -223,7 +259,7 @@ export function registrarAgregador(app: Express, db: any) {
                   FROM subtema_contenido c
                  WHERE c.subtema_id IN (SELECT id FROM bajo WHERE raiz = s.id)) AS cosas
         FROM subtemas s
-        WHERE s.padre_id = ${id} AND s.archived_at IS NULL
+        WHERE s.archived_at IS NULL AND ${sonHijas}
         ORDER BY s.orden, s.nombre
       `);
 
@@ -366,8 +402,27 @@ export function registrarAgregador(app: Express, db: any) {
       const tuyo = yo ? dentro.filter(d => d.duenyo === yo) : [];
       const humanidad = dentro.filter(d => !yo || d.duenyo !== yo);
 
+      // ── LOS RETOS DE LA HUMANIDAD EN ESTE TEMA ──────────────────────────
+      // Eugenio: «y retos de la humanidad». Van por objetivo, no por subtema:
+      // `challenge_objectives` une un reto con un objetivo y no existe ninguna
+      // tabla que lo una con un subtema. Se dice de quién son en la pantalla,
+      // igual que con los indicadores — decir que son de «Bicicleta de carga»
+      // sería afirmar una relación que nadie ha hecho.
+      //
+      // Y hoy MOVILIDAD tiene CERO. Eso se enseña, no se esconde: un hueco que
+      // se ve es un hueco que alguien puede llenar.
+      const retos = await db.execute(sql`
+        SELECT c.id, c.title, c.description, c.scope, c.priority
+        FROM challenges c
+        JOIN challenge_objectives co ON co.challenge_id = c.id
+        WHERE co.objective_id = ${tema.objetivo_id} AND c.archived_at IS NULL
+        ORDER BY c.priority DESC NULLS LAST, c.title
+        LIMIT 30
+      `);
+
       res.json({
         tema,
+        retos: retos.rows,
         camino: camino.rows,
         hijos: hijos.rows,
         palabras,
