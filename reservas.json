@@ -1,3 +1,22 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/utils/objetivos.ts",
+      "motivo": "prog2: pagina de preferencias con la rueda de temas",
+      "desde": "2026-08-25T15:53:54.480Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/temas.ts",
+      "motivo": "prog2: pagina de preferencias con la rueda de temas",
+      "desde": "2026-08-25T15:53:54.480Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Preferencias.tsx",
+      "motivo": "prog2: pagina de preferencias con la rueda de temas",
+      "desde": "2026-08-25T15:53:54.480Z"
+    }
+  ]
 }
