@@ -2,24 +2,6 @@
   "reservas": [
     {
       "agente": "prog3",
-      "ruta": "src/server/documentos.ts",
-      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
-      "desde": "2026-08-25T23:30:47.500Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/server/roadmap.ts",
-      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
-      "desde": "2026-08-25T23:30:47.500Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/navegacion/Panel.tsx",
-      "motivo": "prog3: los paneles filtran por el contexto",
-      "desde": "2026-08-25T23:31:45.199Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "prog3: explorar y proyectos fusionados con sus railes, iconos sobrios, feedback amarillo",
       "desde": "2026-08-25T23:40:00.338Z"
