@@ -53,6 +53,12 @@
       "ruta": "src/components/proyecto/ArbolDeRamas.tsx",
       "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
       "desde": "2026-08-25T22:53:03.372Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "prog3: fuera Areas, lo personal sube al avatar",
+      "desde": "2026-08-25T22:53:18.583Z"
     }
   ]
 }
