@@ -1,16 +1,5 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
-import { OBJECTIVE_ID_BY_KEY } from '../utils/objectiveIds.js';
-
-/**
- * `O008` → `movilidad`. Es `objectiveIds.ts` leído del revés, y se lee del
- * revés en vez de escribir aquí una segunda lista de los catorce: dos listas
- * de lo mismo se separan el día que alguien añade un objetivo, y la que se
- * queda vieja es siempre la copia.
- */
-const NOMBRE_DE_OBJETIVO: Record<string, string> = Object.fromEntries(
-  Object.entries(OBJECTIVE_ID_BY_KEY).map(([nombre, id]) => [id, nombre]),
-);
 
 /**
  * Una lista de textos como UN parámetro de Postgres, para `= ANY(...)`.
@@ -161,9 +150,17 @@ export function registrarAgregador(app: Express, db: any) {
       const id = String(req.params.id || '');
       const yo = req.user?.id || null;
 
+      // EL NOMBRE DEL OBJETIVO SE LEE DE LA BASE, no de una lista en el
+      // código. Aquí había un mapa hecho al revés de `objectiveIds.ts`, y el
+      // mismo día que se escribió ya estaba viejo: prog2 añadió ESPIRITUALIDAD
+      // (`O015`) a `objetivos.ts` y a la tabla `objectives`, y `objectiveIds.ts`
+      // se quedó en catorce. Con dos listas de lo mismo la que se queda vieja
+      // es siempre la copia; `objectives` es donde el dato vive de verdad y no
+      // se puede desincronizar de sí mismo.
       const suyo = await db.execute(sql`
-        SELECT id, objetivo_id, padre_id, nombre FROM subtemas
-        WHERE id = ${id} AND archived_at IS NULL
+        SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, o.title AS objetivo_nombre
+        FROM subtemas s LEFT JOIN objectives o ON o.id = s.objetivo_id
+        WHERE s.id = ${id} AND s.archived_at IS NULL
       `);
       if (!suyo.rows.length) return res.status(404).json({ error: 'Ese tema no existe.' });
       const tema = suyo.rows[0] as any;
@@ -242,7 +239,7 @@ export function registrarAgregador(app: Express, db: any) {
       // plataforma se quedaba fuera de su propio subtema.
       const heredadas = palabrasDe([
         ...(camino.rows as any[]).slice(0, -1).map(r => r.nombre),
-        NOMBRE_DE_OBJETIVO[tema.objetivo_id] ?? '',
+        tema.objetivo_nombre ?? '',
       ]);
       const palabras = [...new Set([...propias, ...heredadas])];
       // `%palabra%` sobre título y cuerpo. `unaccent` no está instalado, así
