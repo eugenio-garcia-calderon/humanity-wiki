@@ -1,3 +1,16 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0129_compartir_cualquier_cosa.sql",
+      "motivo": "la cajita de compartir, comun a paginas y proyectos (prog8)",
+      "desde": "2026-08-25T21:51:47.547Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/dominios.ts",
+      "motivo": "la cajita de compartir, comun a paginas y proyectos (prog8)",
+      "desde": "2026-08-25T21:51:47.547Z"
+    }
+  ]
 }
