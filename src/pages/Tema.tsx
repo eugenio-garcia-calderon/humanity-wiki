@@ -4,6 +4,7 @@ import {
   Loader2, ChevronRight, PlayCircle, FileText, BarChart3, Map as MapIcon,
   Image as ImageIcon, ExternalLink, Sparkles, FolderKanban, LayoutGrid,
   Search, ShieldAlert, Gauge, Play, User as UserIcon, CircleDashed, Flag,
+  Orbit, X as Cerrar, Minimize2,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { OBJETIVOS } from '../utils/objetivos';
@@ -45,6 +46,18 @@ type Pieza = {
   titulo: string; fuente: string | null; idioma: string | null;
   publicado_el: string | null; nota_ia: string | null; calidad: number; estado: string;
   medio_url?: string | null; licencia?: string | null; autor?: string | null;
+  cluster_id?: string | null; genero?: string | null;
+  mapa_x?: number | null; mapa_y?: number | null;
+};
+
+type Cluster = {
+  id: string; nombre: string; frase: string | null;
+  x: number; y: number; cuantas: number; modelo: string | null;
+};
+
+type Vecino = {
+  id: string; vecino_id: string; parecido: number;
+  titulo: string; formato: string; fuente: string | null;
 };
 
 type Cosa = {
@@ -60,6 +73,8 @@ type Respuesta = {
     objetivo_nombre?: string; es_objetivo?: boolean;
   };
   retos: Reto[];
+  clusters: Cluster[];
+  vecinos: Vecino[];
   camino: Array<{ id: string; nombre: string }>;
   hijos: Array<{ id: string; nombre: string; cosas: number }>;
   palabras: string[];
@@ -84,7 +99,7 @@ const ICONO_TIPO: Record<string, any> = {
   mapa: MapIcon, grafica: BarChart3,
 };
 
-type Pestanya = 'explorar' | 'videos' | 'imagenes' | 'arte' | 'tuyo' | 'retos' | 'indicadores';
+type Pestanya = 'mapa' | 'explorar' | 'videos' | 'imagenes' | 'arte' | 'tuyo' | 'retos' | 'indicadores';
 
 export default function Tema() {
   const { id = '' } = useParams();
@@ -134,6 +149,42 @@ export default function Tema() {
     [datos?.fuera],
   );
 
+  /*
+   * ── EL ORDEN: CALIDAD, PERO SIN TRES SEGUIDAS DE LO MISMO ────────────────
+   * Ordenar sólo por `calidad` ponía los cuatro informes del ITF uno detrás de
+   * otro y cinco vídeos del mismo canal a continuación. Cada uno estaba en su
+   * sitio y la primera pantalla no servía: quien llega no quiere lo mejor
+   * cuatro veces, quiere saber qué hay.
+   *
+   * Así que se baja una pieza si algo MUY parecido acaba de salir — se usa el
+   * grafo de vecinos que ya viene calculado, no se recalcula nada aquí. Es
+   * relevancia con variedad, y la penalización es pequeña a propósito: cambia
+   * el orden, nunca esconde.
+   *
+   * Y va AQUÍ ARRIBA, con los demás hooks, no junto al bloque que lo usa: lo
+   * puse ahí y la página se quedó en blanco con «Rendered more hooks than
+   * during the previous render», porque más arriba hay dos `return` para
+   * «cargando» y «error». Un hook detrás de un `return` no se ejecuta siempre,
+   * y React cuenta. No lo vio `tsc`: lo vio abrir la pestaña.
+   */
+  const piezas = useMemo(() => {
+    const base = (datos?.fuera ?? []).filter(p => formato === 'todo' || p.formato === formato);
+    const parecidoCon: Record<string, Set<string>> = {};
+    for (const v of datos?.vecinos ?? []) {
+      if (v.parecido >= 0.62) (parecidoCon[v.id] ||= new Set()).add(v.vecino_id);
+    }
+    const quedan = [...base].sort((a, b) => b.calidad - a.calidad);
+    const salida: Pieza[] = [];
+    while (quedan.length) {
+      const ultimos = salida.slice(-3).map(p => p.id);
+      // El primero que no se parezca a los tres anteriores; si todos se
+      // parecen, el primero y ya — nunca se descarta nada.
+      const i = quedan.findIndex(p => !ultimos.some(u => parecidoCon[p.id]?.has(u) || parecidoCon[u]?.has(p.id)));
+      salida.push(...quedan.splice(i < 0 ? 0 : i, 1));
+    }
+    return salida;
+  }, [datos?.fuera, datos?.vecinos, formato]);
+
   const imagenes = useMemo(
     () => (datos?.fuera ?? []).filter(p => p.formato === 'imagen' && p.medio_url),
     [datos?.fuera],
@@ -149,6 +200,11 @@ export default function Tema() {
   const pestanyas = useMemo(() => {
     if (!datos) return [] as Array<{ id: Pestanya; nombre: string; icono: any; cuantos?: number }>;
     const l: Array<{ id: Pestanya; nombre: string; icono: any; cuantos?: number }> = [];
+    // El mapa va PRIMERO cuando hay grupos: es lo que contesta «¿de qué va
+    // todo esto?» sin leer nada, y esa es la primera pregunta de quien llega.
+    if ((datos.clusters ?? []).length) {
+      l.push({ id: 'mapa', nombre: 'Mapa', icono: Orbit, cuantos: datos.clusters.length });
+    }
     if (datos.hijos.length) l.push({ id: 'explorar', nombre: 'Explorar', icono: LayoutGrid, cuantos: datos.hijos.length });
     if (videos.length) l.push({ id: 'videos', nombre: 'Vídeos', icono: PlayCircle, cuantos: videos.length });
     if (imagenes.length) l.push({ id: 'imagenes', nombre: 'Imágenes', icono: ImageIcon, cuantos: imagenes.length });
@@ -197,7 +253,6 @@ export default function Tema() {
   }
 
   const Icono = objetivo?.icono;
-  const piezas = (datos.fuera ?? []).filter(p => formato === 'todo' || p.formato === formato);
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-5 sm:px-6">
@@ -267,6 +322,11 @@ export default function Tema() {
 
       <div className="mt-6">
 
+        {/* ── EL MAPA ──────────────────────────────────────────────────── */}
+        {pestanya === 'mapa' && (
+          <Constelacion piezas={datos.fuera} clusters={datos.clusters} vecinos={datos.vecinos} />
+        )}
+
         {/* ── EXPLORAR: LA REJILLA DE SUBTEMAS ─────────────────────────── */}
         {pestanya === 'explorar' && (
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -322,7 +382,7 @@ export default function Tema() {
                 ) : null
               ))}
               <span className="ml-auto text-[11.5px] text-slate-400">
-                Ordenado por calidad, no por visitas
+                Por calidad y sin repetir lo parecido — nunca por visitas
               </span>
             </div>
             <ol className="divide-y divide-slate-100">
@@ -423,6 +483,310 @@ export default function Tema() {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CONSTELACIÓN
+   ══════════════════════════════════════════════════════════════════════════
+   Eugenio: «que sea muy muy muy visual, y que den ganas de explorar esos
+   clusters, que se vean claro los nombres de los grupos, y que haciendo hover o
+   zoom se pueda expandir y ver más detalle».
+
+   ── QUÉ SIGNIFICA LA POSICIÓN ─────────────────────────────────────────────
+   Dos piezas están cerca porque **hablan de lo mismo**, medido: se convierte
+   cada una en un vector con lo que dice y se proyecta a dos dimensiones. No es
+   una decoración con las cosas repartidas bonito — si dos puntos se tocan, es
+   que se parecen.
+
+   ── POR QUÉ NO HAY LIBRERÍA DE GRAFOS ─────────────────────────────────────
+   Las posiciones vienen **ya calculadas** de la base, así que pintar esto es
+   colocar divs en porcentajes y una transformación de CSS para el zoom. Meter
+   una librería de fuerzas costaría cientos de kilobytes en el paquete para
+   recolocar en cada visita unos puntos que ya están colocados — y encima
+   saldrían en un sitio distinto cada vez.
+
+   ── TRES NIVELES DE DETALLE, Y NINGUNO ESCONDE NADA ───────────────────────
+   Lejos: los nombres de los grupos, grandes. Al pasar por encima: la pieza, con
+   su nota y sus vecinas. Al entrar en un grupo: sus piezas con título. Es la
+   misma información acercándose, no información que aparece y desaparece.
+*/
+
+/**
+ * Un color por grupo. Fijos y en orden: si se calcularan del id, un grupo
+ * cambiaría de color al recalcular la constelación y el mapa parecería otro.
+ *
+ * ── ELEGIDOS POR DISTANCIA DE TONO, NO POR BONITOS ─────────────────────────
+ * La primera lista llevaba `emerald` y `teal`, y también `sky` y `blue`. Sobre
+ * un punto de doce píxeles **son el mismo color**: la leyenda decía dos grupos
+ * distintos y en el mapa no se distinguían. Un mapa cuyos grupos no se separan
+ * a simple vista no es un mapa, es una decoración.
+ *
+ * Estos seis van repartidos por la rueda de color —verde, cian, amarillo,
+ * violeta, magenta, rojo— sin dos vecinos. Si algún día hacen falta más de
+ * seis grupos, el siguiente color no se añade al final: se replantea, porque a
+ * partir de ahí el color deja de poder distinguirlos y hay que separar por
+ * forma o por posición.
+ */
+const COLORES = [
+  { punto: 'bg-emerald-500', suave: 'bg-emerald-500/10', texto: 'text-emerald-700' },
+  { punto: 'bg-sky-500',     suave: 'bg-sky-500/10',     texto: 'text-sky-700' },
+  { punto: 'bg-amber-400',   suave: 'bg-amber-400/10',   texto: 'text-amber-700' },
+  { punto: 'bg-violet-500',  suave: 'bg-violet-500/10',  texto: 'text-violet-700' },
+  { punto: 'bg-fuchsia-500', suave: 'bg-fuchsia-500/10', texto: 'text-fuchsia-700' },
+  { punto: 'bg-red-500',     suave: 'bg-red-500/10',     texto: 'text-red-700' },
+];
+
+function Constelacion({ piezas, clusters, vecinos }: {
+  piezas: Pieza[]; clusters: Cluster[]; vecinos: Vecino[];
+}) {
+  const [dentro, setDentro] = useState<string | null>(null);
+  const [encima, setEncima] = useState<Pieza | null>(null);
+
+  const enElMapa = useMemo(
+    () => piezas.filter(p => p.mapa_x != null && p.mapa_y != null),
+    [piezas],
+  );
+
+  const colorDe = useMemo(() => {
+    const m: Record<string, typeof COLORES[0]> = {};
+    clusters.forEach((c, i) => { m[c.id] = COLORES[i % COLORES.length]; });
+    return m;
+  }, [clusters]);
+
+  const vecinasDe = useMemo(() => {
+    const m: Record<string, Vecino[]> = {};
+    for (const v of vecinos) (m[v.id] ||= []).push(v);
+    return m;
+  }, [vecinos]);
+
+  const grupo = clusters.find(c => c.id === dentro) ?? null;
+
+  /* El zoom: se lleva el centro del grupo al centro del cuadro y se agranda.
+     Con `transform` y no recalculando posiciones, así la transición la hace el
+     navegador y las piezas se mueven a la vez en vez de saltar. */
+  const zoom = grupo ? 2.1 : 1;
+  const transform = grupo
+    ? `scale(${zoom}) translate(${50 - grupo.x}%, ${50 - grupo.y}%)`
+    : 'scale(1) translate(0,0)';
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-[12.5px] leading-relaxed text-slate-500">
+          Cada punto es una publicación y <b className="font-bold text-slate-700">dos puntos están
+          cerca porque hablan de lo mismo</b> — medido, no colocado a ojo. Pasa por encima de uno
+          para verlo; entra en un grupo para acercarte.
+        </p>
+        {grupo && (
+          <button
+            onClick={() => { setDentro(null); setEncima(null); }}
+            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-slate-700"
+          >
+            <Minimize2 className="h-3.5 w-3.5" />
+            Ver el mapa entero
+          </button>
+        )}
+      </div>
+
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white sm:aspect-[16/10]">
+        <div
+          className="absolute inset-0 origin-center transition-transform duration-500 ease-out"
+          style={{ transform }}
+        >
+          {/* Las nubes de cada grupo, detrás de todo: dan la forma sin pedir
+              atención. */}
+          {clusters.map(c => (
+            <span
+              key={`nube-${c.id}`}
+              aria-hidden
+              className={cn('absolute -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl transition-opacity duration-500',
+                colorDe[c.id]?.suave,
+                dentro && dentro !== c.id ? 'opacity-20' : 'opacity-100')}
+              style={{
+                left: `${c.x}%`, top: `${c.y}%`,
+                width: `${18 + c.cuantas * 1.6}%`, height: `${18 + c.cuantas * 1.6}%`,
+              }}
+            />
+          ))}
+
+          {/* Las aristas de la pieza sobre la que está el ratón. Sólo las suyas:
+              192 líneas a la vez serían una maraña, y una maraña no dice nada. */}
+          {encima && encima.mapa_x != null && (
+            <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
+              {(vecinasDe[encima.id] ?? []).map(v => {
+                const o = enElMapa.find(p => p.id === v.vecino_id);
+                if (!o) return null;
+                return (
+                  <line
+                    key={v.vecino_id}
+                    x1={`${encima.mapa_x}%`} y1={`${encima.mapa_y}%`}
+                    x2={`${o.mapa_x}%`} y2={`${o.mapa_y}%`}
+                    className="stroke-slate-400"
+                    strokeWidth={1} strokeDasharray="3 3"
+                  />
+                );
+              })}
+            </svg>
+          )}
+
+          {/* Los puntos. El tamaño es la calidad: lo mejor pesa más en el mapa
+              sin que haya que leer un número. */}
+          {enElMapa.map(p => {
+            const c = colorDe[p.cluster_id ?? ''] ?? COLORES[0];
+            const apagado = !!dentro && p.cluster_id !== dentro;
+            const d = 8 + Math.round((p.calidad / 100) * 12);
+            // Dentro de un grupo, cada pieza dice cómo se llama. Ése es el
+            // premio de acercarse: si al entrar sólo salieran los mismos puntos
+            // más grandes, no habría motivo para entrar.
+            const conNombre = dentro != null && p.cluster_id === dentro;
+            return (
+              <button
+                key={p.id}
+                onMouseEnter={() => setEncima(p)}
+                onFocus={() => setEncima(p)}
+                onClick={() => setEncima(p)}
+                title={p.titulo}
+                aria-label={p.titulo}
+                className={cn('group/punto absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:z-20',
+                  apagado ? 'opacity-20' : 'opacity-95',
+                  encima?.id === p.id && 'z-20')}
+                style={{ left: `${p.mapa_x}%`, top: `${p.mapa_y}%` }}
+              >
+                <span
+                  className={cn('block rounded-full ring-2 ring-white transition-transform duration-300 group-hover/punto:scale-150',
+                    c.punto, encima?.id === p.id && 'scale-150 ring-slate-900')}
+                  style={{ width: d, height: d }}
+                />
+                {conNombre && (
+                  <span
+                    className="pointer-events-none absolute left-1/2 top-full mt-0.5 block w-24 -translate-x-1/2 text-center font-bold leading-tight text-slate-600"
+                    style={{ fontSize: '0.28rem' }}
+                  >
+                    {p.titulo.length > 46 ? p.titulo.slice(0, 46) + '…' : p.titulo}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {/* Los títulos de los grupos: lo más grande del mapa, porque son lo
+              que se lee desde lejos y lo que decide a dónde entrar. */}
+          {clusters.map(c => (
+            <button
+              key={`nom-${c.id}`}
+              onClick={() => { setDentro(dentro === c.id ? null : c.id); setEncima(null); }}
+              className={cn('absolute z-10 max-w-[30%] -translate-x-1/2 -translate-y-1/2 rounded-xl px-2 py-1 text-center transition-all duration-500 hover:bg-white/80',
+                dentro && dentro !== c.id ? 'opacity-30' : 'opacity-100')}
+              style={{ left: `${c.x}%`, top: `${c.y}%`, fontSize: grupo ? '0.5rem' : '0.8rem' }}
+            >
+              <span className={cn('block font-black leading-tight tracking-tight', colorDe[c.id]?.texto)}>
+                {c.nombre}
+              </span>
+              <span className="block text-[0.6em] font-bold text-slate-400">{c.cuantas}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* La ficha de la pieza señalada, encima del mapa y sin moverse con él:
+            si se moviera con el zoom saldría del cuadro justo al acercarse. */}
+        {encima && (
+          <div className="absolute bottom-3 left-3 right-3 z-30 rounded-2xl border border-slate-200 bg-white/95 p-3.5 shadow-xl backdrop-blur sm:right-auto sm:max-w-md">
+            <button
+              onClick={() => setEncima(null)}
+              aria-label="Cerrar"
+              className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-lg text-slate-300 hover:text-slate-600"
+            >
+              <Cerrar className="h-3.5 w-3.5" />
+            </button>
+
+            <p className="flex flex-wrap items-center gap-1.5 pr-6 text-[10.5px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-slate-600">{NOMBRE_FORMATO[encima.formato] ?? encima.formato}</span>
+              {encima.genero && (
+                <>
+                  <span className="text-slate-200">·</span>
+                  <span className="rounded bg-slate-100 px-1 py-px normal-case tracking-normal text-slate-500">
+                    {encima.genero}
+                  </span>
+                </>
+              )}
+              {encima.fuente && <><span className="text-slate-200">·</span><span>{encima.fuente}</span></>}
+            </p>
+
+            <a
+              href={encima.url} target="_blank" rel="noopener noreferrer"
+              className="mt-1 block text-[14.5px] font-bold leading-snug text-slate-800 hover:text-emerald-700 hover:underline"
+            >
+              {encima.titulo}
+            </a>
+
+            {encima.nota_ia && (
+              <p className="mt-1.5 line-clamp-3 border-l-2 border-emerald-300 pl-2 text-[12px] leading-relaxed text-slate-500">
+                {encima.nota_ia}
+              </p>
+            )}
+
+            {(vecinasDe[encima.id] ?? []).length > 0 && (
+              <div className="mt-2.5 border-t border-slate-100 pt-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                  Habla de lo mismo que
+                </p>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {(vecinasDe[encima.id] ?? []).map(v => (
+                    <li key={v.vecino_id}>
+                      <button
+                        onClick={() => setEncima(enElMapa.find(p => p.id === v.vecino_id) ?? null)}
+                        className="flex w-full items-baseline gap-2 text-left text-[11.5px] text-slate-600 hover:text-emerald-700"
+                      >
+                        <span className="min-w-0 flex-1 truncate">{v.titulo}</span>
+                        <span className="shrink-0 tabular-nums text-slate-300">
+                          {Math.round(v.parecido * 100)}%
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* La leyenda es también el mando: entrar en un grupo desde aquí es lo
+          mismo que pulsar su nombre en el mapa, y en un móvil es más fácil. */}
+      <div className="flex flex-wrap gap-2">
+        {clusters.map(c => (
+          <button
+            key={`ley-${c.id}`}
+            onClick={() => { setDentro(dentro === c.id ? null : c.id); setEncima(null); }}
+            className={cn('flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all',
+              dentro === c.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:border-slate-300')}
+          >
+            <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', colorDe[c.id]?.punto)} />
+            <span className="text-[12.5px] font-bold">{c.nombre}</span>
+            <span className={cn('text-[11px] font-black tabular-nums', dentro === c.id ? 'text-white/60' : 'text-slate-300')}>
+              {c.cuantas}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {grupo?.frase && (
+        <p className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-[13px] leading-relaxed text-slate-600">
+          <b className="font-bold text-slate-800">{grupo.nombre}.</b> {grupo.frase}
+        </p>
+      )}
+
+      {/* Quién agrupó esto y cuándo. Un mapa hecho por una máquina que no dice
+          que lo hizo una máquina se lee como un hecho. */}
+      {clusters[0]?.modelo && (
+        <p className="text-[11px] leading-relaxed text-slate-400">
+          Grupos y posiciones calculados con {clusters[0].modelo}. La cercanía mide de qué habla
+          cada pieza, no su calidad ni su fecha — y se equivoca: si dos que no pegan salen juntas,
+          es que se parecen en las palabras y no en el fondo.
+        </p>
+      )}
     </div>
   );
 }
@@ -708,6 +1072,14 @@ function FichaDeFuera({ pieza }: { pieza: Pieza }) {
             <Icono className="h-3 w-3" />
             {NOMBRE_FORMATO[pieza.formato] ?? pieza.formato}
           </span>
+          {pieza.genero && (
+            <>
+              <span className="text-slate-200">·</span>
+              <span className="rounded bg-slate-100 px-1 py-px normal-case tracking-normal text-slate-500">
+                {pieza.genero}
+              </span>
+            </>
+          )}
           {pieza.fuente && <><span className="text-slate-200">·</span><span>{pieza.fuente}</span></>}
           {pieza.publicado_el && (
             <>
