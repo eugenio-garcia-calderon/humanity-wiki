@@ -1366,23 +1366,45 @@ export default function Layout() {
 
       {/* En móvil «Organizar» ocupa la pantalla: a 375 px un raíl y un panel
           uno al lado del otro no dejan nada para el contenido. */}
+      {/* ══ Y SALE POR LA DERECHA, COMO EN EL ORDENADOR (2026-08-25) ══════
+          Eugenio: «en versión móvil, cuando pulsas el botón de organizar, se
+          abre el menú de izquierda a derecha. Cuando ese menú en realidad tiene
+          que estar a la derecha».
+
+          Tenía razón y era un despiste con consecuencias: en el ordenador
+          «Explorar» vive a la izquierda y «Organizar» a la derecha, y esa
+          posición es la mitad de lo que distingue a los dos menús — se aprende
+          con la mano antes que con la cabeza. En el móvil los dos salían por la
+          izquierda, así que el mismo botón abría el mismo sitio en dos lados
+          distintos según el aparato.
+
+          En una fila flex el orden del documento es el orden en pantalla, así
+          que basta con invertirlo: primero el velo y después el menú. Es
+          exactamente lo que ya hace la versión de escritorio, donde el panel va
+          antes que el raíl por la misma razón.
+
+          Y entra deslizándose desde su lado: un cajón que aparece por un borde
+          y se va por el otro cuenta mal de dónde ha salido. */}
       {circulo === 'organizar' && esMovil && (
         <div className="fixed inset-0 z-[9997] flex bg-white">
-          {panelAbierto
-            ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
-            : <Rail
-                siempreAbierto
-                claro
-                abierta={null}
-                // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
-                // que no hay ningún gesto intermedio entre mirar y abrir. El
-                // nombre lleva a la herramienta y la flecha enseña lo que tiene
-                // dentro; sin ella, una de las dos cosas no tendría puerta.
-                onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
-                onAbrirSubmenu={h => setPanelAbierto(h)}
-                onInicio={() => { navigate('/'); setCirculo(null); }}
-              />}
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
+          <div className="flex animate-in slide-in-from-right duration-200">
+            {panelAbierto
+              ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+              : <Rail
+                  siempreAbierto
+                  claro
+                  ladoDerecho
+                  abierta={null}
+                  // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
+                  // que no hay ningún gesto intermedio entre mirar y abrir. El
+                  // nombre lleva a la herramienta y la flecha enseña lo que tiene
+                  // dentro; sin ella, una de las dos cosas no tendría puerta.
+                  onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
+                  onAbrirSubmenu={h => setPanelAbierto(h)}
+                  onInicio={() => { navigate('/'); setCirculo(null); }}
+                />}
+          </div>
         </div>
       )}
 

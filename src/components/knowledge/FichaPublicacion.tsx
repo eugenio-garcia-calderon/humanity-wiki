@@ -7,6 +7,7 @@ import WindowContent from './WindowContent';
 import { KIND_TINT } from './esferaKit';
 import { cn } from '../../utils/cn';
 import { useEsMovil } from '../../hooks/useEsMovil';
+import FuenteDeLaPublicacion from './FuenteDeLaPublicacion';
 
 // ============================================================================
 // FICHA DE UNA PUBLICACIÓN (2026-08-08, petición del usuario)
@@ -332,7 +333,11 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
             <span className="inline-flex items-center gap-1">
               <UserIcon className="w-3 h-3" />{pub.autor_nombre || 'Anónimo'}
             </span>
-            {pub.donde && <span>· {pub.donde}</span>}
+            {/* Cuando el bloque de la fuente sale abajo —con su nombre, su
+                recuento y sus piezas— este renglón repetiría el mismo dato en
+                gris de 11 px. Se queda sólo cuando no hay bloque: para un
+                proyecto o un mapa, donde `donde` es una cuenta y no un sitio. */}
+            {pub.donde && !(pub.tipo === 'ventana' && pub.donde_slug) && <span>· {pub.donde}</span>}
             {pub.vistas > 0 && <span className="inline-flex items-center gap-0.5"><Eye className="w-3 h-3" />{pub.vistas}</span>}
             {pub.ia && <span className="inline-flex items-center gap-0.5 text-amber-600"><Sparkles className="w-3 h-3" />Escrito por la IA</span>}
             {nColaboradores > 0 && (
@@ -418,6 +423,27 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
                 </button>
               </form>
             </div>
+          )}
+
+          {/* ══ DE DÓNDE VIENE ESTO, CON SUS PIEZAS ══════════════════════════
+              Eugenio: «dale más relevancia al grafo o proyecto al que
+              pertenezca esta publicación… podemos meter una preview de esa
+              fuente y dará a entender que hay más piezas».
+
+              VA AL FINAL, y es a propósito: primero se lee lo que has venido a
+              leer, y cuando se acaba, aparece de dónde salía y qué más hay
+              dentro. Puesto arriba, competiría con el propio contenido — y esto
+              no es un encabezado, es lo que viene después.
+
+              Sólo para una ventana que viva en un lienzo. En un proyecto o un
+              mapa, `donde` trae una cuenta —«3/8 hechas»— y no un sitio; ya
+              está catalogado que ese campo significa dos cosas. */}
+          {pub.tipo === 'ventana' && pub.donde_slug && (
+            <FuenteDeLaPublicacion
+              slug={pub.donde_slug}
+              excepto={pub.id}
+              onIr={pub.ruta && onIr ? () => onIr(pub.ruta!) : undefined}
+            />
           )}
         </div>
 
