@@ -169,6 +169,24 @@ const ESPACIO_DE = subdominioDeUsuario();
  */
 function AplicacionDeEspacio({ handle }: { handle: string }) {
   return (
+    /*
+     * ── EL ESPACIO TAMBIÉN NECESITA SESIÓN Y DATOS (2026-08-26) ─────────────
+     * Aquí no había proveedores, y con lo que se servía antes —páginas, la
+     * portada, una ficha de producto— no hacían falta: ninguna preguntaba quién
+     * eres.
+     *
+     * Un proyecto sí. Al añadir su ruta, la pantalla se quedó **en blanco** con
+     * `useAuth must be used within AuthProvider` en la consola. No es un fallo
+     * de esa pantalla: es que este árbol no le daba lo que cualquier otra parte
+     * de la aplicación da por hecho.
+     *
+     * Envolverlo aquí es además lo correcto para lo que viene: quien entre en el
+     * espacio de alguien **con su propia sesión** debe poder ver el botón de
+     * editar si resulta que el proyecto es suyo, en vez de tener que salir al
+     * dominio principal para tocar lo suyo.
+     */
+    <AuthProvider>
+    <DataProvider>
     <BrowserRouter>
       <Suspense fallback={<Esperando />}>
         <Routes>
@@ -181,11 +199,31 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               es fijo y `:slug` variable: si no se declarara, una tienda con
               una página llamada «producto» se comería todas las fichas. */}
           <Route path="producto/:producto" element={<FichaProducto handle={handle} />} />
+          {/* ── UN PROYECTO TAMBIÉN SE VE EN EL ESPACIO DE ALGUIEN (2026-08-26) ─
+              Sin esta línea, `quien.humanity.wiki/mi-proyecto` acababa en una
+              PÁGINA EN BLANCO. Y no era un fallo de datos: `PaginaPublica`
+              resuelve la dirección, ve que es un proyecto y manda a
+              `/proyectos/:slug` — una ruta que en el subdominio **no existía**.
+              Así que caía en el comodín de abajo, volvía a `PaginaPublica` con
+              el tramo «proyectos» como si fuera el nombre de una página, y ahí
+              no hay nada.
+
+              Lo peor es dónde caía: la dirección corta es justo la que la
+              cajita de compartir enseña como «la que se enseña». La larga
+              funcionaba desde el primer día, así que probando por ahí no se veía
+              nada raro — que es exactamente lo que me pasó.
+
+              Va ANTES que `:slug` porque «proyectos» es fijo y `:slug` variable:
+              si no, una página llamada «proyectos» se comería todos los
+              proyectos. Misma razón que `pedido` y `producto` aquí arriba. */}
+          <Route path="proyectos/:slug" element={<Proyecto />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </DataProvider>
+    </AuthProvider>
   );
 }
 
