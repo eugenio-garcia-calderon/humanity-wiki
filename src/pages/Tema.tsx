@@ -4,11 +4,12 @@ import {
   Loader2, ChevronRight, PlayCircle, FileText, BarChart3, Map as MapIcon,
   Image as ImageIcon, ExternalLink, Sparkles, FolderKanban, LayoutGrid,
   Search, ShieldAlert, Gauge, Play, User as UserIcon, CircleDashed, Flag,
-  Orbit, X as Cerrar, Minimize2, Plus, Minus, Pencil, Check, Move,
+  Orbit, X as Cerrar, Minimize2, Plus, Minus, Pencil, Check, Move, Disc3, ArrowRight,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth, ROLE } from '../contexts/AuthContext';
-import { OBJETIVOS } from '../utils/objetivos';
+import { OBJETIVOS, hexDelColor } from '../utils/objetivos';
+import RuedaDeConocimiento, { alternarRamaDeRueda, type NodoRueda } from '../components/rueda/RuedaDeConocimiento';
 
 // ============================================================================
 // LA PÁGINA DE UN TEMA — `/temas/:id` (2026-08-25)
@@ -89,6 +90,15 @@ type Indicador = {
   objective_id: string; direction?: string;
 };
 
+/**
+ * Un color por rama de primer nivel en la rueda.
+ *
+ * Repartidos por la rueda de color y sin dos vecinos, por lo mismo que en el
+ * mapa: `emerald` junto a `teal` son el mismo color en un trozo estrecho, y
+ * entonces la rueda deja de decir qué frente estás mirando.
+ */
+const PALETA_RUEDA = ['#10b981', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444', '#14b8a6', '#6366f1', '#f97316'];
+
 const ICONO_FORMATO: Record<string, any> = {
   video: PlayCircle, texto: FileText, grafica: BarChart3, mapa: MapIcon, imagen: ImageIcon,
 };
@@ -100,7 +110,7 @@ const ICONO_TIPO: Record<string, any> = {
   mapa: MapIcon, grafica: BarChart3,
 };
 
-type Pestanya = 'mapa' | 'explorar' | 'videos' | 'imagenes' | 'arte' | 'tuyo' | 'retos' | 'indicadores';
+type Pestanya = 'rueda' | 'mapa' | 'explorar' | 'videos' | 'imagenes' | 'arte' | 'tuyo' | 'retos' | 'indicadores';
 
 export default function Tema() {
   const { id = '' } = useParams();
@@ -113,6 +123,19 @@ export default function Tema() {
   /** Sube cuando alguien corrige el mapa: es lo que vuelve a pedir el tema. */
   const [vuelta, setVuelta] = useState(0);
   const recargar = () => setVuelta(v => v + 1);
+  /*
+   * ── EL ÁRBOL ENTERO, PARA LA RUEDA (2026-08-26) ──────────────────────────
+   * Eugenio: «en movilidad pon la rueda de todas las ramas de movilidad, que
+   * cumpla la misma función de mostrar en ruedas consecutivas toda la
+   * información ramificada».
+   *
+   * `/api/agregador/tema/:id` devuelve sólo las hijas directas, que es lo que
+   * necesita la rejilla. La rueda necesita **todo lo que cuelga**, porque para
+   * repartir el hueco de una rama hay que saber cuánto ocupan sus nietas. Se
+   * pide una vez el árbol del objetivo —una consulta, plano, con `padre_id`— y
+   * de ahí sale cualquier rueda de dentro.
+   */
+  const [arbol, setArbol] = useState<Array<{ id: string; padre_id: string | null; nombre: string; cosas: number; favorito?: boolean }> | null>(null);
 
   useEffect(() => {
     let vivo = true;
@@ -127,6 +150,16 @@ export default function Tema() {
       .catch(e => { if (vivo) { setError(e.message); setCargando(false); } });
     return () => { vivo = false; };
   }, [id, vuelta]);
+
+  useEffect(() => {
+    if (!datos) return;
+    let vivo = true;
+    fetch(`/api/temas/${encodeURIComponent(datos.tema.objetivo_id)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (vivo) setArbol(j?.subtemas ?? []); })
+      .catch(() => { if (vivo) setArbol([]); });
+    return () => { vivo = false; };
+  }, [datos?.tema.objetivo_id]);
 
   // Los indicadores son del OBJETIVO, no del subtema: hoy no hay ninguna tabla
   // que los una a un subtema, y decir que estos siete son de «Bicicleta de
@@ -189,6 +222,58 @@ export default function Tema() {
     return salida;
   }, [datos?.fuera, datos?.vecinos, formato]);
 
+  /*
+   * ── LOS NODOS DE LA RUEDA ────────────────────────────────────────────────
+   * Las raíces son las hijas de lo que se está mirando —en `/temas/O008`, las
+   * nueve ramas de MOVILIDAD— y debajo va todo lo que cuelgue de ellas.
+   *
+   * El color se reparte por RAÍZ, no por objetivo: en Personalizar cada uno de
+   * los quince trae el suyo del mapa, pero aquí todas las ramas son del mismo
+   * objetivo y pintarlas del mismo color dejaría la rueda en una mancha de un
+   * solo tono. Un color por rama es lo que hace que se lea de un vistazo qué
+   * frente estás mirando — la misma razón que en el mapa de la constelación.
+   */
+  const [abiertosRueda, setAbiertosRueda] = useState<Set<string>>(new Set());
+  const [elegidoRueda, setElegidoRueda] = useState<string | null>(null);
+
+  const nodosRueda = useMemo<NodoRueda[]>(() => {
+    if (!datos || !arbol) return [];
+    const raizId = datos.tema.es_objetivo ? null : datos.tema.id;
+    const hijasDirectas = arbol.filter(s => (s.padre_id ?? null) === raizId);
+    const dentro = new Set(hijasDirectas.map(h => h.id));
+    // Todo lo que cuelgue, sin límite de niveles: se recorre hasta que no entre
+    // nada nuevo, que es lo que hace que valga igual para un árbol de dos
+    // niveles y para uno de seis.
+    let creció = true;
+    while (creció) {
+      creció = false;
+      for (const s of arbol) {
+        if (!dentro.has(s.id) && s.padre_id && dentro.has(s.padre_id)) { dentro.add(s.id); creció = true; }
+      }
+    }
+    const colorDeRaiz: Record<string, string> = {};
+    hijasDirectas.forEach((h, i) => { colorDeRaiz[h.id] = PALETA_RUEDA[i % PALETA_RUEDA.length]; });
+    const raizDe = (id: string): string => {
+      let a: string | null = id;
+      for (let i = 0; i < 12 && a; i++) {
+        if (colorDeRaiz[a]) return a;
+        a = arbol.find(x => x.id === a)?.padre_id ?? null;
+      }
+      return id;
+    };
+    return [...dentro].map(id => {
+      const s = arbol.find(x => x.id === id)!;
+      return {
+        id: s.id,
+        nombre: s.nombre,
+        padre: (s.padre_id ?? null) === raizId ? null : s.padre_id,
+        color: colorDeRaiz[raizDe(s.id)] ?? hexDelColor(objetivo?.color),
+        cosas: s.cosas || 0,
+        favorito: !!s.favorito,
+      };
+    });
+  }, [datos, arbol, objetivo?.color]);
+
   const imagenes = useMemo(
     () => (datos?.fuera ?? []).filter(p => p.formato === 'imagen' && p.medio_url),
     [datos?.fuera],
@@ -206,6 +291,16 @@ export default function Tema() {
     const l: Array<{ id: Pestanya; nombre: string; icono: any; cuantos?: number }> = [];
     // El mapa va PRIMERO cuando hay grupos: es lo que contesta «¿de qué va
     // todo esto?» sin leer nada, y esa es la primera pregunta de quien llega.
+    // La rueda va la primera cuando hay ramas: contesta «¿en qué se divide
+    // esto?» de un vistazo, que es la primera pregunta de quien llega a un tema
+    // grande. El mapa contesta «¿de qué habla?», que es la siguiente.
+    if (nodosRueda.length) {
+      // El número es el de RAMAS DE PRIMER NIVEL, no el de nodos: en MOVILIDAD
+      // son 9 ramas y 95 nodos, y un «95» en la pestaña promete una lista de
+      // noventa y cinco cosas que nadie va a encontrar. La pestaña dice en
+      // cuántas se divide esto, que es lo que se ve al abrirla.
+      l.push({ id: 'rueda', nombre: 'Rueda', icono: Disc3, cuantos: nodosRueda.filter(n => !n.padre).length });
+    }
     if ((datos.clusters ?? []).length) {
       l.push({ id: 'mapa', nombre: 'Mapa', icono: Orbit, cuantos: datos.clusters.length });
     }
@@ -223,7 +318,7 @@ export default function Tema() {
     l.push({ id: 'retos', nombre: 'Retos', icono: Flag, cuantos: datos.retos?.length ?? 0 });
     l.push({ id: 'indicadores', nombre: 'Indicadores', icono: Gauge, cuantos: indicadores?.length });
     return l;
-  }, [datos, videos.length, imagenes.length, indicadores?.length]);
+  }, [datos, videos.length, imagenes.length, indicadores?.length, nodosRueda.length]);
 
   const pedida = params.get('ver') as Pestanya | null;
   const pestanya: Pestanya = useMemo(() => {
@@ -325,6 +420,58 @@ export default function Tema() {
       </div>
 
       <div className="mt-6">
+
+        {/* ── LA RUEDA DE CONOCIMIENTO ─────────────────────────────────────
+            El MISMO componente que usa Personalizar. Aquí sólo cambian los
+            nodos y lo que va en el agujero: si mañana se toca el reparto, el
+            giro o la tipografía de la rueda, cambia en las dos a la vez. Ésa
+            era la petición. */}
+        {pestanya === 'rueda' && (
+          <div className="flex flex-col gap-3">
+            <p className="max-w-2xl text-[12.5px] leading-relaxed text-slate-500">
+              Cada anillo es un nivel y el tamaño de cada trozo dice cuánto hay dentro.
+              <b className="font-bold text-slate-700"> Pulsa una rama y se abre la siguiente</b>, hacia la
+              derecha, sin perder de vista dónde encaja.
+            </p>
+            <RuedaDeConocimiento
+              nodos={nodosRueda}
+              abiertos={abiertosRueda}
+              elegido={elegidoRueda}
+              etiqueta={`Rueda de conocimiento de ${datos.tema.nombre}`}
+              onPulsar={id => {
+                setElegidoRueda(id);
+                setAbiertosRueda(a => alternarRamaDeRueda(nodosRueda, a, id));
+              }}
+              centro={elegidoRueda ? (() => {
+                const n = nodosRueda.find(x => x.id === elegidoRueda);
+                const dentro = nodosRueda.filter(x => x.padre === elegidoRueda).length;
+                if (!n) return null;
+                return (
+                  <>
+                    <p className="line-clamp-2 text-[13px] font-black leading-tight text-white">{n.nombre}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {dentro ? `${dentro} dentro` : 'sin ramas dentro'}
+                      {n.cosas ? ` · ${n.cosas} publicaciones` : ''}
+                    </p>
+                    {/* La rueda enseña el árbol; la página enseña lo que hay
+                        dentro. Sin esta puerta se puede recorrer el mapa entero
+                        y no llegar nunca al contenido. */}
+                    <Link
+                      to={`/temas/${n.id}`}
+                      className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10.5px] font-bold text-white transition-colors hover:bg-white/20"
+                    >
+                      Entrar <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </>
+                );
+              })() : (
+                <p className="px-1 text-[11px] leading-snug text-slate-400">
+                  Pulsa una rama para abrirla
+                </p>
+              )}
+            />
+          </div>
+        )}
 
         {/* ── EL MAPA ──────────────────────────────────────────────────── */}
         {pestanya === 'mapa' && (
