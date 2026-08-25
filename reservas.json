@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/pages/Preferencias.tsx",
-      "motivo": "prog2: rueda grande e integrada, y sembrar 8+8 subtemas",
-      "desde": "2026-08-25T16:19:51.283Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "scripts/sembrar-subtemas.mjs",
       "motivo": "prog2: rueda grande e integrada, y sembrar 8+8 subtemas",
       "desde": "2026-08-25T16:19:51.283Z"
