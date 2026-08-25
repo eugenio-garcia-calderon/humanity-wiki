@@ -256,7 +256,15 @@ export function registrarTemas(app: Express, db: any) {
                -- Recursivo, y no una cuenta simple, porque el árbol no tiene límite de
                -- profundidad: lo que cuelga de una rama puede estar cuatro
                -- niveles más abajo.
-               (SELECT count(*)::int FROM subtema_contenido c
+               -- DISTINCT, y cuesta una palabra: sin él esto contaba FILAS de
+               -- subtema_contenido y no PIEZAS. Una publicación puede estar
+               -- colgada de varias ramas de la misma rama a propósito —0120 lo
+               -- permite—, así que se contaba dos y tres veces. El menú decía
+               -- 75 en «Movilidad eléctrica ligera» y su página decía 64: el
+               -- mismo nodo con dos números en dos pantallas. (Sin acentos
+               -- graves aquí: esto va dentro de una plantilla sql y uno solo la
+               -- corta en seco.)
+               (SELECT count(DISTINCT (c.tipo, c.entity_id))::int FROM subtema_contenido c
                  WHERE c.subtema_id IN (
                    WITH RECURSIVE rama AS (
                      SELECT s.id
@@ -387,7 +395,15 @@ export function registrarTemas(app: Express, db: any) {
                -- Recursivo, y no una cuenta simple, porque el árbol no tiene límite de
                -- profundidad: lo que cuelga de una rama puede estar cuatro
                -- niveles más abajo.
-               (SELECT count(*)::int FROM subtema_contenido c
+               -- DISTINCT, y cuesta una palabra: sin él esto contaba FILAS de
+               -- subtema_contenido y no PIEZAS. Una publicación puede estar
+               -- colgada de varias ramas de la misma rama a propósito —0120 lo
+               -- permite—, así que se contaba dos y tres veces. El menú decía
+               -- 75 en «Movilidad eléctrica ligera» y su página decía 64: el
+               -- mismo nodo con dos números en dos pantallas. (Sin acentos
+               -- graves aquí: esto va dentro de una plantilla sql y uno solo la
+               -- corta en seco.)
+               (SELECT count(DISTINCT (c.tipo, c.entity_id))::int FROM subtema_contenido c
                  WHERE c.subtema_id IN (
                    WITH RECURSIVE rama AS (
                      SELECT s.id

@@ -265,6 +265,8 @@ export default function Rail({
     hay: (clave: string) => boolean;
     abierto: (clave: string) => boolean;
     alternar: (clave: string) => void;
+    /** Sólo para quien pueda crear temas. Si no viene, el «+» no existe. */
+    onAnadir?: (padreId: string) => void;
   };
 }) {
 
@@ -359,47 +361,86 @@ export default function Rail({
     const hijosDe = (padre: string | null) => todos.filter(t => t.padre_id === padre);
 
     /*
-     * ── EN EL MENÚ SÓLO EL PRIMER NIVEL (2026-08-25) ──────────────────────
-     * La siembra puso 8 subtemas por objetivo y 8 dentro de cada uno, así que
-     * abrir un objetivo aquí soltaba **72 renglones de golpe** en una tira de
-     * 224 px. Funcionaba; se hacía larguísimo. Lo señaló prog8 y la siembra era
-     * mía, así que el recorte también.
+     * ── CASCADA, RAMA A RAMA (2026-08-25) ─────────────────────────────────
+     * Eugenio: «que en el menú lateral izquierdo aparezcan esos subtemas en
+     * formato cascada».
      *
-     * Ocho es un menú y setenta y dos es un documento. Lo que se pierde no se
-     * pierde: cada rama lleva a `/temas/:id`, y ahí caben sus ocho hijas con
-     * sitio para leerlas. El menú dice **a dónde se puede ir**; la página dice
-     * qué hay.
+     * Aquí hubo un tope de un solo nivel, y con motivo: la siembra puso 8+8 por
+     * objetivo, así que abrir un objetivo soltaba 72 renglones de golpe en una
+     * tira de 224 px. El tope lo arreglaba a lo bruto — quitando la hondura
+     * entera para que no cupiera lo de más abajo.
      *
-     * `NIVELES_EN_EL_MENU` con nombre y no un `1` suelto: el día que alguien
-     * quiera dos, que sepa que está cambiando una decisión y no un número.
+     * La cascada lo arregla sin quitar nada: **cada rama con hijas trae su
+     * propia flecha y nace cerrada**. Abrir MOVILIDAD son nueve renglones, no
+     * setenta y dos, y quien quiera bajar baja — sin límite, que es lo que
+     * decidió Eugenio en `0120` para el árbol.
+     *
+     * La sangría sí se para a los cuatro niveles: el árbol no tiene fondo pero
+     * la tira mide 224 px, y a partir de ahí sangrar más sólo estrecha el
+     * nombre sin decir nada nuevo.
      */
-    const NIVELES_EN_EL_MENU = 1;
-
     const pintar = (padre: string | null, nivel: number): any => hijosDe(padre).map(t => {
       const suyos = hijosDe(t.id);
+      const abierta = ramas.abierto(t.id);
       return (
         <div key={t.id}>
-          <NavLink
-            to={`/temas/${t.id}`}
-            title={`${t.nombre} — ${t.cosas} ${t.cosas === 1 ? 'cosa' : 'cosas'}`}
-            style={{ paddingLeft: 12 + Math.min(nivel, 3) * 11 }}
-            className={({ isActive }) => cn(
-              'flex items-center gap-2 rounded-lg py-1.5 pr-2 text-[12px] transition-colors',
-              isActive
-                ? (claro ? 'bg-emerald-50 font-bold text-emerald-800' : 'bg-slate-800 font-bold text-emerald-300')
-                : (claro ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' : 'text-slate-500 hover:bg-slate-800/70 hover:text-white'),
+          <div className="group/rama flex items-center">
+            {/* La flecha va ANTES del nombre y ocupa sitio aunque no haya nada
+                que abrir: si apareciera sólo en las que tienen hijas, los
+                nombres bailarían de izquierda a derecha por la lista. */}
+            {suyos.length > 0 ? (
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); ramas.alternar(t.id); }}
+                title={abierta ? `Cerrar ${t.nombre}` : `Ver lo que hay dentro de ${t.nombre}`}
+                aria-label={abierta ? `Cerrar ${t.nombre}` : `Ver lo que hay dentro de ${t.nombre}`}
+                aria-expanded={abierta}
+                style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }}
+                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded transition-colors',
+                  claro ? 'text-slate-300 hover:text-slate-700' : 'text-slate-600 hover:text-white')}
+              >
+                {abierta ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              </button>
+            ) : (
+              <span aria-hidden style={{ marginLeft: 6 + Math.min(nivel, 3) * 11 }} className="h-6 w-5 shrink-0" />
             )}
-          >
-            <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
-            {/* Cuántas cosas hay dentro. Un cero no se pinta: un número gris
-                al lado de un nombre se lee como «esto está vacío» y de los 31
-                subtemas de Movilidad hay varios que sólo tienen cosas en sus
-                hijos. */}
-            {t.cosas > 0 && (
-              <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
+
+            <NavLink
+              to={`/temas/${t.id}`}
+              title={`${t.nombre} — ${t.cosas} ${t.cosas === 1 ? 'cosa' : 'cosas'}`}
+              className={({ isActive }) => cn(
+                'flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1.5 pl-1 pr-2 text-[12px] transition-colors',
+                isActive
+                  ? (claro ? 'bg-emerald-50 font-bold text-emerald-800' : 'bg-slate-800 font-bold text-emerald-300')
+                  : (claro ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' : 'text-slate-500 hover:bg-slate-800/70 hover:text-white'),
+              )}
+            >
+              <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
+              {/* Un cero no se pinta: un número gris al lado de un nombre se
+                  lee como «esto está vacío», y hay ramas que sólo tienen cosas
+                  en sus hijas. */}
+              {t.cosas > 0 && (
+                <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
+              )}
+            </NavLink>
+
+            {/* ── AÑADIR UN TEMA AQUÍ DENTRO ─────────────────────────────
+                Eugenio: «haz que un administrador pueda añadir temas a ese
+                submenú, directamente desde el menú lateral». Sale al pasar el
+                ratón por la fila y sólo si quien mira puede: en reposo esto es
+                un índice, no un panel de mandos. */}
+            {ramas.onAnadir && (
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); ramas.onAnadir!(t.id); }}
+                title={`Añadir un tema dentro de ${t.nombre}`}
+                aria-label={`Añadir un tema dentro de ${t.nombre}`}
+                className={cn('grid h-6 w-5 shrink-0 place-items-center rounded opacity-0 transition-all group-hover/rama:opacity-100',
+                  claro ? 'text-slate-300 hover:text-emerald-600' : 'text-slate-600 hover:text-emerald-400')}
+              >
+                <Plus className="h-3 w-3" />
+              </button>
             )}
-          </NavLink>
-          {suyos.length > 0 && nivel + 1 < NIVELES_EN_EL_MENU && pintar(t.id, nivel + 1)}
+          </div>
+          {suyos.length > 0 && abierta && pintar(t.id, nivel + 1)}
         </div>
       );
     });

@@ -36,14 +36,46 @@ import { cn } from '../../utils/cn';
 
 type Encontrado = { id: string; objetivo_id: string; nombre: string; ruta: string; nivel: number };
 
-export default function DialogoNuevoTema({ onCerrar, onCreado }: {
+export default function DialogoNuevoTema({ onCerrar, onCreado, padreInicial }: {
   onCerrar: () => void;
   onCreado?: (id: string) => void;
+  /**
+   * DE QUÉ RAMA CUELGA, YA DECIDIDO (2026-08-25, prog8).
+   *
+   * Cuando esto se abre desde el «+» de una fila del menú, el padre ya está
+   * elegido: es la fila que se ha pulsado. Preguntarlo otra vez —«¿principal o
+   * dentro de una rama?», y luego buscar entre mil— sería pedir dos veces algo
+   * que ya se ha dicho con el dedo.
+   *
+   * Se sigue pudiendo cambiar: el buscador de padre queda a la vista. Lo que
+   * cambia es de dónde se parte, no lo que se puede hacer.
+   */
+  padreInicial?: string;
 }) {
   const [nombre, setNombre] = useState('');
-  const [donde, setDonde] = useState<'principal' | 'rama'>('principal');
+  const [donde, setDonde] = useState<'principal' | 'rama'>(padreInicial ? 'rama' : 'principal');
   const [objetivo, setObjetivo] = useState(OBJETIVOS[0].id);
   const [padre, setPadre] = useState<Encontrado | null>(null);
+
+  // El nombre de la rama de la que cuelga no viaja en la propiedad —el menú
+  // tiene el id, no la ficha entera— así que se pide. Sin esto el diálogo
+  // diría «dentro de: ST_MEL_CARGA», que no le dice nada a nadie.
+  useEffect(() => {
+    if (!padreInicial) return;
+    let vivo = true;
+    fetch(`/api/agregador/tema/${encodeURIComponent(padreInicial)}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (!vivo || !j?.tema) return;
+        setPadre({
+          id: j.tema.id, objetivo_id: j.tema.objetivo_id, nombre: j.tema.nombre,
+          ruta: [...(j.camino || []).map((c: any) => c.nombre)].join(' › ') || j.tema.nombre,
+          nivel: (j.camino?.length ?? 1) - 1,
+        });
+      })
+      .catch(() => { /* se queda sin nombre y el buscador sigue ahí */ });
+    return () => { vivo = false; };
+  }, [padreInicial]);
   const [buscaPadre, setBuscaPadre] = useState('');
   const [candidatos, setCandidatos] = useState<Encontrado[]>([]);
   const [parecidos, setParecidos] = useState<Encontrado[]>([]);
