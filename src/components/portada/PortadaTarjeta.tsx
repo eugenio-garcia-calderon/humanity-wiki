@@ -366,7 +366,10 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
     <div
       onMouseEnter={() => setEncima(true)}
       onMouseLeave={() => setEncima(false)}
-      className="relative aspect-video w-full overflow-visible rounded-xl bg-slate-100"
+      // Sin esquinas redondeadas cuando va a todo el ancho: una foto pegada a
+      // los dos bordes con las puntas recortadas deja cuatro triángulos de
+      // fondo que se leen como un fallo. Desde `sm`, con su margen, vuelven.
+      className="relative aspect-video w-full overflow-visible bg-slate-100 sm:rounded-xl"
     >
       {/* AQUÍ CRECÍA EL VÍDEO AL PASAR EL RATÓN (`scale-[1.25]`), y se retira
           el 2026-08-24 a petición de Eugenio: «esto no queda bien».
@@ -378,7 +381,7 @@ export function ImagenDePortada({ portada, titulo }: { portada: Portada; titulo:
           viva, y eso no le quita sitio a nadie.
           Lo que sí se queda: el sonido. Eugenio: «eso sí que ha sido una
           mejora». */}
-      <div className="absolute inset-0 overflow-hidden rounded-xl">
+      <div className="absolute inset-0 overflow-hidden sm:rounded-xl">
         {/* Quieta: la miniatura. Siempre, aunque haya vídeo — así la rejilla se
             pinta entera sin esperar a ningún reproductor. */}
         {portada.imagen && !rota && (

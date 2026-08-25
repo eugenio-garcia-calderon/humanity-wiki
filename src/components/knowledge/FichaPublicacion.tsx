@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   X, ExternalLink, Globe, Lock, Trash2, Users, Check, Loader2, Pencil,
-  CircleDot, CheckCircle2, AlertCircle, User as UserIcon, Eye, Sparkles,
+  CircleDot, CheckCircle2, AlertCircle, User as UserIcon, Eye, Sparkles, MoreHorizontal,
 } from 'lucide-react';
 import WindowContent from './WindowContent';
 import { KIND_TINT } from './esferaKit';
 import { cn } from '../../utils/cn';
+import { useEsMovil } from '../../hooks/useEsMovil';
 
 // ============================================================================
 // FICHA DE UNA PUBLICACIÓN (2026-08-08, petición del usuario)
@@ -130,6 +131,25 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
   const [aviso, setAviso] = useState<string | null>(null);
   const [confirmandoBorrado, setConfirmandoBorrado] = useState(false);
   const [panelColab, setPanelColab] = useState(false);
+  const esMovil = useEsMovil();
+  /*
+   * ── EN UN TELÉFONO, LO DE SIEMPRE DETRÁS DE UN BOTÓN (2026-08-25) ─────────
+   * Eugenio, con una captura: «arregla la versión móvil de la ventana de
+   * publicaciones, mira el problema de los botones, y simplifica y que sea
+   * minimalista».
+   *
+   * La barra de abajo lleva cinco acciones en una fila que se parte. En un
+   * ordenador caben todas; en un teléfono de 390 px se convierten en **cinco
+   * renglones apilados** que ocupan media pantalla, tapan el contenido y
+   * chocan con los tres círculos que flotan encima.
+   *
+   * Lo que se hace no es encoger los botones —serían cinco objetivos pequeños
+   * en vez de cinco grandes— sino separar lo que se usa de lo que se consulta:
+   * **Editar** se queda a la vista, porque es lo que se viene a hacer, y lo
+   * demás se recoge detrás de un botón. Nada desaparece; deja de estar todo a
+   * la vez.
+   */
+  const [masAbierto, setMasAbierto] = useState(false);
   const [colaboradores, setColaboradores] = useState<any[]>([]);
   const [invitado, setInvitado] = useState('');
   const cajaTitulo = useRef<HTMLInputElement>(null);
@@ -241,24 +261,42 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
     : campoCfg ? { ...guardado.config, [campoCfg]: guardado.texto } : guardado.config;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-3 sm:p-4"
       onClick={() => !editando && onCerrar()}>
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto"
+      {/* ── SITIO PARA LOS TRES CÍRCULOS ─────────────────────────────────
+          Flotan encima de todo y en la captura de Eugenio se plantan sobre la
+          última fila de botones. `--hueco-muelle` es la altura que ellos mismos
+          publican y que ya respetan todas las páginas; la ficha no la usaba.
+          En un ordenador vale 92 px y no molesta; en un móvil es lo que separa
+          «se puede pulsar» de «lo tapa el botón verde». */}
+      <div
+        style={{ marginBottom: 'var(--hueco-muelle, 0px)' }}
+        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
 
         {/* Cabecera */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-5 py-3 flex items-center justify-between gap-3 z-10">
-          <div className="flex items-center gap-2 min-w-0">
+        {/* ── LA CABECERA, CON SITIO PARA CERRAR ───────────────────────────
+            Las tres chapas llevan `shrink-0`, así que en un teléfono no caben y
+            se salían **por debajo del aspa y del botón de abrir**: en la
+            captura de Eugenio la de «EN DESARROLLO» sale cortada con la ✕
+            encima. `min-w-0` en la fila y `overflow-hidden` es lo que permite
+            que lo que sobra se recorte en vez de invadir los botones. */}
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-4 sm:px-5 py-3 flex items-center justify-between gap-2 z-10">
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded shrink-0"
               style={{ color: tint, backgroundColor: `${tint}18` }}>
               {TIPO_LABEL[pub.tipo] || pub.kind}
             </span>
-            <span className={cn('text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1 shrink-0',
+            {/* De `sm` para arriba. En un móvil sobran, y no se pierde nada:
+                si es pública lo dice el botón de abajo («Hacer privada»), y el
+                estado igual. Dos sitios para el mismo dato es lo primero que
+                se puede quitar cuando falta ancho. */}
+            <span className={cn('hidden sm:inline-flex text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full items-center gap-1 shrink-0',
               publico ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500')}>
               {publico ? <Globe className="w-2.5 h-2.5" /> : <Lock className="w-2.5 h-2.5" />}
               {publico ? 'Pública' : 'Privada'}
             </span>
-            <span className={cn('text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1 shrink-0',
+            <span className={cn('hidden sm:inline-flex text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full items-center gap-1 shrink-0',
               estado === 'terminado' ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700')}>
               {estado === 'terminado' ? <CheckCircle2 className="w-2.5 h-2.5" /> : <CircleDot className="w-2.5 h-2.5" />}
               {estado === 'terminado' ? 'Terminada' : 'En desarrollo'}
@@ -409,7 +447,21 @@ export default function FichaPublicacion({ pub, onCerrar, onIr, onCambiada, edit
                     <Pencil className="w-3.5 h-3.5" /> Editar
                   </button>
                 )}
-                {pub.soy_autor && (
+                {/* EN MÓVIL, EL RESTO DETRÁS DE ESTE BOTÓN. Ver la nota de
+                    `masAbierto`: cinco acciones en una fila que se parte son
+                    cinco renglones apilados en un teléfono. */}
+                {esMovil && pub.soy_autor && (
+                  <button
+                    onClick={() => setMasAbierto(v => !v)}
+                    aria-expanded={masAbierto}
+                    aria-label="Más acciones"
+                    className={cn('inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-colors',
+                      masAbierto ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-600')}
+                  >
+                    <MoreHorizontal className="h-4 w-4" /> Más
+                  </button>
+                )}
+                {pub.soy_autor && (!esMovil || masAbierto) && (
                   <>
                     <button onClick={cambiarVisibilidad} disabled={guardando}
                       className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-600 transition-colors disabled:opacity-50">
