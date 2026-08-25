@@ -5,6 +5,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "crear una persona nueva desde el proyecto (prog8)",
       "desde": "2026-08-25T21:23:54.140Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0128_ramas_de_proyecto.sql",
+      "motivo": "ramas dentro de un proyecto, en arbol (prog8)",
+      "desde": "2026-08-25T21:31:21.906Z"
     }
   ]
 }
