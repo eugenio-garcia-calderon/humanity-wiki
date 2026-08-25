@@ -59,6 +59,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "drizzle/0121_arbol_de_temas.sql",
+      "motivo": "prog2: el arbol de 1008 temas como datos",
+      "desde": "2026-08-25T16:30:25.605Z"
     }
   ]
 }
