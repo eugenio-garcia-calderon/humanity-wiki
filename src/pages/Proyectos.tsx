@@ -674,6 +674,24 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
   const [personas, setPersonas] = useState<any[]>([]);
   const [todas, setTodas] = useState<any[]>([]);
   const [anadiendo, setAnadiendo] = useState(false);
+  /*
+   * ── CREAR UNA PERSONA SIN SALIR DE AQUÍ (2026-08-25) ─────────────────────
+   * Eugenio: «cuando añades a personas, que te permita crear una nueva persona
+   * directamente desde ahí».
+   *
+   * Antes, si no tenías a nadie creado en el Juego Vital, este panel decía
+   * «aún no has creado ninguna» y ahí se acababa: un callejón sin salida en el
+   * único sitio donde alguien está buscando exactamente eso. Había que irse al
+   * Juego Vital, crearla, volver al proyecto y volver a abrir el panel — cuatro
+   * pasos para escribir un nombre.
+   *
+   * La API ya sabía hacerlo (`POST /api/juego/agentes`); lo que faltaba era la
+   * puerta.
+   */
+  const [nombreNuevo, setNombreNuevo] = useState('');
+  const [rolNuevo, setRolNuevo] = useState('');
+  const [creando, setCreando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
 
   const cargar = () =>
     fetch(`/api/juego/proyectos/${proyectoId}/personas`, { credentials: 'include' })
@@ -695,6 +713,41 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
     }).catch(() => {});
     setAnadiendo(false);
     cargar();
+  };
+
+  /**
+   * Crear la persona y meterla en el proyecto, en ese orden y sin preguntar en
+   * medio. Quien escribe un nombre aquí quiere las dos cosas: crearla y que
+   * esté. Crearla y dejarla fuera sería obligarle a un segundo clic para
+   * terminar algo que ya había pedido entero.
+   */
+  const crearYPoner = async () => {
+    const nombre = nombreNuevo.trim();
+    if (!nombre || creando) return;
+    setCreando(true);
+    setFallo(null);
+    try {
+      const r = await fetch('/api/juego/agentes', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'persona', nombre, rol: rolNuevo.trim() || null }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.id) throw new Error(j?.error || 'No se ha podido crear.');
+      await fetch(`/api/juego/agentes/${j.id}/proyectos`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proyecto_id: proyectoId }),
+      });
+      setNombreNuevo(''); setRolNuevo(''); setAnadiendo(false);
+      cargar();
+    } catch (e: any) {
+      // El fallo se dice donde se escribió. Cerrar el panel y perder el nombre
+      // es la forma más rápida de que nadie lo vuelva a intentar.
+      setFallo(e.message || 'No se ha podido crear.');
+    } finally {
+      setCreando(false);
+    }
   };
 
   // Sin personas y sin permiso de edición no hay nada que enseñar.
@@ -724,7 +777,9 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
           </span>
         ))}
         {personas.length === 0 && (
-          <p className="text-xs text-slate-400">Nadie todavía. Las personas de tu mundo pueden formar parte de este proyecto.</p>
+          <p className="text-xs text-slate-400">
+            Nadie todavía.{puedeEditar && ' Añade a alguien de tu mundo o crea una persona nueva.'}
+          </p>
         )}
         {puedeEditar && !anadiendo && (
           <button onClick={abrirAnadir}
@@ -747,8 +802,53 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
               </button>
             ))}
             {candidatas.length === 0 && (
-              <p className="text-xs text-slate-400">Todas las personas de tu mundo están ya en el proyecto (o aún no has creado ninguna en el Juego Vital).</p>
+              <p className="text-xs text-slate-400">
+                {todas.length === 0
+                  ? 'Todavía no tienes a nadie en tu mundo. Escribe un nombre aquí abajo y lo creas.'
+                  : 'Todas las personas de tu mundo están ya en este proyecto.'}
+              </p>
             )}
+          </div>
+
+          {/* ── O CREAR UNA NUEVA ────────────────────────────────────────
+              Debajo de la lista y no encima: quien ya tiene a esa persona
+              creada debe encontrarla antes que el formulario de crearla otra
+              vez. Es la misma regla que en los temas — que encontrar lo que hay
+              sea más cómodo que crear un duplicado. */}
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              O crea a alguien nuevo
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <input
+                value={nombreNuevo}
+                onChange={e => { setNombreNuevo(e.target.value); setFallo(null); }}
+                onKeyDown={e => { if (e.key === 'Enter') crearYPoner(); }}
+                placeholder="Nombre"
+                aria-label="Nombre de la persona nueva"
+                className="min-w-0 flex-1 px-2.5 py-1.5 border border-slate-200 rounded-full text-xs font-bold text-slate-700 placeholder:font-normal placeholder:text-slate-300 focus:border-emerald-300 focus:outline-none"
+              />
+              <input
+                value={rolNuevo}
+                onChange={e => setRolNuevo(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') crearYPoner(); }}
+                placeholder="Su papel (opcional)"
+                aria-label="Papel de la persona nueva"
+                className="min-w-0 flex-1 px-2.5 py-1.5 border border-slate-200 rounded-full text-xs text-slate-600 placeholder:text-slate-300 focus:border-emerald-300 focus:outline-none"
+              />
+              <button
+                onClick={crearYPoner}
+                disabled={!nombreNuevo.trim() || creando}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                {creando ? 'Creando…' : 'Crear y añadir'}
+              </button>
+            </div>
+            {fallo && <p className="mt-1.5 text-[11px] font-bold text-red-600">{fallo}</p>}
+            <p className="mt-1.5 text-[10.5px] text-slate-400">
+              Se crea en tu mundo del Juego Vital y entra en este proyecto a la vez.
+            </p>
           </div>
         </div>
       )}
