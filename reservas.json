@@ -11,6 +11,12 @@
       "ruta": "equipo/REPARTO.md",
       "motivo": "la regla del stash en un fichero de solo-anadir",
       "desde": "2026-08-25T17:53:03.252Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0125_agregador_imagenes.sql",
+      "motivo": "imagenes de Commons para movilidad electrica ligera",
+      "desde": "2026-08-25T18:02:25.117Z"
     }
   ]
 }
