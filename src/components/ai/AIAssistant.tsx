@@ -55,6 +55,11 @@ interface Message {
   pending?: boolean;
   error?: boolean;
   attachmentName?: string;
+  /** Una MINIATURA de la imagen enviada, no la imagen. Ver `miniatura()`: una
+   *  captura de 4 MB dentro de cada mensaje se queda en memoria mientras dure
+   *  la conversación, y con cinco capturas eso es una pestaña que va a tirones
+   *  por enseñar cinco cuadraditos de 120 píxeles. */
+  attachmentPreview?: string;
   /** Coste real de esta respuesta (créditos de Anthropic + comisión de la plataforma). */
   /** LO QUE COSTÓ. `totalCents` es lo que paga la persona (0 casi siempre);
    *  `costCents` es lo que le cuesta a la plataforma, que no es lo mismo y es
@@ -142,6 +147,41 @@ const costeEstimado = (
  *  por una palabra suelta hacen falta tres, porque «co» encaja con «coche»,
  *  «coste», «comunidad» y «conservación» a la vez, y cuatro áreas que salen
  *  siempre no son una predicción, son ruido. */
+/** ══ UNA MINIATURA, NO LA IMAGEN ═══════════════════════════════════════════
+ *  (2026-08-25, Eugenio: «haz que al pegar una imagen en el chat se vea con
+ *  una preview como hace claude code».)
+ *
+ *  Para la pastilla de «lo que vas a enviar» se usa la imagen entera: es una
+ *  sola, está viva un momento y se ve exactamente lo que se va a mandar.
+ *
+ *  Para el MENSAJE YA ENVIADO no: ahí la imagen se quedaría en memoria toda la
+ *  conversación, y cinco capturas de cuatro megas son veinte megas retenidos
+ *  para enseñar cinco cuadraditos de 120 píxeles. Se guarda una miniatura.
+ *
+ *  SI EL NAVEGADOR NO PUEDE HACERLA, NO SE INVENTA NADA: se devuelve `null` y
+ *  el mensaje enseña la pastilla con el nombre, como hasta hoy. Una vista
+ *  previa rota sería peor que ninguna. */
+const miniatura = (dataUrl: string, lado = 240): Promise<string | null> =>
+  new Promise(resolver => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const escala = Math.min(1, lado / Math.max(img.width, img.height));
+        const lienzo = document.createElement('canvas');
+        lienzo.width = Math.max(1, Math.round(img.width * escala));
+        lienzo.height = Math.max(1, Math.round(img.height * escala));
+        const ctx = lienzo.getContext('2d');
+        if (!ctx) return resolver(null);
+        ctx.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+        // JPEG y no PNG: una captura de pantalla en PNG pesa varias veces más
+        // y aquí solo hace falta que se reconozca de un vistazo.
+        resolver(lienzo.toDataURL('image/jpeg', 0.7));
+      } catch { resolver(null); }
+    };
+    img.onerror = () => resolver(null);
+    img.src = dataUrl;
+  });
+
 /** UNA CAPTURA LLEGA SIN NOMBRE PROPIO: el navegador la llama «image.png»
  *  SIEMPRE, así que tres capturas pegadas seguidas se llaman las tres igual y
  *  no hay manera de saber cuál es cuál en la conversación. Se le pone la hora,
@@ -1268,7 +1308,24 @@ export default function AIAssistant({ modo = 'panel' }: {
     setAttachment(null);
     setSugerencias([]);
     setSugerenciaActiva(-1);
-    setMessages(m => [...m, { role: 'user', content: text, attachmentName: pendingAttachment?.name }]);
+    // ══ TU MENSAJE APARECE YA; LA MINIATURA, EN CUANTO ESTÉ ═══════════════
+    // Fabricar la miniatura antes de pintar el mensaje retrasaría tu propia
+    // frase — descodificar una captura de cuatro megas no es gratis— y en un
+    // chat eso se nota como lentitud del chat, no del adjunto. Se pinta
+    // primero y se rellena después.
+    //
+    // Se localiza POR IDENTIDAD del objeto y no por su posición: entre que se
+    // añade y que la miniatura está lista pueden haber entrado más mensajes, y
+    // un índice guardado sería el de otro.
+    const mensajeUsuario: Message = { role: 'user', content: text, attachmentName: pendingAttachment?.name };
+    setMessages(m => [...m, mensajeUsuario]);
+    if (pendingAttachment && pendingAttachment.mediaType !== 'application/pdf') {
+      miniatura(`data:${pendingAttachment.mediaType};base64,${pendingAttachment.data}`)
+        .then(mini => {
+          if (!mini) return;   // sin miniatura, el mensaje se queda con su nombre
+          setMessages(m => m.map(x => (x === mensajeUsuario ? { ...x, attachmentPreview: mini } : x)));
+        });
+    }
     setBusy(true);
     try {
       // ══ BUSCAR PRIMERO, Y BUSCAR CASI SIEMPRE ════════════════════════════
@@ -1577,6 +1634,16 @@ export default function AIAssistant({ modo = 'panel' }: {
                   m.role === 'user' ? 'bg-emerald-600 text-white whitespace-pre-wrap'
                     : m.error ? 'bg-amber-50 text-amber-800 border border-amber-200 whitespace-pre-wrap'
                     : 'bg-slate-100 text-slate-800')}>
+                  {/* La miniatura de lo que enviaste, dentro de tu propio
+                      mensaje: al desplazar hacia arriba se ve qué imagen era
+                      esa pregunta sin tener que acordarse del nombre. */}
+                  {m.attachmentPreview && (
+                    <img
+                      src={m.attachmentPreview}
+                      alt={m.attachmentName || 'imagen enviada'}
+                      className="block mb-1.5 max-h-40 w-auto max-w-full rounded-lg border border-white/30"
+                    />
+                  )}
                   {m.attachmentName && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/20 px-1.5 py-0.5 rounded mb-1">
                       <Paperclip className="w-2.5 h-2.5" /> {m.attachmentName}
@@ -2084,11 +2151,38 @@ export default function AIAssistant({ modo = 'panel' }: {
               del modelo se queda —es un dato, no una etiqueta— y las palabras
               se van al `title`, donde no roban sitio. */}
           <div className="border-t border-slate-100 px-3 pt-2.5 pb-2 space-y-2 bg-white">
+            {/* ══ SE VE LO QUE VAS A ENVIAR, NO SU NOMBRE ══════════════════
+                (2026-08-25, Eugenio: «que al pegar una imagen en el chat se
+                vea con una preview como hace claude code».)
+
+                Un nombre de fichero no dice si has pegado la captura buena, y
+                con «captura 18.23.18.png» menos todavía. La miniatura sí, y de
+                un vistazo: es la única forma de darse cuenta ANTES de enviar
+                de que has pegado la ventana equivocada.
+
+                El PDF se queda con su icono: una primera página en miniatura
+                haría falta abrir el PDF para pintarla, y no aclara gran cosa. */}
             {attachment && (
-              <div className="flex items-center gap-2 px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
-                {attachment.mediaType === 'application/pdf' ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <ImageIcon className="w-3.5 h-3.5 shrink-0" />}
-                <span className="truncate flex-1">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="text-emerald-600 hover:text-emerald-900 shrink-0">
+              <div className="flex items-center gap-2.5 p-1.5 pr-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
+                {attachment.mediaType === 'application/pdf' ? (
+                  <span className="w-10 h-10 shrink-0 grid place-items-center rounded-md bg-white border border-emerald-200">
+                    <FileText className="w-4 h-4" />
+                  </span>
+                ) : (
+                  <img
+                    src={`data:${attachment.mediaType};base64,${attachment.data}`}
+                    alt={attachment.name}
+                    className="w-10 h-10 shrink-0 rounded-md object-cover border border-emerald-200 bg-white"
+                  />
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold">{attachment.name}</span>
+                  <span className="block text-[10px] text-emerald-600">
+                    {attachment.mediaType === 'application/pdf' ? 'PDF' : 'Imagen'} · se enviará con tu mensaje
+                  </span>
+                </span>
+                <button onClick={() => setAttachment(null)} title="Quitar el adjunto"
+                  className="text-emerald-600 hover:text-emerald-900 shrink-0">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
