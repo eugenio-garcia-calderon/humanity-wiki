@@ -47,6 +47,12 @@
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
       "desde": "2026-08-25T22:52:59.879Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/proyecto/ArbolDeRamas.tsx",
+      "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
+      "desde": "2026-08-25T22:53:03.372Z"
     }
   ]
 }
