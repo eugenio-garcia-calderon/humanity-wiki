@@ -5,30 +5,6 @@
       "ruta": "drizzle/0126_constelacion.sql",
       "motivo": "clusters, generos y mapa de las piezas (prog8)",
       "desde": "2026-08-25T18:59:06.793Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
-      "motivo": "buscador 30% mas largo y centrado",
-      "desde": "2026-08-25T19:01:07.521Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/buscador/CajaBusqueda.tsx",
-      "motivo": "buscador 30% mas largo y centrado",
-      "desde": "2026-08-25T19:01:13.351Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "que el buscador de arriba quede centrado",
-      "desde": "2026-08-25T19:03:19.443Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: buscador mas largo y centrado",
-      "desde": "2026-08-25T19:07:07.533Z"
     }
   ]
 }
