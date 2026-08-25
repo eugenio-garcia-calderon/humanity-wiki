@@ -41,6 +41,12 @@
       "ruta": "src/server/roadmap.ts",
       "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
       "desde": "2026-08-25T22:52:56.439Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Proyectos.tsx",
+      "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
+      "desde": "2026-08-25T22:52:59.879Z"
     }
   ]
 }
