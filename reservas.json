@@ -17,6 +17,12 @@
       "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
       "motivo": "buscador 30% mas largo y centrado",
       "desde": "2026-08-25T19:01:07.521Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "src/components/buscador/CajaBusqueda.tsx",
+      "motivo": "buscador 30% mas largo y centrado",
+      "desde": "2026-08-25T19:01:13.351Z"
     }
   ]
 }
