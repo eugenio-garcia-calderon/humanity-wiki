@@ -7043,3 +7043,18 @@ Medido después, en el navegador:
 | 375 (móvil) | — | — | la página **no** desborda a lo ancho |
 
 Antes: 426 px y 272 px de desviación.
+
+## 2026-08-25 — The wheel now has a door: "Abrir el tema" (prog2)
+
+The preferences wheel drew the whole tree and led nowhere. You could open branch
+after branch and never reach the content, which is the fastest way for a map to
+stop being used. The centre panel now carries a second button, `Abrir el tema`,
+next to `Abrir rama`: one widens the fan without leaving, the other leaves the
+wheel and enters the theme. Two destinations, because they are two different
+things — an objective goes to `/objetivos/O001` (that page resolves the code as
+written, checked for O001 and for the new O015) and a subtheme to `/temas/:id`.
+No session required: reading a theme does not ask for an account.
+
+Also fixed the heading copy, which still said "los catorce del centro" after
+ESPIRITUALIDAD made fifteen. It now counts `OBJETIVOS.length`, so the sentence
+cannot go stale again the next time the list grows.

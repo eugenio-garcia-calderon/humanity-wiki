@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Plus, Loader2, EyeOff, Eye, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
+import { Star, Plus, Loader2, EyeOff, Eye, ChevronsUpDown, ChevronsDownUp, ArrowUpRight } from 'lucide-react';
 import { OBJETIVOS, hexDelColor } from '../utils/objetivos';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
@@ -395,6 +395,16 @@ export default function Preferencias() {
   const objetivoDe = (clave: string) =>
     OBJETIVOS.some(o => o.id === clave) ? clave : (subs.find(s => s.id === clave)?.objetivo_id || '');
 
+  // ── A DÓNDE LLEVA CADA TROZO ──────────────────────────────────────────────
+  // La rueda enseña el árbol; la página enseña lo que hay dentro. Hasta ahora
+  // no había puerta entre las dos: se podía recorrer el mapa entero y no
+  // llegar a ningún sitio, que es la manera más rápida de que un mapa deje de
+  // usarse. Son dos páginas distintas porque son dos cosas distintas: un
+  // objetivo es de la casa (`/objetivos/O001`, y esa página acepta el código
+  // tal cual) y un subtema es del árbol (`/temas/:id`).
+  const paginaDe = (clave: string) =>
+    OBJETIVOS.some(o => o.id === clave) ? `/objetivos/${clave}` : `/temas/${clave}`;
+
   const favoritos = [
     ...OBJETIVOS.filter(o => esFav(o.id)).map(o => ({ clave: o.id, nombre: o.titulo, color: hexDelColor(o.color) })),
     ...subs.filter(s => esFav(s.id)).map(s => ({
@@ -408,7 +418,7 @@ export default function Preferencias() {
       <header className="mb-6">
         <h1 className="text-2xl font-black tracking-tight text-slate-900">Tus temas</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Los catorce del centro son los de todos. Lo de fuera lo va añadiendo la gente: pulsa
+          Los {OBJETIVOS.length} del centro son los de todos. Lo de fuera lo va añadiendo la gente: pulsa
           uno para abrir lo que tiene dentro, y marca con la estrella los que quieras arriba en tu menú.
         </p>
       </header>
@@ -641,7 +651,7 @@ export default function Preferencias() {
               {elegido ? (
                 <foreignObject x={c - (R0 - 16)} y={c - (R0 - 16)} width={(R0 - 16) * 2} height={(R0 - 16) * 2}>
                   <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
-                    <p className="line-clamp-3 text-[13px] font-black leading-tight text-white">{nombreDe(elegido)}</p>
+                    <p className="line-clamp-2 text-[13px] font-black leading-tight text-white">{nombreDe(elegido)}</p>
                     <p className="text-[10px] text-slate-400">
                       {(hijosDe[elegido] || []).length
                         ? `${(hijosDe[elegido] || []).length} dentro`
@@ -665,6 +675,20 @@ export default function Preferencias() {
                           : <><ChevronsUpDown className="h-3.5 w-3.5" /> Abrir rama</>}
                       </button>
                     )}
+                    {/* ── ABRIR EL TEMA ─────────────────────────────────
+                        El segundo botón que pidió Eugenio, y el que cierra el
+                        recorrido: «Abrir rama» ensancha el abanico sin salir
+                        de aquí, y éste sale de la rueda y entra en el tema.
+                        Va antes que los iconos y con la flecha de salir, para
+                        que se lea la diferencia de un vistazo: uno se queda,
+                        el otro se va.
+                        Sin sesión también: leer un tema no pide cuenta. */}
+                    <Link
+                      to={paginaDe(elegido)}
+                      className="mt-1 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-900 transition-opacity hover:opacity-90"
+                    >
+                      Abrir el tema <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
                     {user && (
                       <div className="mt-0.5 flex items-center gap-1">
                         <button
