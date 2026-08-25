@@ -19,12 +19,6 @@
       "desde": "2026-08-25T16:25:04.655Z"
     },
     {
-      "agente": "prog8",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "entrada: pegar imagenes en la IA",
-      "desde": "2026-08-25T16:29:23.390Z"
-    },
-    {
       "agente": "prog2",
       "ruta": "src/server/temas.ts",
       "motivo": "prog2: la cuenta de la rama entera, no la del nodo",
