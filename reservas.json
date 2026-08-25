@@ -11,6 +11,18 @@
       "ruta": "src/pages/Explorar.tsx",
       "motivo": "prog2: en movil el texto de la tarjeta mas pegado al borde",
       "desde": "2026-08-25T15:23:55.599Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/fuente.ts",
+      "motivo": "prog2: las piezas hermanas de un lienzo, para la ficha",
+      "desde": "2026-08-25T15:26:18.199Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "prog2: las piezas hermanas de un lienzo, para la ficha",
+      "desde": "2026-08-25T15:26:18.199Z"
     }
   ]
 }
