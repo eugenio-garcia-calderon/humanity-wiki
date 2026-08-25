@@ -23,24 +23,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "scripts/auditar-subtemas.mjs",
-      "motivo": "prog2: buscar sinonimos en la siembra",
-      "desde": "2026-08-25T17:18:42.940Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "drizzle/0124_cicloturismo.sql",
-      "motivo": "prog2: la rama con errata que duplica la de prog8",
-      "desde": "2026-08-25T17:24:13.701Z"
-    },
-    {
-      "agente": "prog2",
-      "ruta": "scripts/sembrar-subtemas.mjs",
-      "motivo": "prog2: la siembra tiene que pasar por el desempatador",
-      "desde": "2026-08-25T17:24:50.152Z"
     }
   ]
 }
