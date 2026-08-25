@@ -6832,3 +6832,41 @@ llegaba a actuar nunca. Hacían falta las dos cosas:
 
 Comprobado a 360, 414 y en la portada: **nada se sale**. A 320 px se sale
 todavía la cabecera —el botón de la cuenta, 38 px— y eso es de `Layout.tsx`.
+
+### 2026-08-25 — Pegar una imagen a la IA (prog8)
+
+Eugenio: «el buscador de IA no me permite pegarle imágenes, arréglalo».
+
+Adjuntar ya funcionaba de dos maneras —el «+» y arrastrar— pero **no con el
+gesto que se usa de verdad para una captura**: copiar y pegar. En un chat donde
+se enseña lo que se está viendo, ése es el camino corto, y era el que faltaba.
+
+- **`Ctrl+V` / `⌘V` en la caja del chat** adjunta la imagen o el PDF del
+  portapapeles. Vale igual en la columna de la derecha y en la página «IA».
+- **Y en la barra de arriba con el interruptor de IA encendido**: ahí esa caja
+  es «hablarle a la IA», así que pegarle una captura abre el chat con ella ya
+  adjunta. La barra **no aprende a adjuntar**: pasa el fichero por
+  `ai:adjuntar` y el chat hace el resto — los formatos, el tamaño máximo y el
+  aviso de error siguen viviendo en un solo sitio. Con el interruptor apagado
+  no se pasa nada: mandarle una imagen a la IA porque la pegaste en un buscador
+  de palabras sería una sorpresa cara.
+- **Pegar texto sigue siendo pegar texto.** Solo se intercepta el pegado
+  cuando el portapapeles trae un fichero; si no, no se llama a
+  `preventDefault` y lo pega el navegador.
+- **Un fichero que no se admite también se contesta.** Un `.zip` pegado dice
+  «solo se admiten imágenes o PDF» —la misma frase del clip y de arrastrar— en
+  vez de no hacer nada: pegar un fichero no escribe texto, así que en silencio
+  no pasaría NADA en la pantalla y el usuario pegaría otra vez.
+- **La captura recibe un nombre con la hora.** El navegador las llama
+  «image.png» a todas, así que tres capturas seguidas se llamaban igual y no
+  había forma de distinguirlas en la conversación. El renombrado es una sola
+  función compartida por las dos puertas: si no, la misma captura se llamaría
+  distinto según dónde la pegaste.
+- El «+» ahora lo dice: «también puedes pegar una captura o arrastrarla», y el
+  aviso de soltar añade «o pega una captura con ⌘V».
+
+Comprobado en 3008: pegar un PNG en el chat de `/ia` → adjunto «captura
+18.23.18.png»; pegar texto → `preventDefault` en `false`, lo pega el navegador;
+pegar un `.zip` → el aviso de formatos; pegar un PDF → adjunto con su nombre
+real; y pegar un PNG en la barra de arriba con la IA encendida → el chat se
+abre con «captura 18.28.45.png» puesta. `tsc` limpio.
