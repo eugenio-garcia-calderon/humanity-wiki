@@ -7258,3 +7258,52 @@ su ancho.
 «Explorar» lleva a `/preferencias` y no a `/explorar` porque él se corrigió en la
 misma frase —«se lleva a la página de personalizar realmente»— y **manda la
 corrección, no la primera versión**. Ahí está la rueda de los catorce temas.
+---
+
+## 2026-08-26 — Los tres puntitos de una tarjeta de proyecto
+
+Eugenio: «crea un botón de tres puntitos para editar las tarjetas de los
+proyectos desde la página de proyectos general, donde se puede editar el icono,
+el nombre, la descripción y la imagen de portada, sin tener que entrar en cada
+proyecto».
+
+Los puntitos salen al pasar por la tarjeta, y sólo los ve quien puede editarla.
+La tarjeta entera es un enlace, así que el botón hace `preventDefault` **y**
+`stopPropagation`: sin las dos cosas, pulsarlo abriría el proyecto además de la
+ventana, que es justo lo que se pidió evitar.
+
+### Las cuatro cosas se guardan en UNA llamada
+
+El nombre y el icono iban por `/api/elemento`; la descripción y la portada por
+`/api/proyectos`. Dos llamadas es un guardado que puede quedarse a medias —la
+portada puesta y el nombre no— sin que nadie pueda saber cuál de los dos falló.
+Así que `PUT /api/proyectos/:id` aprendió a escribir `icono`, y la ventana
+guarda los cuatro campos de una vez.
+
+### Un fallo que estaba ahí desde antes: la descripción no se podía vaciar
+
+`descripcion` iba con `COALESCE`, donde `null` significa «déjalo como estaba».
+Borrar la descripción desde esa ruta era imposible: se guardaba y no pasaba
+nada, que es la peor forma de no funcionar. Ahora `null` y cadena vacía la
+borran, y **no mandar el campo** es lo que la respeta. Comprobado vaciándola.
+
+### La rejilla de 988 iconos se mudó a un sitio
+
+`ui/SelectorDeIcono`, sacada de `PopupRenombrar` (que baja de 206 a 109 líneas y
+ahora la usa). Copiarla habría dejado dos rejillas: el día que cambie una, la
+otra se queda vieja y sigue pareciendo correcta.
+
+### Una sesión de prueba local que desaparecía sola
+
+Dos veces se cayó a media verificación y parecía un fallo de sesión. No lo era:
+`scripts/capturas-tienda.mjs` termina con
+`DELETE FROM sessions WHERE user_agent = 'claude-dev-verificacion'`, sin filtrar
+por quién la creó. Cuando otro agente lo ejecuta, se lleva también la de quien
+esté verificando en ese momento. Desde hoy etiqueto las mías como
+`claude-dev-verificacion prog8`: se sigue viendo de un vistazo que son de un
+agente, y el borrado exacto del otro script ya no las alcanza.
+
+**Comprobado en local**: los puntitos abren la ventana sin abrir el proyecto,
+los cuatro campos se guardan, la tarjeta se repinta en el sitio sin recargar la
+lista, y vaciar descripción y portada funciona. El proyecto de prueba quedó
+como estaba y la sesión, borrada.
