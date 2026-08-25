@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "prog2",
-      "ruta": "src/pages/Preferencias.tsx",
-      "motivo": "prog2: el abanico se abre hacia la derecha y con un solo clic",
-      "desde": "2026-08-25T18:55:46.845Z"
-    },
-    {
       "agente": "prog8-turn",
       "ruta": "drizzle/0126_constelacion.sql",
       "motivo": "clusters, generos y mapa de las piezas (prog8)",
