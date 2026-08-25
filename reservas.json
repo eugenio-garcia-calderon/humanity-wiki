@@ -17,6 +17,12 @@
       "ruta": "src/components/navegacion/HojaCrear.tsx",
       "motivo": "prog3: menu inferior de herramientas, rail derecho de proyectos, fuera los 3 circulos",
       "desde": "2026-08-25T22:52:41.882Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0130_portadas_y_galeria.sql",
+      "motivo": "portadas de rama, galeria del proyecto y tarjetas (prog8)",
+      "desde": "2026-08-25T22:52:46.044Z"
     }
   ]
 }
