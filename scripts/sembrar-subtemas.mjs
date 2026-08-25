@@ -33,6 +33,9 @@
 //   node --env-file=.env scripts/sembrar-subtemas.mjs            # los 14
 //   node --env-file=.env scripts/sembrar-subtemas.mjs O001       # sólo uno
 //   node --env-file=.env scripts/sembrar-subtemas.mjs --solo-primer-nivel
+//
+// En la salida: · creado, = ya existía igual, ~ ya existía con otro nombre,
+// ! la IA no contestó.
 import pg from 'pg';
 
 const OBJETIVOS = [
@@ -106,14 +109,68 @@ const pool = new pg.Pool({
 // que no ha tomado.
 const AUTOR = 'SEMILLA';
 
+/**
+ * ¿Alguno de los que ya cuelgan de ahí dice lo mismo con otras palabras?
+ *
+ * ── ESTO FALTABA, Y COSTÓ UN DUPLICADO ──────────────────────────────────────
+ * El desempatador vivía sólo en `POST /api/temas`, y esto inserta por SQL
+ * directo. Así que la semilla entraba **sin pasar por él**: la puerta contra
+ * los duplicados tenía al lado una ventana abierta, y la ventana era ésta.
+ *
+ * Se vio en MOVILIDAD: la semilla puso «Cicloturismo y micormovilidad» al lado
+ * de «Movilidad eléctrica ligera», que ya existía con 31 subtemas y 50
+ * publicaciones. Lo encontró prog8 mirando su objetivo, no un script.
+ *
+ * Compara contra TODOS los hermanos, no sólo contra los que ha puesto la
+ * semilla: lo que había antes lo puso alguien y vale más que lo que llega
+ * ahora.
+ *
+ * Si la IA no contesta, se crea. Igual que en el servidor y por lo mismo: un
+ * duplicado se arregla; un tema que no se deja crear porque un modelo se quedó
+ * callado es una puerta cerrada sin explicación.
+ */
+async function diceLoMismoQueAlguno(nombre, hermanos) {
+  if (!hermanos.length) return null;
+  const clave_api = process.env.ANTHROPIC_API_KEY;
+  if (!clave_api) return null;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': clave_api, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 8,
+        system: [
+          'Decides si un tema nuevo es el MISMO que uno que ya existe.',
+          'Mismo significa que alguien que buscara uno esperaría encontrar el otro.',
+          'Ser parecidos o estar relacionados NO es ser el mismo: «Riego» y «Riego por goteo» son distintos.',
+          'Contesta SOLO con el número de la lista, o con 0 si es un tema nuevo.',
+        ].join('\n'),
+        messages: [{ role: 'user', content: `Tema nuevo: "${nombre}"\n\nYa existen:\n` + hermanos.map((h, i) => `${i + 1}. ${h.nombre}`).join('\n') }],
+      }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const n = parseInt(String(j.content?.[0]?.text || '').trim().match(/\d+/)?.[0] || '0', 10);
+    return n >= 1 && n <= hermanos.length ? hermanos[n - 1] : null;
+  } catch { return null; }
+}
+
 async function meter(objetivo, padre, nombre, orden) {
   const k = clave(nombre);
   if (!k) return null;
-  const y = await pool.query(
-    `SELECT id FROM subtemas WHERE archived_at IS NULL AND nombre_clave = $1
-       AND coalesce(padre_id,'') = coalesce($2,'') AND ($2 IS NOT NULL OR objetivo_id = $3)`,
-    [k, padre, objetivo]);
-  if (y.rows.length) return y.rows[0].id;
+  const hermanos = await pool.query(
+    `SELECT id, nombre, nombre_clave FROM subtemas
+      WHERE archived_at IS NULL AND coalesce(padre_id,'') = coalesce($1,'')
+        AND ($1 IS NOT NULL OR objetivo_id = $2)`,
+    [padre, objetivo]);
+  const y = hermanos.rows.find(h => h.nombre_clave === k);
+  if (y) return y.id;
+  const mismo = await diceLoMismoQueAlguno(nombre, hermanos.rows);
+  if (mismo) {
+    process.stdout.write('~');   // ya estaba con otro nombre
+    return mismo.id;
+  }
   const id = nuevoId();
   try {
     await pool.query(
