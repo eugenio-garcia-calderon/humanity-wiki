@@ -92,6 +92,14 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
         // gratis y no dependen de la IA. Lo que cambia es a dónde va el Intro.
         alBuscar={q => navegar(conIA ? `/ia?q=${encodeURIComponent(q)}` : `/buscar?q=${encodeURIComponent(q)}`)}
+        // CON LA IA ENCENDIDA, PEGAR UNA CAPTURA AQUÍ LA MANDA A LA IA
+        // (2026-08-25, Eugenio: «el buscador de IA no me permite pegarle
+        // imágenes»). Esta caja no sabe adjuntar y no debe aprender: los
+        // formatos, el tamaño máximo y el aviso de error viven en el chat, en
+        // un solo sitio. Aquí solo se le pasa el fichero y él lo abre y lo
+        // adjunta. Con el interruptor apagado no se pasa nada, y pegar un
+        // fichero en una caja de buscar palabras sigue sin hacer nada.
+        alPegarFichero={conIA ? (f => window.dispatchEvent(new CustomEvent('ai:adjuntar', { detail: f }))) : undefined}
         derecha={
           <>
             {/* EL INTERRUPTOR, DENTRO DE LA CAJA. Fuera sería un ajuste de la
