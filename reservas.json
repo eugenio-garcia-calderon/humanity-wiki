@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog2: en movil, Organizar tiene que abrirse por la derecha",
+      "desde": "2026-08-25T15:22:37.172Z"
+    }
+  ]
 }
