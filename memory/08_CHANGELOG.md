@@ -6998,3 +6998,48 @@ Comprobado en 3008: pegada una imagen de 320×180 → miniatura en la caja
 aparece dentro de la burbuja verde, en JPEG de **3 KB**, con el nombre y el
 texto debajo; pegado un PDF → icono, «PDF · se enviará con tu mensaje», y
 **ninguna imagen rota** en la página. `tsc` limpio.
+
+### 2026-08-25 — La caja de buscar, un 30 % más larga y centrada de verdad (prog8)
+
+Eugenio, con una captura de la barra: «haz que el chat de búsqueda sea un 30 %
+más largo, y que esté centrado».
+
+**Estaba torcido porque lo estaba, y no por poco: 272 px.** Medido antes de
+tocar nada, en una ventana de 1440: la caja se pintaba a **426 px** y su centro
+caía en 448, con el centro de la pantalla en 720.
+
+Las dos causas, distintas y las dos reales:
+
+- **El ancho no lo mandaba su tope.** El tope era `max-w-xl` (576 px) pero la
+  caja se quedaba en 426: en la cabecera había **dos** `flex-1` —el contenedor
+  del buscador y un hueco vacío que empujaba los iconos a la derecha— y se
+  repartían el espacio libre a partes iguales. El buscador vivía en la mitad
+  izquierda de ese reparto.
+- **Centrar en el hueco no es centrar en la pantalla.** El raíl de la derecha
+  (Feedback, iconos, tu foto) es **97 px más ancho** que el de la izquierda, así
+  que el centro del hueco cae 53 px a la izquierda del centro real.
+
+Lo que se ha hecho:
+
+- **Ancho: `max-w-[34.5rem]` = 552 px**, que es 426 × 1,3. El número sale de lo
+  medido, no del tope viejo.
+- **El hueco vacío deja de crecer** por debajo de 1280 px, así que el buscador
+  se lleva todo el espacio libre y su caja queda centrada dentro.
+- **Desde 1280 px la caja se sale del flujo y se clava en el centro de la
+  ventana** (`xl:absolute left-1/2 -translate-x-1/2`). Solo desde ahí: por
+  debajo no cabe y se montaría sobre los iconos.
+- **Y al sacarla del flujo, el empuje de los iconos pasa al hueco vacío**, que
+  recupera su `flex-1` en esa misma anchura. Sin eso, los iconos se vendrían al
+  centro con la caja encima — el fallo clásico de centrar en absoluto sin mirar
+  quién sostenía la columna.
+
+Medido después, en el navegador:
+
+| Ventana | Ancho | Desviación del centro | Holgura hasta los iconos |
+|---|---|---|---|
+| 1440 | 552 px | **0** | 100 px |
+| 1280 (el límite) | 552 px | **0** | 20 px |
+| 1279 | 552 px | 53 px (centrada en el hueco) | 72 px |
+| 375 (móvil) | — | — | la página **no** desborda a lo ancho |
+
+Antes: 426 px y 272 px de desviación.

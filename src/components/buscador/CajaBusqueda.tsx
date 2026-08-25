@@ -169,7 +169,12 @@ export default function CajaBusqueda({
   }
 
   return (
-    <div ref={caja} className={cn('relative w-full', pastilla && 'max-w-xl', className)}>
+    // ══ 30 % MÁS LARGA (2026-08-25) ═══════════════════════════════════════
+    // Medido antes de tocar nada: en una ventana de 1440 la caja se pintaba a
+    // 426 px, no a los 576 del tope de antes (`max-w-xl`) — la estrechaba el
+    // reparto del hueco de la cabecera, no este número. 426 × 1,3 = 554, así
+    // que el tope nuevo son 34,5 rem = 552 px y ahora sí es el que manda.
+    <div ref={caja} className={cn('relative w-full', pastilla && 'max-w-[34.5rem]', className)}>
       {/* En la barra de arriba la caja es un `form`: así el Intro del teclado
           y la lupa hacen lo mismo sin escribirlo dos veces, y el navegador la
           reconoce como lo que es. */}

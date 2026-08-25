@@ -1231,7 +1231,21 @@ export default function Layout() {
           </div>
         )}
 
-        <div className="flex-1" />
+        {/* ══ ESTE HUECO YA NO CRECE, PARA QUE EL BUSCADOR QUEDE CENTRADO ══
+            (2026-08-25, Eugenio: «haz que el chat de búsqueda sea un 30 % más
+            largo, y que esté centrado».)
+
+            Aquí había un `flex-1` vacío cuyo único trabajo era empujar los
+            iconos a la derecha. Pero el contenedor del buscador **también** es
+            `flex-1`, así que los dos se repartían el hueco a partes iguales: el
+            buscador se quedaba con la mitad izquierda de ese espacio y su
+            centro caía a 448 px en una ventana de 1440 — a 272 px del centro
+            de la pantalla. Se veía torcido porque lo estaba.
+
+            Sin crecer, el buscador se lleva todo el hueco libre y su caja queda
+            centrada dentro. Los iconos siguen a la derecha exactamente igual:
+            los empuja el buscador, que ahora es el único que crece. */}
+        <div className="shrink-0 xl:flex-1" />
 
         {/* EL BOTÓN DE COLAPSAR. Solo aparece si hay ventanas: sin ellas no hay
             nada que encoger. */}
