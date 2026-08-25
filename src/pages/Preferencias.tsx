@@ -207,8 +207,22 @@ export default function Preferencias() {
    * un poco de aire alrededor cuando no hay nada abierto, y ese aire no
    * molesta: lo que molesta es que se mueva lo que estás mirando.
    */
+  /*
+   * ── EL ANILLO RESERVADO ES MÁS ESTRECHO QUE LOS OTROS DOS ─────────────────
+   * Se sigue reservando el sitio del tercer nivel para que abrir una rama no
+   * encoja la rueda —eso ya costó un arreglo—, pero reservarlo del mismo ancho
+   * (104) dejaba una franja vacía de 104 px alrededor de todo. En pantalla se
+   * ve como un hueco entre la cabecera y la rueda que parece un fallo de
+   * maquetación.
+   *
+   * El tercero es además el que menos texto lleva: son ocho nombres dentro del
+   * trozo de un subtema, y ahí se lee tanto con 60 como con 104. Así que se le
+   * dan 60, y el aire de alrededor baja de 104 a 60.
+   */
+  const ANCHO_HONDO = 60;
+  const radioDe = (nivel: number) => R0 + ANCHO * Math.min(nivel - 1, 2) + ANCHO_HONDO * Math.max(0, nivel - 3);
   const nivelMax = Math.max(3, ...trozos.map(t => t.nivel));
-  const lado = 2 * (R0 + ANCHO * nivelMax) + 36;
+  const lado = 2 * radioDe(nivelMax + 1) + 24;
   const c = lado / 2;
 
   const pulsar = (clave: string) => {
@@ -305,8 +319,8 @@ export default function Preferencias() {
               aria-label="Rueda de temas"
             >
               {trozos.map(t => {
-                const r0 = R0 + (t.nivel - 1) * ANCHO;
-                const r1 = r0 + ANCHO - 3;
+                const r0 = radioDe(t.nivel);
+                const r1 = radioDe(t.nivel + 1) - 3;
                 const medio = (t.a0 + t.a1) / 2;
                 /*
                  * ── EL TEXTO DE FUERA VA HACIA FUERA ──────────────────────
