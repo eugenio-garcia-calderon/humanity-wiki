@@ -59,6 +59,12 @@
       "ruta": "src/components/navegacion/Rail.tsx",
       "motivo": "prog3: fuera Areas, lo personal sube al avatar",
       "desde": "2026-08-25T22:53:18.583Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/seguridad/politica.ts",
+      "motivo": "declarar galeria y ramas (prog8)",
+      "desde": "2026-08-25T23:04:26.242Z"
     }
   ]
 }
