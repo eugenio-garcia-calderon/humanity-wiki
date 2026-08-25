@@ -60,7 +60,13 @@ export function registrarRamas(app: Express, db: any) {
       }
 
       const r = await db.execute(sql`
-        SELECT id, padre_id, nombre, nota, color, orden, created_at
+        -- portada_url VA EN EL SELECT (sin comillas invertidas: dentro de una
+        -- plantilla sql las corta por la mitad, y el error sale en la línea
+        -- siguiente). Es la tercera vez que se me olvida la columna:
+        -- columna creada, endpoint que la escribe, pantalla que la pinta, y
+        -- una lista de columnas escrita a mano donde nadie la añadió. No falla
+        -- nada: simplemente la portada no existe para quien mira.
+        SELECT id, padre_id, nombre, nota, color, orden, portada_url, created_at
         FROM proyecto_ramas
         WHERE proyecto_id = ${req.params.id} AND archived_at IS NULL
         ORDER BY orden, created_at
@@ -121,7 +127,12 @@ export function registrarRamas(app: Express, db: any) {
 
   /**
    * CAMBIARLA — `PUT /api/proyectos/:id/ramas/:rama`
-   * `{ nombre?, nota?, color?, padre? }`
+   * `{ nombre?, nota?, color?, padre?, portada_url? }`
+   *
+   * `portada_url` se manda a `null` para quitarla, y por eso NO puede ir con
+   * `coalesce`: con `coalesce` un `null` significa «no lo toques», y entonces
+   * quitar la portada de una rama sería imposible sin una ruta aparte para
+   * borrarla. Lo mismo que ya hacían `nota` y `color` aquí debajo.
    *
    * `padre` también se puede cambiar: mover una rama entera con lo que cuelgue
    * de ella. Es lo que convierte un árbol en algo con lo que se puede pensar en
@@ -166,6 +177,7 @@ export function registrarRamas(app: Express, db: any) {
           nombre = coalesce(${req.body?.nombre ?? null}::text, nombre),
           nota   = CASE WHEN ${req.body?.nota === undefined} THEN nota ELSE ${req.body?.nota ?? null}::text END,
           color  = CASE WHEN ${req.body?.color === undefined} THEN color ELSE ${req.body?.color ?? null}::text END,
+          portada_url = CASE WHEN ${req.body?.portada_url === undefined} THEN portada_url ELSE ${req.body?.portada_url ?? null}::text END,
           padre_id = CASE WHEN ${padre === undefined} THEN padre_id ELSE ${padre ?? null}::text END,
           updated_at = now()
         WHERE id = ${req.params.rama}

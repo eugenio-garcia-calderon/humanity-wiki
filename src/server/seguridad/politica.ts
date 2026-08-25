@@ -286,6 +286,15 @@ const SIN_REVISAR: Entrada[] = [
   { m: 'PUT', ruta: '/api/proyectos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'DELETE', ruta: '/api/proyectos/:id', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'POST', ruta: '/api/proyectos/:id/herramienta', guardia: { tipo: 'propietario', minimo: 4 } },
+  // Las ramas y la galería de un proyecto: las escribe quien lo creó, y un
+  // administrador. Lo comprueba cada ruta con `proyectoQuePuedeTocar`; esto lo
+  // deja DICHO, que es de lo que va esta tabla.
+  { m: 'POST', ruta: '/api/proyectos/:id/ramas', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/proyectos/:id/ramas/:rama', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/proyectos/:id/ramas/:rama', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'POST', ruta: '/api/proyectos/:id/galeria', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'PUT', ruta: '/api/proyectos/:id/galeria/:img', guardia: { tipo: 'propietario', minimo: 4 } },
+  { m: 'DELETE', ruta: '/api/proyectos/:id/galeria/:img', guardia: { tipo: 'propietario', minimo: 4 } },
   { m: 'POST', ruta: '/api/roadmap', guardia: { tipo: 'propietario', minimo: 4 },
     nota: 'las tarjetas son del proyecto: manda quien lo creo' },
   { m: 'PUT', ruta: '/api/roadmap/:id', guardia: { tipo: 'propietario', minimo: 4 } },
