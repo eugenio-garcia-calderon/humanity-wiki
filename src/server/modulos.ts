@@ -57,6 +57,7 @@ import { registerDominiosRoutes } from './dominios.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
+import { registrarTemas } from './temas.js';
 import { registerNavegadorRemotoRoutes } from './navegadorRemoto.js';
 import { registerFinanzasRoutes } from './finanzas.js';
 import { registerYoutubeRoutes } from './youtube.js';
@@ -173,6 +174,7 @@ export const MODULOS: Modulo[] = [
   { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },
+  { nombre: 'temas', montar: (app, db) => registrarTemas(app, db) },
   { nombre: 'archivo', montar: (app, db) => registerArchivoRoutes(app, db) },
   { nombre: 'incidencias', montar: (app, db) => registerIncidenciasRoutes(app, db) },
   { nombre: 'bd', montar: (app, db) => registerBdRoutes(app, db) },
