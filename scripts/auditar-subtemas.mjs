@@ -17,9 +17,18 @@
 // las tres de la mañana.
 //
 // ── LO QUE DA, MEDIDO: UNA LISTA PARA MIRAR, NO PARA OBEDECER ───────────────
-// Primera pasada sobre los 1080: **120 parejas sospechosas en 142 grupos**. Eso
-// no es un árbol lleno de duplicados, es un auditor que salta con cualquier
-// parecido. Mirando el informe a mano:
+// Sobre los 1080, con las dos preguntas: **141 grupos, 105 parejas marcadas por
+// parecido, de las que 45 quedan arriba como posibles copias y 60 bajan por
+// parecer cortes.**
+//
+// La segunda pregunta —la regla de la partición, de prog8— **reduce a la mitad
+// lo que hay que leer primero, y no mejora la puntería**. Entre esas 45 sigue
+// habiendo cosas que no son copias: «Drenaje urbano» contra «Infraestructura de
+// riego», «Ganadería intensiva» contra «Bienestar animal». Lo que ha mejorado
+// es el ORDEN, no el criterio, y conviene no confundir las dos cosas.
+//
+// De la primera pasada, con una sola pregunta, salían 120 arriba. Mirando el
+// informe a mano:
 //
 //   · lo encontró de verdad — «Movilidad eléctrica ligera» contra
 //     «Cicloturismo y micormovilidad», que era el caso conocido; y
@@ -76,8 +85,76 @@ async function parejasQueSobran(hermanos, contexto) {
   }).filter(Boolean);
 }
 
+/**
+ * ── LA SEGUNDA PREGUNTA: ¿ES UNA PARTICIÓN O UNA COPIA? (2026-08-25) ─────────
+ *
+ * La regla es de prog8, y es la mejor cosa que ha salido de esta auditoría.
+ * Pasó el auditor por su objetivo y de las cuatro parejas marcadas, tres eran
+ * falsas — y las tres tenían **la misma forma exacta**:
+ *
+ *     «Fabricación en Asia»          contra  «Fabricación en Europa»
+ *     «Carga familiar»               contra  «Reparto urbano»
+ *     «Aviación de corta distancia»  contra  «Aviación regional»
+ *
+ * Comparten el sustantivo y se diferencian en un calificativo que nombra **dos
+ * valores distintos de un mismo eje**: geografía, uso, alcance.
+ *
+ * Y eso es lo CONTRARIO de un duplicado. Clasificar es trazar una raya, y los
+ * dos lados de una raya siempre se parecen: comparten todo menos aquello por lo
+ * que se separan. Un auditor que mide parecido marca toda raya bien trazada —
+ * y cuanto mejor esté trazada, más la marca.
+ *
+ * «Desalación» y «Desalinización» no tienen eje: son la misma palabra dos
+ * veces. «Asia» y «Europa» sí lo tienen.
+ *
+ * Así que a cada pareja marcada se le hace una segunda pregunta, y ésta va
+ * sola: sin la lista de hermanos alrededor y sin la palabra «duplicado»
+ * delante, para que no arrastre la respuesta de antes.
+ *
+ * ── PERO NO DESCARTA: ETIQUETA. Y ESO SE DECIDIÓ MIDIENDO ──────────────────
+ * La primera versión tiraba a la basura lo que saliera CORTE. Calibrado contra
+ * nueve parejas revisadas a mano: **7 de 9**, y uno de los dos fallos fue
+ * llamar CORTE a «Refrigeración y congelación» contra «Conservación en frío
+ * controlado», que es una copia de manual.
+ *
+ * O sea que descartando se pierden duplicados de verdad, en silencio — un
+ * auditor que esconde justo lo que busca es peor que uno ruidoso. Así que las
+ * parejas siguen todas en el informe, con su etiqueta, y las COPIA salen
+ * primero. La mejora no es filtrar: es **ordenar**, que baja el trabajo de
+ * quien lee sin decidir por él.
+ */
+async function esUnaParticion(a, b) {
+  const clave = process.env.ANTHROPIC_API_KEY;
+  if (!clave) return false;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': clave, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 8,
+        system: [
+          'Te doy dos temas hermanos de una clasificación. Decides si son un CORTE o una COPIA.',
+          'CORTE: comparten el asunto y se diferencian en dos valores excluyentes de un mismo eje',
+          '  (dónde, cuándo, para quién, de qué tamaño, en qué fase). Ejemplos de corte:',
+          '  «Fabricación en Asia» y «Fabricación en Europa»; «Vivienda urbana» y «Vivienda rural»;',
+          '  «Prevención» y «Tratamiento»; «Corto plazo» y «Largo plazo».',
+          'COPIA: dicen lo mismo con otras palabras y sobra uno. Ejemplos de copia:',
+          '  «Desalación» y «Desalinización»; «Refrigeración» y «Conservación en frío».',
+          'Contesta SOLO una palabra: CORTE o COPIA.',
+        ].join('\n'),
+        messages: [{ role: 'user', content: `1. ${a}\n2. ${b}` }],
+      }),
+    });
+    if (!r.ok) return false;
+    const j = await r.json();
+    return /CORTE/i.test(String(j.content?.[0]?.text || ''));
+  } catch { return false; }
+}
+
 const objetivos = await pool.query(`SELECT id, title FROM objectives WHERE archived_at IS NULL ORDER BY id`);
-let grupos = 0, sospechas = 0;
+let grupos = 0, marcadas = 0, cortes = 0, sospechas = 0;
+const informe = [];
 
 for (const o of objetivos.rows) {
   const todos = await pool.query(
@@ -97,14 +174,22 @@ for (const o of objetivos.rows) {
     try { parejas = await parejasQueSobran(hermanos, `Dentro de: ${o.title} › ${nombrePadre}`); }
     catch (e) { console.error(`! ${o.title} / ${nombrePadre}: ${e.message}`); continue; }
     for (const [a, b] of parejas) {
-      sospechas++;
-      console.log(`${o.title} › ${nombrePadre}`);
-      console.log(`    «${a.nombre}»  [${a.creador_user_id}]`);
-      console.log(`    «${b.nombre}»  [${b.creador_user_id}]`);
-      console.log('');
+      marcadas++;
+      const corte = await esUnaParticion(a.nombre, b.nombre);
+      if (corte) cortes++; else sospechas++;
+      // Nada se tira: se guarda con su etiqueta y al final salen las copias
+      // primero. Ver la nota de `esUnaParticion`.
+      informe.push({ corte, texto:
+        `${corte ? '· corte ' : '¿COPIA?'}  ${o.title} › ${nombrePadre}\n` +
+        `    «${a.nombre}»  [${a.creador_user_id}]\n` +
+        `    «${b.nombre}»  [${b.creador_user_id}]\n` });
     }
   }
   process.stderr.write(`${o.title} `);
 }
-console.error(`\n\n${grupos} grupos mirados, ${sospechas} parejas sospechosas.`);
+// Las dudosas primero: es lo único que hace este informe por quien lo lee.
+for (const l of informe.filter(x => !x.corte)) console.log(l.texto);
+console.log('\n──────── y estas parecen cortes, no copias ────────\n');
+for (const l of informe.filter(x => x.corte)) console.log(l.texto);
+console.error(`\n\n${grupos} grupos. ${marcadas} marcadas por parecido: ${sospechas} podrían ser copias, ${cortes} parecen cortes.`);
 await pool.end();
