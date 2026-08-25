@@ -6870,3 +6870,93 @@ Comprobado en 3008: pegar un PNG en el chat de `/ia` → adjunto «captura
 pegar un `.zip` → el aviso de formatos; pegar un PDF → adjunto con su nombre
 real; y pegar un PNG en la barra de arriba con la IA encendida → el chat se
 abre con «captura 18.28.45.png» puesta. `tsc` limpio.
+
+## 2026-08-25 — El agregador: los subtemas en el menú y las primeras 50 piezas
+Eugenio: «eres un agregador de publicaciones de redes como YouTube y X […] hacer
+lo mejor posible para enseñar contenido relevante en forma de mapas, imágenes,
+vídeos, textos y gráficas cada vez que alguien pulse en un tema concreto», con
+«un breve comentario como "IA" de por qué es relevante esta publicación»; luego
+«de esas 50 publicaciones, puedes crear subtemas y ligarlos al nuevo menú que
+está construyendo el Programador 2»; y luego «también tienes que tener en cuenta
+si el usuario tiene alguna publicación, proyecto, mapa o página relacionada con
+ese tema, que le tengas que refrescar y mostrar como contenido propio».
+
+**El árbol de 0120 existía y no se veía por ninguna parte.** El Programador 2
+dejó hechas las tablas, la API y las preferencias del menú, y el menú seguía
+enseñando sólo los catorce objetivos. Esto es la mitad que faltaba: `Rail.tsx`
+pinta ahora el árbol debajo de cada tema, y cada rama lleva a `/temas/:id`.
+
+- **`0121_agregador_contenido.sql`** — `contenido_agregado`, para lo que viene de
+  fuera. Aparte de `publications` porque un enlace a YouTube no tiene autor aquí
+  y puede morirse sin avisar; mezclarlos haría que un enlace roto de fuera se
+  pareciera a una publicación borrada de dentro.
+- **50 piezas de `movilidad-electrica-ligera`**, con su nota de IA y una
+  `calidad` de 0 a 100 con el motivo escrito al lado. Ordena por calidad y
+  **nunca por visitas**: el 97 es un informe del ITF y el 48 una página de
+  Statista que ve mucha más gente.
+- **31 subtemas sacados de esas 50**, no inventados antes: cada rama existe
+  porque hay contenido dentro. Los que Eugenio nombró de ejemplo y ninguna de
+  las 50 llena —«pedaleo sin cadena»— quedan anotados como huecos en la
+  semilla, sin crear la rama vacía.
+- **Tres carriles en `/temas/:id`**: lo tuyo, lo de la Humanidad, lo de fuera.
+
+**Tres cosas que sólo se vieron al probarlas contra la base de datos:**
+
+1. **Un array de JavaScript dentro de la plantilla `sql` no es un array.**
+   Drizzle lo despliega en `($1, $2, …, $31)`, así que `= ANY(...)` revienta —y
+   `ANY()` de una lista vacía ni siquiera es SQL válido. `tsc` da las dos por
+   buenas. Hay una función `arreglo()` que construye el `ARRAY[…]::text[]`.
+2. **Buscar «baterias» no encuentra «batería».** Quitarle las tildes al patrón
+   no sirve de nada si el texto las lleva; hay que quitárselas también a la
+   columna. `translate()` en vez de la extensión `unaccent`, que habría que
+   instalar en producción.
+3. **Heredar las palabras del padre ENSANCHA la búsqueda, y eso era el fallo.**
+   «España: VMP y DGT» traía «Evolución precio vivienda España» e «Incendios
+   forestales de España»: bastaba acertar una palabra y la que acertaban era
+   «españa». Ahora la rama estrecha en vez de ensanchar —algo del tema **y**
+   algo de su rama— y el objetivo entra en esa segunda condición, porque
+   «Tratamiento y purificación del agua» cuelga de «Infraestructura y
+   distribución urbana», donde la palabra «agua» ya no está.
+
+**Lo que no está y hay que decir:** de las cinco formas que pidió Eugenio hay
+cero imágenes (22 textos, 19 vídeos, 5 mapas, 4 gráficas). La YouTube Data API
+v3 está desactivada en el proyecto de Google cuya clave ya vive en el `.env`
+(980567586105) y sin ella no hay rastreo ni miniaturas; `api.x.com` responde 401
+y su plan gratuito no deja leer búsquedas. Y las 50.000 por subtema que pidió no
+salen: la cuota gratuita de YouTube son 10.000 unidades al día y una búsqueda
+cuesta 100 y devuelve 50 vídeos — 5.000 vídeos diarios para toda la plataforma.
+
+**Y un 403 no es un enlace roto.** ITF/OCDE, Elsevier, Taylor & Francis y
+Statista contestan 403 a un programa y 200 a una persona. Seis de las 50 llevan
+`estado = 'bloquea_robots'` y la pantalla lo dice: un comprobador que tratara el
+403 como caído iría tirando, por orden, las fuentes más serias que tiene.
+
+**Y la página acabó siendo un panel, no una lista.** Eugenio, el mismo día:
+«no solo el estado del arte, sino publicaciones con vídeos chulos […] en una
+especie de grid […] compacto y visualmente atractivo y moderno, como un
+dashboard». Cinco pestañas —Explorar, Vídeos, Estado del arte, En la
+plataforma, Indicadores— sobre una cabecera de dos renglones. La primera
+versión era una columna de cincuenta fichas y a la número cincuenta no llegaba
+nadie. La pestaña que se abre depende de lo que tenga el tema y **vive en la
+URL** (`?ver=videos`), así que un enlace la lleva puesta y el «atrás» desde un
+vídeo te devuelve donde estabas.
+
+**Y un fallo entero mío, que es el que más enseña de todo esto: la PR se
+desplegó en verde y en producción no había nada.** `0121` creó la tabla y el
+despliegue la aplicó; las 50 filas vivían en un fichero de `scripts/` que no
+ejecuta nadie. Las rutas contestaban 200, la tabla existía, y el tema decía
+«no existe». Verde por todas partes y la pantalla vacía. `deploy/migrate.sh`
+aplica `drizzle/*.sql` y **nada más**: si un dato tiene que llegar a
+producción, o es una migración o no llega. De ahí `0124`.
+
+**Los indicadores dicen que no lo saben.** Los siete de MOVILIDAD están
+definidos y sin medir. No se esconde la pestaña y no se pinta un cero: un cero
+es una medición y un hueco no lo es. Es el principio del `CLAUDE.md` de la
+raíz, y escondida esa pestaña no la llenaría nadie nunca.
+
+**Medido al terminar, sobre el árbol entero:** 1.103 subtemas vivos y **27 con
+algo dentro** — las 27, de esta tanda. El resto es andamio esperando
+contenido. Y un aviso para quien quiera podar por ahí: contar sólo el
+contenido propio **mata a los padres** (cuatro ramas de éstas salen a cero y
+tienen dos o tres hijas llenas). Hay que contar la rama, y sin límite de
+profundidad eso es un `WITH RECURSIVE`.
