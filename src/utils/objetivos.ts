@@ -39,6 +39,42 @@ export interface Objetivo {
   palabras: string[];
 }
 
+/**
+ * EL MISMO COLOR, EN HEXADECIMAL (2026-08-25)
+ *
+ * Los catorce colores viven arriba como clases de Tailwind (`text-blue-500`),
+ * que es lo correcto para pintar texto e iconos. Pero un dibujo en SVG —la
+ * rueda de temas de la página de preferencias— necesita el color de verdad:
+ * una clase de CSS no vale como relleno de un sector.
+ *
+ * ── POR QUÉ LA TABLA ESTÁ AQUÍ Y NO EN LA PÁGINA QUE LA USA ────────────────
+ * Por lo mismo que el color se mudó junto al nombre y al icono, y está contado
+ * ahí arriba: cuando el agua deja de ser azul, tiene que dejar de serlo en un
+ * sitio. Si esta tabla viviera en la rueda, mañana habría dos verdades sobre
+ * de qué color es AGUA y sólo se notaría al mirarlas juntas.
+ */
+const HEX: Record<string, string> = {
+  'text-blue-500': '#3b82f6',
+  'text-amber-500': '#f59e0b',
+  'text-indigo-500': '#6366f1',
+  'text-rose-500': '#f43f5e',
+  'text-purple-500': '#a855f7',
+  'text-emerald-500': '#10b981',
+  'text-sky-500': '#0ea5e9',
+  'text-orange-500': '#f97316',
+  'text-yellow-500': '#eab308',
+  'text-cyan-500': '#06b6d4',
+  'text-lime-500': '#84cc16',
+  'text-violet-500': '#8b5cf6',
+  'text-pink-500': '#ec4899',
+  'text-fuchsia-500': '#d946ef',
+};
+
+/** El color de un objetivo, listo para un `fill` de SVG. El gris es para lo que
+ *  no tiene color propio: un subtema hereda el de su objetivo, así que aquí no
+ *  debería caer nada — y si cae, se ve gris en vez de desaparecer. */
+export const hexDelColor = (clase?: string): string => (clase && HEX[clase]) || '#94a3b8';
+
 export const OBJETIVOS: Objetivo[] = [
   { id: 'O001', titulo: 'AGUA',         icono: Droplets, color: 'text-blue-500',       palabras: ['agua', 'hidric', 'riego', 'acuifer', 'potable', 'saneamiento', 'sequia', 'rio', 'embalse'] },
   { id: 'O002', titulo: 'ALIMENTACIÓN', icono: Wheat, color: 'text-amber-500',          palabras: ['aliment', 'comida', 'nutricion', 'cultivo', 'agricultura', 'huerto', 'cosecha', 'hambre'] },

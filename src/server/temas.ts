@@ -256,6 +256,43 @@ export function registrarTemas(app: Express, db: any) {
     }
   });
 
+  /**
+   * TODO EL ÁRBOL DE UNA VEZ — `GET /api/temas`
+   *
+   * Para la página de preferencias: la rueda enseña los catorce objetivos y
+   * todo lo que cuelga de ellos, así que pedirlo objetivo a objetivo serían
+   * catorce viajes para pintar un solo dibujo.
+   *
+   * Es una consulta más grande y aun así la correcta: el árbol entero de la
+   * plataforma son los subtemas que ha creado la gente, no un catálogo de
+   * millones. Si algún día lo fuera, esto se pagina por objetivo — y entonces
+   * la rueda pedirá cada rama al abrirla, que es como ya funciona por dentro.
+   */
+  app.get('/api/temas', async (req: Request, res: Response) => {
+    try {
+      const yo = req.user?.id || null;
+      const filas = await db.execute(sql`
+        SELECT s.id, s.objetivo_id, s.padre_id, s.nombre, s.orden,
+               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas,
+               coalesce(p.favorito, false) AS favorito,
+               coalesce(p.oculto, false) AS oculto
+        FROM subtemas s
+        LEFT JOIN preferencias_menu p ON p.clave = s.id AND p.user_id = ${yo}::text
+        WHERE s.archived_at IS NULL
+        ORDER BY s.objetivo_id, coalesce(p.orden, s.orden), s.created_at
+      `);
+      // Y las preferencias de los catorce, que no son filas de `subtemas`: sin
+      // esto la rueda sabría qué subtemas son favoritos y no qué objetivos.
+      const prefs = yo
+        ? await db.execute(sql`SELECT clave, favorito, oculto, orden FROM preferencias_menu WHERE user_id = ${yo}`)
+        : { rows: [] as any[] };
+      res.json({ subtemas: filas.rows, preferencias: prefs.rows });
+    } catch (e: any) {
+      console.error('[temas todos]', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** LO MÍO DE LOS 14 OBJETIVOS — `GET /api/temas/mio/objetivos` */
   app.get('/api/temas/mio/objetivos', async (req: Request, res: Response) => {
     if (!req.user) return res.json({ preferencias: [] });

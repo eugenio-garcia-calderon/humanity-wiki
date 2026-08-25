@@ -668,6 +668,7 @@ export default function Layout() {
               reordenar: reordenarTemas,
               ocultos: temasOcultos.map(o => ({ clave: o.clave, nombre: o.nombre })),
               mostrar: c => guardarPref(c, { oculto: false }),
+              onPersonalizar: () => { navigate('/preferencias'); setCirculo(null); },
             } : undefined}
             ramas={{
               de: c => ramas[c] ?? [],
