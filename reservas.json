@@ -11,36 +11,6 @@
       "ruta": "equipo/REPARTO.md",
       "motivo": "la regla del stash en un fichero de solo-anadir",
       "desde": "2026-08-25T17:53:03.252Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/carrera-5.txt",
-      "motivo": "prueba 5",
-      "desde": "2026-08-25T17:58:06.143Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/carrera-6.txt",
-      "motivo": "prueba 6",
-      "desde": "2026-08-25T17:58:06.142Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/carrera-4.txt",
-      "motivo": "prueba 4",
-      "desde": "2026-08-25T17:58:06.147Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/carrera-8.txt",
-      "motivo": "tarde 8",
-      "desde": "2026-08-25T17:58:42.877Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/carrera-7.txt",
-      "motivo": "tarde 7",
-      "desde": "2026-08-25T17:58:42.877Z"
     }
   ]
 }
