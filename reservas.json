@@ -41,6 +41,12 @@
       "ruta": "pruebas/carrera-5.txt",
       "motivo": "prueba 5",
       "desde": "2026-08-25T17:51:20.664Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "pruebas/carrera-9.txt",
+      "motivo": "el que llega tarde",
+      "desde": "2026-08-25T17:51:54.691Z"
     }
   ]
 }
