@@ -23,6 +23,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "scripts/auditar-subtemas.mjs",
+      "motivo": "prog2: la regla de la particion, de prog8",
+      "desde": "2026-08-25T17:31:48.192Z"
     }
   ]
 }
