@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Preferencias.tsx",
+      "motivo": "prog2: rueda en acordeon, legible a cualquier profundidad",
+      "desde": "2026-08-25T18:27:16.516Z"
+    }
+  ]
 }
