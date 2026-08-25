@@ -5,6 +5,24 @@
       "ruta": "drizzle/0121_agregador_contenido.sql",
       "motivo": "agregador de contenido: tabla de publicaciones externas",
       "desde": "2026-08-25T16:03:05.295Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "el arbol de subtemas dentro del menu (agregador, prog8)",
+      "desde": "2026-08-25T16:18:01.267Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "el arbol de subtemas dentro del menu (agregador, prog8)",
+      "desde": "2026-08-25T16:18:01.267Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/App.tsx",
+      "motivo": "el arbol de subtemas dentro del menu (agregador, prog8)",
+      "desde": "2026-08-25T16:18:01.267Z"
     }
   ]
 }
