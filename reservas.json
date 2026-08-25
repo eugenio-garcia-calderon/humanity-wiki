@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/server/fuente.ts",
-      "motivo": "prog2: las piezas hermanas de un lienzo, para la ficha",
-      "desde": "2026-08-25T15:26:18.199Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/server/modulos.ts",
       "motivo": "prog2: las piezas hermanas de un lienzo, para la ficha",
       "desde": "2026-08-25T15:26:18.199Z"
