@@ -130,7 +130,7 @@ export default function Preferencias() {
   // Se recorre el árbol repartiendo ángulos: los catorce objetivos se parten
   // la vuelta entera, y cada nodo abierto reparte SU trozo entre sus hijos.
   const trozos = useMemo(() => {
-    const out: Array<{ clave: string; nombre: string; color: string; nivel: number; a0: number; a1: number; hijos: number }> = [];
+    const out: Array<{ clave: string; nombre: string; color: string; nivel: number; a0: number; a1: number; hijos: number; cosas: number }> = [];
     const paso = (2 * Math.PI) / OBJETIVOS.length;
     OBJETIVOS.forEach((o, i) => {
       // Se empieza arriba (-90º) para que el primero quede a las doce, que es
@@ -138,7 +138,10 @@ export default function Preferencias() {
       const a0 = -Math.PI / 2 + i * paso;
       const a1 = a0 + paso;
       const color = hexDelColor(o.color);
-      out.push({ clave: o.id, nombre: o.titulo, color, nivel: 1, a0, a1, hijos: (hijosDe[o.id] || []).length });
+      // La cuenta del objetivo es la suma de sus ramas: un objetivo no tiene
+      // contenido propio, lo tiene todo colgado por debajo.
+      const suyas = (hijosDe[o.id] || []).reduce((n, h) => n + (h.cosas || 0), 0);
+      out.push({ clave: o.id, nombre: o.titulo, color, nivel: 1, a0, a1, hijos: (hijosDe[o.id] || []).length, cosas: suyas });
       const bajar = (padre: string, d0: number, d1: number, nivel: number) => {
         /*
          * ── QUÉ SE VE SIN PULSAR NADA, Y POR QUÉ NO ES TODO ──────────────
@@ -164,7 +167,7 @@ export default function Preferencias() {
             hs.forEach((h, k) => {
               const b0 = d0 + k * ancho;
               const b1 = b0 + ancho;
-              out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length });
+              out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length, cosas: h.cosas || 0 });
               bajar(h.id, b0, b1, nivel + 1);
             });
           }
@@ -177,7 +180,7 @@ export default function Preferencias() {
         hs.forEach((h, k) => {
           const b0 = d0 + k * ancho;
           const b1 = b0 + ancho;
-          out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length });
+          out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length, cosas: h.cosas || 0 });
           bajar(h.id, b0, b1, nivel + 1);
         });
       };
@@ -368,6 +371,30 @@ export default function Preferencias() {
                     />
                     {esFav(t.clave) && (
                       <circle cx={tx} cy={ty - (cabe ? 12 : 0)} r={3.5} fill="#fbbf24" stroke="#fff" strokeWidth={1} />
+                    )}
+                    {/* ── CUÁNTAS COSAS HAY EN ESA RAMA ────────────────────
+                        Propuesta de prog8, y es mejor que la que yo tenía. Yo
+                        andaba pensando en PODAR lo vacío; él midió el árbol
+                        —27 ramas con algo de 1103— y señaló lo obvio: 953
+                        hojas vacías no significan que sobren, significan que
+                        **están esperando**. Borrarlas sería tirar el sitio
+                        donde va a caer lo que aún no ha llegado.
+                        Lo que sí hace falta es que se vea. Un cero visible al
+                        lado de un tema es una invitación a llenarlo; un cero
+                        invisible es una promesa que nadie puede comprobar. Con
+                        el número delante, esta rueda deja de ser un mapa y se
+                        convierte en la lista de lo que falta. */}
+                    {t.cosas > 0 && cabe && (
+                      <text
+                        x={c + (rTexto + (radial ? 0 : 13)) * Math.cos(medio) + (radial ? 0 : 0)}
+                        y={ty + (radial ? 11 : 13)}
+                        transform={`rotate(${giro} ${tx} ${ty})`}
+                        textAnchor={anclaje} dominantBaseline="middle"
+                        className="pointer-events-none select-none"
+                        style={{ fontSize: 8, fontWeight: 700, fill: t.nivel === 1 ? 'rgba(255,255,255,.75)' : '#64748b' }}
+                      >
+                        {t.cosas}
+                      </text>
                     )}
                     {cabe && (
                       <text
