@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Preferencias.tsx",
+      "motivo": "prog2: boton para ir a la pagina del tema",
+      "desde": "2026-08-25T19:15:48.547Z"
+    }
+  ]
 }
