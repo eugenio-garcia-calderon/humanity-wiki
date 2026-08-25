@@ -233,24 +233,30 @@ export default function Preferencias() {
       bajar(o.id, a0, a1, 2);
     });
     /*
-     * ── LA RAMA ABIERTA SE VIENE ARRIBA ───────────────────────────────────
-     * Visto en pantalla: al abrir MOVILIDAD, que cae en la parte de abajo, la
-     * cuña se ensanchaba **hacia fuera de la pantalla** y chocaba con los tres
-     * círculos. La rama estaba bien dibujada y no se podía mirar.
+     * ── EL ABANICO SE ABRE HACIA LA DERECHA ───────────────────────────────
+     * Eugenio: «esto se tiene que abrir de izquierda a derecha, es decir el
+     * abanico siempre a abrirse el detalle a la derecha, y el origen se queda a
+     * la izquierda».
      *
-     * Así que la rueda gira para que lo abierto quede arriba, que es donde se
-     * empieza a leer un círculo y donde siempre hay sitio. «Abrir rama» deja de
-     * significar «ensancha esto donde esté» y pasa a significar «tráeme esto»,
-     * que es lo que uno quiere decir al pulsarlo.
+     * Antes lo abierto subía arriba, y eso arreglaba el problema de que se
+     * saliera de la pantalla pero dejaba el abanico creciendo hacia el techo.
+     * A la derecha es mejor por una razón que no es de gusto: **se lee en el
+     * mismo sentido que se escribe**. El origen queda a la izquierda, el
+     * detalle se despliega hacia la derecha, y el ojo recorre la rama como
+     * recorre una frase. Hacia arriba hay que girar la cabeza para saber por
+     * dónde empieza.
+     *
+     * Cero radianes es el este en SVG, así que basta con llevar el centro de la
+     * cuña abierta ahí.
      *
      * El giro entra en la misma animación que el reparto: la rueda gira y se
      * ensancha a la vez, y el ojo sigue el movimiento en lugar de encontrarse
      * otro dibujo.
      */
-    const arriba = -Math.PI / 2;
+    const alaDerecha = 0;
     const abierto = out.find(x => abiertos.has(x.clave) && x.nivel === 1);
     if (abierto) {
-      const giro = arriba - (abierto.a0 + abierto.a1) / 2;
+      const giro = alaDerecha - (abierto.a0 + abierto.a1) / 2;
       for (const x of out) { x.a0 += giro; x.a1 += giro; }
     }
     return out;
@@ -326,23 +332,36 @@ export default function Preferencias() {
    * trozo de un subtema, y ahí se lee tanto con 60 como con 104. Así que se le
    * dan 60, y el aire de alrededor baja de 104 a 60.
    */
-  const ANCHO_HONDO = 60;
+  /*
+   * El tercer anillo era de 60 px porque sólo se reservaba sitio para él. Ahora
+   * que el abanico lo abre de verdad, ese ancho **es el renglón** de sus
+   * nombres: 60 px son trece letras, y «Ataques de malware y ransomware» son
+   * treinta y una. Con 84 caben dieciocho por renglón y dos renglones, o sea
+   * treinta y seis — el nombre entero.
+   *
+   * Cuesta un 7 % de rueda. Es el cambio más barato que hay aquí para lo que
+   * Eugenio pidió, que era justo que el tercer nivel se leyera.
+   */
+  const ANCHO_HONDO = 84;
   const radioDe = (nivel: number) => R0 + ANCHO * Math.min(nivel - 1, 2) + ANCHO_HONDO * Math.max(0, nivel - 3);
   const nivelMax = Math.max(3, ...trozos.map(t => t.nivel));
   const lado = 2 * radioDe(nivelMax + 1) + 24;
   const c = lado / 2;
 
   /*
-   * ── PULSAR ES ELEGIR; ABRIR ES OTRO GESTO ─────────────────────────────────
-   * Eugenio: «en el centro tiene que haber un botón de abrir rama».
+   * ── UN SOLO CLIC: ELIGE Y ABRE ────────────────────────────────────────────
+   * Eugenio: «también se debe de poder pinchar en un tema o subtema y se abre
+   * el abanico directamente sin tener que pinchar en el centro».
    *
-   * Antes pulsar un trozo hacía las dos cosas a la vez, y con un acordeón eso
-   * es peor de lo que parece: **abrir mueve toda la rueda**, así que rozar un
-   * trozo para ver cómo se llama te recolocaba el dibujo entero. Ahora pulsar
-   * sólo lo trae al centro —que no mueve nada— y ensanchar la rama es un botón
-   * aparte, que se pulsa cuando ya se ha decidido.
+   * Yo lo había separado por miedo a que abrir moviera la rueda al rozar un
+   * trozo sólo para leerlo. Con el abanico ya animado y saliendo siempre por el
+   * mismo lado, ese miedo se paga demasiado caro: obliga a dos gestos para lo
+   * que se viene a hacer, que es entrar.
+   *
+   * El botón del centro se queda —ahí dice «Cerrar rama», que es lo que no
+   * tiene otro sitio evidente donde pulsarse— pero deja de ser el único camino.
    */
-  const pulsar = (clave: string) => setElegido(clave);
+  const pulsar = (clave: string) => { setElegido(clave); abrirRama(clave); };
 
   /** De un tema hacia arriba: él, su padre, su abuelo… hasta el objetivo. */
   const caminoDe = (clave: string): string[] => {
@@ -484,7 +503,10 @@ export default function Preferencias() {
                  * de ejemplo — y no es una copia de estilo: es la única manera
                  * de que quepan ocho nombres en una vuelta.
                  */
-                const radial = t.nivel > 1;
+                // Una franja comprimida se escribe hacia fuera aunque sea del
+                // primer anillo: al estrecharse, su arco ya no da para escribir
+                // siguiendo la curva.
+                const radial = t.nivel > 1 || t.fino;
                 const rTexto = radial ? r0 + 6 : (r0 + r1) / 2;
                 const tx = c + rTexto * Math.cos(medio);
                 const ty = c + rTexto * Math.sin(medio);
@@ -496,10 +518,7 @@ export default function Preferencias() {
                 const anclaje = radial ? (alReves ? 'end' : 'start') : 'middle';
                 // Radial: lo que limita es el ANCHO DEL ANILLO. Siguiendo la
                 // curva: el largo del arco.
-                // Una franja comprimida no lleva nombre: es contexto, no
-                // contenido. Con texto volvería a ser ruido, que es justo lo
-                // que se ha venido a quitar.
-                const cabe = t.fino ? false : (radial ? (r1 - r0) > 26 : (t.a1 - t.a0) * rTexto > 30);
+                const cabe = radial ? (r1 - r0) > 26 : (t.a1 - t.a0) * rTexto > 30;
                 return (
                   <g key={t.clave} className="cursor-pointer" onClick={() => pulsar(t.clave)}>
                     <title>{t.nombre}{t.hijos ? ` · ${t.hijos} dentro` : ''}</title>
@@ -549,7 +568,30 @@ export default function Preferencias() {
                         transform={`rotate(${giro} ${tx} ${ty})`}
                         textAnchor={anclaje} dominantBaseline="middle"
                         className="pointer-events-none select-none"
-                        style={{ fontSize: t.nivel === 1 ? 15 : t.nivel === 2 ? 10 : 9, fontWeight: 800, fill: t.nivel === 1 ? '#fff' : '#0f172a' }}
+                        /*
+                         * ── LO NO ELEGIDO SE VE, PERO SE VE APAGADO ────────
+                         * Eugenio: «deja visible el nombre resumido de las
+                         * otras opciones que no se han elegido, pero en una
+                         * transparencia tal que se entienda que no está
+                         * seleccionado, pero que está ahí y se puede pinchar».
+                         *
+                         * Antes las franjas comprimidas iban mudas, y eso las
+                         * convertía en decoración: se veía que había algo y no
+                         * qué era, así que nadie las pulsaba. Un trozo de color
+                         * sin nombre no es contexto, es un hueco.
+                         *
+                         * Con el nombre a media tinta dicen las dos cosas a la
+                         * vez —«aquí hay un tema» y «no es el que estás
+                         * mirando»— sin competir con lo abierto. La
+                         * transparencia hace el trabajo que hacía el silencio,
+                         * y encima invita a pulsar.
+                         */
+                        opacity={t.fino ? 0.45 : 1}
+                        style={{
+                          fontSize: t.fino ? 8 : t.nivel === 1 ? 15 : t.nivel === 2 ? 10 : 9,
+                          fontWeight: t.fino ? 700 : 800,
+                          fill: t.nivel === 1 && !t.fino ? '#fff' : '#0f172a',
+                        }}
                       >
                         {(() => {
                           /*
@@ -565,6 +607,13 @@ export default function Preferencias() {
                            * espacio —nunca a mitad de palabra— y sólo si hace
                            * falta: los que caben en uno se quedan en uno.
                            */
+                          // Comprimido: un solo renglón y corto. Es una
+                          // etiqueta para reconocerlo y pulsarlo, no para
+                          // leerlo entero — para eso está abrirlo.
+                          if (t.fino) {
+                            const corto = Math.floor((r1 - r0) / 4.2);
+                            return t.nombre.length > corto ? t.nombre.slice(0, corto - 1) + '…' : t.nombre;
+                          }
                           const tope = radial ? Math.floor((r1 - r0) / 4.6) : 22;
                           if (t.nombre.length <= tope) return t.nombre;
                           if (!radial) return t.nombre.slice(0, tope - 1) + '…';
