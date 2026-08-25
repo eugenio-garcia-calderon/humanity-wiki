@@ -112,10 +112,10 @@ function caducada(r) {
  * punto de commitear una copia vieja del changelog encima del trabajo ajeno,
  * porque la espera envejeció su `stash`.
  */
-function escribir(aplicarCambio, mensaje) {
+function escribir(aplicarCambio, mensaje, yaEsta) {
   // Escritura atómica: si otro ha empujado mientras tanto, el push se rechaza,
   // releemos, **volvemos a aplicar el cambio sobre lo nuevo** y reintentamos.
-  // Tres intentos y avisamos.
+  //
   // ══ SEIS INTENTOS Y UNA ESPERA DESIGUAL ═══════════════════════════════════
   // Con tres no llegaba: probado el 2026-08-25 con cuatro reservas a la vez,
   // una se quedaba fuera y avisaba de que no había podido. Avisar es correcto
@@ -136,12 +136,33 @@ function escribir(aplicarCambio, mensaje) {
     const commit = git(['commit-tree', arbol, ...padres, '-m', mensaje]);
     const empujado = gitSilencioso(['push', '-q', 'origin', `${commit}:refs/heads/${RAMA}`], { timeout: 20000 });
     if (empujado !== null) return true;
+    // ══ ¿SE GUARDÓ LO MÍO? SE PREGUNTA POR EL CAMBIO, NO POR LA FOTO ═══════
     // El push puede fallar y aun así estar ya guardado lo que queríamos (otro
-    // agente empujó lo mismo, o el remoto lo aceptó y cortó la respuesta). Antes
-    // de dar por perdida una liberación, comprobamos el estado de verdad.
+    // agente empujó lo mismo, o el remoto lo aceptó y cortó la respuesta).
+    //
+    // Antes esto comparaba la lista ENTERA con la que se quería empujar, y esa
+    // es la misma forma del fallo que arregla esta función: entre el push
+    // rechazado y esta relectura cabe perfectamente que otro haya guardado lo
+    // suyo —es la premisa misma de la contención—, y entonces la comparación
+    // decía que no aunque lo mío sí estuviera. Resultado: «No he podido
+    // guardar» a un agente al que sí se le había guardado, que es la peor
+    // clase de mentira que puede decir una herramienta — la que no distingue
+    // «no se hizo» de «se hizo, y además cambió otra cosa». (Encontrado por el
+    // agente del agregador al revisar el arreglo, 2026-08-25.)
+    //
+    // Cada orden dice qué significa haber acertado: soltar, que mis rutas ya
+    // no estén; reservar, que las mías estén con mi nombre.
+    //
+    // Y NO VALE EL ATAJO de comparar `aplicarCambio(ahora)` con `ahora`: en
+    // `soltar` funcionaría —es un filtro puro— pero en `reservar` no, porque
+    // quita las mías y las vuelve a añadir AL FINAL, así que con otro agente
+    // empujando detrás el resultado no es igual byte a byte aunque mi reserva
+    // esté perfectamente puesta.
     const { reservas: ahora } = leer();
-    const igual = JSON.stringify(ahora) === JSON.stringify(reservas);
-    if (igual) return true;
+    const salio = yaEsta
+      ? yaEsta(ahora)
+      : JSON.stringify(ahora) === JSON.stringify(reservas);
+    if (salio) return true;
     if (intento === 6) {
       console.error('No he podido guardar la reserva (¿sin red, o alguien empujando a la vez?).');
       return false;
@@ -275,7 +296,9 @@ if (orden === 'reservar') {
     for (const ruta of rutas) vivas.push({ agente: yo, ruta, motivo, desde: ahora });
     return vivas;
   };
-  if (!escribir(anadirLasMias, `${yo} reserva ${rutas.join(', ')}`)) process.exit(1);
+  const miReservaEsta = (actuales) =>
+    rutas.every((ruta) => actuales.some((r) => r.agente === yo && r.ruta === ruta));
+  if (!escribir(anadirLasMias, `${yo} reserva ${rutas.join(', ')}`, miReservaEsta)) process.exit(1);
   console.log(`Reservado por ${yo}: ${rutas.join(', ')}`);
   process.exit(0);
 }
@@ -290,7 +313,8 @@ if (orden === 'liberar') {
   const soltadas = reservas.length - quedan.length;
   if (!soltadas) { console.log(`${quien} no tenía nada reservado.`); process.exit(0); }
   if (!escribir((actuales) => actuales.filter((r) => r.agente !== quien),
-    `${yo} libera las reservas de ${quien} (agente parado)`)) process.exit(1);
+    `${yo} libera las reservas de ${quien} (agente parado)`,
+    (actuales) => !actuales.some((r) => r.agente === quien))) process.exit(1);
   console.log(`Liberadas ${soltadas} reserva(s) de ${quien}.`);
   process.exit(0);
 }
@@ -318,7 +342,8 @@ if (orden === 'soltar') {
     const rutasMuertas = quedan2.length === reservas.length ? [] :
       reservas.filter((r) => !quedan2.includes(r)).map((r) => r.ruta);
     if (!escribir((actuales) => actuales.filter((r) => r.agente !== yo || !rutasMuertas.includes(r.ruta)),
-      `${yo} suelta ${soltadas2} reserva(s) muerta(s)`)) process.exit(1);
+      `${yo} suelta ${soltadas2} reserva(s) muerta(s)`,
+      (actuales) => !actuales.some((r) => r.agente === yo && rutasMuertas.includes(r.ruta)))) process.exit(1);
     console.log(`Soltadas ${soltadas2} reserva(s) muerta(s).`);
     process.exit(0);
   }
@@ -335,7 +360,10 @@ if (orden === 'soltar') {
     if (todo) return false;
     return !rutas.some((x) => x === r.ruta);
   });
-  if (!escribir(soltarLasMias, `${yo} suelta ${todo ? 'todo' : rutas.join(', ')}`)) process.exit(1);
+  const yaNoTengoNada = (actuales) => todo
+    ? !actuales.some((r) => r.agente === yo)
+    : !actuales.some((r) => r.agente === yo && rutas.some((x) => x === r.ruta));
+  if (!escribir(soltarLasMias, `${yo} suelta ${todo ? 'todo' : rutas.join(', ')}`, yaNoTengoNada)) process.exit(1);
   console.log(`Soltadas ${soltadas} reserva(s).`);
   process.exit(0);
 }
