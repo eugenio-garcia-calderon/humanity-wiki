@@ -7058,3 +7058,69 @@ No session required: reading a theme does not ask for an account.
 Also fixed the heading copy, which still said "los catorce del centro" after
 ESPIRITUALIDAD made fifteen. It now counts `OBJETIVOS.length`, so the sentence
 cannot go stale again the next time the list grows.
+
+---
+
+## 2026-08-26 — Pegar imágenes en los archivos, y el nombre vuelve a ser humanity.wiki
+
+### Pegar una imagen en los archivos de un proyecto
+
+Eugenio: «permite en proyectos, en la parte de archivos, permitir pegar imágenes».
+
+Una captura de pantalla no es un fichero que se pueda arrastrar: está en el
+portapapeles y en ningún sitio más. Antes había que guardarla al disco, buscarla
+y arrastrarla — tres pasos para algo que acababa de ocurrir en la pantalla.
+
+Está en `src/components/archivo/Adjuntos.tsx`, que es **el mismo bloque de
+archivos que usan los proyectos, las tarjetas del tablero y los documentos**: se
+pidió para proyectos y lo ganan los tres, sin tres implementaciones.
+
+- **Nunca le roba el ⌘V a un campo de texto.** `enCampoDeTexto()` (el ayudante
+  que ya existía en `src/utils/pegado.ts`) descarta el pegado si el destino es
+  un `input`, un `textarea` o un editable.
+- **Y tampoco al bloque de al lado.** En un proyecto puede haber varios bloques
+  de archivos a la vez —el del proyecto y el de cada tarea abierta— y un
+  `paste` escuchado en la ventana los despertaría a todos: la misma captura
+  subida tres veces. Por eso hace falta que el bloque esté **señalado**: el
+  ratón encima, o el foco dentro (es `tabIndex={0}`, así que también se puede
+  señalar sin ratón). Es lo que convierte «pegar» en «pegar AQUÍ».
+- **Un pegado que no responde se lee como que esto no funciona.** Copiar una
+  imagen desde una web pone en el portapapeles el HTML del trozo, no el
+  archivo. En ese caso se dice: «Eso es texto, no un archivo. Copia la imagen
+  (o arrástrala) y vuelve a pegar».
+- **A una captura se le pone nombre.** Llega como `image.png` o sin nombre, y en
+  una lista de archivos tres cosas llamadas `image.png` no se distinguen entre
+  sí. Se les pone `Captura 26/08, 00:46.png`.
+- **De paso, subir acepta varios.** Soltar cinco fotos subía una, y elegir cinco
+  en el diálogo subía una: el mismo fallo dos veces, en el `onDrop` y en el
+  `<input type="file">` sin `multiple`. Los dos arreglados.
+
+Comprobado en local con un PNG de verdad en el portapapeles: sube y aparece en
+la lista; con el ratón fuera del bloque no sube nada; y pegando dentro de un
+`textarea` no sube nada y **no llama a `preventDefault`**, así que el texto se
+pega como siempre. El adjunto y la sesión de prueba, borrados.
+
+### El nombre vuelve a ser humanity.wiki
+
+Eugenio: «vuelve a poner humanity wiki como nombre del proyecto y cambiarlo
+donde ponga red de conocimiento […] salvo en la portada, que también pon
+humanity wiki en grande y debajo pon la red de conocimiento».
+
+El reparto es el que dice la frase, y tiene sentido más allá de la orden: **la
+barra identifica y la portada explica**. Arriba va el nombre a secas —que además
+es el dominio que se teclea y lo que pone la pestaña del navegador, y tener tres
+nombres para lo mismo es no tener ninguno—; en la portada va el nombre en grande
+y debajo, en versalitas, «La red de conocimiento», que es lo que esto ES y sólo
+hace falta cuando alguien todavía no lo sabe.
+
+Dónde ha cambiado: la barra de arriba y sus `title`/`aria-label`
+(`Layout.tsx`), la cabecera de los dos raíles (`Rail.tsx`, era el valor por
+defecto de `titulo`) y las **dos** portadas — `Bienvenida.tsx` para quien no ha
+entrado y `TresCaminos.tsx` para quien sí. Las dos son la primera pantalla, sólo
+que de gente distinta, y dos primeras pantallas con nombres distintos son dos
+productos.
+
+El verde sigue siendo el `emerald-600` de siempre y ahora lo lleva `.wiki`
+(`emerald-400` sobre fondo negro, como antes). `index.html` ya decía
+`Humanity.wiki`: no había que tocarlo, y por eso la barra del navegador era lo
+único que llevaba semanas diciendo la verdad.

@@ -885,8 +885,8 @@ export default function Layout() {
                ruta ha cambiado, así que pulsabas el logo y no pasaba nada
                visible. Se apartan, no se cierran: siguen arriba a un clic. */
             onClick={() => { minimizarTodas(); navigate('/'); }}
-            title="Red de Conocimiento — ir al inicio"
-            aria-label="Red de Conocimiento — ir al inicio"
+            title="humanity.wiki — ir al inicio"
+            aria-label="humanity.wiki — ir al inicio"
             className="shrink-0 w-7 h-7 rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
           >
             {/* EL LOGO DE VERDAD (2026-08-22, Eugenio lo mandó). Antes era un
@@ -897,7 +897,10 @@ export default function Layout() {
         )}
 
         {/* ══ EL NOMBRE, CENTRADO (2026-08-23) ════════════════════════════
-            Eugenio: «vamos a llamarla Red de Conocimiento. Eso tiene que estar
+            Eugenio, 2026-08-26: el nombre vuelve a ser humanity.wiki, y «la
+            red de conocimiento» se queda sólo en la portada, debajo del nombre,
+            como lo que esto es. Lo de arriba identifica; lo de la portada
+            explica. Antes: «vamos a llamarla Red de Conocimiento. Eso tiene que estar
             arriba en el menú superior centrado».
 
             `absolute` y `pointer-events-none`: está centrado respecto a la
@@ -939,7 +942,7 @@ export default function Layout() {
               barra ya lleva el buscador y el nombre entero no cabe. Ninguna
               página se pierde — se abre igual. */}
           {/* DOS BOTONES DENTRO DE UNA PASTILLA (2026-08-24). Eugenio: «el
-              logo de Red de Conocimiento debe actuar como botón de regresar a
+              logo de humanity.wiki debe actuar como botón de regresar a
               INICIO "/", y sólo cuando se pinche en la flecha desplegable de su
               derecha se abrirá el menú».
 
@@ -959,19 +962,21 @@ export default function Layout() {
               compacto ? 'h-7' : 'h-9',
               nombreEnNegro ? 'bg-slate-900 text-white' : 'text-slate-800')}
           >
-            {/* «CONOCIMIENTO» EN VERDE (2026-08-24). Eugenio: «el logo de Red
-                de Conocimiento, pon Conocimiento en el verde que has utilizado
-                en la página principal de sesión no iniciada».
+            {/* EL NOMBRE, EN LA BARRA (2026-08-26). Eugenio: «vuelve a poner
+                humanity wiki como nombre del proyecto».
 
-                Es el `emerald-600` de la portada, que es donde ese verde ya
+                Aquí va el nombre a secas, sin la frase: la barra identifica,
+                no explica. «La red de conocimiento» vive en la portada, que es
+                donde alguien que aún no sabe qué es esto está mirando.
+
+                El verde es el `emerald-600` de la portada, que es donde ya
                 significa algo —lo lleva el botón de entrar y los datos que sí
-                están medidos—. Poner un verde parecido pero distinto sería
-                empezar el segundo verde de la marca.
-
-                Y va sólo en la segunda palabra: «Red de» es lo genérico y
-                «Conocimiento» es el nombre. Cuando el botón está abierto o
-                estás en una de sus páginas el fondo es negro, y ahí el verde
-                oscuro no se leería: se sube a `emerald-400`. */}
+                están medidos—; un verde parecido pero distinto sería empezar
+                el segundo verde de la marca. Va sólo en `.wiki`: «humanity» es
+                la palabra y el dominio es lo que la convierte en nombre.
+                Cuando el botón está abierto o estás en una de sus páginas el
+                fondo es negro, y ahí el verde oscuro no se leería: sube a
+                `emerald-400`. */}
             <button
               onClick={() => { setInfoAbierta(false); navigate('/'); }}
               title="Ir al inicio"
@@ -979,16 +984,16 @@ export default function Layout() {
                 nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
             >
               <span className="whitespace-nowrap text-sm font-black tracking-tight">
-                Red de{' '}
+                humanity
                 <span className={cn(nombreEnNegro ? 'text-emerald-400' : 'text-emerald-600')}>
-                  Conocimiento
+                  .wiki
                 </span>
               </span>
             </button>
             <button
               onClick={() => setInfoAbierta(o => !o)}
-              title="Sobre la Red de Conocimiento"
-              aria-label="Sobre la Red de Conocimiento"
+              title="Sobre humanity.wiki"
+              aria-label="Sobre humanity.wiki"
               aria-expanded={infoAbierta}
               className={cn('flex h-full items-center rounded-lg px-1.5 transition-colors sm:rounded-l-none',
                 nombreEnNegro ? 'hover:bg-slate-800' : 'hover:bg-slate-100')}
@@ -1052,7 +1057,7 @@ export default function Layout() {
            */
           className="hidden"
         >
-          Red de Conocimiento
+          humanity.wiki
         </span>
 
         {/* ══ EL BUSCADOR, EN EL CENTRO (2026-08-24) ═══════════════════════
@@ -1323,8 +1328,8 @@ export default function Layout() {
               : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
         >
           <IconoFeedback className={cn('shrink-0', compacto ? 'w-4 h-4' : 'w-5 h-5')} />
-          {/* LA PALABRA SE VA EN EL MÓVIL (2026-08-23). Al centrar «Red de
-              Conocimiento» en la barra, a 375 px el nombre se montaba encima de
+          {/* LA PALABRA SE VA EN EL MÓVIL (2026-08-23). Al centrar el nombre
+              en la barra, a 375 px se montaba encima de
               esta palabra: dos textos superpuestos y ninguno legible. Se ve en
               una captura, no compilando.
               Se quita la de aquí y no el nombre porque el nombre es la marca de

@@ -12,6 +12,7 @@
 // subiendo como siempre sin saber nada de contenedores.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../../utils/subir';
+import { enCampoDeTexto } from '../../utils/pegado';
 import {
   Paperclip, Loader2, Trash2, FileText, Image as ImageIcon, Video, Music, File as FileIcon, Download,
 } from 'lucide-react';
@@ -65,32 +66,84 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
   /** Sube los bytes y luego los cuelga de aquí. Si el segundo paso falla, se
    *  dice: un fichero subido que no queda colgado de nada es exactamente el
    *  problema que este archivo viene a resolver. */
-  const subir = async (f?: File | null) => {
-    if (!f) return;
+  const subir = async (...archivos: Array<File | null | undefined>) => {
+    const fs = archivos.filter(Boolean) as File[];
+    if (!fs.length) return;
     setSubiendo(true);
     setError(null);
     try {
-      const u = await subirArchivo(f);
-      if (u.error) throw new Error(u.error);
+      for (const f of fs) {
+        const u = await subirArchivo(f);
+        if (u.error) throw new Error(u.error);
 
-      const r = await fetch('/api/archivo', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          [contenedor]: id,
-          url: u.url, nombre: f.name || 'archivo',
-          mime: u.type, bytes: u.bytes, clase: u.clase,
-        }),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j?.error || 'Se ha subido, pero no he podido colgarlo aquí.');
-      setLista(l => [j, ...(l || [])]);
+        const r = await fetch('/api/archivo', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            [contenedor]: id,
+            // Una captura pegada llega SIN NOMBRE («image.png» o vacío). Se le
+            // pone uno con la fecha: en una lista de archivos, tres cosas
+            // llamadas «image.png» no se distinguen entre sí, y el nombre es lo
+            // único que se ve.
+            url: u.url,
+            nombre: f.name && f.name !== 'image.png'
+              ? f.name
+              : `Captura ${new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}${(f.type.split('/')[1] ? '.' + f.type.split('/')[1] : '')}`,
+            mime: u.type, bytes: u.bytes, clase: u.clase,
+          }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j?.error || 'Se ha subido, pero no he podido colgarlo aquí.');
+        setLista(l => [j, ...(l || [])]);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
       setSubiendo(false);
     }
   };
+
+  /*
+   * ── PEGAR (2026-08-26) ────────────────────────────────────────────────────
+   * Eugenio: «en proyectos, en la parte de archivos, permitir pegar imágenes».
+   *
+   * Una captura de pantalla no es un fichero que puedas arrastrar: está en el
+   * portapapeles y en ningún sitio más. Sin esto había que guardarla al disco
+   * primero, buscarla y arrastrarla — tres pasos para algo que acaba de
+   * ocurrir en la pantalla.
+   *
+   * ── NUNCA SE LE ROBA EL ⌘V A UN CAMPO DE TEXTO ───────────────────────────
+   * Ni a otro bloque de archivos. En un proyecto puede haber varios a la vez
+   * —el del proyecto y el de cada tarea abierta— y un `paste` en la ventana los
+   * despertaría a todos: la misma captura subida tres veces, en tres sitios,
+   * sin que nadie lo haya pedido.
+   *
+   * Por eso hace falta que este bloque esté **señalado**: el ratón encima o el
+   * foco dentro. Es lo que convierte «pegar» en «pegar AQUÍ», que es la única
+   * forma de que la respuesta no sea una lotería.
+   */
+  const [senalado, setSenalado] = useState(false);
+
+  useEffect(() => {
+    if (!puedeEditar || !senalado) return;
+    const alPegar = (e: ClipboardEvent) => {
+      if (enCampoDeTexto(e.target)) return;
+      const fs = Array.from(e.clipboardData?.files || []);
+      if (!fs.length) {
+        // Se dice, en vez de no hacer nada. Copiar una imagen desde una web
+        // pone en el portapapeles el HTML del trozo, no el archivo — y un
+        // pegado que no responde se lee como que esto no funciona.
+        if ((e.clipboardData?.getData('text/plain') || '').trim()) {
+          setError('Eso es texto, no un archivo. Copia la imagen (o arrástrala) y vuelve a pegar.');
+        }
+        return;
+      }
+      e.preventDefault();
+      subir(...fs);
+    };
+    window.addEventListener('paste', alPegar);
+    return () => window.removeEventListener('paste', alPegar);
+  }, [puedeEditar, senalado, contenedor, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const quitar = async (a: Adjunto) => {
     setLista(l => (l || []).filter(x => x.id !== a.id));
@@ -113,8 +166,17 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
         if (!puedeEditar) return;
         e.preventDefault();
         setEncima(false);
-        subir(e.dataTransfer.files?.[0]);
+        // Todos los que se suelten, no sólo el primero: arrastrar cinco fotos y
+        // que suba una es de las cosas que no se notan hasta que faltan cuatro.
+        subir(...Array.from(e.dataTransfer.files || []));
       }}
+      onMouseEnter={() => setSenalado(true)}
+      onMouseLeave={() => setSenalado(false)}
+      onFocus={() => setSenalado(true)}
+      onBlur={() => setSenalado(false)}
+      // Enfocable para que en un teclado —y en un lector de pantalla— también
+      // se pueda señalar dónde se pega, sin ratón.
+      tabIndex={puedeEditar ? 0 : undefined}
       className={cn('rounded-2xl border bg-white p-4 transition-colors',
         encima ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-slate-200')}
     >
@@ -125,8 +187,10 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
         </h3>
         {puedeEditar && (
           <>
-            <input ref={fichero} type="file" className="hidden"
-              onChange={e => { subir(e.target.files?.[0]); e.target.value = ''; }} />
+            {/* `multiple`, ahora que subir acepta varios: elegir cinco en el
+                diálogo y que suba una es el mismo fallo que arrastrar cinco. */}
+            <input ref={fichero} type="file" multiple className="hidden"
+              onChange={e => { subir(...Array.from(e.target.files || [])); e.target.value = ''; }} />
             <button
               onClick={() => fichero.current?.click()}
               disabled={subiendo}
@@ -147,7 +211,7 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
         <p className="text-[11px] text-slate-300 italic">Cargando…</p>
       ) : lista.length === 0 ? (
         <p className="text-[11px] text-slate-400 italic">
-          {puedeEditar ? 'Nada todavía. Arrastra un archivo aquí o pulsa Adjuntar.' : 'Sin archivos.'}
+          {puedeEditar ? 'Nada todavía. Arrastra un archivo aquí, pega una imagen con ⌘V o pulsa Adjuntar.' : 'Sin archivos.'}
         </p>
       ) : (
         <ul className="space-y-1">

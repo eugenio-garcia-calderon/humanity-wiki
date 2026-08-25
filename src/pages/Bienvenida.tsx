@@ -107,14 +107,22 @@ export default function Bienvenida() {
           herramientas — que es lo que hay que ver. Sigue entero en «i → Visión»,
           que es su casa. */}
       <header className="flex min-h-[33vh] flex-col items-center justify-center py-3 text-center">
-        {/* EL NOMBRE NUEVO (2026-08-23, Eugenio: «vamos a llamarla Red de
-            Conocimiento»). Aquí importa más que en ningún otro sitio: es lo
-            primero que lee alguien que no sabe qué es esto, y si la portada
-            dice un nombre y la barra de arriba dice otro, ninguno de los dos
-            se cree. */}
+        {/* EL NOMBRE, Y DEBAJO LO QUE ES (2026-08-26, Eugenio: «vuelve a poner
+            humanity wiki como nombre del proyecto […] salvo en la portada, que
+            también pon humanity wiki en grande y debajo pon la red de
+            conocimiento»).
+
+            El nombre es el dominio que se teclea y el que sale en la pestaña:
+            si la portada dice una cosa y la barra del navegador dice otra,
+            nadie sabe cómo se llama esto. «La red de conocimiento» pasa a ser
+            lo que hay debajo del nombre —lo que esto ES— y ahí sí puede
+            explicar, porque ya no tiene que identificar. */}
         <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
-          Red de <span className="text-emerald-600">Conocimiento</span>
+          humanity<span className="text-emerald-600">.wiki</span>
         </h1>
+        <p className="mt-2 text-sm font-bold uppercase tracking-[0.18em] text-slate-400 sm:text-base">
+          La red de conocimiento
+        </p>
         <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
           Agregar el conocimiento de la humanidad y repartir lo que genere entre
           quienes lo crean.
