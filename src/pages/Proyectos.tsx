@@ -26,7 +26,7 @@ import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 // El listado
 // ----------------------------------------------------------------------------
 export function Proyectos() {
-  const { user } = useAuth();
+  const { user, updateUiSettings } = useAuth();
   const navigate = useNavigate();
   const [proyectos, setProyectos] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -42,6 +42,43 @@ export function Proyectos() {
 
   useEffect(() => { cargar(); }, []);
 
+  /*
+   * ── EL NOMBRE DE ESTA PÁGINA ES SUYO (2026-08-25) ────────────────────────
+   * Eugenio: «permite ponerle un nombre característico y propio a la página de
+   * proyectos, para que arriba no aparezca sólo Proyectos, sino Proyectos: y
+   * el nombre del usuario o lo que el usuario decida».
+   *
+   * ── DÓNDE SE GUARDA, Y POR QUÉ AHÍ ────────────────────────────────────────
+   * En `ui_settings`, el jsonb que ya lleva las preferencias de interfaz de
+   * cada persona, con `PUT /api/auth/ui-settings`, que hace una fusión
+   * superficial. No hace falta ni tabla ni columna ni ruta nuevas: esto es una
+   * preferencia de alguien sobre su propia pantalla, exactamente lo que esa
+   * columna guarda.
+   *
+   * ── EL VALOR POR DEFECTO ES SU NOMBRE, Y NO SE GUARDA ────────────────────
+   * Quien no toque nada lee «Proyectos: Eugenio» sin haber hecho nada, que es
+   * lo que pidió. Pero ese nombre **no se copia** a `ui_settings`: si se
+   * guardara, el día que alguien cambie cómo se llama, su página de proyectos
+   * se quedaría con el nombre viejo y no habría forma de saber por qué. Se
+   * guarda sólo lo que la persona escribe **a propósito**.
+   *
+   * Y se puede dejar en blanco: entonces vuelve a poner «Proyectos» a secas,
+   * que es lo que había. Poner un nombre es una decisión, y toda decisión debe
+   * poder deshacerse.
+   */
+  const suyo = (user?.uiSettings?.titulo_proyectos ?? '') as string;
+  const porDefecto = user ? (user.displayName || user.name || '') : '';
+  const sufijo = suyo || porDefecto;
+  const [editandoTitulo, setEditandoTitulo] = useState(false);
+  const [tituloBorrador, setTituloBorrador] = useState('');
+
+  const guardarTitulo = async () => {
+    const v = tituloBorrador.trim().slice(0, 40);
+    setEditandoTitulo(false);
+    if (v === suyo) return;
+    await updateUiSettings({ titulo_proyectos: v });
+  };
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-8 pb-24">
@@ -56,10 +93,50 @@ export function Proyectos() {
             entra veinte veces al día ya sabiéndolo. El botón se sube al lado
             del nombre porque es lo único que se hace desde aquí aparte de
             entrar en uno. */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 group/titulo">
           <h1 className="text-3xl font-black tracking-tight text-slate-900 inline-flex items-center gap-2">
             <FolderKanban className="w-6 h-6 text-slate-400" /> Proyectos
+            {editandoTitulo ? (
+              <>
+                <span className="text-slate-300">:</span>
+                <input
+                  autoFocus
+                  value={tituloBorrador}
+                  onChange={e => setTituloBorrador(e.target.value)}
+                  onBlur={guardarTitulo}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') guardarTitulo();
+                    if (e.key === 'Escape') setEditandoTitulo(false);
+                  }}
+                  maxLength={40}
+                  placeholder="ponle un nombre"
+                  aria-label="Nombre de tu página de proyectos"
+                  className="w-56 max-w-full border-b-2 border-emerald-400 bg-transparent text-3xl font-black tracking-tight text-slate-900 outline-none placeholder:font-bold placeholder:text-slate-300"
+                />
+              </>
+            ) : sufijo ? (
+              <>
+                <span className="text-slate-300">:</span>
+                <span className="text-emerald-700">{sufijo}</span>
+              </>
+            ) : null}
           </h1>
+
+          {/* El lápiz sale al pasar por la fila, y se queda si no hay nada
+              escrito todavía: quien aún no le ha puesto nombre es justo quien
+              necesita ver que se le puede poner. */}
+          {user && !editandoTitulo && (
+            <button
+              onClick={() => { setTituloBorrador(suyo || porDefecto); setEditandoTitulo(true); }}
+              title="Ponle un nombre a tu página de proyectos"
+              aria-label="Ponle un nombre a tu página de proyectos"
+              className={cn('grid h-7 w-7 place-items-center rounded-lg text-slate-300 transition-all hover:bg-slate-100 hover:text-slate-700',
+                suyo ? 'opacity-0 group-hover/titulo:opacity-100' : 'opacity-100')}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {user && (
             <button onClick={() => setCreando(true)}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow transition-colors">
