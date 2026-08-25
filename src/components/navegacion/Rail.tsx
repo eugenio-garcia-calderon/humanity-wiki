@@ -135,7 +135,7 @@ export const PERSONALES_MUDADAS: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'humanity.wiki', claro = false, onAbrirSubmenu, onPlegar,
-  personal, ramas, pie,
+  personal, ramas, pie, cabeza,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -222,6 +222,12 @@ export default function Rail({
    * UN componente y no tres parecidos.
    */
   pie?: any;
+  /**
+   * LO QUE VA ANTES DE LA LISTA (2026-08-25). Hoy: tu foto, arriba del raíl de
+   * la derecha, con mensajes, contactos y calendario debajo. Se pasa desde
+   * fuera por lo mismo que `pie`: el raíl no debe saber qué está pintando.
+   */
+  cabeza?: any;
   onAbrirSubmenu?: (h: Herramienta) => void;
   /**
    * PLEGARSE (2026-08-24). Eugenio: «permite que ambos menús, el de la derecha
@@ -805,6 +811,8 @@ export default function Rail({
             bajado la lista entera — o sea, quien ya no lo necesita.
             Se pinta distinto del resto —más pequeño y en gris— porque no es un
             tema más: es lo que se hace CON los temas. */}
+        {cabeza}
+
         {personal?.onPersonalizar && (
           <button
             onClick={personal.onPersonalizar}
