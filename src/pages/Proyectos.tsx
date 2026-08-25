@@ -300,6 +300,59 @@ export function Proyecto() {
   const [borrando, setBorrando] = useState(false);
   const [quitando, setQuitando] = useState(false);
   const [renombrando, setRenombrando] = useState(false);
+  /*
+   * ── LA DESCRIPCIÓN TAMBIÉN SE EDITA (2026-08-25) ─────────────────────────
+   * Eugenio: «cuando le des a editar, también se puede editar la descripción
+   * del proyecto, no sólo el título y el icono».
+   *
+   * ── POR QUÉ AQUÍ Y NO DENTRO DEL POPUP DE RENOMBRAR ──────────────────────
+   * Ese popup es COMÚN: lo usan el menú, las personas y todo lo que tiene
+   * nombre e icono. Meterle una descripción le añadiría un campo a páginas,
+   * mapas y esquemas, que no la tienen — arreglar una pantalla estropeando
+   * cinco.
+   *
+   * Se edita donde se lee, que además es donde uno se da cuenta de que hay que
+   * cambiarla.
+   *
+   * ── Y SIN DESCRIPCIÓN NO HABÍA NI SITIO DONDE PULSAR ─────────────────────
+   * `{proyecto.descripcion && …}`: si estaba vacía no se pintaba nada, así que
+   * un proyecto sin descripción no tenía forma de ganar una. El hueco vacío
+   * ahora invita, y sólo a quien puede editar.
+   */
+  const [editandoDesc, setEditandoDesc] = useState(false);
+  const [descBorrador, setDescBorrador] = useState('');
+  const [guardandoDesc, setGuardandoDesc] = useState(false);
+
+  /**
+   * Guardar la descripción.
+   *
+   * Se manda cadena vacía y no `null` cuando se borra: el `UPDATE` de
+   * `roadmap.ts` usa `COALESCE(${d.descripcion}, descripcion)`, así que un
+   * `null` **conserva la que había** y borrarla sería imposible. La cadena
+   * vacía sí pasa por el COALESCE y la deja limpia.
+   */
+  const guardarDescripcion = async () => {
+    if (guardandoDesc) return;
+    const v = descBorrador.trim().slice(0, 400);
+    setGuardandoDesc(true);
+    try {
+      const r = await fetch(`/api/proyectos/${proyecto.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descripcion: v }),
+      });
+      if (r.ok) {
+        const j = await r.json().catch(() => null);
+        // Se repinta con lo que devolvió el servidor, no con lo que se escribió:
+        // si algún día ese PUT recorta o limpia el texto, la pantalla tiene que
+        // enseñar lo que quedó guardado y no lo que uno tecleó.
+        setProyecto((p: any) => (p ? { ...p, descripcion: j?.descripcion ?? v } : p));
+        setEditandoDesc(false);
+      }
+    } catch { /* se queda abierto con lo escrito dentro */ } finally {
+      setGuardandoDesc(false);
+    }
+  };
   // La publicación recién creada, abierta para escribirla sin salir de aquí.
   const [publicando, setPublicando] = useState<string | null>(null);
 
@@ -545,7 +598,57 @@ export function Proyecto() {
               </button>
             )}
           </h1>
-          {proyecto.descripcion && <p className="text-sm text-slate-500 mt-1.5">{proyecto.descripcion}</p>}
+          {editandoDesc ? (
+            <div className="mt-1.5">
+              <textarea
+                autoFocus
+                value={descBorrador}
+                onChange={e => setDescBorrador(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') { setEditandoDesc(false); return; }
+                  // Enter guarda y Mayús+Enter salta de línea: una descripción
+                  // es casi siempre una frase, y obligar a buscar un botón para
+                  // una frase es un paso de más.
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); guardarDescripcion(); }
+                }}
+                rows={2}
+                maxLength={400}
+                placeholder="Una línea que diga de qué va este proyecto"
+                className="w-full max-w-2xl px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-emerald-300 resize-y"
+              />
+              <div className="flex items-center gap-2 mt-1.5">
+                <button onClick={guardarDescripcion} disabled={guardandoDesc}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black disabled:opacity-40 transition-colors">
+                  {guardandoDesc ? 'Guardando…' : 'Guardar'}
+                </button>
+                <button onClick={() => setEditandoDesc(false)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[11px] font-bold hover:bg-slate-50 transition-colors">
+                  Cancelar
+                </button>
+                <span className="text-[10.5px] text-slate-400">Enter guarda · Mayús+Enter salta de línea</span>
+              </div>
+            </div>
+          ) : proyecto.descripcion ? (
+            <p className="group/desc mt-1.5 flex items-start gap-1.5 text-sm text-slate-500">
+              <span>{proyecto.descripcion}</span>
+              {puedoEditar && (
+                <button
+                  onClick={() => { setDescBorrador(proyecto.descripcion || ''); setEditandoDesc(true); }}
+                  title="Cambiar la descripción" aria-label="Cambiar la descripción"
+                  className="shrink-0 p-1 rounded text-slate-300 opacity-0 group-hover/desc:opacity-100 focus:opacity-100 hover:text-emerald-700 transition-all"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              )}
+            </p>
+          ) : puedoEditar ? (
+            <button
+              onClick={() => { setDescBorrador(''); setEditandoDesc(true); }}
+              className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-emerald-700 transition-colors"
+            >
+              <Pencil className="w-3 h-3" /> Añade una descripción
+            </button>
+          ) : null}
           {proyecto.vision && (
             <p className="text-sm text-slate-600 leading-relaxed mt-4 border-l-2 border-emerald-300 pl-4">{proyecto.vision}</p>
           )}
