@@ -23,6 +23,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "prog2: las piezas hermanas de un lienzo, para la ficha",
       "desde": "2026-08-25T15:26:18.199Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/FuenteDeLaPublicacion.tsx",
+      "motivo": "prog2: la fuente con sus piezas en la ficha",
+      "desde": "2026-08-25T15:27:18.057Z"
     }
   ]
 }
