@@ -17,6 +17,12 @@
       "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
       "motivo": "pegar una imagen en la barra con la IA encendida",
       "desde": "2026-08-25T16:25:04.655Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "scripts/equipo.mjs",
+      "motivo": "la carrera del push resucita reservas soltadas",
+      "desde": "2026-08-25T17:48:57.591Z"
     }
   ]
 }
