@@ -1,3 +1,16 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/components/knowledge/FichaPublicacion.tsx",
+      "motivo": "prog2: la ficha en movil y la portada a todo el ancho",
+      "desde": "2026-08-25T15:10:26.882Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Explorar.tsx",
+      "motivo": "prog2: la ficha en movil y la portada a todo el ancho",
+      "desde": "2026-08-25T15:10:26.882Z"
+    }
+  ]
 }
