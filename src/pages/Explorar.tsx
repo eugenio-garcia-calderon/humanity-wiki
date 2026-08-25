@@ -1052,8 +1052,32 @@ export default function Explorar() {
                           tarjeta sin foto no recibe un relleno, porque si todas
                           tuvieran imagen «tener imagen» dejaría de ser el
                           criterio con el que está ordenada esta página. */}
+                      {/* ── A TODO EL ANCHO EN UN TELÉFONO (2026-08-25) ─────
+                          Eugenio: «haz que la imagen y vídeo de las
+                          publicaciones ocupen todo el ancho de la pantalla,
+                          como en YouTube móvil».
+
+                          En una pantalla de 390 px, 10 px de margen a cada lado
+                          son 20 de los 390 — un 5 % del ancho gastado en aire
+                          alrededor de lo único que se mira de lejos. YouTube no
+                          los pone, y no es minimalismo: es que en un teléfono la
+                          foto **es** la publicación, y lo que la enmarca compite
+                          con ella.
+                          Desde `sm` vuelve el margen, porque ahí hay columnas y
+                          una foto pegada al borde de su columna se confunde con
+                          la de al lado.
+
+                          ── EL `-mx-5` VA EMPAREJADO CON EL `px-5` DE FUERA ──
+                          Los 20 px no eran de la tarjeta: los pone el contenedor
+                          de la página (`max-w-[1500px] mx-auto px-5`), que los
+                          necesita para el nombre, el título y las etiquetas. Así
+                          que no se quitan — **se cancelan sólo para la foto**,
+                          con un margen negativo del mismo tamaño. Si algún día
+                          cambia ese `px-5`, este `-mx-5` tiene que cambiar con
+                          él: son el mismo número escrito dos veces, y por eso
+                          queda dicho aquí. */}
                       {(() => { const p = portadaDe(it); return p ? (
-                      <div className="px-2.5 pt-2.5">
+                      <div className="-mx-5 pt-2.5 sm:mx-0 sm:px-2.5">
                       <ImagenDePortada portada={p} titulo={it.titulo} />
                       </div>
                       ) : null; })()}
