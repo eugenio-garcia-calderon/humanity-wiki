@@ -35,6 +35,12 @@
       "ruta": "src/components/navegacion/RailInferior.tsx",
       "motivo": "prog3: explorar y proyectos fusionados con sus railes, iconos sobrios, feedback amarillo",
       "desde": "2026-08-25T23:40:00.338Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "prog3: el chat deja de pisar la variable del menu inferior",
+      "desde": "2026-08-25T23:42:19.734Z"
     }
   ]
 }
