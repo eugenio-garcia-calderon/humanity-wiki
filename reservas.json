@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog2",
-      "ruta": "src/pages/Preferencias.tsx",
-      "motivo": "prog2: pagina de preferencias con la rueda de temas",
-      "desde": "2026-08-25T15:53:54.480Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/App.tsx",
       "motivo": "prog2: ruta y boton de Preferencias",
       "desde": "2026-08-25T15:56:55.227Z"
