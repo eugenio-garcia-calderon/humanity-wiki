@@ -5,6 +5,24 @@
       "ruta": "src/pages/Preferencias.tsx",
       "motivo": "prog2: rueda en acordeon, legible a cualquier profundidad",
       "desde": "2026-08-25T18:27:16.516Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
+      "desde": "2026-08-25T18:30:04.569Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
+      "desde": "2026-08-25T18:30:04.569Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/DialogoNuevoTema.tsx",
+      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
+      "desde": "2026-08-25T18:30:04.569Z"
     }
   ]
 }
