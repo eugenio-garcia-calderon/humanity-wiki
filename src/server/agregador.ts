@@ -194,9 +194,34 @@ export function registrarAgregador(app: Express, db: any) {
       `);
       const ramaIds = arreglo((rama.rows as any[]).map(r => r.id));
 
+      // ── LA CUENTA DE CADA HIJA ES LA DE SU RAMA ENTERA ──────────────────
+      // Aquí había un `count` plano y **mentía**: «Baterías y seguridad
+      // eléctrica» salía con 0 publicaciones en la rejilla teniendo cinco
+      // repartidas entre sus tres hijas. Un cero al lado de un tema que sí
+      // tiene cosas es peor que no poner número: dice que ahí no hay nada, y
+      // quien lo lea no vuelve a entrar.
+      //
+      // El mismo fallo estaba en `GET /api/temas/:objetivo` y prog2 lo arregló
+      // allí; éste es el mío, en mi fichero, y no se vio hasta mirar la página
+      // en producción después de que él arreglara el suyo. Dos consultas
+      // correctas por separado no verifican la costura entre ellas.
+      //
+      // `WITH RECURSIVE` y no un número fijo de niveles porque el árbol no
+      // tiene fondo (decisión de Eugenio en `0120`). `DISTINCT` porque una
+      // misma pieza puede estar colgada de dos ramas de la misma rama y no
+      // debe contarse dos veces.
       const hijos = await db.execute(sql`
-        SELECT s.id, s.nombre,
-               (SELECT count(*)::int FROM subtema_contenido c WHERE c.subtema_id = s.id) AS cosas
+        WITH RECURSIVE bajo AS (
+          SELECT id AS raiz, id FROM subtemas
+          WHERE padre_id = ${id} AND archived_at IS NULL
+          UNION ALL
+          SELECT b.raiz, s.id FROM subtemas s JOIN bajo b ON s.padre_id = b.id
+          WHERE s.archived_at IS NULL
+        )
+        SELECT s.id, s.nombre, s.orden,
+               (SELECT count(DISTINCT (c.tipo, c.entity_id))::int
+                  FROM subtema_contenido c
+                 WHERE c.subtema_id IN (SELECT id FROM bajo WHERE raiz = s.id)) AS cosas
         FROM subtemas s
         WHERE s.padre_id = ${id} AND s.archived_at IS NULL
         ORDER BY s.orden, s.nombre
