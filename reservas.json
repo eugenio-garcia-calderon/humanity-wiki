@@ -1,16 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8",
-      "ruta": "scripts/equipo.mjs",
-      "motivo": "la carrera del push resucita reservas soltadas",
-      "desde": "2026-08-25T17:48:57.591Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "equipo/REPARTO.md",
-      "motivo": "la regla del stash en un fichero de solo-anadir",
-      "desde": "2026-08-25T17:53:03.252Z"
-    }
-  ]
+  "reservas": []
 }
