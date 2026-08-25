@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Preferencias.tsx",
+      "motivo": "prog2: el abanico se abre hacia la derecha y con un solo clic",
+      "desde": "2026-08-25T18:55:46.845Z"
+    }
+  ]
 }
