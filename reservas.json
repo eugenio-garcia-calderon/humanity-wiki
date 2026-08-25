@@ -29,6 +29,12 @@
       "ruta": "src/pages/Preferencias.tsx",
       "motivo": "prog2: la cuenta de la rama entera, no la del nodo",
       "desde": "2026-08-25T17:43:49.302Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada del agregador (prog8-turn), esperando desde hace una hora",
+      "desde": "2026-08-25T17:44:35.941Z"
     }
   ]
 }
