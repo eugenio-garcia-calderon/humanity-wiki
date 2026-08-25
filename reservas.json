@@ -11,12 +11,6 @@
       "ruta": "equipo/REPARTO.md",
       "motivo": "la regla del stash en un fichero de solo-anadir",
       "desde": "2026-08-25T17:53:03.252Z"
-    },
-    {
-      "agente": "prog8",
-      "ruta": "pruebas/final.txt",
-      "motivo": "comprobacion despues de fusionar",
-      "desde": "2026-08-25T18:02:00.100Z"
     }
   ]
 }
