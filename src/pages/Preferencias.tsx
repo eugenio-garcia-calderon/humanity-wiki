@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Plus, Loader2, EyeOff, Eye } from 'lucide-react';
+import { Star, Plus, Loader2, EyeOff, Eye, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
 import { OBJETIVOS, hexDelColor } from '../utils/objetivos';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
@@ -126,66 +126,133 @@ export default function Preferencias() {
     return m;
   }, [subs]);
 
-  // ── EL DIBUJO ─────────────────────────────────────────────────────────────
-  // Se recorre el árbol repartiendo ángulos: los catorce objetivos se parten
-  // la vuelta entera, y cada nodo abierto reparte SU trozo entre sus hijos.
+  /*
+   * ══ EL DIBUJO: UN ACORDEÓN, NO UNA TARTA ══════════════════════════════════
+   *
+   * ── EL PROBLEMA ERA ARITMÉTICO, NO DE ESTILO ──────────────────────────────
+   * Antes cada nivel se repartía el hueco de su padre. Con 8 hijos por rama eso
+   * divide el espacio por ocho en cada salto:
+   *
+   *     objetivos        15 trozos ·  24°   · 142 px de arco
+   *     subtemas        120 trozos ·   3°   ·  18 px
+   *     sub-subtemas    960 trozos ·   0,4° ·   2,2 px   ← ilegible
+   *
+   * Un nombre pide unos 14 px escrito hacia fuera. En 2,2 px caben ocho nombres
+   * uno encima de otro, y eso es lo que Eugenio vio: una mancha negra abajo. No
+   * había tipografía que lo arreglara — la vuelta tiene 360° y no da más.
+   *
+   * ── LA SALIDA: EL ESPACIO SE REPARTE SEGÚN LO QUE MIRAS ───────────────────
+   * Decisión de Eugenio entre las opciones: **acordeón**. Lo que abres se
+   * ensancha y lo demás se comprime, en vez de que todo pese lo mismo siempre.
+   *
+   *     el objetivo abierto  120°  →  sus 8 subtemas a 15° ·  63 px
+   *     un subtema abierto    60°  →  sus 8 hijos    a 7,5° · 43 px
+   *     los otros 14 objetivos      ·  17° cada uno · franja de color sin texto
+   *
+   * El trozo más pequeño pasa de 2,2 px a 43. La mancha no puede volver.
+   *
+   * ── LO QUE CUESTA, Y CÓMO SE PAGA ─────────────────────────────────────────
+   * Un acordeón mueve TODO al pulsar, y una rueda que se recoloca de golpe es
+   * mareante — ya costó un arreglo cuando se encogía sola. Por eso los ángulos
+   * se animan (ver `useAnguloAnimado`): el ojo sigue a dónde se ha ido cada
+   * trozo en vez de encontrarse un dibujo distinto.
+   *
+   * ── Y UNA GARANTÍA QUE NO DEPENDE DE ESTOS NÚMEROS ────────────────────────
+   * `MINIMO_LEGIBLE`: un anillo cuyos trozos bajen de ahí **no se dibuja**. Hoy
+   * los números salen bien, pero el árbol lo llena la gente: el día que alguien
+   * cuelgue cuarenta hijos de una rama, esto se queda sin pintar en vez de
+   * volver a hacer una mancha.
+   */
+  const PARTE_DEL_ABIERTO_ARRIBA = 1 / 3;   // 120° de la vuelta
+  const PARTE_DEL_ABIERTO_DENTRO = 1 / 2;   // la mitad del hueco de su padre
+  const MINIMO_LEGIBLE = 3.2;               // grados; por debajo, ese anillo no se pinta
+
   const trozos = useMemo(() => {
-    const out: Array<{ clave: string; nombre: string; color: string; nivel: number; a0: number; a1: number; hijos: number; cosas: number }> = [];
-    const paso = (2 * Math.PI) / OBJETIVOS.length;
+    const out: Array<{ clave: string; nombre: string; color: string; nivel: number; a0: number; a1: number; hijos: number; cosas: number; fino: boolean }> = [];
+
+    /**
+     * Reparte un hueco entre hermanos dándole más al que está abierto.
+     * Devuelve `[inicio, fin]` por cada hermano, en el mismo orden.
+     */
+    const repartir = (d0: number, d1: number, claves: string[], parteAbierto: number): Array<[number, number]> => {
+      const abierto = claves.findIndex(c => abiertos.has(c));
+      const total = d1 - d0;
+      if (abierto < 0 || claves.length < 2) {
+        const w = total / claves.length;
+        return claves.map((_, k) => [d0 + k * w, d0 + (k + 1) * w] as [number, number]);
+      }
+      const suyo = total * parteAbierto;
+      const resto = (total - suyo) / (claves.length - 1);
+      let x = d0;
+      return claves.map((_, k) => {
+        const w = k === abierto ? suyo : resto;
+        const par: [number, number] = [x, x + w];
+        x += w;
+        return par;
+      });
+    };
+
+    const grados = (a0: number, a1: number) => ((a1 - a0) * 180) / Math.PI;
+
+    const claves1 = OBJETIVOS.map(o => o.id);
+    // Se empieza arriba (-90°) para que el primero quede a las doce, que es
+    // donde todo el mundo empieza a leer un círculo.
+    const nivel1 = repartir(-Math.PI / 2, -Math.PI / 2 + 2 * Math.PI, claves1, PARTE_DEL_ABIERTO_ARRIBA);
+
     OBJETIVOS.forEach((o, i) => {
-      // Se empieza arriba (-90º) para que el primero quede a las doce, que es
-      // donde todo el mundo empieza a leer un círculo.
-      const a0 = -Math.PI / 2 + i * paso;
-      const a1 = a0 + paso;
+      const [a0, a1] = nivel1[i];
       const color = hexDelColor(o.color);
+      const hs = hijosDe[o.id] || [];
       // La cuenta del objetivo es la suma de sus ramas: un objetivo no tiene
       // contenido propio, lo tiene todo colgado por debajo.
-      const suyas = (hijosDe[o.id] || []).reduce((n, h) => n + (h.cosas || 0), 0);
-      out.push({ clave: o.id, nombre: o.titulo, color, nivel: 1, a0, a1, hijos: (hijosDe[o.id] || []).length, cosas: suyas });
+      const suyas = hs.reduce((n, h) => n + (h.cosas || 0), 0);
+      // FINO = comprimido y sin texto. Es el «aro de contexto» que pidió
+      // Eugenio: sigues viendo dónde encaja lo que miras, y de un clic te vas.
+      const fino = abiertos.size > 0 && !abiertos.has(o.id);
+      out.push({ clave: o.id, nombre: o.titulo, color, nivel: 1, a0, a1, hijos: hs.length, cosas: suyas, fino });
+
       const bajar = (padre: string, d0: number, d1: number, nivel: number) => {
-        /*
-         * ── QUÉ SE VE SIN PULSAR NADA, Y POR QUÉ NO ES TODO ──────────────
-         * Eugenio quiere la rueda entera, con sus ocho subtemas por tema y sus
-         * ocho dentro de cada uno. El segundo anillo sale SIEMPRE: son 14 × 8
-         * = 112 trozos, 3,2° cada uno, que se ven y se pueden señalar.
-         *
-         * El tercero **no cabe**, y esto es aritmética y no una opinión: 112 ×
-         * 8 = 896 trozos en una vuelta son 0,4° cada uno. En una rueda de 900
-         * px de ancho eso es un trozo de **3 píxeles**: no se lee, no se
-         * distingue del de al lado y no se puede pulsar con el dedo ni con el
-         * ratón. Dibujarlo sería enseñar una textura, no una rueda.
-         *
-         * Así que el tercero aparece cuando abres una rama, y entonces ocupa
-         * los 3,2° de su padre repartidos entre ocho — 0,4° cada uno pero **en
-         * el anillo de fuera**, que es cuatro veces más largo. Ahí sí se ve.
-         * Está todo, y está donde se puede mirar.
-         */
-        if (nivel <= 2) {
-          const hs = hijosDe[padre] || [];
-          if (hs.length) {
-            const ancho = (d1 - d0) / hs.length;
-            hs.forEach((h, k) => {
-              const b0 = d0 + k * ancho;
-              const b1 = b0 + ancho;
-              out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length, cosas: h.cosas || 0 });
-              bajar(h.id, b0, b1, nivel + 1);
-            });
-          }
-          return;
-        }
-        if (!abiertos.has(padre) || nivel > 5) return;
-        const hs = hijosDe[padre] || [];
-        if (!hs.length) return;
-        const ancho = (d1 - d0) / hs.length;
-        hs.forEach((h, k) => {
-          const b0 = d0 + k * ancho;
-          const b1 = b0 + ancho;
-          out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length, cosas: h.cosas || 0 });
+        if (!abiertos.has(padre) || nivel > 4) return;
+        const hijos = hijosDe[padre] || [];
+        if (!hijos.length) return;
+        const trozosHijos = repartir(d0, d1, hijos.map(h => h.id), PARTE_DEL_ABIERTO_DENTRO);
+        // Si el más estrecho no se puede leer, este anillo no se pinta. Ver la
+        // nota de `MINIMO_LEGIBLE`.
+        const masEstrecho = Math.min(...trozosHijos.map(([x, y]) => grados(x, y)));
+        if (masEstrecho < MINIMO_LEGIBLE) return;
+        hijos.forEach((h, k) => {
+          const [b0, b1] = trozosHijos[k];
+          out.push({
+            clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1,
+            hijos: (hijosDe[h.id] || []).length, cosas: h.cosas || 0,
+            fino: abiertos.size > 0 && !abiertos.has(h.id) && hijos.some(x => abiertos.has(x.id)),
+          });
           bajar(h.id, b0, b1, nivel + 1);
         });
       };
       bajar(o.id, a0, a1, 2);
     });
+    /*
+     * ── LA RAMA ABIERTA SE VIENE ARRIBA ───────────────────────────────────
+     * Visto en pantalla: al abrir MOVILIDAD, que cae en la parte de abajo, la
+     * cuña se ensanchaba **hacia fuera de la pantalla** y chocaba con los tres
+     * círculos. La rama estaba bien dibujada y no se podía mirar.
+     *
+     * Así que la rueda gira para que lo abierto quede arriba, que es donde se
+     * empieza a leer un círculo y donde siempre hay sitio. «Abrir rama» deja de
+     * significar «ensancha esto donde esté» y pasa a significar «tráeme esto»,
+     * que es lo que uno quiere decir al pulsarlo.
+     *
+     * El giro entra en la misma animación que el reparto: la rueda gira y se
+     * ensancha a la vez, y el ojo sigue el movimiento en lugar de encontrarse
+     * otro dibujo.
+     */
+    const arriba = -Math.PI / 2;
+    const abierto = out.find(x => abiertos.has(x.clave) && x.nivel === 1);
+    if (abierto) {
+      const giro = arriba - (abierto.a0 + abierto.a1) / 2;
+      for (const x of out) { x.a0 += giro; x.a1 += giro; }
+    }
     return out;
   }, [hijosDe, abiertos]);
 
@@ -196,6 +263,43 @@ export default function Preferencias() {
    * «Desperdicio de …»; con 104 caben veinte y se lee «Desperdicio de
    * alimentos». Medido en la pantalla, no calculado.
    */
+  /*
+   * ══ QUE EL DIBUJO SE MUEVA, NO QUE CAMBIE ═════════════════════════════════
+   * Un acordeón recoloca la rueda entera al abrir una rama. Sin animar, cada
+   * clic sustituye un dibujo por otro y hay que volver a buscarlo todo: los
+   * trozos no se han movido, han desaparecido y han aparecido en otro sitio.
+   *
+   * Animando los ángulos, el ojo **sigue** cada trozo hasta donde va y entiende
+   * solo que lo que ha crecido es lo que acaba de pulsar. Es la mitad de lo que
+   * hace usable esta forma de repartir el espacio, y por eso va aquí y no en la
+   * lista de mejoras de después.
+   *
+   * Se anima a mano y no con CSS porque lo que cambia es el atributo `d` de un
+   * `path`, que CSS no sabe interpolar.
+   */
+  const [avance, setAvance] = useState(1);
+  const anteriores = useRef<Map<string, [number, number]>>(new Map());
+  const destino = useRef<Map<string, [number, number]>>(new Map());
+  const firma = [...abiertos].sort().join('|');
+
+  useEffect(() => {
+    // La foto de dónde estaba cada trozo, para salir de ahí y no de cero.
+    anteriores.current = new Map(destino.current);
+    setAvance(0);
+    let vivo = true;
+    const t0 = performance.now();
+    const paso = (ahora: number) => {
+      if (!vivo) return;
+      const x = Math.min(1, (ahora - t0) / 320);
+      // Suavizado: arranca y frena despacio. Un movimiento a velocidad
+      // constante se lee como una máquina, no como algo que se aparta.
+      setAvance(x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+      if (x < 1) requestAnimationFrame(paso);
+    };
+    const id = requestAnimationFrame(paso);
+    return () => { vivo = false; cancelAnimationFrame(id); };
+  }, [firma]);
+
   const R0 = 84, ANCHO = 104;
   /*
    * ── EL SITIO SE RESERVA, NO SE PIDE AL ABRIR ──────────────────────────────
@@ -228,13 +332,43 @@ export default function Preferencias() {
   const lado = 2 * radioDe(nivelMax + 1) + 24;
   const c = lado / 2;
 
-  const pulsar = (clave: string) => {
-    setElegido(clave);
-    setAbiertos(a => {
-      const n = new Set(a);
-      n.has(clave) ? n.delete(clave) : n.add(clave);
-      return n;
-    });
+  /*
+   * ── PULSAR ES ELEGIR; ABRIR ES OTRO GESTO ─────────────────────────────────
+   * Eugenio: «en el centro tiene que haber un botón de abrir rama».
+   *
+   * Antes pulsar un trozo hacía las dos cosas a la vez, y con un acordeón eso
+   * es peor de lo que parece: **abrir mueve toda la rueda**, así que rozar un
+   * trozo para ver cómo se llama te recolocaba el dibujo entero. Ahora pulsar
+   * sólo lo trae al centro —que no mueve nada— y ensanchar la rama es un botón
+   * aparte, que se pulsa cuando ya se ha decidido.
+   */
+  const pulsar = (clave: string) => setElegido(clave);
+
+  /** De un tema hacia arriba: él, su padre, su abuelo… hasta el objetivo. */
+  const caminoDe = (clave: string): string[] => {
+    const camino: string[] = [];
+    let actual: string | undefined = clave;
+    // El tope es por si algún día una fila apunta a su propio antepasado: sin
+    // él, un ciclo en los datos cuelga la página en vez de dibujar de menos.
+    for (let i = 0; i < 12 && actual; i++) {
+      camino.push(actual);
+      const s = subs.find(x => x.id === actual);
+      actual = s ? (s.padre_id || s.objetivo_id) : undefined;
+      if (actual && OBJETIVOS.some(o => o.id === actual)) { camino.push(actual); break; }
+    }
+    return camino;
+  };
+
+  /*
+   * ABRIR UNA RAMA ES ABRIR SU CAMINO ENTERO, y cerrar lo demás.
+   *
+   * Sin esto se podrían quedar dos ramas abiertas a la vez, y entonces las dos
+   * querrían el trozo grande de su nivel: el acordeón dejaría de repartir y
+   * volveríamos a tener trozos que no se leen. Una rama abierta cada vez es lo
+   * que hace que el espacio alcance.
+   */
+  const abrirRama = (clave: string) => {
+    setAbiertos(a => (a.has(clave) ? new Set(caminoDe(clave).slice(1)) : new Set(caminoDe(clave))));
   };
 
   const nombreDe = (clave: string) =>
@@ -321,7 +455,17 @@ export default function Preferencias() {
               role="img"
               aria-label="Rueda de temas"
             >
-              {trozos.map(t => {
+              {trozos.map(tr => {
+                /*
+                 * DE DÓNDE VENÍA CADA TROZO. Si es nuevo, se sale del sitio
+                 * donde estaba su padre — así aparece creciendo desde dentro en
+                 * vez de materializarse. Ver la nota de `avance`.
+                 */
+                const antes = anteriores.current.get(tr.clave);
+                const t = antes && avance < 1
+                  ? { ...tr, a0: antes[0] + (tr.a0 - antes[0]) * avance, a1: antes[1] + (tr.a1 - antes[1]) * avance }
+                  : tr;
+                destino.current.set(tr.clave, [tr.a0, tr.a1]);
                 const r0 = radioDe(t.nivel);
                 const r1 = radioDe(t.nivel + 1) - 3;
                 const medio = (t.a0 + t.a1) / 2;
@@ -352,7 +496,10 @@ export default function Preferencias() {
                 const anclaje = radial ? (alReves ? 'end' : 'start') : 'middle';
                 // Radial: lo que limita es el ANCHO DEL ANILLO. Siguiendo la
                 // curva: el largo del arco.
-                const cabe = radial ? (r1 - r0) > 26 : (t.a1 - t.a0) * rTexto > 30;
+                // Una franja comprimida no lleva nombre: es contexto, no
+                // contenido. Con texto volvería a ser ruido, que es justo lo
+                // que se ha venido a quitar.
+                const cabe = t.fino ? false : (radial ? (r1 - r0) > 26 : (t.a1 - t.a0) * rTexto > 30);
                 return (
                   <g key={t.clave} className="cursor-pointer" onClick={() => pulsar(t.clave)}>
                     <title>{t.nombre}{t.hijos ? ` · ${t.hijos} dentro` : ''}</title>
@@ -405,11 +552,34 @@ export default function Preferencias() {
                         style={{ fontSize: t.nivel === 1 ? 15 : t.nivel === 2 ? 10 : 9, fontWeight: 800, fill: t.nivel === 1 ? '#fff' : '#0f172a' }}
                       >
                         {(() => {
-                          // Cuánto texto cabe: en radial manda el ancho del
-                          // anillo (~13 letras por cada 60 px); siguiendo la
-                          // curva, el arco.
+                          /*
+                           * ── DOS RENGLONES CUANDO EL NOMBRE NO CABE EN UNO ──
+                           * Escrito hacia fuera, lo que limita es el ancho del
+                           * anillo: 104 px dan para unas 20 letras, y
+                           * «Transporte público urbano» son 25. Antes se
+                           * cortaba con puntos suspensivos, que es perder el
+                           * final de casi todos los nombres.
+                           *
+                           * Con el acordeón cada trozo mide 63 px de arco, y
+                           * ahí caben dos renglones de sobra. Se parte por un
+                           * espacio —nunca a mitad de palabra— y sólo si hace
+                           * falta: los que caben en uno se quedan en uno.
+                           */
                           const tope = radial ? Math.floor((r1 - r0) / 4.6) : 22;
-                          return t.nombre.length > tope ? t.nombre.slice(0, tope - 1) + '…' : t.nombre;
+                          if (t.nombre.length <= tope) return t.nombre;
+                          if (!radial) return t.nombre.slice(0, tope - 1) + '…';
+                          // El corte más cercano al tope, por un espacio.
+                          const corte = t.nombre.lastIndexOf(' ', tope);
+                          if (corte < 4) return t.nombre.slice(0, tope - 1) + '…';
+                          const segunda = t.nombre.slice(corte + 1);
+                          return (
+                            <>
+                              <tspan x={tx} dy="-0.55em">{t.nombre.slice(0, corte)}</tspan>
+                              <tspan x={tx} dy="1.1em">
+                                {segunda.length > tope ? segunda.slice(0, tope - 1) + '…' : segunda}
+                              </tspan>
+                            </>
+                          );
                         })()}
                       </text>
                     )}
@@ -428,6 +598,24 @@ export default function Preferencias() {
                         ? `${(hijosDe[elegido] || []).length} dentro`
                         : 'sin nada dentro'}
                     </p>
+                    {/* ── ABRIR RAMA ────────────────────────────────────
+                        Lo pidió Eugenio y es el gesto que faltaba: pulsar un
+                        trozo lo trae aquí, y desde aquí se decide ensanchar su
+                        rama. Va para todo el mundo, con sesión o sin ella —
+                        mirar el árbol no es una preferencia de nadie.
+                        Sólo cuando hay algo dentro: un botón que abre una rama
+                        vacía enseña que no hay nada donde se esperaba, y la
+                        siguiente vez ya no se pulsa. */}
+                    {(hijosDe[elegido] || []).length > 0 && (
+                      <button
+                        onClick={() => abrirRama(elegido)}
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-black text-white transition-colors hover:bg-white/20"
+                      >
+                        {abiertos.has(elegido)
+                          ? <><ChevronsDownUp className="h-3.5 w-3.5" /> Cerrar rama</>
+                          : <><ChevronsUpDown className="h-3.5 w-3.5" /> Abrir rama</>}
+                      </button>
+                    )}
                     {user && (
                       <div className="mt-0.5 flex items-center gap-1">
                         <button
