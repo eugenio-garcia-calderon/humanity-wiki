@@ -1,28 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/navegacion/Rail.tsx",
-      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
-      "desde": "2026-08-25T18:30:04.569Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
-      "desde": "2026-08-25T18:30:04.569Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/navegacion/DialogoNuevoTema.tsx",
-      "motivo": "la pagina del objetivo, la cascada y el + de admin (prog8)",
-      "desde": "2026-08-25T18:30:04.569Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/temas.ts",
-      "motivo": "la cuenta del menu contaba filas y no piezas (75 contra 64)",
-      "desde": "2026-08-25T18:39:45.528Z"
-    }
-  ]
+  "reservas": []
 }
