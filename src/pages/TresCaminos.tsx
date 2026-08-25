@@ -12,7 +12,7 @@ import HojaCrear from '../components/navegacion/HojaCrear';
  * "Explorar", "Crear", "Proyectar", y ahí se pone una imagen en cada una de esas
  * tarjetas con una preview animada de lo que te vas a encontrar en esas 3 formas
  * de interactuar con la plataforma. Y arriba de esas 3 pones el nombre en grande
- * de "Red de Conocimiento"».
+ * de "Red de Conocimiento"» — y el 2026-08-26 volvió a ser humanity.wiki.
  *
  * QUÉ CAMBIA DE VERDAD. Hasta hoy «/» era el muro: al abrir la aplicación
  * empezabas leyendo. Eso responde a una sola de las tres cosas que se pueden
@@ -91,19 +91,25 @@ export default function TresCaminos() {
   return (
     <div className="h-full overflow-y-auto">
       <EstilosPrevias />
-      {/* PEGADO A LA BARRA DE ARRIBA (2026-08-24, Eugenio: «sube el nombre de
-          Red de Conocimiento más hacia el menú de arriba»). Estaba a `8vh`, que
+      {/* PEGADO A LA BARRA DE ARRIBA (2026-08-24, Eugenio: «sube el nombre
+          más hacia el menú de arriba»). Estaba a `8vh`, que
           en una pantalla alta son 80 px de nada antes de empezar: el nombre
           flotaba en medio y las tarjetas se iban hacia abajo. Ahora arranca a
           24 px de la barra —36 en escritorio—, que es la misma distancia a la
           que empieza el contenido en el resto de las páginas. */}
       <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-6 sm:px-8 sm:pt-9">
-        {/* EL NOMBRE, EN GRANDE. «Conocimiento» en el mismo `emerald-600` que
-            lleva en la barra de arriba y en la portada de sin sesión: es el
-            verde de la marca, y un segundo verde parecido lo estropearía. */}
+        {/* EL NOMBRE, EN GRANDE, Y DEBAJO LO QUE ES (2026-08-26, Eugenio).
+            Mismo par que en la portada de sin sesión, a propósito: las dos son
+            la primera pantalla, sólo que de gente distinta, y dos primeras
+            pantallas que se presentan con nombres distintos son dos productos.
+            `.wiki` en el mismo `emerald-600` de la barra de arriba: es el verde
+            de la marca, y un segundo verde parecido lo estropearía. */}
         <h1 className="text-center text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">
-          Red de <span className="text-emerald-600">Conocimiento</span>
+          humanity<span className="text-emerald-600">.wiki</span>
         </h1>
+        <p className="mt-2 text-center text-sm font-bold uppercase tracking-[0.18em] text-slate-400 sm:text-base">
+          La red de conocimiento
+        </p>
         {/* EN UNA SOLA LÍNEA, TAMBIÉN EN EL MÓVIL, que es lo que se pidió. A
             375 px cada tarjeta mide unos 105 px: el dibujo se sigue leyendo
             —son formas grandes, no texto— y la frase de debajo se esconde,
