@@ -47,6 +47,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/pages/Preferencias.tsx",
+      "motivo": "prog2: el hueco reservado de la rueda",
+      "desde": "2026-08-25T16:36:20.969Z"
     }
   ]
 }
