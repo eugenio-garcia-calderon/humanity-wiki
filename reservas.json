@@ -2,21 +2,33 @@
   "reservas": [
     {
       "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
-      "desde": "2026-08-25T23:14:42.188Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/components/navegacion/Rail.tsx",
       "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
       "desde": "2026-08-25T23:14:42.188Z"
     },
     {
       "agente": "prog3",
+      "ruta": "src/server/documentos.ts",
+      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
+      "desde": "2026-08-25T23:30:47.500Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/roadmap.ts",
+      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
+      "desde": "2026-08-25T23:30:47.500Z"
+    },
+    {
+      "agente": "prog3",
       "ruta": "src/components/navegacion/RailInferior.tsx",
-      "motivo": "prog3: avatar al rail derecho, cabecera despejada, feedback abajo en rojo",
-      "desde": "2026-08-25T23:14:42.188Z"
+      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
+      "desde": "2026-08-25T23:30:47.500Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog3: navegacion contextual, filtrar por proyecto y tema",
+      "desde": "2026-08-25T23:30:47.500Z"
     }
   ]
 }
