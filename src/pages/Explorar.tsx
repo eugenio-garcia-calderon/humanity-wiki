@@ -856,7 +856,26 @@ export default function Explorar() {
 
                           La foto es de 26 px y con inicial de respaldo: sin foto
                           guardada, un círculo vacío es peor que una letra. */}
-                      {/* ── EL SELLO, ENCIMA DE TODO ────────────────────────
+                      {/* ── PEGADO AL BORDE EN UN TELÉFONO (2026-08-25) ─────
+                          Eugenio: «haz que el título, la persona que lo publica
+                          y las etiquetas estén más alineadas hacia la izquierda,
+                          pegándose más al borde de la pantalla izquierda».
+
+                          Se sumaban DOS sangrías: los 20 px del contenedor de la
+                          página y los 14 de la propia tarjeta, o sea **34 px de
+                          los 375** antes de que empiece una letra. En un
+                          ordenador ese doble margen separa una tarjeta de la de
+                          al lado; en un teléfono no hay tarjeta de al lado —hay
+                          una sola columna— así que la segunda sangría no separa
+                          de nada y sólo estrecha el texto.
+
+                          Se quita **la de dentro**, no la de fuera: así todo lo
+                          escrito queda alineado en la misma vertical que el
+                          resto de la página, y la portada sigue siendo lo único
+                          que llega al borde de verdad. Desde `sm` vuelve, porque
+                          allí sí hay columnas.
+
+                          ── EL SELLO, ENCIMA DE TODO ────────────────────────
                           Eugenio: «que aparezca arriba el que republica».
 
                           Va **antes** del nombre y no dentro del pie porque
@@ -866,11 +885,11 @@ export default function Explorar() {
                           de romper esto de verdad — que republicar acabe
                           pareciendo firmar. */}
                       {it.republica && (
-                      <div className="px-3.5 pt-2.5">
+                      <div className="px-0 sm:px-3.5 pt-2.5">
                       <SelloRepublicado nombre={it.autor_nombre} />
                       </div>
                       )}
-                      <div className={cn('px-3.5 flex items-center gap-1.5', it.republica ? 'pt-1' : 'pt-3')}>
+                      <div className={cn('px-0 sm:px-3.5 flex items-center gap-1.5', it.republica ? 'pt-1' : 'pt-3')}>
                       {/* ── QUIEN PUBLICA ES UN ENLACE, NO PARTE DEL CARTEL ────
                           Eugenio: «si se pincha en ese nombre, te lleve al perfil
                           de esa persona. Ahora mismo es todo como una gran
@@ -1087,7 +1106,7 @@ export default function Explorar() {
                           — y un párrafo vacío deja un salto que parece un
                           fallo de maquetación. */}
                       {it.titulo && (
-                      <p className="px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
+                      <p className="px-0 sm:px-3.5 pt-2 text-[15px] font-black text-slate-900 leading-snug line-clamp-2">{it.titulo}</p>
                       )}
 
                       {/* EL TEXTO, DEBAJO DEL TÍTULO (2026-08-24). Eugenio: «haz
@@ -1103,7 +1122,7 @@ export default function Explorar() {
                       {(() => {
                       const texto = textoDe(it);
                       return texto ? (
-                      <p className="px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
+                      <p className="px-0 sm:px-3.5 pt-1.5 text-[12px] leading-snug text-slate-500 line-clamp-2">{texto}</p>
                       ) : null;
                       })()}
 
@@ -1115,7 +1134,7 @@ export default function Explorar() {
                           que reparte. Y dentro de un marco, que es lo que
                           impide que los dos textos se lean como uno. */}
                       {it.republica && (
-                      <div className="px-3.5 pt-2">
+                      <div className="px-0 sm:px-3.5 pt-2">
                       <Republicacion r={it.republica} compacto />
                       </div>
                       )}
@@ -1124,7 +1143,7 @@ export default function Explorar() {
                           filtra el menú de la izquierda, así que la etiqueta y
                           el filtro nunca se contradicen: si una tarjeta dice
                           «Energía», está en «Energía». */}
-                      <div className="px-3.5 pt-1.5 pb-1">
+                      <div className="px-0 sm:px-3.5 pt-1.5 pb-1">
                       <EtiquetasDeTema item={it} />
                       </div>
 
@@ -1136,7 +1155,7 @@ export default function Explorar() {
                           portada ni cuerpo: un grafo o una tabla, donde el dibujo ES
                           la publicación. */}
                       {!portadaDe(it) && !textoDe(it) && (
-                      <div className="px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
+                      <div className="px-0 sm:px-3.5 py-2 flex-1 min-h-0 overflow-hidden">
                       <WindowContent kind={it.kind} config={it.config || {}} variant="node" />
                       </div>
                       )}
@@ -1151,7 +1170,7 @@ export default function Explorar() {
                           `items-start` porque la etiqueta ocupa dos líneas y las
                           visualizaciones una: centradas, la de una línea flotaba
                           a media altura de la otra. */}
-                      <div className="px-3.5 py-2 flex flex-wrap items-start gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                      <div className="px-0 sm:px-3.5 py-2 flex flex-wrap items-start gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
                       {/* ── DÓNDE ESTÁ METIDA ESTO, Y CUÁNDO SE PUEDE PULSAR ───
                           Eugenio: «hay una información abajo que es dónde está
                           integrada esa publicación, puede estar integrada dentro
