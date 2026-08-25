@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Proyectos.tsx",
+      "motivo": "editar la descripcion del proyecto desde su pagina (prog8)",
+      "desde": "2026-08-25T21:42:05.188Z"
+    }
+  ]
 }
