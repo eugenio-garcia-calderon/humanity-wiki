@@ -658,18 +658,35 @@ export function Proyecto() {
               </div>
             </div>
           ) : proyecto.descripcion ? (
-            <p className="group/desc mt-1.5 flex items-start gap-1.5 text-sm text-slate-500">
+            /*
+             * ── EL LÁPIZ ESTABA INVISIBLE, Y ESO ES NO PODER EDITARLA ────────
+             * Lo puse con `opacity-0` hasta pasar el ratón, y Eugenio volvió a
+             * decir que no se podía cambiar la descripción. Tenía razón: el
+             * botón existía en la página con opacidad **cero**, así que no
+             * había forma de saber que estaba ahí — y en una pantalla táctil no
+             * hay ratón que pasar, así que no aparecía nunca.
+             *
+             * Es el mismo fallo que me hizo llegar aquí con los subtemas del
+             * menú: poner la puerta donde nadie va a mirar. Lo escribí en aquel
+             * commit y lo repetí tres pantallas después.
+             *
+             * Ahora: **la descripción entera se pulsa** —es el sitio grande y
+             * evidente— y el lápiz se ve siempre, en gris flojo. Que un botón
+             * sea discreto está bien; que sea invisible es no tenerlo.
+             */
+            <button
+              type="button"
+              onClick={() => { setDescBorrador(proyecto.descripcion || ''); setEditandoDesc(true); }}
+              disabled={!puedoEditar}
+              title={puedoEditar ? 'Cambiar la descripción' : undefined}
+              className={cn('group/desc mt-1.5 flex items-start gap-1.5 text-left text-sm text-slate-500 rounded-lg',
+                puedoEditar && '-mx-1.5 px-1.5 py-0.5 hover:bg-slate-50 hover:text-slate-700 transition-colors')}
+            >
               <span>{proyecto.descripcion}</span>
               {puedoEditar && (
-                <button
-                  onClick={() => { setDescBorrador(proyecto.descripcion || ''); setEditandoDesc(true); }}
-                  title="Cambiar la descripción" aria-label="Cambiar la descripción"
-                  className="shrink-0 p-1 rounded text-slate-300 opacity-0 group-hover/desc:opacity-100 focus:opacity-100 hover:text-emerald-700 transition-all"
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
+                <Pencil className="w-3 h-3 mt-1 shrink-0 text-slate-300 group-hover/desc:text-emerald-600 transition-colors" />
               )}
-            </p>
+            </button>
           ) : puedoEditar ? (
             <button
               onClick={() => { setDescBorrador(''); setEditandoDesc(true); }}
