@@ -17,6 +17,7 @@ import {
   Droplets, Wheat, Home as HomeIcon, HeartPulse, Users, TreePine, GraduationCap,
   Car, Zap, Cpu, Briefcase, Landmark, Coins, Palette, Sparkles,
 } from 'lucide-react';
+import { OBJECTIVE_ID_BY_KEY } from './objectiveIds';
 
 export interface Objetivo {
   id: string;
@@ -175,3 +176,26 @@ export const areasQueEncajan = (texto: string, cuantas = 3): Objetivo[] => {
 /** El área por su id, para pintar su icono y su color donde haga falta. */
 export const AREA_POR_ID: Record<string, Objetivo> =
   Object.fromEntries(OBJETIVOS.map(o => [o.id, o]));
+
+/*
+ * ── QUE LAS DOS LISTAS NO SE SEPAREN ──────────────────────────────────────
+ * `src/utils/objectiveIds.ts` repite estos mismos ids sin iconos ni colores,
+ * porque de ahí tira también el servidor y aquí dentro hay `lucide-react`.
+ *
+ * Dos listas de lo mismo se separan: al añadir ESPIRITUALIDAD, aquélla se
+ * quedó en catorce y los 72 subtemas del quince buscaban sin su palabra. No
+ * falló nada ni se quejó nadie — se encontró leyendo.
+ *
+ * Esto no las une; **avisa cuando dejan de coincidir**, y sólo en desarrollo:
+ * en producción un aviso en la consola no lo lee nadie y el arreglo hay que
+ * hacerlo antes de desplegar, no después.
+ */
+if (import.meta.env?.DEV) {
+  const faltan = OBJETIVOS.filter(o => !Object.values(OBJECTIVE_ID_BY_KEY).includes(o.id));
+  if (faltan.length) {
+    console.warn(
+      '[objetivos] estos están aquí y no en objectiveIds.ts:',
+      faltan.map(o => `${o.id} ${o.titulo}`).join(', '),
+      '— añádelos allí o lo que lea esa lista se los saltará sin avisar.');
+  }
+}

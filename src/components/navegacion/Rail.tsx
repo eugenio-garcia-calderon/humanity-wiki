@@ -4,7 +4,7 @@ import {
   Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
-  ChevronLeft, ChevronRight, ChevronDown, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal,
+  ChevronLeft, ChevronRight, ChevronDown, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal, Plus,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -237,6 +237,8 @@ export default function Rail({
     mostrar?: (clave: string) => void;
     /** Ir a la página donde se ordenan los temas a lo grande. */
     onPersonalizar?: () => void;
+    /** Abrir el diálogo de crear un tema. */
+    onNuevoTema?: () => void;
   };
   /*
    * ══ LOS SUBTEMAS, DENTRO DEL MENÚ (2026-08-25, prog8) ═════════════════════
@@ -356,6 +358,23 @@ export default function Rail({
 
     const hijosDe = (padre: string | null) => todos.filter(t => t.padre_id === padre);
 
+    /*
+     * ── EN EL MENÚ SÓLO EL PRIMER NIVEL (2026-08-25) ──────────────────────
+     * La siembra puso 8 subtemas por objetivo y 8 dentro de cada uno, así que
+     * abrir un objetivo aquí soltaba **72 renglones de golpe** en una tira de
+     * 224 px. Funcionaba; se hacía larguísimo. Lo señaló prog8 y la siembra era
+     * mía, así que el recorte también.
+     *
+     * Ocho es un menú y setenta y dos es un documento. Lo que se pierde no se
+     * pierde: cada rama lleva a `/temas/:id`, y ahí caben sus ocho hijas con
+     * sitio para leerlas. El menú dice **a dónde se puede ir**; la página dice
+     * qué hay.
+     *
+     * `NIVELES_EN_EL_MENU` con nombre y no un `1` suelto: el día que alguien
+     * quiera dos, que sepa que está cambiando una decisión y no un número.
+     */
+    const NIVELES_EN_EL_MENU = 1;
+
     const pintar = (padre: string | null, nivel: number): any => hijosDe(padre).map(t => {
       const suyos = hijosDe(t.id);
       return (
@@ -380,7 +399,7 @@ export default function Rail({
               <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-300">{t.cosas}</span>
             )}
           </NavLink>
-          {suyos.length > 0 && pintar(t.id, nivel + 1)}
+          {suyos.length > 0 && nivel + 1 < NIVELES_EN_EL_MENU && pintar(t.id, nivel + 1)}
         </div>
       );
     });
@@ -733,6 +752,32 @@ export default function Rail({
           </button>
         )}
 
+        {/* CREAR UN TEMA, JUNTO A PERSONALIZAR (2026-08-25). Eugenio: «añade la
+            opción en el menú izquierdo de crear un nuevo tema».
+            Va con el otro y no al final de los quince: los dos son cosas que se
+            hacen CON la lista, no elementos de la lista. Juntos arriba se leen
+            como lo que son —las herramientas del menú— y no como dos temas más
+            perdidos entre los demás. */}
+        {personal?.onNuevoTema && (
+          <button
+            onClick={personal.onNuevoTema}
+            title="Crear un tema"
+            aria-label="Crear un tema"
+            className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
+              desplegado ? 'w-full' : 'w-10 justify-center',
+              claro ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-400 hover:bg-slate-800 hover:text-white')}
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
+              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
+              Nuevo tema
+            </span>
+          </button>
+        )}
+
+        {/* Cada entrada y, debajo, su rama de subtemas (prog8). Las dos cosas
+            conviven: mi botón es una herramienta del menú y su árbol es el
+            contenido — el choque al fusionar era de sitio, no de idea. */}
         {(items ?? HERRAMIENTAS).map(h => (
           <Fragment key={h.clave}>
             {boton(h)}
