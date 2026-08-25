@@ -17,6 +17,12 @@
       "ruta": "src/components/ai/AIAssistant.tsx",
       "motivo": "previsualizar la imagen pegada en el chat",
       "desde": "2026-08-25T18:05:24.839Z"
+    },
+    {
+      "agente": "prog8",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "entrada: vista previa del adjunto",
+      "desde": "2026-08-25T18:08:58.739Z"
     }
   ]
 }
