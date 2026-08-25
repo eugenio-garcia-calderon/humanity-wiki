@@ -45,7 +45,26 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
   const [conIA, setConIA] = useState(false);
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
+    // ══ CENTRADA EN LA PANTALLA, NO EN EL HUECO QUE SOBRA ═══════════════════
+    // (2026-08-25, Eugenio: «y que esté centrado».)
+    //
+    // Centrar en el hueco no basta: el raíl de la derecha (Feedback, iconos,
+    // tu foto) es 97 px más ancho que el de la izquierda, así que el centro
+    // del hueco cae 53 px a la izquierda del centro de la pantalla. Medido,
+    // no estimado.
+    //
+    // Desde 1280 px la caja se saca del flujo y se clava en el centro de la
+    // ventana. **Solo desde ahí**: por debajo no cabe y se montaría encima de
+    // los iconos — a 1280 el borde derecho de la caja queda a 916 px y los
+    // iconos empiezan en 936, veinte de margen. Por debajo se queda centrada
+    // en el hueco, que es lo que se puede.
+    //
+    // Y AL SACARLA DEL FLUJO HAY QUE DEVOLVERLE EL EMPUJE A OTRO: quien manda
+    // los iconos a la derecha era esta caja al crecer. Desde 1280 lo hace el
+    // hueco vacío de `Layout.tsx`, que recupera su `flex-1` justo a esa
+    // anchura. Si no, los iconos se vendrían al centro con la caja encima.
+    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5
+      xl:absolute xl:left-1/2 xl:w-[34.5rem] xl:-translate-x-1/2 xl:flex-none">
       {/* ══ EN UNA PANTALLA MUY ESTRECHA, UN BOTÓN Y NO UNA CAJA ══════════
           Medido a 320 px: la caja quedaba en 18 px de ancho **con 116 px de
           botones dentro**, y el campo de escribir medía **0**. O sea que el
