@@ -23,12 +23,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "entrada: pegar imagenes en la IA",
       "desde": "2026-08-25T16:29:23.390Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "drizzle/0124_agregador_movilidad_ligera.sql",
-      "motivo": "la semilla de las 50 como migracion, para que llegue a produccion",
-      "desde": "2026-08-25T17:05:52.250Z"
     }
   ]
 }
