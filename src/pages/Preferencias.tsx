@@ -140,6 +140,36 @@ export default function Preferencias() {
       const color = hexDelColor(o.color);
       out.push({ clave: o.id, nombre: o.titulo, color, nivel: 1, a0, a1, hijos: (hijosDe[o.id] || []).length });
       const bajar = (padre: string, d0: number, d1: number, nivel: number) => {
+        /*
+         * ── QUÉ SE VE SIN PULSAR NADA, Y POR QUÉ NO ES TODO ──────────────
+         * Eugenio quiere la rueda entera, con sus ocho subtemas por tema y sus
+         * ocho dentro de cada uno. El segundo anillo sale SIEMPRE: son 14 × 8
+         * = 112 trozos, 3,2° cada uno, que se ven y se pueden señalar.
+         *
+         * El tercero **no cabe**, y esto es aritmética y no una opinión: 112 ×
+         * 8 = 896 trozos en una vuelta son 0,4° cada uno. En una rueda de 900
+         * px de ancho eso es un trozo de **3 píxeles**: no se lee, no se
+         * distingue del de al lado y no se puede pulsar con el dedo ni con el
+         * ratón. Dibujarlo sería enseñar una textura, no una rueda.
+         *
+         * Así que el tercero aparece cuando abres una rama, y entonces ocupa
+         * los 3,2° de su padre repartidos entre ocho — 0,4° cada uno pero **en
+         * el anillo de fuera**, que es cuatro veces más largo. Ahí sí se ve.
+         * Está todo, y está donde se puede mirar.
+         */
+        if (nivel <= 2) {
+          const hs = hijosDe[padre] || [];
+          if (hs.length) {
+            const ancho = (d1 - d0) / hs.length;
+            hs.forEach((h, k) => {
+              const b0 = d0 + k * ancho;
+              const b1 = b0 + ancho;
+              out.push({ clave: h.id, nombre: h.nombre, color, nivel, a0: b0, a1: b1, hijos: (hijosDe[h.id] || []).length });
+              bajar(h.id, b0, b1, nivel + 1);
+            });
+          }
+          return;
+        }
         if (!abiertos.has(padre) || nivel > 5) return;
         const hs = hijosDe[padre] || [];
         if (!hs.length) return;
@@ -156,7 +186,14 @@ export default function Preferencias() {
     return out;
   }, [hijosDe, abiertos]);
 
-  const R0 = 58, ANCHO = 52;
+  /*
+   * Anillos anchos y centro pequeño, y no al revés: lo que se lee aquí son los
+   * nombres del segundo anillo, escritos hacia fuera, así que **el ancho del
+   * anillo es el renglón**. Con 78 px cabían quince letras y salían cosas como
+   * «Desperdicio de …»; con 104 caben veinte y se lee «Desperdicio de
+   * alimentos». Medido en la pantalla, no calculado.
+   */
+  const R0 = 84, ANCHO = 104;
   /*
    * ── EL SITIO SE RESERVA, NO SE PIDE AL ABRIR ──────────────────────────────
    * La primera versión hacía el lienzo del tamaño justo de lo abierto. Visto en
@@ -246,10 +283,24 @@ export default function Preferencias() {
       ) : (
         <>
           {/* ══ LA RUEDA ═══════════════════════════════════════════════════ */}
-          <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start">
+          {/* ── TODO DENTRO DE LA RUEDA (2026-08-25) ────────────────────────
+              Eugenio: «no lo que has hecho en la parte derecha, sino que esté
+              todo integrado en una rueda».
+
+              El panel de al lado se va. Lo que hacía —decir qué has pulsado,
+              la estrella, y añadir un subtema— se muda **al agujero del
+              centro**, que estaba ahí sin usar y es justo donde miras después
+              de pulsar un trozo. Al lado, la información aparecía a 500 px de
+              donde acababa de ocurrir el gesto.
+
+              Y la rueda pasa de 520 a 900 px: con dos anillos llenos —catorce
+              fuera y ciento doce dentro— a 520 px los nombres del segundo
+              anillo no caben en su trozo. El tamaño aquí no es lujo, es lo que
+              decide si se puede leer. */}
+          <div className="flex justify-center">
             <svg
               viewBox={`0 0 ${lado} ${lado}`}
-              className="w-full max-w-[520px] shrink-0"
+              className="w-full max-w-[900px]"
               role="img"
               aria-label="Rueda de temas"
             >
@@ -257,15 +308,34 @@ export default function Preferencias() {
                 const r0 = R0 + (t.nivel - 1) * ANCHO;
                 const r1 = r0 + ANCHO - 3;
                 const medio = (t.a0 + t.a1) / 2;
-                const rTexto = (r0 + r1) / 2;
+                /*
+                 * ── EL TEXTO DE FUERA VA HACIA FUERA ──────────────────────
+                 * Los catorce del primer anillo se escriben SIGUIENDO la curva:
+                 * sus trozos son anchos (25,7°) y ahí una palabra cabe de sobra.
+                 *
+                 * Del segundo en adelante, no. Con ocho subtemas por tema, cada
+                 * trozo mide 3,2°, que a esa altura son unos quince píxeles de
+                 * arco: no cabe ni «Riego». Pero **a lo largo del radio hay
+                 * cien**, porque el anillo es ancho.
+                 *
+                 * Así que el texto se gira y se lee del centro hacia fuera, que
+                 * es como está escrita la rueda de permacultura que puso Eugenio
+                 * de ejemplo — y no es una copia de estilo: es la única manera
+                 * de que quepan ocho nombres en una vuelta.
+                 */
+                const radial = t.nivel > 1;
+                const rTexto = radial ? r0 + 6 : (r0 + r1) / 2;
                 const tx = c + rTexto * Math.cos(medio);
                 const ty = c + rTexto * Math.sin(medio);
-                // El texto se gira para seguir el anillo, y se le da la vuelta
-                // en la mitad izquierda: sin eso, la mitad de los nombres se
-                // leerían del revés.
                 let giro = (medio * 180) / Math.PI;
-                if (giro > 90 || giro < -90) giro += 180;
-                const cabe = (t.a1 - t.a0) * rTexto > 34;
+                // En la mitad izquierda se le da la vuelta: si no, la mitad de
+                // los nombres se leerían boca abajo.
+                const alReves = giro > 90 || giro < -90;
+                if (alReves) giro += 180;
+                const anclaje = radial ? (alReves ? 'end' : 'start') : 'middle';
+                // Radial: lo que limita es el ANCHO DEL ANILLO. Siguiendo la
+                // curva: el largo del arco.
+                const cabe = radial ? (r1 - r0) > 26 : (t.a1 - t.a0) * rTexto > 30;
                 return (
                   <g key={t.clave} className="cursor-pointer" onClick={() => pulsar(t.clave)}>
                     <title>{t.nombre}{t.hijos ? ` · ${t.hijos} dentro` : ''}</title>
@@ -289,98 +359,98 @@ export default function Preferencias() {
                       <text
                         x={tx} y={ty}
                         transform={`rotate(${giro} ${tx} ${ty})`}
-                        textAnchor="middle" dominantBaseline="middle"
+                        textAnchor={anclaje} dominantBaseline="middle"
                         className="pointer-events-none select-none"
-                        style={{ fontSize: t.nivel === 1 ? 10 : 9, fontWeight: 800, fill: t.nivel === 1 ? '#fff' : '#0f172a' }}
+                        style={{ fontSize: t.nivel === 1 ? 15 : t.nivel === 2 ? 10 : 9, fontWeight: 800, fill: t.nivel === 1 ? '#fff' : '#0f172a' }}
                       >
-                        {t.nombre.length > 16 ? t.nombre.slice(0, 15) + '…' : t.nombre}
+                        {(() => {
+                          // Cuánto texto cabe: en radial manda el ancho del
+                          // anillo (~13 letras por cada 60 px); siguiendo la
+                          // curva, el arco.
+                          const tope = radial ? Math.floor((r1 - r0) / 4.6) : 22;
+                          return t.nombre.length > tope ? t.nombre.slice(0, tope - 1) + '…' : t.nombre;
+                        })()}
                       </text>
                     )}
                   </g>
                 );
               })}
-              <circle cx={c} cy={c} r={R0 - 6} fill="#0f172a" />
-              <text x={c} y={c - 5} textAnchor="middle" style={{ fontSize: 11, fontWeight: 900, fill: '#fff' }}>TEMAS</text>
-              <text x={c} y={c + 10} textAnchor="middle" style={{ fontSize: 9, fill: '#94a3b8' }}>
-                {OBJETIVOS.length} + {subs.length}
-              </text>
-            </svg>
-
-            {/* Lo que hay dentro de lo que acabas de pulsar. */}
-            <div className="w-full lg:max-w-sm">
+              {/* EL AGUJERO DEL CENTRO ES EL PANEL. Ver la nota de arriba:
+                  lo que se pulsa se cuenta donde se está mirando. */}
+              <circle cx={c} cy={c} r={R0 - 8} fill="#0f172a" />
               {elegido ? (
-                <div className="rounded-2xl border border-slate-200 p-4">
-                  <div className="flex items-start gap-2">
-                    <span className="mt-1 h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: hexDelColor(OBJETIVOS.find(o => o.id === objetivoDe(elegido))?.color) }} />
-                    <h2 className="min-w-0 flex-1 text-base font-black text-slate-900">{nombreDe(elegido)}</h2>
+                <foreignObject x={c - (R0 - 16)} y={c - (R0 - 16)} width={(R0 - 16) * 2} height={(R0 - 16) * 2}>
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
+                    <p className="line-clamp-3 text-[13px] font-black leading-tight text-white">{nombreDe(elegido)}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {(hijosDe[elegido] || []).length
+                        ? `${(hijosDe[elegido] || []).length} dentro`
+                        : 'sin nada dentro'}
+                    </p>
                     {user && (
-                      <>
+                      <div className="mt-0.5 flex items-center gap-1">
                         <button
                           onClick={() => marcar(elegido, { favorito: !esFav(elegido) })}
                           title={esFav(elegido) ? 'Quitar de favoritos' : 'Marcar como favorito'}
-                          className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors',
-                            esFav(elegido) ? 'text-amber-400' : 'text-slate-300 hover:text-amber-400')}
+                          className={cn('grid h-7 w-7 place-items-center rounded-lg transition-colors',
+                            esFav(elegido) ? 'text-amber-400' : 'text-slate-500 hover:text-amber-400')}
                         >
                           <Star className="h-4 w-4" fill={esFav(elegido) ? 'currentColor' : 'none'} />
                         </button>
                         <button
                           onClick={() => marcar(elegido, { oculto: !estaOculto(elegido) })}
                           title={estaOculto(elegido) ? 'Devolver al menú' : 'Quitar del menú'}
-                          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-300 transition-colors hover:text-slate-600"
+                          className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 transition-colors hover:text-white"
                         >
                           {estaOculto(elegido) ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
-                      </>
+                        <button
+                          onClick={() => { setCreandoEn(elegido); setNombreNuevo(''); }}
+                          title="Añadir un subtema aquí"
+                          className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 transition-colors hover:text-white"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
-
-                  <ul className="mt-3 space-y-1">
-                    {(hijosDe[elegido] || []).map(h => (
-                      <li key={h.id}>
-                        <button onClick={() => pulsar(h.id)}
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-bold text-slate-600 hover:bg-slate-50">
-                          {esFav(h.id) && <Star className="h-3 w-3 shrink-0 text-amber-400" fill="currentColor" />}
-                          <span className="min-w-0 flex-1 truncate">{h.nombre}</span>
-                          {h.cosas > 0 && <span className="shrink-0 text-[10px] text-slate-400">{h.cosas}</span>}
-                        </button>
-                      </li>
-                    ))}
-                    {!(hijosDe[elegido] || []).length && (
-                      <li className="px-2 py-1.5 text-xs text-slate-400">Todavía no tiene nada dentro.</li>
-                    )}
-                  </ul>
-
-                  {user && (
-                    creandoEn === elegido ? (
-                      <form
-                        onSubmit={e => { e.preventDefault(); crear(objetivoDe(elegido), OBJETIVOS.some(o => o.id === elegido) ? null : elegido); }}
-                        className="mt-2 flex gap-1.5"
-                      >
-                        <input
-                          autoFocus
-                          value={nombreNuevo}
-                          onChange={e => setNombreNuevo(e.target.value)}
-                          placeholder="Nombre del subtema"
-                          className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-emerald-400"
-                        />
-                        <button type="submit" className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white">Crear</button>
-                      </form>
-                    ) : (
-                      <button onClick={() => { setCreandoEn(elegido); setNombreNuevo(''); }}
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                        <Plus className="h-3.5 w-3.5" /> Añadir un subtema aquí
-                      </button>
-                    )
-                  )}
-                </div>
+                </foreignObject>
               ) : (
-                <p className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-xs text-slate-400">
-                  Pulsa un trozo de la rueda para abrirlo.
-                </p>
+                <>
+                  <text x={c} y={c - 6} textAnchor="middle" style={{ fontSize: 14, fontWeight: 900, fill: '#fff' }}>TEMAS</text>
+                  <text x={c} y={c + 12} textAnchor="middle" style={{ fontSize: 11, fill: '#94a3b8' }}>
+                    {OBJETIVOS.length} + {subs.length}
+                  </text>
+                </>
               )}
-            </div>
+            </svg>
+
           </div>
+
+          {/* CREAR UN SUBTEMA, DEBAJO DE LA RUEDA. Se abre desde el «+» del
+              centro, y el campo sale aquí porque dentro del agujero no cabe
+              un teclado: un campo de texto de 60 px de ancho no se puede
+              escribir. Lo que va al centro es lo que se lee de un vistazo; lo
+              que hay que teclear, fuera. */}
+          {user && creandoEn && (
+            <form
+              onSubmit={e => { e.preventDefault(); crear(objetivoDe(creandoEn), OBJETIVOS.some(o => o.id === creandoEn) ? null : creandoEn); }}
+              className="mx-auto mt-4 flex max-w-md items-center gap-2"
+            >
+              <span className="shrink-0 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                Dentro de {nombreDe(creandoEn)}
+              </span>
+              <input
+                autoFocus
+                value={nombreNuevo}
+                onChange={e => setNombreNuevo(e.target.value)}
+                placeholder="Nombre del subtema"
+                className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
+              />
+              <button type="submit" className="shrink-0 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white">Crear</button>
+              <button type="button" onClick={() => setCreandoEn(null)} className="shrink-0 text-xs font-bold text-slate-400 hover:text-slate-700">Cancelar</button>
+            </form>
+          )}
 
           {/* ══ Y LA TABLA, DEBAJO ═════════════════════════════════════════
               Eugenio: «los objetivos de izquierda a derecha, y los subtemas de
