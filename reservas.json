@@ -23,6 +23,12 @@
       "ruta": "src/pages/TresCaminos.tsx",
       "motivo": "volver a humanity.wiki como nombre (prog8)",
       "desde": "2026-08-25T22:43:20.652Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Bienvenida.tsx",
+      "motivo": "volver a humanity.wiki como nombre (prog8)",
+      "desde": "2026-08-25T22:43:24.073Z"
     }
   ]
 }
