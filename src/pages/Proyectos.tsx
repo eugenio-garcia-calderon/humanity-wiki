@@ -4,7 +4,7 @@ import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
   Package, Table2, CalendarDays, Bookmark, ExternalLink,
-  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2,
+  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2, MoreHorizontal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
@@ -16,6 +16,7 @@ import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import Adjuntos from '../components/archivo/Adjuntos';
 import GaleriaProyecto from '../components/proyecto/GaleriaProyecto';
+import EditarProyecto from '../components/proyecto/EditarProyecto';
 import { elegirYSubirImagenes } from '../utils/elegirImagen';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
@@ -37,6 +38,17 @@ export function Proyectos() {
   // Con `?nuevo=1` el diálogo nace abierto: es lo que manda el «+» de la
   // sección PROYECTOS del menú (2026-08-20), que antes solo traía al índice.
   const [creando, setCreando] = useState(() => new URLSearchParams(window.location.search).get('nuevo') === '1');
+  /*
+   * ── EDITAR UNA TARJETA SIN ENTRAR (2026-08-26) ───────────────────────────
+   * Eugenio: «crea un botón de tres puntitos para editar las tarjetas de los
+   * proyectos desde la página de proyectos general […] sin tener que entrar en
+   * cada proyecto».
+   *
+   * Guarda el proyecto que se está editando, no un booleano: la ventana
+   * necesita saber CUÁL, y con un booleano habría que adivinarlo desde otro
+   * sitio.
+   */
+  const [editando, setEditando] = useState<any | null>(null);
 
   const cargar = () => fetch('/api/proyectos', { credentials: 'include' })
     .then(r => r.json())
@@ -75,6 +87,12 @@ export function Proyectos() {
   const sufijo = suyo || porDefecto;
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [tituloBorrador, setTituloBorrador] = useState('');
+
+  /** ¿Puede esta persona editar este proyecto? La misma regla que el servidor
+   *  comprueba en el PUT: su creador, o un administrador. Aquí sólo decide si
+   *  se enseña el botón — quien llame a la ruta a mano se encuentra el 403. */
+  const puedeEditarProyecto = (p: any) =>
+    !!user && (p.creador_user_id === user.id || !!user.isAdmin);
 
   const guardarTitulo = async () => {
     const v = tituloBorrador.trim().slice(0, 40);
@@ -165,7 +183,7 @@ export function Proyectos() {
               const avance = p.tarjetas ? Math.round((p.hechas / p.tarjetas) * 100) : 0;
               return (
                 <Link key={p.id} to={`/proyectos/${p.slug}`}
-                  className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all">
+                  className="group/tarjeta bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all">
                   {/* LA PORTADA (2026-08-26, Eugenio: «añade la posibilidad de
                       crear imágenes de portada de esos proyectos, que
                       aparecerán en las tarjetas de los proyectos cuando
@@ -179,7 +197,28 @@ export function Proyectos() {
                     <img src={p.portada_url} alt="" loading="lazy"
                       className="h-32 w-full object-cover" />
                   )}
-                  <div className="p-5">
+                  <div className="relative p-5">
+                    {/* LOS TRES PUNTITOS. Sólo los ve quien puede editar el
+                        proyecto, y salen al pasar por la tarjeta — en reposo
+                        esto es una rejilla de proyectos, no doce botones.
+                        En una pantalla táctil no hay ratón que pasar, así que
+                        `focus-within` los saca también con el teclado, y el
+                        botón se queda visible en cuanto se toca.
+
+                        `preventDefault` Y `stopPropagation`: la tarjeta entera
+                        es un enlace, y sin las dos cosas pulsar los puntitos
+                        abriría el proyecto además de la ventana — que es
+                        justo lo que se pidió evitar. */}
+                    {puedeEditarProyecto(p) && (
+                      <button
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); setEditando(p); }}
+                        title={`Editar ${p.titulo}`}
+                        aria-label={`Editar ${p.titulo}`}
+                        className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-400 opacity-0 shadow-sm transition-opacity hover:text-slate-800 focus:opacity-100 group-hover/tarjeta:opacity-100"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    )}
                   <div className="flex items-center gap-1.5 mb-1.5">
                     {p.publico ? <Globe className="w-3 h-3 text-emerald-600" /> : <Lock className="w-3 h-3 text-amber-600" />}
                     <span className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
@@ -228,6 +267,17 @@ export function Proyectos() {
         <ModalNuevoProyecto
           onCerrar={() => setCreando(false)}
           onCreado={p => navigate(`/proyectos/${p.slug}`)}
+        />
+      )}
+
+      {editando && (
+        <EditarProyecto
+          proyecto={editando}
+          onCerrar={() => setEditando(null)}
+          /* Se repinta la tarjeta con lo que quedó, en vez de recargar la
+             lista entera: recargar doce proyectos para cambiar una palabra
+             hace parpadear toda la pantalla por el cambio de una tarjeta. */
+          onHecho={c => setProyectos(l => l.map(x => (x.id === editando.id ? { ...x, ...c } : x)))}
         />
       )}
     </div>

@@ -321,7 +321,16 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       await db.execute(sql`
         UPDATE proyectos SET
           titulo      = COALESCE(${d.titulo ?? null}, titulo),
-          descripcion = COALESCE(${d.descripcion ?? null}, descripcion),
+          -- LA DESCRIPCIÓN Y EL ICONO SE PUEDEN VACIAR (2026-08-26). Con
+          -- COALESCE, mandar null significa «déjalo como estaba», así que
+          -- borrar la descripción era imposible desde aquí: se escribía y no
+          -- pasaba nada, que es la peor forma de no funcionar. Ahora null y
+          -- cadena vacía borran, y no mandar el campo es lo que lo respeta.
+          descripcion = CASE WHEN ${d.descripcion === undefined} THEN descripcion ELSE ${d.descripcion ?? null}::text END,
+          -- La columna icono la escribía sólo /api/elemento. Entra aquí para que la
+          -- ventanita de editar una tarjeta guarde sus cuatro campos en UNA
+          -- llamada: dos llamadas es un guardado que puede quedarse a medias.
+          icono       = CASE WHEN ${d.icono === undefined} THEN icono ELSE ${d.icono ?? null}::text END,
           vision      = COALESCE(${d.vision ?? null}, vision),
           grupos      = COALESCE(${d.grupos ? JSON.stringify(d.grupos) : null}::jsonb, grupos),
           columnas    = COALESCE(${d.columnas ? JSON.stringify(limpiarColumnas(d.columnas)) : null}::jsonb, columnas),
