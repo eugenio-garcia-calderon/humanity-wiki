@@ -1,0 +1,21 @@
+-- ============================================================================
+-- LO QUE CORRIGE UNA PERSONA NO LO PISA LA MÁQUINA (2026-08-25)
+-- ============================================================================
+-- Eugenio: «permite al admin modificar el mapa de cluster de las
+-- publicaciones».
+--
+-- Los grupos los calcula `scripts/agregador/constelacion.py` midiendo de qué
+-- habla cada pieza, y se equivoca: dos textos pueden parecerse en las palabras
+-- y no en el fondo. Poder arreglarlo a mano es lo que convierte el mapa en algo
+-- de lo que fiarse.
+--
+-- ── PERO CORREGIR NO SIRVE DE NADA SI SE BORRA SOLO ────────────────────────
+-- La constelación se recalcula cada vez que entra contenido nuevo. Sin esta
+-- marca, cada recálculo devolvería a su sitio equivocado todo lo que alguien
+-- hubiera movido — y nadie corrige dos veces la misma cosa.
+--
+-- `a_mano` es una frontera: lo que hay debajo es de la máquina y se recalcula;
+-- lo que está marcado es de una persona y se respeta. El script tendrá que
+-- mirarla antes de escribir, y eso queda escrito en su cabecera, no aquí.
+ALTER TABLE contenido_agregado ADD COLUMN IF NOT EXISTS a_mano boolean NOT NULL DEFAULT false;
+ALTER TABLE contenido_cluster  ADD COLUMN IF NOT EXISTS a_mano boolean NOT NULL DEFAULT false;

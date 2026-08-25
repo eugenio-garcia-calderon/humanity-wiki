@@ -153,7 +153,8 @@ def q(s):
 
 # ── LAS PIEZAS ──────────────────────────────────────────────────────────────
 filas = psql("""
-  SELECT a.id, a.formato, a.titulo, coalesce(a.fuente,''), coalesce(a.nota_ia,''), a.calidad
+  SELECT a.id, a.formato, a.titulo, coalesce(a.fuente,''), coalesce(a.nota_ia,''), a.calidad,
+         coalesce(a.a_mano, false)::text, coalesce(a.cluster_id, '')
   FROM contenido_agregado a
   WHERE a.archived_at IS NULL
     AND EXISTS (SELECT 1 FROM subtema_contenido c
@@ -303,15 +304,34 @@ CREATE TABLE IF NOT EXISTS contenido_vecino (
 CREATE INDEX IF NOT EXISTS contenido_vecino_por_id ON contenido_vecino (id);
 """)
 
-w('\nDELETE FROM contenido_cluster WHERE tema_id = \'O008\';')
+# Los grupos NO se borran y se vuelven a crear: se actualizan. Borrarlos se
+# llevaría por delante el nombre que alguien les hubiera puesto a mano, y
+# `a_mano` en el `ON CONFLICT` es lo que decide si el nombre nuevo entra.
 w('INSERT INTO contenido_cluster (id, tema_id, nombre, frase, x, y, cuantas, modelo) VALUES')
 w(',\n'.join(
     f"  ('CL_O008_{g['g']}', 'O008', {q(g['nombre'])}, {q(g['frase'])}, "
     f"{g['x']:.2f}, {g['y']:.2f}, {g['cuantas']}, 'gemini-embedding-001 + gemini-3.6-flash')"
-    for g in grupos) + ';')
+    for g in grupos) + '''
+ON CONFLICT (id) DO UPDATE SET
+  x = EXCLUDED.x, y = EXCLUDED.y, cuantas = EXCLUDED.cuantas, modelo = EXCLUDED.modelo,
+  -- El nombre y la frase sólo si nadie los ha tocado.
+  nombre = CASE WHEN contenido_cluster.a_mano THEN contenido_cluster.nombre ELSE EXCLUDED.nombre END,
+  frase  = CASE WHEN contenido_cluster.a_mano THEN contenido_cluster.frase  ELSE EXCLUDED.frase  END,
+  calculado_el = now();''')
 
-w('\n-- Cada pieza: su grupo, su tipo y su sitio.')
+w('''
+-- Cada pieza: su grupo, su tipo y su sitio.
+--
+-- LO QUE MOVIÓ UNA PERSONA NO SE TOCA. Las piezas con `a_mano` conservan su
+-- grupo y sólo se les actualiza la posición y el género. Sin esto, cada
+-- recálculo devolvería a su sitio equivocado todo lo que un administrador
+-- hubiera corregido — y nadie corrige dos veces la misma cosa.''')
 for i, f in enumerate(filas):
+    if len(f) > 6 and f[6] == 'true':
+        w(f"UPDATE contenido_agregado SET "
+          f"genero={q(genero.get(i))}, mapa_x={XY[i][0]:.2f}, mapa_y={XY[i][1]:.2f} "
+          f"WHERE id={q(f[0])};  -- movida a mano: se le respeta el grupo")
+        continue
     w(f"UPDATE contenido_agregado SET cluster_id='CL_O008_{asig[i]}', "
       f"genero={q(genero.get(i))}, mapa_x={XY[i][0]:.2f}, mapa_y={XY[i][1]:.2f} WHERE id={q(f[0])};")
 

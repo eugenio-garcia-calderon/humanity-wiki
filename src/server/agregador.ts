@@ -463,6 +463,83 @@ export function registrarAgregador(app: Express, db: any) {
   });
 
   /**
+   * CORREGIR EL MAPA — `PUT /api/agregador/cluster/:id` y
+   * `PUT /api/agregador/pieza/:id/cluster`
+   *
+   * Eugenio: «permite al admin modificar el mapa de cluster de las
+   * publicaciones».
+   *
+   * ── POR QUÉ HACE FALTA, Y NO ES UN CAPRICHO ────────────────────────────
+   * Los grupos los calcula una máquina midiendo de qué habla cada pieza, y **se
+   * equivoca**: dos textos pueden parecerse en las palabras y no en el fondo.
+   * Hasta ahora la única forma de arreglar un grupo mal puesto era volver a
+   * ejecutar el script entero y rezar para que esta vez saliera distinto — o
+   * sea, ninguna.
+   *
+   * ── LO QUE SE CORRIGE A MANO NO SE PIERDE AL RECALCULAR ────────────────
+   * `a_mano` marca la pieza que ha movido una persona. El día que la
+   * constelación se vuelva a calcular, esas se respetan: si el trabajo de
+   * corregir se borrara en el siguiente cálculo, nadie corregiría dos veces.
+   */
+  app.put('/api/agregador/cluster/:id', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    if ((req.user.roleLevel ?? 0) < 4) {
+      return res.status(403).json({ error: 'Cambiar el mapa común es cosa de administración.' });
+    }
+    try {
+      const nombre = String(req.body?.nombre ?? '').trim().slice(0, 60);
+      const frase = req.body?.frase === undefined ? null : String(req.body.frase).trim().slice(0, 200);
+      if (nombre.length < 2) return res.status(400).json({ error: 'El grupo necesita un nombre.' });
+      const r = await db.execute(sql`
+        UPDATE contenido_cluster
+           SET nombre = ${nombre},
+               frase = coalesce(${frase}::text, frase),
+               a_mano = true
+         WHERE id = ${req.params.id}
+        RETURNING id, nombre, frase
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Ese grupo no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('[agregador cluster]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/agregador/pieza/:id/cluster', async (req: Request, res: Response) => {
+    if (!req.user) return res.status(401).json({ error: 'Inicia sesión.' });
+    if ((req.user.roleLevel ?? 0) < 4) {
+      return res.status(403).json({ error: 'Cambiar el mapa común es cosa de administración.' });
+    }
+    try {
+      const destino = String(req.body?.cluster_id ?? '').trim();
+      const cl = await db.execute(sql`SELECT id, tema_id FROM contenido_cluster WHERE id = ${destino}`);
+      if (!cl.rows.length) return res.status(404).json({ error: 'Ese grupo no existe.' });
+
+      const antes = await db.execute(sql`SELECT cluster_id FROM contenido_agregado WHERE id = ${req.params.id}`);
+      if (!antes.rows.length) return res.status(404).json({ error: 'Esa publicación no existe.' });
+
+      await db.execute(sql`
+        UPDATE contenido_agregado SET cluster_id = ${destino}, a_mano = true WHERE id = ${req.params.id}
+      `);
+      // Las cuentas de los dos grupos, el que pierde y el que gana. Si sólo se
+      // actualizara el de destino, el de origen seguiría diciendo que tiene una
+      // pieza que ya no tiene — y el número de la leyenda es lo único que dice
+      // si un grupo vale la pena.
+      await db.execute(sql`
+        UPDATE contenido_cluster c
+           SET cuantas = (SELECT count(*) FROM contenido_agregado a
+                           WHERE a.cluster_id = c.id AND a.archived_at IS NULL)
+         WHERE c.id IN (${destino}, coalesce(${(antes.rows[0] as any).cluster_id}::text, ''))
+      `);
+      res.json({ ok: true });
+    } catch (e: any) {
+      console.error('[agregador mover]', e?.cause?.message || e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
    * PONER ALGO EN UN TEMA — `POST /api/agregador/tema/:id/contenido`
    * `{ tipo, entity_id }`
    *
