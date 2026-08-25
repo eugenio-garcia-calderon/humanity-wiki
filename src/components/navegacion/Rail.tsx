@@ -91,8 +91,28 @@ export const HERRAMIENTAS: Herramienta[] = [
  * de romper una aplicación al rediseñar su navegación: no falla nada, solo deja
  * de haber camino.
  */
-export const PERSONALES: Herramienta[] = [
-  { clave: 'areas',     nombre: 'Áreas',            icono: Layers,         ruta: '/objetivos' },
+/*
+ * ── ESTE GRUPO SE HA VACIADO (2026-08-25) ─────────────────────────────────
+ * Eugenio, al mudar las herramientas al menú de abajo y los proyectos al de la
+ * derecha: «toda la parte de mensajes y contactos se coloca al lado de la
+ * imagen de perfil; mi perfil ya está dentro de esa imagen, y la papelera se
+ * puede meter también dentro de ese menú de usuario. La parte de áreas no es
+ * necesaria, se puede quitar del menú».
+ *
+ * Así que **ninguna de estas siete desaparece salvo Áreas**: cinco se han
+ * mudado a la barra de arriba —Mensajes y Contactos como iconos junto a tu
+ * foto; Mi perfil, Todas las personas, Papelera y Tu portada dentro de tu
+ * menú— y sólo Áreas se retira, porque él lo pidió.
+ *
+ * La lista se queda vacía y no se borra: `Rail` la pinta cuando no recibe
+ * `items`, y ese caso ya no ocurre —los dos raíles pasan su lista—. Dejarla
+ * vacía documenta la mudanza; borrar la constante haría que el siguiente que
+ * lea `!items && PERSONALES.map` no encuentre nada que leer.
+ */
+export const PERSONALES: Herramienta[] = [];
+
+/** Lo que había aquí antes del 2026-08-25, por si hay que volver a mirarlo. */
+export const PERSONALES_MUDADAS: Herramienta[] = [
   { clave: 'personas',  nombre: 'Todas las personas', icono: Users2,       ruta: '/personas' },
   { clave: 'mensajes',  nombre: 'Mensajes',         icono: MessageSquare,  ruta: '/mensajes' },
   // CONTACTOS, NO «TELÉFONO» (2026-08-24, Eugenio: «antes era Teléfono,
@@ -115,7 +135,7 @@ export const PERSONALES: Herramienta[] = [
 export default function Rail({
   abierta, onElegir, onInicio, siempreAbierto = false, ladoDerecho = false,
   items, titulo = 'humanity.wiki', claro = false, onAbrirSubmenu, onPlegar,
-  personal, ramas,
+  personal, ramas, pie,
 }: {
   /** Qué herramienta tiene el panel abierto, si hay alguno. */
   abierta: string | null;
@@ -193,6 +213,15 @@ export default function Rail({
    * izquierdo, a la izquierda en el derecho— y se gira cuando ya está abierto,
    * porque entonces lo que hace es cerrarlo.
    */
+  /**
+   * LO QUE VA AL FINAL DE LA LISTA (2026-08-25). El raíl de la derecha son
+   * ahora los proyectos, y una lista de proyectos sin un «nuevo proyecto» al
+   * pie es una lista en la que sólo entra quien ya sabe crearlos por otro
+   * camino. Se pasa desde fuera en vez de escribirlo aquí porque el raíl no
+   * debe saber qué lista está pintando: ése es el acuerdo que lo mantiene como
+   * UN componente y no tres parecidos.
+   */
+  pie?: any;
   onAbrirSubmenu?: (h: Herramienta) => void;
   /**
    * PLEGARSE (2026-08-24). Eugenio: «permite que ambos menús, el de la derecha
@@ -830,6 +859,8 @@ export default function Rail({
             nada. */}
         {!items && <div className={cn('my-1 h-px shrink-0', claro ? 'bg-slate-200' : 'bg-slate-800')} />}
         {!items && PERSONALES.map(boton)}
+
+        {pie}
 
         {/* ── LO QUE HAS QUITADO, AL FINAL ─────────────────────────────────
             Un renglón pequeño y en gris, no una sección: no es contenido, es
