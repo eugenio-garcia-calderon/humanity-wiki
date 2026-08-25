@@ -1,0 +1,87 @@
+-- ============================================================================
+-- LOS 72 TEMAS DE ESPIRITUALIDAD (2026-08-25)
+-- ============================================================================
+-- El objetivo 15 entró en `0122` y sus temas se quedaron fuera: los creó el
+-- sembrador contra la base local, y una base local no viaja a ninguna parte.
+--
+-- Se vio en producción y no leyendo: `/api/temas/O015` contestaba 200 con cero
+-- subtemas. **El objetivo estaba y por dentro no había nada**, así que en la
+-- rueda salía un trozo de color sin nada alrededor. Nada roto, nada que avisara.
+--
+-- Es la misma forma que `0121`, y por las mismas razones que están escritas
+-- allí: los nombres los escribió un modelo y viajan como datos, no se generan
+-- al desplegar.
+INSERT INTO subtemas (id, objetivo_id, padre_id, nombre, nombre_clave, creador_user_id, orden) VALUES
+  ('ST_MT8WBKHS_MTNNA','O015',NULL,'Tradiciones religiosas mundiales','tradiciones religiosas mundiales','SEMILLA',0),
+  ('ST_MT8WBLQ4_E8ZA2','O015',NULL,'Meditación y prácticas contemplativas','meditacion y practicas contemplativas','SEMILLA',1),
+  ('ST_MT8WBMX1_W3COK','O015',NULL,'Búsqueda de sentido existencial','busqueda de sentido existencial','SEMILLA',2),
+  ('ST_MT8WBNWJ_I4IFQ','O015',NULL,'Conexión con la naturaleza','conexion con la naturaleza','SEMILLA',3),
+  ('ST_MT8WBPBA_9HEWY','O015',NULL,'Ética y valores morales','etica y valores morales','SEMILLA',4),
+  ('ST_MT8WBQJH_ZABAX','O015',NULL,'Experiencias místicas y trascendencia','experiencias misticas y trascendencia','SEMILLA',5),
+  ('ST_MT8WBRN5_EEJ3L','O015',NULL,'Comunidad y rituales sagrados','comunidad y rituales sagrados','SEMILLA',6),
+  ('ST_MT8WBSJH_T79N9','O015',NULL,'Cuerpo y salud integral','cuerpo y salud integral','SEMILLA',7),
+  ('ST_MT8WBMWM_YMYMF','O015','ST_MT8WBLQ4_E8ZA2','Técnicas de respiración y atención','tecnicas de respiracion y atencion','SEMILLA',0),
+  ('ST_MT8WBTGL_FCQX9','O015','ST_MT8WBSJH_T79N9','Nutrición y equilibrio metabólico','nutricion y equilibrio metabolico','SEMILLA',0),
+  ('ST_MT8WBRMR_52L06','O015','ST_MT8WBQJH_ZABAX','Experiencias cercanas a la muerte','experiencias cercanas a la muerte','SEMILLA',0),
+  ('ST_MT8WBQJ1_QX7XP','O015','ST_MT8WBPBA_9HEWY','Autonomía y libertad individual','autonomia y libertad individual','SEMILLA',0),
+  ('ST_MT8WBPAT_B8GLK','O015','ST_MT8WBNWJ_I4IFQ','Prácticas meditativas en entornos naturales','practicas meditativas en entornos naturales','SEMILLA',0),
+  ('ST_MT8WBLPM_UKYLY','O015','ST_MT8WBKHS_MTNNA','Monoteísmos abrahámicos','monoteismos abrahamicos','SEMILLA',0),
+  ('ST_MT8WBNW6_Q8EUI','O015','ST_MT8WBMX1_W3COK','Propósito y realización personal','proposito y realizacion personal','SEMILLA',0),
+  ('ST_MT8WBSJ5_EOCN2','O015','ST_MT8WBRN5_EEJ3L','Prácticas ceremoniales ancestrales','practicas ceremoniales ancestrales','SEMILLA',0),
+  ('ST_MT8WBQJ4_UL03L','O015','ST_MT8WBPBA_9HEWY','Justicia distributiva y equidad','justicia distributiva y equidad','SEMILLA',1),
+  ('ST_MT8WBMWO_S6NWF','O015','ST_MT8WBLQ4_E8ZA2','Tradiciones contemplativas históricas','tradiciones contemplativas historicas','SEMILLA',1),
+  ('ST_MT8WBNW7_XNHV0','O015','ST_MT8WBMX1_W3COK','Conexión con lo trascendente','conexion con lo trascendente','SEMILLA',1),
+  ('ST_MT8WBLPQ_U7F51','O015','ST_MT8WBKHS_MTNNA','Religiones dharmonicas asiáticas','religiones dharmonicas asiaticas','SEMILLA',1),
+  ('ST_MT8WBPAV_ESBQG','O015','ST_MT8WBNWJ_I4IFQ','Reconocimiento de seres vivos como seres sintientes','reconocimiento de seres vivos como seres sintientes','SEMILLA',1),
+  ('ST_MT8WBRMT_X2Q5R','O015','ST_MT8WBQJH_ZABAX','Meditación y estados alterados','meditacion y estados alterados','SEMILLA',1),
+  ('ST_MT8WBSJ7_IS9XF','O015','ST_MT8WBRN5_EEJ3L','Espacios sagrados comunitarios','espacios sagrados comunitarios','SEMILLA',1),
+  ('ST_MT8WBTGN_TT1H9','O015','ST_MT8WBSJH_T79N9','Actividad física y movimiento','actividad fisica y movimiento','SEMILLA',1),
+  ('ST_MT8WBQJ7_WOJDA','O015','ST_MT8WBPBA_9HEWY','Responsabilidad ambiental y ecológica','responsabilidad ambiental y ecologica','SEMILLA',2),
+  ('ST_MT8WBRMV_V9920','O015','ST_MT8WBQJH_ZABAX','Revelaciones religiosas y teofanías','revelaciones religiosas y teofanias','SEMILLA',2),
+  ('ST_MT8WBMWQ_QQH6K','O015','ST_MT8WBLQ4_E8ZA2','Beneficios neurológicos y psicológicos','beneficios neurologicos y psicologicos','SEMILLA',2),
+  ('ST_MT8WBPAX_GLHY8','O015','ST_MT8WBNWJ_I4IFQ','Sagrado en ecosistemas y paisajes','sagrado en ecosistemas y paisajes','SEMILLA',2),
+  ('ST_MT8WBNW9_H0JQ0','O015','ST_MT8WBMX1_W3COK','Valores y ética de vida','valores y etica de vida','SEMILLA',2),
+  ('ST_MT8WBLPT_SMGML','O015','ST_MT8WBKHS_MTNNA','Espiritualidades indígenas y chamánicas','espiritualidades indigenas y chamanicas','SEMILLA',2),
+  ('ST_MT8WBSJ8_66P5O','O015','ST_MT8WBRN5_EEJ3L','Transmisión intergeneracional de creencias','transmision intergeneracional de creencias','SEMILLA',2),
+  ('ST_MT8WBTGO_S2714','O015','ST_MT8WBSJH_T79N9','Sueño y descanso reparador','sueno y descanso reparador','SEMILLA',2),
+  ('ST_MT8WBLPV_HAA02','O015','ST_MT8WBKHS_MTNNA','Ateísmo y secularismo','ateismo y secularismo','SEMILLA',3),
+  ('ST_MT8WBNWA_2IT2U','O015','ST_MT8WBMX1_W3COK','Identidad y autenticidad','identidad y autenticidad','SEMILLA',3),
+  ('ST_MT8WBRMX_HG9IE','O015','ST_MT8WBQJH_ZABAX','Conexión con la naturaleza sagrada','conexion con la naturaleza sagrada','SEMILLA',3),
+  ('ST_MT8WBTGP_DBTPF','O015','ST_MT8WBSJH_T79N9','Salud mental y emocional','salud mental y emocional','SEMILLA',3),
+  ('ST_MT8WBSJA_6TPP3','O015','ST_MT8WBRN5_EEJ3L','Sincretismo religioso contemporáneo','sincretismo religioso contemporaneo','SEMILLA',3),
+  ('ST_MT8WBMWS_LKJEV','O015','ST_MT8WBLQ4_E8ZA2','Práctica en contextos seculares','practica en contextos seculares','SEMILLA',3),
+  ('ST_MT8WBQJ9_0JGNO','O015','ST_MT8WBPBA_9HEWY','Dignidad humana universal','dignidad humana universal','SEMILLA',3),
+  ('ST_MT8WBPAZ_R10DU','O015','ST_MT8WBNWJ_I4IFQ','Rituales y ceremonias de reciprocidad ambiental','rituales y ceremonias de reciprocidad ambiental','SEMILLA',3),
+  ('ST_MT8WBSJB_GXF1A','O015','ST_MT8WBRN5_EEJ3L','Conflictos entre tradición y modernidad','conflictos entre tradicion y modernidad','SEMILLA',4),
+  ('ST_MT8WBTGR_OO285','O015','ST_MT8WBSJH_T79N9','Medicina preventiva y diagnóstico','medicina preventiva y diagnostico','SEMILLA',4),
+  ('ST_MT8WBPB2_T7QOG','O015','ST_MT8WBNWJ_I4IFQ','Sanación energética mediante elementos naturales','sanacion energetica mediante elementos naturales','SEMILLA',4),
+  ('ST_MT8WBMWT_GRL35','O015','ST_MT8WBLQ4_E8ZA2','Meditación guiada y aplicaciones','meditacion guiada y aplicaciones','SEMILLA',4),
+  ('ST_MT8WBLPX_3LMSM','O015','ST_MT8WBKHS_MTNNA','Sincretismo y fusiones religiosas','sincretismo y fusiones religiosas','SEMILLA',4),
+  ('ST_MT8WBQJA_9OE0D','O015','ST_MT8WBPBA_9HEWY','Solidaridad y bien común','solidaridad y bien comun','SEMILLA',4),
+  ('ST_MT8WBRMY_RIW3A','O015','ST_MT8WBQJH_ZABAX','Prácticas chamánicas y curanderismo','practicas chamanicas y curanderismo','SEMILLA',4),
+  ('ST_MT8WBNWC_NM5B1','O015','ST_MT8WBMX1_W3COK','Comunidad y pertenencia','comunidad y pertenencia','SEMILLA',4),
+  ('ST_MT8WBTGS_3F83W','O015','ST_MT8WBSJH_T79N9','Enfermedades crónicas y degenerativas','enfermedades cronicas y degenerativas','SEMILLA',5),
+  ('ST_MT8WBQJB_0K7AL','O015','ST_MT8WBPBA_9HEWY','Autenticidad y coherencia personal','autenticidad y coherencia personal','SEMILLA',5),
+  ('ST_MT8WBRN0_28SLU','O015','ST_MT8WBQJH_ZABAX','Éxtasis místico y unión divina','extasis mistico y union divina','SEMILLA',5),
+  ('ST_MT8WBMWV_H9M0J','O015','ST_MT8WBLQ4_E8ZA2','Obstáculos y resistencias iniciales','obstaculos y resistencias iniciales','SEMILLA',5),
+  ('ST_MT8WBNWE_0XCEO','O015','ST_MT8WBMX1_W3COK','Confrontación con la mortalidad','confrontacion con la mortalidad','SEMILLA',5),
+  ('ST_MT8WBSJC_I4BNV','O015','ST_MT8WBRN5_EEJ3L','Papel de líderes espirituales','papel de lideres espirituales','SEMILLA',5),
+  ('ST_MT8WBLPZ_0UU4R','O015','ST_MT8WBKHS_MTNNA','Místicas y corrientes contemplativas','misticas y corrientes contemplativas','SEMILLA',5),
+  ('ST_MT8WBPB4_CZXAF','O015','ST_MT8WBNWJ_I4IFQ','Interconexión de todos los seres vivos','interconexion de todos los seres vivos','SEMILLA',5),
+  ('ST_MT8WBPB6_12G14','O015','ST_MT8WBNWJ_I4IFQ','Cosmovisiones indígenas y conocimiento ancestral','cosmovisiones indigenas y conocimiento ancestral','SEMILLA',6),
+  ('ST_MT8WBSJD_LKIZC','O015','ST_MT8WBRN5_EEJ3L','Rituales de transición vital','rituales de transicion vital','SEMILLA',6),
+  ('ST_MT8WBNWG_BOPSY','O015','ST_MT8WBMX1_W3COK','Sentido en el sufrimiento','sentido en el sufrimiento','SEMILLA',6),
+  ('ST_MT8WBQJF_36T9A','O015','ST_MT8WBPBA_9HEWY','Límites éticos en la tecnología','limites eticos en la tecnologia','SEMILLA',6),
+  ('ST_MT8WBRN2_WMMQT','O015','ST_MT8WBQJH_ZABAX','Sincronicidades y fenómenos paranormales','sincronicidades y fenomenos paranormales','SEMILLA',6),
+  ('ST_MT8WBMWX_BS8N7','O015','ST_MT8WBLQ4_E8ZA2','Integración en vida cotidiana','integracion en vida cotidiana','SEMILLA',6),
+  ('ST_MT8WBLQ1_9DPLI','O015','ST_MT8WBKHS_MTNNA','Rituales y prácticas ceremoniales','rituales y practicas ceremoniales','SEMILLA',6),
+  ('ST_MT8WBTGT_871ND','O015','ST_MT8WBSJH_T79N9','Sustancias adictivas y dependencias','sustancias adictivas y dependencias','SEMILLA',6),
+  ('ST_MT8WBLQ3_2FN5K','O015','ST_MT8WBKHS_MTNNA','Conflictos e intolerancia interreligiosa','conflictos e intolerancia interreligiosa','SEMILLA',7),
+  ('ST_MT8WBPB8_7SQLG','O015','ST_MT8WBNWJ_I4IFQ','Transformación personal a través de la inmersión natural','transformacion personal a traves de la inmersion natural','SEMILLA',7),
+  ('ST_MT8WBNWH_3C633','O015','ST_MT8WBMX1_W3COK','Prácticas contemplativas y transformación','practicas contemplativas y transformacion','SEMILLA',7),
+  ('ST_MT8WBSJF_QCQTC','O015','ST_MT8WBRN5_EEJ3L','Dimensión comunitaria de la fe','dimension comunitaria de la fe','SEMILLA',7),
+  ('ST_MT8WBQJG_P347N','O015','ST_MT8WBPBA_9HEWY','Pluralismo moral y diálogo intercultural','pluralismo moral y dialogo intercultural','SEMILLA',7),
+  ('ST_MT8WBTGU_UYSEB','O015','ST_MT8WBSJH_T79N9','Sexualidad y reproducción responsable','sexualidad y reproduccion responsable','SEMILLA',7),
+  ('ST_MT8WBRN4_SI0XE','O015','ST_MT8WBQJH_ZABAX','Transformación personal y renacimiento espiritual','transformacion personal y renacimiento espiritual','SEMILLA',7),
+  ('ST_MT8WBMWZ_H6Q9H','O015','ST_MT8WBLQ4_E8ZA2','Investigación científica y validación','investigacion cientifica y validacion','SEMILLA',7)
+ON CONFLICT DO NOTHING;
