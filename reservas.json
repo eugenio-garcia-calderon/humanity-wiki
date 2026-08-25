@@ -11,6 +11,18 @@
       "ruta": "src/server/dominios.ts",
       "motivo": "la cajita de compartir, comun a paginas y proyectos (prog8)",
       "desde": "2026-08-25T21:51:47.547Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Proyectos.tsx",
+      "motivo": "compartir proyectos con la cajita comun (prog8)",
+      "desde": "2026-08-25T21:57:05.141Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "compartir proyectos con la cajita comun (prog8)",
+      "desde": "2026-08-25T21:57:05.141Z"
     }
   ]
 }
