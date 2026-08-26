@@ -94,7 +94,17 @@ export const PAGINAS_INFO: PaginaInfo[] = [
   // ESTA RUTA NO SE CAMBIA. Se pega en la ficha de la tienda, y moverla obliga
   // a volver a pasar revisión. Si algún día hay que moverla, se deja una
   // redirección, nunca un 404.
-  { ruta: 'borrar-cuenta', titulo: 'Borrar tu cuenta', icono: UserX,
+  // FUERA DEL DESPLEGABLE, PERO NO DE LA APLICACIÓN (2026-08-25). Eugenio: «lo
+  // de borrar tu cuenta del menú desplegable ponlo mejor en el apartado de
+  // Configuración de cuenta, debajo del icono de usuario». Tiene sentido: es lo
+  // único de esta lista que no explica la plataforma, sino que hace algo con TU
+  // cuenta — y además algo irreversible.
+  //
+  // `enMenu: false` la quita del desplegable; **la ruta sigue exactamente donde
+  // estaba**, que es lo que no se puede tocar: se pega en la ficha de Google
+  // Play y moverla obligaría a pasar revisión otra vez. Ahora se llega desde el
+  // menú de tu foto, en `AvatarRail`.
+  { ruta: 'borrar-cuenta', titulo: 'Borrar tu cuenta', icono: UserX, enMenu: false,
     componente: lazy(() => import('./pages/BorrarCuentaPublica')) },
 
   // Qué hacemos con tus datos. LA EXIGEN LAS DOS TIENDAS: App Store Connect no
