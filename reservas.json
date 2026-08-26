@@ -5,6 +5,12 @@
       "ruta": "src/components/navegacion/RailInferior.tsx",
       "motivo": "prog3: la i en el centro del menu inferior",
       "desde": "2026-08-26T00:08:58.542Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "prog3: hover por icono, solo su nombre",
+      "desde": "2026-08-26T00:18:43.215Z"
     }
   ]
 }
