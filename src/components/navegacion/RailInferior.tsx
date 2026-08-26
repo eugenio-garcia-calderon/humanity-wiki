@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { ChevronUp, MessageCircleWarning } from 'lucide-react';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Compass, Store,
   CalendarDays, Database, Sparkles, Gamepad2, Globe,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Info } from 'lucide-react';
+import { PAGINAS_INFO } from '../../paginasInfo';
 import { cn } from '../../utils/cn';
 import type { Herramienta } from './Rail';
 import { useContextoNavegacion, conContexto } from '../../utils/contextoNavegacion';
@@ -94,6 +97,7 @@ export default function RailInferior({
   onIA: () => void;
 }) {
   const [encima, setEncima] = useState(false);
+  const [infoAbierta, setInfoAbierta] = useState(false);
   const desplegado = fijo || encima;
 
   /*
@@ -241,7 +245,70 @@ export default function RailInferior({
         </div>
         <div className="mx-1 h-8 w-px shrink-0 self-center bg-slate-700" />
 
-        {HERRAMIENTAS_ABAJO.map(h => {
+        {HERRAMIENTAS_ABAJO.map((h, i) => (
+          <Fragment key={`tramo-${h.clave}`}>
+            {/* ══ LA «i», EN EL CENTRO EXACTO (2026-08-25) ═══════════════════
+                Eugenio: «pon el botón de la i en el centro del menú inferior».
+
+                Y en el centro DE VERDAD: la posición se calcula
+                (`HERRAMIENTAS_ABAJO.length / 2`) en vez de escribirse a mano
+                entre dos herramientas. Escrito a mano, el día que entre o salga
+                una herramienta —y aquí ya han entrado y salido varias— la «i»
+                se quedaría descentrada sin que nadie lo note.
+
+                Va discreta, en gris: no es una herramienta ni un botón de
+                acción, es dónde se explica qué es todo esto. Si compitiera con
+                el verde de la IA o el ámbar del feedback, los tres dejarían de
+                destacar. */}
+            {i === Math.floor(HERRAMIENTAS_ABAJO.length / 2) && (
+              <div className="relative flex shrink-0 flex-col items-center">
+                <button
+                  onClick={() => setInfoAbierta(a => !a)}
+                  title="Sobre la plataforma"
+                  aria-label="Sobre la plataforma"
+                  aria-expanded={infoAbierta}
+                  className={cn('flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors',
+                    infoAbierta ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-800 hover:text-white')}
+                >
+                  <Info className="h-5 w-5 shrink-0" />
+                  <span className={cn(
+                    'overflow-hidden whitespace-nowrap text-[10px] font-bold leading-none transition-all duration-200',
+                    desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+                  )}>
+                    Información
+                  </span>
+                </button>
+
+                {/* SUBE, y va `fixed` y no `absolute`. La barra se desplaza en
+                    horizontal (`overflow-x-auto`), y un contenedor que recorta
+                    en un eje recorta en los dos: colgado de la barra, el menú
+                    salía **detrás de ella** y no se veía nada. Se ve en una
+                    captura, no compilando. Sacándolo del flujo se dibuja encima
+                    de todo, y se coloca contra la misma medida que reserva la
+                    barra, así que sube con ella si cambia de alto. */}
+                {infoAbierta && (
+                  <div
+                    className="fixed left-1/2 z-[9995] w-56 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl"
+                    style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 14px)' }}
+                  >
+                    <p className="border-b border-slate-100 px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Información
+                    </p>
+                    {PAGINAS_INFO.filter(o => o.enMenu !== false).map(o => (
+                      <Link
+                        key={o.ruta}
+                        to={`/${o.ruta}`}
+                        onClick={() => setInfoAbierta(false)}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                      >
+                        <o.icono className="h-3.5 w-3.5 text-slate-400" /> {o.titulo}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {(() => {
           const activa = abierta === h.clave;
           return (
             <div key={h.clave} className="relative flex shrink-0 flex-col items-center">
@@ -292,7 +359,9 @@ export default function RailInferior({
               )}
             </div>
           );
-        })}
+            })()}
+          </Fragment>
+        ))}
 
       </nav>
     </div>
