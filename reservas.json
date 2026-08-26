@@ -35,6 +35,12 @@
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "prog3: fase 5, comentar cada bloque de una pagina publica",
       "desde": "2026-08-26T11:39:13.020Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/publicar.ts",
+      "motivo": "prog3: fase 6, al publicar se indexa en subtema_contenido",
+      "desde": "2026-08-26T11:39:49.250Z"
     }
   ]
 }
