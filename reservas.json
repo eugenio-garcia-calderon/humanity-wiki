@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog3",
-      "ruta": "src/pages/Documento.tsx",
-      "motivo": "prog3: fase 2, la barra de abajo se vuelve la barra del editor",
-      "desde": "2026-08-26T11:19:54.596Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/components/layout/Layout.tsx",
       "motivo": "prog3: fase 2, la barra de abajo se vuelve la barra del editor",
       "desde": "2026-08-26T11:19:54.596Z"
@@ -17,6 +11,24 @@
       "ruta": "src/components/navegacion/HojaCrear.tsx",
       "motivo": "prog3: fase 2, la barra de abajo se vuelve la barra del editor",
       "desde": "2026-08-26T11:19:54.596Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/documentos.ts",
+      "motivo": "prog3: fase 3, acceso por persona con lectura o edicion",
+      "desde": "2026-08-26T11:29:22.192Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/knowledge/DialogoCompartir.tsx",
+      "motivo": "prog3: fase 3, acceso por persona con lectura o edicion",
+      "desde": "2026-08-26T11:29:22.192Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "prog3: fase 3, acceso por persona con lectura o edicion",
+      "desde": "2026-08-26T11:29:22.192Z"
     }
   ]
 }
