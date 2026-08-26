@@ -8,9 +8,21 @@
     },
     {
       "agente": "prog3",
+      "ruta": "src/components/navegacion/RailInferior.tsx",
+      "motivo": "prog3: todo son paginas, fase 1 (nombres + boton verde de crear)",
+      "desde": "2026-08-26T11:11:18.473Z"
+    },
+    {
+      "agente": "prog3",
       "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "prog3: quitar botones que no hacen nada y alternar el menu",
-      "desde": "2026-08-26T11:00:14.428Z"
+      "motivo": "prog3: todo son paginas, fase 1 (nombres + boton verde de crear)",
+      "desde": "2026-08-26T11:11:18.473Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
+      "motivo": "prog3: todo son paginas, fase 1 (nombres + boton verde de crear)",
+      "desde": "2026-08-26T11:11:18.473Z"
     }
   ]
 }
