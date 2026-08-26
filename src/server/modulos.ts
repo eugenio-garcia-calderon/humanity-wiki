@@ -58,6 +58,7 @@ import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
 import { registrarTemas } from './temas.js';
+import { registrarTronco } from './tronco.js';
 import { registrarAgregador } from './agregador.js';
 import { registrarRamas } from './ramas.js';
 import { registrarCompartir } from './compartir.js';
@@ -178,6 +179,13 @@ export const MODULOS: Modulo[] = [
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },
   { nombre: 'temas', montar: (app, db) => registrarTemas(app, db) },
+  // El tronco del conocimiento: raíz → ramas → los quince. Va justo detrás de
+  // `temas` porque son las dos mitades del mismo árbol —arriba lo que decide
+  // la casa, abajo lo que propone la gente— y sus rutas no se rozan:
+  // `/api/tronco/…` contra `/api/temas/…`. Si este módulo no monta, el árbol
+  // no se dibuja y la rueda sigue funcionando: son dos vistas, no una encima
+  // de otra.
+  { nombre: 'tronco', montar: (app, db) => registrarTronco(app, db) },
   // Va DESPUÉS de `temas`: lee el árbol que aquel crea. Sus rutas cuelgan de
   // `/api/agregador/…` y no de `/api/temas/…` a propósito — `/api/temas/:objetivo`
   // es un comodín de un segmento y cualquier ruta nueva ahí se le puede colar.

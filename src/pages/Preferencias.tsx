@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Star, Plus, Loader2, EyeOff, Eye, ChevronsUpDown, ChevronsDownUp, ArrowUpRight } from 'lucide-react';
 import { OBJETIVOS, hexDelColor } from '../utils/objetivos';
 import RuedaDeConocimiento, { alternarRamaDeRueda, type NodoRueda } from '../components/rueda/RuedaDeConocimiento';
-import { useAuth } from '../contexts/AuthContext';
+import ArbolDeConocimiento from '../components/arbol/ArbolDeConocimiento';
+import { useAuth, ROLE } from '../contexts/AuthContext';
 import { cn } from '../utils/cn';
 
 /*
@@ -214,6 +215,24 @@ export default function Preferencias() {
           <button onClick={() => setAviso(null)} className="shrink-0 text-slate-400 hover:text-slate-700">Vale</button>
         </p>
       )}
+
+      {/* ── EL ÁRBOL, ENCIMA DE LA RUEDA (2026-08-26) ────────────────────
+          Eugenio: «encima de esa rueda vamos a crear un nuevo diseño
+          conservando la anterior debajo, pero arriba vamos a explorar cómo
+          quedaría esa rueda si fuese en forma de árbol».
+
+          Las dos, y a la vez, porque **contestan preguntas distintas**: la
+          rueda dice cuánto hay —el tamaño de cada trozo es la cantidad— y el
+          árbol dice de dónde viene cada cosa. La rueda no puede enseñar que
+          SALUD cuelga de dos ramas; el árbol no puede enseñar de un vistazo
+          que AGUA tiene ocho veces más que EMPLEO.
+
+          Es exploración declarada: la fase 1 existe para que se elija MIRANDO
+          el reparto, no imaginándolo. Si el reparto de tres ramas no convence,
+          lo que se tira es esto y la rueda se queda intacta. */}
+      <div className="mb-6">
+        <ArbolDeConocimiento hijosDe={hijosDe} puedeEditar={(user?.roleLevel ?? 0) >= ROLE.ADMIN} onElegir={setElegido} />
+      </div>
 
       {favoritos.length > 0 && (
         <div className="mb-6">
