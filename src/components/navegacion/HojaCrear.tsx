@@ -68,6 +68,8 @@ interface Cosa {
   a?: string;
   abrir?: () => void;
   nota?: string;
+  /** Para el oficio de elegir: lo que se devuelve en `onElegirItem`. */
+  clave?: string;
 }
 
 const COSAS: Cosa[] = [
@@ -125,9 +127,24 @@ const COSAS: Cosa[] = [
  * dentro. Es opcional porque la hoja también se abre pulsando, y entonces no
  * hay nada que vigilar.
  */
-export default function HojaCrear({ onCerrar, gesto }: {
+/*
+ * ══ LA MISMA VENTANA, DOS OFICIOS (2026-08-25) ══════════════════════════════
+ * Eugenio, en la gran actualización de páginas: «en el editor de páginas,
+ * cuando le das a más, recicla esa ventana que teníamos donde aparecían todas
+ * las herramientas con el nombre y la imagen».
+ *
+ * Reciclar de verdad, no copiar: esta hoja acepta ahora una lista distinta
+ * (`items`) y un `onElegirItem` que devuelve la clave elegida en vez de
+ * navegar. El editor le pasa sus bloques con dibujo; sin esas props, la hoja
+ * sigue siendo exactamente la de crear de siempre. Una ventana, dos oficios,
+ * cero duplicados que mantener iguales.
+ */
+export default function HojaCrear({ onCerrar, gesto, titulo = 'Crear', items, onElegirItem }: {
   onCerrar: () => void;
   gesto?: { ref: RefObject<HTMLDivElement | null>; onClickCapture: () => void };
+  titulo?: string;
+  items?: Cosa[];
+  onElegirItem?: (clave: string) => void;
 }) {
   const navegar = useNavigate();
 
@@ -143,7 +160,7 @@ export default function HojaCrear({ onCerrar, gesto }: {
         {...gesto}
         role="dialog"
         aria-modal="true"
-        aria-label="Crear"
+        aria-label={titulo}
         /*
          * 72 vh Y NO LA MITAD (2026-08-23). Eugenio: «haz más grande la ventana
          * central de crear y un poco más pequeñas las tarjetas de herramientas
@@ -210,7 +227,7 @@ export default function HojaCrear({ onCerrar, gesto }: {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="px-5 pb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Crear</p>
+          <p className="px-5 pb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{titulo}</p>
           {/* Las trece animaciones, una sola vez. */}
           <EstilosPrevias />
 
@@ -227,10 +244,15 @@ export default function HojaCrear({ onCerrar, gesto }: {
                 herramienta hay que volver a mirar esto: la rejilla no avisa,
                 simplemente empieza a hacer falta bajar. */}
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-              {COSAS.map(c => (
+              {(items ?? COSAS).map(c => (
                 <button
                   key={c.nombre}
-                  onClick={() => { if (c.abrir) c.abrir(); else if (c.a) navegar(c.a); onCerrar(); }}
+                  onClick={() => {
+                    if (onElegirItem && c.clave) onElegirItem(c.clave);
+                    else if (c.abrir) c.abrir();
+                    else if (c.a) navegar(c.a);
+                    onCerrar();
+                  }}
                   title={c.nota}
                   // `group` es lo que enciende la animación de dentro del
                   // dibujo: cada previsualización se mueve con `group-hover`.
