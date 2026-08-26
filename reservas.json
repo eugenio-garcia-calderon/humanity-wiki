@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog3",
-      "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
-      "desde": "2026-08-26T10:08:30.523Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/components/navegacion/AvatarRail.tsx",
       "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
       "desde": "2026-08-26T10:08:30.523Z"
@@ -23,6 +17,18 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
       "desde": "2026-08-26T10:08:30.523Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "prog3: quitar botones que no hacen nada y alternar el menu",
+      "desde": "2026-08-26T11:00:14.428Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "prog3: quitar botones que no hacen nada y alternar el menu",
+      "desde": "2026-08-26T11:00:14.428Z"
     }
   ]
 }
