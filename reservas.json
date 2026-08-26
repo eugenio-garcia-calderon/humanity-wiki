@@ -26,12 +26,6 @@
     },
     {
       "agente": "prog8-turn",
-      "ruta": "src/pages/Mensajes.tsx",
-      "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
-      "desde": "2026-08-26T10:14:13.878Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "src/components/tablero/TableroKanban.tsx",
       "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
       "desde": "2026-08-26T10:14:17.063Z"
