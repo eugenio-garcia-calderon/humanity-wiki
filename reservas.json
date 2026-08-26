@@ -19,12 +19,6 @@
       "desde": "2026-08-26T11:29:37.976Z"
     },
     {
-      "agente": "prog2",
-      "ruta": "src/pages/Preferencias.tsx",
-      "motivo": "prog2: el arbol encima de la rueda",
-      "desde": "2026-08-26T11:34:04.194Z"
-    },
-    {
       "agente": "prog3",
       "ruta": "src/components/knowledge/BloquesLectura.tsx",
       "motivo": "prog3: fase 5, comentar cada bloque de una pagina publica",
