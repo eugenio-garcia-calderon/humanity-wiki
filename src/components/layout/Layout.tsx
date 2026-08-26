@@ -1748,6 +1748,14 @@ export default function Layout() {
           para no enseñar nada. Ahora esa franja lleva las once herramientas,
           que sí son destinos. Reserva 64 px abajo en vez de 92, así que el
           contenido de todas las páginas gana 28. */}
+      {/* ══ DENTRO DEL EDITOR, LA BARRA ES OTRA (2026-08-25) ═══════════════
+          Eugenio: «sólo una vez que estás en el editor de una página aparece el
+          menú inferior con todas las herramientas para poder agregar a esa
+          página». En `/paginas/:id` la barra global se retira y el editor pinta
+          la suya —con los bloques que se pueden AÑADIR, no con las páginas a
+          las que se puede IR—. Dos barras a la vez serían dos filas de iconos
+          compitiendo por el mismo pulgar. */}
+      {!/^\/paginas\/[^/]+/.test(location.pathname) && (
       <div ref={cajaCirculos}>
         <RailInferior
           abierta={panelAbierto?.clave ?? null}
@@ -1757,6 +1765,7 @@ export default function Layout() {
           onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
         />
       </div>
+      )}
 
       {/* ══ EL PANEL SUBE DESDE ABAJO (2026-08-25) ═════════════════════════
           Eugenio: «esa ventana emergente que aparece cuando se le da a ampliar

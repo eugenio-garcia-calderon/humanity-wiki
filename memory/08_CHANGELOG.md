@@ -7644,3 +7644,30 @@ páginas». El plan completo, con lo que ya existe y lo que falta, está en
   el contexto: crear desde un proyecto la mete en ese proyecto.
 - La IA pasa de verde a **violeta**: el verde es ahora del crear, y dos
   pastillas verdes competirían.
+
+## 2026-08-25 — «Todo son páginas», fase 2: la barra del editor
+Eugenio: «sólo una vez que estás en el editor de una página, aparece el menú
+inferior con todas las herramientas para poder agregar a esa página. Recicla esa
+ventana que teníamos donde aparecían todas las herramientas con el nombre y la
+imagen».
+
+- **En `/paginas/:id` la barra global se retira** (lo decide el Layout) y el
+  editor pinta la suya, con la misma piel: mismo negro, mismos 64 px reservados.
+  Dos barras a la vez serían dos filas de iconos compitiendo por el mismo pulgar.
+- La barra del editor: el **«+ Añadir» verde** y ocho accesos rápidos (texto,
+  título, lista, casilla, imagen, base de datos, publicación, separador). Todo
+  llama al MISMO `insertar` del menú «/»: una sola forma de añadir, tres puertas.
+- El «+» abre la **ventana reciclada de crear** —`HojaCrear` gana `titulo`,
+  `items` y `onElegirItem`— con los 19 bloques del catálogo `TIPOS_MENU` vestidos
+  con las previsualizaciones de la portada. **Derivado, no copiado**: si mañana
+  entra un bloque nuevo en `TIPOS_MENU`, aparece en la hoja solo.
+- Sólo si puedes editar: a una página de solo lectura no se le añade nada.
+- La reserva de 64 px (`--hueco-muelle`) la publica el editor en esa ruta:
+  quien tapa, reserva.
+- Los bloques nuevos se insertan tras el bloque activo, o al final si no hay.
+
+Verificado con la página real «Incendios forestales en España en 2025»: barra
+global fuera, barra del editor dentro, hoja con los 19 bloques y su título
+«Añadir a la página». (Mi primer detector daba un falso rojo: pescaba el nav del
+raíl lateral, que también se llama «Herramientas», y el botón de IA del propio
+chat. Medir con el selector equivocado es medir otra cosa.)
