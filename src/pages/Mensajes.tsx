@@ -32,6 +32,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTelecom } from '../telecom/useTelecom';
 import { llamar, estoyEscribiendo } from '../telecom/motor';
 import { reloj } from '../components/telecom/piezas';
+import TextoConEnlaces from '../components/ui/TextoConEnlaces';
 
 interface Adjunto { url: string; tipo: string | null; nombre: string | null; segundos: number | null }
 interface Conversacion {
@@ -502,7 +503,7 @@ function Burbuja({ m }: { m: Mensaje }) {
           </a>
         )}
 
-        {m.texto && <span className="whitespace-pre-wrap">{m.texto}</span>}
+        {m.texto && <TextoConEnlaces texto={m.texto} />}
 
         <span className={cn('flex items-center gap-1 mt-1 text-[9px]', m.mio ? 'text-emerald-100 justify-end' : 'text-slate-400')}>
           {new Date(m.fecha).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}

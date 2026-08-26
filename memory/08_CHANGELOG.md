@@ -7543,3 +7543,70 @@ icono de usuario».
 - **La ruta `/borrar-cuenta` NO se ha movido.** Está pegada en la ficha de Google
   Play y cambiarla obligaría a pasar revisión otra vez; sólo cambia desde dónde
   se llega (`enMenu: false` la quita del desplegable, la ruta sigue igual).
+---
+
+## 2026-08-26 — «Todos los proyectos» en el raíl, y los enlaces abren el navegador de la plataforma
+
+### Todos los proyectos
+
+Eugenio: «tiene que haber un botón en el menú derecho que sea "Todos los
+proyectos" y que te lleve a esa página general de proyectos».
+
+Desde que el raíl derecho enseña los proyectos uno a uno, **no había forma de
+llegar a la página que los tiene todos** salvo saberse la dirección: la única
+entrada era «Nuevo proyecto», que lleva allí pero con el diálogo de crear
+abierto. Va encima de esa, porque ir a lo que ya existe es lo de todos los días
+y crear es lo excepcional.
+
+### Un enlace a una web abre el navegador de la plataforma
+
+Eugenio: «el navegador se tiene que abrir automáticamente cuando se haga click
+en un enlace de una web».
+
+Un solo oyente en `GestorVentanas`, en fase de captura, y no una regla repetida
+en cada sitio que pinta enlaces: esos son muchos y crecen cada semana, así que
+escrita treinta veces sería treinta sitios donde olvidarla. Escrita ahí, la
+cumplen también los enlaces que aún no existen.
+
+Lo que NO se toca, y por qué: los enlaces del mismo origen (son navegación de la
+aplicación y los lleva React Router); ⌘/Ctrl/Mayús/Alt y el botón central (eso
+es «ábrelo en una pestaña de verdad», dicho a propósito por quien pulsa, y
+quitarle esa salida es quitarle el control de su navegador); `mailto:`, `tel:`,
+`download`, `blob:` y `data:` (no son páginas); y en el móvil, donde un
+navegador dentro de otro no significa nada y el enlace va al del teléfono.
+
+**Y un fallo que iba de serie**: reusar el navegador ya abierto era lo correcto
+—si no, cada enlace abriría uno nuevo— pero sólo lo LEVANTABA. Pulsabas un
+enlace, la ventana saltaba al frente enseñando la página anterior, y eso se lee
+como que el enlace está roto; peor, parece que ha funcionado. Ahora, si llega
+una dirección de verdad, la ventana se va a ella. `about:inicio` —lo que manda
+el menú— sigue limitándose a levantarla: abrir el menú no es pedir volver a la
+portada del navegador. La `key` del `Navegador` lleva el destino, porque guarda
+su dirección en su propio estado a partir de `inicial` y cambiar esa propiedad
+sola no lo movería.
+
+### Un enlace pegado se ve y se pulsa
+
+Eugenio: «haz que cuando se pega un enlace en la plataforma, este se pueda hacer
+click y salga en un azulito con subrayado».
+
+`ui/TextoConEnlaces`, puesto en el muro, los mensajes, la ficha de una tarjeta
+del tablero y el popup de una publicación. **Se pinta, no se guarda**: el texto
+sigue en la base tal cual lo escribió su autor, y aquí no hay HTML sino trozos
+de texto y elementos React — un `dangerouslySetInnerHTML` alimentado por lo que
+escribe cualquiera es la forma clásica de que alguien meta un script en el muro
+de otro.
+
+**El paréntesis final me lo llevé mal a la primera.** «(mira
+https://…/Bicicleta_eléctrica)» dejaba el `)` dentro del enlace, que así apunta
+a una página que no existe. La regla que lo distingue es si ese paréntesis tiene
+pareja DENTRO de la dirección: `…/Foo_(bar)` es suyo, `…/Bicicleta)` es de la
+frase. Mi primera versión contaba sobre la dirección **sin** ese paréntesis y
+entonces los dos casos daban «equilibrado». Lo vi en pantalla, no compilando.
+
+**Comprobado en local**: el botón lleva a `/proyectos`; un enlace externo abre el
+navegador interno; un segundo enlace distinto **mueve esa misma ventana** en vez
+de abrir otra; un enlace nuestro navega normal; `mailto:` y ⌘+clic no se
+interceptan; y una publicación con tres enlaces pegados los pinta en azul
+subrayado con el texto de alrededor intacto, y al pulsar uno se abre el
+navegador de la plataforma. La publicación de prueba y la sesión, borradas.

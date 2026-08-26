@@ -5,6 +5,7 @@ import { useAuth, ROLE } from '../contexts/AuthContext';
 import { useHelpers } from '../contexts/DataContext';
 import { resolveEntityLink } from '../utils/entityLinks';
 import { cn } from '../utils/cn';
+import TextoConEnlaces from '../components/ui/TextoConEnlaces';
 
 // ============================================================================
 // Muro — Fase 4 (interfaz)
@@ -194,7 +195,9 @@ function PublicationCard({ pub, onReact, onSave, canEdit, onEdit }: {
       </div>
 
       {pub.title && <h3 className="text-base font-black text-slate-900 mt-3">{pub.title}</h3>}
-      {pub.body && <p className="text-sm text-slate-600 leading-relaxed mt-1.5 whitespace-pre-wrap">{pub.body}</p>}
+      {/* Los enlaces pegados salen en azul y se pulsan (2026-08-26). El texto
+          se guarda tal cual: esto sólo lo pinta. */}
+      {pub.body && <TextoConEnlaces texto={pub.body} className="block text-sm text-slate-600 leading-relaxed mt-1.5" />}
 
       <EntityBadges links={pub.entity_links} />
 
