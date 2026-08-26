@@ -29,6 +29,12 @@
       "ruta": "src/components/ventanas/GestorVentanas.tsx",
       "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
       "desde": "2026-08-26T10:14:03.854Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/ui/TextoConEnlaces.tsx",
+      "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
+      "desde": "2026-08-26T10:14:07.293Z"
     }
   ]
 }
