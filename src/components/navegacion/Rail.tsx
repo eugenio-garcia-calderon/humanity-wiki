@@ -336,6 +336,10 @@ export default function Rail({
     try { return localStorage.getItem('hw_rail_fijado') === '1'; } catch { return false; }
   });
   const [encima, setEncima] = useState(false);
+  /* Qué fila tiene el ratón encima y a qué altura de la pantalla está. Se
+     guarda la altura porque la etiqueta se dibuja FUERA del raíl —ver abajo— y
+     necesita saber a qué renglón pertenece. */
+  const [rozada, setRozada] = useState<{ h: Herramienta; y: number } | null>(null);
 
   /*
    * ── FLOTAR O QUEDARSE ─────────────────────────────────────────────────────
@@ -354,7 +358,26 @@ export default function Rail({
    * el submenú quedaría abierto sin que se vea de cuál de los catorce es.
    */
   const anclado = siempreAbierto || fijado || abierta !== null;
-  const desplegado = anclado || encima;
+  /*
+   * ══ EL RATÓN YA NO ABRE LA COLUMNA ENTERA (2026-08-25) ═══════════════════
+   * Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre
+   * de ese icono; por ejemplo, si hago hover en movilidad aparece el nombre de
+   * movilidad, y me permite pinchar ahí o darle a la flecha y ver su submenú.
+   * De esa manera queda mucho más elegante, ya que no aparecen todos los
+   * nombres de golpe. Cuando sí pincho arriba y se fija el menú izquierdo,
+   * aparecen todos los nombres».
+   *
+   * Y tiene razón en lo que es: **catorce nombres apareciendo por rozar el
+   * borde son catorce cosas que no has pedido**. Pasar el ratón es mirar, no
+   * decidir; y la respuesta a mirar un icono es ese icono, no la lista entera.
+   *
+   * Así que `desplegado` pasa a depender SÓLO de haber decidido —la chincheta,
+   * el rótulo de arriba o un submenú abierto—, y el nombre de cada tema sale en
+   * su propia etiqueta al pasar por encima de él (más abajo, `group-hover/fila`).
+   * `encima` se conserva porque el raíl lo sigue usando para saber si el ratón
+   * está dentro, pero ya no ensancha nada.
+   */
+  const desplegado = anclado;
 
   const fijar = () => {
     setFijado(v => {
@@ -523,6 +546,8 @@ export default function Rail({
           if (desde && desde !== h.clave) personal.reordenar!(desde, h.clave);
           arrastrado.current = null;
         } : undefined}
+        onMouseEnter={e => { if (!desplegado) setRozada({ h, y: e.currentTarget.getBoundingClientRect().top }); }}
+        onMouseLeave={() => setRozada(r => (r?.h.clave === h.clave ? null : r))}
         className={cn('group/fila relative flex shrink-0 items-center',
           desplegado ? 'w-full' : 'w-10')}>
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
@@ -907,6 +932,60 @@ export default function Rail({
           </div>
         )}
       </nav>
+
+      {/* ══ LA ETIQUETA DE UNO SOLO (2026-08-25) ══════════════════════════
+          Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el
+          nombre de ese icono… me permite pinchar ahí o darle a la flecha y ver
+          su submenú. Queda mucho más elegante, ya que no aparecen todos los
+          nombres de golpe».
+
+          ── POR QUÉ VA AQUÍ FUERA Y NO DENTRO DE SU FILA ──────────────────
+          Primero la colgué de la fila con `absolute`. No se veía: **la columna
+          se desplaza en vertical para los catorce temas, y un contenedor que
+          recorta en un eje recorta en los dos**, así que la etiqueta salía
+          detrás del raíl. Es el mismo tropiezo que la «i» del menú de abajo, y
+          la segunda vez ya no es casualidad: si algo tiene que salirse de una
+          caja que hace scroll, se dibuja fuera de la caja.
+
+          Va `fixed` a la altura del renglón que se está rozando, así que la
+          columna no se ensancha y **los otros trece iconos no se mueven un
+          píxel**. Un menú que se reordena debajo del ratón se pulsa mal.
+
+          Y lleva la flecha al lado cuando ese tema tiene subtemas, porque él
+          pidió las dos cosas desde aquí: el nombre lleva al tema, la flecha lo
+          abre sin salir. */}
+      {!desplegado && rozada && (
+        <div
+          onMouseEnter={() => setRozada(rozada)}
+          onMouseLeave={() => setRozada(null)}
+          className={cn('fixed z-[60] flex items-center gap-1', ladoDerecho ? 'flex-row-reverse' : '')}
+          style={{
+            top: rozada.y,
+            ...(ladoDerecho ? { right: 44 } : { left: 44 }),
+          }}
+        >
+          <button
+            onClick={() => { onElegir(rozada.h); setRozada(null); }}
+            className={cn('flex h-10 items-center whitespace-nowrap rounded-xl px-3 text-[13px] font-bold shadow-xl ring-1 transition-colors',
+              claro ? 'bg-white text-slate-900 ring-slate-200 hover:bg-slate-50'
+                    : 'bg-slate-800 text-white ring-white/10 hover:bg-slate-700')}
+          >
+            {rozada.h.nombre}
+          </button>
+          {ramas?.hay(rozada.h.clave) && (
+            <button
+              onClick={() => { ramas.alternar(rozada.h.clave); setRozada(null); }}
+              title={`Ver los subtemas de ${rozada.h.nombre}`}
+              aria-label={`Ver los subtemas de ${rozada.h.nombre}`}
+              className={cn('grid h-10 w-9 place-items-center rounded-xl shadow-xl ring-1 transition-colors',
+                claro ? 'bg-white text-slate-400 ring-slate-200 hover:text-slate-900'
+                      : 'bg-slate-800 text-slate-400 ring-white/10 hover:text-white')}
+            >
+              <ChevronRight className={cn('h-4 w-4', ladoDerecho && 'rotate-180')} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
