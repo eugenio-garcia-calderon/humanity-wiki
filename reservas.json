@@ -41,6 +41,18 @@
       "ruta": "src/server/publicar.ts",
       "motivo": "prog3: fase 6, al publicar se indexa en subtema_contenido",
       "desde": "2026-08-26T11:39:49.250Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "prog3: fase 5, pasar la pagina comentable a la vista de lectura",
+      "desde": "2026-08-26T11:40:57.760Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/pages/PaginaDeDominio.tsx",
+      "motivo": "prog3: fase 5, pasar la pagina comentable a la vista de lectura",
+      "desde": "2026-08-26T11:40:57.760Z"
     }
   ]
 }
