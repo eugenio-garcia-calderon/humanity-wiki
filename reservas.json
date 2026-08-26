@@ -23,6 +23,12 @@
       "ruta": "src/paginasInfo.ts",
       "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
       "desde": "2026-08-26T10:08:30.523Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/ventanas/GestorVentanas.tsx",
+      "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
+      "desde": "2026-08-26T10:14:03.854Z"
     }
   ]
 }
