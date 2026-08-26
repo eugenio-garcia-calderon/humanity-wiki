@@ -7435,3 +7435,27 @@ Eugenio: «pon el botón de la i en el centro del menú inferior».
   horizontal, y un contenedor que recorta en un eje recorta en los dos**, así
   que colgado de ella el menú salía detrás de la barra y no se veía. Se ve en
   una captura, no compilando.
+
+## 2026-08-25 — El menú izquierdo enseña un nombre, no catorce
+Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre de
+ese icono; por ejemplo, si hago hover en movilidad aparece el nombre de
+movilidad, y me permite pinchar ahí o darle a la flecha y ver su submenú. Queda
+mucho más elegante, ya que no aparecen todos los nombres de golpe. Cuando sí
+pincho arriba y se fija el menú, aparecen todos los nombres».
+
+- **Pasar el ratón deja de abrir la columna entera.** Catorce nombres saliendo
+  por rozar el borde son catorce cosas que nadie ha pedido: pasar el ratón es
+  mirar, no decidir, y la respuesta a mirar un icono es ese icono.
+- La etiqueta lleva **el nombre y su flecha**, las dos cosas que él pidió desde
+  ahí: el nombre va al tema, la flecha lo abre sin salir.
+- **Se dibuja fuera del raíl.** Colgada de su fila con `absolute` no se veía:
+  la columna se desplaza en vertical para los catorce temas, y **un contenedor
+  que recorta en un eje recorta en los dos**. Es el segundo tropiezo igual en la
+  misma tarde —el primero fue el desplegable de la «i»—, así que queda escrito:
+  **si algo tiene que salirse de una caja que hace scroll, se dibuja fuera de la
+  caja.**
+- Y va a la altura del renglón rozado, así que la columna no se ensancha y los
+  otros trece iconos **no se mueven un píxel**. Un menú que se reordena debajo
+  del ratón se pulsa mal.
+- Con el menú fijado desde arriba, todos los nombres se leen en su sitio y la
+  etiqueta no sale: sería decir lo mismo dos veces.
