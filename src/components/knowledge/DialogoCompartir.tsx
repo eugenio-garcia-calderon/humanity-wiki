@@ -48,6 +48,56 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
   const [ocupado, setOcupado] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
+
+  /*
+   * ══ PERSONAS CONCRETAS (2026-08-25, fase 3 de «todo son páginas») ═════════
+   * Eugenio: «existe la opción de que la página sea semiprivada, donde das
+   * acceso a personas concretas, de solo lectura o también de edición».
+   *
+   * Vive en ESTE diálogo y no en otro: compartir con el mundo (publicar) y
+   * compartir con alguien (acceso) son la misma pregunta —¿quién ve esto?— y
+   * dos ventanas para una pregunta es cómo se contesta mal en una de las dos.
+   */
+  const [accesos, setAccesos] = useState<any[] | null>(null);
+  const [buscaPersona, setBuscaPersona] = useState('');
+  const [candidatos, setCandidatos] = useState<any[]>([]);
+  const relojPersona = useRef<any>(null);
+
+  const cargarAccesos = () => {
+    fetch(`/api/accesos/pagina/${paginaId}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(j => setAccesos(Array.isArray(j.accesos) ? j.accesos : []))
+      // Un 403 aquí significa «no eres el autor»: la sección entera se esconde,
+      // porque enseñar una lista que no puedes tocar sólo confunde.
+      .catch(() => setAccesos(null));
+  };
+  useEffect(cargarAccesos, [paginaId]);
+
+  const buscarPersonas = (v: string) => {
+    setBuscaPersona(v);
+    clearTimeout(relojPersona.current);
+    if (v.trim().length < 2) { setCandidatos([]); return; }
+    relojPersona.current = setTimeout(async () => {
+      const r = await fetch(`/api/accesos/buscar-personas?q=${encodeURIComponent(v.trim())}`, { credentials: 'include' });
+      const j = await r.json().catch(() => ({}));
+      setCandidatos(Array.isArray(j.personas) ? j.personas : []);
+    }, 300);
+  };
+
+  const darAcceso = async (userId: string, rol: 'lectura' | 'edicion') => {
+    await fetch(`/api/accesos/pagina/${paginaId}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, rol }),
+    });
+    setBuscaPersona(''); setCandidatos([]);
+    cargarAccesos();
+  };
+
+  const quitarAcceso = async (userId: string) => {
+    await fetch(`/api/accesos/pagina/${paginaId}/${userId}`, { method: 'DELETE', credentials: 'include' });
+    cargarAccesos();
+  };
   const temporizador = useRef<any>(null);
 
   // Quién soy y cómo se llama mi espacio. Sin nombre no se puede publicar: la
@@ -191,6 +241,71 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
               {ocupado ? <Loader2 className="w-4 h-4 animate-spin" /> : estado.publico ? 'Dejar de publicar' : 'Publicar'}
             </button>
           </div>
+
+          {/* ── PERSONAS CONCRETAS: SEMIPRIVADA ──────────────────────────
+              Sólo la ve el autor (el servidor contesta 403 a los demás y la
+              sección no se pinta). El rol se elige al dar el acceso; repetir a
+              alguien con el otro rol se lo cambia. */}
+          {accesos !== null && (
+            <div className="rounded-xl border border-slate-200 p-3">
+              <p className="text-xs font-black text-slate-700">Personas con acceso</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed mb-2">
+                Aunque la página esté privada, estas personas la ven. Con edición, también la editan.
+              </p>
+              <div className="relative">
+                <input
+                  value={buscaPersona}
+                  onChange={e => buscarPersonas(e.target.value)}
+                  placeholder="Buscar a alguien por su nombre…"
+                  className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-emerald-300"
+                />
+                {candidatos.length > 0 && (
+                  <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-xl border border-slate-200 bg-white py-1 shadow-xl">
+                    {candidatos.map(cand => (
+                      <div key={cand.id} className="flex items-center gap-2 px-2.5 py-1.5">
+                        {cand.avatar_url
+                          ? <img src={cand.avatar_url} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                          : <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-200 text-[10px] font-black text-slate-500">{(cand.nombre || '?').charAt(0).toUpperCase()}</span>}
+                        <span className="min-w-0 flex-1 truncate text-xs font-bold text-slate-700">{cand.nombre}</span>
+                        <button onClick={() => darAcceso(cand.id, 'lectura')}
+                          className="shrink-0 rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-black text-slate-600 hover:border-emerald-300 hover:text-emerald-700">
+                          Lectura
+                        </button>
+                        <button onClick={() => darAcceso(cand.id, 'edicion')}
+                          className="shrink-0 rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black text-white hover:bg-slate-800">
+                          Edición
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {accesos.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {accesos.map(a => (
+                    <div key={a.user_id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
+                      {a.avatar_url
+                        ? <img src={a.avatar_url} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                        : <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-200 text-[10px] font-black text-slate-500">{(a.nombre || '?').charAt(0).toUpperCase()}</span>}
+                      <span className="min-w-0 flex-1 truncate text-xs font-bold text-slate-700">{a.nombre}</span>
+                      <button
+                        onClick={() => darAcceso(a.user_id, a.rol === 'edicion' ? 'lectura' : 'edicion')}
+                        title="Cambiar el rol"
+                        className={cn('shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black',
+                          a.rol === 'edicion' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600')}
+                      >
+                        {a.rol === 'edicion' ? 'Edición' : 'Lectura'}
+                      </button>
+                      <button onClick={() => quitarAcceso(a.user_id)} title="Quitar el acceso" aria-label={`Quitar el acceso a ${a.nombre}`}
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── EL NOMBRE DEL ESPACIO ─────────────────────────────────────── */}
           {!estado.handle && (
