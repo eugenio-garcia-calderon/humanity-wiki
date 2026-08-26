@@ -7738,3 +7738,21 @@ tenía `handle`— y esa condición quedó también probada.
 
 Con esto, **las 6 fases de la gran actualización están cerradas**: 1-3 y 5-6
 construidas aquí, la 4 ya existía. `memory/15_PLAN_PAGINAS.md` queda como mapa.
+## 2026-08-26 — The tree of knowledge, phase 1 (prog2)
+
+A left-to-right tree above the wheel on `/preferencias`: RED DE CONOCIMIENTO →
+three branches → the fifteen objectives → the 1080 subthemes, expanding on
+click. The wheel stays underneath, untouched. Two views because they answer
+different questions: the wheel shows how MUCH there is (the size of a slice is
+the amount), the tree shows where each thing COMES FROM.
+
+Left-to-right is not only what Eugenio asked for, it is what survives the size:
+growing upward spreads children horizontally and the fourth level is kilometres
+wide; growing rightward spreads them vertically, and down there is no limit.
+
+New: `tronco_ramas` / `tronco_aristas` (0130), `src/server/tronco.ts`,
+`src/components/arbol/ArbolDeConocimiento.tsx`. Admins move an objective between
+branches by dragging it; with Alt it hangs from both. Everyone else can look —
+reading the common tree does not ask for an account.
+
+See `03_DECISIONS.md` for why it is a graph and what that costs.

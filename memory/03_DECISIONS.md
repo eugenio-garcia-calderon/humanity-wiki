@@ -502,3 +502,39 @@ wrong debate somebody corrects.
 **Consequence**: `refutada` and `disputada` demand a written reason. Marking
 something false without saying why leaves the author nothing to answer and the
 reader nothing to check — the same rule as citing a source for a figure.
+
+## 2026-08-26 — The trunk of knowledge is a GRAPH, not a tree (prog2)
+
+Eugenio asked for a tree above the wheel: root "Red de Conocimiento" → three
+areas (social / ecology / technology) → the fifteen objectives → down to
+millions of pages, "each page linked like a mycelium to different branches".
+
+**The decision, and it was his.** I offered a tree (one mother per branch) and a
+graph (several). I recommended the tree and said why: with two mothers the same
+branch is drawn in two places and "where does this live?" stops having one
+answer. He chose the graph. Recorded here so that in a year it reads as a
+decision, not an oversight.
+
+**What the graph costs, concretely, and what was built to pay it:**
+
+| Cost | Paid with |
+|---|---|
+| A cycle makes the drawing recurse forever — the browser hangs, no error | `seLlegaBajando` runs before every write. It carries a `vistos` set, which is not an optimisation: without it, a graph that already has a cycle hangs the very check meant to prevent one |
+| Removing the last mother leaves a branch written but undrawable — alive in the database, invisible | `DELETE /api/tronco/arista` refuses the last edge and says why |
+| The same node drawn twice reads as a duplicate someone will "fix" by deleting one | Nodes are keyed by PATH, not id; repeats are hollow, dashed, say "·también aquí", and do not expand — so their children are counted once, not twice |
+
+**Two tables for one tree, on purpose.** `tronco_aristas` holds root → branches →
+objectives; `subtemas` (0120) holds everything below. It looks like duplication
+and is not: above there are fifteen names the house decides and that change once
+a year; below, a million the public proposes, changing hourly. Different write
+rates, different guarantees, different tables.
+
+**The mycelium needs no new table.** `subtema_contenido` has been many-to-many
+since 0120, so a page already hangs from as many subthemes as it likes. The rule
+is: *a branch has one place, a page has many* — and that is what keeps the
+left-to-right drawing drawable.
+
+**The reparto is A, and its number is 7.** SOCIAL carries 7 of the 15. I said a
+branch holding half of everything does not sort anything, and offered a 5×3
+alternative. He chose A. Phase 1 is draggable precisely so that number can be
+felt and changed by looking, not argued.
