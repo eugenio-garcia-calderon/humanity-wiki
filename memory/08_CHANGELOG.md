@@ -7459,3 +7459,21 @@ pincho arriba y se fija el menú, aparecen todos los nombres».
   del ratón se pulsa mal.
 - Con el menú fijado desde arriba, todos los nombres se leen en su sitio y la
   etiqueta no sale: sería decir lo mismo dos veces.
+
+## 2026-08-25 — La flecha abre el submenú al pasar el ratón, en los tres menús
+Eugenio: «si pongo el ratón encima de la flecha a la derecha de la palabra
+movilidad que se expanda el submenú, pero sólo de los elementos que están dentro
+de movilidad. También si pincho. Y replica esto mismo en el menú derecho e
+inferior».
+
+- **Abre, no alterna**, y ésa es la diferencia que lo hace usable: alternar al
+  pasar el ratón cerraría el submenú justo cuando mueves el ratón hacia él para
+  leerlo. Pasar el ratón sólo abre; cerrar sigue siendo cosa del clic, que es
+  una decisión.
+- Los tres menús: la etiqueta flotante del izquierdo, la flecha de la fila
+  desplegada, la del raíl derecho y la del inferior.
+- **Y abrir un subtema ensancha la columna.** Sin eso, la flecha los abría
+  **dentro de una columna de 40 px**: se abrían de verdad y no se veía ninguno.
+  El submenú vive dentro del raíl, así que enseñarlo obliga a ensancharlo. Es un
+  estado propio y no la chincheta: la chincheta se guarda en el navegador y se
+  queda para siempre; esto dura lo que el ratón esté dentro.
