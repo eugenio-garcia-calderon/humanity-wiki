@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
+import { OBJETIVOS, hablaDe } from '../../utils/objetivos';
+import { useContextoNavegacion, type Contexto } from '../../utils/contextoNavegacion';
 import { HojaPanel, type Herramienta } from './Rail';
 
 /*
@@ -128,6 +130,42 @@ function Grupo({ icono: Icono, titulo, cuantos, a }: { icono?: any; titulo: stri
  * respuesta entera y devuelve la lista; si no puede, que lance — y entonces
  * sale «no lo sé», que es la verdad.
  */
+/*
+ * ══ EL CONTEXTO FILTRA LO QUE SE ENSEÑA (2026-08-25) ═══════════════════════
+ * Eugenio: «si estoy explorando movilidad y le doy a páginas, me tienen que
+ * aparecer todas las páginas de movilidad».
+ *
+ * DOS FILTROS, PORQUE SON DOS COSAS DISTINTAS:
+ *
+ *   · Por PROYECTO se filtra por el dato: cada cosa sabe en qué proyecto está
+ *     (`proyecto_slug` o `proyecto_id`). Es exacto.
+ *   · Por TEMA se filtra por las PALABRAS, con `hablaDe`, exactamente igual que
+ *     el muro y las etiquetas de las tarjetas. **Y esto no es un atajo: es que
+ *     no existe ninguna tabla que una una página con un objetivo.** Está escrito
+ *     en `utils/objetivos.ts` desde que se creó. Filtrar aquí de otra forma
+ *     inventaría una relación que la base no tiene, y además diría cosas
+ *     distintas que el muro para el mismo contenido.
+ *
+ * Si el contexto no aplica —una lista cuyas cosas no llevan proyecto—, NO se
+ * filtra y se devuelve todo. Devolver una lista vacía porque el dato no viaja
+ * sería decir «no tienes nada» cuando lo cierto es «no lo sé».
+ */
+function aplicaContexto<T extends Record<string, any>>(lista: T[], ctx: Contexto, texto: (x: T) => string): T[] {
+  if (ctx.proyecto) {
+    const suyas = lista.filter(x => x.proyecto_slug === ctx.proyecto!.slug || x.proyecto?.slug === ctx.proyecto!.slug);
+    // Si NINGUNA lleva proyecto, es que ese dato no viaja en esta lista: se
+    // enseña entera en vez de fingir que está vacía.
+    const alguienLoTrae = lista.some(x => 'proyecto_slug' in x || 'proyecto_id' in x || 'proyecto' in x);
+    return alguienLoTrae ? suyas : lista;
+  }
+  if (ctx.tema) {
+    const obj = OBJETIVOS.find(o => o.id === ctx.tema!.id);
+    if (!obj) return lista;
+    return lista.filter(x => hablaDe(texto(x), obj));
+  }
+  return lista;
+}
+
 function useLista<T = any>(url: string, extrae?: (j: any) => T[]) {
   const [estado, setEstado] = useState<T[] | 'fallo' | null>(null);
   const pedir = () => {
@@ -336,8 +374,17 @@ function PanelPaginas({ onCerrar }: { onCerrar: () => void }) {
   }, []);
 
   const q = busca.trim().toLowerCase();
+  /* EL CONTEXTO MANDA ANTES QUE EL BUSCADOR: primero se decide QUÉ lista es
+     ésta —las de este proyecto, las de este tema o todas— y después se busca
+     dentro. Al revés, escribir una palabra sacaría cosas de otros proyectos. */
+  const contexto = useContextoNavegacion();
   const visibles = (grupos || [])
-    .map(g => ({ ...g, paginas: (g.paginas || []).filter((p: any) => !q || (p.title || '').toLowerCase().includes(q)) }))
+    .filter((g: any) => !contexto.proyecto || g.slug === contexto.proyecto.slug)
+    .map(g => ({
+      ...g,
+      paginas: aplicaContexto<any>(g.paginas || [], contexto, (p: any) => p.title || '')
+        .filter((p: any) => !q || (p.title || '').toLowerCase().includes(q)),
+    }))
     // Con búsqueda, un grupo sin resultados estorba. Sin búsqueda, un proyecto
     // vacío se enseña: es donde vas a soltar la primera página.
     .filter(g => (q ? g.paginas.length > 0 : true));

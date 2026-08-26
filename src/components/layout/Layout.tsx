@@ -871,6 +871,44 @@ export default function Layout() {
       <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-1 sm:px-2 flex items-center gap-1 sm:gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
+        {/* ══ «EXPLORAR», FUSIONADO CON LA COLUMNA DE LA IZQUIERDA ═══════════
+            (2026-08-25) Eugenio: «el botón de explorar tiene que estar
+            fusionado con el menú izquierdo, y el logo de humanity.wiki a la
+            derecha de explorar. Y tiene que tener el logo de la exploración, no
+            el de una casa: utiliza una brújula. Piensa cómo hacer esta fusión
+            de forma elegante y eficiente para que, cuando el usuario pinche, se
+            fije el menú que le corresponde y le lleve a su página».
+
+            ── CÓMO SE HACE LA FUSIÓN, Y POR QUÉ ASÍ ────────────────────────
+            No es un botón que esté «cerca» del raíl: es **su remate**. Va el
+            primero de la barra, pegado al mismo borde del que nace la columna,
+            y cuando está activo se pinta como ella y **sin línea abajo**
+            (`-mb-px` se come el borde de la cabecera), de modo que el color
+            corre sin corte desde el rótulo hasta el último tema. Eso es lo que
+            hace que se lean como una sola pieza y no como dos cosas alineadas.
+
+            Y hace las DOS cosas que pidió, en este orden: **fija** el menú —que
+            deja de depender del ratón— y **navega**. Fijar sin navegar dejaría
+            el menú abierto sobre la misma página; navegar sin fijar cerraría el
+            menú justo al llegar a la página que va de eso.
+
+            La brújula y no la casa: una casa es «inicio», que es otro sitio
+            —el logo de al lado ya lleva ahí—. Explorar es buscar sin saber
+            todavía qué. */}
+        {user && (
+          <button
+            onClick={() => { setCirculo('explorar'); setPorRoce(false); navigate('/preferencias'); }}
+            title="Explorar los catorce temas"
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
+              circulo === 'explorar' || location.pathname === '/preferencias'
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          >
+            <Compass className="h-4 w-4 shrink-0" />
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
+          </button>
+        )}
+
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
             llamativo y grande».
@@ -1101,20 +1139,6 @@ export default function Layout() {
             palabra es el rótulo de esa columna. Y lleva a `/preferencias`, que
             es donde vive la rueda: él se corrigió a sí mismo en la frase y
             **manda la corrección**, no la primera versión. */}
-        {user && (
-          <Link
-            to="/preferencias"
-            className={cn('hidden shrink-0 items-center gap-1.5 rounded-lg px-2.5 transition-colors sm:flex',
-              compacto ? 'h-7' : 'h-9',
-              location.pathname === '/preferencias'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
-          >
-            <Home className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap text-[13px] font-black">Explorar</span>
-          </Link>
-        )}
-
         <BuscadorSuperior compacto={compacto} />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
@@ -1390,18 +1414,46 @@ export default function Layout() {
 
             Tu foto ya no está aquí: se ha mudado a lo alto de esa misma columna
             (ver `AvatarRail`), con mensajes, contactos y calendario debajo. */}
+            {/* ══ Y EN EL MÓVIL, SIN LA PALABRA PERO CON EL BOTÓN ══════════
+                (2026-08-25) Eugenio: «arregla el menú de la versión móvil,
+                porque no se puede acceder al menú derecho desde el móvil».
+
+                Y era literal: este botón llevaba `hidden … sm:flex`, así que por
+                debajo de 640 px **no se dibujaba**. En un ordenador el raíl de
+                la derecha se despliega al acercar el ratón; en un teléfono no
+                hay ratón, así que este botón era la única puerta — y no estaba.
+                Tus proyectos existían y no había forma de llegar a ellos.
+
+                Lo mismo le pasaba a «Explorar». El izquierdo al menos conservaba
+                el botón de las tres rayas; el derecho no tenía nada.
+
+                Ahora el botón se dibuja siempre y lo que se esconde es **la
+                palabra**, que es lo que no cabe. El icono se queda, y con él la
+                puerta. */}
+        {/* EL MISMO REMATE, POR EL OTRO LADO. Fija el raíl de la derecha y
+            lleva a tus proyectos, con el mismo par de gestos que «Explorar»:
+            las dos esquinas se comportan igual porque son la misma idea. */}
         {user && (
-          <Link
-            to="/proyectos"
-            className={cn('hidden shrink-0 items-center gap-1.5 rounded-lg px-2.5 transition-colors sm:flex',
-              compacto ? 'h-7' : 'h-9',
-              location.pathname.startsWith('/proyectos')
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          <button
+            /* EN EL MÓVIL ABRE EL CAJÓN Y NO NAVEGA. En un ordenador el raíl
+               se queda a un lado y la página cambia detrás: las dos cosas se
+               ven. En un teléfono el cajón ocupa la pantalla, así que navegar
+               además dejaría el cajón abierto sobre otra página — y al cerrarlo
+               aparecerías en un sitio al que no habías pedido ir. */
+            onClick={() => {
+              setPorRoce(false);
+              if (esMovil) setCirculo(c => (c === 'organizar' ? null : 'organizar'));
+              else { setCirculo('organizar'); navigate('/proyectos'); }
+            }}
+            title="Tus proyectos"
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
+              circulo === 'organizar' || location.pathname.startsWith('/proyectos')
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <FolderKanban className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap text-[13px] font-black">Mis proyectos</span>
-          </Link>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis proyectos</span>
+          </button>
         )}
 
         {!user && !cargandoSesion && (
@@ -1460,6 +1512,13 @@ export default function Layout() {
             pantalla completa, y tener además su botón flotante daría dos
             chats a la vez — el error que este proyecto ya pagó caro. */}
         {!isIAPage && <AIAssistant />}
+
+        {/* EL CÍRCULO FLOTANTE SE HA IDO (2026-08-25). Eugenio: «mejor pon
+            el botón de IA dentro del menú inferior». Estuvo suelto abajo a la
+            derecha unas horas y él tenía razón: flotando era un elemento más
+            que esquivar —se apartaba del raíl derecho y del inferior leyendo
+            sus medidas—, y dentro de la barra no hay nada que esquivar porque
+            es la barra. La puerta es la misma: el aviso `ai:abrir`. */}
 
         {/* EL TELÉFONO, EN TODA LA APLICACIÓN (2026-08-22). Va aquí y no en la
             pantalla de Mensajes porque una llamada tiene que sonar estés donde
@@ -1668,15 +1727,42 @@ export default function Layout() {
           onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
           onPasarPorEncima={() => setPorRoce(false)}
           onFeedback={() => navigate('/hormiguero')}
+          onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
         />
       </div>
 
-      {/* El panel de una herramienta del raíl de abajo sale por la izquierda,
-          como el de siempre: es el mismo `Panel`, no una copia. */}
+      {/* ══ EL PANEL SUBE DESDE ABAJO (2026-08-25) ═════════════════════════
+          Eugenio: «esa ventana emergente que aparece cuando se le da a ampliar
+          una de las herramientas del menú inferior, en vez de que aparezca en
+          el lateral izquierdo, haz que aparezca de abajo arriba hasta la mitad
+          de la pantalla».
+
+          Y tiene razón de sobra: **sale del menú de abajo y aparecía arriba a
+          la izquierda**, o sea en la otra punta de la pantalla, sin nada que lo
+          uniera al botón que acababas de pulsar. Ahora nace justo encima de su
+          barra, del mismo ancho máximo, y sube. El gesto y lo que ocurre pasan
+          en el mismo sitio.
+
+          MEDIA PANTALLA Y NO MÁS: lo que estabas mirando sigue detrás y se ve.
+          A pantalla completa habría que cerrarlo para recordar de dónde venías.
+
+          Arranca en `--hueco-muelle`, que es lo que mide la barra: si un día
+          cambia de alto, este panel sube con ella y no hay que acordarse. */}
       {!esMovil && panelAbierto && (
-        <div className="fixed bottom-[84px] left-3 top-16 z-[9991] flex" {...gestoDelMenu}>
-          <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
-        </div>
+        <>
+          <div
+            onClick={() => setPanelAbierto(null)}
+            aria-hidden
+            className="fixed inset-0 z-[9990] bg-slate-900/20 animate-in fade-in duration-150"
+          />
+          <div
+            {...gestoDelMenu}
+            className="fixed inset-x-0 z-[9991] mx-auto flex h-[50vh] max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl ring-1 ring-slate-200 animate-in slide-in-from-bottom duration-200 [&>*]:w-full [&>*]:border-0"
+            style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 8px)' }}
+          >
+            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          </div>
+        </>
       )}
 
       {/* La hoja recibe `gestoDelMenu` como cualquier otro menú abierto por

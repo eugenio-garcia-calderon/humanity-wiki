@@ -336,6 +336,27 @@ export default function Rail({
     try { return localStorage.getItem('hw_rail_fijado') === '1'; } catch { return false; }
   });
   const [encima, setEncima] = useState(false);
+  /* Qué fila tiene el ratón encima y a qué altura de la pantalla está. Se
+     guarda la altura porque la etiqueta se dibuja FUERA del raíl —ver abajo— y
+     necesita saber a qué renglón pertenece. */
+  const [rozada, setRozada] = useState<{ h: Herramienta; y: number } | null>(null);
+  /*
+   * ══ EL SUBMENÚ SALE AL LADO, NO DENTRO (2026-08-25, segunda corrección) ══
+   * Eugenio: «cuando haces hover en la flecha se expande TODO el submenú, y lo
+   * único que quiero es ver lo que hay dentro de educación, a la derecha de
+   * educación, **sin que me cambie la palabra educación de sitio**. Aparece a
+   * la derecha en una pequeña ventanita que, si quito el hover, desaparece».
+   *
+   * Mi primer intento ensanchaba la columna entera para que cupieran los
+   * subtemas dentro. Funcionaba y estaba mal: **movía de sitio la palabra que
+   * el usuario estaba señalando**. Un menú que se recoloca bajo el ratón
+   * obliga a volver a buscar lo que ya habías encontrado.
+   *
+   * Ahora los subtemas salen en una ventanita flotante pegada a la etiqueta.
+   * La columna no se toca, «EDUCACIÓN» no se mueve, y al sacar el ratón
+   * desaparece sola.
+   */
+  const [subtemasDe, setSubtemasDe] = useState<Herramienta | null>(null);
 
   /*
    * ── FLOTAR O QUEDARSE ─────────────────────────────────────────────────────
@@ -354,7 +375,26 @@ export default function Rail({
    * el submenú quedaría abierto sin que se vea de cuál de los catorce es.
    */
   const anclado = siempreAbierto || fijado || abierta !== null;
-  const desplegado = anclado || encima;
+  /*
+   * ══ EL RATÓN YA NO ABRE LA COLUMNA ENTERA (2026-08-25) ═══════════════════
+   * Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre
+   * de ese icono; por ejemplo, si hago hover en movilidad aparece el nombre de
+   * movilidad, y me permite pinchar ahí o darle a la flecha y ver su submenú.
+   * De esa manera queda mucho más elegante, ya que no aparecen todos los
+   * nombres de golpe. Cuando sí pincho arriba y se fija el menú izquierdo,
+   * aparecen todos los nombres».
+   *
+   * Y tiene razón en lo que es: **catorce nombres apareciendo por rozar el
+   * borde son catorce cosas que no has pedido**. Pasar el ratón es mirar, no
+   * decidir; y la respuesta a mirar un icono es ese icono, no la lista entera.
+   *
+   * Así que `desplegado` pasa a depender SÓLO de haber decidido —la chincheta,
+   * el rótulo de arriba o un submenú abierto—, y el nombre de cada tema sale en
+   * su propia etiqueta al pasar por encima de él (más abajo, `group-hover/fila`).
+   * `encima` se conserva porque el raíl lo sigue usando para saber si el ratón
+   * está dentro, pero ya no ensancha nada.
+   */
+  const desplegado = anclado;
 
   const fijar = () => {
     setFijado(v => {
@@ -523,6 +563,8 @@ export default function Rail({
           if (desde && desde !== h.clave) personal.reordenar!(desde, h.clave);
           arrastrado.current = null;
         } : undefined}
+        onMouseEnter={e => { if (!desplegado) setRozada({ h, y: e.currentTarget.getBoundingClientRect().top }); }}
+        onMouseLeave={() => setRozada(r => (r?.h.clave === h.clave ? null : r))}
         className={cn('group/fila relative flex shrink-0 items-center',
           desplegado ? 'w-full' : 'w-10')}>
         {/* La marca de «aquí estás» es una barra a la izquierda, no un fondo
@@ -558,10 +600,22 @@ export default function Rail({
               : (activa ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'),
           )}
         >
-          {/* EL COLOR DEL TEMA, cuando lo tiene: el mismo azul del agua que en
-              el mapa. Sobre fondo oscuro no se usa —un `text-yellow-500` sobre
-              negro casi no se ve— y ahí manda el estado del botón. */}
-          <Icono className={cn('h-5 w-5 shrink-0', claro && h.color && !activa && h.color)} />
+          {/* ══ SIN COLORINES (2026-08-25) ═══════════════════════════════
+              Eugenio: «haz que los iconos del menú izquierdo no sean de
+              colorines, sino que tengan el mismo aspecto sobrio y negro del
+              menú lateral derecho».
+
+              Llevaban el color de cada tema en el mapa —el azul del agua, el
+              ámbar de la alimentación—. La idea era buena y el resultado no:
+              catorce colores en columna compiten entre sí y con lo que hay en
+              el centro de la pantalla, que es lo que hay que mirar. En el mapa
+              el color distingue territorios que están unos al lado de otros;
+              en una lista, el nombre ya los distingue.
+
+              El color no se pierde: sigue en el mapa y en las etiquetas de las
+              tarjetas, que es donde separa cosas de verdad. Aquí manda el
+              estado del botón, igual que en el raíl de la derecha. */}
+          <Icono className="h-5 w-5 shrink-0" />
           {/* El nombre NO se desmonta al plegar: se hace transparente y se le
               quita el ancho. Desmontarlo hace que el texto aparezca de golpe al
               final de la animación en vez de acompañarla. */}
@@ -587,6 +641,8 @@ export default function Rail({
         {conRamas && (
           <button
             onClick={e => { e.stopPropagation(); ramas!.alternar(h.clave); }}
+            // Igual que la otra flecha: al pasar el ratón sólo abre.
+            onMouseEnter={() => { if (!ramas!.abierto(h.clave)) ramas!.alternar(h.clave); }}
             title={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
             aria-label={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
             aria-expanded={ramas!.abierto(h.clave)}
@@ -668,6 +724,9 @@ export default function Rail({
         {conFlecha && (
           <button
             onClick={() => onAbrirSubmenu!(h)}
+            // ABRE AL PASAR EL RATÓN, y sólo abre. Alternar aquí cerraría el
+            // submenú justo cuando mueves el ratón hacia él para leerlo.
+            onMouseEnter={() => { if (abierta !== h.clave) onAbrirSubmenu!(h); }}
             title={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
             aria-label={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
             aria-expanded={activa}
@@ -895,6 +954,112 @@ export default function Rail({
           </div>
         )}
       </nav>
+
+      {/* ══ LA ETIQUETA DE UNO SOLO (2026-08-25) ══════════════════════════
+          Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el
+          nombre de ese icono… me permite pinchar ahí o darle a la flecha y ver
+          su submenú. Queda mucho más elegante, ya que no aparecen todos los
+          nombres de golpe».
+
+          ── POR QUÉ VA AQUÍ FUERA Y NO DENTRO DE SU FILA ──────────────────
+          Primero la colgué de la fila con `absolute`. No se veía: **la columna
+          se desplaza en vertical para los catorce temas, y un contenedor que
+          recorta en un eje recorta en los dos**, así que la etiqueta salía
+          detrás del raíl. Es el mismo tropiezo que la «i» del menú de abajo, y
+          la segunda vez ya no es casualidad: si algo tiene que salirse de una
+          caja que hace scroll, se dibuja fuera de la caja.
+
+          Va `fixed` a la altura del renglón que se está rozando, así que la
+          columna no se ensancha y **los otros trece iconos no se mueven un
+          píxel**. Un menú que se reordena debajo del ratón se pulsa mal.
+
+          Y lleva la flecha al lado cuando ese tema tiene subtemas, porque él
+          pidió las dos cosas desde aquí: el nombre lleva al tema, la flecha lo
+          abre sin salir. */}
+      {!desplegado && rozada && (
+        <div
+          onMouseEnter={() => setRozada(rozada)}
+          onMouseLeave={() => { setRozada(null); setSubtemasDe(null); }}
+          className={cn('fixed z-[60] flex items-center gap-1', ladoDerecho ? 'flex-row-reverse' : '')}
+          style={{
+            top: rozada.y,
+            ...(ladoDerecho ? { right: 44 } : { left: 44 }),
+          }}
+        >
+          <button
+            onClick={() => { onElegir(rozada.h); setRozada(null); }}
+            className={cn('flex h-10 items-center whitespace-nowrap rounded-xl px-3 text-[13px] font-bold shadow-xl ring-1 transition-colors',
+              claro ? 'bg-white text-slate-900 ring-slate-200 hover:bg-slate-50'
+                    : 'bg-slate-800 text-white ring-white/10 hover:bg-slate-700')}
+          >
+            {rozada.h.nombre}
+          </button>
+          {/* LA VENTANITA DE LOS SUBTEMAS, pegada a la etiqueta y a su misma
+              altura. Se pinta aquí dentro —no en otro sitio— para que el ratón
+              pueda ir del nombre a la flecha y de la flecha a la lista sin
+              salirse nunca de la misma zona: si estuviera fuera, cruzar el
+              hueco la cerraría antes de llegar. */}
+          {subtemasDe?.clave === rozada.h.clave && ramas && (
+            <div className={cn('max-h-[60vh] w-56 overflow-y-auto rounded-xl py-1.5 shadow-2xl ring-1',
+              claro ? 'bg-white ring-slate-200' : 'bg-slate-800 ring-white/10')}>
+              <p className={cn('px-3 pb-1 text-[9px] font-black uppercase tracking-[0.15em]',
+                claro ? 'text-slate-400' : 'text-slate-500')}>
+                Dentro de {rozada.h.nombre}
+              </p>
+              {ramas.de(rozada.h.clave).filter(t => !t.padre_id).length === 0 && (
+                <p className={cn('px-3 py-1.5 text-[11px]', claro ? 'text-slate-400' : 'text-slate-500')}>
+                  Abriendo…
+                </p>
+              )}
+              {ramas.de(rozada.h.clave).filter(t => !t.padre_id).map(t => (
+                <NavLink
+                  key={t.id}
+                  to={`/temas/${t.id}`}
+                  onClick={() => { setRozada(null); setSubtemasDe(null); }}
+                  className={cn('flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors',
+                    claro ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                          : 'text-slate-400 hover:bg-slate-700 hover:text-white')}
+                >
+                  <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
+                  {t.cosas > 0 && (
+                    <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-400">{t.cosas}</span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          )}
+
+          {ramas?.hay(rozada.h.clave) && (
+            /* ══ LA FLECHA TAMBIÉN ABRE AL PASAR EL RATÓN (2026-08-25)
+               Eugenio: «si pongo el ratón encima de la flecha a la derecha de
+               la palabra movilidad, que se expanda el submenú, sólo de los
+               subtemas de movilidad. También si pincho».
+
+               ABRE, NO ALTERNA, y ésa es la diferencia que lo hace usable:
+               alternar al pasar el ratón cerraría el submenú justo cuando
+               mueves el ratón hacia él para leerlo. Pasar el ratón sólo abre;
+               cerrar sigue siendo cosa del clic, que es una decisión. */
+            <button
+              /* ABRIR LA VENTANITA ES TAMBIÉN PEDIR LOS DATOS. Los subtemas
+                 de un objetivo no viajan hasta que alguien los pide, y quien
+                 los pide es `alternar` — que además marca esa rama como
+                 abierta. Aquí eso no se ve: el árbol de dentro sólo se pinta
+                 con la columna desplegada, y aquí está estrecha. Sin esta
+                 llamada la ventanita salía en su sitio y **vacía**, que fue
+                 justo lo que pasó al primer intento. */
+              onClick={() => { if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave); setSubtemasDe(rozada.h); }}
+              onMouseEnter={() => { if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave); setSubtemasDe(rozada.h); }}
+              title={`Ver los subtemas de ${rozada.h.nombre}`}
+              aria-label={`Ver los subtemas de ${rozada.h.nombre}`}
+              className={cn('grid h-10 w-9 place-items-center rounded-xl shadow-xl ring-1 transition-colors',
+                claro ? 'bg-white text-slate-400 ring-slate-200 hover:text-slate-900'
+                      : 'bg-slate-800 text-slate-400 ring-white/10 hover:text-white')}
+            >
+              <ChevronRight className={cn('h-4 w-4', ladoDerecho && 'rotate-180')} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

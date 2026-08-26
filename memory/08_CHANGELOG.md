@@ -7258,6 +7258,42 @@ su ancho.
 «Explorar» lleva a `/preferencias` y no a `/explorar` porque él se corrigió en la
 misma frase —«se lleva a la página de personalizar realmente»— y **manda la
 corrección, no la primera versión**. Ahí está la rueda de los catorce temas.
+
+## 2026-08-25 — Paso 1 de la navegación contextual: dónde estás
+Eugenio: «si estoy en la página de un proyecto y le doy a crear una tarea, que
+se asigne a ese proyecto… y si estoy explorando movilidad y le doy a páginas,
+que me aparezcan las páginas de movilidad. Crea esta sofisticación en cuanto a
+la navegación, donde todos los menús están funcionales en cuanto a lo que se ve
+en el centro de la pantalla». Pidió hacerlo **entero, aunque tarde varios pasos**.
+
+**Paso 1, el que sostiene todo lo demás:**
+
+- `src/utils/contextoNavegacion.ts` — de dónde estás sale de **la dirección**, no
+  de un estado global: es lo único que sigue siendo cierto al recargar, al
+  compartir un enlace y al volver atrás. Un «proyecto actual» guardado aparte
+  sería una segunda verdad, y esas dos discrepan siempre después de un «atrás».
+- Con proyecto **y** tema a la vez, manda el proyecto: es lo concreto. El tema
+  dice de qué habla; el proyecto dice dónde vive.
+- `scripts/probar-contexto.ts`, 13 casos. Esto decide en qué proyecto acaba una
+  tarea: equivocarse no da ningún error, mete el trabajo de alguien en el
+  proyecto de al lado y no se entera nadie hasta que lo busca donde lo dejó.
+  La primera versión de la prueba usaba `movilidad` como identificador y los
+  catorce se llaman `O001`…`O014` — **lo dijo la prueba, no la pantalla**.
+- El raíl inferior pega el contexto a cada destino y **lo enseña escrito**
+  («EN APTERA»). Una barra que se comporta distinto según dónde estés y no lo
+  dice es una barra que sorprende.
+- El panel de Páginas ya filtra: por proyecto con el dato (`proyecto_slug`, que
+  ya viajaba) y por tema con `hablaDe`, el mismo criterio que el muro. **Y por
+  tema no puede ser de otra forma: no existe ninguna tabla que una una página
+  con un objetivo**, está escrito en `utils/objetivos.ts` desde que se creó.
+- Si el dato no viaja en una lista, **no se filtra**: se enseña entera. Devolver
+  vacío porque el dato falta sería decir «no tienes nada» cuando lo cierto es
+  «no lo sé».
+
+**Lo que falta, y es lo que viene:** que los paneles de Mapas, Tareas, Esquemas
+y Comercio filtren igual (a dos de ellos hay que añadirles el proyecto en el
+servidor, hoy no lo devuelven), que las páginas completas honren `?proyecto=` y
+`?objetivo=`, y el «crear dentro de este proyecto».
 ---
 
 ## 2026-08-26 — Los tres puntitos de una tarjeta de proyecto
@@ -7307,3 +7343,182 @@ agente, y el borrado exacto del otro script ya no las alcanza.
 los cuatro campos se guardan, la tarjeta se repinta en el sitio sin recargar la
 lista, y vaciar descripción y portada funciona. El proyecto de prueba quedó
 como estaba y la sesión, borrada.
+
+## 2026-08-25 — Las dos esquinas son el remate de sus menús
+Eugenio, en el mismo mensaje: «el botón de explorar tiene que estar fusionado
+con el menú izquierdo, y el logo de humanity.wiki a la derecha de explorar; con
+una brújula, no una casa. Lo mismo con proyectos y el menú de la derecha. Piensa
+cómo hacer esta fusión de forma elegante para que, cuando el usuario pinche, se
+fije el menú que le corresponde y le lleve a su página». Y después: los iconos
+del menú izquierdo sobrios en vez de de colorines, el feedback amarillo, y el
+chat de IA en un círculo flotante abajo a la derecha.
+
+- **La fusión no es cercanía, es remate.** Cada rótulo va pegado al borde del
+  que nace su columna y, cuando está activo, se pinta como ella y **sin línea
+  abajo** (`-mb-px` se come el borde de la cabecera): el color corre sin corte
+  desde el rótulo hasta el último elemento. Eso es lo que hace que se lean como
+  una pieza y no como dos cosas alineadas.
+- **Dos cosas al pulsar, y en este orden**: fija el menú y navega. Fijar sin
+  navegar deja el menú abierto sobre la misma página; navegar sin fijar cierra
+  el menú justo al llegar a la página que va de eso.
+- Brújula y no casa: una casa es «inicio», que es otro sitio y ya lo lleva el
+  logo de al lado. Explorar es buscar sin saber todavía qué.
+- **Iconos sobrios.** Catorce colores en columna compiten entre sí y con el
+  centro de la pantalla. El color sigue en el mapa y en las etiquetas de las
+  tarjetas, que es donde separa cosas de verdad.
+- **Feedback amarillo.** Empezó rojo esta misma tarde; en esta aplicación el
+  rojo ya significa error o borrar, así que un botón rojo permanente decía «algo
+  va mal» todo el rato.
+
+**Y el conflicto que él notaba entre el chat y el menú de abajo era invisible y
+real:** `AIAssistant` escribía `--hueco-muelle` a `0px` cada vez que se abría o
+se cerraba, y el raíl inferior escribe ahí sus 64 px. El último en escribir
+gana, así que **abrir el chat borraba la reserva del menú** y la última fila de
+todas las páginas se metía debajo de la barra. No daba error. La regla que
+queda: **una variable, un dueño** — `--hueco-muelle` es de quien tapa abajo,
+`--hueco-lateral` es del chat.
+
+El círculo flotante no es un chat nuevo: manda `ai:abrir`, el aviso que
+`AIAssistant` ya escuchaba, así que abre el mismo con su historial y su modelo.
+Y se aparta solo de los dos menús porque lee sus variables (`--hueco-lateral` a
+la derecha, `--hueco-muelle` abajo): si mañana cambian de tamaño, se mueve con
+ellos.
+
+## 2026-08-25 — El proyecto nuevo sale solo, y el panel sube desde su botón
+- **Un proyecto recién creado aparece en el menú de la derecha sin recargar.**
+  El aviso ya existía —`humanity:menu-cambiado`, que dispara el diálogo de crear
+  desde el 2026-08-20— y el menú simplemente no lo escuchaba. No hizo falta ni
+  endpoint nuevo ni tocar a quien crea: hacía falta escuchar.
+  Y se vuelve a preguntar en vez de añadir el proyecto a la lista a mano: meterlo
+  a mano deja fuera el `slug` que calcula el servidor y el icono por defecto, y
+  el menú enseñaría algo que todavía no existe tal cual.
+- **El panel de una herramienta sube desde abajo**, hasta media pantalla, en vez
+  de aparecer arriba a la izquierda. Eugenio: «esa ventana emergente… haz que
+  aparezca de abajo arriba hasta la mitad de la pantalla». Salía del menú de
+  abajo y aparecía en la otra punta, sin nada que la uniera al botón que
+  acababas de pulsar; ahora el gesto y lo que ocurre pasan en el mismo sitio.
+  Media pantalla y no más: lo que estabas mirando sigue detrás y se ve.
+  Arranca en `--hueco-muelle`, así que si la barra cambia de alto, sube con ella.
+
+## 2026-08-25 — La IA entra en el menú de abajo, y es el botón más destacado
+Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero ponlo
+destacado como has hecho con el de feedback, pero incluso más destacado».
+
+- **Cómo se hace «más» destacado sin gritar**: el de feedback es color sobre el
+  fondo oscuro —amarillo, y ya—. Éste sube un escalón entero y pasa a ser una
+  **pastilla rellena**: verde sólido, letra blanca y halo. En una fila de iconos
+  planos, el único que tiene cuerpo se ve antes que cualquier cambio de color, y
+  no hace falta agrandarlo, que es lo que habría descolocado la barra.
+- **Va el primero, no el último.** Lo puse al final y **se salía de la
+  pantalla**: la barra lleva doce herramientas y se desplaza en horizontal
+  cuando no caben, así que el último es justo el que deja de verse. Poner el
+  botón más importante donde primero se corta es la peor plaza. Al principio se
+  ve siempre y comparte esquina con el de feedback: los dos que no son
+  herramientas, juntos.
+- **El asistente estaba dos veces y llevaban a sitios distintos**: una
+  herramienta «Asistente» que abría la página `/ia` y un círculo flotante que
+  abría el chat con tu historial. Ahora hay una sola puerta —el aviso
+  `ai:abrir`— y el círculo flotante se retira: flotando era un elemento más que
+  esquivar; dentro de la barra no hay nada que esquivar porque es la barra.
+
+## 2026-08-25 — La «i», en el centro exacto del menú de abajo
+Eugenio: «pon el botón de la i en el centro del menú inferior».
+
+- **En el centro de verdad**: la posición se calcula
+  (`HERRAMIENTAS_ABAJO.length / 2`) en vez de escribirse a mano entre dos
+  herramientas. A mano, el día que entre o salga una —y aquí ya han entrado y
+  salido varias esta misma tarde— se quedaría descentrada sin que nadie lo note.
+- **Discreta, en gris.** No es una herramienta ni una acción: es dónde se
+  explica qué es todo esto. Si compitiera con el verde de la IA o el ámbar del
+  feedback, los tres dejarían de destacar.
+- Su desplegable va `fixed` y no `absolute`: **la barra se desplaza en
+  horizontal, y un contenedor que recorta en un eje recorta en los dos**, así
+  que colgado de ella el menú salía detrás de la barra y no se veía. Se ve en
+  una captura, no compilando.
+
+## 2026-08-25 — El menú izquierdo enseña un nombre, no catorce
+Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre de
+ese icono; por ejemplo, si hago hover en movilidad aparece el nombre de
+movilidad, y me permite pinchar ahí o darle a la flecha y ver su submenú. Queda
+mucho más elegante, ya que no aparecen todos los nombres de golpe. Cuando sí
+pincho arriba y se fija el menú, aparecen todos los nombres».
+
+- **Pasar el ratón deja de abrir la columna entera.** Catorce nombres saliendo
+  por rozar el borde son catorce cosas que nadie ha pedido: pasar el ratón es
+  mirar, no decidir, y la respuesta a mirar un icono es ese icono.
+- La etiqueta lleva **el nombre y su flecha**, las dos cosas que él pidió desde
+  ahí: el nombre va al tema, la flecha lo abre sin salir.
+- **Se dibuja fuera del raíl.** Colgada de su fila con `absolute` no se veía:
+  la columna se desplaza en vertical para los catorce temas, y **un contenedor
+  que recorta en un eje recorta en los dos**. Es el segundo tropiezo igual en la
+  misma tarde —el primero fue el desplegable de la «i»—, así que queda escrito:
+  **si algo tiene que salirse de una caja que hace scroll, se dibuja fuera de la
+  caja.**
+- Y va a la altura del renglón rozado, así que la columna no se ensancha y los
+  otros trece iconos **no se mueven un píxel**. Un menú que se reordena debajo
+  del ratón se pulsa mal.
+- Con el menú fijado desde arriba, todos los nombres se leen en su sitio y la
+  etiqueta no sale: sería decir lo mismo dos veces.
+
+## 2026-08-25 — La flecha abre el submenú al pasar el ratón, en los tres menús
+Eugenio: «si pongo el ratón encima de la flecha a la derecha de la palabra
+movilidad que se expanda el submenú, pero sólo de los elementos que están dentro
+de movilidad. También si pincho. Y replica esto mismo en el menú derecho e
+inferior».
+
+- **Abre, no alterna**, y ésa es la diferencia que lo hace usable: alternar al
+  pasar el ratón cerraría el submenú justo cuando mueves el ratón hacia él para
+  leerlo. Pasar el ratón sólo abre; cerrar sigue siendo cosa del clic, que es
+  una decisión.
+- Los tres menús: la etiqueta flotante del izquierdo, la flecha de la fila
+  desplegada, la del raíl derecho y la del inferior.
+- **Y abrir un subtema ensancha la columna.** Sin eso, la flecha los abría
+  **dentro de una columna de 40 px**: se abrían de verdad y no se veía ninguno.
+  El submenú vive dentro del raíl, así que enseñarlo obliga a ensancharlo. Es un
+  estado propio y no la chincheta: la chincheta se guarda en el navegador y se
+  queda para siempre; esto dura lo que el ratón esté dentro.
+
+## 2026-08-25 — Dos correcciones de Eugenio sobre el hover de los menús
+«No has conseguido que en el menú inferior pase lo mismo que en el lateral
+izquierdo… Y cuando haces hover en la flecha se expande TODO el submenú, y lo
+único que quiero es ver lo que hay dentro de educación, a la derecha de
+educación, **sin que me cambie la palabra educación de sitio**.»
+
+- **El menú inferior enseña un nombre, no doce.** Se me quedó a medias: quité la
+  apertura completa en el izquierdo y no en el de abajo.
+- **Los subtemas salen en una ventanita al lado, no dentro.** Mi solución de
+  antes ensanchaba la columna para que cupieran, y estaba mal por la razón que
+  él dio: **movía de sitio la palabra que estaba señalando**. Un menú que se
+  recoloca bajo el ratón obliga a volver a buscar lo que ya habías encontrado.
+  Ahora la columna no se toca y la ventanita desaparece al salir.
+- Abrir la ventanita **es también pedir los datos**: los subtemas no viajan
+  hasta que alguien los pide, y al primer intento salió en su sitio y vacía.
+
+**Y una regla que hoy me ha costado tres veces**, escrita para no repetirla:
+`overflow-x: auto` recorta TAMBIÉN en vertical. Lo tropecé con el desplegable de
+la «i», con la etiqueta del menú izquierdo y con la del inferior — y en el
+tercero llegué a escribir en un comentario que lo había comprobado cuando no lo
+había hecho. **Si algo tiene que salirse de una caja que hace scroll, se dibuja
+fuera de la caja. Sin suponer.**
+
+## 2026-08-25 — En el móvil no había puerta al menú derecho
+Eugenio: «arregla el menú de la versión móvil, porque no se puede acceder al
+menú derecho desde el móvil».
+
+Y era literal: el botón «Mis proyectos» llevaba `hidden … sm:flex`, así que **por
+debajo de 640 px no se dibujaba**. En un ordenador el raíl de la derecha se
+despliega al acercar el ratón; en un teléfono no hay ratón, así que ese botón era
+la única puerta — y no estaba. Tus proyectos existían y no había forma de llegar
+a ellos. A «Explorar» le pasaba lo mismo; el izquierdo al menos conservaba el
+botón de las tres rayas, el derecho no tenía nada.
+
+- Ahora **el botón se dibuja siempre** y lo que se esconde es la palabra, que es
+  lo que no cabe. El icono se queda, y con él la puerta.
+- **En el móvil abre el cajón y no navega.** En un ordenador el raíl se queda a
+  un lado y la página cambia detrás: se ven las dos cosas. En un teléfono el
+  cajón ocupa la pantalla, así que navegar además lo dejaría abierto sobre otra
+  página, y al cerrarlo aparecerías donde no habías pedido ir.
+
+Es la tercera vez esta tarde que una función se queda sin puerta al mover algo de
+sitio, y las tres veces la causa ha sido la misma: **mirar sólo la pantalla
+grande**. Comprobado a 375 px con el navegador, no supuesto.

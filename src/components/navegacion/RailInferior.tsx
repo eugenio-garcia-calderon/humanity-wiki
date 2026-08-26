@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { ChevronUp, MessageCircleWarning } from 'lucide-react';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Compass, Store,
   CalendarDays, Database, Sparkles, Gamepad2, Globe,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Info } from 'lucide-react';
+import { PAGINAS_INFO } from '../../paginasInfo';
 import { cn } from '../../utils/cn';
 import type { Herramienta } from './Rail';
+import { useContextoNavegacion, conContexto } from '../../utils/contextoNavegacion';
 
 /*
  * EL MENÚ DE ABAJO — LAS HERRAMIENTAS, A MANO (2026-08-25, agente de APP/UX)
@@ -61,9 +65,14 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
   { clave: 'calendario',    nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario',  conPanel: true },
   { clave: 'archivos',      nombre: 'Archivos',      icono: Database,     ruta: '/archivos',    conPanel: true },
   { clave: 'comercio',      nombre: 'Comercio',      icono: Store,        ruta: '/comercio',    conPanel: true },
-  // LAS TRES QUE NO ESTABAN EN NINGÚN MENÚ y sólo se abrían desde el cajetín de
+  // LAS QUE NO ESTABAN EN NINGÚN MENÚ y sólo se abrían desde el cajetín de
   // crear. Son herramientas de contenido como las demás: aquí es su sitio.
-  { clave: 'ia',            nombre: 'Asistente',     icono: Sparkles,     ruta: '/ia' },
+  //
+  // EL ASISTENTE YA NO ESTÁ EN ESTA LISTA (2026-08-25): tiene su propio botón
+  // destacado al final de la barra. Estaba dos veces —aquí y en el círculo
+  // flotante— y las dos abrían cosas distintas: éste llevaba a la página `/ia`
+  // y aquél abría el chat con tu historial. Dos puertas al mismo sitio que no
+  // llevan al mismo sitio es peor que una sola.
   { clave: 'visor3d',       nombre: 'Visor 3D',      icono: Gamepad2,     ruta: '/juego' },
   { clave: 'navegador',     nombre: 'Navegador',     icono: Globe,        ruta: '/navegador' },
 ];
@@ -72,7 +81,7 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
 export const ALTO_RESERVADO = 64;
 
 export default function RailInferior({
-  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima, onFeedback,
+  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima, onFeedback, onIA,
 }: {
   /** Qué herramienta tiene su panel abierto, si hay alguno. */
   abierta: string | null;
@@ -82,11 +91,39 @@ export default function RailInferior({
   /** Desplegado y quieto, sin depender del ratón. */
   fijo?: boolean;
   onPasarPorEncima?: () => void;
-  /** El botón rojo. Bajó de la barra de arriba para despejarla. */
+  /** El botón amarillo. Bajó de la barra de arriba para despejarla. */
   onFeedback: () => void;
+  /** El botón verde, el más destacado: abre el chat con tu historial. */
+  onIA: () => void;
 }) {
   const [encima, setEncima] = useState(false);
-  const desplegado = fijo || encima;
+  const [infoAbierta, setInfoAbierta] = useState(false);
+  /*
+   * ══ UN NOMBRE, NO DOCE (2026-08-25, corrección de Eugenio) ═══════════════
+   * «No has conseguido que en el menú inferior pase lo mismo que en el lateral
+   * izquierdo: cuando hagas hover en una herramienta, sólo se ve el nombre de
+   * esa herramienta».
+   *
+   * Tenía razón: aquí pasar el ratón por la barra sacaba los doce nombres de
+   * golpe, que es justo lo que acabábamos de quitar en el menú de la izquierda.
+   * Ahora el nombre sale en una etiqueta encima del icono señalado, y la barra
+   * sólo enseña todos los nombres cuando está fijada.
+   */
+  const [rozada, setRozada] = useState<{ clave: string; x: number } | null>(null);
+  const desplegado = fijo;
+
+  /*
+   * ══ LAS HERRAMIENTAS SE APLICAN A DONDE ESTÁS (2026-08-25) ═══════════════
+   * Eugenio: «si estoy en la página de un proyecto y le doy a crear una tarea,
+   * que se asigne a ese proyecto… y si estoy explorando movilidad y le doy a
+   * páginas, que me aparezcan las páginas de movilidad».
+   *
+   * El contexto sale de la dirección, así que esta barra no tiene que saber
+   * nada: pregunta dónde está y se lo pega a cada destino. Si no hay contexto,
+   * `conContexto` devuelve la ruta tal cual y todo se comporta como antes.
+   */
+  const contexto = useContextoNavegacion();
+  const dondeEstoy = contexto.proyecto?.slug || contexto.tema?.titulo || null;
   const reloj = useRef<number | null>(null);
 
   /*
@@ -138,10 +175,65 @@ export default function RailInferior({
           desplegado ? 'py-2' : 'py-1.5',
         )}
       >
+        {/* ══ EN QUÉ ESTÁS, ESCRITO ══════════════════════════════════════
+            Una barra que se comporta distinto según dónde estés y no lo dice es
+            una barra que sorprende. Con el rótulo, «Páginas» deja de significar
+            «todas las páginas» y pasa a significar «las páginas de esto», que
+            es lo que hace. Sólo cuando está desplegada: en reposo son iconos, y
+            un rótulo suelto entre iconos no se lee, se estorba. */}
+        {desplegado && dondeEstoy && (
+          <span className="mr-1 max-w-[9rem] shrink-0 self-center truncate rounded-lg bg-slate-800 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300">
+            en {dondeEstoy}
+          </span>
+        )}
+
+        {/* ══ LA IA, EL BOTÓN MÁS DESTACADO DE LA BARRA (2026-08-25) ═══════
+            Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero
+            ponlo destacado como has hecho con el de feedback, pero incluso más
+            destacado».
+
+            ── CÓMO SE HACE «MÁS» DESTACADO SIN GRITAR ──────────────────────
+            El de feedback es **color sobre el fondo oscuro**: amarillo, y ya.
+            Éste sube un escalón entero y pasa a ser **una pastilla rellena**:
+            fondo verde sólido, letra blanca y un halo. En una fila de iconos
+            planos, el único que tiene cuerpo se ve antes que cualquier cambio
+            de color — y no hace falta subir el tamaño, que es lo que habría
+            descolocado la barra.
+
+            ── Y VA EL PRIMERO, NO EL ÚLTIMO ───────────────────────────────
+            Empezó al final y **se salía de la pantalla**: la barra lleva doce
+            herramientas y se desplaza en horizontal cuando no caben, así que el
+            último es justo el que deja de verse. Poner el botón más importante
+            donde primero se corta es la peor plaza de todas. Al principio se ve
+            siempre, y comparte esquina con el de feedback: los dos que no son
+            herramientas, juntos, y las herramientas después de la raya.
+
+            NO LLEVA A `/ia`: manda `ai:abrir`, así que abre el chat de siempre
+            con tu historial y tu modelo. Antes esto estaba dos veces —una
+            herramienta llamada «Asistente» que iba a la página y un círculo
+            flotante que abría el chat—, y llevaban a sitios distintos. */}
+        <div className="relative flex shrink-0 flex-col items-center">
+          <button
+            onClick={onIA}
+            title="Preguntar a la IA"
+            aria-label="Preguntar a la IA"
+            className="flex flex-col items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
+          >
+            <Sparkles className="h-5 w-5 shrink-0" />
+            <span className={cn(
+              'overflow-hidden whitespace-nowrap text-[10px] font-black leading-none transition-all duration-200',
+              desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+            )}>
+              IA
+            </span>
+          </button>
+        </div>
         {/* ══ FEEDBACK, AQUÍ Y EN ROJO (2026-08-25) ═══════════════════════
             Eugenio: «el feedback, mételo en la barra de herramientas inferior
-            con un color distinto, que sea en rojo, que destaque. Y así también
-            la liberamos de arriba».
+            con un color distinto, que destaque». Empezó en rojo y lo cambió a
+            **amarillo** el 2026-08-25, y es mejor: en esta aplicación el rojo
+            ya significa error o borrar, así que un botón rojo permanente decía
+            «algo va mal» todo el rato. El amarillo llama igual y no alarma.
 
             El rojo no es decoración: es el único botón de esta barra que no
             crea nada — sirve para decir que algo está roto. Que se distinga de
@@ -152,7 +244,7 @@ export default function RailInferior({
             onClick={onFeedback}
             title="Lo que falla y lo que falta"
             aria-label="Feedback: lo que falla y lo que falta"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-rose-400 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-amber-400 transition-colors hover:bg-amber-500/15 hover:text-amber-300"
           >
             <MessageCircleWarning className="h-5 w-5 shrink-0" />
             <span className={cn(
@@ -165,12 +257,83 @@ export default function RailInferior({
         </div>
         <div className="mx-1 h-8 w-px shrink-0 self-center bg-slate-700" />
 
-        {HERRAMIENTAS_ABAJO.map(h => {
+        {HERRAMIENTAS_ABAJO.map((h, i) => (
+          <Fragment key={`tramo-${h.clave}`}>
+            {/* ══ LA «i», EN EL CENTRO EXACTO (2026-08-25) ═══════════════════
+                Eugenio: «pon el botón de la i en el centro del menú inferior».
+
+                Y en el centro DE VERDAD: la posición se calcula
+                (`HERRAMIENTAS_ABAJO.length / 2`) en vez de escribirse a mano
+                entre dos herramientas. Escrito a mano, el día que entre o salga
+                una herramienta —y aquí ya han entrado y salido varias— la «i»
+                se quedaría descentrada sin que nadie lo note.
+
+                Va discreta, en gris: no es una herramienta ni un botón de
+                acción, es dónde se explica qué es todo esto. Si compitiera con
+                el verde de la IA o el ámbar del feedback, los tres dejarían de
+                destacar. */}
+            {i === Math.floor(HERRAMIENTAS_ABAJO.length / 2) && (
+              <div className="relative flex shrink-0 flex-col items-center">
+                <button
+                  onClick={() => setInfoAbierta(a => !a)}
+                  title="Sobre la plataforma"
+                  aria-label="Sobre la plataforma"
+                  aria-expanded={infoAbierta}
+                  className={cn('flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors',
+                    infoAbierta ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-800 hover:text-white')}
+                >
+                  <Info className="h-5 w-5 shrink-0" />
+                  <span className={cn(
+                    'overflow-hidden whitespace-nowrap text-[10px] font-bold leading-none transition-all duration-200',
+                    desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+                  )}>
+                    Información
+                  </span>
+                </button>
+
+                {/* SUBE, y va `fixed` y no `absolute`. La barra se desplaza en
+                    horizontal (`overflow-x-auto`), y un contenedor que recorta
+                    en un eje recorta en los dos: colgado de la barra, el menú
+                    salía **detrás de ella** y no se veía nada. Se ve en una
+                    captura, no compilando. Sacándolo del flujo se dibuja encima
+                    de todo, y se coloca contra la misma medida que reserva la
+                    barra, así que sube con ella si cambia de alto. */}
+                {infoAbierta && (
+                  <div
+                    className="fixed left-1/2 z-[9995] w-56 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl"
+                    style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 14px)' }}
+                  >
+                    <p className="border-b border-slate-100 px-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Información
+                    </p>
+                    {PAGINAS_INFO.filter(o => o.enMenu !== false).map(o => (
+                      <Link
+                        key={o.ruta}
+                        to={`/${o.ruta}`}
+                        onClick={() => setInfoAbierta(false)}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                      >
+                        <o.icono className="h-3.5 w-3.5 text-slate-400" /> {o.titulo}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {(() => {
           const activa = abierta === h.clave;
           return (
-            <div key={h.clave} className="relative flex shrink-0 flex-col items-center">
+            <div
+              key={h.clave}
+              onMouseEnter={e => {
+                const c = e.currentTarget.getBoundingClientRect();
+                setRozada({ clave: h.clave, x: c.left + c.width / 2 });
+              }}
+              onMouseLeave={() => setRozada(r => (r?.clave === h.clave ? null : r))}
+              className="relative flex shrink-0 flex-col items-center"
+            >
               <button
-                onClick={() => onElegir(h)}
+                onClick={() => onElegir({ ...h, ruta: conContexto(h.ruta, contexto) })}
                 title={h.nombre}
                 aria-label={h.nombre}
                 className={cn(
@@ -201,9 +364,14 @@ export default function RailInferior({
                 la barra desplegada: en reposo no hay sitio y, sobre todo, no
                 habría forma de saber cuál de los dos vas a pulsar.
               */}
-              {desplegado && h.conPanel && onAbrirSubmenu && (
+              {(desplegado || rozada?.clave === h.clave) && h.conPanel && onAbrirSubmenu && (
                 <button
                   onClick={e => { e.stopPropagation(); onAbrirSubmenu(h); }}
+                  // ABRE AL PASAR EL RATÓN, igual que en los dos laterales
+                  // (2026-08-25, Eugenio: «replica esto mismo en el menú
+                  // derecho e inferior»). Y sólo abre: alternar cerraría el
+                  // panel justo al mover el ratón hacia él.
+                  onMouseEnter={() => { if (abierta !== h.clave) onAbrirSubmenu(h); }}
                   title={`Ver lo que hay en ${h.nombre}`}
                   aria-label={`Ver lo que hay en ${h.nombre}`}
                   className={cn(
@@ -216,8 +384,29 @@ export default function RailInferior({
               )}
             </div>
           );
-        })}
+            })()}
+          </Fragment>
+        ))}
+
       </nav>
+
+      {/* ══ EL NOMBRE DE LA HERRAMIENTA SEÑALADA ══════════════════════════
+          Y va FUERA de la barra, con `fixed`. Lo puse dentro con `absolute`
+          creyendo que, como sale hacia arriba, el recorte horizontal de la
+          barra no le afectaría — **y escribí en el comentario que lo había
+          comprobado cuando no lo había hecho**. No se veía: `overflow-x: auto`
+          recorta también en vertical, que es exactamente lo mismo que ya había
+          pasado hoy con el desplegable de la «i» y con la etiqueta del menú
+          izquierdo. Tercera vez: si algo tiene que salirse de una caja que hace
+          scroll, se dibuja fuera de la caja. Sin excepciones y sin suponer. */}
+      {!desplegado && rozada && (
+        <span
+          className="pointer-events-none fixed z-[9993] -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-800 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-xl ring-1 ring-white/10"
+          style={{ left: rozada.x, bottom: `calc(var(--hueco-muelle, 64px) + 14px)` }}
+        >
+          {HERRAMIENTAS_ABAJO.find(h => h.clave === rozada.clave)?.nombre}
+        </span>
+      )}
     </div>
   );
 }

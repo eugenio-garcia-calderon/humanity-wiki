@@ -64,6 +64,29 @@ export function useProyectos(activo = true) {
   };
 
   useEffect(() => { if (activo) recargar(); }, [activo]);
+
+  /*
+   * ══ UN PROYECTO NUEVO SALE AL MOMENTO (2026-08-25) ═══════════════════════
+   * Eugenio: «donde se crea un nuevo proyecto, inmediatamente tiene que
+   * aparecer en el menú derecho de proyectos; no se tiene que esperar a que se
+   * refresque la página».
+   *
+   * El aviso YA EXISTÍA —`humanity:menu-cambiado`, que dispara el diálogo de
+   * crear desde el 2026-08-20— y este menú simplemente no lo escuchaba. Así que
+   * no hace falta ni un endpoint nuevo ni tocar quien crea: hacía falta
+   * escuchar.
+   *
+   * Se vuelve a preguntar en vez de añadir el proyecto a la lista a mano. Es
+   * una petición más, y a cambio la lista del menú y la de la base no pueden
+   * discrepar: meterlo a mano deja fuera el `slug` que calcula el servidor y el
+   * icono por defecto, y el menú enseñaría algo que no existe todavía tal cual.
+   */
+  useEffect(() => {
+    if (!activo) return;
+    window.addEventListener('humanity:menu-cambiado', recargar);
+    return () => window.removeEventListener('humanity:menu-cambiado', recargar);
+  }, [activo]);
+
   return { estado, recargar };
 }
 
