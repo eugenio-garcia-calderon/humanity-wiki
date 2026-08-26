@@ -382,7 +382,31 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       const ya = a.clase === 'navegador'
         ? vs.filter(v => v.clase === 'navegador').reduce<Ventana | null>((m, v) => (!m || v.z > m.z ? v : m), null)
         : vs.find(v => v.clase === 'app' && v.destino === a.destino);
-      if (ya) return vs.map(v => (v.id === ya.id ? { ...v, z: ++contadorZ, minimizada: false } : v));
+      if (ya) {
+        /*
+         * ── UNA VENTANA QUE SE TRAE AL FRENTE CON LA PÁGINA DE ANTES NO HA
+         *    ABIERTO NADA (2026-08-26) ──────────────────────────────────────
+         * Reusar el navegador abierto es lo correcto —si no, cada enlace
+         * abriría uno nuevo— pero hasta hoy sólo lo levantaba: pulsabas un
+         * enlace, el navegador saltaba delante enseñando la página anterior, y
+         * eso se lee como que el enlace está roto. Peor: parece que ha
+         * funcionado.
+         *
+         * Ahora, si llega una dirección DE VERDAD, la ventana se va a ella. Y
+         * sólo entonces: `about:inicio` —lo que manda el menú— sigue
+         * limitándose a levantarla, porque abrir el menú no es pedir volver a
+         * la portada del navegador.
+         */
+        const mudarse = a.clase === 'navegador'
+          && /^https?:\/\//i.test(a.destino)
+          && a.destino !== ya.destino;
+        return vs.map(v => (v.id === ya.id
+          ? {
+              ...v, z: ++contadorZ, minimizada: false,
+              ...(mudarse ? { destino: a.destino, titulo: a.titulo, ruta: a.destino, historia: [a.destino] } : {}),
+            }
+          : v));
+      }
       const n = vs.length;
       return [...vs, {
         id: `v${Date.now().toString(36)}`,
@@ -393,6 +417,60 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       }];
     });
   }, [esMovil, navigate]);
+
+  /*
+   * ── UN ENLACE A UNA WEB ABRE EL NAVEGADOR DE LA PLATAFORMA (2026-08-26) ───
+   * Eugenio: «el navegador se tiene que abrir automáticamente cuando se haga
+   * click en un enlace de una web».
+   *
+   * Va aquí y no en cada sitio que pinta un enlace porque los sitios que
+   * pintan enlaces son muchos —publicaciones, mensajes, tarjetas, documentos,
+   * el agregador— y se añaden cada semana. Una regla escrita treinta veces es
+   * treinta sitios donde se puede olvidar; escrita aquí, la cumplen también los
+   * enlaces que aún no existen.
+   *
+   * ── LO QUE NO SE TOCA, Y POR QUÉ ─────────────────────────────────────────
+   * - **Los nuestros** (mismo origen): son navegación de la aplicación y los
+   *   lleva React Router. Meterlos en el navegador interno sería abrir la
+   *   plataforma dentro de la plataforma.
+   * - **Con ⌘, Ctrl, Mayús, Alt o el botón central**: eso es «ábrelo en una
+   *   pestaña de verdad», dicho a propósito por quien pulsa. Quitarle esa
+   *   salida es quitarle el control de su propio navegador.
+   * - **`mailto:`, `tel:`, `download`, `blob:`, `data:`**: no son páginas. El
+   *   navegador interno no puede hacer nada con ellos y el sistema sí.
+   * - **En un teléfono**: `abrir()` ya decide ahí arriba que un navegador
+   *   dentro de otro navegador no significa nada, y manda el enlace al del
+   *   propio teléfono.
+   *
+   * Se escucha en CAPTURA para llegar antes que cualquier `onClick` de la
+   * página, y se comprueba `defaultPrevented` para no pisar a quien ya haya
+   * decidido qué hacer con ese clic.
+   */
+  useEffect(() => {
+    const alPulsar = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const a = (e.target as HTMLElement | null)?.closest?.('a');
+      if (!a) return;
+      if (a.hasAttribute('download')) return;
+
+      const href = a.getAttribute('href') || '';
+      if (!/^https?:\/\//i.test(href)) return;
+
+      let url: URL;
+      try { url = new URL(href); } catch { return; }
+      if (url.origin === window.location.origin) return;
+
+      e.preventDefault();
+      // El título de partida es el dominio: es lo que identifica el sitio antes
+      // de que la página cargue y diga cómo se llama de verdad, y `Navegador`
+      // lo corrige solo con `onTitulo` en cuanto lo sabe.
+      abrir({ titulo: url.hostname.replace(/^www\./, ''), clase: 'navegador', destino: url.href });
+    };
+    document.addEventListener('click', alPulsar, true);
+    return () => document.removeEventListener('click', alPulsar, true);
+  }, [abrir]);
 
   // Los avisos del menú y de los iconos de la cabecera.
   useEffect(() => {
@@ -618,7 +696,14 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
             )}
           <div className="flex-1 min-h-0 relative bg-white">
             {v.clase === 'navegador'
-              ? <Navegador inicial={v.destino}
+              /* LA `key` LLEVA EL DESTINO. `Navegador` guarda su dirección en
+                 su propio estado a partir de `inicial`, así que cambiar esa
+                 propiedad no lo movería: React reutilizaría el componente y la
+                 dirección nueva se quedaría sin efecto. Con el destino en la
+                 `key`, pedirle otra página lo vuelve a montar ahí. Se pierde el
+                 historial de esa ventana, y es lo correcto: has pedido ir a
+                 otro sitio, no volver. */
+              ? <Navegador key={`${v.id}|${v.destino}`} inicial={v.destino}
                   controles={controlesDe(v)}
                   onMover={e => empezarGesto(e, v, 'mover')}
                   arrastrable={!v.maximizada}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderKanban, Loader2, Plus, X } from 'lucide-react';
+import { FolderKanban, LayoutGrid, Loader2, Plus, X } from 'lucide-react';
 import { componenteDeTrazo } from '../ui/iconosDeTrazo';
 import { HojaPanel, type Herramienta } from './Rail';
 import { cn } from '../../utils/cn';
@@ -220,18 +220,38 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
       </div>
     );
   }
+  const fila = (desplegado: boolean) => cn(
+    'mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900',
+    desplegado ? 'w-full' : 'w-10 justify-center');
+  const palabra = (desplegado: boolean) => cn(
+    'overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
+    desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0');
+
   return (
-    <Link
-      to="/proyectos?nuevo=1"
-      title="Nuevo proyecto"
-      className={cn('mb-1 flex h-9 shrink-0 items-center gap-3 rounded-xl px-[10px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900',
-        desplegado ? 'w-full' : 'w-10 justify-center')}
-    >
-      <Plus className="h-4 w-4 shrink-0" />
-      <span className={cn('overflow-hidden whitespace-nowrap text-left text-[12px] font-bold transition-all duration-200',
-        desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0')}>
-        Nuevo proyecto
-      </span>
-    </Link>
+    <>
+      {/*
+        ── TODOS LOS PROYECTOS (2026-08-26) ──────────────────────────────────
+        Eugenio: «tiene que haber un botón en el menú derecho que sea "Todos
+        los proyectos" y que te lleve a esa página general de proyectos».
+
+        Este raíl enseña tus proyectos uno a uno, y desde que es así **no había
+        forma de llegar a la página que los tiene todos** salvo acordarse de la
+        dirección: la única entrada era «Nuevo proyecto», que lleva allí pero
+        con el diálogo de crear abierto. Se llega a la portada de proyectos sin
+        crear nada.
+
+        Va ENCIMA de «Nuevo proyecto» porque ir a lo que ya existe es lo que se
+        hace a diario y crear es lo excepcional.
+      */}
+      <Link to="/proyectos" title="Todos los proyectos" className={fila(desplegado)}>
+        <LayoutGrid className="h-4 w-4 shrink-0" />
+        <span className={palabra(desplegado)}>Todos los proyectos</span>
+      </Link>
+
+      <Link to="/proyectos?nuevo=1" title="Nuevo proyecto" className={fila(desplegado)}>
+        <Plus className="h-4 w-4 shrink-0" />
+        <span className={palabra(desplegado)}>Nuevo proyecto</span>
+      </Link>
+    </>
   );
 }
