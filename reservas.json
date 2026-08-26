@@ -2,19 +2,7 @@
   "reservas": [
     {
       "agente": "prog3",
-      "ruta": "src/components/navegacion/BuscadorSuperior.tsx",
-      "motivo": "prog3: todo son paginas, fase 1 (nombres + boton verde de crear)",
-      "desde": "2026-08-26T11:11:18.473Z"
-    },
-    {
-      "agente": "prog3",
       "ruta": "src/pages/Documento.tsx",
-      "motivo": "prog3: fase 2, la barra de abajo se vuelve la barra del editor",
-      "desde": "2026-08-26T11:19:54.596Z"
-    },
-    {
-      "agente": "prog3",
-      "ruta": "src/components/navegacion/RailInferior.tsx",
       "motivo": "prog3: fase 2, la barra de abajo se vuelve la barra del editor",
       "desde": "2026-08-26T11:19:54.596Z"
     },
