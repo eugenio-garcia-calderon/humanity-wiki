@@ -2,9 +2,27 @@
   "reservas": [
     {
       "agente": "prog3",
+      "ruta": "src/components/navegacion/RailInferior.tsx",
+      "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
+      "desde": "2026-08-26T10:08:30.523Z"
+    },
+    {
+      "agente": "prog3",
       "ruta": "src/components/layout/Layout.tsx",
-      "motivo": "prog3: en movil no habia puerta al menu derecho",
-      "desde": "2026-08-26T10:03:47.022Z"
+      "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
+      "desde": "2026-08-26T10:08:30.523Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/components/navegacion/AvatarRail.tsx",
+      "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
+      "desde": "2026-08-26T10:08:30.523Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/paginasInfo.ts",
+      "motivo": "prog3: feedback e i al desplegable del nombre; borrar cuenta bajo el usuario",
+      "desde": "2026-08-26T10:08:30.523Z"
     }
   ]
 }
