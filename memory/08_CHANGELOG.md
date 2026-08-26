@@ -7671,3 +7671,33 @@ global fuera, barra del editor dentro, hoja con los 19 bloques y su título
 «Añadir a la página». (Mi primer detector daba un falso rojo: pescaba el nav del
 raíl lateral, que también se llama «Herramientas», y el botón de IA del propio
 chat. Medir con el selector equivocado es medir otra cosa.)
+
+## 2026-08-25 — «Todo son páginas», fase 3: semiprivada, con personas concretas
+Eugenio: «existe la opción de que la página sea semiprivada, donde das acceso a
+personas concretas. Esas personas pueden tener diferentes accesos, de solo
+lectura o también de edición».
+
+- **Tabla `accesos_entidad`** (migración 0131), con la forma genérica
+  `(entidad_tipo, entidad_id, user_id, rol)` que ya usan 0129 y las denuncias —
+  no la tabla de unión número 44 que `src/db/CLAUDE.md` pide no crear. Un
+  proyecto o un mapa con acceso por persona será una fila más, no otra tabla.
+- **`lectura`**: ve la página aunque esté privada. **`edicion`**: además la
+  edita. Gestionar la lista queda del autor o un administrador: dar edición no
+  es nombrar dueño.
+- La MISMA tabla abre la pantalla (`GET /api/windows/:id`) y el guardado
+  (`PUT /api/windows/:id`): sin lo segundo, quien tiene edición vería un editor
+  que tira su trabajo al guardar.
+- Buscador de personas sin filtrar correos: se busca por correo, pero el correo
+  no viaja en la respuesta.
+- La sección vive en el diálogo de Compartir: publicar y dar acceso son la misma
+  pregunta —¿quién ve esto?— y dos ventanas la contestarían mal.
+
+Probado de punta a punta con dos sesiones locales marcadas: Lucía sin acceso
+rebota (403), con lectura ve, con edición guarda (PUT 200), y al revocar vuelve
+el 403. Interfaz probada en el navegador: buscar «Luc», dar lectura, verla en la
+lista.
+
+**Y la fase 4 no hay que hacerla**: el dominio propio, las dos URLs y el
+interruptor de indexado ya los construyó otro programador hoy (módulo
+`compartir.ts`, migración 0129, `DominioPropio.tsx`). Quedan la 5 (comentarios
+por elemento) y la 6 (indexado en ramas al publicar).
