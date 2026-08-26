@@ -7125,6 +7125,619 @@ El verde sigue siendo el `emerald-600` de siempre y ahora lo lleva `.wiki`
 `Humanity.wiki`: no había que tocarlo, y por eso la barra del navegador era lo
 único que llevaba semanas diciendo la verdad.
 
+## 2026-08-25 — Tres barras, tres preguntas
+Eugenio: «traslada todas las herramientas de visualización y creación de
+contenido fuera del menú lateral derecho, a un nuevo menú inferior. El anterior
+menú inferior deja de tener sentido y se elimina. El lateral derecho pasa a ser
+un visor de todos los proyectos del usuario, cada uno con su icono, y con
+submenú para ver lo que hay dentro sin pinchar».
+
+La regla que queda, y que hace que no haya que aprenderse dónde está cada cosa:
+
+| Barra | Contesta |
+|---|---|
+| Izquierda | **de qué habla** — los catorce temas |
+| Abajo | **con qué se hace** — las doce herramientas |
+| Derecha | **qué tienes** — tus proyectos |
+
+- **Fuera los tres círculos.** No eran destinos: eran mandos para abrir otros
+  menús, y se quedaban con la franja que alcanza el pulgar sin enseñar nada.
+- **El raíl inferior** reserva 64 px donde los círculos reservaban 92, así que
+  el contenido de todas las páginas gana 28. Iconos en reposo, nombres al
+  acercarse, y la flechita abre el panel de esa herramienta.
+- **El raíl derecho** pinta un proyecto por icono, con el icono que cada uno
+  tiene guardado. La flecha abre su árbol —`/api/proyectos/:id/arbol`, el mismo
+  que usa la ficha— con tres estados: cargando, contenido y **fallo**, que no es
+  lo mismo que «vacío».
+- **Lo personal sube a tu foto**: Mensajes y Contactos como iconos al lado;
+  Mi perfil, Todas las personas, Papelera y Tu portada dentro del menú. **Áreas
+  se retira**, que es lo que pidió.
+- **En el móvil, tus proyectos tienen puerta nueva** en la barra de arriba. Sin
+  ella habrían quedado existiendo y sin forma de llegar: el círculo que los
+  abría acaba de desaparecer y en un teléfono no hay ratón.
+- `HojaCrear` dejaba de colocarse bien: se apoyaba en `--alto-circulos`, que ya
+  no lo publica nadie, y habría caído al valor de reserva —92 px— sin dar ningún
+  error. Ahora lee `--hueco-muelle`. **Lo cazó otro programador leyendo el plan.**
+- Comprobado en el navegador: «Personalizar» sigue siendo alcanzable en el raíl
+  izquierdo, que es la única puerta a `/preferencias`.
+---
+
+## 2026-08-26 — Portadas de rama, galería del proyecto y tarjetas que dicen algo
+
+Eugenio, tres cosas en un mensaje: portada en cada rama, galería general del
+proyecto debajo del título con pie de foto opcional, y tarjetas del listado con
+portada y **sin repetir doce veces el nombre del creador**.
+
+### La portada de cada rama
+
+`portada_url` en `proyecto_ramas` (0130). Se pone y se quita desde el propio
+árbol, pasando el ratón por la rama.
+
+**Si una rama tiene portada, crecen TODAS las tarjetas.** No es comodidad: la
+simetría es el algoritmo de ese dibujo. Las hijas se colocan a
+`nivel * altoNivel`, así que con tarjetas de alturas distintas en un mismo nivel
+unas líneas entran por la cabeza de la tarjeta y otras por su mitad, y el árbol
+se ve torcido sin que nada esté mal colocado. La rama sin foto enseña una banda
+lisa de su color con el icono de añadir: se ve el hueco, y ver el hueco es la
+mejor invitación a llenarlo.
+
+### La galería, debajo del título
+
+Tabla `proyecto_imagenes` (0130) y módulo `src/server/galeria.ts`. Tira
+horizontal, pie de foto opcional, visor a pantalla completa con flechas y
+Escape, reordenar con ‹ ›, y **pegar con ⌘V** con la misma regla que los
+archivos: sólo actúa si el bloque está señalado y nunca dentro de un campo de
+texto.
+
+En la migración queda escrito **por qué no se reutiliza `archivos`**: son dos
+cosas distintas para quien las usa. Los archivos son el material del proyecto;
+la galería es lo que el proyecto enseña de sí mismo. Mezclarlas significaría que
+adjuntar una factura la publica en la portada.
+
+### Las tarjetas del listado
+
+Eugenio: «no pongas en todos el creador del proyecto, porque en realidad sí va a
+ser el del perfil». La regla que ha quedado: **el creador sólo se enseña cuando
+no eres tú**; en tus propios proyectos salen las personas asociadas —hasta tres
+caras y «+N»—, y si no hay ninguna no se pinta nada. Rellenar el hueco con
+«Anónimo» era inventarse un dato donde lo que hay es una ausencia.
+
+Las personas son `game_agents` del Juego Vital y viajan filtradas por
+`user_id`: en el proyecto público de otra persona esa línea sale vacía, que es
+la misma regla que ya protege esos datos en su herramienta. Van en **una
+consulta aparte y con su fallo tragado**: esto adorna la tarjeta, no la
+sostiene, y una subconsulta habría tumbado la lista entera el día que
+`game_agents` no esté.
+
+Y `portada_url` en `proyectos`, que sale en la tarjeta **sólo si la hay**: un
+hueco gris reservado en las doce tarjetas para que dos tengan foto convierte el
+listado en una rejilla de marcos vacíos.
+
+### Dos fallos míos, por escrito
+
+- **La columna no estaba en el SELECT.** `portada_url` creada, endpoint que la
+  escribe, pantalla que la pinta — y la lista de columnas de
+  `GET /api/proyectos/:id/ramas` escrita a mano, donde nadie la añadió. No falla
+  nada: la portada simplemente no existe para quien mira. Es la tercera vez.
+- **Comillas invertidas dentro de una plantilla `sql`.** Las puse en un
+  comentario SQL y cortaron la plantilla; el error salió como «se esperaba `)`»
+  en la línea siguiente. Y `tsc` no lo cazó porque **no lo volví a ejecutar
+  después de esa edición**: lo cazó el servidor al arrancar.
+
+Las seis rutas nuevas están declaradas en `seguridad/politica.ts`
+(`auditar-permisos` baja de 58 a 52 pendientes; las 52 son de otros).
+
+**Comprobado en local**, con datos creados por la ruta del producto y borrados
+después: portada de rama con las alturas iguales, galería con visor, pegado,
+reordenado que persiste, portada de proyecto en la tarjeta y las caras en lugar
+del creador. **Lo que NO he podido ver**: la tarjeta de un proyecto de OTRA
+persona —en esta base no hay ninguno— así que el caso «sí se enseña el creador
+porque no eres tú» está leído en el código, no visto en pantalla.
+
+## 2026-08-25 — La barra de arriba, para el buscador
+Eugenio: «la imagen de perfil se introduce en el menú derecho, y mensajería,
+teléfono y calendario justo debajo cuando se hace clic, y a continuación los
+proyectos. Así despejamos la parte de arriba, que la dejamos principalmente para
+la barra de buscar, que, por cierto, ha empeorado su aspecto».
+
+**Tenía razón sobre el buscador y la causa era el resto de la barra.** Arriba
+había siete cosas y la caja se quedaba con lo que sobraba: medido antes de tocar
+nada, **por debajo de 1024 px el campo de escribir llegaba a medir cero**. No es
+que el buscador fuera feo: es que no cabía. Vaciando la barra, la caja recupera
+su ancho.
+
+| Qué | Dónde estaba | Dónde está |
+|---|---|---|
+| Tu foto y su menú | arriba a la derecha | arriba del raíl derecho |
+| Mensajes, Contactos, Calendario | barra de arriba | debajo de tu foto, al pulsarla |
+| Feedback | barra de arriba | raíl inferior, **en rojo** |
+| «Explorar» + casa | no existía | fijo arriba a la izquierda → `/preferencias` |
+| «Mis proyectos» | no existía | fijo arriba a la derecha → `/proyectos` |
+| La campana | barra de arriba | **se queda**: es lo único que avisa, y esconder un aviso es dejar de avisar |
+
+«Explorar» lleva a `/preferencias` y no a `/explorar` porque él se corrigió en la
+misma frase —«se lleva a la página de personalizar realmente»— y **manda la
+corrección, no la primera versión**. Ahí está la rueda de los catorce temas.
+
+## 2026-08-25 — Paso 1 de la navegación contextual: dónde estás
+Eugenio: «si estoy en la página de un proyecto y le doy a crear una tarea, que
+se asigne a ese proyecto… y si estoy explorando movilidad y le doy a páginas,
+que me aparezcan las páginas de movilidad. Crea esta sofisticación en cuanto a
+la navegación, donde todos los menús están funcionales en cuanto a lo que se ve
+en el centro de la pantalla». Pidió hacerlo **entero, aunque tarde varios pasos**.
+
+**Paso 1, el que sostiene todo lo demás:**
+
+- `src/utils/contextoNavegacion.ts` — de dónde estás sale de **la dirección**, no
+  de un estado global: es lo único que sigue siendo cierto al recargar, al
+  compartir un enlace y al volver atrás. Un «proyecto actual» guardado aparte
+  sería una segunda verdad, y esas dos discrepan siempre después de un «atrás».
+- Con proyecto **y** tema a la vez, manda el proyecto: es lo concreto. El tema
+  dice de qué habla; el proyecto dice dónde vive.
+- `scripts/probar-contexto.ts`, 13 casos. Esto decide en qué proyecto acaba una
+  tarea: equivocarse no da ningún error, mete el trabajo de alguien en el
+  proyecto de al lado y no se entera nadie hasta que lo busca donde lo dejó.
+  La primera versión de la prueba usaba `movilidad` como identificador y los
+  catorce se llaman `O001`…`O014` — **lo dijo la prueba, no la pantalla**.
+- El raíl inferior pega el contexto a cada destino y **lo enseña escrito**
+  («EN APTERA»). Una barra que se comporta distinto según dónde estés y no lo
+  dice es una barra que sorprende.
+- El panel de Páginas ya filtra: por proyecto con el dato (`proyecto_slug`, que
+  ya viajaba) y por tema con `hablaDe`, el mismo criterio que el muro. **Y por
+  tema no puede ser de otra forma: no existe ninguna tabla que una una página
+  con un objetivo**, está escrito en `utils/objetivos.ts` desde que se creó.
+- Si el dato no viaja en una lista, **no se filtra**: se enseña entera. Devolver
+  vacío porque el dato falta sería decir «no tienes nada» cuando lo cierto es
+  «no lo sé».
+
+**Lo que falta, y es lo que viene:** que los paneles de Mapas, Tareas, Esquemas
+y Comercio filtren igual (a dos de ellos hay que añadirles el proyecto en el
+servidor, hoy no lo devuelven), que las páginas completas honren `?proyecto=` y
+`?objetivo=`, y el «crear dentro de este proyecto».
+---
+
+## 2026-08-26 — Los tres puntitos de una tarjeta de proyecto
+
+Eugenio: «crea un botón de tres puntitos para editar las tarjetas de los
+proyectos desde la página de proyectos general, donde se puede editar el icono,
+el nombre, la descripción y la imagen de portada, sin tener que entrar en cada
+proyecto».
+
+Los puntitos salen al pasar por la tarjeta, y sólo los ve quien puede editarla.
+La tarjeta entera es un enlace, así que el botón hace `preventDefault` **y**
+`stopPropagation`: sin las dos cosas, pulsarlo abriría el proyecto además de la
+ventana, que es justo lo que se pidió evitar.
+
+### Las cuatro cosas se guardan en UNA llamada
+
+El nombre y el icono iban por `/api/elemento`; la descripción y la portada por
+`/api/proyectos`. Dos llamadas es un guardado que puede quedarse a medias —la
+portada puesta y el nombre no— sin que nadie pueda saber cuál de los dos falló.
+Así que `PUT /api/proyectos/:id` aprendió a escribir `icono`, y la ventana
+guarda los cuatro campos de una vez.
+
+### Un fallo que estaba ahí desde antes: la descripción no se podía vaciar
+
+`descripcion` iba con `COALESCE`, donde `null` significa «déjalo como estaba».
+Borrar la descripción desde esa ruta era imposible: se guardaba y no pasaba
+nada, que es la peor forma de no funcionar. Ahora `null` y cadena vacía la
+borran, y **no mandar el campo** es lo que la respeta. Comprobado vaciándola.
+
+### La rejilla de 988 iconos se mudó a un sitio
+
+`ui/SelectorDeIcono`, sacada de `PopupRenombrar` (que baja de 206 a 109 líneas y
+ahora la usa). Copiarla habría dejado dos rejillas: el día que cambie una, la
+otra se queda vieja y sigue pareciendo correcta.
+
+### Una sesión de prueba local que desaparecía sola
+
+Dos veces se cayó a media verificación y parecía un fallo de sesión. No lo era:
+`scripts/capturas-tienda.mjs` termina con
+`DELETE FROM sessions WHERE user_agent = 'claude-dev-verificacion'`, sin filtrar
+por quién la creó. Cuando otro agente lo ejecuta, se lleva también la de quien
+esté verificando en ese momento. Desde hoy etiqueto las mías como
+`claude-dev-verificacion prog8`: se sigue viendo de un vistazo que son de un
+agente, y el borrado exacto del otro script ya no las alcanza.
+
+**Comprobado en local**: los puntitos abren la ventana sin abrir el proyecto,
+los cuatro campos se guardan, la tarjeta se repinta en el sitio sin recargar la
+lista, y vaciar descripción y portada funciona. El proyecto de prueba quedó
+como estaba y la sesión, borrada.
+
+## 2026-08-25 — Las dos esquinas son el remate de sus menús
+Eugenio, en el mismo mensaje: «el botón de explorar tiene que estar fusionado
+con el menú izquierdo, y el logo de humanity.wiki a la derecha de explorar; con
+una brújula, no una casa. Lo mismo con proyectos y el menú de la derecha. Piensa
+cómo hacer esta fusión de forma elegante para que, cuando el usuario pinche, se
+fije el menú que le corresponde y le lleve a su página». Y después: los iconos
+del menú izquierdo sobrios en vez de de colorines, el feedback amarillo, y el
+chat de IA en un círculo flotante abajo a la derecha.
+
+- **La fusión no es cercanía, es remate.** Cada rótulo va pegado al borde del
+  que nace su columna y, cuando está activo, se pinta como ella y **sin línea
+  abajo** (`-mb-px` se come el borde de la cabecera): el color corre sin corte
+  desde el rótulo hasta el último elemento. Eso es lo que hace que se lean como
+  una pieza y no como dos cosas alineadas.
+- **Dos cosas al pulsar, y en este orden**: fija el menú y navega. Fijar sin
+  navegar deja el menú abierto sobre la misma página; navegar sin fijar cierra
+  el menú justo al llegar a la página que va de eso.
+- Brújula y no casa: una casa es «inicio», que es otro sitio y ya lo lleva el
+  logo de al lado. Explorar es buscar sin saber todavía qué.
+- **Iconos sobrios.** Catorce colores en columna compiten entre sí y con el
+  centro de la pantalla. El color sigue en el mapa y en las etiquetas de las
+  tarjetas, que es donde separa cosas de verdad.
+- **Feedback amarillo.** Empezó rojo esta misma tarde; en esta aplicación el
+  rojo ya significa error o borrar, así que un botón rojo permanente decía «algo
+  va mal» todo el rato.
+
+**Y el conflicto que él notaba entre el chat y el menú de abajo era invisible y
+real:** `AIAssistant` escribía `--hueco-muelle` a `0px` cada vez que se abría o
+se cerraba, y el raíl inferior escribe ahí sus 64 px. El último en escribir
+gana, así que **abrir el chat borraba la reserva del menú** y la última fila de
+todas las páginas se metía debajo de la barra. No daba error. La regla que
+queda: **una variable, un dueño** — `--hueco-muelle` es de quien tapa abajo,
+`--hueco-lateral` es del chat.
+
+El círculo flotante no es un chat nuevo: manda `ai:abrir`, el aviso que
+`AIAssistant` ya escuchaba, así que abre el mismo con su historial y su modelo.
+Y se aparta solo de los dos menús porque lee sus variables (`--hueco-lateral` a
+la derecha, `--hueco-muelle` abajo): si mañana cambian de tamaño, se mueve con
+ellos.
+
+## 2026-08-25 — El proyecto nuevo sale solo, y el panel sube desde su botón
+- **Un proyecto recién creado aparece en el menú de la derecha sin recargar.**
+  El aviso ya existía —`humanity:menu-cambiado`, que dispara el diálogo de crear
+  desde el 2026-08-20— y el menú simplemente no lo escuchaba. No hizo falta ni
+  endpoint nuevo ni tocar a quien crea: hacía falta escuchar.
+  Y se vuelve a preguntar en vez de añadir el proyecto a la lista a mano: meterlo
+  a mano deja fuera el `slug` que calcula el servidor y el icono por defecto, y
+  el menú enseñaría algo que todavía no existe tal cual.
+- **El panel de una herramienta sube desde abajo**, hasta media pantalla, en vez
+  de aparecer arriba a la izquierda. Eugenio: «esa ventana emergente… haz que
+  aparezca de abajo arriba hasta la mitad de la pantalla». Salía del menú de
+  abajo y aparecía en la otra punta, sin nada que la uniera al botón que
+  acababas de pulsar; ahora el gesto y lo que ocurre pasan en el mismo sitio.
+  Media pantalla y no más: lo que estabas mirando sigue detrás y se ve.
+  Arranca en `--hueco-muelle`, así que si la barra cambia de alto, sube con ella.
+
+## 2026-08-25 — La IA entra en el menú de abajo, y es el botón más destacado
+Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero ponlo
+destacado como has hecho con el de feedback, pero incluso más destacado».
+
+- **Cómo se hace «más» destacado sin gritar**: el de feedback es color sobre el
+  fondo oscuro —amarillo, y ya—. Éste sube un escalón entero y pasa a ser una
+  **pastilla rellena**: verde sólido, letra blanca y halo. En una fila de iconos
+  planos, el único que tiene cuerpo se ve antes que cualquier cambio de color, y
+  no hace falta agrandarlo, que es lo que habría descolocado la barra.
+- **Va el primero, no el último.** Lo puse al final y **se salía de la
+  pantalla**: la barra lleva doce herramientas y se desplaza en horizontal
+  cuando no caben, así que el último es justo el que deja de verse. Poner el
+  botón más importante donde primero se corta es la peor plaza. Al principio se
+  ve siempre y comparte esquina con el de feedback: los dos que no son
+  herramientas, juntos.
+- **El asistente estaba dos veces y llevaban a sitios distintos**: una
+  herramienta «Asistente» que abría la página `/ia` y un círculo flotante que
+  abría el chat con tu historial. Ahora hay una sola puerta —el aviso
+  `ai:abrir`— y el círculo flotante se retira: flotando era un elemento más que
+  esquivar; dentro de la barra no hay nada que esquivar porque es la barra.
+
+## 2026-08-25 — La «i», en el centro exacto del menú de abajo
+Eugenio: «pon el botón de la i en el centro del menú inferior».
+
+- **En el centro de verdad**: la posición se calcula
+  (`HERRAMIENTAS_ABAJO.length / 2`) en vez de escribirse a mano entre dos
+  herramientas. A mano, el día que entre o salga una —y aquí ya han entrado y
+  salido varias esta misma tarde— se quedaría descentrada sin que nadie lo note.
+- **Discreta, en gris.** No es una herramienta ni una acción: es dónde se
+  explica qué es todo esto. Si compitiera con el verde de la IA o el ámbar del
+  feedback, los tres dejarían de destacar.
+- Su desplegable va `fixed` y no `absolute`: **la barra se desplaza en
+  horizontal, y un contenedor que recorta en un eje recorta en los dos**, así
+  que colgado de ella el menú salía detrás de la barra y no se veía. Se ve en
+  una captura, no compilando.
+
+## 2026-08-25 — El menú izquierdo enseña un nombre, no catorce
+Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre de
+ese icono; por ejemplo, si hago hover en movilidad aparece el nombre de
+movilidad, y me permite pinchar ahí o darle a la flecha y ver su submenú. Queda
+mucho más elegante, ya que no aparecen todos los nombres de golpe. Cuando sí
+pincho arriba y se fija el menú, aparecen todos los nombres».
+
+- **Pasar el ratón deja de abrir la columna entera.** Catorce nombres saliendo
+  por rozar el borde son catorce cosas que nadie ha pedido: pasar el ratón es
+  mirar, no decidir, y la respuesta a mirar un icono es ese icono.
+- La etiqueta lleva **el nombre y su flecha**, las dos cosas que él pidió desde
+  ahí: el nombre va al tema, la flecha lo abre sin salir.
+- **Se dibuja fuera del raíl.** Colgada de su fila con `absolute` no se veía:
+  la columna se desplaza en vertical para los catorce temas, y **un contenedor
+  que recorta en un eje recorta en los dos**. Es el segundo tropiezo igual en la
+  misma tarde —el primero fue el desplegable de la «i»—, así que queda escrito:
+  **si algo tiene que salirse de una caja que hace scroll, se dibuja fuera de la
+  caja.**
+- Y va a la altura del renglón rozado, así que la columna no se ensancha y los
+  otros trece iconos **no se mueven un píxel**. Un menú que se reordena debajo
+  del ratón se pulsa mal.
+- Con el menú fijado desde arriba, todos los nombres se leen en su sitio y la
+  etiqueta no sale: sería decir lo mismo dos veces.
+
+## 2026-08-25 — La flecha abre el submenú al pasar el ratón, en los tres menús
+Eugenio: «si pongo el ratón encima de la flecha a la derecha de la palabra
+movilidad que se expanda el submenú, pero sólo de los elementos que están dentro
+de movilidad. También si pincho. Y replica esto mismo en el menú derecho e
+inferior».
+
+- **Abre, no alterna**, y ésa es la diferencia que lo hace usable: alternar al
+  pasar el ratón cerraría el submenú justo cuando mueves el ratón hacia él para
+  leerlo. Pasar el ratón sólo abre; cerrar sigue siendo cosa del clic, que es
+  una decisión.
+- Los tres menús: la etiqueta flotante del izquierdo, la flecha de la fila
+  desplegada, la del raíl derecho y la del inferior.
+- **Y abrir un subtema ensancha la columna.** Sin eso, la flecha los abría
+  **dentro de una columna de 40 px**: se abrían de verdad y no se veía ninguno.
+  El submenú vive dentro del raíl, así que enseñarlo obliga a ensancharlo. Es un
+  estado propio y no la chincheta: la chincheta se guarda en el navegador y se
+  queda para siempre; esto dura lo que el ratón esté dentro.
+
+## 2026-08-25 — Dos correcciones de Eugenio sobre el hover de los menús
+«No has conseguido que en el menú inferior pase lo mismo que en el lateral
+izquierdo… Y cuando haces hover en la flecha se expande TODO el submenú, y lo
+único que quiero es ver lo que hay dentro de educación, a la derecha de
+educación, **sin que me cambie la palabra educación de sitio**.»
+
+- **El menú inferior enseña un nombre, no doce.** Se me quedó a medias: quité la
+  apertura completa en el izquierdo y no en el de abajo.
+- **Los subtemas salen en una ventanita al lado, no dentro.** Mi solución de
+  antes ensanchaba la columna para que cupieran, y estaba mal por la razón que
+  él dio: **movía de sitio la palabra que estaba señalando**. Un menú que se
+  recoloca bajo el ratón obliga a volver a buscar lo que ya habías encontrado.
+  Ahora la columna no se toca y la ventanita desaparece al salir.
+- Abrir la ventanita **es también pedir los datos**: los subtemas no viajan
+  hasta que alguien los pide, y al primer intento salió en su sitio y vacía.
+
+**Y una regla que hoy me ha costado tres veces**, escrita para no repetirla:
+`overflow-x: auto` recorta TAMBIÉN en vertical. Lo tropecé con el desplegable de
+la «i», con la etiqueta del menú izquierdo y con la del inferior — y en el
+tercero llegué a escribir en un comentario que lo había comprobado cuando no lo
+había hecho. **Si algo tiene que salirse de una caja que hace scroll, se dibuja
+fuera de la caja. Sin suponer.**
+
+## 2026-08-25 — En el móvil no había puerta al menú derecho
+Eugenio: «arregla el menú de la versión móvil, porque no se puede acceder al
+menú derecho desde el móvil».
+
+Y era literal: el botón «Mis proyectos» llevaba `hidden … sm:flex`, así que **por
+debajo de 640 px no se dibujaba**. En un ordenador el raíl de la derecha se
+despliega al acercar el ratón; en un teléfono no hay ratón, así que ese botón era
+la única puerta — y no estaba. Tus proyectos existían y no había forma de llegar
+a ellos. A «Explorar» le pasaba lo mismo; el izquierdo al menos conservaba el
+botón de las tres rayas, el derecho no tenía nada.
+
+- Ahora **el botón se dibuja siempre** y lo que se esconde es la palabra, que es
+  lo que no cabe. El icono se queda, y con él la puerta.
+- **En el móvil abre el cajón y no navega.** En un ordenador el raíl se queda a
+  un lado y la página cambia detrás: se ven las dos cosas. En un teléfono el
+  cajón ocupa la pantalla, así que navegar además lo dejaría abierto sobre otra
+  página, y al cerrarlo aparecerías donde no habías pedido ir.
+
+Es la tercera vez esta tarde que una función se queda sin puerta al mover algo de
+sitio, y las tres veces la causa ha sido la misma: **mirar sólo la pantalla
+grande**. Comprobado a 375 px con el navegador, no supuesto.
+
+## 2026-08-25 — Feedback y la «i» al desplegable del nombre; borrar cuenta, bajo tu foto
+Eugenio: «pon el botón de feedback y el de "i" en el menú desplegable de
+humanity.wiki y sácalos del menú inferior. Y lo de borrar tu cuenta del menú
+desplegable ponlo mejor en el apartado de Configuración de cuenta, debajo del
+icono de usuario».
+
+- **La barra de abajo se queda con una sola idea**: la IA y las doce
+  herramientas. Ni feedback ni la «i» hacían nada — uno avisa de lo que falla y
+  el otro explica qué es esto, y las dos cosas son «sobre la plataforma», que es
+  justo lo que cuelga de su nombre.
+- Feedback va el primero del desplegable y separado por una raya: es lo único de
+  esa lista que no es una página que leer, sino algo que escribir. Conserva su
+  ámbar, porque se busca en un momento malo y encontrarlo rápido es media
+  función.
+- **Borrar tu cuenta** sale del desplegable de información —donde estaba entre
+  páginas que EXPLICAN la plataforma— y pasa a tu menú de usuario, detrás de
+  Configuración. No explica nada: hace algo con tu cuenta, y además irreversible.
+- **La ruta `/borrar-cuenta` NO se ha movido.** Está pegada en la ficha de Google
+  Play y cambiarla obligaría a pasar revisión otra vez; sólo cambia desde dónde
+  se llega (`enMenu: false` la quita del desplegable, la ruta sigue igual).
+---
+
+## 2026-08-26 — «Todos los proyectos» en el raíl, y los enlaces abren el navegador de la plataforma
+
+### Todos los proyectos
+
+Eugenio: «tiene que haber un botón en el menú derecho que sea "Todos los
+proyectos" y que te lleve a esa página general de proyectos».
+
+Desde que el raíl derecho enseña los proyectos uno a uno, **no había forma de
+llegar a la página que los tiene todos** salvo saberse la dirección: la única
+entrada era «Nuevo proyecto», que lleva allí pero con el diálogo de crear
+abierto. Va encima de esa, porque ir a lo que ya existe es lo de todos los días
+y crear es lo excepcional.
+
+### Un enlace a una web abre el navegador de la plataforma
+
+Eugenio: «el navegador se tiene que abrir automáticamente cuando se haga click
+en un enlace de una web».
+
+Un solo oyente en `GestorVentanas`, en fase de captura, y no una regla repetida
+en cada sitio que pinta enlaces: esos son muchos y crecen cada semana, así que
+escrita treinta veces sería treinta sitios donde olvidarla. Escrita ahí, la
+cumplen también los enlaces que aún no existen.
+
+Lo que NO se toca, y por qué: los enlaces del mismo origen (son navegación de la
+aplicación y los lleva React Router); ⌘/Ctrl/Mayús/Alt y el botón central (eso
+es «ábrelo en una pestaña de verdad», dicho a propósito por quien pulsa, y
+quitarle esa salida es quitarle el control de su navegador); `mailto:`, `tel:`,
+`download`, `blob:` y `data:` (no son páginas); y en el móvil, donde un
+navegador dentro de otro no significa nada y el enlace va al del teléfono.
+
+**Y un fallo que iba de serie**: reusar el navegador ya abierto era lo correcto
+—si no, cada enlace abriría uno nuevo— pero sólo lo LEVANTABA. Pulsabas un
+enlace, la ventana saltaba al frente enseñando la página anterior, y eso se lee
+como que el enlace está roto; peor, parece que ha funcionado. Ahora, si llega
+una dirección de verdad, la ventana se va a ella. `about:inicio` —lo que manda
+el menú— sigue limitándose a levantarla: abrir el menú no es pedir volver a la
+portada del navegador. La `key` del `Navegador` lleva el destino, porque guarda
+su dirección en su propio estado a partir de `inicial` y cambiar esa propiedad
+sola no lo movería.
+
+### Un enlace pegado se ve y se pulsa
+
+Eugenio: «haz que cuando se pega un enlace en la plataforma, este se pueda hacer
+click y salga en un azulito con subrayado».
+
+`ui/TextoConEnlaces`, puesto en el muro, los mensajes, la ficha de una tarjeta
+del tablero y el popup de una publicación. **Se pinta, no se guarda**: el texto
+sigue en la base tal cual lo escribió su autor, y aquí no hay HTML sino trozos
+de texto y elementos React — un `dangerouslySetInnerHTML` alimentado por lo que
+escribe cualquiera es la forma clásica de que alguien meta un script en el muro
+de otro.
+
+**El paréntesis final me lo llevé mal a la primera.** «(mira
+https://…/Bicicleta_eléctrica)» dejaba el `)` dentro del enlace, que así apunta
+a una página que no existe. La regla que lo distingue es si ese paréntesis tiene
+pareja DENTRO de la dirección: `…/Foo_(bar)` es suyo, `…/Bicicleta)` es de la
+frase. Mi primera versión contaba sobre la dirección **sin** ese paréntesis y
+entonces los dos casos daban «equilibrado». Lo vi en pantalla, no compilando.
+
+**Comprobado en local**: el botón lleva a `/proyectos`; un enlace externo abre el
+navegador interno; un segundo enlace distinto **mueve esa misma ventana** en vez
+de abrir otra; un enlace nuestro navega normal; `mailto:` y ⌘+clic no se
+interceptan; y una publicación con tres enlaces pegados los pinta en azul
+subrayado con el texto de alrededor intacto, y al pulsar uno se abre el
+navegador de la plataforma. La publicación de prueba y la sesión, borradas.
+
+## 2026-08-25 — Fuera los botones que no hacían nada; los rótulos alternan
+Eugenio: «hay botones, uno a la izquierda de explorar y otro a la derecha de mis
+proyectos, que si los pulsas no hacen nada. Que expandan también ese menú o que
+los eliminemos, pero no dupliquemos, por favor. Haz que la interfaz sea sencilla.
+También, si pulso en mis proyectos y se expande el menú y vuelvo a pulsar, se
+debería contraer».
+
+**Primero medí lo que él decía que no funcionaba, y funcionaba**: «Explorar»
+llevaba el raíl izquierdo de 56 a 256 px y «Mis proyectos» el derecho. Preguntar
+en vez de suponer sacó lo que de verdad fallaba, que era otra cosa.
+
+- **Eran las casitas de «Inicio»** al principio de cada raíl. Tenía razón en las
+  dos: **no parecían hacer nada** —desde la portada, llevar a la portada no se
+  nota— y **duplicaban**, porque el rótulo de arriba ya dice de qué es cada
+  columna. Se quitan. Al inicio se sigue llegando desde el logo y desde su
+  desplegable: **comprobado antes de borrarlas**, que es el orden correcto.
+- **Los dos rótulos alternan**: pulsar abre, volver a pulsar cierra. Un botón
+  que abre y no cierra obliga a buscar otro botón para deshacer lo que acabas de
+  hacer, que es justo lo que él pidió quitar.
+
+Medido después: 56 → 256 → 56, y cero botones de «Inicio» en los raíles.
+
+## 2026-08-25 — «Todo son páginas», fase 1 de 6
+La gran actualización de Eugenio: «me he dado cuenta de que en realidad todo son
+páginas». El plan completo, con lo que ya existe y lo que falta, está en
+`memory/15_PLAN_PAGINAS.md`; esta fase entrega los nombres y la puerta:
+
+- «Buscar páginas…» en el buscador, «Explorar páginas» arriba a la izquierda,
+  «Mis páginas» arriba a la derecha, «Organizar» como título del raíl derecho.
+- **El botón verde de crear página**, un «+», el primero del menú inferior. Con
+  el contexto: crear desde un proyecto la mete en ese proyecto.
+- La IA pasa de verde a **violeta**: el verde es ahora del crear, y dos
+  pastillas verdes competirían.
+
+## 2026-08-25 — «Todo son páginas», fase 2: la barra del editor
+Eugenio: «sólo una vez que estás en el editor de una página, aparece el menú
+inferior con todas las herramientas para poder agregar a esa página. Recicla esa
+ventana que teníamos donde aparecían todas las herramientas con el nombre y la
+imagen».
+
+- **En `/paginas/:id` la barra global se retira** (lo decide el Layout) y el
+  editor pinta la suya, con la misma piel: mismo negro, mismos 64 px reservados.
+  Dos barras a la vez serían dos filas de iconos compitiendo por el mismo pulgar.
+- La barra del editor: el **«+ Añadir» verde** y ocho accesos rápidos (texto,
+  título, lista, casilla, imagen, base de datos, publicación, separador). Todo
+  llama al MISMO `insertar` del menú «/»: una sola forma de añadir, tres puertas.
+- El «+» abre la **ventana reciclada de crear** —`HojaCrear` gana `titulo`,
+  `items` y `onElegirItem`— con los 19 bloques del catálogo `TIPOS_MENU` vestidos
+  con las previsualizaciones de la portada. **Derivado, no copiado**: si mañana
+  entra un bloque nuevo en `TIPOS_MENU`, aparece en la hoja solo.
+- Sólo si puedes editar: a una página de solo lectura no se le añade nada.
+- La reserva de 64 px (`--hueco-muelle`) la publica el editor en esa ruta:
+  quien tapa, reserva.
+- Los bloques nuevos se insertan tras el bloque activo, o al final si no hay.
+
+Verificado con la página real «Incendios forestales en España en 2025»: barra
+global fuera, barra del editor dentro, hoja con los 19 bloques y su título
+«Añadir a la página». (Mi primer detector daba un falso rojo: pescaba el nav del
+raíl lateral, que también se llama «Herramientas», y el botón de IA del propio
+chat. Medir con el selector equivocado es medir otra cosa.)
+
+## 2026-08-25 — «Todo son páginas», fase 3: semiprivada, con personas concretas
+Eugenio: «existe la opción de que la página sea semiprivada, donde das acceso a
+personas concretas. Esas personas pueden tener diferentes accesos, de solo
+lectura o también de edición».
+
+- **Tabla `accesos_entidad`** (migración 0131), con la forma genérica
+  `(entidad_tipo, entidad_id, user_id, rol)` que ya usan 0129 y las denuncias —
+  no la tabla de unión número 44 que `src/db/CLAUDE.md` pide no crear. Un
+  proyecto o un mapa con acceso por persona será una fila más, no otra tabla.
+- **`lectura`**: ve la página aunque esté privada. **`edicion`**: además la
+  edita. Gestionar la lista queda del autor o un administrador: dar edición no
+  es nombrar dueño.
+- La MISMA tabla abre la pantalla (`GET /api/windows/:id`) y el guardado
+  (`PUT /api/windows/:id`): sin lo segundo, quien tiene edición vería un editor
+  que tira su trabajo al guardar.
+- Buscador de personas sin filtrar correos: se busca por correo, pero el correo
+  no viaja en la respuesta.
+- La sección vive en el diálogo de Compartir: publicar y dar acceso son la misma
+  pregunta —¿quién ve esto?— y dos ventanas la contestarían mal.
+
+Probado de punta a punta con dos sesiones locales marcadas: Lucía sin acceso
+rebota (403), con lectura ve, con edición guarda (PUT 200), y al revocar vuelve
+el 403. Interfaz probada en el navegador: buscar «Luc», dar lectura, verla en la
+lista.
+
+**Y la fase 4 no hay que hacerla**: el dominio propio, las dos URLs y el
+interruptor de indexado ya los construyó otro programador hoy (módulo
+`compartir.ts`, migración 0129, `DominioPropio.tsx`). Quedan la 5 (comentarios
+por elemento) y la 6 (indexado en ramas al publicar).
+
+## 2026-08-25 — «Todo son páginas», fases 5 y 6: comentarios por elemento e indexado en ramas
+Las dos últimas fases con código. La 4 (dominio propio) ya existía —la hizo otro
+programador en `compartir.ts`/0129— y no se rehízo.
+
+**Fase 5 — cada elemento comentable, sólo en páginas públicas:**
+- Los comentarios NO son nuevos: son los polimórficos de siempre
+  (`EntityComments`, tabla `comments`, `/api/comments`). El bloque se identifica
+  como `<pagina>:<bloque>` porque no tiene tabla propia.
+- El guardia vive en el SERVIDOR: comentar un bloque de una página privada
+  devuelve 403 aunque la interfaz se salte. Una interfaz que esconde el botón no
+  protege nada si la ruta acepta la petición.
+- La burbuja sale al pasar el ratón por cada bloque en las vistas públicas
+  (`PaginaPublica`, `PaginaDeDominio`); con comentarios, enseña el número. El
+  editor y las vistas privadas quedan intactos.
+
+**Fase 6 — al publicar, la página se indexa en sus ramas:**
+- `PUT /api/publicar/paginas/:id` acepta `ramas[]` (ids de `subtemas`) y escribe
+  `subtema_contenido (subtema_id, 'pagina', id, quien)`. **Varias ramas es lo
+  correcto**: Eugenio decidió que esto es un grafo, «como un micelio».
+- Se borra y reescribe la lista entera: la clave primaria triple hace el insert
+  idempotente y lo que queda es exactamente lo elegido.
+- **Despublicar BORRA las filas, no las marca** (aviso de prog2: una fila
+  marcada la sigue sumando la cuenta recursiva del árbol).
+- En el diálogo de Compartir, las ramas se **proponen por las palabras**
+  (`hablaDe`, el criterio del muro) y se editan con un toque — propuesto y
+  editable: sólo automático clasifica mal en silencio, sólo manual acaba con
+  todo sin clasificar.
+
+Probado de punta a punta en local con datos de prueba borrados al final (y el
+`handle` de la cuenta de demostración restaurado): 403 en privada, publicar
+indexa en 2 ramas, comentar 200, 2 burbujas pintadas, el comentario se lee,
+despublicar desindexa. El primer intento falló con 409 —el usuario local no
+tenía `handle`— y esa condición quedó también probada.
+
+Con esto, **las 6 fases de la gran actualización están cerradas**: 1-3 y 5-6
+construidas aquí, la 4 ya existía. `memory/15_PLAN_PAGINAS.md` queda como mapa.
 ## 2026-08-26 — The tree of knowledge, phase 1 (prog2)
 
 A left-to-right tree above the wheel on `/preferencias`: RED DE CONOCIMIENTO →

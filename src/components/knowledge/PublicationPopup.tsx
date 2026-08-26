@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { X, Network, User as UserIcon, MessageSquare } from 'lucide-react';
 import EntityComments from './EntityComments';
+import TextoConEnlaces from '../ui/TextoConEnlaces';
 
 // ============================================================================
 // Pop-up central de publicación (Fase 11f, 2026-08-05)
@@ -48,7 +49,7 @@ export default function PublicationPopup({ publication, graphs, onClose }: {
           </div>
 
           {publication.body && (
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{publication.body}</p>
+            <TextoConEnlaces texto={publication.body} className="block text-sm text-slate-700 leading-relaxed" />
           )}
 
           {graphs.length > 0 && (

@@ -1979,13 +1979,22 @@ export default function AIAssistant({ modo = 'panel' }: {
     // dejaría una franja en blanco al final de todas las páginas. El hueco lo
     // publica ahora `navegacion/TresCirculos.tsx`, que es lo que de verdad está
     // ahí abajo: **quien tapa, reserva.**
-    raiz.style.setProperty('--hueco-muelle', '0px');
-    // Y A LA DERECHA, el lateral cuando lo hay. En el teléfono no se reserva
-    // nada: allí el panel ocupa la pantalla entera y no hay página detrás que
-    // proteger.
+    // ── Y YA NO SE ESCRIBE, NI SIQUIERA A CERO (2026-08-25) ─────────────
+    // Escribir `0px` aquí NO era inofensivo: el raíl inferior publica sus 64 px
+    // en esa misma variable, y este efecto se vuelve a ejecutar cada vez que el
+    // chat se abre, se cierra o cambia de ancho. El último en escribir gana, así
+    // que **abrir el chat borraba la reserva del menú de abajo** y la última
+    // fila de todas las páginas se metía debajo de la barra. No daba ningún
+    // error y sólo se veía mirándolo.
+    //
+    // Eugenio lo notó desde el otro lado: «el menú de abajo no tiene que entrar
+    // en conflicto con el chat». El conflicto era esta línea.
+    //
+    // La regla, y vale para toda la aplicación: **una variable, un dueño.**
+    // `--hueco-muelle` es de quien está abajo tapando; `--hueco-lateral` es de
+    // este componente, y ése sí se sigue escribiendo aquí.
     raiz.style.setProperty('--hueco-lateral', open && !esMovil ? `${anchoLateral}px` : '0px');
     return () => {
-      raiz.style.setProperty('--hueco-muelle', '0px');
       raiz.style.setProperty('--hueco-lateral', '0px');
     };
   }, [open, esMovil, anchoLateral]);

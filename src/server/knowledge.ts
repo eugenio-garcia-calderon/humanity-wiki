@@ -1761,7 +1761,20 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       const w = await db.execute(sql`SELECT creator_user_id FROM knowledge_windows WHERE id = ${req.params.id}`);
       if (!w.rows.length) return res.status(404).json({ error: 'Ventana no encontrada.' });
       if (!canEdit(req, (w.rows[0] as any).creator_user_id)) {
-        return res.status(403).json({ error: 'Solo el creador de la ventana o un administrador pueden editarla.' });
+        // ══ EL ROL DE EDICIÓN TAMBIÉN ESCRIBE (2026-08-25, fase 3) ═════════
+        // La pantalla ya decía «puedes editar» a quien tiene `edicion` en
+        // `accesos_entidad`; si esta ruta no lo aceptara, esa persona vería un
+        // editor que tira su trabajo al guardar — la promesa rota en el peor
+        // momento posible. La misma tabla que abre la pantalla abre el guardado:
+        // una sola verdad sobre quién edita.
+        const acceso = await db.execute(sql`
+          SELECT 1 FROM accesos_entidad
+          WHERE entidad_tipo = 'pagina' AND entidad_id = ${req.params.id}
+            AND user_id = ${req.user!.id} AND rol = 'edicion'
+        `);
+        if (!acceso.rows.length) {
+          return res.status(403).json({ error: 'Solo el creador, un administrador o alguien con acceso de edición pueden editarla.' });
+        }
       }
       const d = req.body || {};
       // «Convert to»: cambiar el tipo de una ventana ya creada.
@@ -2112,6 +2125,28 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       if (!requireLevel(req, res, ROLE.USER)) return;
       const { entity_type, entity_id, body } = req.body || {};
       if (!entity_type || !entity_id || !body) return res.status(400).json({ error: 'Faltan entity_type, entity_id o el texto.' });
+      /*
+       * ══ COMENTAR UN BLOQUE, SÓLO SI SU PÁGINA ES PÚBLICA (2026-08-25,
+       * fase 5 de «todo son páginas») ═══════════════════════════════════════
+       * Eugenio: «cada elemento de la página puede ser comentado por cualquier
+       * usuario, siempre y cuando esa página sea pública».
+       *
+       * El `entity_id` de un bloque es `<pagina>:<bloque>`: el bloque no tiene
+       * tabla propia —vive dentro del config de su página— así que la página
+       * viaja delante para poder comprobar esto sin inventar tablas. Y se
+       * comprueba AQUÍ y no sólo en la interfaz: una interfaz que esconde el
+       * botón no protege nada si la ruta acepta la petición igualmente.
+       */
+      if (entity_type === 'bloque') {
+        const paginaId = String(entity_id).split(':')[0];
+        const pg = await db.execute(sql`
+          SELECT publico FROM knowledge_windows
+          WHERE id = ${paginaId} AND archived_at IS NULL AND deleted_at IS NULL
+        `);
+        if (!pg.rows.length || !(pg.rows[0] as any).publico) {
+          return res.status(403).json({ error: 'Solo se pueden comentar los elementos de una página pública.' });
+        }
+      }
       const id = newId('CMT');
       await db.execute(sql`
         INSERT INTO comments (id, entity_type, entity_id, publication_id, author_user_id, body, created_by, updated_by)

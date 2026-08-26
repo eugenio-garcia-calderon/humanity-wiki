@@ -21,6 +21,10 @@ import {
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
+import HojaCrear from '../components/navegacion/HojaCrear';
+import {
+  PreviaPagina, PreviaArchivos, PreviaTabla, PreviaPublicaciones, PreviaComercio,
+} from '../components/bienvenida/previas';
 import { abrirLateral } from '../components/ventanas/bus';
 import { cn } from '../utils/cn';
 import CrearProducto from '../components/knowledge/CrearProducto';
@@ -78,6 +82,22 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'portada', label: 'Portada de tienda', icon: LayoutTemplate },
   { tipo: 'rejilla', label: 'Rejilla de productos', icon: LayoutGrid },
 ];
+
+/*
+ * EL CATÁLOGO CON DIBUJO (2026-08-25). Es TIPOS_MENU —la única lista de
+ * bloques— vestido con las previsualizaciones de la portada. Derivarlo y no
+ * copiarlo: si mañana entra un bloque nuevo en TIPOS_MENU, aparece aquí solo.
+ * Los bloques de texto comparten el dibujo de página porque son formas de
+ * escribir; repetir un dibujo cuando dos cosas se parecen de verdad es honesto.
+ */
+const PREVIA_DE: Record<string, () => any> = {
+  imagen: PreviaArchivos, basedatos: PreviaTabla, tabla: PreviaTabla,
+  publicacion: PreviaPublicaciones, producto: PreviaComercio,
+  portada: PreviaComercio, rejilla: PreviaComercio,
+};
+const BLOQUES_HOJA = TIPOS_MENU.map(t => ({
+  nombre: t.label, clave: t.tipo as string, Previa: PREVIA_DE[t.tipo] ?? PreviaPagina,
+}));
 
 const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '🏛️', '💡', '🎯', '🧭', '🤝', '⚖️', '🛠️', '🗺️', '❤️'];
 
@@ -151,6 +171,8 @@ export default function Documento() {
   // en crudo (**negrita**); los demás se ven ya formateados aunque estés en
   // modo edición. Al pulsar uno, pasa a activo y se puede teclear.
   const [bloqueActivo, setBloqueActivo] = useState<string | null>(null);
+  /** La hoja reciclada de «añadir a la página» (gran actualización 2026-08-25). */
+  const [catalogoAbierto, setCatalogoAbierto] = useState(false);
   // Selección múltiple (2026-08-08, petición del usuario): Ctrl/Cmd+clic
   // marca bloques sueltos, Shift+clic marca el rango desde el último
   // marcado, y una barra flotante los elimina de golpe.
@@ -963,6 +985,21 @@ export default function Documento() {
   // Render de un bloque
   // --------------------------------------------------------------------------
   const editable = puedoEditar && !generando;
+
+  /*
+   * QUIEN TAPA, RESERVA (2026-08-25). La barra global de herramientas no se
+   * pinta en esta ruta —lo decide el Layout— y la del editor sí, así que la
+   * reserva de 64 px la publica el editor. Sin esto, el último bloque de la
+   * página quedaría debajo de la barra y no se podría pulsar.
+   */
+  useEffect(() => {
+    const raiz = document.documentElement;
+    raiz.style.setProperty('--hueco-muelle', 'calc(64px + env(safe-area-inset-bottom))');
+    return () => { raiz.style.setProperty('--hueco-muelle', '0px'); };
+  }, []);
+
+  /** Dónde se inserta lo nuevo: tras el bloque activo, o al final. */
+  const anclaInsercion = () => bloqueActivo ?? (bloques.length ? bloques[bloques.length - 1].id : null);
 
   const renderBloque = (b: Bloque, indice: number) => {
     const texto = textosRef.current[b.id] ?? b.texto ?? '';
@@ -1965,6 +2002,60 @@ export default function Documento() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ══ LA BARRA DEL EDITOR (2026-08-25, gran actualización) ═══════════
+          Eugenio: «sólo una vez que estás en el editor de una página, aparece
+          el menú inferior con todas las herramientas para poder agregar a esa
+          página». La barra global se retira en esta ruta (Layout) y ésta ocupa
+          su sitio con su misma piel: mismos 64 px reservados, mismo negro.
+
+          El «+» verde abre la ventana RECICLADA de crear —la de los dibujos—
+          con el catálogo de bloques; los accesos rápidos de al lado son los
+          bloques de cada día. Todo llama al MISMO `insertar` del menú «/»: una
+          sola forma de añadir, tres puertas. Sólo si puedes editar: a una
+          página de solo lectura no se le añade nada. */}
+      {editable && (
+        <div
+          className="pointer-events-none fixed inset-x-0 z-[9990] flex justify-center px-3"
+          style={{ bottom: 'calc(12px + env(safe-area-inset-bottom))' }}
+        >
+          <nav
+            aria-label="Añadir a la página"
+            className="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-2xl bg-slate-900 px-2 py-1.5 shadow-2xl ring-1 ring-white/10"
+          >
+            <button
+              onClick={() => setCatalogoAbierto(true)}
+              title="Añadir a la página"
+              aria-label="Añadir a la página"
+              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-2.5 py-2 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
+            >
+              <Plus className="h-5 w-5 shrink-0" />
+              <span className="whitespace-nowrap text-[11px] font-black">Añadir</span>
+            </button>
+            <div className="mx-1 h-8 w-px shrink-0 self-center bg-slate-700" />
+            {TIPOS_MENU.filter(t => ['parrafo', 'titulo1', 'lista', 'tarea', 'imagen', 'basedatos', 'publicacion', 'separador'].includes(t.tipo)).map(t => (
+              <button
+                key={t.tipo}
+                onClick={() => insertar(anclaInsercion(), t.tipo)}
+                title={t.label}
+                aria-label={`Añadir ${t.label}`}
+                className="flex shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              >
+                <t.icon className="h-5 w-5 shrink-0" />
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {catalogoAbierto && (
+        <HojaCrear
+          titulo="Añadir a la página"
+          items={BLOQUES_HOJA}
+          onElegirItem={clave => insertar(anclaInsercion(), clave as TipoBloque)}
+          onCerrar={() => setCatalogoAbierto(false)}
+        />
       )}
     </div>
   );

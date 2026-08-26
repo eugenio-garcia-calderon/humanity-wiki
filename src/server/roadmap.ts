@@ -176,13 +176,70 @@ export function registerRoadmapRoutes(app: Express, db: any) {
         ORDER BY p.created_at DESC
         LIMIT 100
       `);
-      // A QUIEN NO HA ENTRADO NO SE LE DA EL ID DEL CREADOR (2026-08-20).
-      // No es una fuga —los proyectos que salen son los públicos— pero un id
-      // interno de usuario no le sirve de nada a un visitante y sí sirve para
-      // relacionar cosas entre sí. Se manda el nombre, que es lo que se pinta.
-      const filas = (rows.rows as any[]).map(p => (
-        req.user ? p : { ...p, creador_user_id: undefined, created_by: undefined, updated_by: undefined }
-      ));
+      /*
+       * ── LAS PERSONAS DE CADA PROYECTO (2026-08-26) ────────────────────────
+       * Eugenio: «cuando aparecen todos los proyectos de un perfil, no pongas
+       * en todos el creador del proyecto, porque en realidad sí va a ser el
+       * del perfil. Pon en su defecto las personas asociadas a ese proyecto
+       * que no sean el propio perfil».
+       *
+       * Tiene razón y va más allá del ruido visual: un dato que es idéntico en
+       * las doce tarjetas no distingue nada, y ocupa el sitio del único dato
+       * que sí distingue, que es con quién está hecho cada uno.
+       *
+       * ── SÓLO LAS TUYAS, Y ESO NO ES UNA LIMITACIÓN ────────────────────────
+       * Las personas de un proyecto son `game_agents` del Juego Vital:
+       * representaciones PRIVADAS que cada cual hace en su mundo. Se filtra por
+       * `user_id`, así que en el proyecto público de otro no verás las suyas —
+       * ni él las tuyas. Es la misma regla que ya aplica
+       * `GET /api/juego/proyectos/:id/personas`, y cambiarla aquí sería abrir
+       * por la puerta de atrás lo que allí está cerrado.
+       *
+       * ── VA EN SU PROPIA CONSULTA, Y A PROPÓSITO ───────────────────────────
+       * Como subconsulta dentro de la de arriba, un día que `game_agents` no
+       * exista —o le falte una columna— la lista de proyectos entera devuelve
+       * 500. Aparte, ese fallo se traga aquí y los proyectos siguen saliendo
+       * sin personas, que es exactamente lo que debe pasar: esto adorna la
+       * tarjeta, no la sostiene.
+       */
+      let personasPorProyecto: Record<string, any[]> = {};
+      if (req.user && rows.rows.length) {
+        try {
+          const ids = (rows.rows as any[]).map(p => String(p.id));
+          // Un array de JavaScript metido en una plantilla `sql` NO viaja como
+          // array: se expande a `($1, $2, …)`, que es una lista y no vale para
+          // `?|`. Hay que construir el ARRAY de Postgres a mano. Me costó una
+          // tarde la primera vez que lo di por hecho, en el agregador.
+          const comoArray = sql`ARRAY[${sql.join(ids.map(i => sql`${i}`), sql`, `)}]::text[]`;
+          const gente = await db.execute(sql`
+            SELECT g.id, g.nombre, g.rol, g.foto_url, g.proyecto_ids
+            FROM game_agents g
+            WHERE g.user_id = ${req.user.id} AND g.archived_at IS NULL AND g.tipo = 'persona'
+              AND g.proyecto_ids ?| ${comoArray}
+            ORDER BY g.created_at ASC
+          `);
+          // Una persona puede estar en varios proyectos: se reparte en memoria
+          // en vez de pedirla una vez por proyecto.
+          for (const g of gente.rows as any[]) {
+            const suyos: string[] = Array.isArray(g.proyecto_ids) ? g.proyecto_ids : [];
+            for (const pid of suyos) {
+              if (!ids.includes(pid)) continue;
+              (personasPorProyecto[pid] ||= []).push({
+                id: g.id, nombre: g.nombre, rol: g.rol, foto_url: g.foto_url,
+              });
+            }
+          }
+        } catch { personasPorProyecto = {}; }
+      }
+      const filas = (rows.rows as any[]).map(p => {
+        const con = { ...p, personas: personasPorProyecto[p.id] || [] };
+        // A QUIEN NO HA ENTRADO NO SE LE DA EL ID DEL CREADOR (2026-08-20).
+        // No es una fuga —los proyectos que salen son los públicos— pero un id
+        // interno de usuario no le sirve de nada a un visitante y sí sirve
+        // para relacionar cosas entre sí. Se manda el nombre, que es lo que se
+        // pinta.
+        return req.user ? con : { ...con, creador_user_id: undefined, created_by: undefined, updated_by: undefined };
+      });
       res.json(filas);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
@@ -264,11 +321,23 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       await db.execute(sql`
         UPDATE proyectos SET
           titulo      = COALESCE(${d.titulo ?? null}, titulo),
-          descripcion = COALESCE(${d.descripcion ?? null}, descripcion),
+          -- LA DESCRIPCIÓN Y EL ICONO SE PUEDEN VACIAR (2026-08-26). Con
+          -- COALESCE, mandar null significa «déjalo como estaba», así que
+          -- borrar la descripción era imposible desde aquí: se escribía y no
+          -- pasaba nada, que es la peor forma de no funcionar. Ahora null y
+          -- cadena vacía borran, y no mandar el campo es lo que lo respeta.
+          descripcion = CASE WHEN ${d.descripcion === undefined} THEN descripcion ELSE ${d.descripcion ?? null}::text END,
+          -- La columna icono la escribía sólo /api/elemento. Entra aquí para que la
+          -- ventanita de editar una tarjeta guarde sus cuatro campos en UNA
+          -- llamada: dos llamadas es un guardado que puede quedarse a medias.
+          icono       = CASE WHEN ${d.icono === undefined} THEN icono ELSE ${d.icono ?? null}::text END,
           vision      = COALESCE(${d.vision ?? null}, vision),
           grupos      = COALESCE(${d.grupos ? JSON.stringify(d.grupos) : null}::jsonb, grupos),
           columnas    = COALESCE(${d.columnas ? JSON.stringify(limpiarColumnas(d.columnas)) : null}::jsonb, columnas),
           publico     = COALESCE(${d.publico ?? null}, publico),
+          -- La portada se quita mandando null, así que no puede ir con
+          -- COALESCE: ahí null significa «déjalo como estaba».
+          portada_url = CASE WHEN ${d.portada_url === undefined} THEN portada_url ELSE ${d.portada_url ?? null}::text END,
           updated_at = now(), updated_by = ${req.user!.id}
         WHERE id = ${req.params.id}
       `);

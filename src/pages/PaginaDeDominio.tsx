@@ -113,7 +113,7 @@ export default function PaginaDeDominio({ host }: { host: string }) {
             {new Date(datos.updated_at || datos.created_at).toLocaleDateString('es-ES')}
           </p>
         </header>
-        <BloquesLectura bloques={bloques} />
+        <BloquesLectura bloques={bloques} comentable={(datos as any).id} />
       </article>
       {/* Si la página vende algo, la cesta va igual: el dominio cambia la
           dirección, no lo que la página es. */}

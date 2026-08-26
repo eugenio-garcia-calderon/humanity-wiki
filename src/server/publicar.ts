@@ -968,6 +968,38 @@ export function registerPublicarRoutes(app: Express, db: any) {
         WHERE id = ${pagina.id}
       `);
 
+      /*
+       * ══ AL PUBLICAR, LA PÁGINA SE INDEXA EN SUS RAMAS (2026-08-25, fase 6
+       * de «todo son páginas») ═══════════════════════════════════════════════
+       * Eugenio: «cada página se indexa dentro del conocimiento de la
+       * humanidad al publicarse; mientras esté privada no se indexa a ninguna
+       * rama, y al dar a publicar se acepta que se indexa».
+       *
+       * `ramas` son ids de `subtemas`, elegidos en el diálogo (propuestos por
+       * las palabras y editables — acordado con prog2, que tiene el árbol).
+       * VARIAS ramas es lo correcto, no un caso raro: Eugenio decidió que esto
+       * es un grafo, «como un micelio».
+       *
+       * Se borra y se reescribe la lista entera en vez de calcular diferencias:
+       * la clave primaria de tres campos hace el insert idempotente, y así lo
+       * que queda en la tabla es EXACTAMENTE lo que se eligió, ni una fila de
+       * una publicación anterior.
+       */
+      if (Array.isArray(d.ramas)) {
+        await db.execute(sql`
+          DELETE FROM subtema_contenido WHERE tipo = 'pagina' AND entity_id = ${pagina.id}
+        `);
+        for (const rama of d.ramas.slice(0, 20)) {
+          if (typeof rama !== 'string' || !rama) continue;
+          await db.execute(sql`
+            INSERT INTO subtema_contenido (subtema_id, tipo, entity_id, puesto_por)
+            SELECT ${rama}, 'pagina', ${pagina.id}, ${req.user!.id}
+            WHERE EXISTS (SELECT 1 FROM subtemas WHERE id = ${rama})
+            ON CONFLICT DO NOTHING
+          `);
+        }
+      }
+
       res.json({
         slug, handle, publico,
         // Se devuelven LAS DOS formas. La de ruta funciona hoy; la de subdominio
@@ -993,6 +1025,14 @@ export function registerPublicarRoutes(app: Express, db: any) {
       // El `slug` NO se borra: si vuelve a publicarse, recupera su misma
       // dirección y los enlaces que ya circulaban vuelven a funcionar.
       await db.execute(sql`UPDATE knowledge_windows SET publico = false, updated_at = now() WHERE id = ${req.params.id}`);
+      // ══ DESPUBLICAR ES DESINDEXAR (fase 6) ══ Se BORRA la fila, no se
+      // marca: una fila marcada la seguiría sumando la cuenta del árbol y el
+      // subtema diría «3 páginas» con dos visibles (aviso de prog2, que ya
+      // pisó esa piedra). El slug sí se queda, para que republicar recupere
+      // la misma dirección.
+      await db.execute(sql`
+        DELETE FROM subtema_contenido WHERE tipo = 'pagina' AND entity_id = ${req.params.id}
+      `);
       res.json({ ok: true });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });

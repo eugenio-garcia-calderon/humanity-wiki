@@ -6,7 +6,7 @@ import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
   Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
- PanelLeftOpen, Info, Search,} from 'lucide-react';
+ PanelLeftOpen, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
 import { abrirVentana, minimizarTodas, pulsarVentana, cerrarVentana, cerrarTodasLasVentanas, maximizarVentana, ordenarVentanas, pedirVentanas, type VentanaEstado } from '../ventanas/bus';
 import GestorVentanas from '../ventanas/GestorVentanas';
@@ -14,7 +14,19 @@ import VentanaLateral from '../ventanas/VentanaLateral';
 import MenuLateral from './MenuLateral';
 import Rail, { type Herramienta } from '../navegacion/Rail';
 import Panel, { EstilosPanel } from '../navegacion/Panel';
-import TresCirculos, { type Circulo } from '../navegacion/TresCirculos';
+/*
+ * LOS TRES CÍRCULOS SE HAN IDO (2026-08-25). Eugenio: «el anterior menú
+ * inferior deja de tener sentido y se elimina, pasando a ser sustituido por
+ * este nuevo menú» — el raíl de herramientas.
+ *
+ * `Circulo` sobrevive como tipo porque el estado sigue mandando en UNA cosa: en
+ * el móvil, qué cajón está abierto. Lo que se ha ido son los tres botones, no
+ * la idea de «hay un menú abierto».
+ */
+import { type Circulo } from '../navegacion/TresCirculos';
+import RailInferior from '../navegacion/RailInferior';
+import AvatarRail from '../navegacion/AvatarRail';
+import { useProyectos, comoItems, PanelProyecto, PieProyectos } from '../navegacion/ProyectosRail';
 import PanelExplorar, { OBJETIVOS_RAIL } from '../navegacion/PanelExplorar';
 import HojaCrear from '../navegacion/HojaCrear';
 import BuscadorSuperior from '../navegacion/BuscadorSuperior';
@@ -110,6 +122,18 @@ export default function Layout() {
    * cualquiera cuando se ha equivocado de botón.
    */
   const [circulo, setCirculo] = useState<Circulo | null>(null);
+
+  /*
+   * TUS PROYECTOS, QUE AHORA SON EL MENÚ DE LA DERECHA (2026-08-25).
+   * Se piden una vez desde aquí y no desde el raíl, porque el mismo dato lo
+   * necesitan el raíl (para los iconos) y el panel (para saber cuál abrir).
+   * Dos peticiones para lo mismo son dos listas que se pueden contradecir.
+   */
+  const { estado: proyectos, recargar: recargarProyectos } = useProyectos(!!user);
+  const listaProyectos = Array.isArray(proyectos) ? proyectos : [];
+  const itemsProyectos = comoItems(listaProyectos);
+  const proyectosDe = (clave: string) => listaProyectos.find(p => `proyecto-${p.id}` === clave);
+  const [proyectoAbierto, setProyectoAbierto] = useState<ReturnType<typeof proyectosDe>>(undefined);
   /** Qué objetivo tiene el panel abierto en el lado de Explorar. */
   const [objetivoAbierto, setObjetivoAbierto] = useState<string | null>(null);
   const pulsarCirculo = (c: Circulo) => {
@@ -847,6 +871,56 @@ export default function Layout() {
       <header className={cn('relative border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-1 sm:px-2 flex items-center gap-1 sm:gap-2 z-40 shrink-0 shadow-sm',
         !menuPuesto ? 'h-14' : compacto ? 'h-8' : 'h-10')}>
 
+        {/* ══ «EXPLORAR», FUSIONADO CON LA COLUMNA DE LA IZQUIERDA ═══════════
+            (2026-08-25) Eugenio: «el botón de explorar tiene que estar
+            fusionado con el menú izquierdo, y el logo de humanity.wiki a la
+            derecha de explorar. Y tiene que tener el logo de la exploración, no
+            el de una casa: utiliza una brújula. Piensa cómo hacer esta fusión
+            de forma elegante y eficiente para que, cuando el usuario pinche, se
+            fije el menú que le corresponde y le lleve a su página».
+
+            ── CÓMO SE HACE LA FUSIÓN, Y POR QUÉ ASÍ ────────────────────────
+            No es un botón que esté «cerca» del raíl: es **su remate**. Va el
+            primero de la barra, pegado al mismo borde del que nace la columna,
+            y cuando está activo se pinta como ella y **sin línea abajo**
+            (`-mb-px` se come el borde de la cabecera), de modo que el color
+            corre sin corte desde el rótulo hasta el último tema. Eso es lo que
+            hace que se lean como una sola pieza y no como dos cosas alineadas.
+
+            Y hace las DOS cosas que pidió, en este orden: **fija** el menú —que
+            deja de depender del ratón— y **navega**. Fijar sin navegar dejaría
+            el menú abierto sobre la misma página; navegar sin fijar cerraría el
+            menú justo al llegar a la página que va de eso.
+
+            La brújula y no la casa: una casa es «inicio», que es otro sitio
+            —el logo de al lado ya lleva ahí—. Explorar es buscar sin saber
+            todavía qué. */}
+        {user && (
+          <button
+            /* ══ PULSAR OTRA VEZ LO CIERRA (2026-08-25) ══════════════════
+               Eugenio: «si pulso en mis proyectos y se expande el menú, y
+               vuelvo a pulsar en mis proyectos, se debería contraer».
+
+               Y vale para los dos rótulos, porque son la misma idea. Un botón
+               que abre y no cierra obliga a buscar OTRO botón para deshacer lo
+               que acabas de hacer — que es justo lo que él ha pedido quitar. */
+            onClick={() => {
+              setPorRoce(false);
+              if (circulo === 'explorar') { setCirculo(null); return; }
+              setCirculo('explorar');
+              navigate('/preferencias');
+            }}
+            title="Explorar los catorce temas"
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
+              circulo === 'explorar' || location.pathname === '/preferencias'
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          >
+            <Compass className="h-4 w-4 shrink-0" />
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar páginas</span>
+          </button>
+        )}
+
         {/* ══ TRAER EL MENÚ DE VUELTA ═══════════════════════════════════════
             Eugenio, 2026-08-21: «haremos el botón de descolapsar todavía más
             llamativo y grande».
@@ -1025,6 +1099,21 @@ export default function Layout() {
                   fichero que nadie más está editando, y no un cambio en estas
                   veinte. El marco, el tamaño y el ajuste al móvil de abajo se
                   quedan como estaban. */}
+              {/* ══ FEEDBACK, AQUÍ (2026-08-25) ═════════════════════════════
+                  Eugenio: «pon el botón de feedback y el de "i" en el menú
+                  desplegable de humanity.wiki y sácalos del menú inferior».
+
+                  Va el primero y separado: es lo único de esta lista que no es
+                  una página que leer, sino algo que escribir. Conserva su ámbar
+                  —el mismo que tenía abajo— porque sigue siendo lo que se busca
+                  en un momento malo, y encontrarlo rápido es media función. */}
+              <button
+                onClick={() => { setInfoAbierta(false); navigate('/hormiguero'); }}
+                className="mb-1 flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-xs font-black text-amber-700 hover:bg-amber-50"
+              >
+                <IconoFeedback className="h-3.5 w-3.5 shrink-0" /> Feedback
+              </button>
+
               {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
                 <button key={op.ruta}
                   onClick={() => { setInfoAbierta(false); navigate(`/${op.ruta}`); }}
@@ -1065,6 +1154,18 @@ export default function Layout() {
             centro y la cuenta a la derecha. El centro de la barra es el sitio
             más grande que hay y hasta hoy lo ocupaba un rótulo que no hace
             nada; ahora lo ocupa lo único de ahí arriba que se usa a diario. */}
+        {/* ══ «EXPLORAR», FIJO ARRIBA A LA IZQUIERDA (2026-08-25) ═════════
+            Eugenio: «donde el menú lateral izquierdo se fusiona con el menú
+            superior, ahí es donde está la parte de explorar; tiene que aparecer
+            el icono de explorar, un icono de una casa, y que aparezca también
+            la palabra explorar fija. Si se pulsa, se abre ese menú y te lleva a
+            la página donde está la rueda de todos los temas — la página de
+            personalizar, realmente».
+
+            Va justo encima de la columna de los catorce temas, así que la
+            palabra es el rótulo de esa columna. Y lleva a `/preferencias`, que
+            es donde vive la rueda: él se corrigió a sí mismo en la frase y
+            **manda la corrección**, no la primera versión. */}
         <BuscadorSuperior compacto={compacto} />
 
         {/* ══ EL MENÚ, A LA IZQUIERDA Y SIN PALABRA ═══════════════════════
@@ -1307,160 +1408,91 @@ export default function Layout() {
             centro, que hace lo mismo y además deja escribir sin cambiar de
             pantalla primero.) */}
 
+        {/* ══ LA BARRA DE ARRIBA SE HA VACIADO (2026-08-25) ═══════════════
+            Eugenio: «así despejamos la parte de arriba, que la dejamos
+            principalmente para la barra de buscar, que, por cierto, ha
+            empeorado su aspecto».
 
-        <button
-          onClick={() => navigate('/hormiguero')}
-          title={incidencias.bloqueadas
-            ? `${incidencias.bloqueadas} ${incidencias.bloqueadas === 1 ? 'nota necesita' : 'notas necesitan'} algo tuyo`
-            : 'Lo que falla y lo que falta'}
-          aria-label="Feedback: lo que falla y lo que falta"
-          /* CON LA PALABRA AL LADO (2026-08-22, Eugenio: «pon la palabra
-             Feedback en el menú, al lado del icono»). Un icono solo obliga a
-             adivinar o a dejar el dedo encima esperando el globo de ayuda —y en
-             un móvil no hay globo de ayuda, así que ahí simplemente no se sabe
-             qué es. Con la palabra deja de haber adivinanza.
-             En la barra estrecha la palabra se oculta: ahí no cabe, y es el
-             único sitio donde el icono va solo. */
-          className={cn('relative flex items-center gap-1.5 rounded-lg transition-colors shrink-0',
-            compacto ? 'w-7 h-7 justify-center' : 'h-9 px-2.5',
-            location.pathname === '/hormiguero'
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
-        >
-          <IconoFeedback className={cn('shrink-0', compacto ? 'w-4 h-4' : 'w-5 h-5')} />
-          {/* LA PALABRA SE VA EN EL MÓVIL (2026-08-23). Al centrar el nombre
-              en la barra, a 375 px se montaba encima de
-              esta palabra: dos textos superpuestos y ninguno legible. Se ve en
-              una captura, no compilando.
-              Se quita la de aquí y no el nombre porque el nombre es la marca de
-              la aplicación y esto es un botón que ya se entiende por su icono —
-              y que además conserva la palabra en su `aria-label`. */}
-          {!compacto && <span className="hidden text-xs font-bold sm:inline">Feedback</span>}
-          {incidencias.bloqueadas > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
-              {incidencias.bloqueadas > 9 ? '9+' : incidencias.bloqueadas}
-            </span>
-          )}
-        </button>
+            Tenía razón y la causa era ésta: aquí había siete cosas —feedback,
+            mensajes, contactos, calendario, campana, tu foto y su menú— y el
+            buscador se quedaba con lo que sobraba. Medido antes de tocar nada:
+            **por debajo de 1024 px el campo de escribir llegaba a medir cero**.
+            No era que el buscador fuera feo: es que no cabía.
 
-        {/* ══ MENSAJERÍA Y LLAMADAS, A LA DERECHA DEL TODO (2026-08-24) ═══
-            Eugenio: «pon en el menú superior a la derecha del todo el botón de
-            mensajería y telecomunicaciones».
-
-            Va PEGADO a la cuenta y después de la campana, y las tres cosas
-            juntas cuentan lo mismo desde ángulos distintos: quién eres, qué te
-            avisa y quién te habla. Antes vivía sólo en el menú lateral, o sea
-            que para ver si alguien te había escrito había que abrir un menú —
-            y un mensaje que hay que ir a buscar es un mensaje que llega tarde.
-
-            Un solo botón para las dos cosas porque son la misma pantalla:
-            `/mensajes` lleva el chat y desde ahí se llama. Dos botones serían
-            dos puertas a la misma habitación. */}
-        <button
-          onClick={() => navigate('/mensajes')}
-          title="Mensajes y llamadas"
-          aria-label="Mensajes y llamadas"
-          className={cn('grid shrink-0 place-items-center rounded-lg transition-colors',
-            compacto ? 'w-7 h-7' : 'w-9 h-9',
-            location.pathname.startsWith('/mensajes') || location.pathname.startsWith('/telefono')
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')}
-        >
-          <MessageSquare className={cn(compacto ? 'w-4 h-4' : 'w-5 h-5')} />
-        </button>
-
-        {/* ══ EL CALENDARIO, ARRIBA A LA DERECHA (2026-08-24) ═══════════
-            Eugenio: «pon el acceso al calendario arriba a la derecha, y que
-            cuando se haga hover te dé una preview del día de hoy y si tienes
-            algún evento, y si se pincha ya te lleva a la página de calendario».
-
-            SÓLO CON LA SESIÓN ABIERTA, y no por prudencia: `/api/calendario`
-            contesta 401 sin sesión, así que a un visitante este botón le
-            enseñaría un panel vacío cada vez que pasara por encima. Un
-            calendario que dice «hoy no tienes nada» a quien ni siquiera ha
-            entrado no está informando de nada.
-
-            Va junto a la campana y los mensajes porque las tres contestan la
-            misma clase de pregunta —qué me espera— y se miran de un vistazo. */}
-        {user && (
-          <BotonCalendario compacto={compacto} activo={location.pathname.startsWith('/calendario')} />
-        )}
+            Dónde ha ido cada cosa, y ninguna se ha perdido:
+              · Feedback  → al raíl de abajo, en rojo, que es donde él lo pidió.
+              · Mensajes, Contactos y Calendario → debajo de tu foto, en el raíl
+                de la derecha.
+              · Tu foto y su menú → arriba del raíl de la derecha.
+            Se queda **la campana**, que él no nombró y que es lo único que
+            avisa: esconder un aviso detrás de un clic es dejar de avisar. */}
 
         <Campana compacto={compacto} />
 
-        <div className="relative shrink-0" ref={cuentaRef}>
-          {user ? (
-            <>
-              <button
-                onClick={() => setCuentaAbierta(o => !o)}
-                title={`${user.displayName || user.email} · ${user.roleLabel}`}
-                className={cn('block rounded-full transition-all',
-                  cuentaAbierta ? 'ring-2 ring-slate-900 ring-offset-1' : 'hover:ring-2 hover:ring-slate-200')}
-              >
-                {/* SOLO LA FOTO (2026-08-21, Eugenio: «en la foto de perfil
-                    elimina la flecha lateral y deja solo la foto»). Una foto
-                    redonda en la esquina ya se entiende como «tu cuenta» sin
-                    que nadie tenga que explicarlo, y la flecha obligaba a
-                    llevar un borde y un relleno alrededor para que no quedara
-                    suelta. Sin ella, la foto es el botón. */}
-                {user.avatarUrl
-                  ? <img src={user.avatarUrl} alt="" className={cn('rounded-full object-cover', compacto ? 'w-7 h-7' : 'w-9 h-9')} />
-                  : <span className={cn('rounded-full bg-slate-100 grid place-items-center text-slate-400', compacto ? 'w-7 h-7' : 'w-9 h-9')}>
-                      <User className="w-4 h-4" />
-                    </span>}
-              </button>
 
-              {cuentaAbierta && (
-                <div className="absolute top-11 right-0 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <p className="px-3 pb-1.5 text-[11px] font-black text-slate-800 truncate">
-                    {user.displayName || user.email}
-                  </p>
-                  <p className="px-3 pb-2 text-[10px] text-slate-400 truncate border-b border-slate-100">{user.roleLabel}</p>
-                  <button onClick={() => { setCuentaAbierta(false); navigate(`/personas/${user.id}`); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
-                    <User className="w-3.5 h-3.5 text-slate-400" /> Mi Perfil
-                  </button>
-                  <button onClick={() => { setCuentaAbierta(false); navigate('/configuracion'); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 text-left">
-                    <Settings className="w-3.5 h-3.5 text-slate-400" /> Configuración
-                  </button>
-                  <button onClick={() => { setCuentaAbierta(false); logout(); navigate('/'); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-600 text-left">
-                    <LogOut className="w-3.5 h-3.5 text-slate-400" /> Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </>
-          ) : cargandoSesion ? (
-            /* EL DESTELLO DE SESIÓN CERRADA (B21). Aquí estaba el daño: durante
-               los ~5 segundos que tarda en cargar la aplicación, `user` todavía
-               es null y esto pintaba «Iniciar sesión» a alguien que SÍ tenía la
-               sesión abierta. En el primer contacto de cada visita, la
-               plataforma le decía al usuario que había perdido su trabajo.
+        {/* ══ «MIS PROYECTOS», FIJO ARRIBA A LA DERECHA (2026-08-25) ══════
+            Eugenio: «arriba a la derecha, mis proyectos, que también debe estar
+            fijo arriba a la derecha esa palabra; te lleva a tus proyectos».
 
-               No sabemos aún si hay sesión, así que no se afirma ninguna de las
-               dos cosas: un hueco de la medida exacta del botón que va a venir.
-               Y no es que /api/auth/me sea lento (tarda 0,38 s): son los 3,7 MB
-               del paquete de la aplicación en un solo trozo. Eso es otra
-               conversación; esto es no mentir mientras tanto. */
-            <div
-              aria-hidden
-              className={cn('rounded-full bg-slate-100 animate-pulse', compacto ? 'h-6 w-14' : 'h-8 w-16')}
-            />
-          ) : (
-            <Link to="/login"
-              aria-label="Iniciar sesión"
-              className="h-9 px-2.5 sm:px-3 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
-              <User className="w-3.5 h-3.5 shrink-0" />
-              {/* Dos palabras distintas para lo mismo, y no un texto recortado:
-                  «Iniciar ses…» no es más corto, es peor. El `aria-label` de
-                  arriba dice la frase entera pase lo que pase, así que quien no
-                  ve la pantalla oye siempre lo mismo. */}
-              <span className="sm:hidden">Entrar</span>
-              <span className="hidden sm:inline">Iniciar sesión</span>
-            </Link>
-          )}
-        </div>
+            La palabra va escrita y no es un icono: es el rótulo de la columna
+            que tiene debajo, igual que «Explorar» lo es de la de la izquierda.
+            Un icono aquí obligaría a adivinar de qué es esa columna, que es
+            justo lo que estas dos palabras quitan.
+
+            Tu foto ya no está aquí: se ha mudado a lo alto de esa misma columna
+            (ver `AvatarRail`), con mensajes, contactos y calendario debajo. */}
+            {/* ══ Y EN EL MÓVIL, SIN LA PALABRA PERO CON EL BOTÓN ══════════
+                (2026-08-25) Eugenio: «arregla el menú de la versión móvil,
+                porque no se puede acceder al menú derecho desde el móvil».
+
+                Y era literal: este botón llevaba `hidden … sm:flex`, así que por
+                debajo de 640 px **no se dibujaba**. En un ordenador el raíl de
+                la derecha se despliega al acercar el ratón; en un teléfono no
+                hay ratón, así que este botón era la única puerta — y no estaba.
+                Tus proyectos existían y no había forma de llegar a ellos.
+
+                Lo mismo le pasaba a «Explorar». El izquierdo al menos conservaba
+                el botón de las tres rayas; el derecho no tenía nada.
+
+                Ahora el botón se dibuja siempre y lo que se esconde es **la
+                palabra**, que es lo que no cabe. El icono se queda, y con él la
+                puerta. */}
+        {/* EL MISMO REMATE, POR EL OTRO LADO. Fija el raíl de la derecha y
+            lleva a tus proyectos, con el mismo par de gestos que «Explorar»:
+            las dos esquinas se comportan igual porque son la misma idea. */}
+        {user && (
+          <button
+            /* EN EL MÓVIL ABRE EL CAJÓN Y NO NAVEGA. En un ordenador el raíl
+               se queda a un lado y la página cambia detrás: las dos cosas se
+               ven. En un teléfono el cajón ocupa la pantalla, así que navegar
+               además dejaría el cajón abierto sobre otra página — y al cerrarlo
+               aparecerías en un sitio al que no habías pedido ir. */
+            onClick={() => {
+              setPorRoce(false);
+              if (circulo === 'organizar') { setCirculo(null); return; }
+              setCirculo('organizar');
+              if (!esMovil) navigate('/proyectos');
+            }}
+            title="Tus proyectos"
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
+              circulo === 'organizar' || location.pathname.startsWith('/proyectos')
+                ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
+          >
+            <FolderKanban className="h-4 w-4 shrink-0" />
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
+          </button>
+        )}
+
+        {!user && !cargandoSesion && (
+          <Link to="/login"
+            aria-label="Iniciar sesión"
+            className="h-9 px-2.5 sm:px-3 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
+            <User className="w-3.5 h-3.5 shrink-0" />
+            <span className="sm:hidden">Entrar</span>
+            <span className="hidden sm:inline">Iniciar sesión</span>
+          </Link>
+        )}
       </header>
 
       {/* Contenido + Asistente IA: fila flex real — el panel acoplado empuja
@@ -1509,6 +1541,13 @@ export default function Layout() {
             chats a la vez — el error que este proyecto ya pagó caro. */}
         {!isIAPage && <AIAssistant />}
 
+        {/* EL CÍRCULO FLOTANTE SE HA IDO (2026-08-25). Eugenio: «mejor pon
+            el botón de IA dentro del menú inferior». Estuvo suelto abajo a la
+            derecha unas horas y él tenía razón: flotando era un elemento más
+            que esquivar —se apartaba del raíl derecho y del inferior leyendo
+            sus medidas—, y dentro de la barra no hay nada que esquivar porque
+            es la barra. La puerta es la misma: el aviso `ai:abrir`. */}
+
         {/* EL TELÉFONO, EN TODA LA APLICACIÓN (2026-08-22). Va aquí y no en la
             pantalla de Mensajes porque una llamada tiene que sonar estés donde
             estés. Y va SOLO en este lado del `if`, no en el de las ventanas
@@ -1541,25 +1580,38 @@ export default function Layout() {
           nota de allí. Aquí el panel va ANTES que el raíl: en una fila flex el
           orden del documento es el orden en pantalla, y el raíl tiene que
           quedar pegado al borde derecho. */}
+      {/* ══ EL RAÍL DE LA DERECHA SON TUS PROYECTOS (2026-08-25) ═══════════
+          Eugenio: «el menú lateral derecho pasa a ser un visor de todos los
+          proyectos del usuario, cada uno con su icono, y si se hace hover se
+          ven los nombres; y sigue teniendo el submenú para ver dentro de cada
+          proyecto lo que hay, sin necesidad de pinchar en él».
+
+          Las herramientas que vivían aquí se han bajado al raíl inferior. La
+          regla que ordena ahora las tres barras: izquierda **de qué habla**,
+          abajo **con qué se hace**, derecha **qué tienes**. */}
       {!esMovil && (
         <div className="flex h-full shrink-0" {...gestoDelMenu}>
-          {panelAbierto && (
-            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          {proyectoAbierto && (
+            <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
           )}
-          {/* FONDO BLANCO EN LOS DOS (2026-08-24, Eugenio: «ponle el fondo
-              blanco»). En blanco los colores del mapa se ven — un
-              `text-yellow-500` sobre negro casi no existe. */}
           <Rail
             siempreAbierto={circulo === 'organizar'}
             claro
             ladoDerecho
-            abierta={panelAbierto?.clave ?? null}
-            // El nombre lleva a la herramienta; la flecha enseña lo que hay
-            // dentro sin sacarte de donde estás.
+            titulo="Organizar"
+            items={itemsProyectos}
+            cabeza={<AvatarRail desplegado />}
+            abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
+            // El icono lleva al proyecto; la flecha enseña lo que hay dentro
+            // sin sacarte de donde estás.
             onElegir={h => navigate(h.ruta)}
-            onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
-            onPlegar={() => { setCirculo(null); setPorRoce(false); setPanelAbierto(null); }}
-            onInicio={() => { navigate('/'); setPanelAbierto(null); setCirculo(null); }}
+            onAbrirSubmenu={h => {
+              const p = proyectosDe(h.clave);
+              setProyectoAbierto(a => (a?.id === p?.id ? null : p ?? null));
+            }}
+            onPlegar={() => { setCirculo(null); setPorRoce(false); setProyectoAbierto(null); }}
+            onInicio={() => { navigate('/'); setProyectoAbierto(null); setCirculo(null); }}
+            pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
           />
         </div>
       )}
@@ -1589,20 +1641,24 @@ export default function Layout() {
         <div className="fixed inset-0 z-[9997] flex bg-white">
           <div onClick={() => { setPanelAbierto(null); setCirculo(null); }} aria-hidden className="flex-1 bg-slate-900/30" />
           <div className="flex animate-in slide-in-from-right duration-200">
-            {panelAbierto
-              ? <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+            {proyectoAbierto
+              ? <PanelProyecto proyecto={proyectoAbierto} onCerrar={() => setProyectoAbierto(null)} />
               : <Rail
                   siempreAbierto
                   claro
                   ladoDerecho
+                  titulo="Organizar"
+                  items={itemsProyectos}
+                  cabeza={<AvatarRail desplegado />}
                   abierta={null}
                   // EN MÓVIL LA FLECHA HACE MÁS FALTA TODAVÍA: no hay ratón, así
                   // que no hay ningún gesto intermedio entre mirar y abrir. El
-                  // nombre lleva a la herramienta y la flecha enseña lo que tiene
+                  // nombre abre el proyecto y la flecha enseña lo que tiene
                   // dentro; sin ella, una de las dos cosas no tendría puerta.
-                  onElegir={h => { if (h.ruta.startsWith('/')) { navigate(h.ruta); setCirculo(null); } else setPanelAbierto(h); }}
-                  onAbrirSubmenu={h => setPanelAbierto(h)}
+                  onElegir={h => { navigate(h.ruta); setCirculo(null); }}
+                  onAbrirSubmenu={h => setProyectoAbierto(proyectosDe(h.clave) ?? null)}
                   onInicio={() => { navigate('/'); setCirculo(null); }}
+                  pie={<PieProyectos estado={proyectos} desplegado onReintentar={recargarProyectos} />}
                 />}
           </div>
         </div>
@@ -1686,9 +1742,64 @@ export default function Layout() {
         />
       )}
 
+      {/* ══ EL MENÚ DE ABAJO: LAS HERRAMIENTAS ═════════════════════════════
+          Sustituye a los tres círculos. Aquéllos no eran destinos: eran mandos
+          para abrir otros menús, y ocupaban la franja que alcanza el pulgar
+          para no enseñar nada. Ahora esa franja lleva las once herramientas,
+          que sí son destinos. Reserva 64 px abajo en vez de 92, así que el
+          contenido de todas las páginas gana 28. */}
+      {/* ══ DENTRO DEL EDITOR, LA BARRA ES OTRA (2026-08-25) ═══════════════
+          Eugenio: «sólo una vez que estás en el editor de una página aparece el
+          menú inferior con todas las herramientas para poder agregar a esa
+          página». En `/paginas/:id` la barra global se retira y el editor pinta
+          la suya —con los bloques que se pueden AÑADIR, no con las páginas a
+          las que se puede IR—. Dos barras a la vez serían dos filas de iconos
+          compitiendo por el mismo pulgar. */}
+      {!/^\/paginas\/[^/]+/.test(location.pathname) && (
       <div ref={cajaCirculos}>
-        <TresCirculos abierto={circulo} onPulsar={pulsarCirculo} onPasarPorEncima={abrirPorRoce} />
+        <RailInferior
+          abierta={panelAbierto?.clave ?? null}
+          onElegir={h => { navigate(h.ruta); setPanelAbierto(null); }}
+          onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
+          onPasarPorEncima={() => setPorRoce(false)}
+          onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
+        />
       </div>
+      )}
+
+      {/* ══ EL PANEL SUBE DESDE ABAJO (2026-08-25) ═════════════════════════
+          Eugenio: «esa ventana emergente que aparece cuando se le da a ampliar
+          una de las herramientas del menú inferior, en vez de que aparezca en
+          el lateral izquierdo, haz que aparezca de abajo arriba hasta la mitad
+          de la pantalla».
+
+          Y tiene razón de sobra: **sale del menú de abajo y aparecía arriba a
+          la izquierda**, o sea en la otra punta de la pantalla, sin nada que lo
+          uniera al botón que acababas de pulsar. Ahora nace justo encima de su
+          barra, del mismo ancho máximo, y sube. El gesto y lo que ocurre pasan
+          en el mismo sitio.
+
+          MEDIA PANTALLA Y NO MÁS: lo que estabas mirando sigue detrás y se ve.
+          A pantalla completa habría que cerrarlo para recordar de dónde venías.
+
+          Arranca en `--hueco-muelle`, que es lo que mide la barra: si un día
+          cambia de alto, este panel sube con ella y no hay que acordarse. */}
+      {!esMovil && panelAbierto && (
+        <>
+          <div
+            onClick={() => setPanelAbierto(null)}
+            aria-hidden
+            className="fixed inset-0 z-[9990] bg-slate-900/20 animate-in fade-in duration-150"
+          />
+          <div
+            {...gestoDelMenu}
+            className="fixed inset-x-0 z-[9991] mx-auto flex h-[50vh] max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl ring-1 ring-slate-200 animate-in slide-in-from-bottom duration-200 [&>*]:w-full [&>*]:border-0"
+            style={{ bottom: 'calc(var(--hueco-muelle, 64px) + 8px)' }}
+          >
+            <Panel herramienta={panelAbierto} onCerrar={() => setPanelAbierto(null)} />
+          </div>
+        </>
+      )}
 
       {/* La hoja recibe `gestoDelMenu` como cualquier otro menú abierto por
           roce: sin él, llevar el ratón desde el botón hasta las herramientas

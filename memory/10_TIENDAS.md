@@ -368,3 +368,71 @@ PORT=3002 NODE_ENV=production node --env-file=.env node_modules/.bin/tsx server.
 The first screenshot should be the logged-out front page: it is the only screen
 with no real person's data on it, so it needs no cleaning and cannot go stale
 with somebody else's content.
+
+---
+
+# The Play Console, opened and read (2026-08-24, app/UX agent)
+
+Eugenio said the developer account was verified. It is not, and the difference
+decides the calendar. **Everything below was read in the console, not
+remembered.**
+
+## Where the account is
+
+Chrome had four Google accounts signed in and the console is on **none of the
+first three**. It is at `play.google.com/console/u/4`, on
+`administracion@lighthumanity.org`. Worth writing down because two agents have
+now landed on the signup page and concluded there was no account.
+
+| Field | Value, read on screen |
+|---|---|
+| Developer name | Light for Humanity |
+| **Account type** | **Personal** — not organisation |
+| Developer account ID | 8816194342876069590 |
+| Account owner | administracion@lighthumanity.org (Eugenio Garcia-Calderon Huerta) |
+| Legal name | EUGENIO GARCIA-CALDERÓN HUERTA — the **person**, not the association |
+| Address | C. Bahía de Almería, 30, Bajo C, Madrid 28042, España |
+| Website | **https://solarcrowd.com** — wrong, it should be humanity.wiki |
+
+## Nothing can be done in the console yet, and this is measured
+
+**«Crear aplicación» is greyed out with a padlock**: «Completa las
+verificaciones de la cuenta para crear aplicaciones nuevas». So the store
+listing, the Data safety form and the content rating cannot even be started.
+
+Two tasks block it, and **only Eugenio can do either**:
+
+1. **Prove access to a real Android device** — sign in to the Play Console
+   mobile app on an Android phone.
+2. **Verify the contact phone number** — which the console says explicitly comes
+   *after* «verificar tu identidad y que Google apruebe tus documentos de
+   identidad».
+
+## The account type is a month of calendar, and it is reversible only by asking
+
+`Personal` means the rule this file already recorded applies: **12 testers on a
+closed test for 14 continuous days** before anything can go to production. An
+**organisation** account is exempt.
+
+Light for Humanity has CIF **G88040563** — it is an association, so the
+organisation route was available and was not taken. Whether Google lets an
+existing personal account convert is not written down here because it was not
+checked; do not guess it.
+
+**This is Eugenio's decision, not an agent's**, and it is the difference between
+publishing in days and publishing in a month.
+
+## What is ready and waiting
+
+| | |
+|---|---|
+| Listing copy — name, short and full description | in this file, since 2026-08-23 |
+| Five phone screenshots, 1080×1920 | `node --env-file=.env scripts/capturas-tienda.mjs` |
+| pwabuilder.com report on humanity.wiki | **0 errors**; the Android package can be generated |
+| Privacy policy and account deletion pages | live, at fixed URLs that must never move |
+
+Still not done, and it needs the package first: `/.well-known/assetlinks.json`
+with the signing fingerprint. Note for whoever writes it: `express.static`
+defaults to `dotfiles: 'ignore'`, so a file dropped in `public/.well-known/`
+**will 404**. It needs a route in an `src/server/*.ts` module — `server.ts` is
+frozen.

@@ -5,6 +5,7 @@ import {
   Download, FileText, Image as ImageIcon, FileType, Search,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { OBJETIVOS, hablaDe } from '../../utils/objetivos';
 
 // ============================================================================
 // COMPARTIR UNA PÁGINA (2026-08-22)
@@ -48,6 +49,95 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
   const [ocupado, setOcupado] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
+
+  /*
+   * ══ PERSONAS CONCRETAS (2026-08-25, fase 3 de «todo son páginas») ═════════
+   * Eugenio: «existe la opción de que la página sea semiprivada, donde das
+   * acceso a personas concretas, de solo lectura o también de edición».
+   *
+   * Vive en ESTE diálogo y no en otro: compartir con el mundo (publicar) y
+   * compartir con alguien (acceso) son la misma pregunta —¿quién ve esto?— y
+   * dos ventanas para una pregunta es cómo se contesta mal en una de las dos.
+   */
+  /*
+   * ══ LAS RAMAS DEL CONOCIMIENTO (2026-08-25, fase 6) ═══════════════════════
+   * Eugenio: «cada página se indexa dentro del conocimiento al publicarse». Las
+   * ramas se PROPONEN por las palabras del título (`hablaDe`, el mismo criterio
+   * del muro) y se editan aquí — propuesto y editable, no una cosa o la otra:
+   * sólo automático clasifica mal en silencio, y sólo manual acaba con todo sin
+   * clasificar (aviso de prog2, que tiene el árbol). Se preseleccionan las
+   * ramas cuyo nombre comparte alguna palabra con el título; el resto quedan a
+   * un toque.
+   */
+  const [temas, setTemas] = useState<any[]>([]);
+  const [ramasSel, setRamasSel] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    fetch('/api/temas', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(j => {
+        const lista = Array.isArray(j) ? j : (j?.subtemas ?? j?.temas ?? []);
+        setTemas(Array.isArray(lista) ? lista : []);
+        const objetivosDelTitulo = new Set(OBJETIVOS.filter(o => hablaDe(titulo || '', o)).map(o => o.id));
+        const palabras = (titulo || '').toLowerCase().split(/\W+/).filter(w => w.length > 3);
+        const pre = new Set<string>();
+        for (const t of (Array.isArray(lista) ? lista : [])) {
+          if (t.padre_id) continue;
+          if (!objetivosDelTitulo.has(t.objetivo_id)) continue;
+          const nombre = String(t.nombre || '').toLowerCase();
+          if (palabras.some(w => nombre.includes(w))) pre.add(t.id);
+        }
+        setRamasSel(pre);
+      })
+      .catch(() => {});
+  }, [titulo]);
+  const ramasPropuestas = (() => {
+    const objetivosDelTitulo = new Set(OBJETIVOS.filter(o => hablaDe(titulo || '', o)).map(o => o.id));
+    return temas.filter(t => !t.padre_id && objetivosDelTitulo.has(t.objetivo_id));
+  })();
+  const alternarRama = (id: string) => setRamasSel(sel => {
+    const s2 = new Set(sel); s2.has(id) ? s2.delete(id) : s2.add(id); return s2;
+  });
+
+  const [accesos, setAccesos] = useState<any[] | null>(null);
+  const [buscaPersona, setBuscaPersona] = useState('');
+  const [candidatos, setCandidatos] = useState<any[]>([]);
+  const relojPersona = useRef<any>(null);
+
+  const cargarAccesos = () => {
+    fetch(`/api/accesos/pagina/${paginaId}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(j => setAccesos(Array.isArray(j.accesos) ? j.accesos : []))
+      // Un 403 aquí significa «no eres el autor»: la sección entera se esconde,
+      // porque enseñar una lista que no puedes tocar sólo confunde.
+      .catch(() => setAccesos(null));
+  };
+  useEffect(cargarAccesos, [paginaId]);
+
+  const buscarPersonas = (v: string) => {
+    setBuscaPersona(v);
+    clearTimeout(relojPersona.current);
+    if (v.trim().length < 2) { setCandidatos([]); return; }
+    relojPersona.current = setTimeout(async () => {
+      const r = await fetch(`/api/accesos/buscar-personas?q=${encodeURIComponent(v.trim())}`, { credentials: 'include' });
+      const j = await r.json().catch(() => ({}));
+      setCandidatos(Array.isArray(j.personas) ? j.personas : []);
+    }, 300);
+  };
+
+  const darAcceso = async (userId: string, rol: 'lectura' | 'edicion') => {
+    await fetch(`/api/accesos/pagina/${paginaId}`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, rol }),
+    });
+    setBuscaPersona(''); setCandidatos([]);
+    cargarAccesos();
+  };
+
+  const quitarAcceso = async (userId: string) => {
+    await fetch(`/api/accesos/pagina/${paginaId}/${userId}`, { method: 'DELETE', credentials: 'include' });
+    cargarAccesos();
+  };
   const temporizador = useRef<any>(null);
 
   // Quién soy y cómo se llama mi espacio. Sin nombre no se puede publicar: la
@@ -119,7 +209,7 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
       // Si todavía no ha contestado, se publica SIN indexar. La asimetría lo
       // decide: estar en Google se tarda días en deshacer, y no estarlo se
       // arregla con un clic. Ante la duda, la opción reversible.
-      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable: indexable === true }),
+      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable: indexable === true, ramas: [...ramasSel] }),
     });
     const j = await r.json();
     setOcupado(false);
@@ -191,6 +281,100 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
               {ocupado ? <Loader2 className="w-4 h-4 animate-spin" /> : estado.publico ? 'Dejar de publicar' : 'Publicar'}
             </button>
           </div>
+
+          {/* ── LAS RAMAS DONDE SE INDEXA (fase 6) ───────────────────────
+              Sólo tiene sentido de cara a publicar; con la página privada no se
+              indexa nada y la sección lo dice en vez de esconderse. */}
+          {ramasPropuestas.length > 0 && (
+            <div className="rounded-xl border border-slate-200 p-3">
+              <p className="text-xs font-black text-slate-700">Ramas del conocimiento</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed mb-2">
+                {estado.publico
+                  ? 'Al estar pública, la página se indexa en las ramas que elijas.'
+                  : 'Al publicarla, la página se indexará en las ramas que elijas.'}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {ramasPropuestas.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => alternarRama(t.id)}
+                    aria-pressed={ramasSel.has(t.id)}
+                    className={cn('rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors',
+                      ramasSel.has(t.id)
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
+                  >
+                    {t.nombre}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── PERSONAS CONCRETAS: SEMIPRIVADA ──────────────────────────
+              Sólo la ve el autor (el servidor contesta 403 a los demás y la
+              sección no se pinta). El rol se elige al dar el acceso; repetir a
+              alguien con el otro rol se lo cambia. */}
+          {accesos !== null && (
+            <div className="rounded-xl border border-slate-200 p-3">
+              <p className="text-xs font-black text-slate-700">Personas con acceso</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed mb-2">
+                Aunque la página esté privada, estas personas la ven. Con edición, también la editan.
+              </p>
+              <div className="relative">
+                <input
+                  value={buscaPersona}
+                  onChange={e => buscarPersonas(e.target.value)}
+                  placeholder="Buscar a alguien por su nombre…"
+                  className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-emerald-300"
+                />
+                {candidatos.length > 0 && (
+                  <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-xl border border-slate-200 bg-white py-1 shadow-xl">
+                    {candidatos.map(cand => (
+                      <div key={cand.id} className="flex items-center gap-2 px-2.5 py-1.5">
+                        {cand.avatar_url
+                          ? <img src={cand.avatar_url} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                          : <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-200 text-[10px] font-black text-slate-500">{(cand.nombre || '?').charAt(0).toUpperCase()}</span>}
+                        <span className="min-w-0 flex-1 truncate text-xs font-bold text-slate-700">{cand.nombre}</span>
+                        <button onClick={() => darAcceso(cand.id, 'lectura')}
+                          className="shrink-0 rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-black text-slate-600 hover:border-emerald-300 hover:text-emerald-700">
+                          Lectura
+                        </button>
+                        <button onClick={() => darAcceso(cand.id, 'edicion')}
+                          className="shrink-0 rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black text-white hover:bg-slate-800">
+                          Edición
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {accesos.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {accesos.map(a => (
+                    <div key={a.user_id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
+                      {a.avatar_url
+                        ? <img src={a.avatar_url} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                        : <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-200 text-[10px] font-black text-slate-500">{(a.nombre || '?').charAt(0).toUpperCase()}</span>}
+                      <span className="min-w-0 flex-1 truncate text-xs font-bold text-slate-700">{a.nombre}</span>
+                      <button
+                        onClick={() => darAcceso(a.user_id, a.rol === 'edicion' ? 'lectura' : 'edicion')}
+                        title="Cambiar el rol"
+                        className={cn('shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black',
+                          a.rol === 'edicion' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600')}
+                      >
+                        {a.rol === 'edicion' ? 'Edición' : 'Lectura'}
+                      </button>
+                      <button onClick={() => quitarAcceso(a.user_id)} title="Quitar el acceso" aria-label={`Quitar el acceso a ${a.nombre}`}
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── EL NOMBRE DEL ESPACIO ─────────────────────────────────────── */}
           {!estado.handle && (

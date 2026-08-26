@@ -4,7 +4,7 @@ import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
   Users, Trash2, Loader2, FileText, Globe2, Map as MapIcon, ListChecks,
   Package, Table2, CalendarDays, Bookmark, ExternalLink,
-  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2,
+  Megaphone, ImageIcon, Video, Paperclip, Link2, Send, Share2, MoreHorizontal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TableroKanban, { type ItemTablero, type Grupo, idDeEtiqueta } from '../components/tablero/TableroKanban';
@@ -15,6 +15,9 @@ import { useEsMovil } from '../hooks/useEsMovil';
 import IconoElemento from '../components/ui/Icono';
 import { iconoDeProyecto } from '../utils/iconoDeNombre';
 import Adjuntos from '../components/archivo/Adjuntos';
+import GaleriaProyecto from '../components/proyecto/GaleriaProyecto';
+import EditarProyecto from '../components/proyecto/EditarProyecto';
+import { elegirYSubirImagenes } from '../utils/elegirImagen';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
@@ -35,6 +38,17 @@ export function Proyectos() {
   // Con `?nuevo=1` el diálogo nace abierto: es lo que manda el «+» de la
   // sección PROYECTOS del menú (2026-08-20), que antes solo traía al índice.
   const [creando, setCreando] = useState(() => new URLSearchParams(window.location.search).get('nuevo') === '1');
+  /*
+   * ── EDITAR UNA TARJETA SIN ENTRAR (2026-08-26) ───────────────────────────
+   * Eugenio: «crea un botón de tres puntitos para editar las tarjetas de los
+   * proyectos desde la página de proyectos general […] sin tener que entrar en
+   * cada proyecto».
+   *
+   * Guarda el proyecto que se está editando, no un booleano: la ventana
+   * necesita saber CUÁL, y con un booleano habría que adivinarlo desde otro
+   * sitio.
+   */
+  const [editando, setEditando] = useState<any | null>(null);
 
   const cargar = () => fetch('/api/proyectos', { credentials: 'include' })
     .then(r => r.json())
@@ -73,6 +87,12 @@ export function Proyectos() {
   const sufijo = suyo || porDefecto;
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [tituloBorrador, setTituloBorrador] = useState('');
+
+  /** ¿Puede esta persona editar este proyecto? La misma regla que el servidor
+   *  comprueba en el PUT: su creador, o un administrador. Aquí sólo decide si
+   *  se enseña el botón — quien llame a la ruta a mano se encuentra el 403. */
+  const puedeEditarProyecto = (p: any) =>
+    !!user && (p.creador_user_id === user.id || !!user.isAdmin);
 
   const guardarTitulo = async () => {
     const v = tituloBorrador.trim().slice(0, 40);
@@ -163,7 +183,42 @@ export function Proyectos() {
               const avance = p.tarjetas ? Math.round((p.hechas / p.tarjetas) * 100) : 0;
               return (
                 <Link key={p.id} to={`/proyectos/${p.slug}`}
-                  className="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all">
+                  className="group/tarjeta bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all">
+                  {/* LA PORTADA (2026-08-26, Eugenio: «añade la posibilidad de
+                      crear imágenes de portada de esos proyectos, que
+                      aparecerán en las tarjetas de los proyectos cuando
+                      estemos en la visión general»).
+
+                      Sólo si la tiene. Un hueco gris reservado en las doce
+                      tarjetas para que dos tengan foto convierte el listado en
+                      una rejilla de marcos vacíos, y las que sí tienen foto
+                      dejan de destacar, que es justo para lo que sirve. */}
+                  {p.portada_url && (
+                    <img src={p.portada_url} alt="" loading="lazy"
+                      className="h-32 w-full object-cover" />
+                  )}
+                  <div className="relative p-5">
+                    {/* LOS TRES PUNTITOS. Sólo los ve quien puede editar el
+                        proyecto, y salen al pasar por la tarjeta — en reposo
+                        esto es una rejilla de proyectos, no doce botones.
+                        En una pantalla táctil no hay ratón que pasar, así que
+                        `focus-within` los saca también con el teclado, y el
+                        botón se queda visible en cuanto se toca.
+
+                        `preventDefault` Y `stopPropagation`: la tarjeta entera
+                        es un enlace, y sin las dos cosas pulsar los puntitos
+                        abriría el proyecto además de la ventana — que es
+                        justo lo que se pidió evitar. */}
+                    {puedeEditarProyecto(p) && (
+                      <button
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); setEditando(p); }}
+                        title={`Editar ${p.titulo}`}
+                        aria-label={`Editar ${p.titulo}`}
+                        className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-400 opacity-0 shadow-sm transition-opacity hover:text-slate-800 focus:opacity-100 group-hover/tarjeta:opacity-100"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    )}
                   <div className="flex items-center gap-1.5 mb-1.5">
                     {p.publico ? <Globe className="w-3 h-3 text-emerald-600" /> : <Lock className="w-3 h-3 text-amber-600" />}
                     <span className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
@@ -178,11 +233,28 @@ export function Proyectos() {
                   <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${avance}%` }} />
                   </div>
-                  <div className="flex items-center justify-between mt-2 text-[10px] text-slate-400">
-                    <span className="inline-flex items-center gap-1">
-                      <UserIcon className="w-2.5 h-2.5" />{p.creador_nombre || 'Anónimo'}
-                    </span>
-                    <span>{p.hechas} de {p.tarjetas} · {avance}%</span>
+                  <div className="flex items-center justify-between gap-2 mt-2 text-[10px] text-slate-400">
+                    {/*
+                      ── QUIÉN SALE AQUÍ (2026-08-26) ──────────────────────────
+                      Eugenio: «cuando aparecen todos los proyectos de un
+                      perfil, no pongas en todos el creador del proyecto,
+                      porque en realidad sí va a ser el del perfil. Pon en su
+                      defecto las personas asociadas a ese proyecto».
+
+                      La regla: **el creador sólo se enseña cuando no eres tú**.
+                      Tu nombre repetido en las doce tarjetas de tu propia
+                      página no distingue una de otra, y ocupa el sitio del
+                      único dato que sí lo hace — con quién está hecho cada uno.
+                      En el proyecto de otro, en cambio, saber de quién es es lo
+                      primero que hace falta, y ahí se queda.
+
+                      Y si no hay personas ni creador ajeno, no se pinta nada.
+                      Rellenar el hueco con «Anónimo» era inventarse un dato
+                      donde lo que hay es una ausencia.
+                    */}
+                    <PersonasDeLaTarjeta proyecto={p} yo={user?.id} />
+                    <span className="shrink-0">{p.hechas} de {p.tarjetas} · {avance}%</span>
+                  </div>
                   </div>
                 </Link>
               );
@@ -197,7 +269,64 @@ export function Proyectos() {
           onCreado={p => navigate(`/proyectos/${p.slug}`)}
         />
       )}
+
+      {editando && (
+        <EditarProyecto
+          proyecto={editando}
+          onCerrar={() => setEditando(null)}
+          /* Se repinta la tarjeta con lo que quedó, en vez de recargar la
+             lista entera: recargar doce proyectos para cambiar una palabra
+             hace parpadear toda la pantalla por el cambio de una tarjeta. */
+          onHecho={c => setProyectos(l => l.map(x => (x.id === editando.id ? { ...x, ...c } : x)))}
+        />
+      )}
     </div>
+  );
+}
+
+/**
+ * Las caras de una tarjeta del listado. Enseña hasta tres personas y cuenta el
+ * resto; el creador sólo aparece cuando no eres tú.
+ *
+ * Las personas vienen del servidor y son **las tuyas**: son representaciones
+ * privadas del Juego Vital, así que en el proyecto público de otra persona esta
+ * línea sale vacía. Eso no es un fallo: es la misma regla que ya protege esos
+ * datos en su propia herramienta.
+ */
+function PersonasDeLaTarjeta({ proyecto, yo }: { proyecto: any; yo?: string }) {
+  const personas: any[] = Array.isArray(proyecto.personas) ? proyecto.personas : [];
+  const ajeno = proyecto.creador_user_id && yo && proyecto.creador_user_id !== yo;
+
+  if (!personas.length) {
+    // Sin personas: el creador, y sólo si no eres tú.
+    if (!ajeno) return <span />;
+    return (
+      <span className="inline-flex min-w-0 items-center gap-1">
+        <UserIcon className="w-2.5 h-2.5 shrink-0" />
+        <span className="truncate">{proyecto.creador_nombre || 'Anónimo'}</span>
+      </span>
+    );
+  }
+
+  const primeras = personas.slice(0, 3);
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <span className="flex -space-x-1.5">
+        {primeras.map(m => (
+          m.foto_url
+            ? <img key={m.id} src={m.foto_url} alt="" title={m.nombre}
+                className="h-4 w-4 rounded-full border border-white object-cover" />
+            : <span key={m.id} title={m.nombre}
+                className="grid h-4 w-4 place-items-center rounded-full border border-white bg-slate-200 text-[7px] font-black text-slate-500">
+                <UserIcon className="h-2 w-2" />
+              </span>
+        ))}
+      </span>
+      <span className="truncate">
+        {primeras.map(m => m.nombre).join(', ')}
+        {personas.length > 3 && ` +${personas.length - 3}`}
+      </span>
+    </span>
   );
 }
 
@@ -334,6 +463,37 @@ export function Proyecto() {
    * `null` **conserva la que había** y borrarla sería imposible. La cadena
    * vacía sí pasa por el COALESCE y la deja limpia.
    */
+  /*
+   * ── LA PORTADA DEL PROYECTO (2026-08-26) ──────────────────────────────────
+   * Eugenio la pidió para las TARJETAS del listado. Se pone desde aquí, desde
+   * la página del proyecto, y se ve aquí: **la única forma honesta de elegir
+   * una portada es viéndola puesta**. Un selector que sólo enseña el resultado
+   * en otra pantalla convierte cada cambio en un viaje de ida y vuelta para
+   * comprobar si has acertado con el recorte.
+   */
+  const [portadaOcupada, setPortadaOcupada] = useState(false);
+
+  const guardarPortada = async (url: string | null) => {
+    setPortadaOcupada(true);
+    try {
+      const r = await fetch(`/api/proyectos/${proyecto.id}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portada_url: url }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { setError(j?.error || 'No he podido guardar la portada.'); return; }
+      setProyecto((x: any) => (x ? { ...x, portada_url: url } : x));
+    } finally { setPortadaOcupada(false); }
+  };
+
+  const elegirPortada = async () => {
+    const sub = await elegirYSubirImagenes(false);
+    if (sub.error) { setError(sub.error); return; }
+    if (!sub.urls.length) return;
+    await guardarPortada(sub.urls[0]);
+  };
+
   const guardarDescripcion = async () => {
     if (guardandoDesc) return;
     const v = descBorrador.trim().slice(0, 400);
@@ -579,6 +739,35 @@ export function Proyecto() {
           )}
         </div>
 
+        {/* LA PORTADA DEL PROYECTO. Cuando la hay, es una banda ancha antes del
+            título; cuando no, un botón discreto que sólo ve quien puede
+            ponerla. Nada de marco vacío para quien pasa a mirar. */}
+        {proyecto.portada_url ? (
+          <div className="group/portada relative mt-4 overflow-hidden rounded-3xl border border-slate-200">
+            <img src={proyecto.portada_url} alt="" className="h-40 w-full object-cover sm:h-56" />
+            {puedoEditar && (
+              <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover/portada:opacity-100 focus-within:opacity-100">
+                <button onClick={elegirPortada} disabled={portadaOcupada}
+                  title="Cambiar la portada" aria-label="Cambiar la portada"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-500 shadow-sm hover:text-emerald-700 disabled:opacity-40">
+                  {portadaOcupada ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pencil className="h-3.5 w-3.5" />}
+                </button>
+                <button onClick={() => guardarPortada(null)} disabled={portadaOcupada}
+                  title="Quitar la portada" aria-label="Quitar la portada"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-500 shadow-sm hover:text-rose-600 disabled:opacity-40">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : puedoEditar ? (
+          <button onClick={elegirPortada} disabled={portadaOcupada}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 px-3 py-1.5 text-[11px] font-bold text-slate-400 transition-colors hover:border-emerald-300 hover:text-emerald-700 disabled:opacity-40">
+            {portadaOcupada ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
+            Portada del proyecto
+          </button>
+        ) : null}
+
         <div className="max-w-3xl mt-4">
           <div className="flex items-center gap-1.5 mb-1.5">
             {proyecto.publico ? <Globe className="w-3 h-3 text-emerald-600" /> : <Lock className="w-3 h-3 text-amber-600" />}
@@ -698,6 +887,11 @@ export function Proyecto() {
           {proyecto.vision && (
             <p className="text-sm text-slate-600 leading-relaxed mt-4 border-l-2 border-emerald-300 pl-4">{proyecto.vision}</p>
           )}
+
+          {/* LA GALERÍA, JUSTO DEBAJO DEL TÍTULO (2026-08-26, Eugenio). Aquí y
+              no más abajo: es lo que el proyecto enseña de sí mismo, y va con
+              el título y la descripción, no detrás del tablero. */}
+          <GaleriaProyecto proyectoId={proyecto.id} />
           {total > 0 && (
             <div className="mt-6 flex items-center gap-4">
               <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden max-w-sm">

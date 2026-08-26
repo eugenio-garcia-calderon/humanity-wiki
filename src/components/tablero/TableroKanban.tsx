@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Adjuntos from '../archivo/Adjuntos';
+import TextoConEnlaces from '../ui/TextoConEnlaces';
 
 // ============================================================================
 // TABLERO KANBAN reutilizable (2026-08-08, petición del usuario)
@@ -602,9 +603,7 @@ function FichaFuncionalidad({ item, grupo: g, grupos, puedeEditar, onCrearEtique
                     {b.pie && <figcaption className="text-[10px] text-slate-400 px-3 py-1.5">{b.pie}</figcaption>}
                   </figure>
                 ) : (
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 rounded-2xl p-3.5">
-                    {b.texto}
-                  </p>
+                  <TextoConEnlaces texto={b.texto} className="block text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-2xl p-3.5" />
                 )}
                 {puedeEditar && (
                   <button onClick={() => quitarBloque(i)} title="Quitar esta nota"
