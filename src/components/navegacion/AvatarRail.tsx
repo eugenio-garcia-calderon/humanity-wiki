@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   User, MessageSquare, Phone, CalendarDays, Trash2, LayoutGrid,
-  Users2, Settings, LogOut, ChevronDown,
+  Users2, Settings, LogOut, ChevronDown, UserX,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
@@ -53,6 +53,19 @@ export default function AvatarRail({ desplegado }: { desplegado: boolean }) {
     { icono: LayoutGrid,    nombre: 'Tu portada', ruta: '/explorar?portada=1' },
     { icono: User,          nombre: 'Mi perfil', ruta: `/personas/${user.id}` },
     { icono: Settings,      nombre: 'Configuración', ruta: '/configuracion' },
+    /*
+     * BORRAR TU CUENTA, AQUÍ Y NO EN EL DESPLEGABLE DE INFORMACIÓN
+     * (2026-08-25). Eugenio: «ponlo mejor en el apartado de Configuración de
+     * cuenta, debajo del icono de usuario». Estaba entre las páginas que
+     * EXPLICAN la plataforma, y esto no explica nada: hace algo con tu cuenta,
+     * y además algo irreversible. Va detrás de Configuración porque es la
+     * última cosa que se hace con una cuenta.
+     *
+     * La dirección `/borrar-cuenta` NO se ha movido: está pegada en la ficha de
+     * Google Play, y cambiarla obligaría a pasar revisión otra vez. Lo que ha
+     * cambiado es desde dónde se llega.
+     */
+    { icono: UserX,         nombre: 'Borrar tu cuenta', ruta: '/borrar-cuenta' },
   ];
 
   return (
