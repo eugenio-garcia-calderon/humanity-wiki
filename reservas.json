@@ -59,6 +59,12 @@
       "ruta": "src/components/knowledge/PublicationPopup.tsx",
       "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
       "desde": "2026-08-26T10:14:20.386Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/ProyectosRail.tsx",
+      "motivo": "enlaces al navegador interno y Todos los proyectos (prog8)",
+      "desde": "2026-08-26T10:14:23.809Z"
     }
   ]
 }
