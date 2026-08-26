@@ -777,33 +777,24 @@ export default function Rail({
         )}
       >
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            onClick={onInicio}
-            title="Inicio"
-            aria-label="Inicio"
-            // `min-w-0` NO ES DECORACIÓN. Sin él este botón no baja de lo que
-            // mide su texto —«humanity.wiki» son ~140 px con el icono— y
-            // en un raíl de 224 px eso deja 34 para lo que venga detrás. Con un
-            // solo botón al lado cabía por los pelos; al añadir el de plegar,
-            // la fila se desbordó y, como el raíl recorta lo que se sale, **el
-            // botón nuevo acabó fuera de la pantalla**: existía, respondía al
-            // teclado y no se veía. Medido en el navegador: `x = 1299` en una
-            // ventana de 1280.
-            className={cn(
-              'flex h-10 min-w-0 items-center gap-3 rounded-xl px-[10px] transition-colors',
-              claro ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-              desplegado ? 'flex-1' : 'w-10 justify-center',
-            )}
-          >
-            <Home className="h-5 w-5 shrink-0" />
-            <span className={cn(
-              'truncate whitespace-nowrap text-[13px] font-black transition-all duration-200',
-              desplegado ? 'w-auto opacity-100' : 'w-0 opacity-0',
-            )}>
-              {titulo}
-            </span>
-          </button>
+          {/* ══ EL BOTÓN DE INICIO SE HA IDO DE AQUÍ (2026-08-25) ═══════════
+              Eugenio: «hay botones, uno a la izquierda de explorar y otro a la
+              derecha de mis proyectos, que si los pulsas no hacen nada. Que
+              expandan también ese menú o que los eliminemos, pero no
+              dupliquemos, por favor. Haz que la interfaz sea sencilla».
 
+              Eran éstos: una casita al principio de cada raíl que llevaba al
+              inicio. Y tenía razón en las dos cosas —**no parecían hacer nada**,
+              porque desde la portada llevar a la portada no se nota, y
+              **duplicaban**: el rótulo de arriba ya dice de qué es cada
+              columna, y al inicio se va desde el logo, que está a dos dedos.
+
+              Se quita el botón, no la salida: `humanity.wiki` en la barra y su
+              desplegable siguen llevando a `/`. Comprobado antes de borrarlo,
+              que es el orden correcto.
+
+              El hueco queda para la chincheta y el plegar, que sí hacen algo
+              que no hace nadie más. */}
           {/* ══ PLEGAR, Y FIJAR ═══════════════════════════════════════════
               Eugenio: «permite que ambos menús, el de la derecha y la
               izquierda, tengan el botón de volverse a plegar cuando se

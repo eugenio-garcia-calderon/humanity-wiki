@@ -897,7 +897,19 @@ export default function Layout() {
             todavía qué. */}
         {user && (
           <button
-            onClick={() => { setCirculo('explorar'); setPorRoce(false); navigate('/preferencias'); }}
+            /* ══ PULSAR OTRA VEZ LO CIERRA (2026-08-25) ══════════════════
+               Eugenio: «si pulso en mis proyectos y se expande el menú, y
+               vuelvo a pulsar en mis proyectos, se debería contraer».
+
+               Y vale para los dos rótulos, porque son la misma idea. Un botón
+               que abre y no cierra obliga a buscar OTRO botón para deshacer lo
+               que acabas de hacer — que es justo lo que él ha pedido quitar. */
+            onClick={() => {
+              setPorRoce(false);
+              if (circulo === 'explorar') { setCirculo(null); return; }
+              setCirculo('explorar');
+              navigate('/preferencias');
+            }}
             title="Explorar los catorce temas"
             className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
               circulo === 'explorar' || location.pathname === '/preferencias'
@@ -1457,8 +1469,9 @@ export default function Layout() {
                aparecerías en un sitio al que no habías pedido ir. */
             onClick={() => {
               setPorRoce(false);
-              if (esMovil) setCirculo(c => (c === 'organizar' ? null : 'organizar'));
-              else { setCirculo('organizar'); navigate('/proyectos'); }
+              if (circulo === 'organizar') { setCirculo(null); return; }
+              setCirculo('organizar');
+              if (!esMovil) navigate('/proyectos');
             }}
             title="Tus proyectos"
             className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',

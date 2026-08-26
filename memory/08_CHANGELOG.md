@@ -7610,3 +7610,25 @@ de abrir otra; un enlace nuestro navega normal; `mailto:` y ⌘+clic no se
 interceptan; y una publicación con tres enlaces pegados los pinta en azul
 subrayado con el texto de alrededor intacto, y al pulsar uno se abre el
 navegador de la plataforma. La publicación de prueba y la sesión, borradas.
+
+## 2026-08-25 — Fuera los botones que no hacían nada; los rótulos alternan
+Eugenio: «hay botones, uno a la izquierda de explorar y otro a la derecha de mis
+proyectos, que si los pulsas no hacen nada. Que expandan también ese menú o que
+los eliminemos, pero no dupliquemos, por favor. Haz que la interfaz sea sencilla.
+También, si pulso en mis proyectos y se expande el menú y vuelvo a pulsar, se
+debería contraer».
+
+**Primero medí lo que él decía que no funcionaba, y funcionaba**: «Explorar»
+llevaba el raíl izquierdo de 56 a 256 px y «Mis proyectos» el derecho. Preguntar
+en vez de suponer sacó lo que de verdad fallaba, que era otra cosa.
+
+- **Eran las casitas de «Inicio»** al principio de cada raíl. Tenía razón en las
+  dos: **no parecían hacer nada** —desde la portada, llevar a la portada no se
+  nota— y **duplicaban**, porque el rótulo de arriba ya dice de qué es cada
+  columna. Se quitan. Al inicio se sigue llegando desde el logo y desde su
+  desplegable: **comprobado antes de borrarlas**, que es el orden correcto.
+- **Los dos rótulos alternan**: pulsar abre, volver a pulsar cierra. Un botón
+  que abre y no cierra obliga a buscar otro botón para deshacer lo que acabas de
+  hacer, que es justo lo que él pidió quitar.
+
+Medido después: 56 → 256 → 56, y cero botones de «Inicio» en los raíles.
