@@ -35,6 +35,12 @@
       "ruta": "src/server/knowledge.ts",
       "motivo": "prog3: fase 3, el guardado respeta el rol de edicion",
       "desde": "2026-08-26T11:29:37.976Z"
+    },
+    {
+      "agente": "prog2",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "prog2: montar el tronco del conocimiento",
+      "desde": "2026-08-26T11:34:00.236Z"
     }
   ]
 }
