@@ -7399,3 +7399,24 @@ ellos.
   acababas de pulsar; ahora el gesto y lo que ocurre pasan en el mismo sitio.
   Media pantalla y no más: lo que estabas mirando sigue detrás y se ve.
   Arranca en `--hueco-muelle`, así que si la barra cambia de alto, sube con ella.
+
+## 2026-08-25 — La IA entra en el menú de abajo, y es el botón más destacado
+Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero ponlo
+destacado como has hecho con el de feedback, pero incluso más destacado».
+
+- **Cómo se hace «más» destacado sin gritar**: el de feedback es color sobre el
+  fondo oscuro —amarillo, y ya—. Éste sube un escalón entero y pasa a ser una
+  **pastilla rellena**: verde sólido, letra blanca y halo. En una fila de iconos
+  planos, el único que tiene cuerpo se ve antes que cualquier cambio de color, y
+  no hace falta agrandarlo, que es lo que habría descolocado la barra.
+- **Va el primero, no el último.** Lo puse al final y **se salía de la
+  pantalla**: la barra lleva doce herramientas y se desplaza en horizontal
+  cuando no caben, así que el último es justo el que deja de verse. Poner el
+  botón más importante donde primero se corta es la peor plaza. Al principio se
+  ve siempre y comparte esquina con el de feedback: los dos que no son
+  herramientas, juntos.
+- **El asistente estaba dos veces y llevaban a sitios distintos**: una
+  herramienta «Asistente» que abría la página `/ia` y un círculo flotante que
+  abría el chat con tu historial. Ahora hay una sola puerta —el aviso
+  `ai:abrir`— y el círculo flotante se retira: flotando era un elemento más que
+  esquivar; dentro de la barra no hay nada que esquivar porque es la barra.

@@ -62,9 +62,14 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
   { clave: 'calendario',    nombre: 'Calendario',    icono: CalendarDays, ruta: '/calendario',  conPanel: true },
   { clave: 'archivos',      nombre: 'Archivos',      icono: Database,     ruta: '/archivos',    conPanel: true },
   { clave: 'comercio',      nombre: 'Comercio',      icono: Store,        ruta: '/comercio',    conPanel: true },
-  // LAS TRES QUE NO ESTABAN EN NINGÚN MENÚ y sólo se abrían desde el cajetín de
+  // LAS QUE NO ESTABAN EN NINGÚN MENÚ y sólo se abrían desde el cajetín de
   // crear. Son herramientas de contenido como las demás: aquí es su sitio.
-  { clave: 'ia',            nombre: 'Asistente',     icono: Sparkles,     ruta: '/ia' },
+  //
+  // EL ASISTENTE YA NO ESTÁ EN ESTA LISTA (2026-08-25): tiene su propio botón
+  // destacado al final de la barra. Estaba dos veces —aquí y en el círculo
+  // flotante— y las dos abrían cosas distintas: éste llevaba a la página `/ia`
+  // y aquél abría el chat con tu historial. Dos puertas al mismo sitio que no
+  // llevan al mismo sitio es peor que una sola.
   { clave: 'visor3d',       nombre: 'Visor 3D',      icono: Gamepad2,     ruta: '/juego' },
   { clave: 'navegador',     nombre: 'Navegador',     icono: Globe,        ruta: '/navegador' },
 ];
@@ -73,7 +78,7 @@ export const HERRAMIENTAS_ABAJO: Herramienta[] = [
 export const ALTO_RESERVADO = 64;
 
 export default function RailInferior({
-  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima, onFeedback,
+  abierta, onElegir, onAbrirSubmenu, fijo = false, onPasarPorEncima, onFeedback, onIA,
 }: {
   /** Qué herramienta tiene su panel abierto, si hay alguno. */
   abierta: string | null;
@@ -83,8 +88,10 @@ export default function RailInferior({
   /** Desplegado y quieto, sin depender del ratón. */
   fijo?: boolean;
   onPasarPorEncima?: () => void;
-  /** El botón rojo. Bajó de la barra de arriba para despejarla. */
+  /** El botón amarillo. Bajó de la barra de arriba para despejarla. */
   onFeedback: () => void;
+  /** El botón verde, el más destacado: abre el chat con tu historial. */
+  onIA: () => void;
 }) {
   const [encima, setEncima] = useState(false);
   const desplegado = fijo || encima;
@@ -164,6 +171,47 @@ export default function RailInferior({
           </span>
         )}
 
+        {/* ══ LA IA, EL BOTÓN MÁS DESTACADO DE LA BARRA (2026-08-25) ═══════
+            Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero
+            ponlo destacado como has hecho con el de feedback, pero incluso más
+            destacado».
+
+            ── CÓMO SE HACE «MÁS» DESTACADO SIN GRITAR ──────────────────────
+            El de feedback es **color sobre el fondo oscuro**: amarillo, y ya.
+            Éste sube un escalón entero y pasa a ser **una pastilla rellena**:
+            fondo verde sólido, letra blanca y un halo. En una fila de iconos
+            planos, el único que tiene cuerpo se ve antes que cualquier cambio
+            de color — y no hace falta subir el tamaño, que es lo que habría
+            descolocado la barra.
+
+            ── Y VA EL PRIMERO, NO EL ÚLTIMO ───────────────────────────────
+            Empezó al final y **se salía de la pantalla**: la barra lleva doce
+            herramientas y se desplaza en horizontal cuando no caben, así que el
+            último es justo el que deja de verse. Poner el botón más importante
+            donde primero se corta es la peor plaza de todas. Al principio se ve
+            siempre, y comparte esquina con el de feedback: los dos que no son
+            herramientas, juntos, y las herramientas después de la raya.
+
+            NO LLEVA A `/ia`: manda `ai:abrir`, así que abre el chat de siempre
+            con tu historial y tu modelo. Antes esto estaba dos veces —una
+            herramienta llamada «Asistente» que iba a la página y un círculo
+            flotante que abría el chat—, y llevaban a sitios distintos. */}
+        <div className="relative flex shrink-0 flex-col items-center">
+          <button
+            onClick={onIA}
+            title="Preguntar a la IA"
+            aria-label="Preguntar a la IA"
+            className="flex flex-col items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
+          >
+            <Sparkles className="h-5 w-5 shrink-0" />
+            <span className={cn(
+              'overflow-hidden whitespace-nowrap text-[10px] font-black leading-none transition-all duration-200',
+              desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+            )}>
+              IA
+            </span>
+          </button>
+        </div>
         {/* ══ FEEDBACK, AQUÍ Y EN ROJO (2026-08-25) ═══════════════════════
             Eugenio: «el feedback, mételo en la barra de herramientas inferior
             con un color distinto, que destaque». Empezó en rojo y lo cambió a
@@ -245,6 +293,7 @@ export default function RailInferior({
             </div>
           );
         })}
+
       </nav>
     </div>
   );
