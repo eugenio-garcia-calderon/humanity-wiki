@@ -340,6 +340,16 @@ export default function Rail({
      guarda la altura porque la etiqueta se dibuja FUERA del raíl —ver abajo— y
      necesita saber a qué renglón pertenece. */
   const [rozada, setRozada] = useState<{ h: Herramienta; y: number } | null>(null);
+  /*
+   * ABRIR UN SUBTEMA DESPLIEGA LA COLUMNA (2026-08-25). Sin esto, la flecha de
+   * la etiqueta abría los subtemas **dentro de una columna de 40 px**: se
+   * abrían de verdad y no se veía ninguno. El submenú vive dentro del raíl, así
+   * que enseñarlo obliga a ensanchar el raíl.
+   *
+   * Es un estado propio y no la chincheta: la chincheta se guarda en el
+   * navegador y se queda para siempre; esto dura lo que dure el ratón dentro.
+   */
+  const [porSubtema, setPorSubtema] = useState(false);
 
   /*
    * ── FLOTAR O QUEDARSE ─────────────────────────────────────────────────────
@@ -357,7 +367,7 @@ export default function Rail({
    * tapa a nadie. Y se queda desplegado aunque apartes el ratón, porque si no,
    * el submenú quedaría abierto sin que se vea de cuál de los catorce es.
    */
-  const anclado = siempreAbierto || fijado || abierta !== null;
+  const anclado = siempreAbierto || fijado || abierta !== null || porSubtema;
   /*
    * ══ EL RATÓN YA NO ABRE LA COLUMNA ENTERA (2026-08-25) ═══════════════════
    * Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre
@@ -624,6 +634,8 @@ export default function Rail({
         {conRamas && (
           <button
             onClick={e => { e.stopPropagation(); ramas!.alternar(h.clave); }}
+            // Igual que la otra flecha: al pasar el ratón sólo abre.
+            onMouseEnter={() => { if (!ramas!.abierto(h.clave)) ramas!.alternar(h.clave); }}
             title={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
             aria-label={ramas!.abierto(h.clave) ? `Cerrar los subtemas de ${h.nombre}` : `Ver los subtemas de ${h.nombre}`}
             aria-expanded={ramas!.abierto(h.clave)}
@@ -705,6 +717,9 @@ export default function Rail({
         {conFlecha && (
           <button
             onClick={() => onAbrirSubmenu!(h)}
+            // ABRE AL PASAR EL RATÓN, y sólo abre. Alternar aquí cerraría el
+            // submenú justo cuando mueves el ratón hacia él para leerlo.
+            onMouseEnter={() => { if (abierta !== h.clave) onAbrirSubmenu!(h); }}
             title={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
             aria-label={activa ? `Cerrar ${h.nombre}` : `Ver lo que hay en ${h.nombre}`}
             aria-expanded={activa}
@@ -730,7 +745,7 @@ export default function Rail({
       <nav
         aria-label="Herramientas"
         onMouseEnter={() => setEncima(true)}
-        onMouseLeave={() => setEncima(false)}
+        onMouseLeave={() => { setEncima(false); setPorSubtema(false); }}
         className={cn(
           // z-50, POR ENCIMA DE LA BARRA SUPERIOR (2026-08-23). La barra
           // también es z-40 y va después en el documento, así que al
@@ -973,8 +988,22 @@ export default function Rail({
             {rozada.h.nombre}
           </button>
           {ramas?.hay(rozada.h.clave) && (
+            /* ══ LA FLECHA TAMBIÉN ABRE AL PASAR EL RATÓN (2026-08-25)
+               Eugenio: «si pongo el ratón encima de la flecha a la derecha de
+               la palabra movilidad, que se expanda el submenú, sólo de los
+               subtemas de movilidad. También si pincho».
+
+               ABRE, NO ALTERNA, y ésa es la diferencia que lo hace usable:
+               alternar al pasar el ratón cerraría el submenú justo cuando
+               mueves el ratón hacia él para leerlo. Pasar el ratón sólo abre;
+               cerrar sigue siendo cosa del clic, que es una decisión. */
             <button
-              onClick={() => { ramas.alternar(rozada.h.clave); setRozada(null); }}
+              onClick={() => { setPorSubtema(true); ramas.alternar(rozada.h.clave); setRozada(null); }}
+              onMouseEnter={() => {
+                setPorSubtema(true);
+                if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave);
+                setRozada(null);
+              }}
               title={`Ver los subtemas de ${rozada.h.nombre}`}
               aria-label={`Ver los subtemas de ${rozada.h.nombre}`}
               className={cn('grid h-10 w-9 place-items-center rounded-xl shadow-xl ring-1 transition-colors',

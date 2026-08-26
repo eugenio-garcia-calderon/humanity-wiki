@@ -347,6 +347,11 @@ export default function RailInferior({
               {desplegado && h.conPanel && onAbrirSubmenu && (
                 <button
                   onClick={e => { e.stopPropagation(); onAbrirSubmenu(h); }}
+                  // ABRE AL PASAR EL RATÓN, igual que en los dos laterales
+                  // (2026-08-25, Eugenio: «replica esto mismo en el menú
+                  // derecho e inferior»). Y sólo abre: alternar cerraría el
+                  // panel justo al mover el ratón hacia él.
+                  onMouseEnter={() => { if (abierta !== h.clave) onAbrirSubmenu(h); }}
                   title={`Ver lo que hay en ${h.nombre}`}
                   aria-label={`Ver lo que hay en ${h.nombre}`}
                   className={cn(
