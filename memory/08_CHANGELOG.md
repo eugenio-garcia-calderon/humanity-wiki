@@ -7420,3 +7420,18 @@ destacado como has hecho con el de feedback, pero incluso más destacado».
   abría el chat con tu historial. Ahora hay una sola puerta —el aviso
   `ai:abrir`— y el círculo flotante se retira: flotando era un elemento más que
   esquivar; dentro de la barra no hay nada que esquivar porque es la barra.
+
+## 2026-08-25 — La «i», en el centro exacto del menú de abajo
+Eugenio: «pon el botón de la i en el centro del menú inferior».
+
+- **En el centro de verdad**: la posición se calcula
+  (`HERRAMIENTAS_ABAJO.length / 2`) en vez de escribirse a mano entre dos
+  herramientas. A mano, el día que entre o salga una —y aquí ya han entrado y
+  salido varias esta misma tarde— se quedaría descentrada sin que nadie lo note.
+- **Discreta, en gris.** No es una herramienta ni una acción: es dónde se
+  explica qué es todo esto. Si compitiera con el verde de la IA o el ámbar del
+  feedback, los tres dejarían de destacar.
+- Su desplegable va `fixed` y no `absolute`: **la barra se desplaza en
+  horizontal, y un contenedor que recorta en un eje recorta en los dos**, así
+  que colgado de ella el menú salía detrás de la barra y no se veía. Se ve en
+  una captura, no compilando.
