@@ -5,6 +5,7 @@ import {
   Download, FileText, Image as ImageIcon, FileType, Search,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { OBJETIVOS, hablaDe } from '../../utils/objetivos';
 
 // ============================================================================
 // COMPARTIR UNA PÁGINA (2026-08-22)
@@ -58,6 +59,45 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
    * compartir con alguien (acceso) son la misma pregunta —¿quién ve esto?— y
    * dos ventanas para una pregunta es cómo se contesta mal en una de las dos.
    */
+  /*
+   * ══ LAS RAMAS DEL CONOCIMIENTO (2026-08-25, fase 6) ═══════════════════════
+   * Eugenio: «cada página se indexa dentro del conocimiento al publicarse». Las
+   * ramas se PROPONEN por las palabras del título (`hablaDe`, el mismo criterio
+   * del muro) y se editan aquí — propuesto y editable, no una cosa o la otra:
+   * sólo automático clasifica mal en silencio, y sólo manual acaba con todo sin
+   * clasificar (aviso de prog2, que tiene el árbol). Se preseleccionan las
+   * ramas cuyo nombre comparte alguna palabra con el título; el resto quedan a
+   * un toque.
+   */
+  const [temas, setTemas] = useState<any[]>([]);
+  const [ramasSel, setRamasSel] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    fetch('/api/temas', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(j => {
+        const lista = Array.isArray(j) ? j : (j?.subtemas ?? j?.temas ?? []);
+        setTemas(Array.isArray(lista) ? lista : []);
+        const objetivosDelTitulo = new Set(OBJETIVOS.filter(o => hablaDe(titulo || '', o)).map(o => o.id));
+        const palabras = (titulo || '').toLowerCase().split(/\W+/).filter(w => w.length > 3);
+        const pre = new Set<string>();
+        for (const t of (Array.isArray(lista) ? lista : [])) {
+          if (t.padre_id) continue;
+          if (!objetivosDelTitulo.has(t.objetivo_id)) continue;
+          const nombre = String(t.nombre || '').toLowerCase();
+          if (palabras.some(w => nombre.includes(w))) pre.add(t.id);
+        }
+        setRamasSel(pre);
+      })
+      .catch(() => {});
+  }, [titulo]);
+  const ramasPropuestas = (() => {
+    const objetivosDelTitulo = new Set(OBJETIVOS.filter(o => hablaDe(titulo || '', o)).map(o => o.id));
+    return temas.filter(t => !t.padre_id && objetivosDelTitulo.has(t.objetivo_id));
+  })();
+  const alternarRama = (id: string) => setRamasSel(sel => {
+    const s2 = new Set(sel); s2.has(id) ? s2.delete(id) : s2.add(id); return s2;
+  });
+
   const [accesos, setAccesos] = useState<any[] | null>(null);
   const [buscaPersona, setBuscaPersona] = useState('');
   const [candidatos, setCandidatos] = useState<any[]>([]);
@@ -169,7 +209,7 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
       // Si todavía no ha contestado, se publica SIN indexar. La asimetría lo
       // decide: estar en Google se tarda días en deshacer, y no estarlo se
       // arregla con un clic. Ante la duda, la opción reversible.
-      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable: indexable === true }),
+      body: JSON.stringify({ slug: slug || undefined, publico: true, indexable: indexable === true, ramas: [...ramasSel] }),
     });
     const j = await r.json();
     setOcupado(false);
@@ -241,6 +281,35 @@ export default function DialogoCompartir({ paginaId, titulo, publicoInicial, onC
               {ocupado ? <Loader2 className="w-4 h-4 animate-spin" /> : estado.publico ? 'Dejar de publicar' : 'Publicar'}
             </button>
           </div>
+
+          {/* ── LAS RAMAS DONDE SE INDEXA (fase 6) ───────────────────────
+              Sólo tiene sentido de cara a publicar; con la página privada no se
+              indexa nada y la sección lo dice en vez de esconderse. */}
+          {ramasPropuestas.length > 0 && (
+            <div className="rounded-xl border border-slate-200 p-3">
+              <p className="text-xs font-black text-slate-700">Ramas del conocimiento</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed mb-2">
+                {estado.publico
+                  ? 'Al estar pública, la página se indexa en las ramas que elijas.'
+                  : 'Al publicarla, la página se indexará en las ramas que elijas.'}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {ramasPropuestas.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => alternarRama(t.id)}
+                    aria-pressed={ramasSel.has(t.id)}
+                    className={cn('rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors',
+                      ramasSel.has(t.id)
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
+                  >
+                    {t.nombre}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── PERSONAS CONCRETAS: SEMIPRIVADA ──────────────────────────
               Sólo la ve el autor (el servidor contesta 403 a los demás y la

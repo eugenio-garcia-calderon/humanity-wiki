@@ -2125,6 +2125,28 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       if (!requireLevel(req, res, ROLE.USER)) return;
       const { entity_type, entity_id, body } = req.body || {};
       if (!entity_type || !entity_id || !body) return res.status(400).json({ error: 'Faltan entity_type, entity_id o el texto.' });
+      /*
+       * ══ COMENTAR UN BLOQUE, SÓLO SI SU PÁGINA ES PÚBLICA (2026-08-25,
+       * fase 5 de «todo son páginas») ═══════════════════════════════════════
+       * Eugenio: «cada elemento de la página puede ser comentado por cualquier
+       * usuario, siempre y cuando esa página sea pública».
+       *
+       * El `entity_id` de un bloque es `<pagina>:<bloque>`: el bloque no tiene
+       * tabla propia —vive dentro del config de su página— así que la página
+       * viaja delante para poder comprobar esto sin inventar tablas. Y se
+       * comprueba AQUÍ y no sólo en la interfaz: una interfaz que esconde el
+       * botón no protege nada si la ruta acepta la petición igualmente.
+       */
+      if (entity_type === 'bloque') {
+        const paginaId = String(entity_id).split(':')[0];
+        const pg = await db.execute(sql`
+          SELECT publico FROM knowledge_windows
+          WHERE id = ${paginaId} AND archived_at IS NULL AND deleted_at IS NULL
+        `);
+        if (!pg.rows.length || !(pg.rows[0] as any).publico) {
+          return res.status(403).json({ error: 'Solo se pueden comentar los elementos de una página pública.' });
+        }
+      }
       const id = newId('CMT');
       await db.execute(sql`
         INSERT INTO comments (id, entity_type, entity_id, publication_id, author_user_id, body, created_by, updated_by)

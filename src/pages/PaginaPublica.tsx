@@ -167,7 +167,10 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
         {/* El editor no vale aquí: va enredado con el cursor, el guardado y
             los menús, y quien lee no tiene nada de eso. `BloquesLectura` pinta
             los mismos bloques con la misma tabla de estilos. */}
-        <BloquesLectura bloques={bloques || []} />
+        {/* Esta vista sólo existe para páginas publicadas, así que aquí siempre se
+            puede comentar: la regla «sólo si es pública» la vuelve a comprobar el
+            servidor en cada comentario, que es donde protege de verdad. */}
+        <BloquesLectura bloques={bloques || []} comentable={(pagina as any).id} />
       </article>
 
       <footer className="mt-10 pt-4 border-t border-slate-100">
