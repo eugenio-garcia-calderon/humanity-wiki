@@ -917,7 +917,7 @@ export default function Layout() {
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <Compass className="h-4 w-4 shrink-0" />
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar páginas</span>
           </button>
         )}
 
@@ -1480,7 +1480,7 @@ export default function Layout() {
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <FolderKanban className="h-4 w-4 shrink-0" />
-            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis proyectos</span>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis páginas</span>
           </button>
         )}
 
@@ -1598,7 +1598,7 @@ export default function Layout() {
             siempreAbierto={circulo === 'organizar'}
             claro
             ladoDerecho
-            titulo="Tus proyectos"
+            titulo="Organizar"
             items={itemsProyectos}
             cabeza={<AvatarRail desplegado />}
             abierta={proyectoAbierto ? `proyecto-${proyectoAbierto.id}` : null}
@@ -1647,7 +1647,7 @@ export default function Layout() {
                   siempreAbierto
                   claro
                   ladoDerecho
-                  titulo="Tus proyectos"
+                  titulo="Organizar"
                   items={itemsProyectos}
                   cabeza={<AvatarRail desplegado />}
                   abierta={null}

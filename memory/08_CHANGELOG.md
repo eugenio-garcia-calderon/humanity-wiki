@@ -7632,3 +7632,15 @@ en vez de suponer sacó lo que de verdad fallaba, que era otra cosa.
   hacer, que es justo lo que él pidió quitar.
 
 Medido después: 56 → 256 → 56, y cero botones de «Inicio» en los raíles.
+
+## 2026-08-25 — «Todo son páginas», fase 1 de 6
+La gran actualización de Eugenio: «me he dado cuenta de que en realidad todo son
+páginas». El plan completo, con lo que ya existe y lo que falta, está en
+`memory/15_PLAN_PAGINAS.md`; esta fase entrega los nombres y la puerta:
+
+- «Buscar páginas…» en el buscador, «Explorar páginas» arriba a la izquierda,
+  «Mis páginas» arriba a la derecha, «Organizar» como título del raíl derecho.
+- **El botón verde de crear página**, un «+», el primero del menú inferior. Con
+  el contexto: crear desde un proyecto la mete en ese proyecto.
+- La IA pasa de verde a **violeta**: el verde es ahora del crear, y dos
+  pastillas verdes competirían.
