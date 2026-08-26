@@ -1488,46 +1488,12 @@ export default function Layout() {
             chats a la vez — el error que este proyecto ya pagó caro. */}
         {!isIAPage && <AIAssistant />}
 
-        {/* ══ EL CHAT, EN UN CÍRCULO ABAJO A LA DERECHA (2026-08-25) ═══════
-            Eugenio: «haz que el chat de IA esté flotando con un círculo abajo a
-            la derecha, que abra la ventana del chat con todo el historial y el
-            modelo que ya hemos fabricado antes. Entonces el menú de abajo no
-            tiene que entrar en conflicto con el chat, ni tampoco el de la
-            derecha».
-
-            ── NO ES UN CHAT NUEVO ──────────────────────────────────────────
-            Es una puerta al que ya hay. Manda el aviso `ai:abrir`, que
-            `AIAssistant` ya escuchaba desde el botón del teléfono. Escribir
-            aquí un segundo chat sería tener dos historiales y dos modelos que
-            se separan en la primera corrección.
-
-            ── Y NO CHOCA CON NADIE, POR CONSTRUCCIÓN ───────────────────────
-            · Con el raíl de la DERECHA: se aparta `--hueco-lateral`, que ese
-              raíl ya publica. Puesto en `right-4` a secas quedaría debajo de la
-              columna de proyectos.
-            · Con el menú de ABAJO: ése va centrado con un ancho máximo, y el
-              círculo se sube por encima de su altura reservada
-              (`--hueco-muelle`). Los dos leen la misma variable, así que si un
-              día la barra cambia de alto, el círculo se mueve con ella.
-
-            El conflicto de verdad que él notaba estaba en otro sitio y era
-            invisible: el chat escribía `--hueco-muelle` a cero cada vez que se
-            abría, y **borraba la reserva del menú de abajo**. Arreglado en
-            `AIAssistant.tsx`; esto es sólo la puerta. */}
-        {!isIAPage && user && (
-          <button
-            onClick={() => window.dispatchEvent(new Event('ai:abrir'))}
-            title="Preguntar a la IA"
-            aria-label="Preguntar a la IA"
-            className="fixed z-[9992] grid h-14 w-14 place-items-center rounded-full bg-slate-900 text-white shadow-2xl ring-1 ring-white/10 transition-transform hover:scale-105 active:scale-95"
-            style={{
-              right: 'calc(var(--hueco-lateral, 0px) + 16px)',
-              bottom: 'calc(var(--hueco-muelle, 64px) + 16px)',
-            }}
-          >
-            <Sparkles className="h-6 w-6" />
-          </button>
-        )}
+        {/* EL CÍRCULO FLOTANTE SE HA IDO (2026-08-25). Eugenio: «mejor pon
+            el botón de IA dentro del menú inferior». Estuvo suelto abajo a la
+            derecha unas horas y él tenía razón: flotando era un elemento más
+            que esquivar —se apartaba del raíl derecho y del inferior leyendo
+            sus medidas—, y dentro de la barra no hay nada que esquivar porque
+            es la barra. La puerta es la misma: el aviso `ai:abrir`. */}
 
         {/* EL TELÉFONO, EN TODA LA APLICACIÓN (2026-08-22). Va aquí y no en la
             pantalla de Mensajes porque una llamada tiene que sonar estés donde
@@ -1736,6 +1702,7 @@ export default function Layout() {
           onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
           onPasarPorEncima={() => setPorRoce(false)}
           onFeedback={() => navigate('/hormiguero')}
+          onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
         />
       </div>
 
