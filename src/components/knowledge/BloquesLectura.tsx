@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List } from 'lucide-react';
+import EntityComments from './EntityComments';
+import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
 import ProductoPublico from './ProductoPublico';
@@ -41,13 +42,69 @@ export const CLASES_TEXTO: Record<string, string> = {
   codigo: 'font-mono text-[13px] leading-relaxed text-slate-100 whitespace-pre-wrap',
 };
 
-export default function BloquesLectura({ bloques }: { bloques: any[] }) {
+/*
+ * ══ CADA BLOQUE SE PUEDE COMENTAR (2026-08-25, fase 5 de «todo son páginas»)
+ * Eugenio: «cada elemento de la página puede ser comentado por cualquier
+ * usuario, siempre y cuando esa página sea pública».
+ *
+ * `comentable` es el id de la página, y sólo llega desde las vistas PÚBLICAS:
+ * sin él no se pinta ninguna burbuja, así que el editor y las vistas privadas
+ * quedan igual que estaban. Los comentarios son los polimórficos de siempre
+ * (`EntityComments`, tabla `comments`): el bloque se identifica como
+ * `<pagina>:<bloque>` porque no tiene tabla propia, y el servidor usa esa
+ * primera mitad para negarse si la página no es pública.
+ */
+/**
+ * La burbuja de un bloque. Envuelve al bloque SIN tocarlo: el dibujo de cada
+ * tipo sigue siendo el de siempre, y la burbuja sale a su derecha al pasar el
+ * ratón. Al pulsarla se abren los comentarios de ESE bloque, debajo de él —
+ * no un panel lateral: quien comenta un párrafo quiere verlo mientras escribe.
+ */
+function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bloqueId: string; children: any }) {
+  const [abierto, setAbierto] = useState(false);
+  const [cuantos, setCuantos] = useState(0);
+  return (
+    <div className="group/bloq relative">
+      {children}
+      <button
+        onClick={() => setAbierto(a => !a)}
+        title={abierto ? 'Cerrar los comentarios' : 'Comentar este elemento'}
+        aria-label={abierto ? 'Cerrar los comentarios de este elemento' : 'Comentar este elemento'}
+        aria-expanded={abierto}
+        className={cn(
+          'absolute -right-9 top-0 grid h-7 w-7 place-items-center rounded-lg text-[10px] transition-all',
+          abierto ? 'bg-emerald-600 text-white'
+                  : cuantos > 0
+                    ? 'bg-slate-100 text-slate-600'
+                    : 'text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover/bloq:opacity-100',
+        )}
+      >
+        {/* El número sólo cuando existe: una burbuja con «0» invita menos que
+            una burbuja vacía. */}
+        {cuantos > 0 ? <span className="font-black">{cuantos}</span> : <MessageCircle className="h-3.5 w-3.5" />}
+      </button>
+      {abierto && (
+        <div className="my-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+          <EntityComments entityType="bloque" entityId={`${paginaId}:${bloqueId}`} onCountChange={setCuantos} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function BloquesLectura({ bloques, comentable }: { bloques: any[]; comentable?: string }) {
   if (!Array.isArray(bloques) || bloques.length === 0) {
     return <p className="text-sm text-slate-400">Esta página todavía no tiene contenido.</p>;
   }
   return (
     <div className="space-y-2.5">
-      {bloques.map((b, i) => <Bloque key={b?.id || i} b={b} indice={i} bloques={bloques} />)}
+      {bloques.map((b, i) => (
+        comentable && b?.id
+          ? <ConComentarios key={b.id} paginaId={comentable} bloqueId={String(b.id)}>
+              <Bloque b={b} indice={i} bloques={bloques} />
+            </ConComentarios>
+          : <Bloque key={b?.id || i} b={b} indice={i} bloques={bloques} />
+      ))}
     </div>
   );
 }

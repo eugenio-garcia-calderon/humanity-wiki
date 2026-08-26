@@ -7701,3 +7701,40 @@ lista.
 interruptor de indexado ya los construyó otro programador hoy (módulo
 `compartir.ts`, migración 0129, `DominioPropio.tsx`). Quedan la 5 (comentarios
 por elemento) y la 6 (indexado en ramas al publicar).
+
+## 2026-08-25 — «Todo son páginas», fases 5 y 6: comentarios por elemento e indexado en ramas
+Las dos últimas fases con código. La 4 (dominio propio) ya existía —la hizo otro
+programador en `compartir.ts`/0129— y no se rehízo.
+
+**Fase 5 — cada elemento comentable, sólo en páginas públicas:**
+- Los comentarios NO son nuevos: son los polimórficos de siempre
+  (`EntityComments`, tabla `comments`, `/api/comments`). El bloque se identifica
+  como `<pagina>:<bloque>` porque no tiene tabla propia.
+- El guardia vive en el SERVIDOR: comentar un bloque de una página privada
+  devuelve 403 aunque la interfaz se salte. Una interfaz que esconde el botón no
+  protege nada si la ruta acepta la petición.
+- La burbuja sale al pasar el ratón por cada bloque en las vistas públicas
+  (`PaginaPublica`, `PaginaDeDominio`); con comentarios, enseña el número. El
+  editor y las vistas privadas quedan intactos.
+
+**Fase 6 — al publicar, la página se indexa en sus ramas:**
+- `PUT /api/publicar/paginas/:id` acepta `ramas[]` (ids de `subtemas`) y escribe
+  `subtema_contenido (subtema_id, 'pagina', id, quien)`. **Varias ramas es lo
+  correcto**: Eugenio decidió que esto es un grafo, «como un micelio».
+- Se borra y reescribe la lista entera: la clave primaria triple hace el insert
+  idempotente y lo que queda es exactamente lo elegido.
+- **Despublicar BORRA las filas, no las marca** (aviso de prog2: una fila
+  marcada la sigue sumando la cuenta recursiva del árbol).
+- En el diálogo de Compartir, las ramas se **proponen por las palabras**
+  (`hablaDe`, el criterio del muro) y se editan con un toque — propuesto y
+  editable: sólo automático clasifica mal en silencio, sólo manual acaba con
+  todo sin clasificar.
+
+Probado de punta a punta en local con datos de prueba borrados al final (y el
+`handle` de la cuenta de demostración restaurado): 403 en privada, publicar
+indexa en 2 ramas, comentar 200, 2 burbujas pintadas, el comentario se lee,
+despublicar desindexa. El primer intento falló con 409 —el usuario local no
+tenía `handle`— y esa condición quedó también probada.
+
+Con esto, **las 6 fases de la gran actualización están cerradas**: 1-3 y 5-6
+construidas aquí, la 4 ya existía. `memory/15_PLAN_PAGINAS.md` queda como mapa.
