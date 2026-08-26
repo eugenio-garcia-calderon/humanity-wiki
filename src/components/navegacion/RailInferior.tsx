@@ -98,7 +98,19 @@ export default function RailInferior({
 }) {
   const [encima, setEncima] = useState(false);
   const [infoAbierta, setInfoAbierta] = useState(false);
-  const desplegado = fijo || encima;
+  /*
+   * ══ UN NOMBRE, NO DOCE (2026-08-25, corrección de Eugenio) ═══════════════
+   * «No has conseguido que en el menú inferior pase lo mismo que en el lateral
+   * izquierdo: cuando hagas hover en una herramienta, sólo se ve el nombre de
+   * esa herramienta».
+   *
+   * Tenía razón: aquí pasar el ratón por la barra sacaba los doce nombres de
+   * golpe, que es justo lo que acabábamos de quitar en el menú de la izquierda.
+   * Ahora el nombre sale en una etiqueta encima del icono señalado, y la barra
+   * sólo enseña todos los nombres cuando está fijada.
+   */
+  const [rozada, setRozada] = useState<{ clave: string; x: number } | null>(null);
+  const desplegado = fijo;
 
   /*
    * ══ LAS HERRAMIENTAS SE APLICAN A DONDE ESTÁS (2026-08-25) ═══════════════
@@ -311,7 +323,15 @@ export default function RailInferior({
             {(() => {
           const activa = abierta === h.clave;
           return (
-            <div key={h.clave} className="relative flex shrink-0 flex-col items-center">
+            <div
+              key={h.clave}
+              onMouseEnter={e => {
+                const c = e.currentTarget.getBoundingClientRect();
+                setRozada({ clave: h.clave, x: c.left + c.width / 2 });
+              }}
+              onMouseLeave={() => setRozada(r => (r?.clave === h.clave ? null : r))}
+              className="relative flex shrink-0 flex-col items-center"
+            >
               <button
                 onClick={() => onElegir({ ...h, ruta: conContexto(h.ruta, contexto) })}
                 title={h.nombre}
@@ -344,7 +364,7 @@ export default function RailInferior({
                 la barra desplegada: en reposo no hay sitio y, sobre todo, no
                 habría forma de saber cuál de los dos vas a pulsar.
               */}
-              {desplegado && h.conPanel && onAbrirSubmenu && (
+              {(desplegado || rozada?.clave === h.clave) && h.conPanel && onAbrirSubmenu && (
                 <button
                   onClick={e => { e.stopPropagation(); onAbrirSubmenu(h); }}
                   // ABRE AL PASAR EL RATÓN, igual que en los dos laterales
@@ -369,6 +389,24 @@ export default function RailInferior({
         ))}
 
       </nav>
+
+      {/* ══ EL NOMBRE DE LA HERRAMIENTA SEÑALADA ══════════════════════════
+          Y va FUERA de la barra, con `fixed`. Lo puse dentro con `absolute`
+          creyendo que, como sale hacia arriba, el recorte horizontal de la
+          barra no le afectaría — **y escribí en el comentario que lo había
+          comprobado cuando no lo había hecho**. No se veía: `overflow-x: auto`
+          recorta también en vertical, que es exactamente lo mismo que ya había
+          pasado hoy con el desplegable de la «i» y con la etiqueta del menú
+          izquierdo. Tercera vez: si algo tiene que salirse de una caja que hace
+          scroll, se dibuja fuera de la caja. Sin excepciones y sin suponer. */}
+      {!desplegado && rozada && (
+        <span
+          className="pointer-events-none fixed z-[9993] -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-800 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-xl ring-1 ring-white/10"
+          style={{ left: rozada.x, bottom: `calc(var(--hueco-muelle, 64px) + 14px)` }}
+        >
+          {HERRAMIENTAS_ABAJO.find(h => h.clave === rozada.clave)?.nombre}
+        </span>
+      )}
     </div>
   );
 }

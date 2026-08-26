@@ -7477,3 +7477,26 @@ inferior».
   El submenú vive dentro del raíl, así que enseñarlo obliga a ensancharlo. Es un
   estado propio y no la chincheta: la chincheta se guarda en el navegador y se
   queda para siempre; esto dura lo que el ratón esté dentro.
+
+## 2026-08-25 — Dos correcciones de Eugenio sobre el hover de los menús
+«No has conseguido que en el menú inferior pase lo mismo que en el lateral
+izquierdo… Y cuando haces hover en la flecha se expande TODO el submenú, y lo
+único que quiero es ver lo que hay dentro de educación, a la derecha de
+educación, **sin que me cambie la palabra educación de sitio**.»
+
+- **El menú inferior enseña un nombre, no doce.** Se me quedó a medias: quité la
+  apertura completa en el izquierdo y no en el de abajo.
+- **Los subtemas salen en una ventanita al lado, no dentro.** Mi solución de
+  antes ensanchaba la columna para que cupieran, y estaba mal por la razón que
+  él dio: **movía de sitio la palabra que estaba señalando**. Un menú que se
+  recoloca bajo el ratón obliga a volver a buscar lo que ya habías encontrado.
+  Ahora la columna no se toca y la ventanita desaparece al salir.
+- Abrir la ventanita **es también pedir los datos**: los subtemas no viajan
+  hasta que alguien los pide, y al primer intento salió en su sitio y vacía.
+
+**Y una regla que hoy me ha costado tres veces**, escrita para no repetirla:
+`overflow-x: auto` recorta TAMBIÉN en vertical. Lo tropecé con el desplegable de
+la «i», con la etiqueta del menú izquierdo y con la del inferior — y en el
+tercero llegué a escribir en un comentario que lo había comprobado cuando no lo
+había hecho. **Si algo tiene que salirse de una caja que hace scroll, se dibuja
+fuera de la caja. Sin suponer.**
