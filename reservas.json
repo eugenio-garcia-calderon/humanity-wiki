@@ -29,6 +29,12 @@
       "ruta": "src/pages/Documento.tsx",
       "motivo": "prog3: fase 3, acceso por persona con lectura o edicion",
       "desde": "2026-08-26T11:29:22.192Z"
+    },
+    {
+      "agente": "prog3",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "prog3: fase 3, el guardado respeta el rol de edicion",
+      "desde": "2026-08-26T11:29:37.976Z"
     }
   ]
 }
