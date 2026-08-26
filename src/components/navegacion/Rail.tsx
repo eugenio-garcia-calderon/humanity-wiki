@@ -341,15 +341,22 @@ export default function Rail({
      necesita saber a qué renglón pertenece. */
   const [rozada, setRozada] = useState<{ h: Herramienta; y: number } | null>(null);
   /*
-   * ABRIR UN SUBTEMA DESPLIEGA LA COLUMNA (2026-08-25). Sin esto, la flecha de
-   * la etiqueta abría los subtemas **dentro de una columna de 40 px**: se
-   * abrían de verdad y no se veía ninguno. El submenú vive dentro del raíl, así
-   * que enseñarlo obliga a ensanchar el raíl.
+   * ══ EL SUBMENÚ SALE AL LADO, NO DENTRO (2026-08-25, segunda corrección) ══
+   * Eugenio: «cuando haces hover en la flecha se expande TODO el submenú, y lo
+   * único que quiero es ver lo que hay dentro de educación, a la derecha de
+   * educación, **sin que me cambie la palabra educación de sitio**. Aparece a
+   * la derecha en una pequeña ventanita que, si quito el hover, desaparece».
    *
-   * Es un estado propio y no la chincheta: la chincheta se guarda en el
-   * navegador y se queda para siempre; esto dura lo que dure el ratón dentro.
+   * Mi primer intento ensanchaba la columna entera para que cupieran los
+   * subtemas dentro. Funcionaba y estaba mal: **movía de sitio la palabra que
+   * el usuario estaba señalando**. Un menú que se recoloca bajo el ratón
+   * obliga a volver a buscar lo que ya habías encontrado.
+   *
+   * Ahora los subtemas salen en una ventanita flotante pegada a la etiqueta.
+   * La columna no se toca, «EDUCACIÓN» no se mueve, y al sacar el ratón
+   * desaparece sola.
    */
-  const [porSubtema, setPorSubtema] = useState(false);
+  const [subtemasDe, setSubtemasDe] = useState<Herramienta | null>(null);
 
   /*
    * ── FLOTAR O QUEDARSE ─────────────────────────────────────────────────────
@@ -367,7 +374,7 @@ export default function Rail({
    * tapa a nadie. Y se queda desplegado aunque apartes el ratón, porque si no,
    * el submenú quedaría abierto sin que se vea de cuál de los catorce es.
    */
-  const anclado = siempreAbierto || fijado || abierta !== null || porSubtema;
+  const anclado = siempreAbierto || fijado || abierta !== null;
   /*
    * ══ EL RATÓN YA NO ABRE LA COLUMNA ENTERA (2026-08-25) ═══════════════════
    * Eugenio: «cuando hago hover en uno de los iconos se muestra sólo el nombre
@@ -745,7 +752,7 @@ export default function Rail({
       <nav
         aria-label="Herramientas"
         onMouseEnter={() => setEncima(true)}
-        onMouseLeave={() => { setEncima(false); setPorSubtema(false); }}
+        onMouseLeave={() => setEncima(false)}
         className={cn(
           // z-50, POR ENCIMA DE LA BARRA SUPERIOR (2026-08-23). La barra
           // también es z-40 y va después en el documento, así que al
@@ -972,7 +979,7 @@ export default function Rail({
       {!desplegado && rozada && (
         <div
           onMouseEnter={() => setRozada(rozada)}
-          onMouseLeave={() => setRozada(null)}
+          onMouseLeave={() => { setRozada(null); setSubtemasDe(null); }}
           className={cn('fixed z-[60] flex items-center gap-1', ladoDerecho ? 'flex-row-reverse' : '')}
           style={{
             top: rozada.y,
@@ -987,6 +994,41 @@ export default function Rail({
           >
             {rozada.h.nombre}
           </button>
+          {/* LA VENTANITA DE LOS SUBTEMAS, pegada a la etiqueta y a su misma
+              altura. Se pinta aquí dentro —no en otro sitio— para que el ratón
+              pueda ir del nombre a la flecha y de la flecha a la lista sin
+              salirse nunca de la misma zona: si estuviera fuera, cruzar el
+              hueco la cerraría antes de llegar. */}
+          {subtemasDe?.clave === rozada.h.clave && ramas && (
+            <div className={cn('max-h-[60vh] w-56 overflow-y-auto rounded-xl py-1.5 shadow-2xl ring-1',
+              claro ? 'bg-white ring-slate-200' : 'bg-slate-800 ring-white/10')}>
+              <p className={cn('px-3 pb-1 text-[9px] font-black uppercase tracking-[0.15em]',
+                claro ? 'text-slate-400' : 'text-slate-500')}>
+                Dentro de {rozada.h.nombre}
+              </p>
+              {ramas.de(rozada.h.clave).filter(t => !t.padre_id).length === 0 && (
+                <p className={cn('px-3 py-1.5 text-[11px]', claro ? 'text-slate-400' : 'text-slate-500')}>
+                  Abriendo…
+                </p>
+              )}
+              {ramas.de(rozada.h.clave).filter(t => !t.padre_id).map(t => (
+                <NavLink
+                  key={t.id}
+                  to={`/temas/${t.id}`}
+                  onClick={() => { setRozada(null); setSubtemasDe(null); }}
+                  className={cn('flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors',
+                    claro ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                          : 'text-slate-400 hover:bg-slate-700 hover:text-white')}
+                >
+                  <span className="min-w-0 flex-1 truncate">{t.nombre}</span>
+                  {t.cosas > 0 && (
+                    <span className="shrink-0 text-[10px] font-black tabular-nums text-slate-400">{t.cosas}</span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          )}
+
           {ramas?.hay(rozada.h.clave) && (
             /* ══ LA FLECHA TAMBIÉN ABRE AL PASAR EL RATÓN (2026-08-25)
                Eugenio: «si pongo el ratón encima de la flecha a la derecha de
@@ -998,12 +1040,15 @@ export default function Rail({
                mueves el ratón hacia él para leerlo. Pasar el ratón sólo abre;
                cerrar sigue siendo cosa del clic, que es una decisión. */
             <button
-              onClick={() => { setPorSubtema(true); ramas.alternar(rozada.h.clave); setRozada(null); }}
-              onMouseEnter={() => {
-                setPorSubtema(true);
-                if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave);
-                setRozada(null);
-              }}
+              /* ABRIR LA VENTANITA ES TAMBIÉN PEDIR LOS DATOS. Los subtemas
+                 de un objetivo no viajan hasta que alguien los pide, y quien
+                 los pide es `alternar` — que además marca esa rama como
+                 abierta. Aquí eso no se ve: el árbol de dentro sólo se pinta
+                 con la columna desplegada, y aquí está estrecha. Sin esta
+                 llamada la ventanita salía en su sitio y **vacía**, que fue
+                 justo lo que pasó al primer intento. */
+              onClick={() => { if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave); setSubtemasDe(rozada.h); }}
+              onMouseEnter={() => { if (!ramas.abierto(rozada.h.clave)) ramas.alternar(rozada.h.clave); setSubtemasDe(rozada.h); }}
               title={`Ver los subtemas de ${rozada.h.nombre}`}
               aria-label={`Ver los subtemas de ${rozada.h.nombre}`}
               className={cn('grid h-10 w-9 place-items-center rounded-xl shadow-xl ring-1 transition-colors',
