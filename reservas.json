@@ -3,14 +3,14 @@
     {
       "agente": "prog3",
       "ruta": "src/components/navegacion/Rail.tsx",
-      "motivo": "prog3: la flecha abre el submenu al pasar el raton",
-      "desde": "2026-08-26T00:31:03.075Z"
+      "motivo": "prog3: submenu flotante y nombre por icono abajo",
+      "desde": "2026-08-26T00:41:57.366Z"
     },
     {
       "agente": "prog3",
       "ruta": "src/components/navegacion/RailInferior.tsx",
-      "motivo": "prog3: la flecha abre el submenu al pasar el raton",
-      "desde": "2026-08-26T00:31:03.075Z"
+      "motivo": "prog3: submenu flotante y nombre por icono abajo",
+      "desde": "2026-08-26T00:41:57.366Z"
     }
   ]
 }
