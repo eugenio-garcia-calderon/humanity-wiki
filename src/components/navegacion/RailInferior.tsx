@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { ChevronUp, MessageCircleWarning } from 'lucide-react';
+import { ChevronUp, Plus } from 'lucide-react';
 import {
   FileText, Globe2, Map as MapIcon, ListChecks, Table2, Compass, Store,
   CalendarDays, Database, Sparkles, Gamepad2, Globe,
@@ -181,6 +181,31 @@ export default function RailInferior({
           </span>
         )}
 
+        {/* ══ CREAR PÁGINA, EL VERDE Y EL PRIMERO (2026-08-25) ═══════════
+            Eugenio, en la gran actualización: «me he dado cuenta de que en
+            realidad TODO son páginas. Tiene que haber un botón de crear página
+            verde, que sea un más, en el menú inferior».
+
+            Es el más de toda la plataforma: casi todo lo que se hace aquí
+            empieza creando una página. Lleva el contexto como todo lo demás —
+            crear desde un proyecto la mete en ese proyecto. */}
+        <div className="relative flex shrink-0 flex-col items-center">
+          <button
+            onClick={() => onElegir({ clave: 'crear-pagina', nombre: 'Crear página', icono: Plus, ruta: conContexto('/paginas?nueva=1', contexto) })}
+            title="Crear una página"
+            aria-label="Crear una página"
+            className="flex flex-col items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
+          >
+            <Plus className="h-5 w-5 shrink-0" />
+            <span className={cn(
+              'overflow-hidden whitespace-nowrap text-[10px] font-black leading-none transition-all duration-200',
+              desplegado ? 'max-h-4 opacity-100' : 'max-h-0 opacity-0',
+            )}>
+              Crear
+            </span>
+          </button>
+        </div>
+
         {/* ══ LA IA, EL BOTÓN MÁS DESTACADO DE LA BARRA (2026-08-25) ═══════
             Eugenio: «mejor pon el botón de IA dentro del menú inferior, pero
             ponlo destacado como has hecho con el de feedback, pero incluso más
@@ -211,7 +236,7 @@ export default function RailInferior({
             onClick={onIA}
             title="Preguntar a la IA"
             aria-label="Preguntar a la IA"
-            className="flex flex-col items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-white shadow-lg shadow-emerald-600/40 ring-1 ring-emerald-400/50 transition-colors hover:bg-emerald-500"
+            className="flex flex-col items-center gap-1 rounded-xl bg-violet-600 px-2.5 py-1.5 text-white shadow-lg shadow-violet-600/40 ring-1 ring-violet-400/50 transition-colors hover:bg-violet-500"
           >
             <Sparkles className="h-5 w-5 shrink-0" />
             <span className={cn(

@@ -105,7 +105,7 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
       <CajaBusqueda
         pastilla
         compacto={compacto}
-        placeholder={conIA ? 'Pregúntale a la IA…' : 'Buscar en la Red…'}
+        placeholder={conIA ? 'Pregúntale a la IA…' : 'Buscar páginas…'}
         className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
