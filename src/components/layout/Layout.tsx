@@ -1087,6 +1087,21 @@ export default function Layout() {
                   fichero que nadie más está editando, y no un cambio en estas
                   veinte. El marco, el tamaño y el ajuste al móvil de abajo se
                   quedan como estaban. */}
+              {/* ══ FEEDBACK, AQUÍ (2026-08-25) ═════════════════════════════
+                  Eugenio: «pon el botón de feedback y el de "i" en el menú
+                  desplegable de humanity.wiki y sácalos del menú inferior».
+
+                  Va el primero y separado: es lo único de esta lista que no es
+                  una página que leer, sino algo que escribir. Conserva su ámbar
+                  —el mismo que tenía abajo— porque sigue siendo lo que se busca
+                  en un momento malo, y encontrarlo rápido es media función. */}
+              <button
+                onClick={() => { setInfoAbierta(false); navigate('/hormiguero'); }}
+                className="mb-1 flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-xs font-black text-amber-700 hover:bg-amber-50"
+              >
+                <IconoFeedback className="h-3.5 w-3.5 shrink-0" /> Feedback
+              </button>
+
               {PAGINAS_INFO.filter(op => op.enMenu !== false).map(op => (
                 <button key={op.ruta}
                   onClick={() => { setInfoAbierta(false); navigate(`/${op.ruta}`); }}
@@ -1726,7 +1741,6 @@ export default function Layout() {
           onElegir={h => { navigate(h.ruta); setPanelAbierto(null); }}
           onAbrirSubmenu={h => setPanelAbierto(a => (a?.clave === h.clave ? null : h))}
           onPasarPorEncima={() => setPorRoce(false)}
-          onFeedback={() => navigate('/hormiguero')}
           onIA={() => window.dispatchEvent(new Event('ai:abrir'))}
         />
       </div>

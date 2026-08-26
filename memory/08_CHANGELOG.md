@@ -7522,3 +7522,24 @@ botón de las tres rayas, el derecho no tenía nada.
 Es la tercera vez esta tarde que una función se queda sin puerta al mover algo de
 sitio, y las tres veces la causa ha sido la misma: **mirar sólo la pantalla
 grande**. Comprobado a 375 px con el navegador, no supuesto.
+
+## 2026-08-25 — Feedback y la «i» al desplegable del nombre; borrar cuenta, bajo tu foto
+Eugenio: «pon el botón de feedback y el de "i" en el menú desplegable de
+humanity.wiki y sácalos del menú inferior. Y lo de borrar tu cuenta del menú
+desplegable ponlo mejor en el apartado de Configuración de cuenta, debajo del
+icono de usuario».
+
+- **La barra de abajo se queda con una sola idea**: la IA y las doce
+  herramientas. Ni feedback ni la «i» hacían nada — uno avisa de lo que falla y
+  el otro explica qué es esto, y las dos cosas son «sobre la plataforma», que es
+  justo lo que cuelga de su nombre.
+- Feedback va el primero del desplegable y separado por una raya: es lo único de
+  esa lista que no es una página que leer, sino algo que escribir. Conserva su
+  ámbar, porque se busca en un momento malo y encontrarlo rápido es media
+  función.
+- **Borrar tu cuenta** sale del desplegable de información —donde estaba entre
+  páginas que EXPLICAN la plataforma— y pasa a tu menú de usuario, detrás de
+  Configuración. No explica nada: hace algo con tu cuenta, y además irreversible.
+- **La ruta `/borrar-cuenta` NO se ha movido.** Está pegada en la ficha de Google
+  Play y cambiarla obligaría a pasar revisión otra vez; sólo cambia desde dónde
+  se llega (`enMenu: false` la quita del desplegable, la ruta sigue igual).
