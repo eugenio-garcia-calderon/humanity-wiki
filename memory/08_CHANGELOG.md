@@ -7500,3 +7500,25 @@ la «i», con la etiqueta del menú izquierdo y con la del inferior — y en el
 tercero llegué a escribir en un comentario que lo había comprobado cuando no lo
 había hecho. **Si algo tiene que salirse de una caja que hace scroll, se dibuja
 fuera de la caja. Sin suponer.**
+
+## 2026-08-25 — En el móvil no había puerta al menú derecho
+Eugenio: «arregla el menú de la versión móvil, porque no se puede acceder al
+menú derecho desde el móvil».
+
+Y era literal: el botón «Mis proyectos» llevaba `hidden … sm:flex`, así que **por
+debajo de 640 px no se dibujaba**. En un ordenador el raíl de la derecha se
+despliega al acercar el ratón; en un teléfono no hay ratón, así que ese botón era
+la única puerta — y no estaba. Tus proyectos existían y no había forma de llegar
+a ellos. A «Explorar» le pasaba lo mismo; el izquierdo al menos conservaba el
+botón de las tres rayas, el derecho no tenía nada.
+
+- Ahora **el botón se dibuja siempre** y lo que se esconde es la palabra, que es
+  lo que no cabe. El icono se queda, y con él la puerta.
+- **En el móvil abre el cajón y no navega.** En un ordenador el raíl se queda a
+  un lado y la página cambia detrás: se ven las dos cosas. En un teléfono el
+  cajón ocupa la pantalla, así que navegar además lo dejaría abierto sobre otra
+  página, y al cerrarlo aparecerías donde no habías pedido ir.
+
+Es la tercera vez esta tarde que una función se queda sin puerta al mover algo de
+sitio, y las tres veces la causa ha sido la misma: **mirar sólo la pantalla
+grande**. Comprobado a 375 px con el navegador, no supuesto.

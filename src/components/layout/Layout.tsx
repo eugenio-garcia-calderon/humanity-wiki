@@ -899,13 +899,13 @@ export default function Layout() {
           <button
             onClick={() => { setCirculo('explorar'); setPorRoce(false); navigate('/preferencias'); }}
             title="Explorar los catorce temas"
-            className={cn('hidden shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2.5 transition-colors sm:flex -mb-px border-b',
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
               circulo === 'explorar' || location.pathname === '/preferencias'
                 ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <Compass className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap text-[13px] font-black">Explorar</span>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Explorar</span>
           </button>
         )}
 
@@ -1414,20 +1414,45 @@ export default function Layout() {
 
             Tu foto ya no está aquí: se ha mudado a lo alto de esa misma columna
             (ver `AvatarRail`), con mensajes, contactos y calendario debajo. */}
+            {/* ══ Y EN EL MÓVIL, SIN LA PALABRA PERO CON EL BOTÓN ══════════
+                (2026-08-25) Eugenio: «arregla el menú de la versión móvil,
+                porque no se puede acceder al menú derecho desde el móvil».
+
+                Y era literal: este botón llevaba `hidden … sm:flex`, así que por
+                debajo de 640 px **no se dibujaba**. En un ordenador el raíl de
+                la derecha se despliega al acercar el ratón; en un teléfono no
+                hay ratón, así que este botón era la única puerta — y no estaba.
+                Tus proyectos existían y no había forma de llegar a ellos.
+
+                Lo mismo le pasaba a «Explorar». El izquierdo al menos conservaba
+                el botón de las tres rayas; el derecho no tenía nada.
+
+                Ahora el botón se dibuja siempre y lo que se esconde es **la
+                palabra**, que es lo que no cabe. El icono se queda, y con él la
+                puerta. */}
         {/* EL MISMO REMATE, POR EL OTRO LADO. Fija el raíl de la derecha y
             lleva a tus proyectos, con el mismo par de gestos que «Explorar»:
             las dos esquinas se comportan igual porque son la misma idea. */}
         {user && (
           <button
-            onClick={() => { setCirculo('organizar'); setPorRoce(false); navigate('/proyectos'); }}
+            /* EN EL MÓVIL ABRE EL CAJÓN Y NO NAVEGA. En un ordenador el raíl
+               se queda a un lado y la página cambia detrás: las dos cosas se
+               ven. En un teléfono el cajón ocupa la pantalla, así que navegar
+               además dejaría el cajón abierto sobre otra página — y al cerrarlo
+               aparecerías en un sitio al que no habías pedido ir. */
+            onClick={() => {
+              setPorRoce(false);
+              if (esMovil) setCirculo(c => (c === 'organizar' ? null : 'organizar'));
+              else { setCirculo('organizar'); navigate('/proyectos'); }
+            }}
             title="Tus proyectos"
-            className={cn('hidden shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2.5 transition-colors sm:flex -mb-px border-b',
+            className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
               circulo === 'organizar' || location.pathname.startsWith('/proyectos')
                 ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >
             <FolderKanban className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap text-[13px] font-black">Mis proyectos</span>
+            <span className="hidden whitespace-nowrap text-[13px] font-black sm:inline">Mis proyectos</span>
           </button>
         )}
 
