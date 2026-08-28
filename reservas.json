@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog2",
-      "ruta": "src/server/roadmap.ts",
-      "motivo": "prog2: imagen o archivo al crear una tarjeta del kanban",
-      "desde": "2026-08-28T10:55:48.678Z"
-    },
-    {
-      "agente": "prog2",
       "ruta": "src/pages/Proyectos.tsx",
       "motivo": "prog2: imagen o archivo al crear una tarjeta del kanban",
       "desde": "2026-08-28T10:55:52.384Z"
