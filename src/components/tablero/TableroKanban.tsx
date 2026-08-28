@@ -3,7 +3,7 @@ import { subirArchivo } from '../../utils/subir';
 import {
   X, Plus, Image as ImageIcon, Trash2, User as UserIcon,
   CircleDot, CircleCheck, Circle, Flame, Layers, MoreVertical, Pencil, Check, ChevronDown,
-  Camera, Video,
+  Camera, Video, Paperclip,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Adjuntos from '../archivo/Adjuntos';
@@ -37,6 +37,11 @@ export interface ItemTablero {
   responsable_nombre?: string | null;
   responsable_foto?: string | null;
   responsable_icono?: string | null;
+  /** La primera imagen que lleva colgada, si lleva alguna, y cuántos archivos
+   *  tiene en total. Las manda ya la lista de tarjetas: pedirlas por tarjeta
+   *  serían cuarenta viajes para pintar un tablero. */
+  portada?: string | null;
+  adjuntos?: number;
   /** Para pintar el proyecto sin esperar a la lista. */
   proyecto_titulo?: string | null;
 }
@@ -350,7 +355,28 @@ export default function TableroKanban({
                       {it.resumen && (
                         <p className="text-[11px] text-slate-500 leading-relaxed mt-1 line-clamp-2">{it.resumen}</p>
                       )}
-                      {(it.bloques?.length > 0 || it.autor_nombre) && (
+                      {/* ── LA IMAGEN, EN LA PROPIA TARJETA ─────────────────
+                          (2026-08-28, Eugenio: «que las tarjetas permitan
+                          subir una imagen o archivo»).
+
+                          Enseñarla aquí y no sólo dentro es la mitad del
+                          encargo: una foto que hay que abrir la tarjeta para
+                          ver no ahorra el paso que se subió a ahorrar. En un
+                          tablero, la imagen es lo que hace que se reconozca
+                          la tarjeta sin leerla.
+
+                          `loading="lazy"`: un tablero puede tener cuarenta, y
+                          las de las columnas de abajo no se descargan hasta
+                          que alguien baja a mirarlas. */}
+                      {it.portada && (
+                        <img
+                          src={it.portada}
+                          alt=""
+                          loading="lazy"
+                          className="mt-2 w-full h-24 object-cover rounded-lg border border-slate-100 bg-slate-50"
+                        />
+                      )}
+                      {(it.bloques?.length > 0 || it.autor_nombre || (it.adjuntos ?? 0) > 0) && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-50 text-[10px] text-slate-400">
                           {(it.responsable_nombre || it.autor_nombre) && (
                             <span className="inline-flex items-center gap-1 truncate">
@@ -358,6 +384,15 @@ export default function TableroKanban({
                                 ? <img src={it.responsable_foto} alt="" className="w-3 h-3 rounded-full object-cover shrink-0" />
                                 : <UserIcon className="w-2.5 h-2.5 shrink-0" />}
                               {(it.responsable_nombre || it.autor_nombre || '').split(' ')[0]}
+                            </span>
+                          )}
+                          {/* El clip va SIEMPRE que haya archivos, aunque la
+                              portada ya se vea: un PDF no pinta miniatura, y
+                              sin este número no habría nada en la tarjeta que
+                              dijera que lleva algo dentro. */}
+                          {(it.adjuntos ?? 0) > 0 && (
+                            <span className="inline-flex items-center gap-0.5 shrink-0">
+                              <Paperclip className="w-2.5 h-2.5" />{it.adjuntos}
                             </span>
                           )}
                           {it.bloques?.length > 0 && <span className="ml-auto shrink-0">{it.bloques.length} nota(s)</span>}

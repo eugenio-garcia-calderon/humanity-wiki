@@ -46,10 +46,33 @@ export function registerRoadmapRoutes(app: Express, db: any) {
         SELECT r.id, r.grupo, r.titulo, r.resumen, r.estado, r.prioridad, r.bloques, r.orden,
                r.autor_user_id, r.proyecto_id, r.updated_at, r.responsable_agente_id,
                u.display_name AS autor_nombre, u.email AS autor_email, u.avatar_url AS autor_avatar,
-               ag.nombre AS responsable_nombre, ag.foto_url AS responsable_foto, ag.icono AS responsable_icono
+               ag.nombre AS responsable_nombre, ag.foto_url AS responsable_foto, ag.icono AS responsable_icono,
+               -- LA PORTADA Y CUÁNTOS ARCHIVOS LLEVA (2026-08-28, Eugenio:
+               -- «que las tarjetas permitan subir una imagen o archivo»).
+               --
+               -- Viene AQUÍ y no con una petición por tarjeta: un tablero de
+               -- cuarenta tarjetas serían cuarenta viajes para pintar cuarenta
+               -- miniaturas, y el tablero se dibujaría a trozos durante un
+               -- segundo largo. Con dos laterales, sigue siendo un viaje.
+               --
+               -- La columna adjuntos va aparte de portada a propósito: una tarjeta
+               -- puede llevar un PDF y ninguna imagen, y entonces no hay
+               -- miniatura que enseñar pero SÍ hay algo dentro. Sin ese número,
+               -- el archivo existiría sin que nada en el tablero lo dijera.
+               img.url AS portada,
+               COALESCE(ad.n, 0)::int AS adjuntos
         FROM roadmap_items r
         LEFT JOIN users u ON u.id = r.autor_user_id
         LEFT JOIN game_agents ag ON ag.id = r.responsable_agente_id
+        LEFT JOIN LATERAL (
+          SELECT a.url FROM archivos a
+           WHERE a.tarea_id = r.id AND a.archived_at IS NULL AND a.clase = 'imagen'
+           ORDER BY a.created_at LIMIT 1
+        ) img ON true
+        LEFT JOIN LATERAL (
+          SELECT count(*) AS n FROM archivos a
+           WHERE a.tarea_id = r.id AND a.archived_at IS NULL
+        ) ad ON true
         WHERE r.archived_at IS NULL
           AND (${proyecto}::text IS NULL AND r.proyecto_id IS NULL
                OR r.proyecto_id = ${proyecto})

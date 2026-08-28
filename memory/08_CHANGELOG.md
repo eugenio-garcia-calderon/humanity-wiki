@@ -7756,3 +7756,40 @@ branches by dragging it; with Alt it hangs from both. Everyone else can look —
 reading the common tree does not ask for an account.
 
 See `03_DECISIONS.md` for why it is a graph and what that costs.
+
+## 2026-08-28 — A card can carry an image or a file from the moment it is born (prog2)
+
+Eugenio: "que las tarjetas del Kanban permitan no solo poner un título y una
+descripción, sino también subir una imagen o archivo, y también permitan elegir
+el nombre de la etiqueta".
+
+**Half of this already existed and is worth saying so.** Custom labels were
+already there: a project ships with NO default labels, anyone creates one from
+the board or by typing `@` in the title, duplicates are refused by name, and a
+new label immediately becomes an option on every other card. Nothing was needed.
+
+Files were half there: `<Adjuntos contenedor="tarea_id">` has been on the card
+detail for a while, so an EXISTING card could take files. A NEW one could not —
+and that gap is where the photo gets lost. Whoever has the picture in front of
+them has to create the card, find it on the board, open it, and only then
+attach; half the time that does not happen.
+
+Now the new-card panel takes files. The bytes upload immediately, on pick,
+through the shared `subirArchivo` helper; only the *link* to the card waits,
+because `archivos.tarea_id` has a foreign key to `roadmap_items` and the
+database itself would reject hanging a file on a card that does not exist yet.
+If the card saves and the attach then fails, it says exactly that and does NOT
+say "could not create" — that would be a lie that makes the user create a
+second card.
+
+And the image now shows ON the card in the board (`portada`), with a clip and a
+count for everything else (`adjuntos`). Both come from the list query via two
+LATERAL joins: per-card requests would be forty round trips to draw one board.
+The count is separate from the cover on purpose — a PDF draws no thumbnail, and
+without the number nothing on the card would say it carries anything.
+
+Measured, not assumed: the cover renders and the API returns
+`portada` + `adjuntos`. The `<img>` stays `complete:false` in the automation
+browser because it is `loading="lazy"` and that browser fires no
+IntersectionObserver events — the documented trap. Forcing `eager` loaded it at
+160×160, which is what proves the path.
