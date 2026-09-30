@@ -4,6 +4,8 @@ import { ArrowLeft } from 'lucide-react';
 import BloquesLectura from '../knowledge/BloquesLectura';
 import { useSitio } from './ContextoSitio';
 import { cn } from '../../utils/cn';
+import { useEsMovil } from '../../hooks/useEsMovil';
+import { LayoutCabecera, ladoIcono } from '../knowledge/CabeceraPagina';
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -46,6 +48,8 @@ export default function VistaPagina({ pagina, propio, pie }: {
   const mostrarAutor = cfg.mostrarAutor === true;
   const mostrarFecha = cfg.mostrarFecha === true;
   const icono: string | null = cfg.icono || null;
+  const esMovil = useEsMovil();
+  const lado = ladoIcono(cfg.cabecera, esMovil);
 
   // El título de la pestaña, la orden a los buscadores y el icono. El servidor
   // ya los escribe en el HTML para quien no ejecuta JavaScript; esto los
@@ -83,40 +87,42 @@ export default function VistaPagina({ pagina, propio, pie }: {
 
   return (
     <div className="min-h-screen bg-white">
-      {cfg.portada && (
-        <div className="h-40 sm:h-64 w-full overflow-hidden bg-slate-100">
-          <img src={cfg.portada} alt="" className="w-full h-full object-cover" />
-        </div>
-      )}
-      <div className={cn('mx-auto px-5 sm:px-8 pb-16', cfg.anchoCompleto ? 'max-w-6xl' : 'max-w-3xl',
-        cfg.portada ? 'pt-6' : 'pt-8 sm:pt-14')}>
+      <div className={cn('mx-auto px-5 sm:px-8 pb-16 pt-6 sm:pt-12', cfg.anchoCompleto ? 'max-w-6xl' : 'max-w-3xl')}>
         {aPadre && (
           <Link to={aPadre} className="inline-flex items-center gap-1 mb-4 text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> {padre!.titulo || 'Volver'}
           </Link>
         )}
         <article>
-          <header className="mb-6">
-            {icono && (
-              <div className={cn('mb-2', cfg.portada && '-mt-14 sm:-mt-16')}>
-                {esUrl(icono)
-                  ? <img src={icono} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-white shadow-sm" />
-                  : <span className="text-5xl sm:text-6xl leading-none">{icono}</span>}
-              </div>
-            )}
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
-              {pagina.titulo || 'Sin título'}
-            </h1>
-            {(mostrarAutor || mostrarFecha) && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-                {mostrarAutor && pagina.autor?.avatar && (
-                  <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+          {/* La misma cabecera que el editor: imagen arriba, debajo o a un
+              lado, con el tamaño que eligió el autor. */}
+          <header className="mb-8">
+            <LayoutCabecera
+              cabecera={cfg.cabecera}
+              imagen={cfg.portada ? <img src={cfg.portada} alt="" className="w-full h-56 object-cover rounded-2xl" /> : null}
+              cuerpo={<>
+                {icono && (
+                  <div className="mb-3">
+                    {esUrl(icono)
+                      ? <img src={icono} alt="" style={{ width: lado, height: lado }} className="rounded-xl object-cover bg-white" />
+                      : <span style={{ fontSize: Math.round(lado * 0.85), lineHeight: 1 }}>{icono}</span>}
+                  </div>
                 )}
-                {mostrarAutor && pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
-                {mostrarAutor && mostrarFecha && <span>·</span>}
-                {mostrarFecha && <span>{new Date(pagina.updated_at || pagina.created_at || Date.now()).toLocaleDateString('es-ES')}</span>}
-              </div>
-            )}
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
+                  {pagina.titulo || 'Sin título'}
+                </h1>
+                {(mostrarAutor || mostrarFecha) && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                    {mostrarAutor && pagina.autor?.avatar && (
+                      <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                    )}
+                    {mostrarAutor && pagina.autor?.nombre && <span>de <b className="text-slate-600">{pagina.autor.nombre}</b></span>}
+                    {mostrarAutor && mostrarFecha && <span>·</span>}
+                    {mostrarFecha && <span>{new Date(pagina.updated_at || pagina.created_at || Date.now()).toLocaleDateString('es-ES')}</span>}
+                  </div>
+                )}
+              </>}
+            />
           </header>
           <BloquesLectura bloques={bloques} comentable={pagina.id} />
         </article>

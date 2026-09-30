@@ -18,6 +18,7 @@ import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowl
 import MenuBloque from '../components/knowledge/MenuBloque';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import { claseColor } from '../utils/coloresBloque';
+import { LayoutCabecera, MandosCabecera, ladoIcono } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
@@ -208,6 +209,8 @@ function EditorPagina() {
   /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
   const [ajustes, setAjustes] = useState<Ajustes>({});
   const [ajustesAbierto, setAjustesAbierto] = useState(false);
+  /** Los mandos de «Diseño de la cabecera» a la vista. */
+  const [disenoAbierto, setDisenoAbierto] = useState(false);
   const iconoFileRef = useRef<HTMLInputElement>(null);
   const [subiendoIcono, setSubiendoIcono] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
@@ -2077,38 +2080,72 @@ function EditorPagina() {
             Suelta el archivo y lo añado al final de la página.
           </p>
         )}
-        {/* Portada e icono, estilo Notion (Fase 2) */}
-        {portada && (
-          <div className="group/portada relative -mx-6 sm:-mx-12 mb-6">
-            <img src={portada} alt="" className="w-full h-44 sm:h-56 object-cover rounded-2xl" />
-            {editable && (
-              <button
-                onClick={() => { setPortada(null); programarGuardado(); }}
-                className="absolute top-2 right-2 px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600 opacity-0 group-hover/portada:opacity-100 transition-opacity"
-              >
-                Quitar portada
-              </button>
+        {compartirAbierto && (
+          <DialogoCompartir
+            paginaId={docId.current}
+            titulo={titulo}
+            publicoInicial={publico}
+            onCerrar={() => setCompartirAbierto(false)}
+            onCambio={p => setPublico(p)}
+          />
+        )}
+
+        {/* Miga de pan: la página madre y la base de datos donde vive ésta. */}
+        {filaDe && (
+          <nav className="flex items-center flex-wrap gap-1 mb-2 text-xs font-bold text-slate-400">
+            {filaDe.padre && (
+              <>
+                <Link to={`/paginas/${filaDe.padre.id}`} className="hover:text-slate-700 truncate max-w-[14rem]">
+                  {filaDe.padre.titulo || 'Sin título'}
+                </Link>
+                {filaDe.tabla_titulo && <span aria-hidden>/</span>}
+              </>
             )}
-          </div>
+            {filaDe.tabla_titulo && <span className="truncate max-w-[14rem]">{filaDe.tabla_titulo}</span>}
+          </nav>
         )}
-        {icono && (
-          <div className="relative inline-block">
-            <button
-              onClick={() => editable && setEligiendoIcono(v => !v)}
-              className={cn('block mb-2', editable && 'hover:scale-110 transition-transform')}
-              title={editable ? 'Cambiar icono' : undefined}
-            >
-              {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
-                  2026-08-20). Se distinguen mirando el valor, no con una
-                  columna aparte que pudiera contradecirlo. */}
-              <IconoElemento valor={icono} tamano={56} className="rounded-xl" />
-            </button>
-          </div>
-        )}
-        {editable && (eligiendoIcono || !icono || !portada) && (
-          <div className="flex items-center gap-3 mb-2">
-            {(eligiendoIcono || !icono) && (
-              <div className="flex items-center gap-1 flex-wrap">
+
+        {/* ══ LA CABECERA: IMAGEN, ICONO Y TÍTULO (2026-09-30) ══════════════
+            Eugenio eligió que la imagen pueda ir arriba, debajo o a un lado
+            del título, con una barra para el tamaño. La misma pieza pinta la
+            página publicada. Ver `CabeceraPagina.tsx`. */}
+        <LayoutCabecera
+          cabecera={ajustes.cabecera}
+          sangrar
+          imagen={portada ? (
+            <div className="group/portada relative">
+              <img src={portada} alt="" className="w-full h-56 object-cover rounded-2xl" />
+              {editable && (
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
+                  <label className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600 cursor-pointer">
+                    Cambiar
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
+                  </label>
+                  <button onClick={() => { setPortada(null); programarGuardado(); }}
+                    className="px-2 py-1 bg-white/90 rounded-lg text-[10px] font-black text-slate-600">
+                    Quitar
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : null}
+          cuerpo={<>
+            {icono && (
+              <div className="relative inline-block">
+                <button
+                  onClick={() => editable && setEligiendoIcono(v => !v)}
+                  className={cn('block mb-2', editable && 'hover:scale-105 transition-transform')}
+                  title={editable ? 'Cambiar icono' : undefined}
+                >
+                  {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
+                      2026-08-20). Se distinguen mirando el valor. */}
+                  <IconoElemento valor={icono} tamano={ladoIcono(ajustes.cabecera, esMovil)} className="rounded-xl" />
+                </button>
+              </div>
+            )}
+            {editable && (
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 {!icono && !eligiendoIcono && (
                   <button onClick={() => setEligiendoIcono(true)}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
@@ -2116,6 +2153,7 @@ function EditorPagina() {
                   </button>
                 )}
                 {eligiendoIcono && (
+                  <div className="flex items-center gap-1 flex-wrap">
                   <>
                     {EMOJIS_ICONO.map(e => (
                       <button key={e} onClick={() => { setIcono(e); setEligiendoIcono(false); programarGuardado(); }}
@@ -2142,44 +2180,24 @@ function EditorPagina() {
                     <button onClick={() => { setIcono(null); setEligiendoIcono(false); programarGuardado(); }}
                       className="text-[10px] font-bold text-slate-400 hover:text-rose-500 ml-1">Quitar</button>
                   </>
+                  </div>
+                )}
+                {!portada && !eligiendoIcono && (
+                  <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
+                    <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
+                  </label>
+                )}
+                {(portada || icono) && !eligiendoIcono && (
+                  <button onClick={() => setDisenoAbierto(v => !v)} aria-expanded={disenoAbierto}
+                    className={cn('inline-flex items-center gap-1 text-[11px] font-bold transition-colors',
+                      disenoAbierto ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
+                    <LayoutTemplate className="w-3.5 h-3.5" /> Diseño de la cabecera
+                  </button>
                 )}
               </div>
             )}
-            {!portada && !eligiendoIcono && (
-              <label className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
-                <ImageIcon className="w-3.5 h-3.5" /> Añadir portada
-                <input type="file" accept="image/*" className="hidden"
-                  onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
-              </label>
-            )}
-          </div>
-        )}
-
-        {compartirAbierto && (
-          <DialogoCompartir
-            paginaId={docId.current}
-            titulo={titulo}
-            publicoInicial={publico}
-            onCerrar={() => setCompartirAbierto(false)}
-            onCambio={p => setPublico(p)}
-          />
-        )}
-
-        {/* Miga de pan: la página madre y la base de datos donde vive ésta. */}
-        {filaDe && (
-          <nav className="flex items-center flex-wrap gap-1 mb-2 text-xs font-bold text-slate-400">
-            {filaDe.padre && (
-              <>
-                <Link to={`/paginas/${filaDe.padre.id}`} className="hover:text-slate-700 truncate max-w-[14rem]">
-                  {filaDe.padre.titulo || 'Sin título'}
-                </Link>
-                {filaDe.tabla_titulo && <span aria-hidden>/</span>}
-              </>
-            )}
-            {filaDe.tabla_titulo && <span className="truncate max-w-[14rem]">{filaDe.tabla_titulo}</span>}
-          </nav>
-        )}
-
         {/* Título del documento */}
         {editable ? (
           <TituloEditable
@@ -2204,6 +2222,16 @@ function EditorPagina() {
         ) : ajustes.mostrarAutor ? (
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
+
+          </>}
+        />
+
+        {editable && disenoAbierto && (portada || icono) && (
+          <div className="mb-6">
+            <MandosCabecera cabecera={ajustes.cabecera} hayImagen={!!portada} hayIcono={!!icono}
+              onCambio={cab => { setAjustes(a => ({ ...a, cabecera: cab })); programarGuardado(); }} />
+          </div>
+        )}
 
         {ajustesAbierto && (
           <AjustesPagina ajustes={ajustes} portada={portada} titulo={titulo}

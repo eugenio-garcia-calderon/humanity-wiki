@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { subirArchivo } from '../../utils/subir';
 import { cn } from '../../utils/cn';
+import type { Cabecera } from './CabeceraPagina';
 
 // ============================================================================
 // AJUSTES DE LA PÁGINA (2026-09-30)
@@ -22,10 +23,12 @@ export type Ajustes = {
   descripcion?: string;
   /** La imagen de la vista previa. Sin ella, la portada. */
   imagenCompartir?: string;
+  /** Cómo se colocan imagen, icono y título. Ver `CabeceraPagina.tsx`. */
+  cabecera?: Cabecera;
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCerrar }: {
   ajustes: Ajustes;

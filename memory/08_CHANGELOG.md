@@ -7971,3 +7971,15 @@ needs.
   them.
 - **Ancho completo** now applies in the editor too; before it only changed the
   published page, so switching it on looked like it did nothing.
+
+## 2026-09-30 — Page header layouts: image above, below or beside the title (prog8)
+
+Eugenio never liked Notion's fixed cover-on-top. The page header (image,
+icon, title) now has four layouts — image above (default), below, left or
+right of the title — chosen from «Diseño de la cabecera» in the editor, with
+a slider for the image size (height when stacked; image/title split when
+side by side, 20–80) and another for the icon (32–128 px). Stored in
+`config.cabecera`; one component (`CabeceraPagina.tsx`) paints both the
+editor and the published page. One choice serves both screens: side-by-side
+stacks on phones (image first), stacked images render at 55 % height and the
+icon is capped at 72 px on mobile.
