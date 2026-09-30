@@ -1,16 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/dominios.ts",
-      "motivo": "botón solicitar certificado",
-      "desde": "2026-09-30T15:50:42.724Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/knowledge/DominioPropio.tsx",
-      "motivo": "botón solicitar certificado",
-      "desde": "2026-09-30T15:50:42.724Z"
-    }
-  ]
+  "reservas": []
 }
