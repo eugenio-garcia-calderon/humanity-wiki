@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -35,7 +35,7 @@ type Fila = {
 
 export type FormaVista = 'galeria' | 'tabla';
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano, visibles, onCambiarVisibles }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -51,7 +51,11 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Tamaño de las tarjetas de la galería, y quién lo guarda (el editor). */
   tamano?: TamanoGaleria;
   onCambiarTamano?: (t: TamanoGaleria) => void;
+  /** Qué propiedades se ven en las tarjetas, y quién lo guarda. */
+  visibles?: string[];
+  onCambiarVisibles?: (ids: string[]) => void;
 }) {
+  const [menuProps, setMenuProps] = useState(false);
   const tono = tonoDe(color);
   const esMovil = useEsMovil();
   const navigate = useNavigate();
@@ -192,9 +196,40 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>
         {/* Las dos vistas, como las pestañas de Notion. */}
+        {/* QUÉ SE VE EN LAS TARJETAS (2026-10-01): «configurar la vista de
+            galería para mostrar los enlaces a otras bases de datos». */}
+        {vista === 'galeria' && onCambiarVisibles && (
+          <div className="relative ml-auto shrink-0">
+            <button onClick={() => setMenuProps(v => !v)} aria-expanded={menuProps}
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300">
+              <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Propiedades</span>
+            </button>
+            {menuProps && (
+              <div className="absolute right-0 top-full z-30 mt-1 w-60 bg-white border border-slate-200 rounded-xl shadow-2xl p-1.5">
+                <p className="px-2 pt-1 pb-1.5 text-[10px] font-black uppercase tracking-wide text-slate-400">Se ven en la tarjeta</p>
+                {columnas.filter(c => c.id !== datos.columna_titulo).map(c => {
+                  const actuales = visibles ?? columnas.filter(x => x.id !== datos.columna_titulo).slice(0, 3).map(x => x.id);
+                  const puesta = actuales.includes(c.id);
+                  return (
+                    <button key={c.id}
+                      onClick={() => onCambiarVisibles(puesta ? actuales.filter(x => x !== c.id) : [...actuales, c.id])}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-bold text-slate-600 text-left hover:bg-slate-50">
+                      <span className={cn('w-3.5 h-3.5 rounded border grid place-items-center shrink-0',
+                        puesta ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300')}>
+                        {puesta && <Check className="w-2.5 h-2.5" />}
+                      </span>
+                      <span className="flex-1 truncate">{c.nombre}</span>
+                      {c.tipo === 'relacion' && <span className="text-[10px] font-bold text-slate-300">enlace</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
         {/* Tamaño de las tarjetas: sólo en galería y sólo para quien edita. */}
         {vista === 'galeria' && onCambiarTamano && (
-          <label className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
+          <label className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0', !onCambiarVisibles && 'ml-auto')}>
             <span className="hidden sm:inline">Tamaño</span>
             <select value={tamano} onChange={e => onCambiarTamano(e.target.value as TamanoGaleria)}
               aria-label="Tamaño de las tarjetas"
@@ -231,7 +266,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
         <div style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
           <Galeria tablaId={tablaId} columnas={columnas} filas={filas}
             columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar}
-            claseTitulo={tono.texto} tamano={tamano} />
+            claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
         </div>
       ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
