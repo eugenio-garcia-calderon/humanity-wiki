@@ -60,9 +60,20 @@ export function motivoInvalido(d: string): string | null {
   return null;
 }
 
-/** Our public IP(s) as written in the DNS instructions; first one is shown. */
+/**
+ * THE SERVER'S PUBLIC IP. Production moved to a new Hetzner machine in
+ * September 2026 (37.27.244.35, Helsinki) and `IP_PUBLICA` was not set there,
+ * so every custom domain was told to point at the OLD address
+ * (167.233.245.191) — which Let's Encrypt then validated against, failing
+ * every time. One constant, used by the instructions and by every check.
+ * `IP_PUBLICA` (comma-separated) still overrides it.
+ */
+const IP_POR_DEFECTO = '37.27.244.35';
+const nuestrasIps = () => (process.env.IP_PUBLICA || IP_POR_DEFECTO).split(',').map(x => x.trim()).filter(Boolean);
+
+/** Our public IP as written in the DNS instructions (the first one). */
 function ipPublica(): string {
-  return (process.env.IP_PUBLICA || '167.233.245.191').split(',')[0].trim();
+  return nuestrasIps()[0];
 }
 
 export function registerDominiosRoutes(app: Express, db: any) {
@@ -460,8 +471,7 @@ async function apuntaAqui(dominio: string): Promise<boolean> {
 
   // Nuestras direcciones. Se leen del entorno para que cambiar de máquina no
   // sea buscar una IP escrita a mano en un fichero de código.
-  const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
-    .split(',').map(x => x.trim()).filter(Boolean);
+  const nuestras = nuestrasIps();
 
   let apunta = false;
   try {
@@ -536,8 +546,7 @@ const pausa = (ms: number) => new Promise(r => setTimeout(r, ms));
 export async function comprobarConexion(dominio: string, { solicitar = false } = {}): Promise<{
   listo: boolean; resumen: string; pasos: Paso[];
 }> {
-  const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
-    .split(',').map(x => x.trim()).filter(Boolean);
+  const nuestras = nuestrasIps();
   const pasos: Paso[] = [];
 
   // ── 1. EL REGISTRO A DE LA RAÍZ ────────────────────────────────────────
