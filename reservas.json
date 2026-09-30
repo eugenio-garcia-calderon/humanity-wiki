@@ -5,6 +5,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "Sitios publicados limpios (prog8)",
       "desde": "2026-09-30T20:52:34.085Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/App.tsx",
+      "motivo": "Sitios publicados limpios (prog8)",
+      "desde": "2026-09-30T20:52:37.923Z"
     }
   ]
 }
