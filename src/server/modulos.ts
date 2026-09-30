@@ -54,6 +54,7 @@ import { registerBdRoutes } from './bd.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
+import { registrarSitios } from './sitios.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
 import { registrarFuente } from './fuente.js';
@@ -176,6 +177,13 @@ export const MODULOS: Modulo[] = [
   // certificado, así que si este módulo no monta, nadie puede estrenar un
   // dominio nuevo — pero los que ya tienen certificado siguen funcionando.
   { nombre: 'dominios', montar: (app, db) => registerDominiosRoutes(app, db) },
+  // Los sitios publicados: subpáginas visibles por herencia, la vista previa
+  // al compartir escrita en el HTML, y robots/sitemap de cada dominio. Tiene
+  // que ir antes que el comodín de la aplicación (que está en `server.ts`,
+  // después de todos los módulos), porque escribe el HTML de las direcciones
+  // de páginas publicadas. Si no monta, las páginas se siguen viendo: sólo
+  // se pierde la vista previa y las subpáginas públicas.
+  { nombre: 'sitios', montar: (app, db) => registrarSitios(app, db) },
   { nombre: 'buscador', montar: (app, db) => registerBuscadorRoutes(app, db) },
   { nombre: 'republicar', montar: (app, db) => registrarRepublicar(app, db) },
   { nombre: 'fuente', montar: (app, db) => registrarFuente(app, db) },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
+import { useSitio } from '../sitio/ContextoSitio';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
@@ -46,6 +47,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
 }) {
   const esMovil = useEsMovil();
   const navigate = useNavigate();
+  const sitio = useSitio();
   const [vista, setVista] = useState<FormaVista>(vistaInicial || 'tabla');
   useEffect(() => { if (vistaInicial) setVista(vistaInicial); }, [vistaInicial]);
   const cambiarVista = (v: FormaVista) => { setVista(v); onCambiarVista?.(v); };
@@ -122,7 +124,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
 
   /** Abrir la página de una fila desde la tabla — el «ABRIR» de Notion. */
   const abrirPagina = async (f: Fila) => {
-    if (f.pagina_id) { navigate(`/paginas/${f.pagina_id}`); return; }
+    if (f.pagina_id) { navigate(sitio ? sitio.enlacePagina(f.pagina_id) : `/paginas/${f.pagina_id}`); return; }
+    if (sitio) return;
     const r = await fetch(`/api/bd/filas/${f.id}/pagina`, { method: 'POST', credentials: 'include' });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.pagina_id) navigate(`/paginas/${j.pagina_id}`);

@@ -7,13 +7,14 @@ import {
   ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, MoreHorizontal, Maximize2, Minimize2,
+  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
 import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
+import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
@@ -194,6 +195,9 @@ function EditorPagina() {
   // Fase 2 —
   const [portada, setPortada] = useState<string | null>(null);
   const [icono, setIcono] = useState<string | null>(null);
+  /** Ajustes de publicación (autor, fecha, ancho, descripción, imagen). */
+  const [ajustes, setAjustes] = useState<Ajustes>({});
+  const [ajustesAbierto, setAjustesAbierto] = useState(false);
   const iconoFileRef = useRef<HTMLInputElement>(null);
   const [subiendoIcono, setSubiendoIcono] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
@@ -243,6 +247,9 @@ function EditorPagina() {
         setPuedoEditar(!!j.puedo_editar);
         setPortada(j.config?.portada || null);
         setIcono(j.config?.icono || null);
+        const aj: Ajustes = {};
+        for (const k of CLAVES_AJUSTES) if (j.config?.[k] !== undefined) (aj as any)[k] = j.config[k];
+        setAjustes(aj);
         let bs: Bloque[] = j.config?.bloques || [];
         // Documentos guardados antes del arreglo del título duplicado: si el
         // primer bloque es un H1 idéntico al título, se omite (y el próximo
@@ -335,9 +342,9 @@ function EditorPagina() {
   // eso lee SIEMPRE de estos refs, que un efecto mantiene al día en cuanto
   // React aplica cada cambio de estado.
   const bloquesRef = useRef<Bloque[]>([]);
-  const metaRef = useRef<{ titulo: string; portada: string | null; icono: string | null }>({ titulo: '', portada: null, icono: null });
+  const metaRef = useRef<{ titulo: string; portada: string | null; icono: string | null; ajustes: Ajustes }>({ titulo: '', portada: null, icono: null, ajustes: {} });
   useEffect(() => { bloquesRef.current = bloques; }, [bloques]);
-  useEffect(() => { metaRef.current = { titulo, portada, icono }; }, [titulo, portada, icono]);
+  useEffect(() => { metaRef.current = { titulo, portada, icono, ajustes }; }, [titulo, portada, icono, ajustes]);
 
   const serializar = useCallback((): Bloque[] =>
     bloquesRef.current.map(b => ({
@@ -357,7 +364,9 @@ function EditorPagina() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: meta.titulo || 'Documento sin título',
-        config: { bloques: bs, portada: meta.portada || undefined, icono: meta.icono || undefined },
+        // Los ajustes van en la misma `config`: si no se mandaran, cada
+        // guardado automático los borraría.
+        config: { ...meta.ajustes, bloques: bs, portada: meta.portada || undefined, icono: meta.icono || undefined },
       }),
     }).catch(() => null);
     setGuardado(r?.ok ? 'sí' : 'pendiente');
@@ -1731,6 +1740,12 @@ function EditorPagina() {
               a alguien es lo que se quiere hacer nueve de cada diez veces, y
               hasta hoy no existía el botón — solo un icono de descarga que
               nadie asocia con compartir. */}
+          {editable && (
+            <button onClick={() => setAjustesAbierto(true)} title="Ajustes de la página" aria-label="Ajustes de la página"
+              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+              <Settings2 className="w-4 h-4" />
+            </button>
+          )}
           <button onClick={() => setCompartirAbierto(true)}
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors">
             <Share2 className="w-3.5 h-3.5" /> Compartir
@@ -1886,7 +1901,27 @@ function EditorPagina() {
         ) : (
           <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1 break-words">{titulo}</h1>
         )}
-        {autor && <p className="text-xs text-slate-400 mb-6">de {autor}</p>}
+        {/* EL AUTOR, OCULTO POR DEFECTO (2026-09-30). Quien escribe lo ve
+            atenuado, con la opción de mostrarlo al pasar el ratón; quien lee
+            sólo lo ve si el autor lo ha decidido. */}
+        {autor && (editable ? (
+          <p className="group flex items-center gap-2 text-xs mb-6">
+            <span className={ajustes.mostrarAutor ? 'text-slate-400' : 'text-slate-300 line-through decoration-slate-200'}>de {autor}</span>
+            <button onClick={() => { setAjustes(a => ({ ...a, mostrarAutor: !a.mostrarAutor })); programarGuardado(); }}
+              className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:bg-slate-50 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+              {ajustes.mostrarAutor ? <><EyeOff className="w-3 h-3" /> Ocultar nombre</> : <><Eye className="w-3 h-3" /> Mostrar nombre</>}
+            </button>
+            {!ajustes.mostrarAutor && <span className="text-[11px] text-slate-300 group-hover:hidden">oculto al publicar</span>}
+          </p>
+        ) : ajustes.mostrarAutor ? (
+          <p className="text-xs text-slate-400 mb-6">de {autor}</p>
+        ) : <div className="mb-6" />)}
+
+        {ajustesAbierto && (
+          <AjustesPagina ajustes={ajustes} portada={portada} titulo={titulo}
+            onCambio={a => { setAjustes(a); programarGuardado(); }}
+            onCerrar={() => setAjustesAbierto(false)} />
+        )}
 
         {/* Los bloques */}
         <div className={cn('space-y-2', editable && 'pl-0')}>

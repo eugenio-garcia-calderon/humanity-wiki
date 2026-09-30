@@ -7909,3 +7909,36 @@ de datos. Todo son páginas dentro de páginas».
 - The «← Páginas» arrow on a page that is a database row now returns to the
   page holding that database, named after it. Eugenio: going back to the list
   of all pages «es terrible para la experiencia de usuario».
+
+## 2026-09-30 — Published pages become real websites (prog8)
+
+Eugenio: when a shared page was opened from its own link it looked clean, but
+clicking a database item dropped the reader into the full Humanity Wiki app;
+the author name showed by default. He asked for a deep restructure so the page
+builder works as a white-label website builder, plus five things a serious one
+needs.
+
+- **Sub-pages stay inside the site.** A database item on a published page opens
+  at `/p/:id` on the same custom domain or subdomain (`/@quien/p/:id` on the
+  main domain), without the app shell. `components/sitio/ContextoSitio.tsx`
+  tells the gallery and the grid's «Abrir» which address to use.
+- **Visibility is inherited** (`server/sitios.ts`): a row page, and a table,
+  can be seen if the page holding the database is published — Notion's rule.
+  Before, a published page's database showed «no tienes acceso» to everyone
+  but the author.
+- **One published view** (`components/sitio/VistaPagina.tsx`) for the three
+  doors, with the cover and icon that were never shown publicly, a back link to
+  the parent page inside the site, and an unbranded 404.
+- **Custom domains showed the title and an empty page**: the domain resolver
+  never returned the blocks. Content now comes from `/api/sitio/pagina/:id`.
+- **Author hidden by default.** In the editor it shows dimmed with a hover
+  «Mostrar nombre / Ocultar nombre».
+- The five additions: (1) **Page settings** panel — author, date, full width,
+  description, share image; (2) **link previews**: title, description, image,
+  canonical and robots written into the HTML server-side for WhatsApp,
+  LinkedIn and Google (production only; dev HTML is Vite's); (3) the page
+  **icon as favicon** and a tab title without «· humanity.wiki» on own
+  domains/subdomains; (4) **sitemap.xml and robots.txt** per custom domain and
+  subdomain, including sub-pages; (5) **no platform branding** on own
+  domains/subdomains (footer and «Ir a humanity.wiki» only on the main
+  domain).

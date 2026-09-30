@@ -84,6 +84,8 @@ const Buscar = lazy(() => import('./pages/Buscar'));
 const Comercio = lazy(() => import('./pages/Comercio'));
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada'));
 const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
+const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
+const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
 const PortadaEspacio = lazy(() => import('./pages/PortadaEspacio'));
 const MiPedido = lazy(() => import('./pages/MiPedido'));
 const FichaProducto = lazy(() => import('./pages/FichaProducto'));
@@ -225,6 +227,9 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               proyectos. Misma razón que `pedido` y `producto` aquí arriba. */}
           <Route path="carpetas/:slug" element={<Carpeta />} />
           <Route path="proyectos/:slug" element={<Carpeta />} />
+          {/* Las subpáginas (elementos de sus bases de datos), dentro del
+              subdominio y sin armazón. Ver `SubpaginaSitio`. */}
+          <Route path="p/:id" element={<SubpaginaEnEspacio />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -284,6 +289,8 @@ export default function App() {
                   enlace, no tiene cuenta, y no debe ver la barra de trabajo ni
                   un «todavia no tienes proyectos» que no es su vida. */}
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
+              {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
+              <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />
 
               {/* LA MISMA PÁGINA, POR LA PUERTA CORTA. En
                   `claude-dos.humanity.wiki/mi-pagina` el nombre viaja en el

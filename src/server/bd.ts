@@ -34,6 +34,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { registrarHistorial } from './historial';
+import { tablaVisible } from './sitios';
 import { TIPOS, tipar, type Tipo } from './bd/tipos';
 import { celdasDe, type Celda } from './bd/celdas';
 import { CLASE_DE_TIPO, enlacesDe, guardarEnlaces, comprobarEnlaces, celdaDeEnlaces, type Apuntado } from './bd/enlaces';
@@ -95,6 +96,10 @@ export function registerBdRoutes(app: Express, db: any) {
 
     if (escribir) return { error: 'Solo quien creó el proyecto puede escribir en sus tablas.', codigo: 403 };
     if (t.proyecto_id ? t.proyecto_publico : false) return { tabla: t };
+    // UNA TABLA METIDA EN UNA PÁGINA PUBLICADA SE VE (2026-09-30). La tabla
+    // no tiene visibilidad propia fuera de su proyecto: la hereda de la página
+    // donde se enseña. Ver `sitios.ts`.
+    if (await tablaVisible(db, t.id)) return { tabla: t };
     return { error: 'No tienes acceso a esa tabla.', codigo: 403 };
   }
 
