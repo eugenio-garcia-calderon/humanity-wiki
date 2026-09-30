@@ -60,6 +60,11 @@ export function motivoInvalido(d: string): string | null {
   return null;
 }
 
+/** Our public IP(s) as written in the DNS instructions; first one is shown. */
+function ipPublica(): string {
+  return (process.env.IP_PUBLICA || '167.233.245.191').split(',')[0].trim();
+}
+
 export function registerDominiosRoutes(app: Express, db: any) {
   /**
    * ¿PUEDO EMITIR UN CERTIFICADO PARA ESTE DOMINIO? — lo pregunta Caddy.
@@ -215,8 +220,15 @@ export function registerDominiosRoutes(app: Express, db: any) {
         // Lo que hay que poner en el DNS. Se manda desde el servidor para que
         // el día que cambie la IP no haya que buscarlo en una pantalla.
         instrucciones: {
-          cname: { nombre: 'www', valor: 'humanity.wiki' },
-          a: { nombre: '@', valor: process.env.IP_PUBLICA || '167.233.245.191' },
+          a: { nombre: '@', valor: ipPublica() },
+          // `www` es OTRO registro A, no un CNAME a humanity.wiki (2026-09-30).
+          // humanity.wiki está detrás de Cloudflare, así que un CNAME hacia él
+          // llevaba `www.sudominio` a Cloudflare, que no tiene certificado
+          // para ese nombre ni sabe de él: la dirección con www no abría
+          // nunca. Lo destapó luzhumanidad.com, el primer dominio real.
+          // La clave se sigue llamando `cname` para las pantallas ya
+          // desplegadas; `tipo` dice lo que es.
+          cname: { tipo: 'A', nombre: 'www', valor: ipPublica() },
         },
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
@@ -315,8 +327,8 @@ export function registerDominiosRoutes(app: Express, db: any) {
         estado: 'pendiente',
         // Lo que hay que hacer AHORA, en el orden en que hay que hacerlo.
         pasos: [
-          `En el panel de tu dominio, crea un registro A: nombre «@», valor ${process.env.IP_PUBLICA || '167.233.245.191'}.`,
-          'Y un registro CNAME: nombre «www», valor humanity.wiki.',
+          `En el panel de tu dominio, crea un registro A: nombre «@», valor ${ipPublica()}.`,
+          `Y otro registro A: nombre «www», el mismo valor ${ipPublica()}.`,
           'Espera a que se propague. Suele tardar minutos, a veces horas.',
           `Después abre https://${d} — el certificado se emite solo en esa primera visita.`,
         ],
@@ -448,9 +460,10 @@ async function apuntaAqui(dominio: string): Promise<boolean> {
       dns.resolveCname(dominio),
     ]);
     if (v4.status === 'fulfilled' && v4.value.some(ip => nuestras.includes(ip))) apunta = true;
-    if (!apunta && cname.status === 'fulfilled') {
-      apunta = cname.value.some(c => c.replace(/\.$/, '').toLowerCase().endsWith('humanity.wiki'));
-    }
+    // A CNAME to humanity.wiki no longer counts: it resolves to Cloudflare,
+    // which cannot serve this name. `resolve4` already follows CNAMEs, so a
+    // chain that really ends at our IP is still accepted above.
+    void cname;
   } catch {
     apunta = false;
   }
@@ -495,10 +508,10 @@ export async function comprobarConexion(dominio: string): Promise<{
   const [v4, cname] = await Promise.allSettled([dns.resolve4(dominio), dns.resolveCname(dominio)]);
   const ips = v4.status === 'fulfilled' ? v4.value : [];
   const cnames = cname.status === 'fulfilled' ? cname.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
-  const raizOk = ips.some(ip => nuestras.includes(ip)) || cnames.some(c => c.endsWith('humanity.wiki'));
+  const raizOk = ips.some(ip => nuestras.includes(ip));
 
   let detalleA: string;
-  if (raizOk) detalleA = `Apunta a ${ips.join(', ') || cnames.join(', ')}. Correcto.`;
+  if (raizOk) detalleA = `Apunta a ${ips.join(', ')}. Correcto.`;
   else if (ips.length === 0) detalleA = `Todavía no hay registro A. Crea uno con nombre «@» y valor ${nuestras[0]}. Si ya lo has creado, espera: puede tardar minutos u horas en propagarse.`;
   else if (ips.every(esDeCloudflare)) detalleA = `Apunta a ${ips.join(', ')}, que son de Cloudflare. En Cloudflare, pulsa la nube naranja del registro para dejarla gris («DNS only»).`;
   else detalleA = `Apunta a ${ips.join(', ')}, que no es esta plataforma. Cambia el valor del registro A a ${nuestras[0]}.`;
@@ -511,13 +524,16 @@ export async function comprobarConexion(dominio: string): Promise<{
   const [wv4, wcn] = await Promise.allSettled([dns.resolve4(www), dns.resolveCname(www)]);
   const wips = wv4.status === 'fulfilled' ? wv4.value : [];
   const wcns = wcn.status === 'fulfilled' ? wcn.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
-  const wwwOk = wips.some(ip => nuestras.includes(ip))
-    || wcns.some(c => c === dominio || c.endsWith('humanity.wiki'));
+  // Only our IP counts. `resolve4` follows a CNAME to the root domain, so that
+  // setup still passes; a CNAME to humanity.wiki lands on Cloudflare and fails.
+  const wwwOk = wips.some(ip => nuestras.includes(ip));
+  const wwwAHumanity = wcns.some(c => c.endsWith('humanity.wiki'));
   pasos.push({
     clave: 'www', ok: wwwOk, aviso: !wwwOk, titulo: `Registro de ${www}`,
     detalle: wwwOk ? 'Correcto.'
+      : wwwAHumanity ? `Es un CNAME a humanity.wiki, y así no funciona. Bórralo y crea en su lugar un registro A con nombre «www» y valor ${nuestras[0]}.`
       : wips.length && wips.every(esDeCloudflare) ? 'Está detrás de la nube naranja de Cloudflare. Déjala gris.'
-      : 'Falta o apunta a otro sitio. Crea un CNAME con nombre «www» y valor humanity.wiki. No es imprescindible: sin él solo falla la dirección con «www».',
+      : `Falta o apunta a otro sitio. Crea un registro A con nombre «www» y valor ${nuestras[0]}. No es imprescindible: sin él solo falla la dirección con «www».`,
   });
 
   // La caché del `ask` de Caddy se pone al día con lo que acabamos de ver:
@@ -549,7 +565,7 @@ export async function comprobarConexion(dominio: string): Promise<{
     } catch (e: any) {
       const c = String(e?.cause?.code || e?.name || '');
       detalle = /CERT|SSL|TLS|ALTNAME|SELF_SIGNED/i.test(c)
-        ? 'El DNS está bien, pero el certificado aún no está listo. Vuelve a comprobar en un minuto.'
+        ? 'El DNS está bien, pero el certificado aún no está listo. Suele tardar un minuto; si el DNS se cambió hace poco, Let\'s Encrypt puede tardar hasta una hora en volver a intentarlo.'
         : /Timeout|Abort/i.test(c)
           ? 'No ha respondido a tiempo. El certificado puede estar emitiéndose: vuelve a comprobar en un minuto.'
           : `No se ha podido conectar (${c || 'error de red'}). Si acabas de cambiar el DNS, espera unos minutos.`;

@@ -7809,3 +7809,13 @@ The fresh DNS result is written into the one-minute cache the Caddy `ask`
 uses, so someone who has just fixed their DNS is no longer refused a
 certificate by a stale «no». Only the Páginas dialog (`DominioPropio.tsx`) has
 the button; `CajaCompartir` (projects) still lists domains without it.
+
+## 2026-09-30 — Custom domains: `www` is an A record, not a CNAME to humanity.wiki (prog8)
+
+The first real custom domain (luzhumanidad.com) showed the instructions were
+wrong: a `www` CNAME to humanity.wiki resolves to Cloudflare, which has no
+certificate for `www.<their domain>`, so the www address never opened — and
+the new «Comprobar conexión» said «Correcto» about it. The instructions now ask
+for a second A record (`www` → our IP); the check only accepts our IP for root
+and www, and names the CNAME explicitly when it finds one. The `cname` key in
+`GET /api/dominios` keeps its name for deployed screens and gains `tipo: 'A'`.
