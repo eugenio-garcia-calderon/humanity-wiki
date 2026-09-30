@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "drizzle/0132_carpetas_rescate.sql",
+      "motivo": "carpetas: rescate de proyectos en páginas",
+      "desde": "2026-09-30T15:14:02.212Z"
+    }
+  ]
 }
