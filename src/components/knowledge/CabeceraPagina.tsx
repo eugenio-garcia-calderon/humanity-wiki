@@ -33,10 +33,43 @@ export type Cabecera = {
   tamano?: number;
   /** Lado del icono en píxeles, 32–128. */
   icono?: number;
+  /** Tamaño de letra de la descripción bajo el título, 12–32 px. */
+  descripcion?: number;
+  /** El icono al lado del título (por defecto) o encima. */
+  iconoPos?: 'lado' | 'encima';
 };
+
+/**
+ * El icono y el título (con su descripción) como un bloque. Por defecto el
+ * icono va A LA IZQUIERDA del título (Eugenio, 2026-09-30); «encima» es la
+ * forma de Notion. En un teléfono también va al lado: es más corto en alto,
+ * que es lo que falta en una pantalla vertical.
+ */
+export function FilaTitulo({ cabecera, icono, children }: {
+  cabecera?: Cabecera;
+  icono: ReactNode | null;
+  children: ReactNode;
+}) {
+  if (!icono) return <div>{children}</div>;
+  if (cabecera?.iconoPos === 'encima') return <div><div className="mb-2">{icono}</div>{children}</div>;
+  return (
+    <div className="flex items-start gap-3 sm:gap-4">
+      <div className="shrink-0">{icono}</div>
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  );
+}
 
 export const TAMANO_POR_DEFECTO = 50;
 export const ICONO_POR_DEFECTO = 56;
+export const DESCRIPCION_POR_DEFECTO = 18;
+
+/** El tamaño de letra de la descripción. En un teléfono, como mucho 22 px:
+ *  una entradilla enorme empuja el contenido fuera de la primera pantalla. */
+export function letraDescripcion(cabecera: Cabecera | undefined, esMovil: boolean): number {
+  const t = acotar(cabecera?.descripcion, 12, 32, DESCRIPCION_POR_DEFECTO);
+  return esMovil ? Math.min(t, 22) : t;
+}
 
 const acotar = (n: number | undefined, min: number, max: number, def: number) =>
   typeof n === 'number' && Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
@@ -48,14 +81,11 @@ const altoDe = (t: number) => Math.round(120 + ((t - 20) / 60) * 360);
  * Coloca la imagen y el cuerpo (icono + título + lo demás) según la
  * disposición elegida. No sabe qué hay dentro: eso lo pone quien la usa.
  */
-export function LayoutCabecera({ cabecera, imagen, cuerpo, sangrar = false }: {
+export function LayoutCabecera({ cabecera, imagen, cuerpo }: {
   cabecera?: Cabecera;
   /** La imagen ya pintada, o `null` si la página no tiene. */
   imagen: ReactNode | null;
   cuerpo: ReactNode;
-  /** Arriba/debajo, la imagen sale de los márgenes de la columna, como en el
-   *  editor de siempre. */
-  sangrar?: boolean;
 }) {
   const d = cabecera?.disposicion || 'arriba';
   const t = acotar(cabecera?.tamano, 20, 80, TAMANO_POR_DEFECTO);
@@ -71,7 +101,7 @@ export function LayoutCabecera({ cabecera, imagen, cuerpo, sangrar = false }: {
         className={cn('flex flex-col gap-5 sm:grid sm:items-center sm:gap-8',
           d === 'izquierda' ? 'sm:[grid-template-columns:var(--img)_var(--txt)]' : 'sm:[grid-template-columns:var(--txt)_var(--img)]')}>
         {/* En móvil la imagen va siempre primero, como en «arriba». */}
-        <div className={cn('min-w-0 [&_img]:w-full [&_img]:h-auto [&_img]:aspect-[4/3] [&_img]:object-cover', d === 'derecha' && 'sm:order-2')}>{imagen}</div>
+        <div className={cn('min-w-0 [&_img]:w-full [&_img]:h-auto [&_img]:object-contain', d === 'derecha' && 'sm:order-2')}>{imagen}</div>
         <div className={cn('min-w-0', d === 'derecha' && 'sm:order-1')}>{cuerpo}</div>
       </div>
     );
@@ -80,7 +110,12 @@ export function LayoutCabecera({ cabecera, imagen, cuerpo, sangrar = false }: {
   const estilo = { '--alto': `${altoDe(t)}px` } as CSSProperties;
   const caja = (
     <div style={estilo}
-      className={cn('[&_img]:h-[calc(var(--alto)*0.55)] sm:[&_img]:h-[var(--alto)]', sangrar && '-mx-6 sm:-mx-12')}>
+      // LA IMAGEN ENTERA, SIN RECORTAR (2026-09-30, Eugenio: «que el
+      // cuadradito se ajuste al tamaño de la imagen para que no salga
+      // cortada»). La barra fija el alto MÁXIMO; el ancho sale solo de la
+      // proporción de la imagen, así que nunca se recorta ni se deforma.
+      className={cn('[&_img]:w-auto [&_img]:max-w-full [&_img]:h-auto [&_img]:object-contain',
+        '[&_img]:max-h-[calc(var(--alto)*0.8)] sm:[&_img]:max-h-[var(--alto)]')}>
       {imagen}
     </div>
   );
@@ -105,10 +140,11 @@ const OPCIONES: { d: Disposicion; label: string; Icono: any }[] = [
   { d: 'derecha', label: 'Imagen a la derecha', Icono: PanelRight },
 ];
 
-export function MandosCabecera({ cabecera, hayImagen, hayIcono, onCambio }: {
+export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion = false, onCambio }: {
   cabecera?: Cabecera;
   hayImagen: boolean;
   hayIcono: boolean;
+  hayDescripcion?: boolean;
   onCambio: (c: Cabecera) => void;
 }) {
   const c = cabecera || {};
@@ -132,14 +168,33 @@ export function MandosCabecera({ cabecera, hayImagen, hayIcono, onCambio }: {
       )}
       {hayImagen && (
         <Deslizador
-          etiqueta={lateral ? 'Imagen ↔ título' : 'Alto de la imagen'}
+          etiqueta={lateral ? 'Imagen ↔ título' : 'Tamaño de la imagen'}
           valor={acotar(c.tamano, 20, 80, TAMANO_POR_DEFECTO)} min={20} max={80}
           texto={v => (lateral ? `${v} / ${100 - v}` : `${v}%`)}
           onCambio={v => pon({ tamano: v })} />
       )}
+      {hayDescripcion && (
+        <Deslizador
+          etiqueta="Descripción"
+          valor={acotar(c.descripcion, 12, 32, DESCRIPCION_POR_DEFECTO)} min={12} max={32}
+          texto={v => `${v} px`}
+          onCambio={v => pon({ descripcion: v })} />
+      )}
+      {hayIcono && (
+        <div className="flex items-center gap-1" role="radiogroup" aria-label="Dónde va el icono">
+          <span className="text-[11px] font-bold text-slate-500 mr-1">Icono</span>
+          {([['lado', 'Al lado'], ['encima', 'Encima']] as const).map(([v, label]) => (
+            <button key={v} role="radio" aria-checked={(c.iconoPos || 'lado') === v} onClick={() => pon({ iconoPos: v })}
+              className={cn('h-11 sm:h-8 px-2.5 rounded-lg border text-[11px] font-bold transition-colors',
+                (c.iconoPos || 'lado') === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-400 hover:text-slate-700')}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       {hayIcono && (
         <Deslizador
-          etiqueta="Icono"
+          etiqueta="Tamaño del icono"
           valor={acotar(c.icono, 32, 128, ICONO_POR_DEFECTO)} min={32} max={128}
           texto={v => `${v} px`}
           onCambio={v => pon({ icono: v })} />
@@ -153,11 +208,11 @@ function Deslizador({ etiqueta, valor, min, max, texto, onCambio }: {
   texto: (v: number) => string; onCambio: (v: number) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 min-w-[12rem] flex-1">
+    <label className="flex items-center gap-2 basis-full sm:basis-[calc(50%-0.75rem)] min-w-0">
       <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">{etiqueta}</span>
       <input type="range" min={min} max={max} value={valor}
         onChange={e => onCambio(Number(e.target.value))}
-        className="flex-1 h-11 sm:h-6 accent-emerald-600" />
+        className="flex-1 min-w-0 w-full h-11 sm:h-6 accent-emerald-600" />
       <span className="w-16 shrink-0 whitespace-nowrap text-right text-[11px] font-bold text-slate-400 tabular-nums">{texto(valor)}</span>
     </label>
   );

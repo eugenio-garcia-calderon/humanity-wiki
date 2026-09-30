@@ -133,6 +133,10 @@ async function datosPagina(db: any, id: string) {
 export function descripcionDe(config: any): string {
   const propia = typeof config?.descripcion === 'string' ? config.descripcion.trim() : '';
   if (propia) return propia.slice(0, 300);
+  // La descripción visible bajo el título, si es pública, dice de qué va la
+  // página mejor que su primer párrafo. Oculta, no sale: el autor dijo que no.
+  const sub = typeof config?.subtitulo === 'string' && !config?.subtituloOculto ? config.subtitulo.trim() : '';
+  if (sub) return sub.slice(0, 300);
   const bloques = Array.isArray(config?.bloques) ? config.bloques : [];
   for (const b of bloques) {
     const t = typeof b?.texto === 'string' ? b.texto.replace(/[*`#>\[\]]|\(http[^)]*\)/g, '').trim() : '';
