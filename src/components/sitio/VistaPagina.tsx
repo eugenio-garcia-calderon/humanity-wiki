@@ -111,8 +111,8 @@ export default function VistaPagina({ pagina, propio, pie }: {
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
                   {pagina.titulo || 'Sin título'}
                 </h1>
-                {/* La descripción sólo si su autor la hizo pública. */}
-                {cfg.subtitulo && !cfg.subtituloOculto && (
+                {/* Si está escrita, se publica. */}
+                {cfg.subtitulo && (
                   <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line break-words"
                     style={{ fontSize: letraDescripcion(cfg.cabecera, esMovil) }}>
                     {cfg.subtitulo}

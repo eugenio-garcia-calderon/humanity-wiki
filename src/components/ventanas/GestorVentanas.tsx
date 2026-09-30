@@ -419,9 +419,13 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
   }, [esMovil, navigate]);
 
   /*
-   * ── UN ENLACE A UNA WEB ABRE EL NAVEGADOR DE LA PLATAFORMA (2026-08-26) ───
-   * Eugenio: «el navegador se tiene que abrir automáticamente cuando se haga
-   * click en un enlace de una web».
+   * ── UN ENLACE A UNA WEB ABRE EL NAVEGADOR DEL USUARIO (2026-10-01) ───────
+   * CAMBIÓ DE SENTIDO. El 2026-08-26 Eugenio pidió lo contrario («el navegador
+   * se tiene que abrir automáticamente cuando se haga click en un enlace de
+   * una web») y esto metía cada enlace en el navegador interno. El 2026-10-01
+   * pidió que se abran en SU navegador (Chrome, Firefox, Safari). Se conserva
+   * el sitio único que decide, y lo que decide ahora es: pestaña nueva de
+   * verdad. Lo que sigue explica por qué se hace aquí y qué no se toca.
    *
    * Va aquí y no en cada sitio que pinta un enlace porque los sitios que
    * pintan enlaces son muchos —publicaciones, mensajes, tarjetas, documentos,
@@ -463,10 +467,14 @@ export default function GestorVentanas({ onPaginaNavegador, compacto = false }: 
       if (url.origin === window.location.origin) return;
 
       e.preventDefault();
-      // El título de partida es el dominio: es lo que identifica el sitio antes
-      // de que la página cargue y diga cómo se llama de verdad, y `Navegador`
-      // lo corrige solo con `onTitulo` en cuanto lo sabe.
-      abrir({ titulo: url.hostname.replace(/^www\./, ''), clase: 'navegador', destino: url.href });
+      // ══ AL NAVEGADOR DEL USUARIO, NO AL INTERNO (2026-10-01) ═════════════
+      // Eugenio: «al clicar en un enlace, que se abra en el navegador en el
+      // que esté el usuario —Chrome, Firefox o Safari— y no en la herramienta
+      // de navegador propio de la aplicación». Hasta hoy esta regla metía todo
+      // enlace externo en el navegador interno; ahora abre una pestaña nueva
+      // del navegador de verdad. El interno sigue existiendo para quien lo
+      // abra a propósito desde su menú.
+      window.open(url.href, '_blank', 'noopener');
     };
     document.addEventListener('click', alPulsar, true);
     return () => document.removeEventListener('click', alPulsar, true);

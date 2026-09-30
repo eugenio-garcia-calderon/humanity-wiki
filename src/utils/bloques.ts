@@ -48,6 +48,8 @@ export type TipoBloque =
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
  *  pegar y que hay que REPRODUCIR o LEER dentro del documento, no descargar. */
+export type TamanoGaleria = 'pequeno' | 'mediano' | 'grande' | 'muy-grande';
+
 export type ClaseMedio = 'video' | 'youtube' | 'vimeo' | 'audio' | 'pdf' | 'archivo';
 
 export interface Bloque {
@@ -107,6 +109,9 @@ export interface Bloque {
    *  cambió. Se guarda en el bloque y no en la tabla: la misma tabla puede
    *  verse como galería en una página y como rejilla en otra. */
   vistaBd?: 'galeria' | 'tabla';
+  /** `basedatos` en galería: el tamaño de las tarjetas (2026-10-01, como
+   *  Notion). Sin valor, mediano. */
+  tamanoGaleria?: TamanoGaleria;
   /** Color de texto (`rojo`) o de fondo (`fondo-rojo`). Ver `coloresBloque.ts`. */
   color?: string;
   /** ══ BLOQUES EN COLUMNAS (2026-09-30) ══════════════════════════════════

@@ -26,7 +26,7 @@ import { cn } from '../../utils/cn';
 export type Disposicion = 'arriba' | 'debajo' | 'izquierda' | 'derecha';
 
 export type Cabecera = {
-  /** Dónde va la imagen respecto al título. Sin valor, arriba (Notion). */
+  /** Dónde va la imagen respecto al título. Sin valor, a la derecha. */
   disposicion?: Disposicion;
   /** 20–80. Arriba/debajo: el alto de la imagen. A un lado: qué parte del
    *  ancho es imagen (el resto es título). */
@@ -61,6 +61,10 @@ export function FilaTitulo({ cabecera, icono, children }: {
 }
 
 export const TAMANO_POR_DEFECTO = 50;
+/** Por defecto la imagen a la DERECHA y a la izquierda el icono, el título y
+ *  la descripción (Eugenio, 2026-10-01). En un teléfono se apila igual que
+ *  cualquier disposición lateral: imagen arriba, texto debajo. */
+export const DISPOSICION_POR_DEFECTO: Disposicion = 'derecha';
 export const ICONO_POR_DEFECTO = 56;
 export const DESCRIPCION_POR_DEFECTO = 18;
 
@@ -87,7 +91,7 @@ export function LayoutCabecera({ cabecera, imagen, cuerpo }: {
   imagen: ReactNode | null;
   cuerpo: ReactNode;
 }) {
-  const d = cabecera?.disposicion || 'arriba';
+  const d = cabecera?.disposicion || DISPOSICION_POR_DEFECTO;
   const t = acotar(cabecera?.tamano, 20, 80, TAMANO_POR_DEFECTO);
 
   if (!imagen) return <div>{cuerpo}</div>;
@@ -148,7 +152,7 @@ export function MandosCabecera({ cabecera, hayImagen, hayIcono, hayDescripcion =
   onCambio: (c: Cabecera) => void;
 }) {
   const c = cabecera || {};
-  const d = c.disposicion || 'arriba';
+  const d = c.disposicion || DISPOSICION_POR_DEFECTO;
   const lateral = d === 'izquierda' || d === 'derecha';
   const pon = (x: Partial<Cabecera>) => onCambio({ ...c, ...x });
 

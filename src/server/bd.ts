@@ -234,7 +234,7 @@ export function registerBdRoutes(app: Express, db: any) {
   /** Lo que la galería necesita de la página de cada fila: su portada o la
    *  primera imagen, su icono y un trozo del primer texto. En un viaje. */
   const tarjetasDe = async (paginaIds: string[]) => {
-    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string }> = {};
+    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null }> = {};
     if (!paginaIds.length) return out;
     const r = await db.execute(sql`
       SELECT id, title, config FROM knowledge_windows
@@ -250,6 +250,9 @@ export function registerBdRoutes(app: Express, db: any) {
         imagen: cfg.portada || img,
         icono: cfg.icono || null,
         resumen: String(texto).replace(/[*`#>\[\]]/g, '').slice(0, 160),
+        // La descripción que su autor escribió bajo el título (2026-10-01):
+        // la tarjeta la enseña bajo el nombre, como la página.
+        descripcion: typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? cfg.subtitulo.trim().slice(0, 300) : null,
       };
     }
     return out;

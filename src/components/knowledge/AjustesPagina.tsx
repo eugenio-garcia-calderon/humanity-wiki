@@ -28,7 +28,8 @@ export type Ajustes = {
   /** La descripción que va bajo el título (2026-09-30). Distinta de
    *  `descripcion`, que es para Google y las redes y no se ve en la página. */
   subtitulo?: string;
-  /** Oculta: sólo la ve quien edita. Pública: sale en la web. */
+  /** Ya no se usa (2026-10-01: si está escrita, es pública). Se lee para
+   *  poder borrarlo de las páginas que lo tenían. */
   subtituloOculto?: boolean;
 };
 
