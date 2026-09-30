@@ -314,3 +314,18 @@ ahorro.
 **Y lo que no sirve para decidir esto**: la medición por ruta (`medicion.ts`) vive
 en memoria y se pierde en cada reinicio; cada despliegue reinicia. Responde «qué
 se está pidiendo ahora», nunca «desde cuándo no lo pide nadie».
+
+## 2026-09-30 — The classic project screen still exists behind the page
+
+`Proyectos.tsx` (`/proyectos/:slug?vista=clasica`) keeps branches, gallery,
+people, budgets and attachments, because on 2026-09-30 only the kanban became a
+page block (`tablero`). Two screens for one thing is exactly what the merge was
+meant to end. Cost of leaving it: one link («Más del proyecto →») and one more
+place where the project's title/icon can be edited. Cost of finishing it: one
+block per section, ~1 h each, using `BloqueTablero` as the template. Do it
+section by section as Eugenio asks for them; do not rewrite `Proyectos.tsx`
+in one go.
+
+Also: `BloqueTablero` imports `ModalNuevaTarjeta` from `pages/Proyectos.tsx`,
+so opening any page pulls the projects screen into the same chunk. Moving the
+modal to `components/tablero/` is 10 minutes; do it with the next block.

@@ -4,6 +4,7 @@ import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, Chec
 import { cn } from '../../utils/cn';
 import Rejilla from '../tablas/Rejilla';
 import ProductoPublico from './ProductoPublico';
+import BloqueTablero from '../proyecto/BloqueTablero';
 import { Portada, RejillaProductos, Columnas, Franja } from './BloquesMaqueta';
 
 // ============================================================================
@@ -289,6 +290,22 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       return b.entityId
         ? <ProductoPublico id={b.entityId} titulo={b.pubTitulo || b.texto} />
         : null;
+
+    // Una página hija (2026-09-30): el mismo enlace, con su título vivo si la
+    // lectura pública lo trae en `pubTitulo`; la ruta es la de la página.
+    case 'pagina':
+      return (
+        <a href={b.pubUrl || (b.entityId ? `/paginas/${b.entityId}` : '#')}
+          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+          <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="text-[15px] font-bold text-slate-800 underline decoration-slate-300 underline-offset-4">{b.pubTitulo || 'Sin título'}</span>
+        </a>
+      );
+
+    // El tablero del proyecto, en la lectura pública: se ve, y quien pueda
+    // editar el proyecto (su dueño) también puede mover tarjetas desde aquí.
+    case 'tablero':
+      return b.entityId ? <BloqueTablero proyectoId={b.entityId} editable={false} /> : null;
 
     case 'publicacion':
     case 'ventana':

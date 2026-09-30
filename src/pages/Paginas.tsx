@@ -33,6 +33,8 @@ interface Pagina {
   bloques: number;
   adelanto: string | null;
   imagen: string | null;
+  /** La página de la que cuelga, si es una subpágina. */
+  padre: { id: string; titulo: string } | null;
 }
 
 interface GrupoProyecto {
@@ -51,7 +53,11 @@ export default function Paginas() {
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [plegados, setPlegados] = useState<Record<string, boolean>>({});
-  const [creando, setCreando] = useState<null | { proyectoId: string | null }>(null);
+  // `?nueva=1` abre el diálogo nada más llegar: es lo que manda el «+» de
+  // abajo y, desde 2026-09-30, también «Nuevo proyecto» — un proyecto es una
+  // página con tablero.
+  const [creando, setCreando] = useState<null | { proyectoId: string | null }>(
+    () => (new URLSearchParams(window.location.search).get('nueva') === '1' ? { proyectoId: null } : null));
   const [tituloNuevo, setTituloNuevo] = useState('');
   const [guardando, setGuardando] = useState(false);
   /** Qué página se está arrastrando y sobre qué proyecto está encima. */
@@ -279,6 +285,9 @@ export default function Paginas() {
                               ? <Globe className="w-3 h-3 text-emerald-500 shrink-0 mt-1" />
                               : <Lock className="w-3 h-3 text-slate-300 shrink-0 mt-1" />}
                           </div>
+                          {p.padre && (
+                            <p className="text-[10px] font-bold text-slate-400 mt-0.5 truncate">↳ dentro de «{p.padre.titulo}»</p>
+                          )}
                           {p.adelanto && (
                             <p className="text-[11px] text-slate-400 leading-snug line-clamp-2 mt-1">{p.adelanto}</p>
                           )}

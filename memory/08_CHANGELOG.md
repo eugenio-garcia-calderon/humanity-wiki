@@ -7836,3 +7836,33 @@ Verified: `tsc` clean, `build` passes, screenshots at 1440/1280/1100/390 and
 the window open over `/buscar` without navigating. Not verified: a real note
 written through the window (no session in the preview), and the phone with the
 app installed.
+
+## 2026-09-30 — Pages inside pages, and a project is a page
+
+Eugenio, in chat: «en el creador de bloques dentro de una página falta poder
+crear una página dentro de una página, como hace Notion»; and «fusiona el
+creador de páginas y el creador de proyectos […] mantén solo una herramienta».
+
+- **Block «Página»** (`pagina`): creates a real child page (`padre_id`,
+  migration 0132), leaves a link block, saves and opens it. The child shows a
+  breadcrumb back to its mother; the page list says «↳ dentro de …». Child
+  titles are refreshed live in the editor and written back into the block, so
+  the public reader and the exports show the current name.
+- **Block «Tablero de tareas»** (`tablero`): the project kanban inside the
+  page (`components/proyecto/BloqueTablero`). Adding it to a page that is not a
+  project yet creates the project from the page's title (`POST /api/proyectos`
+  with `pagina_id`, idempotent). Renders in the editor and in the public
+  reader; owners can move cards from either.
+- **Every existing project got a page** (migration 0133): title, icon, cover,
+  privacy and owner copied; description and vision as blocks; the board block
+  at the end. `/proyectos/:slug` now redirects to that page; `?vista=clasica`
+  keeps the old screen for branches, gallery and people.
+- **One door to create:** «Nuevo proyecto» in the right rail and the create
+  sheet are gone; «Nueva página» everywhere, and `/paginas?nueva=1` now really
+  opens the dialog (it never read the parameter before).
+
+Verified: `tsc` clean, `build` passes; a page with a child link and a board
+rendered in the preview with mocked API. Not verified: migration 0133 against
+a real database (no Postgres here) — it is a `DO` block with `random()`-based
+ids and must be run once on staging or with a backup at hand; and creating a
+child page end to end (needs a session).

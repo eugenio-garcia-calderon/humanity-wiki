@@ -161,8 +161,12 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   app.get('/api/windows/:id', async (req: Request, res: Response) => {
     try {
       const r = await db.execute(sql`
-        SELECT id, title, kind, config, publico, creator_user_id, views, created_at, updated_at, deleted_at
-        FROM knowledge_windows WHERE id = ${req.params.id} AND archived_at IS NULL
+        SELECT w.id, w.title, w.kind, w.config, w.publico, w.creator_user_id, w.views, w.created_at, w.updated_at, w.deleted_at,
+               w.padre_id, p.title AS padre_titulo,
+               (SELECT pr.id FROM proyectos pr WHERE pr.pagina_id = w.id AND pr.archived_at IS NULL LIMIT 1) AS proyecto_propio_id
+        FROM knowledge_windows w
+        LEFT JOIN knowledge_windows p ON p.id = w.padre_id AND p.archived_at IS NULL AND p.deleted_at IS NULL
+        WHERE w.id = ${req.params.id} AND w.archived_at IS NULL
       `);
       const w = r.rows[0] as any;
       if (!w || w.deleted_at) return res.status(404).json({ error: 'No existe.' });
@@ -300,11 +304,17 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       // Puede nacer YA dentro de un proyecto (2026-08-20). Se comprueba que
       // ese proyecto sea tuyo: si no, la página nace suelta en vez de colarse
       // en el proyecto de otra persona.
-      const proyecto = await proyectoTuyo(req, req.body?.proyecto_id);
+      let proyecto = await proyectoTuyo(req, req.body?.proyecto_id);
+      // ══ DENTRO DE OTRA PÁGINA (2026-09-30, «una página dentro de una
+      // página, como hace Notion»). Solo si la madre es tuya o puedes
+      // editarla: si no, la nueva nace suelta. Y hereda el proyecto de la
+      // madre, para que no aparezca en otra carpeta que su madre.
+      const padre = await paginaEditable(req, req.body?.padre_id);
+      if (padre) proyecto = padre.proyecto_id ?? proyecto;
       await db.execute(sql`
-        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
+        INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id, padre_id)
         VALUES (${id}, ${titulo}, 'pagina', ${JSON.stringify({ bloques })}::jsonb,
-                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id}, ${proyecto})
+                false, ${req.user.id}, false, ${req.user.id}, ${req.user.id}, ${proyecto}, ${padre?.id ?? null})
       `);
       res.json({ id });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -318,6 +328,24 @@ export function registerDocumentosRoutes(app: Express, db: any) {
   // Una página YA existe —un `knowledge_windows` de tipo 'pagina', con su
   // editor tipo Notion en /paginas/:id—; lo que faltaba era el sitio desde
   // el que verlas todas. Esta ruta no crea nada nuevo: reparte lo que hay.
+
+  /** La página madre que se pide, solo si puedes editarla (tuya, admin o
+   *  con acceso de edición). Devuelve null en cualquier otro caso. */
+  const paginaEditable = async (req: Request, id: unknown): Promise<{ id: string; proyecto_id: string | null } | null> => {
+    const pid = typeof id === 'string' && id.trim() ? id.trim() : null;
+    if (!pid || !req.user) return null;
+    const r = await db.execute(sql`
+      SELECT id, creator_user_id, proyecto_id FROM knowledge_windows
+      WHERE id = ${pid} AND kind = 'pagina' AND archived_at IS NULL AND deleted_at IS NULL
+    `);
+    const w = r.rows[0] as any;
+    if (!w) return null;
+    if (w.creator_user_id === req.user.id || (req.user.roleLevel ?? 0) >= ROLE.ADMIN) return { id: w.id, proyecto_id: w.proyecto_id };
+    const a = await db.execute(sql`
+      SELECT 1 FROM accesos_entidad WHERE entidad_tipo = 'pagina' AND entidad_id = ${pid} AND user_id = ${req.user.id} AND rol = 'edicion'
+    `);
+    return a.rows.length ? { id: w.id, proyecto_id: w.proyecto_id } : null;
+  };
 
   /** El proyecto que se pide, solo si es tuyo. Devuelve null en cualquier otro
    *  caso (no existe, es de otro, no se pidió ninguno). */
@@ -339,10 +367,13 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       const rows = await db.execute(sql`
         SELECT w.id, w.title, w.publico, w.created_at, w.updated_at,
                w.config->'bloques' AS bloques,
-               w.proyecto_id, p.titulo AS proyecto_titulo, p.slug AS proyecto_slug
+               w.proyecto_id, p.titulo AS proyecto_titulo, p.slug AS proyecto_slug,
+               w.padre_id, m.title AS padre_titulo
         FROM knowledge_windows w
         LEFT JOIN proyectos p ON p.id = w.proyecto_id
                              AND p.archived_at IS NULL AND p.deleted_at IS NULL
+        LEFT JOIN knowledge_windows m ON m.id = w.padre_id
+                             AND m.archived_at IS NULL AND m.deleted_at IS NULL
         WHERE w.kind = 'pagina'
           AND w.creator_user_id = ${yo}
           AND w.archived_at IS NULL AND w.deleted_at IS NULL
@@ -393,6 +424,9 @@ export function registerDocumentosRoutes(app: Express, db: any) {
           bloques: bloques.length,
           adelanto: primerTexto ? String(primerTexto).replace(/\s+/g, ' ').trim().slice(0, 140) : null,
           imagen: primeraImagen,
+          // De qué página cuelga, si cuelga de alguna (2026-09-30). La lista
+          // la enseña igual —una subpágina es una página— pero lo dice.
+          padre: w.padre_id && w.padre_titulo ? { id: w.padre_id, titulo: w.padre_titulo } : null,
         });
       }
 
@@ -697,6 +731,8 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
             }));
             break;
           }
+          case 'pagina':
+          case 'tablero':
           case 'publicacion':
             hijos.push(new Paragraph({
               children: [new TextRun({ text: `▣ ${b.pubTitulo || 'Publicación'} (en humanity.wiki)`, italics: true })],
@@ -828,6 +864,8 @@ Entre 5 y 9 diapositivas; la primera es la portada (sin puntos o con un subtítu
             doc.moveDown(0.3);
             break;
           }
+          case 'pagina':
+          case 'tablero':
           case 'publicacion':
             escribir(`▣ ${b.pubTitulo || 'Publicación'} — humanity.wiki${b.pubUrl || ''}`, 10, 'Helvetica-Bold');
             doc.moveDown(0.2);

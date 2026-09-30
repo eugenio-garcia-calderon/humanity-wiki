@@ -40,7 +40,15 @@ export type TipoBloque =
   //                 gritar en mayúsculas ni poner tres signos de admiración.
   //   `indice`      la lista de títulos de la propia página. No guarda nada:
   //                 se calcula al pintar, así que nunca se queda vieja.
-  | 'desplegable' | 'aviso' | 'indice';
+  | 'desplegable' | 'aviso' | 'indice'
+  // 2026-09-30 (Eugenio: «falta poder crear una página dentro de una página,
+  // como hace Notion»). Una página hija: `entityId` es su id, `pubTitulo` el
+  // título que tenía al crearla (se refresca al pintar). Reutiliza los campos
+  // de `publicacion` porque es lo mismo: una cosa de la plataforma enlazada.
+  | 'pagina'
+  // 2026-09-30 («un proyecto es una página»). El tablero de tareas del
+  // proyecto de esta página, dentro de ella. `entityId` es el id del proyecto.
+  | 'tablero';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -249,6 +257,8 @@ export function bloquesAMarkdown(bloques: Bloque[]): string {
       // JSON, y el markdown solo es la descarga.
       case 'medio': salida.push(`[${b.pie || 'Archivo'}](${b.url || ''})`); break;
       case 'publicacion': salida.push(`[${b.pubTitulo || 'Publicación'}](${b.pubUrl || ''})`); break;
+      case 'pagina': salida.push(`[${b.pubTitulo || 'Sin título'}](${b.pubUrl || ''})`); break;
+      case 'tablero': salida.push(`▣ Tablero de tareas${b.pubTitulo ? ` de ${b.pubTitulo}` : ''} (en humanity.wiki)`); break;
       case 'producto': salida.push(`[${b.pubTitulo || 'Producto'}](${b.pubUrl || ''})`); break;
       case 'tabla': {
         const filas = b.filas || [];
