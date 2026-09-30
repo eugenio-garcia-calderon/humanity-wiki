@@ -8020,3 +8020,9 @@ icon is capped at 72 px on mobile.
 - **Gallery card size**: Pequeño / Mediano / Grande / Muy grande, per block
   (`tamanoGaleria`), as a minimum card width so it adapts to any screen.
 - **Gallery cards show the page description** under the title.
+
+## 2026-10-01 — New page databases are called «Nueva base de datos» (prog8)
+
+The table created from a page's database block took the page's title (or
+«Tabla de la página»); it is now born as «Nueva base de datos» and renamed by
+clicking its name.

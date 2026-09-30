@@ -1462,7 +1462,11 @@ function EditorPagina() {
                     const r = await fetch('/api/bd/tablas', {
                       method: 'POST', credentials: 'include',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ titulo: titulo || 'Tabla de la página' }),
+                      // Nace como «Nueva base de datos» (Eugenio, 2026-10-01), no
+                      // con el título de la página: dos cosas con el mismo nombre
+                      // en la misma pantalla no se distinguen. Se renombra
+                      // pinchando en el nombre.
+                      body: JSON.stringify({ titulo: 'Nueva base de datos' }),
                     });
                     const j = await r.json();
                     if (j.id) {
