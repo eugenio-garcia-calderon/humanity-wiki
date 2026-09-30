@@ -7871,3 +7871,32 @@ that machine — which no longer serves us (Caddy's log on the new server:
 new IP, in one constant (`IP_POR_DEFECTO`) used by the instructions and every
 check; `IP_PUBLICA` still overrides it. Anyone who already configured a domain
 must change their A record to the new IP.
+
+## 2026-09-30 — Gallery view for page databases; every row is a page (prog8)
+
+Eugenio: «una vista de galería como la que tiene Notion, y que sea la vista por
+defecto […] cuando pinchas en la imagen se te abre esa página dentro de esa base
+de datos. Todo son páginas dentro de páginas».
+
+- The `basedatos` block now has two views, **Galería** (default) and **Tabla**,
+  switchable from tabs in its header. The choice is stored on the block
+  (`vistaBd`), so the same table can be a gallery in one page and a grid in
+  another. The «Tablas» tool keeps the grid as its default.
+- **Every row is a page.** `bd_filas.pagina_id` existed since migration 0053 but
+  nothing filled it. New rows are born with a `pagina` window; older rows get one
+  the first time someone who can write opens them
+  (`POST /api/bd/filas/:id/pagina`). The page inherits the table's project and
+  its visibility.
+- The row's name and its page title are one thing: the first `texto` column
+  (the «Nombre» every table is born with) is rewritten when the page is
+  retitled, and vice versa.
+- Gallery cards show the page cover, else its first image, else the start of
+  its text; clicking opens the page. «Nueva página» creates row + page and
+  opens it. The grid view gets an «Abrir» button on each row.
+- A row's page shows a breadcrumb back to the page holding the database
+  (`fila_de` in `GET /api/windows/:id`).
+- Fixed on the way: jumping from page to page reused the editor and kept the
+  previous `docId`, so autosave could have written one page over another; the
+  editor is now keyed by id and flushes a pending save on leaving. Reading mode
+  looked for `b.tablaId` while the editor saves `tabla_id`, so embedded
+  databases never showed to readers.

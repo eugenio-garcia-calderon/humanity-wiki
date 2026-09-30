@@ -185,6 +185,71 @@ export function registerBdRoutes(app: Express, db: any) {
       : null;
   };
 
+  /** ══ CADA FILA ES UNA PÁGINA (2026-09-30) ══════════════════════════════
+   *  Eugenio: «todas las bases de datos, cuando crean un nuevo elemento, son
+   *  en realidad nuevas páginas; todo son páginas dentro de páginas, como
+   *  hace Notion».
+   *
+   *  La columna `pagina_id` existía desde la capa 1 (decisión 3 de la
+   *  migración 0053) pero nada la rellenaba. Ahora la fila nace con su página
+   *  y, para las que ya existían, se crea al abrirla por primera vez.
+   *
+   *  EL NOMBRE DE LA FILA Y EL TÍTULO DE SU PÁGINA SON LA MISMA COSA. La
+   *  primera columna de texto hace de nombre (la que nace con toda tabla,
+   *  «Nombre»); escribirla retitula la página, y retitular la página la
+   *  reescribe (ver `PUT /api/windows/:id`). Dos nombres para una misma cosa
+   *  acabarían diciendo cosas distintas. */
+  const columnaTitulo = async (tablaId: string): Promise<string | null> => {
+    const r = await db.execute(sql`
+      SELECT id FROM bd_columnas
+      WHERE tabla_id = ${tablaId} AND archived_at IS NULL AND tipo = 'texto'
+      ORDER BY orden, created_at LIMIT 1
+    `);
+    return (r.rows[0] as any)?.id ?? null;
+  };
+
+  /** Crea la página de una fila que no la tiene. La visibilidad sale del
+   *  proyecto de la tabla, que es quien decide quién ve la tabla: una página
+   *  más abierta que su tabla enseñaría lo que la tabla esconde. */
+  const crearPaginaDeFila = async (filaId: string, tabla: any, titulo: string, actor: string): Promise<string> => {
+    const id = nid('KW');
+    await db.execute(sql`
+      INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
+      VALUES (${id}, ${titulo || 'Sin título'}, 'pagina', '{"bloques":[]}'::jsonb,
+              ${tabla.proyecto_id ? !!tabla.proyecto_publico : false}, ${actor}, false, ${actor}, ${actor}, ${tabla.proyecto_id || null})
+    `);
+    await db.execute(sql`UPDATE bd_filas SET pagina_id = ${id} WHERE id = ${filaId} AND pagina_id IS NULL`);
+    // Si otra petición ganó la carrera, vale la suya y ésta se retira.
+    const r = await db.execute(sql`SELECT pagina_id FROM bd_filas WHERE id = ${filaId}`);
+    const ganadora = (r.rows[0] as any)?.pagina_id;
+    if (ganadora !== id) await db.execute(sql`UPDATE knowledge_windows SET deleted_at = now() WHERE id = ${id}`);
+    return ganadora;
+  };
+
+  /** Lo que la galería necesita de la página de cada fila: su portada o la
+   *  primera imagen, su icono y un trozo del primer texto. En un viaje. */
+  const tarjetasDe = async (paginaIds: string[]) => {
+    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string }> = {};
+    if (!paginaIds.length) return out;
+    const r = await db.execute(sql`
+      SELECT id, title, config FROM knowledge_windows
+      WHERE id IN (${sql.join(paginaIds.map(i => sql`${i}`), sql`, `)}) AND deleted_at IS NULL
+    `);
+    for (const w of r.rows as any[]) {
+      const cfg = w.config || {};
+      const bloques: any[] = Array.isArray(cfg.bloques) ? cfg.bloques : [];
+      const img = bloques.find(b => b?.tipo === 'imagen' && b.url)?.url || null;
+      const texto = bloques.find(b => typeof b?.texto === 'string' && b.texto.trim())?.texto || '';
+      out[w.id] = {
+        titulo: w.title || '',
+        imagen: cfg.portada || img,
+        icono: cfg.icono || null,
+        resumen: String(texto).replace(/[*`#>\[\]]/g, '').slice(0, 160),
+      };
+    }
+    return out;
+  };
+
   const columnasDe = async (tablaId: string) => {
     const r = await db.execute(sql`
       SELECT id, nombre, tipo, opciones, config, orden
@@ -238,6 +303,9 @@ export function registerBdRoutes(app: Express, db: any) {
       const columnasQueApuntan = columnas.filter(c => CLASE_DE_TIPO[c.tipo]);
       const columnasConFicheros = columnas.filter(c => CLASE_FICHERO[c.tipo]);
 
+      const tarjetas = await tarjetasDe(filas.map(x => x.pagina_id).filter(Boolean));
+      const colTitulo = await columnaTitulo(req.params.id);
+
       const preparadas = filas.map(fila => {
           const celdas = celdasDe(fila.valores || {}, columnas);
           // Las columnas que apuntan no guardan nada en el jsonb: su valor sale
@@ -260,6 +328,7 @@ export function registerBdRoutes(app: Express, db: any) {
           return {
             id: fila.id,
             pagina_id: fila.pagina_id,
+            pagina: fila.pagina_id ? tarjetas[fila.pagina_id] || null : null,
             orden: fila.orden,
             celdas,
             archivos,
@@ -305,6 +374,7 @@ export function registerBdRoutes(app: Express, db: any) {
           descripcion: permiso.tabla.descripcion, proyecto_id: permiso.tabla.proyecto_id,
         },
         columnas,
+        columna_titulo: colTitulo,
         ...(vista ? { vista: { id: vista.id, nombre: vista.nombre, ocultas: vista.ocultas } } : {}),
         // Se dice CUÁNTAS había antes de filtrar. Sin ese número, una vista con
         // un filtro puesto y otra sin él se ven igual de completas y nadie sabe
@@ -680,11 +750,38 @@ export function registerBdRoutes(app: Express, db: any) {
 
       const ultima = await db.execute(sql`SELECT COALESCE(max(orden), -1) AS m FROM bd_filas WHERE tabla_id = ${req.params.id}`);
       const id = nid('BDF');
+      // Se puede nacer ya con nombre (el «+ Nuevo» de la galería lo pide).
+      const titulo = String((req.body || {}).titulo || '').replace(/\s+/g, ' ').trim().slice(0, 2000);
+      const colTitulo = titulo ? await columnaTitulo(req.params.id) : null;
+      const valores = colTitulo ? { [colTitulo]: titulo } : {};
       await db.execute(sql`
         INSERT INTO bd_filas (id, tabla_id, valores, orden, created_by, updated_by)
-        VALUES (${id}, ${req.params.id}, '{}'::jsonb, ${Number((ultima.rows[0] as any).m) + 1}, ${req.user!.id}, ${req.user!.id})
+        VALUES (${id}, ${req.params.id}, ${JSON.stringify(valores)}::jsonb, ${Number((ultima.rows[0] as any).m) + 1}, ${req.user!.id}, ${req.user!.id})
       `);
-      res.json({ id });
+      const pagina_id = await crearPaginaDeFila(id, permiso.tabla, titulo, req.user!.id);
+      res.json({ id, pagina_id });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** La página de una fila, creándola si aún no tiene (las filas de antes
+   *  del 2026-09-30 nacieron sin ella). Abrirla es de lectura: sólo se CREA
+   *  si quien la abre puede escribir en la tabla; si no, se dice que no hay. */
+  app.post('/api/bd/filas/:id/pagina', async (req: Request, res: Response) => {
+    try {
+      const f = await db.execute(sql`SELECT * FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Esa fila no existe.' });
+      if (fila.pagina_id) {
+        const lee = await puedeConTabla(req, fila.tabla_id, false);
+        if ('error' in lee) return res.status(lee.codigo).json({ error: lee.error });
+        return res.json({ pagina_id: fila.pagina_id });
+      }
+      if (!exigeSesion(req, res)) return;
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: 'Esta fila todavía no tiene página y solo quien puede escribir en la tabla puede crearla.' });
+      const colTitulo = await columnaTitulo(fila.tabla_id);
+      const titulo = colTitulo ? String((fila.valores || {})[colTitulo] ?? '') : '';
+      res.json({ pagina_id: await crearPaginaDeFila(fila.id, permiso.tabla, titulo, req.user!.id) });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
@@ -791,6 +888,16 @@ export function registerBdRoutes(app: Express, db: any) {
         UPDATE bd_filas SET valores = ${JSON.stringify(valores)}::jsonb, updated_by = ${req.user!.id}, updated_at = now()
         WHERE id = ${req.params.id}
       `);
+      // El nombre de la fila es el título de su página: se escriben juntos.
+      if (fila.pagina_id) {
+        const colTitulo = await columnaTitulo(fila.tabla_id);
+        if (colTitulo && colTitulo in entrantes) {
+          await db.execute(sql`
+            UPDATE knowledge_windows SET title = ${String(valores[colTitulo] ?? '') || 'Sin título'}, updated_at = now()
+            WHERE id = ${fila.pagina_id}
+          `);
+        }
+      }
       const trasEscribir = celdasDe(valores, columnas);
       const enlacesAhora = await enlacesDe(db, [fila.id]);
       for (const c of columnas) {

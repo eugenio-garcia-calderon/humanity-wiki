@@ -127,7 +127,18 @@ function Inline({ texto }: { texto: string }) {
 }
 
 
+/** ══ UNA PÁGINA, UNA INSTANCIA (2026-09-30) ════════════════════════════
+ *  Con las tarjetas de la galería se salta de página a página sin salir de
+ *  `/paginas/:id`, y React reutilizaba el editor: `docId` seguía apuntando a
+ *  la página de antes, así que el guardado automático habría escrito el
+ *  contenido de la nueva ENCIMA de la anterior. La clave obliga a montar un
+ *  editor limpio por página. */
 export default function Documento() {
+  const { id } = useParams<{ id: string }>();
+  return <EditorPagina key={id} />;
+}
+
+function EditorPagina() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -140,6 +151,8 @@ export default function Documento() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState<string | null>(null);
+  /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
+  const [filaDe, setFilaDe] = useState<{ tabla_titulo: string; padre: { id: string; titulo: string } | null } | null>(null);
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
@@ -224,6 +237,7 @@ export default function Documento() {
         const j = await r.json();
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
         setTitulo(j.title || '');
+        setFilaDe(j.fila_de || null);
         setAutor(j.autor_nombre || null);
         setPublico(!!j.publico);
         setPuedoEditar(!!j.puedo_editar);
@@ -355,7 +369,16 @@ export default function Documento() {
     timerGuardado.current = setTimeout(() => guardarAhora(), 1200);
   }, [guardarAhora]);
 
-  useEffect(() => () => clearTimeout(timerGuardado.current), []);
+  // Al irse de la página (p. ej. a una tarjeta de su galería) lo que quedaba
+  // por guardar se guarda YA, en vez de tirarse con el temporizador.
+  const guardarAhoraRef = useRef(guardarAhora);
+  guardarAhoraRef.current = guardarAhora;
+  const hayPendiente = useRef(false);
+  useEffect(() => { hayPendiente.current = guardado === 'pendiente'; }, [guardado]);
+  useEffect(() => () => {
+    clearTimeout(timerGuardado.current);
+    if (hayPendiente.current) guardarAhoraRef.current();
+  }, []);
 
   // --------------------------------------------------------------------------
   // Operaciones de bloques
@@ -1177,7 +1200,11 @@ export default function Documento() {
             </div>
           );
         }
-        return <Rejilla tablaId={tablaId} editable={editable} alto={520} />;
+        return (
+          <Rejilla tablaId={tablaId} editable={editable} alto={520}
+            vista={b.vistaBd || 'galeria'}
+            onCambiarVista={editable ? v => { b.vistaBd = v; setBloques(bs => [...bs]); programarGuardado(); } : undefined} />
+        );
       }
 
       if (b.tipo === 'tabla') {
@@ -1828,6 +1855,21 @@ export default function Documento() {
             onCerrar={() => setCompartirAbierto(false)}
             onCambio={p => setPublico(p)}
           />
+        )}
+
+        {/* Miga de pan: la página madre y la base de datos donde vive ésta. */}
+        {filaDe && (
+          <nav className="flex items-center flex-wrap gap-1 mb-2 text-xs font-bold text-slate-400">
+            {filaDe.padre && (
+              <>
+                <Link to={`/paginas/${filaDe.padre.id}`} className="hover:text-slate-700 truncate max-w-[14rem]">
+                  {filaDe.padre.titulo || 'Sin título'}
+                </Link>
+                <span aria-hidden>/</span>
+              </>
+            )}
+            <span className="truncate max-w-[14rem]">{filaDe.tabla_titulo}</span>
+          </nav>
         )}
 
         {/* Título del documento */}
