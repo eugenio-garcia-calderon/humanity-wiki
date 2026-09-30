@@ -7846,3 +7846,16 @@ rescatar la info poniéndola en páginas».
   `carpeta` and now writes a real owned `pagina` (it wrote an ownerless
   `documento` that never appeared in Páginas).
 - A new folder is born private (a new project was born public).
+
+## 2026-09-30 — «Solicitar certificado y conectar» button for custom domains (prog8)
+
+Eugenio chose on-demand over a background poller: «que no revise cada minuto,
+sino cuando se le da a un botón de solicitar certificado». Until a domain is
+active, the Páginas share dialog shows **Solicitar certificado y conectar**
+(`POST /api/dominios/:id/certificado`, one press per 30 s). It runs the same
+checks as «Comprobar conexión» plus two things: it refuses to ask for anything
+until Cloudflare (1.1.1.1) and Google (8.8.8.8) also see the A record — asking
+while the DNS is half-propagated is what burns Let's Encrypt's 5-failures-per-
+hour limit — and it then makes the HTTPS request that makes Caddy obtain the
+certificate, retrying three times, and warms `www.` too. Once active the button
+goes back to «Comprobar conexión».
