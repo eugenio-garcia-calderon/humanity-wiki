@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2 } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Galeria from './Galeria';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
@@ -21,20 +23,35 @@ import { cn } from '../../utils/cn';
 
 type Fila = {
   id: string;
+  pagina_id?: string | null;
+  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string } | null;
   celdas: Record<string, Celda>;
   apuntados?: Record<string, any[]>;
   archivos?: Record<string, any[]>;
 };
 
-export default function Rejilla({ tablaId, editable = true, alto }: {
+export type FormaVista = 'galeria' | 'tabla';
+
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
   alto?: number;
+  /** Galería o tabla (2026-09-30). Sin valor, tabla: es lo que se veía hasta
+   *  hoy en la herramienta «Tablas». El bloque de página pasa `galeria`. */
+  vista?: FormaVista;
+  /** Quien la incrusta guarda la elección; si no se pasa, cambiar de vista
+   *  vale solo para quien mira y no se recuerda. */
+  onCambiarVista?: (v: FormaVista) => void;
 }) {
   const esMovil = useEsMovil();
+  const navigate = useNavigate();
+  const [vista, setVista] = useState<FormaVista>(vistaInicial || 'tabla');
+  useEffect(() => { if (vistaInicial) setVista(vistaInicial); }, [vistaInicial]);
+  const cambiarVista = (v: FormaVista) => { setVista(v); onCambiarVista?.(v); };
   const [datos, setDatos] = useState<{
     tabla: any; columnas: Columna[]; filas: Fila[]; ciclo?: string[]; total?: number; mostradas?: number;
+    columna_titulo?: string | null;
   } | null>(null);
   const [cargando, setCargando] = useState(true);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -85,6 +102,15 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
     cargar();
   };
 
+  /** Abrir la página de una fila desde la tabla — el «ABRIR» de Notion. */
+  const abrirPagina = async (f: Fila) => {
+    if (f.pagina_id) { navigate(`/paginas/${f.pagina_id}`); return; }
+    const r = await fetch(`/api/bd/filas/${f.id}/pagina`, { method: 'POST', credentials: 'include' });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.pagina_id) navigate(`/paginas/${j.pagina_id}`);
+    else setFallo(j.error || 'No se pudo abrir la página.');
+  };
+
   const borrarFila = async (filaId: string) => {
     await fetch(`/api/bd/filas/${filaId}`, { method: 'DELETE', credentials: 'include' });
     cargar();
@@ -116,6 +142,16 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
             ? `${datos.mostradas} de ${datos.total} filas`
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>
+        {/* Las dos vistas, como las pestañas de Notion. */}
+        <div className="ml-auto flex items-center gap-0.5 shrink-0" role="tablist">
+          {([['galeria', 'Galería', LayoutGrid], ['tabla', 'Tabla', Table2]] as const).map(([v, label, Icono]) => (
+            <button key={v} role="tab" aria-selected={vista === v} onClick={() => cambiarVista(v)}
+              className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold transition-colors',
+                vista === v ? 'bg-white text-slate-800 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-700')}>
+              <Icono className="w-3.5 h-3.5" /> {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {datos.ciclo?.length && (
@@ -128,8 +164,12 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
         </div>
       )}
 
-      {/* ── MÓVIL: FICHAS ─────────────────────────────────────────────────── */}
-      {esMovil ? (
+      {vista === 'galeria' ? (
+        <div style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
+          <Galeria tablaId={tablaId} columnas={columnas} filas={filas}
+            columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar} />
+        </div>
+      ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
           {filas.map(f => (
             <div key={f.id} className="p-3 space-y-1.5">
@@ -143,6 +183,10 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
                   </div>
                 </div>
               ))}
+              <button onClick={() => abrirPagina(f)}
+                className="mt-1 inline-flex items-center gap-1 h-11 px-2 text-[11px] font-bold text-slate-500 active:text-emerald-600">
+                <ArrowUpRight className="w-3.5 h-3.5" /> Abrir página
+              </button>
               {editable && (
                 <button onClick={() => borrarFila(f.id)}
                   className="mt-1 inline-flex items-center gap-1 h-11 px-2 text-[11px] font-bold text-slate-400 active:text-rose-600">
@@ -183,8 +227,14 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
             <tbody>
               {filas.map(f => (
                 <tr key={f.id} className="hover:bg-slate-50/40">
-                  {columnas.map(c => (
-                    <td key={c.id} className="border-b border-r border-slate-100 p-0 align-top">
+                  {columnas.map((c, ci) => (
+                    <td key={c.id} className="group/celda relative border-b border-r border-slate-100 p-0 align-top">
+                      {ci === 0 && (
+                        <button onClick={() => abrirPagina(f)} title="Abrir la página de esta fila"
+                          className="absolute right-1 top-1 z-[1] inline-flex items-center gap-0.5 h-6 px-1.5 rounded border border-slate-200 bg-white text-[10px] font-black uppercase tracking-wide text-slate-500 opacity-0 group-hover/celda:opacity-100 focus:opacity-100 hover:text-emerald-600 transition-opacity">
+                          <ArrowUpRight className="w-3 h-3" /> Abrir
+                        </button>
+                      )}
                       <CeldaTabla celda={f.celdas[c.id] ?? { estado: 'vacia' }} columna={c}
                         apuntados={f.apuntados?.[c.id]} archivos={f.archivos?.[c.id]}
                         editable={editable} onGuardar={v => guardar(f.id, c.id, v)} />
@@ -205,7 +255,7 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
         </div>
       )}
 
-      {editable && esMovil && (
+      {editable && esMovil && vista === 'tabla' && (
         <button onClick={() => setEditorColumna('nueva')}
           className="w-full flex items-center gap-1.5 px-3 h-11 border-t border-slate-100 text-xs font-bold text-slate-400 active:text-emerald-600">
           <Settings2 className="w-4 h-4" /> Añadir columna
@@ -222,7 +272,7 @@ export default function Rejilla({ tablaId, editable = true, alto }: {
         />
       )}
 
-      {editable && (
+      {editable && vista === 'tabla' && (
         <button onClick={anadirFila}
           className="w-full flex items-center gap-1.5 px-3 h-11 border-t border-slate-100 text-xs font-bold text-slate-400 hover:text-emerald-600 hover:bg-slate-50 transition-colors">
           <Plus className="w-4 h-4" /> Añadir fila

@@ -265,7 +265,12 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
 
     case 'basedatos':
       // La tabla de verdad, en modo mirar. `Rejilla` ya sabe no dejar escribir.
-      return b.tablaId ? <Rejilla tablaId={b.tablaId} editable={false} alto={520} /> : null;
+      // El editor guarda `tabla_id`; `tablaId` se sigue aceptando por si algún
+      // bloque se escribió a mano con ese nombre.
+      {
+        const tablaId = b.tabla_id || (b as any).tablaId;
+        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} /> : null;
+      }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────
     // Sólo se ven al leer. En el editor se siguen tratando como bloques

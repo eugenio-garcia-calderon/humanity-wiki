@@ -191,7 +191,22 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         return res.status(403).json({ error: 'Este documento es privado.' });
       }
       const autor = await db.execute(sql`SELECT COALESCE(display_name, name, email) AS nombre FROM users WHERE id = ${w.creator_user_id}`);
-      res.json({ ...w, autor_nombre: (autor.rows[0] as any)?.nombre || null, puedo_editar: esAutor || esAdmin || rolAcceso === 'edicion' });
+      // ══ PÁGINAS DENTRO DE PÁGINAS (2026-09-30) ══════════════════════════
+      // Si esta página es el cuerpo de una fila de base de datos, se dice de
+      // qué tabla y en qué página vive esa tabla: es la miga de pan para
+      // volver, como en Notion. Sin ella, abrir una tarjeta de la galería es
+      // un viaje sin regreso.
+      const fr = await db.execute(sql`
+        SELECT f.id AS fila_id, t.id AS tabla_id, t.titulo AS tabla_titulo,
+               (SELECT json_build_object('id', p.id, 'titulo', p.title) FROM knowledge_windows p
+                WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+                  AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', t.id))
+                ORDER BY p.created_at LIMIT 1) AS padre
+        FROM bd_filas f JOIN bd_tablas t ON t.id = f.tabla_id
+        WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL LIMIT 1
+      `);
+      const fila_de = (fr.rows[0] as any) || null;
+      res.json({ ...w, fila_de, autor_nombre: (autor.rows[0] as any)?.nombre || null, puedo_editar: esAutor || esAdmin || rolAcceso === 'edicion' });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

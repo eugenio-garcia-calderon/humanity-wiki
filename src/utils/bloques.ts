@@ -97,6 +97,13 @@ export interface Bloque {
    *  quien lee: guardar la preferencia de cada lector obligaría a saber quién
    *  es, y quien abre una página pública no tiene por qué serlo. */
   abierto?: boolean;
+  /** `basedatos`: la tabla a la que apunta. */
+  tabla_id?: string;
+  /** `basedatos`: con qué vista se abre (2026-09-30). Sin valor, galería —
+   *  la de por defecto, como pidió Eugenio—; `tabla` si quien escribe la
+   *  cambió. Se guarda en el bloque y no en la tabla: la misma tabla puede
+   *  verse como galería en una página y como rejilla en otra. */
+  vistaBd?: 'galeria' | 'tabla';
 }
 
 /** Un tramo de texto con su formato resuelto — para las exportaciones (Word,
