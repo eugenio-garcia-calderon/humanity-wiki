@@ -34,7 +34,7 @@ import Cesta from '../components/knowledge/Cesta';
  * tipo nuevo es una línea; si algún día son diez, se sube a `utils/`.
  */
 function rutaDe(x: { tipo: string; slug: string; id: string }): string {
-  if (x.tipo === 'proyecto') return `/proyectos/${x.slug || x.id}`;
+  if (x.tipo === 'proyecto') return `/carpetas/${x.slug || x.id}`;
   return `/`;
 }
 

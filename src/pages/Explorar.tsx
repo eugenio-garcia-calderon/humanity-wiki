@@ -48,7 +48,7 @@ const TIPOS: { label: string; kinds: string[] | null }[] = [
   { label: 'Mapas', kinds: ['mapa'] },
   { label: 'Lienzos', kinds: ['grafo'] },
   { label: 'Presentaciones', kinds: ['presentacion'] },
-  { label: 'Proyectos', kinds: ['proyecto'] },
+  { label: 'Carpetas', kinds: ['proyecto'] },
   { label: 'Bases de datos', kinds: ['tabla', 'ficha'] },
   { label: 'Imágenes', kinds: ['imagen'] },
   { label: 'Vídeos', kinds: ['video'] },

@@ -137,7 +137,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
             id: clave,
             esHojaDeRuta: !t.proyecto_id,
             titulo: t.proyecto_titulo || 'Hoja de ruta de humanity.wiki',
-            url: t.proyecto_slug ? `/proyectos/${t.proyecto_slug}` : '/vision',
+            url: t.proyecto_slug ? `/carpetas/${t.proyecto_slug}` : '/vision',
             publico: t.proyecto_id ? !!t.proyecto_publico : true,
             icono: t.proyecto_icono || null,
             mio: !!yo && t.proyecto_creador === yo,
@@ -192,7 +192,19 @@ export function registerRoadmapRoutes(app: Express, db: any) {
                (SELECT count(*)::int FROM roadmap_items r
                  WHERE r.proyecto_id = p.id AND r.archived_at IS NULL) AS tarjetas,
                (SELECT count(*)::int FROM roadmap_items r
-                 WHERE r.proyecto_id = p.id AND r.archived_at IS NULL AND r.estado = 'hecho') AS hechas
+                 WHERE r.proyecto_id = p.id AND r.archived_at IS NULL AND r.estado = 'hecho') AS hechas,
+               -- A folder holds pages (2026-09-30): how many, and the first
+               -- few titles for the card. Strangers only count public ones.
+               (SELECT count(*)::int FROM knowledge_windows w
+                 WHERE w.proyecto_id = p.id AND w.kind = 'pagina'
+                   AND w.archived_at IS NULL AND w.deleted_at IS NULL
+                   AND (w.publico OR p.creador_user_id = ${req.user?.id || null})) AS paginas,
+               (SELECT coalesce(json_agg(t.title), '[]'::json) FROM (
+                  SELECT w.title FROM knowledge_windows w
+                  WHERE w.proyecto_id = p.id AND w.kind = 'pagina'
+                    AND w.archived_at IS NULL AND w.deleted_at IS NULL
+                    AND (w.publico OR p.creador_user_id = ${req.user?.id || null})
+                  ORDER BY w.updated_at DESC NULLS LAST LIMIT 3) t) AS paginas_titulos
         FROM proyectos p LEFT JOIN users u ON u.id = p.creador_user_id
         WHERE p.archived_at IS NULL
           AND (p.publico OR p.creador_user_id = ${req.user?.id || null})

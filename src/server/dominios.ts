@@ -186,7 +186,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
       // las dos cosas pasa.
       if (!p) {
         return res.status(404).json({
-          error: `Este dominio apunta a ${c.nombre === 'página' ? 'una página' : 'un ' + c.nombre} que ya no está ${c.nombre === 'página' ? 'publicada' : 'publicado'}.`,
+          error: `Este dominio apunta a ${/a$/.test(c.nombre) ? 'una ' + c.nombre : 'un ' + c.nombre} que ya no está ${/a$/.test(c.nombre) ? 'publicada' : 'publicado'}.`,
           tipo: 'despublicada',
         });
       }
@@ -288,10 +288,10 @@ export function registerDominiosRoutes(app: Express, db: any) {
             ${c.col.archivado ? sql.raw(`AND e.${c.col.archivado} IS NULL`) : sql``}
             ${c.col.borrado ? sql.raw(`AND e.${c.col.borrado} IS NULL`) : sql``}
         `)).rows[0] as any;
-        if (!p) return res.status(404).json({ error: `Ese ${c.nombre} no es tuyo o no existe.` });
+        if (!p) return res.status(404).json({ error: `${/a$/.test(c.nombre) ? 'Esa' : 'Ese'} ${c.nombre} no es ${/a$/.test(c.nombre) ? 'tuya' : 'tuyo'} o no existe.` });
         if (!p.publico) {
           return res.status(400).json({
-            error: `Publica ${c.nombre === 'página' ? 'la página' : 'el ' + c.nombre} antes de ponerle un dominio: si no, el dominio no enseñaría nada.`,
+            error: `Publica ${/a$/.test(c.nombre) ? 'la ' + c.nombre : 'el ' + c.nombre} antes de ponerle un dominio: si no, el dominio no enseñaría nada.`,
           });
         }
       }

@@ -607,7 +607,7 @@ export default function PersonaPublica() {
         <FilaDelPerfil
           titulo="Proyectos" icono={<FolderKanban className="w-3.5 h-3.5" />}
           vacio={isMe ? 'Todavía no tienes proyectos. Crea el primero →' : 'Sin proyectos públicos.'}
-          onCrear={isMe ? () => navigate('/proyectos') : undefined}
+          onCrear={isMe ? () => navigate('/carpetas') : undefined}
           elementos={proyectos.map(p => ({
             id: p.id, titulo: p.titulo,
             detalle: p.pendientes === 0 ? 'todo hecho' : `${p.pendientes} por hacer`,

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  Home, FolderKanban, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
+  Home, FolderKanban, Folder, FileText, Globe2, Map as MapIcon, ListChecks, Table2,
   Compass, Store, Sparkles, CalendarDays, Database, Gamepad2, Globe,
   Layers, Users2, MessageSquare, Phone, User, Pin, PanelLeftClose, PanelRightClose,
   ChevronLeft, ChevronRight, ChevronDown, Trash2, LayoutGrid, Star, EyeOff, MoreVertical, GripVertical, SlidersHorizontal, Plus,
@@ -66,7 +66,7 @@ export interface Herramienta {
  * abren desde el botón del centro.
  */
 export const HERRAMIENTAS: Herramienta[] = [
-  { clave: 'proyectos',    nombre: 'Proyectos',     icono: FolderKanban, ruta: '/proyectos',    conPanel: true },
+  { clave: 'proyectos',    nombre: 'Carpetas',      icono: Folder, ruta: '/carpetas',    conPanel: true },
   { clave: 'paginas',      nombre: 'Páginas',       icono: FileText,     ruta: '/paginas',      conPanel: true },
   { clave: 'esquemas',     nombre: 'Esquemas',      icono: Globe2,       ruta: '/esquemas' , conPanel: true },
   { clave: 'mapas',        nombre: 'Mapas',         icono: MapIcon,      ruta: '/mapas' , conPanel: true },

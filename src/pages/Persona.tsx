@@ -309,7 +309,7 @@ export default function Persona() {
             <Bloque icono={FolderKanban} titulo="Proyectos" cuantos={proyectos.length}>
               <div className="flex flex-wrap gap-1.5">
                 {proyectos.map(x => (
-                  <Link key={x.id} to={`/proyectos/${x.slug}`}
+                  <Link key={x.id} to={`/carpetas/${x.slug}`}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-800 hover:border-amber-300 transition-colors">
                     {x.icono && <span>{x.icono}</span>}{x.titulo}
                   </Link>

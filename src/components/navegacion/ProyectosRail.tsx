@@ -100,7 +100,7 @@ export function comoItems(proyectos: Proyecto[]): Herramienta[] {
     clave: `proyecto-${p.id}`,
     nombre: p.titulo || 'Sin título',
     icono: p.icono ? componenteDeTrazo(p.icono) : FolderKanban,
-    ruta: `/proyectos/${p.slug}`,
+    ruta: `/carpetas/${p.slug}`,
     conPanel: true,
   }));
 }
@@ -145,7 +145,7 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
       {/* Abrir el proyecto entero sigue a un clic: el submenú enseña, no
           sustituye. */}
       <Link
-        to={`/proyectos/${proyecto.slug}`}
+        to={`/carpetas/${proyecto.slug}`}
         className="mx-3 mb-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-1.5 text-center text-[12px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
       >
         Abrir el proyecto
@@ -171,7 +171,7 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
           </div>
         )}
 
-        {vacio && <p className="px-2 py-2 text-[11px] text-slate-400">Este proyecto está vacío todavía.</p>}
+        {vacio && <p className="px-2 py-2 text-[11px] text-slate-400">Esta carpeta está vacía todavía.</p>}
 
         {Array.isArray(arbol) && arbol.map((rama: any) => (
           rama.hijos?.length ? (
@@ -186,7 +186,7 @@ export function PanelProyecto({ proyecto, onCerrar }: { proyecto: Proyecto; onCe
                 <HojaPanel key={h.id} a={h.destino}>{h.label || 'Sin título'}</HojaPanel>
               ))}
               {rama.hijos.length > 8 && (
-                <Link to={`/proyectos/${proyecto.slug}`}
+                <Link to={`/carpetas/${proyecto.slug}`}
                   className="block px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:underline">
                   Ver los {rama.hijos.length}
                 </Link>
@@ -210,7 +210,7 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
       <div className="px-1.5 py-2">
         <button
           onClick={onReintentar}
-          title="Volver a cargar tus proyectos"
+          title="Volver a cargar tus carpetas"
           className={cn('flex h-9 items-center gap-2 rounded-xl px-[10px] text-[12px] font-bold text-amber-700 hover:bg-amber-50',
             desplegado ? 'w-full' : 'w-10 justify-center')}
         >
@@ -243,14 +243,14 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
         Va ENCIMA de «Nuevo proyecto» porque ir a lo que ya existe es lo que se
         hace a diario y crear es lo excepcional.
       */}
-      <Link to="/proyectos" title="Todos los proyectos" className={fila(desplegado)}>
+      <Link to="/carpetas" title="Todas las carpetas" className={fila(desplegado)}>
         <LayoutGrid className="h-4 w-4 shrink-0" />
-        <span className={palabra(desplegado)}>Todos los proyectos</span>
+        <span className={palabra(desplegado)}>Todas las carpetas</span>
       </Link>
 
-      <Link to="/proyectos?nuevo=1" title="Nuevo proyecto" className={fila(desplegado)}>
+      <Link to="/carpetas?nuevo=1" title="Nueva carpeta" className={fila(desplegado)}>
         <Plus className="h-4 w-4 shrink-0" />
-        <span className={palabra(desplegado)}>Nuevo proyecto</span>
+        <span className={palabra(desplegado)}>Nueva carpeta</span>
       </Link>
     </>
   );

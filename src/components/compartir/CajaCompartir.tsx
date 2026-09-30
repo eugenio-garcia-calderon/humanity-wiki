@@ -107,6 +107,9 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
     if (!e) return <div className="flex justify-center py-8 text-slate-300"><Loader2 className="h-5 w-5 animate-spin" /></div>;
 
     const raiz = typeof window !== 'undefined' ? window.location.origin : '';
+    // «Esta carpeta», «esta página», «este mapa»: the server sends the noun,
+    // the article has to agree with it.
+    const este = /a$/.test(e.nombre) ? 'Esta' : 'Este';
 
     return (
       <>
@@ -126,7 +129,7 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] font-black text-slate-800">
-              {e.publico ? `Este ${e.nombre} es público` : `Este ${e.nombre} es privado`}
+              {e.publico ? `${este} ${e.nombre} es ${este === 'Esta' ? 'pública' : 'público'}` : `${este} ${e.nombre} es ${este === 'Esta' ? 'privada' : 'privado'}`}
             </span>
             <span className="block text-[11.5px] leading-snug text-slate-500">
               {e.publico
@@ -252,7 +255,7 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
         <div className="mb-3 flex items-center gap-2">
           <Share2 className="h-4 w-4 text-emerald-600" />
           <h2 className="flex-1 text-sm font-black text-slate-900">
-            Compartir {e ? `este ${e.nombre}` : ''}
+            Compartir {e ? `${/a$/.test(e.nombre) ? 'esta' : 'este'} ${e.nombre}` : ''}
           </h2>
           <button onClick={onCerrar} aria-label="Cerrar" className="text-slate-300 hover:text-slate-600">
             <X className="h-4 w-4" />

@@ -82,7 +82,7 @@ const destinoDe = (a: Aviso): string | null => {
   if (a.entity_type === 'users') return `/personas/${a.entity_id}`;
   if (a.entity_type === 'publications') return `/explorar`;
   if (a.entity_type === 'knowledge_windows') return `/paginas/${a.entity_id}`;
-  if (a.entity_type === 'proyectos') return `/proyectos`;
+  if (a.entity_type === 'proyectos') return `/carpetas`;
   // Una llamada perdida lleva al teléfono, y un mensaje a esa conversación
   // concreta — no a la bandeja, que te obligaría a buscar de quién era.
   if (a.entity_type === 'llamadas') return `/telefono`;

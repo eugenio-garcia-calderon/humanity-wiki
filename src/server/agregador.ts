@@ -379,7 +379,7 @@ export function registrarAgregador(app: Express, db: any) {
           tipo: 'proyecto', id: r.id, titulo: r.titulo,
           extracto: (r.descripcion || '').slice(0, 220),
           duenyo: r.creador_user_id, fecha: r.updated_at || r.created_at,
-          ruta: `/proyectos/${r.slug || r.id}`, por_busqueda: !r.clasificado,
+          ruta: `/carpetas/${r.slug || r.id}`, por_busqueda: !r.clasificado,
         });
       }
 

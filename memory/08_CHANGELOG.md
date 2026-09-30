@@ -7819,3 +7819,30 @@ the new «Comprobar conexión» said «Correcto» about it. The instructions now
 for a second A record (`www` → our IP); the check only accepts our IP for root
 and www, and names the CNAME explicitly when it finds one. The `cname` key in
 `GET /api/dominios` keeps its name for deployed screens and gains `tipo: 'A'`.
+
+## 2026-09-30 — Proyectos become Carpetas: folders that hold pages only (prog8)
+
+Eugenio: «a lo que antes llamábamos proyectos, ahora se va a llamar CARPETAS, y
+en las carpetas puedes meter PÁGINAS y nada más que páginas […] intenta
+rescatar la info poniéndola en páginas».
+
+- New screens in `src/pages/Carpetas.tsx`: `/carpetas` (my folders, then other
+  people's public ones) and `/carpetas/:slug` (the folder's pages; new page, add
+  existing pages, take a page out, share, edit name/icon/visibility, remove the
+  folder — its pages go to «Sin carpeta», never deleted). `/proyectos` and
+  `/proyectos/:slug` redirect, so old links and custom domains keep working.
+  The old project page (`pages/Proyectos.tsx`, 1777 lines) and its gallery,
+  branch tree and edit dialog are gone.
+- Migration `0132_carpetas_rescate.sql` copies what a project held into
+  ordinary pages inside the folder: «Sobre …» (description, vision, cover,
+  gallery, branches, files), «Tareas de …» (the board as checklists, with
+  notes, images, videos and files), «Publicaciones de …» (the wall) and «Más de
+  …» (links to diagrams, maps, products; live `basedatos` blocks for tables;
+  events). Only INSERTs, all pages private, idempotent via `config.rescate`.
+- `GET /api/proyectos/:id/paginas` (new) and page counts/titles in
+  `GET /api/proyectos`. The folder tree in the side menu shows pages only.
+- Every visible «proyecto» in navigation, create menus, welcome copy, share box
+  and the assistant now says «carpeta». The assistant's `CREATE_PAGINA` accepts
+  `carpeta` and now writes a real owned `pagina` (it wrote an ownerless
+  `documento` that never appeared in Páginas).
+- A new folder is born private (a new project was born public).

@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import { subdominioDeUsuario } from './utils/subdominio';
 
@@ -67,8 +67,15 @@ const Personas = lazy(() => import('./pages/Personas'));
 const Presentacion = lazy(() => import('./pages/Presentacion'));
 const ProjectProfile = lazy(() => import('./pages/ProjectProfile'));
 const Projects = lazy(() => import('./pages/Projects'));
-const Proyecto = lazy(() => import('./pages/Proyectos').then(m => ({ default: m.Proyecto })));
-const Proyectos = lazy(() => import('./pages/Proyectos').then(m => ({ default: m.Proyectos })));
+// Projects became folders of pages on 2026-09-30 (`pages/Carpetas.tsx`); the
+// old `/proyectos` addresses redirect so shared links keep working.
+const Carpeta = lazy(() => import('./pages/Carpetas').then(m => ({ default: m.Carpeta })));
+const Carpetas = lazy(() => import('./pages/Carpetas').then(m => ({ default: m.Carpetas })));
+function ProyectoACarpeta() {
+  const { slug } = useParams();
+  const { search } = useLocation();
+  return <Navigate to={`/carpetas${slug ? `/${slug}` : ''}${search}`} replace />;
+}
 const Restablecer = lazy(() => import('./pages/Restablecer'));
 const RetoVistas = lazy(() => import('./pages/RetoVistas'));
 const SocioConfirmacion = lazy(() => import('./pages/SocioConfirmacion'));
@@ -216,7 +223,8 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
               Va ANTES que `:slug` porque «proyectos» es fijo y `:slug` variable:
               si no, una página llamada «proyectos» se comería todos los
               proyectos. Misma razón que `pedido` y `producto` aquí arriba. */}
-          <Route path="proyectos/:slug" element={<Proyecto />} />
+          <Route path="carpetas/:slug" element={<Carpeta />} />
+          <Route path="proyectos/:slug" element={<Carpeta />} />
           <Route path=":slug" element={<PaginaPublica handleFijo={handle} />} />
           <Route path="*" element={<PaginaPublica handleFijo={handle} />} />
         </Routes>
@@ -372,7 +380,8 @@ export default function App() {
                     de ruta desmontaría el componente y perdería la carpeta abierta
                     al tocar el interruptor De la Humanidad/Mías (2026-08-08). */}
                 <Route path="mis-publicaciones" element={<Navigate to="/explorar?mias=1" replace />} />
-                <Route path="proyectos" element={<Proyectos />} />
+                <Route path="carpetas" element={<Carpetas />} />
+                <Route path="proyectos" element={<ProyectoACarpeta />} />
                 <Route path="tareas" element={<Tareas />} />
                 <Route path="hormiguero" element={<Hormiguero />} />
                 <Route path="buscar" element={<Buscar />} />
@@ -389,7 +398,8 @@ export default function App() {
                 {/* Una persona de TU mundo: su ficha y vuestra conversación, sin
                     cargar el Mundo 3D entero (Eugenio, 2026-08-20). */}
                 <Route path="persona/:id" element={<Persona />} />
-                <Route path="proyectos/:slug" element={<Proyecto />} />
+                <Route path="carpetas/:slug" element={<Carpeta />} />
+                <Route path="proyectos/:slug" element={<ProyectoACarpeta />} />
                 {/* /paginas/nuevo?prompt=… genera con la IA en directo;
                     /paginas/:id abre uno guardado. */}
                 {/* El editor de documentos y el de páginas son EL MISMO

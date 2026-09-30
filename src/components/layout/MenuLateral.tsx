@@ -24,7 +24,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  FolderKanban, Wrench, Store, Users2, PanelLeftClose,
+  FolderKanban, Folder, Wrench, Store, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
@@ -238,7 +238,7 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
     // se quedan para las PERSONAS, donde son una inicial de verdad y no un
     // dibujo de lo que la cosa es.
     insignia: iconoDeProyecto(p.icono, p.titulo),
-    destino: `/proyectos/${p.slug}`,
+    destino: `/carpetas/${p.slug}`,
     editable: { tipo: 'proyecto', id: p.id },
     // Los hijos se piden al desplegar, no antes.
     cargarHijos: async () => {
@@ -299,7 +299,7 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
   // ---- LAS SECCIONES DEL MENÚ, CONFIGURABLES -------------------------------
   // El catálogo fijo: qué secciones existen y cómo se llaman de fábrica.
   const SECCIONES_BASE = [
-    { clave: 'proyectos', titulo: 'Proyectos', icono: FolderKanban },
+    { clave: 'proyectos', titulo: 'Carpetas', icono: Folder },
     { clave: 'herramientas', titulo: 'Herramientas', icono: Wrench },
     { clave: 'areas', titulo: 'Áreas', icono: Layers },
     { clave: 'productos', titulo: 'Productos', icono: Store },
@@ -421,8 +421,8 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
       // hace ya el nombre de la sección: un botón con un más tiene que crear
       // algo, o no ser un más.
       accion: (
-        <button onClick={() => abrir({ id: 'p', label: 'Nuevo proyecto', destino: '/proyectos?nuevo=1' })}
-          title="Crear un proyecto"
+        <button onClick={() => abrir({ id: 'p', label: 'Nueva carpeta', destino: '/carpetas?nuevo=1' })}
+          title="Crear una carpeta"
           className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors">
           <Plus className="w-3.5 h-3.5" />
         </button>
@@ -431,8 +431,8 @@ export default function MenuLateral({ activo, movil = false, onCerrar }: {
         <>
           {nodosProyectos.length === 0 && (
             user
-              ? <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes proyectos.</p>
-              : invitar('Crea tu cuenta y empieza tu primer proyecto →')
+              ? <p className="px-2 py-1 text-[11px] text-slate-400 italic">Todavía no tienes carpetas.</p>
+              : invitar('Crea tu cuenta y empieza tu primera carpeta →')
           )}
           {filas('proyectos', nodosProyectos)}
         </>

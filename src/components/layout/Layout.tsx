@@ -4,7 +4,7 @@ import { useCerrarAlPulsarFuera } from '../../hooks/useCerrarAlPulsarFuera';
 import { useCerrarAlAlejarse } from '../../hooks/useAbrirAlAcercarse';
 import {
   User, LogOut, Store, Map as MapIcon, Globe2, Database, Settings,
-  Compass, Menu, X, FolderKanban, Users2, Gamepad2, AppWindow, Globe, ListChecks,
+  Compass, Menu, X, FolderKanban, Folder, Users2, Gamepad2, AppWindow, Globe, ListChecks,
   FileText, ChevronDown, CalendarDays, ChevronsDownUp, ChevronsUpDown, Sparkles, Home, MessageSquare,
  PanelLeftOpen, Info, Search, Trash2, LayoutGrid, Phone,} from 'lucide-react';
 import { PAGINAS_INFO } from '../../paginasInfo';
@@ -56,7 +56,7 @@ const SECCIONES_COMUN = [
   { to: '/esquemas', label: 'Grafos', icon: Globe2 },
   { to: '/mapas', label: 'Mapas', icon: MapIcon },
   { to: '/juego', label: 'Visor 3D', icon: Gamepad2 },
-  { to: '/proyectos', label: 'Mis proyectos', icon: FolderKanban },
+  { to: '/carpetas', label: 'Mis carpetas', icon: Folder },
   { to: '/paginas', label: 'Páginas', icon: FileText },
   { to: '/tareas', label: 'Tareas', icon: ListChecks },
   { to: '/archivos', label: 'Archivos', icon: Database },
@@ -78,7 +78,7 @@ function iconoDeRuta(ruta: string) {
   const exacta = TODAS_SECCIONES.find(sec => sec.to === camino);
   if (exacta) return exacta.icon;
   const porPrefijo: Array<[string, any]> = [
-    ['/personas/', User], ['/proyectos/', FolderKanban], ['/paginas/', FileText],
+    ['/personas/', User], ['/carpetas/', Folder], ['/paginas/', FileText],
     ['/esquemas/', Globe2], ['/mapas/', MapIcon], ['/documentos/', FileText],
     ['/organizaciones/', Users2],
   ];
@@ -1471,11 +1471,11 @@ export default function Layout() {
               setPorRoce(false);
               if (circulo === 'organizar') { setCirculo(null); return; }
               setCirculo('organizar');
-              if (!esMovil) navigate('/proyectos');
+              if (!esMovil) navigate('/carpetas');
             }}
-            title="Tus proyectos"
+            title="Tus carpetas"
             className={cn('flex shrink-0 items-center gap-1.5 self-stretch rounded-t-xl px-2 transition-colors sm:px-2.5 -mb-px border-b',
-              circulo === 'organizar' || location.pathname.startsWith('/proyectos')
+              circulo === 'organizar' || location.pathname.startsWith('/carpetas')
                 ? 'border-white bg-white text-slate-900 shadow-[inset_0_2px_0_0_theme(colors.emerald.500)]'
                 : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900')}
           >

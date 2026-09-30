@@ -77,10 +77,10 @@ const CAMINOS: Camino[] = [
   {
     clave: 'proyectar',
     titulo: 'Proyectar',
-    frase: 'Tus proyectos y sus tableros: lo que está por hacer y lo hecho.',
+    frase: 'Tus carpetas y las páginas que guardas en ellas.',
     Previa: PreviaProyectar,
     Icono: LayoutGrid,
-    ruta: '/proyectos',
+    ruta: '/carpetas',
   },
 ];
 

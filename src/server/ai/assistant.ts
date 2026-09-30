@@ -107,7 +107,7 @@ const ACTION_CATALOG: Record<string, { minLevel: number; entity?: string; descri
   // ninguna acción para eso. Estas tres son las que se usan a diario.
   CREATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Crear una tarea en un proyecto' },
   UPDATE_TAREA:    { minLevel: ROLE.USER, entity: 'roadmap_items', description: 'Cambiar una tarea (estado, título, responsable)' },
-  CREATE_PROYECTO: { minLevel: ROLE.USER, entity: 'proyectos',     description: 'Crear un proyecto' },
+  CREATE_PROYECTO: { minLevel: ROLE.USER, entity: 'proyectos',     description: 'Crear una carpeta (guarda páginas)' },
   CREATE_PAGINA:   { minLevel: ROLE.USER, entity: 'knowledge_windows', description: 'Crear una página' },
   // 2026-08-08: "ordename las publicaciones por carpetas" — sin parámetros,
   // el servidor lee todo lo que ha publicado quien pregunta y las agrupa.
@@ -594,8 +594,11 @@ LAS COSAS DE LA PROPIA PLATAFORMA. Sabes hacer esto, y se hace igual: mandando l
 · UPDATE_TAREA — «marca X como hecha», «pon en curso lo del baño», «ponle
   plazo el viernes». Parámetros: tarea (parte del título basta), estado,
   prioridad, titulo_nuevo, resumen, vence (mismo formato; null lo quita).
-· CREATE_PROYECTO — titulo (obligatorio), descripcion, publico (true/false).
-· CREATE_PAGINA — titulo (obligatorio), texto (el contenido inicial).
+· CREATE_PROYECTO — crea una CARPETA (lo que antes se llamaba proyecto): un
+  sitio donde guardar páginas, y solo páginas. titulo (obligatorio), publico
+  (true/false; si no lo dicen, false).
+· CREATE_PAGINA — titulo (obligatorio), texto (el contenido inicial), carpeta
+  (el NOMBRE de una carpeta suya, si quiere guardarla en una).
 
 Ejemplo, para «añade una tarea de prueba en el proyecto Humanity.wiki»:
 
@@ -1273,7 +1276,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
             // Con su DESCRIPCIÓN: ahí es donde vive «autonomía 90 km/día», y
             // sin ella la IA no podía responder por las características de un
             // proyecto aunque las tuviera escritas su dueño.
-            proyectos: proy.rows.map((p: any) => ({
+            carpetas: proy.rows.map((p: any) => ({
               nombre: p.titulo,
               pendientes: p.pendientes,
               descripcion: p.descripcion || undefined,
@@ -1597,7 +1600,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
           // al índice es casi como no tener enlace. El listado ya sabe abrir
           // una tarjeta concreta con `?tarea=`, y aquí tenemos su id.
           roadmap_items: `/tareas?tarea=${result.entityId}`,
-          proyectos: `/proyectos`,
+          proyectos: `/carpetas`,
           knowledge_windows: `/paginas/${result.entityId}`,
           eventos: `/calendario`,
           knowledge_graphs: result.slug ? `/esquemas/${result.slug}` : '/esquemas',
@@ -1931,7 +1934,7 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
 
         case 'CREATE_PROYECTO': {
           const titulo = String(params.titulo || params.nombre || '').trim();
-          if (!titulo) return { ok: false, error: 'El proyecto necesita un nombre.' };
+          if (!titulo) return { ok: false, error: 'La carpeta necesita un nombre.' };
           const id = newId('PRY');
           const slug = `${titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -1951,13 +1954,32 @@ REGLA DE ORO, LA ÚLTIMA Y LA MÁS IMPORTANTE: si dices que has hecho, apuntado 
         case 'CREATE_PAGINA': {
           const titulo = String(params.titulo || params.nombre || '').trim();
           if (!titulo) return { ok: false, error: 'La página necesita un título.' };
+          // Into a folder by NAME, only one of theirs. A name that matches
+          // none is an error listing the real ones — never a silent fallback.
+          let carpetaId: string | null = null;
+          const nombreCarpeta = String(params.carpeta || params.proyecto || '').trim();
+          if (nombreCarpeta) {
+            const suyas = (await db.execute(sql`
+              SELECT id, titulo FROM proyectos
+              WHERE creador_user_id = ${actorId} AND archived_at IS NULL AND deleted_at IS NULL
+            `)).rows as any[];
+            const norm = (x: string) => x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const hit = suyas.find(c => norm(c.titulo) === norm(nombreCarpeta));
+            if (!hit) {
+              return { ok: false, error: `No tienes ninguna carpeta llamada «${nombreCarpeta}». Tus carpetas: ${suyas.map(c => c.titulo).join(', ') || 'ninguna'}.` };
+            }
+            carpetaId = hit.id;
+          }
           const id = newId('KW');
+          // `kind = 'pagina'` and the creator: before 2026-09-30 this wrote a
+          // 'documento' with no owner, which never showed up in Páginas.
           await db.execute(sql`
-            INSERT INTO knowledge_windows (id, title, kind, config, created_by, updated_by)
-            VALUES (${id}, ${titulo.slice(0, 200)}, 'documento',
+            INSERT INTO knowledge_windows (id, title, kind, config, publico, creator_user_id, is_ai_generated, created_by, updated_by, proyecto_id)
+            VALUES (${id}, ${titulo.slice(0, 200)}, 'pagina',
                     ${JSON.stringify({ bloques: params.texto
-                      ? [{ id: 'b1', tipo: 'parrafo', texto: String(params.texto).slice(0, 20000) }] : [] })}::jsonb,
-                    ${actorId}, ${actorId})
+                      ? [{ id: 'b1', tipo: 'parrafo', texto: String(params.texto).slice(0, 20000) }]
+                      : [{ id: 'b1', tipo: 'parrafo', texto: '' }] })}::jsonb,
+                    false, ${actorId}, true, ${actorId}, ${actorId}, ${carpetaId})
           `);
           return { ok: true, entityId: id, entityType: 'knowledge_windows' };
         }

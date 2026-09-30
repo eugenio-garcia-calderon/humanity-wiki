@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileText, Table2, Store, ListChecks, CalendarDays, Globe2, Map as MapIcon,
-  Sparkles, Database, Compass, MessageSquare, FolderKanban, Loader2,
+  Sparkles, Database, Compass, MessageSquare, FolderKanban, Folder, Loader2,
   CheckCircle2, CircleDashed, CircleAlert, Bug,
 } from 'lucide-react';
 
@@ -117,7 +117,7 @@ const HERRAMIENTAS: Herramienta[] = [
     claves: ['tabla', 'tablas', 'columna', 'fórmula', 'base de datos'],
   },
   {
-    id: 'proyectos', nombre: 'Proyectos', icono: FolderKanban, destino: '/proyectos',
+    id: 'proyectos', nombre: 'Carpetas', icono: Folder, destino: '/carpetas',
     vision: 'El cajón donde vive todo lo demás: páginas, tareas, gente.',
     estado: 'usable',
     cuenta: { clave: 'proyectos', etiqueta: 'proyectos' },

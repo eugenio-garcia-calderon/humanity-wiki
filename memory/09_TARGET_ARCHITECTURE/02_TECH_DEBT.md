@@ -314,3 +314,14 @@ ahorro.
 **Y lo que no sirve para decidir esto**: la medición por ruta (`medicion.ts`) vive
 en memoria y se pierde en cada reinicio; cada despliegue reinicia. Responde «qué
 se está pidiendo ahora», nunca «desde cuándo no lo pide nadie».
+
+## Carpetas: tools that still attach non-page things to a folder (2026-09-30)
+
+A folder holds pages only, but these still write `proyecto_id` on other rows,
+which then do not show inside the folder: creating a task/diagram/map from the
+bottom rail while standing in a folder (`RailInferior`, `POST
+/api/proyectos/:id/herramienta`), «Añadir a un proyecto» in Personas, product →
+project in Mercado, web saves in the Navegador, events and budgets
+(Calendario, Finanzas), and the 3D world's project buildings. Each needs a
+product decision (drop the link, or turn it into a page). Until then they work
+as before and their data is safe.

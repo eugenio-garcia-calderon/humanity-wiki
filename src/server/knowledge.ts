@@ -1092,7 +1092,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
           autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
           donde: p.tarjetas ? `${p.hechas}/${p.tarjetas} hechas` : 'Sin tarjetas aún',
           donde_slug: p.slug, personal: false,
-          ruta: `/proyectos/${p.slug}`,
+          ruta: `/carpetas/${p.slug}`,
           publico: p.publico, ...comun(p),
         })),
         ...(mapas.rows as any[]).map(m => ({
@@ -1486,7 +1486,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         vistas: 0, ia: false, fecha: p.created_at,
         autor_id: p.creator_user_id, autor_nombre: p.autor_nombre, autor_avatar: p.autor_avatar,
         donde: p.tarjetas ? `${p.hechas}/${p.tarjetas} hechas` : 'Sin tarjetas aún', donde_slug: p.slug, personal: false,
-        ruta: `/proyectos/${p.slug}`,
+        ruta: `/carpetas/${p.slug}`,
         publico: p.publico, estado: p.estado, n_colaboradores: p.n_colaboradores,
         puedo_editar: mio(p.creator_user_id) || (!!usuarioId && p.soy_colaborador), soy_autor: mio(p.creator_user_id),
       });

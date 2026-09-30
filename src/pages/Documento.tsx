@@ -453,7 +453,7 @@ export default function Documento() {
   }, [buscadorPub, busquedaPub]);
 
   const embeber = (pub: any) => {
-    const rutaDe: Record<string, string> = { lienzo: '/esquemas/', mapa: '/mapas/', proyecto: '/proyectos/' };
+    const rutaDe: Record<string, string> = { lienzo: '/esquemas/', mapa: '/mapas/', proyecto: '/carpetas/' };
     const nuevo: Bloque = {
       id: nuevoIdBloque(),
       tipo: pub.tipo === 'producto' ? 'producto' : 'publicacion',
@@ -1247,7 +1247,7 @@ export default function Documento() {
       }
       if (b.tipo === 'publicacion') {
         const ventana = b.pubTipo === 'ventana' ? ventanasEmbebidas[b.entityId || ''] : undefined;
-        const etiqueta = ({ ventana: b.pubKind || 'ventana', lienzo: 'lienzo', mapa: 'mapa', proyecto: 'proyecto', muro: 'muro' } as any)[b.pubTipo || ''] || 'publicación';
+        const etiqueta = ({ ventana: b.pubKind || 'ventana', lienzo: 'lienzo', mapa: 'mapa', proyecto: 'carpeta', muro: 'muro' } as any)[b.pubTipo || ''] || 'publicación';
         const interior = (
           <div className="border border-emerald-200 bg-emerald-50/30 rounded-2xl overflow-hidden">
             <div className="flex items-center gap-2 px-3.5 py-2 border-b border-emerald-100">
