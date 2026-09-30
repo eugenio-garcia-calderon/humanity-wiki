@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog8-turn",
-      "ruta": "src/server/dominios.ts",
-      "motivo": "Sitios publicados limpios (prog8)",
-      "desde": "2026-09-30T20:53:16.812Z"
-    },
-    {
-      "agente": "prog8-turn",
       "ruta": "src/pages/PaginaPublica.tsx",
       "motivo": "Sitios publicados limpios (prog8)",
       "desde": "2026-09-30T20:53:20.839Z"
