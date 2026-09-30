@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { Loader2, FileQuestion } from 'lucide-react';
-import BloquesLectura from '../components/knowledge/BloquesLectura';
 import Cesta from '../components/knowledge/Cesta';
+import VistaPagina, { Cargando, SinPagina } from '../components/sitio/VistaPagina';
+import { ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 
 // ============================================================================
 // LA CARA PÚBLICA DE UNA PÁGINA — `/@nombre/pagina` (2026-08-22)
@@ -94,103 +94,44 @@ export default function PaginaPublica({ handleFijo }: { handleFijo?: string }) {
     return () => { vivo = false; };
   }, [handle, slug]);
 
-  // El título de la pestaña y la orden a los buscadores. `noindex` se pone
-  // cuando el autor ha dicho que no quiere aparecer en Google: publicar y ser
-  // encontrable son dos decisiones distintas.
-  useEffect(() => {
-    if (estado !== 'ok' || !pagina) return;
-    const anterior = document.title;
-    document.title = `${pagina.titulo} · humanity.wiki`;
-    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-    const creada = !meta;
-    if (!meta) { meta = document.createElement('meta'); meta.name = 'robots'; document.head.appendChild(meta); }
-    meta.content = pagina.indexable ? 'index,follow' : 'noindex,nofollow';
-    return () => {
-      document.title = anterior;
-      if (creada && meta) meta.remove();
-    };
-  }, [estado, pagina]);
-
   // A dónde va lo que no es una página. `replace` para que el botón de atrás
   // devuelva a donde estaba quien pulsó el enlace, y no a esta pantalla
   // intermedia que rebota otra vez.
   if (otroSitio) return <Navigate to={otroSitio} replace />;
 
-  if (estado === 'cargando') {
-    return (
-      <Marco>
-        <p className="flex items-center gap-2 text-sm text-slate-400">
-          <Loader2 className="w-4 h-4 animate-spin" /> Cargando…
-        </p>
-      </Marco>
-    );
-  }
+  // Por subdominio es la web de alguien: sin marca, sin «ir a humanity.wiki».
+  // Por `/@quien/…` se está en casa y la puerta de vuelta sí tiene sentido.
+  const propio = !!handleFijo;
+  const sitio = propio ? sitioConAnfitrion(null) : sitioEnCasa(handle || '');
+
+  if (estado === 'cargando') return <Cargando />;
 
   if (estado !== 'ok') {
     return (
-      <Marco>
-        <div className="text-center py-10">
-          <FileQuestion className="w-10 h-10 mx-auto text-slate-300" />
-          <h1 className="mt-3 text-lg font-black text-slate-800">Esta página no está aquí</h1>
-          <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
-            {estado === 'no-existe'
-              ? 'O nunca existió, o quien la escribió ha dejado de publicarla.'
-              : 'No se ha podido cargar. Inténtalo dentro de un momento.'}
-          </p>
-          <Link to="/" className="inline-block mt-4 h-11 leading-[2.75rem] px-4 rounded-xl bg-slate-900 text-white text-sm font-bold">
-            Ir a humanity.wiki
-          </Link>
-        </div>
-      </Marco>
+      <SinPagina
+        titulo="Esta página no está aquí"
+        texto={estado === 'no-existe'
+          ? 'O nunca existió, o quien la escribió ha dejado de publicarla.'
+          : 'No se ha podido cargar. Inténtalo dentro de un momento.'}
+        volver="/"
+      />
     );
   }
 
-  const bloques = pagina.config?.bloques || pagina.config?.blocks || null;
-
   return (
-    <Marco>
-      <article>
-        <header className="mb-6">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 break-words">
-            {pagina.titulo}
-          </h1>
-          <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-            {pagina.autor?.avatar && (
-              <img src={pagina.autor.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
-            )}
-            <span>de <b className="text-slate-600">{pagina.autor?.nombre}</b></span>
-            <span>·</span>
-            <span>{new Date(pagina.updated_at || pagina.created_at).toLocaleDateString('es-ES')}</span>
-          </div>
-        </header>
-
-        {/* El editor no vale aquí: va enredado con el cursor, el guardado y
-            los menús, y quien lee no tiene nada de eso. `BloquesLectura` pinta
-            los mismos bloques con la misma tabla de estilos. */}
-        {/* Esta vista sólo existe para páginas publicadas, así que aquí siempre se
-            puede comentar: la regla «sólo si es pública» la vuelve a comprobar el
-            servidor en cada comentario, que es donde protege de verdad. */}
-        <BloquesLectura bloques={bloques || []} comentable={(pagina as any).id} />
-      </article>
-
-      <footer className="mt-10 pt-4 border-t border-slate-100">
-        <Link to="/" className="text-[11px] font-bold text-slate-400 hover:text-slate-600">
-          Publicado en <b>humanity.wiki</b> — el conocimiento de la humanidad, en común
-        </Link>
-      </footer>
-
-      {/* Sólo dentro de una tienda, y sólo si hay algo dentro: la cesta se
-          esconde sola cuando está vacía. */}
-      {handleFijo && <Cesta tienda={handleFijo} />}
-    </Marco>
-  );
-}
-
-/** Sin barra lateral y sin herramientas: ver la nota de arriba. */
-function Marco({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-8 sm:py-14">{children}</div>
-    </div>
+    <ProveedorSitio sitio={sitio}>
+      <VistaPagina pagina={pagina} propio={propio} pie={<>
+        {!propio && (
+          <footer className="mt-10 pt-4 border-t border-slate-100">
+            <Link to="/" className="text-[11px] font-bold text-slate-400 hover:text-slate-600">
+              Publicado en <b>humanity.wiki</b>
+            </Link>
+          </footer>
+        )}
+        {/* Sólo dentro de una tienda, y sólo si hay algo dentro: la cesta se
+            esconde sola cuando está vacía. */}
+        {handleFijo && <Cesta tienda={handleFijo} />}
+      </>} />
+    </ProveedorSitio>
   );
 }

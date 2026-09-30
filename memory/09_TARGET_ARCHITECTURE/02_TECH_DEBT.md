@@ -325,3 +325,12 @@ project in Mercado, web saves in the Navegador, events and budgets
 (Calendario, Finanzas), and the 3D world's project buildings. Each needs a
 product decision (drop the link, or turn it into a page). Until then they work
 as before and their data is safe.
+
+## 2026-09-30 — Inherited visibility scans page JSON (prog8)
+
+`sitios.ts` finds «which page holds this table» with
+`config->'bloques' @> [{tabla_id}]` over every `pagina` window, with no index,
+and only for top-level blocks (a database inside `columnas` or `desplegable`
+is not found). Fine at today's few thousand pages; the right shape is a
+`tabla_en_pagina(tabla_id, pagina_id)` link written on save. Cost: ~2 h now,
+plus a backfill later.

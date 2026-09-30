@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import { cn } from '../../utils/cn';
+import { useSitio } from '../sitio/ContextoSitio';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -42,6 +43,9 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   onCambio: () => void;
 }) {
   const navigate = useNavigate();
+  // En una página publicada, la tarjeta abre la subpágina DENTRO del sitio
+  // (su dominio, su subdominio), no el editor de la plataforma.
+  const sitio = useSitio();
   const [abriendo, setAbriendo] = useState<string | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
 
@@ -50,7 +54,10 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
 
   const abrir = async (f: Fila) => {
     setFallo(null);
-    if (f.pagina_id) { navigate(`/paginas/${f.pagina_id}`); return; }
+    if (f.pagina_id) { navigate(sitio ? sitio.enlacePagina(f.pagina_id) : `/paginas/${f.pagina_id}`); return; }
+    // Un lector no puede crear la página que falta: lo hará su autor al
+    // abrirla la primera vez.
+    if (sitio) return;
     setAbriendo(f.id);
     try {
       const r = await fetch(`/api/bd/filas/${f.id}/pagina`, { method: 'POST', credentials: 'include' });
@@ -84,7 +91,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
           return (
-            <button key={f.id} onClick={() => abrir(f)}
+            <button key={f.id} onClick={() => abrir(f)} disabled={!!sitio && !f.pagina_id}
               className="group text-left rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all">
               <div className="aspect-[16/9] bg-slate-50 border-b border-slate-100 overflow-hidden grid place-items-center">
                 {f.pagina?.imagen ? (
