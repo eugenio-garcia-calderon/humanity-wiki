@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus, Move } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
+import { FichaRelacion } from './Relacion';
 import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -39,7 +40,7 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano' }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles }: {
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -51,6 +52,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   claseTitulo?: string;
   /** Tamaño de las tarjetas. */
   tamano?: TamanoGaleria;
+  /** Qué columnas se ven en la tarjeta, en orden. Sin valor, las tres primeras. */
+  visibles?: string[];
 }) {
   const navigate = useNavigate();
   // En una página publicada, la tarjeta abre la subpágina DENTRO del sitio
@@ -60,7 +63,11 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   const [fallo, setFallo] = useState<string | null>(null);
 
   const colTitulo = columnas.find(c => c.id === columnaTitulo) || null;
-  const otras = columnas.filter(c => c.id !== columnaTitulo).slice(0, PROPIEDADES);
+  // Las que se ven en la tarjeta: las que eligió quien edita o, si no eligió,
+  // las tres primeras. Una lista vacía elegida a propósito es «ninguna».
+  const otras = visibles
+    ? visibles.map(id => columnas.find(c => c.id === id)).filter((c): c is Columna => !!c && c.id !== columnaTitulo)
+    : columnas.filter(c => c.id !== columnaTitulo).slice(0, PROPIEDADES);
 
   const abrir = async (f: Fila) => {
     setFallo(null);
@@ -148,6 +155,16 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line">{f.pagina.descripcion}</p>
                 )}
                 {otras.map(c => {
+                  // Una relación se enseña como fichas que llevan a la página
+                  // enlazada: «Movilidad» en la tarjeta del coche volador.
+                  if (c.tipo === 'relacion') {
+                    const lista = f.apuntados?.[c.id] || [];
+                    return lista.length ? (
+                      <div key={c.id} className="flex flex-wrap items-center gap-1 pt-0.5">
+                        {lista.map((a: any) => <FichaRelacion key={a.id} a={a} />)}
+                      </div>
+                    ) : null;
+                  }
                   const v = formatear(f.celdas[c.id] ?? { estado: 'vacia' }, c,
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });
                   return v ? (

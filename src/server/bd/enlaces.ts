@@ -34,7 +34,22 @@ const FUENTES: Record<Clase, { tabla: string; etiqueta: string; extra: string; f
   persona:     { tabla: 'users',             etiqueta: 'COALESCE(display_name, name, email)', extra: 'avatar_url',   filtro: 'archived_at IS NULL' },
   proyecto:    { tabla: 'proyectos',         etiqueta: 'titulo',                              extra: 'icono',        filtro: 'archived_at IS NULL AND deleted_at IS NULL' },
   publicacion: { tabla: 'knowledge_windows', etiqueta: 'title',                               extra: 'kind',         filtro: 'archived_at IS NULL AND deleted_at IS NULL' },
-  fila:        { tabla: 'bd_filas',          etiqueta: "''",                                  extra: 'tabla_id',     filtro: 'archived_at IS NULL AND deleted_at IS NULL' },
+  // UNA FILA SE LLAMA COMO SU PÁGINA (2026-10-01). Aquí ponía `''`: una
+  // relación enseñaba fichas vacías. El nombre es el título de su página y,
+  // si aún no tiene, su primera columna de texto — la misma regla que
+  // `columnaTitulo` en `bd.ts`. `extra` lleva la tabla y la página, para que
+  // la pantalla pueda enlazar al elemento.
+  fila: {
+    tabla: 'bd_filas',
+    etiqueta: `COALESCE(
+      (SELECT kw.title FROM knowledge_windows kw WHERE kw.id = bd_filas.pagina_id AND kw.deleted_at IS NULL),
+      (SELECT bd_filas.valores->>c.id FROM bd_columnas c
+        WHERE c.tabla_id = bd_filas.tabla_id AND c.tipo = 'texto' AND c.archived_at IS NULL
+        ORDER BY c.orden, c.created_at LIMIT 1),
+      '')`,
+    extra: `json_build_object('tabla_id', bd_filas.tabla_id, 'pagina_id', bd_filas.pagina_id)`,
+    filtro: 'archived_at IS NULL AND deleted_at IS NULL',
+  },
 };
 
 /**

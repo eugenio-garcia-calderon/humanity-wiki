@@ -16,6 +16,7 @@ import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import MenuBloque from '../components/knowledge/MenuBloque';
+import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
@@ -141,7 +142,7 @@ function EditorPagina() {
   /** Dónde se ve publicada: su dominio propio, o su dirección en Humanity Wiki. */
   const [urlPublicada, setUrlPublicada] = useState<string | null>(null);
   /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
-  const [filaDe, setFilaDe] = useState<{ tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
+  const [filaDe, setFilaDe] = useState<{ fila_id?: string; tabla_id?: string; tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
@@ -1524,6 +1525,8 @@ function EditorPagina() {
             vista={b.vistaBd || 'galeria'}
             color={b.color}
             tamano={b.tamanoGaleria || 'mediano'}
+            visibles={b.propsGaleria}
+            onCambiarVisibles={editable ? ids => { b.propsGaleria = ids; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarVista={editable ? v => { b.vistaBd = v; setBloques(bs => [...bs]); programarGuardado(); } : undefined} />
         );
@@ -2311,6 +2314,12 @@ function EditorPagina() {
 
           </>}
         />
+
+        {/* Las propiedades del elemento, si esta página es una fila de una
+            base de datos: ahí se liga el proyecto a su área. */}
+        {filaDe?.fila_id && filaDe.tabla_id && (
+          <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
+        )}
 
         {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined) && (
           <div className="mb-6">

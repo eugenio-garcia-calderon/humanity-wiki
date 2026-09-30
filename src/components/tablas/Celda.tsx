@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Star, ExternalLink, Paperclip, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { CeldaRelacion } from './Relacion';
 
 // ============================================================================
 // TABLAS · UNA CELDA
@@ -173,6 +174,15 @@ export default function CeldaTabla({
           </button>
         ))}
       </div>
+    );
+  }
+
+  // ── RELACIÓN CON OTRA BASE DE DATOS: fichas que llevan a su página y un
+  //    selector para elegirlas (2026-10-01). Ver `Relacion.tsx`.
+  if (columna.tipo === 'relacion') {
+    return (
+      <CeldaRelacion columna={columna} apuntados={apuntados || []} editable={puedeEditar}
+        onGuardar={ids => guardar(ids)} />
     );
   }
 

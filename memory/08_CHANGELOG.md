@@ -8043,3 +8043,22 @@ clicking its name.
   card, drag, «Guardar posición». Stored as `config.encuadre` {x,y}% on the
   row's page via `PUT /api/bd/filas/:id/encuadre` (table write permission),
   applied as `object-position`.
+
+## 2026-10-01 — Relations between databases you can actually use (prog8)
+
+Eugenio: link each innovation project (flying car, boat) to its area
+(mobility, energy) and show that link in the gallery. The data model already
+had «Otra tabla» relation columns (`bd_enlaces`), but:
+
+- Related rows showed as **empty chips**: `enlaces.ts` labelled `fila` with
+  `''`. It now uses the row page's title (or its first text column) and
+  returns `{tabla_id, pagina_id}` so chips can link.
+- There was **no way to pick** related rows: relation cells only displayed.
+  New `CeldaRelacion` (`tablas/Relacion.tsx`): chips that open the related
+  page (inside the site when published) and a searchable picker of the
+  target table's rows (single or multiple per the column's «varios»).
+- **Row pages show their properties** under the title (`PropiedadesFila`),
+  editable with the same cells and save route as the grid — so a project is
+  linked to its area from its own page.
+- **Gallery «Propiedades»** menu: choose which columns show on cards
+  (`propsGaleria` on the block); relations render as clickable chips.
