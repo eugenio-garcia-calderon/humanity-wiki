@@ -47,6 +47,12 @@
       "ruta": "src/server/dominios.ts",
       "motivo": "carpetas",
       "desde": "2026-09-30T15:18:04.873Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/PaginaPublica.tsx",
+      "motivo": "carpetas",
+      "desde": "2026-09-30T15:20:40.830Z"
     }
   ]
 }
