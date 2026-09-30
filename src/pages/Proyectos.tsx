@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban, Plus, X, User as UserIcon, Lock, Globe, ArrowLeft, Pencil, Check,
@@ -18,6 +18,7 @@ import Adjuntos from '../components/archivo/Adjuntos';
 import GaleriaProyecto from '../components/proyecto/GaleriaProyecto';
 import EditarProyecto from '../components/proyecto/EditarProyecto';
 import { elegirYSubirImagenes } from '../utils/elegirImagen';
+import { subirArchivo } from '../utils/subir';
 import PopupRenombrar from '../components/layout/menu/PopupRenombrar';
 
 // ============================================================================
@@ -1294,6 +1295,23 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
   const [grupo, setGrupo] = useState(grupoInicial);
   const [prioridad, setPrioridad] = useState('media');
   const [guardando, setGuardando] = useState(false);
+  // ── LA IMAGEN O EL ARCHIVO, DESDE EL PRIMER MOMENTO ────────────────────
+  // (2026-08-28, Eugenio: «que las tarjetas permitan no solo poner un título y
+  // una descripción, sino también subir una imagen o archivo»).
+  //
+  // Se podía adjuntar, pero SÓLO abriendo una tarjeta que ya existía. Es una
+  // diferencia pequeña de escribir y grande de usar: quien tiene la foto
+  // delante en el momento de crear la tarjeta tenía que crearla, buscarla en
+  // el tablero, abrirla y entonces adjuntar. La mitad de las veces eso no se
+  // hace, y la foto se queda en el móvil.
+  //
+  // Los bytes suben YA, al elegir el archivo; lo que espera es sólo la
+  // anotación de a qué tarjeta pertenece. No es capricho: `archivos.tarea_id`
+  // apunta a `roadmap_items` con una clave foránea, así que colgarlo de una
+  // tarjeta que todavía no existe lo rechazaría la propia base de datos.
+  const [adjuntos, setAdjuntos] = useState<Array<{ url: string; nombre: string; mime: string; bytes: number; clase: string; esImagen: boolean }>>([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const fichero = useRef<HTMLInputElement>(null);
   /** «hecho» durante el instante de la confirmación, antes de cerrar. */
   const [hecho, setHecho] = useState(false);
   const esMovil = useEsMovil();
@@ -1328,8 +1346,42 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
     return () => window.removeEventListener('keydown', alTecla);
   }, [guardando, hecho, onCerrar]);
 
+  /** Sube lo elegido y lo guarda a la espera de que la tarjeta exista. Si uno
+   *  falla se para y se dice: seguir con los demás dejaría una tarjeta a la
+   *  que le falta un archivo sin que nadie se entere. */
+  const elegirArchivos = async (files: FileList | null) => {
+    if (!files?.length || subiendo) return;
+    setSubiendo(true); setError(null);
+    try {
+      for (const f of Array.from(files)) {
+        const u = await subirArchivo(f);
+        // `!== undefined` y no a secas: `subirArchivo` devuelve dos formas —una
+        // con `error` y otra con `error?: undefined`— y sólo comparando contra
+        // `undefined` sabe TypeScript cuál de las dos tiene delante.
+        // Se pregunta por la DIRECCIÓN y no sólo por el error: sin dirección
+        // no hay nada que colgar, diga lo que diga el resto de la respuesta.
+        // Y se copian los campos uno a uno en vez de esparcir el objeto —así
+        // lo que se guarda aquí es exactamente lo que luego se manda, sin que
+        // se cuele de propina el propio `error`.
+        if (u.error !== undefined || !u.url) {
+          setError(u.error || `No se ha podido subir ${f.name}.`);
+          break;
+        }
+        const subido = {
+          url: u.url, nombre: f.name, mime: u.type ?? 'application/octet-stream',
+          bytes: u.bytes ?? 0, clase: u.clase ?? 'archivo', esImagen: !!u.esImagen,
+        };
+        setAdjuntos(a => [...a, subido]);
+      }
+    } finally {
+      setSubiendo(false);
+      if (fichero.current) fichero.current.value = '';
+    }
+  };
+
   const crear = async () => {
     if (!titulo.trim()) { setError('La tarjeta necesita un título.'); return; }
+    if (subiendo) { setError('Espera a que termine de subirse el archivo.'); return; }
     setGuardando(true); setError(null);
     try {
       const r = await fetch('/api/roadmap', {
@@ -1338,6 +1390,29 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'No se pudo crear.');
+
+      // ── AHORA SE CUELGAN LOS ARCHIVOS ────────────────────────────────
+      // La tarjeta ya existe, así que ya hay de qué colgarlos. Si esto falla,
+      // la tarjeta SIGUE CREADA: no se puede decir «no se pudo crear» porque
+      // sería mentira, y quien lo lea volverá a crearla y tendrá dos. Se dice
+      // exactamente lo que ha pasado y se cierra igual — el archivo se puede
+      // volver a arrastrar dentro de la tarjeta, que ya está en el tablero.
+      let fallo: string | null = null;
+      for (const a of adjuntos) {
+        const ra = await fetch('/api/archivo', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+          body: JSON.stringify({
+            tarea_id: j.id, url: a.url, nombre: a.nombre,
+            mime: a.mime, bytes: a.bytes, clase: a.clase,
+          }),
+        });
+        if (!ra.ok) {
+          const d = await ra.json().catch(() => ({}));
+          fallo = d.error || `La tarjeta se ha creado, pero «${a.nombre}» no se ha podido adjuntar.`;
+          break;
+        }
+      }
+      if (fallo) { setError(fallo); setGuardando(false); setTimeout(() => onCreada(), 2500); return; }
       // SE CONFIRMA ANTES DE CERRAR (2026-08-22, Eugenio: «haz una animación
       // chula y elegante de refuerzo positivo cuando se dé a guardar que
       // confirme que se ha guardado correctamente»). Cerrar en seco deja la
@@ -1408,6 +1483,52 @@ function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, on
           </div>
           <textarea value={resumen} onChange={e => setResumen(e.target.value)} rows={3}
             className={cn(input, 'resize-none leading-snug')} placeholder="El contexto que haga falta (opcional)" />
+
+          {/* ── LA IMAGEN O EL ARCHIVO ────────────────────────────────────
+              Un botón y las miniaturas de lo que ya lleva. Se puede quitar
+              antes de guardar: lo subido todavía no cuelga de ninguna tarjeta,
+              así que quitarlo aquí no deja nada roto detrás. */}
+          <div>
+            <input ref={fichero} type="file" multiple className="hidden"
+              onChange={e => elegirArchivos(e.target.files)} />
+            <button
+              type="button"
+              onClick={() => fichero.current?.click()}
+              disabled={subiendo}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:border-slate-400 disabled:opacity-50"
+            >
+              {subiendo
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo…</>
+                : <><Paperclip className="w-3.5 h-3.5" /> Imagen o archivo</>}
+            </button>
+
+            {adjuntos.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {adjuntos.map((a, i) => (
+                  <div key={a.url} className="relative group">
+                    {a.esImagen ? (
+                      <img src={a.url} alt={a.nombre}
+                        className="w-16 h-16 object-cover rounded-xl border border-slate-200" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex flex-col items-center justify-center px-1">
+                        <Paperclip className="w-4 h-4 text-slate-400" />
+                        <span className="mt-0.5 text-[9px] font-bold text-slate-500 truncate w-full text-center">{a.nombre}</span>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setAdjuntos(l => l.filter((_, j) => j !== i))}
+                      title={`Quitar ${a.nombre}`}
+                      className="absolute -top-1.5 -right-1.5 p-0.5 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-red-600 shadow-sm"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-wrap gap-1.5">
             {grupos.map(g => (
               <button key={g.id} onClick={() => setGrupo(g.id)}
