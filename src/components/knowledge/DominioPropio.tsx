@@ -180,7 +180,7 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
           <div className="mt-2 space-y-1.5">
             <Registro tipo="A" nombre={instrucciones.a.nombre} valor={instrucciones.a.valor}
               copiado={copiado === 'a'} onCopiar={() => copiar(instrucciones.a.valor, 'a')} />
-            <Registro tipo="CNAME" nombre={instrucciones.cname.nombre} valor={instrucciones.cname.valor}
+            <Registro tipo={instrucciones.cname.tipo || 'CNAME'} nombre={instrucciones.cname.nombre} valor={instrucciones.cname.valor}
               copiado={copiado === 'cname'} onCopiar={() => copiar(instrucciones.cname.valor, 'cname')} />
           </div>
           <p className="mt-2 text-[11px] text-amber-900/80 leading-relaxed">
