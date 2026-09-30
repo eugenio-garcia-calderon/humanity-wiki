@@ -7859,3 +7859,15 @@ while the DNS is half-propagated is what burns Let's Encrypt's 5-failures-per-
 hour limit — and it then makes the HTTPS request that makes Caddy obtain the
 certificate, retrying three times, and warms `www.` too. Once active the button
 goes back to «Comprobar conexión».
+
+## 2026-09-30 — Custom domains pointed at the old server's IP (prog8)
+
+Production moved to a new Hetzner machine (37.27.244.35, Helsinki) and
+`IP_PUBLICA` was never set there, so `dominios.ts` fell back to the hardcoded
+old address, 167.233.245.191. Every custom domain was told to point there, the
+`ask` gate approved domains pointing there, and Let's Encrypt validated against
+that machine — which no longer serves us (Caddy's log on the new server:
+«167.233.245.191: remote error: tls: internal error»). The default is now the
+new IP, in one constant (`IP_POR_DEFECTO`) used by the instructions and every
+check; `IP_PUBLICA` still overrides it. Anyone who already configured a domain
+must change their A record to the new IP.
