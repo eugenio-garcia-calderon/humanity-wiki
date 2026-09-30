@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X } from 'lucide-react';
+import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X, ShieldCheck } from 'lucide-react';
 
 // ============================================================================
 // PONER TU PROPIO DOMINIO EN UNA PÁGINA — como en Notion (2026-08-22)
@@ -76,10 +76,12 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
     cargar();
   }
 
-  async function comprobar(d: Dominio) {
+  /** `solicitar`: the «Solicitar certificado» button — asks for the
+   *  certificate now instead of waiting for the first visit. */
+  async function comprobar(d: Dominio, solicitar = false) {
     setComprobando(d.id);
     try {
-      const r = await fetch(`/api/dominios/${d.id}/comprobar`, { method: 'POST', credentials: 'include' });
+      const r = await fetch(`/api/dominios/${d.id}/${solicitar ? 'certificado' : 'comprobar'}`, { method: 'POST', credentials: 'include' });
       const j = await r.json().catch(() => ({}));
       setResultados(x => ({
         ...x,
@@ -136,13 +138,27 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
           {/* COMPROBAR LA CONEXIÓN (2026-09-30). Se ofrece siempre, también
               cuando ya funciona: si un día deja de ir, es lo primero que se
               pulsa, y que diga cuál de los pasos se ha roto ahorra adivinar. */}
-          <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
-            className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
-                       bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60">
-            {comprobando === d.id
-              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Comprobando… puede tardar unos segundos</>
-              : <><RefreshCw className="w-3.5 h-3.5" /> Comprobar conexión</>}
-          </button>
+          {/* SOLICITAR EL CERTIFICADO (2026-09-30). Until the domain works,
+              the button asks for the certificate now — only when the DNS has
+              reached the whole internet — instead of leaving it to the first
+              visit. Once it works it goes back to a plain check. */}
+          {d.estado !== 'activo' ? (
+            <button onClick={() => comprobar(d, true)} disabled={comprobando === d.id}
+              className="mt-2 w-full h-11 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600
+                         text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60">
+              {comprobando === d.id
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Solicitando… puede tardar hasta un minuto</>
+                : <><ShieldCheck className="w-3.5 h-3.5" /> Solicitar certificado y conectar</>}
+            </button>
+          ) : (
+            <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
+              className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
+                         bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60">
+              {comprobando === d.id
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Comprobando… puede tardar unos segundos</>
+                : <><RefreshCw className="w-3.5 h-3.5" /> Comprobar conexión</>}
+            </button>
+          )}
           {resultados[d.id] && <ResultadoComprobacion r={resultados[d.id]} />}
         </div>
       ))}
@@ -184,8 +200,9 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               copiado={copiado === 'cname'} onCopiar={() => copiar(instrucciones.cname.valor, 'cname')} />
           </div>
           <p className="mt-2 text-[11px] text-amber-900/80 leading-relaxed">
-            Luego pulsa «Comprobar conexión»: miramos el DNS y el certificado, y
-            te decimos qué falta si algo no está bien.
+            Luego pulsa «Solicitar certificado y conectar»: esperamos a que el DNS
+            haya llegado a todo internet, pedimos el certificado y te decimos qué
+            falta si algo no está bien.
           </p>
           {/* EL MINUTO DE ESPERA, DICHO ANTES DE QUE OCURRA (2026-08-22).
               Lo señaló prog6 revisando: comprobamos el DNS y guardamos el
@@ -195,8 +212,8 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               Decirlo antes cuesta una línea; no decirlo cuesta un «no me
               funciona» treinta segundos después. */}
           <p className="mt-1.5 text-[11px] text-amber-900/80 leading-relaxed">
-            Si acabas de cambiar el DNS y todavía falla, espera un minuto y
-            vuelve a probar: comprobamos el DNS una vez por minuto.
+            Un cambio de DNS tarda de minutos a horas en llegar a todo internet.
+            El botón te dice si ya ha llegado; si no, no pide nada todavía.
           </p>
         </div>
       )}

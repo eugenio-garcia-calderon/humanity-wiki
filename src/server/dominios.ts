@@ -352,7 +352,17 @@ export function registerDominiosRoutes(app: Express, db: any) {
    * en esa caché: así, quien acaba de arreglar su DNS no espera a que caduque
    * un «no» viejo para que Caddy le emita el certificado.
    */
-  app.post('/api/dominios/:id/comprobar', async (req: Request, res: Response) => {
+  /*
+   * SOLICITAR EL CERTIFICADO — `POST /api/dominios/:id/certificado` (2026-09-30)
+   *
+   * Eugenio: «que no revise cada minuto, sino cuando se le da a un botón de
+   * solicitar certificado para conectar dominio». Same route body as
+   * `comprobar`, with `solicitar`: public resolvers must agree first, then
+   * the certificate is requested now, patiently, instead of on the first
+   * visit — so it is ready before anyone opens the domain.
+   */
+  app.post(['/api/dominios/:id/comprobar', '/api/dominios/:id/certificado'], async (req: Request, res: Response) => {
+    const solicitar = req.path.endsWith('/certificado');
     try {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
       const fila = (await db.execute(sql`
@@ -367,14 +377,16 @@ export function registerDominiosRoutes(app: Express, db: any) {
       // golpear un dominio ajeno.
       const ahora = Date.now();
       const ultima = ultimaComprobacion.get(fila.id) ?? 0;
-      if (ahora - ultima < ESPERA_COMPROBAR_MS) {
-        const s = Math.ceil((ESPERA_COMPROBAR_MS - (ahora - ultima)) / 1000);
-        return res.status(429).json({ error: `Espera ${s} s antes de volver a comprobar.` });
+      // Requesting waits longer between presses: each one may reach Let's Encrypt.
+      const espera = solicitar ? 30_000 : ESPERA_COMPROBAR_MS;
+      if (ahora - ultima < espera) {
+        const s = Math.ceil((espera - (ahora - ultima)) / 1000);
+        return res.status(429).json({ error: `Espera ${s} s antes de volver a ${solicitar ? 'solicitarlo' : 'comprobar'}.` });
       }
       ultimaComprobacion.set(fila.id, ahora);
       if (ultimaComprobacion.size > 1000) ultimaComprobacion.clear();
 
-      const r = await comprobarConexion(fila.dominio);
+      const r = await comprobarConexion(fila.dominio, { solicitar });
 
       // Se guarda lo que ha salido. `estado` sólo sube a 'activo' cuando todo
       // está bien; si algo falla NO se pone 'fallo', porque `permitido` sólo
@@ -497,7 +509,31 @@ function esDeCloudflare(ip: string): boolean {
 
 type Paso = { clave: string; ok: boolean; aviso?: boolean; titulo: string; detalle: string };
 
-export async function comprobarConexion(dominio: string): Promise<{
+/**
+ * What public resolvers see for the root A record. Let's Encrypt validates
+ * from outside, so «our resolver says yes» is not enough: if Cloudflare or
+ * Google still see the old value, the validation can fail — and five failures
+ * lock the domain out for an hour.
+ */
+async function ipsPublicas(dominio: string): Promise<Array<{ quien: string; ips: string[] }>> {
+  const RESOLUTORES = [{ quien: 'Cloudflare', ip: '1.1.1.1' }, { quien: 'Google', ip: '8.8.8.8' }];
+  return Promise.all(RESOLUTORES.map(async r => {
+    const res = new dns.Resolver({ timeout: 4000, tries: 2 });
+    res.setServers([r.ip]);
+    try { return { quien: r.quien, ips: await res.resolve4(dominio) }; }
+    catch { return { quien: r.quien, ips: [] }; }
+  }));
+}
+
+const pausa = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/**
+ * @param solicitar  The «Solicitar certificado» button (2026-09-30): also
+ *   require the public resolvers to agree before asking for anything, and be
+ *   patient with the HTTPS step — it is the request that makes Caddy obtain
+ *   the certificate, so it retries while Caddy is still issuing.
+ */
+export async function comprobarConexion(dominio: string, { solicitar = false } = {}): Promise<{
   listo: boolean; resumen: string; pasos: Paso[];
 }> {
   const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
@@ -536,6 +572,23 @@ export async function comprobarConexion(dominio: string): Promise<{
       : `Falta o apunta a otro sitio. Crea un registro A con nombre «www» y valor ${nuestras[0]}. No es imprescindible: sin él solo falla la dirección con «www».`,
   });
 
+  // ── 2b. QUE TODO INTERNET LO VEA YA (sólo al solicitar) ────────────────
+  // Asking for a certificate while the DNS is half-propagated is the most
+  // expensive way to fail: Let's Encrypt counts it. So the button refuses to
+  // ask until the public resolvers agree, and says who is still behind.
+  let propagado = true;
+  if (solicitar && raizOk) {
+    const vistas = await ipsPublicas(dominio);
+    const atrasados = vistas.filter(v => !v.ips.some(ip => nuestras.includes(ip)));
+    propagado = atrasados.length === 0;
+    pasos.push({
+      clave: 'propagacion', ok: propagado, titulo: 'Propagación del DNS',
+      detalle: propagado
+        ? `${vistas.map(v => v.quien).join(' y ')} ya ven tu dominio apuntando aquí.`
+        : `${atrasados.map(v => `${v.quien} todavía ve ${v.ips.join(', ') || 'nada'}`).join('; ')}. Aún no pedimos el certificado: si lo pidiéramos ahora podría fallar y bloquear tu dominio una hora. Vuelve a pulsar en unos minutos.`,
+    });
+  }
+
   // La caché del `ask` de Caddy se pone al día con lo que acabamos de ver:
   // si no, un «no» de hace treinta segundos seguiría negando el certificado.
   cacheDns.set(dominio, { apunta: raizOk, hasta: Date.now() + VIDA_CACHE_MS });
@@ -543,34 +596,50 @@ export async function comprobarConexion(dominio: string): Promise<{
   // ── 3. HTTPS, CERTIFICADO Y QUE RESPONDEMOS NOSOTROS ───────────────────
   // Sin DNS bueno no se intenta: la petición iría a otra máquina y no
   // demostraría nada (y sería ir a llamar a una puerta ajena).
-  if (!raizOk) {
-    pasos.push({ clave: 'https', ok: false, titulo: 'Conexión segura (HTTPS)', detalle: 'Se comprobará cuando el registro A esté bien.' });
+  if (!raizOk || !propagado) {
+    pasos.push({ clave: 'https', ok: false, titulo: 'Conexión segura (HTTPS)',
+      detalle: !raizOk ? 'Se comprobará cuando el registro A esté bien.' : 'Se pedirá cuando el DNS se haya propagado.' });
   } else {
     // Esta petición es además la «primera visita» que hace que Caddy pida
-    // el certificado; por eso se le da tiempo de sobra.
-    let ok = false; let detalle: string;
-    try {
-      const r = await fetch(`https://${dominio}/api/dominios/resolver?host=${encodeURIComponent(dominio)}`, {
-        signal: AbortSignal.timeout(20_000), redirect: 'manual',
-        headers: { accept: 'application/json' },
-      });
-      const j: any = await r.json().catch(() => null);
-      if (j && (j.tipo || j.error)) {
-        ok = r.ok;
-        detalle = r.ok ? 'Certificado válido y la página responde desde tu dominio.'
-          : `El dominio llega bien, pero: ${j.error}`;
-      } else {
-        detalle = `Responde (código ${r.status}), pero no es esta plataforma. Revisa que no haya otro servicio delante.`;
+    // el certificado; por eso se le da tiempo de sobra. When requesting,
+    // up to three tries: a TLS error right after the first one usually means
+    // Caddy is still talking to Let's Encrypt.
+    let ok = false; let detalle = '';
+    const intentos = solicitar ? 3 : 1;
+    for (let i = 0; i < intentos && !ok; i++) {
+      if (i > 0) await pausa(8_000);
+      try {
+        const r = await fetch(`https://${dominio}/api/dominios/resolver?host=${encodeURIComponent(dominio)}`, {
+          signal: AbortSignal.timeout(20_000), redirect: 'manual',
+          headers: { accept: 'application/json' },
+        });
+        const j: any = await r.json().catch(() => null);
+        if (j && (j.tipo || j.error)) {
+          ok = r.ok;
+          detalle = r.ok ? 'Certificado válido y la página responde desde tu dominio.'
+            : `El dominio llega bien, pero: ${j.error}`;
+        } else {
+          detalle = `Responde (código ${r.status}), pero no es esta plataforma. Revisa que no haya otro servicio delante.`;
+        }
+      } catch (e: any) {
+        const c = String(e?.cause?.code || e?.name || '');
+        detalle = /CERT|SSL|TLS|ALTNAME|SELF_SIGNED/i.test(c)
+          ? 'El DNS está bien, pero el certificado aún no está listo. Suele tardar un minuto; si el DNS se cambió hace poco, Let\'s Encrypt puede tardar hasta una hora en volver a intentarlo.'
+          : /Timeout|Abort/i.test(c)
+            ? 'No ha respondido a tiempo. El certificado puede estar emitiéndose: vuelve a comprobar en un minuto.'
+            : `No se ha podido conectar (${c || 'error de red'}). Si acabas de cambiar el DNS, espera unos minutos.`;
       }
-    } catch (e: any) {
-      const c = String(e?.cause?.code || e?.name || '');
-      detalle = /CERT|SSL|TLS|ALTNAME|SELF_SIGNED/i.test(c)
-        ? 'El DNS está bien, pero el certificado aún no está listo. Suele tardar un minuto; si el DNS se cambió hace poco, Let\'s Encrypt puede tardar hasta una hora en volver a intentarlo.'
-        : /Timeout|Abort/i.test(c)
-          ? 'No ha respondido a tiempo. El certificado puede estar emitiéndose: vuelve a comprobar en un minuto.'
-          : `No se ha podido conectar (${c || 'error de red'}). Si acabas de cambiar el DNS, espera unos minutos.`;
+    }
+    if (!ok && solicitar && /certificado aún no está listo/.test(detalle)) {
+      detalle = 'Hemos pedido el certificado pero no ha llegado. Espera unos minutos y vuelve a pulsar; si sigue igual, avísanos: puede ser un problema de nuestro servidor.';
     }
     pasos.push({ clave: 'https', ok, titulo: 'Conexión segura (HTTPS)', detalle });
+
+    // The www certificate too, so www.<domain> works on the first visit.
+    // Best effort: it never blocks the result.
+    if (ok && solicitar && wwwOk) {
+      await fetch(`https://www.${dominio}/`, { signal: AbortSignal.timeout(20_000), redirect: 'manual' }).catch(() => {});
+    }
   }
 
   const bloqueante = pasos.find(p => !p.ok && !p.aviso);
