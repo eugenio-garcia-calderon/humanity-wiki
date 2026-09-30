@@ -4,6 +4,7 @@ import { FileText, Loader2, Plus } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
+import type { TamanoGaleria } from '../../utils/bloques';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -20,10 +21,15 @@ import { useSitio } from '../sitio/ContextoSitio';
 type Fila = {
   id: string;
   pagina_id?: string | null;
-  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string } | null;
+  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null } | null;
   celdas: Record<string, Celda>;
   apuntados?: Record<string, any[]>;
   archivos?: Record<string, any[]>;
+};
+
+/** Ancho mínimo de una tarjeta, en píxeles, por tamaño. */
+export const ANCHO_TARJETA: Record<TamanoGaleria, number> = {
+  pequeno: 150, mediano: 220, grande: 300, 'muy-grande': 420,
 };
 
 /** Cuántas propiedades se enseñan bajo el título. Más no caben sin que la
@@ -33,7 +39,7 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano' }: {
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -41,6 +47,10 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   editable: boolean;
   /** Tras crear algo, para que la tabla se recargue. */
   onCambio: () => void;
+  /** El color de texto del bloque, para los títulos de las tarjetas. */
+  claseTitulo?: string;
+  /** Tamaño de las tarjetas. */
+  tamano?: TamanoGaleria;
 }) {
   const navigate = useNavigate();
   // En una página publicada, la tarjeta abre la subpágina DENTRO del sitio
@@ -85,7 +95,11 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   return (
     <div className="p-3">
       {fallo && <p className="mb-2 text-xs font-bold text-rose-600">{fallo}</p>}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* EL TAMAÑO DE LAS TARJETAS (2026-10-01). Se da como ANCHO MÍNIMO de
+          tarjeta y la rejilla mete las que quepan: así el mismo «grande» son
+          tres por fila en un escritorio ancho y una en un teléfono, sin un
+          ajuste distinto para cada pantalla. */}
+      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filas.map(f => {
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
@@ -107,7 +121,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                 )}
               </div>
               <div className="px-3 py-2.5 space-y-1">
-                <p className="flex items-center gap-1.5 text-sm font-bold text-slate-800 min-w-0">
+                <p className={cn('flex items-center gap-1.5 text-sm font-bold min-w-0', claseTitulo || 'text-slate-800')}>
                   {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                     : icono ? (esUrl(icono)
                       ? <img src={icono} alt="" className="w-4 h-4 rounded object-cover shrink-0" />
@@ -115,6 +129,11 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                     : null}
                   <span className={cn('truncate', !nombre && 'text-slate-400')}>{nombre || 'Sin título'}</span>
                 </p>
+                {/* La descripción de la página, si la tiene: imagen, título y
+                    descripción, como en la propia página. */}
+                {f.pagina?.descripcion && (
+                  <p className="text-xs text-slate-500 leading-snug line-clamp-2 whitespace-pre-line">{f.pagina.descripcion}</p>
+                )}
                 {otras.map(c => {
                   const v = formatear(f.celdas[c.id] ?? { estado: 'vacia' }, c,
                     { apuntados: f.apuntados?.[c.id], archivos: f.archivos?.[c.id] });

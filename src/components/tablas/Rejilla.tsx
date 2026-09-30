@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
+import type { TamanoGaleria } from '../../utils/bloques';
 import { useSitio } from '../sitio/ContextoSitio';
 import EditorColumna from './EditorColumna';
 import CeldaTabla, { type Celda, type Columna } from './Celda';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { cn } from '../../utils/cn';
+import { tonoDe } from '../../utils/coloresBloque';
 
 // ============================================================================
 // TABLAS · LA REJILLA
@@ -25,7 +27,7 @@ import { cn } from '../../utils/cn';
 type Fila = {
   id: string;
   pagina_id?: string | null;
-  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string } | null;
+  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null } | null;
   celdas: Record<string, Celda>;
   apuntados?: Record<string, any[]>;
   archivos?: Record<string, any[]>;
@@ -33,7 +35,7 @@ type Fila = {
 
 export type FormaVista = 'galeria' | 'tabla';
 
-export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista }: {
+export default function Rejilla({ tablaId, editable = true, alto, vista: vistaInicial, onCambiarVista, color, tamano = 'mediano', onCambiarTamano }: {
   tablaId: string;
   editable?: boolean;
   /** Alto máximo cuando va incrustada en una página. Suelta ocupa lo que haya. */
@@ -44,7 +46,13 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   /** Quien la incrusta guarda la elección; si no se pasa, cambiar de vista
    *  vale solo para quien mira y no se recuerda. */
   onCambiarVista?: (v: FormaVista) => void;
+  /** El color elegido en el menú del bloque. Ver `tonoDe`. */
+  color?: string;
+  /** Tamaño de las tarjetas de la galería, y quién lo guarda (el editor). */
+  tamano?: TamanoGaleria;
+  onCambiarTamano?: (t: TamanoGaleria) => void;
 }) {
+  const tono = tonoDe(color);
   const esMovil = useEsMovil();
   const navigate = useNavigate();
   const sitio = useSitio();
@@ -152,8 +160,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const { columnas, filas } = datos;
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-slate-50/60">
+    <div className={cn('border border-slate-200 rounded-xl overflow-hidden', tono.fondo || 'bg-white')}>
+      <div className={cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
         <Table2 className="w-4 h-4 text-slate-400 shrink-0" />
         {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
             cambiar el nombre de la base de datos»). Enter o salir guarda;
@@ -166,14 +174,14 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               if (e.key === 'Enter') e.currentTarget.blur();
               if (e.key === 'Escape') { setNombre(null); setFalloNombre(null); }
             }}
-            className="min-w-0 flex-1 max-w-xs h-7 px-1.5 -mx-1.5 rounded border border-slate-300 bg-white text-xs font-black text-slate-700 outline-none focus:border-emerald-400" />
+            className={cn('min-w-0 flex-1 max-w-xs h-7 px-1.5 -mx-1.5 rounded border border-slate-300 bg-white text-xs font-black outline-none focus:border-emerald-400', tono.texto || 'text-slate-700')} />
         ) : editable ? (
           <button onClick={() => setNombre(datos.tabla.titulo || '')} title="Cambiar el nombre"
-            className="min-w-0 h-7 px-1.5 -mx-1.5 rounded text-xs font-black text-slate-700 truncate hover:bg-slate-100 transition-colors">
+            className={cn('min-w-0 h-7 px-1.5 -mx-1.5 rounded text-xs font-black truncate hover:bg-slate-100 transition-colors', tono.texto || 'text-slate-700')}>
             {datos.tabla.titulo}
           </button>
         ) : (
-          <p className="text-xs font-black text-slate-700 truncate">{datos.tabla.titulo}</p>
+          <p className={cn('text-xs font-black truncate', tono.texto || 'text-slate-700')}>{datos.tabla.titulo}</p>
         )}
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
         <span className="text-[11px] text-slate-400">
@@ -184,7 +192,21 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>
         {/* Las dos vistas, como las pestañas de Notion. */}
-        <div className="ml-auto flex items-center gap-0.5 shrink-0" role="tablist">
+        {/* Tamaño de las tarjetas: sólo en galería y sólo para quien edita. */}
+        {vista === 'galeria' && onCambiarTamano && (
+          <label className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
+            <span className="hidden sm:inline">Tamaño</span>
+            <select value={tamano} onChange={e => onCambiarTamano(e.target.value as TamanoGaleria)}
+              aria-label="Tamaño de las tarjetas"
+              className="h-8 rounded-md border border-slate-200 bg-white px-1.5 text-[11px] font-bold text-slate-600 outline-none focus:border-emerald-400">
+              <option value="pequeno">Pequeño</option>
+              <option value="mediano">Mediano</option>
+              <option value="grande">Grande</option>
+              <option value="muy-grande">Muy grande</option>
+            </select>
+          </label>
+        )}
+        <div className={cn('flex items-center gap-0.5 shrink-0', !(vista === 'galeria' && onCambiarTamano) && 'ml-auto')} role="tablist">
           {([['galeria', 'Galería', LayoutGrid], ['tabla', 'Tabla', Table2]] as const).map(([v, label, Icono]) => (
             <button key={v} role="tab" aria-selected={vista === v} onClick={() => cambiarVista(v)}
               className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold transition-colors',
@@ -208,7 +230,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       {vista === 'galeria' ? (
         <div style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
           <Galeria tablaId={tablaId} columnas={columnas} filas={filas}
-            columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar} />
+            columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar}
+            claseTitulo={tono.texto} tamano={tamano} />
         </div>
       ) : esMovil ? (
         <div className="divide-y divide-slate-100" style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>

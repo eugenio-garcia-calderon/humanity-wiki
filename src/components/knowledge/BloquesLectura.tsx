@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { enFilas } from '../../utils/bloques';
-import { claseColor } from '../../utils/coloresBloque';
+import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
+import TextoEnriquecido from './TextoEnriquecido';
 import EntityComments from './EntityComments';
 import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -119,10 +120,12 @@ export default function BloquesLectura({ bloques, comentable }: { bloques: any[]
     const dentro = <Bloque b={b} indice={i} bloques={bloques} />;
     // Color y ancla van en un envoltorio: ningún tipo de bloque tiene que
     // saber de ellos.
-    const color = claseColor(b?.color);
+    // La base de datos recibe el color y lo pinta ella (ver `tonoDe`).
+    const propio = PINTAN_SU_COLOR.has(b?.tipo);
+    const color = propio ? '' : claseColor(b?.color);
     const caja = (
       <div id={b?.id ? `b-${b.id}` : undefined}
-        className={cn(color, b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
+        className={cn(color, !propio && b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
         {dentro}
       </div>
     );
@@ -157,7 +160,7 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
     <div id={esTitulo && b.id ? String(b.id) : undefined}
          className={cn(CLASES_TEXTO[b.tipo] || CLASES_TEXTO.parrafo, esTitulo && 'scroll-mt-20', extra)}
          style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
-      {b.texto || ''}
+      <TextoEnriquecido texto={b.texto || ''} />
     </div>
   );
 
@@ -306,7 +309,7 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
       // bloque se escribió a mano con ese nombre.
       {
         const tablaId = b.tabla_id || (b as any).tablaId;
-        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} /> : null;
+        return tablaId ? <Rejilla tablaId={tablaId} editable={false} alto={520} vista={b.vistaBd || 'galeria'} color={b.color} tamano={b.tamanoGaleria || 'mediano'} /> : null;
       }
 
     // ── LOS BLOQUES DE MAQUETACIÓN (fase 9) ────────────────────────────
@@ -417,7 +420,7 @@ function Aviso({ b }: { b: any }) {
       <div className={`min-w-0 flex-1 text-[15px] leading-relaxed ${t.texto}`}>
         {dentro.length > 0
           ? <BloquesLectura bloques={dentro} />
-          : <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{b.texto || ''}</p>}
+          : <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}><TextoEnriquecido texto={b.texto || ''} /></p>}
       </div>
     </div>
   );

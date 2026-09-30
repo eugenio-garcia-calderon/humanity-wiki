@@ -7997,3 +7997,26 @@ icon is capped at 72 px on mobile.
   (Notion's way) is an option in the same panel.
 - **Cover images are no longer cropped**: the frame follows the image's own
   proportions; the size slider sets a maximum height instead of cutting.
+
+## 2026-10-01 — Database colors, default header, simpler description, real-browser links, publish button, gallery sizes (prog8)
+
+- **Block color on a database did nothing**: the color went on the wrapper and
+  the gallery/grid painted its own white background and greys over it. The
+  database now receives the color (`tonoDe`): text color tints its name and
+  the card titles; background tints the frame, cards stay white.
+- **Default header**: cover on the RIGHT, icon + title + description on the
+  left (Eugenio). Phones still stack image first.
+- **Description simplified**: no «Pública/Oculta» or «Quitar» buttons. If it
+  is written, it is published; emptying it removes it. The old hidden flag is
+  ignored.
+- **Links**: one renderer (`TextoEnriquecido`) for editor and published pages;
+  markdown links and bare URLs are now clickable on published pages (they
+  showed raw brackets before). External links open a new tab of the user's
+  own browser: the global click rule in `GestorVentanas` that sent every
+  external link to the in-app browser (Eugenio's request of 2026-08-26) is
+  reversed at his request.
+- **«Ver página publicada»** next to «Pública» in the editor: the active
+  custom domain if any, else the short `quien.humanity.wiki` address.
+- **Gallery card size**: Pequeño / Mediano / Grande / Muy grande, per block
+  (`tamanoGaleria`), as a minimum card width so it adapts to any screen.
+- **Gallery cards show the page description** under the title.

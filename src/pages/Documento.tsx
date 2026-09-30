@@ -7,7 +7,7 @@ import {
   ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, MoreHorizontal, Maximize2, Minimize2,
+  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -16,8 +16,9 @@ import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
 import MenuBloque from '../components/knowledge/MenuBloque';
+import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
-import { claseColor } from '../utils/coloresBloque';
+import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
@@ -113,38 +114,12 @@ const BLOQUES_HOJA = TIPOS_MENU.map(t => ({
 
 const EMOJIS_ICONO = ['📄', '📊', '📚', '🌍', '🔥', '💧', '🌱', '🏛️', '💡', '🎯', '🧭', '🤝', '⚖️', '🛠️', '🗺️', '❤️'];
 
-/** Marcado inline de markdown → nodos React (negrita, cursiva, código, enlaces). */
+/** Marcado inline de markdown → nodos React (negrita, cursiva, código,
+ *  enlaces y direcciones pegadas). El mismo pintor que la página publicada. */
 function Inline({ texto }: { texto: string }) {
-  const partes = useMemo(() => {
-    const out: React.ReactNode[] = [];
-    const re = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
-    let ultimo = 0; let m: RegExpExecArray | null; let k = 0;
-    while ((m = re.exec(texto))) {
-      if (m.index > ultimo) out.push(texto.slice(ultimo, m.index));
-      const s = m[0];
-      if (s.startsWith('**')) out.push(<strong key={k++}>{s.slice(2, -2)}</strong>);
-      else if (s.startsWith('`')) out.push(<code key={k++} className="px-1 py-0.5 bg-slate-100 rounded text-[0.9em] font-mono">{s.slice(1, -1)}</code>);
-      else if (s.startsWith('*')) out.push(<em key={k++}>{s.slice(1, -1)}</em>);
-      else {
-        const link = s.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-        if (link) out.push(<a key={k++} href={link[2]} target="_blank" rel="noreferrer" className="text-emerald-700 underline decoration-emerald-300 hover:decoration-emerald-600">{link[1]}</a>);
-        else out.push(s);
-      }
-      ultimo = m.index + s.length;
-    }
-    if (ultimo < texto.length) out.push(texto.slice(ultimo));
-    return out;
-  }, [texto]);
-  return <>{partes}</>;
+  return <TextoEnriquecido texto={texto} />;
 }
 
-
-/** ══ UNA PÁGINA, UNA INSTANCIA (2026-09-30) ════════════════════════════
- *  Con las tarjetas de la galería se salta de página a página sin salir de
- *  `/paginas/:id`, y React reutilizaba el editor: `docId` seguía apuntando a
- *  la página de antes, así que el guardado automático habría escrito el
- *  contenido de la nueva ENCIMA de la anterior. La clave obliga a montar un
- *  editor limpio por página. */
 export default function Documento() {
   const { id } = useParams<{ id: string }>();
   return <EditorPagina key={id} />;
@@ -163,6 +138,8 @@ function EditorPagina() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState<string | null>(null);
+  /** Dónde se ve publicada: su dominio propio, o su dirección en Humanity Wiki. */
+  const [urlPublicada, setUrlPublicada] = useState<string | null>(null);
   /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
   const [filaDe, setFilaDe] = useState<{ tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
   const [publico, setPublico] = useState(false);
@@ -300,6 +277,27 @@ function EditorPagina() {
   useEffect(() => {
     if (!esNuevo && id) { setCargando(true); cargar(id); }
   }, [esNuevo, id, cargar]);
+
+  // La dirección publicada se pregunta a quien arma las direcciones
+  // (`compartir.ts`), para que el botón y la caja de compartir digan lo mismo.
+  // Se vuelve a preguntar al cambiar la visibilidad: publicar asigna el nombre.
+  useEffect(() => {
+    if (!publico || !id || esNuevo) { setUrlPublicada(null); return; }
+    let vivo = true;
+    fetch(`/api/compartir/pagina/${id}`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (!vivo || !j) return;
+        const dom = (j.dominios || []).find((d: any) => d.estado === 'activo');
+        // Sin nombre corto (publicada sin elegir dirección) se ve igual por
+        // `/@quien/p/:id`, la puerta que sirve cualquier página visible.
+        setUrlPublicada(dom ? `https://${dom.dominio}`
+          : j.urls?.corta
+          || (j.handle ? `https://${j.handle}.humanity.wiki/p/${id}` : null));
+      })
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, [publico, id, esNuevo]);
 
   // --------------------------------------------------------------------------
   // Generación en directo (/paginas/nuevo?prompt=…)
@@ -1483,6 +1481,9 @@ function EditorPagina() {
         return (
           <Rejilla tablaId={tablaId} editable={editable} alto={520}
             vista={b.vistaBd || 'galeria'}
+            color={b.color}
+            tamano={b.tamanoGaleria || 'mediano'}
+            onCambiarTamano={editable ? t => { b.tamanoGaleria = t; setBloques(bs => [...bs]); programarGuardado(); } : undefined}
             onCambiarVista={editable ? v => { b.vistaBd = v; setBloques(bs => [...bs]); programarGuardado(); } : undefined} />
         );
       }
@@ -1761,8 +1762,8 @@ function EditorPagina() {
           destino?.id === b.id && destino.lado === 'izquierda' && 'shadow-[-4px_0_0_0_theme(colors.emerald.400)]',
           destino?.id === b.id && destino.lado === 'derecha' && 'shadow-[4px_0_0_0_theme(colors.emerald.400)]',
           arrastrando === b.id && 'opacity-40',
-          b.color && claseColor(b.color),
-          b.color && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
+          b.color && !PINTAN_SU_COLOR.has(b.tipo) && claseColor(b.color),
+          b.color && !PINTAN_SU_COLOR.has(b.tipo) && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
       >
@@ -2027,6 +2028,16 @@ function EditorPagina() {
                 {publico ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                 {publico ? 'Pública' : 'Privada'}
               </button>
+              {/* VER LA PÁGINA PUBLICADA (2026-10-01): en su dominio propio si
+                  tiene uno funcionando; si no, en su dirección de Humanity
+                  Wiki. En una pestaña nueva del navegador del usuario. */}
+              {publico && urlPublicada && (
+                <a href={urlPublicada} target="_blank" rel="noopener noreferrer" data-externo
+                  title={urlPublicada}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors">
+                  <ExternalLink className="w-3 h-3" /> Ver página publicada
+                </a>
+              )}
             </>
           )}
           {/* COMPARTIR, y va antes que descargar a propósito: mandarle la página
@@ -2222,15 +2233,15 @@ function EditorPagina() {
         {ajustes.subtitulo !== undefined && (editable ? (
           <DescripcionEditable
             valor={ajustes.subtitulo}
-            oculta={!!ajustes.subtituloOculto}
             letra={letraDescripcion(ajustes.cabecera, esMovil)}
             enfocar={focoDescripcion}
             onEnfocado={() => setFocoDescripcion(false)}
             onCambiar={v => { setAjustes(a => ({ ...a, subtitulo: v })); programarGuardado(); }}
-            onOcultar={() => { setAjustes(a => ({ ...a, subtituloOculto: !a.subtituloOculto })); programarGuardado(); }}
-            onQuitar={() => { setAjustes(a => ({ ...a, subtitulo: undefined, subtituloOculto: undefined })); programarGuardado(); }}
+            // Se quita BORRÁNDOLA (Eugenio, 2026-10-01: «sin botón»): vacía al
+            // salir, desaparece y vuelve el «Añadir descripción».
+            onVaciar={() => { setAjustes(a => ({ ...a, subtitulo: undefined, subtituloOculto: undefined })); programarGuardado(); }}
           />
-        ) : ajustes.subtitulo && !ajustes.subtituloOculto ? (
+        ) : ajustes.subtitulo ? (
           <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line" style={{ fontSize: letraDescripcion(ajustes.cabecera, esMovil) }}>
             {ajustes.subtitulo}
           </p>
@@ -2652,12 +2663,11 @@ function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: st
 }
 
 /** La descripción bajo el título, en el editor. Crece con el texto (admite
- *  varias líneas) y, al pasar el ratón o al estar escribiendo, enseña si es
- *  pública u oculta y cómo quitarla. Oculta se ve atenuada: quien edita tiene
- *  que saber que eso no lo leerá nadie más. */
-function DescripcionEditable({ valor, oculta, letra, enfocar, onEnfocado, onCambiar, onOcultar, onQuitar }: {
-  valor: string; oculta: boolean; letra: number; enfocar: boolean; onEnfocado: () => void;
-  onCambiar: (v: string) => void; onOcultar: () => void; onQuitar: () => void;
+ *  varias líneas). No lleva botones: si está escrita se publica con la página,
+ *  y se quita borrándola (Eugenio, 2026-10-01). */
+function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onVaciar }: {
+  valor: string; letra: number; enfocar: boolean; onEnfocado: () => void;
+  onCambiar: (v: string) => void; onVaciar: () => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const ajustar = useCallback(() => {
@@ -2672,33 +2682,16 @@ function DescripcionEditable({ valor, oculta, letra, enfocar, onEnfocado, onCamb
   }, [enfocar, onEnfocado]);
 
   return (
-    <div className="group/desc relative mt-2">
-      <textarea
-        ref={ref}
-        rows={1}
-        value={valor}
-        onChange={e => onCambiar(e.target.value)}
-        placeholder="Escribe una descripción…"
-        aria-label="Descripción de la página"
-        style={{ fontSize: letra }}
-        className={cn('w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug placeholder:text-slate-300',
-          oculta ? 'text-slate-300 italic' : 'text-slate-500')}
-      />
-      <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/desc:opacity-100 focus-within:opacity-100 group-focus-within/desc:opacity-100 transition-opacity">
-        <button onClick={onOcultar}
-          title={oculta ? 'Ahora sólo la ves tú. Pulsa para que salga en la web.' : 'Ahora sale en la web. Pulsa para verla sólo aquí.'}
-          className={cn('inline-flex items-center gap-1 h-7 px-2 rounded-md text-[11px] font-bold transition-colors',
-            oculta ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100')}>
-          {oculta ? <><EyeOff className="w-3 h-3" /> Oculta · sólo en el editor</> : <><Eye className="w-3 h-3" /> Pública</>}
-        </button>
-        <button onClick={onQuitar}
-          className="inline-flex items-center h-7 px-2 rounded-md text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50">
-          Quitar descripción
-        </button>
-      </div>
-      {/* Oculta, se dice aunque no se pase el ratón: si no, parece pública. */}
-      {oculta && <span className="absolute right-0 top-1 text-[10px] font-bold text-amber-500 group-hover/desc:hidden group-focus-within/desc:hidden">oculta</span>}
-    </div>
+    <textarea
+      ref={ref}
+      rows={1}
+      value={valor}
+      onChange={e => onCambiar(e.target.value)}
+      onBlur={() => { if (!valor.trim()) onVaciar(); }}
+      placeholder="Escribe una descripción…"
+      aria-label="Descripción de la página"
+      style={{ fontSize: letra }}
+      className="mt-2 w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug text-slate-500 placeholder:text-slate-300"
+    />
   );
 }
-

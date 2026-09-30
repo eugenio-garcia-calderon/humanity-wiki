@@ -40,3 +40,19 @@ export function claseColor(color?: string | null): string {
   }
   return TEXTO[color] || '';
 }
+
+/** ══ EL COLOR DE UN BLOQUE QUE PINTA SUS PROPIOS COLORES (2026-10-01) ═══
+ *  Una base de datos (galería o tabla) tiene fondo blanco y textos grises
+ *  propios, así que el color puesto en su envoltorio no se veía: Eugenio,
+ *  «coges morado o verde y no cambia nada». Se le pasa el color y ella
+ *  decide dónde va: el de texto tiñe su nombre y los títulos de las
+ *  tarjetas; el de fondo tiñe el marco (las tarjetas siguen blancas para que
+ *  se lean). */
+export function tonoDe(color?: string | null): { texto: string; fondo: string } {
+  if (!color) return { texto: '', fondo: '' };
+  if (color.startsWith('fondo-')) return { texto: '', fondo: FONDO[color.slice(6)] || '' };
+  return { texto: TEXTO[color] || '', fondo: '' };
+}
+
+/** Los bloques que reciben el color en vez de llevarlo en el envoltorio. */
+export const PINTAN_SU_COLOR = new Set(['basedatos']);
