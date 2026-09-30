@@ -1,16 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/server/dominios.ts",
-      "motivo": "",
-      "desde": "2026-09-30T14:36:19.437Z"
-    },
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/knowledge/DominioPropio.tsx",
-      "motivo": "",
-      "desde": "2026-09-30T14:36:19.437Z"
-    }
-  ]
+  "reservas": []
 }
