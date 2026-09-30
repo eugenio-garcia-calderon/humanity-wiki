@@ -7983,3 +7983,17 @@ side by side, 20–80) and another for the icon (32–128 px). Stored in
 editor and the published page. One choice serves both screens: side-by-side
 stacks on phones (image first), stacked images render at 55 % height and the
 icon is capped at 72 px on mobile.
+
+## 2026-09-30 — Page description under the title; icon beside title; uncropped covers (prog8)
+
+- **«Añadir descripción»**: a text under the title (`config.subtitulo`),
+  distinct from the SEO description. It travels with the title wherever the
+  image goes (title + description are one unit), has its own size slider in
+  «Diseño de la cabecera» (12–32 px, capped at 22 on phones), and can be
+  **Pública** (shown on the published site) or **Oculta** (editor only,
+  shown dimmed and labelled). When public and no SEO description is set, it
+  feeds the link preview.
+- **The icon sits to the left of the title by default** (Eugenio); «Encima»
+  (Notion's way) is an option in the same panel.
+- **Cover images are no longer cropped**: the frame follows the image's own
+  proportions; the size slider sets a maximum height instead of cutting.

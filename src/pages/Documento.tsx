@@ -7,7 +7,7 @@ import {
   ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, MoreHorizontal, Maximize2, Minimize2,
+  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -18,7 +18,7 @@ import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowl
 import MenuBloque from '../components/knowledge/MenuBloque';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
 import { claseColor } from '../utils/coloresBloque';
-import { LayoutCabecera, MandosCabecera, ladoIcono } from '../components/knowledge/CabeceraPagina';
+import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
@@ -211,6 +211,8 @@ function EditorPagina() {
   const [ajustesAbierto, setAjustesAbierto] = useState(false);
   /** Los mandos de «Diseño de la cabecera» a la vista. */
   const [disenoAbierto, setDisenoAbierto] = useState(false);
+  /** Recién pulsado «Añadir descripción»: el cursor va a ella. */
+  const [focoDescripcion, setFocoDescripcion] = useState(false);
   const iconoFileRef = useRef<HTMLInputElement>(null);
   const [subiendoIcono, setSubiendoIcono] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
@@ -2111,9 +2113,8 @@ function EditorPagina() {
             página publicada. Ver `CabeceraPagina.tsx`. */}
         <LayoutCabecera
           cabecera={ajustes.cabecera}
-          sangrar
           imagen={portada ? (
-            <div className="group/portada relative">
+            <div className="group/portada relative w-fit max-w-full">
               <img src={portada} alt="" className="w-full h-56 object-cover rounded-2xl" />
               {editable && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/portada:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -2131,19 +2132,6 @@ function EditorPagina() {
             </div>
           ) : null}
           cuerpo={<>
-            {icono && (
-              <div className="relative inline-block">
-                <button
-                  onClick={() => editable && setEligiendoIcono(v => !v)}
-                  className={cn('block mb-2', editable && 'hover:scale-105 transition-transform')}
-                  title={editable ? 'Cambiar icono' : undefined}
-                >
-                  {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
-                      2026-08-20). Se distinguen mirando el valor. */}
-                  <IconoElemento valor={icono} tamano={ladoIcono(ajustes.cabecera, esMovil)} className="rounded-xl" />
-                </button>
-              </div>
-            )}
             {editable && (
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 {!icono && !eligiendoIcono && (
@@ -2189,7 +2177,13 @@ function EditorPagina() {
                       onChange={e => e.target.files?.[0] && subirPortada(e.target.files[0])} />
                   </label>
                 )}
-                {(portada || icono) && !eligiendoIcono && (
+                {ajustes.subtitulo === undefined && !eligiendoIcono && (
+                  <button onClick={() => { setAjustes(a => ({ ...a, subtitulo: '' })); setFocoDescripcion(true); }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
+                    <AlignLeft className="w-3.5 h-3.5" /> Añadir descripción
+                  </button>
+                )}
+                {(portada || icono || ajustes.subtitulo !== undefined) && !eligiendoIcono && (
                   <button onClick={() => setDisenoAbierto(v => !v)} aria-expanded={disenoAbierto}
                     className={cn('inline-flex items-center gap-1 text-[11px] font-bold transition-colors',
                       disenoAbierto ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
@@ -2198,6 +2192,21 @@ function EditorPagina() {
                 )}
               </div>
             )}
+            {/* Icono al lado del título por defecto; título y descripción
+                van juntos. Ver `FilaTitulo`. */}
+            <FilaTitulo cabecera={ajustes.cabecera} icono={icono ? (
+              <div className="relative inline-block">
+                <button
+                  onClick={() => editable && setEligiendoIcono(v => !v)}
+                  className={cn('block', editable && 'hover:scale-105 transition-transform')}
+                  title={editable ? 'Cambiar icono' : undefined}
+                >
+                  {/* El icono puede ser un emoji o una IMAGEN tuya (Eugenio,
+                      2026-08-20). Se distinguen mirando el valor. */}
+                  <IconoElemento valor={icono} tamano={ladoIcono(ajustes.cabecera, esMovil)} className="rounded-xl" />
+                </button>
+              </div>
+            ) : null}>
         {/* Título del documento */}
         {editable ? (
           <TituloEditable
@@ -2207,6 +2216,26 @@ function EditorPagina() {
         ) : (
           <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-1 break-words">{titulo}</h1>
         )}
+        {/* LA DESCRIPCIÓN, PEGADA AL TÍTULO (2026-09-30). Va dentro de la
+            cabecera, así que se mueve con él cuando la imagen cambia de
+            sitio: título y descripción son un solo bloque. */}
+        {ajustes.subtitulo !== undefined && (editable ? (
+          <DescripcionEditable
+            valor={ajustes.subtitulo}
+            oculta={!!ajustes.subtituloOculto}
+            letra={letraDescripcion(ajustes.cabecera, esMovil)}
+            enfocar={focoDescripcion}
+            onEnfocado={() => setFocoDescripcion(false)}
+            onCambiar={v => { setAjustes(a => ({ ...a, subtitulo: v })); programarGuardado(); }}
+            onOcultar={() => { setAjustes(a => ({ ...a, subtituloOculto: !a.subtituloOculto })); programarGuardado(); }}
+            onQuitar={() => { setAjustes(a => ({ ...a, subtitulo: undefined, subtituloOculto: undefined })); programarGuardado(); }}
+          />
+        ) : ajustes.subtitulo && !ajustes.subtituloOculto ? (
+          <p className="mt-2 text-slate-500 leading-snug whitespace-pre-line" style={{ fontSize: letraDescripcion(ajustes.cabecera, esMovil) }}>
+            {ajustes.subtitulo}
+          </p>
+        ) : null)}
+            </FilaTitulo>
         {/* EL AUTOR, OCULTO POR DEFECTO (2026-09-30). Quien escribe lo ve
             atenuado, con la opción de mostrarlo al pasar el ratón; quien lee
             sólo lo ve si el autor lo ha decidido. */}
@@ -2226,9 +2255,10 @@ function EditorPagina() {
           </>}
         />
 
-        {editable && disenoAbierto && (portada || icono) && (
+        {editable && disenoAbierto && (portada || icono || ajustes.subtitulo !== undefined) && (
           <div className="mb-6">
             <MandosCabecera cabecera={ajustes.cabecera} hayImagen={!!portada} hayIcono={!!icono}
+              hayDescripcion={ajustes.subtitulo !== undefined}
               onCambio={cab => { setAjustes(a => ({ ...a, cabecera: cab })); programarGuardado(); }} />
           </div>
         )}
@@ -2620,3 +2650,55 @@ function TituloEditable({ valor, onCambiar }: { valor: string; onCambiar: (v: st
     />
   );
 }
+
+/** La descripción bajo el título, en el editor. Crece con el texto (admite
+ *  varias líneas) y, al pasar el ratón o al estar escribiendo, enseña si es
+ *  pública u oculta y cómo quitarla. Oculta se ve atenuada: quien edita tiene
+ *  que saber que eso no lo leerá nadie más. */
+function DescripcionEditable({ valor, oculta, letra, enfocar, onEnfocado, onCambiar, onOcultar, onQuitar }: {
+  valor: string; oculta: boolean; letra: number; enfocar: boolean; onEnfocado: () => void;
+  onCambiar: (v: string) => void; onOcultar: () => void; onQuitar: () => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const ajustar = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+  useEffect(ajustar, [valor, letra, ajustar]);
+  useEffect(() => {
+    if (enfocar) { ref.current?.focus(); onEnfocado(); }
+  }, [enfocar, onEnfocado]);
+
+  return (
+    <div className="group/desc relative mt-2">
+      <textarea
+        ref={ref}
+        rows={1}
+        value={valor}
+        onChange={e => onCambiar(e.target.value)}
+        placeholder="Escribe una descripción…"
+        aria-label="Descripción de la página"
+        style={{ fontSize: letra }}
+        className={cn('w-full resize-none overflow-hidden block bg-transparent outline-none leading-snug placeholder:text-slate-300',
+          oculta ? 'text-slate-300 italic' : 'text-slate-500')}
+      />
+      <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/desc:opacity-100 focus-within:opacity-100 group-focus-within/desc:opacity-100 transition-opacity">
+        <button onClick={onOcultar}
+          title={oculta ? 'Ahora sólo la ves tú. Pulsa para que salga en la web.' : 'Ahora sale en la web. Pulsa para verla sólo aquí.'}
+          className={cn('inline-flex items-center gap-1 h-7 px-2 rounded-md text-[11px] font-bold transition-colors',
+            oculta ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100')}>
+          {oculta ? <><EyeOff className="w-3 h-3" /> Oculta · sólo en el editor</> : <><Eye className="w-3 h-3" /> Pública</>}
+        </button>
+        <button onClick={onQuitar}
+          className="inline-flex items-center h-7 px-2 rounded-md text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50">
+          Quitar descripción
+        </button>
+      </div>
+      {/* Oculta, se dice aunque no se pase el ratón: si no, parece pública. */}
+      {oculta && <span className="absolute right-0 top-1 text-[10px] font-bold text-amber-500 group-hover/desc:hidden group-focus-within/desc:hidden">oculta</span>}
+    </div>
+  );
+}
+

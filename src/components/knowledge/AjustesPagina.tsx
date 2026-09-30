@@ -25,10 +25,15 @@ export type Ajustes = {
   imagenCompartir?: string;
   /** Cómo se colocan imagen, icono y título. Ver `CabeceraPagina.tsx`. */
   cabecera?: Cabecera;
+  /** La descripción que va bajo el título (2026-09-30). Distinta de
+   *  `descripcion`, que es para Google y las redes y no se ve en la página. */
+  subtitulo?: string;
+  /** Oculta: sólo la ve quien edita. Pública: sale en la web. */
+  subtituloOculto?: boolean;
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'mostrarFecha', 'anchoCompleto', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCerrar }: {
   ajustes: Ajustes;
