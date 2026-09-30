@@ -5,6 +5,36 @@
       "ruta": "drizzle/0132_carpetas_rescate.sql",
       "motivo": "carpetas: rescate de proyectos en páginas",
       "desde": "2026-09-30T15:14:02.212Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/documentos.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:17:34.757Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/roadmap.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:17:34.757Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/compartir.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:17:34.757Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/App.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:17:34.757Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Carpetas.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:17:34.757Z"
     }
   ]
 }
