@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/dominios.ts",
+      "motivo": "IP del servidor nuevo",
+      "desde": "2026-09-30T17:10:23.636Z"
+    }
+  ]
 }
