@@ -53,6 +53,168 @@
       "ruta": "src/pages/PaginaPublica.tsx",
       "motivo": "carpetas",
       "desde": "2026-09-30T15:20:40.830Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/knowledge.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/buscador.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/menu.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/calendario.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/agregador.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/ai/assistant.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/server/social.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/layout/MenuLateral.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/layout/Layout.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/social/Campana.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/social/TuTrabajo.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/knowledge/CreadorPublicacion.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/ai/AIAssistant.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/ProyectosRail.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/Panel.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/HojaCrear.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/Rail.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Vision.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/PersonaPublica.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/EstadoHerramientas.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Persona.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/TresCaminos.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Documento.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/JuegoVital.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/utils/contextoNavegacion.ts",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/Paginas.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/navegacion/RailInferior.tsx",
+      "motivo": "proyectos → carpetas",
+      "desde": "2026-09-30T15:21:51.792Z"
     }
   ]
 }
