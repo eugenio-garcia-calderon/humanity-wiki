@@ -46,10 +46,19 @@ const subirDesdePagina = (id: string) => sql`
   WITH RECURSIVE sube(id, n) AS (
     SELECT ${id}::text, 0
     UNION
-    SELECT w.id, s.n + 1 FROM sube s
-    JOIN bd_filas f ON f.pagina_id = s.id AND f.deleted_at IS NULL
-    JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
-      AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+    SELECT madre.id, s.n + 1 FROM sube s
+    CROSS JOIN LATERAL (
+      -- Madre por base de datos: la página que contiene la tabla de su fila.
+      SELECT w.id FROM bd_filas f
+      JOIN knowledge_windows w ON w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+        AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tabla_id', f.tabla_id))
+      WHERE f.pagina_id = s.id AND f.deleted_at IS NULL
+      UNION
+      -- Madre por bloque «Página» (2026-09-30): la que la enlaza.
+      SELECT w.id FROM knowledge_windows w
+      WHERE w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+        AND w.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', s.id))
+    ) madre
     WHERE s.n < ${PROFUNDIDAD}
   )
   SELECT EXISTS (
@@ -163,7 +172,17 @@ export function registrarSitios(app: Express, db: any) {
         WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL
         ORDER BY p.publico DESC, p.created_at LIMIT 1
       `);
-      const p = pr.rows[0] as any;
+      let p = pr.rows[0] as any;
+      if (!p) {
+        const sr = await db.execute(sql`
+          SELECT p.id, p.title, p.slug, p.publico, u.handle FROM knowledge_windows p
+          JOIN users u ON u.id = p.creator_user_id
+          WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+            AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
+          ORDER BY p.publico DESC, p.created_at LIMIT 1
+        `);
+        p = sr.rows[0] as any;
+      }
       res.json({
         id: w.id, titulo: w.title, config: w.config,
         // Una subpágina que no se publicó por su cuenta se indexa si su madre
@@ -199,11 +218,17 @@ export function registrarSitios(app: Express, db: any) {
           WITH RECURSIVE baja(id, n) AS (
             SELECT ${raiz}::text, 0
             UNION
-            SELECT f.pagina_id, b.n + 1 FROM baja b
+            SELECT h.hijo, b.n + 1 FROM baja b
             JOIN knowledge_windows w ON w.id = b.id
             CROSS JOIN LATERAL jsonb_array_elements(COALESCE(w.config->'bloques', '[]'::jsonb)) blq
-            JOIN bd_filas f ON f.tabla_id = blq->>'tabla_id' AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL
-            WHERE b.n < ${PROFUNDIDAD} AND blq->>'tipo' = 'basedatos'
+            CROSS JOIN LATERAL (
+              SELECT f.pagina_id AS hijo FROM bd_filas f
+              WHERE blq->>'tipo' = 'basedatos' AND f.tabla_id = blq->>'tabla_id'
+                AND f.deleted_at IS NULL AND f.pagina_id IS NOT NULL
+              UNION ALL
+              SELECT blq->>'entityId' WHERE blq->>'tipo' = 'subpagina' AND blq->>'entityId' IS NOT NULL
+            ) h
+            WHERE b.n < ${PROFUNDIDAD}
           )
           SELECT w.id, w.updated_at FROM baja b JOIN knowledge_windows w ON w.id = b.id
           WHERE b.n > 0 AND w.deleted_at IS NULL AND w.archived_at IS NULL

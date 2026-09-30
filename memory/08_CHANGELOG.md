@@ -7942,3 +7942,32 @@ needs.
   subdomain, including sub-pages; (5) **no platform branding** on own
   domains/subdomains (footer and «Ir a humanity.wiki» only on the main
   domain).
+
+## 2026-09-30 — Notion-grade blocks: handle menu, pointer drag, columns (prog8)
+
+- **Drag was broken**: the ⋮⋮ handle used native HTML drag-and-drop, and over
+  editable blocks the browser tries to drop *text* into the block below, so a
+  dragged block often stayed where it was. Rewritten with pointer events; the
+  drop target is recomputed where the pointer is released.
+- **Side by side**: drop on the left or right edge of a block to put them in
+  columns (up to 4). The list stays flat — consecutive blocks sharing `grupo`
+  form a row (`enFilas` in `utils/bloques.ts`) — so saving, Word/PDF export,
+  AI and comments keep working unaware of columns. Columns stack on phones.
+  Each column holds one block; anything added «after» a block in a row goes
+  below the whole row. Split groups are repaired on load.
+- **Handle menu** (click ⋮⋮): Borrar, Duplicar (⌘D), Convertir en (text
+  types, keeps the text), Color (9 text + 9 background, closed list), Copiar
+  enlace al bloque (`#b-<id>`, scrolls and highlights on public pages), Sacar
+  de las columnas.
+- **Deshacer**: a «Bloque borrado · Deshacer» toast and ⌘Z outside text for
+  structural changes (delete, move, duplicate, convert, color); typing undo
+  stays the browser's.
+- **«Página» block**: creates a sub-page, links it and opens it. Its title and
+  icon are read live. Sub-pages inherit visibility from the page that links
+  them, open inside the site (`/p/:id`), appear in the sitemap, and the
+  editor's back arrow returns to the parent.
+- **«Archivo» in the + menu**; the always-on «Archivos» section at the foot of
+  every page is gone (Eugenio). Pages that already had attachments still show
+  them.
+- **Ancho completo** now applies in the editor too; before it only changed the
+  published page, so switching it on looked like it did nothing.

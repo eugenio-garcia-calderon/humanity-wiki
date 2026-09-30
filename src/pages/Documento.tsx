@@ -15,10 +15,13 @@ import Rejilla from '../components/tablas/Rejilla';
 import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import AjustesPagina, { CLAVES_AJUSTES, type Ajustes } from '../components/knowledge/AjustesPagina';
+import MenuBloque from '../components/knowledge/MenuBloque';
+import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
+import { claseColor } from '../utils/coloresBloque';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
 import {
-  type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
+  type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown, enFilas,
 } from '../utils/bloques';
 import { leerPegado, tamanoLegible, idYoutube, idVimeo, enCampoDeTexto } from '../utils/pegado';
 import PortadaPdf from '../components/ui/PortadaPdf';
@@ -66,9 +69,16 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'desplegable', label: 'Desplegable', icon: ChevronRight },
   { tipo: 'aviso', label: 'Aviso', icon: Info },
   { tipo: 'indice', label: 'Índice', icon: List },
+  // Una página dentro de ésta (2026-09-30): «todo son páginas dentro de
+  // páginas, como hace Notion».
+  { tipo: 'subpagina', label: 'Página', icon: FileText },
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
+  // Subir un archivo cualquiera (2026-09-30). Sustituye a la sección fija de
+  // «Archivos» del pie: Eugenio, «si alguien quiere subir un archivo, lo sube
+  // desde el botón de +».
+  { tipo: 'medio', label: 'Archivo', icon: Paperclip },
   // La primera es la buena: columnas con tipo, fórmulas y relaciones. La de
   // texto se queda debajo y dice lo que es, para quien solo quiera una rejilla
   // de texto en un documento.
@@ -153,7 +163,7 @@ function EditorPagina() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState<string | null>(null);
   /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
-  const [filaDe, setFilaDe] = useState<{ tabla_titulo: string; padre: { id: string; titulo: string } | null } | null>(null);
+  const [filaDe, setFilaDe] = useState<{ tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
@@ -201,8 +211,25 @@ function EditorPagina() {
   const iconoFileRef = useRef<HTMLInputElement>(null);
   const [subiendoIcono, setSubiendoIcono] = useState(false);
   const [eligiendoIcono, setEligiendoIcono] = useState(false);
-  const [arrastrando, setArrastrando] = useState<string | null>(null);   // id del bloque en vuelo
-  const [sobreBloque, setSobreBloque] = useState<string | null>(null);   // id del bloque bajo el cursor
+  // ══ ARRASTRAR BLOQUES CON EL PUNTERO (2026-09-30) ══════════════════════
+  // Antes era el arrastrar-y-soltar nativo del navegador, y sobre bloques
+  // editables el navegador intenta soltar TEXTO dentro del bloque de debajo:
+  // Eugenio, «cuando se arrastra un bloque por encima de otro no se queda en
+  // la nueva posición». Con eventos de puntero lo decide esta página entera,
+  // y de paso se puede soltar a un LADO para ponerlos en columnas.
+  const [arrastre, setArrastre] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [destino, setDestino] = useState<{ id: string; lado: 'arriba' | 'abajo' | 'izquierda' | 'derecha' } | null>(null);
+  const destinoRef = useRef<typeof destino>(null);
+  const arrastrando = arrastre?.id ?? null;
+  /** El bloque cuyo menú del asa ⋮⋮ está abierto. */
+  const [menuAsa, setMenuAsa] = useState<string | null>(null);
+  /** Aviso de abajo con «Deshacer». */
+  const [aviso, setAviso] = useState<string | null>(null);
+  const avisoTimer = useRef<any>(null);
+  /** Fotos de la estructura antes de cada cambio que no se deshace tecleando. */
+  const historia = useRef<Bloque[][]>([]);
+  const archivoRef = useRef<HTMLInputElement>(null);
+  const archivoTras = useRef<string | null>(null);
   /** Hay un archivo del escritorio volando sobre el documento (2026-08-22).
    *  Se pinta un borde para decir «suéltalo aquí»: sin señal, arrastrar algo
    *  encima de una página es probar a ver si pasa algo. */
@@ -259,7 +286,7 @@ function EditorPagina() {
           if (b.texto !== undefined) textosRef.current[b.id] = b.texto;
           if (b.filas) filasRef.current[b.id] = b.filas;
         }
-        setBloques(bs.length ? bs : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
+        setBloques(bs.length ? normalizarGrupos(bs) : [{ id: nuevoIdBloque(), tipo: 'parrafo', texto: '' }]);
       })
       .catch(e => setError(e.message))
       .finally(() => setCargando(false));
@@ -401,13 +428,20 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
   };
 
   const insertar = (tras: string | null, tipo: TipoBloque) => {
+    if (tipo === 'subpagina') { crearSubpagina(tras); return; }
+    if (tipo === 'medio') {
+      setMenuAbierto(null);
+      archivoTras.current = tras;
+      archivoRef.current?.click();
+      return;
+    }
     // El bloque de publicación no se inserta vacío: primero se elige QUÉ
     // publicación embeber, en el buscador.
     if (tipo === 'publicacion' || tipo === 'producto') {
@@ -420,9 +454,9 @@ function EditorPagina() {
     }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo };
     if (tipo === 'tabla') filasRef.current[nuevo.id] = [['', ''], ['', '']];
-    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla' && tipo !== 'medio') textosRef.current[nuevo.id] = '';
+    if (tipo !== 'separador' && tipo !== 'imagen' && tipo !== 'tabla') textosRef.current[nuevo.id] = '';
     setBloques(bs => {
-      const i = tras ? bs.findIndex(b => b.id === tras) : -1;
+      const i = tras ? finDeFila(bs, bs.findIndex(b => b.id === tras)) : -1;
       const copia = [...bs];
       copia.splice(i + 1, 0, nuevo);
       return copia;
@@ -446,22 +480,246 @@ function EditorPagina() {
     programarGuardado();
   };
 
-  // -- Fase 2: reordenar arrastrando desde el tirador ⋮⋮ ----------------------
-  const soltarSobre = (destino: string) => {
-    if (!arrastrando || arrastrando === destino) { setArrastrando(null); setSobreBloque(null); return; }
-    setBloques(bs => {
-      const desde = bs.findIndex(b => b.id === arrastrando);
-      const hasta = bs.findIndex(b => b.id === destino);
-      if (desde < 0 || hasta < 0) return bs;
-      const copia = [...bs];
-      const [movido] = copia.splice(desde, 1);
-      copia.splice(hasta, 0, movido);
-      return copia;
+  // ══ LO QUE SE HACE CON UN BLOQUE (2026-09-30) ═════════════════════════
+
+  /** Lo que se añade «detrás» de un bloque en columnas va detrás de TODA la
+   *  fila: metido en medio partiría las columnas en dos. Cada columna lleva
+   *  un bloque; para apilar varios dentro, se arrastran a un lado. */
+  const finDeFila = (bs: Bloque[], i: number) => {
+    const g = bs[i]?.grupo;
+    let j = i;
+    while (g && bs[j + 1]?.grupo === g) j++;
+    return j;
+  };
+
+  /** Un grupo de columnas con un solo bloque ya no es un grupo. */
+  const normalizarGrupos = (bs: Bloque[]): Bloque[] => {
+    // Un grupo partido en dos tramos son dos filas: el segundo tramo recibe
+    // otro nombre, para que mover uno no arrastre al otro.
+    const vistos = new Set<string>();
+    const renombre: Record<string, string> = {};
+    const tramos = bs.map((x, i) => {
+      if (!x.grupo) return x;
+      const seguido = i > 0 && bs[i - 1].grupo === x.grupo;
+      if (!seguido) {
+        if (vistos.has(x.grupo)) renombre[x.grupo] = `G${nuevoIdBloque()}`;
+        else { vistos.add(x.grupo); delete renombre[x.grupo]; }
+      }
+      return renombre[x.grupo] ? { ...x, grupo: renombre[x.grupo] } : x;
     });
-    setArrastrando(null);
-    setSobreBloque(null);
+    const cuenta: Record<string, number> = {};
+    for (const x of tramos) if (x.grupo) cuenta[x.grupo] = (cuenta[x.grupo] || 0) + 1;
+    return tramos.map(x => (x.grupo && cuenta[x.grupo] < 2 ? { ...x, grupo: undefined } : x));
+  };
+
+  const guardarHistoria = () => {
+    historia.current.push(serializar());
+    if (historia.current.length > 50) historia.current.shift();
+  };
+
+  const avisar = (texto: string) => {
+    setAviso(texto);
+    clearTimeout(avisoTimer.current);
+    avisoTimer.current = setTimeout(() => setAviso(null), 6000);
+  };
+
+  const deshacer = () => {
+    const antes = historia.current.pop();
+    if (!antes) return;
+    for (const x of antes) {
+      if (x.texto !== undefined) textosRef.current[x.id] = x.texto;
+      if (x.filas) filasRef.current[x.id] = x.filas;
+    }
+    setBloques(antes);
+    setAviso(null);
     programarGuardado();
   };
+
+  const borrarBloque = (bid: string) => {
+    guardarHistoria();
+    setMenuAsa(null);
+    eliminar(bid);
+    setBloques(bs => normalizarGrupos(bs));
+    avisar('Bloque borrado');
+  };
+
+  const duplicar = (bid: string) => {
+    guardarHistoria();
+    setMenuAsa(null);
+    const nuevoId = nuevoIdBloque();
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      if (i < 0) return bs;
+      const o = bs[i];
+      const copia: Bloque = {
+        ...o, id: nuevoId, grupo: undefined,
+        texto: o.texto !== undefined || textosRef.current[o.id] !== undefined ? (textosRef.current[o.id] ?? o.texto ?? '') : undefined,
+        filas: filasRef.current[o.id] ? filasRef.current[o.id].map(f => [...f]) : o.filas,
+      };
+      if (copia.texto !== undefined) textosRef.current[nuevoId] = copia.texto;
+      if (copia.filas) filasRef.current[nuevoId] = copia.filas;
+      // En columnas, la copia va debajo de toda la fila: una columna aquí no
+      // apila bloques dentro.
+      let j = i;
+      while (o.grupo && bs[j + 1]?.grupo === o.grupo) j++;
+      const lista = [...bs];
+      lista.splice(j + 1, 0, copia);
+      return lista;
+    });
+    setBloqueActivo(nuevoId);
+    programarGuardado();
+    avisar('Bloque duplicado');
+  };
+
+  const cambiarBloque = (bid: string, cambios: Partial<Bloque>) => {
+    guardarHistoria();
+    setMenuAsa(null);
+    setBloques(bs => bs.map(x => (x.id === bid ? { ...x, ...cambios } : x)));
+    programarGuardado();
+  };
+
+  const copiarEnlace = (bid: string) => {
+    setMenuAsa(null);
+    const url = `${location.origin}${location.pathname}#b-${bid}`;
+    navigator.clipboard?.writeText(url).then(() => avisar('Enlace al bloque copiado'), () => avisar(url));
+  };
+
+  /** Mueve un bloque encima, debajo o a un lado de otro. */
+  const mover = (bid: string, d: NonNullable<typeof destino>) => {
+    if (bid === d.id) return;
+    guardarHistoria();
+    setBloques(bs => {
+      const movido = bs.find(x => x.id === bid);
+      if (!movido) return bs;
+      let lista = normalizarGrupos(bs.filter(x => x.id !== bid));
+      const t = lista.findIndex(x => x.id === d.id);
+      if (t < 0) return bs;
+      const obj = lista[t];
+      if (d.lado === 'izquierda' || d.lado === 'derecha') {
+        const g = obj.grupo || `G${nuevoIdBloque()}`;
+        lista = lista.map(x => (x.id === obj.id ? { ...x, grupo: g } : x));
+        lista.splice(d.lado === 'izquierda' ? t : t + 1, 0, { ...movido, grupo: g });
+      } else {
+        // Encima o debajo de un bloque en columnas es encima o debajo de TODA
+        // la fila: meterlo en medio partiría las columnas en dos.
+        let i = t, j = t;
+        while (obj.grupo && lista[i - 1]?.grupo === obj.grupo) i--;
+        while (obj.grupo && lista[j + 1]?.grupo === obj.grupo) j++;
+        lista.splice(d.lado === 'arriba' ? i : j + 1, 0, { ...movido, grupo: undefined });
+      }
+      return normalizarGrupos(lista);
+    });
+    programarGuardado();
+  };
+
+  const sacarDeColumnas = (bid: string) => {
+    guardarHistoria();
+    setMenuAsa(null);
+    setBloques(bs => {
+      const i = bs.findIndex(x => x.id === bid);
+      const o = bs[i];
+      if (!o?.grupo) return bs;
+      const lista = bs.filter(x => x.id !== bid);
+      let j = lista.findIndex(x => x.grupo === o.grupo);
+      while (lista[j + 1]?.grupo === o.grupo) j++;
+      lista.splice(j + 1, 0, { ...o, grupo: undefined });
+      return normalizarGrupos(lista);
+    });
+    programarGuardado();
+  };
+
+  /** El asa: un clic abre el menú; arrastrar mueve el bloque. */
+  const empezarArrastre = (bid: string, e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const x0 = e.clientX, y0 = e.clientY;
+    let movido = false;
+    /** Dónde caería el bloque si se soltara en (x, y). */
+    const calcular = (x: number, y: number) => {
+      const caja = (document.elementFromPoint(x, y) as HTMLElement | null)?.closest<HTMLElement>('[data-bloque-caja]');
+      if (!caja) return;   // en el hueco entre dos bloques se queda el último destino
+      const tid = caja.dataset.bloqueCaja!;
+      if (tid === bid) { destinoRef.current = null; setDestino(null); return; }
+      const r = caja.getBoundingClientRect();
+      const franja = Math.min(80, r.width * 0.2);
+      const obj = bloquesRef.current.find(x2 => x2.id === tid);
+      const enFila = obj?.grupo ? bloquesRef.current.filter(x2 => x2.grupo === obj.grupo && x2.id !== bid).length : 1;
+      const lateral = !esMovil && enFila < 4;
+      const lado = lateral && x < r.left + franja ? 'izquierda'
+        : lateral && x > r.right - franja ? 'derecha'
+        : y < r.top + r.height / 2 ? 'arriba' : 'abajo';
+      destinoRef.current = { id: tid, lado };
+      setDestino(destinoRef.current);
+    };
+    const alMover = (ev: PointerEvent) => {
+      if (!movido && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
+      if (!movido) { movido = true; setMenuAsa(null); document.body.style.userSelect = 'none'; }
+      setArrastre({ id: bid, x: ev.clientX, y: ev.clientY });
+      calcular(ev.clientX, ev.clientY);
+    };
+    const alSoltar = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', alMover);
+      // Se decide donde se SUELTA, no donde fue el último movimiento.
+      if (movido && (ev.clientX || ev.clientY)) calcular(ev.clientX, ev.clientY);
+      window.removeEventListener('pointerup', alSoltar);
+      document.body.style.userSelect = '';
+      if (!movido) setMenuAsa(m => (m === bid ? null : bid));
+      else if (destinoRef.current) mover(bid, destinoRef.current);
+      destinoRef.current = null;
+      setDestino(null);
+      setArrastre(null);
+    };
+    window.addEventListener('pointermove', alMover);
+    window.addEventListener('pointerup', alSoltar);
+  };
+
+  /** Subir archivos desde el «+»: el mismo camino que pegarlos o soltarlos. */
+  const subirDesdeMenu = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const dt = new DataTransfer();
+    for (const f of Array.from(files)) dt.items.add(f);
+    try {
+      const nuevos = await bloquesDelPortapapeles(dt);
+      if (!nuevos) { setError('No se ha podido subir ese archivo.'); return; }
+      const tras = archivoTras.current ? bloquesRef.current.find(x => x.id === archivoTras.current) ?? null : null;
+      insertarBloques(tras, nuevos, false);
+    } catch (e: any) { setError(e.message || 'No se pudo subir.'); }
+    finally { setSubiendo(null); if (archivoRef.current) archivoRef.current.value = ''; }
+  };
+
+  /** Una página nueva dentro de ésta: se crea, se enlaza y se abre. */
+  const crearSubpagina = async (tras: string | null) => {
+    setMenuAbierto(null);
+    const r = await fetch('/api/documentos', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo: 'Sin título' }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.id) { setError(j.error || 'No se pudo crear la página.'); return; }
+    const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: 'Sin título' };
+    const lista = serializar();
+    const i = tras ? finDeFila(lista, lista.findIndex(x => x.id === tras)) : lista.length - 1;
+    lista.splice(i + 1, 0, nuevo);
+    setBloques(lista);
+    await guardarAhora(lista);
+    navigate(`/paginas/${j.id}`);
+  };
+
+  // ⌘Z fuera de un texto deshace lo último (borrar, mover, duplicar…). Dentro
+  // de un bloque manda el navegador, que sabe deshacer lo tecleado.
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z' || e.shiftKey) return;
+      const activo = document.activeElement as HTMLElement | null;
+      if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
+      if (!historia.current.length) return;
+      e.preventDefault();
+      deshacer();
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  });
 
   // -- Fase 2: buscador de publicaciones para embeber -------------------------
   useEffect(() => {
@@ -500,7 +758,7 @@ function EditorPagina() {
     };
     setBloques(bs => {
       if (buscadorPub === '') return [...bs, nuevo];
-      const i = bs.findIndex(b => b.id === buscadorPub);
+      const i = finDeFila(bs, bs.findIndex(b => b.id === buscadorPub));
       const copia = [...bs];
       copia.splice(i + 1, 0, nuevo);
       return copia;
@@ -604,6 +862,9 @@ function EditorPagina() {
   const alTeclear = (b: Bloque, e: React.KeyboardEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
 
+    // ⌘D duplica el bloque, como en Notion.
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicar(b.id); return; }
+
     // ⌘A SELECCIONA ESTE BLOQUE, NO EL DOCUMENTO ENTERO (2026-08-20). El
     // «seleccionar todo» del navegador se lleva por delante media página; al
     // escribir encima, el navegador borraba nodos de OTROS bloques que React
@@ -660,7 +921,7 @@ function EditorPagina() {
       const nuevo: Bloque = { id: nuevoIdBloque(), tipo: heredan.includes(b.tipo) ? b.tipo : 'parrafo', texto: despues };
       textosRef.current[nuevo.id] = despues;
       setBloques(bs => {
-        const i = bs.findIndex(x => x.id === b.id);
+        const i = finDeFila(bs, bs.findIndex(x => x.id === b.id));
         const copia = bs.map(x => x.id === b.id ? { ...x, texto: antes } : x);
         copia.splice(i + 1, 0, nuevo);
         return copia;
@@ -761,8 +1022,10 @@ function EditorPagina() {
       if (!b) return [...bs, ...nuevos];
       const i = bs.findIndex(x => x.id === b.id);
       const copia = [...bs];
-      // Sobre un bloque vacío lo sustituyen; con texto, van detrás.
-      copia.splice(vacio ? i : i + 1, vacio ? 1 : 0, ...nuevos);
+      // Sobre un bloque vacío lo sustituyen (y heredan su columna); con
+      // texto, van detrás de la fila.
+      if (vacio && b.grupo && nuevos.length === 1) nuevos = [{ ...nuevos[0], grupo: b.grupo }];
+      copia.splice(vacio ? i : finDeFila(bs, i) + 1, vacio ? 1 : 0, ...nuevos);
       return copia;
     });
     if (b && vacio) delete textosRef.current[b.id];
@@ -896,8 +1159,10 @@ function EditorPagina() {
 
   const eliminarSeleccion = useCallback(() => {
     if (!seleccion.length) return;
+    historia.current.push(serializar());
+    setAviso(seleccion.length === 1 ? 'Bloque borrado' : `${seleccion.length} bloques borrados`);
     setBloques(bs => {
-      const restantes = bs.filter(x => !seleccion.includes(x.id));
+      const restantes = normalizarGrupos(bs.filter(x => !seleccion.includes(x.id)));
       return restantes.length ? restantes : [{ id: nuevoIdBloque(), tipo: 'parrafo' }];
     });
     for (const id of seleccion) { delete textosRef.current[id]; delete filasRef.current[id]; }
@@ -1038,6 +1303,7 @@ function EditorPagina() {
 
     const cuerpo = (() => {
       if (b.tipo === 'separador') return <hr className="border-slate-200 my-2" />;
+      if (b.tipo === 'subpagina') return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
 
       if (b.tipo === 'imagen') {
         // UNA IMAGEN SE EMBEBE, SALVO QUE LA HAYAS CERRADO (2026-08-22,
@@ -1477,18 +1743,23 @@ function EditorPagina() {
       return cuerpo();
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina'].includes(b.tipo);
 
     return (
       <div
         key={b.id}
+        id={`b-${b.id}`}
+        data-bloque-caja={b.id}
         className={cn('group/bloque relative rounded transition-shadow',
-          sobreBloque === b.id && arrastrando && 'shadow-[0_-2px_0_0_theme(colors.emerald.400)]',
+          destino?.id === b.id && destino.lado === 'arriba' && 'shadow-[0_-3px_0_0_theme(colors.emerald.400)]',
+          destino?.id === b.id && destino.lado === 'abajo' && 'shadow-[0_3px_0_0_theme(colors.emerald.400)]',
+          destino?.id === b.id && destino.lado === 'izquierda' && 'shadow-[-4px_0_0_0_theme(colors.emerald.400)]',
+          destino?.id === b.id && destino.lado === 'derecha' && 'shadow-[4px_0_0_0_theme(colors.emerald.400)]',
           arrastrando === b.id && 'opacity-40',
+          b.color && claseColor(b.color),
+          b.color && !b.color.startsWith('fondo-') && '[&_[data-bloque]]:![color:inherit] [&_.cursor-text]:![color:inherit]',
           seleccion.includes(b.id) && 'ring-2 ring-emerald-400 bg-emerald-50/60')}
         onClickCapture={editable ? e => { clicSeleccion(b, e); } : undefined}
-        onDragOver={editable ? e => { if (arrastrando) { e.preventDefault(); setSobreBloque(b.id); } } : undefined}
-        onDrop={editable ? () => soltarSobre(b.id) : undefined}
       >
         {/* LOS MANDOS DEL BLOQUE. En escritorio viven FUERA de la columna, a
             56 px por la izquierda, y aparecen al pasar el ratón.
@@ -1518,7 +1789,7 @@ function EditorPagina() {
           <div className={cn('absolute flex items-center transition-opacity',
             esMovil
               ? 'right-0 -top-1 z-10'
-              : '-left-14 top-0.5 opacity-0 group-hover/bloque:opacity-100')}>
+              : cn('-left-14 top-0.5 z-20 opacity-0 group-hover/bloque:opacity-100', menuAsa === b.id && '!opacity-100'))}>
             <button
               onClick={e => { e.stopPropagation(); setMenuAbierto(m => (m === b.id ? null : b.id)); }}
               title="Añadir un bloque debajo"
@@ -1532,14 +1803,29 @@ function EditorPagina() {
             </button>
             {!esMovil && (
               <span
-                draggable
-                onDragStart={e => { setArrastrando(b.id); e.dataTransfer.effectAllowed = 'move'; }}
-                onDragEnd={() => { setArrastrando(null); setSobreBloque(null); }}
-                title="Arrastrar para reordenar"
-                className="p-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing"
+                role="button"
+                aria-label="Opciones del bloque"
+                onPointerDown={e => empezarArrastre(b.id, e)}
+                title="Arrastra para mover · clic para opciones"
+                className="p-1 rounded-md text-slate-300 hover:text-slate-500 hover:bg-slate-50 cursor-grab active:cursor-grabbing touch-none"
               >
                 <GripVertical className="w-4 h-4" />
               </span>
+            )}
+            {menuAsa === b.id && (
+              <MenuBloque
+                tipo={b.tipo} color={b.color} enColumnas={!!b.grupo}
+                onBorrar={() => borrarBloque(b.id)}
+                onDuplicar={() => duplicar(b.id)}
+                onConvertir={t => {
+                  // Lo escrito se conserva: sólo cambia la forma.
+                  cambiarBloque(b.id, { tipo: t, texto: textosRef.current[b.id] ?? b.texto ?? '' });
+                }}
+                onColor={c => cambiarBloque(b.id, { color: c })}
+                onEnlace={() => copiarEnlace(b.id)}
+                onSacarDeColumnas={() => sacarDeColumnas(b.id)}
+                onCerrar={() => setMenuAsa(null)}
+              />
             )}
           </div>
         )}
@@ -1699,7 +1985,9 @@ function EditorPagina() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-6 sm:px-12 pt-8 pb-32">
+      {/* «Ancho completo» también aquí (2026-09-30): se aplicaba sólo a la
+          página publicada, y quien lo activaba no veía ningún cambio. */}
+      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', ajustes.anchoCompleto ? 'max-w-6xl' : 'max-w-3xl')}>
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
@@ -1885,10 +2173,10 @@ function EditorPagina() {
                 <Link to={`/paginas/${filaDe.padre.id}`} className="hover:text-slate-700 truncate max-w-[14rem]">
                   {filaDe.padre.titulo || 'Sin título'}
                 </Link>
-                <span aria-hidden>/</span>
+                {filaDe.tabla_titulo && <span aria-hidden>/</span>}
               </>
             )}
-            <span className="truncate max-w-[14rem]">{filaDe.tabla_titulo}</span>
+            {filaDe.tabla_titulo && <span className="truncate max-w-[14rem]">{filaDe.tabla_titulo}</span>}
           </nav>
         )}
 
@@ -1925,7 +2213,17 @@ function EditorPagina() {
 
         {/* Los bloques */}
         <div className={cn('space-y-2', editable && 'pl-0')}>
-          {bloques.map((b, i) => renderBloque(b, i))}
+          {/* Una fila es un bloque suelto o varios en columnas. En un
+              teléfono las columnas se apilan: 390 px no caben dos. */}
+          {enFilas(bloques).map(fila => fila.length === 1
+            ? renderBloque(fila[0], bloques.indexOf(fila[0]))
+            : (
+              <div key={`fila-${fila[0].grupo}`} className="flex flex-col sm:flex-row gap-2 sm:gap-14">
+                {fila.map(x => (
+                  <div key={`col-${x.id}`} className="sm:flex-1 min-w-0">{renderBloque(x, bloques.indexOf(x))}</div>
+                ))}
+              </div>
+            ))}
         </div>
         </div>
 
@@ -1971,10 +2269,34 @@ function EditorPagina() {
             fallaría al pulsarlo. */}
         {id && !esNuevo && (
           <div className="mt-10">
-            <Adjuntos contenedor="pagina_id" id={id} puedeEditar={puedoEditar} />
+            {/* Ya no está siempre (2026-09-30, Eugenio: «elimina lo de archivos
+                adjuntos que está por defecto; se sube desde el +»). Sólo se
+                enseña en las páginas que ya tenían archivos, para no
+                esconderle a nadie lo que subió. */}
+            <Adjuntos contenedor="pagina_id" id={id} puedeEditar={puedoEditar} soloSiHay />
           </div>
         )}
       </div>
+
+      <input ref={archivoRef} type="file" multiple className="hidden" onChange={e => subirDesdeMenu(e.target.files)} />
+
+      {/* Lo que se arrastra, siguiendo al puntero. */}
+      {arrastre && (
+        <div className="fixed z-[90] pointer-events-none px-2.5 py-1 rounded-lg bg-slate-900/85 text-white text-[11px] font-bold shadow-lg"
+          style={{ left: arrastre.x + 14, top: arrastre.y + 10 }}>
+          {destino?.lado === 'izquierda' || destino?.lado === 'derecha' ? 'Soltar al lado' : 'Mover bloque'}
+        </div>
+      )}
+
+      {/* «Bloque borrado · Deshacer», como en Notion. */}
+      {aviso && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-3 pl-4 pr-2 h-11 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xl">
+          <span>{aviso}</span>
+          {historia.current.length > 0 && !aviso.startsWith('Enlace') && !aviso.startsWith('http') && (
+            <button onClick={deshacer} className="h-8 px-3 rounded-lg bg-white/10 hover:bg-white/20">Deshacer <span className="text-white/50">⌘Z</span></button>
+          )}
+        </div>
+      )}
 
       {/* Barra flotante de la selección múltiple */}
       {seleccion.length > 0 && (

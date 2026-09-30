@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { enFilas } from '../../utils/bloques';
+import { claseColor } from '../../utils/coloresBloque';
+import EnlaceSubpagina from './EnlaceSubpagina';
 import EntityComments from './EntityComments';
 import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -93,17 +96,48 @@ function ConComentarios({ paginaId, bloqueId, children }: { paginaId: string; bl
 }
 
 export default function BloquesLectura({ bloques, comentable }: { bloques: any[]; comentable?: string }) {
+  // UN ENLACE A UN BLOQUE (`#b-…`, 2026-09-30). El navegador salta al ancla
+  // al cargar, pero aquí los bloques llegan después: se salta a mano y se
+  // resalta un momento para que se vea a qué apuntaba el enlace.
+  useEffect(() => {
+    const h = typeof location !== 'undefined' ? location.hash : '';
+    if (!h.startsWith('#b-')) return;
+    const el = document.getElementById(h.slice(1));
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('ring-2', 'ring-amber-300', 'rounded');
+    const t = setTimeout(() => el.classList.remove('ring-2', 'ring-amber-300'), 2500);
+    return () => clearTimeout(t);
+  }, [bloques]);
+
   if (!Array.isArray(bloques) || bloques.length === 0) {
     return <p className="text-sm text-slate-400">Esta página todavía no tiene contenido.</p>;
   }
+
+  const uno = (b: any) => {
+    const i = bloques.indexOf(b);
+    const dentro = <Bloque b={b} indice={i} bloques={bloques} />;
+    // Color y ancla van en un envoltorio: ningún tipo de bloque tiene que
+    // saber de ellos.
+    const color = claseColor(b?.color);
+    const caja = (
+      <div id={b?.id ? `b-${b.id}` : undefined}
+        className={cn(color, b?.color && !String(b.color).startsWith('fondo-') && '[&_*]:![color:inherit]')}>
+        {dentro}
+      </div>
+    );
+    return comentable && b?.id
+      ? <ConComentarios key={b.id} paginaId={comentable} bloqueId={String(b.id)}>{caja}</ConComentarios>
+      : <div key={b?.id || i}>{caja}</div>;
+  };
+
   return (
     <div className="space-y-2.5">
-      {bloques.map((b, i) => (
-        comentable && b?.id
-          ? <ConComentarios key={b.id} paginaId={comentable} bloqueId={String(b.id)}>
-              <Bloque b={b} indice={i} bloques={bloques} />
-            </ConComentarios>
-          : <Bloque key={b?.id || i} b={b} indice={i} bloques={bloques} />
+      {enFilas(bloques).map((fila, k) => fila.length === 1 ? uno(fila[0]) : (
+        // Columnas en pantalla ancha; una debajo de otra en un teléfono.
+        <div key={`fila-${fila[0].grupo}-${k}`} className="flex flex-col sm:flex-row gap-2.5 sm:gap-10">
+          {fila.map((b: any) => <div key={`col-${b.id}`} className="sm:flex-1 min-w-0">{uno(b)}</div>)}
+        </div>
       ))}
     </div>
   );
@@ -262,6 +296,9 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
         </div>
       );
     }
+
+    case 'subpagina':
+      return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
 
     case 'basedatos':
       // La tabla de verdad, en modo mirar. `Rejilla` ya sabe no dejar escribir.

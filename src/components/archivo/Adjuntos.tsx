@@ -42,11 +42,14 @@ const tamano = (b: number | string) => {
   return `${(n / 1024 / 1024).toLocaleString('es-ES', { maximumFractionDigits: 1 })} MB`;
 };
 
-export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archivos' }: {
+export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archivos', soloSiHay = false }: {
   contenedor: 'proyecto_id' | 'tarea_id' | 'pagina_id';
   id: string;
   puedeEditar: boolean;
   titulo?: string;
+  /** No enseñar nada si no hay archivos (2026-09-30, en las páginas: se sube
+   *  desde el «+», y las que ya tenían adjuntos los siguen viendo). */
+  soloSiHay?: boolean;
 }) {
   const [lista, setLista] = useState<Adjunto[] | null>(null);
   const [subiendo, setSubiendo] = useState(false);
@@ -156,6 +159,7 @@ export default function Adjuntos({ contenedor, id, puedeEditar, titulo = 'Archiv
     }
   };
 
+  if (soloSiHay && (lista === null || lista.length === 0)) return null;
   return (
     <section
       // ARRASTRAR UN FICHERO ENCIMA lo sube. Es como se mueve un fichero en
