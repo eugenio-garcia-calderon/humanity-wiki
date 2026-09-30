@@ -102,6 +102,24 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     cargar();
   };
 
+  /** El nombre mientras se edita; `null` cuando no se está editando. */
+  const [nombre, setNombre] = useState<string | null>(null);
+  const [falloNombre, setFalloNombre] = useState<string | null>(null);
+  const guardarNombre = async () => {
+    if (nombre === null || !datos) return;
+    const limpio = nombre.trim();
+    if (!limpio || limpio === datos.tabla.titulo) { setNombre(null); setFalloNombre(null); return; }
+    const r = await fetch(`/api/bd/tablas/${tablaId}`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo: limpio }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { setFalloNombre(j.error || 'No se pudo cambiar el nombre.'); return; }
+    setDatos(d => d ? { ...d, tabla: { ...d.tabla, titulo: j.titulo ?? limpio } } : d);
+    setNombre(null); setFalloNombre(null);
+  };
+
   /** Abrir la página de una fila desde la tabla — el «ABRIR» de Notion. */
   const abrirPagina = async (f: Fila) => {
     if (f.pagina_id) { navigate(`/paginas/${f.pagina_id}`); return; }
@@ -134,7 +152,27 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
     <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-slate-50/60">
         <Table2 className="w-4 h-4 text-slate-400 shrink-0" />
-        <p className="text-xs font-black text-slate-700 truncate">{datos.tabla.titulo}</p>
+        {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
+            cambiar el nombre de la base de datos»). Enter o salir guarda;
+            Escape deja el de antes. */}
+        {editable && nombre !== null ? (
+          <input autoFocus value={nombre} maxLength={200} aria-label="Nombre de la base de datos"
+            onChange={e => setNombre(e.target.value)}
+            onBlur={guardarNombre}
+            onKeyDown={e => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+              if (e.key === 'Escape') { setNombre(null); setFalloNombre(null); }
+            }}
+            className="min-w-0 flex-1 max-w-xs h-7 px-1.5 -mx-1.5 rounded border border-slate-300 bg-white text-xs font-black text-slate-700 outline-none focus:border-emerald-400" />
+        ) : editable ? (
+          <button onClick={() => setNombre(datos.tabla.titulo || '')} title="Cambiar el nombre"
+            className="min-w-0 h-7 px-1.5 -mx-1.5 rounded text-xs font-black text-slate-700 truncate hover:bg-slate-100 transition-colors">
+            {datos.tabla.titulo}
+          </button>
+        ) : (
+          <p className="text-xs font-black text-slate-700 truncate">{datos.tabla.titulo}</p>
+        )}
+        {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
         <span className="text-[11px] text-slate-400">
           {/* Si hay filtro puesto se dice: sin este número, una tabla filtrada y
               una completa se ven igual y nadie sabe que mira un trozo. */}
