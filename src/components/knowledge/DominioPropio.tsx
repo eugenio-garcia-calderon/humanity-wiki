@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle } from 'lucide-react';
+import { Globe, Loader2, Check, Copy, Trash2, AlertTriangle, RefreshCw, X } from 'lucide-react';
 
 // ============================================================================
 // PONER TU PROPIO DOMINIO EN UNA PÁGINA — como en Notion (2026-08-22)
@@ -30,6 +30,10 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pasos, setPasos] = useState<string[] | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
+  // La última comprobación de cada dominio, por id. Se queda a la vista hasta
+  // la siguiente: es la lista de lo que falta, y desaparecer sería perderla.
+  const [comprobando, setComprobando] = useState<string | null>(null);
+  const [resultados, setResultados] = useState<Record<string, Comprobacion>>({});
 
   async function cargar() {
     try {
@@ -72,6 +76,22 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
     cargar();
   }
 
+  async function comprobar(d: Dominio) {
+    setComprobando(d.id);
+    try {
+      const r = await fetch(`/api/dominios/${d.id}/comprobar`, { method: 'POST', credentials: 'include' });
+      const j = await r.json().catch(() => ({}));
+      setResultados(x => ({
+        ...x,
+        [d.id]: r.ok ? j : { listo: false, resumen: j.error || 'No se ha podido comprobar.', pasos: [] },
+      }));
+      if (r.ok) await cargar();
+    } catch {
+      setResultados(x => ({ ...x, [d.id]: { listo: false, resumen: 'No hay conexión con el servidor.', pasos: [] } }));
+    }
+    setComprobando(null);
+  }
+
   function copiar(t: string, cual: string) {
     navigator.clipboard?.writeText(t);
     setCopiado(cual);
@@ -112,6 +132,18 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               <Trash2 className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
+
+          {/* COMPROBAR LA CONEXIÓN (2026-09-30). Se ofrece siempre, también
+              cuando ya funciona: si un día deja de ir, es lo primero que se
+              pulsa, y que diga cuál de los pasos se ha roto ahorra adivinar. */}
+          <button onClick={() => comprobar(d)} disabled={comprobando === d.id}
+            className="mt-2 w-full h-10 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200
+                       bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60">
+            {comprobando === d.id
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Comprobando… puede tardar unos segundos</>
+              : <><RefreshCw className="w-3.5 h-3.5" /> Comprobar conexión</>}
+          </button>
+          {resultados[d.id] && <ResultadoComprobacion r={resultados[d.id]} />}
         </div>
       ))}
 
@@ -152,8 +184,8 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
               copiado={copiado === 'cname'} onCopiar={() => copiar(instrucciones.cname.valor, 'cname')} />
           </div>
           <p className="mt-2 text-[11px] text-amber-900/80 leading-relaxed">
-            Luego abre tu dominio en el navegador. El certificado de seguridad se
-            crea solo en esa primera visita, y tarda unos segundos.
+            Luego pulsa «Comprobar conexión»: miramos el DNS y el certificado, y
+            te decimos qué falta si algo no está bien.
           </p>
           {/* EL MINUTO DE ESPERA, DICHO ANTES DE QUE OCURRA (2026-08-22).
               Lo señaló prog6 revisando: comprobamos el DNS y guardamos el
@@ -174,6 +206,36 @@ export default function DominioPropio({ paginaId }: { paginaId: string }) {
           Tienes {otros.length} {otros.length === 1 ? 'dominio' : 'dominios'} más apuntando a otras páginas.
         </p>
       )}
+    </div>
+  );
+}
+
+type Comprobacion = {
+  listo: boolean; resumen: string;
+  pasos: Array<{ clave: string; ok: boolean; aviso?: boolean; titulo: string; detalle: string }>;
+};
+
+/** Lo que ha salido de comprobar: arriba el veredicto, debajo cada paso. */
+function ResultadoComprobacion({ r }: { r: Comprobacion }) {
+  return (
+    <div className={`mt-2 p-2.5 rounded-xl border ${r.listo ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
+      <p className={`text-[11px] font-black ${r.listo ? 'text-emerald-800' : 'text-rose-800'}`}>
+        {r.listo ? 'Tu dominio está conectado correctamente' : 'Todavía no está conectado'}
+      </p>
+      {r.pasos.length === 0 && <p className="mt-1 text-[11px] text-rose-700">{r.resumen}</p>}
+      <ul className="mt-1.5 space-y-1.5">
+        {r.pasos.map(p => (
+          <li key={p.clave} className="flex items-start gap-1.5">
+            {p.ok ? <Check className="w-3.5 h-3.5 shrink-0 mt-px text-emerald-600" />
+              : p.aviso ? <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px text-amber-600" />
+              : <X className="w-3.5 h-3.5 shrink-0 mt-px text-rose-600" />}
+            <span className="min-w-0">
+              <span className="block text-[11px] font-bold text-slate-800 break-all">{p.titulo}</span>
+              <span className="block text-[11px] text-slate-600 leading-relaxed break-words">{p.detalle}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

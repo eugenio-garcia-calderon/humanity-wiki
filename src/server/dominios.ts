@@ -324,6 +324,63 @@ export function registerDominiosRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * COMPROBAR LA CONEXIÓN — `POST /api/dominios/:id/comprobar` (2026-09-30)
+   *
+   * Eugenio: «crea un botón que sea COMPROBAR conexión de dominio, y que haga
+   * el tema de comprobar que se ha conectado correctamente».
+   *
+   * Hasta hoy la única prueba era abrir el dominio y mirar. Si fallaba, no se
+   * sabía POR QUÉ: DNS sin propagar, la nube naranja de Cloudflare, un A que
+   * apunta a otra máquina o un certificado que no llegó se ven iguales desde
+   * el navegador. Aquí se miran de uno en uno, en el orden en que dependen
+   * unos de otros, y se dice cuál falla y qué hacer.
+   *
+   * Consulta el DNS en fresco (sin la caché de un minuto) y deja el resultado
+   * en esa caché: así, quien acaba de arreglar su DNS no espera a que caduque
+   * un «no» viejo para que Caddy le emita el certificado.
+   */
+  app.post('/api/dominios/:id/comprobar', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      const fila = (await db.execute(sql`
+        SELECT id, dominio, estado FROM dominios_paginas
+        WHERE id = ${String(req.params.id)} AND propietario_user_id = ${req.user.id}
+          AND estado <> 'retirado'
+      `)).rows[0] as any;
+      if (!fila) return res.status(404).json({ error: 'Ese dominio no es tuyo o no existe.' });
+
+      // Cada comprobación hace consultas de DNS y una petición HTTPS hacia
+      // fuera. Sin freno, el botón es una manera gratis de ponernos a
+      // golpear un dominio ajeno.
+      const ahora = Date.now();
+      const ultima = ultimaComprobacion.get(fila.id) ?? 0;
+      if (ahora - ultima < ESPERA_COMPROBAR_MS) {
+        const s = Math.ceil((ESPERA_COMPROBAR_MS - (ahora - ultima)) / 1000);
+        return res.status(429).json({ error: `Espera ${s} s antes de volver a comprobar.` });
+      }
+      ultimaComprobacion.set(fila.id, ahora);
+      if (ultimaComprobacion.size > 1000) ultimaComprobacion.clear();
+
+      const r = await comprobarConexion(fila.dominio);
+
+      // Se guarda lo que ha salido. `estado` sólo sube a 'activo' cuando todo
+      // está bien; si algo falla NO se pone 'fallo', porque `permitido` sólo
+      // deja emitir certificados a 'pendiente' y 'activo': marcarlo como
+      // fallido impediría justo el arreglo que se está esperando.
+      await db.execute(sql`
+        UPDATE dominios_paginas SET
+          estado = CASE WHEN ${r.listo} THEN 'activo' ELSE estado END,
+          activo_desde = CASE WHEN ${r.listo} THEN COALESCE(activo_desde, now()) ELSE activo_desde END,
+          ultimo_error = ${r.listo ? null : r.resumen},
+          updated_at = now()
+        WHERE id = ${fila.id}
+      `);
+
+      res.json({ dominio: fila.dominio, estado: r.listo ? 'activo' : fila.estado, ...r });
+    } catch (e: any) { console.error('[dominios comprobar]', e); res.status(500).json({ error: e.message }); }
+  });
+
   /** Cambiar a qué página apunta, o retirarlo. */
   app.put('/api/dominios/:id', async (req: Request, res: Response) => {
     try {
@@ -404,4 +461,106 @@ async function apuntaAqui(dominio: string): Promise<boolean> {
   // sesenta segundos de caché, no un índice que haya que conservar.
   if (cacheDns.size > 1000) cacheDns.clear();
   return apunta;
+}
+
+// ============================================================================
+// LA COMPROBACIÓN, PASO A PASO
+// ============================================================================
+
+const ultimaComprobacion = new Map<string, number>();
+const ESPERA_COMPROBAR_MS = 10_000;
+
+/**
+ * Los rangos de Cloudflare que más se ven. Si el A del dominio cae aquí, lo que
+ * pasa casi siempre es que está con la «nube naranja» (proxy) y el DNS no
+ * enseña nuestra IP. Es el fallo más común y el más desconcertante: el panel
+ * dice la IP buena y nosotros vemos otra.
+ */
+function esDeCloudflare(ip: string): boolean {
+  const [a, b] = ip.split('.').map(Number);
+  return (a === 104 && b >= 16 && b <= 31) || (a === 172 && b >= 64 && b <= 71)
+    || (a === 188 && b === 114) || (a === 162 && b === 158) || (a === 141 && b === 101);
+}
+
+type Paso = { clave: string; ok: boolean; aviso?: boolean; titulo: string; detalle: string };
+
+export async function comprobarConexion(dominio: string): Promise<{
+  listo: boolean; resumen: string; pasos: Paso[];
+}> {
+  const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
+    .split(',').map(x => x.trim()).filter(Boolean);
+  const pasos: Paso[] = [];
+
+  // ── 1. EL REGISTRO A DE LA RAÍZ ────────────────────────────────────────
+  const [v4, cname] = await Promise.allSettled([dns.resolve4(dominio), dns.resolveCname(dominio)]);
+  const ips = v4.status === 'fulfilled' ? v4.value : [];
+  const cnames = cname.status === 'fulfilled' ? cname.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
+  const raizOk = ips.some(ip => nuestras.includes(ip)) || cnames.some(c => c.endsWith('humanity.wiki'));
+
+  let detalleA: string;
+  if (raizOk) detalleA = `Apunta a ${ips.join(', ') || cnames.join(', ')}. Correcto.`;
+  else if (ips.length === 0) detalleA = `Todavía no hay registro A. Crea uno con nombre «@» y valor ${nuestras[0]}. Si ya lo has creado, espera: puede tardar minutos u horas en propagarse.`;
+  else if (ips.every(esDeCloudflare)) detalleA = `Apunta a ${ips.join(', ')}, que son de Cloudflare. En Cloudflare, pulsa la nube naranja del registro para dejarla gris («DNS only»).`;
+  else detalleA = `Apunta a ${ips.join(', ')}, que no es esta plataforma. Cambia el valor del registro A a ${nuestras[0]}.`;
+  pasos.push({ clave: 'a', ok: raizOk, titulo: `Registro A de ${dominio}`, detalle: detalleA });
+
+  // ── 2. EL «www» ────────────────────────────────────────────────────────
+  // No bloquea: la página funciona sin él. Pero quien escribe www.sudominio
+  // y ve un error cree que todo está roto, así que se avisa.
+  const www = `www.${dominio}`;
+  const [wv4, wcn] = await Promise.allSettled([dns.resolve4(www), dns.resolveCname(www)]);
+  const wips = wv4.status === 'fulfilled' ? wv4.value : [];
+  const wcns = wcn.status === 'fulfilled' ? wcn.value.map(c => c.replace(/\.$/, '').toLowerCase()) : [];
+  const wwwOk = wips.some(ip => nuestras.includes(ip))
+    || wcns.some(c => c === dominio || c.endsWith('humanity.wiki'));
+  pasos.push({
+    clave: 'www', ok: wwwOk, aviso: !wwwOk, titulo: `Registro de ${www}`,
+    detalle: wwwOk ? 'Correcto.'
+      : wips.length && wips.every(esDeCloudflare) ? 'Está detrás de la nube naranja de Cloudflare. Déjala gris.'
+      : 'Falta o apunta a otro sitio. Crea un CNAME con nombre «www» y valor humanity.wiki. No es imprescindible: sin él solo falla la dirección con «www».',
+  });
+
+  // La caché del `ask` de Caddy se pone al día con lo que acabamos de ver:
+  // si no, un «no» de hace treinta segundos seguiría negando el certificado.
+  cacheDns.set(dominio, { apunta: raizOk, hasta: Date.now() + VIDA_CACHE_MS });
+
+  // ── 3. HTTPS, CERTIFICADO Y QUE RESPONDEMOS NOSOTROS ───────────────────
+  // Sin DNS bueno no se intenta: la petición iría a otra máquina y no
+  // demostraría nada (y sería ir a llamar a una puerta ajena).
+  if (!raizOk) {
+    pasos.push({ clave: 'https', ok: false, titulo: 'Conexión segura (HTTPS)', detalle: 'Se comprobará cuando el registro A esté bien.' });
+  } else {
+    // Esta petición es además la «primera visita» que hace que Caddy pida
+    // el certificado; por eso se le da tiempo de sobra.
+    let ok = false; let detalle: string;
+    try {
+      const r = await fetch(`https://${dominio}/api/dominios/resolver?host=${encodeURIComponent(dominio)}`, {
+        signal: AbortSignal.timeout(20_000), redirect: 'manual',
+        headers: { accept: 'application/json' },
+      });
+      const j: any = await r.json().catch(() => null);
+      if (j && (j.tipo || j.error)) {
+        ok = r.ok;
+        detalle = r.ok ? 'Certificado válido y la página responde desde tu dominio.'
+          : `El dominio llega bien, pero: ${j.error}`;
+      } else {
+        detalle = `Responde (código ${r.status}), pero no es esta plataforma. Revisa que no haya otro servicio delante.`;
+      }
+    } catch (e: any) {
+      const c = String(e?.cause?.code || e?.name || '');
+      detalle = /CERT|SSL|TLS|ALTNAME|SELF_SIGNED/i.test(c)
+        ? 'El DNS está bien, pero el certificado aún no está listo. Vuelve a comprobar en un minuto.'
+        : /Timeout|Abort/i.test(c)
+          ? 'No ha respondido a tiempo. El certificado puede estar emitiéndose: vuelve a comprobar en un minuto.'
+          : `No se ha podido conectar (${c || 'error de red'}). Si acabas de cambiar el DNS, espera unos minutos.`;
+    }
+    pasos.push({ clave: 'https', ok, titulo: 'Conexión segura (HTTPS)', detalle });
+  }
+
+  const bloqueante = pasos.find(p => !p.ok && !p.aviso);
+  return {
+    listo: !bloqueante,
+    resumen: bloqueante ? bloqueante.detalle : 'Conectado correctamente.',
+    pasos,
+  };
 }
