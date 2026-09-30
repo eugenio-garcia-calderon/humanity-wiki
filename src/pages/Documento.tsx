@@ -207,6 +207,19 @@ function EditorPagina() {
   const [menuAsa, setMenuAsa] = useState<string | null>(null);
   /** Aviso de abajo con «Deshacer». */
   const [aviso, setAviso] = useState<string | null>(null);
+  /** ══ UN FALLO AL HACER ALGO NO ES UN FALLO DE LA PÁGINA (2026-10-01) ════
+   *  Eugenio subió una imagen, falló la red, y el editor ENTERO se cambió por
+   *  una pantalla de error cuyo botón llevaba a Explorar: perdió de vista su
+   *  página. Subir, pegar, soltar o pedir algo a la IA que falla se dice aquí,
+   *  en un aviso rojo encima de la página, y la página sigue donde estaba.
+   *  La pantalla de error queda sólo para cuando la página no se puede abrir. */
+  const [fallo, setFallo] = useState<string | null>(null);
+  const falloTimer = useRef<any>(null);
+  const fallar = (texto: string | null) => {
+    setFallo(texto);
+    clearTimeout(falloTimer.current);
+    if (texto) falloTimer.current = setTimeout(() => setFallo(null), 8000);
+  };
   const avisoTimer = useRef<any>(null);
   /** Fotos de la estructura antes de cada cambio que no se deshace tecleando. */
   const historia = useRef<Bloque[][]>([]);
@@ -683,10 +696,10 @@ function EditorPagina() {
     for (const f of Array.from(files)) dt.items.add(f);
     try {
       const nuevos = await bloquesDelPortapapeles(dt);
-      if (!nuevos) { setError('No se ha podido subir ese archivo.'); return; }
+      if (!nuevos) { fallar('No se ha podido subir ese archivo.'); return; }
       const tras = archivoTras.current ? bloquesRef.current.find(x => x.id === archivoTras.current) ?? null : null;
       insertarBloques(tras, nuevos, false);
-    } catch (e: any) { setError(e.message || 'No se pudo subir.'); }
+    } catch (e: any) { fallar(e.message || 'No se pudo subir.'); }
     finally { setSubiendo(null); if (archivoRef.current) archivoRef.current.value = ''; }
   };
 
@@ -699,7 +712,7 @@ function EditorPagina() {
       body: JSON.stringify({ titulo: 'Sin título' }),
     });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok || !j.id) { setError(j.error || 'No se pudo crear la página.'); return; }
+    if (!r.ok || !j.id) { fallar(j.error || 'No se pudo crear la página.'); return; }
     const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'subpagina', entityId: j.id, pubTitulo: 'Sin título' };
     const lista = serializar();
     const i = tras ? finDeFila(lista, lista.findIndex(x => x.id === tras)) : lista.length - 1;
@@ -802,8 +815,7 @@ function EditorPagina() {
       setBloques(bs => bs.map(x => x.id === b.id ? { ...x, texto: j.texto } : x));
       await guardarAhora();
     } catch (e: any) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      fallar(e.message);
     } finally {
       setIaOcupada(null);
     }
@@ -828,8 +840,7 @@ function EditorPagina() {
       programarGuardado();
       setTimeout(() => finalRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (e: any) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      fallar(e.message);
     } finally {
       setIaOcupada(null);
     }
@@ -853,9 +864,33 @@ function EditorPagina() {
     }, 'image/png');
   };
 
+  // ══ SUBIDAS CON PROGRESO (2026-10-01) ══════════════════════════════════
+  // Eugenio: con una imagen pesada «parece que no está haciendo nada», y uno
+  // cancela, sale o la vuelve a subir. Mientras sube se enseña la propia foto
+  // (en local, al instante) con una barra y el porcentaje.
+  const [subidas, setSubidas] = useState<Record<string, { fraccion: number; vista: string | null }>>({});
+  const conProgreso = async (clave: string, archivo: File) => {
+    const vista = archivo.type.startsWith('image/') ? URL.createObjectURL(archivo) : null;
+    setSubidas(s => ({ ...s, [clave]: { fraccion: 0, vista } }));
+    try {
+      return await subirArchivo(archivo, undefined, f => setSubidas(s => (s[clave] ? { ...s, [clave]: { ...s[clave], fraccion: f } } : s)));
+    } finally {
+      setSubidas(s => { const n = { ...s }; delete n[clave]; return n; });
+      if (vista) setTimeout(() => URL.revokeObjectURL(vista), 5000);
+    }
+  };
+  // Salir a mitad de una subida la pierde: el navegador pregunta antes.
+  const haySubidas = Object.keys(subidas).length > 0;
+  useEffect(() => {
+    if (!haySubidas) return;
+    const aviso = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', aviso);
+    return () => window.removeEventListener('beforeunload', aviso);
+  }, [haySubidas]);
+
   const subirPortada = async (archivo: File) => {
-    const sub = await subirArchivo(archivo);
-    if (sub.error) { setError(sub.error); return; }
+    const sub = await conProgreso('portada', archivo);
+    if (sub.error) { fallar(sub.error); return; }
     setPortada(sub.url);
     programarGuardado();
   };
@@ -1058,13 +1093,13 @@ function EditorPagina() {
     if (arrastrando || !traeArchivos(e.dataTransfer)) return;
     e.preventDefault();
     setArchivoEncima(false);
-    if (!editable) { setError('Esta página es de solo lectura: no se pueden añadir archivos.'); return; }
+    if (!editable) { fallar('Esta página es de solo lectura: no se pueden añadir archivos.'); return; }
     try {
       const nuevos = await bloquesDelPortapapeles(e.dataTransfer);
       // `null` = no traía nada que sepamos incrustar. Se dice, en vez de
       // tragárselo en silencio: soltar algo y que no pase nada es el fallo que
       // nadie sabe reportar.
-      if (!nuevos?.length) { setError('De eso que has soltado no sé hacer un bloque.'); return; }
+      if (!nuevos?.length) { fallar('De eso que has soltado no sé hacer un bloque.'); return; }
       insertarBloques(null, nuevos, false);
     } finally {
       setSubiendo(null);
@@ -1240,8 +1275,8 @@ function EditorPagina() {
   };
 
   const subirImagen = async (b: Bloque, archivo: File) => {
-    const sub = await subirArchivo(archivo);
-    if (sub.error) { setError(sub.error); return; }
+    const sub = await conProgreso(b.id, archivo);
+    if (sub.error) { fallar(sub.error); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, url: sub.url } : x));
     programarGuardado();
   };
@@ -1342,6 +1377,8 @@ function EditorPagina() {
             )}
             {b.pie && <figcaption className="text-xs text-slate-400 mt-1">{b.pie}</figcaption>}
           </figure>
+        ) : subidas[b.id] ? (
+          <SubiendoImagen vista={subidas[b.id].vista} fraccion={subidas[b.id].fraccion} texto="Subiendo la imagen" />
         ) : editable ? (
           <label className="flex items-center gap-2 px-4 py-6 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-colors">
             <ImageIcon className="w-4 h-4" /> Elegir una imagen…
@@ -1985,9 +2022,12 @@ function EditorPagina() {
         <div className="text-center max-w-sm">
           <FileText className="w-8 h-8 text-slate-300 mx-auto mb-3" />
           <p className="text-sm text-slate-500">{error}</p>
-          <Link to="/explorar" className="inline-flex items-center gap-1.5 mt-4 text-xs font-black text-emerald-700 hover:underline">
-            <ArrowLeft className="w-3.5 h-3.5" /> Volver a Explorar
-          </Link>
+          {/* A donde estabas, no a Explorar: quien llega aquí venía de algún
+              sitio y ése es el que quiere recuperar. */}
+          <button onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/paginas'))}
+            className="inline-flex items-center gap-1.5 mt-4 h-11 px-3 text-xs font-black text-emerald-700 hover:underline">
+            <ArrowLeft className="w-3.5 h-3.5" /> Volver atrás
+          </button>
         </div>
       </div>
     );
@@ -2128,7 +2168,9 @@ function EditorPagina() {
             página publicada. Ver `CabeceraPagina.tsx`. */}
         <LayoutCabecera
           cabecera={ajustes.cabecera}
-          imagen={portada ? (
+          imagen={subidas.portada ? (
+            <SubiendoImagen vista={subidas.portada.vista} fraccion={subidas.portada.fraccion} texto="Subiendo la portada" />
+          ) : portada ? (
             <div className="group/portada relative w-fit max-w-full">
               <img src={portada} alt="" className="w-full h-56 object-cover rounded-2xl" />
               {editable && (
@@ -2358,6 +2400,15 @@ function EditorPagina() {
         <div className="fixed z-[90] pointer-events-none px-2.5 py-1 rounded-lg bg-slate-900/85 text-white text-[11px] font-bold shadow-lg"
           style={{ left: arrastre.x + 14, top: arrastre.y + 10 }}>
           {destino?.lado === 'izquierda' || destino?.lado === 'derecha' ? 'Soltar al lado' : 'Mover bloque'}
+        </div>
+      )}
+
+      {fallo && (
+        <div role="alert" className="fixed top-20 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-3 pl-4 pr-2 min-h-11 max-w-[calc(100vw-2rem)] rounded-xl bg-rose-600 text-white text-xs font-bold shadow-2xl">
+          <span className="py-2">{fallo}</span>
+          <button onClick={() => fallar(null)} aria-label="Cerrar el aviso" className="w-8 h-8 grid place-items-center rounded-lg hover:bg-white/15">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -2699,3 +2750,30 @@ function DescripcionEditable({ valor, letra, enfocar, onEnfocado, onCambiar, onV
     />
   );
 }
+
+/** Una imagen que está subiendo: la foto (en local, al instante), atenuada,
+ *  con una barra y el porcentaje. Sin esto, subir una foto de 8 MB son veinte
+ *  segundos sin ninguna señal de que algo pasa. */
+function SubiendoImagen({ vista, fraccion, texto }: { vista: string | null; fraccion: number; texto: string }) {
+  const pct = Math.round(fraccion * 100);
+  return (
+    <div className="relative w-full max-w-full overflow-hidden rounded-2xl bg-slate-100" role="status" aria-live="polite">
+      {vista
+        ? <img src={vista} alt="" className="block w-full max-h-72 object-contain opacity-40" />
+        : <div className="h-40" />}
+      <div className="absolute inset-0 grid place-items-center p-4">
+        <div className="w-full max-w-xs rounded-xl bg-white/95 shadow-lg px-4 py-3">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span className="inline-flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" /> {texto}…</span>
+            <span className="tabular-nums">{pct < 100 ? `${pct}%` : 'Casi…'}</span>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-full bg-emerald-500 transition-[width] duration-200" style={{ width: `${Math.max(3, pct)}%` }} />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-400">No cierres la página hasta que termine.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+

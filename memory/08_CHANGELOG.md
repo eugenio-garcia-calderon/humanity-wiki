@@ -8026,3 +8026,20 @@ icon is capped at 72 px on mobile.
 The table created from a page's database block took the page's title (or
 «Tabla de la página»); it is now born as «Nueva base de datos» and renamed by
 clicking its name.
+
+## 2026-10-01 — Upload failures no longer throw you out of the page; upload progress; reposition gallery images (prog8)
+
+- A failed upload (or paste, drop, AI edit, sub-page creation) replaced the
+  whole editor with an error screen whose button went to Explorar — Eugenio
+  lost his page. Those failures are now a red dismissible toast over the
+  page; the full-screen error is kept only for «this page can't be opened»,
+  and its button goes back where you came from.
+- Uploads retry once after a network blip before reporting.
+- **Upload progress**: `subirArchivo` uses XHR to report progress; cover and
+  image uploads show the local preview dimmed with a bar, a percentage and
+  «No cierres la página hasta que termine», and the browser asks before
+  leaving mid-upload.
+- **Reposition a gallery image** (Notion's «Reposition»): «Recolocar» on a
+  card, drag, «Guardar posición». Stored as `config.encuadre` {x,y}% on the
+  row's page via `PUT /api/bd/filas/:id/encuadre` (table write permission),
+  applied as `object-position`.
