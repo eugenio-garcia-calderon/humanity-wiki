@@ -7793,3 +7793,19 @@ Measured, not assumed: the cover renders and the API returns
 browser because it is `loading="lazy"` and that browser fires no
 IntersectionObserver events — the documented trap. Forcing `eager` loaded it at
 160×160, which is what proves the path.
+## 2026-09-30 — «Comprobar conexión» for custom domains (prog8)
+
+Eugenio: a button in Páginas → Compartir → Tu propio dominio that checks the
+domain is connected properly. `POST /api/dominios/:id/comprobar` (owner only,
+one check per domain every 10 s) runs three steps in order and says which one
+fails and what to do: the root A record (detects Cloudflare's orange cloud,
+missing record, wrong IP), `www` (a warning, not blocking), and HTTPS — a real
+request to `https://<domain>/api/dominios/resolver` that proves the certificate
+is valid and that it is *this* platform answering. All green → `estado =
+'activo'`; otherwise the reason goes to `ultimo_error` and the state is left as
+it was (never `fallo`, which would stop Caddy issuing the certificate).
+
+The fresh DNS result is written into the one-minute cache the Caddy `ask`
+uses, so someone who has just fixed their DNS is no longer refused a
+certificate by a stale «no». Only the Páginas dialog (`DominioPropio.tsx`) has
+the button; `CajaCompartir` (projects) still lists domains without it.
