@@ -45,7 +45,18 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
   const [slugBorrador, setSlugBorrador] = useState('');
   const [editandoSlug, setEditandoSlug] = useState(false);
   const [dominioNuevo, setDominioNuevo] = useState('');
-  const [pasos, setPasos] = useState<string[] | null>(null);
+  /** Los dos registros DNS que hay que crear. Vienen del servidor (`GET
+   *  /api/dominios`) para que el día que cambie la IP no haya que tocar esto. */
+  const [registros, setRegistros] = useState<{
+    a: { nombre: string; valor: string }; cname: { nombre: string; valor: string };
+  } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/dominios', { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => setRegistros(j?.instrucciones ?? null))
+      .catch(() => {});
+  }, []);
 
   const cargar = () =>
     fetch(`/api/compartir/${tipo}/${encodeURIComponent(id)}`, { credentials: 'include' })
@@ -84,7 +95,7 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
   const anadirDominio = async () => {
     const d = dominioNuevo.trim();
     if (!d) return;
-    setOcupado(true); setFallo(null); setPasos(null);
+    setOcupado(true); setFallo(null);
     try {
       const r = await fetch('/api/dominios', {
         method: 'POST', credentials: 'include',
@@ -96,7 +107,6 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
       });
       const j = await r.json().catch(() => null);
       if (!r.ok) throw new Error(j?.error || 'No se ha podido añadir.');
-      setPasos(j.pasos ?? null);
       setDominioNuevo('');
       await cargar();
     } catch (err: any) { setFallo(err.message); } finally { setOcupado(false); }
@@ -230,13 +240,50 @@ export default function CajaCompartir({ tipo, id, onCerrar, onCambiado }: {
               </button>
             </div>
 
-            {/* Los pasos que devuelve el servidor, tal cual: qué registro DNS
-                crear y en qué orden. Escribirlos aquí otra vez sería tener dos
-                versiones de la misma instrucción. */}
-            {pasos && (
-              <ol className="mt-2 flex list-decimal flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50/70 p-3 pl-6 text-[11.5px] leading-relaxed text-slate-600">
-                {pasos.map((p, i) => <li key={i}>{p}</li>)}
-              </ol>
+            {/* ══ LAS INSTRUCCIONES, MIENTRAS HAGAN FALTA (2026-09-30) ════════
+                Eugenio: «haz que las instrucciones para conectar un dominio
+                aparezcan siempre que haya un dominio pendiente, ya que al
+                cerrar el cuadro de diálogo y volver a abrirlo han desaparecido».
+
+                Antes salían solo en la respuesta de «Apuntar aquí»: cerrabas la
+                caja para ir a tu proveedor de dominio —que es justo lo que
+                piden— y al volver ya no estaban. Ahora dependen del ESTADO del
+                dominio, no de haber pulsado un botón hace un rato: mientras
+                alguno no esté activo, se enseñan.
+
+                Y cada valor va en su propia casilla con su botón de copiar. En
+                una frase la IP acababa en punto, y quien la copiaba se llevaba
+                el punto (Feedback del 30 sept: «aparece un punto al final, y da
+                error la IP»). */}
+            {registros && e.dominios.some(d => d.estado !== 'activo') && (
+              <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-[11.5px] font-black text-amber-900">Falta un paso, y no es aquí</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-amber-900/80">
+                  Entra donde compraste el dominio y crea estos dos registros DNS:
+                </p>
+                <div className="mt-2 space-y-1.5">
+                  {([['A', registros.a], ['CNAME', registros.cname]] as const).map(([t, r]) => (
+                    <div key={t} className="flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-2 py-1.5">
+                      <span className="w-12 shrink-0 text-[10px] font-black text-amber-900">{t}</span>
+                      <span className="w-8 shrink-0 text-[10px] text-slate-500">{r.nombre}</span>
+                      <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-slate-800">{r.valor}</span>
+                      <button
+                        onClick={() => copiar(r.valor, `dns-${t}`)}
+                        aria-label={`Copiar el valor del registro ${t}`}
+                        className="grid h-8 w-8 shrink-0 place-items-center rounded-md hover:bg-amber-50"
+                      >
+                        {copiado === `dns-${t}` ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-400" />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-amber-900/80">
+                  Espera a que se propague (minutos, a veces horas) y abre tu dominio
+                  en el navegador: el certificado de seguridad se crea solo en esa
+                  primera visita. Si acabas de cambiar el DNS y todavía falla, espera
+                  un minuto y vuelve a probar.
+                </p>
+              </div>
             )}
           </div>
         )}

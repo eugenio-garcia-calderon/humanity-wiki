@@ -40,6 +40,8 @@ export interface Proyecto {
   titulo: string;
   slug: string;
   icono?: string | null;
+  /** La página que ES el proyecto (desde 2026-09-30). Si la tiene, se abre ella. */
+  pagina_id?: string | null;
 }
 
 /** Lo que devuelve el enganche: la lista, `null` mientras carga, `'fallo'` si no se pudo. */
@@ -100,7 +102,7 @@ export function comoItems(proyectos: Proyecto[]): Herramienta[] {
     clave: `proyecto-${p.id}`,
     nombre: p.titulo || 'Sin título',
     icono: p.icono ? componenteDeTrazo(p.icono) : FolderKanban,
-    ruta: `/proyectos/${p.slug}`,
+    ruta: p.pagina_id ? `/paginas/${p.pagina_id}` : `/proyectos/${p.slug}`,
     conPanel: true,
   }));
 }
@@ -248,9 +250,11 @@ export function PieProyectos({ estado, desplegado, onReintentar }: {
         <span className={palabra(desplegado)}>Todos los proyectos</span>
       </Link>
 
-      <Link to="/proyectos?nuevo=1" title="Nuevo proyecto" className={fila(desplegado)}>
+      {/* UNA SOLA PUERTA PARA CREAR (2026-09-30): una página. Se hace
+          proyecto al ponerle el bloque «Tablero de tareas». */}
+      <Link to="/paginas?nueva=1" title="Nueva página" className={fila(desplegado)}>
         <Plus className="h-4 w-4 shrink-0" />
-        <span className={palabra(desplegado)}>Nuevo proyecto</span>
+        <span className={palabra(desplegado)}>Nueva página</span>
       </Link>
     </>
   );

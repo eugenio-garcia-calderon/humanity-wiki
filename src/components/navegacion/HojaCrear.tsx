@@ -81,9 +81,11 @@ const COSAS: Cosa[] = [
   // «quiero hacer esto» y no un «esto que estoy leyendo». Sin esta entrada, lo
   // de fuera no tendría puerta: no hay ninguna tarjeta de la que colgarlo.
   { nombre: 'Republicar',   Previa: PreviaPublicaciones, a: '/explorar?republicar=1', nota: 'De aquí o de otra red' },
-  { nombre: 'Proyecto',     Previa: PreviaTareas,        a: '/proyectos?nuevo=1', nota: 'Con su tablero' },
+  // «PROYECTO» YA NO ES OTRA COSA (2026-09-30, Eugenio: «mantén solo una
+  // herramienta, la del creador de páginas»). Un proyecto es una página a la
+  // que se le pone el bloque «Tablero de tareas».
   { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
-  { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },
+  { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, tablero, fotos… o tu web' },
   { nombre: 'Esquema',      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  nota: 'Ideas conectadas' },
   // Un debate se CREA como cualquier otra cosa (2026-08-24, Eugenio). Estaba
   // solo en el menú de información, que es donde se EXPLICA lo que es — y ahí

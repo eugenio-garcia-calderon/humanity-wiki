@@ -538,3 +538,33 @@ left-to-right drawing drawable.
 branch holding half of everything does not sort anything, and offered a 5×3
 alternative. He chose A. Phase 1 is draggable precisely so that number can be
 felt and changed by looking, not argued.
+
+## 2026-09-30 — A project is a page (the two creators become one)
+
+Eugenio: «fusiona el creador de páginas y el creador de proyectos, una página
+puede ser un proyecto o una publicación o una web. Pero mantén solo una
+herramienta que es la herramienta del creador de páginas […] con el estilo de
+Notion donde añadimos bloques, y que luego eso lo podemos compartir y conectar
+un dominio». Asked about existing projects: convert them into pages. Asked about
+a page "type": none — «sin tipo, todo es una página».
+
+**The decision.** The `proyectos` table stays, because eleven tables hang from
+`proyecto_id` (kanban cards, branches, gallery, budgets, products, events,
+files, database tables, game items, publications, pages). What changes is the
+door and the identity: every project has a page (`proyectos.pagina_id`,
+migration 0133), the page is where it is seen and edited, and the kanban is a
+block (`tablero`) between the text. A project is "a page that has a board".
+Creating a project is creating a page and adding the board block; the board
+block creates the project row lazily, once, from the page's title.
+
+**The alternative, and why not.** Folding `proyectos` into `knowledge_windows`
+(kind `proyecto`) would have meant rewriting the FK of eleven tables and every
+query in `roadmap.ts`, `menu.ts`, `ramas.ts`, `galeria.ts` — days, for the same
+screen. The page-in-front approach ships in one PR and keeps every URL alive
+(`/proyectos/:slug` redirects to the page; `?vista=clasica` still opens the old
+screen for what is not a block yet).
+
+**What is not a block yet, said plainly:** branches (`proyecto_ramas`), gallery,
+people, budgets, attachments. They still live in the classic project screen,
+reachable from the board block's «Más del proyecto →». Each becomes a block
+when it is asked for; the pattern is the one `BloqueTablero` sets.

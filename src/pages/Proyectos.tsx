@@ -38,7 +38,12 @@ export function Proyectos() {
   const [cargando, setCargando] = useState(true);
   // Con `?nuevo=1` el diálogo nace abierto: es lo que manda el «+» de la
   // sección PROYECTOS del menú (2026-08-20), que antes solo traía al índice.
-  const [creando, setCreando] = useState(() => new URLSearchParams(window.location.search).get('nuevo') === '1');
+  // `?nuevo=1` venía del «+» de abajo y abría aquí el diálogo. Ahora crear un
+  // proyecto es crear una página, así que se reenvía al creador de páginas.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('nuevo') === '1') navigate('/paginas?nueva=1', { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const crearNuevo = () => navigate('/paginas?nueva=1');
   /*
    * ── EDITAR UNA TARJETA SIN ENTRAR (2026-08-26) ───────────────────────────
    * Eugenio: «crea un botón de tres puntitos para editar las tarjetas de los
@@ -161,7 +166,7 @@ export function Proyectos() {
           )}
 
           {user && (
-            <button onClick={() => setCreando(true)}
+            <button onClick={crearNuevo}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow transition-colors">
               <Plus className="w-3.5 h-3.5" /> Crear nuevo
             </button>
@@ -175,7 +180,7 @@ export function Proyectos() {
             <FolderKanban className="w-9 h-9 text-slate-300 mx-auto mb-3" />
             <p className="text-sm text-slate-500">Todavía no hay proyectos.</p>
             {user
-              ? <button onClick={() => setCreando(true)} className="mt-3 text-sm font-black text-emerald-700 hover:text-emerald-900">Crea el primero</button>
+              ? <button onClick={crearNuevo} className="mt-3 text-sm font-black text-emerald-700 hover:text-emerald-900">Crea el primero</button>
               : <Link to="/login" className="mt-3 inline-block text-sm font-black text-emerald-700">Entra para crear el tuyo</Link>}
           </div>
         ) : (
@@ -183,7 +188,7 @@ export function Proyectos() {
             {proyectos.map(p => {
               const avance = p.tarjetas ? Math.round((p.hechas / p.tarjetas) * 100) : 0;
               return (
-                <Link key={p.id} to={`/proyectos/${p.slug}`}
+                <Link key={p.id} to={p.pagina_id ? `/paginas/${p.pagina_id}` : `/proyectos/${p.slug}`}
                   className="group/tarjeta bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-0.5 transition-all">
                   {/* LA PORTADA (2026-08-26, Eugenio: «añade la posibilidad de
                       crear imágenes de portada de esos proyectos, que
@@ -264,13 +269,6 @@ export function Proyectos() {
         )}
       </div>
 
-      {creando && (
-        <ModalNuevoProyecto
-          onCerrar={() => setCreando(false)}
-          onCreado={p => navigate(`/proyectos/${p.slug}`)}
-        />
-      )}
-
       {editando && (
         <EditarProyecto
           proyecto={editando}
@@ -331,76 +329,12 @@ function PersonasDeLaTarjeta({ proyecto, yo }: { proyecto: any; yo?: string }) {
   );
 }
 
-function ModalNuevoProyecto({ onCerrar, onCreado }: { onCerrar: () => void; onCreado: (p: any) => void }) {
-  const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [vision, setVision] = useState('');
-  const [publico, setPublico] = useState(true);
-  const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const input = 'w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300';
-
-  const crear = async () => {
-    if (!titulo.trim()) { setError('El proyecto necesita un nombre.'); return; }
-    setGuardando(true); setError(null);
-    try {
-      const r = await fetch('/api/proyectos', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ titulo: titulo.trim(), descripcion: descripcion.trim() || null, vision: vision.trim() || null, publico }),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'No se pudo crear.');
-      // Que el menú lateral se entere (2026-08-20): antes seguía diciendo
-      // «PROYECTOS 4» y el nuevo no salía hasta recargar la página entera.
-      window.dispatchEvent(new Event('humanity:menu-cambiado'));
-      onCreado(j);
-    } catch (e: any) { setError(e.message); setGuardando(false); }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-slate-900/45 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onCerrar}>
-      {/* Un diálogo tiene que DECIR que lo es (2026-08-20): sin `role` ni
-          `aria-modal` un lector de pantalla lo lee como un trozo más de la
-          página y la persona no sabe que se ha abierto nada. */}
-      <div role="dialog" aria-modal="true" aria-labelledby="titulo-nuevo-proyecto"
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-          <h2 id="titulo-nuevo-proyecto" className="text-sm font-black text-slate-900 inline-flex items-center gap-1.5">
-            <FolderKanban className="w-4 h-4 text-emerald-600" /> Nuevo proyecto
-          </h2>
-          <button onClick={onCerrar} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-50"><X className="w-4 h-4" /></button>
-        </div>
-        <div className="p-5 space-y-3 flex-1 overflow-y-auto">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nombre</label>
-            <input value={titulo} onChange={e => setTitulo(e.target.value)} autoFocus className={input} placeholder="p. ej. Reforestar mi comarca" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">De qué va (una línea)</label>
-            <input value={descripcion} onChange={e => setDescripcion(e.target.value)} className={input} />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">La visión (opcional)</label>
-            <textarea value={vision} onChange={e => setVision(e.target.value)} rows={3} className={cn(input, 'resize-none')}
-              placeholder="Para qué existe este proyecto y qué quiere conseguir." />
-          </div>
-          <label className="flex items-center gap-2 text-xs text-slate-600">
-            <input type="checkbox" checked={publico} onChange={e => setPublico(e.target.checked)} className="accent-emerald-600" />
-            Público — cualquiera puede verlo (solo tú puedes editarlo)
-          </label>
-          {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5">{error}</p>}
-        </div>
-        <div className="px-5 py-3.5 border-t border-slate-100 flex justify-end gap-2 shrink-0">
-          <button onClick={onCerrar} className="px-3.5 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button onClick={crear} disabled={guardando}
-            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-40">
-            {guardando ? 'Creando…' : 'Crear proyecto'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ══ EL DIÁLOGO «NUEVO PROYECTO» SE HA IDO (2026-09-30) ══════════════════════
+// Eugenio: «fusiona el creador de páginas y el creador de proyectos […] mantén
+// solo una herramienta, la del creador de páginas». Un proyecto se crea como
+// cualquier página —«Nueva página»— y se convierte en proyecto al ponerle el
+// bloque «Tablero de tareas». Los que ya existían tienen su página desde la
+// migración 0133 y esta pantalla los manda allí.
 
 // ----------------------------------------------------------------------------
 // El tablero de un proyecto
@@ -577,7 +511,16 @@ export function Proyecto() {
   useEffect(() => {
     fetch(`/api/proyectos/${slug}`, { credentials: 'include' })
       .then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; })
-      .then(p => { setProyecto(p); cargarItems(p.id); })
+      .then(p => {
+        // UN PROYECTO CON PÁGINA SE VE EN SU PÁGINA (2026-09-30). Esta pantalla
+        // queda para los que aún no la tienen y, con `?vista=clasica`, para lo
+        // que la página todavía no enseña (ramas, galería, personas).
+        if (p.pagina_id && new URLSearchParams(window.location.search).get('vista') !== 'clasica') {
+          navegar(`/paginas/${p.pagina_id}`, { replace: true });
+          return;
+        }
+        setProyecto(p); cargarItems(p.id);
+      })
       .catch(e => setError(e.message));
   }, [slug]);
 
@@ -1282,7 +1225,7 @@ function SeccionPersonas({ proyectoId, puedeEditar }: { proyectoId: string; pued
   );
 }
 
-function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, onCrearEtiqueta, onCerrar, onCreada }: {
+export function ModalNuevaTarjeta({ proyectoId, grupos, grupoInicial, estadoInicial, onCrearEtiqueta, onCerrar, onCreada }: {
   proyectoId: string; grupos: Grupo[]; grupoInicial: string;
   /** En qué columna nace. Por defecto «Por hacer», que es donde va casi todo. */
   estadoInicial?: string;

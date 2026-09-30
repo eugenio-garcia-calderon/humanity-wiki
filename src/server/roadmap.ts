@@ -298,6 +298,27 @@ export function registerRoadmapRoutes(app: Express, db: any) {
       if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión para crear un proyecto.' });
       const d = req.body || {};
       if (!d.titulo) return res.status(400).json({ error: 'El proyecto necesita un título.' });
+      // ══ UN PROYECTO NACE DE UNA PÁGINA (2026-09-30, «un proyecto es una
+      // página»). Si viene `pagina_id`, el proyecto es el tablero de ESA
+      // página: tiene que ser tuya, y si ya tiene proyecto se devuelve el que
+      // hay — poner dos veces el bloque «Tablero» no puede crear dos proyectos.
+      let paginaId: string | null = null;
+      if (typeof d.pagina_id === 'string' && d.pagina_id.trim()) {
+        const pg = await db.execute(sql`
+          SELECT id, creator_user_id, publico, config->>'icono' AS icono FROM knowledge_windows
+          WHERE id = ${d.pagina_id.trim()} AND kind = 'pagina' AND archived_at IS NULL AND deleted_at IS NULL
+        `);
+        const w = pg.rows[0] as any;
+        if (!w) return res.status(404).json({ error: 'Esa página no existe.' });
+        if (w.creator_user_id !== req.user.id && (req.user.roleLevel ?? 0) < ROLE.ADMIN) {
+          return res.status(403).json({ error: 'Esa página no es tuya.' });
+        }
+        const ya = await db.execute(sql`SELECT * FROM proyectos WHERE pagina_id = ${w.id} AND archived_at IS NULL LIMIT 1`);
+        if (ya.rows.length) return res.json(ya.rows[0]);
+        paginaId = w.id;
+        if (d.publico === undefined) d.publico = !!w.publico;
+        if (!d.icono && w.icono && !String(w.icono).startsWith('http') && !String(w.icono).startsWith('/')) d.icono = w.icono;
+      }
       const id = 'PRY' + Date.now().toString(36).toUpperCase();
       const base = String(d.titulo).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'proyecto';
@@ -307,11 +328,14 @@ export function registerRoadmapRoutes(app: Express, db: any) {
         -- EL ICONO SE ELIGE SOLO a partir del nombre (D90, 2026-08-21). Si
         -- quien crea el proyecto manda uno, manda el suyo: automático no es
         -- obligatorio.
-        INSERT INTO proyectos (id, titulo, descripcion, vision, slug, creador_user_id, grupos, publico, icono, created_by, updated_by)
+        INSERT INTO proyectos (id, titulo, descripcion, vision, slug, creador_user_id, grupos, publico, icono, created_by, updated_by, pagina_id)
         VALUES (${id}, ${d.titulo}, ${d.descripcion || null}, ${d.vision || null}, ${slug}, ${req.user.id},
                 ${JSON.stringify(d.grupos?.length ? d.grupos : GRUPOS_POR_DEFECTO)}::jsonb,
-                ${d.publico !== false}, ${d.icono || iconoDeNombre(d.titulo)}, ${req.user.id}, ${req.user.id})
+                ${d.publico !== false}, ${d.icono || iconoDeNombre(d.titulo)}, ${req.user.id}, ${req.user.id}, ${paginaId})
       `);
+      // La página del proyecto vive DENTRO del proyecto: así en la lista de
+      // páginas sale en su carpeta y no suelta.
+      if (paginaId) await db.execute(sql`UPDATE knowledge_windows SET proyecto_id = ${id} WHERE id = ${paginaId}`);
       const row = await db.execute(sql`SELECT * FROM proyectos WHERE id = ${id}`);
       res.json(row.rows[0]);
     } catch (e: any) { res.status(500).json({ error: e.message }); }

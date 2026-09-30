@@ -8,6 +8,7 @@ import {
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
   Search, X, Wand2, PenLine, Smile, Paperclip, Share2, MoreHorizontal, Maximize2, Minimize2,
+  SquareKanban,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -16,6 +17,7 @@ import WindowContent from '../components/knowledge/WindowContent';
 import DialogoCompartir from '../components/knowledge/DialogoCompartir';
 import IconoElemento from '../components/ui/Icono';
 import EditorImagen from '../components/knowledge/EditorImagen';
+import BloqueTablero from '../components/proyecto/BloqueTablero';
 import {
   type Bloque, type TipoBloque, nuevoIdBloque, markdownABloques, bloquesAMarkdown,
 } from '../utils/bloques';
@@ -59,6 +61,14 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   { tipo: 'numerada', label: 'Lista numerada', icon: ListOrdered },
   { tipo: 'tarea', label: 'Casilla', icon: CheckSquare },
   { tipo: 'cita', label: 'Cita', icon: Quote },
+  // UNA PÁGINA DENTRO DE LA PÁGINA (2026-09-30, Eugenio: «como hace Notion»).
+  // Va entre los de escribir porque es lo que es: la forma de seguir
+  // escribiendo en otra hoja sin que ésta se haga interminable.
+  { tipo: 'pagina', label: 'Página', icon: FileText },
+  // EL TABLERO DEL PROYECTO (2026-09-30, «un proyecto es una página»). Ponerlo
+  // es lo que convierte esta página en un proyecto: tarjetas, columnas y
+  // etiquetas, aquí dentro, entre el texto.
+  { tipo: 'tablero', label: 'Tablero de tareas', icon: SquareKanban },
   // Los tres de Notion que faltaban (2026-08-23). Van aquí arriba, entre los
   // de texto, porque es lo que son: formas de escribir, no cosas que se
   // embeben.
@@ -140,6 +150,14 @@ export default function Documento() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState<string | null>(null);
+  /** De qué página cuelga ésta, si cuelga de alguna: la miga de pan de arriba. */
+  const [padre, setPadre] = useState<{ id: string; titulo: string } | null>(null);
+  /** El proyecto del que esta página es LA página (su tablero vive aquí). */
+  const [proyectoPropio, setProyectoPropio] = useState<string | null>(null);
+  /** Los títulos vivos de las páginas hijas enlazadas en bloques `pagina`:
+   *  el bloque guarda el título del momento de crearla, y la hija se renombra
+   *  después. `null` = pidiéndose; `undefined` = no existe ya. */
+  const [paginasHijas, setPaginasHijas] = useState<Record<string, { title: string; icono?: string | null } | null | undefined>>({});
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [bloques, setBloques] = useState<Bloque[]>([]);
@@ -225,6 +243,8 @@ export default function Documento() {
         if (!r.ok) throw new Error(j.error || 'No se ha podido cargar.');
         setTitulo(j.title || '');
         setAutor(j.autor_nombre || null);
+        setPadre(j.padre_id && j.padre_titulo ? { id: j.padre_id, titulo: j.padre_titulo } : null);
+        setProyectoPropio(j.proyecto_propio_id || null);
         setPublico(!!j.publico);
         setPuedoEditar(!!j.puedo_editar);
         setPortada(j.config?.portada || null);
@@ -369,13 +389,93 @@ export default function Documento() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
+    // La barra estaba en un bloque vacío: la página nueva lo SUSTITUYE, como
+    // haría Notion, en vez de dejar un párrafo hueco encima.
+    if (tipo === 'pagina') { crearSubpagina(b.id, true); return; }
+    if (tipo === 'tablero') { ponerTablero(b.id, true); return; }
     if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
   };
 
+  /**
+   * ══ CREAR UNA PÁGINA DENTRO DE ÉSTA (2026-09-30) ═══════════════════════
+   * Se crea de verdad en el servidor (con `padre_id`, así hereda el proyecto
+   * y sabe volver), se deja el bloque-enlace aquí, se guarda, y se ABRE: lo
+   * que hace Notion y lo que espera quien pulsa «Página». Volver es la miga
+   * de pan de arriba. Si `reemplazar`, el bloque `tras` (vacío, con la barra
+   * «/») se convierte en el enlace en vez de quedarse debajo.
+   */
+  const crearSubpagina = async (tras: string | null, reemplazar = false) => {
+    setMenuAbierto(null);
+    setBarra(null);
+    if (!docId.current) return;
+    try {
+      const r = await fetch('/api/documentos', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo: 'Sin título', padre_id: docId.current }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j?.id) throw new Error(j?.error || 'No se ha podido crear la página.');
+      const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'pagina', entityId: j.id, pubTitulo: 'Sin título', pubUrl: `/paginas/${j.id}` };
+      const estructura = (() => {
+        const bs = bloquesRef.current;
+        if (reemplazar && tras) {
+          delete textosRef.current[tras];
+          return bs.map(b => (b.id === tras ? nuevo : b));
+        }
+        const i = tras ? bs.findIndex(b => b.id === tras) : -1;
+        const copia = [...bs];
+        copia.splice(i + 1, 0, nuevo);
+        return copia;
+      })();
+      setBloques(estructura);
+      bloquesRef.current = estructura;
+      await guardarAhora(serializar());
+      navigate(`/paginas/${j.id}`);
+    } catch (e: any) { setError(e.message); }
+  };
+
+  /**
+   * ══ PONER EL TABLERO (2026-09-30) ══════════════════════════════════════
+   * Si la página aún no es un proyecto, se crea uno con su título — es lo que
+   * la convierte en proyecto — y se cuelga de ella. Si ya lo es, se usa el
+   * que hay: dos bloques «Tablero» enseñan el mismo tablero, no dos proyectos.
+   */
+  const ponerTablero = async (tras: string | null, reemplazar = false) => {
+    setMenuAbierto(null);
+    setBarra(null);
+    if (!docId.current) return;
+    try {
+      let pid = proyectoPropio;
+      if (!pid) {
+        const r = await fetch('/api/proyectos', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: metaRef.current.titulo || 'Proyecto sin título', pagina_id: docId.current }),
+        });
+        const j = await r.json();
+        if (!r.ok || !j?.id) throw new Error(j?.error || 'No se ha podido crear el tablero.');
+        pid = j.id as string;
+        setProyectoPropio(pid);
+      }
+      const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'tablero', entityId: pid, pubTitulo: metaRef.current.titulo || undefined };
+      setBloques(bs => {
+        if (reemplazar && tras) { delete textosRef.current[tras]; return bs.map(b => (b.id === tras ? nuevo : b)); }
+        const i = tras ? bs.findIndex(b => b.id === tras) : -1;
+        const copia = [...bs];
+        copia.splice(i + 1, 0, nuevo);
+        return copia;
+      });
+      programarGuardado();
+    } catch (e: any) { setError(e.message); }
+  };
+
   const insertar = (tras: string | null, tipo: TipoBloque) => {
+    if (tipo === 'pagina') { crearSubpagina(tras); return; }
+    if (tipo === 'tablero') { ponerTablero(tras); return; }
     // El bloque de publicación no se inserta vacío: primero se elige QUÉ
     // publicación embeber, en el buscador.
     if (tipo === 'publicacion' || tipo === 'producto') {
@@ -491,6 +591,29 @@ export default function Documento() {
         .catch(() => {});
     }
   }, [bloques, ventanasEmbebidas]);
+
+  // Los títulos de las páginas hijas, en vivo: el bloque guarda el título del
+  // momento de crearla («Sin título», casi siempre) y la hija se renombra
+  // dentro. Sin esto, la madre enseñaría para siempre el nombre viejo.
+  useEffect(() => {
+    const pendientes = bloques.filter(b => b.tipo === 'pagina' && b.entityId && !(b.entityId in paginasHijas));
+    if (!pendientes.length) return;
+    for (const b of pendientes) {
+      setPaginasHijas(v => ({ ...v, [b.entityId!]: null }));
+      fetch(`/api/windows/${b.entityId}`, { credentials: 'include' })
+        .then(r => (r.ok ? r.json() : undefined))
+        .then(j => {
+          setPaginasHijas(v => ({ ...v, [b.entityId!]: j ? { title: j.title, icono: j.config?.icono ?? null } : undefined }));
+          // Y se deja escrito en el bloque, si se puede: la lectura pública y
+          // las descargas no preguntan al servidor por cada hija, leen esto.
+          if (j?.title && puedoEditar && j.title !== b.pubTitulo) {
+            setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, pubTitulo: j.title } : x)));
+            programarGuardado();
+          }
+        })
+        .catch(() => setPaginasHijas(v => ({ ...v, [b.entityId!]: undefined })));
+    }
+  }, [bloques, paginasHijas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // -- Fase 2: IA dentro del documento ---------------------------------------
   const iaMejorar = async (b: Bloque) => {
@@ -1229,6 +1352,40 @@ export default function Documento() {
       // Publicación embebida (Fase 2): una ventana enseña su contenido REAL
       // con el mismo renderer que el resto de la app; un lienzo, mapa o
       // proyecto se enseña como tarjeta que lleva a su página.
+      // ══ UNA PÁGINA HIJA (2026-09-30). Se pinta como en Notion: una línea
+      // con el icono de página y su título, que se abre al pulsarla. Aquí SÍ
+      // se navega (y no se abre al lado como una publicación): es la misma
+      // herramienta, y la miga de pan de arriba devuelve a esta página.
+      if (b.tipo === 'pagina') {
+        const hija = b.entityId ? paginasHijas[b.entityId] : undefined;
+        const titulo = hija === undefined && b.entityId! in paginasHijas
+          ? null
+          : (hija?.title || b.pubTitulo || 'Sin título');
+        const icono = hija?.icono;
+        return (
+          <button
+            type="button"
+            onClick={() => b.entityId && titulo !== null && navigate(`/paginas/${b.entityId}`)}
+            className={cn('group/hija flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors',
+              titulo === null ? 'cursor-default text-slate-300' : 'hover:bg-slate-100')}
+          >
+            {icono && !icono.startsWith('http') && !icono.startsWith('/')
+              ? <span className="w-5 text-center text-base leading-none">{icono}</span>
+              : icono
+                ? <img src={icono} alt="" className="h-5 w-5 rounded object-cover" />
+                : <FileText className="h-4.5 w-4.5 shrink-0 text-slate-400 group-hover/hija:text-slate-700" />}
+            <span className={cn('text-[15px] font-bold underline decoration-slate-300 underline-offset-4',
+              titulo === null ? 'no-underline italic' : 'text-slate-800')}>
+              {titulo === null ? 'Esta página ya no existe' : titulo}
+            </span>
+          </button>
+        );
+      }
+      if (b.tipo === 'tablero') {
+        return b.entityId
+          ? <BloqueTablero proyectoId={b.entityId} editable={editable} />
+          : <p className="text-xs text-slate-400">Este tablero no tiene proyecto.</p>;
+      }
       if (b.tipo === 'producto') {
         return (
           <button
@@ -1828,6 +1985,16 @@ export default function Documento() {
             onCerrar={() => setCompartirAbierto(false)}
             onCambio={p => setPublico(p)}
           />
+        )}
+
+        {/* LA MIGA DE PAN: de qué página cuelga ésta (2026-09-30). Es el
+            camino de vuelta de una subpágina; sin él, «atrás» del navegador
+            es lo único que hay, y no siempre lleva a la madre. */}
+        {padre && (
+          <Link to={`/paginas/${padre.id}`}
+            className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+            <ArrowLeft className="h-3.5 w-3.5" /> {padre.titulo}
+          </Link>
         )}
 
         {/* Título del documento */}
