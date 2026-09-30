@@ -143,7 +143,7 @@ export function registerBuscadorRoutes(app: Express, db: any) {
       const sugerencias: any[] = [];
       for (const r of pubs.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'publicación', texto: r.titulo, url: `/explorar?p=${r.id}` });
       for (const r of retos.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'reto', texto: r.titulo, url: `/retos/${r.id}` });
-      for (const r of proyectos.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'proyecto', texto: r.titulo, url: `/proyectos/${r.id}` });
+      for (const r of proyectos.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'proyecto', texto: r.titulo, url: `/carpetas/${r.id}` });
       for (const r of prods.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'producto', texto: r.titulo, url: `/mercado?producto=${r.id}` });
       for (const r of paginas.rows as any[]) sugerencias.push({ clase: 'contenido', tipo: 'página', texto: r.titulo, url: `/@${r.handle}/${r.id}` });
 
@@ -237,7 +237,7 @@ export function registerBuscadorRoutes(app: Express, db: any) {
       for (const r of pubs.rows as any[]) meter('publicación', r.title || String(r.body || '').slice(0, 60), r.body, `/explorar?p=${r.id}`);
       for (const r of retos.rows as any[]) meter('reto', r.title, r.description, `/retos/${r.id}`);
       for (const r of sols.rows as any[]) meter('solución', r.title, r.description, `/soluciones/${r.id}`);
-      for (const r of proyectos.rows as any[]) meter('proyecto', r.titulo, r.descripcion, `/proyectos/${r.slug}`);
+      for (const r of proyectos.rows as any[]) meter('proyecto', r.titulo, r.descripcion, `/carpetas/${r.slug}`);
       for (const r of prods.rows as any[]) meter('producto', r.name, r.description, `/mercado?producto=${r.id}`);
       for (const r of orgs.rows as any[]) meter('organización', r.name, r.description, `/organizaciones/${r.id}`);
       for (const r of paginas.rows as any[]) {

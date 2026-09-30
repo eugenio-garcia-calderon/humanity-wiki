@@ -81,7 +81,7 @@ const COSAS: Cosa[] = [
   // «quiero hacer esto» y no un «esto que estoy leyendo». Sin esta entrada, lo
   // de fuera no tendría puerta: no hay ninguna tarjeta de la que colgarlo.
   { nombre: 'Republicar',   Previa: PreviaPublicaciones, a: '/explorar?republicar=1', nota: 'De aquí o de otra red' },
-  { nombre: 'Proyecto',     Previa: PreviaTareas,        a: '/proyectos?nuevo=1', nota: 'Con su tablero' },
+  { nombre: 'Carpeta',      Previa: PreviaTareas,        a: '/carpetas?nuevo=1', nota: 'Para tus páginas' },
   { nombre: 'Tarea',        Previa: PreviaTareas,        a: '/tareas?nueva=1' },
   { nombre: 'Página',       Previa: PreviaPagina,        a: '/paginas?nueva=1',   nota: 'Texto, fotos y vídeo' },
   { nombre: 'Esquema',      Previa: PreviaEsquema,       a: '/esquemas?nuevo=1',  nota: 'Ideas conectadas' },

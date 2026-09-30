@@ -1307,7 +1307,7 @@ export default function JuegoVital() {
     }
     // La persona SE UNE al proyecto: sección de personas, no tarjeta del
     // kanban (petición de Eugenio). En la sala «Personas» aparece su avatar.
-    const r = await fetch(`/api/juego/agentes/${quien.id}/proyectos`, {
+    const r = await fetch(`/api/juego/agentes/${quien.id}/carpetas`, {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ proyecto_id: i.proyecto.id }),
@@ -2966,7 +2966,7 @@ export default function JuegoVital() {
             await cargarAgentes();
             avisar('Quitado de tu mundo (se puede recuperar).');
           }}
-          onAbrirProyecto={(slug) => navigate(`/proyectos/${slug}`)}
+          onAbrirProyecto={(slug) => navigate(`/carpetas/${slug}`)}
           onEditarAspecto={() => { setAspectoBorrador(fichaAgente.apariencia || {}); setEditandoAspecto(fichaAgente); }}
         />
       )}
@@ -3031,7 +3031,7 @@ export default function JuegoVital() {
                 </div>
               </div>
             )}
-            <Button onClick={() => navigate(`/proyectos/${panel.slug}`)} className="w-full mt-3">Abrir el proyecto</Button>
+            <Button onClick={() => navigate(`/carpetas/${panel.slug}`)} className="w-full mt-3">Abrir el proyecto</Button>
             <input
               ref={portadaProyRef} type="file" accept="image/*" className="hidden"
               onChange={e => { subirPortadaProyecto(e.target.files?.[0]); e.target.value = ''; }}

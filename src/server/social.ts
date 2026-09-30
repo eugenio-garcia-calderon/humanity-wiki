@@ -955,7 +955,7 @@ export function registerSocialRoutes(app: Express, db: any) {
         items.push({
           clave: `proyecto:${p.id}`, tipo: 'proyecto', id: p.id,
           titulo: p.titulo, resumen: corta(p.descripcion),
-          url: `/proyectos/${p.slug}`, fecha: p.updated_at || p.created_at,
+          url: `/carpetas/${p.slug}`, fecha: p.updated_at || p.created_at,
           privado: !p.publico,
           dato: p.tarjetas ? `${p.tarjetas} tarjetas` : null,
           imagen: p.portada || null,

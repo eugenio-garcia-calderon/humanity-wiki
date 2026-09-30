@@ -538,3 +538,27 @@ left-to-right drawing drawable.
 branch holding half of everything does not sort anything, and offered a 5×3
 alternative. He chose A. Phase 1 is draggable precisely so that number can be
 felt and changed by looking, not argued.
+
+## 2026-09-30 — Carpetas reuse the `proyectos` table instead of a new one
+
+**Context.** Eugenio renamed projects to folders that hold pages only.
+
+**Options.** (a) A new `carpetas_paginas` table and move pages over; (b) keep
+`proyectos` as the folder and change what the product does with it.
+
+**Chosen: (b).** Pages already hung from projects through
+`knowledge_windows.proyecto_id` (0043), and shared links, `/@who/slug`, custom
+domains (`dominios_paginas.entidad_tipo = 'proyecto'`) and the share registry
+all key on the project row. A new table would have broken every one of them
+for a rename. The name `carpetas` was also taken: 0024's bookmark folders for
+publications (`/api/carpetas`, `ORGANIZAR_CARPETAS`) — a different feature.
+
+**Cost.** Internal names say `proyecto` while the product says `carpeta`
+(`/api/proyectos`, `tipo: 'proyecto'`, `proyecto_id`). Renaming them is a
+multi-table migration plus every client; not worth it until something else
+forces it.
+
+**Rescue, not move.** What a project held that is not a page was *copied* into
+pages (0132), and the originals were left in place: tasks still live in
+`roadmap_items` and show in `/tareas`. Nothing was deleted, so the rescue can be
+redone or improved later without data loss.

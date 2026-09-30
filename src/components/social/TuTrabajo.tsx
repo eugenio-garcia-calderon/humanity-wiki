@@ -59,8 +59,8 @@ export default function TuTrabajo() {
     <div className="mb-4">
       <div>
           <div className="flex items-center gap-2 mb-2 px-0.5">
-            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Tus proyectos</p>
-            <button onClick={() => navigate('/proyectos')}
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Tus carpetas</p>
+            <button onClick={() => navigate('/carpetas')}
               className="ml-auto text-[10px] font-bold text-slate-400 hover:text-emerald-700 inline-flex items-center gap-0.5">
               Ver todos <ChevronRight className="w-3 h-3" />
             </button>

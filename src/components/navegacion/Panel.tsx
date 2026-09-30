@@ -264,14 +264,14 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
 
   return (
     <>
-      <Cabecera titulo="Proyectos" onCerrar={onCerrar} />
-      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar un proyecto…" />
+      <Cabecera titulo="Carpetas" onCerrar={onCerrar} />
+      <Buscador valor={busca} onCambiar={setBusca} placeholder="Buscar una carpeta…" />
 
       <button
-        onClick={() => navegar('/proyectos?nuevo=1')}
+        onClick={() => navegar('/carpetas?nuevo=1')}
         className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-2.5 py-2 text-[13px] font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:text-emerald-700"
       >
-        <Plus className="h-3.5 w-3.5" /> Nuevo proyecto
+        <Plus className="h-3.5 w-3.5" /> Nueva carpeta
       </button>
 
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
@@ -289,7 +289,7 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
           </div>
         )}
         {Array.isArray(proyectos) && visibles.length === 0 && (
-          <Vacio>{busca ? 'Ningún proyecto con ese nombre.' : 'Todavía no tienes proyectos. Empieza por el botón de arriba.'}</Vacio>
+          <Vacio>{busca ? 'Ninguna carpeta con ese nombre.' : 'Todavía no tienes carpetas. Empieza por el botón de arriba.'}</Vacio>
         )}
         {visibles.map(p => {
           const desplegado = abierto === p.id;
@@ -309,7 +309,7 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
                     distintas y por eso son dos zonas distintas. Un solo botón
                     que hiciera las dos obliga a elegir cuál de las dos sorprende. */}
                 <Link
-                  to={`/proyectos/${p.slug}`}
+                  to={`/carpetas/${p.slug}`}
                   className="min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-[13px] font-bold text-slate-800 hover:bg-slate-100"
                 >
                   {p.titulo}
@@ -324,7 +324,7 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
                     </p>
                   )}
                   {Array.isArray(arbol) && arbol.length === 0 && (
-                    <p className="px-2 py-2 text-[11px] text-slate-400">Este proyecto está vacío todavía.</p>
+                    <p className="px-2 py-2 text-[11px] text-slate-400">Esta carpeta está vacía todavía.</p>
                   )}
                   {Array.isArray(arbol) && arbol.map((rama: any) => (
                     <div key={rama.clave} className="py-0.5">
@@ -335,7 +335,7 @@ function PanelProyectos({ onCerrar }: { onCerrar: () => void }) {
                         <HojaPanel key={h.id} a={h.destino} icono={ICONO_RAMA[rama.clave]}>{h.label || 'Sin título'}</HojaPanel>
                       ))}
                       {rama.hijos.length > 8 && (
-                        <Link to={`/proyectos/${p.slug}`} className="block px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:underline">
+                        <Link to={`/carpetas/${p.slug}`} className="block px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:underline">
                           y {rama.hijos.length - 8} más →
                         </Link>
                       )}
@@ -514,7 +514,7 @@ function PanelTareas({ onCerrar }: { onCerrar: () => void }) {
       <div className="pn-cascada min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <Estado estado={estado} que="las tareas" onReintentar={recargar} />
         {Array.isArray(estado) && visibles.length === 0 && (
-          <Vacio>{q ? 'Ninguna tarea con ese texto.' : 'No tienes tareas. Se crean dentro de un proyecto.'}</Vacio>
+          <Vacio>{q ? 'Ninguna tarea con ese texto.' : 'No tienes tareas.'}</Vacio>
         )}
         {Array.isArray(estado) && ESTADOS_TAREA.map(e => {
           const suyas = visibles.filter(t => (t.estado || 'por_hacer') === e.clave);
@@ -697,7 +697,7 @@ function PanelTablas({ onCerrar }: { onCerrar: () => void }) {
     const clave = p ? String(t.proyecto_id) : '__sueltas__';
     if (!grupos.has(clave)) {
       grupos.set(clave, p
-        ? { titulo: (p as any).titulo, url: `/proyectos/${(p as any).slug}`, items: [] }
+        ? { titulo: (p as any).titulo, url: `/carpetas/${(p as any).slug}`, items: [] }
         : { titulo: 'Sueltas', url: null, items: [] });
     }
     grupos.get(clave)!.items.push(t);

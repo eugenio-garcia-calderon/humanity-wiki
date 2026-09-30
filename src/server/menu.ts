@@ -364,8 +364,8 @@ export function registerMenuRoutes(app: Express, db: any) {
         const p = await db.execute(sql`SELECT titulo, slug FROM proyectos WHERE id = ${proyectoId}`);
         const fila = p.rows[0] as any;
         if (!fila) { segmentos.push({ label: tipo }); return; }
-        segmentos.push({ label: 'proyectos', url: '/proyectos' });
-        segmentos.push({ label: fila.titulo || fila.slug, url: `/proyectos/${fila.slug}` });
+        segmentos.push({ label: 'carpetas', url: '/carpetas' });
+        segmentos.push({ label: fila.titulo || fila.slug, url: `/carpetas/${fila.slug}` });
         segmentos.push({ label: tipo });
       };
 
@@ -405,7 +405,7 @@ export function registerMenuRoutes(app: Express, db: any) {
         const pr = await db.execute(sql`
           SELECT titulo FROM proyectos WHERE slug = ${resto} OR id = ${resto} LIMIT 1
         `);
-        segmentos.push({ label: 'proyectos', url: '/proyectos' });
+        segmentos.push({ label: 'carpetas', url: '/carpetas' });
         segmentos.push({ label: (pr.rows[0] as any)?.titulo || resto, url: destino });
       } else if (seccion === 'tareas' && params.get('tarea')) {
         const t = await db.execute(sql`
@@ -550,6 +550,9 @@ export function registerMenuRoutes(app: Express, db: any) {
       // `tipo` es lo que le dice al menú qué se puede renombrar y contra qué
       // tabla. Sin él, el menú tendría que adivinarlo por la ruta.
       const rama = (clave: string, label: string, tipo: string, hijos: any[]) => {
+        // A folder holds pages and nothing else (2026-09-30): the other
+        // branches are still queried by older screens' shape but not shown.
+        if (clave !== 'paginas') return;
         if (hijos.length) ramas.push({ clave, label, tipo, hijos });
       };
       rama('tareas', 'Tareas', 'tarea', (tareas.rows as any[]).map(t => ({

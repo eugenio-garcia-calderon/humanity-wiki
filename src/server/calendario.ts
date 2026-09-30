@@ -179,7 +179,7 @@ export function registerCalendarioRoutes(app: Express, db: any) {
           proyectoId: t.proyecto_id, proyecto: t.proyecto_titulo,
           proyectoSlug: t.proyecto_slug, repeticion: null,
           estado: t.estado, prioridad: t.prioridad,
-          url: t.proyecto_slug ? `/proyectos/${t.proyecto_slug}` : '/tareas',
+          url: t.proyecto_slug ? `/carpetas/${t.proyecto_slug}` : '/tareas',
         })),
       ];
 

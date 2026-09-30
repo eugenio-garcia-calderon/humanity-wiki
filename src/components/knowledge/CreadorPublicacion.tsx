@@ -212,7 +212,7 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
         onCerrar(); navigate(`/mapas/${j.slug}`);
       } else if (tipo === 'proyecto') {
         const j = await llamar('/api/proyectos', { titulo: t });
-        onCerrar(); navigate(`/proyectos/${j.slug}`);
+        onCerrar(); navigate(`/carpetas/${j.slug}`);
       } else {
         await llamar('/api/publications', { title: t || null, body: cuerpo.trim() || null });
         setTitulo(''); setCuerpo('');
@@ -491,7 +491,7 @@ export default function CreadorPublicacion({ abierto, onCerrar, tipoInicial }: {
               // Y al tablero del proyecto, que es donde está la tarea que
               // acabas de alimentar.
               onCerrar();
-              navigate(`/proyectos/${destino.proyecto}`);
+              navigate(`/carpetas/${destino.proyecto}`);
               return;
             }
             setTitulo('');

@@ -657,7 +657,7 @@ export default function Vision() {
             </p>
           </div>
 
-          <Link to="/proyectos"
+          <Link to="/carpetas"
             className="inline-flex items-center gap-1.5 mt-5 text-xs font-black text-indigo-600 hover:text-indigo-800 transition-colors">
             <FolderKanban className="w-3.5 h-3.5" />
             Este mismo tablero, para tus proyectos

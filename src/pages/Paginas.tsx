@@ -328,7 +328,7 @@ export default function Paginas() {
               <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
                 {creando.proyectoId
                   ? `Nace dentro de «${grupos.find(g => g.id === creando.proyectoId)?.titulo}» y solo la ves tú hasta que la publiques.`
-                  : 'Nace suelta y solo la ves tú hasta que la publiques. Luego puedes arrastrarla a un proyecto.'}
+                  : 'Nace sin carpeta y solo la ves tú hasta que la publiques. Luego puedes arrastrarla a una carpeta.'}
               </p>
               <Button type="submit" disabled={!tituloNuevo.trim() || guardando}
                 className="w-full mt-4 inline-flex items-center justify-center gap-1.5">

@@ -64,7 +64,9 @@ export const COMPARTIBLES: Compartible[] = [
     },
   },
   {
-    tipo: 'proyecto', nombre: 'proyecto', tabla: 'proyectos',
+    // Shown as «carpeta» since 2026-09-30; the type key stays `proyecto`
+    // because shared links and custom domains already store it.
+    tipo: 'proyecto', nombre: 'carpeta', tabla: 'proyectos',
     col: {
       id: 'id', titulo: 'titulo', slug: 'slug', publico: 'publico',
       duenyo: 'creador_user_id', archivado: 'archived_at', borrado: 'deleted_at',
@@ -256,7 +258,7 @@ export function registrarCompartir(app: Express, db: any) {
       const d = (duenyo.rows[0] as any)?.duenyo;
       if (!d) return res.status(404).json({ error: 'Eso no existe.' });
       if (d !== req.user.id && (req.user.roleLevel ?? 0) < 4) {
-        return res.status(403).json({ error: `Ese ${c.nombre} no es tuyo.` });
+        return res.status(403).json({ error: `${/a$/.test(c.nombre) ? 'Esa' : 'Ese'} ${c.nombre} no es ${/a$/.test(c.nombre) ? 'tuya' : 'tuyo'}.` });
       }
 
       const publico = req.body?.publico;

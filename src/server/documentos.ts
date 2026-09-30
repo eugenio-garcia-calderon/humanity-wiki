@@ -364,11 +364,11 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       for (const p of mios.rows as any[]) {
         grupos.set(p.id, {
           id: p.id, sueltas: false, titulo: p.titulo,
-          url: `/proyectos/${p.slug}`, paginas: [],
+          url: `/carpetas/${p.slug}`, paginas: [],
         });
       }
       grupos.set('__sueltas__', {
-        id: '__sueltas__', sueltas: true, titulo: 'Sueltas', url: null, paginas: [],
+        id: '__sueltas__', sueltas: true, titulo: 'Sin carpeta', url: null, paginas: [],
       });
       for (const w of rows.rows as any[]) {
         // Un proyecto archivado deja su página suelta, no en un grupo fantasma.
@@ -379,7 +379,7 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         if (!grupos.has(clave)) {
           grupos.set(clave, {
             id: clave, sueltas: false, titulo: w.proyecto_titulo,
-            url: `/proyectos/${w.proyecto_slug}`, paginas: [],
+            url: `/carpetas/${w.proyecto_slug}`, paginas: [],
           });
         }
         const bloques: any[] = Array.isArray(w.bloques) ? w.bloques : [];
@@ -433,6 +433,51 @@ export function registerDocumentosRoutes(app: Express, db: any) {
       `);
       res.json({ ok: true, proyecto_id: destino });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  /**
+   * THE PAGES OF A FOLDER — `GET /api/proyectos/:id/paginas` (2026-09-30)
+   *
+   * A folder («carpeta», the old project) holds pages and nothing else. The
+   * owner (or an admin) sees all of them; anyone else sees the public ones of
+   * a public folder. `:id` accepts the slug too, like the folder route.
+   */
+  app.get('/api/proyectos/:id/paginas', async (req: Request, res: Response) => {
+    try {
+      const f = (await db.execute(sql`
+        SELECT id, creador_user_id, publico FROM proyectos
+        WHERE (id = ${req.params.id} OR slug = ${req.params.id})
+          AND archived_at IS NULL AND deleted_at IS NULL
+      `)).rows[0] as any;
+      if (!f) return res.status(404).json({ error: 'Esa carpeta no existe.' });
+      const dueno = !!req.user && (f.creador_user_id === req.user.id || (req.user.roleLevel ?? 0) >= ROLE.ADMIN);
+      if (!f.publico && !dueno) return res.status(403).json({ error: 'Esta carpeta es privada.' });
+      const rows = await db.execute(sql`
+        SELECT w.id, w.title, w.publico, w.created_at, w.updated_at,
+               w.config->'bloques' AS bloques, w.config->>'icono' AS icono,
+               w.config->>'rescate' AS rescate
+        FROM knowledge_windows w
+        WHERE w.proyecto_id = ${f.id} AND w.kind = 'pagina'
+          AND w.archived_at IS NULL AND w.deleted_at IS NULL
+          AND (${dueno} OR w.publico)
+        ORDER BY w.updated_at DESC NULLS LAST, w.created_at DESC
+      `);
+      res.json({
+        puedeEditar: dueno,
+        paginas: (rows.rows as any[]).map(w => {
+          const bloques: any[] = Array.isArray(w.bloques) ? w.bloques : [];
+          const primerTexto = bloques.find(b => b?.tipo !== 'titulo2' && typeof b?.texto === 'string' && b.texto.trim())?.texto || null;
+          return {
+            id: w.id, titulo: w.title, publica: !!w.publico, icono: w.icono,
+            fecha: w.updated_at || w.created_at, bloques: bloques.length,
+            // Pages made from the old project's content (migration 0132).
+            rescatada: !!w.rescate,
+            adelanto: primerTexto ? String(primerTexto).replace(/\s+/g, ' ').trim().slice(0, 140) : null,
+            imagen: bloques.find(b => b?.tipo === 'imagen' && b?.url)?.url || null,
+          };
+        }),
+      });
+    } catch (e: any) { console.error('carpeta paginas:', e); res.status(500).json({ error: e.message }); }
   });
 
   /**

@@ -51,20 +51,20 @@ interface Herramienta {
 // entiende de un vistazo (escribir, dibujar, situar en el mapa), y al final lo
 // que hay que explicar. Quien abandona una portada lo hace por arriba.
 const HERRAMIENTAS: Herramienta[] = [
-  { nombre: 'Páginas', que: 'Escribe documentos con texto, imágenes y vídeo. Solos o dentro de un proyecto.', icono: FileText, Previa: PreviaPagina },
+  { nombre: 'Páginas', que: 'Escribe documentos con texto, imágenes y vídeo. Sueltas o dentro de una carpeta.', icono: FileText, Previa: PreviaPagina },
   { nombre: 'Esquemas', que: 'Conecta ideas, causas y soluciones en un lienzo. Lo que sabes, dibujado.', icono: Globe2, Previa: PreviaEsquema },
   { nombre: 'Mapas', que: 'Sitúa lo que ocurre donde ocurre. Territorios, indicadores y tus propios sitios.', icono: MapIcon, Previa: PreviaMapa },
-  { nombre: 'Tareas', que: 'Un tablero por proyecto: por hacer, en curso y hecho.', icono: ListChecks, Previa: PreviaTareas },
+  { nombre: 'Tareas', que: 'Un tablero: por hacer, en curso y hecho.', icono: ListChecks, Previa: PreviaTareas },
   { nombre: 'Tablas', que: 'Tus datos con columnas de verdad: números, fechas, dinero, enlaces.', icono: Table2, Previa: PreviaTabla },
   { nombre: 'Publicaciones', que: 'Un muro donde se comparte lo que cada cual va aprendiendo.', icono: Compass, Previa: PreviaPublicaciones },
   { nombre: 'Debates', que: 'Una afirmación, sus razones a favor y en contra, y las fuentes de cada una. Al final no hay un veredicto: hay un mapa de quién piensa qué y por qué.', icono: Scale, Previa: PreviaDebate },
   { nombre: 'Mensajes y llamadas', que: 'Habla con cualquiera de la plataforma: mensajes, voz y vídeo, sin salir de aquí.', icono: MessageSquare, Previa: PreviaTelecom },
   { nombre: 'Comercio', que: 'Vende lo que haces. Tu tienda, tus pedidos y tus envíos.', icono: Store, Previa: PreviaComercio },
-  { nombre: 'Asistente', que: 'Una IA que conoce tus proyectos y crea contigo dentro de ellos.', icono: Sparkles, Previa: PreviaIA },
-  { nombre: 'Calendario', que: 'Las fechas de tus proyectos, en un solo sitio.', icono: CalendarDays, Previa: PreviaCalendario },
+  { nombre: 'Asistente', que: 'Una IA que conoce tus carpetas y crea contigo dentro de ellas.', icono: Sparkles, Previa: PreviaIA },
+  { nombre: 'Calendario', que: 'Todas tus fechas, en un solo sitio.', icono: CalendarDays, Previa: PreviaCalendario },
   { nombre: 'Archivos', que: 'Fotos, vídeos y documentos colgados de la tarea a la que pertenecen.', icono: Database, Previa: PreviaArchivos },
   { nombre: 'Visor 3D', que: 'Tus proyectos como un lugar por el que caminar.', icono: Gamepad2, Previa: PreviaMundo },
-  { nombre: 'Navegador', que: 'Guarda lo que encuentres en internet dentro del proyecto que lo necesita.', icono: Globe, Previa: PreviaNavegador },
+  { nombre: 'Navegador', que: 'Guarda lo que encuentres en internet.', icono: Globe, Previa: PreviaNavegador },
 ];
 
 /** El botón. Se repite arriba y abajo del todo — es el mismo, no dos. */

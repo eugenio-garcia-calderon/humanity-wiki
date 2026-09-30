@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import CreadorPublicacion from '../knowledge/CreadorPublicacion';
-import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight, Camera } from 'lucide-react';
+import { Sparkles, X, Send, Globe, Database, Plus, MessageSquare, Settings2, Check, Ban, Paperclip, FileText, Image as ImageIcon, Network, Mic, MicOff, Cpu, Euro, Eye, ChevronDown, ChevronUp , FolderKanban, Folder, ListChecks, Share2, Megaphone, Users2, CalendarDays, Search, Map as MapIcon, Compass, Home, UsersRound, PanelLeftClose, ChevronRight, Camera } from 'lucide-react';
 import { useDataSinPedir } from '../../contexts/DataContext';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { useAuth } from '../../contexts/AuthContext';
@@ -539,7 +539,7 @@ function BotonMuelle({ icono: Icono, label, titulo, onClick, activo }: {
 const HERRAMIENTAS_CREAR: Array<{ label: string; icono: any; destino?: string; crear?: 'camara' | 'muro' | 'documento' | 'lienzo' | 'mapa' | 'proyecto' }> = [
   { label: 'Cámara',      crear: 'camara',        icono: Camera },
   { label: 'Publicación', crear: 'muro',          icono: Megaphone },
-  { label: 'Proyecto',    destino: '/proyectos',  icono: FolderKanban },
+  { label: 'Carpeta',     destino: '/carpetas?nuevo=1',  icono: Folder },
   { label: 'Tarea',       destino: '/tareas',     icono: ListChecks },
   { label: 'Página',      destino: '/paginas',    icono: FileText },
   { label: 'Esquema',     destino: '/esquemas',   icono: Share2 },
@@ -1006,13 +1006,13 @@ export default function AIAssistant({ modo = 'panel' }: {
   const nombreDeRuta = (ruta: string) => {
     const fijas: Record<string, string> = {
       '/': 'Tu perfil', '/esquemas': 'Grafos', '/mapas': 'Mapas', '/juego': 'Mundo 3D',
-      '/proyectos': 'Mis proyectos', '/archivos': 'Archivos', '/explorar': 'Explorar',
+      '/carpetas': 'Mis carpetas', '/archivos': 'Archivos', '/explorar': 'Explorar',
       '/mercado': 'Mercado', '/configuracion': 'Configuración', '/vision': 'Visión y hoja de ruta',
     };
     if (fijas[ruta]) return fijas[ruta];
     if (ruta.startsWith('/personas/')) return 'Un perfil';
     if (ruta.startsWith('/esquemas/')) return 'Un grafo';
-    if (ruta.startsWith('/proyectos/')) return 'Un proyecto';
+    if (ruta.startsWith('/carpetas/')) return 'Una carpeta';
     if (ruta.startsWith('/mapas/')) return 'Un mapa';
     const primero = ruta.split('/')[1] || '';
     return primero ? primero[0].toUpperCase() + primero.slice(1) : 'La portada';
@@ -2616,9 +2616,9 @@ export default function AIAssistant({ modo = 'panel' }: {
         <BotonMuelle icono={Home} label="Inicio" titulo="Publicaciones"
           activo={ruta === '/' || ruta.startsWith('/explorar')}
           onClick={() => navigate('/')} />
-        <BotonMuelle icono={FolderKanban} label="Proyectos" titulo="Ir a tus proyectos"
-          activo={ruta.startsWith('/proyectos')}
-          onClick={() => navigate(user ? '/proyectos' : '/login?crear=1')} />
+        <BotonMuelle icono={Folder} label="Carpetas" titulo="Ir a tus carpetas"
+          activo={ruta.startsWith('/carpetas')}
+          onClick={() => navigate(user ? '/carpetas' : '/login?crear=1')} />
 
         <button
           onClick={() => { setOpen(true); setPanelMuelle('chat'); }}
