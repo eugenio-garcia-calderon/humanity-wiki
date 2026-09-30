@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog8-turn",
-      "ruta": "src/components/ventanas/GestorVentanas.tsx",
-      "motivo": "Enlaces externos al navegador del usuario (prog8)",
-      "desde": "2026-09-30T22:13:16.281Z"
-    }
-  ]
+  "reservas": []
 }
