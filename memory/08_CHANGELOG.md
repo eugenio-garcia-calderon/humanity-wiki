@@ -7900,3 +7900,12 @@ de datos. Todo son páginas dentro de páginas».
   editor is now keyed by id and flushes a pending save on leaving. Reading mode
   looked for `b.tablaId` while the editor saves `tabla_id`, so embedded
   databases never showed to readers.
+
+## 2026-09-30 — Rename a database; back arrow from a row page (prog8)
+
+- The database name in the block header is now editable in place (click, type,
+  Enter or leave saves, Escape cancels), using the existing
+  `PUT /api/bd/tablas/:id`.
+- The «← Páginas» arrow on a page that is a database row now returns to the
+  page holding that database, named after it. Eugenio: going back to the list
+  of all pages «es terrible para la experiencia de usuario».

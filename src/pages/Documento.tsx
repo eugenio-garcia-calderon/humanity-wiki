@@ -1695,9 +1695,14 @@ function EditorPagina() {
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">
           {/* Se vuelve a PÁGINAS, que es de donde vienes desde que documentos
-              y páginas son lo mismo (Eugenio, 2026-08-20). */}
-          <Link to={user ? '/paginas' : '/explorar'} className="inline-flex items-center gap-1 font-bold text-slate-400 hover:text-slate-700 transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" /> Páginas
+              y páginas son lo mismo (Eugenio, 2026-08-20). SALVO si esta
+              página es un elemento de una base de datos: entonces se vuelve a
+              la página que contiene esa base de datos (2026-09-30, Eugenio:
+              «me ha llevado a páginas en general […] eso es terrible»). */}
+          <Link to={filaDe?.padre ? `/paginas/${filaDe.padre.id}` : user ? '/paginas' : '/explorar'}
+            className="inline-flex items-center gap-1 font-bold text-slate-400 hover:text-slate-700 transition-colors min-w-0">
+            <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate max-w-[12rem]">{filaDe?.padre ? (filaDe.padre.titulo || 'Sin título') : 'Páginas'}</span>
           </Link>
           {generando && (
             <span className="inline-flex items-center gap-1.5 text-emerald-700 font-black ml-2">
