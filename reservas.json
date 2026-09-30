@@ -41,6 +41,12 @@
       "ruta": "src/pages/PaginaDeDominio.tsx",
       "motivo": "Sitios publicados limpios (prog8)",
       "desde": "2026-09-30T20:53:24.848Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/AplicacionDeDominio.tsx",
+      "motivo": "Sitios publicados limpios (prog8)",
+      "desde": "2026-09-30T20:53:31.136Z"
     }
   ]
 }
