@@ -27,7 +27,7 @@ import { tonoDe } from '../../utils/coloresBloque';
 type Fila = {
   id: string;
   pagina_id?: string | null;
-  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null } | null;
+  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
   celdas: Record<string, Celda>;
   apuntados?: Record<string, any[]>;
   archivos?: Record<string, any[]>;

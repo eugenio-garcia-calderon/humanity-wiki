@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Loader2, Plus } from 'lucide-react';
+import { FileText, Loader2, Plus, Move } from 'lucide-react';
 import { formatear, type Celda, type Columna } from './Celda';
 import { cn } from '../../utils/cn';
 import { useSitio } from '../sitio/ContextoSitio';
@@ -21,7 +21,7 @@ import type { TamanoGaleria } from '../../utils/bloques';
 type Fila = {
   id: string;
   pagina_id?: string | null;
-  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null } | null;
+  pagina?: { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion?: string | null; encuadre?: { x: number; y: number } | null } | null;
   celdas: Record<string, Celda>;
   apuntados?: Record<string, any[]>;
   archivos?: Record<string, any[]>;
@@ -105,13 +105,26 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
             || f.pagina?.titulo || '';
           const icono = f.pagina?.icono;
           return (
-            <button key={f.id} onClick={() => abrir(f)} disabled={!!sitio && !f.pagina_id}
-              className="group text-left rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all">
+            // Un `div` que hace de botón, no un `<button>`: dentro van los
+            // mandos de recolocar la imagen, y un botón no puede llevar otro.
+            <div key={f.id} role="link" tabIndex={0}
+              aria-disabled={!!sitio && !f.pagina_id}
+              onClick={() => abrir(f)}
+              onKeyDown={e => { if (e.key === 'Enter') abrir(f); }}
+              className="group text-left rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer">
               <div className="aspect-[16/9] bg-slate-50 border-b border-slate-100 overflow-hidden grid place-items-center">
                 {f.pagina?.imagen ? (
-                  <img src={f.pagina.imagen} alt="" loading="lazy"
-                    onError={e => { e.currentTarget.style.display = 'none'; }}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform" />
+                  <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
+                    recolocable={editable && !sitio && !!f.pagina_id}
+                    onGuardar={async (x, y) => {
+                      const r = await fetch(`/api/bd/filas/${f.id}/encuadre`, {
+                        method: 'PUT', credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ x, y }),
+                      });
+                      if (!r.ok) { setFallo('No se pudo guardar la posición de la imagen.'); return; }
+                      onCambio();
+                    }} />
                 ) : f.pagina?.resumen ? (
                   // Sin imagen, Notion enseña el principio del texto. Mejor
                   // que un hueco gris: dice de qué va sin abrirla.
@@ -144,7 +157,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   ) : null;
                 })}
               </div>
-            </button>
+            </div>
           );
         })}
         {editable && (
@@ -161,3 +174,75 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
     </div>
   );
 }
+
+/**
+ * La imagen de una tarjeta, con «Recolocar» como en Notion: se pulsa, se
+ * arrastra la imagen dentro del marco y se guarda. La posición es el
+ * `object-position` en %, así que vale igual para cualquier tamaño de
+ * tarjeta y de pantalla.
+ */
+function ImagenTarjeta({ src, encuadre, recolocable, onGuardar }: {
+  src: string;
+  encuadre: { x: number; y: number } | null;
+  recolocable: boolean;
+  onGuardar: (x: number, y: number) => Promise<void>;
+}) {
+  const [modo, setModo] = useState(false);
+  const [pos, setPos] = useState(encuadre || { x: 50, y: 50 });
+  const [guardando, setGuardando] = useState(false);
+  const inicio = useRef<{ px: number; py: number; x: number; y: number; w: number; h: number } | null>(null);
+  const visible = modo ? pos : (encuadre || { x: 50, y: 50 });
+  const parar = (e: React.SyntheticEvent) => e.stopPropagation();
+
+  return (
+    <div className={cn('relative w-full h-full', modo && 'cursor-move touch-none')}
+      onClick={modo ? parar : undefined}
+      onPointerDown={modo ? e => {
+        e.stopPropagation();
+        const r = e.currentTarget.getBoundingClientRect();
+        inicio.current = { px: e.clientX, py: e.clientY, x: pos.x, y: pos.y, w: r.width, h: r.height };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } : undefined}
+      onPointerMove={modo ? e => {
+        const i = inicio.current;
+        if (!i) return;
+        // Arrastrar la imagen hacia abajo enseña su parte de arriba: por eso
+        // el desplazamiento resta.
+        const c = (n: number) => Math.min(100, Math.max(0, n));
+        setPos({ x: c(i.x - ((e.clientX - i.px) / i.w) * 100), y: c(i.y - ((e.clientY - i.py) / i.h) * 100) });
+      } : undefined}
+      onPointerUp={modo ? () => { inicio.current = null; } : undefined}>
+      <img src={src} alt="" loading="lazy" draggable={false}
+        onError={e => { e.currentTarget.style.display = 'none'; }}
+        style={{ objectPosition: `${visible.x}% ${visible.y}%` }}
+        className={cn('w-full h-full object-cover select-none', !modo && 'group-hover:scale-[1.02] transition-transform')} />
+
+      {recolocable && !modo && (
+        <button type="button"
+          onClick={e => { e.stopPropagation(); setPos(encuadre || { x: 50, y: 50 }); setModo(true); }}
+          className="absolute top-2 right-2 inline-flex items-center gap-1 h-8 px-2 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+          <Move className="w-3 h-3" /> Recolocar
+        </button>
+      )}
+      {modo && (
+        <>
+          <span className="absolute top-2 left-2 px-2 py-1 rounded-md bg-slate-900/75 text-white text-[10px] font-bold pointer-events-none">
+            Arrastra la imagen
+          </span>
+          <div className="absolute bottom-2 right-2 flex gap-1" onPointerDown={parar}>
+            <button type="button" onClick={e => { e.stopPropagation(); setModo(false); }}
+              className="h-8 px-2.5 rounded-lg bg-white/90 border border-slate-200 text-[11px] font-bold text-slate-600">
+              Cancelar
+            </button>
+            <button type="button" disabled={guardando}
+              onClick={async e => { e.stopPropagation(); setGuardando(true); await onGuardar(pos.x, pos.y); setGuardando(false); setModo(false); }}
+              className="h-8 px-2.5 rounded-lg bg-slate-900 text-white text-[11px] font-bold disabled:opacity-50">
+              {guardando ? 'Guardando…' : 'Guardar posición'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+

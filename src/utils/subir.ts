@@ -50,20 +50,44 @@ export type ResultadoSubida =
 export async function subirArchivo(
   dato: File | Blob | ArrayBuffer,
   tipo?: string,
+  /** 0–1 según avanza la subida (2026-10-01). Eugenio: con una imagen pesada
+   *  «parece que no está haciendo nada» y uno cancela o sale antes de tiempo. */
+  alProgreso?: (fraccion: number) => void,
 ): Promise<ResultadoSubida> {
   const suTipo = tipo
     || (typeof File !== 'undefined' && dato instanceof File && dato.type)
     || (typeof Blob !== 'undefined' && dato instanceof Blob && dato.type)
     || 'application/octet-stream';
+
+  // `fetch` no dice cuánto lleva enviado; `XMLHttpRequest` sí. Por eso se usa
+  // éste: es lo único que permite pintar una barra de progreso de verdad.
+  const enviar = () => new Promise<{ status: number; j: any }>((ok, mal) => {
+    const x = new XMLHttpRequest();
+    x.open('POST', `/api/uploads?type=${encodeURIComponent(suTipo)}`);
+    x.withCredentials = true;
+    x.setRequestHeader('Content-Type', 'application/octet-stream');
+    x.upload.onprogress = e => { if (e.lengthComputable && alProgreso) alProgreso(Math.min(0.99, e.loaded / e.total)); };
+    x.onload = () => {
+      let j: any = {};
+      try { j = JSON.parse(x.responseText); } catch { /* respuesta no JSON */ }
+      ok({ status: x.status, j });
+    };
+    x.onerror = () => mal(new Error('red'));
+    x.ontimeout = () => mal(new Error('red'));
+    x.send(dato as XMLHttpRequestBodyInit);
+  });
+
   try {
-    const r = await fetch(`/api/uploads?type=${encodeURIComponent(suTipo)}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: dato as BodyInit,
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok || !j?.url) return { error: j?.error || 'No se ha podido subir el archivo.' };
+    // UN CORTE DE RED SE REINTENTA UNA VEZ (2026-10-01). A Eugenio le falló
+    // una imagen con «no hay conexión» y el servidor estaba bien: fue un
+    // corte de un instante. Un reintento a los dos segundos lo salva sin que
+    // nadie se entere; si vuelve a fallar, entonces sí se dice.
+    let r: { status: number; j: any };
+    try { r = await enviar(); }
+    catch { alProgreso?.(0); await new Promise(res => setTimeout(res, 2000)); r = await enviar(); }
+    const j = r.j;
+    if (r.status < 200 || r.status >= 300 || !j?.url) return { error: j?.error || 'No se ha podido subir el archivo.' };
+    alProgreso?.(1);
     return {
       url: j.url as string,
       bytes: Number(j.bytes) || 0,
@@ -72,8 +96,6 @@ export async function subirArchivo(
       clase: String(j.clase || 'archivo'),
     };
   } catch {
-    // Sin red. Se distingue de un rechazo del servidor porque el mensaje lo
-    // dice: quien lo lea sabrá si volver a intentarlo o mirar el archivo.
-    return { error: 'No hay conexión: el archivo no se ha subido.' };
+    return { error: 'No se ha podido subir el archivo: se ha cortado la conexión. Tu página sigue igual; vuelve a intentarlo.' };
   }
 }

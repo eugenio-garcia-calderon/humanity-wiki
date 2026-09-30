@@ -234,7 +234,7 @@ export function registerBdRoutes(app: Express, db: any) {
   /** Lo que la galería necesita de la página de cada fila: su portada o la
    *  primera imagen, su icono y un trozo del primer texto. En un viaje. */
   const tarjetasDe = async (paginaIds: string[]) => {
-    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null }> = {};
+    const out: Record<string, { titulo: string; imagen: string | null; icono: string | null; resumen: string; descripcion: string | null; encuadre: { x: number; y: number } | null }> = {};
     if (!paginaIds.length) return out;
     const r = await db.execute(sql`
       SELECT id, title, config FROM knowledge_windows
@@ -253,6 +253,8 @@ export function registerBdRoutes(app: Express, db: any) {
         // La descripción que su autor escribió bajo el título (2026-10-01):
         // la tarjeta la enseña bajo el nombre, como la página.
         descripcion: typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? cfg.subtitulo.trim().slice(0, 300) : null,
+        // Qué parte de la imagen se ve en la tarjeta (ver `/encuadre`).
+        encuadre: cfg.encuadre && Number.isFinite(cfg.encuadre.x) && Number.isFinite(cfg.encuadre.y) ? cfg.encuadre : null,
       };
     }
     return out;
@@ -790,6 +792,33 @@ export function registerBdRoutes(app: Express, db: any) {
       const colTitulo = await columnaTitulo(fila.tabla_id);
       const titulo = colTitulo ? String((fila.valores || {})[colTitulo] ?? '') : '';
       res.json({ pagina_id: await crearPaginaDeFila(fila.id, permiso.tabla, titulo, req.user!.id) });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
+  /** ══ RECOLOCAR LA IMAGEN EN LA TARJETA (2026-10-01) ═══════════════════
+   *  Eugenio: «como en Notion, que la imagen se reposicione dentro del marco
+   *  de la galería». Se guarda en la página de la fila (`config.encuadre`,
+   *  en %) y no en la tabla: es cómo se ve SU imagen. Escribe quien puede
+   *  escribir en la tabla, que es quien ve el botón. Sólo toca esa clave:
+   *  el resto de la página no viaja ni se pisa. */
+  app.put('/api/bd/filas/:id/encuadre', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT tabla_id, pagina_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila?.pagina_id) return res.status(404).json({ error: 'Esa fila no tiene página.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const acotar = (n: any) => Math.min(100, Math.max(0, Math.round(Number(n) * 10) / 10));
+      const x = acotar(req.body?.x), y = acotar(req.body?.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return res.status(400).json({ error: 'Posición no válida.' });
+      await db.execute(sql`
+        UPDATE knowledge_windows
+        SET config = jsonb_set(COALESCE(config, '{}'::jsonb), '{encuadre}', ${JSON.stringify({ x, y })}::jsonb),
+            updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${fila.pagina_id}
+      `);
+      res.json({ x, y });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
