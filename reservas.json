@@ -35,6 +35,12 @@
       "ruta": "src/pages/Carpetas.tsx",
       "motivo": "proyectos → carpetas",
       "desde": "2026-09-30T15:17:34.757Z"
+    },
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/components/compartir/CajaCompartir.tsx",
+      "motivo": "carpetas",
+      "desde": "2026-09-30T15:17:52.504Z"
     }
   ]
 }
