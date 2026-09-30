@@ -35,6 +35,7 @@ import DialogoNuevoTema from '../navegacion/DialogoNuevoTema';
 import Campana from '../social/Campana';
 import { cn } from '../../utils/cn';
 import { IconoFeedback } from '../ui/IconoFeedback';
+import VentanaFeedback, { abrirFeedback } from '../feedback/VentanaFeedback';
 import { detectorDeGesto } from '../../utils/gestoAtrasAdelante';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEdit } from '../../contexts/EditContext';
@@ -1108,7 +1109,7 @@ export default function Layout() {
                   —el mismo que tenía abajo— porque sigue siendo lo que se busca
                   en un momento malo, y encontrarlo rápido es media función. */}
               <button
-                onClick={() => { setInfoAbierta(false); navigate('/hormiguero'); }}
+                onClick={() => { setInfoAbierta(false); abrirFeedback(); }}
                 className="mb-1 flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-xs font-black text-amber-700 hover:bg-amber-50"
               >
                 <IconoFeedback className="h-3.5 w-3.5 shrink-0" /> Feedback
@@ -1351,7 +1352,7 @@ export default function Layout() {
             Sin crecer, el buscador se lleva todo el hueco libre y su caja queda
             centrada dentro. Los iconos siguen a la derecha exactamente igual:
             los empuja el buscador, que ahora es el único que crece. */}
-        <div className="shrink-0 xl:flex-1" />
+        <div className="shrink-0 2xl:flex-1" />
 
         {/* EL BOTÓN DE COLAPSAR. Solo aparece si hay ventanas: sin ellas no hay
             nada que encoger. */}
@@ -1494,6 +1495,10 @@ export default function Layout() {
           </Link>
         )}
       </header>
+
+      {/* La ventana de «Dar Feedback»: se abre encima de cualquier página con
+          `abrirFeedback()` y no navega (2026-09-30). */}
+      <VentanaFeedback />
 
       {/* Contenido + Asistente IA: fila flex real — el panel acoplado empuja
           el contenido en vez de superponerse. En las páginas de Grafos el

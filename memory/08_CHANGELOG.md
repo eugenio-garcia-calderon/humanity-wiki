@@ -7793,3 +7793,46 @@ Measured, not assumed: the cover renders and the API returns
 browser because it is `loading="lazy"` and that browser fires no
 IntersectionObserver events — the documented trap. Forcing `eager` loaded it at
 160×160, which is what proves the path.
+
+## 2026-09-30 — «Dar Feedback» in the top bar, as a window; domain instructions that stay
+
+Eugenio, from the Feedback board and in chat: «pon el botón de feedback en el
+menú superior a la derecha de la barra de buscar, bien grande que se vea en
+naranja, y que ponga "Dar Feedback"»; «haz que feedback sea un pop up central
+que no te saque de la página en la que estás»; «haz que las instrucciones para
+conectar un dominio aparezcan siempre que haya un dominio pendiente»; and the
+board note «aparece un punto al final, y da error la IP».
+
+- **Orange «Dar Feedback» button** right of the search box, in
+  `BuscadorSuperior`. Full words from `sm`, icon only on a phone. Because the
+  block grew 10.5 rem, the absolute centring of the search box moves from `xl`
+  to `2xl`, and the pushing gap in `Layout.tsx` moves with it — the two cut-offs
+  must be the same or the icons drift into the box.
+- **Feedback opens as a centred window** (`components/feedback/VentanaFeedback`)
+  over whatever page you are on. Any button fires `abrirFeedback()`; the menu
+  entry under the platform name uses it too. `/hormiguero` still exists for the
+  links that point there — same component, `enVentana` prop, no second copy.
+  The window adds «Desde: /ruta» to the note, because "where were you" is the
+  first question and the last thing anyone writes.
+- **DNS instructions depend on the domain's state, not on having just pressed
+  a button.** `CajaCompartir` used to show them only in the reply to «Apuntar
+  aquí»; closing the box to go to the registrar — the very thing it asks — lost
+  them. Now they show while any domain is not `activo`, each value in its own
+  copy box. The sentence form put a full stop after the IP and people copied it.
+- **The IP was the dead server's.** `dominios.ts` said 167.233.245.191 three
+  times — the CPX42 deleted on 2026-09-17. Since `IP_PUBLICA` is not set in
+  production, everyone connecting a domain was told to point at a machine that
+  no longer exists, and the "does it point here" check compared against the
+  same dead address. One constant now, `37.27.244.35` (humanity-wiki-mini),
+  environment still wins. **Not verified against the Hetzner console** (login
+  wall in the automation browser); the value comes from the 2026-09-17 record.
+  If a pending domain still fails after this deploys, the IP is the first thing
+  to check.
+- **`application_name: 'humanity-wiki'`** on the pg pool (Feedback, 22 ago):
+  the sealed register now writes `humanity@humanity-wiki` instead of
+  `humanity@sin-nombre`, so a hand `psql` no longer looks like the server.
+
+Verified: `tsc` clean, `build` passes, screenshots at 1440/1280/1100/390 and
+the window open over `/buscar` without navigating. Not verified: a real note
+written through the window (no session in the preview), and the phone with the
+app installed.

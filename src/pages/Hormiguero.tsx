@@ -52,7 +52,15 @@ const SEMAFORO = {
   hecha:     { punto: 'bg-emerald-500', texto: 'text-emerald-700', fondo: 'bg-emerald-50 border-emerald-200', label: 'Hecha' },
 } as const;
 
-export default function Hormiguero() {
+/**
+ * `enVentana`: se pinta dentro de la ventana flotante de «Dar Feedback»
+ * (2026-09-30, Eugenio: «haz que feedback sea un pop up central que no te saque
+ * de la página en la que estás»). Sin título propio —la ventana ya lo lleva— y
+ * con `desde`, la dirección de la página que tenías debajo: se añade sola a la
+ * nota, porque «dónde estabas» es lo primero que hay que preguntar y lo último
+ * que alguien se acuerda de escribir.
+ */
+export default function Hormiguero({ enVentana = false, desde }: { enVentana?: boolean; desde?: string } = {}) {
   const { user, can } = useAuth();
   const esAdmin = can(ROLE.ADMIN);
   const [lista, setLista] = useState<Incidencia[] | null>(null);
@@ -87,7 +95,7 @@ export default function Hormiguero() {
       const r = await fetch('/api/incidencias', {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo: titulo.trim(), detalle: detalle.trim() || null, clase }),
+        body: JSON.stringify({ titulo: titulo.trim(), detalle: conDesde(detalle.trim(), desde) || null, clase }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j?.error || 'No se ha podido anotar.');
@@ -147,8 +155,8 @@ export default function Hormiguero() {
   const cuenta = (e: Incidencia['estado']) => (lista || []).filter(i => i.estado === e).length;
 
   return (
-    <div className="max-w-3xl mx-auto w-full animate-in fade-in duration-300">
-      <div className="flex flex-wrap items-center gap-3 mb-5">
+    <div className={cn('max-w-3xl mx-auto w-full', !enVentana && 'animate-in fade-in duration-300')}>
+      {!enVentana && <div className="flex flex-wrap items-center gap-3 mb-5">
         {/* FEEDBACK, antes «Hormiguero» (2026-08-22, Eugenio: «pon la palabra
             Feedback en el menú… y llama a esa página FEEDBACK para recoger el
             feedback de los usuarios»).
@@ -158,7 +166,7 @@ export default function Hormiguero() {
           <IconoFeedback className="w-5 h-5 text-emerald-600" /> Feedback
         </h1>
         <p className="text-xs text-slate-400">Lo que falla y lo que falta. Cuéntalo aquí y llega a quien programa.</p>
-      </div>
+      </div>}
 
       {/* ANOTAR. Arriba y siempre abierto: si hubiera que pulsar «nuevo» para
           que apareciera el cuadro, la mitad de lo que molesta no se anotaría —
@@ -369,4 +377,12 @@ export default function Hormiguero() {
       )}
     </div>
   );
+}
+
+/** Añade «Desde: /ruta» al detalle, en su propia línea, si se sabe desde dónde
+ *  se escribió. Si el detalle ya está vacío, queda solo esa línea. */
+function conDesde(detalle: string, desde?: string): string {
+  if (!desde || desde.startsWith('/hormiguero')) return detalle;
+  const linea = `Desde: ${desde}`;
+  return detalle ? `${detalle}\n\n${linea}` : linea;
 }

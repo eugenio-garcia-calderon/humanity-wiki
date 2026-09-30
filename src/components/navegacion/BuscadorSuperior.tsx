@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Sparkles } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import CajaBusqueda from '../buscador/CajaBusqueda';
+import { BotonDarFeedback } from '../feedback/VentanaFeedback';
 
 /*
  * EL BUSCADOR DE ARRIBA (2026-08-24, agente de APP/UX)
@@ -63,8 +64,19 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
     // los iconos a la derecha era esta caja al crecer. Desde 1280 lo hace el
     // hueco vacío de `Layout.tsx`, que recupera su `flex-1` justo a esa
     // anchura. Si no, los iconos se vendrían al centro con la caja encima.
-    <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5
-      xl:absolute xl:left-1/2 xl:w-[34.5rem] xl:-translate-x-1/2 xl:flex-none">
+    //
+    // ── Y CON «DAR FEEDBACK» AL LADO (2026-09-30) ─────────────────────────
+    // Eugenio: «pon el botón de feedback en el menú superior a la derecha de
+    // la barra de buscar, bien grande que se vea en naranja». El botón va
+    // DENTRO de este bloque para que quede pegado a la caja a cualquier
+    // anchura. Eso hace el bloque 10,5 rem más ancho, y a 1280 px ya no cabe
+    // clavado en el centro sin montarse en la campana (el margen era de 20
+    // px). Así que el centrado absoluto pasa de `xl` (1280) a `2xl` (1536);
+    // por debajo el bloque va en el flujo y la caja encoge lo que haga falta.
+    // El hueco de `Layout.tsx` que empuja los iconos cambia de `xl` a `2xl`
+    // por la misma razón: los dos cortes tienen que ser el mismo.
+    <div className="flex min-w-0 flex-1 items-center justify-center gap-2
+      2xl:absolute 2xl:left-1/2 2xl:w-[45rem] 2xl:-translate-x-1/2 2xl:flex-none">
       {/* ══ EN UNA PANTALLA MUY ESTRECHA, UN BOTÓN Y NO UNA CAJA ══════════
           Medido a 320 px: la caja quedaba en 18 px de ancho **con 116 px de
           botones dentro**, y el campo de escribir medía **0**. O sea que el
@@ -106,7 +118,7 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
         pastilla
         compacto={compacto}
         placeholder={conIA ? 'Pregúntale a la IA…' : 'Buscar páginas…'}
-        className={cn('hidden lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
+        className={cn('hidden min-w-0 flex-1 lg:block', conIA && '[&_form]:border-violet-300 [&_form]:ring-1 [&_form]:ring-violet-200')}
         // CON EL INTERRUPTOR ENCENDIDO, BUSCAR ES PREGUNTAR. Las sugerencias de
         // debajo siguen saliendo y siguen llevando a la cosa concreta: son
         // gratis y no dependen de la IA. Lo que cambia es a dónde va el Intro.
@@ -167,6 +179,8 @@ export default function BuscadorSuperior({ compacto = false }: { compacto?: bool
           </>
         }
       />
+
+      <BotonDarFeedback compacto={compacto} />
     </div>
   );
 }

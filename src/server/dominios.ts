@@ -60,6 +60,18 @@ export function motivoInvalido(d: string): string | null {
   return null;
 }
 
+/**
+ * LA IP DEL SERVIDOR, EN UN SOLO SITIO (2026-09-30).
+ * Estaba escrita tres veces en este fichero, y las tres decían 167.233.245.191:
+ * la del servidor grande (CPX42) que se borró el 2026-09-17 al mudarse a
+ * «humanity-wiki-mini» (CX23, 37.27.244.35). Como IP_PUBLICA no está puesta en
+ * producción, a quien conectaba su dominio se le decía que apuntara a una
+ * máquina que ya no existe — y la comprobación de «¿apunta aquí?» comparaba con
+ * esa misma IP muerta. Ahora hay un único valor por defecto; el entorno manda.
+ */
+const IP_POR_DEFECTO = '37.27.244.35';
+const IP_PUBLICA = () => (process.env.IP_PUBLICA || IP_POR_DEFECTO).split(',')[0].trim();
+
 export function registerDominiosRoutes(app: Express, db: any) {
   /**
    * ¿PUEDO EMITIR UN CERTIFICADO PARA ESTE DOMINIO? — lo pregunta Caddy.
@@ -216,7 +228,7 @@ export function registerDominiosRoutes(app: Express, db: any) {
         // el día que cambie la IP no haya que buscarlo en una pantalla.
         instrucciones: {
           cname: { nombre: 'www', valor: 'humanity.wiki' },
-          a: { nombre: '@', valor: process.env.IP_PUBLICA || '167.233.245.191' },
+          a: { nombre: '@', valor: IP_PUBLICA() },
         },
       });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
@@ -315,8 +327,11 @@ export function registerDominiosRoutes(app: Express, db: any) {
         estado: 'pendiente',
         // Lo que hay que hacer AHORA, en el orden en que hay que hacerlo.
         pasos: [
-          `En el panel de tu dominio, crea un registro A: nombre «@», valor ${process.env.IP_PUBLICA || '167.233.245.191'}.`,
-          'Y un registro CNAME: nombre «www», valor humanity.wiki.',
+          // EL VALOR VA AL FINAL Y SIN PUNTO DETRÁS (2026-09-30, Feedback: «aparece
+          // un punto al final, y da error la IP»). Quien copia de una frase se
+          // lleva el punto, y una IP con punto no es una IP.
+          `En el panel de tu dominio, crea un registro A con nombre «@» y este valor: ${IP_PUBLICA()}`,
+          'Y un registro CNAME con nombre «www» y este valor: humanity.wiki',
           'Espera a que se propague. Suele tardar minutos, a veces horas.',
           `Después abre https://${d} — el certificado se emite solo en esa primera visita.`,
         ],
@@ -379,7 +394,7 @@ async function apuntaAqui(dominio: string): Promise<boolean> {
 
   // Nuestras direcciones. Se leen del entorno para que cambiar de máquina no
   // sea buscar una IP escrita a mano en un fichero de código.
-  const nuestras = (process.env.IP_PUBLICA || '167.233.245.191')
+  const nuestras = (process.env.IP_PUBLICA || IP_POR_DEFECTO)
     .split(',').map(x => x.trim()).filter(Boolean);
 
   let apunta = false;
