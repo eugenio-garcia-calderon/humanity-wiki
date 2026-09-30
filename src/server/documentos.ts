@@ -205,7 +205,18 @@ export function registerDocumentosRoutes(app: Express, db: any) {
         FROM bd_filas f JOIN bd_tablas t ON t.id = f.tabla_id
         WHERE f.pagina_id = ${w.id} AND f.deleted_at IS NULL LIMIT 1
       `);
-      const fila_de = (fr.rows[0] as any) || null;
+      let fila_de = (fr.rows[0] as any) || null;
+      // O es una página enlazada con un bloque «Página» dentro de otra.
+      if (!fila_de) {
+        const sp = await db.execute(sql`
+          SELECT p.id, p.title FROM knowledge_windows p
+          WHERE p.kind = 'pagina' AND p.deleted_at IS NULL AND p.archived_at IS NULL
+            AND p.config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'subpagina', 'entityId', ${w.id}::text))
+          ORDER BY p.created_at LIMIT 1
+        `);
+        const m = sp.rows[0] as any;
+        if (m) fila_de = { tabla_titulo: null, padre: { id: m.id, titulo: m.title } };
+      }
       res.json({ ...w, fila_de, autor_nombre: (autor.rows[0] as any)?.nombre || null, puedo_editar: esAutor || esAdmin || rolAcceso === 'edicion' });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });

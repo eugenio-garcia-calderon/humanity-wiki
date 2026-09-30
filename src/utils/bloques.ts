@@ -40,7 +40,10 @@ export type TipoBloque =
   //                 gritar en mayúsculas ni poner tres signos de admiración.
   //   `indice`      la lista de títulos de la propia página. No guarda nada:
   //                 se calcula al pintar, así que nunca se queda vieja.
-  | 'desplegable' | 'aviso' | 'indice';
+  | 'desplegable' | 'aviso' | 'indice'
+  // 2026-09-30. Una página dentro de la página, como en Notion: el bloque es
+  // el enlace y la página vive aparte (`entityId`), con su propio contenido.
+  | 'subpagina';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede
@@ -104,6 +107,28 @@ export interface Bloque {
    *  cambió. Se guarda en el bloque y no en la tabla: la misma tabla puede
    *  verse como galería en una página y como rejilla en otra. */
   vistaBd?: 'galeria' | 'tabla';
+  /** Color de texto (`rojo`) o de fondo (`fondo-rojo`). Ver `coloresBloque.ts`. */
+  color?: string;
+  /** ══ BLOQUES EN COLUMNAS (2026-09-30) ══════════════════════════════════
+   *  Eugenio: «que se pueda arrastrar y poner un bloque al lado de otro, como
+   *  en Notion». Los bloques seguidos con el mismo `grupo` se pintan uno al
+   *  lado del otro. La lista sigue siendo PLANA a propósito: todo lo que ya
+   *  sabe tratar bloques (guardar, exportar a Word, la IA, los comentarios)
+   *  sigue funcionando sin saber de columnas; quien no las entiende las lee
+   *  una debajo de otra, que es lo que se ve en un teléfono. */
+  grupo?: string;
+}
+
+/** Parte la lista en filas: un bloque suelto, o varios seguidos con el mismo
+ *  `grupo`. Compartido por el editor y la lectura para que no se separen. */
+export function enFilas<T extends { grupo?: string }>(bloques: T[]): T[][] {
+  const out: T[][] = [];
+  for (const b of bloques) {
+    const ultima = out[out.length - 1];
+    if (b.grupo && ultima && ultima[0].grupo === b.grupo) ultima.push(b);
+    else out.push([b]);
+  }
+  return out;
 }
 
 /** Un tramo de texto con su formato resuelto — para las exportaciones (Word,
