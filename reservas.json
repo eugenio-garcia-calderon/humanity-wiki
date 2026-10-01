@@ -53,6 +53,12 @@
       "ruta": "src/components/sitio/VistaPagina.tsx",
       "motivo": "",
       "desde": "2026-10-01T12:25:15.558Z"
+    },
+    {
+      "agente": "prog8-pizarra",
+      "ruta": "src/pages/GrafoCanvas.tsx",
+      "motivo": "Pizarra estilo Miro (prog8-pizarra)",
+      "desde": "2026-10-01T12:31:22.420Z"
     }
   ]
 }
