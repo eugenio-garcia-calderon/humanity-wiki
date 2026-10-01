@@ -8115,3 +8115,15 @@ taking the page down.
   tool, Space+drag still pans. An embedded board only captures scrolling
   after you click into it, so scrolling the page doesn't get stuck on it.
   Toolbar tooltips and the shortcuts sheet now describe this.
+
+## 2026-10-02 — «Enlazar con otra base de datos» in sight; pages always full width (prog8)
+
+- Eugenio couldn't find yesterday's database relations: creating one needed
+  a «Otra tabla» column, only reachable from the Tabla view. Now there is an
+  «Enlazar con otra base de datos» button in the gallery header and under a
+  row page's properties; it opens the column editor already on «Otra tabla»
+  (`EditorColumna tipoInicial`).
+- Pages are always full width in the editor; the «Ancho completo» switch is
+  gone from page settings. The published page's container lives in
+  `CabeceraLectura.tsx`, owned by the prog8-rapido session, which made it
+  always full width in its PR.

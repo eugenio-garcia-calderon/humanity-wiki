@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Loader2, Table2, Settings2, LayoutGrid, ArrowUpRight, SlidersHorizontal, Check, Link2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Galeria from './Galeria';
 import type { TamanoGaleria } from '../../utils/bloques';
@@ -70,7 +70,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
   const [cargando, setCargando] = useState(true);
   const [fallo, setFallo] = useState<string | null>(null);
   /** `'nueva'` para crear, o la columna que se está editando. */
-  const [editorColumna, setEditorColumna] = useState<'nueva' | any | null>(null);
+  const [editorColumna, setEditorColumna] = useState<'nueva' | 'nueva-relacion' | any | null>(null);
 
   const cargar = useCallback(async () => {
     setFallo(null);
@@ -208,10 +208,21 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
         </span>}
         {/* Las dos vistas, como las pestañas de Notion. */}
+        {/* ENLAZAR CON OTRA BASE DE DATOS, A LA VISTA (2026-10-02). Eugenio
+            no encontraba cómo relacionar bases de datos: sólo se podía
+            creando una columna desde la vista Tabla. Ahora está aquí, en la
+            galería, con su nombre. */}
+        {editable && vista === 'galeria' && (
+          <button onClick={() => setEditorColumna('nueva-relacion')}
+            title="Enlazar los elementos de esta base de datos con los de otra"
+            className="ml-auto inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300 shrink-0">
+            <Link2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Enlazar con otra base de datos</span>
+          </button>
+        )}
         {/* QUÉ SE VE EN LAS TARJETAS (2026-10-01): «configurar la vista de
             galería para mostrar los enlaces a otras bases de datos». */}
         {vista === 'galeria' && onCambiarVisibles && (
-          <div className="relative ml-auto shrink-0">
+          <div className="relative shrink-0">
             <button onClick={() => setMenuProps(v => !v)} aria-expanded={menuProps}
               className="inline-flex items-center gap-1 h-8 px-2 rounded-md border border-slate-200 bg-white text-[11px] font-bold text-slate-600 hover:border-slate-300">
               <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Propiedades</span>
@@ -380,7 +391,8 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       {editorColumna && (
         <EditorColumna
           tablaId={tablaId}
-          columna={editorColumna === 'nueva' ? undefined : editorColumna}
+          columna={editorColumna === 'nueva' || editorColumna === 'nueva-relacion' ? undefined : editorColumna}
+          tipoInicial={editorColumna === 'nueva-relacion' ? 'relacion' : undefined}
           columnas={columnas}
           onCerrar={() => setEditorColumna(null)}
           onHecho={cargar}

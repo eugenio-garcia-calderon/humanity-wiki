@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import CeldaTabla, { type Columna } from './Celda';
+import EditorColumna from './EditorColumna';
+import { Link2 } from 'lucide-react';
 
 // ============================================================================
 // LAS PROPIEDADES DE UN ELEMENTO, EN SU PÁGINA (2026-10-01)
@@ -16,6 +18,7 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   tablaId: string; filaId: string; editable: boolean;
 }) {
   const [datos, setDatos] = useState<{ columnas: Columna[]; fila: any; titulo: string | null } | null>(null);
+  const [creando, setCreando] = useState(false);
 
   const cargar = useCallback(async () => {
     const r = await fetch(`/api/bd/tablas/${tablaId}`, { credentials: 'include' });
@@ -31,7 +34,9 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
   // La columna del nombre ya es el título de la página: repetirla aquí sería
   // tener el mismo dato en dos sitios de la misma pantalla.
   const columnas = datos.columnas.filter(c => c.id !== datos.titulo);
-  if (!columnas.length) return null;
+  // Sin propiedades y sin poder editar no hay nada que enseñar; quien edita
+  // ve al menos el botón de enlazar.
+  if (!columnas.length && !editable) return null;
 
   const guardar = async (columnaId: string, valor: any) => {
     const r = await fetch(`/api/bd/filas/${filaId}`, {
@@ -59,6 +64,18 @@ export default function PropiedadesFila({ tablaId, filaId, editable }: {
           </div>
         </div>
       ))}
+      {/* ENLAZAR DESDE LA PÁGINA DEL ELEMENTO (2026-10-02): el mismo botón
+          que en la galería, para no tener que volver a la tabla. */}
+      {editable && (
+        <button onClick={() => setCreando(true)}
+          className="inline-flex items-center gap-1 h-9 px-1 text-xs font-bold text-slate-400 hover:text-emerald-700">
+          <Link2 className="w-3.5 h-3.5" /> Enlazar con otra base de datos
+        </button>
+      )}
+      {creando && (
+        <EditorColumna tablaId={tablaId} columnas={datos.columnas} tipoInicial="relacion"
+          onCerrar={() => setCreando(false)} onHecho={cargar} />
+      )}
     </div>
   );
 }
