@@ -57,6 +57,14 @@ export function subdominioDeUsuario(host?: string): string | null {
  * hay que preguntar.
  */
 export function dominioPropio(host?: string): string | null {
+  // SÓLO EN DESARROLLO: `localhost:3009/?probar-dominio=midominio.com` monta
+  // la aplicación de dominio propio. Sin esto, lo que pasa en el dominio de
+  // un usuario sólo se podía ver en producción — y así se coló una pizarra
+  // que dejaba esas páginas en blanco (2026-10-01).
+  if (!host && import.meta.env?.DEV && typeof location !== 'undefined') {
+    const prueba = new URLSearchParams(location.search).get('probar-dominio');
+    if (prueba) return prueba.toLowerCase();
+  }
   const h = (host ?? (typeof location !== 'undefined' ? location.hostname : '')).toLowerCase();
   if (!h) return null;
   if (h === DOMINIO || h.endsWith('.' + DOMINIO)) return null;

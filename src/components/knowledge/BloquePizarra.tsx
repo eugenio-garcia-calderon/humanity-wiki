@@ -1,4 +1,5 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Component, Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
+import { AuthProvider, useHayProveedorDeSesion } from '../../contexts/AuthContext';
 import { PenTool, Maximize2, X, Loader2, Link2, LayoutPanelTop } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -20,6 +21,55 @@ import { cn } from '../../utils/cn';
 
 const GrafoLienzo = lazy(() => import('../../pages/GrafoCanvas').then(m => ({ default: m.GrafoLienzo })));
 
+/**
+ * LA PIZARRA NO PUEDE TUMBAR LA PÁGINA (2026-10-01). Eugenio: «en la página
+ * publicada, cuando abres una página con pizarra, de repente toda la página
+ * se queda en blanco». Era un dominio propio: allí la aplicación arranca sin
+ * la sesión de la plataforma, las piezas de la pizarra la piden para sus
+ * valoraciones, y el error se llevaba la página entera. Dos defensas:
+ *   · si falta la sesión, la pizarra se la pone ella misma;
+ *   · y si aun así algo falla dentro, se enseña un aviso EN SU SITIO y el
+ *     resto de la página sigue a la vista.
+ */
+class BarreraPizarra extends Component<{ children: ReactNode }, { fallo: boolean }> {
+  state = { fallo: false };
+  static getDerivedStateFromError() { return { fallo: true }; }
+  componentDidCatch(e: unknown) { console.error('[pizarra]', e); }
+  render() {
+    if (this.state.fallo) {
+      return (
+        <div className="h-full min-h-40 grid place-items-center p-6 text-center">
+          <p className="text-xs text-slate-400">Esta pizarra no se ha podido mostrar. El resto de la página sigue igual.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function ConSesion({ children }: { children: ReactNode }) {
+  return useHayProveedorDeSesion() ? <>{children}</> : <AuthProvider>{children}</AuthProvider>;
+}
+
+/** La pizarra, con sus dos defensas puestas. */
+function Lienzo({ id }: { id: string }) {
+  return (
+    <BarreraPizarra>
+      <ConSesion>
+        <Suspense fallback={<Cargando />}><GrafoLienzo slug={id} incrustado /></Suspense>
+      </ConSesion>
+    </BarreraPizarra>
+  );
+}
+
+function Cargando() {
+  return (
+    <div className="h-full grid place-items-center text-xs text-slate-400">
+      <span className="inline-flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando la pizarra…</span>
+    </div>
+  );
+}
+
 export default function BloquePizarra({ id, titulo, vista, editable, onCambiarVista }: {
   id: string;
   titulo?: string;
@@ -40,11 +90,6 @@ export default function BloquePizarra({ id, titulo, vista, editable, onCambiarVi
   }, [completa]);
 
   const nombre = titulo || 'Pizarra';
-  const cargando = (
-    <div className="h-full grid place-items-center text-xs text-slate-400">
-      <span className="inline-flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando la pizarra…</span>
-    </div>
-  );
 
   return (
     <div className="rounded-xl border border-slate-200 overflow-hidden bg-white">
@@ -77,7 +122,7 @@ export default function BloquePizarra({ id, titulo, vista, editable, onCambiarVi
       ) : (
         // La altura la pone la página: la pizarra llena lo que le den.
         <div className="relative h-[420px] sm:h-[520px]">
-          {!completa && <Suspense fallback={cargando}><GrafoLienzo slug={id} incrustado /></Suspense>}
+          {!completa && <Lienzo id={id} />}
         </div>
       )}
 
@@ -92,7 +137,7 @@ export default function BloquePizarra({ id, titulo, vista, editable, onCambiarVi
             </button>
           </div>
           <div className="relative flex-1 min-h-0">
-            <Suspense fallback={cargando}><GrafoLienzo slug={id} incrustado /></Suspense>
+            <Lienzo id={id} />
           </div>
         </div>
       )}

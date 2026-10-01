@@ -8089,3 +8089,14 @@ or row count; the title reads as a heading; cards are borderless (rounded
 image, text below); no inner scroll (`alto` no longer caps a gallery). The
 view switch, «Propiedades» and «Tamaño» only show to editors. The table view
 keeps its frame, where it helps reading rows.
+
+## 2026-10-01 — Pages with a whiteboard went blank on custom domains (prog8)
+
+On a custom domain the app mounts without `AuthProvider`; the whiteboard's
+pieces render `RatingWidget`, which calls `useAuth()` and throws — and with
+no error boundary the whole page went blank. Reproduced locally with a new
+dev-only switch, `?probar-dominio=<host>` (`utils/subdominio.ts`), that mounts
+the custom-domain app on localhost. Fix, local to `BloquePizarra`: it wraps
+the board in `AuthProvider` when none is mounted (`useHayProveedorDeSesion`)
+and in an error boundary that shows a notice in place of the board instead of
+taking the page down.
