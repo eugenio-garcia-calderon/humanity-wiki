@@ -8100,3 +8100,18 @@ the custom-domain app on localhost. Fix, local to `BloquePizarra`: it wraps
 the board in `AuthProvider` when none is mounted (`useHayProveedorDeSesion`)
 and in an error boundary that shows a notice in place of the board instead of
 taking the page down.
+
+## 2026-10-01 — Whiteboard: clean boards and Miro-style navigation (prog8)
+
+- **No central card on page whiteboards** (Eugenio: «deja una pizarra
+  limpia»). With `incrustado`, the graph's centre node isn't drawn unless
+  something already hangs from it, and new pieces are no longer linked to the
+  centre by default (`AddWindowPanel limpia`). Esquemas boards keep theirs.
+- **Navigation like Miro on a Mac**: everyone starts with the hand tool, so
+  dragging the background pans (before, the default «Marcar» tool drew a
+  selection rectangle — the source of «I can't click and move left/right»).
+  Two-finger trackpad scroll pans in any direction (it used to zoom), pinch
+  and ⌘+wheel zoom, ⌘+/⌘− zoom, Shift+drag marks by rectangle with either
+  tool, Space+drag still pans. An embedded board only captures scrolling
+  after you click into it, so scrolling the page doesn't get stuck on it.
+  Toolbar tooltips and the shortcuts sheet now describe this.

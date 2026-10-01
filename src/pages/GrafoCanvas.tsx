@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { subirArchivo } from '../utils/subir';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ReactFlow, Background, MiniMap, Handle, Position, MarkerType, ConnectionMode,
+  ReactFlow, Background, MiniMap, Handle, Position, MarkerType, ConnectionMode, PanOnScrollMode,
   useNodesState, useEdgesState, useInternalNode, useStore, getStraightPath,
   BaseEdge, EdgeLabelRenderer,
   type Node, type Edge, type NodeProps, type EdgeProps, type InternalNode,
@@ -596,11 +596,15 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
   const helpers = useHelpers();
   const raizRef = useRef<HTMLDivElement>(null);
   const activaRef = useRef(!incrustado);
+  /** Lo mismo en estado: decide si el desplazamiento con dos dedos es de la
+   *  pizarra o de la página de alrededor. */
+  const [activa, setActiva] = useState(!incrustado);
   useEffect(() => {
     if (!incrustado) return;
     const marcar = (e: PointerEvent) => {
       const dentro = !!raizRef.current?.contains(e.target as globalThis.Node);
       activaRef.current = dentro;
+      setActiva(dentro);
       if (dentro) raizRef.current?.setAttribute('data-pizarra-activa', '');
       else raizRef.current?.removeAttribute('data-pizarra-activa');
     };
@@ -639,7 +643,10 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
   // Nada de esto necesita servidor nuevo: `PUT /api/graphs/:id/layout` ya
   // acepta una LISTA de piezas con x, y, w, h, rot, z y bloqueo, así que
   // alinear veinte tarjetas es una sola llamada — y deshacerlo, otra.
-  const [modo, setModo] = useState<ModoLienzo>('seleccion');
+  // Se empieza con la MANO (2026-10-01): pinchar el fondo y arrastrar mueve
+  // la vista, que es lo que Eugenio esperaba («como en Miro»). La flecha
+  // «Marcar» sigue en la barra para dibujar rectángulos.
+  const [modo, setModo] = useState<ModoLienzo>('mano');
   const [espacio, setEspacio] = useState(false);
   const [rejilla, setRejilla] = useState(false);
   const [zoom, setZoom] = useState(1);
@@ -1039,11 +1046,16 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
     // desaparecía en cuanto hacías una sola acción.
     setNodes(prev => {
       const marcados = new Set(prev.filter(n => n.selected).map(n => n.id));
-      return [centerNode, ...extraNodes, ...relNodes, ...winNodes].map(n =>
+      // UNA PIZARRA LIMPIA (2026-10-01, Eugenio: «quita la tarjeta central
+      // que se crea automáticamente y deja una pizarra limpia»). En la
+      // pizarra de una página no se pinta el centro —salvo que algo cuelgue
+      // ya de él, para no dejar flechas que salen de la nada—.
+      const conCentro = !incrustado || sortedCenter.length > 0;
+      return [...(conCentro ? [centerNode] : []), ...extraNodes, ...relNodes, ...winNodes].map(n =>
         (marcados.has(n.id) ? { ...n, selected: true } : n));
     });
     setEdges(flowEdges);
-  }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges]);
+  }, [data, openWindow, openEdge, focusBranch, activeBranch, setNodes, setEdges, incrustado]);
 
   // Encuadre inicial: con ReactFlowProvider externo, la prop fitView no se
   // aplica a nodos que llegan tras el montaje — se lanza a mano una vez.
@@ -1552,6 +1564,9 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
       if (k === ' ' && !meta) { setEspacio(true); e.preventDefault(); return; }
       if (k === '?') { setAtajos(true); e.preventDefault(); return; }
       if (meta && k === '0') { rf.current?.zoomTo(1, { duration: 200 }); e.preventDefault(); return; }
+      // ⌘+ / ⌘− acercan y alejan, como en Miro.
+      if (meta && (k === '+' || k === '=')) { rf.current?.zoomIn({ duration: 150 }); e.preventDefault(); return; }
+      if (meta && (k === '-' || k === '_')) { rf.current?.zoomOut({ duration: 150 }); e.preventDefault(); return; }
       if (meta && k === '1') { fitView({ padding: 0.12, duration: 300 }); e.preventDefault(); return; }
       if (k === 'Escape') {
         marcar('nada'); setSelected(null); setSelectedEdge(null);
@@ -1655,13 +1670,29 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
         onConnect={onConnect}
         elementsSelectable
         elevateNodesOnSelect={false}
-        // EL GESTO DEL RATÓN (2026-08-22). En modo selección, arrastrar sobre
-        // el vacío DIBUJA UN RECTÁNGULO —como en Miro— y el lienzo se mueve
-        // con la rueda, el botón central o el espacio. En modo mano, o cuando
-        // solo se mira, arrastrar mueve el lienzo y no hay nada que marcar.
+        // ══ NAVEGAR COMO EN MIRO (2026-10-01) ═══════════════════════════════
+        // Eugenio: «no puedo pinchar en un punto de la pizarra y moverme a la
+        // izquierda o la derecha; copia la experiencia de Miro en un Mac».
+        //   · Pinchar el FONDO y arrastrar mueve la vista: se empieza con la
+        //     mano. Antes se empezaba en «Marcar», donde arrastrar dibujaba un
+        //     rectángulo, y eso era lo que confundía.
+        //   · Con «Marcar» elegida, arrastrar dibuja el rectángulo; con
+        //     cualquiera de las dos, Mayús + arrastrar también.
+        //   · Trackpad: dos dedos desplazan en cualquier dirección y pellizcar
+        //     hace zoom (antes dos dedos hacían zoom). ⌘ + rueda también.
+        //   · Espacio + arrastrar sigue moviendo, como siempre.
+        // Incrustada en una página, la pizarra no se queda el desplazamiento
+        // hasta que se pincha dentro: si no, bajar por la página se atascaría
+        // en ella.
         panOnDrag={modoMano ? true : [1, 2]}
         selectionOnDrag={!modoMano}
         selectionKeyCode="Shift"
+        panOnScroll={activa}
+        panOnScrollMode={PanOnScrollMode.Free}
+        zoomOnScroll={false}
+        zoomOnPinch={activa}
+        zoomActivationKeyCode={['Meta', 'Control']}
+        preventScrolling={activa}
         // Mayús para ir sumando piezas a la selección, que es lo que hace todo
         // el mundo; ⌘/Ctrl también, por si vienes de otra herramienta.
         multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
@@ -2029,6 +2060,7 @@ export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
           graphId={data.graph.id}
           initialKind={connectFrom?.kind || (typeof showAdd === 'string' ? showAdd : undefined)}
           from={connectFrom}
+          limpia={incrustado}
           onClose={() => { setShowAdd(false); setConnectFrom(null); }}
           onAdded={load}
         />
