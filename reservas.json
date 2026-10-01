@@ -65,6 +65,12 @@
       "ruta": "src/components/tablas/Rejilla.tsx",
       "motivo": "Ancho completo fijo y enlazar bases de datos (prog8-pizarra)",
       "desde": "2026-10-01T12:42:10.957Z"
+    },
+    {
+      "agente": "prog8-pizarra",
+      "ruta": "src/components/tablas/PropiedadesFila.tsx",
+      "motivo": "Ancho completo fijo y enlazar bases de datos (prog8-pizarra)",
+      "desde": "2026-10-01T12:42:14.454Z"
     }
   ]
 }
