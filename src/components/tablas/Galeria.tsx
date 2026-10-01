@@ -40,7 +40,7 @@ const PROPIEDADES = 3;
 /** ¿El icono es una imagen subida o un emoji? */
 const esUrl = (s: string) => /^(https?:|\/)/.test(s);
 
-export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles }: {
+export default function Galeria({ tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', visibles, sinMargen = false }: {
   tablaId: string;
   columnas: Columna[];
   filas: Fila[];
@@ -54,6 +54,8 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   tamano?: TamanoGaleria;
   /** Qué columnas se ven en la tarjeta, en orden. Sin valor, las tres primeras. */
   visibles?: string[];
+  /** Sin el relleno de alrededor: la galería limpia de una página. */
+  sinMargen?: boolean;
 }) {
   const navigate = useNavigate();
   // En una página publicada, la tarjeta abre la subpágina DENTRO del sitio
@@ -100,13 +102,13 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
   };
 
   return (
-    <div className="p-3">
+    <div className={sinMargen ? '' : 'p-3'}>
       {fallo && <p className="mb-2 text-xs font-bold text-rose-600">{fallo}</p>}
       {/* EL TAMAÑO DE LAS TARJETAS (2026-10-01). Se da como ANCHO MÍNIMO de
           tarjeta y la rejilla mete las que quepan: así el mismo «grande» son
           tres por fila en un escritorio ancho y una en un teléfono, sin un
           ajuste distinto para cada pantalla. */}
-      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
+      <div className="grid gap-x-4 gap-y-5" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filas.map(f => {
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
@@ -118,8 +120,11 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
               aria-disabled={!!sitio && !f.pagina_id}
               onClick={() => abrir(f)}
               onKeyDown={e => { if (e.key === 'Enter') abrir(f); }}
-              className="group text-left rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer">
-              <div className="aspect-[16/9] bg-slate-50 border-b border-slate-100 overflow-hidden grid place-items-center">
+              // SIN RECUADRO (2026-10-01, Eugenio: «sin esas líneas que envuelven
+              // al contenido en forma de rectángulos»): la imagen con sus
+              // esquinas redondeadas y el texto debajo, como un portfolio.
+              className="group text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-xl">
+              <div className="aspect-[16/9] bg-slate-50 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md">
                 {f.pagina?.imagen ? (
                   <ImagenTarjeta src={f.pagina.imagen} encuadre={f.pagina.encuadre ?? null}
                     recolocable={editable && !sitio && !!f.pagina_id}
@@ -140,7 +145,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
                   <FileText className="w-8 h-8 text-slate-200" />
                 )}
               </div>
-              <div className="px-3 py-2.5 space-y-1">
+              <div className="px-0.5 pt-2.5 pb-1 space-y-1">
                 <p className={cn('flex items-center gap-1.5 text-sm font-bold min-w-0', claseTitulo || 'text-slate-800')}>
                   {abriendo === f.id ? <Loader2 className="w-4 h-4 animate-spin shrink-0 text-slate-400" />
                     : icono ? (esUrl(icono)
@@ -179,7 +184,7 @@ export default function Galeria({ tablaId, columnas, filas, columnaTitulo, edita
         })}
         {editable && (
           <button onClick={nueva} disabled={abriendo === 'nueva'}
-            className="min-h-[9rem] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors">
+            className="min-h-[9rem] aspect-[16/9] rounded-xl border border-dashed border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-colors">
             {abriendo === 'nueva' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
             Nueva página
           </button>
