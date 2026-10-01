@@ -2073,9 +2073,9 @@ function EditorPagina() {
 
   return (
     <div className="h-full overflow-y-auto">
-      {/* «Ancho completo» también aquí (2026-09-30): se aplicaba sólo a la
-          página publicada, y quien lo activaba no veía ningún cambio. */}
-      <div className={cn('mx-auto px-6 sm:px-12 pt-8 pb-32', ajustes.anchoCompleto ? 'max-w-6xl' : 'max-w-3xl')}>
+      {/* SIEMPRE A ANCHO COMPLETO (2026-10-02, Eugenio: «quita la opción de
+          que no sea ancho completo»). El mismo ancho que la página publicada. */}
+      <div className="mx-auto px-6 sm:px-12 pt-8 pb-32 max-w-6xl">
 
         {/* Cabecera: volver, estado de guardado, visibilidad, descargar */}
         <div className="flex items-center gap-2 mb-6 text-xs">

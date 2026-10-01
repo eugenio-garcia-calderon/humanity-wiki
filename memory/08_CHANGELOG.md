@@ -8116,6 +8116,17 @@ taking the page down.
   after you click into it, so scrolling the page doesn't get stuck on it.
   Toolbar tooltips and the shortcuts sheet now describe this.
 
+## 2026-10-02 — «Enlazar con otra base de datos» in sight; pages always full width (prog8)
+
+- Eugenio couldn't find yesterday's database relations: creating one needed
+  a «Otra tabla» column, only reachable from the Tabla view. Now there is an
+  «Enlazar con otra base de datos» button in the gallery header and under a
+  row page's properties; it opens the column editor already on «Otra tabla»
+  (`EditorColumna tipoInicial`).
+- Pages are always full width in the editor; the «Ancho completo» switch is
+  gone from page settings. The published page's container lives in
+  `CabeceraLectura.tsx`, owned by the prog8-rapido session, which made it
+  always full width in its PR.
 ### 2026-10-01 — Dominio propio: el título y la imagen en menos de un segundo (prog8)
 - Eugenio: «el dominio propio tarda muchísimo en mostrar la primera imagen o el primer título». Medido en luzhumanidad.com: DNS + TLS + HTML en 0,25–0,4 s (no era el DNS), pero el título salía a los 2,5 s por **cinco viajes en fila**: la plataforma entera (388 KB comprimidos), «¿a qué apunta este dominio?», la pantalla, «dame la página» y la imagen.
 - `sitios.ts` escribe ahora dentro del HTML del dominio propio: las dos respuestas (`window.__SITIO__`, leídas por `utils/precargado.ts`), la cabecera ya dibujada en `#root` (`server/cabeceraSitio.tsx`, el mismo componente `CabeceraLectura` que usa el navegador: cero saltos al arrancar, medido) y los `modulepreload` de la web del dominio en vez de los de la plataforma.
