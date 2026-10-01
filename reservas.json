@@ -55,12 +55,6 @@
       "desde": "2026-10-01T12:25:15.558Z"
     },
     {
-      "agente": "prog8-pizarra",
-      "ruta": "src/components/knowledge/AjustesPagina.tsx",
-      "motivo": "Ancho completo fijo y enlazar bases de datos (prog8-pizarra)",
-      "desde": "2026-10-01T12:42:23.216Z"
-    },
-    {
       "agente": "prog8-rapido",
       "ruta": "src/components/sitio/CabeceraLectura.tsx",
       "motivo": "",
