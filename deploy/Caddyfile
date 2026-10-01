@@ -133,6 +133,11 @@ humanity.wiki {
 
 	# Misma razón que arriba: un subdominio sirve la misma aplicación, así que
 	# sirve el mismo `sw.js` y necesita la misma regla.
+	# Los estáticos con hash, un año (2026-10-01): faltaba aquí igual que en
+	# el bloque de los dominios propios. Ver la nota de allí.
+	@assetsSub path /assets/*
+	header @assetsSub >Cache-Control "public, max-age=31536000, immutable"
+
 	@sinCacheSub path /sw.js /manifest.webmanifest
 	header @sinCacheSub >Cache-Control "no-cache"
 }
@@ -189,6 +194,16 @@ humanity.wiki {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
+
+	# ── LOS ESTÁTICOS, UN AÑO, TAMBIÉN AQUÍ (2026-10-01) ────────────────────
+	# Esta regla estaba en `humanity.wiki` y faltaba en este bloque. Medido en
+	# luzhumanidad.com: cada fichero de `/assets` salía con `max-age=0`, así
+	# que en cada visita el navegador volvía a preguntar por TODOS antes de
+	# pintar nada. Aquí no hay Cloudflare delante que lo disimule: cada
+	# pregunta es un viaje hasta Helsinki. El nombre lleva el hash del
+	# contenido, así que guardarlo un año es seguro. Ver el `>` arriba.
+	@assetsDom path /assets/*
+	header @assetsDom >Cache-Control "public, max-age=31536000, immutable"
 
 	# El service worker, sin caché: misma razón que en los otros bloques.
 	@sinCacheDom path /sw.js /manifest.webmanifest

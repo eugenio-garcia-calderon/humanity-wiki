@@ -8115,3 +8115,11 @@ taking the page down.
   tool, Space+drag still pans. An embedded board only captures scrolling
   after you click into it, so scrolling the page doesn't get stuck on it.
   Toolbar tooltips and the shortcuts sheet now describe this.
+
+### 2026-10-01 — Dominio propio: el título y la imagen en menos de un segundo (prog8)
+- Eugenio: «el dominio propio tarda muchísimo en mostrar la primera imagen o el primer título». Medido en luzhumanidad.com: DNS + TLS + HTML en 0,25–0,4 s (no era el DNS), pero el título salía a los 2,5 s por **cinco viajes en fila**: la plataforma entera (388 KB comprimidos), «¿a qué apunta este dominio?», la pantalla, «dame la página» y la imagen.
+- `sitios.ts` escribe ahora dentro del HTML del dominio propio: las dos respuestas (`window.__SITIO__`, leídas por `utils/precargado.ts`), la cabecera ya dibujada en `#root` (`server/cabeceraSitio.tsx`, el mismo componente `CabeceraLectura` que usa el navegador: cero saltos al arrancar, medido) y los `modulepreload` de la web del dominio en vez de los de la plataforma.
+- `main.tsx` carga `App` y `AplicacionDeDominio` a demanda: el dominio ya no se baja la plataforma. La plataforma no pierde un viaje: `vite.config.ts` anuncia sus trozos en `index.html` (`data-app="casa"`), y `sellar-sw` los precachea.
+- Caddy: los `/assets/*` de los dominios propios y subdominios salían con `max-age=0` (la regla del año sólo estaba en `humanity.wiki`). Ya no.
+- Páginas publicadas siempre a ancho completo (petición de Eugenio vía prog8-pizarra).
+- Los picos de 5–10 s medidos ese día coincidían con despliegues: Caddy hace esperar hasta 20 s mientras se cambia el contenedor.

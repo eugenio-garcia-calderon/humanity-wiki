@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
+import { paginaPrecargada } from '../utils/precargado';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -17,10 +18,12 @@ import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../com
 export default function SubpaginaSitio({ propio }: { propio: boolean }) {
   const { id } = useParams();
   const sitio = useSitio();
-  const [estado, setEstado] = useState<'cargando' | 'ok' | 'no' | 'fallo'>('cargando');
-  const [pagina, setPagina] = useState<DatosPagina | null>(null);
+  // Al entrar directamente por `/p/:id`, la página ya viene en el HTML.
+  const [pagina, setPagina] = useState<DatosPagina | null>(() => paginaPrecargada(id));
+  const [estado, setEstado] = useState<'cargando' | 'ok' | 'no' | 'fallo'>(pagina ? 'ok' : 'cargando');
 
   useEffect(() => {
+    if (pagina?.id === id) return;
     let vivo = true;
     setEstado('cargando');
     fetch(`/api/sitio/pagina/${encodeURIComponent(id || '')}`)
