@@ -8079,3 +8079,13 @@ Flow.
 - A board embedded in a published page is readable by anyone, pieces
   included (`pizarraVisible` in `sitios.ts`, used by `GET /api/graphs/:slug`);
   editing stays with its author.
+
+## 2026-10-01 — Clean gallery: no frames, title + cards; no view switch for visitors (prog8)
+
+Eugenio: no rectangles around the content — just the database title and the
+gallery below, nothing extra; and on the published site no «Galería / Tabla»
+switch. In gallery view the database now has no outer frame, grey header bar
+or row count; the title reads as a heading; cards are borderless (rounded
+image, text below); no inner scroll (`alto` no longer caps a gallery). The
+view switch, «Propiedades» and «Tamaño» only show to editors. The table view
+keeps its frame, where it helps reading rows.

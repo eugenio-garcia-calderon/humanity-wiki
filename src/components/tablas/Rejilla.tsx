@@ -163,10 +163,22 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
 
   const { columnas, filas } = datos;
 
+  // ══ LA GALERÍA, LIMPIA (2026-10-01) ════════════════════════════════════
+  // Eugenio: «sin esas líneas que envuelven el contenido en rectángulos; sólo
+  // el título de la base de datos y debajo la galería, sin nada extra». En
+  // galería no hay marco, ni barra gris, ni contador de filas: el título como
+  // un encabezado y las tarjetas. Los mandos sólo existen para quien edita.
+  // La vista de tabla conserva su marco: ahí sí ayuda a leer filas y columnas.
+  const limpia = vista === 'galeria';
+
   return (
-    <div className={cn('border border-slate-200 rounded-xl overflow-hidden', tono.fondo || 'bg-white')}>
-      <div className={cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
-        <Table2 className="w-4 h-4 text-slate-400 shrink-0" />
+    <div className={limpia
+      ? cn(tono.fondo && `${tono.fondo} rounded-2xl p-4`)
+      : cn('border border-slate-200 rounded-xl overflow-hidden', tono.fondo || 'bg-white')}>
+      <div className={limpia
+        ? 'flex items-center gap-2 pb-3 min-h-9'
+        : cn('flex items-center gap-2 px-3 py-2 border-b border-slate-100', tono.fondo ? 'bg-white/40' : 'bg-slate-50/60')}>
+        {!limpia && <Table2 className="w-4 h-4 text-slate-400 shrink-0" />}
         {/* El nombre se cambia pinchando en él (2026-09-30, Eugenio: «permite
             cambiar el nombre de la base de datos»). Enter o salir guarda;
             Escape deja el de antes. */}
@@ -178,23 +190,23 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               if (e.key === 'Enter') e.currentTarget.blur();
               if (e.key === 'Escape') { setNombre(null); setFalloNombre(null); }
             }}
-            className={cn('min-w-0 flex-1 max-w-xs h-7 px-1.5 -mx-1.5 rounded border border-slate-300 bg-white text-xs font-black outline-none focus:border-emerald-400', tono.texto || 'text-slate-700')} />
+            className={cn('min-w-0 flex-1 max-w-xs px-1.5 -mx-1.5 rounded border border-slate-300 bg-white font-black outline-none focus:border-emerald-400', limpia ? 'h-9 text-lg' : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))} />
         ) : editable ? (
           <button onClick={() => setNombre(datos.tabla.titulo || '')} title="Cambiar el nombre"
-            className={cn('min-w-0 h-7 px-1.5 -mx-1.5 rounded text-xs font-black truncate hover:bg-slate-100 transition-colors', tono.texto || 'text-slate-700')}>
+            className={cn('min-w-0 px-1.5 -mx-1.5 rounded font-black truncate hover:bg-slate-100 transition-colors', limpia ? 'h-9 text-lg' : 'h-7 text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>
             {datos.tabla.titulo}
           </button>
         ) : (
-          <p className={cn('text-xs font-black truncate', tono.texto || 'text-slate-700')}>{datos.tabla.titulo}</p>
+          <p className={cn('font-black truncate', limpia ? 'text-lg' : 'text-xs', tono.texto || (limpia ? 'text-slate-900' : 'text-slate-700'))}>{datos.tabla.titulo}</p>
         )}
         {falloNombre && <span className="text-[11px] font-bold text-rose-600 truncate">{falloNombre}</span>}
-        <span className="text-[11px] text-slate-400">
+        {!limpia && <span className="text-[11px] text-slate-400">
           {/* Si hay filtro puesto se dice: sin este número, una tabla filtrada y
               una completa se ven igual y nadie sabe que mira un trozo. */}
           {datos.mostradas !== undefined && datos.total !== undefined && datos.mostradas !== datos.total
             ? `${datos.mostradas} de ${datos.total} filas`
             : `${filas.length} ${filas.length === 1 ? 'fila' : 'filas'}`}
-        </span>
+        </span>}
         {/* Las dos vistas, como las pestañas de Notion. */}
         {/* QUÉ SE VE EN LAS TARJETAS (2026-10-01): «configurar la vista de
             galería para mostrar los enlaces a otras bases de datos». */}
@@ -241,7 +253,9 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
             </select>
           </label>
         )}
-        <div className={cn('flex items-center gap-0.5 shrink-0', !(vista === 'galeria' && onCambiarTamano) && 'ml-auto')} role="tablist">
+        {/* Galería/Tabla sólo para quien edita: en la web publicada la vista
+            la decide el autor y el visitante no necesita el interruptor. */}
+        {editable && <div className={cn('flex items-center gap-0.5 shrink-0', !(vista === 'galeria' && onCambiarTamano) && 'ml-auto')} role="tablist">
           {([['galeria', 'Galería', LayoutGrid], ['tabla', 'Tabla', Table2]] as const).map(([v, label, Icono]) => (
             <button key={v} role="tab" aria-selected={vista === v} onClick={() => cambiarVista(v)}
               className={cn('inline-flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-bold transition-colors',
@@ -249,7 +263,7 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
               <Icono className="w-3.5 h-3.5" /> {label}
             </button>
           ))}
-        </div>
+        </div>}
       </div>
 
       {datos.ciclo?.length && (
@@ -263,8 +277,10 @@ export default function Rejilla({ tablaId, editable = true, alto, vista: vistaIn
       )}
 
       {vista === 'galeria' ? (
-        <div style={alto ? { maxHeight: alto, overflowY: 'auto' } : undefined}>
-          <Galeria tablaId={tablaId} columnas={columnas} filas={filas}
+        // Sin altura máxima: una galería en una página se lee bajando la
+        // página, no con una barra de desplazamiento dentro de otra.
+        <div>
+          <Galeria tablaId={tablaId} columnas={columnas} filas={filas} sinMargen
             columnaTitulo={datos.columna_titulo ?? null} editable={editable} onCambio={cargar}
             claseTitulo={tono.texto} tamano={tamano} visibles={visibles} />
         </div>
