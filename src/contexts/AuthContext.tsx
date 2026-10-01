@@ -195,6 +195,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+/** ¿Hay sesión de la plataforma montada encima? (2026-10-01). En un dominio
+ *  propio la aplicación arranca sin ella, y lo que se reutiliza de dentro
+ *  —la pizarra— necesita saberlo para ponérsela sin reventar la página. */
+export const useHayProveedorDeSesion = () => useContext(AuthContext) !== null;
+
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
