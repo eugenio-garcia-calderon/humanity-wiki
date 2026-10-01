@@ -18,6 +18,8 @@ import type { Cabecera } from './CabeceraPagina';
 export type Ajustes = {
   mostrarAutor?: boolean;
   mostrarFecha?: boolean;
+  /** Ya no se usa: desde el 2026-10-02 todas las páginas son de ancho
+   *  completo, sin opción (Eugenio). Se conserva para leer las que lo tenían. */
   anchoCompleto?: boolean;
   /** Para buscadores y para la vista previa al compartir. */
   descripcion?: string;
@@ -73,8 +75,6 @@ export default function AjustesPagina({ ajustes, portada, titulo, onCambio, onCe
             valor={!!ajustes.mostrarAutor} onCambio={v => pon({ mostrarAutor: v })} />
           <Interruptor etiqueta="Mostrar la fecha" ayuda="La fecha de la última edición."
             valor={!!ajustes.mostrarFecha} onCambio={v => pon({ mostrarFecha: v })} />
-          <Interruptor etiqueta="Ancho completo" ayuda="Usa todo el ancho de la pantalla, para galerías y tablas grandes."
-            valor={!!ajustes.anchoCompleto} onCambio={v => pon({ anchoCompleto: v })} />
         </section>
 
         <section className="space-y-3">

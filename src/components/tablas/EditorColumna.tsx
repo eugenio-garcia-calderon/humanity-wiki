@@ -86,7 +86,7 @@ const OPERACIONES = [
   { id: 'o_alguno', label: '¿Alguna cumple?' },
 ];
 
-export default function EditorColumna({ tablaId, columna, columnas, onCerrar, onHecho }: {
+export default function EditorColumna({ tablaId, columna, columnas, onCerrar, onHecho, tipoInicial }: {
   tablaId: string;
   /** Si viene, se edita; si no, se crea. */
   columna?: any;
@@ -94,10 +94,13 @@ export default function EditorColumna({ tablaId, columna, columnas, onCerrar, on
   columnas: any[];
   onCerrar: () => void;
   onHecho: () => void;
+  /** Al crear, con qué tipo se abre (p. ej. `relacion` desde «Enlazar con
+   *  otra base de datos»). */
+  tipoInicial?: string;
 }) {
   const editando = !!columna;
   const [nombre, setNombre] = useState(columna?.nombre || '');
-  const [tipo, setTipo] = useState(columna?.tipo || 'texto');
+  const [tipo, setTipo] = useState(columna?.tipo || tipoInicial || 'texto');
   const [opciones, setOpciones] = useState<Array<{ id?: string; label: string }>>(columna?.opciones || []);
   const [config, setConfig] = useState<any>(columna?.config || {});
   const [tablas, setTablas] = useState<any[]>([]);
