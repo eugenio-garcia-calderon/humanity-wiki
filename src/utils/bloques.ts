@@ -43,7 +43,10 @@ export type TipoBloque =
   | 'desplegable' | 'aviso' | 'indice'
   // 2026-09-30. Una página dentro de la página, como en Notion: el bloque es
   // el enlace y la página vive aparte (`entityId`), con su propio contenido.
-  | 'subpagina';
+  | 'subpagina'
+  // 2026-10-01. Una pizarra estilo Miro (la de «Esquemas»), incrustada o como
+  // enlace. `entityId` es la pizarra; `vista` dice cuál de las dos formas.
+  | 'pizarra';
 
 /** Qué es un bloque `medio`. La imagen tiene su propio tipo desde el principio
  *  (se escribe `![pie](url)` en markdown); esto es todo lo demás que se puede

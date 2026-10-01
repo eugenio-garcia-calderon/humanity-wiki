@@ -8062,3 +8062,20 @@ had «Otra tabla» relation columns (`bd_enlaces`), but:
   linked to its area from its own page.
 - **Gallery «Propiedades»** menu: choose which columns show on cards
   (`propsGaleria` on the block); relations render as clickable chips.
+
+## 2026-10-01 — «Pizarra» block: the Esquemas whiteboard inside pages (prog8)
+
+Eugenio asked for a Miro-style whiteboard block, reusing the existing one.
+«+» → Pizarra creates a board (`POST /api/graphs`, draft) and embeds the same
+`GrafoLienzo` used by Esquemas — not a copy. Two forms, switchable from the
+block header: embedded (live board, 420/520 px) or as a link card; both open
+full screen. Loaded lazily, so pages without a board don't download React
+Flow.
+
+- `GrafoLienzo` gets `incrustado`: its window-wide keyboard and paste
+  handlers only act after a click inside the board (`data-pizarra-activa`),
+  and the page's paste and ⌘Z step aside while it is active — otherwise ⌘Z,
+  ⌘D, Delete or paste would hit both the board and the page.
+- A board embedded in a published page is readable by anyone, pieces
+  included (`pizarraVisible` in `sitios.ts`, used by `GET /api/graphs/:slug`);
+  editing stays with its author.

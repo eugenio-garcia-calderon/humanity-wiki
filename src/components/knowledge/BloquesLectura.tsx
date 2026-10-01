@@ -3,6 +3,7 @@ import { enFilas } from '../../utils/bloques';
 import { claseColor, PINTAN_SU_COLOR } from '../../utils/coloresBloque';
 import EnlaceSubpagina from './EnlaceSubpagina';
 import TextoEnriquecido from './TextoEnriquecido';
+import BloquePizarra from './BloquePizarra';
 import EntityComments from './EntityComments';
 import { FileText, Paperclip, ChevronRight, Info, AlertTriangle, Lightbulb, CheckCircle2, List, MessageCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -299,6 +300,10 @@ function Bloque({ b, indice, bloques }: { b: any; indice: number; bloques: any[]
         </div>
       );
     }
+
+    case 'pizarra':
+      // La misma pizarra, sin poder editarla (el servidor sólo deja a su autor).
+      return b.entityId ? <BloquePizarra id={b.entityId} titulo={b.pubTitulo} vista={b.vista} editable={false} /> : null;
 
     case 'subpagina':
       return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;

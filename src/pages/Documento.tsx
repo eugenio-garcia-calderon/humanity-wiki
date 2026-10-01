@@ -7,7 +7,7 @@ import {
   ChevronRight, Info,
   LayoutTemplate, LayoutGrid,
   Download, Sparkles, Loader2, ArrowLeft, FileText, GripVertical, Boxes, Store, ImagePlus,
-  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, MoreHorizontal, Maximize2, Minimize2,
+  Search, X, Wand2, PenLine, Smile, Paperclip, Share2, Settings2, EyeOff, Eye, AlignLeft, ExternalLink, PenTool, MoreHorizontal, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEsMovil } from '../hooks/useEsMovil';
@@ -19,6 +19,7 @@ import MenuBloque from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
 import EnlaceSubpagina from '../components/knowledge/EnlaceSubpagina';
+import BloquePizarra from '../components/knowledge/BloquePizarra';
 import { claseColor, PINTAN_SU_COLOR } from '../utils/coloresBloque';
 import { LayoutCabecera, MandosCabecera, FilaTitulo, ladoIcono, letraDescripcion } from '../components/knowledge/CabeceraPagina';
 import IconoElemento from '../components/ui/Icono';
@@ -75,6 +76,8 @@ const TIPOS_MENU: { tipo: TipoBloque; label: string; icon: any }[] = [
   // Una página dentro de ésta (2026-09-30): «todo son páginas dentro de
   // páginas, como hace Notion».
   { tipo: 'subpagina', label: 'Página', icon: FileText },
+  // La pizarra de «Esquemas», dentro de la página (2026-10-01).
+  { tipo: 'pizarra', label: 'Pizarra', icon: PenTool },
   { tipo: 'separador', label: 'Separador', icon: Minus },
   { tipo: 'codigo', label: 'Código', icon: Code2 },
   { tipo: 'imagen', label: 'Imagen', icon: ImageIcon },
@@ -445,7 +448,7 @@ function EditorPagina() {
     if (el) el.textContent = '';
     textosRef.current[b.id] = '';
     if (tipo === 'publicacion' || tipo === 'producto') { insertar(b.id, tipo); return; }
-    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio') { insertar(b.id, tipo); return; }
+    if (tipo === 'separador' || tipo === 'imagen' || tipo === 'tabla' || tipo === 'basedatos' || tipo === 'subpagina' || tipo === 'medio' || tipo === 'pizarra') { insertar(b.id, tipo); return; }
     setBloques(bs => bs.map(x => x.id === b.id ? { ...x, tipo, texto: '' } : x));
     setFocoId(b.id);
     programarGuardado();
@@ -453,6 +456,7 @@ function EditorPagina() {
 
   const insertar = (tras: string | null, tipo: TipoBloque) => {
     if (tipo === 'subpagina') { crearSubpagina(tras); return; }
+    if (tipo === 'pizarra') { crearPizarra(tras); return; }
     if (tipo === 'medio') {
       setMenuAbierto(null);
       archivoTras.current = tras;
@@ -704,6 +708,27 @@ function EditorPagina() {
     finally { setSubiendo(null); if (archivoRef.current) archivoRef.current.value = ''; }
   };
 
+  /** Una pizarra nueva: se crea como borrador (se ve cuando la página se
+   *  publica, ver `pizarraVisible`) y queda incrustada donde estaba el «+». */
+  const crearPizarra = async (tras: string | null) => {
+    setMenuAbierto(null);
+    const r = await fetch('/api/graphs', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: titulo ? `Pizarra · ${titulo}`.slice(0, 120) : 'Pizarra', status: 'borrador' }),
+    });
+    const g = await r.json().catch(() => ({}));
+    if (!r.ok || !g.id) { fallar(g.error || 'No se pudo crear la pizarra.'); return; }
+    const nuevo: Bloque = { id: nuevoIdBloque(), tipo: 'pizarra', entityId: g.id, pubTitulo: g.title };
+    setBloques(bs => {
+      const i = tras ? finDeFila(bs, bs.findIndex(x => x.id === tras)) : bs.length - 1;
+      const copia = [...bs];
+      copia.splice(i + 1, 0, nuevo);
+      return copia;
+    });
+    programarGuardado();
+  };
+
   /** Una página nueva dentro de ésta: se crea, se enlaza y se abre. */
   const crearSubpagina = async (tras: string | null) => {
     setMenuAbierto(null);
@@ -730,6 +755,8 @@ function EditorPagina() {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z' || e.shiftKey) return;
       const activo = document.activeElement as HTMLElement | null;
       if (activo && (activo.isContentEditable || activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA')) return;
+      // Dentro de una pizarra, ⌘Z deshace en la pizarra, no en la página.
+      if (document.querySelector('[data-pizarra-activa]')) return;
       if (!historia.current.length) return;
       e.preventDefault();
       deshacer();
@@ -1154,6 +1181,8 @@ function EditorPagina() {
   useEffect(() => {
     if (!puedoEditar || generando) return;
     const alPegarEnLaPagina = (e: ClipboardEvent) => {
+      // Trabajando en una pizarra incrustada, lo pegado es suyo.
+      if (document.querySelector('[data-pizarra-activa]')) return;
       if (enCampoDeTexto(e.target)) return;   // ya lo atiende el bloque, o es un formulario
       if (!e.clipboardData) return;
       const dt = e.clipboardData;
@@ -1343,6 +1372,12 @@ function EditorPagina() {
     const cuerpo = (() => {
       if (b.tipo === 'separador') return <hr className="border-slate-200 my-2" />;
       if (b.tipo === 'subpagina') return b.entityId ? <EnlaceSubpagina id={b.entityId} tituloGuardado={b.pubTitulo} /> : null;
+      if (b.tipo === 'pizarra') {
+        return b.entityId ? (
+          <BloquePizarra id={b.entityId} titulo={b.pubTitulo} vista={b.vista} editable={editable}
+            onCambiarVista={v => { setBloques(bs => bs.map(x => (x.id === b.id ? { ...x, vista: v } : x))); programarGuardado(); }} />
+        ) : null;
+      }
 
       if (b.tipo === 'imagen') {
         // UNA IMAGEN SE EMBEBE, SALVO QUE LA HAYAS CERRADO (2026-08-22,
@@ -1793,7 +1828,7 @@ function EditorPagina() {
       return cuerpo();
     })();
 
-    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina'].includes(b.tipo);
+    const esBloqueTexto = !['separador', 'imagen', 'tabla', 'publicacion', 'producto', 'medio', 'subpagina', 'pizarra'].includes(b.tipo);
 
     return (
       <div
