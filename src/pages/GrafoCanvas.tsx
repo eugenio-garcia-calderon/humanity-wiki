@@ -580,12 +580,33 @@ export interface LienzoApi {
   openConnect: () => void;
 }
 
-export function GrafoLienzo({ slug, toolbar }: {
+export function GrafoLienzo({ slug, toolbar, incrustado = false }: {
   slug: string;
   /** Sustituye los botones Ventana/Conectar por una barra propia. */
   toolbar?: (api: LienzoApi) => React.ReactNode;
+  /** ══ DENTRO DE UNA PÁGINA (2026-10-01) ═══════════════════════════════
+   *  La pizarra escucha el teclado y el pegado en TODA la ventana: a pantalla
+   *  completa es lo correcto. Metida en una página, ⌘Z, ⌘D, Borrar o pegar
+   *  actuarían a la vez sobre la pizarra y sobre el texto de alrededor. Con
+   *  `incrustado`, sólo responde mientras se está trabajando DENTRO (el
+   *  último clic fue en ella), y lo anuncia con `data-pizarra-activa` para
+   *  que la página se aparte. */
+  incrustado?: boolean;
 }) {
   const helpers = useHelpers();
+  const raizRef = useRef<HTMLDivElement>(null);
+  const activaRef = useRef(!incrustado);
+  useEffect(() => {
+    if (!incrustado) return;
+    const marcar = (e: PointerEvent) => {
+      const dentro = !!raizRef.current?.contains(e.target as globalThis.Node);
+      activaRef.current = dentro;
+      if (dentro) raizRef.current?.setAttribute('data-pizarra-activa', '');
+      else raizRef.current?.removeAttribute('data-pizarra-activa');
+    };
+    document.addEventListener('pointerdown', marcar, true);
+    return () => document.removeEventListener('pointerdown', marcar, true);
+  }, [incrustado]);
   // Instancia real de React Flow (via onInit): controla el viewport (fitView).
   const rf = useRef<ReactFlowInstance | null>(null);
   const fitView = useCallback((opts?: any) => { rf.current?.fitView(opts); }, []);
@@ -767,6 +788,7 @@ export function GrafoLienzo({ slug, toolbar }: {
   useEffect(() => {
     if (!data?.can_edit) return;
     const onPaste = async (e: ClipboardEvent) => {
+      if (!activaRef.current) return;
       // Nunca robar el pegado de un campo de texto (el chat, los formularios).
       if (enCampoDeTexto(e.target)) return;
       if (!e.clipboardData) return;
@@ -1521,6 +1543,7 @@ export function GrafoLienzo({ slug, toolbar }: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (!activaRef.current) return;
       if (enCampoDeTexto(e.target)) return;
       const meta = e.metaKey || e.ctrlKey;
       const k = e.key;
@@ -1605,6 +1628,7 @@ export function GrafoLienzo({ slug, toolbar }: {
 
   return (
     <div
+      ref={raizRef}
       className="relative w-full h-full"
       onDrop={onDrop}
       onDragOver={e => { if (data.can_edit) e.preventDefault(); }}

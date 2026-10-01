@@ -86,6 +86,19 @@ export async function tablaVisible(db: any, tablaId: string): Promise<boolean> {
   return false;
 }
 
+/** ¿Puede ver cualquiera esta pizarra? Sí si está metida (bloque
+ *  `pizarra`) en una página que se ve. Como las tablas: la hereda. */
+export async function pizarraVisible(db: any, graphId: string): Promise<boolean> {
+  const r = await db.execute(sql`
+    SELECT id FROM knowledge_windows
+    WHERE kind = 'pagina' AND deleted_at IS NULL AND archived_at IS NULL
+      AND config->'bloques' @> jsonb_build_array(jsonb_build_object('tipo', 'pizarra', 'entityId', ${graphId}::text))
+    LIMIT 20
+  `);
+  for (const p of r.rows as any[]) if (await paginaVisible(db, p.id)) return true;
+  return false;
+}
+
 // ── QUÉ SITIO ES ESTE ANFITRIÓN ─────────────────────────────────────────────
 // La misma decisión que toma el navegador en `utils/subdominio.ts`, hecha
 // aquí para poder escribir el HTML antes de que llegue.

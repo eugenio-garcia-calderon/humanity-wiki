@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import { pizarraVisible } from './sitios';
 import { registrarHistorial } from './historial';
 import { sql } from 'drizzle-orm';
 import { ROLE } from './auth.js';
@@ -474,8 +475,14 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
       `);
       if (!g.rows.length) return res.status(404).json({ error: 'Grafo no encontrado.' });
       const graph = g.rows[0] as any;
+      // UNA PIZARRA METIDA EN UNA PÁGINA PUBLICADA SE VE (2026-10-01), aunque
+      // sea borrador: es parte de esa página. Y se ve ENTERA —sus piezas
+      // también—, porque quien publicó la página publicó lo que hay dentro.
+      // Editar sigue siendo sólo de su autor.
+      let porPagina = false;
       if (graph.status !== 'publicado' && !canEdit(req, graph.creator_user_id)) {
-        return res.status(404).json({ error: 'Grafo no encontrado.' });
+        porPagina = await pizarraVisible(db, graph.id);
+        if (!porPagina) return res.status(404).json({ error: 'Grafo no encontrado.' });
       }
 
       const windows = await db.execute(sql`
@@ -486,7 +493,7 @@ export function registerKnowledgeRoutes(app: Express, db: any) {
         LEFT JOIN users u ON u.id = w.creator_user_id
         WHERE gw.graph_id = ${graph.id} AND w.archived_at IS NULL AND w.deleted_at IS NULL
           -- Una pieza marcada como privada solo la ve quien la escribió.
-          AND (w.publico OR w.creator_user_id = ${req.user?.id || null}::text
+          AND (w.publico OR ${porPagina} OR w.creator_user_id = ${req.user?.id || null}::text
                OR ${(req.user?.roleLevel ?? 0) >= ROLE.ADMIN})
       `);
       const edges = await db.execute(sql`
