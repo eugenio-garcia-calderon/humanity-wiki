@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-turn",
+      "ruta": "src/pages/GrafoCanvas.tsx",
+      "motivo": "Pizarra incrustada en páginas (prog8)",
+      "desde": "2026-10-01T11:40:22.763Z"
+    }
+  ]
 }
