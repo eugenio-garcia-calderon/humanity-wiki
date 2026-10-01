@@ -83,6 +83,24 @@
       "ruta": "src/components/knowledge/AjustesPagina.tsx",
       "motivo": "Ancho completo fijo y enlazar bases de datos (prog8-pizarra)",
       "desde": "2026-10-01T12:42:23.216Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/components/sitio/CabeceraLectura.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:46:28.868Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/server/cabeceraSitio.tsx",
+      "motivo": "",
+      "desde": "2026-10-01T12:46:28.868Z"
+    },
+    {
+      "agente": "prog8-rapido",
+      "ruta": "src/utils/precargado.ts",
+      "motivo": "",
+      "desde": "2026-10-01T12:46:28.868Z"
     }
   ]
 }
